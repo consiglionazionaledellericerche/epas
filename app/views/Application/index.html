@@ -1,4 +1,24 @@
 #{extends 'main.html' /}
 #{set title:'Home' /}
 
-#{welcome /}
+#{if flash.error}
+    <p style="color:#c00">
+        ${flash.error}
+    </p>
+#{/if}
+
+<head>
+<title><P align="center">Migrazione tabelle</P></title>
+</head>
+<Body bgcolor="#FFA500">
+Qui il nostro contenuto
+
+
+<!--  <form action="@{Application.index()}" method="GET">
+    <!--  <input type="text" name="myName" />
+    <input type="submit" value="" />
+    
+</form>-->
+
+</Body>
+ 
