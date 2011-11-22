@@ -1,0 +1,6 @@
+Listening for transport dt_socket at address: 8000
+17:26:38,661 INFO  ~ Starting /home/dario/git/epas
+17:26:39,436 WARN  ~ You're running Play! in DEV mode
+17:26:39,539 INFO  ~ Listening for HTTP on port 9000 (Waiting a first request to start) ...
+17:26:52,824 INFO  ~ Connected to jdbc:postgresql://127.0.0.1/IIT
+17:26:54,949 INFO  ~ Application 'Personnel Attendance Sheet' is now started !

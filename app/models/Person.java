@@ -34,4 +34,5 @@ public class Person extends Model {
 	public String contractLevel;
 	
 	public String matricola;
+	
 }
