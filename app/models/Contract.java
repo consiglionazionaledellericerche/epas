@@ -19,13 +19,13 @@ import play.db.jpa.Model;
 public class Contract extends Model{
 	
 	
-	@OneToMany
-	@JoinColumn(name="qualification_id")
-	public Qualification qualification;
+//	@OneToMany(mappedBy="contract")
+//	@JoinColumn(name="qualification_id")
+//	public Qualification qualification;
 	
-	@ManyToOne
-	@JoinColumn(name= "person_id", nullable = false)
-	public Person person;
+//	@ManyToOne
+//	@JoinColumn(name= "person_id", nullable = false)
+//	public Person person;
 	
 	@Column
 	public Date beginContract;

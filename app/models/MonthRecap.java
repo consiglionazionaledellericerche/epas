@@ -19,7 +19,8 @@ import play.db.jpa.JPA;
  * @author dario
  *
  * Per adesso la classe Month recap contiene la stessa struttura della tabella presente sul db Mysql per 
- * l'applicazione Orologio. Deve essere rivista sia nella struttura che più banalmente nei nomi dei campi.
+ * l'applicazione Orologio. Deve essere rivista sia nella struttura che più banalmente nei nomi dei campi
+ * 
  */
 @Entity
 public class MonthRecap extends Model {

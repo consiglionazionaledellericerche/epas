@@ -25,17 +25,20 @@ public class FillTable extends Controller{
 	/**
 	 * @param args
 	 */
-	protected static String mySqldriver = "com.mysql.jdbc.Driver";	
+	public static String mySqldriver = "com.mysql.jdbc.Driver";	
 	
 	public static void riempiTabelle() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
 		Connection mysqlconn = null;
 		PreparedStatement stmt;
+				
+		Class.forName(mySqldriver).newInstance();
 		
-		try{
-			Class.forName(mySqldriver).newInstance();
-			mysqlconn = DriverManager.getConnection("jdbc:mysql://localhost:3306/IIT","root", "orologio");
+		mysqlconn = DriverManager.getConnection("jdbc:mysql://localhost:3306/IIT?zeroDateTimeBehavior=convertToNull","root", "orologio");
+		
+		try{			
 			
 			stmt = mysqlconn.prepareStatement("SELECT * FROM orari_di_lavoro ");
+			
 			ResultSet rs = stmt.executeQuery();
 			
 			EntityManager em = JPA.em();
@@ -55,8 +58,8 @@ public class FillTable extends Controller{
 				wtt.mondayTimeSlotExitTo = rs.getInt("lu_fascia_uscita1");
 				wtt.mondayTimeMealFrom = rs.getInt("lu_fascia_pranzo");
 				wtt.mondayTimeMealTo = rs.getInt("lu_fascia_pranzo1");
-				wtt.mondayBreakTicketTime = rs.getString("Gruppo"); //capire quale campo è
-				wtt.mondayMealTicketTime = rs.getInt("Valore"); // capire quale campo è
+		//		wtt.mondayBreakTicketTime = rs.getString("Gruppo"); //capire quale campo è
+		//		wtt.mondayMealTicketTime = rs.getInt("Valore"); // capire quale campo è
 				wtt.tuesdayWorkingTime = rs.getInt("ma_tempo_lavoro");
 				wtt.tuesdayHoliday = rs.getByte("ma_festa");
 				wtt.tuesdayTimeSlotEntranceFrom = rs.getInt("ma_fascia_ingresso");
@@ -65,8 +68,8 @@ public class FillTable extends Controller{
 				wtt.tuesdayTimeSlotExitTo = rs.getInt("ma_fascia_uscita1");
 				wtt.tuesdayTimeMealFrom = rs.getInt("ma_fascia_pranzo");
 				wtt.tuesdayTimeMealTo = rs.getInt("ma_fascia_pranzo1");
-				wtt.tuesdayBreakTicketTime = rs.getString("CodiceSost"); //capire quale campo è
-				wtt.tuesdayMealTicketTime = rs.getByte("IgnoraTimbr"); //capire quale campo è
+		//		wtt.tuesdayBreakTicketTime = rs.getString("CodiceSost"); //capire quale campo è
+		//		wtt.tuesdayMealTicketTime = rs.getByte("IgnoraTimbr"); //capire quale campo è
 				wtt.wednesdayWorkingTime = rs.getInt("me_tempo_lavoro");
 				wtt.wednesdayHoliday = rs.getByte("me_festa");
 				wtt.wednesdayTimeSlotEntranceFrom = rs.getInt("me_fascia_ingresso");
@@ -75,8 +78,8 @@ public class FillTable extends Controller{
 				wtt.wednesdayTimeSlotExitTo = rs.getInt("me_fascia_uscita1");
 				wtt.wednesdayTimeMealFrom = rs.getInt("me_fascia_pranzo");
 				wtt.wednesdayTimeMealTo = rs.getInt("me_fascia_pranzo1");
-				wtt.wednesdayBreakTicketTime = rs.getInt(""); //capire quale campo è
-				wtt.wednesdayMealTicketTime = rs.getInt(""); //capire quale campo è
+		//		wtt.wednesdayBreakTicketTime = rs.getInt(""); //capire quale campo è
+		//		wtt.wednesdayMealTicketTime = rs.getInt(""); //capire quale campo è
 				wtt.thursdayWorkingTime = rs.getInt("gi_tempo_lavoro");
 				wtt.thursdayHoliday = rs.getByte("gi_festa");
 				wtt.thursdayTimeSlotEntranceFrom = rs.getInt("gi_fascia_ingresso");
@@ -85,8 +88,8 @@ public class FillTable extends Controller{
 				wtt.thursdayTimeSlotExitTo = rs.getInt("gi_fascia_uscita1");
 				wtt.thursdayTimeMealFrom = rs.getInt("gi_fascia_pranzo");
 				wtt.thursdayTimeMealTo = rs.getInt("gi_fascia_pranzo1");
-				wtt.thursdayBreakTicketTime = rs.getInt(""); //capire quale campo è
-				wtt.thursdayMealTicketTime = rs.getInt(""); //capire quale campo è
+		//		wtt.thursdayBreakTicketTime = rs.getInt(""); //capire quale campo è
+		//		wtt.thursdayMealTicketTime = rs.getInt(""); //capire quale campo è
 				wtt.fridayWorkingTime = rs.getInt("ve_tempo_lavoro");
 				wtt.fridayHoliday = rs.getByte("ve_festa");
 				wtt.fridayTimeSlotEntranceFrom = rs.getInt("ve_fascia_ingresso");
@@ -95,8 +98,8 @@ public class FillTable extends Controller{
 				wtt.fridayTimeSlotExitTo = rs.getInt("ve_fascia_uscita1");
 				wtt.fridayTimeMealFrom = rs.getInt("ve_fascia_pranzo");
 				wtt.fridayTimeMealTo = rs.getInt("ve_fascia_pranzo1");
-				wtt.fridayBreakTicketTime = rs.getInt(""); //capire quale campo è
-				wtt.fridayMealTicketTime = rs.getInt(""); //capire quale campo è
+		//		wtt.fridayBreakTicketTime = rs.getInt(""); //capire quale campo è
+		//		wtt.fridayMealTicketTime = rs.getInt(""); //capire quale campo è
 				wtt.saturdayWorkingTime = rs.getInt("sa_tempo_lavoro");
 				wtt.saturdayHoliday = rs.getByte("sa_festa");
 				wtt.saturdayTimeSlotEntranceFrom = rs.getInt("sa_fascia_ingresso");
@@ -105,8 +108,8 @@ public class FillTable extends Controller{
 				wtt.saturdayTimeSlotExitTo = rs.getInt("sa_fascia_uscita1");
 				wtt.saturdayTimeMealFrom = rs.getInt("sa_fascia_pranzo");
 				wtt.saturdayTimeMealTo = rs.getInt("sa_fascia_pranzo1");
-				wtt.saturdayBreakTicketTime = rs.getInt(""); //capire quale campo è
-				wtt.saturdayMealTicketTime = rs.getInt(""); //capire quale campo è
+		//		wtt.saturdayBreakTicketTime = rs.getInt(""); //capire quale campo è
+		//		wtt.saturdayMealTicketTime = rs.getInt(""); //capire quale campo è
 				wtt.sundayWorkingTime = rs.getInt("do_tempo_lavoro");
 				wtt.sundayHoliday = rs.getByte("do_festa");
 				wtt.sundayTimeSlotEntranceFrom = rs.getInt("do_fascia_ingresso");
@@ -115,8 +118,8 @@ public class FillTable extends Controller{
 				wtt.sundayTimeSlotExitTo = rs.getInt("do_fascia_uscita1");
 				wtt.sundayTimeMealFrom = rs.getInt("do_fascia_pranzo");
 				wtt.sundayTimeMealTo = rs.getInt("do_fascia_pranzo1");
-				wtt.sundayBreakTicketTime = rs.getInt(""); //capire quale campo è
-				wtt.sundayMealTicketTime = rs.getInt(""); //capire quale campo è
+		//		wtt.sundayBreakTicketTime = rs.getInt(""); //capire quale campo è
+		//		wtt.sundayMealTicketTime = rs.getInt(""); //capire quale campo è
 				
 				wtt._save();	
 				
@@ -133,6 +136,7 @@ public class FillTable extends Controller{
 			
 			EntityManager em = JPA.em();
 			VacationType vt = null;
+						
 			while(rs.next()){
 				vt = new VacationType();
 				vt.description = rs.getString("nome");
@@ -141,6 +145,26 @@ public class FillTable extends Controller{
 				vt._save();
 			}
 			em.persist(vt);
+						
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		try{
+			stmt = mysqlconn.prepareStatement("SELECT Nome, Cognome, DataNascita, Matricola, Qualifica FROM Persone");
+			ResultSet rs = stmt.executeQuery();
+			
+			EntityManager em = JPA.em();
+			Person person = null;
+			while(rs.next()){
+				person = new Person();
+				person.name = rs.getString("Nome");
+				person.surname = rs.getString("Cognome");
+				person.bornDate = rs.getDate("DataNascita");
+				person.contractLevel = rs.getInt("Qualifica");
+				person.number = rs.getInt("Matricola");
+				person._save();
+			}
+			em.persist(person);
 			
 		}catch(Exception e){
 			e.printStackTrace();
@@ -153,8 +177,8 @@ public class FillTable extends Controller{
 			PersonVacation pv = null;
 			while(rs.next()){
 				pv = new PersonVacation();
-				pv.fid = rs.getByte("fid");
-				pv.pid = rs.getShort("pid");
+			//	pv.fid = rs.getByte("fid");
+			//	pv.pid = rs.getShort("pid");
 				pv.beginFrom = rs.getDate("data_inizio");
 				pv.endTo = rs.getDate("data_fine");
 				pv._save();
@@ -164,60 +188,112 @@ public class FillTable extends Controller{
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		
+				
 		try{
-						
-			stmt = mysqlconn.prepareStatement("SELECT * FROM assenze");
-			ResultSet rs = stmt.executeQuery();
-			
-			EntityManager em = JPA.em();
-			AbsenceType assenze = null;
-			
-			while(rs.next()){
-				assenze = new AbsenceType();
-				
-				assenze.code = rs.getString("Codice");			
-				assenze.certificateCode = rs.getString("Codice_att");
-				assenze.description = rs.getString("Descrizione");
-				assenze.validFrom = rs.getDate("DataInizio");
-				assenze.validTo = rs.getDate("DataFine");
-		//		assenze.g1 = rs.getByte("g1");
-		//		assenze.g2 = rs.getByte("g2");
-				
-				assenze._save();
-				
-			}
-			em.persist(assenze);
-			
-			//mysqlconn.commit();
-			//mysqlconn.close();	
-			
-			
-		}
-		catch(Exception e){
-			e.printStackTrace();
-		}
-		try{
-			stmt = mysqlconn.prepareStatement("SELECT * FROM Persone");
+			stmt = mysqlconn.prepareStatement("SELECT Dipartimento, Sede, Stanza, Email, Fax, Telefono FROM Persone");
 			ResultSet rs = stmt.executeQuery();
 			
 			EntityManager em = JPA.em();
 			Location locazione = null;
+			ContactData cd = null;
 			
 			while(rs.next()){
 				locazione = new Location();
+				cd = new ContactData();
 				locazione.department = rs.getString("Dipartimento");
-				locazione.headOffice = rs.getNString("Sede");
+				locazione.headOffice = rs.getString("Sede");
 				locazione.room = rs.getString("Stanza");
+				cd.email = rs.getString("Email");
+				cd.fax = rs.getInt("Fax");
+				cd.telephone = rs.getInt("Telefono");
 				
 				locazione._save();
+				cd._save();
 			}
 			em.persist(locazione);
-			mysqlconn.close();
+			em.persist(cd);
+			
 			
 		}catch(Exception e){
 			e.printStackTrace();
 		}
+		try{
+			stmt = mysqlconn.prepareStatement("SELECT * FROM totali_anno");
+			ResultSet rs = stmt.executeQuery();
+			
+			EntityManager em = JPA.em();
+			YearRecap recap = null;
+			
+			while(rs.next()){
+				recap = new YearRecap();
+				recap.year = rs.getShort("anno");
+				recap.remaining = rs.getInt("residuo");
+				recap.remainingAp = rs.getInt("residuoap");
+				recap.recg = rs.getInt("recg");
+				recap.recgap = rs.getInt("recgap");
+				recap.overtime = rs.getInt("straord");
+				recap.overtimeAp = rs.getInt("straordap");
+				recap.recguap = rs.getInt("recguap");
+				recap.recm = rs.getInt("recm");
+				recap.lastModified = rs.getTimestamp("data_ultimamod");
+				
+				recap._save();
+			}
+			em.persist(recap);
+			
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		try{
+			stmt = mysqlconn.prepareStatement("SELECT * FROM totali_mens limit 200");
+			ResultSet rs = stmt.executeQuery();
+			
+			EntityManager em = JPA.em();
+			MonthRecap recap = null;
+			
+			while(rs.next()){
+				recap = new MonthRecap();
+				recap.month = rs.getShort("mese");
+				recap.year = rs.getShort("anno");
+				recap.workingDays = rs.getShort("giorni_lavorativi");
+				recap.daysWorked = rs.getShort("giorni_lavorati");
+				recap.giorniLavorativiLav = rs.getShort("giorni_lavorativi");
+				recap.workTime = rs.getInt("tempo_lavorato");
+				recap.remaining = rs.getInt("residuo");
+				recap.justifiedAbsence = rs.getShort("assenze_giust");
+				recap.vacationAp = rs.getShort("ferie_ap");
+				recap.vacationAc = rs.getShort("ferie_ac");
+				recap.holidaySop = rs.getShort("festiv_sop");
+				recap.recoveries = rs.getInt("recuperi");
+				recap.recoveriesAp = rs.getShort("recuperiap");
+				recap.recoveriesG = rs.getShort("recuperig");
+				recap.recoveriesGap = rs.getShort("recuperigap");
+				recap.overtime = rs.getInt("ore_str");
+				recap.lastModified = rs.getTimestamp("data_ultimamod");
+				recap.residualApUsed = rs.getInt("residuoap_usato");
+				recap.extraTimeAdmin = rs.getInt("tempo_eccesso_ammin");
+				recap.additionalHours = rs.getInt("ore_aggiuntive");
+				recap.nadditionalHours = rs.getByte("nore_aggiuntive");
+				recap.residualFine = rs.getInt("residuo_fine");
+				recap.beginWork = rs.getByte("inizio_lavoro");
+				recap.endWork = rs.getByte("fine_lavoro");
+				recap.timeHourVisit = rs.getInt("tempo_visite_orarie");
+				recap.endRecoveries = rs.getShort("recuperi_fine");
+				recap.negative = rs.getInt("negativo");
+				recap.endNegative = rs.getInt("negativo_fine");
+				recap.progressive = rs.getString("progressivo");				
+				
+				recap._save();
+			}
+			em.persist(recap);
+			
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		//mysqlconn.commit();
+		mysqlconn.close();
        
     }
 

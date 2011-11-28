@@ -6,6 +6,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import play.data.validation.Required;
@@ -17,7 +18,11 @@ import play.db.jpa.JPA;
  *
  */
 
+@Entity
+@Table(name = "absence_type_group")
 public class AbsenceTypeGroup extends Model{
+	
+
 	@Column
 	public String label;
 	@Column

@@ -3,6 +3,10 @@
  */
 package models;
 
+
+
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -27,12 +31,15 @@ public class Person extends Model {
 	@Required
 	public String surname;
 	
+	@Column
+	public Date bornDate;
+	
 	@Email
 	public String email;
 	
 	@Column(name = "contract_level")
-	public String contractLevel;
+	public int contractLevel;
 	
-	public String matricola;
+	public int number;
 	
 }

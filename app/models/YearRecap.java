@@ -34,6 +34,8 @@ public class YearRecap extends Model{
 	@Column
 	public int recg;
 	@Column
+	public int recgap;
+	@Column
 	public int overtime;
 	@Column
 	public int overtimeAp;
