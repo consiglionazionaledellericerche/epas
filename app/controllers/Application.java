@@ -18,8 +18,8 @@ public class Application extends Controller {
     public static void index() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
     	//Class.forName(mySqldriver).newInstance();
     	//conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/IIT","root", "orologio");
-    	//FillAbsences.riempiAssenze();    	
-    	//RiempiOrario.riempiOrario();
+    	    	
+    	
     	FillTable.riempiTabelle();
         render();
     }

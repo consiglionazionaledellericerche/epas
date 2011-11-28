@@ -17,11 +17,13 @@ import play.db.jpa.JPA;
  * @author dario
  *
  */
+@Entity
+@Table(name = "contact_data")
 public class ContactData extends Model{
 
-	@ManyToOne
-	@JoinColumn(name = "person_id", nullable = false)
-	public Person person;
+//	@ManyToOne
+//	@JoinColumn(name = "person_id", nullable = false)
+//	public Person person;
 	@Column
 	public int telephone;
 	@Column

@@ -1,6 +1,7 @@
 package models;
 
 import java.util.Date;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,6 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -19,8 +21,13 @@ import play.db.jpa.JPA;
  * @author dario
  *
  */
-
+@Entity
+@Table(name = "absence_types")
 public class AbsenceType extends Model{
+	
+	@OneToMany(mappedBy="absenceType")
+	public Set<Absences> absence;
+	
 	@Column
 	public String code;
 	@Column
@@ -40,11 +47,7 @@ public class AbsenceType extends Model{
 	@Column
 	public boolean mealTicketCalculation;
 	@Column
-	public boolean ignoreStamping;
-	
-	@OneToOne
-	@JoinColumn(name ="absenceTypeGroup_id")
-	public AbsenceTypeGroup absenceTypeGroup;
+	public boolean ignoreStamping;	
 	@Column
 	public int groupValue;
 	

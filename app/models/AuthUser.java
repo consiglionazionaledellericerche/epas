@@ -5,6 +5,8 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -22,6 +24,20 @@ import play.db.jpa.JPA;
  */
 
 public class AuthUser extends Model{
+	
+	public enum AuthRed {
+		SI,
+		NO
+	}
+	public enum AuthMod {
+		SI,
+		NO
+	}
+	public enum AuthSys {
+		SI,
+		NO
+	}
+	
 	@Column 
 	public String user;
 	@Column
@@ -32,12 +48,16 @@ public class AuthUser extends Model{
 	public short scadenzaPassword;
 	@Column
 	public Timestamp ultimaModifica;
-	@Column
-	public enum authred {SI,NO};
-	@Column
-	public enum authmod {SI,NO};
-	@Column
-	public enum authsys {SI,NO};
+	
+	@Enumerated(EnumType.STRING)
+	public AuthRed authred;
+	
+	@Enumerated(EnumType.STRING)
+	public AuthMod authmod;
+	
+	@Enumerated(EnumType.STRING)
+	public AuthSys autsys;
+	
 	@Column
 	public String authIp;
 	@Column

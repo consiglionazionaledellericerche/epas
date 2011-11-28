@@ -29,7 +29,7 @@ public class Absences extends Model{
 	@Column
 	public Date date;
 	
-	@Column
+	//@Column
 	@ManyToOne()
 	public AbsenceType absenceType;
 	
