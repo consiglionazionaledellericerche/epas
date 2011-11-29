@@ -18,6 +18,14 @@ import play.db.jpa.Model;
  * @author cristian
  * @author dario
  */
+/**
+ * @author dario
+ *
+ */
+/**
+ * @author dario
+ *
+ */
 @Entity
 public class WorkingTimeTypeDay extends Model {
 
@@ -38,14 +46,33 @@ public class WorkingTimeTypeDay extends Model {
 	 */
 	public int workingTime = 0;
 	
+	/**
+	 * tempo di lavoro espresso in minuti che conteggia se possibile usufruire del buono pasto
+	 */
 	public int mealTicketTime = 0;
+	
 	public int breakTicketTime = 0;
+	/**
+	 * booleano per controllo se il giorno in questione è festivo o meno
+	 */
 	public boolean holiday = false;
+	/**
+	 * tempo di inizio finestra di entrata
+	 */
 	public int timeSlotEntranceFrom = 0;
+	/**
+	 * tempo di fine finestra di entrata
+	 */
 	public int timeSlotEntranceTo = 0;
 	public int timeSlotExitFrom = 0;
 	public int timeSlotExitTo = 0;
+	/**
+	 * tempo inizio pausa pranzo
+	 */
 	public int timeMealFrom = 0;
+	/**
+	 * tempo fine pausa pranzo
+	 */
 	public int timeMealTo = 0;
 	
 }
