@@ -14,6 +14,7 @@ import java.util.*;
 import javax.persistence.EntityManager;
 
 import models.*;
+import models.WorkingTimeTypeDay.DayOfWeek;
 
 /**
  * 
@@ -27,99 +28,131 @@ public class FillTable extends Controller{
 	 */
 	public static String mySqldriver = "com.mysql.jdbc.Driver";	
 	
-	public static void riempiTabelle() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
-		Connection mysqlconn = null;
-		PreparedStatement stmt;
-				
+	private static Connection mysqlCon = null;
+	
+	
+	/**
+	 * @return un singleton per la connessione Mysql
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws ClassNotFoundException
+	 * @throws SQLException
+	 */
+	private static Connection getMysqlConnection() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
+		if (mysqlCon != null ) {
+			return mysqlCon;
+		}
 		Class.forName(mySqldriver).newInstance();
 		
-		mysqlconn = DriverManager.getConnection("jdbc:mysql://localhost:3306/IIT?zeroDateTimeBehavior=convertToNull","root", "orologio");
-		
+		return DriverManager.getConnection("jdbc:mysql://localhost:3306/IIT?zeroDateTimeBehavior=convertToNull","root", "orologio");
+	}
+	
+	
+	public static void fillWorkingTime() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
+		Connection mysqlCon = getMysqlConnection();
+		PreparedStatement stmt;
 		try{			
 			
-			stmt = mysqlconn.prepareStatement("SELECT * FROM orari_di_lavoro ");
+			stmt = mysqlCon.prepareStatement("SELECT * FROM orari_di_lavoro ");
 			
 			ResultSet rs = stmt.executeQuery();
 			
 			EntityManager em = JPA.em();
 			WorkingTimeType wtt = null;
-						
+
+			
 			while(rs.next()){
 				
 				wtt = new WorkingTimeType();
 				
 				wtt.description = rs.getString("nome");
 				
-				wtt.mondayWorkingTime = rs.getInt("lu_tempo_lavoro");
-				wtt.mondayHoliday = rs.getByte("lu_festa");
-				wtt.mondayTimeSlotEntranceFrom = rs.getInt("lu_fascia_ingresso");
-				wtt.mondayTimeSlotEntranceTo = rs.getInt("lu_fascia_ingresso1");
-				wtt.mondayTimeSlotExitFrom = rs.getInt("lu_fascia_uscita");
-				wtt.mondayTimeSlotExitTo = rs.getInt("lu_fascia_uscita1");
-				wtt.mondayTimeMealFrom = rs.getInt("lu_fascia_pranzo");
-				wtt.mondayTimeMealTo = rs.getInt("lu_fascia_pranzo1");
-		//		wtt.mondayBreakTicketTime = rs.getString("Gruppo"); //capire quale campo è
-		//		wtt.mondayMealTicketTime = rs.getInt("Valore"); // capire quale campo è
-				wtt.tuesdayWorkingTime = rs.getInt("ma_tempo_lavoro");
-				wtt.tuesdayHoliday = rs.getByte("ma_festa");
-				wtt.tuesdayTimeSlotEntranceFrom = rs.getInt("ma_fascia_ingresso");
-				wtt.tuesdayTimeSlotEntranceTo = rs.getInt("ma_fascia_ingresso1");
-				wtt.tuesdayTimeSlotExitFrom = rs.getInt("ma_fascia_uscita");
-				wtt.tuesdayTimeSlotExitTo = rs.getInt("ma_fascia_uscita1");
-				wtt.tuesdayTimeMealFrom = rs.getInt("ma_fascia_pranzo");
-				wtt.tuesdayTimeMealTo = rs.getInt("ma_fascia_pranzo1");
+				wtt.shift = rs.getBoolean("turno");
+
+				WorkingTimeTypeDay wttd_mo = new WorkingTimeTypeDay();
+				wttd_mo.workingTime = rs.getInt("lu_tempo_lavoro");
+				wttd_mo.holiday = rs.getBoolean("lu_festa");
+				
+				wttd_mo.timeSlotEntranceFrom = rs.getInt("lu_fascia_ingresso");
+				wttd_mo.timeSlotEntranceTo = rs.getInt("lu_fascia_ingresso1");
+				wttd_mo.timeSlotExitFrom = rs.getInt("lu_fascia_uscita");
+				wttd_mo.timeSlotExitTo = rs.getInt("lu_fascia_uscita1");
+				wttd_mo.timeMealFrom = rs.getInt("lu_fascia_pranzo");
+				wttd_mo.timeMealTo = rs.getInt("lu_fascia_pranzo1");
+				wttd_mo.breakTicketTime = rs.getInt("lu_tempo_interv"); 
+				wttd_mo.mealTicketTime = rs.getInt("lu_tempo_buono");
+				
+				WorkingTimeTypeDay wttd_tu = new WorkingTimeTypeDay();
+				wttd_tu.workingTime = rs.getInt("ma_tempo_lavoro");
+				wttd_tu.holiday = rs.getBoolean("ma_festa");
+				wttd_tu.timeSlotEntranceFrom = rs.getInt("ma_fascia_ingresso");
+				wttd_tu.timeSlotEntranceTo = rs.getInt("ma_fascia_ingresso1");
+				wttd_tu.timeSlotExitFrom = rs.getInt("ma_fascia_uscita");
+				wttd_tu.timeSlotExitTo = rs.getInt("ma_fascia_uscita1");
+				wttd_tu.timeMealFrom = rs.getInt("ma_fascia_pranzo");
+				wttd_tu.timeMealTo = rs.getInt("ma_fascia_pranzo1");
 		//		wtt.tuesdayBreakTicketTime = rs.getString("CodiceSost"); //capire quale campo è
 		//		wtt.tuesdayMealTicketTime = rs.getByte("IgnoraTimbr"); //capire quale campo è
-				wtt.wednesdayWorkingTime = rs.getInt("me_tempo_lavoro");
-				wtt.wednesdayHoliday = rs.getByte("me_festa");
-				wtt.wednesdayTimeSlotEntranceFrom = rs.getInt("me_fascia_ingresso");
-				wtt.wednesdayTimeSlotEntranceTo = rs.getInt("me_fascia_ingresso1");
-				wtt.wednesdayTimeSlotExitFrom = rs.getInt("me_fascia_uscita");
-				wtt.wednesdayTimeSlotExitTo = rs.getInt("me_fascia_uscita1");
-				wtt.wednesdayTimeMealFrom = rs.getInt("me_fascia_pranzo");
-				wtt.wednesdayTimeMealTo = rs.getInt("me_fascia_pranzo1");
-		//		wtt.wednesdayBreakTicketTime = rs.getInt(""); //capire quale campo è
-		//		wtt.wednesdayMealTicketTime = rs.getInt(""); //capire quale campo è
-				wtt.thursdayWorkingTime = rs.getInt("gi_tempo_lavoro");
-				wtt.thursdayHoliday = rs.getByte("gi_festa");
-				wtt.thursdayTimeSlotEntranceFrom = rs.getInt("gi_fascia_ingresso");
-				wtt.thursdayTimeSlotEntranceTo = rs.getInt("gi_fascia_ingresso1");
-				wtt.thursdayTimeSlotExitFrom = rs.getInt("gi_fascia_uscita");
-				wtt.thursdayTimeSlotExitTo = rs.getInt("gi_fascia_uscita1");
-				wtt.thursdayTimeMealFrom = rs.getInt("gi_fascia_pranzo");
-				wtt.thursdayTimeMealTo = rs.getInt("gi_fascia_pranzo1");
-		//		wtt.thursdayBreakTicketTime = rs.getInt(""); //capire quale campo è
-		//		wtt.thursdayMealTicketTime = rs.getInt(""); //capire quale campo è
-				wtt.fridayWorkingTime = rs.getInt("ve_tempo_lavoro");
-				wtt.fridayHoliday = rs.getByte("ve_festa");
-				wtt.fridayTimeSlotEntranceFrom = rs.getInt("ve_fascia_ingresso");
-				wtt.fridayTimeSlotEntranceTo = rs.getInt("ve_fascia_ingresso1");
-				wtt.fridayTimeSlotExitFrom = rs.getInt("ve_fascia_uscita");
-				wtt.fridayTimeSlotExitTo = rs.getInt("ve_fascia_uscita1");
-				wtt.fridayTimeMealFrom = rs.getInt("ve_fascia_pranzo");
-				wtt.fridayTimeMealTo = rs.getInt("ve_fascia_pranzo1");
-		//		wtt.fridayBreakTicketTime = rs.getInt(""); //capire quale campo è
-		//		wtt.fridayMealTicketTime = rs.getInt(""); //capire quale campo è
-				wtt.saturdayWorkingTime = rs.getInt("sa_tempo_lavoro");
-				wtt.saturdayHoliday = rs.getByte("sa_festa");
-				wtt.saturdayTimeSlotEntranceFrom = rs.getInt("sa_fascia_ingresso");
-				wtt.saturdayTimeSlotEntranceTo = rs.getInt("sa_fascia_ingresso1");
-				wtt.saturdayTimeSlotExitFrom = rs.getInt("sa_fascia_uscita");
-				wtt.saturdayTimeSlotExitTo = rs.getInt("sa_fascia_uscita1");
-				wtt.saturdayTimeMealFrom = rs.getInt("sa_fascia_pranzo");
-				wtt.saturdayTimeMealTo = rs.getInt("sa_fascia_pranzo1");
-		//		wtt.saturdayBreakTicketTime = rs.getInt(""); //capire quale campo è
-		//		wtt.saturdayMealTicketTime = rs.getInt(""); //capire quale campo è
-				wtt.sundayWorkingTime = rs.getInt("do_tempo_lavoro");
-				wtt.sundayHoliday = rs.getByte("do_festa");
-				wtt.sundayTimeSlotEntranceFrom = rs.getInt("do_fascia_ingresso");
-				wtt.sundayTimeSlotEntranceTo = rs.getInt("do_fascia_ingresso1");
-				wtt.sundayTimeSlotExitFrom = rs.getInt("do_fascia_uscita");
-				wtt.sundayTimeSlotExitTo = rs.getInt("do_fascia_uscita1");
-				wtt.sundayTimeMealFrom = rs.getInt("do_fascia_pranzo");
-				wtt.sundayTimeMealTo = rs.getInt("do_fascia_pranzo1");
-		//		wtt.sundayBreakTicketTime = rs.getInt(""); //capire quale campo è
-		//		wtt.sundayMealTicketTime = rs.getInt(""); //capire quale campo è
+				
+				WorkingTimeTypeDay wttd_we = new WorkingTimeTypeDay();
+				wttd_we.workingTime = rs.getInt("me_tempo_lavoro");
+				wttd_we.holiday = rs.getBoolean("me_festa");
+				wttd_we.timeSlotEntranceFrom = rs.getInt("me_fascia_ingresso");
+				wttd_we.timeSlotEntranceTo = rs.getInt("me_fascia_ingresso1");
+				wttd_we.timeSlotExitFrom = rs.getInt("me_fascia_uscita");
+				wttd_we.timeSlotExitTo = rs.getInt("me_fascia_uscita1");
+				wttd_we.timeMealFrom = rs.getInt("me_fascia_pranzo");
+				wttd_we.timeMealTo = rs.getInt("me_fascia_pranzo1");
+		//		wttd_we.BreakTicketTime = rs.getInt(""); //capire quale campo è
+		//		wttd_we.MealTicketTime = rs.getInt(""); //capire quale campo è
+				
+				WorkingTimeTypeDay wttd_th = new WorkingTimeTypeDay();
+				wttd_th.workingTime = rs.getInt("gi_tempo_lavoro");
+				wttd_th.holiday = rs.getBoolean("gi_festa");
+				wttd_th.timeSlotEntranceFrom = rs.getInt("gi_fascia_ingresso");
+				wttd_th.timeSlotEntranceTo = rs.getInt("gi_fascia_ingresso1");
+				wttd_th.timeSlotExitFrom = rs.getInt("gi_fascia_uscita");
+				wttd_th.timeSlotExitTo = rs.getInt("gi_fascia_uscita1");
+				wttd_th.timeMealFrom = rs.getInt("gi_fascia_pranzo");
+				wttd_th.timeMealTo = rs.getInt("gi_fascia_pranzo1");
+		//		wttd_th.BreakTicketTime = rs.getInt(""); //capire quale campo è
+		//		wttd_th.MealTicketTime = rs.getInt(""); //capire quale campo è
+				
+				WorkingTimeTypeDay wttd_fr = new WorkingTimeTypeDay();
+				wttd_fr.workingTime = rs.getInt("ve_tempo_lavoro");
+				wttd_fr.holiday = rs.getBoolean("ve_festa");
+				wttd_fr.timeSlotEntranceFrom = rs.getInt("ve_fascia_ingresso");
+				wttd_fr.timeSlotEntranceTo = rs.getInt("ve_fascia_ingresso1");
+				wttd_fr.timeSlotExitFrom = rs.getInt("ve_fascia_uscita");
+				wttd_fr.timeSlotExitTo = rs.getInt("ve_fascia_uscita1");
+				wttd_fr.timeMealFrom = rs.getInt("ve_fascia_pranzo");
+				wttd_fr.timeMealTo = rs.getInt("ve_fascia_pranzo1");
+		//		wttd_fr.BreakTicketTime = rs.getInt(""); //capire quale campo è
+		//		wttd_fr.MealTicketTime = rs.getInt(""); //capire quale campo è
+				
+				WorkingTimeTypeDay wttd_sa = new WorkingTimeTypeDay();
+				wttd_sa.workingTime = rs.getInt("sa_tempo_lavoro");
+				wttd_sa.holiday = rs.getBoolean("sa_festa");
+				wttd_sa.timeSlotEntranceFrom = rs.getInt("sa_fascia_ingresso");
+				wttd_sa.timeSlotEntranceTo = rs.getInt("sa_fascia_ingresso1");
+				wttd_sa.timeSlotExitFrom = rs.getInt("sa_fascia_uscita");
+				wttd_sa.timeSlotExitTo = rs.getInt("sa_fascia_uscita1");
+				wttd_sa.timeMealFrom = rs.getInt("sa_fascia_pranzo");
+				wttd_sa.timeMealTo = rs.getInt("sa_fascia_pranzo1");
+		//		wttd_sa.BreakTicketTime = rs.getInt(""); //capire quale campo è
+		//		wttd_sa.MealTicketTime = rs.getInt(""); //capire quale campo è
+
+				WorkingTimeTypeDay wttd_su = new WorkingTimeTypeDay();				
+				wttd_su.workingTime = rs.getInt("do_tempo_lavoro");
+				wttd_su.holiday = rs.getBoolean("do_festa");
+				wttd_su.timeSlotEntranceFrom = rs.getInt("do_fascia_ingresso");
+				wttd_su.timeSlotEntranceTo = rs.getInt("do_fascia_ingresso1");
+				wttd_su.timeSlotExitFrom = rs.getInt("do_fascia_uscita");
+				wttd_su.timeSlotExitTo = rs.getInt("do_fascia_uscita1");
+				wttd_su.timeMealFrom = rs.getInt("do_fascia_pranzo");
+				wttd_su.timeMealTo = rs.getInt("do_fascia_pranzo1");
+		//		wttd_su.BreakTicketTime = rs.getInt(""); //capire quale campo è
+		//		wttd_su.MealTicketTime = rs.getInt(""); //capire quale campo è
 				
 				wtt._save();	
 				
@@ -129,9 +162,16 @@ public class FillTable extends Controller{
 		}
 		catch(Exception e){
 			e.printStackTrace();
-		}		
+		}
+	} 
+	public static void riempiTabelle() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
+		Connection mysqlCon = getMysqlConnection();
+		PreparedStatement stmt;
+		
+		fillWorkingTime();
+		
 		try{
-			stmt = mysqlconn.prepareStatement("SELECT * FROM ferie");
+			stmt = mysqlCon.prepareStatement("SELECT * FROM ferie");
 			ResultSet rs = stmt.executeQuery();
 			
 			EntityManager em = JPA.em();
@@ -150,7 +190,7 @@ public class FillTable extends Controller{
 			e.printStackTrace();
 		}
 		try{
-			stmt = mysqlconn.prepareStatement("SELECT Nome, Cognome, DataNascita, Matricola, Qualifica FROM Persone");
+			stmt = mysqlCon.prepareStatement("SELECT Nome, Cognome, DataNascita, Matricola, Qualifica FROM Persone");
 			ResultSet rs = stmt.executeQuery();
 			
 			EntityManager em = JPA.em();
@@ -170,7 +210,7 @@ public class FillTable extends Controller{
 			e.printStackTrace();
 		}
 		try{
-			stmt = mysqlconn.prepareStatement("SELECT * FROM ferie_pers");
+			stmt = mysqlCon.prepareStatement("SELECT * FROM ferie_pers");
 			ResultSet rs = stmt.executeQuery();
 			
 			EntityManager em = JPA.em();
@@ -190,7 +230,7 @@ public class FillTable extends Controller{
 		}
 				
 		try{
-			stmt = mysqlconn.prepareStatement("SELECT Dipartimento, Sede, Stanza, Email, Fax, Telefono FROM Persone");
+			stmt = mysqlCon.prepareStatement("SELECT Dipartimento, Sede, Stanza, Email, Fax, Telefono FROM Persone");
 			ResultSet rs = stmt.executeQuery();
 			
 			EntityManager em = JPA.em();
@@ -204,8 +244,12 @@ public class FillTable extends Controller{
 				locazione.headOffice = rs.getString("Sede");
 				locazione.room = rs.getString("Stanza");
 				cd.email = rs.getString("Email");
-				cd.fax = rs.getInt("Fax");
-				cd.telephone = rs.getInt("Telefono");
+				cd.fax = rs.getString("Fax");
+				// TODO: Provare la valdazione del nuovo campo phone come 
+				// "+39.0" +  rs.getString("Telefono"); se va a buon fine impostare questa
+				// altrimenti null e log con warning
+				// Fare qualche euristica per estrarre i telefoni correnti
+				cd.telephone = "+39.0" + rs.getString("Telefono");
 				
 				locazione._save();
 				cd._save();
@@ -218,7 +262,7 @@ public class FillTable extends Controller{
 			e.printStackTrace();
 		}
 		try{
-			stmt = mysqlconn.prepareStatement("SELECT * FROM totali_anno");
+			stmt = mysqlCon.prepareStatement("SELECT * FROM totali_anno");
 			ResultSet rs = stmt.executeQuery();
 			
 			EntityManager em = JPA.em();
@@ -246,7 +290,7 @@ public class FillTable extends Controller{
 			e.printStackTrace();
 		}
 		try{
-			stmt = mysqlconn.prepareStatement("SELECT * FROM totali_mens limit 200");
+			stmt = mysqlCon.prepareStatement("SELECT * FROM totali_mens limit 200");
 			ResultSet rs = stmt.executeQuery();
 			
 			EntityManager em = JPA.em();
@@ -293,7 +337,7 @@ public class FillTable extends Controller{
 			e.printStackTrace();
 		}
 		//mysqlconn.commit();
-		mysqlconn.close();
+		mysqlCon.close();
        
     }
 
