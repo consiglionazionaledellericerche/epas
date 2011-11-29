@@ -91,8 +91,8 @@ public class FillTable extends Controller{
 				wttd_tu.timeSlotExitTo = rs.getInt("ma_fascia_uscita1");
 				wttd_tu.timeMealFrom = rs.getInt("ma_fascia_pranzo");
 				wttd_tu.timeMealTo = rs.getInt("ma_fascia_pranzo1");
-		//		wtt.tuesdayBreakTicketTime = rs.getString("CodiceSost"); //capire quale campo è
-		//		wtt.tuesdayMealTicketTime = rs.getByte("IgnoraTimbr"); //capire quale campo è
+				wttd_tu.breakTicketTime = rs.getInt("ma_tempo_interv"); 
+				wttd_tu.mealTicketTime = rs.getByte("ma_tempo_buono"); 
 				
 				WorkingTimeTypeDay wttd_we = new WorkingTimeTypeDay();
 				wttd_we.workingTime = rs.getInt("me_tempo_lavoro");
@@ -103,8 +103,8 @@ public class FillTable extends Controller{
 				wttd_we.timeSlotExitTo = rs.getInt("me_fascia_uscita1");
 				wttd_we.timeMealFrom = rs.getInt("me_fascia_pranzo");
 				wttd_we.timeMealTo = rs.getInt("me_fascia_pranzo1");
-		//		wttd_we.BreakTicketTime = rs.getInt(""); //capire quale campo è
-		//		wttd_we.MealTicketTime = rs.getInt(""); //capire quale campo è
+				wttd_we.breakTicketTime = rs.getInt("me_tempo_interv"); 
+				wttd_we.mealTicketTime = rs.getInt("me_tempo_buono"); 
 				
 				WorkingTimeTypeDay wttd_th = new WorkingTimeTypeDay();
 				wttd_th.workingTime = rs.getInt("gi_tempo_lavoro");
@@ -115,8 +115,8 @@ public class FillTable extends Controller{
 				wttd_th.timeSlotExitTo = rs.getInt("gi_fascia_uscita1");
 				wttd_th.timeMealFrom = rs.getInt("gi_fascia_pranzo");
 				wttd_th.timeMealTo = rs.getInt("gi_fascia_pranzo1");
-		//		wttd_th.BreakTicketTime = rs.getInt(""); //capire quale campo è
-		//		wttd_th.MealTicketTime = rs.getInt(""); //capire quale campo è
+				wttd_th.breakTicketTime = rs.getInt("me_tempo_interv"); 
+				wttd_th.mealTicketTime = rs.getInt("me_tempo_buono"); 
 				
 				WorkingTimeTypeDay wttd_fr = new WorkingTimeTypeDay();
 				wttd_fr.workingTime = rs.getInt("ve_tempo_lavoro");
@@ -127,8 +127,8 @@ public class FillTable extends Controller{
 				wttd_fr.timeSlotExitTo = rs.getInt("ve_fascia_uscita1");
 				wttd_fr.timeMealFrom = rs.getInt("ve_fascia_pranzo");
 				wttd_fr.timeMealTo = rs.getInt("ve_fascia_pranzo1");
-		//		wttd_fr.BreakTicketTime = rs.getInt(""); //capire quale campo è
-		//		wttd_fr.MealTicketTime = rs.getInt(""); //capire quale campo è
+				wttd_fr.breakTicketTime = rs.getInt("me_tempo_interv"); 
+				wttd_fr.mealTicketTime = rs.getInt("me_tempo_buono"); 
 				
 				WorkingTimeTypeDay wttd_sa = new WorkingTimeTypeDay();
 				wttd_sa.workingTime = rs.getInt("sa_tempo_lavoro");
@@ -139,8 +139,8 @@ public class FillTable extends Controller{
 				wttd_sa.timeSlotExitTo = rs.getInt("sa_fascia_uscita1");
 				wttd_sa.timeMealFrom = rs.getInt("sa_fascia_pranzo");
 				wttd_sa.timeMealTo = rs.getInt("sa_fascia_pranzo1");
-		//		wttd_sa.BreakTicketTime = rs.getInt(""); //capire quale campo è
-		//		wttd_sa.MealTicketTime = rs.getInt(""); //capire quale campo è
+				wttd_sa.breakTicketTime = rs.getInt("me_tempo_interv");
+				wttd_sa.mealTicketTime = rs.getInt("me_tempo_buono"); 
 
 				WorkingTimeTypeDay wttd_su = new WorkingTimeTypeDay();				
 				wttd_su.workingTime = rs.getInt("do_tempo_lavoro");
@@ -151,8 +151,8 @@ public class FillTable extends Controller{
 				wttd_su.timeSlotExitTo = rs.getInt("do_fascia_uscita1");
 				wttd_su.timeMealFrom = rs.getInt("do_fascia_pranzo");
 				wttd_su.timeMealTo = rs.getInt("do_fascia_pranzo1");
-		//		wttd_su.BreakTicketTime = rs.getInt(""); //capire quale campo è
-		//		wttd_su.MealTicketTime = rs.getInt(""); //capire quale campo è
+				wttd_su.breakTicketTime = rs.getInt("me_tempo_interv");
+				wttd_su.mealTicketTime = rs.getInt("me_tempo_buono");
 				
 				wtt._save();	
 				
@@ -164,12 +164,10 @@ public class FillTable extends Controller{
 			e.printStackTrace();
 		}
 	} 
-	public static void riempiTabelle() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
+	
+	public static void fillVacationType() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt;
-		
-		fillWorkingTime();
-		
 		try{
 			stmt = mysqlCon.prepareStatement("SELECT * FROM ferie");
 			ResultSet rs = stmt.executeQuery();
@@ -189,6 +187,10 @@ public class FillTable extends Controller{
 		}catch(Exception e){
 			e.printStackTrace();
 		}
+	}
+	public static void fillPerson() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+		Connection mysqlCon = getMysqlConnection();
+		PreparedStatement stmt;
 		try{
 			stmt = mysqlCon.prepareStatement("SELECT Nome, Cognome, DataNascita, Matricola, Qualifica FROM Persone");
 			ResultSet rs = stmt.executeQuery();
@@ -209,6 +211,10 @@ public class FillTable extends Controller{
 		}catch(Exception e){
 			e.printStackTrace();
 		}
+	}
+	public static void fillPersonVacation() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+		Connection mysqlCon = getMysqlConnection();
+		PreparedStatement stmt;
 		try{
 			stmt = mysqlCon.prepareStatement("SELECT * FROM ferie_pers");
 			ResultSet rs = stmt.executeQuery();
@@ -217,8 +223,6 @@ public class FillTable extends Controller{
 			PersonVacation pv = null;
 			while(rs.next()){
 				pv = new PersonVacation();
-			//	pv.fid = rs.getByte("fid");
-			//	pv.pid = rs.getShort("pid");
 				pv.beginFrom = rs.getDate("data_inizio");
 				pv.endTo = rs.getDate("data_fine");
 				pv._save();
@@ -228,39 +232,10 @@ public class FillTable extends Controller{
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-				
-		try{
-			stmt = mysqlCon.prepareStatement("SELECT Dipartimento, Sede, Stanza, Email, Fax, Telefono FROM Persone");
-			ResultSet rs = stmt.executeQuery();
-			
-			EntityManager em = JPA.em();
-			Location locazione = null;
-			ContactData cd = null;
-			
-			while(rs.next()){
-				locazione = new Location();
-				cd = new ContactData();
-				locazione.department = rs.getString("Dipartimento");
-				locazione.headOffice = rs.getString("Sede");
-				locazione.room = rs.getString("Stanza");
-				cd.email = rs.getString("Email");
-				cd.fax = rs.getString("Fax");
-				// TODO: Provare la valdazione del nuovo campo phone come 
-				// "+39.0" +  rs.getString("Telefono"); se va a buon fine impostare questa
-				// altrimenti null e log con warning
-				// Fare qualche euristica per estrarre i telefoni correnti
-				cd.telephone = "+39.0" + rs.getString("Telefono");
-				
-				locazione._save();
-				cd._save();
-			}
-			em.persist(locazione);
-			em.persist(cd);
-			
-			
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+	}
+	public static void fillYearRecap() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+		Connection mysqlCon = getMysqlConnection();
+		PreparedStatement stmt;
 		try{
 			stmt = mysqlCon.prepareStatement("SELECT * FROM totali_anno");
 			ResultSet rs = stmt.executeQuery();
@@ -289,6 +264,10 @@ public class FillTable extends Controller{
 		}catch(Exception e){
 			e.printStackTrace();
 		}
+	}
+	public static void fillMonthRecap() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+		Connection mysqlCon = getMysqlConnection();
+		PreparedStatement stmt;
 		try{
 			stmt = mysqlCon.prepareStatement("SELECT * FROM totali_mens limit 200");
 			ResultSet rs = stmt.executeQuery();
@@ -336,7 +315,73 @@ public class FillTable extends Controller{
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		//mysqlconn.commit();
+	}
+	public static void fillContactAndLocation() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+		Connection mysqlCon = getMysqlConnection();
+		PreparedStatement stmt;
+		try{
+			stmt = mysqlCon.prepareStatement("SELECT Dipartimento, Sede, Stanza, Email, Fax, Telefono FROM Persone");
+			ResultSet rs = stmt.executeQuery();
+			
+			EntityManager em = JPA.em();
+			Location locazione = null;
+			ContactData cd = null;
+			
+			while(rs.next()){
+				locazione = new Location();
+				cd = new ContactData();
+				locazione.department = rs.getString("Dipartimento");
+				locazione.headOffice = rs.getString("Sede");
+				locazione.room = rs.getString("Stanza");
+				cd.email = rs.getString("Email");
+				cd.fax = rs.getString("Fax");
+				// TODO: Provare la valdazione del nuovo campo phone come 
+				// "+39.0" +  rs.getString("Telefono"); se va a buon fine impostare questa
+				// altrimenti null e log con warning
+				// Fare qualche euristica per estrarre i telefoni correnti
+				cd.telephone = rs.getString("Telefono");
+				if(cd.telephone != null){
+					if(cd.telephone.length() == 4){
+						String tel = cd.telephone;
+						cd.telephone = "+39050315"+tel;
+					}
+					if((cd.telephone.startsWith("3"))&&(cd.telephone.length() > 4)){
+						cd.mobile = cd.telephone;
+					}
+					if(cd.telephone.startsWith("50")){
+						String tel = cd.telephone;
+						cd.telephone = "+390"+tel;
+					}					
+										
+				}
+				else 
+					System.out.println("Validazione numero di telefono non avvenuta. Il campo verra' settato a null");
+					cd.telephone = null;
+					
+				
+				locazione._save();
+				cd._save();
+			}
+			em.persist(locazione);
+			em.persist(cd);
+			
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	public static void riempiTabelle() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
+		Connection mysqlCon = getMysqlConnection();
+		PreparedStatement stmt;
+		
+		fillWorkingTime();
+		fillVacationType();
+		fillPerson();
+		fillPersonVacation();
+		fillYearRecap();
+		fillMonthRecap();
+		fillContactAndLocation();
+				
 		mysqlCon.close();
        
     }
