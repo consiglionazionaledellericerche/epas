@@ -2,3 +2,6 @@
 /.project
 /.classpath
 /tmp
+/logs
+eclipse/classes/
+server.pid
