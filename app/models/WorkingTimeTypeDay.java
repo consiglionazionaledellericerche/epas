@@ -18,14 +18,6 @@ import play.db.jpa.Model;
  * @author cristian
  * @author dario
  */
-/**
- * @author dario
- *
- */
-/**
- * @author dario
- *
- */
 @Entity
 public class WorkingTimeTypeDay extends Model {
 
@@ -35,7 +27,6 @@ public class WorkingTimeTypeDay extends Model {
 
 	@ManyToOne
 	@JoinColumn(name = "working_time_type_id")
-	@Column(name = "working_time_type")
 	public WorkingTimeType workingTimeType;
 	
 	@Required
