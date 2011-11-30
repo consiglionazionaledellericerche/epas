@@ -7,6 +7,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import play.data.validation.Email;
@@ -23,9 +24,9 @@ import play.db.jpa.JPA;
 @Table(name = "contact_data")
 public class ContactData extends Model{
 
-//	@ManyToOne
-//	@JoinColumn(name = "person_id", nullable = false)
-//	public Person person;
+	@OneToOne
+	@JoinColumn(name = "person_id")
+	public Person person;
 
 	@Phone
 	public String telephone;

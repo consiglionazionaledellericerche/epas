@@ -21,9 +21,10 @@ import play.db.jpa.JPA;
 @Entity
 public class Location extends Model{
 	
-//	@ManyToOne
-//	@JoinColumn(name = "person_id", nullable = false)
-//	public Person person;
+	@ManyToOne
+	@JoinColumn(name = "person_id")
+	public Person person;
+	
 	@Column
 	public String department;
 	@Column
