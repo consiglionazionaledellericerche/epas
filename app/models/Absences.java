@@ -29,8 +29,9 @@ public class Absences extends Model{
 	@Column
 	public Date date;
 	
-	//@Column
-	@ManyToOne()
+	
+	@ManyToOne
+	@JoinColumn(name = "absenceType_id")
 	public AbsenceType absenceType;
 	
 

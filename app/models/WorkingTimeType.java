@@ -7,7 +7,9 @@ import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import play.data.validation.Required;
@@ -34,6 +36,16 @@ public class WorkingTimeType extends Model {
 	 */
 	public boolean shift = false;
 	
+	/**
+	 * relazione con la tabella persone
+	 */
+	@OneToOne
+	@JoinColumn(name="person_id")
+	public Person person;
+	
+	/**
+	 * relazione con la tabella di specifiche di orario di lavoro
+	 */
 	@OneToMany(mappedBy = "workingTimeType")
 	public List<WorkingTimeTypeDay> workingTimeTypeDay;
 
