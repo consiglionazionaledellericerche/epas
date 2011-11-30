@@ -21,6 +21,7 @@ import play.db.jpa.JPA;
  *
  */
 @Entity
+@Table(name="contractLevel")
 public class ContractLevel extends Model{
 
 	@Required
@@ -29,6 +30,6 @@ public class ContractLevel extends Model{
 	@OneToMany(mappedBy = "contractLevel")
 	public List<Contract> contract;
 	
-	@ManyToMany(mappedBy="absenceType_id")
+	@ManyToMany(mappedBy="absenceType")
 	public List<AbsenceType> absenceType;
 }

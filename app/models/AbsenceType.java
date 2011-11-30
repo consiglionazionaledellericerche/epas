@@ -33,6 +33,7 @@ public class AbsenceType extends Model{
 	public AbsenceTypeGroup absenceTypeGroup;
 	
 	@ManyToMany(mappedBy="contractLevel_id")
+	@JoinTable(name="contractLevel", joinColumns = { @JoinColumn(name="contractLevel_id")})
 	public List<ContractLevel> contractLevel;
 	
 		
