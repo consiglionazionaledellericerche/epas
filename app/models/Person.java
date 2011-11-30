@@ -48,7 +48,7 @@ public class Person extends Model {
 	 * relazione con la tabella delle absence
 	 */
 	@OneToMany(mappedBy="person")
-	public List<Absences> absence;
+	public List<Absences> absences;
 	
 	/**
 	 * relazione con la tabella di person vacation

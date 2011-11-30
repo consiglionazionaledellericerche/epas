@@ -6,6 +6,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import play.data.validation.Required;
@@ -18,6 +19,10 @@ import play.db.jpa.JPA;
  */
 @Entity
 public class Qualification extends Model{
+
+	@ManyToOne
+	@JoinColumn(name="contracts_id")
+	public Contract contract;
 
 	@Column
 	public String description;
