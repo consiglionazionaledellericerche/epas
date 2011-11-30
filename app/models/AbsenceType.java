@@ -1,7 +1,7 @@
 package models;
 
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -26,8 +26,16 @@ import play.db.jpa.JPA;
 public class AbsenceType extends Model{
 	
 	@OneToMany(mappedBy="absenceType")
-	public Set<Absences> absence;
+	public List<Absences> absence;
 	
+	@OneToOne
+	@JoinColumn(name="absenceTypeGroup_id")
+	public AbsenceTypeGroup absenceTypeGroup;
+	
+	@ManyToMany(mappedBy="contractLevel_id")
+	public List<ContractLevel> contractLevel;
+	
+		
 	@Column
 	public String code;
 	@Column
