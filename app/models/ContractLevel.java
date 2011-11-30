@@ -30,6 +30,6 @@ public class ContractLevel extends Model{
 	@OneToMany(mappedBy = "contractLevel")
 	public List<Contract> contract;
 	
-	@ManyToMany(mappedBy="absenceType")
-	public List<AbsenceType> absenceType;
+//	@OneToMany(mappedBy="contractLevel")
+//	public List<AbsenceType> absenceType;
 }

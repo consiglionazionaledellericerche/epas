@@ -23,7 +23,6 @@ public class Contract extends Model{
 	
 	
 	@OneToMany(mappedBy="contract")
-	@JoinColumn(name="qualification_id")
 	public List<Qualification> qualification;
 	
 	@ManyToOne
