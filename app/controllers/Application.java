@@ -12,15 +12,9 @@ import models.*;
 
 public class Application extends Controller {
 	
-	//static String mySqldriver = "com.mysql.jdbc.Driver";
-	//static Connection conn = null;	
-
     public static void index() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-    	//Class.forName(mySqldriver).newInstance();
-    	//conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/IIT","root", "orologio");
-    	    	
     	
-    	FillTable.riempiTabelle();
+    	//FillTable.riempiTabelle();
         render();
     }
 

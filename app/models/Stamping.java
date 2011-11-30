@@ -10,6 +10,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
@@ -34,6 +35,11 @@ public class Stamping extends Model {
 	
 	@Required
 	@ManyToOne(optional = false)
+	@JoinColumn(name = "person_id", nullable = false)
+	public Person person;
+	
+	@Required
+	@ManyToOne(optional = false)
 	@JoinColumn(name = "stamp_type_id", nullable = false)
 	public StampType stampType;
 	
@@ -45,4 +51,9 @@ public class Stamping extends Model {
 	public WayType way;
 	
 	public String notes;
+	
+	public boolean isMealTicketAssigned() {
+		//Se il tempo è maggiore delle ore impostate nel tipo di orario di questa timbratura return true, false altrimenti
+		return true;
+	}
 }

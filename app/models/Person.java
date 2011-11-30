@@ -10,6 +10,8 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import play.data.validation.Email;
@@ -37,9 +39,13 @@ public class Person extends Model {
 	@Email
 	public String email;
 	
-	@Column(name = "contract_level")
-	public int contractLevel;
+	@ManyToOne
+	@JoinColumn(name = "contract_level_id")
+	public ContractLevel contractLevel;
 	
-	public int number;
+	/**
+	 * Numero di matricola
+	 */
+	public Integer number;
 	
 }
