@@ -23,14 +23,14 @@ import play.db.jpa.JPA;
 @Entity
 public class PersonVacation extends Model{
 	
-//	
-//	@ManyToOne	
-//	@JoinColumn(name = "person_id", nullable = false)
-//	public Person person;
-//	
-//	@ManyToOne
-//	@JoinColumn(name = "vacationType_id", nullable = false)
-//	public VacationType vacationType;
+	
+	@ManyToOne	
+	@JoinColumn(name = "person_id", nullable = false)
+	public Person person;
+	
+	@ManyToOne
+	@JoinColumn(name = "vacationType_id", nullable = false)
+	public VacationType vacationType;
 	
 	@Column
 	public Date beginFrom;

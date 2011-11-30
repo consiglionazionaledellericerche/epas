@@ -1,6 +1,7 @@
 package models;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -21,13 +22,17 @@ import play.db.jpa.Model;
 public class Contract extends Model{
 	
 	
-//	@OneToMany(mappedBy="contract")
-//	@JoinColumn(name="qualification_id")
-//	public Qualification qualification;
+	@OneToMany(mappedBy="contract")
+	@JoinColumn(name="qualification_id")
+	public List<Qualification> qualification;
 	
-//	@ManyToOne
-//	@JoinColumn(name= "person_id", nullable = false)
-//	public Person person;
+	@ManyToOne
+	@JoinColumn(name="contractLevel_id")
+	public ContractLevel contractLevel;
+	
+	@ManyToOne
+	@JoinColumn(name= "person_id")
+	public Person person;
 	
 	@Column
 	public Date beginContract;
