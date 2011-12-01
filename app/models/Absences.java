@@ -34,5 +34,9 @@ public class Absences extends Model{
 	@JoinColumn(name = "absenceType_id")
 	public AbsenceType absenceType;
 	
+	@ManyToOne
+	@JoinColumn(name="person_id")
+	public Person person;
+	
 
 }
