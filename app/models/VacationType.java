@@ -3,8 +3,7 @@
  */
 package models;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -23,7 +22,7 @@ import play.db.jpa.Model;
 public class VacationType extends Model {
 	
 	@OneToMany(mappedBy="vacationType")
-	public Set personVacation = new HashSet();
+	public List<PersonVacation> personVacation;
 	
 	@Required
 	public String description;
