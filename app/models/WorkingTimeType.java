@@ -8,6 +8,7 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -24,6 +25,7 @@ import play.db.jpa.Model;
  * 
  */
 @Entity
+@Audited
 @Table(name="working_time_types")
 public class WorkingTimeType extends Model {
 	
@@ -48,6 +50,10 @@ public class WorkingTimeType extends Model {
 	 */
 	@OneToMany(mappedBy = "workingTimeType")
 	public List<WorkingTimeTypeDay> workingTimeTypeDay;
+	
+	
+	@ManyToMany(mappedBy="workingTimeType")
+	public List<PersonStamping> personStamping;
 
 }
 

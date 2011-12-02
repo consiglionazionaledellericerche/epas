@@ -5,6 +5,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
+import java.util.Date;
 
 import javax.persistence.EntityManager;
 
@@ -14,7 +16,9 @@ import models.ContactData;
 import models.Location;
 import models.MonthRecap;
 import models.Person;
+import models.PersonStamping;
 import models.PersonVacation;
+import models.Stamping;
 import models.VacationType;
 import models.WorkingTimeType;
 import models.YearRecap;
@@ -70,15 +74,21 @@ public class FromMysqlToPostgres extends Controller{
 				person.bornDate = rs.getDate("DataNascita");
 				//person.contractLevel = rs.getInteger("Qualifica");
 				person.number = rs.getInt("Matricola");
+				em.persist(person);
 				
+				location.person = person;
 				location.department = rs.getString("Dipartimento");
 				location.headOffice = rs.getString("Sede");
 				location.room = rs.getString("Stanza");
-				location.person.id = rs.getLong("ID");
 				
+				contactData.person = person;
 				contactData.email = rs.getString("Email");
 				contactData.fax = rs.getString("Fax");
 				contactData.telephone = rs.getString("Telefono");
+				
+				em.persist(location);
+				
+				
 				/**
 				 * controllo sui valori del campo Telefono e conseguente modifica sul nuovo db
 				 */
@@ -98,6 +108,7 @@ public class FromMysqlToPostgres extends Controller{
 				else 
 					log.warn("Validazione numero di telefono non avvenuta. Il campo verra' settato a null");
 				contactData.telephone = null;
+				em.persist(contactData);
 				
 				/**
 				 * recupero id del soggetto per fare le query sulle tabelle correlate a Persone e popolare
@@ -152,7 +163,7 @@ public class FromMysqlToPostgres extends Controller{
 				PreparedStatement stmt4 = mysqlCon.prepareStatement("SELECT * FROM totali_mens WHERE ID="+id);
 				ResultSet rs4 = stmt4.executeQuery();
 				MonthRecap monthRecap = null;
-				while(rs.next()){
+				while(rs4.next()){
 					monthRecap = new MonthRecap();
 					monthRecap.id = rs4.getLong("ID");
 					monthRecap.month = rs4.getShort("mese");
@@ -187,29 +198,47 @@ public class FromMysqlToPostgres extends Controller{
 
 					monthRecap._save();
 				}
-				em.persist(monthRecap);
-
+				em.persist(monthRecap);				
 				
 				
+				PreparedStatement stmt5 = mysqlCon.prepareStatement("SELECT " +
+						"Orario.ID, Orario.Giorno, Orario.TipoGiorno, Orario.TipoTimbratura, Orario.Ora, " +
+						"Orario.Ora1, orario_pers.data_inizio, orario_pers.data_fine " +
+						"FROM orario_pers,Orario, Persone " +
+						"WHERE Persone.id=orario_pers.pid " +
+						"AND orario_pers.pid=Orario.id " +
+						"AND Persone.id="+id);
+				ResultSet rs5 = stmt5.executeQuery();
+				PersonStamping personStamping = null;
+				Stamping stamping = null;
+				while(rs5.next()){
+					/**
+					 * popolo la tabella PersonStamping
+					 */
+					personStamping = new PersonStamping();
+				
+					personStamping.person = person;
+					personStamping.data_inizio = rs5.getDate("data_inizio");
+					personStamping.data_fine = rs5.getDate("data_fine");
+					em.persist(personStamping);
+					
+					/**
+					 * popolo la tabella stampings
+					 */
+					stamping = new Stamping();
+					byte tipoTimbratura = rs5.getByte("TipoTimbratura");
+					Date giorno = rs.getDate("Giorno");
+					Time ora = rs.getTime("Ora");
+					
+					
+				}
 				
 				
-				
-				
-				PreparedStatement stmt6 = mysqlCon.prepareStatement("SELECT * FROM ferie_pers WHERE pid="+id);
 				PreparedStatement stmt7 = mysqlCon.prepareStatement("SELECT * FROM ferie_pers WHERE pid="+id);
 				PreparedStatement stmt8 = mysqlCon.prepareStatement("SELECT * FROM ferie_pers WHERE pid="+id);
 				PreparedStatement stmt9 = mysqlCon.prepareStatement("SELECT * FROM ferie_pers WHERE pid="+id);
-				
-						
-				person._save();
-				contactData._save();
-				location._save();
-			}
-			em.persist(person);
-			em.persist(contactData);
-			em.persist(location);
-
-			
+								
+			}			
 			
 		}
 		catch(Exception e){
