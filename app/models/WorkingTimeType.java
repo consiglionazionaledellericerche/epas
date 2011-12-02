@@ -13,6 +13,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.hibernate.envers.Audited;
+
 import play.data.validation.Required;
 import play.db.jpa.Model;
 
@@ -25,7 +27,7 @@ import play.db.jpa.Model;
  * 
  */
 @Entity
-
+@Audited
 @Table(name="working_time_types")
 public class WorkingTimeType extends Model {
 	

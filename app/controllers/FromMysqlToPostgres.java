@@ -19,6 +19,7 @@ import models.Person;
 import models.PersonStamping;
 import models.PersonVacation;
 import models.Stamping;
+import models.Stamping.WayType;
 import models.VacationType;
 import models.WorkingTimeType;
 import models.YearRecap;
@@ -51,7 +52,8 @@ public class FromMysqlToPostgres extends Controller{
 			ResultSet rs = stmt.executeQuery();
 			EntityManager em = JPA.em();
 			/**
-			 * da completare...
+			 * da completare...da capire però se quell'id (smallint) della tabella su mysql è il legame con la tabella 
+			 * persone che ha sempre id (smallint) della stessa dimensione.
 			 */
 			
 		}catch(Exception e){
@@ -229,12 +231,12 @@ public class FromMysqlToPostgres extends Controller{
 					/**
 					 * popolo la tabella PersonStamping
 					 */
-					personStamping = new PersonStamping();
-				
-					personStamping.person = person;
-					personStamping.data_inizio = rs5.getDate("data_inizio");
-					personStamping.data_fine = rs5.getDate("data_fine");
-					em.persist(personStamping);
+//					personStamping = new PersonStamping();
+//				
+//					personStamping.person = person;
+//					personStamping.data_inizio = rs5.getDate("data_inizio");
+//					personStamping.data_fine = rs5.getDate("data_fine");
+//					em.persist(personStamping);
 					
 					/**
 					 * popolo la tabella stampings
@@ -243,10 +245,15 @@ public class FromMysqlToPostgres extends Controller{
 					byte tipoTimbratura = rs5.getByte("TipoTimbratura");
 					Date giorno = rs.getDate("Giorno");
 					Time ora = rs.getTime("Ora");
+					if((int)tipoTimbratura%2 != 0)
+						stamping.way = WayType.in;
+					
+					else
+						stamping.way = WayType.out;
 					
 					
 				}
-				
+				em.persist(stamping);
 				
 				PreparedStatement stmt7 = mysqlCon.prepareStatement("SELECT * FROM orari_di_lavoro WHERE pid="+id);
 				PreparedStatement stmt8 = mysqlCon.prepareStatement("SELECT * FROM ferie_pers WHERE pid="+id);
