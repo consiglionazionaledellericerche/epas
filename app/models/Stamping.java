@@ -3,6 +3,8 @@
  */
 package models;
 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -42,6 +44,10 @@ public class Stamping extends Model {
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "stamp_type_id", nullable = false)
 	public StampType stampType;
+	
+	
+	@ManyToMany(mappedBy="stampings")
+	public List<PersonStamping> personStamping;
 	
 	@Required
 	public LocalDate date;
