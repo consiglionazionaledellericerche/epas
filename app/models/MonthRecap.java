@@ -8,6 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import play.data.validation.Required;
@@ -24,6 +25,11 @@ import play.db.jpa.JPA;
  */
 @Entity
 public class MonthRecap extends Model {
+	
+	@ManyToOne
+	@JoinColumn(name = "person_id")
+	public Person person;
+	
 	@Column
 	public short month;
 	@Column
