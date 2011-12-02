@@ -19,6 +19,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.hibernate.envers.Audited;
+
 import play.data.validation.Email;
 import play.data.validation.Required;
 import play.data.validation.Valid;
@@ -29,6 +31,7 @@ import play.db.jpa.Model;
  *
  */
 @Entity
+@Audited
 @Table(name = "persons")
 public class Person extends Model {
 	

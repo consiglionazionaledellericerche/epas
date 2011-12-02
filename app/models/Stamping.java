@@ -17,6 +17,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.CollectionId;
+import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
@@ -62,4 +63,5 @@ public class Stamping extends Model {
 		//Se il tempo è maggiore delle ore impostate nel tipo di orario di questa timbratura return true, false altrimenti
 		return true;
 	}
+	
 }
