@@ -3,5 +3,6 @@
 /.classpath
 /tmp
 /logs
-eclipse/classes/
+eclipse/
 server.pid
+lib/
