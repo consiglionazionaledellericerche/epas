@@ -39,6 +39,18 @@ public class Person extends Model {
 	public List<Stamping> stampings;
 	
 	/**
+	 * relazione con la tabella di storico YearRecap
+	 */
+	@OneToMany(mappedBy="person")
+	public List<YearRecap> yearRecap;
+	
+	/**
+	 * relazione con la tabella di storico MonthRecap
+	 */
+	@OneToMany(mappedBy="person")
+	public List<MonthRecap> monthRecap;
+	
+	/**
 	 * relazione con la tabella ponte tra timbrature e tipi di orario
 	 */
 	@OneToMany(mappedBy="person")

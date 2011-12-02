@@ -25,7 +25,7 @@ import play.db.jpa.Model;
  * 
  */
 @Entity
-@Audited
+
 @Table(name="working_time_types")
 public class WorkingTimeType extends Model {
 	
@@ -51,9 +51,6 @@ public class WorkingTimeType extends Model {
 	@OneToMany(mappedBy = "workingTimeType")
 	public List<WorkingTimeTypeDay> workingTimeTypeDay;
 	
-	
-	@ManyToMany(mappedBy="workingTimeType")
-	public List<PersonStamping> personStamping;
 
 }
 

@@ -43,6 +43,22 @@ public class FromMysqlToPostgres extends Controller{
 		return DriverManager.getConnection("jdbc:mysql://localhost:3306/IIT?zeroDateTimeBehavior=convertToNull","root", "orologio");
 	}
 	
+	public static void fillOtherTables() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+		Connection mysqlCon = getMysqlConnection();
+		PreparedStatement stmt;
+		try{
+			stmt = mysqlCon.prepareStatement("SELECT * FROM Codici");
+			ResultSet rs = stmt.executeQuery();
+			EntityManager em = JPA.em();
+			/**
+			 * da completare...
+			 */
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	
 	public static void fillTables() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt;
@@ -86,8 +102,7 @@ public class FromMysqlToPostgres extends Controller{
 				contactData.fax = rs.getString("Fax");
 				contactData.telephone = rs.getString("Telefono");
 				
-				em.persist(location);
-				
+				em.persist(location);				
 				
 				/**
 				 * controllo sui valori del campo Telefono e conseguente modifica sul nuovo db
@@ -140,8 +155,7 @@ public class FromMysqlToPostgres extends Controller{
 				YearRecap recap = null;
 				while(rs3.next()){
 					recap = new YearRecap();
-					recap.id = rs3.getLong("ID");
-					recap = new YearRecap();
+					recap.person = person;
 					recap.year = rs3.getShort("anno");
 					recap.remaining = rs3.getInt("residuo");
 					recap.remainingAp = rs3.getInt("residuoap");
@@ -165,7 +179,7 @@ public class FromMysqlToPostgres extends Controller{
 				MonthRecap monthRecap = null;
 				while(rs4.next()){
 					monthRecap = new MonthRecap();
-					monthRecap.id = rs4.getLong("ID");
+					monthRecap.person = person;
 					monthRecap.month = rs4.getShort("mese");
 					monthRecap.year = rs4.getShort("anno");
 					monthRecap.workingDays = rs4.getShort("giorni_lavorativi");
@@ -234,7 +248,7 @@ public class FromMysqlToPostgres extends Controller{
 				}
 				
 				
-				PreparedStatement stmt7 = mysqlCon.prepareStatement("SELECT * FROM ferie_pers WHERE pid="+id);
+				PreparedStatement stmt7 = mysqlCon.prepareStatement("SELECT * FROM orari_di_lavoro WHERE pid="+id);
 				PreparedStatement stmt8 = mysqlCon.prepareStatement("SELECT * FROM ferie_pers WHERE pid="+id);
 				PreparedStatement stmt9 = mysqlCon.prepareStatement("SELECT * FROM ferie_pers WHERE pid="+id);
 								
