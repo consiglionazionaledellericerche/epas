@@ -71,13 +71,13 @@ public class MonthRecap extends Model {
 	@Column
 	public int additionalHours;
 	@Column
-	public byte nadditionalHours;
+	public boolean nadditionalHours;
 	@Column
 	public int residualFine;
 	@Column
-	public byte endWork;
+	public short endWork;
 	@Column
-	public byte beginWork;
+	public short beginWork;
 	@Column
 	public int timeHourVisit;
 	@Column

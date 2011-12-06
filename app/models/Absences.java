@@ -1,7 +1,7 @@
 package models;
 
 import java.sql.Time;
-import java.util.Date;
+
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -12,6 +12,8 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
 import play.db.jpa.Model;
@@ -27,7 +29,7 @@ import play.db.jpa.JPA;
 public class Absences extends Model{
 	
 	@Column
-	public Date date;
+	public LocalDate date;
 	
 	
 	@ManyToOne
