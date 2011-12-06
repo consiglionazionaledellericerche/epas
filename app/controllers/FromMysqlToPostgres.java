@@ -6,12 +6,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 import javax.persistence.EntityManager;
 
 import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
 
+import models.AbsenceType;
+import models.Absences;
+import models.Codes;
 import models.ContactData;
 import models.Location;
 import models.MonthRecap;
@@ -48,24 +54,83 @@ public class FromMysqlToPostgres extends Controller{
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt;
 		try{
+
+			/**
+			 * la query sulla tabella opzioni non viene effettuata poichè in quella tabella sul db mysql 
+			 * non ci sono dati, pertanto la tabella verrà solo creata.
+			 * preparo la query per recuperare i dati dalla tabella codici
+			 */
 			stmt = mysqlCon.prepareStatement("SELECT * FROM Codici");
 			ResultSet rs = stmt.executeQuery();
 			EntityManager em = JPA.em();
-			/**
-			 * da completare...da capire però se quell'id (smallint) della tabella su mysql è il legame con la tabella 
-			 * persone che ha sempre id (smallint) della stessa dimensione.
-			 */
-			
+		
+			ResultSet rs6 = stmt.executeQuery();
+			Codes codes = null;
+			while(rs6.next()){
+				/**
+				 * popolo la tabella Codes
+				 */
+				codes = new Codes();
+				codes.code = rs6.getString("Codice");
+				codes.code_att = rs6.getString("Codice_att");
+				codes.description = rs6.getString("Descrizione");
+				if(rs6.getByte("Inattivo")==0)
+					codes.inactive = false;
+				else
+					codes.inactive = true;
+				if(rs6.getByte("Interno")==0)
+					codes.internal = false;
+				else 
+					codes.internal = true;
+				codes.fromDate = rs6.getDate("DataInizio");
+				codes.toDate = rs6.getDate("DataFine");
+				codes.qualification = rs6.getString("Qualifiche");
+				codes.group = rs6.getString("Gruppo");
+				codes.value = rs6.getInt("Valore");
+				if(rs6.getByte("MinutiEccesso")==0)
+					codes.minutesOver = false;
+				else
+					codes.minutesOver = true;
+				if(rs6.getByte("QuantMin")==0)
+					codes.quantMin = false;
+				else
+					codes.quantMin = true;
+				codes.storage = rs6.getShort("Accumulo");
+				if(rs6.getByte("Recuperabile")==0)
+					codes.recoverable = false;
+				else
+					codes.recoverable = true;
+				codes.limit = rs6.getInt("Limite");
+				codes.gestLim = rs6.getShort("GestLim");
+				codes.codiceSost = rs6.getString("CodiceSost");
+				if(rs6.getByte("IgnoraTimbr")==0)
+					codes.ignoreStamping = false;
+				else
+					codes.ignoreStamping = true;
+				if(rs6.getByte("UsoMulti")==0)
+					codes.usoMulti = false;
+				else
+					codes.usoMulti = true;
+				if(rs6.getByte("TempoBuono")==0)
+					codes.tempoBuono = false;
+				else
+					codes.tempoBuono = true;
+			}
+			em.persist(codes);
+						
 		}catch(Exception e){
 			e.printStackTrace();
 		}
 	}
 	
+	@SuppressWarnings("deprecation")
 	public static void fillTables() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt;
 		try{			
-
+			/**
+			 * preparo la query sulla tabella persone, che sarà la query principale 
+			 */
 			stmt = mysqlCon.prepareStatement("SELECT * FROM Persone ");
 
 			ResultSet rs = stmt.executeQuery();
@@ -133,21 +198,28 @@ public class FromMysqlToPostgres extends Controller{
 				 */
 				id = rs.getShort("ID");
 				/**
-				 * query su ferie_pers per popolare VacationType
+				 * query su ferie_pers per popolare VacationType e PersonVacation
 				 */
 				PreparedStatement stmt2 = mysqlCon.prepareStatement("SELECT * FROM ferie WHERE pid="+id);
 				ResultSet rs2 = stmt2.executeQuery();
 				PersonVacation personVacation = null;
+				VacationType vacationType = null;
 				
 				while(rs2.next()){
+					vacationType = new VacationType();
+					vacationType.description = rs2.getString("nome");
 					personVacation = new PersonVacation();
+					personVacation.person = person;
+					personVacation.vacationType = vacationType;
 					personVacation.beginFrom = rs2.getDate("data_inizio");
 					personVacation.endTo = rs2.getDate("data_fine");
 					personVacation.vacationType.id = rs2.getLong("fid");
 					
 					personVacation._save();
+					vacationType._save();
 				}
-				em.persist(personVacation);				
+				em.persist(personVacation);			
+				em.persist(vacationType);
 								
 				/**
 				 * query su totali_anno per recuperare lo storico da mettere in YearRecap
@@ -202,7 +274,10 @@ public class FromMysqlToPostgres extends Controller{
 					monthRecap.residualApUsed = rs4.getInt("residuoap_usato");
 					monthRecap.extraTimeAdmin = rs4.getInt("tempo_eccesso_ammin");
 					monthRecap.additionalHours = rs4.getInt("ore_aggiuntive");
-					monthRecap.nadditionalHours = rs4.getByte("nore_aggiuntive");
+					if(rs4.getByte("nore_aggiuntive")==0)
+						monthRecap.nadditionalHours = false;
+					else 
+						monthRecap.nadditionalHours = true;
 					monthRecap.residualFine = rs4.getInt("residuo_fine");
 					monthRecap.beginWork = rs4.getByte("inizio_lavoro");
 					monthRecap.endWork = rs4.getByte("fine_lavoro");
@@ -225,19 +300,9 @@ public class FromMysqlToPostgres extends Controller{
 						"AND orario_pers.pid=Orario.id " +
 						"AND Persone.id="+id);
 				ResultSet rs5 = stmt5.executeQuery();
-				PersonStamping personStamping = null;
 				Stamping stamping = null;
 				while(rs5.next()){
-					/**
-					 * popolo la tabella PersonStamping
-					 */
-//					personStamping = new PersonStamping();
-//				
-//					personStamping.person = person;
-//					personStamping.data_inizio = rs5.getDate("data_inizio");
-//					personStamping.data_fine = rs5.getDate("data_fine");
-//					em.persist(personStamping);
-					
+										
 					/**
 					 * popolo la tabella stampings
 					 */
@@ -246,18 +311,52 @@ public class FromMysqlToPostgres extends Controller{
 					Date giorno = rs.getDate("Giorno");
 					Time ora = rs.getTime("Ora");
 					if((int)tipoTimbratura%2 != 0)
-						stamping.way = WayType.in;
-					
+						stamping.way = WayType.in;					
 					else
 						stamping.way = WayType.out;
+					Calendar calGiorno = new GregorianCalendar();
+                    calGiorno.setTime(giorno);
+                    Calendar calOra = new GregorianCalendar();
+                    calOra.setTime(ora);
+                    
+                    calGiorno.set(Calendar.HOUR, calOra.get(Calendar.HOUR));
+                    calGiorno.set(Calendar.MINUTE, calOra.get(Calendar.MINUTE));
+                    calGiorno.set(Calendar.SECOND, calOra.get(Calendar.SECOND));
+                    stamping.date = new LocalDate(calGiorno);
 					
-					
+					stamping._save();
 				}
 				em.persist(stamping);
+			
 				
-				PreparedStatement stmt7 = mysqlCon.prepareStatement("SELECT * FROM orari_di_lavoro WHERE pid="+id);
-				PreparedStatement stmt8 = mysqlCon.prepareStatement("SELECT * FROM ferie_pers WHERE pid="+id);
-				PreparedStatement stmt9 = mysqlCon.prepareStatement("SELECT * FROM ferie_pers WHERE pid="+id);
+				PreparedStatement stmt7 = mysqlCon.prepareStatement("SELECT Persone.ID, assenze_init.id, assenze_init.anno, " +
+						"assenze_init.mese, assenze_init.giorno, assenze_init.Codice, assenze_init.giorni, " +
+						"assenze.matricola, assenze.mese AS 'AssenzeMese', assenze.anno AS 'AssenzeAnno', " +
+						"assenze.g1, assenze.g2 " +
+						"FROM assenze, assenze_init, Persone " +
+						"WHERE Persone.ID=assenze.ID and assenze.ID=assenze_init.idp and Persone.ID="+id);
+				ResultSet rs7 = stmt7.executeQuery();
+				Absences absence = null;
+				AbsenceType absenceType = null;
+				while(rs7.next()){
+					/**
+					 * popolo la tabella absence e la tabella absenceType con i dati prelevati da assenze e 
+					 * assenze_init
+					 */
+					absence.person = person;
+					absenceType = new AbsenceType();
+					absence.absenceType = absenceType;
+					Calendar cal = new GregorianCalendar();
+					cal.set(rs7.getInt("anno"), rs7.getInt("mese"), rs7.getInt("giorno"));
+					absence.date = new LocalDate(cal);
+					absenceType.code = rs7.getString("codice");
+					
+					absence._save();
+					absenceType._save();
+					
+				}
+				em.persist(absence);
+				em.persist(absenceType);				
 								
 			}			
 			

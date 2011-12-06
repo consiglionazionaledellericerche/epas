@@ -1,12 +1,9 @@
 package models;
 
+import java.util.Date;
 import java.util.Set;
 
 import javax.persistence.Column;
-
-
-import org.joda.time.LocalDate;
-
 import play.db.jpa.Model;
 /**
  * 
@@ -30,57 +27,60 @@ public class Codes extends Model{
 	public String description;
 	
 	@Column
-	public byte inactive;
+	public boolean inactive;
 	
 	@Column
-	public byte internal;
+	public boolean internal;
 	
 	@Column
-	public LocalDate fromDate;
+	public Date fromDate;
 	
 	@Column
-	public LocalDate toDate;
+	public Date toDate;
 	
 	@Column
-	public Set qualification;
+	public String qualification;
+	
+	@Column
+	public String group;
 	
 	@Column
 	public int value;
 	
 	@Column
-	public byte minutesOver;
+	public boolean minutesOver;
 	
 	@Column
 	public String descriptionValue;
 	
 	@Column
-	public byte quantGiust;
+	public short quantGiust;
 	
 	@Column
-	public byte quantMin;
+	public boolean quantMin;
 	
 	@Column
-	public byte storage;
+	public short storage;
 	
 	@Column
-	public byte recoverable;
+	public boolean recoverable;
 	
 	@Column
 	public int limit;
 	
 	@Column
-	public byte gestLim;
+	public short gestLim;
 	
 	@Column
 	public String codiceSost;
 	
 	@Column
-	public byte ignoreStamping;
+	public boolean ignoreStamping;
 	
 	@Column
-	public byte usoMulti;
+	public boolean usoMulti;
 	
 	@Column
-	public byte tempoBuono;
+	public boolean tempoBuono;
 	
 }
