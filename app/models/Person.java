@@ -54,12 +54,6 @@ public class Person extends Model {
 	public List<MonthRecap> monthRecap;
 	
 	/**
-	 * relazione con la tabella ponte tra timbrature e tipi di orario
-	 */
-	@OneToMany(mappedBy="person")
-	public List<PersonStamping> personStamping;
-	
-	/**
 	 * relazione con la tabella dei contratti
 	 */
 	@OneToMany(mappedBy="person")
