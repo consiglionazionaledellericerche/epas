@@ -46,9 +46,9 @@ public class Stamping extends Model {
 	@JoinColumn(name = "stamp_type_id", nullable = false)
 	public StampType stampType;
 	
-	
-	@ManyToMany(mappedBy="stampings")
-	public List<PersonStamping> personStamping;
+//	
+//	@ManyToMany(mappedBy="stampings")
+//	public List<PersonStamping> personStamping;
 	
 	@Required
 	public LocalDate date;

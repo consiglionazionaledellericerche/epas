@@ -14,7 +14,8 @@ public class Application extends Controller {
 	
     public static void index() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
     	
-    	//FillTable.riempiTabelle();
+    	FromMysqlToPostgres.fillOtherTables();
+    	FromMysqlToPostgres.fillTables();
         render();
     }
 
