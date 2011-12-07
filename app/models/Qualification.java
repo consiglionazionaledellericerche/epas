@@ -9,6 +9,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import lombok.Data;
+
 import play.data.validation.Required;
 import play.db.jpa.Model;
 import play.db.jpa.JPA;
@@ -17,13 +19,9 @@ import play.db.jpa.JPA;
  * @author dario
  *
  */
-@Entity
-public class Qualification extends Model{
-
-	@ManyToOne
-	@JoinColumn(name="contracts_id")
-	public Contract contract;
-
-	@Column
+@Data
+public class Qualification {
+	
 	public String description;
+	
 }

@@ -4,6 +4,7 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Table;
 
 import play.db.jpa.Model;
 
@@ -15,7 +16,8 @@ import play.db.jpa.Model;
  * costruiti sul db mysql poiché non sono riuscito a trovare una giusta e corretta traduzione.
  */
 @Entity
-public class Options extends Model{
+@Table(name = "options")
+public class Option extends Model{
 
 	@Column
 	public boolean patronDay;

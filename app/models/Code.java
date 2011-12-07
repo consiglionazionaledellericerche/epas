@@ -4,13 +4,18 @@ import java.util.Date;
 import java.util.Set;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
 import play.db.jpa.Model;
 /**
  * 
  * @author dario
  *
  */
-public class Codes extends Model{
+@Entity
+@Table(name = "codes")
+public class Code extends Model{
 	
 	/**
 	 * tabella codici del db mysql, per adesso alcuni campi sono riscritti tali e quali al db vecchio.
