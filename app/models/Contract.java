@@ -10,35 +10,29 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import lombok.Data;
+
 import play.db.jpa.Model;
 
 /**
  * 
  * @author dario
  *
+ * il contratto non è gestito direttamente da questa applicazione ma le sue informazioni
+ * sono prelevate da un altro servizio
  */
-@Entity
-@Table(name = "contracts")
-public class Contract extends Model{
+@Data
+public class Contract {
 	
+	public Qualification qualification;
 	
-	@OneToMany(mappedBy="contract")
-	public List<Qualification> qualification;
-	
-	@ManyToOne
-	@JoinColumn(name="contractLevel_id")
 	public ContractLevel contractLevel;
 	
-	@ManyToOne
-	@JoinColumn(name= "person_id")
 	public Person person;
 	
-	@Column
 	public Date beginContract;
 	
-	@Column
 	public Date endContract;
 	
-	@Column
 	public Date previousContract;
 }

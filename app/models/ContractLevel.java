@@ -11,6 +11,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import lombok.Data;
+
 import play.data.validation.Required;
 import play.db.jpa.Model;
 import play.db.jpa.JPA;
@@ -20,16 +22,9 @@ import play.db.jpa.JPA;
  * @author dario
  *
  */
-@Entity
-@Table(name="contractLevel")
-public class ContractLevel extends Model{
+@Data
+public class ContractLevel {
 
-	@Required
 	public String description;
 	
-	@OneToMany(mappedBy = "contractLevel")
-	public List<Contract> contract;
-	
-//	@OneToMany(mappedBy="contractLevel")
-//	public List<AbsenceType> absenceType;
 }

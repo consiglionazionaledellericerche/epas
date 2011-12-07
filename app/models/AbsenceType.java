@@ -14,6 +14,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import play.data.validation.Required;
 import play.db.jpa.Model;
@@ -27,9 +28,6 @@ import play.db.jpa.JPA;
 @Audited
 @Table(name = "absence_types")
 public class AbsenceType extends Model{
-	
-	@OneToMany(mappedBy="absenceType")
-	public List<Absences> absence;
 	
 	@OneToOne
 	@JoinColumn(name="absenceTypeGroup_id")

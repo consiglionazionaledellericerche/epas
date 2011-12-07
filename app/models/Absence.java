@@ -26,11 +26,10 @@ import play.db.jpa.JPA;
  */
 @Entity
 @Table(name = "absences")
-public class Absences extends Model{
+public class Absence extends Model {
 	
 	@Column
 	public LocalDate date;
-	
 	
 	@ManyToOne
 	@JoinColumn(name = "absenceType_id")

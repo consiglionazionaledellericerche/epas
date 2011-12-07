@@ -11,6 +11,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.envers.Audited;
+
 import play.data.validation.Required;
 import play.db.jpa.Model;
 import play.db.jpa.JPA;
@@ -20,9 +22,10 @@ import play.db.jpa.JPA;
  * @author dario
  *
  */
+@Audited
 @Entity
+@Table(name = "person_vacations")
 public class PersonVacation extends Model{
-	
 	
 	@ManyToOne	
 	@JoinColumn(name = "person_id", nullable = false)
@@ -32,9 +35,7 @@ public class PersonVacation extends Model{
 	@JoinColumn(name = "vacationType_id", nullable = false)
 	public VacationType vacationType;
 	
-	@Column
 	public Date beginFrom;
 	
-	@Column
 	public Date endTo;
 }

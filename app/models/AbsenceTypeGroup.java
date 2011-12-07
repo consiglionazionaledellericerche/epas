@@ -10,6 +10,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.hibernate.envers.Audited;
+
 import play.data.validation.Required;
 import play.db.jpa.Model;
 import play.db.jpa.JPA;
@@ -18,9 +20,9 @@ import play.db.jpa.JPA;
  * @author dario
  *
  */
-
+@Audited
 @Entity
-@Table(name = "absence_type_group")
+@Table(name = "absence_type_groups")
 public class AbsenceTypeGroup extends Model{
 	
 

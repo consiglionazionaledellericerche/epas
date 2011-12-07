@@ -3,5 +3,6 @@
 require:
     - play
     - org.hibernate -> hibernate-envers 3.6.1.Final:
-          transitive: false    
-#	- org.hibernate -> hibernate-envers 3.6.1.Final, transitive: false    
+          transitive: false
+    - org.projectlombok -> lombok 0.10.4    
+    

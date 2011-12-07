@@ -18,8 +18,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import play.data.validation.Email;
 import play.data.validation.Required;
@@ -38,32 +40,36 @@ public class Person extends Model {
 	/**
 	 * relazione con la tabella delle timbrature
 	 */
+	@NotAudited
 	@OneToMany(mappedBy="person")
 	public List<Stamping> stampings;
 	
 	/**
 	 * relazione con la tabella di storico YearRecap
 	 */
+	@NotAudited
 	@OneToMany(mappedBy="person")
 	public List<YearRecap> yearRecap;
 	
 	/**
 	 * relazione con la tabella di storico MonthRecap
 	 */
+	@NotAudited
 	@OneToMany(mappedBy="person")
 	public List<MonthRecap> monthRecap;
 	
 	/**
 	 * relazione con la tabella dei contratti
 	 */
-	@OneToMany(mappedBy="person")
-	public List<Contract> contract;
+	@Transient
+	public Contract contract;
 	
 	/**
 	 * relazione con la tabella delle absence
 	 */
+	@NotAudited
 	@OneToMany(mappedBy="person")
-	public List<Absences> absences;
+	public List<Absence> absences;
 	
 	/**
 	 * relazione con la tabella di person vacation
@@ -75,12 +81,13 @@ public class Person extends Model {
 	 * relazione con la tabella delle tipologie di orario di lavoro
 	 */
 	@OneToOne
-	@JoinColumn(name="workingTimeType_id")
+	@JoinColumn(name="working_time_type_id")
 	public WorkingTimeType workingTimeType;
 	
 	/**
 	 * relazione con la tabella delle locazioni degli utenti
 	 */
+	@NotAudited
 	@OneToOne
 	@JoinColumn(name="location_id")
 	public Location location;
@@ -88,9 +95,10 @@ public class Person extends Model {
 	/**
 	 * relazione con la tabella delle info di contatto
 	 */
+	@NotAudited
 	@OneToOne
-	@JoinColumn(name="contactData_id")
-	public ContactData contact;
+	@JoinColumn(name="contact_data_id")
+	public ContactData contactData;
 	
 	@Required
 	public String name;
@@ -103,14 +111,7 @@ public class Person extends Model {
 	
 	@Email
 	public String email;
-	
-	/**
-	 * relazione con la tabella dei contratti
-	 */
-	@ManyToOne
-	@JoinColumn(name = "contract_level_id")
-	public ContractLevel contractLevel;
-	
+		
 	/**
 	 * Numero di matricola
 	 */

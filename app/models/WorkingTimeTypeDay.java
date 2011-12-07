@@ -7,6 +7,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 import org.hibernate.envers.Audited;
 
@@ -20,7 +21,9 @@ import play.db.jpa.Model;
  * @author cristian
  * @author dario
  */
+@Audited
 @Entity
+@Table(name = "working_time_type_days")
 public class WorkingTimeTypeDay extends Model {
 
 	public enum DayOfWeek {
