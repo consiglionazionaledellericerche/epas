@@ -17,7 +17,8 @@ import play.db.jpa.JPA;
  *
  */
 @Entity
+@Table(name = "build_up_edge_behaviour")
 public class BuildUpEdgeBehaviour extends Model{
-	@Column
+
 	public String label;
 }

@@ -24,6 +24,7 @@ import play.db.jpa.JPA;
  * 
  */
 @Entity
+@Table(name = "month_recaps")
 public class MonthRecap extends Model {
 	
 	@ManyToOne

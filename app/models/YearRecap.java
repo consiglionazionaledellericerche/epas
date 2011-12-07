@@ -25,6 +25,7 @@ import play.db.jpa.JPA;
  * l'applicazione Orologio. Deve essere rivista.
  */
 @Entity
+@Table(name = "year_recaps")
 public class YearRecap extends Model{
 	
 	@ManyToOne

@@ -35,7 +35,9 @@ public class PersonVacation extends Model{
 	@JoinColumn(name = "vacationType_id", nullable = false)
 	public VacationType vacationType;
 	
+	@Column(name = "begin_from")
 	public Date beginFrom;
 	
+	@Column(name = "end_to")
 	public Date endTo;
 }
