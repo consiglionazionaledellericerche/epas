@@ -22,7 +22,6 @@ import models.ContactData;
 import models.Location;
 import models.MonthRecap;
 import models.Person;
-import models.PersonStamping;
 import models.PersonVacation;
 import models.Stamping;
 import models.WorkingTimeTypeDay;
