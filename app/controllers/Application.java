@@ -13,9 +13,7 @@ import models.*;
 public class Application extends Controller {
 	
     public static void index() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-    	
-    	//FromMysqlToPostgres.fillOtherTables();
-    	//FromMysqlToPostgres.fillTables();
+
         render();
     }
 
