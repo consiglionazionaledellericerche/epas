@@ -1,0 +1,9 @@
+#{extends 'main_admin.html' /}
+#{set title:'Interfaccia di amministrazione' /}
+
+#{if flash.error}
+    <p style="color:#c00">
+        ${flash.error}
+    </p>
+#{/if}
+ 

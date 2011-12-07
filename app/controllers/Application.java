@@ -12,8 +12,7 @@ import models.*;
 
 public class Application extends Controller {
 	
-    public static void index() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-
+    public static void index() {
         render();
     }
 
