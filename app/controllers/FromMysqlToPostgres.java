@@ -16,8 +16,10 @@ import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 
 import models.AbsenceType;
-import models.Absences;
-import models.Codes;
+
+import models.Code;
+
+import models.Absence;
 import models.ContactData;
 import models.Location;
 import models.MonthRecap;
@@ -66,12 +68,12 @@ public class FromMysqlToPostgres extends Controller{
 			EntityManager em = JPA.em();
 		
 			ResultSet rs6 = stmt.executeQuery();
-			Codes codes = null;
+			Code codes = null;
 			while(rs6.next()){
 				/**
 				 * popolo la tabella Codes
 				 */
-				codes = new Codes();
+				codes = new Code();
 				codes.code = rs6.getString("Codice");
 				codes.code_att = rs6.getString("Codice_att");
 				codes.description = rs6.getString("Descrizione");
@@ -201,7 +203,9 @@ public class FromMysqlToPostgres extends Controller{
 				/**
 				 * query su ferie_pers per popolare VacationType e PersonVacation
 				 */
-				PreparedStatement stmt2 = mysqlCon.prepareStatement("SELECT * FROM ferie WHERE pid="+id);
+				PreparedStatement stmt2 = mysqlCon.prepareStatement("SELECT ferie.nome, ferie_pers.data_inizio, ferie_pers.data_fine" +
+						" FROM ferie,ferie_pers WHERE ferie_pers.fid=ferie.id" +
+						"AND ferie_pers.pid="+id);
 				ResultSet rs2 = stmt2.executeQuery();
 				PersonVacation personVacation = null;
 				VacationType vacationType = null;
@@ -214,7 +218,7 @@ public class FromMysqlToPostgres extends Controller{
 					personVacation.vacationType = vacationType;
 					personVacation.beginFrom = rs2.getDate("data_inizio");
 					personVacation.endTo = rs2.getDate("data_fine");
-					personVacation.vacationType.id = rs2.getLong("fid");
+					
 					
 					personVacation._save();
 					vacationType._save();
@@ -251,7 +255,13 @@ public class FromMysqlToPostgres extends Controller{
 				ResultSet rs8 = stmt.executeQuery();
 
 				WorkingTimeType wtt = null;
-				WorkingTimeTypeDay wttd = null;
+				WorkingTimeTypeDay wttd_mo = null;
+				WorkingTimeTypeDay wttd_tu = null;
+				WorkingTimeTypeDay wttd_we = null;
+				WorkingTimeTypeDay wttd_th = null;
+				WorkingTimeTypeDay wttd_fr = null;
+				WorkingTimeTypeDay wttd_sa = null;
+				WorkingTimeTypeDay wttd_su = null;
 
 
 				while(rs.next()){
@@ -263,21 +273,23 @@ public class FromMysqlToPostgres extends Controller{
 
 					wtt.shift = rs.getBoolean("turno");
 					
-					wttd = new WorkingTimeTypeDay();
-					wttd.workingTimeType = wtt;
-					wttd.dayOfWeek = DayOfWeek.monday;
-					wttd.workingTime = rs.getInt("lu_tempo_lavoro");
-					wttd.holiday = rs.getBoolean("lu_festa");
-					wttd.timeSlotEntranceFrom = rs.getInt("lu_fascia_ingresso");
-					wttd.timeSlotEntranceTo = rs.getInt("lu_fascia_ingresso1");
-					wttd.timeSlotExitFrom = rs.getInt("lu_fascia_uscita");
-					wttd.timeSlotExitTo = rs.getInt("lu_fascia_uscita1");
-					wttd.timeMealFrom = rs.getInt("lu_fascia_pranzo");
-					wttd.timeMealTo = rs.getInt("lu_fascia_pranzo1");
-					wttd.breakTicketTime = rs.getInt("lu_tempo_interv"); 
-					wttd.mealTicketTime = rs.getInt("lu_tempo_buono");
+					wttd_mo = new WorkingTimeTypeDay();
+					wttd_mo.workingTimeType = wtt;
+					wttd_mo.dayOfWeek = DayOfWeek.monday;
+					wttd_mo.workingTime = rs.getInt("lu_tempo_lavoro");
+					wttd_mo.holiday = rs.getBoolean("lu_festa");
+					wttd_mo.timeSlotEntranceFrom = rs.getInt("lu_fascia_ingresso");
+					wttd_mo.timeSlotEntranceTo = rs.getInt("lu_fascia_ingresso1");
+					wttd_mo.timeSlotExitFrom = rs.getInt("lu_fascia_uscita");
+					wttd_mo.timeSlotExitTo = rs.getInt("lu_fascia_uscita1");
+					wttd_mo.timeMealFrom = rs.getInt("lu_fascia_pranzo");
+					wttd_mo.timeMealTo = rs.getInt("lu_fascia_pranzo1");
+					wttd_mo.breakTicketTime = rs.getInt("lu_tempo_interv"); 
+					wttd_mo.mealTicketTime = rs.getInt("lu_tempo_buono");
+					em.persist(wttd_mo);
 
-					WorkingTimeTypeDay wttd_tu = new WorkingTimeTypeDay();
+					wttd_tu = new WorkingTimeTypeDay();
+					wttd_tu.workingTimeType = wtt;
 					wttd_tu.workingTime = rs.getInt("ma_tempo_lavoro");
 					wttd_tu.holiday = rs.getBoolean("ma_festa");
 					wttd_tu.timeSlotEntranceFrom = rs.getInt("ma_fascia_ingresso");
@@ -288,8 +300,10 @@ public class FromMysqlToPostgres extends Controller{
 					wttd_tu.timeMealTo = rs.getInt("ma_fascia_pranzo1");
 					wttd_tu.breakTicketTime = rs.getInt("ma_tempo_interv"); 
 					wttd_tu.mealTicketTime = rs.getByte("ma_tempo_buono"); 
+					em.persist(wttd_tu);
 
-					WorkingTimeTypeDay wttd_we = new WorkingTimeTypeDay();
+					wttd_we = new WorkingTimeTypeDay();
+					wttd_we.workingTimeType = wtt;
 					wttd_we.workingTime = rs.getInt("me_tempo_lavoro");
 					wttd_we.holiday = rs.getBoolean("me_festa");
 					wttd_we.timeSlotEntranceFrom = rs.getInt("me_fascia_ingresso");
@@ -300,8 +314,10 @@ public class FromMysqlToPostgres extends Controller{
 					wttd_we.timeMealTo = rs.getInt("me_fascia_pranzo1");
 					wttd_we.breakTicketTime = rs.getInt("me_tempo_interv"); 
 					wttd_we.mealTicketTime = rs.getInt("me_tempo_buono"); 
+					em.persist(wttd_we);
 
-					WorkingTimeTypeDay wttd_th = new WorkingTimeTypeDay();
+					wttd_th = new WorkingTimeTypeDay();
+					wttd_th.workingTimeType = wtt;
 					wttd_th.workingTime = rs.getInt("gi_tempo_lavoro");
 					wttd_th.holiday = rs.getBoolean("gi_festa");
 					wttd_th.timeSlotEntranceFrom = rs.getInt("gi_fascia_ingresso");
@@ -312,8 +328,10 @@ public class FromMysqlToPostgres extends Controller{
 					wttd_th.timeMealTo = rs.getInt("gi_fascia_pranzo1");
 					wttd_th.breakTicketTime = rs.getInt("me_tempo_interv"); 
 					wttd_th.mealTicketTime = rs.getInt("me_tempo_buono"); 
+					em.persist(wttd_th);
 
-					WorkingTimeTypeDay wttd_fr = new WorkingTimeTypeDay();
+					wttd_fr = new WorkingTimeTypeDay();
+					wttd_fr.workingTimeType = wtt;
 					wttd_fr.workingTime = rs.getInt("ve_tempo_lavoro");
 					wttd_fr.holiday = rs.getBoolean("ve_festa");
 					wttd_fr.timeSlotEntranceFrom = rs.getInt("ve_fascia_ingresso");
@@ -324,8 +342,10 @@ public class FromMysqlToPostgres extends Controller{
 					wttd_fr.timeMealTo = rs.getInt("ve_fascia_pranzo1");
 					wttd_fr.breakTicketTime = rs.getInt("me_tempo_interv"); 
 					wttd_fr.mealTicketTime = rs.getInt("me_tempo_buono"); 
+					em.persist(wttd_fr);
 
-					WorkingTimeTypeDay wttd_sa = new WorkingTimeTypeDay();
+					wttd_sa = new WorkingTimeTypeDay();
+					wttd_sa.workingTimeType = wtt;
 					wttd_sa.workingTime = rs.getInt("sa_tempo_lavoro");
 					wttd_sa.holiday = rs.getBoolean("sa_festa");
 					wttd_sa.timeSlotEntranceFrom = rs.getInt("sa_fascia_ingresso");
@@ -336,8 +356,10 @@ public class FromMysqlToPostgres extends Controller{
 					wttd_sa.timeMealTo = rs.getInt("sa_fascia_pranzo1");
 					wttd_sa.breakTicketTime = rs.getInt("me_tempo_interv");
 					wttd_sa.mealTicketTime = rs.getInt("me_tempo_buono"); 
+					em.persist(wttd_sa);
 
-					WorkingTimeTypeDay wttd_su = new WorkingTimeTypeDay();				
+					wttd_su = new WorkingTimeTypeDay();		
+					wttd_su.workingTimeType = wtt;
 					wttd_su.workingTime = rs.getInt("do_tempo_lavoro");
 					wttd_su.holiday = rs.getBoolean("do_festa");
 					wttd_su.timeSlotEntranceFrom = rs.getInt("do_fascia_ingresso");
@@ -348,14 +370,11 @@ public class FromMysqlToPostgres extends Controller{
 					wttd_su.timeMealTo = rs.getInt("do_fascia_pranzo1");
 					wttd_su.breakTicketTime = rs.getInt("me_tempo_interv");
 					wttd_su.mealTicketTime = rs.getInt("me_tempo_buono");
+					em.persist(wttd_su);
 
 					wtt._save();
-					wttd._save();
-
 				}
 				em.persist(wtt);
-				em.persist(wttd);
-
 			}
 				
 				/**
@@ -449,7 +468,7 @@ public class FromMysqlToPostgres extends Controller{
 						"FROM assenze, assenze_init, Persone " +
 						"WHERE Persone.ID=assenze.ID and assenze.ID=assenze_init.idp and Persone.ID="+id);
 				ResultSet rs7 = stmt7.executeQuery();
-				Absences absence = null;
+				Absence absence = null;
 				AbsenceType absenceType = null;
 				while(rs7.next()){
 					/**
@@ -469,9 +488,7 @@ public class FromMysqlToPostgres extends Controller{
 					
 				}
 				em.persist(absence);
-				em.persist(absenceType);				
-								
-						
+				em.persist(absenceType);						
 			
 		}
 		catch(Exception e){
