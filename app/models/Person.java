@@ -106,7 +106,7 @@ public class Person extends Model {
 	@Required
 	public String surname;
 	
-	@Column
+	@Column(name = "born_date")
 	public Date bornDate;
 	
 	@Email

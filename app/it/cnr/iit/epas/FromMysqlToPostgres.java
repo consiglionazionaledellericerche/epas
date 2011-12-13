@@ -1,4 +1,4 @@
-package controllers;
+package it.cnr.iit.epas;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -34,28 +34,133 @@ import models.WorkingTimeType;
 import models.WorkingTimeTypeDay.DayOfWeek;
 import models.YearRecap;
 
+import play.Play;
 import play.db.jpa.JPA;
 import play.mvc.Controller;
 
-public class FromMysqlToPostgres extends Controller{
+public class FromMysqlToPostgres {
 	
 	private static Logger log;
 	
-	public static String mySqldriver = "com.mysql.jdbc.Driver";	
+	public static String mySqldriver = Play.configuration.getProperty("db.old.driver");//"com.mysql.jdbc.Driver";	
 
 	private static Connection mysqlCon = null;
 	
-	private static Connection getMysqlConnection() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
+	public static Connection getMysqlConnection() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		if (mysqlCon != null ) {
 			return mysqlCon;
 		}
 		Class.forName(mySqldriver).newInstance();
 
-		return DriverManager.getConnection("jdbc:mysql://localhost:3306/IIT?zeroDateTimeBehavior=convertToNull","root", "orologio");
+		return DriverManager.getConnection(
+				Play.configuration.getProperty("db.old.url"),
+				Play.configuration.getProperty("db.old.user"),
+				Play.configuration.getProperty("db.old.password"));
+				//"jdbc:mysql://localhost:3306/IIT?zeroDateTimeBehavior=convertToNull","root", "orologio");
 	}
+	
+	public static Person createPerson(ResultSet rs, EntityManager em) throws SQLException {
+		Person person = new Person();
+		person.name = rs.getString("Nome");
+		person.surname = rs.getString("Cognome");
+		person.bornDate = rs.getDate("DataNascita");
+		person.number = rs.getInt("Matricola");
+		em.persist(person);
+		return person;
+	}
+	
+	public static void createLocation(ResultSet rs, Person person, EntityManager em) throws SQLException {
+		Location location = new Location();
+		location.person = person;
 		
+		location.department = rs.getString("Dipartimento");
+		location.headOffice = rs.getString("Sede");
+		location.room = rs.getString("Stanza");		
+		em.persist(location);
+	}
+	
+	public static void createContactData(ResultSet rs, Person person, EntityManager em) throws SQLException {
+		ContactData contactData = new ContactData();
+		contactData.person = person;
+		
+		contactData.email = rs.getString("Email");
+		contactData.fax = rs.getString("Fax");
+		contactData.telephone = rs.getString("Telefono");
+					
+		/**
+		 * controllo sui valori del campo Telefono e conseguente modifica sul nuovo db
+		 */
+		if(contactData.telephone != null){
+			if(contactData.telephone.length() == 4){
+				contactData.telephone = "+39050315" + contactData.telephone;
+			}
+			if((contactData.telephone.startsWith("3"))&&(contactData.telephone.length() > 4)){
+				contactData.mobile = contactData.telephone;
+				contactData.telephone = null;
+			}
+			if(contactData.telephone.startsWith("50")){
+				contactData.telephone = "+390" + contactData.telephone;
+			}					
 
-	@SuppressWarnings("deprecation")
+		}
+		else 
+			log.warn("Validazione numero di telefono non avvenuta. Il campo verra' settato a null");
+		contactData.telephone = "";		
+		em.persist(contactData);
+	}
+	
+	public static void createStampings(short id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
+
+		Connection mysqlCon = getMysqlConnection();
+		
+		/**
+		 * query sulle tabelle orario, orario_pers per recuperare le info sulle timbrature
+		 * di ciascuna persona
+		 */
+		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT * FROM Orario WHERE id=" + id);
+		ResultSet rs = stmtOrari.executeQuery();
+		
+		//StampType stamptype = null;
+		if(rs != null){
+			//stamptype = new StampType();
+			while(rs.next()){						
+				/**
+				 * popolo la tabella stampings
+				 */
+				Stamping stamping = new Stamping();
+				//stamptype.description = "inserimento di prova";
+				stamping.person = person;						
+				//stamping.stampType = stamptype;
+				stamping.dayType = rs.getInt("TipoGiorno");
+				byte tipoTimbratura = rs.getByte("TipoTimbratura");
+				Date giorno = rs.getDate("Giorno");
+				Time ora = null;
+				try {
+					ora = rs.getTime("Ora");
+				} catch (SQLException sqle) {
+					//L'ora va "corretta"
+					log.warn("Timbratura errata. Persona ");
+				}
+
+				if((int)tipoTimbratura%2 != 0)
+					stamping.way = WayType.in;					
+				else
+					stamping.way = WayType.out;
+				Calendar calGiorno = new GregorianCalendar();
+                calGiorno.setTime(giorno);
+                Calendar calOra = new GregorianCalendar();
+                calOra.setTime(ora);
+                
+                calGiorno.set(Calendar.HOUR, calOra.get(Calendar.HOUR));
+                calGiorno.set(Calendar.MINUTE, calOra.get(Calendar.MINUTE));
+                calGiorno.set(Calendar.SECOND, calOra.get(Calendar.SECOND));
+                stamping.date = new LocalDate(calGiorno);
+				em.persist(stamping);		
+			}
+		}
+
+	}
+	
 	public static void fillTables() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt;		
@@ -69,124 +174,29 @@ public class FromMysqlToPostgres extends Controller{
 			ResultSet rs = stmt.executeQuery();
 
 			EntityManager em = JPA.em();
+			em.getTransaction().begin();
 			
 			short id;
 			
 			Person person = null;
-			Location location = null;
-			ContactData contactData = null;
 			while(rs.next()){
-				/**
-				 * costruzione istanze delle tabelle Person, ContactData e Location 
-				 * con conseguente riempimento dei campi presi dalla tabella Persone
-				 * sul db mysql
-				 */
-				person = new Person();							
 				
 				/**
 				 * recupero id del soggetto per fare le query sulle tabelle correlate a Persone e popolare
 				 * le tabelle del nuovo db in relazione con Person
 				 */
-				id = rs.getShort("ID");
+				id = rs.getShort("ID");	
 				
-				person.name = rs.getString("Nome");
-				person.surname = rs.getString("Cognome");
-				person.bornDate = rs.getDate("DataNascita");
-				person.number = rs.getInt("Matricola");
-				
-				person.save();
-				 
-				//em.persist(person);				
-				
-				location = new Location();
-				location.person = person;
-				
-				location.department = rs.getString("Dipartimento");
-				location.headOffice = rs.getString("Sede");
-				location.room = rs.getString("Stanza");		
-				location.save();
-				//em.persist(location);
-				
-				contactData = new ContactData();
-				contactData.person = person;
-				
-				contactData.email = rs.getString("Email");
-				contactData.fax = rs.getString("Fax");
-				contactData.telephone = rs.getString("Telefono");
-							
 				/**
-				 * controllo sui valori del campo Telefono e conseguente modifica sul nuovo db
+				 * costruzione istanze delle tabelle Person, ContactData e Location 
+				 * con conseguente riempimento dei campi presi dalla tabella Persone
+				 * sul db mysql
 				 */
-				if(contactData.telephone != null){
-					if(contactData.telephone.length() == 4){
-						contactData.telephone = "+39050315" + contactData.telephone;
-					}
-					if((contactData.telephone.startsWith("3"))&&(contactData.telephone.length() > 4)){
-						contactData.mobile = contactData.telephone;
-						contactData.telephone = null;
-					}
-					if(contactData.telephone.startsWith("50")){
-						contactData.telephone = "+390" + contactData.telephone;
-					}					
-
-				}
-				else 
-					log.warn("Validazione numero di telefono non avvenuta. Il campo verra' settato a null");
-				contactData.telephone = "";		
+				person = createPerson(rs, em);							
+				createLocation(rs, person, em);
+				createContactData(rs, person, em);
 				
-				contactData.save();
-				//em.persist(contactData);
-				
-							
-				/**
-				 * query sulle tabelle orario, orario_pers per recuperare le info sulle timbrature
-				 * di ciascuna persona
-				 */
-				PreparedStatement stmt5 = mysqlCon.prepareStatement("SELECT " +
-						"Orario.Giorno, Orario.TipoGiorno, Orario.TipoTimbratura, Orario.Ora, " +
-						"Orario.Ora1, orario_pers.data_inizio, orario_pers.data_fine " +
-						"FROM orario_pers,Orario, Persone " +
-						"WHERE Persone.id=orario_pers.pid " +
-						"AND orario_pers.pid=Orario.id " +
-						"AND Persone.id="+id);
-				ResultSet rs5 = stmt5.executeQuery();
-				StampType stamptype = null;
-				Stamping stamping = null; 
-				if(rs5 != null){
-					stamptype = new StampType();
-					stamping = new Stamping();
-					while(rs5.next()){						
-						/**
-						 * popolo la tabella stampings
-						 */
-						
-						stamptype.description = "inserimento di prova";
-						stamping.person = person;						
-						stamping.stampType = stamptype;
-						stamping.dayType = rs5.getInt("TipoGiorno");
-						byte tipoTimbratura = rs5.getByte("TipoTimbratura");
-						Date giorno = rs5.getDate("Giorno");
-						Time ora = rs5.getTime("Ora");
-						if((int)tipoTimbratura%2 != 0)
-							stamping.way = WayType.in;					
-						else
-							stamping.way = WayType.out;
-						Calendar calGiorno = new GregorianCalendar();
-	                    calGiorno.setTime(giorno);
-	                    Calendar calOra = new GregorianCalendar();
-	                    calOra.setTime(ora);
-	                    
-	                    calGiorno.set(Calendar.HOUR, calOra.get(Calendar.HOUR));
-	                    calGiorno.set(Calendar.MINUTE, calOra.get(Calendar.MINUTE));
-	                    calGiorno.set(Calendar.SECOND, calOra.get(Calendar.SECOND));
-	                    stamping.date = new LocalDate(calGiorno);
-						stamptype.save();
-						stamping.save();
-												
-					}	
-					em.persist(stamptype);
-					em.persist(stamping);
-				}
+				createStampings(id, person, em);
 				
 				
 				PreparedStatement stmt7 = mysqlCon.prepareStatement("SELECT Persone.ID, assenze_init.id, assenze_init.anno, " +
@@ -468,10 +478,9 @@ public class FromMysqlToPostgres extends Controller{
 				
 								
 			} //qui finisce il while principale di Person
-			em.persist(person);
-			em.persist(location);
-			em.persist(contactData);
-
+			
+			em.getTransaction().commit();
+			
 		}
 		catch(Exception e){
 			e.printStackTrace();
