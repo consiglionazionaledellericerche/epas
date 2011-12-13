@@ -12,7 +12,7 @@ public class Administration extends Controller {
     
     
     public static void migrateDb(){
-        	try {
+        	try {        		
 				FromMysqlToPostgres.fillTables();
 				FromMysqlToPostgres.fillOtherTables();
 			} catch (InstantiationException e) {

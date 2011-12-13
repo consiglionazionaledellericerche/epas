@@ -2,8 +2,6 @@ package models;
 
 import java.sql.Time;
 
-import java.util.Set;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;

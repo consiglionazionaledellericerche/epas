@@ -32,7 +32,7 @@ public class PersonVacation extends Model{
 	public Person person;
 	
 	@ManyToOne
-	@JoinColumn(name = "vacationType_id", nullable = false)
+	@JoinColumn(name = "vacationType_id")
 	public VacationType vacationType;
 	
 	@Column(name = "begin_from")
