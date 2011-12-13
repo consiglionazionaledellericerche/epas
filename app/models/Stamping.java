@@ -42,15 +42,13 @@ public class Stamping extends Model {
 	@JoinColumn(name = "person_id", nullable = false)
 	public Person person;
 	
-	@Required
-	@ManyToOne(optional = false)
+	//@Required
+	@ManyToOne(optional = true)
 	@JoinColumn(name = "stamp_type_id")
 	public StampType stampType;
 	
 	@Required
 	public LocalDate date;
-	
-	
 	
 	public int dayType;
 	@OneToMany(mappedBy="stamping")

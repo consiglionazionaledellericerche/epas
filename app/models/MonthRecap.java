@@ -1,15 +1,18 @@
 package models;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import play.data.validation.Required;
 import play.db.jpa.Model;
@@ -31,62 +34,76 @@ public class MonthRecap extends Model {
 	@JoinColumn(name = "person_id")
 	public Person person;
 	
-	@Column
 	public short month;
-	@Column
+
 	public short year;
-	@Column
+
 	public short workingDays;
-	@Column
+
 	public short daysWorked;
-	@Column
+
 	public short giorniLavorativiLav;
-	@Column
+
 	public int workTime;
-	@Column
+
 	public int remaining;
-	@Column
+
 	public short justifiedAbsence;
-	@Column
+
 	public short vacationAp;
-	@Column
+
 	public short vacationAc;
-	@Column
+
 	public short holidaySop;
-	@Column
+
 	public int recoveries;
-	@Column
+
 	public short recoveriesG;
-	@Column
+
 	public short recoveriesAp;
-	@Column
+
 	public short recoveriesGap;
-	@Column
+
 	public int overtime;
-	@Column
+
 	public Timestamp lastModified;
-	@Column
+
 	public int residualApUsed;
-	@Column
+
 	public int extraTimeAdmin;
-	@Column
+
 	public int additionalHours;
-	@Column
+
 	public boolean nadditionalHours;
-	@Column
+
 	public int residualFine;
-	@Column
+
 	public short endWork;
-	@Column
+
 	public short beginWork;
-	@Column
+
 	public int timeHourVisit;
-	@Column
+
 	public short endRecoveries;
-	@Column
+
 	public int negative;
-	@Column
+
 	public int endNegative;
-	@Column
+
 	public String progressive;
+	
+	@Transient
+	public List<Day> days;
+	
+	public static MonthRecap byPersonAndMonthAndYear(Person person, short month, short year) {
+		MonthRecap monthRecap = MonthRecap.find("byPersonAndMonthAndYear", person, month, year).first();
+		if (monthRecap == null) {
+			return emptyMonthAndYear();
+		}
+		return monthRecap;
+	}
+	
+	public static MonthRecap emptyMonthAndYear() {
+		return null;
+	}
 }
