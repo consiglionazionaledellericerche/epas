@@ -5,6 +5,9 @@ import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import play.db.jpa.Model;
@@ -20,72 +23,53 @@ public class Code extends Model{
 	/**
 	 * tabella codici del db mysql, per adesso alcuni campi sono riscritti tali e quali al db vecchio.
 	 * 
-	 */
+	 */	
+	@ManyToOne
+	@JoinColumn(name = "dayType", nullable = false)
+	public Stamping stamping;	
 	
-	@Column
 	public String code;
-	
-	@Column
+		
 	public String code_att;
-	
-	@Column
+		
 	public String description;
 	
-	@Column
 	public boolean inactive;
-	
-	@Column
+		
 	public boolean internal;
-	
-	@Column
+		
 	public Date fromDate;
 	
-	@Column
 	public Date toDate;
-	
-	@Column
+		
 	public String qualification;
-	
-	@Column
-	public String group;
-	
-	@Column
+		
+	public String groupOf;
+		
 	public int value;
-	
-	@Column
+		
 	public boolean minutesOver;
-	
-	@Column
+		
 	public String descriptionValue;
-	
-	@Column
+		
 	public short quantGiust;
-	
-	@Column
+		
 	public boolean quantMin;
-	
-	@Column
+		
 	public short storage;
-	
-	@Column
+		
 	public boolean recoverable;
-	
-	@Column
-	public int limit;
-	
-	@Column
+		
+	public int limitOf;
+		
 	public short gestLim;
-	
-	@Column
+		
 	public String codiceSost;
-	
-	@Column
+		
 	public boolean ignoreStamping;
-	
-	@Column
+		
 	public boolean usoMulti;
-	
-	@Column
+		
 	public boolean tempoBuono;
 	
 }

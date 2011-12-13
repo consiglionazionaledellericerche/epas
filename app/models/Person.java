@@ -69,7 +69,7 @@ public class Person extends Model {
 	 */
 	@NotAudited
 	@OneToMany(mappedBy="person")
-	public List<Absence> absences;
+	public List<Absence> absence;
 	
 	/**
 	 * relazione con la tabella di person vacation

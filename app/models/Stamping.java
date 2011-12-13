@@ -14,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.CollectionId;
@@ -43,11 +44,17 @@ public class Stamping extends Model {
 	
 	@Required
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "stamp_type_id", nullable = false)
+	@JoinColumn(name = "stamp_type_id")
 	public StampType stampType;
 	
 	@Required
 	public LocalDate date;
+	
+	
+	
+	public int dayType;
+	@OneToMany(mappedBy="stamping")
+	public List<Code> codes;
 	
 	@Required
 	@Enumerated(EnumType.STRING)
