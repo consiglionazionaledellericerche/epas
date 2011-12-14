@@ -96,7 +96,7 @@ public class FromMysqlToPostgres extends Controller{
 				
 				person.save();
 				 
-				//em.persist(person);				
+				em.persist(person);				
 				
 				location = new Location();
 				location.person = person;
@@ -468,7 +468,7 @@ public class FromMysqlToPostgres extends Controller{
 				
 								
 			} //qui finisce il while principale di Person
-			em.persist(person);
+			//em.persist(person);
 			em.persist(location);
 			em.persist(contactData);
 
