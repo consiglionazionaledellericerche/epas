@@ -60,6 +60,13 @@ public class Stamping extends Model {
 	
 	public String notes;
 	
+	/**
+	 * questo campo booleano consente di determinare se la timbratura è stata effettuata dall'utente all'apposita
+	 * macchinetta (valore = false) o se è stato l'amministratore a settare l'orario di timbratura poichè la persona 
+	 * in questione non ha potuto effettuare la timbratura (valore = true)
+	 */
+	public boolean isMarkedByAdmin;
+	
 	public boolean isMealTicketAssigned() {
 		//Se il tempo è maggiore delle ore impostate nel tipo di orario di questa timbratura return true, false altrimenti
 		return true;
