@@ -74,13 +74,16 @@ public class ModelTest extends UnitTest {
 		FromMysqlToPostgres.createLocation(rs, person, em);
 		FromMysqlToPostgres.createContactData(rs, person, em);
 		
-		FromMysqlToPostgres.createStampings(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
+		FromMysqlToPostgres.createVacations(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
+		FromMysqlToPostgres.createWorkingTimeTypes(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
+		//FromMysqlToPostgres.createStampings(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
+		//FromMysqlToPostgres.createStampingTest(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
 
 		
-		long stampingsCount = Stamping.count("person = ?", person); 
-		assertTrue("Dovrebbe essere stato inserita almeno una timbratura, invece sono zero.", 
-			 stampingsCount > 0);
-		
-		System.out.println(String.format("Sono state inserite %d timbrature per l'utente con id = %d su orologio", stampingsCount, CRISTAN_LUCCHESI_OROLOGIO_ID));
+//		long stampingsCount = Stamping.count("person = ?", person); 
+//		assertTrue("Dovrebbe essere stato inserita almeno una timbratura, invece sono zero.", 
+//			 stampingsCount > 0);
+//		
+//		System.out.println(String.format("Sono state inserite %d timbrature per l'utente con id = %d su orologio", stampingsCount, CRISTAN_LUCCHESI_OROLOGIO_ID));
 	}
 }
