@@ -12,7 +12,6 @@ import java.util.GregorianCalendar;
 
 import javax.persistence.EntityManager;
 
-import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 
 import models.AbsenceType;
@@ -34,13 +33,12 @@ import models.WorkingTimeType;
 import models.WorkingTimeTypeDay.DayOfWeek;
 import models.YearRecap;
 
+import play.Logger;
 import play.Play;
 import play.db.jpa.JPA;
 import play.mvc.Controller;
 
 public class FromMysqlToPostgres {
-	
-	private static Logger log;
 	
 	public static String mySqldriver = Play.configuration.getProperty("db.old.driver");//"com.mysql.jdbc.Driver";	
 
@@ -56,7 +54,6 @@ public class FromMysqlToPostgres {
 				Play.configuration.getProperty("db.old.url"),
 				Play.configuration.getProperty("db.old.user"),
 				Play.configuration.getProperty("db.old.password"));
-				//"jdbc:mysql://localhost:3306/IIT?zeroDateTimeBehavior=convertToNull","root", "orologio");
 	}
 	
 	public static Person createPerson(ResultSet rs, EntityManager em) throws SQLException {
@@ -104,89 +101,12 @@ public class FromMysqlToPostgres {
 
 		}
 		else 
-			log.warn("Validazione numero di telefono non avvenuta. Il campo verra' settato a null");
+			Logger.warn("Validazione numero di telefono non avvenuta. Il campo verra' settato a null");
 		contactData.telephone = null;		
 		em.persist(contactData);
-	}
+	}	
 	
-	
-	public static void createStampingTest(short id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-		Connection mysqlCon = getMysqlConnection();
-		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT * FROM Orario WHERE Giorno = '2004-08-23' AND TipoTimbratura= 4 AND id=" + id);
-		ResultSet rs = stmtOrari.executeQuery();	
-		while(rs.next()){						
-			
-			Stamping stamping = new Stamping();
-			
-			stamping.person = person;
-			Date giorno = rs.getDate("Giorno");
-			Time ora = null;
-			//try {
-				//byte b = rs.getByte("Ora");
-			
-			
-				//System.out.println("Qui prendo il campo ora della tabella ---> "+rs.getString("Ora"));
-			String s = rs.getString("Ora");
-//				
-//				if(s == null){
-//					stamping.date = null;
-//					stamping.isMarkedByAdmin = false;
-//				}
-//				else{
-//					System.out.println(s.toString());
-//					int hour = Integer.parseInt(s.substring(0, 2));
-//					System.out.println("hour ="+hour);
-//					
-//					int minute = Integer.parseInt(s.substring(3, 5));
-//					System.out.println("minute ="+minute);
-//					
-//					if(hour > 33){
-//						hour = hour * 60;
-//						hour = hour + minute;
-//						hour = hour - 2000;
-//						hour = hour / 60;
-//						int min = hour % 60;
-//						
-//						@SuppressWarnings("deprecation")
-//						Time newOra = new Time(hour,min,0);
-//						Calendar calGiorno = new GregorianCalendar();
-//		                calGiorno.setTime(giorno);
-//		                Calendar calOra = new GregorianCalendar();
-//		                calOra.setTime(newOra);
-//		                
-//		                calGiorno.set(Calendar.HOUR, calOra.get(Calendar.HOUR));
-//		                calGiorno.set(Calendar.MINUTE, calOra.get(Calendar.MINUTE));
-//		                calGiorno.set(Calendar.SECOND, calOra.get(Calendar.SECOND));
-//		                stamping.date = new LocalDate(calGiorno);
-//		                stamping.isMarkedByAdmin = true;							
-//					}						
-//									
-//					else{
-//						ora = rs.getTime("Ora");
-//						Calendar calGiorno = new GregorianCalendar();
-//		                calGiorno.setTime(giorno);
-//		                Calendar calOra = new GregorianCalendar();
-//		                calOra.setTime(ora);
-//		                
-//		                calGiorno.set(Calendar.HOUR, calOra.get(Calendar.HOUR));
-//		                calGiorno.set(Calendar.MINUTE, calOra.get(Calendar.MINUTE));
-//		                calGiorno.set(Calendar.SECOND, calOra.get(Calendar.SECOND));
-//		                stamping.date = new LocalDate(calGiorno);
-//		                stamping.isMarkedByAdmin = false;
-//					}
-//				}
-					
-//			}catch(SQLException sqle) {
-//				sqle.printStackTrace();
-//				System.out.println("Timbratura errata. Persona con id="+id);
-//				log.warn("Timbratura errata. Persona con id= "+id);
-//			}
-		}
-	}
-		
-	
-	
-	@SuppressWarnings("deprecation")
+
 	public static void createStampings(short id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 
 		Connection mysqlCon = getMysqlConnection();
@@ -222,9 +142,12 @@ public class FromMysqlToPostgres {
 					 * per adesso svolgo l'intero processo del controllo sull'ora all'interno del metodo.
 					 * In seguito verrà usata una funzione da chiamare che svolgerà questo compito.
 					 */
-					//byte b = rs.getByte("Ora");
 					
-					String s = rs.getString("Ora");
+					//il campo Ora contiene dei valori piuttosto "bizzarri", tipo 52:30:12, piuttosto che -11:40:00
+					//quindi il campo viene prelevato "row" come byte[] a poi convertito in stringa in modo da evitare
+					//controlli di consistenza da parte del driver JDBC che tenta di validare il campo come time.
+					byte[] bs = rs.getBytes("Ora");
+					String s = bs != null ? new String(bs) : null;
 					
 					if(s == null){
 						stamping.date = null;
@@ -278,7 +201,7 @@ public class FromMysqlToPostgres {
 					//L'ora va "corretta"
 					sqle.printStackTrace();
 					System.out.println("Timbratura errata. Persona con id="+id);
-					log.warn("Timbratura errata. Persona con id= "+id);
+					Logger.warn("Timbratura errata. Persona con id= "+id);
 				}			
 				
 				em.persist(stamping);		
@@ -367,7 +290,7 @@ public class FromMysqlToPostgres {
 		 * per popolare workin_time_type e working_time_type_days
 		 */
 		Connection mysqlCon = getMysqlConnection();		
-		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM orari_di_lavoro,Persone,orario_pers WHERE" +
+		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM orari_di_lavoro,Persone,orario_pers WHERE " +
 				"Persone.ID=orario_pers.pid AND orario_pers.oid=orari_di_lavoro.id and Persone.id="+id);
 
 		ResultSet rs = stmt.executeQuery();
@@ -389,6 +312,8 @@ public class FromMysqlToPostgres {
 				wtt.description = rs.getString("nome");
 
 				wtt.shift = rs.getBoolean("turno");
+				
+				em.persist(wtt);
 				
 				wttd_mo = new WorkingTimeTypeDay();
 				wttd_mo.workingTimeType = wtt;
@@ -490,7 +415,6 @@ public class FromMysqlToPostgres {
 				em.persist(wttd_su);
 			
 			}
-			em.persist(wtt);
 		}
 	}
 	
