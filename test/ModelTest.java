@@ -76,8 +76,7 @@ public class ModelTest extends UnitTest {
 		
 		FromMysqlToPostgres.createVacations(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
 		FromMysqlToPostgres.createWorkingTimeTypes(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
-		//FromMysqlToPostgres.createStampings(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
-		//FromMysqlToPostgres.createStampingTest(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
+		FromMysqlToPostgres.createStampings(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
 
 		
 //		long stampingsCount = Stamping.count("person = ?", person); 
