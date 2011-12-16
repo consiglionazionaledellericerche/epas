@@ -24,10 +24,7 @@ public class Code extends Model{
 	 * tabella codici del db mysql, per adesso alcuni campi sono riscritti tali e quali al db vecchio.
 	 * 
 	 */	
-	@ManyToOne
-	@JoinColumn(name = "dayType", nullable = false)
-	public Stamping stamping;	
-	
+		
 	public String code;
 		
 	public String code_att;
