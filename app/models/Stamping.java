@@ -67,6 +67,11 @@ public class Stamping extends Model {
 	 */
 	public boolean isMarkedByAdmin;
 	
+	/**
+	 * questo campo booleano consente di determinare se la timbratura è come uscita di servizio.
+	 */
+	public boolean isServiceExit;
+	
 	public boolean isMealTicketAssigned() {
 		//Se il tempo è maggiore delle ore impostate nel tipo di orario di questa timbratura return true, false altrimenti
 		return true;

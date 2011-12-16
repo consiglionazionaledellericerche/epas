@@ -152,24 +152,15 @@ public class FromMysqlToPostgres {
 					if(s == null){
 						stamping.date = null;
 						stamping.isMarkedByAdmin = false;
+						stamping.isServiceExit = false;
 					}
 					else{
-						System.out.println(s.toString());
-						int hour = Integer.parseInt(s.substring(0, 2));
-						System.out.println("hour ="+hour);
-						
-						int minute = Integer.parseInt(s.substring(3, 5));
-						System.out.println("minute ="+minute);
-						
-						if(hour > 33){
-							hour = hour * 60;
-							hour = hour + minute;
-							hour = hour - 2000;
-							hour = hour / 60;
-							int min = hour % 60;
-							
+						if(s.startsWith("-")){
+							int hour = Integer.parseInt(s.substring(1, 3));
+							int minute = Integer.parseInt(s.substring(4, 6));
+							int second = Integer.parseInt(s.substring(7, 9));
 							@SuppressWarnings("deprecation")
-							Time newOra = new Time(hour,min,0);
+							Time newOra = new Time(hour,minute,second);
 							Calendar calGiorno = new GregorianCalendar();
 			                calGiorno.setTime(giorno);
 			                Calendar calOra = new GregorianCalendar();
@@ -179,21 +170,50 @@ public class FromMysqlToPostgres {
 			                calGiorno.set(Calendar.MINUTE, calOra.get(Calendar.MINUTE));
 			                calGiorno.set(Calendar.SECOND, calOra.get(Calendar.SECOND));
 			                stamping.date = new LocalDate(calGiorno);
-			                stamping.isMarkedByAdmin = true;							
-						}						
-										
-						else{
-							ora = rs.getTime("Ora");
-							Calendar calGiorno = new GregorianCalendar();
-			                calGiorno.setTime(giorno);
-			                Calendar calOra = new GregorianCalendar();
-			                calOra.setTime(ora);
-			                
-			                calGiorno.set(Calendar.HOUR, calOra.get(Calendar.HOUR));
-			                calGiorno.set(Calendar.MINUTE, calOra.get(Calendar.MINUTE));
-			                calGiorno.set(Calendar.SECOND, calOra.get(Calendar.SECOND));
-			                stamping.date = new LocalDate(calGiorno);
 			                stamping.isMarkedByAdmin = false;
+			                stamping.isServiceExit = true;
+						}
+						else{
+							
+							int hour = Integer.parseInt(s.substring(0, 2));
+							int minute = Integer.parseInt(s.substring(3, 5));
+													
+							if(hour > 33){
+								hour = hour * 60;
+								hour = hour + minute;
+								hour = hour - 2000;
+								hour = hour / 60;
+								int min = hour % 60;
+								
+								@SuppressWarnings("deprecation")
+								Time newOra = new Time(hour,min,0);
+								Calendar calGiorno = new GregorianCalendar();
+				                calGiorno.setTime(giorno);
+				                Calendar calOra = new GregorianCalendar();
+				                calOra.setTime(newOra);
+				                
+				                calGiorno.set(Calendar.HOUR, calOra.get(Calendar.HOUR));
+				                calGiorno.set(Calendar.MINUTE, calOra.get(Calendar.MINUTE));
+				                calGiorno.set(Calendar.SECOND, calOra.get(Calendar.SECOND));
+				                stamping.date = new LocalDate(calGiorno);
+				                stamping.isMarkedByAdmin = true;
+				                stamping.isServiceExit = false;
+							}						
+											
+							else{
+								ora = rs.getTime("Ora");
+								Calendar calGiorno = new GregorianCalendar();
+				                calGiorno.setTime(giorno);
+				                Calendar calOra = new GregorianCalendar();
+				                calOra.setTime(ora);
+				                
+				                calGiorno.set(Calendar.HOUR, calOra.get(Calendar.HOUR));
+				                calGiorno.set(Calendar.MINUTE, calOra.get(Calendar.MINUTE));
+				                calGiorno.set(Calendar.SECOND, calOra.get(Calendar.SECOND));
+				                stamping.date = new LocalDate(calGiorno);
+				                stamping.isMarkedByAdmin = false;
+				                stamping.isServiceExit = false;
+							}
 						}
 					}
 				}				
