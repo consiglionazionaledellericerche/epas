@@ -82,6 +82,8 @@ public class ModelTest extends UnitTest {
 		
 		FromMysqlToPostgres.createMonthRecap(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
 		
+		FromMysqlToPostgres.fillOtherTables();
+		
 //		long stampingsCount = Stamping.count("person = ?", person); 
 //		assertTrue("Dovrebbe essere stato inserita almeno una timbratura, invece sono zero.", 
 //			 stampingsCount > 0);

@@ -51,8 +51,7 @@ public class Stamping extends Model {
 	public LocalDate date;
 	
 	public int dayType;
-	@OneToMany(mappedBy="stamping")
-	public List<Code> codes;
+	
 	
 	@Required
 	@Enumerated(EnumType.STRING)
