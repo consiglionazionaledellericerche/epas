@@ -16,6 +16,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.CollectionId;
 import org.hibernate.envers.Audited;
@@ -47,11 +49,14 @@ public class Stamping extends Model {
 	@JoinColumn(name = "stamp_type_id")
 	public StampType stampType;
 	
+	
 	@Required
+	@Column(name = "date")
 	public LocalDate date;
-	
-	public int dayType;
-	
+
+	@ManyToOne
+	@JoinColumn( name = "code_id") 
+	public Code code;
 	
 	@Required
 	@Enumerated(EnumType.STRING)
@@ -70,7 +75,7 @@ public class Stamping extends Model {
 	 * questo campo booleano consente di determinare se la timbratura è come uscita di servizio.
 	 */
 	public boolean isServiceExit;
-	
+		
 	public boolean isMealTicketAssigned() {
 		//Se il tempo è maggiore delle ore impostate nel tipo di orario di questa timbratura return true, false altrimenti
 		return true;

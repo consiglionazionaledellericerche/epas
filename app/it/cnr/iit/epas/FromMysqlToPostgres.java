@@ -12,6 +12,7 @@ import java.util.GregorianCalendar;
 
 import javax.persistence.EntityManager;
 
+import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 
 import models.AbsenceType;
@@ -30,7 +31,6 @@ import models.WorkingTimeTypeDay;
 import models.Stamping.WayType;
 import models.VacationType;
 import models.WorkingTimeType;
-import models.WorkingTimeTypeDay.DayOfWeek;
 import models.YearRecap;
 
 import play.Logger;
@@ -127,8 +127,9 @@ public class FromMysqlToPostgres {
 				 * popolo la tabella stampings
 				 */
 				stamping.person = person;						
-		
-				stamping.dayType = rs.getInt("TipoGiorno");
+				
+				//FIXME: da rivedere ed importare correttamente
+				//stamping.code = rs.getInt("TipoGiorno");
 				
 				byte tipoTimbratura = rs.getByte("TipoTimbratura");
 				if((int)tipoTimbratura%2 != 0)
@@ -328,7 +329,7 @@ public class FromMysqlToPostgres {
 				
 				wtt = new WorkingTimeType();
 
-				wtt.person = person;
+				person.workingTimeType = wtt;
 				wtt.description = rs.getString("nome");
 
 				wtt.shift = rs.getBoolean("turno");
@@ -337,7 +338,7 @@ public class FromMysqlToPostgres {
 				
 				wttd_mo = new WorkingTimeTypeDay();
 				wttd_mo.workingTimeType = wtt;
-				wttd_mo.dayOfWeek = DayOfWeek.monday;
+				wttd_mo.dayOfWeek = DateTimeConstants.MONDAY;
 				wttd_mo.workingTime = rs.getInt("lu_tempo_lavoro");
 				wttd_mo.holiday = rs.getBoolean("lu_festa");
 				wttd_mo.timeSlotEntranceFrom = rs.getInt("lu_fascia_ingresso");
@@ -352,6 +353,7 @@ public class FromMysqlToPostgres {
 
 				wttd_tu = new WorkingTimeTypeDay();
 				wttd_tu.workingTimeType = wtt;
+				wttd_mo.dayOfWeek = DateTimeConstants.TUESDAY;
 				wttd_tu.workingTime = rs.getInt("ma_tempo_lavoro");
 				wttd_tu.holiday = rs.getBoolean("ma_festa");
 				wttd_tu.timeSlotEntranceFrom = rs.getInt("ma_fascia_ingresso");
@@ -366,6 +368,7 @@ public class FromMysqlToPostgres {
 
 				wttd_we = new WorkingTimeTypeDay();
 				wttd_we.workingTimeType = wtt;
+				wttd_mo.dayOfWeek = DateTimeConstants.WEDNESDAY;
 				wttd_we.workingTime = rs.getInt("me_tempo_lavoro");
 				wttd_we.holiday = rs.getBoolean("me_festa");
 				wttd_we.timeSlotEntranceFrom = rs.getInt("me_fascia_ingresso");
@@ -380,6 +383,7 @@ public class FromMysqlToPostgres {
 
 				wttd_th = new WorkingTimeTypeDay();
 				wttd_th.workingTimeType = wtt;
+				wttd_mo.dayOfWeek = DateTimeConstants.THURSDAY;
 				wttd_th.workingTime = rs.getInt("gi_tempo_lavoro");
 				wttd_th.holiday = rs.getBoolean("gi_festa");
 				wttd_th.timeSlotEntranceFrom = rs.getInt("gi_fascia_ingresso");
@@ -394,6 +398,7 @@ public class FromMysqlToPostgres {
 
 				wttd_fr = new WorkingTimeTypeDay();
 				wttd_fr.workingTimeType = wtt;
+				wttd_mo.dayOfWeek = DateTimeConstants.FRIDAY;
 				wttd_fr.workingTime = rs.getInt("ve_tempo_lavoro");
 				wttd_fr.holiday = rs.getBoolean("ve_festa");
 				wttd_fr.timeSlotEntranceFrom = rs.getInt("ve_fascia_ingresso");
@@ -408,6 +413,7 @@ public class FromMysqlToPostgres {
 
 				wttd_sa = new WorkingTimeTypeDay();
 				wttd_sa.workingTimeType = wtt;
+				wttd_mo.dayOfWeek = DateTimeConstants.SATURDAY;
 				wttd_sa.workingTime = rs.getInt("sa_tempo_lavoro");
 				wttd_sa.holiday = rs.getBoolean("sa_festa");
 				wttd_sa.timeSlotEntranceFrom = rs.getInt("sa_fascia_ingresso");
@@ -422,6 +428,7 @@ public class FromMysqlToPostgres {
 
 				wttd_su = new WorkingTimeTypeDay();		
 				wttd_su.workingTimeType = wtt;
+				wttd_mo.dayOfWeek = DateTimeConstants.SUNDAY;
 				wttd_su.workingTime = rs.getInt("do_tempo_lavoro");
 				wttd_su.holiday = rs.getBoolean("do_festa");
 				wttd_su.timeSlotEntranceFrom = rs.getInt("do_fascia_ingresso");
