@@ -10,6 +10,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.hibernate.envers.Audited;
+import org.joda.time.DateTimeConstants;
 
 import play.data.validation.Required;
 import play.db.jpa.Model;
@@ -26,16 +27,12 @@ import play.db.jpa.Model;
 @Table(name = "working_time_type_days")
 public class WorkingTimeTypeDay extends Model {
 
-	public enum DayOfWeek {
-		monday, tuesday, wednesday, thursday, friday, saturday, sunday
-	}
-
 	@ManyToOne
 	@JoinColumn(name = "working_time_type_id")
 	public WorkingTimeType workingTimeType;
 	
 	@Required
-	public DayOfWeek dayOfWeek;
+	public int dayOfWeek;
 		
 	/**
 	 * tempo di lavoro giornaliero espresso in minuti 

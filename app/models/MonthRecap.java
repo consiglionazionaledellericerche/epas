@@ -93,7 +93,7 @@ public class MonthRecap extends Model {
 	public String progressive;
 	
 	@Transient
-	public List<Day> days;
+	public List<PersonDay> days;
 	
 	public static MonthRecap byPersonAndMonthAndYear(Person person, short month, short year) {
 		MonthRecap monthRecap = MonthRecap.find("byPersonAndMonthAndYear", person, month, year).first();

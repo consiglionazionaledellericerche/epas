@@ -43,9 +43,8 @@ public class WorkingTimeType extends Model {
 	/**
 	 * relazione con la tabella persone
 	 */
-	@OneToOne
-	@JoinColumn(name="person_id")
-	public Person person;
+	@OneToMany( mappedBy = "workingTimeType")
+	public List<Person> persons;
 	
 	/**
 	 * relazione con la tabella di specifiche di orario di lavoro

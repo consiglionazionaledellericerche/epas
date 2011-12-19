@@ -80,7 +80,7 @@ public class Person extends Model {
 	/**
 	 * relazione con la tabella delle tipologie di orario di lavoro
 	 */
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name="working_time_type_id")
 	public WorkingTimeType workingTimeType;
 	
