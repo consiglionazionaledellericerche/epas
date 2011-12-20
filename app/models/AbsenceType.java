@@ -26,13 +26,19 @@ import play.db.jpa.JPA;
  */
 @Entity
 @Audited
-@Table(name = "absence_types")
 public class AbsenceType extends Model{
 	
 	@OneToOne
 	@JoinColumn(name="absenceTypeGroup_id")
 	public AbsenceTypeGroup absenceTypeGroup;
 	
+	@OneToOne
+	@JoinColumn(name="hourlyAbsenceType_id")
+	public HourlyAbsenceType hourlyAbsenceType;
+	
+	@OneToOne
+	@JoinColumn(name="dailyAbsenceType_id")
+	public DailyAbsenceType dailyAbsenceType;
 //	@OneToMany(mappedBy="absenceType")
 //	public List<ContractLevel> contractLevel;
 	
@@ -51,13 +57,5 @@ public class AbsenceType extends Model{
 	public boolean internalUse;
 	@Column
 	public boolean multipleUse;
-	@Column
-	public int justifiedWorkTime;
-	@Column
-	public boolean mealTicketCalculation;
-	@Column
-	public boolean ignoreStamping;	
-	@Column
-	public int groupValue;
-	
+
 }
