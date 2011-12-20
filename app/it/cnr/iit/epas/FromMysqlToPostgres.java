@@ -235,31 +235,41 @@ public class FromMysqlToPostgres {
 		Connection mysqlCon = getMysqlConnection();
 		
 		/**
-		 * query sulla tabella assenze_init, per recuperare le info sulle assenze e i motivi delle
-		 * assenze di ciascuna persona. La query va ottimizzata perchè sul db vecchio i dati sono poco densi
-		 * e poco aggiornati
+		 * query sulla tabelle Orario e Codici per recuperare le info sulle assenze e i motivi delle
+		 * assenze di ciascuna persona. La query prende tutti i codici di assenza che vengono poi "smistati"
+		 * nella tabella di postgres corrispondente attraverso l'analisi del campo QuantGiust presente soltanto 
+		 * nelle righe relative a codici di natura giornaliera.
 		 */
-		PreparedStatement stmtAssenze = mysqlCon.prepareStatement("SELECT Persone.ID, assenze_init.anno, " +
-				"assenze_init.mese, assenze_init.giorno, assenze_init.Codice, " +
-				"FROM assenze_init,Persone " +
-				"WHERE Persone.ID=assenze_init.idp and Persone.ID= "+id);
+		PreparedStatement stmtAssenze = mysqlCon.prepareStatement("Select Orario.Giorno, Orario.TipoTimbratura, " +
+				"Codici.Descrizione, Codici.QuantGiust, Codici.IgnoraTimbr " +
+				"from Persone, Codici, Orario " +
+				"where Orario.TipoGiorno=Codici.id " +
+				"and TipoGiorno !=0 and Orario.id = "+id);
 		ResultSet rs = stmtAssenze.executeQuery();
 		if(rs != null){
 			Absence absence = null;
 			AbsenceType absenceType = null;
 			while(rs.next()){			
 				/**
-				 * popolo la tabella absence e la tabella absenceType con i dati prelevati da assenze e 
-				 * assenze_init
+				 * popolo la tabella absence, la tabella absenceType e le tabelle HourlyAbsenceType e DailyAbsenceType
+				 * con i dati prelevati da Orario e Codici
 				 */
 				absence = new Absence();
 				absence.person = person;
 				absenceType = new AbsenceType();
 				absence.absenceType = absenceType;
-				Calendar cal = new GregorianCalendar();
-				cal.set(rs.getInt("anno"), rs.getInt("mese"), rs.getInt("giorno"));
-				absence.date = new LocalDate(cal);
+
+				absence.date = new LocalDate(rs.getDate("Giorno"));
 				absenceType.code = rs.getString("codice");
+				absenceType.description = rs.getString("Descrizione");
+				if(rs.getInt("QuantGiust")!=0){
+					//caso di codice di assenza oraria
+					//TODO
+				}
+				else{
+					//caso di codice di assenza giornaliera
+					//TODO
+				}
 				
 			}
 			em.persist(absence);
