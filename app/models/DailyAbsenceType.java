@@ -17,6 +17,7 @@ import play.db.jpa.Model;
  * @author dario
  *
  */
+@Entity
 public class DailyAbsenceType extends AbsenceType{	
 
 	@OneToOne

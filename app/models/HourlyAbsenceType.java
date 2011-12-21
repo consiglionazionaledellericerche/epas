@@ -2,6 +2,7 @@ package models;
 
 import java.util.Date;
 
+import javax.jws.HandlerChain;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -18,6 +19,7 @@ import play.db.jpa.Model;
  * @author dario
  *
  */
+@Entity
 public class HourlyAbsenceType extends AbsenceType{
 	
 	@OneToOne
