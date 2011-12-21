@@ -1,6 +1,7 @@
 package models;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -12,7 +13,7 @@ import javax.persistence.Table;
 
 import play.db.jpa.Model;
 /**
- * 
+ * tabella codici del db mysql, per adesso alcuni campi sono riscritti tali e quali al db vecchio.
  * @author dario
  *
  */
@@ -21,9 +22,10 @@ import play.db.jpa.Model;
 public class Code extends Model{
 	
 	/**
-	 * tabella codici del db mysql, per adesso alcuni campi sono riscritti tali e quali al db vecchio.
-	 * 
-	 */	
+	 * relazione con la tabella StampType
+	 */
+	@OneToMany(mappedBy="code")
+	public List <StampType> stampType;
 		
 	public String code;
 		

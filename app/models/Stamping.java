@@ -44,7 +44,7 @@ public class Stamping extends Model {
 	@JoinColumn(name = "person_id", nullable = false)
 	public Person person;
 	
-	//@Required
+	@Required
 	@ManyToOne(optional = true)
 	@JoinColumn(name = "stamp_type_id")
 	public StampType stampType;
@@ -54,9 +54,6 @@ public class Stamping extends Model {
 	@Column(name = "date")
 	public LocalDate date;
 
-	@ManyToOne
-	@JoinColumn( name = "code_id") 
-	public Code code;
 	
 	@Required
 	@Enumerated(EnumType.STRING)

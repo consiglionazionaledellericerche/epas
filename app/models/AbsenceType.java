@@ -28,6 +28,9 @@ import play.db.jpa.JPA;
 @Audited
 public class AbsenceType extends Model{
 	
+	@OneToMany(mappedBy="absenceType")
+	public List<Absence> absence;	
+	
 	@OneToOne
 	@JoinColumn(name="absenceTypeGroup_id")
 	public AbsenceTypeGroup absenceTypeGroup;
