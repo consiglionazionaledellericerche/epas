@@ -20,7 +20,10 @@ import models.AbsenceType;
 import models.Code;
 
 import models.Absence;
+import models.AbsenceTypeGroup;
 import models.ContactData;
+import models.DailyAbsenceType;
+import models.HourlyAbsenceType;
 import models.Location;
 import models.MonthRecap;
 import models.Person;
@@ -115,7 +118,7 @@ public class FromMysqlToPostgres {
 		 * query sulle tabelle orario, orario_pers per recuperare le info sulle timbrature
 		 * di ciascuna persona
 		 */
-		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT * FROM Orario WHERE id=" + id);
+		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT * FROM Orario WHERE TipoGiorno = 0 and id=" + id);
 		ResultSet rs = stmtOrari.executeQuery();		
 		
 	//	if(rs != null){
@@ -127,9 +130,12 @@ public class FromMysqlToPostgres {
 				 * popolo la tabella stampings
 				 */
 				stamping.person = person;						
+				StampType stampType = new StampType();
 				
 				//FIXME: da rivedere ed importare correttamente
 				//stamping.code = rs.getInt("TipoGiorno");
+				
+				stampType.code.id = (long)rs.getInt("TipoGiorno");
 				
 				byte tipoTimbratura = rs.getByte("TipoTimbratura");
 				if((int)tipoTimbratura%2 != 0)
@@ -225,7 +231,8 @@ public class FromMysqlToPostgres {
 					Logger.warn("Timbratura errata. Persona con id= "+id);
 				}			
 				
-				em.persist(stamping);		
+				em.persist(stamping);	
+				em.persist(stampType);
 			}
 		//}
 
@@ -241,7 +248,8 @@ public class FromMysqlToPostgres {
 		 * nelle righe relative a codici di natura giornaliera.
 		 */
 		PreparedStatement stmtAssenze = mysqlCon.prepareStatement("Select Orario.Giorno, Orario.TipoTimbratura, " +
-				"Codici.Descrizione, Codici.QuantGiust, Codici.IgnoraTimbr " +
+				"Codici.Descrizione, Codici.QuantGiust, Codici.IgnoraTimbr, Codici.MinutiEccesso, Codici.Limite, " +
+				"Codici.Accumulo, Codici.CodiceSost " +
 				"from Persone, Codici, Orario " +
 				"where Orario.TipoGiorno=Codici.id " +
 				"and TipoGiorno !=0 and Orario.id = "+id);
@@ -249,9 +257,11 @@ public class FromMysqlToPostgres {
 		if(rs != null){
 			Absence absence = null;
 			AbsenceType absenceType = null;
+			AbsenceTypeGroup absTypeGroup = null;
 			while(rs.next()){			
 				/**
-				 * popolo la tabella absence, la tabella absenceType e le tabelle HourlyAbsenceType e DailyAbsenceType
+				 * popolo la tabella absence, la tabella absenceType, la tabella absenceTypeGroup
+				 * e le tabelle HourlyAbsenceType e DailyAbsenceType
 				 * con i dati prelevati da Orario e Codici
 				 */
 				absence = new Absence();
@@ -262,20 +272,46 @@ public class FromMysqlToPostgres {
 				absence.date = new LocalDate(rs.getDate("Giorno"));
 				absenceType.code = rs.getString("codice");
 				absenceType.description = rs.getString("Descrizione");
-				if(rs.getInt("QuantGiust")!=0){
-					//caso di codice di assenza oraria
-					//TODO
-				}
-				else{
-					//caso di codice di assenza giornaliera
-					//TODO
-				}
 				
+				em.persist(absence);
+				em.persist(absenceType);
+				em.persist(absTypeGroup);
+				
+				/**
+				 * caso di assenze orarie
+				 */
+				if(rs.getInt("QuantGiust") != 0){
+					HourlyAbsenceType hourlyAbsenceType = new HourlyAbsenceType();
+					hourlyAbsenceType.absenceType = absenceType;
+					if(rs.getByte("IgnoraTimbr")==0)
+						hourlyAbsenceType.ignoreStamping = false;
+					else 
+						hourlyAbsenceType.ignoreStamping = true;
+					hourlyAbsenceType.justifiedWorkTime = rs.getInt("QuantGiust");
+					em.persist(hourlyAbsenceType);
+				}
+				/**
+				 * caso di assenze giornaliere
+				 */
+				else{
+					DailyAbsenceType dailyAbsenceType = new DailyAbsenceType();
+					dailyAbsenceType.absenceType = absenceType;
+					if(rs.getByte("IgnoraTimbr")==0)
+						dailyAbsenceType.ignoreStamping = false;
+					else 
+						dailyAbsenceType.ignoreStamping = true;
+					em.persist(dailyAbsenceType);
+				}
+				absTypeGroup = new AbsenceTypeGroup();
+				absTypeGroup.equivalentCode = rs.getString("CodiceSost");
+				absTypeGroup.buildUp = rs.getInt("Accumulo");
+				absTypeGroup.buildUpLimit = rs.getInt("Limite");
+				if(rs.getByte("MinutiEccesso")==0)
+					absTypeGroup.minutesExcess = false;
+				else 
+					absTypeGroup.minutesExcess = true;				
 			}
-			em.persist(absence);
-			em.persist(absenceType);
-		}
-		
+		}		
 	}
 	
 	public static void createVacations(short id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
@@ -300,8 +336,7 @@ public class FromMysqlToPostgres {
 					personVacation.person = person;
 					personVacation.vacationType = vacationType;
 					personVacation.beginFrom = rs.getDate("data_inizio");
-					personVacation.endTo = rs.getDate("data_fine");
-					
+					personVacation.endTo = rs.getDate("data_fine");					
 				
 				}
 			}

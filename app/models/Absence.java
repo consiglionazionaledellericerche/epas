@@ -26,7 +26,6 @@ import play.db.jpa.JPA;
 @Table(name = "absences")
 public class Absence extends Model {
 	
-	@Column
 	public LocalDate date;
 	
 	@ManyToOne
