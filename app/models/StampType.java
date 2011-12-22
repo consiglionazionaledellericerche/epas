@@ -28,9 +28,6 @@ public class StampType extends Model {
 	@MinLength(value=2)
 	public String description;	
 
-	@ManyToOne
-	@JoinColumn( name = "code_id") 
-	public Code code;
 	
 	@OneToMany(mappedBy="stampType")
 	public Set<Stamping> stampings; 

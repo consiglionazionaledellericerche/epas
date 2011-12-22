@@ -21,12 +21,6 @@ import play.db.jpa.Model;
 @Table(name = "codes")
 public class Code extends Model{
 	
-	/**
-	 * relazione con la tabella StampType
-	 */
-	@OneToMany(mappedBy="code")
-	public List <StampType> stampType;
-		
 	public String code;
 		
 	public String code_att;

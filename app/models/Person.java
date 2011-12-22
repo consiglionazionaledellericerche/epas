@@ -78,6 +78,13 @@ public class Person extends Model {
 	public List <PersonVacation> personVacation;
 	
 	/**
+	 * relazione con la tabella Competence
+	 */
+	@NotAudited
+	@OneToMany(mappedBy="person")
+	public List<Competence> competence;
+	
+	/**
 	 * relazione con la tabella delle tipologie di orario di lavoro
 	 */
 	@ManyToOne

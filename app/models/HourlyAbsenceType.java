@@ -19,6 +19,7 @@ import play.db.jpa.Model;
  * @author dario
  *
  */
+@Audited
 @Entity
 public class HourlyAbsenceType extends AbsenceType{
 	
@@ -28,8 +29,5 @@ public class HourlyAbsenceType extends AbsenceType{
 	
 	public int justifiedWorkTime;	
 
-	public boolean mealTicketCalculation;
-
-	public boolean ignoreStamping;	
 
 }

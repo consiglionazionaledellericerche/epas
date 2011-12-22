@@ -44,21 +44,24 @@ public class AbsenceType extends Model{
 	public DailyAbsenceType dailyAbsenceType;
 //	@OneToMany(mappedBy="absenceType")
 //	public List<ContractLevel> contractLevel;
+			
 	
-		
-	@Column
 	public String code;
-	@Column
+	
 	public String certificateCode;
-	@Column
+	
 	public String description;
-	@Column
+	
 	public Date validFrom;
-	@Column
+	
 	public Date validTo;
-	@Column
+	
 	public boolean internalUse;
-	@Column
-	public boolean multipleUse;
+	
+	public boolean multipleUse;	
+
+	public boolean mealTicketCalculation;
+
+	public boolean ignoreStamping;	
 
 }
