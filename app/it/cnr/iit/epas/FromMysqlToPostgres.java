@@ -9,6 +9,8 @@ import java.sql.Time;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 
@@ -21,6 +23,8 @@ import models.Code;
 
 import models.Absence;
 import models.AbsenceTypeGroup;
+import models.Competence;
+import models.CompetenceCode;
 import models.ContactData;
 import models.DailyAbsenceType;
 import models.HourlyAbsenceType;
@@ -120,25 +124,31 @@ public class FromMysqlToPostgres {
 		 */
 		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT * FROM Orario WHERE TipoGiorno = 0 and id=" + id);
 		ResultSet rs = stmtOrari.executeQuery();		
-		
-	//	if(rs != null){
-		
-			while(rs.next()){						
 			
+			while(rs.next()){
+				
+				byte tipoTimbratura = rs.getByte("TipoTimbratura");
+				StampType stampType = new StampType();
+				if((int)tipoTimbratura % 2 == 1 && (int)tipoTimbratura / 2 == 0){
+					stampType.description = "Prima timbratura di ingresso";					
+				}
+				if((int)tipoTimbratura % 2 == 0 && (int)tipoTimbratura / 2 == 1){
+					stampType.description = "Prima timbratura di uscita";
+				}
+				if((int)tipoTimbratura % 2 == 1 && (int)tipoTimbratura / 2 == 1){
+					stampType.description = "Timbratura di ingresso";
+				}
+				if((int)tipoTimbratura % 2 == 0 && (int)tipoTimbratura / 2 == 2){
+					stampType.description = "Timbratura di uscita";
+				}
+				em.persist(stampType);
 				Stamping stamping = new Stamping();
 				/**
 				 * popolo la tabella stampings
 				 */
-				stamping.person = person;						
-				StampType stampType = new StampType();
+				stamping.person = person;				
 				
-				//FIXME: da rivedere ed importare correttamente
-				//stamping.code = rs.getInt("TipoGiorno");
-				
-				stampType.code.id = (long)rs.getInt("TipoGiorno");
-				
-				byte tipoTimbratura = rs.getByte("TipoTimbratura");
-				if((int)tipoTimbratura%2 != 0)
+				if((int)tipoTimbratura % 2 != 0)
 					stamping.way = WayType.in;					
 				else
 					stamping.way = WayType.out;
@@ -232,9 +242,8 @@ public class FromMysqlToPostgres {
 				}			
 				
 				em.persist(stamping);	
-				em.persist(stampType);
-			}
-		//}
+				
+			}		
 
 	}
 	
@@ -266,15 +275,29 @@ public class FromMysqlToPostgres {
 				 */
 				absence = new Absence();
 				absence.person = person;
+				absence.date = new LocalDate(rs.getDate("Giorno"));				
+				em.persist(absence);
+				
 				absenceType = new AbsenceType();
 				absence.absenceType = absenceType;
-
-				absence.date = new LocalDate(rs.getDate("Giorno"));
 				absenceType.code = rs.getString("codice");
 				absenceType.description = rs.getString("Descrizione");
-				
-				em.persist(absence);
+				if(rs.getByte("IgnoraTimbr")==0)
+					absenceType.ignoreStamping = false;
+				else 
+					absenceType.ignoreStamping = true;
 				em.persist(absenceType);
+				
+				absTypeGroup = new AbsenceTypeGroup();
+				absenceType.absenceTypeGroup = absTypeGroup;
+				if(rs.getByte("IgnoraTimbr")==0)
+					absTypeGroup.minutesExcess = false;
+				else 
+					absTypeGroup.minutesExcess= true;
+				absTypeGroup.equivalentCode = rs.getString("CodiceSost");
+				absTypeGroup.buildUp = rs.getInt("Accumulo");
+				absTypeGroup.buildUpLimit = rs.getInt("Limite");				
+								
 				em.persist(absTypeGroup);
 				
 				/**
@@ -282,11 +305,7 @@ public class FromMysqlToPostgres {
 				 */
 				if(rs.getInt("QuantGiust") != 0){
 					HourlyAbsenceType hourlyAbsenceType = new HourlyAbsenceType();
-					hourlyAbsenceType.absenceType = absenceType;
-					if(rs.getByte("IgnoraTimbr")==0)
-						hourlyAbsenceType.ignoreStamping = false;
-					else 
-						hourlyAbsenceType.ignoreStamping = true;
+					hourlyAbsenceType.absenceType = absenceType;					
 					hourlyAbsenceType.justifiedWorkTime = rs.getInt("QuantGiust");
 					em.persist(hourlyAbsenceType);
 				}
@@ -296,20 +315,10 @@ public class FromMysqlToPostgres {
 				else{
 					DailyAbsenceType dailyAbsenceType = new DailyAbsenceType();
 					dailyAbsenceType.absenceType = absenceType;
-					if(rs.getByte("IgnoraTimbr")==0)
-						dailyAbsenceType.ignoreStamping = false;
-					else 
-						dailyAbsenceType.ignoreStamping = true;
+					
 					em.persist(dailyAbsenceType);
 				}
-				absTypeGroup = new AbsenceTypeGroup();
-				absTypeGroup.equivalentCode = rs.getString("CodiceSost");
-				absTypeGroup.buildUp = rs.getInt("Accumulo");
-				absTypeGroup.buildUpLimit = rs.getInt("Limite");
-				if(rs.getByte("MinutiEccesso")==0)
-					absTypeGroup.minutesExcess = false;
-				else 
-					absTypeGroup.minutesExcess = true;				
+					
 			}
 		}		
 	}
@@ -570,6 +579,61 @@ public class FromMysqlToPostgres {
 			}
 			em.persist(monthRecap);
 		}
+	}
+	
+	public static void createCompetence(short id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+		/**
+		 * funzione che riempe la tabella competence e la tabella competence_code relativamente alle competenze
+		 * di una determinata persona
+		 */
+		
+		Connection mysqlCon = getMysqlConnection();
+		PreparedStatement stmt = mysqlCon.prepareStatement("Select codici_comp.id, competenze.mese, " +
+				"competenze.anno, competenze.codice, competenze.valore, codici_comp.descrizione, codici_comp.inattivo " +
+				"from competenze, codici_comp where codici_comp.codice=competenze.codice and competenze.id= "+id);
+		ResultSet rs = stmt.executeQuery();
+		
+		Competence competence = null;
+		CompetenceCode competenceCode = null;
+		Map<Integer,Integer> mappaCodici = new HashMap<Integer,Integer>();
+		while(rs.next()){			
+			competence = new Competence();
+			competence.person = person;
+			competence.value = rs.getInt("valore");
+			competence.code = rs.getString("codice");
+			competence.month = rs.getInt("mese");
+			competence.year = rs.getInt("anno");
+			int idCodiciCompetenza = rs.getInt("id");	
+			if(mappaCodici.get(idCodiciCompetenza)== null){
+				competenceCode = new CompetenceCode();
+				competenceCode.description = rs.getString("descrizione");
+				
+				if(rs.getByte("inattivo")==0)
+					competenceCode.inactive = false;
+				else 
+					competenceCode.inactive = true;
+				long c = competenceCode.id;
+				int codiceCompetenza = (int)c;
+				Integer codiceCompetenzaNuovo = new Integer(codiceCompetenza);
+				mappaCodici.put(idCodiciCompetenza,codiceCompetenzaNuovo);
+				em.persist(competenceCode);
+				em.persist(competence);
+			}
+			else{
+				competenceCode = CompetenceCode.findById(idCodiciCompetenza);
+				competence.competenceCode = competenceCode;				
+				competenceCode.description = rs.getString("descrizione");
+				
+				if(rs.getByte("inattivo")==0)
+					competenceCode.inactive = false;
+				else 
+					competenceCode.inactive = true;
+				em.persist(competenceCode);
+				em.persist(competence);
+			}
+			
+		}		
+		
 	}
 	
 	public static void fillOtherTables() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{

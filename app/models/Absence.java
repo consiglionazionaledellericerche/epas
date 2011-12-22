@@ -11,6 +11,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
@@ -22,6 +23,7 @@ import play.db.jpa.JPA;
  * @author dario
  *
  */
+@Audited
 @Entity
 @Table(name = "absences")
 public class Absence extends Model {
