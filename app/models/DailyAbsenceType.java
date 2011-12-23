@@ -24,10 +24,6 @@ public class DailyAbsenceType extends AbsenceType{
 	@OneToOne
 	@JoinColumn(name="absenceType_id")
 	public AbsenceType absenceType;
-	
-	@Column
-	public boolean mealTicketCalculation;
-	
-	@Column
-	public boolean ignoreStamping;	
+
+
 }
