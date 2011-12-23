@@ -64,6 +64,7 @@ public class FromMysqlToPostgres {
 	}
 	
 	public static Person createPerson(ResultSet rs, EntityManager em) throws SQLException {
+		Logger.debug("Inizio a creare la persona");
 		Person person = new Person();
 		person.name = rs.getString("Nome");
 		person.surname = rs.getString("Cognome");
@@ -74,6 +75,7 @@ public class FromMysqlToPostgres {
 	}
 	
 	public static void createLocation(ResultSet rs, Person person, EntityManager em) throws SQLException {
+		Logger.debug("Inizio a creare la locazione");
 		Location location = new Location();
 		location.person = person;
 		
@@ -84,6 +86,7 @@ public class FromMysqlToPostgres {
 	}
 	
 	public static void createContactData(ResultSet rs, Person person, EntityManager em) throws SQLException {
+		Logger.debug("Inizio a creare il contact data");
 		ContactData contactData = new ContactData();
 		contactData.person = person;
 		
@@ -115,7 +118,7 @@ public class FromMysqlToPostgres {
 	
 
 	public static void createStampings(short id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-
+		Logger.debug("Inizio a creare le timbrature");
 		Connection mysqlCon = getMysqlConnection();
 		
 		/**
@@ -240,7 +243,7 @@ public class FromMysqlToPostgres {
 					System.out.println("Timbratura errata. Persona con id="+id);
 					Logger.warn("Timbratura errata. Persona con id= "+id);
 				}			
-				
+				Logger.debug("Termino di creare le timbrature");
 				em.persist(stamping);	
 				
 			}		
@@ -248,6 +251,7 @@ public class FromMysqlToPostgres {
 	}
 	
 	public static void createAbsences(short id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+		Logger.debug("Inizio a creare le assenze");
 		Connection mysqlCon = getMysqlConnection();
 		
 		/**
@@ -257,12 +261,13 @@ public class FromMysqlToPostgres {
 		 * nelle righe relative a codici di natura giornaliera.
 		 */
 		PreparedStatement stmtAssenze = mysqlCon.prepareStatement("Select Orario.Giorno, Orario.TipoTimbratura, " +
-				"Codici.Descrizione, Codici.QuantGiust, Codici.IgnoraTimbr, Codici.MinutiEccesso, Codici.Limite, " +
-				"Codici.Accumulo, Codici.CodiceSost " +
-				"from Persone, Codici, Orario " +
+				"Codici.Codice, Codici.Descrizione, Codici.QuantGiust, Codici.IgnoraTimbr, Codici.MinutiEccesso, Codici.Limite, " +
+				"Codici.Accumulo, Codici.CodiceSost, Codici.id " +
+				"from Codici, Orario " +
 				"where Orario.TipoGiorno=Codici.id " +
 				"and TipoGiorno !=0 and Orario.id = "+id);
 		ResultSet rs = stmtAssenze.executeQuery();
+		Map<Integer,Long> mappaCodici = new HashMap<Integer,Long>();
 		if(rs != null){
 			Absence absence = null;
 			AbsenceType absenceType = null;
@@ -276,21 +281,46 @@ public class FromMysqlToPostgres {
 				absence = new Absence();
 				absence.person = person;
 				absence.date = new LocalDate(rs.getDate("Giorno"));				
-				em.persist(absence);
 				
-				absenceType = new AbsenceType();
-				absence.absenceType = absenceType;
-				absenceType.code = rs.getString("codice");
-				absenceType.description = rs.getString("Descrizione");
-				if(rs.getByte("IgnoraTimbr")==0)
-					absenceType.ignoreStamping = false;
-				else 
-					absenceType.ignoreStamping = true;
-				em.persist(absenceType);
+				int idCodiceAssenza = rs.getInt("id");
+				if(mappaCodici.get(idCodiceAssenza)== null){
+					
+					absenceType = new AbsenceType();
+					absence.absenceType = absenceType;
+					absenceType.code = rs.getString("Codice");
+					absenceType.description = rs.getString("Descrizione");
+					if(rs.getByte("IgnoraTimbr")==0)
+						absenceType.ignoreStamping = false;
+					else 
+						absenceType.ignoreStamping = true;
+									
+					em.persist(absenceType);					
+					em.persist(absence);
+					mappaCodici.put(idCodiceAssenza,absenceType.id);
+					
+					//FIXME
+					/**
+					 * arrivato fino a qui: c'è da fare i controlli sugli inserimenti dei codici di absencetypegroup
+					 */
+				}
+				else{
+					absenceType = AbsenceType.findById(mappaCodici.get(idCodiceAssenza));
+					absence.absenceType = absenceType;	
+					absenceType.code = rs.getString("Codice");
+					absenceType.description = rs.getString("Descrizione");
+					if(rs.getByte("IgnoraTimbr")==0)
+						absenceType.ignoreStamping = false;
+					else 
+						absenceType.ignoreStamping = true;
+									
+					em.persist(absenceType);					
+					em.persist(absence);
+				}
+				
 				
 				absTypeGroup = new AbsenceTypeGroup();
 				absenceType.absenceTypeGroup = absTypeGroup;
-				if(rs.getByte("IgnoraTimbr")==0)
+				if(rs.getByte("MinutiEccesso")==0)
 					absTypeGroup.minutesExcess = false;
 				else 
 					absTypeGroup.minutesExcess= true;
@@ -315,7 +345,7 @@ public class FromMysqlToPostgres {
 				else{
 					DailyAbsenceType dailyAbsenceType = new DailyAbsenceType();
 					dailyAbsenceType.absenceType = absenceType;
-					
+					Logger.debug("Termino di creare le assenze");
 					em.persist(dailyAbsenceType);
 				}
 					
@@ -327,6 +357,7 @@ public class FromMysqlToPostgres {
 		/**
 		 * query su ferie_pers per popolare VacationType e PersonVacation
 		 */
+		Logger.debug("Inizio a creare le ferie");
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT ferie.nome,ferie_pers.data_inizio," +
 				"ferie_pers.data_fine FROM ferie,ferie_pers " +
@@ -364,6 +395,7 @@ public class FromMysqlToPostgres {
 		 * query su orari di lavoro in join con orario pers e Persone
 		 * per popolare workin_time_type e working_time_type_days
 		 */
+		Logger.debug("Inizio a creare l'orario di lavoro");
 		Connection mysqlCon = getMysqlConnection();		
 		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM orari_di_lavoro,Persone,orario_pers WHERE " +
 				"Persone.ID=orario_pers.pid AND orario_pers.oid=orari_di_lavoro.id and Persone.id="+id);
@@ -504,6 +536,7 @@ public class FromMysqlToPostgres {
 		/**
 		 * query su totali_anno per recuperare lo storico da mettere in YearRecap
 		 */
+		Logger.debug("Inizio a creare il riepilogo annuale");
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM totali_anno WHERE ID="+id);
 		ResultSet rs = stmt.executeQuery();
@@ -526,6 +559,7 @@ public class FromMysqlToPostgres {
 				yearRecap.lastModified = rs.getTimestamp("data_ultimamod");
 									
 			}
+			Logger.debug("Termino di creare il riepilogo annuale");
 			em.persist(yearRecap);
 		}
 	}
@@ -533,6 +567,7 @@ public class FromMysqlToPostgres {
 		/**
 		 * query su totali_mens per recueperare lo storico mensile da mettere su monthRecap
 		 */
+		Logger.debug("Inizio a creare il riepilogo mensile");
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM totali_mens WHERE ID="+id);
 		ResultSet rs = stmt.executeQuery();
@@ -577,6 +612,7 @@ public class FromMysqlToPostgres {
 				monthRecap.progressive = rs.getString("progressivo");				
 
 			}
+			Logger.debug("Termino di creare il riepilogo mensile");
 			em.persist(monthRecap);
 		}
 	}
@@ -586,7 +622,7 @@ public class FromMysqlToPostgres {
 		 * funzione che riempe la tabella competence e la tabella competence_code relativamente alle competenze
 		 * di una determinata persona
 		 */
-		
+		Logger.debug("Inizio a creare le competenze");
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt = mysqlCon.prepareStatement("Select codici_comp.id, competenze.mese, " +
 				"competenze.anno, competenze.codice, competenze.valore, codici_comp.descrizione, codici_comp.inattivo " +
@@ -595,7 +631,7 @@ public class FromMysqlToPostgres {
 		
 		Competence competence = null;
 		CompetenceCode competenceCode = null;
-		Map<Integer,Integer> mappaCodici = new HashMap<Integer,Integer>();
+		Map<Integer,Long> mappaCodici = new HashMap<Integer,Long>();
 		while(rs.next()){			
 			competence = new Competence();
 			competence.person = person;
@@ -612,15 +648,17 @@ public class FromMysqlToPostgres {
 					competenceCode.inactive = false;
 				else 
 					competenceCode.inactive = true;
-				long c = competenceCode.id;
-				int codiceCompetenza = (int)c;
-				Integer codiceCompetenzaNuovo = new Integer(codiceCompetenza);
-				mappaCodici.put(idCodiciCompetenza,codiceCompetenzaNuovo);
 				em.persist(competenceCode);
 				em.persist(competence);
+				//long c = competenceCode.id;
+				//int codiceCompetenza = (int)c;
+				//Integer codiceCompetenzaNuovo = new Integer(codiceCompetenza);
+				mappaCodici.put(idCodiciCompetenza,competenceCode.id);
+				
 			}
 			else{
-				competenceCode = CompetenceCode.findById(idCodiciCompetenza);
+				//Integer codiceCompetenza = new Integer(idCodiciCompetenza);
+				competenceCode = CompetenceCode.findById(mappaCodici.get(idCodiciCompetenza));
 				competence.competenceCode = competenceCode;				
 				competenceCode.description = rs.getString("descrizione");
 				
@@ -628,6 +666,7 @@ public class FromMysqlToPostgres {
 					competenceCode.inactive = false;
 				else 
 					competenceCode.inactive = true;
+				Logger.debug("Termino di creare le competenze");
 				em.persist(competenceCode);
 				em.persist(competence);
 			}
