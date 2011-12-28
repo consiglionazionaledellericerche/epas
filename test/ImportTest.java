@@ -44,17 +44,17 @@ public class ImportTest extends UnitTest {
 		FromMysqlToPostgres.createLocation(rs, person, em);
 		FromMysqlToPostgres.createContactData(rs, person, em);
 		
-//		FromMysqlToPostgres.createVacations(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
+		FromMysqlToPostgres.createVacations(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
 //		
 		FromMysqlToPostgres.createAbsences(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
-//		FromMysqlToPostgres.createWorkingTimeTypes(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
-//		FromMysqlToPostgres.createStampings(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
+		FromMysqlToPostgres.createWorkingTimeTypes(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
+		FromMysqlToPostgres.createStampings(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
 //		
-//		FromMysqlToPostgres.createYearRecap(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
+		FromMysqlToPostgres.createYearRecap(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
 //		
-//		FromMysqlToPostgres.createMonthRecap(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
+		FromMysqlToPostgres.createMonthRecap(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
 //		
-//		FromMysqlToPostgres.createCompetence(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
+		FromMysqlToPostgres.createCompetence(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
 //		
 //		FromMysqlToPostgres.fillOtherTables();
 		

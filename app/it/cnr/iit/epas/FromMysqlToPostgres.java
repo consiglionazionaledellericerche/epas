@@ -26,6 +26,7 @@ import models.AbsenceTypeGroup;
 import models.Competence;
 import models.CompetenceCode;
 import models.ContactData;
+import models.Contract;
 import models.DailyAbsenceType;
 import models.HourlyAbsenceType;
 import models.Location;
@@ -115,6 +116,70 @@ public class FromMysqlToPostgres {
 		contactData.telephone = null;		
 		em.persist(contactData);
 	}	
+	
+	/**
+	 * 
+	 * @param id
+	 * @param person
+	 * @param em
+	 * metodo che crea un contratto per la persona in questione. Se è già presente un contratto per quella persona,
+	 * questo viene cancellato nel caso in cui la data di fine del contratto già salvato sia inferiore alla data inizio
+	 * del nuovo contratto così da salvare nello storico il contratto precedente.
+	 */
+	public static void createContract(short id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+		Connection mysqlCon = getMysqlConnection();
+		PreparedStatement stmtContratto = mysqlCon.prepareStatement("SELECT id,Datainizio,Datafine,continua FROM Personedate WHERE id=" + id);
+		ResultSet rs = stmtContratto.executeQuery();	
+		Map<Integer,Long> mappaCodici = new HashMap<Integer, Long>();
+		Contract contract = null;
+		while(rs.next()){
+			int idContratto = rs.getInt("id");
+			if(mappaCodici.get(idContratto)== null){
+				contract = new Contract();
+				contract.person = person;
+				if(rs.getDate("Datainizio") != null)
+					contract.beginContract = rs.getDate("Datainizio");
+				else
+					contract.beginContract = null;
+				if(rs.getDate("Datafine") != null)
+					contract.endContract = rs.getDate("Datafine");
+				else
+					contract.endContract = null;
+				if(rs.getByte("continua")==0)
+					contract.isContinued = false;
+				else 
+					contract.isContinued = true;
+				em.persist(contract);
+				mappaCodici.put(idContratto,contract.id);
+			}
+			else{
+				/**
+				 * riprendere da qui: controllare nel record precedentemente salvato, la data di fine contratto sia 
+				 * precedente alla data di inizio del nuovo contratto.
+				 * 
+				 */
+				contract = Contract.findById(id);
+				contract.delete();
+				contract = new Contract();
+				contract.person = person;
+				if(rs.getDate("Datainizio") != null)
+					contract.beginContract = rs.getDate("Datainizio");
+				else
+					contract.beginContract = null;
+				if(rs.getDate("Datafine") != null)
+					contract.endContract = rs.getDate("Datafine");
+				else
+					contract.endContract = null;
+				if(rs.getByte("continua")==0)
+					contract.isContinued = false;
+				else 
+					contract.isContinued = true;
+				em.persist(contract);
+				mappaCodici.put(idContratto,contract.id);
+			}
+		}
+		
+	}
 	
 
 	public static void createStampings(short id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
@@ -268,6 +333,7 @@ public class FromMysqlToPostgres {
 				"and TipoGiorno !=0 and Orario.id = "+id);
 		ResultSet rs = stmtAssenze.executeQuery();
 		Map<Integer,Long> mappaCodici = new HashMap<Integer,Long>();
+		Map<Integer,Long> mappaCodiciGruppo = new HashMap<Integer,Long>();
 		if(rs != null){
 			Absence absence = null;
 			AbsenceType absenceType = null;
@@ -302,6 +368,18 @@ public class FromMysqlToPostgres {
 					/**
 					 * arrivato fino a qui: c'è da fare i controlli sugli inserimenti dei codici di absencetypegroup
 					 */
+					absTypeGroup = new AbsenceTypeGroup();
+					absTypeGroup.absenceType = absenceType;
+					absTypeGroup.buildUp = rs.getInt("Accumulo");
+					absTypeGroup.buildUpLimit = rs.getInt("Limite");
+					absTypeGroup.equivalentCode = rs.getString("CodiceSost");
+					if(rs.getByte("MinutiEccesso")==0)
+						absTypeGroup.minutesExcess = false;
+					else 
+						absTypeGroup.minutesExcess = true; 
+					em.persist(absTypeGroup);
+					
+					
 				}
 				else{
 					absenceType = AbsenceType.findById(mappaCodici.get(idCodiceAssenza));
@@ -315,21 +393,20 @@ public class FromMysqlToPostgres {
 									
 					em.persist(absenceType);					
 					em.persist(absence);
+					
+					absTypeGroup = new AbsenceTypeGroup();
+					absenceType.absenceTypeGroup = absTypeGroup;
+					if(rs.getByte("MinutiEccesso")==0)
+						absTypeGroup.minutesExcess = false;
+					else 
+						absTypeGroup.minutesExcess= true;
+					absTypeGroup.equivalentCode = rs.getString("CodiceSost");
+					absTypeGroup.buildUp = rs.getInt("Accumulo");
+					absTypeGroup.buildUpLimit = rs.getInt("Limite");				
+									
+					em.persist(absTypeGroup);
 				}
-				
-				
-				absTypeGroup = new AbsenceTypeGroup();
-				absenceType.absenceTypeGroup = absTypeGroup;
-				if(rs.getByte("MinutiEccesso")==0)
-					absTypeGroup.minutesExcess = false;
-				else 
-					absTypeGroup.minutesExcess= true;
-				absTypeGroup.equivalentCode = rs.getString("CodiceSost");
-				absTypeGroup.buildUp = rs.getInt("Accumulo");
-				absTypeGroup.buildUpLimit = rs.getInt("Limite");				
-								
-				em.persist(absTypeGroup);
-				
+						
 				/**
 				 * caso di assenze orarie
 				 */
@@ -650,14 +727,12 @@ public class FromMysqlToPostgres {
 					competenceCode.inactive = true;
 				em.persist(competenceCode);
 				em.persist(competence);
-				//long c = competenceCode.id;
-				//int codiceCompetenza = (int)c;
-				//Integer codiceCompetenzaNuovo = new Integer(codiceCompetenza);
+
 				mappaCodici.put(idCodiciCompetenza,competenceCode.id);
 				
 			}
 			else{
-				//Integer codiceCompetenza = new Integer(idCodiciCompetenza);
+			
 				competenceCode = CompetenceCode.findById(mappaCodici.get(idCodiciCompetenza));
 				competence.competenceCode = competenceCode;				
 				competenceCode.description = rs.getString("descrizione");
