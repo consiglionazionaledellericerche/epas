@@ -130,8 +130,8 @@ public class ModelTest extends UnitTest {
 		assertFalse(personSaturdayDay.isWorkingDay());		
 	}
 	
-	@Test
-	public void testGetStampings() {
-		Fixtures.loadModels("data.yml");
-	}
+//	@Test
+//	public void testGetStampings() {
+//		Fixtures.loadModels("data.yml");
+//	}
 }

@@ -62,6 +62,8 @@ public class Person extends Model {
 	 * relazione con la tabella dei contratti
 	 */
 	@Transient
+	@OneToOne(mappedBy="person")
+	@JoinColumn(name="contract_id")
 	public Contract contract;
 	
 	/**
