@@ -128,38 +128,38 @@ public class FromMysqlToPostgres {
 	 */
 	public static void createContract(short id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		Connection mysqlCon = getMysqlConnection();
-		PreparedStatement stmtContratto = mysqlCon.prepareStatement("SELECT id,Datainizio,Datafine,continua FROM Personedate WHERE id=" + id);
+		PreparedStatement stmtContratto = mysqlCon.prepareStatement("SELECT id,Datainizio,Datafine,continua " +
+				"FROM Personedate WHERE id=" + id + " order by Datainizio");
 		ResultSet rs = stmtContratto.executeQuery();	
-		Map<Integer,Long> mappaCodici = new HashMap<Integer, Long>();
+		//Map<Integer,Long> mappaCodici = new HashMap<Integer, Long>();
 		Contract contract = null;
 		while(rs.next()){
-			int idContratto = rs.getInt("id");
-			if(mappaCodici.get(idContratto)== null){
-				contract = new Contract();
-				contract.person = person;
-				if(rs.getDate("Datainizio") != null)
-					contract.beginContract = rs.getDate("Datainizio");
-				else
-					contract.beginContract = null;
-				if(rs.getDate("Datafine") != null)
-					contract.endContract = rs.getDate("Datafine");
-				else
-					contract.endContract = null;
-				if(rs.getByte("continua")==0)
-					contract.isContinued = false;
-				else 
-					contract.isContinued = true;
-				em.persist(contract);
-				mappaCodici.put(idContratto,contract.id);
+		//	int idContratto = rs.getInt("id");
+		//	if(mappaCodici.get(idContratto)== null){
+		//		
+			contract = Contract.findById(rs.getLong("id"));
+			if(contract != null){
+				Date nuovaDataInizio = rs.getDate("Datainizio");
+				if(contract.endContract.compareTo(nuovaDataInizio) < 0){
+					contract.delete();
+					contract = new Contract();
+					contract.person = person;
+					if(rs.getDate("Datainizio") != null)
+						contract.beginContract = rs.getDate("Datainizio");
+					else
+						contract.beginContract = null;
+					if(rs.getDate("Datafine") != null)
+						contract.endContract = rs.getDate("Datafine");
+					else
+						contract.endContract = null;
+					if(rs.getByte("continua")==0)
+						contract.isContinued = false;
+					else 
+						contract.isContinued = true;
+					em.persist(contract);		
+				}
 			}
 			else{
-				/**
-				 * riprendere da qui: controllare nel record precedentemente salvato, la data di fine contratto sia 
-				 * precedente alla data di inizio del nuovo contratto.
-				 * 
-				 */
-				contract = Contract.findById(id);
-				contract.delete();
 				contract = new Contract();
 				contract.person = person;
 				if(rs.getDate("Datainizio") != null)
@@ -175,10 +175,9 @@ public class FromMysqlToPostgres {
 				else 
 					contract.isContinued = true;
 				em.persist(contract);
-				mappaCodici.put(idContratto,contract.id);
-			}
-		}
-		
+							
+			}				
+		}		
 	}
 	
 
