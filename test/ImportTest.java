@@ -24,40 +24,42 @@ import play.test.UnitTest;
  */
 public class ImportTest extends UnitTest {
 
-	private final static short CRISTAN_LUCCHESI_OROLOGIO_ID = 146;
+	private final static long CRISTAN_LUCCHESI_OROLOGIO_ID = 146;
 	
 	@Test
 	public void testImportDataPerson() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		Connection mysqlCon = FromMysqlToPostgres.getMysqlConnection();
-		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM Persone WHERE id = " + CRISTAN_LUCCHESI_OROLOGIO_ID);
-		ResultSet rs = stmt.executeQuery();
-		rs.next(); // exactly one result so allowed 
-		
 		EntityManager em = JPA.em();
-		
-		Person person = FromMysqlToPostgres.createPerson(rs, em);
-		assertNotNull(person);
-		assertNotNull(person.id);
-		assertEquals("Cristian", person.name);
-		assertEquals("Lucchesi", person.surname);
-		
-		FromMysqlToPostgres.createLocation(rs, person, em);
-		FromMysqlToPostgres.createContactData(rs, person, em);
-		
-		FromMysqlToPostgres.createContract(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
-		
-//		FromMysqlToPostgres.createVacations(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
-//		
-//		FromMysqlToPostgres.createAbsences(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
-//		FromMysqlToPostgres.createWorkingTimeTypes(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
-//		FromMysqlToPostgres.createStampings(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
-//		
-//		FromMysqlToPostgres.createYearRecap(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
-//		
-//		FromMysqlToPostgres.createMonthRecap(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
-//		
-//		FromMysqlToPostgres.createCompetence(CRISTAN_LUCCHESI_OROLOGIO_ID, person, em);
-//		
+		//PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM Persone WHERE id = " + CRISTAN_LUCCHESI_OROLOGIO_ID);
+		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT ID, Nome, Cognome, DataNascita, Telefono," +
+				"Fax, Email, Stanza, Matricola, Dipartimento, Sede FROM Persone");
+		ResultSet rs = stmt.executeQuery();
+		while(rs.next()){	
+			//rs.next(); // exactly one result so allowed 
+					
+			Person person = FromMysqlToPostgres.createPerson(rs, em);
+			assertNotNull(person);
+			assertNotNull(person.id);
+			//assertEquals("Cristian", person.name);
+			//assertEquals("Lucchesi", person.surname);
+			
+			FromMysqlToPostgres.createLocation(rs, person, em);
+			FromMysqlToPostgres.createContactData(rs, person, em);
+			
+			FromMysqlToPostgres.createContract(person.id, person, em);
+			
+			FromMysqlToPostgres.createVacations(person.id, person, em);
+	
+			FromMysqlToPostgres.createAbsences(person.id, person, em);
+			FromMysqlToPostgres.createWorkingTimeTypes(person.id, person, em);
+			FromMysqlToPostgres.createStampings(person.id, person, em);
+			
+			FromMysqlToPostgres.createYearRecap(person.id, person, em);
+			
+			FromMysqlToPostgres.createMonthRecap(person.id, person, em);
+			
+			FromMysqlToPostgres.createCompetence(person.id, person, em);
+		}
 //		FromMysqlToPostgres.fillOtherTables();
 		
 //		long stampingsCount = Stamping.count("person = ?", person); 
