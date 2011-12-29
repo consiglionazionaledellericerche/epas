@@ -126,7 +126,7 @@ public class FromMysqlToPostgres {
 	 * questo viene cancellato nel caso in cui la data di fine del contratto già salvato sia inferiore alla data inizio
 	 * del nuovo contratto così da salvare nello storico il contratto precedente.
 	 */
-	public static void createContract(short id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+	public static void createContract(long id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmtContratto = mysqlCon.prepareStatement("SELECT id,Datainizio,Datafine,continua " +
 				"FROM Personedate WHERE id=" + id + " order by Datainizio");
@@ -140,7 +140,7 @@ public class FromMysqlToPostgres {
 			contract = Contract.findById(rs.getLong("id"));
 			if(contract != null){
 				Date nuovaDataInizio = rs.getDate("Datainizio");
-				if(contract.endContract.compareTo(nuovaDataInizio) < 0){
+				if(contract.endContract != null && contract.endContract.compareTo(nuovaDataInizio) < 0){
 					contract.delete();
 					contract = new Contract();
 					contract.person = person;
@@ -181,7 +181,7 @@ public class FromMysqlToPostgres {
 	}
 	
 
-	public static void createStampings(short id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
+	public static void createStampings(long id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 		Logger.debug("Inizio a creare le timbrature");
 		Connection mysqlCon = getMysqlConnection();
 		
@@ -287,7 +287,20 @@ public class FromMysqlToPostgres {
 							else{
 								ora = rs.getTime("Ora");
 								Calendar calGiorno = new GregorianCalendar();
-				                calGiorno.setTime(giorno);
+								/**
+								 * controllo sulla validità del campo giorno della tabella Orario.
+								 * Le date di tipo 0000-00-00 presenti sul db mysql non sono riconosciute dal db postgres
+								 * e al momento dell'inserimento viene riscontrato un errore.
+								 * Con l'accorgimento del parametro "zeroDateTimeBehaviour=convertToNull alla stringa di 
+								 * connessione al db mysql si risolve l'inconveniente. Però nel momento di inserire un oggetto null
+								 * nel nuovo campo data della nuova tabella in postgres viene sollevata
+								 * una nullPointerException. Qui la necessità di usare una data fittizia: '1900-01-01' per 
+								 * questi casi
+								 */
+								if(giorno!=null)
+									calGiorno.setTime(giorno);
+								else
+									calGiorno.setTime(new Date(1900-01-01));
 				                Calendar calOra = new GregorianCalendar();
 				                calOra.setTime(ora);
 				                
@@ -314,7 +327,7 @@ public class FromMysqlToPostgres {
 
 	}
 	
-	public static void createAbsences(short id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+	public static void createAbsences(long id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		Logger.debug("Inizio a creare le assenze");
 		Connection mysqlCon = getMysqlConnection();
 		
@@ -429,7 +442,7 @@ public class FromMysqlToPostgres {
 		}		
 	}
 	
-	public static void createVacations(short id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
+	public static void createVacations(long id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
 		/**
 		 * query su ferie_pers per popolare VacationType e PersonVacation
 		 */
@@ -453,7 +466,9 @@ public class FromMysqlToPostgres {
 					personVacation.vacationType = vacationType;
 					personVacation.beginFrom = rs.getDate("data_inizio");
 					personVacation.endTo = rs.getDate("data_fine");					
-				
+					
+					em.persist(personVacation);			
+					em.persist(vacationType);
 				}
 			}
 		}
@@ -461,12 +476,11 @@ public class FromMysqlToPostgres {
 				sqle.printStackTrace();
 				System.out.println("Ferie errate. Persona con id="+id);				
 			}			
-			em.persist(personVacation);			
-			em.persist(vacationType);
+			
 		}
 	
 	
-	public static void createWorkingTimeTypes(short id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
+	public static void createWorkingTimeTypes(long id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
 		/**
 		 * query su orari di lavoro in join con orario pers e Persone
 		 * per popolare workin_time_type e working_time_type_days
@@ -607,7 +621,7 @@ public class FromMysqlToPostgres {
 		}
 	}
 	
-	public static void createYearRecap(short id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
+	public static void createYearRecap(long id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
 		
 		/**
 		 * query su totali_anno per recuperare lo storico da mettere in YearRecap
@@ -633,13 +647,14 @@ public class FromMysqlToPostgres {
 				yearRecap.recguap = rs.getInt("recguap");
 				yearRecap.recm = rs.getInt("recm");
 				yearRecap.lastModified = rs.getTimestamp("data_ultimamod");
-									
+				
+				em.persist(yearRecap);			
 			}
 			Logger.debug("Termino di creare il riepilogo annuale");
-			em.persist(yearRecap);
+			
 		}
 	}
-	public static void createMonthRecap(short id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
+	public static void createMonthRecap(long id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
 		/**
 		 * query su totali_mens per recueperare lo storico mensile da mettere su monthRecap
 		 */
@@ -687,13 +702,14 @@ public class FromMysqlToPostgres {
 				monthRecap.endNegative = rs.getInt("negativo_fine");
 				monthRecap.progressive = rs.getString("progressivo");				
 
+				em.persist(monthRecap);
 			}
 			Logger.debug("Termino di creare il riepilogo mensile");
-			em.persist(monthRecap);
+			
 		}
 	}
 	
-	public static void createCompetence(short id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+	public static void createCompetence(long id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		/**
 		 * funzione che riempe la tabella competence e la tabella competence_code relativamente alle competenze
 		 * di una determinata persona
@@ -838,7 +854,7 @@ public class FromMysqlToPostgres {
 			EntityManager em = JPA.em();
 			em.getTransaction().begin();
 			
-			short id;
+			long id;
 			
 			Person person = null;
 			while(rs.next()){
