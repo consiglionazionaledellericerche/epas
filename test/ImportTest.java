@@ -12,6 +12,7 @@ import models.Person;
 import org.junit.Test;
 
 import play.db.jpa.JPA;
+import play.Logger;
 import play.test.UnitTest;
 
 /**
@@ -32,9 +33,10 @@ public class ImportTest extends UnitTest {
 		EntityManager em = JPA.em();
 		//PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM Persone WHERE id = " + CRISTAN_LUCCHESI_OROLOGIO_ID);
 		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT ID, Nome, Cognome, DataNascita, Telefono," +
-				"Fax, Email, Stanza, Matricola, Dipartimento, Sede FROM Persone");
+				"Fax, Email, Stanza, Matricola, Dipartimento, Sede FROM Persone order by ID");
 		ResultSet rs = stmt.executeQuery();
-		while(rs.next()){	
+		while(rs.next()){
+			Logger.warn("Creazione delle info per la persona: "+rs.getString("Nome").toString()+" "+rs.getString("Cognome").toString());
 			//rs.next(); // exactly one result so allowed 
 					
 			Person person = FromMysqlToPostgres.createPerson(rs, em);
