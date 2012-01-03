@@ -65,7 +65,9 @@ public class FromMysqlToPostgres {
 	}
 	
 	public static Person createPerson(ResultSet rs, EntityManager em) throws SQLException {
-		Logger.warn("Inizio a creare la persona: "+rs.getString("Nome").toString()+" "+rs.getString("Cognome").toString());
+		Logger.configuredManually = true;
+		Logger.debug("Inizio a creare la persona: "+rs.getString("Nome").toString()+" "+rs.getString("Cognome").toString());
+		
 		Person person = new Person();
 		person.name = rs.getString("Nome");
 		person.surname = rs.getString("Cognome");
@@ -76,7 +78,7 @@ public class FromMysqlToPostgres {
 	}
 	
 	public static void createLocation(ResultSet rs, Person person, EntityManager em) throws SQLException {
-		Logger.debug("Inizio a creare la locazione");
+		Logger.warn("Inizio a creare la locazione");
 		Location location = new Location();
 		location.person = person;
 		
@@ -87,7 +89,7 @@ public class FromMysqlToPostgres {
 	}
 	
 	public static void createContactData(ResultSet rs, Person person, EntityManager em) throws SQLException {
-		Logger.debug("Inizio a creare il contact data");
+		Logger.warn("Inizio a creare il contact data");
 		ContactData contactData = new ContactData();
 		contactData.person = person;
 		
@@ -462,47 +464,22 @@ public class FromMysqlToPostgres {
 	
 	public static void createVacations(long id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
 		/**
-		 * query su ferie_pers per popolare VacationType e PersonVacation
+		 * query su Orario per popolare PersonVacation
 		 */
-		Logger.debug("Inizio a creare le ferie");
+		Logger.warn("Inizio a creare le ferie");
 		Connection mysqlCon = getMysqlConnection();
-		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT ferie.id,ferie.nome,ferie_pers.data_inizio," +
-				"ferie_pers.data_fine FROM ferie,ferie_pers " +
-				"WHERE ferie_pers.fid=ferie.id AND ferie_pers.pid="+id);
+		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM Orario WHERE TipoGiorno = 32 and id=" + id);
 		ResultSet rs = stmt.executeQuery();
 		PersonVacation personVacation = null;
-		VacationType vacationType = null;
-		Map<Integer,Long> mappaCodici = new HashMap<Integer,Long>();
+
 		try{
-			if(rs != null){
-				
+			if(rs != null){				
 				while(rs.next()){	
-					int idCodiciFerie = rs.getInt("id");	
-					if(mappaCodici.get(idCodiciFerie)== null){
-										
-						vacationType = new VacationType();
-						vacationType.description = rs.getString("nome");
-						personVacation = new PersonVacation();
-						personVacation.person = person;
-						personVacation.vacationType = vacationType;
-						personVacation.beginFrom = rs.getDate("data_inizio");
-						personVacation.endTo = rs.getDate("data_fine");					
-						
-						em.persist(personVacation);			
-						em.persist(vacationType);
-						mappaCodici.put(idCodiciFerie,vacationType.id);
-					}
-					else{
-						vacationType = VacationType.findById(mappaCodici.get(idCodiciFerie));
-						personVacation = new PersonVacation();
-						personVacation.person = person;
-						personVacation.vacationType = vacationType;
-						personVacation.beginFrom = rs.getDate("data_inizio");
-						personVacation.endTo = rs.getDate("data_fine");	
-						
-						em.persist(personVacation);
-						em.persist(vacationType);
-					}
+
+					personVacation = new PersonVacation();
+					personVacation.person = person;
+					personVacation.vacationDay = rs.getDate("Giorno");
+					em.persist(personVacation);
 				}
 			}
 		}

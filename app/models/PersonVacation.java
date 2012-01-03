@@ -20,7 +20,7 @@ import play.db.jpa.JPA;
 /**
  * 
  * @author dario
- *
+ * modificata temporaneamente per permettere la gestione del solo giorno di ferie relativo alla persona
  */
 @Audited
 @Entity
@@ -31,13 +31,16 @@ public class PersonVacation extends Model{
 	@JoinColumn(name = "person_id", nullable = false)
 	public Person person;
 	
-	@ManyToOne
-	@JoinColumn(name = "vacationType_id")
-	public VacationType vacationType;
+//	@ManyToOne
+//	@JoinColumn(name = "vacationType_id")
+//	public VacationType vacationType;
 	
-	@Column(name = "begin_from")
-	public Date beginFrom;
+//	@Column(name = "begin_from")
+//	public Date beginFrom;
+//	
+//	@Column(name = "end_to")
+//	public Date endTo;
+	@Column(name="vacation_day")
+	public Date vacationDay;
 	
-	@Column(name = "end_to")
-	public Date endTo;
 }

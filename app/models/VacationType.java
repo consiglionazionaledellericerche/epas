@@ -19,21 +19,21 @@ import play.db.jpa.Model;
  * @author cristian
  *
  */
-@Audited
-@Entity
-@Table(name = "vacation_types")
+//@Audited
+//@Entity
+//@Table(name = "vacation_types")
 public class VacationType extends Model {
 	
-	@OneToMany(mappedBy="vacationType")
-	public List<PersonVacation> personVacation;
+//	@OneToMany(mappedBy="vacationType")
+//	public List<PersonVacation> personVacation;
 	
-	@Required
+//	@Required
 	public String description;
 	
-	@Required
+//	@Required
 	public int vacationDays = 28;
 	
-	@Required
+//	@Required
 	public int permissionDays = 4;
 	
 }
