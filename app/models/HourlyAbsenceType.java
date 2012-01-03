@@ -7,6 +7,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
 
 import org.hibernate.envers.Audited;
 
@@ -21,6 +22,7 @@ import play.db.jpa.Model;
  */
 @Audited
 @Entity
+@PrimaryKeyJoinColumn(name="absence_type_id")
 public class HourlyAbsenceType extends AbsenceType{
 	
 	@OneToOne
