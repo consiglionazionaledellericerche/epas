@@ -46,9 +46,6 @@ public class AbsenceType extends Model{
 	@OneToOne
 	@JoinColumn(name="dailyAbsenceType_id")
 	public DailyAbsenceType dailyAbsenceType;
-//	@OneToMany(mappedBy="absenceType")
-//	public List<ContractLevel> contractLevel;
-			
 	
 	public String code;
 	

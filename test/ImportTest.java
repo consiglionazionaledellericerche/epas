@@ -51,6 +51,8 @@ public class ImportTest extends UnitTest {
 			FromMysqlToPostgres.createContract(person.id, person, em);
 			
 			FromMysqlToPostgres.createVacations(person.id, person, em);
+			
+			FromMysqlToPostgres.createVacationType(person.id, person, em);
 	
 			FromMysqlToPostgres.createAbsences(person.id, person, em);
 			FromMysqlToPostgres.createWorkingTimeTypes(person.id, person, em);

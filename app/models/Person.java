@@ -80,6 +80,14 @@ public class Person extends Model {
 	public List <PersonVacation> personVacation;
 	
 	/**
+	 * relazione con la tabella di vacation_code
+	 */
+	@OneToOne
+	@JoinColumn(name="vacation_period_id")
+	public VacationPeriod vacationPeriod;
+	
+	
+	/**
 	 * relazione con la tabella Competence
 	 */
 	@NotAudited

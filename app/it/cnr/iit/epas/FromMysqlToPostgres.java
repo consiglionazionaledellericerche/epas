@@ -10,6 +10,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -35,9 +36,10 @@ import models.Person;
 import models.PersonVacation;
 import models.StampType;
 import models.Stamping;
+import models.VacationPeriod;
 import models.WorkingTimeTypeDay;
 import models.Stamping.WayType;
-import models.VacationType;
+import models.VacationCode;
 import models.WorkingTimeType;
 import models.YearRecap;
 
@@ -47,6 +49,10 @@ import play.db.jpa.JPA;
 import play.mvc.Controller;
 
 public class FromMysqlToPostgres {
+	
+	public static Map<Integer,Long> mappaCodiciCompetence = new HashMap<Integer,Long>();
+	public static Map<Integer,Long> mappaCodiciAbsence = new HashMap<Integer,Long>();
+	public static Map<Integer,Long> mappaCodiciVacationType = new HashMap<Integer,Long>();
 	
 	public static String mySqldriver = Play.configuration.getProperty("db.old.driver");//"com.mysql.jdbc.Driver";	
 
@@ -196,7 +202,8 @@ public class FromMysqlToPostgres {
 				em.persist(contract);
 							
 			}				
-		}		
+		}	
+		mysqlCon.close();
 	}
 	
 
@@ -335,7 +342,7 @@ public class FromMysqlToPostgres {
 					}
 				}				
 				 catch (SQLException sqle) {
-					//L'ora va "corretta"
+					
 					sqle.printStackTrace();
 					System.out.println("Timbratura errata. Persona con id="+id);
 					Logger.warn("Timbratura errata. Persona con id= "+id);
@@ -343,7 +350,8 @@ public class FromMysqlToPostgres {
 				Logger.debug("Termino di creare le timbrature");
 				em.persist(stamping);	
 				
-			}		
+			}
+			mysqlCon.close();
 
 	}
 	
@@ -359,13 +367,13 @@ public class FromMysqlToPostgres {
 		 */
 		PreparedStatement stmtAssenze = mysqlCon.prepareStatement("Select Orario.Giorno, Orario.TipoTimbratura, " +
 				"Codici.Codice, Codici.Descrizione, Codici.QuantGiust, Codici.IgnoraTimbr, Codici.MinutiEccesso, Codici.Limite, " +
-				"Codici.Accumulo, Codici.CodiceSost, Codici.id " +
+				"Codici.Accumulo, Codici.CodiceSost, Codici.id, Codici.Gruppo " +
 				"from Codici, Orario " +
 				"where Orario.TipoGiorno=Codici.id " +
 				"and TipoGiorno !=0 and Orario.id = "+id+ " limit 200");
 		ResultSet rs = stmtAssenze.executeQuery();
-		Map<Integer,Long> mappaCodici = new HashMap<Integer,Long>();
-		Map<Integer,Long> mappaCodiciGruppo = new HashMap<Integer,Long>();
+		
+		
 		if(rs != null){
 			Absence absence = null;
 			AbsenceType absenceType = null;
@@ -381,7 +389,7 @@ public class FromMysqlToPostgres {
 				absence.date = new LocalDate(rs.getDate("Giorno"));				
 				
 				int idCodiceAssenza = rs.getInt("id");
-				if(mappaCodici.get(idCodiceAssenza)== null){
+				if(mappaCodiciAbsence.get(idCodiceAssenza)== null){
 					
 					absenceType = new AbsenceType();
 					absence.absenceType = absenceType;
@@ -394,27 +402,26 @@ public class FromMysqlToPostgres {
 									
 					em.persist(absenceType);					
 					em.persist(absence);
-					mappaCodici.put(idCodiceAssenza,absenceType.id);
+					mappaCodiciAbsence.put(idCodiceAssenza,absenceType.id);
 					
-					//FIXME
-					/**
-					 * arrivato fino a qui: c'è da fare i controlli sugli inserimenti dei codici di absencetypegroup
-					 */
-					absTypeGroup = new AbsenceTypeGroup();
-					absTypeGroup.absenceType = absenceType;
-					absTypeGroup.buildUp = rs.getInt("Accumulo");
-					absTypeGroup.buildUpLimit = rs.getInt("Limite");
-					absTypeGroup.equivalentCode = rs.getString("CodiceSost");
-					if(rs.getByte("MinutiEccesso")==0)
-						absTypeGroup.minutesExcess = false;
-					else 
-						absTypeGroup.minutesExcess = true; 
-					em.persist(absTypeGroup);
+					if(rs.getString("Gruppo")!=null){
+						absTypeGroup = new AbsenceTypeGroup();
+						absTypeGroup.absenceType = absenceType;
+						absTypeGroup.label = rs.getString("Gruppo");
+						absTypeGroup.buildUp = rs.getInt("Accumulo");
+						absTypeGroup.buildUpLimit = rs.getInt("Limite");
+						absTypeGroup.equivalentCode = rs.getString("CodiceSost");
+						if(rs.getByte("MinutiEccesso")==0)
+							absTypeGroup.minutesExcess = false;
+						else 
+							absTypeGroup.minutesExcess = true; 
+						em.persist(absTypeGroup);
+					}
 					
 					
 				}
 				else{
-					absenceType = AbsenceType.findById(mappaCodici.get(idCodiceAssenza));
+					absenceType = AbsenceType.findById(mappaCodiciAbsence.get(idCodiceAssenza));
 					absence.absenceType = absenceType;	
 					absenceType.code = rs.getString("Codice");
 					absenceType.description = rs.getString("Descrizione");
@@ -425,18 +432,20 @@ public class FromMysqlToPostgres {
 									
 					em.persist(absenceType);					
 					em.persist(absence);
+					if(rs.getString("Gruppo")!=null){
 					
-					absTypeGroup = new AbsenceTypeGroup();
-					absenceType.absenceTypeGroup = absTypeGroup;
-					if(rs.getByte("MinutiEccesso")==0)
-						absTypeGroup.minutesExcess = false;
-					else 
-						absTypeGroup.minutesExcess= true;
-					absTypeGroup.equivalentCode = rs.getString("CodiceSost");
-					absTypeGroup.buildUp = rs.getInt("Accumulo");
-					absTypeGroup.buildUpLimit = rs.getInt("Limite");				
-									
-					em.persist(absTypeGroup);
+						absTypeGroup = new AbsenceTypeGroup();
+						absenceType.absenceTypeGroup = absTypeGroup;
+						if(rs.getByte("MinutiEccesso")==0)
+							absTypeGroup.minutesExcess = false;
+						else 
+							absTypeGroup.minutesExcess= true;
+						absTypeGroup.equivalentCode = rs.getString("CodiceSost");
+						absTypeGroup.buildUp = rs.getInt("Accumulo");
+						absTypeGroup.buildUpLimit = rs.getInt("Limite");				
+										
+						em.persist(absTypeGroup);
+					}
 				}
 						
 				/**
@@ -459,7 +468,8 @@ public class FromMysqlToPostgres {
 				}
 					
 			}
-		}		
+		}	
+		mysqlCon.close();
 	}
 	
 	public static void createVacations(long id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
@@ -486,9 +496,82 @@ public class FromMysqlToPostgres {
 		catch(SQLException sqle) {				
 				sqle.printStackTrace();
 				Logger.warn("Ferie errate. Persona con id="+id);				
-			}			
-			
+		}			
+		mysqlCon.close();
+	}
+	
+	public static void createVacationType(long id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+		Logger.warn("Inizio a creare i periodi di ferie");
+		Connection mysqlCon = getMysqlConnection();
+		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * " +
+				"FROM ferie f,ferie_pers fp " +
+				"WHERE f.id=fp.fid AND fp.pid = " +id);
+		ResultSet rs = stmt.executeQuery();
+		
+		VacationPeriod vacationPeriod = null;
+		VacationCode vacationCode = null;
+		try{
+			if(rs != null){
+				while(rs.next()){
+					int idCodiciFerie = rs.getInt("id");
+					Logger.warn("l'id del tipo ferie è questo: " + rs.getInt("id"));
+					Logger.warn("Ed è relativo alla persona con id= "+ id);
+					Logger.warn("Nella mappacodici l'id relativo al codiceferie "+ idCodiciFerie + " è " + mappaCodiciVacationType.get(idCodiciFerie));
+					if(mappaCodiciVacationType.get(idCodiciFerie)==null){
+						//Logger.warn("Nella mappacodici l'id relativo al codiceferie "+ idCodiciFerie + "è " + mappaCodici.get(idCodiciFerie));
+						vacationCode = new VacationCode();
+						Logger.warn("Creo un nuovo vacation code perchè nella mappa il codice ferie non era presente");
+
+						vacationCode.description = rs.getString("nome");
+						vacationCode.vacationDays = rs.getInt("giorni_ferie");
+						vacationCode.permissionDays = rs.getInt("giorni_pl");
+					
+						em.persist(vacationCode);
+						Logger.warn("Il valore del vacation code appena creato è "+ vacationCode.id);
+						mappaCodiciVacationType.put(idCodiciFerie,vacationCode.id);
+						
+						vacationPeriod = new VacationPeriod();
+						vacationPeriod.vacationCode = vacationCode;
+						vacationPeriod.person = person;
+						vacationPeriod.beginFrom = rs.getDate("data_inizio");
+						vacationPeriod.endsTo = rs.getDate("data_fine");
+						em.persist(vacationPeriod);				
+						
+					}
+					else{
+						Logger.warn("Il codice era presente, devo quindi fare una find per recuperare l'oggetto vacationCode");
+						vacationCode = VacationCode.findById(mappaCodiciVacationType.get(idCodiciFerie));
+									
+						Logger.warn("Faccio la query sui vacationPeriod...");
+						
+//						List<VacationPeriod> vacation = VacationPeriod.find("person_id ? and vacation_code_id ?", person.id, vacationCode.id).fetch(1);
+//						if(vacation == null){
+							
+							vacationPeriod = new VacationPeriod();
+							vacationPeriod.vacationCode = vacationCode;
+							vacationPeriod.person = person;
+							vacationPeriod.beginFrom = rs.getDate("data_inizio");
+							vacationPeriod.endsTo = rs.getDate("data_fine");
+							em.persist(vacationPeriod);
+						//}
+//						else{
+//							Logger.warn("Nella query sui vacationPeriod ho trovato precedenti periodi feriali per la persona in oggetto: " + person.id);
+//							vacationPeriod = vacation.get(0);
+//							vacationPeriod.beginFrom = rs.getDate("data_inizio");
+//							vacationPeriod.endsTo = rs.getDate("data_fine");
+//							em.persist(vacationPeriod);
+//						}
+					}
+										
+				}
+			}
 		}
+		catch(SQLException e){
+			e.printStackTrace();
+			Logger.error("Periodi di ferie errati. Persona con id="+id);			
+		}
+		mysqlCon.close();
+	}
 	
 	
 	public static void createWorkingTimeTypes(long id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
@@ -519,7 +602,7 @@ public class FromMysqlToPostgres {
 					wtt = new WorkingTimeType();
 	
 					person.workingTimeType = wtt;
-					wtt.description = rs.getString("nome");
+					wtt.description = rs.getString("orari_di_lavoro.nome");
 	
 					wtt.shift = rs.getBoolean("turno");
 					
@@ -743,6 +826,7 @@ public class FromMysqlToPostgres {
 			
 			}
 		}
+		mysqlCon.close();
 	}
 	
 	public static void createYearRecap(long id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
@@ -777,7 +861,9 @@ public class FromMysqlToPostgres {
 			Logger.debug("Termino di creare il riepilogo annuale");
 			
 		}
+		mysqlCon.close();
 	}
+	
 	public static void createMonthRecap(long id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
 		/**
 		 * query su totali_mens per recueperare lo storico mensile da mettere su monthRecap
@@ -831,6 +917,7 @@ public class FromMysqlToPostgres {
 			Logger.debug("Termino di creare il riepilogo mensile");
 			
 		}
+		mysqlCon.close();
 	}
 	
 	public static void createCompetence(long id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
@@ -847,7 +934,7 @@ public class FromMysqlToPostgres {
 		
 		Competence competence = null;
 		CompetenceCode competenceCode = null;
-		Map<Integer,Long> mappaCodici = new HashMap<Integer,Long>();
+		
 		while(rs.next()){			
 			competence = new Competence();
 			competence.person = person;
@@ -856,7 +943,7 @@ public class FromMysqlToPostgres {
 			competence.month = rs.getInt("mese");
 			competence.year = rs.getInt("anno");
 			int idCodiciCompetenza = rs.getInt("id");	
-			if(mappaCodici.get(idCodiciCompetenza)== null){
+			if(mappaCodiciCompetence.get(idCodiciCompetenza)== null){
 				competenceCode = new CompetenceCode();
 				competenceCode.description = rs.getString("descrizione");
 				
@@ -867,12 +954,12 @@ public class FromMysqlToPostgres {
 				em.persist(competenceCode);
 				em.persist(competence);
 
-				mappaCodici.put(idCodiciCompetenza,competenceCode.id);
+				mappaCodiciCompetence.put(idCodiciCompetenza,competenceCode.id);
 				
 			}
 			else{
 			
-				competenceCode = CompetenceCode.findById(mappaCodici.get(idCodiciCompetenza));
+				competenceCode = CompetenceCode.findById(mappaCodiciCompetence.get(idCodiciCompetenza));
 				competence.competenceCode = competenceCode;				
 				competenceCode.description = rs.getString("descrizione");
 				
@@ -885,7 +972,8 @@ public class FromMysqlToPostgres {
 				em.persist(competence);
 			}
 			
-		}		
+		}	
+		mysqlCon.close();
 		
 	}
 	
