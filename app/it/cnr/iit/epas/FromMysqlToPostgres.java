@@ -53,6 +53,7 @@ public class FromMysqlToPostgres {
 	public static Map<Integer,Long> mappaCodiciCompetence = new HashMap<Integer,Long>();
 	public static Map<Integer,Long> mappaCodiciAbsence = new HashMap<Integer,Long>();
 	public static Map<Integer,Long> mappaCodiciVacationType = new HashMap<Integer,Long>();
+	public static Map<Integer,Long> mappaCodiciWorkingTimeType = new HashMap<Integer,Long>();
 	
 	public static String mySqldriver = Play.configuration.getProperty("db.old.driver");//"com.mysql.jdbc.Driver";	
 
@@ -581,8 +582,8 @@ public class FromMysqlToPostgres {
 		 */
 		Logger.debug("Inizio a creare l'orario di lavoro");
 		Connection mysqlCon = getMysqlConnection();		
-		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM orari_di_lavoro,Persone,orario_pers WHERE " +
-				"Persone.ID=orario_pers.pid AND orario_pers.oid=orari_di_lavoro.id and Persone.id="+id);
+		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM orari_di_lavoro,orario_pers WHERE " +
+				"orario_pers.oid=orari_di_lavoro.id and orario_pers.pid="+id);
 
 		ResultSet rs = stmt.executeQuery();
 		
@@ -596,16 +597,12 @@ public class FromMysqlToPostgres {
 			WorkingTimeTypeDay wttd_sa = null;
 			WorkingTimeTypeDay wttd_su = null;
 			while(rs.next()){
-				
-				wtt = WorkingTimeType.findById(rs.getLong("orari_di_lavoro.id"));
-				if(wtt == null){
-					wtt = new WorkingTimeType();
-	
-					person.workingTimeType = wtt;
-					wtt.description = rs.getString("orari_di_lavoro.nome");
-	
-					wtt.shift = rs.getBoolean("turno");
+				int idCodiceOrarioLavoro = rs.getInt("id");
+				if(mappaCodiciWorkingTimeType.get(idCodiceOrarioLavoro)!=null){
+					wtt = WorkingTimeType.findById(mappaCodiciWorkingTimeType.get(idCodiceOrarioLavoro));
 					
+					person.workingTimeType = wtt;
+				
 					em.persist(wtt);
 					
 					wttd_mo = new WorkingTimeTypeDay();
@@ -714,8 +711,14 @@ public class FromMysqlToPostgres {
 					em.persist(wttd_su);
 				}
 				else{
+					wtt = new WorkingTimeType();
+					wtt.description = rs.getString("nome");
+					
+					wtt.shift = rs.getBoolean("turno");
 					person.workingTimeType = wtt;
 					em.persist(wtt);
+					
+					mappaCodiciWorkingTimeType.put(idCodiceOrarioLavoro,wtt.id);
 					
 					wttd_mo = new WorkingTimeTypeDay();
 					wttd_mo.workingTimeType = wtt;
@@ -975,138 +978,6 @@ public class FromMysqlToPostgres {
 		}	
 		mysqlCon.close();
 		
-	}
-	
-	public static void fillOtherTables() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-		Connection mysqlCon = getMysqlConnection();
-		PreparedStatement stmt;
-		try{
-			/**
-			 * la query sulla tabella opzioni non viene effettuata poichè in quella tabella sul db mysql 
-			 * non ci sono dati, pertanto la tabella verrà solo creata.
-			 * preparo la query per recuperare i dati dalla tabella codici
-			 */
-			stmt = mysqlCon.prepareStatement("SELECT * FROM Codici");
-			ResultSet rs = stmt.executeQuery();
-			
-			EntityManager em = JPA.em();		
-			
-			Code codes = null;
-			while(rs.next()){
-				/**
-				 * popolo la tabella Codes
-				 */
-				codes = new Code();
-				codes.code = rs.getString("Codice");
-				codes.code_att = rs.getString("Codice_att");
-				codes.description = rs.getString("Descrizione");
-				if(rs.getByte("Inattivo")==0)
-					codes.inactive = false;
-				else
-					codes.inactive = true;
-				if(rs.getByte("Interno")==0)
-					codes.internal = false;
-				else 
-					codes.internal = true;
-				codes.fromDate = rs.getDate("DataInizio");
-				codes.toDate = rs.getDate("DataFine");
-				codes.qualification = rs.getString("Qualifiche");
-				codes.groupOf = rs.getString("Gruppo");
-				codes.value = rs.getInt("Valore");
-				if(rs.getByte("MinutiEccesso")==0)
-					codes.minutesOver = false;
-				else
-					codes.minutesOver = true;
-				if(rs.getByte("QuantMin")==0)
-					codes.quantMin = false;
-				else
-					codes.quantMin = true;
-				codes.storage = rs.getShort("Accumulo");
-				if(rs.getByte("Recuperabile")==0)
-					codes.recoverable = false;
-				else
-					codes.recoverable = true;
-				codes.limitOf = rs.getInt("Limite");
-				codes.gestLim = rs.getShort("GestLim");
-				codes.codiceSost = rs.getString("CodiceSost");
-				if(rs.getByte("IgnoraTimbr")==0)
-					codes.ignoreStamping = false;
-				else
-					codes.ignoreStamping = true;
-				if(rs.getByte("UsoMulti")==0)
-					codes.usoMulti = false;
-				else
-					codes.usoMulti = true;
-				if(rs.getByte("TempoBuono")==0)
-					codes.tempoBuono = false;
-				else
-					codes.tempoBuono = true;
-			}
-			em.persist(codes);
-						
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		
-	}
-	
-	
-	public static void fillTables() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
-		Connection mysqlCon = getMysqlConnection();
-		PreparedStatement stmt;		
-		
-		try{			
-			/**
-			 * preparo la query sulla tabella persone, che sarà la query principale 
-			 */
-			stmt = mysqlCon.prepareStatement("SELECT * FROM Persone");
-
-			ResultSet rs = stmt.executeQuery();
-
-			EntityManager em = JPA.em();
-			em.getTransaction().begin();
-			
-			long id;
-			
-			Person person = null;
-			while(rs.next()){
-				
-				/**
-				 * recupero id del soggetto per fare le query sulle tabelle correlate a Persone e popolare
-				 * le tabelle del nuovo db in relazione con Person
-				 */
-				id = rs.getShort("ID");	
-				
-				/**
-				 * costruzione istanze delle tabelle Person, ContactData e Location 
-				 * con conseguente riempimento dei campi presi dalla tabella Persone
-				 * sul db mysql
-				 */
-				person = createPerson(rs, em);							
-				createLocation(rs, person, em);
-				createContactData(rs, person, em);
-				
-				/**
-				 * popolo le tabelle stamping, absences, absence_type, vacation_type, person_vacation,
-				 * working_time_type, working_time_type_day, year_recap e month_recap invocando i rispettivi
-				 * metodi 
-				 */
-				createStampings(id, person, em);
-				createAbsences(id, person, em);
-				createVacations(id, person, em);
-				createWorkingTimeTypes(id, person, em);
-				createYearRecap(id, person, em);
-				createMonthRecap(id, person, em);
-				
-								
-			} //qui finisce il while principale di Person
-			
-			em.getTransaction().commit();
-			
-		}
-		catch(Exception e){
-			e.printStackTrace();
-		}
 	}
 	
 }
