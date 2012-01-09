@@ -1,6 +1,8 @@
 package models;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -26,5 +28,18 @@ public class VacationPeriod extends Model{
 	public Date beginFrom;
 	
 	public Date endsTo;
+	
+	/**
+	 * 
+	 * @param id
+	 * @return vacationList
+	 * funzione che ritorna una lista di ferie mensili relativi a una certa persona
+	 */
+	public List<VacationPeriod> vacationForMonth(long id){
+		List<VacationPeriod> vacationList = new ArrayList<VacationPeriod>();
+		return vacationList;
+	}
+	
+	
 	
 }

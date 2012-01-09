@@ -63,6 +63,6 @@ public class AbsenceType extends Model{
 
 	public boolean mealTicketCalculation;
 
-	public boolean ignoreStamping;	
-
+	public boolean ignoreStamping;		
+	
 }
