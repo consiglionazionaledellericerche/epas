@@ -106,4 +106,6 @@ public class MonthRecap extends Model {
 	public static MonthRecap emptyMonthAndYear() {
 		return null;
 	}
+	
+	public static MonthRecap 
 }

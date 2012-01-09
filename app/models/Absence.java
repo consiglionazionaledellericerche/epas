@@ -1,6 +1,8 @@
 package models;
 
 import java.sql.Time;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -38,5 +40,16 @@ public class Absence extends Model {
 	@JoinColumn(name="person_id")
 	public Person person;
 	
-
+	/**
+	 * 
+	 * @param id
+	 * @return absenceList
+	 * funzione che ritorna l'insieme delle assenze mensili di una persona
+	 */
+	public List<Absence> returnAbsencesForMonth(long id){
+		List<Absence> absenceList = new ArrayList<Absence>();
+		
+		return absenceList;
+		
+	}
 }

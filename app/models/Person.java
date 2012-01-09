@@ -134,4 +134,16 @@ public class Person extends Model {
 	 */
 	public Integer number;
 	
+	public void createPerson(){
+		
+	}
+	
+	public void deletePerson(long id){
+		/**
+		 * a cascata vanno elimate tutte le occorrenze nelle tabelle correlate con person che hanno l'id dell persona
+		 * da cancellare
+		 */
+		int numberOfPersonDeleted = Person.delete("", id);
+	}
+	
 }
