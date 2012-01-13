@@ -107,5 +107,5 @@ public class MonthRecap extends Model {
 		return null;
 	}
 	
-	public static MonthRecap 
+	
 }
