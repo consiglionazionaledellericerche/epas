@@ -218,22 +218,23 @@ public class FromMysqlToPostgres {
 		 */
 		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT * FROM Orario WHERE TipoGiorno = 0 and id=" + id + " limit 200");
 		ResultSet rs = stmtOrari.executeQuery();		
-			
+		Time oraInizioPranzo = new Time(11,59,59);
+		Time oraFinePranzo = new Time(14,59,59);
 			while(rs.next()){
 				
 				byte tipoTimbratura = rs.getByte("TipoTimbratura");
 				StampType stampType = new StampType();
 				if((int)tipoTimbratura % 2 == 1 && (int)tipoTimbratura / 2 == 0){
-					stampType.description = "Prima timbratura di ingresso";					
+					stampType.description = "Timbratura di ingresso";					
 				}
-				if((int)tipoTimbratura % 2 == 0 && (int)tipoTimbratura / 2 == 1){
-					stampType.description = "Prima timbratura di uscita";
+				if((int)tipoTimbratura % 2 == 0 && (int)tipoTimbratura / 2 == 1 ){
+					stampType.description = "Timbratura d'uscita per pranzo";
 				}
-				if((int)tipoTimbratura % 2 == 1 && (int)tipoTimbratura / 2 == 1){
-					stampType.description = "Seconda Timbratura di ingresso";
+				if((int)tipoTimbratura % 2 == 1 && (int)tipoTimbratura / 2 == 1 ){
+					stampType.description = "Timbratura di ingresso dopo pausa pranzo";
 				}
 				if((int)tipoTimbratura % 2 == 0 && (int)tipoTimbratura / 2 == 2){
-					stampType.description = "Seconda Timbratura di uscita";
+					stampType.description = "Timbratura di uscita";
 				}
 				em.persist(stampType);
 				Stamping stamping = new Stamping();
@@ -387,7 +388,7 @@ public class FromMysqlToPostgres {
 				 */
 				absence = new Absence();
 				absence.person = person;
-				absence.date = new LocalDate(rs.getDate("Giorno"));				
+				absence.date = rs.getDate("Giorno");				
 				
 				int idCodiceAssenza = rs.getInt("id");
 				if(mappaCodiciAbsence.get(idCodiceAssenza)== null){
@@ -417,8 +418,7 @@ public class FromMysqlToPostgres {
 						else 
 							absTypeGroup.minutesExcess = true; 
 						em.persist(absTypeGroup);
-					}
-					
+					}					
 					
 				}
 				else{
@@ -545,23 +545,12 @@ public class FromMysqlToPostgres {
 									
 						Logger.warn("Faccio la query sui vacationPeriod...");
 						
-//						List<VacationPeriod> vacation = VacationPeriod.find("person_id ? and vacation_code_id ?", person.id, vacationCode.id).fetch(1);
-//						if(vacation == null){
-							
 							vacationPeriod = new VacationPeriod();
 							vacationPeriod.vacationCode = vacationCode;
 							vacationPeriod.person = person;
 							vacationPeriod.beginFrom = rs.getDate("data_inizio");
 							vacationPeriod.endsTo = rs.getDate("data_fine");
 							em.persist(vacationPeriod);
-						//}
-//						else{
-//							Logger.warn("Nella query sui vacationPeriod ho trovato precedenti periodi feriali per la persona in oggetto: " + person.id);
-//							vacationPeriod = vacation.get(0);
-//							vacationPeriod.beginFrom = rs.getDate("data_inizio");
-//							vacationPeriod.endsTo = rs.getDate("data_fine");
-//							em.persist(vacationPeriod);
-//						}
 					}
 										
 				}

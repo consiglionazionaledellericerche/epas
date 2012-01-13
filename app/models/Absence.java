@@ -2,6 +2,7 @@ package models;
 
 import java.sql.Time;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -30,7 +31,7 @@ import play.db.jpa.JPA;
 @Table(name = "absences")
 public class Absence extends Model {
 	
-	public LocalDate date;
+	public Date date;
 	
 	@ManyToOne
 	@JoinColumn(name = "absenceType_id")

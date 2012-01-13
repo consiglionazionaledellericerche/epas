@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 
 import javax.persistence.EntityManager;
 
@@ -102,7 +103,7 @@ public class ModelTest extends UnitTest {
 		em.persist(hat);
 		
 		Absence absence = new Absence();
-		absence.date = new LocalDate(2011,12,21);
+		absence.date = new Date(2011,12,21);
 		absence.person = p;
 		absence.person = p2;
 		absence.absenceType = absenceType;
