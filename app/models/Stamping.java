@@ -3,6 +3,9 @@
  */
 package models;
 
+import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -21,7 +24,7 @@ import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.CollectionId;
 import org.hibernate.envers.Audited;
-import org.joda.time.LocalDate;
+
 
 import play.data.validation.Required;
 import play.db.jpa.Model;
@@ -52,8 +55,8 @@ public class Stamping extends Model {
 	
 	@Required
 	@Column(name = "date")
-	public LocalDate date;
-
+	public Date date;
+	
 	
 	@Required
 	@Enumerated(EnumType.STRING)

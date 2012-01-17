@@ -43,4 +43,8 @@ public class Contract extends Model{
 	public Date endContract;
 	
 	public boolean isContinued;
+	
+	public boolean workSaturday;
+	
+	public boolean workSunday;
 }
