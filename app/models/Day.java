@@ -14,6 +14,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeFieldType;
 import org.joda.time.LocalDate;
 
 import play.Logger;
@@ -24,12 +25,6 @@ import play.db.jpa.JPA;
 public class Day {
 
 	private Person person;
-	
-	//private boolean mealTicket;
-	
-	//private List<AbsenceType> absenceTypeList;
-	
-	//private List<Stamping> stampingList;
 	
 	private String workingTimeType;
 	
@@ -75,9 +70,17 @@ public class Day {
 	 * @param person
 	 * @param date
 	 * @return la lista di codici di assenza fatti da quella persona in quella data
+	 * @throws SQLException 
+	 * @throws ClassNotFoundException 
+	 * @throws IllegalAccessException 
+	 * @throws InstantiationException 
 	 */
-	public List<AbsenceType> absenceList(Person person, Date date){
-				
+	public List<AbsenceType> absenceList(Person person, Date date) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+		
+		Connection mypostgresCon = getMyPostgresConnection();
+		PreparedStatement stmt = mypostgresCon.prepareStatement("Select Absence.date, AbsenceType.code from Absence, AbsenceType" +
+				"where Absence.absenceType_id = absenceType_id and Absence.person_id = person_id");
+		ResultSet rs = stmt.executeQuery();
 		List<AbsenceType> listaAssenze = new ArrayList<AbsenceType>();
 		listaAssenze = AbsenceType.find("Select at, abs from AbsenceType at, Absence abs where " +
 				"at.Absence = abs and abs.person = ? and abs.date = ? ", person, date).fetch();
@@ -96,9 +99,10 @@ public class Day {
 		int dateToMinute = 0;
 		
 		if (date!=null){
-			//int hour = date.getHours();
-			//int minute = date.getMinutes();
-			//dateToMinute = (60*hour)+minute;
+			int hour = date.get(DateTimeFieldType.hourOfDay());
+			int minute = date.get(DateTimeFieldType.minuteOfHour());
+			
+			dateToMinute = (60*hour)+minute;
 		}
 		return dateToMinute;
 	}
@@ -129,13 +133,11 @@ public class Day {
 	 * @param data
 	 * @return true se il giorno in questione è un giorno di festa. False altrimenti
 	 */
-	public boolean isHoliday(Date data){
-		if (data!=null){
-			
-			LocalDate date = new LocalDate(); 
-			date.fromDateFields(data);
+	public boolean isHoliday(LocalDate date){
+		if (date!=null){
+
 			Logger.warn("Nel metodo isHoliday la data è: " +date);
-			//System.out.println("Nel metodo idHoliday la data è: " +date);
+			
 			if(date.getDayOfWeek() == 7)
 				return true;		
 			if((date.getMonthOfYear() == 12) && (date.getDayOfMonth() == 25))
@@ -172,11 +174,10 @@ public class Day {
 	 * @throws IllegalAccessException 
 	 * @throws InstantiationException 
 	 */
-	public boolean isWorkingDay(Date date, Person person) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-		
-		LocalDate data = toLocalDate(date);
+	public boolean isWorkingDay(LocalDate date, Person person) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+				
 		boolean isHoliday = false;
-		int day = data.getDayOfWeek();
+		int day = date.getDayOfWeek();
 		//EntityManager em = JPA.em();
 		Connection mypostgresCon = getMyPostgresConnection();
 		PreparedStatement stmt = mypostgresCon.prepareStatement("Select wttd.holiday from WorkingTimeTypeDay wttd, WorkingTimeType w" +
@@ -184,8 +185,7 @@ public class Day {
 		ResultSet rs = stmt.executeQuery();
 		while(rs.next()){	
 			if(rs.getBoolean("holiday") == true)
-				isHoliday = true;
-			
+				isHoliday = true;			
 			else
 				isHoliday = false;
 			
@@ -198,7 +198,7 @@ public class Day {
 	 * @param date
 	 * @return numero di minuti in cui una persona è stata a lavoro in quella data
 	 */
-	public int timeAtWork(Person person, Date date){
+	public int timeAtWork(Person person, LocalDate date){
 		
 		List<Stamping> listStamp = Stamping.find("select s from Stamping s " +
 			    "where s.person = ? and s.date = ? order by date", person, date).fetch();
@@ -236,13 +236,13 @@ public class Day {
 	 * @param date
 	 * @return la differenza in minuti tra l'orario giornaliero e quello effettivamente lavorato dalla persona
 	 */
-	public int difference(Date date){
+	public int difference(LocalDate date){
 		if(date != null){
-			LocalDate data = new LocalDate();
-			data.fromDateFields(date);
-			if((data.getDayOfMonth()==1) && (data.getDayOfWeek()==6 || data.getDayOfWeek()==7))
+			//LocalDate data = new LocalDate();
+			//data.fromDateFields(date);
+			if((date.getDayOfMonth()==1) && (date.getDayOfWeek()==6 || date.getDayOfWeek()==7))
 				return 0;
-			if((data.getDayOfMonth()==2) && (data.getDayOfWeek()==7))
+			if((date.getDayOfMonth()==2) && (date.getDayOfWeek()==7))
 					return 0;			
 			else{
 				int minutiDiLavoro = timeAtWork(person,date);
@@ -259,13 +259,12 @@ public class Day {
 	 * @param date
 	 * @return il progressivo delle ore in più o in meno rispetto al normale orario previsto per quella data
 	 */
-	public int progressive(Date date){
+	public int progressive(LocalDate date){
 		if(date != null){
-			LocalDate data = new LocalDate();
-			data.fromDateFields(date);
-			if((data.getDayOfMonth()==1) && (data.getDayOfWeek()==6 || data.getDayOfWeek()==7))
+		
+			if((date.getDayOfMonth()==1) && (date.getDayOfWeek()==6 || date.getDayOfWeek()==7))
 				return 0;			
-			if((data.getDayOfMonth()==2) && (data.getDayOfWeek()==7))
+			if((date.getDayOfMonth()==2) && (date.getDayOfWeek()==7))
 				return 0;
 			else{
 				progressive = progressive+difference;
@@ -294,7 +293,7 @@ public class Day {
 	 * @param person
 	 * @return se la persona può usufruire del buono pasto per quella data
 	 */
-	public boolean mealTicket(Date date, int timeAtWork, Person person){
+	public boolean mealTicket(LocalDate date, int timeAtWork, Person person){
 		if(timeAtWork == 0){
 			return true;
 		}
