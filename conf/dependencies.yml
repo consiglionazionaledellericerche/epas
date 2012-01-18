@@ -5,4 +5,5 @@ require:
     - org.hibernate -> hibernate-envers 3.6.1.Final:
           transitive: false
     - org.projectlombok -> lombok 0.10.4
+    - joda-time -> joda-time-hibernate 1.3 
     
