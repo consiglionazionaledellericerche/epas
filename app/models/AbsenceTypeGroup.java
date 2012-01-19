@@ -1,20 +1,13 @@
 package models;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.hibernate.envers.Audited;
 
-import play.data.validation.Required;
 import play.db.jpa.Model;
-import play.db.jpa.JPA;
 /**
  * 
  * @author dario
@@ -25,21 +18,21 @@ import play.db.jpa.JPA;
 @Table(name = "absence_type_groups")
 public class AbsenceTypeGroup extends Model{
 	
+	private static final long serialVersionUID = -8664634519147481684L;
 
 	@OneToOne
-	@JoinColumn(name="absenceType_id")
+	@JoinColumn(name="absence_type_id")
 	public AbsenceType absenceType;
 	
-	@Column
 	public String label;
-	@Column
-	public boolean minutesExcess;
-	@Column
-	public int buildUp;
-	@Column
-	public int buildUpLimit;
-	@Column
-	public int buildUpEdgeBehaviour;
-	@Column
+
+	public Boolean minutesExcess;
+
+	public Integer buildUp;
+
+	public Integer buildUpLimit;
+
+	public Integer buildUpEdgeBehaviour;
+
 	public String equivalentCode;
 }

@@ -3,27 +3,23 @@ package models;
 import java.sql.Timestamp;
 import java.util.Date;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
-import play.data.validation.Required;
 import play.db.jpa.Model;
-import play.db.jpa.JPA;
 
 /**
  * 
  * @author dario
  *
  */
-
+@Entity
+@Table(name = "auth_users")
 public class AuthUser extends Model{
+	
+	private static final long serialVersionUID = -1726409927134109278L;
 	
 	public enum AuthRed {
 		SI,
@@ -38,15 +34,14 @@ public class AuthUser extends Model{
 		NO
 	}
 	
-	@Column 
 	public String user;
-	@Column
+
 	public String password;
-	@Column
+
 	public Date dataCpas;
-	@Column
-	public short scadenzaPassword;
-	@Column
+
+	public Short scadenzaPassword;
+
 	public Timestamp ultimaModifica;
 	
 	@Enumerated(EnumType.STRING)
@@ -58,8 +53,7 @@ public class AuthUser extends Model{
 	@Enumerated(EnumType.STRING)
 	public AuthSys autsys;
 	
-	@Column
 	public String authIp;
-	@Column
+
 	public String passwordMD5;
 }

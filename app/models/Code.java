@@ -1,14 +1,8 @@
 package models;
 
 import java.util.Date;
-import java.util.List;
-import java.util.Set;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import play.db.jpa.Model;
@@ -19,17 +13,19 @@ import play.db.jpa.Model;
  */
 @Entity
 @Table(name = "codes")
-public class Code extends Model{
+public class Code extends Model {
 	
+	private static final long serialVersionUID = 2849341711375846361L;
+
 	public String code;
 		
 	public String code_att;
 		
 	public String description;
 	
-	public boolean inactive;
+	public boolean inactive = false;
 		
-	public boolean internal;
+	public boolean internal = false;
 		
 	public Date fromDate;
 	
@@ -41,7 +37,7 @@ public class Code extends Model{
 		
 	public int value;
 		
-	public boolean minutesOver;
+	public Boolean minutesOver;
 		
 	public String descriptionValue;
 		
