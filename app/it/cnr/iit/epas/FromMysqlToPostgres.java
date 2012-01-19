@@ -19,6 +19,7 @@ import javax.persistence.EntityManager;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 
 import models.AbsenceType;
 
@@ -241,6 +242,7 @@ public class FromMysqlToPostgres {
 				}
 				em.persist(stampType);
 				Stamping stamping = new Stamping();
+
 				/**
 				 * popolo la tabella stampings
 				 */
@@ -284,7 +286,7 @@ public class FromMysqlToPostgres {
 			                calGiorno.set(Calendar.MINUTE, minute);
 			                calGiorno.set(Calendar.SECOND, second);
 			                //stamping.date = calGiorno.getTime();
-			                stamping.date = new LocalDate(calGiorno);
+			                stamping.date = new LocalDateTime(calGiorno);
 			                
 			                stamping.isMarkedByAdmin = false;
 			                stamping.isServiceExit = true;
@@ -301,7 +303,6 @@ public class FromMysqlToPostgres {
 								hour = hour / 60;
 								int min = hour % 60;
 								
-								@SuppressWarnings("deprecation")
 								Time newOra = new Time(hour,min,0);
 								Calendar calGiorno = new GregorianCalendar();
 				                calGiorno.setTime(giorno);
@@ -313,7 +314,7 @@ public class FromMysqlToPostgres {
 				                calGiorno.set(Calendar.SECOND, second);
 				                
 				                //stamping.date = calGiorno.getTime();
-				                stamping.date = new LocalDate(calGiorno);
+				                stamping.date = new LocalDateTime(calGiorno);
 				                
 				                stamping.isMarkedByAdmin = true;
 				                stamping.isServiceExit = false;
@@ -344,7 +345,7 @@ public class FromMysqlToPostgres {
 				                calGiorno.set(Calendar.SECOND, second);
 				                
 				                //stamping.date = calGiorno.getTime();
-				                stamping.date = new LocalDate(calGiorno);
+				                stamping.date = new LocalDateTime(calGiorno);
 				                
 				                stamping.isMarkedByAdmin = false;
 				                stamping.isServiceExit = false;

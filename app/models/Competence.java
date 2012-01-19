@@ -4,8 +4,6 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
-import org.joda.time.LocalDate;
-
 import play.db.jpa.Model;
 
 /**

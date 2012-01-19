@@ -16,6 +16,7 @@ import javax.persistence.EntityManager;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 
 import play.Logger;
 import play.Play;
@@ -94,8 +95,7 @@ public class Day {
 	 * @return calcola il numero di minuti di cui è composta la data passata come parametro (di cui considera solo
 	 * ora e minuti
 	 */
-	@SuppressWarnings("deprecation")
-	public int toMinute(LocalDate date){
+	public int toMinute(LocalDateTime date){
 		int dateToMinute = 0;
 		
 		if (date!=null){
