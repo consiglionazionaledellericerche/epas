@@ -222,16 +222,16 @@ public class FromMysqlToPostgres {
 		 * di ciascuna persona
 		 */
 		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT * FROM Orario WHERE TipoGiorno = 0 and id=" + id);
-		ResultSet rs = stmtOrari.executeQuery();		
-		//Time oraInizioPranzo = new Time(11,59,59);
-		//Time oraFinePranzo = new Time(14,59,59);
-			while(rs.next()){
-				int idCodiceTimbratura = rs.getInt("id");
-				if(mappaCodiciStampType.get(idCodiceTimbratura)== null){
-					
-				}
-				byte tipoTimbratura = rs.getByte("TipoTimbratura");
-				StampType stampType = new StampType();
+		ResultSet rs = stmtOrari.executeQuery();	
+		StampType stampType = null;
+		Stamping stamping = null;
+		byte tipoTimbratura = (Byte) null;
+		while(rs.next()){
+			int idCodiceTimbratura = rs.getInt("id");
+			if(mappaCodiciStampType.get(idCodiceTimbratura)== null){
+				stampType = new StampType();
+				tipoTimbratura = rs.getByte("TipoTimbratura");
+				
 				if((int)tipoTimbratura % 2 == 1 && (int)tipoTimbratura / 2 == 0){
 					stampType.description = "Timbratura di ingresso";					
 				}
@@ -245,130 +245,136 @@ public class FromMysqlToPostgres {
 					stampType.description = "Timbratura di uscita";
 				}
 				em.persist(stampType);
-				Stamping stamping = new Stamping();
-
-				/**
-				 * popolo la tabella stampings
-				 */
-				stamping.person = person;	
-				stamping.stampType = stampType;
+				mappaCodiciStampType.put(idCodiceTimbratura,stampType.id);
+			}
+			else{
+				stampType = StampType.findById(mappaCodiciStampType.get(idCodiceTimbratura));
 				
-				if((int)tipoTimbratura % 2 != 0)
-					stamping.way = WayType.in;					
-				else
-					stamping.way = WayType.out;
+			}				
+						
+			stamping = new Stamping();
+			stamping.stampType = stampType;	
+			stamping.person = person;
+			/**
+			 * popolo la tabella stampings
+			 */
+				
+			tipoTimbratura = rs.getByte("TipoTimbratura");
+			if((int)tipoTimbratura % 2 != 0)
+				stamping.way = WayType.in;					
+			else
+				stamping.way = WayType.out;
 
-				Date giorno = rs.getDate("Giorno");
-				Time ora = null;
-				try {
-					/**
-					 * per adesso svolgo l'intero processo del controllo sull'ora all'interno del metodo.
-					 * In seguito verrà usata una funzione da chiamare che svolgerà questo compito.
-					 */
-					
-					//il campo Ora contiene dei valori piuttosto "bizzarri", tipo 52:30:12, piuttosto che -11:40:00
-					//quindi il campo viene prelevato "row" come byte[] a poi convertito in stringa in modo da evitare
-					//controlli di consistenza da parte del driver JDBC che tenta di validare il campo come time.
-					byte[] bs = rs.getBytes("Ora");
-					String s = bs != null ? new String(bs) : null;
-					
-					if(s == null){
-						stamping.date = null;
-						stamping.isMarkedByAdmin = false;
-						stamping.isServiceExit = false;
+			Date giorno = rs.getDate("Giorno");
+			Time ora = null;
+			try {
+				/**
+				 * per adesso svolgo l'intero processo del controllo sull'ora all'interno del metodo.
+				 * In seguito verrà usata una funzione da chiamare che svolgerà questo compito.
+				 */
+				
+				//il campo Ora contiene dei valori piuttosto "bizzarri", tipo 52:30:12, piuttosto che -11:40:00
+				//quindi il campo viene prelevato "row" come byte[] a poi convertito in stringa in modo da evitare
+				//controlli di consistenza da parte del driver JDBC che tenta di validare il campo come time.
+				byte[] bs = rs.getBytes("Ora");
+				String s = bs != null ? new String(bs) : null;
+				
+				if(s == null){
+					stamping.date = null;
+					stamping.isMarkedByAdmin = false;
+					stamping.isServiceExit = false;
+				}
+				else{
+					if(s.startsWith("-")){
+						int hour = Integer.parseInt(s.substring(1, 3));
+						int minute = Integer.parseInt(s.substring(4, 6));
+						int second = Integer.parseInt(s.substring(7, 9));
+
+						Calendar calGiorno = new GregorianCalendar();
+		                calGiorno.setTime(giorno);
+		                
+		                calGiorno.set(Calendar.HOUR, hour);
+		                calGiorno.set(Calendar.MINUTE, minute);
+		                calGiorno.set(Calendar.SECOND, second);
+		                //stamping.date = calGiorno.getTime();
+		                stamping.date = new LocalDateTime(calGiorno);
+		                
+		                stamping.isMarkedByAdmin = false;
+		                stamping.isServiceExit = true;
 					}
 					else{
-						if(s.startsWith("-")){
-							int hour = Integer.parseInt(s.substring(1, 3));
-							int minute = Integer.parseInt(s.substring(4, 6));
-							int second = Integer.parseInt(s.substring(7, 9));
-
+						
+						int hour = Integer.parseInt(s.substring(0, 2));
+						int minute = Integer.parseInt(s.substring(3, 5));
+						int second = Integer.parseInt(s.substring(6, 8));						
+						if(hour > 33){
+							hour = hour * 60;
+							hour = hour + minute;
+							hour = hour - 2000;
+							hour = hour / 60;
+							int min = hour % 60;
+							
+							Time newOra = new Time(hour,min,0);
 							Calendar calGiorno = new GregorianCalendar();
 			                calGiorno.setTime(giorno);
+			                Calendar calOra = new GregorianCalendar();
+			                calOra.setTime(newOra);
+			                
+			                calGiorno.set(Calendar.HOUR, hour);
+			                calGiorno.set(Calendar.MINUTE, min);
+			                calGiorno.set(Calendar.SECOND, second);
+			                
+			                //stamping.date = calGiorno.getTime();
+			                stamping.date = new LocalDateTime(calGiorno);
+			                
+			                stamping.isMarkedByAdmin = true;
+			                stamping.isServiceExit = false;
+						}						
+										
+						else{
+							ora = rs.getTime("Ora");
+							Calendar calGiorno = new GregorianCalendar();
+							/**
+							 * controllo sulla validità del campo giorno della tabella Orario.
+							 * Le date di tipo 0000-00-00 presenti sul db mysql non sono riconosciute dal db postgres
+							 * e al momento dell'inserimento viene riscontrato un errore.
+							 * Con l'accorgimento del parametro "zeroDateTimeBehaviour=convertToNull alla stringa di 
+							 * connessione al db mysql si risolve l'inconveniente. Però nel momento di inserire un oggetto null
+							 * nel nuovo campo data della nuova tabella in postgres viene sollevata
+							 * una nullPointerException. Qui la necessità di usare una data fittizia: '1900-01-01' per 
+							 * questi casi
+							 */
+							if(giorno!=null)
+								calGiorno.setTime(giorno);
+							else
+								calGiorno.setTime(new Date(1900-01-01));
+			                Calendar calOra = new GregorianCalendar();
+			                calOra.setTime(ora);
 			                
 			                calGiorno.set(Calendar.HOUR, hour);
 			                calGiorno.set(Calendar.MINUTE, minute);
 			                calGiorno.set(Calendar.SECOND, second);
+			                
 			                //stamping.date = calGiorno.getTime();
 			                stamping.date = new LocalDateTime(calGiorno);
 			                
 			                stamping.isMarkedByAdmin = false;
-			                stamping.isServiceExit = true;
-						}
-						else{
-							
-							int hour = Integer.parseInt(s.substring(0, 2));
-							int minute = Integer.parseInt(s.substring(3, 5));
-							int second = Integer.parseInt(s.substring(6, 8));						
-							if(hour > 33){
-								hour = hour * 60;
-								hour = hour + minute;
-								hour = hour - 2000;
-								hour = hour / 60;
-								int min = hour % 60;
-								
-								Time newOra = new Time(hour,min,0);
-								Calendar calGiorno = new GregorianCalendar();
-				                calGiorno.setTime(giorno);
-				                Calendar calOra = new GregorianCalendar();
-				                calOra.setTime(newOra);
-				                
-				                calGiorno.set(Calendar.HOUR, hour);
-				                calGiorno.set(Calendar.MINUTE, min);
-				                calGiorno.set(Calendar.SECOND, second);
-				                
-				                //stamping.date = calGiorno.getTime();
-				                stamping.date = new LocalDateTime(calGiorno);
-				                
-				                stamping.isMarkedByAdmin = true;
-				                stamping.isServiceExit = false;
-							}						
-											
-							else{
-								ora = rs.getTime("Ora");
-								Calendar calGiorno = new GregorianCalendar();
-								/**
-								 * controllo sulla validità del campo giorno della tabella Orario.
-								 * Le date di tipo 0000-00-00 presenti sul db mysql non sono riconosciute dal db postgres
-								 * e al momento dell'inserimento viene riscontrato un errore.
-								 * Con l'accorgimento del parametro "zeroDateTimeBehaviour=convertToNull alla stringa di 
-								 * connessione al db mysql si risolve l'inconveniente. Però nel momento di inserire un oggetto null
-								 * nel nuovo campo data della nuova tabella in postgres viene sollevata
-								 * una nullPointerException. Qui la necessità di usare una data fittizia: '1900-01-01' per 
-								 * questi casi
-								 */
-								if(giorno!=null)
-									calGiorno.setTime(giorno);
-								else
-									calGiorno.setTime(new Date(1900-01-01));
-				                Calendar calOra = new GregorianCalendar();
-				                calOra.setTime(ora);
-				                
-				                calGiorno.set(Calendar.HOUR, hour);
-				                calGiorno.set(Calendar.MINUTE, minute);
-				                calGiorno.set(Calendar.SECOND, second);
-				                
-				                //stamping.date = calGiorno.getTime();
-				                stamping.date = new LocalDateTime(calGiorno);
-				                
-				                stamping.isMarkedByAdmin = false;
-				                stamping.isServiceExit = false;
-							}
+			                stamping.isServiceExit = false;
 						}
 					}
-				}		
-				 catch (SQLException sqle) {
-					
-					sqle.printStackTrace();
-					System.out.println("Timbratura errata. Persona con id="+id);
-					Logger.warn("Timbratura errata. Persona con id= "+id);
-				}			
-				Logger.debug("Termino di creare le timbrature");
-				em.persist(stamping);	
+				}
+			}		
+			 catch (SQLException sqle) {
 				
-			}
-			mysqlCon.close();
-
+				sqle.printStackTrace();
+				System.out.println("Timbratura errata. Persona con id="+id);
+				Logger.warn("Timbratura errata. Persona con id= "+id);
+			}			
+			Logger.debug("Termino di creare le timbrature");
+			em.persist(stamping);	
+			
+		}
+		mysqlCon.close();
 	}
 	
 	public static void createAbsences(long id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
