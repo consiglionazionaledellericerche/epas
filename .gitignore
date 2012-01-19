@@ -7,3 +7,4 @@ eclipse/
 server.pid
 lib/
 /test-result
+/test-output

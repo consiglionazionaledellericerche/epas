@@ -38,8 +38,22 @@ WorkingTimeTypeDay(normalSunday):
     workingTimeType: normal
     dayOfWeek: 7
     holiday: true
-    
+ 
+StampType(timbratureIngresso):
+    description: Timbratura di ingresso
+
+StampType(timbraturaUscitaPerPranzo):
+    description: Timbratura d'uscita per pranzo
+
+StampType(timbraturaIngressoDopoPausaPranzo):
+    description: Timbratura di ingresso dopo pausa pranzo
+
+StampType(timbratureUscita):
+    description: Timbratura di uscita
+
 Person(cristian):
     name: Cristian
     surname: Lucchesi
     workingTimeType: normal
+    
+ 

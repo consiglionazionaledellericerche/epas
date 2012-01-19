@@ -26,6 +26,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 
 
 import play.data.validation.Required;
@@ -57,8 +58,8 @@ public class Stamping extends Model {
 	
 	@Required
 	@Column
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
-	public LocalDate date;
+	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDateTime")
+	public LocalDateTime date;
 	
 	
 	@Required
