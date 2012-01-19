@@ -56,6 +56,7 @@ public class FromMysqlToPostgres {
 	public static Map<Integer,Long> mappaCodiciAbsence = new HashMap<Integer,Long>();
 	public static Map<Integer,Long> mappaCodiciVacationType = new HashMap<Integer,Long>();
 	public static Map<Integer,Long> mappaCodiciWorkingTimeType = new HashMap<Integer,Long>();
+	public static Map<Integer,Long> mappaCodiciStampType = new HashMap<Integer,Long>();
 	
 	public static String mySqldriver = Play.configuration.getProperty("db.old.driver");//"com.mysql.jdbc.Driver";	
 
@@ -219,12 +220,15 @@ public class FromMysqlToPostgres {
 		 * query sulle tabelle orario, orario_pers per recuperare le info sulle timbrature
 		 * di ciascuna persona
 		 */
-		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT * FROM Orario WHERE TipoGiorno = 0 and id=" + id + " limit 200");
+		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT * FROM Orario WHERE TipoGiorno = 0 and id=" + id);
 		ResultSet rs = stmtOrari.executeQuery();		
 		//Time oraInizioPranzo = new Time(11,59,59);
 		//Time oraFinePranzo = new Time(14,59,59);
 			while(rs.next()){
-				
+				int idCodiceTimbratura = rs.getInt("id");
+				if(mappaCodiciStampType.get(idCodiceTimbratura)== null){
+					
+				}
 				byte tipoTimbratura = rs.getByte("TipoTimbratura");
 				StampType stampType = new StampType();
 				if((int)tipoTimbratura % 2 == 1 && (int)tipoTimbratura / 2 == 0){
