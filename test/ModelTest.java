@@ -4,7 +4,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 import javax.persistence.EntityManager;
 
@@ -20,6 +22,9 @@ import models.Stamping.WayType;
 
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import play.Logger;
@@ -36,6 +41,12 @@ import play.test.UnitTest;
  *
  */
 public class ModelTest extends UnitTest {
+	
+	@Before
+	public void loadFixtures() {
+		Fixtures.deleteDatabase();
+		Fixtures.loadModels("data.yml");
+	}
 	
 	@Test
 	public void testPersonAssociation() {
@@ -102,8 +113,8 @@ public class ModelTest extends UnitTest {
 		hat.absenceType = absenceType2;
 		em.persist(hat);
 		
-		Absence absence = new Absence();
-		absence.date = new Date(2011,12,21);
+		Absence absence = new Absence();	
+		absence.date = GregorianCalendar.getInstance().getTime();
 		absence.person = p;
 		absence.person = p2;
 		absence.absenceType = absenceType;
@@ -116,7 +127,6 @@ public class ModelTest extends UnitTest {
 	
 	@Test
 	public void testPersonDayIsWorkingDay() {
-		Fixtures.loadModels("data.yml");
 		Person p = Person.find("name = ?", "Cristian").first();
 		assertEquals("Lucchesi", p.surname);
 		assertEquals("normal", p.workingTimeType.description);
@@ -131,6 +141,20 @@ public class ModelTest extends UnitTest {
 		assertFalse(personSaturdayDay.isWorkingDay());		
 	}
 	
+	@Test 
+	public void localDateAndTime() {
+		Person p = Person.find("name = ?", "Cristian").first();
+		Stamping s = new Stamping();
+		s.stampType = StampType.findById(1l);
+		s.person = p;
+		s.way = WayType.in;
+		LocalDateTime date = new LocalDateTime();
+		s.date = date;
+		s.save();
+		assertEquals(date, s.date);
+		assertNotNull(s.date.hourOfDay());
+		
+	}
 //	@Test
 //	public void testGetStampings() {
 //		Fixtures.loadModels("data.yml");
