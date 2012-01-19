@@ -75,13 +75,17 @@ public class Day {
 	 * @throws IllegalAccessException 
 	 * @throws InstantiationException 
 	 */
-	public List<AbsenceType> absenceList(Person person, Date date) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+	public List<String> absenceList(Person person, Date date) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		
-		Connection mypostgresCon = getMyPostgresConnection();
-		PreparedStatement stmt = mypostgresCon.prepareStatement("Select Absence.date, AbsenceType.code from Absence, AbsenceType" +
-				"where Absence.absenceType_id = absenceType_id and Absence.person_id = person_id");
-		ResultSet rs = stmt.executeQuery();
 		List<AbsenceType> listaAssenze = new ArrayList<AbsenceType>();
+		Connection mypostgresCon = getMyPostgresConnection();
+		PreparedStatement stmt = mypostgresCon.prepareStatement("Select code from Absence, AbsenceType" +
+				"where Absence.absenceType_id = absenceType_id and Absence.person_id = person_id and Absence.date = "+date);
+		ResultSet rs = stmt.executeQuery();
+		while(rs.next()){
+			listaAssenze.addAll(rs.getString("code"));
+		}
+		
 		listaAssenze = AbsenceType.find("Select at, abs from AbsenceType at, Absence abs where " +
 				"at.Absence = abs and abs.person = ? and abs.date = ? ", person, date).fetch();
 		return listaAssenze;
@@ -217,11 +221,11 @@ public class Day {
 			while(iter.hasNext()){
 				Stamping s = iter.next();
 				if(s.way == Stamping.WayType.in){
-				//	timeAtWork -= toMinute(s.date);		
+					timeAtWork -= toMinute(s.date);		
 					System.out.println("Timbratura di ingresso: "+timeAtWork);
 				}
 				if(s.way == Stamping.WayType.out){
-				//	timeAtWork += toMinute(s.date);
+					timeAtWork += toMinute(s.date);
 					System.out.println("Timbratura di uscita: "+timeAtWork);
 				}
 			}
