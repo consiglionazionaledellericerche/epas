@@ -3,19 +3,16 @@
  */
 package models;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 
-import org.joda.time.DateTimeConstants;
+import lombok.Data;
+
 import org.joda.time.LocalDate;
 
 import play.Logger;
 import play.db.jpa.JPA;
-
-import lombok.Data;
 
 /**
  * Classe che rappresenta un giorno, sia esso lavorativo o festivo di una persona.

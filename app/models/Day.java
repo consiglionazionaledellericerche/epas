@@ -78,13 +78,13 @@ public class Day {
 	 */
 	public List<String> absenceList(Person person, Date date) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		
-		List<AbsenceType> listaAssenze = new ArrayList<AbsenceType>();
+		List<String> listaAssenze = new ArrayList<String>();
 		Connection mypostgresCon = getMyPostgresConnection();
 		PreparedStatement stmt = mypostgresCon.prepareStatement("Select code from Absence, AbsenceType" +
 				"where Absence.absenceType_id = absenceType_id and Absence.person_id = person_id and Absence.date = "+date);
 		ResultSet rs = stmt.executeQuery();
 		while(rs.next()){
-			listaAssenze.addAll(rs.getString("code"));
+			listaAssenze.add(rs.getString("code"));
 		}
 		
 		listaAssenze = AbsenceType.find("Select at, abs from AbsenceType at, Absence abs where " +

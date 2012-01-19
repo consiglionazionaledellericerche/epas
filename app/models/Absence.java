@@ -23,6 +23,8 @@ import play.db.jpa.Model;
 @Table(name = "absences")
 public class Absence extends Model {
 	
+	private static final long serialVersionUID = -1963061850354314327L;
+
 	public Date date;
 	
 	@ManyToOne
@@ -39,7 +41,7 @@ public class Absence extends Model {
 	 * @return absenceList
 	 * funzione che ritorna l'insieme delle assenze mensili di una persona
 	 */
-	public List<Absence> returnAbsencesForMonth(long id){
+	public static List<Absence> returnAbsencesForMonth(long id){
 		List<Absence> absenceList = new ArrayList<Absence>();
 		
 		return absenceList;

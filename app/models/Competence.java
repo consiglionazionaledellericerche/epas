@@ -3,18 +3,23 @@ package models;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 import play.db.jpa.Model;
 
 /**
  * tabella delle competenze relative alla persona in cui sono memorizzate le competenze in determinate date (espresse
  * attraverso due interi, uno relativo all'anno e uno relativo al mese con relative descrizioni e valori
+ * 
  * @author dario
  *
  */
 @Entity
-public class Competence extends Model{
+@Table(name = "competences")
+public class Competence extends Model {
 	
+	private static final long serialVersionUID = -36737525666037452L;
+
 	@ManyToOne
 	@JoinColumn(name="person_id")
 	public Person person;

@@ -1,19 +1,15 @@
 package models;
 
 import java.util.Date;
-import java.util.List;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import org.hibernate.envers.Audited;
-
 import lombok.Data;
+
+import org.hibernate.envers.Audited;
 
 import play.db.jpa.Model;
 
@@ -28,7 +24,9 @@ import play.db.jpa.Model;
 @Audited
 @Entity
 @Table(name="contract")
-public class Contract extends Model{
+public class Contract extends Model {
+	
+	private static final long serialVersionUID = -4472102414284745470L;
 	
 //	public Qualification qualification;
 	

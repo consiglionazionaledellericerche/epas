@@ -1,17 +1,11 @@
 package models;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import play.data.validation.Required;
 import play.db.jpa.Model;
-import play.db.jpa.JPA;
 
 /**
  * 
@@ -19,16 +13,18 @@ import play.db.jpa.JPA;
  *
  */
 @Entity
-public class Location extends Model{
+@Table(name = "locations")
+public class Location extends Model {
 	
+	private static final long serialVersionUID = -5959095020484665233L;
+
 	@ManyToOne
 	@JoinColumn(name = "person_id")
 	public Person person;
 	
-	@Column
 	public String department;
-	@Column
+
 	public String headOffice;
-	@Column 
+ 
 	public String room;
 }

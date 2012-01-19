@@ -1,24 +1,19 @@
 package models;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
-import play.data.validation.Required;
 import play.db.jpa.Model;
-import play.db.jpa.JPA;
 /**
  * 
  * @author dario
  *
  */
 @Entity
-@Table(name = "build_up_edge_behaviour")
+@Table(name = "build_up_edge_behaviours")
 public class BuildUpEdgeBehaviour extends Model{
 
+	private static final long serialVersionUID = -4570498420971254278L;
+	
 	public String label;
 }

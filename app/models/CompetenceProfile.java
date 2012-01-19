@@ -6,7 +6,6 @@ package models;
 import java.util.Set;
 
 import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
@@ -22,6 +21,8 @@ import play.db.jpa.Model;
 @Entity
 @Table(name = "competence_profiles")
 public class CompetenceProfile extends Model {
+
+	private static final long serialVersionUID = 3248927401625914048L;
 
 	@Required
 	public String code;

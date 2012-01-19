@@ -3,31 +3,16 @@
  */
 package models;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
-import org.hibernate.annotations.CollectionId;
 import org.hibernate.annotations.Type;
-import org.hibernate.envers.Audited;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-
 
 import play.data.validation.Required;
 import play.db.jpa.Model;
@@ -39,6 +24,8 @@ import play.db.jpa.Model;
 @Entity
 @Table(name = "stampings")
 public class Stamping extends Model {
+
+	private static final long serialVersionUID = -2422323948436157747L;
 
 	public enum WayType {
 		in,

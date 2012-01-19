@@ -1,17 +1,12 @@
 package models;
 
-import java.util.Date;
-
-import javax.jws.HandlerChain;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Table;
 
 import org.hibernate.envers.Audited;
-
-import play.db.jpa.Model;
 
 /**
  * questa classe estende absenceType ereditandone i campi e soprattutto ereditandone l'estensione del Model
@@ -22,9 +17,12 @@ import play.db.jpa.Model;
  */
 @Audited
 @Entity
+@Table(name = "hourly_absence_types")
 @PrimaryKeyJoinColumn(name="absence_type_id")
-public class HourlyAbsenceType extends AbsenceType{
+public class HourlyAbsenceType extends AbsenceType {
 	
+	private static final long serialVersionUID = 6598043062600364402L;
+
 	@OneToOne
 	@JoinColumn(name="absenceType_id")
 	public AbsenceType absenceType;

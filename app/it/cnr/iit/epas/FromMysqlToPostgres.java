@@ -903,10 +903,7 @@ public class FromMysqlToPostgres {
 			MonthRecap monthRecap = null;
 			while(rs.next()){
 				
-				monthRecap = new MonthRecap();
-				monthRecap.person = person;
-				monthRecap.month = rs.getShort("mese");
-				monthRecap.year = rs.getShort("anno");
+				monthRecap = new MonthRecap(person, rs.getInt("anno"), rs.getInt("mese"));
 				monthRecap.workingDays = rs.getShort("giorni_lavorativi");
 				monthRecap.daysWorked = rs.getShort("giorni_lavorati");
 				monthRecap.giorniLavorativiLav = rs.getShort("giorni_lavorativi");
