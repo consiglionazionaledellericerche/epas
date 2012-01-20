@@ -1,8 +1,3 @@
-import models.Person;
-import play.jobs.Job;
-import play.jobs.OnApplicationStart;
-import play.test.Fixtures;
-
 /**
  * 
  */

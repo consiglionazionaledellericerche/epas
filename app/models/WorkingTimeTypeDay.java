@@ -3,14 +3,12 @@
  */
 package models;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.hibernate.envers.Audited;
-import org.joda.time.DateTimeConstants;
 
 import play.data.validation.Required;
 import play.db.jpa.Model;
@@ -26,6 +24,8 @@ import play.db.jpa.Model;
 @Entity
 @Table(name = "working_time_type_days")
 public class WorkingTimeTypeDay extends Model {
+
+	private static final long serialVersionUID = 4622948996966018754L;
 
 	@ManyToOne
 	@JoinColumn(name = "working_time_type_id")

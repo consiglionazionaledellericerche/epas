@@ -6,9 +6,6 @@ package models;
 import java.util.Set;
 
 import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -23,6 +20,9 @@ import play.db.jpa.Model;
 @Entity
 @Table(name = "stamp_types")
 public class StampType extends Model {
+
+	private static final long serialVersionUID = 1953695910638450365L;
+
 
 	@Required
 	@MinLength(value=2)
