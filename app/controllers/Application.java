@@ -9,7 +9,7 @@ public class Application extends Controller {
     
 	public static final String USERNAME_SESSION_KEY = "username";
 	public static final String PERSON_ID_SESSION_KEY = "person_id";
-	
+		
     @Before
     static void addPerson() {
         Person person = connected();
@@ -32,7 +32,7 @@ public class Application extends Controller {
     
 	public static void index() {
         if(connected() != null) {
-            Stampings.show(Long.parseLong(session.get(PERSON_ID_SESSION_KEY)));
+            Stampings.show();
         }
         render();
     } 
@@ -42,10 +42,12 @@ public class Application extends Controller {
         if(person != null) {
             session.put(USERNAME_SESSION_KEY, person.username);
             session.put(PERSON_ID_SESSION_KEY, person.id);
+            
             flash.success("Welcome, " + person.name + person.surname);
             Logger.info("person %s successfully logged in", person.username);
             Logger.debug("%s: person.id = %d", person.username, person.id);
-            Stampings.show(person.id);         
+            
+            Stampings.show();
         }
         // Oops
         flash.put("username", username);
@@ -57,5 +59,5 @@ public class Application extends Controller {
         session.clear();
         index();
     }
-
+    
 }
