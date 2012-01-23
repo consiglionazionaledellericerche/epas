@@ -6,26 +6,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
-import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeConstants;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-
-import models.AbsenceType;
-
-import models.Code;
-
 import models.Absence;
+import models.AbsenceType;
 import models.AbsenceTypeGroup;
 import models.Competence;
 import models.CompetenceCode;
@@ -39,17 +29,17 @@ import models.Person;
 import models.PersonVacation;
 import models.StampType;
 import models.Stamping;
-import models.VacationPeriod;
-import models.WorkingTimeTypeDay;
 import models.Stamping.WayType;
 import models.VacationCode;
+import models.VacationPeriod;
 import models.WorkingTimeType;
+import models.WorkingTimeTypeDay;
 import models.YearRecap;
+
+import org.joda.time.LocalDateTime;
 
 import play.Logger;
 import play.Play;
-import play.db.jpa.JPA;
-import play.mvc.Controller;
 
 public class FromMysqlToPostgres {
 	
@@ -82,6 +72,8 @@ public class FromMysqlToPostgres {
 		Person person = new Person();
 		person.name = rs.getString("Nome");
 		person.surname = rs.getString("Cognome");
+		person.username = String.format("%s.%s", person.name.toLowerCase(), person.surname.toLowerCase() );
+		person.password = rs.getString("passwordmd5");
 		person.bornDate = rs.getDate("DataNascita");
 		person.number = rs.getInt("Matricola");
 		em.persist(person);
@@ -225,23 +217,23 @@ public class FromMysqlToPostgres {
 		ResultSet rs = stmtOrari.executeQuery();	
 		StampType stampType = null;
 		Stamping stamping = null;
-		byte tipoTimbratura = (Byte) null;
+		int tipoTimbratura;
 		while(rs.next()){
 			int idCodiceTimbratura = rs.getInt("id");
 			if(mappaCodiciStampType.get(idCodiceTimbratura)== null){
 				stampType = new StampType();
-				tipoTimbratura = rs.getByte("TipoTimbratura");
+				tipoTimbratura = rs.getInt("TipoTimbratura");
 				
-				if((int)tipoTimbratura % 2 == 1 && (int)tipoTimbratura / 2 == 0){
+				if(tipoTimbratura % 2 == 1 && tipoTimbratura / 2 == 0){
 					stampType.description = "Timbratura di ingresso";					
 				}
-				if((int)tipoTimbratura % 2 == 0 && (int)tipoTimbratura / 2 == 1 ){
+				if(tipoTimbratura % 2 == 0 && tipoTimbratura / 2 == 1 ){
 					stampType.description = "Timbratura d'uscita per pranzo";
 				}
-				if((int)tipoTimbratura % 2 == 1 && (int)tipoTimbratura / 2 == 1 ){
+				if(tipoTimbratura % 2 == 1 && tipoTimbratura / 2 == 1 ){
 					stampType.description = "Timbratura di ingresso dopo pausa pranzo";
 				}
-				if((int)tipoTimbratura % 2 == 0 && (int)tipoTimbratura / 2 == 2){
+				if(tipoTimbratura % 2 == 0 && tipoTimbratura / 2 == 2){
 					stampType.description = "Timbratura di uscita";
 				}
 				em.persist(stampType);
@@ -260,7 +252,7 @@ public class FromMysqlToPostgres {
 			 */
 				
 			tipoTimbratura = rs.getByte("TipoTimbratura");
-			if((int)tipoTimbratura % 2 != 0)
+			if(tipoTimbratura % 2 != 0)
 				stamping.way = WayType.in;					
 			else
 				stamping.way = WayType.out;
