@@ -1,10 +1,16 @@
 # Routes
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
-*		/										module:secure
+#*		/										module:secure
 
 # Home page
 GET     /                                       Application.index
+
+#Orario e timbrature
+GET     /orario/{id}                            Stampings.show
+
+POST    /login                                  Application.login
+GET     /logout                                 Application.logout
 
 # Ignore favicon requests
 GET     /favicon.ico                            404
