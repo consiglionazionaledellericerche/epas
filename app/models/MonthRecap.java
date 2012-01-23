@@ -1,6 +1,7 @@
 package models;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -18,6 +19,7 @@ import net.sf.oval.guard.Guarded;
 
 import org.joda.time.LocalDate;
 
+import play.Logger;
 import play.data.validation.Required;
 import play.db.jpa.Model;
 
@@ -158,9 +160,11 @@ public class MonthRecap extends Model {
 		if (days != null) {
 			return days;
 		}
+		days = new ArrayList<PersonDay>();
 		Calendar firstDayOfMonth = GregorianCalendar.getInstance();
 		firstDayOfMonth.set(year, month, 1);
 		for (int day = 1; day <= firstDayOfMonth.getActualMaximum(Calendar.DAY_OF_MONTH); day++) {
+			Logger.trace("generating PersonDay: person = %s, year = %d, month = %d, day = %d", person.username, year, month, day);
 			days.add(new PersonDay(person, new LocalDate(year, month, day)));
 		}
 		return days;
