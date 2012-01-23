@@ -121,12 +121,18 @@ public class Person extends Model {
 	@Required
 	public String surname;
 	
+	public String othersSurname;
+	
 	@Column(name = "born_date")
 	public Date bornDate;
 	
 	@Email
 	public String email;
 		
+	public String username;
+	
+	public String password;
+	
 	/**
 	 * Numero di matricola
 	 */
