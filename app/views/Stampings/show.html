@@ -1,5 +1,5 @@
 #{extends 'main.html' /}
-#{set title:person.surname /}
+#{set title:monthRecap.person.surname /}
 
 <table>
 	<tr>
@@ -18,8 +18,8 @@
      for(day in monthRecap.days) {
 }%
 		<tr>
-			<td>${day.isMealTicketAssigned()}</td>
-			<td>$day.</td>
+			<td></td>
+			<td>${day.date}</td>
 			<td></td>
 			<td></td>
 			<td></td>
