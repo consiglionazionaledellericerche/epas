@@ -273,7 +273,8 @@ public class PersonDay {
 	public String workingTimeType(Person person){
 		
 		String description = new String();
-		WorkingTimeType wtt = WorkingTimeType.find("Select wtt from WorkingTimeType wtt where wtt.person = ?", person).first();
+		WorkingTimeType wtt = WorkingTimeType.find("Select wtt from Person p, WorkingTimeType wtt " +
+				"where p.workingTimeType = wtt and p = ?", person).first();
 				
 		description = wtt.description;
 		return description;

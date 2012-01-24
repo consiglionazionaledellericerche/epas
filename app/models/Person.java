@@ -96,8 +96,10 @@ public class Person extends Model {
 	/**
 	 * relazione con la tabella delle tipologie di orario di lavoro
 	 */
-	@OneToMany(mappedBy="person")
-	public List<WorkingTimeType> workingTimeType;
+	@ManyToOne
+	@JoinColumn(name="workingTimeType_id")
+	public WorkingTimeType workingTimeType;
+	
 	
 	/**
 	 * relazione con la tabella delle locazioni degli utenti
