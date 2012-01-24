@@ -45,8 +45,8 @@ public class ImportTest extends UnitTest {
 			//assertEquals("Cristian", person.name);
 			//assertEquals("Lucchesi", person.surname);
 			
-			FromMysqlToPostgres.createLocation(rs, person, em);
-			FromMysqlToPostgres.createContactData(rs, person, em);
+			//FromMysqlToPostgres.createLocation(rs, person, em);
+			//FromMysqlToPostgres.createContactData(rs, person, em);
 			
 			FromMysqlToPostgres.createContract(person.id, person, em);
 			

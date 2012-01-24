@@ -9,7 +9,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
+import org.joda.time.LocalDate;
 
 import play.db.jpa.Model;
 
@@ -25,7 +27,8 @@ public class Absence extends Model {
 	
 	private static final long serialVersionUID = -1963061850354314327L;
 
-	public Date date;
+	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	public LocalDate date;
 	
 	@ManyToOne
 	@JoinColumn(name = "absenceType_id")
