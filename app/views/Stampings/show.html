@@ -18,13 +18,15 @@
      for(day in monthRecap.days) {
 }%
 		<tr>
-			<td>${day.isMealTicketAssigned()}</td>
-			<td>$day.</td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
+			<td>${day.mealTicket()}</td>
+			<td>${day.date}</td>
+			<td>${day.absenceList()}</td>
+			<td>${day.getStampings().get(0)}</td>
+			<td>${day.getStampings().get(1)}</td>
+			<td>${day.timeAtWork()}</td>
+			<td>${day.difference()}</td>
+			<td>${day.progressive()}</td>
+			<td>${day.workingTimeType()</td>
 		</tr>
 %{  		   
      }

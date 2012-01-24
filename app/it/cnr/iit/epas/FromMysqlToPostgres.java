@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -85,11 +86,7 @@ public class FromMysqlToPostgres {
 		person.bornDate = rs.getDate("DataNascita");
 		person.number = rs.getInt("Matricola");
 		em.persist(person);
-		return person;
-	}
-	
-	public static void createLocation(ResultSet rs, Person person, EntityManager em) throws SQLException {
-		Logger.warn("Inizio a creare la locazione");
+		
 		Location location = new Location();
 		location.person = person;
 		
@@ -97,20 +94,14 @@ public class FromMysqlToPostgres {
 		location.headOffice = rs.getString("Sede");
 		location.room = rs.getString("Stanza");		
 		em.persist(location);
-	}
-	
-	public static void createContactData(ResultSet rs, Person person, EntityManager em) throws SQLException {
-		Logger.warn("Inizio a creare il contact data");
+		
 		ContactData contactData = new ContactData();
+		//contactData.person = person;
 		contactData.person = person;
 		
 		contactData.email = rs.getString("Email");
 		contactData.fax = rs.getString("Fax");
 		contactData.telephone = rs.getString("Telefono");
-					
-		/**
-		 * controllo sui valori del campo Telefono e conseguente modifica sul nuovo db
-		 */
 		if(contactData.telephone != null){
 			if(contactData.telephone.length() == 4){
 				contactData.telephone = "+39050315" + contactData.telephone;
@@ -135,7 +126,61 @@ public class FromMysqlToPostgres {
 			contactData.telephone = "No phone number";		
 		}
 		em.persist(contactData);
-	}	
+		
+		return person;
+	}
+	
+//	public static void createLocation(ResultSet rs, Person person, EntityManager em) throws SQLException {
+//		Logger.warn("Inizio a creare la locazione");
+//		Location location = new Location();
+//		//location.person = person;
+//		
+//		location.department = rs.getString("Dipartimento");
+//		location.headOffice = rs.getString("Sede");
+//		location.room = rs.getString("Stanza");		
+//		em.persist(location);
+//		location.person = person;
+//	}
+	
+//	public static void createContactData(ResultSet rs, Person person, EntityManager em) throws SQLException {
+//		Logger.warn("Inizio a creare il contact data");
+//		ContactData contactData = new ContactData();
+//		//contactData.person = person;
+//		contactData.person = person;
+//		
+//		contactData.email = rs.getString("Email");
+//		contactData.fax = rs.getString("Fax");
+//		contactData.telephone = rs.getString("Telefono");
+//					
+//		/**
+//		 * controllo sui valori del campo Telefono e conseguente modifica sul nuovo db
+//		 */
+//		if(contactData.telephone != null){
+//			if(contactData.telephone.length() == 4){
+//				contactData.telephone = "+39050315" + contactData.telephone;
+//			}
+//			if(contactData.telephone.startsWith("315")){
+//				contactData.telephone = "+39050" + contactData.telephone;
+//			}	
+//			if(contactData.telephone.startsWith("335")){
+//				contactData.mobile = contactData.telephone;
+//				contactData.telephone = "No internal number";
+//			}
+//			if(contactData.telephone.length() == 2){
+//				contactData.telephone = "No internal number";
+//			}
+//			if(contactData.telephone.startsWith("503")){
+//				contactData.telephone = "+390" + contactData.telephone;
+//			}			
+//
+//		}
+//		else{ 
+//			Logger.warn("Validazione numero di telefono non avvenuta. No phone number");
+//			contactData.telephone = "No phone number";		
+//		}
+//		em.persist(contactData);
+//		
+//	}	
 	
 	/**
 	 * 
@@ -221,16 +266,17 @@ public class FromMysqlToPostgres {
 		 * query sulle tabelle orario, orario_pers per recuperare le info sulle timbrature
 		 * di ciascuna persona
 		 */
-		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT * FROM Orario WHERE TipoGiorno = 0 and id=" + id);
+		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT * FROM Orario WHERE TipoTimbratura is not null " +
+				"and TipoGiorno = 0 and id=" + id +" limit 200");
 		ResultSet rs = stmtOrari.executeQuery();	
 		StampType stampType = null;
 		Stamping stamping = null;
-		byte tipoTimbratura = (Byte) null;
+		byte tipoTimbratura;
 		while(rs.next()){
 			int idCodiceTimbratura = rs.getInt("id");
+			tipoTimbratura = rs.getByte("TipoTimbratura");
 			if(mappaCodiciStampType.get(idCodiceTimbratura)== null){
-				stampType = new StampType();
-				tipoTimbratura = rs.getByte("TipoTimbratura");
+				stampType = new StampType();				
 				
 				if((int)tipoTimbratura % 2 == 1 && (int)tipoTimbratura / 2 == 0){
 					stampType.description = "Timbratura di ingresso";					
@@ -258,8 +304,7 @@ public class FromMysqlToPostgres {
 			/**
 			 * popolo la tabella stampings
 			 */
-				
-			tipoTimbratura = rs.getByte("TipoTimbratura");
+						
 			if((int)tipoTimbratura % 2 != 0)
 				stamping.way = WayType.in;					
 			else
@@ -408,7 +453,7 @@ public class FromMysqlToPostgres {
 				 */
 				absence = new Absence();
 				absence.person = person;
-				absence.date = rs.getDate("Giorno");				
+				absence.date = new LocalDate(rs.getDate("Giorno"));				
 				
 				int idCodiceAssenza = rs.getInt("id");
 				if(mappaCodiciAbsence.get(idCodiceAssenza)== null){
@@ -609,10 +654,10 @@ public class FromMysqlToPostgres {
 				int idCodiceOrarioLavoro = rs.getInt("id");
 				if(mappaCodiciWorkingTimeType.get(idCodiceOrarioLavoro)!=null){
 					wtt = WorkingTimeType.findById(mappaCodiciWorkingTimeType.get(idCodiceOrarioLavoro));
-					
-					person.workingTimeType = wtt;
-				
+
+					wtt.person = person;
 					em.persist(wtt);
+										
 					
 					wttd_mo = new WorkingTimeTypeDay();
 					wttd_mo.workingTimeType = wtt;
@@ -729,12 +774,14 @@ public class FromMysqlToPostgres {
 				else{
 					wtt = new WorkingTimeType();
 					wtt.description = rs.getString("nome");
-					
 					wtt.shift = rs.getBoolean("turno");
-					person.workingTimeType = wtt;
+
+					wtt.person = person;
 					em.persist(wtt);
 					
+					
 					mappaCodiciWorkingTimeType.put(idCodiceOrarioLavoro,wtt.id);
+					
 					
 					wttd_mo = new WorkingTimeTypeDay();
 					wttd_mo.workingTimeType = wtt;

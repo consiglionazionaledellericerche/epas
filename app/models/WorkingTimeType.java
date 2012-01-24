@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -43,14 +44,16 @@ public class WorkingTimeType extends Model {
 	/**
 	 * relazione con la tabella persone
 	 */
-	@OneToMany( mappedBy = "workingTimeType")
-	public List<Person> persons;
+	@ManyToOne
+	@JoinColumn(name="person_id", nullable= false)
+	public Person person;
+	
 	
 	/**
 	 * relazione con la tabella di specifiche di orario di lavoro
 	 */
-	@OneToMany(mappedBy = "workingTimeType")
-	public List<WorkingTimeTypeDay> workingTimeTypeDay;
+	@OneToMany( mappedBy = "workingTimeType")
+	public List<WorkingTimeTypeDay> worTimeTypeDays;
 	
 
 }

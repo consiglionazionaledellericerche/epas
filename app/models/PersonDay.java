@@ -63,13 +63,13 @@ public class PersonDay {
 	 * @return true se il giorno corrente è un giorno lavorativo, false altrimenti.
 	 */
 	public boolean isWorkingDay() {
-		EntityManager em = JPA.em();
-		WorkingTimeTypeDay wttd = em.createQuery("SELECT wttd FROM Person p JOIN p.workingTimeType wtt JOIN wtt.workingTimeTypeDay wttd " + 
-				"WHERE p.id = :personId AND wttd.dayOfWeek = :day", WorkingTimeTypeDay.class)
-				.setParameter("personId", person.id)
-				.setParameter("day", date.getDayOfWeek())
-				.getSingleResult();
-		return !wttd.holiday;
+		boolean isWorkingDay = false;
+	
+		WorkingTimeTypeDay wttd2 = WorkingTimeTypeDay.find("Select wttd from WorkingTimeType wtt, WorkingTimeTypeDay wttd, Person p " +
+				"where p.workingTimeType = wtt and wttd.workingTimeType = wtt and p = ? and wttd.dayOfWeek = ? ", person, date.getDayOfWeek()).first();
+		Logger.warn("In isWorkingDay il giorno chiamato è: " +date.getDayOfWeek() +" mentre la persona è: " +person.id);
+		isWorkingDay = wttd2.holiday;
+		return isWorkingDay;
 	}
 	
 	public boolean isAbsent() {
@@ -89,17 +89,14 @@ public class PersonDay {
 		return absence;
 	}
 	
-	public List<Stamping> getStampings() {
+	public List<Stamping> getStampings(Person person, LocalDateTime date2) {
 		if (stampings == null) {
-			EntityManager em = JPA.em();
-
-			stampings = 
-				em.createQuery("SELECT s FROM Stamping WHERE s.person = :person and date >= :startDate and date < endDate ORDER BY date", 
-					Stamping.class)
-				.setParameter("person", person)
-				.setParameter("startDate", date.toDateMidnight())
-				.setParameter("endDate", date.plusDays(1).toDateMidnight())
-				.getResultList();
+			
+			stampings = Stamping.find("SELECT s FROM Stamping s " +
+					"WHERE s.person = ? and date between ? and ? " +
+					"ORDER BY date", 
+					person, date2, date2.plusDays(1)).fetch();
+							
 		}
 		return stampings;
 	}
@@ -142,13 +139,13 @@ public class PersonDay {
 	
 	/**
 	 * 
-	 * @param date
+	 * @param date2
 	 * @return numero di minuti in cui una persona è stata a lavoro in quella data
 	 */
-	public int timeAtWork(Person person, LocalDate date){
+	public int timeAtWork(Person person, LocalDateTime date2){
 		
 		List<Stamping> listStamp = Stamping.find("select s from Stamping s " +
-			    "where s.person = ? and s.date = ? order by date", person, date).fetch();
+			    "where s.person = ? and s.date between ? and ? order by date", person, date2, date2.plusDays(1)).fetch();
 		
 		int size = listStamp.size();
 		timeAtWork = 0;
@@ -184,14 +181,16 @@ public class PersonDay {
 	 * @return il progressivo delle ore in più o in meno rispetto al normale orario previsto per quella data
 	 */
 	public int progressive(LocalDate date){
-		if(date != null){
-		
-			if((date.getDayOfMonth()==1) && (date.getDayOfWeek()==6 || date.getDayOfWeek()==7))
-				return 0;			
-			if((date.getDayOfMonth()==2) && (date.getDayOfWeek()==7))
-				return 0;
-			else{
-				progressive = progressive+difference;
+		if(progressive == 0){
+			if(date != null){
+			
+				if((date.getDayOfMonth()==1) && (date.getDayOfWeek()==6 || date.getDayOfWeek()==7))
+					return 0;			
+				if((date.getDayOfMonth()==2) && (date.getDayOfWeek()==7))
+					return 0;
+				else{
+					progressive = progressive+difference;
+				}
 			}
 		}
 		return progressive;
@@ -225,16 +224,24 @@ public class PersonDay {
 	 * @throws IllegalAccessException 
 	 * @throws InstantiationException 
 	 */
-	public List<String> absenceList(Person person, Date date) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+	public List<AbsenceType> absenceList() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		
-		List<String> listaAssenze = new ArrayList<String>();
+		List<AbsenceType> listaAssenze = new ArrayList<AbsenceType>();
 		EntityManager em = JPA.em();
-		listaAssenze = em.createQuery("Select code from Absence, AbsenceType" +
-				"where Absence.absenceType = absenceType and Absence.person = :person and Absence.date = :date")
-				.setParameter("person", person)
-				.setParameter("date", date)
-				.getResultList();
+		listaAssenze = AbsenceType.find("SELECT abt FROM AbsenceType abt, Absence abs, Person p " +
+				"WHERE abs.person = p AND abs.absenceType = abt AND p = ? AND abs.date = ?", person, date).fetch();
 		//Connection mypostgresCon = getMyPostgresConnection();
+		if(listaAssenze != null){
+			Iterator iter = listaAssenze.iterator();
+			while(iter.hasNext()){
+				AbsenceType abt = (AbsenceType) iter.next(); 
+				Logger.warn("Codice: " +abt.code);
+			    //System.out.print("Codice: " +abt.code );
+			}		
+		}
+		else
+			Logger.warn("Non ci sono assenze" );
+	
 		return listaAssenze;
 		
 	}
@@ -246,7 +253,7 @@ public class PersonDay {
 	 * @param person
 	 * @return se la persona può usufruire del buono pasto per quella data
 	 */
-	public boolean mealTicket(LocalDate date, int timeAtWork, Person person){
+	public boolean mealTicket(LocalDateTime date, int timeAtWork, Person person){
 		boolean isMealTicketAvailable;
 		if(timeAtWork == 0){
 			isMealTicketAvailable = false;
@@ -258,6 +265,23 @@ public class PersonDay {
 		}
 		return isMealTicketAvailable;
 	}
+	
+	public int difference(){
+		if(difference == 0){
+			
+		}
+		return difference;
+	}
+	
+	public String workingTimeType(Person person){
+		
+		String description = new String();
+		WorkingTimeType wtt = WorkingTimeType.find("Select wtt from WorkingTimeType wtt where wtt.person = ?", person).first();
+				
+		description = wtt.description;
+		return description;
+	}
+	
 	
 	public int mealTicketToUse(){
 		return 0;

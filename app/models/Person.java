@@ -19,6 +19,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -97,9 +98,8 @@ public class Person extends Model {
 	/**
 	 * relazione con la tabella delle tipologie di orario di lavoro
 	 */
-	@ManyToOne
-	@JoinColumn(name="working_time_type_id")
-	public WorkingTimeType workingTimeType;
+	@OneToMany(mappedBy="person")
+	public List<WorkingTimeType> workingTimeType;
 	
 	/**
 	 * relazione con la tabella delle locazioni degli utenti
