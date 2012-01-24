@@ -33,7 +33,7 @@ public class ImportTest extends UnitTest {
 		EntityManager em = JPA.em();
 		//PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM Persone WHERE id = " + CRISTAN_LUCCHESI_OROLOGIO_ID);
 		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT ID, Nome, Cognome, DataNascita, Telefono," +
-				"Fax, Email, Stanza, Matricola, Dipartimento, Sede FROM Persone order by ID");
+				"Fax, Email, Stanza, Matricola, passwordmd5, Dipartimento, Sede FROM Persone where id = 146 order by ID");
 		ResultSet rs = stmt.executeQuery();
 		while(rs.next()){
 			Logger.warn("Creazione delle info per la persona: "+rs.getString("Nome").toString()+" "+rs.getString("Cognome").toString());
