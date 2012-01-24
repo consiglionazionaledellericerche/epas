@@ -34,7 +34,7 @@ public class AuthUser extends Model{
 		NO
 	}
 	
-	public String user;
+	public String username;
 
 	public String password;
 

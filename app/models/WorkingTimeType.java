@@ -6,12 +6,14 @@ package models;
 import java.util.List;
 
 import javax.persistence.Entity;
+<<<<<<< HEAD
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+=======
+>>>>>>> 5b2767fc827d089fcf0ffe161d3f8912d1d592f5
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.hibernate.envers.Audited;
@@ -32,6 +34,8 @@ import play.db.jpa.Model;
 @Table(name="working_time_types")
 public class WorkingTimeType extends Model {
 	
+	private static final long serialVersionUID = -3443521979786226461L;
+
 	@Required
 	public String description;
 	

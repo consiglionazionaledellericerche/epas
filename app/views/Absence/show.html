@@ -1,0 +1,33 @@
+#{extends 'main.html' /}
+#{set title:person.surname /}
+
+<table>
+	<tr>
+		<th>Buono mensa</th>
+		<th>Giorno</th>
+		<th>Codice di assenza</th>
+		<th>1° entrata</th>
+		<th>1° uscita</th>
+		<th>tempo</th>
+		<th>differ.</th>
+		<th>progress</th>
+		<th>tipo orario</th>
+	</tr>
+	
+%{
+     for(absence in absence) {
+}%
+		<tr>
+			<td>${stamping.isMealTicketAssigned()}</td>
+			<td>${stamping.isMealTicketAssigned()}</td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+%{  		   
+     }
+     
+}%
+</table>

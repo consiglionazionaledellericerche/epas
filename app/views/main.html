@@ -42,10 +42,23 @@
 				<h1>#{get 'title' /}</h1>
 			</header>
 			<div id="main" role="main">
+
+				#{if flash.error}
+                <p class="fError">
+                    <strong>${flash.error}</strong>
+                </p>
+            	#{/if}
+            	#{if flash.success}
+                <p class="fSuccess">
+                    <strong>${flash.success}</strong>
+                </p>
+            	#{/if}
+			
 				#{doLayout /}
 			</div>
 	 		<footer>
-	
+				Created with <a href="http://www.playframework.org">play framework</a> 
+				and really inspirated from the "orologio" application developed by Pasquale Lazzareschi
 			</footer>
 		</div> <!--! end of #container -->
 	    
