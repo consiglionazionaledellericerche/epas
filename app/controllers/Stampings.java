@@ -11,9 +11,9 @@ import play.mvc.Controller;
 
 public class Stampings extends Controller {
 
-<<<<<<< HEAD
-    public static void show(Long id) {
-=======
+
+    //public static void show(Long id) {
+
     @Before
     static void checkPerson() {
         if(session.get(Application.PERSON_ID_SESSION_KEY) == null) {
@@ -22,8 +22,8 @@ public class Stampings extends Controller {
         }
     }
 
-    private static void show(@NotNull Long id) {
->>>>>>> 5b2767fc827d089fcf0ffe161d3f8912d1d592f5
+    private static void show(Long id) {
+
     	Person person = Person.findById(id);
     	
     	LocalDate now = new LocalDate();

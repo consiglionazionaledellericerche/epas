@@ -76,16 +76,43 @@ public class FromMysqlToPostgres {
 				Play.configuration.getProperty("db.old.password"));
 	}
 	
-	public static Person createPerson(ResultSet rs, EntityManager em) throws SQLException {
+	public static Person createPerson(ResultSet rs, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 		Logger.configuredManually = true;
 		Logger.debug("Inizio a creare la persona: "+rs.getString("Nome").toString()+" "+rs.getString("Cognome").toString());
-		
+				
 		Person person = new Person();
 		person.name = rs.getString("Nome");
 		person.surname = rs.getString("Cognome");
 		person.bornDate = rs.getDate("DataNascita");
 		person.number = rs.getInt("Matricola");
+		long id = rs.getLong("ID");
+		
 		em.persist(person);
+		Connection mysqlCon = getMysqlConnection();
+		PreparedStatement stmtWorkingTime = mysqlCon.prepareStatement("SELECT * FROM orari_di_lavoro,orario_pers WHERE " +
+				"orario_pers.oid=orari_di_lavoro.id and orario_pers.pid="+id);
+		ResultSet rsInterno = stmtWorkingTime.executeQuery();
+		if(rsInterno != null){
+			while(rsInterno.next()){
+				WorkingTimeType wtt = null;
+				int idCodiceOrarioLavoro = rsInterno.getInt("id");
+				if(mappaCodiciWorkingTimeType.get(idCodiceOrarioLavoro)!=null){
+					wtt = WorkingTimeType.findById(mappaCodiciWorkingTimeType.get(idCodiceOrarioLavoro));
+					person.workingTimeType = wtt;
+					
+				}
+				else{
+					wtt = new WorkingTimeType();
+					wtt.description = rsInterno.getString("nome");
+					wtt.shift = rsInterno.getBoolean("turno");
+					person.workingTimeType=wtt;
+					em.persist(wtt);			
+					
+					mappaCodiciWorkingTimeType.put(idCodiceOrarioLavoro,wtt.id);
+				}
+				em.persist(person);
+			}
+		}
 		
 		Location location = new Location();
 		location.person = person;
@@ -126,6 +153,7 @@ public class FromMysqlToPostgres {
 			contactData.telephone = "No phone number";		
 		}
 		em.persist(contactData);
+		
 		
 		return person;
 	}
@@ -654,11 +682,7 @@ public class FromMysqlToPostgres {
 				int idCodiceOrarioLavoro = rs.getInt("id");
 				if(mappaCodiciWorkingTimeType.get(idCodiceOrarioLavoro)!=null){
 					wtt = WorkingTimeType.findById(mappaCodiciWorkingTimeType.get(idCodiceOrarioLavoro));
-
-					wtt.person = person;
-					em.persist(wtt);
-										
-					
+				
 					wttd_mo = new WorkingTimeTypeDay();
 					wttd_mo.workingTimeType = wtt;
 					wttd_mo.dayOfWeek = 1;
@@ -776,12 +800,10 @@ public class FromMysqlToPostgres {
 					wtt.description = rs.getString("nome");
 					wtt.shift = rs.getBoolean("turno");
 
-					wtt.person = person;
-					em.persist(wtt);
+					//wtt.person = person;
+					em.persist(wtt);				
 					
-					
-					mappaCodiciWorkingTimeType.put(idCodiceOrarioLavoro,wtt.id);
-					
+					mappaCodiciWorkingTimeType.put(idCodiceOrarioLavoro,wtt.id);					
 					
 					wttd_mo = new WorkingTimeTypeDay();
 					wttd_mo.workingTimeType = wtt;

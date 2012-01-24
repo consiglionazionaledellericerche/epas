@@ -6,13 +6,13 @@ package models;
 import java.util.List;
 
 import javax.persistence.Entity;
-<<<<<<< HEAD
+
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-=======
->>>>>>> 5b2767fc827d089fcf0ffe161d3f8912d1d592f5
+
+
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -48,10 +48,9 @@ public class WorkingTimeType extends Model {
 	/**
 	 * relazione con la tabella persone
 	 */
-	@ManyToOne
-	@JoinColumn(name="person_id", nullable= false)
-	public Person person;
-	
+	@OneToMany(mappedBy="workingTimeType")
+	public List<Person> person;
+		
 	
 	/**
 	 * relazione con la tabella di specifiche di orario di lavoro
