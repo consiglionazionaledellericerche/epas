@@ -81,7 +81,10 @@ public class PersonDay {
 	
 	public Absence getAbsence() {
 		if (absence == null) {
-			//si calcola prendendola dal db
+			
+			absence = Absence.find("Select abs from Absence abs where abs.person = ? " +
+					" and abs.date = ? ", person, date).first();
+			
 		}
 		return absence;
 	}
@@ -224,10 +227,10 @@ public class PersonDay {
 	public List<AbsenceType> absenceList() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		
 		List<AbsenceType> listaAssenze = new ArrayList<AbsenceType>();
-		EntityManager em = JPA.em();
+		
 		listaAssenze = AbsenceType.find("SELECT abt FROM AbsenceType abt, Absence abs, Person p " +
 				"WHERE abs.person = p AND abs.absenceType = abt AND p = ? AND abs.date = ?", person, date).fetch();
-		//Connection mypostgresCon = getMyPostgresConnection();
+		
 		if(listaAssenze != null){
 			Iterator iter = listaAssenze.iterator();
 			while(iter.hasNext()){
