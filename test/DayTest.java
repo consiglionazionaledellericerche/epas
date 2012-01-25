@@ -30,28 +30,28 @@ import models.Stamping;
 public class DayTest extends UnitTest{
 	
 //	private final static long CRISTAN_LUCCHESI_OROLOGIO_ID = 146;
-	private static Connection postgresqlConn = null;
-	public static String myPostgresDriver = Play.configuration.getProperty("db.new.driver");
+//	private static Connection postgresqlConn = null;
+//	public static String myPostgresDriver = Play.configuration.getProperty("db.new.driver");
 	
 	
-	public static Connection getMyPostgresConnection() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
-		if (postgresqlConn != null ) {
-			return postgresqlConn;
-		}
-		Class.forName(myPostgresDriver).newInstance();
-
-		return DriverManager.getConnection(
-				//Play.configuration.getProperty("db.new"));
-			Play.configuration.getProperty("db.new.url"),
-			Play.configuration.getProperty("db.new.user"),
-			Play.configuration.getProperty("db.new.password"));
-				
-	}
+//	public static Connection getMyPostgresConnection() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
+//		if (postgresqlConn != null ) {
+//			return postgresqlConn;
+//		}
+//		Class.forName(myPostgresDriver).newInstance();
+//
+//		return DriverManager.getConnection(
+//				//Play.configuration.getProperty("db.new"));
+//			Play.configuration.getProperty("db.new.url"),
+//			Play.configuration.getProperty("db.new.user"),
+//			Play.configuration.getProperty("db.new.password"));
+//				
+//	}
 	
 	@Test
 	public void testWorkingDay() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		
-		Connection postgresCon = getMyPostgresConnection();
+	//	Connection postgresCon = getMyPostgresConnection();
 		LocalDateTime now = new LocalDateTime();
 		now.now();
 		
@@ -60,10 +60,10 @@ public class DayTest extends UnitTest{
 		//LocalDateTime data = now.toLocalDate();
 		System.out.println("La Localdata è: " +data);
 				
-		long id = 40;
+		long id = 139;
 		Person person = Person.findById(id);		
 				
-		assertNotNull(person);
+		//assertNotNull(person);
 		PersonDay giorno = new PersonDay(person, data.toLocalDate());
 		List<Stamping> timbrature = new ArrayList<Stamping>();
 
