@@ -14,7 +14,7 @@ public class Application extends Controller {
     static void addPerson() {
         Person person = connected();
         if(person != null) {
-            renderArgs.put(USERNAME_SESSION_KEY, person);
+            renderArgs.put("person", person);
         }
     }
     

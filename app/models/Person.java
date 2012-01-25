@@ -16,7 +16,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
 
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -139,17 +138,5 @@ public class Person extends Model {
 	 * Numero di matricola
 	 */
 	public Integer number;
-	
-	public void createPerson(){
-		
-	}
-	
-	public void deletePerson(long id){
-		/**
-		 * a cascata vanno elimate tutte le occorrenze nelle tabelle correlate con person che hanno l'id dell persona
-		 * da cancellare
-		 */
-		int numberOfPersonDeleted = Person.delete("", id);
-	}
 	
 }
