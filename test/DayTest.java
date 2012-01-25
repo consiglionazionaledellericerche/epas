@@ -1,6 +1,3 @@
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import play.Logger;
-import play.Play;
 import play.test.Fixtures;
 import play.test.UnitTest;
 
@@ -25,25 +21,6 @@ import play.test.UnitTest;
  *
  */
 public class DayTest extends UnitTest{
-	
-//	private final static long CRISTAN_LUCCHESI_OROLOGIO_ID = 146;
-	private static Connection postgresqlConn = null;
-	public static String myPostgresDriver = Play.configuration.getProperty("db.new.driver");
-	
-	
-	public static Connection getMyPostgresConnection() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
-		if (postgresqlConn != null ) {
-			return postgresqlConn;
-		}
-		Class.forName(myPostgresDriver).newInstance();
-
-		return DriverManager.getConnection(
-				//Play.configuration.getProperty("db.new"));
-			Play.configuration.getProperty("db.new.url"),
-			Play.configuration.getProperty("db.new.user"),
-			Play.configuration.getProperty("db.new.password"));
-				
-	}
 	
 	@Before
 	public void loadFixtures() {
@@ -70,7 +47,7 @@ public class DayTest extends UnitTest{
 		assertNotNull(person.workingTimeType);
 		assertEquals(WorkingTimeTypeDay.findById(1), person.workingTimeType);
 		System.out.println("La persona con id " +id+ "ha la seguente tipologia di lavoro: " + person.workingTimeType.description);
-		
+
 		PersonDay giorno = new PersonDay(person, data.toLocalDate());
 		List<Stamping> timbrature = new ArrayList<Stamping>();
 

@@ -77,7 +77,10 @@ public class PersonDay {
 	
 	public Absence getAbsence() {
 		if (absence == null) {
-			//si calcola prendendola dal db
+			
+			absence = Absence.find("Select abs from Absence abs where abs.person = ? " +
+					" and abs.date = ? ", person, date).first();
+			
 		}
 		return absence;
 	}
@@ -220,9 +223,9 @@ public class PersonDay {
 	public List<AbsenceType> absenceList() {
 		
 		List<AbsenceType> listaAssenze = new ArrayList<AbsenceType>();
-
 		listaAssenze = AbsenceType.find("SELECT abt FROM AbsenceType abt, Absence abs, Person p " +
 				"WHERE abs.person = p AND abs.absenceType = abt AND p = ? AND abs.date = ?", person, date).fetch();
+
 		if(listaAssenze != null){
 			for (AbsenceType abt : listaAssenze) {
 				Logger.warn("Codice: " +abt.code);
