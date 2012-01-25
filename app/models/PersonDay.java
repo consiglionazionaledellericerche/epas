@@ -5,11 +5,8 @@ package models;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-
-import javax.persistence.EntityManager;
 
 import lombok.Data;
 
@@ -18,7 +15,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
 import play.Logger;
-import play.db.jpa.JPA;
 
 /**
  * Classe che rappresenta un giorno, sia esso lavorativo o festivo di una persona.
@@ -42,7 +38,7 @@ public class PersonDay {
 	 */
 	private Integer dailyTime;
 
-	private int timeAtWork;
+	private Integer timeAtWork;
 
 	private int progressive;
 
@@ -86,13 +82,13 @@ public class PersonDay {
 		return absence;
 	}
 	
-	public List<Stamping> getStampings(Person person, LocalDateTime date2) {
+	public List<Stamping> getStampings() {
 		if (stampings == null) {
 			
 			stampings = Stamping.find("SELECT s FROM Stamping s " +
 					"WHERE s.person = ? and date between ? and ? " +
 					"ORDER BY date", 
-					person, date2, date2.plusDays(1)).fetch();
+					person, date, date.plusDays(1)).fetch();
 							
 		}
 		return stampings;
@@ -103,7 +99,7 @@ public class PersonDay {
 	 * @param data
 	 * @return true se il giorno in questione è un giorno di festa. False altrimenti
 	 */
-	public boolean isHoliday(LocalDate date){
+	public boolean isHoliday(){
 		if (date!=null){
 
 			Logger.warn("Nel metodo isHoliday la data è: " +date);
@@ -136,13 +132,13 @@ public class PersonDay {
 	
 	/**
 	 * 
-	 * @param date2
+	 * @param date
 	 * @return numero di minuti in cui una persona è stata a lavoro in quella data
 	 */
-	public int timeAtWork(Person person, LocalDateTime date2){
+	public int timeAtWork(){
 		
 		List<Stamping> listStamp = Stamping.find("select s from Stamping s " +
-			    "where s.person = ? and s.date between ? and ? order by date", person, date2, date2.plusDays(1)).fetch();
+			    "where s.person = ? and s.date between ? and ? order by date", person, date, date.plusDays(1)).fetch();
 		
 		int size = listStamp.size();
 		timeAtWork = 0;
@@ -177,7 +173,7 @@ public class PersonDay {
 	 * @param date
 	 * @return il progressivo delle ore in più o in meno rispetto al normale orario previsto per quella data
 	 */
-	public int progressive(LocalDate date){
+	public int progressive(){
 		if(progressive == 0){
 			if(date != null){
 			
@@ -199,7 +195,7 @@ public class PersonDay {
 	 * @return calcola il numero di minuti di cui è composta la data passata come parametro (di cui considera solo
 	 * ora e minuti
 	 */
-	public int toMinute(LocalDateTime date){
+	private static int toMinute(LocalDateTime date){
 		int dateToMinute = 0;
 		
 		if (date!=null){
@@ -221,20 +217,16 @@ public class PersonDay {
 	 * @throws IllegalAccessException 
 	 * @throws InstantiationException 
 	 */
-	public List<AbsenceType> absenceList() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+	public List<AbsenceType> absenceList() {
 		
 		List<AbsenceType> listaAssenze = new ArrayList<AbsenceType>();
-		EntityManager em = JPA.em();
+
 		listaAssenze = AbsenceType.find("SELECT abt FROM AbsenceType abt, Absence abs, Person p " +
 				"WHERE abs.person = p AND abs.absenceType = abt AND p = ? AND abs.date = ?", person, date).fetch();
-		//Connection mypostgresCon = getMyPostgresConnection();
 		if(listaAssenze != null){
-			Iterator iter = listaAssenze.iterator();
-			while(iter.hasNext()){
-				AbsenceType abt = (AbsenceType) iter.next(); 
+			for (AbsenceType abt : listaAssenze) {
 				Logger.warn("Codice: " +abt.code);
-			    //System.out.print("Codice: " +abt.code );
-			}		
+			}
 		}
 		else
 			Logger.warn("Non ci sono assenze" );
@@ -250,49 +242,19 @@ public class PersonDay {
 	 * @param person
 	 * @return se la persona può usufruire del buono pasto per quella data
 	 */
-	public boolean mealTicket(LocalDateTime date, int timeAtWork, Person person){
+	public boolean mealTicket(){
 		boolean isMealTicketAvailable;
+		if (timeAtWork == null) {
+			timeAtWork = timeAtWork();
+		}
 		if(timeAtWork == 0){
 			isMealTicketAvailable = false;
 		}
-			
 		else{
-			timeAtWork = timeAtWork(person, date);
 			isMealTicketAvailable = true;
 		}
 		return isMealTicketAvailable;
 	}
-	
-	public int difference(){
-		if(difference == 0){
-			
-		}
-		return difference;
-	}
-	
-	public String workingTimeType(Person person){
 		
-		String description = new String();
-		WorkingTimeType wtt = WorkingTimeType.find("Select wtt from Person p, WorkingTimeType wtt " +
-				"where p.workingTimeType = wtt and p = ?", person).first();
-				
-		description = wtt.description;
-		return description;
-	}
-	
-	
-	public int mealTicketToUse(){
-		return 0;
-		
-	}
-	
-	public int mealTicketToReturn(){
-		return 0;
-	}
-	
-	public int officeWorkingDay(){
-		return 0;
-	}
-	
 	
 }

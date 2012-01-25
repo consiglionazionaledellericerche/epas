@@ -38,8 +38,14 @@
     <body>
     
 		<div id="container">
-			<header>
+			<header class="${$person?.id != nil ? 'loggedIn' : 'notLoggedIn'}">
 				<h1>#{get 'title' /}</h1>
+				#{if person?.id}
+				<div id="options">
+					logged in as: ${person}
+					<a href="@{Application.logout()}">Logout</a>
+				</div>
+				#{/if}
 			</header>
 			<div id="main" role="main">
 

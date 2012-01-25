@@ -3,8 +3,8 @@ html {
 }
 
 body {
-	margin: 20px auto;
-    width: 690px;
+	/*margin: 20px auto;*/
+    /*width: 690px;*/
     font-family: Arial;
     color: rgb(54, 47, 45);
     background: #fff;
@@ -36,10 +36,14 @@ a {
 
 /** Header **/
 
-header {
+header.notLoggedIn {
     height: 200px;
-    position: relative;
+    /*position: relative;*/
     background: #fff url(../images/time_banner.jpg) 0px -180px no-repeat;
+}
+
+header {
+	position: relative;
 }
 
 header h1 {
@@ -74,7 +78,7 @@ header #options a {
 #formLogin {
     border-bottom: 1px dashed #aaa;
     width: 300px;
-    margin: 0 auto;
+    /*margin: 0 auto;*/
     padding: 20px;
 }
 

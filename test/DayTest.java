@@ -1,26 +1,23 @@
-import it.cnr.iit.epas.FromMysqlToPostgres;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
-import org.joda.time.LocalDate;
+import models.AbsenceType;
+import models.Person;
+import models.PersonDay;
+import models.Stamping;
+import models.WorkingTimeTypeDay;
+
 import org.joda.time.LocalDateTime;
+import org.junit.Before;
 import org.junit.Test;
 
 import play.Logger;
 import play.Play;
+import play.test.Fixtures;
 import play.test.UnitTest;
-import models.AbsenceType;
-
-import models.Absence;
-import models.Person;
-import models.PersonDay;
-import models.Stamping;
 
 /**
  * 
@@ -48,10 +45,15 @@ public class DayTest extends UnitTest{
 				
 	}
 	
+	@Before
+	public void loadFixtures() {
+		Fixtures.deleteDatabase();
+		Fixtures.loadModels("data.yml");
+	}
+	
 	@Test
-	public void testWorkingDay() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+	public void testWorkingDay() {
 		
-		Connection postgresCon = getMyPostgresConnection();
 		LocalDateTime now = new LocalDateTime();
 		now.now();
 		
@@ -60,27 +62,28 @@ public class DayTest extends UnitTest{
 		//LocalDateTime data = now.toLocalDate();
 		System.out.println("La Localdata è: " +data);
 				
-		long id = 40;
-		Person person = Person.findById(id);		
+		long id = 1;
+		Person person = Person.findById(1);		
 				
 		assertNotNull(person);
+		
+		assertNotNull(person.workingTimeType);
+		assertEquals(WorkingTimeTypeDay.findById(1), person.workingTimeType);
+		System.out.println("La persona con id " +id+ "ha la seguente tipologia di lavoro: " + person.workingTimeType.description);
+		
 		PersonDay giorno = new PersonDay(person, data.toLocalDate());
 		List<Stamping> timbrature = new ArrayList<Stamping>();
 
-		
-		String tipoLavoro = giorno.workingTimeType(person);
-		System.out.println("La persona con id " +id+ "ha la seguente tipologia di lavoro: " +tipoLavoro);
-		
-		timbrature = giorno.getStampings(person, data);
+		timbrature = giorno.getStampings();
 		assertNotNull(timbrature);
 		
 		System.out.println("Creo un personDay con data : " +now.toLocalDate());
-		int giornoDiLavoro = giorno.timeAtWork(person,data); 
+		int giornoDiLavoro = giorno.timeAtWork(); 
 		assertNotNull(giornoDiLavoro);
 		
 		System.out.println("Ho lavorato: " +giornoDiLavoro+ "minuti in data " +data);
 		
-		boolean festa = giorno.isHoliday(data.toLocalDate());
+		boolean festa = giorno.isHoliday();
 		if (festa == true)
 			System.out.println("E' festa!");
 		else
@@ -96,11 +99,8 @@ public class DayTest extends UnitTest{
 		List<AbsenceType> listaAssenze = giorno.absenceList();
 		assertNotNull(listaAssenze);
 		if(listaAssenze != null){
-			Iterator iter = listaAssenze.iterator();
-			while(iter.hasNext()){
-				AbsenceType abt = (AbsenceType) iter.next(); 
+			for (AbsenceType abt : listaAssenze) {
 				Logger.warn("Codice: " +abt.code);
-			    //System.out.print("Codice: " +abt.code );
 			}
 		}			
 		else
