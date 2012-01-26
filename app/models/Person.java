@@ -122,7 +122,7 @@ public class Person extends Model {
 	@Required
 	public String surname;
 	
-	public String othersSurname;
+	public String othersSurnames;
 	
 	@Column(name = "born_date")
 	public Date bornDate;
