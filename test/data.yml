@@ -56,4 +56,26 @@ Person(cristian):
     surname: Lucchesi
     workingTimeType: normal
     
- 	
+Stamping(t1):
+    data: 2001-07-03 08:00
+    stampType: timbratureIngresso
+    person: cristian
+    wayType: in
+
+Stamping(t2):
+    data: 2001-07-03 12:00
+    stampType: timbratureUscita
+    person: cristian
+    wayType: out
+
+Stamping(t3):
+    data: 2001-07-03 13:00
+    stampType: timbratureIngresso
+    person: cristian
+    wayType: in
+
+Stamping(t4):
+    data: 2001-07-03 18:00
+    stampType: timbratureUscita
+    person: cristian
+    wayType: out
