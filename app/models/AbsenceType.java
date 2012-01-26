@@ -20,7 +20,7 @@ import play.db.jpa.Model;
  *
  */
 @Entity
-@Table(name="absence_type")
+@Table(name="absence_types")
 @Audited
 @Inheritance(strategy=InheritanceType.JOINED)
 public class AbsenceType extends Model {

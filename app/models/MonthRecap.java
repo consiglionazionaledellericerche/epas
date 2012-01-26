@@ -143,10 +143,8 @@ public class MonthRecap extends Model {
 			@NotNull Person person, 
 			@Min(1970) int year, 
 			@Range(min=1, max=12) int month) {
-		if (person == null) {
-			throw new RuntimeException("person should not be null");
-		}
-		MonthRecap monthRecap = MonthRecap.find("byPerson", person).first();
+
+		MonthRecap monthRecap = MonthRecap.find("byPersonAndYearAndMonth", person, year, month).first();
 		if (monthRecap == null) {
 			return new MonthRecap(person, year, month);
 		}
@@ -159,14 +157,20 @@ public class MonthRecap extends Model {
 	 * @return la lista di giorni (PersonDay) associato alla persona nel mese di riferimento
 	 */
 	public List<PersonDay> getDays() {
+		Logger.trace("getting days of %s-%s-%s", year, month, 1);
+
 		if (days != null) {
 			return days;
 		}
 		days = new ArrayList<PersonDay>();
 		Calendar firstDayOfMonth = GregorianCalendar.getInstance();
 		firstDayOfMonth.set(year, month, 1);
-		for (int day = 1; day < firstDayOfMonth.getActualMaximum(Calendar.DAY_OF_MONTH); day++) {
-			Logger.info("generating PersonDay: person = %s, year = %d, month = %d, day = %d", person.username, year, month, day);
+		
+		Logger.trace(" %s-%s-%s : maximum day of month = %s", 
+			year, month, 1, firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH));
+		
+		for (int day = 1; day <= firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH); day++) {
+			Logger.trace("generating PersonDay: person = %s, year = %d, month = %d, day = %d", person.username, year, month, day);
 			days.add(new PersonDay(person, new LocalDate(year, month, day)));
 		}
 		return days;
