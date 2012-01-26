@@ -27,6 +27,9 @@ public class PersonDay {
 
 	public final LocalDate date;
 	
+	public final LocalDateTime startOfDay;
+	public final LocalDateTime endOfDay;
+	
 	private final Person person;
 	
 	private List<Stamping> stampings = null;
@@ -47,6 +50,8 @@ public class PersonDay {
 	public PersonDay(Person person, LocalDate date) {
 		this.person = person;
 		this.date = date;
+		this.startOfDay = new LocalDateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 0, 0);
+		this.endOfDay = new LocalDateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 23, 59);
 	}
 	
 	/**	 
@@ -91,7 +96,7 @@ public class PersonDay {
 			stampings = Stamping.find("SELECT s FROM Stamping s " +
 					"WHERE s.person = ? and date between ? and ? " +
 					"ORDER BY date", 
-					person, date, date.plusDays(1)).fetch();
+					person, startOfDay, endOfDay).fetch();
 							
 		}
 		return stampings;
@@ -141,7 +146,7 @@ public class PersonDay {
 	public int timeAtWork(){
 		
 		List<Stamping> listStamp = Stamping.find("select s from Stamping s " +
-			    "where s.person = ? and s.date between ? and ? order by date", person, date, date.plusDays(1)).fetch();
+			    "where s.person = ? and s.date between ? and ? order by date", person, startOfDay, endOfDay).fetch();
 		
 		int size = listStamp.size();
 		timeAtWork = 0;
