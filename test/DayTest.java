@@ -52,7 +52,7 @@ public class DayTest extends UnitTest{
 		PersonDay giorno = new PersonDay(person, data.toLocalDate());
 		List<Stamping> timbrature = new ArrayList<Stamping>();
 
-		timbrature = giorno.getStampings(data);
+		timbrature = giorno.getStampings();
 		assertNotNull(timbrature);
 		
 		System.out.println("Creo un personDay con data : " +now.toLocalDate());

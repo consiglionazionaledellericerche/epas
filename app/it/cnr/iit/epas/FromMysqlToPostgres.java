@@ -248,35 +248,38 @@ public class FromMysqlToPostgres {
 		while(rs.next()){
 			int idCodiceTimbratura = rs.getInt("id");
 			tipoTimbratura = rs.getByte("TipoTimbratura");
-			if(mappaCodiciStampType.get(idCodiceTimbratura)== null){
+			if(mappaCodiciStampType.get(idCodiceTimbratura)== null){				
+				
 				stampType = new StampType();				
 				
-				if(tipoTimbratura % 2 == 1 && tipoTimbratura / 2 == 0){
+				if((tipoTimbratura % 2 == 1) && (tipoTimbratura / 2 == 0)){
 					stampType.description = "Timbratura di ingresso";					
 				}
-				if(tipoTimbratura % 2 == 0 && tipoTimbratura / 2 == 1 ){
+				if((tipoTimbratura % 2 == 0) && (tipoTimbratura / 2 == 1) ){
 					stampType.description = "Timbratura d'uscita per pranzo";
 				}
-				if(tipoTimbratura % 2 == 1 && tipoTimbratura / 2 == 1 ){
+				if((tipoTimbratura % 2 == 1) && (tipoTimbratura / 2 == 1 )){
 					stampType.description = "Timbratura di ingresso dopo pausa pranzo";
 				}
-				if(tipoTimbratura % 2 == 0 && tipoTimbratura / 2 == 2){
+				if((tipoTimbratura % 2 == 0) && (tipoTimbratura / 2 == 2)){
 					stampType.description = "Timbratura di uscita";
 				}
-				em.persist(stampType);
+				if((tipoTimbratura % 2 == 1) && (tipoTimbratura / 2 == 2)){
+					stampType.description = "Altra timbratura di ingresso";
+				}
+				if((tipoTimbratura % 2 == 0) && (tipoTimbratura / 2 == 3)){
+					stampType.description = "Altra timbratura di uscita";
+				}
+				em.persist(stampType);	
 				mappaCodiciStampType.put(idCodiceTimbratura,stampType.id);
 			}
 			else{
-				stampType = StampType.findById(mappaCodiciStampType.get(idCodiceTimbratura));
-				
-			}				
-						
+				stampType = StampType.findById(mappaCodiciStampType.get(idCodiceTimbratura));	
+			}
+					
 			stamping = new Stamping();
 			stamping.stampType = stampType;	
 			stamping.person = person;
-			/**
-			 * popolo la tabella stampings
-			 */
 						
 			if(tipoTimbratura % 2 != 0)
 				stamping.way = WayType.in;					
@@ -286,14 +289,7 @@ public class FromMysqlToPostgres {
 			Date giorno = rs.getDate("Giorno");
 			Time ora = null;
 			try {
-				/**
-				 * per adesso svolgo l'intero processo del controllo sull'ora all'interno del metodo.
-				 * In seguito verrà usata una funzione da chiamare che svolgerà questo compito.
-				 */
-				
-				//il campo Ora contiene dei valori piuttosto "bizzarri", tipo 52:30:12, piuttosto che -11:40:00
-				//quindi il campo viene prelevato "row" come byte[] a poi convertito in stringa in modo da evitare
-				//controlli di consistenza da parte del driver JDBC che tenta di validare il campo come time.
+
 				byte[] bs = rs.getBytes("Ora");
 				String s = bs != null ? new String(bs) : null;
 				
@@ -314,7 +310,7 @@ public class FromMysqlToPostgres {
 		                calGiorno.set(Calendar.HOUR, hour);
 		                calGiorno.set(Calendar.MINUTE, minute);
 		                calGiorno.set(Calendar.SECOND, second);
-		                //stamping.date = calGiorno.getTime();
+		                
 		                stamping.date = new LocalDateTime(calGiorno);
 		                
 		                stamping.isMarkedByAdmin = false;
@@ -340,9 +336,8 @@ public class FromMysqlToPostgres {
 			                
 			                calGiorno.set(Calendar.HOUR, hour);
 			                calGiorno.set(Calendar.MINUTE, min);
-			                calGiorno.set(Calendar.SECOND, second);
+			                calGiorno.set(Calendar.SECOND, second);			                
 			                
-			                //stamping.date = calGiorno.getTime();
 			                stamping.date = new LocalDateTime(calGiorno);
 			                
 			                stamping.isMarkedByAdmin = true;
@@ -352,16 +347,7 @@ public class FromMysqlToPostgres {
 						else{
 							ora = rs.getTime("Ora");
 							Calendar calGiorno = new GregorianCalendar();
-							/**
-							 * controllo sulla validità del campo giorno della tabella Orario.
-							 * Le date di tipo 0000-00-00 presenti sul db mysql non sono riconosciute dal db postgres
-							 * e al momento dell'inserimento viene riscontrato un errore.
-							 * Con l'accorgimento del parametro "zeroDateTimeBehaviour=convertToNull alla stringa di 
-							 * connessione al db mysql si risolve l'inconveniente. Però nel momento di inserire un oggetto null
-							 * nel nuovo campo data della nuova tabella in postgres viene sollevata
-							 * una nullPointerException. Qui la necessità di usare una data fittizia: '1900-01-01' per 
-							 * questi casi
-							 */
+					
 							if(giorno!=null)
 								calGiorno.setTime(giorno);
 							else
@@ -372,8 +358,7 @@ public class FromMysqlToPostgres {
 			                calGiorno.set(Calendar.HOUR, hour);
 			                calGiorno.set(Calendar.MINUTE, minute);
 			                calGiorno.set(Calendar.SECOND, second);
-			                
-			                //stamping.date = calGiorno.getTime();
+			                			               
 			                stamping.date = new LocalDateTime(calGiorno);
 			                
 			                stamping.isMarkedByAdmin = false;
@@ -411,8 +396,7 @@ public class FromMysqlToPostgres {
 				"from Codici, Orario " +
 				"where Orario.TipoGiorno=Codici.id " +
 				"and TipoGiorno !=0 and Orario.id = "+id);
-		ResultSet rs = stmtAssenze.executeQuery();
-		
+		ResultSet rs = stmtAssenze.executeQuery();		
 		
 		if(rs != null){
 			Absence absence = null;
@@ -423,27 +407,19 @@ public class FromMysqlToPostgres {
 				 * popolo la tabella absence, la tabella absenceType, la tabella absenceTypeGroup
 				 * e le tabelle HourlyAbsenceType e DailyAbsenceType
 				 * con i dati prelevati da Orario e Codici
-				 */
-				absence = new Absence();
-				absence.person = person;
-				absence.date = new LocalDate(rs.getDate("Giorno"));				
+				 */			
 				
 				int idCodiceAssenza = rs.getInt("id");
 				if(mappaCodiciAbsence.get(idCodiceAssenza)== null){
 					
-					absenceType = new AbsenceType();
-					absence.absenceType = absenceType;
+					absenceType = new AbsenceType();					
 					absenceType.code = rs.getString("Codice");
 					absenceType.description = rs.getString("Descrizione");
 					if(rs.getByte("IgnoraTimbr")==0)
 						absenceType.ignoreStamping = false;
 					else 
-						absenceType.ignoreStamping = true;
-									
-					em.persist(absenceType);					
-					em.persist(absence);
-					mappaCodiciAbsence.put(idCodiceAssenza,absenceType.id);
-					
+						absenceType.ignoreStamping = true;					
+										
 					if(rs.getString("Gruppo")!=null){
 						absTypeGroup = new AbsenceTypeGroup();
 						absTypeGroup.absenceType = absenceType;
@@ -456,20 +432,42 @@ public class FromMysqlToPostgres {
 						else 
 							absTypeGroup.minutesExcess = true; 
 						em.persist(absTypeGroup);
-					}					
+					}
+					/**
+					 * caso di assenze orarie
+					 */
+					if(rs.getInt("QuantGiust") != 0){
+						HourlyAbsenceType hourlyAbsenceType = new HourlyAbsenceType();
+						hourlyAbsenceType.absenceType = absenceType;					
+						hourlyAbsenceType.justifiedWorkTime = rs.getInt("QuantGiust");
+						em.persist(hourlyAbsenceType);
+					}
+					/**
+					 * caso di assenze giornaliere
+					 */
+					else{
+						DailyAbsenceType dailyAbsenceType = new DailyAbsenceType();
+						dailyAbsenceType.absenceType = absenceType;
+						Logger.debug("Termino di creare le assenze");
+						em.persist(dailyAbsenceType);
+					}
+					em.persist(absenceType);
+					mappaCodiciAbsence.put(idCodiceAssenza,absenceType.id);
+					
+					absence = new Absence();
+					absence.person = person;
+					absence.date = new LocalDate(rs.getDate("Giorno"));	
+					absence.absenceType = absenceType;
+					em.persist(absence);
 					
 				}
 				else{
 					absenceType = AbsenceType.findById(mappaCodiciAbsence.get(idCodiceAssenza));
+					absence = new Absence();
+					absence.person = person;
+					absence.date = new LocalDate(rs.getDate("Giorno"));	
 					absence.absenceType = absenceType;	
-//					absenceType.code = rs.getString("Codice");
-//					absenceType.description = rs.getString("Descrizione");
-//					if(rs.getByte("IgnoraTimbr")==0)
-//						absenceType.ignoreStamping = false;
-//					else 
-//						absenceType.ignoreStamping = true;
-//									
-//					em.persist(absenceType);					
+					
 					em.persist(absence);
 					if(rs.getString("Gruppo")!=null){
 					
@@ -485,26 +483,7 @@ public class FromMysqlToPostgres {
 										
 						em.persist(absTypeGroup);
 					}
-				}
-						
-				/**
-				 * caso di assenze orarie
-				 */
-				if(rs.getInt("QuantGiust") != 0){
-					HourlyAbsenceType hourlyAbsenceType = new HourlyAbsenceType();
-					hourlyAbsenceType.absenceType = absenceType;					
-					hourlyAbsenceType.justifiedWorkTime = rs.getInt("QuantGiust");
-					em.persist(hourlyAbsenceType);
-				}
-				/**
-				 * caso di assenze giornaliere
-				 */
-				else{
-					DailyAbsenceType dailyAbsenceType = new DailyAbsenceType();
-					dailyAbsenceType.absenceType = absenceType;
-					Logger.debug("Termino di creare le assenze");
-					em.persist(dailyAbsenceType);
-				}
+				}			
 					
 			}
 		}	
