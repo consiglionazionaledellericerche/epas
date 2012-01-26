@@ -2,7 +2,6 @@ package controllers;
 
 import models.MonthRecap;
 import models.Person;
-import net.sf.oval.constraint.NotNull;
 
 import org.joda.time.LocalDate;
 
@@ -10,9 +9,6 @@ import play.mvc.Before;
 import play.mvc.Controller;
 
 public class Stampings extends Controller {
-
-
-    //public static void show(Long id) {
 
     @Before
     static void checkPerson() {

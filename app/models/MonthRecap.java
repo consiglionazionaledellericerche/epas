@@ -143,8 +143,10 @@ public class MonthRecap extends Model {
 			@NotNull Person person, 
 			@Min(1970) int year, 
 			@Range(min=1, max=12) int month) {
-
-		MonthRecap monthRecap = MonthRecap.find("byPersonAndYearAndMonth", person, year, month).first();
+		if (person == null) {
+			throw new RuntimeException("person should not be null");
+		}
+		MonthRecap monthRecap = MonthRecap.find("byPerson", person).first();
 		if (monthRecap == null) {
 			return new MonthRecap(person, year, month);
 		}
@@ -163,8 +165,8 @@ public class MonthRecap extends Model {
 		days = new ArrayList<PersonDay>();
 		Calendar firstDayOfMonth = GregorianCalendar.getInstance();
 		firstDayOfMonth.set(year, month, 1);
-		for (int day = 1; day <= firstDayOfMonth.getActualMaximum(Calendar.DAY_OF_MONTH); day++) {
-			Logger.trace("generating PersonDay: person = %s, year = %d, month = %d, day = %d", person.username, year, month, day);
+		for (int day = 1; day < firstDayOfMonth.getActualMaximum(Calendar.DAY_OF_MONTH); day++) {
+			Logger.info("generating PersonDay: person = %s, year = %d, month = %d, day = %d", person.username, year, month, day);
 			days.add(new PersonDay(person, new LocalDate(year, month, day)));
 		}
 		return days;
