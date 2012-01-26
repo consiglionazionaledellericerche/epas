@@ -462,14 +462,14 @@ public class FromMysqlToPostgres {
 				else{
 					absenceType = AbsenceType.findById(mappaCodiciAbsence.get(idCodiceAssenza));
 					absence.absenceType = absenceType;	
-					absenceType.code = rs.getString("Codice");
-					absenceType.description = rs.getString("Descrizione");
-					if(rs.getByte("IgnoraTimbr")==0)
-						absenceType.ignoreStamping = false;
-					else 
-						absenceType.ignoreStamping = true;
-									
-					em.persist(absenceType);					
+//					absenceType.code = rs.getString("Codice");
+//					absenceType.description = rs.getString("Descrizione");
+//					if(rs.getByte("IgnoraTimbr")==0)
+//						absenceType.ignoreStamping = false;
+//					else 
+//						absenceType.ignoreStamping = true;
+//									
+//					em.persist(absenceType);					
 					em.persist(absence);
 					if(rs.getString("Gruppo")!=null){
 					
