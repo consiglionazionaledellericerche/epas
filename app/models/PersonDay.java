@@ -90,7 +90,7 @@ public class PersonDay {
 		return absence;
 	}
 	
-	public List<Stamping> getStampings(LocalDateTime datalocale) {
+	public List<Stamping> getStampings() {
 		if (stampings == null) {
 			
 			stampings = Stamping.find("SELECT s FROM Stamping s " +
@@ -143,7 +143,7 @@ public class PersonDay {
 	 * @param date
 	 * @return numero di minuti in cui una persona è stata a lavoro in quella data
 	 */
-	public int timeAtWork(LocalDateTime datalocale){
+	public int timeAtWork(){
 		
 		List<Stamping> listStamp = Stamping.find("select s from Stamping s " +
  		    "where s.person = ? and s.date between ? and ? order by date", person, startOfDay, endOfDay).fetch();
@@ -151,12 +151,26 @@ public class PersonDay {
 		
 		int size = listStamp.size();
 		timeAtWork = 0;
-		if(size%2 != 0){
-			/**
-			 * vuol dire che ci sono più timbrature di ingresso rispetto alle uscite o viceversa,
-			 * come devo gestire questa cosa???
-			 */
-		}
+		
+		if(((size / 2 == 1) && (size % 2 == 1)) || ((size / 2 == 0) && (size % 2 == 1))){
+			LocalDateTime now = new LocalDateTime();
+			now.now();
+			int nowToMinute = toMinute(now);
+			
+			for(Stamping s : listStamp){
+				if(s.way == Stamping.WayType.in)
+					timeAtWork -= toMinute(s.date);				
+				if(s.way == Stamping.WayType.out)
+					timeAtWork += toMinute(s.date);
+				if(timeAtWork < 0)
+					timeAtWork = nowToMinute + timeAtWork.intValue();
+				else 
+					timeAtWork = nowToMinute - timeAtWork.intValue();
+				return timeAtWork;
+			}
+						
+		}		
+		
 		else{
 			
 			Iterator<Stamping> iter = listStamp.iterator();
@@ -169,11 +183,11 @@ public class PersonDay {
 				if(s.way == Stamping.WayType.out){
 					timeAtWork += toMinute(s.date);
 					System.out.println("Timbratura di uscita: "+timeAtWork);
-				}
-			}
+				}				
+			}			
 		}
 		System.out.println("Totale: "+timeAtWork);
-		return timeAtWork;
+		return timeAtWork;	
 		
 	}
 	
@@ -251,10 +265,10 @@ public class PersonDay {
 	 * @param person
 	 * @return se la persona può usufruire del buono pasto per quella data
 	 */
-	public boolean mealTicket(LocalDateTime datalocale){
+	public boolean mealTicket(){
 		boolean isMealTicketAvailable;
 		if (timeAtWork == null) {
-			timeAtWork = timeAtWork(datalocale);
+			timeAtWork = timeAtWork();
 		}
 		if(timeAtWork == 0){
 			isMealTicketAvailable = false;

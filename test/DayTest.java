@@ -56,7 +56,7 @@ public class DayTest extends UnitTest{
 		assertNotNull(timbrature);
 		
 		System.out.println("Creo un personDay con data : " +now.toLocalDate());
-		int giornoDiLavoro = giorno.timeAtWork(data); 
+		int giornoDiLavoro = giorno.timeAtWork(); 
 		assertNotNull(giornoDiLavoro);
 		
 		System.out.println("Ho lavorato: " +giornoDiLavoro+ "minuti in data " +data);
