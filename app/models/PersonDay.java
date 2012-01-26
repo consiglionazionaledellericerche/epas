@@ -85,13 +85,13 @@ public class PersonDay {
 		return absence;
 	}
 	
-	public List<Stamping> getStampings() {
+	public List<Stamping> getStampings(LocalDateTime datalocale) {
 		if (stampings == null) {
 			
 			stampings = Stamping.find("SELECT s FROM Stamping s " +
 					"WHERE s.person = ? and date between ? and ? " +
 					"ORDER BY date", 
-					person, date, date.plusDays(1)).fetch();
+					person, datalocale, datalocale.plusDays(1)).fetch();
 							
 		}
 		return stampings;
@@ -138,10 +138,10 @@ public class PersonDay {
 	 * @param date
 	 * @return numero di minuti in cui una persona è stata a lavoro in quella data
 	 */
-	public int timeAtWork(){
+	public int timeAtWork(LocalDateTime datalocale){
 		
 		List<Stamping> listStamp = Stamping.find("select s from Stamping s " +
-			    "where s.person = ? and s.date between ? and ? order by date", person, date, date.plusDays(1)).fetch();
+			    "where s.person = ? and s.date between ? and ? order by date", person, datalocale, datalocale.plusDays(1)).fetch();
 		
 		int size = listStamp.size();
 		timeAtWork = 0;
@@ -245,10 +245,10 @@ public class PersonDay {
 	 * @param person
 	 * @return se la persona può usufruire del buono pasto per quella data
 	 */
-	public boolean mealTicket(){
+	public boolean mealTicket(LocalDateTime datalocale){
 		boolean isMealTicketAvailable;
 		if (timeAtWork == null) {
-			timeAtWork = timeAtWork();
+			timeAtWork = timeAtWork(datalocale);
 		}
 		if(timeAtWork == 0){
 			isMealTicketAvailable = false;

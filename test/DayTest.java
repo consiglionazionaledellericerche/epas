@@ -5,6 +5,7 @@ import models.AbsenceType;
 import models.Person;
 import models.PersonDay;
 import models.Stamping;
+import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 
 import org.joda.time.LocalDateTime;
@@ -34,28 +35,28 @@ public class DayTest extends UnitTest{
 		LocalDateTime now = new LocalDateTime();
 		now.now();
 		
-		LocalDateTime data = new LocalDateTime(2000,07,03, 8,0);
+		LocalDateTime data = new LocalDateTime(2001,07,03,8,0);
 		
 		//LocalDateTime data = now.toLocalDate();
 		System.out.println("La Localdata è: " +data);
 				
-		long id = 1;
-		Person person = Person.findById(1);		
+		long id = 2;
+		Person person = Person.findById(id);		
 				
 		assertNotNull(person);
 		
 		assertNotNull(person.workingTimeType);
-		assertEquals(WorkingTimeTypeDay.findById(1), person.workingTimeType);
+		assertEquals(WorkingTimeType.findById(id), person.workingTimeType);
 		System.out.println("La persona con id " +id+ "ha la seguente tipologia di lavoro: " + person.workingTimeType.description);
 
 		PersonDay giorno = new PersonDay(person, data.toLocalDate());
 		List<Stamping> timbrature = new ArrayList<Stamping>();
 
-		timbrature = giorno.getStampings();
+		timbrature = giorno.getStampings(data);
 		assertNotNull(timbrature);
 		
 		System.out.println("Creo un personDay con data : " +now.toLocalDate());
-		int giornoDiLavoro = giorno.timeAtWork(); 
+		int giornoDiLavoro = giorno.timeAtWork(data); 
 		assertNotNull(giornoDiLavoro);
 		
 		System.out.println("Ho lavorato: " +giornoDiLavoro+ "minuti in data " +data);
