@@ -21,8 +21,7 @@ import models.Competence;
 import models.CompetenceCode;
 import models.ContactData;
 import models.Contract;
-import models.DailyAbsenceType;
-import models.HourlyAbsenceType;
+
 import models.Location;
 import models.MonthRecap;
 import models.Person;
@@ -240,13 +239,13 @@ public class FromMysqlToPostgres {
 		 * di ciascuna persona
 		 */
 		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT * FROM Orario WHERE TipoTimbratura is not null " +
-				"and TipoGiorno = 0 and id=" + id +" limit 200");
+				"and TipoGiorno = 0 and id=" + id);
 		ResultSet rs = stmtOrari.executeQuery();	
 		StampType stampType = null;
 		Stamping stamping = null;
 		byte tipoTimbratura;
 		while(rs.next()){
-			int idCodiceTimbratura = rs.getInt("id");
+			int idCodiceTimbratura = rs.getInt("TipoTimbratura");
 			tipoTimbratura = rs.getByte("TipoTimbratura");
 			if(mappaCodiciStampType.get(idCodiceTimbratura)== null){				
 				
@@ -267,9 +266,7 @@ public class FromMysqlToPostgres {
 				if((tipoTimbratura % 2 == 1) && (tipoTimbratura / 2 == 2)){
 					stampType.description = "Altra timbratura di ingresso";
 				}
-				if((tipoTimbratura % 2 == 0) && (tipoTimbratura / 2 == 3)){
-					stampType.description = "Altra timbratura di uscita";
-				}
+				
 				em.persist(stampType);	
 				mappaCodiciStampType.put(idCodiceTimbratura,stampType.id);
 			}
@@ -419,10 +416,28 @@ public class FromMysqlToPostgres {
 						absenceType.ignoreStamping = false;
 					else 
 						absenceType.ignoreStamping = true;					
-										
+					
+					/**
+					 * caso di assenze orarie
+					 */
+					if(rs.getInt("QuantGiust") != 0){
+						absenceType.isHourlyAbsence = true;
+						absenceType.isDailyAbsence = false;
+						absenceType.justifiedWorkTime = rs.getInt("QuantGiust");
+						
+					}
+					/**
+					 * caso di assenze giornaliere
+					 */
+					else{
+						absenceType.isDailyAbsence = true;
+						absenceType.isHourlyAbsence = false;
+						
+					}				
+					
+					
 					if(rs.getString("Gruppo")!=null){
-						absTypeGroup = new AbsenceTypeGroup();
-						absTypeGroup.absenceType = absenceType;
+						absTypeGroup = new AbsenceTypeGroup();						
 						absTypeGroup.label = rs.getString("Gruppo");
 						absTypeGroup.buildUp = rs.getInt("Accumulo");
 						absTypeGroup.buildUpLimit = rs.getInt("Limite");
@@ -432,27 +447,10 @@ public class FromMysqlToPostgres {
 						else 
 							absTypeGroup.minutesExcess = true; 
 						em.persist(absTypeGroup);
-					}
-					/**
-					 * caso di assenze orarie
-					 */
-					if(rs.getInt("QuantGiust") != 0){
-						HourlyAbsenceType hourlyAbsenceType = new HourlyAbsenceType();
-						hourlyAbsenceType.absenceType = absenceType;					
-						hourlyAbsenceType.justifiedWorkTime = rs.getInt("QuantGiust");
-						em.persist(hourlyAbsenceType);
-					}
-					/**
-					 * caso di assenze giornaliere
-					 */
-					else{
-						DailyAbsenceType dailyAbsenceType = new DailyAbsenceType();
-						dailyAbsenceType.absenceType = absenceType;
-						Logger.debug("Termino di creare le assenze");
-						em.persist(dailyAbsenceType);
+						absenceType.absenceTypeGroup = absTypeGroup;
 					}
 					em.persist(absenceType);
-					mappaCodiciAbsence.put(idCodiceAssenza,absenceType.id);
+					mappaCodiciAbsence.put(idCodiceAssenza,absenceType.id);	
 					
 					absence = new Absence();
 					absence.person = person;
@@ -463,26 +461,18 @@ public class FromMysqlToPostgres {
 				}
 				else{
 					absenceType = AbsenceType.findById(mappaCodiciAbsence.get(idCodiceAssenza));
-					absence = new Absence();
-					absence.person = person;
-					absence.date = new LocalDate(rs.getDate("Giorno"));	
-					absence.absenceType = absenceType;	
 					
-					em.persist(absence);
-					if(rs.getString("Gruppo")!=null){
-					
-						absTypeGroup = new AbsenceTypeGroup();
-						absenceType.absenceTypeGroup = absTypeGroup;
-						if(rs.getByte("MinutiEccesso")==0)
-							absTypeGroup.minutesExcess = false;
-						else 
-							absTypeGroup.minutesExcess= true;
-						absTypeGroup.equivalentCode = rs.getString("CodiceSost");
-						absTypeGroup.buildUp = rs.getInt("Accumulo");
-						absTypeGroup.buildUpLimit = rs.getInt("Limite");				
-										
-						em.persist(absTypeGroup);
-					}
+					/**
+					 * caso di assenze orarie
+					 */
+
+						
+						absence = new Absence();
+						absence.person = person;
+						absence.date = new LocalDate(rs.getDate("Giorno"));	
+						absence.absenceType = absenceType;	
+						em.persist(absence);
+					//}
 				}			
 					
 			}

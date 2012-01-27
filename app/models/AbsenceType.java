@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -30,17 +31,17 @@ public class AbsenceType extends Model {
 	@OneToMany(mappedBy="absenceType")
 	public List<Absence> absence;	
 	
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name="absenceTypeGroup_id")
 	public AbsenceTypeGroup absenceTypeGroup;
 	
-	@OneToOne
-	@JoinColumn(name="hourlyAbsenceType_id")
-	public HourlyAbsenceType hourlyAbsenceType;
-	
-	@OneToOne
-	@JoinColumn(name="dailyAbsenceType_id")
-	public DailyAbsenceType dailyAbsenceType;
+//	@OneToOne
+//	@JoinColumn(name="hourlyAbsenceType_id")
+//	public HourlyAbsenceType hourlyAbsenceType;
+//	
+//	@OneToOne
+//	@JoinColumn(name="dailyAbsenceType_id")
+//	public DailyAbsenceType dailyAbsenceType;
 	
 	public String code;
 	
@@ -59,5 +60,11 @@ public class AbsenceType extends Model {
 	public boolean mealTicketCalculation;
 
 	public boolean ignoreStamping;		
+	
+	public boolean isHourlyAbsence;
+	
+	public int justifiedWorkTime;
+	
+	public boolean isDailyAbsence;
 	
 }
