@@ -12,8 +12,7 @@ import javax.persistence.EntityManager;
 
 import models.Absence;
 import models.AbsenceType;
-import models.DailyAbsenceType;
-import models.HourlyAbsenceType;
+
 import models.Person;
 import models.PersonDay;
 import models.StampType;
@@ -90,28 +89,28 @@ public class ModelTest extends UnitTest {
 		assertEquals(null, p2.id);
 		em.persist(p2);
 		assertNotNull(p2.id);
-		
-		HourlyAbsenceType hat = new HourlyAbsenceType();
-		hat.ignoreStamping = false;
-		hat.justifiedWorkTime = 3;
-		hat.mealTicketCalculation = true;		
-		
-		DailyAbsenceType dat = new DailyAbsenceType();		
-		dat.ignoreStamping = true;
-		dat.mealTicketCalculation = false;		
+//		
+//		HourlyAbsenceType hat = new HourlyAbsenceType();
+//		hat.ignoreStamping = false;
+//		hat.justifiedWorkTime = 3;
+//		hat.mealTicketCalculation = true;		
+//		
+//		DailyAbsenceType dat = new DailyAbsenceType();		
+//		dat.ignoreStamping = true;
+//		dat.mealTicketCalculation = false;		
 		
 		AbsenceType absenceType = new AbsenceType();
 		absenceType.code = "09s";
-		absenceType.dailyAbsenceType = dat;
+		//absenceType.dailyAbsenceType = dat;
 		
 		AbsenceType absenceType2 = new AbsenceType();
 		absenceType2.code = "20t";
-		absenceType2.hourlyAbsenceType = hat;
+		//absenceType2.hourlyAbsenceType = hat;
 		
-		dat.absenceType = absenceType;
-		em.persist(dat);
-		hat.absenceType = absenceType2;
-		em.persist(hat);
+		//dat.absenceType = absenceType;
+		//em.persist(dat);
+		//hat.absenceType = absenceType2;
+		//em.persist(hat);
 		
 		Absence absence = new Absence();	
 		absence.date = new LocalDate(GregorianCalendar.getInstance().getTime());
