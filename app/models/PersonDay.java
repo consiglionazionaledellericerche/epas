@@ -112,7 +112,7 @@ public class PersonDay {
 
 			Logger.warn("Nel metodo isHoliday la data è: " +date);
 			
-			if(date.getDayOfWeek() == 7)
+			if((date.getDayOfWeek() == 7)||(date.getDayOfWeek() == 6))
 				return true;		
 			if((date.getMonthOfYear() == 12) && (date.getDayOfMonth() == 25))
 				return true;
@@ -147,8 +147,9 @@ public class PersonDay {
 		
 		List<Stamping> listStamp = Stamping.find("select s from Stamping s " +
  		    "where s.person = ? and s.date between ? and ? order by date", person, startOfDay, endOfDay).fetch();
-
-		
+		for(Stamping s : listStamp){
+			System.out.println("gli elementi della lista di timbrature: " +s.date);
+		}
 		int size = listStamp.size();
 		timeAtWork = 0;
 		
@@ -156,38 +157,38 @@ public class PersonDay {
 			LocalDateTime now = new LocalDateTime();
 			now.now();
 			int nowToMinute = toMinute(now);
-			
+			int orelavoro=0;
 			for(Stamping s : listStamp){
 				if(s.way == Stamping.WayType.in)
-					timeAtWork -= toMinute(s.date);				
+					orelavoro -= toMinute(s.date);				
 				if(s.way == Stamping.WayType.out)
-					timeAtWork += toMinute(s.date);
-				if(timeAtWork < 0)
-					timeAtWork = nowToMinute + timeAtWork.intValue();
+					orelavoro += toMinute(s.date);
+				if(orelavoro < 0)
+					timeAtWork = nowToMinute + orelavoro;
 				else 
-					timeAtWork = nowToMinute - timeAtWork.intValue();
-				return timeAtWork;
+					timeAtWork = nowToMinute - orelavoro;
+				
 			}
-						
+			return timeAtWork;	
 		}		
 		
 		else{
-			
-			Iterator<Stamping> iter = listStamp.iterator();
-			while(iter.hasNext()){
-				Stamping s = iter.next();
+			int orealavoro=0;
+			for(Stamping s : listStamp){
 				if(s.way == Stamping.WayType.in){
-					timeAtWork -= toMinute(s.date);		
-					System.out.println("Timbratura di ingresso: "+timeAtWork);
+					orealavoro -= toMinute(s.date);
+					//timeAtWork -= toMinute(s.date);		
+					System.out.println("Timbratura di ingresso: "+orealavoro);	
 				}
 				if(s.way == Stamping.WayType.out){
-					timeAtWork += toMinute(s.date);
-					System.out.println("Timbratura di uscita: "+timeAtWork);
-				}				
-			}			
+					orealavoro += toMinute(s.date);
+					//timeAtWork += toMinute(s.date);
+					System.out.println("Timbratura di uscita: "+orealavoro);
+				}
+				timeAtWork = orealavoro;
+			}
+			return timeAtWork;
 		}
-		System.out.println("Totale: "+timeAtWork);
-		return timeAtWork;	
 		
 	}
 	
