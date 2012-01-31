@@ -14,6 +14,7 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDateTime;
 
+import play.data.validation.InPast;
 import play.data.validation.Required;
 import play.db.jpa.Model;
 
@@ -46,6 +47,7 @@ public class Stamping extends Model {
 	@Required
 	@Column
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDateTime")
+	@InPast
 	public LocalDateTime date;
 	
 	
