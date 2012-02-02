@@ -8,4 +8,5 @@ require:
     - joda-time -> joda-time-hibernate 1.3
     - org.yaml -> snakeyaml 1.9:
           force: true
+    - play -> db 1.1+      
     
