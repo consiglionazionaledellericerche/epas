@@ -15,6 +15,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
 import play.Logger;
+import play.db.jpa.Model;
 
 /**
  * Classe che rappresenta un giorno, sia esso lavorativo o festivo di una persona.
@@ -23,7 +24,7 @@ import play.Logger;
  *
  */
 @Data
-public class PersonDay {
+public class PersonDay extends Model{
 
 	public final LocalDate date;
 	
