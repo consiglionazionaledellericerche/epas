@@ -56,6 +56,7 @@ public class Person extends Model {
 	@OneToMany(mappedBy="person")
 	public List<MonthRecap> monthRecap;
 	
+		
 	/**
 	 * relazione con la tabella dei contratti
 	 */

@@ -5,7 +5,9 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import org.joda.time.DateTimeFieldType;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 
 import play.Logger;
 import play.db.jpa.Model;
@@ -17,12 +19,16 @@ import lombok.Data;
 @Data
 public class PersonMonth extends Model{
 	
+	private int year;
+	
+	private int month;
+	
 	private int workingDays;
 	
-	private final LocalDate date;
+	private LocalDate date;
 	
 	private Person person;
-
+	
 	private int daysAtWorkOnHoliday;
 	
 	private int daysAtWorkOnWorkingDays;
@@ -31,14 +37,46 @@ public class PersonMonth extends Model{
 	
 	private int differenceHoursAtEndOfMonth;
 	
-	private Absence justifiedAbsence = null;
+	private int justifiedAbsence = 0;
 	
-	private Absence notJustifiedAbsence = null;
+	private int notJustifiedAbsence = 0;
 	
 	private int mealTicketToRender;
 	
-	public PersonMonth(LocalDate data){
-		this.date= data;
+//	public PersonMonth(Person person, LocalDate data){
+//		this.person = person;	
+//		this.date = data;
+//	}
+	
+	public PersonMonth(Person person, LocalDate data){
+		this.person = person;
+		this.year = data.getYear();
+		this.month = data.getMonthOfYear();
+	}
+	
+	
+	
+	/**
+	 * prepara una lista con le timbrature di una giornata
+	 * @return
+	 */
+	public List<Stamping> getStampings(int day) {
+		List<Stamping> stampings;
+		LocalDateTime startOfDay = new LocalDateTime(date.getYear(), date.getMonthOfYear(), day, 0, 0);
+		LocalDateTime endOfDay = new LocalDateTime(date.getYear(), date.getMonthOfYear(), day, 23, 59);
+		stampings = Stamping.find("SELECT s FROM Stamping s " +
+					"WHERE s.person = ? and date between ? and ? " +
+					"ORDER BY date", person, startOfDay, endOfDay).fetch();							
+		
+		return stampings;
+	}
+	
+	public List<AbsenceType> getAbsences(int day){
+		LocalDate data = new LocalDate(date.getYear(),date.getMonthOfYear(), day);
+		List<AbsenceType> absences;
+		absences = AbsenceType.find("SELECT abt FROM AbsenceType abt, Absence abs, Person p " +
+				"WHERE abs.person = p AND abs.absenceType = abt AND p = ? AND abs.date = ?", person, data).fetch();
+		return absences;
 	}
 	
 	/**
@@ -76,17 +114,19 @@ public class PersonMonth extends Model{
 	 * @return workingDays
 	 */
 	public int getWorkingDays(){
-		
+		int month = date.getMonthOfYear();
+		int year = date.getYear();
+		Calendar firstDayOfMonth = GregorianCalendar.getInstance();
+		firstDayOfMonth.set(year, month, 1);
 		int giorniLavoro = 0;
-		List<PersonDay> pd = new ArrayList<PersonDay>();
-		pd = PersonDay.find("Select pd from PersonDay pd where person = ? and date >= ? and date < ?", person, date, date.plusMonths(1)).fetch();
-		for(PersonDay p : pd){
-			List<Stamping> timbrature = p.getStampings();
+		for (int day = 1; day <= firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH); day++) {			
+			List<Stamping> timbrature = getStampings(day);
 			if(timbrature != null){
 				giorniLavoro++;
 			}
-			daysAtWorkOnWorkingDays = giorniLavoro;
 		}		
+		daysAtWorkOnWorkingDays = giorniLavoro;
+				
 		return daysAtWorkOnWorkingDays;
 	}
 	
@@ -95,16 +135,19 @@ public class PersonMonth extends Model{
 	 * @return daysAtWorkOnHoliday
 	 */
 	public int workingDaysInHoliday(){
-		
-		List<PersonDay> pd = new ArrayList<PersonDay>();
-		pd = PersonDay.find("Select pd from PersonDay pd where person = ? and date >= ? and date < ?", person, date, date.plusMonths(1)).fetch();
-		for(PersonDay p : pd){
-			List<Stamping> timbrature = p.getStampings();
+		int month = date.getMonthOfYear();
+		int year = date.getYear();
+		Calendar firstDayOfMonth = GregorianCalendar.getInstance();
+		firstDayOfMonth.set(year, month, 1);
+		for (int day = 1; day <= firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH); day++) {
+			LocalDate data = new LocalDate(year, month, day);
+			List<Stamping> timbrature = getStampings(day);
 			if(timbrature!=null){
-				boolean festa = p.isHoliday();
-				if (festa = true)
-					daysAtWorkOnHoliday++;
+				boolean festa = isHoliday(data);
+				if (festa == true)
+					daysAtWorkOnHoliday++;	
 			}
+				
 		}				
 				
 		return daysAtWorkOnHoliday;
@@ -115,14 +158,14 @@ public class PersonMonth extends Model{
 	 * @return workingHours
 	 */
 	public int monthHoursRecap(){
+		int month = date.getMonthOfYear();
+		int year = date.getYear();
+		Calendar firstDayOfMonth = GregorianCalendar.getInstance();
+		firstDayOfMonth.set(year, month, 1);
+		for(int day= 1; day <= firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH); day++){
+			workingHours += dailyTimeAtWork(day);
+		}			
 		
-		if(workingHours == null){
-			List<PersonDay> pd = new ArrayList<PersonDay>();
-			pd = PersonDay.find("Select pd from PersonDay pd where person = ? and date >= ? and date < ?", person, date, date.plusMonths(1)).fetch();
-			for(PersonDay p : pd){
-				workingHours += p.timeAtWork();
-			}
-		}
 		return workingHours;
 	}
 	
@@ -132,13 +175,16 @@ public class PersonMonth extends Model{
 	 * @return mealTicketToRender
 	 */
 	public int mealTicketToRender(){
-		List<PersonDay> pd = new ArrayList<PersonDay>();
-		pd = PersonDay.find("Select pd from PersonDay pd where person = ? and date >= ? and date < ?", person, date, date.plusMonths(1)).fetch();
-		for(PersonDay p : pd){
-			if(p.timeAtWork() < 390)
-				mealTicketToRender++;
-		}
 		
+		int month = date.getMonthOfYear();
+		int year = date.getYear();
+		Calendar firstDayOfMonth = GregorianCalendar.getInstance();
+		firstDayOfMonth.set(year, month, 1);
+		for(int day= 1; day <= firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH); day++){			
+			int tempoLavoro = dailyTimeAtWork(day);
+			if(tempoLavoro < 390)
+				mealTicketToRender++;
+		}				
 		return mealTicketToRender;
 	}
 	
@@ -148,12 +194,176 @@ public class PersonMonth extends Model{
 	 */
 	public int getJustifiedAbsence(){
 		int numberOfJustifiedAbsence = 0;
-		List<PersonDay> pd = new ArrayList<PersonDay>();
-		pd = PersonDay.find("Select pd from PersonDay pd where person = ? and date >= ? and date < ?", person, date, date.plusMonths(1)).fetch();
-		for(PersonDay p : pd){
-			List <AbsenceType> listaAssenze = p.absenceList();
-			numberOfJustifiedAbsence = listaAssenze.size();
+		int month = date.getMonthOfYear();
+		int year = date.getYear();
+		Calendar firstDayOfMonth = GregorianCalendar.getInstance();
+		firstDayOfMonth.set(year, month, 1);
+		for(int day= 1; day <= firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH); day++){
+			LocalDate data = new LocalDate(year, month, day);
+			List<AbsenceType> listaAssenze = AbsenceType.find("SELECT abt FROM AbsenceType abt, Absence abs, Person p " +
+					"WHERE abs.person = p AND abs.absenceType = abt AND p = ? AND abs.date = ?", person, data).fetch();
+			if(listaAssenze!=null)
+				numberOfJustifiedAbsence += listaAssenze.size();
 		}
-		return numberOfJustifiedAbsence;
+		
+		justifiedAbsence = numberOfJustifiedAbsence;
+		return justifiedAbsence;
+	}
+	
+	/**
+	 * calcola il numero di giorni in cui non ci sono assenze giustificate a partire dalla lista delle timbrature e dei codici 
+	 * di assenza
+	 * @return notJustifiedAbsence
+	 */
+	public int getNotJustifiedAbsence(){
+		int numberOfNotJustifiedAbsence = 0;
+		int month = date.getMonthOfYear();
+		int year = date.getYear();
+		Calendar firstDayOfMonth = GregorianCalendar.getInstance();
+		firstDayOfMonth.set(year, month, 1);
+		for(int day= 1; day <= firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH); day++){
+			List<Stamping> timbrature = getStampings(day);
+			List<AbsenceType> listaAssenze = getAbsences(day);
+			if(timbrature == null && listaAssenze == null)
+				numberOfNotJustifiedAbsence++;
+		}
+		
+		notJustifiedAbsence = numberOfNotJustifiedAbsence;
+		return notJustifiedAbsence;
+	}
+	
+	public int dailyTimeAtWork(int day){
+		LocalDateTime startOfDay = new LocalDateTime(date.getYear(), date.getMonthOfYear(), day, 0, 0);
+		LocalDateTime endOfDay = new LocalDateTime(date.getYear(), date.getMonthOfYear(), day, 23, 59);
+		int timeAtWork=0;
+		List<Stamping> listStamp = Stamping.find("SELECT s FROM Stamping s " +
+				"WHERE s.person = ? and date between ? and ? " +
+				"ORDER BY date", person, startOfDay, endOfDay).fetch();
+		int size = listStamp.size();
+		if(((size / 2 == 1) && (size % 2 == 1)) || ((size / 2 == 0) && (size % 2 == 1))){
+			int orelavoro=0;
+			for(Stamping s : listStamp){
+				if(s.way == Stamping.WayType.in)
+					orelavoro -= toMinute(s.date);				
+				if(s.way == Stamping.WayType.out)
+					orelavoro += toMinute(s.date);
+				if(orelavoro < 0)
+					timeAtWork += orelavoro;
+				else 
+					timeAtWork += -orelavoro;					
+			}
+			//return timeAtWork;	
+		}			
+		else{
+			int orealavoro=0;
+			for(Stamping s : listStamp){
+				if(s.way == Stamping.WayType.in){
+					orealavoro -= toMinute(s.date);								
+					System.out.println("Timbratura di ingresso: "+orealavoro);	
+				}
+				if(s.way == Stamping.WayType.out){
+					orealavoro += toMinute(s.date);						
+					System.out.println("Timbratura di uscita: "+orealavoro);
+				}
+				timeAtWork += orealavoro;
+			}				
+		}
+	
+		return timeAtWork;		
+	}
+	/**
+	 * 
+	 * @return numero di minuti in cui una persona è stata a lavoro in quel mese
+	 */
+	public int timeAtWork(){
+		int month = date.getMonthOfYear();
+		int year = date.getYear();
+		
+		Calendar firstDayOfMonth = GregorianCalendar.getInstance();
+		firstDayOfMonth.set(year, month, 1);
+		int timeAtWork = 0;
+		for (int day = 1; day <= firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH); day++){
+			List<Stamping> listStamp = getStampings(day);
+			int size = listStamp.size();
+			if(((size / 2 == 1) && (size % 2 == 1)) || ((size / 2 == 0) && (size % 2 == 1))){
+				int orelavoro=0;
+				for(Stamping s : listStamp){
+					if(s.way == Stamping.WayType.in)
+						orelavoro -= toMinute(s.date);				
+					if(s.way == Stamping.WayType.out)
+						orelavoro += toMinute(s.date);
+					if(orelavoro < 0)
+						timeAtWork += orelavoro;
+					else 
+						timeAtWork += -orelavoro;					
+				}
+				//return timeAtWork;	
+			}			
+			else{
+				int orealavoro=0;
+				for(Stamping s : listStamp){
+					if(s.way == Stamping.WayType.in){
+						orealavoro -= toMinute(s.date);								
+						System.out.println("Timbratura di ingresso: "+orealavoro);	
+					}
+					if(s.way == Stamping.WayType.out){
+						orealavoro += toMinute(s.date);						
+						System.out.println("Timbratura di uscita: "+orealavoro);
+					}
+					timeAtWork += orealavoro;
+				}				
+			}
+			//return timeAtWork;
+		}
+		return timeAtWork;		
+	}
+	
+	/**
+	 * 
+	 * @param date
+	 * @return calcola il numero di minuti di cui è composta la data passata come parametro (di cui considera solo
+	 * ora e minuti
+	 */
+	private static int toMinute(LocalDateTime date){
+		int dateToMinute = 0;
+		
+		if (date!=null){
+			int hour = date.get(DateTimeFieldType.hourOfDay());
+			int minute = date.get(DateTimeFieldType.minuteOfHour());
+			
+			dateToMinute = (60*hour)+minute;
+		}
+		return dateToMinute;
+	}
+	
+	public boolean isHoliday(LocalDate data){
+		if (data!=null){
+
+			Logger.warn("Nel metodo isHoliday la data è: " +data);
+			
+			if((data.getDayOfWeek() == 7)||(data.getDayOfWeek() == 6))
+				return true;		
+			if((data.getMonthOfYear() == 12) && (data.getDayOfMonth() == 25))
+				return true;
+			if((data.getMonthOfYear() == 12) && (data.getDayOfMonth() == 26))
+				return true;
+			if((data.getMonthOfYear() == 12) && (data.getDayOfMonth() == 8))
+				return true;
+			if((data.getMonthOfYear() == 6) && (data.getDayOfMonth() == 2))
+				return true;
+			if((data.getMonthOfYear() == 4) && (data.getDayOfMonth() == 25))
+				return true;
+			if((data.getMonthOfYear() == 5) && (data.getDayOfMonth() == 1))
+				return true;
+			if((data.getMonthOfYear() == 8) && (data.getDayOfMonth() == 15))
+				return true;
+			if((data.getMonthOfYear() == 1) && (data.getDayOfMonth() == 1))
+				return true;
+			if((data.getMonthOfYear() == 1) && (data.getDayOfMonth() == 6))
+				return true;
+			if((data.getMonthOfYear() == 11) && (data.getDayOfMonth() == 1))
+				return true;			
+		}
+		return false;
 	}
 }

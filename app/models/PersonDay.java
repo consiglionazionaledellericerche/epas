@@ -8,6 +8,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
 import lombok.Data;
 
 import org.joda.time.DateTimeFieldType;
@@ -26,12 +31,12 @@ import play.db.jpa.Model;
 @Data
 public class PersonDay extends Model{
 
+	private final Person person;
+	
 	public final LocalDate date;
 	
 	public final LocalDateTime startOfDay;
 	public final LocalDateTime endOfDay;
-	
-	private final Person person;
 	
 	private List<Stamping> stampings = null;
 	
@@ -96,9 +101,7 @@ public class PersonDay extends Model{
 			
 			stampings = Stamping.find("SELECT s FROM Stamping s " +
 					"WHERE s.person = ? and date between ? and ? " +
-					"ORDER BY date", person, startOfDay, endOfDay).fetch();
-
-							
+					"ORDER BY date", person, startOfDay, endOfDay).fetch();							
 		}
 		return stampings;
 	}
@@ -155,9 +158,9 @@ public class PersonDay extends Model{
 		timeAtWork = 0;
 		
 		if(((size / 2 == 1) && (size % 2 == 1)) || ((size / 2 == 0) && (size % 2 == 1))){
-			LocalDateTime now = new LocalDateTime();
-			now.now();
-			int nowToMinute = toMinute(now);
+			LocalDateTime ora = new LocalDateTime();
+			//ora.now();
+			int nowToMinute = toMinute(ora);
 			int orelavoro=0;
 			for(Stamping s : listStamp){
 				if(s.way == Stamping.WayType.in)
@@ -237,10 +240,6 @@ public class PersonDay extends Model{
 	 * @param person
 	 * @param date
 	 * @return la lista di codici di assenza fatti da quella persona in quella data
-	 * @throws SQLException 
-	 * @throws ClassNotFoundException 
-	 * @throws IllegalAccessException 
-	 * @throws InstantiationException 
 	 */
 	public List<AbsenceType> absenceList() {
 		
