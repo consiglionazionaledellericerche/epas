@@ -15,7 +15,7 @@ public class MonthRecapInfo extends Controller{
 	private static void show(LocalDate data) {
 
 		List<Person> personList = Person.findAll();
-    	PersonMonth personMonth = new PersonMonth(data);
+    	PersonMonth personMonth = new PersonMonth();
     	
     	LocalDate now = new LocalDate();
 	    for(Person p : personList){
