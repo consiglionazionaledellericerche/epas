@@ -5,6 +5,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import org.joda.time.DateTimeConstants;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -43,16 +44,16 @@ public class PersonMonth extends Model{
 	
 	private int mealTicketToRender;
 	
-//	public PersonMonth(Person person, LocalDate data){
-//		this.person = person;	
-//		this.date = data;
-//	}
-	
 	public PersonMonth(Person person, LocalDate data){
-		this.person = person;
-		this.year = data.getYear();
-		this.month = data.getMonthOfYear();
+		this.person = person;	
+		this.date = data;
 	}
+	
+//	public PersonMonth(Person person, LocalDate data){
+//		this.person = person;
+//		this.year = data.getYear();
+//		this.month = data.getMonthOfYear();
+//	}
 	
 	
 	
@@ -89,24 +90,27 @@ public class PersonMonth extends Model{
 		int year = date.getYear();
 		Calendar firstDayOfMonth = GregorianCalendar.getInstance();
 		firstDayOfMonth.set(year, month, 1);
-		for (int day = 1; day <= firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH); day++) {
+		int giorniLavorativi = 0;
+		for (int day = 1; day < firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH); day++) {
 			LocalDate newDate = new LocalDate(year,month,day);
-			
-			if(newDate.getDayOfWeek()!=6 || newDate.getDayOfWeek()!=7 
-					|| (newDate.getMonthOfYear() != 12) && (newDate.getDayOfMonth() != 25)
-					|| (newDate.getMonthOfYear() != 12) && (newDate.getDayOfMonth() != 26) 
-					|| (newDate.getMonthOfYear() != 12) && (newDate.getDayOfMonth() != 8)
-					|| (newDate.getMonthOfYear() != 6) && (newDate.getDayOfMonth() != 2) 
-					|| (newDate.getMonthOfYear() != 4) && (newDate.getDayOfMonth() != 25)
-					|| (newDate.getMonthOfYear() != 5) && (newDate.getDayOfMonth() != 1) 
-					|| (newDate.getMonthOfYear() != 8) && (newDate.getDayOfMonth() != 15)
-					|| (newDate.getMonthOfYear() != 1) && (newDate.getDayOfMonth() != 1) 
-					|| (newDate.getMonthOfYear() != 1) && (newDate.getDayOfMonth() != 6)
-					||(newDate.getMonthOfYear() != 11) && (newDate.getDayOfMonth() != 1))
-				workingDays++;				
+			int giornoSettimana = newDate.getDayOfWeek();
+			int meseAnno = newDate.getMonthOfYear();
+			int giornoMese = newDate.getDayOfMonth();
+			if(giornoSettimana != DateTimeConstants.SATURDAY || giornoSettimana != DateTimeConstants.SUNDAY 
+					|| ((meseAnno != DateTimeConstants.DECEMBER) && (giornoMese != 25))
+					|| ((meseAnno != DateTimeConstants.DECEMBER) && (giornoMese != 26)) 
+					|| ((meseAnno != DateTimeConstants.DECEMBER) && (giornoMese != 8))
+					|| ((meseAnno != DateTimeConstants.JUNE) && (giornoMese != 2)) 
+					|| ((meseAnno != DateTimeConstants.APRIL) && (giornoMese != 25))
+					|| ((meseAnno != DateTimeConstants.MAY) && (giornoMese != 1)) 
+					|| ((meseAnno != DateTimeConstants.AUGUST) && (giornoMese != 15))
+					|| ((meseAnno != DateTimeConstants.JANUARY) && (giornoMese != 1)) 
+					|| ((meseAnno != DateTimeConstants.JANUARY) && (giornoMese != 6))
+					|| ((meseAnno != DateTimeConstants.NOVEMBER) && (giornoMese != 1)))
+				giorniLavorativi++;				
 			
 		}	
-		
+		workingDays = giorniLavorativi;
 		return workingDays;
 	}
 	/**
@@ -119,9 +123,10 @@ public class PersonMonth extends Model{
 		Calendar firstDayOfMonth = GregorianCalendar.getInstance();
 		firstDayOfMonth.set(year, month, 1);
 		int giorniLavoro = 0;
-		for (int day = 1; day <= firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH); day++) {			
+		for (int day = 1; day < firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH); day++) {			
 			List<Stamping> timbrature = getStampings(day);
-			if(timbrature != null){
+			if(timbrature.size() != 0){
+				//System.out.println("La lista delle timbrature non è vuota e contiene " +timbrature.size()+ "elementi nel giorno " +day);
 				giorniLavoro++;
 			}
 		}		
@@ -139,7 +144,7 @@ public class PersonMonth extends Model{
 		int year = date.getYear();
 		Calendar firstDayOfMonth = GregorianCalendar.getInstance();
 		firstDayOfMonth.set(year, month, 1);
-		for (int day = 1; day <= firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH); day++) {
+		for (int day = 1; day < firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH); day++) {
 			LocalDate data = new LocalDate(year, month, day);
 			List<Stamping> timbrature = getStampings(day);
 			if(timbrature!=null){
@@ -162,7 +167,7 @@ public class PersonMonth extends Model{
 		int year = date.getYear();
 		Calendar firstDayOfMonth = GregorianCalendar.getInstance();
 		firstDayOfMonth.set(year, month, 1);
-		for(int day= 1; day <= firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH); day++){
+		for(int day= 1; day < firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH); day++){
 			workingHours += dailyTimeAtWork(day);
 		}			
 		
@@ -180,7 +185,7 @@ public class PersonMonth extends Model{
 		int year = date.getYear();
 		Calendar firstDayOfMonth = GregorianCalendar.getInstance();
 		firstDayOfMonth.set(year, month, 1);
-		for(int day= 1; day <= firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH); day++){			
+		for(int day= 1; day < firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH); day++){			
 			int tempoLavoro = dailyTimeAtWork(day);
 			if(tempoLavoro < 390)
 				mealTicketToRender++;
@@ -198,7 +203,7 @@ public class PersonMonth extends Model{
 		int year = date.getYear();
 		Calendar firstDayOfMonth = GregorianCalendar.getInstance();
 		firstDayOfMonth.set(year, month, 1);
-		for(int day= 1; day <= firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH); day++){
+		for(int day= 1; day < firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH); day++){
 			LocalDate data = new LocalDate(year, month, day);
 			List<AbsenceType> listaAssenze = AbsenceType.find("SELECT abt FROM AbsenceType abt, Absence abs, Person p " +
 					"WHERE abs.person = p AND abs.absenceType = abt AND p = ? AND abs.date = ?", person, data).fetch();
@@ -221,7 +226,7 @@ public class PersonMonth extends Model{
 		int year = date.getYear();
 		Calendar firstDayOfMonth = GregorianCalendar.getInstance();
 		firstDayOfMonth.set(year, month, 1);
-		for(int day= 1; day <= firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH); day++){
+		for(int day= 1; day < firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH); day++){
 			List<Stamping> timbrature = getStampings(day);
 			List<AbsenceType> listaAssenze = getAbsences(day);
 			if(timbrature == null && listaAssenze == null)
@@ -282,7 +287,7 @@ public class PersonMonth extends Model{
 		Calendar firstDayOfMonth = GregorianCalendar.getInstance();
 		firstDayOfMonth.set(year, month, 1);
 		int timeAtWork = 0;
-		for (int day = 1; day <= firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH); day++){
+		for (int day = 1; day < firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH); day++){
 			List<Stamping> listStamp = getStampings(day);
 			int size = listStamp.size();
 			if(((size / 2 == 1) && (size % 2 == 1)) || ((size / 2 == 0) && (size % 2 == 1))){
