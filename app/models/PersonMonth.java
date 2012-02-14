@@ -5,6 +5,8 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import javax.persistence.Transient;
+
 import org.joda.time.DateTimeConstants;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.LocalDate;
@@ -44,11 +46,26 @@ public class PersonMonth extends Model{
 	
 	private int mealTicketToRender;
 	
+	@Transient
+	public List<PersonMonth> persons = null;
+	
 	public PersonMonth(Person person, LocalDate data){
 		this.person = person;	
 		this.date = data;
 	}
 	
+	public List<PersonMonth> getPersons(){
+		if(persons != null){
+			return persons;
+		}
+		persons = new ArrayList<PersonMonth>();
+		List <Person> persone = Person.findAll();
+		for(Person p : persone){
+			persons.add(new PersonMonth(p, new LocalDate(date)));
+		}
+		
+		return persons;
+	}
 //	public PersonMonth(Person person, LocalDate data){
 //		this.person = person;
 //		this.year = data.getYear();

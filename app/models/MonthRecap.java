@@ -112,6 +112,7 @@ public class MonthRecap extends Model {
 	@Transient
 	public List<PersonDay> days = null;
 	
+	
 	/**
 	 * Construttore di default con i parametri obbligatori
 	 * 
@@ -175,6 +176,8 @@ public class MonthRecap extends Model {
 		}
 		return days;
 	}
+	
+	
 	
 	
 }

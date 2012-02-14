@@ -14,15 +14,20 @@ public class MonthRecapInfo extends Controller{
 	
 	private static void show(LocalDate data) {
 
-		long id = 1;
-		Person person = Person.findById(id);
-    	PersonMonth personMonth = new PersonMonth(person, data);
+		List<Person> person = Person.findAll();
+		for(Person p : person){
+    	PersonMonth personMonth = new PersonMonth(p, data);
     	
-    	LocalDate now = new LocalDate();
+    	//LocalDate now = new LocalDate();
 	    
-	    	MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, now.getYear(), now.getMonthOfYear());
-	        render(monthRecap);
+	    	//MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, now.getYear(), now.getMonthOfYear());
+	        render(personMonth);
     	
+		}
+	}
+	
+	public static void show() {
+    	show(new LocalDate(session.get(Application.PERSON_ID_SESSION_KEY)));
     }
 
 }
