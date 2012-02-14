@@ -140,4 +140,7 @@ public class Person extends Model {
 	 */
 	public Integer number;
 	
+	public String fullName() {
+		return String.format("%s %s", surname, name);
+	}
 }
