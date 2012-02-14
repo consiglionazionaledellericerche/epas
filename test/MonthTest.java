@@ -2,6 +2,8 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import play.Logger;
 
+import models.Absence;
+import models.AbsenceType;
 import models.Person;
 import models.PersonMonth;
 import models.StampType;
@@ -40,21 +42,27 @@ public class MonthTest extends UnitTest{
 		PersonMonth pm = new PersonMonth(person, data);
 		assertNotNull(person);
 		initializeStamping(person);
+		initializeAbsence(person);
 		int giorniLavoro = pm.getWorkingDays();
 		int giorniLavorativi = pm.monthWorkingDays();
 		int giorniLavoroInVacanza = pm.workingDaysInHoliday();
 		int oreLavoroMensili = pm.timeAtWork();
 		int buoniDaRendere = pm.mealTicketToRender();
+		int assenze = pm.getJustifiedAbsence();
+		int assenzeNonGiustificate = pm.getNotJustifiedAbsence();
 		System.out.println("I giorni di lavoro sono: " +giorniLavoro);
 		System.out.println("I giorni lavorativi invece sono: " +giorniLavorativi);
 		System.out.println("Ho lavorato: " +giorniLavoroInVacanza+ " giorni nonostante fosse vacanza");
 		System.out.println("Ho lavorato " +oreLavoroMensili+ " minuti in questo mese che corrispondono a "+oreLavoroMensili/60+ " ore e " +oreLavoroMensili%60+ " minuti" );
 		System.out.println("Devo restituire: "+buoniDaRendere+ " buoni pasto");
+		System.out.println("Ho fatto : "+assenze+ " assenze in questo mese");
+		System.out.println("Nel mese ho avuto " +assenzeNonGiustificate+ " giorni di assenza non giustificata");
+		
 	}
 	
 	
 	
-	public void initializeStamping(Person person){
+	private void initializeStamping(Person person){
 		String causa = new String ("Timbratura di ingresso");
 		String causa2 = new String ("Timbratura d'uscita per pranzo");
 		String causa3 = new String ("Timbratura di ingresso dopo pausa pranzo");
@@ -72,30 +80,32 @@ public class MonthTest extends UnitTest{
 			Logger.warn("Giornata ha il valore di: "+giornata);
 			if(giornata != 6){
 				if(giornata != 7){
-					Stamping s = new Stamping();
-					s.person = person;
-					s.stampType = StampType.find("Select s from StampType s where description = ?",causa).first();
-					s.way = WayType.in;
-					s.date = new LocalDateTime(year,month,day,8,15,0);
-					s.save();
-					Stamping s1 = new Stamping();
-					s1.person = person;				
-					s1.stampType = StampType.find("Select s from StampType s where description = ?",causa2).first();
-					s1.way = WayType.out;
-					s1.date = new LocalDateTime(year,month,day,12,22,0);
-					s1.save();
-					Stamping s2 = new Stamping();
-					s2.date = new LocalDateTime(year,month,day,13,40,0);
-					s2.person = person;
-					s2.way = WayType.in;
-					s2.stampType = StampType.find("Select s from StampType s where description = ?",causa3).first();
-					s2.save();
-					Stamping s3 = new Stamping();
-					s3.date = new LocalDateTime(year,month,day,18,29,0);
-					s3.person = person;
-					s3.way = WayType.out;
-					s3.stampType = StampType.find("Select s from StampType s where description = ?",causa4).first();
-					s3.save();	
+					if(day != 5 && day != 11){
+						Stamping s = new Stamping();
+						s.person = person;
+						s.stampType = StampType.find("Select s from StampType s where description = ?",causa).first();
+						s.way = WayType.in;
+						s.date = new LocalDateTime(year,month,day,8,15,0);
+						s.save();
+						Stamping s1 = new Stamping();
+						s1.person = person;				
+						s1.stampType = StampType.find("Select s from StampType s where description = ?",causa2).first();
+						s1.way = WayType.out;
+						s1.date = new LocalDateTime(year,month,day,12,22,0);
+						s1.save();
+						Stamping s2 = new Stamping();
+						s2.date = new LocalDateTime(year,month,day,13,40,0);
+						s2.person = person;
+						s2.way = WayType.in;
+						s2.stampType = StampType.find("Select s from StampType s where description = ?",causa3).first();
+						s2.save();
+						Stamping s3 = new Stamping();
+						s3.date = new LocalDateTime(year,month,day,18,29,0);
+						s3.person = person;
+						s3.way = WayType.out;
+						s3.stampType = StampType.find("Select s from StampType s where description = ?",causa4).first();
+						s3.save();
+					}
 				}
 				else{
 					System.out.println("Non scrivo timbratura perchè oggi è sabato o domenica");
@@ -108,6 +118,30 @@ public class MonthTest extends UnitTest{
 			}
 			
 		}
+		
+	}
+	
+	private void initializeAbsence(Person person){
+		int year = 2011;
+		int month = 4;
+		AbsenceType type1 = new AbsenceType();
+		AbsenceType type2 = new AbsenceType();
+		type1.code = "31";
+		type1.description = "ferie ";
+		type1.save();
+		type2.code = "32";
+		type2.description = "malattia";
+		type2.save();
+		Absence absence = new Absence();
+		Absence absence2 = new Absence();
+		absence.person = person;
+		absence.absenceType = type1;
+		absence.date = new LocalDate(year, month, 5);
+		absence.save();
+		absence2.person=person;
+		absence2.date = new LocalDate(year, month, 11);
+		absence2.absenceType = type2;
+		absence2.save();	
 		
 	}
 	

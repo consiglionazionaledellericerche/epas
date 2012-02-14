@@ -209,7 +209,7 @@ public class PersonMonth extends Model{
 			LocalDate data = new LocalDate(year, month, day);
 			List<AbsenceType> listaAssenze = AbsenceType.find("SELECT abt FROM AbsenceType abt, Absence abs, Person p " +
 					"WHERE abs.person = p AND abs.absenceType = abt AND p = ? AND abs.date = ?", person, data).fetch();
-			if(listaAssenze!=null)
+			if(listaAssenze.size()!=0)
 				numberOfJustifiedAbsence += listaAssenze.size();
 		}
 		
@@ -229,12 +229,15 @@ public class PersonMonth extends Model{
 		Calendar firstDayOfMonth = GregorianCalendar.getInstance();
 		firstDayOfMonth.set(year, month, 1);
 		for(int day= 1; day < firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH); day++){
-			List<Stamping> timbrature = getStampings(day);
-			List<AbsenceType> listaAssenze = getAbsences(day);
-			if(timbrature.size() == 0  && listaAssenze.size()==0)
-				numberOfNotJustifiedAbsence++;
-		}
-		
+			LocalDate data = new LocalDate(year, month, day);
+			if(data.getDayOfWeek()!=6 && data.getDayOfWeek()!= 7){
+				List<Stamping> timbrature = getStampings(day);
+				List<AbsenceType> listaAssenze = getAbsences(day);
+				if(timbrature.size() == 0  && listaAssenze.size()==0)
+					numberOfNotJustifiedAbsence++;
+			}
+			
+		}		
 		notJustifiedAbsence = numberOfNotJustifiedAbsence;
 		return notJustifiedAbsence;
 	}
