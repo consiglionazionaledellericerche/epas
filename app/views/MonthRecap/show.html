@@ -1,0 +1,36 @@
+#{extends 'main.html' /}
+#{set title:'Riepilogo Mensile' /}
+
+<table>
+	<tr>
+		<th>Giorni lavorativi nel mese</th>
+		<th>Giorni di presenza a lavoro nei giorni festivi</th>
+		<th>Giorni di presenza a lavoro nei giorni lavorativi</th>
+		<th>Ore di lavoro fatte</th>
+		<th>Assenze giustificate</th>
+		<th>Assenze non giustificate</th>
+		<th>Buoni mensa da restituire</th>		
+		<th>progress</th>
+		<th>tipo orario</th>
+	</tr>
+	
+%{
+     for(p in personMonth.persons) {
+}%
+		<tr>
+			<td>${p.monthWorkingDays()}</td>
+			<td>${p.workingDaysOnHoliday()}</td>
+			<td>${p.getWorkingDays()}</td>
+			<td>${p.getJustifiedAbsence()}</td>
+			<td>${p.getNotJustifiedAbsence()}</td>
+			<td>${p.mealTickeToRender()}</td>
+			<td>${p.progressive()}</td>
+			<td></td>
+		</tr>
+%{  		   
+     }
+     
+}%
+
+*{Significato codici assenza}*
+</table>
