@@ -1,11 +1,24 @@
 package it.cnr.iit.epas;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.security.Policy.Parameters;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -22,6 +35,7 @@ import models.CompetenceCode;
 import models.ContactData;
 import models.Contract;
 
+import models.ConfParameters;
 import models.Location;
 import models.MonthRecap;
 import models.Person;
@@ -40,6 +54,7 @@ import org.joda.time.LocalDateTime;
 
 import play.Logger;
 import play.Play;
+import play.db.jpa.JPA;
 
 public class FromMysqlToPostgres {
 	
@@ -63,6 +78,61 @@ public class FromMysqlToPostgres {
 				Play.configuration.getProperty("db.old.url"),
 				Play.configuration.getProperty("db.old.user"),
 				Play.configuration.getProperty("db.old.password"));
+	}
+	
+	@SuppressWarnings("deprecation")
+	public static void createParameters() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException, IOException{
+		EntityManager em = JPA.em();
+		Connection mysqlCon = getMysqlConnection();
+		PreparedStatement stmtParam = mysqlCon.prepareStatement("SELECT * FROM parametri ORDER BY data_inizio DESC limit 1");
+		ResultSet rsParam = stmtParam.executeQuery();
+		ConfParameters parameters = null;
+		while(rsParam.next()){			
+
+			String blob = rsParam.getString("valore");
+			int lunghezza = blob.length();
+			System.out.println("lunghezza di blob = " +lunghezza);			
+			
+			int i = 0;
+			while(i < lunghezza){
+				String value = "";
+				String desc = "";
+				if(blob.charAt(i)=='$' || blob.charAt(i)=='%'){					
+					int conta = i++;					
+					
+					while(blob.charAt(conta)!='='){
+						desc = desc+blob.charAt(conta);
+						conta++;
+					}
+					parameters = new ConfParameters();
+					if(desc.charAt(0)=='$' || desc.charAt(0)=='%')
+						parameters.description  = desc.substring(1, desc.length()-1);
+					else
+						parameters.description = desc;	
+					Timestamp dataprev = rsParam.getTimestamp("data");
+					parameters.date = new LocalDate(dataprev.getYear(),dataprev.getMonth(),dataprev.getDay());
+					int nuovo = conta++;
+					
+					if(blob.charAt(nuovo)=='='){
+						nuovo++;
+						while(blob.charAt(nuovo)!=';'){
+							value = value+blob.charAt(nuovo);
+							nuovo++;
+						}
+						if(value.charAt(0)=='"')
+							parameters.value = value.substring(1, value.length()-1);
+						else
+							parameters.value = value;
+					}
+					em.persist(parameters);
+				}
+							
+				i++;
+				
+			}
+			
+		}		
+		
 	}
 	
 	public static Person createPerson(ResultSet rs, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {

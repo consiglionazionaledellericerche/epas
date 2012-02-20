@@ -1,5 +1,6 @@
 import it.cnr.iit.epas.FromMysqlToPostgres;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -28,7 +29,7 @@ public class ImportTest extends UnitTest {
 	//private final static long CRISTAN_LUCCHESI_OROLOGIO_ID = 146;
 	
 	@Test
-	public void testImportDataPerson() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
+	public void testImportDataPerson() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException, IOException {
 		Connection mysqlCon = FromMysqlToPostgres.getMysqlConnection();
 		EntityManager em = JPA.em();
 //		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM Persone WHERE id = " + CRISTAN_LUCCHESI_OROLOGIO_ID);
@@ -43,6 +44,8 @@ public class ImportTest extends UnitTest {
 			Person person = FromMysqlToPostgres.createPerson(rs, em);
 			assertNotNull(person);
 			assertNotNull(person.id);
+			
+			
 			
 			FromMysqlToPostgres.createContract(person.id, person, em);
 			
