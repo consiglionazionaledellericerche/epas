@@ -40,6 +40,7 @@ import org.joda.time.LocalDateTime;
 
 import play.Logger;
 import play.Play;
+import play.db.jpa.JPA;
 
 public class FromMysqlToPostgres {
 	
@@ -63,6 +64,39 @@ public class FromMysqlToPostgres {
 				Play.configuration.getProperty("db.old.url"),
 				Play.configuration.getProperty("db.old.user"),
 				Play.configuration.getProperty("db.old.password"));
+	}
+	
+	public static void importAll() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
+		Connection mysqlCon = FromMysqlToPostgres.getMysqlConnection();
+		EntityManager em = JPA.em();
+
+		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT ID, Nome, Cognome, DataNascita, Telefono," +
+				"Fax, Email, Stanza, Matricola, passwordmd5, Dipartimento, Sede " +
+				"FROM Persone order by ID");
+		ResultSet rs = stmt.executeQuery();
+		
+		while(rs.next()){
+			Logger.warn("Creazione delle info per la persona: "+rs.getString("Nome").toString()+" "+rs.getString("Cognome").toString());
+			//rs.next(); // exactly one result so allowed 
+					
+			Person person = FromMysqlToPostgres.createPerson(rs, em);
+			
+			FromMysqlToPostgres.createContract(person.id, person, em);
+			
+			FromMysqlToPostgres.createVacations(person.id, person, em);
+			
+			FromMysqlToPostgres.createVacationType(person.id, person, em);
+	
+			FromMysqlToPostgres.createAbsences(person.id, person, em);
+			FromMysqlToPostgres.createWorkingTimeTypes(person.id, em);
+			FromMysqlToPostgres.createStampings(person.id, person, em);
+			
+			FromMysqlToPostgres.createYearRecap(person.id, person, em);
+			
+			FromMysqlToPostgres.createMonthRecap(person.id, person, em);
+			
+			FromMysqlToPostgres.createCompetence(person.id, person, em);
+		}
 	}
 	
 	public static Person createPerson(ResultSet rs, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
