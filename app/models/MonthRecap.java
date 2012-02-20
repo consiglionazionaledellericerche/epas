@@ -170,7 +170,7 @@ public class MonthRecap extends Model {
 		Logger.trace(" %s-%s-%s : maximum day of month = %s", 
 			year, month, 1, firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH));
 		
-		for (int day = 1; day <= firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH); day++) {
+		for (int day = 1; day < firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH); day++) {
 			Logger.trace("generating PersonDay: person = %s, year = %d, month = %d, day = %d", person.username, year, month, day);
 			days.add(new PersonDay(person, new LocalDate(year, month, day)));
 		}
