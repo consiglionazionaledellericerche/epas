@@ -1,6 +1,7 @@
 #!/bin/bash
 
-PROJECT_DIR=/home/cristian/git/epas
+CURRENT_DIR=`dirname "$0"`
+PROJECT_DIR=$CURRENT_DIR/../../
 
 DB_NAME=epas
 DB_USER=epas
