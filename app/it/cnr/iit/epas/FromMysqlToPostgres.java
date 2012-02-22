@@ -139,27 +139,29 @@ public class FromMysqlToPostgres {
 					
 			Person person = FromMysqlToPostgres.createPerson(rs, em);
 			
-			FromMysqlToPostgres.createContract(person.id, person, em);
+			FromMysqlToPostgres.createContract(rs.getLong("ID"), person, em);
 			
-			FromMysqlToPostgres.createVacations(person.id, person, em);
+			FromMysqlToPostgres.createVacations(rs.getLong("ID"), person, em);
 			
-			FromMysqlToPostgres.createVacationType(person.id, person, em);
+			FromMysqlToPostgres.createVacationType(rs.getLong("ID"), person, em);
 	
-			FromMysqlToPostgres.createAbsences(person.id, person, em);
-			FromMysqlToPostgres.createWorkingTimeTypes(person.id, em);
-			FromMysqlToPostgres.createStampings(person.id, person, em);
+			FromMysqlToPostgres.createAbsences(rs.getLong("ID"), person, em);
 			
-			FromMysqlToPostgres.createYearRecap(person.id, person, em);
+			FromMysqlToPostgres.createWorkingTimeTypes(rs.getLong("ID"), em);
 			
-			FromMysqlToPostgres.createMonthRecap(person.id, person, em);
+			FromMysqlToPostgres.createStampings(rs.getLong("ID"), person, em);
 			
-			FromMysqlToPostgres.createCompetence(person.id, person, em);
+			FromMysqlToPostgres.createYearRecap(rs.getLong("ID"), person, em);
+			
+			FromMysqlToPostgres.createMonthRecap(rs.getLong("ID"), person, em);
+			
+			FromMysqlToPostgres.createCompetence(rs.getLong("ID"), person, em);
 		}
 	}
 	
 	public static Person createPerson(ResultSet rs, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 		Logger.configuredManually = true;
-		Logger.debug("Inizio a creare la persona: "+rs.getString("Nome").toString()+" "+rs.getString("Cognome").toString());
+		Logger.info("Inizio a creare la persona: "+rs.getString("Nome").toString()+" "+rs.getString("Cognome").toString());
 		
 		long id = rs.getLong("ID");
 		Connection mysqlCon = getMysqlConnection();
@@ -208,7 +210,7 @@ public class FromMysqlToPostgres {
 	}
 		
 	public static void createContactData(ResultSet rs, Person person, EntityManager em) throws SQLException {
-		Logger.warn("Inizio a creare il contact data");
+		Logger.info("Inizio a creare il contact data per " +person.name+ " " +person.surname);
 		ContactData contactData = new ContactData();
 		contactData.person = person;
 		
@@ -256,6 +258,7 @@ public class FromMysqlToPostgres {
 	 * del nuovo contratto così da salvare nello storico il contratto precedente.
 	 */
 	public static void createContract(long id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+		Logger.info("Inizio a creare il contratto per " +person.name+ " " +person.surname);
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmtContratto = mysqlCon.prepareStatement("SELECT id,Datainizio,Datafine,continua " +
 				"FROM Personedate WHERE id=" + id + " order by Datainizio");
@@ -321,18 +324,24 @@ public class FromMysqlToPostgres {
 	}
 	
 
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings({ "deprecation", "unused" })
 	public static void createStampings(long id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-		Logger.debug("Inizio a creare le timbrature");
+		Logger.info("Inizio a creare le timbrature per " +person.name+ " " +person.surname);
 		Connection mysqlCon = getMysqlConnection();
 		
 		/**
-		 * query sulle tabelle orario, orario_pers per recuperare le info sulle timbrature
+		 * query sulle tabelle orario, per recuperare le info sulle timbrature
 		 * di ciascuna persona
 		 */
-		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT * FROM Orario WHERE TipoTimbratura is not null " +
-				"and TipoGiorno = 0 and id=" + id);
-		ResultSet rs = stmtOrari.executeQuery();	
+		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT ID,Giorno,TipoGiorno,TipoTimbratura,Ora " +
+				"FROM Orario WHERE TipoTimbratura is not null and Giorno > '2009-12-31' " +
+				"and TipoGiorno = 0 and ID = " + id);
+//		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT ID,Giorno,TipoGiorno,TipoTimbratura,Ora " +
+//				"FROM Orario WHERE TipoTimbratura = 1 and Giorno = '2004-07-26'" +
+//				"and TipoGiorno = 0 and ID = " + id);
+
+		ResultSet rs = stmtOrari.executeQuery();
+				
 		StampType stampType = null;
 		Stamping stamping = null;
 		byte tipoTimbratura;
@@ -355,10 +364,13 @@ public class FromMysqlToPostgres {
 				if((tipoTimbratura % 2 == 0) && (tipoTimbratura / 2 == 2)){
 					stampType.description = "Timbratura di uscita";
 				}
-				if((tipoTimbratura % 2 == 1) && (tipoTimbratura / 2 == 2)){
-					stampType.description = "Altra timbratura di ingresso";
-				}
-				
+//				if((tipoTimbratura % 2 == 1) && (tipoTimbratura / 2 == 2)){
+//					stampType.description = "Altra timbratura di ingresso";
+//				}
+//				if((tipoTimbratura % 2 == 0) && (tipoTimbratura / 2 == 3)){
+//					stampType.description = "Altra timbratura di uscita";
+//				}
+//				
 				em.persist(stampType);	
 				mappaCodiciStampType.put(idCodiceTimbratura,stampType.id);
 			}
@@ -374,103 +386,102 @@ public class FromMysqlToPostgres {
 				stamping.way = WayType.in;					
 			else
 				stamping.way = WayType.out;
-
-			Date giorno = rs.getDate("Giorno");
-			Time ora = null;
-			try {
-
-				byte[] bs = rs.getBytes("Ora");
-				String s = bs != null ? new String(bs) : null;
-				
-				if(s == null){
-					stamping.date = null;
-					stamping.isMarkedByAdmin = false;
-					stamping.isServiceExit = false;
-				}
-				else{
-					if(s.startsWith("-")){
-						int hour = Integer.parseInt(s.substring(1, 3));
-						int minute = Integer.parseInt(s.substring(4, 6));
-						int second = Integer.parseInt(s.substring(7, 9));
-
-						Calendar calGiorno = new GregorianCalendar();
-		                calGiorno.setTime(giorno);
-		                
-		                calGiorno.set(Calendar.HOUR, hour);
-		                calGiorno.set(Calendar.MINUTE, minute);
-		                calGiorno.set(Calendar.SECOND, second);
-		                
-		                stamping.date = new LocalDateTime(calGiorno);
-		                
-		                stamping.isMarkedByAdmin = false;
-		                stamping.isServiceExit = true;
+	
+			LocalDate giornata = new LocalDate(rs.getDate("Giorno"));
+			if(giornata != null){			
+								
+				try {
+	
+					byte[] bs = rs.getBytes("Ora");
+					String s = bs != null ? new String(bs) : null;
+					
+					if(s == null){
+						stamping.date = null;
+						stamping.isMarkedByAdmin = false;
+						stamping.isServiceExit = false;
 					}
 					else{
-						
-						int hour = Integer.parseInt(s.substring(0, 2));
-						int minute = Integer.parseInt(s.substring(3, 5));
-						int second = Integer.parseInt(s.substring(6, 8));						
-						if(hour > 33){
-							hour = hour * 60;
-							hour = hour + minute;
-							hour = hour - 2000;
-							hour = hour / 60;
-							int min = hour % 60;
-							
-							Time newOra = new Time(hour,min,0);
-							Calendar calGiorno = new GregorianCalendar();
-			                calGiorno.setTime(giorno);
-			                Calendar calOra = new GregorianCalendar();
-			                calOra.setTime(newOra);
-			                
-			                calGiorno.set(Calendar.HOUR, hour);
-			                calGiorno.set(Calendar.MINUTE, min);
-			                calGiorno.set(Calendar.SECOND, second);			                
-			                
-			                stamping.date = new LocalDateTime(calGiorno);
-			                
-			                stamping.isMarkedByAdmin = true;
-			                stamping.isServiceExit = false;
-						}						
-										
-						else{
-							ora = rs.getTime("Ora");
-							Calendar calGiorno = new GregorianCalendar();
-					
-							if(giorno!=null)
-								calGiorno.setTime(giorno);
-							else
-								calGiorno.setTime(new Date(1900-01-01));
-			                Calendar calOra = new GregorianCalendar();
-			                calOra.setTime(ora);
-			                
-			                calGiorno.set(Calendar.HOUR, hour);
-			                calGiorno.set(Calendar.MINUTE, minute);
-			                calGiorno.set(Calendar.SECOND, second);
-			                			               
-			                stamping.date = new LocalDateTime(calGiorno);
+						if(s.startsWith("-")){
+							int hour = Integer.parseInt(s.substring(1, 3));
+							int minute = Integer.parseInt(s.substring(4, 6));
+							int second = Integer.parseInt(s.substring(7, 9));
+							/**
+							 * aggiunti i campi anno mese e giorno per provare a risolvere il problema sulle date.
+							 * inoltre aggiunte le set corrispondenti all'oggetto calendar creato
+							 */
+							//int year = giorno.getYear();
+							int year = giornata.getYear();
+							int month = giornata.getMonthOfYear();
+							int day = giornata.getDayOfMonth();
+	
+			                stamping.date = new LocalDateTime(year,month,day,hour,minute,second);
 			                
 			                stamping.isMarkedByAdmin = false;
-			                stamping.isServiceExit = false;
+			                stamping.isServiceExit = true;
+			                em.persist(stamping);
+						}
+						else{
+							
+							int hour = Integer.parseInt(s.substring(0, 2));
+							int minute = Integer.parseInt(s.substring(3, 5));
+							int second = Integer.parseInt(s.substring(6, 8));	
+							int year = giornata.getYear();
+							int month = giornata.getMonthOfYear();
+							int day = giornata.getDayOfMonth();
+	
+							/**
+							 * aggiunti i campi anno mese e giorno per provare a risolvere il problema sulle date.
+							 * inoltre aggiunte le set corrispondenti all'oggetto calendar creato
+							 */
+							if(hour > 33){
+								hour = hour * 60;
+								hour = hour + minute;
+								hour = hour - 2000;
+								int newHour = hour / 60;
+								int min = hour % 60;
+							    stamping.date = new LocalDateTime(year,month,day,newHour,min,second);
+				                
+				                stamping.isMarkedByAdmin = true;
+				                stamping.isServiceExit = false;
+				                em.persist(stamping);
+							}						
+							
+							else{
+								if(hour == 24){
+									stamping.date = new LocalDateTime(year,month,day,0,minute,second).plusDays(1);
+									stamping.isMarkedByAdmin = true;
+					                stamping.isServiceExit = false;
+									em.persist(stamping);
+								}
+								else{
+									//ora = rs.getTimestamp("Ora");
+									Logger.info("L'ora è: ", +hour);
+					                stamping.date = new LocalDateTime(year,month,day,hour,minute,second);
+					                
+					                stamping.isMarkedByAdmin = false;
+					                stamping.isServiceExit = false;
+					                em.persist(stamping);
+								}
+							}
 						}
 					}
-				}
-			}		
-			 catch (SQLException sqle) {
-				
-				sqle.printStackTrace();
-				System.out.println("Timbratura errata. Persona con id="+id);
-				Logger.warn("Timbratura errata. Persona con id= "+id);
-			}			
-			Logger.debug("Termino di creare le timbrature");
-			em.persist(stamping);	
+				}		
+				 catch (SQLException sqle) {
+					
+					sqle.printStackTrace();
+					System.out.println("Timbratura errata. Persona con id="+id);
+					Logger.warn("Timbratura errata. Persona con id= "+id);
+				}			
+				Logger.debug("Termino di creare le timbrature");
+				em.persist(stamping);	
+			}
 			
 		}
 		mysqlCon.close();
 	}
 	
 	public static void createAbsences(long id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-		Logger.debug("Inizio a creare le assenze");
+		Logger.info("Inizio a creare le assenze per "+person.name+ " " +person.surname);
 		Connection mysqlCon = getMysqlConnection();
 		
 		/**
@@ -576,7 +587,7 @@ public class FromMysqlToPostgres {
 		/**
 		 * query su Orario per popolare PersonVacation
 		 */
-		Logger.warn("Inizio a creare le ferie");
+		Logger.info("Inizio a creare le ferie per " +person.name+ " " +person.surname);
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM Orario WHERE TipoGiorno = 32 and id=" + id);
 		ResultSet rs = stmt.executeQuery();
@@ -596,12 +607,13 @@ public class FromMysqlToPostgres {
 		catch(SQLException sqle) {				
 				sqle.printStackTrace();
 				Logger.warn("Ferie errate. Persona con id="+id);				
-		}			
+		}	
+		
 		mysqlCon.close();
 	}
 	
 	public static void createVacationType(long id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-		Logger.warn("Inizio a creare i periodi di ferie");
+		Logger.info("Inizio a creare i periodi di ferie per " +person.name+ " " +person.surname);
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * " +
 				"FROM ferie f,ferie_pers fp " +
@@ -668,7 +680,7 @@ public class FromMysqlToPostgres {
 		 * query su orari di lavoro in join con orario pers e Persone
 		 * per popolare workin_time_type e working_time_type_days
 		 */
-		Logger.debug("Inizio a creare l'orario di lavoro");
+		Logger.info("Inizio a creare l'orario di lavoro ");
 		Connection mysqlCon = getMysqlConnection();		
 		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM orari_di_lavoro,orario_pers WHERE " +
 				"orario_pers.oid=orari_di_lavoro.id and orario_pers.pid="+id);
@@ -935,7 +947,7 @@ public class FromMysqlToPostgres {
 		/**
 		 * query su totali_anno per recuperare lo storico da mettere in YearRecap
 		 */
-		Logger.debug("Inizio a creare il riepilogo annuale");
+		Logger.info("Inizio a creare il riepilogo annuale per " +person.name+ " " +person.surname);
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM totali_anno WHERE ID="+id);
 		ResultSet rs = stmt.executeQuery();
@@ -969,7 +981,7 @@ public class FromMysqlToPostgres {
 		/**
 		 * query su totali_mens per recueperare lo storico mensile da mettere su monthRecap
 		 */
-		Logger.debug("Inizio a creare il riepilogo mensile");
+		Logger.info("Inizio a creare il riepilogo mensile per " +person.name+ " " +person.surname);
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM totali_mens WHERE ID="+id);
 		ResultSet rs = stmt.executeQuery();
@@ -1023,7 +1035,7 @@ public class FromMysqlToPostgres {
 		 * funzione che riempe la tabella competence e la tabella competence_code relativamente alle competenze
 		 * di una determinata persona
 		 */
-		Logger.debug("Inizio a creare le competenze");
+		Logger.info("Inizio a creare le competenze per " +person.name+ " " +person.surname);
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt = mysqlCon.prepareStatement("Select codici_comp.id, competenze.mese, " +
 				"competenze.anno, competenze.codice, competenze.valore, codici_comp.descrizione, codici_comp.inattivo " +
