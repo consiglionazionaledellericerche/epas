@@ -178,11 +178,6 @@ public class MonthRecap extends Model {
 			days.add(new PersonDay(person, new LocalDate(year, month, day)));
 		}
 		return days;
-	}
-	
-	public List<Competence> getCompetence(){
-		return null;
-		
-	}
+	}	
 		
 }

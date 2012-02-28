@@ -28,10 +28,10 @@
 			</td>
 			<td>${day.getStampings().size()>0 ? day.getStampings().get(0) : ''}</td>
 			<td>${day.getStampings().size()>1 ? day.getStampings().get(1) : ''}</td>
-			<td>${day.timeAtWork()}</td>
-			<td>{day.difference()}</td>
-			<td>{day.progressive()}</td>
-			<td></td>
+			<td> ore = day.timeAtWork()/60 minuti = day.timeAtWork()%60</td>
+			<td>${day.difference()}</td>
+			<td>${day.progressive()}</td>
+			<td>${day.getWorkingTimeType().description}</td>
 		</tr>
 %{  		   
      }
