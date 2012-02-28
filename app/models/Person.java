@@ -94,6 +94,13 @@ public class Person extends Model {
 	public List<Competence> competence;
 	
 	/**
+	 * relazione con la tabella delle competence valide
+	 */
+	@NotAudited
+	@OneToMany(mappedBy="person")
+	public List<ValuableCompetence> valuableCompetence;
+	
+	/**
 	 * relazione con la tabella delle tipologie di orario di lavoro
 	 */
 	@ManyToOne

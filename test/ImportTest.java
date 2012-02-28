@@ -45,6 +45,8 @@ public class ImportTest extends UnitTest {
 			assertNotNull(person);
 			assertNotNull(person.id);		
 			
+			FromMysqlToPostgres.createValuableCompetence(rs.getInt("Matricola"),person,em);
+			
 			FromMysqlToPostgres.createContract(rs.getLong("ID"), person, em);
 			
 			FromMysqlToPostgres.createVacations(rs.getLong("ID"), person, em);
