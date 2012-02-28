@@ -34,6 +34,7 @@ import models.Stamping;
 import models.Stamping.WayType;
 import models.VacationCode;
 import models.VacationPeriod;
+import models.ValuableCompetence;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import models.YearRecap;
@@ -138,6 +139,8 @@ public class FromMysqlToPostgres {
 			//rs.next(); // exactly one result so allowed 
 					
 			Person person = FromMysqlToPostgres.createPerson(rs, em);
+			
+			FromMysqlToPostgres.createValuableCompetence(rs.getInt("Matricola"), person, em);
 			
 			FromMysqlToPostgres.createContract(rs.getLong("ID"), person, em);
 			
@@ -1085,6 +1088,34 @@ public class FromMysqlToPostgres {
 		}	
 		mysqlCon.close();
 		
+	}
+	
+	/**
+	 * 
+	 * @param matricola
+	 * @param person
+	 * @param em
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws ClassNotFoundException
+	 * @throws SQLException
+	 * funzione che associa a ciascuna persona creata, le corrispettive competenze valide.
+	 */
+	public static void createValuableCompetence(int matricola, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+		Logger.info("Inizio a creare le competenze valide per " +person.name+ " " +person.surname);
+		Connection mysqlCon = getMysqlConnection();
+		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT codicecomp, descrizione FROM compvalide " +
+				"WHERE matricola = " +matricola );
+		ResultSet rs = stmt.executeQuery();
+		ValuableCompetence valuableCompetence = null;
+		while(rs.next()){
+			valuableCompetence = new ValuableCompetence();
+			valuableCompetence.person = person;
+			valuableCompetence.codicecomp = rs.getString("codicecomp");
+			valuableCompetence.descrizione = rs.getString("descrizione");
+			em.persist(valuableCompetence);
+		}
+		mysqlCon.close();
 	}
 	
 }

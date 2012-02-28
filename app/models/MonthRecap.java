@@ -179,5 +179,10 @@ public class MonthRecap extends Model {
 		}
 		return days;
 	}
+	
+	public List<Competence> getCompetence(){
+		return null;
+		
+	}
 		
 }
