@@ -17,10 +17,7 @@ import play.db.jpa.Model;
 
 import lombok.Data;
 
-
-
-@Data
-public class PersonMonth extends Model{
+public class PersonMonth extends Model {
 	
 	private int year;
 	
