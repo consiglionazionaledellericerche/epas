@@ -28,8 +28,7 @@ import play.db.jpa.Model;
  * @author cristian
  *
  */
-@Data
-public class PersonDay extends Model{
+public class PersonDay extends Model {
 
 	private final Person person;
 	
@@ -278,17 +277,6 @@ public class PersonDay extends Model{
 			isMealTicketAvailable = true;
 		}
 		return isMealTicketAvailable;
-	}
-	
-	/**
-	 * 
-	 * @return il workingTimeType di quella persona
-	 */
-	public WorkingTimeType getWorkingTimeType(){
-		WorkingTimeType wtt = new WorkingTimeType();
-		wtt = WorkingTimeType.find("Select * from WorkingTimeType wtt where wtt.person = ?", person).first();
-		return wtt;
-	}
-		
+	}		
 	
 }
