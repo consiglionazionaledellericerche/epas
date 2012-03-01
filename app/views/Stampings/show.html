@@ -1,9 +1,10 @@
 #{extends 'main.html' /}
-#{set title:monthRecap.person.surname /}
+#{set title:monthRecap.person.surname + ' ' + monthRecap.person.name + ', matricola=' + monthRecap.person.number /}
 
-<table>
+<h2>Situazione presenze mensile <span class="capitalized">&{'views.tags.display.date.month.' + monthRecap.month}</span> ${monthRecap.year}</h2>
+<table id="presenze_mensili">
 	<tr>
-		<th>Buono mensa</th>
+		<th width="5%">Buono mensa</th>
 		<th>Giorno</th>
 		<th>Codice di assenza</th>
 		<th>1° entrata</th>
@@ -18,8 +19,8 @@
      for(day in monthRecap.days) {
 }%
 		<tr>
-			<td>${day.mealTicket()}</td>
-			<td>${day.date}</td>
+			<td>&{'views.common.yes_or_no.' + day.mealTicket()}</td>
+			<td class="capitalized">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), day.date.toDate())}</td>
 			<td>
 				%{for (absenceType in day.absenceList()) {
 					absenceType.code
@@ -28,7 +29,7 @@
 			</td>
 			<td>${day.getStampings().size()>0 ? day.getStampings().get(0) : ''}</td>
 			<td>${day.getStampings().size()>1 ? day.getStampings().get(1) : ''}</td>
-			<td> ore = day.timeAtWork()/60 minuti = day.timeAtWork()%60</td>
+			<td>${String.format("%02d", (day.timeAtWork()/60).toInteger())}:${day.timeAtWork()%60}</td>
 			<td>${day.difference}</td>
 			<td>${day.progressive()}</td>
 			<td>${day.person.workingTimeType != null ? day.person.workingTimeType.description : ''}</td>

@@ -1,0 +1,25 @@
+views.common.true=vero
+views.common.false=falso
+
+views.common.yes_or_no.true=si
+views.common.yes_or_no.false=no
+
+views.tags.display.date.format=dd/MM/yyyy
+views.tags.display.date.format.noDay=MM yyyy
+views.tags.display.date.format.onlyTime=mm:ss
+views.tags.display.date.format.dayAndShortDayName=%%1$td %%1$ta
+
+views.tags.display.date.month.1=gennaio
+views.tags.display.date.month.2=gebbraio
+views.tags.display.date.month.3=marzo
+views.tags.display.date.month.4=aprile
+views.tags.display.date.month.5=maggio
+views.tags.display.date.month.6=giugno
+views.tags.display.date.month.7=luglio
+views.tags.display.date.month.8=agosto
+views.tags.display.date.month.9=settembre
+views.tags.display.date.month.10=ottobre
+views.tags.display.date.month.11=novembre
+views.tags.display.date.month.12=dicembre
+
+ 
