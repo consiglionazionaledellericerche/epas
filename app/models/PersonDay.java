@@ -28,8 +28,7 @@ import play.db.jpa.Model;
  * @author cristian
  *
  */
-@Data
-public class PersonDay extends Model{
+public class PersonDay extends Model {
 
 	private final Person person;
 	
@@ -42,12 +41,11 @@ public class PersonDay extends Model{
 	
 	private Absence absence = null;
 	
-	private WorkingTimeType wtt = null;
 	
 	/**
 	 * Totale del tempo lavorato nel giorno in minuti 
 	 */
-	private Integer dailyTime;
+
 
 	private Integer timeAtWork;
 
@@ -280,6 +278,7 @@ public class PersonDay extends Model{
 			isMealTicketAvailable = true;
 		}
 		return isMealTicketAvailable;
+
 	}
 	
 	/**
@@ -300,26 +299,5 @@ public class PersonDay extends Model{
 		}
 		return difference;
 	}
-	/**
-	 * 
-	 * @return il workingTimeType di quella persona
-	 */
-	public WorkingTimeType getWorkingTimeType(){
-//		WorkingTimeType w = null;
-		if(wtt == null){
-			wtt = WorkingTimeType.find("Select wtt from WorkingTimeType wtt, Person p where p.workingTimeType=wtt and p = ?", person).first();
-			if(wtt != null){
-//				w = wtt.get(0);
-//			}
-//			else{
-//				w = new WorkingTimeType();
-//				w.description="nessun working time type";
-//				w.shift=false;				
-			}			
-//				
-		}
-		return wtt;
-	}
-		
 	
 }

@@ -96,7 +96,6 @@ header #options a {
 
 table {
     border: 1px solid #aaa;
-    width: 100%;
 }
 
 th {
@@ -169,4 +168,11 @@ footer {
     font-size: 70%;
     border-top: 1px dotted #ccc;
     text-align: center;
+}
+
+table.presenze_mensili {
+
+}
+.capitalized {
+	text-transform: capitalize;	
 }
