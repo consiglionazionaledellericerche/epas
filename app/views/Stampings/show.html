@@ -8,6 +8,8 @@
 		<th>Codice di assenza</th>
 		<th>1° entrata</th>
 		<th>1° uscita</th>
+		<th>2° entrata</th>
+		<th>2° uscita</th>
 		<th>tempo</th>
 		<th>differ.</th>
 		<th>progress</th>
@@ -28,8 +30,10 @@
 			</td>
 			<td>${day.getStampings().size()>0 ? day.getStampings().get(0) : ''}</td>
 			<td>${day.getStampings().size()>1 ? day.getStampings().get(1) : ''}</td>
-			<td> ore = day.timeAtWork()/60 minuti = day.timeAtWork()%60</td>
-			<td>${day.difference()}</td>
+			<td>${day.getStampings().size()>2 ? day.getStampings().get(2) : ''}</td>
+			<td>${day.getStampings().size()>3 ? day.getStampings().get(3) : ''}</td>
+			<td>${day.timeAtWork()/60} ore e ${day.timeAtWork()%60} minuti</td>
+			<td>${day.getDifference()}</td>			
 			<td>${day.progressive()}</td>
 			<td>${day.getWorkingTimeType().description}</td>
 		</tr>

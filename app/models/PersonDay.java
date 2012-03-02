@@ -42,6 +42,8 @@ public class PersonDay extends Model{
 	
 	private Absence absence = null;
 	
+	private WorkingTimeType wtt = null;
+	
 	/**
 	 * Totale del tempo lavorato nel giorno in minuti 
 	 */
@@ -282,11 +284,40 @@ public class PersonDay extends Model{
 	
 	/**
 	 * 
+	 * @return la differenza tra l'orario di lavoro giornaliero e l'orario standard in minuti
+	 */
+	public int getDifference(){
+		if(date != null){
+			if((date.getDayOfMonth()==1) && (date.getDayOfWeek()==6 || date.getDayOfWeek()==7))
+				return 0;			
+			if((date.getDayOfMonth()==2) && (date.getDayOfWeek()==7))
+				return 0;
+			else{
+				int minTimeWorking = 432;
+				timeAtWork = timeAtWork();
+				difference = timeAtWork-minTimeWorking;
+			}
+		}
+		return difference;
+	}
+	/**
+	 * 
 	 * @return il workingTimeType di quella persona
 	 */
 	public WorkingTimeType getWorkingTimeType(){
-		WorkingTimeType wtt = new WorkingTimeType();
-		wtt = WorkingTimeType.find("Select * from WorkingTimeType wtt where wtt.person = ?", person).first();
+//		WorkingTimeType w = null;
+		if(wtt == null){
+			wtt = WorkingTimeType.find("Select wtt from WorkingTimeType wtt, Person p where p.workingTimeType=wtt and p = ?", person).first();
+			if(wtt != null){
+//				w = wtt.get(0);
+//			}
+//			else{
+//				w = new WorkingTimeType();
+//				w.description="nessun working time type";
+//				w.shift=false;				
+			}			
+//				
+		}
 		return wtt;
 	}
 		

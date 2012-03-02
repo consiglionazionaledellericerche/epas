@@ -140,6 +140,8 @@ public class FromMysqlToPostgres {
 					
 			Person person = FromMysqlToPostgres.createPerson(rs, em);
 			
+			FromMysqlToPostgres.createContactData(rs, person, em);
+
 			FromMysqlToPostgres.createValuableCompetence(rs.getInt("Matricola"), person, em);
 			
 			FromMysqlToPostgres.createContract(rs.getLong("ID"), person, em);
@@ -162,14 +164,16 @@ public class FromMysqlToPostgres {
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	public static Person createPerson(ResultSet rs, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 		Logger.configuredManually = true;
 		Logger.info("Inizio a creare la persona: "+rs.getString("Nome").toString()+" "+rs.getString("Cognome").toString());
 		
 		long id = rs.getLong("ID");
 		Connection mysqlCon = getMysqlConnection();
-		PreparedStatement stmtWorkingTime = mysqlCon.prepareStatement("SELECT * FROM orari_di_lavoro,orario_pers WHERE " +
-				"orario_pers.oid=orari_di_lavoro.id and orario_pers.pid="+id);
+		PreparedStatement stmtWorkingTime = mysqlCon.prepareStatement("select * from orari_di_lavoro,orario_pers " +
+				" WHERE orario_pers.oid=orari_di_lavoro.id and orario_pers.pid = " + id + " order by data_fine desc limit 1");
+
 		ResultSet rsInterno = stmtWorkingTime.executeQuery();		
 		Person person = new Person();
 		person.name = rs.getString("Nome");
@@ -178,29 +182,51 @@ public class FromMysqlToPostgres {
 		person.password = rs.getString("passwordmd5");
 		person.bornDate = rs.getDate("DataNascita");
 		person.number = rs.getInt("Matricola");
+		int i = 0;
+		
 		WorkingTimeType wtt = null;
-		if(rsInterno != null){
-			while(rsInterno.next()){
-				
-				int idCodiceOrarioLavoro = rsInterno.getInt("id");
-				if(mappaCodiciWorkingTimeType.get(idCodiceOrarioLavoro)!=null){
-					wtt = WorkingTimeType.findById(mappaCodiciWorkingTimeType.get(idCodiceOrarioLavoro));
-					person.workingTimeType = wtt;
-					
-				}
-				else{
-					wtt = new WorkingTimeType();
-					wtt.description = rsInterno.getString("nome");
-					wtt.shift = rsInterno.getBoolean("turno");
-					person.workingTimeType=wtt;
-										
-					mappaCodiciWorkingTimeType.put(idCodiceOrarioLavoro,wtt.id);
-				}
+		if(rsInterno.next()){
+//		while(rsInterno.next()){
+//			i++;
+//		}
+		//Logger.info("l'id dell'orario di lavoro è: " +rsInterno.getInt("id"));
+			int idCodiceOrarioLavoro = rsInterno.getInt("id");
+			if(mappaCodiciWorkingTimeType.get(idCodiceOrarioLavoro)!=null){
+				wtt = WorkingTimeType.findById(mappaCodiciWorkingTimeType.get(idCodiceOrarioLavoro));
+				person.workingTimeType = wtt;
 				em.persist(wtt);
 			}
+			else{
+				wtt = new WorkingTimeType();
+				wtt.description = rsInterno.getString("nome");
+				wtt.shift = rsInterno.getBoolean("turno");
+				person.workingTimeType=wtt;
+				em.persist(wtt);		
+				mappaCodiciWorkingTimeType.put(idCodiceOrarioLavoro,wtt.id);
+			}
+			
+		}
+		else{
+			Logger.info("Sono nel ramo else della costruzione del workingtimetype");
+			Logger.info("Non ho trovato un workingTimeType valido nel db mysql");
+			if(mappaCodiciWorkingTimeType.get(100)==null){
+				wtt = new WorkingTimeType();
+				wtt.description = "normale-mod";
+				wtt.shift = false;
+				em.persist(wtt);
+				person.workingTimeType=wtt;
+				
+				mappaCodiciWorkingTimeType.put(100,wtt.id);
+				
+			}
+			else{
+				wtt = WorkingTimeType.findById(mappaCodiciWorkingTimeType.get(100));
+				person.workingTimeType = wtt;
+				
+			}					
 		}
 		em.persist(person);
-		//em.persist(wtt);
+		
 		Location location = new Location();
 		location.person = person;
 		
@@ -211,6 +237,9 @@ public class FromMysqlToPostgres {
 		
 		return person;
 	}
+	
+		
+	
 		
 	public static void createContactData(ResultSet rs, Person person, EntityManager em) throws SQLException {
 		Logger.info("Inizio a creare il contact data per " +person.name+ " " +person.surname);
@@ -686,7 +715,7 @@ public class FromMysqlToPostgres {
 		Logger.info("Inizio a creare l'orario di lavoro ");
 		Connection mysqlCon = getMysqlConnection();		
 		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM orari_di_lavoro,orario_pers WHERE " +
-				"orario_pers.oid=orari_di_lavoro.id and orario_pers.pid="+id);
+				"orario_pers.oid=orari_di_lavoro.id and orario_pers.pid= " + id + " order by data_fine desc limit 1");
 
 		ResultSet rs = stmt.executeQuery();
 		
@@ -701,130 +730,8 @@ public class FromMysqlToPostgres {
 			WorkingTimeTypeDay wttd_su = null;
 			while(rs.next()){
 				int idCodiceOrarioLavoro = rs.getInt("id");
-				if(mappaCodiciWorkingTimeType.get(idCodiceOrarioLavoro)!=null){
+				//if(mappaCodiciWorkingTimeType.get(idCodiceOrarioLavoro)!=null){
 					wtt = WorkingTimeType.findById(mappaCodiciWorkingTimeType.get(idCodiceOrarioLavoro));
-				
-					wttd_mo = new WorkingTimeTypeDay();
-					wttd_mo.workingTimeType = wtt;
-					wttd_mo.dayOfWeek = 1;
-					//wttd_mo.dayOfWeek = DateTimeConstants.MONDAY;
-					wttd_mo.workingTime = rs.getInt("lu_tempo_lavoro");
-					wttd_mo.holiday = rs.getBoolean("lu_festa");
-					wttd_mo.timeSlotEntranceFrom = rs.getInt("lu_fascia_ingresso");
-					wttd_mo.timeSlotEntranceTo = rs.getInt("lu_fascia_ingresso1");
-					wttd_mo.timeSlotExitFrom = rs.getInt("lu_fascia_uscita");
-					wttd_mo.timeSlotExitTo = rs.getInt("lu_fascia_uscita1");
-					wttd_mo.timeMealFrom = rs.getInt("lu_fascia_pranzo");
-					wttd_mo.timeMealTo = rs.getInt("lu_fascia_pranzo1");
-					wttd_mo.breakTicketTime = rs.getInt("lu_tempo_interv"); 
-					wttd_mo.mealTicketTime = rs.getInt("lu_tempo_buono");
-					em.persist(wttd_mo);
-	
-					wttd_tu = new WorkingTimeTypeDay();
-					wttd_tu.workingTimeType = wtt;
-					wttd_tu.dayOfWeek = 2;
-					//wttd_mo.dayOfWeek = DateTimeConstants.TUESDAY;
-					wttd_tu.workingTime = rs.getInt("ma_tempo_lavoro");
-					wttd_tu.holiday = rs.getBoolean("ma_festa");
-					wttd_tu.timeSlotEntranceFrom = rs.getInt("ma_fascia_ingresso");
-					wttd_tu.timeSlotEntranceTo = rs.getInt("ma_fascia_ingresso1");
-					wttd_tu.timeSlotExitFrom = rs.getInt("ma_fascia_uscita");
-					wttd_tu.timeSlotExitTo = rs.getInt("ma_fascia_uscita1");
-					wttd_tu.timeMealFrom = rs.getInt("ma_fascia_pranzo");
-					wttd_tu.timeMealTo = rs.getInt("ma_fascia_pranzo1");
-					wttd_tu.breakTicketTime = rs.getInt("ma_tempo_interv"); 
-					wttd_tu.mealTicketTime = rs.getInt("ma_tempo_buono"); 
-					em.persist(wttd_tu);
-	
-					wttd_we = new WorkingTimeTypeDay();
-					wttd_we.workingTimeType = wtt;
-					wttd_we.dayOfWeek = 3;
-					//wttd_mo.dayOfWeek = DateTimeConstants.WEDNESDAY;
-					wttd_we.workingTime = rs.getInt("me_tempo_lavoro");
-					wttd_we.holiday = rs.getBoolean("me_festa");
-					wttd_we.timeSlotEntranceFrom = rs.getInt("me_fascia_ingresso");
-					wttd_we.timeSlotEntranceTo = rs.getInt("me_fascia_ingresso1");
-					wttd_we.timeSlotExitFrom = rs.getInt("me_fascia_uscita");
-					wttd_we.timeSlotExitTo = rs.getInt("me_fascia_uscita1");
-					wttd_we.timeMealFrom = rs.getInt("me_fascia_pranzo");
-					wttd_we.timeMealTo = rs.getInt("me_fascia_pranzo1");
-					wttd_we.breakTicketTime = rs.getInt("me_tempo_interv"); 
-					wttd_we.mealTicketTime = rs.getInt("me_tempo_buono"); 
-					em.persist(wttd_we);
-	
-					wttd_th = new WorkingTimeTypeDay();
-					wttd_th.workingTimeType = wtt;
-					wttd_th.dayOfWeek = 4;
-					//wttd_mo.dayOfWeek = DateTimeConstants.THURSDAY;
-					wttd_th.workingTime = rs.getInt("gi_tempo_lavoro");
-					wttd_th.holiday = rs.getBoolean("gi_festa");
-					wttd_th.timeSlotEntranceFrom = rs.getInt("gi_fascia_ingresso");
-					wttd_th.timeSlotEntranceTo = rs.getInt("gi_fascia_ingresso1");
-					wttd_th.timeSlotExitFrom = rs.getInt("gi_fascia_uscita");
-					wttd_th.timeSlotExitTo = rs.getInt("gi_fascia_uscita1");
-					wttd_th.timeMealFrom = rs.getInt("gi_fascia_pranzo");
-					wttd_th.timeMealTo = rs.getInt("gi_fascia_pranzo1");
-					wttd_th.breakTicketTime = rs.getInt("me_tempo_interv"); 
-					wttd_th.mealTicketTime = rs.getInt("me_tempo_buono"); 
-					em.persist(wttd_th);
-	
-					wttd_fr = new WorkingTimeTypeDay();
-					wttd_fr.workingTimeType = wtt;
-					wttd_fr.dayOfWeek = 5;
-					//wttd_mo.dayOfWeek = DateTimeConstants.FRIDAY;
-					wttd_fr.workingTime = rs.getInt("ve_tempo_lavoro");
-					wttd_fr.holiday = rs.getBoolean("ve_festa");
-					wttd_fr.timeSlotEntranceFrom = rs.getInt("ve_fascia_ingresso");
-					wttd_fr.timeSlotEntranceTo = rs.getInt("ve_fascia_ingresso1");
-					wttd_fr.timeSlotExitFrom = rs.getInt("ve_fascia_uscita");
-					wttd_fr.timeSlotExitTo = rs.getInt("ve_fascia_uscita1");
-					wttd_fr.timeMealFrom = rs.getInt("ve_fascia_pranzo");
-					wttd_fr.timeMealTo = rs.getInt("ve_fascia_pranzo1");
-					wttd_fr.breakTicketTime = rs.getInt("me_tempo_interv"); 
-					wttd_fr.mealTicketTime = rs.getInt("me_tempo_buono"); 
-					em.persist(wttd_fr);
-	
-					wttd_sa = new WorkingTimeTypeDay();
-					wttd_sa.workingTimeType = wtt;
-					wttd_sa.dayOfWeek = 6;
-					//wttd_mo.dayOfWeek = DateTimeConstants.SATURDAY;
-					wttd_sa.workingTime = rs.getInt("sa_tempo_lavoro");
-					wttd_sa.holiday = rs.getBoolean("sa_festa");
-					wttd_sa.timeSlotEntranceFrom = rs.getInt("sa_fascia_ingresso");
-					wttd_sa.timeSlotEntranceTo = rs.getInt("sa_fascia_ingresso1");
-					wttd_sa.timeSlotExitFrom = rs.getInt("sa_fascia_uscita");
-					wttd_sa.timeSlotExitTo = rs.getInt("sa_fascia_uscita1");
-					wttd_sa.timeMealFrom = rs.getInt("sa_fascia_pranzo");
-					wttd_sa.timeMealTo = rs.getInt("sa_fascia_pranzo1");
-					wttd_sa.breakTicketTime = rs.getInt("me_tempo_interv");
-					wttd_sa.mealTicketTime = rs.getInt("me_tempo_buono"); 
-					em.persist(wttd_sa);
-	
-					wttd_su = new WorkingTimeTypeDay();		
-					wttd_su.workingTimeType = wtt;
-					wttd_su.dayOfWeek = 7;
-					//wttd_mo.dayOfWeek = DateTimeConstants.SUNDAY;
-					wttd_su.workingTime = rs.getInt("do_tempo_lavoro");
-					wttd_su.holiday = rs.getBoolean("do_festa");
-					wttd_su.timeSlotEntranceFrom = rs.getInt("do_fascia_ingresso");
-					wttd_su.timeSlotEntranceTo = rs.getInt("do_fascia_ingresso1");
-					wttd_su.timeSlotExitFrom = rs.getInt("do_fascia_uscita");
-					wttd_su.timeSlotExitTo = rs.getInt("do_fascia_uscita1");
-					wttd_su.timeMealFrom = rs.getInt("do_fascia_pranzo");
-					wttd_su.timeMealTo = rs.getInt("do_fascia_pranzo1");
-					wttd_su.breakTicketTime = rs.getInt("me_tempo_interv");
-					wttd_su.mealTicketTime = rs.getInt("me_tempo_buono");
-					em.persist(wttd_su);
-				}
-				else{
-					wtt = new WorkingTimeType();
-					wtt.description = rs.getString("nome");
-					wtt.shift = rs.getBoolean("turno");
-
-					//wtt.person = person;
-					em.persist(wtt);				
-					
-					mappaCodiciWorkingTimeType.put(idCodiceOrarioLavoro,wtt.id);					
 					
 					wttd_mo = new WorkingTimeTypeDay();
 					wttd_mo.workingTimeType = wtt;
@@ -937,8 +844,130 @@ public class FromMysqlToPostgres {
 					wttd_su.breakTicketTime = rs.getInt("me_tempo_interv");
 					wttd_su.mealTicketTime = rs.getInt("me_tempo_buono");
 					em.persist(wttd_su);
-					
-				}
+//				}
+//				else{
+//					wtt = new WorkingTimeType();
+//					wtt.description = rs.getString("nome");
+//					wtt.shift = rs.getBoolean("turno");
+//
+//					//wtt.person = person;
+//					em.persist(wtt);				
+//					
+//					mappaCodiciWorkingTimeType.put(idCodiceOrarioLavoro,wtt.id);					
+//					
+//					wttd_mo = new WorkingTimeTypeDay();
+//					wttd_mo.workingTimeType = wtt;
+//					wttd_mo.dayOfWeek = 1;
+//					//wttd_mo.dayOfWeek = DateTimeConstants.MONDAY;
+//					wttd_mo.workingTime = rs.getInt("lu_tempo_lavoro");
+//					wttd_mo.holiday = rs.getBoolean("lu_festa");
+//					wttd_mo.timeSlotEntranceFrom = rs.getInt("lu_fascia_ingresso");
+//					wttd_mo.timeSlotEntranceTo = rs.getInt("lu_fascia_ingresso1");
+//					wttd_mo.timeSlotExitFrom = rs.getInt("lu_fascia_uscita");
+//					wttd_mo.timeSlotExitTo = rs.getInt("lu_fascia_uscita1");
+//					wttd_mo.timeMealFrom = rs.getInt("lu_fascia_pranzo");
+//					wttd_mo.timeMealTo = rs.getInt("lu_fascia_pranzo1");
+//					wttd_mo.breakTicketTime = rs.getInt("lu_tempo_interv"); 
+//					wttd_mo.mealTicketTime = rs.getInt("lu_tempo_buono");
+//					em.persist(wttd_mo);
+//	
+//					wttd_tu = new WorkingTimeTypeDay();
+//					wttd_tu.workingTimeType = wtt;
+//					wttd_tu.dayOfWeek = 2;
+//					//wttd_mo.dayOfWeek = DateTimeConstants.TUESDAY;
+//					wttd_tu.workingTime = rs.getInt("ma_tempo_lavoro");
+//					wttd_tu.holiday = rs.getBoolean("ma_festa");
+//					wttd_tu.timeSlotEntranceFrom = rs.getInt("ma_fascia_ingresso");
+//					wttd_tu.timeSlotEntranceTo = rs.getInt("ma_fascia_ingresso1");
+//					wttd_tu.timeSlotExitFrom = rs.getInt("ma_fascia_uscita");
+//					wttd_tu.timeSlotExitTo = rs.getInt("ma_fascia_uscita1");
+//					wttd_tu.timeMealFrom = rs.getInt("ma_fascia_pranzo");
+//					wttd_tu.timeMealTo = rs.getInt("ma_fascia_pranzo1");
+//					wttd_tu.breakTicketTime = rs.getInt("ma_tempo_interv"); 
+//					wttd_tu.mealTicketTime = rs.getInt("ma_tempo_buono"); 
+//					em.persist(wttd_tu);
+//	
+//					wttd_we = new WorkingTimeTypeDay();
+//					wttd_we.workingTimeType = wtt;
+//					wttd_we.dayOfWeek = 3;
+//					//wttd_mo.dayOfWeek = DateTimeConstants.WEDNESDAY;
+//					wttd_we.workingTime = rs.getInt("me_tempo_lavoro");
+//					wttd_we.holiday = rs.getBoolean("me_festa");
+//					wttd_we.timeSlotEntranceFrom = rs.getInt("me_fascia_ingresso");
+//					wttd_we.timeSlotEntranceTo = rs.getInt("me_fascia_ingresso1");
+//					wttd_we.timeSlotExitFrom = rs.getInt("me_fascia_uscita");
+//					wttd_we.timeSlotExitTo = rs.getInt("me_fascia_uscita1");
+//					wttd_we.timeMealFrom = rs.getInt("me_fascia_pranzo");
+//					wttd_we.timeMealTo = rs.getInt("me_fascia_pranzo1");
+//					wttd_we.breakTicketTime = rs.getInt("me_tempo_interv"); 
+//					wttd_we.mealTicketTime = rs.getInt("me_tempo_buono"); 
+//					em.persist(wttd_we);
+//	
+//					wttd_th = new WorkingTimeTypeDay();
+//					wttd_th.workingTimeType = wtt;
+//					wttd_th.dayOfWeek = 4;
+//					//wttd_mo.dayOfWeek = DateTimeConstants.THURSDAY;
+//					wttd_th.workingTime = rs.getInt("gi_tempo_lavoro");
+//					wttd_th.holiday = rs.getBoolean("gi_festa");
+//					wttd_th.timeSlotEntranceFrom = rs.getInt("gi_fascia_ingresso");
+//					wttd_th.timeSlotEntranceTo = rs.getInt("gi_fascia_ingresso1");
+//					wttd_th.timeSlotExitFrom = rs.getInt("gi_fascia_uscita");
+//					wttd_th.timeSlotExitTo = rs.getInt("gi_fascia_uscita1");
+//					wttd_th.timeMealFrom = rs.getInt("gi_fascia_pranzo");
+//					wttd_th.timeMealTo = rs.getInt("gi_fascia_pranzo1");
+//					wttd_th.breakTicketTime = rs.getInt("me_tempo_interv"); 
+//					wttd_th.mealTicketTime = rs.getInt("me_tempo_buono"); 
+//					em.persist(wttd_th);
+//	
+//					wttd_fr = new WorkingTimeTypeDay();
+//					wttd_fr.workingTimeType = wtt;
+//					wttd_fr.dayOfWeek = 5;
+//					//wttd_mo.dayOfWeek = DateTimeConstants.FRIDAY;
+//					wttd_fr.workingTime = rs.getInt("ve_tempo_lavoro");
+//					wttd_fr.holiday = rs.getBoolean("ve_festa");
+//					wttd_fr.timeSlotEntranceFrom = rs.getInt("ve_fascia_ingresso");
+//					wttd_fr.timeSlotEntranceTo = rs.getInt("ve_fascia_ingresso1");
+//					wttd_fr.timeSlotExitFrom = rs.getInt("ve_fascia_uscita");
+//					wttd_fr.timeSlotExitTo = rs.getInt("ve_fascia_uscita1");
+//					wttd_fr.timeMealFrom = rs.getInt("ve_fascia_pranzo");
+//					wttd_fr.timeMealTo = rs.getInt("ve_fascia_pranzo1");
+//					wttd_fr.breakTicketTime = rs.getInt("me_tempo_interv"); 
+//					wttd_fr.mealTicketTime = rs.getInt("me_tempo_buono"); 
+//					em.persist(wttd_fr);
+//	
+//					wttd_sa = new WorkingTimeTypeDay();
+//					wttd_sa.workingTimeType = wtt;
+//					wttd_sa.dayOfWeek = 6;
+//					//wttd_mo.dayOfWeek = DateTimeConstants.SATURDAY;
+//					wttd_sa.workingTime = rs.getInt("sa_tempo_lavoro");
+//					wttd_sa.holiday = rs.getBoolean("sa_festa");
+//					wttd_sa.timeSlotEntranceFrom = rs.getInt("sa_fascia_ingresso");
+//					wttd_sa.timeSlotEntranceTo = rs.getInt("sa_fascia_ingresso1");
+//					wttd_sa.timeSlotExitFrom = rs.getInt("sa_fascia_uscita");
+//					wttd_sa.timeSlotExitTo = rs.getInt("sa_fascia_uscita1");
+//					wttd_sa.timeMealFrom = rs.getInt("sa_fascia_pranzo");
+//					wttd_sa.timeMealTo = rs.getInt("sa_fascia_pranzo1");
+//					wttd_sa.breakTicketTime = rs.getInt("me_tempo_interv");
+//					wttd_sa.mealTicketTime = rs.getInt("me_tempo_buono"); 
+//					em.persist(wttd_sa);
+//	
+//					wttd_su = new WorkingTimeTypeDay();		
+//					wttd_su.workingTimeType = wtt;
+//					wttd_su.dayOfWeek = 7;
+//					//wttd_mo.dayOfWeek = DateTimeConstants.SUNDAY;
+//					wttd_su.workingTime = rs.getInt("do_tempo_lavoro");
+//					wttd_su.holiday = rs.getBoolean("do_festa");
+//					wttd_su.timeSlotEntranceFrom = rs.getInt("do_fascia_ingresso");
+//					wttd_su.timeSlotEntranceTo = rs.getInt("do_fascia_ingresso1");
+//					wttd_su.timeSlotExitFrom = rs.getInt("do_fascia_uscita");
+//					wttd_su.timeSlotExitTo = rs.getInt("do_fascia_uscita1");
+//					wttd_su.timeMealFrom = rs.getInt("do_fascia_pranzo");
+//					wttd_su.timeMealTo = rs.getInt("do_fascia_pranzo1");
+//					wttd_su.breakTicketTime = rs.getInt("me_tempo_interv");
+//					wttd_su.mealTicketTime = rs.getInt("me_tempo_buono");
+//					em.persist(wttd_su);
+//					
+//				}
 			
 			}
 		}
