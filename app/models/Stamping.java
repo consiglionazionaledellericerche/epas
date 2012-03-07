@@ -69,4 +69,6 @@ public class Stamping extends Model {
 	 */
 	public boolean isServiceExit;
 	
+		
+		
 }
