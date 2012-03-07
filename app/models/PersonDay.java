@@ -5,6 +5,7 @@ package models;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 
@@ -49,9 +50,9 @@ public class PersonDay extends Model {
 
 	private Integer timeAtWork;
 
-	private int progressive;
+	private int progressive = 0;
 
-	private int difference;
+	public int difference;
 	
 	public PersonDay(Person person, LocalDate date) {
 		this.person = person;
@@ -96,15 +97,22 @@ public class PersonDay extends Model {
 		return absence;
 	}
 	
+	/**
+	 * 
+	 * @return la lista di timbrature giornaliere
+	 */
 	public List<Stamping> getStampings() {
 		if (stampings == null) {
 			
 			stampings = Stamping.find("SELECT s FROM Stamping s " +
 					"WHERE s.person = ? and date between ? and ? " +
-					"ORDER BY date", person, startOfDay, endOfDay).fetch();							
+					"ORDER BY date", person, startOfDay, endOfDay).fetch();		
+			
+			
 		}
 		return stampings;
 	}
+	
 	
 	/**
 	 * 
@@ -201,7 +209,7 @@ public class PersonDay extends Model {
 	 * @param date
 	 * @return il progressivo delle ore in più o in meno rispetto al normale orario previsto per quella data
 	 */
-	public int progressive(){
+	public int getProgressive(){
 		if(progressive == 0){
 			if(date != null){
 			
@@ -214,8 +222,12 @@ public class PersonDay extends Model {
 				}
 			}
 		}
+		else{
+			progressive = progressive-difference;
+		}
 		return progressive;
 	}
+	
 	
 	/**
 	 * 
@@ -241,15 +253,15 @@ public class PersonDay extends Model {
 	 * @param date
 	 * @return la lista di codici di assenza fatti da quella persona in quella data
 	 */
-	public List<AbsenceType> absenceList() {
+	public List<Absence> absenceList() {
 		
-		List<AbsenceType> listaAssenze = new ArrayList<AbsenceType>();
-		listaAssenze = AbsenceType.find("SELECT abt FROM AbsenceType abt, Absence abs, Person p " +
-				"WHERE abs.person = p AND abs.absenceType = abt AND p = ? AND abs.date = ?", person, date).fetch();
+		List<Absence> listaAssenze = new ArrayList<Absence>();
+		listaAssenze = AbsenceType.find("SELECT abs FROM Absence abs " +
+				" WHERE abs.person = ? AND abs.date = ?", person, date).fetch();
 
 		if(listaAssenze != null){
-			for (AbsenceType abt : listaAssenze) {
-				Logger.warn("Codice: " +abt.code);
+			for (Absence abs : listaAssenze) {
+				Logger.warn("Codice: " +abs.absenceType.code);
 			}
 		}
 		else
@@ -267,15 +279,18 @@ public class PersonDay extends Model {
 	 * @return se la persona può usufruire del buono pasto per quella data
 	 */
 	public boolean mealTicket(){
-		boolean isMealTicketAvailable;
+		boolean isMealTicketAvailable = false;
 		if (timeAtWork == null) {
 			timeAtWork = timeAtWork();
+			
 		}
 		if(timeAtWork == 0){
 			isMealTicketAvailable = false;
 		}
 		else{
-			isMealTicketAvailable = true;
+			if(person.workingTimeType.description.equals("normale-mod") && timeAtWork>=432)
+				isMealTicketAvailable=true;
+			
 		}
 		return isMealTicketAvailable;
 
@@ -291,12 +306,25 @@ public class PersonDay extends Model {
 				return 0;			
 			if((date.getDayOfMonth()==2) && (date.getDayOfWeek()==7))
 				return 0;
+			if((date.getDayOfWeek()==7) || date.getDayOfWeek()==6)
+				return 0;
+			List<Absence> listaAssenze = absenceList();
+			List<Stamping> listaTimbrature = getStampings();
+			if(listaAssenze.size()!=0){
+				difference = 0;
+			}
+			if(listaTimbrature.size()==0){
+				difference = 0;
+			}
 			else{
 				int minTimeWorking = 432;
 				timeAtWork = timeAtWork();
 				difference = timeAtWork-minTimeWorking;
+				//return difference;
 			}
+				
 		}
+		
 		return difference;
 	}
 	
