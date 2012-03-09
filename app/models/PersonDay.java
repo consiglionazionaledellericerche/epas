@@ -50,7 +50,7 @@ public class PersonDay extends Model {
 
 	private Integer timeAtWork;
 
-	private int progressive = 0;
+	private static int progressive = 0;
 
 	public int difference;
 	
@@ -222,9 +222,7 @@ public class PersonDay extends Model {
 				}
 			}
 		}
-		else{
-			progressive = progressive-difference;
-		}
+		
 		return progressive;
 	}
 	

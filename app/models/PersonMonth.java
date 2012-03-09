@@ -63,12 +63,7 @@ public class PersonMonth extends Model {
 		
 		return persons;
 	}
-//	public PersonMonth(Person person, LocalDate data){
-//		this.person = person;
-//		this.year = data.getYear();
-//		this.month = data.getMonthOfYear();
-//	}
-	
+
 	
 	
 	/**
@@ -174,21 +169,6 @@ public class PersonMonth extends Model {
 		return daysAtWorkOnHoliday;
 	}
 	
-//	/**
-//	 * calcola, a partire dalla lista di PersonDay per il mese in questione, le ore effettivamente lavorate in quel mese.
-//	 * @return workingHours
-//	 */
-//	public int monthHoursRecap(){
-//		int month = date.getMonthOfYear();
-//		int year = date.getYear();
-//		Calendar firstDayOfMonth = GregorianCalendar.getInstance();
-//		firstDayOfMonth.set(year, month, 1);
-//		for(int day= 1; day < firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH); day++){
-//			workingHours += dailyTimeAtWork(day);
-//		}			
-//		
-//		return workingHours;
-//	}
 	
 	/**
 	 * calcola il numero di buoni pasto da restituire a partire dai giorni di presenza effettuati nel mese precedente con più di
@@ -255,46 +235,7 @@ public class PersonMonth extends Model {
 		notJustifiedAbsence = numberOfNotJustifiedAbsence;
 		return notJustifiedAbsence;
 	}
-	
-//	private int dailyTimeAtWork(int day){
-//		LocalDateTime startOfDay = new LocalDateTime(date.getYear(), date.getMonthOfYear(), day, 0, 0);
-//		LocalDateTime endOfDay = new LocalDateTime(date.getYear(), date.getMonthOfYear(), day, 23, 59);
-//		int timeAtWork=0;
-//		List<Stamping> listStamp = Stamping.find("SELECT s FROM Stamping s " +
-//				"WHERE s.person = ? and date between ? and ? " +
-//				"ORDER BY date", person, startOfDay, endOfDay).fetch();
-//		int size = listStamp.size();
-//		if(((size / 2 == 1) && (size % 2 == 1)) || ((size / 2 == 0) && (size % 2 == 1))){
-//			int orelavoro=0;
-//			for(Stamping s : listStamp){
-//				if(s.way == Stamping.WayType.in)
-//					orelavoro -= toMinute(s.date);				
-//				if(s.way == Stamping.WayType.out)
-//					orelavoro += toMinute(s.date);
-//				if(orelavoro < 0)
-//					timeAtWork += orelavoro;
-//				else 
-//					timeAtWork += -orelavoro;					
-//			}
-//			//return timeAtWork;	
-//		}			
-//		else{
-//			int orealavoro=0;
-//			for(Stamping s : listStamp){
-//				if(s.way == Stamping.WayType.in){
-//					orealavoro -= toMinute(s.date);								
-//					System.out.println("Timbratura di ingresso: "+orealavoro);	
-//				}
-//				if(s.way == Stamping.WayType.out){
-//					orealavoro += toMinute(s.date);						
-//					System.out.println("Timbratura di uscita: "+orealavoro);
-//				}
-//				timeAtWork += orealavoro;
-//			}				
-//		}
-//	
-//		return timeAtWork;		
-//	}
+
 	/**
 	 * 
 	 * @return numero di minuti in cui una persona è stata a lavoro in quel mese
