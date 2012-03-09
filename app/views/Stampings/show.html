@@ -23,7 +23,7 @@
 	<tr>
 		<th width="5%">Buono mensa</th>
 		<th>Giorno</th>
-		<th>Codice di assenza</th>
+		<th width="80">Codice di assenza</th>
 		<th>1° entrata</th>
 		<th>1° uscita</th>
 		<th>2° entrata</th>
@@ -47,7 +47,7 @@
 			<td>${day.getStampings().size()>3 ? day.getStampings().get(3).date.toCalendarTime() : ''}</td>
 			<td>${String.format("%02d", (day.timeAtWork()/60).toInteger())} ore e  ${day.timeAtWork()%60 } minuti</td>
 			<td>${day.difference} minuti</td>
-			<td>${day.getProgressive()} minuti</td>			
+			<td>${monthRecap.getProgressive(day.difference)} minuti</td>			
 			<td>${day.person.workingTimeType != null ? day.person.workingTimeType.description : ''}</td>
 		</tr>
 
@@ -70,17 +70,10 @@
 		<th width="200">Descrizione</th>
 			
 	</tr>
+
 	<tr>
-		<td>
-			
-				
-				
-		</td>
-		<td>
-			
-			
-		</td>		
-		
+		<td>${monthRecap.getCodiceAssenza(monthRecap.days).absenceType.code}</td>     
+		<td>${monthRecap.getCodiceAssenza(monthRecap.days).absenceType.description}</td>		
 	</tr>
 
 

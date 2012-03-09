@@ -4,7 +4,9 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -112,6 +114,14 @@ public class MonthRecap extends Model {
 	@Transient
 	public List<PersonDay> days = null;
 	
+	@Transient
+	private static int progressivo=0; 
+	
+	@Transient
+	public static List<Absence> listaCodiciAssenze = new ArrayList<Absence>();
+	
+	
+	
 	
 	/**
 	 * Construttore di default con i parametri obbligatori
@@ -179,5 +189,41 @@ public class MonthRecap extends Model {
 		}
 		return days;
 	}	
+	
+	/**
+	 * 
+	 * @return il progressivo della differenza giornaliera tra orario di lavoro previsto e orario di lavoro effettivamente fatto
+	 */
+	public int getProgressive(int difference){
+				
+		progressivo=progressivo+difference;
+		return progressivo;
+		
+	}
+	/**
+	 * 
+	 * @param days lista di PersonDay
+	 * @return la lista contenente le assenze fatte nell'arco di tempo dalla persona
+	 */
+	public List<Absence> getCodiceAssenza(List<PersonDay> days){
+		
+		days = getDays();
+		for(PersonDay pd : days){
+			if(pd.getAbsence()!=null){
+				Absence assenza = pd.getAbsence();
+				if(listaCodiciAssenze.size()>0){
+					for(Absence a : listaCodiciAssenze){
+						if(a.absenceType.code!=assenza.absenceType.code)
+							listaCodiciAssenze.add(pd.getAbsence());
+					}
+				}
+				else
+					listaCodiciAssenze.add(assenza);
+			}
+		}
+		
+		return listaCodiciAssenze;
+				
+	}
 		
 }
