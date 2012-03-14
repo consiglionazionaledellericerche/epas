@@ -27,7 +27,7 @@
 			<td>${personMonth.getNotJustifiedAbsence()}</td>
 			<td>${personMonth.mealTickeToRender()}</td>
 			<td>${personMonth.progressive()}</td>
-			<td></td>
+			<td>${personMonth.person.workingTimeType != null ? day.person.workingTimeType.description : ''}</td>
 		</tr>
 %{  		   
      }

@@ -5,15 +5,30 @@
 
 <div>
 	<select name="Anno">
-		<option>monthRecap.year</option>
-		
+		<option value="2010">2010</option> 
+		<option value="2011">2011</option> 
+		<option value="2012">2012</option> 
+		<option value="2013">2013</option> 
+
 	</select>
-</div>
-<div >
+
 	<select name="mese">
-		<option>monthRecap.month</option>
-		
+		<option value="Gennaio">Gennaio</option> 
+		<option value="Febbraio">Febbraio</option> 
+		<option value="Marzo">Marzo</option> 
+		<option value="Aprile">Aprile</option>
+		<option value="Maggio">Maggio</option> 
+		<option value="Giugno">Giugno</option> 
+		<option value="Luglio">Luglio</option> 
+		<option value="Agosto">Agosto</option> 
+		<option value="Settembre">Settembre</option> 
+		<option value="Ottobre">Ottobre</option> 
+		<option value="Novembre">Novembre</option> 
+		<option value="Dicembre">Dicembre</option> 
+
 	</select>
+	
+	<input type="submit" value="Submit" onclick="monthRecap.byPersonAndYearAndMonth(person, Anno, mese )">
 </div>
 <br>
 <br>
@@ -46,7 +61,7 @@
 			<td>${day.getStampings().size()>2 ? day.getStampings().get(2).date.toCalendarTime() : ''}</td>
 			<td>${day.getStampings().size()>3 ? day.getStampings().get(3).date.toCalendarTime() : ''}</td>
 			<td>${String.format("%02d", (day.timeAtWork()/60).toInteger())} ore e  ${day.timeAtWork()%60 } minuti</td>
-			<td>${day.difference} minuti</td>
+			<td>${day.difference} </td>
 			<td>${monthRecap.getProgressive(day.difference)} minuti</td>			
 			<td>${day.person.workingTimeType != null ? day.person.workingTimeType.description : ''}</td>
 		</tr>
@@ -64,6 +79,7 @@
 <br>
 <br>
 
+<h3 align="left">Tabella codici di assenza</h3>
 <table id="Codici di assenza">
 	<tr>
 		<th width="80">Codice assenza</th>

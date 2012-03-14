@@ -24,11 +24,20 @@ public class PersonTags extends JavaExtensions{
 		
 		Number second = ldt.getSecondOfMinute();
 		
-		String format = "HH:mm:ss";
+		String format = "HH:mm";
 		Time tempo = new Time(hour.intValue(),minute.intValue(),second.intValue());
 		
 	    return new SimpleDateFormat(format).format(tempo);
-	  //  return new DecimalFormat(format).format(ldt);
+	  
+	}
+	
+	public static String toHourTime(int minutes){
+		int hour = minutes/60;
+		int minute = minutes%60;
+		String format = "HH:mm";
+		Time tempo = new Time(hour,minute,0);
+		
+		return new SimpleDateFormat(format).format(tempo);
 	}
 
 	
