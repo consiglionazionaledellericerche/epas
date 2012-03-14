@@ -326,4 +326,63 @@ public class PersonDay extends Model {
 		return difference;
 	}
 	
+	/**
+	 * 
+	 * @param timbrature
+	 * @return controlla il numero di timbrature e l'orario in cui sono state fatte
+	 */
+	private boolean checkStamping(List<Stamping> timbrature){
+		boolean check = false;
+		if(timbrature.size()==1){
+			Stamping s = timbrature.get(0);
+			if(s.date.getHourOfDay() > 12 && s.date.getHourOfDay() < 14){
+				/**
+				 * cosa fare nel caso ci sia una sola timbratura? io sarei per analizzare a che ora è stata fatta e, di conseguenza,
+				 * trovare il corretto rimedio
+				 */
+			}
+		}
+		if(timbrature.size()%2!=0){
+			/**
+			 * e se ci sono timbrature dispari? cosa bisogna fare?
+			 */
+			for(Stamping s : timbrature){
+				
+			}
+		}
+				
+		return check;
+	}
+	
+	/**
+	 * 
+	 * @param timbrature
+	 * @return la string contenente un solo carattere che ricorda, eventualmente, se c'è stata la necessità di assegnare la mezz'ora
+	 * di pausa pranzo a una giornata a causa della mancanza di timbrature intermedie
+	 */
+	private String checkTimeForLunch(List<Stamping> timbrature){
+		String s = "";
+		if(timbrature.size()==2){
+			int orealavoro=0;
+			for(Stamping st : timbrature){
+				if(st.way == Stamping.WayType.in){
+					orealavoro -= toMinute(st.date);
+					//timeAtWork -= toMinute(s.date);		
+					System.out.println("Timbratura di ingresso: "+orealavoro);	
+				}
+				if(st.way == Stamping.WayType.out){
+					orealavoro += toMinute(st.date);
+					//timeAtWork += toMinute(s.date);
+					System.out.println("Timbratura di uscita: "+orealavoro);
+				}
+				timeAtWork += orealavoro;
+			}
+			if(orealavoro >=390)
+				s = "p";
+		}
+		
+		
+		return s;
+	}
+	
 }

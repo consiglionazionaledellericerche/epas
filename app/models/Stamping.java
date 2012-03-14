@@ -43,6 +43,11 @@ public class Stamping extends Model {
 	@JoinColumn(name = "stamp_type_id")
 	public StampType stampType;
 	
+	@Required
+	@ManyToOne(optional = true)
+	@JoinColumn(name = "stamp_modification_type_id")
+	public StampModificationType stampModificationType;
+	
 	
 	@Required
 	@Column
