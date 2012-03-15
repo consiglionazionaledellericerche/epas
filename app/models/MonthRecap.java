@@ -120,6 +120,9 @@ public class MonthRecap extends Model {
 	@Transient
 	public static List<Absence> listaCodiciAssenze = new ArrayList<Absence>();
 	
+	@Transient
+	public static List<StampModificationType> listaCodiciTimbrature = new ArrayList<StampModificationType>();
+	
 	
 	
 	
@@ -227,6 +230,34 @@ public class MonthRecap extends Model {
 			
 		return listaCodiciAssenze;
 						
+	}
+	
+	/**
+	 * 
+	 * @param days
+	 * @return lista dei codici delle timbrature nel caso in cui 
+	 */
+	public List<StampModificationType> getCodiceTimbratura(List<PersonDay> days){
+		if(days==null){
+			days= getDays();
+		}
+		for(PersonDay pd : days){
+			StampModificationType smt = pd.checkTimeForLunch(pd.getStampings());
+			if(smt != null){
+				if(listaCodiciTimbrature.size()>0){
+					for(StampModificationType s : listaCodiciTimbrature){
+						if(!s.code.equals(smt.code))
+							listaCodiciTimbrature.add(smt);
+					}
+					
+				}
+				else
+					listaCodiciTimbrature.add(smt);
+				
+			}
+	
+		}
+		return listaCodiciTimbrature;
 	}
 		
 }
