@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 
+import models.Absence;
 import models.AbsenceType;
 import models.Person;
 import models.PersonDay;
@@ -145,12 +146,12 @@ public class DayTest extends UnitTest{
 //			System.out.println("Festa!");
 		
 		
-		List<AbsenceType> listaAssenze = giorno.absenceList();
+		List<Absence> listaAssenze = giorno.absenceList();
 		assertNotNull(listaAssenze);
 		if(listaAssenze != null){
-			for (AbsenceType abt : listaAssenze) {
-				Logger.warn("Codice: " +abt.code);
-				Logger.warn("Codice: " +abt.description);
+			for (Absence abt : listaAssenze) {
+				Logger.warn("Codice: " +abt.absenceType.code);
+				Logger.warn("Codice: " +abt.absenceType.description);
 			}
 		}			
 		else

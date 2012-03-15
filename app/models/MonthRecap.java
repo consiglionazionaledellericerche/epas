@@ -207,23 +207,26 @@ public class MonthRecap extends Model {
 	 */
 	public List<Absence> getCodiceAssenza(List<PersonDay> days){
 		
-		days = getDays();
+		if(days == null){
+			days = getDays();
+		}
 		for(PersonDay pd : days){
-			if(pd.getAbsence()!=null){
-				Absence assenza = pd.getAbsence();
+			Absence assenza = pd.getAbsence();
+			if(assenza != null ){
 				if(listaCodiciAssenze.size()>0){
 					for(Absence a : listaCodiciAssenze){
-						if(a.absenceType.code!=assenza.absenceType.code)
-							listaCodiciAssenze.add(pd.getAbsence());
+						if(!a.absenceType.code.equals(assenza.absenceType.code))
+							listaCodiciAssenze.add(assenza);
 					}
 				}
-				else
-					listaCodiciAssenze.add(assenza);
+				else 
+					listaCodiciAssenze.add(assenza);	
 			}
+			
 		}
-		
+			
 		return listaCodiciAssenze;
-				
+						
 	}
 		
 }
