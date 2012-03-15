@@ -360,8 +360,9 @@ public class PersonDay extends Model {
 	 * @return la string contenente un solo carattere che ricorda, eventualmente, se c'è stata la necessità di assegnare la mezz'ora
 	 * di pausa pranzo a una giornata a causa della mancanza di timbrature intermedie
 	 */
-	private String checkTimeForLunch(List<Stamping> timbrature){
-		String s = "";
+	public StampModificationType checkTimeForLunch(List<Stamping> timbrature){
+		String s = "p";
+		StampModificationType smt = null;
 		if(timbrature.size()==2){
 			int orealavoro=0;
 			for(Stamping st : timbrature){
@@ -378,11 +379,11 @@ public class PersonDay extends Model {
 				timeAtWork += orealavoro;
 			}
 			if(orealavoro >=390)
-				s = "p";
-		}
+				smt = StampModificationType.find("Select smt from StampModificationType smt where smt.code = ? ",s ).first();
+			
+		}	
 		
-		
-		return s;
+		return smt;
 	}
 	
 }
