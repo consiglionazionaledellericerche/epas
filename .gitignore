@@ -10,3 +10,4 @@ lib/
 /test-output
 /modules
 /precompiled
+/db/migrate/create.ddl
