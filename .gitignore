@@ -8,3 +8,6 @@ server.pid
 lib/
 /test-result
 /test-output
+/modules
+/precompiled
+/db/migrate/create.ddl

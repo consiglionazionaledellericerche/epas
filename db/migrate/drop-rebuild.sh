@@ -9,7 +9,7 @@ DB_USER=epas
 cd $PROJECT_DIR
 
 play stop
-git pull
+git pull origin master
 
 #play db:export --drop --output=$PROJECT_DIR/db/migrate/drop.ddl
 #echo "Creato il file drop.dll contenente le info per il drop delle sequenze e tabelle del database"
