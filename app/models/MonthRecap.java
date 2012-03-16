@@ -7,6 +7,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -112,16 +113,16 @@ public class MonthRecap extends Model {
 	protected boolean persistent = false;
 	
 	@Transient
-	public List<PersonDay> days = null;
+	private static List<PersonDay> days = null;
+	
+	@Transient	
+	private int progressiveOfDailyTime=0; 
 	
 	@Transient
-	private static int progressivo=0; 
+	private static Map<AbsenceType, Integer> absenceCodeMap = new HashMap<AbsenceType, Integer>();
 	
 	@Transient
-	public static List<Absence> listaCodiciAssenze = new ArrayList<Absence>();
-	
-	@Transient
-	public static List<StampModificationType> listaCodiciTimbrature = new ArrayList<StampModificationType>();
+	private static List<StampModificationType> stampingCodeList = new ArrayList<StampModificationType>();
 	
 	
 	
@@ -197,10 +198,10 @@ public class MonthRecap extends Model {
 	 * 
 	 * @return il progressivo della differenza giornaliera tra orario di lavoro previsto e orario di lavoro effettivamente fatto
 	 */
-	public int getProgressive(int difference){
+	private int getProgressive(int difference){
 				
-		progressivo=progressivo+difference;
-		return progressivo;
+		progressiveOfDailyTime=progressiveOfDailyTime+difference;
+		return progressiveOfDailyTime;
 		
 	}
 	/**
@@ -208,56 +209,63 @@ public class MonthRecap extends Model {
 	 * @param days lista di PersonDay
 	 * @return la lista contenente le assenze fatte nell'arco di tempo dalla persona
 	 */
-	public List<Absence> getCodiceAssenza(List<PersonDay> days){
+	public Map<AbsenceType,Integer> getAbsenceCode(){
 		
 		if(days == null){
 			days = getDays();
 		}
-		for(PersonDay pd : days){
-			Absence assenza = pd.getAbsence();
-			if(assenza != null ){
-				if(listaCodiciAssenze.size()>0){
-					for(Absence a : listaCodiciAssenze){
-						if(!a.absenceType.code.equals(assenza.absenceType.code))
-							listaCodiciAssenze.add(assenza);
-					}
-				}
-				else 
-					listaCodiciAssenze.add(assenza);	
-			}
+		Integer i = 0;
+		 for(PersonDay pd : days){
+             AbsenceType absenceType = pd.getAbsenceType();
+             if(absenceType != null){
+            	 if(!absenceCodeMap.containsKey(absenceType)){
+            		 i=1;
+                     absenceCodeMap.put(absenceType,i);            	 
+            	 }
+            	 else{
+            		 i = absenceCodeMap.get(absenceType);
+                	 absenceCodeMap.remove(absenceType);
+                	 absenceCodeMap.put(absenceType, i+1);
+            	 }
+            	 
+             }             
+             
+		 }
 			
-		}
-			
-		return listaCodiciAssenze;
+		return absenceCodeMap;
 						
 	}
+	public Map<AbsenceType, Integer> getAbsenceCodeMap() {
+		return absenceCodeMap;
+	}
 	
+//	private void test() {
+//		for (Entry<AbsenceType, Integer> entry : absenceCodeMap.entrySet()) {
+//			Logger.info("%s %s", entry.getKey(), entry.getValue());
+//		}
+//		for (AbsenceType at : absenceCodeMap.keySet()) {
+//			Logger.info("%s %s", at, absenceCodeMap.get(at));
+//		}
+//	}
 	/**
 	 * 
 	 * @param days
-	 * @return lista dei codici delle timbrature nel caso in cui 
+	 * @return lista dei codici delle timbrature nel caso in cui ci siano particolarità sulle timbrature dovute a mancate timbrature
+	 * per pausa mensa ecc ecc...
 	 */
-	public List<StampModificationType> getCodiceTimbratura(List<PersonDay> days){
+	public List<StampModificationType> getStampingCode(){
 		if(days==null){
 			days= getDays();
 		}
 		for(PersonDay pd : days){
-			StampModificationType smt = pd.checkTimeForLunch(pd.getStampings());
-			if(smt != null){
-				if(listaCodiciTimbrature.size()>0){
-					for(StampModificationType s : listaCodiciTimbrature){
-						if(!s.code.equals(smt.code))
-							listaCodiciTimbrature.add(smt);
-					}
-					
-				}
-				else
-					listaCodiciTimbrature.add(smt);
-				
-			}
-	
-		}
-		return listaCodiciTimbrature;
-	}
+			List stampings = pd.getStampings();
+			StampModificationType smt = pd.checkTimeForLunch(stampings);
+			boolean stato = stampingCodeList.contains(smt);
+			if(smt != null && stato==false){
+				stampingCodeList.add(smt);
+			}		
 		
+		}
+		return stampingCodeList;
+	}
 }

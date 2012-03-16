@@ -84,8 +84,8 @@
 	</tr>
 
 	<tr>
-		<td>${monthRecap.getCodiceTimbratura(monthRecap.days).code}</td>     
-		<td>${monthRecap.getCodiceTimbratura(monthRecap.days).description}</td>		
+		<td>${monthRecap.getStampingCode().code}</td>     
+		<td>${monthRecap.getStampingCode().description}</td>		
 	</tr>
 
 
@@ -98,14 +98,21 @@
 	<tr>
 		<th width="80">Codice assenza</th>
 		<th width="200">Descrizione</th>
+		<th width="80">Numero giorni</th>
 			
 	</tr>
-
+%{
+     for(entry in monthRecap.getAbsenceCode().entrySet()) {
+}%
 	<tr>
-		<td>${monthRecap.getCodiceAssenza(monthRecap.days).absenceType.code}</td>     
-		<td>${monthRecap.getCodiceAssenza(monthRecap.days).absenceType.description}</td>		
+		<td>${entry.getKey().code}</td>     
+		<td>${entry.getKey().description}</td>	
+		<td>${entry.getValue()}</td>	
 	</tr>
 
-
+%{  		   
+     }
+     
+}%
 </table>
 </div>

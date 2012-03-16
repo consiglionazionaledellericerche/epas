@@ -40,6 +40,8 @@ public class PersonDay extends Model {
 	
 	private List<Stamping> stampings = null;
 	
+	private AbsenceType absenceType = null;
+	
 	private Absence absence = null;
 	
 	
@@ -77,6 +79,10 @@ public class PersonDay extends Model {
 		return isWorkingDay;
 	}
 	
+	/**
+	 * 
+	 * @return true nel caso in cui la persona sia stata assente
+	 */
 	public boolean isAbsent() {
 		if (getAbsence() != null) {
 			if (!stampings.isEmpty()) {
@@ -87,14 +93,29 @@ public class PersonDay extends Model {
 		return absence != null;
 	}
 	
-	public Absence getAbsence() {
-		if (absence == null) {
-			
-			absence = Absence.find("Select abs from Absence abs where abs.person = ? " +
-					" and abs.date = ? ", person, date).first();
-			
+	/**
+	 * 
+	 * @return l'assenza relativa a quella persona in quella data
+	 */
+	public Absence getAbsence(){
+		if(absence == null){
+			absence = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).first();
 		}
 		return absence;
+		
+	}
+	/**
+	 * 
+	 * @return l'absenceType relativo alla persona in quella data
+	 */
+	public AbsenceType getAbsenceType() {
+		if (absenceType == null) {
+			
+			absenceType = AbsenceType.find("SELECT abt FROM Absence abs, AbsenceType abt, Person p WHERE abt = abs.absenceType AND " +
+					"abs.person = p AND p = ? AND abs.date = ? ", person, date).first();
+			
+		}
+		return absenceType;
 	}
 	
 	/**
@@ -166,38 +187,38 @@ public class PersonDay extends Model {
 		timeAtWork = 0;
 		
 		if(((size / 2 == 1) && (size % 2 == 1)) || ((size / 2 == 0) && (size % 2 == 1))){
-			LocalDateTime ora = new LocalDateTime();
+			LocalDateTime now = new LocalDateTime();
 			//ora.now();
-			int nowToMinute = toMinute(ora);
-			int orelavoro=0;
+			int nowToMinute = toMinute(now);
+			int workingTime=0;
 			for(Stamping s : listStamp){
 				if(s.way == Stamping.WayType.in)
-					orelavoro -= toMinute(s.date);				
+					workingTime -= toMinute(s.date);				
 				if(s.way == Stamping.WayType.out)
-					orelavoro += toMinute(s.date);
-				if(orelavoro < 0)
-					timeAtWork = nowToMinute + orelavoro;
+					workingTime += toMinute(s.date);
+				if(workingTime < 0)
+					timeAtWork = nowToMinute + workingTime;
 				else 
-					timeAtWork = nowToMinute - orelavoro;
+					timeAtWork = nowToMinute - workingTime;
 				
 			}
 			return timeAtWork;	
 		}		
 		
 		else{
-			int orealavoro=0;
+			int workTime=0;
 			for(Stamping s : listStamp){
 				if(s.way == Stamping.WayType.in){
-					orealavoro -= toMinute(s.date);
+					workTime -= toMinute(s.date);
 					//timeAtWork -= toMinute(s.date);		
-					System.out.println("Timbratura di ingresso: "+orealavoro);	
+					System.out.println("Timbratura di ingresso: "+workTime);	
 				}
 				if(s.way == Stamping.WayType.out){
-					orealavoro += toMinute(s.date);
+					workTime += toMinute(s.date);
 					//timeAtWork += toMinute(s.date);
-					System.out.println("Timbratura di uscita: "+orealavoro);
+					System.out.println("Timbratura di uscita: "+workTime);
 				}
-				timeAtWork = orealavoro;
+				timeAtWork = workTime;
 			}
 			return timeAtWork;
 		}
@@ -253,19 +274,19 @@ public class PersonDay extends Model {
 	 */
 	public List<Absence> absenceList() {
 		
-		List<Absence> listaAssenze = new ArrayList<Absence>();
-		listaAssenze = AbsenceType.find("SELECT abs FROM Absence abs " +
+		List<Absence> absenceList = new ArrayList<Absence>();
+		absenceList = Absence.find("SELECT abs FROM Absence abs " +
 				" WHERE abs.person = ? AND abs.date = ?", person, date).fetch();
 
-		if(listaAssenze != null){
-			for (Absence abs : listaAssenze) {
+		if(absenceList != null){
+			for (Absence abs : absenceList) {
 				Logger.warn("Codice: " +abs.absenceType.code);
 			}
 		}
 		else
 			Logger.warn("Non ci sono assenze" );
 	
-		return listaAssenze;
+		return absenceList;
 		
 	}
 	
@@ -306,12 +327,12 @@ public class PersonDay extends Model {
 				return 0;
 			if((date.getDayOfWeek()==7) || date.getDayOfWeek()==6)
 				return 0;
-			List<Absence> listaAssenze = absenceList();
-			List<Stamping> listaTimbrature = getStampings();
-			if(listaAssenze.size()!=0){
+			List<Absence> absenceList = absenceList();
+			List<Stamping> stampingList = getStampings();
+			if(absenceList.size()!=0){
 				difference = 0;
 			}
-			if(listaTimbrature.size()==0){
+			if(stampingList.size()==0){
 				difference = 0;
 			}
 			else{
@@ -328,13 +349,13 @@ public class PersonDay extends Model {
 	
 	/**
 	 * 
-	 * @param timbrature
+	 * @param stamping
 	 * @return controlla il numero di timbrature e l'orario in cui sono state fatte
 	 */
-	private boolean checkStamping(List<Stamping> timbrature){
+	private boolean checkStamping(List<Stamping> stamping){
 		boolean check = false;
-		if(timbrature.size()==1){
-			Stamping s = timbrature.get(0);
+		if(stamping.size()==1){
+			Stamping s = stamping.get(0);
 			if(s.date.getHourOfDay() > 12 && s.date.getHourOfDay() < 14){
 				/**
 				 * cosa fare nel caso ci sia una sola timbratura? io sarei per analizzare a che ora è stata fatta e, di conseguenza,
@@ -342,11 +363,11 @@ public class PersonDay extends Model {
 				 */
 			}
 		}
-		if(timbrature.size()%2!=0){
+		if(stamping.size()%2!=0){
 			/**
 			 * e se ci sono timbrature dispari? cosa bisogna fare?
 			 */
-			for(Stamping s : timbrature){
+			for(Stamping s : stamping){
 				
 			}
 		}
@@ -356,31 +377,33 @@ public class PersonDay extends Model {
 	
 	/**
 	 * 
-	 * @param timbrature
-	 * @return la string contenente un solo carattere che ricorda, eventualmente, se c'è stata la necessità di assegnare la mezz'ora
+	 * @param stamping
+	 * @return l'oggetto StampModificationType che ricorda, eventualmente, se c'è stata la necessità di assegnare la mezz'ora
 	 * di pausa pranzo a una giornata a causa della mancanza di timbrature intermedie
 	 */
-	public StampModificationType checkTimeForLunch(List<Stamping> timbrature){
+	public StampModificationType checkTimeForLunch(List<Stamping> stamping){
 		String s = "p";
 		StampModificationType smt = null;
-		if(timbrature.size()==2){
-			int orealavoro=0;
-			for(Stamping st : timbrature){
+		if(stamping.size()==2){
+			int workingTime=0;
+			for(Stamping st : stamping){
 				if(st.way == Stamping.WayType.in){
-					orealavoro -= toMinute(st.date);
+					workingTime -= toMinute(st.date);
 					//timeAtWork -= toMinute(s.date);		
-					System.out.println("Timbratura di ingresso: "+orealavoro);	
+					System.out.println("Timbratura di ingresso: "+workingTime);	
 				}
 				if(st.way == Stamping.WayType.out){
-					orealavoro += toMinute(st.date);
+					workingTime += toMinute(st.date);
 					//timeAtWork += toMinute(s.date);
-					System.out.println("Timbratura di uscita: "+orealavoro);
+					System.out.println("Timbratura di uscita: "+workingTime);
 				}
-				timeAtWork += orealavoro;
+				timeAtWork += workingTime;
 			}
-			if(orealavoro >=390)
-				smt = StampModificationType.find("Select smt from StampModificationType smt where smt.code = ? ",s ).first();
-			
+			if(workingTime >= 390)
+				smt = StampModificationType.findById(StampModificationTypeValue.FOR_DAILY_LUNCH_TIME.getId());
+			else
+				smt = StampModificationType.findById(StampModificationTypeValue.NOTHING_TO_CHANGE.getId());
+					
 		}	
 		
 		return smt;
