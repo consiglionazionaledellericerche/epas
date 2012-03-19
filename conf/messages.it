@@ -1,13 +1,13 @@
 views.common.true=vero
 views.common.false=falso
 
-views.common.yes_or_no.true=si
-views.common.yes_or_no.false=no
+views.common.yes_or_no.true=SI
+views.common.yes_or_no.false=NO
 
 views.tags.display.date.format=dd/MM/yyyy
 views.tags.display.date.format.noDay=MM yyyy
 views.tags.display.date.format.onlyTime=%%mm:%%ss
-views.tags.display.date.format.allTime=%%tH:%%tM:%%tS
+views.tags.display.date.format.allTime=%%hh:%%mm
 views.tags.display.date.format.dayAndShortDayName=%%1$td %%1$ta
 
 views.tags.display.date.month.1=gennaio
