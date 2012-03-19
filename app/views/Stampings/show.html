@@ -3,8 +3,19 @@
 
 <h2 align="center">Situazione presenze mensile <span class="capitalized">&{'views.tags.display.date.month.' + monthRecap.month}</span> ${monthRecap.year}</h2>
 
-<div>
-	<select name="Anno">
+<br>
+
+<div align="right">
+#{form @Application.logout()}
+	
+    	<input type="submit" value="Account logout" />
+     
+
+#{/form}
+</div>
+<div align="left">
+#{form @Stampings.recharge()}
+	<select name="anno">
 		<option value="2011">2011</option> 
 		<option value="2012">2012</option> 
 		<option value="2013">2013</option> 
@@ -12,23 +23,27 @@
 	</select>
 
 	<select name="mese">
-		<option value="Gennaio">Gennaio</option> 
-		<option value="Febbraio">Febbraio</option> 
-		<option value="Marzo">Marzo</option> 
-		<option value="Aprile">Aprile</option>
-		<option value="Maggio">Maggio</option> 
-		<option value="Giugno">Giugno</option> 
-		<option value="Luglio">Luglio</option> 
-		<option value="Agosto">Agosto</option> 
-		<option value="Settembre">Settembre</option> 
-		<option value="Ottobre">Ottobre</option> 
-		<option value="Novembre">Novembre</option> 
-		<option value="Dicembre">Dicembre</option> 
+		<option value="1">Gennaio</option> 
+		<option value="2">Febbraio</option> 
+		<option value="3">Marzo</option> 
+		<option value="4">Aprile</option>
+		<option value="5">Maggio</option> 
+		<option value="6">Giugno</option> 
+		<option value="7">Luglio</option> 
+		<option value="8">Agosto</option> 
+		<option value="9">Settembre</option> 
+		<option value="10">Ottobre</option> 
+		<option value="11">Novembre</option> 
+		<option value="12">Dicembre</option> 
 
 	</select>
 	
-	<input type="submit" value="Submit" onclick="monthRecap.byPersonAndYearAndMonth(person, Anno, mese )">
+		<input type="submit" name="recharge" value="Submit">
+#{/form}
+
 </div>
+
+	
 <br>
 <br>
 
@@ -42,10 +57,10 @@
 		<th>1° uscita</th>
 		<th>2° entrata</th>
 		<th>2° uscita</th>
-		<th>tempo</th>
-		<th>differ.</th>
-		<th>progress</th>
-		<th>tipo orario</th>
+		<th>Tempo lavoro</th>
+		<th>Differenza</th>
+		<th>Progressivo</th>
+		<th>Tipo Orario</th>
 	</tr>
 	
 %{
@@ -60,7 +75,7 @@
 			<td>${day.getStampings().size()>2 ? day.getStampings().get(2).date.toCalendarTime() : ''}</td>
 			<td>${day.getStampings().size()>3 ? day.getStampings().get(3).date.toCalendarTime() : ''}</td>
 			<td>${String.format("%02d", (day.timeAtWork()/60).toInteger())}:${day.timeAtWork()%60 } <b>${day.getStampings().size()==2 ? day.checkTimeForLunch(day.getStampings()).code : ''}</b></td>
-			<td>${day.difference} </td>
+			<td>${day.difference > 0 ? day.difference : 0} minuti </td>
 			<td>${monthRecap.getProgressive(day.difference)} minuti</td>			
 			<td>${day.person.workingTimeType != null ? day.person.workingTimeType.description : ''}</td>
 		</tr>
