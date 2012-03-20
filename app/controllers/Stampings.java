@@ -7,6 +7,7 @@ import org.joda.time.LocalDate;
 
 import com.sun.xml.internal.txw2.Document;
 
+import play.Logger;
 import play.mvc.Before;
 import play.mvc.Controller;
 
@@ -21,26 +22,32 @@ public class Stampings extends Controller {
     }
 
     private static void show(Long id) {
-
     	Person person = Person.findById(id);
+    	String anno = params.get("year");
+    	Logger.info("Anno: "+anno);
+    	String mese= params.get("month");
+    	Logger.info("Mese: "+mese);
+    	if(anno==null || mese==null){
+    		        	
+        	LocalDate now = new LocalDate();
+        	MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, now.getYear(), now.getMonthOfYear());
+            render(monthRecap);
+    	}
+    	else{
+    		Logger.info("Sono dentro il ramo else della creazione del month recap");
+    		Integer year = new Integer(params.get("year"));
+			Integer month = new Integer(params.get("month"));
+    		MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, year.intValue(), month.intValue());
+    		Logger.info("Il month recap è formato da: " +person.id+ ", " +year.intValue()+ ", " +month.intValue());
+    		
+            render(monthRecap);
+    	}
     	
-    	LocalDate now = new LocalDate();
-    	MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, now.getYear(), now.getMonthOfYear());
-        render(monthRecap);
     }
 
     public static void show() {
     	show(Long.parseLong(session.get(Application.PERSON_ID_SESSION_KEY)));
     }
     
-    public static void recharge(String recharge){
-    	if(recharge != null){
-			Integer year = new Integer(session.get("anno"));
-			Integer month = new Integer(session.get("mese"));
-			long id = Long.parseLong(session.get(Application.PERSON_ID_SESSION_KEY));	
-			Person person = Person.findById(id);
-			MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, year.intValue(), month.intValue());
-			render(monthRecap);
-    	}
-    } 
+
 }
