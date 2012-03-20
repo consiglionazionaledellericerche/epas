@@ -8,6 +8,7 @@ GET     /                                       Application.index
 
 #Orario e timbrature
 GET     /orario		                            Stampings.show
+POST	/orario									Stampings.show
 
 POST    /login                                  Application.login
 GET     /logout                                 Application.logout

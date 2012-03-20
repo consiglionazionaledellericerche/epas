@@ -11,7 +11,7 @@ views.tags.display.date.format.allTime=%%hh:%%mm
 views.tags.display.date.format.dayAndShortDayName=%%1$td %%1$ta
 
 views.tags.display.date.month.1=gennaio
-views.tags.display.date.month.2=gebbraio
+views.tags.display.date.month.2=febbraio
 views.tags.display.date.month.3=marzo
 views.tags.display.date.month.4=aprile
 views.tags.display.date.month.5=maggio

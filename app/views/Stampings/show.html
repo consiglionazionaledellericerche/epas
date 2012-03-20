@@ -14,31 +14,30 @@
 #{/form}
 </div>
 <div align="left">
-#{form @Stampings.recharge()}
-	<select name="anno">
-		<option value="2011">2011</option> 
-		<option value="2012">2012</option> 
-		<option value="2013">2013</option> 
+#{form @Stampings.show()}
 
-	</select>
+#{select 'year', value:2012, id:'anno'}
+	#{option 2011}2011#{/option}
+	#{option 2012}2012#{/option}
+	#{option 2013}2013#{/option}
+#{/select}
 
-	<select name="mese">
-		<option value="1">Gennaio</option> 
-		<option value="2">Febbraio</option> 
-		<option value="3">Marzo</option> 
-		<option value="4">Aprile</option>
-		<option value="5">Maggio</option> 
-		<option value="6">Giugno</option> 
-		<option value="7">Luglio</option> 
-		<option value="8">Agosto</option> 
-		<option value="9">Settembre</option> 
-		<option value="10">Ottobre</option> 
-		<option value="11">Novembre</option> 
-		<option value="12">Dicembre</option> 
-
-	</select>
+#{select 'month', value:3, id:'mese'}
+	#{option 1}Gennaio#{/option}
+	#{option 2}Febbraio#{/option}
+	#{option 3}Marzo#{/option}
+	#{option 4}Aprile#{/option}
+	#{option 5}Maggio#{/option}
+	#{option 6}Giugno#{/option}
+	#{option 7}Luglio#{/option}
+	#{option 8}Agosto#{/option}
+	#{option 9}Settembre#{/option}
+	#{option 10}Ottobre#{/option}
+	#{option 11}Novembre#{/option}
+	#{option 12}Dicembre#{/option}
+#{/select}
 	
-		<input type="submit" name="recharge" value="Submit">
+		<input type="submit" value="Submit">
 #{/form}
 
 </div>
