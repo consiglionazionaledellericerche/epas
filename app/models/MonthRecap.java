@@ -114,19 +114,23 @@ public class MonthRecap extends Model {
 	protected boolean persistent = false;
 	
 	@Transient
-	private static List<PersonDay> days = null;
+	private List<PersonDay> days = null;
 	
 	@Transient	
 	private int progressiveOfDailyTime=0; 
 	
 	@Transient
-	private static Map<AbsenceType, Integer> absenceCodeMap = new HashMap<AbsenceType, Integer>();
+	private Map<AbsenceType, Integer> absenceCodeMap;
 	
 	@Transient
-	private static List<StampModificationType> stampingCodeList = new ArrayList<StampModificationType>();
+	private List<StampModificationType> stampingCodeList;
 	
 	
-	
+	protected MonthRecap(){
+		this.stampingCodeList = new ArrayList<StampModificationType>();
+		this.absenceCodeMap  = new HashMap<AbsenceType, Integer>();
+		Logger.debug("Stampingcodelist nel costruttore di default: "+stampingCodeList);
+	}
 	
 	/**
 	 * Construttore di default con i parametri obbligatori
@@ -142,6 +146,9 @@ public class MonthRecap extends Model {
 		this.person = person;
 		this.year = year;
 		this.month = month;
+		this.stampingCodeList = new ArrayList<StampModificationType>();
+		this.absenceCodeMap  = new HashMap<AbsenceType, Integer>();
+		Logger.debug("Stampingcodelist nel costruttore: "+stampingCodeList);
 	}
 	
 	/**
@@ -266,6 +273,22 @@ public class MonthRecap extends Model {
 		for(PersonDay pd : days){
 			List stampings = pd.getStampings();
 			StampModificationType smt = pd.checkTimeForLunch(stampings);
+			/**
+			 * da togliere dopo il debug...
+			 */
+			if(stampingCodeList!=null)
+				Logger.debug("stampingcodelist: "+stampingCodeList);
+			else{
+				Logger.warn("stampingcodelist è nullo");
+				
+			}
+			if(smt!=null)
+				Logger.debug("smt: "+smt);
+			else{
+				Logger.warn("smt è nullo");
+				
+			}
+			
 			boolean stato = stampingCodeList.contains(smt);
 			if(smt != null && stato==false){
 				stampingCodeList.add(smt);

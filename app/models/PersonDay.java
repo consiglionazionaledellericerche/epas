@@ -142,31 +142,33 @@ public class PersonDay extends Model {
 	 */
 	public boolean isHoliday(){
 		if (date!=null){
-
-			Logger.warn("Nel metodo isHoliday la data è: " +date);
+			WorkingTimeType wtt = WorkingTimeType.findById(person.workingTimeType.id);
 			
-			if((date.getDayOfWeek() == 7)||(date.getDayOfWeek() == 6))
-				return true;		
-			if((date.getMonthOfYear() == 12) && (date.getDayOfMonth() == 25))
-				return true;
-			if((date.getMonthOfYear() == 12) && (date.getDayOfMonth() == 26))
-				return true;
-			if((date.getMonthOfYear() == 12) && (date.getDayOfMonth() == 8))
-				return true;
-			if((date.getMonthOfYear() == 6) && (date.getDayOfMonth() == 2))
-				return true;
-			if((date.getMonthOfYear() == 4) && (date.getDayOfMonth() == 25))
-				return true;
-			if((date.getMonthOfYear() == 5) && (date.getDayOfMonth() == 1))
-				return true;
-			if((date.getMonthOfYear() == 8) && (date.getDayOfMonth() == 15))
-				return true;
-			if((date.getMonthOfYear() == 1) && (date.getDayOfMonth() == 1))
-				return true;
-			if((date.getMonthOfYear() == 1) && (date.getDayOfMonth() == 6))
-				return true;
-			if((date.getMonthOfYear() == 11) && (date.getDayOfMonth() == 1))
-				return true;			
+			if(wtt.description.equals("normale-mod")){
+				if((date.getDayOfWeek() == 7)||(date.getDayOfWeek() == 6))
+					return true;		
+				if((date.getMonthOfYear() == 12) && (date.getDayOfMonth() == 25))
+					return true;
+				if((date.getMonthOfYear() == 12) && (date.getDayOfMonth() == 26))
+					return true;
+				if((date.getMonthOfYear() == 12) && (date.getDayOfMonth() == 8))
+					return true;
+				if((date.getMonthOfYear() == 6) && (date.getDayOfMonth() == 2))
+					return true;
+				if((date.getMonthOfYear() == 4) && (date.getDayOfMonth() == 25))
+					return true;
+				if((date.getMonthOfYear() == 5) && (date.getDayOfMonth() == 1))
+					return true;
+				if((date.getMonthOfYear() == 8) && (date.getDayOfMonth() == 15))
+					return true;
+				if((date.getMonthOfYear() == 1) && (date.getDayOfMonth() == 1))
+					return true;
+				if((date.getMonthOfYear() == 1) && (date.getDayOfMonth() == 6))
+					return true;
+				if((date.getMonthOfYear() == 11) && (date.getDayOfMonth() == 1))
+					return true;
+			}
+						
 		}
 		return false;
 	}
