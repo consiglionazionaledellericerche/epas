@@ -297,4 +297,23 @@ public class MonthRecap extends Model {
 		}
 		return stampingCodeList;
 	}
+	
+	/**
+	 * metodo di utilità che calcola nel mese corrente qual'è stato il massimo numero di timbrature giornaliere
+	 * mi servierà nella form di visualizzazione per stabilire quante colonne istanziare per le timbrature
+	 * @return
+	 */
+	public int maxNumberOfStamping(){
+		int max = 0;
+		if(days==null){
+			days= getDays();
+		}
+		for(PersonDay pd : days){
+			List stampings = pd.getStampings();
+			int number = stampings.size();
+			if(number > max)
+				max = number;
+		}
+		return max;
+	}
 }

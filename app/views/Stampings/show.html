@@ -78,12 +78,12 @@
 			}
 			}%
 			<td>${day.absenceList().size()>0  ? day.absenceList().get(0).absenceType.code : ''}</td>
-			<td>${day.getStampings().size()>0 && day.getStampings().size()==2 ? day.getStampings().get(0).date.toCalendarTime() : ''}</td>
+			<td>${day.getStampings().size()>0 ? day.getStampings().get(0).date.toCalendarTime() : ''}</td>
 			<td>${day.getStampings().size()>1 ? day.getStampings().get(1).date.toCalendarTime() : ''}</td>
 			<td>${day.getStampings().size()>2 ? day.getStampings().get(2).date.toCalendarTime() : ''}</td>
 			<td>${day.getStampings().size()>3 ? day.getStampings().get(3).date.toCalendarTime() : ''}</td>
 			<td>${String.format("%02d", (day.timeAtWork()/60).toInteger())}:${day.timeAtWork()%60 } <b>${day.getStampings().size()==2 ? day.checkTimeForLunch(day.getStampings()).code : ''}</b></td>
-			<td>${day.difference > 0 ? day.difference : 0} minuti </td>
+			<td>${day.getDifference()} minuti </td>
 			<td>${monthRecap.getProgressive(day.difference)} minuti</td>			
 			<td>${day.person.workingTimeType != null ? day.person.workingTimeType.description : ''}</td>
 		</tr>
