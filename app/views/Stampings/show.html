@@ -67,7 +67,16 @@
 }%
 		<tr>
 			<td>${String.format(messages.get('views.common.yes_or_no.'+ day.mealTicket()))}</td>
-			<td class="capitalized">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), day.date.toDate())}</td>
+			%{
+			if(day.isHoliday()==false){
+			}%	<td class="capitalized">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), day.date.toDate())}</td>
+			
+			%{
+			}else{
+			}%	<td class="festivi">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), day.date.toDate())}</td>
+			%{
+			}
+			}%
 			<td>${day.absenceList().size()>0  ? day.absenceList().get(0).absenceType.code : ''}</td>
 			<td>${day.getStampings().size()>0 && day.getStampings().size()==2 ? day.getStampings().get(0).date.toCalendarTime() : ''}</td>
 			<td>${day.getStampings().size()>1 ? day.getStampings().get(1).date.toCalendarTime() : ''}</td>
