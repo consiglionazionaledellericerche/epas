@@ -16,6 +16,7 @@ import javax.persistence.Table;
 
 import lombok.Data;
 
+import org.joda.time.DateTimeConstants;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -42,14 +43,11 @@ public class PersonDay extends Model {
 	
 	private AbsenceType absenceType = null;
 	
-	private Absence absence = null;
-	
-	
+	private Absence absence = null;	
+			
 	/**
 	 * Totale del tempo lavorato nel giorno in minuti 
 	 */
-
-
 	private Integer timeAtWork;
 
 	private static int progressive = 0;
@@ -187,7 +185,7 @@ public class PersonDay extends Model {
 		}
 		int size = listStamp.size();
 		timeAtWork = 0;
-		
+		//if(size > 0){
 		if(((size / 2 == 1) && (size % 2 == 1)) || ((size / 2 == 0) && (size % 2 == 1))){
 			LocalDateTime now = new LocalDateTime();
 			//ora.now();
@@ -323,11 +321,13 @@ public class PersonDay extends Model {
 	 */
 	public int getDifference(){
 		if(date != null){
-			if((date.getDayOfMonth()==1) && (date.getDayOfWeek()==6 || date.getDayOfWeek()==7))
-				return 0;			
-			if((date.getDayOfMonth()==2) && (date.getDayOfWeek()==7))
+			if((date.getDayOfWeek()==DateTimeConstants.SATURDAY ) && (date.getDayOfMonth()==1))
+				return 0;		
+			if((date.getDayOfWeek()==DateTimeConstants.SUNDAY) && (date.getDayOfMonth()==1))
 				return 0;
-			if((date.getDayOfWeek()==7) || date.getDayOfWeek()==6)
+			if((date.getDayOfMonth()==2) && (date.getDayOfWeek()==DateTimeConstants.SUNDAY))
+				return 0;
+			if((date.getDayOfWeek()==DateTimeConstants.SUNDAY) || date.getDayOfWeek()==DateTimeConstants.SATURDAY)
 				return 0;
 			List<Absence> absenceList = absenceList();
 			List<Stamping> stampingList = getStampings();
@@ -384,7 +384,7 @@ public class PersonDay extends Model {
 	 * di pausa pranzo a una giornata a causa della mancanza di timbrature intermedie
 	 */
 	public StampModificationType checkTimeForLunch(List<Stamping> stamping){
-		String s = "p";
+		//String s = "p";
 		StampModificationType smt = null;
 		if(stamping.size()==2){
 			int workingTime=0;
@@ -392,12 +392,12 @@ public class PersonDay extends Model {
 				if(st.way == Stamping.WayType.in){
 					workingTime -= toMinute(st.date);
 					//timeAtWork -= toMinute(s.date);		
-					System.out.println("Timbratura di ingresso: "+workingTime);	
+					System.out.println("Timbratura di ingresso in checkTimeForLunch: "+workingTime);	
 				}
 				if(st.way == Stamping.WayType.out){
 					workingTime += toMinute(st.date);
 					//timeAtWork += toMinute(s.date);
-					System.out.println("Timbratura di uscita: "+workingTime);
+					System.out.println("Timbratura di uscita in checkTimeForLunch: "+workingTime);
 				}
 				timeAtWork += workingTime;
 			}
