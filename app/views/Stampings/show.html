@@ -66,7 +66,15 @@
      for(day in monthRecap.days) {
 }%
 		<tr>
-			<td>${String.format(messages.get('views.common.yes_or_no.'+ day.mealTicket()))}</td>
+			%{
+			if(day.isHoliday()==false){
+			}%	<td>${String.format(messages.get('views.common.yes_or_no.'+ day.mealTicket()))}</td>
+			%{
+			}else{
+			}%	<td>${String.format(messages.get('views.common.yes_or_no.true'))}</td>
+			%{
+			}
+			}%
 			%{
 			if(day.isHoliday()==false){
 			}%	<td class="capitalized">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), day.date.toDate())}</td>
@@ -82,9 +90,18 @@
 			<td>${day.getStampings().size()>1 ? day.getStampings().get(1).date.toCalendarTime() : ''}</td>
 			<td>${day.getStampings().size()>2 ? day.getStampings().get(2).date.toCalendarTime() : ''}</td>
 			<td>${day.getStampings().size()>3 ? day.getStampings().get(3).date.toCalendarTime() : ''}</td>
-			<td>${String.format("%02d", (day.timeAtWork()/60).toInteger())}:${day.timeAtWork()%60 } <b>${day.getStampings().size()==2 ? day.checkTimeForLunch(day.getStampings()).code : ''}</b></td>
-			<td>${day.getDifference()} minuti </td>
-			<td>${monthRecap.getProgressive(day.difference)} minuti</td>			
+			<td>${day.getStampings().size()==2 ? (day.convertTimeAtWork(day.timeAtWork()-30)).toCalendarTime() : day.convertTimeAtWork(day.timeAtWork()).toCalendarTime()} <b>${day.getStampings().size()==2 ? day.checkTimeForLunch(day.getStampings()).code : ''}</b></td>
+			%{
+			if(day.getDifference()>0){
+			}% <td>${String.format("%02d",(int)(day.getDifference()/60))}:${String.format("%02d", day.getDifference()%60) } </td>
+			
+			%{
+			}else{
+			}% <td>${String.format("%02d",(int)(day.getDifference()/60))}:${String.format("%02d",-day.getDifference()%60) }</td>
+			%{
+			}
+			}%
+			<td>${String.format("%02d", (int)(monthRecap.getProgressive(day.difference)/60))}:${String.format("%02d", (monthRecap.getProgressive(day.difference)%60))}</td>			
 			<td>${day.person.workingTimeType != null ? day.person.workingTimeType.description : ''}</td>
 		</tr>
 
@@ -95,6 +112,13 @@
 }%
 
 </table>
+<br>
+<br>
+
+<p>Il numero di buoni mensa usabili per questo mese e': <b>${monthRecap.numberOfMealTicketToUse()}</b>, mentre quelli da restituire sono <b>${monthRecap.numberOfMealTicketToRender()}</b>. Il numero di giorni lavorativi in sede è di: <b>${monthRecap.basedWorkingDays()}</b> </p>
+<br>
+<br>
+
 
 *{Significato codici assenza}*
 <div>

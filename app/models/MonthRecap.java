@@ -21,6 +21,7 @@ import net.sf.oval.constraint.Range;
 import net.sf.oval.guard.Guarded;
 
 import org.hibernate.annotations.Target;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 
 import play.Logger;
@@ -315,5 +316,57 @@ public class MonthRecap extends Model {
 				max = number;
 		}
 		return max;
+	}
+	
+	/**
+	 * 
+	 * @return il numero di buoni pasto usabili per quel mese
+	 */
+	public int numberOfMealTicketToUse(){
+		int tickets=0;
+		if(days==null){
+			days= getDays();
+		}
+		for(PersonDay pd : days){
+			if(pd.timeAtWork()>390)
+				tickets++;
+		}
+		
+		return tickets;
+	}
+	
+	/**
+	 * 
+	 * @return il numero di buoni pasto da restituire per quel mese
+	 */
+	public int numberOfMealTicketToRender(){
+		int ticketsToRender=0;
+		if(days==null){
+			days= getDays();
+		}
+		for(PersonDay pd : days){
+			if(pd.timeAtWork()<390 && (pd.isHoliday()==false))
+				ticketsToRender++;
+		}
+		
+		return ticketsToRender;
+	}
+	
+	/**
+	 * 
+	 * @return il numero di giorni lavorati in sede. Per stabilirlo si controlla che per ogni giorno lavorativo, esista almeno una 
+	 * timbratura.
+	 */
+	public int basedWorkingDays(){
+		int basedDays=0;
+		if(days==null){
+			days= getDays();
+		}
+		for(PersonDay pd : days){
+			List<Stamping> stamp = pd.getStampings();
+			if(stamp.size()>0 && pd.isHoliday()==false)
+				basedDays++;
+		}
+		return basedDays;
 	}
 }

@@ -32,10 +32,10 @@ public class PersonTags extends JavaExtensions{
 	}
 	
 	public static String toHourTime(int minutes){
-		int hour = minutes/60;
-		int minute = minutes%60;
+		Number hour = (int)minutes/60;
+		Number minute = minutes%60;
 		String format = "HH:mm";
-		Time tempo = new Time(hour,minute,0);
+		Time tempo = new Time(hour.intValue(),minute.intValue(),0);
 		
 		return new SimpleDateFormat(format).format(tempo);
 	}

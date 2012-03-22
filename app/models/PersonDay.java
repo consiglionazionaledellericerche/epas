@@ -126,7 +126,19 @@ public class PersonDay extends Model {
 			stampings = Stamping.find("SELECT s FROM Stamping s " +
 					"WHERE s.person = ? and date between ? and ? " +
 					"ORDER BY date", person, startOfDay, endOfDay).fetch();		
-			
+//			if(stampings.size()%2 != 0){
+//				int hour= stampings.get(0).date.getHourOfDay();
+//				int minute=stampings.get(0).date.getMinuteOfHour();
+//				for(int i = 1; i<stampings.size();i++){
+//					LocalDateTime ldt = stampings.get(i).date;
+//					if(hour-ldt.getHourOfDay()<1 && minute-ldt.getMinuteOfHour()<30){
+//						
+//					}
+//					
+//					
+//				}			
+//				
+//			}
 			
 		}
 		return stampings;
@@ -315,6 +327,8 @@ public class PersonDay extends Model {
 
 	}
 	
+
+	
 	/**
 	 * 
 	 * @return la differenza tra l'orario di lavoro giornaliero e l'orario standard in minuti
@@ -409,6 +423,19 @@ public class PersonDay extends Model {
 		}	
 		
 		return smt;
+	}
+	
+	/**
+	 * 
+	 * @param timeAtWork
+	 * @return il localdatetime corrispondente al numero di minuti di lavoro giornaliero.
+	 * Questo metodo mi occorre per normalizzare il tempo di lavoro secondo il metodo toCalendarTime() creato nella PersonTags
+	 */
+	public LocalDateTime convertTimeAtWork(int timeAtWork){
+		int hour = (int)timeAtWork/60;
+		int minute = (int)timeAtWork%60;
+		LocalDateTime ldt = new LocalDateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),hour,minute,0);
+		return ldt;
 	}
 	
 }
