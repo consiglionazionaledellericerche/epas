@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.persistence.Entity;
@@ -15,6 +16,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import lombok.Data;
+import models.Stamping.WayType;
 
 import org.joda.time.DateTimeConstants;
 import org.joda.time.DateTimeFieldType;
@@ -120,28 +122,62 @@ public class PersonDay extends Model {
 	 * 
 	 * @return la lista di timbrature giornaliere
 	 */
+//	public List<Stamping> getStampings() {
+//		if (stampings == null) {
+//			
+//			stampings = Stamping.find("SELECT s FROM Stamping s " +
+//					"WHERE s.person = ? and date between ? and ? " +
+//					"ORDER BY date", person, startOfDay, endOfDay).fetch();		
+////			if(stampings.size()%2 != 0){
+////				int hour= stampings.get(0).date.getHourOfDay();
+////				int minute=stampings.get(0).date.getMinuteOfHour();
+////				for(int i = 1; i<stampings.size();i++){
+////					LocalDateTime ldt = stampings.get(i).date;
+////					if(hour-ldt.getHourOfDay()<1 && minute-ldt.getMinuteOfHour()<30){
+////						
+////					}
+////					
+////					
+////				}			
+////				
+////			}
+//			
+//		}
+//		return stampings;
+//	}
+	
 	public List<Stamping> getStampings() {
-		if (stampings == null) {
-			
-			stampings = Stamping.find("SELECT s FROM Stamping s " +
-					"WHERE s.person = ? and date between ? and ? " +
-					"ORDER BY date", person, startOfDay, endOfDay).fetch();		
-//			if(stampings.size()%2 != 0){
-//				int hour= stampings.get(0).date.getHourOfDay();
-//				int minute=stampings.get(0).date.getMinuteOfHour();
-//				for(int i = 1; i<stampings.size();i++){
-//					LocalDateTime ldt = stampings.get(i).date;
-//					if(hour-ldt.getHourOfDay()<1 && minute-ldt.getMinuteOfHour()<30){
-//						
-//					}
-//					
-//					
-//				}			
-//				
-//			}
-			
-		}
-		return stampings;
+        
+        if (stampings == null) {
+            stampings = new LinkedList<Stamping>();
+            List<Stamping> dbStamping = Stamping.find("SELECT s FROM Stamping s " +
+                            "WHERE s.person = ? and date between ? and ? " +
+                            "ORDER BY date", person, startOfDay, endOfDay).fetch();
+            
+            if(dbStamping.size()/2==1 && dbStamping.size()%2==1){
+            	int i = 0;
+            	Stamping s = dbStamping.get(i+1);
+            	if(s.way == dbStamping.get(i).way && s.way == WayType.in){
+        			stampings.add(0, dbStamping.get(i));
+        			stampings.add(1, null);
+        			stampings.add(2, dbStamping.get(i+1));
+        			stampings.add(3, dbStamping.get(i+2));
+        		}
+            	if(s.way == dbStamping.get(i+2).way && s.way == WayType.out){
+            		stampings.add(0, dbStamping.get(i));
+        			stampings.add(1, dbStamping.get(i+1));
+        			stampings.add(2, null);
+        			stampings.add(3, dbStamping.get(i+2));
+            	}
+            	                    
+            }
+            else{
+            	for(int i = 0; i < dbStamping.size(); i++)
+            		stampings.add(i, dbStamping.get(i));
+            }
+                
+        }
+        return stampings;
 	}
 	
 	
@@ -190,51 +226,104 @@ public class PersonDay extends Model {
 	 */
 	public int timeAtWork(){
 		
-		List<Stamping> listStamp = Stamping.find("select s from Stamping s " +
- 		    "where s.person = ? and s.date between ? and ? order by date", person, startOfDay, endOfDay).fetch();
-		for(Stamping s : listStamp){
-			System.out.println("gli elementi della lista di timbrature: " +s.date);
-		}
-		int size = listStamp.size();
-		timeAtWork = 0;
-		//if(size > 0){
-		if(((size / 2 == 1) && (size % 2 == 1)) || ((size / 2 == 0) && (size % 2 == 1))){
-			LocalDateTime now = new LocalDateTime();
-			//ora.now();
-			int nowToMinute = toMinute(now);
-			int workingTime=0;
-			for(Stamping s : listStamp){
-				if(s.way == Stamping.WayType.in)
-					workingTime -= toMinute(s.date);				
-				if(s.way == Stamping.WayType.out)
-					workingTime += toMinute(s.date);
-				if(workingTime < 0)
-					timeAtWork = nowToMinute + workingTime;
-				else 
-					timeAtWork = nowToMinute - workingTime;
+		if(stampings == null){
+			stampings = getStampings();
+			
+		}		
+		if(stampings.contains(null)){
+			/**
+			 * in questo caso si guarda quale posizione della linkedList è null per stabilire se sia mancante un ingresso o un'uscita
+			 */
+			if(stampings.get(0)==null){
+				/**
+				 * è mancante la prima entrata, quindi bisogna fare il calcolo del tempo a lavoro sul tempo trascorso dalla seconda 
+				 * entrata alla seconda uscita
+				 */
+				Stamping enter = stampings.get(2);
+				Stamping exit = stampings.get(3);
+				timeAtWork = toMinute(exit.date)-toMinute(enter.date);
 				
 			}
-			return timeAtWork;	
-		}		
-		
-		else{
-			int workTime=0;
-			for(Stamping s : listStamp){
-				if(s.way == Stamping.WayType.in){
-					workTime -= toMinute(s.date);
-					//timeAtWork -= toMinute(s.date);		
-					System.out.println("Timbratura di ingresso: "+workTime);	
-				}
-				if(s.way == Stamping.WayType.out){
-					workTime += toMinute(s.date);
-					//timeAtWork += toMinute(s.date);
-					System.out.println("Timbratura di uscita: "+workTime);
-				}
-				timeAtWork = workTime;
+			if(stampings.get(1)==null){
+				/**
+				 * è mancante la prima uscita, quindi bisogna fare il calcolo del tempo a lavoro sul tempo trascorso dalla seconda 
+				 * entrata alla seconda uscita
+				 */
+				Stamping enter = stampings.get(2);
+				Stamping exit = stampings.get(3);
+				timeAtWork = toMinute(exit.date)-toMinute(enter.date);
+				
+			}
+			if(stampings.get(2)==null){
+				/**
+				 * è mancante la seconda entrata, quindi bisogna fare il calcolo del tempo a lavoro sul tempo trascorso dalla prima
+				 * entrata alla prima uscita
+				 */
+				Stamping enter = stampings.get(0);
+				Stamping exit = stampings.get(1);
+				timeAtWork = toMinute(exit.date)-toMinute(enter.date);
+				
+			}
+			if(stampings.get(3)==null){
+				/**
+				 * è mancante la seconda uscita, quindi bisogna fare il calcolo del tempo a lavoro sul tempo trascorso dalla prima
+				 * entrata alla prima uscita
+				 */
+				Stamping enter = stampings.get(0);
+				Stamping exit = stampings.get(1);
+				timeAtWork = toMinute(exit.date)-toMinute(enter.date);
+				
 			}
 			return timeAtWork;
+		}		
+		else{
+			int size = stampings.size();
+			timeAtWork = 0;
+			LocalDateTime now = new LocalDateTime().now();
+			if(size > 0){
+				Stamping s = stampings.get(0);
+				if(s.date.getDayOfMonth()==now.getDayOfMonth() && s.date.getMonthOfYear()==now.getMonthOfYear() && 
+					s.date.getYear()==now.getYear()){
+						if(((size / 2 == 1) && (size % 2 == 1)) || ((size / 2 == 0) && (size % 2 == 1))){
+							
+							int nowToMinute = toMinute(now);
+							int workingTime=0;
+							for(Stamping st : stampings){
+								if(st.way == Stamping.WayType.in)
+									workingTime -= toMinute(st.date);				
+								if(st.way == Stamping.WayType.out)
+									workingTime += toMinute(st.date);
+								if(workingTime < 0)
+									timeAtWork = nowToMinute + workingTime;
+								else 
+									timeAtWork = nowToMinute - workingTime;
+								
+							}
+								
+						}				
+				}				
+				else{
+					int workTime=0;
+					for(Stamping st : stampings){
+						if(st.way == Stamping.WayType.in){
+							workTime -= toMinute(st.date);
+							//timeAtWork -= toMinute(s.date);		
+							System.out.println("Timbratura di ingresso: "+workTime);	
+						}
+						if(st.way == Stamping.WayType.out){
+							workTime += toMinute(st.date);
+							//timeAtWork += toMinute(s.date);
+							System.out.println("Timbratura di uscita: "+workTime);
+						}
+						timeAtWork = workTime;
+					}
+					
+				}
+			}
+
 		}
-		
+			
+		return timeAtWork;
 	}
 	
 	/**
@@ -311,6 +400,9 @@ public class PersonDay extends Model {
 	 */
 	public boolean mealTicket(){
 		boolean isMealTicketAvailable = false;
+		if(stampings==null){
+			stampings=getStampings();
+		}
 		if (timeAtWork == null) {
 			timeAtWork = timeAtWork();
 			
@@ -320,6 +412,12 @@ public class PersonDay extends Model {
 		}
 		else{
 			if(person.workingTimeType.description.equals("normale-mod") && timeAtWork>=432)
+				isMealTicketAvailable=true;
+			if(person.workingTimeType.description.equals("normale-mod") && timeAtWork>360 && timeAtWork<390 &&(stampings.size()==4 && checkMinTimeForLunch(stampings)<30))
+				isMealTicketAvailable=true;
+			if(person.workingTimeType.description.equals("normale-mod") && timeAtWork>360 && timeAtWork<390 && (stampings.size()==2))
+				isMealTicketAvailable=true;
+			if(person.workingTimeType.description.equals("normale-mod") && timeAtWork>390 && timeAtWork<432 && (stampings.size()==4 || stampings.size()==2))
 				isMealTicketAvailable=true;
 			
 		}
@@ -333,7 +431,7 @@ public class PersonDay extends Model {
 	 * 
 	 * @return la differenza tra l'orario di lavoro giornaliero e l'orario standard in minuti
 	 */
-	public int getDifference(){
+	public Integer getDifference(){
 		if(date != null){
 			if((date.getDayOfWeek()==DateTimeConstants.SATURDAY ) && (date.getDayOfMonth()==1))
 				return 0;		
@@ -395,7 +493,9 @@ public class PersonDay extends Model {
 	 * 
 	 * @param stamping
 	 * @return l'oggetto StampModificationType che ricorda, eventualmente, se c'è stata la necessità di assegnare la mezz'ora
-	 * di pausa pranzo a una giornata a causa della mancanza di timbrature intermedie
+	 * di pausa pranzo a una giornata a causa della mancanza di timbrature intermedie oppure se c'è stata la necessità di assegnare
+	 * minuti in più a una timbratura di ingresso dopo la pausa pranzo poichè il tempo di pausa è stato minore di 30 minuti e il tempo
+	 * di lavoro giornaliero è stato maggiore stretto di 6 ore.
 	 */
 	public StampModificationType checkTimeForLunch(List<Stamping> stamping){
 		//String s = "p";
@@ -421,6 +521,28 @@ public class PersonDay extends Model {
 				smt = StampModificationType.findById(StampModificationTypeValue.NOTHING_TO_CHANGE.getId());
 					
 		}	
+		if(stamping.size()==4 && !stamping.contains(null)){
+			int hourExit = stamping.get(1).date.getHourOfDay();
+			int minuteExit = stamping.get(1).date.getMinuteOfHour();
+			int hourEnter = stamping.get(2).date.getHourOfDay();
+			int minuteEnter = stamping.get(2).date.getMinuteOfHour();
+			int workingTime=0;
+			for(Stamping st : stamping){
+				if(st.way == Stamping.WayType.in){
+					workingTime -= toMinute(st.date);
+					
+				}
+				if(st.way == Stamping.WayType.out){
+					workingTime += toMinute(st.date);
+					
+				}
+				timeAtWork += workingTime;
+			}
+			if(((hourEnter*60)+minuteEnter) - ((hourExit*60)+minuteExit) < 30 && workingTime > 360){
+				smt = StampModificationType.findById(StampModificationTypeValue.FOR_MIN_LUNCH_TIME.getId());
+			}
+			
+		}
 		
 		return smt;
 	}
@@ -436,6 +558,60 @@ public class PersonDay extends Model {
 		int minute = (int)timeAtWork%60;
 		LocalDateTime ldt = new LocalDateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),hour,minute,0);
 		return ldt;
+	}
+	
+	/**
+	 * 
+	 * @param stamping
+	 * @return il numero di minuti che sono intercorsi tra la timbratura d'uscita per la pausa pranzo e la timbratura d'entrata
+	 * dopo la pausa pranzo. Questo valore verrà poi controllato per stabilire se c'è la necessità di aumentare la durata della pausa
+	 * pranzo intervenendo sulle timbrature
+	 */
+	public int checkMinTimeForLunch(List<Stamping> stamping){
+		int min=0;
+		if(stamping.size()==4 && !stamping.contains(null)){
+			int hourExit = stamping.get(1).date.getHourOfDay();
+			int minuteExit = stamping.get(1).date.getMinuteOfHour();
+			int hourEnter = stamping.get(2).date.getHourOfDay();
+			int minuteEnter = stamping.get(2).date.getMinuteOfHour();
+			
+			min = ((hourEnter*60)+minuteEnter) - ((hourExit*60)+minuteExit);			
+			
+		}
+		return min;
+	}
+	
+	/**
+	 * TODO implementare funzione che restituisca la timbratura di ingresso dopo la pausa pranzo incrementata del numero di minuti 
+	 * che occorrono per arrivare ai 30 minimi per la pausa stessa.
+	 * @param ldt1
+	 * @param ldt2
+	 * @return
+	 */
+	public LocalDateTime adjustedStamp(LocalDateTime ldt1, LocalDateTime ldt2){
+		return ldt2;
+	}
+	
+	/**
+	 * 
+	 * @param difference
+	 * @return
+	 */
+	public LocalDateTime convertDifference(int difference){
+		
+		if(difference>=0){
+			int hour = (int)difference/60;
+			int minute = (int)difference%60;
+			LocalDateTime ldt = new LocalDateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),hour,minute,0);
+			return ldt;
+		}
+		else{
+			difference = -difference;
+			int hour = (int)difference/60;
+			int minute = (int)difference%60;
+			LocalDateTime ldt = new LocalDateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),hour,minute,0);
+			return ldt;
+		}
 	}
 	
 }

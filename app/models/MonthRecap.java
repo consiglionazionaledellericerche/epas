@@ -328,7 +328,7 @@ public class MonthRecap extends Model {
 			days= getDays();
 		}
 		for(PersonDay pd : days){
-			if(pd.timeAtWork()>390)
+			if(pd.mealTicket()==true)
 				tickets++;
 		}
 		
@@ -345,7 +345,7 @@ public class MonthRecap extends Model {
 			days= getDays();
 		}
 		for(PersonDay pd : days){
-			if(pd.timeAtWork()<390 && (pd.isHoliday()==false))
+			if(pd.mealTicket()==false && (pd.isHoliday()==false))
 				ticketsToRender++;
 		}
 		

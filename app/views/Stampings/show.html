@@ -1,11 +1,10 @@
 #{extends 'main.html' /}
 #{set title:monthRecap.person.surname + ' ' + monthRecap.person.name + ', matricola=' + monthRecap.person.number /}
 
-<h2 align="center">Situazione presenze mensile <span class="capitalized">&{'views.tags.display.date.month.' + monthRecap.month}</span> ${monthRecap.year}</h2>
+<h2 id="titoloSituazionePresenzeMensili">Situazione presenze mensile <span class="capitalized">&{'views.tags.display.date.month.' + monthRecap.month}</span> ${monthRecap.year}</h2>
 
-<br>
 
-<div align="right">
+<div id="logout">
 #{form @Application.logout()}
 	
     	<input type="submit" value="Account logout" />
@@ -16,13 +15,13 @@
 <div align="left">
 #{form @Stampings.show()}
 
-#{select 'year', value:2012, id:'anno'}
+#{select 'year', value:monthRecap.year, id:'anno'}
 	#{option 2011}2011#{/option}
 	#{option 2012}2012#{/option}
 	#{option 2013}2013#{/option}
 #{/select}
 
-#{select 'month', value:3, id:'mese'}
+#{select 'month', value:monthRecap.month, id:'mese'}
 	#{option 1}Gennaio#{/option}
 	#{option 2}Febbraio#{/option}
 	#{option 3}Marzo#{/option}
@@ -49,13 +48,15 @@
 
 <table id="presenze_mensili">
 	<tr>
-		<th width="5%">Buono mensa</th>
+		<th>Buono mensa</th>
 		<th>Giorno</th>
-		<th width="80">Codice di assenza</th>
+		<th>Codice di assenza</th>
 		<th>1° entrata</th>
 		<th>1° uscita</th>
 		<th>2° entrata</th>
 		<th>2° uscita</th>
+		<th>3° entrata</th>
+		<th>3° uscita</th>
 		<th>Tempo lavoro</th>
 		<th>Differenza</th>
 		<th>Progressivo</th>
@@ -85,23 +86,27 @@
 			%{
 			}
 			}%
-			<td>${day.absenceList().size()>0  ? day.absenceList().get(0).absenceType.code : ''}</td>
-			<td>${day.getStampings().size()>0 ? day.getStampings().get(0).date.toCalendarTime() : ''}</td>
-			<td>${day.getStampings().size()>1 ? day.getStampings().get(1).date.toCalendarTime() : ''}</td>
-			<td>${day.getStampings().size()>2 ? day.getStampings().get(2).date.toCalendarTime() : ''}</td>
-			<td>${day.getStampings().size()>3 ? day.getStampings().get(3).date.toCalendarTime() : ''}</td>
-			<td>${day.getStampings().size()==2 ? (day.convertTimeAtWork(day.timeAtWork()-30)).toCalendarTime() : day.convertTimeAtWork(day.timeAtWork()).toCalendarTime()} <b>${day.getStampings().size()==2 ? day.checkTimeForLunch(day.getStampings()).code : ''}</b></td>
-			%{
-			if(day.getDifference()>0){
-			}% <td>${String.format("%02d",(int)(day.getDifference()/60))}:${String.format("%02d", day.getDifference()%60) } </td>
+			<td class="assenza">${day.absenceList().size()>0  ? day.absenceList().get(0).absenceType.code : ''}</td>
+			<td class="ingresso">${day.getStampings().size()>0 ? day.getStampings().get(0).date.toCalendarTime() : ''}</td>
+			<td class="uscita">${day.getStampings().size()>1 && day.getStampings().get(1)!=null ? day.getStampings().get(1).date.toCalendarTime() : ''}</td>
+			<td class="ingresso">${day.getStampings().size()>2 && day.getStampings().get(2)!=null && day.checkMinTimeForLunch(day.getStampings())<30 ? day.getStampings().get(2).date.toCalendarTime() : ''}</td>
+			<td class="uscita">${day.getStampings().size()>3 ? day.getStampings().get(3).date.toCalendarTime() : ''}</td>
+			<td class="ingresso"></td>
+			<td class="uscita"></td>
+			
 			
 			%{
-			}else{
-			}% <td>${String.format("%02d",(int)(day.getDifference()/60))}:${String.format("%02d",-day.getDifference()%60) }</td>
+			if(day.getStampings().size()==2){
+	         }% <td class="tempoLavoro">${(day.convertTimeAtWork(day.timeAtWork()-30)).toCalendarTime()} <strong>${day.timeAtWork()>360 ? day.checkTimeForLunch(day.getStampings()).code : ''}</strong></td>
 			%{
-			}
-			}%
-			<td>${String.format("%02d", (int)(monthRecap.getProgressive(day.difference)/60))}:${String.format("%02d", (monthRecap.getProgressive(day.difference)%60))}</td>			
+			 }else{
+			 }% <td class="tempoLavoro">${day.isHoliday()==false ? day.convertTimeAtWork(day.timeAtWork()).toCalendarTime() : ''} <strong>${day.getStampings().size()==4 && !day.getStampings().contains(null) && day.timeAtWork()>300
+			 && day.checkMinTimeForLunch(day.getStampings())<30 ? day.checkTimeForLunch(day.getStampings()).code : ''}</strong></td>
+			%{
+	         }
+	         }%			
+			<td class="differenza">${day.isHoliday()==false ? day.getDifference().toHourTime() : ''}</td>	        		
+			<td class="progressivo">${day.isHoliday()==false ? monthRecap.getProgressive(day.difference).toHourTime() : ''}</td>			
 			<td>${day.person.workingTimeType != null ? day.person.workingTimeType.description : ''}</td>
 		</tr>
 
@@ -112,13 +117,8 @@
 }%
 
 </table>
-<br>
-<br>
 
-<p>Il numero di buoni mensa usabili per questo mese e': <b>${monthRecap.numberOfMealTicketToUse()}</b>, mentre quelli da restituire sono <b>${monthRecap.numberOfMealTicketToRender()}</b>. Il numero di giorni lavorativi in sede è di: <b>${monthRecap.basedWorkingDays()}</b> </p>
-<br>
-<br>
-
+<p id="spiegazioneTabellaTimbrature">Il numero di buoni mensa usabili per questo mese e': <strong>${monthRecap.numberOfMealTicketToUse()}</strong>, mentre quelli da restituire sono <strong>${monthRecap.numberOfMealTicketToRender()}</strong>. Il numero di giorni lavorativi in sede è di: <strong>${monthRecap.basedWorkingDays()}</strong> </p>
 
 *{Significato codici assenza}*
 <div>
@@ -129,12 +129,17 @@
 		<th width="400">Descrizione</th>
 			
 	</tr>
-
+%{
+     for(smt in monthRecap.getStampingCode()) {
+}%
 	<tr>
-		<td>${monthRecap.getStampingCode().code}</td>     
-		<td>${monthRecap.getStampingCode().description}</td>		
+		<td>${smt.code}</td>     
+		<td>${smt.description}</td>		
 	</tr>
-
+%{  		   
+     }
+     
+}%
 
 </table>
 
