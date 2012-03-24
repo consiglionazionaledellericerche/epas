@@ -570,26 +570,35 @@ public class PersonDay extends Model {
 	public int checkMinTimeForLunch(List<Stamping> stamping){
 		int min=0;
 		if(stamping.size()==4 && !stamping.contains(null)){
-			int hourExit = stamping.get(1).date.getHourOfDay();
-			int minuteExit = stamping.get(1).date.getMinuteOfHour();
-			int hourEnter = stamping.get(2).date.getHourOfDay();
-			int minuteEnter = stamping.get(2).date.getMinuteOfHour();
+			int minuteExit = toMinute(stamping.get(1).date);
+				
+			int minuteEnter = toMinute(stamping.get(2).date);
 			
-			min = ((hourEnter*60)+minuteEnter) - ((hourExit*60)+minuteExit);			
+			min = minuteEnter - minuteExit;			
 			
 		}
 		return min;
 	}
 	
 	/**
-	 * TODO implementare funzione che restituisca la timbratura di ingresso dopo la pausa pranzo incrementata del numero di minuti 
+	 * funzione che restituisce la timbratura di ingresso dopo la pausa pranzo incrementata del numero di minuti 
 	 * che occorrono per arrivare ai 30 minimi per la pausa stessa.
 	 * @param ldt1
 	 * @param ldt2
 	 * @return
 	 */
 	public LocalDateTime adjustedStamp(LocalDateTime ldt1, LocalDateTime ldt2){
-		return ldt2;
+		LocalDateTime ld2mod = null;
+		int minuti1 = toMinute(ldt1);
+		int minuti2 = toMinute(ldt2);
+		int difference = minuti2-minuti1;
+		if(difference<30){
+			Integer adjust = 30-difference;
+			ld2mod = ldt2.plusMinutes(adjust);
+			return ld2mod;
+		}
+		
+		return ld2mod;
 	}
 	
 	/**

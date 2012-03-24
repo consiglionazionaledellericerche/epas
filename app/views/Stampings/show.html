@@ -89,7 +89,15 @@
 			<td class="assenza">${day.absenceList().size()>0  ? day.absenceList().get(0).absenceType.code : ''}</td>
 			<td class="ingresso">${day.getStampings().size()>0 ? day.getStampings().get(0).date.toCalendarTime() : ''}</td>
 			<td class="uscita">${day.getStampings().size()>1 && day.getStampings().get(1)!=null ? day.getStampings().get(1).date.toCalendarTime() : ''}</td>
-			<td class="ingresso">${day.getStampings().size()>2 && day.getStampings().get(2)!=null && day.checkMinTimeForLunch(day.getStampings())<30 ? day.getStampings().get(2).date.toCalendarTime() : ''}</td>
+			%{
+			if(day.getStampings().size()>2){
+			}%	<td class="ingresso">${ day.getStampings().get(2)!=null && day.checkMinTimeForLunch(day.getStampings())<30 ? day.adjustedStamp(day.getStampings().get(1).date, day.getStampings().get(2).date).toCalendarTime() : day.getStampings().get(2).date.toCalendarTime()}</td>
+			%{
+			}else{
+			}% <td class="ingresso">${''}</td>
+			%{
+			}
+			}%
 			<td class="uscita">${day.getStampings().size()>3 ? day.getStampings().get(3).date.toCalendarTime() : ''}</td>
 			<td class="ingresso"></td>
 			<td class="uscita"></td>
