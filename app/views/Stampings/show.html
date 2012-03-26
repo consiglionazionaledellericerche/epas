@@ -90,8 +90,10 @@
 			<td class="ingresso">${day.getStampings().size()>0 ? day.getStampings().get(0).date.toCalendarTime() : ''}</td>
 			<td class="uscita">${day.getStampings().size()>1 && day.getStampings().get(1)!=null ? day.getStampings().get(1).date.toCalendarTime() : ''}</td>
 			%{
-			if(day.getStampings().size()>2){
-			}%	<td class="ingresso">${ day.getStampings().get(2)!=null && day.checkMinTimeForLunch(day.getStampings())<30 ? day.adjustedStamp(day.getStampings().get(1).date, day.getStampings().get(2).date).toCalendarTime() : day.getStampings().get(2).date.toCalendarTime()}</td>
+			if(day.getStampings().size()>2 && day.getStampings().get(2)!=null){
+			}%	<td class="ingresso">${day.checkMinTimeForLunch(day.getStampings())<30 ? 
+			day.adjustedStamp(day.getStampings().get(1).date, day.getStampings().get(2).date).toCalendarTime() : 
+			day.getStampings().get(2).date.toCalendarTime()}</td>
 			%{
 			}else{
 			}% <td class="ingresso">${''}</td>
@@ -99,21 +101,29 @@
 			}
 			}%
 			<td class="uscita">${day.getStampings().size()>3 ? day.getStampings().get(3).date.toCalendarTime() : ''}</td>
-			<td class="ingresso"></td>
-			<td class="uscita"></td>
-			
+			<td class="ingresso">${day.getStampings().size()>4 ? day.getStampings().get(4).date.toCalendarTime() : ''}</td>
+			<td class="uscita">${day.getStampings().size()>5 ? day.getStampings().get(5).date.toCalendarTime() : ''}</td>			
 			
 			%{
-			if(day.getStampings().size()==2){
-	         }% <td class="tempoLavoro">${(day.convertTimeAtWork(day.timeAtWork()-30)).toCalendarTime()} <strong>${day.timeAtWork()>360 ? day.checkTimeForLunch(day.getStampings()).code : ''}</strong></td>
+			if(day.getStampings().size()==2 ){
+	         }% <td class="tempoLavoro">${day.timeAtWork()>360 ? day.convertTimeAtWork(day.timeAtWork()-30).toCalendarTime() : day.convertTimeAtWork(day.timeAtWork()).toCalendarTime()} <strong>${day.timeAtWork()>360 ? day.checkTimeForLunch(day.getStampings()).code : ''}</strong></td>
 			%{
 			 }else{
-			 }% <td class="tempoLavoro">${day.isHoliday()==false ? day.convertTimeAtWork(day.timeAtWork()).toCalendarTime() : ''} <strong>${day.getStampings().size()==4 && !day.getStampings().contains(null) && day.timeAtWork()>300
+			 }% <td class="tempoLavoro">${day.isHoliday()==false && day.getStampings().size()==4 && !day.getStampings().contains(null) 
+			 && day.checkMinTimeForLunch(day.getStampings())<30 ? day.convertTimeAtWork(day.timeAtWork()-30+day.checkMinTimeForLunch(day.getStampings())).toCalendarTime() : day.convertTimeAtWork(day.timeAtWork()).toCalendarTime()} <strong>${day.getStampings().size()==4 && !day.getStampings().contains(null) && day.timeAtWork()>300
 			 && day.checkMinTimeForLunch(day.getStampings())<30 ? day.checkTimeForLunch(day.getStampings()).code : ''}</strong></td>
 			%{
 	         }
-	         }%			
-			<td class="differenza">${day.isHoliday()==false ? day.getDifference().toHourTime() : ''}</td>	        		
+	         }%	
+	         %{
+			if(day.getStampings().size()==2){
+	         }%	<td class="differenza">${day.isHoliday()==false && day.timeAtWork()>360 ? (day.getDifference()-30).toHourTime() : (day.getDifference()).toHourTime()}</td>	
+	         %{
+			 }else{
+			 }% <td class="differenza">${day.isHoliday()==false && day.getStampings().size()==4 && day.checkMinTimeForLunch(day.getStampings())<30 ? (day.getDifference()+day.checkMinTimeForLunch(day.getStampings())-30).toHourTime() : (day.getDifference()).toHourTime()}</td>
+			 %{
+	         }
+	         }%	     		
 			<td class="progressivo">${day.isHoliday()==false ? monthRecap.getProgressive(day.difference).toHourTime() : ''}</td>			
 			<td>${day.person.workingTimeType != null ? day.person.workingTimeType.description : ''}</td>
 		</tr>
