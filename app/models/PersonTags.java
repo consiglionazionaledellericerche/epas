@@ -49,7 +49,7 @@ public class PersonTags extends JavaExtensions{
 	public static String toHourTime(Integer minutes) {
 		int min =  Math.abs(minutes%60);
 		int hour= Math.abs((int)minutes/60);
-		if(minutes.intValue()<0 && (int)minutes/60==0)
+		if((minutes.intValue()<0))
 			
 			return String.format("-%02d:%02d", hour, min);
         return String.format("%02d:%02d", hour, min);

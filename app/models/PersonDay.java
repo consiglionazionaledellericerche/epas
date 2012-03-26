@@ -603,6 +603,23 @@ public class PersonDay extends Model {
 	
 	/**
 	 * 
+	 * @param ldt1
+	 * @param ldt2
+	 * @return il numero di minuti di differenza tra i 30 minuti minimi di pausa pranzo e quelli effettivamente fatti tra la timbratura
+	 * d'uscita per la pausa pranzo e quella di ingresso dopo la pausa stessa
+	 */
+	public int timeAdjust(LocalDateTime ldt1, LocalDateTime ldt2){
+		int timeAdjust=0;
+		int minuti1 = toMinute(ldt1);
+		int minuti2 = toMinute(ldt2);
+		int difference = minuti2-minuti1;
+		timeAdjust = 30-difference;
+		return timeAdjust;
+		
+	}
+	
+	/**
+	 * 
 	 * @param difference
 	 * @return
 	 */
