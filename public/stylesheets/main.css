@@ -177,7 +177,7 @@ table#presenze_mensili {
 	text-transform: capitalize;	
 }
 
-td.festivi {background-color: #FF6600; width: 6em}
+td.festivi {background-color: #F88017; width: 6em}
 td.assenza {background-color: #FFFF99; text-align: right; width: 6em}
 td.ingresso {background-color: #FFEEFF}
 td.uscita {background-color: #CCFFCC}

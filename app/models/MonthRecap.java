@@ -208,7 +208,8 @@ public class MonthRecap extends Model {
 	 * @return il progressivo della differenza giornaliera tra orario di lavoro previsto e orario di lavoro effettivamente fatto
 	 */
 	private int getProgressive(int difference){
-				
+		
+		
 		progressiveOfDailyTime=progressiveOfDailyTime+difference;
 		return progressiveOfDailyTime;
 		
