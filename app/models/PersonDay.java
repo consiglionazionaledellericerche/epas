@@ -153,6 +153,7 @@ public class PersonDay extends Model {
             List<Stamping> dbStamping = Stamping.find("SELECT s FROM Stamping s " +
                             "WHERE s.person = ? and date between ? and ? " +
                             "ORDER BY date", person, startOfDay, endOfDay).fetch();
+            Logger.warn("Numero timbrature: %s %s", dbStamping.size(), date);
             
             if(dbStamping.size()/2==1 && dbStamping.size()%2==1){
             	int i = 0;
@@ -172,8 +173,8 @@ public class PersonDay extends Model {
             	                    
             }
             else{
-            	for(int i = 0; i < dbStamping.size(); i++)
-            		stampings.add(i, dbStamping.get(i));
+            	for(Stamping stamping : dbStamping)
+            		stampings.add(stamping);
             }
                 
         }
@@ -350,7 +351,7 @@ public class PersonDay extends Model {
 	
 	
 	/**
-	 * 
+	 * TODO: sistemare nel caso abbia una timbratura d'ingresso la sera tardi senza la corrispondente timbratura d'uscita prima della mezzanotte del giorno stesso
 	 * @param date
 	 * @return calcola il numero di minuti di cui è composta la data passata come parametro (di cui considera solo
 	 * ora e minuti
@@ -569,7 +570,7 @@ public class PersonDay extends Model {
 	 */
 	public int checkMinTimeForLunch(List<Stamping> stamping){
 		int min=0;
-		if(stamping.size()==4 && !stamping.contains(null)){
+		if(stamping.size()>3 && stamping.size()%2==0 && !stamping.contains(null)){
 			int minuteExit = toMinute(stamping.get(1).date);
 				
 			int minuteEnter = toMinute(stamping.get(2).date);
@@ -588,7 +589,10 @@ public class PersonDay extends Model {
 	 * @return
 	 */
 	public LocalDateTime adjustedStamp(LocalDateTime ldt1, LocalDateTime ldt2){
+		if(ldt1== null || ldt2 == null)
+			throw new RuntimeException("parameters localdatetime1 and localdatetime2 must be not null");
 		LocalDateTime ld2mod = null;
+		
 		int minuti1 = toMinute(ldt1);
 		int minuti2 = toMinute(ldt2);
 		int difference = minuti2-minuti1;
