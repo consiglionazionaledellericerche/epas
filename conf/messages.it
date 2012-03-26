@@ -1,7 +1,7 @@
 views.common.true=vero
 views.common.false=falso
 
-views.common.yes_or_no.true=.
+views.common.yes_or_no.true=
 views.common.yes_or_no.false=NO
 
 views.tags.display.date.format=dd/MM/yyyy
