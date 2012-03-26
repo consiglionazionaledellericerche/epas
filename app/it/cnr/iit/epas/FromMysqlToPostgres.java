@@ -164,8 +164,13 @@ public class FromMysqlToPostgres {
 			
 			FromMysqlToPostgres.createCompetence(rs.getLong("ID"), person, em);
 			
-			FromMysqlToPostgres.createStampModificationType(em);
+			
 		}
+	}
+	
+	public static void importNotInOldDb(){
+		EntityManager em = JPA.em();
+		FromMysqlToPostgres.createStampModificationType(em);
 	}
 	
 	@SuppressWarnings("unused")
