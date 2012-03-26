@@ -13,6 +13,7 @@ public class Administration extends Controller {
     
     public static void importAll() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
     	FromMysqlToPostgres.importAll();
+    	FromMysqlToPostgres.importNotInOldDb();
     	renderText("Importate tute le persone dalla vecchia applicazione");
     }
     
