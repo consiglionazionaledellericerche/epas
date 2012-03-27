@@ -556,7 +556,11 @@ public class PersonDay extends Model {
 	 */
 	public LocalDateTime convertTimeAtWork(int timeAtWork){
 		int hour = (int)timeAtWork/60;
+		if(hour <0)
+			hour=Math.abs(hour);
 		int minute = (int)timeAtWork%60;
+		if(minute <0)
+			minute=Math.abs(minute);
 		LocalDateTime ldt = new LocalDateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),hour,minute,0);
 		return ldt;
 	}
