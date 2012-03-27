@@ -11,7 +11,7 @@ import play.data.validation.Required;
 import play.db.jpa.Model;
 
 @Entity
-@Table(name="stamp_modification_type")
+@Table(name="stamp_modification_types")
 public class StampModificationType extends Model{
 	
 	@Required

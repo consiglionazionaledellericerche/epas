@@ -365,7 +365,6 @@ public class FromMysqlToPostgres {
 	}
 	
 
-	@SuppressWarnings({ "deprecation", "unused" })
 	public static void createStampings(long id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 		Logger.info("Inizio a creare le timbrature per " +person.name+ " " +person.surname);
 		Connection mysqlCon = getMysqlConnection();
