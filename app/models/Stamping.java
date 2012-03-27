@@ -60,7 +60,7 @@ public class Stamping extends Model {
 	@Enumerated(EnumType.STRING)
 	public WayType way;
 	
-	public String notes;
+	public String note;
 	
 	/**
 	 * questo campo booleano consente di determinare se la timbratura è stata effettuata dall'utente all'apposita
