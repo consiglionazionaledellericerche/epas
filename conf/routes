@@ -10,6 +10,9 @@ GET     /                                       Application.index
 GET     /orario		                            Stampings.show
 POST	/orario									Stampings.show
 
+#Assenze
+GET		/assenze								Absences.show
+
 POST    /login                                  Application.login
 GET     /logout                                 Application.logout
 
