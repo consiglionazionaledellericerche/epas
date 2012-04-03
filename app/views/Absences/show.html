@@ -15,9 +15,9 @@
 #{form @Absences.show()}
 
 #{select 'year', value:monthRecap.year, id:'anno'}
-	#{option 1}2011#{/option}
-	#{option 2}2012#{/option}
-	#{option 3}2013#{/option}
+	#{option 2011}2011#{/option}
+	#{option 2012}2012#{/option}
+	#{option 2013}2013#{/option}
 #{/select}
 
 #{select 'month', value:monthRecap.month, id:'mese'}
@@ -66,4 +66,29 @@
 
 	</tr>
 
+</table>
+
+
+*{Significato codici assenza}*
+
+<h3 align="left">Significato codici di assenza</h3>
+<table id="Codici di assenza">
+	<tr>
+		<th width="80">Codice assenza</th>
+		<th width="200">Descrizione</th>
+					
+	</tr>
+%{
+     for(entry in monthRecap.getAbsenceCode().entrySet()) {
+}%
+	<tr>
+		<td>${entry.getKey().code}</td>     
+		<td>${entry.getKey().description}</td>	
+		
+	</tr>
+
+%{  		   
+     }
+     
+}%
 </table>
