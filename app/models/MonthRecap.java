@@ -117,6 +117,9 @@ public class MonthRecap extends Model {
 	@Transient
 	private List<PersonDay> days = null;
 	
+	@Transient
+	private List<String> months = null;
+	
 	@Transient	
 	private int progressiveOfDailyTime=0; 
 	
@@ -202,6 +205,28 @@ public class MonthRecap extends Model {
 		}
 		return days;
 	}	
+	
+
+	/**
+	 * 
+	 * @return la lista dei mesi
+	 */
+	public List<String> getMonths(){
+		
+		if(months!=null){
+			return months;
+		}
+		
+		months = new ArrayList<String>();
+		LocalDate firstMonthOfYear = new LocalDate(year, 1,1);
+		
+		for(int month = 1; month <= firstMonthOfYear.getMonthOfYear(); month++){
+			String mese = firstMonthOfYear.monthOfYear().getAsText();
+			months.add(mese);
+			firstMonthOfYear=firstMonthOfYear.plusMonths(1);
+		}
+		return months;
+	}
 	
 	/**
 	 * 

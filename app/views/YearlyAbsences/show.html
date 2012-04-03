@@ -1,0 +1,69 @@
+#{extends 'main.html' /}
+#{set title:monthRecap.person.surname + ' ' + monthRecap.person.name + ', matricola=' + monthRecap.person.number /}
+
+<h2 id="titoloSituazioneAssenzeAnnuali">Situazione assenze per l'anno ${monthRecap.year}</h2>
+
+<div id="logout">
+#{form @Application.logout()}
+	
+    	<input type="submit" value="Account logout" />
+     
+
+#{/form}
+</div>
+<div align="left">
+#{form @Absences.show()}
+
+#{select 'year', value:monthRecap.year, id:'anno'}
+	#{option 2011}2011#{/option}
+	#{option 2012}2012#{/option}
+	#{option 2013}2013#{/option}
+#{/select}
+
+#{select 'month', value:monthRecap.month, id:'mese'}
+	#{option 1}Gennaio#{/option}
+	#{option 2}Febbraio#{/option}
+	#{option 3}Marzo#{/option}
+	#{option 4}Aprile#{/option}
+	#{option 5}Maggio#{/option}
+	#{option 6}Giugno#{/option}
+	#{option 7}Luglio#{/option}
+	#{option 8}Agosto#{/option}
+	#{option 9}Settembre#{/option}
+	#{option 10}Ottobre#{/option}
+	#{option 11}Novembre#{/option}
+	#{option 12}Dicembre#{/option}
+#{/select}
+	
+		<input type="submit" value="Submit">
+#{/form}
+
+</div>
+
+<table id="assenze_annuali">
+
+	<tr>
+		<th>Mese</th>
+		%{
+			for(entry in monthRecap.getAbsenceCode().entrySet()){
+		}%
+		<th>${entry.getKey().code}</th>
+		%{
+			}
+		}%
+
+	</tr>
+	
+	<tr>
+		<td>${monthRecap.person.surname + ' ' + monthRecap.person.name}</td>
+		%{
+			for(entry in monthRecap.getAbsenceCode().entrySet()){
+		}%
+		<td>${entry.getValue()}</td>
+		%{
+			}
+		}%
+
+	</tr>
+
+</table>
