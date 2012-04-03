@@ -122,29 +122,7 @@ public class PersonDay extends Model {
 	 * 
 	 * @return la lista di timbrature giornaliere
 	 */
-//	public List<Stamping> getStampings() {
-//		if (stampings == null) {
-//			
-//			stampings = Stamping.find("SELECT s FROM Stamping s " +
-//					"WHERE s.person = ? and date between ? and ? " +
-//					"ORDER BY date", person, startOfDay, endOfDay).fetch();		
-////			if(stampings.size()%2 != 0){
-////				int hour= stampings.get(0).date.getHourOfDay();
-////				int minute=stampings.get(0).date.getMinuteOfHour();
-////				for(int i = 1; i<stampings.size();i++){
-////					LocalDateTime ldt = stampings.get(i).date;
-////					if(hour-ldt.getHourOfDay()<1 && minute-ldt.getMinuteOfHour()<30){
-////						
-////					}
-////					
-////					
-////				}			
-////				
-////			}
-//			
-//		}
-//		return stampings;
-//	}
+
 	
 	public List<Stamping> getStampings() {
         
