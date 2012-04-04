@@ -13,6 +13,9 @@ POST	/orario									Stampings.show
 #Assenze
 GET		/assenze								Absences.show
 
+#Assenze annuali
+GET		/assenze-annuali						YearlyAbsences.show
+
 POST    /login                                  Application.login
 GET     /logout                                 Application.logout
 

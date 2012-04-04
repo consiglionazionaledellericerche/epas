@@ -179,6 +179,10 @@ table#assenze_mensili {
 	
 }
 
+table#assenze_annuali {
+	margin: 4em 0em 6em;
+}
+
 .capitalized {
 	text-transform: capitalize;	
 }
@@ -195,3 +199,4 @@ p#spiegazioneTabellaTimbrature {margin-top: 2em; margin-bottom: 2em}
 div#logout {text-align: right}
 h2#titoloSituazionePresenzeMensili {text-align: center}
 h2#titoloSituazioneAssenzeMensili {text-align: center}
+h2#titoloSituazioneAssenzeAnnuali {text-align: center}

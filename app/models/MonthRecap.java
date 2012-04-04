@@ -115,6 +115,9 @@ public class MonthRecap extends Model {
 	protected boolean persistent = false;
 	
 	@Transient
+	private List<Integer> date = null;
+	
+	@Transient
 	private List<PersonDay> days = null;
 	
 	@Transient
@@ -135,6 +138,7 @@ public class MonthRecap extends Model {
 		this.absenceCodeMap  = new HashMap<AbsenceType, Integer>();
 		Logger.debug("Stampingcodelist nel costruttore di default: "+stampingCodeList);
 	}
+
 	
 	/**
 	 * Construttore di default con i parametri obbligatori
@@ -226,6 +230,20 @@ public class MonthRecap extends Model {
 			firstMonthOfYear=firstMonthOfYear.plusMonths(1);
 		}
 		return months;
+	}
+	
+	public List<Integer> getSimpleDays(){
+		if(date!=null){
+			return date;
+		}
+		
+		date = new ArrayList<Integer>();
+		for(int month = 1; month<=31; month++){
+			Integer months = new Integer(month);
+			date.add(months);
+		}
+		return date;
+		
 	}
 	
 	/**
