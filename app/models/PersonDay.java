@@ -198,6 +198,7 @@ public class PersonDay extends Model {
 		return false;
 	}
 	
+	
 	/**
 	 * 
 	 * @param date
