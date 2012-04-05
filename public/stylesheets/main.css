@@ -187,6 +187,8 @@ table#assenze_annuali {
 	text-transform: capitalize;	
 }
 
+th.giorni {width: 3em; text-align: center}
+
 td.festivi {background-color: #F88017; width: 6em}
 td.assenza {background-color: #FFFF99; text-align: right; width: 6em}
 td.ingresso {background-color: #FFEEFF}
