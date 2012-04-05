@@ -115,9 +115,6 @@ public class MonthRecap extends Model {
 	protected boolean persistent = false;
 	
 	@Transient
-	private List<Integer> date = null;
-	
-	@Transient
 	private List<PersonDay> days = null;
 	
 	@Transient
@@ -232,18 +229,106 @@ public class MonthRecap extends Model {
 		return months;
 	}
 	
-	public List<Integer> getSimpleDays(){
-		if(date!=null){
-			return date;
+	/**
+	 * 
+	 * @param month
+	 * @param year
+	 * @return massimo numero di giorni in un mese per coadiuvare nella realizzazione della tabella per le assenze annuali
+	 */
+	public int maxNumberOfDays(int year, String month){
+		int max = 0;
+		
+		if(month.equalsIgnoreCase("aprile") || month.equalsIgnoreCase("giugno") || month.equalsIgnoreCase("settembre")
+				|| month.equalsIgnoreCase("novembre"))
+			max=30;
+		if(month.equalsIgnoreCase("gennaio") || month.equalsIgnoreCase("marzo") || month.equalsIgnoreCase("maggio")
+				|| month.equalsIgnoreCase("luglio") || month.equalsIgnoreCase("agosto") || month.equalsIgnoreCase("ottobre")
+				|| month.equalsIgnoreCase("dicembre"))
+			max=31;
+		if(month.equalsIgnoreCase("febbraio") && (year==2008 || year==2012 || year==2016 || year==2020))
+			max=29;
+		else
+			max=28;
+		return max;
+	}
+	
+	/**
+	 * 
+	 * @param year
+	 * @param month
+	 * @param day
+	 * @return la totalità delle assenze per quella persona in un anno
+	 */
+	public List<Absence> getAbsenceInYear(int year, String month, int day){
+		LocalDate date = null;
+		List<Absence> absences = null;
+		if(absences==null){				
+			
+			if(month.equalsIgnoreCase("gennaio")){
+				date = new LocalDate(year,1,day);
+				absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();		
+			}
+			if(month.equalsIgnoreCase("febbraio")){
+				if(day<30){
+					date = new LocalDate(year,2,day);
+					absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();
+				}
+			}
+			if(month.equalsIgnoreCase("marzo")){
+				date = new LocalDate(year,3,day);
+				absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();		
+			}
+			if(month.equalsIgnoreCase("aprile")){
+				if(day<31){
+					date = new LocalDate(year,4,day);
+					absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();	
+				}
+						
+			}
+			if(month.equalsIgnoreCase("maggio")){
+				date = new LocalDate(year,5,day);
+				absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();		
+			}
+			if(month.equalsIgnoreCase("giugno")){
+				if(day<31){
+					date = new LocalDate(year,6,day);
+					absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();		
+				}
+					
+			}
+			if(month.equalsIgnoreCase("luglio")){
+				date = new LocalDate(year,7,day);
+				absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();		
+			}
+			if(month.equalsIgnoreCase("agosto")){
+				date = new LocalDate(year,8,day);
+				absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();		
+			}
+			if(month.equalsIgnoreCase("settembre")){
+				if(day<31){
+					date = new LocalDate(year,9,day);
+					absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();	
+				}
+						
+			}
+			if(month.equalsIgnoreCase("ottobre")){
+				date = new LocalDate(year,10,day);
+				absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();		
+			}
+			if(month.equalsIgnoreCase("novembre")){
+				if(day<31){
+					date = new LocalDate(year,11,day);
+					absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();	
+				}
+						
+			}
+			if(month.equalsIgnoreCase("dicembre")){
+				date = new LocalDate(year,12,day);
+				absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();		
+			}
 		}
 		
-		date = new ArrayList<Integer>();
-		for(int month = 1; month<=31; month++){
-			Integer months = new Integer(month);
-			date.add(months);
-		}
-		return date;
-		
+		return absences;
 	}
 	
 	/**
