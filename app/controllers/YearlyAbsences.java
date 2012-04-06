@@ -2,6 +2,7 @@ package controllers;
 
 import models.MonthRecap;
 import models.Person;
+import models.YearRecap;
 
 import org.joda.time.LocalDate;
 
@@ -24,22 +25,20 @@ public class YearlyAbsences extends Controller{
     	Person person = Person.findById(id);
     	String anno = params.get("year");
     	Logger.info("Anno: "+anno);
-    	String mese= params.get("month");
-    	Logger.info("Mese: "+mese);
-    	if(anno==null || mese==null){
+    	
+    	if(anno==null){
     		        	
         	LocalDate now = new LocalDate();
-        	MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, now.getYear(), now.getMonthOfYear());
-            render(monthRecap);
+        	YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)now.getYear());
+            render(yearRecap);
     	}
     	else{
     		Logger.info("Sono dentro il ramo else della creazione del month recap");
     		Integer year = new Integer(params.get("year"));
-			Integer month = new Integer(params.get("month"));
-    		MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, year.intValue(), month.intValue());
-    		Logger.info("Il month recap è formato da: " +person.id+ ", " +year.intValue()+ ", " +month.intValue());
-    		
-            render(monthRecap);
+			
+    		YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)year.intValue());
+    		    		
+            render(yearRecap);
     	}
     	
     }

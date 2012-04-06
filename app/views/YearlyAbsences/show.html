@@ -1,7 +1,7 @@
 #{extends 'main.html' /}
-#{set title:monthRecap.person.surname + ' ' + monthRecap.person.name + ', matricola=' + monthRecap.person.number /}
+#{set title:yearRecap.person.surname + ' ' + yearRecap.person.name + ', matricola=' + yearRecap.person.number /}
 
-<h2 id="titoloSituazioneAssenzeAnnuali">Situazione assenze per l'anno ${monthRecap.year}</h2>
+<h2 id="titoloSituazioneAssenzeAnnuali">Situazione assenze per l'anno ${yearRecap.year}</h2>
 
 <div id="logout">
 #{form @Application.logout()}
@@ -12,9 +12,9 @@
 #{/form}
 </div>
 <div align="left">
-#{form @Absences.show()}
+#{form @YearlyAbsences.show()}
 
-#{select 'year', value:monthRecap.year, id:'anno'}
+#{select 'year', value:yearRecap.year, id:'anno'}
 	#{option 2011}2011#{/option}
 	#{option 2012}2012#{/option}
 	#{option 2013}2013#{/option}
@@ -42,16 +42,16 @@
 	</tr>
 	
 	%{
-		for(mese in monthRecap.months){
+		for(mese in yearRecap.months){
 	}%
 	<tr>
 		
 		<td>${mese.toString()}</td>
 		%{
 			int j=1;
-			while(j <= monthRecap.maxNumberOfDays(monthRecap.year, mese)){
+			while(j <= yearRecap.maxNumberOfDays(yearRecap.year, mese)){
 		}%
-		<td>${monthRecap.getAbsenceInYear(monthRecap.year,mese,j).size() > 0 ? monthRecap.getAbsenceInYear(monthRecap.year,mese,j).get(0).absenceType.code : ''}</td>
+		<td>${yearRecap.getAbsenceInYear(yearRecap.year,mese,j).size() > 0 ? yearRecap.getAbsenceInYear(yearRecap.year,mese,j).get(0).absenceType.code : ''}</td>
 		%{
 			j++;}
 		}%
