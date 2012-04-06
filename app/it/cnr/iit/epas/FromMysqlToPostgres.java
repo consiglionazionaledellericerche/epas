@@ -873,7 +873,7 @@ public class FromMysqlToPostgres {
 			YearRecap yearRecap = null;
 			while(rs.next()){										
 			
-				yearRecap = new YearRecap();
+				yearRecap = new YearRecap(person, rs.getShort("anno"));
 				yearRecap.person = person;
 				yearRecap.year = rs.getShort("anno");
 				yearRecap.remaining = rs.getInt("residuo");
