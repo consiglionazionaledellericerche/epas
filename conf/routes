@@ -16,6 +16,9 @@ GET		/assenze								Absences.show
 #Assenze annuali
 GET		/assenze-annuali						YearlyAbsences.show
 
+#Dispatcher
+POST	/									SwitchTemplate.show		
+
 POST    /login                                  Application.login
 GET     /logout                                 Application.logout
 

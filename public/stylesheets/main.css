@@ -199,6 +199,7 @@ td.progressivo {background-color: #FFFF99; text-align:right; width: 6em}
 
 p#spiegazioneTabellaTimbrature {margin-top: 2em; margin-bottom: 2em}
 div#logout {text-align: right}
+div#chooseView {text-align: center}
 h2#titoloSituazionePresenzeMensili {text-align: center}
 h2#titoloSituazioneAssenzeMensili {text-align: center}
 h2#titoloSituazioneAssenzeAnnuali {text-align: center}

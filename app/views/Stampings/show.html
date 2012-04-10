@@ -12,6 +12,21 @@
 
 #{/form}
 </div>
+
+<div id="chooseView">
+#{form @SwitchTemplate.show()}
+	
+#{select 'view', value:monthRecap.year, id:'view'}
+	#{option assenzeAnnuali}Assenze Annuali#{/option}
+	#{option assenzeMensili}Assenze Mensili#{/option}
+	#{option timbrature}Timbrature#{/option}
+#{/select}
+    	<input type="submit" value="go!" />
+     
+
+#{/form}
+</div>
+
 <div align="left">
 #{form @Stampings.show()}
 
