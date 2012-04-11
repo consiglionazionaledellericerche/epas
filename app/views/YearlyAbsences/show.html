@@ -77,3 +77,23 @@
 		}%
 </table>
 
+<table id="Codici di assenza">
+	<tr>
+		<th width="80">Codice assenza</th>
+		<th width="200">Descrizione</th>
+					
+	</tr>
+%{
+     for(entry in yearRecap.getYearlyAbsence().entrySet()) {
+}%
+	<tr>
+		<td>${entry.getKey().code}</td>     
+		<td>${entry.getKey().description}</td>	
+		
+	</tr>
+
+%{  		   
+     }
+     
+}%
+</table>
