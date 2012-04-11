@@ -7,6 +7,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -65,7 +66,8 @@ public class YearRecap extends Model{
 	private boolean persistent = false;
 	@Transient
 	private List<String> months = null;
-		
+	@Transient
+	private Map<AbsenceType,Integer> mappaAssenze = new HashMap<AbsenceType,Integer>();
 	
 	protected YearRecap(){
 		
@@ -147,10 +149,12 @@ public class YearRecap extends Model{
 				|| month.equalsIgnoreCase("luglio") || month.equalsIgnoreCase("agosto") || month.equalsIgnoreCase("ottobre")
 				|| month.equalsIgnoreCase("dicembre"))
 			max=31;
-		if(month.equalsIgnoreCase("febbraio") && (year==2008 || year==2012 || year==2016 || year==2020))
-			max=29;
-		else
-			max=28;
+		if(month.equalsIgnoreCase("febbraio")){
+			if(year == 2012 || year == 2016 || year == 2020 )
+				max = 29;
+			else
+				max = 28;
+		}
 		return max;
 	}
 	
@@ -159,78 +163,127 @@ public class YearRecap extends Model{
 	 * @param year
 	 * @param month
 	 * @param day
-	 * @return la totalità delle assenze per quella persona in un anno
+	 * @return la totalità delle assenze per quella persona in un anno, in più aggiorna la lista privata yearlyAbsences nel caso in 
+	 * cui trova un assenza con un codice che ancora non è stato inserito
 	 */
 	public List<Absence> getAbsenceInYear(int year, String month, int day){
 		LocalDate date = null;
 		List<Absence> absences = null;
+		
 		if(absences==null){				
 			
 			if(month.equalsIgnoreCase("gennaio")){
 				date = new LocalDate(year,1,day);
-				absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();		
+				absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();	
+				
 			}
 			if(month.equalsIgnoreCase("febbraio")){
 				if(day<30){
 					date = new LocalDate(year,2,day);
 					absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();
+					
 				}
 			}
 			if(month.equalsIgnoreCase("marzo")){
 				date = new LocalDate(year,3,day);
-				absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();		
+				absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();
+				
 			}
 			if(month.equalsIgnoreCase("aprile")){
 				if(day<31){
 					date = new LocalDate(year,4,day);
 					absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();	
+					
+				
 				}
 						
 			}
 			if(month.equalsIgnoreCase("maggio")){
 				date = new LocalDate(year,5,day);
-				absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();		
+				absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();	
+				
 			}
 			if(month.equalsIgnoreCase("giugno")){
 				if(day<31){
 					date = new LocalDate(year,6,day);
-					absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();		
+					absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();	
+					
 				}
 					
 			}
 			if(month.equalsIgnoreCase("luglio")){
 				date = new LocalDate(year,7,day);
-				absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();		
+				absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();	
+				
 			}
 			if(month.equalsIgnoreCase("agosto")){
 				date = new LocalDate(year,8,day);
-				absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();		
+				absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();
+				
 			}
 			if(month.equalsIgnoreCase("settembre")){
 				if(day<31){
 					date = new LocalDate(year,9,day);
 					absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();	
+					
 				}
 						
 			}
 			if(month.equalsIgnoreCase("ottobre")){
 				date = new LocalDate(year,10,day);
-				absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();		
+				absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();	
+				
 			}
 			if(month.equalsIgnoreCase("novembre")){
 				if(day<31){
 					date = new LocalDate(year,11,day);
 					absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();	
+					
 				}
 						
 			}
 			if(month.equalsIgnoreCase("dicembre")){
 				date = new LocalDate(year,12,day);
-				absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();		
+				absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();	
+				
 			}
 		}
 		
 		return absences;
 	}
-
+	
+	/**
+	 * 
+	 * @return la mappa contenente le assenze fatte dalla persona nell'anno con i relativi codici d'assenza e descrizioni
+	 */
+	public Map<AbsenceType,Integer> getYearlyAbsence(){
+		
+		List<AbsenceType> listaAssenze = null;
+		LocalDate dateFrom = new LocalDate(year,1,1);
+		LocalDate dateTo = new LocalDate(year,12,31);
+		listaAssenze = AbsenceType.find("SELECT abt FROM Absence abs, AbsenceType abt, Person p WHERE abt = abs.absenceType AND " +
+				"abs.person = p AND p = ? AND abs.date >= ? AND abs.date < ?", person, dateFrom, dateTo).fetch();
+		Logger.warn("ListaAssenze: " +listaAssenze);
+		if(mappaAssenze.isEmpty()){
+			Integer i = 0;
+			for(AbsenceType absenceType : listaAssenze){
+				boolean stato = mappaAssenze.containsKey(absenceType);
+				if(stato==false){
+					i=1;
+					mappaAssenze.put(absenceType, i);
+				}
+				else{
+					i = mappaAssenze.get(absenceType);
+					mappaAssenze.remove(absenceType);
+					mappaAssenze.put(absenceType, i+1);
+				}
+				
+					
+			}
+		}
+		
+		Logger.warn("mappaAssenze: " +mappaAssenze);
+		return mappaAssenze;
+	}
+	
 }
