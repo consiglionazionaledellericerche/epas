@@ -629,7 +629,7 @@ public class FromMysqlToPostgres {
 		 */
 		Logger.info("Inizio a creare le ferie per " +person.name+ " " +person.surname);
 		Connection mysqlCon = getMysqlConnection();
-		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM Orario WHERE TipoGiorno = 32 and id=" + id);
+		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM Orario WHERE TipoGiorno = 32 and TipoGiorno = 31 and id=" + id);
 		ResultSet rs = stmt.executeQuery();
 		PersonVacation personVacation = null;
 
