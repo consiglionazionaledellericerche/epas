@@ -1,0 +1,80 @@
+#{extends 'main.html' /}
+#{set title:yearRecap.person.surname + ' ' + yearRecap.person.name + ', matricola=' + yearRecap.person.number /}
+
+<h2 id="titoloSituazioneFerie">Situazione ferie ${yearRecap.year}</h2>
+
+<div id="logout">
+#{form @Application.logout()}
+	
+    	<input type="submit" value="Account logout" />
+     
+
+#{/form}
+</div>
+
+<div id="chooseView">
+#{form @SwitchTemplate.show()}
+	
+#{select 'view', id:'view'}
+	#{option assenzeAnnuali}Assenze Annuali#{/option}
+	#{option assenzeMensili}Assenze Mensili#{/option}
+	#{option timbrature}Timbrature#{/option}
+#{/select}
+    	<input type="submit" value="go!" />
+     
+
+#{/form}
+</div>
+
+<div align="left">
+#{form @YearlyAbsences.show()}
+
+#{select 'year', value:yearRecap.year, id:'anno'}
+	#{option 2011}2011#{/option}
+	#{option 2012}2012#{/option}
+	#{option 2013}2013#{/option}
+#{/select}
+
+	
+		<input type="submit" value="Submit">
+#{/form}
+
+<table id="ferie">
+	<tr>
+		<th colspan=2 class="ferieFatte">Ferie fatte</th>
+		<th rowspan=3>Permessi legge 937/77 fatti</th>
+		<th colspan=5 class="residuo">Residuo</th>
+	</tr>
+	<tr>
+		<th rowspan=2>${yearRecap.year-1} anno precedente</th>
+		<th rowspan=2>${yearRecap.year} anno richiesto</th>
+		<th rowspan=2>ferie ${yearRecap.year-1}</th>
+		<th colspan=2>ferie ${yearRecap.year}</th>
+		<th colspan=2>permessi</th>
+	</tr>
+	<tr>
+		<th>tot.</th>
+		<th>mat.</th>
+		<th>tot.</th>
+		<th>mat.</th>
+	</tr>
+	<tr>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+
+</table>
+
+<div>
+<p><h4>I residui di ferie e permessi per l'anno in corso sono indicati su 2 colonne:</h4></p>
+<p><b>tot.</b>: Giorni residui totali di ferie o permessi</p>
+<p><b>mat.</b>: Giorni di ferie o permesso maturati fino ad oggi</p>
+
+
+</div>

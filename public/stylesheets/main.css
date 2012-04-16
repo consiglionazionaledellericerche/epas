@@ -183,11 +183,18 @@ table#assenze_annuali {
 	margin: 4em 0em 6em;
 }
 
+table#ferie {
+	margin: 4em 0em 6em;
+}
+
 .capitalized {
 	text-transform: capitalize;	
 }
 
 th.giorni {width: 3em; text-align: center}
+
+th.ferieFatte {text-align: center}
+th.residuo {text-align: center}
 
 td.festivi {background-color: #F88017; width: 6em}
 td.assenza {background-color: #FFFF99; text-align: right; width: 6em}
@@ -203,3 +210,4 @@ div#chooseView {text-align: center}
 h2#titoloSituazionePresenzeMensili {text-align: center}
 h2#titoloSituazioneAssenzeMensili {text-align: center}
 h2#titoloSituazioneAssenzeAnnuali {text-align: center}
+h2#titoloSituazioneFerie {text-align: center}
