@@ -13,12 +13,13 @@
 </div>
 
 <div id="chooseView">
-#{form @SwitchTemplate.show()}
-	
-#{select 'view', id:'view'}
-	#{option assenzeAnnuali}Assenze Annuali#{/option}
-	#{option assenzeMensili}Assenze Mensili#{/option}
-	#{option timbrature}Timbrature#{/option}
+#{form @SwitchTemplate.dispatch()}
+
+#{select 'menuItem', value:menuItem}
+	#{option 'yearlyAbsences'}Assenze Annuali#{/option}
+	#{option 'absences'}Assenze Mensili#{/option}
+	#{option 'stampings'}Timbrature#{/option}
+	#{option 'vacations'}Ferie#{/option}	
 #{/select}
     	<input type="submit" value="go!" />
      
