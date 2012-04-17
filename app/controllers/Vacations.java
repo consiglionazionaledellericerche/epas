@@ -1,5 +1,6 @@
 package controllers;
 
+import it.cnr.iit.epas.ActionMenuItem;
 import models.Person;
 import models.YearRecap;
 
@@ -11,6 +12,9 @@ import play.mvc.Controller;
 
 public class Vacations extends Controller{
 	
+	/* corrisponde alla voce di menu selezionata */
+	private final static ActionMenuItem actionMenuItem = ActionMenuItem.vacations;
+	
 	@Before
     static void checkPerson() {
         if(session.get(Application.PERSON_ID_SESSION_KEY) == null) {
@@ -20,6 +24,8 @@ public class Vacations extends Controller{
     }
 	
 	private static void show(Long id) {
+		String menuItem = actionMenuItem.toString();
+		
     	Person person = Person.findById(id);
     	String anno = params.get("year");
     	Logger.info("Anno: "+anno);
@@ -28,7 +34,7 @@ public class Vacations extends Controller{
     		        	
         	LocalDate now = new LocalDate();
         	YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)now.getYear());
-            render(yearRecap);
+            render(yearRecap, menuItem);
     	}
     	else{
     		Logger.info("Sono dentro il ramo else della creazione del month recap");
@@ -36,7 +42,7 @@ public class Vacations extends Controller{
 			
     		YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)year.intValue());
     		    		
-            render(yearRecap);
+            render(yearRecap, menuItem);
     	}
     	
     }

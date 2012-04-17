@@ -20,7 +20,7 @@ GET		/assenze-annuali						YearlyAbsences.show
 GET		/ferie									Vacations.show
 
 #Dispatcher
-POST	/									SwitchTemplate.show		
+POST	/dispatch									SwitchTemplate.dispatch		
 
 POST    /login                                  Application.login
 GET     /logout                                 Application.logout
