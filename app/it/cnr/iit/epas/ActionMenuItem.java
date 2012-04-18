@@ -11,5 +11,6 @@ public enum ActionMenuItem {
 	stampings,
 	yearlyAbsences,
 	absences,
-	vacations
+	vacations,
+	competences
 }

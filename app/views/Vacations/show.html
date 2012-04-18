@@ -20,6 +20,7 @@
 	#{option 'absences'}Assenze Mensili#{/option}
 	#{option 'stampings'}Timbrature#{/option}
 	#{option 'vacations'}Ferie#{/option}	
+	#{option 'competences'}Competenze e Straordinari#{/option}
 #{/select}
     	<input type="submit" value="go!" />
      
@@ -60,8 +61,8 @@
 		<th>mat.</th>
 	</tr>
 	<tr>
-		<td>${yearRecap.vacationDaysLastYear(yearRecap.year)}</td>
-		<td>${yearRecap.vacationDaysCurrentYear(yearRecap.year)}</td>
+		<td><a href="">${yearRecap.vacationDaysLastYear(yearRecap.year)}</a></td>
+		<td><a href="">${yearRecap.vacationDaysCurrentYear(yearRecap.year)}</a></td>
 		<td>${yearRecap.personalPermissionUsed()}</td>
 		<td>${yearRecap.vacationLastYearNotYetUsed(yearRecap.year)}</td>
 		<td>${yearRecap.personalVacationDays()}</td>
