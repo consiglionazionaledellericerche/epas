@@ -33,6 +33,8 @@ public class SwitchTemplate extends Controller{
 			YearlyAbsences.show();
 		case vacations:
 			Vacations.show();
+		case competences:
+			Competences.show();
 		default:
 			break;
 		}

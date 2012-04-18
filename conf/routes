@@ -19,8 +19,11 @@ GET		/assenze-annuali						YearlyAbsences.show
 #Ferie
 GET		/ferie									Vacations.show
 
+#Competenze
+GET		/competenze								Competences.show
+
 #Dispatcher
-POST	/dispatch									SwitchTemplate.dispatch		
+POST	/dispatch								SwitchTemplate.dispatch		
 
 POST    /login                                  Application.login
 GET     /logout                                 Application.logout

@@ -281,15 +281,7 @@ public class MonthRecap extends Model {
 	public Map<AbsenceType, Integer> getAbsenceCodeMap() {
 		return absenceCodeMap;
 	}
-	
-//	private void test() {
-//		for (Entry<AbsenceType, Integer> entry : absenceCodeMap.entrySet()) {
-//			Logger.info("%s %s", entry.getKey(), entry.getValue());
-//		}
-//		for (AbsenceType at : absenceCodeMap.keySet()) {
-//			Logger.info("%s %s", at, absenceCodeMap.get(at));
-//		}
-//	}
+
 	/**
 	 * 
 	 * @param days
@@ -397,5 +389,81 @@ public class MonthRecap extends Model {
 				basedDays++;
 		}
 		return basedDays;
+	}
+	
+	/**
+	 * 
+	 * @return il numero di giorni di indennità di reperibilità festiva per quella persona in quel mese di quell'anno
+	 */
+	public int holidaysAvailability(int year, int month){
+		int holidaysAvailability = 0;
+		List<Competence> competence = Competence.find("Select comp from Competence comp where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.code = ?", person, year, month, "208").fetch();
+		holidaysAvailability = competence.size();
+		return holidaysAvailability;
+	}
+
+	/**
+	 * 
+	 * @return il numero di giorni di indennità di reperibilità feriale per quella persona in quel mese di quell'anno
+	 */
+	public int weekDayAvailability(int year, int month){
+		int weekDayAvailability = 0;
+		List<Competence> competence = Competence.find("Select comp from Competence comp where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.code = ?", person, year, month, "207").fetch();
+		weekDayAvailability = competence.size();
+		return weekDayAvailability;
+	}
+	
+	/**
+	 * 
+	 * @param year
+	 * @param month
+	 * @return il numero di giorni di straordinario diurno nei giorni lavorativi 
+	 */
+	public int daylightWorkingDaysOvertime(int year, int month){
+		int daylightWorkingDaysOvertime = 0;
+		List<Competence> competence = Competence.find("Select comp from Competence comp where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.code = ?", person, year, month, "S1").fetch();
+		daylightWorkingDaysOvertime = competence.size();
+		return daylightWorkingDaysOvertime;
+	}
+	
+	/**
+	 * 
+	 * @param year
+	 * @param month
+	 * @return il numero di giorni di straordinario diurno nei giorni festivi o notturno nei giorni lavorativi
+	 */
+	public int daylightholidaysOvertime(int year, int month){
+		int daylightholidaysOvertime = 0;
+		List<Competence> competence = Competence.find("Select comp from Competence comp where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.code = ?", person, year, month, "S2").fetch();
+		daylightholidaysOvertime = competence.size();
+		return daylightholidaysOvertime;
+	}
+	
+	/**
+	 * 
+	 * @return il numero di giorni di turno ordinario
+	 */
+	public int ordinaryShift(int year, int month){
+		int ordinaryShift = 0;
+		List<Competence> competence = Competence.find("Select comp from Competence comp where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.code = ?", person, year, month, "T1").fetch();
+		ordinaryShift = competence.size();
+		return ordinaryShift;
+	}
+	
+	/**
+	 * 
+	 * @return il numero di giorni di turno notturno
+	 */
+	public int nightShift(int year, int month){
+		int nightShift = 0;
+		List<Competence> competence = Competence.find("Select comp from Competence comp where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.code = ?", person, year, month, "T2").fetch();
+		nightShift = competence.size();
+		return nightShift;
 	}
 }
