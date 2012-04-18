@@ -1,0 +1,87 @@
+#{extends 'main.html' /}
+#{set title:monthRecap.person.surname + ' ' + monthRecap.person.name + ', matricola=' + monthRecap.person.number /}
+
+<h2 id="titoloSituazioneFerie">Gestione straordinari e altre competenze</h2>
+
+<div id="logout">
+#{form @Application.logout()}
+	
+    	<input type="submit" value="Account logout" />
+     
+
+#{/form}
+</div>
+
+<div id="chooseView">
+#{form @SwitchTemplate.dispatch()}
+
+#{select 'menuItem', value:menuItem}
+	#{option 'yearlyAbsences'}Assenze Annuali#{/option}
+	#{option 'absences'}Assenze Mensili#{/option}
+	#{option 'stampings'}Timbrature#{/option}
+	#{option 'vacations'}Ferie#{/option}
+	#{option 'competences'}Competenze e Straordinari#{/option}	
+#{/select}
+    	<input type="submit" value="go!" />
+     
+
+#{/form}
+</div>
+
+<div align="left">
+#{form @Competences.show()}
+
+#{select 'year', value:monthRecap.year, id:'anno'}
+	#{option 2011}2011#{/option}
+	#{option 2012}2012#{/option}
+	#{option 2013}2013#{/option}
+#{/select}
+
+#{select 'month', value:monthRecap.month, id:'mese'}
+	#{option 1}Gennaio#{/option}
+	#{option 2}Febbraio#{/option}
+	#{option 3}Marzo#{/option}
+	#{option 4}Aprile#{/option}
+	#{option 5}Maggio#{/option}
+	#{option 6}Giugno#{/option}
+	#{option 7}Luglio#{/option}
+	#{option 8}Agosto#{/option}
+	#{option 9}Settembre#{/option}
+	#{option 10}Ottobre#{/option}
+	#{option 11}Novembre#{/option}
+	#{option 12}Dicembre#{/option}
+#{/select}
+	
+		<input type="submit" value="Submit">
+#{/form}
+
+
+<table id="competenze">
+	<tr>
+		<th>Cognome nome</th>
+		<th>Ind.tà rep.tà feriale (207)</th>
+		<th>Ind.tà rep.tà festiva (208)</th>
+		<th>Straordinario diurno nei giorni lavorativi</th>
+		<th>Straordinario diurno nei giorni festivi o notturno nei giorni lavorativi</th>
+		<th>Turno ordinario (T1)</th>
+		<th>Turno notturno (T2)</th>
+	</tr>
+	<tr>
+		<td>${monthRecap.person.surname + ' ' + monthRecap.person.name + ' (' + monthRecap.person.number + ')'}</td>
+		<td>${monthRecap.weekDayAvailability(monthRecap.year, monthRecap.month)}</td>
+		<td>${monthRecap.holidaysAvailability(monthRecap.year, monthRecap.month)}</td>
+		<td>${monthRecap.daylightWorkingDaysOvertime(monthRecap.year, monthRecap.month)}</td>
+		<td>${monthRecap.daylightholidaysOvertime(monthRecap.year, monthRecap.month)}</td>
+		<td>${monthRecap.ordinaryShift(monthRecap.year, monthRecap.month)}</td>
+		<td>${monthRecap.nightShift(monthRecap.year, monthRecap.month)}</td>	
+	</tr>
+	<tr>
+		<td>Totali</td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>	
+	</tr>
+</table>
