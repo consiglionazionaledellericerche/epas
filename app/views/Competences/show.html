@@ -58,22 +58,22 @@
 
 <table id="competenze">
 	<tr>
-		<th>Cognome nome</th>
-		<th>Ind.tà rep.tà feriale (207)</th>
-		<th>Ind.tà rep.tà festiva (208)</th>
-		<th>Straordinario diurno nei giorni lavorativi</th>
-		<th>Straordinario diurno nei giorni festivi o notturno nei giorni lavorativi</th>
-		<th>Turno ordinario (T1)</th>
-		<th>Turno notturno (T2)</th>
+		<th class="competenze">Cognome nome</th>
+		<th class="competenze">Ind.tà rep.tà feriale (207)</th>
+		<th class="competenze">Ind.tà rep.tà festiva (208)</th>
+		<th class="competenze">Straordinario diurno nei giorni lavorativi</th>
+		<th class="competenze">Straordinario diurno nei giorni festivi o notturno nei giorni lavorativi</th>
+		<th class="competenze">Turno ordinario (T1)</th>
+		<th class="competenze">Turno notturno (T2)</th>
 	</tr>
 	<tr>
-		<td>${monthRecap.person.surname + ' ' + monthRecap.person.name + ' (' + monthRecap.person.number + ')'}</td>
-		<td>${monthRecap.weekDayAvailability(monthRecap.year, monthRecap.month)}</td>
-		<td>${monthRecap.holidaysAvailability(monthRecap.year, monthRecap.month)}</td>
-		<td>${monthRecap.daylightWorkingDaysOvertime(monthRecap.year, monthRecap.month)}</td>
-		<td>${monthRecap.daylightholidaysOvertime(monthRecap.year, monthRecap.month)}</td>
-		<td>${monthRecap.ordinaryShift(monthRecap.year, monthRecap.month)}</td>
-		<td>${monthRecap.nightShift(monthRecap.year, monthRecap.month)}</td>	
+		<td class="comp-nome">${monthRecap.person.surname + ' ' + monthRecap.person.name + ' (' + monthRecap.person.number + ')'}</td>
+		<td class="comp">${monthRecap.weekDayAvailability(monthRecap.year, monthRecap.month)}</td>
+		<td class="comp">${monthRecap.holidaysAvailability(monthRecap.year, monthRecap.month)}</td>
+		<td class="comp">${monthRecap.daylightWorkingDaysOvertime(monthRecap.year, monthRecap.month)}</td>
+		<td class="comp">${monthRecap.daylightholidaysOvertime(monthRecap.year, monthRecap.month)}</td>
+		<td class="comp">${monthRecap.ordinaryShift(monthRecap.year, monthRecap.month)}</td>
+		<td class="comp">${monthRecap.nightShift(monthRecap.year, monthRecap.month)}</td>	
 	</tr>
 	<tr>
 		<td>Totali</td>
