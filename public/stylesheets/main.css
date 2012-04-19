@@ -187,6 +187,10 @@ table#ferie {
 	margin: 4em 0em 6em;
 }
 
+table#competenze {
+	margin: 4em 0em 6em;
+}
+
 .capitalized {
 	text-transform: capitalize;	
 }
@@ -196,6 +200,8 @@ th.giorni {width: 3em; text-align: center}
 th.ferieFatte {text-align: center}
 th.residuo {text-align: center}
 
+th.competenze {width: 6em; text-align: center}
+
 td.festivi {background-color: #F88017; width: 6em}
 td.assenza {background-color: #FFFF99; text-align: right; width: 6em}
 td.ingresso {background-color: #FFEEFF}
@@ -203,6 +209,8 @@ td.uscita {background-color: #CCFFCC}
 td.tempoLavoro {width: 6em}
 td.differenza {text-align: right; width: 6em}
 td.progressivo {background-color: #FFFF99; text-align:right; width: 6em}
+td.comp {height: 1em; text-align: right}
+td.comp-nome {height: 1em; text-align: left}
 
 p#spiegazioneTabellaTimbrature {margin-top: 2em; margin-bottom: 2em}
 div#logout {text-align: right}

@@ -397,9 +397,13 @@ public class MonthRecap extends Model {
 	 */
 	public int holidaysAvailability(int year, int month){
 		int holidaysAvailability = 0;
-		List<Competence> competence = Competence.find("Select comp from Competence comp where comp.person = ? and " +
-				"comp.year = ? and comp.month = ? and comp.code = ?", person, year, month, "208").fetch();
-		holidaysAvailability = competence.size();
+		Competence competence = Competence.find("Select comp from Competence comp where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.code = ?", person, year, month, "208").first();
+		Logger.warn("competence: " +competence);
+		if(competence != null)
+			holidaysAvailability = competence.value;
+		else
+			holidaysAvailability = 0;
 		return holidaysAvailability;
 	}
 
@@ -409,9 +413,12 @@ public class MonthRecap extends Model {
 	 */
 	public int weekDayAvailability(int year, int month){
 		int weekDayAvailability = 0;
-		List<Competence> competence = Competence.find("Select comp from Competence comp where comp.person = ? and " +
-				"comp.year = ? and comp.month = ? and comp.code = ?", person, year, month, "207").fetch();
-		weekDayAvailability = competence.size();
+		Competence competence = Competence.find("Select comp from Competence comp where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.code = ?", person, year, month, "207").first();
+		if(competence != null)
+			weekDayAvailability = competence.value;
+		else
+			weekDayAvailability = 0;
 		return weekDayAvailability;
 	}
 	
@@ -423,9 +430,12 @@ public class MonthRecap extends Model {
 	 */
 	public int daylightWorkingDaysOvertime(int year, int month){
 		int daylightWorkingDaysOvertime = 0;
-		List<Competence> competence = Competence.find("Select comp from Competence comp where comp.person = ? and " +
-				"comp.year = ? and comp.month = ? and comp.code = ?", person, year, month, "S1").fetch();
-		daylightWorkingDaysOvertime = competence.size();
+		Competence competence = Competence.find("Select comp from Competence comp where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.code = ?", person, year, month, "S1").first();
+		if(competence != null)
+			daylightWorkingDaysOvertime = competence.value;
+		else
+			daylightWorkingDaysOvertime = 0;
 		return daylightWorkingDaysOvertime;
 	}
 	
@@ -437,9 +447,12 @@ public class MonthRecap extends Model {
 	 */
 	public int daylightholidaysOvertime(int year, int month){
 		int daylightholidaysOvertime = 0;
-		List<Competence> competence = Competence.find("Select comp from Competence comp where comp.person = ? and " +
-				"comp.year = ? and comp.month = ? and comp.code = ?", person, year, month, "S2").fetch();
-		daylightholidaysOvertime = competence.size();
+		Competence competence = Competence.find("Select comp from Competence comp where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.code = ?", person, year, month, "S2").first();
+		if(competence != null)
+			daylightholidaysOvertime = competence.value;
+		else
+			daylightholidaysOvertime = 0;
 		return daylightholidaysOvertime;
 	}
 	
@@ -449,9 +462,12 @@ public class MonthRecap extends Model {
 	 */
 	public int ordinaryShift(int year, int month){
 		int ordinaryShift = 0;
-		List<Competence> competence = Competence.find("Select comp from Competence comp where comp.person = ? and " +
-				"comp.year = ? and comp.month = ? and comp.code = ?", person, year, month, "T1").fetch();
-		ordinaryShift = competence.size();
+		Competence competence = Competence.find("Select comp from Competence comp where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.code = ?", person, year, month, "T1").first();
+		if(competence != null)
+			ordinaryShift = competence.value;
+		else
+			ordinaryShift = 0;
 		return ordinaryShift;
 	}
 	
@@ -461,9 +477,12 @@ public class MonthRecap extends Model {
 	 */
 	public int nightShift(int year, int month){
 		int nightShift = 0;
-		List<Competence> competence = Competence.find("Select comp from Competence comp where comp.person = ? and " +
-				"comp.year = ? and comp.month = ? and comp.code = ?", person, year, month, "T2").fetch();
-		nightShift = competence.size();
+		Competence competence = Competence.find("Select comp from Competence comp where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.code = ?", person, year, month, "T2").first();
+		if(competence != null)
+			nightShift = competence.value;
+		else
+			nightShift = 0;
 		return nightShift;
 	}
 }
