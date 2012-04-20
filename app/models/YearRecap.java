@@ -454,10 +454,10 @@ public class YearRecap extends Model{
 	 * 
 	 * @param currentYear
 	 * @return la lista delle assenze che utilizzerò nella finestra di popup per elencare le date in cui sono state fatte le assenze
-	 * per questo anno
+	 * con codice "32"
 	 *  
 	 */
-	public List<Absence> listVacationDaysThisYear(int currentYear){
+	public List<Absence> listVacationDaysCurrentYear(int currentYear){
 		LocalDate now = new LocalDate().now();
 		LocalDate beginYear = new LocalDate(currentYear,1,1);
 		List<Absence> absence = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? " +

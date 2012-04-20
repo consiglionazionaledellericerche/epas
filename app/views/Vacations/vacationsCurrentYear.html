@@ -1,0 +1,27 @@
+#{extends 'main.html' /}
+#{set title:yearRecap.person.surname + ' ' + yearRecap.person.name + ', matricola=' + yearRecap.person.number /}
+
+<h3>Ferie fatte da ${yearRecap.person.surname + ' ' + yearRecap.person.name} nel ${yearRecap.year}</h3>
+<table>
+	<tr>
+		<th>Giorno</th>
+		<th>Mese</th>
+		<th>Anno</th>
+	</tr>
+	%{ 
+		int i = 1;
+		if(yearRecap.listVacationDaysCurrentYear(yearRecap.year).size()>0){
+		while(i < yearRecap.listVacationDaysCurrentYear(yearRecap.year).size()){
+		
+	}%
+	<tr>
+		<td>${yearRecap.listVacationDaysCurrentYear(yearRecap.year).get(i).date.getDayOfMonth()}</td>
+		<td>${yearRecap.listVacationDaysCurrentYear(yearRecap.year).get(i).date.getMonthOfYear()}</td>
+		<td>${yearRecap.listVacationDaysCurrentYear(yearRecap.year).get(i).date.getYear()}</td>
+	</tr>
+	%{
+		i++;}
+		}
+	}%
+
+</table>
