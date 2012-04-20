@@ -1,6 +1,7 @@
 #{extends 'main.html' /}
 #{set title:yearRecap.person.surname + ' ' + yearRecap.person.name + ', matricola=' + yearRecap.person.number /}
 
+
 <h2 id="titoloSituazioneFerie">Situazione ferie ${yearRecap.year}</h2>
 
 <div id="logout">
@@ -61,8 +62,25 @@
 		<th>mat.</th>
 	</tr>
 	<tr>
-		<td><a href="">${yearRecap.vacationDaysLastYear(yearRecap.year)}</a></td>
-		<td><a href="">${yearRecap.vacationDaysCurrentYear(yearRecap.year)}</a></td>
+	
+		<td><a href="vacations.html" class="example3demo">${yearRecap.vacationDaysLastYear(yearRecap.year)}</a> 
+				<script type="text/javascript"> 
+				$('.example3demo').popupWindow({ 
+					height:500, 
+					width:800, 
+					top:50, 
+					left:50 
+				}); 
+				</script></td>
+		<td><a href="vacations2.html" class="example3demo">${yearRecap.vacationDaysCurrentYear(yearRecap.year)}</a> 
+				<script type="text/javascript"> 
+				$('.example3demo').popupWindow({ 
+					height:500, 
+					width:800, 
+					top:50, 
+					left:50 
+				});  
+				</script></td>
 		<td>${yearRecap.personalPermissionUsed()}</td>
 		<td>${yearRecap.vacationLastYearNotYetUsed(yearRecap.year)}</td>
 		<td>${yearRecap.personalVacationDays()}</td>

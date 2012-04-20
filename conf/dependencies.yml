@@ -8,5 +8,15 @@ require:
     - joda-time -> joda-time-hibernate 1.3
     - org.yaml -> snakeyaml 1.9:
           force: true
-    - play -> db 1.1+      
+    - play -> db 1.1+
+    - com.github -> colorbox 1.3.19
+
+# My custom repository
+
+repositories:
+    - github:
+         type:       http
+         artifact:   "https://github.com/jackmoore/colorbox"
+         contains:   
+                  -com.github -> *     
     

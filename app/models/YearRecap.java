@@ -436,6 +436,23 @@ public class YearRecap extends Model{
 	/**
 	 * 
 	 * @param currentYear
+	 * @return la lista delle assenze che utilizzerò nella finestra di popup per elencare le date in cui sono state fatte le assenze
+	 * 
+	 */
+	public List<Absence> listVacationDaysLastYear(int currentYear){
+		LocalDate beginLastYear = new LocalDate(currentYear-1,1,1);
+		LocalDate endLastYear = new LocalDate(currentYear-1,12,31);
+		LocalDate now = new LocalDate().now();
+		LocalDate beginYear = new LocalDate(currentYear,1,1);
+		List<Absence> absence = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? " +
+				"and (abs.date between ? and ? and abs.absenceType = abt and abt.code = ? or abs.date between ? and ? and abs.absenceType = abt and abt.code = ?)", 
+				person, beginLastYear, endLastYear, "32", beginYear, now,  "31").fetch();
+		return absence;
+	}
+	
+	/**
+	 * 
+	 * @param currentYear
 	 * @return il numero di giorni di ferire per l'anno corrente. Il numero di giorni di ferie corrisponde a tutte quelle giornate di
 	 * assenza registrate sul database col codice 32 ovvero "ferie anno corrente"
 	 */
