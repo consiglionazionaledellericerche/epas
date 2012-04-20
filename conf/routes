@@ -18,7 +18,8 @@ GET		/assenze-annuali						YearlyAbsences.show
 
 #Ferie
 GET		/ferie									Vacations.show
-GET		/vacations.html							Vacations.vacations				
+GET		/vacations.html							Vacations.vacations		
+GET		/vacations2.html						Vacations.vacations		
 
 #Competenze
 GET		/competenze								Competences.show
