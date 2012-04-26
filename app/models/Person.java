@@ -34,6 +34,12 @@ import play.db.jpa.Model;
 public class Person extends Model {
 
 	private static final long serialVersionUID = -2293369685203872207L;
+	
+	/**
+	 * relazione con la nuova tabella dei person day
+	 */
+	@OneToMany(mappedBy="person")
+	public List<PersonDay> personDay;
 
 	/**
 	 * relazione con la tabella delle timbrature

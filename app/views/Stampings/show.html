@@ -154,7 +154,7 @@
 			 %{
 	         }
 	         }%	     		
-	         <td class="progressivo">${day.isHoliday()==false ? monthRecap.getProgressive(day.difference).toHourTime() : ''}</td>	
+	         <td class="progressivo">${day.isHoliday()==false ? day.getProgressive().toHourTime() : ''}</td>	
 	         <td>${day.person.workingTimeType != null ? day.person.workingTimeType.description : ''}</td>
 		</tr>
 

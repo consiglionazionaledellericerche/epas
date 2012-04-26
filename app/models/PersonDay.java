@@ -10,20 +10,26 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import lombok.Data;
 import models.Stamping.WayType;
 
+import org.hibernate.annotations.Type;
+import org.hibernate.envers.Audited;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
 import play.Logger;
+import play.data.validation.Required;
 import play.db.jpa.Model;
 
 /**
@@ -32,35 +38,55 @@ import play.db.jpa.Model;
  * @author cristian
  *
  */
+
+/**
+ * TODO rendere persistente la classe nel db, persistendo nello specifico i campi di conteggio di orario del lavoro, del progressivo
+ * e della differenza. Legare la tabella con la classe person e la classe stamping
+ * @author dario
+ *
+ */
+@Entity
+@Audited
+@Table(name="person_day")
 public class PersonDay extends Model {
 
-	private final Person person;
 	
-	public final LocalDate date;
+	@Required
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "person_id", nullable = false)
+	public Person person;
 	
-	public final LocalDateTime startOfDay;
-	public final LocalDateTime endOfDay;
-	
-	private List<Stamping> stampings = null;
-	
-	private AbsenceType absenceType = null;
-	
-	private Absence absence = null;	
-			
-	/**
-	 * Totale del tempo lavorato nel giorno in minuti 
-	 */
-	private Integer timeAtWork;
-
-	private static int progressive = 0;
-
+	@Column
+	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	public LocalDate date;
+	@Column
+	public Integer timeAtWork;
+	@Column
 	public int difference;
+	@Column
+	public int progressive;	
+
+	@Transient
+	private final LocalDateTime startOfDay;
+	@Transient
+	private final LocalDateTime endOfDay;
 	
-	public PersonDay(Person person, LocalDate date) {
+	@Transient
+	private List<Stamping> stampings = null;
+	@Transient
+	private AbsenceType absenceType = null;
+	@Transient
+	private Absence absence = null;	
+
+	
+	public PersonDay(Person person, LocalDate date, int timeAtWork, int difference, int progressive) {
 		this.person = person;
 		this.date = date;
 		this.startOfDay = new LocalDateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 0, 0);
 		this.endOfDay = new LocalDateTime(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth(), 23, 59);
+		this.timeAtWork = timeAtWork;
+		this.difference = difference;
+		this.progressive = progressive;
 	}
 	
 	/**	 
@@ -205,86 +231,91 @@ public class PersonDay extends Model {
 	 * @return numero di minuti in cui una persona è stata a lavoro in quella data
 	 */
 	public int timeAtWork(){
+		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?",person, date).first();
+		if(pd == null){
+			pd = new PersonDay(person, date, 0, 0, 0);
+		}
+		if(pd.stampings == null){
+			pd.stampings = getStampings();
+			pd.save();
+		}	
 		
-		if(stampings == null){
-			stampings = getStampings();
-			
-		}		
-		if(stampings.contains(null)){
+		if(pd.stampings.contains(null)){
 			/**
 			 * in questo caso si guarda quale posizione della linkedList è null per stabilire se sia mancante un ingresso o un'uscita
 			 */
-			if(stampings.get(0)==null){
+			if(pd.stampings.get(0)==null){
 				/**
 				 * è mancante la prima entrata, quindi bisogna fare il calcolo del tempo a lavoro sul tempo trascorso dalla seconda 
 				 * entrata alla seconda uscita
 				 */
-				Stamping enter = stampings.get(2);
-				Stamping exit = stampings.get(3);
-				timeAtWork = toMinute(exit.date)-toMinute(enter.date);
+				Stamping enter = pd.stampings.get(2);
+				Stamping exit = pd.stampings.get(3);
+				pd.timeAtWork = toMinute(exit.date)-toMinute(enter.date);
+				pd.save();
 				
 			}
-			if(stampings.get(1)==null){
+			if(pd.stampings.get(1)==null){
 				/**
 				 * è mancante la prima uscita, quindi bisogna fare il calcolo del tempo a lavoro sul tempo trascorso dalla seconda 
 				 * entrata alla seconda uscita
 				 */
-				Stamping enter = stampings.get(2);
-				Stamping exit = stampings.get(3);
-				timeAtWork = toMinute(exit.date)-toMinute(enter.date);
+				Stamping enter = pd.stampings.get(2);
+				Stamping exit = pd.stampings.get(3);
+				pd.timeAtWork = toMinute(exit.date)-toMinute(enter.date);
+				pd.save();
 				
 			}
-			if(stampings.get(2)==null){
+			if(pd.stampings.get(2)==null){
 				/**
 				 * è mancante la seconda entrata, quindi bisogna fare il calcolo del tempo a lavoro sul tempo trascorso dalla prima
 				 * entrata alla prima uscita
 				 */
-				Stamping enter = stampings.get(0);
-				Stamping exit = stampings.get(1);
-				timeAtWork = toMinute(exit.date)-toMinute(enter.date);
+				Stamping enter = pd.stampings.get(0);
+				Stamping exit = pd.stampings.get(1);
+				pd.timeAtWork = toMinute(exit.date)-toMinute(enter.date);
+				pd.save();
 				
 			}
-			if(stampings.get(3)==null){
+			if(pd.stampings.get(3)==null){
 				/**
 				 * è mancante la seconda uscita, quindi bisogna fare il calcolo del tempo a lavoro sul tempo trascorso dalla prima
 				 * entrata alla prima uscita
 				 */
-				Stamping enter = stampings.get(0);
-				Stamping exit = stampings.get(1);
-				timeAtWork = toMinute(exit.date)-toMinute(enter.date);
-				
+				Stamping enter = pd.stampings.get(0);
+				Stamping exit = pd.stampings.get(1);
+				pd.timeAtWork = toMinute(exit.date)-toMinute(enter.date);
+				pd.save();
 			}
-			return timeAtWork;
+			return pd.timeAtWork;
 		}		
 		else{
-			int size = stampings.size();
-			timeAtWork = 0;
+			int size = pd.stampings.size();
+			pd.timeAtWork = 0;
 			LocalDateTime now = new LocalDateTime().now();
 			if(size > 0){
-				Stamping s = stampings.get(0);
+				Stamping s = pd.stampings.get(0);
 				if(s.date.getDayOfMonth()==now.getDayOfMonth() && s.date.getMonthOfYear()==now.getMonthOfYear() && 
 					s.date.getYear()==now.getYear()){
 						if(((size / 2 == 1) && (size % 2 == 1)) || ((size / 2 == 0) && (size % 2 == 1))){
 							
 							int nowToMinute = toMinute(now);
 							int workingTime=0;
-							for(Stamping st : stampings){
+							for(Stamping st : pd.stampings){
 								if(st.way == Stamping.WayType.in)
 									workingTime -= toMinute(st.date);				
 								if(st.way == Stamping.WayType.out)
 									workingTime += toMinute(st.date);
 								if(workingTime < 0)
-									timeAtWork = nowToMinute + workingTime;
+									pd.timeAtWork = nowToMinute + workingTime;
 								else 
-									timeAtWork = nowToMinute - workingTime;
-								
-							}
-								
+									pd.timeAtWork = nowToMinute - workingTime;								
+							}								
 						}				
 				}				
 				else{
 					int workTime=0;
-					for(Stamping st : stampings){
+					for(Stamping st : pd.stampings){
 						if(st.way == Stamping.WayType.in){
 							workTime -= toMinute(st.date);
 							//timeAtWork -= toMinute(s.date);		
@@ -295,15 +326,16 @@ public class PersonDay extends Model {
 							//timeAtWork += toMinute(s.date);
 							System.out.println("Timbratura di uscita: "+workTime);
 						}
-						timeAtWork = workTime;
+						pd.timeAtWork = workTime;
 					}
 					
 				}
+				pd.save();
 			}
 
 		}
 			
-		return timeAtWork;
+		return pd.timeAtWork;
 	}
 	
 	/**
@@ -312,22 +344,34 @@ public class PersonDay extends Model {
 	 * @return il progressivo delle ore in più o in meno rispetto al normale orario previsto per quella data
 	 */
 	public int getProgressive(){
-		if(progressive == 0){
-			if(date != null){
+		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
+		if(pd == null){
+			pd = new PersonDay(person, date, 0, 0, 0);
+		}
+		if(pd.progressive == 0){			
 			
-				if((date.getDayOfMonth()==1) && (date.getDayOfWeek()==6 || date.getDayOfWeek()==7))
-					return 0;			
-				if((date.getDayOfMonth()==2) && (date.getDayOfWeek()==7))
-					return 0;
-				else{
-					progressive = progressive+difference;
+			if((pd.date.getDayOfMonth()==1) && (pd.date.getDayOfWeek()==6 || pd.date.getDayOfWeek()==7))
+				return 0;			
+			if((pd.date.getDayOfMonth()==2) && (pd.date.getDayOfWeek()==7))
+				return 0;
+			else{
+				PersonDay pdYesterday = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date.minusDays(1)).first();
+				if(pd.difference==0){
+					pd.difference = getDifference();
 				}
+				
+				pd.progressive = pd.difference+pdYesterday.progressive;
+				pd.save();
 			}
+			
 		}
 		
-		return progressive;
+		return pd.progressive;
 	}
 	
+	
+    
+    	
 	
 	/**
 	 * TODO: sistemare nel caso abbia una timbratura d'ingresso la sera tardi senza la corrispondente timbratura d'uscita prima della mezzanotte del giorno stesso
@@ -380,24 +424,28 @@ public class PersonDay extends Model {
 	 */
 	public boolean mealTicket(){
 		boolean isMealTicketAvailable = false;
-		if(stampings==null){
-			stampings=getStampings();
+		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
+		if(pd == null){
+			pd = new PersonDay(person, date, 0, 0, 0);
 		}
-		if (timeAtWork == null) {
-			timeAtWork = timeAtWork();
+		if(pd.stampings==null){
+			pd.stampings=getStampings();
+		}
+		if (pd.timeAtWork == null) {
+			pd.timeAtWork = timeAtWork();
 			
 		}
-		if(timeAtWork == 0){
+		if(pd.timeAtWork == 0){
 			isMealTicketAvailable = false;
 		}
 		else{
-			if(person.workingTimeType.description.equals("normale-mod") && timeAtWork>=432)
+			if(pd.person.workingTimeType.description.equals("normale-mod") && pd.timeAtWork>=432)
 				isMealTicketAvailable=true;
-			if(person.workingTimeType.description.equals("normale-mod") && timeAtWork>360 && timeAtWork<390 &&(stampings.size()==4 && checkMinTimeForLunch(stampings)<30))
+			if(pd.person.workingTimeType.description.equals("normale-mod") && pd.timeAtWork>360 && pd.timeAtWork<390 &&(pd.stampings.size()==4 && checkMinTimeForLunch(pd.stampings)<30))
 				isMealTicketAvailable=true;
-			if(person.workingTimeType.description.equals("normale-mod") && timeAtWork>360 && timeAtWork<390 && (stampings.size()==2))
+			if(pd.person.workingTimeType.description.equals("normale-mod") && pd.timeAtWork>360 && pd.timeAtWork<390 && (pd.stampings.size()==2))
 				isMealTicketAvailable=true;
-			if(person.workingTimeType.description.equals("normale-mod") && timeAtWork>390 && timeAtWork<432 && (stampings.size()==4 || stampings.size()==2))
+			if(pd.person.workingTimeType.description.equals("normale-mod") && pd.timeAtWork>390 && pd.timeAtWork<432 && (pd.stampings.size()==4 || pd.stampings.size()==2))
 				isMealTicketAvailable=true;
 			
 		}
@@ -412,33 +460,37 @@ public class PersonDay extends Model {
 	 * @return la differenza tra l'orario di lavoro giornaliero e l'orario standard in minuti
 	 */
 	public Integer getDifference(){
-		if(date != null){
-			if((date.getDayOfWeek()==DateTimeConstants.SATURDAY ) && (date.getDayOfMonth()==1))
+		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
+		if(pd == null){
+			pd = new PersonDay(person, date, 0, 0, 0);
+		}
+		if(pd.date != null){
+			if((pd.date.getDayOfWeek()==DateTimeConstants.SATURDAY ) && (pd.date.getDayOfMonth()==1))
 				return 0;		
-			if((date.getDayOfWeek()==DateTimeConstants.SUNDAY) && (date.getDayOfMonth()==1))
+			if((pd.date.getDayOfWeek()==DateTimeConstants.SUNDAY) && (pd.date.getDayOfMonth()==1))
 				return 0;
-			if((date.getDayOfMonth()==2) && (date.getDayOfWeek()==DateTimeConstants.SUNDAY))
+			if((pd.date.getDayOfMonth()==2) && (pd.date.getDayOfWeek()==DateTimeConstants.SUNDAY))
 				return 0;
-			if((date.getDayOfWeek()==DateTimeConstants.SUNDAY) || date.getDayOfWeek()==DateTimeConstants.SATURDAY)
+			if((pd.date.getDayOfWeek()==DateTimeConstants.SUNDAY) || pd.date.getDayOfWeek()==DateTimeConstants.SATURDAY)
 				return 0;
-			List<Absence> absenceList = absenceList();
-			List<Stamping> stampingList = getStampings();
+			List<Absence> absenceList = pd.absenceList();
+			List<Stamping> stampingList = pd.getStampings();
 			if(absenceList.size()!=0){
-				difference = 0;
+				pd.difference = 0;
 			}
 			if(stampingList.size()==0){
-				difference = 0;
+				pd.difference = 0;
 			}
 			else{
 				int minTimeWorking = 432;
-				timeAtWork = timeAtWork();
-				difference = timeAtWork-minTimeWorking;
+				pd.timeAtWork = timeAtWork();
+				pd.difference = pd.timeAtWork-minTimeWorking;
 				//return difference;
 			}
 				
 		}
-		
-		return difference;
+		pd.save();
+		return pd.difference;
 	}
 	
 	/**
