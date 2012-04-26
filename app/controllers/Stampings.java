@@ -61,7 +61,10 @@ public class Stampings extends Controller {
     				new LocalDate(
     					Integer.parseInt(params.get("year")),
     					Integer.parseInt(params.get("month")), 
-    					Integer.parseInt(params.get("day"))));
+    					Integer.parseInt(params.get("day"))),
+    					0,
+    					0,
+    					0);
     	render(personDay);
     }
 }
