@@ -145,16 +145,9 @@
 			%{
 	         }
 	         }%	
-	         %{
-			if(day.getStampings().size()==2){
-	         }%	<td class="differenza">${day.isHoliday()==false && day.timeAtWork()>360 ? (day.getDifference()-30).toHourTime() : (day.getDifference()).toHourTime()}</td>	
-	         %{
-			 }else{
-			 }% <td class="differenza">${day.isHoliday()==false && day.getStampings().size()==4 && day.checkMinTimeForLunch(day.getStampings())<30 ? (day.getDifference()+day.checkMinTimeForLunch(day.getStampings())-30).toHourTime() : (day.getDifference()).toHourTime()}</td>
-			 %{
-	         }
-	         }%	     		
-	         <td class="progressivo">${day.isHoliday()==false ? day.getProgressive().toHourTime() : ''}</td>	
+	         <td class="differenza">${day.isHoliday()==false ? (day.getDifference().toHourTime()) : ''}</td>
+			 		
+	         <td class="progressivo">${day.getProgressive().toHourTime()}</td>	
 	         <td>${day.person.workingTimeType != null ? day.person.workingTimeType.description : ''}</td>
 		</tr>
 

@@ -356,12 +356,22 @@ public class PersonDay extends Model {
 				return 0;
 			else{
 				PersonDay pdYesterday = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date.minusDays(1)).first();
-				if(pd.difference==0){
-					pd.difference = getDifference();
+				if(pdYesterday == null){
+					pdYesterday = new PersonDay(person, date, 0, 0, 0);
 				}
 				
+				if(pd.difference==0){
+					pd.difference = getDifference();
+					Logger.warn("Difference today: "+pd.difference);
+				}
+				
+				Logger.warn("Siamo nel: "+pd.date);
+				//Logger.warn("Progressive yesterday: "+pdYesterday.progressive);
+				
 				pd.progressive = pd.difference+pdYesterday.progressive;
+				Logger.warn("Progressive today: "+pd.progressive);
 				pd.save();
+				
 			}
 			
 		}
@@ -464,32 +474,55 @@ public class PersonDay extends Model {
 		if(pd == null){
 			pd = new PersonDay(person, date, 0, 0, 0);
 		}
-		if(pd.date != null){
-			if((pd.date.getDayOfWeek()==DateTimeConstants.SATURDAY ) && (pd.date.getDayOfMonth()==1))
-				return 0;		
-			if((pd.date.getDayOfWeek()==DateTimeConstants.SUNDAY) && (pd.date.getDayOfMonth()==1))
-				return 0;
-			if((pd.date.getDayOfMonth()==2) && (pd.date.getDayOfWeek()==DateTimeConstants.SUNDAY))
-				return 0;
-			if((pd.date.getDayOfWeek()==DateTimeConstants.SUNDAY) || pd.date.getDayOfWeek()==DateTimeConstants.SATURDAY)
-				return 0;
-			List<Absence> absenceList = pd.absenceList();
-			List<Stamping> stampingList = pd.getStampings();
-			if(absenceList.size()!=0){
-				pd.difference = 0;
-			}
-			if(stampingList.size()==0){
-				pd.difference = 0;
-			}
-			else{
-				int minTimeWorking = 432;
-				pd.timeAtWork = timeAtWork();
-				pd.difference = pd.timeAtWork-minTimeWorking;
-				//return difference;
-			}
-				
+		List<Absence> absenceList = pd.absenceList();
+		List<Stamping> stampingList = pd.getStampings();
+		if((pd.date.getDayOfWeek()==DateTimeConstants.SATURDAY ) && (pd.date.getDayOfMonth()==1))
+			pd.difference =  0;		
+		if((pd.date.getDayOfWeek()==DateTimeConstants.SUNDAY) && (pd.date.getDayOfMonth()==1))
+			pd.difference =  0;
+		if((pd.date.getDayOfMonth()==2) && (pd.date.getDayOfWeek()==DateTimeConstants.SUNDAY))
+			pd.difference =  0;
+		if((pd.date.getDayOfWeek()==DateTimeConstants.SUNDAY) || pd.date.getDayOfWeek()==DateTimeConstants.SATURDAY)
+			pd.difference =  0;
+		if(absenceList.size()!=0){
+			return  0;
 		}
-		pd.save();
+		if(stampingList.size()==0){
+			return  0;
+		}
+		int differenza = 0;
+		int minTimeWorking = 432;
+		pd.timeAtWork = timeAtWork();
+		int size = pd.stampings.size();
+		
+		if(size == 2){
+			 if(pd.timeAtWork >= 360){
+				 int delay = 30;					
+					differenza = pd.timeAtWork - minTimeWorking - delay;					
+					pd.difference = differenza;
+					pd.save();
+			 }
+			 else{
+				 pd.difference = pd.timeAtWork - minTimeWorking;
+				 pd.save();
+			 }
+			
+		}
+		int i = pd.checkMinTimeForLunch(pd.stampings);
+		if(size == 4){
+			 if(i < 30){
+				 differenza = pd.timeAtWork-minTimeWorking+(i-30);					
+				 pd.difference = differenza;					
+				 pd.save();
+			 }
+			 else{
+					differenza = pd.timeAtWork-minTimeWorking;
+					pd.difference = differenza;					
+					pd.save();
+				}
+			
+		}
+				
 		return pd.difference;
 	}
 	
