@@ -4,6 +4,7 @@ import it.cnr.iit.epas.ActionMenuItem;
 import models.MonthRecap;
 import models.Person;
 import models.PersonDay;
+import models.PersonMonth;
 
 import org.bouncycastle.asn1.x509.sigi.PersonalData;
 import org.joda.time.LocalDate;
@@ -31,21 +32,20 @@ public class Stampings extends Controller {
     	String menuItem = actionMenuItem.toString();
     	
     	Person person = Person.findById(id);
-    	String year = params.get("year");
-    	String month = params.get("month");
-
     	
-    	if(year==null || month==null){
-        	LocalDate now = new LocalDate();
-        	MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, now.getYear(), now.getMonthOfYear());
-            render(monthRecap, menuItem);
-    	}
-    	else{
-    		MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, Integer.parseInt(year), Integer.parseInt(month));
-    		Logger.debug("Month recap of person.id %s, year=%s, month=%s", person.id, year, month);
-    		
-            render(monthRecap, menuItem);
-    	}
+    	LocalDate now = new LocalDate();
+    	Integer year = params.get("year") != null ? Integer.parseInt(params.get("year")) : now.getYear();
+    	Integer month = params.get("month") != null ? Integer.parseInt(params.get("month")) : now.getMonthOfYear();
+    	
+    	MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, year, month);
+    	PersonMonth personMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and " +
+    			"pm.month = ? and pm.year = ?", person, month, year).first();
+    	if (personMonth == null) {
+			personMonth = new PersonMonth(person, year, month);
+		}
+    	Logger.debug("Month recap of person.id %s, year=%s, month=%s", person.id, year, month);
+        render(monthRecap, personMonth, menuItem);
+    	
     	
     }
 

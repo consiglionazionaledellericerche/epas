@@ -17,6 +17,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.criteria.Fetch;
 
 import lombok.Data;
 import models.Stamping.WayType;
@@ -450,6 +451,13 @@ public class PersonDay extends Model {
 				return 0;			
 			if((pd.date.getDayOfMonth()==2) && (pd.date.getDayOfWeek()==7))
 				return 0;
+			if((pd.date.getDayOfMonth()==1) && (pd.date.getDayOfWeek()!=DateTimeConstants.SATURDAY || pd.date.getDayOfWeek()!=DateTimeConstants.SUNDAY)){
+				if(pd.difference==0){
+					pd.difference = getDifference();
+					Logger.warn("Difference today: "+pd.difference);
+				}
+				pd.progressive = pd.difference;
+			}
 			else{
 				PersonDay pdYesterday = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date.minusDays(1)).first();
 				if(pdYesterday == null){
@@ -461,7 +469,7 @@ public class PersonDay extends Model {
 					Logger.warn("Difference today: "+pd.difference);
 				}
 				
-				Logger.warn("Siamo nel: "+pd.date);
+				//Logger.warn("Siamo nel: "+pd.date);
 				//Logger.warn("Progressive yesterday: "+pdYesterday.progressive);
 				
 				pd.progressive = pd.difference+pdYesterday.progressive;
@@ -485,15 +493,28 @@ public class PersonDay extends Model {
 	}
 	
 	/**
-	 * salva il valore del progressivo giornaliero sul db
+	 * salva il valore del progressivo giornaliero sul db e controlla se siamo al primo giorno del mese e quindi salva sul db il valore 
+	 * del mese precedente sul personMonth corrispondente e anche se siamo al primo giorno dell'anno così salva sul personYear 
+	 * il valore del cumulativo dell'anno precedente compreso tra aprile e dicembre
 	 */
 	public void setProgressive(){
 		progressive = getProgressive();
 		save();
 		if(date.getDayOfMonth()==1){
+			
 			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?",person, date.minusDays(1)).first();
 			PersonMonth pm = null;
-			if(date.getMonthOfYear() == 1){
+			if(date.getMonthOfYear() == DateTimeConstants.JANUARY){
+				int yearProgressive = 0;
+				PersonYear py = new PersonYear(person, date.getYear()-1);
+				List<PersonMonth> personMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and " +
+						"pm.year = ? and pm.month between ? and ?", person, date.getYear()-1, DateTimeConstants.APRIL, DateTimeConstants.DECEMBER).fetch();
+				for(PersonMonth permon : personMonth){
+					yearProgressive = yearProgressive+permon.remainingHours;
+					
+				}
+				py.remainingHours = yearProgressive;
+				py.save();
 				pm = new PersonMonth(person, date.getYear()-1, 12);
 			}
 			else{
@@ -640,7 +661,7 @@ public class PersonDay extends Model {
 			if(size == 2){
 				 if(pd.timeAtWork >= 360){
 					 int delay = 30;	
-					 if(pd.timeAtWork-delay > 360){
+					 if(pd.timeAtWork-delay >= 360){
 						 differenza = pd.timeAtWork-minTimeWorking-delay;
 						 pd.difference = differenza;
 						 //pd.save();

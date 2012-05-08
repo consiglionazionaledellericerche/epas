@@ -89,6 +89,67 @@ public class PersonMonth extends Model {
 		return persons;
 	}
 	
+	/**
+	 * @param actualMonth, actualYear
+	 * @return la somma dei residui mensili passati fino a questo momento; se siamo in un mese prima di aprile i residui da calcolare 
+	 * sono su quello relativo all'anno precedente + i residui mensili fino a quel mese; se siamo in un mese dopo aprile, invece,
+	 * i residui da considerare sono solo quelli da aprile fino a quel momento
+	 */
+	public int getResidualFromPastMonth(int actualMonth, int actualYear){
+		int residual = 0;
+		if(actualMonth <= 4){
+			List<PersonMonth> pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month < ? and pm.year = ?" +
+					" or pm.year = ? and pm.month = ? ", person, actualMonth, actualYear, actualYear-1, 12).fetch();
+			for(PersonMonth personMonth : pm){
+				residual = residual+personMonth.remainingHours;
+			}
+		}
+		else{
+			List<PersonMonth> pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month >=  ? and pm.month < ?" +
+					" and pm.year = ?", person, 4, actualMonth, actualYear).fetch();
+			for(PersonMonth personMonth : pm){
+				residual = residual+personMonth.remainingHours;
+			}
+		}
+		return residual;
+	}
+	
+	/**
+	 * 
+	 * @param month, year
+	 * @return il residuo di ore all'ultimo giorno del mese se visualizzo un mese passato, al giorno attuale se visualizzo il mese
+	 * attuale
+	 */
+	public int getMonthResidual(int month, int year){
+		int residual = 0;
+		LocalDate date = new LocalDate();
+		
+		if(month == date.getMonthOfYear() && year == date.getYear()){
+			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date.minusDays(1)).first();
+			if(pd == null){
+				pd = new PersonDay(person, date.minusDays(1));
+			}
+			residual = pd.progressive;
+		}
+		else{
+			int day = 0;
+			if(month==1 || month==3 || month==5 || month==7 || month==8 ||	month==10 || month==12)
+				day = 31;
+			if(month==4 || month==6 || month==9 || month==11)
+				day = 30;
+			if(month==2){
+				if(year==2008 || year==2012 || year==2016 || year== 2020)
+					day = 29;
+				else 
+					day = 28;
+			}
+			LocalDate hotDate = new LocalDate(year,month,day);
+			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, hotDate).first();
+			residual = pd.progressive;
+		}
+		return residual;
+	}
+	
 	
 	
 

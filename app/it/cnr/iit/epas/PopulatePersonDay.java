@@ -26,8 +26,8 @@ public class PopulatePersonDay {
 		Long id = new Long(139);
 		Person p = Person.findById(id);
 		if(p != null){
-			LocalDate date = new LocalDate(2011,12,31);			
-			LocalDate now = new LocalDate(2012,5,3);
+			LocalDate date = new LocalDate(2010,12,31);			
+			LocalDate now = new LocalDate(2012,5,7);
 			while(!date.equals(now)){
 				PersonDay pd = new PersonDay(p,date);
 				Logger.warn("Person: "+p );
