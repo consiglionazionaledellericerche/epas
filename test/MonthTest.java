@@ -43,20 +43,20 @@ public class MonthTest extends UnitTest{
 		assertNotNull(person);
 		initializeStamping(person);
 		initializeAbsence(person);
-		int giorniLavoro = pm.getWorkingDays();
-		int giorniLavorativi = pm.monthWorkingDays();
-		int giorniLavoroInVacanza = pm.workingDaysInHoliday();
-		int oreLavoroMensili = pm.timeAtWork();
-		int buoniDaRendere = pm.mealTicketToRender();
-		int assenze = pm.getJustifiedAbsence();
-		int assenzeNonGiustificate = pm.getNotJustifiedAbsence();
-		System.out.println("I giorni di lavoro sono: " +giorniLavoro);
-		System.out.println("I giorni lavorativi invece sono: " +giorniLavorativi);
-		System.out.println("Ho lavorato: " +giorniLavoroInVacanza+ " giorni nonostante fosse vacanza");
-		System.out.println("Ho lavorato " +oreLavoroMensili+ " minuti in questo mese che corrispondono a "+oreLavoroMensili/60+ " ore e " +oreLavoroMensili%60+ " minuti" );
-		System.out.println("Devo restituire: "+buoniDaRendere+ " buoni pasto");
-		System.out.println("Ho fatto : "+assenze+ " assenze in questo mese");
-		System.out.println("Nel mese ho avuto " +assenzeNonGiustificate+ " giorni di assenza non giustificata");
+//		int giorniLavoro = pm.getWorkingDays();
+//		int giorniLavorativi = pm.monthWorkingDays();
+//		int giorniLavoroInVacanza = pm.workingDaysInHoliday();
+//		int oreLavoroMensili = pm.timeAtWork();
+//		int buoniDaRendere = pm.mealTicketToRender();
+//		int assenze = pm.getJustifiedAbsence();
+//		int assenzeNonGiustificate = pm.getNotJustifiedAbsence();
+//		System.out.println("I giorni di lavoro sono: " +giorniLavoro);
+//		System.out.println("I giorni lavorativi invece sono: " +giorniLavorativi);
+//		System.out.println("Ho lavorato: " +giorniLavoroInVacanza+ " giorni nonostante fosse vacanza");
+//		System.out.println("Ho lavorato " +oreLavoroMensili+ " minuti in questo mese che corrispondono a "+oreLavoroMensili/60+ " ore e " +oreLavoroMensili%60+ " minuti" );
+//		System.out.println("Devo restituire: "+buoniDaRendere+ " buoni pasto");
+//		System.out.println("Ho fatto : "+assenze+ " assenze in questo mese");
+//		System.out.println("Nel mese ho avuto " +assenzeNonGiustificate+ " giorni di assenza non giustificata");
 		
 	}
 	

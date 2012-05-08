@@ -25,8 +25,15 @@ public class PersonYear extends Model{
 	@JoinColumn(name = "person_id", nullable = false)
 	public Person person;
 	@Column
+	public int year;
+	@Column
 	public int remainingDays;
 	@Column
 	public int remainingHours;
+	
+	public PersonYear(Person person, int year){
+		this.person = person;
+		this.year = year;
+	}
 	
 }

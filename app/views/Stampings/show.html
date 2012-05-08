@@ -182,9 +182,9 @@
 <p id="spiegazioneTabellaTimbrature">Il numero di buoni mensa usabili per questo mese e': <strong>${monthRecap.numberOfMealTicketToUse()}</strong>, mentre quelli da restituire sono <strong>${monthRecap.numberOfMealTicketToRender()}</strong>. Il numero di giorni lavorativi in sede è di: <strong>${monthRecap.basedWorkingDays()}</strong> </p>
 
 <p>Riepilogo delle ore di lavoro in eccesso/difetto: </p>
-<p>Residuo tempo di lavoro dei mesi precedenti  </p>
-<p>Residuo del mese  </p>
-<p>Totale residuo a fine mese   </p>
+<p> - Residuo tempo di lavoro dei mesi precedenti: ${personMonth.getResidualFromPastMonth(monthRecap.month, monthRecap.year).toHourTime()} </p>
+<p> - Residuo del mese:  ${personMonth.getMonthResidual(monthRecap.month, monthRecap.year).toHourTime()}</p>
+<p> - Totale residuo a fine mese  <strong>${(personMonth.getResidualFromPastMonth(monthRecap.month, monthRecap.year) + personMonth.getMonthResidual(monthRecap.month, monthRecap.year)).toHourTime()}</strong></p>
 
 
 
