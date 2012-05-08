@@ -28,6 +28,7 @@ import models.ConfParameters;
 import models.Location;
 import models.MonthRecap;
 import models.Person;
+import models.PersonDay;
 import models.PersonVacation;
 import models.StampModificationType;
 import models.StampType;
@@ -41,6 +42,8 @@ import models.WorkingTimeTypeDay;
 import models.YearRecap;
 import net.sf.oval.constraint.Email;
 
+import org.joda.time.DateTimeConstants;
+import org.joda.time.DateTimeField;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
@@ -376,14 +379,13 @@ public class FromMysqlToPostgres {
 		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT ID,Giorno,TipoGiorno,TipoTimbratura,Ora " +
 				"FROM Orario WHERE TipoTimbratura is not null and Giorno > '2009-12-31' " +
 				"and TipoGiorno = 0 and ID = " + id);
-//		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT ID,Giorno,TipoGiorno,TipoTimbratura,Ora " +
-//				"FROM Orario WHERE TipoTimbratura = 1 and Giorno = '2004-07-26'" +
-//				"and TipoGiorno = 0 and ID = " + id);
+
 
 		ResultSet rs = stmtOrari.executeQuery();
 				
 		StampType stampType = null;
 		Stamping stamping = null;
+		//LocalDate previousDay = null;
 		byte tipoTimbratura;
 		while(rs.next()){
 			int idCodiceTimbratura = rs.getInt("TipoTimbratura");
@@ -404,13 +406,7 @@ public class FromMysqlToPostgres {
 				if((tipoTimbratura % 2 == 0) && (tipoTimbratura / 2 == 2)){
 					stampType.description = "Timbratura di uscita";
 				}
-//				if((tipoTimbratura % 2 == 1) && (tipoTimbratura / 2 == 2)){
-//					stampType.description = "Altra timbratura di ingresso";
-//				}
-//				if((tipoTimbratura % 2 == 0) && (tipoTimbratura / 2 == 3)){
-//					stampType.description = "Altra timbratura di uscita";
-//				}
-//				
+
 				em.persist(stampType);	
 				mappaCodiciStampType.put(idCodiceTimbratura,stampType.id);
 			}
@@ -426,8 +422,15 @@ public class FromMysqlToPostgres {
 				stamping.way = WayType.in;					
 			else
 				stamping.way = WayType.out;
-	
+			
 			LocalDate giornata = new LocalDate(rs.getDate("Giorno"));
+
+//			if(previousDay != null && giornata.getDayOfMonth() != previousDay.getDayOfMonth() && person.id == 139 && giornata.getYear()>2010){
+//				
+//				PersonDay pd = new PersonDay(person,previousDay);
+//				pd.populatePersonDay();
+//				pd.save();
+//			}
 			if(giornata != null){			
 								
 				try {
@@ -449,7 +452,7 @@ public class FromMysqlToPostgres {
 							 * aggiunti i campi anno mese e giorno per provare a risolvere il problema sulle date.
 							 * inoltre aggiunte le set corrispondenti all'oggetto calendar creato
 							 */
-							//int year = giorno.getYear();
+							
 							int year = giornata.getYear();
 							int month = giornata.getMonthOfYear();
 							int day = giornata.getDayOfMonth();
@@ -494,7 +497,7 @@ public class FromMysqlToPostgres {
 									em.persist(stamping);
 								}
 								else{
-									//ora = rs.getTimestamp("Ora");
+									
 									Logger.info("L'ora è: ", +hour);
 					                stamping.date = new LocalDateTime(year,month,day,hour,minute,second);
 					                
@@ -506,6 +509,7 @@ public class FromMysqlToPostgres {
 						}
 					}
 				}		
+				
 				 catch (SQLException sqle) {
 					
 					sqle.printStackTrace();
@@ -513,6 +517,7 @@ public class FromMysqlToPostgres {
 					Logger.warn("Timbratura errata. Persona con id= "+id);
 				}			
 				Logger.debug("Termino di creare le timbrature");
+				//previousDay = new LocalDate(giornata);
 				em.persist(stamping);	
 			}
 			
@@ -1052,5 +1057,7 @@ public class FromMysqlToPostgres {
 		em.persist(smt3);		
 		
 	}
+	
+	
 	
 }

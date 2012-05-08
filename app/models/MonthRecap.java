@@ -485,4 +485,98 @@ public class MonthRecap extends Model {
 			nightShift = 0;
 		return nightShift;
 	}
+	
+	/**
+	 * questo metodo riempe il campo del residuo mensile delle ore del mese precedente nel momento in cui inizia il nuovo mese
+	 * @param date
+	 */
+	public void fillHoursRemaining(LocalDate date){
+		if(date.getDayOfMonth()==1){
+			PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? " +
+					"and pm.month = ?", person, date.getYear(),date.getMonthOfYear()-1).first();
+			if(pm==null){
+				pm = new PersonMonth(person,date.getYear(),date.getMonthOfYear()-1);
+				if((date.getMonthOfYear()-1)==1 || (date.getMonthOfYear()-1)==3 || (date.getMonthOfYear()-1)==5 || 
+						(date.getMonthOfYear()-1)==7 || (date.getMonthOfYear()-1)==8 || 
+						(date.getMonthOfYear()-1)==10 || (date.getMonthOfYear()-1)==12){
+					LocalDate pastMonth = new LocalDate(date.getYear(),date.getMonthOfYear()-1,31);
+					PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and " +
+							"pd.date = ?", person, pastMonth).first();
+					pm.remainingHours = pd.progressive;
+					pm.save();
+				}
+				if((date.getMonthOfYear()-1)==4 || (date.getMonthOfYear()-1)==6 || (date.getMonthOfYear()-1)==9 
+						|| (date.getMonthOfYear()-1)==11){
+					LocalDate pastMonth = new LocalDate(date.getYear(),date.getMonthOfYear()-1,30);
+					PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and " +
+							"pd.date = ?", person, pastMonth).first();
+					pm.remainingHours = pd.progressive;
+					pm.save();
+				}
+				if((date.getMonthOfYear()-1)==2){
+					if(date.getYear()==2008 || date.getYear()==2012 || date.getYear()==2016 || date.getYear() == 2020){
+						LocalDate pastMonth = new LocalDate(date.getYear(),date.getMonthOfYear()-1,29);
+						PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and " +
+								"pd.date = ?", person, pastMonth).first();
+						pm.remainingHours = pd.progressive;
+						pm.save();
+					}
+					else{
+						LocalDate pastMonth = new LocalDate(date.getYear(),date.getMonthOfYear()-1,28);
+						PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and " +
+								"pd.date = ?", person, pastMonth).first();
+						pm.remainingHours = pd.progressive;
+						pm.save();
+					}
+					
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 
+	 * @return il numero di ore di lavoro in eccesso/difetto dai mesi precedenti, calcolate a partire da gennaio dell'anno corrente.
+	 * nel caso in cui ci trovassimo a gennaio, le ore di lavoro in eccesso/difetto provengono dall'anno precedente
+	 */
+	public int pastRemainingHours(int month, int year){
+		int pastRemainingHours = 0;
+		/**
+		 * per adesso ricorro al metodo di ricerca del progressivo all'ultimo giorno dell'anno precedente, non appena sarà pronta 
+		 * la classe PersonYear, andrò a fare la ricerca direttamente dentro quella classe sulla base della persona e dell'anno che mi
+		 * interessa.
+		 */
+		if(month == DateTimeConstants.JANUARY){
+			LocalDate lastDayOfYear = new LocalDate(year-1,DateTimeConstants.DECEMBER,31);
+//			PersonYear py = PersonYear.find("Select py from PersonYear py where py.person = ?",person).first();
+//			pastRemainingHours = py.remainingHours;
+			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, lastDayOfYear).first();
+			pastRemainingHours = pd.progressive;
+		}
+		else{
+			//int month = date.getMonthOfYear();
+			int counter = 0;
+			for(int i = 1; i < month; i++){
+				int day = 0;
+				if(i==1 || i==3 || i==5 || i==7 || i==8 || i==10 || i==12)
+					day = 31;
+				if(i==4 || i==6 || i==9 || i==11)
+					day = 30;
+				if(i==2){
+					if(year==2012 || year==2016 || year==2020)
+						day = 29;
+					else
+						day = 28;
+				}			
+				LocalDate endOfMonth = new LocalDate(year,i,day);	
+				PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? " +
+						"and pd.date = ?", person, endOfMonth).first();
+				counter = counter+pd.progressive;
+			}
+			pastRemainingHours = counter;
+			
+		}
+		
+		return pastRemainingHours;
+	}
 }

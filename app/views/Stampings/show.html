@@ -70,6 +70,8 @@
 		<th>2° uscita</th>
 		<th>3° entrata</th>
 		<th>3° uscita</th>
+		<th>4° entrata</th>
+		<th>4° uscita</th>
 		<th>Tempo lavoro</th>
 		<th>Differenza</th>
 		<th>Progressivo</th>
@@ -135,8 +137,27 @@
 			}
 			}%
 			%{
+			if(day.getStampings().size()>6 && day.getStampings().get(6)!=null){
+			}% <td class="ingresso">${day.getStampings().get(6).date.toCalendarTime()}</td>			
+			%{
+			}else{
+			}% <td class="ingresso">${''}</td>
+			%{
+			}
+			}%
+			%{
+			if(day.getStampings().size()>7 && day.getStampings().get(7)!=null){
+			}% <td class="uscita">${day.getStampings().get(7).date.toCalendarTime()}</td>			
+			%{
+			}else{
+			}% <td class="uscita">${''}</td>
+			%{
+			}
+			}%
+			
+			%{
 			if(day.getStampings().size()==2 ){
-	         }% <td class="tempoLavoro">${day.timeAtWork()>360 ? day.convertTimeAtWork(day.timeAtWork()-30).toCalendarTime() : day.convertTimeAtWork(day.timeAtWork()).toCalendarTime()} <strong>${day.timeAtWork()>360 ? day.checkTimeForLunch(day.getStampings()).code : ''}</strong></td>
+	         }% <td class="tempoLavoro">${day.timeAtWork()>360 && (day.timeAtWork()-30) > 360 ? day.convertTimeAtWork(day.timeAtWork()-30).toCalendarTime() : day.convertTimeAtWork(day.timeAtWork()).toCalendarTime()} <strong>${day.timeAtWork()>360 ? day.checkTimeForLunch(day.getStampings()).code : ''}</strong></td>
 			%{
 			 }else{
 			 }% <td class="tempoLavoro">${day.isHoliday()==false && day.getStampings().size()==4 && !day.getStampings().contains(null) 
@@ -145,8 +166,8 @@
 			%{
 	         }
 	         }%	
-	         <td class="differenza">${day.isHoliday()==false ? (day.getDifference().toHourTime()) : ''}</td>
-			 		
+	         <td class="differenza">${day.isHoliday()==false ? (day.getDifference()).toHourTime() : ''}</td>
+				
 	         <td class="progressivo">${day.getProgressive().toHourTime()}</td>	
 	         <td>${day.person.workingTimeType != null ? day.person.workingTimeType.description : ''}</td>
 		</tr>
@@ -159,6 +180,13 @@
 </table>
 
 <p id="spiegazioneTabellaTimbrature">Il numero di buoni mensa usabili per questo mese e': <strong>${monthRecap.numberOfMealTicketToUse()}</strong>, mentre quelli da restituire sono <strong>${monthRecap.numberOfMealTicketToRender()}</strong>. Il numero di giorni lavorativi in sede è di: <strong>${monthRecap.basedWorkingDays()}</strong> </p>
+
+<p>Riepilogo delle ore di lavoro in eccesso/difetto: </p>
+<p>Residuo tempo di lavoro dei mesi precedenti  </p>
+<p>Residuo del mese  </p>
+<p>Totale residuo a fine mese   </p>
+
+
 
 *{Significato codici assenza}*
 <div>
