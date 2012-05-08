@@ -493,7 +493,7 @@ public class PersonDay extends Model {
 		if(date.getDayOfMonth()==1){
 			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?",person, date.minusDays(1)).first();
 			PersonMonth pm = null;
-			if(date.getDayOfMonth() == 1){
+			if(date.getMonthOfYear() == 1){
 				pm = new PersonMonth(person, date.getYear()-1, 12);
 			}
 			else{
