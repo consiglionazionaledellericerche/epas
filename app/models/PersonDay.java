@@ -24,6 +24,7 @@ import models.Stamping.WayType;
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.joda.time.DateTimeConstants;
+import org.joda.time.DateTimeField;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -87,6 +88,10 @@ public class PersonDay extends Model {
 		this.timeAtWork = timeAtWork;
 		this.difference = difference;
 		this.progressive = progressive;
+	}
+	
+	public PersonDay(Person person, LocalDate date){
+		this(person, date, 0, 0, 0);
 	}
 	
 	/**	 
@@ -176,6 +181,70 @@ public class PersonDay extends Model {
             	}
             	                    
             }
+            if(dbStamping.size()/2==3 && dbStamping.size()%2==1){
+            	int i = 0;
+            	Stamping s = dbStamping.get(i+1);
+            	if(s.way == dbStamping.get(i).way && s.way == WayType.in){
+        			stampings.add(0, dbStamping.get(i));
+        			stampings.add(1, null);
+        			stampings.add(2, dbStamping.get(i+1));
+        			stampings.add(3, dbStamping.get(i+2));
+        			stampings.add(4, dbStamping.get(i+3));
+        			stampings.add(5, dbStamping.get(i+4));
+        			stampings.add(6, dbStamping.get(i+5));
+        			stampings.add(7, dbStamping.get(i+6));
+        		}
+            	if(s.way == dbStamping.get(i+2).way && s.way == WayType.out){
+            		stampings.add(0, dbStamping.get(i));
+        			stampings.add(1, dbStamping.get(i+1));
+        			stampings.add(2, null);
+        			stampings.add(3, dbStamping.get(i+2));
+        			stampings.add(4, dbStamping.get(i+3));
+        			stampings.add(5, dbStamping.get(i+4));
+        			stampings.add(6, dbStamping.get(i+5));
+        			stampings.add(7, dbStamping.get(i+6));
+            	}
+            	if(s.way == dbStamping.get(i+3).way && s.way == WayType.in){
+        			stampings.add(0, dbStamping.get(i));
+        			stampings.add(1, dbStamping.get(i+1));
+        			stampings.add(2, dbStamping.get(i+2));
+        			stampings.add(3, null);
+        			stampings.add(4, dbStamping.get(i+3));
+        			stampings.add(5, dbStamping.get(i+4));
+        			stampings.add(6, dbStamping.get(i+5));
+        			stampings.add(7, dbStamping.get(i+6));
+        		}
+            	if(s.way == dbStamping.get(i+4).way && s.way == WayType.out){
+            		stampings.add(0, dbStamping.get(i));
+        			stampings.add(1, dbStamping.get(i+1));
+        			stampings.add(2, dbStamping.get(i+2));
+        			stampings.add(3, dbStamping.get(i+3));
+        			stampings.add(4, null);
+        			stampings.add(5, dbStamping.get(i+4));
+        			stampings.add(6, dbStamping.get(i+5));
+        			stampings.add(7, dbStamping.get(i+6));
+            	}
+            	if(s.way == dbStamping.get(i+5).way && s.way == WayType.in){
+            		stampings.add(0, dbStamping.get(i));
+        			stampings.add(1, dbStamping.get(i+1));
+        			stampings.add(2, dbStamping.get(i+2));
+        			stampings.add(3, dbStamping.get(i+3));
+        			stampings.add(4, dbStamping.get(i+4));
+        			stampings.add(5, null);
+        			stampings.add(6, dbStamping.get(i+5));
+        			stampings.add(7, dbStamping.get(i+6));
+            	}
+            	if(s.way == dbStamping.get(i+6).way && s.way == WayType.out){
+            		stampings.add(0, dbStamping.get(i));
+        			stampings.add(1, dbStamping.get(i+1));
+        			stampings.add(2, dbStamping.get(i+2));
+        			stampings.add(3, dbStamping.get(i+3));
+        			stampings.add(4, dbStamping.get(i+4));
+        			stampings.add(5, dbStamping.get(i+5));
+        			stampings.add(6, null);
+        			stampings.add(7, dbStamping.get(i+6));
+            	}
+            }
             else{
             	for(Stamping stamping : dbStamping)
             		stampings.add(stamping);
@@ -237,7 +306,7 @@ public class PersonDay extends Model {
 		}
 		if(pd.stampings == null){
 			pd.stampings = getStampings();
-			pd.save();
+			//pd.save();
 		}	
 		
 		if(pd.stampings.contains(null)){
@@ -252,7 +321,7 @@ public class PersonDay extends Model {
 				Stamping enter = pd.stampings.get(2);
 				Stamping exit = pd.stampings.get(3);
 				pd.timeAtWork = toMinute(exit.date)-toMinute(enter.date);
-				pd.save();
+				//pd.save();
 				
 			}
 			if(pd.stampings.get(1)==null){
@@ -263,7 +332,7 @@ public class PersonDay extends Model {
 				Stamping enter = pd.stampings.get(2);
 				Stamping exit = pd.stampings.get(3);
 				pd.timeAtWork = toMinute(exit.date)-toMinute(enter.date);
-				pd.save();
+				//pd.save();
 				
 			}
 			if(pd.stampings.get(2)==null){
@@ -274,7 +343,7 @@ public class PersonDay extends Model {
 				Stamping enter = pd.stampings.get(0);
 				Stamping exit = pd.stampings.get(1);
 				pd.timeAtWork = toMinute(exit.date)-toMinute(enter.date);
-				pd.save();
+				//pd.save();
 				
 			}
 			if(pd.stampings.get(3)==null){
@@ -285,52 +354,79 @@ public class PersonDay extends Model {
 				Stamping enter = pd.stampings.get(0);
 				Stamping exit = pd.stampings.get(1);
 				pd.timeAtWork = toMinute(exit.date)-toMinute(enter.date);
-				pd.save();
+				//pd.save();
+			}
+			if(pd.stampings.get(6)==null){
+				Stamping enter1 = pd.stampings.get(0);
+				Stamping exit1 = pd.stampings.get(1);
+				Stamping enter2 = pd.stampings.get(2);
+				Stamping exit2 = pd.stampings.get(3);
+				Stamping enter3 = pd.stampings.get(4);
+				Stamping exit3 = pd.stampings.get(5);
+				pd.timeAtWork = ((toMinute(exit3.date)-toMinute(enter3.date))+(toMinute(exit2.date)-toMinute(enter2.date))+(toMinute(exit1.date)-toMinute(enter1.date)));
+				//pd.save();
 			}
 			return pd.timeAtWork;
 		}		
 		else{
 			int size = pd.stampings.size();
 			pd.timeAtWork = 0;
-			LocalDateTime now = new LocalDateTime().now();
-			if(size > 0){
-				Stamping s = pd.stampings.get(0);
-				if(s.date.getDayOfMonth()==now.getDayOfMonth() && s.date.getMonthOfYear()==now.getMonthOfYear() && 
-					s.date.getYear()==now.getYear()){
-						if(((size / 2 == 1) && (size % 2 == 1)) || ((size / 2 == 0) && (size % 2 == 1))){
+			// questo contatore controlla se nella lista di timbrature c'è almeno una timbratura di ingresso, in caso contrario fa
+			// ritornare 0 come tempo di lavoro.
+			int count = 0;
+			for(Stamping s : stampings){
+				if(s.way == Stamping.WayType.in)
+					count ++;
+			}
+			if(count == 0){
+				pd.timeAtWork = 0;
+			}
+			else{
+				
+				LocalDateTime now = new LocalDateTime().now();
+				if(size > 0){
+					Stamping s = pd.stampings.get(0);
+					if(s.date.getDayOfMonth()==now.getDayOfMonth() && s.date.getMonthOfYear()==now.getMonthOfYear() && 
+						s.date.getYear()==now.getYear()){
+							if(((size / 2 == 1) && (size % 2 == 1)) || ((size / 2 == 0) && (size % 2 == 1))){
+								
+								int nowToMinute = toMinute(now);
+								int workingTime=0;
+								for(Stamping st : pd.stampings){
+									if(st.way == Stamping.WayType.in)
+										workingTime -= toMinute(st.date);				
+									if(st.way == Stamping.WayType.out)
+										workingTime += toMinute(st.date);
+									if(workingTime < 0)
+										pd.timeAtWork = nowToMinute + workingTime;
+									else 
+										pd.timeAtWork = nowToMinute - workingTime;								
+								}								
+							}				
+					}				
+					else{
+						int workTime=0;
+						for(Stamping st : pd.stampings){
+							if(st.way == Stamping.WayType.in){
+								workTime -= toMinute(st.date);
+								//timeAtWork -= toMinute(s.date);		
+								System.out.println("Timbratura di ingresso: "+workTime);	
+							}
+							if(st.way == Stamping.WayType.out){
+								workTime += toMinute(st.date);
+								//timeAtWork += toMinute(s.date);
+								System.out.println("Timbratura di uscita: "+workTime);
+							}
 							
-							int nowToMinute = toMinute(now);
-							int workingTime=0;
-							for(Stamping st : pd.stampings){
-								if(st.way == Stamping.WayType.in)
-									workingTime -= toMinute(st.date);				
-								if(st.way == Stamping.WayType.out)
-									workingTime += toMinute(st.date);
-								if(workingTime < 0)
-									pd.timeAtWork = nowToMinute + workingTime;
-								else 
-									pd.timeAtWork = nowToMinute - workingTime;								
-							}								
-						}				
-				}				
-				else{
-					int workTime=0;
-					for(Stamping st : pd.stampings){
-						if(st.way == Stamping.WayType.in){
-							workTime -= toMinute(st.date);
-							//timeAtWork -= toMinute(s.date);		
-							System.out.println("Timbratura di ingresso: "+workTime);	
 						}
-						if(st.way == Stamping.WayType.out){
-							workTime += toMinute(st.date);
-							//timeAtWork += toMinute(s.date);
-							System.out.println("Timbratura di uscita: "+workTime);
-						}
-						pd.timeAtWork = workTime;
+						if((pd.stampings.size()==2) && (workTime > 360) && (workTime-30 > 360))
+							pd.timeAtWork = workTime-30;
+						else
+							pd.timeAtWork = workTime;
+						
 					}
-					
+					//pd.save();
 				}
-				pd.save();
 			}
 
 		}
@@ -370,7 +466,7 @@ public class PersonDay extends Model {
 				
 				pd.progressive = pd.difference+pdYesterday.progressive;
 				Logger.warn("Progressive today: "+pd.progressive);
-				pd.save();
+				//pd.save();
 				
 			}
 			
@@ -379,7 +475,52 @@ public class PersonDay extends Model {
 		return pd.progressive;
 	}
 	
+	/**
+	 * salva il valore della differenza giornaliera con l'orario di lavoro sul db
+	 */
+	public void setDifference(){
+		difference = getDifference();
+		
+		
+	}
 	
+	/**
+	 * salva il valore del progressivo giornaliero sul db
+	 */
+	public void setProgressive(){
+		progressive = getProgressive();
+		save();
+		if(date.getDayOfMonth()==1){
+			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?",person, date.minusDays(1)).first();
+			PersonMonth pm = null;
+			if(date.getDayOfMonth() == 1){
+				pm = new PersonMonth(person, date.getYear()-1, 12);
+			}
+			else{
+				pm = new PersonMonth(person,date.getYear(),date.getMonthOfYear()-1);
+			}
+			pm.remainingHours = pd.progressive;
+			pm.save();
+		}
+		
+	}
+	
+	/**
+	 * salva il valore del tempo di lavoro giornaliero sul db
+	 */
+	public void setTimeAtWork(){
+		timeAtWork = timeAtWork();
+		
+	}
+	
+	/**
+	 * chiama le funzioni di popolamento
+	 */
+	public void populatePersonDay(){
+		setDifference();
+		setProgressive();
+		setTimeAtWork();
+	}
     
     	
 	
@@ -474,86 +615,74 @@ public class PersonDay extends Model {
 		if(pd == null){
 			pd = new PersonDay(person, date, 0, 0, 0);
 		}
-		List<Absence> absenceList = pd.absenceList();
-		List<Stamping> stampingList = pd.getStampings();
-		if((pd.date.getDayOfWeek()==DateTimeConstants.SATURDAY ) && (pd.date.getDayOfMonth()==1))
-			pd.difference =  0;		
-		if((pd.date.getDayOfWeek()==DateTimeConstants.SUNDAY) && (pd.date.getDayOfMonth()==1))
-			pd.difference =  0;
-		if((pd.date.getDayOfMonth()==2) && (pd.date.getDayOfWeek()==DateTimeConstants.SUNDAY))
-			pd.difference =  0;
-		if((pd.date.getDayOfWeek()==DateTimeConstants.SUNDAY) || pd.date.getDayOfWeek()==DateTimeConstants.SATURDAY)
-			pd.difference =  0;
-		if(absenceList.size()!=0){
-			return  0;
-		}
-		if(stampingList.size()==0){
-			return  0;
-		}
-		int differenza = 0;
-		int minTimeWorking = 432;
-		pd.timeAtWork = timeAtWork();
-		int size = pd.stampings.size();
-		
-		if(size == 2){
-			 if(pd.timeAtWork >= 360){
-				 int delay = 30;					
-					differenza = pd.timeAtWork - minTimeWorking - delay;					
-					pd.difference = differenza;
-					pd.save();
-			 }
-			 else{
-				 pd.difference = pd.timeAtWork - minTimeWorking;
-				 pd.save();
-			 }
+		if(pd.difference == 0){
+			List<Absence> absenceList = pd.absenceList();
+			List<Stamping> stampingList = pd.getStampings();
+			if((pd.date.getDayOfWeek()==DateTimeConstants.SATURDAY ) && (pd.date.getDayOfMonth()==1))
+				pd.difference =  0;		
+			if((pd.date.getDayOfWeek()==DateTimeConstants.SUNDAY) && (pd.date.getDayOfMonth()==1))
+				pd.difference =  0;
+			if((pd.date.getDayOfMonth()==2) && (pd.date.getDayOfWeek()==DateTimeConstants.SUNDAY))
+				pd.difference =  0;
+			if((pd.date.getDayOfWeek()==DateTimeConstants.SUNDAY) || pd.date.getDayOfWeek()==DateTimeConstants.SATURDAY)
+				pd.difference =  0;
+			if(absenceList.size()!=0){
+				return  0;
+			}
+			if(stampingList.size()==0){
+				return  0;
+			}
+			int differenza = 0;
+			int minTimeWorking = 432;
+			pd.timeAtWork = timeAtWork();
+			int size = pd.stampings.size();
 			
-		}
-		int i = pd.checkMinTimeForLunch(pd.stampings);
-		if(size == 4){
-			 if(i < 30){
-				 differenza = pd.timeAtWork-minTimeWorking+(i-30);					
-				 pd.difference = differenza;					
-				 pd.save();
-			 }
-			 else{
-					differenza = pd.timeAtWork-minTimeWorking;
-					pd.difference = differenza;					
-					pd.save();
-				}
-			
-		}
+			if(size == 2){
+				 if(pd.timeAtWork >= 360){
+					 int delay = 30;	
+					 if(pd.timeAtWork-delay > 360){
+						 differenza = pd.timeAtWork-minTimeWorking-delay;
+						 pd.difference = differenza;
+						 //pd.save();
+					 }
+					 else{						 				
+						 	differenza = pd.timeAtWork - minTimeWorking;					
+							pd.difference = differenza;
+							//pd.save();
+					 }
+					 
+				 }
+				 else{
+					 pd.difference = pd.timeAtWork - minTimeWorking;
+					 //pd.save();
+				 }
+				
+			}
+			int i = pd.checkMinTimeForLunch(pd.stampings);
+			if(size == 4){
+				 if(i < 30){
+					 differenza = pd.timeAtWork-minTimeWorking+(i-30);					
+					 pd.difference = differenza;					
+					 //pd.save();
+				 }
+				 else{
+						differenza = pd.timeAtWork-minTimeWorking;
+						pd.difference = differenza;					
+						//pd.save();
+					}
+				
+			}
+			else{
+				differenza = pd.timeAtWork()-minTimeWorking;
+				pd.difference = differenza;
+				//pd.save();
+			}
+		}		
 				
 		return pd.difference;
 	}
 	
-	/**
-	 * 
-	 * @param stamping
-	 * @return controlla il numero di timbrature e l'orario in cui sono state fatte
-	 */
-	private boolean checkStamping(List<Stamping> stamping){
-		boolean check = false;
-		if(stamping.size()==1){
-			Stamping s = stamping.get(0);
-			if(s.date.getHourOfDay() > 12 && s.date.getHourOfDay() < 14){
-				/**
-				 * cosa fare nel caso ci sia una sola timbratura? io sarei per analizzare a che ora è stata fatta e, di conseguenza,
-				 * trovare il corretto rimedio
-				 */
-			}
-		}
-		if(stamping.size()%2!=0){
-			/**
-			 * e se ci sono timbrature dispari? cosa bisogna fare?
-			 */
-			for(Stamping s : stamping){
-				
-			}
-		}
-				
-		return check;
-	}
-	
+		
 	/**
 	 * 
 	 * @param stamping
@@ -711,5 +840,7 @@ public class PersonDay extends Model {
 			return ldt;
 		}
 	}
+	
+	
 	
 }

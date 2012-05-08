@@ -40,6 +40,18 @@ public class Person extends Model {
 	 */
 	@OneToMany(mappedBy="person")
 	public List<PersonDay> personDay;
+	
+	/**
+	 * relazione con la nuova tabella dei person_month
+	 */
+	@OneToMany(mappedBy="person")
+	public List<PersonMonth> personMonth;
+	
+	/**
+	 * relazione con la nuova tabella dei person_year
+	 */
+	@OneToMany(mappedBy="person")
+	public List<PersonYear> personYear;
 
 	/**
 	 * relazione con la tabella delle timbrature
