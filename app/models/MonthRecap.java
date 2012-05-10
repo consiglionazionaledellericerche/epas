@@ -579,4 +579,6 @@ public class MonthRecap extends Model {
 		
 		return pastRemainingHours;
 	}
+	
+	
 }

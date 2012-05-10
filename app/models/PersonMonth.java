@@ -97,12 +97,15 @@ public class PersonMonth extends Model {
 	 */
 	public int getResidualFromPastMonth(int actualMonth, int actualYear){
 		int residual = 0;
-		if(actualMonth <= 4){
-			List<PersonMonth> pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month < ? and pm.year = ?" +
-					" or pm.year = ? and pm.month = ? ", person, actualMonth, actualYear, actualYear-1, 12).fetch();
+		if(actualMonth < 4){
+			List<PersonMonth> pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month < ? " +
+					"and pm.year = ?", person, actualMonth, actualYear).fetch();			
+			
 			for(PersonMonth personMonth : pm){
 				residual = residual+personMonth.remainingHours;
 			}
+			PersonYear py = PersonYear.find("Select py from PersonYear py where py.person = ? and py.year = ?", person, actualYear-1).first();
+			residual = residual + py.remainingHours;
 		}
 		else{
 			List<PersonMonth> pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month >=  ? and pm.month < ?" +
@@ -122,10 +125,11 @@ public class PersonMonth extends Model {
 	 */
 	public int getMonthResidual(int month, int year){
 		int residual = 0;
-		LocalDate date = new LocalDate();
+		LocalDate date = new LocalDate().now();
 		
 		if(month == date.getMonthOfYear() && year == date.getYear()){
-			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date.minusDays(1)).first();
+			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date < ? and pd.progressive != ? " +
+					"order by pd.date desc", person, date, 0).first();
 			if(pd == null){
 				pd = new PersonDay(person, date.minusDays(1));
 			}
@@ -148,6 +152,68 @@ public class PersonMonth extends Model {
 			residual = pd.progressive;
 		}
 		return residual;
+	}
+	
+	/**
+	 * 
+	 * @param month
+	 * @param year
+	 * @return il numero di giorni di riposo compensativo utilizzati in quel mese 
+	 */
+	public int getCompensatoryRest(int month, int year){
+		int compensatoryRest = 0;
+		int day = 0;
+		if(month==1 || month==3 || month==5 || month==7 || month==8 || month==10 || month==12)
+			day = 31;
+		if(month==4 || month==6 || month==9 || month==11)
+			day = 30;
+		if(month==2){
+			if(year==2012 || year==2016 || year==2020)
+				day = 29;
+			else
+				day = 28;
+		}
+		LocalDate beginMonth = new LocalDate(year, month, 1);
+		LocalDate endMonth = new LocalDate(year, month, day);
+		List<Absence> abs = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date between ? and ?", person, beginMonth, endMonth).fetch();
+		if(abs != null){
+			for(Absence absence : abs){
+				if(absence.absenceType.code.equals("91"))
+					compensatoryRest = compensatoryRest + 1;
+			}
+		}
+			
+		return compensatoryRest;
+		
+	}
+	
+	/**
+	 * 
+	 * @return il numero di minuti residui dell'anno precedente per quella persona
+	 */
+	public int getResidualPastYear(){
+		
+		int residual = 0;
+		PersonYear py = PersonYear.findById(person);
+		residual = py.remainingHours;
+		return residual;
+	}
+	
+	/**
+	 * 
+	 * @param month
+	 * @param year
+	 * @return il totale derivante dalla differenza tra le ore residue e le eventuali ore di riposo compensativo
+	 */
+	public int getTotalOfMonth(int month, int year){
+		int total = 0;
+		int compensatoryRest = getCompensatoryRest(month, year);
+		int monthResidual = getMonthResidual(month, year);
+		int residualFromPastMonth = getResidualFromPastMonth(month, year);
+		total = residualFromPastMonth+monthResidual-(compensatoryRest*432); //numero di giorni di riposo compensativo moltiplicati 
+		//per il numero di minuti presenti in 7 ore e 12 minuti, ovvero il tempo di lavoro.
+		
+		return total;
 	}
 	
 	
