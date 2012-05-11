@@ -522,6 +522,8 @@ public class FromMysqlToPostgres {
 			}
 			
 		}
+		//TODO: invece che chiamarlo una volta alla fine va chiamato alla fine di ogni giorno
+		PopulatePersonDay.fillPersonDay(person);
 		mysqlCon.close();
 	}
 	
