@@ -22,15 +22,14 @@ public class PopulatePersonDay {
 	}
 	
 	
-	public static void fillPersonDay(){
-		Long id = new Long(139);
-		Person p = Person.findById(id);
-		if(p != null){
+	public static void fillPersonDay(Person person) {
+		if(person != null){
+			//TODO:le date vanno rese generiche
 			LocalDate date = new LocalDate(2010,12,31);			
 			LocalDate now = new LocalDate(2012,5,7);
 			while(!date.equals(now)){
-				PersonDay pd = new PersonDay(p,date);
-				Logger.warn("Person: "+p );
+				PersonDay pd = new PersonDay(person,date);
+				Logger.warn("Person: "+person );
 				Logger.warn("Date: "+date);
 				pd.populatePersonDay();
 				pd.save();
@@ -39,6 +38,10 @@ public class PopulatePersonDay {
 		
 			
 		}
-		
+	}
+	
+	//TODO: solo per prova, da cancellare
+	public static void fillPersonDay(){
+		fillPersonDay((Person) Person.findById(139));	
 	}
 }
