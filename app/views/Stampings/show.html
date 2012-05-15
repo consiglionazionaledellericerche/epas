@@ -157,11 +157,10 @@
 			
 			%{
 			if(day.getStampings().size()==2 ){
-	         }% <td class="tempoLavoro">${day.timeAtWork()>360 && (day.timeAtWork()-30) > 360 ? day.convertTimeAtWork(day.timeAtWork()-30).toCalendarTime() : day.convertTimeAtWork(day.timeAtWork()).toCalendarTime()} <strong>${day.timeAtWork()>360 ? day.checkTimeForLunch(day.getStampings()).code : ''}</strong></td>
+	         }% <td class="tempoLavoro">${day.isHoliday()==false ? day.convertTimeAtWork(day.timeAtWork()).toCalendarTime() : ''} <strong>${day.timeAtWork()>360 ? day.checkTimeForLunch(day.getStampings()).code : ''}</strong></td>
 			%{
 			 }else{
-			 }% <td class="tempoLavoro">${day.isHoliday()==false && day.getStampings().size()==4 && !day.getStampings().contains(null) 
-			 && day.checkMinTimeForLunch(day.getStampings())<30 ? day.convertTimeAtWork(day.timeAtWork()-30+day.checkMinTimeForLunch(day.getStampings())).toCalendarTime() : day.convertTimeAtWork(day.timeAtWork()).toCalendarTime()} <strong>${day.getStampings().size()==4 && !day.getStampings().contains(null) && day.timeAtWork()>300
+			 }% <td class="tempoLavoro">${day.isHoliday()==false ? day.convertTimeAtWork(day.timeAtWork()).toCalendarTime() : ''} <strong>${day.getStampings().size()==4 && !day.getStampings().contains(null) && day.timeAtWork()>300
 			 && day.checkMinTimeForLunch(day.getStampings())<30 ? day.checkTimeForLunch(day.getStampings()).code : ''}</strong></td>
 			%{
 	         }

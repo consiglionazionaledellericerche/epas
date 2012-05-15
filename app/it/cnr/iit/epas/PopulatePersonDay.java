@@ -26,7 +26,7 @@ public class PopulatePersonDay {
 		if(person != null){
 			//TODO:le date vanno rese generiche
 			LocalDate date = new LocalDate(2010,12,31);			
-			LocalDate now = new LocalDate(2012,5,7);
+			LocalDate now = new LocalDate();
 			while(!date.equals(now)){
 				PersonDay pd = new PersonDay(person,date);
 				Logger.warn("Person: "+person );
@@ -42,6 +42,7 @@ public class PopulatePersonDay {
 	
 	//TODO: solo per prova, da cancellare
 	public static void fillPersonDay(){
-		fillPersonDay((Person) Person.findById(139));	
+		Long id = new Long(139);
+		fillPersonDay((Person) Person.findById(id));	
 	}
 }
