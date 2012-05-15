@@ -6,6 +6,7 @@ package models;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -269,6 +270,41 @@ public class PersonDay extends Model {
         return stampings;
 	}
 	
+	/**
+	 * 
+	 * @param year
+	 * @return il giorno in cui cade la pasqua
+	 */
+	private static final LocalDate findHolyDay(int year) {
+	    if (year <= 1582) {
+	      throw new IllegalArgumentException(
+	          "Algorithm invalid before April 1583");
+	    }
+	    int golden, century, x, z, d, epact, n;
+	    LocalDate easter = null;
+	    golden = (year % 19) + 1; /* E1: metonic cycle */
+	    century = (year / 100) + 1; /* E2: e.g. 1984 was in 20th C */
+	    x = (3 * century / 4) - 12; /* E3: leap year correction */
+	    z = ((8 * century + 5) / 25) - 5; /* E3: sync with moon's orbit */
+	    d = (5 * year / 4) - x - 10;
+	    epact = (11 * golden + 20 + z - x) % 30; /* E5: epact */
+	    if ((epact == 25 && golden > 11) || epact == 24)
+	      epact++;
+	    n = 44 - epact;
+	    n += 30 * (n < 21 ? 1 : 0); /* E6: */
+	    n += 7 - ((d + n) % 7);
+	    
+	    if (n > 31) /* E7: */{
+	    	easter = new LocalDate(year, 4 , n - 31);
+	    	Logger.warn("Pasqua é: "+easter);
+	      return easter; /* April */
+	    }
+	    else{
+	    	easter = new LocalDate(year, 3 , n);
+	    	Logger.warn("Pasqua é: "+easter);
+	      return easter; /* March */
+	    }
+	  }
 	
 	/**
 	 * 
@@ -280,6 +316,13 @@ public class PersonDay extends Model {
 			WorkingTimeType wtt = WorkingTimeType.findById(person.workingTimeType.id);
 			
 			if(wtt.description.equals("normale-mod")){
+				LocalDate easter = findHolyDay(date.getYear());
+				LocalDate easterMonday = easter.plusDays(1);
+				Logger.warn("Il giorno di pasqua é: "+easter);
+				if(date.getDayOfMonth() == easter.getDayOfMonth() && date.getMonthOfYear() == easter.getMonthOfYear())
+					return true;
+				if(date.getDayOfMonth() == easterMonday.getDayOfMonth() && date.getMonthOfYear() == easterMonday.getMonthOfYear())
+					return true;
 				if((date.getDayOfWeek() == 7)||(date.getDayOfWeek() == 6))
 					return true;		
 				if((date.getMonthOfYear() == 12) && (date.getDayOfMonth() == 25))
