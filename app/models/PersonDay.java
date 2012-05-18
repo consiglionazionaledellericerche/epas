@@ -733,7 +733,8 @@ public class PersonDay extends Model {
 			}
 			int differenza = 0;
 			
-			int minTimeWorking = person.workingTimeType.worTimeTypeDays.get(0).workingTime; 
+			//int minTimeWorking = person.workingTimeType.worTimeTypeDays.get(0).workingTime;
+			int minTimeWorking = 432;
 			timeAtWork = timeAtWork();
 			int size = stampings.size();
 			
