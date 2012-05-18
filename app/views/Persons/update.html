@@ -1,0 +1,78 @@
+#{extends 'main.html' /}
+#{set title:monthRecap.person.surname + ' ' + monthRecap.person.name + ', matricola=' + monthRecap.person.number /}
+
+<h2 id="titoloGestionePersonale">Gestione dati del personale per rilevazione presenze</h2><!-- Da aggiungere come entry nel file main.css dove dovrò sistemare le caratteristiche della tabella  -->
+
+<div id="logout">
+#{form @Application.logout()}
+	
+    	<input type="submit" value="Account logout" />
+     
+
+#{/form}
+</div>
+
+<div id="chooseView">
+#{form @SwitchTemplate.dispatch()}
+#{select 'menuItem', value:menuItem, id:'view'}
+	#{option 'yearlyAbsences'}Assenze Annuali#{/option}
+	#{option 'absences'}Assenze Mensili#{/option}
+	#{option 'stampings'}Timbrature#{/option}
+	#{option 'vacations'}Ferie#{/option}
+	#{option 'competences'}Competenze e Straordinari#{/option}	
+#{/select}
+    	<input type="submit" value="go!" />
+     
+
+#{/form}
+</div>
+
+<p><a href="insert.html">Inserisci una nuova persona</a></p>
+
+<table id="listaPersone"><!-- Da aggiungere come entry nel file main.css dove dovrò sistemare le caratteristiche della tabella  -->
+	<tr>
+		<th>Cognome</th>
+		<th>Nome</th>
+		<th>Matricola</th>
+		<th>Data inizio lavoro</th>
+		<th>Data fine lavoro</th>
+		<th>Orario</th>
+		<th>Ferie</th>
+		<th>Livello</th>
+		<th>Aut. timbratura via web</th>
+		<th>Dipartimento</th>
+		<th>Sede</th>
+		<th>Telefono</th>
+		<th>Stanza</th>
+		<th>Email</th>
+		<th>Note</th>
+	</tr>
+	
+%{
+     for(person in personList) {
+}%
+
+	<tr>
+		<td>${person.surname}</td>
+		<td>${person.name}</td>
+		<td>${person.number}</td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+
+%{  		   
+     }
+     
+}%
+
+</table>

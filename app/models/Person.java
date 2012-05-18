@@ -5,12 +5,17 @@ package models;
 
 
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -19,10 +24,15 @@ import javax.persistence.Transient;
 
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
+import org.joda.time.LocalDate;
+
+import controllers.Check;
+import controllers.Secure;
 
 import play.data.validation.Email;
 import play.data.validation.Required;
 import play.db.jpa.Model;
+import play.mvc.With;
 
 /**
  * @author cristian
@@ -31,9 +41,23 @@ import play.db.jpa.Model;
 @Entity
 @Audited
 @Table(name = "persons")
+@With(Secure.class)
 public class Person extends Model {
 
+	/**
+	 * relazione con la tabella dei permessi
+	 */
 	private static final long serialVersionUID = -2293369685203872207L;
+	
+	@ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
+	public List<Permissions> permissions;
+
+	/**
+	 * relazione con la tabella dei gruppi
+	 */
+	@ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
+	public List<Groups> groups;
+	
 	
 	/**
 	 * relazione con la nuova tabella dei person day
@@ -168,4 +192,6 @@ public class Person extends Model {
 	public String fullName() {
 		return String.format("%s %s", surname, name);
 	}
+	
+	
 }

@@ -296,12 +296,12 @@ public class PersonDay extends Model {
 	    
 	    if (n > 31) /* E7: */{
 	    	easter = new LocalDate(year, 4 , n - 31);
-	    	Logger.warn("Pasqua é: "+easter);
+	    	
 	      return easter; /* April */
 	    }
 	    else{
 	    	easter = new LocalDate(year, 3 , n);
-	    	Logger.warn("Pasqua é: "+easter);
+	    	
 	      return easter; /* March */
 	    }
 	  }
@@ -318,7 +318,9 @@ public class PersonDay extends Model {
 			if(wtt.description.equals("normale-mod")){
 				LocalDate easter = findHolyDay(date.getYear());
 				LocalDate easterMonday = easter.plusDays(1);
+				
 				Logger.warn("Il giorno di pasqua é: "+easter);
+				Logger.warn("Il giorno di pasquetta é: "+easterMonday);
 				if(date.getDayOfMonth() == easter.getDayOfMonth() && date.getMonthOfYear() == easter.getMonthOfYear())
 					return true;
 				if(date.getDayOfMonth() == easterMonday.getDayOfMonth() && date.getMonthOfYear() == easterMonday.getMonthOfYear())
@@ -359,16 +361,11 @@ public class PersonDay extends Model {
 	 */
 	public int timeAtWork(){
 		int tempoLavoro = 0;
-//		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?",person, date).first();
-//		if(pd == null){
-//			pd = new PersonDay(person, date, 0, 0, 0);
-//		}
 
 		if(stampings == null){
 			stampings = getStampings();
-			//pd.save();
+
 		}	
-	//	Logger.warn("Nella funzione timeAtWork() la lista delle timbrature stampings è: "+stampings);
 		if(stampings.contains(null)){
 			/**
 			 * in questo caso si guarda quale posizione della linkedList è null per stabilire se sia mancante un ingresso o un'uscita
@@ -381,8 +378,6 @@ public class PersonDay extends Model {
 				Stamping enter = stampings.get(2);
 				Stamping exit = stampings.get(3);
 				tempoLavoro = toMinute(exit.date)-toMinute(enter.date);
-				//timeAtWork = toMinute(exit.date)-toMinute(enter.date);
-				//pd.save();
 				
 			}
 			if(stampings.get(1)==null){
@@ -393,8 +388,6 @@ public class PersonDay extends Model {
 				Stamping enter = stampings.get(2);
 				Stamping exit = stampings.get(3);
 				tempoLavoro = toMinute(exit.date)-toMinute(enter.date);
-				//timeAtWork = toMinute(exit.date)-toMinute(enter.date);
-				//pd.save();
 				
 			}
 			if(stampings.get(2)==null){
@@ -405,8 +398,6 @@ public class PersonDay extends Model {
 				Stamping enter = stampings.get(0);
 				Stamping exit = stampings.get(1);
 				tempoLavoro = toMinute(exit.date)-toMinute(enter.date);
-				//timeAtWork = toMinute(exit.date)-toMinute(enter.date);
-				//pd.save();
 				
 			}
 			if(stampings.get(3)==null){
@@ -417,8 +408,7 @@ public class PersonDay extends Model {
 				Stamping enter = stampings.get(0);
 				Stamping exit = stampings.get(1);
 				tempoLavoro = toMinute(exit.date)-toMinute(enter.date);
-				//timeAtWork = toMinute(exit.date)-toMinute(enter.date);
-				//pd.save();
+
 			}
 			if(stampings.get(6)==null){
 				Stamping enter1 = stampings.get(0);
@@ -428,8 +418,7 @@ public class PersonDay extends Model {
 				Stamping enter3 = stampings.get(4);
 				Stamping exit3 = stampings.get(5);
 				tempoLavoro = ((toMinute(exit3.date)-toMinute(enter3.date))+(toMinute(exit2.date)-toMinute(enter2.date))+(toMinute(exit1.date)-toMinute(enter1.date)));
-				//timeAtWork = ((toMinute(exit3.date)-toMinute(enter3.date))+(toMinute(exit2.date)-toMinute(enter2.date))+(toMinute(exit1.date)-toMinute(enter1.date)));
-				//pd.save();
+
 			}
 			timeAtWork = tempoLavoro;
 			return timeAtWork;
@@ -449,7 +438,7 @@ public class PersonDay extends Model {
 			}
 			else{
 				
-				LocalDateTime now = new LocalDateTime().now();
+				LocalDateTime now = new LocalDateTime();
 				if(size > 0){
 					Stamping s = stampings.get(0);
 					if(s.date.getDayOfMonth()==now.getDayOfMonth() && s.date.getMonthOfYear()==now.getMonthOfYear() && 
@@ -487,6 +476,10 @@ public class PersonDay extends Model {
 							}
 							
 						}
+						/**
+						 * controllare nei casi in cui ci siano 4 timbrature e la pausa pranzo minore di 30 minuti che il tempo di 
+						 * lavoro ritornato sia effettivamente calcolato sulle timbrature effettive e non su quella aggiustata.
+						 */
 						int minTimeForLunch = checkMinTimeForLunch(getStampings());
 						if((stampings.size()==4) && (minTimeForLunch<30) && (!getStampings().contains(null)))
 							tempoLavoro = workTime - (30-minTimeForLunch);
@@ -499,12 +492,11 @@ public class PersonDay extends Model {
 							//timeAtWork = workTime;
 						
 					}
-					//pd.save();
+					
 				}
 			}
 
 		}
-	//	Logger.warn("Nella funzione timeAtWork() il valore del tempo di lavoro per la data "+date+ "è: "+tempoLavoro);
 		timeAtWork = tempoLavoro;	
 		return timeAtWork;
 	}
@@ -740,11 +732,8 @@ public class PersonDay extends Model {
 				return  0;
 			}
 			int differenza = 0;
-			/**
-			 * questo valore dovrà essere parametrizzato, in particolare dovrà essere il risultato della query sulla tabella del 
-			 * workingTimeType per quanto riguarda la quantità di minuti dell'orario di lavoro giornaliero di ciascun dipendente
-			 */
-			int minTimeWorking = 432;
+			
+			int minTimeWorking = person.workingTimeType.worTimeTypeDays.get(0).workingTime; 
 			timeAtWork = timeAtWork();
 			int size = stampings.size();
 			
@@ -754,18 +743,16 @@ public class PersonDay extends Model {
 					 if(timeAtWork-delay >= 360){
 						 differenza = timeAtWork-minTimeWorking-delay;
 						 difference = differenza;
-						 //pd.save();
+						 
 					 }
 					 else{						 				
 						 	differenza = timeAtWork - minTimeWorking;					
-							difference = differenza;
-							//pd.save();
+							difference = differenza;							
 					 }
 					 
 				 }
 				 else{
-					 difference = timeAtWork - minTimeWorking;
-					 //pd.save();
+					 difference = timeAtWork - minTimeWorking;					 
 				 }
 				
 			}

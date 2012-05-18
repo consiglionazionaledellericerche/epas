@@ -304,7 +304,7 @@ public class YearRecap extends Model{
 		int vacationDays = 0;
 		Contract contract = Contract.find("Select con from Contract con where con.person = ? order by begincontract desc", person).first();
 		LocalDate beginContract = new LocalDate(contract.beginContract);
-		LocalDate now = new LocalDate().now();
+		LocalDate now = new LocalDate();
 		now.withYear(year);
 		
 		int difference = now.getYear()-beginContract.getYear();
@@ -336,7 +336,7 @@ public class YearRecap extends Model{
 	public int permissionCurrentYear(int year){
 		int days = 0;
 		int permissionDays = 0;
-		LocalDate now = new LocalDate().now();
+		LocalDate now = new LocalDate();
 		now.withYear(year);
 		days = now.getDayOfYear();
 		
@@ -393,7 +393,7 @@ public class YearRecap extends Model{
 	 */
 	public int personalPermissionUsed(){
 		int permissionDays = 0;
-		LocalDate now = new LocalDate().now();
+		LocalDate now = new LocalDate();
 		LocalDate beginYear = new LocalDate(now.getYear(),1,1);
 		List<Absence> absence = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? and " +
 				"abs.date between ? and ? and abs.absenceType = abt and abt.code = ?", person, beginYear, now, "94").fetch();
@@ -424,7 +424,7 @@ public class YearRecap extends Model{
 		int vacationDaysLastYear = 0;
 		LocalDate beginLastYear = new LocalDate(currentYear-1,1,1);
 		LocalDate endLastYear = new LocalDate(currentYear-1,12,31);
-		LocalDate now = new LocalDate().now();
+		LocalDate now = new LocalDate();
 		LocalDate beginYear = new LocalDate(currentYear,1,1);
 		List<Absence> absence = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? " +
 				"and (abs.date between ? and ? and abs.absenceType = abt and abt.code = ? or abs.date between ? and ? and abs.absenceType = abt and abt.code = ?)", 
@@ -442,7 +442,7 @@ public class YearRecap extends Model{
 	public List<Absence> listVacationDaysLastYear(int currentYear){
 		LocalDate beginLastYear = new LocalDate(currentYear-1,1,1);
 		LocalDate endLastYear = new LocalDate(currentYear-1,12,31);
-		LocalDate now = new LocalDate().now();
+		LocalDate now = new LocalDate();
 		LocalDate beginYear = new LocalDate(currentYear,1,1);
 		List<Absence> absence = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? " +
 				"and (abs.date between ? and ? and abs.absenceType = abt and abt.code = ? or abs.date between ? and ? and abs.absenceType = abt and abt.code = ?)", 
@@ -458,7 +458,7 @@ public class YearRecap extends Model{
 	 *  
 	 */
 	public List<Absence> listVacationDaysCurrentYear(int currentYear){
-		LocalDate now = new LocalDate().now();
+		LocalDate now = new LocalDate();
 		LocalDate beginYear = new LocalDate(currentYear,1,1);
 		List<Absence> absence = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? " +
 				"and abs.date between ? and ? and abs.absenceType = abt and abt.code = ?", person, beginYear, now, "32").fetch();
@@ -473,7 +473,7 @@ public class YearRecap extends Model{
 	 */
 	public int vacationDaysCurrentYear(int currentYear){
 		int vacationDaysCurrentYear = 0;
-		LocalDate now = new LocalDate().now();
+		LocalDate now = new LocalDate();
 		LocalDate beginYear = new LocalDate(currentYear,1,1);
 		List<Absence> absence = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? " +
 				"and abs.date between ? and ? and abs.absenceType = abt and abt.code = ?", person, beginYear, now, "32").fetch();
