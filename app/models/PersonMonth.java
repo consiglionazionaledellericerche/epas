@@ -125,7 +125,7 @@ public class PersonMonth extends Model {
 	 */
 	public int getMonthResidual(int month, int year){
 		int residual = 0;
-		LocalDate date = new LocalDate().now();
+		LocalDate date = new LocalDate();
 		
 		if(month == date.getMonthOfYear() && year == date.getYear()){
 			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date < ? and pd.progressive != ? " +

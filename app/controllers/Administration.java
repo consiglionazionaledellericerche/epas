@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import it.cnr.iit.epas.FromMysqlToPostgres;
 import it.cnr.iit.epas.PopulatePersonDay;
 import play.mvc.Controller;
+import play.mvc.results.RenderText;
 
 public class Administration extends Controller {
 
@@ -25,6 +26,14 @@ public class Administration extends Controller {
     public static void populatePersonDay(){
     	PopulatePersonDay.PopulatePersonDayForOne();
     	renderText("Calcolate tutte le informazioni su tempi di lavoro, progressivo e differenza per i person day di Cristian Lucchesi");
+    }
+    
+    /**
+     * metodo per aggiungere i workingTimeTypeDay per il workingTimeType normale-mod 
+     */
+    public static void addWorkingTimeType(){
+    	PopulatePersonDay.fillWorkingTimeTypeDays();
+    	renderText("Aggiunti days per il working time type normal-mod");
     }
     
 }
