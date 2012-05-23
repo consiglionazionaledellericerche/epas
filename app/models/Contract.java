@@ -34,6 +34,7 @@ public class Contract extends Model {
 	
 	@OneToOne
 	@JoinColumn(name="person_id")
+	
 	public Person person;
 	
 	public Date beginContract;
