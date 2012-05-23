@@ -28,22 +28,16 @@ import play.mvc.With;
 @Entity
 @Table(name = "groups")
 @With(Secure.class)
-public class Groups extends Model{
+public class Group extends Model{
 
 	@ManyToMany(mappedBy = "groups")
 	public List<Person> persons;
 	
     @ManyToMany(mappedBy = "groups")
-    public List <Permissions> permissions;
-	
-	public int groupType;
-	
+    public List <Permission> permissions;
+		
 	public String description;
 	
-	@Check("administrator")
-	public void addPersonToGroup(Person person){
-		
-	}
 
 	
 }

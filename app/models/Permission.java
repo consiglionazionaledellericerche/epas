@@ -21,22 +21,13 @@ import play.db.jpa.Model;
 @Audited
 @Entity
 @Table(name="permissions")
-public class Permissions extends Model{
+public class Permission extends Model{
 
 	public String description;
 	
-	/**
-	 * da verificare se vadano bene tre campi booleani per le possibilità di intervento sulle classi 
-	 */
-	public boolean canRead;
-	
-	public boolean canWrite;
-	
-	public boolean canModify;
-	
-	@ManyToMany(mappedBy = "permissions")
+	@ManyToMany(mappedBy = "permissions", cascade = { CascadeType.ALL })
     public List<Person> users;
     
     @ManyToMany
-    public List <Groups> groups;
+    public List <Group> groups;
 }
