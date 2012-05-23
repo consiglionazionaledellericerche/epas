@@ -16,7 +16,8 @@ public class Administration extends Controller {
     public static void importAll() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
     	FromMysqlToPostgres.importAll();
     	FromMysqlToPostgres.importNotInOldDb();
-    	renderText("Importate tutte le persone dalla vecchia applicazione");
+    	PopulatePersonDay.fillWorkingTimeTypeDays();
+    	renderText("Importate tutte le persone dalla vecchia applicazione + aggiunti i workingtimetypeday");
     }
     
     /**

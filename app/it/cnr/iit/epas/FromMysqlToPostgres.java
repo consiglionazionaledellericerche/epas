@@ -165,10 +165,11 @@ public class FromMysqlToPostgres {
 			
 			FromMysqlToPostgres.createMonthRecap(rs.getLong("ID"), person, em);
 			
-			FromMysqlToPostgres.createCompetence(rs.getLong("ID"), person, em);
-			
+			FromMysqlToPostgres.createCompetence(rs.getLong("ID"), person, em);		
 			
 		}
+		//PopulatePersonDay.fillWorkingTimeTypeDays();
+		//PopulatePersonDay.fillPersonDay();
 	}
 	
 	public static void importNotInOldDb(){
@@ -301,71 +302,104 @@ public class FromMysqlToPostgres {
 	 * questo viene cancellato nel caso in cui la data di fine del contratto già salvato sia inferiore alla data inizio
 	 * del nuovo contratto così da salvare nello storico il contratto precedente.
 	 */
-	public static void createContract(long id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-		Logger.info("Inizio a creare il contratto per " +person.name+ " " +person.surname);
-		Connection mysqlCon = getMysqlConnection();
-		PreparedStatement stmtContratto = mysqlCon.prepareStatement("SELECT id,Datainizio,Datafine,continua " +
-				"FROM Personedate WHERE id=" + id + " order by Datainizio");
-		ResultSet rs = stmtContratto.executeQuery();	
-		
-		Contract contract = null;
-		while(rs.next()){
-			Date nuovaDataInizio = null;
-			contract = Contract.findById(rs.getLong("id"));
-			if(contract != null){
-				
-				if(contract.endContract == null){
-					em.persist(contract);
-				}
-				else{
-					
-					if(rs.getDate("Datainizio")==null)
-						nuovaDataInizio = new Date(1970-01-01);
-					else
-						nuovaDataInizio = rs.getDate("Datainizio");
-					long endContractMillis=contract.endContract.getTime();
-					long startNewContractMillis = nuovaDataInizio.getTime();
-					if((contract.endContract != null) && (endContractMillis<startNewContractMillis)){
-						contract.delete();
-						contract = new Contract();
-						contract.person = person;
-						if(rs.getDate("Datainizio") != null)
-							contract.beginContract = rs.getDate("Datainizio");
-						else
-							contract.beginContract = null;
-						if(rs.getDate("Datafine") != null)
-							contract.endContract = rs.getDate("Datafine");
-						else
-							contract.endContract = null;
-						if(rs.getByte("continua")==0)
-							contract.isContinued = false;
-						else 
-							contract.isContinued = true;
-						em.persist(contract);		
-					}
-				}
-			}
-			else{
-				contract = new Contract();
-				contract.person = person;
-				if(rs.getDate("Datainizio") != null)
-					contract.beginContract = rs.getDate("Datainizio");
-				else
-					contract.beginContract = null;
-				if(rs.getDate("Datafine") != null)
-					contract.endContract = rs.getDate("Datafine");
-				else
-					contract.endContract = null;
-				if(rs.getByte("continua")==0)
-					contract.isContinued = false;
-				else 
-					contract.isContinued = true;
-				em.persist(contract);
-							
-			}				
-		}	
-		mysqlCon.close();
-	}
+    public static void createContract(long id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+	
+        Logger.info("Inizio a creare il contratto per " +person.name+ " " +person.surname);	
+        Connection mysqlCon = getMysqlConnection();	
+        PreparedStatement stmtContratto = mysqlCon.prepareStatement("SELECT id,Datainizio,Datafine,continua " +	
+                        "FROM Personedate WHERE id=" + id + " order by Datainizio");	
+        ResultSet rs = stmtContratto.executeQuery();       	
+        Contract contract = null;	
+        while(rs.next()){
+        	contract = Contract.find("Select con from Contract con where con.person = ?", person).first();
+        	if(contract == null){
+        		contract = new Contract();
+            	contract.person = person;
+            	contract.beginContract = rs.getDate("Datainizio");
+            	contract.endContract = rs.getDate("Datafine");
+            	if(rs.getByte("continua")==0)
+            		contract.isContinued = false;
+            	else 
+            		contract.isContinued = true;
+        	}
+        	else{
+        		contract.delete();
+        		contract.save();
+        		contract = new Contract();
+            	contract.person = person;
+            	contract.beginContract = rs.getDate("Datainizio");
+            	contract.endContract = rs.getDate("Datafine");
+            	if(rs.getByte("continua")==0)
+            		contract.isContinued = false;
+            	else 
+            		contract.isContinued = true;
+        	}
+        	
+        	em.persist(contract);
+//            Date nuovaDataInizio = null;	
+//            contract = Contract.findById(person.id);	
+//            if(contract != null){                           
+//
+//            	if(contract.endContract == null){
+//                    em.persist(contract);
+//
+//                }
+//
+//                else{
+//                	if(rs.getDate("Datainizio")==null)
+//                		nuovaDataInizio = new Date(1970-01-01);
+//
+//                    else
+//                    	nuovaDataInizio = rs.getDate("Datainizio");
+//                        long endContractMillis=contract.endContract.getTime();
+//                        long startNewContractMillis = nuovaDataInizio.getTime();
+//                        if((contract.endContract != null) && (endContractMillis<startNewContractMillis)){
+//                        	contract.delete();
+//                        	contract.save();
+//                            contract = new Contract();
+//                            contract.person = person;
+//                            if(rs.getDate("Datainizio") != null)
+//                            	contract.beginContract = rs.getDate("Datainizio");
+//                            else
+//                                contract.beginContract = null;
+//                                if(rs.getDate("Datafine") != null)
+//                                	contract.endContract = rs.getDate("Datafine");
+//                                else
+//                                    contract.endContract = null;
+//                                if(rs.getByte("continua")==0)
+//                                    contract.isContinued = false;
+//                                else 
+//                                    contract.isContinued = true;
+//                                                
+//                        }
+//
+//                }
+//            	em.persist(contract);
+//            }
+//
+//            else{
+//                contract = new Contract();
+//                contract.person = person;
+//                if(rs.getDate("Datainizio") != null)
+//                	contract.beginContract = rs.getDate("Datainizio");
+//                else
+//                    contract.beginContract = null;
+//                if(rs.getDate("Datafine") != null)
+//                    contract.endContract = rs.getDate("Datafine");
+//                else
+//                    contract.endContract = null;
+//                if(rs.getByte("continua")==0)
+//                    contract.isContinued = false;
+//                else 
+//                    contract.isContinued = true;
+//                                                                
+//                em.persist(contract);
+//            }                                
+             
+        }
+        mysqlCon.close();
+	
+    }
 	
 
 	public static void createStampings(long id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
