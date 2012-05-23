@@ -1,6 +1,5 @@
 package it.cnr.iit.epas;
 
-import java.security.acl.Permission;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
@@ -10,8 +9,8 @@ import javax.persistence.EntityManager;
 
 import org.joda.time.LocalDate;
 
-import models.Groups;
-import models.Permissions;
+import models.Group;
+import models.Permission;
 import models.Person;
 import models.PersonDay;
 import models.Stamping;
@@ -93,22 +92,5 @@ public class PopulatePersonDay {
 		fillPersonDay((Person) Person.findById(id));	
 	}
 	
-	public static void fillGroupsAndPermissions(){
-		Long id = new Long(139);
-		Person person = Person.findById(id);
-		Groups group = new Groups();
-		Permissions permission = new Permissions();
-		permission.description = "administrator";
-		permission.canModify = true;
-		permission.canRead = true;
-		permission.canWrite = true;
-		permission.save();
-		group.description = "prova";
-		group.permissions.add(permission);
-		group.persons.add(person);
-		group.save();
-		person.permissions.add(permission);
-		person.save();
-		
-	}
+
 }

@@ -191,6 +191,10 @@ table#competenze {
 	margin: 4em 0em 6em;
 }
 
+table#listaPersone {
+	margin: 4em 0em 6em;
+}
+
 .capitalized {
 	text-transform: capitalize;	
 }
@@ -219,3 +223,4 @@ h2#titoloSituazionePresenzeMensili {text-align: center}
 h2#titoloSituazioneAssenzeMensili {text-align: center}
 h2#titoloSituazioneAssenzeAnnuali {text-align: center}
 h2#titoloSituazioneFerie {text-align: center}
+h2#titoloGestionePersonale {text-align: center}
