@@ -68,6 +68,8 @@ public class PersonDay extends Model {
 	public int difference;
 	@Column
 	public int progressive;	
+	@Column
+	public boolean isTicketAvailable;
 
 	@Transient
 	private LocalDateTime startOfDay;
@@ -165,21 +167,19 @@ public class PersonDay extends Model {
         
 		Logger.debug("startOfDay = %s, endOfDay = %s", startOfDay, endOfDay);
 		if (startOfDay == null || endOfDay == null) {
-	//		Logger.warn("startOfDay o endOfDay null, startOfDay = %s, endOfDay = %s", startOfDay, endOfDay);
 			startOfDay = new LocalDateTime(date.getYear(),date.getMonthOfYear(), date.getDayOfMonth(),0,0);
 			endOfDay = new LocalDateTime(date.getYear(),date.getMonthOfYear(), date.getDayOfMonth(),23,59);
 		}
 		
         if (stampings == null) {
         	if (startOfDay == null || endOfDay == null) {
-    		//	Logger.warn("startOfDay o endOfDay null durante il caricamento delle timbrature, startOfDay = %s, endOfDay = %s", startOfDay, endOfDay);
+    		
     		}
             stampings = new LinkedList<Stamping>();
             List<Stamping> dbStamping = Stamping.find("SELECT s FROM Stamping s " +
                             "WHERE s.person = ? and s.date between ? and ?" +
                             " ORDER BY s.date", person, startOfDay, endOfDay).fetch();
-       //     Logger.debug("Numero timbrature: %s %s", dbStamping.size(), date);
-            
+                   
             if(dbStamping.size()/2==1 && dbStamping.size()%2==1){
             	int i = 0;
             	Stamping s = dbStamping.get(i+1);
@@ -453,11 +453,9 @@ public class PersonDay extends Model {
 									if(st.way == Stamping.WayType.out)
 										workingTime += toMinute(st.date);
 									if(workingTime < 0)
-										tempoLavoro = nowToMinute + workingTime;
-										//timeAtWork = nowToMinute + workingTime;
+										tempoLavoro = nowToMinute + workingTime;										
 									else 
-										tempoLavoro = nowToMinute - workingTime;	
-										//timeAtWork = nowToMinute - workingTime;								
+										tempoLavoro = nowToMinute - workingTime;																		
 								}								
 							}				
 					}				
@@ -465,13 +463,11 @@ public class PersonDay extends Model {
 						int workTime=0;
 						for(Stamping st : stampings){
 							if(st.way == Stamping.WayType.in){
-								workTime -= toMinute(st.date);
-								//timeAtWork -= toMinute(s.date);		
+								workTime -= toMinute(st.date);									
 								System.out.println("Timbratura di ingresso: "+workTime);	
 							}
 							if(st.way == Stamping.WayType.out){
-								workTime += toMinute(st.date);
-								//timeAtWork += toMinute(s.date);
+								workTime += toMinute(st.date);								
 								System.out.println("Timbratura di uscita: "+workTime);
 							}
 							
@@ -482,14 +478,11 @@ public class PersonDay extends Model {
 						 */
 						int minTimeForLunch = checkMinTimeForLunch(getStampings());
 						if((stampings.size()==4) && (minTimeForLunch<30) && (!getStampings().contains(null)))
-							tempoLavoro = workTime - (30-minTimeForLunch);
-							//timeAtWork = workTime - (30-minTimeForLunch);
+							tempoLavoro = workTime - (30-minTimeForLunch);							
 						if((stampings.size()==2) && (workTime > 360) && (workTime-30 > 360))
-							tempoLavoro = workTime-30;
-							//timeAtWork = workTime-30;
+							tempoLavoro = workTime-30;							
 						else
-							tempoLavoro = workTime;
-							//timeAtWork = workTime;
+							tempoLavoro = workTime;							
 						
 					}
 					
@@ -507,10 +500,7 @@ public class PersonDay extends Model {
 	 * @return il progressivo delle ore in più o in meno rispetto al normale orario previsto per quella data
 	 */
 	public int getProgressive(){
-//		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
-//		if(pd == null){
-//			pd = new PersonDay(person, date, 0, 0, 0);
-//		}
+
 		if(progressive == 0){			
 			
 			if((date.getDayOfMonth()==1) && (date.getDayOfWeek()==6 || date.getDayOfWeek()==7))
@@ -535,13 +525,8 @@ public class PersonDay extends Model {
 					Logger.warn("Difference today: "+difference);
 				}
 				
-				//Logger.warn("Siamo nel: "+pd.date);
-				//Logger.warn("Progressive yesterday: "+pdYesterday.progressive);
-				
 				progressive = difference+pdYesterday.progressive;
-				Logger.warn("Progressive today: "+progressive);
-				//pd.save();
-				
+				Logger.warn("Progressive today: "+progressive);				
 			}
 			
 		}
@@ -607,6 +592,7 @@ public class PersonDay extends Model {
 		setDifference();
 		setProgressive();
 		setTimeAtWork();
+		setTicketAvailable();
 	}
     
     	
@@ -662,11 +648,7 @@ public class PersonDay extends Model {
 	 */
 	public boolean mealTicket(){
 		boolean ticketAvailable = false;
-//		int tempoLavoro = 0;
-//		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
-//		if(pd == null){
-//			pd = new PersonDay(person, date, 0, 0, 0);
-//		}
+
 		if(stampings==null){
 			stampings=getStampings();
 		}
@@ -674,7 +656,6 @@ public class PersonDay extends Model {
 			timeAtWork = timeAtWork();
 			
 		}
-		//Logger.warn("Nella funzione mealTicket() il timeAtWork appena calcolato è: "+timeAtWork);
 		if(timeAtWork == 0 || timeAtWork < 360){
 			ticketAvailable = false;
 		}				
@@ -696,24 +677,59 @@ public class PersonDay extends Model {
 		if(person.workingTimeType.description.equals("normale-mod") && timeAtWork < 390 && timeAtWork >360 
 				&& stampings.size()==2 )
 			ticketAvailable = true;
-		//Logger.warn("Il timeAtWork è: "+timeAtWork+" Lo stamping.size é: "+stampings.size());
-		//Logger.warn("Il valore del ticket available in data" +date+" è:"+ ticketAvailable);
 		isMealTicketAvailable = ticketAvailable;
 		return isMealTicketAvailable;
 
 	}
 	
+	/**
+	 * setta il campo booleano della tabella PersonDay relativo al mealticket a true se nella giornata è stato raggiunto il tempo 
+	 * minimo per l'assegnazione del buono pasto, false altrimenti. Serve a rendere persistenti le info sulla disponibilità del buono
+	 * pasto evitando così di doverlo ricalcolare ogni volta. Viene chiamata all'interno della populate personDay e la save() viene
+	 * fatta all'interno di essa.
+	 */
+	public void setTicketAvailable(){
+		boolean ticketAvailable = false;
+		if(stampings==null){
+			stampings=getStampings();
+		}
+		if (timeAtWork == 0) {
+			timeAtWork = timeAtWork();
+			
+		}
+		
+		if(timeAtWork == 0 || timeAtWork < 360){
+			ticketAvailable = false;
+		}				
+			
+		if(person.workingTimeType.description.equals("normale-mod") && timeAtWork>=360)
+			ticketAvailable=true;
+		if(person.workingTimeType.description.equals("normale-mod") && timeAtWork>360 && timeAtWork<390 
+				&&(stampings.size()==4 && checkMinTimeForLunch(stampings)<30))
+			ticketAvailable=true;
+		if(person.workingTimeType.description.equals("normale-mod") && timeAtWork>360 && timeAtWork<390 
+				&& (stampings.size()==4))
+			ticketAvailable=true;
+		if(person.workingTimeType.description.equals("normale-mod") && timeAtWork>390 && timeAtWork<432 
+				&& (stampings.size()==4 || stampings.size()==2))
+			ticketAvailable=true;
+		if(person.workingTimeType.description.equals("normale-mod") && timeAtWork>360 && timeAtWork<390 
+				&& (stampings.size()==6))
+			ticketAvailable=true;
+		if(person.workingTimeType.description.equals("normale-mod") && timeAtWork < 390 && timeAtWork >360 
+				&& stampings.size()==2 )
+			ticketAvailable = true;
 
+		isTicketAvailable = ticketAvailable;
+//		save();
+	}
 	
 	/**
 	 * 
 	 * @return la differenza tra l'orario di lavoro giornaliero e l'orario standard in minuti
 	 */
 	public Integer getDifference(){
-//		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
-//		if(pd == null){
-//			pd = new PersonDay(person, date, 0, 0, 0);
-//		}
+
 		if(difference == 0){
 			List<Absence> absenceList = absenceList();
 			List<Stamping> stampingList = getStampings();
@@ -762,20 +778,17 @@ public class PersonDay extends Model {
 			if(size == 4){
 				 if(i < 30){
 					 differenza = timeAtWork-minTimeWorking+(i-30);					
-					 difference = differenza;					
-					 //pd.save();
+					 difference = differenza;				 
 				 }
 				 else{
 						differenza = timeAtWork-minTimeWorking;
 						difference = differenza;					
-						//pd.save();
 					}
 				
 			}
 			else{
 				differenza = timeAtWork()-minTimeWorking;
-				difference = differenza;
-				//pd.save();
+				difference = differenza;			
 			}
 		}		
 				

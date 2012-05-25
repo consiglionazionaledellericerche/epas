@@ -1,0 +1,57 @@
+#{extends 'main.html' /}
+
+<h2 id="titoloGestioneCodiciAssenza">Gestione dei codici di assenza</h2>
+
+<p><a href="insertAbsenceCode.html">Definisci nuovo codice di assenza</a></p>
+
+<p>Codici di assenza esistenti:</p>
+
+<table>
+	<tr>
+		<th>Codice</th>
+		<th>Codice per att. presenza</th>
+		<th>Descrizione</th>
+		<th>uso interno</th>
+		<th>uso multiplo</th>
+		<th>inizio validità</th>
+		<th>fine validità</th>
+		<th>tempo di lavoro giustificato</th>
+		<th>livelli</th>
+		<th>calcolo buono pasto</th>
+		<th>ignora timbrature</th>
+		<th>gruppo</th>
+		<th>valore</th>
+		<th>minuti in eccesso</th>
+		<th>accumulare i valori</th>
+		<th>limite accumulo</th>
+		<th>cosa fare raggiunto il limite</th>
+		<th>codice per sostituzione</th>
+	</tr>
+	%{
+		for(absenceCode in absenceList){			<!-- mettere qui il render del controller che ritorna la lista dei codici di assenza -->
+	}%
+	<tr>
+		<td>${absenceCode.code}</td>
+		<td>${}</td>
+		<td>${absenceCode.description}</td>
+		<td>${absenceCode.internalUse}</td>
+		<td>${absenceCode.multipleUse}</td>
+		<td>${absenceCode.validFrom}</td>
+		<td>${absenceCode.validTo}</td>
+		<td>${absenceCode.justifiedWorkTime}</td>
+		<td>${}</td> <!-- per i livelli c'è da capire come prelevarli poichè sul vecchio db sono gestiti in un campo set -->
+		<td>${absenceCode.mealTickeCalculation}</td>
+		<td>${absenceCode.ignoreStamping}</td>
+		<td>${absenceCode.absenceTypeGroup.label}</td>
+		<td>${absenceCode.absenceTypeGroup.}</td>
+		<td>${absenceCode.absenceTypeGroup.minutesExcess}</td>
+		<td>${}</td>
+		<td>${absenceCode.absenceTypeGroup.buildUpLimit}</td>
+		<td>${}</td>
+		<td>${absenceCode.absenceTypeGroup.equivalentCode}</td>
+	</tr>
+	%{
+		}
+	}%
+
+</table>

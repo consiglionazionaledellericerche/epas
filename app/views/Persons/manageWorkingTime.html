@@ -1,0 +1,40 @@
+#{extends 'main.html' /}
+
+<h2 id="titoloGestioneOrariLavoro">Gestione tipi di orario di lavoro</h2>
+
+<p><a href="insertWorkingTime.html">Nuovo</a></p>
+
+<table>
+	<tr>
+		<th>Nome tipo orario</th>
+		<th></th>
+		<th>Lunedì</th>
+		<th>Martedì</th>
+		<th>Mercoledì</th>
+		<th>Giovedì</th>
+		<th>Venerdì</th>
+		<th>Sabato</th>
+		<th>Domenica</th>
+		<th>Default</th>
+		<th>Può fare turni</th>
+	</tr>
+	%{
+		for(){ <!-- qui mettere il for sulla lista di orari di lavoro presa dal controller -->
+	}%
+	<tr>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+	%{
+		}
+	}%
+</table>
