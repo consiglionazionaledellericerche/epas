@@ -1,6 +1,9 @@
 package controllers;
 
+import java.util.List;
+
 import it.cnr.iit.epas.ActionMenuItem;
+import models.AbsenceType;
 import models.MonthRecap;
 import models.Person;
 
@@ -52,5 +55,13 @@ public class Absences extends Controller{
 	public static void show() {
     	show(Long.parseLong(session.get(Application.PERSON_ID_SESSION_KEY)));
     }
+	
+	/**
+	 * questa è una funzione solo per admin, quindi va messa con il check administrator
+	 */
+	public static void manageAbsenceCode(){
+		List<AbsenceType> absenceList = AbsenceType.findAll();
+		render(absenceList);
+	}
 
 }

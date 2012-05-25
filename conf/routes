@@ -45,7 +45,10 @@ GET     /public/                                staticDir:public
 *       /{controller}/{action}                  {controller}.{action}
 
 # Import Secure routes
-*       /                						module:secure
-GET		/updatePerson							Persons.update		
-POST	/insertPerson							Persons.insert		
+#*       /                						module:secure
+GET		/update									Persons.update		
+GET		/insertPerson							Persons.insert		
+GET		/updatePerson							Persons.updatePerson
+GET		/manageWorkingTime						WorkingTimes.manageWorkingTime
+GET		/vacationsAdmin							VacationsAdmin.manageVacationCode
 

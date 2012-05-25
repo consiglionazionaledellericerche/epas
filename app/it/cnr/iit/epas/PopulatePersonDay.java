@@ -46,7 +46,9 @@ public class PopulatePersonDay {
 	}
 	
 	public static void fillWorkingTimeTypeDays(){
-		WorkingTimeType wtt = WorkingTimeType.find("Select wtt from WorkingTimeType wtt where wtt.description = ?", "normale-mod").first();
+		Long id = new Long(1);
+		WorkingTimeType wtt = WorkingTimeType.findById(id);
+		//WorkingTimeType wtt = WorkingTimeType.find("Select wtt from WorkingTimeType wtt where wtt.description = ?", "normale-mod").first();
 		WorkingTimeTypeDay wttd = null;
 		for(int i=1; i<=5; i++){
 			wttd = new WorkingTimeTypeDay();

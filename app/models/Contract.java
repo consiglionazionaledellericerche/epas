@@ -9,7 +9,9 @@ import javax.persistence.Table;
 
 import lombok.Data;
 
+import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
+import org.joda.time.LocalDate;
 
 import play.db.jpa.Model;
 
@@ -37,9 +39,11 @@ public class Contract extends Model {
 	
 	public Person person;
 	
-	public Date beginContract;
+	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	public LocalDate beginContract;
 	
-	public Date endContract;
+	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	public LocalDate endContract;
 	
 	public boolean isContinued;
 	

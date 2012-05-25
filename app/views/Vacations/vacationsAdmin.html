@@ -1,0 +1,27 @@
+#{extends 'main.html' /}
+
+<h2 id="titoloGestioneTipiFerie">Gestione dei tipi di ferie e dei permessi legge</h2>
+
+<p><a href="insertVacationCode.html">Nuovo</a></p>
+
+<table>
+	<tr>
+		<th>Nome</th>
+		<th>Giorni di ferie</th>
+		<th>Giorni di permesso</th>
+		<th>Default</th>
+	</tr>
+	%{
+		for(vacationCode in vacationCodeList){
+	}%
+	<tr>
+		<td>${vacationCode.description}</td>
+		<td>${vacationCode.vacationDays}</td>
+		<td>${vacationCode.permissionDays}</td>
+		<td></td>		
+	</tr>
+	%{
+		}
+	}%
+
+</table>

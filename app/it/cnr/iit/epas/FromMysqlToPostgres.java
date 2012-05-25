@@ -135,7 +135,7 @@ public class FromMysqlToPostgres {
 		EntityManager em = JPA.em();
 
 		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT ID, Nome, Cognome, DataNascita, Telefono," +
-				"Fax, Email, Stanza, Matricola, passwordmd5, Dipartimento, Sede " +
+				"Fax, Email, Stanza, Matricola, passwordmd5, Qualifica, Dipartimento, Sede " +
 				"FROM Persone order by ID");
 		ResultSet rs = stmt.executeQuery();
 		
@@ -195,6 +195,7 @@ public class FromMysqlToPostgres {
 		person.password = rs.getString("passwordmd5");
 		person.bornDate = rs.getDate("DataNascita");
 		person.number = rs.getInt("Matricola");
+		person.qualification = rs.getInt("Qualifica");
 		int i = 0;
 		
 		WorkingTimeType wtt = null;
@@ -315,8 +316,8 @@ public class FromMysqlToPostgres {
         	if(contract == null){
         		contract = new Contract();
             	contract.person = person;
-            	contract.beginContract = rs.getDate("Datainizio");
-            	contract.endContract = rs.getDate("Datafine");
+            	contract.beginContract = new LocalDate(rs.getDate("Datainizio"));
+            	contract.endContract = new LocalDate(rs.getDate("Datafine"));
             	if(rs.getByte("continua")==0)
             		contract.isContinued = false;
             	else 
@@ -327,8 +328,8 @@ public class FromMysqlToPostgres {
         		contract.save();
         		contract = new Contract();
             	contract.person = person;
-            	contract.beginContract = rs.getDate("Datainizio");
-            	contract.endContract = rs.getDate("Datafine");
+            	contract.beginContract = new LocalDate(rs.getDate("Datainizio"));
+            	contract.endContract = new LocalDate(rs.getDate("Datafine"));
             	if(rs.getByte("continua")==0)
             		contract.isContinued = false;
             	else 
@@ -572,8 +573,8 @@ public class FromMysqlToPostgres {
 		 * nelle righe relative a codici di natura giornaliera.
 		 */
 		PreparedStatement stmtAssenze = mysqlCon.prepareStatement("Select Orario.Giorno, Orario.TipoTimbratura, " +
-				"Codici.Codice, Codici.Descrizione, Codici.QuantGiust, Codici.IgnoraTimbr, Codici.MinutiEccesso, Codici.Limite, " +
-				"Codici.Accumulo, Codici.CodiceSost, Codici.id, Codici.Gruppo " +
+				"Codici.Codice, Codici.Interno, Codici.Descrizione, Codici.QuantGiust, Codici.IgnoraTimbr, Codici.MinutiEccesso, " +
+				"Codici.Limite, Codici.Accumulo, Codici.CodiceSost, Codici.id, Codici.Gruppo, Codici.DataInizio, Codici.DataFine " +
 				"from Codici, Orario " +
 				"where Orario.TipoGiorno=Codici.id " +
 				"and TipoGiorno !=0 and Orario.id = "+id);
@@ -596,6 +597,12 @@ public class FromMysqlToPostgres {
 					absenceType = new AbsenceType();					
 					absenceType.code = rs.getString("Codice");
 					absenceType.description = rs.getString("Descrizione");
+					absenceType.validFrom = rs.getDate("DataInizio");
+					absenceType.validTo = rs.getDate("DataFine");
+					if(rs.getByte("Interno")==0)
+						absenceType.internalUse = false;
+					else
+						absenceType.internalUse = true;
 					if(rs.getByte("IgnoraTimbr")==0)
 						absenceType.ignoreStamping = false;
 					else 

@@ -36,6 +36,7 @@ import controllers.Secure;
 import play.data.validation.Email;
 import play.data.validation.Required;
 import play.db.jpa.Model;
+import play.mvc.Http.Request;
 import play.mvc.With;
 
 /**
@@ -189,6 +190,11 @@ public class Person extends Model {
 	public String password;
 	
 	/**
+	 * livello di contratto
+	 */
+	public int qualification;
+	
+	/**
 	 * Numero di matricola
 	 */
 	public Integer number;
@@ -196,6 +202,11 @@ public class Person extends Model {
 	public String fullName() {
 		return String.format("%s %s", surname, name);
 	}
+	
+	/**
+	 * TODO: importare anche il li campo qualifica dalla tabella Persone perchè identifica il livello di contratto e mi serve per fare
+	 * tutti i calcoli relativi ai contratti.
+	 */
 	
 	/**
 	 * 
@@ -256,7 +267,7 @@ public class Person extends Model {
 				}
 				else{
 					vacation = VacationCode.find("Select vac from VacationCode vac, VacationPeriod per where per.person = ?" +
-							" and per.vacationCode = vac order by per.beginFrom", person).first();
+							" and per.vacationCode = vac order by per.beginFrom", this).first();
 				}
 			}
 			if(endContract == null && beginContract == null){
@@ -282,13 +293,13 @@ public class Person extends Model {
 					int diffMonth = 0;
 					int diffDay = 0;
 					for(Contract c : listaContratti){
-						if(c != null){
+						if(c != null || (c.beginContract!=null && c.endContract!=null)){
 							/**
 							 * TODO: cambiare la tipologia di data di inizio e fine contratto da date a localdate
 							 */
 							diffYear = diffYear + (c.endContract.getYear()-c.beginContract.getYear());
-							diffMonth = diffMonth + (c.endContract.getMonth()-c.beginContract.getMonth());
-							diffDay = diffDay + (c.endContract.getDate()-c.beginContract.getDate());
+							diffMonth = diffMonth + (c.endContract.getMonthOfYear()-c.beginContract.getMonthOfYear());
+							diffDay = diffDay + (c.endContract.getDayOfMonth()-c.beginContract.getDayOfMonth());
 						}
 												
 					}
@@ -299,7 +310,7 @@ public class Person extends Model {
 				}
 				else{
 					vacation = VacationCode.find("Select vac from VacationCode vac, VacationPeriod per where per.person = ?" +
-							" and per.vacationCode = vac order by per.beginFrom", person).first();
+							" and per.vacationCode = vac order by per.beginFrom", this).first();
 				}
 			}
 			
@@ -337,5 +348,6 @@ public class Person extends Model {
 		}
 		return setPermissions;
 	}
+	
 	
 }
