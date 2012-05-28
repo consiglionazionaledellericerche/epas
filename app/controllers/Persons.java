@@ -3,75 +3,83 @@ package controllers;
 import java.util.Date;
 import java.util.List;
 
-import org.joda.time.LocalDate;
-
 import models.ContactData;
 import models.Contract;
 import models.Location;
-import models.MonthRecap;
-import models.Permission;
 import models.Person;
+
+import org.joda.time.LocalDate;
+
 import play.Logger;
+import play.data.validation.Required;
+import play.data.validation.Valid;
 import play.mvc.Controller;
 import play.mvc.With;
-import play.mvc.Http.Request;
 
-//@With(Secure.class)
-//@Check("administrator")
-public class Persons extends Controller{
-	
+@With(Secure.class)
+public class Persons extends Controller {
+
 	public static final String USERNAME_SESSION_KEY = "username";
 
-	//@Check("administrator")
 	public static void insert(){
 		render();
 	}
-	
 
-	public static void update(){
-//		String username = session.get(USERNAME_SESSION_KEY);
-//		if(username != null){			
-//			Person person = Person.find("byUsername", username).first();
-//			for(Permission p : person.permissions){
-//				if(p.description.equals("administrator")){
-					List<Person> personList = Person.find("Select per from Person per order by per.surname").fetch();
-					
-					render(personList);
-//				}
-//				else{
-//					flash.error("This person cannot access this area");
-//			        Application.index();
-//				}
-//			}
-			
-//		}
+
+	@Check(Security.VIEW_PERSON_LIST)
+	public static void list(){
+		List<Person> personList = Person.find("order by surname").fetch();
+		render(personList);
+	}
+
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void form(Long id) {
+		if(id == null) {
+			render();
+		}
+		Person person = Person.findById(id);
+		//FIXME: questo deve essere cambiato in person.contract
+		Contract contract = person.getLastContract();
 		
+		if (contract == null) {
+			contract = new Contract();
+		}
+		
+		Location location = person.location;
+		if (location == null) {
+			location = new Location();
+		}
+		
+		ContactData contactData = person.contactData;
+		if (contactData == null) {
+			contactData = new ContactData();
+		}
+		
+		render(person, contract, location, contactData);
 	}
 	
-	public static void updatePerson(){
-//		String username = session.get(USERNAME_SESSION_KEY);
-//		if(username != null){			
-//		Person person = (Person) renderArgs.get("person");
-//			person = Person.find("byUsername", ).first();
-//			for(Permission p : person.permissions){
-//				if(p.description.equals("administrator")){
-			Person person = params.get("person",Person.class);
-			person.save();
-			if(person != null){
-				List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? " +
-						"order by con.beginContract", person).fetch();
-				render(person, contractList);
-			}
-					
-				}
-//				else{
-//					flash.error("This person cannot access this area");
-//			        Application.index();
-//				}
-//			}
-//		}
-//	}
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void save(@Valid @Required Person person, @Valid Location location, @Valid ContactData contactData, @Valid Contract contract) {
+		if(validation.hasErrors()) {
+			if(request.isAjax()) error("Invalid value");
+			render("@form", person, location, contactData, contract);
+		}
+		
+		person.save();
+		Logger.debug("saving location, deparment = %s", location.department);
+		location.person = person;
+		location.save();
+		
+		contactData.person = person;
+		contactData.save();
+		
+		Logger.debug("saving contract, beginContract = %s, endContract = %s", contract.beginContract, contract.endContract);
+		contract.person = person;
+		contract.save();
+		list();
+	}
 	
+
 	/**
 	 * metodo che crea una nuova persona e la persiste sul db coi soli campi obbligatori
 	 */
@@ -82,13 +90,15 @@ public class Persons extends Controller{
 		person.password = password;
 		person.save();
 	}
-	
+
+
+
 	/**
 	 * 
 	 * @param request
 	 * metodo che crea una nuova persona e la persiste sul db prendendo i dati in input dalla request passata come parametro
 	 */
-	public void createPerson(){
+	public void createPerson2(){
 		/**
 		 * creo la persona
 		 */
@@ -121,7 +131,7 @@ public class Persons extends Controller{
 			contactData.telephone = params.get("telefono");
 			contactData.save();
 		}
-		
+
 		/**
 		 * creo il contratto ammesso che sia stato valorizzato il campo
 		 */
@@ -133,7 +143,7 @@ public class Persons extends Controller{
 			contract.save();
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param person
@@ -142,10 +152,10 @@ public class Persons extends Controller{
 	public void updateBasicPerson(Person person){
 		Person p = Person.findById(person.id);
 		if(p != null){
-		//	request.params.
+			//	request.params.
 		}
 	}
-	
+
 	/**
 	 * cancella una persona dal database
 	 * @param person
@@ -156,6 +166,6 @@ public class Persons extends Controller{
 			person.save();
 		}
 	}
-	
-	
+
+
 }

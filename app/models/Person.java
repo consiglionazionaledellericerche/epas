@@ -159,8 +159,7 @@ public class Person extends Model {
 	 * relazione con la tabella delle locazioni degli utenti
 	 */
 	@NotAudited
-	@OneToOne
-	@JoinColumn(name="location_id")
+	@OneToOne(mappedBy="person")
 	public Location location;
 	
 	/**
@@ -242,6 +241,12 @@ public class Person extends Model {
 		 */
 		List<Contract> listaContratti = Contract.find("Select con from Contract con where con.person = ? " +
 				"order by con.beginContract desc", person).fetch();
+		
+		//XXX: dovrebbe esistere questo caso?? ESISTE ESISTE
+		if (listaContratti.size() == 0) {
+			return null;
+		}
+		
 		/*
 		 * prendo il primo elemento della lista che ho ordinato nella query che contiene il contratto più recente. Controllo che sia
 		 * diverso da null e, in tal caso, guardo la durata: se è maggiore di 3 anni rispetto alla data odierna ritorno un nuovo 

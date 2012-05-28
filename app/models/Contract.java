@@ -22,7 +22,6 @@ import play.db.jpa.Model;
  * il contratto non è gestito direttamente da questa applicazione ma le sue informazioni
  * sono prelevate da un altro servizio
  */
-@Data
 @Audited
 @Entity
 @Table(name="contract")
@@ -36,7 +35,6 @@ public class Contract extends Model {
 	
 	@OneToOne
 	@JoinColumn(name="person_id")
-	
 	public Person person;
 	
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")

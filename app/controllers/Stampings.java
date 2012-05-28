@@ -6,10 +6,7 @@ import models.Person;
 import models.PersonDay;
 import models.PersonMonth;
 
-import org.bouncycastle.asn1.x509.sigi.PersonalData;
 import org.joda.time.LocalDate;
-
-import com.sun.xml.internal.txw2.Document;
 
 import play.Logger;
 import play.mvc.Before;

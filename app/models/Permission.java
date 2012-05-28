@@ -11,6 +11,7 @@ import javax.persistence.Table;
 
 import org.hibernate.envers.Audited;
 
+import play.data.validation.Unique;
 import play.db.jpa.Model;
 
 /**
@@ -23,6 +24,7 @@ import play.db.jpa.Model;
 @Table(name="permissions")
 public class Permission extends Model{
 
+	@Unique
 	public String description;
 	
 	@ManyToMany(mappedBy = "permissions", cascade = { CascadeType.ALL })
