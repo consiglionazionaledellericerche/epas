@@ -9,15 +9,15 @@ import play.test.Fixtures;
  * @author cristian
  *
  */
-//@OnApplicationStart
+@OnApplicationStart
 public class Bootstrap extends Job {
 	
 
-//	public void doJob() {
-//		if (Permission.count() == 0) {
-//			Fixtures.delete();
-//			Fixtures.loadModels("permission.yml");
-//		} 
-//	}
+	public void doJob() {
+		if (Permission.count() == 0) {
+			Fixtures.delete();
+			Fixtures.loadModels("permission.yml");
+		} 
+	}
 
 }

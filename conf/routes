@@ -46,9 +46,12 @@ GET     /public/                                staticDir:public
 
 # Import Secure routes
 #*       /                						module:secure
-GET		/update									Persons.update		
-GET		/insertPerson							Persons.insert		
-GET		/updatePerson							Persons.updatePerson
+
+GET		/persons								Persons.list
+POST	/persons								Persons.save
+GET		/persons/new							Persons.form
+GET		/persons/update							Persons.form
+
 GET		/manageWorkingTime						WorkingTimes.manageWorkingTime
 GET		/vacationsAdmin							VacationsAdmin.manageVacationCode
 
