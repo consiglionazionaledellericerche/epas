@@ -1,0 +1,20 @@
+Permission(viewPersonList):
+    id: 1
+    description: viewPersonList
+
+Permission(updatePersonList):
+    id: 2
+    description: updatePersonList
+
+Permission(deletePerson):
+    id: 3
+    description: deletePerson
+
+Permission(insertPerson):
+    id: 4
+    description: insertPerson
+
+Person(amministratore):
+    name: Admin
+    surname: Admin
+    permission: 2
