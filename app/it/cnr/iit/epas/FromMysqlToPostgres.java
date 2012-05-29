@@ -307,95 +307,97 @@ public class FromMysqlToPostgres {
 	
         Logger.info("Inizio a creare il contratto per " +person.name+ " " +person.surname);	
         Connection mysqlCon = getMysqlConnection();	
-        PreparedStatement stmtContratto = mysqlCon.prepareStatement("SELECT id,Datainizio,Datafine,continua " +	
-                        "FROM Personedate WHERE id=" + id + " order by Datainizio");	
+        PreparedStatement stmtContratto = mysqlCon.prepareStatement("SELECT id,DataInizio,DataFine,continua " +	
+                        "FROM Personedate WHERE id=" + id + " order by DataInizio");	
         ResultSet rs = stmtContratto.executeQuery();       	
         Contract contract = null;	
         while(rs.next()){
         	contract = Contract.find("Select con from Contract con where con.person = ?", person).first();
+        	
         	if(contract == null){
+        		/**
+        		 * non esistono contratti per quella persona nel db, questo è il primo
+        		 */
         		contract = new Contract();
-            	contract.person = person;
-            	contract.beginContract = new LocalDate(rs.getDate("Datainizio"));
-            	contract.endContract = new LocalDate(rs.getDate("Datafine"));
-            	if(rs.getByte("continua")==0)
-            		contract.isContinued = false;
-            	else 
-            		contract.isContinued = true;
+        		contract.person = person;
+        		Date begin = rs.getDate("DataInizio");
+        		Date end = rs.getDate("DataFine");
+        				
+        		
+        		if(begin == null && end == null){
+        			/**
+        			 * le date non sono valorizzate, si costruisce un contratto con date fittizie
+        			 */
+        			contract.beginContract = new LocalDate(1971,12,31);
+        			contract.endContract = new LocalDate(2099,1,1);
+        		}
+        			
+        		if(begin != null && end == null){
+        			/**
+        			 * è il caso dei contratti a tempo indeterminato che non hanno data di fine valorizzata. posso lasciarla anche
+        			 * io a null
+        			 */
+        			contract.beginContract = new LocalDate(begin);
+        			contract.endContract = null;
+        		}
+        		if(begin == null && end != null){
+        			contract.beginContract = new LocalDate(1971,12,31);
+        			contract.endContract = new LocalDate(end);
+        		}
+        		
+        		if(begin != null && end != null){
+        			/**
+        			 * entrambi gli estremi valorizzati, contratto a tempo determinato, si inseriscono entrambe
+        			 */
+        			contract.beginContract = new LocalDate(begin);
+        			contract.endContract = new LocalDate(end);
+        		}
+        		
+        		if(rs.getByte("continua")==0)
+        			contract.isContinued = false;
+        		else
+        			contract.isContinued = true;
+        		em.persist(contract);
         	}
         	else{
+        		/**
+        		 * esistono contratti per quella persona, quindi quello ripescato deve essere cancellato per farlo finire nello storico
+        		 * e inserire il nuovo per la persona. I controlli sulle date sono gli stessi del punto precedente
+        		 */
+        		
         		contract.delete();
-        		contract.save();
-        		contract = new Contract();
-            	contract.person = person;
-            	contract.beginContract = new LocalDate(rs.getDate("Datainizio"));
-            	contract.endContract = new LocalDate(rs.getDate("Datafine"));
-            	if(rs.getByte("continua")==0)
-            		contract.isContinued = false;
-            	else 
-            		contract.isContinued = true;
+        		
+        		em.persist(contract);
+        		
+        		Contract newContract = new Contract();
+        		newContract.person = person;
+        		Date begin = rs.getDate("DataInizio");
+        		Date end = rs.getDate("DataFine");
+        		if(begin == null && end == null){
+        			newContract.beginContract = new LocalDate(1971,12,31);
+        			newContract.endContract = new LocalDate(2099,1,1);
+        		}
+        			
+        		if(begin != null && end == null){
+        			newContract.beginContract = new LocalDate(begin);
+        			newContract.endContract = null;
+        		}
+        		if(begin == null && end != null){
+        			newContract.beginContract = new LocalDate(1971,12,31);
+        			newContract.endContract = new LocalDate(end);
+        		}
+        		if(begin != null && end != null){
+        			newContract.beginContract = new LocalDate(begin);
+        			newContract.endContract = new LocalDate(end);
+        		}
+        		
+        		if(rs.getByte("continua")==0)
+        			newContract.isContinued = false;
+        		else
+        			newContract.isContinued = true;
+        		em.persist(newContract);
         	}
-        	
-        	em.persist(contract);
-//            Date nuovaDataInizio = null;	
-//            contract = Contract.findById(person.id);	
-//            if(contract != null){                           
-//
-//            	if(contract.endContract == null){
-//                    em.persist(contract);
-//
-//                }
-//
-//                else{
-//                	if(rs.getDate("Datainizio")==null)
-//                		nuovaDataInizio = new Date(1970-01-01);
-//
-//                    else
-//                    	nuovaDataInizio = rs.getDate("Datainizio");
-//                        long endContractMillis=contract.endContract.getTime();
-//                        long startNewContractMillis = nuovaDataInizio.getTime();
-//                        if((contract.endContract != null) && (endContractMillis<startNewContractMillis)){
-//                        	contract.delete();
-//                        	contract.save();
-//                            contract = new Contract();
-//                            contract.person = person;
-//                            if(rs.getDate("Datainizio") != null)
-//                            	contract.beginContract = rs.getDate("Datainizio");
-//                            else
-//                                contract.beginContract = null;
-//                                if(rs.getDate("Datafine") != null)
-//                                	contract.endContract = rs.getDate("Datafine");
-//                                else
-//                                    contract.endContract = null;
-//                                if(rs.getByte("continua")==0)
-//                                    contract.isContinued = false;
-//                                else 
-//                                    contract.isContinued = true;
-//                                                
-//                        }
-//
-//                }
-//            	em.persist(contract);
-//            }
-//
-//            else{
-//                contract = new Contract();
-//                contract.person = person;
-//                if(rs.getDate("Datainizio") != null)
-//                	contract.beginContract = rs.getDate("Datainizio");
-//                else
-//                    contract.beginContract = null;
-//                if(rs.getDate("Datafine") != null)
-//                    contract.endContract = rs.getDate("Datafine");
-//                else
-//                    contract.endContract = null;
-//                if(rs.getByte("continua")==0)
-//                    contract.isContinued = false;
-//                else 
-//                    contract.isContinued = true;
-//                                                                
-//                em.persist(contract);
-//            }                                
+           
              
         }
         mysqlCon.close();
@@ -1078,6 +1080,7 @@ public class FromMysqlToPostgres {
 			em.persist(valuableCompetence);
 		}
 		mysqlCon.close();
+	
 	}
 	
 	/**
@@ -1097,10 +1100,7 @@ public class FromMysqlToPostgres {
 		StampModificationType smt3 = new StampModificationType();
 		smt3.code = "";
 		smt3.description = "";
-		em.persist(smt3);		
-		
+		em.persist(smt3);
 	}
-	
-	
-	
 }
+		
