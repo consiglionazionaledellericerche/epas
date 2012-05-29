@@ -13,11 +13,11 @@ import play.test.Fixtures;
 public class Bootstrap extends Job {
 	
 
-	public void doJob() {
-		if (Permission.count() == 0) {
-			Fixtures.delete();
-			Fixtures.loadModels("permission.yml");
-		} 
-	}
+//	public void doJob() {
+//		if (Permission.count() == 0) {
+//			Fixtures.delete();
+//			Fixtures.loadModels("permission.yml");
+//		} 
+//	}
 
 }
