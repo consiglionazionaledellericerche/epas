@@ -55,3 +55,4 @@ GET		/persons/update							Persons.form
 GET		/manageWorkingTime						WorkingTimes.manageWorkingTime
 GET		/vacationsAdmin							VacationsAdmin.manageVacationCode
 
+GET 	/reperibility/personList				Reperibility.personList

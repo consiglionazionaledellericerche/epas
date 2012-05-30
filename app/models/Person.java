@@ -25,6 +25,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import lombok.ToString;
+
 import org.eclipse.jdt.internal.core.BecomeWorkingCopyOperation;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -68,19 +70,19 @@ public class Person extends Model {
 	 * relazione con la nuova tabella dei person day
 	 */
 	@OneToMany(mappedBy="person")
-	public List<PersonDay> personDay;
+	public List<PersonDay> personDays;
 	
 	/**
 	 * relazione con la nuova tabella dei person_month
 	 */
 	@OneToMany(mappedBy="person")
-	public List<PersonMonth> personMonth;
+	public List<PersonMonth> personMonths;
 	
 	/**
 	 * relazione con la nuova tabella dei person_year
 	 */
 	@OneToMany(mappedBy="person")
-	public List<PersonYear> personYear;
+	public List<PersonYear> personYears;
 
 	/**
 	 * relazione con la tabella delle timbrature
@@ -94,14 +96,14 @@ public class Person extends Model {
 	 */
 	@NotAudited
 	@OneToMany(mappedBy="person")
-	public List<YearRecap> yearRecap;
+	public List<YearRecap> yearRecaps;
 	
 	/**
 	 * relazione con la tabella di storico MonthRecap
 	 */
 	@NotAudited
 	@OneToMany(mappedBy="person")
-	public List<MonthRecap> monthRecap;
+	public List<MonthRecap> monthRecaps;
 	
 		
 	/**
@@ -117,19 +119,18 @@ public class Person extends Model {
 	 */
 	@NotAudited
 	@OneToMany(mappedBy="person")
-	public List<Absence> absence;
+	public List<Absence> absences;
 	
 	/**
 	 * relazione con la tabella di person vacation
 	 */
 	@OneToMany(mappedBy="person")
-	public List <PersonVacation> personVacation;
+	public List <PersonVacation> personVacations;
 	
 	/**
 	 * relazione con la tabella di vacation_code
 	 */
-	@OneToOne
-	@JoinColumn(name="vacation_period_id")
+	@OneToOne(mappedBy="person")
 	public VacationPeriod vacationPeriod;
 	
 	
@@ -138,14 +139,14 @@ public class Person extends Model {
 	 */
 	@NotAudited
 	@OneToMany(mappedBy="person")
-	public List<Competence> competence;
+	public List<Competence> competences;
 	
 	/**
 	 * relazione con la tabella delle competence valide
 	 */
 	@NotAudited
 	@OneToMany(mappedBy="person")
-	public List<ValuableCompetence> valuableCompetence;
+	public List<ValuableCompetence> valuableCompetences;
 	
 	/**
 	 * relazione con la tabella delle tipologie di orario di lavoro
@@ -169,6 +170,9 @@ public class Person extends Model {
 	@OneToOne
 	@JoinColumn(name="contact_data_id")
 	public ContactData contactData;
+	
+	@OneToOne(mappedBy="person")
+	public PersonReperibility reperibility;
 	
 	@Required
 	public String name;

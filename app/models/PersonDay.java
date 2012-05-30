@@ -50,7 +50,7 @@ import play.db.jpa.Model;
  */
 @Entity
 @Audited
-@Table(name="person_day")
+@Table(name="person_days")
 public class PersonDay extends Model {
 
 	
@@ -59,20 +59,20 @@ public class PersonDay extends Model {
 	@JoinColumn(name = "person_id", nullable = false)
 	public Person person;
 	
-	@Column
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate date;
-	@Column
+	
 	public Integer timeAtWork;
-	@Column
+	
 	public int difference;
-	@Column
-	public int progressive;	
-	@Column
+	
+	public int progressive;
+	
 	public boolean isTicketAvailable;
 
 	@Transient
 	private LocalDateTime startOfDay;
+	
 	@Transient
 	private LocalDateTime endOfDay;
 	

@@ -136,11 +136,11 @@ public class FromMysqlToPostgres {
 
 		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT ID, Nome, Cognome, DataNascita, Telefono," +
 				"Fax, Email, Stanza, Matricola, passwordmd5, Qualifica, Dipartimento, Sede " +
-				"FROM Persone order by ID");
+				"FROM Persone p order by ID");
 		ResultSet rs = stmt.executeQuery();
 		
 		while(rs.next()){
-			Logger.warn("Creazione delle info per la persona: "+rs.getString("Nome").toString()+" "+rs.getString("Cognome").toString());
+			Logger.info("Creazione delle info per la persona: %s %s", rs.getString("Nome"), rs.getString("Cognome"));
 			//rs.next(); // exactly one result so allowed 
 					
 			Person person = FromMysqlToPostgres.createPerson(rs, em);
@@ -703,56 +703,58 @@ public class FromMysqlToPostgres {
 	}
 	
 	public static void createVacationType(long id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-		Logger.info("Inizio a creare i periodi di ferie per " +person.name+ " " +person.surname);
+		Logger.info("Inizio a creare i periodi di ferie per %s %s", person.name ,person.surname);
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * " +
 				"FROM ferie f,ferie_pers fp " +
-				"WHERE f.id=fp.fid AND fp.pid = " +id);
+				"WHERE f.id=fp.fid AND fp.pid = " +id + 
+				" ORDER BY data_fine");
 		ResultSet rs = stmt.executeQuery();
 		
 		VacationPeriod vacationPeriod = null;
 		VacationCode vacationCode = null;
+		
 		try{
 			if(rs != null){
 				while(rs.next()){
+									
 					int idCodiciFerie = rs.getInt("id");
-					Logger.warn("l'id del tipo ferie è questo: " + rs.getInt("id"));
-					Logger.warn("Ed è relativo alla persona con id= "+ id);
-					Logger.warn("Nella mappacodici l'id relativo al codiceferie "+ idCodiciFerie + " è " + mappaCodiciVacationType.get(idCodiciFerie));
-					if(mappaCodiciVacationType.get(idCodiciFerie)==null){
-						//Logger.warn("Nella mappacodici l'id relativo al codiceferie "+ idCodiciFerie + "è " + mappaCodici.get(idCodiciFerie));
-						vacationCode = new VacationCode();
-						Logger.warn("Creo un nuovo vacation code perchè nella mappa il codice ferie non era presente");
+					Logger.debug("l'id del tipo ferie è %s ed è relativo alla persona con id=%d", rs.getInt("id"), id);
+					Logger.debug("Nella mappacodici l'id relativo al codiceferie "+ idCodiciFerie + " è " + mappaCodiciVacationType.get(idCodiciFerie));
+					
+					if (vacationPeriod != null) {
+						em.remove(vacationPeriod);
+						em.flush();
+					}
+					
+					vacationPeriod = new VacationPeriod();
 
+					if(mappaCodiciVacationType.get(idCodiciFerie)==null){
+						Logger.trace("Creo un nuovo vacation code perchè nella mappa il codice ferie non era presente");
+
+						vacationCode = new VacationCode();
 						vacationCode.description = rs.getString("nome");
 						vacationCode.vacationDays = rs.getInt("giorni_ferie");
 						vacationCode.permissionDays = rs.getInt("giorni_pl");
 					
 						em.persist(vacationCode);
-						Logger.warn("Il valore del vacation code appena creato è "+ vacationCode.id);
+						Logger.debug("Creato un nuovo vacation code con id = , description = %s", vacationCode.id, vacationCode.description);
 						mappaCodiciVacationType.put(idCodiciFerie,vacationCode.id);
 						
-						vacationPeriod = new VacationPeriod();
-						vacationPeriod.vacationCode = vacationCode;
-						vacationPeriod.person = person;
-						vacationPeriod.beginFrom = rs.getDate("data_inizio");
-						vacationPeriod.endsTo = rs.getDate("data_fine");
-						em.persist(vacationPeriod);				
-						
 					}
-					else{
-						Logger.warn("Il codice era presente, devo quindi fare una find per recuperare l'oggetto vacationCode");
+					else {
+						Logger.trace("Il codice era presente, devo quindi fare una find per recuperare l'oggetto vacationCode");
 						vacationCode = VacationCode.findById(mappaCodiciVacationType.get(idCodiciFerie));
-									
-						Logger.warn("Faccio la query sui vacationPeriod...");
-						
-							vacationPeriod = new VacationPeriod();
-							vacationPeriod.vacationCode = vacationCode;
-							vacationPeriod.person = person;
-							vacationPeriod.beginFrom = rs.getDate("data_inizio");
-							vacationPeriod.endsTo = rs.getDate("data_fine");
-							em.persist(vacationPeriod);
+
 					}
+					
+					vacationPeriod.vacationCode = vacationCode;
+					vacationPeriod.person = person;
+					vacationPeriod.beginFrom = rs.getDate("data_inizio");
+					vacationPeriod.endTo = rs.getDate("data_fine");					
+					em.persist(vacationPeriod);		
+					
+					Logger.info("Creato vacationPeriod id=%s per Person = %s con vacationCode = %s", vacationPeriod, person, vacationCode);
 										
 				}
 			}
