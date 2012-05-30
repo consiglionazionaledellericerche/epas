@@ -2,6 +2,7 @@ package models;
 
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
@@ -24,7 +25,7 @@ import play.db.jpa.Model;
  */
 @Audited
 @Entity
-@Table(name="contract")
+@Table(name="contracts")
 public class Contract extends Model {
 	
 	private static final long serialVersionUID = -4472102414284745470L;
@@ -38,11 +39,14 @@ public class Contract extends Model {
 	public Person person;
 	
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	@Column(name="begin_contract")
 	public LocalDate beginContract;
 	
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	@Column(name="end_contract")
 	public LocalDate endContract;
 	
+	@Column(name="is_continued")
 	public boolean isContinued;
 	
 	public boolean workSaturday;

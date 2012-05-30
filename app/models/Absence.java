@@ -12,6 +12,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
+import play.data.validation.Required;
 import play.db.jpa.Model;
 
 /**
@@ -26,6 +27,7 @@ public class Absence extends Model {
 	
 	private static final long serialVersionUID = -1963061850354314327L;
 
+	@Required
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate date;
 	
@@ -33,8 +35,9 @@ public class Absence extends Model {
 	@JoinColumn(name = "absenceType_id")
 	public AbsenceType absenceType;
 	
-	@ManyToOne
-	@JoinColumn(name="person_id")
+	@Required
+	@ManyToOne(optional=false)
+	@JoinColumn(name="person_id", nullable=false)
 	public Person person;
 	
 	

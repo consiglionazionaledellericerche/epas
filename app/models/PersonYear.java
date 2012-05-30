@@ -18,7 +18,7 @@ import play.db.jpa.Model;
  */
 @Audited
 @Entity
-@Table(name="person_year")
+@Table(name="person_years")
 public class PersonYear extends Model{
 	
 	@ManyToOne

@@ -5,6 +5,7 @@ package models;
 
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -36,10 +37,12 @@ public class VacationCode extends Model {
 	public String description;
 	
 	@Required
-	public int vacationDays;
+	@Column(name="vacation_days")
+	public Integer vacationDays;
 	
 	@Required
-	public int permissionDays;
+	@Column(name="permission_days")
+	public Integer permissionDays;
 
 	
 }

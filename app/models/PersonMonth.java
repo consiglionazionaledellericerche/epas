@@ -25,7 +25,7 @@ import play.db.jpa.Model;
 import lombok.Data;
 
 @Audited
-@Table(name="person_month")
+@Table(name="person_months")
 @Entity
 public class PersonMonth extends Model {
 	

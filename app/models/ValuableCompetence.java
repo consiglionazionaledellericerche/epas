@@ -8,8 +8,8 @@ import javax.persistence.Table;
 import play.db.jpa.Model;
 
 @Entity
-@Table(name="valuable_competence")
-public class ValuableCompetence extends Model{
+@Table(name="valuable_competences")
+public class ValuableCompetence extends Model {
 
 	@ManyToOne
 	@JoinColumn(name="person_id")

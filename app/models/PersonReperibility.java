@@ -1,0 +1,46 @@
+/**
+ * 
+ */
+package models;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.Type;
+import org.hibernate.envers.Audited;
+import org.joda.time.LocalDate;
+
+import play.data.validation.Required;
+import play.data.validation.Unique;
+import play.db.jpa.Model;
+
+/**
+ * Contiene le informazioni per l'eventuale "reperibilità" svolta dalla persona
+ * 
+ * @author cristian
+ *
+ */
+@Audited
+@Entity
+@Table(name="person_reperibility")
+public class PersonReperibility extends Model {
+
+	@Unique
+	@Required
+	@OneToOne
+	@JoinColumn(name="person_id", unique=true)
+	public Person person;
+	
+	@Column(name="start_date")
+	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	public LocalDate startDate;
+	
+	@Column(name="end_date")
+	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	public LocalDate endDate;
+	
+	public String note;
+}
