@@ -29,6 +29,7 @@ import models.Location;
 import models.MonthRecap;
 import models.Person;
 import models.PersonDay;
+import models.PersonReperibility;
 import models.PersonVacation;
 import models.StampModificationType;
 import models.StampType;
@@ -200,10 +201,7 @@ public class FromMysqlToPostgres {
 		
 		WorkingTimeType wtt = null;
 		if(rsInterno.next()){
-//		while(rsInterno.next()){
-//			i++;
-//		}
-		//Logger.info("l'id dell'orario di lavoro è: " +rsInterno.getInt("id"));
+
 			int idCodiceOrarioLavoro = rsInterno.getInt("id");
 			if(mappaCodiciWorkingTimeType.get(idCodiceOrarioLavoro)!=null){
 				wtt = WorkingTimeType.findById(mappaCodiciWorkingTimeType.get(idCodiceOrarioLavoro));
@@ -308,96 +306,59 @@ public class FromMysqlToPostgres {
         Logger.info("Inizio a creare il contratto per " +person.name+ " " +person.surname);	
         Connection mysqlCon = getMysqlConnection();	
         PreparedStatement stmtContratto = mysqlCon.prepareStatement("SELECT id,DataInizio,DataFine,continua " +	
-                        "FROM Personedate WHERE id=" + id + " order by DataInizio");	
+                        "FROM Personedate WHERE id=" + id + " order by DataFine");	
         ResultSet rs = stmtContratto.executeQuery();       	
         Contract contract = null;	
         while(rs.next()){
-        	contract = Contract.find("Select con from Contract con where con.person = ?", person).first();
         	
-        	if(contract == null){
-        		/**
-        		 * non esistono contratti per quella persona nel db, questo è il primo
-        		 */
-        		contract = new Contract();
-        		contract.person = person;
-        		Date begin = rs.getDate("DataInizio");
-        		Date end = rs.getDate("DataFine");
-        				
-        		
-        		if(begin == null && end == null){
-        			/**
-        			 * le date non sono valorizzate, si costruisce un contratto con date fittizie
-        			 */
-        			contract.beginContract = new LocalDate(1971,12,31);
-        			contract.endContract = new LocalDate(2099,1,1);
-        		}
-        			
-        		if(begin != null && end == null){
-        			/**
-        			 * è il caso dei contratti a tempo indeterminato che non hanno data di fine valorizzata. posso lasciarla anche
-        			 * io a null
-        			 */
-        			contract.beginContract = new LocalDate(begin);
-        			contract.endContract = null;
-        		}
-        		if(begin == null && end != null){
-        			contract.beginContract = new LocalDate(1971,12,31);
-        			contract.endContract = new LocalDate(end);
-        		}
-        		
-        		if(begin != null && end != null){
-        			/**
-        			 * entrambi gli estremi valorizzati, contratto a tempo determinato, si inseriscono entrambe
-        			 */
-        			contract.beginContract = new LocalDate(begin);
-        			contract.endContract = new LocalDate(end);
-        		}
-        		
-        		if(rs.getByte("continua")==0)
-        			contract.isContinued = false;
-        		else
-        			contract.isContinued = true;
-        		em.persist(contract);
-        	}
-        	else{
-        		/**
-        		 * esistono contratti per quella persona, quindi quello ripescato deve essere cancellato per farlo finire nello storico
-        		 * e inserire il nuovo per la persona. I controlli sulle date sono gli stessi del punto precedente
-        		 */
-        		
-        		contract.delete();
-        		
-        		em.persist(contract);
-        		
-        		Contract newContract = new Contract();
-        		newContract.person = person;
-        		Date begin = rs.getDate("DataInizio");
-        		Date end = rs.getDate("DataFine");
-        		if(begin == null && end == null){
-        			newContract.beginContract = new LocalDate(1971,12,31);
-        			newContract.endContract = new LocalDate(2099,1,1);
-        		}
-        			
-        		if(begin != null && end == null){
-        			newContract.beginContract = new LocalDate(begin);
-        			newContract.endContract = null;
-        		}
-        		if(begin == null && end != null){
-        			newContract.beginContract = new LocalDate(1971,12,31);
-        			newContract.endContract = new LocalDate(end);
-        		}
-        		if(begin != null && end != null){
-        			newContract.beginContract = new LocalDate(begin);
-        			newContract.endContract = new LocalDate(end);
-        		}
-        		
-        		if(rs.getByte("continua")==0)
-        			newContract.isContinued = false;
-        		else
-        			newContract.isContinued = true;
-        		em.persist(newContract);
-        	}
-           
+        	if (contract != null) {
+				em.remove(contract);
+				em.flush();
+			}        	
+        	contract = new Contract();       	
+        	/**
+    		 * non esistono contratti per quella persona nel db, questo è il primo
+    		 */
+    		contract = new Contract();
+    		contract.person = person;
+    		Date begin = rs.getDate("DataInizio");
+    		Date end = rs.getDate("DataFine");    				
+    		
+    		if(begin == null && end == null){
+    			/**
+    			 * le date non sono valorizzate, si costruisce un contratto con date fittizie
+    			 */
+    			contract.beginContract = new LocalDate(1971,12,31);
+    			contract.endContract = new LocalDate(2099,1,1);
+    		}
+    			
+    		if(begin != null && end == null){
+    			/**
+    			 * è il caso dei contratti a tempo indeterminato che non hanno data di fine valorizzata. posso lasciarla anche
+    			 * io a null
+    			 */
+    			contract.beginContract = new LocalDate(begin);
+    			contract.endContract = null;
+    		}
+    		if(begin == null && end != null){
+    			contract.beginContract = new LocalDate(1971,12,31);
+    			contract.endContract = new LocalDate(end);
+    		}
+    		
+    		if(begin != null && end != null){
+    			/**
+    			 * entrambi gli estremi valorizzati, contratto a tempo determinato, si inseriscono entrambe
+    			 */
+    			contract.beginContract = new LocalDate(begin);
+    			contract.endContract = new LocalDate(end);
+    		}
+    		
+    		if(rs.getByte("continua")==0)
+    			contract.isContinued = false;
+    		else
+    			contract.isContinued = true;
+    		em.persist(contract);
+    		em.flush();    	     
              
         }
         mysqlCon.close();
@@ -422,7 +383,6 @@ public class FromMysqlToPostgres {
 				
 		StampType stampType = null;
 		Stamping stamping = null;
-		//LocalDate previousDay = null;
 		byte tipoTimbratura;
 		while(rs.next()){
 			int idCodiceTimbratura = rs.getInt("TipoTimbratura");
@@ -462,12 +422,6 @@ public class FromMysqlToPostgres {
 			
 			LocalDate giornata = new LocalDate(rs.getDate("Giorno"));
 
-//			if(previousDay != null && giornata.getDayOfMonth() != previousDay.getDayOfMonth() && person.id == 139 && giornata.getYear()>2010){
-//				
-//				PersonDay pd = new PersonDay(person,previousDay);
-//				pd.populatePersonDay();
-//				pd.save();
-//			}
 			if(giornata != null){			
 								
 				try {
@@ -1019,6 +973,24 @@ public class FromMysqlToPostgres {
 			competence.person = person;
 			competence.value = rs.getInt("valore");
 			competence.code = rs.getString("codice");
+			/**
+			 * per popolare la personReperibility controllo che quando inserisco un nuovo codice, quella persona abbia anche già
+			 * una entry nella tabella PersonReperibility: in tal caso non la inserisco, altrimenti devo aggiungerla.
+			 */
+			String codice = rs.getString("codice");
+			if(codice.equals("207") || codice.equals("208")){
+				PersonReperibility personRep = PersonReperibility.find("Select pr from PersonReperibility pr where " +
+						"pr.person = ?", person).first();
+				if(personRep==null){
+					personRep = new PersonReperibility();
+					personRep.person = person;
+					personRep.startDate = null;
+					personRep.endDate = null;
+					em.persist(personRep);
+					em.flush();
+				}
+				
+			}
 			competence.month = rs.getInt("mese");
 			competence.year = rs.getInt("anno");
 			int idCodiciCompetenza = rs.getInt("id");	
