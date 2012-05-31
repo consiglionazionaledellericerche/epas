@@ -31,6 +31,8 @@ import lombok.ToString;
 import net.spy.memcached.FailureMode;
 
 import org.eclipse.jdt.internal.core.BecomeWorkingCopyOperation;
+import org.hibernate.envers.AuditReader;
+import org.hibernate.envers.AuditReaderFactory;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
@@ -40,6 +42,7 @@ import controllers.Secure;
 
 import play.data.validation.Email;
 import play.data.validation.Required;
+import play.db.jpa.JPA;
 import play.db.jpa.Model;
 import play.mvc.Http.Request;
 import play.mvc.With;
@@ -219,14 +222,6 @@ public class Person extends Model {
 	 * tutti i calcoli relativi ai contratti.
 	 */
 	
-	/**
-	 * 
-	 * @return l'ultimo contratto in essere per questa persona
-	 */
-	public Contract getLastContract(){
-		Contract contract = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract desc", this).first();
-		return contract;
-	}
 	
 	/**
 	 * 
@@ -251,7 +246,8 @@ public class Person extends Model {
 		 */
 		List<Contract> listaContratti = Contract.find("Select con from Contract con where con.person = ? " +
 				"order by con.beginContract desc", person).fetch();
-		
+		AuditReader reader = AuditReaderFactory.get(JPA.em());
+		//AuditQuery query = getAuditReader().createQuery().forEntitiesAtRevision(MyEntity.class, revisionNumber);
 		//XXX: dovrebbe esistere questo caso?? ESISTE ESISTE
 		if (listaContratti.size() == 0) {
 			return null;

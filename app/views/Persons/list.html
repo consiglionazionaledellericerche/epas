@@ -57,8 +57,8 @@
 		<td><a href="@{form(person.id)}">${person.surname}</a></td>
 		<td>${person.name}</td>
 		<td>${person.number}</td>
-		<td>${person.getLastContract() != null && person.getLastContract().beginContract != null ? person.getLastContract().beginContract : ''}</td>
-		<td>${person.getLastContract() != null && person.getLastContract().endContract != null ? person.getLastContract().endContract : ''}</td>
+		<td>${person.contract != null && person.contract.beginContract != null ? person.contract.beginContract : ''}</td>
+		<td>${person.contract != null && person.contract.endContract != null ? person.contract.endContract : ''}</td>
 		<td>${person.workingTimeType != null && person.workingTimeType.description != null ? person.workingTimeType.description : ''}</td>
 		<td>${person.getVacation(person) != null ? person.getVacation(person).description : ''}</td>
 		<td>${person.qualification}</td>
