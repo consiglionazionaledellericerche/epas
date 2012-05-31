@@ -52,16 +52,15 @@ public class Stampings extends Controller {
     
     public static void dailyStampings() {
     	Person person = Person.findById(Long.parseLong(params.get("id")));
-    	PersonDay personDay = 
-    			new PersonDay(
-    				person, 
-    				new LocalDate(
-    					Integer.parseInt(params.get("year")),
-    					Integer.parseInt(params.get("month")), 
-    					Integer.parseInt(params.get("day"))),
-    					0,
-    					0,
-    					0);
+    	LocalDate day = 
+    			new LocalDate(
+    				Integer.parseInt(params.get("year")),
+    				Integer.parseInt(params.get("month")), 
+    				Integer.parseInt(params.get("day")));
+    	
+    	Logger.trace("dailyStampings called for %s %s", person, day);
+    	
+    	PersonDay personDay = new PersonDay(person, day);
     	render(personDay);
     }
 }
