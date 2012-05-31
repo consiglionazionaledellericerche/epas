@@ -1,0 +1,15 @@
+[
+  %{ 
+  	for (person in personList) {
+  		%}
+  			{
+  			"id" : "${person.id}",
+  			"email" : ${person.contactData.email},
+  			"name" : ${person.name},
+  			"surname : "${person.surname}",
+  			"mobile": "${person.contactData.mobile}",
+  			},		
+  		%{
+  	}
+  }% 
+]

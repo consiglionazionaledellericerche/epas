@@ -35,26 +35,23 @@ public class Stamping extends Model {
 	
 	@Required
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "person_id", nullable = false)
+	@JoinColumn(name = "person_id", nullable = false, updatable = false)
 	public Person person;
 	
 	@Required
-	@ManyToOne(optional = true)
+	@ManyToOne(optional = false)
 	@JoinColumn(name = "stamp_type_id")
 	public StampType stampType;
 	
-	@Required
 	@ManyToOne(optional = true)
 	@JoinColumn(name = "stamp_modification_type_id")
 	public StampModificationType stampModificationType;
 	
 	
 	@Required
-	@Column
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDateTime")
 	@InPast
+	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDateTime")
 	public LocalDateTime date;
-	
 	
 	@Required
 	@Enumerated(EnumType.STRING)
@@ -67,12 +64,14 @@ public class Stamping extends Model {
 	 * macchinetta (valore = false) o se è stato l'amministratore a settare l'orario di timbratura poichè la persona 
 	 * in questione non ha potuto effettuare la timbratura (valore = true)
 	 */
-	public boolean isMarkedByAdmin;
+	@Column(name = "marked_by_admin")
+	public Boolean markedByAdmin;
 	
 	/**
 	 * questo campo booleano consente di determinare se la timbratura è come uscita di servizio.
 	 */
-	public boolean isServiceExit;
+	@Column(name = "service_exit")
+	public Boolean serviceExit;
 	
 		
 		

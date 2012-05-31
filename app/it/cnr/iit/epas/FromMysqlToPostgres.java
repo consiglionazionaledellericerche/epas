@@ -31,6 +31,7 @@ import models.Person;
 import models.PersonDay;
 import models.PersonVacation;
 import models.StampModificationType;
+import models.StampModificationTypeValue;
 import models.StampType;
 import models.Stamping;
 import models.Stamping.WayType;
@@ -477,8 +478,8 @@ public class FromMysqlToPostgres {
 					
 					if(s == null){
 						stamping.date = null;
-						stamping.isMarkedByAdmin = false;
-						stamping.isServiceExit = false;
+						stamping.markedByAdmin = false;
+						stamping.serviceExit = false;
 					}
 					else{
 						if(s.startsWith("-")){
@@ -496,8 +497,8 @@ public class FromMysqlToPostgres {
 	
 			                stamping.date = new LocalDateTime(year,month,day,hour,minute,second);
 			                
-			                stamping.isMarkedByAdmin = false;
-			                stamping.isServiceExit = true;
+			                stamping.markedByAdmin = false;
+			                stamping.serviceExit = true;
 			                em.persist(stamping);
 						}
 						else{
@@ -521,16 +522,16 @@ public class FromMysqlToPostgres {
 								int min = hour % 60;
 							    stamping.date = new LocalDateTime(year,month,day,newHour,min,second);
 				                
-				                stamping.isMarkedByAdmin = true;
-				                stamping.isServiceExit = false;
+				                stamping.markedByAdmin = true;
+				                stamping.serviceExit = false;
 				                em.persist(stamping);
 							}						
 							
 							else{
 								if(hour == 24){
 									stamping.date = new LocalDateTime(year,month,day,0,minute,second).plusDays(1);
-									stamping.isMarkedByAdmin = true;
-					                stamping.isServiceExit = false;
+									stamping.markedByAdmin = true;
+					                stamping.serviceExit = false;
 									em.persist(stamping);
 								}
 								else{
@@ -538,8 +539,8 @@ public class FromMysqlToPostgres {
 									Logger.info("L'ora è: ", +hour);
 					                stamping.date = new LocalDateTime(year,month,day,hour,minute,second);
 					                
-					                stamping.isMarkedByAdmin = false;
-					                stamping.isServiceExit = false;
+					                stamping.markedByAdmin = false;
+					                stamping.serviceExit = false;
 					                em.persist(stamping);
 								}
 							}
@@ -685,11 +686,8 @@ public class FromMysqlToPostgres {
 
 		try{
 			if(rs != null){				
-				while(rs.next()){	
-
-					personVacation = new PersonVacation();
-					personVacation.person = person;
-					personVacation.vacationDay = rs.getDate("Giorno");
+				while(rs.next()){
+					personVacation = new PersonVacation(person, rs.getDate("Giorno"));
 					em.persist(personVacation);
 				}
 			}

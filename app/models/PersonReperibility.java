@@ -6,6 +6,7 @@ package models;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -41,6 +42,10 @@ public class PersonReperibility extends Model {
 	@Column(name="end_date")
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate endDate;
+	
+	@ManyToOne
+	@JoinColumn(name = "person_reperibility_type_id")
+	public PersonReperibilityType personReperibilityType;
 	
 	public String note;
 }

@@ -18,6 +18,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import javax.persistence.criteria.Fetch;
 
 import lombok.Data;
@@ -50,7 +51,7 @@ import play.db.jpa.Model;
  */
 @Entity
 @Audited
-@Table(name="person_days")
+@Table(name="person_days", uniqueConstraints = { @UniqueConstraint(columnNames={ "person_id", "date"}) })
 public class PersonDay extends Model {
 
 	
@@ -59,6 +60,7 @@ public class PersonDay extends Model {
 	@JoinColumn(name = "person_id", nullable = false)
 	public Person person;
 	
+	@Required
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate date;
 	

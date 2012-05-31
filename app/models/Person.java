@@ -24,8 +24,11 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.Version;
 
 import lombok.ToString;
+
+import net.spy.memcached.FailureMode;
 
 import org.eclipse.jdt.internal.core.BecomeWorkingCopyOperation;
 import org.hibernate.envers.Audited;
@@ -55,124 +58,13 @@ public class Person extends Model {
 	 * relazione con la tabella dei permessi
 	 */
 	private static final long serialVersionUID = -2293369685203872207L;
-	
-	@ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
-	public List<Permission> permissions;
 
-	/**
-	 * relazione con la tabella dei gruppi
-	 */
-	@ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
-	public List<Group> groups;
-	
 	
 	/**
-	 * relazione con la nuova tabella dei person day
+	 * Used for optimisti locking
 	 */
-	@OneToMany(mappedBy="person")
-	public List<PersonDay> personDays;
-	
-	/**
-	 * relazione con la nuova tabella dei person_month
-	 */
-	@OneToMany(mappedBy="person")
-	public List<PersonMonth> personMonths;
-	
-	/**
-	 * relazione con la nuova tabella dei person_year
-	 */
-	@OneToMany(mappedBy="person")
-	public List<PersonYear> personYears;
-
-	/**
-	 * relazione con la tabella delle timbrature
-	 */
-	@NotAudited
-	@OneToMany(mappedBy="person")
-	public List<Stamping> stampings;
-	
-	/**
-	 * relazione con la tabella di storico YearRecap
-	 */
-	@NotAudited
-	@OneToMany(mappedBy="person")
-	public List<YearRecap> yearRecaps;
-	
-	/**
-	 * relazione con la tabella di storico MonthRecap
-	 */
-	@NotAudited
-	@OneToMany(mappedBy="person")
-	public List<MonthRecap> monthRecaps;
-	
-		
-	/**
-	 * relazione con la tabella dei contratti
-	 */
-	@Transient
-	@OneToOne(mappedBy="person")
-	@JoinColumn(name="contract_id")
-	public Contract contract;
-	
-	/**
-	 * relazione con la tabella delle absence
-	 */
-	@NotAudited
-	@OneToMany(mappedBy="person")
-	public List<Absence> absences;
-	
-	/**
-	 * relazione con la tabella di person vacation
-	 */
-	@OneToMany(mappedBy="person")
-	public List <PersonVacation> personVacations;
-	
-	/**
-	 * relazione con la tabella di vacation_code
-	 */
-	@OneToOne(mappedBy="person")
-	public VacationPeriod vacationPeriod;
-	
-	
-	/**
-	 * relazione con la tabella Competence
-	 */
-	@NotAudited
-	@OneToMany(mappedBy="person")
-	public List<Competence> competences;
-	
-	/**
-	 * relazione con la tabella delle competence valide
-	 */
-	@NotAudited
-	@OneToMany(mappedBy="person")
-	public List<ValuableCompetence> valuableCompetences;
-	
-	/**
-	 * relazione con la tabella delle tipologie di orario di lavoro
-	 */
-	@ManyToOne
-	@JoinColumn(name="workingTimeType_id")
-	public WorkingTimeType workingTimeType;
-	
-	
-	/**
-	 * relazione con la tabella delle locazioni degli utenti
-	 */
-	@NotAudited
-	@OneToOne(mappedBy="person")
-	public Location location;
-	
-	/**
-	 * relazione con la tabella delle info di contatto
-	 */
-	@NotAudited
-	@OneToOne
-	@JoinColumn(name="contact_data_id")
-	public ContactData contactData;
-	
-	@OneToOne(mappedBy="person")
-	public PersonReperibility reperibility;
+	@Version
+	public Integer version;
 	
 	@Required
 	public String name;
@@ -180,6 +72,7 @@ public class Person extends Model {
 	@Required
 	public String surname;
 	
+	@Column(name = "other_surnames")
 	public String othersSurnames;
 	
 	@Column(name = "born_date")
@@ -195,12 +88,127 @@ public class Person extends Model {
 	/**
 	 * livello di contratto
 	 */
-	public int qualification;
+	public Integer qualification;
 	
 	/**
 	 * Numero di matricola
 	 */
 	public Integer number;
+
+	/**
+	 * relazione con la tabella delle info di contatto
+	 */
+	@OneToOne(mappedBy="person", fetch = FetchType.LAZY)
+	public ContactData contactData;
+	
+	/**
+	 * relazione con la tabella dei contratti
+	 */
+	@Transient
+	@OneToOne(mappedBy="person", fetch=FetchType.LAZY)
+	@JoinColumn(name="contract_id")
+	public Contract contract;
+	
+	/**
+	 * relazione con la tabella delle tipologie di orario di lavoro
+	 */
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="working_time_type_id")
+	public WorkingTimeType workingTimeType;
+	
+	@ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
+	public List<Permission> permissions;
+
+	/**
+	 * relazione con la tabella dei gruppi
+	 */
+	@ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
+	public List<Group> groups;
+	
+	
+	/**
+	 * relazione con la nuova tabella dei person day
+	 */
+	@OneToMany(mappedBy="person", fetch = FetchType.LAZY)
+	public List<PersonDay> personDays;
+	
+	/**
+	 * relazione con la nuova tabella dei person_month
+	 */
+	@OneToMany(mappedBy="person", fetch = FetchType.LAZY)
+	public List<PersonMonth> personMonths;
+	
+	/**
+	 * relazione con la nuova tabella dei person_year
+	 */
+	@OneToMany(mappedBy="person", fetch = FetchType.LAZY)
+	public List<PersonYear> personYears;
+
+	/**
+	 * relazione con la tabella delle timbrature
+	 */
+	@NotAudited
+	@OneToMany(mappedBy="person", fetch = FetchType.LAZY)
+	public List<Stamping> stampings;
+	
+	/**
+	 * relazione con la tabella di storico YearRecap
+	 */
+	@NotAudited
+	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
+	public List<YearRecap> yearRecaps;
+	
+	/**
+	 * relazione con la tabella di storico MonthRecap
+	 */
+	@NotAudited
+	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
+	public List<MonthRecap> monthRecaps;
+	
+	
+	/**
+	 * relazione con la tabella delle absence
+	 */
+	@NotAudited
+	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
+	public List<Absence> absences;
+	
+	/**
+	 * relazione con la tabella di person vacation
+	 */
+	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
+	public List <PersonVacation> personVacations;
+	
+	/**
+	 * relazione con la tabella di vacation_code
+	 */
+	@OneToOne(mappedBy="person", fetch=FetchType.LAZY)
+	public VacationPeriod vacationPeriod;
+	
+	/**
+	 * relazione con la tabella Competence
+	 */
+	@NotAudited
+	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
+	public List<Competence> competences;
+	
+	/**
+	 * relazione con la tabella delle competence valide
+	 */
+	@NotAudited
+	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
+	public List<ValuableCompetence> valuableCompetences;
+	
+	/**
+	 * relazione con la tabella delle locazioni degli utenti
+	 */
+	@NotAudited
+	@OneToOne(mappedBy="person", fetch=FetchType.LAZY)
+	public Location location;
+	
+	
+	@OneToOne(mappedBy="person", fetch=FetchType.LAZY)
+	public PersonReperibility reperibility;
 	
 	public String fullName() {
 		return String.format("%s %s", surname, name);
@@ -216,8 +224,6 @@ public class Person extends Model {
 	 * @return l'ultimo contratto in essere per questa persona
 	 */
 	public Contract getLastContract(){
-		
-		
 		Contract contract = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract desc", this).first();
 		return contract;
 	}
@@ -329,25 +335,6 @@ public class Person extends Model {
 		return vacation;
 	}
 	
-	/**
-	 * 
-	 * @param person
-	 * @return le info sulla locazione della persona in istituto (stanza, dipartimento ecc...)
-	 */
-	public Location getLocation(Person person){
-		Location loc = Location.find("Select loc from Location loc where loc.person = ?", person).first();		
-		return loc;
-	}
-	
-	/**
-	 * 
-	 * @param person
-	 * @return le informazioni di contatto ovvero mail e telefono
-	 */
-	public ContactData getContact(Person person){
-		ContactData con = ContactData.find("Select con from ContactData con where con.person = ?", person).first();
-		return con;
-	}
 	
 	public Set<Permission> getAllPermissions(){
 		Set<Permission> setPermissions = new HashSet<Permission>();
