@@ -42,6 +42,9 @@ public class PersonMonth extends Model {
 	@Column
 	public int remainingHours;
 	
+	@Column
+	public int compensatoryRest;
+	
 	@Transient
 	private int workingDays;
 	@Transient
@@ -160,7 +163,7 @@ public class PersonMonth extends Model {
 	 * @param year
 	 * @return il numero di giorni di riposo compensativo utilizzati in quel mese 
 	 */
-	public int getCompensatoryRest(int month, int year){
+	public static int getCompensatoryRest(int month, int year, Person person){
 		int compensatoryRest = 0;
 		int day = 0;
 		if(month==1 || month==3 || month==5 || month==7 || month==8 || month==10 || month==12)
@@ -207,7 +210,7 @@ public class PersonMonth extends Model {
 	 */
 	public int getTotalOfMonth(int month, int year){
 		int total = 0;
-		int compensatoryRest = getCompensatoryRest(month, year);
+		int compensatoryRest = getCompensatoryRest(month, year, person);
 		int monthResidual = getMonthResidual(month, year);
 		int residualFromPastMonth = getResidualFromPastMonth(month, year);
 		total = residualFromPastMonth+monthResidual-(compensatoryRest*432); //numero di giorni di riposo compensativo moltiplicati 
