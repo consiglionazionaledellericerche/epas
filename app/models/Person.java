@@ -35,6 +35,11 @@ import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
+import org.hibernate.envers.query.AuditEntity;
+import org.hibernate.envers.query.AuditQuery;
+import org.hibernate.envers.query.AuditQueryCreator;
+import org.hibernate.envers.query.criteria.AuditConjunction;
+import org.hibernate.envers.query.criteria.AuditCriterion;
 import org.joda.time.LocalDate;
 
 import controllers.Check;
@@ -217,11 +222,7 @@ public class Person extends Model {
 		return String.format("%s %s", surname, name);
 	}
 	
-	/**
-	 * TODO: importare anche il li campo qualifica dalla tabella Persone perchè identifica il livello di contratto e mi serve per fare
-	 * tutti i calcoli relativi ai contratti.
-	 */
-	
+
 	
 	/**
 	 * 
@@ -231,28 +232,70 @@ public class Person extends Model {
 	@SuppressWarnings("unused")
 	
 	public VacationCode getVacation(Person person){
-		/**
-		 * TODO: controllare nella documentazione dell'envers il modo di interrogare lo storico (e amodificare la proceduira di importazione
-		 * sui contratti per riempire lo storico con i vecchi contratti del personale
-		 */
+	
 		VacationCode vacation = null;
-		/**
-		 * TODO: per adesso sul db (nemmeno in quello della vecchia applicazione) non si tiene traccia della entry con il piano ferie 
-		 * ultimo previsto per coloro i quali sono a tempo indeterminato da più di tre anni (28+4) o sono a tempo determinato e la 
-		 * somma dei loro anni di contratto qui dentro è superiore a 3 o ancora hanno un contratto a tempo determinato della durata di 
-		 * più di 3 anni e si trovano attualmente nel terzo o successivo anno di contratto.
-		 * In tutti questi casi, per adesso, bisogna quindi fare in modo che venga ritornato come piano ferie il 28+4. 
-		 * Successivamente bisogna implementare nella tabella dei piani ferie, una entry che contenga questa informazione
-		 */
-		List<Contract> listaContratti = Contract.find("Select con from Contract con where con.person = ? " +
-				"order by con.beginContract desc", person).fetch();
-		AuditReader reader = AuditReaderFactory.get(JPA.em());
-		//AuditQuery query = getAuditReader().createQuery().forEntitiesAtRevision(MyEntity.class, revisionNumber);
-		//XXX: dovrebbe esistere questo caso?? ESISTE ESISTE
-		if (listaContratti.size() == 0) {
-			return null;
+
+		Contract contract = person.contract;
+		LocalDate now = new LocalDate();
+		if(contract.endContract == null && contract.beginContract != null){
+			/**
+			 * il contratto attuale è a tempo indeterminato, controllo che sia in vigore da più di 3 anni 
+			 */
+			int differenzaAnni = now.getYear() - contract.beginContract.getYear();
+			int differenzaMesi = now.getMonthOfYear() - contract.beginContract.getMonthOfYear();
+			int differenzaGiorni = now.getDayOfMonth() - contract.beginContract.getDayOfMonth();
+			if(differenzaAnni >= 3 && differenzaMesi > 11 && differenzaGiorni >=0){
+				vacation = new VacationCode();
+				vacation.description = "28+4";
+				
+			}
+			else{
+				vacation = VacationCode.find("Select vac from VacationCode vac, VacationPeriod per where per.person = ?" +
+						" and per.vacationCode = vac order by per.beginFrom", this).first();
+			}
 		}
-		
+		if(contract.endContract != null && contract.beginContract != null){
+			/*
+			 * bisogna controllare se nella lista dei contratti ce n'è più di uno e quanti anni questa persona ha accumulato.
+			 * nel caso la durata complessiva dei contratti accumulati sia superiore a 3 anni bisogna ritornare il piano ferie 
+			 * "28+4"
+			 * Si fa la query sullo storico:
+			 */
+			AuditReader reader = AuditReaderFactory.get(JPA.em());
+			List<Contract> listaContratti = (List<Contract>) reader.createQuery().forRevisionsOfEntity(Contract.class, true, false)
+					.addOrder(AuditEntity.property("endContract").asc())
+					;
+			
+			if (listaContratti.size() == 0) {
+				return null;
+			}
+			
+			if(listaContratti.size()>1){
+				int diffYear = 0;
+				int diffMonth = 0;
+				int diffDay = 0;
+				for(Contract c : listaContratti){
+					if(c != null || (c.beginContract!=null && c.endContract!=null)){
+						/**
+						 * TODO: cambiare la tipologia di data di inizio e fine contratto da date a localdate
+						 */
+						diffYear = diffYear + (c.endContract.getYear()-c.beginContract.getYear());
+						diffMonth = diffMonth + (c.endContract.getMonthOfYear()-c.beginContract.getMonthOfYear());
+						diffDay = diffDay + (c.endContract.getDayOfMonth()-c.beginContract.getDayOfMonth());
+					}
+											
+				}
+				if(diffYear > 2 || (diffYear == 2 && diffMonth > 12)){
+					vacation = new VacationCode();
+					vacation.description = "28+4";
+				}
+			}
+			else{
+				vacation = VacationCode.find("Select vac from VacationCode vac, VacationPeriod per where per.person = ?" +
+						" and per.vacationCode = vac order by per.beginFrom", this).first();
+			}
+		}
+			
 		/*
 		 * prendo il primo elemento della lista che ho ordinato nella query che contiene il contratto più recente. Controllo che sia
 		 * diverso da null e, in tal caso, guardo la durata: se è maggiore di 3 anni rispetto alla data odierna ritorno un nuovo 
@@ -293,37 +336,7 @@ public class Person extends Model {
 				vacation = new VacationCode();
 				vacation.description = "28+4";
 			}
-			if(endContract != null && beginContract != null){
-				/*
-				 * bisogna controllare se nella lista dei contratti ce n'è più di uno e quanti anni questa persona ha accumulato.
-				 * nel caso la durata complessiva dei contratti accumulati sia superiore a 3 anni bisogna ritornare il piano ferie 
-				 * "28+4"
-				 */
-				if(listaContratti.size()>1){
-					int diffYear = 0;
-					int diffMonth = 0;
-					int diffDay = 0;
-					for(Contract c : listaContratti){
-						if(c != null || (c.beginContract!=null && c.endContract!=null)){
-							/**
-							 * TODO: cambiare la tipologia di data di inizio e fine contratto da date a localdate
-							 */
-							diffYear = diffYear + (c.endContract.getYear()-c.beginContract.getYear());
-							diffMonth = diffMonth + (c.endContract.getMonthOfYear()-c.beginContract.getMonthOfYear());
-							diffDay = diffDay + (c.endContract.getDayOfMonth()-c.beginContract.getDayOfMonth());
-						}
-												
-					}
-					if(diffYear > 2 || (diffYear == 2 && diffMonth > 12)){
-						vacation = new VacationCode();
-						vacation.description = "28+4";
-					}
-				}
-				else{
-					vacation = VacationCode.find("Select vac from VacationCode vac, VacationPeriod per where per.person = ?" +
-							" and per.vacationCode = vac order by per.beginFrom", this).first();
-				}
-			}
+			
 			
 		}
 //		VacationCode vacation = VacationCode.find("Select vac from VacationCode vac, VacationPeriod per where per.person = ?" +
