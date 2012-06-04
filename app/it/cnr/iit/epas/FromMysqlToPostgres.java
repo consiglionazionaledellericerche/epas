@@ -490,7 +490,7 @@ public class FromMysqlToPostgres {
 								}
 								else{
 									
-									Logger.info("L'ora è: ", +hour);
+									Logger.trace("L'ora è: ", +hour);
 					                stamping.date = new LocalDateTime(year,month,day,hour,minute,second);
 					                
 					                stamping.markedByAdmin = false;
