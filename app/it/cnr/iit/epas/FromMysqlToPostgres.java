@@ -181,8 +181,7 @@ public class FromMysqlToPostgres {
 	
 	@SuppressWarnings("unused")
 	public static Person createPerson(ResultSet rs, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-		Logger.configuredManually = true;
-		Logger.info("Inizio a creare la persona: "+rs.getString("Nome").toString()+" "+rs.getString("Cognome").toString());
+		Logger.info("Inizio a creare la persona %s %s", rs.getString("Nome"), rs.getString("Cognome"));
 		
 		long id = rs.getLong("ID");
 		Connection mysqlCon = getMysqlConnection();
@@ -220,8 +219,7 @@ public class FromMysqlToPostgres {
 			
 		}
 		else{
-			Logger.info("Sono nel ramo else della costruzione del workingtimetype");
-			Logger.info("Non ho trovato un workingTimeType valido nel db mysql");
+			Logger.trace("Non ho trovato un workingTimeType valido nel db mysql");
 			if(mappaCodiciWorkingTimeType.get(100)==null){
 				wtt = new WorkingTimeType();
 				wtt.description = "normale-mod";
@@ -255,7 +253,7 @@ public class FromMysqlToPostgres {
 	
 		
 	public static void createContactData(ResultSet rs, Person person, EntityManager em) throws SQLException {
-		Logger.info("Inizio a creare il contact data per " +person.name+ " " +person.surname);
+		Logger.info("Inizio a creare il contact data per %s %s", person.name, person.surname);
 		ContactData contactData = new ContactData();
 		contactData.person = person;
 		
@@ -304,7 +302,7 @@ public class FromMysqlToPostgres {
 	 */
     public static void createContract(long id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 	
-        Logger.info("Inizio a creare il contratto per " +person.name+ " " +person.surname);	
+        Logger.info("Inizio a creare il contratto per %s %s", person.name, person.surname);	
         Connection mysqlCon = getMysqlConnection();	
         PreparedStatement stmtContratto = mysqlCon.prepareStatement("SELECT id,DataInizio,DataFine,continua " +	
                         "FROM Personedate WHERE id=" + id + " order by DataFine");	
@@ -368,7 +366,7 @@ public class FromMysqlToPostgres {
 	
 
 	public static void createStampings(long id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-		Logger.info("Inizio a creare le timbrature per " +person.name+ " " +person.surname);
+		Logger.info("Inizio a creare le timbrature per %s %s", person.name, person.surname);
 		Connection mysqlCon = getMysqlConnection();
 		
 		/**
@@ -505,10 +503,9 @@ public class FromMysqlToPostgres {
 				 catch (SQLException sqle) {
 					
 					sqle.printStackTrace();
-					System.out.println("Timbratura errata. Persona con id="+id);
-					Logger.warn("Timbratura errata. Persona con id= "+id);
+					Logger.warn("Timbratura errata. Persona con id = %s", id);
 				}			
-				Logger.debug("Termino di creare le timbrature");
+				Logger.debug("Termino di creare le timbrature. Person con id = %s", id);
 				//previousDay = new LocalDate(giornata);
 				em.persist(stamping);	
 			}
@@ -520,7 +517,7 @@ public class FromMysqlToPostgres {
 	}
 	
 	public static void createAbsences(long id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-		Logger.info("Inizio a creare le assenze per "+person.name+ " " +person.surname);
+		Logger.info("Inizio a creare le assenze per %s %s",  person.name, person.surname);
 		Connection mysqlCon = getMysqlConnection();
 		
 		/**
@@ -632,7 +629,7 @@ public class FromMysqlToPostgres {
 		/**
 		 * query su Orario per popolare PersonVacation
 		 */
-		Logger.info("Inizio a creare le ferie per " +person.name+ " " +person.surname);
+		Logger.info("Inizio a creare le ferie per %s %s", person.name, person.surname);
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM Orario WHERE TipoGiorno = 32 and TipoGiorno = 31 and id=" + id);
 		ResultSet rs = stmt.executeQuery();
@@ -671,7 +668,7 @@ public class FromMysqlToPostgres {
 				while(rs.next()){
 									
 					int idCodiciFerie = rs.getInt("id");
-					Logger.debug("l'id del tipo ferie è %s ed è relativo alla persona con id=%d", rs.getInt("id"), id);
+					Logger.trace("l'id del tipo ferie è %s ed è relativo alla persona con id=%d", rs.getInt("id"), id);
 					Logger.debug("Nella mappacodici l'id relativo al codiceferie "+ idCodiciFerie + " è " + mappaCodiciVacationType.get(idCodiciFerie));
 					
 					if (vacationPeriod != null) {
@@ -868,7 +865,7 @@ public class FromMysqlToPostgres {
 		/**
 		 * query su totali_anno per recuperare lo storico da mettere in YearRecap
 		 */
-		Logger.info("Inizio a creare il riepilogo annuale per " +person.name+ " " +person.surname);
+		Logger.info("Inizio a creare il riepilogo annuale per %s %S", person.name, person.surname);
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM totali_anno WHERE ID="+id);
 		ResultSet rs = stmt.executeQuery();
@@ -892,7 +889,7 @@ public class FromMysqlToPostgres {
 				
 				em.persist(yearRecap);			
 			}
-			Logger.debug("Termino di creare il riepilogo annuale");
+			Logger.debug("Terminato di creare il riepilogo annuale per la Person %s", person);
 			
 		}
 		mysqlCon.close();
@@ -956,7 +953,7 @@ public class FromMysqlToPostgres {
 		 * funzione che riempe la tabella competence e la tabella competence_code relativamente alle competenze
 		 * di una determinata persona
 		 */
-		Logger.info("Inizio a creare le competenze per " +person.name+ " " +person.surname);
+		Logger.info("Inizio a creare le competenze per %s %s", person.name, person.surname);
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt = mysqlCon.prepareStatement("Select codici_comp.id, competenze.mese, " +
 				"competenze.anno, competenze.codice, competenze.valore, codici_comp.descrizione, codici_comp.inattivo " +
@@ -1016,7 +1013,7 @@ public class FromMysqlToPostgres {
 					competenceCode.inactive = false;
 				else 
 					competenceCode.inactive = true;
-				Logger.debug("Termino di creare le competenze");
+				Logger.debug("Terminato di creare le competenze per la person %s", person);
 				em.persist(competenceCode);
 				em.persist(competence);
 			}
@@ -1038,7 +1035,7 @@ public class FromMysqlToPostgres {
 	 * funzione che associa a ciascuna persona creata, le corrispettive competenze valide.
 	 */
 	public static void createValuableCompetence(int matricola, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-		Logger.info("Inizio a creare le competenze valide per " +person.name+ " " +person.surname);
+		Logger.info("Inizio a creare le competenze valide per %s %s", person.name, person.surname);
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT codicecomp, descrizione FROM compvalide " +
 				"WHERE matricola = " +matricola );
