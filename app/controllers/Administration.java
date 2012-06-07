@@ -43,4 +43,9 @@ public class Administration extends Controller {
     	renderText("Sistemata situazione contratti");
     }
     
+    public static void manageStampType(){
+    	PopulatePersonDay.manageStampType();
+    	renderText("Sistemata situazione degli stamp type");
+    }
+    
 }
