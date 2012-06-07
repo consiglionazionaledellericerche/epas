@@ -160,6 +160,15 @@ public class PersonDay extends Model {
 	}
 	
 	/**
+	 * setta la lista delle timbrature per quel personDay
+	 */
+	public void setStampings(){
+		
+		stampings = Stamping.find("SELECT s FROM Stamping s " +
+                "WHERE s.person = ? and s.date between ? and ?" +
+                " ORDER BY s.date", person, startOfDay, endOfDay).fetch();
+	}
+	/**
 	 * 
 	 * @return la lista di timbrature giornaliere
 	 */

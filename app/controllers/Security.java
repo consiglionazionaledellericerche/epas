@@ -12,6 +12,7 @@ public class Security extends Secure.Security {
 	public final static String VIEW_PERSON_LIST = "viewPersonList";
 	public final static String INSERT_AND_UPDATE_PERSON = "insertAndUpdatePerson";
 	public final static String DELETE_PERSON = "deletePerson";
+	public final static String INSERT_AND_UPDATE_STAMPING = "insertAndUpdateStamping";
 
 		
 	static boolean authenticate(String username, String password) {

@@ -237,6 +237,15 @@ public class Person extends Model {
 
 		Contract contract = person.contract;
 		LocalDate now = new LocalDate();
+		
+		/**
+		 * ricerca nello storico per recuperare i vecchi contratti per quella persona...speriamo sia fatta bene
+		 */
+		AuditReader reader = AuditReaderFactory.get(JPA.em());
+		List<Contract> listaContratti = (List<Contract>) reader.createQuery().forRevisionsOfEntity(Contract.class, true, false)
+				.addOrder(AuditEntity.property("endContract").asc())
+				;
+		
 		if(contract.endContract == null && contract.beginContract != null){
 			/**
 			 * il contratto attuale è a tempo indeterminato, controllo che sia in vigore da più di 3 anni 
@@ -261,10 +270,7 @@ public class Person extends Model {
 			 * "28+4"
 			 * Si fa la query sullo storico:
 			 */
-			AuditReader reader = AuditReaderFactory.get(JPA.em());
-			List<Contract> listaContratti = (List<Contract>) reader.createQuery().forRevisionsOfEntity(Contract.class, true, false)
-					.addOrder(AuditEntity.property("endContract").asc())
-					;
+			
 			
 			if (listaContratti.size() == 0) {
 				return null;
@@ -303,7 +309,7 @@ public class Person extends Model {
 		 */
 		Contract con = listaContratti.get(0);
 		if(con != null){
-			LocalDate now = new LocalDate();
+			//LocalDate now = new LocalDate();
 			LocalDate beginContract = new LocalDate(con.beginContract);
 			LocalDate endContract = new LocalDate(con.endContract);
 			if(endContract == null && beginContract != null){

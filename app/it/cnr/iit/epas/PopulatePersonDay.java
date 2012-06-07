@@ -14,6 +14,7 @@ import models.Group;
 import models.Permission;
 import models.Person;
 import models.PersonDay;
+import models.StampType;
 import models.Stamping;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
@@ -114,6 +115,15 @@ public class PopulatePersonDay {
 			}
 			
 		}
+	}
+	
+	public static void manageStampType(){
+		StampType st = new StampType();
+		st.description = "Altra timbratura di ingresso";
+		st.save();
+		StampType st2 = new StampType();
+		st2.description = "Altra timbratura di uscita";
+		st2.save();
 	}
 
 }
