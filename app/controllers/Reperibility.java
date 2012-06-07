@@ -3,17 +3,20 @@
  */
 package controllers;
 
+import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.joda.time.LocalDate;
 
 import models.Person;
 import models.PersonReperibilityDay;
 import models.exports.ReperibilityPeriod;
+import models.exports.ReperibilityPeriods;
+
+import org.joda.time.LocalDate;
 
 import play.Logger;
-import play.db.jpa.JPA;
+import play.data.binding.As;
 import play.mvc.Controller;
 
 /**
@@ -53,4 +56,9 @@ public class Reperibility extends Controller {
 		}
 		render(reperibilityPeriods);
 	}
+	
+	public static void update(@As(binder=JsonReperibilityPeriodsBinder.class) ReperibilityPeriods body) {
+		Logger.debug("update: Received reperebilityPeriods %s", body);
+	}
+	
 }
