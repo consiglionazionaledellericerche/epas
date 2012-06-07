@@ -106,14 +106,14 @@ public class Person extends Model {
 	/**
 	 * relazione con la tabella delle info di contatto
 	 */
-	@OneToOne(mappedBy="person", fetch = FetchType.LAZY)
+	@OneToOne(mappedBy="person", fetch = FetchType.EAGER)
 	public ContactData contactData;
 	
 	/**
 	 * relazione con la tabella dei contratti
 	 */
 	@Transient
-	@OneToOne(mappedBy="person", fetch=FetchType.LAZY)
+	@OneToOne(mappedBy="person", fetch=FetchType.EAGER)
 	@JoinColumn(name="contract_id")
 	public Contract contract;
 	
@@ -211,7 +211,7 @@ public class Person extends Model {
 	 * relazione con la tabella delle locazioni degli utenti
 	 */
 	@NotAudited
-	@OneToOne(mappedBy="person", fetch=FetchType.LAZY)
+	@OneToOne(mappedBy="person", fetch=FetchType.EAGER)
 	public Location location;
 	
 	
@@ -301,9 +301,9 @@ public class Person extends Model {
 		 * diverso da null e, in tal caso, guardo la durata: se è maggiore di 3 anni rispetto alla data odierna ritorno un nuovo 
 		 * VacationCode con descrizione "28+4"
 		 */
-		Contract con = listaContratti.get(0);
+		//Contract con = listaContratti.get(0);
+		Contract con = person.contract;
 		if(con != null){
-			LocalDate now = new LocalDate();
 			LocalDate beginContract = new LocalDate(con.beginContract);
 			LocalDate endContract = new LocalDate(con.endContract);
 			if(endContract == null && beginContract != null){
