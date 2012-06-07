@@ -181,10 +181,10 @@
 <p id="spiegazioneTabellaTimbrature">Il numero di buoni mensa usabili per questo mese e': <strong>${monthRecap.numberOfMealTicketToUse()}</strong>, mentre quelli da restituire sono <strong>${monthRecap.numberOfMealTicketToRender()}</strong>. Il numero di giorni lavorativi in sede è di: <strong>${monthRecap.basedWorkingDays()}</strong> </p>
 
 <p>Riepilogo delle ore di lavoro in eccesso/difetto:</p> 
-<p> - Residuo tempo di lavoro dei mesi precedenti: ${personMonth.getResidualFromPastMonth(monthRecap.month, monthRecap.year).toHourTime()}</p> 
-<p> - Residuo del mese:  ${personMonth.getMonthResidual(monthRecap.month, monthRecap.year).toHourTime()}</p>
-<p> - Giorni di riposo compensativo: ${personMonth.getCompensatoryRest(monthRecap.month, monthRecap.year)} per un totale di: -${(personMonth.getCompensatoryRest(monthRecap.month, monthRecap.year)*432).toHourTime()} ore</p>
-<p> - Totale residuo a fine mese  <strong>${personMonth.getTotalOfMonth(monthRecap.month, monthRecap.year).toHourTime()} ore</strong></p>
+<p> - Residuo tempo di lavoro dei mesi precedenti: ${personMonth.getResidualFromPastMonth().toHourTime()}</p> 
+<p> - Residuo del mese:  ${personMonth.getMonthResidual().toHourTime()}</p>
+<p> - Giorni di riposo compensativo: ${personMonth.getCompensatoryRest()} per un totale di: -${(personMonth.getCompensatoryRest()*432).toHourTime()} ore</p>
+<p> - Totale residuo a fine mese  <strong>${personMonth.getTotalOfMonth().toHourTime()} ore</strong></p>
 
 
 

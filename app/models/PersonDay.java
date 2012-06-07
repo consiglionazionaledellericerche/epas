@@ -573,7 +573,8 @@ public class PersonDay extends Model {
 			else{
 				pm = new PersonMonth(person,date.getYear(),date.getMonthOfYear()-1);
 			}
-			pm.compensatoryRest = PersonMonth.getCompensatoryRest(date.getMonthOfYear(), date.getYear(), person);
+			pm.compensatoryRest = pm.getCompensatoryRest();
+
 			pm.remainingHours = pd.progressive - pm.compensatoryRest*(432); //durata in minuti di 7:12 ore relative al giorno di riposo compensativo
 			
 			pm.save();
