@@ -19,20 +19,81 @@
 		<th>Può fare turni</th>
 	</tr>
 	%{
-		for(){ <!-- qui mettere il for sulla lista di orari di lavoro presa dal controller -->
+		for(wtt in wttList){ 
 	}%
 	<tr>
-		<td></td>
-		<td></td>
-		<td></td>
-		<td></td>
-		<td></td>
-		<td></td>
-		<td></td>
-		<td></td>
-		<td></td>
-		<td></td>
-		<td></td>
+		<td rowspan=7>wtt.description</td>
+		<tr>
+			<td>Tempo lavoro</td>
+			<td>getWorkingTimeFromWorkinTimeType(1, wtt)</td>
+			<td>getWorkingTimeFromWorkinTimeType(2, wtt)</td>
+			<td>getWorkingTimeFromWorkinTimeType(3, wtt)</td>
+			<td>getWorkingTimeFromWorkinTimeType(4, wtt)</td>
+			<td>getWorkingTimeFromWorkinTimeType(5, wtt)</td>
+			<td>getWorkingTimeFromWorkinTimeType(6, wtt)</td>
+			<td>getWorkingTimeFromWorkinTimeType(7, wtt)</td>
+		</tr>
+		<tr>
+			<td>Tempo minimo di lavoro per diritto a intervallo pranzo</td>
+			<td>getMinimalTimeForLunch(1, wtt)</td>
+			<td>getMinimalTimeForLunch(2, wtt)</td>
+			<td>getMinimalTimeForLunch(3, wtt)</td>
+			<td>getMinimalTimeForLunch(4, wtt)</td>
+			<td>getMinimalTimeForLunch(5, wtt)</td>
+			<td>getMinimalTimeForLunch(6, wtt)</td>
+			<td>getMinimalTimeForLunch(7, wtt)</td>
+		</tr>
+		<tr>
+			<td>Intervallo pranzo</td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>Giorno festivo</td>
+			<td>wtt.getHolidayFromWorkinTimeType(1, wtt)</td>
+			<td>wtt.getHolidayFromWorkinTimeType(2, wtt)</td>
+			<td>wtt.getHolidayFromWorkinTimeType(3, wtt)</td>
+			<td>wtt.getHolidayFromWorkinTimeType(4, wtt)</td>
+			<td>wtt.getHolidayFromWorkinTimeType(5, wtt)</td>
+			<td>wtt.getHolidayFromWorkinTimeType(6, wtt)</td>
+			<td>wtt.getHolidayFromWorkinTimeType(7, wtt)</td>
+		</tr>
+		<tr>
+			<td>Fascia oraria di ingresso</td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>Fascia oraria di uscita</td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>Fascia oraria pranzo</td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>		
+		<td rowspan=7></td>
+		<td rowspan=7></td>
 	</tr>
 	%{
 		}

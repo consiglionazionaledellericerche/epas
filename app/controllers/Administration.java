@@ -17,7 +17,7 @@ public class Administration extends Controller {
     	FromMysqlToPostgres.importAll();
     	FromMysqlToPostgres.importNotInOldDb();
     	PopulatePersonDay.fillWorkingTimeTypeDays();
-    	//PopulatePersonDay.manageContract();
+    	PopulatePersonDay.manageContract();
     	renderText("Importate tutte le persone dalla vecchia applicazione + aggiunti i workingtimetypeday");
     }
     
