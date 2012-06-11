@@ -61,6 +61,12 @@ public class Absences extends Controller{
 	 */
 	public static void manageAbsenceCode(){
 		List<AbsenceType> absenceList = AbsenceType.findAll();
+		
+		render(absenceList);
+	}
+	
+	public static void absenceCodeList(){
+		List<AbsenceType> absenceList = AbsenceType.findAll();
 		render(absenceList);
 	}
 

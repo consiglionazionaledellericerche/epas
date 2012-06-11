@@ -68,4 +68,5 @@ public class WorkingTimeTypeDay extends Model {
 	 */
 	public int timeMealTo = 0;
 	
+	
 }

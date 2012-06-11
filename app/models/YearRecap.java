@@ -302,7 +302,7 @@ public class YearRecap extends Model{
 	public int vacationCurrentYear(int year){
 		int days = 0;
 		int vacationDays = 0;
-		Contract contract = Contract.find("Select con from Contract con where con.person = ? order by begincontract desc", person).first();
+		Contract contract = Contract.find("Select con from Contract con where con.person = ? order by beginContract desc", person).first();
 		LocalDate beginContract = contract.beginContract;
 		LocalDate now = new LocalDate();
 		now.withYear(year);

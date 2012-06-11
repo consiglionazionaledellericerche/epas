@@ -94,11 +94,6 @@ public class Person extends Model {
 	public String password;
 	
 	/**
-	 * livello di contratto
-	 */
-	public Integer qualification;
-	
-	/**
 	 * Numero di matricola
 	 */
 	public Integer number;
@@ -217,6 +212,10 @@ public class Person extends Model {
 	
 	@OneToOne(mappedBy="person", fetch=FetchType.LAZY)
 	public PersonReperibility reperibility;
+	
+	@ManyToOne
+	@JoinColumn(name="qualification_id")
+	public Qualification qualification;
 	
 	public String fullName() {
 		return String.format("%s %s", surname, name);
