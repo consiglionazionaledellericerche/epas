@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import models.Person;
+import models.PersonReperibilityType;
 
 /**
  * Classe di supporto per l'esportazione delle informazioni relative
@@ -23,10 +24,18 @@ public class ReperibilityPeriod {
 	public final Person person;
 	public final LocalDate start;
 	public LocalDate end;
-	
-	public ReperibilityPeriod(Person person, LocalDate start, LocalDate end) {
+	public final PersonReperibilityType reperibilityType;
+
+	public ReperibilityPeriod(Person person, LocalDate start, PersonReperibilityType type) {
+		this.person = person;
+		this.start = start;
+		this.reperibilityType = type;
+	}
+
+	public ReperibilityPeriod(Person person, LocalDate start, LocalDate end, PersonReperibilityType type) {
 		this.person = person;
 		this.start = start;
 		this.end = end;
+		this.reperibilityType = type;
 	}
 }

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 import models.Person;
+import models.PersonReperibilityType;
 import models.exports.ReperibilityPeriod;
 import models.exports.ReperibilityPeriods;
 
@@ -45,14 +46,37 @@ public class JsonReperibilityPeriodsBinder implements TypeBinder<ReperibilityPer
 			JsonArray jsonArray = new JsonParser().parse(value).getAsJsonArray();
 			Logger.debug("jsonArray = %s", jsonArray);
 
+			JsonObject jsonObject = null;
+			Person person = null;
+			PersonReperibilityType reperibilityType = null;
+			
+			Long personId = null;
+			Long reperibilityTypeId = null;
+			
 			for (JsonElement jsonElement : jsonArray) {
-				JsonObject ob0 = jsonElement.getAsJsonObject();
-				Logger.trace("jsonArray.get(0) = %s", ob0);
-				Person person = Person.findById(ob0.get("id").getAsLong());
-				LocalDate start = new LocalDate(ob0.get("start").getAsString());
-				LocalDate end = new LocalDate(ob0.get("end").getAsString());
 				
-				ReperibilityPeriod reperibilityPeriod =	new ReperibilityPeriod(person, start, end);
+				jsonObject = jsonElement.getAsJsonObject();
+				Logger.trace("jsonObject = %s", jsonObject);
+				
+				personId = jsonObject.get("id").getAsLong();
+				reperibilityTypeId = jsonObject.get("reperibility_type_id").getAsLong();
+				
+				person = Person.findById(personId);
+				
+				if (person == null) {
+					throw new IllegalArgumentException(String.format("Person with id = %s not found", personId));
+				}
+				
+				reperibilityType = PersonReperibilityType.findById(reperibilityTypeId);
+
+				if (reperibilityType == null) {
+					throw new IllegalArgumentException(String.format("PersonReperibilityType with id = %s not found", reperibilityTypeId));
+				}
+
+				LocalDate start = new LocalDate(jsonObject.get("start").getAsString());
+				LocalDate end = new LocalDate(jsonObject.get("end").getAsString());
+				
+				ReperibilityPeriod reperibilityPeriod =	new ReperibilityPeriod(person, start, end, reperibilityType);
 				reperibilityPeriods.add(reperibilityPeriod);
 			}
 			
@@ -67,5 +91,3 @@ public class JsonReperibilityPeriodsBinder implements TypeBinder<ReperibilityPer
 	}
 	
 }
-
-
