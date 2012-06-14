@@ -152,7 +152,6 @@ public class MonthRecap extends Model {
 		this.month = month;
 		this.stampingCodeList = new ArrayList<StampModificationType>();
 		this.absenceCodeMap  = new HashMap<AbsenceType, Integer>();
-		Logger.debug("Stampingcodelist nel costruttore: "+stampingCodeList);
 	}
 	
 	/**
