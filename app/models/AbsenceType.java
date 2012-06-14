@@ -1,12 +1,16 @@
 package models;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -34,6 +38,9 @@ public class AbsenceType extends Model {
 	@ManyToOne
 	@JoinColumn(name="absenceTypeGroup_id")
 	public AbsenceTypeGroup absenceTypeGroup;
+	
+	@ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
+	public List<Qualification> qualifications;
 	
 //	@OneToOne
 //	@JoinColumn(name="hourlyAbsenceType_id")

@@ -21,6 +21,14 @@ public class Administration extends Controller {
     	renderText("Importate tutte le persone dalla vecchia applicazione + aggiunti i workingtimetypeday");
     }
     
+    public static void importAbsenceTypeQualification() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+    	FromMysqlToPostgres.createQualification();
+    	FromMysqlToPostgres.createAbsenceType();
+    	FromMysqlToPostgres.joinTables();
+    	renderText("Creati livelli, absence type e definiti i legami tra le due tabelle");
+    }
+
+    
     /**
      * aggiunto metodo di popolamento iniziale del personDay di modo da rendere tutte le informazioni su ciascuna persona persistenti
      * sul db già al momento della prima visualizzazione.
