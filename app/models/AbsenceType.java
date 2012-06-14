@@ -67,4 +67,5 @@ public class AbsenceType extends Model {
 	
 	public boolean isDailyAbsence;
 	
+		
 }
