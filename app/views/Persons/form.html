@@ -45,18 +45,18 @@
 		<legend>Informazioni di ubicazione e contatti</legend>
 		<input type="hidden" name="location.person_id"  value="${person.id}" />
 	<p>Dipartimento <input name="location.department" type="text" value="${person.location.department}" size="20" maxlength="100" /></p>
-	<p>Sede <input name="sede" type="text" size="40" maxlength="200" /></p>
-	<p>Stanza <input name="stanza" type="text" size="40" maxlength="200" /></p>
-	<p>Telefono <input name="telefono" type="text" size="40" maxlength="200" /></p>
-	<p>Email <input name="email" type="text" size="40" maxlength="200" /></p>
-	<p>Data di nascita <input name="dataNascita" type="text" size="40" maxlength="200" /></p>
-	<p>Codice Fiscale <input name="codiceFiscale" type="text" size="40" maxlength="200" /></p>	
+	<p>Sede <input name="location.seat" type="text" value="${person.location.seat}" size="40" maxlength="200" /></p>
+	<p>Stanza <input name="location.room" type="text" value="${person.location.room}" size="40" maxlength="200" /></p>
+	<p>Telefono <input name="contactData.telephone" type="text" value="${person.contactData.telephone}" size="40" maxlength="200" /></p>
+	<p>Email <input name="contactData.email" type="text" value="${person.contactData.email}" size="40" maxlength="200" /></p>
+	<p>Data di nascita <input name="person.bornDate" type="text" value="${person.bornDate}" size="40" maxlength="200" /></p>
+	<p>Codice Fiscale <input name="codiceFiscale" type="text" value="${person.location.department}" size="40" maxlength="200" /></p>	
 	</fieldset>
 	
 	
 	<p>I valori in <strong>grassetto</strong> sono obbligatori</p>
 	
 	<input type="submit" value="Ok"/>
-	<input type="submit" value="Annulla"/>	
+	<input type=reset value="Annulla">	
 
 #{/form}

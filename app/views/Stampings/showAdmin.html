@@ -102,55 +102,153 @@
 			%{
 			}
 			}%
-			<td class="assenza">${day.absenceList().size()>0  ? day.absenceList().get(0).absenceType.code : ''}</td>
-			<td class="ingresso">${day.getStampings().size()>0 ? day.getStampings().get(0).date.toCalendarTime() : ''}</td>
-			<td class="uscita">${day.getStampings().size()>1 && day.getStampings().get(1)!=null ? day.getStampings().get(1).date.toCalendarTime() : ''}</td>
+			<td class="assenza"><a href="/Absences/insertAbsence.html">${day.absenceList().size()>0  ? day.absenceList().get(0).absenceType.code : ''}</a><script type="text/javascript"> 
+				$('.example3demo').popupWindow({ 
+					height:500, 
+					width:800, 
+					top:50, 
+					left:50 
+				}); 
+				</script></td>
+			<td class="ingresso"><a href="insertStamping.html">${day.getStampings().size()>0 ? day.getStampings().get(0).date.toCalendarTime() : ''}</a><script type="text/javascript"> 
+				$('.example3demo').popupWindow({ 
+					height:500, 
+					width:800, 
+					top:50, 
+					left:50 
+				}); 
+				</script></td>
+			<td class="uscita"><a href="insertStamping.html">${day.getStampings().size()>1 && day.getStampings().get(1)!=null ? day.getStampings().get(1).date.toCalendarTime() : ''}</a><script type="text/javascript"> 
+				$('.example3demo').popupWindow({ 
+					height:500, 
+					width:800, 
+					top:50, 
+					left:50 
+				}); 
+				</script></td>
 			%{
 			if(day.getStampings().size()>2 && day.getStampings().get(2)!=null && day.getStampings().get(1)!=null){
 			}%	
-			<td class="ingresso">${day.checkMinTimeForLunch(day.getStampings())<30 ? 
-			day.adjustedStamp(day.getStampings().get(1).date, day.getStampings().get(2).date).toCalendarTime() : day.getStampings().get(2).date.toCalendarTime()}</td>
+			<td class="ingresso"><a href="insertStamping.html">${day.checkMinTimeForLunch(day.getStampings())<30 ? 
+			day.adjustedStamp(day.getStampings().get(1).date, day.getStampings().get(2).date).toCalendarTime() : day.getStampings().get(2).date.toCalendarTime()}</a><script type="text/javascript"> 
+				$('.example3demo').popupWindow({ 
+					height:500, 
+					width:800, 
+					top:50, 
+					left:50 
+				}); 
+				</script></td>
 			%{
 			}else{
 			}% 
-			<td class="ingresso"></td>
+			<td class="ingresso"><a href="insertStamping.html"></a><script type="text/javascript"> 
+				$('.example3demo').popupWindow({ 
+					height:500, 
+					width:800, 
+					top:50, 
+					left:50 
+				}); 
+				</script></td>
 			%{
 			}
 			}%
-			<td class="uscita">${day.getStampings().size()>3 ? day.getStampings().get(3).date.toCalendarTime() : ''}</td>
+			<td class="uscita"><a href="insertStamping.html">${day.getStampings().size()>3 ? day.getStampings().get(3).date.toCalendarTime() : ''}</a><script type="text/javascript"> 
+				$('.example3demo').popupWindow({ 
+					height:500, 
+					width:800, 
+					top:50, 
+					left:50 
+				}); 
+				</script></td>
 			%{
 			if(day.getStampings().size()>4 && day.getStampings().get(4)!=null){
-			}% <td class="ingresso">${day.getStampings().get(4).date.toCalendarTime()}</td>
+			}% <td class="ingresso"><a href="insertStamping.html">${day.getStampings().get(4).date.toCalendarTime()}</a><script type="text/javascript"> 
+				$('.example3demo').popupWindow({ 
+					height:500, 
+					width:800, 
+					top:50, 
+					left:50 
+				}); 
+				</script></td>
 			%{
 			}else{
-			}% <td class="ingresso">${''}</td>
+			}% <td class="ingresso"><a href="insertStamping.html">${''}</a><script type="text/javascript"> 
+				$('.example3demo').popupWindow({ 
+					height:500, 
+					width:800, 
+					top:50, 
+					left:50 
+				}); 
+				</script></td>
 			%{
 			}
 			}%
 			%{
 			if(day.getStampings().size()>5 && day.getStampings().get(5)!=null){
-			}% <td class="uscita">${day.getStampings().get(5).date.toCalendarTime()}</td>			
+			}% <td class="uscita"><a href="insertStamping.html">${day.getStampings().get(5).date.toCalendarTime()}</a><script type="text/javascript"> 
+				$('.example3demo').popupWindow({ 
+					height:500, 
+					width:800, 
+					top:50, 
+					left:50 
+				}); 
+				</script></td>			
 			%{
 			}else{
-			}% <td class="uscita">${''}</td>
+			}% <td class="uscita"><a href="insertStamping.html">${''}</a><script type="text/javascript"> 
+				$('.example3demo').popupWindow({ 
+					height:500, 
+					width:800, 
+					top:50, 
+					left:50 
+				}); 
+				</script></td>
 			%{
 			}
 			}%
 			%{
 			if(day.getStampings().size()>6 && day.getStampings().get(6)!=null){
-			}% <td class="ingresso">${day.getStampings().get(6).date.toCalendarTime()}</td>			
+			}% <td class="ingresso"><a href="insertStamping.html">${day.getStampings().get(6).date.toCalendarTime()}</a><script type="text/javascript"> 
+				$('.example3demo').popupWindow({ 
+					height:500, 
+					width:800, 
+					top:50, 
+					left:50 
+				}); 
+				</script></td>			
 			%{
 			}else{
-			}% <td class="ingresso">${''}</td>
+			}% <td class="ingresso"><a href="insertStamping.html">${''}</a><script type="text/javascript"> 
+				$('.example3demo').popupWindow({ 
+					height:500, 
+					width:800, 
+					top:50, 
+					left:50 
+				}); 
+				</script></td>
 			%{
 			}
 			}%
 			%{
 			if(day.getStampings().size()>7 && day.getStampings().get(7)!=null){
-			}% <td class="uscita">${day.getStampings().get(7).date.toCalendarTime()}</td>			
+			}% <td class="uscita"><a href="insertStamping.html">${day.getStampings().get(7).date.toCalendarTime()}</a><script type="text/javascript"> 
+				$('.example3demo').popupWindow({ 
+					height:500, 
+					width:800, 
+					top:50, 
+					left:50 
+				}); 
+				</script></td>			
 			%{
 			}else{
-			}% <td class="uscita">${''}</td>
+			}% <td class="uscita"><a href="insertStamping.html">${''}</a><script type="text/javascript"> 
+				$('.example3demo').popupWindow({ 
+					height:500, 
+					width:800, 
+					top:50, 
+					left:50 
+				}); 
+				</script></td>
 			%{
 			}
 			}%
@@ -181,10 +279,10 @@
 <p id="spiegazioneTabellaTimbrature">Il numero di buoni mensa usabili per questo mese e': <strong>${monthRecap.numberOfMealTicketToUse()}</strong>, mentre quelli da restituire sono <strong>${monthRecap.numberOfMealTicketToRender()}</strong>. Il numero di giorni lavorativi in sede è di: <strong>${monthRecap.basedWorkingDays()}</strong> </p>
 
 <p>Riepilogo delle ore di lavoro in eccesso/difetto:</p> 
-<p> - Residuo tempo di lavoro dei mesi precedenti: ${personMonth.getResidualFromPastMonth().toHourTime()}</p> 
-<p> - Residuo del mese:  ${personMonth.getMonthResidual().toHourTime()}</p>
-<p> - Giorni di riposo compensativo: ${personMonth.getCompensatoryRest()} per un totale di: -${(personMonth.getCompensatoryRest()*432).toHourTime()} ore</p>
-<p> - Totale residuo a fine mese  <strong>${personMonth.getTotalOfMonth().toHourTime()} ore</strong></p>
+<p> - Residuo tempo di lavoro dei mesi precedenti: ${personMonth.getResidualFromPastMonth(monthRecap.month, monthRecap.year).toHourTime()}</p> 
+<p> - Residuo del mese:  ${personMonth.getMonthResidual(monthRecap.month, monthRecap.year).toHourTime()}</p>
+<p> - Giorni di riposo compensativo: ${personMonth.getCompensatoryRest(monthRecap.month, monthRecap.year)} per un totale di: -${(personMonth.getCompensatoryRest(monthRecap.month, monthRecap.year)*432).toHourTime()} ore</p>
+<p> - Totale residuo a fine mese  <strong>${personMonth.getTotalOfMonth(monthRecap.month, monthRecap.year).toHourTime()} ore</strong></p>
 
 
 

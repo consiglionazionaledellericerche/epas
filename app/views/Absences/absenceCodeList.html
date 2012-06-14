@@ -1,0 +1,21 @@
+#{extends 'main.html' /}
+
+<h3>Lista codici di assenza</h3>
+
+<table>
+	<tr>
+		<th>Codice</th>
+		<th>Descrizione</th>
+	</tr>
+%{
+     for(abs in absenceList) {
+}%
+	<tr>
+		<td>abs.code</td>
+		<td>abs.description</td>
+	</tr>
+%{  		   
+     }
+     
+}%
+</table>
