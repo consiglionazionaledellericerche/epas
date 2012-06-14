@@ -59,8 +59,6 @@ public class ImportTest extends UnitTest {
 	
 			FromMysqlToPostgres.createAbsences(rs.getLong("ID"), person, em);
 			
-			FromMysqlToPostgres.createWorkingTimeTypes(rs.getLong("ID"), em);
-			
 			FromMysqlToPostgres.createStampings(rs.getLong("ID"), person, em);
 			
 			FromMysqlToPostgres.createYearRecap(rs.getLong("ID"), person, em);

@@ -113,6 +113,18 @@ public class Persons extends Controller {
 			person.save();
 		}
 	}
+	
+	public void changePassword(Person person){
+		Person p = Person.findById(person.id);
+		render(p);
+	}
+	
+	
+	public void savePassword(Person person){
+		Person p = Person.findById(person.id);
+		p.password = params.get("nuovaPassword");
+		p.save();
+	}
 
 
 }

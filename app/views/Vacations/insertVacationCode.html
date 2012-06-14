@@ -2,9 +2,10 @@
 
 <h2 id="titoloInserimentoTipoFerie">Inserimento dati per nuovo tipo di ferie</h2>
 
-<p>Nome <input name="nome" type="text" value="" size="40" maxlength="200" /></p>
-<p>Giorni ferie <input name="giorniFerie" type="text" value="" size="40" maxlength="200" /></p>
-<p>Giorni permesso <input name="giorniPermesso" type="text" value="" size="40" maxlength="200" /></p>
+#{form @VacationsAdmin.insertVacationCode()}
+<p>Nome <input name="nome" type="text" value="${vacationCode.description}" size="40" maxlength="200" /></p>
+<p>Giorni ferie <input name="giorniFerie" type="text" value="${vacationCode.vacationDays}" size="40" maxlength="200" /></p>
+<p>Giorni permesso <input name="giorniPermesso" type="text" value="${vacationCode.permissionDays}" size="40" maxlength="200" /></p>
 <p>Tipo ferie default 	<form> 
  							<fieldset>
   								sì<input type="radio" name="si" value="si"/>
@@ -12,4 +13,5 @@
   							</fieldset>
 						</form>	</p>
 <input type="submit" value="Salva"/>
+#{/form}
 <input type="submit" value="Annulla"/>
