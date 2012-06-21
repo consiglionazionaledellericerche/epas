@@ -26,7 +26,7 @@
 #{/form}
 </div>
 
-<p><a href="insert.html">Inserisci una nuova persona</a></p>
+<p><a href="form.html">Inserisci una nuova persona</a></p>
 
 <p>Personale esistente</p>
 
@@ -57,17 +57,17 @@
 		<td><a href="@{form(person.id)}">${person.surname}</a></td>
 		<td>${person.name}</td>
 		<td>${person.number}</td>
-		<td>${person.contract != null && person.contract.beginContract != null ? person.contract.beginContract : ''}</td>
-		<td>${person.contract != null && person.contract.endContract != null ? person.contract.endContract : ''}</td>
+		<td>${person.getContract() != null ? person.getContract().beginContract : ''}</td>
+		<td>${person.getContract() != null ? person.getContract().endContract : ''}</td>
 		<td>${person.workingTimeType != null && person.workingTimeType.description != null ? person.workingTimeType.description : ''}</td>
-		<td>${person.getVacation(person) != null ? person.getVacation(person).description : ''}</td>
-		<td>${person.qualification}</td>
-		<td>${}</td>
-		<td>${person.getLocation(person) != null ? person.getLocation(person).department : ''}</td>
-		<td>${person.getLocation(person) != null ? person.getLocation(person).headOffice : '' }</td>
-		<td>${person.getContact(person) != null ? person.getContact(person).telephone : ''}</td>
-		<td>${person.getLocation(person) != null ? person.getLocation(person).room : ''}</td>
-		<td>${person.getContact(person) != null ? person.getContact(person).email : ''}</td>
+		<td>${person.getVacation() != null ? person.getVacation().description : ''}</td>
+		<td>${person.qualification.qualification}</td>
+		<td>${''}</td>
+		<td>${person.location != null ? person.location.department : ''}</td>
+		<td>${person.location != null ? person.location.headOffice : '' }</td>
+		<td>${person.contactData != null ? person.contactData.telephone : ''}</td>
+		<td>${person.location != null ? person.location.room : ''}</td>
+		<td>${person.contactData != null ? person.contactData.email : ''}</td>
 		<td>${}</td>
 	</tr>
 
