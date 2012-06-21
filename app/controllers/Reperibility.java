@@ -33,12 +33,16 @@ import play.mvc.Controller;
 public class Reperibility extends Controller {
 
 	public static void personList() {
-		List<Person> personList = Person.find("SELECT p FROM Person p JOIN p.reperibility r WHERE (r.startDate IS NULL OR r.startDate <= now()) and (r.endDate IS NULL OR r.endDate >= now())").fetch();
-		Logger.debug("Reperibilit personList called, found %s reperible person", personList.size());
+		Long type = Long.parseLong(params.get("type"));
+		
+		List<Person> personList = Person.find("SELECT p FROM Person p JOIN p.reperibility r WHERE r.personReperibilityType.id = ? AND (r.startDate IS NULL OR r.startDate <= now()) and (r.endDate IS NULL OR r.endDate >= now())", type).fetch();
+		Logger.debug("Reperibility personList called, found %s reperible person", personList.size());
 		render(personList);
 	}
 
-	public static void find(String type) {
+	public static void find() {
+		Long type = Long.parseLong(params.get("type"));
+		
 		LocalDate from = new LocalDate(Integer.parseInt(params.get("yearFrom")), Integer.parseInt(params.get("monthFrom")), Integer.parseInt(params.get("dayFrom")));
 		LocalDate to = new LocalDate(Integer.parseInt(params.get("yearTo")), Integer.parseInt(params.get("monthTo")), Integer.parseInt(params.get("dayTo")));
 
@@ -53,7 +57,7 @@ public class Reperibility extends Controller {
 		for (PersonReperibilityDay prd : reperibilityDays) {
 			//L'ultima parte dell'if serve per il caso in cui la stessa persona ha due periodi di reperibilità non consecutivi. 
 			if (reperibilityPeriod == null || !reperibilityPeriod.person.equals(prd.personReperibility.person) || !reperibilityPeriod.end.plusDays(1).equals(prd.date)) {
-				reperibilityPeriod = new ReperibilityPeriod(prd.personReperibility.person, prd.date, prd.date, (PersonReperibilityType) PersonReperibilityType.find("type = %s", type).first());
+				reperibilityPeriod = new ReperibilityPeriod(prd.personReperibility.person, prd.date, prd.date, (PersonReperibilityType) PersonReperibilityType.findById(type));
 				reperibilityPeriods.add(reperibilityPeriod);
 				Logger.trace("Creato nuovo reperibilityPeriod, person=%s, start=%s, end=%s", reperibilityPeriod.person, reperibilityPeriod.start, reperibilityPeriod.end);
 			} else {
@@ -76,6 +80,10 @@ public class Reperibility extends Controller {
 	 */
 	public static void update(@As(binder=JsonReperibilityPeriodsBinder.class) ReperibilityPeriods body) {
 		Logger.debug("update: Received reperebilityPeriods %s", body);
+		
+		if (body == null) {
+			badRequest();	
+		}
 		
 		LocalDate day = null;
 		for (ReperibilityPeriod reperibilityPeriod : body.periods) {
@@ -133,5 +141,5 @@ public class Reperibility extends Controller {
 		
 
 	}
-	
+		
 }
