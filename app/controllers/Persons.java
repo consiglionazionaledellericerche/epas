@@ -28,7 +28,7 @@ public class Persons extends Controller {
 
 	@Check(Security.VIEW_PERSON_LIST)
 	public static void list(){
-		List<Person> personList = Person.find("order by surname").fetch();
+		List<Person> personList = Person.findAll();
 		render(personList);
 	}
 
@@ -75,6 +75,10 @@ public class Persons extends Controller {
 		Logger.debug("saving contract, beginContract = %s, endContract = %s", contract.beginContract, contract.endContract);
 		contract.person = person;
 		contract.save();
+		list();
+	}
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void discard(){
 		list();
 	}
 	

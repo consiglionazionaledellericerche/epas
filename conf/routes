@@ -47,7 +47,7 @@ GET     /public/                                staticDir:public
 GET		/persons								Persons.list
 POST	/persons								Persons.save
 GET		/persons/new							Persons.form
-GET		/persons/update							Persons.form
+
 
 GET		/manageWorkingTime						WorkingTimes.manageWorkingTime
 GET		/vacationsAdmin							VacationsAdmin.manageVacationCode

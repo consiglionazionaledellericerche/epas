@@ -14,6 +14,9 @@ public class Administration extends Controller {
     }
     
     public static void importAll() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
+    	FromMysqlToPostgres.createQualification();
+    	FromMysqlToPostgres.createAbsenceType();
+    	FromMysqlToPostgres.joinTables();
     	FromMysqlToPostgres.importAll();
     	FromMysqlToPostgres.importNotInOldDb();
     	PopulatePersonDay.fillWorkingTimeTypeDays();
@@ -21,12 +24,12 @@ public class Administration extends Controller {
     	renderText("Importate tutte le persone dalla vecchia applicazione + aggiunti i workingtimetypeday");
     }
     
-    public static void importAbsenceTypeQualification() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-    	FromMysqlToPostgres.createQualification();
-    	FromMysqlToPostgres.createAbsenceType();
-    	FromMysqlToPostgres.joinTables();
-    	renderText("Creati livelli, absence type e definiti i legami tra le due tabelle");
-    }
+//    public static void importAbsenceTypeQualification() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+//    	FromMysqlToPostgres.createQualification();
+//    	FromMysqlToPostgres.createAbsenceType();
+//    	FromMysqlToPostgres.joinTables();
+//    	renderText("Creati livelli, absence type e definiti i legami tra le due tabelle");
+//    }
 
     
     /**
