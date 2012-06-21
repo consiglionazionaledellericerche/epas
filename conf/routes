@@ -56,11 +56,11 @@ GET		/changePassword							Persons.changePassword
 POST	/changePassword							Persons.savePassword
 
 
-GET 	/reperibility/personList				Reperibility.personList
+GET 	/reperibility/{type}/personList			Reperibility.personList
 
-GET		/reperibility/find/{<(19|20)\d\d>yearFrom}/{<(0[1-9]|1[012])>monthFrom}/{<(0[1-9]|[12][0-9]|3[01])>dayFrom}/{<(19|20)\d\d>yearTo}/{<(0[1-9]|1[012])>monthTo}/{<(0[1-9]|[12][0-9]|3[01])>dayTo}	Reperibility.find
+GET		/reperibility/{type}/find/{<(19|20)\d\d>yearFrom}/{<(0[1-9]|1[012])>monthFrom}/{<(0[1-9]|[12][0-9]|3[01])>dayFrom}/{<(19|20)\d\d>yearTo}/{<(0[1-9]|1[012])>monthTo}/{<(0[1-9]|[12][0-9]|3[01])>dayTo}	Reperibility.find
 
-PUT		/reperibility/update/{body}					Reperibility.update
+PUT		/reperibility/{type}/update/{body}		Reperibility.update
 
 # Catch all
 *       /{controller}/{action}                  {controller}.{action}
