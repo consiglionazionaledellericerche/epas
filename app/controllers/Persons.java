@@ -118,13 +118,16 @@ public class Persons extends Controller {
 		}
 	}
 	
-	public void changePassword(Person person){
-		Person p = Person.findById(person.id);
-		render(p);
+	@Check(Security.INSERT_AND_UPDATE_PASSWORD)
+	public static void changePassword(Person person){
+//		String username = session.get(USERNAME_SESSION_KEY);
+//		
+//		Person p = Person.find("byUsername", username).first();
+		render(person);
 	}
 	
-	
-	public void savePassword(Person person){
+	@Check(Security.INSERT_AND_UPDATE_PASSWORD)
+	public static void savePassword(Person person){
 		Person p = Person.findById(person.id);
 		p.password = params.get("nuovaPassword");
 		p.save();

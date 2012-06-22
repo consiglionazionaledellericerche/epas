@@ -230,6 +230,8 @@ td.comp-nome {height: 1em; text-align: left}
 p#spiegazioneTabellaTimbrature {margin-top: 2em; margin-bottom: 2em}
 div#logout {text-align: right}
 div#chooseView {text-align: center}
+div#cambiaPassword {margin: 1em 4em; text-align: left}
+div#annullaPassword {margin: 1em 4em; text-align: left}
 h2#titoloSituazionePresenzeMensili {text-align: center}
 h2#titoloSituazioneAssenzeMensili {text-align: center}
 h2#titoloSituazioneAssenzeAnnuali {text-align: center}

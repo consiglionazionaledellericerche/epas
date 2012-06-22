@@ -247,14 +247,14 @@ public class Person extends Model {
 			int differenzaAnni = now.getYear() - contract.beginContract.getYear();
 			int differenzaMesi = now.getMonthOfYear() - contract.beginContract.getMonthOfYear();
 			int differenzaGiorni = now.getDayOfMonth() - contract.beginContract.getDayOfMonth();
-			if(differenzaAnni >= 3 && differenzaMesi > 11 && differenzaGiorni >=0){
+			if(differenzaAnni > 3 ){
 				vacation = VacationCode.find("Select vc from VacationCode vc, VacationPeriod vp " +
 						"where vp.vacationCode = vc and vp.person = ?", this).first();
 				if(vacation == null){
 					VacationPeriod vacationPeriod = new VacationPeriod();
 					vacationPeriod.person = this;
 					vacationPeriod.beginFrom = contract.beginContract.toDate();
-					vacationPeriod.endTo = contract.endContract.toDate();
+					vacationPeriod.endTo = null;
 					vacationPeriod.vacationCode = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", "28+4").first();
 					vacationPeriod.save();
 					vacation = VacationCode.find("Select vc from VacationCode vc, VacationPeriod vp " +
@@ -271,13 +271,26 @@ public class Person extends Model {
 		}
 		if(contract.endContract != null && contract.beginContract != null){
 			
+			int differenzaAnni = contract.endContract.getYear() - contract.beginContract.getYear();
+			LocalDate data = new LocalDate(2099,1,1);
 			if(this.qualification.qualification == 0){
 				vacation = null;
-			}
-			
+			}			
 			else{
-				if(contract.endContract.isAfter(new LocalDate(2099,12,30)))
+				if(differenzaAnni >= 3){
+										
 					vacation = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", "28+4").first();
+					VacationPeriod period = VacationPeriod.find("Select vp from VacationPeriod vp where vp.person = ?", this).first();
+					if(period == null){
+						period = new VacationPeriod();
+						period.person = this;
+						period.vacationCode = vacation;
+						period.beginFrom = new LocalDate().toDate();
+						period.endTo = null;
+						period.save();
+					}
+					
+				}					
 				else
 					vacation = VacationCode.find("Select vc from VacationCode vc where vc.description = ?","26+4").first();
 				
