@@ -50,6 +50,7 @@ GET		/persons/new							Persons.form
 
 
 GET		/manageWorkingTime						WorkingTimes.manageWorkingTime
+POST	/insertWorkingTime						WorkingTimes.insertWorkingTime
 GET		/vacationsAdmin							VacationsAdmin.manageVacationCode
 POST	/insertVacation							VacationsAdmin.insertVacationCode
 GET		/changePassword							Persons.changePassword
