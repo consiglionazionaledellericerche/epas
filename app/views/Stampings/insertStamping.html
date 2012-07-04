@@ -5,7 +5,7 @@
 
 Inserire ore e minuti nelle caselle seguenti nel formato HH.MM 
 Lasciare la casella vuota per eliminare una entrata/uscita.
-{form @save()}
+{form @Stampings.save()}
 <table>
 	<tr>
 		<th>1^entrata</th>
@@ -31,4 +31,7 @@ Lasciare la casella vuota per eliminare una entrata/uscita.
 
 <input type="submit" value="ok" />
 #{/form}
-<input type=reset value="Annulla">
+
+{form @Stampings.discard()}
+	<input type=reset value="Annulla">
+#{/form}

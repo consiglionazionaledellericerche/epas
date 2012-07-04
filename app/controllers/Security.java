@@ -19,6 +19,7 @@ public class Security extends Secure.Security {
 	public final static String INSERT_AND_UPDATE_STAMPING = "insertAndUpdateStamping";
 	public final static String INSERT_AND_UPDATE_PASSWORD = "insertAndUpdatePassword";
 	public final static String INSERT_AND_UPDATE_WORKINGTIME = "insertAndUpdateWorkingTime";
+	public final static String INSERT_AND_UPDATE_ABSENCE = "insertAndUpdateAbsence";
 	
 	//public final static String PERSON_SESSION_KEY = "person";
 	private final static String PERMISSION_CACHE_PREFIX = "permission.";

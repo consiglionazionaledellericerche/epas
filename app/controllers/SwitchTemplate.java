@@ -12,10 +12,12 @@ import play.mvc.Controller;
 
 public class SwitchTemplate extends Controller{
 
+	public static final String USERNAME_SESSION_KEY = "username";
+	
 	public static void dispatch(){
  
 		String s = params.get("menuItem");
-		
+		Person person = renderArgs.get(USERNAME_SESSION_KEY, Person.class);
 		if (s == null) {
 			/* fare qualcosa! Reindirizzare l'utente verso una pagina con l'errore? Rimanere sulla stessa pagina mostrando l'errore? */
 			return;
@@ -35,6 +37,10 @@ public class SwitchTemplate extends Controller{
 			Vacations.show();
 		case competences:
 			Competences.show();
+		case changePassword:
+			Persons.changePassword(person);
+		case manageWorkingTime:
+			WorkingTimes.manageWorkingTime();
 		default:
 			break;
 		}
