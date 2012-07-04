@@ -32,7 +32,11 @@ public class Application extends Controller {
     
 	public static void index() {
         if(connected() != null) {
-            Stampings.show();
+        	Person person = connected();
+        	if(person.permissions.isEmpty())
+        		Stampings.show();
+        	else
+        		Stampings.showAdmin();
         }
         render();
     } 

@@ -36,6 +36,12 @@ public class Stampings extends Controller {
         }
     }
 
+    /**
+     * 
+     * @param id
+     * metodo privato invocato dal metodo pubblico show() che ritorna il monthRecap, il personMonth della person che viene recuperata
+     * tramite id oltre al menuItem
+     */
     private static void show(Long id) {
     	String menuItem = actionMenuItem.toString();
     	
@@ -59,6 +65,86 @@ public class Stampings extends Controller {
 
     public static void show() {
     	show(Long.parseLong(session.get(Application.PERSON_ID_SESSION_KEY)));
+    }
+    
+    /**
+     * metodo che prende i parametri di persona, anno e mese dalla showAdmin e li passa alla personStamping relativa a quella persona per quel mese
+     * e per quell'anno
+     */
+    public static void choosePersonAndDate(){
+    	String s = params.get("person");
+
+    	if(s == null)
+    		throw new NullPointerException("Persona non popolata");
+    	else{
+    		Logger.debug("La person é: "+s.toString());
+    		System.out.println("La person è: "+s);
+    	}
+    	
+    	long l = Long.parseLong(s);
+    	Long id = new Long(l);
+    	Person person = Person.findById(id);
+    	Logger.debug("La person é: "+person.name+' '+person.surname);
+    	
+    	LocalDate now = new LocalDate();
+    	Integer year = params.get("year") != null ? Integer.parseInt(params.get("year")) : now.getYear();
+    	Logger.debug("L'anno é: "+year);
+    	Integer month = params.get("month") != null ? Integer.parseInt(params.get("month")) : now.getMonthOfYear();
+    	Logger.debug("Il mese é: "+month);   	
+    	session.put("year", year);
+    	session.put("month", month);
+    	session.put("person_id", person.id);
+    	//render(person, year,month);
+    	Stampings.personStamping();
+    }
+    
+    /**
+     * 
+     * @param person
+     * @param year
+     * @param month
+     */
+    
+    private static void personStamping(Person person, int year, int month){
+    	String menuItem = actionMenuItem.toString();
+    	Logger.debug("Sono dentro la personStamping of person.id %s, year=%s, month=%s", person.id, year, month);
+    	MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, year, month);
+    	List<Person> personList = Person.find("Select p from Person p order by p.surname").fetch();
+    	PersonMonth personMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and " +
+    			"pm.month = ? and pm.year = ?", person, month, year).first();
+    	if (personMonth == null) {
+			personMonth = new PersonMonth(person, year, month);
+		}
+    	Logger.debug("Month recap of person.id %s, year=%s, month=%s", person.id, year, month);
+        render(monthRecap, personMonth, menuItem, personList);
+    }
+    
+    public static void personStamping(){
+    	Person person = null;
+    	personStamping(person = Person.findById(Long.parseLong(session.get("person_id"))), Integer.parseInt(session.get("year")), Integer.parseInt(session.get("month")));
+    }
+
+    
+    private static void showAdmin(Long id) {
+    	String menuItem = actionMenuItem.toString();
+    	
+    	Person person = Person.findById(id);
+    	
+    	List<Person> personList = Person.find("Select p from Person p order by p.surname").fetch();
+    	
+    	LocalDate now = new LocalDate();
+    	Integer year = params.get("year") != null ? Integer.parseInt(params.get("year")) : now.getYear();
+    	Integer month = params.get("month") != null ? Integer.parseInt(params.get("month")) : now.getMonthOfYear();
+    	
+    	MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, year, month);
+
+    	render(menuItem, personList, monthRecap);
+    	
+    	
+    }
+
+    public static void showAdmin() {
+    	showAdmin(Long.parseLong(session.get(Application.PERSON_ID_SESSION_KEY)));
     }
     
     public static void dailyStampings() {
@@ -151,6 +237,9 @@ public class Stampings extends Controller {
 				pd.setProgressive();
 				pd.setTicketAvailable();
 				pd.save();
+				/**
+				 * TODO: applicare la logica del ricalcolo mensile e annuale se mi trovo nel primo giorno del nuovo mese o del nuovo anno
+				 */
 				flag = true;
 			}
 			else{
@@ -159,6 +248,11 @@ public class Stampings extends Controller {
 			
 		}		
 		
-		show();
+		showAdmin();
+	}
+    
+    @Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void discard(){
+		showAdmin();
 	}
 }

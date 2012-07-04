@@ -55,7 +55,13 @@ GET		/vacationsAdmin							VacationsAdmin.manageVacationCode
 POST	/insertVacation							VacationsAdmin.insertVacationCode
 GET		/changePassword							Persons.changePassword
 POST	/changePassword							Persons.savePassword
-
+GET		/insertStamping							Stampings.insertStamping
+POST	/insertStamping							Stampings.save
+GET		/orarioAdmin							Stampings.showAdmin
+GET		/choosePersonAndDate					Stampings.choosePersonAndDate
+GET		/personStamping							Stamping.personStamping
+GET		/Absences/insertAbsence					Absences.insertAbsence
+POST	/Absences/insertAbsence					Absences.save
 
 GET 	/reperibility/{type}/personList			Reperibility.personList
 
