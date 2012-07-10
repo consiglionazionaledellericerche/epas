@@ -1,5 +1,7 @@
 package controllers;
 
+import it.cnr.iit.epas.ActionMenuItem;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -10,15 +12,17 @@ import play.mvc.Controller;
 
 public class WorkingTimes extends Controller{
 
+	private final static ActionMenuItem actionMenuItem = ActionMenuItem.manageWorkingTime;
 	/**
 	 * ritorna la lista dei workingTimeType da cui posso accedere ai workingTimeTypeDays per le caratteristiche che devo evidenziare
 	 * nella view
 	 */
 	@Check(Security.INSERT_AND_UPDATE_WORKINGTIME)
 	public static void manageWorkingTime(){
+		String menuItem = actionMenuItem.toString();
 		List<WorkingTimeType> wttList = WorkingTimeType.findAll();
 		
-		render(wttList);
+		render(wttList,menuItem);
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_WORKINGTIME)

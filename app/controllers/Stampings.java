@@ -93,6 +93,7 @@ public class Stampings extends Controller {
     	Logger.debug("Il mese é: "+month);   	
     	session.put("year", year);
     	session.put("month", month);
+    	
     	session.put("person_id", person.id);
     	//render(person, year,month);
     	Stampings.personStamping();
@@ -116,6 +117,15 @@ public class Stampings extends Controller {
 			personMonth = new PersonMonth(person, year, month);
 		}
     	Logger.debug("Month recap of person.id %s, year=%s, month=%s", person.id, year, month);
+    	
+    	//params.put("person.id", person.id.toString());
+    	/**
+    	 * TODO: capire come inserire tra i params o in session il valore del day in cui si vuole inserire la timbratura preso dalla
+    	 * view in cui si clicca sul giorno in questione
+    	 */
+    	//session.put("day", )
+    	//params.put("day",  );
+    	
         render(monthRecap, personMonth, menuItem, personList);
     }
     
@@ -160,19 +170,24 @@ public class Stampings extends Controller {
     	PersonDay personDay = new PersonDay(person, day);
     	render(personDay);
     }
+
+    
     
     @Check(Security.INSERT_AND_UPDATE_STAMPING)
     public static void insertStamping(){
-    	Person person = Person.findById(Long.parseLong(params.get("id")));
-    	LocalDate day = 
+    	Person person = Person.findById(Long.parseLong(session.get("person_id")));
+    	
+    	Logger.debug("Person: "+person.id);
+       	
+    	LocalDate date = 
     			new LocalDate(
-    				Integer.parseInt(params.get("year")),
-    				Integer.parseInt(params.get("month")), 
-    				Integer.parseInt(params.get("day")));
+    				Integer.parseInt(session.get("year")),
+    				Integer.parseInt(session.get("month")), 
+    				Integer.parseInt(session.get("day")));
     	
-    	Logger.trace("Insert stamping called for %s %s", person, day);
-    	
-    	PersonDay personDay = new PersonDay(person, day);
+    	Logger.trace("Insert stamping called for %s %s", person, Integer.parseInt(session.get("day")));
+    	Logger.debug("day: "+Integer.parseInt(session.get("day")));
+    	PersonDay personDay = new PersonDay(person, date);
     	render(personDay);
     }
     

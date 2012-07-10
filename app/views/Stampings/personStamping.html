@@ -23,6 +23,7 @@
 	#{option 'competences'}Competenze e Straordinari#{/option}	
 	#{option 'changePassword'}Cambia password#{/option}
 	#{option 'manageWorkingTime'}Orari di lavoro#{/option}
+	#{option 'confParameters'}Configurazione Parametri#{/option}
 #{/select}
     	<input type="submit" value="go!" />
      
@@ -94,6 +95,8 @@
 	
 %{
      for(day in monthRecap.days) {
+     		
+			
 }%
 		
 <tr>
@@ -116,6 +119,7 @@
 			%{
 			}
 			}%
+		
 			<td class="assenza"><a href="@{Absences.insertAbsence}">${day.absenceList().size()>0  ? day.absenceList().get(0).absenceType.code : '____'}</a><script type="text/javascript"> 
 				$('.example3demo').popupWindow({ 
 					height:500, 
@@ -124,6 +128,7 @@
 					left:50 
 				}); 
 				</script></td>
+
 			<td class="ingresso"><a href="@{Stampings.insertStamping}">${day.getStampings().size()>0 ? day.getStampings().get(0).date.toCalendarTime() : '_____'}</a><script type="text/javascript"> 
 				$('.example3demo').popupWindow({ 
 					height:500, 
@@ -132,6 +137,7 @@
 					left:50 
 				}); 
 				</script></td>
+			
 			<td class="uscita"><a href="@{Stampings.insertStamping}">${day.getStampings().size()>1 && day.getStampings().get(1)!=null ? day.getStampings().get(1).date.toCalendarTime() : '_____'}</a><script type="text/javascript"> 
 				$('.example3demo').popupWindow({ 
 					height:500, 
@@ -140,6 +146,7 @@
 					left:50 
 				}); 
 				</script></td>
+			
 			%{
 			if(day.getStampings().size()>2 && day.getStampings().get(2)!=null && day.getStampings().get(1)!=null){
 			}%	

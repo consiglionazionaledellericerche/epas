@@ -41,6 +41,8 @@ public class SwitchTemplate extends Controller{
 			Persons.changePassword(person);
 		case manageWorkingTime:
 			WorkingTimes.manageWorkingTime();
+		case confParameters:
+			ConfParameters.show();
 		default:
 			break;
 		}

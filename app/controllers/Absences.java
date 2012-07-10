@@ -73,14 +73,15 @@ public class Absences extends Controller{
 	
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void insertAbsence(){
-		Person person = Person.findById(Long.parseLong(params.get("id")));
+		
+		Person person = Person.findById(Long.parseLong(session.get("person_id")));
     	LocalDate day = 
     			new LocalDate(
-    				Integer.parseInt(params.get("year")),
-    				Integer.parseInt(params.get("month")), 
-    				Integer.parseInt(params.get("day")));
+    				Integer.parseInt(session.get("year")),
+    				Integer.parseInt(session.get("month")), 
+    				Integer.parseInt(session.get("day")));
     	
-    	Logger.trace("Insert stamping called for %s %s", person, day);
+    	Logger.trace("Insert absence called for %s %s", person, day);
     	
     	PersonDay personDay = new PersonDay(person, day);
 		render(personDay);		

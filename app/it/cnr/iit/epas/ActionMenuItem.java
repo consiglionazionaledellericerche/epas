@@ -15,4 +15,5 @@ public enum ActionMenuItem {
 	competences,
 	changePassword,
 	manageWorkingTime,
+	confParameters
 }

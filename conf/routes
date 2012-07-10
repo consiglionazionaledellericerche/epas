@@ -62,6 +62,8 @@ GET		/choosePersonAndDate					Stampings.choosePersonAndDate
 GET		/personStamping							Stamping.personStamping
 GET		/Absences/insertAbsence					Absences.insertAbsence
 POST	/Absences/insertAbsence					Absences.save
+GET		/confParameters							ConfParameters.show
+POST	/confParameters							ConfParameters.save
 
 GET 	/reperibility/{type}/personList			Reperibility.personList
 

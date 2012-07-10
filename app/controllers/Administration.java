@@ -21,7 +21,9 @@ public class Administration extends Controller {
     	FromMysqlToPostgres.importNotInOldDb();
     	PopulatePersonDay.fillWorkingTimeTypeDays();
     	PopulatePersonDay.manageContract();
-    	renderText("Importate tutte le persone dalla vecchia applicazione + aggiunti i workingtimetypeday");
+    	PopulatePersonDay.personPermissions();
+    	renderText("Importate tutte le persone dalla vecchia applicazione + aggiunti i workingtimetypeday e aggiunti i permessi" +
+    			"di amministrazione per l'utente con id 139.");
     }
     
 //    public static void importAbsenceTypeQualification() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
@@ -37,8 +39,9 @@ public class Administration extends Controller {
      * sul db già al momento della prima visualizzazione.
      */
     public static void populatePersonDay(){
-    	PopulatePersonDay.PopulatePersonDayForOne();
-    	renderText("Calcolate tutte le informazioni su tempi di lavoro, progressivo e differenza per i person day di Cristian Lucchesi");
+    	//PopulatePersonDay.PopulatePersonDayForOne();
+    	PopulatePersonDay.PopulatePersonDayForAll();
+    	renderText("Calcolate tutte le informazioni su tempi di lavoro, progressivo e differenza per i person day di tutti gli utenti");
     }
     
     /**
@@ -57,6 +60,11 @@ public class Administration extends Controller {
     public static void manageStampType(){
     	PopulatePersonDay.manageStampType();
     	renderText("Sistemata situazione degli stamp type");
+    }
+    
+    public static void populatePermissions(){
+    	PopulatePersonDay.personPermissions();
+    	renderText("Aggiunti permessi a person con id 139");
     }
     
 }

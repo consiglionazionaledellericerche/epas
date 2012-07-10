@@ -228,10 +228,12 @@ td.comp {height: 1em; text-align: right}
 td.comp-nome {height: 1em; text-align: left}
 
 p#spiegazioneTabellaTimbrature {margin-top: 2em; margin-bottom: 2em}
+p#validita {margin: 2em 0em 2em}
 div#logout {text-align: right}
 div#chooseView {text-align: center}
 div#cambiaPassword {margin: 1em 4em; text-align: left}
 div#annullaPassword {margin: 1em 4em; text-align: left}
+div#gestioneParametri {margin: 1em 4em 1em; text-align: left}
 h2#titoloSituazionePresenzeMensili {text-align: center}
 h2#titoloSituazioneAssenzeMensili {text-align: center}
 h2#titoloSituazioneAssenzeAnnuali {text-align: center}
@@ -242,3 +244,11 @@ h2#titoloCambioPassword {text-align: center}
 h2#titoloGestioneOrariLavoro {text-align: center}
 h2#titoloGestioneTipiFerie {text-align: center}
 h3#titoloSituazionePresenzeMensili {text-align: center}
+h2#titoloConfigurazioneParametri {text-align: center}
+h3#titoloGestioneParametri {margin: 2em 0em 2em; text-align: center}
+fieldset#timbraturaWeb {height: 12em}
+fieldset#stampaPdf {height: 12em}
+textarea#timbraturaWeb {margin: 0em 3em 0em}
+textarea#stampaPdf {margin: 0em 3em 0em}
+input#salvaConfigurazione {margin: 2em 60em 0em; align: center}
+input#annullaConfigurazione {margin: 0em 80em 2em; align: center}
