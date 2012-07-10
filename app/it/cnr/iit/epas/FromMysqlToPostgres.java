@@ -219,60 +219,60 @@ public class FromMysqlToPostgres {
 	}
 	
 	
-	@SuppressWarnings("deprecation")
-	public static void createParameters() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException, IOException{
-		EntityManager em = JPA.em();
-		Connection mysqlCon = getMysqlConnection();
-		PreparedStatement stmtParam = mysqlCon.prepareStatement("SELECT * FROM parametri ORDER BY data_inizio DESC limit 1");
-		ResultSet rsParam = stmtParam.executeQuery();
-		ConfParameters parameters = null;
-		while(rsParam.next()){			
-
-			String blob = rsParam.getString("valore");
-			int lunghezza = blob.length();
-			System.out.println("lunghezza di blob = " +lunghezza);			
-			
-			int i = 0;
-			while(i < lunghezza){
-				String value = "";
-				String desc = "";
-				if(blob.charAt(i)=='$' || blob.charAt(i)=='%'){					
-					int conta = i++;					
-					
-					while(blob.charAt(conta)!='='){
-						desc = desc+blob.charAt(conta);
-						conta++;
-					}
-					parameters = new ConfParameters();
-					if(desc.charAt(0)=='$' || desc.charAt(0)=='%')
-						parameters.description  = desc.substring(1, desc.length()-1);
-					else
-						parameters.description = desc;	
-					Timestamp dataprev = rsParam.getTimestamp("data");
-					parameters.date = new LocalDate(dataprev.getYear(),dataprev.getMonth(),dataprev.getDay());
-					int nuovo = conta++;
-					
-					if(blob.charAt(nuovo)=='='){
-						nuovo++;
-						while(blob.charAt(nuovo)!=';'){
-							value = value+blob.charAt(nuovo);
-							nuovo++;
-						}
-						if(value.charAt(0)=='"')
-							parameters.value = value.substring(1, value.length()-1);
-						else
-							parameters.value = value;
-					}
-					em.persist(parameters);
-				}
-							
-				i++;
-				
-			}
-			
-		}		
-		
-	}
+//	@SuppressWarnings("deprecation")
+//	public static void createParameters() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException, IOException{
+//		EntityManager em = JPA.em();
+//		Connection mysqlCon = getMysqlConnection();
+//		PreparedStatement stmtParam = mysqlCon.prepareStatement("SELECT * FROM parametri ORDER BY data_inizio DESC limit 1");
+//		ResultSet rsParam = stmtParam.executeQuery();
+//		ConfParameters parameters = null;
+//		while(rsParam.next()){			
+//
+//			String blob = rsParam.getString("valore");
+//			int lunghezza = blob.length();
+//			System.out.println("lunghezza di blob = " +lunghezza);			
+//			
+//			int i = 0;
+//			while(i < lunghezza){
+//				String value = "";
+//				String desc = "";
+//				if(blob.charAt(i)=='$' || blob.charAt(i)=='%'){					
+//					int conta = i++;					
+//					
+//					while(blob.charAt(conta)!='='){
+//						desc = desc+blob.charAt(conta);
+//						conta++;
+//					}
+//					parameters = new ConfParameters();
+//					if(desc.charAt(0)=='$' || desc.charAt(0)=='%')
+//						parameters.description  = desc.substring(1, desc.length()-1);
+//					else
+//						parameters.description = desc;	
+//					Timestamp dataprev = rsParam.getTimestamp("data");
+//					parameters.date = new LocalDate(dataprev.getYear(),dataprev.getMonth(),dataprev.getDay());
+//					int nuovo = conta++;
+//					
+//					if(blob.charAt(nuovo)=='='){
+//						nuovo++;
+//						while(blob.charAt(nuovo)!=';'){
+//							value = value+blob.charAt(nuovo);
+//							nuovo++;
+//						}
+//						if(value.charAt(0)=='"')
+//							parameters.value = value.substring(1, value.length()-1);
+//						else
+//							parameters.value = value;
+//					}
+//					em.persist(parameters);
+//				}
+//							
+//				i++;
+//				
+//			}
+//			
+//		}		
+//		
+//	}
 	
 	public static void importAll() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		Connection mysqlCon = FromMysqlToPostgres.getMysqlConnection();
