@@ -3,6 +3,7 @@
 
 <h3>Modifica codici di assenza del ${personDay.date}</h3>
 
+#{form @Absences.save()}
 Inserire un <a href="absenceCodeList.html">codice di assenza</a> nella casella seguente.
 
 <table>
@@ -70,12 +71,13 @@ Inserire un <a href="absenceCodeList.html">codice di assenza</a> nella casella s
 </table>
 
 
- <fieldset>
-  <legend>Buono mensa:</legend>
-  calcolato<input type="radio" name="calcolato" value=""/>
-  No <input type="radio" name="no" value=""/>
-  Sì <input type="radio" name="si" value=""/>
+<fieldset>
+	<legend>Buono mensa:</legend>
+  	calcolato<input type="radio" name="calcolato" value=""/>
+  	No <input type="radio" name="no" value=""/>
+  	Sì <input type="radio" name="si" value=""/>
 </fieldset>
 
 
 <input type="submit" value="Salva"/>
+#{/form}

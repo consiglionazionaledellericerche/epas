@@ -12,5 +12,8 @@ public enum ActionMenuItem {
 	yearlyAbsences,
 	absences,
 	vacations,
-	competences
+	competences,
+	changePassword,
+	manageWorkingTime,
+	confParameters
 }

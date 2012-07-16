@@ -45,6 +45,7 @@ import org.joda.time.LocalDate;
 import controllers.Check;
 import controllers.Secure;
 
+import play.Logger;
 import play.data.validation.Email;
 import play.data.validation.Required;
 import play.db.jpa.JPA;
@@ -230,11 +231,14 @@ public class Person extends Model {
 	 */
 	@SuppressWarnings("unused")
 	
-	public VacationCode getVacation(Person person){
+	public VacationCode getVacation(){
 	
 		VacationCode vacation = null;
 
-		Contract contract = person.contract;
+		Contract contract = Contract.find("Select con from Contract con where con.person = ?", this).first();
+		if(contract == null){
+			Logger.info("Siamo nel bottino che il contratto è nullo per "+this.name+" "+this.surname);
+		}
 		LocalDate now = new LocalDate();
 		if(contract.endContract == null && contract.beginContract != null){
 			/**
@@ -243,103 +247,130 @@ public class Person extends Model {
 			int differenzaAnni = now.getYear() - contract.beginContract.getYear();
 			int differenzaMesi = now.getMonthOfYear() - contract.beginContract.getMonthOfYear();
 			int differenzaGiorni = now.getDayOfMonth() - contract.beginContract.getDayOfMonth();
-			if(differenzaAnni >= 3 && differenzaMesi > 11 && differenzaGiorni >=0){
-				vacation = new VacationCode();
-				vacation.description = "28+4";
-				
+			if(differenzaAnni > 3 ){
+				vacation = VacationCode.find("Select vc from VacationCode vc, VacationPeriod vp " +
+						"where vp.vacationCode = vc and vp.person = ?", this).first();
+				if(vacation == null){
+					VacationPeriod vacationPeriod = new VacationPeriod();
+					vacationPeriod.person = this;
+					vacationPeriod.beginFrom = contract.beginContract.toDate();
+					vacationPeriod.endTo = null;
+					vacationPeriod.vacationCode = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", "28+4").first();
+					vacationPeriod.save();
+					vacation = VacationCode.find("Select vc from VacationCode vc, VacationPeriod vp " +
+							"where vp.vacationCode = vc and vp.person = ?", this).first();
+					return vacation;
+				}
+			
 			}
 			else{
 				vacation = VacationCode.find("Select vac from VacationCode vac, VacationPeriod per where per.person = ?" +
 						" and per.vacationCode = vac order by per.beginFrom", this).first();
+				return vacation;
 			}
 		}
 		if(contract.endContract != null && contract.beginContract != null){
+			
+			int differenzaAnni = contract.endContract.getYear() - contract.beginContract.getYear();
+			LocalDate data = new LocalDate(2099,1,1);
+			if(this.qualification.qualification == 0){
+				vacation = null;
+			}			
+			else{
+				if(differenzaAnni >= 3){
+										
+					vacation = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", "28+4").first();
+					VacationPeriod period = VacationPeriod.find("Select vp from VacationPeriod vp where vp.person = ?", this).first();
+					if(period == null){
+						period = new VacationPeriod();
+						period.person = this;
+						period.vacationCode = vacation;
+						period.beginFrom = new LocalDate().toDate();
+						period.endTo = null;
+						period.save();
+					}
+					
+				}					
+				else
+					vacation = VacationCode.find("Select vc from VacationCode vc where vc.description = ?","26+4").first();
+				
+			}
+			//return vacation;
 			/*
 			 * bisogna controllare se nella lista dei contratti ce n'è più di uno e quanti anni questa persona ha accumulato.
 			 * nel caso la durata complessiva dei contratti accumulati sia superiore a 3 anni bisogna ritornare il piano ferie 
 			 * "28+4"
 			 * Si fa la query sullo storico:
 			 */
-			AuditReader reader = AuditReaderFactory.get(JPA.em());
-			List<Contract> listaContratti = (List<Contract>) reader.createQuery().forRevisionsOfEntity(Contract.class, true, false)
-					.addOrder(AuditEntity.property("endContract").asc())
-					;
-			
-			if (listaContratti.size() == 0) {
-				return null;
-			}
-			
-			if(listaContratti.size()>1){
-				int diffYear = 0;
-				int diffMonth = 0;
-				int diffDay = 0;
-				for(Contract c : listaContratti){
-					if(c != null || (c.beginContract!=null && c.endContract!=null)){
-						/**
-						 * TODO: cambiare la tipologia di data di inizio e fine contratto da date a localdate
-						 */
-						diffYear = diffYear + (c.endContract.getYear()-c.beginContract.getYear());
-						diffMonth = diffMonth + (c.endContract.getMonthOfYear()-c.beginContract.getMonthOfYear());
-						diffDay = diffDay + (c.endContract.getDayOfMonth()-c.beginContract.getDayOfMonth());
-					}
-											
-				}
-				if(diffYear > 2 || (diffYear == 2 && diffMonth > 12)){
-					vacation = new VacationCode();
-					vacation.description = "28+4";
-				}
-			}
-			else{
-				vacation = VacationCode.find("Select vac from VacationCode vac, VacationPeriod per where per.person = ?" +
-						" and per.vacationCode = vac order by per.beginFrom", this).first();
-			}
+//			AuditReader reader = AuditReaderFactory.get(JPA.em());
+//			List<Contract> listaContratti = (List<Contract>) reader.createQuery().forRevisionsOfEntity(Contract.class, true, false)
+//					.addOrder(AuditEntity.property("endContract").asc())
+//					;
+//			
+//			if (listaContratti.size() == 0) {
+//				return null;
+//			}
+//			
+//			if(listaContratti.size()>1){
+//				int diffYear = 0;
+//				int diffMonth = 0;
+//				int diffDay = 0;
+//				for(Contract c : listaContratti){
+//					if(c != null || (c.beginContract!=null && c.endContract!=null)){
+//						/**
+//						 * TODO: cambiare la tipologia di data di inizio e fine contratto da date a localdate
+//						 */
+//						diffYear = diffYear + (c.endContract.getYear()-c.beginContract.getYear());
+//						diffMonth = diffMonth + (c.endContract.getMonthOfYear()-c.beginContract.getMonthOfYear());
+//						diffDay = diffDay + (c.endContract.getDayOfMonth()-c.beginContract.getDayOfMonth());
+//					}
+//											
+//				}
+//				if(diffYear > 2 || (diffYear == 2 && diffMonth > 12)){
+//					vacation = new VacationCode();
+//					vacation.description = "28+4";
+//				}
+//			}
+//			else{
+//				vacation = VacationCode.find("Select vac from VacationCode vac, VacationPeriod per where per.person = ?" +
+//						" and per.vacationCode = vac order by per.beginFrom", this).first();
+//			}
+//		}
+//			
+//		/*
+//		 * prendo il primo elemento della lista che ho ordinato nella query che contiene il contratto più recente. Controllo che sia
+//		 * diverso da null e, in tal caso, guardo la durata: se è maggiore di 3 anni rispetto alla data odierna ritorno un nuovo 
+//		 * VacationCode con descrizione "28+4"
+//		 */
+//		//Contract con = listaContratti.get(0);
+//		Contract con = this.contract;
+//		if(con != null){
+//			LocalDate beginContract = new LocalDate(con.beginContract);
+//			LocalDate endContract = new LocalDate(con.endContract);
+//			if(endContract == null && beginContract != null){
+//				/*
+//				 * il contratto è a tempo indeterminato, controllo quindi se la data odierna è maggiore o no di 3 anni rispetto 
+//				 * all'inizio di questo contratto
+//				 */
+//				int differenzaAnni = now.getYear() - beginContract.getYear();
+//				int differenzaMesi = now.getMonthOfYear() - beginContract.getMonthOfYear();
+//				int differenzaGiorni = now.getDayOfMonth() - beginContract.getDayOfMonth();
+//				if(differenzaAnni >= 3 && differenzaMesi > 11 && differenzaGiorni >=0){
+//					vacation = new VacationCode();
+//					vacation.description = "28+4";
+//					
+//				}
+//				else{
+//					vacation = VacationCode.find("Select vac from VacationCode vac, VacationPeriod per where per.person = ?" +
+//							" and per.vacationCode = vac order by per.beginFrom", this).first();
+//				}
+//			}
+//			
+//			
+//		}
+		
+		
 		}
-			
-		/*
-		 * prendo il primo elemento della lista che ho ordinato nella query che contiene il contratto più recente. Controllo che sia
-		 * diverso da null e, in tal caso, guardo la durata: se è maggiore di 3 anni rispetto alla data odierna ritorno un nuovo 
-		 * VacationCode con descrizione "28+4"
-		 */
-		//Contract con = listaContratti.get(0);
-		Contract con = person.contract;
-		if(con != null){
-			LocalDate beginContract = new LocalDate(con.beginContract);
-			LocalDate endContract = new LocalDate(con.endContract);
-			if(endContract == null && beginContract != null){
-				/*
-				 * il contratto è a tempo indeterminato, controllo quindi se la data odierna è maggiore o no di 3 anni rispetto 
-				 * all'inizio di questo contratto
-				 */
-				int differenzaAnni = now.getYear() - beginContract.getYear();
-				int differenzaMesi = now.getMonthOfYear() - beginContract.getMonthOfYear();
-				int differenzaGiorni = now.getDayOfMonth() - beginContract.getDayOfMonth();
-				if(differenzaAnni >= 3 && differenzaMesi > 11 && differenzaGiorni >=0){
-					vacation = new VacationCode();
-					vacation.description = "28+4";
-					
-				}
-				else{
-					vacation = VacationCode.find("Select vac from VacationCode vac, VacationPeriod per where per.person = ?" +
-							" and per.vacationCode = vac order by per.beginFrom", this).first();
-				}
-			}
-			if(endContract == null && beginContract == null){
-				/*
-				 * è il caso di persone come Laura Abba e Mauro Balestri
-				 * 
-				 */
-				/**
-				 * TODO: fare una find su una classe di enum che associa un valore alla riga della tabella (in questo caso del 
-				 * vacation code)
-				 */
-				vacation = new VacationCode();
-				vacation.description = "28+4";
-			}
-			
-			
-		}
-//		VacationCode vacation = VacationCode.find("Select vac from VacationCode vac, VacationPeriod per where per.person = ?" +
-//				" and per.vacationCode = vac order by per.beginFrom", person).first();		
 		return vacation;
 	}
 	
@@ -351,6 +382,17 @@ public class Person extends Model {
 			setPermissions.addAll(g.permissions);
 		}
 		return setPermissions;
+	}
+	
+	/**
+	 * 
+	 * @return il contratto in essere per quella persona. N.B.: occorre il metodo poichè non capisco perchè non riesco a recuperare
+	 * il contratto dalle informazioni sulla persona tramite il legame tra le due tabelle.
+	 */
+	public Contract getContract(){
+		Contract contract = Contract.find("Select con from Contract con where con.person = ?", this).first();
+		return contract;
+		
 	}
 	
 	

@@ -8,10 +8,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -31,6 +33,7 @@ import models.Person;
 import models.PersonDay;
 import models.PersonReperibility;
 import models.PersonVacation;
+import models.Qualification;
 import models.StampModificationType;
 import models.StampModificationTypeValue;
 import models.StampType;
@@ -60,6 +63,7 @@ public class FromMysqlToPostgres {
 	public static Map<Integer,Long> mappaCodiciVacationType = new HashMap<Integer,Long>();
 	public static Map<Integer,Long> mappaCodiciWorkingTimeType = new HashMap<Integer,Long>();
 	public static Map<Integer,Long> mappaCodiciStampType = new HashMap<Integer,Long>();
+	public static Map<Integer,Long> mappaCodiciQualification = new HashMap<Integer,Long>();
 	
 	public static String mySqldriver = Play.configuration.getProperty("db.old.driver");//"com.mysql.jdbc.Driver";	
 
@@ -77,60 +81,198 @@ public class FromMysqlToPostgres {
 				Play.configuration.getProperty("db.old.password"));
 	}
 	
-	@SuppressWarnings("deprecation")
-	public static void createParameters() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException, IOException{
-		EntityManager em = JPA.em();
+	/**
+	 * metodo per il popolamento delle qualifiche
+	 */
+	public static void createQualification(){
+		int i = 1;
+		while(i < 10){
+			Qualification qual = new Qualification();
+			qual.qualification = i;
+			qual.save();
+			i++;
+		}
+		
+	}	
+	
+	/**
+	 * 
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws ClassNotFoundException
+	 * @throws SQLException
+	 * metodo per il popolamento delle absenceType
+	 * 
+	 */
+	public static void createAbsenceType() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+		
 		Connection mysqlCon = getMysqlConnection();
-		PreparedStatement stmtParam = mysqlCon.prepareStatement("SELECT * FROM parametri ORDER BY data_inizio DESC limit 1");
+		PreparedStatement stmtParam = mysqlCon.prepareStatement("Select Codici.Qualifiche, " +
+				"Codici.Codice, Codici.Interno, Codici.Descrizione, Codici.QuantGiust, Codici.IgnoraTimbr, Codici.MinutiEccesso, " +
+				"Codici.Limite, Codici.Accumulo, Codici.CodiceSost, Codici.id, Codici.Gruppo, Codici.DataInizio, Codici.DataFine " +
+				"from Codici " +
+				"where Codici.id != 0");
 		ResultSet rsParam = stmtParam.executeQuery();
-		ConfParameters parameters = null;
-		while(rsParam.next()){			
-
-			String blob = rsParam.getString("valore");
-			int lunghezza = blob.length();
-			System.out.println("lunghezza di blob = " +lunghezza);			
-			
-			int i = 0;
-			while(i < lunghezza){
-				String value = "";
-				String desc = "";
-				if(blob.charAt(i)=='$' || blob.charAt(i)=='%'){					
-					int conta = i++;					
+		
+		
+		while(rsParam.next()){
+			AbsenceType absenceType = new AbsenceType();
+				
+				absenceType.code = rsParam.getString("Codice");
+				absenceType.description = rsParam.getString("Descrizione");
+				absenceType.validFrom = rsParam.getDate("DataInizio");
+				absenceType.validTo = rsParam.getDate("DataFine");
+				if(rsParam.getByte("Interno")==0)
+					absenceType.internalUse = false;
+				else
+					absenceType.internalUse = true;
+				if(rsParam.getByte("IgnoraTimbr")==0)
+					absenceType.ignoreStamping = false;
+				else 
+					absenceType.ignoreStamping = true;	
+				
+				
+				/**
+				 * caso di assenze orarie
+				 */
+				if(rsParam.getInt("QuantGiust") != 0){
+					absenceType.isHourlyAbsence = true;
+					absenceType.isDailyAbsence = false;
+					absenceType.justifiedWorkTime = rsParam.getInt("QuantGiust");
 					
-					while(blob.charAt(conta)!='='){
-						desc = desc+blob.charAt(conta);
-						conta++;
-					}
-					parameters = new ConfParameters();
-					if(desc.charAt(0)=='$' || desc.charAt(0)=='%')
-						parameters.description  = desc.substring(1, desc.length()-1);
-					else
-						parameters.description = desc;	
-					Timestamp dataprev = rsParam.getTimestamp("data");
-					parameters.date = new LocalDate(dataprev.getYear(),dataprev.getMonth(),dataprev.getDay());
-					int nuovo = conta++;
+				}
+				/**
+				 * caso di assenze giornaliere
+				 */
+				else{
+					absenceType.isDailyAbsence = true;
+					absenceType.isHourlyAbsence = false;
 					
-					if(blob.charAt(nuovo)=='='){
-						nuovo++;
-						while(blob.charAt(nuovo)!=';'){
-							value = value+blob.charAt(nuovo);
-							nuovo++;
-						}
-						if(value.charAt(0)=='"')
-							parameters.value = value.substring(1, value.length()-1);
-						else
-							parameters.value = value;
-					}
-					em.persist(parameters);
+				}				
+				
+				if(rsParam.getString("Gruppo")!=null){
+					AbsenceTypeGroup absTypeGroup = new AbsenceTypeGroup();
+										
+					absTypeGroup.label = rsParam.getString("Gruppo");
+					absTypeGroup.buildUp = rsParam.getInt("Accumulo");
+					absTypeGroup.buildUpLimit = rsParam.getInt("Limite");
+					absTypeGroup.equivalentCode = rsParam.getString("CodiceSost");
+					if(rsParam.getByte("MinutiEccesso")==0)
+						absTypeGroup.minutesExcess = false;
+					else 
+						absTypeGroup.minutesExcess = true; 
+					absTypeGroup.save();
+					absenceType.absenceTypeGroup = absTypeGroup;
 				}
 							
-				i++;
+				absenceType.save();				
+		
+			}
+	}
+	
+	/**
+	 * metodo per la giunzione tra absenceType e Qualifications
+	 */
+	public static void joinTables(){
+		List<AbsenceType> listaAssenze = AbsenceType.findAll();
+		Logger.info("ListaAssenze è lunga: "+listaAssenze.size());
+		for(AbsenceType absenceType : listaAssenze){
+			
+			if(absenceType.code.equals("OA1") || absenceType.code.equals("OA2") || absenceType.code.equals("OA3") 
+					|| absenceType.code.equals("OA4") || absenceType.code.equals("OA5") || absenceType.code.equals("OA6")
+					|| absenceType.code.equals("OA7")){
+				long id1 = 1;
+				long id2 = 2;
+				long id3 = 3;
+				
+				Qualification qual1 = Qualification.findById(id1);
+				Logger.info("La qualifica 1: ", qual1.qualification);
+				Qualification qual2 = Qualification.findById(id2);
+				Qualification qual3 = Qualification.findById(id3);
+				if(absenceType.qualifications == null){
+					absenceType.qualifications = new ArrayList<Qualification>();
+					absenceType.qualifications.add(qual1);
+
+					absenceType.qualifications.add(qual2);
+					absenceType.qualifications.add(qual3);
+					
+				}
+				
+				absenceType.save();
+			}
+			else{
+				
+				List<Qualification> listaQual = Qualification.findAll();
+				
+				for(Qualification qual : listaQual){
+					if(absenceType.qualifications == null){
+						absenceType.qualifications = new ArrayList<Qualification>();
+						absenceType.qualifications.add(qual);
+					}					
+
+					absenceType.save();
+				}
 				
 			}
-			
 		}		
 		
 	}
+	
+	
+//	@SuppressWarnings("deprecation")
+//	public static void createParameters() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException, IOException{
+//		EntityManager em = JPA.em();
+//		Connection mysqlCon = getMysqlConnection();
+//		PreparedStatement stmtParam = mysqlCon.prepareStatement("SELECT * FROM parametri ORDER BY data_inizio DESC limit 1");
+//		ResultSet rsParam = stmtParam.executeQuery();
+//		ConfParameters parameters = null;
+//		while(rsParam.next()){			
+//
+//			String blob = rsParam.getString("valore");
+//			int lunghezza = blob.length();
+//			System.out.println("lunghezza di blob = " +lunghezza);			
+//			
+//			int i = 0;
+//			while(i < lunghezza){
+//				String value = "";
+//				String desc = "";
+//				if(blob.charAt(i)=='$' || blob.charAt(i)=='%'){					
+//					int conta = i++;					
+//					
+//					while(blob.charAt(conta)!='='){
+//						desc = desc+blob.charAt(conta);
+//						conta++;
+//					}
+//					parameters = new ConfParameters();
+//					if(desc.charAt(0)=='$' || desc.charAt(0)=='%')
+//						parameters.description  = desc.substring(1, desc.length()-1);
+//					else
+//						parameters.description = desc;	
+//					Timestamp dataprev = rsParam.getTimestamp("data");
+//					parameters.date = new LocalDate(dataprev.getYear(),dataprev.getMonth(),dataprev.getDay());
+//					int nuovo = conta++;
+//					
+//					if(blob.charAt(nuovo)=='='){
+//						nuovo++;
+//						while(blob.charAt(nuovo)!=';'){
+//							value = value+blob.charAt(nuovo);
+//							nuovo++;
+//						}
+//						if(value.charAt(0)=='"')
+//							parameters.value = value.substring(1, value.length()-1);
+//						else
+//							parameters.value = value;
+//					}
+//					em.persist(parameters);
+//				}
+//							
+//				i++;
+//				
+//			}
+//			
+//		}		
+//		
+//	}
 	
 	public static void importAll() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		Connection mysqlCon = FromMysqlToPostgres.getMysqlConnection();
@@ -158,8 +300,6 @@ public class FromMysqlToPostgres {
 			FromMysqlToPostgres.createVacationType(rs.getLong("ID"), person, em);
 	
 			FromMysqlToPostgres.createAbsences(rs.getLong("ID"), person, em);
-			
-//			FromMysqlToPostgres.createWorkingTimeTypes(rs.getLong("ID"), em);
 			
 			FromMysqlToPostgres.createStampings(rs.getLong("ID"), person, em);
 			
@@ -196,9 +336,9 @@ public class FromMysqlToPostgres {
 		person.password = rs.getString("passwordmd5");
 		person.bornDate = rs.getDate("DataNascita");
 		person.number = rs.getInt("Matricola");
-		//person.qualification = rs.getInt("Qualifica");
-		int i = 0;
 		
+		int i = 0;
+	
 		WorkingTimeType wtt = null;
 		WorkingTimeTypeDay wttd_mo = null;
 		WorkingTimeTypeDay wttd_tu = null;
@@ -226,7 +366,6 @@ public class FromMysqlToPostgres {
 				wttd_mo = new WorkingTimeTypeDay();
 				wttd_mo.workingTimeType = wtt;
 				wttd_mo.dayOfWeek = 1;
-				//wttd_mo.dayOfWeek = DateTimeConstants.MONDAY;
 				wttd_mo.workingTime = rsInterno.getInt("lu_tempo_lavoro");
 				wttd_mo.holiday = rsInterno.getBoolean("lu_festa");
 				wttd_mo.timeSlotEntranceFrom = rsInterno.getInt("lu_fascia_ingresso");
@@ -242,7 +381,6 @@ public class FromMysqlToPostgres {
 				wttd_tu = new WorkingTimeTypeDay();
 				wttd_tu.workingTimeType = wtt;
 				wttd_tu.dayOfWeek = 2;
-				//wttd_mo.dayOfWeek = DateTimeConstants.TUESDAY;
 				wttd_tu.workingTime = rsInterno.getInt("ma_tempo_lavoro");
 				wttd_tu.holiday = rsInterno.getBoolean("ma_festa");
 				wttd_tu.timeSlotEntranceFrom = rsInterno.getInt("ma_fascia_ingresso");
@@ -258,7 +396,6 @@ public class FromMysqlToPostgres {
 				wttd_we = new WorkingTimeTypeDay();
 				wttd_we.workingTimeType = wtt;
 				wttd_we.dayOfWeek = 3;
-				//wttd_mo.dayOfWeek = DateTimeConstants.WEDNESDAY;
 				wttd_we.workingTime = rsInterno.getInt("me_tempo_lavoro");
 				wttd_we.holiday = rsInterno.getBoolean("me_festa");
 				wttd_we.timeSlotEntranceFrom = rsInterno.getInt("me_fascia_ingresso");
@@ -274,7 +411,6 @@ public class FromMysqlToPostgres {
 				wttd_th = new WorkingTimeTypeDay();
 				wttd_th.workingTimeType = wtt;
 				wttd_th.dayOfWeek = 4;
-				//wttd_mo.dayOfWeek = DateTimeConstants.THURSDAY;
 				wttd_th.workingTime = rsInterno.getInt("gi_tempo_lavoro");
 				wttd_th.holiday = rsInterno.getBoolean("gi_festa");
 				wttd_th.timeSlotEntranceFrom = rsInterno.getInt("gi_fascia_ingresso");
@@ -290,7 +426,6 @@ public class FromMysqlToPostgres {
 				wttd_fr = new WorkingTimeTypeDay();
 				wttd_fr.workingTimeType = wtt;
 				wttd_fr.dayOfWeek = 5;
-				//wttd_mo.dayOfWeek = DateTimeConstants.FRIDAY;
 				wttd_fr.workingTime = rsInterno.getInt("ve_tempo_lavoro");
 				wttd_fr.holiday = rsInterno.getBoolean("ve_festa");
 				wttd_fr.timeSlotEntranceFrom = rsInterno.getInt("ve_fascia_ingresso");
@@ -306,7 +441,6 @@ public class FromMysqlToPostgres {
 				wttd_sa = new WorkingTimeTypeDay();
 				wttd_sa.workingTimeType = wtt;
 				wttd_sa.dayOfWeek = 6;
-				//wttd_mo.dayOfWeek = DateTimeConstants.SATURDAY;
 				wttd_sa.workingTime = rsInterno.getInt("sa_tempo_lavoro");
 				wttd_sa.holiday = rsInterno.getBoolean("sa_festa");
 				wttd_sa.timeSlotEntranceFrom = rsInterno.getInt("sa_fascia_ingresso");
@@ -322,7 +456,6 @@ public class FromMysqlToPostgres {
 				wttd_su = new WorkingTimeTypeDay();		
 				wttd_su.workingTimeType = wtt;
 				wttd_su.dayOfWeek = 7;
-				//wttd_mo.dayOfWeek = DateTimeConstants.SUNDAY;
 				wttd_su.workingTime = rsInterno.getInt("do_tempo_lavoro");
 				wttd_su.holiday = rsInterno.getBoolean("do_festa");
 				wttd_su.timeSlotEntranceFrom = rsInterno.getInt("do_fascia_ingresso");
@@ -356,6 +489,7 @@ public class FromMysqlToPostgres {
 			}					
 		}
 		em.persist(person);
+		
 		
 		Location location = new Location();
 		location.person = person;
@@ -475,8 +609,8 @@ public class FromMysqlToPostgres {
     			contract.isContinued = false;
     		else
     			contract.isContinued = true;
-    		em.persist(contract);
-    		em.flush();    	     
+    		contract.save();
+    		    	     
              
         }
         mysqlCon.close();
@@ -635,6 +769,19 @@ public class FromMysqlToPostgres {
 		mysqlCon.close();
 	}
 	
+	/**
+	 * TODO: questo metodo va riscritto dal momento che le absenceType sono già state definite prima della procedura di importazione.
+	 * Quindi occorrerà recuperare solo le assenze e associarle a absenceType già esistenti che si possono recuperare sul db grazie
+	 * a semplici find
+	 * 
+	 * @param id
+	 * @param person
+	 * @param em
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws ClassNotFoundException
+	 * @throws SQLException
+	 */
 	public static void createAbsences(long id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		Logger.info("Inizio a creare le assenze per %s %s",  person.name, person.surname);
 		Connection mysqlCon = getMysqlConnection();
@@ -645,7 +792,7 @@ public class FromMysqlToPostgres {
 		 * nella tabella di postgres corrispondente attraverso l'analisi del campo QuantGiust presente soltanto 
 		 * nelle righe relative a codici di natura giornaliera.
 		 */
-		PreparedStatement stmtAssenze = mysqlCon.prepareStatement("Select Orario.Giorno, Orario.TipoTimbratura, " +
+		PreparedStatement stmtAssenze = mysqlCon.prepareStatement("Select Orario.Giorno, Orario.TipoTimbratura, Codici.Qualifiche, " +
 				"Codici.Codice, Codici.Interno, Codici.Descrizione, Codici.QuantGiust, Codici.IgnoraTimbr, Codici.MinutiEccesso, " +
 				"Codici.Limite, Codici.Accumulo, Codici.CodiceSost, Codici.id, Codici.Gruppo, Codici.DataInizio, Codici.DataFine " +
 				"from Codici, Orario " +
@@ -656,89 +803,23 @@ public class FromMysqlToPostgres {
 		if(rs != null){
 			Absence absence = null;
 			AbsenceType absenceType = null;
-			AbsenceTypeGroup absTypeGroup = null;
+
 			while(rs.next()){			
 				/**
 				 * popolo la tabella absence, la tabella absenceType, la tabella absenceTypeGroup
 				 * e le tabelle HourlyAbsenceType e DailyAbsenceType
 				 * con i dati prelevati da Orario e Codici
 				 */			
+					
+				String codice = rs.getString("Codice");
+				absenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", codice).first();
+								
+				absence = new Absence();
+				absence.person = person;
+				absence.date = new LocalDate(rs.getDate("Giorno"));	
+				absence.absenceType = absenceType;
+				em.persist(absence);
 				
-				int idCodiceAssenza = rs.getInt("id");
-				if(mappaCodiciAbsence.get(idCodiceAssenza)== null){
-					
-					absenceType = new AbsenceType();					
-					absenceType.code = rs.getString("Codice");
-					absenceType.description = rs.getString("Descrizione");
-					absenceType.validFrom = rs.getDate("DataInizio");
-					absenceType.validTo = rs.getDate("DataFine");
-					if(rs.getByte("Interno")==0)
-						absenceType.internalUse = false;
-					else
-						absenceType.internalUse = true;
-					if(rs.getByte("IgnoraTimbr")==0)
-						absenceType.ignoreStamping = false;
-					else 
-						absenceType.ignoreStamping = true;					
-					
-					/**
-					 * caso di assenze orarie
-					 */
-					if(rs.getInt("QuantGiust") != 0){
-						absenceType.isHourlyAbsence = true;
-						absenceType.isDailyAbsence = false;
-						absenceType.justifiedWorkTime = rs.getInt("QuantGiust");
-						
-					}
-					/**
-					 * caso di assenze giornaliere
-					 */
-					else{
-						absenceType.isDailyAbsence = true;
-						absenceType.isHourlyAbsence = false;
-						
-					}				
-					
-					
-					if(rs.getString("Gruppo")!=null){
-						absTypeGroup = new AbsenceTypeGroup();						
-						absTypeGroup.label = rs.getString("Gruppo");
-						absTypeGroup.buildUp = rs.getInt("Accumulo");
-						absTypeGroup.buildUpLimit = rs.getInt("Limite");
-						absTypeGroup.equivalentCode = rs.getString("CodiceSost");
-						if(rs.getByte("MinutiEccesso")==0)
-							absTypeGroup.minutesExcess = false;
-						else 
-							absTypeGroup.minutesExcess = true; 
-						em.persist(absTypeGroup);
-						absenceType.absenceTypeGroup = absTypeGroup;
-					}
-					em.persist(absenceType);
-					mappaCodiciAbsence.put(idCodiceAssenza,absenceType.id);	
-					
-					absence = new Absence();
-					absence.person = person;
-					absence.date = new LocalDate(rs.getDate("Giorno"));	
-					absence.absenceType = absenceType;
-					em.persist(absence);
-					
-				}
-				else{
-					absenceType = AbsenceType.findById(mappaCodiciAbsence.get(idCodiceAssenza));
-					
-					/**
-					 * caso di assenze orarie
-					 */
-
-						
-						absence = new Absence();
-						absence.person = person;
-						absence.date = new LocalDate(rs.getDate("Giorno"));	
-						absence.absenceType = absenceType;	
-						em.persist(absence);
-					//}
-				}			
-					
 			}
 		}	
 		mysqlCon.close();
@@ -833,151 +914,6 @@ public class FromMysqlToPostgres {
 		}
 		mysqlCon.close();
 	}
-	
-	
-//	public static void createWorkingTimeTypes(long id, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
-//		/**
-//		 * query su orari di lavoro in join con orario pers e Persone
-//		 * per popolare workin_time_type e working_time_type_days
-//		 */
-//		Logger.info("Inizio a creare l'orario di lavoro ");
-//		Connection mysqlCon = getMysqlConnection();		
-//		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM orari_di_lavoro,orario_pers WHERE " +
-//				"orario_pers.oid=orari_di_lavoro.id and orario_pers.pid= " + id + " order by data_fine desc limit 1");
-//
-//		ResultSet rs = stmt.executeQuery();
-//		
-//		if(rs != null){
-//			WorkingTimeType wtt = null;
-//			WorkingTimeTypeDay wttd_mo = null;
-//			WorkingTimeTypeDay wttd_tu = null;
-//			WorkingTimeTypeDay wttd_we = null;
-//			WorkingTimeTypeDay wttd_th = null;
-//			WorkingTimeTypeDay wttd_fr = null;
-//			WorkingTimeTypeDay wttd_sa = null;
-//			WorkingTimeTypeDay wttd_su = null;
-//			while(rs.next()){
-//				int idCodiceOrarioLavoro = rs.getInt("id");
-//				//if(mappaCodiciWorkingTimeType.get(idCodiceOrarioLavoro)!=null){
-//					wtt = WorkingTimeType.findById(mappaCodiciWorkingTimeType.get(idCodiceOrarioLavoro));
-//					
-//					wttd_mo = new WorkingTimeTypeDay();
-//					wttd_mo.workingTimeType = wtt;
-//					wttd_mo.dayOfWeek = 1;
-//					//wttd_mo.dayOfWeek = DateTimeConstants.MONDAY;
-//					wttd_mo.workingTime = rs.getInt("lu_tempo_lavoro");
-//					wttd_mo.holiday = rs.getBoolean("lu_festa");
-//					wttd_mo.timeSlotEntranceFrom = rs.getInt("lu_fascia_ingresso");
-//					wttd_mo.timeSlotEntranceTo = rs.getInt("lu_fascia_ingresso1");
-//					wttd_mo.timeSlotExitFrom = rs.getInt("lu_fascia_uscita");
-//					wttd_mo.timeSlotExitTo = rs.getInt("lu_fascia_uscita1");
-//					wttd_mo.timeMealFrom = rs.getInt("lu_fascia_pranzo");
-//					wttd_mo.timeMealTo = rs.getInt("lu_fascia_pranzo1");
-//					wttd_mo.breakTicketTime = rs.getInt("lu_tempo_interv"); 
-//					wttd_mo.mealTicketTime = rs.getInt("lu_tempo_buono");
-//					em.persist(wttd_mo);
-//	
-//					wttd_tu = new WorkingTimeTypeDay();
-//					wttd_tu.workingTimeType = wtt;
-//					wttd_tu.dayOfWeek = 2;
-//					//wttd_mo.dayOfWeek = DateTimeConstants.TUESDAY;
-//					wttd_tu.workingTime = rs.getInt("ma_tempo_lavoro");
-//					wttd_tu.holiday = rs.getBoolean("ma_festa");
-//					wttd_tu.timeSlotEntranceFrom = rs.getInt("ma_fascia_ingresso");
-//					wttd_tu.timeSlotEntranceTo = rs.getInt("ma_fascia_ingresso1");
-//					wttd_tu.timeSlotExitFrom = rs.getInt("ma_fascia_uscita");
-//					wttd_tu.timeSlotExitTo = rs.getInt("ma_fascia_uscita1");
-//					wttd_tu.timeMealFrom = rs.getInt("ma_fascia_pranzo");
-//					wttd_tu.timeMealTo = rs.getInt("ma_fascia_pranzo1");
-//					wttd_tu.breakTicketTime = rs.getInt("ma_tempo_interv"); 
-//					wttd_tu.mealTicketTime = rs.getInt("ma_tempo_buono"); 
-//					em.persist(wttd_tu);
-//	
-//					wttd_we = new WorkingTimeTypeDay();
-//					wttd_we.workingTimeType = wtt;
-//					wttd_we.dayOfWeek = 3;
-//					//wttd_mo.dayOfWeek = DateTimeConstants.WEDNESDAY;
-//					wttd_we.workingTime = rs.getInt("me_tempo_lavoro");
-//					wttd_we.holiday = rs.getBoolean("me_festa");
-//					wttd_we.timeSlotEntranceFrom = rs.getInt("me_fascia_ingresso");
-//					wttd_we.timeSlotEntranceTo = rs.getInt("me_fascia_ingresso1");
-//					wttd_we.timeSlotExitFrom = rs.getInt("me_fascia_uscita");
-//					wttd_we.timeSlotExitTo = rs.getInt("me_fascia_uscita1");
-//					wttd_we.timeMealFrom = rs.getInt("me_fascia_pranzo");
-//					wttd_we.timeMealTo = rs.getInt("me_fascia_pranzo1");
-//					wttd_we.breakTicketTime = rs.getInt("me_tempo_interv"); 
-//					wttd_we.mealTicketTime = rs.getInt("me_tempo_buono"); 
-//					em.persist(wttd_we);
-//	
-//					wttd_th = new WorkingTimeTypeDay();
-//					wttd_th.workingTimeType = wtt;
-//					wttd_th.dayOfWeek = 4;
-//					//wttd_mo.dayOfWeek = DateTimeConstants.THURSDAY;
-//					wttd_th.workingTime = rs.getInt("gi_tempo_lavoro");
-//					wttd_th.holiday = rs.getBoolean("gi_festa");
-//					wttd_th.timeSlotEntranceFrom = rs.getInt("gi_fascia_ingresso");
-//					wttd_th.timeSlotEntranceTo = rs.getInt("gi_fascia_ingresso1");
-//					wttd_th.timeSlotExitFrom = rs.getInt("gi_fascia_uscita");
-//					wttd_th.timeSlotExitTo = rs.getInt("gi_fascia_uscita1");
-//					wttd_th.timeMealFrom = rs.getInt("gi_fascia_pranzo");
-//					wttd_th.timeMealTo = rs.getInt("gi_fascia_pranzo1");
-//					wttd_th.breakTicketTime = rs.getInt("me_tempo_interv"); 
-//					wttd_th.mealTicketTime = rs.getInt("me_tempo_buono"); 
-//					em.persist(wttd_th);
-//	
-//					wttd_fr = new WorkingTimeTypeDay();
-//					wttd_fr.workingTimeType = wtt;
-//					wttd_fr.dayOfWeek = 5;
-//					//wttd_mo.dayOfWeek = DateTimeConstants.FRIDAY;
-//					wttd_fr.workingTime = rs.getInt("ve_tempo_lavoro");
-//					wttd_fr.holiday = rs.getBoolean("ve_festa");
-//					wttd_fr.timeSlotEntranceFrom = rs.getInt("ve_fascia_ingresso");
-//					wttd_fr.timeSlotEntranceTo = rs.getInt("ve_fascia_ingresso1");
-//					wttd_fr.timeSlotExitFrom = rs.getInt("ve_fascia_uscita");
-//					wttd_fr.timeSlotExitTo = rs.getInt("ve_fascia_uscita1");
-//					wttd_fr.timeMealFrom = rs.getInt("ve_fascia_pranzo");
-//					wttd_fr.timeMealTo = rs.getInt("ve_fascia_pranzo1");
-//					wttd_fr.breakTicketTime = rs.getInt("me_tempo_interv"); 
-//					wttd_fr.mealTicketTime = rs.getInt("me_tempo_buono"); 
-//					em.persist(wttd_fr);
-//	
-//					wttd_sa = new WorkingTimeTypeDay();
-//					wttd_sa.workingTimeType = wtt;
-//					wttd_sa.dayOfWeek = 6;
-//					//wttd_mo.dayOfWeek = DateTimeConstants.SATURDAY;
-//					wttd_sa.workingTime = rs.getInt("sa_tempo_lavoro");
-//					wttd_sa.holiday = rs.getBoolean("sa_festa");
-//					wttd_sa.timeSlotEntranceFrom = rs.getInt("sa_fascia_ingresso");
-//					wttd_sa.timeSlotEntranceTo = rs.getInt("sa_fascia_ingresso1");
-//					wttd_sa.timeSlotExitFrom = rs.getInt("sa_fascia_uscita");
-//					wttd_sa.timeSlotExitTo = rs.getInt("sa_fascia_uscita1");
-//					wttd_sa.timeMealFrom = rs.getInt("sa_fascia_pranzo");
-//					wttd_sa.timeMealTo = rs.getInt("sa_fascia_pranzo1");
-//					wttd_sa.breakTicketTime = rs.getInt("me_tempo_interv");
-//					wttd_sa.mealTicketTime = rs.getInt("me_tempo_buono"); 
-//					em.persist(wttd_sa);
-//	
-//					wttd_su = new WorkingTimeTypeDay();		
-//					wttd_su.workingTimeType = wtt;
-//					wttd_su.dayOfWeek = 7;
-//					//wttd_mo.dayOfWeek = DateTimeConstants.SUNDAY;
-//					wttd_su.workingTime = rs.getInt("do_tempo_lavoro");
-//					wttd_su.holiday = rs.getBoolean("do_festa");
-//					wttd_su.timeSlotEntranceFrom = rs.getInt("do_fascia_ingresso");
-//					wttd_su.timeSlotEntranceTo = rs.getInt("do_fascia_ingresso1");
-//					wttd_su.timeSlotExitFrom = rs.getInt("do_fascia_uscita");
-//					wttd_su.timeSlotExitTo = rs.getInt("do_fascia_uscita1");
-//					wttd_su.timeMealFrom = rs.getInt("do_fascia_pranzo");
-//					wttd_su.timeMealTo = rs.getInt("do_fascia_pranzo1");
-//					wttd_su.breakTicketTime = rs.getInt("me_tempo_interv");
-//					wttd_su.mealTicketTime = rs.getInt("me_tempo_buono");
-//					em.persist(wttd_su);
-//
-//			
-//			}
-//		}
-//		mysqlCon.close();
-//	}
 	
 	public static void createYearRecap(long id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
 		

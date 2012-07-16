@@ -14,20 +14,34 @@ public class Administration extends Controller {
     }
     
     public static void importAll() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
+    	FromMysqlToPostgres.createQualification();
+    	FromMysqlToPostgres.createAbsenceType();
+    	FromMysqlToPostgres.joinTables();
     	FromMysqlToPostgres.importAll();
     	FromMysqlToPostgres.importNotInOldDb();
     	PopulatePersonDay.fillWorkingTimeTypeDays();
     	PopulatePersonDay.manageContract();
-    	renderText("Importate tutte le persone dalla vecchia applicazione + aggiunti i workingtimetypeday");
+    	PopulatePersonDay.personPermissions();
+    	renderText("Importate tutte le persone dalla vecchia applicazione + aggiunti i workingtimetypeday e aggiunti i permessi" +
+    			"di amministrazione per l'utente con id 139.");
     }
+    
+//    public static void importAbsenceTypeQualification() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+//    	FromMysqlToPostgres.createQualification();
+//    	FromMysqlToPostgres.createAbsenceType();
+//    	FromMysqlToPostgres.joinTables();
+//    	renderText("Creati livelli, absence type e definiti i legami tra le due tabelle");
+//    }
+
     
     /**
      * aggiunto metodo di popolamento iniziale del personDay di modo da rendere tutte le informazioni su ciascuna persona persistenti
      * sul db già al momento della prima visualizzazione.
      */
     public static void populatePersonDay(){
-    	PopulatePersonDay.PopulatePersonDayForOne();
-    	renderText("Calcolate tutte le informazioni su tempi di lavoro, progressivo e differenza per i person day di Cristian Lucchesi");
+    	//PopulatePersonDay.PopulatePersonDayForOne();
+    	PopulatePersonDay.PopulatePersonDayForAll();
+    	renderText("Calcolate tutte le informazioni su tempi di lavoro, progressivo e differenza per i person day di tutti gli utenti");
     }
     
     /**
@@ -46,6 +60,11 @@ public class Administration extends Controller {
     public static void manageStampType(){
     	PopulatePersonDay.manageStampType();
     	renderText("Sistemata situazione degli stamp type");
+    }
+    
+    public static void populatePermissions(){
+    	PopulatePersonDay.personPermissions();
+    	renderText("Aggiunti permessi a person con id 139");
     }
     
 }

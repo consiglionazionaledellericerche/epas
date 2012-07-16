@@ -28,7 +28,7 @@ public class Persons extends Controller {
 
 	@Check(Security.VIEW_PERSON_LIST)
 	public static void list(){
-		List<Person> personList = Person.find("order by surname").fetch();
+		List<Person> personList = Person.findAll();
 		render(personList);
 	}
 
@@ -77,6 +77,10 @@ public class Persons extends Controller {
 		contract.save();
 		list();
 	}
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void discard(){
+		list();
+	}
 	
 
 	/**
@@ -112,6 +116,21 @@ public class Persons extends Controller {
 			person.delete();
 			person.save();
 		}
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_PASSWORD)
+	public static void changePassword(Person person){
+//		String username = session.get(USERNAME_SESSION_KEY);
+//		
+//		Person p = Person.find("byUsername", username).first();
+		render(person);
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_PASSWORD)
+	public static void savePassword(Person person){
+		Person p = Person.findById(person.id);
+		p.password = params.get("nuovaPassword");
+		p.save();
 	}
 
 
