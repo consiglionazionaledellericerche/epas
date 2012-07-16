@@ -28,23 +28,40 @@ public class PopulatePersonDay {
 		fillPersonDay();
 	}
 	
+	public static void PopulatePersonDayForAll(){
+		fillPersonDay();
+	}
 	
-	public static void fillPersonDay(Person person) {
-		if(person != null){
-			//TODO:le date vanno rese generiche
-			LocalDate date = new LocalDate(2010,12,31);			
-			LocalDate now = new LocalDate();
-			while(!date.equals(now)){
-				PersonDay pd = new PersonDay(person,date);
-				Logger.warn("Person: "+person );
-				Logger.warn("Date: "+date);
-				pd.populatePersonDay();
-				pd.save();
-				date = date.plusDays(1);
+//	//TODO: solo per prova, da cancellare
+//	public static void fillPersonDay(){
+//		Long id = new Long(139);
+//		fillPersonDay((Person) Person.findById(id));	
+//	}
+	/**
+	 * metodo per il popolamento dei personDay per tutti gli utenti: il fatto è che far popolare tutti i personday è troppo oneroso
+	 * in termini di utilizzo della ram e pertanto è preferibile scegliere da quale indice a quale indice far partire la procedura
+	 * di popolamento dei personday
+	 */
+	public static void fillPersonDay() {
+		Long init = new Long(109);
+		Long end = new Long(121);
+		List<Person> personList = Person.find("Select per from Person per where per.id > ? and per.id < ?",init, end).fetch();
+		for(Person person : personList){
+			if(person != null){
+				//TODO:le date vanno rese generiche
+				LocalDate date = new LocalDate(2010,12,31);			
+				LocalDate now = new LocalDate();
+				while(!date.equals(now)){
+					PersonDay pd = new PersonDay(person,date);
+					Logger.warn("Person: "+person );
+					Logger.warn("Date: "+date);
+					pd.populatePersonDay();
+					pd.save();
+					date = date.plusDays(1);
+				}				
 			}
-		
-			
 		}
+		
 	}
 	
 	public static void fillWorkingTimeTypeDays(){
@@ -90,11 +107,7 @@ public class PopulatePersonDay {
 				
 	}
 	
-	//TODO: solo per prova, da cancellare
-	public static void fillPersonDay(){
-		Long id = new Long(139);
-		fillPersonDay((Person) Person.findById(id));	
-	}
+
 	
 	/**
 	 * cancella dalla tabella dei contratti tutti quelli che non sono i più recenti per ciascuna persona
@@ -126,4 +139,39 @@ public class PopulatePersonDay {
 		st2.save();
 	}
 
+	
+	public static void personPermissions(){
+		Permission permission1 = new Permission();
+		permission1.description = "viewPersonList";
+		permission1.save();
+		Permission permission2 = new Permission();
+		permission2.description = "deletePerson";
+		permission2.save();
+		Permission permission3 = new Permission();
+		permission3.description = "insertAndUpdateStamping";
+		permission3.save();
+		Permission permission4 = new Permission();
+		permission4.description = "insertAndUpdatePassword";
+		permission4.save();
+		Permission permission5 = new Permission();
+		permission5.description = "insertAndUpdateWorkingTime";
+		permission5.save();
+		Permission permission6 = new Permission();
+		permission6.description = "insertAndUpdateAbsence";
+		permission6.save();
+		Permission permission7 = new Permission();
+		permission7.description = "insertAndUpdateConfiguration";
+		permission7.save();
+		long id = 139;
+		Person person = Person.findById(id);
+		person.permissions.add(permission1);
+		person.permissions.add(permission2);
+		person.permissions.add(permission3);
+		person.permissions.add(permission4);
+		person.permissions.add(permission5);
+		person.permissions.add(permission6);
+		person.permissions.add(permission7);
+		person.save();
+		
+	}
 }

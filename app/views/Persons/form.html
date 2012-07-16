@@ -45,7 +45,7 @@
 		<legend>Informazioni di ubicazione e contatti</legend>
 		<input type="hidden" name="location.person_id"  value="${person.id}" />
 	<p>Dipartimento <input name="location.department" type="text" value="${person.location.department}" size="20" maxlength="100" /></p>
-	<p>Sede <input name="location.seat" type="text" value="${person.location.seat}" size="40" maxlength="200" /></p>
+	<p>Sede <input name="location.headOffice" type="text" value="${person.location.headOffice}" size="40" maxlength="200" /></p>
 	<p>Stanza <input name="location.room" type="text" value="${person.location.room}" size="40" maxlength="200" /></p>
 	<p>Telefono <input name="contactData.telephone" type="text" value="${person.contactData.telephone}" size="40" maxlength="200" /></p>
 	<p>Email <input name="contactData.email" type="text" value="${person.contactData.email}" size="40" maxlength="200" /></p>
@@ -57,6 +57,10 @@
 	<p>I valori in <strong>grassetto</strong> sono obbligatori</p>
 	
 	<input type="submit" value="Ok"/>
-	<input type=reset value="Annulla">	
+		
 
+#{/form}
+
+#{form @discard()}
+	<input type=reset value="Annulla">
 #{/form}

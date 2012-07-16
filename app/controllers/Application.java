@@ -1,5 +1,8 @@
 package controllers;
 
+import java.util.List;
+
+import models.Permission;
 import models.Person;
 import play.Logger;
 import play.mvc.Before;
@@ -32,7 +35,14 @@ public class Application extends Controller {
     
 	public static void index() {
         if(connected() != null) {
-            Stampings.show();
+        	Person person = connected();
+        	Logger.debug("The person logged is_: " +person.name+ " "+person.surname);
+        	List<Permission> permissions = person.permissions;
+        	Logger.debug("Permissions list = " +permissions);
+        	if(permissions.isEmpty())
+        		Stampings.show();
+        	else
+        		Stampings.showAdmin();
         }
         render();
     } 
@@ -46,8 +56,8 @@ public class Application extends Controller {
             flash.success("Welcome, " + person.name + person.surname);
             Logger.info("person %s successfully logged in", person.username);
             Logger.debug("%s: person.id = %d", person.username, person.id);
-            
-            Stampings.show();
+            index();
+          //  Stampings.show();
         }
         // Oops
         flash.put("username", username);

@@ -85,7 +85,7 @@ public class JsonReperibilityPeriodsBinder implements TypeBinder<ReperibilityPer
 			return new ReperibilityPeriods(reperibilityPeriods);
 			
 		} catch (Exception e) {
-			Logger.error("Problem during binding List<ReperibilityPeriod>. Exception: %s", e);
+			Logger.error(e, "Problem during binding List<ReperibilityPeriod>.");
 			throw e;
 		}
 	}

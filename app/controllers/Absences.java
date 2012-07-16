@@ -6,6 +6,7 @@ import it.cnr.iit.epas.ActionMenuItem;
 import models.AbsenceType;
 import models.MonthRecap;
 import models.Person;
+import models.PersonDay;
 
 import org.joda.time.LocalDate;
 
@@ -68,6 +69,30 @@ public class Absences extends Controller{
 	public static void absenceCodeList(){
 		List<AbsenceType> absenceList = AbsenceType.findAll();
 		render(absenceList);
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
+	public static void insertAbsence(){
+		
+		Person person = Person.findById(Long.parseLong(session.get("person_id")));
+    	LocalDate day = 
+    			new LocalDate(
+    				Integer.parseInt(session.get("year")),
+    				Integer.parseInt(session.get("month")), 
+    				Integer.parseInt(session.get("day")));
+    	
+    	Logger.trace("Insert absence called for %s %s", person, day);
+    	
+    	PersonDay personDay = new PersonDay(person, day);
+		render(personDay);		
+	}
+	
+	
+	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
+	public static void save(){
+		/**
+		 * TODO: implementare il corpo della save di una nuova assenza con la logica 
+		 */
 	}
 
 }

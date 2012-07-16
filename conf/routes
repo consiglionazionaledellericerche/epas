@@ -47,16 +47,29 @@ GET     /public/                                staticDir:public
 GET		/persons								Persons.list
 POST	/persons								Persons.save
 GET		/persons/new							Persons.form
-GET		/persons/update							Persons.form
+
 
 GET		/manageWorkingTime						WorkingTimes.manageWorkingTime
+POST	/insertWorkingTime						WorkingTimes.insertWorkingTime
 GET		/vacationsAdmin							VacationsAdmin.manageVacationCode
+POST	/insertVacation							VacationsAdmin.insertVacationCode
+GET		/changePassword							Persons.changePassword
+POST	/changePassword							Persons.savePassword
+GET		/insertStamping							Stampings.insertStamping
+POST	/insertStamping							Stampings.save
+GET		/orarioAdmin							Stampings.showAdmin
+GET		/choosePersonAndDate					Stampings.choosePersonAndDate
+GET		/personStamping							Stamping.personStamping
+GET		/Absences/insertAbsence					Absences.insertAbsence
+POST	/Absences/insertAbsence					Absences.save
+GET		/confParameters							ConfParameters.show
+POST	/confParameters							ConfParameters.save
 
-GET 	/reperibility/personList				Reperibility.personList
+GET 	/reperibility/{type}/personList			Reperibility.personList
 
-GET		/reperibility/find/{<(19|20)\d\d>yearFrom}/{<(0[1-9]|1[012])>monthFrom}/{<(0[1-9]|[12][0-9]|3[01])>dayFrom}/{<(19|20)\d\d>yearTo}/{<(0[1-9]|1[012])>monthTo}/{<(0[1-9]|[12][0-9]|3[01])>dayTo}	Reperibility.find
+GET		/reperibility/{type}/find/{<(19|20)\d\d>yearFrom}/{<(0[1-9]|1[012])>monthFrom}/{<(0[1-9]|[12][0-9]|3[01])>dayFrom}/{<(19|20)\d\d>yearTo}/{<(0[1-9]|1[012])>monthTo}/{<(0[1-9]|[12][0-9]|3[01])>dayTo}	Reperibility.find
 
-PUT		/reperibility/update/{body}					Reperibility.update
+PUT		/reperibility/{type}/update/{body}		Reperibility.update
 
 # Catch all
 *       /{controller}/{action}                  {controller}.{action}
