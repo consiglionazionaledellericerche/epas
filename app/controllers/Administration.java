@@ -21,7 +21,7 @@ public class Administration extends Controller {
     	FromMysqlToPostgres.importNotInOldDb();
     	PopulatePersonDay.fillWorkingTimeTypeDays();
     	PopulatePersonDay.manageContract();
-    	PopulatePersonDay.personPermissions();
+    	//PopulatePersonDay.personPermissions();
     	renderText("Importate tutte le persone dalla vecchia applicazione + aggiunti i workingtimetypeday e aggiunti i permessi" +
     			"di amministrazione per l'utente con id 139.");
     }

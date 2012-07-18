@@ -17,16 +17,15 @@ public class Competences extends Controller{
 	
 	@Before
     static void checkPerson() {
-        if(session.get(Application.PERSON_ID_SESSION_KEY) == null) {
+		if (!Security.isConnected()) {
             flash.error("Please log in first");
             Application.index();
         }
     }
 	
-	private static void show(Long id) {
+	private static void show(Person person) {
 		String menuItem = actionMenuItem.toString();
 		
-    	Person person = Person.findById(id);
     	String anno = params.get("year");
     	Logger.info("Anno: "+anno);
     	String mese= params.get("month");
@@ -50,7 +49,7 @@ public class Competences extends Controller{
     }
 	
 	public static void show() {
-    	show(Long.parseLong(session.get(Application.PERSON_ID_SESSION_KEY)));
+    	show(Security.getPerson());
     }
 	
 }
