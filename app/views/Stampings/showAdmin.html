@@ -4,71 +4,7 @@
 <h2 id="titoloSituazionePresenzeMensili">Situazione presenze mensile <span class="capitalized">&{'views.tags.display.date.month.' + monthRecap.month}</span> ${monthRecap.year}</h2>
 <h3 id="titoloSituazionePresenzeMensili">Scegli un nome</h3>
 
-<div id="logout">
-#{form @Application.logout()}
-	
-    	<input type="submit" value="Account logout" />
-     
+#{logoutForm /}
 
-#{/form}
-</div>
-
-<div id="chooseView">
-#{form @SwitchTemplate.dispatch()}
-#{select 'menuItem', value:menuItem, id:'view'}
-	#{option 'yearlyAbsences'}Assenze Annuali#{/option}
-	#{option 'absences'}Assenze Mensili#{/option}
-	#{option 'stampings'}Timbrature#{/option}
-	#{option 'vacations'}Ferie#{/option}
-	#{option 'competences'}Competenze e Straordinari#{/option}	
-	#{option 'changePassword'}Cambia password#{/option}
-	#{option 'manageWorkingTime'}Orari di lavoro#{/option}
-	#{option 'confParameters'}Configurazione Parametri#{/option}
-#{/select}
-    	<input type="submit" value="go!" />
-     
-
-#{/form}
-</div>
-
-<div align="left">
-#{form @Stampings.choosePersonAndDate()}
-
-#{select 'year', value:monthRecap.year, id:'anno'}
-	#{option 2011}2011#{/option}
-	#{option 2012}2012#{/option}
-	#{option 2013}2013#{/option}
-#{/select}
-
-#{select 'month', value:monthRecap.month, id:'mese'}
-	#{option 1}Gennaio#{/option}
-	#{option 2}Febbraio#{/option}
-	#{option 3}Marzo#{/option}
-	#{option 4}Aprile#{/option}
-	#{option 5}Maggio#{/option}
-	#{option 6}Giugno#{/option}
-	#{option 7}Luglio#{/option}
-	#{option 8}Agosto#{/option}
-	#{option 9}Settembre#{/option}
-	#{option 10}Ottobre#{/option}
-	#{option 11}Novembre#{/option}
-	#{option 12}Dicembre#{/option}
-#{/select}
-
-#{select 'person', value:personList.get(0).surname, id:'persona'}
-%{
-	for(person in personList){
-}%
-	#{option person.id}${person.surname + ' ' + person.name}#{/option}
-	%{
-		}
-	}%
-
-#{/select}
-
-		<input type="submit" value="Submit">
-#{/form}
-
-</div>
-
+#{functionalMenuForm monthRecap: monthRecap, personList: personList /}
 

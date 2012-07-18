@@ -13,7 +13,9 @@ import org.joda.time.LocalDate;
 import play.Logger;
 import play.mvc.Before;
 import play.mvc.Controller;
+import play.mvc.With;
 
+@With(Secure.class)
 public class Absences extends Controller{
 	
 	/* corrisponde alla voce di menu selezionata */
@@ -21,16 +23,16 @@ public class Absences extends Controller{
 	
 	@Before
     static void checkPerson() {
-        if(session.get(Application.PERSON_ID_SESSION_KEY) == null) {
+		if (!Security.isConnected()) {
             flash.error("Please log in first");
             Application.index();
         }
     }
 	
-	private static void show(Long id) {
+	@Check(Security.VIEW_PERSON_LIST)
+	public static void show(Person person) {
 		String menuItem = actionMenuItem.toString();
 		
-    	Person person = Person.findById(id);
     	String anno = params.get("year");
     	Logger.info("Anno: "+anno);
     	String mese= params.get("month");
@@ -42,11 +44,11 @@ public class Absences extends Controller{
             render(monthRecap, menuItem);
     	}
     	else{
-    		Logger.info("Sono dentro il ramo else della creazione del month recap");
+    		Logger.debug("Sono dentro il ramo else della creazione del month recap");
     		Integer year = new Integer(params.get("year"));
 			Integer month = new Integer(params.get("month"));
     		MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, year.intValue(), month.intValue());
-    		Logger.info("Il month recap è formato da: " +person.id+ ", " +year.intValue()+ ", " +month.intValue());
+    		Logger.debug("Il month recap è formato da: " +person.id+ ", " +year.intValue()+ ", " +month.intValue());
     		
             render(monthRecap, menuItem);
     	}
@@ -54,7 +56,7 @@ public class Absences extends Controller{
     }
 	
 	public static void show() {
-    	show(Long.parseLong(session.get(Application.PERSON_ID_SESSION_KEY)));
+		show(Security.getPerson());
     }
 	
 	/**
@@ -72,18 +74,10 @@ public class Absences extends Controller{
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
-	public static void insertAbsence(){
-		
-		Person person = Person.findById(Long.parseLong(session.get("person_id")));
-    	LocalDate day = 
-    			new LocalDate(
-    				Integer.parseInt(session.get("year")),
-    				Integer.parseInt(session.get("month")), 
-    				Integer.parseInt(session.get("day")));
-    	
-    	Logger.trace("Insert absence called for %s %s", person, day);
-    	
-    	PersonDay personDay = new PersonDay(person, day);
+	public static void insertAbsence(LocalDate date){			
+    	Logger.debug("Insert absence called for %s %s", Security.getPerson(), date);
+
+    	PersonDay personDay = new PersonDay(Security.getPerson(), date);
 		render(personDay);		
 	}
 	

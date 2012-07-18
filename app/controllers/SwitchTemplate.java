@@ -17,7 +17,8 @@ public class SwitchTemplate extends Controller{
 	public static void dispatch(){
  
 		String s = params.get("menuItem");
-		Person person = renderArgs.get(USERNAME_SESSION_KEY, Person.class);
+		Person person = Security.getPerson();
+		
 		if (s == null) {
 			/* fare qualcosa! Reindirizzare l'utente verso una pagina con l'errore? Rimanere sulla stessa pagina mostrando l'errore? */
 			return;

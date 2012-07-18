@@ -751,19 +751,16 @@ public class FromMysqlToPostgres {
 							}
 						}
 					}
-				}		
-				
-				 catch (SQLException sqle) {
-					
+				} catch (SQLException sqle) {					
 					sqle.printStackTrace();
 					Logger.warn("Timbratura errata. Persona con id = %s", id);
 				}			
-				Logger.debug("Termino di creare le timbrature. Person con id = %s", id);
 				//previousDay = new LocalDate(giornata);
 				em.persist(stamping);	
 			}
 			
 		}
+		Logger.debug("Termino di creare le timbrature. Person con id = %s", id);
 		//TODO: invece che chiamarlo una volta alla fine va chiamato alla fine di ogni giorno
 		//PopulatePersonDay.fillPersonDay(person);
 		mysqlCon.close();
@@ -929,7 +926,8 @@ public class FromMysqlToPostgres {
 			YearRecap yearRecap = null;
 			while(rs.next()){										
 			
-				yearRecap = new YearRecap(person, rs.getShort("anno"));
+				short year = rs.getShort("anno");
+				yearRecap = new YearRecap(person, year);
 				yearRecap.person = person;
 				yearRecap.year = rs.getShort("anno");
 				yearRecap.remaining = rs.getInt("residuo");
@@ -942,9 +940,11 @@ public class FromMysqlToPostgres {
 				yearRecap.recm = rs.getInt("recm");
 				yearRecap.lastModified = rs.getTimestamp("data_ultimamod");
 				
-				em.persist(yearRecap);			
+				em.persist(yearRecap);
+				
+				Logger.debug("Terminato di creare il riepilogo annuale per l'anno %d per %s", year, person);
 			}
-			Logger.debug("Terminato di creare il riepilogo annuale per la Person %s", person);
+			Logger.info("Terminati di creare i riepiloghi annuali per %s", person);
 			
 		}
 		mysqlCon.close();
@@ -1057,9 +1057,7 @@ public class FromMysqlToPostgres {
 
 				mappaCodiciCompetence.put(idCodiciCompetenza,competenceCode.id);
 				
-			}
-			else{
-			
+			} else {
 				competenceCode = CompetenceCode.findById(mappaCodiciCompetence.get(idCodiciCompetenza));
 				competence.competenceCode = competenceCode;				
 				competenceCode.description = rs.getString("descrizione");
@@ -1068,12 +1066,13 @@ public class FromMysqlToPostgres {
 					competenceCode.inactive = false;
 				else 
 					competenceCode.inactive = true;
-				Logger.debug("Terminato di creare le competenze per la person %s", person);
+				
 				em.persist(competenceCode);
 				em.persist(competence);
 			}
 			
 		}	
+		Logger.debug("Terminato di creare le competenze per %s", person);
 		mysqlCon.close();
 		
 	}

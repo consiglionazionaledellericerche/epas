@@ -395,5 +395,9 @@ public class Person extends Model {
 		
 	}
 	
+	@Override
+	public String toString() {
+		return String.format("Person[%d] - %s %s", id, name, surname);
+	}
 	
 }

@@ -1,0 +1,28 @@
+Permission(viewPersonList):
+    description: viewPersonList
+
+Permission(deletePerson):
+    description: deletePerson
+
+Permission(insertAndUpdateStamping):
+    description: insertAndUpdateStamping
+
+Permission(insertAndUpdateStamping):
+    description: insertAndUpdateStamping
+
+Permission(insertAndUpdateWorkingTime):
+    description: insertAndUpdateWorkingTime
+
+Permission(insertAndUpdateAbsence):
+    description: insertAndUpdateAbsence
+
+Permission(insertAndUpdateConfiguration):
+    description: insertAndUpdateConfiguration
+
+Person(admin):
+    username: admin
+    name: Admin
+    surname: Admin
+    # password = orologio
+    password: f5e852552deb0ff9a3899938e77cccde
+    permissions: [viewPersonList, deletePerson, insertAndUpdateStamping, insertAndUpdateWorkingTime, insertAndUpdateAbsence, insertAndUpdateConfiguration]

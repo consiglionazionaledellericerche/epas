@@ -22,20 +22,22 @@ import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.mvc.Before;
 import play.mvc.Controller;
+import play.mvc.With;
 
+@With(Secure.class)
 public class Stampings extends Controller {
 
 	/* corrisponde alla voce di menu selezionata */
 	private final static ActionMenuItem actionMenuItem = ActionMenuItem.stampings;
 	
-    @Before
+	@Before
     static void checkPerson() {
-        if(session.get(Application.PERSON_ID_SESSION_KEY) == null) {
+		if (!Security.isConnected()) {
             flash.error("Please log in first");
             Application.index();
         }
     }
-
+	
     /**
      * 
      * @param id
@@ -64,7 +66,7 @@ public class Stampings extends Controller {
     }
 
     public static void show() {
-    	show(Long.parseLong(session.get(Application.PERSON_ID_SESSION_KEY)));
+    	show(Security.getPerson().getId());
     }
     
     /**
@@ -130,8 +132,7 @@ public class Stampings extends Controller {
     }
     
     public static void personStamping(){
-    	Person person = null;
-    	personStamping(person = Person.findById(Long.parseLong(session.get("person_id"))), Integer.parseInt(session.get("year")), Integer.parseInt(session.get("month")));
+    	personStamping((Person) Person.findById(Long.parseLong(session.get("person_id"))), Integer.parseInt(session.get("year")), Integer.parseInt(session.get("month")));
     }
 
     
@@ -154,7 +155,7 @@ public class Stampings extends Controller {
     }
 
     public static void showAdmin() {
-    	showAdmin(Long.parseLong(session.get(Application.PERSON_ID_SESSION_KEY)));
+    	showAdmin(Security.getPerson().getId());
     }
     
     public static void dailyStampings() {
