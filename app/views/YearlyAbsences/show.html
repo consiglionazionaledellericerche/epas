@@ -3,14 +3,7 @@
 
 <h2 id="titoloSituazioneAssenzeAnnuali">Situazione assenze per l'anno ${yearRecap.year}</h2>
 
-<div id="logout">
-#{form @Application.logout()}
-	
-    	<input type="submit" value="Account logout" />
-     
-
-#{/form}
-</div>
+#{logoutForm /}
 
 <div id="chooseView">
 #{form @SwitchTemplate.dispatch()}

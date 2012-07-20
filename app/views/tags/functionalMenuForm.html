@@ -1,7 +1,7 @@
 <div align="left">
 #{form @SwitchTemplate.dispatch()}
 
-	#{select 'menuItem', value:menuItem, id:'view'}
+	#{select 'action', value:_mainMenu.action, id:'action'}
 		#{option 'yearlyAbsences'}Assenze Annuali#{/option}
 		#{option 'absences'}Assenze Mensili#{/option}
 		#{option 'stampings'}Timbrature#{/option}
@@ -12,13 +12,13 @@
 		#{option 'confParameters'}Configurazione Parametri#{/option}
 	#{/select}
 	
-	#{select 'year', value:_monthRecap.year, id:'anno'}
+	#{select 'year', value:_mainMenu.year, id:'year'}
 		#{option 2011}2011#{/option}
 		#{option 2012}2012#{/option}
 		#{option 2013}2013#{/option}
 	#{/select}
 	
-	#{select 'month', value:_monthRecap.month, id:'mese'}
+	#{select 'month', value:_mainMenu.month, id:'month'}
 		#{option 1}Gennaio#{/option}
 		#{option 2}Febbraio#{/option}
 		#{option 3}Marzo#{/option}
@@ -34,9 +34,9 @@
 	#{/select}
 	
 	#{secure.check "viewPersonList"}
-		#{select 'person', value:_personList.get(0).surname, id:'persona'}
+		#{select 'personId', value:_mainMenu.personId, id:'person'}
 		%{
-			for(person in _personList){
+			for(person in _mainMenu.persons){
 		}%
 			#{option person.id}${person.surname + ' ' + person.name}#{/option}
 			%{
