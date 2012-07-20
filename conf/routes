@@ -3,13 +3,17 @@
 # ~~~~
 #*		/										module:secure
 
-
 # Home page
-GET     /                                       Application.index
+GET     /                                       Stampings.show
+
+#Home page amministrazione
+GET		/presenze								Application.indexAdmin
 
 #Orario e timbrature
-GET     /orario		                            Stampings.show
-POST	/orario									Stampings.show
+GET     /orario/{personId}/{year}/{month}		Stampings.show
+
+GET		/orarioAdmin/{personId}/{year}/{month}	Stampings.personStamping
+GET 	/orarioAdmin							Stampings.personStamping
 
 #Assenze
 GET		/assenze								Absences.show
@@ -27,9 +31,6 @@ GET		/competenze								Competences.show
 
 #Dispatcher
 POST	/dispatch								SwitchTemplate.dispatch		
-
-POST    /login                                  Application.login
-GET     /logout                                 Application.logout
 
 GET		/administration/month-recap/{date}		MonthRecap.show
 
@@ -57,7 +58,6 @@ GET		/changePassword							Persons.changePassword
 POST	/changePassword							Persons.savePassword
 GET		/insertStamping							Stampings.insertStamping
 POST	/insertStamping							Stampings.save
-GET		/orarioAdmin							Stampings.showAdmin
 GET		/choosePersonAndDate					Stampings.choosePersonAndDate
 GET		/personStamping							Stamping.personStamping
 GET		/Absences/insertAbsence					Absences.insertAbsence

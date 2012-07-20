@@ -9,20 +9,14 @@ import org.joda.time.LocalDate;
 import play.Logger;
 import play.mvc.Before;
 import play.mvc.Controller;
+import play.mvc.With;
 
+@With(Secure.class)
 public class Vacations extends Controller{
 	
 	/* corrisponde alla voce di menu selezionata */
 	private final static ActionMenuItem actionMenuItem = ActionMenuItem.vacations;
-	
-	@Before
-    static void checkPerson() {
-		if (!Security.isConnected()) {
-            flash.error("Please log in first");
-            Application.index();
-        }
-    }
-	
+		
 	private static void show(Person person) {
 		String menuItem = actionMenuItem.toString();
 		

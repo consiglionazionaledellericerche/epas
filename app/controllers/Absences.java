@@ -20,15 +20,7 @@ public class Absences extends Controller{
 	
 	/* corrisponde alla voce di menu selezionata */
 	private final static ActionMenuItem actionMenuItem = ActionMenuItem.absences;
-	
-	@Before
-    static void checkPerson() {
-		if (!Security.isConnected()) {
-            flash.error("Please log in first");
-            Application.index();
-        }
-    }
-	
+		
 	@Check(Security.VIEW_PERSON_LIST)
 	public static void show(Person person) {
 		String menuItem = actionMenuItem.toString();
