@@ -116,12 +116,12 @@ public class Stampings extends Controller {
 	}
     
     public static void dailyStampings() {
-    	Person person = Person.findById(Long.parseLong(params.get("id")));
+    	Person person = Person.findById(params.get("id", Long.class));
     	LocalDate day = 
     			new LocalDate(
-    				Integer.parseInt(params.get("year")),
-    				Integer.parseInt(params.get("month")), 
-    				Integer.parseInt(params.get("day")));
+    				params.get("year", Integer.class),
+    				params.get("month", Integer.class), 
+    				params.get("day", Integer.class));
     	
     	Logger.trace("dailyStampings called for %s %s", person, day);
     	
@@ -130,10 +130,9 @@ public class Stampings extends Controller {
     }
 
     
-    
     @Check(Security.INSERT_AND_UPDATE_STAMPING)
     public static void insertStamping(){
-    	Person person = Person.findById(params.get("person_id", Long.class));
+    	Person person = Person.findById(params.get("personId", Long.class));
     	
     	Logger.debug("Person: "+person.id);
        	

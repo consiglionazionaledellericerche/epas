@@ -1,8 +1,10 @@
 #{extends 'main.html' /}
-#{set title:monthRecap.person.surname + ' ' + monthRecap.person.name + ', matricola=' + monthRecap.person.number /}
+#{set title:mainMenu.person.surname + ' ' + mainMenu.person.name + ', matricola=' + mainMenu.person.number /}
 
-<h2 id="titoloSituazionePresenzeMensili">Situazione presenze mensile <span class="capitalized">&{'views.tags.display.date.month.' + monthRecap.month}</span> ${monthRecap.year}</h2>
-
+<h2 id="titoloSituazionePresenzeMensili">
+	Situazione presenze mensile 
+	<span class="capitalized">&{'views.tags.display.date.month.' + monthRecap.month}</span> ${monthRecap.year} 
+	di ${mainMenu.person.surname} ${mainMenu.person.name}</h2>
 
 #{logoutForm /}
 
@@ -54,14 +56,19 @@
 			}
 			}%
 		
-			<td class="assenza"><a href="@{Absences.insertAbsence(day.date)}">${day.absenceList().size()>0  ? day.absenceList().get(0).absenceType.code : '____'}</a><script type="text/javascript"> 
-				$('.example3demo').popupWindow({ 
-					height:500, 
-					width:800, 
-					top:50, 
-					left:50 
+			<td class="assenza">
+				<a href="@{Absences.insertAbsence(day.person.id, day.date.year, day.date.monthOfYear, day.date.dayOfMonth)}" class="insertAbsence${day.date.dayOfMonth}">
+					${day.absenceList().size()>0  ? day.absenceList().get(0).absenceType.code : '____'}
+				</a>
+				<script type="text/javascript"> 
+				$('.insertAbsence${day.date.dayOfMonth}').popupWindow({ 
+				height:500, 
+				width:800, 
+				top:50, 
+				left:50 
 				}); 
-				</script></td>
+				</script>			
+			</td>
 
 			<td class="ingresso"><a href="@{Stampings.insertStamping}">${day.getStampings().size()>0 ? day.getStampings().get(0).date.toCalendarTime() : '_____'}</a><script type="text/javascript"> 
 				$('.example3demo').popupWindow({ 

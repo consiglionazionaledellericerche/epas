@@ -30,11 +30,9 @@ public class Security extends Secure.Security {
 		if(person != null){
 			Cache.set(username, person, "30mn");
 			Cache.set(PERMISSION_CACHE_PREFIX + username, person.getAllPermissions(), "30mn");
-			
-            
+			            
             flash.success("Welcome, " + person.name + person.surname);
             Logger.info("person %s successfully logged in", person.username);
-            Logger.debug("%s: person.id = %d", person.username, person.id);
             
 			return true;
 		}
@@ -62,7 +60,8 @@ public class Security extends Secure.Security {
 		Person person = Cache.get(username, Person.class);
 		if(person == null){
 			person = Person.find("byUsername", username).first();
-			Cache.set(username, person);
+			Cache.set(username, person, "30mn");
+			Cache.set(PERMISSION_CACHE_PREFIX + username, person.getAllPermissions(), "30mn");
 		}
 		return person;
 	}
@@ -71,6 +70,7 @@ public class Security extends Secure.Security {
 		Person person = getPerson(username);
 		Set<Permission> permissions = Cache.get(PERMISSION_CACHE_PREFIX + username, Set.class);
 		if (permissions == null) {
+			person.refresh();
 			permissions = person.getAllPermissions();
 			Cache.set(PERMISSION_CACHE_PREFIX + username, permissions, "30mn");
 		}

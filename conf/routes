@@ -60,8 +60,8 @@ GET		/insertStamping							Stampings.insertStamping
 POST	/insertStamping							Stampings.save
 GET		/choosePersonAndDate					Stampings.choosePersonAndDate
 GET		/personStamping							Stamping.personStamping
-GET		/Absences/insertAbsence					Absences.insertAbsence
-POST	/Absences/insertAbsence					Absences.save
+GET		/insertAbsence/{personId}/{year}/{month}/{day}	Absences.insertAbsence
+POST	/saveAbsence							Absences.save
 GET		/confParameters							ConfParameters.show
 POST	/confParameters							ConfParameters.save
 
