@@ -5,6 +5,8 @@ package it.cnr.iit.epas;
 
 import java.util.List;
 
+import play.cache.Cache;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
@@ -18,6 +20,7 @@ import models.Person;
 @Getter
 public class MainMenu {
 
+	public static final String PERSON_ID_CACHE_PREFIX = "personId.";
 	@Setter
 	private Long personId = null;
 
@@ -45,4 +48,14 @@ public class MainMenu {
 		this.persons = persons;
 	}
 	
+	public Person getPerson() {
+		Person person = Cache.get(PERSON_ID_CACHE_PREFIX, Person.class);
+		
+		if (person == null) {
+			person = Person.findById(personId);
+			Cache.set(PERSON_ID_CACHE_PREFIX, person, "30mn");
+		}
+		
+		return person;
+	}
 }
