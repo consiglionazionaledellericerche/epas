@@ -1,12 +1,10 @@
-#{extends 'main.html' /}
+#{extends 'main_admin.html' /}
 #{set title:mainMenu.person.surname + ' ' + mainMenu.person.name + ', matricola=' + mainMenu.person.number /}
 
 <h2 id="titoloSituazionePresenzeMensili">
 	Situazione presenze mensile 
 	<span class="capitalized">&{'views.tags.display.date.month.' + monthRecap.month}</span> ${monthRecap.year} 
 	di ${mainMenu.person.surname} ${mainMenu.person.name}</h2>
-
-#{logoutForm /}
 
 #{functionalMenuForm mainMenu: mainMenu /}
 
@@ -57,9 +55,18 @@
 			}%
 		
 			<td class="assenza">
-				<a href="@{Absences.insertAbsence(day.person.id, day.date.year, day.date.monthOfYear, day.date.dayOfMonth)}" class="insertAbsence${day.date.dayOfMonth}">
-					${day.absenceList().size()>0  ? day.absenceList().get(0).absenceType.code : '____'}
-				</a>
+				%{ absenceList = day.absenceList() }%
+				%{ if (absenceList.size() == 0) { }%
+					<a href="@{Absences.create(day.person.id, day.date.year, day.date.monthOfYear, day.date.dayOfMonth)}" class="insertAbsence${day.date.dayOfMonth}">____</a>
+				%{	} else {
+					for (absence in absenceList) { 
+				%}
+						<a href="@{Absences.edit(absence.id)}" class="insertAbsence${day.date.dayOfMonth}">
+							${absence.absenceType.code}
+						</a>
+					%{ } }%					
+				%{ } }%
+				
 				<script type="text/javascript"> 
 				$('.insertAbsence${day.date.dayOfMonth}').popupWindow({ 
 				height:500, 

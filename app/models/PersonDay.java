@@ -636,21 +636,8 @@ public class PersonDay extends Model {
 	 * @return la lista di codici di assenza fatti da quella persona in quella data
 	 */
 	public List<Absence> absenceList() {
-		
-		List<Absence> absenceList = new ArrayList<Absence>();
-		absenceList = Absence.find("SELECT abs FROM Absence abs " +
+		return Absence.find("SELECT abs FROM Absence abs " +
 				" WHERE abs.person = ? AND abs.date = ?", person, date).fetch();
-
-		if(absenceList != null){
-			for (Absence abs : absenceList) {
-				Logger.warn("Codice: " +abs.absenceType.code);
-			}
-		}
-		else
-			Logger.warn("Non ci sono assenze" );
-	
-		return absenceList;
-		
 	}
 	
 	/**
