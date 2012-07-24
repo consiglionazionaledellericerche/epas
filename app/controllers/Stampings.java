@@ -52,8 +52,8 @@ public class Stampings extends Controller {
     	MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, year, month);
     	PersonMonth personMonth =
     			PersonMonth.find(
-    				"Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
-    				person, month, year).first();
+    				"Select pm from PersonMonth pm where pm.person = ? and pm.year = ? and pm.month = ?", 
+    				person, year, month).first();
     	
     	if (personMonth == null) {
 			personMonth = new PersonMonth(person, year, month);
@@ -66,7 +66,7 @@ public class Stampings extends Controller {
     
 	private static void show() {
 		LocalDate now = new LocalDate();
-		show(Security.getPerson().getId(), now.getMonthOfYear(), now.getYear());
+		show(Security.getPerson().getId(), now.getYear(), now.getMonthOfYear());
 	}
 	
 	private static void show(Long personId) {

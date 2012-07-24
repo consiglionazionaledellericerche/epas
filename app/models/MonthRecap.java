@@ -293,21 +293,6 @@ public class MonthRecap extends Model {
 		for(PersonDay pd : days){
 			List stampings = pd.getStampings();
 			StampModificationType smt = pd.checkTimeForLunch(stampings);
-			/**
-			 * da togliere dopo il debug...
-			 */
-			if(stampingCodeList!=null)
-				Logger.debug("stampingcodelist: "+stampingCodeList);
-			else{
-				Logger.warn("stampingcodelist è nullo");
-				
-			}
-			if(smt!=null)
-				Logger.debug("smt: "+smt);
-			else{
-				Logger.warn("smt è nullo");
-				
-			}
 			
 			boolean stato = stampingCodeList.contains(smt);
 			if(smt != null && stato==false){

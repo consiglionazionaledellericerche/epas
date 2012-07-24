@@ -1,30 +1,30 @@
 #{extends 'main.html' /}
 #{set title:personDay.person.surname + ' ' + personDay.person.name + ', matricola=' + personDay.person.number /}
 
-<h3>Modifica codici di assenza del ${personDay.date}</h3>
+<h3>Modifica codici di assenza del ${personDay.date.toDateTime()}</h3>
 
-#{form @Absences.save()}
+#{form @Absences.insert()}
 	
 Inserire un <a href="absenceCodeList.html">codice di assenza</a> nella casella seguente.
 	<input type="hidden" name="personId" value="${personDay.person.id}"/>
-	<input type="hidden" name="year.from" value="${personDay.date.year}"/>
-	<input type="hidden" name="month.from" value="${personDay.date.monthOfYear}"/>
-	<input type="hidden" name="day.from" value="${personDay.date.dayOfMonth}"/>
-	
+	<input type="hidden" name="yearFrom" value="${personDay.date.year}"/>
+	<input type="hidden" name="monthFrom" value="${personDay.date.monthOfYear}"/>
+	<input type="hidden" name="dayFrom" value="${personDay.date.dayOfMonth}"/>
+
 <table>
 	<tr>
 		<th>Codice</th>
 	</tr>
 	<tr>
-		<td><input name="absenceCode" type="text" value="" size="20" maxlength="100" /></td>
+		<td><input name="absenceCode" type="text" value="${absenceCode}" size="20" maxlength="100" /></td>
 		
-		<td>fino al #{select 'year.to', value:personDay.date.getYear(), id:'anno'}
+		<td>fino al #{select 'year.to', value:personDay.date.getYear(), id:'year.to'}
 					#{option 2011}2011#{/option}
 					#{option 2012}2012#{/option}
 					#{option 2013}2013#{/option}
 					#{/select}
 					
-					#{select 'month.to', value:personDay.date.getMonthOfYear(), id:'mese'}
+					#{select 'month.to', value:personDay.date.getMonthOfYear(), id:'month.to'}
 					#{option 1}Gennaio#{/option}
 					#{option 2}Febbraio#{/option}
 					#{option 3}Marzo#{/option}
@@ -38,7 +38,7 @@ Inserire un <a href="absenceCodeList.html">codice di assenza</a> nella casella s
 					#{option 11}Novembre#{/option}
 					#{option 12}Dicembre#{/option}
 					#{/select}
-					#{select 'day.to', value:personDay.date.getDayOfMonth(), id:'giorno'}
+					#{select 'day.to', value:personDay.date.getDayOfMonth(), id:'day.to'}
 					#{option 1}1#{/option}
 					#{option 2}2#{/option}
 					#{option 3}3#{/option}
@@ -85,5 +85,5 @@ Inserire un <a href="absenceCodeList.html">codice di assenza</a> nella casella s
 </fieldset>
 
 
-<input type="submit" value="Salva"/>
+<input type="submit" value="Inserisci"/>
 #{/form}

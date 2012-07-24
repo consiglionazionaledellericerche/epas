@@ -17,12 +17,6 @@ import play.mvc.With;
 @With( {Secure.class, NavigationMenu.class} )
 public class Application extends Controller {
     
-	@Before
-	public static void populateCommonData() {
-		List<Person> personList = Person.find("Select p from Person p order by p.surname").fetch();
-		renderArgs.put("personList", personList);	
-	}
-
     public static void indexAdmin() {
 		Logger.debug("chiamato metodo indexAdmin dell'Application controller");
        	render();

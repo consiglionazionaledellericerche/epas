@@ -47,7 +47,7 @@ fieldset legend {
 
 /** Header **/
 
-header.notLoggedIn {
+header.notLoggedIn, header.loggedIn {
     height: 200px;
     /*position: relative;*/
     background: #fff url(../images/time_banner.jpg) 0px -180px no-repeat;
@@ -68,15 +68,16 @@ header h1 {
     text-shadow: 0 0 5px rgba(255,255,255,.5);
 }
 
-header #options {
+div#options {
     position: absolute;
     right: 10px;
     top: 13px;
     font-size: 80%;
     color: #eee;
+    width: 200px;
 }
 
-header #options a {
+div#options a {
     color: #eee;
 }
 
@@ -229,7 +230,7 @@ td.comp-nome {height: 1em; text-align: left}
 
 p#spiegazioneTabellaTimbrature {margin-top: 2em; margin-bottom: 2em}
 p#validita {margin: 2em 0em 2em}
-div#logout {text-align: right}
+div#logout {text-align: right; float: right}
 div#chooseView {text-align: center}
 div#cambiaPassword {margin: 1em 4em; text-align: left}
 div#annullaPassword {margin: 1em 4em; text-align: left}

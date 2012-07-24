@@ -1,0 +1,30 @@
+#{extends 'main.html' /}
+#{set title:absence.person.surname + ' ' + absence.person.name + ', matricola=' + absence.person.number /}
+
+<h3>Modifica codici di assenza del ${absence.date.toDateTime()}</h3>
+
+#{form @Absences.update()}
+	
+Inserire un <a href="absenceCodeList.html">codice di assenza</a> nella casella seguente.
+	<input type="hidden" name="absenceId" value="${absence.id}"/>
+
+<table>
+	<tr>
+		<th>Codice</th>
+	</tr>
+	<tr>
+		<td><input name="absenceCode" type="text" value="${absence.absenceType.code}" size="20" maxlength="100" /></td>		
+	</tr>
+</table>
+
+
+<fieldset>
+	<legend>Buono mensa:</legend>
+	  	calcolato<input type="radio" name="calculated" value=""/>
+	  	No <input type="radio" name="no" value=""/>
+	  	Sì <input type="radio" name="si" value=""/>
+</fieldset>
+
+
+<input type="submit" value="Aggiorna"/>
+#{/form}
