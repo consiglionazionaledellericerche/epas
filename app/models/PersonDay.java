@@ -176,7 +176,6 @@ public class PersonDay extends Model {
 	
 	public List<Stamping> getStampings() {
         
-		Logger.debug("startOfDay = %s, endOfDay = %s", startOfDay, endOfDay);
 		if (startOfDay == null || endOfDay == null) {
 			startOfDay = new LocalDateTime(date.getYear(),date.getMonthOfYear(), date.getDayOfMonth(),0,0);
 			endOfDay = new LocalDateTime(date.getYear(),date.getMonthOfYear(), date.getDayOfMonth(),23,59);
@@ -330,8 +329,8 @@ public class PersonDay extends Model {
 				LocalDate easter = findHolyDay(date.getYear());
 				LocalDate easterMonday = easter.plusDays(1);
 				
-				Logger.warn("Il giorno di pasqua é: "+easter);
-				Logger.warn("Il giorno di pasquetta é: "+easterMonday);
+				Logger.trace("Il giorno di pasqua é %s", easter);
+				Logger.trace("Il giorno di pasquetta é %s", easterMonday);
 				if(date.getDayOfMonth() == easter.getDayOfMonth() && date.getMonthOfYear() == easter.getMonthOfYear())
 					return true;
 				if(date.getDayOfMonth() == easterMonday.getDayOfMonth() && date.getMonthOfYear() == easterMonday.getMonthOfYear())
@@ -521,7 +520,7 @@ public class PersonDay extends Model {
 			if((date.getDayOfMonth()==1) && (date.getDayOfWeek()!=DateTimeConstants.SATURDAY || date.getDayOfWeek()!=DateTimeConstants.SUNDAY)){
 				if(difference==0){
 					difference = getDifference();
-					Logger.warn("Difference today: "+difference);
+					Logger.info("Difference today: "+difference);
 				}
 				progressive = difference;
 			}
@@ -533,11 +532,11 @@ public class PersonDay extends Model {
 				
 				if(difference==0){
 					difference = getDifference();
-					Logger.warn("Difference today: "+difference);
+					Logger.info("Difference today: "+difference);
 				}
 				
 				progressive = difference+pdYesterday.progressive;
-				Logger.warn("Progressive today: "+progressive);				
+				Logger.info("Progressive today: "+progressive);				
 			}
 			
 		}
