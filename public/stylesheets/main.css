@@ -217,6 +217,8 @@ th.ferieFatte {text-align: center}
 th.residuo {text-align: center}
 
 th.competenze {width: 6em; text-align: center}
+td.noWrap {white-space:nowrap}
+
 
 td.festivi {background-color: #F88017; width: 6em}
 td.assenza {background-color: #FFFF99; text-align: right; width: 6em}
@@ -253,3 +255,5 @@ textarea#timbraturaWeb {margin: 0em 3em 0em}
 textarea#stampaPdf {margin: 0em 3em 0em}
 input#salvaConfigurazione {margin: 2em 60em 0em; align: center}
 input#annullaConfigurazione {margin: 0em 80em 2em; align: center}
+
+select#assenzaFrequente {margin-bottom: 1em}

@@ -1,6 +1,7 @@
 #{extends 'main.html' /}
 
-<h3>Lista codici di assenza</h3>
+<h2>Lista codici di assenza</h2>
+<h3>Copia&incolla il codice nello spazio ad esso adibito nella form precedente</h3>
 
 <table>
 	<tr>
@@ -11,8 +12,8 @@
      for(abs in absenceList) {
 }%
 	<tr>
-		<td>abs.code</td>
-		<td>abs.description</td>
+		<td>${abs.code}</td>
+		<td>${abs.description}</td>
 	</tr>
 %{  		   
      }

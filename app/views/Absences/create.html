@@ -5,7 +5,7 @@
 
 #{form @Absences.insert()}
 	
-Inserire un <a href="absenceCodeList.html">codice di assenza</a> nella casella seguente.
+
 	<input type="hidden" name="personId" value="${personDay.person.id}"/>
 	<input type="hidden" name="yearFrom" value="${personDay.date.year}"/>
 	<input type="hidden" name="monthFrom" value="${personDay.date.monthOfYear}"/>
@@ -13,12 +13,15 @@ Inserire un <a href="absenceCodeList.html">codice di assenza</a> nella casella s
 
 <table>
 	<tr>
-		<th>Codice</th>
+		<th>Codice da inserire</th>
+		<th>Durata</th>
+		<th>Codici</th>
+		
 	</tr>
 	<tr>
-		<td><input name="absenceCode" type="text" value="${absenceCode}" size="20" maxlength="100" /></td>
+		<td><input name="absenceCode" type="text" value="${absenceCode}" size="10" maxlength="10" /></td>
 		
-		<td>fino al #{select 'year.to', value:personDay.date.getYear(), id:'year.to'}
+		<td class="noWrap">fino al #{select 'year.to', value:personDay.date.getYear(), id:'year.to'}
 					#{option 2011}2011#{/option}
 					#{option 2012}2012#{/option}
 					#{option 2013}2013#{/option}
@@ -71,8 +74,31 @@ Inserire un <a href="absenceCodeList.html">codice di assenza</a> nella casella s
 					#{option 30}30#{/option}
 					#{option 31}31#{/option}
 					#{/select}					
-					</td>
-					<td></td>
+		</td>
+		<td>		
+			#{select 'code', value: '', id:'assenzaFrequente'}
+			<option value="">Codici più usati</option>
+			%{ 
+				for(absenceType in frequentAbsenceTypeList){
+			}%
+			#{option absenceType.code}${absenceType.code} ${absenceType.getShortDescription()}#{/option}
+			%{
+				}
+			}%
+			#{/select}
+							
+			#{select 'code', value: '', id:'tuttiCodici'}
+			<option value="">Tutti i codici</option>
+			%{ 
+				for(absenceType in allCodes){
+			}%
+			#{option absenceType.code}${absenceType.code} ${absenceType.getShortDescription()}#{/option}
+			%{
+				}
+			}%
+			#{/select}		
+		</td>
+
 	</tr>
 </table>
 

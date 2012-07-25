@@ -10,10 +10,34 @@ Inserire un <a href="absenceCodeList.html">codice di assenza</a> nella casella s
 
 <table>
 	<tr>
-		<th>Codice</th>
+		<th>Codice da inserire</th>
+		<th>Codici</th>
 	</tr>
 	<tr>
-		<td><input name="absenceCode" type="text" value="${absence.absenceType.code}" size="20" maxlength="100" /></td>		
+		<td><input name="absenceCode" type="text" value="${absence.absenceType.code}" size="20" maxlength="100" /></td>	
+		<td>		
+			#{select 'code', value: '', id:'assenzaFrequente'}
+			<option value="">Codici più usati</option>
+			%{ 
+				for(absenceType in frequentAbsenceTypeList){
+			}%
+			#{option absenceType.code}${absenceType.code} ${absenceType.getShortDescription()}#{/option}
+			%{
+				}
+			}%
+			#{/select}
+							
+			#{select 'code', value: '', id:'tuttiCodici'}
+			<option value="">Tutti i codici</option>
+			%{ 
+				for(absenceType in allCodes){
+			}%
+			#{option absenceType.code}${absenceType.code} ${absenceType.getShortDescription()}#{/option}
+			%{
+				}
+			}%
+			#{/select}		
+		</td>	
 	</tr>
 </table>
 

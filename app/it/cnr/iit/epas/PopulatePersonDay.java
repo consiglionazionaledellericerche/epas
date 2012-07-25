@@ -32,19 +32,14 @@ public class PopulatePersonDay {
 		fillPersonDay();
 	}
 	
-//	//TODO: solo per prova, da cancellare
-//	public static void fillPersonDay(){
-//		Long id = new Long(139);
-//		fillPersonDay((Person) Person.findById(id));	
-//	}
 	/**
 	 * metodo per il popolamento dei personDay per tutti gli utenti: il fatto è che far popolare tutti i personday è troppo oneroso
 	 * in termini di utilizzo della ram e pertanto è preferibile scegliere da quale indice a quale indice far partire la procedura
 	 * di popolamento dei personday
 	 */
 	public static void fillPersonDay() {
-		Long init = new Long(109);
-		Long end = new Long(121);
+		Long init = new Long(129);
+		Long end = new Long(141);
 		List<Person> personList = Person.find("Select per from Person per where per.id > ? and per.id < ?",init, end).fetch();
 		for(Person person : personList){
 			if(person != null){
