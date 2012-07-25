@@ -67,6 +67,8 @@ POST	/absences/create						Absences.create
 GET		/absences/edit/{absenceId}				Absences.edit
 POST	/absences/update						Absences.update
 
+GET		/absences/absenceCodeList				Absences.absenceCodeList
+
 GET		/confParameters							ConfParameters.show
 POST	/confParameters							ConfParameters.save
 

@@ -15,6 +15,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.envers.Audited;
 
@@ -74,5 +75,11 @@ public class AbsenceType extends Model {
 	
 	public boolean isDailyAbsence;
 	
+	@Transient
+	public String getShortDescription(){
+		if(description != null && description.length() > 60)
+			return description.substring(0, 60)+"...";
+		return description;
+	}
 		
 }
