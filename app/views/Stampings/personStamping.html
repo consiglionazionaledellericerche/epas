@@ -13,14 +13,12 @@
 		<th>Buono mensa</th>
 		<th>Giorno</th>
 		<th>Codice di assenza</th>
-		<th>1° entrata</th>
-		<th>1° uscita</th>
-		<th>2° entrata</th>
-		<th>2° uscita</th>
-		<th>3° entrata</th>
-		<th>3° uscita</th>
-		<th>4° entrata</th>
-		<th>4° uscita</th>
+		%{ for(int i = 1; i <= personMonth.getMaximumCoupleOfStampings(); i++){
+		}%
+		<th>${i}° entrata</th>
+		<th>${i}° uscita</th>
+		%{ } }%
+		<th>Inserisci timbratura</th>
 		<th>Tempo lavoro</th>
 		<th>Differenza</th>
 		<th>Progressivo</th>
@@ -28,7 +26,7 @@
 	</tr>
 	
 %{
-     for(day in monthRecap.days) {
+     for(day in personMonth.days) {
      		
 			
 }%
@@ -77,151 +75,46 @@
 				</script>			
 			</td>
 
-			<td class="ingresso"><a href="@{Stampings.insertStamping}">${day.getStampings().size()>0 ? day.getStampings().get(0).date.toCalendarTime() : '_____'}</a><script type="text/javascript"> 
-				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
-					height:500, 
-					width:800, 
-					top:50, 
-					left:50 
-				}); 
-				</script></td>
+			%{  int j = 0;
+				for(int i = 0; i < personMonth.getMaximumCoupleOfStampings(); i++){
+					j = i*2;
+				}%
+				<td class="ingresso">
+				%{ if(day.getStampings().size() > j && day.getStampings().get(j) !=null ) { }%
+					<a href="@{Stampings.edit(day.getStampings().get(j).id)}">
+					${day.getStampings().get(j).date.toCalendarTime()}
+					</a>
+				${(day.getStampings().get(j).stampModificationType?.code)} 
+				<script type="text/javascript"> 
+					$('.insert${day.date.dayOfMonth}').popupWindow({ 
+						height:500, 
+						width:800, 
+						top:50, 
+						left:50 
+					}); 
+					</script>
+					%{ } }%
+				</td>
+				
+				<td class="uscita">
+				%{ if(day.getStampings().size() > j+1 && day.getStampings().get(j+1) !=null ) { }%
+					<a href="@{Stampings.edit(day.getStampings().get(j+1).id)}">
+					${day.getStampings().get(j+1).date.toCalendarTime()}
+					</a>
+					${(day.getStampings().get(j+1).stampModificationType?.code)} 
+				<script type="text/javascript"> 
+					$('.insert${day.date.dayOfMonth}').popupWindow({ 
+						height:500, 
+						width:800, 
+						top:50, 
+						left:50 
+					}); 
+					</script>
+					%{ } }%
+				</td>
 			
-			<td class="uscita"><a href="@{Stampings.insertStamping}">${day.getStampings().size()>1 && day.getStampings().get(1)!=null ? day.getStampings().get(1).date.toCalendarTime() : '_____'}</a><script type="text/javascript"> 
-				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
-					height:500, 
-					width:800, 
-					top:50, 
-					left:50 
-				}); 
-				</script></td>
-			
-			%{
-			if(day.getStampings().size()>2 && day.getStampings().get(2)!=null && day.getStampings().get(1)!=null){
-			}%	
-			<td class="ingresso"><a href="@{Stampings.insertStamping}">${day.checkMinTimeForLunch(day.getStampings())<30 ? 
-			day.adjustedStamp(day.getStampings().get(1).date, day.getStampings().get(2).date).toCalendarTime() : day.getStampings().get(2).date.toCalendarTime()}</a><script type="text/javascript"> 
-				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
-					height:500, 
-					width:800, 
-					top:50, 
-					left:50 
-				}); 
-				</script></td>
-			%{
-			}else{
-			}% 
-			<td class="ingresso"><a href="@{Stampings.insertStamping}">${'_____'}</a><script type="text/javascript"> 
-				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
-					height:500, 
-					width:800, 
-					top:50, 
-					left:50 
-				}); 
-				</script></td>
-			%{
-			}
-			}%
-			<td class="uscita"><a href="@{Stampings.insertStamping}">${day.getStampings().size()>3 ? day.getStampings().get(3).date.toCalendarTime() : '_____'}</a><script type="text/javascript"> 
-				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
-					height:500, 
-					width:800, 
-					top:50, 
-					left:50 
-				}); 
-				</script></td>
-			%{
-			if(day.getStampings().size()>4 && day.getStampings().get(4)!=null){
-			}% <td class="ingresso"><a href="@{Stampings.insertStamping}">${day.getStampings().get(4).date.toCalendarTime()}</a><script type="text/javascript"> 
-				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
-					height:500, 
-					width:800, 
-					top:50, 
-					left:50 
-				}); 
-				</script></td>
-			%{
-			}else{
-			}% <td class="ingresso"><a href="@{Stampings.insertStamping}">${'_____'}</a><script type="text/javascript"> 
-				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
-					height:500, 
-					width:800, 
-					top:50, 
-					left:50 
-				}); 
-				</script></td>
-			%{
-			}
-			}%
-			%{
-			if(day.getStampings().size()>5 && day.getStampings().get(5)!=null){
-			}% <td class="uscita"><a href="@{Stampings.insertStamping}">${day.getStampings().get(5).date.toCalendarTime()}</a><script type="text/javascript"> 
-				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
-					height:500, 
-					width:800, 
-					top:50, 
-					left:50 
-				}); 
-				</script></td>			
-			%{
-			}else{
-			}% <td class="uscita"><a href="@{Stampings.insertStamping}">${'_____'}</a><script type="text/javascript"> 
-				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
-					height:500, 
-					width:800, 
-					top:50, 
-					left:50 
-				}); 
-				</script></td>
-			%{
-			}
-			}%
-			%{
-			if(day.getStampings().size()>6 && day.getStampings().get(6)!=null){
-			}% <td class="ingresso"><a href="@{Stampings.insertStamping}">${day.getStampings().get(6).date.toCalendarTime()}</a><script type="text/javascript"> 
-				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
-					height:500, 
-					width:800, 
-					top:50, 
-					left:50 
-				}); 
-				</script></td>			
-			%{
-			}else{
-			}% <td class="ingresso"><a href="@{Stampings.insertStamping}">${'_____'}</a><script type="text/javascript"> 
-				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
-					height:500, 
-					width:800, 
-					top:50, 
-					left:50 
-				}); 
-				</script></td>
-			%{
-			}
-			}%
-			%{
-			if(day.getStampings().size()>7 && day.getStampings().get(7)!=null){
-			}% <td class="uscita"><a href="@{Stampings.insertStamping}">${day.getStampings().get(7).date.toCalendarTime()}</a><script type="text/javascript"> 
-				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
-					height:500, 
-					width:800, 
-					top:50, 
-					left:50 
-				}); 
-				</script></td>			
-			%{
-			}else{
-			}% <td class="uscita"><a href="@{Stampings.insertStamping}">${'_____'}</a><script type="text/javascript"> 
-				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
-					height:500, 
-					width:800, 
-					top:50, 
-					left:50 
-				}); 
-				</script></td>
-			%{
-			}
-			}%
-			
+				%{ } }%
+			<td class="inserisciTimbratura"><a href="@{Stampings.create(day.person.id, day.date.year, day.date.monthOfYear, day.date.dayOfMonth)}">+++</a>				
 			%{
 			if(day.getStampings().size()==2 ){
 	         }% <td class="tempoLavoro">${day.isHoliday()==false ? day.convertTimeAtWork(day.timeAtWork()).toCalendarTime() : ''} <strong>${day.timeAtWork()>360 ? day.checkTimeForLunch(day.getStampings()).code : ''}</strong></td>

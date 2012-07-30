@@ -56,8 +56,10 @@ GET		/vacationsAdmin							VacationsAdmin.manageVacationCode
 POST	/insertVacation							VacationsAdmin.insertVacationCode
 GET		/changePassword							Persons.changePassword
 POST	/changePassword							Persons.savePassword
-GET		/insertStamping							Stampings.insertStamping
-POST	/insertStamping							Stampings.save
+POST	/stamping/create/						Stampings.create
+GET		/stampings/insert/{personId}/{year}/{month}/{day}	Stampings.insert
+GET		/stampings/edit/{stampingId}			Stampings.edit
+POST	/stampings/update						Stampings.update
 GET		/choosePersonAndDate					Stampings.choosePersonAndDate
 GET		/personStamping							Stamping.personStamping
 

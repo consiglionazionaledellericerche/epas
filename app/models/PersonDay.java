@@ -13,6 +13,8 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -23,6 +25,7 @@ import javax.persistence.criteria.Fetch;
 
 import lombok.Data;
 import models.Stamping.WayType;
+import models.enumerate.PersonDayModificationType;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
@@ -71,7 +74,10 @@ public class PersonDay extends Model {
 	public int progressive;
 	
 	public boolean isTicketAvailable;
-
+	
+	@Enumerated(EnumType.STRING)
+	public PersonDayModificationType modificationType;
+	
 	@Transient
 	private LocalDateTime startOfDay;
 	

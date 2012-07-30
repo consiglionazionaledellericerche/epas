@@ -2,6 +2,9 @@ package controllers;
 
 import java.sql.SQLException;
 
+import models.Person;
+import models.PersonMonth;
+
 import it.cnr.iit.epas.FromMysqlToPostgres;
 import it.cnr.iit.epas.PopulatePersonDay;
 import play.mvc.Controller;
@@ -58,5 +61,11 @@ public class Administration extends Controller {
     	PopulatePersonDay.personPermissions();
     	renderText("Aggiunti permessi a person con id 139");
     }
+    
+	public static void test(){
+		PersonMonth pm = new PersonMonth(Person.em().getReference(Person.class, 140L), 2012,6);
+		long n = pm.getMaximumCoupleOfStampings();
+		render(n);
+	}
     
 }
