@@ -52,16 +52,19 @@ GET		/persons/new							Persons.form
 
 GET		/manageWorkingTime						WorkingTimes.manageWorkingTime
 POST	/insertWorkingTime						WorkingTimes.insertWorkingTime
+
 GET		/vacationsAdmin							VacationsAdmin.manageVacationCode
 POST	/insertVacation							VacationsAdmin.insertVacationCode
+
 GET		/changePassword							Persons.changePassword
 POST	/changePassword							Persons.savePassword
-POST	/stamping/create/						Stampings.create
-GET		/stampings/insert/{personId}/{year}/{month}/{day}	Stampings.insert
+
+GET		/stampings/create						Stampings.create
+POST	/stampings/insert/{personId}/{year}/{month}/{day}	Stampings.insert
 GET		/stampings/edit/{stampingId}			Stampings.edit
 POST	/stampings/update						Stampings.update
 GET		/choosePersonAndDate					Stampings.choosePersonAndDate
-GET		/personStamping							Stamping.personStamping
+GET		/personStamping							Stampings.personStamping
 
 GET		/absences/insert/{personId}/{year}/{month}/{day}	Absences.insert
 POST	/absences/create						Absences.create

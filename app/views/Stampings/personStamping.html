@@ -81,40 +81,49 @@
 				}%
 				<td class="ingresso">
 				%{ if(day.getStampings().size() > j && day.getStampings().get(j) !=null ) { }%
-					<a href="@{Stampings.edit(day.getStampings().get(j).id)}">
+					<a href="@{Stampings.edit(day.getStampings().get(j).id)}" class="insertStamping${day.date.dayOfMonth}">
 					${day.getStampings().get(j).date.toCalendarTime()}
 					</a>
 				${(day.getStampings().get(j).stampModificationType?.code)} 
 				<script type="text/javascript"> 
-					$('.insert${day.date.dayOfMonth}').popupWindow({ 
-						height:500, 
-						width:800, 
-						top:50, 
-						left:50 
-					}); 
-					</script>
+				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
+				height:500, 
+				width:800, 
+				top:50, 
+				left:50 
+				}); 
+				</script>
 					%{ } }%
 				</td>
 				
 				<td class="uscita">
 				%{ if(day.getStampings().size() > j+1 && day.getStampings().get(j+1) !=null ) { }%
-					<a href="@{Stampings.edit(day.getStampings().get(j+1).id)}">
+					<a href="@{Stampings.edit(day.getStampings().get(j+1).id)}" class="insertStamping${day.date.dayOfMonth}">
 					${day.getStampings().get(j+1).date.toCalendarTime()}
 					</a>
 					${(day.getStampings().get(j+1).stampModificationType?.code)} 
 				<script type="text/javascript"> 
-					$('.insert${day.date.dayOfMonth}').popupWindow({ 
-						height:500, 
-						width:800, 
-						top:50, 
-						left:50 
-					}); 
-					</script>
+				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
+				height:500, 
+				width:800, 
+				top:50, 
+				left:50 
+				}); 
+				</script>
 					%{ } }%
 				</td>
 			
 				%{ } }%
-			<td class="inserisciTimbratura"><a href="@{Stampings.create(day.person.id, day.date.year, day.date.monthOfYear, day.date.dayOfMonth)}">+++</a>				
+			<td class="inserisciTimbratura"><a href="@{Stampings.create(day.person.id, day.date.year, day.date.monthOfYear, day.date.dayOfMonth)}" class="insertStamping${day.date.dayOfMonth}">+++</a>
+				<script type="text/javascript"> 
+				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
+				height:600, 
+				width:1000, 
+				top:50, 
+				left:50 
+				}); 
+				</script>
+			</td>			
 			%{
 			if(day.getStampings().size()==2 ){
 	         }% <td class="tempoLavoro">${day.isHoliday()==false ? day.convertTimeAtWork(day.timeAtWork()).toCalendarTime() : ''} <strong>${day.timeAtWork()>360 ? day.checkTimeForLunch(day.getStampings()).code : ''}</strong></td>
