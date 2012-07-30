@@ -181,29 +181,7 @@ public class MonthRecap extends Model {
 	}
 	
 	
-	/**
-	 * @return la lista di giorni (PersonDay) associato alla persona nel mese di riferimento
-	 */
-	public List<PersonDay> getDays() {
-
-		if (days != null) {
-			return days;
-		}
-		days = new ArrayList<PersonDay>();
-		Calendar firstDayOfMonth = GregorianCalendar.getInstance();
-		//Nel calendar i mesi cominciano da zero
-		firstDayOfMonth.set(year, month - 1, 1);
-		
-		Logger.trace(" %s-%s-%s : maximum day of month = %s", 
-			year, month, 1, firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH));
-		
-		for (int day = 1; day <= firstDayOfMonth.getActualMaximum(Calendar.DAY_OF_MONTH); day++) {
-		
-			Logger.trace("generating PersonDay: person = %s, year = %d, month = %d, day = %d", person.username, year, month, day);
-			days.add(new PersonDay(person, new LocalDate(year, month, day), 0, 0, 0));
-		}
-		return days;
-	}	
+	
 	
 
 	/**
@@ -227,7 +205,29 @@ public class MonthRecap extends Model {
 		return months;
 	}
 	
-	
+	/**
+	 * @return la lista di giorni (PersonDay) associato alla persona nel mese di riferimento
+	 */
+	public List<PersonDay> getDays() {
+
+		if (days != null) {
+			return days;
+		}
+		days = new ArrayList<PersonDay>();
+		Calendar firstDayOfMonth = GregorianCalendar.getInstance();
+		//Nel calendar i mesi cominciano da zero
+		firstDayOfMonth.set(year, month - 1, 1);
+		
+		Logger.trace(" %s-%s-%s : maximum day of month = %s", 
+			year, month, 1, firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH));
+		
+		for (int day = 1; day <= firstDayOfMonth.getActualMaximum(Calendar.DAY_OF_MONTH); day++) {
+		
+			Logger.trace("generating PersonDay: person = %s, year = %d, month = %d, day = %d", person.username, year, month, day);
+			days.add(new PersonDay(person, new LocalDate(year, month, day), 0, 0, 0));
+		}
+		return days;
+	}	
 	
 	/**
 	 * 

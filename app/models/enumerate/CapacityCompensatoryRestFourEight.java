@@ -1,11 +1,11 @@
-package it.cnr.iit.epas;
+package models.enumerate;
 
 /**
  * 
  * @author dario
  *
  */
-public enum CapacityCompensatoryRestOneThree {
+public enum CapacityCompensatoryRestFourEight {
 
 	onDayResidual,
 	onEndOfMonthResidual,

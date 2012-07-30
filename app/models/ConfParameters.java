@@ -1,11 +1,5 @@
 package models;
 
-import it.cnr.iit.epas.AuthWebStamping;
-import it.cnr.iit.epas.AutoDeclareAbsences;
-import it.cnr.iit.epas.AutoDeclareWorkingTime;
-import it.cnr.iit.epas.CapacityCompensatoryRestFourEight;
-import it.cnr.iit.epas.CapacityCompensatoryRestOneThree;
-import it.cnr.iit.epas.ResidualWithPastYear;
 
 import java.sql.Blob;
 import java.util.List;
@@ -17,6 +11,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import models.enumerate.AuthWebStamping;
+import models.enumerate.AutoDeclareAbsences;
+import models.enumerate.AutoDeclareWorkingTime;
+import models.enumerate.CapacityCompensatoryRestFourEight;
+import models.enumerate.CapacityCompensatoryRestOneThree;
+import models.enumerate.ResidualWithPastYear;
+
+import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
 
@@ -25,6 +27,7 @@ import play.db.jpa.Model;
 
 @Entity
 @Table(name="conf_parameters")
+@Audited
 public class ConfParameters extends Model{
 	
 	/**
@@ -70,6 +73,11 @@ public class ConfParameters extends Model{
 	public int monthOfPatron;
 	
 	public int dayOfPatron;
+	
+	/**
+	 * numero di colonne da visualizzare
+	 */
+	public int numberOfViewingCoupleColumn;
 	
 	/**
 	 * Indicare se la durata dell'intervallo pranzo è più corta del minimo deve essere automaticamente spostata l'ora di rientro

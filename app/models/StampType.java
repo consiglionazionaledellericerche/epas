@@ -9,6 +9,8 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.envers.Audited;
+
 import net.sf.oval.constraint.MinLength;
 import play.data.validation.Required;
 import play.db.jpa.Model;
@@ -17,6 +19,7 @@ import play.db.jpa.Model;
  * @author cristian
  *
  */
+@Audited
 @Entity
 @Table(name = "stamp_types")
 public class StampType extends Model {

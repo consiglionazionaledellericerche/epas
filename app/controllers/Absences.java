@@ -90,16 +90,15 @@ public class Absences extends Controller{
 	
 
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
-	public static void create(@Required Long personId, @Required Integer year, @Required Integer month, @Required Integer day) {
+	public static void create(@Required Long personId, @Required Integer year, @Required Integer month, @Required Integer day, String absenceCode) {
     	Logger.debug("Insert absence called for personId=%d, year=%d, month=%d, day=%d", personId, year, month, day);
     	List<AbsenceType> frequentAbsenceTypeList = getFrequentAbsenceTypes();
     	
     	List<AbsenceType> allCodes = getAllAbsenceTypes();
 		Person person = Person.em().getReference(Person.class, personId);
 		LocalDate date = new LocalDate(year, month, day);
-		
-    	PersonDay personDay = new PersonDay(person, date);
-		render(personDay, frequentAbsenceTypeList, allCodes);
+		PersonDay personDay = new PersonDay(person, date);
+		render(personDay, frequentAbsenceTypeList, allCodes, absenceCode);
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
@@ -115,7 +114,7 @@ public class Absences extends Controller{
 			validation.keep();
 			params.flash();
 			flash.error("Il codice di assenza %s non esiste", params.get("absenceCode"));
-			create(personId, yearFrom, monthFrom, dayFrom);
+			create(personId, yearFrom, monthFrom, dayFrom, absenceCode);
 			render("@create");
 		}
 		
@@ -127,7 +126,7 @@ public class Absences extends Controller{
 			validation.keep();
 			params.flash();
 			flash.error("Il codice di assenza %s è già presente per la data %s", params.get("absenceCode"), PersonTags.toDateTime(dateFrom));
-			create(personId, yearFrom, monthFrom, dayFrom);
+			create(personId, yearFrom, monthFrom, dayFrom, absenceCode);
 			render("@create");
 		}
 		Absence absence = new Absence();

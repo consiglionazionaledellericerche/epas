@@ -1,4 +1,4 @@
-package it.cnr.iit.epas;
+package models.enumerate;
 
 /**
  * 

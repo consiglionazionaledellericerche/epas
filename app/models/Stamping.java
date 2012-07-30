@@ -12,6 +12,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Type;
+import org.hibernate.envers.Audited;
 import org.joda.time.LocalDateTime;
 
 import play.data.validation.InPast;
@@ -22,6 +23,7 @@ import play.db.jpa.Model;
  * @author cristian
  *
  */
+@Audited
 @Entity
 @Table(name = "stampings")
 public class Stamping extends Model {

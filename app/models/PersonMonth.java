@@ -1,5 +1,6 @@
 package models;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -7,8 +8,10 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Query;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -46,35 +49,25 @@ public class PersonMonth extends Model {
 	public Integer compensatoryRest;
 	
 	@Transient
-	private LocalDate date;
-	
-	@Transient
 	public List<PersonMonth> persons = null;
 	
+	@Transient
+	public List<PersonDay> days = null;
+	
+	/**
+	 * aggiunta la date per test di getMaximumCoupleOfStampings ---da eliminare
+	 * @param person
+	 * @param year
+	 * @param month
+	 */
 	public PersonMonth(Person person, int year, int month){
 		this.person = person;	
 		this.year = year;
 		this.month = month;
-	}
-	
-	public PersonMonth(Person person, LocalDate date){
-		this.person = person;	
-		this.date = date;
-	}
-	
-	public List<PersonMonth> getPersons(){
-		if(persons != null){
-			return persons;
-		}
-		persons = new ArrayList<PersonMonth>();
-		List <Person> persone = Person.findAll();
-		for(Person p : persone){
-			persons.add(new PersonMonth(p, new LocalDate(date)));
-		}
 		
-		return persons;
 	}
 	
+		
 	/**
 	 * @param actualMonth, actualYear
 	 * @return la somma dei residui mensili passati fino a questo momento; se siamo in un mese prima di aprile i residui da calcolare 
@@ -177,7 +170,56 @@ public class PersonMonth extends Model {
 		return total;
 	}
 	
+	/**
+	 * 
+	 * @return il numero massimo di coppie di colonne ingresso/uscita ricavato dal numero di timbrature di ingresso e di uscita di quella
+	 * persona per quel mese
+	 */
+	public long getMaximumCoupleOfStampings(){
+		EntityManager em = em();
+		LocalDate begin = new LocalDate(year, month, 1);
+		
+		Query q1 = em.createNativeQuery("select count(*) from stampings as st where st.stamp_type_id in (:in1,:in2) and st.person_id = :per "+
+				"and st.date between :beg and :end group by cast(date as Date) order by count(*) desc")
+				.setParameter("in1", 1L)
+				.setParameter("in2", 4L)
+				.setParameter("per", person.id)
+				.setParameter("beg", begin.toDate())
+				.setParameter("end", begin.dayOfMonth().withMaximumValue().toDate())
+				.setMaxResults(1);
+		
+		BigInteger exitStamp = (BigInteger)q1.getSingleResult();
+		
+		
+		q1.setParameter("in1", 2L).setParameter("in2", 3L);
+		BigInteger inStamp = (BigInteger)q1.getSingleResult();
+		return Math.max(exitStamp.longValue(),inStamp.longValue());
+	}
 	
 	
+	
+	/**
+	 * @return la lista di giorni (PersonDay) associato alla persona nel mese di riferimento
+	 */
+	public List<PersonDay> getDays() {
+
+		if (days != null) {
+			return days;
+		}
+		days = new ArrayList<PersonDay>();
+		Calendar firstDayOfMonth = GregorianCalendar.getInstance();
+		//Nel calendar i mesi cominciano da zero
+		firstDayOfMonth.set(year, month - 1, 1);
+		
+		Logger.trace(" %s-%s-%s : maximum day of month = %s", 
+			year, month, 1, firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH));
+		
+		for (int day = 1; day <= firstDayOfMonth.getActualMaximum(Calendar.DAY_OF_MONTH); day++) {
+		
+			Logger.trace("generating PersonDay: person = %s, year = %d, month = %d, day = %d", person.username, year, month, day);
+			days.add(new PersonDay(person, new LocalDate(year, month, day), 0, 0, 0));
+		}
+		return days;
+	}	
 
 }

@@ -229,6 +229,7 @@ td.differenza {text-align: right; width: 6em}
 td.progressivo {background-color: #FFFF99; text-align:right; width: 6em}
 td.comp {height: 1em; text-align: right}
 td.comp-nome {height: 1em; text-align: left}
+td.inserisciTimbratura {text-align: center}
 
 p#spiegazioneTabellaTimbrature {margin-top: 2em; margin-bottom: 2em}
 p#validita {margin: 2em 0em 2em}

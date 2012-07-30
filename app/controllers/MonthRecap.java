@@ -19,7 +19,7 @@ public class MonthRecap extends Controller{
 		List<Person> persons = Person.findAll();
 		List<PersonMonth> personMonths = new ArrayList<PersonMonth>();
 		for( Person p : persons) {
-			personMonths.add(new PersonMonth(p, localDate));
+			personMonths.add(new PersonMonth(p, localDate.getYear(), localDate.getMonthOfYear()));
     	
 	    	//MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, now.getYear(), now.getMonthOfYear());
 	       
