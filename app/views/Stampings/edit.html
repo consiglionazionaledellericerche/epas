@@ -1,0 +1,20 @@
+#{extends 'main.html' /}
+#{set title:stamping.person.surname + ' ' + stamping.person.name + ', matricola=' + stamping.person.number /}
+
+<h3>Modifica Entrate/Uscite del ${date}</h3>
+
+Inserire ore e minuti nelle caselle seguenti nel formato HH.MM 
+Lasciare la casella vuota per eliminare una entrata/uscita.
+
+#{form @Stampings.update()}
+
+	<input type="hidden" name="stampingId" value="${stamping.id}"/>
+
+	<input type="text" name="stamping" value="${hourMinute.get(0)}" size="10" maxlength="20"/>
+	<input type="text" name="stamping" value="${hourMinute.get(1)}" size="10" maxlength="20"/>
+	
+
+
+
+<input type="submit" value="Aggiorna"/>
+#{/form}

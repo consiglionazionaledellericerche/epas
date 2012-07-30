@@ -2,6 +2,7 @@ package models;
 
 
 import java.sql.Blob;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Entity;
@@ -18,6 +19,7 @@ import models.enumerate.CapacityCompensatoryRestFourEight;
 import models.enumerate.CapacityCompensatoryRestOneThree;
 import models.enumerate.ResidualWithPastYear;
 
+import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
@@ -33,7 +35,8 @@ public class ConfParameters extends Model{
 	/**
 	 * Data di inizio uso di questo programma gg/mm/aaaa
 	 */
-	public LocalDate initUseProgram;
+	
+	public Date initUseProgram;
 		
 	/**
 	 * Nome dell'Istituto

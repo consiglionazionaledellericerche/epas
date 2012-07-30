@@ -33,6 +33,7 @@ import play.mvc.With;
 @With( {Secure.class, NavigationMenu.class} )
 public class Stampings extends Controller {
 		
+	//private final static ActionMenuItem actionMenuItem = ActionMenuItem.stampings;
     /**
      * 
      * @param person
@@ -41,6 +42,7 @@ public class Stampings extends Controller {
      */
     public static void show(Long personId, int year, int month){
     	
+    	//String menuItem = actionMenuItem.toString();
     	if (personId == null) {
     		show();
     	}
@@ -66,7 +68,7 @@ public class Stampings extends Controller {
     	
     	Logger.debug("Month recap of person.id %s, year=%s, month=%s", person.id, year, month);
     	    	
-        render(monthRecap, personMonth);
+        render(monthRecap, personMonth/*, menuItem*/);
     }
     
 	private static void show() {
@@ -100,7 +102,8 @@ public class Stampings extends Controller {
     	 * il conf parameters serve per recuperare il parametro di quante colonne entrata/uscita far visualizzare.
     	 * Deve essere popolata una riga di quella tabella prima però....
     	 */
-    	ConfParameters confParameters = ConfParameters.findById(1); 
+    	long id = 1;
+    	ConfParameters confParameters = ConfParameters.findById(id);
     	//TODO: Se il mese è gestito vecchio... usare il monthRecap, altrimenti utilizzare il personMonth
     	MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, year, month);
     	PersonMonth personMonth =
@@ -115,9 +118,9 @@ public class Stampings extends Controller {
     	Logger.debug("Month recap of person.id %s, year=%s, month=%s", person.id, year, month);
     	
     	
-    	//int numberOfInOut = Math.min(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
+    	int numberOfInOut = Math.min(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
     	    	
-        render(monthRecap, personMonth/*, numberOfInOut*/);
+        render(monthRecap, personMonth, numberOfInOut);
     	
     }
 
@@ -244,8 +247,9 @@ public class Stampings extends Controller {
     	if (stamping == null) {
     		notFound();
     	}
+    	LocalDate date = stamping.date.toLocalDate();
     	List<String> hourMinute = timeDivided(stamping);
-		render(stamping, hourMinute);				
+		render(stamping, hourMinute, date);				
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)

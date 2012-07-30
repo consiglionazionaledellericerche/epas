@@ -38,8 +38,8 @@ public class PopulatePersonDay {
 	 * di popolamento dei personday
 	 */
 	public static void fillPersonDay() {
-		Long init = new Long(129);
-		Long end = new Long(141);
+		Long init = new Long(119);
+		Long end = new Long(130);
 		List<Person> personList = Person.find("Select per from Person per where per.id > ? and per.id < ?",init, end).fetch();
 		for(Person person : personList){
 			if(person != null){
