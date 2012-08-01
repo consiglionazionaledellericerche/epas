@@ -67,7 +67,7 @@ public class PopulatePersonDay {
 		for(int i=1; i<=5; i++){
 			wttd = new WorkingTimeTypeDay();
 			wttd.workingTimeType = wtt;
-			wttd.breakTicketTime = 0;
+			wttd.breakTicketTime = 30;
 			wttd.dayOfWeek = i;
 			wttd.holiday = false;
 			wttd.mealTicketTime = 360;
@@ -85,7 +85,7 @@ public class PopulatePersonDay {
 		for(int i=6; i<8; i++){
 			wttd = new WorkingTimeTypeDay();
 			wttd.workingTimeType = wtt;
-			wttd.breakTicketTime = 0;
+			wttd.breakTicketTime = 30;
 			wttd.dayOfWeek = i;
 			wttd.holiday = true;
 			wttd.mealTicketTime = 360;
