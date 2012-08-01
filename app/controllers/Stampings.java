@@ -18,7 +18,7 @@ import models.PersonTags;
 import models.StampType;
 import models.Stamping;
 import models.Stamping.WayType;
-import models.ConfParameters;
+import models.Configuration;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -103,7 +103,7 @@ public class Stampings extends Controller {
     	 * Deve essere popolata una riga di quella tabella prima però....
     	 */
     	long id = 1;
-    	ConfParameters confParameters = ConfParameters.findById(id);
+    	Configuration confParameters = Configuration.findById(id);
     	//TODO: Se il mese è gestito vecchio... usare il monthRecap, altrimenti utilizzare il personMonth
     	MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, year, month);
     	PersonMonth personMonth =

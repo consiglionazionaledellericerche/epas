@@ -28,9 +28,9 @@ import play.data.validation.Email;
 import play.db.jpa.Model;
 
 @Entity
-@Table(name="conf_parameters")
+@Table(name="configuration")
 @Audited
-public class ConfParameters extends Model{
+public class Configuration extends Model{
 	
 	/**
 	 * Data di inizio uso di questo programma gg/mm/aaaa
