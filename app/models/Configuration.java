@@ -28,7 +28,7 @@ import play.data.validation.Email;
 import play.db.jpa.Model;
 
 @Entity
-@Table(name="configuration")
+@Table(name="configurations")
 @Audited
 public class Configuration extends Model{
 	
