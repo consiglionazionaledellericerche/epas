@@ -26,7 +26,7 @@ import models.CompetenceCode;
 import models.ContactData;
 import models.Contract;
 
-import models.ConfParameters;
+import models.Configuration;
 import models.Location;
 import models.MonthRecap;
 import models.Person;
@@ -1064,10 +1064,6 @@ public class FromMysqlToPostgres {
 		smt2.code = "e";
 		smt2.description = "Ora di entrata calcolata perché la durata dell'intervallo pranzo è minore del minimo";
 		em.persist(smt2);
-		StampModificationType smt3 = new StampModificationType();
-		smt3.code = "";
-		smt3.description = "";
-		em.persist(smt3);
 	}
 }
 		
