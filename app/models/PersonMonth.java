@@ -70,29 +70,38 @@ public class PersonMonth extends Model {
 		
 	/**
 	 * @param actualMonth, actualYear
-	 * @return la somma dei residui mensili passati fino a questo momento; se siamo in un mese prima di aprile i residui da calcolare 
-	 * sono su quello relativo all'anno precedente + i residui mensili fino a quel mese; se siamo in un mese dopo aprile, invece,
-	 * i residui da considerare sono solo quelli da aprile fino a quel momento
+	 * @return la somma dei residui mensili passati fino a questo momento; nel caso di dipendenti con qualifica da 4 a 9 
+	 * se siamo in un mese prima di aprile i residui da calcolare sono su quello relativo all'anno precedente + i residui mensili fino a 
+	 * quel mese; se siamo in un mese dopo aprile, invece, i residui da considerare sono solo quelli da aprile fino a quel momento.
+	 * Nel caso invece la qualifica del dipendente sia da 1 a 3, i residui sono sempre validi e non terminano al 31/3
 	 */
 	public int getResidualFromPastMonth(){
 		int residual = 0;
-		if(month < 4){
-			List<PersonMonth> pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month < ? " +
-					"and pm.year = ?", person, month, year).fetch();			
-			
-			for(PersonMonth personMonth : pm){
-				residual = residual+personMonth.remainingHours;
-			}
-			PersonYear py = PersonYear.find("Select py from PersonYear py where py.person = ? and py.year = ?", person, year-1).first();
-			residual = residual + py.remainingHours;
+		if(person.qualification.qualification == 1 || person.qualification.qualification == 2 || person.qualification.qualification == 3){
+			/**
+			 * TODO: come comportarsi in questo caso? come recuperare i residui passati?
+			 */
 		}
 		else{
-			List<PersonMonth> pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month >=  ? and pm.month < ?" +
-					" and pm.year = ?", person, 4, month, year).fetch();
-			for(PersonMonth personMonth : pm){
-				residual = residual+personMonth.remainingHours;
+			if(month < 4 ){
+				List<PersonMonth> pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month < ? " +
+						"and pm.year = ?", person, month, year).fetch();			
+				
+				for(PersonMonth personMonth : pm){
+					residual = residual+personMonth.remainingHours;
+				}
+				PersonYear py = PersonYear.find("Select py from PersonYear py where py.person = ? and py.year = ?", person, year-1).first();
+				residual = residual + py.remainingHours;
+			}
+			else{
+				List<PersonMonth> pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month >=  ? and pm.month < ?" +
+						" and pm.year = ?", person, 4, month, year).fetch();
+				for(PersonMonth personMonth : pm){
+					residual = residual+personMonth.remainingHours;
+				}
 			}
 		}
+		
 		return residual;
 	}
 	

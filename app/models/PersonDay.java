@@ -47,8 +47,6 @@ import play.db.jpa.Model;
  */
 
 /**
- * TODO rendere persistente la classe nel db, persistendo nello specifico i campi di conteggio di orario del lavoro, del progressivo
- * e della differenza. Legare la tabella con la classe person e la classe stamping
  * @author dario
  *
  */
@@ -92,6 +90,10 @@ public class PersonDay extends Model {
 	private Absence absence = null;	
 	
 	@Transient
+	private List<WorkingTimeTypeDay> wttd = WorkingTimeTypeDay.find("Select wttd from WorkingTimeTypeDay wttd where wttd.workingTimeType = ?" +
+			"", person.workingTimeType).fetch();
+	
+	@Transient
 	private boolean isMealTicketAvailable;
 
 	
@@ -121,7 +123,7 @@ public class PersonDay extends Model {
 	
 		WorkingTimeTypeDay wttd2 = WorkingTimeTypeDay.find("Select wttd from WorkingTimeType wtt, WorkingTimeTypeDay wttd, Person p " +
 				"where p.workingTimeType = wtt and wttd.workingTimeType = wtt and p = ? and wttd.dayOfWeek = ? ", person, date.getDayOfWeek()).first();
-		Logger.warn("In isWorkingDay il giorno chiamato è: " +date.getDayOfWeek() +" mentre la persona è: " +person.id);
+		Logger.debug("In isWorkingDay il giorno chiamato è: " +date.getDayOfWeek() +" mentre la persona è: " +person.id);
 		isWorkingDay = wttd2.holiday;
 		return isWorkingDay;
 	}
@@ -492,11 +494,15 @@ public class PersonDay extends Model {
 						 * controllare nei casi in cui ci siano 4 timbrature e la pausa pranzo minore di 30 minuti che il tempo di 
 						 * lavoro ritornato sia effettivamente calcolato sulle timbrature effettive e non su quella aggiustata.
 						 */
+						List<WorkingTimeTypeDay> wttd = WorkingTimeTypeDay.find("Select wttd from WorkingTimeTypeDay wttd where wttd.workingTimeType = ?" +
+								"", person.workingTimeType).fetch();
+						
 						int minTimeForLunch = checkMinTimeForLunch(getStampings());
-						if((stampings.size()==4) && (minTimeForLunch<30) && (!getStampings().contains(null)))
-							tempoLavoro = workTime - (30-minTimeForLunch);							
-						if((stampings.size()==2) && (workTime > 360) && (workTime-30 > 360))
-							tempoLavoro = workTime-30;							
+						if((stampings.size()==4) && (minTimeForLunch < wttd.get(0).breakTicketTime) && (!getStampings().contains(null)))
+							tempoLavoro = workTime - (wttd.get(0).breakTicketTime-minTimeForLunch);							
+						if((stampings.size()==2) && (workTime > wttd.get(0).mealTicketTime) && 
+								(workTime-wttd.get(0).breakTicketTime > wttd.get(0).mealTicketTime))
+							tempoLavoro = workTime-wttd.get(0).breakTicketTime;							
 						else
 							tempoLavoro = workTime;							
 						
@@ -654,6 +660,7 @@ public class PersonDay extends Model {
 	 */
 	public boolean mealTicket(){
 		boolean ticketAvailable = false;
+		
 
 		if(stampings==null){
 			stampings=getStampings();
@@ -662,28 +669,38 @@ public class PersonDay extends Model {
 			timeAtWork = timeAtWork();
 			
 		}
-		if(timeAtWork == 0 || timeAtWork < 360){
+		if(timeAtWork == 0 || timeAtWork < wttd.get(0).mealTicketTime){
 			ticketAvailable = false;
 		}				
-			
-		if(person.workingTimeType.description.equals("normale-mod") && timeAtWork>=360)
-			ticketAvailable=true;
-		if(person.workingTimeType.description.equals("normale-mod") && timeAtWork>360 && timeAtWork<390 
-				&&(stampings.size()==4 && checkMinTimeForLunch(stampings)<30))
-			ticketAvailable=true;
-		if(person.workingTimeType.description.equals("normale-mod") && timeAtWork>360 && timeAtWork<390 
-				&& (stampings.size()==4))
-			ticketAvailable=true;
-		if(person.workingTimeType.description.equals("normale-mod") && timeAtWork>390 && timeAtWork<432 
-				&& (stampings.size()==4 || stampings.size()==2))
-			ticketAvailable=true;
-		if(person.workingTimeType.description.equals("normale-mod") && timeAtWork>360 && timeAtWork<390 
-				&& (stampings.size()==6))
-			ticketAvailable=true;
-		if(person.workingTimeType.description.equals("normale-mod") && timeAtWork < 390 && timeAtWork >360 
-				&& stampings.size()==2 )
-			ticketAvailable = true;
-		isMealTicketAvailable = ticketAvailable;
+
+		
+		if(person.workingTimeType.description.equals("normale-mod") || person.workingTimeType.description.equals("normale")
+				|| person.workingTimeType.description.equals("80%") || person.workingTimeType.description.equals("85%")){
+			if(timeAtWork >= wttd.get(0).mealTicketTime)
+				ticketAvailable=true;
+			if(timeAtWork > wttd.get(0).mealTicketTime 
+					&& timeAtWork < wttd.get(0).mealTicketTime + wttd.get(0).breakTicketTime 
+					&&(stampings.size()==4 && checkMinTimeForLunch(stampings) < wttd.get(0).mealTicketTime))
+				ticketAvailable=true;
+			if(timeAtWork > wttd.get(0).mealTicketTime 
+					&& timeAtWork < wttd.get(0).mealTicketTime + wttd.get(0).breakTicketTime 
+					&& (stampings.size()==4))
+				ticketAvailable=true;
+			if(timeAtWork > wttd.get(0).mealTicketTime + wttd.get(0).breakTicketTime 
+					&& timeAtWork < wttd.get(0).workingTime 
+					&& (stampings.size()==4 || stampings.size()==2))
+				ticketAvailable=true;
+			if(timeAtWork > wttd.get(0).mealTicketTime 
+					&& timeAtWork < wttd.get(0).mealTicketTime + wttd.get(0).breakTicketTime 
+					&& (stampings.size()==6))
+				ticketAvailable=true;
+			if(timeAtWork < wttd.get(0).mealTicketTime + wttd.get(0).breakTicketTime
+					&& timeAtWork > wttd.get(0).mealTicketTime 
+					&& stampings.size()==2 )
+				ticketAvailable = true;
+			isMealTicketAvailable = ticketAvailable;
+		}
+		
 		return isMealTicketAvailable;
 
 	}
@@ -696,38 +713,54 @@ public class PersonDay extends Model {
 	 */
 	public void setTicketAvailable(){
 		boolean ticketAvailable = false;
+				
 		if(stampings==null){
 			stampings=getStampings();
 		}
 		if (timeAtWork == 0) {
 			timeAtWork = timeAtWork();
 			
+		}	
+		
+		if(timeAtWork == 0 || timeAtWork < wttd.get(0).mealTicketTime){
+			ticketAvailable = false;
+		}		
+
+		if(person.workingTimeType.description.equals("normale-mod") || person.workingTimeType.description.equals("normale")
+				|| person.workingTimeType.description.equals("80%") || person.workingTimeType.description.equals("85%")){
+			
+			if(timeAtWork >= wttd.get(0).mealTicketTime)
+				ticketAvailable=true;
+
+			if(timeAtWork > wttd.get(0).mealTicketTime && 
+					timeAtWork < wttd.get(0).mealTicketTime + wttd.get(0).breakTicketTime 
+					&& (stampings.size()==4 && checkMinTimeForLunch(stampings) < wttd.get(0).breakTicketTime))
+				ticketAvailable=true;
+
+			if(timeAtWork > wttd.get(0).mealTicketTime 
+					&& timeAtWork < wttd.get(0).mealTicketTime + wttd.get(0).breakTicketTime 
+					&& (stampings.size()==4))
+				ticketAvailable=true;
+
+			if(timeAtWork > wttd.get(0).mealTicketTime + wttd.get(0).breakTicketTime
+					&& timeAtWork < wttd.get(0).workingTime 
+					&& (stampings.size()==4 || stampings.size()==2))
+				ticketAvailable=true;
+
+			if(timeAtWork > wttd.get(0).mealTicketTime && 
+					timeAtWork < wttd.get(0).mealTicketTime + wttd.get(0).breakTicketTime 
+					&& (stampings.size()==6))
+				ticketAvailable=true;
+
+			if(timeAtWork < wttd.get(0).mealTicketTime + wttd.get(0).breakTicketTime
+					&& timeAtWork > wttd.get(0).mealTicketTime 
+					&& stampings.size()==2 )
+				ticketAvailable = true;
+
 		}
 		
-		if(timeAtWork == 0 || timeAtWork < 360){
-			ticketAvailable = false;
-		}				
-			
-		if(person.workingTimeType.description.equals("normale-mod") && timeAtWork>=360)
-			ticketAvailable=true;
-		if(person.workingTimeType.description.equals("normale-mod") && timeAtWork>360 && timeAtWork<390 
-				&&(stampings.size()==4 && checkMinTimeForLunch(stampings)<30))
-			ticketAvailable=true;
-		if(person.workingTimeType.description.equals("normale-mod") && timeAtWork>360 && timeAtWork<390 
-				&& (stampings.size()==4))
-			ticketAvailable=true;
-		if(person.workingTimeType.description.equals("normale-mod") && timeAtWork>390 && timeAtWork<432 
-				&& (stampings.size()==4 || stampings.size()==2))
-			ticketAvailable=true;
-		if(person.workingTimeType.description.equals("normale-mod") && timeAtWork>360 && timeAtWork<390 
-				&& (stampings.size()==6))
-			ticketAvailable=true;
-		if(person.workingTimeType.description.equals("normale-mod") && timeAtWork < 390 && timeAtWork >360 
-				&& stampings.size()==2 )
-			ticketAvailable = true;
-
 		isTicketAvailable = ticketAvailable;
-//		save();
+
 	}
 	
 	/**
@@ -735,7 +768,7 @@ public class PersonDay extends Model {
 	 * @return la differenza tra l'orario di lavoro giornaliero e l'orario standard in minuti
 	 */
 	public Integer getDifference(){
-
+		
 		if(difference == 0){
 			List<Absence> absenceList = absenceList();
 			List<Stamping> stampingList = getStampings();
@@ -757,14 +790,14 @@ public class PersonDay extends Model {
 			
 			int minTimeWorking = person.workingTimeType.worTimeTypeDays.get(0).workingTime;
 			
-			//int minTimeWorking = 432;
+			
 			timeAtWork = timeAtWork();
 			int size = stampings.size();
 			
 			if(size == 2){
-				 if(timeAtWork >= 360){
-					 int delay = 30;	
-					 if(timeAtWork-delay >= 360){
+				 if(timeAtWork >= wttd.get(0).mealTicketTime){
+					 int delay = wttd.get(0).breakTicketTime;	
+					 if(timeAtWork-delay >= wttd.get(0).mealTicketTime){
 						 differenza = timeAtWork-minTimeWorking-delay;
 						 difference = differenza;
 						 
@@ -782,8 +815,8 @@ public class PersonDay extends Model {
 			}
 			int i = checkMinTimeForLunch(stampings);
 			if(size == 4){
-				 if(i < 30){
-					 differenza = timeAtWork-minTimeWorking+(i-30);					
+				 if(i < wttd.get(0).breakTicketTime){
+					 differenza = timeAtWork-minTimeWorking+(i-wttd.get(0).breakTicketTime);					
 					 difference = differenza;				 
 				 }
 				 else{
@@ -818,17 +851,17 @@ public class PersonDay extends Model {
 			for(Stamping st : stamping){
 				if(st.way == Stamping.WayType.in){
 					workingTime -= toMinute(st.date);
-					//timeAtWork -= toMinute(s.date);		
+							
 					System.out.println("Timbratura di ingresso in checkTimeForLunch: "+workingTime);	
 				}
 				if(st.way == Stamping.WayType.out){
 					workingTime += toMinute(st.date);
-					//timeAtWork += toMinute(s.date);
+					
 					System.out.println("Timbratura di uscita in checkTimeForLunch: "+workingTime);
 				}
 				timeAtWork += workingTime;
 			}
-			if(workingTime >= 390)
+			if(workingTime >= wttd.get(0).mealTicketTime+wttd.get(0).breakTicketTime)
 				smt = StampModificationType.findById(StampModificationTypeValue.FOR_DAILY_LUNCH_TIME.getId());
 			else
 				smt = StampModificationType.findById(StampModificationTypeValue.NOTHING_TO_CHANGE.getId());
@@ -851,7 +884,7 @@ public class PersonDay extends Model {
 				}
 				timeAtWork += workingTime;
 			}
-			if(((hourEnter*60)+minuteEnter) - ((hourExit*60)+minuteExit) < 30 && workingTime > 360){
+			if(((hourEnter*60)+minuteEnter) - ((hourExit*60)+minuteExit) < wttd.get(0).breakTicketTime && workingTime > wttd.get(0).mealTicketTime){
 				smt = StampModificationType.findById(StampModificationTypeValue.FOR_MIN_LUNCH_TIME.getId());
 			}
 			
@@ -933,7 +966,7 @@ public class PersonDay extends Model {
 		int minuti1 = toMinute(ldt1);
 		int minuti2 = toMinute(ldt2);
 		int difference = minuti2-minuti1;
-		timeAdjust = 30-difference;
+		timeAdjust = wttd.get(0).breakTicketTime-difference;
 		return timeAdjust;
 		
 	}
