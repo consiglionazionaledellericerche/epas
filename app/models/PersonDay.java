@@ -15,6 +15,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -72,6 +73,15 @@ public class PersonDay extends Model {
 	public int progressive;
 	
 	public boolean isTicketAvailable;
+	/**
+	 * cambiare la configurazione del database: person in relazione uno a molti con personDay, personDay in relazione uno a molti con stampings
+	 * e con absences che quindi non saranno più in relazione con person
+	 */
+	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY)
+	public List<Stamping> stampings;
+	
+	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY)
+	public List<Absence> absences;
 	
 	@Enumerated(EnumType.STRING)
 	public PersonDayModificationType modificationType;
@@ -81,9 +91,7 @@ public class PersonDay extends Model {
 	
 	@Transient
 	private LocalDateTime endOfDay;
-	
-	@Transient
-	private List<Stamping> stampings = null;
+
 	@Transient
 	private AbsenceType absenceType = null;
 	@Transient
@@ -130,13 +138,14 @@ public class PersonDay extends Model {
 	
 	/**
 	 * 
-	 * @return true nel caso in cui la persona sia stata assente
+	 * @return true nel caso in cui la persona sia stata assente da rivedere alla luce del fatto che per un personDay ci possono essere uno
+	 * o più giorni di assenza e la cosa si può evincere direttamente dal personDay senza fare select
 	 */
 	public boolean isAbsent() {
 		if (getAbsence() != null) {
 			if (!stampings.isEmpty()) {
 				Logger.warn("Attenzione il giorno %s è presente un'assenza (%s) (Person = %s), però ci sono anche %d timbrature.", 
-					absence, absence.person, stampings.size());
+					absence, absence.personDay.person, stampings.size());
 			}
 		}
 		return absence != null;
@@ -144,12 +153,10 @@ public class PersonDay extends Model {
 	
 	/**
 	 * 
-	 * @return l'assenza relativa a quella persona in quella data
+	 * @return l'assenza o le assenze relative a quella persona in quella data
 	 */
 	public Absence getAbsence(){
-		if(absence == null){
-			absence = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).first();
-		}
+	
 		return absence;
 		
 	}
@@ -171,11 +178,13 @@ public class PersonDay extends Model {
 	 * setta la lista delle timbrature per quel personDay
 	 */
 	public void setStampings(){
-		
-		stampings = Stamping.find("SELECT s FROM Stamping s " +
-                "WHERE s.person = ? and s.date between ? and ?" +
-                " ORDER BY s.date", person, startOfDay, endOfDay).fetch();
+		if(stampings == null){
+			stampings = Stamping.find("SELECT s FROM Stamping s " +
+	                "WHERE s.person = ? and s.date between ? and ?" +
+	                " ORDER BY s.date", person, startOfDay, endOfDay).fetch();
+		}
 	}
+		
 	/**
 	 * 
 	 * @return la lista di timbrature giornaliere
@@ -184,12 +193,12 @@ public class PersonDay extends Model {
 	
 	public List<Stamping> getStampings() {
         
-		if (startOfDay == null || endOfDay == null) {
-			startOfDay = new LocalDateTime(date.getYear(),date.getMonthOfYear(), date.getDayOfMonth(),0,0);
-			endOfDay = new LocalDateTime(date.getYear(),date.getMonthOfYear(), date.getDayOfMonth(),23,59);
-		}
+		if(stampings == null){
+			if (startOfDay == null || endOfDay == null) {
+				startOfDay = new LocalDateTime(date.getYear(),date.getMonthOfYear(), date.getDayOfMonth(),0,0);
+				endOfDay = new LocalDateTime(date.getYear(),date.getMonthOfYear(), date.getDayOfMonth(),23,59);
+			}
 		
-        if (stampings == null) {
         	if (startOfDay == null || endOfDay == null) {
     		
     		}
@@ -283,8 +292,9 @@ public class PersonDay extends Model {
             	for(Stamping stamping : dbStamping)
             		stampings.add(stamping);
             }
-                
-        }
+                	        
+		}
+		
         return stampings;
 	}
 	

@@ -1,0 +1,44 @@
+Configuration(defaultConfiguration):
+    initUseProgram: 2012-07-30
+    instituteName: IIT
+    emailToContact:
+    seatCode:
+    urlToPresence:
+    userToPresence:
+    passwordToPresence:
+    monthOfPatron: 6
+    dayOfPatron: 17
+    numberOfViewingCoupleColumn: 3 
+    isMealTimeShorterThanMinimum: false
+    isIntervalTimeCutFromWorkingTime: false
+    calculateIntervalTimeWithoutReturnFromIntevalTime: false
+    mealTicketAssignedWithMealTimeReal: false
+    mealTicketAssignedWithReasonMealTime: false
+    insertAndModifyWorkingTimeWithPlusToReduceAtRealWorkingTime: false
+    addWorkingTimeInExcess: false
+    isLastDayBeforeXmasEntire: false
+    isLastDayBeforeEasterEntire: false
+    isLastDayOfTheYearEntire: false
+    isFirstOrLastMissionDayAHoliday: false
+    isHolidayInMissionAWorkingDay: false
+    workingTime: 432
+    workingTimeToHaveMealTicket: 360
+    mealTime: 30
+    monthExpiryVacationPastYear: 
+    dayExpiryVacationPastYear:
+    monthExpireRecoveryDaysOneThree:
+    monthExpireRecoveryDaysFourNine:
+    maxRecoveryDaysOneThree:
+    maxRecoveryDaysFourNine:
+    residual:
+    maximumOvertimeHours:
+    holydaysAndVacationsOverPermitted: false
+    hourMaxToCalculateWorkTime:
+    auto:
+    autoAbsence:
+    capacityOneThree:
+    capacityFourEight:
+    canInsertMoreAbsenceCodeInDay: false
+    ignoreWorkingTimeWithAbsenceCode: false
+    authWeb:
+    textForMonthlySituation:

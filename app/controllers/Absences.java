@@ -130,7 +130,7 @@ public class Absences extends Controller{
 			render("@create");
 		}
 		Absence absence = new Absence();
-		absence.person = person;
+		absence.personDay.person = person;
 		absence.date = dateFrom;
 		absence.absenceType = absenceType;
 		
@@ -209,7 +209,7 @@ public class Absences extends Controller{
 			
 			AbsenceType absenceType = AbsenceType.find("byCode", absenceCode).first();
 			
-			Absence existingAbsence = Absence.find("person = ? and date = ? and absenceType = ? and id <> ?", absence.person, absence.date, absenceType, absence.id).first();
+			Absence existingAbsence = Absence.find("person = ? and date = ? and absenceType = ? and id <> ?", absence.personDay.person, absence.date, absenceType, absence.id).first();
 			if(existingAbsence != null){
 				validation.keep();
 				params.flash();
@@ -220,7 +220,7 @@ public class Absences extends Controller{
 			absence.absenceType = absenceType;
 			absence.save();
 			flash.success(
-				String.format("Assenza per il giorno %s per %s %s aggiornata con codice %s", PersonTags.toDateTime(absence.date), absence.person.surname, absence.person.name, absenceCode));
+				String.format("Assenza per il giorno %s per %s %s aggiornata con codice %s", PersonTags.toDateTime(absence.date), absence.personDay.person.surname, absence.personDay.person.name, absenceCode));
 		}
 		render("@save");
 	}

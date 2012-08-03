@@ -147,13 +147,13 @@ public class Person extends Model {
 	 */
 	@OneToMany(mappedBy="person", fetch = FetchType.LAZY)
 	public List<PersonYear> personYears;
-
-	/**
-	 * relazione con la tabella delle timbrature
-	 */
-	@NotAudited
-	@OneToMany(mappedBy="person", fetch = FetchType.LAZY)
-	public List<Stamping> stampings;
+//
+//	/**
+//	 * relazione con la tabella delle timbrature
+//	 */
+//	@NotAudited
+//	@OneToMany(mappedBy="person", fetch = FetchType.LAZY)
+//	public List<Stamping> stampings;
 	
 	/**
 	 * relazione con la tabella di storico YearRecap
@@ -170,12 +170,12 @@ public class Person extends Model {
 	public List<MonthRecap> monthRecaps;
 	
 	
-	/**
-	 * relazione con la tabella delle absence
-	 */
-	@NotAudited
-	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
-	public List<Absence> absences;
+//	/**
+//	 * relazione con la tabella delle absence
+//	 */
+//	@NotAudited
+//	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
+//	public List<Absence> absences;
 	
 	/**
 	 * relazione con la tabella di person vacation

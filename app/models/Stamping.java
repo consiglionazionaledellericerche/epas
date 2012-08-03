@@ -37,8 +37,8 @@ public class Stamping extends Model {
 	
 	@Required
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "person_id", nullable = false, updatable = false)
-	public Person person;
+	@JoinColumn(name = "personDay_id", nullable = false, updatable = false)
+	public PersonDay personDay;
 	
 	@Required
 	@ManyToOne(optional = false)

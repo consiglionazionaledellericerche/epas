@@ -28,15 +28,22 @@ import play.data.validation.Email;
 import play.db.jpa.Model;
 
 @Entity
-@Table(name="conf_parameters")
 @Audited
-public class ConfParameters extends Model{
+@Table(name="configurations")
+public class Configuration extends Model{
 	
 	/**
 	 * Data di inizio uso di questo programma gg/mm/aaaa
 	 */
 	
 	public Date initUseProgram;
+	
+	/**
+	 * date di inizio e fine validità della configurazione
+	 */
+	public Date from;
+	
+	public Date to;
 		
 	/**
 	 * Nome dell'Istituto

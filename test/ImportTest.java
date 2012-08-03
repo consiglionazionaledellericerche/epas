@@ -57,7 +57,7 @@ public class ImportTest extends UnitTest {
 			
 			FromMysqlToPostgres.createVacationType(rs.getLong("ID"), person, em);
 	
-			FromMysqlToPostgres.createAbsences(rs.getLong("ID"), person, em);
+//			FromMysqlToPostgres.createAbsences(rs.getLong("ID"), person, em);
 			
 			FromMysqlToPostgres.createStampings(rs.getLong("ID"), person, em);
 			

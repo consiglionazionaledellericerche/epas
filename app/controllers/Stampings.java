@@ -18,7 +18,7 @@ import models.PersonTags;
 import models.StampType;
 import models.Stamping;
 import models.Stamping.WayType;
-import models.ConfParameters;
+import models.Configuration;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -103,7 +103,7 @@ public class Stampings extends Controller {
     	 * Deve essere popolata una riga di quella tabella prima però....
     	 */
     	long id = 1;
-    	ConfParameters confParameters = ConfParameters.findById(id);
+    	Configuration confParameters = Configuration.findById(id);
     	//TODO: Se il mese è gestito vecchio... usare il monthRecap, altrimenti utilizzare il personMonth
     	MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, year, month);
     	PersonMonth personMonth =
@@ -189,7 +189,7 @@ public class Stampings extends Controller {
 				if(stamp == null){
 					stamp = new Stamping();
 					stamp.date = stamping.get(count).date;
-					stamp.person = person;
+					stamp.personDay.person = person;
 					stamp.markedByAdmin = true;
 					if(count == 0 || count == 2 || count == 4 || count == 6){
 						stamp.way = WayType.in;
@@ -267,7 +267,7 @@ public class Stampings extends Controller {
 			
 			AbsenceType absenceType = AbsenceType.find("byCode", absenceCode).first();
 			
-			Absence existingAbsence = Absence.find("person = ? and date = ? and absenceType = ? and id <> ?", stamping.person, stamping.date, absenceType, stamping.id).first();
+			Absence existingAbsence = Absence.find("person = ? and date = ? and absenceType = ? and id <> ?", stamping.personDay.person, stamping.date, absenceType, stamping.id).first();
 			if(existingAbsence != null){
 				validation.keep();
 				params.flash();
@@ -278,7 +278,7 @@ public class Stampings extends Controller {
 			//stamping.absenceType = absenceType;
 			stamping.save();
 			flash.success(
-				String.format("Assenza per il giorno %s per %s %s aggiornata con codice %s", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.person.surname, stamping.person.name, absenceCode));
+				String.format("Assenza per il giorno %s per %s %s aggiornata con codice %s", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name, absenceCode));
 		}
 		render("@save");
 	}

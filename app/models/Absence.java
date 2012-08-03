@@ -35,10 +35,10 @@ public class Absence extends Model {
 	@JoinColumn(name = "absenceType_id")
 	public AbsenceType absenceType;
 	
-	@Required
+	
 	@ManyToOne(optional=false)
-	@JoinColumn(name="person_id", nullable=false)
-	public Person person;
+	@JoinColumn(name="personDay_id", nullable=false)
+	public PersonDay personDay;
 	
 	
 }
