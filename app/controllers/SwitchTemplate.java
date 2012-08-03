@@ -79,7 +79,7 @@ public class SwitchTemplate extends Controller{
 			WorkingTimes.manageWorkingTime();
 			break;
 		case confParameters:
-			ConfParameters.show();
+			Configurations.show();
 			break;
 		default:
 			break;

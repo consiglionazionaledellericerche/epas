@@ -26,7 +26,7 @@ import models.CompetenceCode;
 import models.ContactData;
 import models.Contract;
 
-import models.ConfParameters;
+import models.Configuration;
 import models.Location;
 import models.MonthRecap;
 import models.Person;
@@ -243,7 +243,7 @@ public class FromMysqlToPostgres {
 			
 			FromMysqlToPostgres.createVacationType(rs.getLong("ID"), person, em);
 	
-			FromMysqlToPostgres.createAbsences(rs.getLong("ID"), person, em);
+//			FromMysqlToPostgres.createAbsences(rs.getLong("ID"), person, em);
 			
 			FromMysqlToPostgres.createStampings(rs.getLong("ID"), person, em);
 			
@@ -570,143 +570,210 @@ public class FromMysqlToPostgres {
 		 * query sulle tabelle orario, per recuperare le info sulle timbrature
 		 * di ciascuna persona
 		 */
-		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT ID,Giorno,TipoGiorno,TipoTimbratura,Ora " +
-				"FROM Orario WHERE TipoTimbratura is not null and Giorno > '2009-12-31' " +
-				"and TipoGiorno = 0 and ID = " + id);
-
+		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT Orario.ID,Orario.Giorno,Orario.TipoGiorno,Orario.TipoTimbratura," +
+				"Orario.Ora, Codici.id, Codici.Codice, Codici.Qualifiche " +
+				"FROM Orario, Codici " +
+				"WHERE Orario.TipoGiorno=Codici.id and Orario.Giorno > '2009-12-31' " +
+				"and Orario.ID = " + id + "ORDER BY Orario.Giorno");
 
 		ResultSet rs = stmtOrari.executeQuery();
 				
 		StampType stampType = null;
+		PersonDay pd = null;
+		Absence absence = null;
+		AbsenceType absenceType = null;
 		Stamping stamping = null;
+		LocalDate data = null;
+		LocalDate newData = null;
 		byte tipoTimbratura;
 		while(rs.next()){
-			int idCodiceTimbratura = rs.getInt("TipoTimbratura");
-			tipoTimbratura = rs.getByte("TipoTimbratura");
-			if(mappaCodiciStampType.get(idCodiceTimbratura)== null){				
-				
-				stampType = new StampType();				
-				
-				if((tipoTimbratura % 2 == 1) && (tipoTimbratura / 2 == 0)){
-					stampType.description = "Timbratura di ingresso";					
-				}
-				if((tipoTimbratura % 2 == 0) && (tipoTimbratura / 2 == 1) ){
-					stampType.description = "Timbratura d'uscita per pranzo";
-				}
-				if((tipoTimbratura % 2 == 1) && (tipoTimbratura / 2 == 1 )){
-					stampType.description = "Timbratura di ingresso dopo pausa pranzo";
-				}
-				if((tipoTimbratura % 2 == 0) && (tipoTimbratura / 2 == 2)){
-					stampType.description = "Timbratura di uscita";
-				}
-
-				em.persist(stampType);	
-				mappaCodiciStampType.put(idCodiceTimbratura,stampType.id);
-			}
-			else{
-				stampType = StampType.findById(mappaCodiciStampType.get(idCodiceTimbratura));	
-			}
-					
-			stamping = new Stamping();
-			stamping.stampType = stampType;	
-			stamping.person = person;
-						
-			if(tipoTimbratura % 2 != 0)
-				stamping.way = WayType.in;					
-			else
-				stamping.way = WayType.out;
 			
-			LocalDate giornata = new LocalDate(rs.getDate("Giorno"));
-
-			if(giornata != null){			
-								
-				try {
-	
-					byte[] bs = rs.getBytes("Ora");
-					String s = bs != null ? new String(bs) : null;
+			/**
+			 * mi serve la data per fare i controlli sul calcolo delle info del personDay...non appena la data cambia, faccio i calcoli sul
+			 * personday del giorno precedente
+			 */
+			newData = new LocalDate(rs.getDate("Giorno"));
+			if(data != null){
+				if(newData.isAfter(data)){				
 					
-					if(s == null){
-						stamping.date = null;
-						stamping.markedByAdmin = false;
-						stamping.serviceExit = false;
+					/**
+					 * TODO: in questo caso la data del "giro successivo" è maggiore della data alla fine del giro precedente. Quindi bisogna fare 
+					 * i calcoli del personDay relativi al giorno precedente (quello con date = data) e proseguire nell'elaborazione
+					 */
+					PersonDay pdYesterday = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.data = ?", person, data).first();
+					pdYesterday.timeAtWork = pdYesterday.timeAtWork();
+					pdYesterday.difference = pdYesterday.getDifference();
+					pdYesterday.progressive = pdYesterday.getProgressive();
+					pdYesterday.setTicketAvailable();
+					pdYesterday.save();
+				}
+			}
+			if(data == null || newData.isEqual(data)){
+				/**
+				 * si tratta di timbratura
+				 */
+				if(rs.getInt("TipoGiorno")==0){
+					pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person,data).first();
+					if(pd == null)
+						pd = new PersonDay(person,data);
+					int idCodiceTimbratura = rs.getInt("TipoTimbratura");
+					tipoTimbratura = rs.getByte("TipoTimbratura");
+					if(mappaCodiciStampType.get(idCodiceTimbratura)== null){				
+						
+						stampType = new StampType();				
+						
+						if((tipoTimbratura % 2 == 1) && (tipoTimbratura / 2 == 0)){
+							stampType.description = "Timbratura di ingresso";					
+						}
+						if((tipoTimbratura % 2 == 0) && (tipoTimbratura / 2 == 1) ){
+							stampType.description = "Timbratura d'uscita per pranzo";
+						}
+						if((tipoTimbratura % 2 == 1) && (tipoTimbratura / 2 == 1 )){
+							stampType.description = "Timbratura di ingresso dopo pausa pranzo";
+						}
+						if((tipoTimbratura % 2 == 0) && (tipoTimbratura / 2 == 2)){
+							stampType.description = "Timbratura di uscita";
+						}
+
+						em.persist(stampType);	
+						mappaCodiciStampType.put(idCodiceTimbratura,stampType.id);
 					}
 					else{
-						if(s.startsWith("-")){
-							int hour = Integer.parseInt(s.substring(1, 3));
-							int minute = Integer.parseInt(s.substring(4, 6));
-							int second = Integer.parseInt(s.substring(7, 9));
-							/**
-							 * aggiunti i campi anno mese e giorno per provare a risolvere il problema sulle date.
-							 * inoltre aggiunte le set corrispondenti all'oggetto calendar creato
-							 */
+						stampType = StampType.findById(mappaCodiciStampType.get(idCodiceTimbratura));	
+					}
 							
-							int year = giornata.getYear();
-							int month = giornata.getMonthOfYear();
-							int day = giornata.getDayOfMonth();
-	
-			                stamping.date = new LocalDateTime(year,month,day,hour,minute,second);
-			                
-			                stamping.markedByAdmin = false;
-			                stamping.serviceExit = true;
-			                em.persist(stamping);
-						}
-						else{
+					stamping = new Stamping();
+					stamping.stampType = stampType;	
+								
+					if(tipoTimbratura % 2 != 0)
+						stamping.way = WayType.in;					
+					else
+						stamping.way = WayType.out;
+					
+					LocalDate giornata = new LocalDate(rs.getDate("Giorno"));
+
+					if(giornata != null){			
+										
+						try {
+			
+							byte[] bs = rs.getBytes("Ora");
+							String s = bs != null ? new String(bs) : null;
 							
-							int hour = Integer.parseInt(s.substring(0, 2));
-							int minute = Integer.parseInt(s.substring(3, 5));
-							int second = Integer.parseInt(s.substring(6, 8));	
-							int year = giornata.getYear();
-							int month = giornata.getMonthOfYear();
-							int day = giornata.getDayOfMonth();
-	
-							/**
-							 * aggiunti i campi anno mese e giorno per provare a risolvere il problema sulle date.
-							 * inoltre aggiunte le set corrispondenti all'oggetto calendar creato
-							 */
-							if(hour > 33){
-								hour = hour * 60;
-								hour = hour + minute;
-								hour = hour - 2000;
-								int newHour = hour / 60;
-								int min = hour % 60;
-							    stamping.date = new LocalDateTime(year,month,day,newHour,min,second);
-				                
-				                stamping.markedByAdmin = true;
-				                stamping.serviceExit = false;
-				                em.persist(stamping);
-							}						
-							
+							if(s == null){
+								stamping.date = null;
+								stamping.markedByAdmin = false;
+								stamping.serviceExit = false;
+							}
 							else{
-								if(hour == 24){
-									stamping.date = new LocalDateTime(year,month,day,0,minute,second).plusDays(1);
-									stamping.markedByAdmin = true;
-					                stamping.serviceExit = false;
-									em.persist(stamping);
-								}
-								else{
+								if(s.startsWith("-")){
+									int hour = Integer.parseInt(s.substring(1, 3));
+									int minute = Integer.parseInt(s.substring(4, 6));
+									int second = Integer.parseInt(s.substring(7, 9));
+									/**
+									 * aggiunti i campi anno mese e giorno per provare a risolvere il problema sulle date.
+									 * inoltre aggiunte le set corrispondenti all'oggetto calendar creato
+									 */
 									
-									Logger.trace("L'ora è: ", +hour);
+									int year = giornata.getYear();
+									int month = giornata.getMonthOfYear();
+									int day = giornata.getDayOfMonth();
+			
 					                stamping.date = new LocalDateTime(year,month,day,hour,minute,second);
 					                
 					                stamping.markedByAdmin = false;
-					                stamping.serviceExit = false;
+					                stamping.serviceExit = true;
 					                em.persist(stamping);
 								}
-							}
-						}
-					}
-				} catch (SQLException sqle) {					
-					sqle.printStackTrace();
-					Logger.warn("Timbratura errata. Persona con id = %s", id);
-				}			
-				//previousDay = new LocalDate(giornata);
-				em.persist(stamping);	
-			}
+								else{
+									
+									int hour = Integer.parseInt(s.substring(0, 2));
+									int minute = Integer.parseInt(s.substring(3, 5));
+									int second = Integer.parseInt(s.substring(6, 8));	
+									int year = giornata.getYear();
+									int month = giornata.getMonthOfYear();
+									int day = giornata.getDayOfMonth();
 			
+									/**
+									 * aggiunti i campi anno mese e giorno per provare a risolvere il problema sulle date.
+									 * inoltre aggiunte le set corrispondenti all'oggetto calendar creato
+									 */
+									if(hour > 33){
+										hour = hour * 60;
+										hour = hour + minute;
+										hour = hour - 2000;
+										int newHour = hour / 60;
+										int min = hour % 60;
+									    stamping.date = new LocalDateTime(year,month,day,newHour,min,second);
+						                
+						                stamping.markedByAdmin = true;
+						                stamping.serviceExit = false;
+						                em.persist(stamping);
+									}						
+									
+									else{
+										if(hour == 24){
+											stamping.date = new LocalDateTime(year,month,day,0,minute,second).plusDays(1);
+											stamping.markedByAdmin = true;
+							                stamping.serviceExit = false;
+											em.persist(stamping);
+										}
+										else{
+											
+											Logger.trace("L'ora è: ", +hour);
+							                stamping.date = new LocalDateTime(year,month,day,hour,minute,second);
+							                
+							                stamping.markedByAdmin = false;
+							                stamping.serviceExit = false;
+							                em.persist(stamping);
+										}
+									}
+								}
+							}
+						} catch (SQLException sqle) {					
+							sqle.printStackTrace();
+							Logger.warn("Timbratura errata. Persona con id = %s", id);
+						}			
+						
+						stamping.personDay = pd;
+						em.persist(stamping);	
+						
+					}
+					
+				}
+				/**
+				 * si tratta di assenza
+				 */
+				else{
+					pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, data).first();
+					if(pd == null)
+						pd = new PersonDay(person,data);
+					String codice = rs.getString("Codice");
+					absenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", codice).first();
+					if(absenceType.isDailyAbsence==true){
+						pd.difference += 0;
+						pd.progressive += 0;
+						pd.timeAtWork += 0;
+					}
+					else{
+						int justified = absenceType.justifiedWorkTime;
+						pd.timeAtWork = pd.timeAtWork-justified;
+						pd.difference = pd.difference-justified;
+						pd.progressive = pd.progressive-justified;
+					}
+					pd.save();
+					absence = new Absence();
+					absence.personDay = pd;
+					absence.date = data;	
+					absence.absenceType = absenceType;
+					em.persist(absence);
+					//em.persist(pd);
+				}	
+				data = new LocalDate(rs.getDate("Giorno"));
+			}
+						
 		}
 		Logger.debug("Termino di creare le timbrature. Person con id = %s", id);
-		//TODO: invece che chiamarlo una volta alla fine va chiamato alla fine di ogni giorno
-		//PopulatePersonDay.fillPersonDay(person);
+
 		mysqlCon.close();
 	}
 	
@@ -723,48 +790,43 @@ public class FromMysqlToPostgres {
 	 * @throws ClassNotFoundException
 	 * @throws SQLException
 	 */
-	public static void createAbsences(long id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-		Logger.info("Inizio a creare le assenze per %s %s",  person.name, person.surname);
-		Connection mysqlCon = getMysqlConnection();
-		
-		/**
-		 * query sulla tabelle Orario e Codici per recuperare le info sulle assenze e i motivi delle
-		 * assenze di ciascuna persona. La query prende tutti i codici di assenza che vengono poi "smistati"
-		 * nella tabella di postgres corrispondente attraverso l'analisi del campo QuantGiust presente soltanto 
-		 * nelle righe relative a codici di natura giornaliera.
-		 */
-		PreparedStatement stmtAssenze = mysqlCon.prepareStatement("Select Orario.Giorno, Orario.TipoTimbratura, Codici.Qualifiche, " +
-				"Codici.Codice, Codici.Interno, Codici.Descrizione, Codici.QuantGiust, Codici.IgnoraTimbr, Codici.MinutiEccesso, " +
-				"Codici.Limite, Codici.Accumulo, Codici.CodiceSost, Codici.id, Codici.Gruppo, Codici.DataInizio, Codici.DataFine " +
-				"from Codici, Orario " +
-				"where Orario.TipoGiorno=Codici.id " +
-				"and TipoGiorno !=0 and Orario.id = "+id);
-		ResultSet rs = stmtAssenze.executeQuery();		
-		
-		if(rs != null){
-			Absence absence = null;
-			AbsenceType absenceType = null;
-
-			while(rs.next()){			
-				/**
-				 * popolo la tabella absence, la tabella absenceType, la tabella absenceTypeGroup
-				 * e le tabelle HourlyAbsenceType e DailyAbsenceType
-				 * con i dati prelevati da Orario e Codici
-				 */			
-					
-				String codice = rs.getString("Codice");
-				absenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", codice).first();
-								
-				absence = new Absence();
-				absence.person = person;
-				absence.date = new LocalDate(rs.getDate("Giorno"));	
-				absence.absenceType = absenceType;
-				em.persist(absence);
-				
-			}
-		}	
-		mysqlCon.close();
-	}
+//	public static void createAbsences(long id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+//		Logger.info("Inizio a creare le assenze per %s %s",  person.name, person.surname);
+//		Connection mysqlCon = getMysqlConnection();
+//		
+//		/**
+//		 * query sulla tabelle Orario e Codici per recuperare le info sulle assenze e i motivi delle
+//		 * assenze di ciascuna persona. La query prende tutti i codici di assenza che vengono poi "smistati"
+//		 * nella tabella di postgres corrispondente attraverso l'analisi del campo QuantGiust presente soltanto 
+//		 * nelle righe relative a codici di natura giornaliera.
+//		 */
+//		PreparedStatement stmtAssenze = mysqlCon.prepareStatement("Select Orario.Giorno, Orario.TipoTimbratura, Codici.Qualifiche, " +
+//				"Codici.Codice, Codici.Interno, Codici.Descrizione, Codici.QuantGiust, Codici.IgnoraTimbr, Codici.MinutiEccesso, " +
+//				"Codici.Limite, Codici.Accumulo, Codici.CodiceSost, Codici.id, Codici.Gruppo, Codici.DataInizio, Codici.DataFine " +
+//				"from Codici, Orario " +
+//				"where Orario.TipoGiorno=Codici.id " +
+//				"and TipoGiorno !=0 and Orario.id = "+id);
+//		ResultSet rs = stmtAssenze.executeQuery();		
+//		
+//		if(rs != null){
+//			Absence absence = null;
+//			AbsenceType absenceType = null;
+//
+//			while(rs.next()){			
+//							
+//				String codice = rs.getString("Codice");
+//				absenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", codice).first();
+//								
+//				absence = new Absence();
+//				absence.person = person;
+//				absence.date = new LocalDate(rs.getDate("Giorno"));	
+//				absence.absenceType = absenceType;
+//				em.persist(absence);
+//				
+//			}
+//		}	
+//		mysqlCon.close();
+//	}
 	
 	public static void createVacations(long id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
 		/**

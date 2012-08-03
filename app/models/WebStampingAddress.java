@@ -24,5 +24,5 @@ public class WebStampingAddress extends Model{
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="confParameters_id")
-	public ConfParameters confParameters;
+	public Configuration confParameters;
 }
