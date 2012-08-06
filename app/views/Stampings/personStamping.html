@@ -126,11 +126,11 @@
 			</td>			
 			%{
 			if(day.getStampings().size()==2 ){
-	         }% <td class="tempoLavoro">${day.isHoliday()==false ? day.convertTimeAtWork(day.timeAtWork()).toCalendarTime() : ''} <strong>${day.timeAtWork()>360 ? day.checkTimeForLunch(day.getStampings()).code : ''}</strong></td>
+	         }% <td class="tempoLavoro">${day.isHoliday()==false ? day.convertTimeAtWork(day.timeAtWork()).toCalendarTime() : ''} <strong>${day.timeAtWork()>360 ? day.checkTimeForLunch(day.getStampings())?.code : ''}</strong></td>
 			%{
 			 }else{
 			 }% <td class="tempoLavoro">${day.isHoliday()==false ? day.convertTimeAtWork(day.timeAtWork()).toCalendarTime() : ''} <strong>${day.getStampings().size()==4 && !day.getStampings().contains(null) && day.timeAtWork()>300
-			 && day.checkMinTimeForLunch(day.getStampings())<30 ? day.checkTimeForLunch(day.getStampings()).code : ''}</strong></td>
+			 && day.checkMinTimeForLunch(day.getStampings())<30 ? day.checkTimeForLunch(day.getStampings())?.code : ''}</strong></td>
 			%{
 	         }
 	         }%	

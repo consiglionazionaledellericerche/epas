@@ -28,8 +28,13 @@ import play.data.validation.Email;
 import play.db.jpa.Model;
 
 @Entity
+//<<<<<<< HEAD:app/models/Configuration.java
 @Audited
 @Table(name="configurations")
+//=======
+//@Table(name="configurations")
+//@Audited
+//>>>>>>> 76f247a3c20db8e0a89c079140ea8f5c15c74a42:app/models/Configuration.java
 public class Configuration extends Model{
 	
 	/**
