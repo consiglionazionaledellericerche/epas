@@ -98,8 +98,7 @@ public class PersonDay extends Model {
 	private Absence absence = null;	
 	
 	@Transient
-	private List<WorkingTimeTypeDay> wttd = WorkingTimeTypeDay.find("Select wttd from WorkingTimeTypeDay wttd where wttd.workingTimeType = ?" +
-			"", person.workingTimeType).fetch();
+	private List<WorkingTimeTypeDay> wttd = null;
 	
 	@Transient
 	private boolean isMealTicketAvailable;
@@ -113,6 +112,7 @@ public class PersonDay extends Model {
 		this.timeAtWork = timeAtWork;
 		this.difference = difference;
 		this.progressive = progressive;
+		this.wttd = person.workingTimeType.worTimeTypeDays;
 	}
 	
 	public PersonDay(Person person, LocalDate date){
@@ -873,8 +873,6 @@ public class PersonDay extends Model {
 			}
 			if(workingTime >= wttd.get(0).mealTicketTime+wttd.get(0).breakTicketTime)
 				smt = StampModificationType.findById(StampModificationTypeValue.FOR_DAILY_LUNCH_TIME.getId());
-			else
-				smt = StampModificationType.findById(StampModificationTypeValue.NOTHING_TO_CHANGE.getId());
 					
 		}	
 		if(stamping.size()==4 && !stamping.contains(null)){

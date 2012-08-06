@@ -21,13 +21,14 @@ public class Bootstrap extends Job {
 		if (Permission.count() == 0) {
 			Fixtures.loadModels("permissions.yml");
 			Logger.info("Creati i permessi predefiniti e creato un utente amministratore con associati questi permessi");
-		} 
-		
-		if(Configuration.count() == 0){
-			Fixtures.loadModels("defaultConfiguration.yml");
-			Logger.info("Creata la configurazione iniziale dei parametri");
 		}
 		
+		if (Configuration.count() == 0) {
+			Fixtures.loadModels("defaultConfiguration.yml");
+			Logger.info("Creata la configurazione di default dell'applicazione");
+		} 
+
+
 	}
 
 }
