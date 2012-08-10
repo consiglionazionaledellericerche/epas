@@ -68,9 +68,9 @@ public class PersonDay extends Model {
 	
 	public Integer timeAtWork;
 	
-	public int difference;
+	public Integer difference;
 	
-	public int progressive;
+	public Integer progressive;
 	
 	public boolean isTicketAvailable;
 	/**
@@ -155,10 +155,19 @@ public class PersonDay extends Model {
 	 * 
 	 * @return l'assenza o le assenze relative a quella persona in quella data
 	 */
-	public Absence getAbsence(){
+	public List<Absence> getAbsence(){
 	
-		return absence;
+		return absences;
 		
+	}
+	
+	/**
+	 * metodo che popola la lista delle assenze collegate al personDay solo se la lista è vuota
+	 */
+	public void setAbsence(){
+		if(absences == null){
+			absences = Absence.find("Select abs from Absence where abs.date = ? and abs.personDay.person = ?", date, person).fetch();
+		}
 	}
 	/**
 	 * 
@@ -168,7 +177,7 @@ public class PersonDay extends Model {
 		if (absenceType == null) {
 			
 			absenceType = AbsenceType.find("SELECT abt FROM Absence abs, AbsenceType abt, Person p WHERE abt = abs.absenceType AND " +
-					"abs.person = p AND p = ? AND abs.date = ? ", person, date).first();
+					"abs.personDay.person = p AND p = ? AND abs.date = ? ", person, date).first();
 			
 		}
 		return absenceType;
@@ -180,7 +189,7 @@ public class PersonDay extends Model {
 	public void setStampings(){
 		if(stampings == null){
 			stampings = Stamping.find("SELECT s FROM Stamping s " +
-	                "WHERE s.person = ? and s.date between ? and ?" +
+	                "WHERE s.personDay.person = ? and s.date between ? and ?" +
 	                " ORDER BY s.date", person, startOfDay, endOfDay).fetch();
 		}
 	}
@@ -193,107 +202,110 @@ public class PersonDay extends Model {
 	
 	public List<Stamping> getStampings() {
         
-		if(stampings == null){
-			if (startOfDay == null || endOfDay == null) {
-				startOfDay = new LocalDateTime(date.getYear(),date.getMonthOfYear(), date.getDayOfMonth(),0,0);
-				endOfDay = new LocalDateTime(date.getYear(),date.getMonthOfYear(), date.getDayOfMonth(),23,59);
-			}
-		
-        	if (startOfDay == null || endOfDay == null) {
-    		
-    		}
-            stampings = new LinkedList<Stamping>();
-            List<Stamping> dbStamping = Stamping.find("SELECT s FROM Stamping s " +
-                            "WHERE s.person = ? and s.date between ? and ?" +
-                            " ORDER BY s.date", person, startOfDay, endOfDay).fetch();
-                   
-            if(dbStamping.size()/2==1 && dbStamping.size()%2==1){
-            	int i = 0;
-            	Stamping s = dbStamping.get(i+1);
-            	if(s.way == dbStamping.get(i).way && s.way == WayType.in){
-        			stampings.add(0, dbStamping.get(i));
-        			stampings.add(1, null);
-        			stampings.add(2, dbStamping.get(i+1));
-        			stampings.add(3, dbStamping.get(i+2));
-        		}
-            	if(s.way == dbStamping.get(i+2).way && s.way == WayType.out){
-            		stampings.add(0, dbStamping.get(i));
-        			stampings.add(1, dbStamping.get(i+1));
-        			stampings.add(2, null);
-        			stampings.add(3, dbStamping.get(i+2));
-            	}
-            	                    
-            }
-            if(dbStamping.size()/2==3 && dbStamping.size()%2==1){
-            	int i = 0;
-            	Stamping s = dbStamping.get(i+1);
-            	if(s.way == dbStamping.get(i).way && s.way == WayType.in){
-        			stampings.add(0, dbStamping.get(i));
-        			stampings.add(1, null);
-        			stampings.add(2, dbStamping.get(i+1));
-        			stampings.add(3, dbStamping.get(i+2));
-        			stampings.add(4, dbStamping.get(i+3));
-        			stampings.add(5, dbStamping.get(i+4));
-        			stampings.add(6, dbStamping.get(i+5));
-        			stampings.add(7, dbStamping.get(i+6));
-        		}
-            	if(s.way == dbStamping.get(i+2).way && s.way == WayType.out){
-            		stampings.add(0, dbStamping.get(i));
-        			stampings.add(1, dbStamping.get(i+1));
-        			stampings.add(2, null);
-        			stampings.add(3, dbStamping.get(i+2));
-        			stampings.add(4, dbStamping.get(i+3));
-        			stampings.add(5, dbStamping.get(i+4));
-        			stampings.add(6, dbStamping.get(i+5));
-        			stampings.add(7, dbStamping.get(i+6));
-            	}
-            	if(s.way == dbStamping.get(i+3).way && s.way == WayType.in){
-        			stampings.add(0, dbStamping.get(i));
-        			stampings.add(1, dbStamping.get(i+1));
-        			stampings.add(2, dbStamping.get(i+2));
-        			stampings.add(3, null);
-        			stampings.add(4, dbStamping.get(i+3));
-        			stampings.add(5, dbStamping.get(i+4));
-        			stampings.add(6, dbStamping.get(i+5));
-        			stampings.add(7, dbStamping.get(i+6));
-        		}
-            	if(s.way == dbStamping.get(i+4).way && s.way == WayType.out){
-            		stampings.add(0, dbStamping.get(i));
-        			stampings.add(1, dbStamping.get(i+1));
-        			stampings.add(2, dbStamping.get(i+2));
-        			stampings.add(3, dbStamping.get(i+3));
-        			stampings.add(4, null);
-        			stampings.add(5, dbStamping.get(i+4));
-        			stampings.add(6, dbStamping.get(i+5));
-        			stampings.add(7, dbStamping.get(i+6));
-            	}
-            	if(s.way == dbStamping.get(i+5).way && s.way == WayType.in){
-            		stampings.add(0, dbStamping.get(i));
-        			stampings.add(1, dbStamping.get(i+1));
-        			stampings.add(2, dbStamping.get(i+2));
-        			stampings.add(3, dbStamping.get(i+3));
-        			stampings.add(4, dbStamping.get(i+4));
-        			stampings.add(5, null);
-        			stampings.add(6, dbStamping.get(i+5));
-        			stampings.add(7, dbStamping.get(i+6));
-            	}
-            	if(s.way == dbStamping.get(i+6).way && s.way == WayType.out){
-            		stampings.add(0, dbStamping.get(i));
-        			stampings.add(1, dbStamping.get(i+1));
-        			stampings.add(2, dbStamping.get(i+2));
-        			stampings.add(3, dbStamping.get(i+3));
-        			stampings.add(4, dbStamping.get(i+4));
-        			stampings.add(5, dbStamping.get(i+5));
-        			stampings.add(6, null);
-        			stampings.add(7, dbStamping.get(i+6));
-            	}
-            }
-            else{
-            	for(Stamping stamping : dbStamping)
-            		stampings.add(stamping);
-            }
-                	        
-		}
+//		if(stampings == null){
+//			if (startOfDay == null || endOfDay == null) {
+//				startOfDay = new LocalDateTime(date.getYear(),date.getMonthOfYear(), date.getDayOfMonth(),0,0);
+//				endOfDay = new LocalDateTime(date.getYear(),date.getMonthOfYear(), date.getDayOfMonth(),23,59);
+//			}
+//		
+//            stampings = new LinkedList<Stamping>();
+//            List<Stamping> dbStamping = Stamping.find("SELECT s FROM Stamping s " +
+//                            "WHERE s.personDay.person = ? and s.date between ? and ?" +
+//                            " ORDER BY s.date", person, startOfDay, endOfDay).fetch();
+//            
+//            if(dbStamping != null){            	
+//            
+//	            if(dbStamping.size()/2==1 && dbStamping.size()%2==1){
+//	            	int i = 0;
+//	            	Stamping s = dbStamping.get(i+1);
+//	            	if(s.way == dbStamping.get(i).way && s.way == WayType.in){
+//	        			stampings.add(0, dbStamping.get(i));
+//	        			stampings.add(1, null);
+//	        			stampings.add(2, dbStamping.get(i+1));
+//	        			stampings.add(3, dbStamping.get(i+2));
+//	        		}
+//	            	if(s.way == dbStamping.get(i+2).way && s.way == WayType.out){
+//	            		stampings.add(0, dbStamping.get(i));
+//	        			stampings.add(1, dbStamping.get(i+1));
+//	        			stampings.add(2, null);
+//	        			stampings.add(3, dbStamping.get(i+2));
+//	            	}
+//	            	                    
+//	            }
+//	            if(dbStamping.size()/2==3 && dbStamping.size()%2==1){
+//	            	int i = 0;
+//	            	Stamping s = dbStamping.get(i+1);
+//	            	if(s.way == dbStamping.get(i).way && s.way == WayType.in){
+//	        			stampings.add(0, dbStamping.get(i));
+//	        			stampings.add(1, null);
+//	        			stampings.add(2, dbStamping.get(i+1));
+//	        			stampings.add(3, dbStamping.get(i+2));
+//	        			stampings.add(4, dbStamping.get(i+3));
+//	        			stampings.add(5, dbStamping.get(i+4));
+//	        			stampings.add(6, dbStamping.get(i+5));
+//	        			stampings.add(7, dbStamping.get(i+6));
+//	        		}
+//	            	if(s.way == dbStamping.get(i+2).way && s.way == WayType.out){
+//	            		stampings.add(0, dbStamping.get(i));
+//	        			stampings.add(1, dbStamping.get(i+1));
+//	        			stampings.add(2, null);
+//	        			stampings.add(3, dbStamping.get(i+2));
+//	        			stampings.add(4, dbStamping.get(i+3));
+//	        			stampings.add(5, dbStamping.get(i+4));
+//	        			stampings.add(6, dbStamping.get(i+5));
+//	        			stampings.add(7, dbStamping.get(i+6));
+//	            	}
+//	            	if(s.way == dbStamping.get(i+3).way && s.way == WayType.in){
+//	        			stampings.add(0, dbStamping.get(i));
+//	        			stampings.add(1, dbStamping.get(i+1));
+//	        			stampings.add(2, dbStamping.get(i+2));
+//	        			stampings.add(3, null);
+//	        			stampings.add(4, dbStamping.get(i+3));
+//	        			stampings.add(5, dbStamping.get(i+4));
+//	        			stampings.add(6, dbStamping.get(i+5));
+//	        			stampings.add(7, dbStamping.get(i+6));
+//	        		}
+//	            	if(s.way == dbStamping.get(i+4).way && s.way == WayType.out){
+//	            		stampings.add(0, dbStamping.get(i));
+//	        			stampings.add(1, dbStamping.get(i+1));
+//	        			stampings.add(2, dbStamping.get(i+2));
+//	        			stampings.add(3, dbStamping.get(i+3));
+//	        			stampings.add(4, null);
+//	        			stampings.add(5, dbStamping.get(i+4));
+//	        			stampings.add(6, dbStamping.get(i+5));
+//	        			stampings.add(7, dbStamping.get(i+6));
+//	            	}
+//	            	if(s.way == dbStamping.get(i+5).way && s.way == WayType.in){
+//	            		stampings.add(0, dbStamping.get(i));
+//	        			stampings.add(1, dbStamping.get(i+1));
+//	        			stampings.add(2, dbStamping.get(i+2));
+//	        			stampings.add(3, dbStamping.get(i+3));
+//	        			stampings.add(4, dbStamping.get(i+4));
+//	        			stampings.add(5, null);
+//	        			stampings.add(6, dbStamping.get(i+5));
+//	        			stampings.add(7, dbStamping.get(i+6));
+//	            	}
+//	            	if(s.way == dbStamping.get(i+6).way && s.way == WayType.out){
+//	            		stampings.add(0, dbStamping.get(i));
+//	        			stampings.add(1, dbStamping.get(i+1));
+//	        			stampings.add(2, dbStamping.get(i+2));
+//	        			stampings.add(3, dbStamping.get(i+3));
+//	        			stampings.add(4, dbStamping.get(i+4));
+//	        			stampings.add(5, dbStamping.get(i+5));
+//	        			stampings.add(6, null);
+//	        			stampings.add(7, dbStamping.get(i+6));
+//	            	}
+//	            }
+//	            else{
+//	            	for(Stamping stamping : dbStamping)
+//	            		stampings.add(stamping);
+//	            }
+//            }
+//            else{
+//            	Logger.debug("Non ci sono timbrature presenti per la persona %s in data %s", this.person, startOfDay.toLocalDate());
+//            }
+//                	        
+//		}
 		
         return stampings;
 	}
@@ -391,7 +403,8 @@ public class PersonDay extends Model {
 		int tempoLavoro = 0;
 
 		if(stampings == null){
-			stampings = getStampings();
+			//stampings = getStampings();
+			setStampings();
 
 		}	
 		if(stampings.contains(null)){
@@ -521,8 +534,9 @@ public class PersonDay extends Model {
 				}
 			}
 
-		}
+		}		
 		timeAtWork = tempoLavoro;	
+		Logger.debug("TimeAtWork in %s for %s %s is %s", date, person.name, person.surname, timeAtWork);
 		return timeAtWork;
 	}
 	
@@ -542,7 +556,7 @@ public class PersonDay extends Model {
 			if((date.getDayOfMonth()==1) && (date.getDayOfWeek()!=DateTimeConstants.SATURDAY || date.getDayOfWeek()!=DateTimeConstants.SUNDAY)){
 				if(difference==0){
 					difference = getDifference();
-					Logger.info("Difference today: "+difference);
+					//Logger.debug("Difference today in case of : "+difference);
 				}
 				progressive = difference;
 			}
@@ -554,11 +568,11 @@ public class PersonDay extends Model {
 				
 				if(difference==0){
 					difference = getDifference();
-					Logger.info("Difference today: "+difference);
+					Logger.debug("Difference today: "+difference);
 				}
 				
-				progressive = difference+pdYesterday.progressive;
-				Logger.info("Progressive today: "+progressive);				
+				progressive = difference + pdYesterday.progressive;
+				Logger.debug("Progressive today: "+progressive);				
 			}
 			
 		}
@@ -570,8 +584,7 @@ public class PersonDay extends Model {
 	 * salva il valore della differenza giornaliera con l'orario di lavoro sul db
 	 */
 	public void setDifference(){
-		difference = getDifference();
-		
+		difference = getDifference();	
 		
 	}
 	
@@ -657,8 +670,7 @@ public class PersonDay extends Model {
 	 * @return la lista di codici di assenza fatti da quella persona in quella data
 	 */
 	public List<Absence> absenceList() {
-		return Absence.find("SELECT abs FROM Absence abs " +
-				" WHERE abs.person = ? AND abs.date = ?", person, date).fetch();
+		return this.absences;
 	}
 	
 	/**
@@ -780,8 +792,8 @@ public class PersonDay extends Model {
 	public Integer getDifference(){
 		
 		if(difference == 0){
-			List<Absence> absenceList = absenceList();
-			List<Stamping> stampingList = getStampings();
+//			List<Absence> absenceList = absenceList();
+//			List<Stamping> stampingList = getStampings();
 			if((date.getDayOfWeek()==DateTimeConstants.SATURDAY ) && (date.getDayOfMonth()==1))
 				difference =  0;		
 			if((date.getDayOfWeek()==DateTimeConstants.SUNDAY) && (date.getDayOfMonth()==1))
@@ -790,12 +802,12 @@ public class PersonDay extends Model {
 				difference =  0;
 			if((date.getDayOfWeek()==DateTimeConstants.SUNDAY) || date.getDayOfWeek()==DateTimeConstants.SATURDAY)
 				difference =  0;
-			if(absenceList.size()!=0){
-				return  0;
-			}
-			if(stampingList.size()==0){
-				return  0;
-			}
+//			if(absenceList.size()!=0){
+//				return  0;
+//			}
+//			if(stampingList.size()==0){
+//				return  0;
+//			}
 			int differenza = 0;
 			
 			int minTimeWorking = person.workingTimeType.worTimeTypeDays.get(0).workingTime;
@@ -840,7 +852,7 @@ public class PersonDay extends Model {
 				difference = differenza;			
 			}
 		}		
-				
+		Logger.debug("Difference in %s for %s %s is %s",date, person.name, person.surname, difference);		
 		return difference;
 	}
 	

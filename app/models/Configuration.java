@@ -27,14 +27,10 @@ import org.joda.time.LocalDate;
 import play.data.validation.Email;
 import play.db.jpa.Model;
 
-@Entity
-//<<<<<<< HEAD:app/models/Configuration.java
+
 @Audited
+@Entity
 @Table(name="configurations")
-//=======
-//@Table(name="configurations")
-//@Audited
-//>>>>>>> 76f247a3c20db8e0a89c079140ea8f5c15c74a42:app/models/Configuration.java
 public class Configuration extends Model{
 	
 	/**
@@ -46,9 +42,9 @@ public class Configuration extends Model{
 	/**
 	 * date di inizio e fine validità della configurazione
 	 */
-	public Date from;
+	public Date beginDate;
 	
-	public Date to;
+	public Date endDate;
 		
 	/**
 	 * Nome dell'Istituto
@@ -226,7 +222,7 @@ public class Configuration extends Model{
 	/**
 	 * Permette al personale di autodichiarare gli orari di lavoro (enum dichiarato nel package it.cnr.iit.epas
 	 */
-	public AutoDeclareWorkingTime auto;
+	public AutoDeclareWorkingTime autoDeclare;
 	
 	/**
 	 * Permette al personale di autodichiarare le assenze
