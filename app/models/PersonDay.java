@@ -484,8 +484,8 @@ public class PersonDay extends Model {
 					Stamping s = stampings.get(0);
 					if(s.date.getDayOfMonth()==now.getDayOfMonth() && s.date.getMonthOfYear()==now.getMonthOfYear() && 
 						s.date.getYear()==now.getYear()){
-							if(((size / 2 == 1) && (size % 2 == 1)) || ((size / 2 == 0) && (size % 2 == 1))){
-								
+							//if(((size / 2 == 1) && (size % 2 == 1)) || ((size / 2 == 0) && (size % 2 == 1))){
+							if(size == 3 || size == 1){	
 								int nowToMinute = toMinute(now);
 								int workingTime=0;
 								for(Stamping st : stampings){
