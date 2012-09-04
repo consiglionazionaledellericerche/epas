@@ -39,7 +39,7 @@ public class Administration extends Controller {
      * sul db già al momento della prima visualizzazione.
      */
     public static void populatePersonDay(){
-    	PopulatePersonDay.PopulatePersonDayForAll();
+    	//PopulatePersonDay.PopulatePersonDayForAll();
     	renderText("Calcolate tutte le informazioni su tempi di lavoro, progressivo e differenza per i person day del range di utenti selezionati");
     }
     

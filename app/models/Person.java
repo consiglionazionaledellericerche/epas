@@ -108,10 +108,9 @@ public class Person extends Model {
 	/**
 	 * relazione con la tabella dei contratti
 	 */
-	@Transient
-	@OneToOne(mappedBy="person", fetch=FetchType.EAGER)
-	@JoinColumn(name="contract_id")
-	public Contract contract;
+	@NotAudited
+	@OneToMany(mappedBy="person", fetch=FetchType.EAGER)
+	public List<Contract> contract;
 	
 	/**
 	 * relazione con la tabella delle tipologie di orario di lavoro

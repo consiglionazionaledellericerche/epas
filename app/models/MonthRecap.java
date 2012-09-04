@@ -291,7 +291,7 @@ public class MonthRecap extends Model {
 			days= getDays();
 		}
 		for(PersonDay pd : days){
-			List stampings = pd.getStampings();
+			List stampings = pd.stampings;
 			StampModificationType smt = pd.checkTimeForLunch(stampings);
 			
 			boolean stato = stampingCodeList.contains(smt);
@@ -314,7 +314,7 @@ public class MonthRecap extends Model {
 			days= getDays();
 		}
 		for(PersonDay pd : days){
-			List stampings = pd.getStampings();
+			List stampings = pd.stampings;
 			int number = stampings.size();
 			if(number > max)
 				max = number;
@@ -367,7 +367,7 @@ public class MonthRecap extends Model {
 			days= getDays();
 		}
 		for(PersonDay pd : days){
-			List<Stamping> stamp = pd.getStampings();
+			List<Stamping> stamp = pd.stampings;
 			if(stamp.size()>0 && pd.isHoliday()==false)
 				basedDays++;
 		}

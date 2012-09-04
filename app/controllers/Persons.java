@@ -1,5 +1,6 @@
 package controllers;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -38,10 +39,10 @@ public class Persons extends Controller {
 			render();
 		}
 		Person person = Person.findById(id);
-		Contract contract = person.contract;
+		List<Contract> contracts = person.contract;
 		
-		if (contract == null) {
-			contract = new Contract();
+		if (contracts == null) {
+			contracts = new ArrayList<Contract>();
 		}
 		
 		Location location = person.location;
@@ -54,7 +55,7 @@ public class Persons extends Controller {
 			contactData = new ContactData();
 		}
 		
-		render(person, contract, location, contactData);
+		render(person, contracts, location, contactData);
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)

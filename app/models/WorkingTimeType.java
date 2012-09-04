@@ -11,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OrderBy;
 
 
 import javax.persistence.OneToMany;
@@ -56,6 +57,7 @@ public class WorkingTimeType extends Model {
 	 * relazione con la tabella di specifiche di orario di lavoro
 	 */
 	@OneToMany( mappedBy = "workingTimeType")
+	@OrderBy("dayOfWeek")
 	public List<WorkingTimeTypeDay> worTimeTypeDays;
 	
 	/**

@@ -32,13 +32,13 @@ public class Absence extends Model {
 	public LocalDate date;
 	
 	@ManyToOne
-	@JoinColumn(name = "absenceType_id")
+	@JoinColumn(name = "absence_type_id")
 	public AbsenceType absenceType;
 	
 	
 	@ManyToOne(optional=false)
 	@JoinColumn(name="personDay_id", nullable=false)
 	public PersonDay personDay;
-	
+
 	
 }
