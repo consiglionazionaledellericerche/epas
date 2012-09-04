@@ -219,7 +219,7 @@ public class Stampings extends Controller {
 			if(stamp1 != null && stamp1.date != null){
 				LocalDate datePd = new LocalDate(stamp1.date);
 				PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person,datePd).first();
-				pd.setStampings();
+				
 				pd.setTimeAtWork();
 				pd.setDifference();
 				pd.setProgressive();

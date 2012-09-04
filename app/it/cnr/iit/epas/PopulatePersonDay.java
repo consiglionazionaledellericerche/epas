@@ -24,45 +24,10 @@ import play.db.jpa.JPA;
 
 public class PopulatePersonDay {
 	
-	public static void PopulatePersonDayForOne(){
-		fillPersonDay();
-	}
-	
-	public static void PopulatePersonDayForAll(){
-		fillPersonDay();
-	}
-	
-	/**
-	 * metodo per il popolamento dei personDay per tutti gli utenti: il fatto è che far popolare tutti i personday è troppo oneroso
-	 * in termini di utilizzo della ram e pertanto è preferibile scegliere da quale indice a quale indice far partire la procedura
-	 * di popolamento dei personday
-	 */
-	public static void fillPersonDay() {
-		Long init = new Long(119);
-		Long end = new Long(130);
-		List<Person> personList = Person.find("Select per from Person per where per.id > ? and per.id < ?",init, end).fetch();
-		for(Person person : personList){
-			if(person != null){
-				//TODO:le date vanno rese generiche
-				LocalDate date = new LocalDate(2010,12,31);			
-				LocalDate now = new LocalDate();
-				while(!date.equals(now)){
-					PersonDay pd = new PersonDay(person,date);
-					Logger.warn("Person: "+person );
-					Logger.warn("Date: "+date);
-					pd.populatePersonDay();
-					pd.save();
-					date = date.plusDays(1);
-				}				
-			}
-		}
-		
-	}
-	
 	public static void fillWorkingTimeTypeDays(){
-		Long id = new Long(8);
-		WorkingTimeType wtt = WorkingTimeType.findById(id);
-		//WorkingTimeType wtt = WorkingTimeType.find("Select wtt from WorkingTimeType wtt where wtt.description = ?", "normale-mod").first();
+//		Long id = new Long(2);
+//		WorkingTimeType wtt = WorkingTimeType.findById(id);
+		WorkingTimeType wtt = WorkingTimeType.find("Select wtt from WorkingTimeType wtt where wtt.description = ?", "normale-mod").first();
 		WorkingTimeTypeDay wttd = null;
 		for(int i=1; i<=5; i++){
 			wttd = new WorkingTimeTypeDay();

@@ -4,7 +4,9 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -23,7 +25,7 @@ import play.db.jpa.Model;
  * il contratto non è gestito direttamente da questa applicazione ma le sue informazioni
  * sono prelevate da un altro servizio
  */
-@Audited
+
 @Entity
 @Table(name="contracts")
 public class Contract extends Model {
@@ -34,7 +36,7 @@ public class Contract extends Model {
 	
 //	public ContractLevel contractLevel;
 	
-	@OneToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="person_id")
 	public Person person;
 	
@@ -48,6 +50,9 @@ public class Contract extends Model {
 	
 	@Column(name="is_continued")
 	public boolean isContinued;
+	
+	@Column(name="is_currently_valid")
+	public boolean isCurentlyValid;
 	
 	public boolean workSaturday;
 	
