@@ -73,7 +73,7 @@ public class Persons extends Controller {
 		contactData.person = person;
 		contactData.save();
 		
-		Logger.debug("saving contract, beginContract = %s, endContract = %s", contract.beginContract, contract.endContract);
+		Logger.debug("saving contract, beginContract = %s, endContract = %s", contract.beginContract, contract.expireContract);
 		contract.person = person;
 		contract.save();
 		list();

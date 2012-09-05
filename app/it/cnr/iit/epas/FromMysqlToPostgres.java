@@ -547,57 +547,64 @@ public class FromMysqlToPostgres {
 	 * questo viene cancellato nel caso in cui la data di fine del contratto già salvato sia inferiore alla data inizio
 	 * del nuovo contratto così da salvare nello storico il contratto precedente.
 	 */
-	public static void createContract(long id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+    public static void createContract(long id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+	
+        Logger.info("Inizio a creare il contratto per %s %s", person.name, person.surname);	
+        Connection mysqlCon = getMysqlConnection();	
+        PreparedStatement stmtContratto = mysqlCon.prepareStatement("SELECT id,DataInizio,DataFine,continua " +	
+                        "FROM Personedate WHERE id=" + id + " order by DataInizio");	
+        ResultSet rs = stmtContratto.executeQuery();       	
+        Contract contract = null;
+        while(rs.next()){
+        	LocalDate startContract = null;
+        	LocalDate endContract = null;
+        	Date begin = rs.getDate("DataInizio");
+    		Date end = rs.getDate("DataFine");
+        	if(begin == null && end == null){
+    			/**
+    			 * le date non sono valorizzate, si costruisce un contratto con date fittizie
+    			 */
+        		startContract = new LocalDate(1971,12,31);
+        		endContract = new LocalDate(2099,1,1);
+    		}
+    		if(begin != null && end == null){
+    			/**
+    			 * è il caso dei contratti a tempo indeterminato che non hanno data di fine valorizzata. posso lasciarla anche
+    			 * io a null
+    			 */
+    			startContract = new LocalDate(begin);
+    			endContract = null;
+    		}
+    		if(begin != null && end != null){
+    			/**
+    			 * entrambi gli estremi valorizzati, contratto a tempo determinato, si inseriscono entrambe
+    			 */
+    			startContract = new LocalDate(begin);
+    			endContract = new LocalDate(end);
+    		}
+        	contract = Contract.find("Select con from Contract con where con.person = ? ", person).first();
+        	if(contract == null){
+        		contract = new Contract();
+        		//contract.person = person;
+        		contract.beginContract = startContract;
+        		contract.expireContract = endContract;       		        		
+        	}
+        	else{
+        		
+        		if(rs.getByte("continua")==1){
+        			contract.expireContract = endContract;        			            		
+        		}
+        		else{
+        			contract = new Contract();
+        			//contract.person = person;
+        			contract.beginContract = startContract;
+            		contract.expireContract = endContract;            		            		
+        		}
+        	}    		   		 
 
-		Logger.info("Inizio a creare il contratto per %s %s", person.name, person.surname);	
-		Connection mysqlCon = getMysqlConnection();	
-		PreparedStatement stmtContratto = mysqlCon.prepareStatement("SELECT id,DataInizio,DataFine,continua " +	
-				"FROM Personedate WHERE id=" + id + " order by DataInizio");	
-		ResultSet rs = stmtContratto.executeQuery();       	
-
-		while(rs.next()){
-
-			Contract contract = new Contract();
-
-			Date begin = rs.getDate("DataInizio");
-			Date end = rs.getDate("DataFine"); 
-
-			if(rs.isLast())
-				contract.isCurentlyValid = true;
-			else
-				contract.isCurentlyValid = false;
-
-			if(begin == null && end == null){
-				/**
-				 * le date non sono valorizzate, si costruisce un contratto con date fittizie
-				 */
-				contract.beginContract = new LocalDate(1971,12,31);
-				contract.endContract = new LocalDate(2099,1,1);
-			}
-			if(begin != null && end == null){
-				/**
-				 * è il caso dei contratti a tempo indeterminato che non hanno data di fine valorizzata. posso lasciarla anche
-				 * io a null
-				 */
-				contract.beginContract = new LocalDate(begin);
-				contract.endContract = null;
-			}
-			if(begin != null && end != null){
-				/**
-				 * entrambi gli estremi valorizzati, contratto a tempo determinato, si inseriscono entrambe
-				 */
-				contract.beginContract = new LocalDate(begin);
-				contract.endContract = new LocalDate(end);
-			}
-			if(rs.getByte("continua")==0)
-				contract.isContinued = false;
-			else
-				contract.isContinued = true;
-
-
-			contract.save();
-			contract.person = person;
-			person.save();
+    		contract.save();
+    		contract.person = person;
+    		person.save();
 			Logger.debug("Aggiunto contratto %s per %s ", contract, person.surname);
 
 		}

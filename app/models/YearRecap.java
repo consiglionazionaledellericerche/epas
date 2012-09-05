@@ -336,36 +336,40 @@ public class YearRecap extends Model{
 		return permissionDays;
 	}
 	
+	
+	
 	/**
 	 * 
 	 * @return il numero di giorni di ferie avanzati da quelli maturati l'anno precedente e non ancora utilizzati
 	 */
 	public int vacationLastYearNotYetUsed(){
-		int actualVacationDays = 0;
 		LocalDate date = new LocalDate(year,1,1);
 		//recupero dal db le assenze fatte quest'anno che hanno codice 4 ovvero quelle con causale "residuo anno precedente"
 		List<Absence> absence = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? and abs.date > ? " +
 				"and abs.absenceType = abt and abt.code = ?", person, date, "31").fetch();
 		LocalDate beginLastYear = new LocalDate(year-1,1,1);
 		LocalDate endLastYear = new LocalDate(year-1,12,31);
+
+		Contract contract = person.getCurrentContract();		
 		/**
-		 * bisogna controllare quando iniziava il contratto nell'anno precedente, poichè se il contratto era a tempo determinato ed è iniziato
-		 * durante l'anno, bisogna considerare i giorni fatti di lavoro durante quell'anno per sapere a quanti giorni di ferie ammontava il 
-		 * numero maturato durante l'anno precedente. Con l'envers posso prendermi il contratto attuale e, a partire da quello, navigare indietro
-		 * nelle revisioni, il contratto a una certa revisione che aveva quell'ID.
+		 * se l'anno precedente non c'era contratto ritorna zero.
 		 */
-		List<Contract> contracts = Contract.find("Select con from Contract con where con.person = ? " +
-				"and con.beginContract between ? and ? ", person, beginLastYear,endLastYear).fetch();
+		if(contract == null)
+			return 0;
 		int days = 0;
-		for(Contract con : contracts){
-			if(con.beginContract.getYear() == year-1 && con.endContract.getYear() == year-1){
-				days = days+daysBetweenTwoDates(con.beginContract, con.endContract); // giorni di contratto nell'anno precedente
-			}
-			if((con.beginContract.getYear() == year-1 && con.endContract.getYear() == year) || 
-					(con.beginContract.getYear() == year-1 && con.endContract == null)){
-				days = days+daysBetweenTwoDates(con.beginContract, endLastYear);
-			}
+		/**
+		 * se la data di inizio del contratto è precedente all'anno scorso
+		 */
+		if(contract.beginContract.getYear()<year-1){
+			days = daysBetweenTwoDates(beginLastYear, endLastYear);
 		}
+		/**
+		 * se la data di inizio contratto ricade nell'anno passato
+		 */
+		if(contract.beginContract.getYear()==year-1){
+			days = daysBetweenTwoDates(contract.beginContract, endLastYear);
+		}
+		
 		/**
 		 * a questo punto ho il numero di giorni dell'anno passato in cui quella persona ha lavorato e posso quindi vedere quanti giorni di
 		 * ferie gli spettavano l'anno precedente
@@ -378,14 +382,7 @@ public class YearRecap extends Model{
 				"abs.date < ? and abs.absenceType = abt and abt.code = ?", person, beginLastYear, endLastYear, "32").fetch();
 		//con questa query vado a prendere il piano ferie previsto per la persona da cui vado a estrarre il numero di giorni di ferie 
 		//ad essa attribuiti
-//		VacationCode vacCode = VacationCode.find("Select vc from VacationCode vc, VacationPeriod vp where vp.vacationCode = vc " +
-//				"and vp.person = ? order by vp.beginFrom desc", person).first();
-//		int vacationDays = vacCode.vacationDays;
-//		int residualVacationDays = vacationDays-vacationsLastYear.size();
-//		if(residualVacationDays > 0){
-//			actualVacationDays = residualVacationDays-absence.size();
-//			
-//		}
+
 		int residualVacationDays = vacationDaysAccrued-vacationsLastYear.size();
 		
 		return residualVacationDays;
