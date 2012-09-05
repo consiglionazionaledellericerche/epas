@@ -36,7 +36,7 @@ public class VacationsPermissionsDaysManager {
 		if(person == null || abt == null || date == null)
 			throw new IllegalArgumentException("Person and absenceType and date must be not null...");
 		
-		if(abt.validTo.compareTo(date.toDate()) < 0 || abt.validFrom.compareTo(date.toDate()) > 0)
+		if(abt.validTo.isBefore(date) || abt.validFrom.isAfter(date))
 			return new AvailabilityInfo(String.format("La data di validità del codice %s " +
 					"non è compatibile con la data %s", abt.code, date));
 		if(!abt.qualifications.contains(person.qualification))

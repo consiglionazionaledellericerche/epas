@@ -105,13 +105,13 @@ public class Reperibility extends Controller {
 				//Se la persona è in ferie questo giorno non può essere reperibile 
 				if (PersonVacation.find("date = ? and person = ?", day, reperibilityPeriod.person).fetch().size() > 0) {
 					throw new IllegalArgumentException(
-						String.format("ReperibilityPeriod person.id is not compatible with a Vacaction in the same day %s", reperibilityPeriod.person, day));
+						String.format("ReperibilityPeriod person.id %d is not compatible with a Vacaction in the same day %s", reperibilityPeriod.person.id, day));
 				}
 
 				//Se la persona è in ferie questo giorno non può essere reperibile 
 				if (Absence.find("date = ? and person = ?", day, reperibilityPeriod.person).fetch().size() > 0) {
 					throw new IllegalArgumentException(
-						String.format("ReperibilityPeriod person.id is not compatible with a Absence in the same day %s", reperibilityPeriod.person, day));
+						String.format("ReperibilityPeriod person.id %d is not compatible with a Absence in the same day %s", reperibilityPeriod.person.id, day));
 				}
 
 				//Salvataggio del giorno di reperibilità
