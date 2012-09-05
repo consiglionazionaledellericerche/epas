@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -21,9 +22,13 @@ import javax.persistence.Transient;
 
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
+import net.sf.oval.constraint.NotNull;
 
+import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
+import org.joda.time.LocalDate;
 
+import play.data.validation.Required;
 import play.db.jpa.Model;
 /**
  * 
@@ -37,39 +42,52 @@ public class AbsenceType extends Model {
 	
 	private static final long serialVersionUID = 7157167508454574329L;
 
-	@OneToMany(mappedBy="absenceType")
-	public List<Absence> absences;	
+	@OneToMany(mappedBy="absenceType", fetch = FetchType.LAZY)
+	public List<Absence> absences = new ArrayList<Absence>();	
 	
 	@ManyToOne
 	@JoinColumn(name="absence_type_group_id")
 	public AbsenceTypeGroup absenceTypeGroup;
 	
-	@ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
-	public List<Qualification> qualifications;
+	@ManyToMany(fetch = FetchType.LAZY)
+	public List<Qualification> qualifications = new ArrayList<Qualification>();
 	
+	@Required
 	public String code;
 	
+	@Column(name = "certification_code")
 	public String certificateCode;
 	
 	public String description;
 	
-	public Date validFrom;
+	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	@Column(name = "valid_from")
+	public LocalDate validFrom;
 	
-	public Date validTo;
+	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	@Column(name = "valid_to")
+	public LocalDate validTo;
 	
-	public boolean internalUse;
+	@Column(name = "internal_use")
+	public boolean internalUse = false;
 	
-	public boolean multipleUse;	
+	@Column(name = "multiple_use")
+	public boolean multipleUse = false;
 
-	public boolean mealTicketCalculation;
+	@Column(name = "meal_ticket_calculation")
+	public boolean mealTicketCalculation = false;
 
-	public boolean ignoreStamping;		
+	@Column(name = "ignore_stamping")
+	public boolean ignoreStamping = false;
 	
-	public boolean isHourlyAbsence;
+	@Column(name = "is_hourly_absence")
+	public boolean isHourlyAbsence = false;
 	
-	public int justifiedWorkTime;
+	@Column(name = "justified_work_time")
+	public int justifiedWorkTime = 0;
 	
-	public boolean isDailyAbsence;
+	@Column(name = "id_daily_absence")
+	public boolean isDailyAbsence = false;
 
 	
 	/**
@@ -80,6 +98,7 @@ public class AbsenceType extends Model {
 	 * Questa assenza 09B viene inserita nel giorno in cui si raggiunge il limite, ma non influisce sul calcolo del tempo di lavoro di quel
 	 * giorno.
 	 */
+	@Column(name = "replacing_absence")
 	public boolean replacingAbsence = false;
 	
 	@Transient

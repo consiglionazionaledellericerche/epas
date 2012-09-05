@@ -17,19 +17,19 @@ public class Administration extends Controller {
     }
     
     public static void beforeImportAll() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-    	FromMysqlToPostgres.createQualification();
-    	FromMysqlToPostgres.createAbsenceType();
-    	FromMysqlToPostgres.joinTables();
-    	FromMysqlToPostgres.beforeImportAll();
-
-    	renderText("Create absenceType, qualifiche e importate persone con i loro working time type legate anche alle qualifiche");
+    	FromMysqlToPostgres.createQualifications();
+    	FromMysqlToPostgres.importAbsenceTypes();
+    	FromMysqlToPostgres.createAbsenceTypeToQualificationRelations();
+    	FromMysqlToPostgres.importWorkingTimeTypes();
+    	FromMysqlToPostgres.createWorkinTimeTypeNormaleMod();
+    	FromMysqlToPostgres.createStampModificationType();
+    	
+    	renderText("Importate le qualifiche, i tipi di assenza e i tipi di orari di lavoro");
     }
     
     public static void importAll() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
     	
     	FromMysqlToPostgres.importAll();
-    	FromMysqlToPostgres.importNotInOldDb();
-    	PopulatePersonDay.manageContract();
     	renderText("Importate tutte le persone dalla vecchia applicazione + aggiunti i workingtimetypeday e aggiunti i permessi" +
     			"di amministrazione per l'utente con id 139.");
     }
@@ -50,12 +50,7 @@ public class Administration extends Controller {
     	PopulatePersonDay.fillWorkingTimeTypeDays();
     	renderText("Aggiunti days per il working time type normal-mod");
     }
-    
-    public static void manageContract(){
-    	PopulatePersonDay.manageContract();
-    	renderText("Sistemata situazione contratti");
-    }
-    
+        
     public static void manageStampType(){
     	PopulatePersonDay.manageStampType();
     	renderText("Sistemata situazione degli stamp type");

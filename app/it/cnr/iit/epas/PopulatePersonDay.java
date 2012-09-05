@@ -67,29 +67,6 @@ public class PopulatePersonDay {
 				
 	}
 	
-
-	
-	/**
-	 * cancella dalla tabella dei contratti tutti quelli che non sono i più recenti per ciascuna persona
-	 */
-	public static void manageContract(){
-		List<Person> personList = Person.findAll();
-		for(Person person : personList){
-			List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? " +
-					"order by con.beginContract", person).fetch();
-			if(contractList.size()>1){
-				int size = contractList.size();
-				//int count = 0;
-				for(int count = 0; count<size-1; count++){
-					contractList.get(count).delete();
-					
-				}
-								
-			}
-			
-		}
-	}
-	
 	public static void manageStampType(){
 		StampType st = new StampType();
 		st.description = "Altra timbratura di ingresso";
