@@ -239,7 +239,7 @@ public class Person extends Model {
 			Logger.info("Siamo nel bottino che il contratto è nullo per "+this.name+" "+this.surname);
 		}
 		LocalDate now = new LocalDate();
-		if(contract.endContract == null && contract.beginContract != null){
+		if(contract.expireContract == null && contract.beginContract != null){
 			/**
 			 * il contratto attuale è a tempo indeterminato, controllo che sia in vigore da più di 3 anni 
 			 */
@@ -268,9 +268,9 @@ public class Person extends Model {
 				return vacation;
 			}
 		}
-		if(contract.endContract != null && contract.beginContract != null){
+		if(contract.expireContract != null && contract.beginContract != null){
 			
-			int differenzaAnni = contract.endContract.getYear() - contract.beginContract.getYear();
+			int differenzaAnni = contract.expireContract.getYear() - contract.beginContract.getYear();
 			LocalDate data = new LocalDate(2099,1,1);
 			if(this.qualification.qualification == 0){
 				vacation = null;
@@ -385,13 +385,23 @@ public class Person extends Model {
 	
 	/**
 	 * 
-	 * @return il contratto in essere per quella persona. N.B.: occorre il metodo poichè non capisco perchè non riesco a recuperare
-	 * il contratto dalle informazioni sulla persona tramite il legame tra le due tabelle.
+	 * @return il contratto attivo per quella persona alla date date
 	 */
-	public Contract getContract(){
-		Contract contract = Contract.find("Select con from Contract con where con.person = ?", this).first();
+	public Contract getContract(LocalDate date){
+		
+		Contract contract = Contract.find("Select con from Contract con where con.person = ? " +
+				"and con.beginContract <= ? and (con.expireContract > ? or con.expireContract is null ) " +
+				"and (con.endContract is null or con.endContract > ?", this, date, date, date).first();
+		
 		return contract;
 		
+	}
+	/**
+	 * 
+	 * @return il contratto attualmente attivo per quella persona
+	 */
+	public Contract getCurrentContract(){
+		return getContract(new LocalDate());
 	}
 	
 	@Override
