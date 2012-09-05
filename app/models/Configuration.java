@@ -177,6 +177,11 @@ public class Configuration extends Model{
 	public Integer dayExpiryVacationPastYear;
 	
 	/**
+	 * residuo minimo in minuti da avere a disposizione per poter richiedere un giorno di recupero 
+	 */
+	public Integer minimumRemainingTimeToHaveRecoveryDay;
+	
+	/**
 	 * Mese entro il quale devono essere usati i residui dell'anno precedente per i livelli da 1 a 3 (mm) 
 	 * 00 = i recuperi devono essere presi nell'anno. 99 = i recuperi non scadono mai
 	 */

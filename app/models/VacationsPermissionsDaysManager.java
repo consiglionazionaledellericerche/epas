@@ -72,20 +72,79 @@ public class VacationsPermissionsDaysManager {
 
 	private static AvailabilityInfo isRecoveryDaysAvailable(Person person,
 			LocalDate date) {
-		// TODO Auto-generated method stub
+		/**
+		 * bisogna controllare a quale livello appartiene la persona per poter decidere fino a che punto può usufruire dei giorni di recupero
+		 * (vedere nella configurazione) e quanti al massimo può averne durante l'anno.
+		 */
+		Configuration config = Configuration.find("Select conf from Configuration conf where conf.beginDate < ? and conf.endDate > ?", 
+				date, date).first();
+		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
+		/**
+		 * controllo che il mese in cui risiede la data sia gennaio di modo da passare come residuo, quello alla fine di dicembre dell'anno 
+		 * precedente
+		 */
+		int month = 0;
+		int year = 0;
+		if(date.getMonthOfYear() == 1){
+			month = 12;
+			year = date.getYear()-1;
+		}
+		else{
+			month = date.getMonthOfYear();
+			year = date.getYear();
+		}
+			
+		PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
+				person, month, year).first();
+		if(pd == null || pm == null)
+			throw new IllegalStateException(String.format("Person day o person month non valido per %s %s", person.name, person.surname));
+		if(pd.progressive + pm.remainingHours > config.minimumRemainingTimeToHaveRecoveryDay ){
+			if(person.qualification.qualification == 1 || person.qualification.qualification == 2 || person.qualification.qualification == 3){
+				int expireMonth = config.monthExpireRecoveryDaysOneThree;
+				if(expireMonth > 12 || expireMonth > date.getMonthOfYear())
+					return new AvailabilityInfo(true);
+				else{
+					return new AvailabilityInfo("Il giorno di recupero non può essere preso poichè la data è superiore alla scadenza" +
+							"entro la quale i giorni di recupero possono essere presi.");
+				}
+					
+			}
+			else{
+				int expireMonth = config.monthExpireRecoveryDaysFourNine;
+				if(expireMonth > date.getMonthOfYear()){
+					return new AvailabilityInfo(true);
+				}
+				else{
+					return new AvailabilityInfo("Il giorno di recupero non può essere preso poichè la data è superiore alla scadenza" +
+							"entro la quale i giorni di recupero possono essere presi.");
+				}
+			}
+		}
 		return null;
 	}
 
 	private static AvailabilityInfo isPermissionDaysAvailable(Person person,
 			LocalDate date) {
-		// TODO Auto-generated method stub
-		return null;
+		AvailabilityInfo permissionDaysAvailable = isPermissionCurrentYearAvailable();
+		return permissionDaysAvailable;
 	}
 
 	private static AvailabilityInfo isVacationPastYearAvailable(Person person,
 			LocalDate date) {
-		
-		return null;
+		/**
+		 * per prima cosa si controlla che sia possibile usare ferie dell'anno precedente, ovvero si guarda se non è scaduto il periodo 
+		 * utile per poterle utilizare
+		 */
+		Configuration config = Configuration.find("Select conf from Configuration conf where conf.beginDate < ? and conf.endDate > ?", 
+				date, date).first();
+		if(date.isAfter(new LocalDate(date.getYear(),config.monthExpiryVacationPastYear,config.dayExpiryVacationPastYear))){
+			return new AvailabilityInfo(false);
+		}
+		YearRecap yr = new YearRecap();
+		int vacationDaysPastYearAvailable = yr.vacationLastYearNotYetUsed();
+		if(vacationDaysPastYearAvailable>0)
+			return new AvailabilityInfo(true);
+		return new AvailabilityInfo(false);
 	}
 
 	private static AvailabilityInfo isVacationCurrentYearAvailable(Person person,
@@ -95,9 +154,11 @@ public class VacationsPermissionsDaysManager {
 			AbsenceType abt = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", "31").first();
 			return new AvailabilityInfo(true, true, abt);
 		}
+		else{
+			AbsenceType abt = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", "32").first();
+			return new AvailabilityInfo(true, true, abt);
+		}			
 		
-			
-		return null;
 	}
 	
 	private static AvailabilityInfo isAbsenceTypeWithGroupAvailable(AbsenceType abt, Person person, LocalDate date){
@@ -164,6 +225,16 @@ public class VacationsPermissionsDaysManager {
 			
 		}
 
+	}
+
+	
+	public static AvailabilityInfo isPermissionCurrentYearAvailable(){
+		YearRecap yr = new YearRecap();
+		int permissionDaysAvailable = yr.permissionCurrentYear() - yr.personalPermissionUsed();
+		if(permissionDaysAvailable > 0)
+			return new AvailabilityInfo(true);
+		
+		return new AvailabilityInfo(false);
 	}
 	
 	public static void main(String[]args){
