@@ -9,6 +9,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import lombok.Data;
 
@@ -45,16 +46,27 @@ public class Contract extends Model {
 	public LocalDate beginContract;
 	
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	@Column(name="expire_contract")
+	public LocalDate expireContract;
+
+//	@Column(name="is_continued")
+//	public boolean isContinued;
+	/**
+	 * data di termine contratto in casi di licenziamento, pensione, morte, ecc ecc...
+	 */
+	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="end_contract")
 	public LocalDate endContract;
-	
-	@Column(name="is_continued")
-	public boolean isContinued;
-	
-	@Column(name="is_currently_valid")
-	public boolean isCurentlyValid;
 	
 	public boolean workSaturday;
 	
 	public boolean workSunday;
+	
+	@Transient
+	public boolean isValidContract(){
+		LocalDate date = new LocalDate();
+		return endContract==null && beginContract.isBefore(date) && expireContract.isAfter(date);
+					 
+	}
+	
 }

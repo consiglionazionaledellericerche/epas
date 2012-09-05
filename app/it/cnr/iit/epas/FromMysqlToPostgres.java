@@ -269,23 +269,6 @@ public class FromMysqlToPostgres {
 		Connection mysqlCon = FromMysqlToPostgres.getMysqlConnection();
 		EntityManager em = JPA.em();
 
-//		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT ID, Nome, Cognome, DataNascita, Telefono," +
-//				"Fax, Email, Stanza, Matricola, passwordmd5, Qualifica, Dipartimento, Sede " +
-//				"FROM Persone order by ID limit 20");
-//		ResultSet rs = stmt.executeQuery();
-//		
-//		while(rs.next()){
-//			Person person = new Person();
-//			person.name = rs.getString("Nome");
-//			person.surname = rs.getString("Cognome");
-//			person.username = String.format("%s.%s", person.name.toLowerCase(), person.surname.toLowerCase() );
-//			person.password = rs.getString("passwordmd5");
-//			person.bornDate = rs.getDate("DataNascita");
-//			person.number = rs.getInt("Matricola");
-//			int qualifica = rs.getInt("Qualifica");
-//			person.qualification = Qualification.find("Select qual from Qualification qual where qual.qualification = ?", qualifica).first();
-//			
-//			long id = rs.getLong("ID");
 			WorkingTimeType wtt = null;
 			WorkingTimeTypeDay wttd_mo = null;
 			WorkingTimeTypeDay wttd_tu = null;
@@ -298,16 +281,10 @@ public class FromMysqlToPostgres {
 			PreparedStatement stmt2 = mysqlCon.prepareStatement("select * from orari_di_lavoro");
 			ResultSet rsInterno = stmt2.executeQuery();
 			if(rsInterno.next()){
-
-				//int idCodiceOrarioLavoro = rsInterno.getInt("id");
 				Integer idCodiceOrarioLavoro = rsInterno.getInt("id");
-				//Logger.debug("Il codice dell'orario di lavoro è %s", idCodiceOrarioLavoro);
-//				if(idCodiceOrarioLavoro == null)
-//					idCodiceOrarioLavoro = 100;
 				
 				if(mappaCodiciWorkingTimeType.get(idCodiceOrarioLavoro)!=null){
 					wtt = WorkingTimeType.findById(mappaCodiciWorkingTimeType.get(idCodiceOrarioLavoro));
-				//	person.workingTimeType = wtt;
 					em.persist(wtt);
 				}
 				else{					
@@ -315,7 +292,6 @@ public class FromMysqlToPostgres {
 				
 					wtt.description = rsInterno.getString("nome");
 					wtt.shift = rsInterno.getBoolean("turno");
-					//person.workingTimeType=wtt;
 					em.persist(wtt);		
 					mappaCodiciWorkingTimeType.put(idCodiceOrarioLavoro,wtt.id);
 					
@@ -426,17 +402,7 @@ public class FromMysqlToPostgres {
 				}
 				
 			}
-
-		//	em.persist(person);			
-			
-//			Location location = new Location();
-//			location.person = person;
-//			
-//			location.department = rs.getString("Dipartimento");
-//			location.headOffice = rs.getString("Sede");
-//			location.room = rs.getString("Stanza");		
-//			em.persist(location);			
-					
+				
 		//}
 		WorkingTimeType wttNew = new WorkingTimeType();
 		wttNew.description = "normale-mod";
@@ -444,11 +410,7 @@ public class FromMysqlToPostgres {
 		em.persist(wttNew);
 		mappaCodiciWorkingTimeType.put(100,wttNew.id);
 		PopulatePersonDay.fillWorkingTimeTypeDays();
-//		List<Person> personList = Person.find("Select p from Person p where p.workingTimeType is null").fetch();
-//		for(Person p : personList){
-//			p.workingTimeType = WorkingTimeType.find("Select wtt from WorkingTimeType wtt where wtt.description = ? ","normale-mod").first();
-//			p.save();
-//		}
+
 	}
 	
 	public static void importAll() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
@@ -616,47 +578,54 @@ public class FromMysqlToPostgres {
         PreparedStatement stmtContratto = mysqlCon.prepareStatement("SELECT id,DataInizio,DataFine,continua " +	
                         "FROM Personedate WHERE id=" + id + " order by DataInizio");	
         ResultSet rs = stmtContratto.executeQuery();       	
-        	
+        Contract contract = null;
         while(rs.next()){
-        	
-        	Contract contract = new Contract();
-    		
-    		Date begin = rs.getDate("DataInizio");
-    		Date end = rs.getDate("DataFine"); 
-    		
-    		if(rs.isLast())
-    			contract.isCurentlyValid = true;
-    		else
-    			contract.isCurentlyValid = false;
-    		
-    		if(begin == null && end == null){
+        	LocalDate startContract = null;
+        	LocalDate endContract = null;
+        	Date begin = rs.getDate("DataInizio");
+    		Date end = rs.getDate("DataFine");
+        	if(begin == null && end == null){
     			/**
     			 * le date non sono valorizzate, si costruisce un contratto con date fittizie
     			 */
-    			contract.beginContract = new LocalDate(1971,12,31);
-    			contract.endContract = new LocalDate(2099,1,1);
+        		startContract = new LocalDate(1971,12,31);
+        		endContract = new LocalDate(2099,1,1);
     		}
     		if(begin != null && end == null){
     			/**
     			 * è il caso dei contratti a tempo indeterminato che non hanno data di fine valorizzata. posso lasciarla anche
     			 * io a null
     			 */
-    			contract.beginContract = new LocalDate(begin);
-    			contract.endContract = null;
+    			startContract = new LocalDate(begin);
+    			endContract = null;
     		}
     		if(begin != null && end != null){
     			/**
     			 * entrambi gli estremi valorizzati, contratto a tempo determinato, si inseriscono entrambe
     			 */
-    			contract.beginContract = new LocalDate(begin);
-    			contract.endContract = new LocalDate(end);
+    			startContract = new LocalDate(begin);
+    			endContract = new LocalDate(end);
     		}
-    		if(rs.getByte("continua")==0)
-    			contract.isContinued = false;
-    		else
-    			contract.isContinued = true;
-    		
-    		
+        	contract = Contract.find("Select con from Contract con where con.person = ? ", person).first();
+        	if(contract == null){
+        		contract = new Contract();
+        		//contract.person = person;
+        		contract.beginContract = startContract;
+        		contract.expireContract = endContract;       		        		
+        	}
+        	else{
+        		
+        		if(rs.getByte("continua")==1){
+        			contract.expireContract = endContract;        			            		
+        		}
+        		else{
+        			contract = new Contract();
+        			//contract.person = person;
+        			contract.beginContract = startContract;
+            		contract.expireContract = endContract;            		            		
+        		}
+        	}    		   		 
+
     		contract.save();
     		contract.person = person;
     		person.save();

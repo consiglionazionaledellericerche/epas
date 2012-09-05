@@ -174,10 +174,6 @@ public class PersonDay extends Model {
 		return absenceType;
 	}
 	
-
-		
-
-	
 	/**
 	 * 
 	 * @param year
