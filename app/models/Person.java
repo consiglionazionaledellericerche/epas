@@ -110,7 +110,7 @@ public class Person extends Model {
 	 */
 	@NotAudited
 	@OneToMany(mappedBy="person", fetch=FetchType.EAGER)
-	public List<Contract> contract;
+	public List<Contract> contracts;
 	
 	/**
 	 * relazione con la tabella delle tipologie di orario di lavoro

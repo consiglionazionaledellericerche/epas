@@ -1,5 +1,7 @@
 package models;
 
+import it.cnr.iit.epas.DateUtility;
+
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
@@ -72,17 +74,23 @@ public class VacationsPermissionsDaysManager {
 
 	private static AvailabilityInfo isRecoveryDaysAvailable(Person person,
 			LocalDate date) {
+		
 		/**
 		 * bisogna controllare a quale livello appartiene la persona per poter decidere fino a che punto può usufruire dei giorni di recupero
 		 * (vedere nella configurazione) e quanti al massimo può averne durante l'anno.
 		 */
-		Configuration config = Configuration.find("Select conf from Configuration conf where conf.beginDate < ? and conf.endDate > ?", 
-				date, date).first();
-		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
+		if(DateUtility.isHoliday(person, date))
+			return new AvailabilityInfo(String.format("IL giorno %s è un giorno festivo per la persona %s %s, per cui non si può prendere un" +
+					"giorno di recupero", date, person.name, person.surname));
+		
+		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date < ? and pd.date <> ? order by pd.date desc",
+				person, date, new LocalDate()).first();
 		/**
 		 * controllo che il mese in cui risiede la data sia gennaio di modo da passare come residuo, quello alla fine di dicembre dell'anno 
 		 * precedente
 		 */
+		Configuration config = Configuration.getConfiguration(date);
+		
 		int month = 0;
 		int year = 0;
 		if(date.getMonthOfYear() == 1){
@@ -98,10 +106,12 @@ public class VacationsPermissionsDaysManager {
 				person, month, year).first();
 		if(pd == null || pm == null)
 			throw new IllegalStateException(String.format("Person day o person month non valido per %s %s", person.name, person.surname));
-		if(pd.progressive + pm.remainingHours > config.minimumRemainingTimeToHaveRecoveryDay ){
+		
+		Integer workingTime = person.workingTimeType.getWorkingTimeFromWorkinTimeType(date.getDayOfWeek()).workingTime;
+		if(pd.progressive + pm.remainingHours > workingTime){
 			if(person.qualification.qualification == 1 || person.qualification.qualification == 2 || person.qualification.qualification == 3){
-				int expireMonth = config.monthExpireRecoveryDaysOneThree;
-				if(expireMonth > 12 || expireMonth > date.getMonthOfYear())
+				Integer expireMonth = config.monthExpireRecoveryDaysOneThree;
+				if(expireMonth == null || expireMonth > date.getMonthOfYear())
 					return new AvailabilityInfo(true);
 				else{
 					return new AvailabilityInfo("Il giorno di recupero non può essere preso poichè la data è superiore alla scadenza" +

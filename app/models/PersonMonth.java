@@ -1,5 +1,7 @@
 package models;
 
+import it.cnr.iit.epas.PersonUtility;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -67,43 +69,7 @@ public class PersonMonth extends Model {
 		
 	}
 	
-		
-	/**
-	 * @param actualMonth, actualYear
-	 * @return la somma dei residui mensili passati fino a questo momento; nel caso di dipendenti con qualifica da 4 a 9 
-	 * se siamo in un mese prima di aprile i residui da calcolare sono su quello relativo all'anno precedente + i residui mensili fino a 
-	 * quel mese; se siamo in un mese dopo aprile, invece, i residui da considerare sono solo quelli da aprile fino a quel momento.
-	 * Nel caso invece la qualifica del dipendente sia da 1 a 3, i residui sono sempre validi e non terminano al 31/3
-	 */
-	public int getResidualFromPastMonth(){
-		int residual = 0;
-		if(person.qualification.qualification == 1 || person.qualification.qualification == 2 || person.qualification.qualification == 3){
-			/**
-			 * TODO: come comportarsi in questo caso? come recuperare i residui passati?
-			 */
-		}
-		else{
-			if(month < 4 ){
-				List<PersonMonth> pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month < ? " +
-						"and pm.year = ?", person, month, year).fetch();			
-				
-				for(PersonMonth personMonth : pm){
-					residual = residual+personMonth.remainingHours;
-				}
-				PersonYear py = PersonYear.find("Select py from PersonYear py where py.person = ? and py.year = ?", person, year-1).first();
-				residual = residual + py.remainingHours;
-			}
-			else{
-				List<PersonMonth> pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month >=  ? and pm.month < ?" +
-						" and pm.year = ?", person, 4, month, year).fetch();
-				for(PersonMonth personMonth : pm){
-					residual = residual+personMonth.remainingHours;
-				}
-			}
-		}
-		
-		return residual;
-	}
+
 	
 	/**
 	 * 
@@ -172,7 +138,8 @@ public class PersonMonth extends Model {
 		int total = 0;
 		int compensatoryRest = getCompensatoryRest();
 		int monthResidual = getMonthResidual();
-		int residualFromPastMonth = getResidualFromPastMonth();
+		LocalDate date = new LocalDate(year, month, 1);
+		int residualFromPastMonth = PersonUtility.getResidual(person, date.dayOfMonth().withMaximumValue());
 		total = residualFromPastMonth+monthResidual-(compensatoryRest*432); //numero di giorni di riposo compensativo moltiplicati 
 		//per il numero di minuti presenti in 7 ore e 12 minuti, ovvero il tempo di lavoro.
 		
@@ -231,4 +198,13 @@ public class PersonMonth extends Model {
 		return days;
 	}	
 
+	/**
+	 * 
+	 * !!!!IMPORTANTE!!!! QUANDO SI PASSA A UN NUOVO CONTRATTO NELL'ARCO DI UN MESE, DEVO RICORDARMI DI AZZERARE I RESIDUI DELLE ORE PERCHÈ
+	 * NON SONO CUMULABILI CON QUELLE CHE EVENTUALMENTE AVRÒ COL NUOVO CONTRATTO
+	 * 
+	 * 
+	 */
+	
+	
 }

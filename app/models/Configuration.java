@@ -271,4 +271,15 @@ public class Configuration extends Model{
 	@OneToMany (mappedBy="confParameters", fetch = FetchType.LAZY)
 	public List<WebStampingAddress> webStampingAddress;
 	
+	
+	public static Configuration getConfiguration(LocalDate date){
+		
+		return Configuration.find("Select conf from Configuration conf where conf.beginDate <= ? and conf.endDate >= ?", date, date).first();
+	}
+	
+	public static Configuration getCurrentConfiguration(){
+		
+		return getConfiguration(new LocalDate());
+	}
+	
 }
