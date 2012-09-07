@@ -10,6 +10,8 @@ import javax.persistence.Table;
 
 import org.hibernate.envers.Audited;
 
+import play.data.validation.Max;
+import play.data.validation.Min;
 import play.data.validation.Required;
 import play.db.jpa.Model;
 
@@ -32,19 +34,21 @@ public class WorkingTimeTypeDay extends Model {
 	public WorkingTimeType workingTimeType;
 	
 	@Required
+	@Min(1)
+	@Max(7)
 	public int dayOfWeek;
 		
 	/**
 	 * tempo di lavoro giornaliero espresso in minuti 
 	 */
-	public int workingTime = 0;
+	public Integer workingTime;
 	
 	/**
 	 * tempo di lavoro espresso in minuti che conteggia se possibile usufruire del buono pasto
 	 */
-	public int mealTicketTime = 0;
+	public Integer mealTicketTime;
 	
-	public int breakTicketTime = 0;
+	public Integer breakTicketTime;
 	/**
 	 * booleano per controllo se il giorno in questione è festivo o meno
 	 */
@@ -52,21 +56,21 @@ public class WorkingTimeTypeDay extends Model {
 	/**
 	 * tempo di inizio finestra di entrata
 	 */
-	public int timeSlotEntranceFrom = 0;
+	public Integer timeSlotEntranceFrom;
 	/**
 	 * tempo di fine finestra di entrata
 	 */
-	public int timeSlotEntranceTo = 0;
-	public int timeSlotExitFrom = 0;
-	public int timeSlotExitTo = 0;
+	public Integer timeSlotEntranceTo;
+	public Integer timeSlotExitFrom;
+	public Integer timeSlotExitTo;
 	/**
 	 * tempo inizio pausa pranzo
 	 */
-	public int timeMealFrom = 0;
+	public Integer timeMealFrom;
 	/**
 	 * tempo fine pausa pranzo
 	 */
-	public int timeMealTo = 0;
+	public Integer timeMealTo;
 	
 	
 }

@@ -39,7 +39,7 @@ public class Persons extends Controller {
 			render();
 		}
 		Person person = Person.findById(id);
-		List<Contract> contracts = person.contract;
+		List<Contract> contracts = person.contracts;
 		
 		if (contracts == null) {
 			contracts = new ArrayList<Contract>();

@@ -77,12 +77,12 @@ public class WorkingTimeType extends Model {
 	 * @param dayOfWeek
 	 * @return il tempo di lavoro giornaliero in minuti previsto per quel tipo di workingTimeType in quel giorno della settimana
 	 */
-	public int getWorkingTimeFromWorkinTimeType(int dayOfWeek, WorkingTimeType wtt){
-		int workingTime = 0;
+	public WorkingTimeTypeDay getWorkingTimeFromWorkinTimeType(int dayOfWeek){
+		
 		WorkingTimeTypeDay wttd = WorkingTimeTypeDay.find("Select wttd from WorkingTimeTypeDay wttd where wttd.workingTimeType = ?" +
-				" and wttd.dayOfWeek = ?", wtt, dayOfWeek).first();
-		workingTime = wttd.workingTime;
-		return workingTime;
+				" and wttd.dayOfWeek = ?", this, dayOfWeek).first();
+		
+		return wttd;
 	}
 	
 	/**
