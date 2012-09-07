@@ -26,7 +26,12 @@ public class StampType extends Model {
 
 	private static final long serialVersionUID = 1953695910638450365L;
 
-
+	/**
+	 * Utilizzato come riferimento da passare da parte del client che invia le timbrature al server
+	 */
+	@Required
+	public String code;
+	
 	@Required
 	@MinLength(value=2)
 	public String description;	
