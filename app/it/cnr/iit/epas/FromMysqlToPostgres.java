@@ -1,17 +1,11 @@
 package it.cnr.iit.epas;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,17 +19,12 @@ import models.Competence;
 import models.CompetenceCode;
 import models.ContactData;
 import models.Contract;
-
-import models.Configuration;
 import models.Location;
 import models.MonthRecap;
 import models.Person;
 import models.PersonDay;
 import models.PersonReperibility;
-import models.PersonVacation;
 import models.Qualification;
-import models.StampModificationType;
-import models.StampModificationTypeValue;
 import models.StampType;
 import models.Stamping;
 import models.Stamping.WayType;
@@ -47,35 +36,29 @@ import models.WorkingTimeTypeDay;
 import models.YearRecap;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
-import net.sf.oval.constraint.Email;
+import models.enumerate.StampTypeValues;
+import models.enumerate.WorkingTimeTypeValues;
 
-import org.joda.time.DateTimeConstants;
-import org.joda.time.DateTimeField;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-
-import com.google.common.collect.Collections2;
-import com.google.common.collect.ImmutableMap;
 
 import play.Logger;
 import play.Play;
 import play.db.jpa.JPA;
-import play.utils.Utils.Maps;
+
+import com.google.common.collect.ImmutableMap;
 
 public class FromMysqlToPostgres {
 
-	public static Map<Integer,Long> mappaCodiciCompetence = new HashMap<Integer,Long>();
-	public static Map<Integer,Long> mappaCodiciAbsence = new HashMap<Integer,Long>();
-	public static Map<String,String> mappaCodiciAbsenceTypeGroup = new HashMap<String,String>();
-	public static Map<Integer,Long> mappaCodiciVacationType = new HashMap<Integer,Long>();
-	public static Map<Integer,Long> mappaCodiciWorkingTimeType = new HashMap<Integer,Long>();
-	public static Map<Integer,Long> mappaCodiciStampType = new HashMap<Integer,Long>();
-	public static Map<Integer,Long> mappaCodiciQualification = new HashMap<Integer,Long>();
+	public static Map<Integer,CompetenceCode> mappaCodiciCompetence = new HashMap<Integer,CompetenceCode>();
+	public static Map<String,AbsenceTypeGroup> mappaCodiciAbsenceTypeGroup = new HashMap<String,AbsenceTypeGroup>();
+	public static Map<Integer,VacationCode> mappaCodiciVacationType = new HashMap<Integer,VacationCode>();
+	public static Map<Integer,WorkingTimeType> mappaCodiciWorkingTimeType = new HashMap<Integer,WorkingTimeType>();
 
 	public static String mySqldriver = Play.configuration.getProperty("db.old.driver");//"com.mysql.jdbc.Driver";	
 
 	private static Connection mysqlCon = null;
-
+	
 	public static Connection getMysqlConnection() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		if (mysqlCon != null ) {
 			return mysqlCon;
@@ -90,21 +73,95 @@ public class FromMysqlToPostgres {
 
 
 	/**
-	 * metodo per il popolamento delle qualifiche
+	 * Importa le informazioni del personale dal database Mysql dell'applicazione Orologio.
+	 * I dati importati sono:
+	 *  - ContactData
+	 *  - Location
+	 *  - WorkingTimeType
+	 *  - ValuableCompetence
+	 *  - Contract
+	 *  - Vacations
+	 *  - YearRecap
+	 *  - MonthRecap
+	 *  - Competence
+	 *  - Stampings
+	 * 
+	 * @param limit se questo parametro è maggiore di 0 allora limita il numero di persone da importare in 
+	 * 	funzione di questo parametro 
+	 * 
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws ClassNotFoundException
+	 * @throws SQLException
 	 */
-	public static void createQualifications(){
-		Logger.debug("Inizio a creare le Qualification");
-		if (Qualification.count() == 0) {
-			Qualification qualification = null;
-			for (int i = 1; i < 10; i++) {
-				qualification = new Qualification();
-				qualification.qualification = i;
-				qualification.save();
-				Logger.info("Creata la qualifica %d", i);
-			}
+	public static void importAll(int limit) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
+		Connection mysqlCon = FromMysqlToPostgres.getMysqlConnection();
+		EntityManager em = JPA.em();
+
+		String sql = "SELECT ID, Nome, Cognome, DataNascita, Telefono," +
+				"Fax, Email, Stanza, Matricola, passwordmd5, Qualifica, Dipartimento, Sede " +
+				"FROM Persone order by ID";
+		if (limit > 0) {
+			sql += " LIMIT " + limit;
 		}
-		Logger.debug("Terminata la creazione delle Qualification");
-	}	
+
+		PreparedStatement stmt = mysqlCon.prepareStatement(sql);
+
+		ResultSet rs = stmt.executeQuery();
+
+		while(rs.next()){
+			Logger.info("Creazione delle info per la persona: %s %s", rs.getString("Nome"), rs.getString("Cognome"));
+
+			int oldIDPersona = rs.getInt("ID");
+			
+			Person person = FromMysqlToPostgres.createPerson(rs);
+
+			FromMysqlToPostgres.createContactData(rs, person, em);
+
+			FromMysqlToPostgres.createLocation(rs, person, em);
+
+			FromMysqlToPostgres.createWorkingTimeType(oldIDPersona, person, em);
+
+			FromMysqlToPostgres.createValuableCompetence(rs.getInt("Matricola"), person, em);
+
+			FromMysqlToPostgres.createContract(oldIDPersona, person, em);
+
+			FromMysqlToPostgres.createVacationType(oldIDPersona, person, em);	
+
+			FromMysqlToPostgres.createYearRecap(oldIDPersona, person, em);
+
+			FromMysqlToPostgres.createMonthRecap(oldIDPersona, person, em);
+
+			FromMysqlToPostgres.createCompetence(oldIDPersona, person, em);
+
+			FromMysqlToPostgres.createStampings(oldIDPersona, person, em);
+
+		}		
+	}
+
+	/**
+	 * Importa le informazioni del personale dal database Mysql dell'applicazione Orologio.
+	 * I dati importati sono:
+	 *  - ContactData
+	 *  - Location
+	 *  - WorkingTimeType
+	 *  - ValuableCompetence
+	 *  - Contract
+	 *  - Vacations
+	 *  - YearRecap
+	 *  - MonthRecap
+	 *  - Competence
+	 *  - Stampings
+	 *   
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws ClassNotFoundException
+	 * @throws SQLException
+	 */
+	public static void importAll() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
+		importAll(0);
+	}
+
 
 	/**
 	 * 
@@ -115,41 +172,41 @@ public class FromMysqlToPostgres {
 	 * metodo per il popolamento delle absenceType
 	 * 
 	 */
-	public static void importAbsenceTypes() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+	public static int importAbsenceTypes() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		Logger.debug("Inizio ad importare gli AbsenceType");
+
+
+		long absenceTypeCount = AbsenceType.count();
+		if (absenceTypeCount > 0) {
+			Logger.warn("Sono già presenti %s AbsenceType nell'applicazione, non verranno importati nuovi AbsenceType dalla vecchia applicazione");
+			return 0;
+		}
+		int importedAbsenceTypes = 0;
 		
 		Connection mysqlCon = getMysqlConnection();
-		PreparedStatement stmtParam = mysqlCon.prepareStatement("Select * "+
-				"from Codici " +
-				"where Codici.id != 0");
-		ResultSet rsParam = stmtParam.executeQuery();
+		PreparedStatement stmtCodici = mysqlCon.prepareStatement("Select * from Codici where Codici.id != 0");
+		ResultSet rsCodici = stmtCodici.executeQuery();
 
 		AbsenceTypeGroup absTypeGroup = null;
-		while(rsParam.next()){
+		while(rsCodici.next()){
 			AbsenceType absenceType = new AbsenceType();
 
-			absenceType.code = rsParam.getString("Codice");
-			absenceType.description = rsParam.getString("Descrizione");
-			absenceType.validFrom = new LocalDate(rsParam.getDate("DataInizio"));
-			absenceType.validTo = new LocalDate(rsParam.getDate("DataFine"));
+			absenceType.code = rsCodici.getString("Codice");
+			absenceType.description = rsCodici.getString("Descrizione");
+			absenceType.validFrom = new LocalDate(rsCodici.getDate("DataInizio"));
+			absenceType.validTo = new LocalDate(rsCodici.getDate("DataFine"));
 
-			if(rsParam.getByte("Interno")==0)
-				absenceType.internalUse = false;
-			else
-				absenceType.internalUse = true;
-			if(rsParam.getByte("IgnoraTimbr")==0)
-				absenceType.ignoreStamping = false;
-			else 
-				absenceType.ignoreStamping = true;	
+			absenceType.internalUse = rsCodici.getByte("Interno") != 0; 
+			absenceType.ignoreStamping =  rsCodici.getByte("IgnoraTimbr") != 0;
 
 
 			/**
 			 * caso di assenze orarie
 			 */
-			if(rsParam.getInt("QuantGiust") != 0){
+			if(rsCodici.getInt("QuantGiust") != 0){
 				absenceType.isHourlyAbsence = true;
 				absenceType.isDailyAbsence = false;
-				absenceType.justifiedWorkTime = rsParam.getInt("QuantGiust");
+				absenceType.justifiedWorkTime = rsCodici.getInt("QuantGiust");
 
 			}
 			/**
@@ -161,14 +218,14 @@ public class FromMysqlToPostgres {
 
 			}				
 
-			if(rsParam.getString("Gruppo")!=null){
-				String gruppo = rsParam.getString("Gruppo");
+			if(rsCodici.getString("Gruppo")!=null){
+				String gruppo = rsCodici.getString("Gruppo");
 				if(mappaCodiciAbsenceTypeGroup.get(gruppo) == null){
 					absTypeGroup = new AbsenceTypeGroup();
 
-					absTypeGroup.label = rsParam.getString("Gruppo");
-					absTypeGroup.limitInMinute = rsParam.getInt("Limite");
-					int gestioneLimite = rsParam.getInt("GestLim");
+					absTypeGroup.label = gruppo;
+					absTypeGroup.limitInMinute = rsCodici.getInt("Limite");
+					int gestioneLimite = rsCodici.getInt("GestLim");
 					switch (gestioneLimite){
 					case 0:
 						absTypeGroup.accumulationBehaviour = AccumulationBehaviour.nothing;
@@ -180,10 +237,13 @@ public class FromMysqlToPostgres {
 						absTypeGroup.accumulationBehaviour = AccumulationBehaviour.noMoreAbsencesAccepted;
 						break;
 					default:
-						break;
+						throw new IllegalStateException(
+								String.format("Valore del parametro GestLim = %s del gruppo di codici %s non supportato dalla nuova applicazione, " +
+										"non esiste un corrispettivo AccumulationBehaviour", 
+										gestioneLimite, absTypeGroup.label));
 					}
 
-					int accumulo = rsParam.getInt("Accumulo");
+					int accumulo = rsCodici.getInt("Accumulo");
 					switch (accumulo){
 					case 0:
 						absTypeGroup.accumulationType = AccumulationType.no;
@@ -197,40 +257,40 @@ public class FromMysqlToPostgres {
 					case 3:
 						absTypeGroup.accumulationType = AccumulationType.always;
 						break;
-					default: 
-						break;
-
+					default:
+						throw new IllegalStateException(
+								String.format("Valore del parametro accumulo = \"%s\" non supportato dalla nuova applicazione, " +
+										"non esiste un corrispettivo AccumulationType", accumulo));
 					}
 
-					//absTypeGroup.replacingAbsenceType = 
-					if(rsParam.getByte("MinutiEccesso")==0)
-						absTypeGroup.minutesExcess = false;
-					else 
-						absTypeGroup.minutesExcess = true; 
+					absTypeGroup.minutesExcess = rsCodici.getByte("MinutiEccesso") != 0;
+
 					absTypeGroup.save();
 					Logger.info("Creato absenceTypeGroup %s", absTypeGroup.label);
 					absenceType.absenceTypeGroup = absTypeGroup;
-					mappaCodiciAbsenceTypeGroup.put(gruppo, gruppo);
+					mappaCodiciAbsenceTypeGroup.put(gruppo, absTypeGroup);
 				}
 				else{
-					absTypeGroup = AbsenceTypeGroup.find("Select abg from AbsenceTypeGroup abg " +
-							"where abg.label = ?", mappaCodiciAbsenceTypeGroup.get(gruppo)).first();
+					absTypeGroup = mappaCodiciAbsenceTypeGroup.get(gruppo);
 					absenceType.absenceTypeGroup = absTypeGroup;
 				}
-
+				
 			}
 
 			absenceType.save();				
 			Logger.info("Creato absenceType %s - %s", absenceType.code, absenceType.description);
+			
+			importedAbsenceTypes++;
 		}
+		return importedAbsenceTypes;
 	}
 
 	/**
 	 * metodo per la giunzione tra absenceType e Qualifications
 	 */
 	public static void createAbsenceTypeToQualificationRelations(){
+		Logger.debug("Aggiungo le qualfiche possibili agli AbsenceType");
 		List<AbsenceType> listaAssenze = AbsenceType.findAll();
-		//Logger.info("ListaAssenze è lunga: "+listaAssenze.size());
 		for(AbsenceType absenceType : listaAssenze){
 
 			if(absenceType.code.equals("OA1") || absenceType.code.equals("OA2") || absenceType.code.equals("OA3") 
@@ -241,94 +301,35 @@ public class FromMysqlToPostgres {
 				long id3 = 3;
 
 				Qualification qual1 = Qualification.findById(id1);
-				//	Logger.info("La qualifica 1: ", qual1.qualification);
 				Qualification qual2 = Qualification.findById(id2);
 				Qualification qual3 = Qualification.findById(id3);
-				if(absenceType.qualifications == null){
-					absenceType.qualifications = new ArrayList<Qualification>();
+				
+				if(absenceType.qualifications.isEmpty()){
 					absenceType.qualifications.add(qual1);
-
 					absenceType.qualifications.add(qual2);
 					absenceType.qualifications.add(qual3);
-
+					Logger.debug("Aggiunte le qualifiche 1-2-3 all'AbsenceCode %s", absenceType.code);
 				}
 
-				absenceType.save();
 			}
 			else{
-
 				List<Qualification> listaQual = Qualification.findAll();
-
-				for(Qualification qual : listaQual){
-					if(absenceType.qualifications == null){
-						absenceType.qualifications = new ArrayList<Qualification>();
-						absenceType.qualifications.add(qual);
-					}					
-
-					absenceType.save();
-				}
-
+				absenceType.qualifications.addAll(listaQual);
+				Logger.debug("Aggiunte tutte le qualifiche all'AbsenceCode %s", absenceType.code);
 			}
 		}		
 
 	}
 
-	public static void createWorkinTimeTypeNormaleMod() {
-		Logger.debug("Inizio a creare il workingTimeType \"normale-mod\"");
-		WorkingTimeType wttNew = new WorkingTimeType();
-		wttNew.description = "normale-mod";
-		wttNew.shift = false;
-		wttNew.save();
-
-		mappaCodiciWorkingTimeType.put(-1,wttNew.id);
-		
-		WorkingTimeTypeDay wttd = null;
-		for(int dayOfWeek=1; dayOfWeek<=5; dayOfWeek++){
-			wttd = new WorkingTimeTypeDay();
-			wttd.workingTimeType = wttNew;
-			wttd.breakTicketTime = 30;
-			wttd.dayOfWeek = dayOfWeek;
-			wttd.holiday = false;
-			wttd.mealTicketTime = 360;
-			wttd.timeMealFrom = 0;
-			wttd.timeMealTo = 0;
-			wttd.timeSlotEntranceFrom = 0;
-			wttd.timeSlotEntranceTo = 0;
-			wttd.timeSlotExitFrom = 0;
-			wttd.timeSlotExitTo = 0;
-			wttd.willBeSaved = false;
-			wttd.workingTime = 432;
-			wttd.save();
-			Logger.debug("Creato il WorkingTimeTypeDay per il giorno %d del WorkingTimeType %s", dayOfWeek, wttNew.description);
-
-		}
-		for(int dayOfWeek=6; dayOfWeek <= 7; dayOfWeek++){
-			wttd = new WorkingTimeTypeDay();
-			wttd.workingTimeType = wttNew;
-			wttd.breakTicketTime = 30;
-			wttd.dayOfWeek = dayOfWeek;
-			wttd.holiday = true;
-			wttd.mealTicketTime = 360;
-			wttd.timeMealFrom = 0;
-			wttd.timeMealTo = 0;
-			wttd.timeSlotEntranceFrom = 0;
-			wttd.timeSlotEntranceTo = 0;
-			wttd.timeSlotExitFrom = 0;
-			wttd.timeSlotExitTo = 0;
-			wttd.willBeSaved = false;
-			wttd.workingTime = 432;
-			wttd.save();
-			Logger.debug("Creato il WorkingTimeTypeDay per il giorno %d del WorkingTimeType %s", dayOfWeek, wttNew.description);
-		}
-	}
-	
-	public static void importWorkingTimeTypes() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
+	public static int importWorkingTimeTypes() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 		Logger.debug("Comincio l'importazione dei WorkingTimeType");
 		Long workingTimeTypeCount = WorkingTimeType.count();
-		if (workingTimeTypeCount > 0) {
+		if (workingTimeTypeCount > 1) {
 			Logger.warn("Ci sono %s WorkingTimeType presenti nel database, i workingTimeType NON verranno importati dal database MySQL", workingTimeTypeCount);
-			return;
+			return 0;
 		}
+
+		int importedWorkingTimeTypes = 0;
 		
 		Connection mysqlCon = FromMysqlToPostgres.getMysqlConnection();
 
@@ -336,13 +337,13 @@ public class FromMysqlToPostgres {
 
 		PreparedStatement selectOrariDiLavoro = mysqlCon.prepareStatement("select * from orari_di_lavoro");
 		ResultSet orarioDiLavoro = selectOrariDiLavoro.executeQuery();
-		
+
 		while(orarioDiLavoro.next()){
 
 			Integer idCodiceOrarioLavoro = orarioDiLavoro.getInt("id");
 
 			if(mappaCodiciWorkingTimeType.get(idCodiceOrarioLavoro)!=null){
-				wtt = WorkingTimeType.findById(mappaCodiciWorkingTimeType.get(idCodiceOrarioLavoro));
+				wtt = mappaCodiciWorkingTimeType.get(idCodiceOrarioLavoro);
 			}
 			else{					
 				wtt = new WorkingTimeType();				
@@ -351,15 +352,15 @@ public class FromMysqlToPostgres {
 				wtt.shift = orarioDiLavoro.getBoolean("turno");
 				wtt.save();
 				Logger.info("Creato il WorkingTimeType %s", wtt.description);
-				
-				mappaCodiciWorkingTimeType.put(idCodiceOrarioLavoro,wtt.id);
+
+				mappaCodiciWorkingTimeType.put(idCodiceOrarioLavoro,wtt);
 
 				WorkingTimeTypeDay wttd = null;
 				ImmutableMap<Integer, String> weekDays = 
-					ImmutableMap.<Integer, String>builder()
+						ImmutableMap.<Integer, String>builder()
 						.put(1, "lu").put(2, "ma").put(3, "me").put(4, "gi").put(5, "ve").put(6, "sa").put(7, "do")
 						.build();
-				
+
 				for (int dayOfWeek = 1; dayOfWeek <= 7; dayOfWeek++) {
 					wttd = new WorkingTimeTypeDay();
 					wttd.workingTimeType = wtt;
@@ -379,62 +380,16 @@ public class FromMysqlToPostgres {
 					Logger.debug("Creato il WorkingTimeTypeDay per il giorno %d del WorkingTimeType %s", dayOfWeek, wtt.description);
 				}
 			}
+			importedWorkingTimeTypes++;
 		}
+		return importedWorkingTimeTypes;
 	}
 
-	public static void importAll(int limit) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
-		Connection mysqlCon = FromMysqlToPostgres.getMysqlConnection();
-		EntityManager em = JPA.em();
 
-		String sql = "SELECT ID, Nome, Cognome, DataNascita, Telefono," +
-				"Fax, Email, Stanza, Matricola, passwordmd5, Qualifica, Dipartimento, Sede " +
-				"FROM Persone order by ID";
-		if (limit > 0) {
-			sql += " LIMIT " + limit;
-		}
-		PreparedStatement stmt = mysqlCon.prepareStatement(sql);
-			
-		ResultSet rs = stmt.executeQuery();
 
-		while(rs.next()){
-			Logger.info("Creazione delle info per la persona: %s %s", rs.getString("Nome"), rs.getString("Cognome"));
+	public static Person createPerson(ResultSet rs) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
+		Logger.debug("Inizio a creare la persona %s %s", rs.getString("Nome"), rs.getString("Cognome"));
 
-			Person person = FromMysqlToPostgres.createPerson(rs, em);
-
-			FromMysqlToPostgres.createContactData(rs, person, em);
-
-			FromMysqlToPostgres.createLocation(rs, person, em);
-
-			FromMysqlToPostgres.createWorkingTimeType(rs, person, em);
-
-			FromMysqlToPostgres.createValuableCompetence(rs.getInt("Matricola"), person, em);
-
-			FromMysqlToPostgres.createContract(rs.getLong("ID"), person, em);
-
-			FromMysqlToPostgres.createVacations(rs.getLong("ID"), person, em);
-
-			FromMysqlToPostgres.createVacationType(rs.getLong("ID"), person, em);	
-
-			FromMysqlToPostgres.createYearRecap(rs.getLong("ID"), person, em);
-
-			FromMysqlToPostgres.createMonthRecap(rs.getLong("ID"), person, em);
-
-			FromMysqlToPostgres.createCompetence(rs.getLong("ID"), person, em);
-
-			FromMysqlToPostgres.createStampings(rs.getLong("ID"), person, em);
-
-		}		
-	}
-	
-	public static void importAll() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
-		importAll(0);
-	}
-
-	@SuppressWarnings("unused")
-	public static Person createPerson(ResultSet rs, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-		Logger.info("Inizio a creare la persona %s %s", rs.getString("Nome"), rs.getString("Cognome"));
-
-		long id = rs.getLong("ID");
 		Person person = Person.find("Select p from Person p where p.name = ? and p.surname = ?", rs.getString("Nome"), rs.getString("Cognome")).first();
 		if(person == null){
 			person = new Person();
@@ -444,51 +399,41 @@ public class FromMysqlToPostgres {
 			person.password = rs.getString("passwordmd5");
 			person.bornDate = rs.getDate("DataNascita");
 			person.number = rs.getInt("Matricola");
-			em.persist(person);
-			//person.validateAndSave();
+			person.save();
 
 		}
 
 		return person;
 	}	
 
-	public static void createWorkingTimeType(ResultSet rs, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
+	public static void createWorkingTimeType(int oldIDPersona, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
 		if (person == null) {
 			throw new IllegalArgumentException("Person should not be null at this point");
 		}
-		
-		Logger.info("Inizio a creare il working time type per %s %s", person.name, person.surname);
-		long id = rs.getLong("ID");
+
+		Logger.debug("Inizio a creare il working time type per %s", person);
+
 		Connection mysqlCon = getMysqlConnection();
-		PreparedStatement stmt2 = mysqlCon.prepareStatement("select * from orari_di_lavoro,orario_pers " +
-				" WHERE orario_pers.oid=orari_di_lavoro.id and orario_pers.pid = " + id + " order by data_fine desc limit 1");
-		ResultSet rsInterno = stmt2.executeQuery();
-		while(rsInterno.next()){
-			String descr = rsInterno.getString("nome");
-			WorkingTimeType wtt = null;
-			if(descr == null){
-				wtt = WorkingTimeType.find("Select wtt from WorkingTimeType wtt where wtt.description = ?", "normale-mod").first();				
-			}
-			else{
-				wtt = WorkingTimeType.find("Select wtt from WorkingTimeType wtt where wtt.description = ?", descr).first();
-			}
-			if(person == null){
-				Logger.info("A questo punto della create working time type la person è null. Faccio la find...");
-				person = Person.find("Select p from Person p where p.name = ? and p.surname = ?", 
-						rs.getString("Nome"), rs.getString("Cognome")).first();
-				Logger.info("La person è: %d %d", person.name, person.surname);
-			}
-
-			person.workingTimeType = wtt;
-			person.save();
-
+		PreparedStatement stmt = mysqlCon.prepareStatement("select odl.id, odl.nome from orari_di_lavoro as odl JOIN orario_pers op " +
+				" ON op.oid = odl.id " +
+				" WHERE op.pid = " + oldIDPersona + " order by op.data_fine desc limit 1");
+		ResultSet rs = stmt.executeQuery();
+		
+		WorkingTimeType wtt = null;
+		if(rs.next()){
+			wtt = mappaCodiciWorkingTimeType.get(rs.getInt("id"));
+		} else {
+			//Non c'è nessun orario di lavoro impostato per la Persona quindi impostiamo l'orario predefinito che è il normale-mod
+			wtt = WorkingTimeType.em().getReference(WorkingTimeType.class, WorkingTimeTypeValues.NORMALE_MOD.getId());
 		}
-		Logger.info("Creato il workingTimeType per %s %s e aggiornata la persona", person.name, person.surname);
+		person.workingTimeType = wtt;
+		person.save();
+		Logger.info("Creato il workingTimeType %s per %s", wtt.description, person);
 	}
 
 
 	public static void createContactData(ResultSet rs, Person person, EntityManager em) throws SQLException {
-		Logger.info("Inizio a creare il contact data per %s %s", person.name, person.surname);
+		Logger.debug("Inizio a creare il contact data per %s %s", person.name, person.surname);
 		ContactData contactData = new ContactData();
 		contactData.person = person;
 
@@ -523,89 +468,91 @@ public class FromMysqlToPostgres {
 			contactData.telephone = "No phone number";		
 		}
 		em.persist(contactData);
+		Logger.info("Creato il contactData per %s", person);
 	}
 
 	public static void createLocation(ResultSet rs, Person person, EntityManager em) throws SQLException{
-		Logger.info("Inizio a creare la location per %s %s", person.name, person.surname);
+		Logger.debug("Inizio a creare la location per %s %s", person.name, person.surname);
 		Location location = new Location();
 		location.person = person;
 
 		location.department = rs.getString("Dipartimento");
 		location.headOffice = rs.getString("Sede");
 		location.room = rs.getString("Stanza");		
-		em.persist(location);	
+		em.persist(location);
+		Logger.info("Creata la location per %s", person);
 	}
 
 
 
 	/**
-	 * 
-	 * @param id
-	 * @param person
-	 * @param em
 	 * metodo che crea un contratto per la persona in questione. Se è già presente un contratto per quella persona,
 	 * questo viene cancellato nel caso in cui la data di fine del contratto già salvato sia inferiore alla data inizio
 	 * del nuovo contratto così da salvare nello storico il contratto precedente.
+	 *  
+	 * @param id
+	 * @param person
+	 * @param em
 	 */
-    public static void createContract(long id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-	
-        Logger.info("Inizio a creare il contratto per %s %s", person.name, person.surname);	
-        Connection mysqlCon = getMysqlConnection();	
-        PreparedStatement stmtContratto = mysqlCon.prepareStatement("SELECT id,DataInizio,DataFine,continua " +	
-                        "FROM Personedate WHERE id=" + id + " order by DataInizio");	
-        ResultSet rs = stmtContratto.executeQuery();       	
-        Contract contract = null;
-        while(rs.next()){
-        	LocalDate startContract = null;
-        	LocalDate endContract = null;
-        	Date begin = rs.getDate("DataInizio");
-    		Date end = rs.getDate("DataFine");
-        	if(begin == null && end == null){
-    			/**
-    			 * le date non sono valorizzate, si costruisce un contratto con date fittizie
-    			 */
-        		startContract = new LocalDate(1971,12,31);
-        		endContract = new LocalDate(2099,1,1);
-    		}
-    		if(begin != null && end == null){
-    			/**
-    			 * è il caso dei contratti a tempo indeterminato che non hanno data di fine valorizzata. posso lasciarla anche
-    			 * io a null
-    			 */
-    			startContract = new LocalDate(begin);
-    			endContract = null;
-    		}
-    		if(begin != null && end != null){
-    			/**
-    			 * entrambi gli estremi valorizzati, contratto a tempo determinato, si inseriscono entrambe
-    			 */
-    			startContract = new LocalDate(begin);
-    			endContract = new LocalDate(end);
-    		}
-        	contract = Contract.find("Select con from Contract con where con.person = ? ", person).first();
-        	if(contract == null){
-        		contract = new Contract();
-        		//contract.person = person;
-        		contract.beginContract = startContract;
-        		contract.expireContract = endContract;       		        		
-        	}
-        	else{
-        		
-        		if(rs.getByte("continua")==1){
-        			contract.expireContract = endContract;        			            		
-        		}
-        		else{
-        			contract = new Contract();
-        			//contract.person = person;
-        			contract.beginContract = startContract;
-            		contract.expireContract = endContract;            		            		
-        		}
-        	}    		   		 
+	public static void createContract(long id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+		Logger.debug("Inizio a creare il contratto per %s %s", person.name, person.surname);	
+		
+		Connection mysqlCon = getMysqlConnection();	
+		PreparedStatement stmtContratto = mysqlCon.prepareStatement("SELECT id,DataInizio,DataFine,continua " +	
+				"FROM Personedate WHERE id=" + id + " order by DataInizio");	
+		ResultSet rs = stmtContratto.executeQuery();       	
+		Contract contract = null;
+		while(rs.next()){
+			LocalDate startContract = null;
+			LocalDate endContract = null;
+			Date begin = rs.getDate("DataInizio");
+			Date end = rs.getDate("DataFine");
+			if(begin == null && end == null){
+				/**
+				 * le date non sono valorizzate, si costruisce un contratto con date fittizie
+				 */
+				startContract = new LocalDate(1971,12,31);
+				endContract = new LocalDate(2099,1,1);
+			}
+			if(begin != null && end == null){
+				/**
+				 * è il caso dei contratti a tempo indeterminato che non hanno data di fine valorizzata. posso lasciarla anche
+				 * io a null
+				 */
+				startContract = new LocalDate(begin);
+				endContract = null;
+			}
+			if(begin != null && end != null){
+				/**
+				 * entrambi gli estremi valorizzati, contratto a tempo determinato, si inseriscono entrambe
+				 */
+				startContract = new LocalDate(begin);
+				endContract = new LocalDate(end);
+			}
+			contract = Contract.find("Select con from Contract con where con.person = ? ", person).first();
+			if(contract == null){
+				contract = new Contract();
+				//contract.person = person;
+				contract.beginContract = startContract;
+				contract.expireContract = endContract;       		        		
+			}
+			else{
 
-    		contract.save();
-    		contract.person = person;
-    		person.save();
-			Logger.debug("Aggiunto contratto %s per %s ", contract, person.surname);
+				if(rs.getByte("continua")==1){
+					contract.expireContract = endContract;        			            		
+				}
+				else{
+					contract = new Contract();
+					//contract.person = person;
+					contract.beginContract = startContract;
+					contract.expireContract = endContract;            		            		
+				}
+			}    		   		 
+
+			contract.save();
+			contract.person = person;
+			person.save();
+			Logger.info("Aggiunto contratto %s per %s ", contract, person.surname);
 
 		}
 		mysqlCon.close();
@@ -628,14 +575,13 @@ public class FromMysqlToPostgres {
 
 		ResultSet rs = stmtOrari.executeQuery();
 
-		StampType stampType = null;
 		PersonDay pd = null;
 		Absence absence = null;
 		AbsenceType absenceType = null;
 		Stamping stamping = null;
 		LocalDate data = null;
 		LocalDate newData = null;
-		byte tipoTimbratura;
+		long tipoTimbratura;
 		while(rs.next()){
 
 			/**
@@ -686,37 +632,13 @@ public class FromMysqlToPostgres {
 
 					}
 					pd.save();
-					int idCodiceTimbratura = rs.getInt("TipoTimbratura");
-					tipoTimbratura = rs.getByte("TipoTimbratura");
-					if(mappaCodiciStampType.get(idCodiceTimbratura)== null){				
 
-						stampType = new StampType();				
-
-						if((tipoTimbratura % 2 == 1) && (tipoTimbratura / 2 == 0)){
-							stampType.description = "Timbratura di ingresso";					
-						}
-						if((tipoTimbratura % 2 == 0) && (tipoTimbratura / 2 == 1) ){
-							stampType.description = "Timbratura d'uscita per pranzo";
-						}
-						if((tipoTimbratura % 2 == 1) && (tipoTimbratura / 2 == 1 )){
-							stampType.description = "Timbratura di ingresso dopo pausa pranzo";
-						}
-						if((tipoTimbratura % 2 == 0) && (tipoTimbratura / 2 == 2)){
-							stampType.description = "Timbratura di uscita";
-						}
-
-						em.persist(stampType);	
-						mappaCodiciStampType.put(idCodiceTimbratura,stampType.id);
-					}
-					else{
-						stampType = StampType.findById(mappaCodiciStampType.get(idCodiceTimbratura));	
-					}
+					tipoTimbratura = rs.getLong("TipoTimbratura"); 
 
 					stamping = new Stamping();
-					stamping.stampType = stampType;	
 
 					if(tipoTimbratura % 2 != 0)
-						stamping.way = WayType.in;					
+						stamping.way = WayType.in;	
 					else
 						stamping.way = WayType.out;
 
@@ -732,7 +654,6 @@ public class FromMysqlToPostgres {
 							if(s == null){
 								stamping.date = null;
 								stamping.markedByAdmin = false;
-								stamping.serviceExit = false;
 							}
 							else{
 								if(s.startsWith("-")){
@@ -751,7 +672,7 @@ public class FromMysqlToPostgres {
 									stamping.date = new LocalDateTime(year,month,day,hour,minute,second);
 
 									stamping.markedByAdmin = false;
-									stamping.serviceExit = true;
+									stamping.stampType = StampType.em().getReference(StampType.class, StampTypeValues.MOTIVI_DI_SERVIZIO.getId());
 								}
 								else{
 
@@ -775,14 +696,12 @@ public class FromMysqlToPostgres {
 										stamping.date = new LocalDateTime(year,month,day,newHour,min,second);
 
 										stamping.markedByAdmin = true;
-										stamping.serviceExit = false;
 									}						
 
 									else{
 										if(hour == 24){
 											stamping.date = new LocalDateTime(year,month,day,0,minute,second).plusDays(1);
 											stamping.markedByAdmin = true;
-											stamping.serviceExit = false;
 										}
 										else{
 
@@ -790,7 +709,6 @@ public class FromMysqlToPostgres {
 											stamping.date = new LocalDateTime(year,month,day,hour,minute,second);
 
 											stamping.markedByAdmin = false;
-											stamping.serviceExit = false;
 
 										}
 									}
@@ -859,48 +777,8 @@ public class FromMysqlToPostgres {
 		mysqlCon.close();
 	}
 
-	/**
-	 * TODO: questo metodo va riscritto dal momento che le absenceType sono già state definite prima della procedura di importazione.
-	 * Quindi occorrerà recuperare solo le assenze e associarle a absenceType già esistenti che si possono recuperare sul db grazie
-	 * a semplici find
-	 * 
-	 * @param id
-	 * @param person
-	 * @param em
-	 * @throws InstantiationException
-	 * @throws IllegalAccessException
-	 * @throws ClassNotFoundException
-	 * @throws SQLException
-	 */
-
-	public static void createVacations(long id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
-		/**
-		 * query su Orario per popolare PersonVacation
-		 */
-		Logger.info("Inizio a creare le ferie per %s %s", person.name, person.surname);
-		Connection mysqlCon = getMysqlConnection();
-		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM Orario WHERE TipoGiorno = 32 and TipoGiorno = 31 and id=" + id);
-		ResultSet rs = stmt.executeQuery();
-		PersonVacation personVacation = null;
-
-		try{
-			if(rs != null){				
-				while(rs.next()){
-					personVacation = new PersonVacation(person, rs.getDate("Giorno"));
-					em.persist(personVacation);
-				}
-			}
-		}
-		catch(SQLException sqle) {				
-			sqle.printStackTrace();
-			Logger.warn("Ferie errate. Persona con id="+id);				
-		}	
-
-		mysqlCon.close();
-	}
-
 	public static void createVacationType(long id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-		Logger.info("Inizio a creare i periodi di ferie per %s %s", person.name ,person.surname);
+		Logger.debug("Inizio a creare i periodi di ferie per %s %s", person.name ,person.surname);
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * " +
 				"FROM ferie f,ferie_pers fp " +
@@ -936,13 +814,12 @@ public class FromMysqlToPostgres {
 
 						em.persist(vacationCode);
 						Logger.debug("Creato un nuovo vacation code con id = , description = %s", vacationCode.id, vacationCode.description);
-						mappaCodiciVacationType.put(idCodiciFerie,vacationCode.id);
+						mappaCodiciVacationType.put(idCodiciFerie,vacationCode);
 
 					}
 					else {
 						Logger.trace("Il codice era presente, devo quindi fare una find per recuperare l'oggetto vacationCode");
-						vacationCode = VacationCode.findById(mappaCodiciVacationType.get(idCodiciFerie));
-
+						vacationCode = mappaCodiciVacationType.get(idCodiciFerie);
 					}
 
 					vacationPeriod.vacationCode = vacationCode;
@@ -1106,10 +983,10 @@ public class FromMysqlToPostgres {
 				em.persist(competenceCode);
 				em.persist(competence);
 
-				mappaCodiciCompetence.put(idCodiciCompetenza,competenceCode.id);
+				mappaCodiciCompetence.put(idCodiciCompetenza,competenceCode);
 
 			} else {
-				competenceCode = CompetenceCode.findById(mappaCodiciCompetence.get(idCodiciCompetenza));
+				competenceCode = mappaCodiciCompetence.get(idCodiciCompetenza);
 				competence.competenceCode = competenceCode;				
 				competenceCode.description = rs.getString("descrizione");
 
@@ -1133,6 +1010,7 @@ public class FromMysqlToPostgres {
 	 * @param matricola
 	 * @param person
 	 * @param em
+	 * 
 	 * @throws InstantiationException
 	 * @throws IllegalAccessException
 	 * @throws ClassNotFoundException
@@ -1157,23 +1035,5 @@ public class FromMysqlToPostgres {
 
 	}
 
-	/**
-	 * funzione di popolamento provvisoria per la stampmodificationtype
-	 * @param em
-	 */
-	public static void createStampModificationType(){
-		Logger.info("Inizio a creare le modification type ");
-		StampModificationType smt1 = new StampModificationType();
-		smt1.code = "p";
-		smt1.description = "Tempo calcolato togliendo dal tempo di lavoro la durata dell'intervallo pranzo";
-		smt1.save();
-		Logger.info("Creato lo StampModificationType %s - %s", smt1.code, smt1.description);
-		StampModificationType smt2 = new StampModificationType();
-		smt2.code = "e";
-		smt2.description = "Ora di entrata calcolata perché la durata dell'intervallo pranzo è minore del minimo";
-		smt2.save();
-		Logger.info("Creato lo StampModificationType %s - %s", smt2.code, smt2.description);
-	}
-	 
 }
 
