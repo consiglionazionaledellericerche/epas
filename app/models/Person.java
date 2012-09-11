@@ -219,7 +219,7 @@ public class Person extends Model {
 			Logger.warn("Siamo nel bottino che il contratto è nullo per %s", this);
 			throw new IllegalStateException(String.format("Il contratto della persona %s è nullo", this));
 		}
-		LocalDate now = new LocalDate();
+		LocalDate now = LocalDate.now();
 		if(contract.expireContract == null && contract.beginContract != null){
 			/**
 			 * il contratto attuale è a tempo indeterminato, controllo che sia in vigore da più di 3 anni 
@@ -233,7 +233,7 @@ public class Person extends Model {
 				if(vacation == null){
 					VacationPeriod vacationPeriod = new VacationPeriod();
 					vacationPeriod.person = this;
-					vacationPeriod.beginFrom = contract.beginContract.toDate();
+					vacationPeriod.beginFrom = contract.beginContract;
 					vacationPeriod.endTo = null;
 					vacationPeriod.vacationCode = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", "28+4").first();
 					vacationPeriod.save();
@@ -265,7 +265,7 @@ public class Person extends Model {
 						period = new VacationPeriod();
 						period.person = this;
 						period.vacationCode = vacation;
-						period.beginFrom = new LocalDate().toDate();
+						period.beginFrom = LocalDate.now();
 						period.endTo = null;
 						period.save();
 					}
@@ -382,7 +382,7 @@ public class Person extends Model {
 	 * @return il contratto attualmente attivo per quella persona
 	 */
 	public Contract getCurrentContract(){
-		return getContract(new LocalDate());
+		return getContract(LocalDate.now());
 	}
 	
 	@Override

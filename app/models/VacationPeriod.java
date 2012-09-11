@@ -7,6 +7,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
@@ -14,10 +15,12 @@ import javax.persistence.Table;
 
 import lombok.ToString;
 
+import org.hibernate.annotations.Type;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.query.AuditQuery;
+import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
 import play.data.validation.Unique;
@@ -32,7 +35,7 @@ public class VacationPeriod extends Model{
 	private static final long serialVersionUID = 7082224747753675170L;
 
 	@Required
-	@ManyToOne(cascade={})
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name="vacation_codes_id", nullable=false)
 	public VacationCode vacationCode;
 	
@@ -42,11 +45,13 @@ public class VacationPeriod extends Model{
 	@JoinColumn(name="person_id", unique=true, nullable=false, updatable=false)
 	public Person person;
 	
+	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="begin_from")
-	public Date beginFrom;
+	public LocalDate beginFrom;
 	
+	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="end_to")
-	public Date endTo;
+	public LocalDate endTo;
 	
 	/**
 	 * 
@@ -59,6 +64,10 @@ public class VacationPeriod extends Model{
 		return vacationList;
 	}
 	
-	
+	@Override
+	public String toString() {
+		return String.format("VacactionPeriod[%d] - person.id = %d, vacactionCode.description = %s, beginFrom = %s, endTo = %s",
+			id, person.id, vacationCode.description, beginFrom, endTo);
+	}
 	
 }

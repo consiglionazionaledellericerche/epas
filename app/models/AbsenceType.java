@@ -41,9 +41,6 @@ import play.db.jpa.Model;
 public class AbsenceType extends Model {
 	
 	private static final long serialVersionUID = 7157167508454574329L;
-
-	@OneToMany(mappedBy="absenceType", fetch = FetchType.LAZY)
-	public List<Absence> absences = new ArrayList<Absence>();	
 	
 	@ManyToOne
 	@JoinColumn(name="absence_type_group_id")

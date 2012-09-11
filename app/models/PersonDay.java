@@ -87,13 +87,7 @@ public class PersonDay extends Model {
 	
 	@Enumerated(EnumType.STRING)
 	public PersonDayModificationType modificationType;
-
-	@Transient
-	private AbsenceType absenceType = null;
-	@Transient
-	private Absence absence = null;	
 	
-
 	@Transient
 	private boolean isMealTicketAvailable;
 
@@ -124,8 +118,8 @@ public class PersonDay extends Model {
 	
 		WorkingTimeTypeDay wttd2 = WorkingTimeTypeDay.find("Select wttd from WorkingTimeType wtt, WorkingTimeTypeDay wttd, Person p " +
 				"where p.workingTimeType = wtt and wttd.workingTimeType = wtt and p = ? and wttd.dayOfWeek = ? ", person, date.getDayOfWeek()).first();
-		Logger.debug("In isWorkingDay il giorno chiamato è: " +date.getDayOfWeek() +" mentre la persona è: " +person.id);
 		isWorkingDay = wttd2.holiday;
+		Logger.trace("%s. isWorkingDay = %s", this.toString(), isWorkingDay);
 		return isWorkingDay;
 	}
 	
@@ -135,46 +129,19 @@ public class PersonDay extends Model {
 	 * o più giorni di assenza e la cosa si può evincere direttamente dal personDay senza fare select
 	 */
 	public boolean isAbsent() {
-		if (getAbsence() != null) {
-			if (!stampings.isEmpty()) {
-				Logger.warn("Attenzione il giorno %s è presente un'assenza (%s) (Person = %s), però ci sono anche %d timbrature.", 
-					absence, absence.personDay.person, stampings.size());
-			}
-		}
-		return absence != null;
-	}
-	
-	/**
-	 * 
-	 * @return l'assenza o le assenze relative a quella persona in quella data
-	 */
-	public List<Absence> getAbsence(){
-	
-		return absences;
 		
+//		if (getAbsence() != null) {
+//			if (!stampings.isEmpty()) {
+//				Logger.info("Attenzione il giorno %s è presente un'assenza (%s) (Person = %s), però ci sono anche %d timbrature.", 
+//					absence, absence.personDay.person, stampings.size());
+//			}
+//		}
+//		return absence != null;
+		//TODO: da terminare!!!
+		return false;
 	}
 	
-	/**
-	 * metodo che popola la lista delle assenze collegate al personDay solo se la lista è vuota
-	 */
-	public void setAbsence(){
-		if(absences == null){
-			absences = Absence.find("Select abs from Absence where abs.date = ? and abs.personDay.person = ?", date, person).fetch();
-		}
-	}
-	/**
-	 * 
-	 * @return l'absenceType relativo alla persona in quella data
-	 */
-	public AbsenceType getAbsenceType() {
-		if (absenceType == null) {
-			
-			absenceType = AbsenceType.find("SELECT abt FROM Absence abs, AbsenceType abt, Person p WHERE abt = abs.absenceType AND " +
-					"abs.personDay.person = p AND p = ? AND abs.date = ? ", person, date).first();
-			
-		}
-		return absenceType;
-	}
+
 	
 	/**
 	 * 
@@ -305,8 +272,8 @@ public class PersonDay extends Model {
 						 * controllare nei casi in cui ci siano 4 timbrature e la pausa pranzo minore di 30 minuti che il tempo di 
 						 * lavoro ritornato sia effettivamente calcolato sulle timbrature effettive e non su quella aggiustata.
 						 */
-						List<WorkingTimeTypeDay> wttd = WorkingTimeTypeDay.find("Select wttd from WorkingTimeTypeDay wttd where wttd.workingTimeType = ?" +
-								"", person.workingTimeType).fetch();
+//						List<WorkingTimeTypeDay> wttd = WorkingTimeTypeDay.find("Select wttd from WorkingTimeTypeDay wttd where wttd.workingTimeType = ?" +
+//								"", person.workingTimeType).fetch();
 						
 						int minTimeForLunch = checkMinTimeForLunch(stampings);
 						if((stampings.size()==4) && (minTimeForLunch < getWorkingTimeTypeDay().breakTicketTime) && (!stampings.contains(null)))
@@ -324,7 +291,7 @@ public class PersonDay extends Model {
 
 		}		
 		timeAtWork = tempoLavoro;	
-		Logger.debug("TimeAtWork in %s for %s %s is %s", date, person.name, person.surname, timeAtWork);
+		Logger.trace("PersonDay[%d] - personId = %s, date = %s. TimeAtWork is %d", id, person.id, date, timeAtWork);
 		return timeAtWork;
 	}
 	
@@ -356,11 +323,12 @@ public class PersonDay extends Model {
 				
 				if(difference==0){
 					difference = getDifference();
-					Logger.debug("Difference today: "+difference);
+					Logger.trace("PersonDay[%d] - personId = %s, date = %s. Difference today is %d", id, person.id, date, difference);
+					Logger.trace("%s. Difference today: %s", this.toString(), difference);
 				}
 				
 				progressive = difference + pdYesterday.progressive;
-				Logger.debug("Progressive today: "+progressive);				
+				Logger.trace("PersonDay[%d] - personId = %s, date = %s. Progressive today is %d", id, person.id, date, progressive);				
 			}
 			
 		}
@@ -474,7 +442,7 @@ public class PersonDay extends Model {
 		WorkingTimeType wtt = person.workingTimeType;
 		if (wtt == null)
 			throw new IllegalStateException(String.format("Person %s has no working time type set", person));
-		for(WorkingTimeTypeDay wttd : wtt.workTimeTypeDays){
+		for(WorkingTimeTypeDay wttd : wtt.workingTimeTypeDays){
 			if(wttd.dayOfWeek == day)
 				return wttd;
 		}
@@ -607,7 +575,7 @@ public class PersonDay extends Model {
 //			}
 			int differenza = 0;
 			
-			int minTimeWorking = person.workingTimeType.workTimeTypeDays.get(date.getDayOfWeek() - 1).workingTime;
+			int minTimeWorking = person.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek() - 1).workingTime;
 			
 			
 			timeAtWork = timeAtWork();
@@ -649,7 +617,8 @@ public class PersonDay extends Model {
 				difference = differenza;			
 			}
 		}		
-		Logger.debug("Difference in %s for %s %s is %s",date, person.name, person.surname, difference);		
+		Logger.trace("PersonDay[%d] - personId = %s, date = %s. Difference is %d", id, person.id, date, difference);
+		
 		return difference;
 	}
 	
@@ -810,6 +779,10 @@ public class PersonDay extends Model {
 		}
 	}
 	
-	
+	@Override
+	public String toString() {
+		return String.format("PersonDay[%d] - person.id = %d, date = %s, difference = %s, isTicketAvailable = %s, modificationType = %s, progressive = %s, timeAtWork = %s",
+			id, person.id, date, difference, isTicketAvailable, modificationType, progressive, timeAtWork);
+	}
 	
 }
