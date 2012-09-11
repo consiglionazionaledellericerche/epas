@@ -24,8 +24,14 @@ public class CompetenceCode extends Model {
 	@OneToMany(mappedBy="competenceCode")
 	public List<Competence> competence;
 
+	@Required
 	public String description;
 	
 	@Required
 	public boolean inactive = false;
+	
+	@Override
+	public String toString() {
+		return String.format("CompetenceCode[%d] - description = %s", id, description);
+	}
 }

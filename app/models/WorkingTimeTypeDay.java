@@ -30,8 +30,8 @@ public class WorkingTimeTypeDay extends Model {
 	private static final long serialVersionUID = 4622948996966018754L;
 
 	@Required
-	@ManyToOne
-	@JoinColumn(name = "working_time_type_id")
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "working_time_type_id", nullable = false)
 	public WorkingTimeType workingTimeType;
 	
 	@Required
@@ -73,5 +73,12 @@ public class WorkingTimeTypeDay extends Model {
 	 */
 	public Integer timeMealTo;
 	
+	@Override
+	public String toString() {
+		return String.format("WorkingTimeTypeDay[%d] - dayOfWeek = %d, workingTimeType.id = %d, workingTime = %d, mealTicketTime = %d, breakTicketTime = %d, holiday = %s, " +
+			"timeSlotEntranceFrom = %d, timeSlotEntranceTo = %d, timeSlotExitFrom = %d, timeSlotExitTo = %d, timeMealFrom = %d, timeMealTo = %d",
+			id, dayOfWeek, workingTimeType.id, workingTime, mealTicketTime, breakTicketTime, holiday, timeSlotEntranceFrom, timeSlotEntranceTo, 
+			timeSlotExitFrom, timeSlotExitTo, timeMealFrom, timeMealTo);
+	}
 	
 }

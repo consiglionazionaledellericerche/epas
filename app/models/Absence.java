@@ -40,5 +40,9 @@ public class Absence extends Model {
 	@JoinColumn(name="personDay_id", nullable=false)
 	public PersonDay personDay;
 
-	
+	@Override
+	public String toString() {
+		return String.format("Absence[%d] - personDay.id = %d, date = %s, absenceType.id = %s", 
+			id, personDay.id, date, absenceType.id);
+	}
 }

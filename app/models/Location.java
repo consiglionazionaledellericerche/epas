@@ -29,4 +29,10 @@ public class Location extends Model {
 	public String headOffice;
  
 	public String room;
+	
+	@Override
+	public String toString() {
+		return String.format("Location[] - person.id = %d, department = %s, headOffice = %s, room = %s",
+			id, person.id, department, headOffice, room);
+	}
 }
