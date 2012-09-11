@@ -44,14 +44,14 @@ import play.db.jpa.Model;
 @Entity
 @Table(name = "month_recaps")
 public class MonthRecap extends Model {
-	
+
 	private static final long serialVersionUID = -448436166612631217L;
 
 	@Required
 	@ManyToOne
 	@JoinColumn(name = "person_id")
 	public Person person;
-	
+
 	@Required
 	public int month;
 
@@ -111,31 +111,31 @@ public class MonthRecap extends Model {
 	public int endNegative;
 
 	public String progressive;
-	
+
 	protected boolean persistent = false;
-	
+
 	@Transient
 	private List<PersonDay> days = null;
-	
+
 	@Transient
 	private List<String> months = null;
-	
+
 	@Transient	
 	private int progressiveOfDailyTime=0; 
-	
+
 	@Transient
 	private Map<AbsenceType, Integer> absenceCodeMap;
-	
+
 	@Transient
 	private List<StampModificationType> stampingCodeList;
-	
-	
+
+
 	protected MonthRecap(){
 		this.stampingCodeList = new ArrayList<StampModificationType>();
 		this.absenceCodeMap  = new HashMap<AbsenceType, Integer>();
 	}
 
-	
+
 	/**
 	 * Construttore di default con i parametri obbligatori
 	 * 
@@ -153,7 +153,7 @@ public class MonthRecap extends Model {
 		this.stampingCodeList = new ArrayList<StampModificationType>();
 		this.absenceCodeMap  = new HashMap<AbsenceType, Integer>();
 	}
-	
+
 	/**
 	 * Preleva dallo storage le il MonthRecap relativo ai dati passati.
 	 * Se il monthRecap non è presente sul db ritorna un'istanza vuota
@@ -179,24 +179,24 @@ public class MonthRecap extends Model {
 		monthRecap.persistent = true;
 		return monthRecap;
 	}
-	
-	
-	
-	
+
+
+
+
 
 	/**
 	 * 
 	 * @return la lista dei mesi
 	 */
 	public List<String> getMonths(){
-		
+
 		if(months!=null){
 			return months;
 		}
-		
+
 		months = new ArrayList<String>();
 		LocalDate firstMonthOfYear = new LocalDate(year, 1,1);
-		
+
 		for(int month = 1; month <= firstMonthOfYear.getMonthOfYear(); month++){
 			String mese = firstMonthOfYear.monthOfYear().getAsText();
 			months.add(mese);
@@ -204,7 +204,7 @@ public class MonthRecap extends Model {
 		}
 		return months;
 	}
-	
+
 	/**
 	 * @return la lista di giorni (PersonDay) associato alla persona nel mese di riferimento
 	 */
@@ -217,65 +217,65 @@ public class MonthRecap extends Model {
 		Calendar firstDayOfMonth = GregorianCalendar.getInstance();
 		//Nel calendar i mesi cominciano da zero
 		firstDayOfMonth.set(year, month - 1, 1);
-		
+
 		Logger.trace(" %s-%s-%s : maximum day of month = %s", 
-			year, month, 1, firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH));
-		
+				year, month, 1, firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH));
+
 		for (int day = 1; day <= firstDayOfMonth.getActualMaximum(Calendar.DAY_OF_MONTH); day++) {
-		
+
 			Logger.trace("generating PersonDay: person = %s, year = %d, month = %d, day = %d", person.username, year, month, day);
 			days.add(new PersonDay(person, new LocalDate(year, month, day), 0, 0, 0));
 		}
 		return days;
 	}	
-	
+
 	/**
 	 * 
 	 * @return il progressivo della differenza giornaliera tra orario di lavoro previsto e orario di lavoro effettivamente fatto
 	 */
 	private int getProgressive(int difference){
-		
-		
+
+
 		progressiveOfDailyTime=progressiveOfDailyTime+difference;
 		return progressiveOfDailyTime;
-		
+
 	}
 	/**
 	 * 
 	 * @param days lista di PersonDay
 	 * @return la lista contenente le assenze fatte nell'arco di tempo dalla persona
 	 */
-	
+
 	public Map<AbsenceType,Integer> getAbsenceCode(){
-		
+
 		if(days == null){
 			days = getDays();
 		}
 		if(absenceCodeMap.isEmpty()){
-			Integer i = 0;
+			int i = 0;
 			for(PersonDay pd : days){
-	             AbsenceType absenceType = pd.getAbsenceType();
-	             if(absenceType != null){
-	            	 boolean stato = absenceCodeMap.containsKey(absenceType);
-	            	 if(stato==false){
-	                	 i=1;
-	                	 absenceCodeMap.put(absenceType,i);            	 
-	                 }
-	            	 else{
-	                	 i = absenceCodeMap.get(absenceType);
-	                	 absenceCodeMap.remove(absenceType);
-	                	 absenceCodeMap.put(absenceType, i+1);
-	               	 }
-	             }            
-	            	 
-	        }       
+				for (Absence absence : pd.absences) {
+					AbsenceType absenceType = absence.absenceType;
+					if(absenceType != null){
+						boolean stato = absenceCodeMap.containsKey(absenceType);
+						if(stato==false){
+							i=1;
+							absenceCodeMap.put(absenceType,i);            	 
+						} else{
+							i = absenceCodeMap.get(absenceType);
+							absenceCodeMap.remove(absenceType);
+							absenceCodeMap.put(absenceType, i+1);
+						}
+					}            
+				}	 
+			}       
 		}
-		      
-        return absenceCodeMap;	
-						
+
+		return absenceCodeMap;	
+
 	}
-	
-	
+
+
 	public Map<AbsenceType, Integer> getAbsenceCodeMap() {
 		return absenceCodeMap;
 	}
@@ -293,16 +293,16 @@ public class MonthRecap extends Model {
 		for(PersonDay pd : days){
 			List stampings = pd.stampings;
 			StampModificationType smt = pd.checkTimeForLunch(stampings);
-			
+
 			boolean stato = stampingCodeList.contains(smt);
 			if(smt != null && stato==false){
 				stampingCodeList.add(smt);
 			}		
-		
+
 		}
 		return stampingCodeList;
 	}
-	
+
 	/**
 	 * metodo di utilità che calcola nel mese corrente qual'è stato il massimo numero di timbrature giornaliere
 	 * mi servierà nella form di visualizzazione per stabilire quante colonne istanziare per le timbrature
@@ -321,7 +321,7 @@ public class MonthRecap extends Model {
 		}
 		return max;
 	}
-	
+
 	/**
 	 * 
 	 * @return il numero di buoni pasto usabili per quel mese
@@ -335,10 +335,10 @@ public class MonthRecap extends Model {
 			if(pd.mealTicket()==true)
 				tickets++;
 		}
-		
+
 		return tickets;
 	}
-	
+
 	/**
 	 * 
 	 * @return il numero di buoni pasto da restituire per quel mese
@@ -352,10 +352,10 @@ public class MonthRecap extends Model {
 			if(pd.mealTicket()==false && (pd.isHoliday()==false))
 				ticketsToRender++;
 		}
-		
+
 		return ticketsToRender;
 	}
-	
+
 	/**
 	 * 
 	 * @return il numero di giorni lavorati in sede. Per stabilirlo si controlla che per ogni giorno lavorativo, esista almeno una 
@@ -373,7 +373,7 @@ public class MonthRecap extends Model {
 		}
 		return basedDays;
 	}
-	
+
 	/**
 	 * 
 	 * @return il numero di giorni di indennità di reperibilità festiva per quella persona in quel mese di quell'anno
@@ -404,7 +404,7 @@ public class MonthRecap extends Model {
 			weekDayAvailability = 0;
 		return weekDayAvailability;
 	}
-	
+
 	/**
 	 * 
 	 * @param year
@@ -421,7 +421,7 @@ public class MonthRecap extends Model {
 			daylightWorkingDaysOvertime = 0;
 		return daylightWorkingDaysOvertime;
 	}
-	
+
 	/**
 	 * 
 	 * @param year
@@ -438,7 +438,7 @@ public class MonthRecap extends Model {
 			daylightholidaysOvertime = 0;
 		return daylightholidaysOvertime;
 	}
-	
+
 	/**
 	 * 
 	 * @return il numero di giorni di turno ordinario
@@ -453,7 +453,7 @@ public class MonthRecap extends Model {
 			ordinaryShift = 0;
 		return ordinaryShift;
 	}
-	
+
 	/**
 	 * 
 	 * @return il numero di giorni di turno notturno
@@ -468,7 +468,7 @@ public class MonthRecap extends Model {
 			nightShift = 0;
 		return nightShift;
 	}
-	
+
 	/**
 	 * questo metodo riempe il campo del residuo mensile delle ore del mese precedente nel momento in cui inizia il nuovo mese
 	 * @param date
@@ -511,12 +511,12 @@ public class MonthRecap extends Model {
 						pm.remainingHours = pd.progressive;
 						pm.save();
 					}
-					
+
 				}
 			}
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @return il numero di ore di lavoro in eccesso/difetto dai mesi precedenti, calcolate a partire da gennaio dell'anno corrente.
@@ -531,8 +531,8 @@ public class MonthRecap extends Model {
 		 */
 		if(month == DateTimeConstants.JANUARY){
 			LocalDate lastDayOfYear = new LocalDate(year-1,DateTimeConstants.DECEMBER,31);
-//			PersonYear py = PersonYear.find("Select py from PersonYear py where py.person = ?",person).first();
-//			pastRemainingHours = py.remainingHours;
+			//			PersonYear py = PersonYear.find("Select py from PersonYear py where py.person = ?",person).first();
+			//			pastRemainingHours = py.remainingHours;
 			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, lastDayOfYear).first();
 			pastRemainingHours = pd.progressive;
 		}
@@ -557,11 +557,17 @@ public class MonthRecap extends Model {
 				counter = counter+pd.progressive;
 			}
 			pastRemainingHours = counter;
-			
+
 		}
-		
+
 		return pastRemainingHours;
 	}
-	
-	
+
+	@Override
+	public String toString() {
+		return String.format("MonthRecap[%d] - person.id = %d, year = %d, month = %d, dayWorked = %d, overtime = %d, progressive = %s, , negative = %d, workTime = %d, " +
+				"workingDays = %d, daysWorked = %d, giorniLavorativiLav = %d",
+				id, person.id, year, month, daysWorked, overtime, progressive, negative, workTime, workingDays, daysWorked, giorniLavorativiLav);
+	}
+
 }

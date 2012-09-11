@@ -33,10 +33,6 @@ public class Contract extends Model {
 	
 	private static final long serialVersionUID = -4472102414284745470L;
 	
-//	public Qualification qualification;
-	
-//	public ContractLevel contractLevel;
-	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="person_id")
 	public Person person;
@@ -49,18 +45,12 @@ public class Contract extends Model {
 	@Column(name="expire_contract")
 	public LocalDate expireContract;
 
-//	@Column(name="is_continued")
-//	public boolean isContinued;
 	/**
 	 * data di termine contratto in casi di licenziamento, pensione, morte, ecc ecc...
 	 */
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="end_contract")
 	public LocalDate endContract;
-	
-	public boolean workSaturday;
-	
-	public boolean workSunday;
 	
 	@Transient
 	public boolean isValidContract(){
@@ -69,4 +59,9 @@ public class Contract extends Model {
 					 
 	}
 	
+	@Override
+	public String toString() {
+		return String.format("Contract[%d] - person.id = %d, beginContract = %s, expireContract = %s, endContract = %s",
+			id, person.id, beginContract, expireContract, endContract);
+	}
 }
