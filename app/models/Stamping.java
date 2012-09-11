@@ -40,15 +40,13 @@ public class Stamping extends Model {
 	@JoinColumn(name = "personDay_id", nullable = false, updatable = false)
 	public PersonDay personDay;
 	
-	@Required
-	@ManyToOne(optional = false)
+	@ManyToOne
 	@JoinColumn(name = "stamp_type_id")
 	public StampType stampType;
 	
 	@ManyToOne(optional = true)
 	@JoinColumn(name = "stamp_modification_type_id")
 	public StampModificationType stampModificationType;
-	
 	
 	@Required
 	@InPast
@@ -67,14 +65,6 @@ public class Stamping extends Model {
 	 * in questione non ha potuto effettuare la timbratura (valore = true)
 	 */
 	@Column(name = "marked_by_admin")
-	public Boolean markedByAdmin;
-	
-	/**
-	 * questo campo booleano consente di determinare se la timbratura è come uscita di servizio.
-	 */
-	@Column(name = "service_exit")
-	public Boolean serviceExit;
-	
-		
+	public Boolean markedByAdmin;		
 		
 }

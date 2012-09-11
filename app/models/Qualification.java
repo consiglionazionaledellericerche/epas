@@ -20,7 +20,6 @@ import lombok.Data;
  * @author dario
  *
  */
-@Data
 @Entity
 @Audited
 @Table(name="qualifications")
@@ -29,7 +28,7 @@ public class Qualification extends Model{
 	@OneToMany(mappedBy="qualification", fetch = FetchType.LAZY)
 	public List<Person> person;
 	
-	@ManyToMany(mappedBy = "qualifications", cascade = { CascadeType.ALL })
+	@ManyToMany(mappedBy = "qualifications", fetch = FetchType.LAZY)
 	public List<AbsenceType> absenceType;
 	
 	public int qualification;

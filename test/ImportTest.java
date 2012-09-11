@@ -41,7 +41,7 @@ public class ImportTest extends UnitTest {
 			Logger.info("Creazione delle info per la persona: "+rs.getString("Nome").toString()+" "+rs.getString("Cognome").toString());
 			//rs.next(); // exactly one result so allowed 
 					
-			Person person = FromMysqlToPostgres.createPerson(rs, em);
+			Person person = FromMysqlToPostgres.createPerson(rs);
 			assertNotNull(person);
 			assertNotNull(person.id);	
 			
@@ -52,8 +52,6 @@ public class ImportTest extends UnitTest {
 			FromMysqlToPostgres.createValuableCompetence(rs.getInt("Matricola"),person,em);
 			
 			FromMysqlToPostgres.createContract(rs.getLong("ID"), person, em);
-			
-			FromMysqlToPostgres.createVacations(rs.getLong("ID"), person, em);
 			
 			FromMysqlToPostgres.createVacationType(rs.getLong("ID"), person, em);
 	

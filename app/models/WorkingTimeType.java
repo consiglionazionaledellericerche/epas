@@ -58,7 +58,7 @@ public class WorkingTimeType extends Model {
 	 */
 	@OneToMany( mappedBy = "workingTimeType")
 	@OrderBy("dayOfWeek")
-	public List<WorkingTimeTypeDay> worTimeTypeDays;
+	public List<WorkingTimeTypeDay> workTimeTypeDays;
 	
 	/**
 	 * 

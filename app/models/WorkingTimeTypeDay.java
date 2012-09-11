@@ -29,6 +29,7 @@ public class WorkingTimeTypeDay extends Model {
 
 	private static final long serialVersionUID = 4622948996966018754L;
 
+	@Required
 	@ManyToOne
 	@JoinColumn(name = "working_time_type_id")
 	public WorkingTimeType workingTimeType;
