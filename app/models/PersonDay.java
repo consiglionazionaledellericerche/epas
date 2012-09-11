@@ -474,7 +474,7 @@ public class PersonDay extends Model {
 		WorkingTimeType wtt = person.workingTimeType;
 		if (wtt == null)
 			throw new IllegalStateException(String.format("Person %s has no working time type set", person));
-		for(WorkingTimeTypeDay wttd : wtt.worTimeTypeDays){
+		for(WorkingTimeTypeDay wttd : wtt.workTimeTypeDays){
 			if(wttd.dayOfWeek == day)
 				return wttd;
 		}
@@ -607,7 +607,7 @@ public class PersonDay extends Model {
 //			}
 			int differenza = 0;
 			
-			int minTimeWorking = person.workingTimeType.worTimeTypeDays.get(date.getDayOfWeek()).workingTime;
+			int minTimeWorking = person.workingTimeType.workTimeTypeDays.get(date.getDayOfWeek() - 1).workingTime;
 			
 			
 			timeAtWork = timeAtWork();

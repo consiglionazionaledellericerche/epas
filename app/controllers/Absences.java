@@ -164,7 +164,7 @@ public class Absences extends Controller{
 				 * deve ignorare le timbrature, quindi per quel giorno vale l'assenza e della timbratura che fare? vanno cancellate? e il personday?
 				 */
 				
-				int timbrature = Stamping.delete("Select st from Stamping st " +
+				Stamping.delete("Select st from Stamping st " +
 						"where st.person = ? and st.date between ? and ? ", person, ldtBegin, ldtEnd);
 				
 				pd.populatePersonDay();

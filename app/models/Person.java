@@ -146,14 +146,7 @@ public class Person extends Model {
 	 */
 	@OneToMany(mappedBy="person", fetch = FetchType.LAZY)
 	public List<PersonYear> personYears;
-//
-//	/**
-//	 * relazione con la tabella delle timbrature
-//	 */
-//	@NotAudited
-//	@OneToMany(mappedBy="person", fetch = FetchType.LAZY)
-//	public List<Stamping> stampings;
-	
+
 	/**
 	 * relazione con la tabella di storico YearRecap
 	 */
@@ -168,19 +161,6 @@ public class Person extends Model {
 	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
 	public List<MonthRecap> monthRecaps;
 	
-	
-//	/**
-//	 * relazione con la tabella delle absence
-//	 */
-//	@NotAudited
-//	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
-//	public List<Absence> absences;
-	
-	/**
-	 * relazione con la tabella di person vacation
-	 */
-	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
-	public List <PersonVacation> personVacations;
 	
 	/**
 	 * relazione con la tabella di vacation_code
@@ -236,7 +216,8 @@ public class Person extends Model {
 
 		Contract contract = Contract.find("Select con from Contract con where con.person = ?", this).first();
 		if(contract == null){
-			Logger.info("Siamo nel bottino che il contratto è nullo per "+this.name+" "+this.surname);
+			Logger.warn("Siamo nel bottino che il contratto è nullo per %s", this);
+			throw new IllegalStateException(String.format("Il contratto della persona %s è nullo", this));
 		}
 		LocalDate now = new LocalDate();
 		if(contract.expireContract == null && contract.beginContract != null){
@@ -271,7 +252,7 @@ public class Person extends Model {
 		if(contract.expireContract != null && contract.beginContract != null){
 			
 			int differenzaAnni = contract.expireContract.getYear() - contract.beginContract.getYear();
-			LocalDate data = new LocalDate(2099,1,1);
+
 			if(this.qualification.qualification == 0){
 				vacation = null;
 			}			

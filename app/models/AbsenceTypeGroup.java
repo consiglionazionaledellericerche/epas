@@ -2,9 +2,11 @@ package models;
 
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -13,9 +15,11 @@ import javax.persistence.Transient;
 
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
+import net.sf.oval.constraint.NotNull;
 
 import org.hibernate.envers.Audited;
 
+import play.data.validation.Required;
 import play.db.jpa.Model;
 /**
  * 
@@ -29,20 +33,25 @@ public class AbsenceTypeGroup extends Model{
 	
 	private static final long serialVersionUID = -8664634519147481684L;
 
-	@OneToMany(mappedBy="absenceTypeGroup")
+	@OneToMany(mappedBy="absenceTypeGroup", fetch = FetchType.LAZY)
 	public List<AbsenceType> absenceTypes;
 		
+	@Required
 	public String label;
 
+	@Column(name = "minutes_excess")
 	public Boolean minutesExcess;
 
+	@Column(name = "limin_in_minute")
 	public Integer limitInMinute;
 	
 	
 	@Enumerated(EnumType.STRING)
+	@Column(name = "accumulation_type")
 	public AccumulationType accumulationType;
 	
 	@Enumerated(EnumType.STRING)
+	@Column(name = "accumulationBehaviour")
 	public AccumulationBehaviour accumulationBehaviour;
 	
 	
