@@ -1,0 +1,35 @@
+StampType(motiviDiServizio):
+    code: motiviDiServizio
+    description: Motivi di servizio
+
+StampType(visitaMedica):
+    code: visitaMedica
+    description: Visita Medica
+    
+StampType(permessoSindacale):
+    code: permessoSindacale
+    description: Permesso sindacale
+    
+StampType(incaricoDiInsegnamento):
+    code: incaricoDiInsegnamento
+    description: Incarico di insegnamento
+
+StampType(dirittoAlloStudio):
+    code: dirittoAlloStudio
+    description: Diritto allo studio
+    
+StampType(motiviPersonali):
+    code: motiviPersonali
+    description: Motivi personali
+
+StampType(reperibilita):
+    code: reperibilita
+    description: Reperibilità
+
+StampType(intramoenia):
+    code: intramoenia
+    description: Intramoenia
+    
+StampType(guardiaMedica):
+    code: guardiaMedica
+    description: Guardia Medica
