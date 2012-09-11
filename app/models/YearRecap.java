@@ -28,6 +28,7 @@ import net.sf.oval.constraint.NotNull;
 import net.sf.oval.constraint.Range;
 
 import play.Logger;
+import play.data.validation.Required;
 import play.db.jpa.JPA;
 import play.db.jpa.Model;
 
@@ -44,10 +45,12 @@ public class YearRecap extends Model{
 	
 	private static final long serialVersionUID = -5721503493068567394L;
 
+	@Required
 	@ManyToOne
 	@JoinColumn(name = "person_id")
 	public Person person;
 	
+	@Required
 	@Column
 	public short year;
 	@Column
@@ -503,6 +506,13 @@ public class YearRecap extends Model{
 				"and abs.date between ? and ? and abs.absenceType = abt and abt.code = ?", person, getBeginYear(), now, "32").fetch();
 		vacationDaysCurrentYear = absence.size();
 		return vacationDaysCurrentYear;
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("YearRecap[%d] - person.id = %d, year = %d, overtime = %d, overtimeAp = %d, remaining = %d, remainingAp = %d, recg = %d, recgap = %d, " +
+				"recguap = %d, recm = %d",
+				id, person.id, year, overtime, overtimeAp, remaining, remainingAp, recg, recgap, recguap, recm);
 	}
 	
 	public static void main(String[]args){

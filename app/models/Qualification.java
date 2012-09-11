@@ -29,7 +29,7 @@ public class Qualification extends Model{
 	public List<Person> person;
 	
 	@ManyToMany(mappedBy = "qualifications", fetch = FetchType.LAZY)
-	public List<AbsenceType> absenceType;
+	public List<AbsenceType> absenceTypes;
 	
 	public int qualification;
 	

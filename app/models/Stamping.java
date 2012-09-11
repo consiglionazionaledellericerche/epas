@@ -66,5 +66,10 @@ public class Stamping extends Model {
 	 */
 	@Column(name = "marked_by_admin")
 	public Boolean markedByAdmin;		
-		
+	
+	@Override
+	public String toString() {
+		return String.format("Stamping[%d] - personDay.id = %d, way = %s, date = %s, stampType.id = %s, stampModificationType.id = %s",
+			id, personDay.id, way, date, stampType != null ? stampType.id : "null", stampModificationType != null ? stampModificationType.id : "null");
+	}
 }

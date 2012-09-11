@@ -43,9 +43,16 @@ public class PersonReperibility extends Model {
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate endDate;
 	
+	@Required
 	@ManyToOne
 	@JoinColumn(name = "person_reperibility_type_id")
 	public PersonReperibilityType personReperibilityType;
 	
 	public String note;
+	
+	@Override
+	public String toString() {
+		return String.format("PersonReperibility[%d] - person.id = %d, startDate = %s, endDate = %s, personReperibilityType.id = %s",
+			id, person.id, startDate, endDate, personReperibilityType != null ? personReperibilityType.id : "null");
+	}
 }

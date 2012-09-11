@@ -6,6 +6,7 @@ import java.sql.SQLException;
 
 import models.Person;
 import models.PersonMonth;
+import models.WorkingTimeType;
 import play.mvc.Controller;
 
 public class Administration extends Controller {
@@ -16,7 +17,7 @@ public class Administration extends Controller {
         
     public static void importAll() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
     
-    	final int NUMERO_PERSONE_DA_IMPORTARE = 20;
+    	final int NUMERO_PERSONE_DA_IMPORTARE = 50;
     	
     	int absenceTypes = FromMysqlToPostgres.importAbsenceTypes();
     	FromMysqlToPostgres.createAbsenceTypeToQualificationRelations();
@@ -27,7 +28,6 @@ public class Administration extends Controller {
         		String.format("Importate dalla vecchia applicazione %d tipi di assenza con i relativi gruppi e %d tipi di orari di lavoro.\n" +
         			"Importate %d persone con i relativi dati (contratti, dati personali, assenze, timbrature, ...", 
         			absenceTypes, workingTimeTypes, NUMERO_PERSONE_DA_IMPORTARE));
-
     }
     
     

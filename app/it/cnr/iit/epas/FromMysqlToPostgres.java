@@ -45,6 +45,7 @@ import org.joda.time.LocalDateTime;
 import play.Logger;
 import play.Play;
 import play.db.jpa.JPA;
+import play.db.jpa.JPAPlugin;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -58,17 +59,18 @@ public class FromMysqlToPostgres {
 	public static String mySqldriver = Play.configuration.getProperty("db.old.driver");//"com.mysql.jdbc.Driver";	
 
 	private static Connection mysqlCon = null;
-	
+
 	public static Connection getMysqlConnection() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		if (mysqlCon != null ) {
 			return mysqlCon;
 		}
 		Class.forName(mySqldriver).newInstance();
 
-		return DriverManager.getConnection(
+		mysqlCon = DriverManager.getConnection(
 				Play.configuration.getProperty("db.old.url"),
 				Play.configuration.getProperty("db.old.user"),
 				Play.configuration.getProperty("db.old.password"));
+		return mysqlCon;
 	}
 
 
@@ -96,7 +98,6 @@ public class FromMysqlToPostgres {
 	 */
 	public static void importAll(int limit) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		Connection mysqlCon = FromMysqlToPostgres.getMysqlConnection();
-		EntityManager em = JPA.em();
 
 		String sql = "SELECT ID, Nome, Cognome, DataNascita, Telefono," +
 				"Fax, Email, Stanza, Matricola, passwordmd5, Qualifica, Dipartimento, Sede " +
@@ -109,34 +110,54 @@ public class FromMysqlToPostgres {
 
 		ResultSet rs = stmt.executeQuery();
 
+		JPAPlugin.closeTx(false);
+		
+		Date start = new Date();
+		
 		while(rs.next()){
+			JPAPlugin.startTx(false);
+			
+			Date personStart = new Date();
 			Logger.info("Creazione delle info per la persona: %s %s", rs.getString("Nome"), rs.getString("Cognome"));
 
 			int oldIDPersona = rs.getInt("ID");
-			
+
 			Person person = FromMysqlToPostgres.createPerson(rs);
 
-			FromMysqlToPostgres.createContactData(rs, person, em);
+			FromMysqlToPostgres.createContactData(rs, person);
 
-			FromMysqlToPostgres.createLocation(rs, person, em);
+			FromMysqlToPostgres.createLocation(rs, person);
 
-			FromMysqlToPostgres.createWorkingTimeType(oldIDPersona, person, em);
+			FromMysqlToPostgres.setWorkingTimeType(oldIDPersona, person);
 
-			FromMysqlToPostgres.createValuableCompetence(rs.getInt("Matricola"), person, em);
+			FromMysqlToPostgres.createValuableCompetence(rs.getInt("Matricola"), person);
 
-			FromMysqlToPostgres.createContract(oldIDPersona, person, em);
+			FromMysqlToPostgres.createContract(oldIDPersona, person);
 
-			FromMysqlToPostgres.createVacationType(oldIDPersona, person, em);	
+			FromMysqlToPostgres.createVacationType(oldIDPersona, person);	
 
-			FromMysqlToPostgres.createYearRecap(oldIDPersona, person, em);
+			FromMysqlToPostgres.createYearRecap(oldIDPersona, person);
 
-			FromMysqlToPostgres.createMonthRecap(oldIDPersona, person, em);
+			FromMysqlToPostgres.createMonthRecap(oldIDPersona, person);
 
-			FromMysqlToPostgres.createCompetence(oldIDPersona, person, em);
+			FromMysqlToPostgres.createCompetence(oldIDPersona, person);
 
-			FromMysqlToPostgres.createStampings(oldIDPersona, person, em);
+			JPAPlugin.closeTx(false);
+			
+			FromMysqlToPostgres.createStampings(oldIDPersona, person);
 
-		}		
+			Logger.info("Terminata la creazione delle info della persona %s %s", rs.getString("Nome"), rs.getString("Cognome"));
+
+			JPAPlugin.closeTx(false);
+			
+			Logger.info("In %s secondi, terminata la creazione delle info della persona %s %s",
+					((new Date()).getTime() - personStart.getTime()) / 1000,
+					rs.getString("Nome"), rs.getString("Cognome"));
+		}
+		
+		Logger.info("Terminata l'importazione dei dati di tutte le persone in %d secondi", ((new Date()).getTime() - start.getTime()) / 1000);
+		
+		mysqlCon.close();
 	}
 
 	/**
@@ -163,6 +184,80 @@ public class FromMysqlToPostgres {
 	}
 
 
+	public static Person createPerson(ResultSet rs) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
+		Logger.trace("Inizio a creare la persona %s %s", rs.getString("Nome"), rs.getString("Cognome"));
+
+		Person person = Person.find("Select p from Person p where p.name = ? and p.surname = ?", rs.getString("Nome"), rs.getString("Cognome")).first();
+		if(person == null){
+			person = new Person();
+			person.name = rs.getString("Nome");
+			person.surname = rs.getString("Cognome");
+			person.username = String.format("%s.%s", person.name.toLowerCase(), person.surname.toLowerCase() );
+			person.password = rs.getString("passwordmd5");
+			person.bornDate = rs.getDate("DataNascita");
+			person.number = rs.getInt("Matricola");
+			person.save();
+			Logger.info("Creata %s", person);
+		} else {
+			Logger.info("La persona %s %s era già presente nel db, non ne è stata creata una nuova", rs.getString("Nome"), rs.getString("Cognome"));
+		}
+
+		return person;
+	}	
+
+	public static void createContactData(ResultSet rs, Person person) throws SQLException {
+		Logger.trace("Inizio a creare il contact data per %s", person);
+		ContactData contactData = new ContactData();
+		contactData.person = person;
+
+		contactData.email = rs.getString("Email");
+		contactData.fax = rs.getString("Fax");
+		contactData.telephone = rs.getString("Telefono");
+
+		/**
+		 * controllo sui valori del campo Telefono e conseguente modifica sul nuovo db
+		 */
+		if(contactData.telephone != null){
+			if(contactData.telephone.length() == 4){
+				contactData.telephone = "+39050315" + contactData.telephone;
+			}
+			if(contactData.telephone.startsWith("315")){
+				contactData.telephone = "+39050" + contactData.telephone;
+			}	
+			if(contactData.telephone.startsWith("335")){
+				contactData.mobile = contactData.telephone;
+				contactData.telephone = "No internal number";
+			}
+			if(contactData.telephone.length() == 2){
+				contactData.telephone = "No internal number";
+			}
+			if(contactData.telephone.startsWith("503")){
+				contactData.telephone = "+390" + contactData.telephone;
+			}			
+
+		}
+		else{ 
+			Logger.warn("Validazione numero di telefono non avvenuta. No phone number");
+			contactData.telephone = "No phone number";		
+		}
+		contactData.save();
+		Logger.info("Creato %s", person);
+	}
+
+
+	private static void createLocation(ResultSet rs, Person person) throws SQLException{
+		Logger.debug("Inizio a creare la location per %s", person);
+		Location location = new Location();
+		location.person = person;
+
+		location.department = rs.getString("Dipartimento");
+		location.headOffice = rs.getString("Sede");
+		location.room = rs.getString("Stanza");		
+		location.save();
+		Logger.info("Creata %s", location);
+	}
+
+
 	/**
 	 * 
 	 * @throws InstantiationException
@@ -175,14 +270,15 @@ public class FromMysqlToPostgres {
 	public static int importAbsenceTypes() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		Logger.debug("Inizio ad importare gli AbsenceType");
 
-
+		JPAPlugin.startTx(false);
+		
 		long absenceTypeCount = AbsenceType.count();
 		if (absenceTypeCount > 0) {
 			Logger.warn("Sono già presenti %s AbsenceType nell'applicazione, non verranno importati nuovi AbsenceType dalla vecchia applicazione");
 			return 0;
 		}
 		int importedAbsenceTypes = 0;
-		
+
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmtCodici = mysqlCon.prepareStatement("Select * from Codici where Codici.id != 0");
 		ResultSet rsCodici = stmtCodici.executeQuery();
@@ -274,14 +370,17 @@ public class FromMysqlToPostgres {
 					absTypeGroup = mappaCodiciAbsenceTypeGroup.get(gruppo);
 					absenceType.absenceTypeGroup = absTypeGroup;
 				}
-				
+
 			}
 
 			absenceType.save();				
 			Logger.info("Creato absenceType %s - %s", absenceType.code, absenceType.description);
-			
+
 			importedAbsenceTypes++;
 		}
+		
+		JPAPlugin.closeTx(false);
+		
 		return importedAbsenceTypes;
 	}
 
@@ -290,6 +389,9 @@ public class FromMysqlToPostgres {
 	 */
 	public static void createAbsenceTypeToQualificationRelations(){
 		Logger.debug("Aggiungo le qualfiche possibili agli AbsenceType");
+		
+		JPAPlugin.startTx(false);
+
 		List<AbsenceType> listaAssenze = AbsenceType.findAll();
 		for(AbsenceType absenceType : listaAssenze){
 
@@ -303,7 +405,7 @@ public class FromMysqlToPostgres {
 				Qualification qual1 = Qualification.findById(id1);
 				Qualification qual2 = Qualification.findById(id2);
 				Qualification qual3 = Qualification.findById(id3);
-				
+
 				if(absenceType.qualifications.isEmpty()){
 					absenceType.qualifications.add(qual1);
 					absenceType.qualifications.add(qual2);
@@ -318,11 +420,14 @@ public class FromMysqlToPostgres {
 				Logger.debug("Aggiunte tutte le qualifiche all'AbsenceCode %s", absenceType.code);
 			}
 		}		
-
+		JPAPlugin.closeTx(false);
 	}
 
 	public static int importWorkingTimeTypes() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 		Logger.debug("Comincio l'importazione dei WorkingTimeType");
+		
+		JPAPlugin.startTx(false);
+		
 		Long workingTimeTypeCount = WorkingTimeType.count();
 		if (workingTimeTypeCount > 1) {
 			Logger.warn("Ci sono %s WorkingTimeType presenti nel database, i workingTimeType NON verranno importati dal database MySQL", workingTimeTypeCount);
@@ -330,7 +435,7 @@ public class FromMysqlToPostgres {
 		}
 
 		int importedWorkingTimeTypes = 0;
-		
+
 		Connection mysqlCon = FromMysqlToPostgres.getMysqlConnection();
 
 		WorkingTimeType wtt = null;
@@ -351,7 +456,7 @@ public class FromMysqlToPostgres {
 				wtt.description = orarioDiLavoro.getString("nome");
 				wtt.shift = orarioDiLavoro.getBoolean("turno");
 				wtt.save();
-				Logger.info("Creato il WorkingTimeType %s", wtt.description);
+				Logger.info("Creato %s", wtt);
 
 				mappaCodiciWorkingTimeType.put(idCodiceOrarioLavoro,wtt);
 
@@ -377,48 +482,37 @@ public class FromMysqlToPostgres {
 					wttd.breakTicketTime = orarioDiLavoro.getInt(dayOfWeekStart + "_tempo_interv"); 
 					wttd.mealTicketTime = orarioDiLavoro.getInt(dayOfWeekStart + "_tempo_buono");
 					wttd.save();
-					Logger.debug("Creato il WorkingTimeTypeDay per il giorno %d del WorkingTimeType %s", dayOfWeek, wtt.description);
+					wtt.workingTimeTypeDays.add(wttd);
+					Logger.info("Creato %s", wttd);
 				}
 			}
+			
+			//Per ricaricare la lista dei WorkingTimeTypeDay associati al WorkingTimeType
+			//wtt.refresh();
+			
 			importedWorkingTimeTypes++;
 		}
+		Logger.info("Creati %d workingTimeTimes", importedWorkingTimeTypes);
+		
+		JPAPlugin.closeTx(false);
 		return importedWorkingTimeTypes;
 	}
 
 
 
-	public static Person createPerson(ResultSet rs) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-		Logger.debug("Inizio a creare la persona %s %s", rs.getString("Nome"), rs.getString("Cognome"));
-
-		Person person = Person.find("Select p from Person p where p.name = ? and p.surname = ?", rs.getString("Nome"), rs.getString("Cognome")).first();
-		if(person == null){
-			person = new Person();
-			person.name = rs.getString("Nome");
-			person.surname = rs.getString("Cognome");
-			person.username = String.format("%s.%s", person.name.toLowerCase(), person.surname.toLowerCase() );
-			person.password = rs.getString("passwordmd5");
-			person.bornDate = rs.getDate("DataNascita");
-			person.number = rs.getInt("Matricola");
-			person.save();
-
-		}
-
-		return person;
-	}	
-
-	public static void createWorkingTimeType(int oldIDPersona, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
+	private static void setWorkingTimeType(int oldIDPersona, Person person) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
 		if (person == null) {
 			throw new IllegalArgumentException("Person should not be null at this point");
 		}
 
-		Logger.debug("Inizio a creare il working time type per %s", person);
+		Logger.debug("Cerco il workingTimeType per %s", person);
 
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt = mysqlCon.prepareStatement("select odl.id, odl.nome from orari_di_lavoro as odl JOIN orario_pers op " +
 				" ON op.oid = odl.id " +
 				" WHERE op.pid = " + oldIDPersona + " order by op.data_fine desc limit 1");
 		ResultSet rs = stmt.executeQuery();
-		
+
 		WorkingTimeType wtt = null;
 		if(rs.next()){
 			wtt = mappaCodiciWorkingTimeType.get(rs.getInt("id"));
@@ -428,59 +522,7 @@ public class FromMysqlToPostgres {
 		}
 		person.workingTimeType = wtt;
 		person.save();
-		Logger.info("Creato il workingTimeType %s per %s", wtt.description, person);
-	}
-
-
-	public static void createContactData(ResultSet rs, Person person, EntityManager em) throws SQLException {
-		Logger.debug("Inizio a creare il contact data per %s %s", person.name, person.surname);
-		ContactData contactData = new ContactData();
-		contactData.person = person;
-
-		contactData.email = rs.getString("Email");
-		contactData.fax = rs.getString("Fax");
-		contactData.telephone = rs.getString("Telefono");
-
-		/**
-		 * controllo sui valori del campo Telefono e conseguente modifica sul nuovo db
-		 */
-		if(contactData.telephone != null){
-			if(contactData.telephone.length() == 4){
-				contactData.telephone = "+39050315" + contactData.telephone;
-			}
-			if(contactData.telephone.startsWith("315")){
-				contactData.telephone = "+39050" + contactData.telephone;
-			}	
-			if(contactData.telephone.startsWith("335")){
-				contactData.mobile = contactData.telephone;
-				contactData.telephone = "No internal number";
-			}
-			if(contactData.telephone.length() == 2){
-				contactData.telephone = "No internal number";
-			}
-			if(contactData.telephone.startsWith("503")){
-				contactData.telephone = "+390" + contactData.telephone;
-			}			
-
-		}
-		else{ 
-			Logger.warn("Validazione numero di telefono non avvenuta. No phone number");
-			contactData.telephone = "No phone number";		
-		}
-		em.persist(contactData);
-		Logger.info("Creato il contactData per %s", person);
-	}
-
-	public static void createLocation(ResultSet rs, Person person, EntityManager em) throws SQLException{
-		Logger.debug("Inizio a creare la location per %s %s", person.name, person.surname);
-		Location location = new Location();
-		location.person = person;
-
-		location.department = rs.getString("Dipartimento");
-		location.headOffice = rs.getString("Sede");
-		location.room = rs.getString("Stanza");		
-		em.persist(location);
-		Logger.info("Creata la location per %s", person);
+		Logger.info("Assegnato %s a %s. Il tipo di orario ha questi giorni impostati %s", wtt, person, wtt.workingTimeTypeDays);
 	}
 
 
@@ -494,9 +536,9 @@ public class FromMysqlToPostgres {
 	 * @param person
 	 * @param em
 	 */
-	public static void createContract(long id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-		Logger.debug("Inizio a creare il contratto per %s %s", person.name, person.surname);	
-		
+	public static void createContract(long id, Person person) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+		Logger.debug("Inizio a creare il contratto per %s", person);	
+
 		Connection mysqlCon = getMysqlConnection();	
 		PreparedStatement stmtContratto = mysqlCon.prepareStatement("SELECT id,DataInizio,DataFine,continua " +	
 				"FROM Personedate WHERE id=" + id + " order by DataInizio");	
@@ -552,15 +594,17 @@ public class FromMysqlToPostgres {
 			contract.save();
 			contract.person = person;
 			person.save();
-			Logger.info("Aggiunto contratto %s per %s ", contract, person.surname);
+			Logger.info("Creato %s ", contract);
 
 		}
-		mysqlCon.close();
 
 	}
 
-	public static void createStampings(long id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-		Logger.info("Inizio a creare le timbrature per %s %s", person.name, person.surname);
+	public static void createStampings(long id, Person person) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
+		JPAPlugin.startTx(false);
+		person = Person.findById(person.id);
+		
+		Logger.debug("Inizio a creare le timbrature per %s", person);
 		Connection mysqlCon = getMysqlConnection();
 
 		/**
@@ -570,7 +614,7 @@ public class FromMysqlToPostgres {
 		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT Orario.ID,Orario.Giorno,Orario.TipoGiorno,Orario.TipoTimbratura," +
 				"Orario.Ora, Codici.id, Codici.Codice, Codici.Qualifiche " +
 				"FROM Orario, Codici " +
-				"WHERE Orario.TipoGiorno=Codici.id and Orario.Giorno > '2009-12-31' " +
+				"WHERE Orario.TipoGiorno=Codici.id and Orario.Giorno >= '2000-01-01' " +
 				"and Orario.ID = " + id + " ORDER BY Orario.Giorno");
 
 		ResultSet rs = stmtOrari.executeQuery();
@@ -582,8 +626,11 @@ public class FromMysqlToPostgres {
 		LocalDate data = null;
 		LocalDate newData = null;
 		long tipoTimbratura;
+		
+		int importedStamping = 0;
+		
+		
 		while(rs.next()){
-
 			/**
 			 * controllo che la data prelevata sia diversa da null, poichè nel vecchio db esiste la possibilità di avere date del tipo 0000-00-00
 			 * in tal caso devo scartarle e continuare l'elaborazione
@@ -632,6 +679,7 @@ public class FromMysqlToPostgres {
 
 					}
 					pd.save();
+					Logger.info("Creato %s", pd.toString());
 
 					tipoTimbratura = rs.getLong("TipoTimbratura"); 
 
@@ -721,8 +769,7 @@ public class FromMysqlToPostgres {
 						//pd.save();
 						stamping.personDay = pd;
 						stamping.save();
-						//pd.stampings.add(stamping);
-						//em.persist(stamping);	
+						Logger.trace("Creata %s", stamping.toString());
 
 					}				
 
@@ -753,7 +800,8 @@ public class FromMysqlToPostgres {
 					absence.personDay = pd;
 					absence.date = newData;	
 					absence.absenceType = absenceType;
-					em.persist(absence);
+					absence.save();
+					Logger.info("Creata %s", absence);
 
 				}					
 			}
@@ -768,17 +816,27 @@ public class FromMysqlToPostgres {
 				pd.progressive = pd.getProgressive();
 				pd.setTicketAvailable();
 				pd.save();
+				Logger.info("Creato %s", pd);
 			}
 			data = newData;		
+		
+			if (importedStamping % 100 == 0) {
+					JPAPlugin.closeTx(false);
+					JPAPlugin.startTx(false);
+					person = Person.findById(person.id);
+			}
+			
+			importedStamping++;
 		}
 
-		Logger.debug("Termino di creare le timbrature. Person con id = %s", id);
+		JPAPlugin.closeTx(false);
+		
+		Logger.debug("Terminato di creare le timbrature per %s", person);
 
-		mysqlCon.close();
 	}
 
-	public static void createVacationType(long id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-		Logger.debug("Inizio a creare i periodi di ferie per %s %s", person.name ,person.surname);
+	public static void createVacationType(long id, Person person) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+		Logger.debug("Inizio a creare i periodi di ferie per %s", person);
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * " +
 				"FROM ferie f,ferie_pers fp " +
@@ -795,11 +853,10 @@ public class FromMysqlToPostgres {
 
 					int idCodiciFerie = rs.getInt("id");
 					Logger.trace("l'id del tipo ferie è %s ed è relativo alla persona con id=%d", rs.getInt("id"), id);
-					Logger.debug("Nella mappacodici l'id relativo al codiceferie "+ idCodiciFerie + " è " + mappaCodiciVacationType.get(idCodiciFerie));
+					Logger.trace("Nella mappacodici l'id relativo al codiceferie "+ idCodiciFerie + " è " + mappaCodiciVacationType.get(idCodiciFerie));
 
 					if (vacationPeriod != null) {
-						em.remove(vacationPeriod);
-						em.flush();
+						vacationPeriod.delete();
 					}
 
 					vacationPeriod = new VacationPeriod();
@@ -812,9 +869,10 @@ public class FromMysqlToPostgres {
 						vacationCode.vacationDays = rs.getInt("giorni_ferie");
 						vacationCode.permissionDays = rs.getInt("giorni_pl");
 
-						em.persist(vacationCode);
-						Logger.debug("Creato un nuovo vacation code con id = , description = %s", vacationCode.id, vacationCode.description);
+						vacationCode.save();
 						mappaCodiciVacationType.put(idCodiciFerie,vacationCode);
+						
+						Logger.debug("Creato %s", vacationCode.toString());
 
 					}
 					else {
@@ -824,28 +882,31 @@ public class FromMysqlToPostgres {
 
 					vacationPeriod.vacationCode = vacationCode;
 					vacationPeriod.person = person;
-					vacationPeriod.beginFrom = rs.getDate("data_inizio");
-					vacationPeriod.endTo = rs.getDate("data_fine");					
-					em.persist(vacationPeriod);		
+					vacationPeriod.beginFrom = new LocalDate(rs.getDate("data_inizio"));
+					vacationPeriod.endTo = new LocalDate(rs.getDate("data_fine"));					
+					vacationPeriod.save();		
 
-					Logger.info("Creato vacationPeriod id=%s per Person = %s con vacationCode = %s", vacationPeriod, person, vacationCode);
-
+					Logger.info("Creato %s", vacationPeriod.toString());
 				}
 			}
-		}
+		}		
 		catch(SQLException e){
 			e.printStackTrace();
 			Logger.error("Periodi di ferie errati. Persona con id="+id);			
 		}
-		mysqlCon.close();
+		
+		if (vacationPeriod == null) {
+			Logger.warn("Non ci sono Periodi di Ferie impostati per %s", person);
+		}
+
 	}
 
-	public static void createYearRecap(long id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
+	public static void createYearRecap(long id, Person person) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
 
 		/**
 		 * query su totali_anno per recuperare lo storico da mettere in YearRecap
 		 */
-		Logger.info("Inizio a creare il riepilogo annuale per %s %S", person.name, person.surname);
+		Logger.debug("Inizio a creare i riepiloghi annuali per %s", person);
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM totali_anno WHERE ID="+id);
 		ResultSet rs = stmt.executeQuery();
@@ -868,75 +929,73 @@ public class FromMysqlToPostgres {
 				yearRecap.recm = rs.getInt("recm");
 				yearRecap.lastModified = rs.getTimestamp("data_ultimamod");
 
-				em.persist(yearRecap);
+				yearRecap.save();
 
-				Logger.debug("Terminato di creare il riepilogo annuale per l'anno %d per %s", year, person);
+				Logger.debug("Creato %s", yearRecap);
 			}
 			Logger.info("Terminati di creare i riepiloghi annuali per %s", person);
 
 		}
-		mysqlCon.close();
 	}
 
-	public static void createMonthRecap(long id, Person person, EntityManager em) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
+	public static void createMonthRecap(long id, Person person) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
 		/**
 		 * query su totali_mens per recueperare lo storico mensile da mettere su monthRecap
 		 */
-		Logger.info("Inizio a creare il riepilogo mensile per " +person.name+ " " +person.surname);
+		Logger.debug("Inizio a creare i riepiloghi mensili per %s", person);
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM totali_mens WHERE ID="+id);
 		ResultSet rs = stmt.executeQuery();
 
-		if(rs != null){
-			MonthRecap monthRecap = null;
-			while(rs.next()){
+		while(rs.next()){
 
-				monthRecap = new MonthRecap(person, rs.getInt("anno"), rs.getInt("mese"));
-				monthRecap.workingDays = rs.getShort("giorni_lavorativi");
-				monthRecap.daysWorked = rs.getShort("giorni_lavorati");
-				monthRecap.giorniLavorativiLav = rs.getShort("giorni_lavorativi");
-				monthRecap.workTime = rs.getInt("tempo_lavorato");
-				monthRecap.remaining = rs.getInt("residuo");
-				monthRecap.justifiedAbsence = rs.getShort("assenze_giust");
-				monthRecap.vacationAp = rs.getShort("ferie_ap");
-				monthRecap.vacationAc = rs.getShort("ferie_ac");
-				monthRecap.holidaySop = rs.getShort("festiv_sop");
-				monthRecap.recoveries = rs.getInt("recuperi");
-				monthRecap.recoveriesAp = rs.getShort("recuperiap");
-				monthRecap.recoveriesG = rs.getShort("recuperig");
-				monthRecap.recoveriesGap = rs.getShort("recuperigap");
-				monthRecap.overtime = rs.getInt("ore_str");
-				monthRecap.lastModified = rs.getTimestamp("data_ultimamod");
-				monthRecap.residualApUsed = rs.getInt("residuoap_usato");
-				monthRecap.extraTimeAdmin = rs.getInt("tempo_eccesso_ammin");
-				monthRecap.additionalHours = rs.getInt("ore_aggiuntive");
-				if(rs.getByte("nore_aggiuntive")==0)
-					monthRecap.nadditionalHours = false;
-				else 
-					monthRecap.nadditionalHours = true;
-				monthRecap.residualFine = rs.getInt("residuo_fine");
-				monthRecap.beginWork = rs.getByte("inizio_lavoro");
-				monthRecap.endWork = rs.getByte("fine_lavoro");
-				monthRecap.timeHourVisit = rs.getInt("tempo_visite_orarie");
-				monthRecap.endRecoveries = rs.getShort("recuperi_fine");
-				monthRecap.negative = rs.getInt("negativo");
-				monthRecap.endNegative = rs.getInt("negativo_fine");
-				monthRecap.progressive = rs.getString("progressivo");				
+			MonthRecap monthRecap = new MonthRecap(person, rs.getInt("anno"), rs.getInt("mese"));
+			monthRecap.workingDays = rs.getShort("giorni_lavorativi");
+			monthRecap.daysWorked = rs.getShort("giorni_lavorati");
+			monthRecap.giorniLavorativiLav = rs.getShort("giorni_lavorativi");
+			monthRecap.workTime = rs.getInt("tempo_lavorato");
+			monthRecap.remaining = rs.getInt("residuo");
+			monthRecap.justifiedAbsence = rs.getShort("assenze_giust");
+			monthRecap.vacationAp = rs.getShort("ferie_ap");
+			monthRecap.vacationAc = rs.getShort("ferie_ac");
+			monthRecap.holidaySop = rs.getShort("festiv_sop");
+			monthRecap.recoveries = rs.getInt("recuperi");
+			monthRecap.recoveriesAp = rs.getShort("recuperiap");
+			monthRecap.recoveriesG = rs.getShort("recuperig");
+			monthRecap.recoveriesGap = rs.getShort("recuperigap");
+			monthRecap.overtime = rs.getInt("ore_str");
+			monthRecap.lastModified = rs.getTimestamp("data_ultimamod");
+			monthRecap.residualApUsed = rs.getInt("residuoap_usato");
+			monthRecap.extraTimeAdmin = rs.getInt("tempo_eccesso_ammin");
+			monthRecap.additionalHours = rs.getInt("ore_aggiuntive");
+			if(rs.getByte("nore_aggiuntive")==0)
+				monthRecap.nadditionalHours = false;
+			else 
+				monthRecap.nadditionalHours = true;
+			monthRecap.residualFine = rs.getInt("residuo_fine");
+			monthRecap.beginWork = rs.getByte("inizio_lavoro");
+			monthRecap.endWork = rs.getByte("fine_lavoro");
+			monthRecap.timeHourVisit = rs.getInt("tempo_visite_orarie");
+			monthRecap.endRecoveries = rs.getShort("recuperi_fine");
+			monthRecap.negative = rs.getInt("negativo");
+			monthRecap.endNegative = rs.getInt("negativo_fine");
+			monthRecap.progressive = rs.getString("progressivo");				
 
-				em.persist(monthRecap);
-			}
-			Logger.debug("Termino di creare il riepilogo mensile");
-
+			monthRecap.save();
+			Logger.debug("Creato %s", monthRecap.toString());
 		}
-		mysqlCon.close();
+		Logger.debug("Terminati di creare i riepiloghi mensili per %s", person);
+
+
 	}
 
-	public static void createCompetence(long id, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+	public static void createCompetence(long id, Person person) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		/**
 		 * funzione che riempe la tabella competence e la tabella competence_code relativamente alle competenze
 		 * di una determinata persona
 		 */
-		Logger.info("Inizio a creare le competenze per %s %s", person.name, person.surname);
+		Logger.debug("Inizio a creare le competenze per %s", person);
+
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt = mysqlCon.prepareStatement("Select codici_comp.id, competenze.mese, " +
 				"competenze.anno, competenze.codice, competenze.valore, codici_comp.descrizione, codici_comp.inattivo " +
@@ -950,7 +1009,6 @@ public class FromMysqlToPostgres {
 			competence = new Competence();
 			competence.person = person;
 			competence.value = rs.getInt("valore");
-			competence.code = rs.getString("codice");
 			/**
 			 * per popolare la personReperibility controllo che quando inserisco un nuovo codice, quella persona abbia anche già
 			 * una entry nella tabella PersonReperibility: in tal caso non la inserisco, altrimenti devo aggiungerla.
@@ -964,8 +1022,8 @@ public class FromMysqlToPostgres {
 					personRep.person = person;
 					personRep.startDate = null;
 					personRep.endDate = null;
-					em.persist(personRep);
-					em.flush();
+					personRep.save();
+					Logger.info("Creato %s", personRep.toString());
 				}
 
 			}
@@ -975,33 +1033,23 @@ public class FromMysqlToPostgres {
 			if(mappaCodiciCompetence.get(idCodiciCompetenza)== null){
 				competenceCode = new CompetenceCode();
 				competenceCode.description = rs.getString("descrizione");
-
-				if(rs.getByte("inattivo")==0)
-					competenceCode.inactive = false;
-				else 
-					competenceCode.inactive = true;
-				em.persist(competenceCode);
-				em.persist(competence);
-
+				competenceCode.inactive = rs.getByte("inattivo") != 0;
+				
+				competenceCode.create();
+				Logger.info("Creato %s", competenceCode.toString());
+				
 				mappaCodiciCompetence.put(idCodiciCompetenza,competenceCode);
 
 			} else {
 				competenceCode = mappaCodiciCompetence.get(idCodiciCompetenza);
-				competence.competenceCode = competenceCode;				
-				competenceCode.description = rs.getString("descrizione");
-
-				if(rs.getByte("inattivo")==0)
-					competenceCode.inactive = false;
-				else 
-					competenceCode.inactive = true;
-
-				em.persist(competenceCode);
-				em.persist(competence);
 			}
+			
+			competence.competenceCode = competenceCode;
+			competence.save();
+			Logger.debug("Creato %s", competence.toString());
 
 		}	
 		Logger.debug("Terminato di creare le competenze per %s", person);
-		mysqlCon.close();
 
 	}
 
@@ -1017,8 +1065,8 @@ public class FromMysqlToPostgres {
 	 * @throws SQLException
 	 * funzione che associa a ciascuna persona creata, le corrispettive competenze valide.
 	 */
-	public static void createValuableCompetence(int matricola, Person person, EntityManager em) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-		Logger.info("Inizio a creare le competenze valide per %s %s", person.name, person.surname);
+	public static void createValuableCompetence(int matricola, Person person) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+		Logger.debug("Inizio a creare le competenze valide per %s %s", person.name, person.surname);
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT codicecomp, descrizione FROM compvalide " +
 				"WHERE matricola = " +matricola );
@@ -1029,9 +1077,12 @@ public class FromMysqlToPostgres {
 			valuableCompetence.person = person;
 			valuableCompetence.codicecomp = rs.getString("codicecomp");
 			valuableCompetence.descrizione = rs.getString("descrizione");
-			em.persist(valuableCompetence);
+			valuableCompetence.save();
+			Logger.info("Creato %s", valuableCompetence);
 		}
-		mysqlCon.close();
+		if (valuableCompetence == null) {
+			Logger.info("Non ci sono competenza valide da importare per %s", person);
+		}
 
 	}
 
