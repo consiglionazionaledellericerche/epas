@@ -111,12 +111,12 @@ public class FromMysqlToPostgres {
 		ResultSet rs = stmt.executeQuery();
 
 		JPAPlugin.closeTx(false);
-		
+
 		Date start = new Date();
-		
+
 		while(rs.next()){
 			JPAPlugin.startTx(false);
-			
+
 			Date personStart = new Date();
 			Logger.info("Creazione delle info per la persona: %s %s", rs.getString("Nome"), rs.getString("Cognome"));
 
@@ -143,20 +143,20 @@ public class FromMysqlToPostgres {
 			FromMysqlToPostgres.createCompetence(oldIDPersona, person);
 
 			JPAPlugin.closeTx(false);
-			
+
 			FromMysqlToPostgres.createStampings(oldIDPersona, person);
 
 			Logger.info("Terminata la creazione delle info della persona %s %s", rs.getString("Nome"), rs.getString("Cognome"));
 
 			JPAPlugin.closeTx(false);
-			
+
 			Logger.info("In %s secondi, terminata la creazione delle info della persona %s %s",
 					((new Date()).getTime() - personStart.getTime()) / 1000,
 					rs.getString("Nome"), rs.getString("Cognome"));
 		}
-		
+
 		Logger.info("Terminata l'importazione dei dati di tutte le persone in %d secondi", ((new Date()).getTime() - start.getTime()) / 1000);
-		
+
 		mysqlCon.close();
 	}
 
@@ -271,7 +271,7 @@ public class FromMysqlToPostgres {
 		Logger.debug("Inizio ad importare gli AbsenceType");
 
 		JPAPlugin.startTx(false);
-		
+
 		long absenceTypeCount = AbsenceType.count();
 		if (absenceTypeCount > 0) {
 			Logger.warn("Sono già presenti %s AbsenceType nell'applicazione, non verranno importati nuovi AbsenceType dalla vecchia applicazione");
@@ -378,9 +378,9 @@ public class FromMysqlToPostgres {
 
 			importedAbsenceTypes++;
 		}
-		
+
 		JPAPlugin.closeTx(false);
-		
+
 		return importedAbsenceTypes;
 	}
 
@@ -389,7 +389,7 @@ public class FromMysqlToPostgres {
 	 */
 	public static void createAbsenceTypeToQualificationRelations(){
 		Logger.debug("Aggiungo le qualfiche possibili agli AbsenceType");
-		
+
 		JPAPlugin.startTx(false);
 
 		List<AbsenceType> listaAssenze = AbsenceType.findAll();
@@ -425,9 +425,9 @@ public class FromMysqlToPostgres {
 
 	public static int importWorkingTimeTypes() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 		Logger.debug("Comincio l'importazione dei WorkingTimeType");
-		
+
 		JPAPlugin.startTx(false);
-		
+
 		Long workingTimeTypeCount = WorkingTimeType.count();
 		if (workingTimeTypeCount > 1) {
 			Logger.warn("Ci sono %s WorkingTimeType presenti nel database, i workingTimeType NON verranno importati dal database MySQL", workingTimeTypeCount);
@@ -486,14 +486,14 @@ public class FromMysqlToPostgres {
 					Logger.info("Creato %s", wttd);
 				}
 			}
-			
+
 			//Per ricaricare la lista dei WorkingTimeTypeDay associati al WorkingTimeType
 			//wtt.refresh();
-			
+
 			importedWorkingTimeTypes++;
 		}
 		Logger.info("Creati %d workingTimeTimes", importedWorkingTimeTypes);
-		
+
 		JPAPlugin.closeTx(false);
 		return importedWorkingTimeTypes;
 	}
@@ -603,205 +603,83 @@ public class FromMysqlToPostgres {
 	public static void createStampings(long id, Person person) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 		JPAPlugin.startTx(false);
 		person = Person.findById(person.id);
-		
+
 		Logger.debug("Inizio a creare le timbrature per %s", person);
 		Connection mysqlCon = getMysqlConnection();
 
 		/**
-		 * query sulle tabelle orario, per recuperare le info sulle timbrature
-		 * di ciascuna persona
+		 * query sulle tabelle orario, per recuperare le info sulle timbrature e sulle assenze
+		 * di ciascuna persona per generare i personday
 		 */
 		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT Orario.ID,Orario.Giorno,Orario.TipoGiorno,Orario.TipoTimbratura," +
 				"Orario.Ora, Codici.id, Codici.Codice, Codici.Qualifiche " +
 				"FROM Orario, Codici " +
 				"WHERE Orario.TipoGiorno=Codici.id and Orario.Giorno >= '2000-01-01' " +
-				"and Orario.ID = " + id + " ORDER BY Orario.Giorno");
+				"and Orario.ID = " + id + " ORDER BY Orario.Giorno limit 8 ");
 
 		ResultSet rs = stmtOrari.executeQuery();
 
 		PersonDay pd = null;
-		Absence absence = null;
-		AbsenceType absenceType = null;
-		Stamping stamping = null;
 		LocalDate data = null;
 		LocalDate newData = null;
-		long tipoTimbratura;
-		
+
 		int importedStamping = 0;
-		
-		
+
 		while(rs.next()){
 			/**
 			 * controllo che la data prelevata sia diversa da null, poichè nel vecchio db esiste la possibilità di avere date del tipo 0000-00-00
 			 * in tal caso devo scartarle e continuare l'elaborazione
 			 */
 			if(rs.getDate("Giorno") == null){
-				Logger.warn("Impossibile creare il PersonDay con una data %s. PersonDay non creato per %s %s", newData, person.name, person.surname);
+				Logger.warn("Impossibile importare la timbratura in quanto la data è nulla." +
+						"Timbratura e PersonDay non creati per %s", person.toString());
 				continue;
 			}
 			newData = new LocalDate(rs.getDate("Giorno"));
 			if(data != null){
-				if(newData.isAfter(data)){				
+				if(newData.isAfter(data)){			
+					Logger.debug("Nuovo giorno %s per %s", newData, person.toString());
 
-					/**
-					 * TODO: in questo caso la data del "giro successivo" è maggiore della data alla fine del giro precedente. Quindi bisogna fare 
-					 * i calcoli del personDay relativi al giorno precedente (quello con date = data) e proseguire nell'elaborazione
-					 */
+					pd.setTicketAvailable();
+					pd.timeAtWork = pd.timeAtWork();
+					pd.difference = pd.getDifference();
+					pd.progressive = pd.getProgressive();
+					
+					pd.merge();
+					pd = new PersonDay(person, newData);
+					pd.create();
+					Logger.debug("Creato %s ", pd.toString());
+					if(rs.getInt("TipoGiorno")==0){
 
-					PersonDay pdYesterday = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, data).first();
-					if(pdYesterday == null){
-						pdYesterday = new PersonDay(person, data, 0, 0, 0);						
-
-						pdYesterday.setTicketAvailable();
+						createStamping(pd, rs.getLong("TipoTimbratura"), rs.getBytes("Ora"));
 					}
 					else{
-						pdYesterday.timeAtWork = pdYesterday.timeAtWork();
-
-						pdYesterday.difference = pdYesterday.getDifference();
-
-						pdYesterday.progressive = pdYesterday.getProgressive();
-
-						pdYesterday.setTicketAvailable();
+						createAbsence(pd, rs.getString("Codice"));
 					}
 
-					pdYesterday.save();
 				}
 			}
 			if(data == null || newData.isEqual(data)){
 				/**
 				 * si tratta di timbratura
 				 */
-				if(rs.getInt("TipoGiorno")==0){
-
-					pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person,newData).first();
-					if(pd == null){
-						pd = new PersonDay(person,newData);
-
-					}
-					pd.save();
-					Logger.info("Creato %s", pd.toString());
-
-					tipoTimbratura = rs.getLong("TipoTimbratura"); 
-
-					stamping = new Stamping();
-
-					if(tipoTimbratura % 2 != 0)
-						stamping.way = WayType.in;	
-					else
-						stamping.way = WayType.out;
-
-					LocalDate giornata = new LocalDate(rs.getDate("Giorno"));
-
-					if(giornata != null){			
-
-						try {
-
-							byte[] bs = rs.getBytes("Ora");
-							String s = bs != null ? new String(bs) : null;
-
-							if(s == null){
-								stamping.date = null;
-								stamping.markedByAdmin = false;
-							}
-							else{
-								if(s.startsWith("-")){
-									int hour = Integer.parseInt(s.substring(1, 3));
-									int minute = Integer.parseInt(s.substring(4, 6));
-									int second = Integer.parseInt(s.substring(7, 9));
-									/**
-									 * aggiunti i campi anno mese e giorno per provare a risolvere il problema sulle date.
-									 * inoltre aggiunte le set corrispondenti all'oggetto calendar creato
-									 */
-
-									int year = giornata.getYear();
-									int month = giornata.getMonthOfYear();
-									int day = giornata.getDayOfMonth();
-
-									stamping.date = new LocalDateTime(year,month,day,hour,minute,second);
-
-									stamping.markedByAdmin = false;
-									stamping.stampType = StampType.em().getReference(StampType.class, StampTypeValues.MOTIVI_DI_SERVIZIO.getId());
-								}
-								else{
-
-									int hour = Integer.parseInt(s.substring(0, 2));
-									int minute = Integer.parseInt(s.substring(3, 5));
-									int second = Integer.parseInt(s.substring(6, 8));	
-									int year = giornata.getYear();
-									int month = giornata.getMonthOfYear();
-									int day = giornata.getDayOfMonth();
-
-									/**
-									 * aggiunti i campi anno mese e giorno per provare a risolvere il problema sulle date.
-									 * inoltre aggiunte le set corrispondenti all'oggetto calendar creato
-									 */
-									if(hour > 33){
-										hour = hour * 60;
-										hour = hour + minute;
-										hour = hour - 2000;
-										int newHour = hour / 60;
-										int min = hour % 60;
-										stamping.date = new LocalDateTime(year,month,day,newHour,min,second);
-
-										stamping.markedByAdmin = true;
-									}						
-
-									else{
-										if(hour == 24){
-											stamping.date = new LocalDateTime(year,month,day,0,minute,second).plusDays(1);
-											stamping.markedByAdmin = true;
-										}
-										else{
-
-											Logger.trace("L'ora è: ", +hour);
-											stamping.date = new LocalDateTime(year,month,day,hour,minute,second);
-
-											stamping.markedByAdmin = false;
-
-										}
-									}
-								}
-							}
-						} catch (SQLException sqle) {					
-							sqle.printStackTrace();
-							Logger.warn("Timbratura errata. Persona con id = %s", id);
-						}			
-						//pd.save();
-						stamping.personDay = pd;
-						stamping.save();
-						Logger.trace("Creata %s", stamping.toString());
-
-					}				
+				if(pd == null){
+					pd = new PersonDay(person,newData);
+					pd.create();
+					Logger.debug("Creato %s", pd.toString());
+				}
+				Logger.debug("Prima timbratura, o timbratura dello stesso giorno per %s", person.toString());
+				if(rs.getInt("TipoGiorno")==0){					
+					
+					createStamping(pd, rs.getLong("TipoTimbratura"), rs.getBytes("Ora")); 
 
 				}
 				/**
 				 * si tratta di assenza
 				 */
 				else{
-
-					pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, newData).first();
-					if(pd == null)
-						pd = new PersonDay(person,newData);
-					String codice = rs.getString("Codice");
-					absenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", codice).first();
-					if(absenceType.isDailyAbsence==true){
-						pd.difference = 0;
-						pd.progressive = 0;
-						pd.timeAtWork = 0;
-					}
-					else{
-						int justified = absenceType.justifiedWorkTime;
-						pd.timeAtWork = pd.timeAtWork-justified;
-						pd.difference = pd.difference-justified;
-						pd.progressive = pd.progressive-justified;
-					}
-					pd.save();
-					absence = new Absence();
-					absence.personDay = pd;
-					absence.date = newData;	
-					absence.absenceType = absenceType;
-					absence.save();
-					Logger.info("Creata %s", absence);
+										
+					createAbsence(pd, rs.getString("codice"));
 
 				}					
 			}
@@ -815,22 +693,24 @@ public class FromMysqlToPostgres {
 				pd.difference = pd.getDifference();
 				pd.progressive = pd.getProgressive();
 				pd.setTicketAvailable();
-				pd.save();
+				//pd.refresh();
+				pd.merge();
 				Logger.info("Creato %s", pd);
 			}
 			data = newData;		
-		
+
+
 			if (importedStamping % 100 == 0) {
-					JPAPlugin.closeTx(false);
-					JPAPlugin.startTx(false);
-					person = Person.findById(person.id);
+				JPAPlugin.closeTx(false);
+				JPAPlugin.startTx(false);
+				person = Person.findById(person.id);
 			}
-			
+
 			importedStamping++;
 		}
 
 		JPAPlugin.closeTx(false);
-		
+
 		Logger.debug("Terminato di creare le timbrature per %s", person);
 
 	}
@@ -871,7 +751,7 @@ public class FromMysqlToPostgres {
 
 						vacationCode.save();
 						mappaCodiciVacationType.put(idCodiciFerie,vacationCode);
-						
+
 						Logger.debug("Creato %s", vacationCode.toString());
 
 					}
@@ -894,7 +774,7 @@ public class FromMysqlToPostgres {
 			e.printStackTrace();
 			Logger.error("Periodi di ferie errati. Persona con id="+id);			
 		}
-		
+
 		if (vacationPeriod == null) {
 			Logger.warn("Non ci sono Periodi di Ferie impostati per %s", person);
 		}
@@ -1034,16 +914,16 @@ public class FromMysqlToPostgres {
 				competenceCode = new CompetenceCode();
 				competenceCode.description = rs.getString("descrizione");
 				competenceCode.inactive = rs.getByte("inattivo") != 0;
-				
+
 				competenceCode.create();
 				Logger.info("Creato %s", competenceCode.toString());
-				
+
 				mappaCodiciCompetence.put(idCodiciCompetenza,competenceCode);
 
 			} else {
 				competenceCode = mappaCodiciCompetence.get(idCodiciCompetenza);
 			}
-			
+
 			competence.competenceCode = competenceCode;
 			competence.save();
 			Logger.debug("Creato %s", competence.toString());
@@ -1085,6 +965,107 @@ public class FromMysqlToPostgres {
 		}
 
 	}
+	private static void setDateTimeToStamping(Stamping stamping, LocalDate date, String time){
 
+		if(time.startsWith("-")){
+			int hour = Integer.parseInt(time.substring(1, 3));
+			int minute = Integer.parseInt(time.substring(4, 6));
+			int second = Integer.parseInt(time.substring(7, 9));
+			/**
+			 * aggiunti i campi anno mese e giorno per provare a risolvere il problema sulle date.
+			 * inoltre aggiunte le set corrispondenti all'oggetto calendar creato
+			 */
+
+			int year = date.getYear();
+			int month = date.getMonthOfYear();
+			int day = date.getDayOfMonth();
+
+			stamping.date = new LocalDateTime(year,month,day,hour,minute,second);
+
+			stamping.markedByAdmin = false;
+			stamping.stampType = StampType.em().getReference(StampType.class, StampTypeValues.MOTIVI_DI_SERVIZIO.getId());
+		}
+		else{
+
+			int hour = Integer.parseInt(time.substring(0, 2));
+			int minute = Integer.parseInt(time.substring(3, 5));
+			int second = Integer.parseInt(time.substring(6, 8));	
+			int year = date.getYear();
+			int month = date.getMonthOfYear();
+			int day = date.getDayOfMonth();
+
+			/**
+			 * aggiunti i campi anno mese e giorno per provare a risolvere il problema sulle date.
+			 * inoltre aggiunte le set corrispondenti all'oggetto calendar creato
+			 */
+			if(hour > 33){
+				hour = hour * 60;
+				hour = hour + minute;
+				hour = hour - 2000;
+				int newHour = hour / 60;
+				int min = hour % 60;
+				stamping.date = new LocalDateTime(year,month,day,newHour,min,second);
+
+				stamping.markedByAdmin = true;
+			}						
+
+			else{
+				if(hour == 24){
+					stamping.date = new LocalDateTime(year,month,day,0,minute,second).plusDays(1);
+					stamping.markedByAdmin = true;
+				}
+				else{
+
+					Logger.trace("L'ora è: ", +hour);
+					stamping.date = new LocalDateTime(year,month,day,hour,minute,second);
+
+					stamping.markedByAdmin = false;
+
+				}
+			}
+		}
+	}
+
+	private static void createStamping(PersonDay pd, long tipoTimbratura, byte[] oldTime){
+		Stamping stamping = new Stamping();
+
+		if(tipoTimbratura % 2 != 0)
+			stamping.way = WayType.in;	
+		else
+			stamping.way = WayType.out;
+
+		if(oldTime == null){
+			Logger.warn("L'ora è nulla nella timbratura del %s per la persona %s e non verrà inserita", pd.date, pd.person.toString());
+			return; 
+		}
+		String s = oldTime != null ? new String(oldTime) : null;
+		setDateTimeToStamping(stamping, pd.date, s);
+		stamping.personDay = pd;
+		stamping.save();
+		Logger.debug("Creata %s", stamping.toString());	
+
+	}
+
+	private static void createAbsence(PersonDay pd, String codice){
+
+		AbsenceType absenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", codice).first();
+		if(absenceType.isDailyAbsence==true){
+			pd.difference = 0;
+			pd.progressive = 0;
+			pd.timeAtWork = 0;
+		}
+		else{
+			int justified = absenceType.justifiedWorkTime;
+			pd.timeAtWork = pd.timeAtWork-justified;
+			pd.difference = pd.difference-justified;
+			pd.progressive = pd.progressive-justified;
+		}
+		pd.save();
+		Absence absence = new Absence();
+		absence.personDay = pd;
+		absence.absenceType = absenceType;
+		absence.save();
+		Logger.debug("Creata %s", absence);
+	}
 }
 

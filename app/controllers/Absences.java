@@ -121,7 +121,8 @@ public class Absences extends Controller{
 		
 		Logger.debug("Richiesto inserimento della assenza codice = %s della persona %s, dataInizio = %s", absenceCode, person, dateFrom);
 		
-		Absence existingAbsence = Absence.find("person = ? and date = ? and absenceType = ?", person, dateFrom, absenceType).first();
+		Absence existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date = ?" +
+				" and a.absenceType = ?", person, dateFrom, absenceType).first();
 		if(existingAbsence != null){
 			validation.keep();
 			params.flash();
@@ -130,8 +131,13 @@ public class Absences extends Controller{
 			render("@create");
 		}
 		Absence absence = new Absence();
-		absence.personDay.person = person;
-		absence.date = dateFrom;
+		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, dateFrom).first();
+		if(pd == null){
+			pd = new PersonDay(person, dateFrom);
+			pd.save();
+		}
+		absence.personDay = pd;
+	
 		absence.absenceType = absenceType;
 		
 		absence.save();
@@ -139,8 +145,7 @@ public class Absences extends Controller{
 		if (absence.id != null) {
 			LocalDateTime ldtBegin = new LocalDateTime(dateFrom.getYear(), dateFrom.getMonthOfYear(), dateFrom.getDayOfMonth(), 0, 0);
 			LocalDateTime ldtEnd = new LocalDateTime(dateFrom.getYear(), dateFrom.getMonthOfYear(), dateFrom.getDayOfMonth(), 23, 59);
-			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, dateFrom).first();
-			
+						
 			if(absenceType.isHourlyAbsence == true && absenceType.mealTicketCalculation == true){
 				/**
 				 * è un'assenza oraria e il calcolo del buono mensa deve essere fatto lo stesso: devo vedere se il tempo di lavoro
@@ -204,23 +209,24 @@ public class Absences extends Controller{
 		String absenceCode = params.get("absenceCode");
 		if (absenceCode == null || absenceCode.isEmpty()) {
 			absence.delete();
-			flash.success("Timbratura di tipo %s per il giorno %s rimossa", oldAbsenceCode, PersonTags.toDateTime(absence.date));			
+			flash.success("Timbratura di tipo %s per il giorno %s rimossa", oldAbsenceCode, PersonTags.toDateTime(absence.personDay.date));			
 		} else {
 			
 			AbsenceType absenceType = AbsenceType.find("byCode", absenceCode).first();
 			
-			Absence existingAbsence = Absence.find("person = ? and date = ? and absenceType = ? and id <> ?", absence.personDay.person, absence.date, absenceType, absence.id).first();
+			Absence existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date = ? " +
+					"and a.absenceType = ? and id <> ?", absence.personDay.person, absence.personDay.date, absenceType, absence.id).first();
 			if(existingAbsence != null){
 				validation.keep();
 				params.flash();
-				flash.error("Il codice di assenza %s è già presente per la data %s", params.get("absenceCode"), PersonTags.toDateTime(absence.date));
+				flash.error("Il codice di assenza %s è già presente per la data %s", params.get("absenceCode"), PersonTags.toDateTime(absence.personDay.date));
 				edit(absence.id);
 				render("@edit");
 			}
 			absence.absenceType = absenceType;
 			absence.save();
 			flash.success(
-				String.format("Assenza per il giorno %s per %s %s aggiornata con codice %s", PersonTags.toDateTime(absence.date), absence.personDay.person.surname, absence.personDay.person.name, absenceCode));
+				String.format("Assenza per il giorno %s per %s %s aggiornata con codice %s", PersonTags.toDateTime(absence.personDay.date), absence.personDay.person.surname, absence.personDay.person.name, absenceCode));
 		}
 		render("@save");
 	}
