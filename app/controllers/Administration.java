@@ -17,7 +17,7 @@ public class Administration extends Controller {
         
     public static void importAll() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
     
-    	final int NUMERO_PERSONE_DA_IMPORTARE = 50;
+    	final int NUMERO_PERSONE_DA_IMPORTARE = 1;
     	
     	int absenceTypes = FromMysqlToPostgres.importAbsenceTypes();
     	FromMysqlToPostgres.createAbsenceTypeToQualificationRelations();

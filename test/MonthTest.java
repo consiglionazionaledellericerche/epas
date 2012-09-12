@@ -136,10 +136,10 @@ public class MonthTest extends UnitTest{
 		Absence absence2 = new Absence();
 //		absence.person = person;
 		absence.absenceType = type1;
-		absence.date = new LocalDate(year, month, 5);
+//		absence.date = new LocalDate(year, month, 5);
 		absence.save();
 //		absence2.person=person;
-		absence2.date = new LocalDate(year, month, 11);
+//		absence2.date = new LocalDate(year, month, 11);
 		absence2.absenceType = type2;
 		absence2.save();	
 		

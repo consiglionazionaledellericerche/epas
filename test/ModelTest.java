@@ -113,7 +113,7 @@ public class ModelTest extends UnitTest {
 		//em.persist(hat);
 		
 		Absence absence = new Absence();	
-		absence.date = new LocalDate(GregorianCalendar.getInstance().getTime());
+		//absence.date = new LocalDate(GregorianCalendar.getInstance().getTime());
 		absence.personDay.person = p;
 		absence.personDay.person = p2;
 		absence.absenceType = absenceType;

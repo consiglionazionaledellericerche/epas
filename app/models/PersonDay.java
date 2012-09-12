@@ -166,9 +166,9 @@ public class PersonDay extends Model {
 			/**
 			 * in questo caso si guarda quale posizione della linkedList è null per stabilire se sia mancante un ingresso o un'uscita
 			 */
-			if(stampings.get(0)==null){
+			if(stampings.get(0)==null || stampings.get(1) == null){
 				/**
-				 * è mancante la prima entrata, quindi bisogna fare il calcolo del tempo a lavoro sul tempo trascorso dalla seconda 
+				 * è mancante la prima entrata o la prima uscita, quindi bisogna fare il calcolo del tempo a lavoro sul tempo trascorso dalla seconda 
 				 * entrata alla seconda uscita
 				 */
 				Stamping enter = stampings.get(2);
@@ -176,35 +176,28 @@ public class PersonDay extends Model {
 				tempoLavoro = toMinute(exit.date)-toMinute(enter.date);
 				
 			}
-			if(stampings.get(1)==null){
-				/**
-				 * è mancante la prima uscita, quindi bisogna fare il calcolo del tempo a lavoro sul tempo trascorso dalla seconda 
-				 * entrata alla seconda uscita
-				 */
-				Stamping enter = stampings.get(2);
-				Stamping exit = stampings.get(3);
-				tempoLavoro = toMinute(exit.date)-toMinute(enter.date);
-				
-			}
-			if(stampings.get(2)==null){
-				/**
-				 * è mancante la seconda entrata, quindi bisogna fare il calcolo del tempo a lavoro sul tempo trascorso dalla prima
-				 * entrata alla prima uscita
-				 */
-				Stamping enter = stampings.get(0);
-				Stamping exit = stampings.get(1);
-				tempoLavoro = toMinute(exit.date)-toMinute(enter.date);
-				
-			}
-			if(stampings.get(3)==null){
-				/**
-				 * è mancante la seconda uscita, quindi bisogna fare il calcolo del tempo a lavoro sul tempo trascorso dalla prima
-				 * entrata alla prima uscita
-				 */
-				Stamping enter = stampings.get(0);
-				Stamping exit = stampings.get(1);
-				tempoLavoro = toMinute(exit.date)-toMinute(enter.date);
 
+			if(stampings.get(2)==null || stampings.get(3) == null){
+				/**
+				 * è mancante la seconda entrata o la seconda uscita, quindi bisogna fare il calcolo del tempo a lavoro sul tempo trascorso dalla prima
+				 * entrata alla prima uscita
+				 */
+				Stamping enter = stampings.get(0);
+				Stamping exit = stampings.get(1);
+				tempoLavoro = toMinute(exit.date)-toMinute(enter.date);
+				
+			}
+
+			if( (stampings.size() > 4) && (stampings.get(4) == null || stampings.get(5) == null)){
+				/**
+				 * è mancante la terza entrata o la terza uscita, quindi devo fare il calcolo del tempo a lavoro sul tempo trascorso dalla
+				 * prima entrata alla seconda uscita
+				 */
+				Stamping enter1 = stampings.get(0);
+				Stamping exit1 = stampings.get(1);
+				Stamping enter2 = stampings.get(2);
+				Stamping exit2 = stampings.get(3);
+				tempoLavoro = ((toMinute(exit2.date)-toMinute(enter2.date))+(toMinute(exit1.date)-toMinute(enter1.date)));
 			}
 			if(stampings.get(6)==null){
 				Stamping enter1 = stampings.get(0);
@@ -221,7 +214,7 @@ public class PersonDay extends Model {
 		}		
 		else{
 			int size = stampings.size();
-			timeAtWork = 0;
+			//timeAtWork = 0;
 			// questo contatore controlla se nella lista di timbrature c'è almeno una timbratura di ingresso, in caso contrario fa
 			// ritornare 0 come tempo di lavoro.
 			int count = 0;
@@ -230,7 +223,8 @@ public class PersonDay extends Model {
 					count ++;
 			}
 			if(count == 0){
-				timeAtWork = 0;
+				return 0;
+				//timeAtWork = 0;
 			}
 			else{
 				
@@ -501,7 +495,6 @@ public class PersonDay extends Model {
 	 * fatta all'interno di essa.
 	 */
 	public void setTicketAvailable(){
-		boolean ticketAvailable = false;
 				
 
 		if (timeAtWork == 0) {
@@ -510,9 +503,15 @@ public class PersonDay extends Model {
 		}	
 		
 		if(timeAtWork == 0 || timeAtWork < getWorkingTimeTypeDay().mealTicketTime){
-			ticketAvailable = false;
+			isTicketAvailable = false;
+			return; 
 		}		
 
+		boolean ticketAvailable = false;
+		/**
+		 * TODO: controllare che la persona possa prendere il buono mensa solo a partire dal campo mealTicketAvailable presente sulla tabella
+		 * workingTimeTypeDay per il giorno
+		 */
 		if(person.workingTimeType.description.equals("normale-mod") || person.workingTimeType.description.equals("normale")
 				|| person.workingTimeType.description.equals("80%") || person.workingTimeType.description.equals("85%")){
 			
