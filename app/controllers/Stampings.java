@@ -217,14 +217,10 @@ public class Stampings extends Controller {
 		while(flag == false && i<stamping.size()){
 			stamp1 = stamping.get(i);
 			if(stamp1 != null && stamp1.date != null){
-				LocalDate datePd = new LocalDate(stamp1.date);
-				PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person,datePd).first();
+				stamp1.personDay.populatePersonDay();
 				
-				pd.setTimeAtWork();
-				pd.setDifference();
-				pd.setProgressive();
-				pd.setTicketAvailable();
-				pd.save();
+				stamp1.personDay.save();
+				
 				/**
 				 * TODO: applicare la logica del ricalcolo mensile e annuale se mi trovo nel primo giorno del nuovo mese o del nuovo anno
 				 */

@@ -600,9 +600,9 @@ public class FromMysqlToPostgres {
 
 	}
 
-	public static void createStampings(long id, Person person) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
+	public static void createStampings(long id, Person p) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 		JPAPlugin.startTx(false);
-		person = Person.findById(person.id);
+		Person person = Person.findById(p.id);
 
 		Logger.debug("Inizio a creare le timbrature per %s", person);
 		Connection mysqlCon = getMysqlConnection();
@@ -615,7 +615,7 @@ public class FromMysqlToPostgres {
 				"Orario.Ora, Codici.id, Codici.Codice, Codici.Qualifiche " +
 				"FROM Orario, Codici " +
 				"WHERE Orario.TipoGiorno=Codici.id and Orario.Giorno >= '2000-01-01' " +
-				"and Orario.ID = " + id + " ORDER BY Orario.Giorno limit 8 ");
+				"and Orario.ID = " + id + " ORDER BY Orario.Giorno limit 11 ");
 
 		ResultSet rs = stmtOrari.executeQuery();
 
@@ -638,14 +638,12 @@ public class FromMysqlToPostgres {
 			newData = new LocalDate(rs.getDate("Giorno"));
 			if(data != null){
 				if(newData.isAfter(data)){			
-					Logger.debug("Nuovo giorno %s per %s", newData, person.toString());
-
-					pd.setTicketAvailable();
-					pd.timeAtWork = pd.timeAtWork();
-					pd.difference = pd.getDifference();
-					pd.progressive = pd.getProgressive();
+					Logger.debug("Nuovo giorno %s per %s, prima si fanno i calcoli sul personday poi si crea quello nuovo", newData, person.toString());
 					
-					pd.merge();
+					PersonDay pdOld = PersonDay.findById(pd.id);
+					pdOld.populatePersonDay();	
+					pdOld.merge();
+										
 					pd = new PersonDay(person, newData);
 					pd.create();
 					Logger.debug("Creato %s ", pd.toString());
@@ -658,43 +656,53 @@ public class FromMysqlToPostgres {
 					}
 
 				}
+				if(newData.isEqual(data)){					
+					/**
+					 * si tratta di timbratura
+					 */					
+					if(rs.getInt("TipoGiorno")==0){					
+						Logger.debug("Altra timbratura per %s nel giorno %s", person.toString(), newData);
+						createStamping(pd, rs.getLong("TipoTimbratura"), rs.getBytes("Ora"));
+					}
+					/**
+					 * si tratta di assenza
+					 */
+					else{
+						Logger.debug("Assenza verosimilmente oraria per %s nel giorno %s", person.toString(), newData);					
+						createAbsence(pd, rs.getString("codice"));
+					}
+				}
 			}
-			if(data == null || newData.isEqual(data)){
-				/**
-				 * si tratta di timbratura
-				 */
+			else{
 				if(pd == null){
 					pd = new PersonDay(person,newData);
 					pd.create();
 					Logger.debug("Creato %s", pd.toString());
 				}
-				Logger.debug("Prima timbratura, o timbratura dello stesso giorno per %s", person.toString());
-				if(rs.getInt("TipoGiorno")==0){					
-					
+				
+				Logger.debug("Prima timbratura per %s", person.toString());
+				if(rs.getInt("TipoGiorno")==0){				
 					createStamping(pd, rs.getLong("TipoTimbratura"), rs.getBytes("Ora")); 
-
 				}
 				/**
 				 * si tratta di assenza
 				 */
-				else{
-										
+				else{										
 					createAbsence(pd, rs.getString("codice"));
-
-				}					
+				}	
 			}
+			
 			if(rs.isLast()){
+				Logger.info("Creazione dell'ultimo person day per %s", person.toString());
 				/**
 				 * in questo caso la data del "giro successivo" è nulla poichè siamo all'ultima riga del ciclo. Quindi bisogna fare 
 				 * i calcoli del personDay relativi a questo ultimo giorno (quello con date = data).
 				 */
-				//PersonDay pdLast = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, newData).first();
-				pd.timeAtWork = pd.timeAtWork();
-				pd.difference = pd.getDifference();
-				pd.progressive = pd.getProgressive();
-				pd.setTicketAvailable();
-				//pd.refresh();
+				pd.populatePersonDay();
+				
 				pd.merge();
+				//pd.save();
+				Logger.debug("Il progressivo al termine del resultset è: %s e il differenziale è: %s", pd.progressive, pd.difference);
 				Logger.info("Creato %s", pd);
 			}
 			data = newData;		
@@ -1042,6 +1050,12 @@ public class FromMysqlToPostgres {
 		setDateTimeToStamping(stamping, pd.date, s);
 		stamping.personDay = pd;
 		stamping.save();
+		pd.stampings.add(stamping);
+		if(pd.stampings.size()>1)
+			pd.merge();
+		else
+			pd.save();
+		
 		Logger.debug("Creata %s", stamping.toString());	
 
 	}

@@ -1,5 +1,7 @@
 package models;
 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -7,6 +9,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.hibernate.envers.Audited;
+import org.joda.time.DateTimeConstants;
 
 import play.db.jpa.Model;
 
@@ -35,5 +38,18 @@ public class PersonYear extends Model{
 		this.person = person;
 		this.year = year;
 	}
+	
+	public void update(){
+		int yearProgressive = 0;
+//		List<PersonMonth> personMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and " +
+//				"pm.year = ? and pm.month between ? and ?", person, date.getYear()-1, DateTimeConstants.APRIL, DateTimeConstants.DECEMBER).fetch();
+//		for(PersonMonth permon : personMonth){
+//			yearProgressive = yearProgressive+permon.remainingHours;
+//			
+//		}
+//		this.remainingHours = yearProgressive;
+//		this.save();
+	}
+	
 	
 }

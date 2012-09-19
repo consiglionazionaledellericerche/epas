@@ -10,6 +10,7 @@ import javax.persistence.Entity;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
@@ -60,7 +61,7 @@ public class WorkingTimeType extends Model {
 	/**
 	 * relazione con la tabella di specifiche di orario di lavoro
 	 */
-	@OneToMany( mappedBy = "workingTimeType")
+	@OneToMany( mappedBy = "workingTimeType", fetch = FetchType.EAGER)
 	@OrderBy("dayOfWeek")
 	public List<WorkingTimeTypeDay> workingTimeTypeDays = new ArrayList<WorkingTimeTypeDay>();
 	
