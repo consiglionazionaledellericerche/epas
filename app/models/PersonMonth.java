@@ -206,5 +206,32 @@ public class PersonMonth extends Model {
 	 * 
 	 */
 	
-	
+	public void update(){
+		
+			LocalDate date = new LocalDate(year, month, 1);
+			PersonDay lastPersonDayOfMonth = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?",person, date.dayOfMonth().withMaximumValue()).first();
+			if(date.getMonthOfYear() == DateTimeConstants.JANUARY){
+				int yearProgressive = 0;
+				PersonYear py = new PersonYear(person, date.getYear()-1);
+				List<PersonMonth> personMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and " +
+						"pm.year = ? and pm.month between ? and ?", person, date.getYear()-1, DateTimeConstants.APRIL, DateTimeConstants.DECEMBER).fetch();
+				for(PersonMonth permon : personMonth){
+					yearProgressive = yearProgressive+permon.remainingHours;
+					
+				}
+//				py.remainingHours = yearProgressive;
+//				py.save();
+//				pm = new PersonMonth(person, date.getYear()-1, 12);
+//			}
+//			else{
+//				pm = new PersonMonth(person,date.getYear(),date.getMonthOfYear()-1);
+//			}
+//			pm.compensatoryRest = pm.getCompensatoryRest();
+//
+//			pm.remainingHours = lastPersonDayOfMonth.progressive - pm.compensatoryRest*(432); //durata in minuti di 7:12 ore relative al giorno di riposo compensativo
+//			
+//			pm.save();
+//		
+			}
+	}
 }
