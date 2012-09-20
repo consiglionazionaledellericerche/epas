@@ -615,7 +615,7 @@ public class FromMysqlToPostgres {
 				"Orario.Ora, Codici.id, Codici.Codice, Codici.Qualifiche " +
 				"FROM Orario, Codici " +
 				"WHERE Orario.TipoGiorno=Codici.id and Orario.Giorno >= '2000-01-01' " +
-				"and Orario.ID = " + id + " ORDER BY Orario.Giorno limit 11 ");
+				"and Orario.ID = " + id + " ORDER BY Orario.Giorno limit 27 ");
 
 		ResultSet rs = stmtOrari.executeQuery();
 
@@ -637,10 +637,12 @@ public class FromMysqlToPostgres {
 			}
 			newData = new LocalDate(rs.getDate("Giorno"));
 			if(data != null){
-				if(newData.isAfter(data)){			
-					Logger.debug("Nuovo giorno %s per %s, prima si fanno i calcoli sul personday poi si crea quello nuovo", newData, person.toString());
+				if(newData.isAfter(data)){		
 					
+					Logger.debug("Nuovo giorno %s per %s, prima si fanno i calcoli sul personday poi si crea quello nuovo", newData, person.toString());
+					Logger.debug("Il progressivo del personday del giorno appena trascorso da cui partire per fare i calcoli è: %s", pd.progressive);
 					PersonDay pdOld = PersonDay.findById(pd.id);
+					Logger.debug("Il progressivo del personday del giorno appena trascorso assegnato a un nuovo personDay è: %s", pdOld.progressive);
 					pdOld.populatePersonDay();	
 					pdOld.merge();
 										
@@ -698,6 +700,7 @@ public class FromMysqlToPostgres {
 				 * in questo caso la data del "giro successivo" è nulla poichè siamo all'ultima riga del ciclo. Quindi bisogna fare 
 				 * i calcoli del personDay relativi a questo ultimo giorno (quello con date = data).
 				 */
+				pd.save();
 				pd.populatePersonDay();
 				
 				pd.merge();
