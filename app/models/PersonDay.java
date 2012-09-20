@@ -15,6 +15,7 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
@@ -79,10 +80,7 @@ public class PersonDay extends Model {
 	public Integer progressive;
 
 	public boolean isTicketAvailable;
-	/**
-	 * cambiare la configurazione del database: person in relazione uno a molti con personDay, personDay in relazione uno a molti con stampings
-	 * e con absences che quindi non saranno più in relazione con person
-	 */
+
 	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY)
 	@OrderBy("date")
 	public List<Stamping> stampings = new ArrayList<Stamping>();
@@ -109,6 +107,7 @@ public class PersonDay extends Model {
 	public PersonDay(Person person, LocalDate date){
 		this(person, date, 0, 0, 0);
 	}
+
 
 
 
@@ -345,23 +344,25 @@ public class PersonDay extends Model {
 	private void updateProgressive(){
 
 		int progressivo = 0;
-
+		
 		if((date.getDayOfMonth()==1) && (getWorkingTimeTypeDay().holiday)){
 			//return 0;
 			progressive = 0;
-			save();
+			merge();
 			return;
 		}
 		if((date.getDayOfMonth()==2) && (getWorkingTimeTypeDay().holiday)){
 			progressive = 0;
-			save();
+			merge();
+			
 			return;
 		}
 			//return 0;
 		if((date.getDayOfMonth()==1) && (!getWorkingTimeTypeDay().holiday)){
 			progressivo = difference;
 			progressive = progressivo;
-			save();
+			merge();
+			
 			return;
 			//return progressivo;
 		}
@@ -371,7 +372,8 @@ public class PersonDay extends Model {
 				PersonDay pdYesterday = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date.minusDays(1)).first();
 				progressivo = pdYesterday.progressive;
 				progressive = progressivo;
-				save();
+				merge();
+				
 				return;
 				//return progressivo;
 			}
@@ -379,7 +381,8 @@ public class PersonDay extends Model {
 				PersonDay pdYesterday = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date.minusDays(2)).first();
 				progressivo = pdYesterday.progressive;
 				progressive = progressivo;
-				save();
+				merge();
+				
 				return;
 				//return progressivo;
 			}
@@ -387,7 +390,8 @@ public class PersonDay extends Model {
 				PersonDay pdYesterday = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date.minusDays(1)).first();
 				progressivo = pdYesterday.progressive;
 				progressive = progressivo;
-				save();
+				merge();
+				
 				return;
 				//return progressivo;
 			}
@@ -396,18 +400,17 @@ public class PersonDay extends Model {
 		PersonDay pdYesterday = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date.minusDays(1)).first();
 		if(pdYesterday == null){
 			pdYesterday = new PersonDay(person, date, 0, 0, 0);
+			
 		}
 		Logger.debug("Il progressivo di ieri era: %s. Mentre il differenziale di oggi è: %s", pdYesterday.progressive, difference);
-		progressivo = difference + pdYesterday.progressive;
+	
+		progressivo = progressive + difference + pdYesterday.progressive;
 		progressive = progressivo;
-		save();
+		merge();
+		
 		Logger.debug("Per %s %s il progressivo a oggi, %s, è: %s", person.name, person.surname, date, progressivo);
-		return;
-		//return progressivo;
+				
 	}
-
-
-
 
 
 	/**
@@ -430,15 +433,15 @@ public class PersonDay extends Model {
 	 * chiama le funzioni di popolamento
 	 */
 	public void populatePersonDay(){
-		updateTimeAtWork();
-		merge();
-		calculateDifference();
-		merge();
+		this.updateTimeAtWork();
+		this.merge();
+		this.calculateDifference();
+		this.merge();
 	
-		calculateProgressive();	
-		merge();
-		setTicketAvailable();
-		merge();
+		this.calculateProgressive();	
+		this.merge();
+		this.setTicketAvailable();
+		this.merge();
 		if(date.getDayOfMonth()==1){
 			PersonMonth pm = PersonMonth.find("byYearAndMonthAndPerson", date.minusMonths(1).getYear(), 
 					date.minusMonths(1).getMonthOfYear(), person).first();
