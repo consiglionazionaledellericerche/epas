@@ -25,6 +25,7 @@ import org.joda.time.LocalDateTime;
 
 import play.Logger;
 import play.data.validation.Required;
+import play.db.jpa.JPA;
 import play.db.jpa.Model;
 
 import lombok.Data;
@@ -33,29 +34,62 @@ import lombok.Data;
 @Table(name="person_months")
 @Entity
 public class PersonMonth extends Model {
-	
+
 	@Required
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "person_id", nullable = false)
 	public Person person;	
-	
+
 	@Column
 	public Integer year;
 	@Column
 	public Integer month;	
-	
+
+	/**
+	 * Minuti derivanti dalla somma dei progressivi giornalieri del mese 
+	 */
 	@Column
-	public Integer remainingHours;
+	public Integer progressiveAtEndOfMonthInMinutes;
+
+	/**
+	 * Totale residuo minuti alla fine del mese
+	 * 
+	 * Per i livelli I - III, deriva da:
+	 * 
+	 *  progressiveAtEndOfMonthInMinutes + 
+	 *  residuo mese precedente (che non si azzera all'inizio dell'anno) -
+	 *  recuperi (codice 91)
+	 * 
+	 *  
+	 *  Per i livelli IV - IX, deriva da:
+	 *  
+	 *  progressiveAtEndOfMonthInMinutes +
+	 *  residuo anno precedente (totale anno precedente se ancora utilizzabile) -
+	 *  remainingMinutePastYearTaken -
+	 *  totale remainingMinutePastYearTaken dei mesi precedenti a questo +
+	 *  residuo mese precedente -
+	 *  recuperi (91) -
+	 *  straordinari (notturni, diurni, etc)  
+	 */
+	@Column
+	public Integer totalRemainingMinutes;
+	
+	/**
+	 * Minuti di tempo residuo dell'anno passato utilizzati questo
+	 * mese (come riposo compensativo o come ore in negativo)
+	 */
+	@Column
+	public Integer remainingMinutePastYearTaken;
 	
 	@Column
 	public Integer compensatoryRest;
-	
+
 	@Transient
 	public List<PersonMonth> persons = null;
-	
+
 	@Transient
 	public List<PersonDay> days = null;
-	
+
 	/**
 	 * aggiunta la date per test di getMaximumCoupleOfStampings ---da eliminare
 	 * @param person
@@ -66,11 +100,11 @@ public class PersonMonth extends Model {
 		this.person = person;	
 		this.year = year;
 		this.month = month;
-		
-	}
-	
 
-	
+	}
+
+
+
 	/**
 	 * 
 	 * @param month, year
@@ -80,7 +114,7 @@ public class PersonMonth extends Model {
 	public int getMonthResidual(){
 		int residual = 0;
 		LocalDate date = new LocalDate();
-		
+
 		if(month == date.getMonthOfYear() && year == date.getYear()){
 			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date < ? and pd.progressive != ? " +
 					"order by pd.date desc", person, date, 0).first();
@@ -96,7 +130,7 @@ public class PersonMonth extends Model {
 		}
 		return residual;
 	}
-	
+
 	/**
 	 * 
 	 * @param month
@@ -107,27 +141,27 @@ public class PersonMonth extends Model {
 		if (compensatoryRest != null) {
 			return compensatoryRest;
 		}
-		
+
 		compensatoryRest = 0;
 		LocalDate beginMonth = new LocalDate(year, month, 1);
 
 		return ((Long) Absence.find("Select count(abs) from Absence abs where abs.person = ? and abs.date between ? and ? and abs.absenceType.code = ?", 
 				person, beginMonth, beginMonth.dayOfMonth().withMaximumValue(), "91").first()).intValue();
-		
+
 	}
-	
+
 	/**
 	 * 
 	 * @return il numero di minuti residui dell'anno precedente per quella persona
 	 */
 	public int getResidualPastYear(){
-		
+
 		int residual = 0;
 		PersonYear py = PersonYear.findById(person);
 		residual = py.remainingHours;
 		return residual;
 	}
-	
+
 	/**
 	 * 
 	 * @param month
@@ -142,10 +176,10 @@ public class PersonMonth extends Model {
 		int residualFromPastMonth = PersonUtility.getResidual(person, date.dayOfMonth().withMaximumValue());
 		total = residualFromPastMonth+monthResidual-(compensatoryRest*432); //numero di giorni di riposo compensativo moltiplicati 
 		//per il numero di minuti presenti in 7 ore e 12 minuti, ovvero il tempo di lavoro.
-		
+
 		return total;
 	}
-	
+
 	/**
 	 * 
 	 * @return il numero massimo di coppie di colonne ingresso/uscita ricavato dal numero di timbrature di ingresso e di uscita di quella
@@ -154,7 +188,7 @@ public class PersonMonth extends Model {
 	public long getMaximumCoupleOfStampings(){
 		EntityManager em = em();
 		LocalDate begin = new LocalDate(year, month, 1);
-		
+
 		Query q1 = em.createNativeQuery("select count(*) from stampings as st where st.stamp_type_id in (:in1,:in2) and st.person_id = :per "+
 				"and st.date between :beg and :end group by cast(date as Date) order by count(*) desc")
 				.setParameter("in1", 1L)
@@ -163,17 +197,17 @@ public class PersonMonth extends Model {
 				.setParameter("beg", begin.toDate())
 				.setParameter("end", begin.dayOfMonth().withMaximumValue().toDate())
 				.setMaxResults(1);
-		
+
 		BigInteger exitStamp = (BigInteger)q1.getSingleResult();
-		
-		
+
+
 		q1.setParameter("in1", 2L).setParameter("in2", 3L);
 		BigInteger inStamp = (BigInteger)q1.getSingleResult();
 		return Math.max(exitStamp.longValue(),inStamp.longValue());
 	}
-	
-	
-	
+
+
+
 	/**
 	 * @return la lista di giorni (PersonDay) associato alla persona nel mese di riferimento
 	 */
@@ -186,12 +220,12 @@ public class PersonMonth extends Model {
 		Calendar firstDayOfMonth = GregorianCalendar.getInstance();
 		//Nel calendar i mesi cominciano da zero
 		firstDayOfMonth.set(year, month - 1, 1);
-		
+
 		Logger.trace(" %s-%s-%s : maximum day of month = %s", 
-			year, month, 1, firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH));
-		
+				year, month, 1, firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH));
+
 		for (int day = 1; day <= firstDayOfMonth.getActualMaximum(Calendar.DAY_OF_MONTH); day++) {
-		
+
 			Logger.trace("generating PersonDay: person = %s, year = %d, month = %d, day = %d", person.username, year, month, day);
 			days.add(new PersonDay(person, new LocalDate(year, month, day), 0, 0, 0));
 		}
@@ -205,33 +239,35 @@ public class PersonMonth extends Model {
 	 * 
 	 * 
 	 */
-	
-	public void update(){
+
+	/**
+	 * Aggiorna le variabili d'istanza in funzione dei valori presenti sul db.
+	 * Non effettua il salvataggio sul database.
+	 */
+	public void refreshPersonMonth(){
+
+		LocalDate date = new LocalDate(year, month, 1);
+		PersonDay lastPersonDayOfMonth = 
+				PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date BETWEEN ? AND ? ORDER BY pd.date DESC",
+						person, date.dayOfMonth().withMinimumValue(), date.dayOfMonth().withMaximumValue()).first();
+
+
+		progressiveAtEndOfMonthInMinutes = lastPersonDayOfMonth.progressive;  
+
+		LocalDate startOfMonth = new LocalDate(year, month, 1);
+		compensatoryRest = (Integer) JPA.em().createQuery(
+				"SELECT count(*) FROM Absence a JOIN PersonDay pd WHERE a.absenceType.code = :code WHERE pd.date BETWEEN :startOfMonth AND :endOfMonth AND pd.person = :person")
+				.setParameter("code", "91")
+				.setParameter("startOfMonth", startOfMonth)
+				.setParameter("endOfMonth", startOfMonth.dayOfMonth().withMaximumValue())
+				.setParameter("person", person)
+				.getSingleResult();
+
+		PersonMonth previousPersonMonth = PersonMonth.find("byPersonAndYearAndMonth", person, startOfMonth.minusMonths(1).getYear(), startOfMonth.minusMonths(1).getMonthOfYear()).first();
+		int totalRemainingMinutesPreviousMonth = previousPersonMonth == null ? 0 : previousPersonMonth.totalRemainingMinutes;
 		
-			LocalDate date = new LocalDate(year, month, 1);
-			PersonDay lastPersonDayOfMonth = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?",person, date.dayOfMonth().withMaximumValue()).first();
-			if(date.getMonthOfYear() == DateTimeConstants.JANUARY){
-				int yearProgressive = 0;
-				PersonYear py = new PersonYear(person, date.getYear()-1);
-				List<PersonMonth> personMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and " +
-						"pm.year = ? and pm.month between ? and ?", person, date.getYear()-1, DateTimeConstants.APRIL, DateTimeConstants.DECEMBER).fetch();
-				for(PersonMonth permon : personMonth){
-					yearProgressive = yearProgressive+permon.remainingHours;
-					
-				}
-//				py.remainingHours = yearProgressive;
-//				py.save();
-//				pm = new PersonMonth(person, date.getYear()-1, 12);
-//			}
-//			else{
-//				pm = new PersonMonth(person,date.getYear(),date.getMonthOfYear()-1);
-//			}
-//			pm.compensatoryRest = pm.getCompensatoryRest();
-//
-//			pm.remainingHours = lastPersonDayOfMonth.progressive - pm.compensatoryRest*(432); //durata in minuti di 7:12 ore relative al giorno di riposo compensativo
-//			
-//			pm.save();
-//		
-			}
+		if (person.qualification.qualification <= 3) {
+			totalRemainingMinutes = progressiveAtEndOfMonthInMinutes + totalRemainingMinutes - (compensatoryRest * 1);
+		}
 	}
 }
