@@ -615,7 +615,7 @@ public class FromMysqlToPostgres {
 				"Orario.Ora, Codici.id, Codici.Codice, Codici.Qualifiche " +
 				"FROM Orario, Codici " +
 				"WHERE Orario.TipoGiorno=Codici.id and Orario.Giorno >= '2000-01-01' " +
-				"and Orario.ID = " + id + " ORDER BY Orario.Giorno limit 27 ");
+				"and Orario.ID = " + id + " ORDER BY Orario.Giorno limit 150 ");
 
 		ResultSet rs = stmtOrari.executeQuery();
 
@@ -636,16 +636,16 @@ public class FromMysqlToPostgres {
 				continue;
 			}
 			newData = new LocalDate(rs.getDate("Giorno"));
-			if(data != null){
+			if(data != null) {
 				if(newData.isAfter(data)){		
-					
+
 					Logger.debug("Nuovo giorno %s per %s, prima si fanno i calcoli sul personday poi si crea quello nuovo", newData, person.toString());
-					Logger.debug("Il progressivo del personday del giorno appena trascorso da cui partire per fare i calcoli è: %s", pd.progressive);
+					//Logger.debug("Il progressivo del personday del giorno appena trascorso da cui partire per fare i calcoli è: %s", pd.progressive);
 					PersonDay pdOld = PersonDay.findById(pd.id);
-					Logger.debug("Il progressivo del personday del giorno appena trascorso assegnato a un nuovo personDay è: %s", pdOld.progressive);
 					pdOld.populatePersonDay();	
 					pdOld.merge();
-										
+					Logger.debug("Il progressivo del personday del giorno appena trascorso assegnato a un nuovo personDay è: %s", pdOld.progressive);
+					
 					pd = new PersonDay(person, newData);
 					pd.create();
 					Logger.debug("Creato %s ", pd.toString());
@@ -675,14 +675,16 @@ public class FromMysqlToPostgres {
 					}
 				}
 			}
-			else{
-				if(pd == null){
-					pd = new PersonDay(person,newData);
-					pd.create();
-					Logger.debug("Creato %s", pd.toString());
-				}
-				
-				Logger.debug("Prima timbratura per %s", person.toString());
+			else {
+
+				Logger.debug("Prima timbratura o assenza per %s", person.toString());
+
+				//				if(pd == null){
+				pd = new PersonDay(person,newData);
+				pd.create();
+				Logger.debug("Creato %s", pd.toString());
+				//				}
+
 				if(rs.getInt("TipoGiorno")==0){				
 					createStamping(pd, rs.getLong("TipoTimbratura"), rs.getBytes("Ora")); 
 				}
@@ -693,7 +695,7 @@ public class FromMysqlToPostgres {
 					createAbsence(pd, rs.getString("codice"));
 				}	
 			}
-			
+
 			if(rs.isLast()){
 				Logger.info("Creazione dell'ultimo person day per %s", person.toString());
 				/**
@@ -702,7 +704,7 @@ public class FromMysqlToPostgres {
 				 */
 				pd.save();
 				pd.populatePersonDay();
-				
+
 				pd.merge();
 				//pd.save();
 				Logger.debug("Il progressivo al termine del resultset è: %s e il differenziale è: %s", pd.progressive, pd.difference);
@@ -1026,10 +1028,7 @@ public class FromMysqlToPostgres {
 					stamping.markedByAdmin = true;
 				}
 				else{
-
-					Logger.trace("L'ora è: ", +hour);
 					stamping.date = new LocalDateTime(year,month,day,hour,minute,second);
-
 					stamping.markedByAdmin = false;
 
 				}
@@ -1058,7 +1057,7 @@ public class FromMysqlToPostgres {
 			pd.merge();
 		else
 			pd.save();
-		
+
 		Logger.debug("Creata %s", stamping.toString());	
 
 	}
@@ -1066,16 +1065,20 @@ public class FromMysqlToPostgres {
 	private static void createAbsence(PersonDay pd, String codice){
 
 		AbsenceType absenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", codice).first();
+		createAbsence(pd, absenceType);
+	}
+	
+	private static void createAbsence(PersonDay pd, AbsenceType absenceType) {
 		if(absenceType.isDailyAbsence==true){
 			pd.difference = 0;
-			pd.progressive = 0;
+			//pd.progressive = 0;
 			pd.timeAtWork = 0;
 		}
 		else{
 			int justified = absenceType.justifiedWorkTime;
 			pd.timeAtWork = pd.timeAtWork-justified;
 			pd.difference = pd.difference-justified;
-			pd.progressive = pd.progressive-justified;
+			//pd.progressive = pd.progressive-justified;
 		}
 		pd.save();
 		Absence absence = new Absence();

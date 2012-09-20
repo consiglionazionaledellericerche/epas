@@ -485,7 +485,7 @@ public class MonthRecap extends Model {
 					LocalDate pastMonth = new LocalDate(date.getYear(),date.getMonthOfYear()-1,31);
 					PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and " +
 							"pd.date = ?", person, pastMonth).first();
-					pm.remainingHours = pd.progressive;
+					pm.progressiveAtEndOfMonthInMinutes = pd.progressive;
 					pm.save();
 				}
 				if((date.getMonthOfYear()-1)==4 || (date.getMonthOfYear()-1)==6 || (date.getMonthOfYear()-1)==9 
@@ -493,7 +493,7 @@ public class MonthRecap extends Model {
 					LocalDate pastMonth = new LocalDate(date.getYear(),date.getMonthOfYear()-1,30);
 					PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and " +
 							"pd.date = ?", person, pastMonth).first();
-					pm.remainingHours = pd.progressive;
+					pm.progressiveAtEndOfMonthInMinutes = pd.progressive;
 					pm.save();
 				}
 				if((date.getMonthOfYear()-1)==2){
@@ -501,14 +501,14 @@ public class MonthRecap extends Model {
 						LocalDate pastMonth = new LocalDate(date.getYear(),date.getMonthOfYear()-1,29);
 						PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and " +
 								"pd.date = ?", person, pastMonth).first();
-						pm.remainingHours = pd.progressive;
+						pm.progressiveAtEndOfMonthInMinutes = pd.progressive;
 						pm.save();
 					}
 					else{
 						LocalDate pastMonth = new LocalDate(date.getYear(),date.getMonthOfYear()-1,28);
 						PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and " +
 								"pd.date = ?", person, pastMonth).first();
-						pm.remainingHours = pd.progressive;
+						pm.progressiveAtEndOfMonthInMinutes = pd.progressive;
 						pm.save();
 					}
 

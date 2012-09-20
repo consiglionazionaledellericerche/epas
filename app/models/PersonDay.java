@@ -5,17 +5,11 @@ package models;
 
 import it.cnr.iit.epas.DateUtility;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityManager;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
@@ -26,26 +20,19 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-import javax.persistence.criteria.Fetch;
 
-import lombok.Data;
 import models.Stamping.WayType;
 import models.enumerate.PersonDayModificationType;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
-import org.joda.time.DateTimeConstants;
-import org.joda.time.DateTimeField;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
 import play.Logger;
 import play.data.validation.Required;
-import play.db.jpa.JPA;
 import play.db.jpa.Model;
-import play.db.jpa.Transactional;
-import play.mvc.Scope.Session;
 
 /**
  * Classe che rappresenta un giorno, sia esso lavorativo o festivo di una persona.
@@ -337,96 +324,21 @@ public class PersonDay extends Model {
 
 
 	/**
-	 * 
-	 * @param date
-	 * @return il progressivo delle ore in più o in meno rispetto al normale orario previsto per quella data
+	 * calcola il valore del progressivo giornaliero e lo salva sul db
 	 */
 	private void updateProgressive(){
-
-		int progressivo = 0;
-		
-		if((date.getDayOfMonth()==1) && (getWorkingTimeTypeDay().holiday)){
-			//return 0;
-			progressive = 0;
-			merge();
-			return;
-		}
-		if((date.getDayOfMonth()==2) && (getWorkingTimeTypeDay().holiday)){
-			progressive = 0;
-			merge();
-			
-			return;
-		}
-			//return 0;
-		if((date.getDayOfMonth()==1) && (!getWorkingTimeTypeDay().holiday)){
-			progressivo = difference;
-			progressive = progressivo;
-			merge();
-			
-			return;
-			//return progressivo;
-		}
-
-		if(getWorkingTimeTypeDay().holiday){
-			if(date.getDayOfWeek() == DateTimeConstants.SATURDAY){
-				PersonDay pdYesterday = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date.minusDays(1)).first();
-				progressivo = pdYesterday.progressive;
-				progressive = progressivo;
-				merge();
-				
-				return;
-				//return progressivo;
-			}
-			if(date.getDayOfWeek() == DateTimeConstants.SUNDAY){
-				PersonDay pdYesterday = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date.minusDays(2)).first();
-				progressivo = pdYesterday.progressive;
-				progressive = progressivo;
-				merge();
-				
-				return;
-				//return progressivo;
-			}
-			else{
-				PersonDay pdYesterday = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date.minusDays(1)).first();
-				progressivo = pdYesterday.progressive;
-				progressive = progressivo;
-				merge();
-				
-				return;
-				//return progressivo;
-			}
-
-		}
-		PersonDay pdYesterday = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date.minusDays(1)).first();
-		if(pdYesterday == null){
-			pdYesterday = new PersonDay(person, date, 0, 0, 0);
-			
-		}
-		Logger.debug("Il progressivo di ieri era: %s. Mentre il differenziale di oggi è: %s", pdYesterday.progressive, difference);
 	
-		progressivo = progressive + difference + pdYesterday.progressive;
-		progressive = progressivo;
-		merge();
+		PersonDay lastPreviousPersonDayInMonth = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? and pd.date >= ? and pd.date < ? ORDER by pd.date DESC", person, date.dayOfMonth().withMinimumValue(), date).first();
+		if (lastPreviousPersonDayInMonth == null) {
+			progressive = difference;
+			Logger.debug("%s - %s. Non c'è nessun personDay prima di questa data. Progressive di oggi = %s", person, date, progressive);
+		} else {
+			progressive = difference + lastPreviousPersonDayInMonth.progressive;
+			Logger.debug("%s - %s. Il PersonDay precedente è %s. Difference di oggi = %s, progressive = %s", person, date, lastPreviousPersonDayInMonth, difference, progressive);
+		}
 		
-		Logger.debug("Per %s %s il progressivo a oggi, %s, è: %s", person.name, person.surname, date, progressivo);
-				
-	}
-
-
-	/**
-	 * salva il valore del progressivo giornaliero sul db e controlla se siamo al primo giorno del mese e quindi salva sul db il valore 
-	 * del mese precedente sul personMonth corrispondente e anche se siamo al primo giorno dell'anno così salva sul personYear 
-	 * il valore del cumulativo dell'anno precedente compreso tra aprile e dicembre
-	 */
-	private void calculateProgressive(){
-		updateProgressive();
 		save();
-
-	}
-
-	private void calculateDifference(){
-		returnDifference();
-		save();
+		return;				
 	}
 
 	/**
@@ -435,19 +347,32 @@ public class PersonDay extends Model {
 	public void populatePersonDay(){
 		this.updateTimeAtWork();
 		this.merge();
-		this.calculateDifference();
+		this.updateDifference();
 		this.merge();
 	
-		this.calculateProgressive();	
+		this.updateProgressive();	
 		this.merge();
 		this.setTicketAvailable();
 		this.merge();
-		if(date.getDayOfMonth()==1){
+		
+		/*e controlla se siamo al primo giorno del mese e quindi salva sul db il valore 
+		 * del mese precedente sul personMonth corrispondente e anche se siamo al primo giorno dell'anno così salva sul personYear 
+		 * il valore del cumulativo dell'anno precedente compreso tra aprile e dicembre
+		 */		
+		if(date.getDayOfMonth() == 1){
+			
 			PersonMonth pm = PersonMonth.find("byYearAndMonthAndPerson", date.minusMonths(1).getYear(), 
 					date.minusMonths(1).getMonthOfYear(), person).first();
-			pm.update();
-			pm.merge();
+			
+			if (pm == null) {
+				pm = new PersonMonth(person, date.minusMonths(1).getYear(), date.minusMonths(1).getMonthOfYear());
+				pm.create();
+			}
+						
+			pm.refreshPersonMonth();
 		}
+		
+		//TODO: manca l'aggiornamento del PersonYear
 
 	}
 
@@ -633,7 +558,7 @@ public class PersonDay extends Model {
 	 * @return la differenza tra l'orario di lavoro giornaliero e l'orario standard in minuti
 	 */
 
-	private void returnDifference(){
+	private void updateDifference(){
 
 		if((getWorkingTimeTypeDay().holiday) && (date.getDayOfMonth()==1)){
 			difference = 0;

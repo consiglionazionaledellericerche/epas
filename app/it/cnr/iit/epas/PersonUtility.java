@@ -37,7 +37,7 @@ public class PersonUtility {
 						"and pm.year = ?", person, date.getMonthOfYear(), date.getYear()).fetch();			
 				
 				for(PersonMonth personMonth : pm){
-					residual = residual+personMonth.remainingHours;
+					residual = residual+personMonth.progressiveAtEndOfMonthInMinutes;
 				}
 				PersonYear py = PersonYear.find("Select py from PersonYear py where py.person = ? and py.year = ?", 
 						person, date.getYear()-1).first();
@@ -47,7 +47,7 @@ public class PersonUtility {
 				List<PersonMonth> pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ?", 
 						person, date.getYear()).fetch();
 				for(PersonMonth personMonth : pm){
-					residual = residual+personMonth.remainingHours;
+					residual = residual+personMonth.progressiveAtEndOfMonthInMinutes;
 				}
 			}
 		}

@@ -108,7 +108,7 @@ public class VacationsPermissionsDaysManager {
 			throw new IllegalStateException(String.format("Person day o person month non valido per %s %s", person.name, person.surname));
 		
 		Integer workingTime = person.workingTimeType.getWorkingTimeFromWorkinTimeType(date.getDayOfWeek()).workingTime;
-		if(pd.progressive + pm.remainingHours > workingTime){
+		if(pd.progressive + pm.progressiveAtEndOfMonthInMinutes > workingTime){
 			if(person.qualification.qualification == 1 || person.qualification.qualification == 2 || person.qualification.qualification == 3){
 				Integer expireMonth = config.monthExpireRecoveryDaysOneThree;
 				if(expireMonth == null || expireMonth > date.getMonthOfYear())
