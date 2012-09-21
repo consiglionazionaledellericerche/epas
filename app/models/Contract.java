@@ -17,6 +17,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
+import play.data.validation.Required;
 import play.db.jpa.Model;
 
 /**
@@ -52,6 +53,14 @@ public class Contract extends Model {
 	@Column(name="end_contract")
 	public LocalDate endContract;
 	
+	/**
+	 * I contratti con onCertificate = true sono quelli dei dipendenti CNR e 
+	 * corrispondono a quelli con l'obbligo dell'attestato di presenza 
+	 * da inviare a Roma
+	 */
+	@Required
+	public boolean onCertificate = true;
+
 	@Transient
 	public boolean isValidContract(){
 		LocalDate date = new LocalDate();

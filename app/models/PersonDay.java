@@ -80,8 +80,7 @@ public class PersonDay extends Model {
 
 	@Transient
 	private boolean isMealTicketAvailable;
-
-
+	
 	public PersonDay(Person person, LocalDate date, int timeAtWork, int difference, int progressive) {
 		this.person = person;
 		this.date = date;
@@ -203,7 +202,14 @@ public class PersonDay extends Model {
 				tempoLavoro = ((toMinute(exit3.date)-toMinute(enter3.date))+(toMinute(exit2.date)-toMinute(enter2.date))+(toMinute(exit1.date)-toMinute(enter1.date)));
 
 			}
-			timeAtWork = tempoLavoro;
+			
+			//Per le persone che hanno impostato nello StampProfile la timbrature di default si imposta 
+			//il tempo previsto
+			if (getStampProfile().fixedWorkingTime) {
+				timeAtWork = Math.max(tempoLavoro, getWorkingTimeTypeDay().workingTime);
+			} else {
+				timeAtWork = tempoLavoro;	
+			}
 			//save();
 			return;
 
@@ -222,7 +228,14 @@ public class PersonDay extends Model {
 		}
 		if(count == 0){
 
-			timeAtWork = 0;
+			//Per le persone che hanno impostato nello StampProfile la timbrature di default si imposta 
+			//il tempo previsto
+			if (getStampProfile().fixedWorkingTime) {
+				timeAtWork = getWorkingTimeTypeDay().workingTime;
+			} else {
+				timeAtWork = 0;	
+			}
+
 			//save();
 			return;
 		}
@@ -283,7 +296,14 @@ public class PersonDay extends Model {
 			}
 
 		}
-		timeAtWork = tempoLavoro;	
+		//Per le persone che hanno impostato nello StampProfile la timbrature di default si imposta 
+		//il tempo previsto
+		if (getStampProfile().fixedWorkingTime) {
+			timeAtWork = Math.max(tempoLavoro, getWorkingTimeTypeDay().workingTime);
+		} else {
+			timeAtWork = tempoLavoro;	
+		}
+			
 		Logger.trace("PersonDay[%d] - personId = %s, date = %s. TimeAtWork is %d", id, person.id, date, timeAtWork);
 
 	}
@@ -437,7 +457,7 @@ public class PersonDay extends Model {
 	 * 
 	 * @return il workingTimeTypeDay relativo al giorno specifico della data
 	 */
-	private WorkingTimeTypeDay getWorkingTimeTypeDay(){
+	public WorkingTimeTypeDay getWorkingTimeTypeDay(){
 		int day = date.getDayOfWeek();
 		WorkingTimeType wtt = person.workingTimeType;
 		if (wtt == null)
@@ -793,6 +813,22 @@ public class PersonDay extends Model {
 		}
 	}
 
+	private StampProfile getStampProfile() {
+		List<StampProfile> stampProfiles = 
+			StampProfile.find("SELECT sp FROM StampProfile sp WHERE sp.person = ? " +
+				"AND (sp.startFrom <= ? OR sp.startFrom IS NULL) AND (sp.endTo >= ? OR sp.endTo IS NULL)", person, date, date).fetch();
+		
+		if (stampProfiles.size() > 1) {
+			throw new IllegalStateException(
+				String.format("E' presente più di uno StampProfile per %s per la data %s", person, date));
+		}
+		if (stampProfiles.isEmpty()) {
+			throw new IllegalStateException(
+					String.format("Non è presente uno StampProfile per %s con data %s", person, date));			
+		}
+		return stampProfiles.get(0);
+	}
+	
 	@Override
 	public String toString() {
 		return String.format("PersonDay[%d] - person.id = %d, date = %s, difference = %s, isTicketAvailable = %s, modificationType = %s, progressive = %s, timeAtWork = %s",

@@ -110,7 +110,11 @@ public class Person extends Model {
 	 */
 	@NotAudited
 	@OneToMany(mappedBy="person", fetch=FetchType.EAGER)
-	public List<Contract> contracts;
+	public List<Contract> contracts = new ArrayList<Contract>(); 
+	
+	@NotAudited
+	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
+	public List<StampProfile> stampProfiles = new ArrayList<StampProfile>();
 	
 	/**
 	 * relazione con la tabella delle tipologie di orario di lavoro
