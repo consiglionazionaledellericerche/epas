@@ -25,6 +25,7 @@ import models.Person;
 import models.PersonDay;
 import models.PersonReperibility;
 import models.Qualification;
+import models.StampProfile;
 import models.StampType;
 import models.Stamping;
 import models.Stamping.WayType;
@@ -36,9 +37,11 @@ import models.WorkingTimeTypeDay;
 import models.YearRecap;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
+import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.StampTypeValues;
 import models.enumerate.WorkingTimeTypeValues;
 
+import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
@@ -48,6 +51,7 @@ import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 
 public class FromMysqlToPostgres {
 
@@ -56,6 +60,24 @@ public class FromMysqlToPostgres {
 	public static Map<Integer,VacationCode> mappaCodiciVacationType = new HashMap<Integer,VacationCode>();
 	public static Map<Integer,WorkingTimeType> mappaCodiciWorkingTimeType = new HashMap<Integer,WorkingTimeType>();
 
+	private static Map<Integer, JustifiedTimeAtWork> mappaQuantGiust = 
+			ImmutableMap.<Integer, JustifiedTimeAtWork>builder()
+				.put(0, JustifiedTimeAtWork.AllDay)
+				.put(-1, JustifiedTimeAtWork.HalfDay)
+				.put(1, JustifiedTimeAtWork.OneHour)
+				.put(2, JustifiedTimeAtWork.TwoHours)
+				.put(3, JustifiedTimeAtWork.ThreeHours)
+				.put(4, JustifiedTimeAtWork.FourHours)
+				.put(5, JustifiedTimeAtWork.FiveHours)
+				.put(6, JustifiedTimeAtWork.SixHours)
+				.put(7, JustifiedTimeAtWork.SevenHours)
+				.put(8, JustifiedTimeAtWork.EightHours)
+				.put(20, JustifiedTimeAtWork.Nothing)
+				.put(21, JustifiedTimeAtWork.TimeToComplete)
+				.put(22, JustifiedTimeAtWork.SetWorkingTime)
+				.put(23, JustifiedTimeAtWork.ReduceWorkingTimeOfTwoHours)
+				.build();
+	
 	public static String mySqldriver = Play.configuration.getProperty("db.old.driver");//"com.mysql.jdbc.Driver";	
 
 	private static Connection mysqlCon = null;
@@ -288,6 +310,12 @@ public class FromMysqlToPostgres {
 			AbsenceType absenceType = new AbsenceType();
 
 			absenceType.code = rsCodici.getString("Codice");
+	
+			//I codici della serie 91 sono riposi compensativi
+			if (absenceType.code.startsWith("91")) {
+				absenceType.compensatoryRest = true;
+			}
+			
 			absenceType.description = rsCodici.getString("Descrizione");
 			absenceType.validFrom = new LocalDate(rsCodici.getDate("DataInizio"));
 			absenceType.validTo = new LocalDate(rsCodici.getDate("DataFine"));
@@ -296,23 +324,7 @@ public class FromMysqlToPostgres {
 			absenceType.ignoreStamping =  rsCodici.getByte("IgnoraTimbr") != 0;
 
 
-			/**
-			 * caso di assenze orarie
-			 */
-			if(rsCodici.getInt("QuantGiust") != 0){
-				absenceType.isHourlyAbsence = true;
-				absenceType.isDailyAbsence = false;
-				absenceType.justifiedWorkTime = rsCodici.getInt("QuantGiust");
-
-			}
-			/**
-			 * caso di assenze giornaliere
-			 */
-			else{
-				absenceType.isDailyAbsence = true;
-				absenceType.isHourlyAbsence = false;
-
-			}				
+			absenceType.justifiedTimeAtWork = mappaQuantGiust.get(rsCodici.getInt("QuantGiust"));
 
 			if(rsCodici.getString("Gruppo")!=null){
 				String gruppo = rsCodici.getString("Gruppo");
@@ -540,43 +552,42 @@ public class FromMysqlToPostgres {
 		Logger.debug("Inizio a creare il contratto per %s", person);	
 
 		Connection mysqlCon = getMysqlConnection();	
-		PreparedStatement stmtContratto = mysqlCon.prepareStatement("SELECT id,DataInizio,DataFine,continua " +	
+		PreparedStatement stmtContratto = mysqlCon.prepareStatement("SELECT id,DataInizio,DataFine,continua,firma,Presenzadefault " +	
 				"FROM Personedate WHERE id=" + id + " order by DataInizio");	
 		ResultSet rs = stmtContratto.executeQuery();       	
 		Contract contract = null;
+		StampProfile stampProfile = null;
+		LocalDate startContract;
+		LocalDate endContract;
+		
 		while(rs.next()){
-			LocalDate startContract = null;
-			LocalDate endContract = null;
+			startContract = null;
+			endContract = null;
+
 			Date begin = rs.getDate("DataInizio");
 			Date end = rs.getDate("DataFine");
-			if(begin == null && end == null){
-				/**
-				 * le date non sono valorizzate, si costruisce un contratto con date fittizie
-				 */
-				startContract = new LocalDate(1971,12,31);
-				endContract = new LocalDate(2099,1,1);
-			}
-			if(begin != null && end == null){
-				/**
-				 * è il caso dei contratti a tempo indeterminato che non hanno data di fine valorizzata. posso lasciarla anche
-				 * io a null
-				 */
+			if (begin != null) {
 				startContract = new LocalDate(begin);
-				endContract = null;
 			}
-			if(begin != null && end != null){
-				/**
-				 * entrambi gli estremi valorizzati, contratto a tempo determinato, si inseriscono entrambe
-				 */
-				startContract = new LocalDate(begin);
+			if (end != null) {
 				endContract = new LocalDate(end);
 			}
+			
 			contract = Contract.find("Select con from Contract con where con.person = ? ", person).first();
 			if(contract == null){
 				contract = new Contract();
 				//contract.person = person;
 				contract.beginContract = startContract;
-				contract.expireContract = endContract;       		        		
+				contract.expireContract = endContract;
+				
+				//Un nuovo StampProfile per ogni contratto in modo da mantenere lo storico che
+				//abbiamo dei tipi di timbratura
+				stampProfile = new StampProfile();
+				stampProfile.person = person;
+				stampProfile.fixedWorkingTime = rs.getInt("Presenzadefault") == 0 ? false : true;
+				stampProfile.startFrom = startContract;
+				stampProfile.endTo = endContract;
+				stampProfile.create();
 			}
 			else{
 
@@ -591,6 +602,8 @@ public class FromMysqlToPostgres {
 				}
 			}    		   		 
 
+			contract.onCertificate = rs.getInt("firma") == 0 ? true : false;
+			
 			contract.save();
 			contract.person = person;
 			person.save();
@@ -1069,17 +1082,33 @@ public class FromMysqlToPostgres {
 	}
 	
 	private static void createAbsence(PersonDay pd, AbsenceType absenceType) {
-		if(absenceType.isDailyAbsence==true){
-			pd.difference = 0;
-			//pd.progressive = 0;
-			pd.timeAtWork = 0;
-		}
-		else{
-			int justified = absenceType.justifiedWorkTime;
+		if (absenceType.justifiedTimeAtWork.isFixedJustifiedTime()) {
+			int justified = absenceType.justifiedTimeAtWork.minutesJustified;
 			pd.timeAtWork = pd.timeAtWork-justified;
 			pd.difference = pd.difference-justified;
-			//pd.progressive = pd.progressive-justified;
+		} else {
+			switch (absenceType.justifiedTimeAtWork) {
+			case AllDay:
+				pd.difference = 0;
+				pd.timeAtWork = 0;
+				break;
+			case HalfDay:
+				//TODO: da implementare
+				break;
+			case ReduceWorkingTimeOfTwoHours:
+				//TODO: da implementare
+				break;
+			case SetWorkingTime:
+				//TODO: da implementare
+				break;
+			case TimeToComplete:
+				//TODO: da implementare
+				break;				
+			default:
+				throw new RuntimeException(String.format("%s ha un \"justifiedTimeAtWork\" = %s non riconosciuto dall'applicazione", absenceType.justifiedTimeAtWork));
+			}
 		}
+		
 		pd.save();
 		Absence absence = new Absence();
 		absence.personDay = pd;
@@ -1087,5 +1116,6 @@ public class FromMysqlToPostgres {
 		absence.save();
 		Logger.debug("Creata %s", absence);
 	}
+	
 }
 

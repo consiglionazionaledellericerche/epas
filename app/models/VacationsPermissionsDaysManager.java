@@ -213,12 +213,13 @@ public class VacationsPermissionsDaysManager {
 		Integer currentTotalTime = (Integer)query.getSingleResult();
 		switch(abtg.accumulationBehaviour){
 			case noMoreAbsencesAccepted:
-				if(currentTotalTime + abt.justifiedWorkTime > abtg.limitInMinute)
-					return new AvailabilityInfo(String.format("Nel periodo '%s' sono già stati presi %s minuti per il gruppo di assenze" +
-							" %s. Il limite per questo gruppo di assenze è %s. Quindi non è possibile prendere ulteriori %s minuti", 
-							abtg.accumulationType, currentTotalTime, abtg.label, abtg.limitInMinute, abt.justifiedWorkTime));
-				else
-					return new AvailabilityInfo(true);
+				//TODO: da implementare andando a verificare il justifiedWorkingTime dell'assenza 
+//				if(currentTotalTime + abt.justifiedWorkTime > abtg.limitInMinute)
+//					return new AvailabilityInfo(String.format("Nel periodo '%s' sono già stati presi %s minuti per il gruppo di assenze" +
+//							" %s. Il limite per questo gruppo di assenze è %s. Quindi non è possibile prendere ulteriori %s minuti", 
+//							abtg.accumulationType, currentTotalTime, abtg.label, abtg.limitInMinute, abt.justifiedWorkTime));
+//				else
+//					return new AvailabilityInfo(true);
 				/**
 				 * nel caso in cui debba rimpiazzare il codice orario con il suo codice di completamento giornaliero, controllo che quel codice
 				 * giornaliero non abbia raggiunto il suo limite di utilizzo

@@ -146,7 +146,7 @@ public class Absences extends Controller{
 			LocalDateTime ldtBegin = new LocalDateTime(dateFrom.getYear(), dateFrom.getMonthOfYear(), dateFrom.getDayOfMonth(), 0, 0);
 			LocalDateTime ldtEnd = new LocalDateTime(dateFrom.getYear(), dateFrom.getMonthOfYear(), dateFrom.getDayOfMonth(), 23, 59);
 						
-			if(absenceType.isHourlyAbsence == true && absenceType.mealTicketCalculation == true){
+			if(absenceType.justifiedTimeAtWork.isFixedJustifiedTime() == true && absenceType.mealTicketCalculation == true){
 				/**
 				 * è un'assenza oraria e il calcolo del buono mensa deve essere fatto lo stesso: devo vedere se il tempo di lavoro
 				 */
@@ -154,7 +154,7 @@ public class Absences extends Controller{
 					/**
 					 * tolgo dal tempo di lavoro la quantità di ore che il codice di assenza toglie 
 					 */
-					pd.timeAtWork = pd.timeAtWork-absenceType.justifiedWorkTime;
+					pd.timeAtWork = pd.timeAtWork-absenceType.justifiedTimeAtWork.minutesJustified;
 					pd.populatePersonDay();
 					pd.save();
 				}

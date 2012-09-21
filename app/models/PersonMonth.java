@@ -256,14 +256,23 @@ public class PersonMonth extends Model {
 		progressiveAtEndOfMonthInMinutes = lastPersonDayOfMonth.progressive;  
 
 		LocalDate startOfMonth = new LocalDate(year, month, 1);
-		compensatoryRest = (Integer) JPA.em().createQuery(
-				"SELECT count(*) FROM Absence a JOIN PersonDay pd WHERE a.absenceType.code = :code WHERE pd.date BETWEEN :startOfMonth AND :endOfMonth AND pd.person = :person")
-				.setParameter("code", "91")
+		
+		List<Absence> compensatoryRestAbsences = JPA.em().createQuery(
+				"SELECT count(*) FROM Absence a JOIN PersonDay pd WHERE a.absenceType.compensatoryRest = true AND pd.date BETWEEN :startOfMonth AND :endOfMonth AND pd.person = :person")
 				.setParameter("startOfMonth", startOfMonth)
 				.setParameter("endOfMonth", startOfMonth.dayOfMonth().withMaximumValue())
 				.setParameter("person", person)
-				.getSingleResult();
+				.getResultList();
 
+		for (Absence absence : compensatoryRestAbsences) {
+			//TODO: da implementare andando a verificare il justifiedWorkingTime dell'assenza
+//			if (absence.absenceType.isDailyAbsence) {
+//				compensatoryRest += absence.personDay.getWorkingTimeTypeDay().workingTime;
+//			} else {
+//				compensatoryRest += absence.absenceType.justifiedWorkTime;
+//			}
+		}
+		
 		PersonMonth previousPersonMonth = PersonMonth.find("byPersonAndYearAndMonth", person, startOfMonth.minusMonths(1).getYear(), startOfMonth.minusMonths(1).getMonthOfYear()).first();
 		int totalRemainingMinutesPreviousMonth = previousPersonMonth == null ? 0 : previousPersonMonth.totalRemainingMinutes;
 		/**

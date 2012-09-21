@@ -11,8 +11,7 @@ import play.Logger;
 public class DateUtility {
 
 	public static boolean isHoliday(Person person, LocalDate date){
-		Configuration config = Configuration.getConfiguration(date);
-		WorkingTimeType wtt = WorkingTimeType.findById(person.workingTimeType.id);		
+		Configuration config = Configuration.getConfiguration(date);	
 		
 		if(person.workingTimeType.getWorkingTimeFromWorkinTimeType(date.getDayOfWeek()).holiday)
 			return true;
@@ -24,6 +23,8 @@ public class DateUtility {
 			return true;
 		if(date.getDayOfMonth() == easterMonday.getDayOfMonth() && date.getMonthOfYear() == easterMonday.getMonthOfYear())
 			return true;
+		
+		//TODO: Mettere queste date in configurazione
 		if((date.getDayOfWeek() == 7)||(date.getDayOfWeek() == 6))
 			return true;		
 		if((date.getMonthOfYear() == 12) && (date.getDayOfMonth() == 25))

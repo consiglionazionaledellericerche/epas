@@ -22,6 +22,7 @@ import javax.persistence.Transient;
 
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
+import models.enumerate.JustifiedTimeAtWork;
 import net.sf.oval.constraint.NotNull;
 
 import org.hibernate.annotations.Type;
@@ -77,15 +78,16 @@ public class AbsenceType extends Model {
 	@Column(name = "ignore_stamping")
 	public boolean ignoreStamping = false;
 	
-	@Column(name = "is_hourly_absence")
-	public boolean isHourlyAbsence = false;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "justified_time_at_work")
+	public JustifiedTimeAtWork justifiedTimeAtWork;
 	
-	@Column(name = "justified_work_time")
-	public int justifiedWorkTime = 0;
-	
-	@Column(name = "id_daily_absence")
-	public boolean isDailyAbsence = false;
-
+	/**
+	 * Se è true è un riposo compensativo che viene trattato in maniera "speciale" 
+	 * rispetto agli altri tipi di assenza
+	 */
+	@Column(name = "compensatory_rest")
+	public boolean compensatoryRest = false;
 	
 	/**
 	 * questo campo booleano serve nei casi in cui il codice sostitutivo da usare non debba essere considerato nel calcolo dell'orario di lavoro
