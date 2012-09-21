@@ -103,7 +103,7 @@ public class PersonMonth extends Model {
 
 	}
 
-
+	
 
 	/**
 	 * 
@@ -245,7 +245,8 @@ public class PersonMonth extends Model {
 	 * Non effettua il salvataggio sul database.
 	 */
 	public void refreshPersonMonth(){
-
+		LocalDate now = new LocalDate();
+		Configuration config = Configuration.find("Select conf from Configuration conf where conf.endDate > ?", now).first();
 		LocalDate date = new LocalDate(year, month, 1);
 		PersonDay lastPersonDayOfMonth = 
 				PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date BETWEEN ? AND ? ORDER BY pd.date DESC",
@@ -265,9 +266,25 @@ public class PersonMonth extends Model {
 
 		PersonMonth previousPersonMonth = PersonMonth.find("byPersonAndYearAndMonth", person, startOfMonth.minusMonths(1).getYear(), startOfMonth.minusMonths(1).getMonthOfYear()).first();
 		int totalRemainingMinutesPreviousMonth = previousPersonMonth == null ? 0 : previousPersonMonth.totalRemainingMinutes;
+		/**
+		 * per adesso così, poi vediamo come fare per prendere il workingTime per il giorno specifico...
+		 */
+		int timeAtWork = person.workingTimeType.workingTimeTypeDays.get(0).workingTime;
 		
 		if (person.qualification.qualification <= 3) {
 			totalRemainingMinutes = progressiveAtEndOfMonthInMinutes + totalRemainingMinutes - (compensatoryRest * 1);
+		}
+		else{
+			int totalRemainingMinutePastYearTaken = 0;
+			PersonYear py = PersonYear.find("byPersonAndYear", person, year-1).first();
+			if(month <= config.monthExpireRecoveryDaysFourNine){
+				for(int i = 0; i<month; i++){
+					PersonMonth pm = PersonMonth.find("byPersonAndYearAndMonth", person, year, i).first();
+					totalRemainingMinutePastYearTaken = totalRemainingMinutePastYearTaken+pm.remainingMinutePastYearTaken;
+				}
+			}
+			totalRemainingMinutes = progressiveAtEndOfMonthInMinutes + (py.remainingHours-remainingMinutePastYearTaken) - 
+					totalRemainingMinutePastYearTaken - (compensatoryRest * timeAtWork);
 		}
 	}
 }
