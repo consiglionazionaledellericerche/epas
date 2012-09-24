@@ -27,12 +27,18 @@ public class PersonYear extends Model{
 	@ManyToOne
 	@JoinColumn(name = "person_id", nullable = false)
 	public Person person;
+	
 	@Column
 	public int year;
-	@Column
-	public int remainingDays;
-	@Column
-	public int remainingHours;
+	
+	@Column(name = "remaining_vacation_days")
+	public int remainingVacationDays;
+	
+	/**
+	 * Tempo in minuti residuo alla fine dell'anno
+	 */
+	@Column(name = "remaining_minutes")
+	public int remainingMinutes;
 	
 	public PersonYear(Person person, int year){
 		this.person = person;

@@ -41,7 +41,7 @@ public class PersonUtility {
 				}
 				PersonYear py = PersonYear.find("Select py from PersonYear py where py.person = ? and py.year = ?", 
 						person, date.getYear()-1).first();
-				residual = residual + py.remainingHours;
+				residual = residual + py.remainingMinutes;
 			}
 			else{
 				List<PersonMonth> pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ?", 
