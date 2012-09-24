@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -38,10 +39,6 @@ import play.db.jpa.Model;
  * Classe che rappresenta un giorno, sia esso lavorativo o festivo di una persona.
  *  
  * @author cristian
- *
- */
-
-/**
  * @author dario
  *
  */
@@ -60,13 +57,21 @@ public class PersonDay extends Model {
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate date;
 
+	@Column(name = "time_at_work")
 	public Integer timeAtWork;
 
 	public Integer difference;
 
 	public Integer progressive;
 
-	public boolean isTicketAvailable;
+	@Column(name = "is_ticket_available")
+	public boolean isTicketAvailable = false;
+
+	@Column(name = "is_time_at_work_auto_certificated")
+	public boolean isTimeAtWorkAutoCertificated = false;
+
+	@Column(name = "is_working_in_another_place")
+	public boolean isWorkingInAnotherPlace = false;
 
 	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY)
 	@OrderBy("date")
@@ -75,6 +80,7 @@ public class PersonDay extends Model {
 	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY)
 	public List<Absence> absences = new ArrayList<Absence>();
 
+	@Column(name = "modification_type")
 	@Enumerated(EnumType.STRING)
 	public PersonDayModificationType modificationType;
 
@@ -136,6 +142,9 @@ public class PersonDay extends Model {
 		LocalDateTime endDate = new LocalDateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),23,59);
 		List<Stamping> reloadedStampings = Stamping.find("Select st from Stamping st where st.personDay = ? and " +
 				"st.date > ? and st.date < ? order by st.date", this, beginDate, endDate).fetch();
+		
+		StampProfile stampProfile = getStampProfile();
+		
 		//List<Stamping> reloadedStampings = returnStampingsList(reloadedStampings);
 		if(reloadedStampings.contains(null)){
 			/**
@@ -205,7 +214,7 @@ public class PersonDay extends Model {
 			
 			//Per le persone che hanno impostato nello StampProfile la timbrature di default si imposta 
 			//il tempo previsto
-			if (getStampProfile().fixedWorkingTime) {
+			if (stampProfile != null && stampProfile.fixedWorkingTime) {
 				timeAtWork = Math.max(tempoLavoro, getWorkingTimeTypeDay().workingTime);
 			} else {
 				timeAtWork = tempoLavoro;	
@@ -230,7 +239,7 @@ public class PersonDay extends Model {
 
 			//Per le persone che hanno impostato nello StampProfile la timbrature di default si imposta 
 			//il tempo previsto
-			if (getStampProfile().fixedWorkingTime) {
+			if (stampProfile != null && stampProfile.fixedWorkingTime) {
 				timeAtWork = getWorkingTimeTypeDay().workingTime;
 			} else {
 				timeAtWork = 0;	
@@ -298,7 +307,7 @@ public class PersonDay extends Model {
 		}
 		//Per le persone che hanno impostato nello StampProfile la timbrature di default si imposta 
 		//il tempo previsto
-		if (getStampProfile().fixedWorkingTime) {
+		if (stampProfile != null && stampProfile.fixedWorkingTime) {
 			timeAtWork = Math.max(tempoLavoro, getWorkingTimeTypeDay().workingTime);
 		} else {
 			timeAtWork = tempoLavoro;	
@@ -357,7 +366,6 @@ public class PersonDay extends Model {
 			Logger.debug("%s - %s. Il PersonDay precedente è %s. Difference di oggi = %s, progressive = %s", person, date, lastPreviousPersonDayInMonth, difference, progressive);
 		}
 		
-		save();
 		return;				
 	}
 
@@ -374,26 +382,6 @@ public class PersonDay extends Model {
 		this.merge();
 		this.setTicketAvailable();
 		this.merge();
-		
-		/*e controlla se siamo al primo giorno del mese e quindi salva sul db il valore 
-		 * del mese precedente sul personMonth corrispondente e anche se siamo al primo giorno dell'anno così salva sul personYear 
-		 * il valore del cumulativo dell'anno precedente compreso tra aprile e dicembre
-		 */		
-		if(date.getDayOfMonth() == 1){
-			
-			PersonMonth pm = PersonMonth.find("byYearAndMonthAndPerson", date.minusMonths(1).getYear(), 
-					date.minusMonths(1).getMonthOfYear(), person).first();
-			
-			if (pm == null) {
-				pm = new PersonMonth(person, date.minusMonths(1).getYear(), date.minusMonths(1).getMonthOfYear());
-				pm.create();
-			}
-						
-			pm.refreshPersonMonth();
-		}
-		
-		//TODO: manca l'aggiornamento del PersonYear
-
 	}
 
 
@@ -582,20 +570,20 @@ public class PersonDay extends Model {
 
 		if((getWorkingTimeTypeDay().holiday) && (date.getDayOfMonth()==1)){
 			difference = 0;
-			save();
+//			save();
 			return;
 		}
 
 			//return 0;		
 		if(absenceList().size() > 0){
 			difference = 0;
-			save();
+//			save();
 			return;
 		}
 			//return 0;
 		if(timeAtWork == 0){
 			difference = 0;
-			save();
+//			save();
 			return;
 		}
 			//return 0;
@@ -628,7 +616,7 @@ public class PersonDay extends Model {
 				differenza = timeAtWork - minTimeWorking;					 
 			}
 			difference = differenza;
-			save();
+//			save();
 			return;
 			//return differenza;
 
@@ -642,7 +630,7 @@ public class PersonDay extends Model {
 				differenza = timeAtWork-minTimeWorking;
 			}
 			difference = differenza;
-			save();
+//			save();
 			return;
 			//return differenza;
 		}
@@ -651,7 +639,7 @@ public class PersonDay extends Model {
 			differenza = timeAtWork-minTimeWorking;
 			Logger.debug("Per %s %s la differenza nel giorno %s è: %s", person.name, person.surname, date, differenza);
 			difference = differenza;
-			save();
+//			save();
 			return;
 			//return differenza;
 		}
@@ -823,8 +811,8 @@ public class PersonDay extends Model {
 				String.format("E' presente più di uno StampProfile per %s per la data %s", person, date));
 		}
 		if (stampProfiles.isEmpty()) {
-			throw new IllegalStateException(
-					String.format("Non è presente uno StampProfile per %s con data %s", person, date));			
+			Logger.warn("Non è presente uno StampProfile per %s con data %s", person, date);
+			return null;
 		}
 		return stampProfiles.get(0);
 	}

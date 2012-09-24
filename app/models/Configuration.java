@@ -5,6 +5,7 @@ import java.sql.Blob;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -36,35 +37,44 @@ public class Configuration extends Model{
 	/**
 	 * Data di inizio uso di questo programma gg/mm/aaaa
 	 */
-	
-	public Date initUseProgram;
+	@Column(name = "init_use_program")
+	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	public LocalDate initUseProgram;
 	
 	/**
 	 * date di inizio e fine validità della configurazione
 	 */
-	public Date beginDate;
+	@Column(name = "begin_date")
+	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	public LocalDate beginDate;
 	
-	public Date endDate;
+	@Column(name = "end_date")
+	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	public LocalDate endDate;
 		
 	/**
 	 * Nome dell'Istituto
 	 */
+	@Column(name = "institute_name")
 	public String instituteName;
 	
 	/**
 	 * Email a cui può essere inviato un messaggio in caso di password dimenticata
 	 */	
+	@Column(name = "email_to_contact")
 	@Email
 	public String emailToContact;
 	
 	/**
 	 * Codice sede
 	 */
+	@Column(name = "seat_code")
 	public Integer seatCode;
 	
 	/**
 	 * URL per gestione attestato presenza dell'amministrazione centrale
 	 */
+	@Column(name = "url_to_presence")
 	public String urlToPresence;
 	
 	/**
@@ -278,7 +288,7 @@ public class Configuration extends Model{
 	}
 	
 	public static Configuration getCurrentConfiguration(){
-		
+		//TODO: metterla nella cache
 		return getConfiguration(new LocalDate());
 	}
 	

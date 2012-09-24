@@ -23,7 +23,9 @@ import models.Location;
 import models.MonthRecap;
 import models.Person;
 import models.PersonDay;
+import models.PersonMonth;
 import models.PersonReperibility;
+import models.PersonYear;
 import models.Qualification;
 import models.StampProfile;
 import models.StampType;
@@ -62,22 +64,21 @@ public class FromMysqlToPostgres {
 
 	private static Map<Integer, JustifiedTimeAtWork> mappaQuantGiust = 
 			ImmutableMap.<Integer, JustifiedTimeAtWork>builder()
-				.put(0, JustifiedTimeAtWork.AllDay)
-				.put(-1, JustifiedTimeAtWork.HalfDay)
-				.put(1, JustifiedTimeAtWork.OneHour)
-				.put(2, JustifiedTimeAtWork.TwoHours)
-				.put(3, JustifiedTimeAtWork.ThreeHours)
-				.put(4, JustifiedTimeAtWork.FourHours)
-				.put(5, JustifiedTimeAtWork.FiveHours)
-				.put(6, JustifiedTimeAtWork.SixHours)
-				.put(7, JustifiedTimeAtWork.SevenHours)
-				.put(8, JustifiedTimeAtWork.EightHours)
-				.put(20, JustifiedTimeAtWork.Nothing)
-				.put(21, JustifiedTimeAtWork.TimeToComplete)
-				.put(22, JustifiedTimeAtWork.SetWorkingTime)
-				.put(23, JustifiedTimeAtWork.ReduceWorkingTimeOfTwoHours)
-				.build();
-	
+			.put(0, JustifiedTimeAtWork.AllDay)
+			.put(-1, JustifiedTimeAtWork.HalfDay)
+			.put(1, JustifiedTimeAtWork.OneHour)
+			.put(2, JustifiedTimeAtWork.TwoHours)
+			.put(3, JustifiedTimeAtWork.ThreeHours)
+			.put(4, JustifiedTimeAtWork.FourHours)
+			.put(5, JustifiedTimeAtWork.FiveHours)
+			.put(6, JustifiedTimeAtWork.SixHours)
+			.put(7, JustifiedTimeAtWork.SevenHours)
+			.put(8, JustifiedTimeAtWork.EightHours)
+			.put(20, JustifiedTimeAtWork.Nothing)
+			.put(21, JustifiedTimeAtWork.TimeToComplete)
+			.put(23, JustifiedTimeAtWork.ReduceWorkingTimeOfTwoHours)
+			.build();
+
 	public static String mySqldriver = Play.configuration.getProperty("db.old.driver");//"com.mysql.jdbc.Driver";	
 
 	private static Connection mysqlCon = null;
@@ -218,6 +219,8 @@ public class FromMysqlToPostgres {
 			person.password = rs.getString("passwordmd5");
 			person.bornDate = rs.getDate("DataNascita");
 			person.number = rs.getInt("Matricola");
+			Long qualifica = rs.getLong("Qualifica");
+			person.qualification = qualifica != null && qualifica != 0 ? JPA.em().getReference(Qualification.class, qualifica) : null;
 			person.save();
 			Logger.info("Creata %s", person);
 		} else {
@@ -310,12 +313,12 @@ public class FromMysqlToPostgres {
 			AbsenceType absenceType = new AbsenceType();
 
 			absenceType.code = rsCodici.getString("Codice");
-	
+
 			//I codici della serie 91 sono riposi compensativi
 			if (absenceType.code.startsWith("91")) {
 				absenceType.compensatoryRest = true;
 			}
-			
+
 			absenceType.description = rsCodici.getString("Descrizione");
 			absenceType.validFrom = new LocalDate(rsCodici.getDate("DataInizio"));
 			absenceType.validTo = new LocalDate(rsCodici.getDate("DataFine"));
@@ -323,6 +326,13 @@ public class FromMysqlToPostgres {
 			absenceType.internalUse = rsCodici.getByte("Interno") != 0; 
 			absenceType.ignoreStamping =  rsCodici.getByte("IgnoraTimbr") != 0;
 
+
+			if (rsCodici.getInt("QuantGiust") == 22) {
+				Logger.warn("Il tipo di assenza %s non e' stato importato perche' le assenze con \"Assegna tempo del'orario di lavoro\" non sono " +
+						"più gestite come assenze ma come casi particolari dei PersonDay (gestiti con appositi boolean isTimeAtWorkAutoCertificated e isWorkingInAnotherPlace)",
+						absenceType.description);
+				continue;
+			}
 
 			absenceType.justifiedTimeAtWork = mappaQuantGiust.get(rsCodici.getInt("QuantGiust"));
 
@@ -559,7 +569,7 @@ public class FromMysqlToPostgres {
 		StampProfile stampProfile = null;
 		LocalDate startContract;
 		LocalDate endContract;
-		
+
 		while(rs.next()){
 			startContract = null;
 			endContract = null;
@@ -572,14 +582,14 @@ public class FromMysqlToPostgres {
 			if (end != null) {
 				endContract = new LocalDate(end);
 			}
-			
+
 			contract = Contract.find("Select con from Contract con where con.person = ? ", person).first();
 			if(contract == null){
 				contract = new Contract();
 				//contract.person = person;
 				contract.beginContract = startContract;
 				contract.expireContract = endContract;
-				
+
 				//Un nuovo StampProfile per ogni contratto in modo da mantenere lo storico che
 				//abbiamo dei tipi di timbratura
 				stampProfile = new StampProfile();
@@ -603,7 +613,7 @@ public class FromMysqlToPostgres {
 			}    		   		 
 
 			contract.onCertificate = rs.getInt("firma") == 0 ? true : false;
-			
+
 			contract.save();
 			contract.person = person;
 			person.save();
@@ -627,8 +637,8 @@ public class FromMysqlToPostgres {
 		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT Orario.ID,Orario.Giorno,Orario.TipoGiorno,Orario.TipoTimbratura," +
 				"Orario.Ora, Codici.id, Codici.Codice, Codici.Qualifiche " +
 				"FROM Orario, Codici " +
-				"WHERE Orario.TipoGiorno=Codici.id and Orario.Giorno >= '2000-01-01' " +
-				"and Orario.ID = " + id + " ORDER BY Orario.Giorno limit 150 ");
+				"WHERE Orario.TipoGiorno=Codici.id and Orario.Giorno >= '2012-01-01' " +
+				"and Orario.ID = " + id + " ORDER BY Orario.Giorno");
 
 		ResultSet rs = stmtOrari.executeQuery();
 
@@ -638,6 +648,10 @@ public class FromMysqlToPostgres {
 
 		int importedStamping = 0;
 
+		int currentMonth = 0;
+		int currentYear = 0;
+
+		
 		while(rs.next()){
 			/**
 			 * controllo che la data prelevata sia diversa da null, poichè nel vecchio db esiste la possibilità di avere date del tipo 0000-00-00
@@ -649,6 +663,27 @@ public class FromMysqlToPostgres {
 				continue;
 			}
 			newData = new LocalDate(rs.getDate("Giorno"));
+
+			//Le persone che non hanno qualifica non hanno i PersonMonth da gestire
+			if (person.qualification != null && currentMonth != 0 && currentMonth != newData.getMonthOfYear()) {
+				/* se sto cambiando mese della timbratura allora salvo il PersonMonth con i dati riepilogativi 
+				 */		
+				PersonMonth pm = new PersonMonth(person, currentYear, currentMonth);
+				pm.create();
+				Logger.info("Creato %s", pm);
+				pm.refreshPersonMonth();
+			}
+			
+			//Le persone che non hanno qualifica non hanno i PersonYear da gestire
+			if (person.qualification != null && currentYear != 0 && currentYear != newData.getYear()) {
+				PersonYear py = new PersonYear(person, currentYear);
+				//TODO: py.refreshPersonYear()
+				Logger.info("Creato %s", py);
+			}
+
+			currentMonth = newData.getMonthOfYear();
+			currentYear = newData.getYear();
+			
 			if(data != null) {
 				if(newData.isAfter(data)){		
 
@@ -658,7 +693,7 @@ public class FromMysqlToPostgres {
 					pdOld.populatePersonDay();	
 					pdOld.merge();
 					Logger.debug("Il progressivo del personday del giorno appena trascorso assegnato a un nuovo personDay è: %s", pdOld.progressive);
-					
+
 					pd = new PersonDay(person, newData);
 					pd.create();
 					Logger.debug("Creato %s ", pd.toString());
@@ -715,11 +750,9 @@ public class FromMysqlToPostgres {
 				 * in questo caso la data del "giro successivo" è nulla poichè siamo all'ultima riga del ciclo. Quindi bisogna fare 
 				 * i calcoli del personDay relativi a questo ultimo giorno (quello con date = data).
 				 */
-				pd.save();
+				pd.merge();
 				pd.populatePersonDay();
 
-				pd.merge();
-				//pd.save();
 				Logger.debug("Il progressivo al termine del resultset è: %s e il differenziale è: %s", pd.progressive, pd.difference);
 				Logger.info("Creato %s", pd);
 			}
@@ -1066,10 +1099,7 @@ public class FromMysqlToPostgres {
 		stamping.personDay = pd;
 		stamping.save();
 		pd.stampings.add(stamping);
-		if(pd.stampings.size()>1)
-			pd.merge();
-		else
-			pd.save();
+		pd.merge();
 
 		Logger.debug("Creata %s", stamping.toString());	
 
@@ -1078,44 +1108,45 @@ public class FromMysqlToPostgres {
 	private static void createAbsence(PersonDay pd, String codice){
 
 		AbsenceType absenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", codice).first();
-		createAbsence(pd, absenceType);
-	}
-	
-	private static void createAbsence(PersonDay pd, AbsenceType absenceType) {
-		if (absenceType.justifiedTimeAtWork.isFixedJustifiedTime()) {
-			int justified = absenceType.justifiedTimeAtWork.minutesJustified;
-			pd.timeAtWork = pd.timeAtWork-justified;
-			pd.difference = pd.difference-justified;
-		} else {
-			switch (absenceType.justifiedTimeAtWork) {
-			case AllDay:
-				pd.difference = 0;
-				pd.timeAtWork = 0;
-				break;
-			case HalfDay:
-				//TODO: da implementare
-				break;
-			case ReduceWorkingTimeOfTwoHours:
-				//TODO: da implementare
-				break;
-			case SetWorkingTime:
-				//TODO: da implementare
-				break;
-			case TimeToComplete:
-				//TODO: da implementare
-				break;				
-			default:
-				throw new RuntimeException(String.format("%s ha un \"justifiedTimeAtWork\" = %s non riconosciuto dall'applicazione", absenceType.justifiedTimeAtWork));
-			}
-		}
-		
-		pd.save();
+		pd.merge();
 		Absence absence = new Absence();
 		absence.personDay = pd;
 		absence.absenceType = absenceType;
 		absence.save();
 		Logger.debug("Creata %s", absence);
+		//createAbsence(pd, absenceType);
 	}
-	
+
+	//TODO: da buttare
+	//	private static void createAbsence(PersonDay pd, AbsenceType absenceType) {
+
+	//		if (absenceType.justifiedTimeAtWork.isFixedJustifiedTime()) {
+	//			int justified = absenceType.justifiedTimeAtWork.minutesJustified;
+	//			pd.timeAtWork = pd.timeAtWork-justified;
+	//			pd.difference = pd.difference-justified;
+	//		} else {
+	//			switch (absenceType.justifiedTimeAtWork) {
+	//			case AllDay:
+	//				pd.difference = 0;
+	//				pd.timeAtWork = 0;
+	//				break;
+	//			case HalfDay:
+	//				//TODO: da implementare
+	//				break;
+	//			case ReduceWorkingTimeOfTwoHours:
+	//				//TODO: da implementare
+	//				break;
+	//			case SetWorkingTime:
+	//				//TODO: da implementare
+	//				break;
+	//			case TimeToComplete:
+	//				//TODO: da implementare
+	//				break;				
+	//			default:
+	//				throw new RuntimeException(String.format("%s ha un \"justifiedTimeAtWork\" = %s non riconosciuto dall'applicazione", absenceType.justifiedTimeAtWork));
+	//			}
+	//		}
+	//	}
+
 }
 
