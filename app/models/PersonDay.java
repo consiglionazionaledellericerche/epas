@@ -219,7 +219,7 @@ public class PersonDay extends Model {
 			} else {
 				timeAtWork = tempoLavoro;	
 			}
-			//save();
+			save();
 			return;
 
 		}		
@@ -245,7 +245,7 @@ public class PersonDay extends Model {
 				timeAtWork = 0;	
 			}
 
-			//save();
+			save();
 			return;
 		}
 		/**
@@ -357,7 +357,8 @@ public class PersonDay extends Model {
 	 */
 	private void updateProgressive(){
 	
-		PersonDay lastPreviousPersonDayInMonth = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? and pd.date >= ? and pd.date < ? ORDER by pd.date DESC", person, date.dayOfMonth().withMinimumValue(), date).first();
+		PersonDay lastPreviousPersonDayInMonth = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? " +
+				"and pd.date >= ? and pd.date < ? ORDER by pd.date DESC", person, date.dayOfMonth().withMinimumValue(), date).first();
 		if (lastPreviousPersonDayInMonth == null) {
 			progressive = difference;
 			Logger.debug("%s - %s. Non c'è nessun personDay prima di questa data. Progressive di oggi = %s", person, date, progressive);
@@ -365,7 +366,7 @@ public class PersonDay extends Model {
 			progressive = difference + lastPreviousPersonDayInMonth.progressive;
 			Logger.debug("%s - %s. Il PersonDay precedente è %s. Difference di oggi = %s, progressive = %s", person, date, lastPreviousPersonDayInMonth, difference, progressive);
 		}
-		
+		save();
 		return;				
 	}
 
@@ -570,20 +571,20 @@ public class PersonDay extends Model {
 
 		if((getWorkingTimeTypeDay().holiday) && (date.getDayOfMonth()==1)){
 			difference = 0;
-//			save();
+			save();
 			return;
 		}
 
 			//return 0;		
 		if(absenceList().size() > 0){
 			difference = 0;
-//			save();
+			save();
 			return;
 		}
 			//return 0;
 		if(timeAtWork == 0){
 			difference = 0;
-//			save();
+			save();
 			return;
 		}
 			//return 0;
@@ -616,7 +617,7 @@ public class PersonDay extends Model {
 				differenza = timeAtWork - minTimeWorking;					 
 			}
 			difference = differenza;
-//			save();
+			save();
 			return;
 			//return differenza;
 
@@ -630,7 +631,7 @@ public class PersonDay extends Model {
 				differenza = timeAtWork-minTimeWorking;
 			}
 			difference = differenza;
-//			save();
+			save();
 			return;
 			//return differenza;
 		}
@@ -639,7 +640,7 @@ public class PersonDay extends Model {
 			differenza = timeAtWork-minTimeWorking;
 			Logger.debug("Per %s %s la differenza nel giorno %s è: %s", person.name, person.surname, date, differenza);
 			difference = differenza;
-//			save();
+			save();
 			return;
 			//return differenza;
 		}
