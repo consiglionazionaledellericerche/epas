@@ -86,7 +86,7 @@ public class PersonDay extends Model {
 
 	@Transient
 	private boolean isMealTicketAvailable;
-	
+
 	public PersonDay(Person person, LocalDate date, int timeAtWork, int difference, int progressive) {
 		this.person = person;
 		this.date = date;
@@ -142,9 +142,9 @@ public class PersonDay extends Model {
 		LocalDateTime endDate = new LocalDateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),23,59);
 		List<Stamping> reloadedStampings = Stamping.find("Select st from Stamping st where st.personDay = ? and " +
 				"st.date > ? and st.date < ? order by st.date", this, beginDate, endDate).fetch();
-		
+
 		StampProfile stampProfile = getStampProfile();
-		
+
 		//List<Stamping> reloadedStampings = returnStampingsList(reloadedStampings);
 		if(reloadedStampings.contains(null)){
 			/**
@@ -211,7 +211,7 @@ public class PersonDay extends Model {
 				tempoLavoro = ((toMinute(exit3.date)-toMinute(enter3.date))+(toMinute(exit2.date)-toMinute(enter2.date))+(toMinute(exit1.date)-toMinute(enter1.date)));
 
 			}
-			
+
 			//Per le persone che hanno impostato nello StampProfile la timbrature di default si imposta 
 			//il tempo previsto
 			if (stampProfile != null && stampProfile.fixedWorkingTime) {
@@ -297,8 +297,11 @@ public class PersonDay extends Model {
 				if((reloadedStampings.size()==4) && (minTimeForLunch < getWorkingTimeTypeDay().breakTicketTime) && (!reloadedStampings.contains(null)))
 					tempoLavoro = workTime - (getWorkingTimeTypeDay().breakTicketTime-minTimeForLunch);							
 				if((reloadedStampings.size()==2) && (workTime > getWorkingTimeTypeDay().mealTicketTime) && 
-						(workTime-getWorkingTimeTypeDay().breakTicketTime > getWorkingTimeTypeDay().mealTicketTime))
-					tempoLavoro = workTime-getWorkingTimeTypeDay().breakTicketTime;							
+						(workTime-getWorkingTimeTypeDay().breakTicketTime > getWorkingTimeTypeDay().mealTicketTime)){
+					//Logger.debug("La dimensione della lista di timbrature è %s e quindi devo togliere la pausa pranzo", reloadedStampings.size());
+					tempoLavoro = workTime-getWorkingTimeTypeDay().breakTicketTime;	
+					//Logger.debug("Il tempo lavoro è: %s mentre il breakTickeTime è: %s", tempoLavoro, getWorkingTimeTypeDay().breakTicketTime);
+				}
 				else
 					tempoLavoro = workTime;							
 
@@ -312,7 +315,7 @@ public class PersonDay extends Model {
 		} else {
 			timeAtWork = tempoLavoro;	
 		}
-			
+
 		Logger.trace("PersonDay[%d] - personId = %s, date = %s. TimeAtWork is %d", id, person.id, date, timeAtWork);
 
 	}
@@ -356,7 +359,7 @@ public class PersonDay extends Model {
 	 * calcola il valore del progressivo giornaliero e lo salva sul db
 	 */
 	private void updateProgressive(){
-	
+
 		PersonDay lastPreviousPersonDayInMonth = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? " +
 				"and pd.date >= ? and pd.date < ? ORDER by pd.date DESC", person, date.dayOfMonth().withMinimumValue(), date).first();
 		if (lastPreviousPersonDayInMonth == null) {
@@ -378,7 +381,7 @@ public class PersonDay extends Model {
 		this.merge();
 		this.updateDifference();
 		this.merge();
-	
+
 		this.updateProgressive();	
 		this.merge();
 		this.setTicketAvailable();
@@ -575,19 +578,19 @@ public class PersonDay extends Model {
 			return;
 		}
 
-			//return 0;		
+		//return 0;		
 		if(absenceList().size() > 0){
 			difference = 0;
 			save();
 			return;
 		}
-			//return 0;
+		//return 0;
 		if(timeAtWork == 0){
 			difference = 0;
 			save();
 			return;
 		}
-			//return 0;
+		//return 0;
 
 		int differenza = 0;
 		LocalDateTime beginDate = new LocalDateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),0,0);
@@ -595,26 +598,42 @@ public class PersonDay extends Model {
 		List<Stamping> reloadedStampings = Stamping.find("Select st from Stamping st where st.personDay = ? and " +
 				"st.date > ? and st.date < ? order by st.date", this, beginDate, endDate).fetch();
 
-		WorkingTimeType wtt = person.workingTimeType;
+		//WorkingTimeType wtt = person.workingTimeType;
 
-		WorkingTimeTypeDay wttd = wtt.workingTimeTypeDays.get(date.getDayOfWeek()-1);
-		int minTimeWorking = wttd.workingTime;
+		//WorkingTimeTypeDay wttd = wtt.workingTimeTypeDays.get(date.getDayOfWeek()-1);
+
+		//int minTimeWorking = wttd.workingTime;
+		int minTimeWorking = getWorkingTimeTypeDay().workingTime;
 		//int minTimeWorking = person.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek() - 1).workingTime;
 		//		timeAtWork = updateTimeAtWork();
 		int size = reloadedStampings.size();
 
 		if(size == 2){
-			if(timeAtWork >= getWorkingTimeTypeDay().mealTicketTime){
-				int delay = getWorkingTimeTypeDay().breakTicketTime;	
-				if(timeAtWork-delay >= getWorkingTimeTypeDay().mealTicketTime){
-					differenza = timeAtWork-minTimeWorking-delay;
-				}
-				else{						 				
-					differenza = timeAtWork - minTimeWorking;
-				}
+			
+			if(timeAtWork < minTimeWorking){
+				differenza = timeAtWork - minTimeWorking;
+				difference = differenza;
+				save();
+				return;
+
 			}
 			else{
-				differenza = timeAtWork - minTimeWorking;					 
+				if(timeAtWork >= getWorkingTimeTypeDay().mealTicketTime){
+					int delay = getWorkingTimeTypeDay().breakTicketTime;	
+					
+					if(timeAtWork-delay >= getWorkingTimeTypeDay().mealTicketTime){
+						differenza = timeAtWork-minTimeWorking-delay;
+						
+					}
+					else{						 				
+						differenza = timeAtWork - minTimeWorking;
+						
+					}
+				}
+				else{
+					differenza = timeAtWork - minTimeWorking;	
+					Logger.debug("Il timeAtWork è minore del tempo minimo per avere il buono. La differenza è: %s", differenza);
+				}
 			}
 			difference = differenza;
 			save();
@@ -622,8 +641,9 @@ public class PersonDay extends Model {
 			//return differenza;
 
 		}
-		int i = checkMinTimeForLunch(reloadedStampings);
+		
 		if(size == 4){
+			int i = checkMinTimeForLunch(reloadedStampings);
 			if(i < getWorkingTimeTypeDay().breakTicketTime){
 				differenza = timeAtWork-minTimeWorking+(i-getWorkingTimeTypeDay().breakTicketTime);	
 			}
@@ -804,12 +824,12 @@ public class PersonDay extends Model {
 
 	private StampProfile getStampProfile() {
 		List<StampProfile> stampProfiles = 
-			StampProfile.find("SELECT sp FROM StampProfile sp WHERE sp.person = ? " +
-				"AND (sp.startFrom <= ? OR sp.startFrom IS NULL) AND (sp.endTo >= ? OR sp.endTo IS NULL)", person, date, date).fetch();
-		
+				StampProfile.find("SELECT sp FROM StampProfile sp WHERE sp.person = ? " +
+						"AND (sp.startFrom <= ? OR sp.startFrom IS NULL) AND (sp.endTo >= ? OR sp.endTo IS NULL)", person, date, date).fetch();
+
 		if (stampProfiles.size() > 1) {
 			throw new IllegalStateException(
-				String.format("E' presente più di uno StampProfile per %s per la data %s", person, date));
+					String.format("E' presente più di uno StampProfile per %s per la data %s", person, date));
 		}
 		if (stampProfiles.isEmpty()) {
 			Logger.warn("Non è presente uno StampProfile per %s con data %s", person, date);
@@ -817,7 +837,7 @@ public class PersonDay extends Model {
 		}
 		return stampProfiles.get(0);
 	}
-	
+
 	@Override
 	public String toString() {
 		return String.format("PersonDay[%d] - person.id = %d, date = %s, difference = %s, isTicketAvailable = %s, modificationType = %s, progressive = %s, timeAtWork = %s",
