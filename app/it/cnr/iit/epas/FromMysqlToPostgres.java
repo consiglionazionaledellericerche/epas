@@ -19,6 +19,8 @@ import models.Competence;
 import models.CompetenceCode;
 import models.ContactData;
 import models.Contract;
+import models.InitializationAbsence;
+import models.InitializationTime;
 import models.Location;
 import models.MonthRecap;
 import models.Person;
@@ -119,16 +121,18 @@ public class FromMysqlToPostgres {
 	 * @throws ClassNotFoundException
 	 * @throws SQLException
 	 */
-	public static void importAll(int limit) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
+	
+	public static void importAll(int limit, int anno) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		Connection mysqlCon = FromMysqlToPostgres.getMysqlConnection();
 
+		//TODO: importare tutte le persone o solo quelle che hanno un contratto attivo da quell'anno in poi?
 		String sql = "SELECT ID, Nome, Cognome, DataNascita, Telefono," +
 				"Fax, Email, Stanza, Matricola, passwordmd5, Qualifica, Dipartimento, Sede " +
 				"FROM Persone order by ID";
 		if (limit > 0) {
 			sql += " LIMIT " + limit;
 		}
-
+		
 		PreparedStatement stmt = mysqlCon.prepareStatement(sql);
 
 		ResultSet rs = stmt.executeQuery();
@@ -158,16 +162,16 @@ public class FromMysqlToPostgres {
 			FromMysqlToPostgres.createContract(oldIDPersona, person);
 
 			FromMysqlToPostgres.createVacationType(oldIDPersona, person);	
+			
+			FromMysqlToPostgres.createYearRecap(oldIDPersona, person, anno);
 
-			FromMysqlToPostgres.createYearRecap(oldIDPersona, person);
+//			FromMysqlToPostgres.createMonthRecap(oldIDPersona, person);
 
-			FromMysqlToPostgres.createMonthRecap(oldIDPersona, person);
-
-			FromMysqlToPostgres.createCompetence(oldIDPersona, person);
+			FromMysqlToPostgres.createCompetence(oldIDPersona, person, anno);
 
 			JPAPlugin.closeTx(false);
 
-			FromMysqlToPostgres.createStampings(oldIDPersona, person);
+			FromMysqlToPostgres.createStampings(oldIDPersona, person, anno);
 
 			Logger.info("Terminata la creazione delle info della persona %s %s", rs.getString("Nome"), rs.getString("Cognome"));
 
@@ -202,8 +206,8 @@ public class FromMysqlToPostgres {
 	 * @throws ClassNotFoundException
 	 * @throws SQLException
 	 */
-	public static void importAll() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
-		importAll(0);
+	public static void importAll(int anno) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
+		importAll(0, anno);
 	}
 
 
@@ -623,7 +627,7 @@ public class FromMysqlToPostgres {
 
 	}
 
-	public static void createStampings(long id, Person p) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
+	public static void createStampings(long id, Person p, int anno) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 		JPAPlugin.startTx(false);
 		Person person = Person.findById(p.id);
 
@@ -637,8 +641,11 @@ public class FromMysqlToPostgres {
 		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT Orario.ID,Orario.Giorno,Orario.TipoGiorno,Orario.TipoTimbratura," +
 				"Orario.Ora, Codici.id, Codici.Codice, Codici.Qualifiche " +
 				"FROM Orario, Codici " +
-				"WHERE Orario.TipoGiorno=Codici.id and Orario.Giorno >= '2012-01-01' " +
-				"and Orario.ID = " + id + " ORDER BY Orario.Giorno");
+				"WHERE Orario.TipoGiorno=Codici.id and Orario.Giorno >= ? " +
+				"and Orario.ID = ? ORDER BY Orario.Giorno");
+		java.sql.Date dataSQL = new java.sql.Date(anno,1,1);
+		stmtOrari.setDate(1, dataSQL);
+		stmtOrari.setLong(2, id);
 
 		ResultSet rs = stmtOrari.executeQuery();
 
@@ -840,41 +847,82 @@ public class FromMysqlToPostgres {
 
 	}
 
-	public static void createYearRecap(long id, Person person) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
+	public static void createYearRecap(long id, Person person, int anno) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
 
 		/**
 		 * query su totali_anno per recuperare lo storico da mettere in YearRecap
 		 */
 		Logger.debug("Inizio a creare i riepiloghi annuali per %s", person);
 		Connection mysqlCon = getMysqlConnection();
-		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM totali_anno WHERE ID="+id);
-		ResultSet rs = stmt.executeQuery();
+		PreparedStatement stmtResidualAndRecovery = mysqlCon.prepareStatement("SELECT * FROM totali_anno WHERE ID = ? and anno = ?");
+		stmtResidualAndRecovery.setLong(1, id);
+		stmtResidualAndRecovery.setInt(2, anno);
+		ResultSet rs = stmtResidualAndRecovery.executeQuery();
 
 		if(rs != null){
-			YearRecap yearRecap = null;
-			while(rs.next()){										
-
-				short year = rs.getShort("anno");
-				yearRecap = new YearRecap(person, year);
-				yearRecap.person = person;
-				yearRecap.year = rs.getShort("anno");
-				yearRecap.remaining = rs.getInt("residuo");
-				yearRecap.remainingAp = rs.getInt("residuoap");
-				yearRecap.recg = rs.getInt("recg");
-				yearRecap.recgap = rs.getInt("recgap");
-				yearRecap.overtime = rs.getInt("straord");
-				yearRecap.overtimeAp = rs.getInt("straordap");
-				yearRecap.recguap = rs.getInt("recguap");
-				yearRecap.recm = rs.getInt("recm");
-				yearRecap.lastModified = rs.getTimestamp("data_ultimamod");
-
-				yearRecap.save();
-
-				Logger.debug("Creato %s", yearRecap);
+			while(rs.next()){
+				InitializationTime initTime = new InitializationTime();
+				InitializationAbsence initAbsence = new InitializationAbsence();
+				initTime.date = new LocalDate(anno,12,31);
+				initTime.person = person;
+				initTime.residualMinutes = rs.getInt("residuo");
+				initTime.save();
+				initAbsence.person = person;
+				initAbsence.date = new LocalDate(anno,12,31);
+				initAbsence.recoveryDays = rs.getInt("recg");
+				initAbsence.absenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", "91").first();
+				initAbsence.save();
 			}
-			Logger.info("Terminati di creare i riepiloghi annuali per %s", person);
-
 		}
+		Logger.info("Terminati di creare i riepiloghi annuali per %s", person);
+		
+		PreparedStatement stmtAbsences = mysqlCon.prepareStatement("SELECT Orario.Giorno,Orario.TipoGiorno,Orario.TipoTimbratura,"+
+				"Codici.id, Codici.Codice" +
+				"FROM Orario, Codici " +
+				"WHERE Orario.TipoGiorno=Codici.id AND Orario.ID = ? AND Codici.Codice in (?,?,?,?)"+
+				"AND Giorno >= ? AND Giorno <= ?");
+		stmtAbsences.setLong(1, id);
+		stmtAbsences.setString(2, "31");
+		stmtAbsences.setString(3, "32");
+		stmtAbsences.setString(4, "91");
+		stmtAbsences.setString(5, "94");
+		java.sql.Date beginDate = new java.sql.Date(anno,1,1);
+		java.sql.Date endDate = new java.sql.Date(anno,12,31);
+		stmtAbsences.setDate(6, beginDate);
+		stmtAbsences.setDate(7, endDate);
+		
+		
+		ResultSet rsAbsences = stmtAbsences.executeQuery();
+		int countVacation = 0, countVacationPastYear = 0, countRecovery = 0, countPermission = 0;
+		while(rsAbsences.next()){
+			if(rsAbsences.getString("Codice").equals("31"))
+				countVacationPastYear = countVacationPastYear+ 1;
+			if(rsAbsences.getString("Codice").equals("32"))
+				countVacation = countVacation +1;
+			if(rsAbsences.getString("Codice").equals("91"))
+				countRecovery = countRecovery +1;
+			if(rsAbsences.getString("Codice").equals("94"))
+				countPermission = countPermission +1;
+		}
+		InitializationAbsence initAbsenceVacationPastYear = new InitializationAbsence();
+		initAbsenceVacationPastYear.absenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", "31").first();
+		initAbsenceVacationPastYear.person = person;
+		initAbsenceVacationPastYear.date = new LocalDate(anno, 1, 1);
+		initAbsenceVacationPastYear.absenceDays = countVacationPastYear;
+		initAbsenceVacationPastYear.save();
+		InitializationAbsence initAbsenceVacation = new InitializationAbsence();
+		initAbsenceVacation.absenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", "32").first();
+		initAbsenceVacation.person = person;
+		initAbsenceVacation.date = new LocalDate(anno, 1, 1);
+		initAbsenceVacation.absenceDays = countVacation;
+		initAbsenceVacation.save();
+		InitializationAbsence initAbsencePermission = new InitializationAbsence();
+		initAbsencePermission.absenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", "94").first();
+		initAbsencePermission.person = person;
+		initAbsencePermission.date = new LocalDate(anno, 1, 1);
+		initAbsencePermission.absenceDays = countPermission;
+		initAbsencePermission.save();
+		
 	}
 
 	public static void createMonthRecap(long id, Person person) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
@@ -928,7 +976,7 @@ public class FromMysqlToPostgres {
 
 	}
 
-	public static void createCompetence(long id, Person person) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+	public static void createCompetence(long id, Person person, int anno) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		/**
 		 * funzione che riempe la tabella competence e la tabella competence_code relativamente alle competenze
 		 * di una determinata persona
@@ -938,7 +986,9 @@ public class FromMysqlToPostgres {
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt = mysqlCon.prepareStatement("Select codici_comp.id, competenze.mese, " +
 				"competenze.anno, competenze.codice, competenze.valore, codici_comp.descrizione, codici_comp.inattivo " +
-				"from competenze, codici_comp where codici_comp.codice=competenze.codice and competenze.id= "+id);
+				"from competenze, codici_comp where codici_comp.codice=competenze.codice and competenze.id= ? and competenze.anno = ?");
+		stmt.setLong(1, id);
+		stmt.setInt(2, anno);
 		ResultSet rs = stmt.executeQuery();
 
 		Competence competence = null;

@@ -290,10 +290,15 @@ public class PersonMonth extends Model {
 		int totalRemainingMinutesPreviousMonth = previousPersonMonth == null ? 0 : previousPersonMonth.totalRemainingMinutes;
 
 		if (person.qualification.qualification <= 3) {
-			//TODO: aggiungere eventuali minuti rimanenti derivanti da inizializzazioni
-			//FIXME: in questo caso il totalRemainingMinutes contiene anche i residui degli anni precedenti, i residui dell'anno 
-			//precedente devono essere gestiti e sommati separatamente rispetto a quelli dell'anno in corso?
-			totalRemainingMinutes = progressiveAtEndOfMonthInMinutes + totalRemainingMinutesPreviousMonth - compensatoryRestInMinutes;
+			/**
+			 * si vanno a guardare i residui recuperati dall'anno precedente e si controlla che esista per quella persona sia l'initTime che
+			 * il campo dei minuti residui valorizzato. In tal caso vengono aggiunti al totalRemainingMinutes
+			 */
+			InitializationTime initTime = InitializationTime.find("byPersonAndYear", person, year-1).first();
+			if(initTime != null && initTime.residualMinutes > 0)
+				totalRemainingMinutes = initTime.residualMinutes + progressiveAtEndOfMonthInMinutes + totalRemainingMinutesPreviousMonth - compensatoryRestInMinutes;
+			else
+				totalRemainingMinutes = progressiveAtEndOfMonthInMinutes + totalRemainingMinutesPreviousMonth - compensatoryRestInMinutes;
 		}
 		else{
 			PersonYear py = PersonYear.find("byPersonAndYear", person, year-1).first();

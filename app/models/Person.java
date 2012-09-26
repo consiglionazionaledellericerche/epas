@@ -98,6 +98,14 @@ public class Person extends Model {
 	 * Numero di matricola
 	 */
 	public Integer number;
+	
+	/**
+	 * relazione con la tabella delle assenze iniziali
+	 */
+	@OneToMany(mappedBy="person", fetch = FetchType.LAZY)
+	public List<InitializationAbsence> initializationAbsences = new ArrayList<InitializationAbsence>();
+	
+	
 
 	/**
 	 * relazione con la tabella delle info di contatto

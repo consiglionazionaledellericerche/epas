@@ -572,98 +572,31 @@ public class PersonDay extends Model {
 
 	private void updateDifference(){
 
+		//TODO: contrllare il primo giorno del mese...
 		if((getWorkingTimeTypeDay().holiday) && (date.getDayOfMonth()==1)){
 			difference = 0;
 			save();
 			return;
 		}
 
-		//return 0;		
+		
 		if(absenceList().size() > 0){
 			difference = 0;
 			save();
 			return;
 		}
-		//return 0;
+
 		if(timeAtWork == 0){
 			difference = 0;
 			save();
 			return;
 		}
-		//return 0;
 
-		int differenza = 0;
-		LocalDateTime beginDate = new LocalDateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),0,0);
-		LocalDateTime endDate = new LocalDateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),23,59);
-		List<Stamping> reloadedStampings = Stamping.find("Select st from Stamping st where st.personDay = ? and " +
-				"st.date > ? and st.date < ? order by st.date", this, beginDate, endDate).fetch();
-
-		//WorkingTimeType wtt = person.workingTimeType;
-
-		//WorkingTimeTypeDay wttd = wtt.workingTimeTypeDays.get(date.getDayOfWeek()-1);
-
-		//int minTimeWorking = wttd.workingTime;
 		int minTimeWorking = getWorkingTimeTypeDay().workingTime;
-		//int minTimeWorking = person.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek() - 1).workingTime;
-		//		timeAtWork = updateTimeAtWork();
-		int size = reloadedStampings.size();
-
-		if(size == 2){
-			
-			if(timeAtWork < minTimeWorking){
-				differenza = timeAtWork - minTimeWorking;
-				difference = differenza;
-				save();
-				return;
-
-			}
-			else{
-				if(timeAtWork >= getWorkingTimeTypeDay().mealTicketTime){
-					int delay = getWorkingTimeTypeDay().breakTicketTime;	
-					
-					if(timeAtWork-delay >= getWorkingTimeTypeDay().mealTicketTime){
-						differenza = timeAtWork-minTimeWorking-delay;
-						
-					}
-					else{						 				
-						differenza = timeAtWork - minTimeWorking;
-						
-					}
-				}
-				else{
-					differenza = timeAtWork - minTimeWorking;	
-					Logger.debug("Il timeAtWork è minore del tempo minimo per avere il buono. La differenza è: %s", differenza);
-				}
-			}
-			difference = differenza;
-			save();
-			return;
-			//return differenza;
-
-		}
+		difference = timeAtWork - minTimeWorking;
+		save();
 		
-		if(size == 4){
-			int i = checkMinTimeForLunch(reloadedStampings);
-			if(i < getWorkingTimeTypeDay().breakTicketTime){
-				differenza = timeAtWork-minTimeWorking+(i-getWorkingTimeTypeDay().breakTicketTime);	
-			}
-			else{
-				differenza = timeAtWork-minTimeWorking;
-			}
-			difference = differenza;
-			save();
-			return;
-			//return differenza;
-		}
-		else{
-			//differenza = updateTimeAtWork()-minTimeWorking;
-			differenza = timeAtWork-minTimeWorking;
-			Logger.debug("Per %s %s la differenza nel giorno %s è: %s", person.name, person.surname, date, differenza);
-			difference = differenza;
-			save();
-			return;
-			//return differenza;
-		}
+		
 	}
 
 	/**
