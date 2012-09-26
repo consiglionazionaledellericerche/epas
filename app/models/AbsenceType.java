@@ -50,6 +50,9 @@ public class AbsenceType extends Model {
 	@ManyToMany(fetch = FetchType.LAZY)
 	public List<Qualification> qualifications = new ArrayList<Qualification>();
 	
+	@OneToMany(mappedBy= "absenceType", fetch = FetchType.LAZY)
+	public List<InitializationAbsence> initializationAbsences = new ArrayList<InitializationAbsence>();
+	
 	@Required
 	public String code;
 	

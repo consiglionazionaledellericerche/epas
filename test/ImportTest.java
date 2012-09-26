@@ -47,7 +47,7 @@ public class ImportTest extends UnitTest {
 			
 			FromMysqlToPostgres.createContactData(rs, person);
 
-			FromMysqlToPostgres.createCompetence(rs.getLong("ID"), person);
+//			FromMysqlToPostgres.createCompetence(rs.getLong("ID"), person);
 			
 			FromMysqlToPostgres.createValuableCompetence(rs.getInt("Matricola"),person);
 			
@@ -57,9 +57,9 @@ public class ImportTest extends UnitTest {
 	
 //			FromMysqlToPostgres.createAbsences(rs.getLong("ID"), person, em);
 			
-			FromMysqlToPostgres.createStampings(rs.getLong("ID"), person);
+//			FromMysqlToPostgres.createStampings(rs.getLong("ID"), person);
 			
-			FromMysqlToPostgres.createYearRecap(rs.getLong("ID"), person);
+//			FromMysqlToPostgres.createYearRecap(rs.getLong("ID"), person);
 			
 			FromMysqlToPostgres.createMonthRecap(rs.getLong("ID"), person);
 			
