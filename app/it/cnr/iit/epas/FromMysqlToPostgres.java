@@ -847,6 +847,7 @@ public class FromMysqlToPostgres {
 
 	}
 
+	@SuppressWarnings("deprecation")
 	public static void createYearRecap(long id, Person person, int anno) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
 
 		/**
@@ -876,21 +877,14 @@ public class FromMysqlToPostgres {
 		}
 		Logger.info("Terminati di creare i riepiloghi annuali per %s", person);
 		
-		PreparedStatement stmtAbsences = mysqlCon.prepareStatement("SELECT Orario.Giorno,Orario.TipoGiorno,Orario.TipoTimbratura,"+
-				"Codici.id, Codici.Codice" +
+		java.sql.Date beginDate = (java.sql.Date) new java.sql.Date(2012,1,1);
+		java.sql.Date endDate = (java.sql.Date) new java.sql.Date(2012,12,31);
+		PreparedStatement stmtAbsences = mysqlCon.prepareStatement("SELECT Codici.id,Orario.Giorno,Orario.TipoGiorno,Orario.TipoTimbratura,"+
+				"Codici.id, Codici.Codice " +
 				"FROM Orario, Codici " +
-				"WHERE Orario.TipoGiorno=Codici.id AND Orario.ID = ? AND Codici.Codice in (?,?,?,?)"+
-				"AND Giorno >= ? AND Giorno <= ?");
-		stmtAbsences.setLong(1, id);
-		stmtAbsences.setString(2, "31");
-		stmtAbsences.setString(3, "32");
-		stmtAbsences.setString(4, "91");
-		stmtAbsences.setString(5, "94");
-		java.sql.Date beginDate = new java.sql.Date(anno,1,1);
-		java.sql.Date endDate = new java.sql.Date(anno,12,31);
-		stmtAbsences.setDate(6, beginDate);
-		stmtAbsences.setDate(7, endDate);
-		
+				"WHERE Orario.TipoGiorno=Codici.id AND Orario.ID="+id+ 
+				" AND (Codici.Codice = '31' OR Codici.Codice = '32' OR Codici.Codice ='91' OR Codici.Codice = '94')"+
+				" AND Giorno >= "+beginDate+ " AND Giorno <= "+endDate);
 		
 		ResultSet rsAbsences = stmtAbsences.executeQuery();
 		int countVacation = 0, countVacationPastYear = 0, countRecovery = 0, countPermission = 0;
