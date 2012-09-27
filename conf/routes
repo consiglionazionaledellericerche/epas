@@ -3,13 +3,17 @@
 # ~~~~
 #*		/										module:secure
 
-
 # Home page
-GET     /                                       Application.index
+GET     /                                       Stampings.show
+
+#Home page amministrazione
+GET		/presenze								Application.indexAdmin
 
 #Orario e timbrature
-GET     /orario		                            Stampings.show
-POST	/orario									Stampings.show
+GET     /orario/{personId}/{year}/{month}		Stampings.show
+
+GET		/orarioAdmin/{personId}/{year}/{month}	Stampings.personStamping
+GET 	/orarioAdmin							Stampings.personStamping
 
 #Assenze
 GET		/assenze								Absences.show
@@ -28,9 +32,6 @@ GET		/competenze								Competences.show
 #Dispatcher
 POST	/dispatch								SwitchTemplate.dispatch		
 
-POST    /login                                  Application.login
-GET     /logout                                 Application.logout
-
 GET		/administration/month-recap/{date}		MonthRecap.show
 
 GET		/person/{<[0-9]+>id}/dailyStampings/{<(19|20)\d\d>year}/{<(0[1-9]|1[012])>month}/{<(0[1-9]|[12][0-9]|3[01])>day}				Stampings.dailyStampings
@@ -47,14 +48,34 @@ GET     /public/                                staticDir:public
 GET		/persons								Persons.list
 POST	/persons								Persons.save
 GET		/persons/new							Persons.form
-GET		/persons/update							Persons.form
+
 
 GET		/manageWorkingTime						WorkingTimes.manageWorkingTime
+POST	/insertWorkingTime						WorkingTimes.insertWorkingTime
+
 GET		/vacationsAdmin							VacationsAdmin.manageVacationCode
 POST	/insertVacation							VacationsAdmin.insertVacationCode
+
 GET		/changePassword							Persons.changePassword
 POST	/changePassword							Persons.savePassword
 
+GET		/stampings/create						Stampings.create
+POST	/stampings/insert/{personId}/{year}/{month}/{day}	Stampings.insert
+GET		/stampings/edit/{stampingId}			Stampings.edit
+POST	/stampings/update						Stampings.update
+GET		/choosePersonAndDate					Stampings.choosePersonAndDate
+GET		/personStamping							Stampings.personStamping
+
+GET		/absences/insert/{personId}/{year}/{month}/{day}	Absences.insert
+POST	/absences/create						Absences.create
+
+GET		/absences/edit/{absenceId}				Absences.edit
+POST	/absences/update						Absences.update
+
+GET		/absences/absenceCodeList				Absences.absenceCodeList
+
+GET		/confParameters							ConfParameters.show
+POST	/confParameters							ConfParameters.save
 
 GET 	/reperibility/{type}/personList			Reperibility.personList
 

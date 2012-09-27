@@ -12,7 +12,6 @@ import java.util.List;
 
 import models.Absence;
 import models.Person;
-import models.PersonReperibility;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
 import models.PersonVacation;
@@ -20,11 +19,7 @@ import models.exports.AbsenceReperibilityPeriod;
 import models.exports.ReperibilityPeriod;
 import models.exports.ReperibilityPeriods;
 
-import org.apache.commons.io.IOUtils;
-import org.bouncycastle.asn1.x509.sigi.PersonalData;
 import org.joda.time.LocalDate;
-
-import com.ning.http.client.Response;
 
 import play.Logger;
 import play.data.binding.As;
@@ -169,15 +164,15 @@ public class Reperibility extends Controller {
 				}
 				
 				//Se la persona è in ferie questo giorno non può essere reperibile 
-				if (PersonVacation.find("date = ? and person = ?", day, reperibilityPeriod.person).fetch().size() > 0) {
+				if (Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE a.date = ? and pd.person = ?", day, reperibilityPeriod.person).fetch().size() > 0) {
 					throw new IllegalArgumentException(
-						String.format("ReperibilityPeriod person.id is not compatible with a Vacaction in the same day %s", reperibilityPeriod.person, day));
+						String.format("ReperibilityPeriod person.id %d is not compatible with a Vacaction in the same day %s", reperibilityPeriod.person.id, day));
 				}
 
 				//Se la persona è in ferie questo giorno non può essere reperibile 
-				if (Absence.find("date = ? and person = ?", day, reperibilityPeriod.person).fetch().size() > 0) {
+				if (Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE a.date = and pd.person = ?", day, reperibilityPeriod.person).fetch().size() > 0) {
 					throw new IllegalArgumentException(
-						String.format("ReperibilityPeriod person.id is not compatible with a Absence in the same day %s", reperibilityPeriod.person, day));
+						String.format("ReperibilityPeriod person.id %d is not compatible with a Absence in the same day %s", reperibilityPeriod.person.id, day));
 				}
 
 				//Salvataggio del giorno di reperibilità

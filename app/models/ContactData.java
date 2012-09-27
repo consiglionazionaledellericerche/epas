@@ -39,4 +39,10 @@ public class ContactData extends Model {
 	
 	@Phone
 	public String mobile;
+	
+	@Override
+	public String toString() {
+		return String.format("ContactData[%d] - person.id = %s, telephone = %s, fax = %s, email = %s, mobile = %s", 
+			id, person.id, telephone, fax, email, mobile);
+	}
 }

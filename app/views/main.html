@@ -41,17 +41,12 @@
     <body>
     
 		<div id="container">
-			<header class="${$person?.id != nil ? 'loggedIn' : 'notLoggedIn'}">
+		
+			<header class="notLoggedIn">
 				<h1>#{get 'title' /}</h1>
-				#{if person?.id}
-				<div id="options">
-					logged in as: ${person}
-					<a href="@{Application.logout()}">Logout</a>
-				</div>
-				#{/if}
 			</header>
-			<div id="main" role="main">
 
+			<div id="main" role="main">
 				#{if flash.error}
                 <p class="fError">
                     <strong>${flash.error}</strong>

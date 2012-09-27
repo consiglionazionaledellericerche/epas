@@ -16,7 +16,7 @@ public class ParameterTest extends UnitTest{
 	@Test
 	public void testParameter() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException, IOException {
 		System.out.println("Sono nel test di importdata person");
-		FromMysqlToPostgres.createParameters();
+		//FromMysqlToPostgres.createParameters();
 	}
 	
 }

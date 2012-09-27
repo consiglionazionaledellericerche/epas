@@ -8,15 +8,18 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 
+import org.joda.time.DateTimeFieldType;
+import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
 import play.templates.GroovyTemplate.ExecutableTemplate;
 import play.templates.JavaExtensions;
 
-public class PersonTags extends JavaExtensions{
+public class PersonTags extends JavaExtensions {
 	
 //	public static String toCalendarTime(LocalDateTime ldt) {
 //		Number hour = ldt.getHourOfDay();
@@ -40,6 +43,10 @@ public class PersonTags extends JavaExtensions{
 //		return new SimpleDateFormat(format).format(tempo);
 //	}
 
+	public static String toDateTime(LocalDate localDate) {
+		return String.format("%1$td %1$tB %1$tY", localDate.toDate());
+	}
+	
 	public static String toCalendarTime(LocalDateTime ldt) {
         Number hour = ldt.getHourOfDay();
         Number minute = ldt.getMinuteOfHour();
@@ -54,8 +61,6 @@ public class PersonTags extends JavaExtensions{
 			return String.format("-%02d:%02d", hour, min);
         return String.format("%02d:%02d", hour, min);
 	}
-	
-	
 	
 
 }

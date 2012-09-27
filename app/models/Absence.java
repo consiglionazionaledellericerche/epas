@@ -26,19 +26,19 @@ import play.db.jpa.Model;
 public class Absence extends Model {
 	
 	private static final long serialVersionUID = -1963061850354314327L;
-
-	@Required
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
-	public LocalDate date;
 	
 	@ManyToOne
-	@JoinColumn(name = "absenceType_id")
+	@JoinColumn(name = "absence_type_id")
 	public AbsenceType absenceType;
 	
-	@Required
+	
 	@ManyToOne(optional=false)
-	@JoinColumn(name="person_id", nullable=false)
-	public Person person;
-	
-	
+	@JoinColumn(name="personDay_id", nullable=false)
+	public PersonDay personDay;
+
+	@Override
+	public String toString() {
+		return String.format("Absence[%d] - personDay.id = %d, absenceType.id = %s", 
+			id, personDay.id, absenceType.id);
+	}
 }
