@@ -12,6 +12,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Type;
+import org.hibernate.envers.Audited;
 import org.joda.time.LocalDateTime;
 
 import play.data.validation.InPast;
@@ -22,6 +23,7 @@ import play.db.jpa.Model;
  * @author cristian
  *
  */
+@Audited
 @Entity
 @Table(name = "stampings")
 public class Stamping extends Model {
@@ -35,18 +37,16 @@ public class Stamping extends Model {
 	
 	@Required
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "person_id", nullable = false, updatable = false)
-	public Person person;
+	@JoinColumn(name = "personDay_id", nullable = false, updatable = false)
+	public PersonDay personDay;
 	
-	@Required
-	@ManyToOne(optional = false)
+	@ManyToOne
 	@JoinColumn(name = "stamp_type_id")
 	public StampType stampType;
 	
 	@ManyToOne(optional = true)
 	@JoinColumn(name = "stamp_modification_type_id")
 	public StampModificationType stampModificationType;
-	
 	
 	@Required
 	@InPast
@@ -65,14 +65,11 @@ public class Stamping extends Model {
 	 * in questione non ha potuto effettuare la timbratura (valore = true)
 	 */
 	@Column(name = "marked_by_admin")
-	public Boolean markedByAdmin;
+	public Boolean markedByAdmin;		
 	
-	/**
-	 * questo campo booleano consente di determinare se la timbratura è come uscita di servizio.
-	 */
-	@Column(name = "service_exit")
-	public Boolean serviceExit;
-	
-		
-		
+	@Override
+	public String toString() {
+		return String.format("Stamping[%d] - personDay.id = %d, way = %s, date = %s, stampType.id = %s, stampModificationType.id = %s",
+			id, personDay.id, way, date, stampType != null ? stampType.id : "null", stampModificationType != null ? stampModificationType.id : "null");
+	}
 }

@@ -9,24 +9,17 @@ import org.joda.time.LocalDate;
 import play.Logger;
 import play.mvc.Before;
 import play.mvc.Controller;
+import play.mvc.With;
 
+@With(Secure.class)
 public class Vacations extends Controller{
 	
 	/* corrisponde alla voce di menu selezionata */
 	private final static ActionMenuItem actionMenuItem = ActionMenuItem.vacations;
-	
-	@Before
-    static void checkPerson() {
-        if(session.get(Application.PERSON_ID_SESSION_KEY) == null) {
-            flash.error("Please log in first");
-            Application.index();
-        }
-    }
-	
-	private static void show(Long id) {
+		
+	private static void show(Person person) {
 		String menuItem = actionMenuItem.toString();
 		
-    	Person person = Person.findById(id);
     	String anno = params.get("year");
     	Logger.info("Anno: "+anno);
     	
@@ -48,11 +41,10 @@ public class Vacations extends Controller{
     }
 	
 	public static void show() {
-    	show(Long.parseLong(session.get(Application.PERSON_ID_SESSION_KEY)));
+    	show(Security.getPerson());
     }
 	
-	private static void vacations(Long id){
-		Person person = Person.findById(id);
+	private static void vacations(Person person){
     	String anno = params.get("year");
     	Logger.info("Anno: "+anno);
     	
@@ -73,11 +65,10 @@ public class Vacations extends Controller{
 	}
 	
 	public static void vacations() {
-    	vacations(Long.parseLong(session.get(Application.PERSON_ID_SESSION_KEY)));
+    	vacations(Security.getPerson());
     }
 	
-	private static void vacationsCurrentYear(Long id){
-		Person person = Person.findById(id);
+	private static void vacationsCurrentYear(Person person){
     	String anno = params.get("year");
     	Logger.info("Anno: "+anno);
     	
@@ -98,7 +89,7 @@ public class Vacations extends Controller{
 	}
 	
 	public static void vacationsCurrentYear() {
-    	vacationsCurrentYear(Long.parseLong(session.get(Application.PERSON_ID_SESSION_KEY)));
+    	vacationsCurrentYear(Security.getPerson());
     }
 	
 }

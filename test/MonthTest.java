@@ -39,7 +39,7 @@ public class MonthTest extends UnitTest{
 		LocalDate data = new LocalDate(2011,4,1);
 		long id = 1;
 		Person person = Person.findById(id);
-		PersonMonth pm = new PersonMonth(person, data);
+		PersonMonth pm = new PersonMonth(person, data.getYear(), data.getMonthOfYear());
 		assertNotNull(person);
 		initializeStamping(person);
 		initializeAbsence(person);
@@ -82,26 +82,26 @@ public class MonthTest extends UnitTest{
 				if(giornata != 7){
 					if(day != 5 && day != 11){
 						Stamping s = new Stamping();
-						s.person = person;
+//						s.person = person;
 						s.stampType = StampType.find("Select s from StampType s where description = ?",causa).first();
 						s.way = WayType.in;
 						s.date = new LocalDateTime(year,month,day,8,15,0);
 						s.save();
 						Stamping s1 = new Stamping();
-						s1.person = person;				
+//						s1.person = person;				
 						s1.stampType = StampType.find("Select s from StampType s where description = ?",causa2).first();
 						s1.way = WayType.out;
 						s1.date = new LocalDateTime(year,month,day,12,22,0);
 						s1.save();
 						Stamping s2 = new Stamping();
 						s2.date = new LocalDateTime(year,month,day,13,40,0);
-						s2.person = person;
+//						s2.person = person;
 						s2.way = WayType.in;
 						s2.stampType = StampType.find("Select s from StampType s where description = ?",causa3).first();
 						s2.save();
 						Stamping s3 = new Stamping();
 						s3.date = new LocalDateTime(year,month,day,18,29,0);
-						s3.person = person;
+//						s3.person = person;
 						s3.way = WayType.out;
 						s3.stampType = StampType.find("Select s from StampType s where description = ?",causa4).first();
 						s3.save();
@@ -134,12 +134,12 @@ public class MonthTest extends UnitTest{
 		type2.save();
 		Absence absence = new Absence();
 		Absence absence2 = new Absence();
-		absence.person = person;
+//		absence.person = person;
 		absence.absenceType = type1;
-		absence.date = new LocalDate(year, month, 5);
+//		absence.date = new LocalDate(year, month, 5);
 		absence.save();
-		absence2.person=person;
-		absence2.date = new LocalDate(year, month, 11);
+//		absence2.person=person;
+//		absence2.date = new LocalDate(year, month, 11);
 		absence2.absenceType = type2;
 		absence2.save();	
 		

@@ -1,0 +1,116 @@
+#{extends 'main.html' /}
+
+<h2 id="titoloGestioneOrariLavoro">Gestione tipi di orario di lavoro</h2>
+
+<p><a href="insertWorkingTime.html">Nuovo</a></p>
+
+<table>
+	<tr>
+		<th>Nome tipo orario</th>
+		<th></th>
+		<th>Lunedì</th>
+		<th>Martedì</th>
+		<th>Mercoledì</th>
+		<th>Giovedì</th>
+		<th>Venerdì</th>
+		<th>Sabato</th>
+		<th>Domenica</th>
+		<th>Default</th>
+		<th>Può fare turni</th>
+	</tr>
+	%{
+		for(wtt in wttList){ 
+	}%
+	<tr>
+		<td rowspan=8>${wtt.description}</td>
+		<tr>
+			<td>Tempo lavoro</td>
+			<td>${wtt.getWorkingTimeFromWorkinTimeType(1, wtt)}</td>
+			<td>${wtt.getWorkingTimeFromWorkinTimeType(2, wtt)}</td>
+			<td>${wtt.getWorkingTimeFromWorkinTimeType(3, wtt)}</td>
+			<td>${wtt.getWorkingTimeFromWorkinTimeType(4, wtt)}</td>
+			<td>${wtt.getWorkingTimeFromWorkinTimeType(5, wtt)}</td>
+			<td>${wtt.getWorkingTimeFromWorkinTimeType(6, wtt)}</td>
+			<td>${wtt.getWorkingTimeFromWorkinTimeType(7, wtt)}</td>
+			<td></td>
+			<td></td>
+			
+		</tr>
+		<tr>
+			<td>Tempo minimo di lavoro per diritto a intervallo pranzo</td>
+			<td>${wtt.getMinimalTimeForLunch(1, wtt)}</td>
+			<td>${wtt.getMinimalTimeForLunch(2, wtt)}</td>
+			<td>${wtt.getMinimalTimeForLunch(3, wtt)}</td>
+			<td>${wtt.getMinimalTimeForLunch(4, wtt)}</td>
+			<td>${wtt.getMinimalTimeForLunch(5, wtt)}</td>
+			<td>${wtt.getMinimalTimeForLunch(6, wtt)}</td>
+			<td>${wtt.getMinimalTimeForLunch(7, wtt)}</td>
+			<td></td>
+			<td></td>
+			
+		</tr>
+		<tr>
+			<td>Intervallo pranzo</td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>Giorno festivo</td>
+			<td>${wtt.getHolidayFromWorkinTimeType(1, wtt)}</td>
+			<td>${wtt.getHolidayFromWorkinTimeType(2, wtt)}</td>
+			<td>${wtt.getHolidayFromWorkinTimeType(3, wtt)}</td>
+			<td>${wtt.getHolidayFromWorkinTimeType(4, wtt)}</td>
+			<td>${wtt.getHolidayFromWorkinTimeType(5, wtt)}</td>
+			<td>${wtt.getHolidayFromWorkinTimeType(6, wtt)}</td>
+			<td>${wtt.getHolidayFromWorkinTimeType(7, wtt)}</td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>Fascia oraria di ingresso</td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>Fascia oraria di uscita</td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>Fascia oraria pranzo</td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>	
+		</tr>
+	
+	</tr>
+	%{
+		}
+	}%
+</table>

@@ -63,7 +63,7 @@ public class ModelTest extends UnitTest {
 		assertNotNull(st.id);
 		
 		Stamping s = new Stamping();
-		s.person = p;
+		s.personDay.person = p;
 		s.way = WayType.in;
 		s.stampType = st;
 		em.persist(s);
@@ -113,9 +113,9 @@ public class ModelTest extends UnitTest {
 		//em.persist(hat);
 		
 		Absence absence = new Absence();	
-		absence.date = new LocalDate(GregorianCalendar.getInstance().getTime());
-		absence.person = p;
-		absence.person = p2;
+		//absence.date = new LocalDate(GregorianCalendar.getInstance().getTime());
+		absence.personDay.person = p;
+		absence.personDay.person = p2;
 		absence.absenceType = absenceType;
 		absence.absenceType = absenceType2;
 		em.persist(absence);
@@ -145,7 +145,7 @@ public class ModelTest extends UnitTest {
 		Person p = Person.find("name = ?", "Cristian").first();
 		Stamping s = new Stamping();
 		s.stampType = StampType.findById(1l);
-		s.person = p;
+		s.personDay.person = p;
 		s.way = WayType.in;
 		LocalDateTime date = new LocalDateTime();
 		s.date = date;

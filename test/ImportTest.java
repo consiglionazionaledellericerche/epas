@@ -41,29 +41,27 @@ public class ImportTest extends UnitTest {
 			Logger.info("Creazione delle info per la persona: "+rs.getString("Nome").toString()+" "+rs.getString("Cognome").toString());
 			//rs.next(); // exactly one result so allowed 
 					
-			Person person = FromMysqlToPostgres.createPerson(rs, em);
+			Person person = FromMysqlToPostgres.createPerson(rs);
 			assertNotNull(person);
 			assertNotNull(person.id);	
 			
-			FromMysqlToPostgres.createContactData(rs, person, em);
+			FromMysqlToPostgres.createContactData(rs, person);
 
-			FromMysqlToPostgres.createCompetence(rs.getLong("ID"), person, em);
+//			FromMysqlToPostgres.createCompetence(rs.getLong("ID"), person);
 			
-			FromMysqlToPostgres.createValuableCompetence(rs.getInt("Matricola"),person,em);
+			FromMysqlToPostgres.createValuableCompetence(rs.getInt("Matricola"),person);
 			
-			FromMysqlToPostgres.createContract(rs.getLong("ID"), person, em);
+			FromMysqlToPostgres.createContract(rs.getLong("ID"), person);
 			
-			FromMysqlToPostgres.createVacations(rs.getLong("ID"), person, em);
-			
-			FromMysqlToPostgres.createVacationType(rs.getLong("ID"), person, em);
+			FromMysqlToPostgres.createVacationType(rs.getLong("ID"), person);
 	
-			FromMysqlToPostgres.createAbsences(rs.getLong("ID"), person, em);
+//			FromMysqlToPostgres.createAbsences(rs.getLong("ID"), person, em);
 			
-			FromMysqlToPostgres.createStampings(rs.getLong("ID"), person, em);
+//			FromMysqlToPostgres.createStampings(rs.getLong("ID"), person);
 			
-			FromMysqlToPostgres.createYearRecap(rs.getLong("ID"), person, em);
+//			FromMysqlToPostgres.createYearRecap(rs.getLong("ID"), person);
 			
-			FromMysqlToPostgres.createMonthRecap(rs.getLong("ID"), person, em);
+			FromMysqlToPostgres.createMonthRecap(rs.getLong("ID"), person);
 			
 			
 		}

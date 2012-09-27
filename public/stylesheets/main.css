@@ -47,7 +47,7 @@ fieldset legend {
 
 /** Header **/
 
-header.notLoggedIn {
+header.notLoggedIn, header.loggedIn {
     height: 200px;
     /*position: relative;*/
     background: #fff url(../images/time_banner.jpg) 0px -180px no-repeat;
@@ -68,15 +68,16 @@ header h1 {
     text-shadow: 0 0 5px rgba(255,255,255,.5);
 }
 
-header #options {
+div#options {
     position: absolute;
     right: 10px;
     top: 13px;
     font-size: 80%;
     color: #eee;
+    width: 200px;
 }
 
-header #options a {
+div#options a {
     color: #eee;
 }
 
@@ -216,6 +217,8 @@ th.ferieFatte {text-align: center}
 th.residuo {text-align: center}
 
 th.competenze {width: 6em; text-align: center}
+td.noWrap {white-space:nowrap}
+
 
 td.festivi {background-color: #F88017; width: 6em}
 td.assenza {background-color: #FFFF99; text-align: right; width: 6em}
@@ -226,10 +229,15 @@ td.differenza {text-align: right; width: 6em}
 td.progressivo {background-color: #FFFF99; text-align:right; width: 6em}
 td.comp {height: 1em; text-align: right}
 td.comp-nome {height: 1em; text-align: left}
+td.inserisciTimbratura {text-align: center}
 
 p#spiegazioneTabellaTimbrature {margin-top: 2em; margin-bottom: 2em}
-div#logout {text-align: right}
+p#validita {margin: 2em 0em 2em}
+div#logout {text-align: right; float: right}
 div#chooseView {text-align: center}
+div#cambiaPassword {margin: 1em 4em; text-align: left}
+div#annullaPassword {margin: 1em 4em; text-align: left}
+div#gestioneParametri {margin: 1em 4em 1em; text-align: left}
 h2#titoloSituazionePresenzeMensili {text-align: center}
 h2#titoloSituazioneAssenzeMensili {text-align: center}
 h2#titoloSituazioneAssenzeAnnuali {text-align: center}
@@ -239,3 +247,14 @@ h2#titoloModificaPersonale {text-align: center}
 h2#titoloCambioPassword {text-align: center}
 h2#titoloGestioneOrariLavoro {text-align: center}
 h2#titoloGestioneTipiFerie {text-align: center}
+h3#titoloSituazionePresenzeMensili {text-align: center}
+h2#titoloConfigurazioneParametri {text-align: center}
+h3#titoloGestioneParametri {margin: 2em 0em 2em; text-align: center}
+fieldset#timbraturaWeb {height: 12em}
+fieldset#stampaPdf {height: 12em}
+textarea#timbraturaWeb {margin: 0em 3em 0em}
+textarea#stampaPdf {margin: 0em 3em 0em}
+input#salvaConfigurazione {margin: 2em 60em 0em; align: center}
+input#annullaConfigurazione {margin: 0em 80em 2em; align: center}
+
+select#assenzaFrequente {margin-bottom: 1em}

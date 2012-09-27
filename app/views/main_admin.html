@@ -32,19 +32,25 @@
 	       Modernizr enables HTML5 elements & feature detects; Respond is a polyfill for min/max-width CSS3 Media Queries
 	       For optimal performance, use a custom Modernizr build: www.modernizr.com/download/ -->
 		<script src="@{'/public/js/libs/modernizr-2.0.6.min.js'}"></script>
+		<script src="@{'/public/js/libs/jquery-1.6.2.js'}"></script>
+		<!-- Inserisco il riferimento al javascript che mi serve per i popup -->
+		<script src="@{'/public/js/mylibs/jquery.popupWindow.js'}"></script>
 
     </head>
 
     <body>
     
 		<div id="container">
-			<header>
+		
+			<header class="${session.username != null ? 'loggedIn' : 'notLoggedIn'}">
 				<h1>#{get 'title' /}</h1>
-				
-				<div id="menu">
-					<a href="@{Administration.migrateDb()}">Migrate database</a>
-				</div>
 			</header>
+			#{if session.username}
+				<div id="options">
+					logged in as: ${session.username}
+					#{logoutForm /}
+				</div>
+			#{/if}
 			
 			<div id="main" role="main">
 
@@ -63,7 +69,7 @@
 			</div>
 	 		<footer>
 				Created with <a href="http://www.playframework.org">play framework</a> 
-				and really inspirated from "orologio" software developed by Pasquale Lazzareschi	
+				and really inspirated from "orologio" software developed by Pasquale Lazzareschi
 			</footer>
 		</div> <!--! end of #container -->
 	    

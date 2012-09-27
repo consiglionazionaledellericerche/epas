@@ -3,8 +3,7 @@ package models;
 public enum StampModificationTypeValue {
 
     FOR_DAILY_LUNCH_TIME(1l),
-    FOR_MIN_LUNCH_TIME(2l),
-    NOTHING_TO_CHANGE(3l);
+    FOR_MIN_LUNCH_TIME(2l);
     
     private Long id;
     

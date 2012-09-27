@@ -1,0 +1,209 @@
+#{extends 'main_admin.html' /}
+#{set title:mainMenu.person.surname + ' ' + mainMenu.person.name + ', matricola=' + mainMenu.person.number /}
+
+<h2 id="titoloSituazionePresenzeMensili">
+	Situazione presenze mensile 
+	<span class="capitalized">&{'views.tags.display.date.month.' + monthRecap.month}</span> ${monthRecap.year} 
+	di ${mainMenu.person.surname} ${mainMenu.person.name}</h2>
+
+#{functionalMenuForm mainMenu: mainMenu /}
+
+<table id="presenze_mensili">
+	<tr>
+		<th>Buono mensa</th>
+		<th>Giorno</th>
+		<th>Codice di assenza</th>
+		%{ for(int i = 1; i <= personMonth.getMaximumCoupleOfStampings(); i++){
+		}%
+		<th>${i}° entrata</th>
+		<th>${i}° uscita</th>
+		%{ } }%
+		<th>Inserisci timbratura</th>
+		<th>Tempo lavoro</th>
+		<th>Differenza</th>
+		<th>Progressivo</th>
+		<th>Tipo Orario</th>
+	</tr>
+	
+%{
+     for(day in personMonth.days) {
+     		
+			
+}%
+		
+<tr>
+			%{
+			if(day.isHoliday()==false){
+			}%	<td>${String.format(messages.get('views.common.yes_or_no.'+ day.mealTicket()))}</td>
+			%{
+			}else{
+			}%	<td>${String.format(messages.get('views.common.yes_or_no.true'))}</td>
+			%{
+			}
+			}%
+			%{
+			if(day.isHoliday()==false){
+			}%	<td class="capitalized">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), day.date.toDate())}</td>
+			
+			%{
+			}else{
+			}%	<td class="festivi">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), day.date.toDate())}</td>
+			%{
+			}
+			}%
+		
+			<td class="assenza">
+				%{ absenceList = day.absenceList() }%
+				
+					<a href="@{Absences.create(day.person.id, day.date.year, day.date.monthOfYear, day.date.dayOfMonth)}" class="insertAbsence${day.date.dayOfMonth}">___</a>
+				%{	
+					for (absence in absenceList) { 
+				%}
+						<a href="@{Absences.edit(absence.id)}" class="insertAbsence${day.date.dayOfMonth}">
+							${absence.absenceType.code}
+						</a>
+										
+				%{ } }%
+				
+				<script type="text/javascript"> 
+				$('.insertAbsence${day.date.dayOfMonth}').popupWindow({ 
+				height:600, 
+				width:1000, 
+				top:50, 
+				left:50 
+				}); 
+				</script>			
+			</td>
+
+			%{  int j = 0;
+				for(int i = 0; i < personMonth.getMaximumCoupleOfStampings(); i++){
+					j = i*2;
+				}%
+				<td class="ingresso">
+				%{ if(day.getStampings().size() > j && day.getStampings().get(j) !=null ) { }%
+					<a href="@{Stampings.edit(day.getStampings().get(j).id)}" class="insertStamping${day.date.dayOfMonth}">
+					${day.getStampings().get(j).date.toCalendarTime()}
+					</a>
+				${(day.getStampings().get(j).stampModificationType?.code)} 
+				<script type="text/javascript"> 
+				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
+				height:500, 
+				width:800, 
+				top:50, 
+				left:50 
+				}); 
+				</script>
+					%{ } }%
+				</td>
+				
+				<td class="uscita">
+				%{ if(day.getStampings().size() > j+1 && day.getStampings().get(j+1) !=null ) { }%
+					<a href="@{Stampings.edit(day.getStampings().get(j+1).id)}" class="insertStamping${day.date.dayOfMonth}">
+					${day.getStampings().get(j+1).date.toCalendarTime()}
+					</a>
+					${(day.getStampings().get(j+1).stampModificationType?.code)} 
+				<script type="text/javascript"> 
+				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
+				height:500, 
+				width:800, 
+				top:50, 
+				left:50 
+				}); 
+				</script>
+					%{ } }%
+				</td>
+			
+				%{ } }%
+			<td class="inserisciTimbratura"><a href="@{Stampings.create(day.person.id, day.date.year, day.date.monthOfYear, day.date.dayOfMonth)}" class="insertStamping${day.date.dayOfMonth}">+++</a>
+				<script type="text/javascript"> 
+				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
+				height:600, 
+				width:1000, 
+				top:50, 
+				left:50 
+				}); 
+				</script>
+			</td>			
+			%{
+			if(day.getStampings().size()==2 ){
+	         }% <td class="tempoLavoro">${day.isHoliday()==false ? day.convertTimeAtWork(day.timeAtWork()).toCalendarTime() : ''} <strong>${day.timeAtWork()>360 ? day.checkTimeForLunch(day.getStampings())?.code : ''}</strong></td>
+			%{
+			 }else{
+			 }% <td class="tempoLavoro">${day.isHoliday()==false ? day.convertTimeAtWork(day.timeAtWork()).toCalendarTime() : ''} <strong>${day.getStampings().size()==4 && !day.getStampings().contains(null) && day.timeAtWork()>300
+			 && day.checkMinTimeForLunch(day.getStampings())<30 ? day.checkTimeForLunch(day.getStampings())?.code : ''}</strong></td>
+			%{
+	         }
+	         }%	
+	         <td class="differenza">${day.isHoliday()==false ? (day.getDifference()).toHourTime() : ''}</td>
+				
+	         <td class="progressivo">${day.getProgressive().toHourTime()}</td>	
+	         <td>${day.person.workingTimeType != null ? day.person.workingTimeType.description : ''}</td>
+		</tr>
+
+%{  		   
+     }
+     
+}%
+
+</table>
+
+<p id="spiegazioneTabellaTimbrature">Il numero di buoni mensa usabili per questo mese e': <strong>${monthRecap.numberOfMealTicketToUse()}</strong>, mentre quelli da restituire sono <strong>${monthRecap.numberOfMealTicketToRender()}</strong>. Il numero di giorni lavorativi in sede è di: <strong>${monthRecap.basedWorkingDays()}</strong> </p>
+
+<p>Riepilogo delle ore di lavoro in eccesso/difetto:</p> 
+<p> - Residuo tempo di lavoro dei mesi precedenti: ${personMonth.getResidualFromPastMonth().toHourTime()}</p> 
+<p> - Residuo del mese:  ${personMonth.getMonthResidual().toHourTime()}</p>
+<p> - Giorni di riposo compensativo: ${personMonth.getCompensatoryRest()} per un totale di: -${(personMonth.getCompensatoryRest()*432).toHourTime()} ore</p>
+<p> - Totale residuo a fine mese  <strong>${personMonth.getTotalOfMonth().toHourTime()} ore</strong></p>
+
+
+
+*{Significato codici assenza}*
+<div>
+<h3 align="left">Note:</h3>
+<table id="Note timbrature">
+	<tr>
+		<th width="80">Codice timbratura</th>
+		<th width="400">Descrizione</th>
+			
+	</tr>
+%{
+     for(smt in monthRecap.getStampingCode()) {
+}%
+	<tr>
+		<td>${smt.code}</td>     
+		<td>${smt.description}</td>		
+	</tr>
+	
+	
+%{  		   
+     }
+     
+}%
+
+</table>
+
+<br>
+<br>
+<h3 align="left">Tabella codici di assenza</h3>
+<table id="Codici di assenza">
+	<tr>
+		<th width="80">Codice assenza</th>
+		<th width="200">Descrizione</th>
+		<th width="80">Numero giorni</th>
+			
+	</tr>
+%{
+     for(entry in monthRecap.getAbsenceCode().entrySet()) {
+}%
+	<tr>
+		<td>${entry.getKey().code}</td>     
+		<td>${entry.getKey().description}</td>	
+		<td>${entry.getValue()}</td>	
+	</tr>
+
+%{  		   
+     }
+     
+}%
+</table>
+</div>

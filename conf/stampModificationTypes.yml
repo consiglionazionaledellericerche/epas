@@ -1,0 +1,7 @@
+StampModificationType(p):
+    code: p
+    description: Tempo calcolato togliendo dal tempo di lavoro la durata dell'intervallo pranzo
+    
+StampModificationType(e):
+    code: e
+    description: Ora di entrata calcolata perché la durata dell'intervallo pranzo è minore del minimo

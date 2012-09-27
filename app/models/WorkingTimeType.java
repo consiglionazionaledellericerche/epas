@@ -3,14 +3,19 @@
  */
 package models;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Entity;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OrderBy;
 
 
 import javax.persistence.OneToMany;
@@ -37,6 +42,7 @@ public class WorkingTimeType extends Model {
 	private static final long serialVersionUID = -3443521979786226461L;
 
 	@Required
+	@Column(nullable=false)
 	public String description;
 	
 	/**
@@ -45,18 +51,19 @@ public class WorkingTimeType extends Model {
 	 */
 	public boolean shift = false;
 	
-	/**
-	 * relazione con la tabella persone
-	 */
-	@OneToMany(mappedBy="workingTimeType")
-	public List<Person> person;
+//	/**
+//	 * relazione con la tabella persone
+//	 */
+//	@OneToMany(mappedBy="workingTimeType")
+//	public List<Person> person = new ArrayList<Person>();
 		
 	
 	/**
 	 * relazione con la tabella di specifiche di orario di lavoro
 	 */
-	@OneToMany( mappedBy = "workingTimeType")
-	public List<WorkingTimeTypeDay> worTimeTypeDays;
+	@OneToMany( mappedBy = "workingTimeType", fetch = FetchType.EAGER)
+	@OrderBy("dayOfWeek")
+	public List<WorkingTimeTypeDay> workingTimeTypeDays = new ArrayList<WorkingTimeTypeDay>();
 	
 	/**
 	 * 
@@ -75,12 +82,12 @@ public class WorkingTimeType extends Model {
 	 * @param dayOfWeek
 	 * @return il tempo di lavoro giornaliero in minuti previsto per quel tipo di workingTimeType in quel giorno della settimana
 	 */
-	public int getWorkingTimeFromWorkinTimeType(int dayOfWeek, WorkingTimeType wtt){
-		int workingTime = 0;
+	public WorkingTimeTypeDay getWorkingTimeFromWorkinTimeType(int dayOfWeek){
+		
 		WorkingTimeTypeDay wttd = WorkingTimeTypeDay.find("Select wttd from WorkingTimeTypeDay wttd where wttd.workingTimeType = ?" +
-				" and wttd.dayOfWeek = ?", wtt, dayOfWeek).first();
-		workingTime = wttd.workingTime;
-		return workingTime;
+				" and wttd.dayOfWeek = ?", this, dayOfWeek).first();
+		
+		return wttd;
 	}
 	
 	/**
@@ -97,6 +104,10 @@ public class WorkingTimeType extends Model {
 		return minTimeForLunch;
 	}
 	
-
+	@Override
+	public String toString() {
+		return String.format("WorkingTimeType[%d] - description = %s, shift = %s", 
+			id, description, shift);
+	}
 }
 
