@@ -3,14 +3,7 @@
 
 <h2 id="titoloSituazioneFerie">Gestione straordinari e altre competenze</h2>
 
-<div id="logout">
-#{form @Application.logout()}
-	
-    	<input type="submit" value="Account logout" />
-     
-
-#{/form}
-</div>
+#{logoutForm /}
 
 <div id="chooseView">
 #{form @SwitchTemplate.dispatch()}

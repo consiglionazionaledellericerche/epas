@@ -15,20 +15,20 @@ import play.mvc.With;
 public class Competences extends Controller{
 
 	/* corrisponde alla voce di menu selezionata */
-	private final static ActionMenuItem actionMenuItem = ActionMenuItem.competences;
+//	private final static ActionMenuItem actionMenuItem = ActionMenuItem.competences;
 		
 	private static void show(Person person) {
-		String menuItem = actionMenuItem.toString();
+//		String menuItem = actionMenuItem.toString();
 		
     	String anno = params.get("year");
-    	Logger.info("Anno: "+anno);
+    	Logger.info("Anno: "+anno.toString());
     	String mese= params.get("month");
-    	Logger.info("Mese: "+mese);
+    	Logger.info("Mese: "+mese.toString());
     	if(anno==null || mese==null){
     		        	
         	LocalDate now = new LocalDate();
         	MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, now.getYear(), now.getMonthOfYear());
-            render(monthRecap, menuItem);
+            render(monthRecap/*, menuItem*/);
     	}
     	else{
     		Logger.info("Sono dentro il ramo else della creazione del month recap");
@@ -37,7 +37,7 @@ public class Competences extends Controller{
     		MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, year.intValue(), month.intValue());
     		Logger.info("Il month recap è formato da: " +person.id+ ", " +year.intValue()+ ", " +month.intValue());
     		
-            render(monthRecap, menuItem);
+            render(monthRecap/*, menuItem*/);
     	}
     	
     }

@@ -8,6 +8,7 @@ import java.util.List;
 import models.VacationCode;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
+import play.data.validation.Required;
 import play.mvc.Controller;
 
 public class WorkingTimes extends Controller{
@@ -38,10 +39,16 @@ public class WorkingTimes extends Controller{
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_WORKINGTIME)
-	public static void save(){
+	public static void save(@Required Long workingTimeTypeId){
 		/**
 		 * TODO: completare il metodo per il salvataggio del workingTimeType e dei corrispondenti workingTimeTypeDay
 		 */
+		WorkingTimeType wtt = WorkingTimeType.findById(workingTimeTypeId);
+		if(wtt == null){
+			wtt = new WorkingTimeType();
+			
+		}
+		
 	}
 	
 }

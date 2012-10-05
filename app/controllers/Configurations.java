@@ -17,22 +17,26 @@ public class Configurations extends Controller{
 	@Check(Security.INSERT_AND_UPDATE_CONFIGURATION)
 	public static void show(){
 		Date now = new Date();
-		List<Configuration> configurations = Configuration.find("WHERE from >= ? and to <= ?", now, now).fetch();
-		if(configurations.size() > 1) {
-			throw new IllegalStateException("Dovrebbe esserci una sola configurazione valida per ogni periodo di tempo");
-		}
-		if (configurations.size() == 0) {
-			throw new IllegalStateException("Nessuna configurazione valida presente nel db, contattare Dario!");
-		}
+		Configuration configurations = Configuration.getConfiguration(now);
+//		List<Configuration> configurations = Configuration.find("Select conf from Configuration conf WHERE conf.beginDate <= ? " +
+//				"and conf.endDate >= ?", now, now).fetch();
+//		if(configurations.size() > 1) {
+//			throw new IllegalStateException("Dovrebbe esserci una sola configurazione valida per ogni periodo di tempo");
+//		}
+//		if (configurations.size() == 0) {
+//			throw new IllegalStateException("Nessuna configurazione valida presente nel db, contattare Dario!");
+//		}
 		
-		render(configurations.get(0));
+//		render(configurations.get(0));
+		render(configurations);
 	}
 	
+	@Check(Security.INSERT_AND_UPDATE_CONFIGURATION)
 	public static void save(Long id, Configuration configuration){
 		
 	}
 	
-	
+	@Check(Security.INSERT_AND_UPDATE_CONFIGURATION)
 	public static void discard(){
 		
 	}

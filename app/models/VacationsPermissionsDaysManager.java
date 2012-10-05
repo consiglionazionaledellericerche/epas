@@ -89,7 +89,7 @@ public class VacationsPermissionsDaysManager {
 		 * controllo che il mese in cui risiede la data sia gennaio di modo da passare come residuo, quello alla fine di dicembre dell'anno 
 		 * precedente
 		 */
-		Configuration config = Configuration.getConfiguration(date);
+		Configuration config = Configuration.getConfiguration(date.toDate());
 		
 		int month = 0;
 		int year = 0;

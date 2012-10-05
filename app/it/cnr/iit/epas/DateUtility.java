@@ -11,7 +11,7 @@ import play.Logger;
 public class DateUtility {
 
 	public static boolean isHoliday(Person person, LocalDate date){
-		Configuration config = Configuration.getConfiguration(date);	
+		Configuration config = Configuration.getConfiguration(date.toDate());	
 		
 		if(person.workingTimeType.getWorkingTimeFromWorkinTimeType(date.getDayOfWeek()).holiday)
 			return true;

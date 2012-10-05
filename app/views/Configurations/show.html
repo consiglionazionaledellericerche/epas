@@ -3,9 +3,9 @@
 <h2 id="titoloConfigurazioneParametri">Istituto di informatica e telematica</h2>
 <h3 id="titoloGestioneParametri">Gestione parametri</h3>
 
-#{form @ConfParameters.save()}
+#{form @Configurations.save()}
 <div id="gestioneParametri">
-	<p id="validita"><b>Data inizio di validità di questi parametri:</b> <b>inizio</b>: <input name="" type="text" value="${configurations.from}" size="10" maxlength="100" /> <b>fine</b>: <input name="" type="text" value="${configurations.to}" size="10" maxlength="100" /></p>
+	<p id="validita"><b>Data inizio di validità di questi parametri:</b> <b>inizio</b>: <input name="" type="text" value="${configurations.beginDate}" size="10" maxlength="100" /> <b>fine</b>: <input name="" type="text" value="${configurations.endDate}" size="10" maxlength="100" /></p>
 	
 	<fieldset>
 		<legend>Dati di connessione e di visualizzazione</legend>
@@ -73,8 +73,8 @@
 			   00=i recuperi devono essere presi nell'anno. 99=i recuperi non scadono mai <input name="meseUtilizzoResiduiAP13" type="text" value="${configurations.monthExpireRecoveryDaysOneThree}" size="10" maxlength="100" /></p>
 			<p>Mese entro il quale devono essere usati i residui dell'anno precedente per i livelli da 4 a 9 (mm)
 			   00=i recuperi devono essere presi nell'anno. 99=i recuperi non scadono mai <input name="meseUtilizzoResiduiAP49" type="text" value="${configurations.monthExpireRecoveryDaysFourNine}" size="10" maxlength="100" /></p>
-			<p>Numero massimo di giorni di recupero in un anno per i livelli da 1 a 3 <input name="maxGiorniRecupero13" type="text" value="${configuration.maxRecoveryDaysOneThree}" size="10" maxlength="100" /></p>
-			<p>Numero massimo di giorni di recupero in un anno per i livelli da 4 a 9 <input name="maxGiorniRecupero49" type="text" value="${configuration.maxRecoveryDaysFourNine}" size="10" maxlength="100" /></p>
+			<p>Numero massimo di giorni di recupero in un anno per i livelli da 1 a 3 <input name="maxGiorniRecupero13" type="text" value="${configurations.maxRecoveryDaysOneThree}" size="10" maxlength="100" /></p>
+			<p>Numero massimo di giorni di recupero in un anno per i livelli da 4 a 9 <input name="maxGiorniRecupero49" type="text" value="${configurations.maxRecoveryDaysFourNine}" size="10" maxlength="100" /></p>
 			<p>Compensazione dei residui con quelli dell'anno precedente Al mese entro il quale sono usabili <input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedente" value="true"/>
      			Al mese<input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedente" value="true"/> Al giorno<input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedente" value="true"/></p>
 			<p>Numero massimo di ore di straordinario mensili a persona <input name="" type="text" value="${configurations.maximumOvertimeHours}" size="10" maxlength="100" /></p>
@@ -109,6 +109,6 @@
 	<input id="salvaConfigurazione" type="submit" value="Salva"/>
 #{/form}
 
-#{form @ConfParameters.discard()}
+#{form @Configurations.discard()}
 	<input id="annullaConfigurazione" type="submit" value="Annulla"/>
 #{/form}
