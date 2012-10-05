@@ -1,5 +1,7 @@
 Configuration(defaultConfiguration):
     initUseProgram: 2012-07-30
+    beginDate: 2010-01-01
+    endDate: 2013-01-01
     instituteName: IIT
     emailToContact:
     seatCode:
@@ -24,16 +26,16 @@ Configuration(defaultConfiguration):
     workingTime: 432
     workingTimeToHaveMealTicket: 360
     mealTime: 30
-    monthExpiryVacationPastYear: 
-    dayExpiryVacationPastYear:
+    monthExpiryVacationPastYear: 8
+    dayExpiryVacationPastYear: 31
     monthExpireRecoveryDaysOneThree:
-    monthExpireRecoveryDaysFourNine:
+    monthExpireRecoveryDaysFourNine: 4
     maxRecoveryDaysOneThree:
     maxRecoveryDaysFourNine:
     residual:
     maximumOvertimeHours:
     holydaysAndVacationsOverPermitted: false
-    hourMaxToCalculateWorkTime:
+    hourMaxToCalculateWorkTime: 5
     auto:
     autoAbsence:
     capacityOneThree:

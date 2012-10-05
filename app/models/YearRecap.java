@@ -20,6 +20,7 @@ import javax.persistence.Transient;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
 import org.hibernate.envers.query.AuditQuery;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 
@@ -29,6 +30,7 @@ import net.sf.oval.constraint.Range;
 
 import play.Logger;
 import play.data.validation.Required;
+import play.data.validation.Valid;
 import play.db.jpa.JPA;
 import play.db.jpa.Model;
 
@@ -155,7 +157,63 @@ public class YearRecap extends Model{
 		return months;
 	}
 	
-
+	/**
+	 * 
+	 * @param month
+	 * @return il numero del mese corrispondente alla stringa passata come parametro
+	 */
+	private int fromStringToIntMonth(String month){
+		int numberOfMonth = 0;
+		if(month.equalsIgnoreCase("gennaio")){
+			numberOfMonth = 1;
+		}
+		if(month.equalsIgnoreCase("febbraio")){
+			numberOfMonth = 2;
+		}	
+		if(month.equalsIgnoreCase("marzo")){
+			numberOfMonth = 3;
+		}	
+		if(month.equalsIgnoreCase("aprile")){
+			numberOfMonth = 4;
+		}
+		if(month.equalsIgnoreCase("maggio")){
+			numberOfMonth = 5;
+		}
+		if(month.equalsIgnoreCase("giugno")){
+			numberOfMonth = 6;
+		}
+		if(month.equalsIgnoreCase("luglio")){
+			numberOfMonth = 7;
+		}
+		if(month.equalsIgnoreCase("agosto")){
+			numberOfMonth = 8;
+		}
+		if(month.equalsIgnoreCase("settembre")){
+			numberOfMonth = 9;
+		}
+		if(month.equalsIgnoreCase("ottobre")){
+			numberOfMonth = 10;
+		}
+		if(month.equalsIgnoreCase("novembre")){
+			numberOfMonth = 11;
+		}
+		if(month.equalsIgnoreCase("dicembre")){
+			numberOfMonth = 12;
+		}
+		
+		return numberOfMonth;
+	}
+	
+	/**
+	 * 
+	 * @param year, month
+	 * @return il numero di giorni nel mese e nell'anno considerati. il mese viene calcolato chiamando la funzione fromStringToIntMonth
+	 */
+	public int maxNumberOfDays(int year, String month){
+		int numberOfMonth = fromStringToIntMonth(month);
+		LocalDate date = new LocalDate(year, numberOfMonth, 1);
+		return date.dayOfMonth().withMaximumValue().getDayOfMonth();
+	}
 	
 	/**
 	 * 
@@ -165,90 +223,30 @@ public class YearRecap extends Model{
 	 * @return la totalità delle assenze per quella persona in un anno, in più aggiorna la lista privata yearlyAbsences nel caso in 
 	 * cui trova un assenza con un codice che ancora non è stato inserito
 	 */
-	public List<Absence> getAbsenceInYear(int year, String month, int day){
-		LocalDate date = null;
-		List<Absence> absences = null;
-		
-		if(absences==null){				
-			
-			if(month.equalsIgnoreCase("gennaio")){
-				date = new LocalDate(year,1,day);
-				absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();	
-				
-			}
-			if(month.equalsIgnoreCase("febbraio")){
-				if(day<30){
-					date = new LocalDate(year,2,day);
-					absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();
-					
-				}
-			}
-			if(month.equalsIgnoreCase("marzo")){
-				date = new LocalDate(year,3,day);
-				absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();
-				
-			}
-			if(month.equalsIgnoreCase("aprile")){
-				if(day<31){
-					date = new LocalDate(year,4,day);
-					absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();	
-					
-				
-				}
-						
-			}
-			if(month.equalsIgnoreCase("maggio")){
-				date = new LocalDate(year,5,day);
-				absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();	
-				
-			}
-			if(month.equalsIgnoreCase("giugno")){
-				if(day<31){
-					date = new LocalDate(year,6,day);
-					absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();	
-					
-				}
-					
-			}
-			if(month.equalsIgnoreCase("luglio")){
-				date = new LocalDate(year,7,day);
-				absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();	
-				
-			}
-			if(month.equalsIgnoreCase("agosto")){
-				date = new LocalDate(year,8,day);
-				absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();
-				
-			}
-			if(month.equalsIgnoreCase("settembre")){
-				if(day<31){
-					date = new LocalDate(year,9,day);
-					absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();	
-					
-				}
-						
-			}
-			if(month.equalsIgnoreCase("ottobre")){
-				date = new LocalDate(year,10,day);
-				absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();	
-				
-			}
-			if(month.equalsIgnoreCase("novembre")){
-				if(day<31){
-					date = new LocalDate(year,11,day);
-					absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();	
-					
-				}
-						
-			}
-			if(month.equalsIgnoreCase("dicembre")){
-				date = new LocalDate(year,12,day);
-				absences = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date = ?", person, date).fetch();	
-				
+	public List<Absence> getAbsenceInYear(@Valid int year, @Valid String month, @Valid int day){
+		int mese = fromStringToIntMonth(month);
+		List<Absence> absencesInYear = new ArrayList<Absence>();
+//		List<PersonDay> personDayInYear = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date >= ? and pd.date <= ?", 
+//				person, new LocalDate(year,1,1), new LocalDate(year,12,31)).fetch();
+//		for(PersonDay pd : personDayInYear){
+//			if(pd.absences.size()!=0){
+//				for(Absence abs : pd.absences){
+//					if(abs != null){
+//						absencesInYear.add(abs);
+//					}
+//				}
+//			}
+//		}
+		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", 
+				person, new LocalDate(year, mese, day)).first();
+		if(pd.absences.size() > 0){
+			for(Absence abs : pd.absences){
+				if(abs != null)
+					absencesInYear.add(abs);
 			}
 		}
 		
-		return absences;
+		return absencesInYear;
 	}
 	
 	/**
@@ -256,16 +254,21 @@ public class YearRecap extends Model{
 	 * @return la mappa contenente le assenze fatte dalla persona nell'anno con i relativi codici d'assenza e descrizioni
 	 */
 	public Map<AbsenceType,Integer> getYearlyAbsence(){
-		
-		List<AbsenceType> listaAssenze = null;
-		LocalDate dateFrom = new LocalDate(year,1,1);
-		LocalDate dateTo = new LocalDate(year,12,31);
-		listaAssenze = AbsenceType.find("SELECT abt FROM Absence abs, AbsenceType abt, Person p WHERE abt = abs.absenceType AND " +
-				"abs.person = p AND p = ? AND abs.date >= ? AND abs.date < ?", person, dateFrom, dateTo).fetch();
-		Logger.warn("ListaAssenze: " +listaAssenze);
+		List<AbsenceType> listaTipiAssenze = new ArrayList<AbsenceType>();
+		List<PersonDay> personDayInYear = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date >= ? and pd.date <= ?", 
+				person, new LocalDate(year,1,1), new LocalDate(year,12,31)).fetch();
+		for(PersonDay pd : personDayInYear){
+			if(pd.absences.size() > 0){
+				for(Absence abs : pd.absences){
+					if(abs != null)
+						listaTipiAssenze.add(abs.absenceType);
+				}
+			}
+		}
+		Logger.warn("ListaAssenze: " +listaTipiAssenze);
 		if(mappaAssenze.isEmpty()){
 			Integer i = 0;
-			for(AbsenceType absenceType : listaAssenze){
+			for(AbsenceType absenceType : listaTipiAssenze){
 				boolean stato = mappaAssenze.containsKey(absenceType);
 				if(stato==false){
 					i=1;
@@ -515,11 +518,4 @@ public class YearRecap extends Model{
 				id, person.id, year, overtime, overtimeAp, remaining, remainingAp, recg, recgap, recguap, recm);
 	}
 	
-	public static void main(String[]args){
-		LocalDate begin = new LocalDate(2012,6,12);
-		LocalDate end = new LocalDate(2012,12,31);
-		long days = (end.toDate().getTime() - begin.toDate().getTime()) 
-                / (1000 * 60 * 60 * 24);
-		System.out.println("Giorni: "+days);
-	}
 }

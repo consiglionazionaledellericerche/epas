@@ -34,6 +34,7 @@ import org.joda.time.LocalDateTime;
 import play.Logger;
 import play.data.validation.Required;
 import play.db.jpa.Model;
+import sun.security.krb5.Config;
 
 /**
  * Classe che rappresenta un giorno, sia esso lavorativo o festivo di una persona.
@@ -144,8 +145,72 @@ public class PersonDay extends Model {
 				"st.date > ? and st.date < ? order by st.date", this, beginDate, endDate).fetch();
 
 		StampProfile stampProfile = getStampProfile();
+		
+		/**
+		 * prima di compiere le operazioni sul tempo di lavoro giornaliero, si controlla se per caso ci fossero timbrature inevase dal giorno 
+		 * precedente, ovvero se per caso il giorno precedente ci sia stato un ingresso ma nessuna corrispondente timbratura d'uscita
+		 */
+		Configuration config = Configuration.getCurrentConfiguration();
+		PersonDay pdPastDay = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date.minusDays(1)).first();
+		if(pdPastDay == null){
+			pdPastDay = new PersonDay(person, date.minusDays(1), 0, 0, 0);
+			pdPastDay.create();
+		}
+		List<Stamping> reloadedStampingYesterday = Stamping.find("Select st from Stamping st where st.personDay = ? and " +
+				"st.date between ? and ? order by st.date", pdPastDay, beginDate.minusDays(1), endDate.minusDays(1)).fetch();
 
-		//List<Stamping> reloadedStampings = returnStampingsList(reloadedStampings);
+		if(reloadedStampingYesterday.size() == 1 && reloadedStampingYesterday.get(0).way == WayType.in){
+			if(stampProfile != null && stampProfile.fixedWorkingTime){
+				;
+			}
+			else{
+				for(Stamping st : reloadedStampings){
+					if(st != null){
+						if(st.way == WayType.out && config.hourMaxToCalculateWorkTime > st.date.getHourOfDay()){
+							pdPastDay.timeAtWork = toMinute(st.date) - toMinute(reloadedStampingYesterday.get(0).date);
+							pdPastDay.merge();
+							pdPastDay.difference = pdPastDay.timeAtWork - getWorkingTimeTypeDay().workingTime;
+							pdPastDay.merge();
+							PersonDay pdPast = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date.minusDays(2)).first();
+							pdPastDay.progressive = pdPast.progressive + pdPastDay.difference;
+							pdPastDay.merge();
+						}
+					}
+				}
+//				Stamping st = reloadedStampings.get(0);
+//				if(st.way == WayType.out && config.hourMaxToCalculateWorkTime > st.date.getHourOfDay()){
+//					pdPastDay.timeAtWork = toMinute(st.date) - toMinute(reloadedStampingYesterday.get(0).date);
+//					pdPastDay.merge();
+//					pdPastDay.difference = pdPastDay.timeAtWork - getWorkingTimeTypeDay().workingTime;
+//					pdPastDay.merge();
+//					PersonDay pdPast = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date.minusDays(2)).first();
+//					pdPastDay.progressive = pdPast.progressive + pdPastDay.difference;
+//					pdPastDay.merge();
+//				}
+			}
+			
+		}
+		/**
+		 * a questo punto, se la prima timbratura giornaliera è una timbratura di uscita ed è minore come tempo dell'ora massima per calcolare 
+		 * il timeatwork del giorno precedente, bisogna estrometterla dal calcolo delle informazioni sul personday giornaliero, cancellandola 
+		 * dalla lista delle timbrature ordinate per date.
+		 */
+		
+		/**
+		 * controllo che 
+		 */
+		if(reloadedStampings.size() == 0 && this.absences.size() != 0){
+			timeAtWork = 0;
+			merge();
+			return;
+			
+		}
+		
+		if(reloadedStampings.get(0).way == WayType.out && reloadedStampings.get(0).date.getHourOfDay() < config.hourMaxToCalculateWorkTime){
+			reloadedStampings.remove(0);
+			
+		}
+		
 		if(reloadedStampings.contains(null)){
 			/**
 			 * in questo caso si guarda quale posizione della linkedList è null per stabilire se sia mancante un ingresso o un'uscita
@@ -219,7 +284,8 @@ public class PersonDay extends Model {
 			} else {
 				timeAtWork = tempoLavoro;	
 			}
-			save();
+			merge();
+			//save();
 			return;
 
 		}		
@@ -244,14 +310,14 @@ public class PersonDay extends Model {
 			} else {
 				timeAtWork = 0;	
 			}
-
-			save();
+			//save();
+			merge();
 			return;
 		}
+		
 		/**
 		 * se ci sono timbrature
 		 */
-
 		LocalDateTime now = new LocalDateTime();
 		if(size > 0){
 			Stamping s = reloadedStampings.get(0);
@@ -391,7 +457,7 @@ public class PersonDay extends Model {
 
 
 	/**
-	 * TODO: sistemare nel caso abbia una timbratura d'ingresso la sera tardi senza la corrispondente timbratura d'uscita prima della mezzanotte del giorno stesso
+	 * 
 	 * @param date
 	 * @return calcola il numero di minuti di cui è composta la data passata come parametro (di cui considera solo
 	 * ora e minuti
@@ -409,15 +475,19 @@ public class PersonDay extends Model {
 	}
 
 	/**
-	 * 
-	 * @param person
-	 * @param date
 	 * @return la lista di codici di assenza fatti da quella persona in quella data
 	 */
 	public List<Absence> absenceList() {
 		return this.absences;
 	}
 
+	/**
+	 * 
+	 * @return la lista delle timbrature in quel personday
+	 */
+	public List<Stamping> stampingList(){
+		return this.stampings;
+	}
 
 	/**
 	 * 
@@ -469,47 +539,49 @@ public class PersonDay extends Model {
 	 * @return se la persona può usufruire del buono pasto per quella data
 	 */
 	public boolean mealTicket(){
-		boolean ticketAvailable = false;
-
+		
+		setTicketAvailable();
+		return isTicketAvailable;
 
 		//		if (timeAtWork == 0) {
 		//			timeAtWork = updateTimeAtWork();
 		//
 		//		}
 
-		if(timeAtWork == 0 || timeAtWork < getWorkingTimeTypeDay().mealTicketTime){
-			ticketAvailable = false;
-		}				
-
-
-		if(person.workingTimeType.description.equals("normale-mod") || person.workingTimeType.description.equals("normale")
-				|| person.workingTimeType.description.equals("80%") || person.workingTimeType.description.equals("85%")){
-			if(timeAtWork >= getWorkingTimeTypeDay().mealTicketTime)
-				ticketAvailable=true;
-			if(timeAtWork > getWorkingTimeTypeDay().mealTicketTime 
-					&& timeAtWork < getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime 
-					&&(stampings.size()==4 && checkMinTimeForLunch(stampings) < getWorkingTimeTypeDay().mealTicketTime))
-				ticketAvailable=true;
-			if(timeAtWork > getWorkingTimeTypeDay().mealTicketTime 
-					&& timeAtWork < getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime 
-					&& (stampings.size()==4))
-				ticketAvailable=true;
-			if(timeAtWork > getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime 
-					&& timeAtWork < getWorkingTimeTypeDay().workingTime 
-					&& (stampings.size()==4 || stampings.size()==2))
-				ticketAvailable=true;
-			if(timeAtWork > getWorkingTimeTypeDay().mealTicketTime 
-					&& timeAtWork < getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime 
-					&& (stampings.size()==6))
-				ticketAvailable=true;
-			if(timeAtWork < getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime
-					&& timeAtWork > getWorkingTimeTypeDay().mealTicketTime 
-					&& stampings.size()==2 )
-				ticketAvailable = true;
-			isMealTicketAvailable = ticketAvailable;
-		}
-
-		return isMealTicketAvailable;
+//		if(timeAtWork == 0 || timeAtWork < getWorkingTimeTypeDay().mealTicketTime){
+//			ticketAvailable = false;
+//		}				
+//
+//
+//		if(person.workingTimeType.description.equals("normale-mod") || person.workingTimeType.description.equals("normale")
+//				|| person.workingTimeType.description.equals("80%") || person.workingTimeType.description.equals("85%")){
+//			if(timeAtWork >= getWorkingTimeTypeDay().mealTicketTime)
+//				ticketAvailable=true;
+//			if(timeAtWork > getWorkingTimeTypeDay().mealTicketTime 
+//					&& timeAtWork < getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime 
+//					&&(stampings.size()==4 && checkMinTimeForLunch(stampings) < getWorkingTimeTypeDay().mealTicketTime))
+//				ticketAvailable=true;
+//			if(timeAtWork > getWorkingTimeTypeDay().mealTicketTime 
+//					&& timeAtWork < getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime 
+//					&& (stampings.size()==4))
+//				ticketAvailable=true;
+//			if(timeAtWork > getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime 
+//					&& timeAtWork < getWorkingTimeTypeDay().workingTime 
+//					&& (stampings.size()==4 || stampings.size()==2))
+//				ticketAvailable=true;
+//			if(timeAtWork > getWorkingTimeTypeDay().mealTicketTime 
+//					&& timeAtWork < getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime 
+//					&& (stampings.size()==6))
+//				ticketAvailable=true;
+//			if(timeAtWork < getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime
+//					&& timeAtWork > getWorkingTimeTypeDay().mealTicketTime 
+//					&& stampings.size()==2 )
+//				ticketAvailable = true;
+//			isMealTicketAvailable = ticketAvailable;
+//		}
+//
+//		return isMealTicketAvailable;
+		
 
 	}
 
@@ -533,31 +605,33 @@ public class PersonDay extends Model {
 
 			if(timeAtWork >= getWorkingTimeTypeDay().mealTicketTime)
 				ticketAvailable=true;
+			else
+				ticketAvailable=false;
 
-			if(timeAtWork > getWorkingTimeTypeDay().mealTicketTime && 
-					timeAtWork < getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime 
-					&& (stampings.size()==4 && checkMinTimeForLunch(stampings) < getWorkingTimeTypeDay().breakTicketTime))
-				ticketAvailable=true;
-
-			if(timeAtWork > getWorkingTimeTypeDay().mealTicketTime 
-					&& timeAtWork < getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime 
-					&& (stampings.size()==4))
-				ticketAvailable=true;
-
-			if(timeAtWork > getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime
-					&& timeAtWork < getWorkingTimeTypeDay().workingTime 
-					&& (stampings.size()==4 || stampings.size()==2))
-				ticketAvailable=true;
-
-			if(timeAtWork > getWorkingTimeTypeDay().mealTicketTime && 
-					timeAtWork < getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime 
-					&& (stampings.size()==6))
-				ticketAvailable=true;
-
-			if(timeAtWork < getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime
-					&& timeAtWork > getWorkingTimeTypeDay().mealTicketTime 
-					&& stampings.size()==2 )
-				ticketAvailable = true;
+//			if(timeAtWork > getWorkingTimeTypeDay().mealTicketTime && 
+//					timeAtWork < getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime 
+//					&& (stampings.size()==4 && checkMinTimeForLunch(stampings) < getWorkingTimeTypeDay().breakTicketTime))
+//				ticketAvailable=true;
+//
+//			if(timeAtWork > getWorkingTimeTypeDay().mealTicketTime 
+//					&& timeAtWork < getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime 
+//					&& (stampings.size()==4))
+//				ticketAvailable=true;
+//
+//			if(timeAtWork > getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime
+//					&& timeAtWork < getWorkingTimeTypeDay().workingTime 
+//					&& (stampings.size()==4 || stampings.size()==2))
+//				ticketAvailable=true;
+//
+//			if(timeAtWork > getWorkingTimeTypeDay().mealTicketTime && 
+//					timeAtWork < getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime 
+//					&& (stampings.size()==6))
+//				ticketAvailable=true;
+//
+//			if(timeAtWork < getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime
+//					&& timeAtWork > getWorkingTimeTypeDay().mealTicketTime 
+//					&& stampings.size()==2 )
+//				ticketAvailable = true;
 
 		}
 

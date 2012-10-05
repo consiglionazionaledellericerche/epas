@@ -37,9 +37,9 @@ public class Absences extends Controller{
 		
 	}
 	
-	private static List<AbsenceType> getAllAbsenceTypes(){
+	private static List<AbsenceType> getAllAbsenceTypes(LocalDate date){
 		
-		return AbsenceType.find("Select abt from AbsenceType abt where abt.validTo > ? order by code", new LocalDate().toDate()).fetch();
+		return AbsenceType.find("Select abt from AbsenceType abt where abt.validTo > ? order by code", date).fetch();
 	}
 		 
 	@Check(Security.VIEW_PERSON_LIST)
@@ -94,7 +94,7 @@ public class Absences extends Controller{
     	Logger.debug("Insert absence called for personId=%d, year=%d, month=%d, day=%d", personId, year, month, day);
     	List<AbsenceType> frequentAbsenceTypeList = getFrequentAbsenceTypes();
     	
-    	List<AbsenceType> allCodes = getAllAbsenceTypes();
+    	List<AbsenceType> allCodes = getAllAbsenceTypes(new LocalDate(year,month,day));
 		Person person = Person.em().getReference(Person.class, personId);
 		LocalDate date = new LocalDate(year, month, day);
 		PersonDay personDay = new PersonDay(person, date);
@@ -195,7 +195,7 @@ public class Absences extends Controller{
     	}
     	List<AbsenceType> frequentAbsenceTypeList = getFrequentAbsenceTypes();
     	
-    	List<AbsenceType> allCodes = getAllAbsenceTypes();
+    	List<AbsenceType> allCodes = getAllAbsenceTypes(absence.personDay.date);
 		render(absence, frequentAbsenceTypeList, allCodes);				
 	}
 	
