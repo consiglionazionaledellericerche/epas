@@ -1,13 +1,9 @@
 [
-  %{ 
-  	for (reperibilityPeriod in reperibilityPeriods) {
-  		%}
+  	#{list reperibilityPeriods, as:'reperibilityPeriod'}
   			{
-  			"id" : "${reperibilityPeriod.person.id}",
-  			"start" : ${reperibilityPeriod.start},
-  			"end" : ${reperibilityPeriod.end}
-  			},
-  		%{
-  	}
-  }% 
+  			"id" : ${reperibilityPeriod.person.id},
+  			"start" : "${reperibilityPeriod.start}",
+  			"end" : "${reperibilityPeriod.end}"
+  			}${reperibilityPeriod_isLast ? '' : ','}
+  	#{/list}
 ]
