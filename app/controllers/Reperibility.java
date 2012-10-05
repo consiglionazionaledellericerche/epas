@@ -5,6 +5,8 @@ package controllers;
 
 import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
 
+import java.io.InputStream;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +14,8 @@ import models.Absence;
 import models.Person;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
+import models.PersonVacation;
+import models.exports.AbsenceReperibilityPeriod;
 import models.exports.ReperibilityPeriod;
 import models.exports.ReperibilityPeriods;
 
@@ -36,6 +40,8 @@ public class Reperibility extends Controller {
 	}
 
 	public static void find() {
+		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
+
 		Long type = Long.parseLong(params.get("type"));
 		
 		LocalDate from = new LocalDate(Integer.parseInt(params.get("yearFrom")), Integer.parseInt(params.get("monthFrom")), Integer.parseInt(params.get("dayFrom")));
@@ -60,7 +66,56 @@ public class Reperibility extends Controller {
 				Logger.trace("Aggiornato reperibilityPeriod, person=%s, start=%s, end=%s", reperibilityPeriod.person, reperibilityPeriod.start, reperibilityPeriod.end);
 			}
 		}
+		Logger.debug("Find %s reperibilityPeriods. ReperibilityPeriods = %s", reperibilityPeriods.size(), reperibilityPeriods);
 		render(reperibilityPeriods);
+	}
+	
+	/**
+	 * Legge le assenze dei reperibili di una determinata tipologia in un dato intervallo di tempo
+	 * (portale sistorg)
+	 */
+	public static void absence() {
+		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
+
+		Long type = Long.parseLong(params.get("type"));
+		
+		LocalDate from = new LocalDate(Integer.parseInt(params.get("yearFrom")), Integer.parseInt(params.get("monthFrom")), Integer.parseInt(params.get("dayFrom")));
+		LocalDate to = new LocalDate(Integer.parseInt(params.get("yearTo")), Integer.parseInt(params.get("monthTo")), Integer.parseInt(params.get("dayTo")));
+
+		// read the reperibility person list 
+		List<Person> personList = Person.find("SELECT p FROM Person p JOIN p.reperibility r WHERE r.personReperibilityType.id = ? AND (r.startDate IS NULL OR r.startDate <= now()) and (r.endDate IS NULL OR r.endDate >= now())", type).fetch();
+		Logger.debug("Reperibility personList called, found %s reperible person of type %s", personList.size(), type);
+		
+		// Lists of absence for a single reperibility person and for all persons
+		List<Absence> absencePersonReperibilityDays = new ArrayList<Absence>();
+		List<Absence> absenceReperibilityDays = new ArrayList<Absence>();
+		
+		// List of absence periods
+		List<AbsenceReperibilityPeriod> absenceReperibilityPeriods = new ArrayList<AbsenceReperibilityPeriod>();
+		
+		// for each person in the list read the absence days in the DB
+		for (Person person : personList) {
+			absencePersonReperibilityDays = Absence.find("SELECT abs FROM Absence abs WHERE abs.date BETWEEN ? AND ? AND abs.person = ? ORDER BY abs.date", from, to, person).fetch();
+
+			Logger.debug("Absence of the person %s find called from %s to %s, found %s reperibility days", person.id, from, to, absenceReperibilityDays.size());
+			absenceReperibilityDays.addAll(absencePersonReperibilityDays);
+		}
+		
+		AbsenceReperibilityPeriod absenceReperibilityPeriod = null;
+
+		for (Absence abs : absenceReperibilityDays) {
+			//L'ultima parte dell'if serve per il caso in cui la stessa persona ha due periodi di reperibilità non consecutivi. 
+			if (absenceReperibilityPeriod == null || !absenceReperibilityPeriod.person.equals(abs.person) || !absenceReperibilityPeriod.end.plusDays(1).equals(abs.date)) {
+				absenceReperibilityPeriod = new AbsenceReperibilityPeriod(abs.person, abs.date, abs.date, (PersonReperibilityType) PersonReperibilityType.findById(type));
+				absenceReperibilityPeriods.add(absenceReperibilityPeriod);
+				Logger.trace("Creato nuovo absenceReperibilityPeriod, person=%s, start=%s, end=%s", absenceReperibilityPeriod.person, absenceReperibilityPeriod.start, absenceReperibilityPeriod.end);
+			} else {
+				absenceReperibilityPeriod.end = abs.date;
+				Logger.trace("Aggiornato reperibilityPeriod, person=%s, start=%s, end=%s", absenceReperibilityPeriod.person, absenceReperibilityPeriod.start, absenceReperibilityPeriod.end);
+			}
+		}
+		Logger.debug("Find %s reperibilityPeriods. ReperibilityPeriods = %s", absenceReperibilityPeriods.size(), absenceReperibilityPeriods);
+		render(absenceReperibilityPeriods);
 	}
 	
 	/**
@@ -74,6 +129,17 @@ public class Reperibility extends Controller {
 	 * @param body
 	 */
 	public static void update(@As(binder=JsonReperibilityPeriodsBinder.class) ReperibilityPeriods body) {
+		Logger.debug("chiamata update con REQUEST_METHOD = %s", request.method);
+		
+		if (request.method.equals("OPTIONS")) {
+			response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
+			response.setHeader("Access-Control-Allow-Methods", "PUT, POST, GET, OPTIONS");
+			response.setHeader("Access-Control-Max-Age", "1000");
+			response.setHeader("Access-Control-Allow-Headers", "X-PINGARUNER");
+			response.setHeader("Content-type", "application/json");
+		}else if (request.method.equals("PUT")) {
+			Logger.debug("nella update sono nel ramo put");
+		}
 		Logger.debug("update: Received reperebilityPeriods %s", body);
 		
 		if (body == null) {
