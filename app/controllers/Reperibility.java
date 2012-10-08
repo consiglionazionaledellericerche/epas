@@ -12,9 +12,9 @@ import java.util.List;
 
 import models.Absence;
 import models.Person;
+import models.PersonDay;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
-import models.PersonVacation;
 import models.exports.AbsenceReperibilityPeriod;
 import models.exports.ReperibilityPeriod;
 import models.exports.ReperibilityPeriods;
@@ -95,26 +95,36 @@ public class Reperibility extends Controller {
 		
 		// for each person in the list read the absence days in the DB
 		for (Person person : personList) {
-			absencePersonReperibilityDays = Absence.find("SELECT abs FROM Absence abs WHERE abs.date BETWEEN ? AND ? AND abs.person = ? ORDER BY abs.date", from, to, person).fetch();
-
+			
+			List<PersonDay> personDayList = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.date BETWEEN ? AND ? AND pd.person = ? ORDER BY pd.date", from, to, person).fetch();
+			for(PersonDay pd : personDayList){
+				if(pd.absences.size() > 0){
+					for(Absence abs : pd.absences){
+						absencePersonReperibilityDays.add(abs);
+						Logger.debug("Type of absence: %s", abs.absenceType);
+					}
+				}
+			}
+			
 			Logger.debug("Absence of the person %s find called from %s to %s, found %s reperibility days", person.id, from, to, absenceReperibilityDays.size());
 			absenceReperibilityDays.addAll(absencePersonReperibilityDays);
 		}
 		
 		AbsenceReperibilityPeriod absenceReperibilityPeriod = null;
-
+		
+		Logger.trace("Trovati %s giorni di assenza", absencePersonReperibilityDays.size());
 		for (Absence abs : absenceReperibilityDays) {
 			//L'ultima parte dell'if serve per il caso in cui la stessa persona ha due periodi di reperibilità non consecutivi. 
-			if (absenceReperibilityPeriod == null || !absenceReperibilityPeriod.person.equals(abs.person) || !absenceReperibilityPeriod.end.plusDays(1).equals(abs.date)) {
-				absenceReperibilityPeriod = new AbsenceReperibilityPeriod(abs.person, abs.date, abs.date, (PersonReperibilityType) PersonReperibilityType.findById(type));
+			if (absenceReperibilityPeriod == null || !absenceReperibilityPeriod.person.equals(abs.personDay.person) || !absenceReperibilityPeriod.end.plusDays(1).equals(abs.personDay.date)) {
+				absenceReperibilityPeriod = new AbsenceReperibilityPeriod(abs.personDay.person, abs.personDay.date, abs.personDay.date, (PersonReperibilityType) PersonReperibilityType.findById(type));
 				absenceReperibilityPeriods.add(absenceReperibilityPeriod);
 				Logger.trace("Creato nuovo absenceReperibilityPeriod, person=%s, start=%s, end=%s", absenceReperibilityPeriod.person, absenceReperibilityPeriod.start, absenceReperibilityPeriod.end);
 			} else {
-				absenceReperibilityPeriod.end = abs.date;
+				absenceReperibilityPeriod.end = abs.personDay.date;
 				Logger.trace("Aggiornato reperibilityPeriod, person=%s, start=%s, end=%s", absenceReperibilityPeriod.person, absenceReperibilityPeriod.start, absenceReperibilityPeriod.end);
 			}
 		}
-		Logger.debug("Find %s reperibilityPeriods. ReperibilityPeriods = %s", absenceReperibilityPeriods.size(), absenceReperibilityPeriods);
+		Logger.debug("Find %s reperibilityPeriods. ReperibilityPeriods = %s", absenceReperibilityPeriods.size(), absenceReperibilityPeriods.toString());
 		render(absenceReperibilityPeriods);
 	}
 	
