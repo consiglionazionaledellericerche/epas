@@ -1,5 +1,7 @@
 package controllers;
 
+import it.cnr.iit.epas.ActionMenuItem;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -17,11 +19,12 @@ import play.data.validation.Valid;
 import play.mvc.Controller;
 import play.mvc.With;
 
-@With(Secure.class)
+
 public class Persons extends Controller {
 
 	public static final String USERNAME_SESSION_KEY = "username";
 
+		
 	public static void insert(){
 		render();
 	}
@@ -133,6 +136,6 @@ public class Persons extends Controller {
 		p.password = params.get("nuovaPassword");
 		p.save();
 	}
-
+	
 
 }

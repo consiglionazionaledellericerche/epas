@@ -22,9 +22,9 @@ GET		/assenze								Absences.show
 GET		/assenze-annuali						YearlyAbsences.show
 
 #Ferie
-GET		/ferie									Vacations.show
-GET		/vacations.html							Vacations.vacations		
-GET		/vacationsCurrentYear.html				Vacations.vacationsCurrentYear		
+GET		/vacations								Vacations.show
+POST	/vacations								Vacations.vacations		
+GET		/vacationsCurrentYear					Vacations.vacationsCurrentYear		
 
 #Competenze
 GET		/competenze								Competences.show
@@ -45,17 +45,19 @@ GET     /public/                                staticDir:public
 # Import Secure routes
 #*       /                						module:secure
 
-GET		/persons								Persons.list
+GET		/personList								Persons.list
 POST	/persons								Persons.save
-GET		/persons/new							Persons.form
+GET		/persons								Persons.form
 
 
 GET		/manageWorkingTime						WorkingTimes.manageWorkingTime
-POST	/insertWorkingTime						WorkingTimes.insertWorkingTime
+GET		/insertWorkingTime.html					WorkingTimes.insertWorkingTime
+POST	/insertWorkingTime						WorkingTimes.save
 
 GET		/vacationsAdmin							VacationsAdmin.manageVacationCode
 POST	/insertVacation							VacationsAdmin.insertVacationCode
 
+# Gestione password
 GET		/changePassword							Persons.changePassword
 POST	/changePassword							Persons.savePassword
 
@@ -74,8 +76,8 @@ POST	/absences/update						Absences.update
 
 GET		/absences/absenceCodeList				Absences.absenceCodeList
 
-GET		/confParameters							ConfParameters.show
-POST	/confParameters							ConfParameters.save
+GET		/confParameters							Configurations.show
+POST	/confParameters							Configurations.save
 
 GET 	/reperibility/{type}/personList			Reperibility.personList
 

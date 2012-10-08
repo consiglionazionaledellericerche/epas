@@ -22,5 +22,12 @@ public class VacationsAdmin extends Controller{
 		vacationCode.permissionDays = new Integer(params.get("giorniPermesso"));
 		vacationCode.save();
 	}
+	/**
+	 * questa funzione deve permettere di visualizzare per ciascuna persona con contratto attivo la corrispondente situazione di ferie e
+	 * permessi relativa a questo anno e al precedente
+	 */
+	public static void manageVacationsPermissionsForAll(){
+		
+	}
 	
 }

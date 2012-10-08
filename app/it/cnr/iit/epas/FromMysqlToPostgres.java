@@ -592,6 +592,7 @@ public class FromMysqlToPostgres {
 			contract = Contract.find("Select con from Contract con where con.person = ? ", person).first();
 			if(contract == null){
 				contract = new Contract();
+				contract.create();
 				//contract.person = person;
 				contract.beginContract = startContract;
 				contract.expireContract = endContract;
@@ -619,9 +620,10 @@ public class FromMysqlToPostgres {
 			}    		   		 
 
 			contract.onCertificate = rs.getInt("firma") == 0 ? true : false;
-
-			contract.save();
 			contract.person = person;
+			contract.create();
+			contract.save();
+			
 			person.save();
 			Logger.info("Creato %s ", contract);
 
@@ -640,15 +642,20 @@ public class FromMysqlToPostgres {
 		 * query sulle tabelle orario, per recuperare le info sulle timbrature e sulle assenze
 		 * di ciascuna persona per generare i personday
 		 */
-		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT Orario.ID,Orario.Giorno,Orario.TipoGiorno,Orario.TipoTimbratura," +
-				"Orario.Ora, Codici.id, Codici.Codice, Codici.Qualifiche " +
-				"FROM Orario, Codici " +
-				"WHERE Orario.TipoGiorno=Codici.id and Orario.Giorno >= ? " +
-				"and Orario.ID = ? ORDER BY Orario.Giorno");
-		java.sql.Date dataSQL = new java.sql.Date(anno,1,1);
-		stmtOrari.setDate(1, dataSQL);
-		stmtOrari.setLong(2, id);
-
+//		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT Orario.ID,Orario.Giorno,Orario.TipoGiorno,Orario.TipoTimbratura," +
+//				"Orario.Ora, Codici.id, Codici.Codice, Codici.Qualifiche " +
+//				"FROM Orario, Codici " +
+//				"WHERE Orario.TipoGiorno=Codici.id and Orario.Giorno >= ? " +
+//				"and Orario.ID = ? ORDER BY Orario.Giorno");
+//		java.sql.Date dataSQL = new java.sql.Date(anno,1,1);
+//		stmtOrari.setDate(1, dataSQL);
+//		stmtOrari.setLong(2, id);
+		
+		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT Orario.ID,Orario.Giorno,Orario.TipoGiorno,Orario.TipoTimbratura," + 	
+                "Orario.Ora, Codici.id, Codici.Codice, Codici.Qualifiche " +
+                "FROM Orario, Codici " +
+                "WHERE Orario.TipoGiorno=Codici.id and Orario.Giorno >= '2011-01-01' " +
+                "and Orario.ID = " + id + " ORDER BY Orario.Giorno");
 		ResultSet rs = stmtOrari.executeQuery();
 
 		PersonDay pd = null;
@@ -686,7 +693,7 @@ public class FromMysqlToPostgres {
 			//Le persone che non hanno qualifica non hanno i PersonYear da gestire
 			if (person.qualification != null && currentYear != 0 && currentYear != newData.getYear()) {
 				PersonYear py = new PersonYear(person, currentYear);
-				//TODO: py.refreshPersonYear()
+				py.refreshPersonYear();
 				Logger.info("Creato %s", py);
 			}
 
@@ -697,10 +704,11 @@ public class FromMysqlToPostgres {
 				if(newData.isAfter(data)){		
 
 					Logger.debug("Nuovo giorno %s per %s, prima si fanno i calcoli sul personday poi si crea quello nuovo", newData, person.toString());
-					//Logger.debug("Il progressivo del personday del giorno appena trascorso da cui partire per fare i calcoli è: %s", pd.progressive);
+					Logger.debug("Il progressivo del personday del giorno appena trascorso da cui partire per fare i calcoli è: %s", pd.progressive);
 					PersonDay pdOld = PersonDay.findById(pd.id);
 					pdOld.populatePersonDay();	
 					pdOld.merge();
+
 					Logger.debug("Il progressivo del personday del giorno appena trascorso assegnato a un nuovo personDay è: %s", pdOld.progressive);
 
 					pd = new PersonDay(person, newData);
@@ -1154,45 +1162,17 @@ public class FromMysqlToPostgres {
 	private static void createAbsence(PersonDay pd, String codice){
 
 		AbsenceType absenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", codice).first();
-		pd.merge();
+		
 		Absence absence = new Absence();
 		absence.personDay = pd;
 		absence.absenceType = absenceType;
 		absence.save();
+		pd.absences.add(absence);
+		pd.merge();
 		Logger.debug("Creata %s", absence);
 		//createAbsence(pd, absenceType);
 	}
 
-	//TODO: da buttare
-	//	private static void createAbsence(PersonDay pd, AbsenceType absenceType) {
-
-	//		if (absenceType.justifiedTimeAtWork.isFixedJustifiedTime()) {
-	//			int justified = absenceType.justifiedTimeAtWork.minutesJustified;
-	//			pd.timeAtWork = pd.timeAtWork-justified;
-	//			pd.difference = pd.difference-justified;
-	//		} else {
-	//			switch (absenceType.justifiedTimeAtWork) {
-	//			case AllDay:
-	//				pd.difference = 0;
-	//				pd.timeAtWork = 0;
-	//				break;
-	//			case HalfDay:
-	//				//TODO: da implementare
-	//				break;
-	//			case ReduceWorkingTimeOfTwoHours:
-	//				//TODO: da implementare
-	//				break;
-	//			case SetWorkingTime:
-	//				//TODO: da implementare
-	//				break;
-	//			case TimeToComplete:
-	//				//TODO: da implementare
-	//				break;				
-	//			default:
-	//				throw new RuntimeException(String.format("%s ha un \"justifiedTimeAtWork\" = %s non riconosciuto dall'applicazione", absenceType.justifiedTimeAtWork));
-	//			}
-	//		}
-	//	}
 
 }
 

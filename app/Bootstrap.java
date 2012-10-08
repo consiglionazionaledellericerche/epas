@@ -49,6 +49,11 @@ public class Bootstrap extends Job {
 			Fixtures.loadModels("stampTypes.yml");
 			Logger.info("Creati gli StampType predefiniti");
 		}
+		
+		if(Configuration.count() == 0){
+			Fixtures.loadModels("defaultConfiguration.yml");
+			Logger.info("Creata la configurazione iniziale per il programma");
+		}
 
 	}
 

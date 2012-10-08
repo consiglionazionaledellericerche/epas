@@ -6,11 +6,12 @@ package it.cnr.iit.epas;
  */
 public enum ActionMenuItem {
 	stampings,
+	personList,
 	yearlyAbsences,
 	absences,
 	vacations,
 	competences,
 	changePassword,
 	manageWorkingTime,
-	confParameters
+	confParameters	
 }

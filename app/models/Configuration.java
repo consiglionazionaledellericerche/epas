@@ -38,19 +38,19 @@ public class Configuration extends Model{
 	 * Data di inizio uso di questo programma gg/mm/aaaa
 	 */
 	@Column(name = "init_use_program")
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
-	public LocalDate initUseProgram;
+	//@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	public Date initUseProgram;
 	
 	/**
 	 * date di inizio e fine validità della configurazione
 	 */
 	@Column(name = "begin_date")
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
-	public LocalDate beginDate;
+	//@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	public Date beginDate;
 	
 	@Column(name = "end_date")
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
-	public LocalDate endDate;
+	//@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	public Date endDate;
 		
 	/**
 	 * Nome dell'Istituto
@@ -80,19 +80,23 @@ public class Configuration extends Model{
 	/**
 	 * User per gestione attestato presenza dell'amministrazione centrale
 	 */
+	@Column(name="user_to_presence")
 	public String userToPresence;
 	
 	/**
 	 * Password per gestione attestato presenza dell'amministrazione centrale
 	 */	
+	@Column(name="password_to_presence")
 	public String passwordToPresence;
 	
 	/**
 	 * i prossimi due campi sono il mese e il giorno del santo patrono...per adesso usiamo questa configurazione che è uguale alla 
 	 * precedente per considerare il santo patrono. Poi si vedrà se esistono possibili varianti
 	 */
+	@Column(name="month_of_patron")
 	public int monthOfPatron;
 	
+	@Column(name="day_of_patron")
 	public int dayOfPatron;
 	
 	/**
@@ -282,14 +286,14 @@ public class Configuration extends Model{
 	public List<WebStampingAddress> webStampingAddress;
 	
 	
-	public static Configuration getConfiguration(LocalDate date){
+	public static Configuration getConfiguration(Date date){
 		
 		return Configuration.find("Select conf from Configuration conf where conf.beginDate <= ? and conf.endDate >= ?", date, date).first();
 	}
 	
 	public static Configuration getCurrentConfiguration(){
 		//TODO: metterla nella cache
-		return getConfiguration(new LocalDate());
+		return getConfiguration(new Date());
 	}
 	
 }

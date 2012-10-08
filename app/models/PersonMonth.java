@@ -11,6 +11,7 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Query;
@@ -49,7 +50,7 @@ public class PersonMonth extends Model {
 	 * Minuti derivanti dalla somma dei progressivi giornalieri del mese 
 	 */
 	@Column
-	public Integer progressiveAtEndOfMonthInMinutes;
+	public Integer progressiveAtEndOfMonthInMinutes = 0;
 
 	/**
 	 * Totale residuo minuti alla fine del mese
@@ -72,17 +73,17 @@ public class PersonMonth extends Model {
 	 *  straordinari (notturni, diurni, etc)  
 	 */
 	@Column(name = "total_remaining_minutes")
-	public Integer totalRemainingMinutes;
+	public Integer totalRemainingMinutes = 0;
 
 	/**
 	 * Minuti di tempo residuo dell'anno passato utilizzati questo
 	 * mese (come riposo compensativo o come ore in negativo)
 	 */
 	@Column(name = "remaining_minute_past_year_taken")
-	public Integer remainingMinutesPastYearTaken;
+	public Integer remainingMinutesPastYearTaken = 0;
 
 	@Column(name = "compensatory_rest_in_minutes")
-	public Integer compensatoryRestInMinutes;
+	public Integer compensatoryRestInMinutes = 0;
 
 	@Transient
 	public List<PersonMonth> persons = null;
@@ -177,21 +178,41 @@ public class PersonMonth extends Model {
 		EntityManager em = em();
 		LocalDate begin = new LocalDate(year, month, 1);
 
-		Query q1 = em.createNativeQuery("select count(*) from stampings as st where st.stamp_type_id in (:in1,:in2) and st.person_id = :per "+
-				"and st.date between :beg and :end group by cast(date as Date) order by count(*) desc")
-				.setParameter("in1", 1L)
-				.setParameter("in2", 4L)
-				.setParameter("per", person.id)
-				.setParameter("beg", begin.toDate())
-				.setParameter("end", begin.dayOfMonth().withMaximumValue().toDate())
-				.setMaxResults(1);
-
-		BigInteger exitStamp = (BigInteger)q1.getSingleResult();
-
-
-		q1.setParameter("in1", 2L).setParameter("in2", 3L);
-		BigInteger inStamp = (BigInteger)q1.getSingleResult();
-		return Math.max(exitStamp.longValue(),inStamp.longValue());
+		List<PersonDay> personDayList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+				person, begin, begin.dayOfMonth().withMaximumValue()).fetch();
+		int maxExitStamp = 0;
+		int maxInStamp = 0;
+		for(PersonDay pd : personDayList){
+			int localMaxExitStamp = 0;
+			int localMaxInStamp = 0;
+			for(Stamping st :pd.stampings){
+				if(st.stampType == StampType.findById(1L) || st.stampType == StampType.findById(4L))
+					localMaxExitStamp ++;
+				if(st.stampType == StampType.findById(2L) || st.stampType == StampType.findById(3L))
+					localMaxInStamp ++;
+			}
+			if(localMaxExitStamp > maxExitStamp)
+				maxExitStamp = localMaxExitStamp;			
+			if(localMaxInStamp > maxInStamp)
+				maxInStamp = localMaxInStamp;
+		}
+		return Math.max(maxExitStamp, maxInStamp);
+//		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", params)
+//		Query q1 = em.createNativeQuery("select count(*) from stampings as st where st.stamp_type_id in (:in1,:in2) and st.person_id = :per "+
+//				"and st.date between :beg and :end group by cast(date as Date) order by count(*) desc")
+//				.setParameter("in1", 1L)
+//				.setParameter("in2", 4L)
+//				.setParameter("per", person.id)
+//				.setParameter("beg", begin.toDate())
+//				.setParameter("end", begin.dayOfMonth().withMaximumValue().toDate())
+//				.setMaxResults(1);
+//
+//		BigInteger exitStamp = (BigInteger)q1.getSingleResult();
+//
+//
+//		q1.setParameter("in1", 2L).setParameter("in2", 3L);
+//		BigInteger inStamp = (BigInteger)q1.getSingleResult();
+//		return Math.max(exitStamp.longValue(),inStamp.longValue());
 	}
 
 
@@ -282,6 +303,8 @@ public class PersonMonth extends Model {
 		Logger.trace("%s compensatoryRestInMinutes = %s", toString(), compensatoryRestInMinutes);
 		
 		//TODO: aggiungere eventuali riposi compensativi derivanti da inizializzazioni 
+		InitializationAbsence initAbsence = new InitializationAbsence();
+		int recoveryDays = initAbsence.recoveryDays;
 
 
 		PersonMonth previousPersonMonth = PersonMonth.find("byPersonAndYearAndMonth", person, startOfMonth.minusMonths(1).getYear(), startOfMonth.minusMonths(1).getMonthOfYear()).first();
@@ -294,7 +317,8 @@ public class PersonMonth extends Model {
 			 * si vanno a guardare i residui recuperati dall'anno precedente e si controlla che esista per quella persona sia l'initTime che
 			 * il campo dei minuti residui valorizzato. In tal caso vengono aggiunti al totalRemainingMinutes
 			 */
-			InitializationTime initTime = InitializationTime.find("byPersonAndYear", person, year-1).first();
+			InitializationTime initTime = InitializationTime.find("Select initTime from InitializationTime initTime where initTime.person = ? " +
+					"and initTime.date = ?", person, new LocalDate(year-1,12,31)).first();
 			if(initTime != null && initTime.residualMinutes > 0)
 				totalRemainingMinutes = initTime.residualMinutes + progressiveAtEndOfMonthInMinutes + totalRemainingMinutesPreviousMonth - compensatoryRestInMinutes;
 			else
@@ -306,6 +330,12 @@ public class PersonMonth extends Model {
 			
 			totalRemainingMinutes = progressiveAtEndOfMonthInMinutes + totalRemainingMinutesPreviousMonth - compensatoryRestInMinutes;
 			
+			/**
+			 * TODO: c'è il caso di persone che hanno terminato il rapporto di lavoro in una certa data e che ritornano a lavoro a causa del 
+			 * badge ancora attivo in date successive alla fine del rapporto di lavoro (vedi Fabrizio Leonardi che va in pensione il 31/12/2010
+			 * e torna a lavoro timbrando col badge 3 volte nel 2011. Secondo la nostra idea di personMonth e personYear questi sono casi 
+			 * spinosi poichè non esistono i personMonth pregressi per fare i calcoli sui residui
+			 */
 			if (py != null) {
 				if(month < config.monthExpireRecoveryDaysFourNine){
 					int totalRemainingMinutePastYearTaken = 0;

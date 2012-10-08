@@ -287,80 +287,6 @@ public class Person extends Model {
 					vacation = VacationCode.find("Select vc from VacationCode vc where vc.description = ?","26+4").first();
 				
 			}
-			//return vacation;
-			/*
-			 * bisogna controllare se nella lista dei contratti ce n'è più di uno e quanti anni questa persona ha accumulato.
-			 * nel caso la durata complessiva dei contratti accumulati sia superiore a 3 anni bisogna ritornare il piano ferie 
-			 * "28+4"
-			 * Si fa la query sullo storico:
-			 */
-//			AuditReader reader = AuditReaderFactory.get(JPA.em());
-//			List<Contract> listaContratti = (List<Contract>) reader.createQuery().forRevisionsOfEntity(Contract.class, true, false)
-//					.addOrder(AuditEntity.property("endContract").asc())
-//					;
-//			
-//			if (listaContratti.size() == 0) {
-//				return null;
-//			}
-//			
-//			if(listaContratti.size()>1){
-//				int diffYear = 0;
-//				int diffMonth = 0;
-//				int diffDay = 0;
-//				for(Contract c : listaContratti){
-//					if(c != null || (c.beginContract!=null && c.endContract!=null)){
-//						/**
-//						 * TODO: cambiare la tipologia di data di inizio e fine contratto da date a localdate
-//						 */
-//						diffYear = diffYear + (c.endContract.getYear()-c.beginContract.getYear());
-//						diffMonth = diffMonth + (c.endContract.getMonthOfYear()-c.beginContract.getMonthOfYear());
-//						diffDay = diffDay + (c.endContract.getDayOfMonth()-c.beginContract.getDayOfMonth());
-//					}
-//											
-//				}
-//				if(diffYear > 2 || (diffYear == 2 && diffMonth > 12)){
-//					vacation = new VacationCode();
-//					vacation.description = "28+4";
-//				}
-//			}
-//			else{
-//				vacation = VacationCode.find("Select vac from VacationCode vac, VacationPeriod per where per.person = ?" +
-//						" and per.vacationCode = vac order by per.beginFrom", this).first();
-//			}
-//		}
-//			
-//		/*
-//		 * prendo il primo elemento della lista che ho ordinato nella query che contiene il contratto più recente. Controllo che sia
-//		 * diverso da null e, in tal caso, guardo la durata: se è maggiore di 3 anni rispetto alla data odierna ritorno un nuovo 
-//		 * VacationCode con descrizione "28+4"
-//		 */
-//		//Contract con = listaContratti.get(0);
-//		Contract con = this.contract;
-//		if(con != null){
-//			LocalDate beginContract = new LocalDate(con.beginContract);
-//			LocalDate endContract = new LocalDate(con.endContract);
-//			if(endContract == null && beginContract != null){
-//				/*
-//				 * il contratto è a tempo indeterminato, controllo quindi se la data odierna è maggiore o no di 3 anni rispetto 
-//				 * all'inizio di questo contratto
-//				 */
-//				int differenzaAnni = now.getYear() - beginContract.getYear();
-//				int differenzaMesi = now.getMonthOfYear() - beginContract.getMonthOfYear();
-//				int differenzaGiorni = now.getDayOfMonth() - beginContract.getDayOfMonth();
-//				if(differenzaAnni >= 3 && differenzaMesi > 11 && differenzaGiorni >=0){
-//					vacation = new VacationCode();
-//					vacation.description = "28+4";
-//					
-//				}
-//				else{
-//					vacation = VacationCode.find("Select vac from VacationCode vac, VacationPeriod per where per.person = ?" +
-//							" and per.vacationCode = vac order by per.beginFrom", this).first();
-//				}
-//			}
-//			
-//			
-//		}
-		
 		
 		}
 		return vacation;
@@ -382,9 +308,8 @@ public class Person extends Model {
 	 */
 	public Contract getContract(LocalDate date){
 		
-		Contract contract = Contract.find("Select con from Contract con where con.person = ? " +
-				"and con.beginContract <= ? and (con.expireContract > ? or con.expireContract is null ) " +
-				"and (con.endContract is null or con.endContract > ?", this, date, date, date).first();
+		Contract contract = Contract.find("Select con from Contract con where con.person = ? and con.beginContract <= ? and " +
+				"(con.expireContract > ? or con.expireContract is null ) or (con.endContract is null or con.endContract > ?)",this, date, date, date).first();
 		
 		return contract;
 		

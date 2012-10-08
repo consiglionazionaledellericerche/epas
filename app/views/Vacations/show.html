@@ -4,30 +4,9 @@
 
 <h2 id="titoloSituazioneFerie">Situazione ferie ${yearRecap.year}</h2>
 
-<div id="logout">
-#{form @Application.logout()}
-	
-    	<input type="submit" value="Account logout" />
-     
+#{logoutForm /}
 
-#{/form}
-</div>
-
-<div id="chooseView">
-#{form @SwitchTemplate.dispatch()}
-
-#{select 'menuItem', value:menuItem}
-	#{option 'yearlyAbsences'}Assenze Annuali#{/option}
-	#{option 'absences'}Assenze Mensili#{/option}
-	#{option 'stampings'}Timbrature#{/option}
-	#{option 'vacations'}Ferie#{/option}	
-	#{option 'competences'}Competenze e Straordinari#{/option}
-#{/select}
-    	<input type="submit" value="go!" />
-     
-
-#{/form}
-</div>
+#{functionalMenuForm mainMenu: mainMenu /}
 
 <div align="left">
 #{form @Vacations.show()}
@@ -40,7 +19,7 @@
 
 	
 		<input type="submit" value="Submit">
-#{/form}
+
 
 <table id="ferie">
 	<tr>
@@ -98,3 +77,4 @@
 
 
 </div>
+#{/form}

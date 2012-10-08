@@ -2,33 +2,12 @@
 
 <h2 id="titoloGestionePersonale">Gestione dati del personale per rilevazione presenze</h2><!-- Da aggiungere come entry nel file main.css dove dovrò sistemare le caratteristiche della tabella  -->
 
-<div id="logout">
-#{form @Application.logout()}
-	
-    	<input type="submit" value="Account logout" />
-     
+#{logoutForm /}
 
-#{/form}
-</div>
+#{functionalMenuForm mainMenu: mainMenu /}
 
-<div id="chooseView">
-#{form @SwitchTemplate.dispatch()}
-#{select 'menuItem', value:menuItem, id:'view'}
-	#{option 'yearlyAbsences'}Assenze Annuali#{/option}
-	#{option 'absences'}Assenze Mensili#{/option}
-	#{option 'stampings'}Timbrature#{/option}
-	#{option 'vacations'}Ferie#{/option}
-	#{option 'competences'}Competenze e Straordinari#{/option}
-	#{option 'changePassword'}Cambia password#{/option}
-	#{option 'manageWorkingTime'}Orari di lavoro#{/option}	
-#{/select}
-    	<input type="submit" value="go!" />
-     
 
-#{/form}
-</div>
-
-<p><a href="form.html">Inserisci una nuova persona</a></p>
+<p><a href="@{Persons.form}">Inserisci una nuova persona</a></p>
 
 <p>Personale esistente</p>
 

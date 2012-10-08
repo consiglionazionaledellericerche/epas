@@ -26,8 +26,13 @@ public class PersonUtility {
 	public static int getResidual(Person person, LocalDate date){
 		int residual = 0;
 		if(person.qualification.qualification == 1 || person.qualification.qualification == 2 || person.qualification.qualification == 3){
-			if(person.getCurrentContract().beginContract.isAfter(date)){
-				
+			if(person.getCurrentContract().beginContract != null && person.getCurrentContract().beginContract.isAfter(date)){
+				residual = 0;
+			}
+			else{
+				PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?",
+						person, date.getMonthOfYear(), date.getYear()).first();
+				residual = pm.totalRemainingMinutes;
 			}
 				
 		}
