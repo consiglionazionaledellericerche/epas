@@ -26,6 +26,7 @@ import org.joda.time.LocalDate;
 
 import play.Logger;
 import play.data.validation.Required;
+import play.data.validation.Valid;
 import play.db.jpa.Model;
 
 /**
@@ -181,7 +182,7 @@ public class MonthRecap extends Model {
 	}
 
 
-
+	
 
 
 	/**
@@ -394,10 +395,11 @@ public class MonthRecap extends Model {
 	 * 
 	 * @return il numero di giorni di indennità di reperibilità feriale per quella persona in quel mese di quell'anno
 	 */
-	public int weekDayAvailability(int year, int month){
+	public int weekDayAvailability(@Valid int year, @Valid int month){
 		int weekDayAvailability = 0;
+		CompetenceCode cmpCode = CompetenceCode.find("Select cmpCode from CompetenceCode cmpCode where cmpCode.description = ?", "207").first();
 		Competence competence = Competence.find("Select comp from Competence comp where comp.person = ? and " +
-				"comp.year = ? and comp.month = ? and comp.code = ?", person, year, month, "207").first();
+				"comp.year = ? and comp.month = ? and comp.competenceCode = ?", person, year, month, cmpCode).first();
 		if(competence != null)
 			weekDayAvailability = competence.value;
 		else

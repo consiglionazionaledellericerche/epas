@@ -8,7 +8,7 @@
 	%{ } }%
 </h2>
 
-#{form @save()}
+#{form @Persons.save()}
 
 	<input type="hidden" name="person.id"  value="${person.id}" />
 	
@@ -61,6 +61,6 @@
 
 #{/form}
 
-#{form @discard()}
+#{form @Persons.discard()}
 	<input type=reset value="Annulla">
 #{/form}

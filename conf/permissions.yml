@@ -19,10 +19,13 @@ Permission(insertAndUpdateAbsence):
 Permission(insertAndUpdateConfiguration):
     description: insertAndUpdateConfiguration
 
+Permission(insertAndUpdatePassword):
+    description: insertAndUpdatePassword
+
 Person(admin):
     username: admin
     name: Admin
     surname: Admin
     # password = orologio
     password: f5e852552deb0ff9a3899938e77cccde
-    permissions: [viewPersonList, deletePerson, insertAndUpdateStamping, insertAndUpdateWorkingTime, insertAndUpdateAbsence, insertAndUpdateConfiguration]
+    permissions: [viewPersonList, deletePerson, insertAndUpdateStamping, insertAndUpdateWorkingTime, insertAndUpdateAbsence, insertAndUpdateConfiguration, insertAndUpdatePassword]

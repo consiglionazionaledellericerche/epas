@@ -2,7 +2,7 @@
 
 <h2 id="nuovoOrario">Inserimento dati per nuovo tipo di orario</h2>
 
-#{form @save()}
+#{form @WorkingTimes.save()}
 <p>Nome nuovo tipo di orario <input name="nuovoOrario" type="text" value="${wtt.description}" size="40" maxlength="200" /></p>
 
 <table>
@@ -17,44 +17,44 @@
 		<th>Domenica</th>
 	</tr>
 	<tr>
-		<td>Tempo di lavoro giornaliero</td>
-		<td><input name="tempoLavoro" type="text" value="${wttd.workingTime}" size="40" maxlength="200" /></td>
-		<td><input name="tempoLavoro" type="text" value="${wttd.workingTime}" size="40" maxlength="200" /></td>
-		<td><input name="tempoLavoro" type="text" value="${wttd.workingTime}" size="40" maxlength="200" /></td>
-		<td><input name="tempoLavoro" type="text" value="${wttd.workingTime}" size="40" maxlength="200" /></td>
-		<td><input name="tempoLavoro" type="text" value="${wttd.workingTime}" size="40" maxlength="200" /></td>
-		<td><input name="tempoLavoro" type="text" value="${wttd.workingTime}" size="40" maxlength="200" /></td>
-		<td><input name="tempoLavoro" type="text" value="${wttd.workingTime}" size="40" maxlength="200" /></td>
+		<td>Tempo di lavoro giornaliero (in minuti)</td>
+		<td><input name="tempoLavoro" type="text" value="${wttd.get(0).workingTime}" size="10" maxlength="50" /></td>
+		<td><input name="tempoLavoro" type="text" value="${wttd.get(1).workingTime}" size="10" maxlength="50" /></td>
+		<td><input name="tempoLavoro" type="text" value="${wttd.get(2).workingTime}" size="10" maxlength="50" /></td>
+		<td><input name="tempoLavoro" type="text" value="${wttd.get(3).workingTime}" size="10" maxlength="50" /></td>
+		<td><input name="tempoLavoro" type="text" value="${wttd.get(4).workingTime}" size="10" maxlength="50" /></td>
+		<td><input name="tempoLavoro" type="text" value="${wttd.get(5).workingTime}" size="10" maxlength="50" /></td>
+		<td><input name="tempoLavoro" type="text" value="${wttd.get(6).workingTime}" size="10" maxlength="50" /></td>
 	</tr>
 		<tr>
-		<td>Tempo di lavoro minimo per diritto a intervallo pranzo</td>
-		<td><input name="tempoMinimoPranzo" type="text" value="${wttd.mealTicketTime}" size="40" maxlength="200" /></td>
-		<td><input name="tempoMinimoPranzo" type="text" value="${wttd.mealTicketTime}" size="40" maxlength="200" /></td>
-		<td><input name="tempoMinimoPranzo" type="text" value="${wttd.mealTicketTime}" size="40" maxlength="200" /></td>
-		<td><input name="tempoMinimoPranzo" type="text" value="${wttd.mealTicketTime}" size="40" maxlength="200" /></td>
-		<td><input name="tempoMinimoPranzo" type="text" value="${wttd.mealTicketTime}" size="40" maxlength="200" /></td>
-		<td><input name="tempoMinimoPranzo" type="text" value="${wttd.mealTicketTime}" size="40" maxlength="200" /></td>
-		<td><input name="tempoMinimoPranzo" type="text" value="${wttd.mealTicketTime}" size="40" maxlength="200" /></td>
+		<td>Tempo di lavoro minimo per diritto a intervallo pranzo (in minuti)</td>
+		<td><input name="tempoMinimoPranzo" type="text" value="${wttd.get(0).mealTicketTime}" size="10" maxlength="50" /></td>
+		<td><input name="tempoMinimoPranzo" type="text" value="${wttd.get(1).mealTicketTime}" size="10" maxlength="50" /></td>
+		<td><input name="tempoMinimoPranzo" type="text" value="${wttd.get(2).mealTicketTime}" size="10" maxlength="50" /></td>
+		<td><input name="tempoMinimoPranzo" type="text" value="${wttd.get(3).mealTicketTime}" size="10" maxlength="50" /></td>
+		<td><input name="tempoMinimoPranzo" type="text" value="${wttd.get(4).mealTicketTime}" size="10" maxlength="50" /></td>
+		<td><input name="tempoMinimoPranzo" type="text" value="${wttd.get(5).mealTicketTime}" size="10" maxlength="50" /></td>
+		<td><input name="tempoMinimoPranzo" type="text" value="${wttd.get(6).mealTicketTime}" size="10" maxlength="50" /></td>
 	</tr>
 		<tr>
-		<td>Tempo minimo intervallo pranzo</td>
-		<td><input name="tempoPerPranzo" type="text" value="${wttd.workingTime}" size="40" maxlength="200" /></td>
-		<td><input name="tempoPerPranzo" type="text" value="${wttd.workingTime}" size="40" maxlength="200" /></td>
-		<td><input name="tempoPerPranzo" type="text" value="${wttd.workingTime}" size="40" maxlength="200" /></td>
-		<td><input name="tempoPerPranzo" type="text" value="${wttd.workingTime}" size="40" maxlength="200" /></td>
-		<td><input name="tempoPerPranzo" type="text" value="${wttd.workingTime}" size="40" maxlength="200" /></td>
-		<td><input name="tempoPerPranzo" type="text" value="${wttd.workingTime}" size="40" maxlength="200" /></td>
-		<td><input name="tempoPerPranzo" type="text" value="${wttd.workingTime}" size="40" maxlength="200" /></td>
+		<td>Tempo minimo intervallo pranzo (in minuti)</td>
+		<td><input name="tempoPerPranzo" type="text" value="${wttd.get(0).breakTicketTime}" size="10" maxlength="50" /></td>
+		<td><input name="tempoPerPranzo" type="text" value="${wttd.get(1).breakTicketTime}" size="10" maxlength="50" /></td>
+		<td><input name="tempoPerPranzo" type="text" value="${wttd.get(2).breakTicketTime}" size="10" maxlength="50" /></td>
+		<td><input name="tempoPerPranzo" type="text" value="${wttd.get(3).breakTicketTime}" size="10" maxlength="50" /></td>
+		<td><input name="tempoPerPranzo" type="text" value="${wttd.get(4).breakTicketTime}" size="10" maxlength="50" /></td>
+		<td><input name="tempoPerPranzo" type="text" value="${wttd.get(5).breakTicketTime}" size="10" maxlength="50" /></td>
+		<td><input name="tempoPerPranzo" type="text" value="${wttd.get(6).breakTicketTime}" size="10" maxlength="50" /></td>
 	</tr>
 		<tr>
 		<td>Giorno festivo</td>
-		<td><input name="festivo" type="radio" value="${wttd.holiday}" size="40" maxlength="200" /></td>
-		<td><input name="festivo" type="radio" value="${wttd.holiday}" size="40" maxlength="200" /></td>
-		<td><input name="festivo" type="radio" value="${wttd.holiday}" size="40" maxlength="200" /></td>
-		<td><input name="festivo" type="radio" value="${wttd.holiday}" size="40" maxlength="200" /></td>
-		<td><input name="festivo" type="radio" value="${wttd.holiday}" size="40" maxlength="200" /></td>
-		<td><input name="festivo" type="radio" value="${wttd.holiday}" size="40" maxlength="200" /></td>
-		<td><input name="festivo" type="radio" value="${wttd.holiday}" size="40" maxlength="200" /></td>
+		<td><input name="festivo" type="radio" value="${wttd.get(0).holiday}" size="10" maxlength="50" /></td>
+		<td><input name="festivo" type="radio" value="${wttd.get(1).holiday}" size="10" maxlength="50" /></td>
+		<td><input name="festivo" type="radio" value="${wttd.get(2).holiday}" size="10" maxlength="50" /></td>
+		<td><input name="festivo" type="radio" value="${wttd.get(3).holiday}" size="40" maxlength="50" /></td>
+		<td><input name="festivo" type="radio" value="${wttd.get(4).holiday}" size="10" maxlength="50" /></td>
+		<td><input name="festivo" type="radio" value="${wttd.get(5).holiday}" size="10" maxlength="50" /></td>
+		<td><input name="festivo" type="radio" value="${wttd.get(6).holiday}" size="10" maxlength="50" /></td>
 	</tr>
 
 </table>

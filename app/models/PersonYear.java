@@ -10,6 +10,7 @@ import javax.persistence.Table;
 
 import org.hibernate.envers.Audited;
 import org.joda.time.DateTimeConstants;
+import org.joda.time.LocalDate;
 
 import play.db.jpa.Model;
 
@@ -57,5 +58,22 @@ public class PersonYear extends Model{
 //		this.save();
 	}
 	
+	
+	/**
+	 * aggiorna le variabili di istanza in funzione dei valori presenti sul db
+	 * non fa il salvataggio dei dati (speculare al refreshPersonMonth
+	 */
+	public void refreshPersonYear(){
+		Configuration config = Configuration.getCurrentConfiguration();
+		LocalDate data = new LocalDate();
+		if(data.getDayOfMonth() == 1 && data.getMonthOfYear() == DateTimeConstants.JANUARY){
+			List<PersonMonth> personMonthList = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ?",
+					person, year).fetch();
+			for(PersonMonth pm : personMonthList){
+				remainingMinutes = remainingMinutes + pm.totalRemainingMinutes;
+			}
+		}
+		save();
+	}
 	
 }
