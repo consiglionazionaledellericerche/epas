@@ -53,13 +53,15 @@ GET		/persons								Persons.form
 GET		/manageWorkingTime						WorkingTimes.manageWorkingTime
 GET		/insertWorkingTime.html					WorkingTimes.insertWorkingTime
 POST	/insertWorkingTime						WorkingTimes.save
+POST	/updateWorkingTime						WorkingTimes.updateWorkingTime
+GET 	/workingtimes/edit/{workingTimeId}		WorkingTimes.edit
 
 GET		/vacationsAdmin							VacationsAdmin.manageVacationCode
 POST	/insertVacation							VacationsAdmin.insertVacationCode
 
 # Gestione password
-GET		/changePassword							Persons.changePassword
-POST	/changePassword							Persons.savePassword
+GET		/persons/{personId}/changePassword		Persons.changePassword
+POST	/persons/changePassword					Persons.savePassword
 
 GET		/stampings/create						Stampings.create
 POST	/stampings/insert/{personId}/{year}/{month}/{day}	Stampings.insert

@@ -308,6 +308,9 @@ public class Person extends Model {
 	 */
 	public Contract getContract(LocalDate date){
 		
+		Logger.debug("La data passata come parametro è : %s", date);
+		
+		
 		Contract contract = Contract.find("Select con from Contract con where con.person = ? and con.beginContract <= ? and " +
 				"(con.expireContract > ? or con.expireContract is null ) or (con.endContract is null or con.endContract > ?)",this, date, date, date).first();
 		

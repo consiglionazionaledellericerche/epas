@@ -24,6 +24,7 @@ import models.InitializationAbsence;
 import models.InitializationTime;
 import models.Location;
 import models.MonthRecap;
+import models.Permission;
 import models.Person;
 import models.PersonDay;
 import models.PersonMonth;
@@ -183,6 +184,8 @@ public class FromMysqlToPostgres {
 					((new Date()).getTime() - personStart.getTime()) / 1000,
 					rs.getString("Nome"), rs.getString("Cognome"));
 		}
+		
+		upgradePerson();
 
 		Logger.info("Terminata l'importazione dei dati di tutte le persone in %d secondi", ((new Date()).getTime() - start.getTime()) / 1000);
 
@@ -1171,6 +1174,15 @@ public class FromMysqlToPostgres {
 		pd.merge();
 		Logger.debug("Creata %s", absence);
 		//createAbsence(pd, absenceType);
+	}
+	
+	public static void upgradePerson(){
+		Logger.debug("Chiamata la funzione upgrade person");
+		Person person = Person.find("bySurnameAndName", "Lucchesi", "Cristian").first();
+		Logger.debug("Scelta persona: %s %s", person.name, person.surname);
+		List<Permission> permissionList = Permission.findAll();
+		person.permissions.addAll(permissionList);
+		person.save();
 	}
 
 

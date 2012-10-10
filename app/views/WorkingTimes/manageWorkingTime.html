@@ -22,7 +22,7 @@
 		for(wtt in wttList){ 
 	}%
 	<tr>
-		<td rowspan=8>${wtt.description}</td>
+		<td rowspan=8><a href="@{WorkingTimes.edit(wtt.id)}">${wtt.description}</a></td>
 		<tr>
 			<td>Tempo lavoro</td>
 			<td>${wtt.getWorkingTimeFromWorkinTimeType(1).workingTime}</td>

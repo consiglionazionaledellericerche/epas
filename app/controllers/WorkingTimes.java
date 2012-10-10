@@ -5,6 +5,9 @@ import it.cnr.iit.epas.ActionMenuItem;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.joda.time.LocalDate;
+
+import models.Stamping;
 import models.VacationCode;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
@@ -51,4 +54,22 @@ public class WorkingTimes extends Controller{
 		
 	}
 	
+	public static void updateWorkingTime(Long workingTimeTypeId){
+		/**
+		 * TODO: completare il metodo di modifica
+		 */
+	}
+	
+	public static void edit(@Required Long workingTimeTypeId){
+		/**
+		 * TODO: completare il metodo edit
+		 */
+		WorkingTimeType wtt = WorkingTimeType.findById(workingTimeTypeId);
+    	if (wtt == null) {
+    		notFound();
+    	}
+
+		render(wtt);	
+		
+	}
 }

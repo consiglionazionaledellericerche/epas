@@ -104,6 +104,22 @@ public class WorkingTimeType extends Model {
 		return minTimeForLunch;
 	}
 	
+	/**
+	 * 
+	 * @param dayOfWeek
+	 * @param wtt
+	 * @return il numero di minuti di pausa pranzo per quel giorno per quell'orario
+	 */
+	public int getBreakTime(int dayOfWeek, WorkingTimeType wtt){
+		int breakTime = 0;
+		WorkingTimeTypeDay wttd = WorkingTimeTypeDay.find("Select wttd from WorkingTimeTypeDay wttd where wttd.workingTimeType = ?" +
+				"and wttd.dayOfWeek = ?", wtt, dayOfWeek).first();
+		breakTime = wttd.breakTicketTime;
+		
+		return breakTime;
+	}
+	
+	
 	@Override
 	public String toString() {
 		return String.format("WorkingTimeType[%d] - description = %s, shift = %s", 

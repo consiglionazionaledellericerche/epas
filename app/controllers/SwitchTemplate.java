@@ -81,7 +81,7 @@ public class SwitchTemplate extends Controller{
 			Competences.show();
 			break;
 		case changePassword:
-			Persons.changePassword(person);
+			Persons.changePassword(person.id);
 			break;
 		case manageWorkingTime:
 			WorkingTimes.manageWorkingTime();

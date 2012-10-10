@@ -38,5 +38,13 @@ public class Administration extends Controller {
 		long n = pm.getMaximumCoupleOfStampings();
 		render(n);
 	}
+	
+	/**
+	 * TODO: controllare il corretto funzionamento magari tramite log
+	 */
+	public static void upgradePerson(){
+		FromMysqlToPostgres.upgradePerson();
+		renderText("Modificati i permessi per l'utente");
+	}
     
 }

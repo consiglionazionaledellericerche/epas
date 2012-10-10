@@ -19,7 +19,7 @@ import play.data.validation.Valid;
 import play.mvc.Controller;
 import play.mvc.With;
 
-
+@With( {Secure.class, NavigationMenu.class} )
 public class Persons extends Controller {
 
 	public static final String USERNAME_SESSION_KEY = "username";
@@ -123,18 +123,38 @@ public class Persons extends Controller {
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PASSWORD)
-	public static void changePassword(Person person){
+	public static void changePassword(Long personId){
 //		String username = session.get(USERNAME_SESSION_KEY);
 //		
 //		Person p = Person.find("byUsername", username).first();
+		Person person = Person.findById(personId);
 		render(person);
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PASSWORD)
-	public static void savePassword(Person person){
-		Person p = Person.findById(person.id);
-		p.password = params.get("nuovaPassword");
-		p.save();
+	public static void savePassword(){
+		Long personId = params.get("personId", Long.class);
+		
+		Person p = Person.findById(personId);
+		String nuovaPassword = params.get("nuovaPassword");
+		String confermaPassword = params.get("confermaPassword");
+		if(nuovaPassword.equals(confermaPassword)){
+			p.password = nuovaPassword;
+			p.save();
+			Logger.debug("Salvata la nuova password per %s %s", p.surname, p.name);
+			flash.success("Aggiornata la password per %s %s", p.surname, p.name);
+			Application.indexAdmin();
+		}
+		else{
+			Logger.debug("Errore, password diverse per %s %s", p.surname, p.name);
+			//params.flash();
+			flash.error("Le due password non sono coincidenti!!!");
+			
+			changePassword(personId);
+			render("@changePassword");
+		}
+			
+		
 	}
 	
 
