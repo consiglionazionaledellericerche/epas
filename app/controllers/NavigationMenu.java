@@ -29,7 +29,7 @@ public class NavigationMenu extends Controller {
 		
 		int year = params.get("year") != null ? params.get("year", Integer.class) : now.getYear(); 
 		int month = params.get("month") != null ? params.get("month", Integer.class) : now.getMonthOfYear();
-		ActionMenuItem action = params.get("action") != null ? ActionMenuItem.valueOf(params.get("action")) : ActionMenuItem.stampings;
+		ActionMenuItem action = params.get("action") != null && !params.get("action").equals("") ? ActionMenuItem.valueOf(params.get("action")) : ActionMenuItem.stampings;
 		Long personId =  params.get("personId") != null ? params.get("personId", Long.class) : null;
 		
 		List<Person> persons = (List<Person>) Cache.get("persons");
