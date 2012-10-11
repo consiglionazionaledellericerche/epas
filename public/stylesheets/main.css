@@ -207,6 +207,10 @@ table#listaPersone {
 	margin: 4em 0em 6em;
 }
 
+table#listaAmministratori {
+	margin: 4em 0em 6em;
+}
+
 .capitalized {
 	text-transform: capitalize;	
 }
@@ -246,10 +250,12 @@ h2#titoloGestionePersonale {text-align: center}
 h2#titoloModificaPersonale {text-align: center}
 h2#titoloCambioPassword {text-align: center}
 h2#titoloGestioneOrariLavoro {text-align: center}
+h2#nuovoOrario {text-align: center}
 h2#titoloGestioneTipiFerie {text-align: center}
 h3#titoloSituazionePresenzeMensili {text-align: center}
 h2#titoloConfigurazioneParametri {text-align: center}
 h3#titoloGestioneParametri {margin: 2em 0em 2em; text-align: center}
+h3#gestioneUtenteAmministrativo {margin: 2em 0em 2em; text-align: center}
 fieldset#timbraturaWeb {height: 12em}
 fieldset#stampaPdf {height: 12em}
 textarea#timbraturaWeb {margin: 0em 3em 0em}

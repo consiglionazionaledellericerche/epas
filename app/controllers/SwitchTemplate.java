@@ -92,6 +92,9 @@ public class SwitchTemplate extends Controller{
 		case personList:
 			Persons.list();
 			break;
+		case administrator:
+			Administrators.list();
+			break;
 		default:
 			break;
 		}

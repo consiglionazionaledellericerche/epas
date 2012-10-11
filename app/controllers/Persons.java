@@ -32,7 +32,10 @@ public class Persons extends Controller {
 
 	@Check(Security.VIEW_PERSON_LIST)
 	public static void list(){
-		List<Person> personList = Person.findAll();
+		List<Person> personList = Person.find("Select p from Person p where p.name <> ?", "Admin").fetch();
+		Logger.debug("La lista delle persone: %s", personList.toString());
+		//List<Person> personList = Person.findAll();
+		
 		render(personList);
 	}
 

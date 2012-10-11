@@ -1,0 +1,26 @@
+#{extends 'main.html' /}
+
+<h2 id="nuovoAdmin">Inserimento dati per nuovo amministratore</h2>
+
+#{form @Administrators.save()}
+<fieldset>
+	<legend>Dati nuovo amministratore e permessi</legend>
+	<!-- Cambiare con un menu a tendina contenente la lista delle persone al posto dei due campi text per nome e cognome -->
+	<p>Nome: <input type="text" name="" value="" /></p>
+	<p>Cognome: <input type="text" name="" value="" /></p>
+	<p>Può vedere persone: Sì <input type="radio" name="viewPersonList" value=""/> No <input type="radio" name="viewPersonList" value=""/></p>
+	<p>Può inserire e modificare persone: Sì <input type="radio" name="insertAndUpdatePerson" value=""/> No <input type="radio" name="insertAndUpdatePerson" value=""/></p>
+	<p>Può cancellare persone: Sì <input type="radio" name="deletePerson" value=""/> No <input type="radio" name="deletePerson" value=""/></p>
+	<p>Può inserire e modificare timbrature: Sì <input type="radio" name="insertAndUpdateStamping" value=""/> No <input type="radio" name="insertAndUpdateStamping" value=""/></p>
+	<p>Può inserire e moficare password: Sì <input type="radio" name="insertAndUpdatePassword" value=""/> No <input type="radio" name="insertAndUpdatePassword" value=""/></p>
+	<p>Può inserire e modifcare orari di lavoro: Sì <input type="radio" name="insertAndUpdateWorkingTime" value=""/> No <input type="radio" name="insertAndUpdateWorkingTime" value=""/></p>
+	<p>Può inserire e modificare assenze: Sì <input type="radio" name="insertAndUpdateAbsence" value=""/> No <input type="radio" name="insertAndUpdateAbsence" value=""/></p>
+	<p>Può inserire e modificare configurazioni di sistema: Sì <input type="radio" name="insertAndUpdateConfiguration" value=""/> No <input type="radio" name="insertAndUpdateConfiguration" value=""/></p>
+	<p>Può inserire e modificare utenti amministratori: Sì <input type="radio" name="insertAndUpdateAdministrator" value=""/> No <input type="radio" name="insertAndUpdateAdministrator" value=""/></p>
+</fieldset>
+<input type="submit" value="Ok"/>
+#{/form}
+
+#{form @Administrators.discard()}
+<input type="submit" value="Annulla"/>
+#{/form}

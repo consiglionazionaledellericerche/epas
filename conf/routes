@@ -45,11 +45,12 @@ GET     /public/                                staticDir:public
 # Import Secure routes
 #*       /                						module:secure
 
+# Gestione persone
 GET		/personList								Persons.list
 POST	/persons								Persons.save
 GET		/persons								Persons.form
 
-
+# Gestione orari di lavoro
 GET		/manageWorkingTime						WorkingTimes.manageWorkingTime
 GET		/insertWorkingTime.html					WorkingTimes.insertWorkingTime
 POST	/insertWorkingTime						WorkingTimes.save
@@ -63,6 +64,7 @@ POST	/insertVacation							VacationsAdmin.insertVacationCode
 GET		/persons/{personId}/changePassword		Persons.changePassword
 POST	/persons/changePassword					Persons.savePassword
 
+# Gestione timbrature
 GET		/stampings/create						Stampings.create
 POST	/stampings/insert/{personId}/{year}/{month}/{day}	Stampings.insert
 GET		/stampings/edit/{stampingId}			Stampings.edit
@@ -70,6 +72,7 @@ POST	/stampings/update						Stampings.update
 GET		/choosePersonAndDate					Stampings.choosePersonAndDate
 GET		/personStamping							Stampings.personStamping
 
+#Gestione assenze
 GET		/absences/insert/{personId}/{year}/{month}/{day}	Absences.insert
 POST	/absences/create						Absences.create
 
@@ -78,9 +81,18 @@ POST	/absences/update						Absences.update
 
 GET		/absences/absenceCodeList				Absences.absenceCodeList
 
+#Gestione configurazione parametri
 GET		/confParameters							Configurations.show
 POST	/confParameters							Configurations.save
 
+#Gestione utenti amministratori
+GET		/administratorList						Administrators.list
+GET		/insertAdministrator					Administrators.insertAdmin
+POST	/insertAdministrator					Administrators.save
+GET 	/administrators/edit/{adminId}			Administrators.edit
+
+
+#Gestione reperibilità
 GET 	/reperibility/{type}/personList			Reperibility.personList
 
 GET		/reperibility/{type}/find/{<(19|20)\d\d>yearFrom}/{<(0[1-9]|1[012])>monthFrom}/{<(0[1-9]|[12][0-9]|3[01])>dayFrom}/{<(19|20)\d\d>yearTo}/{<(0[1-9]|1[012])>monthTo}/{<(0[1-9]|[12][0-9]|3[01])>dayTo}	Reperibility.find
