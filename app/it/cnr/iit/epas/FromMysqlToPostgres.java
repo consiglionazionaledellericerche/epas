@@ -185,7 +185,7 @@ public class FromMysqlToPostgres {
 					rs.getString("Nome"), rs.getString("Cognome"));
 		}
 		
-		upgradePerson();
+//		upgradePerson();
 
 		Logger.info("Terminata l'importazione dei dati di tutte le persone in %d secondi", ((new Date()).getTime() - start.getTime()) / 1000);
 
@@ -279,7 +279,7 @@ public class FromMysqlToPostgres {
 	}
 
 
-	private static void createLocation(ResultSet rs, Person person) throws SQLException{
+	public static void createLocation(ResultSet rs, Person person) throws SQLException{
 		Logger.debug("Inizio a creare la location per %s", person);
 		Location location = new Location();
 		location.person = person;

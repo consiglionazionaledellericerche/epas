@@ -44,6 +44,7 @@ import org.joda.time.LocalDate;
 
 import controllers.Check;
 import controllers.Secure;
+import controllers.Security;
 
 import play.Logger;
 import play.data.validation.Email;
@@ -265,7 +266,7 @@ public class Person extends Model {
 			
 			int differenzaAnni = contract.expireContract.getYear() - contract.beginContract.getYear();
 
-			if(this.qualification.qualification == 0){
+			if(/*this.qualification.qualification == 0*/this.getQualification() == null){
 				vacation = null;
 			}			
 			else{
@@ -292,6 +293,16 @@ public class Person extends Model {
 		return vacation;
 	}
 	
+	/**
+	 * 
+	 * @return la locazione della persona
+	 */
+	public Location getLocation(){
+		if(this.location != null)
+			return this.location;
+		else
+			return null;
+	}
 	
 	public Set<Permission> getAllPermissions(){
 		Set<Permission> setPermissions = new HashSet<Permission>();
@@ -312,7 +323,7 @@ public class Person extends Model {
 		
 		
 		Contract contract = Contract.find("Select con from Contract con where con.person = ? and con.beginContract <= ? and " +
-				"(con.expireContract > ? or con.expireContract is null ) or (con.endContract is null or con.endContract > ?)",this, date, date, date).first();
+				"(con.expireContract > ? or con.expireContract is null )",this, date, date).first();
 		
 		return contract;
 		
@@ -325,9 +336,97 @@ public class Person extends Model {
 		return getContract(LocalDate.now());
 	}
 	
+	/**
+	 * 
+	 * @return la qualifica della persona
+	 */
+	public Qualification getQualification(){
+		if(this.qualification != null)
+			return this.qualification;
+		else
+			return null;
+	}
+	
+	
 	@Override
 	public String toString() {
 		return String.format("Person[%d] - %s %s", id, name, surname);
 	}
 	
+	/**
+	 * Metodi di utilità per verificare se nella lista dei permessi c'è il permesso richiesto. Utile in visualizzazione
+	 * 
+	 */
+	
+	public boolean isViewPersonAvailable(){
+		for(Permission p : this.permissions){
+			if(p.description.equals(Security.VIEW_PERSON_LIST))
+				return true;
+		}
+		return false;
+	}
+	
+	public boolean isInsertAndUpdatePersonAvailable(){
+		for(Permission p : this.permissions){
+			if(p.description.equals(Security.INSERT_AND_UPDATE_PERSON))
+				return true;
+		}
+		return false;
+	}
+	
+	public boolean isInsertAndUpdateAbsenceAvailable(){
+		for(Permission p : this.permissions){
+			if(p.description.equals(Security.INSERT_AND_UPDATE_ABSENCE))
+				return true;
+		}
+		return false;
+	}
+	
+	public boolean isDeletePersonAvailable(){
+		for(Permission p : this.permissions){
+			if(p.description.equals(Security.DELETE_PERSON))
+				return true;
+		}
+		return false;
+	}
+	
+	public boolean isInsertAndUpdateWorkinTimeAvailable(){
+		for(Permission p : this.permissions){
+			if(p.description.equals(Security.INSERT_AND_UPDATE_WORKINGTIME))
+				return true;
+		}
+		return false;
+	}
+	
+	public boolean isInsertAndUpdateStampingAvailable(){
+		for(Permission p : this.permissions){
+			if(p.description.equals(Security.INSERT_AND_UPDATE_STAMPING))
+				return true;
+		}
+		return false;
+	}
+	
+	public boolean isInsertAndUpdatePasswordAvailable(){
+		for(Permission p : this.permissions){
+			if(p.description.equals(Security.INSERT_AND_UPDATE_PASSWORD))
+				return true;
+		}
+		return false;
+	}
+	
+	public boolean isInsertAndUpdateConfigurationAvailable(){
+		for(Permission p : this.permissions){
+			if(p.description.equals(Security.INSERT_AND_UPDATE_CONFIGURATION))
+				return true;
+		}
+		return false;
+	}
+	
+	public boolean isInsertAndUpdateAdministratorAvailable(){
+		for(Permission p : this.permissions){
+			if(p.description.equals(Security.INSERT_AND_UPDATE_ADMINISTRATOR))
+				return true;
+		}
+		return false;
+	}
 }

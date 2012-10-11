@@ -106,10 +106,10 @@
 			
 			%{
 			if(day.getStampings().size()==2 ){
-	         }% <td class="tempoLavoro">${day.isHoliday()==false ? day.convertTimeAtWork(day.timeAtWork()).toCalendarTime() : ''} <strong>${day.timeAtWork()>360 ? day.checkTimeForLunch(day.getStampings()).code : ''}</strong></td>
+	         }% <td class="tempoLavoro">${day.isHoliday()==false ? day.convertTimeAtWork(day.timeAtWork).toCalendarTime() : ''} <strong>${day.timeAtWork>360 ? day.checkTimeForLunch(day.getStampings()).code : ''}</strong></td>
 			%{
 			 }else{
-			 }% <td class="tempoLavoro">${day.isHoliday()==false ? day.convertTimeAtWork(day.timeAtWork()).toCalendarTime() : ''} <strong>${day.getStampings().size()==4 && !day.getStampings().contains(null) && day.timeAtWork()>300
+			 }% <td class="tempoLavoro">${day.isHoliday()==false ? day.convertTimeAtWork(day.timeAtWork).toCalendarTime() : ''} <strong>${day.getStampings().size()==4 && !day.getStampings().contains(null) && day.timeAtWork()>300
 			 && day.checkMinTimeForLunch(day.getStampings())<30 ? day.checkTimeForLunch(day.getStampings()).code : ''}</strong></td>
 			%{
 	         }
@@ -130,9 +130,9 @@
 <p id="spiegazioneTabellaTimbrature">Il numero di buoni mensa usabili per questo mese e': <strong>${monthRecap.numberOfMealTicketToUse()}</strong>, mentre quelli da restituire sono <strong>${monthRecap.numberOfMealTicketToRender()}</strong>. Il numero di giorni lavorativi in sede è di: <strong>${monthRecap.basedWorkingDays()}</strong> </p>
 
 <p>Riepilogo delle ore di lavoro in eccesso/difetto:</p> 
-<p> - Residuo tempo di lavoro dei mesi precedenti: ${personMonth.getResidualFromPastMonth().toHourTime()}</p> 
+<p> - Residuo tempo di lavoro dei mesi precedenti: ${personMonth.getMonthResidual().toHourTime()}</p> 
 <p> - Residuo del mese:  ${personMonth.getMonthResidual().toHourTime()}</p>
-<p> - Giorni di riposo compensativo: ${personMonth.getCompensatoryRest()} per un totale di: -${(personMonth.getCompensatoryRest()*432).toHourTime()} ore</p>
+<p> - Giorni di riposo compensativo: ${personMonth.getCompensatoryRestInMinutes()} per un totale di: -${(personMonth.getCompensatoryRestInMinutes()).toHourTime()} ore</p>
 <p> - Totale residuo a fine mese  <strong>${personMonth.getTotalOfMonth().toHourTime()} ore</strong></p>
 
 

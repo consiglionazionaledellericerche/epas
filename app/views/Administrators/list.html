@@ -1,0 +1,116 @@
+#{extends 'main.html' /}
+
+<h3 id="gestioneUtenteAmministrativo">Gestione user per accesso amministrativo</h3>
+
+#{logoutForm /}
+
+<p><a href="@{Administrators.insertAdmin}">Inserisci un nuovo amministratore</a></p>
+
+<h3>User esistenti</h3>
+
+<table id="listaAmministratori">
+	<tr>
+		<th>Nome</th>
+		<th>Cognome</th>
+		<th>Può vedere persone</th>
+		<th>Può inserire e modificare persone</th>
+		<th>Può cancellare persone</th>
+		<th>Può inserire e modificare timbrature</th>
+		<th>Può inserire e moficare password</th>
+		<th>Può inserire e modifcare orari di lavoro</th>
+		<th>Può inserire e modificare assenze</th>
+		<th>Può inserire e modificare configurazioni di sistema</th>
+		<th>Può inserire e modificare utenti amministratori</th>
+	</tr>
+	%{
+		for(admin in administratorList){ 
+	}%
+	<tr>
+		<td><a href="@{Administrators.edit(admin.id)}">${admin.name}</a></td>
+		<td>${admin.surname}</td>
+		<td>
+		
+		%{ if(admin.isViewPersonAvailable() == true){ }%
+				<input type="checkbox" name="viewPersonList" value ="" checked="checked"/>
+			%{ } else { }%
+				<input type="checkbox" name="viewPersonList" value=""/>
+			%{ } }%		
+		</td>
+		<td>
+		
+		%{ if(admin.isInsertAndUpdatePersonAvailable()==true){ }%
+				<input type="checkbox" name="insertAndUpdatePerson" value ="" checked="checked"/>
+			%{ } else { }%
+				<input type="checkbox" name="insertAndUpdatePerson" value=""/>
+			%{ } }%
+		
+		</td>
+		<td>
+		
+		%{ if(admin.isDeletePersonAvailable()){ }%
+				<input type="checkbox" name="deletePerson" value ="" checked="checked"/>
+			%{ } else { }%
+				<input type="checkbox" name="deletePerson" value=""/>
+			%{ } }%
+		
+		</td>
+		<td>
+		
+		%{ if(admin.isInsertAndUpdateStampingAvailable()){ }%
+				<input type="checkbox" name="insertAndUpdateStamping" value ="" checked="checked"/>
+			%{ } else { }%
+				<input type="checkbox" name="insertAndUpdateStamping" value=""/>
+			%{ } }%
+		
+		</td>
+		<td>
+		
+		%{ if(admin.isInsertAndUpdatePasswordAvailable()){ }%
+				<input type="checkbox" name="insertAndUpdatePassword" value ="" checked="checked"/>
+			%{ } else { }%
+				<input type="checkbox" name="insertAndUpdatePassword" value=""/>
+			%{ } }%
+		
+		</td>
+		<td>
+		
+		%{ if(admin.isInsertAndUpdateWorkinTimeAvailable()){ }%
+				<input type="checkbox" name="insertAndUpdateWorkingTime" value ="" checked="checked"/>
+			%{ } else { }%
+				<input type="checkbox" name="insertAndUpdateWorkingTime" value=""/>
+			%{ } }%
+		
+		</td>
+		<td>
+		
+		%{ if(admin.isInsertAndUpdateAbsenceAvailable()){ }%
+				<input type="checkbox" name="insertAndUpdateAbsence" value ="" checked="checked"/>
+			%{ } else { }%
+				<input type="checkbox" name="insertAndUpdateAbsence" value=""/>
+			%{ } }%
+			
+		</td>
+		<td>
+		
+		%{ if(admin.isInsertAndUpdateConfigurationAvailable()){ }%
+				<input type="checkbox" name="insertAndUpdateConfiguration" value ="" checked="checked"/>
+			%{ } else { }%
+				<input type="checkbox" name="insertAndUpdateConfiguration" value=""/>
+			%{ } }%
+		
+		</td>
+		<td>
+		
+		%{ if(admin.isInsertAndUpdateAdministratorAvailable()){ }%
+				<input type="checkbox" name="insertAndUpdateAdministrator" value ="" checked="checked"/>
+			%{ } else { }%
+				<input type="checkbox" name="insertAndUpdateAdministrator" value=""/>
+			%{ } }%
+			
+		</td>	
+	</tr>
+
+	%{
+		}
+	}%
+</table>
