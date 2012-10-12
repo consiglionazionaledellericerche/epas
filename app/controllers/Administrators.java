@@ -37,17 +37,91 @@ public class Administrators extends Controller {
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_ADMINISTRATOR)
-	public static void save(@Valid @Required Person person, @Valid List<Permission> permissionList) {
+	public static void save(@Valid @Required Long personId) {
 	
 		if(validation.hasErrors()) {
 			if(request.isAjax()) error("Invalid value");
 			render("@list");
 		}
+		List<Permission> permissionList = Permission.findAll();
+		Person person = Person.em().getReference(Person.class, personId);
+		String viewPersonList = params.get("viewPersonList");
+		String insertAndUpdatePerson = params.get("insertAndUpdatePerson");
+		String deletePerson = params.get("deletePerson");
+		String insertAndUpdateStamping = params.get("insertAndUpdateStamping");
+		String insertAndUpdatePassword = params.get("insertAndUpdatePassword");
+		String insertAndUpdateWorkingTime = params.get("insertAndUpdateWorkingTime");
+		String insertAndUpdateAbsence = params.get("insertAndUpdateAbsence");
+		String insertAndUpdateConfiguration = params.get("insertAndUpdateConfiguration");
+		String insertAndUpdateAdministrator = params.get("insertAndUpdateAdministrator");
+		if(viewPersonList.equals("true")){
+			for(Permission p : permissionList){
+				if(p.description.equals("viewPersonList"))
+					person.permissions.add(p);
+			}
+			
+		}
+		if(insertAndUpdatePerson.equals("true")){
+			for(Permission p : permissionList){
+				if(p.description.equals("insertAndUpdatePerson"))
+					person.permissions.add(p);
+			}
+			
+		}
+		if(deletePerson.equals("true")){
+			for(Permission p : permissionList){
+				if(p.description.equals("deletePerson"))
+					person.permissions.add(p);
+			}
+			
+		}	
+		if(insertAndUpdateStamping.equals("true")){
+			for(Permission p : permissionList){
+				if(p.description.equals("insertAndUpdateStamping"))
+					person.permissions.add(p);
+			}
+			
+		}
+		if(insertAndUpdatePassword.equals("true")){
+			for(Permission p : permissionList){
+				if(p.description.equals("insertAndUpdatePassword"))
+					person.permissions.add(p);
+			}
+			
+		}
+		if(insertAndUpdateWorkingTime.equals("true")){
+			for(Permission p : permissionList){
+				if(p.description.equals("insertAndUpdateWorkingTime"))
+					person.permissions.add(p);
+			}
+			
+		}
+		if(insertAndUpdateAbsence.equals("true")){
+			for(Permission p : permissionList){
+				if(p.description.equals("insertAndUpdateAbsence"))
+					person.permissions.add(p);
+			}
+			
+		}
+		if(insertAndUpdateConfiguration.equals("true")){
+			for(Permission p : permissionList){
+				if(p.description.equals("insertAndUpdateConfiguration"))
+					person.permissions.add(p);
+			}
+			
+		}
+		if(insertAndUpdateAdministrator.equals("true")){
+			for(Permission p : permissionList){
+				if(p.description.equals("insertAndUpdateAdministrator"))
+					person.permissions.add(p);
+			}
+			
+		}
 		
-		person.permissions = permissionList;
+		//Logger.warn("viewPersonList= %s", viewPersonList);
+		//person.permissions = permissionList;
 		person.save();
-		flash.success(
-				String.format("Aggiornati permessi per %s %s con successo", person.name, person.surname));
+		flash.success(String.format("Aggiornati permessi per %s %s con successo", person.name, person.surname));
 		Application.indexAdmin();
 		
 	}
@@ -60,9 +134,11 @@ public class Administrators extends Controller {
 	
 	@Check(Security.INSERT_AND_UPDATE_ADMINISTRATOR)
 	public static void insertAdmin(Long id){
+		List<Person> personList = Person.findAll();
 		if(id == null) {
-			render();
+			render(personList);
 		}
+		
 		Person person = Person.findById(id);
 		if(person == null){
 			person = new Person();
@@ -71,7 +147,7 @@ public class Administrators extends Controller {
 		if(permissionList == null){
 			permissionList = new ArrayList<Permission>();
 		}
-		render(person, permissionList);
+		render(person, permissionList, personList);
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_ADMINISTRATOR)
