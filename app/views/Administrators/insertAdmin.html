@@ -6,17 +6,25 @@
 <fieldset>
 	<legend>Dati nuovo amministratore e permessi</legend>
 	<!-- Cambiare con un menu a tendina contenente la lista delle persone al posto dei due campi text per nome e cognome -->
-	<p>Nome: <input type="text" name="" value="" /></p>
-	<p>Cognome: <input type="text" name="" value="" /></p>
-	<p>Può vedere persone: Sì <input type="radio" name="viewPersonList" value=""/> No <input type="radio" name="viewPersonList" value=""/></p>
-	<p>Può inserire e modificare persone: Sì <input type="radio" name="insertAndUpdatePerson" value=""/> No <input type="radio" name="insertAndUpdatePerson" value=""/></p>
-	<p>Può cancellare persone: Sì <input type="radio" name="deletePerson" value=""/> No <input type="radio" name="deletePerson" value=""/></p>
-	<p>Può inserire e modificare timbrature: Sì <input type="radio" name="insertAndUpdateStamping" value=""/> No <input type="radio" name="insertAndUpdateStamping" value=""/></p>
-	<p>Può inserire e moficare password: Sì <input type="radio" name="insertAndUpdatePassword" value=""/> No <input type="radio" name="insertAndUpdatePassword" value=""/></p>
-	<p>Può inserire e modifcare orari di lavoro: Sì <input type="radio" name="insertAndUpdateWorkingTime" value=""/> No <input type="radio" name="insertAndUpdateWorkingTime" value=""/></p>
-	<p>Può inserire e modificare assenze: Sì <input type="radio" name="insertAndUpdateAbsence" value=""/> No <input type="radio" name="insertAndUpdateAbsence" value=""/></p>
-	<p>Può inserire e modificare configurazioni di sistema: Sì <input type="radio" name="insertAndUpdateConfiguration" value=""/> No <input type="radio" name="insertAndUpdateConfiguration" value=""/></p>
-	<p>Può inserire e modificare utenti amministratori: Sì <input type="radio" name="insertAndUpdateAdministrator" value=""/> No <input type="radio" name="insertAndUpdateAdministrator" value=""/></p>
+	#{select 'personId', value:_person, id:'person'}
+		%{
+			for(person in personList){
+		}%
+			#{option person.id}${person.surname + ' ' + person.name}#{/option}
+			%{
+				}
+			}%
+		
+	#{/select}
+	<p>Può vedere persone: Sì <input type="radio" name="viewPersonList" value="true"/> No <input type="radio" name="viewPersonList" value="false"/></p>
+	<p>Può inserire e modificare persone: Sì <input type="radio" name="insertAndUpdatePerson" value="true"/> No <input type="radio" name="insertAndUpdatePerson" value="false"/></p>
+	<p>Può cancellare persone: Sì <input type="radio" name="deletePerson" value="true"/> No <input type="radio" name="deletePerson" value="false"/></p>
+	<p>Può inserire e modificare timbrature: Sì <input type="radio" name="insertAndUpdateStamping" value="true"/> No <input type="radio" name="insertAndUpdateStamping" value="false"/></p>
+	<p>Può inserire e moficare password: Sì <input type="radio" name="insertAndUpdatePassword" value="true"/> No <input type="radio" name="insertAndUpdatePassword" value="false"/></p>
+	<p>Può inserire e modifcare orari di lavoro: Sì <input type="radio" name="insertAndUpdateWorkingTime" value="true"/> No <input type="radio" name="insertAndUpdateWorkingTime" value="false"/></p>
+	<p>Può inserire e modificare assenze: Sì <input type="radio" name="insertAndUpdateAbsence" value="true"/> No <input type="radio" name="insertAndUpdateAbsence" value="false"/></p>
+	<p>Può inserire e modificare configurazioni di sistema: Sì <input type="radio" name="insertAndUpdateConfiguration" value="true"/> No <input type="radio" name="insertAndUpdateConfiguration" value="false"/></p>
+	<p>Può inserire e modificare utenti amministratori: Sì <input type="radio" name="insertAndUpdateAdministrator" value="true"/> No <input type="radio" name="insertAndUpdateAdministrator" value="false"/></p>
 </fieldset>
 <input type="submit" value="Ok"/>
 #{/form}
