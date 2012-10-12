@@ -82,8 +82,10 @@ POST	/absences/update						Absences.update
 GET		/absences/absenceCodeList				Absences.absenceCodeList
 
 #Gestione configurazione parametri
-GET		/confParameters							Configurations.show
-POST	/confParameters							Configurations.save
+GET		/listConfigurations						Configurations.list
+GET		/insertConfiguration					Configurations.insertConfig
+POST	/insertConfiguration					Configurations.save
+GET		/configurations/edit/{configId}			Configurations.edit
 
 #Gestione utenti amministratori
 GET		/administratorList						Administrators.list

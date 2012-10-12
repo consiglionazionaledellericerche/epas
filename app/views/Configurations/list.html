@@ -1,0 +1,26 @@
+#{extends 'main.html' /}
+
+<h3 id="gestioneConfigurazioneParametri">Gestione configurazione parametri</h3>
+
+#{logoutForm /}
+
+<p><a href="@{Configurations.insertConfig}">Inserisci una nuova configurazione</a></p>
+
+<h3>Configurazioni esistenti</h3>
+
+<table>
+  <tr>
+    <th>ID</th>
+    <th>Name</th>
+  </tr>
+  %{ for(conf in configList){
+  }%
+  <tr>
+    <td>${conf.id}</td>
+    <td><a href="@{Configurations.edit(conf.id)}">${conf.beginDate}</a></td>
+  </tr>
+  %{
+  }
+  }%
+</table>
+

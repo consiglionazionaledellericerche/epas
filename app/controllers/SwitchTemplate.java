@@ -87,7 +87,7 @@ public class SwitchTemplate extends Controller{
 			WorkingTimes.manageWorkingTime();
 			break;
 		case confParameters:
-			Configurations.show();
+			Configurations.list();
 			break;
 		case personList:
 			Persons.list();
