@@ -242,6 +242,7 @@ div#chooseView {text-align: center}
 div#cambiaPassword {margin: 1em 4em; text-align: left}
 div#annullaPassword {margin: 1em 4em; text-align: left}
 div#gestioneParametri {margin: 1em 4em 1em; text-align: left}
+div#spiegazioneValoriGrassetto {margin: 1em 4em 1em}
 h2#titoloSituazionePresenzeMensili {text-align: center}
 h2#titoloSituazioneAssenzeMensili {text-align: center}
 h2#titoloSituazioneAssenzeAnnuali {text-align: center}
@@ -263,5 +264,7 @@ textarea#timbraturaWeb {margin: 0em 3em 0em}
 textarea#stampaPdf {margin: 0em 3em 0em}
 input#salvaConfigurazione {margin: 2em 60em 0em; align: center}
 input#annullaConfigurazione {margin: 0em 80em 2em; align: center}
+input#submitInsertPerson {margin: 2em 60em 0em; align: center}
+input#resetInsertPerson {margin: 1em 60em 0em; align: center}
 
 select#assenzaFrequente {margin-bottom: 1em}

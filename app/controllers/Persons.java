@@ -10,6 +10,7 @@ import models.ContactData;
 import models.Contract;
 import models.Location;
 import models.Person;
+import models.Qualification;
 
 import org.joda.time.LocalDate;
 
@@ -24,9 +25,12 @@ public class Persons extends Controller {
 
 	public static final String USERNAME_SESSION_KEY = "username";
 
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void edit(Long personId){
+		Person person = Person.findById(personId);
+		List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract", person).fetch();
 		
-	public static void insert(){
-		render();
+		render(person, contractList);
 	}
 
 
@@ -40,96 +44,100 @@ public class Persons extends Controller {
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void form(Long id) {
-		if(id == null) {
-			render();
-		}
-		Person person = Person.findById(id);
-		List<Contract> contracts = person.contracts;
-		
-		if (contracts == null) {
-			contracts = new ArrayList<Contract>();
-		}
-		
-		Location location = person.location;
-		if (location == null) {
-			location = new Location();
-		}
-		
-		ContactData contactData = person.contactData;
-		if (contactData == null) {
-			contactData = new ContactData();
-		}
-		
-		render(person, contracts, location, contactData);
+	public static void insertPerson() {
+		Person person = new Person();
+		Contract contract = new Contract();
+		Location location = new Location();
+		ContactData contactData = new ContactData();
+		render(person, contract, location, contactData);
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void save(@Valid @Required Person person, @Valid Location location, @Valid ContactData contactData, @Valid Contract contract) {
+	public static void save(Long personId) {
 		if(validation.hasErrors()) {
 			if(request.isAjax()) error("Invalid value");
-			render("@form", person, location, contactData, contract);
+			render("@insertPerson");
 		}
+		Person person = null;
+		Location location = null;
+		ContactData contactData = null;
+		Contract contract = null;
+		if(personId == null){
+			person = new Person();
+			location = new Location();
+			contactData = new ContactData();
+			contract = new Contract();
+		}
+		else{
+			person = Person.findById(personId);
+		}
+		Logger.debug("Saving person...");
 		
+		person.name = params.get("name");
+		person.surname = params.get("surname");
+		person.number = params.get("number", Integer.class);
+		Qualification qual = Qualification.findById(new Long(params.get("person.qualification", Integer.class)));
+		person.qualification = qual;
 		person.save();
+		
 		Logger.debug("saving location, deparment = %s", location.department);
+		location.department = params.get("department");
+		location.headOffice = params.get("headOffice");
+		location.room = params.get("room");
 		location.person = person;
 		location.save();
+		Logger.debug("Saving contact data...");
 		
+		contactData.email = params.get("email");
+		contactData.telephone = params.get("telephone");
 		contactData.person = person;
 		contactData.save();
 		
-		Logger.debug("saving contract, beginContract = %s, endContract = %s", contract.beginContract, contract.expireContract);
+		LocalDate beginContract = params.get("beginContract", LocalDate.class);
+		contract.beginContract = beginContract;
+		LocalDate expireContract = params.get("expireContract", LocalDate.class);
+		contract.expireContract = expireContract;
 		contract.person = person;
 		contract.save();
-		list();
-	}
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void discard(){
-		list();
+		Logger.debug("saving contract, beginContract = %s, endContract = %s", contract.beginContract, contract.expireContract);
+		
+		flash.success(String.format("Inserita nuova persona in anagrafica: %s %s ",person.name, person.surname));
+		Application.indexAdmin();
+		
 	}
 	
-
-	/**
-	 * metodo che crea una nuova persona e la persiste sul db coi soli campi obbligatori
-	 */
-	public void createBasicPerson(String nome, String cognome, String password){
-		Person person = new Person();
-		person.name = nome;
-		person.surname = cognome;
-		person.password = password;
-		person.save();
-	}
-
-
-	/**
-	 * 
-	 * @param person
-	 * aggiorna la entry sul db di quella persona 
-	 */
-	public void updateBasicPerson(Person person){
-		Person p = Person.findById(person.id);
-		if(p != null){
-			//	request.params.
-		}
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void discard(){
+		render("@list");
 	}
 
 	/**
 	 * cancella una persona dal database
 	 * @param person
 	 */
-	public void deletePerson(Person person){
+	@Check(Security.DELETE_PERSON)
+	public void deletePerson(Long personId){
+		Person person = Person.findById(personId);
 		if(person != null){
+			Location location = person.location;
+			location.delete();
+			ContactData contactData = person.contactData;
+			contactData.delete();
+			List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ?", person).fetch();
+			contractList.clear();
 			person.delete();
-			person.save();
+			flash.success(String.format("Eliminato %s %s", person.name, person.surname + "dall'anagrafica insieme alle sue info su locazione" +
+					", contatti e lista contratti."));
+			Application.indexAdmin();
+		}
+		else{
+			flash.error("L'id passato come parametro non corrisponde a nessuna persona in anagrafica. Controllare id = %s", personId);
+			Application.indexAdmin();
 		}
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PASSWORD)
 	public static void changePassword(Long personId){
-//		String username = session.get(USERNAME_SESSION_KEY);
-//		
-//		Person p = Person.find("byUsername", username).first();
 		Person person = Person.findById(personId);
 		render(person);
 	}
@@ -150,7 +158,6 @@ public class Persons extends Controller {
 		}
 		else{
 			Logger.debug("Errore, password diverse per %s %s", p.surname, p.name);
-			//params.flash();
 			flash.error("Le due password non sono coincidenti!!!");
 			
 			changePassword(personId);
