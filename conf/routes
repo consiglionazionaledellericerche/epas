@@ -48,7 +48,8 @@ GET     /public/                                staticDir:public
 # Gestione persone
 GET		/personList								Persons.list
 POST	/persons								Persons.save
-GET		/persons								Persons.form
+GET		/persons								Persons.insertPerson
+GET		/persons/edit/{personId}				Persons.edit
 
 # Gestione orari di lavoro
 GET		/manageWorkingTime						WorkingTimes.manageWorkingTime

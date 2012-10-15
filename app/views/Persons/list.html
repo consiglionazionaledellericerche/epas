@@ -7,7 +7,7 @@
 #{functionalMenuForm mainMenu: mainMenu /}
 
 
-<p><a href="@{Persons.form}">Inserisci una nuova persona</a></p>
+<p><a href="@{Persons.insertPerson}">Inserisci una nuova persona</a></p>
 
 <p>Personale esistente</p>
 
@@ -35,7 +35,7 @@
 }%
 
 	<tr>
-		<td><a href="@{form(person.id)}">${person.surname}</a></td>
+		<td><a href="@{edit(person.id)}">${person.surname}</a></td>
 		<td>${person.name}</td>
 		<td>${person.number}</td>
 		<td>${person.getCurrentContract() != null ? person.getCurrentContract().beginContract : ''}</td>

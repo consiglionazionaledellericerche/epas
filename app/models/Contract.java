@@ -59,7 +59,7 @@ public class Contract extends Model {
 	 * da inviare a Roma
 	 */
 	@Required
-	public boolean onCertificate = true;
+	public boolean onCertificate = false;
 
 	@Transient
 	public boolean isValidContract(){

@@ -1,0 +1,65 @@
+#{extends 'main.html' /}
+
+<h2 id="titoloModificaPersonale">
+	%{ if (person.id == null) { }% 
+		Inserisci dati per una nuova persona
+	%{ } else { }%
+		Modifica dati di ${person.name + ' ' + person.surname}
+	%{ } }%
+</h2>
+
+#{form @Persons.save()}
+
+	<input type="hidden" name="person.id"  value="${person.id}" />
+	
+	<fieldset>
+		<legend>Dati personali</legend>
+		<div><b>Cognome</b> <input name="surname" type="text" value="${person.surname}" size="20" maxlength="100" /></div>
+		<div><b>Nome</b> <input name="name" type="text" value="${person.name}" size="20" maxlength="50" /></div>
+		<!--  <div>Password <input name="person.password" type="text" value="" size="10" maxlength="10" /></div>-->
+		<div>Matricola <input name="number" type="text" value="${person.number}" size="10" maxlength="10" /></div>
+		<div>Livello 
+			#{select 'person.qualification', value:person.qualification, id:'qualifica'} 
+				#{option 0}0#{/option}
+				#{option 1}1#{/option}
+				#{option 2}2#{/option}
+				#{option 3}3#{/option}
+				#{option 4}4#{/option}
+				#{option 5}5#{/option}
+				#{option 6}6#{/option}
+				#{option 7}7#{/option}
+				#{option 8}8#{/option}
+			#{/select}
+		</div>
+		
+	</fieldset>
+	
+	<fieldset>
+		<legend>Dati Contrattuali</legend>
+		<div><b>Inizio contratto</b> <input name="beginContract" type="date" value="${contract.beginContract}" size="10" maxlength="10" /></div>
+		<div>Fine contratto <input name="expireContract" type="date" value="${contract.expireContract}" size="10" maxlength="10" /></div>
+		<div>Obbligo attestato di presenza (per dipendenti CNR) <input name="onCertificate" type="checkbox" value="${contract.onCertificate}"  /></div>
+	</fieldset>
+	
+	<fieldset>
+		<legend>Informazioni di ubicazione e contatti</legend>
+		<input type="hidden" name="location.person_id"  value="${person.id}" />
+		<p>Dipartimento <input name="department" type="text" value="${location.department}" size="20" maxlength="100" /></p>
+		<p>Sede <input name="headOffice" type="text" value="${location.headOffice}" size="40" maxlength="200" /></p>
+		<p>Stanza <input name="room" type="text" value="${location.room}" size="40" maxlength="200" /></p>
+		<p>Telefono <input name="telephone" type="text" value="${contactData.telephone}" size="40" maxlength="200" /></p>
+		<p>Email <input name="email" type="text" value="${contactData.email}" size="40" maxlength="200" /></p>
+		<p>Data di nascita <input name="bornDate" type="text" value="${person.bornDate}" size="40" maxlength="200" /></p>
+	</fieldset>
+	
+	
+	<div id="spiegazioneValoriGrassetto">I valori in <b>grassetto</b> sono obbligatori</iv>
+	
+	<input id="submitInsertPerson" type="submit" value="Ok"/>
+		
+
+#{/form}
+
+#{form @Persons.discard()}
+	<input id="resetInsertPerson"type=reset value="Annulla">
+#{/form}

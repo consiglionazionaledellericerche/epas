@@ -3,21 +3,80 @@
 #{form @Administrators.save()}
 <fieldset>
 	<legend>Modifica dati amministratore e permessi</legend>
-	<p>Nome: <input type="text" name="" value="" disabled="disabled"/></p>
-	<p>Cognome: <input type="text" name="" value="" /></p>
-	<p>Può vedere persone: Sì <input type="radio" name="viewPersonList" value=""/> No <input type="radio" name="viewPersonList" value=""/></p>
-	<p>Può inserire e modificare persone: Sì <input type="radio" name="insertAndUpdatePerson" value=""/> No <input type="radio" name="insertAndUpdatePerson" value=""/></p>
-	<p>Può cancellare persone: Sì <input type="radio" name="deletePerson" value=""/> No <input type="radio" name="deletePerson" value=""/></p>
-	<p>Può inserire e modificare timbrature: Sì <input type="radio" name="insertAndUpdateStamping" value=""/> No <input type="radio" name="insertAndUpdateStamping" value=""/></p>
-	<p>Può inserire e moficare password: Sì <input type="radio" name="insertAndUpdatePassword" value=""/> No <input type="radio" name="insertAndUpdatePassword" value=""/></p>
-	<p>Può inserire e modifcare orari di lavoro: Sì <input type="radio" name="insertAndUpdateWorkingTime" value=""/> No <input type="radio" name="insertAndUpdateWorkingTime" value=""/></p>
-	<p>Può inserire e modificare assenze: Sì <input type="radio" name="insertAndUpdateAbsence" value=""/> No <input type="radio" name="insertAndUpdateAbsence" value=""/></p>
-	<p>Può inserire e modificare configurazioni di sistema: Sì <input type="radio" name="insertAndUpdateConfiguration" value=""/> No <input type="radio" name="insertAndUpdateConfiguration" value=""/></p>
-	<p>Può inserire e modificare utenti amministratori: Sì <input type="radio" name="insertAndUpdateAdministrator" value=""/> No <input type="radio" name="insertAndUpdateAdministrator" value=""/></p>
+	<p>Nome: <input type="text" name="" value="${person.name}" disabled="disabled"/></p>
+	<p>Cognome: <input type="text" name="" value="${person.surname}" disabled="disabled" /></p>
+	<p>Può vedere persone: 
+	
+	%{	if(person.isViewPersonAvailable()==true){ }%
+			Sì <input type="radio" name="viewPersonList" value="false" checked="checked"/> No <input type="radio" name="viewPersonList" value="true"/>
+			%{ } else {	}% 
+			Sì <input type="radio" name="viewPersonList" value="true"/> No <input type="radio" name="viewPersonList" value="false" checked="checked"/>
+			%{ } }%
+	</p>
+	<p>Può inserire e modificare persone: 
+	%{	if(person.isInsertAndUpdatePersonAvailable()==true){ }%
+			Sì <input type="radio" name="insertAndUpdatePerson" value="false" checked="checked"/> No <input type="radio" name="insertAndUpdatePerson" value="true"/>
+			%{ } else {	}%
+			Sì <input type="radio" name="insertAndUpdatePerson" value="true"/> No <input type="radio" name="insertAndUpdatePerson" value ="false" checked="checked"/>
+			%{ } }%
+	</p>
+	<p>	Può cancellare persone: 
+	%{	if(person.isDeletePersonAvailable()==true){ }%
+			Sì <input type="radio" name="deletePerson" value="false" checked="checked"/> No <input type="radio" name="deletePerson" value="true"/>
+			%{ } else {	}%
+			Sì <input type="radio" name="deletePerson" value="true"/> No <input type="radio" name="deletePerson" value="false" checked="checked"/>
+			%{ } }%
+	</p>
+	<p>Può inserire e modificare timbrature: 
+	%{	if(person.isInsertAndUpdateStampingAvailable()==true){ }%
+			Sì <input type="radio" name="insertAndUpdateStamping" value="false" checked="checked"/> No <input type="radio" name="insertAndUpdateStamping" value="true"/>
+			%{ } else {	}%
+			Sì <input type="radio" name="insertAndUpdateStamping" value="true"/> No <input type="radio" name="insertAndUpdateStamping" value="false" checked="checked"/>
+			%{ } }%
+	</p>
+	<p>Può inserire e moficare password: 
+	%{	if(person.isInsertAndUpdatePasswordAvailable()==true){ }%
+			Sì <input type="radio" name="insertAndUpdatePassword" value="false" checked="checked"/> No <input type="radio" name="insertAndUpdatePassword" value="true"/>
+			%{ } else {	}%
+			Sì <input type="radio" name="insertAndUpdatePassword" value="true"/> No <input type="radio" name="insertAndUpdatePassword" value="false" checked="checked"/>
+			%{ } }%
+	</p>
+	<p>Può inserire e modifcare orari di lavoro: 
+	%{	if(person.isInsertAndUpdateWorkinTimeAvailable()==true){ }%
+			Sì <input type="radio" name="insertAndUpdateWorkingTime" value="false" checked="checked"/> No <input type="radio" name="insertAndUpdateWorkingTime" value="true"/>
+			%{ } else {	}%
+			Sì <input type="radio" name="insertAndUpdateWorkingTime" value="true"/> No <input type="radio" name="insertAndUpdateWorkingTime" value="false" checked="checked"/>
+			%{ } }%
+	</p>
+	<p>Può inserire e modificare assenze: 
+	%{	if(person.isInsertAndUpdateAbsenceAvailable()==true){ }%
+			Sì <input type="radio" name="insertAndUpdateAbsence" value="false" checked="checked"/> No <input type="radio" name="insertAndUpdateAbsence" value="true"/>
+			%{ } else {	}%
+			Sì <input type="radio" name="insertAndUpdateAbsence" value="true"/> No <input type="radio" name="insertAndUpdateAbsence" value="false" checked="checked"/>
+			%{ } }%
+	</p>
+	<p>Può inserire e modificare configurazioni di sistema: 
+	%{	if(person.isInsertAndUpdateConfigurationAvailable()==true){ }%
+			Sì <input type="radio" name="insertAndUpdateConfiguration" value="false" checked="checked"/> No <input type="radio" name="insertAndUpdateConfiguration" value="true"/>
+			%{ } else {	}%
+			Sì <input type="radio" name="insertAndUpdateConfiguration" value="true"/> No <input type="radio" name="insertAndUpdateConfiguration" value="false" checked="checked"/>
+			%{ } }%
+	</p>
+	<p>Può inserire e modificare utenti amministratori: 
+	%{	if(person.isInsertAndUpdateAdministratorAvailable()==true){ }%
+			Sì <input type="radio" name="insertAndUpdateAdministrator" value="false" checked="checked"/> No <input type="radio" name="insertAndUpdateAdministrator" value="true"/>
+			%{ } else {	}%
+			Sì <input type="radio" name="insertAndUpdateAdministrator" value="true"/> No <input type="radio" name="insertAndUpdateAdministrator" value="false" checked="checked"/>
+			%{ } }%
+	</p>
 </fieldset>
 <input type="submit" value="Ok"/>
 #{/form}
 
 #{form @Administrators.discard()}
 <input type="submit" value="Annulla"/>
+#{/form}
+
+#{form @Administrators.delete()}
+<input type="submit" value="Elimina"/>
 #{/form}

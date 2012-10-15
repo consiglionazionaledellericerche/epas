@@ -110,19 +110,19 @@ public class Configurations extends Controller{
 	
 	@Check(Security.INSERT_AND_UPDATE_CONFIGURATION)
 	public static void insertConfig(){
-		Configuration config = new Configuration();
-		render(config);
+		Configuration configurations = new Configuration();
+		render(configurations);
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_CONFIGURATION)
 	public static void edit(Long configId){
-		Configuration configuration = Configuration.findById(configId);
-		render(configuration);
+		Configuration configurations = Configuration.findById(configId);
+		render(configurations);
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_CONFIGURATION)
 	public static void discard(){
-		list();
+		Configurations.list();
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_CONFIGURATION)
