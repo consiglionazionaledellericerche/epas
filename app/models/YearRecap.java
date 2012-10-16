@@ -225,28 +225,22 @@ public class YearRecap extends Model{
 	 */
 	public List<Absence> getAbsenceInYear(@Valid int year, @Valid String month, @Valid int day){
 		int mese = fromStringToIntMonth(month);
-		List<Absence> absencesInYear = new ArrayList<Absence>();
-//		List<PersonDay> personDayInYear = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date >= ? and pd.date <= ?", 
-//				person, new LocalDate(year,1,1), new LocalDate(year,12,31)).fetch();
-//		for(PersonDay pd : personDayInYear){
-//			if(pd.absences.size()!=0){
-//				for(Absence abs : pd.absences){
-//					if(abs != null){
-//						absencesInYear.add(abs);
-//					}
-//				}
-//			}
-//		}
-		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", 
-				person, new LocalDate(year, mese, day)).first();
-		if(pd.absences.size() > 0){
-			for(Absence abs : pd.absences){
-				if(abs != null)
-					absencesInYear.add(abs);
+		Logger.debug("Il mese è :", mese);
+		Logger.debug("Il giorno è: ", day);
+		List<Absence> absencesInDay = new ArrayList<Absence>();
+		//LocalDate date = new LocalDate(year, 1, 1);
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", 
+				person, new LocalDate(year, mese, day)).fetch();
+		for(PersonDay pd : pdList){
+			if(pd.absences.size() > 0){
+				for(Absence abs : pd.absences){
+					if(abs != null)
+						absencesInDay.add(abs);
+				}
 			}
-		}
+		}		
 		
-		return absencesInYear;
+		return absencesInDay;
 	}
 	
 	/**

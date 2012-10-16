@@ -19,13 +19,15 @@ public class SwitchTemplate extends Controller{
 		LocalDate now = new LocalDate();
 		
 		String action = params.get("action");
+		Logger.debug("La action è: %s", action);
+		if (action == null) {
+			
+			flash.error(String.format("La action da eseguire è: %s", action));
+			Application.indexAdmin();
+			
+		}
 		ActionMenuItem menuItem = ActionMenuItem.valueOf(action);
 		
-		if (action == null) {
-			/* fare qualcosa! Reindirizzare l'utente verso una pagina con l'errore? Rimanere sulla stessa pagina mostrando l'errore? */
-			return;
-		}
-
 		Person person = Security.getPerson();
 		
 		Long personId = null;
@@ -61,10 +63,10 @@ public class SwitchTemplate extends Controller{
 			break;
 			
 		case absences:
-			Absences.show();
+			Absences.show(personId, year, month);
 			break;
 		case yearlyAbsences:
-			YearlyAbsences.show();
+			YearlyAbsences.show(personId, year, month);
 			break;
 		case vacations:
 			

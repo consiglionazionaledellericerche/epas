@@ -14,17 +14,15 @@ import play.mvc.With;
 
 @With( {Secure.class, NavigationMenu.class} )
 public class YearlyAbsences extends Controller{
-
-	/* corrisponde alla voce di menu selezionata */
-//	private final static ActionMenuItem actionMenuItem = ActionMenuItem.yearlyAbsences;
 	
 	@Check(Security.VIEW_PERSON_LIST)
-	private static void show(Person person) {
-//		String menuItem = actionMenuItem.toString();
+	public static void show(Long personId, int year, int month) {
+
 		
     	Integer anno = params.get("year", Integer.class);
-    	Long personId = params.get("personId", Long.class);
+    	//Long personId = params.get("personId", Long.class);
     	Logger.debug("L'id della persona è: %s", personId);
+    	Person person = Person.findById(personId);
     	Logger.info("Anno: "+anno);
     	
     	if(anno==null){
@@ -35,17 +33,18 @@ public class YearlyAbsences extends Controller{
     	}
     	else{
     		Logger.info("Sono dentro il ramo else della creazione del month recap");
-    		Integer year = new Integer(params.get("year"));
-			
-    		YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)year.intValue());
+    		//Integer year = new Integer(params.get("year"));
+			MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, year, month);
+    		YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)year);
     		    		
-            render(yearRecap);
+            render(yearRecap, monthRecap);
     	}
     	
     }
 	
-	@Check(Security.VIEW_PERSON_LIST)
-	public static void show() {
-    	show(Security.getPerson());
-    }
+//	@Check(Security.VIEW_PERSON_LIST)
+//	public static void show() {
+//		
+//    	show(Security.getPerson());
+//    }
 }

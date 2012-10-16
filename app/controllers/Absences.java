@@ -25,7 +25,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
-@With(Secure.class)
+@With( {Secure.class, NavigationMenu.class} )
 public class Absences extends Controller{
 	
 	/* corrisponde alla voce di menu selezionata */
@@ -43,34 +43,33 @@ public class Absences extends Controller{
 	}
 		 
 	@Check(Security.VIEW_PERSON_LIST)
-	public static void show(Person person) {
-		String menuItem = actionMenuItem.toString();
+	public static void show(Long personId, Integer year, Integer month) {
 		
-    	String anno = params.get("year");
-    	Logger.info("Anno: "+anno);
-    	String mese= params.get("month");
-    	Logger.info("Mese: "+mese);
-    	if(anno==null || mese==null){
+		Person person = Person.findById(personId);
+    	
+    	Logger.info("Anno: "+year);    	
+    	Logger.info("Mese: "+month);
+    	
+    	if(year==null || month==null){
     		        	
         	LocalDate now = new LocalDate();
         	MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, now.getYear(), now.getMonthOfYear());
-            render(monthRecap, menuItem);
+            render(monthRecap);
     	}
     	else{
     		Logger.debug("Sono dentro il ramo else della creazione del month recap");
-    		Integer year = new Integer(params.get("year"));
-			Integer month = new Integer(params.get("month"));
+    		
     		MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, year.intValue(), month.intValue());
     		Logger.debug("Il month recap è formato da: " +person.id+ ", " +year.intValue()+ ", " +month.intValue());
     		
-            render(monthRecap, menuItem);
+            render(monthRecap);
     	}
     	
     }
-	
-	public static void show() {
-		show(Security.getPerson());
-    }
+//	
+//	public static void show() {
+//		show(Security.getPerson());
+//    }
 	
 	/**
 	 * questa è una funzione solo per admin, quindi va messa con il check administrator
