@@ -253,6 +253,8 @@ h2#titoloCambioPassword {text-align: center}
 h2#titoloGestioneOrariLavoro {text-align: center}
 h2#nuovoOrario {text-align: center}
 h2#titoloGestioneTipiFerie {text-align: center}
+h2#titoloModificaDatiPersonali {text-align: center}
+h2#titoloTerminazioneRapporto {text-align: center}
 h3#titoloSituazionePresenzeMensili {text-align: center}
 h2#titoloConfigurazioneParametri {text-align: center}
 h3#titoloGestioneParametri {margin: 2em 0em 2em; text-align: center}
@@ -260,11 +262,14 @@ h3#gestioneUtenteAmministrativo {margin: 2em 0em 2em; text-align: center}
 h3#gestioneConfigurazioneParametri {text-align: center}
 fieldset#timbraturaWeb {height: 12em}
 fieldset#stampaPdf {height: 12em}
+fieldset#fieldsetTerminateContract {height: 30 em}
 textarea#timbraturaWeb {margin: 0em 3em 0em}
 textarea#stampaPdf {margin: 0em 3em 0em}
 input#salvaConfigurazione {margin: 2em 60em 0em; align: center}
 input#annullaConfigurazione {margin: 0em 80em 2em; align: center}
 input#submitInsertPerson {margin: 2em 60em 0em; align: center}
 input#resetInsertPerson {margin: 1em 60em 0em; align: center}
+input#submitTerminazioneRapporto {margin: 2em 60em 0em; align: center}
+input#discardTerminazioneRapporto {margin: 1em 60em 0em; align: center}
 
 select#assenzaFrequente {margin-bottom: 1em}
