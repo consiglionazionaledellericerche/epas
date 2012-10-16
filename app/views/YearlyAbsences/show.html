@@ -5,36 +5,7 @@
 
 #{logoutForm /}
 
-<div id="chooseView">
-#{form @SwitchTemplate.dispatch()}
-
-#{select 'menuItem', value:menuItem}
-	#{option 'yearlyAbsences'}Assenze Annuali#{/option}
-	#{option 'absences'}Assenze Mensili#{/option}
-	#{option 'stampings'}Timbrature#{/option}
-	#{option 'vacations'}Ferie#{/option}
-	#{option 'competences'}Competenze e Straordinari#{/option}	
-#{/select}
-    	<input type="submit" value="go!" />
-     
-
-#{/form}
-</div>
-
-<div align="left">
-#{form @YearlyAbsences.show()}
-
-#{select 'year', value:yearRecap.year, id:'anno'}
-	#{option 2011}2011#{/option}
-	#{option 2012}2012#{/option}
-	#{option 2013}2013#{/option}
-#{/select}
-
-	
-		<input type="submit" value="Submit">
-#{/form}
-
-</div>
+#{functionalMenuForm mainMenu: mainMenu /}
 
 <table id="assenze_annuali">
 

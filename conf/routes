@@ -50,6 +50,10 @@ GET		/personList								Persons.list
 POST	/persons								Persons.save
 GET		/persons								Persons.insertPerson
 GET		/persons/edit/{personId}				Persons.edit
+POST	/persons/deletePerson/{personId}		Persons.deletePerson
+GET		/persons/terminatePerson/{personId}		Persons.terminatePerson
+POST	/persons/terminateContract/{personId}	Persons.terminateContract
+
 
 # Gestione orari di lavoro
 GET		/manageWorkingTime						WorkingTimes.manageWorkingTime

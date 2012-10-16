@@ -111,14 +111,14 @@ public class Person extends Model {
 	/**
 	 * relazione con la tabella delle info di contatto
 	 */
-	@OneToOne(mappedBy="person", fetch = FetchType.EAGER)
+	@OneToOne(mappedBy="person", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
 	public ContactData contactData;
 	
 	/**
 	 * relazione con la tabella dei contratti
 	 */
 	@NotAudited
-	@OneToMany(mappedBy="person", fetch=FetchType.EAGER)
+	@OneToMany(mappedBy="person", fetch=FetchType.EAGER, cascade = {CascadeType.REMOVE})
 	public List<Contract> contracts = new ArrayList<Contract>(); 
 	
 	@NotAudited
@@ -199,7 +199,7 @@ public class Person extends Model {
 	 * relazione con la tabella delle locazioni degli utenti
 	 */
 	@NotAudited
-	@OneToOne(mappedBy="person", fetch=FetchType.EAGER)
+	@OneToOne(mappedBy="person", fetch=FetchType.EAGER, cascade = {CascadeType.REMOVE})
 	public Location location;
 	
 	
@@ -319,7 +319,7 @@ public class Person extends Model {
 	 */
 	public Contract getContract(LocalDate date){
 		
-		Logger.debug("La data passata come parametro è : %s", date);
+		//Logger.debug("La data passata come parametro è : %s", date);
 		
 		
 		Contract contract = Contract.find("Select con from Contract con where con.person = ? and con.beginContract <= ? and " +

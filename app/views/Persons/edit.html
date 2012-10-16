@@ -1,5 +1,7 @@
 #{extends 'main.html' /}
 
+<h2 id="titoloModificaDatiPersonali">Modifica dati per l'utente ${person.name} ${person.surname}</h2>
+
 #{form @Persons.save()}
 <input type="hidden" name="person.id"  value="${person.id}" />
 	
@@ -30,17 +32,23 @@
 		<legend>Dati Contrattuali</legend>
 		<table>
 			<tr>
-				<th></th>
 				<th>Data inizio</th>
 				<th>Data fine</th>
+				<th>Data terminazione esperienza lavorativa</th>
 				<th>Attestato presenza</th>
 			</tr>
 		%{ for(contract in contractList){
 		}%
-		<tr>
-			<td></td>
+		<tr>			
 			<td><input name="beginContract" type="date" value="${contract.beginContract}" size="10" maxlength="10" /></td>
 			<td><input name="expireContract" type="date" value="${contract.expireContract}" size="10" maxlength="10" /></td>
+			%{ if(contract.endContract == null){
+			}%<td><a href="@{Persons.terminatePerson(person.id)}">Termina contratto</a></td>
+			%{ } else{
+			}% <td><input name ="endContract" type="date" value="${contract.endContract}"/></td>
+			%{
+			}
+			}%
 			<td><input name="onCertificate" type="checkbox" value="${contract.onCertificate}"/></td>			
 		</tr>
 		%{
@@ -67,6 +75,6 @@
 <input type="submit" value="Annulla"/>
 #{/form}
 
-#{form @Persons.deletePerson()}
+#{form @Persons.deletePerson(person.id)}
 <input type="submit" value="Elimina"/>
 #{/form}

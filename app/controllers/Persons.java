@@ -36,8 +36,13 @@ public class Persons extends Controller {
 
 	@Check(Security.VIEW_PERSON_LIST)
 	public static void list(){
+	//	List<Person> personList = new ArrayList<Person>();
 		List<Person> personList = Person.find("Select p from Person p where p.name <> ?", "Admin").fetch();
 		Logger.debug("La lista delle persone: %s", personList.toString());
+//		for(Person p : persons){
+//			if(p.getCurrentContract() != null && p.getCurrentContract().endContract != null)
+//				personList.add(p);
+//		}
 		//List<Person> personList = Person.findAll();
 		
 		render(personList);
@@ -93,9 +98,11 @@ public class Persons extends Controller {
 		contactData.person = person;
 		contactData.save();
 		
-		LocalDate beginContract = params.get("beginContract", LocalDate.class);
+		Date begin = params.get("beginContract", Date.class);
+		Date end = params.get("expireContract", Date.class);
+		LocalDate beginContract = new LocalDate(begin);
 		contract.beginContract = beginContract;
-		LocalDate expireContract = params.get("expireContract", LocalDate.class);
+		LocalDate expireContract = new LocalDate(end);
 		contract.expireContract = expireContract;
 		contract.person = person;
 		contract.save();
@@ -116,13 +123,9 @@ public class Persons extends Controller {
 	 * @param person
 	 */
 	@Check(Security.DELETE_PERSON)
-	public void deletePerson(Long personId){
+	public static void deletePerson(Long personId){
 		Person person = Person.findById(personId);
 		if(person != null){
-			Location location = person.location;
-			location.delete();
-			ContactData contactData = person.contactData;
-			contactData.delete();
 			List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ?", person).fetch();
 			contractList.clear();
 			person.delete();
@@ -165,6 +168,34 @@ public class Persons extends Controller {
 		}
 			
 		
+	}
+	
+	@Check(Security.DELETE_PERSON)
+	public static void terminatePerson(Long personId){
+		
+		Person person = Person.findById(personId);
+		render(person);		
+	}
+	
+	@Check(Security.DELETE_PERSON)
+	public static void terminateContract(Long personId){
+		Date end = params.get("endContract", Date.class);
+		LocalDate endContract = new LocalDate(end);
+		Logger.debug("La data di terminazione anticipata è %s", endContract);
+		if(endContract != null){
+			Person person = Person.findById(params.get("personId", Long.class));
+			Contract contract = person.getCurrentContract();
+			contract.endContract = endContract;
+			person.save();
+			contract.save();		
+			flash.success(String.format("Aggiunta data di terminazione anticipata del rapporto di lavoro per il dipendente %s %s ",
+					person.name, person.surname));			
+		}
+		else{
+			flash.error(String.format("Errore nel parametro passato dalla form, la data è nulla o non corretta"));
+			
+		}
+		Application.indexAdmin();
 	}
 	
 

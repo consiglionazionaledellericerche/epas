@@ -1,0 +1,34 @@
+#{extends 'main.html' /}
+
+<h2 id="titoloTerminazioneRapporto">Terminazione rapporto per ${person.name} ${person.surname}</h2>
+
+#{logoutForm /}
+
+#{form @terminateContract(person.id)}
+<fieldset id="fieldsetTerminateContract">
+	<legend>Dati persona e contratti</legend>
+	<input type="hidden" name="personId"  value="${person.id}" />
+	<table>
+		<tr>
+			<th>Nome</th>
+			<th>Cognome</th>
+			<th>Data inizio contratto corrente</th>
+			<th>Data fine contratto corrente</th>
+			<th>Data terminazione anticipata rapporto</th>
+		</tr>
+		<tr>
+			<td><input name="name" type ="text" value="${person.name}" disabled="disabled" /></td>
+			<td><input name="surname" type ="text" value="${person.surname}" disabled="disabled" /></td>
+			<td><input name="beginContract" type ="date" value="${person.getCurrentContract().beginContract}" disabled="disabled" /></td>
+			<td><input name="expireContract" type ="date" value="${person.getCurrentContract().expireContract}" disabled="disabled" /></td>
+			<td><input name="endContract" type ="date" value="${person.getCurrentContract().endContract}" /></td>
+		</tr>	
+	</table>
+</fieldset>
+
+<input id="submitTerminazioneRapporto" type="submit" value="Ok"/>
+#{/form}
+
+#{form @Persons.discard()}
+<input id="discardTerminazioneRapporto" type="submit" value="Annulla"/>
+#{/form}
