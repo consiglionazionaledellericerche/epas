@@ -1,7 +1,7 @@
 #{extends 'main.html' /}
 #{set title:yearRecap.person.surname + ' ' + yearRecap.person.name + ', matricola=' + yearRecap.person.number /}
 
-<h2 id="titoloSituazioneAssenzeAnnuali">Situazione assenze per l'anno ${yearRecap.year}</h2>
+<h2 id="titoloSituazioneAssenzeAnnuali">Situazione assenze per l'anno ${yearRecap.year} di ${yearRecap.person.name} ${yearRecap.person.surname}</h2>
 
 #{logoutForm /}
 
@@ -23,20 +23,20 @@
 	</tr>
 	
 	%{
-		for(mese in yearRecap.months){
+		for(mese in yearRecap.getMonths()){
 	}%
 	<tr>
 		
 		<td>${mese.toString()}</td>
-		%{
-			int j=1;
-			while(j <= yearRecap.maxNumberOfDays(yearRecap.year, mese)){
-		}%
-		<td>${yearRecap.getAbsenceInYear(yearRecap.year,mese,j).size() > 0 ? yearRecap.getAbsenceInYear(yearRecap.year,mese,j).get(0).absenceType.code : ''}</td>
-		%{
-			j++;}
-		}%
+                %{
+                  int j=1;
+                  while(j <= yearRecap.maxNumberOfDays(yearRecap.year, mese)){
+                }%
 
+		<td>${yearRecap.getAbsenceInYear(yearRecap.year,mese,j).size() > 0 ? yearRecap.getAbsenceInYear(yearRecap.year,mese,j).get(0).absenceType.code : ''}</td>
+                %{
+                 j++;}
+                }%
 	</tr>
 		%{
 			}
