@@ -21,6 +21,10 @@ GET		/assenze/{personId}/{year}/{month}		Absences.show
 #Assenze annuali
 GET		/assenze-annuali/{personId}/{year}		YearlyAbsences.show
 
+#Assenze mensili globali
+GET		/generalMonthlyAbsences/{year}/{month}	YearlyAbsences.showGeneralMonthlyAbsences
+GET		/yearlyAbsences/absencesPerPerson		YearlyAbsences.absencesPerPerson
+
 #Ferie
 GET		/vacations								Vacations.show
 POST	/vacations								Vacations.vacations		

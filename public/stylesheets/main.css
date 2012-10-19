@@ -257,6 +257,7 @@ h2#titoloModificaDatiPersonali {text-align: center}
 h2#titoloTerminazioneRapporto {text-align: center}
 h3#titoloSituazionePresenzeMensili {text-align: center}
 h2#titoloConfigurazioneParametri {text-align: center}
+h2#titoloTotaleAssenzeMensili {margin: 4em 1em 1em; text-align: center}
 h3#titoloGestioneParametri {margin: 2em 0em 2em; text-align: center}
 h3#gestioneUtenteAmministrativo {margin: 2em 0em 2em; text-align: center}
 h3#gestioneConfigurazioneParametri {text-align: center}
@@ -271,5 +272,8 @@ input#submitInsertPerson {margin: 2em 60em 0em; align: center}
 input#resetInsertPerson {margin: 1em 60em 0em; align: center}
 input#submitTerminazioneRapporto {margin: 2em 60em 0em; align: center}
 input#discardTerminazioneRapporto {margin: 1em 60em 0em; align: center}
+
+table#tabellaPersoneCodiciAssenzaMensili {margin: 2em 1em 1em; align: left}
+
 
 select#assenzaFrequente {margin-bottom: 1em}

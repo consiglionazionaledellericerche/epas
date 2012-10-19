@@ -14,5 +14,6 @@ public enum ActionMenuItem {
 	changePassword,
 	manageWorkingTime,
 	confParameters,
-	administrator
+	administrator,
+	totalMonthlyAbsences
 }
