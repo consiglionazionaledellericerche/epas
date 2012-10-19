@@ -1,0 +1,46 @@
+#{extends 'main.html' /}
+
+<h1>Giorni di assenza a <span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year} per ${person.name} ${person.surname}</h2>
+
+
+<input type=submit value=Chiudi onClick="window.close();" align="right">
+
+
+%{ if(tipo == 0){
+}%
+<h3>Codice: ${abt.code} con significato: ${abt.description}</h1>
+
+<ul type="disc">
+%{	for(date in dateAbsenceList){
+		}%
+		<li>${date.toDateTime()}</li>
+		%{
+	}
+}%
+
+</ul>
+%{
+} else{
+}%
+<h3>Lista di tutte le assenze fatte nel mese</h1>
+
+<table>
+	<tr>
+		<th>Codice</th>
+		<th>Descrizione</th>
+		<th>Data</th>
+	</tr>
+	%{ for(abtd in listaAssenzeDate){
+	}%
+	<tr>
+		<td>${abtd.absenceType.code}</td>
+		<td>${abtd.absenceType.description}</td>
+		<td>${abtd.date.toDateTime()}</td>
+	</tr>
+	%{
+	}
+	}%
+</table>
+%{
+}
+}%

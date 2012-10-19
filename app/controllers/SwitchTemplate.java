@@ -15,7 +15,7 @@ public class SwitchTemplate extends Controller{
 
 	public static final String USERNAME_SESSION_KEY = "username";
 	
-	public static void dispatch(){
+	public static void dispatch() throws InstantiationException, IllegalAccessException{
 		LocalDate now = new LocalDate();
 		
 		String action = params.get("action");
@@ -67,6 +67,9 @@ public class SwitchTemplate extends Controller{
 			break;
 		case yearlyAbsences:
 			YearlyAbsences.show(personId, year, month);
+			break;
+		case totalMonthlyAbsences:
+			YearlyAbsences.showGeneralMonthlyAbsences(year, month);
 			break;
 		case vacations:
 			
