@@ -1,1 +1,82 @@
 #{extends 'main.html' /}
+
+<h2 id="inserimentoNuovoCodiceAssenza">Inserimento dati per nuovo codice di assenza</h2>
+
+#{form @Absences.saveAbsenceCode()}
+<fieldset>
+<legend>Nuovo codice di assenza</legend>
+<p>Codice* <input id="codiceNuovoCodiceAssenza"type="text" name="codice" value="${}" size="10" maxlength="10"/> codice di assenza</p>
+<p>Codice per attestati presenza <input id="attPresNuovoCodiceAssenza"type="text" name="codiceAttestati" value="${}" size="10" maxlength="10"/> Usare solo se il codice che deve andare negli attestati di presenza e' diverso da quello definito nella riga precedente (questo diventa il codice vero e quello sulla riga precedente un alias per uso interno)</p>
+<p>Descrizione* <input id="descrizioneNuovoCodiceAssenza" type="text" name="descrizione" value="${}" size="50" maxlength="200"/> Descrizione codice di assenza</p>
+<p>Uso interno Sì<input id="usoInternoNuovoCodiceAssenzaSI" type="radio" name="usoInterno" value="true"/>
+     			No<input id="usoInternoNuovoCodiceAssenzaNO" type="radio" name="usoInterno" value="false"/> Seleziona "si" se il codice è solo per uso interno (non previsto dal CNR) non sarà trasferito negli attestati di presenza</p>
+<p>Uso multiplo Sì<input id="usoMultiploNuovoCodiceAssenza"type="radio" name="usoMultiplo" value="true"/>
+     			No<input type="radio" name="usoMultiplo" value="false"/> Seleziona "si" se il codice può essere usato insieme ad altri codici nello stesso giorno</p>
+<p>Inizio validità <input id="dataInizioNuovoCodiceAssenza" type="date" name="inizioValidita" value="${}" size="10" maxlength="10"/> Data inizio validità di questo codice nel formato aaa/mm/gg (se vuoto valido da sempre)</p>
+<p>Fine validità <input id="dataFineNuovoCodiceAssenza" type="date" name="fineValidita" value="${}" size="10" maxlength="10"/>Data fine validità di questo codice nel formato aaaa/mm/gg (se vuoto valido da sempre)</p>
+<p>Tempo lavoro giustificato #{select 'jwt', value:jwt , id:'jwt.id'}
+								%{
+									for(jwt in justifiedTimeAtWorkList){
+									}%
+										#{option jwt}${jwt.description}#{/option}
+										%{
+											}
+										}%
+							#{/select} Tempo di lavoro giustificato (Es. codice 661h2 indicare 2)</p>
+
+<p>Livelli  <input type="checkbox" name="livello1" value ="livello1" checked= "checked"/> 1
+			<input type="checkbox" name="livello2" value ="livello2" checked= "checked"/> 2
+			<input type="checkbox" name="livello3" value ="livello3" checked= "checked"/> 3
+			<input type="checkbox" name="livello4" value ="livello4" checked= "checked"/> 4
+			<input type="checkbox" name="livello5" value ="livello5" checked= "checked"/> 5
+			<input type="checkbox" name="livello6" value ="livello6" checked= "checked"/> 6
+			<input type="checkbox" name="livello7" value ="livello7" checked= "checked"/> 7
+			<input type="checkbox" name="livello8" value ="livello8" checked= "checked"/> 8
+			<input type="checkbox" name="livello9" value ="livello9" checked= "checked"/> 9
+			livelli CNR per i quali può essere usato questo codice</p>
+<p>Calcolo buono pasto Sì<input type="radio" name="calcoloBuono" value="true"/>
+     			No<input type="radio" name="calcoloBuono" value="false"/> Seleziona "si" per considerare anche il tempo giustificato nel calcolo della spettanza del buono pasto</p>
+<p>Ignora timbrature Sì<input type="radio" name="ignoraTimbrature" value="true"/>
+     			No<input type="radio" name="ignoraTimbrature" value="false"/> Seleziona "si" per ignorare eventuali timbrature di ingresso/uscita quando presente questo codice di assenza (le timbrature inserite dall'amministratore sono gestite regolarmente)</p>
+<p>Gruppo <input id="gruppoNuovoCodiceAssenza"type="text" name="gruppo" value="${}" size="10" maxlength="10"/> o seleziona gruppo esistente 
+									#{select 'label', value:abtg.label, id:'abtg.id'}
+									%{
+										for(abtg in abtList){
+										}%
+											#{option abtg.id}${abtg.label}#{/option}
+											%{
+												}
+											}%										
+								#{/select} Nome che raggruppa più codici che devono essere gestiti insieme per gli accumuli (Es. i codici 661h1,661h2,661h3,.. possono essere assegnati a un gruppo 661hx in modo da poter accumulare i valori e controllare il tetto)</p>
+</fieldset>
+<fieldset>
+<legend>Da compilare in caso di valorizzazione del campo "Gruppo"</legend>
+<p>Valore <input id="valoreNuovoCodiceAssenza"type="text" name="valore" value="${}" size="5" maxlength="5"/> Valore o peso (Es.codice 661h2 il valore è 2) nel caso di codici a completamento usare 999 per accumulare i minuti mancanti</p>
+<p>Minuti in eccesso Sì<input type="radio" name="minutiEccesso" value="true"/>
+     			No<input type="radio" name="minutiEccesso" value="false"/> Seleziona "si" se il codice prevede il conteggio dei minuti in eccesso rispetto all'ora intera (Es. codici 18h2,18h3,...)</p>
+<p>Accumulare i valori #{select 'accType', value:accType, id:'accType.id'}
+									%{
+										for(accType in accumulationTypeList){
+										}%
+											#{option accType}${accType.description}#{/option}
+											%{
+												}
+											}%										
+								#{/select} Se i valori devono essere sommati per ogni utilizzo. Alla fine del periodo (mese o anno) l'accumulo riparte da zero. (Es. codice 661h2 indicare "Annuale")</p>
+<p>Limite accumulo <input id="limiteAccumuloNuovoCodiceAssenza" type="text" name="limiteAccumulo" value="${}" size="5" maxlength="5"/> Valore massimo accumulo, raggiuntio il quale deve comportarsi come specificato nella definizione successiva (Es. codice 661h2 indicare 18)</p>
+<p>Cosa fare raggiunto il limite #{select 'accBehaviour', value:accBehaviour, id:'accBehaviour.id'}
+									%{
+										for(accBehaviour in accumulationBehaviourList){
+										}%
+											#{option accBehaviour}${accBehaviour.description}#{/option}
+											%{
+												}
+											}%										
+								#{/select} Comportamento da tenere al raggiungimento del limite (Es. codice 661h2 selezionere "Non accetta ...")</p>
+<p>Codice per sostituzione <input id="codSostNuovoCodiceAssenza" type="text" name="codicePerSostituzione" value="${}" size="10" maxlength="10"/> Codice di assenza da sostituire quando nella definizione precedente si è selezionato "sostituisci ..." (Es. si potrebbe definire un codice ad uso interno per mezza giornata di ferie usando: valore=1, quantità giustificata= mezza giornata, accumulare i valori=sempre,limite=2, cosa fare=sostituisci questo campo=32)</p>
+</fieldset>
+<input id="submitNuovoCodiceAssenza" type="submit" value="Ok"/>
+#{/form}
+#{form @Absences.discard()}
+<input id="discardNuovoCodiceAssenza" type="submit" value="Annulla"/>
+#{/form}

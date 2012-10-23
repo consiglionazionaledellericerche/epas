@@ -42,7 +42,7 @@ public class AbsenceTypeGroup extends Model{
 	@Column(name = "minutes_excess")
 	public Boolean minutesExcess;
 
-	@Column(name = "limin_in_minute")
+	@Column(name = "limit_in_minute")
 	public Integer limitInMinute;
 	
 	

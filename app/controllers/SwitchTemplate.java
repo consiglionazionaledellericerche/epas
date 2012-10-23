@@ -71,6 +71,9 @@ public class SwitchTemplate extends Controller{
 		case totalMonthlyAbsences:
 			YearlyAbsences.showGeneralMonthlyAbsences(year, month);
 			break;
+		case manageAbsenceCode:
+			Absences.manageAbsenceCode();
+			break;
 		case vacations:
 			
 			if (personId != null) {
