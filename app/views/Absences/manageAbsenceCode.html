@@ -2,7 +2,7 @@
 
 <h2 id="titoloGestioneCodiciAssenza">Gestione dei codici di assenza</h2>
 
-<p><a href="insertAbsenceCode.html">Definisci nuovo codice di assenza</a></p>
+<p><a href="@{Absences.insertAbsenceCode}">Definisci nuovo codice di assenza</a></p>
 
 <p>Codici di assenza esistenti:</p>
 
@@ -32,23 +32,23 @@
 	}%
 	<tr>
 		<td>${absenceCode.code}</td>
-		<td>${}</td>
+		<td>${absenceCode.certificateCode}</td>
 		<td>${absenceCode.description}</td>
 		<td>${absenceCode.internalUse}</td>
 		<td>${absenceCode.multipleUse}</td>
 		<td>${absenceCode.validFrom}</td>
 		<td>${absenceCode.validTo}</td>
-		<td>${absenceCode.justifiedWorkTime}</td>
-		<td>${absenceCode.qualification.qualification ' '}</td> <!-- per i livelli c'è da capire come prelevarli poichè sul vecchio db sono gestiti in un campo set -->
-		<td>${absenceCode.mealTickeCalculation}</td>
+		<td>${absenceCode.justifiedTimeAtWork != null ? absenceCode.justifiedTimeAtWork.description : ''}</td>
+		<td>${absenceCode.qualifications.qualification}</td> 
+		<td>${absenceCode.mealTicketCalculation}</td>
 		<td>${absenceCode.ignoreStamping}</td>
-		<td>${absenceCode.absenceTypeGroup.label}</td>
-		<td>${absenceCode.absenceTypeGroup.}</td>
-		<td>${absenceCode.absenceTypeGroup.minutesExcess}</td>
-		<td>${}</td>
-		<td>${absenceCode.absenceTypeGroup.buildUpLimit}</td>
-		<td>${}</td>
-		<td>${absenceCode.absenceTypeGroup.equivalentCode}</td>
+		<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.label : ''}</td>
+		<td>${}</td> <!-- cos'è??? -->
+		<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.minutesExcess : ''}</td>
+		<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.accumulationType : ''}</td>
+		<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.limitInMinute : ''}</td>
+		<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.accumulationBehaviour : ''}</td>
+		<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.replacingAbsenceType : ''}</td>
 	</tr>
 	%{
 		}

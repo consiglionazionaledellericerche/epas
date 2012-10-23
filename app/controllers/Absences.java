@@ -1,16 +1,22 @@
 package controllers;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import it.cnr.iit.epas.ActionMenuItem;
 import models.Absence;
 import models.AbsenceType;
+import models.AbsenceTypeGroup;
 import models.MonthRecap;
 import models.Person;
 import models.PersonDay;
 import models.PersonTags;
+import models.Qualification;
 import models.Stamping;
+import models.enumerate.AccumulationBehaviour;
+import models.enumerate.AccumulationType;
+import models.enumerate.JustifiedTimeAtWork;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -87,7 +93,130 @@ public class Absences extends Controller{
 		render(absenceList);
 	}
 	
+	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
+	public static void insertAbsenceCode(){
+		AbsenceType abt = new AbsenceType();
+		AbsenceTypeGroup  abtg = new AbsenceTypeGroup();
+		List<Qualification> qualificationList = Qualification.findAll();
+		List<AbsenceTypeGroup> abtList = AbsenceTypeGroup.findAll();
+		List<JustifiedTimeAtWork> justifiedTimeAtWorkList = new ArrayList<JustifiedTimeAtWork>();
+		justifiedTimeAtWorkList.add(JustifiedTimeAtWork.AllDay);
+		justifiedTimeAtWorkList.add(JustifiedTimeAtWork.EightHours);
+		justifiedTimeAtWorkList.add(JustifiedTimeAtWork.FiveHours);
+		justifiedTimeAtWorkList.add(JustifiedTimeAtWork.FourHours);
+		justifiedTimeAtWorkList.add(JustifiedTimeAtWork.HalfDay);
+		justifiedTimeAtWorkList.add(JustifiedTimeAtWork.Nothing);
+		justifiedTimeAtWorkList.add(JustifiedTimeAtWork.OneHour);
+		justifiedTimeAtWorkList.add(JustifiedTimeAtWork.ReduceWorkingTimeOfTwoHours);
+		justifiedTimeAtWorkList.add(JustifiedTimeAtWork.SevenHours);
+		justifiedTimeAtWorkList.add(JustifiedTimeAtWork.SixHours);
+		justifiedTimeAtWorkList.add(JustifiedTimeAtWork.ThreeHours);
+		justifiedTimeAtWorkList.add(JustifiedTimeAtWork.TimeToComplete);
+		justifiedTimeAtWorkList.add(JustifiedTimeAtWork.TwoHours);
+		List<AccumulationType> accumulationTypeList = new ArrayList<AccumulationType>();
+		accumulationTypeList.add(AccumulationType.always);
+		accumulationTypeList.add(AccumulationType.monthly);
+		accumulationTypeList.add(AccumulationType.no);
+		accumulationTypeList.add(AccumulationType.yearly);
+		
+		List<AccumulationBehaviour> accumulationBehaviourList = new ArrayList<AccumulationBehaviour>();
+		accumulationBehaviourList.add(AccumulationBehaviour.noMoreAbsencesAccepted);
+		accumulationBehaviourList.add(AccumulationBehaviour.nothing);
+		accumulationBehaviourList.add(AccumulationBehaviour.replaceCodeAndDecreaseAccumulation);
+		
+		render(abt, abtg, qualificationList, abtList, justifiedTimeAtWorkList, accumulationTypeList, accumulationBehaviourList);
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
+	public static void saveAbsenceCode(){
+		AbsenceType abt = new AbsenceType();
+		AbsenceTypeGroup abtg = null;
+		abt.code = params.get("codice");
+		if(params.get("codiceAttestati") != null)
+			abt.certificateCode = params.get("codiceAttestati");
+		else
+			abt.certificateCode = null;
+		abt.description = params.get("descrizione");
+		abt.ignoreStamping = params.get("ignoraTimbrature", Boolean.class);
+		abt.internalUse = params.get("usoInterno", Boolean.class);
+		abt.mealTicketCalculation = params.get("calcoloBuono", Boolean.class);
+		if(params.get("inizioValidita", Date.class) != null){
+			Date validFrom = params.get("inizioValidita", Date.class);
+			abt.validFrom = new LocalDate(validFrom);
+		}
+		else
+			abt.validFrom = null;
+		if(params.get("fineValidita", Date.class) != null){
+			Date validTo = params.get("fineValidita", Date.class);
+			abt.validTo = new LocalDate(validTo);
+		}
+		else
+			abt.validTo = null;
+		
+		abt.justifiedTimeAtWork = params.get("jwt", JustifiedTimeAtWork.class);
+		abt.multipleUse = params.get("usoMultiplo", Boolean.class);
+		/**
+		 * TODO: come fare per le qualifiche????
+		 */
+		if(params.get("livello1", Boolean.class) != null){
+			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 1).first();
+			abt.qualifications.add(qual);
+		}
+		if(params.get("livello2", Boolean.class) != null){
+			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 2).first();
+			abt.qualifications.add(qual);
+		}
+		if(params.get("livello3", Boolean.class) != null){
+			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 3).first();
+			abt.qualifications.add(qual);
+		}
+		if(params.get("livello4", Boolean.class) != null){
+			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 4).first();
+			abt.qualifications.add(qual);
+		}
+		if(params.get("livello5", Boolean.class) != null){
+			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 5).first();
+			abt.qualifications.add(qual);
+		}
+		if(params.get("livello6", Boolean.class) != null){
+			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 6).first();
+			abt.qualifications.add(qual);
+		}
+		if(params.get("livello7", Boolean.class) != null){
+			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 7).first();
+			abt.qualifications.add(qual);
+		}
+		if(params.get("livello8", Boolean.class) != null){
+			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 8).first();
+			abt.qualifications.add(qual);
+		}
+		if(params.get("livello9", Boolean.class) != null){
+			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 9).first();
+			abt.qualifications.add(qual);
+		}
+			
+		if(!params.get("gruppo").equals("")){
+			abtg = new AbsenceTypeGroup();
+			abtg.accumulationBehaviour = params.get("accBehaviour", AccumulationBehaviour.class);
+			abtg.accumulationType = params.get("accType", AccumulationType.class);
+			abtg.label = params.get("gruppo");
+			abtg.limitInMinute = params.get("limiteAccumulo", Integer.class);
+			abtg.minutesExcess = params.get("minutiEccesso", Boolean.class);
+			abtg.replacingAbsenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", params.get("codicePerSostituzione")).first();
+			abtg.save();
+		}
+		abt.absenceTypeGroup = abtg;
+		abt.save();
+		flash.success(
+				String.format("Inserita nuova assenza con codice %s", abt.code));
+		Application.indexAdmin();
+	}
 
+	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
+	public static void discard(){
+		manageAbsenceCode();
+	}
+	
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void create(@Required Long personId, @Required Integer year, @Required Integer month, @Required Integer day, String absenceCode) {
     	Logger.debug("Insert absence called for personId=%d, year=%d, month=%d, day=%d", personId, year, month, day);
@@ -229,5 +358,7 @@ public class Absences extends Controller{
 		}
 		render("@save");
 	}
+	
+	
 
 }
