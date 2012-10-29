@@ -260,10 +260,14 @@ h2#titoloConfigurazioneParametri {text-align: center}
 h2#titoloTotaleAssenzeMensili {margin: 4em 1em 1em; text-align: center}
 h2#inserimentoNuovoCodiceAssenza {text-align: center}
 h2#titoloGestioneCompetenze {text-align: center}
+h2#titoloControllaTimbratureMancanti {text-align: center}
+h2#titoloInserimentoTipoFerie {text-align: center}
 
 h3#titoloGestioneParametri {margin: 2em 0em 2em; text-align: center}
 h3#gestioneUtenteAmministrativo {margin: 2em 0em 2em; text-align: center}
 h3#gestioneConfigurazioneParametri {text-align: center}
+h3#titoloPianoFerie {margin: 2em 1em 1em; text-align: left}
+
 fieldset#timbraturaWeb {height: 12em}
 fieldset#stampaPdf {height: 12em}
 fieldset#fieldsetTerminateContract {height: 30 em}
@@ -280,6 +284,7 @@ input#submitNuovoCodiceAssenza {margin: 2em 60em 0em; align: center}
 input#discardNuovoCodiceAssenza {margin: 1em 60em 0em; align: center}
 table#tabellaPersoneCodiciAssenzaMensili {margin: 2em 1em 1em; align: left}
 table#tabellaPersoneCompetenze {margin: 2em 1em 1em; align: left}
+table#tabellaTimbratureMancanti {margin: 2em 1em 1em; align: left}
 
 
 select#assenzaFrequente {margin-bottom: 1em}

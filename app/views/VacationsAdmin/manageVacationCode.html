@@ -2,8 +2,13 @@
 
 <h2 id="titoloGestioneTipiFerie">Gestione dei tipi di ferie e dei permessi legge</h2>
 
-<p><a href="insertVacationCode.html">Nuovo</a></p>
+#{logoutForm /}
 
+#{functionalMenuForm mainMenu: mainMenu /} 
+
+<p><a href="@{VacationsAdmin.insertVacationCode}">Nuovo</a></p>
+
+<h3 id="titoloPianoFerie">Tipi di piano ferie definiti</h3>
 <table>
 	<tr>
 		<th>Nome</th>
@@ -15,7 +20,7 @@
 		for(vacationCode in vacationCodeList){
 	}%
 	<tr>
-		<td>${vacationCode.description}</td>
+		<td><a href="@{VacationsAdmin.edit(vacationCode.id)}">${vacationCode.description}</a></td>
 		<td>${vacationCode.vacationDays}</td>
 		<td>${vacationCode.permissionDays}</td>
 		<td></td>		
