@@ -3,6 +3,7 @@ package controllers;
 import it.cnr.iit.epas.FromMysqlToPostgres;
 
 import java.sql.SQLException;
+import java.util.List;
 
 import models.Person;
 import models.PersonMonth;
@@ -39,12 +40,15 @@ public class Administration extends Controller {
 		render(n);
 	}
 	
-	/**
-	 * TODO: controllare il corretto funzionamento magari tramite log
-	 */
 	public static void upgradePerson(){
 		FromMysqlToPostgres.upgradePerson();
 		renderText("Modificati i permessi per l'utente");
+	}
+	
+	public static void updateCompetence() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+		//Person person = Person.find("bySurnameAndName", "Lucchesi", "Cristian").first();
+		FromMysqlToPostgres.updateCompetence();
+		renderText("Aggiunti gli straordinari diurni feriali alle persone nella tabella competenze");
 	}
     
 }

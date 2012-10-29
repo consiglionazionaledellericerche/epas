@@ -86,7 +86,7 @@ public class SwitchTemplate extends Controller{
 			
 			break;
 		case competences:
-			Competences.show();
+			Competences.showCompetences(year, month);
 			break;
 		case changePassword:
 			Persons.changePassword(person.id);
@@ -103,6 +103,8 @@ public class SwitchTemplate extends Controller{
 		case administrator:
 			Administrators.list();
 			break;
+		case missingStamping:
+			Stampings.missingStamping(year, month);
 		default:
 			break;
 		}

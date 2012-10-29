@@ -16,5 +16,6 @@ public enum ActionMenuItem {
 	confParameters,
 	administrator,
 	totalMonthlyAbsences,
-	manageAbsenceCode
+	manageAbsenceCode,
+	missingStamping
 }

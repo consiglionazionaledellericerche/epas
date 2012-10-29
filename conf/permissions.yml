@@ -25,4 +25,7 @@ Permission(insertAndUpdatePassword):
 Permission(insertAndUpdateAdministrator):
     description: insertAndUpdateAdministrator
 
+Permission(insertAndUpdateCompetences):
+    description: insertAndUpdateCompetences
+
 

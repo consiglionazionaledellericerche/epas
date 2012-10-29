@@ -1180,11 +1180,61 @@ public class FromMysqlToPostgres {
 		Logger.debug("Chiamata la funzione upgrade person");
 		Person person = Person.find("bySurnameAndName", "Lucchesi", "Cristian").first();
 		Logger.debug("Scelta persona: %s %s", person.name, person.surname);
-		List<Permission> permissionList = Permission.findAll();
-		person.permissions.addAll(permissionList);
+		if(person.permissions.size() > 0){
+			List<Permission> oldPermissions = person.permissions;
+			person.permissions.removeAll(oldPermissions);
+			List<Permission> permissionList = Permission.findAll();
+			person.permissions.addAll(permissionList);
+		}
+		else{
+			List<Permission> permissionList = Permission.findAll();
+			person.permissions.addAll(permissionList);
+		}		
+		
 		person.save();
 	}
 
+	/**
+	 * TODO: cambiare la query, invece di farla sul monthrecap che è vuoto, farla sul totali_mens sul db vecchio
+	 * @throws SQLException 
+	 * @throws ClassNotFoundException 
+	 * @throws IllegalAccessException 
+	 * @throws InstantiationException 
+	 */
+	public static void updateCompetence() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+		Logger.debug("Chiamata la funzione update competence");
+		Connection mysqlCon = getMysqlConnection();
+		List<Person> personList = Person.findAll();
+		for(Person p : personList){
+			
+			PreparedStatement stmt = mysqlCon.prepareStatement("Select totali_mens.ore_str, totali_mens.mese " +
+					"from totali_mens, Persone where Persone.Id = totali_mens.id and totali_mens.anno = ? and Persone.Nome = ?" +
+					" and Persone.Cognome = ?");
+			stmt.setLong(1, 2012);
+			stmt.setString(2, p.name);
+			stmt.setString(3, p.surname);
+			ResultSet rs = stmt.executeQuery();
+			CompetenceCode code = null;
+			while(rs.next()){
+				code = CompetenceCode.find("Select code from CompetenceCode code where code.description = ?", 
+						"Straoridinario diurno nei giorni lavorativi").first();
+				if(code == null){
+					code = new CompetenceCode();
+					code.description = "Straordinario diurno nei giorni lavorativi";
+					code.inactive = false;
+					code.save();
+				}
+				Competence comp = new Competence();
+				comp.competenceCode = code;
+				comp.person = p;
+				comp.year = 2012;
+				comp.month = rs.getInt("mese");
+				comp.value = rs.getInt("ore_str");
+				comp.save();
+			}
+		}		
+		
+	}
 
 }
 
