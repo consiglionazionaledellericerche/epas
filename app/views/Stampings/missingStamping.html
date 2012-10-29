@@ -2,7 +2,12 @@
 
 <h2 id="titoloControllaTimbratureMancanti">Controllo delle timbrature mancanti di <span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year}</h2>
 
-<table>
+
+#{logoutForm /}
+
+#{functionalMenuForm mainMenu: mainMenu /} 
+
+<table id="tabellaTimbratureMancanti">
 	<tr>
 		<th>Nome</th>
 		<th>Giorni da controllare</th>

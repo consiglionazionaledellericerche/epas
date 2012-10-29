@@ -75,15 +75,7 @@ public class SwitchTemplate extends Controller{
 			Absences.manageAbsenceCode();
 			break;
 		case vacations:
-			
-			if (personId != null) {
-				Logger.debug("sto per chiamare il metodo showAdmin con personId = %s, year = %s, month = %s", personId, year, month);
-				Vacations.show();
-			} else {
-				Logger.debug("sto per chiamare il metodo show con personId = %s, year = %s, month = %s", personId, year, month);
-				Vacations.show();
-			}
-			
+			VacationsAdmin.manageVacationCode();		
 			break;
 		case competences:
 			Competences.showCompetences(year, month);
