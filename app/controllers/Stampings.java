@@ -335,4 +335,27 @@ public class Stampings extends Controller {
     	render(personPersonDayMap, month, year);
     	
     }
+    
+    @Check(Security.INSERT_AND_UPDATE_PERSON)
+    public static void dailyPresence(Integer year, Integer month, Integer day){
+    	/**
+    	 * TODO: invece della lista dei personDay, devo far ritornare una mappa che ha come chiave la persona e come valore il personDay
+    	 * relativo al giorno che compongo tramite localdate con year, month e day.
+    	 */
+    	List<PersonDay> pdList = null;
+    	LocalDate today = null;
+    	if(day == null){
+    		today = new LocalDate();
+    		pdList = PersonDay.find("Select pd from PersonDay pd where pd.date = ?", today).fetch();
+    	}    	
+    	else{
+    		LocalDate date = new LocalDate(year,month,day);
+    		pdList = PersonDay.find("Select pd from PersonDay pd where pd.date = ?", date).fetch();
+    	}
+    	List<Integer> days = new ArrayList<Integer>();
+    	for(Integer i = 1; i < 32; i++){
+    		days.add(i);
+    	}
+    	render(pdList, days, year, month, day);
+    }
 }

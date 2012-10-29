@@ -1,0 +1,14 @@
+#{extends 'main.html' /}
+
+<h2 id="titoloModificaTipoFerie">Modifica dati per tipo ferie: ${vc.description}</h2>
+
+#{form @VacationsAdmin.save()}
+<p>Nome <input name="nome" type="text" value="${vc.description}" size="40" maxlength="200" /></p>
+<p>Giorni ferie <input name="giorniFerie" type="text" value="${vc.vacationDays}" size="10" maxlength="10" /></p>
+<p>Giorni permesso <input name="giorniPermesso" type="text" value="${vc.permissionDays}" size="10" maxlength="10" /></p>
+
+<input type="submit" value="Salva"/>
+#{/form}
+#{form @VacationsAdmin.discard()}
+<input type="submit" value="Annulla"/>
+#{/form}

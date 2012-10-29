@@ -47,6 +47,11 @@ public class SwitchTemplate extends Controller{
 			year = params.get("year", Integer.class);
 		}
 		
+		int day = now.getDayOfMonth();
+		if(params.get("day") != null){
+			day = params.get("day", Integer.class);
+		}
+		
 		switch (menuItem) {
 		
 		case stampings:
@@ -97,6 +102,10 @@ public class SwitchTemplate extends Controller{
 			break;
 		case missingStamping:
 			Stampings.missingStamping(year, month);
+			break;
+		case dailyPresence:
+			Stampings.dailyPresence(year, month, day);
+			break;
 		default:
 			break;
 		}

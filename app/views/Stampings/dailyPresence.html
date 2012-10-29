@@ -1,0 +1,46 @@
+#{extends 'main.html' /}
+
+#{logoutForm /}
+
+#{functionalMenuForm mainMenu: mainMenu /} 
+
+#{select 'day', value:day, id: 'giorno'}
+	%{ for(day in days){
+		}%
+		#{option day}${day}#{/option}
+		%{
+			}
+		}%		
+#{/select}
+
+<h2 id="situazionePresenzaGiornaliera">Situazione presenze del giorno ${day} <span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year}</h2>
+
+<table id ="tabellaPresenzaGiornaliera">
+	<tr>
+		<th>Cognome Nome</th>
+		<th>Assenza</th>
+		<th>1° entrata</th>
+		<th>1° uscita</th>
+		<th>2° entrata</th>
+		<th>2° uscita</th>
+		<th>3° entrata</th>
+		<th>3° uscita</th>
+		<th>Tempo</th>		
+	</tr>
+	%{for(pd in pdList){
+	}%
+	<tr>
+		<td>${pd.person.surname} ${pd.person.name}</td>
+		<td>${pd.absences.size() > 0 ? pd.absences.get(0).absenceType.code : ''}</td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td>${pd.timeAtWork.toHourTime()}</td>
+	</tr>	
+		%{
+		}
+		}%
+</table>
