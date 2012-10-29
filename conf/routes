@@ -80,6 +80,7 @@ GET		/stampings/edit/{stampingId}			Stampings.edit
 POST	/stampings/update						Stampings.update
 GET		/choosePersonAndDate					Stampings.choosePersonAndDate
 GET		/personStamping							Stampings.personStamping
+GET		/stampings/missingStamping/{year}/{month}			Stampings.missingStamping
 
 #Gestione assenze
 GET		/absences/insert/{personId}/{year}/{month}/{day}	Absences.insert
@@ -104,6 +105,9 @@ GET		/administratorList						Administrators.list
 GET		/insertAdministrator					Administrators.insertAdmin
 POST	/insertAdministrator					Administrators.save
 GET 	/administrators/edit/{adminId}			Administrators.edit
+
+#Gestione straordinari e competenze
+GET		/showCompetences/{year}/{month}			Competences.showCompetences
 
 
 #Gestione reperibilità

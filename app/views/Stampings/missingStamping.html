@@ -1,0 +1,24 @@
+#{extends 'main.html' /}
+
+<h2 id="titoloControllaTimbratureMancanti">Controllo delle timbrature mancanti di <span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year}</h2>
+
+<table>
+	<tr>
+		<th>Nome</th>
+		<th>Giorni da controllare</th>
+	</tr>
+	%{ for(entry in personPersonDayMap.entrySet()){
+	}%
+	<tr>
+		<td>${entry.getKey().surname} ${entry.getKey().name}</td>
+		<td>%{ for(pd in entry.getValue()){ 
+			}% ${pd.date.getDayOfMonth() } 
+			%{
+			}
+			}%
+		</td>
+	</tr>
+	%{
+	}
+	}%
+</table>

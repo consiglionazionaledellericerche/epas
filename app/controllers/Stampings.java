@@ -1,7 +1,9 @@
 package controllers;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import it.cnr.iit.epas.ActionMenuItem;
 import it.cnr.iit.epas.MainMenu;
@@ -302,4 +304,35 @@ public class Stampings extends Controller {
 	public static void discard(){
 		personStamping();
 	}
+    
+    @Check(Security.INSERT_AND_UPDATE_PERSON)
+    public static void missingStamping(int year, int month){
+
+    	Map<Person, List<PersonDay>> personPersonDayMap = new HashMap<Person,List<PersonDay>>();
+    	List<Person> personList = Person.findAll();
+    	for(Person p : personList){
+    		List<PersonDay> pdMissingStampingList = new ArrayList<PersonDay>();
+    		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date >= ? and pd.date <= ?", 
+    				p, new LocalDate(year, month, 1), new LocalDate(year, month,1).dayOfMonth().withMaximumValue()).fetch();
+    				
+    		for(PersonDay pd : pdList){
+    			if(pd.stampings.size() == 1 || (pd.stampings.size() == 0 && pd.absences.size() == 0)){
+    				
+    				if(!personPersonDayMap.containsKey(p)){
+    					pdMissingStampingList.add(pd);
+    					personPersonDayMap.put(p, pdMissingStampingList);
+    				}
+    				else{
+    					pdMissingStampingList = personPersonDayMap.remove(p);
+    					pdMissingStampingList.add(pd);
+    					personPersonDayMap.put(p, pdMissingStampingList);
+    				}    					
+    				
+    			}
+    				
+    		}
+    	}
+    	render(personPersonDayMap, month, year);
+    	
+    }
 }
