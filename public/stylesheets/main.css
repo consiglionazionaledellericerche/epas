@@ -264,6 +264,7 @@ h2#titoloControllaTimbratureMancanti {text-align: center}
 h2#titoloInserimentoTipoFerie {text-align: center}
 h2#titoloModificaTipoFerie {text-align: center}
 h2#situazionePresenzaGiornaliera {text-align: center}
+h2#titoloRiepilogoBuoniMensa {text-align: center}
 
 h3#titoloGestioneParametri {margin: 2em 0em 2em; text-align: center}
 h3#gestioneUtenteAmministrativo {margin: 2em 0em 2em; text-align: center}
@@ -288,6 +289,7 @@ table#tabellaPersoneCodiciAssenzaMensili {margin: 2em 1em 1em; align: left}
 table#tabellaPersoneCompetenze {margin: 2em 1em 1em; align: left}
 table#tabellaTimbratureMancanti {margin: 2em 1em 1em; align: left}
 table#tabellaPresenzaGiornaliera {margin: 2em 1em 1em; align: left}
+table#tabellaRiepilogoBuoniMensa {margin: 2em; align:left}
 
 
 select#assenzaFrequente {margin-bottom: 1em}

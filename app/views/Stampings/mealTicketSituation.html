@@ -1,0 +1,36 @@
+#{extends 'main.html' /}
+
+<h2 id="titoloRiepilogoBuoniMensa">Riepilogo buoni mensa di <span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year}</h2>
+
+
+#{logoutForm /}
+
+#{functionalMenuForm mainMenu: mainMenu /}
+
+<table id="tabellaRiepilogoBuoniMensa">
+	<tr>
+		<th rowspan="2">Nome</th>
+		<th colspan="${numberOfDays}">Giorni</th>
+	</tr>
+	%{  for(col in tablePersonTicket.columnKeySet()){
+		}%
+		<th>${col.getDayOfMonth()}</th>
+	%{
+		}
+	}%
+	%{  for(entry in tablePersonTicket.rowMap().entrySet()){
+		}%
+	<tr>
+		<td>${entry.getKey().surname} ${entry.getKey().name}</td>
+		%{ for(col in tablePersonTicket.columnKeySet()){
+		}%
+			<td>${entry.getValue().get(col)}</td>
+		%{
+		   }
+		}%
+	</tr>
+	%{
+	   }
+	}%
+	
+</table>

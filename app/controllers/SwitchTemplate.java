@@ -4,6 +4,8 @@ import it.cnr.iit.epas.ActionMenuItem;
 
 import org.joda.time.LocalDate;
 
+import com.ning.http.util.DateUtil.DateParseException;
+
 import models.MonthRecap;
 import models.Person;
 import models.Stamping;
@@ -15,7 +17,7 @@ public class SwitchTemplate extends Controller{
 
 	public static final String USERNAME_SESSION_KEY = "username";
 	
-	public static void dispatch() throws InstantiationException, IllegalAccessException{
+	public static void dispatch() throws InstantiationException, IllegalAccessException, DateParseException{
 		LocalDate now = new LocalDate();
 		
 		String action = params.get("action");
@@ -105,6 +107,9 @@ public class SwitchTemplate extends Controller{
 			break;
 		case dailyPresence:
 			Stampings.dailyPresence(year, month, day);
+			break;
+		case mealTicketSituation:
+			Stampings.mealTicketSituation(year, month);
 			break;
 		default:
 			break;
