@@ -87,6 +87,7 @@ GET		/choosePersonAndDate					Stampings.choosePersonAndDate
 GET		/personStamping							Stampings.personStamping
 GET		/stampings/missingStamping/{year}/{month}			Stampings.missingStamping
 GET		/stampings/dailyPresence/{year}/{month}/{day}		Stampings.dailyPresence
+GET		/stampings/mealTicketSituation/{year}/{month}		Stampings.mealTicketSituation
 
 #Gestione assenze
 GET		/absences/insert/{personId}/{year}/{month}/{day}	Absences.insert

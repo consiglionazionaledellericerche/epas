@@ -1,6 +1,8 @@
 package controllers;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +27,12 @@ import models.Configuration;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.ImmutableTable;
+import com.google.common.collect.ImmutableTable.Builder;
+import com.google.common.collect.Table;
+import com.ning.http.util.DateUtil.DateParseException;
+
 import play.Logger;
 import play.data.validation.Required;
 import play.data.validation.Valid;
@@ -35,7 +43,6 @@ import play.mvc.With;
 @With( {Secure.class, NavigationMenu.class} )
 public class Stampings extends Controller {
 		
-	//private final static ActionMenuItem actionMenuItem = ActionMenuItem.stampings;
     /**
      * 
      * @param person
@@ -43,9 +50,9 @@ public class Stampings extends Controller {
      * @param month
      */
     public static void show(Long personId, int year, int month){
-    	
-    	//String menuItem = actionMenuItem.toString();
+    	    	
     	if (personId == null) {
+    	
     		show();
     	}
     	
@@ -337,11 +344,8 @@ public class Stampings extends Controller {
     }
     
     @Check(Security.INSERT_AND_UPDATE_PERSON)
-    public static void dailyPresence(Integer year, Integer month, Integer day){
-    	/**
-    	 * TODO: invece della lista dei personDay, devo far ritornare una mappa che ha come chiave la persona e come valore il personDay
-    	 * relativo al giorno che compongo tramite localdate con year, month e day.
-    	 */
+    public static void dailyPresence(Integer year, Integer month, Integer day) throws DateParseException{
+
     	List<PersonDay> pdList = null;
     	LocalDate today = null;
     	if(day == null){
@@ -349,8 +353,15 @@ public class Stampings extends Controller {
     		pdList = PersonDay.find("Select pd from PersonDay pd where pd.date = ?", today).fetch();
     	}    	
     	else{
-    		LocalDate date = new LocalDate(year,month,day);
-    		pdList = PersonDay.find("Select pd from PersonDay pd where pd.date = ?", date).fetch();
+    		try{
+    			LocalDate date = new LocalDate(year,month,day);
+				pdList = PersonDay.find("Select pd from PersonDay pd where pd.date = ?", date).fetch();
+    		}
+    		catch(IllegalArgumentException e){
+    			flash.error(String.format("La data richiesta è errata"));
+    			dailyPresence(year, month, day);
+    		}
+    		
     	}
     	List<Integer> days = new ArrayList<Integer>();
     	for(Integer i = 1; i < 32; i++){
@@ -358,4 +369,50 @@ public class Stampings extends Controller {
     	}
     	render(pdList, days, year, month, day);
     }
+    
+    @Check(Security.INSERT_AND_UPDATE_PERSON)
+    public static void mealTicketSituation(Integer year, Integer month){
+    	/**
+    	 * TODO: nuovo tipo di permesso per la visualizzazione della situazione mensile dei buoni pasto
+    	 */
+    	LocalDate beginMonth = new LocalDate(year, month, 1);
+    	    	
+    	List<Person> activePersons = Person.getActivePersons(new LocalDate(year, month, 1));
+    	Builder<Person, LocalDate, String> builder = ImmutableTable.<Person, LocalDate, String>builder().orderColumnsBy(new Comparator<LocalDate>() {
+
+	    	public int compare(LocalDate date1, LocalDate date2) {
+				return date1.compareTo(date2);
+			}
+		}).orderRowsBy(new Comparator<Person>(){
+			public int compare(Person p1, Person p2) {
+
+				return p1.surname.compareTo(p2.surname);
+			}
+			
+		});
+    	for(Person p : activePersons){
+    		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
+    				p, beginMonth, beginMonth.dayOfMonth().withMaximumValue()).fetch();
+    		Logger.debug("La lista dei personDay: ", pdList);
+    		for(PersonDay pd : pdList){
+    			
+    			Logger.debug("Per la persona %s nel personDay %s il buono mensa è: %s", p, pd, pd.isTicketAvailable);
+    			if(pd.isTicketAvailable == true){
+    				Logger.debug("Per il giorno %s il valore del ticket è: ", pd.date, "si");
+    				builder.put(p, pd.date, "si");
+    			}
+    			else{
+    				Logger.debug("Per il giorno %s il valore del ticket è: ", pd.date, "");
+    				builder.put(p, pd.date, "");
+    			}    			
+    			
+    		}
+    		
+    	}
+    	LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
+    	int numberOfDays = endMonth.getDayOfMonth();
+    	Table<Person, LocalDate, String> tablePersonTicket = builder.build();
+    	render(year, month, tablePersonTicket, numberOfDays);
+    }
+  
 }

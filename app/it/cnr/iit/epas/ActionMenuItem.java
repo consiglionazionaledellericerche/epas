@@ -18,5 +18,6 @@ public enum ActionMenuItem {
 	totalMonthlyAbsences,
 	manageAbsenceCode,
 	missingStamping,
-	dailyPresence
+	dailyPresence,
+	mealTicketSituation
 }
