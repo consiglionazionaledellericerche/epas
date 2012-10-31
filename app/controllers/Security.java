@@ -23,6 +23,7 @@ public class Security extends Secure.Security {
 	public final static String INSERT_AND_UPDATE_CONFIGURATION = "insertAndUpdateConfiguration";
 	public final static String INSERT_AND_UPDATE_ADMINISTRATOR = "insertAndUpdateAdministrator";
 	public final static String INSERT_AND_UPDATE_COMPETENCES = "insertAndUpdateCompetences";
+	public final static String INSERT_AND_UPDATE_VACATIONS = "insertAndUpdateVacations";
 	
 	private final static String PERMISSION_CACHE_PREFIX = "permission.";
 		

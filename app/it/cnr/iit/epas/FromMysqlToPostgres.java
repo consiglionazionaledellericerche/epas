@@ -645,14 +645,7 @@ public class FromMysqlToPostgres {
 		 * query sulle tabelle orario, per recuperare le info sulle timbrature e sulle assenze
 		 * di ciascuna persona per generare i personday
 		 */
-//		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT Orario.ID,Orario.Giorno,Orario.TipoGiorno,Orario.TipoTimbratura," +
-//				"Orario.Ora, Codici.id, Codici.Codice, Codici.Qualifiche " +
-//				"FROM Orario, Codici " +
-//				"WHERE Orario.TipoGiorno=Codici.id and Orario.Giorno >= ? " +
-//				"and Orario.ID = ? ORDER BY Orario.Giorno");
-//		java.sql.Date dataSQL = new java.sql.Date(anno,1,1);
-//		stmtOrari.setDate(1, dataSQL);
-//		stmtOrari.setLong(2, id);
+
 		
 		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT Orario.ID,Orario.Giorno,Orario.TipoGiorno,Orario.TipoTimbratura," + 	
                 "Orario.Ora, Codici.id, Codici.Codice, Codici.Qualifiche " +
@@ -991,7 +984,7 @@ public class FromMysqlToPostgres {
 		Logger.debug("Inizio a creare le competenze per %s", person);
 
 		Connection mysqlCon = getMysqlConnection();
-		PreparedStatement stmt = mysqlCon.prepareStatement("Select codici_comp.id, competenze.mese, " +
+		PreparedStatement stmt = mysqlCon.prepareStatement("Select codici_comp.id, competenze.mese, codici_comp.codice, codici_comp.codice_att, " +
 				"competenze.anno, competenze.codice, competenze.valore, codici_comp.descrizione, codici_comp.inattivo " +
 				"from competenze, codici_comp where codici_comp.codice=competenze.codice and competenze.id= ? and competenze.anno = ?");
 		stmt.setLong(1, id);
@@ -1028,6 +1021,8 @@ public class FromMysqlToPostgres {
 			int idCodiciCompetenza = rs.getInt("id");	
 			if(mappaCodiciCompetence.get(idCodiciCompetenza)== null){
 				competenceCode = new CompetenceCode();
+				competenceCode.code = rs.getString("codice");
+				competenceCode.codeToPresence = rs.getString("codice_att");
 				competenceCode.description = rs.getString("descrizione");
 				competenceCode.inactive = rs.getByte("inattivo") != 0;
 
@@ -1205,25 +1200,24 @@ public class FromMysqlToPostgres {
 		Logger.debug("Chiamata la funzione update competence");
 		Connection mysqlCon = getMysqlConnection();
 		List<Person> personList = Person.findAll();
+		CompetenceCode code = new CompetenceCode();
+		code.description = "Straordinario diurno nei giorni lavorativi";
+		code.code = "S1";
+		code.codeToPresence = "S1";
+		code.inactive = false;
+		code.save();
 		for(Person p : personList){
 			
-			PreparedStatement stmt = mysqlCon.prepareStatement("Select totali_mens.ore_str, totali_mens.mese " +
+			PreparedStatement stmt = mysqlCon.prepareStatement("Select totali_mens.ore_str, totali_mens.mese, totali_mens.anno " +
 					"from totali_mens, Persone where Persone.Id = totali_mens.id and totali_mens.anno = ? and Persone.Nome = ?" +
 					" and Persone.Cognome = ?");
-			stmt.setLong(1, 2012);
+			stmt.setLong(1, 2011);
 			stmt.setString(2, p.name);
 			stmt.setString(3, p.surname);
 			ResultSet rs = stmt.executeQuery();
-			CompetenceCode code = null;
+			
 			while(rs.next()){
-				code = CompetenceCode.find("Select code from CompetenceCode code where code.description = ?", 
-						"Straoridinario diurno nei giorni lavorativi").first();
-				if(code == null){
-					code = new CompetenceCode();
-					code.description = "Straordinario diurno nei giorni lavorativi";
-					code.inactive = false;
-					code.save();
-				}
+				
 				Competence comp = new Competence();
 				comp.competenceCode = code;
 				comp.person = p;

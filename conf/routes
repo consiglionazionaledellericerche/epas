@@ -115,6 +115,11 @@ GET 	/administrators/edit/{adminId}			Administrators.edit
 
 #Gestione straordinari e competenze
 GET		/showCompetences/{year}/{month}			Competences.showCompetences
+GET		/manageCompetenceCode					Competences.manageCompetenceCode
+GET		/competences/edit/{competenceCodeId}	Competences.edit
+GET		/insertCompetenceCode					Competences.insertCompetenceCode
+POST	/insertCompetenceCode					Competences.save
+GET		/manageCompetenceCode					Competences.discard
 
 
 #Gestione reperibilità

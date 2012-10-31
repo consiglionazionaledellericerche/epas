@@ -20,7 +20,7 @@ public class Administration extends Controller {
     
     	final int NUMERO_PERSONE_DA_IMPORTARE = 0;
     	
-    	final int ANNO_DA_CUI_INIZIARE_IMPORTAZIONE = 2012;
+    	final int ANNO_DA_CUI_INIZIARE_IMPORTAZIONE = 2007;
     	
     	int absenceTypes = FromMysqlToPostgres.importAbsenceTypes();
     	FromMysqlToPostgres.createAbsenceTypeToQualificationRelations();

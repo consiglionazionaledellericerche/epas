@@ -12,19 +12,19 @@ public class VacationsAdmin extends Controller{
 	/**
 	 * TODO: inserire un nuovo permesso nella lista dei permessi: INSERT_AND_UPDATE_VACATIONS
 	 */
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	@Check(Security.INSERT_AND_UPDATE_VACATIONS)
 	public static void manageVacationCode(){
 		List<VacationCode> vacationCodeList = VacationCode.findAll();
 		render(vacationCodeList);
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	@Check(Security.INSERT_AND_UPDATE_VACATIONS)
 	public static void edit(Long vacationCodeId){
 		VacationCode vc = VacationCode.findById(vacationCodeId);
 		render(vc);
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	@Check(Security.INSERT_AND_UPDATE_VACATIONS)
 	public static void save(){
 		VacationCode vacationCode = new VacationCode();
 		vacationCode.description = params.get("nome");
@@ -42,13 +42,13 @@ public class VacationsAdmin extends Controller{
 		}
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	@Check(Security.INSERT_AND_UPDATE_VACATIONS)
 	public static void insertVacationCode(){
 		VacationCode vacationCode = new VacationCode();
 		render(vacationCode);
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	@Check(Security.INSERT_AND_UPDATE_VACATIONS)
 	public static void discard(){
 		manageVacationCode();
 	}

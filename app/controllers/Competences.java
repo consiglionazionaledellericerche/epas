@@ -5,6 +5,7 @@ import java.util.List;
 
 import it.cnr.iit.epas.ActionMenuItem;
 import models.Competence;
+import models.CompetenceCode;
 import models.MonthRecap;
 import models.Person;
 
@@ -86,6 +87,62 @@ public class Competences extends Controller{
 		int numberOfDifferentCompetenceType = tablePersonCompetences.columnKeySet().size();
 		render(tablePersonCompetences, year, month, numberOfDifferentCompetenceType);
     	
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	public static void manageCompetenceCode(){
+		List<CompetenceCode> compCodeList = CompetenceCode.findAll();
+		render(compCodeList);
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	public static void insertCompetenceCode(){
+		CompetenceCode code = new CompetenceCode();
+		render(code);
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	public static void edit(Long competenceCodeId){
+		CompetenceCode code = CompetenceCode.findById(competenceCodeId);
+		render(code);
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	public static void save(Long competenceCodeId){
+		if(competenceCodeId == null){
+			CompetenceCode code = new CompetenceCode();
+			code.code = params.get("codice");
+			code.codeToPresence = params.get("codiceAttPres");
+			code.description = params.get("descrizione");
+			code.inactive = params.get("inattivo", Boolean.class);
+			CompetenceCode codeControl = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", 
+					params.get("codice")).first();
+			if(codeControl == null){
+				code.save();
+				flash.success(String.format("Codice %s aggiunto con successo", code.code));
+				Application.indexAdmin();
+			}
+			else{
+				flash.error(String.format("Il codice competenza %s è già presente nel database. Cambiare nome al codice.", params.get("codice")));
+				Application.indexAdmin();
+			}
+			
+		}
+		else{
+			CompetenceCode code = CompetenceCode.findById(competenceCodeId);
+			code.code = params.get("codice");
+			code.codeToPresence = params.get("codiceAttPres");
+			code.description = params.get("descrizione");
+			code.inactive = params.get("inattivo", Boolean.class);
+			code.save();
+			flash.success(String.format("Codice %s aggiornato con successo", code.code));
+			Application.indexAdmin();
+		}
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	public static void discard(){
+		manageCompetenceCode();
 	}
 	
 }

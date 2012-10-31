@@ -28,4 +28,7 @@ Permission(insertAndUpdateAdministrator):
 Permission(insertAndUpdateCompetences):
     description: insertAndUpdateCompetences
 
+Permission(insertAndUpdateVacations):
+    description: insertAndUpdateVacations
+
 
