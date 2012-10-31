@@ -111,7 +111,10 @@ public class SwitchTemplate extends Controller{
 		case mealTicketSituation:
 			Stampings.mealTicketSituation(year, month);
 			break;
-		default:
+		case manageCompetence:
+			Competences.manageCompetenceCode();
+			break;
+		default:		
 			break;
 		}
 		

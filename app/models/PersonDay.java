@@ -593,6 +593,7 @@ public class PersonDay extends Model {
 	 */
 	private void setTicketAvailable(){
 
+		Logger.debug("Chiamata della setTicketAvailable, il timeAtWork per %s %s è: %s", person.name, person.surname, timeAtWork);
 		if(timeAtWork == 0 || timeAtWork < getWorkingTimeTypeDay().mealTicketTime){
 			isTicketAvailable = false;
 			return; 
@@ -607,36 +608,10 @@ public class PersonDay extends Model {
 				ticketAvailable=true;
 			else
 				ticketAvailable=false;
-
-//			if(timeAtWork > getWorkingTimeTypeDay().mealTicketTime && 
-//					timeAtWork < getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime 
-//					&& (stampings.size()==4 && checkMinTimeForLunch(stampings) < getWorkingTimeTypeDay().breakTicketTime))
-//				ticketAvailable=true;
-//
-//			if(timeAtWork > getWorkingTimeTypeDay().mealTicketTime 
-//					&& timeAtWork < getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime 
-//					&& (stampings.size()==4))
-//				ticketAvailable=true;
-//
-//			if(timeAtWork > getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime
-//					&& timeAtWork < getWorkingTimeTypeDay().workingTime 
-//					&& (stampings.size()==4 || stampings.size()==2))
-//				ticketAvailable=true;
-//
-//			if(timeAtWork > getWorkingTimeTypeDay().mealTicketTime && 
-//					timeAtWork < getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime 
-//					&& (stampings.size()==6))
-//				ticketAvailable=true;
-//
-//			if(timeAtWork < getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime
-//					&& timeAtWork > getWorkingTimeTypeDay().mealTicketTime 
-//					&& stampings.size()==2 )
-//				ticketAvailable = true;
-
 		}
-
+		
 		isTicketAvailable = ticketAvailable;
-
+		Logger.debug("Quindi il valore del buono pasto è %s", isTicketAvailable);
 	}
 
 	/**

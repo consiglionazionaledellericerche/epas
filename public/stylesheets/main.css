@@ -265,11 +265,13 @@ h2#titoloInserimentoTipoFerie {text-align: center}
 h2#titoloModificaTipoFerie {text-align: center}
 h2#situazionePresenzaGiornaliera {text-align: center}
 h2#titoloRiepilogoBuoniMensa {text-align: center}
+h2#titoloGestisciCodiceCompetenza {text-align: center}
 
 h3#titoloGestioneParametri {margin: 2em 0em 2em; text-align: center}
 h3#gestioneUtenteAmministrativo {margin: 2em 0em 2em; text-align: center}
 h3#gestioneConfigurazioneParametri {text-align: center}
 h3#titoloPianoFerie {margin: 2em 1em 1em; text-align: left}
+h3#modificaCodiceCompetenza {margin: 2em 0em 2em; text-align: center}
 
 fieldset#timbraturaWeb {height: 12em}
 fieldset#stampaPdf {height: 12em}
@@ -290,6 +292,7 @@ table#tabellaPersoneCompetenze {margin: 2em 1em 1em; align: left}
 table#tabellaTimbratureMancanti {margin: 2em 1em 1em; align: left}
 table#tabellaPresenzaGiornaliera {margin: 2em 1em 1em; align: left}
 table#tabellaRiepilogoBuoniMensa {margin: 2em; align:left}
+table#tabellaCodiciCompetenza {margin: 2em; align: left}
 
 
 select#assenzaFrequente {margin-bottom: 1em}
