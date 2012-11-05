@@ -16,6 +16,14 @@ public class Administration extends Controller {
         render();
     }
         
+    
+    public static void importOreStraordinario() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+    	
+    	FromMysqlToPostgres.importOreStraordinario();
+    	renderText("Importati tutti i dati relativi ai monte ore straordinari");
+    }
+    
+    
     public static void importAll() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
     
     	final int NUMERO_PERSONE_DA_IMPORTARE = 0;
