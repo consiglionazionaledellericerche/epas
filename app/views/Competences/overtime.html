@@ -1,0 +1,11 @@
+#{extends 'main.html' /}
+
+#{logoutForm /}
+
+#{functionalMenuForm mainMenu: mainMenu /} 
+
+    <ul class="nav nav-tabs">
+    	<li ><a href="@{Competences.showCompetences}">Competenze</a></li>
+    	<li class="active"><a href="@{Competences.overtime}#">Straordinari</a></li>
+    	<li><a href="@{Competences.totalOvertimeHours}#">Monte ore</a></li>
+    </ul>

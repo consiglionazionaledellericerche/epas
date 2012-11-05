@@ -46,6 +46,10 @@ GET     /favicon.ico                            404
 # Map static resources from the /app/public folder to the /public path
 GET     /public/                                staticDir:public
 
+# Bootstrap
+GET     /public/bootstrap/img/glyphicons-halflings-white.png    staticDir:public  
+GET     /public/bootstrap/img/glyphicons-halflings.png            staticDir:public
+
 # Import Secure routes
 #*       /                						module:secure
 
@@ -120,6 +124,9 @@ GET		/competences/edit/{competenceCodeId}	Competences.edit
 GET		/insertCompetenceCode					Competences.insertCompetenceCode
 POST	/insertCompetenceCode					Competences.save
 GET		/manageCompetenceCode					Competences.discard
+GET		/competences/totalOvertimeHours			Competences.totalOvertimeHours
+POST	/insertOvertime/{year}					Competences.saveOvertime
+GET		/competences/overtime					Competences.overtime
 
 
 #Gestione reperibilità

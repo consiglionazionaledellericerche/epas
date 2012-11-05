@@ -8,6 +8,7 @@ import models.Competence;
 import models.CompetenceCode;
 import models.MonthRecap;
 import models.Person;
+import models.TotalOvertime;
 
 import org.joda.time.LocalDate;
 
@@ -57,14 +58,9 @@ public class Competences extends Controller{
 	
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void showCompetences(Integer year, Integer month){
-		
-		/**
-		 * TODO: siccome le ore di straordinario mensili sono in totali_mens, si può fare o che le prendo da lì e le aggiungo qui, oppure 
-		 * devo inventare un metodo che inserisce quelle ore di straordinario mensile nella tabella competenze.
-		 * I codici mancanti derivano dal fatto che bisogna mettere indietro nel tempo la ricerca delle informazioni: partire dal 2007
-		 */
+	
 		Table<Person, String, Integer> tablePersonCompetences =  HashBasedTable.create();
-		List<Person> activePersons = Person.getActivePersons(new LocalDate(year, month, 1)).subList(0, 100);
+		List<Person> activePersons = Person.getActivePersons(new LocalDate(year, month, 1));
 		for(Person p : activePersons){
 			List<Competence> competenceInMonth = Competence.find("Select comp from Competence comp where comp.person = ? and comp.year = ?" +
 					"and comp.month = ?", p, year, month).fetch();
@@ -143,6 +139,34 @@ public class Competences extends Controller{
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void discard(){
 		manageCompetenceCode();
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	public static void totalOvertimeHours(int year){
+		List<TotalOvertime> total = TotalOvertime.find("Select tot from TotalOvertime tot where tot.year = ?", year).fetch();
+		render(total);
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	public static void saveOvertime(int year){
+		TotalOvertime total = new TotalOvertime();
+		total.date = new LocalDate();
+		total.year = new LocalDate().getYear();
+		String numeroOre = params.get("numeroOre");
+		if(numeroOre.startsWith("-")){
+			total.numberOfHours = new Integer(numeroOre.substring(1, numeroOre.length())) * (-1);
+		}
+		if(numeroOre.startsWith("+")){
+			total.numberOfHours = new Integer(numeroOre.substring(1, numeroOre.length()));
+		}
+		total.save();
+		flash.success(String.format("Aggiornato monte ore per l'anno", year));
+		Application.indexAdmin();
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	public static void overtime(){
+		
 	}
 	
 }

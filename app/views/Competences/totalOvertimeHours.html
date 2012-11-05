@@ -1,0 +1,38 @@
+#{extends 'main.html' /}
+
+#{logoutForm /}
+
+#{functionalMenuForm mainMenu: mainMenu /} 
+
+    <ul class="nav nav-tabs">
+    	<li ><a href="@{Competences.showCompetences}">Competenze</a></li>
+    	<li><a href="@{Competences.overtime}#">Straordinari</a></li>
+    	<li class="active"><a href="@{Competences.totalOvertimeHours}#">Monte ore</a></li>
+    </ul>
+    #{form @Competences.saveOvertime()}
+    <h3 id="monteOreStraordinario">Modifica del monte ore di straordinario del 2012</h3>
+    <table>
+	    <tr>
+	    	<th>Quando</th>
+	    	<th>Ore definite</th>
+	    </tr>
+	    %{for(tot in total){
+	    }%
+	    <tr>
+	    	<td>${}</td>
+	    	<td>${}</td>
+	    </tr>
+	    	%{
+	    	}
+	    	}%	
+    </table>
+    <p>Totale monte ore definite: ${}</p>
+    
+    <p id="inserimentoMonteOre">Inserire un incremento (segno +) o una diminuizione (segno -) rispetto al totale già disponibile</p>
+    
+    <input type="text" name="numeroOre" value="${}"/>
+    
+    <input id="" type="submit" value="Salva" />
+    #{/form}
+    
+    

@@ -259,7 +259,7 @@ h3#titoloSituazionePresenzeMensili {text-align: center}
 h2#titoloConfigurazioneParametri {text-align: center}
 h2#titoloTotaleAssenzeMensili {margin: 4em 1em 1em; text-align: center}
 h2#inserimentoNuovoCodiceAssenza {text-align: center}
-h2#titoloGestioneCompetenze {text-align: center}
+h2#titoloGestioneStraordinariCompetenze {margin: 2em; text-align: center}
 h2#titoloControllaTimbratureMancanti {text-align: center}
 h2#titoloInserimentoTipoFerie {text-align: center}
 h2#titoloModificaTipoFerie {text-align: center}
@@ -267,11 +267,13 @@ h2#situazionePresenzaGiornaliera {text-align: center}
 h2#titoloRiepilogoBuoniMensa {text-align: center}
 h2#titoloGestisciCodiceCompetenza {text-align: center}
 
+h3#titoloGestioneCompetenze {margin: 2em 0em 0em; text-align: left}
 h3#titoloGestioneParametri {margin: 2em 0em 2em; text-align: center}
 h3#gestioneUtenteAmministrativo {margin: 2em 0em 2em; text-align: center}
 h3#gestioneConfigurazioneParametri {text-align: center}
 h3#titoloPianoFerie {margin: 2em 1em 1em; text-align: left}
 h3#modificaCodiceCompetenza {margin: 2em 0em 2em; text-align: center}
+h3#monteOreStraordinario {margin: 2em 0em 0em; text-align: center}
 
 fieldset#timbraturaWeb {height: 12em}
 fieldset#stampaPdf {height: 12em}

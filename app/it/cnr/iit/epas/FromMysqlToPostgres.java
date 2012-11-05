@@ -35,6 +35,7 @@ import models.StampProfile;
 import models.StampType;
 import models.Stamping;
 import models.Stamping.WayType;
+import models.TotalOvertime;
 import models.VacationCode;
 import models.VacationPeriod;
 import models.ValuableCompetence;
@@ -125,6 +126,27 @@ public class FromMysqlToPostgres {
 	 * @throws SQLException
 	 */
 	
+	public static void importOreStraordinario() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+		Connection mysqlCon = FromMysqlToPostgres.getMysqlConnection();
+		String sql = "SELECT * FROM monteorestr";
+		
+		PreparedStatement stmt = mysqlCon.prepareStatement(sql);
+
+		ResultSet rs = stmt.executeQuery();
+		Logger.info("Inizio popolamento tabella degli straordinari");
+		while(rs.next()){
+			
+			TotalOvertime total = new TotalOvertime();
+			total.date = new LocalDate(rs.getDate("data"));
+			total.year = rs.getInt("anno");
+			total.numberOfHours = rs.getInt("ore");
+			total.save();
+		}
+		Logger.info("Fine popolamento tabella straordinari");
+		mysqlCon.close();
+
+	}
+	
 	public static void importAll(int limit, int anno) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		Connection mysqlCon = FromMysqlToPostgres.getMysqlConnection();
 
@@ -135,6 +157,7 @@ public class FromMysqlToPostgres {
 		if (limit > 0) {
 			sql += " LIMIT " + limit;
 		}
+				
 		
 		PreparedStatement stmt = mysqlCon.prepareStatement(sql);
 
@@ -168,8 +191,6 @@ public class FromMysqlToPostgres {
 			
 			FromMysqlToPostgres.createYearRecap(oldIDPersona, person, anno);
 
-//			FromMysqlToPostgres.createMonthRecap(oldIDPersona, person);
-
 			FromMysqlToPostgres.createCompetence(oldIDPersona, person, anno);
 
 			JPAPlugin.closeTx(false);
@@ -185,8 +206,6 @@ public class FromMysqlToPostgres {
 					rs.getString("Nome"), rs.getString("Cognome"));
 		}
 		
-//		upgradePerson();
-
 		Logger.info("Terminata l'importazione dei dati di tutte le persone in %d secondi", ((new Date()).getTime() - start.getTime()) / 1000);
 
 		mysqlCon.close();
