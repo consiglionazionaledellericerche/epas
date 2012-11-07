@@ -273,7 +273,8 @@ h3#gestioneUtenteAmministrativo {margin: 2em 0em 2em; text-align: center}
 h3#gestioneConfigurazioneParametri {text-align: center}
 h3#titoloPianoFerie {margin: 2em 1em 1em; text-align: left}
 h3#modificaCodiceCompetenza {margin: 2em 0em 2em; text-align: center}
-h3#monteOreStraordinario {margin: 2em 0em 0em; text-align: center}
+h3#monteOreStraordinario {margin: 2em 0em 1em; text-align: left}
+h3#titoloStraordinari {margin: 2em 0em 1em; text-align: left}
 
 fieldset#timbraturaWeb {height: 12em}
 fieldset#stampaPdf {height: 12em}
