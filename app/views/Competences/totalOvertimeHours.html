@@ -1,16 +1,18 @@
 #{extends 'main.html' /}
 
+<h2 id="titoloGestioneStraordinariCompetenze">Gestione straordinari e altre competenze</h2>
+
 #{logoutForm /}
 
 #{functionalMenuForm mainMenu: mainMenu /} 
 
     <ul class="nav nav-tabs">
-    	<li ><a href="@{Competences.showCompetences}">Competenze</a></li>
-    	<li><a href="@{Competences.overtime}#">Straordinari</a></li>
-    	<li class="active"><a href="@{Competences.totalOvertimeHours}#">Monte ore</a></li>
+    	<li ><a href="@{Competences.showCompetences(year,month)}#">Competenze</a></li>
+    	<li><a href="@{Competences.overtime(year, month)}#">Straordinari</a></li>
+    	<li class="active"><a href="@{Competences.totalOvertimeHours(year, month)}#">Monte ore</a></li>
     </ul>
     #{form @Competences.saveOvertime()}
-    <h3 id="monteOreStraordinario">Modifica del monte ore di straordinario del 2012</h3>
+    <h3 id="monteOreStraordinario">Modifica del monte ore di straordinario del ${year}</h3>
     <table>
 	    <tr>
 	    	<th>Quando</th>
@@ -19,16 +21,21 @@
 	    %{for(tot in total){
 	    }%
 	    <tr>
-	    	<td>${}</td>
-	    	<td>${}</td>
+	    	<td>${tot.date}</td>
+	    	<td>${tot.numberOfHours}</td>
 	    </tr>
 	    	%{
 	    	}
 	    	}%	
     </table>
-    <p>Totale monte ore definite: ${}</p>
+    <p>Totale monte ore definite: %{int totale = 0;
+    								for(tot in total) {
+    								    totale = totale+tot.numberOfHours;
+    								    }
+    							   }% <b>${totale}</b>
+    </p>
     
-    <p id="inserimentoMonteOre">Inserire un incremento (segno +) o una diminuizione (segno -) rispetto al totale già disponibile</p>
+    <p id="inserimentoMonteOre">Inserire un incremento (segno +) o una diminuizione (segno -) rispetto al totale già disponibile prima del numero di ore da inserire</p>
     
     <input type="text" name="numeroOre" value="${}"/>
     

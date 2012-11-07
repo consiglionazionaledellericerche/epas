@@ -124,9 +124,9 @@ GET		/competences/edit/{competenceCodeId}	Competences.edit
 GET		/insertCompetenceCode					Competences.insertCompetenceCode
 POST	/insertCompetenceCode					Competences.save
 GET		/manageCompetenceCode					Competences.discard
-GET		/competences/totalOvertimeHours			Competences.totalOvertimeHours
-POST	/insertOvertime/{year}					Competences.saveOvertime
-GET		/competences/overtime					Competences.overtime
+GET		/totalOvertimeHours/{year}/{month}		Competences.totalOvertimeHours
+POST	/totalOvertimeHours/					Competences.saveOvertime
+GET		/overtime/{year}/{month}				Competences.overtime
 
 
 #Gestione reperibilità

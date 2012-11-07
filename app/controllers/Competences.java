@@ -1,13 +1,17 @@
 package controllers;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import it.cnr.iit.epas.ActionMenuItem;
+import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
 import models.MonthRecap;
 import models.Person;
+import models.PersonDay;
 import models.TotalOvertime;
 
 import org.joda.time.LocalDate;
@@ -142,31 +146,65 @@ public class Competences extends Controller{
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
-	public static void totalOvertimeHours(int year){
+	public static void totalOvertimeHours(int year, int month){
 		List<TotalOvertime> total = TotalOvertime.find("Select tot from TotalOvertime tot where tot.year = ?", year).fetch();
-		render(total);
+		Logger.debug("la lista di monte ore per l'anno %s è %s", year, total);
+		render(total, year, month);
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
-	public static void saveOvertime(int year){
+	public static void saveOvertime(int year, int month){
 		TotalOvertime total = new TotalOvertime();
-		total.date = new LocalDate();
-		total.year = new LocalDate().getYear();
+		LocalDate data = new LocalDate();
+		total.date = data;
+		total.year = data.getYear();
+			
 		String numeroOre = params.get("numeroOre");
 		if(numeroOre.startsWith("-")){
-			total.numberOfHours = new Integer(numeroOre.substring(1, numeroOre.length())) * (-1);
+		
+			total.numberOfHours = - new Integer(numeroOre.substring(1, numeroOre.length()));
+			
 		}
 		if(numeroOre.startsWith("+")){
+		
 			total.numberOfHours = new Integer(numeroOre.substring(1, numeroOre.length()));
 		}
 		total.save();
-		flash.success(String.format("Aggiornato monte ore per l'anno", year));
+		flash.success(String.format("Aggiornato monte ore per l'anno %s", data.getYear()));
 		Application.indexAdmin();
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
-	public static void overtime(){
+	public static void overtime(int year, int month){
+		Map<Person, List<Object>> mapPersonFeatures = new HashMap<Person, List<Object>>();
+		List<Object> lista = null;
+		LocalDate beginMonth = new LocalDate(year, month, 1);
+		List<Person> activePersons = Person.getActivePersons(new LocalDate(year, month, 1));
+		for(Person p : activePersons){
+			Integer daysAtWork = 0;
+			Integer recoveryDays = 0;
+			Integer timeAtWork = 0;
+			List<PersonDay> personDayList = PersonDay.find("Select pd from PersonDay pd where pd.date between ? and ? and pd.person = ?", 
+					beginMonth, beginMonth.dayOfMonth().withMaximumValue(), p).fetch();
+			for(PersonDay pd : personDayList){
+				if(pd.stampings.size()>0)
+					daysAtWork = daysAtWork +1;
+				timeAtWork = timeAtWork + pd.timeAtWork;
+				for(Absence abs : pd.absences){
+					if(abs.absenceType.code.equals("94"))
+						recoveryDays = recoveryDays+1;
+				}
+				
+			}
+			lista = new ArrayList<Object>();
+			lista.add(daysAtWork);
+			lista.add(timeAtWork);
+			lista.add(recoveryDays);
+			mapPersonFeatures.put(p, lista);
+			
+		}
 		
+		render(mapPersonFeatures, year, month);
 	}
 	
 }

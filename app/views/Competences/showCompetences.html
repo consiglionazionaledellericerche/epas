@@ -8,9 +8,9 @@
 #{functionalMenuForm mainMenu: mainMenu /} 
 
     <ul class="nav nav-tabs">
-    	<li class="active"><a href="@{Competences.showCompetences}">Competenze</a></li>
-    	<li><a href="@{Competences.overtime}#">Straordinari</a></li>
-    	<li><a href="@{Competences.totalOvertimeHours}#">Monte ore</a></li>
+    	<li class="active"><a href="@{Competences.showCompetences(year, month)}#">Competenze</a></li>
+    	<li><a href="@{Competences.overtime(year, month)}#">Straordinari</a></li>
+    	<li><a href="@{Competences.totalOvertimeHours(year, month)}#">Monte ore</a></li>
     </ul>
 
 <h3 id="titoloGestioneCompetenze">Competenze del mese di <span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year}</h3>
