@@ -18,9 +18,9 @@
 	    	<th>Nome e cognome</th>
 	    	<th>Giorni di presenza</th>
 	    	<th>Tempo lavorato (HH:MM)</th>
-	    	<th>Tempo di lavoro in eccesso</th>
+	    	<th>Tempo di lavoro in eccesso (HH:MM)</th>
 	    	<th>Residuo - rip. compens.</th>
-	    	<th>Residuo netto</th>
+	    	<th>Residuo netto (HH:MM)</th>
 	    	<th>Ore straor. pagate</th>
 	    	<th>Riposi compensativi</th>
     	</tr>
@@ -30,11 +30,11 @@
     		<td>${entry.getKey().surname} ${entry.getKey().name}</td>
     		<td>${entry.getValue().get(0)}</td>
     		<td>${entry.getValue().get(1).toHourTime()}</td>
+    		<td>${entry.getValue().get(2).toHourTime()}</td>
     		<td></td>
-    		<td></td>
-    		<td></td>
-    		<td></td>
-    		<td>${entry.getValue().get(2)}</td>
+    		<td>${entry.getValue().get(3).toHourTime()}</td>
+    		<td>${entry.getValue().get(4)}</td>
+    		<td>${entry.getValue().get(5)}</td>
     	</tr> 
     	%{
     	}

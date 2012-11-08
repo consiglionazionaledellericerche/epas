@@ -184,22 +184,41 @@ public class Competences extends Controller{
 			Integer daysAtWork = 0;
 			Integer recoveryDays = 0;
 			Integer timeAtWork = 0;
+			Integer difference = 0;
+			Integer differenceLessOvertime = 0;
+			Integer overtime = 0;
 			List<PersonDay> personDayList = PersonDay.find("Select pd from PersonDay pd where pd.date between ? and ? and pd.person = ?", 
 					beginMonth, beginMonth.dayOfMonth().withMaximumValue(), p).fetch();
 			for(PersonDay pd : personDayList){
 				if(pd.stampings.size()>0)
 					daysAtWork = daysAtWork +1;
 				timeAtWork = timeAtWork + pd.timeAtWork;
+				difference = difference +pd.difference;
 				for(Absence abs : pd.absences){
 					if(abs.absenceType.code.equals("94"))
 						recoveryDays = recoveryDays+1;
 				}
 				
 			}
+			Logger.debug("Sto per caricare il valore degli straordinari per %s %s con id %s", p.surname, p.name, p.id);
+			CompetenceCode code = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", "S1").first();
+			Logger.debug("Il codice per la ricerca è: %s", code.code);
+			
+			Competence comp = Competence.find("Select comp from Competence comp where comp.person = ? " +
+					"and comp.year = ? and comp.month = ? and comp.competenceCode.code = ?", 
+					p, year, month, code.code).first();
+			Logger.debug("La competenza è: %s", comp);
+			if(comp != null)
+				overtime = comp.value;
+			else
+				overtime = 0;
 			lista = new ArrayList<Object>();
-			lista.add(daysAtWork);
-			lista.add(timeAtWork);
-			lista.add(recoveryDays);
+			lista.add(daysAtWork);  //posizione 0 della lista
+			lista.add(timeAtWork);  //posizione 1 della lista
+			lista.add(difference);  //posizione 2 della lista
+			lista.add(difference-(overtime*60)); //posizione 3 della lista
+			lista.add(overtime);    //posizione 4 della lista
+			lista.add(recoveryDays);//posizione 5 della lista
 			mapPersonFeatures.put(p, lista);
 			
 		}
