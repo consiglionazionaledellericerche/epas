@@ -89,8 +89,8 @@ div#options a {
 
 #formLogin {
     border-bottom: 1px dashed #aaa;
-    width: 300px;
-    /*margin: 0 auto;*/
+    width: 350px;
+    margin: 2 auto;
     padding: 20px;
 }
 
@@ -287,6 +287,8 @@ input#submitInsertPerson {margin: 2em 60em 0em; align: center}
 input#resetInsertPerson {margin: 1em 60em 0em; align: center}
 input#submitTerminazioneRapporto {margin: 2em 60em 0em; align: center}
 input#discardTerminazioneRapporto {margin: 1em 60em 0em; align: center}
+input#username {margin: 2em}
+input#password {margin: 2em}
 
 input#submitNuovoCodiceAssenza {margin: 2em 60em 0em; align: center}
 input#discardNuovoCodiceAssenza {margin: 1em 60em 0em; align: center}

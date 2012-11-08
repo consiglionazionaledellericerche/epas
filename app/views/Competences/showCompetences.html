@@ -25,6 +25,18 @@
 		}
 		}%	
 	</tr>		
-
-
+	%{ for(entry in tablePersonCompetences.rowMap().entrySet()){
+	}%
+	<tr>
+		<td>${entry.getKey().name} ${entry.getKey().surname}</td>
+		%{ for(col in tablePersonCompetences.columnKeySet()){
+		}%
+		<td>${entry.getValue().get(col)}</td>
+		%{
+		}
+		}%	
+	</tr>
+	%{
+	}
+	}%
 </table>

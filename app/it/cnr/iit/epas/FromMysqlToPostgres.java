@@ -880,7 +880,7 @@ public class FromMysqlToPostgres {
 		 */
 		Logger.debug("Inizio a creare i riepiloghi annuali per %s", person);
 		Connection mysqlCon = getMysqlConnection();
-		PreparedStatement stmtResidualAndRecovery = mysqlCon.prepareStatement("SELECT * FROM totali_anno WHERE ID = ? and anno = ?");
+		PreparedStatement stmtResidualAndRecovery = mysqlCon.prepareStatement("SELECT * FROM totali_anno WHERE ID = ? and anno >= ?");
 		stmtResidualAndRecovery.setLong(1, id);
 		stmtResidualAndRecovery.setInt(2, anno);
 		ResultSet rs = stmtResidualAndRecovery.executeQuery();
@@ -1005,7 +1005,7 @@ public class FromMysqlToPostgres {
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt = mysqlCon.prepareStatement("Select codici_comp.id, competenze.mese, codici_comp.codice, codici_comp.codice_att, " +
 				"competenze.anno, competenze.codice, competenze.valore, codici_comp.descrizione, codici_comp.inattivo " +
-				"from competenze, codici_comp where codici_comp.codice=competenze.codice and competenze.id= ? and competenze.anno = ?");
+				"from competenze, codici_comp where codici_comp.codice=competenze.codice and competenze.id= ? and competenze.anno >= ?");
 		stmt.setLong(1, id);
 		stmt.setInt(2, anno);
 		ResultSet rs = stmt.executeQuery();
