@@ -23,6 +23,11 @@ public class Administration extends Controller {
     	renderText("Importati tutti i dati relativi ai monte ore straordinari");
     }
     
+    public static void addPermissionToAll(){
+    	
+    	FromMysqlToPostgres.addPermissiontoAll();
+    	renderText("Aggiunto permesso in sola lettura per tutti gli utenti");
+    }
     
     public static void importAll() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
     
