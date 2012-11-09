@@ -31,4 +31,7 @@ Permission(insertAndUpdateCompetences):
 Permission(insertAndUpdateVacations):
     description: insertAndUpdateVacations
 
+Permission(viewPersonalSituation):
+    description: viewPersonalSituation
+
 

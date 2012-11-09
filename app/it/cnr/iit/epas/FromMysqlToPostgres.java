@@ -1190,6 +1190,9 @@ public class FromMysqlToPostgres {
 		//createAbsence(pd, absenceType);
 	}
 	
+	/**
+	 * metodo che consente permessi di "amministrazione" a un utente specificato
+	 */
 	public static void upgradePerson(){
 		Logger.debug("Chiamata la funzione upgrade person");
 		Person person = Person.find("bySurnameAndName", "Lucchesi", "Cristian").first();
@@ -1206,8 +1209,24 @@ public class FromMysqlToPostgres {
 		}		
 		
 		person.save();
+		
 	}
 
+	/**
+	 * metodo che dà a ciascun utente presente in anagrafica la possibilità di avere il permesso di visualizzazione per la propria
+	 * situazione mensile
+	 */
+	public static void addPermissiontoAll(){
+		Logger.debug("Chiamata la funzione addPermissiontoAll");
+		List<Person> personList = Person.findAll();
+		Permission per = Permission.find("Select per from Permission per where per.description = ?", "viewPersonalSituation").first();
+		Logger.debug("Caricato il permesso: %s", per.description);
+		for(Person p : personList){
+			p.permissions.add(per);
+			p.save();
+		}
+		
+	}
 	/**
 	 * TODO: cambiare la query, invece di farla sul monthrecap che è vuoto, farla sul totali_mens sul db vecchio
 	 * @throws SQLException 

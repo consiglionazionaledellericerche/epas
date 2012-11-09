@@ -1,5 +1,6 @@
 package controllers;
 
+import it.cnr.iit.epas.ActionEmployeesMenuItem;
 import it.cnr.iit.epas.ActionMenuItem;
 
 import org.joda.time.LocalDate;
@@ -118,6 +119,70 @@ public class SwitchTemplate extends Controller{
 			break;
 		}
 		
+	}
+	
+	public static void switchTemplateEmployees(){
+		LocalDate now = new LocalDate();
+		
+		String action = params.get("action");
+		Logger.debug("La action è: %s", action);
+		if (action == null) {
+			
+			flash.error(String.format("La action da eseguire è: %s", action));
+			Application.indexAdmin();
+			
+		}
+		ActionEmployeesMenuItem menuItem = ActionEmployeesMenuItem.valueOf(action);
+		
+		Person person = Security.getPerson();
+		Long personId = null;
+		if (params.get("personId") != null) {
+			personId = params.get("personId", Long.class);
+			person = Person.findById(personId);
+		} 
+				
+		int month = now.getMonthOfYear();
+		if (params.get("month") != null) {
+			month = params.get("month", Integer.class);
+		}
+		
+		int year = now.getYear();
+		if (params.get("year") != null) {
+			year = params.get("year", Integer.class);
+		}
+		
+		int day = now.getDayOfMonth();
+		if(params.get("day") != null){
+			day = params.get("day", Integer.class);
+		}
+		
+		switch (menuItem) {
+		case stampings:
+			Stampings.show(personId, year, month); //vediamo se va bene questa o se c'è necessità di farne una nuova per l'impiegato
+			break;
+		case absences:
+			Absences.show(personId, year, month); //vediamo se va bene questa o se c'è necessità di farne una nuova per l'impiegato
+			break;
+		case absencesPerPerson:
+			/**
+			 * TODO
+			 */
+			break;
+		case vacations:
+			Vacations.show();
+			break;
+		case competences:
+			Competences.show();
+			break;
+		case hourRecap:
+			PersonMonths.hourRecap(year);
+			break;
+		case changePassword:
+			Persons.changePassword(personId);
+			break;
+			default: 
+				break;
+		}
 	}
 
 }
