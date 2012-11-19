@@ -56,6 +56,7 @@ public class PersonMonths extends Controller{
 				lista.add(3, 0);
 				mapMonthSituation.put(date.getMonthOfYear(), lista);
 			}
+			compensatoryRest = 0;
 			
 		}
 		
