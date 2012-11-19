@@ -11,12 +11,13 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
-@With(Secure.class)
+@With( {Secure.class, NavigationMenu.class} )
 public class Vacations extends Controller{
 	
 	/* corrisponde alla voce di menu selezionata */
 	private final static ActionMenuItem actionMenuItem = ActionMenuItem.vacations;
 		
+	@Check(Security.VIEW_PERSONAL_SITUATION)
 	private static void show(Person person) {
 		String menuItem = actionMenuItem.toString();
 		
@@ -40,6 +41,7 @@ public class Vacations extends Controller{
     	
     }
 	
+	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void show() {
     	show(Security.getPerson());
     }
@@ -68,6 +70,7 @@ public class Vacations extends Controller{
     	vacations(Security.getPerson());
     }
 	
+	@Check({Security.VIEW_PERSONAL_SITUATION, Security.INSERT_AND_UPDATE_VACATIONS})
 	private static void vacationsCurrentYear(Person person){
     	String anno = params.get("year");
     	Logger.info("Anno: "+anno);
@@ -88,6 +91,7 @@ public class Vacations extends Controller{
     	}
 	}
 	
+	@Check({Security.VIEW_PERSONAL_SITUATION, Security.INSERT_AND_UPDATE_VACATIONS})
 	public static void vacationsCurrentYear() {
     	vacationsCurrentYear(Security.getPerson());
     }

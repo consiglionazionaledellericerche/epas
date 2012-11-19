@@ -381,8 +381,10 @@ public class MonthRecap extends Model {
 	 */
 	public int holidaysAvailability(int year, int month){
 		int holidaysAvailability = 0;
-		Competence competence = Competence.find("Select comp from Competence comp where comp.person = ? and " +
-				"comp.year = ? and comp.month = ? and comp.code = ?", person, year, month, "208").first();
+		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "208").first();
+		Logger.debug("Il codice competenza é: %s", cmpCode);
+		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
 		Logger.warn("competence: " +competence);
 		if(competence != null)
 			holidaysAvailability = competence.value;
@@ -397,9 +399,11 @@ public class MonthRecap extends Model {
 	 */
 	public int weekDayAvailability(@Valid int year, @Valid int month){
 		int weekDayAvailability = 0;
-		CompetenceCode cmpCode = CompetenceCode.find("Select cmpCode from CompetenceCode cmpCode where cmpCode.description = ?", "207").first();
-		Competence competence = Competence.find("Select comp from Competence comp where comp.person = ? and " +
-				"comp.year = ? and comp.month = ? and comp.competenceCode = ?", person, year, month, cmpCode).first();
+		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "207").first();
+		Logger.debug("Il codice competenza é: %s", cmpCode);
+		
+		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
 		if(competence != null)
 			weekDayAvailability = competence.value;
 		else
@@ -415,8 +419,10 @@ public class MonthRecap extends Model {
 	 */
 	public int daylightWorkingDaysOvertime(int year, int month){
 		int daylightWorkingDaysOvertime = 0;
-		Competence competence = Competence.find("Select comp from Competence comp where comp.person = ? and " +
-				"comp.year = ? and comp.month = ? and comp.code = ?", person, year, month, "S1").first();
+		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "S1").first();
+		Logger.debug("Il codice competenza é: %s", cmpCode);
+		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
 		if(competence != null)
 			daylightWorkingDaysOvertime = competence.value;
 		else
@@ -432,8 +438,10 @@ public class MonthRecap extends Model {
 	 */
 	public int daylightholidaysOvertime(int year, int month){
 		int daylightholidaysOvertime = 0;
-		Competence competence = Competence.find("Select comp from Competence comp where comp.person = ? and " +
-				"comp.year = ? and comp.month = ? and comp.code = ?", person, year, month, "S2").first();
+		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "S2").first();
+		Logger.debug("Il codice competenza é: %s", cmpCode);
+		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
 		if(competence != null)
 			daylightholidaysOvertime = competence.value;
 		else
@@ -447,8 +455,10 @@ public class MonthRecap extends Model {
 	 */
 	public int ordinaryShift(int year, int month){
 		int ordinaryShift = 0;
-		Competence competence = Competence.find("Select comp from Competence comp where comp.person = ? and " +
-				"comp.year = ? and comp.month = ? and comp.code = ?", person, year, month, "T1").first();
+		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "T1").first();
+		Logger.debug("Il codice competenza é: %s", cmpCode);
+		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
 		if(competence != null)
 			ordinaryShift = competence.value;
 		else
@@ -462,8 +472,12 @@ public class MonthRecap extends Model {
 	 */
 	public int nightShift(int year, int month){
 		int nightShift = 0;
-		Competence competence = Competence.find("Select comp from Competence comp where comp.person = ? and " +
-				"comp.year = ? and comp.month = ? and comp.code = ?", person, year, month, "T2").first();
+		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "T2").first();
+		Logger.debug("Il codice competenza é: %s", cmpCode);
+		if(cmpCode == null)
+			return 0;
+		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
 		if(competence != null)
 			nightShift = competence.value;
 		else

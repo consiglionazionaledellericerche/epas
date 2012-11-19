@@ -23,6 +23,8 @@ public class Security extends Secure.Security {
 	public final static String INSERT_AND_UPDATE_CONFIGURATION = "insertAndUpdateConfiguration";
 	public final static String INSERT_AND_UPDATE_ADMINISTRATOR = "insertAndUpdateAdministrator";
 	public final static String INSERT_AND_UPDATE_COMPETENCES = "insertAndUpdateCompetences";
+	public final static String INSERT_AND_UPDATE_VACATIONS = "insertAndUpdateVacations";
+	public final static String VIEW_PERSONAL_SITUATION ="viewPersonalSituation";
 	
 	private final static String PERMISSION_CACHE_PREFIX = "permission.";
 		
@@ -35,7 +37,7 @@ public class Security extends Secure.Security {
 			            
             flash.success("Welcome, " + person.name + person.surname);
             Logger.info("person %s successfully logged in", person.username);
-            
+            Logger.info("Permission list for %s %s: %s", person.name, person.surname, person.permissions);
 			return true;
 		}
 		

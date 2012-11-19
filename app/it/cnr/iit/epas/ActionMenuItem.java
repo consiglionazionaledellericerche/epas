@@ -19,5 +19,6 @@ public enum ActionMenuItem {
 	manageAbsenceCode,
 	missingStamping,
 	dailyPresence,
-	mealTicketSituation
+	mealTicketSituation,
+	manageCompetence
 }

@@ -15,10 +15,6 @@ import models.enumerate.ResidualWithPastYear;
 @With( {Secure.class, NavigationMenu.class} )
 public class Configurations extends Controller{
 	
-	
-	/**
-	 * TODO: implementare il controller per la validazione e l'utilizzo dei parametri di configurazione
-	 */
 	@Check(Security.INSERT_AND_UPDATE_CONFIGURATION)
 	public static void show(){
 		Date now = new Date();
@@ -129,5 +125,15 @@ public class Configurations extends Controller{
 	public static void list(){
 		List<Configuration> configList = Configuration.findAll();
 		render(configList);
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_CONFIGURATION)
+	public static void manageExitCausal(){
+		
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_CONFIGURATION)
+	public static void insertExitCausal(){
+		
 	}
 }
