@@ -6,7 +6,7 @@
 
 #{logoutForm /}
 
-#{functionalMenuForm mainMenu: mainMenu /}
+#{employeesForm mainMenu: mainMenu /}
 
 <div align="left">
 #{form @Vacations.show()}
@@ -42,7 +42,7 @@
 	</tr>
 	<tr>
 	
-		<td><a href="vacations.html" class="example3demo">${yearRecap.vacationDaysLastYear(yearRecap.year)}</a> 
+		<td><a href="vacations.html" class="example3demo">${yearRecap.vacationDaysLastYear()}</a> 
 				<script type="text/javascript"> 
 				$('.example3demo').popupWindow({ 
 					height:500, 
@@ -51,7 +51,7 @@
 					left:50 
 				}); 
 				</script></td>
-		<td><a href="vacationsCurrentYear.html" class="example3demo">${yearRecap.vacationDaysCurrentYear(yearRecap.year)}</a> 
+		<td><a href="vacationsCurrentYear.html" class="example3demo">${yearRecap.vacationDaysCurrentYear()}</a> 
 				<script type="text/javascript"> 
 				$('.example3demo').popupWindow({ 
 					height:500, 
@@ -61,11 +61,11 @@
 				});  
 				</script></td>
 		<td>${yearRecap.personalPermissionUsed()}</td>
-		<td>${yearRecap.vacationLastYearNotYetUsed(yearRecap.year)}</td>
+		<td>${yearRecap.vacationLastYearNotYetUsed()}</td>
 		<td>${yearRecap.personalVacationDays()}</td>
-		<td>${yearRecap.vacationCurrentYear(yearRecap.year)}</td>
+		<td>${yearRecap.vacationCurrentYear()}</td>
 		<td>${yearRecap.personalPermission()}</td>
-		<td>${yearRecap.permissionCurrentYear(yearRecap.year)}</td>
+		<td>${yearRecap.permissionCurrentYear()}</td>
 	</tr>
 
 </table>

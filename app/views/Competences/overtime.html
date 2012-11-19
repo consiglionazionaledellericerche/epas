@@ -1,0 +1,45 @@
+#{extends 'main.html' /}
+
+<h2 id="titoloGestioneStraordinariCompetenze">Gestione straordinari e altre competenze</h2>
+
+#{logoutForm /}
+
+#{functionalMenuForm mainMenu: mainMenu /} 
+
+    <ul class="nav nav-tabs">
+    	<li ><a href="@{Competences.showCompetences(year, month)}#">Competenze</a></li>
+    	<li class="active"><a href="@{Competences.overtime(year, month)}#">Straordinari</a></li>
+    	<li><a href="@{Competences.totalOvertimeHours(year, month)}#">Monte ore</a></li>
+    </ul>
+    
+    <h3 id="titoloStraordinari">Tabella riassuntiva del mese di <span class="capitalized">&{'views.tags.display.date.month.' + month}</span></h3>
+    <table>
+    	<tr>
+	    	<th>Nome e cognome</th>
+	    	<th>Giorni di presenza</th>
+	    	<th>Tempo lavorato (HH:MM)</th>
+	    	<th>Tempo di lavoro in eccesso (HH:MM)</th>
+	    	<th>Residuo - rip. compens.</th>
+	    	<th>Residuo netto (HH:MM)</th>
+	    	<th>Ore straor. pagate</th>
+	    	<th>Riposi compensativi</th>
+    	</tr>
+    	%{for(entry in mapPersonFeatures.entrySet()){
+    	}%
+    	<tr>
+    		<td>${entry.getKey().surname} ${entry.getKey().name}</td>
+    		<td>${entry.getValue().get(0)}</td>
+    		<td>${entry.getValue().get(1).toHourTime()}</td>
+    		<td>${entry.getValue().get(2).toHourTime()}</td>
+    		<td></td>
+    		<td>${entry.getValue().get(3).toHourTime()}</td>
+    		<td>${entry.getValue().get(4)}</td>
+    		<td>${entry.getValue().get(5)}</td>
+    	</tr> 
+    	%{
+    	}
+    	}%   
+    </table>
+    
+    
+    

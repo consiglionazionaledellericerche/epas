@@ -16,6 +16,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.criteria.Fetch;
 
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
@@ -345,8 +346,8 @@ public class YearRecap extends Model{
 	public int vacationLastYearNotYetUsed(){
 		LocalDate date = new LocalDate(year,1,1);
 		//recupero dal db le assenze fatte quest'anno che hanno codice 4 ovvero quelle con causale "residuo anno precedente"
-		List<Absence> absence = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? and abs.date > ? " +
-				"and abs.absenceType = abt and abt.code = ?", person, date, "31").fetch();
+//		List<Absence> absence = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? and abs.date > ? " +
+//				"and abs.absenceType = abt and abt.code = ?", person, date, "31").fetch();
 		LocalDate beginLastYear = new LocalDate(year-1,1,1);
 		LocalDate endLastYear = new LocalDate(year-1,12,31);
 
@@ -378,12 +379,20 @@ public class YearRecap extends Model{
 		int vacationDaysAccrued = VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysLessThreeYears(days);
 		
 		//recupero dal db le assenze fatte l'anno precedente che hanno codice 5 ovvero quelle con causale "ferie anno corrente"		
-		List<Absence> vacationsLastYear = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? and abs.date >= ? and " +
-				"abs.date < ? and abs.absenceType = abt and abt.code = ?", person, beginLastYear, endLastYear, "32").fetch();
+		int vacationDaysPastYear = 0;
+//		List<Absence> vacationsLastYear = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? and abs.date >= ? and " +
+//				"abs.date < ? and abs.absenceType = abt and abt.code = ?", person, beginLastYear, endLastYear, "32").fetch();
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+				person, beginLastYear, endLastYear).fetch();
+		for(PersonDay pd : pdList){
+			if(pd.absences.size() == 1 && pd.absences.get(0).absenceType.code.equals("32"))
+				vacationDaysPastYear ++;
+		}
+				
 		//con questa query vado a prendere il piano ferie previsto per la persona da cui vado a estrarre il numero di giorni di ferie 
 		//ad essa attribuiti
 
-		int residualVacationDays = vacationDaysAccrued-vacationsLastYear.size();
+		int residualVacationDays = vacationDaysAccrued-vacationDaysPastYear;
 		
 		return residualVacationDays;
 	}
@@ -420,10 +429,15 @@ public class YearRecap extends Model{
 	public int personalPermissionUsed(){
 		int permissionDays = 0;
 		LocalDate now = new LocalDate();
-		
-		List<Absence> absence = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? and " +
-				"abs.date between ? and ? and abs.absenceType = abt and abt.code = ?", person, getBeginYear(), now, "94").fetch();
-		permissionDays = absence.size();
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+				person, getBeginYear(), now).fetch();
+		for(PersonDay pd : pdList){
+			if(pd.absences.size() == 1 && pd.absences.get(0).absenceType.code.equals("94"))
+				permissionDays++;
+		}
+//		List<Absence> absence = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? and " +
+//				"abs.date between ? and ? and abs.absenceType = abt and abt.code = ?", person, getBeginYear(), now, "94").fetch();
+//		permissionDays = absence.size();
 		return permissionDays;
 	}
 	
@@ -451,11 +465,24 @@ public class YearRecap extends Model{
 		LocalDate beginLastYear = new LocalDate(year-1,1,1);
 		LocalDate endLastYear = new LocalDate(year-1,12,31);
 		LocalDate now = new LocalDate();
-		
-		List<Absence> absence = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? " +
-				"and (abs.date between ? and ? and abs.absenceType = abt and abt.code = ? or abs.date between ? and ? and abs.absenceType = abt and abt.code = ?)", 
-				person, beginLastYear, endLastYear, "32", getBeginYear(), now,  "31").fetch();
-		vacationDaysLastYear = absence.size();
+		List<PersonDay> pdListPast = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+				person, beginLastYear, endLastYear).fetch();
+		for(PersonDay pd : pdListPast){
+			if(pd.absences.size() == 1 && pd.absences.get(0).absenceType.code.equals("31")){
+				vacationDaysLastYear++;
+			}
+		}
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+				person, getBeginYear(), now).fetch();
+		for(PersonDay pd : pdList){
+			if(pd.absences.size() == 1 && pd.absences.get(0).absenceType.code.equals("32")){
+				vacationDaysLastYear++;
+			}
+		}
+//		List<Absence> absence = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? " +
+//				"and (abs.date between ? and ? and abs.absenceType = abt and abt.code = ? or abs.date between ? and ? and abs.absenceType = abt and abt.code = ?)", 
+//				person, beginLastYear, endLastYear, "32", getBeginYear(), now,  "31").fetch();
+//		vacationDaysLastYear = absence.size();
 		return vacationDaysLastYear;
 	}
 	
@@ -498,10 +525,15 @@ public class YearRecap extends Model{
 	public int vacationDaysCurrentYear(){
 		int vacationDaysCurrentYear = 0;
 		LocalDate now = new LocalDate();
-		
-		List<Absence> absence = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? " +
-				"and abs.date between ? and ? and abs.absenceType = abt and abt.code = ?", person, getBeginYear(), now, "32").fetch();
-		vacationDaysCurrentYear = absence.size();
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?",
+				person, getBeginYear(), now).fetch();
+		for(PersonDay pd : pdList){
+			if(pd.absences.size() == 1 && pd.absences.get(0).absenceType.code.equals("32"))
+				vacationDaysCurrentYear ++;
+		}
+//		List<Absence> absence = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? " +
+//				"and abs.date between ? and ? and abs.absenceType = abt and abt.code = ?", person, getBeginYear(), now, "32").fetch();
+//		vacationDaysCurrentYear = absence.size();
 		return vacationDaysCurrentYear;
 	}
 	

@@ -1,0 +1,31 @@
+#{extends 'main.html' /}
+
+<h2 id="titoloGestisciCodiceCompetenza">Gestione Codici competenze</h2>
+
+
+#{logoutForm /}
+
+#{functionalMenuForm mainMenu: mainMenu /}
+
+<p><a href="@{Competences.insertCompetenceCode}">Nuovo</a></p>
+
+<table id="tabellaCodiciCompetenza">
+	<tr>
+		<th>Codice</th>
+		<th>Codice per attestato di presenza</th>
+		<th>Descrizione</th>
+		<th>Inattivo</th>
+	</tr>
+	%{ for(compCode in compCodeList){
+	}%
+	<tr>
+		<td><a href="@{Competences.edit(compCode.id)}">${compCode.code}</a></td>
+		<td>${compCode.codeToPresence}</td>
+		<td>${compCode.description}</td>
+		<td>${compCode.inactive}</td>
+	</tr>
+	%{
+	}
+	}%
+
+</table>

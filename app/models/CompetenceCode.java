@@ -2,6 +2,7 @@ package models;
 
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -23,6 +24,12 @@ public class CompetenceCode extends Model {
 
 	@OneToMany(mappedBy="competenceCode")
 	public List<Competence> competence;
+	
+	@Required
+	public String code;
+	
+	@Column
+	public String codeToPresence;
 
 	@Required
 	public String description;
