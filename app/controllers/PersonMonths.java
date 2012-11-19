@@ -51,10 +51,17 @@ public class PersonMonths extends Controller{
 					lista.add(2, 0);
 				lista.add(3,pd.progressive);
 				mapMonthSituation.put(date.getMonthOfYear(), lista);
-			}			
+			}	
+			else{
+				lista.add(0, 0);
+				lista.add(1, 0);
+				lista.add(2, 0);
+				lista.add(3, 0);
+				mapMonthSituation.put(date.getMonthOfYear(), lista);
+			}
 			
 		}
 		
-		render(mapMonthSituation);	
+		render(mapMonthSituation, person, year);	
 	}
 }
