@@ -34,7 +34,6 @@ import org.joda.time.LocalDateTime;
 import play.Logger;
 import play.data.validation.Required;
 import play.db.jpa.Model;
-import sun.security.krb5.Config;
 
 /**
  * Classe che rappresenta un giorno, sia esso lavorativo o festivo di una persona.
