@@ -32,11 +32,8 @@ public class PersonMonths extends Controller{
 			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 					person, date, date.dayOfMonth().withMaximumValue()).fetch();
 			for(PersonDay p : pdList){
-				if(p.absences.size()>0){
-					for(Absence abs : p.absences){
-						if(abs.absenceType.code.equals("91"))
-							compensatoryRest = compensatoryRest +1;
-					}
+				if(p.absences.size() == 1 && p.absences.get(0).absenceType.code.equals("91")){
+					compensatoryRest = compensatoryRest +1;					
 				}
 			}
 			Competence comp = Competence.find("Select comp from Competence comp where comp.person = ? and comp.year = ? " +

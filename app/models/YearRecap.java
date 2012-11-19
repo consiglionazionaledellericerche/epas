@@ -385,7 +385,7 @@ public class YearRecap extends Model{
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 				person, beginLastYear, endLastYear).fetch();
 		for(PersonDay pd : pdList){
-			if(pd.absences.size() == 1 && pd.absences.get(0).equals("32"))
+			if(pd.absences.size() == 1 && pd.absences.get(0).absenceType.code.equals("32"))
 				vacationDaysPastYear ++;
 		}
 				
@@ -432,7 +432,7 @@ public class YearRecap extends Model{
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 				person, getBeginYear(), now).fetch();
 		for(PersonDay pd : pdList){
-			if(pd.absences.size() == 1 && pd.absences.get(0).equals("94"))
+			if(pd.absences.size() == 1 && pd.absences.get(0).absenceType.code.equals("94"))
 				permissionDays++;
 		}
 //		List<Absence> absence = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? and " +
@@ -468,14 +468,14 @@ public class YearRecap extends Model{
 		List<PersonDay> pdListPast = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 				person, beginLastYear, endLastYear).fetch();
 		for(PersonDay pd : pdListPast){
-			if(pd.absences.size() == 1 && pd.absences.get(0).equals("31")){
+			if(pd.absences.size() == 1 && pd.absences.get(0).absenceType.code.equals("31")){
 				vacationDaysLastYear++;
 			}
 		}
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 				person, getBeginYear(), now).fetch();
 		for(PersonDay pd : pdList){
-			if(pd.absences.size() == 1 && pd.absences.get(0).equals("32")){
+			if(pd.absences.size() == 1 && pd.absences.get(0).absenceType.code.equals("32")){
 				vacationDaysLastYear++;
 			}
 		}
@@ -528,7 +528,7 @@ public class YearRecap extends Model{
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?",
 				person, getBeginYear(), now).fetch();
 		for(PersonDay pd : pdList){
-			if(pd.absences.size() == 1 && pd.absences.get(0).equals("32"))
+			if(pd.absences.size() == 1 && pd.absences.get(0).absenceType.code.equals("32"))
 				vacationDaysCurrentYear ++;
 		}
 //		List<Absence> absence = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? " +
