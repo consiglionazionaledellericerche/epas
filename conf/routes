@@ -34,10 +34,11 @@ GET		/vacationsCurrentYear					Vacations.vacationsCurrentYear
 GET		/competenze								Competences.show
 
 #Riepilogo ore
-GET		/hourRecap/{year}						PersonMonths.hourRecap()
+GET		/hourRecap/{personId}/{year}			PersonMonths.hourRecap
 
 #Dispatcher
-POST	/dispatch								SwitchTemplate.dispatch		
+POST	/dispatch								SwitchTemplate.dispatch	
+
 
 GET		/administration/month-recap/{date}		MonthRecap.show
 

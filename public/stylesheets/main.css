@@ -287,8 +287,8 @@ input#submitInsertPerson {margin: 2em 60em 0em; align: center}
 input#resetInsertPerson {margin: 1em 60em 0em; align: center}
 input#submitTerminazioneRapporto {margin: 2em 60em 0em; align: center}
 input#discardTerminazioneRapporto {margin: 1em 60em 0em; align: center}
-input#username {margin: 2em}
-input#password {margin: 2em}
+input#username {margin: 4 em 2em 2em}
+input#password {margin: 4 em 2em 2em}
 
 input#submitNuovoCodiceAssenza {margin: 2em 60em 0em; align: center}
 input#discardNuovoCodiceAssenza {margin: 1em 60em 0em; align: center}
