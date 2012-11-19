@@ -13,13 +13,14 @@ import models.Person;
 import models.PersonDay;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.Logger;
 
 @With( {Secure.class, NavigationMenu.class} )
 public class PersonMonths extends Controller{
 	
 	@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void hourRecap(int year){
-		Person person = Person.findById(params.get("id", Long.class));
+	public static void hourRecap(Long personId,int year){
+		Person person = Person.findById(personId);
 		Map<Integer, List<Integer>> mapMonthSituation = new HashMap<Integer, List<Integer>>();
 		List<Integer> lista = null;
 		Integer compensatoryRest = 0;
@@ -27,6 +28,7 @@ public class PersonMonths extends Controller{
 			LocalDate date = new LocalDate(year, month, 1);
 			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", 
 					person, date.dayOfMonth().withMaximumValue()).first();
+			Logger.debug("Il person day scansionato è: %s", pd);
 			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 					person, date, date.dayOfMonth().withMaximumValue()).fetch();
 			for(PersonDay p : pdList){
@@ -40,14 +42,16 @@ public class PersonMonths extends Controller{
 			Competence comp = Competence.find("Select comp from Competence comp where comp.person = ? and comp.year = ? " +
 					"and comp.month = ? and comp.competenceCode.description = ?", person, year, date.getMonthOfYear(), "S1").first();
 			lista = new ArrayList<Integer>();
-			lista.add(0, pd.difference);
-			lista.add(1, compensatoryRest);
-			if(comp != null)
-				lista.add(2, comp.value);
-			else
-				lista.add(2, 0);
-			lista.add(3,pd.progressive);
-			mapMonthSituation.put(date.getMonthOfYear(), lista);
+			if(pd != null){
+				lista.add(0, pd.difference);
+				lista.add(1, compensatoryRest);
+				if(comp != null)
+					lista.add(2, comp.value);
+				else
+					lista.add(2, 0);
+				lista.add(3,pd.progressive);
+				mapMonthSituation.put(date.getMonthOfYear(), lista);
+			}			
 			
 		}
 		

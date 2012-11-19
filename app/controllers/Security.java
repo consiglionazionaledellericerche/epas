@@ -37,7 +37,7 @@ public class Security extends Secure.Security {
 			            
             flash.success("Welcome, " + person.name + person.surname);
             Logger.info("person %s successfully logged in", person.username);
-            
+            Logger.info("Permission list for %s %s: %s", person.name, person.surname, person.permissions);
 			return true;
 		}
 		

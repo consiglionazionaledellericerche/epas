@@ -29,14 +29,14 @@ public class Competences extends Controller{
 
 	/* corrisponde alla voce di menu selezionata */
 //	private final static ActionMenuItem actionMenuItem = ActionMenuItem.competences;
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	@Check(Security.VIEW_PERSONAL_SITUATION)
 	private static void show(Person person) {
 //		String menuItem = actionMenuItem.toString();
 		
     	String anno = params.get("year");
-    	Logger.info("Anno: "+anno.toString());
+    //	Logger.info("Anno: "+anno.toString());
     	String mese= params.get("month");
-    	Logger.info("Mese: "+mese.toString());
+    //	Logger.info("Mese: "+mese.toString());
     	if(anno==null || mese==null){
     		        	
         	LocalDate now = new LocalDate();
@@ -55,7 +55,7 @@ public class Competences extends Controller{
     	
     }
 	
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void show() {
     	show(Security.getPerson());
     }

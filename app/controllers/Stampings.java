@@ -49,6 +49,7 @@ public class Stampings extends Controller {
      * @param year
      * @param month
      */
+	@Check(Security.VIEW_PERSONAL_SITUATION)
     public static void show(Long personId, int year, int month){
     	    	
     	if (personId == null) {
@@ -80,11 +81,13 @@ public class Stampings extends Controller {
         render(monthRecap, personMonth/*, menuItem*/);
     }
     
+	@Check(Security.VIEW_PERSONAL_SITUATION)
 	private static void show() {
 		LocalDate now = new LocalDate();
 		show(Security.getPerson().getId(), now.getYear(), now.getMonthOfYear());
 	}
 	
+	@Check(Security.VIEW_PERSONAL_SITUATION)
 	private static void show(Long personId) {
 		LocalDate now = new LocalDate();
 		show(personId, now.getMonthOfYear(), now.getYear());

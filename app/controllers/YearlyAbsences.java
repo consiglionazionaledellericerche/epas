@@ -90,7 +90,7 @@ public class YearlyAbsences extends Controller{
 		}
 	}
 	
-	@Check(Security.VIEW_PERSON_LIST)
+	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void show(Long personId, int year, int month) {
 
 

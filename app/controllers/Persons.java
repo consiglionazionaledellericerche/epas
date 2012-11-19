@@ -139,7 +139,11 @@ public class Persons extends Controller {
 		}
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_PASSWORD)
+//	@Check({Security.INSERT_AND_UPDATE_PASSWORD, Security.VIEW_PERSONAL_SITUATION})
+	/**
+	 * 
+	 * @param personId permette all'utente di cambiare la propria password.
+	 */
 	public static void changePassword(Long personId){
 		Person person = Person.findById(personId);
 		render(person);
