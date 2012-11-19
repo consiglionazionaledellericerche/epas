@@ -4,7 +4,7 @@
 
 #{employeesForm mainMenu: mainMenu /} 
 
-<h2>Riepilogo ore di lavoro, straordinario e recuperi (${})</h2>
+<h2>Riepilogo ore di lavoro, straordinario e recuperi (${person.surname} ${person.name} anno: ${year})</h2>
 
 <table>
 	<tr>
@@ -16,15 +16,22 @@
 		<th rowspan=2>Ore straordinario</th>
 		<th rowspan=2>Residuo ore a fine mese</th>
 	</tr>
+	<tr>
+		<th>Mese prec.</th>
+		<th>Anno prec.</th>
+		<th>Tot. prec.</th>
+	</tr>
 	%{for(entry in mapMonthSituation.entrySet()){
 	}%<tr>
 		<td><span class="capitalized">&{'views.tags.display.date.month.' + entry.getKey()}</span></td>
 		<td></td>
 		<td></td>
-		<td>${entry.getValue().get(0)}</td>
+		<td></td>
+		<td></td>
+		<td>${entry.getValue().get(0).toHourTime()}</td>
 		<td>${entry.getValue().get(1)}</td>
 		<td>${entry.getValue().get(2)}</td>
-		<td>${entry.getValue().get(3)}</td>	
+		<td>${entry.getValue().get(3).toHourTime()}</td>	
 	</tr>
 	%{
 	}
