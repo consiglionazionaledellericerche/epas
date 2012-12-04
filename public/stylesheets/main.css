@@ -237,6 +237,7 @@ td.inserisciTimbratura {text-align: center}
 
 p#spiegazioneTabellaTimbrature {margin-top: 2em; margin-bottom: 2em}
 p#validita {margin: 2em 0em 2em}
+p#nuovoCodiceCompetenza {margin: 4em 0em 2em; align: left}
 div#logout {text-align: right; float: right}
 div#chooseView {text-align: center}
 div#cambiaPassword {margin: 1em 4em; text-align: left}
@@ -266,6 +267,7 @@ h2#titoloModificaTipoFerie {text-align: center}
 h2#situazionePresenzaGiornaliera {text-align: center}
 h2#titoloRiepilogoBuoniMensa {text-align: center}
 h2#titoloGestisciCodiceCompetenza {text-align: center}
+h2#titoloInserisciCodiceCompetenza {text-align: center}
 
 h3#titoloGestioneCompetenze {margin: 2em 0em 0em; text-align: left}
 h3#titoloGestioneParametri {margin: 2em 0em 2em; text-align: center}
@@ -289,6 +291,8 @@ input#submitTerminazioneRapporto {margin: 2em 60em 0em; align: center}
 input#discardTerminazioneRapporto {margin: 1em 60em 0em; align: center}
 input#username {margin: 4 em 2em 2em}
 input#password {margin: 4 em 2em 2em}
+input#nuovaPassword {margin: 3 em 2em 2em}
+input#confermaPassword {margin: 4 em 2em 2em}
 
 input#submitNuovoCodiceAssenza {margin: 2em 60em 0em; align: center}
 input#discardNuovoCodiceAssenza {margin: 1em 60em 0em; align: center}

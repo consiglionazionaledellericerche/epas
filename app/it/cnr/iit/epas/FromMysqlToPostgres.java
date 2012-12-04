@@ -759,11 +759,11 @@ public class FromMysqlToPostgres {
 
 				Logger.debug("Prima timbratura o assenza per %s", person.toString());
 
-				//				if(pd == null){
-				pd = new PersonDay(person,newData);
-				pd.create();
-				Logger.debug("Creato %s", pd.toString());
-				//				}
+				if(pd == null){
+					pd = new PersonDay(person,newData);
+					pd.create();
+					Logger.debug("Creato %s", pd.toString());
+				}
 
 				if(rs.getInt("TipoGiorno")==0){				
 					createStamping(pd, rs.getLong("TipoTimbratura"), rs.getBytes("Ora")); 

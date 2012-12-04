@@ -210,6 +210,9 @@ public class Person extends Model {
 	@JoinColumn(name="qualification_id")
 	public Qualification qualification;
 	
+	@OneToOne(mappedBy="person", fetch=FetchType.LAZY)
+	public PersonShift personShift;
+	
 	public String fullName() {
 		return String.format("%s %s", surname, name);
 	}
@@ -307,9 +310,9 @@ public class Person extends Model {
 	public Set<Permission> getAllPermissions(){
 		Set<Permission> setPermissions = new HashSet<Permission>();
 		setPermissions.addAll(permissions);
-		for(Group g : groups){
-			setPermissions.addAll(g.permissions);
-		}
+//		for(Group g : groups){
+//			setPermissions.addAll(g.permissions);
+//		}
 		return setPermissions;
 	}
 	
