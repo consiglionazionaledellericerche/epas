@@ -271,43 +271,56 @@ public class Absences extends Controller{
 		absence.save();
 		
 		if (absence.id != null) {
-			LocalDateTime ldtBegin = new LocalDateTime(dateFrom.getYear(), dateFrom.getMonthOfYear(), dateFrom.getDayOfMonth(), 0, 0);
-			LocalDateTime ldtEnd = new LocalDateTime(dateFrom.getYear(), dateFrom.getMonthOfYear(), dateFrom.getDayOfMonth(), 23, 59);
-						
-			if(absenceType.justifiedTimeAtWork.isFixedJustifiedTime() == true && absenceType.mealTicketCalculation == true){
-				/**
-				 * è un'assenza oraria e il calcolo del buono mensa deve essere fatto lo stesso: devo vedere se il tempo di lavoro
-				 */
-				if(person.workingTimeType.getMinimalTimeForLunch(dateFrom.getDayOfWeek(), person.workingTimeType) < pd.timeAtWork){
+//			if(params.get("buonoMensaSi", Boolean.class)==true){
+//				/**
+//				 * in questo caso bisogna forzare l'assegnazione del buono pasto nonostante l'assenza
+//				 */
+//				pd.isTicketAvailable = true;
+//				pd.save();
+//				flash.success(String.format("Assenza di tipo %s inserita per il giorno %s per %s %s con buono mensa assegnato", absenceCode, PersonTags.toDateTime(dateFrom), person.surname, person.name));
+//				render("@save");	
+//			}
+//			else{
+							
+				LocalDateTime ldtBegin = new LocalDateTime(dateFrom.getYear(), dateFrom.getMonthOfYear(), dateFrom.getDayOfMonth(), 0, 0);
+				LocalDateTime ldtEnd = new LocalDateTime(dateFrom.getYear(), dateFrom.getMonthOfYear(), dateFrom.getDayOfMonth(), 23, 59);
+							
+				if(absenceType.justifiedTimeAtWork.isFixedJustifiedTime() == true && absenceType.mealTicketCalculation == true){
 					/**
-					 * tolgo dal tempo di lavoro la quantità di ore che il codice di assenza toglie 
+					 * è un'assenza oraria e il calcolo del buono mensa deve essere fatto lo stesso: devo vedere se il tempo di lavoro
 					 */
-					pd.timeAtWork = pd.timeAtWork-absenceType.justifiedTimeAtWork.minutesJustified;
+					if(person.workingTimeType.getMinimalTimeForLunch(dateFrom.getDayOfWeek(), person.workingTimeType) < pd.timeAtWork){
+						/**
+						 * tolgo dal tempo di lavoro la quantità di ore che il codice di assenza toglie 
+						 */
+						pd.timeAtWork = pd.timeAtWork-absenceType.justifiedTimeAtWork.minutesJustified;
+						pd.populatePersonDay();
+						pd.save();
+					}
+					else{
+						/**
+						 * in questo caso il tempo di lavoro è superiore almeno al minimo tempo per ottenere il buono mensa
+						 */
+					}
+				}
+				
+				if(absenceType.ignoreStamping == true){
+					/**
+					 * deve ignorare le timbrature, quindi per quel giorno vale l'assenza e della timbratura che fare? vanno cancellate? e il personday?
+					 */
+					
+					Stamping.delete("Select st from Stamping st " +
+							"where st.person = ? and st.date between ? and ? ", person, ldtBegin, ldtEnd);
+					
 					pd.populatePersonDay();
 					pd.save();
 				}
-				else{
-					/**
-					 * in questo caso il tempo di lavoro è superiore almeno al minimo tempo per ottenere il buono mensa
-					 */
-				}
-			}
-			if(absenceType.ignoreStamping == true){
-				/**
-				 * deve ignorare le timbrature, quindi per quel giorno vale l'assenza e della timbratura che fare? vanno cancellate? e il personday?
-				 */
 				
-				Stamping.delete("Select st from Stamping st " +
-						"where st.person = ? and st.date between ? and ? ", person, ldtBegin, ldtEnd);
-				
-				pd.populatePersonDay();
-				pd.save();
+				flash.success(
+					String.format("Assenza di tipo %s inserita per il giorno %s per %s %s", absenceCode, PersonTags.toDateTime(dateFrom), person.surname, person.name));
+				render("@save");	
 			}
-			
-			flash.success(
-				String.format("Assenza di tipo %s inserita per il giorno %s per %s %s", absenceCode, PersonTags.toDateTime(dateFrom), person.surname, person.name));
-			render("@save");	
-		}
+	//	}
 		
 		
 	}
@@ -350,6 +363,13 @@ public class Absences extends Controller{
 				flash.error("Il codice di assenza %s è già presente per la data %s", params.get("absenceCode"), PersonTags.toDateTime(absence.personDay.date));
 				edit(absence.id);
 				render("@edit");
+			}
+			if(params.get("buonoMensaSi", Boolean.class) == true){
+				PersonDay pd = absence.personDay;
+				pd.isTicketAvailable = true;
+				pd.save();
+				flash.success(String.format("Assenza di tipo %s inserita per il giorno %s per %s %s con buono mensa assegnato", absenceCode, PersonTags.toDateTime(pd.date), pd.person.surname, pd.person.name));
+				render("@save");
 			}
 			absence.absenceType = absenceType;
 			absence.save();

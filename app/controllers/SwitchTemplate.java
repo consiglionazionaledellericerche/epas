@@ -23,10 +23,8 @@ public class SwitchTemplate extends Controller{
 		
 		Long id = params.get("personId", Long.class);
 		Person p = Person.findById(id);
-		if(p.permissions.size() > 1){
-			/**
-			 * Sono nel caso di un utente con più permessi, un amministratore
-			 */
+		
+		
 			String action = params.get("action");
 			Logger.debug("La action è: %s", action);
 			if (action == null) {
@@ -63,7 +61,7 @@ public class SwitchTemplate extends Controller{
 			
 			switch (menuItem) {
 			
-			case stampings:
+			case stampingsAdmin:
 				Logger.debug("sto per chiamare il metodo show");
 				
 				if (personId != null) {
@@ -76,7 +74,7 @@ public class SwitchTemplate extends Controller{
 
 				break;
 				
-			case absences:
+			case absencesAdmin:
 				Absences.show(personId, year, month);
 				break;
 			case yearlyAbsences:
@@ -88,10 +86,10 @@ public class SwitchTemplate extends Controller{
 			case manageAbsenceCode:
 				Absences.manageAbsenceCode();
 				break;
-			case vacations:
+			case vacationsAdmin:
 				VacationsAdmin.manageVacationCode();		
 				break;
-			case competences:
+			case competencesAdmin:
 				Competences.showCompetences(year, month);
 				break;
 			case changePassword:
@@ -121,44 +119,6 @@ public class SwitchTemplate extends Controller{
 			case manageCompetence:
 				Competences.manageCompetenceCode();
 				break;
-			default:		
-				break;
-			}
-		}
-		else{
-			String action = params.get("action");
-			Logger.debug("La action è: %s", action);
-			if (action == null) {
-				
-				flash.error(String.format("La action da eseguire è: %s", action));
-				Application.indexAdmin();
-				
-			}
-			ActionEmployeesMenuItem menuItem = ActionEmployeesMenuItem.valueOf(action);
-			
-			Person person = Security.getPerson();
-			Long personId = null;
-			if (params.get("personId") != null) {
-				personId = params.get("personId", Long.class);
-				person = Person.findById(personId);
-			} 
-					
-			int month = now.getMonthOfYear();
-			if (params.get("month") != null) {
-				month = params.get("month", Integer.class);
-			}
-			
-			int year = now.getYear();
-			if (params.get("year") != null) {
-				year = params.get("year", Integer.class);
-			}
-			
-			int day = now.getDayOfMonth();
-			if(params.get("day") != null){
-				day = params.get("day", Integer.class);
-			}
-			
-			switch (menuItem) {
 			case stampings:
 				Stampings.show(personId, year, month); //vediamo se va bene questa o se c'è necessità di farne una nuova per l'impiegato
 				break;
@@ -177,17 +137,19 @@ public class SwitchTemplate extends Controller{
 			case hourRecap:
 				PersonMonths.hourRecap(personId,year);
 				break;
-			case changePassword:
-				Persons.changePassword(personId);
+//			case changePassword:
+//				Persons.changePassword(personId);
+//				break;
+			default: 
 				break;
-				default: 
-					break;
-			}
+			
 		}
-		
-		render(p.permissions);
-		
 	}
+}
+		
+		//render(p.permissions);
+		
+//	}
 //	
 //	public static void switchTemplateEmployees() throws InstantiationException, IllegalAccessException, DateParseException{
 //		LocalDate now = new LocalDate();
@@ -195,4 +157,4 @@ public class SwitchTemplate extends Controller{
 //		
 //	}
 
-}
+//}

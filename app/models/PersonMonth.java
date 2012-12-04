@@ -236,7 +236,13 @@ public class PersonMonth extends Model {
 		for (int day = 1; day <= firstDayOfMonth.getActualMaximum(Calendar.DAY_OF_MONTH); day++) {
 
 			Logger.trace("generating PersonDay: person = %s, year = %d, month = %d, day = %d", person.username, year, month, day);
-			days.add(new PersonDay(person, new LocalDate(year, month, day), 0, 0, 0));
+			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", 
+					person, new LocalDate(year, month, day)).first();
+			if(pd == null)
+				days.add(new PersonDay(person, new LocalDate(year, month, day), 0, 0, 0));
+			else
+				days.add(pd);
+			Logger.debug("Inserito in days il person day: %s", pd);
 		}
 		return days;
 	}	
