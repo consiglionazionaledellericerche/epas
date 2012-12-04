@@ -14,5 +14,7 @@ public class ReperibilityPeriods {
 
 	public List<ReperibilityPeriod> periods = new ArrayList<ReperibilityPeriod>();
 	
-	public ReperibilityPeriods(List<ReperibilityPeriod> periods) {  this.periods = periods; }
+	public ReperibilityPeriods(List<ReperibilityPeriod> periods) {
+		this.periods = periods;
+	}
 }
