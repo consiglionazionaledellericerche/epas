@@ -34,10 +34,11 @@ public class Security extends Secure.Security {
 		if(person != null){
 			Cache.set(username, person, "30mn");
 			Cache.set(PERMISSION_CACHE_PREFIX + username, person.getAllPermissions(), "30mn");
+			Cache.set("personId", person.id, "30mn");
 			            
             flash.success("Welcome, " + person.name + person.surname);
             Logger.info("person %s successfully logged in", person.username);
-            Logger.info("Permission list for %s %s: %s", person.name, person.surname, person.permissions);
+            //Logger.info("Permission list for %s %s: %s", person.name, person.surname, person.permissions);
 			return true;
 		}
 		

@@ -149,7 +149,7 @@ public class Persons extends Controller {
 		render(person);
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_PASSWORD)
+//	@Check(Security.INSERT_AND_UPDATE_PASSWORD)
 	public static void savePassword(){
 		Long personId = params.get("personId", Long.class);
 		
