@@ -59,7 +59,7 @@ public class JsonReperibilityPeriodsBinder implements TypeBinder<ReperibilityPer
 				Logger.trace("jsonObject = %s", jsonObject);
 				
 				personId = jsonObject.get("id").getAsLong();
-				reperibilityTypeId = jsonObject.get("reperibility_type_id").getAsLong();
+				//reperibilityTypeId = jsonObject.get("reperibility_type_id").getAsLong();
 				
 				person = Person.findById(personId);
 				
@@ -67,16 +67,16 @@ public class JsonReperibilityPeriodsBinder implements TypeBinder<ReperibilityPer
 					throw new IllegalArgumentException(String.format("Person with id = %s not found", personId));
 				}
 				
-				reperibilityType = PersonReperibilityType.findById(reperibilityTypeId);
+				//reperibilityType = PersonReperibilityType.findById(reperibilityTypeId);
 
-				if (reperibilityType == null) {
-					throw new IllegalArgumentException(String.format("PersonReperibilityType with id = %s not found", reperibilityTypeId));
-				}
+//				if (reperibilityType == null) {
+//					throw new IllegalArgumentException(String.format("PersonReperibilityType with id = %s not found", reperibilityTypeId));
+//				}
 
 				LocalDate start = new LocalDate(jsonObject.get("start").getAsString());
 				LocalDate end = new LocalDate(jsonObject.get("end").getAsString());
 				
-				ReperibilityPeriod reperibilityPeriod =	new ReperibilityPeriod(person, start, end, reperibilityType);
+				ReperibilityPeriod reperibilityPeriod =	new ReperibilityPeriod(person, start, end);
 				reperibilityPeriods.add(reperibilityPeriod);
 			}
 			
