@@ -78,7 +78,7 @@ public class Stampings extends Controller {
     	
     	Logger.debug("Month recap of person.id %s, year=%s, month=%s", person.id, year, month);
     	    	
-        render(monthRecap, personMonth/*, menuItem*/);
+        render(monthRecap, personMonth);
     }
     
 	@Check(Security.VIEW_PERSONAL_SITUATION)
@@ -96,7 +96,7 @@ public class Stampings extends Controller {
 	
 	
 	
-	
+	@Check(Security.INSERT_AND_UPDATE_STAMPING)
     public static void personStamping(Long personId, int year, int month) {
 		
     	if (personId == null) {
@@ -107,7 +107,7 @@ public class Stampings extends Controller {
     		personStamping(personId);
     	}
     	
-    	Logger.trace("Called show of personId=%s, year=%s, month=%s", personId, year, month);
+    	Logger.debug("Called personStamping of personId=%s, year=%s, month=%s", personId, year, month);
     	
     	Person person = Person.findById(personId);
     	/**
@@ -128,6 +128,7 @@ public class Stampings extends Controller {
 		}
     	
     	Logger.debug("Month recap of person.id %s, year=%s, month=%s", person.id, year, month);
+    	Logger.debug("PersonMonth of person.id %s, year=%s, month=%s", person.id, year, month);
     	
     	
     	int numberOfInOut = Math.min(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());

@@ -66,6 +66,9 @@ public class PersonDay extends Model {
 
 	@Column(name = "is_ticket_available")
 	public boolean isTicketAvailable = false;
+	
+	@Column(name = "is_ticket_forced_by_admin")
+	public boolean isTicketForcedByAdmin = false;
 
 	@Column(name = "is_time_at_work_auto_certificated")
 	public boolean isTimeAtWorkAutoCertificated = false;
@@ -84,8 +87,6 @@ public class PersonDay extends Model {
 	@Enumerated(EnumType.STRING)
 	public PersonDayModificationType modificationType;
 
-	@Transient
-	private boolean isMealTicketAvailable;
 
 	public PersonDay(Person person, LocalDate date, int timeAtWork, int difference, int progressive) {
 		this.person = person;
@@ -415,11 +416,7 @@ public class PersonDay extends Model {
 			}
 		}
 	}
-
-
-
-
-
+	
 	/**
 	 * calcola il valore del progressivo giornaliero e lo salva sul db
 	 */
@@ -434,23 +431,37 @@ public class PersonDay extends Model {
 			progressive = difference + lastPreviousPersonDayInMonth.progressive;
 			Logger.debug("%s - %s. Il PersonDay precedente è %s. Difference di oggi = %s, progressive = %s", person, date, lastPreviousPersonDayInMonth, difference, progressive);
 		}
+		if(this.date.dayOfMonth().equals(date.dayOfMonth().withMaximumValue())){
+			PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
+					person, date.getMonthOfYear(), date.getYear()).first();
+			if(pm == null){
+				pm = new PersonMonth(person, date.getMonthOfYear(),date.getYear());
+				pm.progressiveAtEndOfMonthInMinutes = progressive;
+				pm.save();
+			}
+			else{
+				pm.progressiveAtEndOfMonthInMinutes = progressive;
+				pm.merge();
+			}
+					
+		}
 		save();
-		return;				
+		//return;				
 	}
 
 	/**
 	 * chiama le funzioni di popolamento
 	 */
 	public void populatePersonDay(){
-		this.updateTimeAtWork();
-		this.merge();
-		this.updateDifference();
-		this.merge();
+		updateTimeAtWork();
+		merge();
+		updateDifference();
+		merge();
 
-		this.updateProgressive();	
-		this.merge();
-		this.setTicketAvailable();
-		this.merge();
+		updateProgressive();	
+		merge();
+		setTicketAvailable();
+		merge();
 	}
 
 
@@ -542,46 +553,6 @@ public class PersonDay extends Model {
 		setTicketAvailable();
 		return isTicketAvailable;
 
-		//		if (timeAtWork == 0) {
-		//			timeAtWork = updateTimeAtWork();
-		//
-		//		}
-
-//		if(timeAtWork == 0 || timeAtWork < getWorkingTimeTypeDay().mealTicketTime){
-//			ticketAvailable = false;
-//		}				
-//
-//
-//		if(person.workingTimeType.description.equals("normale-mod") || person.workingTimeType.description.equals("normale")
-//				|| person.workingTimeType.description.equals("80%") || person.workingTimeType.description.equals("85%")){
-//			if(timeAtWork >= getWorkingTimeTypeDay().mealTicketTime)
-//				ticketAvailable=true;
-//			if(timeAtWork > getWorkingTimeTypeDay().mealTicketTime 
-//					&& timeAtWork < getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime 
-//					&&(stampings.size()==4 && checkMinTimeForLunch(stampings) < getWorkingTimeTypeDay().mealTicketTime))
-//				ticketAvailable=true;
-//			if(timeAtWork > getWorkingTimeTypeDay().mealTicketTime 
-//					&& timeAtWork < getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime 
-//					&& (stampings.size()==4))
-//				ticketAvailable=true;
-//			if(timeAtWork > getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime 
-//					&& timeAtWork < getWorkingTimeTypeDay().workingTime 
-//					&& (stampings.size()==4 || stampings.size()==2))
-//				ticketAvailable=true;
-//			if(timeAtWork > getWorkingTimeTypeDay().mealTicketTime 
-//					&& timeAtWork < getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime 
-//					&& (stampings.size()==6))
-//				ticketAvailable=true;
-//			if(timeAtWork < getWorkingTimeTypeDay().mealTicketTime + getWorkingTimeTypeDay().breakTicketTime
-//					&& timeAtWork > getWorkingTimeTypeDay().mealTicketTime 
-//					&& stampings.size()==2 )
-//				ticketAvailable = true;
-//			isMealTicketAvailable = ticketAvailable;
-//		}
-//
-//		return isMealTicketAvailable;
-		
-
 	}
 
 	/**
@@ -592,6 +563,8 @@ public class PersonDay extends Model {
 	 */
 	private void setTicketAvailable(){
 
+		if(isTicketForcedByAdmin)
+			return;
 		Logger.debug("Chiamata della setTicketAvailable, il timeAtWork per %s %s è: %s", person.name, person.surname, timeAtWork);
 		if(timeAtWork == 0 || timeAtWork < getWorkingTimeTypeDay().mealTicketTime){
 			isTicketAvailable = false;
@@ -626,7 +599,6 @@ public class PersonDay extends Model {
 			save();
 			return;
 		}
-
 		
 		if(absenceList().size() > 0){
 			difference = 0;
@@ -642,9 +614,8 @@ public class PersonDay extends Model {
 
 		int minTimeWorking = getWorkingTimeTypeDay().workingTime;
 		difference = timeAtWork - minTimeWorking;
-		save();
-		
-		
+		save();		
+		//return;
 	}
 
 	/**

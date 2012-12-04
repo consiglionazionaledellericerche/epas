@@ -5,20 +5,47 @@ package it.cnr.iit.epas;
  *
  */
 public enum ActionMenuItem {
-	stampings,
-	personList,
-	yearlyAbsences,
-	absences,
-	vacations,
-	competences,
-	changePassword,
-	manageWorkingTime,
-	confParameters,
-	administrator,
-	totalMonthlyAbsences,
-	manageAbsenceCode,
-	missingStamping,
-	dailyPresence,
-	mealTicketSituation,
-	manageCompetence
+	stampingsAdmin("Timbrature", "insertAndUpdateStamping"),
+    personList("Lista persone", "insertAndUpdatePerson"),
+    yearlyAbsences("Assenze annuali", "insertAndUpdateAbsence"),
+    absencesAdmin("Gestione assenze", "insertAndUpdateAbsence"),
+    vacationsAdmin("Gestione ferie e permessi", "insertAndUpdateVacations"),
+    competencesAdmin("Gestione competenze", "insertAndUpdateCompetences"),
+    changePassword("Gestione password", "insertAndUpdatePassword"),
+    manageWorkingTime("Gestione orari di lavoro", "insertAndUpdateWorkingTime"),
+    confParameters("Configurazione parametri", "insertAndUpdateConfiguration"),
+    administrator("Gestione amministratori", "insertAndUpdateAdministrator"),
+    totalMonthlyAbsences("Totale assenze mensili", "insertAndUpdateAbsence"),
+    manageAbsenceCode("Gestione codici d'assenza", "insertAndUpdateAbsence"),
+    missingStamping("Timbrature mancanti", "insertAndUpdatePerson"),
+    dailyPresence("Presenza giornaliera", "insertAndUpdatePerson"),
+    mealTicketSituation("Situazione buoni mensa", "insertAndUpdatePerson"),
+    manageCompetence("Gestione codici competenze", "insertAndUpdateCompetences"),
+	stampings("Situazione mensile", "viewPersonalSituation"),
+	absences("Assenze", "viewPersonalSituation"),
+	absencesPerPerson("Assenze per persona", "viewPersonalSituation"),
+	vacations("Ferie", "viewPersonalSituation"),
+	competences("Competenze", "viewPersonalSituation"),
+	hourRecap("Riepilogo orario", "viewPersonalSituation");
+	//changePassword("", "");
+
+    
+    private String description;
+    private String permission;
+
+    private ActionMenuItem(String description, String permission) {
+        this.description = description;
+        this.permission = permission;
+    }
+
+    public String getAction() {
+        return this.name();
+    }
+
+    public String getDescription() {
+        return this.description;
+    }
+    public String getPermission() {
+        return permission;
+    } 
 }

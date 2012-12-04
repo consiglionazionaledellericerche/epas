@@ -3,14 +3,21 @@
  */
 package it.cnr.iit.epas;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import controllers.Security;
+
+import play.Logger;
 import play.cache.Cache;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import models.Permission;
 import models.Person;
 
 /**
@@ -49,13 +56,45 @@ public class MainMenu {
 	}
 	
 	public Person getPerson() {
-		Person person = Cache.get(PERSON_ID_CACHE_PREFIX, Person.class);
+		
+		if (personId == null) {
+			return null;
+		}
+		
+		Person person = Cache.get(PERSON_ID_CACHE_PREFIX + personId, Person.class);
 		
 		if (person == null) {
+			Logger.debug("L'id della persona è: %s", personId);
 			person = Person.findById(personId);
-			Cache.set(PERSON_ID_CACHE_PREFIX, person, "30mn");
+//			if(person == null){
+//				Long id = Cache.get("personId", Long.class);
+//				person = Person.findById(id);
+//				
+//			}
+			Cache.set(PERSON_ID_CACHE_PREFIX + personId, person, "30mn");
 		}
 		
 		return person;
 	}
+	
+	public List<ActionMenuItem> getActions() {
+        //List<String> actions = new ArrayList<String>();
+		List<ActionMenuItem> actions = new ArrayList<ActionMenuItem>();
+		
+		Set<Permission> permissions = Security.getPerson().getAllPermissions();
+		//Logger.debug("Permission di %s sono: %s" , Security.getPerson(), permissions);
+		Set<String> permissionDescriptions = new HashSet<String>();
+		for(Permission p : permissions){
+			permissionDescriptions.add(p.description);
+			
+		}
+		//Logger.debug("PermissionDescription di %s sono: %s" , Security.getPerson(), permissionDescriptions);
+        for (ActionMenuItem menuItem : ActionMenuItem.values()) {
+            if (permissionDescriptions.contains(menuItem.getPermission())) {
+                actions.add(menuItem);
+            }
+        }
+       // Logger.debug("La lista delle azioni: %s", actions);
+        return actions;
+    } 
 }
