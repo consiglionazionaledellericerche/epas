@@ -22,8 +22,8 @@ public class PersonShiftDay extends Model{
 	@OneToOne(mappedBy="personShiftDay", fetch=FetchType.LAZY)
 	public ShiftType shiftType;
 	
-	@OneToMany(mappedBy="personShiftDay", fetch=FetchType.LAZY)
-	public List<ShiftTimeTable> shiftTimeTables;
+	@OneToOne(mappedBy="personShiftDay", fetch=FetchType.LAZY)
+	public ShiftTimeTable shiftTimeTables;
 	
 	@OneToOne
 	@JoinColumn(name="person_shift_id", unique=true, nullable=false, updatable=false)

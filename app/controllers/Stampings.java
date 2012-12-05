@@ -327,7 +327,8 @@ public class Stampings extends Controller {
     				p, new LocalDate(year, month, 1), new LocalDate(year, month,1).dayOfMonth().withMaximumValue()).fetch();
     				
     		for(PersonDay pd : pdList){
-    			if(pd.stampings.size() == 1 || (pd.stampings.size() == 0 && pd.absences.size() == 0)){
+    			if(pd.stampings.size() == 1 || 
+    					(pd.stampings.size() == 0 && pd.absences.size() == 0 && pd.date.getDayOfWeek() != 7 && pd.date.getDayOfWeek() != 6)){
     				
     				if(!personPersonDayMap.containsKey(p)){
     					pdMissingStampingList.add(pd);
