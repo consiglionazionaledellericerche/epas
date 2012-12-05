@@ -566,6 +566,7 @@ public class PersonDay extends Model {
 		if(isTicketForcedByAdmin)
 			return;
 		Logger.debug("Chiamata della setTicketAvailable, il timeAtWork per %s %s è: %s", person.name, person.surname, timeAtWork);
+		Logger.debug("Il tempo per avere il buono mensa è: %s", getWorkingTimeTypeDay().mealTicketTime);
 		if(timeAtWork == 0 || timeAtWork < getWorkingTimeTypeDay().mealTicketTime){
 			isTicketAvailable = false;
 			return; 
@@ -584,6 +585,8 @@ public class PersonDay extends Model {
 		
 		isTicketAvailable = ticketAvailable;
 		Logger.debug("Quindi il valore del buono pasto è %s", isTicketAvailable);
+		save();
+		
 	}
 
 	/**
@@ -592,8 +595,7 @@ public class PersonDay extends Model {
 	 */
 
 	private void updateDifference(){
-
-		//TODO: contrllare il primo giorno del mese...
+		
 		if((getWorkingTimeTypeDay().holiday) && (date.getDayOfMonth()==1)){
 			difference = 0;
 			save();
@@ -615,7 +617,7 @@ public class PersonDay extends Model {
 		int minTimeWorking = getWorkingTimeTypeDay().workingTime;
 		difference = timeAtWork - minTimeWorking;
 		save();		
-		//return;
+		
 	}
 
 	/**
