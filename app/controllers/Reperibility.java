@@ -8,7 +8,9 @@ import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import models.Absence;
 import models.Person;
@@ -23,6 +25,7 @@ import org.joda.time.LocalDate;
 
 import play.Logger;
 import play.data.binding.As;
+import play.db.jpa.JPA;
 import play.mvc.Controller;
 
 /**
@@ -40,7 +43,6 @@ public class Reperibility extends Controller {
 	}
 
 	public static void find() {
-		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 
 		Long type = Long.parseLong(params.get("type"));
 		
@@ -75,7 +77,6 @@ public class Reperibility extends Controller {
 	 * (portale sistorg)
 	 */
 	public static void absence() {
-		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 
 		Long type = Long.parseLong(params.get("type"));
 		
@@ -133,36 +134,47 @@ public class Reperibility extends Controller {
 	 * 
 	 * Per provarlo è possibile effettuare una chiamata JSON come questa:
 	 * 	$  curl -H "Content-Type: application/json" -X PUT \
-	 * 			-d '[ {"id" : "49","start" : 2012-05-05,"end" : "2012-05-10", "reperibility_type_id" : "1"}, { "id" : "139","start" : "2012-05-12" , "end" : "2012-05-14", "reperibility_type_id" : "1" } , { "id" : "139","start" : "2012-05-17","end" : "2012-05-18", "reperibility_type_id" : "1" } ]' \ 
-	 * 			http://localhost:9000/reperibility/update
+	 * 			-d '[ {"id" : "49","start" : 2012-12-05,"end" : "2012-12-10", "reperibility_type_id" : "1"}, { "id" : "139","start" : "2012-12-12" , "end" : "2012-12-14", "reperibility_type_id" : "1" } , { "id" : "139","start" : "2012-12-17","end" : "2012-12-18", "reperibility_type_id" : "1" } ]' \ 
+	 * 			http://localhost:9000/reperibility/1/update/2012/12
 	 * 
 	 * @param body
 	 */
-	public static void update(@As(binder=JsonReperibilityPeriodsBinder.class) ReperibilityPeriods body) {
-		Logger.debug("chiamata update con REQUEST_METHOD = %s", request.method);
-		
-		if (request.method.equals("OPTIONS")) {
-			response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
-			response.setHeader("Access-Control-Allow-Methods", "PUT, POST, GET, OPTIONS");
-			response.setHeader("Access-Control-Max-Age", "1000");
-			response.setHeader("Access-Control-Allow-Headers", "X-PINGARUNER");
-			response.setHeader("Content-type", "application/json");
-		}else if (request.method.equals("PUT")) {
-			Logger.debug("nella update sono nel ramo put");
-		}
+	public static void update(Long type, Integer year, Integer month, @As(binder=JsonReperibilityPeriodsBinder.class) ReperibilityPeriods body) {
+
 		Logger.debug("update: Received reperebilityPeriods %s", body);
 		
 		if (body == null) {
 			badRequest();	
 		}
 		
+		PersonReperibilityType reperibilityType = PersonReperibilityType.findById(type);
+		
+		if (reperibilityType == null) {
+			throw new IllegalArgumentException(String.format("ReperibilityType id = %s doesn't exist", type));			
+		}
+		
+		//Il mese e l'anno ci servono per "azzerare" eventuale giorni di reperibilità rimasti vuoti
+		LocalDate monthToManage = new LocalDate(year, month, 1);
+		
+		//Conterrà i giorni del mese che devono essere attribuiti a qualche reperibile 
+		Set<Integer> daysOfMonthToAssign = new HashSet<Integer>();
+		
+		for (int i = 1 ; i <= monthToManage.dayOfMonth().withMaximumValue().getDayOfMonth(); i++) {
+			daysOfMonthToAssign.add(i);
+		}
+		Logger.trace("Lista dei giorni del mese = %s", daysOfMonthToAssign);
+		
 		LocalDate day = null;
+		
 		for (ReperibilityPeriod reperibilityPeriod : body.periods) {
+			
+			reperibilityPeriod.reperibilityType = reperibilityType;
 			
 			if (reperibilityPeriod.start.isAfter(reperibilityPeriod.end)) {
 				throw new IllegalArgumentException(
 					String.format("ReperibilityPeriod person.id = %s has start date %s after end date %s", reperibilityPeriod.person.id, reperibilityPeriod.start, reperibilityPeriod.end));
 			}
+			
 			
 			day = reperibilityPeriod.start;
 			while (day.isBefore(reperibilityPeriod.end.plusDays(1))) {
@@ -174,13 +186,13 @@ public class Reperibility extends Controller {
 				}
 				
 				//Se la persona è in ferie questo giorno non può essere reperibile 
-				if (Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE a.date = ? and pd.person = ?", day, reperibilityPeriod.person).fetch().size() > 0) {
+				if (Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date = ? and pd.person = ?", day, reperibilityPeriod.person).fetch().size() > 0) {
 					throw new IllegalArgumentException(
 						String.format("ReperibilityPeriod person.id %d is not compatible with a Vacaction in the same day %s", reperibilityPeriod.person.id, day));
 				}
 
 				//Se la persona è in ferie questo giorno non può essere reperibile 
-				if (Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE a.date = and pd.person = ?", day, reperibilityPeriod.person).fetch().size() > 0) {
+				if (Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date = ? and pd.person = ?", day, reperibilityPeriod.person).fetch().size() > 0) {
 					throw new IllegalArgumentException(
 						String.format("ReperibilityPeriod person.id %d is not compatible with a Absence in the same day %s", reperibilityPeriod.person.id, day));
 				}
@@ -204,13 +216,37 @@ public class Reperibility extends Controller {
 				
 				personReperibilityDay.save();
 				
+				//Questo giorno è stato assegnato
+				daysOfMonthToAssign.remove(day.getDayOfMonth());
+				
 				Logger.info("Inserito o aggiornato PersonReperibilityDay = %s", personReperibilityDay);
 				
 				day = day.plusDays(1);
 			}
 		}
 		
+		Logger.info("Giorni di reperibilità da rimuovere = %s", daysOfMonthToAssign);
+		
+		for (int dayToRemove : daysOfMonthToAssign) {
+			LocalDate dateToRemove = new LocalDate(year, month, dayToRemove);
+			Logger.trace("Eseguo la cancellazione del giorno %s", dateToRemove);
+			
+			int cancelled = JPA.em().createQuery("DELETE FROM PersonReperibilityDay WHERE reperibilityType = :reperibilityType AND date = :dateToRemove)")
+			.setParameter("reperibilityType", reperibilityType)
+			.setParameter("dateToRemove", dateToRemove)
+			.executeUpdate();
+			if (cancelled == 1) {
+				Logger.info("Rimossa reperibilità di tipo %s del giorno %s", reperibilityType, dateToRemove);
+			}
+		}
 
+	}
+	
+	public static void main(String[] args) {
+		LocalDate l1 = new LocalDate(2012, 11, 1);
+		LocalDate l2 = new LocalDate(2012, 11, 1);
+		System.out.println("l1 = l2 = " + l1.equals(l2));
+		
 	}
 		
 }

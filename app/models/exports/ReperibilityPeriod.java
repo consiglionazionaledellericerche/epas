@@ -24,12 +24,12 @@ public class ReperibilityPeriod {
 	public final Person person;
 	public final LocalDate start;
 	public LocalDate end;
-	public final PersonReperibilityType reperibilityType;
+	public PersonReperibilityType reperibilityType;
 
-	public ReperibilityPeriod(Person person, LocalDate start, PersonReperibilityType type) {
+	public ReperibilityPeriod(Person person, LocalDate start, LocalDate end) {
 		this.person = person;
 		this.start = start;
-		this.reperibilityType = type;
+		this.end = end;
 	}
 
 	public ReperibilityPeriod(Person person, LocalDate start, LocalDate end, PersonReperibilityType type) {
