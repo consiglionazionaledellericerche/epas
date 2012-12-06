@@ -62,7 +62,8 @@ public class Stampings extends Controller {
     	}
     	
     	Logger.trace("Called show of personId=%s, year=%s, month=%s", personId, year, month);
-    	
+    	long id = 1;
+    	Configuration confParameters = Configuration.findById(id);
     	Person person = Person.findById(personId);
     	
     	//TODO: Se il mese è gestito vecchio... usare il monthRecap, altrimenti utilizzare il personMonth
@@ -75,10 +76,11 @@ public class Stampings extends Controller {
     	if (personMonth == null) {
 			personMonth = new PersonMonth(person, year, month);
 		}
+    	int numberOfInOut = Math.min(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
     	
     	Logger.debug("Month recap of person.id %s, year=%s, month=%s", person.id, year, month);
     	    	
-        render(monthRecap, personMonth);
+        render(monthRecap, personMonth, numberOfInOut);
     }
     
 	@Check(Security.VIEW_PERSONAL_SITUATION)

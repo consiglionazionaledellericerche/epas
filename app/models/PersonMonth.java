@@ -6,7 +6,9 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -30,6 +32,7 @@ import play.db.jpa.JPA;
 import play.db.jpa.Model;
 
 import lombok.Data;
+import models.Stamping.WayType;
 
 @Audited
 @Table(name="person_months")
@@ -90,6 +93,12 @@ public class PersonMonth extends Model {
 
 	@Transient
 	public List<PersonDay> days = null;
+	
+	@Transient
+	private Map<AbsenceType, Integer> absenceCodeMap;
+
+	@Transient
+	private List<StampModificationType> stampingCodeList;
 
 	/**
 	 * aggiunta la date per test di getMaximumCoupleOfStampings ---da eliminare
@@ -175,7 +184,7 @@ public class PersonMonth extends Model {
 	 * persona per quel mese
 	 */
 	public long getMaximumCoupleOfStampings(){
-		EntityManager em = em();
+		//EntityManager em = em();
 		LocalDate begin = new LocalDate(year, month, 1);
 
 		List<PersonDay> personDayList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
@@ -186,9 +195,9 @@ public class PersonMonth extends Model {
 			int localMaxExitStamp = 0;
 			int localMaxInStamp = 0;
 			for(Stamping st :pd.stampings){
-				if(st.stampType == StampType.findById(1L) || st.stampType == StampType.findById(4L))
+				if(st.way == WayType.out)
 					localMaxExitStamp ++;
-				if(st.stampType == StampType.findById(2L) || st.stampType == StampType.findById(3L))
+				if(st.way == WayType.in)
 					localMaxInStamp ++;
 			}
 			if(localMaxExitStamp > maxExitStamp)
@@ -374,6 +383,126 @@ public class PersonMonth extends Model {
 		
 		save();
 	}
+	
+	/**
+	 * 
+	 * @return il numero di buoni pasto usabili per quel mese
+	 */
+	public int numberOfMealTicketToUse(){
+		int tickets=0;
+		if(days==null){
+			days= getDays();
+		}
+		for(PersonDay pd : days){
+			if(pd.mealTicket()==true)
+				tickets++;
+		}
+
+		return tickets;
+	}
+
+	/**
+	 * 
+	 * @return il numero di buoni pasto da restituire per quel mese
+	 */
+	public int numberOfMealTicketToRender(){
+		int ticketsToRender=0;
+		if(days==null){
+			days= getDays();
+		}
+		for(PersonDay pd : days){
+			if(pd.mealTicket()==false && (pd.isHoliday()==false))
+				ticketsToRender++;
+		}
+
+		return ticketsToRender;
+	}
+
+	/**
+	 * 
+	 * @return il numero di giorni lavorati in sede. Per stabilirlo si controlla che per ogni giorno lavorativo, esista almeno una 
+	 * timbratura.
+	 */
+	public int basedWorkingDays(){
+		int basedDays=0;
+		if(days==null){
+			days= getDays();
+		}
+		for(PersonDay pd : days){
+			List<Stamping> stamp = pd.stampings;
+			if(stamp.size()>0 && pd.isHoliday()==false)
+				basedDays++;
+		}
+		return basedDays;
+	}
+	
+	/**
+	 * 
+	 * @param days lista di PersonDay
+	 * @return la lista contenente le assenze fatte nell'arco di tempo dalla persona
+	 */
+
+	public Map<AbsenceType,Integer> getAbsenceCode(){
+
+		if(days == null){
+			days = getDays();
+		}
+		absenceCodeMap = new HashMap<AbsenceType, Integer>();
+		if(absenceCodeMap.isEmpty()){
+			int i = 0;
+			for(PersonDay pd : days){
+				for (Absence absence : pd.absences) {
+					AbsenceType absenceType = absence.absenceType;
+					if(absenceType != null){
+						boolean stato = absenceCodeMap.containsKey(absenceType);
+						if(stato==false){
+							i=1;
+							absenceCodeMap.put(absenceType,i);            	 
+						} else{
+							i = absenceCodeMap.get(absenceType);
+							absenceCodeMap.remove(absenceType);
+							absenceCodeMap.put(absenceType, i+1);
+						}
+					}            
+				}	 
+			}       
+		}
+
+		return absenceCodeMap;	
+
+	}
+
+
+	public Map<AbsenceType, Integer> getAbsenceCodeMap() {
+		return absenceCodeMap;
+	}
+
+	/**
+	 * 
+	 * @param days
+	 * @return lista dei codici delle timbrature nel caso in cui ci siano particolarità sulle timbrature dovute a mancate timbrature
+	 * per pausa mensa ecc ecc...
+	 */
+	public List<StampModificationType> getStampingCode(){
+		if(days==null){
+			days= getDays();
+		}
+		for(PersonDay pd : days){
+			stampingCodeList = new ArrayList<StampModificationType>();
+			//List stampings = pd.stampings;
+			StampModificationType smt = pd.checkTimeForLunch(pd.stampings);
+			Logger.debug("Lo stamp modification type è: %s", smt);
+			//boolean stato = stampingCodeList.contains(smt);
+			if(smt != null && !stampingCodeList.contains(smt)){
+				stampingCodeList.add(smt);
+			}		
+
+		}
+		return stampingCodeList;
+	}
+	
+	
+	
 	
 	@Override
 	public String toString() {

@@ -12,7 +12,7 @@
 	<tr>
 		<th>Nome</th>
 		%{
-			for(entry in monthRecap.getAbsenceCode().entrySet()){
+			for(entry in personMonth.getAbsenceCode().entrySet()){
 		}%
 		<th>${entry.getKey().code}</th>
 		%{
@@ -24,7 +24,7 @@
 	<tr>
 		<td>${monthRecap.person.surname + ' ' + monthRecap.person.name}</td>
 		%{
-			for(entry in monthRecap.getAbsenceCode().entrySet()){
+			for(entry in personMonth.getAbsenceCode().entrySet()){
 		}%
 		<td>${entry.getValue()}</td>
 		%{
@@ -46,7 +46,7 @@
 					
 	</tr>
 %{
-     for(entry in monthRecap.getAbsenceCode().entrySet()) {
+     for(entry in personMonth.getAbsenceCode().entrySet()) {
 }%
 	<tr>
 		<td>${entry.getKey().code}</td>     
