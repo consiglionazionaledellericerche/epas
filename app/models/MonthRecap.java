@@ -124,17 +124,13 @@ public class MonthRecap extends Model {
 	@Transient	
 	private int progressiveOfDailyTime=0; 
 
-	@Transient
-	private Map<AbsenceType, Integer> absenceCodeMap;
-
-	@Transient
-	private List<StampModificationType> stampingCodeList;
 
 
-	protected MonthRecap(){
-		this.stampingCodeList = new ArrayList<StampModificationType>();
-		this.absenceCodeMap  = new HashMap<AbsenceType, Integer>();
-	}
+
+//	protected MonthRecap(){
+//		this.stampingCodeList = new ArrayList<StampModificationType>();
+//		this.absenceCodeMap  = new HashMap<AbsenceType, Integer>();
+//	}
 
 
 	/**
@@ -151,8 +147,8 @@ public class MonthRecap extends Model {
 		this.person = person;
 		this.year = year;
 		this.month = month;
-		this.stampingCodeList = new ArrayList<StampModificationType>();
-		this.absenceCodeMap  = new HashMap<AbsenceType, Integer>();
+//		this.stampingCodeList = new ArrayList<StampModificationType>();
+//		this.absenceCodeMap  = new HashMap<AbsenceType, Integer>();
 	}
 
 	/**
@@ -241,68 +237,7 @@ public class MonthRecap extends Model {
 		return progressiveOfDailyTime;
 
 	}
-	/**
-	 * 
-	 * @param days lista di PersonDay
-	 * @return la lista contenente le assenze fatte nell'arco di tempo dalla persona
-	 */
-
-	public Map<AbsenceType,Integer> getAbsenceCode(){
-
-		if(days == null){
-			days = getDays();
-		}
-		if(absenceCodeMap.isEmpty()){
-			int i = 0;
-			for(PersonDay pd : days){
-				for (Absence absence : pd.absences) {
-					AbsenceType absenceType = absence.absenceType;
-					if(absenceType != null){
-						boolean stato = absenceCodeMap.containsKey(absenceType);
-						if(stato==false){
-							i=1;
-							absenceCodeMap.put(absenceType,i);            	 
-						} else{
-							i = absenceCodeMap.get(absenceType);
-							absenceCodeMap.remove(absenceType);
-							absenceCodeMap.put(absenceType, i+1);
-						}
-					}            
-				}	 
-			}       
-		}
-
-		return absenceCodeMap;	
-
-	}
-
-
-	public Map<AbsenceType, Integer> getAbsenceCodeMap() {
-		return absenceCodeMap;
-	}
-
-	/**
-	 * 
-	 * @param days
-	 * @return lista dei codici delle timbrature nel caso in cui ci siano particolarità sulle timbrature dovute a mancate timbrature
-	 * per pausa mensa ecc ecc...
-	 */
-	public List<StampModificationType> getStampingCode(){
-		if(days==null){
-			days= getDays();
-		}
-		for(PersonDay pd : days){
-			List stampings = pd.stampings;
-			StampModificationType smt = pd.checkTimeForLunch(stampings);
-
-			boolean stato = stampingCodeList.contains(smt);
-			if(smt != null && stato==false){
-				stampingCodeList.add(smt);
-			}		
-
-		}
-		return stampingCodeList;
-	}
+	
 
 	/**
 	 * metodo di utilità che calcola nel mese corrente qual'è stato il massimo numero di timbrature giornaliere
@@ -323,57 +258,7 @@ public class MonthRecap extends Model {
 		return max;
 	}
 
-	/**
-	 * 
-	 * @return il numero di buoni pasto usabili per quel mese
-	 */
-	public int numberOfMealTicketToUse(){
-		int tickets=0;
-		if(days==null){
-			days= getDays();
-		}
-		for(PersonDay pd : days){
-			if(pd.mealTicket()==true)
-				tickets++;
-		}
-
-		return tickets;
-	}
-
-	/**
-	 * 
-	 * @return il numero di buoni pasto da restituire per quel mese
-	 */
-	public int numberOfMealTicketToRender(){
-		int ticketsToRender=0;
-		if(days==null){
-			days= getDays();
-		}
-		for(PersonDay pd : days){
-			if(pd.mealTicket()==false && (pd.isHoliday()==false))
-				ticketsToRender++;
-		}
-
-		return ticketsToRender;
-	}
-
-	/**
-	 * 
-	 * @return il numero di giorni lavorati in sede. Per stabilirlo si controlla che per ogni giorno lavorativo, esista almeno una 
-	 * timbratura.
-	 */
-	public int basedWorkingDays(){
-		int basedDays=0;
-		if(days==null){
-			days= getDays();
-		}
-		for(PersonDay pd : days){
-			List<Stamping> stamp = pd.stampings;
-			if(stamp.size()>0 && pd.isHoliday()==false)
-				basedDays++;
-		}
-		return basedDays;
-	}
+	
 
 	/**
 	 * 

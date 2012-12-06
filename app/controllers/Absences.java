@@ -11,6 +11,7 @@ import models.AbsenceTypeGroup;
 import models.MonthRecap;
 import models.Person;
 import models.PersonDay;
+import models.PersonMonth;
 import models.PersonTags;
 import models.Qualification;
 import models.Stamping;
@@ -55,7 +56,14 @@ public class Absences extends Controller{
     	
     	Logger.info("Anno: "+year);    	
     	Logger.info("Mese: "+month);
+    	PersonMonth personMonth =
+    			PersonMonth.find(
+    				"Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
+    				person, month, year).first();
     	
+    	if (personMonth == null) {
+			personMonth = new PersonMonth(person, year, month);
+		}
     	if(year==null || month==null){
     		        	
         	LocalDate now = new LocalDate();
@@ -68,7 +76,7 @@ public class Absences extends Controller{
     		MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, year.intValue(), month.intValue());
     		Logger.debug("Il month recap è formato da: " +person.id+ ", " +year.intValue()+ ", " +month.intValue());
     		
-            render(monthRecap);
+            render(monthRecap, personMonth);
     	}
     	
     }

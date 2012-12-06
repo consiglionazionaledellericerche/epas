@@ -13,7 +13,7 @@
 		<th>Buono mensa</th>
 		<th>Giorno</th>
 		<th>Codice di assenza</th>
-		%{ for(int i = 1; i <= personMonth.getMaximumCoupleOfStampings(); i++){
+		%{ for(int i = 1; i <= numberOfInOut; i++){
 		}%
 		<th>${i}° entrata</th>
 		<th>${i}° uscita</th>
@@ -76,7 +76,7 @@
 			</td>
 
 			%{  int j = 0;
-				for(int i = 0; i < personMonth.getMaximumCoupleOfStampings(); i++){
+				for(int i = 0; i < numberOfInOut; i++){
 					j = i*2;
 				}%
 				<td class="ingresso">
@@ -147,12 +147,12 @@
 
 </table>
 
-<p id="spiegazioneTabellaTimbrature">Il numero di buoni mensa usabili per questo mese e': <strong>${monthRecap.numberOfMealTicketToUse()}</strong>, mentre quelli da restituire sono <strong>${monthRecap.numberOfMealTicketToRender()}</strong>. Il numero di giorni lavorativi in sede è di: <strong>${monthRecap.basedWorkingDays()}</strong> </p>
+<p id="spiegazioneTabellaTimbrature">Il numero di buoni mensa usabili per questo mese e': <strong>${personMonth.numberOfMealTicketToUse()}</strong>, mentre quelli da restituire sono <strong>${personMonth.numberOfMealTicketToRender()}</strong>. Il numero di giorni lavorativi in sede è di: <strong>${personMonth.basedWorkingDays()}</strong> </p>
 
 <p>Riepilogo delle ore di lavoro in eccesso/difetto:</p> 
 <p> - Residuo tempo di lavoro dei mesi precedenti: ${personMonth.getMonthResidual().toHourTime()}</p> 
 <p> - Residuo del mese:  ${personMonth.getMonthResidual().toHourTime()}</p>
-<p> - Giorni di riposo compensativo: ${personMonth.getCompensatoryRestInMinutes()} per un totale di: -${(personMonth.getCompensatoryRestInMinutes()).toHourTime()} ore</p>
+<p> - Minuti di riposo compensativo: ${personMonth.getCompensatoryRestInMinutes()} per un totale di: -${(personMonth.getCompensatoryRestInMinutes()).toHourTime()} ore</p>
 <p> - Totale residuo a fine mese  <strong>${personMonth.getTotalOfMonth().toHourTime()} ore</strong></p>
 
 
@@ -167,7 +167,7 @@
 			
 	</tr>
 %{
-     for(smt in monthRecap.getStampingCode()) {
+     for(smt in personMonth.getStampingCode()) {
 }%
 	<tr>
 		<td>${smt.code}</td>     
@@ -193,7 +193,7 @@
 			
 	</tr>
 %{
-     for(entry in monthRecap.getAbsenceCode().entrySet()) {
+     for(entry in personMonth.getAbsenceCode().entrySet()) {
 }%
 	<tr>
 		<td>${entry.getKey().code}</td>     
