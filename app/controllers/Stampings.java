@@ -188,6 +188,7 @@ public class Stampings extends Controller {
 		 * guardo quante e quali timbrature sono state modificate e per queste genero i nuovi stamping o aggiorno i già esistenti 
 		 * TODO: completare la select per il recupero dell'eventuale già presente timbratura da aggiornare
 		 */
+		LocalDate now = new LocalDate();
 		LocalDate date = new LocalDate(year,month,day);
 		LocalDateTime startOfDay = new LocalDateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),0,0);
 		LocalDateTime endOfDay = new LocalDateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),23,59);
@@ -239,6 +240,12 @@ public class Stampings extends Controller {
 				/**
 				 * TODO: applicare la logica del ricalcolo mensile e annuale se mi trovo nel primo giorno del nuovo mese o del nuovo anno
 				 */
+				if(date.getMonthOfYear() < now.getMonthOfYear()){
+					
+				}
+				if(date.getYear() < now.getYear()){
+					
+				}
 				flag = true;
 			}
 			else{
@@ -263,33 +270,34 @@ public class Stampings extends Controller {
 		render(stamping, hourMinute, date);				
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
+	@Check(Security.INSERT_AND_UPDATE_STAMPING)
 	public static void update() {
 		Stamping stamping = Stamping.findById(params.get("stampingId", Long.class));
 		if (stamping == null) {
 			notFound();
 		}
 		//String oldAbsenceCode = stamping.absenceType.code;
-		String absenceCode = params.get("absenceCode");
-		if (absenceCode == null || absenceCode.isEmpty()) {
+		Integer hour = params.get("stampingHour", Integer.class);
+		Integer minute = params.get("stampingMinute", Integer.class);
+		if (hour == null && minute == null) {
 			stamping.delete();
-			//flash.success("Timbratura di tipo %s per il giorno %s rimossa", oldAbsenceCode, PersonTags.toDateTime(stamping.date.toLocalDate()));			
+			flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(stamping.date.toLocalDate()));			
 		} else {
+			stamping.date.withHourOfDay(hour).withMinuteOfHour(minute);
+			//AbsenceType absenceType = AbsenceType.find("byCode", absenceCode).first();
 			
-			AbsenceType absenceType = AbsenceType.find("byCode", absenceCode).first();
-			
-			Absence existingAbsence = Absence.find("person = ? and date = ? and absenceType = ? and id <> ?", stamping.personDay.person, stamping.date, absenceType, stamping.id).first();
-			if(existingAbsence != null){
-				validation.keep();
-				params.flash();
-				flash.error("Il codice di assenza %s è già presente per la data %s", params.get("absenceCode"), PersonTags.toDateTime(stamping.date.toLocalDate()));
-				edit(stamping.id);
-				render("@edit");
-			}
+//			Absence existingAbsence = Absence.find("person = ? and date = ? and absenceType = ? and id <> ?", stamping.personDay.person, stamping.date, absenceType, stamping.id).first();
+//			if(existingAbsence != null){
+//				validation.keep();
+//				params.flash();
+//				flash.error("Il codice di assenza %s è già presente per la data %s", params.get("absenceCode"), PersonTags.toDateTime(stamping.date.toLocalDate()));
+//				edit(stamping.id);
+//				render("@edit");
+//			}
 			//stamping.absenceType = absenceType;
 			stamping.save();
 			flash.success(
-				String.format("Assenza per il giorno %s per %s %s aggiornata con codice %s", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name, absenceCode));
+				String.format("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name));
 		}
 		render("@save");
 	}
