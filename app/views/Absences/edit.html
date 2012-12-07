@@ -1,7 +1,7 @@
 #{extends 'main.html' /}
-#{set title:absence.person.surname + ' ' + absence.person.name + ', matricola=' + absence.person.number /}
+#{set title:absence.personDay.person.surname + ' ' + absence.personDay.person.name + ', matricola=' + absence.personDay.person.number /}
 
-<h3>Modifica codici di assenza del ${absence.date.toDateTime()}</h3>
+<h3>Modifica codici di assenza del ${absence.personDay.date.toDateTime()}</h3>
 
 #{form @Absences.update()}
 	
