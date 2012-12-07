@@ -66,11 +66,7 @@ public class MainMenu {
 		if (person == null) {
 			Logger.debug("L'id della persona è: %s", personId);
 			person = Person.findById(personId);
-//			if(person == null){
-//				Long id = Cache.get("personId", Long.class);
-//				person = Person.findById(id);
-//				
-//			}
+
 			Cache.set(PERSON_ID_CACHE_PREFIX + personId, person, "30mn");
 		}
 		
@@ -78,23 +74,23 @@ public class MainMenu {
 	}
 	
 	public List<ActionMenuItem> getActions() {
-        //List<String> actions = new ArrayList<String>();
+        
 		List<ActionMenuItem> actions = new ArrayList<ActionMenuItem>();
 		
 		Set<Permission> permissions = Security.getPerson().getAllPermissions();
-		//Logger.debug("Permission di %s sono: %s" , Security.getPerson(), permissions);
+		
 		Set<String> permissionDescriptions = new HashSet<String>();
 		for(Permission p : permissions){
 			permissionDescriptions.add(p.description);
 			
 		}
-		//Logger.debug("PermissionDescription di %s sono: %s" , Security.getPerson(), permissionDescriptions);
+		
         for (ActionMenuItem menuItem : ActionMenuItem.values()) {
             if (permissionDescriptions.contains(menuItem.getPermission())) {
                 actions.add(menuItem);
             }
         }
-       // Logger.debug("La lista delle azioni: %s", actions);
+       
         return actions;
     } 
 }
