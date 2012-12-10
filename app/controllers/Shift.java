@@ -1,5 +1,8 @@
 package controllers;
 
+import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
+
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,15 +13,16 @@ import models.PersonReperibilityType;
 import models.PersonShiftDay;
 import models.ShiftTimeTable;
 import models.ShiftType;
-import models.exports.ReperibilityPeriod;
 import models.exports.ShiftPeriod;
+import models.exports.ShiftPeriods;
 
 import play.Logger;
+import play.data.binding.As;
 import play.mvc.Controller;
 
 /**
  * 
- * @author dario
+ * @author dario, arianna
  *
  */
 public class Shift extends Controller{
@@ -55,12 +59,21 @@ public class Shift extends Controller{
 		
 	}
 	
-	public static void absence(){
+	public static void update(Long type, Integer year, Integer month, @As(binder=JsonShiftPeriodsBinder.class) ShiftPeriods body){
+		Logger.debug("update: Received reperebilityPeriods %s", body);
 		
+		if (body == null) {
+			badRequest();	
+		}
+		
+		ShiftType shiftType = ShiftType.findById(type);
+		
+		if (shiftType == null) {
+			throw new IllegalArgumentException(String.format("ShiftType id = %s doesn't exist", type));			
+		}
 	}
 	
-	
-	public static void update(){
+	public static void absence(){
 		
 	}
 }
