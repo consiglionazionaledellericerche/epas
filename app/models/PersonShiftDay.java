@@ -25,7 +25,7 @@ public class PersonShiftDay extends Model{
 	
 	@OneToOne
 	@JoinColumn(name="shift_time_table_id", unique=true, nullable=false, updatable=false)
-	public ShiftTimeTable shiftTimeTables;
+	public ShiftTimeTable shiftTimeTable;
 	
 	@OneToOne
 	@JoinColumn(name="person_shift_id", unique=true, nullable=false, updatable=false)
