@@ -42,7 +42,11 @@ public class Reperibility extends Controller {
 		render(personList);
 	}
 
+	/**
+	 * per provarlo: curl -H "Accept: application/json" http://localhost:9001/reperibility/1/find/2012/11/26/2013/01/06
+	 */
 	public static void find() {
+		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 
 		Long type = Long.parseLong(params.get("type"));
 		
@@ -73,10 +77,12 @@ public class Reperibility extends Controller {
 	}
 	
 	/**
+	 * @author arianna
 	 * Legge le assenze dei reperibili di una determinata tipologia in un dato intervallo di tempo
 	 * (portale sistorg)
 	 */
 	public static void absence() {
+		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 
 		Long type = Long.parseLong(params.get("type"));
 		
@@ -125,11 +131,12 @@ public class Reperibility extends Controller {
 				Logger.trace("Aggiornato reperibilityPeriod, person=%s, start=%s, end=%s", absenceReperibilityPeriod.person, absenceReperibilityPeriod.start, absenceReperibilityPeriod.end);
 			}
 		}
-		Logger.debug("Find %s reperibilityPeriods. ReperibilityPeriods = %s", absenceReperibilityPeriods.size(), absenceReperibilityPeriods.toString());
+		Logger.debug("Find %s absenceReperibilityDays. AbsenceReperibilityPeriod = %s", absenceReperibilityPeriods.size(), absenceReperibilityPeriods.toString());
 		render(absenceReperibilityPeriods);
 	}
 	
 	/**
+	 * @author cristian, arianna
 	 * Aggiorna le informazioni relative alla Reperibilità del personale
 	 * 
 	 * Per provarlo è possibile effettuare una chiamata JSON come questa:
