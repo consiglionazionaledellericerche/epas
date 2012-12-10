@@ -276,30 +276,28 @@ public class Stampings extends Controller {
 		if (stamping == null) {
 			notFound();
 		}
-		//String oldAbsenceCode = stamping.absenceType.code;
+		
 		Integer hour = params.get("stampingHour", Integer.class);
 		Integer minute = params.get("stampingMinute", Integer.class);
+		if(hour != null && minute == null || hour == null && minute != null){
+			flash.error("Attribuire valore a ciascun campo se si intende modificare la timbratura o togliere valore a entrambi i campi" +
+					" se si intende cancellarla");
+			Stampings.personStamping();
+		}
 		if (hour == null && minute == null) {
 			stamping.delete();
 			flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(stamping.date.toLocalDate()));			
 		} else {
 			stamping.date.withHourOfDay(hour).withMinuteOfHour(minute);
-			//AbsenceType absenceType = AbsenceType.find("byCode", absenceCode).first();
-			
-//			Absence existingAbsence = Absence.find("person = ? and date = ? and absenceType = ? and id <> ?", stamping.personDay.person, stamping.date, absenceType, stamping.id).first();
-//			if(existingAbsence != null){
-//				validation.keep();
-//				params.flash();
-//				flash.error("Il codice di assenza %s è già presente per la data %s", params.get("absenceCode"), PersonTags.toDateTime(stamping.date.toLocalDate()));
-//				edit(stamping.id);
-//				render("@edit");
-//			}
-			//stamping.absenceType = absenceType;
 			stamping.save();
+			stamping.personDay.populatePersonDay();
+			stamping.personDay.save();
+
 			flash.success(
 				String.format("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name));
 		}
-		render("@save");
+		//render("@personStamping");
+		Stampings.personStamping();
 	}
     
 	/**
