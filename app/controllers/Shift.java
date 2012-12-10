@@ -1,7 +1,6 @@
 package controllers;
 
-import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
-
+import it.cnr.iit.epas.JsonShiftPeriodsBinder;
 
 import java.util.ArrayList;
 import java.util.List;

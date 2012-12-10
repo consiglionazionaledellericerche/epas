@@ -48,10 +48,10 @@ public class JsonReperibilityPeriodsBinder implements TypeBinder<ReperibilityPer
 
 			JsonObject jsonObject = null;
 			Person person = null;
-			PersonReperibilityType reperibilityType = null;
+			//PersonReperibilityType reperibilityType = null;
 			
 			Long personId = null;
-			Long reperibilityTypeId = null;
+			//Long reperibilityTypeId = null;
 			
 			for (JsonElement jsonElement : jsonArray) {
 				
