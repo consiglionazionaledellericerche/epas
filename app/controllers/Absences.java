@@ -243,6 +243,7 @@ public class Absences extends Controller{
 		LocalDate dateFrom = new LocalDate(yearFrom, monthFrom, dayFrom);
 		
 		AbsenceType absenceType = AbsenceType.find("byCode", absenceCode).first();
+		Logger.debug("L'absenceType è: %s", absenceType);
 		if (absenceType == null) {
 			validation.keep();
 			params.flash();
@@ -254,7 +255,7 @@ public class Absences extends Controller{
 		
 		Logger.debug("Richiesto inserimento della assenza codice = %s della persona %s, dataInizio = %s", absenceCode, person, dateFrom);
 		
-		Absence existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date = ?" +
+		Absence existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where a.personDay = pd and pd.person = ? and pd.date = ?" +
 				" and a.absenceType = ?", person, dateFrom, absenceType).first();
 		if(existingAbsence != null){
 			validation.keep();
@@ -313,9 +314,14 @@ public class Absences extends Controller{
 					/**
 					 * deve ignorare le timbrature, quindi per quel giorno vale l'assenza e della timbratura che fare? vanno cancellate? e il personday?
 					 */
-					
-					Stamping.delete("Select st from Stamping st " +
-							"where st.person = ? and st.date between ? and ? ", person, ldtBegin, ldtEnd);
+					List<Stamping> stList = Stamping.find("Select st from Stamping st, PersonDay pd where st.personDay = pd and pd.date = ?" +
+							" and pd.person = ?", dateFrom, person).fetch();
+					for(Stamping st : stList){
+						st.delete();
+						
+					}
+				//	Stamping.delete("st.personDay = pd and pd.date = ? and " +
+				//			"pd.person = ? ", dateFrom, person);
 					
 					pd.populatePersonDay();
 					pd.save();

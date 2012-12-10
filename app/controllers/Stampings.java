@@ -167,13 +167,14 @@ public class Stampings extends Controller {
     @Check(Security.INSERT_AND_UPDATE_STAMPING)
     public static void create(@Required Long personId, @Required Integer year, @Required Integer month, @Required Integer day){
     	Logger.debug("Insert stamping called for personId=%d, year=%d, month=%d, day=%d", personId, year, month, day);
-    	Person person = Person.em().getReference(Person.class, personId);
-    	    	      	
+    	Person person = Person.findById(personId);
+    	//Person person = Person.em().getReference(Person.class, personId);
+    	Logger.debug("La person caricata è: %s", person);   	      	
     	LocalDate date = new LocalDate(year,month,day);
     	    	
     	PersonDay personDay = new PersonDay(person, date);
     	
-    	render(personDay);
+    	render(person, personDay);
     }
     
     @Check(Security.INSERT_AND_UPDATE_STAMPING)
