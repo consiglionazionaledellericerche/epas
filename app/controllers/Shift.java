@@ -45,13 +45,13 @@ public class Shift extends Controller{
 		List<ShiftPeriod> shiftPeriods = new ArrayList<ShiftPeriod>();
 		ShiftPeriod shiftPeriod = null;
 		for(PersonShiftDay psd : personShiftDay){
-			if (shiftPeriod == null || !shiftPeriod.person.equals(psd.personShift.person) || !shiftPeriod.dateEnd.plusDays(1).equals(psd.date)) {
+			if (shiftPeriod == null || !shiftPeriod.person.equals(psd.personShift.person) || !shiftPeriod.end.plusDays(1).equals(psd.date)) {
 				shiftPeriod = new ShiftPeriod(psd.personShift.person, psd.date, psd.date, (ShiftType) ShiftType.findById(type), psd.shiftTimeTables);
 				shiftPeriods.add(shiftPeriod);
-				Logger.trace("Creato nuovo reperibilityPeriod, person=%s, start=%s, end=%s, timetable=%s" , shiftPeriod.person, shiftPeriod.dateStart, shiftPeriod.dateEnd, shiftPeriod.shiftTimeTable);
+				Logger.trace("Creato nuovo reperibilityPeriod, person=%s, start=%s, end=%s, timetable=%s" , shiftPeriod.person, shiftPeriod.start, shiftPeriod.end, shiftPeriod.shiftTimeTable);
 			} else {
-				shiftPeriod.dateEnd = psd.date;
-				Logger.trace("Aggiornato ShiftPeriod, person=%s, start=%s, end=%s", shiftPeriod.person, shiftPeriod.dateStart, shiftPeriod.dateEnd);
+				shiftPeriod.end = psd.date;
+				Logger.trace("Aggiornato ShiftPeriod, person=%s, start=%s, end=%s", shiftPeriod.person, shiftPeriod.start, shiftPeriod.end);
 			}
 		}
 		Logger.debug("Find %s shiftPeriods. ShiftPeriods = %s", shiftPeriods.size(), shiftPeriods);

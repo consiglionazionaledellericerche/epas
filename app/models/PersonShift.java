@@ -22,10 +22,10 @@ public class PersonShift extends Model{
 	@OneToOne
 	@JoinColumn(name="person_id", unique=true, nullable=false, updatable=false)
 	public Person person;
+
+	@OneToMany(mappedBy="personShift", fetch=FetchType.LAZY)
+	public List<ShiftType> shiftTypes;
 	
 	@OneToOne(mappedBy="personShift", fetch=FetchType.LAZY)
 	public PersonShiftDay personShiftDay;
-	
-	@OneToMany(mappedBy="personShift", fetch=FetchType.LAZY)
-	public List<ShiftType> shiftTypes;
 }

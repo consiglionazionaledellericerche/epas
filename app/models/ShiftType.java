@@ -14,15 +14,12 @@ import play.db.jpa.Model;
 public class ShiftType extends Model{
 
 	public String type;
-	
 	public String description;
 	
-	@ManyToOne(fetch=FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(name="person_shift_id")
 	public PersonShift personShift;
 	
-	@OneToOne
-	@JoinColumn(name="person_shift_day_id", unique=true, nullable=false, updatable=false)
+	@OneToOne(mappedBy="shiftType", fetch=FetchType.LAZY)
 	public PersonShiftDay personShiftDay;
-	
 }
