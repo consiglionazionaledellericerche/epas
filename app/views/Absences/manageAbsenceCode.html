@@ -39,7 +39,11 @@
 		<td>${absenceCode.validFrom}</td>
 		<td>${absenceCode.validTo}</td>
 		<td>${absenceCode.justifiedTimeAtWork != null ? absenceCode.justifiedTimeAtWork.description : ''}</td>
-		<td>${absenceCode.qualifications.qualification}</td> 
+		<td>%{for(qualification in absenceCode.qualifications){
+			}%
+				${qualification.qualification},
+			%{ } }%
+		</td> 
 		<td>${absenceCode.mealTicketCalculation}</td>
 		<td>${absenceCode.ignoreStamping}</td>
 		<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.label : ''}</td>

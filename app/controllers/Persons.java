@@ -36,14 +36,9 @@ public class Persons extends Controller {
 
 	@Check(Security.VIEW_PERSON_LIST)
 	public static void list(){
-	//	List<Person> personList = new ArrayList<Person>();
+
 		List<Person> personList = Person.find("Select p from Person p where p.name <> ?", "Admin").fetch();
 		Logger.debug("La lista delle persone: %s", personList.toString());
-//		for(Person p : persons){
-//			if(p.getCurrentContract() != null && p.getCurrentContract().endContract != null)
-//				personList.add(p);
-//		}
-		//List<Person> personList = Person.findAll();
 		
 		render(personList);
 	}
