@@ -20,11 +20,11 @@ public class PersonShiftDay extends Model{
 	public LocalDate date;
 	
 	@OneToOne
-	@JoinColumn(name="shift_type_id", unique=true, nullable=false, updatable=false)
+	@JoinColumn(name="shift_type_id")
 	public ShiftType shiftType;
 	
 	@OneToOne
-	@JoinColumn(name="shift_time_table_id", unique=true, nullable=false, updatable=false)
+	@JoinColumn(name="shift_time_table_id")
 	public ShiftTimeTable shiftTimeTables;
 	
 	@OneToOne
