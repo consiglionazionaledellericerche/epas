@@ -18,8 +18,5 @@ public class ShiftTimeTable extends Model{
 	public LocalTime endShift;
 	
 	public String description;
-	
-	@OneToOne
-	@JoinColumn(name="person_shift_day_id")
-	public PersonShiftDay personShiftDay;
+
 }
