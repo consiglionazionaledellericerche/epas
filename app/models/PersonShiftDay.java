@@ -19,10 +19,12 @@ public class PersonShiftDay extends Model{
 
 	public LocalDate date;
 	
-	@OneToOne(mappedBy="personShiftDay", fetch=FetchType.LAZY)
+	@OneToOne
+	@JoinColumn(name="shift_type_id", unique=true, nullable=false, updatable=false)
 	public ShiftType shiftType;
 	
-	@OneToOne(mappedBy="personShiftDay", fetch=FetchType.LAZY)
+	@OneToOne
+	@JoinColumn(name="shift_time_table_id", unique=true, nullable=false, updatable=false)
 	public ShiftTimeTable shiftTimeTables;
 	
 	@OneToOne

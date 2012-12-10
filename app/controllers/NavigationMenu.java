@@ -3,11 +3,13 @@
  */
 package controllers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import it.cnr.iit.epas.ActionMenuItem;
 import it.cnr.iit.epas.MainMenu;
 
+import models.Contract;
 import models.Person;
 
 import org.joda.time.LocalDate;
@@ -35,7 +37,17 @@ public class NavigationMenu extends Controller {
 		List<Person> persons = (List<Person>) Cache.get("persons");
 		
 		if (persons == null) {
-			persons = Person.find("Select p from Person p order by p.surname").fetch();
+			
+			persons = new ArrayList<Person>();
+			List<Person> genericPerson = Person.find("Select p from Person p order by p.surname").fetch();
+			for(Person p : genericPerson){
+				Contract c = Contract.find("Select c from Contract c where c.person = ? and ((c.beginContract != null and c.expireContract = null) or " +
+						"(c.expireContract > ?) or (c.beginContract = null and c.expireContract = null)) order by c.beginContract desc limit 1", p, now).first();
+				if(c != null && c.onCertificate == true)
+					persons.add(p);
+			}
+//			persons = Person.find("Select distinct p from Person p, Contract c where c.person = p and c.onCertificate = ? " +
+//					"order by p.surname", true).fetch();
 			Cache.set("persons", persons, "5mn");
 		}
 		

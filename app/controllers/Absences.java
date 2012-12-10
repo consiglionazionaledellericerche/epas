@@ -35,9 +35,6 @@ import play.mvc.With;
 @With( {Secure.class, NavigationMenu.class} )
 public class Absences extends Controller{
 	
-	/* corrisponde alla voce di menu selezionata */
-	private final static ActionMenuItem actionMenuItem = ActionMenuItem.absences;
-	
 	private static List<AbsenceType> getFrequentAbsenceTypes(){
 		return AbsenceType.find("Select abt from AbsenceType abt, Absence abs " +
     			"where abs.absenceType = abt group by abt order by sum(abt.id) desc limit 20").fetch();
@@ -359,12 +356,13 @@ public class Absences extends Controller{
 		if (absenceCode == null || absenceCode.isEmpty()) {
 			absence.delete();
 			flash.success("Timbratura di tipo %s per il giorno %s rimossa", oldAbsenceCode, PersonTags.toDateTime(absence.personDay.date));			
-		} else {
+		} 
+		else {
 			
 			AbsenceType absenceType = AbsenceType.find("byCode", absenceCode).first();
 			
 			Absence existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date = ? " +
-					"and a.absenceType = ? and id <> ?", absence.personDay.person, absence.personDay.date, absenceType, absence.id).first();
+					"and a.absenceType = ? and a.id <> ?", absence.personDay.person, absence.personDay.date, absenceType, absence.id).first();
 			if(existingAbsence != null){
 				validation.keep();
 				params.flash();
