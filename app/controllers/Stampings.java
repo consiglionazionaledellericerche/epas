@@ -19,6 +19,8 @@ import models.Person;
 import models.PersonDay;
 import models.PersonMonth;
 import models.PersonTags;
+import models.StampModificationType;
+import models.StampModificationTypeValue;
 import models.StampType;
 import models.Stamping;
 import models.Stamping.WayType;
@@ -171,101 +173,180 @@ public class Stampings extends Controller {
     	//Person person = Person.em().getReference(Person.class, personId);
     	Logger.debug("La person caricata è: %s", person);   	      	
     	LocalDate date = new LocalDate(year,month,day);
-    	    	
+    	    	Logger.debug("La data è: %s", date);
     	PersonDay personDay = new PersonDay(person, date);
     	
     	render(person, personDay);
     }
     
     @Check(Security.INSERT_AND_UPDATE_STAMPING)
-	public static void insert(@Valid @Required Long personId, @Required Integer year, @Required Integer month, @Required Integer day, String s) {
-		if(validation.hasErrors()) {
-			
+	public static void insert(@Valid @Required Long personId, @Required Integer year, @Required Integer month, @Required Integer day) {
+//		if(validation.hasErrors()) {
+//			
+//			render("@create", personId, year, month, day);
+//		}
+		Person person = Person.em().getReference(Person.class, personId);
+
+		LocalDate date = new LocalDate(year,month,day);
+		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
+		
+		if(pd.stampings.size() == 0 && pd.isHoliday()){
+			flash.error("Si sta inserendo una timbratura in un giorno di festa. Errore");
 			render("@create", personId, year, month, day);
 		}
-		Person person = Person.em().getReference(Person.class, personId);
+		Integer hour = params.get("hourStamping", Integer.class);
+		Integer minute = params.get("minuteStamping", Integer.class);
+		Logger.debug("I parametri per costruire la data sono: anno: %s, mese: %s, giorno: %s, ora: %s, minuti: %s", year, month, day, hour, minute);
+		LocalDateTime dateStamp = new LocalDateTime(year, month, day, hour, minute, 0);
+		//Stamping stamp = null;
+		//int count = 0;
 		
-		/**
-		 * guardo quante e quali timbrature sono state modificate e per queste genero i nuovi stamping o aggiorno i già esistenti 
-		 * TODO: completare la select per il recupero dell'eventuale già presente timbratura da aggiornare
-		 */
-		LocalDate now = new LocalDate();
-		LocalDate date = new LocalDate(year,month,day);
-		LocalDateTime startOfDay = new LocalDateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),0,0);
-		LocalDateTime endOfDay = new LocalDateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),23,59);
-		List<Stamping> stamping = Stamping.find("Select st from Stamping where st.person = ? " +
-				"and st.date between ? and ? ", person, startOfDay, endOfDay).fetch();
-		Stamping stamp = null;
-		int count = 0;
+		String type = params.get("type");
+		Stamping stamp = new Stamping();
+		stamp.date = new LocalDateTime(year, month, day, hour, minute, 0);
+		stamp.markedByAdmin = true;
+		stamp.note = "timbratura inserita dall'amministratore";
+		if(type.equals("true")){
+			stamp.way = Stamping.WayType.in;
+		}
+		else{
+			stamp.way = Stamping.WayType.out;
+		}
+		stamp.personDay = pd;
+		stamp.save();
+		pd.stampings.add(stamp);
+		pd.merge();
+		pd.populatePersonDay();
+		pd.save();
+		flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
+		Application.indexAdmin();
+//		while(count <= pd.stampings.size()){
+//			if(count+1 > pd.stampings.size()){
+//				/**
+//				 * siamo all'ultimo elemento della lista...
+//				 * inserisco la timbratura in fondo alla lista  
+//				 */
+//				stamp = new Stamping();
+//				stamp.date = dateStamp;
+//				stamp.markedByAdmin = true;
+//				stamp.note = "timbratura inserita dall'amministratore";
+//				if(type.equals("true")){
+//					stamp.way = Stamping.WayType.in;
+//					stamp.save();
+//					pd.stampings.add(stamp);
+//				}
+//				else{
+//					stamp.way = Stamping.WayType.out;
+//					stamp.save();
+//					pd.stampings.add(stamp);
+//				}
+//				pd.save();
+//				pd.populatePersonDay();
+//				flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
+//				Application.indexAdmin();
+//			}
+//			if(pd.stampings.get(count) != null && pd.stampings.get(count).date.isAfter(dateStamp)){				
+//				/**
+//				 * in questo caso la nuova timbratura è precedente alla prima timbratura di quel personday: ergo la nuova 
+//				 * timbratura va messa all'inizio della lista
+//				 */
+//				stamp = new Stamping();
+//				stamp.date = dateStamp;
+//				stamp.markedByAdmin = true;
+//				stamp.note = "timbratura inserita dall'amministratore";
+//				if(type.equals("true")){
+//					stamp.way = Stamping.WayType.in;
+//					stamp.save();
+//					pd.stampings.add(count, stamp);
+//					pd.stampings.add(count+1, null);
+//				}
+//				else{
+//					stamp.way = Stamping.WayType.out;
+//					stamp.save();
+//					pd.stampings.add(count, null);
+//					pd.stampings.add(count+1, stamp);
+//				}
+//				pd.save();
+//				pd.populatePersonDay();
+//				flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
+//				Application.indexAdmin();
+//			}
+//			if(pd.stampings.get(count)!=null && pd.stampings.get(count).date.isBefore(dateStamp) && 
+//					(pd.stampings.get(count+1) == null || pd.stampings.size() < count+1)){
+//				/**
+//				 * la timbratura successiva è nulla 
+//				 */
+//				continue;
+//			}
+//			if(pd.stampings.get(count)!= null && pd.stampings.get(count).date.isBefore(dateStamp) && 
+//					pd.stampings.get(count+1).date.isAfter(dateStamp)){
+//				/**
+//				 * la timbratura sta a cavallo di quella attualmente considerata e della successiva, va messa in posizione in mezzo
+//				 * alle due.
+//				 */
+//				stamp = new Stamping();
+//				stamp.date = dateStamp;
+//				stamp.markedByAdmin = true;
+//				stamp.note = "timbratura inserita dall'amministratore";
+//				if(type.equals("true")){
+//					stamp.way = Stamping.WayType.in;
+//					stamp.save();
+//					pd.stampings.add(count+1, stamp);
+//					pd.stampings.add(count+2, null);
+//				}
+//				else{
+//					stamp.way = Stamping.WayType.out;
+//					stamp.save();
+//					pd.stampings.add(count+1, null);
+//					pd.stampings.add(count+2, stamp);
+//				}
+//				pd.save();
+//				pd.populatePersonDay();
+//				flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
+//				Application.indexAdmin();
+//			}
+//			if(pd.stampings.get(count)==null && pd.stampings.get(count+1).date.isAfter(dateStamp)){
+//				/**
+//				 * c'è una timbratura nulla e la successiva timbratura è successiva a quella inserita dall'utente. La timbratura nuova
+//				 * prende il posto di quella nulla.
+//				 */
+//				stamp = new Stamping();
+//				stamp.date = dateStamp;
+//				stamp.markedByAdmin = true;
+//				stamp.note = "timbratura inserita dall'amministratore";
+//				if(type.equals("true")){
+//					stamp.way = Stamping.WayType.in;
+//					stamp.save();
+//					pd.stampings.add(count+1, stamp);
+//					pd.stampings.add(count+2, null);
+//				}
+//				else{
+//					stamp.way = Stamping.WayType.out;
+//					stamp.save();
+//					pd.stampings.add(count+1, null);
+//					pd.stampings.add(count+2, stamp);
+//				}
+//				pd.save();
+//				pd.populatePersonDay();
+//				flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
+//				Application.indexAdmin();
+//			}
+//			
+//			count ++;
+//		}
 		
-		List<Stamping> stamps = Stamping.find("Select st from Stamping st where st.person = ? " +
-				"and st.date between ? and ? order by st.date", person,startOfDay,endOfDay).fetch();
-		while(count <= stamping.size()){
-			if(stamping.get(count) != null){
-				stamp = stamps.get(count);				
-				if(stamp == null){
-					stamp = new Stamping();
-					stamp.date = stamping.get(count).date;
-					stamp.personDay.person = person;
-					stamp.markedByAdmin = true;
-					if(count == 0 || count == 2 || count == 4 || count == 6){
-						stamp.way = WayType.in;
-					}
-					else
-						stamp.way = WayType.out;
-					stamp.save();
-				}
-				else{
-					stamp.date = stamping.get(count).date;
-					stamp.markedByAdmin = true;
-					stamp.save();
-				}				
-														
-			}
-			count++;
-		}		
-		/**
-		 * a questo punto devono essere ricalcolati tutti i valori del timeAtWork, del progressive e della difference oltre che 
-		 * dell'assegnazione del buono pasto sul personDay comprendente la nuova timbratura
-		 */
-		boolean flag = false;
-		int i = 0;
-		Stamping stamp1 = null;
-		while(flag == false && i<stamping.size()){
-			stamp1 = stamping.get(i);
-			if(stamp1 != null && stamp1.date != null){
-				stamp1.personDay.populatePersonDay();
-				
-				stamp1.personDay.save();
-				
-				/**
-				 * TODO: applicare la logica del ricalcolo mensile e annuale se mi trovo nel primo giorno del nuovo mese o del nuovo anno
-				 */
-				if(date.getMonthOfYear() < now.getMonthOfYear()){
-					
-				}
-				if(date.getYear() < now.getYear()){
-					
-				}
-				flag = true;
-			}
-			else{
-				i++;
-			}
-			
-		}		
-		
-		render("@save");
+	//	render("@save");
 	}
     
     @Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void edit(@Required Long stampingId) {
-    	Logger.debug("Edit absence called for absenceId=%d", stampingId);
+    	Logger.debug("Edit stamping called for stampingId=%d", stampingId);
     	
     	Stamping stamping = Stamping.findById(stampingId);
     	if (stamping == null) {
     		notFound();
     	}
+    	
     	LocalDate date = stamping.date.toLocalDate();
     	List<String> hourMinute = timeDivided(stamping);
 		render(stamping, hourMinute, date);				
@@ -287,7 +368,10 @@ public class Stampings extends Controller {
 		}
 		if (hour == null && minute == null) {
 			stamping.delete();
-			flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(stamping.date.toLocalDate()));			
+			stamping.personDay.populatePersonDay();
+			stamping.personDay.save();
+			flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(stamping.date.toLocalDate()));	
+			render("@create");
 		} else {
 			stamping.date.withHourOfDay(hour).withMinuteOfHour(minute);
 			stamping.save();
@@ -296,6 +380,7 @@ public class Stampings extends Controller {
 
 			flash.success(
 				String.format("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name));
+			render("@create");
 		}
 		//render("@personStamping");
 		Stampings.personStamping();
