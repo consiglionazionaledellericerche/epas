@@ -5,3 +5,7 @@ StampModificationType(p):
 StampModificationType(e):
     code: e
     description: Ora di entrata calcolata perché la durata dell'intervallo pranzo è minore del minimo
+
+StampModificationType(m):
+    code: m
+    description: Timbratura modificata dall'amministratore

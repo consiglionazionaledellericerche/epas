@@ -98,7 +98,7 @@ public class PersonMonth extends Model {
 	private Map<AbsenceType, Integer> absenceCodeMap;
 
 	@Transient
-	private List<StampModificationType> stampingCodeList;
+	private List<StampModificationType> stampingCodeList = new ArrayList<StampModificationType>();
 
 	/**
 	 * aggiunta la date per test di getMaximumCoupleOfStampings ---da eliminare
@@ -487,18 +487,25 @@ public class PersonMonth extends Model {
 		if(days==null){
 			days= getDays();
 		}
+		List<StampModificationType> stampCodeList = new ArrayList<StampModificationType>();
 		for(PersonDay pd : days){
-			stampingCodeList = new ArrayList<StampModificationType>();
-			//List stampings = pd.stampings;
-			StampModificationType smt = pd.checkTimeForLunch(pd.stampings);
+			
+			StampModificationType smt = pd.checkTimeForLunch();
 			Logger.debug("Lo stamp modification type è: %s", smt);
-			//boolean stato = stampingCodeList.contains(smt);
-			if(smt != null && !stampingCodeList.contains(smt)){
-				stampingCodeList.add(smt);
-			}		
+			
+			if(smt != null && !stampCodeList.contains(smt)){
+				Logger.debug("Aggiunto %s alla lista", smt.description);
+				stampCodeList.add(smt);
+			}
+			StampModificationType smtMarked = pd.checkMarkedByAdmin();
+			if(smtMarked != null && !stampCodeList.contains(smtMarked)){
+				stampCodeList.add(smtMarked);
+				Logger.debug("Aggiunto %s alla lista", smtMarked.description);
+			}
 
 		}
-		return stampingCodeList;
+		Logger.debug("La lista degli stamping code per questo mese contiene: %s", stampingCodeList);
+		return stampCodeList;
 	}
 	
 	
