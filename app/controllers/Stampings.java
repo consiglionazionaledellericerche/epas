@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import it.cnr.iit.epas.ActionMenuItem;
+import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
 import it.cnr.iit.epas.MainMenu;
 import models.Absence;
 import models.AbsenceType;
@@ -24,6 +25,7 @@ import models.StampModificationTypeValue;
 import models.StampType;
 import models.Stamping;
 import models.Stamping.WayType;
+import models.exports.ReperibilityPeriods;
 import models.Configuration;
 
 import org.joda.time.LocalDate;
@@ -36,6 +38,7 @@ import com.google.common.collect.Table;
 import com.ning.http.util.DateUtil.DateParseException;
 
 import play.Logger;
+import play.data.binding.As;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.mvc.Before;
@@ -514,4 +517,22 @@ public class Stampings extends Controller {
     	render(year, month, tablePersonTicket, numberOfDays);
     }
   
+	/**
+	 * Aggiorna le informazioni relative alla Reperibilità del personale
+	 * 
+	 * Per provarlo è possibile effettuare una chiamata JSON come questa:
+	 * 	$  curl -H "Content-Type: application/json" -X PUT \
+	 * 			-d '[ {"id" : "49","start" : 2012-12-05,"end" : "2012-12-10", "reperibility_type_id" : "1"}, { "id" : "139","start" : "2012-12-12" , "end" : "2012-12-14", "reperibility_type_id" : "1" } , { "id" : "139","start" : "2012-12-17","end" : "2012-12-18", "reperibility_type_id" : "1" } ]' \ 
+	 * 			http://localhost:9000/reperibility/1/update/2012/12
+	 * 
+	 * @param body
+	 */
+	public static void create(@As(binder=JsonReperibilityPeriodsBinder.class) ReperibilityPeriods body) {
+
+		Logger.debug("update: Received reperebilityPeriods %s", body);
+		
+		if (body == null) {
+			badRequest();	
+		}
+	}
 }
