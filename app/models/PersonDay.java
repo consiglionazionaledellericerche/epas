@@ -359,7 +359,7 @@ public class PersonDay extends Model {
 				//						List<WorkingTimeTypeDay> wttd = WorkingTimeTypeDay.find("Select wttd from WorkingTimeTypeDay wttd where wttd.workingTimeType = ?" +
 				//								"", person.workingTimeType).fetch();
 
-				int minTimeForLunch = checkMinTimeForLunch(reloadedStampings);
+				int minTimeForLunch = checkMinTimeForLunch();
 				if((reloadedStampings.size()==4) && (minTimeForLunch < getWorkingTimeTypeDay().breakTicketTime) && (!reloadedStampings.contains(null)))
 					tempoLavoro = workTime - (getWorkingTimeTypeDay().breakTicketTime-minTimeForLunch);							
 				if((reloadedStampings.size()==2) && (workTime > getWorkingTimeTypeDay().mealTicketTime) && 
@@ -628,35 +628,19 @@ public class PersonDay extends Model {
 	 * minuti in più a una timbratura di ingresso dopo la pausa pranzo poichè il tempo di pausa è stato minore di 30 minuti e il tempo
 	 * di lavoro giornaliero è stato maggiore stretto di 6 ore.
 	 */
-	public StampModificationType checkTimeForLunch(List<Stamping> stamping){
-		//String s = "p";
+	public StampModificationType checkTimeForLunch(){
 		StampModificationType smt = null;
-		if(stamping.size()==2){
-			int workingTime=0;
-			for(Stamping st : stamping){
-				if(st.way == Stamping.WayType.in){
-					workingTime -= toMinute(st.date);
-
-					System.out.println("Timbratura di ingresso in checkTimeForLunch: "+workingTime);	
-				}
-				if(st.way == Stamping.WayType.out){
-					workingTime += toMinute(st.date);
-
-					System.out.println("Timbratura di uscita in checkTimeForLunch: "+workingTime);
-				}
-				timeAtWork += workingTime;
-			}
-			if(workingTime >= getWorkingTimeTypeDay().mealTicketTime+getWorkingTimeTypeDay().breakTicketTime)
+		if(stampings.size()==2){
+			if(timeAtWork >= getWorkingTimeTypeDay().mealTicketTime+getWorkingTimeTypeDay().breakTicketTime)
 				smt = StampModificationType.findById(StampModificationTypeValue.FOR_DAILY_LUNCH_TIME.getId());
-
-		}	
-		if(stamping.size()==4 && !stamping.contains(null)){
-			int hourExit = stamping.get(1).date.getHourOfDay();
-			int minuteExit = stamping.get(1).date.getMinuteOfHour();
-			int hourEnter = stamping.get(2).date.getHourOfDay();
-			int minuteEnter = stamping.get(2).date.getMinuteOfHour();
+		}
+		if(stampings.size()==4 && !stampings.contains(null)){
+			int hourExit = stampings.get(1).date.getHourOfDay();
+			int minuteExit = stampings.get(1).date.getMinuteOfHour();
+			int hourEnter = stampings.get(2).date.getHourOfDay();
+			int minuteEnter = stampings.get(2).date.getMinuteOfHour();
 			int workingTime=0;
-			for(Stamping st : stamping){
+			for(Stamping st : stampings){
 				if(st.way == Stamping.WayType.in){
 					workingTime -= toMinute(st.date);
 
@@ -665,16 +649,75 @@ public class PersonDay extends Model {
 					workingTime += toMinute(st.date);
 
 				}
-				timeAtWork += workingTime;
 			}
-			if(((hourEnter*60)+minuteEnter) - ((hourExit*60)+minuteExit) < getWorkingTimeTypeDay().breakTicketTime && workingTime > getWorkingTimeTypeDay().mealTicketTime){
+			if(((hourEnter*60)+minuteEnter) - ((hourExit*60)+minuteExit) < getWorkingTimeTypeDay().breakTicketTime && workingTime > getWorkingTimeTypeDay().mealTicketTime)
 				smt = StampModificationType.findById(StampModificationTypeValue.FOR_MIN_LUNCH_TIME.getId());
-			}
-
 		}
-
 		return smt;
 	}
+	
+	/**
+	 * 
+	 * @return lo stamp modification type relativo alla timbratura modificata/inserita dall'amministratore
+	 */
+	public StampModificationType checkMarkedByAdmin(){
+		StampModificationType smt = null;
+		for(Stamping st : stampings){
+			if(st.markedByAdmin == true)
+				smt = StampModificationType.findById(StampModificationTypeValue.MARKED_BY_ADMIN.getId());
+		}
+		
+		return smt;
+	}
+	
+	
+//	public StampModificationType checkTimeForLunch(List<Stamping> stamping){
+//		//String s = "p";
+//		StampModificationType smt = null;
+//		if(stamping.size()==2){
+//			int workingTime=0;
+//			for(Stamping st : stamping){
+//				if(st.way == Stamping.WayType.in){
+//					workingTime -= toMinute(st.date);
+//
+//					System.out.println("Timbratura di ingresso in checkTimeForLunch: "+workingTime);	
+//				}
+//				if(st.way == Stamping.WayType.out){
+//					workingTime += toMinute(st.date);
+//
+//					System.out.println("Timbratura di uscita in checkTimeForLunch: "+workingTime);
+//				}
+//				timeAtWork += workingTime;
+//			}
+//			if(workingTime >= getWorkingTimeTypeDay().mealTicketTime+getWorkingTimeTypeDay().breakTicketTime)
+//				smt = StampModificationType.findById(StampModificationTypeValue.FOR_DAILY_LUNCH_TIME.getId());
+//
+//		}	
+//		if(stamping.size()==4 && !stamping.contains(null)){
+//			int hourExit = stamping.get(1).date.getHourOfDay();
+//			int minuteExit = stamping.get(1).date.getMinuteOfHour();
+//			int hourEnter = stamping.get(2).date.getHourOfDay();
+//			int minuteEnter = stamping.get(2).date.getMinuteOfHour();
+//			int workingTime=0;
+//			for(Stamping st : stamping){
+//				if(st.way == Stamping.WayType.in){
+//					workingTime -= toMinute(st.date);
+//
+//				}
+//				if(st.way == Stamping.WayType.out){
+//					workingTime += toMinute(st.date);
+//
+//				}
+//				timeAtWork += workingTime;
+//			}
+//			if(((hourEnter*60)+minuteEnter) - ((hourExit*60)+minuteExit) < getWorkingTimeTypeDay().breakTicketTime && workingTime > getWorkingTimeTypeDay().mealTicketTime){
+//				smt = StampModificationType.findById(StampModificationTypeValue.FOR_MIN_LUNCH_TIME.getId());
+//			}
+//
+//		}
+//
+//		return smt;
+//	}
 
 	/**
 	 * 
@@ -700,12 +743,12 @@ public class PersonDay extends Model {
 	 * dopo la pausa pranzo. Questo valore verrà poi controllato per stabilire se c'è la necessità di aumentare la durata della pausa
 	 * pranzo intervenendo sulle timbrature
 	 */
-	public int checkMinTimeForLunch(List<Stamping> stamping){
+	public int checkMinTimeForLunch(){
 		int min=0;
-		if(stamping.size()>3 && stamping.size()%2==0 && !stamping.contains(null)){
-			int minuteExit = toMinute(stamping.get(1).date);
+		if(stampings.size()>3 && stampings.size()%2==0 && !stampings.contains(null)){
+			int minuteExit = toMinute(stampings.get(1).date);
 
-			int minuteEnter = toMinute(stamping.get(2).date);
+			int minuteEnter = toMinute(stampings.get(2).date);
 
 			min = minuteEnter - minuteExit;			
 
