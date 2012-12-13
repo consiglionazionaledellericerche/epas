@@ -101,6 +101,11 @@ public class Person extends Model {
 	public Integer number;
 	
 	/**
+	 * numero di matricola sul badge
+	 */
+	public String badgeNumber;
+	
+	/**
 	 * relazione con la tabella delle assenze iniziali
 	 */
 	@OneToMany(mappedBy="person", fetch = FetchType.LAZY)
