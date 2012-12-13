@@ -3,8 +3,8 @@
 
 <h3>Modifica Entrate/Uscite del ${stamping.personDay.date}</h3>
 
-Inserire ore e minuti nelle caselle seguenti nel formato HH.MM 
-Lasciare le caselle vuote per eliminare una entrata/uscita.
+<p id="updateStampingText">Inserire ore e minuti nelle caselle seguenti nel formato HH.MM 
+Lasciare le caselle vuote per eliminare una entrata/uscita.</p>
 
 #{form @Stampings.update()}
 
@@ -16,5 +16,5 @@ Lasciare le caselle vuote per eliminare una entrata/uscita.
 
 
 
-<input type="submit" value="Aggiorna"/>
+<input id="updateStamping" type="submit" value="Aggiorna"/>
 #{/form}

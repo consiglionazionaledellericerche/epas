@@ -1,5 +1,5 @@
 #{extends 'main.html' /}
-#{set title:personDay.person.surname + ' ' + personDay.person.name + ', matricola=' + personDay.person.number /}
+#{set title: personDay.person.surname + ' ' + personDay.person.name + ', matricola=' + personDay.person.number /}
 
 <h3>Inserisci Entrata/Uscita del ${personDay.date}</h3>
 
@@ -10,18 +10,19 @@ Lasciare la casella vuota per eliminare una entrata/uscita.
 	
 
 	<input type="hidden" name="personId" value="${personDay.person.id}"/>
-	<input type="hidden" name="yearFrom" value="${personDay.date.year}"/>
-	<input type="hidden" name="monthFrom" value="${personDay.date.monthOfYear}"/>
-	<input type="hidden" name="dayFrom" value="${personDay.date.dayOfMonth}"/>
+	<input type="hidden" name="year" value="${personDay.date.year}"/>
+	<input type="hidden" name="month" value="${personDay.date.monthOfYear}"/>
+	<input type="hidden" name="day" value="${personDay.date.dayOfMonth}"/>
 	<fieldset>
 		<legend>Inserimento timbratura nel formato HH:MM</legend>
-			<input type="text" name="hourStamping" value="${}" size="5" maxlength="5"/>
-			<input type="text" name="minuteStamping" value="${}" size="5" maxlength="5"/>		
+			Ore <input type="text" name="hourStamping" value="${hourStamping}" size="5" maxlength="5"/>
+			Minuti <input type="text" name="minuteStamping" value="${minuteStamping}" size="5" maxlength="5"/>		
+			<p id="tipoTimbratura">Tipologia di timbratura: </p> <p id="choice">Ingresso <input type="radio" name="type" value="true"/> Uscita <input type="radio" name="type" value="false"/></p>
 	</fieldset>
 	
-<input type="submit" value="Inserisci"/>
+	
+<input id="submitStamping" type="submit" value="Inserisci"/>
 #{/form}
-
 #{form @Stampings.discard()}
-	<input type=reset value="Annulla">
+<input id="discardStamping" type=reset value="Annulla">
 #{/form}

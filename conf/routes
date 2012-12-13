@@ -88,7 +88,7 @@ POST	/persons/changePassword					Persons.savePassword
 
 # Gestione timbrature
 GET		/stampings/create						Stampings.create
-POST	/stampings/insert/{personId}/{year}/{month}/{day}	Stampings.insert
+POST	/stampings/insert/						Stampings.insert
 GET		/stampings/edit/{stampingId}			Stampings.edit
 POST	/stampings/update						Stampings.update
 GET		/choosePersonAndDate					Stampings.choosePersonAndDate
@@ -98,8 +98,8 @@ GET		/stampings/dailyPresence/{year}/{month}/{day}		Stampings.dailyPresence
 GET		/stampings/mealTicketSituation/{year}/{month}		Stampings.mealTicketSituation
 
 #Gestione assenze
-GET		/absences/insert/{personId}/{year}/{month}/{day}	Absences.insert
-POST	/absences/create						Absences.create
+POST	/absences/insert						Absences.insert
+GET		/absences/create						Absences.create
 
 GET		/absences/edit/{absenceId}				Absences.edit
 POST	/absences/update						Absences.update

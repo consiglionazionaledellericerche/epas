@@ -81,7 +81,7 @@
 			%{
 			 }else{
 			 }% <td class="tempoLavoro">${day.isHoliday()==false ? day.convertTimeAtWork(day.timeAtWork).toCalendarTime() : ''} <strong>${day.stampingList().size()==4 && !day.stampingList().contains(null) && day.timeAtWork>300
-			 && day.checkMinTimeForLunch(day.stampingList())<30 ? day.checkTimeForLunch(day.stampingList())?.code : ''}</strong></td>
+			 && day.checkMinTimeForLunch()<30 ? day.checkTimeForLunch(day.stampingList())?.code : ''}</strong></td>
 			%{
 	         }
 	         }%	

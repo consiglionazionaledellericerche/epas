@@ -9,6 +9,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Type;
@@ -56,6 +57,10 @@ public class Stamping extends Model {
 	@Required
 	@Enumerated(EnumType.STRING)
 	public WayType way;
+	
+	@ManyToOne
+	@JoinColumn(name ="badge_reader_id")
+	public BadgeReader badgeReader;
 	
 	public String note;
 	
