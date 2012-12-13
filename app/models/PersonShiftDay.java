@@ -30,4 +30,6 @@ public class PersonShiftDay extends Model{
 	@OneToOne
 	@JoinColumn(name="person_shift_id", unique=true, nullable=false, updatable=false)
 	public PersonShift personShift;
+	
+
 }
