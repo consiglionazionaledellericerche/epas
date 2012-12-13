@@ -94,7 +94,7 @@ public class JsonStampingBinder implements TypeBinder<ReperibilityPeriods> {
 					person = Person.find("Select p from Person p where p.badgeNumber = ?", tipoMatricolaFirmaCode).first();
 					break;
 				case idTabellaINT:
-					String lessSign = tipoMatricolaFirmaCode.substring(0,2);
+					String lessSign = tipoMatricolaFirmaCode.substring(0,3);
 					long personId = Long.parseLong(lessSign);
 					person = Person.findById(personId);
 					break;
@@ -108,6 +108,18 @@ public class JsonStampingBinder implements TypeBinder<ReperibilityPeriods> {
 						
 			
 			//Estrarre la data
+			Integer anno = jsonObject.get("anno").getAsInt();
+			Integer mese = jsonObject.get("mese").getAsInt();
+			Integer giorno = jsonObject.get("giorno").getAsInt();
+			Integer ora = jsonObject.get("ora").getAsInt();
+			Integer minuti = jsonObject.get("minuti").getAsInt();
+			if(anno == null || mese == null || giorno == null || ora == null || minuti == null){
+				LocalDateTime date = new LocalDateTime(anno, mese, giorno, ora, minuti, 0);
+				
+				stamping.dateTime = date;
+				
+			}
+			
 			
 			
 			Logger.debug("Effettuato il binding, stampingFromClient = %s", stamping);
