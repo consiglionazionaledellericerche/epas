@@ -45,7 +45,7 @@ public class Shift extends Controller{
 		ShiftPeriod shiftPeriod = null;
 		for(PersonShiftDay psd : personShiftDay){
 			if (shiftPeriod == null || !shiftPeriod.person.equals(psd.personShift.person) || !shiftPeriod.end.plusDays(1).equals(psd.date)) {
-				shiftPeriod = new ShiftPeriod(psd.personShift.person, psd.date, psd.date, (ShiftType) ShiftType.findById(type), psd.shiftTimeTables);
+				shiftPeriod = new ShiftPeriod(psd.personShift.person, psd.date, psd.date, (ShiftType) ShiftType.findById(type), psd.shiftTimeTable);
 				shiftPeriods.add(shiftPeriod);
 				Logger.trace("Creato nuovo reperibilityPeriod, person=%s, start=%s, end=%s, timetable=%s" , shiftPeriod.person, shiftPeriod.start, shiftPeriod.end, shiftPeriod.shiftTimeTable);
 			} else {

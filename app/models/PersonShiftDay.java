@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -19,15 +20,15 @@ public class PersonShiftDay extends Model{
 
 	public LocalDate date;
 	
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name="shift_type_id")
 	public ShiftType shiftType;
 	
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name="shift_time_table_id")
-	public ShiftTimeTable shiftTimeTables;
+	public ShiftTimeTable shiftTimeTable;
 	
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name="person_shift_id", unique=true, nullable=false, updatable=false)
 	public PersonShift personShift;
 }
