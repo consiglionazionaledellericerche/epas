@@ -1,7 +1,11 @@
 package models;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -21,6 +25,6 @@ public class ShiftTimeTable extends Model{
 	public LocalTime endShift;
 	public String description;
 	
-	@OneToOne(mappedBy="shiftTimeTable", fetch=FetchType.LAZY)
-	public PersonShiftDay personShiftDay;
+	@OneToMany(mappedBy="shiftTimeTable", fetch=FetchType.LAZY)
+	public List<PersonShiftDay> personShiftDay = new ArrayList<PersonShiftDay>();
 }
