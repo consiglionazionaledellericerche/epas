@@ -47,6 +47,7 @@ public class JsonStampingBinder implements TypeBinder<ReperibilityPeriods> {
 		Logger.debug("binding StampingFromClient: %s, %s, %s, %s, %s", name, annotations, value, actualClass, genericType);
 		try {
 			
+			Person person = null;
 			JsonObject jsonObject = new JsonParser().parse(value).getAsJsonObject();
 			
 			Logger.debug("jsonObject = %s", jsonObject);
@@ -84,6 +85,22 @@ public class JsonStampingBinder implements TypeBinder<ReperibilityPeriods> {
 			String tipoMatricolaFirmaCode = jsonObject.get("tipoMatricolaFirma").getAsString();
 			
 			TipoMatricolaFirma tipoMatricolaFirma = StampingFromClient.TipoMatricolaFirma.valueOf(tipoMatricolaFirmaCode);
+			switch(tipoMatricolaFirma){
+				case matricolaCNR:
+					int firma = Integer.parseInt(tipoMatricolaFirmaCode);
+					person = Person.find("Select p from Person p where p.number = ?", firma).first();
+					break;
+				case matricolaBadge:
+					person = Person.find("Select p from Person p where p.badgeNumber = ?", tipoMatricolaFirmaCode).first();
+					break;
+				case idTabellaINT:
+					String lessSign = tipoMatricolaFirmaCode.substring(0,2);
+					long personId = Long.parseLong(lessSign);
+					person = Person.findById(personId);
+					break;
+					default:
+						break;
+			}
 			//Eventualmente catchare l'eccezione e loggare decentemente
 			
 			Long matricolaFirma = jsonObject.get("matricolaFirma").getAsLong();

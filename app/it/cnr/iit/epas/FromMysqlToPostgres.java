@@ -152,7 +152,7 @@ public class FromMysqlToPostgres {
 
 		//TODO: importare tutte le persone o solo quelle che hanno un contratto attivo da quell'anno in poi?
 		String sql = "SELECT ID, Nome, Cognome, DataNascita, Telefono," +
-				"Fax, Email, Stanza, Matricola, passwordmd5, Qualifica, Dipartimento, Sede " +
+				"Fax, Email, Stanza, Matricola, Matricolabadge, passwordmd5, Qualifica, Dipartimento, Sede " +
 				"FROM Persone order by ID";
 		if (limit > 0) {
 			sql += " LIMIT " + limit;
@@ -247,6 +247,7 @@ public class FromMysqlToPostgres {
 			person.password = rs.getString("passwordmd5");
 			person.bornDate = rs.getDate("DataNascita");
 			person.number = rs.getInt("Matricola");
+			person.badgeNumber = rs.getString("Matricolabadge");
 			Long qualifica = rs.getLong("Qualifica");
 			person.qualification = qualifica != null && qualifica != 0 ? JPA.em().getReference(Qualification.class, qualifica) : null;
 			person.save();
