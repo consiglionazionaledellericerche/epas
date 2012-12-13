@@ -3,7 +3,9 @@
  */
 package controllers;
 
+import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
+
 
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -15,6 +17,7 @@ import java.util.Set;
 import models.Absence;
 import models.Person;
 import models.PersonDay;
+import models.PersonReperibility;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
 import models.exports.AbsenceReperibilityPeriod;
@@ -23,10 +26,19 @@ import models.exports.ReperibilityPeriods;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.collect.Collections2;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.ImmutableTable;
+import com.google.common.collect.Table;
+import com.google.common.collect.TreeBasedTable;
+
 import play.Logger;
 import play.data.binding.As;
 import play.db.jpa.JPA;
 import play.mvc.Controller;
+
+import static play.modules.pdf.PDF.*;
+
 
 /**
  * @author cristian
@@ -249,11 +261,40 @@ public class Reperibility extends Controller {
 
 	}
 	
-	public static void main(String[] args) {
-		LocalDate l1 = new LocalDate(2012, 11, 1);
-		LocalDate l2 = new LocalDate(2012, 11, 1);
-		System.out.println("l1 = l2 = " + l1.equals(l2));
+	public static void exportYearAsPDF() {
+		int year = params.get("year", Integer.class);
+		Long reperibilityId = params.get("type", Long.class);
+		PersonReperibilityType reperibilityType = PersonReperibilityType.findById(reperibilityId);
 		
+		if (reperibilityType == null) {
+			notFound(String.format("ReperibilityType id = %s doesn't exist", reperibilityId));			
+		}
+		
+		List<Table<Person, Integer, String>> reperibilityMonths = new ArrayList<Table<Person, Integer, String>>();
+		
+		for (int i = 1; i <=12; i++) {
+			
+			LocalDate firstOfMonth = new LocalDate(year, i, 1);
+			
+			List<PersonReperibilityDay> personReperibilityDays = 
+					JPA.em().createQuery("SELECT prd FROM PersonReperibilityDay prd WHERE date BETWEEN :firstOfMonth AND :endOfMonth AND reperibilityType = :reperibilityType ORDER by date")
+					.setParameter("firstOfMonth", firstOfMonth)
+					.setParameter("endOfMonth", firstOfMonth.dayOfMonth().withMaximumValue())
+					.setParameter("reperibilityType", reperibilityType)
+					.getResultList();
+			
+			ImmutableTable.Builder<Person, Integer, String> builder = ImmutableTable.builder(); 
+			Table<Person, Integer, String> reperibilityMonth = null;
+			
+			for (PersonReperibilityDay personReperibilityDay : personReperibilityDays) {
+				Person person = personReperibilityDay.personReperibility.person;
+				
+				builder.put(person, personReperibilityDay.date.getDayOfMonth(), DateUtility.isHoliday(person, personReperibilityDay.date) ? "fs" : "fr");
+			}
+			reperibilityMonth = builder.build();
+			reperibilityMonths.add(reperibilityMonth);
+		}
+		renderPDF(year, reperibilityMonths);
 	}
 		
 }
