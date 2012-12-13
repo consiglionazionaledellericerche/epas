@@ -238,6 +238,9 @@ td.inserisciTimbratura {text-align: center}
 p#spiegazioneTabellaTimbrature {margin-top: 2em; margin-bottom: 2em}
 p#validita {margin: 2em 0em 2em}
 p#nuovoCodiceCompetenza {margin: 4em 0em 2em; align: left}
+p#tipoTimbratura {margin: 3em 0em 2em; align: left; font-weight:bold;}
+p#updateStampingText{margin: 3em 0em 2em; align: left;}
+
 div#logout {text-align: right; float: right}
 div#chooseView {text-align: center}
 div#cambiaPassword {margin: 1em 4em; text-align: left}
@@ -294,6 +297,9 @@ input#username {margin: 4 em 2em 2em}
 input#password {margin: 4 em 2em 2em}
 input#nuovaPassword {margin: 3 em 2em 2em}
 input#confermaPassword {margin: 4 em 2em 2em}
+input#submitStamping {margin: 0em 30em 0em; align: center}
+input#discardStamping {margin: 0em 40em 0em; align: center}
+input#updateStamping {margin: 0em 25em 0em; align: center}
 
 input#submitNuovoCodiceAssenza {margin: 2em 60em 0em; align: center}
 input#discardNuovoCodiceAssenza {margin: 1em 60em 0em; align: center}

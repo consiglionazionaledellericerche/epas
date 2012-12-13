@@ -223,7 +223,7 @@ public class Absences extends Controller{
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
-	public static void create(@Required Long personId, @Required Integer year, @Required Integer month, @Required Integer day, String absenceCode) {
+	public static void create(@Required Long personId, @Required Integer year, @Required Integer month, @Required Integer day) {
     	Logger.debug("Insert absence called for personId=%d, year=%d, month=%d, day=%d", personId, year, month, day);
     	List<AbsenceType> frequentAbsenceTypeList = getFrequentAbsenceTypes();
     	
@@ -231,7 +231,7 @@ public class Absences extends Controller{
 		Person person = Person.em().getReference(Person.class, personId);
 		LocalDate date = new LocalDate(year, month, day);
 		PersonDay personDay = new PersonDay(person, date);
-		render(personDay, frequentAbsenceTypeList, allCodes, absenceCode);
+		render(personDay, frequentAbsenceTypeList, allCodes);
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
@@ -243,24 +243,25 @@ public class Absences extends Controller{
 		LocalDate dateFrom = new LocalDate(yearFrom, monthFrom, dayFrom);
 		
 		AbsenceType absenceType = AbsenceType.find("byCode", absenceCode).first();
+		Logger.debug("L'absenceType è: %s", absenceType);
 		if (absenceType == null) {
 			validation.keep();
 			params.flash();
 			flash.error("Il codice di assenza %s non esiste", params.get("absenceCode"));
-			create(personId, yearFrom, monthFrom, dayFrom, absenceCode);
+			create(personId, yearFrom, monthFrom, dayFrom);
 			render("@create");
 		}
 		
 		
 		Logger.debug("Richiesto inserimento della assenza codice = %s della persona %s, dataInizio = %s", absenceCode, person, dateFrom);
 		
-		Absence existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date = ?" +
+		Absence existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where a.personDay = pd and pd.person = ? and pd.date = ?" +
 				" and a.absenceType = ?", person, dateFrom, absenceType).first();
 		if(existingAbsence != null){
 			validation.keep();
 			params.flash();
 			flash.error("Il codice di assenza %s è già presente per la data %s", params.get("absenceCode"), PersonTags.toDateTime(dateFrom));
-			create(personId, yearFrom, monthFrom, dayFrom, absenceCode);
+			create(personId, yearFrom, monthFrom, dayFrom);
 			render("@create");
 		}
 		Absence absence = new Absence();
@@ -313,9 +314,14 @@ public class Absences extends Controller{
 					/**
 					 * deve ignorare le timbrature, quindi per quel giorno vale l'assenza e della timbratura che fare? vanno cancellate? e il personday?
 					 */
-					
-					Stamping.delete("Select st from Stamping st " +
-							"where st.person = ? and st.date between ? and ? ", person, ldtBegin, ldtEnd);
+					List<Stamping> stList = Stamping.find("Select st from Stamping st, PersonDay pd where st.personDay = pd and pd.date = ?" +
+							" and pd.person = ?", dateFrom, person).fetch();
+					for(Stamping st : stList){
+						st.delete();
+						
+					}
+				//	Stamping.delete("st.personDay = pd and pd.date = ? and " +
+				//			"pd.person = ? ", dateFrom, person);
 					
 					pd.populatePersonDay();
 					pd.save();

@@ -28,4 +28,5 @@ public enum StampTypeValues {
 	public Long getId() {
 		return id;
 	}
+	
 }
