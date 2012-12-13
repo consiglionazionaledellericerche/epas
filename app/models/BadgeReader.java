@@ -10,6 +10,8 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.envers.Audited;
+
 import net.sf.oval.constraint.NotNull;
 
 import play.db.jpa.Model;
@@ -20,6 +22,7 @@ import play.db.jpa.Model;
  */
 @Entity
 @Table(name="badge_readers")
+@Audited
 public class BadgeReader extends Model {
 
 	@NotNull
