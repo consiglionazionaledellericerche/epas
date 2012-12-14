@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Reperibilità anno - ${year}</title>
+        <link rel="stylesheet" href="@{'/public/stylesheets/reperibilityPDF.css'}" type="text/css" charset="utf-8">
+    </head>
+    <body>
+        <div id="content">
+        	Qui ci vanno le reperibilità dell'anno ${year}
+        	
+%{
+	int i = 0;
+	for(reperibilityMonth in reperibilityMonths) {
+     	i++
+}%
+	<table border="1">
+		<caption>Reperibilità ${i} ${year}</caption>
+		<tr>
+			<th>Nome dipendente</th>
+		%{
+			for (dayOfMonth in reperibilityMonth.columnKeySet()) {
+		}%
+			<th>${dayOfMonth}</th>
+		%{
+			}
+		}%
+		</tr>
+		
+		%{
+			for (person in reperibilityMonth.rowKeySet()) {
+				
+		}%
+			<tr>
+				<td class="nome-dipendente">${person.surname} - ${person.name}</td>
+				%{
+					for (dayOfMonth in reperibilityMonth.columnKeySet()) {
+				}%
+						<td>${reperibilityMonth.contains(person, dayOfMonth) ? reperibilityMonth.get(person, dayOfMonth) : ''}</td>
+				%{
+					}
+				}%
+			</tr>
+		%{
+			}	
+		}%
+	</table>
+%{
+    }
+}%
+
+
+        </div>
+    </body>
+</html>

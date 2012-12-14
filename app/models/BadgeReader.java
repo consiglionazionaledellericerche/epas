@@ -23,6 +23,7 @@ import play.db.jpa.Model;
 @Audited
 @Entity
 @Table(name="badge_readers")
+@Audited
 public class BadgeReader extends Model {
 
 	@NotNull
