@@ -20,7 +20,7 @@ import play.db.jpa.Model;
  * @author cristian
  *
  */
-@Audited
+
 @Entity
 @Table(name="badge_readers")
 @Audited

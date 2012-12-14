@@ -150,7 +150,7 @@ public class FromMysqlToPostgres {
 	public static void importAll(int limit, int anno) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		Connection mysqlCon = FromMysqlToPostgres.getMysqlConnection();
 
-		//TODO: importare tutte le persone o solo quelle che hanno un contratto attivo da quell'anno in poi?
+		
 		String sql = "SELECT ID, Nome, Cognome, DataNascita, Telefono," +
 				"Fax, Email, Stanza, Matricola, Matricolabadge, passwordmd5, Qualifica, Dipartimento, Sede " +
 				"FROM Persone order by ID";
