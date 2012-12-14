@@ -6,6 +6,7 @@
 #{form @WorkingTimes.updateWorkingTime()}
 
 Nome di questo tipo di orario: <input type="text" name="workingTimeTypeDescription" value="${wtt.description}"/>
+<input type="hidden" name="wttId" value="${wtt.id}"/>
 <table>
 	<tr>
 		<th></th>
@@ -54,39 +55,39 @@ Nome di questo tipo di orario: <input type="text" name="workingTimeTypeDescripti
 		<tr>
 			<td>Giorno festivo</td>
 			%{ if(wtt.getHolidayFromWorkinTimeType(1, wtt)==true){ }%
-				<td><input type="checkbox" name="mondayHoliday" value ="" checked="checked"/></td>
+				<td><input type="checkbox" name="mondayHoliday" value ="si" checked="checked"/></td>
 			%{ } else { }%
-				<td><input type="checkbox" name="mondayHoliday" value=""/></td>
+				<td><input type="checkbox" name="mondayHoliday" value="no"/></td>
 			%{ } }%
 			%{ if(wtt.getHolidayFromWorkinTimeType(2, wtt)==true){ }%
-				<td><input type="checkbox" name="tuesdayHoliday" value="" checked="checked"/></td>
+				<td><input type="checkbox" name="tuesdayHoliday" value="si" checked="checked"/></td>
 			%{ } else { }%
-				<td><input type="checkbox" name="tuesdayHoliday" value=""/></td>
+				<td><input type="checkbox" name="tuesdayHoliday" value="no"/></td>
 			%{ } }%
 			%{ if(wtt.getHolidayFromWorkinTimeType(3, wtt)==true){ }%
-				<td><input type="checkbox" name="wednesdayHoliday" value=""  checked="checked"/></td>
+				<td><input type="checkbox" name="wednesdayHoliday" value="si"  checked="checked"/></td>
 			%{ } else { }%
-				<td><input type="checkbox" name="wednesdayHoliday" value=""/></td>
+				<td><input type="checkbox" name="wednesdayHoliday" value="no"/></td>
 			%{ } }%
 			%{ if(wtt.getHolidayFromWorkinTimeType(4, wtt)==true){ }%
-				<td><input type="checkbox" name="thursdayHoliday" value="" checked="checked"/></td>
+				<td><input type="checkbox" name="thursdayHoliday" value="si" checked="checked"/></td>
 			%{ } else { }%
-				<td><input type="checkbox" name="thursdayHoliday" value=""/></td>
+				<td><input type="checkbox" name="thursdayHoliday" value="no"/></td>
 			%{ } }%
 			%{ if(wtt.getHolidayFromWorkinTimeType(5, wtt)==true){ }%
-				<td><input type="checkbox" name="fridayHoliday" value= "" checked="checked"/></td>
+				<td><input type="checkbox" name="fridayHoliday" value= "si}" checked="checked"/></td>
 			%{ } else { }%
-				<td><input type="checkbox" name="fridayHoliday" value=""/></td>
+				<td><input type="checkbox" name="fridayHoliday" value="no"/></td>
 			%{ } }%
 			%{ if(wtt.getHolidayFromWorkinTimeType(6, wtt)==true){ }%
-				<td><input type="checkbox" name="saturdayHoliday" value="" checked="checked"/></td>
+				<td><input type="checkbox" name="saturdayHoliday" value="si" checked="checked"/></td>
 			%{ } else { }%
-				<td><input type="checkbox" name="saturdayHoliday" value=""/></td>
+				<td><input type="checkbox" name="saturdayHoliday" value="no"/></td>
 			%{ } }%
 			%{ if(wtt.getHolidayFromWorkinTimeType(7, wtt)==true){ }%
-				<td><input type="checkbox" name="sundayHoliday" value="" checked="checked"/></td>
+				<td><input type="checkbox" name="sundayHoliday" value="si" checked="checked"/></td>
 			%{ } else { }%
-				<td><input type="checkbox" name="sundayHoliday" value=""/></td>
+				<td><input type="checkbox" name="sundayHoliday" value="no"/></td>
 			%{ } }%
 		</tr>	
 </table>

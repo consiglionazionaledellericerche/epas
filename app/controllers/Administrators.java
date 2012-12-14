@@ -169,13 +169,8 @@ public class Administrators extends Controller {
 	
 	@Check(Security.INSERT_AND_UPDATE_ADMINISTRATOR)
 	public static void update(){
-		//List<Permission> permissionList = Permission.findAll();
-		//String nome = params.get("nome", String.class);
-		//String cognome = params.get("cognome", String.class);
 		long personId = params.get("personId", Long.class);
 		Person person = Person.findById(personId);
-		//Person person = Person.find("Select p from Person p where p.name = ? and p.surname = ?", nome, cognome).first();
-		//Person person = Person.em().getReference(Person.class, personId);
 		String viewPersonList = params.get("viewPersonList");
 		String insertAndUpdatePerson = params.get("insertAndUpdatePerson");
 		String deletePerson = params.get("deletePerson");
