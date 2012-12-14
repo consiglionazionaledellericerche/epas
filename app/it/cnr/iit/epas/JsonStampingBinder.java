@@ -52,13 +52,6 @@ public class JsonStampingBinder implements TypeBinder<ReperibilityPeriods> {
 			
 			Logger.debug("jsonObject = %s", jsonObject);
 
-//			public BadgeReader badgeReader;
-//			public StampType stampType;
-//			public Long matricolaFirma;
-//			public TipoMatricolaFirma tipoMatricolaFirma;
-//			
-//			public LocalDateTime dateTime;
-//			
 			StampingFromClient stamping = new StampingFromClient();
 			
 			String badgeReaderCode = jsonObject.get("lettore").getAsString();
@@ -85,42 +78,51 @@ public class JsonStampingBinder implements TypeBinder<ReperibilityPeriods> {
 			String tipoMatricolaFirmaCode = jsonObject.get("tipoMatricolaFirma").getAsString();
 			
 			TipoMatricolaFirma tipoMatricolaFirma = StampingFromClient.TipoMatricolaFirma.valueOf(tipoMatricolaFirmaCode);
-			switch(tipoMatricolaFirma){
-				case matricolaCNR:
-					int firma = Integer.parseInt(tipoMatricolaFirmaCode);
-					person = Person.find("Select p from Person p where p.number = ?", firma).first();
-					break;
-				case matricolaBadge:
-					person = Person.find("Select p from Person p where p.badgeNumber = ?", tipoMatricolaFirmaCode).first();
-					break;
-				case idTabellaINT:
-					String lessSign = tipoMatricolaFirmaCode.substring(0,3);
-					long personId = Long.parseLong(lessSign);
-					person = Person.findById(personId);
-					break;
-					default:
-						break;
-			}
+			
 			//Eventualmente catchare l'eccezione e loggare decentemente
-			
-			Long matricolaFirma = jsonObject.get("matricolaFirma").getAsLong();
 			//Cercare la persona in funzione del tipo di matricolaFirma
+			String matricolaFirma = jsonObject.get("matricolaFirma").getAsString();
+			if(matricolaFirma.startsWith("INT")){
+				/**
+				 * in questo caso dal client arriva la timbratura con la firma specificata secondo lo schema INT123.
+				 * Si fa quindi una substring sulla matricolafirma e ciò che si ottiene è l'id di tipo long per fare la ricerca sulla
+				 * tabella persone per capire a chi è relativa quella timbratura
+				 */
+				String lessSign = matricolaFirma.substring(0,3);
+				long personId = Long.parseLong(lessSign);
+				person = Person.findById(personId);
+				stamping.matricolaFirma = personId;
+			}
+			else{
+				/**
+				 * si cerca se quel che è stato passato può essere il campo "number" (matricola) della tabella Person
+				 */
+				int firma = Integer.parseInt(matricolaFirma);
+				person = Person.find("Select p from Person p where p.number = ?", firma).first();
+				if(person == null){
+					/**
+					 * la persona ritornata è null, quindi si cerca sempre su tabella Person però restringendo sul campo badgeNumber
+					 * (matricolaBadge)
+					 */
+					person = Person.find("Select p from Person p where p.badgeNumber = ?", matricolaFirma).first();
+					
+				}
+				stamping.matricolaFirma = (long) firma;
+			}						
 						
-			
-			//Estrarre la data
 			Integer anno = jsonObject.get("anno").getAsInt();
 			Integer mese = jsonObject.get("mese").getAsInt();
 			Integer giorno = jsonObject.get("giorno").getAsInt();
 			Integer ora = jsonObject.get("ora").getAsInt();
 			Integer minuti = jsonObject.get("minuti").getAsInt();
-			if(anno == null || mese == null || giorno == null || ora == null || minuti == null){
-				LocalDateTime date = new LocalDateTime(anno, mese, giorno, ora, minuti, 0);
-				
+			if(anno != null && mese != null && giorno != null && ora != null && minuti != null){
+				LocalDateTime date = new LocalDateTime(anno, mese, giorno, ora, minuti, 0);				
 				stamping.dateTime = date;
 				
+			}	
+			else{
+				throw new IllegalArgumentException("Uno dei parametri relativi alla data è risultato nullo. Impossibile crearla.");
 			}
-			
-			
 			
 			Logger.debug("Effettuato il binding, stampingFromClient = %s", stamping);
 			

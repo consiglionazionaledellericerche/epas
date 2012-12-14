@@ -160,9 +160,7 @@ public class Absences extends Controller{
 		
 		abt.justifiedTimeAtWork = params.get("jwt", JustifiedTimeAtWork.class);
 		abt.multipleUse = params.get("usoMultiplo", Boolean.class);
-		/**
-		 * TODO: come fare per le qualifiche????
-		 */
+
 		if(params.get("livello1", Boolean.class) != null){
 			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 1).first();
 			abt.qualifications.add(qual);

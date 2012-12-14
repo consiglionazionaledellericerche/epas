@@ -506,6 +506,7 @@ public class FromMysqlToPostgres {
 
 				wtt.description = orarioDiLavoro.getString("nome");
 				wtt.shift = orarioDiLavoro.getBoolean("turno");
+//				wtt.defaultWorkingTimeType = orarioDiLavoro.getBoolean("comune");
 				wtt.save();
 				Logger.info("Creato %s", wtt);
 
@@ -1229,7 +1230,6 @@ public class FromMysqlToPostgres {
 		
 	}
 	/**
-	 * TODO: cambiare la query, invece di farla sul monthrecap che è vuoto, farla sul totali_mens sul db vecchio
 	 * @throws SQLException 
 	 * @throws ClassNotFoundException 
 	 * @throws IllegalAccessException 
