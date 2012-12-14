@@ -51,6 +51,11 @@ public class WorkingTimeType extends Model {
 	 */
 	public boolean shift = false;
 	
+	/**
+	 * true se e solo se è l'orario di lavoro di default da assegnare
+	 */
+//	public boolean defaultWorkingTimeType = false;
+	
 //	/**
 //	 * relazione con la tabella persone
 //	 */

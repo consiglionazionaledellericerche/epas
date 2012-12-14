@@ -120,6 +120,7 @@ GET		/administratorList						Administrators.list
 GET		/insertAdministrator					Administrators.insertAdmin
 POST	/insertAdministrator					Administrators.save
 GET 	/administrators/edit/{adminId}			Administrators.edit
+POST	/administrators/update					Administrators.update
 
 #Gestione straordinari e competenze
 GET		/showCompetences/{year}/{month}			Competences.showCompetences
@@ -147,5 +148,12 @@ GET		/shift/{type}/personList				Shift.personList
 
 GET		/shift/{type}/find/{<(19|20)\d\d>yearFrom}/{<(0[1-9]|1[012])>monthFrom}/{<(0[1-9]|[12][0-9]|3[01])>dayFrom}/{<(19|20)\d\d>yearTo}/{<(0[1-9]|1[012])>monthTo}/{<(0[1-9]|[12][0-9]|3[01])>dayTo}	Shift.find
 
+#Gestione timbrature via json
+
+PUT		/stampings/create
+
 # Catch all
 *       /{controller}/{action}                  {controller}.{action}
+
+
+

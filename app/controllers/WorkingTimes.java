@@ -119,6 +119,170 @@ public class WorkingTimes extends Controller{
 		/**
 		 * TODO: completare il metodo di modifica
 		 */
+		WorkingTimeType wtt = WorkingTimeType.findById(workingTimeTypeId);
+		String description = params.get("workingTimeTypeDescription");
+		if(!wtt.description.equals(description)){
+			wtt.description = description;
+		}
+		Integer mondayWorkingMinutes = params.get("mondayWorkingTime", Integer.class);
+		Integer tuesdayWorkingMinutes = params.get("tuesdayWorkingTime", Integer.class);
+		Integer wednesdayWorkingMinutes = params.get("wednesdayWorkingTime", Integer.class);
+		Integer thursdayWorkingMinutes = params.get("thursdayWorkingTime", Integer.class);
+		Integer fridayWorkingMinutes = params.get("fridayWorkingTime", Integer.class);
+		Integer saturdayWorkingMinutes = params.get("saturdayWorkingTime", Integer.class);
+		Integer sundayWorkingMinutes = params.get("sundayWorkingTime", Integer.class);
+		if(wtt.getWorkingTimeFromWorkinTimeType(1).workingTime != mondayWorkingMinutes){
+			wtt.getWorkingTimeFromWorkinTimeType(1).workingTime = mondayWorkingMinutes;
+			wtt.getWorkingTimeFromWorkinTimeType(1).save();
+		}
+		if(wtt.getWorkingTimeFromWorkinTimeType(2).workingTime != tuesdayWorkingMinutes){
+			wtt.getWorkingTimeFromWorkinTimeType(2).workingTime = tuesdayWorkingMinutes;
+			wtt.getWorkingTimeFromWorkinTimeType(2).save();
+		}
+		if(wtt.getWorkingTimeFromWorkinTimeType(3).workingTime != wednesdayWorkingMinutes){
+			wtt.getWorkingTimeFromWorkinTimeType(3).workingTime = wednesdayWorkingMinutes;
+			wtt.getWorkingTimeFromWorkinTimeType(3);
+		}
+		if(wtt.getWorkingTimeFromWorkinTimeType(4).workingTime != thursdayWorkingMinutes){
+			wtt.getWorkingTimeFromWorkinTimeType(4).workingTime = thursdayWorkingMinutes;
+			wtt.getWorkingTimeFromWorkinTimeType(4);
+		}
+		if(wtt.getWorkingTimeFromWorkinTimeType(5).workingTime != fridayWorkingMinutes){
+			wtt.getWorkingTimeFromWorkinTimeType(5).workingTime = fridayWorkingMinutes;
+			wtt.getWorkingTimeFromWorkinTimeType(5);
+		}
+		if(wtt.getWorkingTimeFromWorkinTimeType(6).workingTime != saturdayWorkingMinutes){
+			wtt.getWorkingTimeFromWorkinTimeType(6).workingTime = saturdayWorkingMinutes;
+			wtt.getWorkingTimeFromWorkinTimeType(6);
+		}
+		if(wtt.getWorkingTimeFromWorkinTimeType(7).workingTime != sundayWorkingMinutes){
+			wtt.getWorkingTimeFromWorkinTimeType(7).workingTime = sundayWorkingMinutes;
+			wtt.getWorkingTimeFromWorkinTimeType(7);
+		}
+		
+		Integer mondayMinimalTimeLunch = params.get("mondayMinimalTimeLunch", Integer.class);
+		Integer tuesdayMinimalTimeLunch = params.get("tuesdayMinimalTimeLunch", Integer.class);
+		Integer wednesdayMinimalTimeLunch = params.get("wednesdayMinimalTimeLunch", Integer.class);
+		Integer thursdayMinimalTimeLunch = params.get("thursdayMinimalTimeLunch", Integer.class);
+		Integer fridayMinimalTimeLunch = params.get("fridayMinimalTimeLunch", Integer.class);
+		Integer saturdayMinimalTimeLunch = params.get("saturdayMinimalTimeLunch", Integer.class);
+		Integer sundayMinimalTimeLunch = params.get("sundayMinimalTimeLunch", Integer.class);
+		if(wtt.getMinimalTimeForLunch(1, wtt) != mondayMinimalTimeLunch){
+			wtt.getWorkingTimeFromWorkinTimeType(1).mealTicketTime = mondayMinimalTimeLunch;
+			wtt.getWorkingTimeFromWorkinTimeType(1);
+		}
+		if(wtt.getMinimalTimeForLunch(2, wtt) != tuesdayMinimalTimeLunch){
+			wtt.getWorkingTimeFromWorkinTimeType(2).mealTicketTime = tuesdayMinimalTimeLunch;
+			wtt.getWorkingTimeFromWorkinTimeType(2);
+		}
+		if(wtt.getMinimalTimeForLunch(3, wtt) != wednesdayMinimalTimeLunch){
+			wtt.getWorkingTimeFromWorkinTimeType(3).mealTicketTime = wednesdayMinimalTimeLunch;
+			wtt.getWorkingTimeFromWorkinTimeType(3);
+		}
+		if(wtt.getMinimalTimeForLunch(4, wtt) != thursdayMinimalTimeLunch){
+			wtt.getWorkingTimeFromWorkinTimeType(4).mealTicketTime = thursdayMinimalTimeLunch;
+			wtt.getWorkingTimeFromWorkinTimeType(4);
+		}
+		if(wtt.getMinimalTimeForLunch(5, wtt) != fridayMinimalTimeLunch){
+			wtt.getWorkingTimeFromWorkinTimeType(5).mealTicketTime = fridayMinimalTimeLunch;
+			wtt.getWorkingTimeFromWorkinTimeType(5);
+		}
+		if(wtt.getMinimalTimeForLunch(6, wtt) != saturdayMinimalTimeLunch){
+			wtt.getWorkingTimeFromWorkinTimeType(6).mealTicketTime = saturdayMinimalTimeLunch;
+			wtt.getWorkingTimeFromWorkinTimeType(6);
+		}
+		if(wtt.getMinimalTimeForLunch(7, wtt) != sundayMinimalTimeLunch){
+			wtt.getWorkingTimeFromWorkinTimeType(7).mealTicketTime = sundayMinimalTimeLunch;
+			wtt.getWorkingTimeFromWorkinTimeType(7);
+		}
+		
+		Integer mondayBreakTime = params.get("mondayBreakTime", Integer.class);
+		Integer tuesdayBreakTime = params.get("tuesdayBreakTime", Integer.class);
+		Integer wednesdayBreakTime = params.get("wednesdayBreakTime", Integer.class);
+		Integer thursdayBreakTime = params.get("thursdayBreakTime", Integer.class);
+		Integer fridayBreakTime = params.get("fridayBreakTime", Integer.class);
+		Integer saturdayBreakTime = params.get("saturdayBreakTime", Integer.class);
+		Integer sundayBreakTime = params.get("sundayBreakTime", Integer.class);
+		if(wtt.getBreakTime(1, wtt) != mondayBreakTime){
+			wtt.getWorkingTimeFromWorkinTimeType(1).breakTicketTime = mondayBreakTime;
+			wtt.getWorkingTimeFromWorkinTimeType(1);
+		}
+		if(wtt.getBreakTime(2, wtt) != tuesdayBreakTime){
+			wtt.getWorkingTimeFromWorkinTimeType(2).breakTicketTime = tuesdayBreakTime;
+			wtt.getWorkingTimeFromWorkinTimeType(2);
+		}
+		if(wtt.getBreakTime(3, wtt) != wednesdayBreakTime){
+			wtt.getWorkingTimeFromWorkinTimeType(3).breakTicketTime = wednesdayBreakTime;
+			wtt.getWorkingTimeFromWorkinTimeType(3);
+		}
+		if(wtt.getBreakTime(4, wtt) != thursdayBreakTime){
+			wtt.getWorkingTimeFromWorkinTimeType(4).breakTicketTime = thursdayBreakTime;
+			wtt.getWorkingTimeFromWorkinTimeType(4);
+		}
+		if(wtt.getBreakTime(5, wtt) != fridayBreakTime){
+			wtt.getWorkingTimeFromWorkinTimeType(5).breakTicketTime = fridayBreakTime;
+			wtt.getWorkingTimeFromWorkinTimeType(5);
+		}
+		if(wtt.getBreakTime(6, wtt) != saturdayBreakTime){
+			wtt.getWorkingTimeFromWorkinTimeType(6).breakTicketTime = saturdayBreakTime;
+			wtt.getWorkingTimeFromWorkinTimeType(6);
+		}
+		if(wtt.getBreakTime(7, wtt) != sundayBreakTime){
+			wtt.getWorkingTimeFromWorkinTimeType(7).breakTicketTime = sundayBreakTime;
+			wtt.getWorkingTimeFromWorkinTimeType(7);
+		}
+		
+		Boolean mondayHoliday = params.get("mondayHoliday", Boolean.class);
+		Boolean tuesdayHoliday = params.get("tuesdayHoliday", Boolean.class);
+		Boolean wednesdayHoliday = params.get("wednesdayHoliday", Boolean.class);
+		Boolean thursdayHoliday = params.get("thursdayHoliday", Boolean.class);
+		Boolean fridayHoliday = params.get("fridayHoliday", Boolean.class);
+		Boolean saturdayHoliday = params.get("saturdayHoliday", Boolean.class);
+		Boolean sundayHoliday = params.get("sundayHoliday", Boolean.class);
+		if(wtt.getHolidayFromWorkinTimeType(1, wtt) != mondayHoliday){
+			wtt.getWorkingTimeFromWorkinTimeType(1).holiday = mondayHoliday;
+			wtt.getWorkingTimeFromWorkinTimeType(1);
+		}
+		if(wtt.getHolidayFromWorkinTimeType(2, wtt) != tuesdayHoliday){
+			wtt.getWorkingTimeFromWorkinTimeType(2).holiday = tuesdayHoliday;
+			wtt.getWorkingTimeFromWorkinTimeType(2);
+		}
+		if(wtt.getHolidayFromWorkinTimeType(3, wtt) != wednesdayHoliday){
+			wtt.getWorkingTimeFromWorkinTimeType(3).holiday = wednesdayHoliday;
+			wtt.getWorkingTimeFromWorkinTimeType(3);
+		}
+		if(wtt.getHolidayFromWorkinTimeType(4, wtt) != thursdayHoliday){
+			wtt.getWorkingTimeFromWorkinTimeType(4).holiday = thursdayHoliday;
+			wtt.getWorkingTimeFromWorkinTimeType(4);
+		}
+		if(wtt.getHolidayFromWorkinTimeType(5, wtt) != fridayHoliday){
+			wtt.getWorkingTimeFromWorkinTimeType(5).holiday = fridayHoliday;
+			wtt.getWorkingTimeFromWorkinTimeType(5);
+		}
+		if(wtt.getHolidayFromWorkinTimeType(6, wtt) != saturdayHoliday){
+			wtt.getWorkingTimeFromWorkinTimeType(6).holiday = saturdayHoliday;
+			wtt.getWorkingTimeFromWorkinTimeType(6);
+		}
+		if(wtt.getHolidayFromWorkinTimeType(7, wtt) != sundayHoliday){
+			wtt.getWorkingTimeFromWorkinTimeType(7).holiday = sundayHoliday;
+			wtt.getWorkingTimeFromWorkinTimeType(7);
+		}
+		Boolean defaultWorkingTime = params.get("default", Boolean.class);
+		/**
+		 * scommentare quando si è capito come inserire una nuova colonna nella classe senza generare disastri
+		 */
+//		if(wtt.defaultWorkingTimeType != defaultWorkingTime)
+//			wtt.defaultWorkingTimeType = defaultWorkingTime;
+		
+		Boolean shift = params.get("turni", Boolean.class);
+		if(wtt.shift != shift)
+			wtt.shift = shift;
+
+		wtt.save();
+		
+		flash.success(String.format("Aggiornato orario di lavoro con nuovo nome %s '", description + "'"));
+		Application.indexAdmin();
+		
 	}
 	
 	public static void edit(@Required Long workingTimeTypeId){

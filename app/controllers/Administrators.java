@@ -6,6 +6,10 @@ import java.util.List;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
+import org.joda.time.LocalDate;
+
 import models.ContactData;
 import models.Contract;
 import models.Location;
@@ -161,6 +165,66 @@ public class Administrators extends Controller {
 			Person person = Person.findById(adminId);
 			render(person);
 		}
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_ADMINISTRATOR)
+	public static void update(){
+		//List<Permission> permissionList = Permission.findAll();
+		//String nome = params.get("nome", String.class);
+		//String cognome = params.get("cognome", String.class);
+		long personId = params.get("personId", Long.class);
+		Person person = Person.findById(personId);
+		//Person person = Person.find("Select p from Person p where p.name = ? and p.surname = ?", nome, cognome).first();
+		//Person person = Person.em().getReference(Person.class, personId);
+		String viewPersonList = params.get("viewPersonList");
+		String insertAndUpdatePerson = params.get("insertAndUpdatePerson");
+		String deletePerson = params.get("deletePerson");
+		String insertAndUpdateStamping = params.get("insertAndUpdateStamping");
+		String insertAndUpdatePassword = params.get("insertAndUpdatePassword");
+		String insertAndUpdateWorkingTime = params.get("insertAndUpdateWorkingTime");
+		String insertAndUpdateAbsence = params.get("insertAndUpdateAbsence");
+		String insertAndUpdateConfiguration = params.get("insertAndUpdateConfiguration");
+		String insertAndUpdateAdministrator = params.get("insertAndUpdateAdministrator");
+		if(viewPersonList.equals("true") && !person.isViewPersonAvailable()){
+			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "viewPersonList").first();
+			person.permissions.add(p);
+		}
+		if(insertAndUpdatePerson.equals("true") && !person.isInsertAndUpdatePersonAvailable()){
+			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdatePerson").first();
+			person.permissions.add(p);
+		}
+		if(deletePerson.equals("true") && !person.isDeletePersonAvailable()){
+			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "deletePerson").first();
+			person.permissions.add(p);
+		}
+		if(insertAndUpdateStamping.equals("true") && !person.isInsertAndUpdateStampingAvailable()){
+			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateStamping").first();
+			person.permissions.add(p);
+		}
+		if(insertAndUpdatePassword.equals("true") && !person.isInsertAndUpdatePasswordAvailable()){
+			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdatePassword").first();
+			person.permissions.add(p);
+		}	
+		if(insertAndUpdateWorkingTime.equals("true") && !person.isInsertAndUpdateWorkinTimeAvailable()){
+			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateWorkingTime").first();
+			person.permissions.add(p);
+		}	
+		if(insertAndUpdateAbsence.equals("true") && !person.isInsertAndUpdateAbsenceAvailable()){
+			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateAbsence").first();
+			person.permissions.add(p);
+		}
+		if(insertAndUpdateConfiguration.equals("true") && !person.isInsertAndUpdateConfigurationAvailable()){
+			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateConfiguration").first();
+			person.permissions.add(p);
+		}
+		if(insertAndUpdateAdministrator.equals("true") && !person.isInsertAndUpdateAdministratorAvailable()){
+			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateAdministrator").first();
+			person.permissions.add(p);
+		}
+		person.save();
+		flash.success(String.format("Aggiornati con successo i permessi per %s %s", person.name, person.surname));
+		Application.indexAdmin();
+		
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_ADMINISTRATOR)
