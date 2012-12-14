@@ -143,6 +143,7 @@ PUT		/reperibility/{type}/update/{year}/{month}		Reperibility.update
 
 GET		/reperibility/{type}/absence/{<(19|20)\d\d>yearFrom}/{<(0[1-9]|1[012])>monthFrom}/{<(0[1-9]|[12][0-9]|3[01])>dayFrom}/{<(19|20)\d\d>yearTo}/{<(0[1-9]|1[012])>monthTo}/{<(0[1-9]|[12][0-9]|3[01])>dayTo}	Reperibility.absence
 
+GET 	/reperibility/{<\d>type}/exportYearAsPDF/{<(19|20)\d\d>year}			Reperibility.exportYearAsPDF
 #Gestione turni
 GET		/shift/{type}/personList				Shift.personList
 
