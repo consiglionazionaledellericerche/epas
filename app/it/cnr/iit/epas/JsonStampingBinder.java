@@ -36,7 +36,7 @@ import com.google.gson.JsonParser;
  *
  */
 @Global
-public class JsonStampingBinder implements TypeBinder<ReperibilityPeriods> {
+public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 
 	/**
 	 * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[], java.lang.String, java.lang.Class, java.lang.reflect.Type)
@@ -74,11 +74,7 @@ public class JsonStampingBinder implements TypeBinder<ReperibilityPeriods> {
 				}
 				stamping.stampType = stampType;
 			}
-
-			String tipoMatricolaFirmaCode = jsonObject.get("tipoMatricolaFirma").getAsString();
-			
-			TipoMatricolaFirma tipoMatricolaFirma = StampingFromClient.TipoMatricolaFirma.valueOf(tipoMatricolaFirmaCode);
-			
+					
 			//Eventualmente catchare l'eccezione e loggare decentemente
 			//Cercare la persona in funzione del tipo di matricolaFirma
 			String matricolaFirma = jsonObject.get("matricolaFirma").getAsString();

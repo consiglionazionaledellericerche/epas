@@ -9,6 +9,7 @@ import java.util.Map;
 
 import it.cnr.iit.epas.ActionMenuItem;
 import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
+import it.cnr.iit.epas.JsonStampingBinder;
 import it.cnr.iit.epas.MainMenu;
 import models.Absence;
 import models.AbsenceType;
@@ -26,6 +27,7 @@ import models.StampType;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.exports.ReperibilityPeriods;
+import models.exports.StampingFromClient;
 import models.Configuration;
 
 import org.joda.time.LocalDate;
@@ -516,21 +518,22 @@ public class Stampings extends Controller {
     }
   
 	/**
-	 * Aggiorna le informazioni relative alla Reperibilità del personale
-	 * 
-	 * Per provarlo è possibile effettuare una chiamata JSON come questa:
-	 * 	$  curl -H "Content-Type: application/json" -X PUT \
-	 * 			-d '[ {"id" : "49","start" : 2012-12-05,"end" : "2012-12-10", "reperibility_type_id" : "1"}, { "id" : "139","start" : "2012-12-12" , "end" : "2012-12-14", "reperibility_type_id" : "1" } , { "id" : "139","start" : "2012-12-17","end" : "2012-12-18", "reperibility_type_id" : "1" } ]' \ 
-	 * 			http://localhost:9000/reperibility/1/update/2012/12
-	 * 
+	 * Aggiunge una timbratura ad una persona
+	 *  
 	 * @param body
 	 */
-	public static void create(@As(binder=JsonReperibilityPeriodsBinder.class) ReperibilityPeriods body) {
+	public static String create(@As(binder=JsonStampingBinder.class) StampingFromClient body) {
 
-		Logger.debug("update: Received reperebilityPeriods %s", body);
+		Logger.debug("create: Received stampingFromClient %s", body);
 		
 		if (body == null) {
 			badRequest();	
 		}
+		
+		if (Person.createStamping(body)) {
+			return "OK";
+		}
+		
+		return "KO";
 	}
 }
