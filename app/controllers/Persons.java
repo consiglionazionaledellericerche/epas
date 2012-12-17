@@ -179,9 +179,11 @@ public class Persons extends Controller {
 	@Check(Security.DELETE_PERSON)
 	public static void terminateContract(Long personId){
 		Date end = params.get("endContract", Date.class);
-		LocalDate endContract = new LocalDate(end);
-		Logger.debug("La data di terminazione anticipata è %s", endContract);
-		if(endContract != null){
+		
+		if(end != null){
+			LocalDate endContract = new LocalDate(end);
+			Logger.debug("La data di terminazione anticipata è %s", endContract);
+
 			Person person = Person.findById(params.get("personId", Long.class));
 			Contract contract = person.getCurrentContract();
 			contract.endContract = endContract;
