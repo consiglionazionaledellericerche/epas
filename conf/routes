@@ -151,7 +151,7 @@ GET		/shift/{type}/find/{<(19|20)\d\d>yearFrom}/{<(0[1-9]|1[012])>monthFrom}/{<(
 
 #Gestione timbrature via json
 
-PUT		/stampings/create
+PUT		/stampings/create						Stampings.create
 
 # Catch all
 *       /{controller}/{action}                  {controller}.{action}

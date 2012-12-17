@@ -455,11 +455,12 @@ public class Person extends Model {
 	 * @throws IllegalAccessException 
 	 * @throws InstantiationException 
 	 */
-	public static void createStamping(@As(binder=JsonStampingBinder.class) StampingFromClient stamp){
+	public static boolean createStamping(StampingFromClient stamping){
 				
 		/**
 		 * TODO: problema tattico nell'affrontare questo metodo...
 		 */
+		return true;
 	}
 	
 	
