@@ -2,50 +2,84 @@
 
 <html>
     <head>
-        <title>Reperibilità anno - ${year}</title>
+        <title>Istituto di Informatica e Telematica - Piano delle Reperibilità ${year}</title>
         <link rel="stylesheet" href="@{'/public/stylesheets/reperibilityPDF.css'}" type="text/css" charset="utf-8">
     </head>
     <body>
-        <div id="content">
-        	Qui ci vanno le reperibilità dell'anno ${year}
+        	<h1>Istituto di Informatica e Telematica - Piano delle Reperibilità ${year} </h1>
         	
 %{
-	int i = 0;
+	int mm = 0;
+	
 	for(reperibilityMonth in reperibilityMonths) {
-     	i++
 }%
-	<table border="1">
-		<caption>Reperibilità ${i} ${year}</caption>
+<div class="table">
+	<table>
+		<caption>Reperibilità ${firstOfYear.plusMonths(mm).monthOfYear().getAsText()} ${year}</caption>
 		<tr>
 			<th>Nome dipendente</th>
 		%{
 			for (dayOfMonth in reperibilityMonth.columnKeySet()) {
+				
 		}%
-			<th>${dayOfMonth}</th>
+		
+			<th>${firstOfYear.plusDays(dayOfMonth-2).dayOfWeek().getAsText().toString().substring(0,1)} <br/> ${dayOfMonth}</th>
+		
 		%{
 			}
 		}%
+		
 		</tr>
 		
 		%{
 			for (person in reperibilityMonth.rowKeySet()) {
 				
 		}%
+		
 			<tr>
-				<td class="nome-dipendente">${person.surname} - ${person.name}</td>
+				<td class="nome-dipendente" id="${person.surname.toString().replace(' ', '')}">${person.surname} ${person.name}</td>
 				%{
+					nfr = 0;
+					nfs = 0;
+					prova = 0;
 					for (dayOfMonth in reperibilityMonth.columnKeySet()) {
+					
+						if (reperibilityMonth.contains(person, dayOfMonth) && reperibilityMonth.get(person, dayOfMonth).toString().equals('fs')) { 
+							nfs++;
+						}
+						if (reperibilityMonth.contains(person, dayOfMonth) && reperibilityMonth.get(person, dayOfMonth).toString().equals('fr')) { 
+							nfr++;
+						}
+						
 				}%
-						<td>${reperibilityMonth.contains(person, dayOfMonth) ? reperibilityMonth.get(person, dayOfMonth) : ''}</td>
+						<td class="${reperibilityMonth.get(person, dayOfMonth)}">${reperibilityMonth.contains(person, dayOfMonth) ? reperibilityMonth.get(person, dayOfMonth) : ''}</td>
 				%{
 					}
 				}%
+				
+				<td class="label no-border">
+					Feriali=
+				</td>
+				<td class="no-border">
+					${nfr}
+				</td>
+				<td class="label no-border">
+					Festivi=
+				</td>
+				<td class="no-border red">
+					${nfs}
+				</td>
 			</tr>
+			
 		%{
 			}	
 		}%
+		
 	</table>
+</div>
+
 %{
+		mm++;
     }
 }%
 

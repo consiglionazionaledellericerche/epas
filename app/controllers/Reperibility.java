@@ -294,7 +294,9 @@ public class Reperibility extends Controller {
 			reperibilityMonth = builder.build();
 			reperibilityMonths.add(reperibilityMonth);
 		}
-		renderPDF(year, reperibilityMonths);
+		
+		LocalDate firstOfYear = new LocalDate(year, 1, 1);
+		renderPDF(year, firstOfYear, reperibilityMonths);
 	}
 		
 }

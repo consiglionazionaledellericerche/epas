@@ -1,3 +1,86 @@
-div#content {
+body {
+	color: black;
+	font-family: Verdana, Arial, sans-serif;
+}
+
+h1 {
+	color: #284A7E;
+	font-size: 11pt;
+	align: center;
+}
+
+table {
+	width: 80%;
+	border-collapse: collapse;
+}
+
+caption {
+	width: 80%;
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 10pt;
+	font-weight: bold;
+	color: white;
+	background-color: #284A7E;
+	padding: 0.5 0 0.5 0;
+}
+
+tr th {
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 8pt;
+	color: white;
+	background-color: #284A7E;
+	text-align: center;
+}
+
+tr td {
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 8pt;
+	border: 0.5px solid silver;
+	text-align: center;
+	padding : 0.2em;
+}
+
+tr td.nome-dipendente {
+	font-weight: bold;
+	text-align: left;
+}
+
+tr td.label {
+	padding-left: 1.5em;
+}
+
+tr td.no-border {
+	border: none;
+}
+
+.red {
 	color: red;
+}
+
+tr td#Rossi {
+	color: green;	
+}
+
+tr td#Lucchesi {
+	color: #200772;	
+}
+
+tr td#Vivaldi {
+	color: #E339A4;	
+}
+
+tr td#Ruberti {
+	color: #64026E;	
+}
+
+tr td#LuconiTrombacchi {
+	color: #33CCCC;	
+}
+
+tr td.fs {
+	background-color: #FF8D40;
+}
+
+div.table {
+	margin: 1em;
 }
