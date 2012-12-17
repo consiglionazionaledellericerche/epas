@@ -474,9 +474,7 @@ public class Stampings extends Controller {
     
     @Check(Security.INSERT_AND_UPDATE_PERSON)
     public static void mealTicketSituation(Integer year, Integer month){
-    	/**
-    	 * TODO: nuovo tipo di permesso per la visualizzazione della situazione mensile dei buoni pasto
-    	 */
+ 
     	LocalDate beginMonth = new LocalDate(year, month, 1);
     	    	
     	List<Person> activePersons = Person.getActivePersons(new LocalDate(year, month, 1));
