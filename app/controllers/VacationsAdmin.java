@@ -9,9 +9,7 @@ import play.mvc.With;
 @With( {Secure.class, NavigationMenu.class} )
 public class VacationsAdmin extends Controller{
 
-	/**
-	 * TODO: inserire un nuovo permesso nella lista dei permessi: INSERT_AND_UPDATE_VACATIONS
-	 */
+
 	@Check(Security.INSERT_AND_UPDATE_VACATIONS)
 	public static void manageVacationCode(){
 		List<VacationCode> vacationCodeList = VacationCode.findAll();

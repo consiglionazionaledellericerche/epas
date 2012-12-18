@@ -5,6 +5,9 @@ package models;
 
 
 
+import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
+import it.cnr.iit.epas.JsonStampingBinder;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -27,6 +30,8 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import lombok.ToString;
+import models.exports.ReperibilityPeriods;
+import models.exports.StampingFromClient;
 
 import net.spy.memcached.FailureMode;
 
@@ -47,6 +52,7 @@ import controllers.Secure;
 import controllers.Security;
 
 import play.Logger;
+import play.data.binding.As;
 import play.data.validation.Email;
 import play.data.validation.Required;
 import play.db.jpa.JPA;
@@ -274,7 +280,7 @@ public class Person extends Model {
 			
 			int differenzaAnni = contract.expireContract.getYear() - contract.beginContract.getYear();
 
-			if(/*this.qualification.qualification == 0*/this.getQualification() == null){
+			if(this.getQualification() == null){
 				vacation = null;
 			}			
 			else{
@@ -293,10 +299,8 @@ public class Person extends Model {
 					
 				}					
 				else
-					vacation = VacationCode.find("Select vc from VacationCode vc where vc.description = ?","26+4").first();
-				
-			}
-		
+					vacation = VacationCode.find("Select vc from VacationCode vc where vc.description = ?","26+4").first();				
+			}		
 		}
 		return vacation;
 	}
@@ -315,9 +319,7 @@ public class Person extends Model {
 	public Set<Permission> getAllPermissions(){
 		Set<Permission> setPermissions = new HashSet<Permission>();
 		setPermissions.addAll(permissions);
-//		for(Group g : groups){
-//			setPermissions.addAll(g.permissions);
-//		}
+
 		return setPermissions;
 	}
 	
@@ -326,10 +328,7 @@ public class Person extends Model {
 	 * @return il contratto attivo per quella persona alla date date
 	 */
 	public Contract getContract(LocalDate date){
-		
-		//Logger.debug("La data passata come parametro è : %s", date);
-		
-		
+			
 		Contract contract = Contract.find("Select con from Contract con where con.person = ? and con.beginContract <= ? and " +
 				"(con.expireContract > ? or con.expireContract is null )",this, date, date).first();
 		
@@ -449,5 +448,20 @@ public class Person extends Model {
 		return activePersons;
 		
 	}
+	
+	/**
+	 * metodo per la creazione di una timbratura a partire dall'oggetto stampModificationType che è stato costruito dal binder del Json
+	 * passato dal client python
+	 * @throws IllegalAccessException 
+	 * @throws InstantiationException 
+	 */
+	public static boolean createStamping(StampingFromClient stamping){
+				
+		/**
+		 * TODO: problema tattico nell'affrontare questo metodo...
+		 */
+		return true;
+	}
+	
 	
 }

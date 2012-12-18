@@ -160,9 +160,7 @@ public class Absences extends Controller{
 		
 		abt.justifiedTimeAtWork = params.get("jwt", JustifiedTimeAtWork.class);
 		abt.multipleUse = params.get("usoMultiplo", Boolean.class);
-		/**
-		 * TODO: come fare per le qualifiche????
-		 */
+
 		if(params.get("livello1", Boolean.class) != null){
 			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 1).first();
 			abt.qualifications.add(qual);
@@ -236,9 +234,7 @@ public class Absences extends Controller{
 	
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void insert(@Required Long personId, @Required Integer yearFrom, @Required Integer monthFrom, @Required Integer dayFrom, @Required String absenceCode){
-		/**
-		 * TODO: implementare il corpo della insertAbsence di una nuova assenza con la logica 
-		 */
+
 		Person person = Person.em().getReference(Person.class, personId);
 		LocalDate dateFrom = new LocalDate(yearFrom, monthFrom, dayFrom);
 		
