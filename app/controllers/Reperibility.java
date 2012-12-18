@@ -46,6 +46,8 @@ import static play.modules.pdf.PDF.*;
  */
 public class Reperibility extends Controller {
 
+	public enum SemRep {FS1S, FR1S, FS2S, FR2S}; 
+	
 	public static void personList() {
 		Long type = Long.parseLong(params.get("type"));
 		
@@ -272,6 +274,9 @@ public class Reperibility extends Controller {
 		
 		List<Table<Person, Integer, String>> reperibilityMonths = new ArrayList<Table<Person, Integer, String>>();
 		
+		
+//		Table<Person, SemRep, Integer> reperibilitySumDays = null;
+		
 		for (int i = 1; i <=12; i++) {
 			
 			LocalDate firstOfMonth = new LocalDate(year, i, 1);
@@ -295,8 +300,32 @@ public class Reperibility extends Controller {
 			reperibilityMonths.add(reperibilityMonth);
 		}
 		
+		int i = 0;
+		//ImmutableTable.Builder<Person, String, Integer> builder1 = ImmutableTable.builder(); 
+		//Table<Person, SemRep, Integer> reperibilitySumDays = ImmutableTable.<Person, Reperibility.SemRep, Integer>create();
+		Table<Person, String, Integer> reperibilitySumDays = HashBasedTable.<Person, String, Integer>create();
+		for (Table<Person, Integer, String> reperibilityMonth: reperibilityMonths) {
+			i++;
+			for (Person person: reperibilityMonth.rowKeySet()) {
+				for (Integer dayOfMonth: reperibilityMonth.columnKeySet()) {
+					if (reperibilityMonth.contains(person, dayOfMonth)) { 
+						//SemRep semRep = SemRep.valueOf( String.format("%s%dS", reperibilityMonth.get(person, dayOfMonth).toUpperCase(), (i<=6 ?1:2)));
+						String col = String.format("%s%dS", reperibilityMonth.get(person, dayOfMonth).toUpperCase(), (i<=6 ?1:2));
+						
+						//int n = reperibilitySumDays.contains(person, semRep) ? reperibilitySumDays.get(person, semRep) + 1 : 1;
+						//reperibilitySumDays.put(person, semRep, Integer.valueOf(n));
+						int n = reperibilitySumDays.contains(person, col) ? reperibilitySumDays.get(person, col) + 1 : 1;
+						reperibilitySumDays.put(person, col, Integer.valueOf(n));
+						
+					} else {
+						
+					}
+				}
+			}
+		}
+		
 		LocalDate firstOfYear = new LocalDate(year, 1, 1);
-		renderPDF(year, firstOfYear, reperibilityMonths);
+		renderPDF(year, firstOfYear, reperibilityMonths, reperibilitySumDays);
 	}
 		
 }
