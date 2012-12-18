@@ -10,8 +10,8 @@ h1 {
 }
 
 table {
-	width: 80%;
 	border-collapse: collapse;
+	width: 100%;
 }
 
 caption {
@@ -21,7 +21,7 @@ caption {
 	font-weight: bold;
 	color: white;
 	background-color: #284A7E;
-	padding: 0.5 0 0.5 0;
+	padding: 0.5em 0 0.5em 0;
 }
 
 tr th {
@@ -32,10 +32,35 @@ tr th {
 	text-align: center;
 }
 
+table.no-border tr th {
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 8pt;
+	border: none;
+	padding: 0.5em;
+	text-align: center;
+	background-color: white;
+	color: black;
+	font-weight: bold;
+}
+
+table.no-border {
+	border: none;
+	width: 80%;
+	margin: 2em 1em;
+}
+
+table.no-border tr td {
+	border: none;
+}
+
+tr td.no-border {
+	border: none;
+}
+
 tr td {
 	font-family: Verdana, Arial, sans-serif;
 	font-size: 8pt;
-	border: 0.5px solid silver;
+	border: 0.2px solid silver;
 	text-align: center;
 	padding : 0.2em;
 }
@@ -47,11 +72,10 @@ tr td.nome-dipendente {
 
 tr td.label {
 	padding-left: 1.5em;
+	font-weight: bold;
 }
 
-tr td.no-border {
-	border: none;
-}
+
 
 .red {
 	color: red;
@@ -83,4 +107,22 @@ tr td.fs {
 
 div.table {
 	margin: 1em;
+}
+
+div.firma {
+	width: 20%;
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 8pt;
+	text-align: center;
+	margin-top: 3em;
+}
+
+div.dir {
+	float: left;
+	margin-left: 7em;
+}
+
+div.resp {
+	float: right;
+	margin-right: 7em;
 }
