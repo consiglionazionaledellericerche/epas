@@ -33,13 +33,13 @@ public class PersonYear extends Model{
 	public int year;
 	
 	@Column(name = "remaining_vacation_days")
-	public int remainingVacationDays;
+	public Integer remainingVacationDays;
 	
 	/**
 	 * Tempo in minuti residuo alla fine dell'anno
 	 */
 	@Column(name = "remaining_minutes")
-	public int remainingMinutes;
+	public Integer remainingMinutes;
 	
 	public PersonYear(Person person, int year){
 		this.person = person;
@@ -74,6 +74,36 @@ public class PersonYear extends Model{
 			}
 		}
 		save();
+	}
+	
+	/**
+	 * conta quanti giorni di ferie sono rimasti da utilizzare dalle ferie dell'anno corrente
+	 */
+	public int getRemainingVacationDays(){
+		if(remainingVacationDays == null){
+			LocalDate date = new LocalDate(year, 1, 1);
+			List<Absence> absList = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date between ? and ? and abs.absenceType.code = ? ",
+					person, date, date.plusYears(1), "32").fetch();
+			remainingVacationDays = person.vacationPeriod.vacationCode.vacationDays - absList.size();
+			save();
+		}
+		
+		return remainingVacationDays;
+	}
+	
+	/**
+	 * ritorna quanti minuti sono in più/in meno alla fine dell'anno
+	 */
+	public int getRemainingMinutes(){
+		if(remainingMinutes == null){
+			List<PersonMonth> personMonthList = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ?",
+					person, year).fetch();
+			for(PersonMonth pm : personMonthList){
+				remainingMinutes = remainingMinutes + pm.totalRemainingMinutes;
+			}
+			save();
+		}
+		return remainingMinutes;
 	}
 	
 }

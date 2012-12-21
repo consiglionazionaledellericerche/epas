@@ -119,7 +119,7 @@ public class PersonMonth extends Model {
 	 * 
 	 * @param month, year
 	 * @return il residuo di ore all'ultimo giorno del mese se visualizzo un mese passato, al giorno attuale se visualizzo il mese
-	 * attuale
+	 * attuale, ovvero il progressivo orario all'ultimo giorno del mese (se passato) o al giorno attuale (se il mese è quello attuale)
 	 */
 	public int getMonthResidual(){
 		int residual = 0;
@@ -145,18 +145,22 @@ public class PersonMonth extends Model {
 	 * 
 	 * @param month
 	 * @param year
-	 * @return il numero di giorni di riposo compensativo utilizzati in quel mese 
+	 * @return il numero di minuti di riposo compensativo utilizzati in quel mese 
 	 */
 	public int getCompensatoryRestInMinutes(){
 		if (compensatoryRestInMinutes != null) {
 			return compensatoryRestInMinutes;
 		}
-
+		
 		compensatoryRestInMinutes = 0;
 		LocalDate beginMonth = new LocalDate(year, month, 1);
-
-		return ((Long) Absence.find("Select count(abs) from Absence abs where abs.person = ? and abs.date between ? and ? and abs.absenceType.code = ?", 
-				person, beginMonth, beginMonth.dayOfMonth().withMaximumValue(), "91").first()).intValue();
+		List<Absence> absList = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date between ? and ? and abs.absenceType.code = ?", 
+				person, beginMonth, beginMonth.dayOfMonth().withMaximumValue(), "91").fetch();
+		compensatoryRestInMinutes = (absList.size()*person.workingTimeType.getWorkingTimeFromWorkinTimeType(1).workingTime);
+		save();
+		return compensatoryRestInMinutes;
+//		return ((Long) Absence.find("Select count(abs) from Absence abs where abs.person = ? and abs.date between ? and ? and abs.absenceType.code = ?", 
+//				person, beginMonth, beginMonth.dayOfMonth().withMaximumValue(), "91").first()).intValue();
 
 	}
 
@@ -172,9 +176,7 @@ public class PersonMonth extends Model {
 		int monthResidual = getMonthResidual();
 		LocalDate date = new LocalDate(year, month, 1);
 		int residualFromPastMonth = PersonUtility.getResidual(person, date.dayOfMonth().withMaximumValue());
-		total = residualFromPastMonth+monthResidual-(compensatoryRest*432); //numero di giorni di riposo compensativo moltiplicati 
-		//per il numero di minuti presenti in 7 ore e 12 minuti, ovvero il tempo di lavoro.
-
+		total = residualFromPastMonth+monthResidual-(compensatoryRest); 
 		return total;
 	}
 
@@ -206,22 +208,7 @@ public class PersonMonth extends Model {
 				maxInStamp = localMaxInStamp;
 		}
 		return Math.max(maxExitStamp, maxInStamp);
-//		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", params)
-//		Query q1 = em.createNativeQuery("select count(*) from stampings as st where st.stamp_type_id in (:in1,:in2) and st.person_id = :per "+
-//				"and st.date between :beg and :end group by cast(date as Date) order by count(*) desc")
-//				.setParameter("in1", 1L)
-//				.setParameter("in2", 4L)
-//				.setParameter("per", person.id)
-//				.setParameter("beg", begin.toDate())
-//				.setParameter("end", begin.dayOfMonth().withMaximumValue().toDate())
-//				.setMaxResults(1);
-//
-//		BigInteger exitStamp = (BigInteger)q1.getSingleResult();
-//
-//
-//		q1.setParameter("in1", 2L).setParameter("in2", 3L);
-//		BigInteger inStamp = (BigInteger)q1.getSingleResult();
-//		return Math.max(exitStamp.longValue(),inStamp.longValue());
+
 	}
 
 

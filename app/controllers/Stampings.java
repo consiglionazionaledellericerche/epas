@@ -517,23 +517,5 @@ public class Stampings extends Controller {
     	render(year, month, tablePersonTicket, numberOfDays);
     }
   
-	/**
-	 * Aggiunge una timbratura ad una persona
-	 *  
-	 * @param body
-	 */
-	public static String create(@As(binder=JsonStampingBinder.class) StampingFromClient body) {
-
-		Logger.debug("create: Received stampingFromClient %s", body);
-		
-		if (body == null) {
-			badRequest();	
-		}
-		
-		if (Person.createStamping(body)) {
-			return "OK";
-		}
-		
-		return "KO";
-	}
+	
 }
