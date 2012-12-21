@@ -30,6 +30,7 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import lombok.ToString;
+import models.Stamping.WayType;
 import models.exports.ReperibilityPeriods;
 import models.exports.StampingFromClient;
 
@@ -456,10 +457,37 @@ public class Person extends Model {
 	 * @throws InstantiationException 
 	 */
 	public static boolean createStamping(StampingFromClient stamping){
-				
-		/**
-		 * TODO: problema tattico nell'affrontare questo metodo...
-		 */
+		
+		if(stamping == null)
+			return false;
+		long id = stamping.matricolaFirma;
+		Person person = Person.findById(id);
+		
+		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", 
+				person, stamping.dateTime.toLocalDate() ).first();
+		if(pd == null){
+			/**
+			 * non esiste un personDay per quella data, va creato e quindi salvato
+			 */
+			pd = new PersonDay(person, stamping.dateTime.toLocalDate());
+			pd.save();
+			
+			
+		}
+		Stamping stamp = new Stamping();
+		stamp.date = stamping.dateTime;
+		stamp.markedByAdmin = false;
+		if(stamping.inOut == 0)
+			stamp.way = WayType.in;
+		else
+			stamp.way = WayType.out;
+		stamp.badgeReader = stamping.badgeReader;
+		stamp.personDay = pd;
+		stamp.save();
+		
+		
+		pd.populatePersonDay();
+		pd.merge();
 		return true;
 	}
 	
