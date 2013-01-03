@@ -1,5 +1,6 @@
 package models;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -12,6 +13,7 @@ import org.hibernate.envers.Audited;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 
+import play.Logger;
 import play.db.jpa.Model;
 
 /**
@@ -40,6 +42,22 @@ public class PersonYear extends Model{
 	 */
 	@Column(name = "remaining_minutes")
 	public Integer remainingMinutes;
+	
+	/**
+	 * qui di sotto tutti i campi contenenti i valori che devono essere salvati per ciascun tipo di permesso orario utilizzato dal
+	 * dipendente durante l'anno. Quelli a controllo mensile si trovano nel personMonth del dipendente
+	 */
+	@Column(name= "permission_hourly_visit")
+	public Integer permissionHourlyVisit;
+		
+	@Column(name = "personal_reason_permission")
+	public Integer personalReasonPermission;
+	
+	@Column(name = "right_to_study_permission")
+	public Integer rightToStudyPermission;
+	
+	@Column(name = "days_completion_right_to_study")
+	public Integer daysCompletionRightToStudy;
 	
 	public PersonYear(Person person, int year){
 		this.person = person;
@@ -80,11 +98,24 @@ public class PersonYear extends Model{
 	 * conta quanti giorni di ferie sono rimasti da utilizzare dalle ferie dell'anno corrente
 	 */
 	public int getRemainingVacationDays(){
+		List<Absence> absList = new ArrayList<Absence>();
 		if(remainingVacationDays == null){
+			remainingVacationDays = 0;
 			LocalDate date = new LocalDate(year, 1, 1);
-			List<Absence> absList = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date between ? and ? and abs.absenceType.code = ? ",
-					person, date, date.plusYears(1), "32").fetch();
-			remainingVacationDays = person.vacationPeriod.vacationCode.vacationDays - absList.size();
+			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+					person, date, date.plusYears(1)).fetch();
+			for(PersonDay pd : pdList){
+				if(pd.absences.size() > 0){
+					for(Absence abs : pd.absences){
+						if(abs.absenceType.equals("32"))
+							absList.add(abs);
+					}
+				}
+			}
+			if(person.vacationPeriod != null)
+				remainingVacationDays = person.vacationPeriod.vacationCode.vacationDays - absList.size();
+			else 
+				remainingVacationDays = 0;
 			save();
 		}
 		
@@ -96,11 +127,18 @@ public class PersonYear extends Model{
 	 */
 	public int getRemainingMinutes(){
 		if(remainingMinutes == null){
+			remainingMinutes = 0;
 			List<PersonMonth> personMonthList = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ?",
 					person, year).fetch();
-			for(PersonMonth pm : personMonthList){
-				remainingMinutes = remainingMinutes + pm.totalRemainingMinutes;
+			Logger.debug("La lista dei personMonth per %s %s: %s",person.name, person.surname, personMonthList);
+			if(personMonthList != null){
+				for(PersonMonth pm : personMonthList){
+					remainingMinutes = remainingMinutes + pm.totalRemainingMinutes;
+				}
+				
 			}
+			else
+				remainingMinutes = 0;
 			save();
 		}
 		return remainingMinutes;
