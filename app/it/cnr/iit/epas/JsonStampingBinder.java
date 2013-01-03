@@ -90,15 +90,18 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 			 * matricola
 			 */
 			String matricolaFirma = jsonObject.get("matricolaFirma").getAsString();
-			if(matricolaFirma.startsWith("00000000000INT")){
+			Logger.debug("La matricola firma è del tipo: %s", matricolaFirma);
+			if(matricolaFirma.contains("INT")){
 				/**
 				 * in questo caso dal client arriva la timbratura con la firma specificata secondo lo schema INT123.
 				 * Si fa quindi una substring sulla matricolafirma e ciò che si ottiene è l'id di tipo long per fare la ricerca sulla
 				 * tabella persone per capire a chi è relativa quella timbratura
 				 */
-				String lessSign = matricolaFirma.substring(0,14);
+				String lessSign = matricolaFirma.substring(14,matricolaFirma.length());
 				long personId = Long.parseLong(lessSign);
+				Logger.debug("L'id recuperato è: %s", personId);
 				person = Person.findById(personId);
+				Logger.debug("l'id corrisponde a: %s %s", person.name, person.surname);
 				stamping.matricolaFirma = personId;
 			}
 			else{
@@ -142,5 +145,12 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 			throw e;
 		}
 	}
+	
+//	public static void main(String[]args){
+//		String s = "00000000000INT123";
+//		String lessSign = s.substring(14,s.length());
+//		long personId = Long.parseLong(lessSign);
+//		System.out.println("L'id è: "+personId);
+//	}
 	
 }

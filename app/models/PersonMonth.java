@@ -87,6 +87,16 @@ public class PersonMonth extends Model {
 
 	@Column(name = "compensatory_rest_in_minutes")
 	public Integer compensatoryRestInMinutes = 0;
+	
+	/**
+	 * qui di seguito i valori che devono essere salvati relativi al numero di minuti che il dipendente ha usato per i permessi in
+	 * questione a controllo mensile. Nel personYear della persona si trovano invece quelli a controllo annuale
+	 */
+	@Column(name = "permission_help_relatives")
+	public Integer permissionHelpRelatives;
+	
+	@Column(name = "hourly_permission_disabled_person")
+	public Integer hourlyPermissionDisabledPerson;
 
 	@Transient
 	public List<PersonMonth> persons = null;
@@ -346,8 +356,13 @@ public class PersonMonth extends Model {
 						PersonMonth pm = PersonMonth.find("byPersonAndYearAndMonth", person, year, i).first();
 						totalRemainingMinutePastYearTaken += pm.remainingMinutesPastYearTaken;						
 					}
+					int remainingMinutesResidualLastYear = 0;
+					if(py.remainingMinutes != null && totalRemainingMinutePastYearTaken != 0){
+						remainingMinutesResidualLastYear =  py.remainingMinutes - totalRemainingMinutePastYearTaken;
+					}
+					else
+						remainingMinutesResidualLastYear = 0;
 					
-					int remainingMinutesResidualLastYear =  py.remainingMinutes - totalRemainingMinutePastYearTaken;
 					if (remainingMinutesResidualLastYear < 0) {
 						throw new IllegalStateException(
 							String.format("Il valore dei minuti residui dell'anno precedente per %s nel mese %s %s e' %s. " +

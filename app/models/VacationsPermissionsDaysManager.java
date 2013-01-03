@@ -224,10 +224,32 @@ public class VacationsPermissionsDaysManager {
 				 * nel caso in cui debba rimpiazzare il codice orario con il suo codice di completamento giornaliero, controllo che quel codice
 				 * giornaliero non abbia raggiunto il suo limite di utilizzo
 				 */
+				
 			case replaceCodeAndDecreaseAccumulation:
 				AvailabilityInfo availabilityReplaceCode = isAvailable(abt.absenceTypeGroup.replacingAbsenceType, person, date);
-				if(availabilityReplaceCode.isAvailable)
+				if(availabilityReplaceCode.isAvailable){
+					PersonYear py = PersonYear.find("Select py from PersonYear py where py.person = ? and py.year = ?", 
+							person, date.getYear()).first();
+					/**
+					 * si controlla a quale delle assenze orarie con controllo annuale bisogna andare a togliere i minuti
+					 */
+					if(abt.description.equals("")){
+						
+					}
+					if(abt.description.equals("")){
+						
+					}
+					if(abt.description.equals("")){
+						
+					}
+					if(abt.description.equals("")){
+						
+					}
+					//abtg.limitInMinute = abtg.limitInMinute - abt.justifiedTimeAtWork.minutesJustified;
+					abtg.save();
 					return new AvailabilityInfo(true);
+				}
+					
 				return new AvailabilityInfo(String.format("Il codice %s dovrebbe essere affiancato da %s perchè sono stati già presi" +
 						"%s minuti per il gruppo di assenze %s. Questo però non è possibile poichè: %s",
 						abt.code, abtg.replacingAbsenceType.code, currentTotalTime, abtg.label, availabilityReplaceCode.reason));
