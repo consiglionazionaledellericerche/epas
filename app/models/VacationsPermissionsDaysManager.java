@@ -175,7 +175,7 @@ public class VacationsPermissionsDaysManager {
 		/**
 		 * se il comportamento in caso di raggiungimento del limite è "non fare niente", è inutile fare ulteriori controlli
 		 */
-		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
+//		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
 		if(abt.absenceTypeGroup.accumulationBehaviour.equals(AccumulationBehaviour.nothing))
 			return new AvailabilityInfo(true);
 		

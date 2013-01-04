@@ -471,21 +471,32 @@ public class Person extends Model {
 			 */
 			pd = new PersonDay(person, stamping.dateTime.toLocalDate());
 			pd.save();			
+			Stamping stamp = new Stamping();
+			stamp.date = stamping.dateTime;
+			stamp.markedByAdmin = false;
+			if(stamping.inOut == 0)
+				stamp.way = WayType.in;
+			else
+				stamp.way = WayType.out;
+			stamp.badgeReader = stamping.badgeReader;
+			stamp.personDay = pd;
+			stamp.save();
 			
 		}
-
-		for(Stamping s : pd.stampings){
-			if(!s.date.isEqual(stamping.dateTime)){
-				Stamping stamp = new Stamping();
-				stamp.date = stamping.dateTime;
-				stamp.markedByAdmin = false;
-				if(stamping.inOut == 0)
-					stamp.way = WayType.in;
-				else
-					stamp.way = WayType.out;
-				stamp.badgeReader = stamping.badgeReader;
-				stamp.personDay = pd;
-				stamp.save();
+		else{
+			for(Stamping s : pd.stampings){
+				if(!s.date.isEqual(stamping.dateTime)){
+					Stamping stamp = new Stamping();
+					stamp.date = stamping.dateTime;
+					stamp.markedByAdmin = false;
+					if(stamping.inOut == 0)
+						stamp.way = WayType.in;
+					else
+						stamp.way = WayType.out;
+					stamp.badgeReader = stamping.badgeReader;
+					stamp.personDay = pd;
+					stamp.save();
+				}
 			}
 		}
 			
