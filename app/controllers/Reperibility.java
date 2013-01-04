@@ -29,18 +29,18 @@ import models.PersonReperibilityType;
 import models.exports.AbsenceReperibilityPeriod;
 import models.exports.ReperibilityPeriod;
 import models.exports.ReperibilityPeriods;
-import net.fortuna.ical4j.data.CalendarOutputter;
-import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.DateTime;
-import net.fortuna.ical4j.model.TimeZoneRegistry;
-import net.fortuna.ical4j.model.TimeZoneRegistryFactory;
-import net.fortuna.ical4j.model.ValidationException;
-import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.component.VTimeZone;
-import net.fortuna.ical4j.model.property.CalScale;
-import net.fortuna.ical4j.model.property.ProdId;
-import net.fortuna.ical4j.model.property.Uid;
-import net.fortuna.ical4j.model.property.Version;
+//import net.fortuna.ical4j.data.CalendarOutputter;
+//import net.fortuna.ical4j.model.Calendar;
+//import net.fortuna.ical4j.model.DateTime;
+//import net.fortuna.ical4j.model.TimeZoneRegistry;
+//import net.fortuna.ical4j.model.TimeZoneRegistryFactory;
+//import net.fortuna.ical4j.model.ValidationException;
+//import net.fortuna.ical4j.model.component.VEvent;
+//import net.fortuna.ical4j.model.component.VTimeZone;
+//import net.fortuna.ical4j.model.property.CalScale;
+//import net.fortuna.ical4j.model.property.ProdId;
+//import net.fortuna.ical4j.model.property.Uid;
+//import net.fortuna.ical4j.model.property.Version;
 
 import org.joda.time.LocalDate;
 
@@ -308,45 +308,45 @@ public class Reperibility extends Controller {
 		renderPDF(year, reperibilityMonths);
 	}
 		
-	private static Calendar createCalendar(Long personId, Long year)  {
-        TimeZoneRegistry registry = TimeZoneRegistryFactory.getInstance().createRegistry();
-        TimeZone timezone = registry.getTimeZone("Europe/Rome");
-        timezone.getID();
-
-        Date date = new Date();
-        
-
-        // Create a calendar
-        Calendar icsCalendar = new net.fortuna.ical4j.model.Calendar();
-        icsCalendar.getProperties().add(new ProdId("-//Events Calendar//iCal4j 1.0//EN"));
-        icsCalendar.getProperties().add(CalScale.GREGORIAN);
-        icsCalendar.getProperties().add(Version.VERSION_2_0);
-        
-        // Create the event
-        //TODO: fare un ciclo sui giorni di reperibilità della persona nell'anno ed aggiungere tutti i giorni
-        //al calendario
-        VEvent reperibilityDay = new VEvent(new DateTime(date), new DateTime(date), "Reperibilità Registro");
-
-        icsCalendar.getComponents().add(reperibilityDay);
-        return icsCalendar;
-	}
+//	private static Calendar createCalendar(Long personId, Long year)  {
+//        TimeZoneRegistry registry = TimeZoneRegistryFactory.getInstance().createRegistry();
+//        TimeZone timezone = registry.getTimeZone("Europe/Rome");
+//        timezone.getID();
+//
+//        Date date = new Date();
+//        
+//
+//        // Create a calendar
+//        Calendar icsCalendar = new net.fortuna.ical4j.model.Calendar();
+//        icsCalendar.getProperties().add(new ProdId("-//Events Calendar//iCal4j 1.0//EN"));
+//        icsCalendar.getProperties().add(CalScale.GREGORIAN);
+//        icsCalendar.getProperties().add(Version.VERSION_2_0);
+//        
+//        // Create the event
+//        //TODO: fare un ciclo sui giorni di reperibilità della persona nell'anno ed aggiungere tutti i giorni
+//        //al calendario
+//        VEvent reperibilityDay = new VEvent(new DateTime(date), new DateTime(date), "Reperibilità Registro");
+//
+//        icsCalendar.getComponents().add(reperibilityDay);
+//        return icsCalendar;
+//	}
 	
-	public static void ical(Long personId, Long year) {
-		try {
-		Calendar calendar = createCalendar(personId, year);
-		
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        CalendarOutputter outputter = new CalendarOutputter();
-        outputter.output(calendar, bos);
-        response.setHeader("Content-Type", "application/ics");
-        InputStream is = new ByteArrayInputStream(bos.toByteArray());
-        renderBinary(is,"reperibilitaRegistro.ics");
-        bos.close();
-        is.close();
-    } catch (IOException e) {
-        Logger.error("Io exception building ical", e);
-    } catch (ValidationException e) {
-        Logger.error("Validation exception generating ical", e);
-    }
-	}
+//	public static void ical(Long personId, Long year) {
+//		try {
+//		Calendar calendar = createCalendar(personId, year);
+//		
+//		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//        CalendarOutputter outputter = new CalendarOutputter();
+//        outputter.output(calendar, bos);
+//        response.setHeader("Content-Type", "application/ics");
+//        InputStream is = new ByteArrayInputStream(bos.toByteArray());
+//        renderBinary(is,"reperibilitaRegistro.ics");
+//        bos.close();
+//        is.close();
+//    } catch (IOException e) {
+//        Logger.error("Io exception building ical", e);
+//    } catch (ValidationException e) {
+//        Logger.error("Validation exception generating ical", e);
+//    }
+//	}
 }
