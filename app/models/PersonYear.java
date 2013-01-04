@@ -43,22 +43,7 @@ public class PersonYear extends Model{
 	@Column(name = "remaining_minutes")
 	public Integer remainingMinutes;
 	
-	/**
-	 * qui di sotto tutti i campi contenenti i valori che devono essere salvati per ciascun tipo di permesso orario utilizzato dal
-	 * dipendente durante l'anno. Quelli a controllo mensile si trovano nel personMonth del dipendente
-	 */
-	@Column(name= "permission_hourly_visit")
-	public Integer permissionHourlyVisit;
-		
-	@Column(name = "personal_reason_permission")
-	public Integer personalReasonPermission;
-	
-	@Column(name = "right_to_study_permission")
-	public Integer rightToStudyPermission;
-	
-	@Column(name = "days_completion_right_to_study")
-	public Integer daysCompletionRightToStudy;
-	
+
 	public PersonYear(Person person, int year){
 		this.person = person;
 		this.year = year;

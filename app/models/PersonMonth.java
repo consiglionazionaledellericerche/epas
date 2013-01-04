@@ -87,16 +87,7 @@ public class PersonMonth extends Model {
 
 	@Column(name = "compensatory_rest_in_minutes")
 	public Integer compensatoryRestInMinutes = 0;
-	
-	/**
-	 * qui di seguito i valori che devono essere salvati relativi al numero di minuti che il dipendente ha usato per i permessi in
-	 * questione a controllo mensile. Nel personYear della persona si trovano invece quelli a controllo annuale
-	 */
-	@Column(name = "permission_help_relatives")
-	public Integer permissionHelpRelatives;
-	
-	@Column(name = "hourly_permission_disabled_person")
-	public Integer hourlyPermissionDisabledPerson;
+
 
 	@Transient
 	public List<PersonMonth> persons = null;
