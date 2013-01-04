@@ -20,7 +20,7 @@ public class StampingFromClient {
 	    matricolaBadge, // la matricola sul badge e' quella del campo matricola badge
 	    idTabella // la matricola sul badge e' l'id della tabella Person
 	}
-	
+	public Integer inOut;
 	public BadgeReader badgeReader;
 	public StampType stampType;
 	public Long matricolaFirma;

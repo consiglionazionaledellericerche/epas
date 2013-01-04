@@ -476,9 +476,7 @@ public class Stampings extends Controller {
     
     @Check(Security.INSERT_AND_UPDATE_PERSON)
     public static void mealTicketSituation(Integer year, Integer month){
-    	/**
-    	 * TODO: nuovo tipo di permesso per la visualizzazione della situazione mensile dei buoni pasto
-    	 */
+ 
     	LocalDate beginMonth = new LocalDate(year, month, 1);
     	    	
     	List<Person> activePersons = Person.getActivePersons(new LocalDate(year, month, 1));
@@ -519,23 +517,5 @@ public class Stampings extends Controller {
     	render(year, month, tablePersonTicket, numberOfDays);
     }
   
-	/**
-	 * Aggiunge una timbratura ad una persona
-	 *  
-	 * @param body
-	 */
-	public static String create(@As(binder=JsonStampingBinder.class) StampingFromClient body) {
-
-		Logger.debug("create: Received stampingFromClient %s", body);
-		
-		if (body == null) {
-			badRequest();	
-		}
-		
-		if (Person.createStamping(body)) {
-			return "OK";
-		}
-		
-		return "KO";
-	}
+	
 }

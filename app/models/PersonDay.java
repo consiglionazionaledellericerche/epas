@@ -27,6 +27,7 @@ import models.enumerate.PersonDayModificationType;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -431,22 +432,47 @@ public class PersonDay extends Model {
 			progressive = difference + lastPreviousPersonDayInMonth.progressive;
 			Logger.debug("%s - %s. Il PersonDay precedente è %s. Difference di oggi = %s, progressive = %s", person, date, lastPreviousPersonDayInMonth, difference, progressive);
 		}
+		save();
+		
 		if(this.date.dayOfMonth().equals(date.dayOfMonth().withMaximumValue())){
 			PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
 					person, date.getMonthOfYear(), date.getYear()).first();
 			if(pm == null){
 				pm = new PersonMonth(person, date.getMonthOfYear(),date.getYear());
 				pm.progressiveAtEndOfMonthInMinutes = progressive;
+				pm.compensatoryRestInMinutes =  pm.getCompensatoryRestInMinutes();
+				pm.totalRemainingMinutes = pm.getTotalOfMonth();
 				pm.save();
 			}
 			else{
-				pm.progressiveAtEndOfMonthInMinutes = progressive;
+				if(pm.compensatoryRestInMinutes == null)
+					pm.compensatoryRestInMinutes = pm.getCompensatoryRestInMinutes();
+				if(pm.progressiveAtEndOfMonthInMinutes == null)
+					pm.progressiveAtEndOfMonthInMinutes = progressive;
+				if(pm.totalRemainingMinutes == null)
+					pm.totalRemainingMinutes = pm.getTotalOfMonth();
+				
 				pm.merge();
 			}
 					
 		}
-		save();
-		//return;				
+		if(this.date.getMonthOfYear() == DateTimeConstants.DECEMBER && this.date.getDayOfMonth() == 31){
+			PersonYear py = PersonYear.find("Select py from PersonYear py where py.person = ? and py.year = ?", person, this.date.getYear()).first();
+			if(py == null){
+				py = new PersonYear(person, this.date.getYear());
+				py.remainingMinutes = py.getRemainingMinutes();
+				py.remainingVacationDays = py.remainingVacationDays;
+				py.save();						
+			}
+			else{
+				if(py.remainingMinutes == null)
+					py.remainingMinutes = py.getRemainingMinutes();
+				if(py.remainingVacationDays == null)
+					py.remainingVacationDays = py.getRemainingVacationDays();
+				py.merge();
+			}
+		}		
+						
 	}
 
 	/**
