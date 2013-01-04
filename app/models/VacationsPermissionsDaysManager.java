@@ -175,18 +175,19 @@ public class VacationsPermissionsDaysManager {
 		/**
 		 * se il comportamento in caso di raggiungimento del limite è "non fare niente", è inutile fare ulteriori controlli
 		 */
-		
+		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
 		if(abt.absenceTypeGroup.accumulationBehaviour.equals(AccumulationBehaviour.nothing))
 			return new AvailabilityInfo(true);
 		
 		AbsenceTypeGroup abtg = abt.absenceTypeGroup;
 		
-		String initQuery = "Select sum(abt.justifiedWorkTime) from AbsenceType abt join Absence abs " +
-				"where abt.absenceTypeGroup = :abtg";
+		String initQuery = "Select sum(abt.justifiedTimeAtWork.minutesJustified) from AbsenceType abt join Absence abs join PersonDay pd " +
+				"where abt.absenceTypeGroup = :abtg ";
 		
-		Query query =  JPA.em().createQuery(initQuery + " and abs.date between :begin and :end " +
+		Query query =  JPA.em().createQuery(initQuery + " and pd.date between :begin and :end " +
 				"group by abt.absenceTypeGroup")
-				.setParameter("abtg", abtg);
+				.setParameter("abtg", abtg)
+				;
 		
 		
 		switch(abtg.accumulationType){
@@ -213,40 +214,21 @@ public class VacationsPermissionsDaysManager {
 		Integer currentTotalTime = (Integer)query.getSingleResult();
 		switch(abtg.accumulationBehaviour){
 			case noMoreAbsencesAccepted:
-				//TODO: da implementare andando a verificare il justifiedWorkingTime dell'assenza 
-//				if(currentTotalTime + abt.justifiedWorkTime > abtg.limitInMinute)
-//					return new AvailabilityInfo(String.format("Nel periodo '%s' sono già stati presi %s minuti per il gruppo di assenze" +
-//							" %s. Il limite per questo gruppo di assenze è %s. Quindi non è possibile prendere ulteriori %s minuti", 
-//							abtg.accumulationType, currentTotalTime, abtg.label, abtg.limitInMinute, abt.justifiedWorkTime));
-//				else
-//					return new AvailabilityInfo(true);
-				/**
-				 * nel caso in cui debba rimpiazzare il codice orario con il suo codice di completamento giornaliero, controllo che quel codice
-				 * giornaliero non abbia raggiunto il suo limite di utilizzo
-				 */
+			/**
+			 * nel caso in cui debba rimpiazzare il codice orario con il suo codice di completamento giornaliero, controllo che quel codice
+			 * giornaliero non abbia raggiunto il suo limite di utilizzo
+			 */
 				
 			case replaceCodeAndDecreaseAccumulation:
 				AvailabilityInfo availabilityReplaceCode = isAvailable(abt.absenceTypeGroup.replacingAbsenceType, person, date);
 				if(availabilityReplaceCode.isAvailable){
-					PersonYear py = PersonYear.find("Select py from PersonYear py where py.person = ? and py.year = ?", 
-							person, date.getYear()).first();
-					/**
-					 * si controlla a quale delle assenze orarie con controllo annuale bisogna andare a togliere i minuti
-					 */
-					if(abt.description.equals("")){
-						
+					
+					if(currentTotalTime + abt.justifiedTimeAtWork.minutesJustified > abtg.limitInMinute){
+						return new AvailabilityInfo(String.format("Nel periodo '%s' sono già stati presi %s minuti per il gruppo di assenze" +
+								" %s. Il limite per questo gruppo di assenze è %s. Quindi non è possibile prendere ulteriori %s minuti", 
+								abtg.accumulationType, currentTotalTime, abtg.label, abtg.limitInMinute, abt.justifiedTimeAtWork.minutesJustified));
 					}
-					if(abt.description.equals("")){
-						
-					}
-					if(abt.description.equals("")){
-						
-					}
-					if(abt.description.equals("")){
-						
-					}
-					//abtg.limitInMinute = abtg.limitInMinute - abt.justifiedTimeAtWork.minutesJustified;
-					abtg.save();
+					
 					return new AvailabilityInfo(true);
 				}
 					
