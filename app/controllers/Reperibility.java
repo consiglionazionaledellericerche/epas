@@ -127,7 +127,7 @@ public class Reperibility extends Controller {
 				}
 			}
 			
-			Logger.debug("Absence of the person %s find called from %s to %s, found %s reperibility days", person.id, from, to, absenceReperibilityDays.size());
+			Logger.debug("Absence of the person %s find called from %s to %s, found %s absence reperibility days", person.id, from, to, absenceReperibilityDays.size());
 			absenceReperibilityDays.addAll(absencePersonReperibilityDays);
 		}
 		
@@ -263,6 +263,11 @@ public class Reperibility extends Controller {
 
 	}
 	
+	/**
+	 * @author arianna, cristian
+	 * crea il file PDF con il calendario annuale delle reperibilità
+	 * (portale sistorg)
+	 */
 	public static void exportYearAsPDF() {
 		int year = params.get("year", Integer.class);
 		Long reperibilityId = params.get("type", Long.class);
