@@ -10,6 +10,7 @@
         	
 %{
 	int mm = 0;
+	int gg = 0;
 	
 	for(reperibilityMonth in reperibilityMonths) {
 }%
@@ -20,13 +21,13 @@
 		<tr>
 			<th>Nome dipendente</th>
 		%{
-			for (dayOfMonth in reperibilityMonth.columnKeySet()) {
-				
+			for (dayOfMonth in reperibilityMonth.columnKeySet()) {	
 		}%
 		
-			<th>${firstOfYear.plusDays(dayOfMonth-2).dayOfWeek().getAsText().toString().substring(0,1)} <br/> ${dayOfMonth}</th>
+			<th>${firstOfYear.plusDays(gg).dayOfWeek().getAsText().toString().substring(0,1)} <br/> ${dayOfMonth}</th>
 		
 		%{
+		gg++;
 			}
 		}%
 		
@@ -98,7 +99,7 @@
 		<td class="nome-dipendente" id="${person.surname.toString().replace(' ', '')}">${person.surname} ${person.name}
 	
 		<td> ${reperibilitySumDays.contains(person, "FR1S") ? reperibilitySumDays.get(person, "FR1S") : ''}</td>
-		<td class="red"> ${reperibilitySumDays.contains(person, "FR1S") ? reperibilitySumDays.get(person, "FR1S") : ''}</td>
+		<td class="red"> ${reperibilitySumDays.contains(person, "FS1S") ? reperibilitySumDays.get(person, "FS1S") : ''}</td>
 		<td> ${reperibilitySumDays.contains(person, "FR2S") ? reperibilitySumDays.get(person, "FR2S") : ''}</td>
 		<td class="red"> ${reperibilitySumDays.contains(person, "FS2S") ? reperibilitySumDays.get(person, "FS2S") : ''}</td>
 		%{
