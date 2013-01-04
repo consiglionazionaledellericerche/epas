@@ -58,35 +58,50 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 			if (!badgeReaderCode.isEmpty()) {
 				BadgeReader badgeReader = BadgeReader.find("byCode", badgeReaderCode).first();
 				if (badgeReader == null) {
-					throw new IllegalArgumentException(
-						String.format("Lettore con codice %s sconosciuto. Abilitare in configurazione", badgeReaderCode));
+					//throw new IllegalArgumentException(
+					//	String.format("Lettore con codice %s sconosciuto. Abilitare in configurazione", badgeReaderCode));
+					Logger.warn("Lettore di badge con codice %s non presente sul database/sconosciuto", badgeReaderCode);
 				}
 				stamping.badgeReader = badgeReader;
 			}
 			
-			
-			String stampTypeCode = jsonObject.get("causale").getAsString();
-			if (!stampTypeCode.isEmpty()) {
-				StampType stampType = StampType.find("byCode", stampTypeCode).first();
-				if (stampType == null) {
-					throw new IllegalArgumentException(
-						String.format("Causale con codice %s sconosciuta.", stampTypeCode));
-				}
-				stamping.stampType = stampType;
+			Integer inOut = jsonObject.get("operazione").getAsInt();
+			if(inOut != null){
+				stamping.inOut = inOut;
 			}
-					
-			//Eventualmente catchare l'eccezione e loggare decentemente
-			//Cercare la persona in funzione del tipo di matricolaFirma
+			
+			
+			JsonElement jsel = jsonObject.get("causale");
+			if(!jsel.isJsonNull()){
+				String stampTypeCode = jsel.getAsString();
+				if (!stampTypeCode.isEmpty()) {
+					StampType stampType = StampType.find("byCode", stampTypeCode).first();
+					if (stampType == null) {
+						throw new IllegalArgumentException(
+							String.format("Causale con codice %s sconosciuta.", stampTypeCode));
+					}
+					stamping.stampType = stampType;
+				}
+			}
+								
+			/**
+			 * Cercare la persona in funzione del tipo di matricolaFirma.
+			 * Nel campo matricolaFirma decido di riportare il valore dell'id con cui viene salvata la persona sul db invece che la 
+			 * matricola
+			 */
 			String matricolaFirma = jsonObject.get("matricolaFirma").getAsString();
-			if(matricolaFirma.startsWith("INT")){
+			Logger.debug("La matricola firma è del tipo: %s", matricolaFirma);
+			if(matricolaFirma.contains("INT")){
 				/**
 				 * in questo caso dal client arriva la timbratura con la firma specificata secondo lo schema INT123.
 				 * Si fa quindi una substring sulla matricolafirma e ciò che si ottiene è l'id di tipo long per fare la ricerca sulla
 				 * tabella persone per capire a chi è relativa quella timbratura
 				 */
-				String lessSign = matricolaFirma.substring(0,3);
+				String lessSign = matricolaFirma.substring(14,matricolaFirma.length());
 				long personId = Long.parseLong(lessSign);
+				Logger.debug("L'id recuperato è: %s", personId);
 				person = Person.findById(personId);
+				Logger.debug("l'id corrisponde a: %s %s", person.name, person.surname);
 				stamping.matricolaFirma = personId;
 			}
 			else{
@@ -103,7 +118,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 					person = Person.find("Select p from Person p where p.badgeNumber = ?", matricolaFirma).first();
 					
 				}
-				stamping.matricolaFirma = (long) firma;
+				stamping.matricolaFirma = person.id;
 			}						
 						
 			Integer anno = jsonObject.get("anno").getAsInt();
@@ -130,5 +145,12 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 			throw e;
 		}
 	}
+	
+//	public static void main(String[]args){
+//		String s = "00000000000INT123";
+//		String lessSign = s.substring(14,s.length());
+//		long personId = Long.parseLong(lessSign);
+//		System.out.println("L'id è: "+personId);
+//	}
 	
 }

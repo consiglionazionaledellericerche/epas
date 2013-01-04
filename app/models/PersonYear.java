@@ -1,5 +1,6 @@
 package models;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -12,6 +13,7 @@ import org.hibernate.envers.Audited;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 
+import play.Logger;
 import play.db.jpa.Model;
 
 /**
@@ -33,14 +35,15 @@ public class PersonYear extends Model{
 	public int year;
 	
 	@Column(name = "remaining_vacation_days")
-	public int remainingVacationDays;
+	public Integer remainingVacationDays;
 	
 	/**
 	 * Tempo in minuti residuo alla fine dell'anno
 	 */
 	@Column(name = "remaining_minutes")
-	public int remainingMinutes;
+	public Integer remainingMinutes;
 	
+
 	public PersonYear(Person person, int year){
 		this.person = person;
 		this.year = year;
@@ -74,6 +77,56 @@ public class PersonYear extends Model{
 			}
 		}
 		save();
+	}
+	
+	/**
+	 * conta quanti giorni di ferie sono rimasti da utilizzare dalle ferie dell'anno corrente
+	 */
+	public int getRemainingVacationDays(){
+		List<Absence> absList = new ArrayList<Absence>();
+		if(remainingVacationDays == null){
+			remainingVacationDays = 0;
+			LocalDate date = new LocalDate(year, 1, 1);
+			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+					person, date, date.plusYears(1)).fetch();
+			for(PersonDay pd : pdList){
+				if(pd.absences.size() > 0){
+					for(Absence abs : pd.absences){
+						if(abs.absenceType.equals("32"))
+							absList.add(abs);
+					}
+				}
+			}
+			if(person.vacationPeriod != null)
+				remainingVacationDays = person.vacationPeriod.vacationCode.vacationDays - absList.size();
+			else 
+				remainingVacationDays = 0;
+			save();
+		}
+		
+		return remainingVacationDays;
+	}
+	
+	/**
+	 * ritorna quanti minuti sono in più/in meno alla fine dell'anno
+	 */
+	public int getRemainingMinutes(){
+		if(remainingMinutes == null){
+			remainingMinutes = 0;
+			List<PersonMonth> personMonthList = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ?",
+					person, year).fetch();
+			Logger.debug("La lista dei personMonth per %s %s: %s",person.name, person.surname, personMonthList);
+			if(personMonthList != null){
+				for(PersonMonth pm : personMonthList){
+					remainingMinutes = remainingMinutes + pm.totalRemainingMinutes;
+				}
+				
+			}
+			else
+				remainingMinutes = 0;
+			save();
+		}
+		return remainingMinutes;
 	}
 	
 }
