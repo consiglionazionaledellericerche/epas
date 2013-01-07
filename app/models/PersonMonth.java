@@ -149,20 +149,37 @@ public class PersonMonth extends Model {
 	 * @return il numero di minuti di riposo compensativo utilizzati in quel mese 
 	 */
 	public int getCompensatoryRestInMinutes(){
-		if (compensatoryRestInMinutes != null) {
-			return compensatoryRestInMinutes;
-		}
 		
-		compensatoryRestInMinutes = 0;
-		LocalDate beginMonth = new LocalDate(year, month, 1);
-		List<Absence> absList = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date between ? and ? and abs.absenceType.code = ?", 
-				person, beginMonth, beginMonth.dayOfMonth().withMaximumValue(), "91").fetch();
-		compensatoryRestInMinutes = (absList.size()*person.workingTimeType.getWorkingTimeFromWorkinTimeType(1).workingTime);
-		save();
+		int compensatoryRest = getCompensatoryRest();
+		
+		Logger.debug("NUmero di giorni di riposo compensativo nel mese: %s", compensatoryRest);
+		int minutesOfCompensatoryRest = compensatoryRest * person.workingTimeType.getWorkingTimeFromWorkinTimeType(1).workingTime;
+		if(minutesOfCompensatoryRest != compensatoryRestInMinutes){
+			compensatoryRestInMinutes = minutesOfCompensatoryRest;
+			save();
+		}
 		return compensatoryRestInMinutes;
-//		return ((Long) Absence.find("Select count(abs) from Absence abs where abs.person = ? and abs.date between ? and ? and abs.absenceType.code = ?", 
-//				person, beginMonth, beginMonth.dayOfMonth().withMaximumValue(), "91").first()).intValue();
 
+	}
+	
+	/**
+	 * 
+	 * @return il numero di giorni di riposo compensativo nel mese
+	 */
+	public int getCompensatoryRest(){
+		int compensatoryRest = 0;
+		LocalDate beginMonth = new LocalDate(year, month, 1);
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+				person, beginMonth, beginMonth.dayOfMonth().withMaximumValue()).fetch();
+		for(PersonDay pd : pdList){
+			if(pd.absences.size() > 0){
+				for(Absence abs : pd.absences){
+					if(abs.absenceType.code.equals("91"))
+						compensatoryRest = compensatoryRest +1;
+				}
+			}
+		}
+		return compensatoryRest;
 	}
 
 	/**
@@ -501,8 +518,46 @@ public class PersonMonth extends Model {
 		return stampCodeList;
 	}
 	
+	/**
+	 * 
+	 * @return il numero di riposi compensativi fatti dall'inizio dell'anno a quel momento
+	 */
+	public int getCompensatoryRestInYear(){
+		LocalDate beginYear = new LocalDate(year, 1, 1);
+		LocalDate now = new LocalDate();
+		int numberOfCompensatoryRest = 0;
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+				person, beginYear, now).fetch();
+		for(PersonDay pd : pdList){
+			if(pd.absences.size() > 0){
+				for(Absence abs : pd.absences){
+					if(abs.absenceType.code.equals("91"))
+						numberOfCompensatoryRest = numberOfCompensatoryRest + 1;
+				}
+			}
+		}
+		return numberOfCompensatoryRest;
+		
+	}
 	
-	
+	/**
+	 * 
+	 * @return il numero di ore di straordinario fatte dall'inizio dell'anno
+	 */
+	public int getOvertimeHourInYear(){
+		Logger.debug("Chiamata funzione di controllo straordinari...");
+		int overtimeHour = 0;
+		List<Competence> compList = Competence.find("Select comp from Competence comp, CompetenceCode code where comp.person = ? and comp.year = ? and " +
+				"comp.competenceCode = code and code.code = ?", person, year, "S1").fetch();
+		Logger.debug("La lista degli straordinari da inizio anno : %s", compList);
+		if(compList != null){
+			for(Competence comp : compList){
+				overtimeHour = overtimeHour + comp.value;
+			}
+		}
+		Logger.debug("Il numero di ore di straordinari è: ", overtimeHour);
+		return overtimeHour;
+	}
 	
 	@Override
 	public String toString() {

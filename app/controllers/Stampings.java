@@ -21,6 +21,7 @@ import models.Person;
 import models.PersonDay;
 import models.PersonMonth;
 import models.PersonTags;
+import models.PersonYear;
 import models.StampModificationType;
 import models.StampModificationTypeValue;
 import models.StampType;
@@ -68,6 +69,11 @@ public class Stampings extends Controller {
     		show(personId);
     	}
     	
+    	int previousMonth = 0;
+    	int previousYear = 0;
+    	
+    	PersonMonth previousPersonMonth = null;
+    	
     	Logger.trace("Called show of personId=%s, year=%s, month=%s", personId, year, month);
     	long id = 1;
     	Configuration confParameters = Configuration.findById(id);
@@ -83,11 +89,31 @@ public class Stampings extends Controller {
     	if (personMonth == null) {
 			personMonth = new PersonMonth(person, year, month);
 		}
+    	
+    	Logger.debug("Controllo gli straordinari nel corso dell'anno fino ad oggi per %s %s...", person.name, person.surname);
+    	int overtimeHour = personMonth.getOvertimeHourInYear();
+    	Logger.debug("Le ore di straordinario da inizio anno sono: %s", overtimeHour);
+    	
+    	if(month == 1){    		
+    		previousMonth = 12;
+    		previousYear = year - 1;
+    		Logger.debug("Prendo il personMonth relativo al dicembre dell'anno precedente: %s %s", previousMonth, previousYear);
+    		previousPersonMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
+    			person, previousMonth, previousYear).first();
+    	}
+    	else{
+    		previousMonth = month - 1;
+    		Logger.debug("Prendo il personMonth relativo al mese precedente: %s %s", previousMonth, year);
+    		previousPersonMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?",
+    				person, previousMonth, year).first();
+    	}
+    	
+    	int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
     	int numberOfInOut = Math.min(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
     	
     	Logger.debug("Month recap of person.id %s, year=%s, month=%s", person.id, year, month);
     	    	
-        render(monthRecap, personMonth, numberOfInOut);
+        render(monthRecap, personMonth, numberOfInOut, numberOfCompensatoryRest, previousPersonMonth, overtimeHour);
     }
     
 	@Check(Security.VIEW_PERSONAL_SITUATION)
@@ -115,7 +141,10 @@ public class Stampings extends Controller {
     	if (year == 0 || month == 0) {
     		personStamping(personId);
     	}
+    	int previousMonth = 0;
+    	int previousYear = 0;
     	
+    	PersonMonth previousPersonMonth = null;
     	Logger.debug("Called personStamping of personId=%s, year=%s, month=%s", personId, year, month);
     	
     	Person person = Person.findById(personId);
@@ -138,11 +167,27 @@ public class Stampings extends Controller {
     	
     	Logger.debug("Month recap of person.id %s, year=%s, month=%s", person.id, year, month);
     	Logger.debug("PersonMonth of person.id %s, year=%s, month=%s", person.id, year, month);
+    	if(month == 1){    		
+    		previousMonth = 12;
+    		previousYear = year - 1;
+    		Logger.debug("Prendo il personMonth relativo al dicembre dell'anno precedente: %s %s", previousMonth, previousYear);
+    		previousPersonMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
+    			person, previousMonth, previousYear).first();
+    	}
+    	else{
+    		previousMonth = month - 1;
+    		Logger.debug("Prendo il personMonth relativo al mese precedente: %s %s", previousMonth, year);
+    		previousPersonMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?",
+    				person, previousMonth, year).first();
+    	}
+    	Logger.debug("Controllo gli straordinari nel corso dell'anno fino ad oggi per %s %s...", person.name, person.surname);
+    	int overtimeHour = personMonth.getOvertimeHourInYear();
+    	Logger.debug("Le ore di straordinario da inizio anno sono: %s", overtimeHour);
     	
-    	
+    	int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
     	int numberOfInOut = Math.min(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
     	    	
-        render(monthRecap, personMonth, numberOfInOut);
+        render(monthRecap, personMonth, numberOfInOut, previousPersonMonth, numberOfCompensatoryRest, overtimeHour);
     	
     }
 

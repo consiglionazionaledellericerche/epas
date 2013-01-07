@@ -248,6 +248,7 @@ public class FromMysqlToPostgres {
 			person.bornDate = rs.getDate("DataNascita");
 			person.number = rs.getInt("Matricola");
 			person.badgeNumber = rs.getString("Matricolabadge");
+			person.oldId = rs.getLong("ID");
 			Long qualifica = rs.getLong("Qualifica");
 			person.qualification = qualifica != null && qualifica != 0 ? JPA.em().getReference(Qualification.class, qualifica) : null;
 			person.save();
@@ -1245,23 +1246,23 @@ public class FromMysqlToPostgres {
 		code.codeToPresence = "S1";
 		code.inactive = false;
 		code.save();
-		for(Person p : personList){
+		for(Person pers : personList){
 			
-			PreparedStatement stmt = mysqlCon.prepareStatement("Select totali_mens.ore_str, totali_mens.mese, totali_mens.anno " +
-					"from totali_mens, Persone where Persone.Id = totali_mens.id and totali_mens.anno = ? and Persone.Nome = ?" +
-					" and Persone.Cognome = ?");
+			PreparedStatement stmt = mysqlCon.prepareStatement("Select ore_str, mese, anno " +
+					"from totali_mens, Persone where Persone.ID = totali_mens.ID and totali_mens.anno > ? and Persone.ID = ?");
 			stmt.setLong(1, 2011);
-			stmt.setString(2, p.name);
-			stmt.setString(3, p.surname);
+			stmt.setLong(2, pers.oldId);
+			
 			ResultSet rs = stmt.executeQuery();
 			
 			while(rs.next()){
 				
 				Competence comp = new Competence();
 				comp.competenceCode = code;
-				comp.person = p;
-				comp.year = 2012;
+				comp.person = pers;
+				comp.year = rs.getInt("anno");
 				comp.month = rs.getInt("mese");
+				
 				comp.value = rs.getInt("ore_str");
 				comp.save();
 			}

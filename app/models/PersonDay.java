@@ -432,7 +432,7 @@ public class PersonDay extends Model {
 			progressive = difference + lastPreviousPersonDayInMonth.progressive;
 			Logger.debug("%s - %s. Il PersonDay precedente è %s. Difference di oggi = %s, progressive = %s", person, date, lastPreviousPersonDayInMonth, difference, progressive);
 		}
-		save();
+		this.save();
 		
 		if(this.date.dayOfMonth().equals(date.dayOfMonth().withMaximumValue())){
 			PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
