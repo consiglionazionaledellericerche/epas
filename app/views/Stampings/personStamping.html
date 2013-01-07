@@ -158,12 +158,14 @@
 
 </table>
 
+<p>Il numero di riposi compensativi usati da inizio anno a oggi è: <strong>${numberOfCompensatoryRest}</strong></p>
+<p>Il numero di ore di straordinario da inizio anno è: <strong>${overtimeHour}</strong></p>
 <p id="spiegazioneTabellaTimbrature">Il numero di buoni mensa usabili per questo mese e': <strong>${personMonth.numberOfMealTicketToUse()}</strong>, mentre quelli da restituire sono <strong>${personMonth.numberOfMealTicketToRender()}</strong>. Il numero di giorni lavorativi in sede è di: <strong>${personMonth.basedWorkingDays()}</strong> </p>
 
 <p>Riepilogo delle ore di lavoro in eccesso/difetto:</p> 
-<p> - Residuo tempo di lavoro dei mesi precedenti: ${personMonth.getMonthResidual().toHourTime()}</p> 
+<p> - Residuo tempo di lavoro dei mesi precedenti: ${previousPersonMonth.totalRemainingMinutes.toHourTime()}</p> 
 <p> - Residuo del mese:  ${personMonth.getMonthResidual().toHourTime()}</p>
-<p> - Minuti di riposo compensativo: ${personMonth.getCompensatoryRestInMinutes()} per un totale di: -${(personMonth.getCompensatoryRestInMinutes()).toHourTime()} ore</p>
+<p> - Giorni di riposo compensativo: ${personMonth.getCompensatoryRest()} per un totale di: -${(personMonth.getCompensatoryRestInMinutes()).toHourTime()} ore</p>
 <p> - Totale residuo a fine mese  <strong>${personMonth.getTotalOfMonth().toHourTime()} ore</strong></p>
 
 <div>

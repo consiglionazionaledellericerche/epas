@@ -113,6 +113,11 @@ public class Person extends Model {
 	public String badgeNumber;
 	
 	/**
+	 * id che questa persona aveva nel vecchio database
+	 */
+	public Long oldId;
+	
+	/**
 	 * relazione con la tabella delle assenze iniziali
 	 */
 	@OneToMany(mappedBy="person", fetch = FetchType.LAZY)
@@ -462,6 +467,10 @@ public class Person extends Model {
 			return false;
 		long id = stamping.matricolaFirma;
 		Person person = Person.findById(id);
+		if(person == null){
+			Logger.debug("Non ho trovato la persona con la query tramite id, adesso la cerco tramite l'oldId che aveva nel vecchio db");
+			person = Person.find("Select p from Person p where p.oldId = ?", id).first();
+		}
 		Logger.debug("Sto per segnare la timbratura di %s %s", person.name, person.surname);
 		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", 
 				person, stamping.dateTime.toLocalDate() ).first();

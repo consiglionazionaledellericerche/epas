@@ -104,36 +104,20 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 				 * Si fa quindi una substring sulla matricolafirma e ciò che si ottiene è l'id di tipo long per fare la ricerca sulla
 				 * tabella persone per capire a chi è relativa quella timbratura...
 				 * 
-				 * TODO: il problema è che quell'id è relativo al db vecchio quindi nel nuovo non ci trovo una cippa con quell'id.
-				 * Ecco perchè dà errore!!! Provare con una connessione al db mysql per recuperare nome e cognome della persona e, tramite
-				 * quelli, provare a risalire all'id che quella persona ha sul nuovo database?
+				 * ho aggiunto il campo oldId alla tabella Person e con quello farò la query per recuperare la persona 
 				 */
 				String lessSign = matricolaFirma.substring(14,matricolaFirma.length());
 				Logger.debug("L'id recuperato è: %s", lessSign);
 				long personId = Long.parseLong(lessSign);
 				
-				person = Person.findById(personId);
-				if(person == null){
-					/**
-					 * si può fare qui la connessione al db mysql per recuperare nome e cognome... 
-					 */
-					Connection mysqlCon = FromMysqlToPostgres.getMysqlConnection();
-					PreparedStatement stmt = mysqlCon.prepareStatement("Select Nome,Cognome from Persone where ID = " +personId);
-					ResultSet rs = stmt.executeQuery();
-					rs.first();
-					String nome = rs.getString("Nome");
-					String cognome = rs.getString("Cognome");
-					/**
-					 * si prova a cercare la persona sul nostro nuovo db tramite nome e cognome (speriamo non ci siano casi di omonimia...)
-					 */
-					Person p = Person.find("Select p from Person p where p.name = ? and p.surname = ?", nome, cognome).first();
-					if(p != null)
-						stamping.matricolaFirma = p.id;
-					else
-						throw new IllegalArgumentException(String.format("La persona non è stata trovata tramite i parametri %s %s", nome, cognome));
-				}
-				Logger.debug("l'id corrisponde a: %s %s", person.name, person.surname);
-				stamping.matricolaFirma = personId;
+				//person = Person.findById(personId);
+				//if(person == null){
+				person = Person.find("Select p from Person p where p.oldId = ?", personId).first();
+				Logger.debug("La persona è: %s %s", person.name, person.surname);
+					
+				//}
+				
+				stamping.matricolaFirma = person.oldId;
 			}
 			else{
 				/**
