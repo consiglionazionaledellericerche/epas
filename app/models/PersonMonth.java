@@ -136,8 +136,11 @@ public class PersonMonth extends Model {
 		}
 		else{
 			LocalDate hotDate = new LocalDate(year,month,1).dayOfMonth().withMaximumValue();
-			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, hotDate).first();
+			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date <= ? and pd.date > ?" +
+					" order by pd.date", person, hotDate, hotDate.dayOfMonth().withMinimumValue()).first();
+			
 			residual = pd.progressive;
+			
 		}
 		return residual;
 	}

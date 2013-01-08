@@ -49,6 +49,7 @@ import models.enumerate.StampTypeValues;
 import models.enumerate.WorkingTimeTypeValues;
 
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
+import org.hibernate.envers.reader.FirstLevelCache;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
@@ -1247,28 +1248,29 @@ public class FromMysqlToPostgres {
 		code.inactive = false;
 		code.save();
 		for(Person pers : personList){
-			
-			PreparedStatement stmt = mysqlCon.prepareStatement("Select ore_str, mese, anno " +
-					"from totali_mens, Persone where Persone.ID = totali_mens.ID and totali_mens.anno > ? and Persone.ID = ?");
-			stmt.setLong(1, 2011);
-			stmt.setLong(2, pers.oldId);
-			
-			ResultSet rs = stmt.executeQuery();
-			
-			while(rs.next()){
+			if(pers.oldId != null){
+				PreparedStatement stmt = mysqlCon.prepareStatement("Select ore_str, mese, anno " +
+						"from totali_mens, Persone where Persone.ID = totali_mens.ID and totali_mens.anno > ? and Persone.ID = ?");
+				stmt.setLong(1, 2011);
+				stmt.setLong(2, pers.oldId);
 				
-				Competence comp = new Competence();
-				comp.competenceCode = code;
-				comp.person = pers;
-				comp.year = rs.getInt("anno");
-				comp.month = rs.getInt("mese");
+				ResultSet rs = stmt.executeQuery();
 				
-				comp.value = rs.getInt("ore_str");
-				comp.save();
+				while(rs.next()){
+					
+					Competence comp = new Competence();
+					comp.competenceCode = code;
+					comp.person = pers;
+					comp.year = rs.getInt("anno");
+					comp.month = rs.getInt("mese");
+					
+					comp.value = rs.getInt("ore_str");
+					comp.save();
+				}
 			}
+			
 		}		
 		
 	}
-
 }
 
