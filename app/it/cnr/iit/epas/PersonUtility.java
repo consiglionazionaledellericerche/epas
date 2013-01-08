@@ -32,7 +32,13 @@ public class PersonUtility {
 			else{
 				PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?",
 						person, date.getMonthOfYear(), date.getYear()).first();
-				residual = pm.totalRemainingMinutes;
+				if(pm != null)
+					residual = pm.totalRemainingMinutes;
+				else
+					/**
+					 * TODO: controllare se questa dicitura è corretta...
+					 */
+					residual = 0;
 			}
 				
 		}
