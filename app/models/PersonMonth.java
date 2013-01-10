@@ -94,7 +94,7 @@ public class PersonMonth extends Model {
 
 	@Transient
 	public List<PersonDay> days = null;
-	
+
 	@Transient
 	private Map<AbsenceType, Integer> absenceCodeMap;
 
@@ -137,10 +137,10 @@ public class PersonMonth extends Model {
 		else{
 			LocalDate hotDate = new LocalDate(year,month,1).dayOfMonth().withMaximumValue();
 			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date <= ? and pd.date > ?" +
-					" order by pd.date", person, hotDate, hotDate.dayOfMonth().withMinimumValue()).first();
-			
+					" order by pd.date desc", person, hotDate, hotDate.dayOfMonth().withMinimumValue()).first();
+
 			residual = pd.progressive;
-			
+
 		}
 		return residual;
 	}
@@ -152,9 +152,9 @@ public class PersonMonth extends Model {
 	 * @return il numero di minuti di riposo compensativo utilizzati in quel mese 
 	 */
 	public int getCompensatoryRestInMinutes(){
-		
+
 		int compensatoryRest = getCompensatoryRest();
-		
+
 		Logger.debug("NUmero di giorni di riposo compensativo nel mese: %s", compensatoryRest);
 		int minutesOfCompensatoryRest = compensatoryRest * person.workingTimeType.getWorkingTimeFromWorkinTimeType(1).workingTime;
 		if(minutesOfCompensatoryRest != compensatoryRestInMinutes){
@@ -164,7 +164,7 @@ public class PersonMonth extends Model {
 		return compensatoryRestInMinutes;
 
 	}
-	
+
 	/**
 	 * 
 	 * @return il numero di giorni di riposo compensativo nel mese
@@ -279,16 +279,16 @@ public class PersonMonth extends Model {
 	public void refreshPersonMonth(){
 
 		Configuration config = Configuration.getCurrentConfiguration();
-		
+
 		LocalDate date = new LocalDate(year, month, 1);
 		PersonDay lastPersonDayOfMonth = 
-				PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date BETWEEN ? AND ? ORDER BY pd.date DESC",
+				PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date <= ? and pd.date > ? ORDER BY pd.date DESC",
 						person, date.dayOfMonth().withMinimumValue(), date.dayOfMonth().withMaximumValue()).first();
 
 		Logger.trace("%s, lastPersonDayOfMonth = %s", toString(), lastPersonDayOfMonth);
-		
-		progressiveAtEndOfMonthInMinutes = lastPersonDayOfMonth.progressive;  
-
+		if(lastPersonDayOfMonth != null)
+			progressiveAtEndOfMonthInMinutes = lastPersonDayOfMonth.progressive;  
+		this.merge();
 		LocalDate startOfMonth = new LocalDate(year, month, 1);
 
 		List<Absence> compensatoryRestAbsences = JPA.em().createQuery(
@@ -322,17 +322,17 @@ public class PersonMonth extends Model {
 				compensatoryRestInMinutes += absence.absenceType.justifiedTimeAtWork.minutesJustified; 
 			}
 		}
-		
+
 		Logger.trace("%s compensatoryRestInMinutes = %s", toString(), compensatoryRestInMinutes);
-		
+
 		//TODO: aggiungere eventuali riposi compensativi derivanti da inizializzazioni 
-		InitializationAbsence initAbsence = new InitializationAbsence();
-		int recoveryDays = initAbsence.recoveryDays;
+		//InitializationAbsence initAbsence = new InitializationAbsence();
+		//int recoveryDays = initAbsence.recoveryDays;
 
 
 		PersonMonth previousPersonMonth = PersonMonth.find("byPersonAndYearAndMonth", person, startOfMonth.minusMonths(1).getYear(), startOfMonth.minusMonths(1).getMonthOfYear()).first();
 		Logger.trace("%s, previousPersonMonth = %s", toString(), previousPersonMonth);
-		
+
 		int totalRemainingMinutesPreviousMonth = previousPersonMonth == null ? 0 : previousPersonMonth.totalRemainingMinutes;
 
 		if (person.qualification.qualification <= 3) {
@@ -350,9 +350,9 @@ public class PersonMonth extends Model {
 		else{
 			PersonYear py = PersonYear.find("byPersonAndYear", person, year-1).first();
 			//Se personYyear anno precedente non devo fare niente e totalRemainingMinutePastYearTaken = 0
-			
+
 			totalRemainingMinutes = progressiveAtEndOfMonthInMinutes + totalRemainingMinutesPreviousMonth - compensatoryRestInMinutes;
-			
+
 			/**
 			 * TODO: c'è il caso di persone che hanno terminato il rapporto di lavoro in una certa data e che ritornano a lavoro a causa del 
 			 * badge ancora attivo in date successive alla fine del rapporto di lavoro (vedi Fabrizio Leonardi che va in pensione il 31/12/2010
@@ -362,7 +362,7 @@ public class PersonMonth extends Model {
 			if (py != null) {
 				if(month < config.monthExpireRecoveryDaysFourNine){
 					int totalRemainingMinutePastYearTaken = 0;
-					
+
 					for(int i = 1; i < month; i++){
 						PersonMonth pm = PersonMonth.find("byPersonAndYearAndMonth", person, year, i).first();
 						totalRemainingMinutePastYearTaken += pm.remainingMinutesPastYearTaken;						
@@ -373,17 +373,17 @@ public class PersonMonth extends Model {
 					}
 					else
 						remainingMinutesResidualLastYear = 0;
-					
+
 					if (remainingMinutesResidualLastYear < 0) {
 						throw new IllegalStateException(
-							String.format("Il valore dei minuti residui dell'anno precedente per %s nel mese %s %s e' %s. " +
-								"Non ci dovrebbero essere valori negativi per le ore residue dell'anno precedente", person, year, month, remainingMinutesResidualLastYear));
+								String.format("Il valore dei minuti residui dell'anno precedente per %s nel mese %s %s e' %s. " +
+										"Non ci dovrebbero essere valori negativi per le ore residue dell'anno precedente", person, year, month, remainingMinutesResidualLastYear));
 					}
-					
+
 					if (compensatoryRestInMinutes > 0 && remainingMinutesResidualLastYear > 0) {
 						remainingMinutesPastYearTaken = Math.min(compensatoryRestInMinutes, remainingMinutesResidualLastYear);
 					}
-					
+
 					//Se non sono nell'ultimo mese in cui sono valide le ore residue dell'anno passato allora mi porto dietro
 					// le ore residue che non ho ancora preso
 					if (month < (config.monthExpireRecoveryDaysFourNine - 1)) {
@@ -392,11 +392,12 @@ public class PersonMonth extends Model {
 
 				}
 			}
+			this.save();
 		}
-		
-		save();
+
+		this.save();
 	}
-	
+
 	/**
 	 * 
 	 * @return il numero di buoni pasto usabili per quel mese
@@ -448,7 +449,7 @@ public class PersonMonth extends Model {
 		}
 		return basedDays;
 	}
-	
+
 	/**
 	 * 
 	 * @param days lista di PersonDay
@@ -502,10 +503,10 @@ public class PersonMonth extends Model {
 		}
 		List<StampModificationType> stampCodeList = new ArrayList<StampModificationType>();
 		for(PersonDay pd : days){
-			
+
 			StampModificationType smt = pd.checkTimeForLunch();
 			Logger.debug("Lo stamp modification type è: %s", smt);
-			
+
 			if(smt != null && !stampCodeList.contains(smt)){
 				Logger.debug("Aggiunto %s alla lista", smt.description);
 				stampCodeList.add(smt);
@@ -520,7 +521,7 @@ public class PersonMonth extends Model {
 		Logger.debug("La lista degli stamping code per questo mese contiene: %s", stampingCodeList);
 		return stampCodeList;
 	}
-	
+
 	/**
 	 * 
 	 * @return il numero di riposi compensativi fatti dall'inizio dell'anno a quel momento
@@ -540,9 +541,9 @@ public class PersonMonth extends Model {
 			}
 		}
 		return numberOfCompensatoryRest;
-		
+
 	}
-	
+
 	/**
 	 * 
 	 * @return il numero di ore di straordinario fatte dall'inizio dell'anno
@@ -561,11 +562,41 @@ public class PersonMonth extends Model {
 		Logger.debug("Il numero di ore di straordinari è: ", overtimeHour);
 		return overtimeHour;
 	}
-	
+
 	@Override
 	public String toString() {
 		return String.format("PersonMonth[%d] - person.id = %d, year = %s, month = %d, totalRemainingMinutes = %d, " +
-			"progressiveAtEndOfMonthInMinutes = %d, compensatoryRestInMinutes = %d, remainingMinutesPastYearTakes = %d",
-			id, person.id, year, month, totalRemainingMinutes, progressiveAtEndOfMonthInMinutes, compensatoryRestInMinutes, remainingMinutesPastYearTaken);
+				"progressiveAtEndOfMonthInMinutes = %d, compensatoryRestInMinutes = %d, remainingMinutesPastYearTakes = %d",
+				id, person.id, year, month, totalRemainingMinutes, progressiveAtEndOfMonthInMinutes, compensatoryRestInMinutes, remainingMinutesPastYearTaken);
 	}
+
+	public static PersonMonth build(Person person, int year, int month){
+
+		PersonMonth pm = new PersonMonth(person, month, year);
+		pm.create();
+		LocalDate date = new LocalDate(year, month, 1);
+		//			Contract con = person.getContract(date.dayOfMonth().withMaximumValue());
+		//			Contract otherContract = Contract.find("Select con from Contract con where con.person = ? and con.beginContract <= ? and " +
+		//					"con.expireContract < ? and con.expireContract > ?",person, date, date.dayOfMonth().withMaximumValue(), date).first();
+		//			if(otherContract == null){
+		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date desc ", 
+				person, date, date.dayOfMonth().withMaximumValue()).first();
+		pm.progressiveAtEndOfMonthInMinutes = pd.progressive;
+		pm.compensatoryRestInMinutes =  pm.getCompensatoryRestInMinutes();
+		pm.totalRemainingMinutes = pm.getTotalOfMonth();
+		pm.save();
+		//			}
+		//			else{
+		//				int progressiveMiniContract = 0;
+		//				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?",
+		//						person, con.beginContract, date.dayOfMonth().withMaximumValue()).fetch();
+		//				for(PersonDay pd : pdList){
+		//					progressiveMiniContract = progressiveMiniContract + pd.progressive;
+		//				}
+		//			}
+		//			
+		return pm;
+	}
+
+
 }

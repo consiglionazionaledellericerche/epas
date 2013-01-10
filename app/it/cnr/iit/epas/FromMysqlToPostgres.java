@@ -50,8 +50,10 @@ import models.enumerate.WorkingTimeTypeValues;
 
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 import org.hibernate.envers.reader.FirstLevelCache;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.joda.time.YearMonth;
 
 import play.Logger;
 import play.Play;
@@ -64,6 +66,7 @@ import com.google.common.collect.Maps;
 
 public class FromMysqlToPostgres {
 
+		
 	public static Map<Integer,CompetenceCode> mappaCodiciCompetence = new HashMap<Integer,CompetenceCode>();
 	public static Map<String,AbsenceTypeGroup> mappaCodiciAbsenceTypeGroup = new HashMap<String,AbsenceTypeGroup>();
 	public static Map<Integer,VacationCode> mappaCodiciVacationType = new HashMap<Integer,VacationCode>();
@@ -699,26 +702,7 @@ public class FromMysqlToPostgres {
 			}
 			newData = new LocalDate(rs.getDate("Giorno"));
 
-			//Le persone che non hanno qualifica non hanno i PersonMonth da gestire
-			if (person.qualification != null && currentMonth != 0 && currentMonth != newData.getMonthOfYear()) {
-				/* se sto cambiando mese della timbratura allora salvo il PersonMonth con i dati riepilogativi 
-				 */		
-				PersonMonth pm = new PersonMonth(person, currentYear, currentMonth);
-				pm.create();
-				Logger.info("Creato %s", pm);
-				pm.refreshPersonMonth();
-			}
-			
-			//Le persone che non hanno qualifica non hanno i PersonYear da gestire
-			if (person.qualification != null && currentYear != 0 && currentYear != newData.getYear()) {
-				PersonYear py = new PersonYear(person, currentYear);
-				py.refreshPersonYear();
-				Logger.info("Creato %s", py);
-			}
-
-			currentMonth = newData.getMonthOfYear();
-			currentYear = newData.getYear();
-			
+						
 			if(data != null) {
 				if(newData.isAfter(data)){		
 
@@ -740,6 +724,29 @@ public class FromMysqlToPostgres {
 					else{
 						createAbsence(pd, rs.getString("Codice"));
 					}
+					
+					//Le persone che non hanno qualifica non hanno i PersonMonth da gestire
+//					if (person.qualification != null && currentMonth != 0 && currentMonth != newData.getMonthOfYear()) {
+//						/* se sto cambiando mese della timbratura allora salvo il PersonMonth con i dati riepilogativi 
+//						 */		
+//						PersonMonth pm = new PersonMonth(person, currentYear, currentMonth);
+//						pm.create();
+//						pm.refreshPersonMonth();
+//						pm.save();
+//						Logger.info("Creato %s per %s %s dell'anno %s e del mese %s", pm, person.name, person.surname, pm.year, pm.month);
+//						
+//					}
+//					
+//					//Le persone che non hanno qualifica non hanno i PersonYear da gestire
+//					if (person.qualification != null && currentYear != 0 && currentYear != newData.getYear()) {
+//						PersonYear py = new PersonYear(person, currentYear);
+//						py.refreshPersonYear();
+//						py.save();
+//						Logger.info("Creato %s per %s %s dell'anno %s", py, person.name, person.surname, py.year);
+//					}
+//
+//					currentMonth = newData.getMonthOfYear();
+//					currentYear = newData.getYear();
 
 				}
 				if(newData.isEqual(data)){					
@@ -1099,6 +1106,55 @@ public class FromMysqlToPostgres {
 		}
 
 	}
+	
+	public static void createPersonMonthAndYear(Person person){
+
+		List<YearMonth> yearMonthList = JPA.em().createNativeQuery("select distinct (extract(year from date)," +
+				" extract(month from date))from person_days where person_id = :personId", YearMonth.class)
+		.setParameter("personId", person.id).getResultList(); 
+		
+		for(YearMonth ym : yearMonthList){
+			PersonMonth pm = PersonMonth.build(person, ym.YEAR, ym.MONTH_OF_YEAR);
+			pm.save();
+		}
+		
+		
+//		
+//		if(this.date.getMonthOfYear() == DateTimeConstants.DECEMBER && this.date.getDayOfMonth() == 31){
+//			PersonYear py = PersonYear.find("Select py from PersonYear py where py.person = ? and py.year = ?", person, this.date.getYear()).first();
+//			if(py == null){
+//				int vacationDayActualYear = 0;
+//				py = new PersonYear(person, this.date.getYear());
+//				py.remainingMinutes = py.getRemainingMinutes();
+//				VacationCode code = VacationCode.find("Select code from VacationCode code, VacationPeriod per where per.vacationCode = code " +
+//						"and vacationPeriod.person = ?", person).first();
+//				if(code != null){
+//					int vacationDays = code.vacationDays;
+//					List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+//							person, new LocalDate(date.getYear(), 1, 1), new LocalDate(date.getYear(), 12, 31)).fetch();
+//					for(PersonDay pd : pdList){
+//						if(pd.absences.size() > 0){
+//							for(Absence abs : pd.absences){
+//								if(abs.absenceType.code.equals("32"))
+//									vacationDayActualYear = vacationDayActualYear +1;
+//							}
+//						}
+//					}
+//					py.remainingVacationDays = vacationDays - vacationDayActualYear;
+//				}
+//				
+//				py.save();						
+//			}
+//			else{
+//				if(py.remainingMinutes == null)
+//					py.remainingMinutes = py.getRemainingMinutes();
+//				if(py.remainingVacationDays == null)
+//					py.remainingVacationDays = py.getRemainingVacationDays();
+//				py.merge();
+//			}
+//		}
+	}
+	
 	private static void setDateTimeToStamping(Stamping stamping, LocalDate date, String time){
 
 		if(time.startsWith("-")){
