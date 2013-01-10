@@ -412,10 +412,10 @@ public class PersonDay extends Model {
 	 * calcola il valore del progressivo giornaliero e lo salva sul db
 	 */
 	private void updateProgressive(){
-	
-		Contract con = person.getContract(date.dayOfMonth().withMaximumValue());
-		if((date.isAfter(con.beginContract) && date.isBefore(con.expireContract)) || 
-				(date.isAfter(con.beginContract) && con.expireContract == null)){
+
+		Contract con = person.getContract(date);
+		if(con.beginContract == null || 
+				(date.isAfter(con.beginContract) && (con.expireContract == null || date.isBefore(con.expireContract)))) {
 			PersonDay lastPreviousPersonDayInMonth = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? " +
 					"and pd.date >= ? and pd.date < ? ORDER by pd.date DESC", person, date.dayOfMonth().withMinimumValue(), date).first();
 			if (lastPreviousPersonDayInMonth == null) {
@@ -428,22 +428,29 @@ public class PersonDay extends Model {
 			}
 			this.save();
 		}
-		
+
 	}
 
 	/**
 	 * chiama le funzioni di popolamento
 	 */
 	public void populatePersonDay(){
-		updateTimeAtWork();
-		merge();
-		updateDifference();
-		merge();
+		Contract con = person.getContract(date);
+		//Se la persona non ha un contratto attivo non si fanno calcoli per quel giorno
+		//Le timbrature vengono comunque mantenute
+		if (con != null) {
+			updateTimeAtWork();
+			merge();
+			updateDifference();
+			merge();
 
-		updateProgressive();	
-		merge();
-		setTicketAvailable();
-		merge();
+			updateProgressive();	
+			merge();
+			setTicketAvailable();
+			merge();
+		} else {
+			Logger.info("I calcoli sul giorno %s non vengono effettuati perché %s non ha un contratto attivo in questa data", date, person);
+		}
 	}
 
 

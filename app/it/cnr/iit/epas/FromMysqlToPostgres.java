@@ -201,6 +201,8 @@ public class FromMysqlToPostgres {
 
 			FromMysqlToPostgres.createStampings(oldIDPersona, person, anno);
 
+			createPersonMonthAndYear(person);
+			
 			Logger.info("Terminata la creazione delle info della persona %s %s", rs.getString("Nome"), rs.getString("Cognome"));
 
 			JPAPlugin.closeTx(false);
@@ -209,10 +211,18 @@ public class FromMysqlToPostgres {
 					((new Date()).getTime() - personStart.getTime()) / 1000,
 					rs.getString("Nome"), rs.getString("Cognome"));
 		}
-		
+
 		Logger.info("Terminata l'importazione dei dati di tutte le persone in %d secondi", ((new Date()).getTime() - start.getTime()) / 1000);
 
 		mysqlCon.close();
+		
+		Logger.info("Adesso creo le competenze, il monte ore ed aggiusto i permessi");
+		
+		updateCompetence();
+		importOreStraordinario();
+		addPermissiontoAll();
+		
+		Logger.info("Importazione terminata");
 	}
 
 	/**

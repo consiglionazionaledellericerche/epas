@@ -335,7 +335,7 @@ public class Person extends Model {
 	 */
 	public Contract getContract(LocalDate date){
 			
-		Contract contract = Contract.find("Select con from Contract con where con.person = ? and con.beginContract <= ? and " +
+		Contract contract = Contract.find("Select con from Contract con where con.person = ? and (con.beginContract IS NULL or con.beginContract <= ?) and " +
 				"(con.expireContract > ? or con.expireContract is null )",this, date, date).first();
 		
 		return contract;
