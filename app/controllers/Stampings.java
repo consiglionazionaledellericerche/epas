@@ -59,10 +59,7 @@ public class Stampings extends Controller {
      */
 	@Check(Security.VIEW_PERSONAL_SITUATION)
     public static void show(Long personId, int year, int month){
-    	    	
-		if(personId == 1){
-			personStamping();
-		}
+
     	if (personId == null) {
     	
     		show();
@@ -82,7 +79,7 @@ public class Stampings extends Controller {
     	Configuration confParameters = Configuration.findById(id);
     	Person person = Person.findById(personId);
     	
-    	//TODO: Se il mese è gestito vecchio... usare il monthRecap, altrimenti utilizzare il personMonth
+    	
     	MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, year, month);
     	PersonMonth personMonth =
     			PersonMonth.find(
@@ -157,7 +154,7 @@ public class Stampings extends Controller {
     	 */
     	long id = 1;
     	Configuration confParameters = Configuration.findById(id);
-    	//TODO: Se il mese è gestito vecchio... usare il monthRecap, altrimenti utilizzare il personMonth
+    	
     	MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, year, month);
     	PersonMonth personMonth =
     			PersonMonth.find(
@@ -166,6 +163,8 @@ public class Stampings extends Controller {
     	
     	if (personMonth == null) {
 			personMonth = new PersonMonth(person, year, month);
+			personMonth.create();
+			
 		}
     	
     	Logger.debug("Month recap of person.id %s, year=%s, month=%s", person.id, year, month);
