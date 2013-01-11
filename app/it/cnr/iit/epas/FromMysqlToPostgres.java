@@ -66,6 +66,16 @@ import com.google.common.collect.Maps;
 
 public class FromMysqlToPostgres {
 
+	
+//	private final class YearMonth {
+//		private int year;
+//		private int month;
+//		
+//		private YearMonth(int year, int month){
+//			this.year = year;
+//			this.month = month;
+//		}
+//	}
 		
 	public static Map<Integer,CompetenceCode> mappaCodiciCompetence = new HashMap<Integer,CompetenceCode>();
 	public static Map<String,AbsenceTypeGroup> mappaCodiciAbsenceTypeGroup = new HashMap<String,AbsenceTypeGroup>();
@@ -1116,53 +1126,29 @@ public class FromMysqlToPostgres {
 		}
 
 	}
+
 	
 	public static void createPersonMonthAndYear(Person person){
 
-		List<YearMonth> yearMonthList = JPA.em().createNativeQuery("select distinct (extract(year from date)," +
-				" extract(month from date))from person_days where person_id = :personId", YearMonth.class)
-		.setParameter("personId", person.id).getResultList(); 
+		JPAPlugin.startTx(false);
+		Logger.debug("Inizio a creare i personMonth e personYear per %s %s", person.name, person.surname);
+		List<LocalDate> yearMonthList = PersonDay.find("Select distinct pd.date from PersonDay pd where pd.person = ?", person).fetch();
+//		List<YearMonth> yearMonthList = JPA.em().createNativeQuery("select distinct extract(year from date)," +
+//				" extract(month from date) from person_days where person_id = :personId group by extract(year from date), extract(month from date)" +
+//				"", YearMonth.class)
+//		.setParameter("personId", person.id).getResultList(); 
 		
-		for(YearMonth ym : yearMonthList){
-			PersonMonth pm = PersonMonth.build(person, ym.YEAR, ym.MONTH_OF_YEAR);
+		for(LocalDate ym : yearMonthList){
+			PersonMonth pm = PersonMonth.build(person, ym.getYear(), ym.getMonthOfYear());
 			pm.save();
+			if(ym.getMonthOfYear() == 12){
+				PersonYear py = PersonYear.build(person, ym.getYear());
+				py.save();
+			}
+				
 		}
-		
-		
-//		
-//		if(this.date.getMonthOfYear() == DateTimeConstants.DECEMBER && this.date.getDayOfMonth() == 31){
-//			PersonYear py = PersonYear.find("Select py from PersonYear py where py.person = ? and py.year = ?", person, this.date.getYear()).first();
-//			if(py == null){
-//				int vacationDayActualYear = 0;
-//				py = new PersonYear(person, this.date.getYear());
-//				py.remainingMinutes = py.getRemainingMinutes();
-//				VacationCode code = VacationCode.find("Select code from VacationCode code, VacationPeriod per where per.vacationCode = code " +
-//						"and vacationPeriod.person = ?", person).first();
-//				if(code != null){
-//					int vacationDays = code.vacationDays;
-//					List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-//							person, new LocalDate(date.getYear(), 1, 1), new LocalDate(date.getYear(), 12, 31)).fetch();
-//					for(PersonDay pd : pdList){
-//						if(pd.absences.size() > 0){
-//							for(Absence abs : pd.absences){
-//								if(abs.absenceType.code.equals("32"))
-//									vacationDayActualYear = vacationDayActualYear +1;
-//							}
-//						}
-//					}
-//					py.remainingVacationDays = vacationDays - vacationDayActualYear;
-//				}
-//				
-//				py.save();						
-//			}
-//			else{
-//				if(py.remainingMinutes == null)
-//					py.remainingMinutes = py.getRemainingMinutes();
-//				if(py.remainingVacationDays == null)
-//					py.remainingVacationDays = py.getRemainingVacationDays();
-//				py.merge();
-//			}
-//		}
+		JPAPlugin.closeTx(false);
+		Logger.debug("Terminata la creazione dei personMonth e personYear per %s %s", person.name, person.surname);
 	}
 	
 	private static void setDateTimeToStamping(Stamping stamping, LocalDate date, String time){

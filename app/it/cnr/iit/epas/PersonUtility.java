@@ -24,6 +24,7 @@ public class PersonUtility {
 	 * 
 	 */
 	public static int getResidual(Person person, LocalDate date){
+		
 		int residual = 0;
 		if(person.qualification.qualification == 1 || person.qualification.qualification == 2 || person.qualification.qualification == 3){
 			if(person.getCurrentContract().beginContract != null && person.getCurrentContract().beginContract.isAfter(date)){

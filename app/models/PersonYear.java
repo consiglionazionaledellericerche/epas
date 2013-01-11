@@ -136,8 +136,8 @@ public class PersonYear extends Model{
 		LocalDate date = new LocalDate(year, 1, 1);
 		Contract contract = person.getContract(new LocalDate(date.monthOfYear().withMaximumValue().dayOfYear().withMaximumValue()));
 		int vacationDaysActualYear = 0;
-		PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? order by pm.month desc ", 
-				person, year).first();
+		PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? " +
+				"order by pm.month desc ", person, year).first();
 		py.remainingMinutes = pm.totalRemainingMinutes;
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? " +
 				"and pd.date > ? and pd.date < ?",
