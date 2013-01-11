@@ -1,0 +1,10 @@
+ShiftType(A):
+    type: A
+    description: turno di tipo A
+    personShift: [vannozzi, groppioni, mariani]
+    
+ShiftType(B):
+    Type: B
+    description: turno di tipo B
+    personShift: [pancrazi, serrecchia, mariani]
+    

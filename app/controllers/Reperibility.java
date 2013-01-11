@@ -21,6 +21,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 
 import models.Absence;
+import models.CompetenceCode;
 import models.Person;
 import models.PersonDay;
 import models.PersonReperibility;
@@ -42,6 +43,7 @@ import net.fortuna.ical4j.model.property.ProdId;
 import net.fortuna.ical4j.model.property.Uid;
 import net.fortuna.ical4j.model.property.Version;
 
+import org.h2.command.ddl.CreateAggregate;
 import org.joda.time.LocalDate;
 
 import com.google.common.collect.Collections2;
@@ -49,6 +51,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
+import com.sun.org.apache.bcel.internal.util.ClassPath.ClassFile;
 
 import play.Logger;
 import play.data.binding.As;
@@ -75,18 +78,28 @@ public class Reperibility extends Controller {
 	}
 
 	/**
+	 * @author cristian, arianna
+	 * Fornisce i periodi di reperibilità del personale reperibile di tipo 'type'
+	 * nell'intervallo di tempo da 'yearFrom/monthFrom/dayFrom'  a 'yearTo/monthTo/dayTo'
+	 * 
 	 * per provarlo: curl -H "Accept: application/json" http://localhost:9001/reperibility/1/find/2012/11/26/2013/01/06
 	 */
 	public static void find() {
 		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 
+		// reperibility type validation
 		Long type = Long.parseLong(params.get("type"));
+		PersonReperibilityType reperibilityType = PersonReperibilityType.findById(type);
+		if (reperibilityType == null) {
+			notFound(String.format("ReperibilityType id = %s doesn't exist", type));			
+		}
 		
+		// date interval construction
 		LocalDate from = new LocalDate(Integer.parseInt(params.get("yearFrom")), Integer.parseInt(params.get("monthFrom")), Integer.parseInt(params.get("dayFrom")));
 		LocalDate to = new LocalDate(Integer.parseInt(params.get("yearTo")), Integer.parseInt(params.get("monthTo")), Integer.parseInt(params.get("dayTo")));
 
 		List<PersonReperibilityDay> reperibilityDays = 
-				PersonReperibilityDay.find("SELECT prd FROM PersonReperibilityDay prd WHERE prd.date BETWEEN ? AND ? ORDER BY prd.date", from, to).fetch();
+				PersonReperibilityDay.find("SELECT prd FROM PersonReperibilityDay prd WHERE prd.date BETWEEN ? AND ? AND prd.reperibilityType = ? ORDER BY prd.date", from, to, reperibilityType).fetch();
 
 		Logger.debug("Reperibility find called from %s to %s, found %s reperibility days", from, to, reperibilityDays.size());
 
@@ -105,8 +118,10 @@ public class Reperibility extends Controller {
 			}
 		}
 		Logger.debug("Find %s reperibilityPeriods. ReperibilityPeriods = %s", reperibilityPeriods.size(), reperibilityPeriods);
+		
 		render(reperibilityPeriods);
 	}
+	
 	
 	/**
 	 * @author arianna
@@ -281,9 +296,10 @@ public class Reperibility extends Controller {
 
 	}
 	
+	
 	/**
 	 * @author arianna, cristian
-	 * crea il file PDF con il calendario annuale delle reperibilità
+	 * crea il file PDF con il calendario annuale delle reperibilità di tipi 'type' per l'anno 'year'
 	 * (portale sistorg)
 	 */
 	public static void exportYearAsPDF() {
@@ -296,9 +312,6 @@ public class Reperibility extends Controller {
 		}
 		
 		List<Table<Person, Integer, String>> reperibilityMonths = new ArrayList<Table<Person, Integer, String>>();
-		
-		
-//		Table<Person, SemRep, Integer> reperibilitySumDays = null;
 		
 		for (int i = 1; i <=12; i++) {
 			
@@ -350,46 +363,214 @@ public class Reperibility extends Controller {
 		LocalDate firstOfYear = new LocalDate(year, 1, 1);
 		renderPDF(year, firstOfYear, reperibilityMonths, reperibilitySumDays);
 	}
+
+	
+	/**
+	 * @author arianna
+	 * crea il file PDF con il resoconto mensile delle reperibilità di tipo 'type' per
+	 * il mese 'month' dell'anno 'year'
+	 * (portale sistorg)
+	 */
+	public static void exportMonthAsPDF() {
+		int year = params.get("year", Integer.class);
+		int month = params.get("month", Integer.class);
+		Long reperibilityId = params.get("type", Long.class);
 		
-	private static Calendar createCalendar(Long personId, Long year)  {
-        TimeZoneRegistry registry = TimeZoneRegistryFactory.getInstance().createRegistry();
+		class PRP {
+			int inizio;
+			int fine;
+			String tipo;
+			
+			public PRP (int inizio, int fine, String tipo) {
+				this.inizio = inizio;
+				this.fine = fine;
+				this.tipo = tipo;
+			}
+			
+			public String toString () {
+				List<Integer> art = new ArrayList<Integer>();
+				art.add(1);
+				art.add(11);
+				art.add(8);
+				String articolo = (art.contains(inizio)) ? "l'" : "il";
+				return (inizio == fine) ? String.format("%s%d", articolo, inizio) : String.format("dal %d al %d", inizio, fine);
+			}
+		}
+		class PRD {
+			int giorno;
+			String tipo;
+			
+			public PRD (int giorno, String tipo) {
+				this.giorno = giorno;
+				this.tipo  = tipo;
+			}
+		}
+		
+		PersonReperibilityType reperibilityType = PersonReperibilityType.findById(reperibilityId);	
+		if (reperibilityType == null) {
+			notFound(String.format("ReperibilityType id = %s doesn't exist", reperibilityId));			
+		}
+			
+		LocalDate firstOfMonth = new LocalDate(year, month, 1);
+		List<PersonReperibilityDay> personReperibilityDays = 
+			JPA.em().createQuery("SELECT prd FROM PersonReperibilityDay prd WHERE date BETWEEN :firstOfMonth AND :endOfMonth AND reperibilityType = :reperibilityType ORDER by date")
+			.setParameter("firstOfMonth", firstOfMonth)
+			.setParameter("endOfMonth", firstOfMonth.dayOfMonth().withMaximumValue())
+			.setParameter("reperibilityType", reperibilityType)
+			.getResultList();
+			
+		ImmutableTable.Builder<Person, Integer, String> builder = ImmutableTable.builder(); 
+		Table<Person, Integer, String> reperibilityMonth = null;
+			
+		for (PersonReperibilityDay personReperibilityDay : personReperibilityDays) {
+			Person person = personReperibilityDay.personReperibility.person;
+				
+			builder.put(person, personReperibilityDay.date.getDayOfMonth(), DateUtility.isHoliday(person, personReperibilityDay.date) ? "fs" : "fr");
+		}
+		
+		reperibilityMonth = builder.build();
+		
+		Table<Person, String, Integer> reperibilitySumDays = HashBasedTable.<Person, String, Integer>create();
+		Table<Person, String, List<PRP>> reperibilityDateDays = HashBasedTable.<Person, String, List<PRP>>create();
+		
+		
+		// for each person
+		for (Person person: reperibilityMonth.rowKeySet()) {
+			
+			// lista dei periodi di reperibilità ferieali e festivi
+			List<PRP> fsPeriods = new ArrayList<PRP>();
+			List<PRP> frPeriods = new ArrayList<PRP>();
+		
+			PRD previousPersonReperibilityDay = null;
+			PRP currentPersonReperibilityPeriod = null;
+			
+			// for each day of month
+			for (Integer dayOfMonth: reperibilityMonth.columnKeySet()) {
+				
+				// counts the reperibility days 
+				if (reperibilityMonth.contains(person, dayOfMonth)) { 
+					String col = String.format("%s", reperibilityMonth.get(person, dayOfMonth).toUpperCase());
+						
+					int n = reperibilitySumDays.contains(person, col) ? reperibilitySumDays.get(person, col) + 1 : 1;
+					reperibilitySumDays.put(person, col, Integer.valueOf(n));
+				} 
+				
+				// create the reperibility periods divided by fs and fr
+				if (reperibilityMonth.contains(person, dayOfMonth)) {
+					if ((previousPersonReperibilityDay == null) || 
+						(!reperibilityMonth.get(person, dayOfMonth).equals(previousPersonReperibilityDay.tipo)) ||
+						((dayOfMonth - 1) != previousPersonReperibilityDay.giorno)) { 		
+							currentPersonReperibilityPeriod = new PRP (dayOfMonth, dayOfMonth, reperibilityMonth.get(person, dayOfMonth));
+					
+							if (currentPersonReperibilityPeriod.tipo == "fs") {
+								fsPeriods.add(currentPersonReperibilityPeriod);
+							} else {
+								frPeriods.add(currentPersonReperibilityPeriod);
+							}
+					}
+					else {
+						currentPersonReperibilityPeriod.fine = dayOfMonth;
+					}
+					previousPersonReperibilityDay = new PRD (dayOfMonth, reperibilityMonth.get(person, dayOfMonth));
+				}
+			}
+			
+			reperibilityDateDays.put(person, "FS", fsPeriods);
+			reperibilityDateDays.put(person, "FR", frPeriods);
+		}
+		
+		// read the reperebility type codes
+		CompetenceCode codeFR = CompetenceCode.findById(2L);
+		CompetenceCode codeFS = CompetenceCode.findById(3L);
+		String codFr = codeFR.code;
+		String codFs = codeFS.code;
+		
+		renderPDF(firstOfMonth, reperibilitySumDays, reperibilityDateDays, codFs, codFr);
+	}
+
+	
+	/*
+	 * Export the reperibility calendar in iCal for the person with id = personId with reperibility 
+	 * of type 'type' for the 'year' year
+	 */
+	private static Calendar createCalendar(Long type, Long personId, int year) {
+		Logger.debug("Crea calendario per l'anno %d della person con id = %d, reperibility type %s", year, personId, type);
+		
+		// check for the parameter
+		PersonReperibilityType reperibilityType = PersonReperibilityType.findById(type);	
+		if (reperibilityType == null) {
+			notFound(String.format("ReperibilityType id = %s doesn't exist", type));			
+		}
+		
+		// read the reperibility person list 
+		PersonReperibility personReperibility = PersonReperibility.find("SELECT pr FROM PersonReperibility pr WHERE pr.personReperibilityType.id = ? AND pr.person.id = ?", type, personId).first();
+		if (personReperibility == null) {
+			notFound(String.format("Person id = %d is not associated to a reperibility of type = %d", personId, reperibilityType));
+		}
+		
+		TimeZoneRegistry registry = TimeZoneRegistryFactory.getInstance().createRegistry();
         TimeZone timezone = registry.getTimeZone("Europe/Rome");
         timezone.getID();
 
-        Date date = new Date();
+        //Date date = new Date();
         
-
         // Create a calendar
         Calendar icsCalendar = new net.fortuna.ical4j.model.Calendar();
         icsCalendar.getProperties().add(new ProdId("-//Events Calendar//iCal4j 1.0//EN"));
         icsCalendar.getProperties().add(CalScale.GREGORIAN);
         icsCalendar.getProperties().add(Version.VERSION_2_0);
         
-        // Create the event
-        //TODO: fare un ciclo sui giorni di reperibilità della persona nell'anno ed aggiungere tutti i giorni
-        //al calendario
-        VEvent reperibilityDay = new VEvent(new DateTime(date), new DateTime(date), "Reperibilità Registro");
+        // read the person reperibility days for the year
+		LocalDate from = new LocalDate(Integer.parseInt(params.get("year")), 1, 1);
+		LocalDate to = new LocalDate(Integer.parseInt(params.get("year")), 12, 31);
+		
+		List<PersonReperibilityDay> reperibilityDays = 
+				PersonReperibilityDay.find("SELECT prd FROM PersonReperibilityDay prd WHERE prd.date BETWEEN ? AND ? AND reperibilityType = ? AND personReperibility = ? ORDER BY prd.date", from, to, reperibilityType, personReperibility).fetch();
 
-        icsCalendar.getComponents().add(reperibilityDay);
+		Logger.debug("Reperibility find called from %s to %s, found %s reperibility days for person id = %s", from, to, reperibilityDays.size(), personId);
+
+		VEvent reperibilityPeriod = null;
+		for (PersonReperibilityDay prd : reperibilityDays) {
+			if (reperibilityPeriod != null) {
+				Logger.trace("controlla se %s<>%s (legge %s)", reperibilityPeriod.getEndDate().getDate(), new DateTime(prd.date.minusDays(1).toDate()), new DateTime(prd.date.toDate()));
+			}
+			//L'ultima parte dell'if serve per il caso in cui la stessa persona ha due periodi di reperibilità non consecutivi. 
+			if (reperibilityPeriod == null || !reperibilityPeriod.getEndDate().getDate().equals(new DateTime(prd.date.minusDays(1).toDate()))) {
+				reperibilityPeriod = new VEvent(new DateTime(prd.date.toDate()), new DateTime(prd.date.toDate()), "Reperibilità Registro");
+				icsCalendar.getComponents().add(reperibilityPeriod);
+				Logger.trace("Creato nuovo reperibilityPeriod, start=%s, end=%s", reperibilityPeriod.getStartDate().getDate(), reperibilityPeriod.getEndDate().getDate());
+			} else {
+				reperibilityPeriod.getEndDate().setDate(new DateTime(prd.date.toDate()));
+				Logger.trace("Aggiornato reperibilityPeriod, start=%s, end=%s", reperibilityPeriod.getStartDate().getDate(), reperibilityPeriod.getEndDate().getDate());
+			}
+		}
+		Logger.debug("Find %s periodi di reperibilità.", icsCalendar.getComponents().size());
+        
         return icsCalendar;
 	}
 	
-	public static void ical(Long personId, Long year) {
-		try {
-		Calendar calendar = createCalendar(personId, year);
+	public static void iCal() {
+		Long type = params.get("type", Long.class);
+		Long personId = params.get("personId", Long.class);
+		int year = params.get("year", Integer.class);
 		
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        CalendarOutputter outputter = new CalendarOutputter();
-        outputter.output(calendar, bos);
-        response.setHeader("Content-Type", "application/ics");
-        InputStream is = new ByteArrayInputStream(bos.toByteArray());
-        renderBinary(is,"reperibilitaRegistro.ics");
-        bos.close();
-        is.close();
-    } catch (IOException e) {
-        Logger.error("Io exception building ical", e);
-    } catch (ValidationException e) {
-        Logger.error("Validation exception generating ical", e);
-    }
+		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
+		
+		try {
+			Calendar calendar = createCalendar(type, personId, year);
+			
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+	        CalendarOutputter outputter = new CalendarOutputter();
+	        outputter.output(calendar, bos);
+	        response.setHeader("Content-Type", "application/ics");
+	        InputStream is = new ByteArrayInputStream(bos.toByteArray());
+	        renderBinary(is,"reperibilitaRegistro.ics");
+	        bos.close();
+	        is.close();
+		} catch (IOException e) {
+			Logger.error("Io exception building ical", e);
+		} catch (ValidationException e) {
+			Logger.error("Validation exception generating ical", e);
+		}
 	}
 }
