@@ -1,0 +1,35 @@
+PersonShift(vannozzi):
+    person: 37
+    shiftTypes: [A]
+    jolly: false
+    description: turni di Daniele Vannozzi
+            
+PersonShift(groppioni):
+    person: 18
+    shiftTypes: [A]
+    jolly: false
+    description: turni di Stefano Groppioni
+    
+PersonShift(serrecchia):
+    person: 143
+    shiftTypes: [B]
+    jolly: false
+    description: turni di Irma Serrecchia
+    
+PersonShift(pancrazi):
+    person: 27
+    shiftTypes: [B]
+    jolly: false
+    description: turni di Daniele Pancrazi
+            
+PersonShift(marinai):
+    person: 24
+    shiftTypes: [A, B]
+    jolly: true
+    description: turni di Mario Marinai
+            
+
+
+    
+
+

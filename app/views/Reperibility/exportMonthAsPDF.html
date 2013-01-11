@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Istituto di Informatica e Telematica - Reperibilità di ${month} ${year}</title>
+        <link rel="stylesheet" href="@{'/public/stylesheets/reperibilityPDF.css'}" type="text/css" charset="utf-8">
+    </head>
+    <body>
+    		%{
+    			mm = 0;
+    		}%
+        	<h1>Istituto di Informatica e Telematica </h1>
+        
+        	<div class="table">
+			<table class="mensile">
+			<caption> Reperibilità del personale per il mese di ${firstOfMonth.plusMonths(mm).monthOfYear().getAsText()} ${firstOfMonth.plusMonths(mm).year().getAsText()}</caption>
+			<tr>
+				<td class="no-border"></td><th colspan="2"> Feriali - Cod: ${codFr}</th> <th colspan="2"> Festivi - Cod: ${codFs}</th>
+			</tr>
+			<tr>
+				<th>Nome dipendente  </th> <th> Date </th> <th> Num. giorni</th> <th> Date </th> <th>Num. giorni</th>
+			</tr>
+			
+			%{
+				for(person in reperibilitySumDays.rowKeySet()) {
+			}%
+			<tr>
+				<td> ${person.surname} ${person.name}</th>
+				<td> 
+					%{
+						for(day in reperibilityDateDays.get(person, "FR")) {
+					}%
+						${day} <br/>
+					%{
+    					}
+					}%
+				</td>
+				<td> ${reperibilitySumDays.contains(person, "FR") ? reperibilitySumDays.get(person, "FR") : ''}</td>
+				<td> %{
+						for(day in reperibilityDateDays.get(person, "FS")) {
+					}%
+						${day} <br/>
+					%{
+    					}
+					}%
+				</td>
+				<td> ${reperibilitySumDays.contains(person, "FS") ? reperibilitySumDays.get(person, "FS") : ''}</td>
+			</tr>
+
+			%{
+    			}
+			}%
+			</table>
+      		</div>
+      		<div class="date">
+      			<trong>Data ________________ </trong>
+      		</div>
+      		<div class="firma dir">
+      			<strong>Il Direttore</strong> <br />
+      			Dott. Domenico Laforenza
+      		</div>
+      
+     		<div class="firma resp">
+      			<strong>Il Responsabile</strong><br />
+      			Dott. Maurizio Martinelli
+      		</div>
+      		
+    </body>
+</html>

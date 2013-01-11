@@ -6,7 +6,13 @@ body {
 h1 {
 	color: #284A7E;
 	font-size: 11pt;
-	align: center;
+	text-align: center;
+}
+
+h2 {
+	color: #284A7E;
+	font-size: 10pt;
+	text-align: center;
 }
 
 table {
@@ -19,8 +25,8 @@ caption {
 	font-family: Verdana, Arial, sans-serif;
 	font-size: 10pt;
 	font-weight: bold;
-	color: white;
-	background-color: #284A7E;
+	color: #284A7E;
+	background-color: white;
 	padding: 0.5em 0 0.5em 0;
 }
 
@@ -30,6 +36,14 @@ tr th {
 	color: white;
 	background-color: #284A7E;
 	text-align: center;
+}
+
+tr td {
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 8pt;
+	border: 0.2px solid silver;
+	text-align: center;
+	padding : 0.2em;
 }
 
 table.no-border tr th {
@@ -43,6 +57,7 @@ table.no-border tr th {
 	font-weight: bold;
 }
 
+/* Tabella riassuntiva nel PDF annuale*/
 table.no-border {
 	border: none;
 	width: 80%;
@@ -53,16 +68,45 @@ table.no-border tr td {
 	border: none;
 }
 
-tr td.no-border {
-	border: none;
+
+/* tabella del PDF mensile*/
+table.mensile {
+	border-collapse: collapse;
+	width: 80%;
+	margin-left: 10%;
 }
 
-tr td {
+table.mensile tr th {
 	font-family: Verdana, Arial, sans-serif;
 	font-size: 8pt;
 	border: 0.2px solid silver;
-	text-align: center;
-	padding : 0.2em;
+	padding: 0.5em;
+	text-align: left;
+	background-color: white;
+	color: black;
+	font-weight: bold;
+	vertical-align: top;
+}
+
+table.mensile tr td {
+	vertical-align: top;
+	text-align: left;
+}
+
+table.mensile caption {
+	width: 80%;
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 10pt;
+	font-weight: bold;
+	color: #284A7E;
+	padding: 0.5em 0 0.5em 0;
+	background-color: white;
+	margin-left: 10%;
+}
+
+
+tr td.no-border {
+	border: none;
 }
 
 tr td.nome-dipendente {
@@ -106,15 +150,24 @@ tr td.fs {
 }
 
 div.table {
-	margin: 1em;
+	margin: 2em, 1em;
 }
 
+/* Firme in calce ai file PDF*/
 div.firma {
 	width: 20%;
 	font-family: Verdana, Arial, sans-serif;
 	font-size: 8pt;
 	text-align: center;
 	margin-top: 3em;
+}
+
+div.date {
+	width: 20%;
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 8pt;
+	text-align: left;
+	margin: 3em, 0, 4em, 7em;
 }
 
 div.dir {

@@ -1,0 +1,9 @@
+ShiftTimeTable(mattino):
+    startShift: 07:00:00
+    endShift: 13:00:00
+    description: turno della mattina
+
+ShiftTimeTable(pomeriggio):
+    startShift: 13:30:00
+    endShift: 19:00:00
+    description: turno del pomeriggio
