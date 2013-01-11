@@ -572,7 +572,7 @@ public class PersonMonth extends Model {
 
 	public static PersonMonth build(Person person, int year, int month){
 
-		PersonMonth pm = new PersonMonth(person, month, year);
+		PersonMonth pm = new PersonMonth(person, year, month);
 		pm.create();
 		LocalDate date = new LocalDate(year, month, 1);
 		//			Contract con = person.getContract(date.dayOfMonth().withMaximumValue());
