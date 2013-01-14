@@ -66,17 +66,6 @@ import com.google.common.collect.Maps;
 
 public class FromMysqlToPostgres {
 
-	
-//	private final class YearMonth {
-//		private int year;
-//		private int month;
-//		
-//		private YearMonth(int year, int month){
-//			this.year = year;
-//			this.month = month;
-//		}
-//	}
-		
 	public static Map<Integer,CompetenceCode> mappaCodiciCompetence = new HashMap<Integer,CompetenceCode>();
 	public static Map<String,AbsenceTypeGroup> mappaCodiciAbsenceTypeGroup = new HashMap<String,AbsenceTypeGroup>();
 	public static Map<Integer,VacationCode> mappaCodiciVacationType = new HashMap<Integer,VacationCode>();
@@ -137,19 +126,19 @@ public class FromMysqlToPostgres {
 	 * @throws InstantiationException
 	 * @throws IllegalAccessException
 	 * @throws ClassNotFoundException
-	 * @throws SQLException
+	 * @throws SQLExceptiongetMonthResidual
 	 */
-	
+
 	public static void importOreStraordinario() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		Connection mysqlCon = FromMysqlToPostgres.getMysqlConnection();
 		String sql = "SELECT * FROM monteorestr";
-		
+
 		PreparedStatement stmt = mysqlCon.prepareStatement(sql);
 
 		ResultSet rs = stmt.executeQuery();
 		Logger.info("Inizio popolamento tabella degli straordinari");
 		while(rs.next()){
-			
+
 			TotalOvertime total = new TotalOvertime();
 			total.date = new LocalDate(rs.getDate("data"));
 			total.year = rs.getInt("anno");
@@ -160,19 +149,19 @@ public class FromMysqlToPostgres {
 		mysqlCon.close();
 
 	}
-	
+
 	public static void importAll(int limit, int anno) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		Connection mysqlCon = FromMysqlToPostgres.getMysqlConnection();
 
-		
+
 		String sql = "SELECT ID, Nome, Cognome, DataNascita, Telefono," +
 				"Fax, Email, Stanza, Matricola, Matricolabadge, passwordmd5, Qualifica, Dipartimento, Sede " +
 				"FROM Persone order by ID";
 		if (limit > 0) {
 			sql += " LIMIT " + limit;
 		}
-				
-		
+
+
 		PreparedStatement stmt = mysqlCon.prepareStatement(sql);
 
 		ResultSet rs = stmt.executeQuery();
@@ -194,25 +183,25 @@ public class FromMysqlToPostgres {
 			FromMysqlToPostgres.createContactData(rs, person);
 
 			FromMysqlToPostgres.createLocation(rs, person);
-
+			
 			FromMysqlToPostgres.setWorkingTimeType(oldIDPersona, person);
 
 			FromMysqlToPostgres.createValuableCompetence(rs.getInt("Matricola"), person);
+			
+			FromMysqlToPostgres.createCompetence(oldIDPersona, person, anno);
 
 			FromMysqlToPostgres.createContract(oldIDPersona, person);
 
 			FromMysqlToPostgres.createVacationType(oldIDPersona, person);	
-			
-			FromMysqlToPostgres.createYearRecap(oldIDPersona, person, anno);
 
-			FromMysqlToPostgres.createCompetence(oldIDPersona, person, anno);
+			FromMysqlToPostgres.createYearRecap(oldIDPersona, person, anno);			
 
 			JPAPlugin.closeTx(false);
 
 			FromMysqlToPostgres.createStampings(oldIDPersona, person, anno);
-
-			createPersonMonthAndYear(person);
 			
+			FromMysqlToPostgres.createPersonMonthAndYear(person);
+
 			Logger.info("Terminata la creazione delle info della persona %s %s", rs.getString("Nome"), rs.getString("Cognome"));
 
 			JPAPlugin.closeTx(false);
@@ -221,18 +210,20 @@ public class FromMysqlToPostgres {
 					((new Date()).getTime() - personStart.getTime()) / 1000,
 					rs.getString("Nome"), rs.getString("Cognome"));
 		}
-
+		JPAPlugin.startTx(false);
 		Logger.info("Terminata l'importazione dei dati di tutte le persone in %d secondi", ((new Date()).getTime() - start.getTime()) / 1000);
 
-		mysqlCon.close();
-		
 		Logger.info("Adesso creo le competenze, il monte ore ed aggiusto i permessi");
-		
-		updateCompetence();
+
+		FromMysqlToPostgres.updateCompetence();
 		importOreStraordinario();
 		addPermissiontoAll();
-		
+		JPAPlugin.closeTx(false);
 		Logger.info("Importazione terminata");
+		
+		mysqlCon.close();
+
+		
 	}
 
 	/**
@@ -531,7 +522,7 @@ public class FromMysqlToPostgres {
 
 				wtt.description = orarioDiLavoro.getString("nome");
 				wtt.shift = orarioDiLavoro.getBoolean("turno");
-//				wtt.defaultWorkingTimeType = orarioDiLavoro.getBoolean("comune");
+				//				wtt.defaultWorkingTimeType = orarioDiLavoro.getBoolean("comune");
 				wtt.save();
 				Logger.info("Creato %s", wtt);
 
@@ -672,7 +663,7 @@ public class FromMysqlToPostgres {
 			contract.person = person;
 			contract.create();
 			contract.save();
-			
+
 			person.save();
 			Logger.info("Creato %s ", contract);
 
@@ -692,12 +683,12 @@ public class FromMysqlToPostgres {
 		 * di ciascuna persona per generare i personday
 		 */
 
-		
+
 		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT Orario.ID,Orario.Giorno,Orario.TipoGiorno,Orario.TipoTimbratura," + 	
-                "Orario.Ora, Codici.id, Codici.Codice, Codici.Qualifiche " +
-                "FROM Orario, Codici " +
-                "WHERE Orario.TipoGiorno=Codici.id and Orario.Giorno >= '2011-01-01' " +
-                "and Orario.ID = " + id + " ORDER BY Orario.Giorno");
+				"Orario.Ora, Codici.id, Codici.Codice, Codici.Qualifiche " +
+				"FROM Orario, Codici " +
+				"WHERE Orario.TipoGiorno=Codici.id and Orario.Giorno >= '2011-01-01' " +
+				"and Orario.ID = " + id + " ORDER BY Orario.Giorno");
 		ResultSet rs = stmtOrari.executeQuery();
 
 		PersonDay pd = null;
@@ -709,7 +700,7 @@ public class FromMysqlToPostgres {
 		int currentMonth = 0;
 		int currentYear = 0;
 
-		
+
 		while(rs.next()){
 			/**
 			 * controllo che la data prelevata sia diversa da null, poichè nel vecchio db esiste la possibilità di avere date del tipo 0000-00-00
@@ -722,7 +713,7 @@ public class FromMysqlToPostgres {
 			}
 			newData = new LocalDate(rs.getDate("Giorno"));
 
-						
+
 			if(data != null) {
 				if(newData.isAfter(data)){		
 
@@ -744,29 +735,6 @@ public class FromMysqlToPostgres {
 					else{
 						createAbsence(pd, rs.getString("Codice"));
 					}
-					
-					//Le persone che non hanno qualifica non hanno i PersonMonth da gestire
-//					if (person.qualification != null && currentMonth != 0 && currentMonth != newData.getMonthOfYear()) {
-//						/* se sto cambiando mese della timbratura allora salvo il PersonMonth con i dati riepilogativi 
-//						 */		
-//						PersonMonth pm = new PersonMonth(person, currentYear, currentMonth);
-//						pm.create();
-//						pm.refreshPersonMonth();
-//						pm.save();
-//						Logger.info("Creato %s per %s %s dell'anno %s e del mese %s", pm, person.name, person.surname, pm.year, pm.month);
-//						
-//					}
-//					
-//					//Le persone che non hanno qualifica non hanno i PersonYear da gestire
-//					if (person.qualification != null && currentYear != 0 && currentYear != newData.getYear()) {
-//						PersonYear py = new PersonYear(person, currentYear);
-//						py.refreshPersonYear();
-//						py.save();
-//						Logger.info("Creato %s per %s %s dell'anno %s", py, person.name, person.surname, py.year);
-//					}
-//
-//					currentMonth = newData.getMonthOfYear();
-//					currentYear = newData.getYear();
 
 				}
 				if(newData.isEqual(data)){					
@@ -932,7 +900,7 @@ public class FromMysqlToPostgres {
 			}
 		}
 		Logger.info("Terminati di creare i riepiloghi annuali per %s", person);
-		
+
 		java.sql.Date beginDate = (java.sql.Date) new java.sql.Date(2012,1,1);
 		java.sql.Date endDate = (java.sql.Date) new java.sql.Date(2012,12,31);
 		PreparedStatement stmtAbsences = mysqlCon.prepareStatement("SELECT Codici.id,Orario.Giorno,Orario.TipoGiorno,Orario.TipoTimbratura,"+
@@ -941,7 +909,7 @@ public class FromMysqlToPostgres {
 				"WHERE Orario.TipoGiorno=Codici.id AND Orario.ID="+id+ 
 				" AND (Codici.Codice = '31' OR Codici.Codice = '32' OR Codici.Codice ='91' OR Codici.Codice = '94')"+
 				" AND Giorno >= "+beginDate+ " AND Giorno <= "+endDate);
-		
+
 		ResultSet rsAbsences = stmtAbsences.executeQuery();
 		int countVacation = 0, countVacationPastYear = 0, countRecovery = 0, countPermission = 0;
 		while(rsAbsences.next()){
@@ -972,7 +940,7 @@ public class FromMysqlToPostgres {
 		initAbsencePermission.date = new LocalDate(anno, 1, 1);
 		initAbsencePermission.absenceDays = countPermission;
 		initAbsencePermission.save();
-		
+
 	}
 
 	public static void createMonthRecap(long id, Person person) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
@@ -1045,9 +1013,7 @@ public class FromMysqlToPostgres {
 		CompetenceCode competenceCode = null;
 
 		while(rs.next()){			
-			competence = new Competence();
-			competence.person = person;
-			competence.value = rs.getInt("valore");
+			
 			/**
 			 * per popolare la personReperibility controllo che quando inserisco un nuovo codice, quella persona abbia anche già
 			 * una entry nella tabella PersonReperibility: in tal caso non la inserisco, altrimenti devo aggiungerla.
@@ -1066,25 +1032,30 @@ public class FromMysqlToPostgres {
 				}
 
 			}
-			competence.month = rs.getInt("mese");
-			competence.year = rs.getInt("anno");
+			
 			int idCodiciCompetenza = rs.getInt("id");	
 			if(mappaCodiciCompetence.get(idCodiciCompetenza)== null){
+				Logger.debug("Non esiste ancora il codice competenza %s, lo creo.", rs.getString("codice"));
 				competenceCode = new CompetenceCode();
 				competenceCode.code = rs.getString("codice");
 				competenceCode.codeToPresence = rs.getString("codice_att");
 				competenceCode.description = rs.getString("descrizione");
 				competenceCode.inactive = rs.getByte("inattivo") != 0;
 
-				competenceCode.create();
-				Logger.info("Creato %s", competenceCode.toString());
-
+				competenceCode.save();
 				mappaCodiciCompetence.put(idCodiciCompetenza,competenceCode);
+				Logger.debug("Creato il codice competenza %s.", competenceCode.code);
+				Logger.info("Creato %s", competenceCode.toString());			
 
-			} else {
+			} 
+			else {
 				competenceCode = mappaCodiciCompetence.get(idCodiciCompetenza);
 			}
-
+			competence = new Competence();
+			competence.month = rs.getInt("mese");
+			competence.year = rs.getInt("anno");
+			competence.person = person;
+			competence.value = rs.getInt("valore");
 			competence.competenceCode = competenceCode;
 			competence.save();
 			Logger.debug("Creato %s", competence.toString());
@@ -1127,30 +1098,34 @@ public class FromMysqlToPostgres {
 
 	}
 
-	
+
 	public static void createPersonMonthAndYear(Person person){
 
 		JPAPlugin.startTx(false);
 		Logger.debug("Inizio a creare i personMonth e personYear per %s %s", person.name, person.surname);
-		List<LocalDate> yearMonthList = PersonDay.find("Select distinct pd.date from PersonDay pd where pd.person = ?", person).fetch();
-//		List<YearMonth> yearMonthList = JPA.em().createNativeQuery("select distinct extract(year from date)," +
-//				" extract(month from date) from person_days where person_id = :personId group by extract(year from date), extract(month from date)" +
-//				"", YearMonth.class)
-//		.setParameter("personId", person.id).getResultList(); 
-		
-		for(LocalDate ym : yearMonthList){
-			PersonMonth pm = PersonMonth.build(person, ym.getYear(), ym.getMonthOfYear());
+
+		List<String> result = JPA.em().
+				createNativeQuery("select cast(extract(year from date) as text) || extract(month from date) " +
+						"FROM person_days WHERE person_id = :personId group by extract(year from date), extract(month from date) " +
+						"order by extract(year from date), extract(month from date)").setParameter("personId", person.id).getResultList();
+
+		for(String s : result){
+			Integer year = new Integer(s.substring(0, 4));
+			Logger.debug("L'anno di riferimento per il personMonth di %s %s è %s", person.name, person.surname, year);
+			Integer month  = new Integer(s.substring(4, s.length()));
+			Logger.debug("Il mese di riferimento per il personMonth di %s %s è %s", person.name, person.surname, month);
+			PersonMonth pm = PersonMonth.build(person, year, month);
 			pm.save();
-			if(ym.getMonthOfYear() == 12){
-				PersonYear py = PersonYear.build(person, ym.getYear());
+			if(month == 12){
+				PersonYear py = PersonYear.build(person, year);
 				py.save();
 			}
-				
+
 		}
-		JPAPlugin.closeTx(false);
+	//	JPAPlugin.closeTx(false);
 		Logger.debug("Terminata la creazione dei personMonth e personYear per %s %s", person.name, person.surname);
 	}
-	
+
 	private static void setDateTimeToStamping(Stamping stamping, LocalDate date, String time){
 
 		if(time.startsWith("-")){
@@ -1235,7 +1210,7 @@ public class FromMysqlToPostgres {
 	private static void createAbsence(PersonDay pd, String codice){
 
 		AbsenceType absenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", codice).first();
-		
+
 		Absence absence = new Absence();
 		absence.personDay = pd;
 		absence.absenceType = absenceType;
@@ -1245,7 +1220,7 @@ public class FromMysqlToPostgres {
 		Logger.debug("Creata %s", absence);
 		//createAbsence(pd, absenceType);
 	}
-	
+
 	/**
 	 * metodo che consente permessi di "amministrazione" a un utente specificato
 	 */
@@ -1263,9 +1238,9 @@ public class FromMysqlToPostgres {
 			List<Permission> permissionList = Permission.findAll();
 			person.permissions.addAll(permissionList);
 		}		
-		
+
 		person.save();
-		
+
 	}
 
 	/**
@@ -1281,7 +1256,7 @@ public class FromMysqlToPostgres {
 			p.permissions.add(per);
 			p.save();
 		}
-		
+
 	}
 	/**
 	 * @throws SQLException 
@@ -1290,38 +1265,48 @@ public class FromMysqlToPostgres {
 	 * @throws InstantiationException 
 	 */
 	public static void updateCompetence() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-		Logger.debug("Chiamata la funzione update competence");
-		Connection mysqlCon = getMysqlConnection();
+		//Logger.debug("Chiamata la funzione update competence per %s %s per impostare gli straordinari", person.name, person.surname);
+		
 		List<Person> personList = Person.findAll();
-		CompetenceCode code = new CompetenceCode();
-		code.description = "Straordinario diurno nei giorni lavorativi";
-		code.code = "S1";
-		code.codeToPresence = "S1";
-		code.inactive = false;
-		code.save();
-		for(Person pers : personList){
-			if(pers.oldId != null){
+		CompetenceCode code = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?","S1").first();
+		Logger.debug("Il codice competenze è: %s", code);
+		if(code == null){
+			Logger.debug("Il codice era nullo, quindi va creato...");
+			code = new CompetenceCode();
+			code.description = "Straordinario diurno nei giorni lavorativi";
+			code.code = "S1";
+			code.codeToPresence = "S1";
+			code.inactive = false;
+			code.save();
+			Logger.debug("Il codice creato: %s", code.code);
+		}
+		
+		for(Person person : personList){
+			Logger.debug("Prendo il vecchio id di %s %s: %s", person.name, person.surname, person.oldId);
+			if(person.oldId != null){
+				//Connection mysqlCon = getMysqlConnection();
 				PreparedStatement stmt = mysqlCon.prepareStatement("Select ore_str, mese, anno " +
 						"from totali_mens, Persone where Persone.ID = totali_mens.ID and totali_mens.anno > ? and Persone.ID = ?");
 				stmt.setLong(1, 2011);
-				stmt.setLong(2, pers.oldId);
-				
+				stmt.setLong(2, person.oldId);
+
 				ResultSet rs = stmt.executeQuery();
-				
+				Logger.debug("Risultato della interrogazione sul vecchio db per le competenze: %s", rs.toString());
 				while(rs.next()){
 					
 					Competence comp = new Competence();
 					comp.competenceCode = code;
-					comp.person = pers;
+					comp.person = person;
 					comp.year = rs.getInt("anno");
 					comp.month = rs.getInt("mese");
-					
+
 					comp.value = rs.getInt("ore_str");
 					comp.save();
+					Logger.debug("Creata competenza per il mese di %s e anno %s con valore: %s", comp.month, comp.year, comp.value);
 				}
 			}
-			
-		}		
+			Logger.debug("Terminata la update competence per %s %s.", person.name, person.surname);
+		}
 		
 	}
 }

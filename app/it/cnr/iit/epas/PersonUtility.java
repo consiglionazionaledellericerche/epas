@@ -5,6 +5,11 @@ import java.util.List;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 
+import play.Logger;
+import play.db.jpa.JPA;
+import play.db.jpa.JPAPlugin;
+import play.db.jpa.Transactional;
+
 import models.Configuration;
 import models.Contract;
 import models.Person;
@@ -23,53 +28,72 @@ public class PersonUtility {
 	 * !!!IMPORTANTE!!! nel momento in cui si cambia la qualifica (da 4-9 a 1-3), viene cambiato anche il contratto. 
 	 * 
 	 */
+	
 	public static int getResidual(Person person, LocalDate date){
-		
+		Logger.debug("Chiamata la funzione getResidual per %s %s alla data %s", person.name, person.surname, date);
+		person = Person.findById(person.id);
 		int residual = 0;
-		if(person.qualification.qualification == 1 || person.qualification.qualification == 2 || person.qualification.qualification == 3){
-			if(person.getCurrentContract().beginContract != null && person.getCurrentContract().beginContract.isAfter(date)){
-				residual = 0;
-			}
-			else{
-				PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?",
-						person, date.getMonthOfYear(), date.getYear()).first();
-				if(pm != null)
-					residual = pm.totalRemainingMinutes;
-				else
-					/**
-					 * TODO: controllare se questa dicitura è corretta...
-					 */
-					residual = 0;
-			}
-				
+		if(person.qualification == null){
+			/**
+			 * questa persona non ha qualifica...come bisogna agire in questo caso? di norma dovrebbe essere un collaboratore...quindi non inquadrato
+			 * come contratto cnr...
+			 */
+			residual = 0;
 		}
 		else{
-			if(date.getMonthOfYear() < Configuration.getCurrentConfiguration().monthExpireRecoveryDaysFourNine ){
-				List<PersonMonth> pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month < ? " +
-						"and pm.year = ?", person, date.getMonthOfYear(), date.getYear()).fetch();			
-				
-				for(PersonMonth personMonth : pm){
-					residual = residual+personMonth.progressiveAtEndOfMonthInMinutes;
-				}
-				PersonYear py = PersonYear.find("Select py from PersonYear py where py.person = ? and py.year = ?", 
-						person, date.getYear()-1).first();
-				if(py != null)
-					residual = residual + py.remainingMinutes;
-				else
+			if(person.qualification.qualification == 1 || person.qualification.qualification == 2 || person.qualification.qualification == 3){
+				if(person.getCurrentContract().beginContract != null && person.getCurrentContract().beginContract.isAfter(date)){
 					residual = 0;
+				}
+				else{
+					PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month < ? and pm.year = ? order by pm.month desc",
+							person, date.getMonthOfYear(), date.getYear()).first();
+					if(pm != null)
+						residual = pm.totalRemainingMinutes;
+					else
+						/**
+						 * TODO: controllare se questa dicitura è corretta...
+						 */
+						residual = 0;
+				}
+					
 			}
 			else{
-				List<PersonMonth> pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ?", 
-						person, date.getYear()).fetch();
-				for(PersonMonth personMonth : pm){
-					residual = residual+personMonth.progressiveAtEndOfMonthInMinutes;
+				/**
+				 * in questo caso ritorna il residuo totale del mese precedente comprendente anche i residui derivanti dall'anno precedente
+				 */
+				if(date.getMonthOfYear() < Configuration.getCurrentConfiguration().monthExpireRecoveryDaysFourNine ){
+					PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month < ? " +
+							"and pm.year = ? order by pm.month desc", person, date.getMonthOfYear(), date.getYear()).first();			
+					if(pm != null)		
+						residual = residual + pm.totalRemainingMinutes;
+					else
+						residual = 0;
+					
+//					PersonYear py = PersonYear.find("Select py from PersonYear py where py.person = ? and py.year = ?", 
+//							person, date.getYear()-1).first();
+//					if(py != null)
+//						residual = residual + py.remainingMinutes;
+//					else
+//						residual = 0;
+				}
+				else{
+					/**
+					 * qui siamo nel caso in cui il mese è successivo a quello impostato in configurazione entro il quale poter usare le ore dell'
+					 * anno precedente...
+					 */
+					List<PersonMonth> pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ?", 
+							person, date.getYear()).fetch();
+					for(PersonMonth personMonth : pm){
+						residual = residual+personMonth.progressiveAtEndOfMonthInMinutes;
+					}
 				}
 			}
 		}
 		
 		return residual;
+		
 	}
 	
 	
-
 }

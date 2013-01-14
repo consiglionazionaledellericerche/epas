@@ -135,25 +135,45 @@ public class PersonYear extends Model{
 		py.create();
 		LocalDate date = new LocalDate(year, 1, 1);
 		Contract contract = person.getContract(new LocalDate(date.monthOfYear().withMaximumValue().dayOfYear().withMaximumValue()));
-		int vacationDaysActualYear = 0;
-		PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? " +
-				"order by pm.month desc ", person, year).first();
-		py.remainingMinutes = pm.totalRemainingMinutes;
-		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? " +
-				"and pd.date > ? and pd.date < ?",
-				person, date, date.monthOfYear().withMaximumValue().dayOfYear().withMaximumValue(), contract.beginContract, contract.expireContract).fetch();
- 		for(PersonDay pd : pdList){
- 			if(pd.absences.size() > 0){
- 				for(Absence abs : pd.absences){
- 					if(abs.absenceType.code.equals("32"))
- 						vacationDaysActualYear = vacationDaysActualYear +1;
- 				}
- 			}
- 		}
- 		VacationPeriod per = VacationPeriod.find("Select per from VacationPeriod per where per.person = ? and per.beginFrom < ? " +
- 				"and per.endTo > ?", person, date, date.monthOfYear().withMaximumValue().dayOfYear().withMaximumValue()).first();
-		py.remainingVacationDays = per.vacationCode.vacationDays - vacationDaysActualYear; 
-		
+		if(contract != null){
+			int vacationDaysActualYear = 0;
+			PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? " +
+					"order by pm.month desc ", person, year).first();
+			py.remainingMinutes = pm.totalRemainingMinutes;
+			List<PersonDay> pdList = null;
+			if(contract.beginContract != null && contract.expireContract != null){
+				pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? " +
+						"and pd.date > ? and pd.date < ?",
+						person, date, date.monthOfYear().withMaximumValue().dayOfYear().withMaximumValue(), contract.beginContract, contract.expireContract).fetch();
+		 		
+			}
+			if(contract.beginContract != null && contract.expireContract == null){
+				pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? " +
+						"and pd.date > ? and pd.date < ?",
+						person, date, date.monthOfYear().withMaximumValue().dayOfYear().withMaximumValue(), contract.beginContract, new LocalDate(2099,12,31)).fetch();
+			}
+			else{
+				pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? ",
+						person, date, date.monthOfYear().withMaximumValue().dayOfYear().withMaximumValue()).fetch();
+			}
+			for(PersonDay pd : pdList){
+	 			if(pd.absences.size() > 0){
+	 				for(Absence abs : pd.absences){
+	 					if(abs.absenceType.code.equals("32"))
+	 						vacationDaysActualYear = vacationDaysActualYear +1;
+	 				}
+	 			}
+	 		}
+			
+	 		VacationPeriod per = VacationPeriod.find("Select per from VacationPeriod per where per.person = ? and per.beginFrom < ? " +
+	 				"and per.endTo > ?", person, date, date.monthOfYear().withMaximumValue().dayOfYear().withMaximumValue()).first();
+	 		if(per != null)
+	 			py.remainingVacationDays = per.vacationCode.vacationDays - vacationDaysActualYear;
+	 		else 
+	 			py.remainingVacationDays = 0;
+
+		}
+				
 		py.save();
 	
 		return py;
