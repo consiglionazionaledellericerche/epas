@@ -187,9 +187,6 @@ public class PersonDay extends Model {
 		 * dalla lista delle timbrature ordinate per date.
 		 */
 
-		/**
-		 * controllo che 
-		 */
 		if(reloadedStampings.size() == 0 && this.absences.size() != 0){
 			timeAtWork = 0;
 			merge();
@@ -199,6 +196,28 @@ public class PersonDay extends Model {
 
 		if(reloadedStampings.get(0).way == WayType.out && reloadedStampings.get(0).date.getHourOfDay() < config.hourMaxToCalculateWorkTime){
 			reloadedStampings.remove(0);
+
+		}
+
+		/**
+		 * per ora la gestione la facciamo considerando il caso di 3 timbrature nella lista del personDay
+		 */
+		if(reloadedStampings.size()==3 && !reloadedStampings.contains(null)){
+			int workingTime = 0;
+			Stamping stamp = reloadedStampings.get(0);
+
+			if(stamp.way == WayType.in && reloadedStampings.get(1).way == WayType.out){
+				workingTime = -toMinute(stamp.date) + toMinute(reloadedStampings.get(1).date);
+				timeAtWork = workingTime;
+				merge();
+				return;
+			}
+			if(stamp.way == WayType.in && reloadedStampings.get(1).way == WayType.in){
+				workingTime = -toMinute(reloadedStampings.get(1).date) + toMinute(reloadedStampings.get(2).date);
+				timeAtWork = workingTime;
+				merge();
+				return;
+			}
 
 		}
 		//FIXME: trovare un algoritmo più efficiente senza considerare casi specifici...
@@ -230,10 +249,7 @@ public class PersonDay extends Model {
 					Stamping exit = reloadedStampings.get(3);
 					tempoLavoro = toMinute(exit.date)-toMinute(enter.date);
 				}
-
-
 			}
-
 			if(reloadedStampings.size() > 3 && (reloadedStampings.get(2)==null || reloadedStampings.get(3) == null)){
 				/**
 				 * è mancante la seconda entrata o la seconda uscita, quindi bisogna fare il calcolo del tempo a lavoro sul tempo trascorso dalla prima
@@ -243,7 +259,6 @@ public class PersonDay extends Model {
 				Stamping exit = reloadedStampings.get(1);
 				tempoLavoro = toMinute(exit.date)-toMinute(enter.date);
 			}
-
 			if( (reloadedStampings.size() > 4) && (reloadedStampings.get(4) == null || reloadedStampings.get(5) == null)){
 				/**
 				 * è mancante la terza entrata o la terza uscita, quindi devo fare il calcolo del tempo a lavoro sul tempo trascorso dalla
@@ -265,9 +280,7 @@ public class PersonDay extends Model {
 				Stamping enter3 = reloadedStampings.get(4);
 				Stamping exit3 = reloadedStampings.get(5);
 				tempoLavoro = ((toMinute(exit3.date)-toMinute(enter3.date))+(toMinute(exit2.date)-toMinute(enter2.date))+(toMinute(exit1.date)-toMinute(enter1.date)));
-
 			}
-
 			//Per le persone che hanno impostato nello StampProfile la timbrature di default si imposta 
 			//il tempo previsto
 			if (stampProfile != null && stampProfile.fixedWorkingTime) {
@@ -276,7 +289,6 @@ public class PersonDay extends Model {
 				timeAtWork = tempoLavoro;	
 			}
 			merge();
-			//save();
 			return;
 
 		}		
@@ -284,7 +296,6 @@ public class PersonDay extends Model {
 		 * in caso non ci sia nessuna timbratura nulla
 		 */
 		int size = reloadedStampings.size();
-		//timeAtWork = 0;
 		// questo contatore controlla se nella lista di timbrature c'è almeno una timbratura di ingresso, in caso contrario fa
 		// ritornare 0 come tempo di lavoro.
 		int count = 0;
@@ -293,7 +304,6 @@ public class PersonDay extends Model {
 				count ++;
 		}
 		if(count == 0){
-
 			//Per le persone che hanno impostato nello StampProfile la timbrature di default si imposta 
 			//il tempo previsto
 			if (stampProfile != null && stampProfile.fixedWorkingTime) {
@@ -301,7 +311,6 @@ public class PersonDay extends Model {
 			} else {
 				timeAtWork = 0;	
 			}
-			//save();
 			merge();
 			return;
 		}
@@ -314,7 +323,6 @@ public class PersonDay extends Model {
 			Stamping s = reloadedStampings.get(0);
 			if(s.date.getDayOfMonth()==now.getDayOfMonth() && s.date.getMonthOfYear()==now.getMonthOfYear() && 
 					s.date.getYear()==now.getYear()){
-				//if(((size / 2 == 1) && (size % 2 == 1)) || ((size / 2 == 0) && (size % 2 == 1))){
 				if(size == 3 || size == 1){	
 					int nowToMinute = toMinute(now);
 					int workingTime=0;
@@ -347,9 +355,6 @@ public class PersonDay extends Model {
 				 * controllare nei casi in cui ci siano 4 timbrature e la pausa pranzo minore di 30 minuti che il tempo di 
 				 * lavoro ritornato sia effettivamente calcolato sulle timbrature effettive e non su quella aggiustata.
 				 */
-				//						List<WorkingTimeTypeDay> wttd = WorkingTimeTypeDay.find("Select wttd from WorkingTimeTypeDay wttd where wttd.workingTimeType = ?" +
-				//								"", person.workingTimeType).fetch();
-
 				int minTimeForLunch = checkMinTimeForLunch();
 				if((reloadedStampings.size()==4) && (minTimeForLunch < getWorkingTimeTypeDay().breakTicketTime) && (!reloadedStampings.contains(null)))
 					tempoLavoro = workTime - (getWorkingTimeTypeDay().breakTicketTime-minTimeForLunch);							
@@ -385,20 +390,18 @@ public class PersonDay extends Model {
 		List<Stamping> reloadedStampings = Stamping.find("Select st from Stamping st where st.date > ? and st.date < ? order by st.date", 
 				beginDate, endDate).fetch();
 		List<Stamping> withNullStampings = returnStampingsList(reloadedStampings);
-		boolean stampingForLunch = false;
+		//		boolean stampingForLunch = false;
 		if(withNullStampings.size() <= 1)
 			return;
 		Stamping lastValidEntrance = null;
-		Stamping lastValidExit = null;
+		//		Stamping lastValidExit = null;
 		Stamping lastStamping = null;
 		int numberOfValidEntranceExitCouple = 0;
-		int timeAtWork = 0;
+		//		int timeAtWork = 0;
 		for(Stamping st : withNullStampings){
 			if(st.way == WayType.out && (lastValidEntrance != null)){
 				timeAtWork = toMinute(st.date)-toMinute(lastValidEntrance.date);
 				numberOfValidEntranceExitCouple++;
-
-
 			}
 			if(st.way == WayType.in){
 				if(lastStamping.way == WayType.in){

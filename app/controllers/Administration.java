@@ -60,7 +60,7 @@ public class Administration extends Controller {
 	
 	public static void updateCompetence() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		//Person person = Person.find("bySurnameAndName", "Lucchesi", "Cristian").first();
-		FromMysqlToPostgres.updateCompetence();
+	//	FromMysqlToPostgres.updateCompetence();
 		renderText("Aggiunti gli straordinari diurni feriali alle persone nella tabella competenze");
 	}
     

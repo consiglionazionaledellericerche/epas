@@ -87,6 +87,9 @@ public class PersonMonth extends Model {
 
 	@Column(name = "compensatory_rest_in_minutes")
 	public Integer compensatoryRestInMinutes = 0;
+	
+	@Column(name = "residual_past_year")
+	public Integer residualPastYear = 0;
 
 
 	@Transient
@@ -138,10 +141,18 @@ public class PersonMonth extends Model {
 			LocalDate hotDate = new LocalDate(year,month,1).dayOfMonth().withMaximumValue();
 			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date <= ? and pd.date > ?" +
 					" order by pd.date desc", person, hotDate, hotDate.dayOfMonth().withMinimumValue()).first();
-
-			residual = pd.progressive;
+			if(pd == null){
+				/**
+				 * si sta cercando il personDay di una data ancora non realizzata (ad esempio il personDay dell'ultimo giorno di un mese ancora da 
+				 * completare...es.: siamo al 4 gennaio 2013 e si cerca il personDay del 31 gennaio, che ancora non è stato realizzato
+				 */
+				residual = 0;
+			}
+			else
+				residual = pd.progressive;
 
 		}
+
 		return residual;
 	}
 
@@ -157,10 +168,11 @@ public class PersonMonth extends Model {
 
 		Logger.debug("NUmero di giorni di riposo compensativo nel mese: %s", compensatoryRest);
 		int minutesOfCompensatoryRest = compensatoryRest * person.workingTimeType.getWorkingTimeFromWorkinTimeType(1).workingTime;
-		if(minutesOfCompensatoryRest != compensatoryRestInMinutes){
+		if(minutesOfCompensatoryRest != compensatoryRestInMinutes && compensatoryRestInMinutes != null){
 			compensatoryRestInMinutes = minutesOfCompensatoryRest;
 			save();
 		}
+		
 		return compensatoryRestInMinutes;
 
 	}
@@ -194,13 +206,22 @@ public class PersonMonth extends Model {
 	public int getTotalOfMonth(){
 		int total = 0;
 		int compensatoryRest = getCompensatoryRestInMinutes();
+		//Logger.debug("CompensatoryRest in getTotalOfMonth: %s", compensatoryRest);
 		int monthResidual = getMonthResidual();
+		//Logger.debug("MonthResidual in getTotalOfMonth: %s", monthResidual);
 		LocalDate date = new LocalDate(year, month, 1);
+		/**
+		 * TODO: devo farlo qui il controllo di quale sia la qualifica per poter aggiungere o meno il valore del residuo dell'anno precedente!?!?!?
+		 */
 		int residualFromPastMonth = PersonUtility.getResidual(person, date.dayOfMonth().withMaximumValue());
+		 
 		total = residualFromPastMonth+monthResidual-(compensatoryRest); 
+
 		return total;
 	}
 
+	
+	
 	/**
 	 * 
 	 * @return il numero massimo di coppie di colonne ingresso/uscita ricavato dal numero di timbrature di ingresso e di uscita di quella
@@ -575,10 +596,7 @@ public class PersonMonth extends Model {
 		PersonMonth pm = new PersonMonth(person, year, month);
 		pm.create();
 		LocalDate date = new LocalDate(year, month, 1);
-		//			Contract con = person.getContract(date.dayOfMonth().withMaximumValue());
-		//			Contract otherContract = Contract.find("Select con from Contract con where con.person = ? and con.beginContract <= ? and " +
-		//					"con.expireContract < ? and con.expireContract > ?",person, date, date.dayOfMonth().withMaximumValue(), date).first();
-		//			if(otherContract == null){
+	
 		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date desc ", 
 				person, date, date.dayOfMonth().withMaximumValue()).first();
 		pm.progressiveAtEndOfMonthInMinutes = pd.progressive;
