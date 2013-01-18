@@ -136,6 +136,19 @@ public class MonthResidualTest  {
 						residualPastYearTaken -= residualPastYearAvailable;
 					} else {
 						residualPastYearTaken -= monthResidual;
+						System.out.println("residualPastYearTaken = " + residualPastYearTaken);
+					}
+				}
+				else{
+					//vediamo come aggiustare questo pezzo
+					if (monthResidual > residualPastYearAvailable) {
+						
+						//residualPastYearTaken += residualPastYearAvailable;
+						residualPastYearTaken += 0;
+						System.out.println("MonthResidual > residualPastYearAvailable, residualPastYearTaken = " + residualPastYearTaken);
+					} else {
+						residualPastYearTaken -= monthResidual;
+						System.out.println("residualPastYearTaken = " + residualPastYearTaken);
 					}
 				}
 			} else {
@@ -170,7 +183,9 @@ public class MonthResidualTest  {
 				totalResidualEndOfMonth += previousMonth.getTotalResidualEndOfMonth();
 			}
 			
-			if (month.equals(1)) {
+			if (month.equals(1) && residualPastYear > 0 && residualPastYearTaken <= residualPastYear) {
+				System.out.println("2) residualPastYear = " + residualPastYear);
+				System.out.println("2) residualPastYearTaken = " + residualPastYearTaken);
 				totalResidualEndOfMonth += (residualPastYear - residualPastYearTaken);
 				System.out.println("2) totalResidualEndOfMonth = " + totalResidualEndOfMonth);
 			}			
@@ -181,7 +196,7 @@ public class MonthResidualTest  {
 				totalResidualEndOfMonth -= previousMonth != null ? previousMonth.getResidualPastYearAvailable() : 0;
 				
 //				System.out.println("2a) residualFromLastMonthsDerivedFromLastYear() = " + getResidualFromLastMonthsDerivedFromLastYear());
-//				System.out.println("2b) totalResidualEndOfMonth = " + totalResidualEndOfMonth);
+				System.out.println("2b) totalResidualEndOfMonth = " + totalResidualEndOfMonth);
 			}
 
 		}
