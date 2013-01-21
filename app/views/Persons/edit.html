@@ -1,80 +1,123 @@
 #{extends 'main.html' /}
 
-<h2 id="titoloModificaDatiPersonali">Modifica dati per l'utente ${person.name} ${person.surname}</h2>
+#{logoutForm /}
+
+#{functionalMenuForm mainMenu: mainMenu /} 
+<h2 id="titoloModificaDatiPersonali">Modifica dati per l'utente
+	${person.name} ${person.surname}</h2>
 
 #{form @Persons.save()}
-<input type="hidden" name="person.id"  value="${person.id}" />
-	
-	<fieldset>
-		<legend>Dati personali</legend>
-		<div><b>Cognome</b> <input name="surname" type="text" value="${person.surname}" size="20" maxlength="100" /></div>
-		<div><b>Nome</b> <input name="name" type="text" value="${person.name}" size="20" maxlength="50" /></div>
-		<div>Id univoco <input name="personId" type="text" value="${person.id}" disabled="disabled"/></div>
-		<!--  <div>Password <input name="person.password" type="text" value="" size="10" maxlength="10" /></div>-->
-		<div>Matricola <input name="number" type="text" value="${person.number}" size="10" maxlength="10" /></div>
-		<div>Livello 
-			#{select 'person.qualification', value:person.qualification, id:'qualifica'} 
-				#{option 0}0#{/option}
-				#{option 1}1#{/option}
-				#{option 2}2#{/option}
-				#{option 3}3#{/option}
-				#{option 4}4#{/option}
-				#{option 5}5#{/option}
-				#{option 6}6#{/option}
-				#{option 7}7#{/option}
-				#{option 8}8#{/option}
-			#{/select}
-		</div>
-		
-	</fieldset>
-	
-	<fieldset>
-		<legend>Dati Contrattuali</legend>
-		<table>
-			<tr>
-				<th>Data inizio</th>
-				<th>Data fine</th>
-				<th>Data terminazione esperienza lavorativa</th>
-				<th>Attestato presenza</th>
-			</tr>
-		%{ for(contract in contractList){
-		}%
-		<tr>			
-			<td><input name="beginContract" type="date" value="${contract.beginContract}" size="10" maxlength="10" /></td>
-			<td><input name="expireContract" type="date" value="${contract.expireContract}" size="10" maxlength="10" /></td>
-			%{ if(contract.endContract == null){
-			}%<td><a href="@{Persons.terminatePerson(person.id)}">Termina contratto</a></td>
-			%{ } else{
-			}% <td><input name ="endContract" type="date" value="${contract.endContract}"/></td>
-			%{
-			}
-			}%
-			<td><input name="onCertificate" type="checkbox" value="${contract.onCertificate}"/></td>			
+<input type="hidden" name="person.id" value="${person.id}" />
+
+<fieldset>
+	<legend>Dati personali</legend>
+	<div>
+		<b>Cognome</b> <input name="surname" type="text"
+			value="${person.surname}" size="20" maxlength="100" />
+	</div>
+	<div>
+		<b>Nome</b> <input name="name" type="text" value="${person.name}"
+			size="20" maxlength="50" />
+	</div>
+	<div>
+		Id univoco <input name="personId" type="text" value="${person.id}"
+			disabled="disabled" />
+	</div>
+	<!--  <div>Password <input name="person.password" type="text" value="" size="10" maxlength="10" /></div>-->
+	<div>
+		Matricola <input name="number" type="text" value="${person.number}"
+			size="10" maxlength="10" />
+	</div>
+	<div>Livello #{select 'person.qualification',
+		value:person.qualification, id:'qualifica'} #{option 0}0#{/option}
+		#{option 1}1#{/option} #{option 2}2#{/option} #{option 3}3#{/option}
+		#{option 4}4#{/option} #{option 5}5#{/option} #{option 6}6#{/option}
+		#{option 7}7#{/option} #{option 8}8#{/option} #{/select}</div>
+
+</fieldset>
+
+<fieldset>
+	<legend>Dati Contrattuali</legend>
+	<table>
+		<tr>
+			<th>Data inizio</th>
+			<th>Data fine</th>
+			<th>Data terminazione esperienza lavorativa</th>
+			<th>Attestato presenza</th>
 		</tr>
-		%{
-		}
-		}%	
-		</table>
+		%{ for(contract in contractList){ }%
+		<tr>
+			<td><input name="beginContract" type="date"
+				value="${contract.beginContract}" size="10" maxlength="10" /></td>
+			<td><input name="expireContract" type="date"
+				value="${contract.expireContract}" size="10" maxlength="10" /></td> %{
+			if(contract.endContract == null){ }%
+			<td><a href="@{Persons.terminatePerson(person.id)}">Termina
+					contratto</a></td> %{ } else{ }%
+			<td><input name="endContract" type="date"
+				value="${contract.endContract}" /></td> %{ } }%
+			<td><input name="onCertificate" type="checkbox"
+				value="${contract.onCertificate}" /></td>
+		</tr>
+		%{ } }%
+	</table>
+
+</fieldset>
+
+<fieldset>
+	<legend>Informazioni di ubicazione e contatti</legend>
+	<input type="hidden" name="location.person_id" value="${person.id}" />
+	<p>
+		Dipartimento <input name="department" type="text"
+			value="${person.location.department}" size="20" maxlength="100" />
+	</p>
+	<p>
+		Sede <input name="headOffice" type="text"
+			value="${person.location.headOffice}" size="40" maxlength="200" />
+	</p>
+	<p>
+		Stanza <input name="room" type="text" value="${person.location.room}"
+			size="40" maxlength="200" />
+	</p>
+	<p>
+		Telefono <input name="telephone" type="text"
+			value="${person.contactData.telephone}" size="40" maxlength="200" />
+	</p>
+	<p>
+		Email <input name="email" type="text"
+			value="${person.contactData.email}" size="40" maxlength="200" />
+	</p>
+	<p>
+		Data di nascita <input name="bornDate" type="text"
+			value="${person.bornDate}" size="40" maxlength="200" />
+	</p>
+</fieldset>
+
+<fieldset>
+	<legend>Informazioni su straordinari e reperibilità</legend>
+	<p>Fra parentesi nella cella relativa agli straordinari diurni, il numero di ore disponibili nel mese da poter essere utilizzate per gli
+	straordinari</p>
+	<table id="competenze">
+		<tr>
+			
+			<th class="competenze">Ind.tà rep.tà feriale (207)</th>
+			<th class="competenze">Ind.tà rep.tà festiva (208)</th>
+			<th class="competenze">Straordinario diurno nei giorni lavorativi (S1)</th>
+			
+		</tr>
+		<tr>
+			
+			<td class="comp"><input type="text" value="${weekDayAvailability}" size="10" maxlength="10"/></td>
+			<td class="comp"><input type="text" value="${holidaysAvailability}"size="10" maxlength="10"/></td>
+			<td class="comp">(${progressive})<input type="text" value="${daylightWorkingDaysOvertime}"size="10" maxlength="10"/></td>
+			
+		</tr>
 		
-	</fieldset>
-	
-	<fieldset>
-		<legend>Informazioni di ubicazione e contatti</legend>
-		<input type="hidden" name="location.person_id"  value="${person.id}" />
-		<p>Dipartimento <input name="department" type="text" value="${person.location.department}" size="20" maxlength="100" /></p>
-		<p>Sede <input name="headOffice" type="text" value="${person.location.headOffice}" size="40" maxlength="200" /></p>
-		<p>Stanza <input name="room" type="text" value="${person.location.room}" size="40" maxlength="200" /></p>
-		<p>Telefono <input name="telephone" type="text" value="${person.contactData.telephone}" size="40" maxlength="200" /></p>
-		<p>Email <input name="email" type="text" value="${person.contactData.email}" size="40" maxlength="200" /></p>
-		<p>Data di nascita <input name="bornDate" type="text" value="${person.bornDate}" size="40" maxlength="200" /></p>
-	</fieldset>
-
-#{/form}
-
-#{form @Persons.discard()}
-<input type="submit" value="Annulla"/>
-#{/form}
-
-#{form @Persons.deletePerson(person.id)}
-<input type="submit" value="Elimina"/>
+	</table>
+</fieldset>
+<input type="submit" value="Ok" />
+#{/form} #{form @Persons.discard()}
+<input type="submit" value="Annulla" />
+#{/form} #{form @Persons.deletePerson(person.id)}
+<input type="submit" value="Elimina" />
 #{/form}

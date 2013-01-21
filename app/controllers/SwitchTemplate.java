@@ -147,14 +147,4 @@ public class SwitchTemplate extends Controller{
 	}
 }
 		
-		//render(p.permissions);
-		
-//	}
-//	
-//	public static void switchTemplateEmployees() throws InstantiationException, IllegalAccessException, DateParseException{
-//		LocalDate now = new LocalDate();
-//		
-//		
-//	}
 
-//}

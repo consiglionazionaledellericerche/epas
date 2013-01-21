@@ -200,14 +200,14 @@ public class Competences extends Controller{
 				}
 				
 			}
-			Logger.debug("Sto per caricare il valore degli straordinari per %s %s con id %s", p.surname, p.name, p.id);
+			//Logger.debug("Sto per caricare il valore degli straordinari per %s %s con id %s", p.surname, p.name, p.id);
 			CompetenceCode code = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", "S1").first();
-			Logger.debug("Il codice per la ricerca è: %s", code.code);
+			//Logger.debug("Il codice per la ricerca è: %s", code.code);
 			
 			Competence comp = Competence.find("Select comp from Competence comp where comp.person = ? " +
 					"and comp.year = ? and comp.month = ? and comp.competenceCode.code = ?", 
 					p, year, month, code.code).first();
-			Logger.debug("La competenza è: %s", comp);
+			//Logger.debug("La competenza è: %s", comp);
 			if(comp != null)
 				overtime = comp.value;
 			else

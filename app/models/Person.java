@@ -443,6 +443,22 @@ public class Person extends Model {
 		return false;
 	}
 	
+	public boolean isInsertAndUpdateCompetenceAndOvertimeAvailable(){
+		for(Permission p : this.permissions){
+			if(p.description.equals(Security.INSERT_AND_UPDATE_COMPETENCES))
+				return true;
+		}
+		return false;
+	}
+	
+	public boolean isInsertAndUpdateVacationsAvailable(){
+		for(Permission p : this.permissions){
+			if(p.description.equals(Security.INSERT_AND_UPDATE_VACATIONS))
+				return true;
+		}
+		return false;
+	}
+	
 	/**
 	 * 
 	 * @param date

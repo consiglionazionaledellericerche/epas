@@ -31,7 +31,12 @@
 		<td>${entry.getKey().name} ${entry.getKey().surname}</td>
 		%{ for(col in tablePersonCompetences.columnKeySet()){
 		}%
-		<td>${entry.getValue().get(col)}</td>
+		<td>%{if(col.equals("Straordinario diurno nei giorni lavorativi")){
+		}%<input name="StraordinarioDiurnoLavorativo" type="text" value="${entry.getValue().get(col)}" size="10" maxlength="10" />
+			%{
+			}
+			}%
+		</td>
 		%{
 		}
 		}%	
