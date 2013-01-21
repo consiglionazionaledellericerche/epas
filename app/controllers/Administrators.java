@@ -59,6 +59,8 @@ public class Administrators extends Controller {
 		String insertAndUpdateAbsence = params.get("insertAndUpdateAbsence");
 		String insertAndUpdateConfiguration = params.get("insertAndUpdateConfiguration");
 		String insertAndUpdateAdministrator = params.get("insertAndUpdateAdministrator");
+		String insertAndUpdateCompetences = params.get("insertAndUpdateCompetences");
+		String insertAndUpdateVacations = params.get("insertAndUpdateVacations");
 		
 		if(person.permissions.size() > 0){
 			person.permissions.clear();
@@ -128,6 +130,18 @@ public class Administrators extends Controller {
 			}
 
 		}
+		if(insertAndUpdateCompetences.equals("true")){
+			for(Permission p : permissionList){
+				if(p.description.equals("insertAndUpdateCompetences"))
+					person.permissions.add(p);
+			}
+		}
+		if(insertAndUpdateVacations.equals("true")){
+			for(Permission p : permissionList){
+				if(p.description.equals("insertAndUpdateVacations"))
+					person.permissions.add(p);
+			}
+		}
 		
 		person.save();
 		flash.success(String.format("Aggiornati permessi per %s %s con successo", person.name, person.surname));
@@ -180,6 +194,8 @@ public class Administrators extends Controller {
 		String insertAndUpdateAbsence = params.get("insertAndUpdateAbsence");
 		String insertAndUpdateConfiguration = params.get("insertAndUpdateConfiguration");
 		String insertAndUpdateAdministrator = params.get("insertAndUpdateAdministrator");
+		String insertAndUpdateVacations = params.get("insertAndUpdateVacations");
+		String insertAndUpdateCompetences = params.get("insertAndUpdateCompetences");
 		if(viewPersonList.equals("true") && !person.isViewPersonAvailable()){
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "viewPersonList").first();
 			person.permissions.add(p);
@@ -214,6 +230,14 @@ public class Administrators extends Controller {
 		}
 		if(insertAndUpdateAdministrator.equals("true") && !person.isInsertAndUpdateAdministratorAvailable()){
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateAdministrator").first();
+			person.permissions.add(p);
+		}
+		if(insertAndUpdateCompetences.equals("true") && !person.isInsertAndUpdateCompetenceAndOvertimeAvailable()){
+			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateCompetences").first();
+			person.permissions.add(p);
+		}
+		if(insertAndUpdateVacations.equals("true") && !person.isInsertAndUpdateVacationsAvailable()){
+			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateVacations").first();
 			person.permissions.add(p);
 		}
 		person.save();
