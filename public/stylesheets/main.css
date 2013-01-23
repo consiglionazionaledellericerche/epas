@@ -303,6 +303,11 @@ input#updateStamping {margin: 0em 25em 0em; align: center}
 
 input#submitNuovoCodiceAssenza {margin: 2em 60em 0em; align: center}
 input#discardNuovoCodiceAssenza {margin: 1em 60em 0em; align: center}
+input#submitEditPerson {margin: 2em 60em 0em; align left}
+input#discardEditPerson {margin: 1em 60em 0em; align: center}
+input#deletePerson {margin: 1em 60em 0em; align: right}
+
+input#updateOldOvertime {margin: 0em 25em 0em; align: center}
 table#tabellaPersoneCodiciAssenzaMensili {margin: 2em 1em 1em; align: left}
 table#tabellaPersoneCompetenze {margin: 2em 1em 1em; align: left}
 table#tabellaTimbratureMancanti {margin: 2em 1em 1em; align: left}

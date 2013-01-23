@@ -118,17 +118,17 @@
 		</tr>
 		<tr>
 			
-			<td class="comp"><input type="text" value="${weekDayAvailability}" size="10" maxlength="10"/></td>
-			<td class="comp"><input type="text" value="${holidaysAvailability}"size="10" maxlength="10"/></td>
-			<td class="comp">(${progressive})<input type="text" value="${daylightWorkingDaysOvertime}"size="10" maxlength="10"/></td>
+			<td class="comp"><input type="text" value="${weekDayAvailability}" size="4" maxlength="4"/></td>
+			<td class="comp"><input type="text" value="${holidaysAvailability}"size="4" maxlength="4"/></td>
+			<td class="comp">(${progressive})<input type="text" value="${daylightWorkingDaysOvertime}"size="4" maxlength="4"/></td>
 			
 		</tr>
 		
 	</table>
 </fieldset>
-<input type="submit" value="Ok" />
+<input id="submitEditPerson"type="submit" value="Ok" />
 #{/form} #{form @Persons.discard()}
-<input type="submit" value="Annulla" />
+<input id="discardEditPerson" type="submit" value="Annulla" />
 #{/form} #{form @Persons.deletePerson(person.id)}
-<input type="submit" value="Elimina" />
+<input id="deletePerson" type="submit" value="Elimina" />
 #{/form}
