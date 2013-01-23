@@ -264,7 +264,7 @@ public class Competences extends Controller{
 		//				"and pd.date >= ? and pd.date < ? ORDER by pd.date DESC", person, date.dayOfMonth().withMinimumValue(), date).first();
 		//		if(lastPreviousPersonDayInMonth != null)
 		progressive = progressive /60;
-		render(weekDayAvailability,holidaysAvailability,daylightWorkingDaysOvertime, progressive, date);
+		render(weekDayAvailability,holidaysAvailability,daylightWorkingDaysOvertime, progressive, date, person);
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)

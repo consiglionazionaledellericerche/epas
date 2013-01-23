@@ -139,10 +139,13 @@ public class PersonUtility {
 			PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
 					person, year, month-1).first();
 
-
-			if(pm.totalRemainingMinutes > -negativeDifference)
-				canOrNot = true;
-			else 
+			if(pm != null){
+				if(pm.totalRemainingMinutes > -negativeDifference)
+					canOrNot = true;
+				else 
+					canOrNot = false;
+			}
+			else
 				canOrNot = false;
 
 

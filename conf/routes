@@ -66,6 +66,7 @@ POST	/persons/deletePerson/{personId}		Persons.deletePerson
 GET		/persons/terminatePerson/{personId}		Persons.terminatePerson
 POST	/persons/terminateContract/{personId}	Persons.terminateContract
 GET		/competences/updateOldOvertime/{personId}	Competences.updateOldOvertime
+PUT		/competences/saveOldOvertime			Competences.saveOldOvertime
 
 
 # Gestione orari di lavoro
