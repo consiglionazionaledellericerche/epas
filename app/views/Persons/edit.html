@@ -3,6 +3,7 @@
 #{logoutForm /}
 
 #{functionalMenuForm mainMenu: mainMenu /} 
+
 <h2 id="titoloModificaDatiPersonali">Modifica dati per l'utente
 	${person.name} ${person.surname}</h2>
 
@@ -29,7 +30,7 @@
 			size="10" maxlength="10" />
 	</div>
 	<div>Livello #{select 'person.qualification',
-		value:person.qualification, id:'qualifica'} #{option 0}0#{/option}
+		value:person.qualification.qualification, id:'qualifica'} #{option 0}0#{/option}
 		#{option 1}1#{/option} #{option 2}2#{/option} #{option 3}3#{/option}
 		#{option 4}4#{/option} #{option 5}5#{/option} #{option 6}6#{/option}
 		#{option 7}7#{/option} #{option 8}8#{/option} #{/select}</div>
@@ -73,23 +74,23 @@
 	</p>
 	<p>
 		Sede <input name="headOffice" type="text"
-			value="${person.location.headOffice}" size="40" maxlength="200" />
+			value="${person.location.headOffice}" size="20" maxlength="200" />
 	</p>
 	<p>
 		Stanza <input name="room" type="text" value="${person.location.room}"
-			size="40" maxlength="200" />
+			size="20" maxlength="200" />
 	</p>
 	<p>
 		Telefono <input name="telephone" type="text"
-			value="${person.contactData.telephone}" size="40" maxlength="200" />
+			value="${person.contactData.telephone}" size="20" maxlength="200" />
 	</p>
 	<p>
 		Email <input name="email" type="text"
-			value="${person.contactData.email}" size="40" maxlength="200" />
+			value="${person.contactData.email}" size="20" maxlength="200" />
 	</p>
 	<p>
 		Data di nascita <input name="bornDate" type="text"
-			value="${person.bornDate}" size="40" maxlength="200" />
+			value="${person.bornDate}" size="20" maxlength="200" />
 	</p>
 </fieldset>
 
@@ -97,6 +98,16 @@
 	<legend>Informazioni su straordinari e reperibilità</legend>
 	<p>Fra parentesi nella cella relativa agli straordinari diurni, il numero di ore disponibili nel mese da poter essere utilizzate per gli
 	straordinari</p>
+	<p>Nel caso si volessero modificare i valori degli straordinari del mese precedente, clicca qui ---> <a href="@{Competences.updateOldOvertime(person.id)}" class="updateOldOvertime${person.id}">Modifica gli straordinari per il mese precedente</a><script type="text/javascript"> 
+				$('.updateOldOvertime${person.id}').popupWindow({ 
+				height:500, 
+				width:800, 
+				top:50, 
+				left:50 
+				}); 
+				</script></p>
+	
+	
 	<table id="competenze">
 		<tr>
 			

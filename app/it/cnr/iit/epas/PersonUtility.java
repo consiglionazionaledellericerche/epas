@@ -13,6 +13,7 @@ import play.db.jpa.Transactional;
 import models.Configuration;
 import models.Contract;
 import models.Person;
+import models.PersonDay;
 import models.PersonMonth;
 import models.PersonYear;
 
@@ -28,7 +29,7 @@ public class PersonUtility {
 	 * !!!IMPORTANTE!!! nel momento in cui si cambia la qualifica (da 4-9 a 1-3), viene cambiato anche il contratto. 
 	 * 
 	 */
-	
+
 	public static int getResidual(Person person, LocalDate date){
 		Logger.debug("Chiamata la funzione getResidual per %s %s alla data %s", person.name, person.surname, date);
 		person = Person.findById(person.id);
@@ -56,7 +57,7 @@ public class PersonUtility {
 						 */
 						residual = 0;
 				}
-					
+
 			}
 			else{
 				/**
@@ -69,13 +70,13 @@ public class PersonUtility {
 						residual = residual + pm.totalRemainingMinutes;
 					else
 						residual = 0;
-					
-//					PersonYear py = PersonYear.find("Select py from PersonYear py where py.person = ? and py.year = ?", 
-//							person, date.getYear()-1).first();
-//					if(py != null)
-//						residual = residual + py.remainingMinutes;
-//					else
-//						residual = 0;
+
+					//					PersonYear py = PersonYear.find("Select py from PersonYear py where py.person = ? and py.year = ?", 
+					//							person, date.getYear()-1).first();
+					//					if(py != null)
+					//						residual = residual + py.remainingMinutes;
+					//					else
+					//						residual = 0;
 				}
 				else{
 					/**
@@ -90,10 +91,64 @@ public class PersonUtility {
 				}
 			}
 		}
-		
+
 		return residual;
-		
+
 	}
-	
-	
+
+
+	/**
+	 * questa funzione all'apparenza oscura calcola nel mese passato come parametro, quanti sono stati i giorni in cui la persona ha fatto ore/minuti
+	 * in più rispetto al proprio orario di lavoro. Questa somma mi servirà per stabilire se in quel mese quella persona potrà beneficiare o meno
+	 * di straordinari
+	 * @return la somma delle differenze positive dei giorni del mese
+	 */
+	public static int getPositiveDaysForOvertime(Person person, int year, int month){
+		int positiveDifference = 0;
+		LocalDate date = new LocalDate(year, month, 1);
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+				person, date, date.dayOfMonth().withMaximumValue()).fetch();
+		for(PersonDay pd : pdList){
+			if(pd.difference > 0)
+				positiveDifference = positiveDifference + pd.difference;
+		}
+
+
+		return positiveDifference;
+	}
+
+	public static boolean canTakeOvertime(Person person, int year, int month){
+		boolean canOrNot = false;
+		int positiveDifference = 0;
+		int negativeDifference = 0;
+		LocalDate date = new LocalDate(year, month, 1);
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+				person, date, date.dayOfMonth().withMaximumValue()).fetch();
+		for(PersonDay pd : pdList){
+			if(pd.difference > 0)
+				positiveDifference = positiveDifference + pd.difference;
+			else
+				negativeDifference = negativeDifference + pd.difference;
+		}
+		if(positiveDifference > -negativeDifference)
+			canOrNot = true;
+		else{
+			/**
+			 * per "bilanciare" i residui negativi del mese, si va a vedere se esistono residui positivi dal mese precedente o dall'anno precedente
+			 */
+			PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
+					person, year, month-1).first();
+
+
+			if(pm.totalRemainingMinutes > -negativeDifference)
+				canOrNot = true;
+			else 
+				canOrNot = false;
+
+
+		}
+		return canOrNot;
+
+	}
+
 }
