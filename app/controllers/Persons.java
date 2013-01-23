@@ -36,8 +36,7 @@ public class Persons extends Controller {
 		 * questa data serve come default per far vedere durante la visualizzazione le eventuali reperibilità e straordinari di quella persona
 		 * in quel mese in quell'anno
 		 */
-		
-		LocalDate date = new LocalDate();		
+		LocalDate date = new LocalDate();
 		List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract", person).fetch();
 		int weekDayAvailability;
 		int holidaysAvailability;

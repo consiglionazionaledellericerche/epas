@@ -1,0 +1,27 @@
+#{extends 'main.html' /}
+#{form @Competences.saveOldOvertime()}
+<h3>Tabella contenente le informazioni su straordinari e reperibilità del mese di <span class="capitalized">&{'views.tags.display.date.month.' + date.getMonthOfYear()}</span> ${date.getYear()}</h3>
+<input type="hidden" name="person.id" value="${person.id}" />
+<input type="hidden" name="month" value="${date.getMonthOfYear()}" />
+<input type="hidden" name="year" value="${date.getYear()}" />
+<input type="hidden" name="progressive" value="${progressive}" />
+<table id="competenze">
+		<tr>
+			
+			<th class="competenze">Ind.tà rep.tà feriale (207)</th>
+			<th class="competenze">Ind.tà rep.tà festiva (208)</th>
+			<th class="competenze">Straordinario diurno nei giorni lavorativi (S1)</th>
+			
+		</tr>
+		<tr>
+			
+			<td class="comp"><input type="text" name="reperibilitaFeriale" value="${weekDayAvailability}" size="10" maxlength="10"/></td>
+			<td class="comp"><input type="text" name="reperibilitaFestiva" value="${holidaysAvailability}"size="10" maxlength="10"/></td>
+			<td class="comp">(${progressive})<input type="text" name="straordinari" value="${daylightWorkingDaysOvertime}"size="10" maxlength="10"/></td>
+			
+		</tr>
+		
+</table>
+
+<input type="submit" value="Ok"/>
+#{/form}

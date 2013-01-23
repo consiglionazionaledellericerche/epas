@@ -31,7 +31,7 @@ POST	/vacations								Vacations.vacations
 GET		/vacationsCurrentYear					Vacations.vacationsCurrentYear		
 
 #Competenze
-GET		/competenze								Competences.show
+GET		/competenze/{personId}/{year}/{month}	Competences.show
 
 #Riepilogo ore
 GET		/hourRecap/{personId}/{year}			PersonMonths.hourRecap
@@ -65,6 +65,7 @@ GET		/persons/edit/{personId}				Persons.edit
 POST	/persons/deletePerson/{personId}		Persons.deletePerson
 GET		/persons/terminatePerson/{personId}		Persons.terminatePerson
 POST	/persons/terminateContract/{personId}	Persons.terminateContract
+GET		/competences/updateOldOvertime/{personId}	Competences.updateOldOvertime
 
 
 # Gestione orari di lavoro
@@ -132,6 +133,7 @@ GET		/manageCompetenceCode					Competences.discard
 GET		/totalOvertimeHours/{year}/{month}		Competences.totalOvertimeHours
 POST	/totalOvertimeHours/					Competences.saveOvertime
 GET		/overtime/{year}/{month}				Competences.overtime
+
 
 
 #Gestione reperibilità
