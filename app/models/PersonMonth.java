@@ -615,6 +615,14 @@ public class PersonMonth extends Model {
 		//			
 		return pm;
 	}
+	
+	public static PersonMonth getInstance(Person person, int year, int month) {
+		PersonMonth personMonth = PersonMonth.find("person = ?, year = ?, month = ?", person, year, month).first();
+		if (personMonth == null) {
+			personMonth = new PersonMonth(person, year, month);
+		}
+		return personMonth;
+	}
 
 
 }
