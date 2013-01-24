@@ -103,11 +103,11 @@ public class PersonUtility {
 	 * di straordinari
 	 * @return la somma delle differenze positive dei giorni del mese
 	 */
-	public static int getPositiveDaysForOvertime(Person person, int year, int month){
+	public static int getPositiveDaysForOvertime(PersonMonth personMonth){
 		int positiveDifference = 0;
-		LocalDate date = new LocalDate(year, month, 1);
+		LocalDate date = new LocalDate(personMonth.year, personMonth.month, 1);
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-				person, date, date.dayOfMonth().withMaximumValue()).fetch();
+				personMonth.person, date, date.dayOfMonth().withMaximumValue()).fetch();
 		for(PersonDay pd : pdList){
 			if(pd.difference > 0)
 				positiveDifference = positiveDifference + pd.difference;
@@ -117,6 +117,16 @@ public class PersonUtility {
 		return positiveDifference;
 	}
 
+	public int getOvertimeAvailable(PersonMonth personMonth) {
+		int positiveDaysForOvertime = getPositiveDaysForOvertime(personMonth);
+		if (positiveDaysForOvertime <= 0) {
+			return 0;
+		}
+		//TODO calcolare il tempo disponibile sottraendo al positiveDaysForOvertime le eventuali ore da recuperare
+		//dall'anno precedente, dal mese precedente e dal mese corrente
+		return 0;
+	}
+	
 	public static boolean canTakeOvertime(Person person, int year, int month){
 		boolean canOrNot = false;
 		int positiveDifference = 0;

@@ -13,6 +13,7 @@ import models.CompetenceCode;
 import models.MonthRecap;
 import models.Person;
 import models.PersonDay;
+import models.PersonMonth;
 import models.TotalOvertime;
 
 import org.joda.time.LocalDate;
@@ -259,7 +260,7 @@ public class Competences extends Controller{
 		else
 			daylightWorkingDaysOvertime = 0;
 		int progressive = 0;
-		progressive = PersonUtility.getPositiveDaysForOvertime(person, date.getYear(), date.getMonthOfYear());
+		progressive = PersonUtility.getPositiveDaysForOvertime(PersonMonth.getInstance(person, date.getYear(), date.getMonthOfYear()));
 		//		PersonDay lastPreviousPersonDayInMonth = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? " +
 		//				"and pd.date >= ? and pd.date < ? ORDER by pd.date DESC", person, date.dayOfMonth().withMinimumValue(), date).first();
 		//		if(lastPreviousPersonDayInMonth != null)
