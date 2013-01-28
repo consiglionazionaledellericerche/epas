@@ -617,7 +617,7 @@ public class PersonMonth extends Model {
 	}
 	
 	public static PersonMonth getInstance(Person person, int year, int month) {
-		PersonMonth personMonth = PersonMonth.find("person = ?, year = ?, month = ?", person, year, month).first();
+		PersonMonth personMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? and pm.month = ?", person, year, month).first();
 		if (personMonth == null) {
 			personMonth = new PersonMonth(person, year, month);
 		}

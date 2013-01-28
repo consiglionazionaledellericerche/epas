@@ -1,5 +1,8 @@
-import org.joda.time.LocalDate;
+import static org.junit.Assert.*;
+import junit.framework.Assert;
 
+import org.joda.time.LocalDate;
+import org.junit.Test;
 import lombok.Getter;
 import lombok.Setter;
 import models.Person;
@@ -23,12 +26,17 @@ public class UltimateMonthResidualTest {
 		@Getter @Setter
 		private int residuoAnnoPrecedente = 0;
 
+		@Getter @Setter
 		public int residuoDelMeseInPositivo;
+		
+		@Getter @Setter
 		public int residuoDelMeseInNegativo;
 		
 		public int recuperiOreDaAnnoPrecedente;
 		public int riposoCompensativiDaAnnoPrecedente;
 		public int riposiCompensativiDaAnnoCorrente;
+		
+		@Getter @Setter
 		public int straordinari;
 
 			
@@ -164,6 +172,31 @@ public class UltimateMonthResidualTest {
 		}
 	}
 
+	@Test
+	public void lastYearPositiveResidualEndMarchPositive() {
+		//int lastYearResidual = 2 * 60;
+		PersonMonthUltimate jan = new PersonMonthUltimate(2013,1);
+		jan.setResiduoAnnoPrecedente(600);
+		jan.setStraordinari(120);
+		jan.setResiduoDelMeseInNegativo(-60);
+		jan.setResiduoDelMeseInPositivo(240);
+		jan.setMesePrecedente(null);
+				
+		Assert.assertEquals("Totale residuo anno corrente a fine mese", 60, jan.totaleResiduoAnnoCorrenteAFineMese());
+		Assert.assertEquals("Totale residuo anno corrente al mese precedente", 0, jan.totaleResiduoAnnoCorrenteAlMesePrecedente());
+		Assert.assertEquals("Totale residuo anno corrente a fine mese più residuo anno precedente", 660, jan.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese());
+		
+		
+//		PersonMonthUltimate feb = new PersonMonthUltimate(2013,2);
+//		feb.setResiduoAnnoPrecedente(600);
+//
+//		PersonMonthUltimate mar = new PersonMonthUltimate(2013,3);
+//		mar.setResiduoAnnoPrecedente(600);
+//
+//	
+//		PersonMonthUltimate apr = new PersonMonthUltimate(2013,4);
 
+
+	}
 
 }
