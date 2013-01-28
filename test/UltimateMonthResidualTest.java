@@ -85,7 +85,7 @@ public class UltimateMonthResidualTest {
 		}
 		
 		public int totaleResiduoAnnoCorrenteAFineMese() {
-			return residuoDelMese() + totaleResiduoAnnoCorrenteAlMesePrecedente() + riposiCompensativiDaAnnoCorrente - straordinari;  
+			return residuoDelMese() + totaleResiduoAnnoCorrenteAlMesePrecedente() + riposiCompensativiDaAnnoCorrente - straordinari - recuperiOreDaAnnoPrecedente;  
 		}
 		
 		public int totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese() {
@@ -176,19 +176,38 @@ public class UltimateMonthResidualTest {
 	public void lastYearPositiveResidualEndMarchPositive() {
 		//int lastYearResidual = 2 * 60;
 		PersonMonthUltimate jan = new PersonMonthUltimate(2013,1);
-		jan.setResiduoAnnoPrecedente(600);
-		jan.setStraordinari(120);
-		jan.setResiduoDelMeseInNegativo(-60);
-		jan.setResiduoDelMeseInPositivo(240);
+		jan.setResiduoAnnoPrecedente(1528);
+		jan.setStraordinari(0);
+		jan.setResiduoDelMeseInNegativo(-760);
+		jan.setResiduoDelMeseInPositivo(591);
 		jan.setMesePrecedente(null);
-				
-		Assert.assertEquals("Totale residuo anno corrente a fine mese", 60, jan.totaleResiduoAnnoCorrenteAFineMese());
+		
+		jan.aggiornaRiepiloghi();
+		
+		Assert.assertEquals("Residuo del mese", -169, jan.residuoDelMese());
+		Assert.assertEquals("Totale residuo anno corrente a fine mese", 591, jan.totaleResiduoAnnoCorrenteAFineMese());
 		Assert.assertEquals("Totale residuo anno corrente al mese precedente", 0, jan.totaleResiduoAnnoCorrenteAlMesePrecedente());
-		Assert.assertEquals("Totale residuo anno corrente a fine mese più residuo anno precedente", 660, jan.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese());
+		Assert.assertEquals("Totale residuo anno corrente a fine mese più residuo anno precedente", 1359, jan.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese());
+		
+		Assert.assertEquals("Residuo anno precedente disponibile alla fine del mese", 768, jan.residuoAnnoPrecedenteDisponibileAllaFineDelMese());
 		
 		
-//		PersonMonthUltimate feb = new PersonMonthUltimate(2013,2);
-//		feb.setResiduoAnnoPrecedente(600);
+		PersonMonthUltimate feb = new PersonMonthUltimate(2013,2);
+		feb.setMesePrecedente(jan);
+		feb.setResiduoAnnoPrecedente(1528);
+		
+		feb.setResiduoDelMeseInNegativo(-389);
+		feb.setResiduoDelMeseInPositivo(614);
+
+		feb.aggiornaRiepiloghi();
+		
+		Assert.assertEquals("Residuo del mese", 225, feb.residuoDelMese());
+		Assert.assertEquals("Totale residuo anno corrente a fine mese", 1205, feb.totaleResiduoAnnoCorrenteAFineMese());
+		Assert.assertEquals("Totale residuo anno corrente al mese precedente", 591, feb.totaleResiduoAnnoCorrenteAlMesePrecedente());
+		Assert.assertEquals("Totale residuo anno corrente a fine mese più residuo anno precedente", 1584, feb.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese());
+		
+		Assert.assertEquals("Residuo anno precedente disponibile alla fine del mese", 379, feb.residuoAnnoPrecedenteDisponibileAllaFineDelMese());
+		
 //
 //		PersonMonthUltimate mar = new PersonMonthUltimate(2013,3);
 //		mar.setResiduoAnnoPrecedente(600);
