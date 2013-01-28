@@ -158,6 +158,12 @@ public class Person extends Model {
 	@ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
 	public List<Group> groups;
 	
+
+	/**
+	 * relazione con la tabella dei figli del personale
+	 */
+	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
+	public List<PersonChildren> personChildren;
 	
 	/**
 	 * relazione con la nuova tabella dei person day
