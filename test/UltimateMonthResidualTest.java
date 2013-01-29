@@ -208,9 +208,22 @@ public class UltimateMonthResidualTest {
 		
 		Assert.assertEquals("Residuo anno precedente disponibile alla fine del mese", 379, feb.residuoAnnoPrecedenteDisponibileAllaFineDelMese());
 		
-//
-//		PersonMonthUltimate mar = new PersonMonthUltimate(2013,3);
-//		mar.setResiduoAnnoPrecedente(600);
+
+		PersonMonthUltimate mar = new PersonMonthUltimate(2013,3);
+		mar.setMesePrecedente(feb);
+		mar.setResiduoAnnoPrecedente(1528);
+		mar.setResiduoDelMeseInNegativo(-539);
+		mar.setResiduoDelMeseInPositivo(731);
+		mar.setStraordinari(864);
+		mar.aggiornaRiepiloghi();
+		
+		Assert.assertEquals("Residuo del mese", 192, mar.residuoDelMese());
+		Assert.assertEquals("Totale residuo anno corrente a fine mese", 417, mar.totaleResiduoAnnoCorrenteAFineMese());
+		Assert.assertEquals("Totale residuo anno corrente al mese precedente", 225, mar.totaleResiduoAnnoCorrenteAlMesePrecedente());
+		Assert.assertEquals("Totale residuo anno corrente a fine mese più residuo anno precedente", 912, mar.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese());
+		
+		Assert.assertEquals("Residuo anno precedente disponibile alla fine del mese", 379, mar.residuoAnnoPrecedenteDisponibileAllaFineDelMese());
+		
 //
 //	
 //		PersonMonthUltimate apr = new PersonMonthUltimate(2013,4);
