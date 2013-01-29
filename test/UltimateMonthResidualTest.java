@@ -5,6 +5,7 @@ import org.joda.time.LocalDate;
 import org.junit.Test;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import models.Person;
 import models.PersonMonth;
 
@@ -13,6 +14,7 @@ import models.PersonMonth;
  * @author dario
  *
  */
+@Slf4j
 public class UltimateMonthResidualTest {
 
 	private static final class PersonMonthUltimate extends PersonMonth {
@@ -36,7 +38,7 @@ public class UltimateMonthResidualTest {
 		public int riposoCompensativiDaAnnoPrecedente;
 		public int riposiCompensativiDaAnnoCorrente;
 		
-		@Getter @Setter
+		@Getter
 		public int straordinari;
 
 			
@@ -51,6 +53,12 @@ public class UltimateMonthResidualTest {
 
 		public int residuoDelMese() {
 			return residuoDelMeseInPositivo + residuoDelMeseInNegativo;
+		}
+		
+		public int residuoAllaData(LocalDate date) {
+			//FIXME: da calcolare in funzione della data
+			//residui in positivo alla data + residui in negativo alla data, ovvero il "progressivo"
+			return residuoDelMese();
 		}
 		
 		/**
@@ -68,6 +76,7 @@ public class UltimateMonthResidualTest {
 
 		public int residuoAnnoPrecedenteDisponibileAllInizioDelMese() {
 			if (possibileUtilizzareResiduoAnnoPrecedente()) {
+				
 				if (month.equals(1)) {
 					return residuoAnnoPrecedente;
 				} 
@@ -75,17 +84,28 @@ public class UltimateMonthResidualTest {
 					return 0;
 				}
 				return mesePrecedente.residuoAnnoPrecedenteDisponibileAllaFineDelMese();
-			} else {
-				return 0;
-			}
+			} 
+			
+			return 0;
+			
 		}
 		
 		public int residuoAnnoPrecedenteDisponibileAllaFineDelMese() {
-			return residuoAnnoPrecedenteDisponibileAllInizioDelMese() + recuperiOreDaAnnoPrecedente + riposoCompensativiDaAnnoPrecedente;
+			int residuoAnnoPrecedenteDisponibileAllInizioDelMese = residuoAnnoPrecedenteDisponibileAllInizioDelMese();
+			System.out.println("mese: " + month + ". residuoAnnoPrecedenteDisponibileAllInizioDelMese = " + residuoAnnoPrecedenteDisponibileAllInizioDelMese);
+			
+			int residuoAnnoPrecedenteDisponibileAllaFineDelMese = residuoAnnoPrecedenteDisponibileAllInizioDelMese + recuperiOreDaAnnoPrecedente + riposoCompensativiDaAnnoPrecedente;
+			
+			System.out.println("mese: " + month + ". residuoAnnoPrecedenteDisponibileAllaFineDelMese() = " + residuoAnnoPrecedenteDisponibileAllaFineDelMese);
+			return residuoAnnoPrecedenteDisponibileAllaFineDelMese;
 		}
-		
+	
 		public int totaleResiduoAnnoCorrenteAFineMese() {
 			return residuoDelMese() + totaleResiduoAnnoCorrenteAlMesePrecedente() + riposiCompensativiDaAnnoCorrente - straordinari - recuperiOreDaAnnoPrecedente;  
+		}
+		
+		public int totaleResiduoAnnoCorrenteAllaData(LocalDate date) {
+			return residuoAllaData(date) + totaleResiduoAnnoCorrenteAlMesePrecedente() + riposiCompensativiDaAnnoCorrente - straordinari - recuperiOreDaAnnoPrecedente;  
 		}
 		
 		public int totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese() {
@@ -93,12 +113,23 @@ public class UltimateMonthResidualTest {
 		}
 		
 		public void aggiornaRiepiloghi() {
+			log.debug("Aggiornamento dei riepiloghi del mese {}", month);
+			
 			int residuoAnnoPrecedenteDisponibileAllaFineDelMese = residuoAnnoPrecedenteDisponibileAllaFineDelMese();
 			
 			if (residuoDelMeseInNegativo != 0 && residuoAnnoPrecedenteDisponibileAllaFineDelMese > 0) {
-				  
+				
+				 log.debug("mese = {}. Residuo del mese in negativo ({}) != 0 e residuoAnnoPrecedenteDisponibileAllaFineDelMese ({}) > 0, recupero dall'anno scorso il recuperabile",
+						new Object[] { month , residuoDelMeseInNegativo, residuoAnnoPrecedenteDisponibileAllaFineDelMese });
+				 
 				if (residuoAnnoPrecedenteDisponibileAllaFineDelMese > -residuoDelMeseInNegativo) {
+					log.debug("mese = {}. residuoAnnoPrecedenteDisponibileAllaFineDelMese > del residuo del mese in negativo, aumento i recuperiOreDaAnnoPrecedente (adesso {}) di {} minuti",
+						new Object[] { month, recuperiOreDaAnnoPrecedente, residuoDelMeseInNegativo});
+					
 					recuperiOreDaAnnoPrecedente += residuoDelMeseInNegativo;
+					
+					log.debug("mese = {}. recuperiOreDaAnnoPrecedente = {} minuti",
+							new Object[] { month, recuperiOreDaAnnoPrecedente });
 				} else {
 					recuperiOreDaAnnoPrecedente -= residuoAnnoPrecedenteDisponibileAllaFineDelMese;
 				}
@@ -113,31 +144,54 @@ public class UltimateMonthResidualTest {
 			}
 		}
 		
-		public int tempoDisponibilePerStraordinariORecuperi(LocalDate date) {
+		public int tempoDisponibilePerRecuperi(LocalDate date) {
+			int totaleResiduoAnnoCorrenteAllaData = totaleResiduoAnnoCorrenteAllaData(date);
 			
-			//Prendere il residuoInPositivo alla data indicata
-			int residuoPositivoAllaDataRichiesta = residuoDelMeseInPositivo;
+			System.out.println("totaleResiduoAnnoCorrenteAllaData = " + totaleResiduoAnnoCorrenteAllaData);
 			
-			if (residuoPositivoAllaDataRichiesta <= 0) {
+			int tempoDisponibile = totaleResiduoAnnoCorrenteAllaData + residuoAnnoPrecedenteDisponibileAllaFineDelMese();
+			
+			if (tempoDisponibile <= 0) {
+				tempoDisponibile = 0;
+			}
+			System.out.println("Data = " + date + ". Tempo disponibile per recuperi = " + tempoDisponibile);
+			return tempoDisponibile;
+			
+		}
+		
+		public int tempoDisponibilePerStraordinari() {
+					
+			if (residuoDelMeseInPositivo <= 0) {
 				return 0;
 			}
 			
-			int totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese = totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese();
+			int residuoAllaDataRichiesta = residuoDelMese();
 			
-			if (totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese < 0) {
+			int tempoDisponibile = residuoAnnoPrecedenteDisponibileAllaFineDelMese() + mesePrecedente.totaleResiduoAnnoCorrenteAFineMese() + residuoAllaDataRichiesta;
+			
+			if (tempoDisponibile <= 0) {
 				return 0;
 			}
 			
-			return Math.min(residuoPositivoAllaDataRichiesta, totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese);
+			return Math.min(residuoDelMeseInPositivo, tempoDisponibile);
 						
+		}
+		
+		public boolean assegnaStraordinari(int ore) {
+			if (tempoDisponibilePerStraordinari() > ore * 60) {
+				straordinari = ore * 60;
+				return true;
+			}
+			return false;
 		}
 		
 		public boolean prendiRiposoCompensativo(LocalDate date) {
 			int minutiRiposoCompensativo = minutiRiposoCompensativo();
 			
-			if (minutiRiposoCompensativo > tempoDisponibilePerStraordinariORecuperi(date)) {
+			if (-minutiRiposoCompensativo > tempoDisponibilePerRecuperi(date)) {
 				return false;
 			}
+			
 			int residuoAnnoPrecedenteDisponibileAllaFineDelMese = residuoAnnoPrecedenteDisponibileAllaFineDelMese();
 			
 			if (residuoAnnoPrecedenteDisponibileAllaFineDelMese < 0) {
@@ -147,9 +201,10 @@ public class UltimateMonthResidualTest {
 						person, date));
 			}
 			
+			System.out.println("residuoAnnoPrecedenteDisponibileAllaFineDelMese = " + residuoAnnoPrecedenteDisponibileAllaFineDelMese);
 			if (residuoAnnoPrecedenteDisponibileAllaFineDelMese == 0) {
 				//Per esempio per i tecnici/amministrativi da aprile in poi
-				riposiCompensativiDaAnnoCorrente = minutiRiposoCompensativo;
+				riposiCompensativiDaAnnoCorrente += minutiRiposoCompensativo;
 			} else {
 				if (minutiRiposoCompensativo < residuoAnnoPrecedenteDisponibileAllaFineDelMese) {
 					riposoCompensativiDaAnnoPrecedente += minutiRiposoCompensativo;
@@ -160,6 +215,7 @@ public class UltimateMonthResidualTest {
 			}
 			
 			//Creare l'assenza etc....
+			aggiornaRiepiloghi();
 			return true;
 		}
 		
@@ -173,11 +229,10 @@ public class UltimateMonthResidualTest {
 	}
 
 	@Test
-	public void lastYearPositiveResidualEndMarchPositive() {
+	public void lastYearPositiveResidualEndMarchPositiveTechnician() {
 		//int lastYearResidual = 2 * 60;
 		PersonMonthUltimate jan = new PersonMonthUltimate(2013,1);
 		jan.setResiduoAnnoPrecedente(1528);
-		jan.setStraordinari(0);
 		jan.setResiduoDelMeseInNegativo(-760);
 		jan.setResiduoDelMeseInPositivo(591);
 		jan.setMesePrecedente(null);
@@ -214,21 +269,140 @@ public class UltimateMonthResidualTest {
 		mar.setResiduoAnnoPrecedente(1528);
 		mar.setResiduoDelMeseInNegativo(-539);
 		mar.setResiduoDelMeseInPositivo(731);
-		mar.setStraordinari(864);
+		
 		mar.aggiornaRiepiloghi();
 		
+		Assert.assertTrue(mar.prendiRiposoCompensativo(new LocalDate(2012,3,19)));
+		
+		Assert.assertEquals("Riposi compensativi da anno precedente", 0, mar.riposoCompensativiDaAnnoPrecedente);
+		Assert.assertEquals("Riposi compensativi da anno corrente", -432, mar.riposiCompensativiDaAnnoCorrente);
+		
+		Assert.assertTrue(mar.prendiRiposoCompensativo(new LocalDate(2012,3,28)));
+		
+		Assert.assertEquals("Riposi compensativi da anno precedente", 0, mar.riposoCompensativiDaAnnoPrecedente);
+		Assert.assertEquals("Riposi compensativi da anno corrente", -864, mar.riposiCompensativiDaAnnoCorrente);
+		
 		Assert.assertEquals("Residuo del mese", 192, mar.residuoDelMese());
-		Assert.assertEquals("Totale residuo anno corrente a fine mese", 417, mar.totaleResiduoAnnoCorrenteAFineMese());
-		Assert.assertEquals("Totale residuo anno corrente al mese precedente", 225, mar.totaleResiduoAnnoCorrenteAlMesePrecedente());
+		
+		Assert.assertEquals("Totale residuo anno corrente a fine mese", 912, mar.totaleResiduoAnnoCorrenteAFineMese());
+		Assert.assertEquals("Totale residuo anno corrente al mese precedente", 1205, mar.totaleResiduoAnnoCorrenteAlMesePrecedente());
 		Assert.assertEquals("Totale residuo anno corrente a fine mese più residuo anno precedente", 912, mar.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese());
 		
-		Assert.assertEquals("Residuo anno precedente disponibile alla fine del mese", 379, mar.residuoAnnoPrecedenteDisponibileAllaFineDelMese());
+		Assert.assertEquals("Residuo anno precedente disponibile alla fine del mese", 0, mar.residuoAnnoPrecedenteDisponibileAllaFineDelMese());
 		
-//
-//	
-//		PersonMonthUltimate apr = new PersonMonthUltimate(2013,4);
+		PersonMonthUltimate apr = new PersonMonthUltimate(2013,4);
+		apr.setMesePrecedente(mar);
+		apr.setResiduoAnnoPrecedente(1528);
+		apr.setResiduoDelMeseInNegativo(-115);
+		apr.setResiduoDelMeseInPositivo(685);
 
+		apr.aggiornaRiepiloghi();
+
+		Assert.assertEquals("Residuo del mese", 570, apr.residuoDelMese());
+		
+		Assert.assertEquals("Totale residuo anno corrente a fine mese", 1482, apr.totaleResiduoAnnoCorrenteAFineMese());
+		Assert.assertEquals("Totale residuo anno corrente al mese precedente", 912, apr.totaleResiduoAnnoCorrenteAlMesePrecedente());
+		Assert.assertEquals("Totale residuo anno corrente a fine mese più residuo anno precedente", 1482, apr.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese());
+		
+		Assert.assertEquals("Residuo anno precedente disponibile alla fine del mese", 0, apr.residuoAnnoPrecedenteDisponibileAllaFineDelMese());
+
+		//Assegnazione straordinari
+		Assert.assertTrue("Straordinari non assegnati, invece dovevano essere assegnati tutti", apr.assegnaStraordinari(5));
+
+		Assert.assertEquals("Totale residuo anno corrente a fine mese", 1182, apr.totaleResiduoAnnoCorrenteAFineMese());
+		Assert.assertEquals("Totale residuo anno corrente a fine mese più residuo anno precedente", 1182, apr.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese());
+		
+		Assert.assertEquals("Straordinari assegnati", 300, apr.getStraordinari());
 
 	}
+	
+	@Test
+	public void lastYearPositiveResidualEndMarchPositiveTechnologist() {
+		//int lastYearResidual = 2 * 60;
+		PersonMonthUltimate jan = new PersonMonthUltimate(2013,1);
+		jan.setResiduoAnnoPrecedente(1528);
+		jan.setResiduoDelMeseInNegativo(-760);
+		jan.setResiduoDelMeseInPositivo(591);
+		jan.setMesePrecedente(null);
+		
+		jan.aggiornaRiepiloghi();
+		
+		Assert.assertEquals("Residuo del mese", -169, jan.residuoDelMese());
+		Assert.assertEquals("Totale residuo anno corrente a fine mese", 591, jan.totaleResiduoAnnoCorrenteAFineMese());
+		Assert.assertEquals("Totale residuo anno corrente al mese precedente", 0, jan.totaleResiduoAnnoCorrenteAlMesePrecedente());
+		Assert.assertEquals("Totale residuo anno corrente a fine mese più residuo anno precedente", 1359, jan.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese());
+		
+		Assert.assertEquals("Residuo anno precedente disponibile alla fine del mese", 768, jan.residuoAnnoPrecedenteDisponibileAllaFineDelMese());
+		
+		
+		PersonMonthUltimate feb = new PersonMonthUltimate(2013,2);
+		feb.setMesePrecedente(jan);
+		feb.setResiduoAnnoPrecedente(1528);
+		
+		feb.setResiduoDelMeseInNegativo(-389);
+		feb.setResiduoDelMeseInPositivo(614);
+
+		feb.aggiornaRiepiloghi();
+		
+		Assert.assertEquals("Residuo del mese", 225, feb.residuoDelMese());
+		Assert.assertEquals("Totale residuo anno corrente a fine mese", 1205, feb.totaleResiduoAnnoCorrenteAFineMese());
+		Assert.assertEquals("Totale residuo anno corrente al mese precedente", 591, feb.totaleResiduoAnnoCorrenteAlMesePrecedente());
+		Assert.assertEquals("Totale residuo anno corrente a fine mese più residuo anno precedente", 1584, feb.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese());
+		
+		Assert.assertEquals("Residuo anno precedente disponibile alla fine del mese", 379, feb.residuoAnnoPrecedenteDisponibileAllaFineDelMese());
+		
+
+		PersonMonthUltimate mar = new PersonMonthUltimate(2013,3);
+		mar.setMesePrecedente(feb);
+		mar.setResiduoAnnoPrecedente(1528);
+		mar.setResiduoDelMeseInNegativo(-539);
+		mar.setResiduoDelMeseInPositivo(731);
+		
+		mar.aggiornaRiepiloghi();
+		
+		Assert.assertTrue(mar.prendiRiposoCompensativo(new LocalDate(2012,3,19)));
+		
+		Assert.assertEquals("Riposi compensativi da anno precedente", 0, mar.riposoCompensativiDaAnnoPrecedente);
+		Assert.assertEquals("Riposi compensativi da anno corrente", -432, mar.riposiCompensativiDaAnnoCorrente);
+		
+		Assert.assertTrue(mar.prendiRiposoCompensativo(new LocalDate(2012,3,28)));
+		
+		Assert.assertEquals("Riposi compensativi da anno precedente", 0, mar.riposoCompensativiDaAnnoPrecedente);
+		Assert.assertEquals("Riposi compensativi da anno corrente", -864, mar.riposiCompensativiDaAnnoCorrente);
+		
+		Assert.assertEquals("Residuo del mese", 192, mar.residuoDelMese());
+		
+		Assert.assertEquals("Totale residuo anno corrente a fine mese", 912, mar.totaleResiduoAnnoCorrenteAFineMese());
+		Assert.assertEquals("Totale residuo anno corrente al mese precedente", 1205, mar.totaleResiduoAnnoCorrenteAlMesePrecedente());
+		Assert.assertEquals("Totale residuo anno corrente a fine mese più residuo anno precedente", 912, mar.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese());
+		
+		Assert.assertEquals("Residuo anno precedente disponibile alla fine del mese", 0, mar.residuoAnnoPrecedenteDisponibileAllaFineDelMese());
+		
+		PersonMonthUltimate apr = new PersonMonthUltimate(2013,4);
+		apr.setMesePrecedente(mar);
+		apr.setResiduoAnnoPrecedente(1528);
+		apr.setResiduoDelMeseInNegativo(-115);
+		apr.setResiduoDelMeseInPositivo(685);
+
+		apr.aggiornaRiepiloghi();
+
+		Assert.assertEquals("Residuo del mese", 570, apr.residuoDelMese());
+		
+		Assert.assertEquals("Totale residuo anno corrente a fine mese", 1482, apr.totaleResiduoAnnoCorrenteAFineMese());
+		Assert.assertEquals("Totale residuo anno corrente al mese precedente", 912, apr.totaleResiduoAnnoCorrenteAlMesePrecedente());
+		Assert.assertEquals("Totale residuo anno corrente a fine mese più residuo anno precedente", 1482, apr.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese());
+		
+		Assert.assertEquals("Residuo anno precedente disponibile alla fine del mese", 0, apr.residuoAnnoPrecedenteDisponibileAllaFineDelMese());
+
+		//Assegnazione straordinari
+		Assert.assertTrue("Straordinari non assegnati, invece dovevano essere assegnati tutti", apr.assegnaStraordinari(5));
+
+		Assert.assertEquals("Totale residuo anno corrente a fine mese", 1182, apr.totaleResiduoAnnoCorrenteAFineMese());
+		Assert.assertEquals("Totale residuo anno corrente a fine mese più residuo anno precedente", 1182, apr.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese());
+		
+		Assert.assertEquals("Straordinari assegnati", 300, apr.getStraordinari());
+
+	}
+	
 
 }
