@@ -20,7 +20,7 @@ public class UltimateMonthResidualTest {
 	private static final class PersonMonthUltimate extends PersonMonth {
 
 		@Getter @Setter
-		private int personLevel = 4;
+		private int personLevel = 2;
 
 		@Getter @Setter
 		private PersonMonthUltimate mesePrecedente = null;
