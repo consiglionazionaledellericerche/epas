@@ -240,6 +240,7 @@ p#validita {margin: 2em 0em 2em}
 p#nuovoCodiceCompetenza {margin: 4em 0em 2em; align: left}
 p#tipoTimbratura {margin: 3em 0em 2em; align: left; font-weight:bold;}
 p#updateStampingText{margin: 3em 0em 2em; align: left;}
+p#allegaFile{margin:3em 0em 3em; align: center;}
 
 div#logout {text-align: right; float: right}
 div#chooseView {text-align: center}

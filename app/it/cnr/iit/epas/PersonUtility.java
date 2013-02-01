@@ -2,6 +2,8 @@ package it.cnr.iit.epas;
 
 import java.util.List;
 
+import javax.persistence.FetchType;
+
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 
@@ -10,9 +12,12 @@ import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 import play.db.jpa.Transactional;
 
+import models.Absence;
+import models.AbsenceType;
 import models.Configuration;
 import models.Contract;
 import models.Person;
+import models.PersonChildren;
 import models.PersonDay;
 import models.PersonMonth;
 import models.PersonYear;
@@ -162,6 +167,58 @@ public class PersonUtility {
 		}
 		return canOrNot;
 
+	}
+	
+	/**
+	 * metodo per stabilire se una persona può ancora prendere o meno giorni di permesso causa malattia del figlio
+	 */
+	public static boolean canTakePermissionIllnessChild(Person person, LocalDate date){
+		PersonChildren persChild = PersonChildren.find("Select pc from PersonChildren pc where pc.person = ? ", person).first();
+		
+//		List<AbsenceType> abtList = AbsenceType.find("Select abt from AbsenceType abt where abt.code in (?,?,?,?,?,?,?)", 
+//				"12","122","123","13","132","133","14").fetch();
+//		List<PersonDay> pdList = null;
+		/**
+		 * 	controllo che il figlio per cui si intende prendere il permesso di malattia abbia meno di 3 anni per usufruire del codice di 
+		 * congedo per malattia retribuito	
+		 */
+		if(persChild.bornDate.isAfter(date.minusYears(3))){
+			List<Absence> absenceList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
+					"and abs.personDay.date between ? and ? and abs.absenceType.code in (?,?,?)", 
+					person, date.minusYears(3), date, "12","122","123").fetch();
+//			pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+//					person, date.minusYears(3), date).fetch();
+//			for()
+			if(absenceList.size()>30){
+				return false;
+			}
+			else{
+				return true;
+			}
+		}
+		/**
+		 * controllo che il figlio per cui si intende prendere il permesso di malattia abbia meno di 8 anni di età
+		 */
+		if(persChild.bornDate.isAfter(date.minusYears(8))){
+			List<Absence> absenceList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
+					"and abs.personDay.date between ? and ? and abs.absenceType.code in (?,?,?,?)",
+					person, date.minusYears(5), date, "13","132","133","134").fetch();
+//			pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+//					person, date, ).fetch();
+			if(absenceList.size() > 5){
+				return false;
+			}
+			else{
+				return true;
+			}
+		}
+		
+		/**
+		 * per la malattia si possono prendere 30 giorni pagati nei primi 3 anni di vita del figlio e 5 giorni non pagati fino all'età di 8
+		 * anni
+		 */
+		
+		return false;
 	}
 
 }
