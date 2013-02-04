@@ -229,7 +229,7 @@ public class Person extends Model {
 	@OneToOne(mappedBy="person", fetch=FetchType.LAZY)
 	public PersonReperibility reperibility;
 	
-	@ManyToOne
+	@ManyToOne( fetch=FetchType.EAGER )
 	@JoinColumn(name="qualification_id")
 	public Qualification qualification;
 	
@@ -341,10 +341,13 @@ public class Person extends Model {
 	 */
 	public Contract getContract(LocalDate date){
 			
-		Contract contract = Contract.find("Select con from Contract con where con.person = ? and (con.beginContract IS NULL or con.beginContract <= ?) and " +
-				"(con.expireContract > ? or con.expireContract is null )",this, date, date).first();
-		
-		return contract;
+		List<Contract> contracts = Contract.find("Select con from Contract con where con.person = ? and (con.beginContract IS NULL or con.beginContract <= ?) and " +
+				"(con.expireContract > ? or con.expireContract is null )",this, date, date).fetch(2);
+		if (contracts.size() > 1) {
+			throw new IllegalStateException(
+				String.format("Trovati più contratti in contemporanea per la persona %s nella data %s", this, date));
+		}
+		return contracts.get(0);
 		
 	}
 	/**

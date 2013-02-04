@@ -421,9 +421,9 @@ public class PersonDay extends Model {
 				(date.isAfter(con.beginContract) && (con.expireContract == null || date.isBefore(con.expireContract)))) {
 			PersonDay lastPreviousPersonDayInMonth = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? " +
 					"and pd.date >= ? and pd.date < ? ORDER by pd.date DESC", person, date.dayOfMonth().withMinimumValue(), date).first();
-			if (lastPreviousPersonDayInMonth == null) {
+			if (lastPreviousPersonDayInMonth == null || (con != null && con.beginContract != null && lastPreviousPersonDayInMonth.date.isBefore(con.beginContract))) {
 				progressive = difference;
-				Logger.debug("%s - %s. Non c'è nessun personDay prima di questa data. Progressive di oggi = %s", person, date, progressive);
+				Logger.debug("%s - %s. Non c'è nessun personDay nel contratto attuale prima di questa data. Progressive di oggi = %s", person, date, progressive);
 			} else {
 
 				progressive = difference + lastPreviousPersonDayInMonth.progressive;
