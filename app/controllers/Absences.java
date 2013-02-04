@@ -27,6 +27,7 @@ import play.Logger;
 import play.data.binding.As;
 import play.data.binding.types.DateTimeBinder;
 import play.data.validation.Required;
+import play.db.jpa.Blob;
 import play.db.jpa.GenericModel.JPAQuery;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -266,6 +267,11 @@ public class Absences extends Controller{
 			pd = new PersonDay(person, dateFrom);
 			pd.save();
 		}
+		if(params.get("datasize", Blob.class) != null){
+			absence.absenceRequest = params.get("datasize", Blob.class);
+		}
+		else 
+			absence.absenceRequest = null;
 		absence.personDay = pd;
 	
 		absence.absenceType = absenceType;
@@ -378,6 +384,9 @@ public class Absences extends Controller{
 				pd.save();
 				flash.success(String.format("Assenza di tipo %s inserita per il giorno %s per %s %s con buono mensa assegnato", absenceCode, PersonTags.toDateTime(pd.date), pd.person.surname, pd.person.name));
 				render("@save");
+			}
+			if(params.get("datasize", Blob.class) != null){
+				absence.absenceRequest = params.get("datasize", Blob.class);
 			}
 			absence.absenceType = absenceType;
 			absence.save();
