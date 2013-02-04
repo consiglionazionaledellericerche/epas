@@ -13,6 +13,7 @@ import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
+import play.db.jpa.Blob;
 import play.db.jpa.Model;
 
 /**
@@ -35,6 +36,8 @@ public class Absence extends Model {
 	@ManyToOne(optional=false)
 	@JoinColumn(name="personDay_id", nullable=false)
 	public PersonDay personDay;
+	
+	public Blob absenceRequest;
 
 	@Override
 	public String toString() {
