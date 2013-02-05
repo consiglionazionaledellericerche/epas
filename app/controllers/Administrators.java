@@ -29,7 +29,7 @@ public class Administrators extends Controller {
 	@Check(Security.INSERT_AND_UPDATE_ADMINISTRATOR)
 	public static void list(){
 		List<Person> administratorList = new ArrayList<Person>();
-		List<Person> personList = Person.findAll();
+		List<Person> personList = Person.find("Select p from Person p where p.name <> ? order by p.surname", "Admin").fetch();
 		for(Person p : personList){
 			if(p.permissions.size() > 0){
 				administratorList.add(p);
