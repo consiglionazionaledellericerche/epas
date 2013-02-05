@@ -107,7 +107,7 @@ public class VacationsPermissionsDaysManager {
 		if(pd == null || pm == null)
 			throw new IllegalStateException(String.format("Person day o person month non valido per %s %s", person.name, person.surname));
 		
-		Integer workingTime = person.workingTimeType.getWorkingTimeFromWorkinTimeType(date.getDayOfWeek()).workingTime;
+		Integer workingTime = person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime;
 		if(pd.progressive + pm.progressiveAtEndOfMonthInMinutes > workingTime){
 			if(person.qualification.qualification == 1 || person.qualification.qualification == 2 || person.qualification.qualification == 3){
 				Integer expireMonth = config.monthExpireRecoveryDaysOneThree;
@@ -175,7 +175,7 @@ public class VacationsPermissionsDaysManager {
 		/**
 		 * se il comportamento in caso di raggiungimento del limite è "non fare niente", è inutile fare ulteriori controlli
 		 */
-		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
+//		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
 		if(abt.absenceTypeGroup.accumulationBehaviour.equals(AccumulationBehaviour.nothing))
 			return new AvailabilityInfo(true);
 		

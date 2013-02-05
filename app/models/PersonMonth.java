@@ -31,9 +31,16 @@ import play.data.validation.Required;
 import play.db.jpa.JPA;
 import play.db.jpa.Model;
 
+import lombok.Cleanup;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import models.Stamping.WayType;
 
+/**
+ * @author cristian
+ *
+ */
 @Audited
 @Table(name="person_months")
 @Entity
@@ -47,12 +54,28 @@ public class PersonMonth extends Model {
 	@Column
 	public Integer year;
 	@Column
-	public Integer month;	
+	public Integer month;
 
+	@Transient
+	private PersonMonth mesePrecedenteCache;
+	
+	@Column(name = "recuperi_ore_da_anno_precedente")
+	public int recuperiOreDaAnnoPrecedente;
+	
+	@Column(name = "riposi_compensativi_da_anno_precedente")
+	public int riposiCompensativiDaAnnoPrecedente;
+	
+	@Column(name = "riposi_compensativi_da_anno_corrente")
+	public int riposiCompensativiDaAnnoCorrente;
+	
+	@Column
+	public int straordinari;
+	
 	/**
 	 * Minuti derivanti dalla somma dei progressivi giornalieri del mese 
 	 */
 	@Column
+	@Deprecated
 	public Integer progressiveAtEndOfMonthInMinutes = 0;
 
 	/**
@@ -76,6 +99,7 @@ public class PersonMonth extends Model {
 	 *  straordinari (notturni, diurni, etc)  
 	 */
 	@Column(name = "total_remaining_minutes")
+	@Deprecated
 	public Integer totalRemainingMinutes = 0;
 
 	/**
@@ -88,13 +112,12 @@ public class PersonMonth extends Model {
 	@Column(name = "compensatory_rest_in_minutes")
 	public Integer compensatoryRestInMinutes = 0;
 
-
-	@Transient
-	public List<PersonMonth> persons = null;
+	@Column(name = "residual_past_year")
+	public Integer residualPastYear = 0;
 
 	@Transient
 	public List<PersonDay> days = null;
-	
+
 	@Transient
 	private Map<AbsenceType, Integer> absenceCodeMap;
 
@@ -122,6 +145,7 @@ public class PersonMonth extends Model {
 	 * @return il residuo di ore all'ultimo giorno del mese se visualizzo un mese passato, al giorno attuale se visualizzo il mese
 	 * attuale, ovvero il progressivo orario all'ultimo giorno del mese (se passato) o al giorno attuale (se il mese è quello attuale)
 	 */
+	@Deprecated
 	public int getMonthResidual(){
 		int residual = 0;
 		LocalDate date = new LocalDate();
@@ -136,9 +160,20 @@ public class PersonMonth extends Model {
 		}
 		else{
 			LocalDate hotDate = new LocalDate(year,month,1).dayOfMonth().withMaximumValue();
-			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, hotDate).first();
-			residual = pd.progressive;
+			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date <= ? and pd.date > ?" +
+					" order by pd.date desc", person, hotDate, hotDate.dayOfMonth().withMinimumValue()).first();
+			if(pd == null){
+				/**
+				 * si sta cercando il personDay di una data ancora non realizzata (ad esempio il personDay dell'ultimo giorno di un mese ancora da 
+				 * completare...es.: siamo al 4 gennaio 2013 e si cerca il personDay del 31 gennaio, che ancora non è stato realizzato
+				 */
+				residual = 0;
+			}
+			else
+				residual = pd.progressive;
+
 		}
+
 		return residual;
 	}
 
@@ -148,21 +183,41 @@ public class PersonMonth extends Model {
 	 * @param year
 	 * @return il numero di minuti di riposo compensativo utilizzati in quel mese 
 	 */
+	@Deprecated
 	public int getCompensatoryRestInMinutes(){
-		if (compensatoryRestInMinutes != null) {
-			return compensatoryRestInMinutes;
-		}
-		
-		compensatoryRestInMinutes = 0;
-		LocalDate beginMonth = new LocalDate(year, month, 1);
-		List<Absence> absList = Absence.find("Select abs from Absence abs where abs.person = ? and abs.date between ? and ? and abs.absenceType.code = ?", 
-				person, beginMonth, beginMonth.dayOfMonth().withMaximumValue(), "91").fetch();
-		compensatoryRestInMinutes = (absList.size()*person.workingTimeType.getWorkingTimeFromWorkinTimeType(1).workingTime);
-		save();
-		return compensatoryRestInMinutes;
-//		return ((Long) Absence.find("Select count(abs) from Absence abs where abs.person = ? and abs.date between ? and ? and abs.absenceType.code = ?", 
-//				person, beginMonth, beginMonth.dayOfMonth().withMaximumValue(), "91").first()).intValue();
 
+		int compensatoryRest = getCompensatoryRest();
+
+		Logger.debug("NUmero di giorni di riposo compensativo nel mese: %s", compensatoryRest);
+		int minutesOfCompensatoryRest = compensatoryRest * person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime;
+		if(minutesOfCompensatoryRest != compensatoryRestInMinutes && compensatoryRestInMinutes != null){
+			compensatoryRestInMinutes = minutesOfCompensatoryRest;
+			save();
+		}
+
+		return compensatoryRestInMinutes;
+
+	}
+
+	/**
+	 * 
+	 * @return il numero di giorni di riposo compensativo nel mese
+	 */
+	@Deprecated
+	public int getCompensatoryRest(){
+		int compensatoryRest = 0;
+		LocalDate beginMonth = new LocalDate(year, month, 1);
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+				person, beginMonth, beginMonth.dayOfMonth().withMaximumValue()).fetch();
+		for(PersonDay pd : pdList){
+			if(pd.absences.size() > 0){
+				for(Absence abs : pd.absences){
+					if(abs.absenceType.code.equals("91"))
+						compensatoryRest = compensatoryRest +1;
+				}
+			}
+		}
+		return compensatoryRest;
 	}
 
 	/**
@@ -171,15 +226,25 @@ public class PersonMonth extends Model {
 	 * @param year
 	 * @return il totale derivante dalla differenza tra le ore residue e le eventuali ore di riposo compensativo
 	 */
+	@Deprecated
 	public int getTotalOfMonth(){
 		int total = 0;
 		int compensatoryRest = getCompensatoryRestInMinutes();
+		//Logger.debug("CompensatoryRest in getTotalOfMonth: %s", compensatoryRest);
 		int monthResidual = getMonthResidual();
+		//Logger.debug("MonthResidual in getTotalOfMonth: %s", monthResidual);
 		LocalDate date = new LocalDate(year, month, 1);
+		/**
+		 * TODO: devo farlo qui il controllo di quale sia la qualifica per poter aggiungere o meno il valore del residuo dell'anno precedente!?!?!?
+		 */
 		int residualFromPastMonth = PersonUtility.getResidual(person, date.dayOfMonth().withMaximumValue());
+
 		total = residualFromPastMonth+monthResidual-(compensatoryRest); 
+
 		return total;
 	}
+
+
 
 	/**
 	 * 
@@ -256,19 +321,20 @@ public class PersonMonth extends Model {
 	 * Aggiorna le variabili d'istanza in funzione dei valori presenti sul db.
 	 * Non effettua il salvataggio sul database.
 	 */
+	@Deprecated
 	public void refreshPersonMonth(){
 
 		Configuration config = Configuration.getCurrentConfiguration();
-		
+
 		LocalDate date = new LocalDate(year, month, 1);
 		PersonDay lastPersonDayOfMonth = 
-				PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date BETWEEN ? AND ? ORDER BY pd.date DESC",
+				PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date <= ? and pd.date > ? ORDER BY pd.date DESC",
 						person, date.dayOfMonth().withMinimumValue(), date.dayOfMonth().withMaximumValue()).first();
 
 		Logger.trace("%s, lastPersonDayOfMonth = %s", toString(), lastPersonDayOfMonth);
-		
-		progressiveAtEndOfMonthInMinutes = lastPersonDayOfMonth.progressive;  
-
+		if(lastPersonDayOfMonth != null)
+			progressiveAtEndOfMonthInMinutes = lastPersonDayOfMonth.progressive;  
+		this.merge();
 		LocalDate startOfMonth = new LocalDate(year, month, 1);
 
 		List<Absence> compensatoryRestAbsences = JPA.em().createQuery(
@@ -302,17 +368,17 @@ public class PersonMonth extends Model {
 				compensatoryRestInMinutes += absence.absenceType.justifiedTimeAtWork.minutesJustified; 
 			}
 		}
-		
+
 		Logger.trace("%s compensatoryRestInMinutes = %s", toString(), compensatoryRestInMinutes);
-		
+
 		//TODO: aggiungere eventuali riposi compensativi derivanti da inizializzazioni 
-		InitializationAbsence initAbsence = new InitializationAbsence();
-		int recoveryDays = initAbsence.recoveryDays;
+		//InitializationAbsence initAbsence = new InitializationAbsence();
+		//int recoveryDays = initAbsence.recoveryDays;
 
 
 		PersonMonth previousPersonMonth = PersonMonth.find("byPersonAndYearAndMonth", person, startOfMonth.minusMonths(1).getYear(), startOfMonth.minusMonths(1).getMonthOfYear()).first();
 		Logger.trace("%s, previousPersonMonth = %s", toString(), previousPersonMonth);
-		
+
 		int totalRemainingMinutesPreviousMonth = previousPersonMonth == null ? 0 : previousPersonMonth.totalRemainingMinutes;
 
 		if (person.qualification.qualification <= 3) {
@@ -330,9 +396,9 @@ public class PersonMonth extends Model {
 		else{
 			PersonYear py = PersonYear.find("byPersonAndYear", person, year-1).first();
 			//Se personYyear anno precedente non devo fare niente e totalRemainingMinutePastYearTaken = 0
-			
+
 			totalRemainingMinutes = progressiveAtEndOfMonthInMinutes + totalRemainingMinutesPreviousMonth - compensatoryRestInMinutes;
-			
+
 			/**
 			 * TODO: c'è il caso di persone che hanno terminato il rapporto di lavoro in una certa data e che ritornano a lavoro a causa del 
 			 * badge ancora attivo in date successive alla fine del rapporto di lavoro (vedi Fabrizio Leonardi che va in pensione il 31/12/2010
@@ -342,7 +408,7 @@ public class PersonMonth extends Model {
 			if (py != null) {
 				if(month < config.monthExpireRecoveryDaysFourNine){
 					int totalRemainingMinutePastYearTaken = 0;
-					
+
 					for(int i = 1; i < month; i++){
 						PersonMonth pm = PersonMonth.find("byPersonAndYearAndMonth", person, year, i).first();
 						totalRemainingMinutePastYearTaken += pm.remainingMinutesPastYearTaken;						
@@ -353,17 +419,17 @@ public class PersonMonth extends Model {
 					}
 					else
 						remainingMinutesResidualLastYear = 0;
-					
+
 					if (remainingMinutesResidualLastYear < 0) {
 						throw new IllegalStateException(
-							String.format("Il valore dei minuti residui dell'anno precedente per %s nel mese %s %s e' %s. " +
-								"Non ci dovrebbero essere valori negativi per le ore residue dell'anno precedente", person, year, month, remainingMinutesResidualLastYear));
+								String.format("Il valore dei minuti residui dell'anno precedente per %s nel mese %s %s e' %s. " +
+										"Non ci dovrebbero essere valori negativi per le ore residue dell'anno precedente", person, year, month, remainingMinutesResidualLastYear));
 					}
-					
+
 					if (compensatoryRestInMinutes > 0 && remainingMinutesResidualLastYear > 0) {
 						remainingMinutesPastYearTaken = Math.min(compensatoryRestInMinutes, remainingMinutesResidualLastYear);
 					}
-					
+
 					//Se non sono nell'ultimo mese in cui sono valide le ore residue dell'anno passato allora mi porto dietro
 					// le ore residue che non ho ancora preso
 					if (month < (config.monthExpireRecoveryDaysFourNine - 1)) {
@@ -372,11 +438,12 @@ public class PersonMonth extends Model {
 
 				}
 			}
+			this.save();
 		}
-		
-		save();
+
+		this.save();
 	}
-	
+
 	/**
 	 * 
 	 * @return il numero di buoni pasto usabili per quel mese
@@ -428,7 +495,7 @@ public class PersonMonth extends Model {
 		}
 		return basedDays;
 	}
-	
+
 	/**
 	 * 
 	 * @param days lista di PersonDay
@@ -482,10 +549,10 @@ public class PersonMonth extends Model {
 		}
 		List<StampModificationType> stampCodeList = new ArrayList<StampModificationType>();
 		for(PersonDay pd : days){
-			
+
 			StampModificationType smt = pd.checkTimeForLunch();
 			Logger.debug("Lo stamp modification type è: %s", smt);
-			
+
 			if(smt != null && !stampCodeList.contains(smt)){
 				Logger.debug("Aggiunto %s alla lista", smt.description);
 				stampCodeList.add(smt);
@@ -500,14 +567,348 @@ public class PersonMonth extends Model {
 		Logger.debug("La lista degli stamping code per questo mese contiene: %s", stampingCodeList);
 		return stampCodeList;
 	}
-	
-	
-	
-	
+
+	/**
+	 * 
+	 * @return il numero di riposi compensativi fatti dall'inizio dell'anno a quel momento
+	 */
+	public int getCompensatoryRestInYear(){
+		LocalDate beginYear = new LocalDate(year, 1, 1);
+		LocalDate now = new LocalDate();
+		int numberOfCompensatoryRest = 0;
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+				person, beginYear, now).fetch();
+		for(PersonDay pd : pdList){
+			if(pd.absences.size() > 0){
+				for(Absence abs : pd.absences){
+					if(abs.absenceType.code.equals("91"))
+						numberOfCompensatoryRest = numberOfCompensatoryRest + 1;
+				}
+			}
+		}
+		return numberOfCompensatoryRest;
+
+	}
+
+	/**
+	 * 
+	 * @return il numero di ore di straordinario fatte dall'inizio dell'anno
+	 */
+	public int getOvertimeHourInYear(){
+		Logger.debug("Chiamata funzione di controllo straordinari...");
+		int overtimeHour = 0;
+		List<Competence> compList = Competence.find("Select comp from Competence comp, CompetenceCode code where comp.person = ? and comp.year = ? and " +
+				"comp.competenceCode = code and code.code = ?", person, year, "S1").fetch();
+		Logger.debug("La lista degli straordinari da inizio anno : %s", compList);
+		if(compList != null){
+			for(Competence comp : compList){
+				overtimeHour = overtimeHour + comp.value;
+			}
+		}
+		Logger.debug("Il numero di ore di straordinari è: ", overtimeHour);
+		return overtimeHour;
+	}
+
 	@Override
 	public String toString() {
+		//FIXME: da sistemare
 		return String.format("PersonMonth[%d] - person.id = %d, year = %s, month = %d, totalRemainingMinutes = %d, " +
-			"progressiveAtEndOfMonthInMinutes = %d, compensatoryRestInMinutes = %d, remainingMinutesPastYearTakes = %d",
-			id, person.id, year, month, totalRemainingMinutes, progressiveAtEndOfMonthInMinutes, compensatoryRestInMinutes, remainingMinutesPastYearTaken);
+				"progressiveAtEndOfMonthInMinutes = %d, compensatoryRestInMinutes = %d, remainingMinutesPastYearTakes = %d",
+				id, person.id, year, month, totalRemainingMinutes, progressiveAtEndOfMonthInMinutes, compensatoryRestInMinutes, remainingMinutesPastYearTaken);
+	}
+
+	public static PersonMonth build(Person person, int year, int month){
+
+		PersonMonth pm = new PersonMonth(person, year, month);
+		pm.create();
+		pm.aggiornaRiepiloghi();
+		return pm;
+		
+	}
+
+	public static PersonMonth getInstance(Person person, int year, int month) {
+		PersonMonth personMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? and pm.month = ?", person, year, month).first();
+		if (personMonth == null) {
+			personMonth = new PersonMonth(person, year, month);
+		}
+		return personMonth;
+	}
+
+
+	/**
+	 * @return la somma dei minuti dei giorni (entro una certa data) che hanno una differenza negativa rispetto all'orario di lavoro
+	 */
+	public long residuoDelMeseInNegativoAllaData(LocalDate date) {
+		LocalDate startOfMonth = new LocalDate(year, month, 1);
+		Long residuo = JPA.em().createQuery("SELECT sum(pd.difference) FROM PersonDay pd WHERE pd.date BETWEEN :startOfMonth AND :endOfMonth and pd.person = :person " +
+				"AND pd.difference < 0 and pd.date <= :date", Long.class)
+				.setParameter("startOfMonth", startOfMonth)
+				.setParameter("endOfMonth", startOfMonth.dayOfMonth().withMaximumValue())
+				.setParameter("person", person)
+				.setParameter("date", date)
+				.getSingleResult();
+		
+		return residuo != null ? residuo : 0;
+	}
+	
+	/**
+	 * @return la somma dei minuti dei giorni (alla fine del mese) che hanno una differenza negativa rispetto all'orario di lavoro
+	 */
+	public long residuoDelMeseInNegativo() {
+		LocalDate startOfMonth = new LocalDate(year, month, 1);
+		return residuoDelMeseInNegativoAllaData(startOfMonth.dayOfMonth().withMaximumValue());
+	}
+
+	/**
+	 * @return la somma dei minuti dei giorni (entro una certa data) che hanno una differenza positiva rispetto all'orario di lavoro
+	 */
+	public long residuoDelMeseInPositivoAllaData(LocalDate date) {
+		Long residuo = JPA.em().createQuery("SELECT sum(pd.difference) FROM PersonDay pd WHERE pd.date BETWEEN :startOfMonth AND :endOfMonth and pd.person = :person " +
+				"AND pd.difference > 0 and pd.date <= :date", Long.class)
+				.setParameter("startOfMonth", new LocalDate(year, month, 1))
+				.setParameter("endOfMonth", (new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()))
+				.setParameter("person", person)
+				.setParameter("date", date)
+				.getSingleResult();
+		return residuo != null ? residuo : 0;
+	}
+	
+	/**
+	 * @return la somma dei minuti dei giorni (alla fine del mese) che hanno una differenza positiva rispetto all'orario di lavoro
+	 */
+	public long residuoDelMeseInPositivo() {
+		return residuoDelMeseInPositivoAllaData(new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
+	}
+	
+	/**
+	 * @return i minuti di lavoro residui dell'anno precedente (il fatto di poterli utilizzare o meno può dipendere dal tipo di contratto e dal mese corrente
+	 */
+	public int residuoAnnoPrecedente() {
+		Contract contractLastYear = person.getContract(new LocalDate(year - 1, 12, 31));
+		
+		//Se il contratto della persona era attivo anche l'anno scorso si prende il personYear dell'anno precedente altrimenti il residuo dell'anno precedente
+		if (contractLastYear != null && contractLastYear.equals(person.getCurrentContract())) {
+			PersonYear personYear = PersonYear.find("SELECT py FROM PersonYear py WHERE py.year = ? AND py.person = ?", year - 1, person).first();
+			return personYear != null ? personYear.getRemainingMinutes() : 0;
+		} else {
+			return 0;
+		}
+	}
+	
+	/**
+	 * @return il PersonMonth del mese precedente
+	 */
+	public PersonMonth mesePrecedente() {
+		Contract currentContract = person.getContract(new LocalDate(year, month, 1));
+		LocalDate fineMesePrecedente = (new LocalDate(year, month, 1)).minusMonths(1).dayOfMonth().withMaximumValue();
+		
+		if(currentContract == null)
+			return null;
+		if (currentContract.beginContract != null && fineMesePrecedente.isBefore(currentContract.beginContract)) {
+			return null;
+		}
+		
+		if (mesePrecedenteCache != null) {
+			return mesePrecedenteCache;
+		}
+		LocalDate date = new LocalDate(year, month, 1);
+		date = date.minusMonths(1);
+		return PersonMonth.find("SELECT pm FROM PersonMonth pm WHERE pm.year = ? and pm.month = ? AND pm.person = ?", date.getYear(), date.getMonthOfYear(), person).first();
+	}
+	
+	public boolean possibileUtilizzareResiduoAnnoPrecedente() {
+		//Dipende dal livello.... e da
+		Qualification qualification = Qualification.find("SELECT p.qualification FROM Person p WHERE p = ?", person).first(); 
+		if(qualification == null)
+			return false;
+		// TODO:considerare quando non c'è la qualifica...	
+		return month <= 3 || qualification.qualification <= 3;
+	}
+	
+	/**
+	 * @return la somma dei residui positivi e di quelli negativi
+	 */
+	public long residuoDelMese() {
+		return residuoDelMeseInPositivo() + residuoDelMeseInNegativo();
+	}
+
+	/**
+	 * @return la somma dei residui positivi e di quelli negativi alla data specificata
+	 */
+	public long residuoDelMeseAllaData(LocalDate date) {
+		return residuoDelMeseInPositivoAllaData(date) + residuoDelMeseInNegativoAllaData(date);
+	}
+	
+	/**
+	 * @return il tempo di lavoro dai mese precedenti eventualmente comprensivo di quello derivante
+	 * 	dall'anno precedente
+	 */
+	public long totaleResiduoAnnoCorrenteAlMesePrecedente() {
+		//Deve esistere un mese precedente ed essere dello stesso anno (quindi a gennaio il mese precedente di questo anno non esiste)
+		if (mesePrecedente() != null && month != 1) {
+			return mesePrecedente().totaleResiduoAnnoCorrenteAFineMese();
+		}
+		return 0;
+
+	}
+	
+	public int residuoAnnoPrecedenteDisponibileAllInizioDelMese() {
+		if (possibileUtilizzareResiduoAnnoPrecedente()) {
+			
+			if (month.equals(1)) {
+				return residuoAnnoPrecedente();
+			} 
+			if (mesePrecedente() == null) {
+				return 0;
+			}
+			return mesePrecedente().residuoAnnoPrecedenteDisponibileAllaFineDelMese();
+		} 
+		
+		return 0;
+		
+	}
+	
+	public int residuoAnnoPrecedenteDisponibileAllaFineDelMese() {
+		int residuoAnnoPrecedenteDisponibileAllInizioDelMese = residuoAnnoPrecedenteDisponibileAllInizioDelMese();
+		//System.out.println("mese: " + month + ". residuoAnnoPrecedenteDisponibileAllInizioDelMese = " + residuoAnnoPrecedenteDisponibileAllInizioDelMese);
+		
+		int residuoAnnoPrecedenteDisponibileAllaFineDelMese = residuoAnnoPrecedenteDisponibileAllInizioDelMese + recuperiOreDaAnnoPrecedente + riposiCompensativiDaAnnoPrecedente;
+		
+		//System.out.println("mese: " + month + ". residuoAnnoPrecedenteDisponibileAllaFineDelMese() = " + residuoAnnoPrecedenteDisponibileAllaFineDelMese);
+		return residuoAnnoPrecedenteDisponibileAllaFineDelMese;
+	}
+	
+	public long totaleResiduoAnnoCorrenteAFineMese() {
+		return residuoDelMese() + totaleResiduoAnnoCorrenteAlMesePrecedente() + riposiCompensativiDaAnnoCorrente - straordinari - recuperiOreDaAnnoPrecedente;  
+	}
+	
+	public long totaleResiduoAnnoCorrenteAllaData(LocalDate date) {
+		return residuoDelMeseAllaData(date) + totaleResiduoAnnoCorrenteAlMesePrecedente() + riposiCompensativiDaAnnoCorrente - straordinari - recuperiOreDaAnnoPrecedente;  
+	}
+	
+	public long totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese() {
+		return totaleResiduoAnnoCorrenteAFineMese() + residuoAnnoPrecedenteDisponibileAllaFineDelMese();
+	}
+	
+	public void aggiornaRiepiloghi() {
+		Logger.debug("Aggiornamento dei riepiloghi del mese %s per %s", month, person);
+		
+		int residuoAnnoPrecedenteDisponibileAllaFineDelMese = residuoAnnoPrecedenteDisponibileAllaFineDelMese();
+		
+		long residuoDelMeseInNegativo = residuoDelMeseInNegativo();
+		long residuoDelMeseInPositivo = residuoDelMeseInPositivo();
+		
+		if (residuoDelMeseInNegativo != 0 && residuoAnnoPrecedenteDisponibileAllaFineDelMese > 0) {
+			
+			 Logger.debug("mese = %s. Residuo del mese in negativo (%s) != 0 e residuoAnnoPrecedenteDisponibileAllaFineDelMese (%s) > 0, recupero dall'anno scorso il recuperabile",
+					month , residuoDelMeseInNegativo, residuoAnnoPrecedenteDisponibileAllaFineDelMese);
+			 
+			if (residuoAnnoPrecedenteDisponibileAllaFineDelMese > -residuoDelMeseInNegativo) {
+				Logger.debug("mese = %s. residuoAnnoPrecedenteDisponibileAllaFineDelMese > del residuo del mese in negativo, aumento i recuperiOreDaAnnoPrecedente (adesso %s) di %s minuti",
+					month, recuperiOreDaAnnoPrecedente, residuoDelMeseInNegativo);
+				
+				recuperiOreDaAnnoPrecedente += residuoDelMeseInNegativo;
+				
+				Logger.debug("mese = %s. recuperiOreDaAnnoPrecedente = %s minuti", month, recuperiOreDaAnnoPrecedente);
+			} else {
+				recuperiOreDaAnnoPrecedente -= residuoAnnoPrecedenteDisponibileAllaFineDelMese;
+			}
+		}
+		
+		if (residuoDelMeseInPositivo != 0 && residuoAnnoPrecedenteDisponibileAllaFineDelMese < 0) {
+			if (residuoDelMeseInPositivo > -residuoAnnoPrecedenteDisponibileAllaFineDelMese) {
+				recuperiOreDaAnnoPrecedente -= residuoAnnoPrecedenteDisponibileAllaFineDelMese;
+			} else {
+				recuperiOreDaAnnoPrecedente += residuoDelMeseInPositivo;
+			}
+		}
+		save();
+	}
+	
+	public long tempoDisponibilePerRecuperi(LocalDate date) {
+		long totaleResiduoAnnoCorrenteAllaData = totaleResiduoAnnoCorrenteAllaData(date);
+		
+		//System.out.println("totaleResiduoAnnoCorrenteAllaData = " + totaleResiduoAnnoCorrenteAllaData);
+		
+		long tempoDisponibile = totaleResiduoAnnoCorrenteAllaData + residuoAnnoPrecedenteDisponibileAllaFineDelMese();
+		
+		if (tempoDisponibile <= 0) {
+			tempoDisponibile = 0;
+		}
+		//System.out.println("Data = " + date + ". Tempo disponibile per recuperi = " + tempoDisponibile);
+		return tempoDisponibile;
+		
+	}	
+	
+	public long tempoDisponibilePerStraordinari() {
+		
+		long residuoDelMeseInPositivo = residuoDelMeseInPositivo();
+		
+		if (residuoDelMeseInPositivo <= 0) {
+			return 0;
+		}
+		
+		long residuoAllaDataRichiesta = residuoDelMese();
+		
+		long tempoDisponibile = residuoAnnoPrecedenteDisponibileAllaFineDelMese() + mesePrecedente().totaleResiduoAnnoCorrenteAFineMese() + residuoAllaDataRichiesta;
+		
+		if (tempoDisponibile <= 0) {
+			return 0;
+		}
+		
+		return Math.min(residuoDelMeseInPositivo, tempoDisponibile);
+					
+	}
+	
+	public boolean assegnaStraordinari(int ore) {
+		if (tempoDisponibilePerStraordinari() > ore * 60) {
+			straordinari = ore * 60;
+			save();
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean prendiRiposoCompensativo(LocalDate date) {
+		int minutiRiposoCompensativo = minutiRiposoCompensativo(date);
+		
+		if (-minutiRiposoCompensativo > tempoDisponibilePerRecuperi(date)) {
+			return false;
+		}
+		
+		int residuoAnnoPrecedenteDisponibileAllaFineDelMese = residuoAnnoPrecedenteDisponibileAllaFineDelMese();
+		
+		if (residuoAnnoPrecedenteDisponibileAllaFineDelMese < 0) {
+			throw new IllegalStateException(
+				String.format("Richiesto riposo compensativo per l'utente %s nella data %s: ci sono ore disponibili " +
+					"ma il residuo dell'anno scorso è negativo, questo non dovrebbe essere possibile, contattare Dario <dario.tagliaferri@iit.cnr.it>",
+					person, date));
+		}
+		
+		//System.out.println("residuoAnnoPrecedenteDisponibileAllaFineDelMese = " + residuoAnnoPrecedenteDisponibileAllaFineDelMese);
+		if (residuoAnnoPrecedenteDisponibileAllaFineDelMese == 0) {
+			//Per esempio per i tecnici/amministrativi da aprile in poi
+			riposiCompensativiDaAnnoCorrente += minutiRiposoCompensativo;
+		} else {
+			if (minutiRiposoCompensativo < residuoAnnoPrecedenteDisponibileAllaFineDelMese) {
+				riposiCompensativiDaAnnoPrecedente += minutiRiposoCompensativo;
+			} else {
+				riposiCompensativiDaAnnoPrecedente += residuoAnnoPrecedenteDisponibileAllaFineDelMese;
+				riposiCompensativiDaAnnoCorrente += (minutiRiposoCompensativo + residuoAnnoPrecedenteDisponibileAllaFineDelMese);
+			}				
+		}
+		
+		//Creare l'assenza etc....
+		aggiornaRiepiloghi();
+		return true;
+	}
+	
+	/**
+	 * @return il valore (negativo) dei minuti a cui corrisponde un riposo compensativo
+	 */
+	public int minutiRiposoCompensativo(LocalDate date) {
+		//Cambia in funzione del tipo di orario di lavoro
+		return - person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime;
+
 	}
 }

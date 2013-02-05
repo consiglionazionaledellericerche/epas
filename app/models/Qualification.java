@@ -25,7 +25,7 @@ import lombok.Data;
 @Table(name="qualifications")
 public class Qualification extends Model{
 	
-	@OneToMany(mappedBy="qualification", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy="qualification")
 	public List<Person> person;
 	
 	@ManyToMany(mappedBy = "qualifications", fetch = FetchType.LAZY)

@@ -6,10 +6,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import models.Absence;
+import models.Competence;
+import models.CompetenceCode;
 import models.ContactData;
 import models.Contract;
 import models.Location;
 import models.Person;
+import models.PersonDay;
 import models.Qualification;
 
 import org.joda.time.LocalDate;
@@ -28,16 +32,51 @@ public class Persons extends Controller {
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void edit(Long personId){
 		Person person = Person.findById(personId);
+		/**
+		 * questa data serve come default per far vedere durante la visualizzazione le eventuali reperibilità e straordinari di quella persona
+		 * in quel mese in quell'anno
+		 */
+		LocalDate date = new LocalDate();
 		List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract", person).fetch();
-		
-		render(person, contractList);
+		int weekDayAvailability;
+		int holidaysAvailability;
+		int daylightWorkingDaysOvertime;
+		CompetenceCode cmpCode1 = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "207").first();
+		CompetenceCode cmpCode2 = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "208").first();
+		CompetenceCode cmpCode3 = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "S1").first();
+		Logger.debug("Anno e mese: %s %s", date.getYear(), date.getMonthOfYear());
+		Competence comp1 = Competence.find("Select comp from Competence comp, CompetenceCode code where comp.competenceCode = code and comp.person = ?" +
+				" and comp.year = ? and comp.month = ? and code = ?", person, date.getYear(), date.getMonthOfYear(), cmpCode1).first();
+		Competence comp2 = Competence.find("Select comp from Competence comp, CompetenceCode code where comp.competenceCode = code and comp.person = ?" +
+				" and comp.year = ? and comp.month = ? and code = ?", person, date.getYear(), date.getMonthOfYear(), cmpCode2).first();
+		Competence comp3 = Competence.find("Select comp from Competence comp, CompetenceCode code where comp.competenceCode = code and comp.person = ?" +
+				" and comp.year = ? and comp.month = ? and code = ?", person, date.getYear(), date.getMonthOfYear(), cmpCode3).first();
+		if(comp1 != null)
+			weekDayAvailability = comp1.value;
+		else
+			weekDayAvailability = 0;
+		if(comp2 != null)
+			holidaysAvailability = comp2.value;
+		else
+			holidaysAvailability = 0;
+		if(comp3 != null)
+			daylightWorkingDaysOvertime = comp3.value;
+		else
+			daylightWorkingDaysOvertime = 0;
+		int progressive = 0;
+		PersonDay lastPreviousPersonDayInMonth = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? " +
+				"and pd.date >= ? and pd.date < ? ORDER by pd.date DESC", person, date.dayOfMonth().withMinimumValue(), date).first();
+		if(lastPreviousPersonDayInMonth != null)
+			progressive = lastPreviousPersonDayInMonth.progressive /60;
+				
+		render(person, contractList, weekDayAvailability, holidaysAvailability, daylightWorkingDaysOvertime, progressive);
 	}
 
 
 	@Check(Security.VIEW_PERSON_LIST)
 	public static void list(){
 
-		List<Person> personList = Person.find("Select p from Person p where p.name <> ?", "Admin").fetch();
+		List<Person> personList = Person.find("Select p from Person p where p.name <> ? order by p.surname", "Admin").fetch();
 		Logger.debug("La lista delle persone: %s", personList.toString());
 		
 		render(personList);
@@ -134,7 +173,7 @@ public class Persons extends Controller {
 		}
 	}
 	
-//	@Check({Security.INSERT_AND_UPDATE_PASSWORD, Security.VIEW_PERSONAL_SITUATION})
+
 	/**
 	 * 
 	 * @param personId permette all'utente di cambiare la propria password.
@@ -199,5 +238,5 @@ public class Persons extends Controller {
 		Application.indexAdmin();
 	}
 	
-
+	
 }
