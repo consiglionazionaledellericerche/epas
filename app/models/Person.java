@@ -76,79 +76,79 @@ public class Person extends Model {
 	 */
 	private static final long serialVersionUID = -2293369685203872207L;
 
-	
+
 	/**
 	 * Used for optimisti locking
 	 */
 	@Version
 	public Integer version;
-	
+
 	@Required
 	public String name;
-	
+
 	@Required
 	public String surname;
-	
+
 	@Column(name = "other_surnames")
 	public String othersSurnames;
-	
+
 	@Column(name = "born_date")
 	public Date bornDate;
-	
+
 	@Email
 	public String email;
-		
+
 	public String username;
-	
+
 	public String password;
-	
+
 	/**
 	 * Numero di matricola
 	 */
 	public Integer number;
-	
+
 	/**
 	 * numero di matricola sul badge
 	 */
 	public String badgeNumber;
-	
+
 	/**
 	 * id che questa persona aveva nel vecchio database
 	 */
 	public Long oldId;
-	
+
 	/**
 	 * relazione con la tabella delle assenze iniziali
 	 */
 	@OneToMany(mappedBy="person", fetch = FetchType.LAZY)
 	public List<InitializationAbsence> initializationAbsences = new ArrayList<InitializationAbsence>();
-	
-	
+
+
 
 	/**
 	 * relazione con la tabella delle info di contatto
 	 */
 	@OneToOne(mappedBy="person", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
 	public ContactData contactData;
-	
+
 	/**
 	 * relazione con la tabella dei contratti
 	 */
 	@NotAudited
 	@OneToMany(mappedBy="person", fetch=FetchType.EAGER, cascade = {CascadeType.REMOVE})
 	public List<Contract> contracts = new ArrayList<Contract>(); 
-	
+
 	@NotAudited
 	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
 	public List<StampProfile> stampProfiles = new ArrayList<StampProfile>();
-	
+
 	/**
 	 * relazione con la tabella delle tipologie di orario di lavoro
 	 */
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="working_time_type_id")
 	public WorkingTimeType workingTimeType;
-	
+
 	@ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
 	public List<Permission> permissions;
 
@@ -157,26 +157,26 @@ public class Person extends Model {
 	 */
 	@ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
 	public List<Group> groups;
-	
+
 
 	/**
 	 * relazione con la tabella dei figli del personale
 	 */
 	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
 	public List<PersonChildren> personChildren;
-	
+
 	/**
 	 * relazione con la nuova tabella dei person day
 	 */
 	@OneToMany(mappedBy="person", fetch = FetchType.LAZY)
 	public List<PersonDay> personDays;
-	
+
 	/**
 	 * relazione con la nuova tabella dei person_month
 	 */
 	@OneToMany(mappedBy="person", fetch = FetchType.LAZY)
 	public List<PersonMonth> personMonths;
-	
+
 	/**
 	 * relazione con la nuova tabella dei person_year
 	 */
@@ -189,68 +189,68 @@ public class Person extends Model {
 	@NotAudited
 	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
 	public List<YearRecap> yearRecaps;
-	
+
 	/**
 	 * relazione con la tabella di storico MonthRecap
 	 */
 	@NotAudited
 	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
 	public List<MonthRecap> monthRecaps;
-	
-	
+
+
 	/**
 	 * relazione con la tabella di vacation_code
 	 */
 	@OneToOne(mappedBy="person", fetch=FetchType.LAZY)
 	public VacationPeriod vacationPeriod;
-	
+
 	/**
 	 * relazione con la tabella Competence
 	 */
 	@NotAudited
 	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
 	public List<Competence> competences;
-	
+
 	/**
 	 * relazione con la tabella delle competence valide
 	 */
 	@NotAudited
 	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
 	public List<ValuableCompetence> valuableCompetences;
-	
+
 	/**
 	 * relazione con la tabella delle locazioni degli utenti
 	 */
 	@NotAudited
 	@OneToOne(mappedBy="person", fetch=FetchType.EAGER, cascade = {CascadeType.REMOVE})
 	public Location location;
-	
-	
+
+
 	@OneToOne(mappedBy="person", fetch=FetchType.LAZY)
 	public PersonReperibility reperibility;
-	
+
 	@ManyToOne( fetch=FetchType.EAGER )
 	@JoinColumn(name="qualification_id")
 	public Qualification qualification;
-	
+
 	@OneToOne(mappedBy="person", fetch=FetchType.LAZY)
 	public PersonShift personShift;
-	
+
 	public String fullName() {
 		return String.format("%s %s", surname, name);
 	}
-	
 
-	
+
+
 	/**
 	 * 
 	 * @param person
 	 * @return il piano ferie previsto per quella persona
 	 */
 	@SuppressWarnings("unused")
-	
+
 	public VacationCode getVacation(){
-	
+
 		VacationCode vacation = null;
 
 		Contract contract = Contract.find("Select con from Contract con where con.person = ?", this).first();
@@ -280,7 +280,7 @@ public class Person extends Model {
 							"where vp.vacationCode = vc and vp.person = ?", this).first();
 					return vacation;
 				}
-			
+
 			}
 			else{
 				vacation = VacationCode.find("Select vac from VacationCode vac, VacationPeriod per where per.person = ?" +
@@ -289,7 +289,7 @@ public class Person extends Model {
 			}
 		}
 		if(contract.expireContract != null && contract.beginContract != null){
-			
+
 			int differenzaAnni = contract.expireContract.getYear() - contract.beginContract.getYear();
 
 			if(this.getQualification() == null){
@@ -297,7 +297,7 @@ public class Person extends Model {
 			}			
 			else{
 				if(differenzaAnni >= 3){
-										
+
 					vacation = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", "28+4").first();
 					VacationPeriod period = VacationPeriod.find("Select vp from VacationPeriod vp where vp.person = ?", this).first();
 					if(period == null){
@@ -308,7 +308,7 @@ public class Person extends Model {
 						period.endTo = null;
 						period.save();
 					}
-					
+
 				}					
 				else
 					vacation = VacationCode.find("Select vc from VacationCode vc where vc.description = ?","26+4").first();				
@@ -316,7 +316,7 @@ public class Person extends Model {
 		}
 		return vacation;
 	}
-	
+
 	/**
 	 * 
 	 * @return la locazione della persona
@@ -327,28 +327,37 @@ public class Person extends Model {
 		else
 			return null;
 	}
-	
+
 	public Set<Permission> getAllPermissions(){
 		Set<Permission> setPermissions = new HashSet<Permission>();
 		setPermissions.addAll(permissions);
 
 		return setPermissions;
 	}
-	
+
 	/**
 	 * 
 	 * @return il contratto attivo per quella persona alla date date
 	 */
 	public Contract getContract(LocalDate date){
-			
-		List<Contract> contracts = Contract.find("Select con from Contract con where con.person = ? and (con.beginContract IS NULL or con.beginContract <= ?) and " +
-				"(con.expireContract > ? or con.expireContract is null )",this, date, date).fetch(2);
-		if (contracts.size() > 1) {
-			throw new IllegalStateException(
-				String.format("Trovati più contratti in contemporanea per la persona %s nella data %s", this, date));
+
+		Contract contract = Contract.find("Select con from Contract con where con.person = ? and (con.beginContract IS NULL or con.beginContract <= ?) and " +
+				"(con.expireContract > ? or con.expireContract is null )",this, date, date).first();
+		if(contract == null){
+			return null;
 		}
-		return contracts.get(0);
-		
+//		Logger.debug("La lista contratti è %s", contracts);
+//		Logger.debug("Il primo contratto è: %s", contracts.get(0));
+//		
+//		if (contracts.size() > 1) {
+//
+//			throw new IllegalStateException(
+//					String.format("Trovati più contratti in contemporanea per la persona %s nella data %s", this, date));
+//			
+//		}
+//		else
+		return contract;
+
 	}
 	/**
 	 * 
@@ -357,7 +366,7 @@ public class Person extends Model {
 	public Contract getCurrentContract(){
 		return getContract(LocalDate.now());
 	}
-	
+
 	/**
 	 * 
 	 * @return la qualifica della persona
@@ -368,18 +377,18 @@ public class Person extends Model {
 		else
 			return null;
 	}
-	
-	
+
+
 	@Override
 	public String toString() {
 		return String.format("Person[%d] - %s %s", id, name, surname);
 	}
-	
+
 	/**
 	 * Metodi di utilità per verificare se nella lista dei permessi c'è il permesso richiesto. Utile in visualizzazione
 	 * 
 	 */
-	
+
 	public boolean isViewPersonAvailable(){
 		for(Permission p : this.permissions){
 			if(p.description.equals(Security.VIEW_PERSON_LIST))
@@ -387,7 +396,7 @@ public class Person extends Model {
 		}
 		return false;
 	}
-	
+
 	public boolean isInsertAndUpdatePersonAvailable(){
 		for(Permission p : this.permissions){
 			if(p.description.equals(Security.INSERT_AND_UPDATE_PERSON))
@@ -395,7 +404,7 @@ public class Person extends Model {
 		}
 		return false;
 	}
-	
+
 	public boolean isInsertAndUpdateAbsenceAvailable(){
 		for(Permission p : this.permissions){
 			if(p.description.equals(Security.INSERT_AND_UPDATE_ABSENCE))
@@ -403,7 +412,7 @@ public class Person extends Model {
 		}
 		return false;
 	}
-	
+
 	public boolean isDeletePersonAvailable(){
 		for(Permission p : this.permissions){
 			if(p.description.equals(Security.DELETE_PERSON))
@@ -411,7 +420,7 @@ public class Person extends Model {
 		}
 		return false;
 	}
-	
+
 	public boolean isInsertAndUpdateWorkinTimeAvailable(){
 		for(Permission p : this.permissions){
 			if(p.description.equals(Security.INSERT_AND_UPDATE_WORKINGTIME))
@@ -419,7 +428,7 @@ public class Person extends Model {
 		}
 		return false;
 	}
-	
+
 	public boolean isInsertAndUpdateStampingAvailable(){
 		for(Permission p : this.permissions){
 			if(p.description.equals(Security.INSERT_AND_UPDATE_STAMPING))
@@ -427,7 +436,7 @@ public class Person extends Model {
 		}
 		return false;
 	}
-	
+
 	public boolean isInsertAndUpdatePasswordAvailable(){
 		for(Permission p : this.permissions){
 			if(p.description.equals(Security.INSERT_AND_UPDATE_PASSWORD))
@@ -435,7 +444,7 @@ public class Person extends Model {
 		}
 		return false;
 	}
-	
+
 	public boolean isInsertAndUpdateConfigurationAvailable(){
 		for(Permission p : this.permissions){
 			if(p.description.equals(Security.INSERT_AND_UPDATE_CONFIGURATION))
@@ -443,7 +452,7 @@ public class Person extends Model {
 		}
 		return false;
 	}
-	
+
 	public boolean isInsertAndUpdateAdministratorAvailable(){
 		for(Permission p : this.permissions){
 			if(p.description.equals(Security.INSERT_AND_UPDATE_ADMINISTRATOR))
@@ -451,7 +460,7 @@ public class Person extends Model {
 		}
 		return false;
 	}
-	
+
 	public boolean isInsertAndUpdateCompetenceAndOvertimeAvailable(){
 		for(Permission p : this.permissions){
 			if(p.description.equals(Security.INSERT_AND_UPDATE_COMPETENCES))
@@ -459,7 +468,7 @@ public class Person extends Model {
 		}
 		return false;
 	}
-	
+
 	public boolean isInsertAndUpdateVacationsAvailable(){
 		for(Permission p : this.permissions){
 			if(p.description.equals(Security.INSERT_AND_UPDATE_VACATIONS))
@@ -467,7 +476,7 @@ public class Person extends Model {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 
 	 * @param date
@@ -477,9 +486,9 @@ public class Person extends Model {
 		List<Person> activePersons = Person.find("Select distinct (p) from Person p, Contract c where c.person = p and (c.endContract is null or c.endContract > ?)" +
 				" and (c.expireContract > ? or c.expireContract is null) and (c.beginContract < ? or c.beginContract is null) order by p.surname, p.name", date, date, date).fetch();
 		return activePersons;
-		
+
 	}
-	
+
 	/**
 	 * metodo per la creazione di una timbratura a partire dall'oggetto stampModificationType che è stato costruito dal binder del Json
 	 * passato dal client python
@@ -487,7 +496,7 @@ public class Person extends Model {
 	 * @throws InstantiationException 
 	 */
 	public static boolean createStamping(StampingFromClient stamping){
-		
+
 		if(stamping == null)
 			return false;
 		long id = stamping.matricolaFirma;
@@ -515,7 +524,7 @@ public class Person extends Model {
 			stamp.badgeReader = stamping.badgeReader;
 			stamp.personDay = pd;
 			stamp.save();
-			
+
 		}
 		else{
 			for(Stamping s : pd.stampings){
@@ -533,11 +542,11 @@ public class Person extends Model {
 				}
 			}
 		}
-			
+
 		pd.populatePersonDay();
 		pd.merge();
 		return true;
 	}
-	
-	
+
+
 }
