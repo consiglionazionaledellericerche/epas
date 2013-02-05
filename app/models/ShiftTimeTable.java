@@ -1,13 +1,18 @@
 package models;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import net.fortuna.ical4j.model.DateTime;
+
 import org.hibernate.annotations.Type;
-import org.joda.time.LocalTime;
+import org.joda.time.LocalDateTime;
 
 import play.db.jpa.Model;
 
@@ -16,11 +21,34 @@ import play.db.jpa.Model;
 public class ShiftTimeTable extends Model{
 
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDateTime")
-	public LocalTime startShift;
+	public LocalDateTime startShift;
 	
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDateTime")
-	public LocalTime endShift;
+	public LocalDateTime endShift;
 	
 	public String description;
+	
+	@OneToMany(mappedBy="shiftTimeTable", fetch=FetchType.LAZY)
+	public List<PersonShiftDay> personShiftDay = new ArrayList<PersonShiftDay>();
+	
+	// return startShift as a string in hh:mm format
+	public String getStartShift(){
+		return PersonTags.toCalendarTime(startShift);
+	}
+	
+	// return endShift as a string in hh:mm format
+	public String getEndShift(){
+		return PersonTags.toCalendarTime(endShift);
+	}
 
+	public void setStartShift(String startShift) {
+		String[] hmsStart = startShift.split(":");
+		this.startShift = new LocalDateTime(1970, 01, 01, Integer.parseInt(hmsStart[0]), Integer.parseInt(hmsStart[1]));
+	}
+
+	public void setEndShift(String endShift) {
+		String[] hmsEnd = endShift.split(":");
+		this.endShift = new LocalDateTime(1970, 01, 01, Integer.parseInt(hmsEnd[0]), Integer.parseInt(hmsEnd[1]));
+	}
+	
 }

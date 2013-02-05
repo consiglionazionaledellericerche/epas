@@ -1,0 +1,11 @@
+[
+  	#{list shiftPeriods, as:'shiftPeriod'}
+  			{
+  			"id" : ${shiftPeriod.person.id},
+  			"start" : "${shiftPeriod.start}",
+  			"end" : "${shiftPeriod.end}",
+  			"ttStart": "${shiftPeriod.shiftTimeTable.getStartShift()}",
+  			"ttEnd": "${shiftPeriod.shiftTimeTable.getEndShift()}"
+  			}${shiftPeriod_isLast ? '' : ','}
+  	#{/list}
+]

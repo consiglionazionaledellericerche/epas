@@ -1,0 +1,59 @@
+# id dei turnisti
+Person(37):
+     id: 37
+
+Person(18):
+    id: 18    
+
+Person(143):
+    id: 143
+
+Person(27):
+    id: 27
+
+Person(24):
+    id: 24
+
+# tipologie di turno
+ShiftType(a):
+    type: A
+    description: 'turno di tipo a'
+
+ShiftType(b):
+    type: B
+    description: 'turno di tipo b'
+
+ShiftType(x):
+    type: X
+    description: 'turno annullato'
+
+# definizione dei turni
+PersonShift(vannozzi):
+    person: 37
+    shiftTypes: [a, x]
+    jolly: false
+    description: 'turni di Daniele Vannozzi'
+            
+PersonShift(groppioni):
+    person: 18
+    shiftTypes: [a, x]
+    jolly: false
+    description: 'turni di Stefano Groppioni'
+    
+PersonShift(serrecchia):
+    person: 143
+    shiftTypes: [b, x]
+    jolly: false
+    description: 'turni di Irma Serrecchia'
+    
+PersonShift(pancrazi):
+    person: 27
+    shiftTypes: [b, x]
+    jolly: false
+    description: 'turni di Daniele Pancrazi'
+            
+PersonShift(marinai):
+    person: 24
+    shiftTypes: [a, b, x]
+    jolly: true
+    description: 'turni di Mario Marinai'

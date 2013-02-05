@@ -1,9 +1,14 @@
 package models;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -14,14 +19,11 @@ import play.db.jpa.Model;
 public class ShiftType extends Model{
 
 	public String type;
-	
 	public String description;
 	
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="person_shift_id")
-	public PersonShift personShift;
+	@ManyToMany(mappedBy="shiftTypes")
+	public List<PersonShift> personShifts = new ArrayList<PersonShift>();
 	
-	@OneToOne(mappedBy="shiftType", fetch=FetchType.LAZY)
-	public PersonShiftDay personShiftDay;
-	
+	@OneToMany(mappedBy="shiftType", fetch=FetchType.LAZY)
+	public List<PersonShiftDay> personShiftDays = new ArrayList<PersonShiftDay>();
 }
