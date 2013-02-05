@@ -5,31 +5,32 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
 import play.db.jpa.Model;
 
 @Entity
-@Table(name="person_shift_day")
+@Table(name="person_shift_days")
 public class PersonShiftDay extends Model{
 
+	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate date;
 	
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name="shift_type_id")
 	public ShiftType shiftType;
 	
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name="shift_time_table_id")
-	public ShiftTimeTable shiftTimeTables;
+	public ShiftTimeTable shiftTimeTable;
 	
-	@OneToOne
-	@JoinColumn(name="person_shift_id", unique=true, nullable=false, updatable=false)
+	@ManyToOne
+	@JoinColumn(name="person_shift_id", nullable=false)
 	public PersonShift personShift;
-	
-
 }

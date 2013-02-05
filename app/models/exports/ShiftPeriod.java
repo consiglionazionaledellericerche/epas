@@ -16,22 +16,22 @@ import org.joda.time.LocalDate;
 public class ShiftPeriod {
 
 	public final Person person;
-	public final LocalDate dateStart;
-	public LocalDate dateEnd;
+	public final LocalDate start;
+	public LocalDate end;
 	public final ShiftType shiftType;
 	public final ShiftTimeTable shiftTimeTable;
 	
-	public ShiftPeriod(Person person, LocalDate dateStart, LocalDate dateEnd, ShiftType shiftType, ShiftTimeTable shiftTimeTable){
+	public ShiftPeriod(Person person, LocalDate start, LocalDate end, ShiftType shiftType, ShiftTimeTable shiftTimeTable){
 		this.person = person;
-		this.dateStart = dateStart;
-		this.dateEnd = dateEnd;
+		this.start = start;
+		this.end = end;
 		this.shiftType = shiftType;
 		this.shiftTimeTable = shiftTimeTable;
 	}
 	
-	public ShiftPeriod(Person person, LocalDate dateStart, ShiftType shiftType, ShiftTimeTable shiftTimeTable){
+	public ShiftPeriod(Person person, LocalDate start, ShiftType shiftType, ShiftTimeTable shiftTimeTable){
 		this.person = person;
-		this.dateStart = dateStart;
+		this.start = start;
 		this.shiftType = shiftType;
 		this.shiftTimeTable = shiftTimeTable;
 	}

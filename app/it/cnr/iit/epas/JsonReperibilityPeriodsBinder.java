@@ -48,10 +48,10 @@ public class JsonReperibilityPeriodsBinder implements TypeBinder<ReperibilityPer
 
 			JsonObject jsonObject = null;
 			Person person = null;
-			PersonReperibilityType reperibilityType = null;
+			//PersonReperibilityType reperibilityType = null;
 			
 			Long personId = null;
-			Long reperibilityTypeId = null;
+			//Long reperibilityTypeId = null;
 			
 			for (JsonElement jsonElement : jsonArray) {
 				
@@ -59,10 +59,7 @@ public class JsonReperibilityPeriodsBinder implements TypeBinder<ReperibilityPer
 				Logger.trace("jsonObject = %s", jsonObject);
 				
 				personId = jsonObject.get("id").getAsLong();
-				//reperibilityTypeId = jsonObject.get("reperibility_type_id").getAsLong();
-				
 				person = Person.findById(personId);
-				
 				if (person == null) {
 					throw new IllegalArgumentException(String.format("Person with id = %s not found", personId));
 				}
