@@ -21,6 +21,9 @@
 		<th>Può inserire e modificare assenze</th>
 		<th>Può inserire e modificare configurazioni di sistema</th>
 		<th>Può inserire e modificare utenti amministratori</th>
+		<th>Può inserire e modificare straordinari e competenze</th>
+		<th>Può inserire e modificare ferie e permessi</th>
+		
 	</tr>
 	%{
 		for(admin in administratorList){ 
@@ -108,6 +111,25 @@
 			%{ } }%
 			
 		</td>	
+		<td>
+		
+		%{ if(admin.isInsertAndUpdateCompetenceAndOvertimeAvailable()){ }%
+				<input type="checkbox" name="insertAndUpdateCompetences" value ="" checked="checked"/>
+			%{ } else { }%
+				<input type="checkbox" name="insertAndUpdateCompetences" value=""/>
+			%{ } }%
+			
+		</td>	
+		<td>
+		
+		%{ if(admin.isInsertAndUpdateVacationsAvailable()){ }%
+				<input type="checkbox" name="insertAndUpdateVacations" value ="" checked="checked"/>
+			%{ } else { }%
+				<input type="checkbox" name="insertAndUpdateVacations" value=""/>
+			%{ } }%
+			
+		</td>	
+		
 	</tr>
 
 	%{

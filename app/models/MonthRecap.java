@@ -124,15 +124,6 @@ public class MonthRecap extends Model {
 	@Transient	
 	private int progressiveOfDailyTime=0; 
 
-
-
-
-//	protected MonthRecap(){
-//		this.stampingCodeList = new ArrayList<StampModificationType>();
-//		this.absenceCodeMap  = new HashMap<AbsenceType, Integer>();
-//	}
-
-
 	/**
 	 * Construttore di default con i parametri obbligatori
 	 * 
@@ -147,8 +138,7 @@ public class MonthRecap extends Model {
 		this.person = person;
 		this.year = year;
 		this.month = month;
-//		this.stampingCodeList = new ArrayList<StampModificationType>();
-//		this.absenceCodeMap  = new HashMap<AbsenceType, Integer>();
+
 	}
 
 	/**

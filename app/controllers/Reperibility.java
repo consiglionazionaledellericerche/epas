@@ -30,6 +30,7 @@ import models.PersonReperibilityType;
 import models.exports.AbsenceReperibilityPeriod;
 import models.exports.ReperibilityPeriod;
 import models.exports.ReperibilityPeriods;
+
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.DateTime;
@@ -574,4 +575,5 @@ public class Reperibility extends Controller {
 			Logger.error("Validation exception generating ical", e);
 		}
 	}
+
 }

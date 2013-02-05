@@ -132,7 +132,7 @@ public class SwitchTemplate extends Controller{
 				Vacations.show();
 				break;
 			case competences:
-				Competences.show();
+				Competences.show(personId, year, month);
 				break;
 			case hourRecap:
 				PersonMonths.hourRecap(personId,year);
@@ -147,14 +147,4 @@ public class SwitchTemplate extends Controller{
 	}
 }
 		
-		//render(p.permissions);
-		
-//	}
-//	
-//	public static void switchTemplateEmployees() throws InstantiationException, IllegalAccessException, DateParseException{
-//		LocalDate now = new LocalDate();
-//		
-//		
-//	}
 
-//}

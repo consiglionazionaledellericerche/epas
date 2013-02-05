@@ -5,6 +5,9 @@ package it.cnr.iit.epas;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -23,6 +26,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
 import play.Logger;
+import play.Play;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 
@@ -31,6 +35,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+
 /**
  * @author cristian
  *
@@ -38,6 +43,7 @@ import com.google.gson.JsonParser;
 @Global
 public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 
+	public static String mySqldriver = Play.configuration.getProperty("db.old.driver");
 	/**
 	 * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[], java.lang.String, java.lang.Class, java.lang.reflect.Type)
 	 */
@@ -92,17 +98,26 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 			String matricolaFirma = jsonObject.get("matricolaFirma").getAsString();
 			Logger.debug("La matricola firma è del tipo: %s", matricolaFirma);
 			if(matricolaFirma.contains("INT")){
+				Logger.debug("Sono entrato nel controllo if delle matricole di tipo 000000INT123");
 				/**
 				 * in questo caso dal client arriva la timbratura con la firma specificata secondo lo schema INT123.
 				 * Si fa quindi una substring sulla matricolafirma e ciò che si ottiene è l'id di tipo long per fare la ricerca sulla
-				 * tabella persone per capire a chi è relativa quella timbratura
+				 * tabella persone per capire a chi è relativa quella timbratura...
+				 * 
+				 * ho aggiunto il campo oldId alla tabella Person e con quello farò la query per recuperare la persona 
 				 */
 				String lessSign = matricolaFirma.substring(14,matricolaFirma.length());
+				Logger.debug("L'id recuperato è: %s", lessSign);
 				long personId = Long.parseLong(lessSign);
-				Logger.debug("L'id recuperato è: %s", personId);
-				person = Person.findById(personId);
-				Logger.debug("l'id corrisponde a: %s %s", person.name, person.surname);
-				stamping.matricolaFirma = personId;
+				
+				//person = Person.findById(personId);
+				//if(person == null){
+				person = Person.find("Select p from Person p where p.oldId = ?", personId).first();
+				Logger.debug("La persona è: %s %s", person.name, person.surname);
+					
+				//}
+				
+				stamping.matricolaFirma = person.oldId;
 			}
 			else{
 				/**
@@ -147,10 +162,14 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 	}
 	
 //	public static void main(String[]args){
-//		String s = "00000000000INT123";
-//		String lessSign = s.substring(14,s.length());
-//		long personId = Long.parseLong(lessSign);
-//		System.out.println("L'id è: "+personId);
+//		String s = "00000000000INT252";
+//		if(s.contains("INT")){
+//			System.out.println("TRovato!");
+//			String lessSign = s.substring(14,s.length());
+//			long personId = Long.parseLong(lessSign);
+//			System.out.println("L'id è: "+personId);
+//		}
+//		
 //	}
 	
 }

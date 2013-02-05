@@ -15,7 +15,7 @@ public class DateUtility {
 		
 		Logger.debug("configurazione: %s con localdate: %s", config, date);
 		
-		if(person.workingTimeType.getWorkingTimeFromWorkinTimeType(date.getDayOfWeek()).holiday)
+		if(person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).holiday)
 			return true;
 	
 		LocalDate easter = findEaster(date.getYear());

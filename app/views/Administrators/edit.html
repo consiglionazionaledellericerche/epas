@@ -70,6 +70,20 @@
 			Sì <input type="radio" name="insertAndUpdateAdministrator" value="true"/> No <input type="radio" name="insertAndUpdateAdministrator" value="false" checked="checked"/>
 			%{ } }%
 	</p>
+	<p>Può inserire e modificare straordinari e competenze: 
+	%{	if(person.isInsertAndUpdateCompetenceAndOvertimeAvailable()==true){ }%
+			Sì <input type="radio" name="insertAndUpdateCompetences" value="false" checked="checked"/> No <input type="radio" name="insertAndUpdateCompetences" value="true"/>
+			%{ } else {	}%
+			Sì <input type="radio" name="insertAndUpdateCompetences" value="true"/> No <input type="radio" name="insertAndUpdateCompetences" value="false" checked="checked"/>
+			%{ } }%
+	</p>
+	<p>Può inserire e modificare ferie e permessi: 
+	%{	if(person.isInsertAndUpdateVacationsAvailable()==true){ }%
+			Sì <input type="radio" name="insertAndUpdateVacations" value="false" checked="checked"/> No <input type="radio" name="insertAndUpdateVacations" value="true"/>
+			%{ } else {	}%
+			Sì <input type="radio" name="insertAndUpdateVacations" value="true"/> No <input type="radio" name="insertAndUpdateVacations" value="false" checked="checked"/>
+			%{ } }%
+	</p>
 </fieldset>
 <input type="submit" value="Ok"/>
 #{/form}
