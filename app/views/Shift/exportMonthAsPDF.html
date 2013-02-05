@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Istituto di Informatica e Telematica - Turni di ${month} ${year}</title>
+        <link rel="stylesheet" href="@{'/public/stylesheets/reperibilityPDF.css'}" type="text/css" charset="utf-8">
+    </head>
+    <body>
+    		%{
+    			mm = 0;
+    		}%
+        	<h1>Istituto di Informatica e Telematica </h1>
+        
+        	<div class="table">
+			<table class="mensile">
+			<caption> Giorni di turno del personale per il mese di ${firstOfMonth.plusMonths(mm).monthOfYear().getAsText()} ${firstOfMonth.plusMonths(mm).year().getAsText()}</caption>
+				
+			<tr>
+			%{
+				for(label in shiftSumDays.columnKeySet()) {
+			}%
+
+					<th> Turno ${label}</th> 
+			%{
+    			}
+			}%
+			</tr>
+			<tr>	
+			%{
+				for(shift in shiftSumDays.columnKeySet()) {
+			}%
+				<td> 
+				%{
+					for(person in shiftSumDays.rowKeySet()) {
+				}%	
+					%{
+						if ((shiftSumDays.contains(person, shift) && !shiftSumDays.contains(person, "Jolly")) || (shiftSumDays.contains(person, shift) && (shift == "Jolly"))) {
+					}%
+						<p>
+						${person.surname} ${person.name}: &nbsp; ${shiftSumDays.get(person, shift)} gg
+						</p>
+					%{
+						}
+					}%
+					
+				%{
+    				}
+				}%
+				</td>
+			%{
+    			}
+			}%
+			</tr>
+			</table>
+      		</div>
+      		<div class="date">
+      			<trong>Data ________________ </trong>
+      		</div>
+      		<div class="firma dir">
+      			<strong>Il Direttore</strong> <br />
+      			Dott. Domenico Laforenza
+      		</div>
+      
+     		<div class="firma resp">
+      			<strong>Il Responsabile</strong><br />
+      			Dott. Maurizio Martinelli
+      		</div>
+      		
+    </body>
+</html>
