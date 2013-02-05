@@ -36,11 +36,6 @@ public class Bootstrap extends Job {
 			Logger.info("Create le fasce di orario dei vari turni");
 		}
 		
-		if (PersonShift.count() == 0) {
-			Fixtures.loadModels("personShifts.yml");
-			Logger.info("Inseriti i turnisti");
-		}
-		
 		if (Permission.count() == 0) {
 			Fixtures.loadModels("permissions.yml");
 			Logger.info("Creati i permessi predefiniti e creato un utente amministratore con associati questi permessi");

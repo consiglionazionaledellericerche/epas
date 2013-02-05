@@ -33,11 +33,13 @@ import models.exports.ReperibilityPeriods;
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.DateTime;
+import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.TimeZoneRegistry;
 import net.fortuna.ical4j.model.TimeZoneRegistryFactory;
 import net.fortuna.ical4j.model.ValidationException;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VTimeZone;
+import net.fortuna.ical4j.model.parameter.Value;
 import net.fortuna.ical4j.model.property.CalScale;
 import net.fortuna.ical4j.model.property.ProdId;
 import net.fortuna.ical4j.model.property.Uid;
@@ -45,6 +47,7 @@ import net.fortuna.ical4j.model.property.Version;
 
 import org.h2.command.ddl.CreateAggregate;
 import org.joda.time.LocalDate;
+import org.joda.time.ReadablePeriod;
 
 import com.google.common.collect.Collections2;
 import com.google.common.collect.HashBasedTable;
@@ -195,14 +198,12 @@ public class Reperibility extends Controller {
 	 */
 	public static void update(Long type, Integer year, Integer month, @As(binder=JsonReperibilityPeriodsBinder.class) ReperibilityPeriods body) {
 
-		Logger.debug("update: Received reperebilityPeriods %s", body);
-		
+		Logger.debug("update: Received reperebilityPeriods %s", body);	
 		if (body == null) {
 			badRequest();	
 		}
 		
-		PersonReperibilityType reperibilityType = PersonReperibilityType.findById(type);
-		
+		PersonReperibilityType reperibilityType = PersonReperibilityType.findById(type);	
 		if (reperibilityType == null) {
 			throw new IllegalArgumentException(String.format("ReperibilityType id = %s doesn't exist", type));			
 		}
@@ -211,8 +212,7 @@ public class Reperibility extends Controller {
 		LocalDate monthToManage = new LocalDate(year, month, 1);
 		
 		//Conterrà i giorni del mese che devono essere attribuiti a qualche reperibile 
-		Set<Integer> daysOfMonthToAssign = new HashSet<Integer>();
-		
+		Set<Integer> daysOfMonthToAssign = new HashSet<Integer>();	
 		for (int i = 1 ; i <= monthToManage.dayOfMonth().withMaximumValue().getDayOfMonth(); i++) {
 			daysOfMonthToAssign.add(i);
 		}
@@ -228,8 +228,7 @@ public class Reperibility extends Controller {
 				throw new IllegalArgumentException(
 					String.format("ReperibilityPeriod person.id = %s has start date %s after end date %s", reperibilityPeriod.person.id, reperibilityPeriod.start, reperibilityPeriod.end));
 			}
-			
-			
+					
 			day = reperibilityPeriod.start;
 			while (day.isBefore(reperibilityPeriod.end.plusDays(1))) {
 				
@@ -537,13 +536,15 @@ public class Reperibility extends Controller {
 			//L'ultima parte dell'if serve per il caso in cui la stessa persona ha due periodi di reperibilità non consecutivi. 
 			if (reperibilityPeriod == null || !reperibilityPeriod.getEndDate().getDate().equals(new DateTime(prd.date.minusDays(1).toDate()))) {
 				reperibilityPeriod = new VEvent(new DateTime(prd.date.toDate()), new DateTime(prd.date.toDate()), "Reperibilità Registro");
-				icsCalendar.getComponents().add(reperibilityPeriod);
+				Logger.trace("Aggiunge il periodo %s-%s", reperibilityPeriod.getStartDate().getDate(), reperibilityPeriod.getEndDate().getDate());
+				icsCalendar.getComponents().add(reperibilityPeriod.getDuration());
 				Logger.trace("Creato nuovo reperibilityPeriod, start=%s, end=%s", reperibilityPeriod.getStartDate().getDate(), reperibilityPeriod.getEndDate().getDate());
 			} else {
 				reperibilityPeriod.getEndDate().setDate(new DateTime(prd.date.toDate()));
 				Logger.trace("Aggiornato reperibilityPeriod, start=%s, end=%s", reperibilityPeriod.getStartDate().getDate(), reperibilityPeriod.getEndDate().getDate());
 			}
 		}
+
 		Logger.debug("Find %s periodi di reperibilità.", icsCalendar.getComponents().size());
         
         return icsCalendar;

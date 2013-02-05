@@ -3,7 +3,9 @@
   			{
   			"id" : ${shiftPeriod.person.id},
   			"start" : "${shiftPeriod.start}",
-  			"end" : "${shiftPeriod.end}"
+  			"end" : "${shiftPeriod.end}",
+  			"ttStart": "${shiftPeriod.shiftTimeTable.getStartShift()}",
+  			"ttEnd": "${shiftPeriod.shiftTimeTable.getEndShift()}"
   			}${shiftPeriod_isLast ? '' : ','}
   	#{/list}
 ]
