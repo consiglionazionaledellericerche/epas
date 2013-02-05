@@ -687,7 +687,7 @@ public class PersonMonth extends Model {
 		Contract contractLastYear = person.getContract(new LocalDate(year - 1, 12, 31));
 		
 		//Se il contratto della persona era attivo anche l'anno scorso si prende il personYear dell'anno precedente altrimenti il residuo dell'anno precedente
-		if (contractLastYear.equals(person.getCurrentContract())) {
+		if (contractLastYear != null && contractLastYear.equals(person.getCurrentContract())) {
 			PersonYear personYear = PersonYear.find("SELECT py FROM PersonYear py WHERE py.year = ? AND py.person = ?", year - 1, person).first();
 			return personYear != null ? personYear.getRemainingMinutes() : 0;
 		} else {
@@ -702,6 +702,8 @@ public class PersonMonth extends Model {
 		Contract currentContract = person.getContract(new LocalDate(year, month, 1));
 		LocalDate fineMesePrecedente = (new LocalDate(year, month, 1)).minusMonths(1).dayOfMonth().withMaximumValue();
 		
+		if(currentContract == null)
+			return null;
 		if (currentContract.beginContract != null && fineMesePrecedente.isBefore(currentContract.beginContract)) {
 			return null;
 		}
@@ -717,7 +719,9 @@ public class PersonMonth extends Model {
 	public boolean possibileUtilizzareResiduoAnnoPrecedente() {
 		//Dipende dal livello.... e da
 		Qualification qualification = Qualification.find("SELECT p.qualification FROM Person p WHERE p = ?", person).first(); 
-			
+		if(qualification == null)
+			return false;
+		// TODO:considerare quando non c'è la qualifica...	
 		return month <= 3 || qualification.qualification <= 3;
 	}
 	
