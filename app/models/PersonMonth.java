@@ -638,7 +638,7 @@ public class PersonMonth extends Model {
 	/**
 	 * @return la somma dei minuti dei giorni (entro una certa data) che hanno una differenza negativa rispetto all'orario di lavoro
 	 */
-	public long residuoDelMeseInNegativoAllaData(LocalDate date) {
+	public int residuoDelMeseInNegativoAllaData(LocalDate date) {
 		LocalDate startOfMonth = new LocalDate(year, month, 1);
 		Long residuo = JPA.em().createQuery("SELECT sum(pd.difference) FROM PersonDay pd WHERE pd.date BETWEEN :startOfMonth AND :endOfMonth and pd.person = :person " +
 				"AND pd.difference < 0 and pd.date <= :date", Long.class)
@@ -647,14 +647,17 @@ public class PersonMonth extends Model {
 				.setParameter("person", person)
 				.setParameter("date", date)
 				.getSingleResult();
+		int res = 0;
+		if(residuo != null)
+			res = residuo.intValue();
 		
-		return residuo != null ? residuo : 0;
+		return res;
 	}
 	
 	/**
 	 * @return la somma dei minuti dei giorni (alla fine del mese) che hanno una differenza negativa rispetto all'orario di lavoro
 	 */
-	public long residuoDelMeseInNegativo() {
+	public int residuoDelMeseInNegativo() {
 		LocalDate startOfMonth = new LocalDate(year, month, 1);
 		return residuoDelMeseInNegativoAllaData(startOfMonth.dayOfMonth().withMaximumValue());
 	}
@@ -662,7 +665,7 @@ public class PersonMonth extends Model {
 	/**
 	 * @return la somma dei minuti dei giorni (entro una certa data) che hanno una differenza positiva rispetto all'orario di lavoro
 	 */
-	public long residuoDelMeseInPositivoAllaData(LocalDate date) {
+	public int residuoDelMeseInPositivoAllaData(LocalDate date) {
 		Long residuo = JPA.em().createQuery("SELECT sum(pd.difference) FROM PersonDay pd WHERE pd.date BETWEEN :startOfMonth AND :endOfMonth and pd.person = :person " +
 				"AND pd.difference > 0 and pd.date <= :date", Long.class)
 				.setParameter("startOfMonth", new LocalDate(year, month, 1))
@@ -670,13 +673,16 @@ public class PersonMonth extends Model {
 				.setParameter("person", person)
 				.setParameter("date", date)
 				.getSingleResult();
-		return residuo != null ? residuo : 0;
+		int res = 0;
+		if(residuo != null)
+			res = residuo.intValue();
+		return res;
 	}
 	
 	/**
 	 * @return la somma dei minuti dei giorni (alla fine del mese) che hanno una differenza positiva rispetto all'orario di lavoro
 	 */
-	public long residuoDelMeseInPositivo() {
+	public int residuoDelMeseInPositivo() {
 		return residuoDelMeseInPositivoAllaData(new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
 	}
 	
@@ -728,14 +734,14 @@ public class PersonMonth extends Model {
 	/**
 	 * @return la somma dei residui positivi e di quelli negativi
 	 */
-	public long residuoDelMese() {
+	public int residuoDelMese() {
 		return residuoDelMeseInPositivo() + residuoDelMeseInNegativo();
 	}
 
 	/**
 	 * @return la somma dei residui positivi e di quelli negativi alla data specificata
 	 */
-	public long residuoDelMeseAllaData(LocalDate date) {
+	public int residuoDelMeseAllaData(LocalDate date) {
 		return residuoDelMeseInPositivoAllaData(date) + residuoDelMeseInNegativoAllaData(date);
 	}
 	
@@ -743,7 +749,7 @@ public class PersonMonth extends Model {
 	 * @return il tempo di lavoro dai mese precedenti eventualmente comprensivo di quello derivante
 	 * 	dall'anno precedente
 	 */
-	public long totaleResiduoAnnoCorrenteAlMesePrecedente() {
+	public int totaleResiduoAnnoCorrenteAlMesePrecedente() {
 		//Deve esistere un mese precedente ed essere dello stesso anno (quindi a gennaio il mese precedente di questo anno non esiste)
 		if (mesePrecedente() != null && month != 1) {
 			return mesePrecedente().totaleResiduoAnnoCorrenteAFineMese();
@@ -778,15 +784,15 @@ public class PersonMonth extends Model {
 		return residuoAnnoPrecedenteDisponibileAllaFineDelMese;
 	}
 	
-	public long totaleResiduoAnnoCorrenteAFineMese() {
+	public int totaleResiduoAnnoCorrenteAFineMese() {
 		return residuoDelMese() + totaleResiduoAnnoCorrenteAlMesePrecedente() + riposiCompensativiDaAnnoCorrente - straordinari - recuperiOreDaAnnoPrecedente;  
 	}
 	
-	public long totaleResiduoAnnoCorrenteAllaData(LocalDate date) {
+	public int totaleResiduoAnnoCorrenteAllaData(LocalDate date) {
 		return residuoDelMeseAllaData(date) + totaleResiduoAnnoCorrenteAlMesePrecedente() + riposiCompensativiDaAnnoCorrente - straordinari - recuperiOreDaAnnoPrecedente;  
 	}
 	
-	public long totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese() {
+	public int totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese() {
 		return totaleResiduoAnnoCorrenteAFineMese() + residuoAnnoPrecedenteDisponibileAllaFineDelMese();
 	}
 	
@@ -795,8 +801,8 @@ public class PersonMonth extends Model {
 		
 		int residuoAnnoPrecedenteDisponibileAllaFineDelMese = residuoAnnoPrecedenteDisponibileAllaFineDelMese();
 		
-		long residuoDelMeseInNegativo = residuoDelMeseInNegativo();
-		long residuoDelMeseInPositivo = residuoDelMeseInPositivo();
+		int residuoDelMeseInNegativo = residuoDelMeseInNegativo();
+		int residuoDelMeseInPositivo = residuoDelMeseInPositivo();
 		
 		if (residuoDelMeseInNegativo != 0 && residuoAnnoPrecedenteDisponibileAllaFineDelMese > 0) {
 			
@@ -813,6 +819,7 @@ public class PersonMonth extends Model {
 			} else {
 				recuperiOreDaAnnoPrecedente -= residuoAnnoPrecedenteDisponibileAllaFineDelMese;
 			}
+			save();
 		}
 		
 		if (residuoDelMeseInPositivo != 0 && residuoAnnoPrecedenteDisponibileAllaFineDelMese < 0) {
@@ -821,16 +828,17 @@ public class PersonMonth extends Model {
 			} else {
 				recuperiOreDaAnnoPrecedente += residuoDelMeseInPositivo;
 			}
+			save();
 		}
 		save();
 	}
 	
-	public long tempoDisponibilePerRecuperi(LocalDate date) {
-		long totaleResiduoAnnoCorrenteAllaData = totaleResiduoAnnoCorrenteAllaData(date);
+	public int tempoDisponibilePerRecuperi(LocalDate date) {
+		int totaleResiduoAnnoCorrenteAllaData = totaleResiduoAnnoCorrenteAllaData(date);
 		
 		//System.out.println("totaleResiduoAnnoCorrenteAllaData = " + totaleResiduoAnnoCorrenteAllaData);
 		
-		long tempoDisponibile = totaleResiduoAnnoCorrenteAllaData + residuoAnnoPrecedenteDisponibileAllaFineDelMese();
+		int tempoDisponibile = totaleResiduoAnnoCorrenteAllaData + residuoAnnoPrecedenteDisponibileAllaFineDelMese();
 		
 		if (tempoDisponibile <= 0) {
 			tempoDisponibile = 0;
@@ -840,17 +848,17 @@ public class PersonMonth extends Model {
 		
 	}	
 	
-	public long tempoDisponibilePerStraordinari() {
+	public int tempoDisponibilePerStraordinari() {
 		
-		long residuoDelMeseInPositivo = residuoDelMeseInPositivo();
+		int residuoDelMeseInPositivo = residuoDelMeseInPositivo();
 		
 		if (residuoDelMeseInPositivo <= 0) {
 			return 0;
 		}
 		
-		long residuoAllaDataRichiesta = residuoDelMese();
+		int residuoAllaDataRichiesta = residuoDelMese();
 		
-		long tempoDisponibile = residuoAnnoPrecedenteDisponibileAllaFineDelMese() + mesePrecedente().totaleResiduoAnnoCorrenteAFineMese() + residuoAllaDataRichiesta;
+		int tempoDisponibile = residuoAnnoPrecedenteDisponibileAllaFineDelMese() + mesePrecedente().totaleResiduoAnnoCorrenteAFineMese() + residuoAllaDataRichiesta;
 		
 		if (tempoDisponibile <= 0) {
 			return 0;
@@ -863,7 +871,7 @@ public class PersonMonth extends Model {
 	public boolean assegnaStraordinari(int ore) {
 		if (tempoDisponibilePerStraordinari() > ore * 60) {
 			straordinari = ore * 60;
-			save();
+			this.save();
 			return true;
 		}
 		return false;
@@ -897,7 +905,7 @@ public class PersonMonth extends Model {
 				riposiCompensativiDaAnnoCorrente += (minutiRiposoCompensativo + residuoAnnoPrecedenteDisponibileAllaFineDelMese);
 			}				
 		}
-		
+		save();
 		//Creare l'assenza etc....
 		aggiornaRiepiloghi();
 		return true;
