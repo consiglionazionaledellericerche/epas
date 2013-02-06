@@ -194,7 +194,9 @@ public class FromMysqlToPostgres {
 
 			FromMysqlToPostgres.createVacationType(oldIDPersona, person);	
 
-			FromMysqlToPostgres.createYearRecap(oldIDPersona, person, anno);			
+		//	FromMysqlToPostgres.createYearRecap(oldIDPersona, person, anno);		
+			
+			FromMysqlToPostgres.createPersonYear(oldIDPersona, person);
 
 			JPAPlugin.closeTx(false);
 
@@ -687,7 +689,7 @@ public class FromMysqlToPostgres {
 		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT Orario.ID,Orario.Giorno,Orario.TipoGiorno,Orario.TipoTimbratura," + 	
 				"Orario.Ora, Codici.id, Codici.Codice, Codici.Qualifiche " +
 				"FROM Orario, Codici " +
-				"WHERE Orario.TipoGiorno=Codici.id and Orario.Giorno >= '2011-01-01' " +
+				"WHERE Orario.TipoGiorno=Codici.id and Orario.Giorno >= '2012-01-01' " +
 				"and Orario.ID = " + id + " ORDER BY Orario.Giorno");
 		ResultSet rs = stmtOrari.executeQuery();
 
@@ -696,10 +698,6 @@ public class FromMysqlToPostgres {
 		LocalDate newData = null;
 
 		int importedStamping = 0;
-
-		int currentMonth = 0;
-		int currentYear = 0;
-
 
 		while(rs.next()){
 			/**
@@ -941,6 +939,19 @@ public class FromMysqlToPostgres {
 		initAbsencePermission.absenceDays = countPermission;
 		initAbsencePermission.save();
 
+	}
+	
+	public static void createPersonYear(long id, Person person) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+		Connection mysqlCon = getMysqlConnection();
+		PreparedStatement stmtResidualAndRecovery = mysqlCon.prepareStatement("SELECT * FROM totali_anno WHERE ID = ? and anno = 2011");
+		stmtResidualAndRecovery.setLong(1, id);
+		
+		ResultSet rs = stmtResidualAndRecovery.executeQuery();
+		while(rs.next()){
+			PersonYear py = new PersonYear(person,2011);
+			py.remainingMinutes = rs.getInt("residuo");
+			py.save();
+		}
 	}
 
 	public static void createMonthRecap(long id, Person person) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
