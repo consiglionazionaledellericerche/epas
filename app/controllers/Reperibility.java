@@ -55,7 +55,6 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
-import com.sun.org.apache.bcel.internal.util.ClassPath.ClassFile;
 
 import play.Logger;
 import play.data.binding.As;
