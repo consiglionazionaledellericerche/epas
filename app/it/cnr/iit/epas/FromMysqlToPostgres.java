@@ -1127,7 +1127,7 @@ public class FromMysqlToPostgres {
 			Logger.debug("Il mese di riferimento per il personMonth di %s %s è %s", person.name, person.surname, month);
 			PersonMonth pm = PersonMonth.build(person, year, month);
 			pm.save();
-			if(month == 12){
+			if(month.equals(12)){
 				PersonYear py = PersonYear.build(person, year);
 				py.save();
 			}
