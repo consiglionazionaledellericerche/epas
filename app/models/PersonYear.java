@@ -135,11 +135,13 @@ public class PersonYear extends Model{
 		py.create();
 		LocalDate date = new LocalDate(year, 1, 1);
 		Contract contract = person.getContract(new LocalDate(date.monthOfYear().withMaximumValue().dayOfYear().withMaximumValue()));
+		
 		if(contract != null){
 			int vacationDaysActualYear = 0;
 			PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? " +
 					"order by pm.month desc ", person, year).first();
-			py.remainingMinutes = pm.totalRemainingMinutes;
+			py.remainingMinutes = pm.totaleResiduoAnnoCorrenteAFineMese();
+			
 			List<PersonDay> pdList = null;
 			if(contract.beginContract != null && contract.expireContract != null){
 				pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? " +
