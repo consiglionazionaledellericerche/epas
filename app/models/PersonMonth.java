@@ -727,7 +727,7 @@ public class PersonMonth extends Model {
 		Qualification qualification = Qualification.find("SELECT p.qualification FROM Person p WHERE p = ?", person).first(); 
 		if(qualification == null)
 			return false;
-		// TODO:considerare quando non c'è la qualifica...	
+			
 		return month <= 3 || qualification.qualification <= 3;
 	}
 	
@@ -819,7 +819,7 @@ public class PersonMonth extends Model {
 			} else {
 				recuperiOreDaAnnoPrecedente -= residuoAnnoPrecedenteDisponibileAllaFineDelMese;
 			}
-			save();
+			this.save();
 		}
 		
 		if (residuoDelMeseInPositivo != 0 && residuoAnnoPrecedenteDisponibileAllaFineDelMese < 0) {
@@ -828,9 +828,9 @@ public class PersonMonth extends Model {
 			} else {
 				recuperiOreDaAnnoPrecedente += residuoDelMeseInPositivo;
 			}
-			save();
+			this.save();
 		}
-		save();
+		this.save();
 	}
 	
 	public int tempoDisponibilePerRecuperi(LocalDate date) {
