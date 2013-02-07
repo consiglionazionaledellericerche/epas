@@ -84,7 +84,7 @@
 					<a href="@{Stampings.edit(day.getStampings().get(j).id)}" class="insertStamping${day.date.dayOfMonth}">
 					${day.stampings.get(j).date.toCalendarTime()}
 					</a>
-				${(day.stampingList().get(j).stampModificationType?.code)} 
+				<strong>${(day.stampingList().get(j).stampModificationType?.code)}</strong> 
 				<script type="text/javascript"> 
 				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
 				height:500, 
@@ -107,7 +107,7 @@
 					<a href="@{Stampings.edit(day.getStampings().get(j+1).id)}" class="insertStamping${day.date.dayOfMonth}">
 					${day.stampingList().get(j+1).date.toCalendarTime()}
 					</a>
-					${(day.stampingList().get(j+1).stampModificationType?.code)} 
+					<strong>${(day.stampingList().get(j+1).stampModificationType?.code)}</strong> 
 				<script type="text/javascript"> 
 				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
 				height:500, 

@@ -720,6 +720,20 @@ public class PersonDay extends Model {
 
 		return smt;
 	}
+	
+	/**
+	 * 
+	 * @return lo stamp modification type relativo alla timbratura aggiunta dal sistema nel caso mancasse la timbratura d'uscita prima
+	 * della mezzanotte del giorno in questione
+	 */
+	public StampModificationType checkMissingExitStampBeforeMidnight(){
+		StampModificationType smt = null;
+		for(Stamping st : stampings){
+			if(st.stampModificationType != null)
+				smt = StampModificationType.findById(StampModificationTypeValue.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getId());
+		}
+		return smt;
+	}
 
 	/**
 	 * 
