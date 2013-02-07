@@ -180,6 +180,7 @@ public class PersonDay extends Model {
 								correctStamp.date = new LocalDateTime(pdPastDay.date.getYear(), pdPastDay.date.getMonthOfYear(), pdPastDay.date.getDayOfMonth(), 23, 59);
 								correctStamp.way = WayType.out;
 								correctStamp.markedByAdmin = false;
+								correctStamp.stampModificationType = StampModificationType.findById(4l);
 								correctStamp.note = "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
 								correctStamp.personDay = pdPastDay;
 								correctStamp.save();
@@ -204,6 +205,7 @@ public class PersonDay extends Model {
 								newEntranceStamp.date = new LocalDateTime(this.date.getYear(), this.date.getMonthOfYear(), this.date.getDayOfMonth(),0,0);
 								newEntranceStamp.way = WayType.in;
 								newEntranceStamp.markedByAdmin = false;
+								newEntranceStamp.stampModificationType = StampModificationType.findById(4l);
 								newEntranceStamp.note = "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
 								newEntranceStamp.personDay = this;
 								newEntranceStamp.save();

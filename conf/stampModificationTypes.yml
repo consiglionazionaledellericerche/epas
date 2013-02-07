@@ -9,3 +9,7 @@ StampModificationType(e):
 StampModificationType(m):
     code: m
     description: Timbratura modificata dall'amministratore
+
+StampModificationType(x):
+    code: x
+    description: Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte
