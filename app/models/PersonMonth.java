@@ -562,6 +562,11 @@ public class PersonMonth extends Model {
 				stampCodeList.add(smtMarked);
 				Logger.debug("Aggiunto %s alla lista", smtMarked.description);
 			}
+			StampModificationType smtMidnight = pd.checkMissingExitStampBeforeMidnight();
+			if(smtMidnight != null && !stampCodeList.contains(smtMidnight)){
+				stampCodeList.add(smtMidnight);
+				Logger.debug("Aggiunto %s alla lista", smtMidnight.description);
+			}
 
 		}
 		Logger.debug("La lista degli stamping code per questo mese contiene: %s", stampingCodeList);
