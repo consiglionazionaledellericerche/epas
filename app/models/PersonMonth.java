@@ -17,10 +17,12 @@ import javax.persistence.Transient;
 import models.Stamping.WayType;
 
 import org.hibernate.envers.Audited;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 
 import play.Logger;
 import play.data.validation.Required;
+import play.data.validation.Valid;
 import play.db.jpa.JPA;
 import play.db.jpa.Model;
 
@@ -124,7 +126,11 @@ public class PersonMonth extends Model {
 
 	}
 
-
+    public static PersonMonth byPersonAndYearAndMonth(Person person, int year, int month) {
+    	return PersonMonth.find(
+				"Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
+				person, month, year).first();
+    }
 
 	/**
 	 * 
@@ -864,4 +870,162 @@ public class PersonMonth extends Model {
 		return - person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime;
 
 	}
+	
+	/**
+	 * 
+	 * @return il numero di giorni di indennità di reperibilità festiva per quella persona in quel mese di quell'anno
+	 */
+	public int holidaysAvailability(int year, int month){
+		int holidaysAvailability = 0;
+		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "208").first();
+		Logger.debug("Il codice competenza é: %s", cmpCode);
+		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
+		Logger.warn("competence: " +competence);
+		if(competence != null)
+			holidaysAvailability = competence.value;
+		else
+			holidaysAvailability = 0;
+		return holidaysAvailability;
+	}
+
+	/**
+	 * 
+	 * @return il numero di giorni di indennità di reperibilità feriale per quella persona in quel mese di quell'anno
+	 */
+	public int weekDayAvailability(@Valid int year, @Valid int month){
+		int weekDayAvailability = 0;
+		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "207").first();
+		Logger.debug("Il codice competenza é: %s", cmpCode);
+		
+		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
+		if(competence != null)
+			weekDayAvailability = competence.value;
+		else
+			weekDayAvailability = 0;
+		return weekDayAvailability;
+	}
+
+	/**
+	 * 
+	 * @param year
+	 * @param month
+	 * @return il numero di giorni di straordinario diurno nei giorni lavorativi 
+	 */
+	public int daylightWorkingDaysOvertime(int year, int month){
+		int daylightWorkingDaysOvertime = 0;
+		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "S1").first();
+		Logger.debug("Il codice competenza é: %s", cmpCode);
+		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
+		if(competence != null)
+			daylightWorkingDaysOvertime = competence.value;
+		else
+			daylightWorkingDaysOvertime = 0;
+		return daylightWorkingDaysOvertime;
+	}
+
+	/**
+	 * 
+	 * @param year
+	 * @param month
+	 * @return il numero di giorni di straordinario diurno nei giorni festivi o notturno nei giorni lavorativi
+	 */
+	public int daylightholidaysOvertime(int year, int month){
+		int daylightholidaysOvertime = 0;
+		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "S2").first();
+		Logger.debug("Il codice competenza é: %s", cmpCode);
+		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
+		if(competence != null)
+			daylightholidaysOvertime = competence.value;
+		else
+			daylightholidaysOvertime = 0;
+		return daylightholidaysOvertime;
+	}
+
+	/**
+	 * 
+	 * @return il numero di giorni di turno ordinario
+	 */
+	public int ordinaryShift(int year, int month){
+		int ordinaryShift = 0;
+		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "T1").first();
+		Logger.debug("Il codice competenza é: %s", cmpCode);
+		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
+		if(competence != null)
+			ordinaryShift = competence.value;
+		else
+			ordinaryShift = 0;
+		return ordinaryShift;
+	}
+
+	/**
+	 * 
+	 * @return il numero di giorni di turno notturno
+	 */
+	public int nightShift(int year, int month){
+		int nightShift = 0;
+		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "T2").first();
+		Logger.debug("Il codice competenza é: %s", cmpCode);
+		if(cmpCode == null)
+			return 0;
+		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
+		if(competence != null)
+			nightShift = competence.value;
+		else
+			nightShift = 0;
+		return nightShift;
+	}
+
+
+	/**
+	 * 
+	 * @return il numero di ore di lavoro in eccesso/difetto dai mesi precedenti, calcolate a partire da gennaio dell'anno corrente.
+	 * nel caso in cui ci trovassimo a gennaio, le ore di lavoro in eccesso/difetto provengono dall'anno precedente
+	 */
+	public int pastRemainingHours(int month, int year){
+		int pastRemainingHours = 0;
+		/**
+		 * per adesso ricorro al metodo di ricerca del progressivo all'ultimo giorno dell'anno precedente, non appena sarà pronta 
+		 * la classe PersonYear, andrò a fare la ricerca direttamente dentro quella classe sulla base della persona e dell'anno che mi
+		 * interessa.
+		 */
+		if(month == DateTimeConstants.JANUARY){
+			LocalDate lastDayOfYear = new LocalDate(year-1,DateTimeConstants.DECEMBER,31);
+			//			PersonYear py = PersonYear.find("Select py from PersonYear py where py.person = ?",person).first();
+			//			pastRemainingHours = py.remainingHours;
+			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, lastDayOfYear).first();
+			pastRemainingHours = pd.progressive;
+		}
+		else{
+			//int month = date.getMonthOfYear();
+			int counter = 0;
+			for(int i = 1; i < month; i++){
+				int day = 0;
+				if(i==1 || i==3 || i==5 || i==7 || i==8 || i==10 || i==12)
+					day = 31;
+				if(i==4 || i==6 || i==9 || i==11)
+					day = 30;
+				if(i==2){
+					if(year==2012 || year==2016 || year==2020)
+						day = 29;
+					else
+						day = 28;
+				}			
+				LocalDate endOfMonth = new LocalDate(year,i,day);	
+				PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? " +
+						"and pd.date = ?", person, endOfMonth).first();
+				counter = counter+pd.progressive;
+			}
+			pastRemainingHours = counter;
+
+		}
+
+		return pastRemainingHours;
+	}
+
 }

@@ -1,7 +1,6 @@
 package it.cnr.iit.epas;
 
 import java.sql.Connection;
-
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,8 +9,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.persistence.EntityManager;
 
 import models.Absence;
 import models.AbsenceType;
@@ -23,7 +20,6 @@ import models.Contract;
 import models.InitializationAbsence;
 import models.InitializationTime;
 import models.Location;
-import models.MonthRecap;
 import models.Permission;
 import models.Person;
 import models.PersonDay;
@@ -41,19 +37,14 @@ import models.VacationPeriod;
 import models.ValuableCompetence;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
-import models.YearRecap;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.StampTypeValues;
 import models.enumerate.WorkingTimeTypeValues;
 
-import org.eclipse.jdt.core.dom.PrimitiveType.Code;
-import org.hibernate.envers.reader.FirstLevelCache;
-import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-import org.joda.time.YearMonth;
 
 import play.Logger;
 import play.Play;
@@ -61,7 +52,6 @@ import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 
 
 public class FromMysqlToPostgres {
@@ -954,56 +944,6 @@ public class FromMysqlToPostgres {
 		}
 	}
 
-	public static void createMonthRecap(long id, Person person) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
-		/**
-		 * query su totali_mens per recueperare lo storico mensile da mettere su monthRecap
-		 */
-		Logger.debug("Inizio a creare i riepiloghi mensili per %s", person);
-		Connection mysqlCon = getMysqlConnection();
-		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM totali_mens WHERE ID="+id);
-		ResultSet rs = stmt.executeQuery();
-
-		while(rs.next()){
-
-			MonthRecap monthRecap = new MonthRecap(person, rs.getInt("anno"), rs.getInt("mese"));
-			monthRecap.workingDays = rs.getShort("giorni_lavorativi");
-			monthRecap.daysWorked = rs.getShort("giorni_lavorati");
-			monthRecap.giorniLavorativiLav = rs.getShort("giorni_lavorativi");
-			monthRecap.workTime = rs.getInt("tempo_lavorato");
-			monthRecap.remaining = rs.getInt("residuo");
-			monthRecap.justifiedAbsence = rs.getShort("assenze_giust");
-			monthRecap.vacationAp = rs.getShort("ferie_ap");
-			monthRecap.vacationAc = rs.getShort("ferie_ac");
-			monthRecap.holidaySop = rs.getShort("festiv_sop");
-			monthRecap.recoveries = rs.getInt("recuperi");
-			monthRecap.recoveriesAp = rs.getShort("recuperiap");
-			monthRecap.recoveriesG = rs.getShort("recuperig");
-			monthRecap.recoveriesGap = rs.getShort("recuperigap");
-			monthRecap.overtime = rs.getInt("ore_str");
-			monthRecap.lastModified = rs.getTimestamp("data_ultimamod");
-			monthRecap.residualApUsed = rs.getInt("residuoap_usato");
-			monthRecap.extraTimeAdmin = rs.getInt("tempo_eccesso_ammin");
-			monthRecap.additionalHours = rs.getInt("ore_aggiuntive");
-			if(rs.getByte("nore_aggiuntive")==0)
-				monthRecap.nadditionalHours = false;
-			else 
-				monthRecap.nadditionalHours = true;
-			monthRecap.residualFine = rs.getInt("residuo_fine");
-			monthRecap.beginWork = rs.getByte("inizio_lavoro");
-			monthRecap.endWork = rs.getByte("fine_lavoro");
-			monthRecap.timeHourVisit = rs.getInt("tempo_visite_orarie");
-			monthRecap.endRecoveries = rs.getShort("recuperi_fine");
-			monthRecap.negative = rs.getInt("negativo");
-			monthRecap.endNegative = rs.getInt("negativo_fine");
-			monthRecap.progressive = rs.getString("progressivo");				
-
-			monthRecap.save();
-			Logger.debug("Creato %s", monthRecap.toString());
-		}
-		Logger.debug("Terminati di creare i riepiloghi mensili per %s", person);
-
-
-	}
 
 	public static void createCompetence(long id, Person person, int anno) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		/**

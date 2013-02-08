@@ -93,7 +93,6 @@ GET		/stampings/create						Stampings.create
 POST	/stampings/insert/						Stampings.insert
 GET		/stampings/edit/{stampingId}			Stampings.edit
 POST	/stampings/update						Stampings.update
-GET		/choosePersonAndDate					Stampings.choosePersonAndDate
 GET		/personStamping							Stampings.personStamping
 GET		/stampings/missingStamping/{year}/{month}			Stampings.missingStamping
 GET		/stampings/dailyPresence/{year}/{month}/{day}		Stampings.dailyPresence

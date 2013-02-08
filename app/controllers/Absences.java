@@ -1,15 +1,14 @@
 package controllers;
 
+import it.cnr.iit.epas.PersonUtility;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import it.cnr.iit.epas.ActionMenuItem;
-import it.cnr.iit.epas.PersonUtility;
 import models.Absence;
 import models.AbsenceType;
 import models.AbsenceTypeGroup;
-import models.MonthRecap;
 import models.Person;
 import models.PersonDay;
 import models.PersonMonth;
@@ -20,17 +19,11 @@ import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
 import models.enumerate.JustifiedTimeAtWork;
 
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 
 import play.Logger;
-import play.data.binding.As;
-import play.data.binding.types.DateTimeBinder;
 import play.data.validation.Required;
 import play.db.jpa.Blob;
-import play.db.jpa.GenericModel.JPAQuery;
-import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -55,34 +48,23 @@ public class Absences extends Controller{
 
 		Logger.info("Anno: "+year);    	
 		Logger.info("Mese: "+month);
-		PersonMonth personMonth =
-				PersonMonth.find(
-						"Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
-						person, month, year).first();
+		PersonMonth personMonth = PersonMonth.byPersonAndYearAndMonth(person, year, month);
 
 		if (personMonth == null) {
 			personMonth = new PersonMonth(person, year, month);
 		}
 		if(year==null || month==null){
-
-			LocalDate now = new LocalDate();
-			MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, now.getYear(), now.getMonthOfYear());
-			render(monthRecap);
+			render(personMonth);
 		}
 		else{
 			Logger.debug("Sono dentro il ramo else della creazione del month recap");
-
-			MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, year.intValue(), month.intValue());
 			Logger.debug("Il month recap è formato da: " +person.id+ ", " +year.intValue()+ ", " +month.intValue());
 
-			render(monthRecap, personMonth);
+			render(personMonth);
 		}
 
 	}
-	//	
-	//	public static void show() {
-	//		show(Security.getPerson());
-	//    }
+
 
 	/**
 	 * questa è una funzione solo per admin, quindi va messa con il check administrator

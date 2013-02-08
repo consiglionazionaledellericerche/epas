@@ -1,16 +1,15 @@
 package controllers;
 
+import it.cnr.iit.epas.PersonUtility;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import it.cnr.iit.epas.ActionMenuItem;
-import it.cnr.iit.epas.PersonUtility;
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
-import models.MonthRecap;
 import models.Person;
 import models.PersonDay;
 import models.PersonMonth;
@@ -18,13 +17,12 @@ import models.TotalOvertime;
 
 import org.joda.time.LocalDate;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
-
 import play.Logger;
-import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
+
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 
 @With( {Secure.class, NavigationMenu.class} )
 public class Competences extends Controller{
@@ -43,25 +41,19 @@ public class Competences extends Controller{
 		if(anno==null || mese==null){
 
 			LocalDate now = new LocalDate();
-			MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, now.getYear(), now.getMonthOfYear());
-			render(monthRecap/*, menuItem*/);
+			PersonMonth personMonth = PersonMonth.byPersonAndYearAndMonth(person, now.getYear(), now.getMonthOfYear());
+
+			render(personMonth);
 		}
 		else{
 			Logger.info("Sono dentro il ramo else della creazione del month recap");
-			//		Integer year = new Integer(params.get("year"));
-			//		Integer month = new Integer(params.get("month"));
-			MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, year, month);
-			//		Logger.info("Il month recap è formato da: " +person.id+ ", " +year.intValue()+ ", " +month.intValue());
+			PersonMonth personMonth = PersonMonth.byPersonAndYearAndMonth(person, year, month);
 
-			render(monthRecap/*, menuItem*/);
+			render(personMonth);
+
 		}
 
 	}
-
-	//	@Check(Security.VIEW_PERSONAL_SITUATION)
-	//	public static void show() {
-	//    	show(Security.getPerson());
-	//    }
 
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void showCompetences(Integer year, Integer month){

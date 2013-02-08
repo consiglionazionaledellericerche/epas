@@ -1,5 +1,5 @@
 #{extends 'main.html' /}
-#{set title:monthRecap.person.surname + ' ' + monthRecap.person.name + ', matricola=' + monthRecap.person.number /}
+#{set title:personMonth.person.surname + ' ' + personMonth.person.name + ', matricola=' + personMonth.person.number /}
 
 <h2 id="titoloSituazioneFerie">Gestione straordinari e altre competenze</h2>
 
@@ -20,13 +20,13 @@
 		<th class="competenze">Turno notturno (T2)</th>
 	</tr>
 	<tr>
-		<td class="comp-nome">${monthRecap.person.surname + ' ' + monthRecap.person.name + ' (' + monthRecap.person.number + ')'}</td>
-		<td class="comp">${monthRecap.weekDayAvailability(monthRecap.year, monthRecap.month)}</td>
-		<td class="comp">${monthRecap.holidaysAvailability(monthRecap.year, monthRecap.month)}</td>
-		<td class="comp">${monthRecap.daylightWorkingDaysOvertime(monthRecap.year, monthRecap.month)}</td>
-		<td class="comp">${monthRecap.daylightholidaysOvertime(monthRecap.year, monthRecap.month)}</td>
-		<td class="comp">${monthRecap.ordinaryShift(monthRecap.year, monthRecap.month)}</td>
-		<td class="comp">${monthRecap.nightShift(monthRecap.year, monthRecap.month)}</td>	
+		<td class="comp-nome">${personMonth.person.surname + ' ' + personMonth.person.name + ' (' + personMonth.person.number + ')'}</td>
+		<td class="comp">${personMonth.weekDayAvailability(personMonth.year, personMonth.month)}</td>
+		<td class="comp">${personMonth.holidaysAvailability(personMonth.year, personMonth.month)}</td>
+		<td class="comp">${personMonth.daylightWorkingDaysOvertime(personMonth.year, personMonth.month)}</td>
+		<td class="comp">${personMonth.daylightholidaysOvertime(personMonth.year, personMonth.month)}</td>
+		<td class="comp">${personMonth.ordinaryShift(personMonth.year, personMonth.month)}</td>
+		<td class="comp">${personMonth.nightShift(personMonth.year, personMonth.month)}</td>	
 	</tr>
 	<tr>
 		<td>Totali</td>
