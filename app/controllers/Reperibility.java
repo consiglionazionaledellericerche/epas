@@ -12,6 +12,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -45,9 +46,11 @@ import net.fortuna.ical4j.model.property.CalScale;
 import net.fortuna.ical4j.model.property.ProdId;
 import net.fortuna.ical4j.model.property.Uid;
 import net.fortuna.ical4j.model.property.Version;
+import net.fortuna.ical4j.util.UidGenerator;
 
 import org.h2.command.ddl.CreateAggregate;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.joda.time.ReadablePeriod;
 
 import com.google.common.collect.Collections2;
@@ -529,18 +532,28 @@ public class Reperibility extends Controller {
 		Logger.debug("Reperibility find called from %s to %s, found %s reperibility days for person id = %s", from, to, reperibilityDays.size(), personId);
 
 		VEvent reperibilityPeriod = null;
+
+		
 		for (PersonReperibilityDay prd : reperibilityDays) {
+						
 			if (reperibilityPeriod != null) {
 				Logger.trace("controlla se %s<>%s (legge %s)", reperibilityPeriod.getEndDate().getDate(), new DateTime(prd.date.minusDays(1).toDate()), new DateTime(prd.date.toDate()));
 			}
+			
+			org.joda.time.DateTime endDate = prd.date.toDateTimeAtStartOfDay().withHourOfDay(23).withMinuteOfHour(59).withSecondOfMinute(59);
+
 			//L'ultima parte dell'if serve per il caso in cui la stessa persona ha due periodi di reperibilità non consecutivi. 
-			if (reperibilityPeriod == null || !reperibilityPeriod.getEndDate().getDate().equals(new DateTime(prd.date.minusDays(1).toDate()))) {
-				reperibilityPeriod = new VEvent(new DateTime(prd.date.toDate()), new DateTime(prd.date.toDate()), "Reperibilità Registro");
+			if (reperibilityPeriod == null || !reperibilityPeriod.getEndDate().getDate().equals(new DateTime(prd.date.toDateTimeAtStartOfDay().minusSeconds(1).toDate()))) {
+				reperibilityPeriod = new VEvent(new DateTime(prd.date.toDate()), new DateTime(endDate.toDate()), "Reperibilità Registro");
+ 
+				reperibilityPeriod.getProperties().add(new Uid(UUID.randomUUID().toString()));
+
 				Logger.trace("Aggiunge il periodo %s-%s", reperibilityPeriod.getStartDate().getDate(), reperibilityPeriod.getEndDate().getDate());
-				icsCalendar.getComponents().add(reperibilityPeriod.getDuration());
+				icsCalendar.getComponents().add(reperibilityPeriod);
 				Logger.trace("Creato nuovo reperibilityPeriod, start=%s, end=%s", reperibilityPeriod.getStartDate().getDate(), reperibilityPeriod.getEndDate().getDate());
 			} else {
-				reperibilityPeriod.getEndDate().setDate(new DateTime(prd.date.toDate()));
+				
+				reperibilityPeriod.getEndDate().setDate(new DateTime(endDate.toDate()));
 				Logger.trace("Aggiornato reperibilityPeriod, start=%s, end=%s", reperibilityPeriod.getStartDate().getDate(), reperibilityPeriod.getEndDate().getDate());
 			}
 		}
@@ -549,6 +562,7 @@ public class Reperibility extends Controller {
         
         return icsCalendar;
 	}
+
 	
 	public static void iCal() {
 		Long type = params.get("type", Long.class);
