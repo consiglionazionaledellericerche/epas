@@ -553,7 +553,7 @@ public class PersonMonth extends Model {
 		Logger.debug("La lista degli straordinari da inizio anno : %s", compList);
 		if(compList != null){
 			for(Competence comp : compList){
-				overtimeHour = overtimeHour + comp.value;
+				overtimeHour = overtimeHour + comp.valueApproved;
 			}
 		}
 		Logger.debug("Il numero di ore di straordinari è: ", overtimeHour);
@@ -883,7 +883,7 @@ public class PersonMonth extends Model {
 				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
 		Logger.warn("competence: " +competence);
 		if(competence != null)
-			holidaysAvailability = competence.value;
+			holidaysAvailability = competence.valueApproved;
 		else
 			holidaysAvailability = 0;
 		return holidaysAvailability;
@@ -901,7 +901,7 @@ public class PersonMonth extends Model {
 		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
 				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
 		if(competence != null)
-			weekDayAvailability = competence.value;
+			weekDayAvailability = competence.valueApproved;
 		else
 			weekDayAvailability = 0;
 		return weekDayAvailability;
@@ -920,7 +920,7 @@ public class PersonMonth extends Model {
 		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
 				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
 		if(competence != null)
-			daylightWorkingDaysOvertime = competence.value;
+			daylightWorkingDaysOvertime = competence.valueApproved;
 		else
 			daylightWorkingDaysOvertime = 0;
 		return daylightWorkingDaysOvertime;
@@ -939,7 +939,7 @@ public class PersonMonth extends Model {
 		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
 				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
 		if(competence != null)
-			daylightholidaysOvertime = competence.value;
+			daylightholidaysOvertime = competence.valueApproved;
 		else
 			daylightholidaysOvertime = 0;
 		return daylightholidaysOvertime;
@@ -956,7 +956,7 @@ public class PersonMonth extends Model {
 		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
 				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
 		if(competence != null)
-			ordinaryShift = competence.value;
+			ordinaryShift = competence.valueApproved;
 		else
 			ordinaryShift = 0;
 		return ordinaryShift;
@@ -975,7 +975,7 @@ public class PersonMonth extends Model {
 		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
 				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
 		if(competence != null)
-			nightShift = competence.value;
+			nightShift = competence.valueApproved;
 		else
 			nightShift = 0;
 		return nightShift;

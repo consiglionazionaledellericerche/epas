@@ -1006,7 +1006,7 @@ public class FromMysqlToPostgres {
 			competence.month = rs.getInt("mese");
 			competence.year = rs.getInt("anno");
 			competence.person = person;
-			competence.value = rs.getInt("valore");
+			competence.valueApproved = rs.getInt("valore");
 			competence.competenceCode = competenceCode;
 			competence.save();
 			Logger.debug("Creato %s", competence.toString());
@@ -1251,9 +1251,9 @@ public class FromMysqlToPostgres {
 					comp.year = rs.getInt("anno");
 					comp.month = rs.getInt("mese");
 
-					comp.value = rs.getInt("ore_str");
+					comp.valueApproved = rs.getInt("ore_str");
 					comp.save();
-					Logger.debug("Creata competenza per il mese di %s e anno %s con valore: %s", comp.month, comp.year, comp.value);
+					Logger.debug("Creata competenza per il mese di %s e anno %s con valore: %s", comp.month, comp.year, comp.valueApproved);
 				}
 			}
 			Logger.debug("Terminata la update competence per %s %s.", person.name, person.surname);
