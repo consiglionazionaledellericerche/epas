@@ -131,7 +131,7 @@ public class PersonUtility {
 		//dall'anno precedente, dal mese precedente e dal mese corrente
 		return 0;
 	}
-	
+
 	public static boolean canTakeOvertime(Person person, int year, int month){
 		boolean canOrNot = false;
 		int positiveDifference = 0;
@@ -168,57 +168,112 @@ public class PersonUtility {
 		return canOrNot;
 
 	}
-	
+
 	/**
 	 * metodo per stabilire se una persona può ancora prendere o meno giorni di permesso causa malattia del figlio
 	 */
-	public static boolean canTakePermissionIllnessChild(Person person, LocalDate date){
-		PersonChildren persChild = PersonChildren.find("Select pc from PersonChildren pc where pc.person = ? ", person).first();
-		
-//		List<AbsenceType> abtList = AbsenceType.find("Select abt from AbsenceType abt where abt.code in (?,?,?,?,?,?,?)", 
-//				"12","122","123","13","132","133","14").fetch();
-//		List<PersonDay> pdList = null;
+	public static boolean canTakePermissionIllnessChild(Person person, LocalDate date, AbsenceType abt){
 		/**
-		 * 	controllo che il figlio per cui si intende prendere il permesso di malattia abbia meno di 3 anni per usufruire del codice di 
-		 * congedo per malattia retribuito	
+		 * controllo che la persona abbia un figlio in età per poter usufruire del congedo
 		 */
-		if(persChild.bornDate.isAfter(date.minusYears(3))){
-			List<Absence> absenceList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
-					"and abs.personDay.date between ? and ? and abs.absenceType.code in (?,?,?)", 
-					person, date.minusYears(3), date, "12","122","123").fetch();
-//			pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-//					person, date.minusYears(3), date).fetch();
-//			for()
-			if(absenceList.size()>30){
-				return false;
+		List<PersonChildren> persChildList = PersonChildren.find("Select pc from PersonChildren pc where pc.person = ? order by pc.bornDate", 
+				person).fetch();
+		int code = new Integer(abt.code).intValue();
+		PersonChildren child = null;
+		switch(code){
+		case 12:
+			child = persChildList.get(0);
+			if(child.bornDate.isAfter(date.minusYears(3))){
+				List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date between ? and ?" +
+						"and a.absenceType = ?", person, date.minusYears(3), date, abt).fetch();
+				if(existingAbsence.size() < 30)
+					return true;
+				else
+					return false;
 			}
-			else{
-				return true;
+			break;
+			
+		
+		case 122:
+			child = persChildList.get(1);
+			if(child.bornDate.isAfter(date.minusYears(3))){
+				List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date between ? and ?" +
+						"and a.absenceType = ?", person, date.minusYears(3), date, abt).fetch();
+				if(existingAbsence.size() < 30)
+					return true;
+				else
+					return false;
 			}
+			break;
+			
+		case 123:
+			child = persChildList.get(2);
+			if(child.bornDate.isAfter(date.minusYears(3))){
+				List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date between ? and ?" +
+						"and a.absenceType = ?", person, date.minusYears(3), date, abt).fetch();
+				if(existingAbsence.size() < 30)
+					return true;
+				else
+					return false;
+			}
+			break;
+			
+		case 13:
+			child = persChildList.get(0);
+			if(child.bornDate.isAfter(date.minusYears(8))){
+				List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date between ? and ?" +
+						"and a.absenceType = ?", person, date.minusYears(8), date, abt).fetch();
+				if(existingAbsence.size() < 5)
+					return true;
+				else
+					return false;
+			}	
+			break;
+			
+		case 132:
+			child = persChildList.get(1);
+			if(child.bornDate.isAfter(date.minusYears(8))){
+				List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date between ? and ?" +
+						"and a.absenceType = ?", person, date.minusYears(8), date, abt).fetch();
+				if(existingAbsence.size() < 5)
+					return true;
+				else
+					return false;
+			}	
+			break;
+			
+		case 133:
+			child = persChildList.get(2);
+			if(child.bornDate.isAfter(date.minusYears(8))){
+				List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date between ? and ?" +
+						"and a.absenceType = ?", person, date.minusYears(8), date, abt).fetch();
+				if(existingAbsence.size() < 5)
+					return true;
+				else
+					return false;
+			}				
+			break;
+			
+		case 134:
+			child = persChildList.get(3);
+			if(child.bornDate.isAfter(date.minusYears(8))){
+				List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date between ? and ?" +
+						"and a.absenceType = ?", person, date.minusYears(8), date, abt).fetch();
+				if(existingAbsence.size() < 5)
+					return true;
+				else
+					return false;
+			}			
+			break;
+			
+			default:
+				throw new IllegalArgumentException(String.format("Il codice %s che si tenta di verificare non è compreso nella lista di quelli " +
+						"previsti per la retribuzione dei giorni di malattia dei figli.", code));
 		}
-		/**
-		 * controllo che il figlio per cui si intende prendere il permesso di malattia abbia meno di 8 anni di età
-		 */
-		if(persChild.bornDate.isAfter(date.minusYears(8))){
-			List<Absence> absenceList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
-					"and abs.personDay.date between ? and ? and abs.absenceType.code in (?,?,?,?)",
-					person, date.minusYears(5), date, "13","132","133","134").fetch();
-//			pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-//					person, date, ).fetch();
-			if(absenceList.size() > 5){
-				return false;
-			}
-			else{
-				return true;
-			}
-		}
-		
-		/**
-		 * per la malattia si possono prendere 30 giorni pagati nei primi 3 anni di vita del figlio e 5 giorni non pagati fino all'età di 8
-		 * anni
-		 */
-		
 		return false;
 	}
-
 }
+
+
+
+
