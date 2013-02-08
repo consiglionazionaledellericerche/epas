@@ -49,18 +49,6 @@ public class PersonYear extends Model{
 		this.year = year;
 	}
 	
-	public void update(){
-		int yearProgressive = 0;
-//		List<PersonMonth> personMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and " +
-//				"pm.year = ? and pm.month between ? and ?", person, date.getYear()-1, DateTimeConstants.APRIL, DateTimeConstants.DECEMBER).fetch();
-//		for(PersonMonth permon : personMonth){
-//			yearProgressive = yearProgressive+permon.remainingHours;
-//			
-//		}
-//		this.remainingHours = yearProgressive;
-//		this.save();
-	}
-	
 	
 	/**
 	 * aggiorna le variabili di istanza in funzione dei valori presenti sul db
@@ -92,7 +80,7 @@ public class PersonYear extends Model{
 			for(PersonDay pd : pdList){
 				if(pd.absences.size() > 0){
 					for(Absence abs : pd.absences){
-						if(abs.absenceType.equals("32"))
+						if(abs.absenceType.code.equals("32"))
 							absList.add(abs);
 					}
 				}

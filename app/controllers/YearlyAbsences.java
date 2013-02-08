@@ -117,27 +117,6 @@ public class YearlyAbsences extends Controller{
 
 	}
 
-	private final class PersonComparator implements Comparator<Person>{
-
-		@Override
-		public int compare(Person p, Person p1) {
-			if(p.surname.equals(p1.surname))
-				return p.name.compareTo(p1.name);
-			return p.surname.compareTo(p1.surname);
-		}
-
-	}
-
-	private final class AbsenceCodeComparator implements Comparator<String>{
-
-		@Override
-		public int compare(String code1, String code2) {
-			return code1.compareTo(code2);
-
-		}
-
-	}
-
 
 	/**
 	 * 

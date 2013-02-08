@@ -504,7 +504,7 @@ public class Reperibility extends Controller {
 		// read the reperibility person list 
 		PersonReperibility personReperibility = PersonReperibility.find("SELECT pr FROM PersonReperibility pr WHERE pr.personReperibilityType.id = ? AND pr.person.id = ?", type, personId).first();
 		if (personReperibility == null) {
-			notFound(String.format("Person id = %d is not associated to a reperibility of type = %d", personId, reperibilityType));
+			notFound(String.format("Person id = %d is not associated to a reperibility of type = %s", personId, reperibilityType));
 		}
 		
 		TimeZoneRegistry registry = TimeZoneRegistryFactory.getInstance().createRegistry();

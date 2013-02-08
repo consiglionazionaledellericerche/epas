@@ -36,10 +36,10 @@ public class MonthTest extends UnitTest{
 	@Test
 	public void testWorkingDays(){
 		
-		LocalDate data = new LocalDate(2011,4,1);
+		//LocalDate data = new LocalDate(2011,4,1);
 		long id = 1;
 		Person person = Person.findById(id);
-		PersonMonth pm = new PersonMonth(person, data.getYear(), data.getMonthOfYear());
+		//PersonMonth pm = new PersonMonth(person, data.getYear(), data.getMonthOfYear());
 		assertNotNull(person);
 		initializeStamping(person);
 		initializeAbsence(person);

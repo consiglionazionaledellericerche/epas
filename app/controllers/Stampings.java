@@ -226,7 +226,7 @@ public class Stampings extends Controller {
     public static void create(@Required Long personId, @Required Integer year, @Required Integer month, @Required Integer day){
     	Logger.debug("Insert stamping called for personId=%d, year=%d, month=%d, day=%d", personId, year, month, day);
     	Person person = Person.findById(personId);
-    	//Person person = Person.em().getReference(Person.class, personId);
+
     	Logger.debug("La person caricata è: %s", person);   	      	
     	LocalDate date = new LocalDate(year,month,day);
     	    	Logger.debug("La data è: %s", date);
@@ -253,9 +253,6 @@ public class Stampings extends Controller {
 		Integer hour = params.get("hourStamping", Integer.class);
 		Integer minute = params.get("minuteStamping", Integer.class);
 		Logger.debug("I parametri per costruire la data sono: anno: %s, mese: %s, giorno: %s, ora: %s, minuti: %s", year, month, day, hour, minute);
-		LocalDateTime dateStamp = new LocalDateTime(year, month, day, hour, minute, 0);
-		//Stamping stamp = null;
-		//int count = 0;
 		
 		String type = params.get("type");
 		Stamping stamp = new Stamping();
@@ -429,13 +426,17 @@ public class Stampings extends Controller {
 			flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(stamping.date.toLocalDate()));	
 			render("@create");
 		} else {
+			if (hour == null || minute == null) {
+				flash.error("E' necessario specificare sia il campo ore che minuti, oppure nessuno dei due per rimuovere la timbratura.");
+				render("@edit");
+				return;
+			}
 			stamping.date.withHourOfDay(hour).withMinuteOfHour(minute);
 			stamping.save();
 			stamping.personDay.populatePersonDay();
 			stamping.personDay.save();
 
-			flash.success(
-				String.format("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name));
+			flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name);
 			render("@create");
 		}
 		//render("@personStamping");
