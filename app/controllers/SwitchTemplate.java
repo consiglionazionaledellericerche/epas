@@ -1,16 +1,10 @@
 package controllers;
 
-import it.cnr.iit.epas.ActionEmployeesMenuItem;
 import it.cnr.iit.epas.ActionMenuItem;
+import models.Person;
 
 import org.joda.time.LocalDate;
 
-import com.ning.http.util.DateUtil.DateParseException;
-
-import models.MonthRecap;
-import models.Person;
-import models.Stamping;
-import models.YearRecap;
 import play.Logger;
 import play.mvc.Controller;
 
@@ -18,7 +12,7 @@ public class SwitchTemplate extends Controller{
 
 	public static final String USERNAME_SESSION_KEY = "username";
 
-	public static void dispatch() throws InstantiationException, IllegalAccessException, DateParseException{
+	public static void dispatch() throws InstantiationException, IllegalAccessException {
 		LocalDate now = new LocalDate();
 
 		String action = params.get("action");

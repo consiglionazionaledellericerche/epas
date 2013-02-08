@@ -1,52 +1,31 @@
 package controllers;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import it.cnr.iit.epas.ActionMenuItem;
-import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
-import it.cnr.iit.epas.JsonStampingBinder;
-import it.cnr.iit.epas.MainMenu;
-import models.Absence;
-import models.AbsenceType;
-import models.ContactData;
-import models.Contract;
-import models.Location;
-import models.MonthRecap;
+import models.Configuration;
 import models.Person;
 import models.PersonDay;
 import models.PersonMonth;
 import models.PersonTags;
-import models.PersonYear;
-import models.StampModificationType;
-import models.StampModificationTypeValue;
-import models.StampType;
 import models.Stamping;
-import models.Stamping.WayType;
-import models.exports.ReperibilityPeriods;
-import models.exports.StampingFromClient;
-import models.Configuration;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
-import com.google.common.collect.HashBasedTable;
+import play.Logger;
+import play.data.validation.Required;
+import play.data.validation.Valid;
+import play.mvc.Controller;
+import play.mvc.With;
+
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.ImmutableTable.Builder;
 import com.google.common.collect.Table;
 import com.ning.http.util.DateUtil.DateParseException;
-
-import play.Logger;
-import play.data.binding.As;
-import play.data.validation.Required;
-import play.data.validation.Valid;
-import play.mvc.Before;
-import play.mvc.Controller;
-import play.mvc.With;
 
 @With( {Secure.class, NavigationMenu.class} )
 public class Stampings extends Controller {
@@ -82,9 +61,7 @@ public class Stampings extends Controller {
     	long id = 1;
     	Configuration confParameters = Configuration.findById(id);
     	Person person = Person.findById(personId);
-    	
-    	
-    	MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, year, month);
+    	    	
     	PersonMonth personMonth =
     			PersonMonth.find(
     				"Select pm from PersonMonth pm where pm.person = ? and pm.year = ? and pm.month = ?", 
@@ -117,7 +94,7 @@ public class Stampings extends Controller {
     	
     	Logger.debug("Month recap of person.id %s, year=%s, month=%s", person.id, year, month);
     	    	
-        render(monthRecap, personMonth, numberOfInOut, numberOfCompensatoryRest, previousPersonMonth, overtimeHour);
+        render(personMonth, numberOfInOut, numberOfCompensatoryRest, previousPersonMonth, overtimeHour);
     }
     
 	@Check(Security.VIEW_PERSONAL_SITUATION)
@@ -159,7 +136,6 @@ public class Stampings extends Controller {
     	long id = 1;
     	Configuration confParameters = Configuration.findById(id);
     	
-    	MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, year, month);
     	PersonMonth personMonth =
     			PersonMonth.find(
     				"Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
@@ -193,7 +169,7 @@ public class Stampings extends Controller {
     	int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
     	int numberOfInOut = Math.min(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
     	    	
-        render(monthRecap, personMonth, numberOfInOut, previousPersonMonth, numberOfCompensatoryRest, overtimeHour);
+        render(personMonth, numberOfInOut, previousPersonMonth, numberOfCompensatoryRest, overtimeHour);
     	
     }
 
@@ -273,122 +249,7 @@ public class Stampings extends Controller {
 		pd.save();
 		flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
 		Application.indexAdmin();
-//		while(count <= pd.stampings.size()){
-//			if(count+1 > pd.stampings.size()){
-//				/**
-//				 * siamo all'ultimo elemento della lista...
-//				 * inserisco la timbratura in fondo alla lista  
-//				 */
-//				stamp = new Stamping();
-//				stamp.date = dateStamp;
-//				stamp.markedByAdmin = true;
-//				stamp.note = "timbratura inserita dall'amministratore";
-//				if(type.equals("true")){
-//					stamp.way = Stamping.WayType.in;
-//					stamp.save();
-//					pd.stampings.add(stamp);
-//				}
-//				else{
-//					stamp.way = Stamping.WayType.out;
-//					stamp.save();
-//					pd.stampings.add(stamp);
-//				}
-//				pd.save();
-//				pd.populatePersonDay();
-//				flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
-//				Application.indexAdmin();
-//			}
-//			if(pd.stampings.get(count) != null && pd.stampings.get(count).date.isAfter(dateStamp)){				
-//				/**
-//				 * in questo caso la nuova timbratura è precedente alla prima timbratura di quel personday: ergo la nuova 
-//				 * timbratura va messa all'inizio della lista
-//				 */
-//				stamp = new Stamping();
-//				stamp.date = dateStamp;
-//				stamp.markedByAdmin = true;
-//				stamp.note = "timbratura inserita dall'amministratore";
-//				if(type.equals("true")){
-//					stamp.way = Stamping.WayType.in;
-//					stamp.save();
-//					pd.stampings.add(count, stamp);
-//					pd.stampings.add(count+1, null);
-//				}
-//				else{
-//					stamp.way = Stamping.WayType.out;
-//					stamp.save();
-//					pd.stampings.add(count, null);
-//					pd.stampings.add(count+1, stamp);
-//				}
-//				pd.save();
-//				pd.populatePersonDay();
-//				flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
-//				Application.indexAdmin();
-//			}
-//			if(pd.stampings.get(count)!=null && pd.stampings.get(count).date.isBefore(dateStamp) && 
-//					(pd.stampings.get(count+1) == null || pd.stampings.size() < count+1)){
-//				/**
-//				 * la timbratura successiva è nulla 
-//				 */
-//				continue;
-//			}
-//			if(pd.stampings.get(count)!= null && pd.stampings.get(count).date.isBefore(dateStamp) && 
-//					pd.stampings.get(count+1).date.isAfter(dateStamp)){
-//				/**
-//				 * la timbratura sta a cavallo di quella attualmente considerata e della successiva, va messa in posizione in mezzo
-//				 * alle due.
-//				 */
-//				stamp = new Stamping();
-//				stamp.date = dateStamp;
-//				stamp.markedByAdmin = true;
-//				stamp.note = "timbratura inserita dall'amministratore";
-//				if(type.equals("true")){
-//					stamp.way = Stamping.WayType.in;
-//					stamp.save();
-//					pd.stampings.add(count+1, stamp);
-//					pd.stampings.add(count+2, null);
-//				}
-//				else{
-//					stamp.way = Stamping.WayType.out;
-//					stamp.save();
-//					pd.stampings.add(count+1, null);
-//					pd.stampings.add(count+2, stamp);
-//				}
-//				pd.save();
-//				pd.populatePersonDay();
-//				flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
-//				Application.indexAdmin();
-//			}
-//			if(pd.stampings.get(count)==null && pd.stampings.get(count+1).date.isAfter(dateStamp)){
-//				/**
-//				 * c'è una timbratura nulla e la successiva timbratura è successiva a quella inserita dall'utente. La timbratura nuova
-//				 * prende il posto di quella nulla.
-//				 */
-//				stamp = new Stamping();
-//				stamp.date = dateStamp;
-//				stamp.markedByAdmin = true;
-//				stamp.note = "timbratura inserita dall'amministratore";
-//				if(type.equals("true")){
-//					stamp.way = Stamping.WayType.in;
-//					stamp.save();
-//					pd.stampings.add(count+1, stamp);
-//					pd.stampings.add(count+2, null);
-//				}
-//				else{
-//					stamp.way = Stamping.WayType.out;
-//					stamp.save();
-//					pd.stampings.add(count+1, null);
-//					pd.stampings.add(count+2, stamp);
-//				}
-//				pd.save();
-//				pd.populatePersonDay();
-//				flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
-//				Application.indexAdmin();
-//			}
-//			
-//			count ++;
-//		}
-		
-	//	render("@save");
+
 	}
     
     @Check(Security.INSERT_AND_UPDATE_ABSENCE)
@@ -500,7 +361,7 @@ public class Stampings extends Controller {
     }
     
     @Check(Security.INSERT_AND_UPDATE_PERSON)
-    public static void dailyPresence(Integer year, Integer month, Integer day) throws DateParseException{
+    public static void dailyPresence(Integer year, Integer month, Integer day) {
 
     	List<PersonDay> pdList = null;
     	LocalDate today = null;

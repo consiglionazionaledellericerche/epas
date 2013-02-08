@@ -1,33 +1,23 @@
 package controllers;
 
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
-import it.cnr.iit.epas.ActionMenuItem;
 import models.Absence;
 import models.AbsenceType;
-import models.MonthRecap;
 import models.Person;
 import models.PersonDay;
+import models.PersonMonth;
 import models.YearRecap;
 
 import org.joda.time.LocalDate;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
-import com.google.common.collect.TreeBasedTable;
-
 import play.Logger;
-import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
+
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 
 @With( {Secure.class, NavigationMenu.class} )
 public class YearlyAbsences extends Controller{
@@ -109,10 +99,10 @@ public class YearlyAbsences extends Controller{
 		else{
 			Logger.info("Sono dentro il ramo else della creazione del month recap");
 			//Integer year = new Integer(params.get("year"));
-			MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, year, month);
+			PersonMonth personMonth = PersonMonth.byPersonAndYearAndMonth(person, year, month);
 			YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)year);
 
-			render(yearRecap, monthRecap);
+			render(yearRecap, personMonth);
 		}
 
 	}

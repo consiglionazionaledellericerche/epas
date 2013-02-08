@@ -191,14 +191,6 @@ public class Person extends Model {
 	public List<YearRecap> yearRecaps;
 
 	/**
-	 * relazione con la tabella di storico MonthRecap
-	 */
-	@NotAudited
-	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
-	public List<MonthRecap> monthRecaps;
-
-
-	/**
 	 * relazione con la tabella di vacation_code
 	 */
 	@OneToOne(mappedBy="person", fetch=FetchType.LAZY)
