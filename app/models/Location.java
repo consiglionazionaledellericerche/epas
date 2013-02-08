@@ -32,7 +32,7 @@ public class Location extends Model {
 	
 	@Override
 	public String toString() {
-		return String.format("Location[] - person.id = %d, department = %s, headOffice = %s, room = %s",
+		return String.format("Location[id=%d] - person.id = %d, department = %s, headOffice = %s, room = %s",
 			id, person.id, department, headOffice, room);
 	}
 }

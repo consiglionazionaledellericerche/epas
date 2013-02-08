@@ -130,31 +130,31 @@ public class WorkingTimes extends Controller{
 		Integer fridayWorkingMinutes = params.get("fridayWorkingTime", Integer.class);
 		Integer saturdayWorkingMinutes = params.get("saturdayWorkingTime", Integer.class);
 		Integer sundayWorkingMinutes = params.get("sundayWorkingTime", Integer.class);
-		if(wtt.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime != mondayWorkingMinutes){
+		if(!wtt.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime.equals(mondayWorkingMinutes)){
 			wtt.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime = mondayWorkingMinutes;
 			wtt.getWorkingTimeTypeDayFromDayOfWeek(1).save();
 		}
-		if(wtt.getWorkingTimeTypeDayFromDayOfWeek(2).workingTime != tuesdayWorkingMinutes){
+		if(!wtt.getWorkingTimeTypeDayFromDayOfWeek(2).workingTime.equals(tuesdayWorkingMinutes)){
 			wtt.getWorkingTimeTypeDayFromDayOfWeek(2).workingTime = tuesdayWorkingMinutes;
 			wtt.getWorkingTimeTypeDayFromDayOfWeek(2).save();
 		}
-		if(wtt.getWorkingTimeTypeDayFromDayOfWeek(3).workingTime != wednesdayWorkingMinutes){
+		if(!wtt.getWorkingTimeTypeDayFromDayOfWeek(3).workingTime.equals(wednesdayWorkingMinutes)){
 			wtt.getWorkingTimeTypeDayFromDayOfWeek(3).workingTime = wednesdayWorkingMinutes;
 			wtt.getWorkingTimeTypeDayFromDayOfWeek(3).save();
 		}
-		if(wtt.getWorkingTimeTypeDayFromDayOfWeek(4).workingTime != thursdayWorkingMinutes){
+		if(!wtt.getWorkingTimeTypeDayFromDayOfWeek(4).workingTime.equals(thursdayWorkingMinutes)){
 			wtt.getWorkingTimeTypeDayFromDayOfWeek(4).workingTime = thursdayWorkingMinutes;
 			wtt.getWorkingTimeTypeDayFromDayOfWeek(4).save();
 		}
-		if(wtt.getWorkingTimeTypeDayFromDayOfWeek(5).workingTime != fridayWorkingMinutes){
+		if(!wtt.getWorkingTimeTypeDayFromDayOfWeek(5).workingTime.equals(fridayWorkingMinutes)){
 			wtt.getWorkingTimeTypeDayFromDayOfWeek(5).workingTime = fridayWorkingMinutes;
 			wtt.getWorkingTimeTypeDayFromDayOfWeek(5).save();
 		}
-		if(wtt.getWorkingTimeTypeDayFromDayOfWeek(6).workingTime != saturdayWorkingMinutes){
+		if(!wtt.getWorkingTimeTypeDayFromDayOfWeek(6).workingTime.equals(saturdayWorkingMinutes)){
 			wtt.getWorkingTimeTypeDayFromDayOfWeek(6).workingTime = saturdayWorkingMinutes;
 			wtt.getWorkingTimeTypeDayFromDayOfWeek(6).save();
 		}
-		if(wtt.getWorkingTimeTypeDayFromDayOfWeek(7).workingTime != sundayWorkingMinutes){
+		if(!wtt.getWorkingTimeTypeDayFromDayOfWeek(7).workingTime.equals(sundayWorkingMinutes)){
 			wtt.getWorkingTimeTypeDayFromDayOfWeek(7).workingTime = sundayWorkingMinutes;
 			wtt.getWorkingTimeTypeDayFromDayOfWeek(7).save();
 		}
@@ -310,13 +310,6 @@ public class WorkingTimes extends Controller{
 		else
 			wttd7.holiday = true;
 		wttd7.save();
-
-		Boolean defaultWorkingTime = params.get("default", Boolean.class);
-		/**
-		 * scommentare quando si è capito come inserire una nuova colonna nella classe senza generare disastri
-		 */
-//		if(wtt.defaultWorkingTimeType != defaultWorkingTime)
-//			wtt.defaultWorkingTimeType = defaultWorkingTime;
 		
 		Boolean shift = params.get("turni", Boolean.class);
 		if(shift == null || shift == false)

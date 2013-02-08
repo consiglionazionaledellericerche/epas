@@ -34,12 +34,12 @@ public class Competences extends Controller{
 	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void show(Long personId, int year, int month) {
 		Person person = Person.findById(personId); //Security.getPerson();
-		Logger.info("Anno: "+year);
-		Logger.info("Mese: "+month);
+		
+		Logger.trace("Year: {}, month: {}", year, month);
+
 		String anno = params.get("year");
-		Logger.info("Anno: "+anno.toString());
 		String mese= params.get("month");
-		Logger.info("Mese: "+mese.toString());
+
 		if(anno==null || mese==null){
 
 			LocalDate now = new LocalDate();
@@ -188,7 +188,7 @@ public class Competences extends Controller{
 			Integer recoveryDays = 0;
 			Integer timeAtWork = 0;
 			Integer difference = 0;
-			Integer differenceLessOvertime = 0;
+
 			Integer overtime = 0;
 			List<PersonDay> personDayList = PersonDay.find("Select pd from PersonDay pd where pd.date between ? and ? and pd.person = ?", 
 					beginMonth, beginMonth.dayOfMonth().withMaximumValue(), p).fetch();

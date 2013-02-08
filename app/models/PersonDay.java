@@ -423,40 +423,13 @@ public class PersonDay extends Model {
 	}
 
 
-	public void calculateTimeAtWork(){
-		LocalDateTime beginDate = new LocalDateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),0,0);
-		LocalDateTime endDate = new LocalDateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),23,59);
-		Logger.debug("Lista timbrature: ", stampings.toString());
-		List<Stamping> reloadedStampings = Stamping.find("Select st from Stamping st where st.date > ? and st.date < ? order by st.date", 
-				beginDate, endDate).fetch();
-		List<Stamping> withNullStampings = returnStampingsList(reloadedStampings);
-		//		boolean stampingForLunch = false;
-		if(withNullStampings.size() <= 1)
-			return;
-		Stamping lastValidEntrance = null;
-		//		Stamping lastValidExit = null;
-		Stamping lastStamping = null;
-		int numberOfValidEntranceExitCouple = 0;
-		//		int timeAtWork = 0;
-		for(Stamping st : withNullStampings){
-			if(st.way == WayType.out && (lastValidEntrance != null)){
-				timeAtWork = toMinute(st.date)-toMinute(lastValidEntrance.date);
-				numberOfValidEntranceExitCouple++;
-			}
-			if(st.way == WayType.in){
-				if(lastStamping.way == WayType.in){
-
-				}
-			}
-		}
-	}
-
 	/**
 	 * calcola il valore del progressivo giornaliero e lo salva sul db
 	 */
 	private void updateProgressive(){
 
 		Contract con = person.getContract(date);
+
 		if(con.beginContract == null || 
 				(date.isAfter(con.beginContract) && (con.expireContract == null || date.isBefore(con.expireContract)))) {
 			PersonDay lastPreviousPersonDayInMonth = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? " +

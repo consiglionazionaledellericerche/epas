@@ -279,20 +279,7 @@ public class Absences extends Controller{
 		absence.save();
 		
 		if (absence.id != null) {
-//			if(params.get("buonoMensaSi", Boolean.class)==true){
-//				/**
-//				 * in questo caso bisogna forzare l'assegnazione del buono pasto nonostante l'assenza
-//				 */
-//				pd.isTicketAvailable = true;
-//				pd.save();
-//				flash.success(String.format("Assenza di tipo %s inserita per il giorno %s per %s %s con buono mensa assegnato", absenceCode, PersonTags.toDateTime(dateFrom), person.surname, person.name));
-//				render("@save");	
-//			}
-//			else{
-							
-				LocalDateTime ldtBegin = new LocalDateTime(dateFrom.getYear(), dateFrom.getMonthOfYear(), dateFrom.getDayOfMonth(), 0, 0);
-				LocalDateTime ldtEnd = new LocalDateTime(dateFrom.getYear(), dateFrom.getMonthOfYear(), dateFrom.getDayOfMonth(), 23, 59);
-							
+						
 				if(absenceType.justifiedTimeAtWork.isFixedJustifiedTime() == true && absenceType.mealTicketCalculation == true){
 					/**
 					 * è un'assenza oraria e il calcolo del buono mensa deve essere fatto lo stesso: devo vedere se il tempo di lavoro

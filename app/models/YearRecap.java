@@ -344,10 +344,7 @@ public class YearRecap extends Model{
 	 * @return il numero di giorni di ferie avanzati da quelli maturati l'anno precedente e non ancora utilizzati
 	 */
 	public int vacationLastYearNotYetUsed(){
-		LocalDate date = new LocalDate(year,1,1);
-		//recupero dal db le assenze fatte quest'anno che hanno codice 4 ovvero quelle con causale "residuo anno precedente"
-//		List<Absence> absence = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? and abs.date > ? " +
-//				"and abs.absenceType = abt and abt.code = ?", person, date, "31").fetch();
+
 		LocalDate beginLastYear = new LocalDate(year-1,1,1);
 		LocalDate endLastYear = new LocalDate(year-1,12,31);
 
@@ -380,8 +377,7 @@ public class YearRecap extends Model{
 		
 		//recupero dal db le assenze fatte l'anno precedente che hanno codice 5 ovvero quelle con causale "ferie anno corrente"		
 		int vacationDaysPastYear = 0;
-//		List<Absence> vacationsLastYear = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? and abs.date >= ? and " +
-//				"abs.date < ? and abs.absenceType = abt and abt.code = ?", person, beginLastYear, endLastYear, "32").fetch();
+
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 				person, beginLastYear, endLastYear).fetch();
 		for(PersonDay pd : pdList){

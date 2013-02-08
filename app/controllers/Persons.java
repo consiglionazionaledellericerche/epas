@@ -98,18 +98,25 @@ public class Persons extends Controller {
 			render("@insertPerson");
 		}
 		Person person = null;
-		Location location = null;
-		ContactData contactData = null;
-		Contract contract = null;
+		Location location = new Location();
+		ContactData contactData = new ContactData();
+		
+		//FIXME: viene sempre creato un contratto nuovo ma ci dovrebbe essere la possibilità
+		//di modificare un contratto esistente. Fare in questo o in un altro metodo?
+		Contract contract = new Contract();
 		if(personId == null){
 			person = new Person();
-			location = new Location();
-			contactData = new ContactData();
-			contract = new Contract();
 		}
 		else{
 			person = Person.findById(personId);
+			if (person.contactData != null) {
+				contactData = person.contactData;
+			}
+			if (person.location != null) {
+				location = person.location;
+			}
 		}
+		
 		Logger.debug("Saving person...");
 		
 		person.name = params.get("name");

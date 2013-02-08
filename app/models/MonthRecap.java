@@ -121,9 +121,6 @@ public class MonthRecap extends Model {
 	@Transient
 	private List<String> months = null;
 
-	@Transient	
-	private int progressiveOfDailyTime=0; 
-
 	/**
 	 * Construttore di default con i parametri obbligatori
 	 * 
@@ -216,18 +213,6 @@ public class MonthRecap extends Model {
 		return days;
 	}	
 
-	/**
-	 * 
-	 * @return il progressivo della differenza giornaliera tra orario di lavoro previsto e orario di lavoro effettivamente fatto
-	 */
-	private int getProgressive(int difference){
-
-
-		progressiveOfDailyTime=progressiveOfDailyTime+difference;
-		return progressiveOfDailyTime;
-
-	}
-	
 
 	/**
 	 * metodo di utilità che calcola nel mese corrente qual'è stato il massimo numero di timbrature giornaliere

@@ -146,7 +146,7 @@ public class Shift extends Controller{
 				}
 				
 				//Se la persona è in ferie questo giorno non può essere in turno (almeno che non sia cancellato)
-				if ((Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date = ? and pd.person = ?", day, shiftPeriod.person).fetch().size() > 0) && (type != "X")){
+				if ((Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date = ? and pd.person = ?", day, shiftPeriod.person).fetch().size() > 0) && (!type.equals("X"))){
 					throw new IllegalArgumentException(
 						String.format("ShiftPeriod person.id %d is not compatible with a Absence in the same day %s", shiftPeriod.person.id, day));
 				}

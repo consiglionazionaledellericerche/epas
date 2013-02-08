@@ -1,8 +1,5 @@
 package models;
 
-import it.cnr.iit.epas.PersonUtility;
-
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -12,30 +9,20 @@ import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.Query;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import models.Stamping.WayType;
+
 import org.hibernate.envers.Audited;
-import org.joda.time.DateTimeConstants;
-import org.joda.time.DateTimeFieldType;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 
 import play.Logger;
 import play.data.validation.Required;
 import play.db.jpa.JPA;
 import play.db.jpa.Model;
-
-import lombok.Cleanup;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import models.Stamping.WayType;
 
 /**
  * @author cristian
@@ -179,28 +166,6 @@ public class PersonMonth extends Model {
 
 	/**
 	 * 
-	 * @param month
-	 * @param year
-	 * @return il numero di minuti di riposo compensativo utilizzati in quel mese 
-	 */
-	@Deprecated
-	public int getCompensatoryRestInMinutes(){
-
-		int compensatoryRest = getCompensatoryRest();
-
-		Logger.debug("NUmero di giorni di riposo compensativo nel mese: %s", compensatoryRest);
-		int minutesOfCompensatoryRest = compensatoryRest * person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime;
-		if(minutesOfCompensatoryRest != compensatoryRestInMinutes && compensatoryRestInMinutes != null){
-			compensatoryRestInMinutes = minutesOfCompensatoryRest;
-			save();
-		}
-
-		return compensatoryRestInMinutes;
-
-	}
-
-	/**
-	 * 
 	 * @return il numero di giorni di riposo compensativo nel mese
 	 */
 	@Deprecated
@@ -219,31 +184,6 @@ public class PersonMonth extends Model {
 		}
 		return compensatoryRest;
 	}
-
-	/**
-	 * 
-	 * @param month
-	 * @param year
-	 * @return il totale derivante dalla differenza tra le ore residue e le eventuali ore di riposo compensativo
-	 */
-	@Deprecated
-	public int getTotalOfMonth(){
-		int total = 0;
-		int compensatoryRest = getCompensatoryRestInMinutes();
-		//Logger.debug("CompensatoryRest in getTotalOfMonth: %s", compensatoryRest);
-		int monthResidual = getMonthResidual();
-		//Logger.debug("MonthResidual in getTotalOfMonth: %s", monthResidual);
-		LocalDate date = new LocalDate(year, month, 1);
-		/**
-		 * TODO: devo farlo qui il controllo di quale sia la qualifica per poter aggiungere o meno il valore del residuo dell'anno precedente!?!?!?
-		 */
-		int residualFromPastMonth = PersonUtility.getResidual(person, date.dayOfMonth().withMaximumValue());
-
-		total = residualFromPastMonth+monthResidual-(compensatoryRest); 
-
-		return total;
-	}
-
 
 
 	/**
