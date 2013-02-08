@@ -383,11 +383,11 @@ public class PersonDay extends Model {
 				for(Stamping st : reloadedStampings){
 					if(st.way == Stamping.WayType.in){
 						workTime -= toMinute(st.date);									
-						System.out.println("Timbratura di ingresso: "+workTime);	
+						Logger.trace("Timbratura di ingresso: %s", workTime);	
 					}
 					if(st.way == Stamping.WayType.out){
 						workTime += toMinute(st.date);								
-						System.out.println("Timbratura di uscita: "+workTime);
+						Logger.trace("Timbratura di uscita: %s", workTime);
 					}
 
 				}
