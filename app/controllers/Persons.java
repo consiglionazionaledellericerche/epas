@@ -52,15 +52,15 @@ public class Persons extends Controller {
 		Competence comp3 = Competence.find("Select comp from Competence comp, CompetenceCode code where comp.competenceCode = code and comp.person = ?" +
 				" and comp.year = ? and comp.month = ? and code = ?", person, date.getYear(), date.getMonthOfYear(), cmpCode3).first();
 		if(comp1 != null)
-			weekDayAvailability = comp1.value;
+			weekDayAvailability = comp1.valueApproved;
 		else
 			weekDayAvailability = 0;
 		if(comp2 != null)
-			holidaysAvailability = comp2.value;
+			holidaysAvailability = comp2.valueApproved;
 		else
 			holidaysAvailability = 0;
 		if(comp3 != null)
-			daylightWorkingDaysOvertime = comp3.value;
+			daylightWorkingDaysOvertime = comp3.valueApproved;
 		else
 			daylightWorkingDaysOvertime = 0;
 		int progressive = 0;
@@ -92,7 +92,7 @@ public class Persons extends Controller {
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void save(Long personId) {
+	public static void save() {
 		if(validation.hasErrors()) {
 			if(request.isAjax()) error("Invalid value");
 			render("@insertPerson");
@@ -103,20 +103,8 @@ public class Persons extends Controller {
 		
 		//FIXME: viene sempre creato un contratto nuovo ma ci dovrebbe essere la possibilità
 		//di modificare un contratto esistente. Fare in questo o in un altro metodo?
-		Contract contract = new Contract();
-		if(personId == null){
-			person = new Person();
-		}
-		else{
-			person = Person.findById(personId);
-			if (person.contactData != null) {
-				contactData = person.contactData;
-			}
-			if (person.location != null) {
-				location = person.location;
-			}
-		}
-		
+		Contract contract = new Contract();		
+		person = new Person();		
 		Logger.debug("Saving person...");
 		
 		person.name = params.get("name");
@@ -142,8 +130,9 @@ public class Persons extends Controller {
 		Date begin = params.get("beginContract", Date.class);
 		Date end = params.get("expireContract", Date.class);
 		LocalDate beginContract = new LocalDate(begin);
-		contract.beginContract = beginContract;
 		LocalDate expireContract = new LocalDate(end);
+				
+		contract.beginContract = beginContract;
 		contract.expireContract = expireContract;
 		contract.person = person;
 		contract.save();
@@ -152,6 +141,60 @@ public class Persons extends Controller {
 		flash.success(String.format("Inserita nuova persona in anagrafica: %s %s ",person.name, person.surname));
 		Application.indexAdmin();
 		
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void update(){
+		Long personId = params.get("personId", Long.class);		
+		
+		Person person = Person.findById(personId);
+		ContactData contactData = person.contactData;
+		Location location = person.location;
+		if(!contactData.email.equals(params.get("email"))){
+			contactData.email = params.get("email");
+		}
+		if(!contactData.telephone.equals(params.get("telephone"))){
+			contactData.telephone = params.get("telephone");
+		}
+		contactData.save();
+		if(!location.department.equals(params.get("department"))){
+			location.department = params.get("department");
+		}
+		if(!location.headOffice.equals(params.get("headOffice"))){
+			location.headOffice = params.get("headOffice");
+		}
+		if(!location.room.equals(params.get("room"))){
+			location.room = params.get("room");
+		}
+		location.save();
+		/**
+		 * TODO: da completare
+		 */
+		
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void modifyContract(Long contractId){
+		if(contractId != null){
+			Contract contract = Contract.findById(contractId);
+			Person person = Person.find("Select person from Person person where person.contract = ?", contract).first();
+			render(contract, person);
+		}
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void updateContract(){
+		Long contractId = params.get("contractId", Long.class);
+		Contract contract = Contract.findById(contractId);
+		if(!contract.beginContract.isEqual(params.get("beginContract", LocalDate.class)))
+			contract.beginContract = params.get("beginContract", LocalDate.class);
+		if(!contract.expireContract.isEqual(params.get("expireContract", LocalDate.class)))
+			contract.expireContract = params.get("expireContract", LocalDate.class);
+		if(contract.endContract == null && params.get("endContract", LocalDate.class) != null)
+			contract.endContract = params.get("endContract", LocalDate.class);
+		/**
+		 * TODO: da completare
+		 */
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)

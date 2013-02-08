@@ -7,8 +7,8 @@
 <h2 id="titoloModificaDatiPersonali">Modifica dati per l'utente
 	${person.name} ${person.surname}</h2>
 
-#{form @Persons.save()}
-<input type="hidden" name="person.id" value="${person.id}" />
+#{form @Persons.update()}
+<input type="hidden" name="personId" value="${person.id}" />
 
 <fieldset>
 	<legend>Dati personali</legend>
@@ -45,6 +45,7 @@
 			<th>Data fine</th>
 			<th>Data terminazione esperienza lavorativa</th>
 			<th>Attestato presenza</th>
+			<th>Modifica</th>
 		</tr>
 		%{ for(contract in contractList){ }%
 		<tr>
@@ -59,6 +60,7 @@
 				value="${contract.endContract}" /></td> %{ } }%
 			<td><input name="onCertificate" type="checkbox"
 				value="${contract.onCertificate}" /></td>
+			<td><a href="@{Persons.modifyContract(contract.id)}"><input value="Modifica" class="Forminput" type="button"></a></td>
 		</tr>
 		%{ } }%
 	</table>

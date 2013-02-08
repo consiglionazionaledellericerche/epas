@@ -34,11 +34,15 @@ public class Competence extends Model {
 	
 	public int month;	
 	
-	public int value;
+	public int valueApproved;
+	
+	public int valueRequest;
+	
+	public String reason;
 	
 	@Override
 	public String toString() {
 		return String.format("Competence[%d] - person.id = %d, competenceCode.id = %d, year = %d, month = %d,value = %d",
-			id, person.id, competenceCode.id, year, month, value);
+			id, person.id, competenceCode.id, year, month, valueApproved);
 	}
 }

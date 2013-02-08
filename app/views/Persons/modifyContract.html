@@ -1,0 +1,24 @@
+#{extends 'main.html' /}
+
+#{logoutForm /}
+
+#{functionalMenuForm mainMenu: mainMenu /} 
+
+<h2 id="titoloModificaDatiContrattuali">Modifica dati contrattuali per l'utente ${person.name} ${person.surname}</h2>
+#{form @Persons.updateContract()}
+<input type="hidden" name="contractId" value="${contract.id}" />
+<table>
+	<tr>
+		<th>Data inizio contratto</th>
+		<th>Data fine contratto</th>
+		<th>Data terminazione contratto (causa morte, pensione...)</th>
+		<th>In attestati presenza</th>
+	</tr>
+	<tr>
+		<td><input type="text" value="${contract.beginContract}" name="beginContract"/></td>
+		<td><input type="text" value="${contract.expireContract}" name="expireContract"/></td>
+		<td><input type="text" value="${contract.endContract}" name="endContract"/></td>
+		<td><input type="radio" value="${contract.onCertificate}" name="onCertificate"/></td>
+	</tr>
+</table>
+#{/form}

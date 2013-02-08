@@ -43,7 +43,7 @@ public class PersonMonths extends Controller{
 				lista.add(0, pd.difference);
 				lista.add(1, compensatoryRest);
 				if(comp != null)
-					lista.add(2, comp.value);
+					lista.add(2, comp.valueApproved);
 				else
 					lista.add(2, 0);
 				lista.add(3,pd.progressive);

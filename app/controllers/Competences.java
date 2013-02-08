@@ -204,7 +204,7 @@ public class Competences extends Controller{
 					p, year, month, code.code).first();
 			//Logger.debug("La competenza è: %s", comp);
 			if(comp != null)
-				overtime = comp.value;
+				overtime = comp.valueApproved;
 			else
 				overtime = 0;
 			lista = new ArrayList<Object>();
@@ -240,15 +240,15 @@ public class Competences extends Controller{
 		Competence comp3 = Competence.find("Select comp from Competence comp, CompetenceCode code where comp.competenceCode = code and comp.person = ?" +
 				" and comp.year = ? and comp.month = ? and code = ?", person, date.getYear(), date.getMonthOfYear(), cmpCode3).first();
 		if(comp1 != null)
-			weekDayAvailability = comp1.value;
+			weekDayAvailability = comp1.valueApproved;
 		else
 			weekDayAvailability = 0;
 		if(comp2 != null)
-			holidaysAvailability = comp2.value;
+			holidaysAvailability = comp2.valueApproved;
 		else
 			holidaysAvailability = 0;
 		if(comp3 != null)
-			daylightWorkingDaysOvertime = comp3.value;
+			daylightWorkingDaysOvertime = comp3.valueApproved;
 		else
 			daylightWorkingDaysOvertime = 0;
 		int progressive = 0;
@@ -281,11 +281,11 @@ public class Competences extends Controller{
 					comp.month = month;
 					comp.year = year;
 					comp.competenceCode = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", "S1").first();
-					comp.value = overtime;
+					comp.valueApproved = overtime;
 
 				}
 				else{
-					comp.value = progressive;
+					comp.valueApproved = progressive;
 				}
 				comp.save();
 				flash.success(String.format("Inserite %s ore di straordinario per %s %s il %s/%s", overtime, person.name, person.surname, month, year));
