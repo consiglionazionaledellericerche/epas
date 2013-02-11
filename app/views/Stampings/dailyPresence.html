@@ -32,12 +32,12 @@
 	<tr>
 		<td>${pd.person.surname} ${pd.person.name}</td>
 		<td>${pd.absences.size() > 0 ? pd.absences.get(0).absenceType.code : ''}</td>
-		<td></td>
-		<td></td>
-		<td></td>
-		<td></td>
-		<td></td>
-		<td></td>
+		<td>${pd.stampings.size() > 1 ? pd.stampings.get(1).date.toCalendarTime() : ''}</td>
+		<td>${pd.stampings.size() > 2 ? pd.stampings.get(2).date.toCalendarTime() : ''}</td>
+		<td>${pd.stampings.size() > 3 ? pd.stampings.get(3).date.toCalendarTime() : ''}</td>
+		<td>${pd.stampings.size() > 4 ? pd.stampings.get(4).date.toCalendarTime() : ''}</td>
+		<td>${pd.stampings.size() > 5 ? pd.stampings.get(5).date.toCalendarTime() : ''}</td>
+		<td>${pd.stampings.size() > 6 ? pd.stampings.get(6).date.toCalendarTime() : ''}</td>
 		<td>${pd.timeAtWork.toHourTime()}</td>
 	</tr>	
 		%{
