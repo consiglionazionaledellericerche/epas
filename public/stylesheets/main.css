@@ -307,6 +307,7 @@ input#discardNuovoCodiceAssenza {margin: 1em 60em 0em; align: center}
 input#submitEditPerson {margin: 2em 60em 0em; align left}
 input#discardEditPerson {margin: 1em 60em 0em; align: center}
 input#deletePerson {margin: 1em 60em 0em; align: right}
+input#modificaContratto {margin: 1em 25em 0em; align: center}
 
 input#updateOldOvertime {margin: 0em 25em 0em; align: center}
 table#tabellaPersoneCodiciAssenzaMensili {margin: 2em 1em 1em; align: left}
