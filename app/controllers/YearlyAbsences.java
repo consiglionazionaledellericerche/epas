@@ -120,7 +120,7 @@ public class YearlyAbsences extends Controller{
 	public static void showGeneralMonthlyAbsences(int year, int month) throws InstantiationException, IllegalAccessException{
 		Table<Person, String, Integer> tablePersonAbsences =  HashBasedTable.create();
 		
-		List<Person> activePersons = Person.getActivePersons(new LocalDate(year, month, 1)).subList(0, 100);
+		List<Person> activePersons = Person.getActivePersons(new LocalDate(year, month, 1));
 		for(Person p : activePersons){
 			List<Absence> absenceInMonth = Absence.find("Select abs from Absence abs, PersonDay pd where abs.personDay = pd and " +
 					"pd.person = ? and pd.date >= ? and pd.date <= ?", 
