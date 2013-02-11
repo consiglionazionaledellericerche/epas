@@ -49,18 +49,28 @@
 		</tr>
 		%{ for(contract in contractList){ }%
 		<tr>
-			<td><input name="beginContract" type="date"
+			<td><input name="beginContract" type="date" readOnly="readOnly"
 				value="${contract.beginContract}" size="10" maxlength="10" /></td>
-			<td><input name="expireContract" type="date"
+			<td><input name="expireContract" type="date" readOnly="readOnly"
 				value="${contract.expireContract}" size="10" maxlength="10" /></td> %{
 			if(contract.endContract == null){ }%
 			<td><a href="@{Persons.terminatePerson(person.id)}">Termina
 					contratto</a></td> %{ } else{ }%
-			<td><input name="endContract" type="date"
+			<td><input name="endContract" type="date" readOnly="readOnly"
 				value="${contract.endContract}" /></td> %{ } }%
-			<td><input name="onCertificate" type="checkbox"
+			<td><input name="onCertificate" type="checkbox" readOnly="readOnly"
 				value="${contract.onCertificate}" /></td>
-			<td><a href="@{Persons.modifyContract(contract.id)}"><input value="Modifica" class="Forminput" type="button"></a></td>
+			<td>
+			<a href="@{Persons.modifyContract(contract.id)}" class="modifyContract${contract.id}"><input value="Modifica" class="Forminput" type="button"></a>
+			<script type="text/javascript"> 
+				$('.modifyContract${contract.id}').popupWindow({ 
+				height:500, 
+				width:800, 
+				top:50, 
+				left:50 
+				}); 
+				</script>
+			</td>
 		</tr>
 		%{ } }%
 	</table>

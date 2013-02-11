@@ -4,7 +4,7 @@
 
 #{functionalMenuForm mainMenu: mainMenu /} 
 
-<h2 id="titoloModificaDatiContrattuali">Modifica dati contrattuali per l'utente ${person.name} ${person.surname}</h2>
+<h3 id="titoloModificaDatiContrattuali">Modifica dati contrattuali per l'utente ${contract.person.name} ${contract.person.surname}</h3>
 #{form @Persons.updateContract()}
 <input type="hidden" name="contractId" value="${contract.id}" />
 <table>
@@ -21,4 +21,5 @@
 		<td><input type="radio" value="${contract.onCertificate}" name="onCertificate"/></td>
 	</tr>
 </table>
+<input id="modificaContratto" type="submit" value="Modifica"/>
 #{/form}
