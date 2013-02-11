@@ -177,8 +177,13 @@ public class Persons extends Controller {
 	public static void modifyContract(Long contractId){
 		if(contractId != null){
 			Contract contract = Contract.findById(contractId);
-			Person person = Person.find("Select person from Person person where person.contract = ?", contract).first();
-			render(contract, person);
+			if(contract == null){
+				flash.error("Non è stato trovato nessun contratto con id %s per il dipendente ", contractId);
+				Application.indexAdmin();
+			}
+			
+			//Person person = Person.find("Select person from Person person where person.contract = ?", contract).first();
+			render(contract);
 		}
 	}
 	
@@ -192,9 +197,11 @@ public class Persons extends Controller {
 			contract.expireContract = params.get("expireContract", LocalDate.class);
 		if(contract.endContract == null && params.get("endContract", LocalDate.class) != null)
 			contract.endContract = params.get("endContract", LocalDate.class);
-		/**
-		 * TODO: da completare
-		 */
+		
+		contract.save();
+		flash.success("Aggiornato contratto per il dipendente %s %s", contract.person.name, contract.person.surname);
+		Application.indexAdmin();
+		
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
