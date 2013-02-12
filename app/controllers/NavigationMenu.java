@@ -28,12 +28,12 @@ public class NavigationMenu extends Controller {
 	@Before
 	public static void injectMenu() { 
 		LocalDate now = new LocalDate();
-		
-		int year = params.get("year") != null ? params.get("year", Integer.class) : now.getYear(); 
-		int month = params.get("month") != null ? params.get("month", Integer.class) : now.getMonthOfYear();
-		ActionMenuItem action = params.get("action") != null && !params.get("action").equals("") ? ActionMenuItem.valueOf(params.get("action")) : ActionMenuItem.stampings;
+		int day = params.get("day") != null ? params.get("day", Integer.class).intValue() : 1;
+		int year = params.get("year") != null ? params.get("year", Integer.class).intValue() : now.getYear(); 
+		int month = params.get("month") != null ? params.get("month", Integer.class).intValue() : now.getMonthOfYear();
+		ActionMenuItem action = params.get("action") != null && !params.get("action").equals("") ? ActionMenuItem.valueOf(params.get("action")) : ActionMenuItem.stampingsAdmin;
 		Long personId =  params.get("personId") != null ? params.get("personId", Long.class) : null;
-		
+	
 		List<Person> persons = (List<Person>) Cache.get("persons");
 		
 		if (persons == null) {
@@ -50,8 +50,11 @@ public class NavigationMenu extends Controller {
 //					"order by p.surname", true).fetch();
 			Cache.set("persons", persons, "5mn");
 		}
-		
-		MainMenu mainMenu = new MainMenu(personId, year, month, action, persons);
+		MainMenu mainMenu = null;
+		if(!action.getDescription().equals("Presenza giornaliera"))
+			mainMenu = new MainMenu(personId, year, month, action, persons);
+		else
+			mainMenu = new MainMenu(personId, year, month, day, action, persons);
 		
 		renderArgs.put("mainMenu", mainMenu);
 

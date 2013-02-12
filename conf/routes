@@ -10,16 +10,16 @@ GET     /                                       Stampings.show
 GET		/presenze								Application.indexAdmin
 
 #Orario e timbrature
-GET     /orario/{personId}/{year}/{month}		Stampings.show
+GET     /stampings/{personId}/{year}/{month}	Stampings.show
 
 GET		/orarioAdmin/{personId}/{year}/{month}	Stampings.personStamping
 GET 	/orarioAdmin							Stampings.personStamping
 
 #Assenze
-GET		/assenze/{personId}/{year}/{month}		Absences.show
+GET		/absences/{personId}/{year}/{month}		Absences.show
 
 #Assenze annuali
-GET		/assenze-annuali/{personId}/{year}		YearlyAbsences.show
+GET		/yearlyAbsences/{personId}/{year}		YearlyAbsences.show
 
 #Assenze mensili globali
 GET		/generalMonthlyAbsences/{year}/{month}	YearlyAbsences.showGeneralMonthlyAbsences
@@ -31,7 +31,7 @@ POST	/vacations								Vacations.vacations
 GET		/vacationsCurrentYear					Vacations.vacationsCurrentYear		
 
 #Competenze
-GET		/competenze/{personId}/{year}/{month}	Competences.show
+GET		/competences/{personId}/{year}/{month}	Competences.show
 
 #Riepilogo ore
 GET		/hourRecap/{personId}/{year}			PersonMonths.hourRecap
@@ -49,10 +49,6 @@ GET     /favicon.ico                            404
 
 # Map static resources from the /app/public folder to the /public path
 GET     /public/                                staticDir:public
-
-# Bootstrap
-GET     /public/bootstrap/img/glyphicons-halflings-white.png    staticDir:public  
-GET     /public/bootstrap/img/glyphicons-halflings.png            staticDir:public
 
 # Import Secure routes
 #*       /                						module:secure
