@@ -81,11 +81,11 @@
 			%{
 			 }else{
 			 }% <td class="tempoLavoro">${day.isHoliday()==false ? day.convertTimeAtWork(day.timeAtWork).toCalendarTime() : ''} <strong>${day.stampingList().size()==4 && !day.stampingList().contains(null) && day.timeAtWork>300
-			 && day.checkMinTimeForLunch()<30 ? day.checkTimeForLunch(day.stampingList())?.code : ''}</strong></td>
+			 && day.checkMinTimeForLunch()<30 ? day.checkTimeForLunch()?.code : ''}</strong></td>
 			%{
 	         }
 	         }%	
-	         <td class="differenza">${day.isHoliday()==false ? (day.difference).toHourTime() : ''}</td>
+	         <td class="differenza">${(day.difference).toHourTime()}</td>
 				
 	         <td class="progressivo">${day.progressive.toHourTime()}</td>	
 	         <td>${day.person.workingTimeType != null ? day.person.workingTimeType.description : ''}</td>

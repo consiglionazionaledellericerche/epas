@@ -362,7 +362,8 @@ public class Stampings extends Controller {
     
     @Check(Security.INSERT_AND_UPDATE_PERSON)
     public static void dailyPresence(Integer year, Integer month, Integer day) {
-
+    	long id = 1;
+    	Configuration confParameters = Configuration.findById(id);
     	List<PersonDay> pdList = null;
     	LocalDate today = null;
     	if(day == null){
@@ -384,7 +385,9 @@ public class Stampings extends Controller {
     	for(Integer i = 1; i < 32; i++){
     		days.add(i);
     	}
-    	render(pdList, days, year, month, day);
+    	PersonMonth personMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.year = ? and pm.month = ?", year, month).first();
+    	int numberOfInOut = Math.min(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
+    	render(pdList, days, year, month, day, numberOfInOut);
     }
     
     @Check(Security.INSERT_AND_UPDATE_PERSON)

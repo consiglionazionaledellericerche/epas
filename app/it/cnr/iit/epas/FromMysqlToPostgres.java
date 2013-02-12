@@ -205,8 +205,9 @@ public class FromMysqlToPostgres {
 		JPAPlugin.startTx(false);
 		Logger.info("Terminata l'importazione dei dati di tutte le persone in %d secondi", ((new Date()).getTime() - start.getTime()) / 1000);
 
-		Logger.info("Adesso creo le competenze, il monte ore ed aggiusto i permessi");
-
+		Logger.info("Adesso aggiorno le date di inizio dei contratti, i vacation period, creo le competenze, il monte ore ed aggiusto i permessi");
+		FromMysqlToPostgres.updateContract();
+		FromMysqlToPostgres.updateVacationPeriod();
 		FromMysqlToPostgres.updateCompetence();
 		importOreStraordinario();
 		addPermissiontoAll();
@@ -217,6 +218,45 @@ public class FromMysqlToPostgres {
 
 		
 	}
+
+	/**
+	 * metodo che assegna un "default" di periodo ferie a quelle persone che dall'importazione non hanno ricevuto un vacationPeriod
+	 */
+	public static void updateVacationPeriod() {
+		List<Person> personList = Person.findAll();
+		for(Person p : personList){
+			if(p.vacationPeriod == null){
+				VacationPeriod vp = new VacationPeriod();
+				vp.person = p;
+				vp.vacationCode = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", "28+4").first();
+				vp.beginFrom = new LocalDate(1970,1,1);
+				vp.save();
+			}
+		}
+		
+	}
+	
+	/**
+	 * metodo che assegna un inizio di contratto di default a quelle persone che dall'importazione non hanno ricevuto un beginContract
+	 */
+	public static void updateContract(){
+		List<Person> personList = Person.findAll();
+		for(Person p : personList){
+			Contract con = Contract.find("Select con from Contract con where con.person = ?", p).first();
+			if(con != null && con.beginContract == null){
+				con.beginContract = new LocalDate(1970,1,1);
+				con.save();
+			}
+			else{
+				con = new Contract();
+				con.beginContract = new LocalDate(1970,1,1);
+				con.person = p;
+				con.onCertificate = true;
+				con.save();
+			}
+		}
+	}
+
 
 	/**
 	 * Importa le informazioni del personale dal database Mysql dell'applicazione Orologio.
@@ -847,6 +887,15 @@ public class FromMysqlToPostgres {
 					Logger.info("Creato %s", vacationPeriod.toString());
 				}
 			}
+//			else{
+//				VacationCode vc = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", "28+4").first();
+//				VacationPeriod vp = new VacationPeriod();
+//				vp.vacationCode = vc;
+//				vp.person = person;
+//				vp.beginFrom = new LocalDate(1970,1,1);
+//				vp.save();
+//				Logger.info("Creato vacation perdiod per dipendente %s %s che dal vecchio db non aveva informazione", person.name, person.surname);
+//			}
 		}		
 		catch(SQLException e){
 			e.printStackTrace();
