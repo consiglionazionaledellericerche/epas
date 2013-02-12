@@ -44,11 +44,13 @@ public class SwitchTemplate extends Controller{
 			year = params.get("year", Integer.class);
 		}
 
-		int day = now.getDayOfMonth();
+		int day ;
 		if(params.get("day") != null){
 			day = params.get("day", Integer.class);
 		}
-
+		else
+			day = now.getDayOfMonth();
+		
 		switch (menuItem) {
 
 		case stampingsAdmin:
@@ -110,10 +112,10 @@ public class SwitchTemplate extends Controller{
 			Competences.manageCompetenceCode();
 			break;
 		case stampings:
-			Stampings.show(personId, year, month); //vediamo se va bene questa o se c'è necessità di farne una nuova per l'impiegato
+			Stampings.show(personId, year, month);
 			break;
 		case absences:
-			Absences.show(personId, year, month); //vediamo se va bene questa o se c'è necessità di farne una nuova per l'impiegato
+			Absences.show(personId, year, month); 
 			break;
 		case absencesPerPerson:
 			YearlyAbsences.show(personId, year, month);
@@ -127,9 +129,7 @@ public class SwitchTemplate extends Controller{
 		case hourRecap:
 			PersonMonths.hourRecap(personId,year);
 			break;
-			//			case changePassword:
-			//				Persons.changePassword(personId);
-			//				break;
+
 		default: 
 			break;
 
