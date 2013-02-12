@@ -28,11 +28,13 @@ import models.Person;
 public class MainMenu {
 
 	public static final String PERSON_ID_CACHE_PREFIX = "personId.";
+	
 	@Setter
 	private Long personId = null;
 
 	private int year;
 	private int month;
+	private int day;
 	
 	@Setter
 	private ActionMenuItem action = null;
@@ -50,8 +52,21 @@ public class MainMenu {
 		this.action = action;
 	}
 	
+	public MainMenu(Long personId, int year, int month, int day, ActionMenuItem action){
+		this.personId = personId;
+		this.year = year;
+		this.month = month;
+		this.day = day;
+		this.action = action;
+	}
+	
 	public MainMenu(Long personId, int year, int month, ActionMenuItem action, List<Person> persons) {
 		this(personId, year, month, action);
+		this.persons = persons;
+	}
+	
+	public MainMenu(Long personId, int year, int month, int day, ActionMenuItem action, List<Person> persons) {
+		this(personId, year, month, day, action);
 		this.persons = persons;
 	}
 	
@@ -89,6 +104,7 @@ public class MainMenu {
             if (permissionDescriptions.contains(menuItem.getPermission())) {
                 actions.add(menuItem);
             }
+            
         }
        
         return actions;
