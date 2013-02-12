@@ -300,8 +300,8 @@ public class YearRecap extends Model{
 		LocalDate now = new LocalDate();
 		now.withYear(year);
 		
-		int difference = now.getYear()-beginContract.getYear();
-		Logger.warn("difference is:" +difference+ "now.getYear is: "+now.getYear()+ "beginContract.getYear is: "+beginContract.getYear());
+	//	int difference = now.getYear()-beginContract.getYear();
+	//	Logger.warn("difference is:" +difference+ "now.getYear is: "+now.getYear()+ "beginContract.getYear is: "+beginContract.getYear());
 		if(now.getYear()-beginContract.getYear() < 3){
 			if(now.getYear()-beginContract.getYear() < 1 && beginContract.getMonthOfYear() != 1 && beginContract.getDayOfMonth() != 1){
 				LocalDate newDate = now.minusYears(beginContract.getYear()).minusMonths(beginContract.getMonthOfYear()).minusDays(beginContract.getDayOfMonth());
@@ -358,13 +358,13 @@ public class YearRecap extends Model{
 		/**
 		 * se la data di inizio del contratto è precedente all'anno scorso
 		 */
-		if(contract.beginContract.getYear()<year-1){
+		if(contract.beginContract != null && contract.beginContract.getYear()<year-1){
 			days = daysBetweenTwoDates(beginLastYear, endLastYear);
 		}
 		/**
 		 * se la data di inizio contratto ricade nell'anno passato
 		 */
-		if(contract.beginContract.getYear()==year-1){
+		if(contract.beginContract != null && contract.beginContract.getYear()==year-1){
 			days = daysBetweenTwoDates(contract.beginContract, endLastYear);
 		}
 		
@@ -445,7 +445,10 @@ public class YearRecap extends Model{
 		int vacationDays = 0;
 		VacationCode vacCode = VacationCode.find("Select vc from VacationCode vc, VacationPeriod vp where vp.vacationCode = vc " +
 				"and vp.person = ? order by vp.beginFrom desc", person).first();
-		vacationDays = vacCode.vacationDays;
+		if(vacCode != null)
+			vacationDays = vacCode.vacationDays;
+		else 
+			vacationDays = 0;
 		return vacationDays;
 	}
 	
