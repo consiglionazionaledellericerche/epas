@@ -24,7 +24,7 @@ public class SwitchTemplate extends Controller{
 
 		}
 		ActionMenuItem menuItem = ActionMenuItem.valueOf(action);
-
+		Logger.debug("Il menuItem è: %s relativo alla action: %s", menuItem, action);
 		Person person = Security.getPerson();
 
 		Long personId = null;
@@ -67,10 +67,10 @@ public class SwitchTemplate extends Controller{
 			break;
 
 		case absencesAdmin:
-			Absences.show(personId, year, month);
+			Absences.absences(personId, year, month);
 			break;
 		case yearlyAbsences:
-			YearlyAbsences.show(personId, year, month);
+			YearlyAbsences.yearlyAbsences(personId, year);
 			break;
 		case totalMonthlyAbsences:
 			YearlyAbsences.showGeneralMonthlyAbsences(year, month);
@@ -115,16 +115,16 @@ public class SwitchTemplate extends Controller{
 			Stampings.show(personId, year, month);
 			break;
 		case absences:
-			Absences.show(personId, year, month); 
+			Absences.absences(personId, year, month); 
 			break;
 		case absencesPerPerson:
-			YearlyAbsences.show(personId, year, month);
+			YearlyAbsences.absencesPerPerson(personId, year);
 			break;
 		case vacations:
 			Vacations.show();
 			break;
 		case competences:
-			Competences.show(personId, year, month);
+			Competences.competences(personId, year, month);
 			break;
 		case hourRecap:
 			PersonMonths.hourRecap(personId,year);

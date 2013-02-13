@@ -32,6 +32,7 @@ public class NavigationMenu extends Controller {
 		int year = params.get("year") != null ? params.get("year", Integer.class).intValue() : now.getYear(); 
 		int month = params.get("month") != null ? params.get("month", Integer.class).intValue() : now.getMonthOfYear();
 		ActionMenuItem action = params.get("action") != null && !params.get("action").equals("") ? ActionMenuItem.valueOf(params.get("action")) : ActionMenuItem.stampingsAdmin;
+		Logger.debug("nella injectMenu la action è: %s", action);
 		Long personId =  params.get("personId") != null ? params.get("personId", Long.class) : null;
 	
 		List<Person> persons = (List<Person>) Cache.get("persons");
@@ -50,6 +51,7 @@ public class NavigationMenu extends Controller {
 //					"order by p.surname", true).fetch();
 			Cache.set("persons", persons, "5mn");
 		}
+		Logger.debug("nella injectMenu la action è: %s", action.getDescription());
 		MainMenu mainMenu = null;
 		if(!action.getDescription().equals("Presenza giornaliera"))
 			mainMenu = new MainMenu(personId, year, month, action, persons);
