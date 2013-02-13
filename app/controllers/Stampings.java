@@ -42,7 +42,7 @@ public class Stampings extends Controller {
 	 */
 	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void show(Long personId, int year, int month){
-
+		
 		if (Security.getPerson().username.equals("admin")) {
 			Application.indexAdmin();
 		}
