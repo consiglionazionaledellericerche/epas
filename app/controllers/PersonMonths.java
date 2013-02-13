@@ -20,7 +20,11 @@ public class PersonMonths extends Controller{
 	
 	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void hourRecap(Long personId,int year){
-		Person person = Person.findById(personId);
+		Person person = null;
+		if(personId != null)
+			person = Person.findById(personId);
+		else
+			person = Security.getPerson();
 		Map<Integer, List<Integer>> mapMonthSituation = new HashMap<Integer, List<Integer>>();
 		List<Integer> lista = null;
 		Integer compensatoryRest = 0;

@@ -117,7 +117,7 @@ public class SwitchTemplate extends Controller{
 		case absences:
 			Absences.absences(personId, year, month); 
 			break;
-		case absencesPerPerson:
+		case absencesperperson:
 			YearlyAbsences.absencesPerPerson(personId, year);
 			break;
 		case vacations:
@@ -126,7 +126,7 @@ public class SwitchTemplate extends Controller{
 		case competences:
 			Competences.competences(personId, year, month);
 			break;
-		case hourRecap:
+		case hourrecap:
 			PersonMonths.hourRecap(personId,year);
 			break;
 
