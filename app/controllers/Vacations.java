@@ -18,10 +18,14 @@ public class Vacations extends Controller{
 	private final static ActionMenuItem actionMenuItem = ActionMenuItem.vacations;
 		
 	@Check(Security.VIEW_PERSONAL_SITUATION)
-	private static void show(Person person) {
+	public static void show(Long personId, Integer anno) {
 		String menuItem = actionMenuItem.toString();
-		
-    	String anno = params.get("year");
+		Person person = null;
+		if(personId != null)
+			person = Person.findById(personId);
+		else
+			person = Security.getPerson();
+    	//String anno = params.get("year");
     	Logger.info("Anno: "+anno);
     	
     	if(anno==null){
@@ -32,23 +36,29 @@ public class Vacations extends Controller{
     	}
     	else{
     		Logger.info("Sono dentro il ramo else della creazione del month recap");
-    		Integer year = new Integer(params.get("year"));
+    		//Integer year = new Integer(params.get("year"));
 			
-    		YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)year.intValue());
+    		YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)anno.intValue());
     		    		
             render(yearRecap, menuItem);
     	}
     	
     }
 	
-	@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void show() {
-    	show(Security.getPerson());
-    }
+//	@Check(Security.VIEW_PERSONAL_SITUATION)
+//	public static void show() {
+//    	show(Security.getPerson());
+//    }
 	
-	private static void vacations(Person person){
-    	String anno = params.get("year");
-    	Logger.info("Anno: "+anno);
+	public static void vacations(Long personId, Integer anno){
+    	//String anno = params.get("year");
+    	Person person = null;
+    	if(personId != null)
+    		person = Person.findById(personId);
+    	else
+    		person = Security.getPerson();
+		
+		Logger.info("Anno: "+anno);
     	
     	if(anno==null){
     		        	
@@ -58,17 +68,17 @@ public class Vacations extends Controller{
     	}
     	else{
     		Logger.info("Sono dentro il ramo else della creazione del month recap");
-    		Integer year = new Integer(params.get("year"));
+    		//Integer year = new Integer(params.get("year"));
 			
-    		YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)year.intValue());
+    		YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)anno.intValue());
     		    		
             render(yearRecap);
     	}
 	}
 	
-	public static void vacations() {
-    	vacations(Security.getPerson());
-    }
+//	public static void vacations() {
+//    	vacations(Security.getPerson());
+//    }
 	
 	@Check({Security.VIEW_PERSONAL_SITUATION, Security.INSERT_AND_UPDATE_VACATIONS})
 	private static void vacationsCurrentYear(Person person){

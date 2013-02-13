@@ -4,7 +4,7 @@
 
 #{functionalMenuForm mainMenu: mainMenu /} 
 
-<h2>Riepilogo ore di lavoro, straordinario e recuperi (${person.surname} ${person.name} anno: ${year})</h2>
+<h3>Riepilogo ore di lavoro, straordinario e recuperi (${person.surname} ${person.name} anno: ${year})</h3>
 
 <table>
 	<tr>
@@ -29,7 +29,7 @@
 		<td>${entry.getValue().get(2).toHourTime()}</td>
 		<td>${entry.getValue().get(3).toHourTime()}</td>
 		<td>${entry.getValue().get(4).toHourTime()}</td>
-		<td>${entry.getValue().get(5)}</td>
+		<td>${entry.getValue().get(5)} (${(entry.getValue().get(5)*432).toHourTime()})</td>
 		<td>${entry.getValue().get(6)}</td>
 		<td>${entry.getValue().get(7).toHourTime()}</td>	
 	</tr>
