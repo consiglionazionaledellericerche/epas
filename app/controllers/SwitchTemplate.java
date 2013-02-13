@@ -34,15 +34,19 @@ public class SwitchTemplate extends Controller{
 			person = Person.findById(personId);
 		} 
 
-		int month = now.getMonthOfYear();
+		int month;
 		if (params.get("month") != null) {
 			month = params.get("month", Integer.class);
 		}
+		else 
+			month = now.getMonthOfYear();
 
-		int year = now.getYear();
+		int year;
 		if (params.get("year") != null) {
 			year = params.get("year", Integer.class);
 		}
+		else 
+			year = now.getYear();
 
 		int day ;
 		if(params.get("day") != null){
@@ -121,7 +125,7 @@ public class SwitchTemplate extends Controller{
 			YearlyAbsences.absencesPerPerson(personId, year);
 			break;
 		case vacations:
-			Vacations.show();
+			Vacations.show(personId, year);
 			break;
 		case competences:
 			Competences.competences(personId, year, month);

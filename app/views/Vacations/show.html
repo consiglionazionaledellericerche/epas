@@ -1,12 +1,11 @@
 #{extends 'main.html' /}
 #{set title:yearRecap.person.surname + ' ' + yearRecap.person.name + ', matricola=' + yearRecap.person.number /}
 
-
-<h2 id="titoloSituazioneFerie">Situazione ferie ${yearRecap.year}</h2>
-
 #{logoutForm /}
 
 #{functionalMenuForm mainMenu: mainMenu /} 
+
+<h3 id="titoloSituazioneFerie">Situazione ferie ${yearRecap.year}</h3>
 
 <div align="left">
 #{form @Vacations.show()}

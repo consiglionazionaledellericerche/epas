@@ -68,7 +68,7 @@ public class PersonMonths extends Controller{
 				lista.add(1, 0);
 			else
 				lista.add(1, pm.mesePrecedente().residuoDelMese());
-			if(month < 4)
+			if(month < 4 || person.qualification.qualification < 4)
 				lista.add(2, pm.residuoAnnoPrecedente());
 			else
 				lista.add(2, 0);
@@ -77,13 +77,13 @@ public class PersonMonths extends Controller{
 			else
 				lista.add(3, pm.mesePrecedente().residuoDelMese()+pm.residuoAnnoPrecedente());
 			if(pd != null){
-				lista.add(4, pd.difference);
+				lista.add(4, pm.residuoDelMese());
 				lista.add(5, compensatoryRest);
 				if(comp != null)
 					lista.add(6, comp.valueApproved);
 				else
 					lista.add(6, 0);
-				lista.add(7,pm.residuoDelMese());
+				lista.add(7,pm.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese());
 				mapMonthSituation.put(date.getMonthOfYear(), lista);
 			}	
 			else{
