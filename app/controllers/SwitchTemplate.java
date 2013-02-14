@@ -15,16 +15,16 @@ public class SwitchTemplate extends Controller{
 	public static void dispatch() throws InstantiationException, IllegalAccessException {
 		LocalDate now = new LocalDate();
 
-		String action = params.get("action");
-		Logger.debug("La action è: %s", action);
-		if (action == null) {
+		String method = params.get("method");
+		Logger.debug("La action è: %s", method);
+		if (method == null) {
 
-			flash.error(String.format("La action da eseguire è: %s", action));
+			flash.error(String.format("La action da eseguire è: %s", method));
 			Application.indexAdmin();
 
 		}
-		ActionMenuItem menuItem = ActionMenuItem.valueOf(action);
-		Logger.debug("Il menuItem è: %s relativo alla action: %s", menuItem, action);
+		ActionMenuItem menuItem = ActionMenuItem.valueOf(method);
+		Logger.debug("Il menuItem è: %s relativo alla action: %s", menuItem, method);
 		Person person = Security.getPerson();
 
 		Long personId = null;
@@ -55,6 +55,8 @@ public class SwitchTemplate extends Controller{
 		else
 			day = now.getDayOfMonth();
 		
+		params.flash();
+		
 		switch (menuItem) {
 
 		case stampingsAdmin:
@@ -70,6 +72,7 @@ public class SwitchTemplate extends Controller{
 
 			break;
 
+		
 		case absencesAdmin:
 			Absences.absences(personId, year, month);
 			break;
