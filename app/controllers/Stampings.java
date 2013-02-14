@@ -42,6 +42,11 @@ public class Stampings extends Controller {
 	 */
 	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void stampings(Long personId, Integer year, Integer month){
+		
+		if (Security.getPerson().username.equals("admin")) {
+			Application.indexAdmin();
+		}
+		
 		long id = 1;
 		Configuration confParameters = Configuration.findById(id);
 		
