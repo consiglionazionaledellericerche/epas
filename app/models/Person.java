@@ -505,7 +505,7 @@ public class Person extends Model {
 			 * non esiste un personDay per quella data, va creato e quindi salvato
 			 */
 			pd = new PersonDay(person, stamping.dateTime.toLocalDate());
-			pd.save();			
+			pd.create();			
 			Stamping stamp = new Stamping();
 			stamp.date = stamping.dateTime;
 			stamp.markedByAdmin = false;
@@ -515,7 +515,7 @@ public class Person extends Model {
 				stamp.way = WayType.out;
 			stamp.badgeReader = stamping.badgeReader;
 			stamp.personDay = pd;
-			stamp.save();
+			stamp.create();
 
 		}
 		else{
@@ -536,7 +536,7 @@ public class Person extends Model {
 		}
 
 		pd.populatePersonDay();
-		pd.merge();
+		pd.save();
 		return true;
 	}
 

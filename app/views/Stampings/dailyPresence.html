@@ -4,14 +4,6 @@
 
 #{functionalMenuForm mainMenu: mainMenu /} 
 
-#{select 'day', value:day, id: 'day'}
-	%{ for(day in days){
-		}%
-		#{option day}${day}#{/option}
-		%{
-			}
-		}%		
-#{/select}
 <h2 id="situazionePresenzaGiornaliera">Situazione presenze del giorno ${day} <span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year}</h2>
 
 <table id="tabellaPresenzaGiornaliera">

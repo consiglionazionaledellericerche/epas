@@ -28,12 +28,15 @@ public class NavigationMenu extends Controller {
 	@Before
 	public static void injectMenu() { 
 		LocalDate now = new LocalDate();
-		int day = params.get("day") != null ? params.get("day", Integer.class).intValue() : 1;
-		int year = params.get("year") != null ? params.get("year", Integer.class).intValue() : now.getYear(); 
-		int month = params.get("month") != null ? params.get("month", Integer.class).intValue() : now.getMonthOfYear();
-		ActionMenuItem action = params.get("action") != null && !params.get("action").equals("") ? ActionMenuItem.valueOf(params.get("action")) : ActionMenuItem.stampingsAdmin;
+		Integer day = flash.get("day") != null ? Integer.valueOf(flash.get("day")) : null;
+		int year = flash.get("year") != null ? Integer.valueOf(flash.get("year")) : now.getYear(); 
+		int month = flash.get("month") != null ? Integer.valueOf(flash.get("month")) : now.getMonthOfYear();		
+		
+		ActionMenuItem action = flash.get("method") != null && !flash.get("method").equals("") ? ActionMenuItem.valueOf(flash.get("method")) : ActionMenuItem.stampingsAdmin;
+		
 		Logger.debug("nella injectMenu la action è: %s", action);
-		Long personId =  params.get("personId") != null ? params.get("personId", Long.class) : null;
+		
+		Long personId =  flash.get("personId") != null ? Long.parseLong(flash.get("personId")) : null;
 	
 		List<Person> persons = (List<Person>) Cache.get("persons");
 		
