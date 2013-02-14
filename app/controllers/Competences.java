@@ -30,8 +30,12 @@ public class Competences extends Controller{
 	/* corrisponde alla voce di menu selezionata */
 	//	private final static ActionMenuItem actionMenuItem = ActionMenuItem.competences;
 	@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void show(Long personId, int year, int month) {
-		Person person = Person.findById(personId); //Security.getPerson();
+	public static void competences(Long personId, int year, int month) {
+		Person person = null;
+		if(personId != null)
+			person = Person.findById(personId); //Security.getPerson();
+		else
+			person = Security.getPerson();
 		
 		Logger.trace("Year: {}, month: {}", year, month);
 

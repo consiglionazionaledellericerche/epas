@@ -23,10 +23,10 @@ public enum ActionMenuItem {
     manageCompetence("Gestione codici competenze", "insertAndUpdateCompetences"),
 	stampings("Situazione mensile", "viewPersonalSituation"),
 	absences("Assenze", "viewPersonalSituation"),
-	absencesPerPerson("Assenze per persona", "viewPersonalSituation"),
+	absencesperperson("Assenze per persona", "viewPersonalSituation"),
 	vacations("Ferie", "viewPersonalSituation"),
 	competences("Competenze", "viewPersonalSituation"),
-	hourRecap("Riepilogo orario", "viewPersonalSituation");
+	hourrecap("Riepilogo orario", "viewPersonalSituation");
 	//changePassword("", "");
 
     
