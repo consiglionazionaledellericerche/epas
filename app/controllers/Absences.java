@@ -52,8 +52,8 @@ public class Absences extends Controller{
 //		else
 //			person = Person.findById(personId);
 
-		Logger.info("Anno: "+year);    	
-		Logger.info("Mese: "+month);
+		Logger.trace("Anno: "+year);    	
+		Logger.trace("Mese: "+month);
 		PersonMonth personMonth = PersonMonth.byPersonAndYearAndMonth(person, year, month);
 
 		if (personMonth == null) {
