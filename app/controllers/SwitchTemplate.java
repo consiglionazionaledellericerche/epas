@@ -24,7 +24,7 @@ public class SwitchTemplate extends Controller{
 
 		}
 		ActionMenuItem menuItem = ActionMenuItem.valueOf(action);
-
+		Logger.debug("Il menuItem è: %s relativo alla action: %s", menuItem, action);
 		Person person = Security.getPerson();
 
 		Long personId = null;
@@ -34,15 +34,19 @@ public class SwitchTemplate extends Controller{
 			person = Person.findById(personId);
 		} 
 
-		int month = now.getMonthOfYear();
+		int month;
 		if (params.get("month") != null) {
 			month = params.get("month", Integer.class);
 		}
+		else 
+			month = now.getMonthOfYear();
 
-		int year = now.getYear();
+		int year;
 		if (params.get("year") != null) {
 			year = params.get("year", Integer.class);
 		}
+		else 
+			year = now.getYear();
 
 		int day ;
 		if(params.get("day") != null){
@@ -67,10 +71,10 @@ public class SwitchTemplate extends Controller{
 			break;
 
 		case absencesAdmin:
-			Absences.show(personId, year, month);
+			Absences.absences(personId, year, month);
 			break;
 		case yearlyAbsences:
-			YearlyAbsences.show(personId, year, month);
+			YearlyAbsences.yearlyAbsences(personId, year);
 			break;
 		case totalMonthlyAbsences:
 			YearlyAbsences.showGeneralMonthlyAbsences(year, month);
@@ -115,18 +119,18 @@ public class SwitchTemplate extends Controller{
 			Stampings.show(personId, year, month);
 			break;
 		case absences:
-			Absences.show(personId, year, month); 
+			Absences.absences(personId, year, month); 
 			break;
-		case absencesPerPerson:
-			YearlyAbsences.show(personId, year, month);
+		case absencesperperson:
+			YearlyAbsences.absencesPerPerson(personId, year);
 			break;
 		case vacations:
-			Vacations.show();
+			Vacations.show(personId, year);
 			break;
 		case competences:
-			Competences.show(personId, year, month);
+			Competences.competences(personId, year, month);
 			break;
-		case hourRecap:
+		case hourrecap:
 			PersonMonths.hourRecap(personId,year);
 			break;
 
