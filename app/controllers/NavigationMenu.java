@@ -58,9 +58,10 @@ public class NavigationMenu extends Controller {
 		MainMenu mainMenu = null;
 		if(!action.getDescription().equals("Presenza giornaliera"))
 			mainMenu = new MainMenu(personId, year, month, action, persons);
-		else
+		else{
+			day = Integer.valueOf(flash.get("day"));
 			mainMenu = new MainMenu(personId, year, month, day, action, persons);
-		
+		}		
 		renderArgs.put("mainMenu", mainMenu);
 
 	}
