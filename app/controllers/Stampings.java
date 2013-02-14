@@ -367,7 +367,9 @@ public class Stampings extends Controller {
 
 		int maxNumberOfInOut = maxNumberOfStampingsInMonth(year, month, day);
 		Logger.debug("Il numero massimo di timbrature tra tutti i dipendenti per questo mese è: %d", maxNumberOfInOut);
-		Table<Person, String, String> tablePersonDailyPresence =  HashBasedTable.create();
+		ImmutableTable.Builder<Person, String, String> builder = ImmutableTable.builder();
+		Table<Person, String, String> tablePersonDailyPresence = null;
+		//Table<Person, String, String> tablePersonDailyPresence =  HashBasedTable.create();
 		//List<Person> persons = Person.findAll();
 		//
 		//List<Person> activePersons = Person.getActivePersons(new LocalDate(year, month, giorno));
@@ -385,13 +387,13 @@ public class Stampings extends Controller {
 
 		
 		Person per = new Person();
-		tablePersonDailyPresence.put(per, "Assenza", "");
+		builder.put(per, "Assenza", "");
 		for(int i = 1; i <= maxNumberOfInOut; i++){
 			if(i % 2 != 0){
-				tablePersonDailyPresence.put(per, (i+1)/2+"^ Ingresso", "");    			
+				builder.put(per, (i+1)/2+"^ Ingresso", "");    			
 			}
 			else{
-				tablePersonDailyPresence.put(per, (i/2)+"^ Uscita", "");
+				builder.put(per, (i/2)+"^ Uscita", "");
 			}
 		}
 
@@ -401,27 +403,27 @@ public class Stampings extends Controller {
 			Logger.debug("Cerco il person day in data %s per %s %s", today, p.name, p.surname);
 			if(pd != null){
 				if(pd.absences.size() > 0)
-					tablePersonDailyPresence.put(p, "Assenza", pd.absences.get(0).absenceType.code);
+					builder.put(p, "Assenza", pd.absences.get(0).absenceType.code);
 				else
-					tablePersonDailyPresence.put(p, "Assenza", " ");
+					builder.put(p, "Assenza", " ");
 				int size = pd.stampings.size();
 
 				for(int i = 0; i < size; i++){
 					if(pd.stampings.get(i).way == WayType.in){
-						tablePersonDailyPresence.put(p, 1+(i+1)/2+"^ Ingresso", PersonTags.toCalendarTime(pd.stampings.get(i).date));
+						builder.put(p, 1+(i+1)/2+"^ Ingresso", PersonTags.toCalendarTime(pd.stampings.get(i).date));
 						Logger.debug("inserisco in tabella l'ingresso per %s %s", p.name, p.surname);
 					}
 					else{
-						tablePersonDailyPresence.put(p, 1+(i/2)+"^ Uscita", PersonTags.toCalendarTime(pd.stampings.get(i).date));
+						builder.put(p, 1+(i/2)+"^ Uscita", PersonTags.toCalendarTime(pd.stampings.get(i).date));
 						Logger.debug("inserisco in tabella l'uscita per %s %s", p.name, p.surname);
 					}
 				}
 
-				tablePersonDailyPresence.put(p, "Tempo Lavoro", PersonTags.toHourTime(pd.timeAtWork));
+				builder.put(p, "Tempo Lavoro", PersonTags.toHourTime(pd.timeAtWork));
 			}
 
 		}
-
+		tablePersonDailyPresence = builder.build();
 		List<Integer> days = new ArrayList<Integer>();
 		for(Integer i = 1; i < today.dayOfMonth().withMaximumValue().getDayOfMonth(); i++){
 			days.add(i);
