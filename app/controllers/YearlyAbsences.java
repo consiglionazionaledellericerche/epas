@@ -89,7 +89,7 @@ public class YearlyAbsences extends Controller{
 		//Long personId = params.get("personId", Long.class);
 		Logger.debug("L'id della persona è: %s", personId);
 		//person = Person.findById(personId);
-		Logger.info("Anno: "+anno);
+		Logger.trace("Anno: "+anno);
 
 		if(anno==null){
 
@@ -158,7 +158,7 @@ public class YearlyAbsences extends Controller{
 			person = Security.getPerson();
 		Integer anno = params.get("year", Integer.class);
 		Logger.debug("L'id della persona è: %s", personId);
-		Logger.info("Anno: "+anno);
+		Logger.trace("Anno: "+anno);
 
 		if(anno==null){
 			LocalDate now = new LocalDate();

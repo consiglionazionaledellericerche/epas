@@ -26,7 +26,7 @@ public class Vacations extends Controller{
 		else
 			person = Security.getPerson();
     	//String anno = params.get("year");
-    	Logger.info("Anno: "+anno);
+    	Logger.trace("Anno: "+anno);
     	
     	if(anno==null){
     		        	
@@ -58,7 +58,7 @@ public class Vacations extends Controller{
     	else
     		person = Security.getPerson();
 		
-		Logger.info("Anno: "+anno);
+		Logger.trace("Anno: "+anno);
     	
     	if(anno==null){
     		        	
@@ -83,7 +83,7 @@ public class Vacations extends Controller{
 	@Check({Security.VIEW_PERSONAL_SITUATION, Security.INSERT_AND_UPDATE_VACATIONS})
 	private static void vacationsCurrentYear(Person person){
     	String anno = params.get("year");
-    	Logger.info("Anno: "+anno);
+    	Logger.trace("Anno: "+anno);
     	
     	if(anno==null){
     		        	
