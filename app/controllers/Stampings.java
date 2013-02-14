@@ -41,77 +41,55 @@ public class Stampings extends Controller {
 	 * @param month
 	 */
 	@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void show(Long personId, int year, int month){
-		
-		if (Security.getPerson().username.equals("admin")) {
-			Application.indexAdmin();
-		}
-
-		if (personId == null) {
-
-			show();
-		}
-
-		if (year == 0 || month == 0) {
-			show(personId);
-		}
-
-		int previousMonth = 0;
-		int previousYear = 0;
-
-		PersonMonth previousPersonMonth = null;
-
-		Logger.trace("Called show of personId=%s, year=%s, month=%s", personId, year, month);
+	public static void stampings(Long personId, Integer year, Integer month){
 		long id = 1;
 		Configuration confParameters = Configuration.findById(id);
-		Person person = Person.findById(personId);
-
-		PersonMonth personMonth =
-				PersonMonth.find(
-						"Select pm from PersonMonth pm where pm.person = ? and pm.year = ? and pm.month = ?", 
-						person, year, month).first();
-
-		if (personMonth == null) {
-			personMonth = new PersonMonth(person, year, month);
+		
+		Person person = null;
+		Logger.debug("Il valore tra i params dell'id della persona è: %d", params.get("personId", Long.class));
+		person = Security.getPerson();
+		Logger.debug("La persona presa dal security è: %s %s", person.name, person.surname);
+		LocalDate date = new LocalDate();
+		Logger.info("Anno: "+year);    	
+		Logger.info("Mese: "+month);
+		if(year == null || month == null){
+			year = date.getYear();
+			month = date.getMonthOfYear();
 		}
+		PersonMonth personMonth = PersonMonth.byPersonAndYearAndMonth(person, year, month);
 
-		Logger.debug("Controllo gli straordinari nel corso dell'anno fino ad oggi per %s %s...", person.name, person.surname);
-		int overtimeHour = personMonth.getOvertimeHourInYear();
-		Logger.debug("Le ore di straordinario da inizio anno sono: %s", overtimeHour);
-
-		if(month == 1){    		
-			previousMonth = 12;
-			previousYear = year - 1;
-			Logger.debug("Prendo il personMonth relativo al dicembre dell'anno precedente: %s %s", previousMonth, previousYear);
-			previousPersonMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
-					person, previousMonth, previousYear).first();
-		}
-		else{
-			previousMonth = month - 1;
-			Logger.debug("Prendo il personMonth relativo al mese precedente: %s %s", previousMonth, year);
-			previousPersonMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?",
-					person, previousMonth, year).first();
-		}
-
+//		if (personMonth == null) {
+//			personMonth = new PersonMonth(person, year, month);
+//		}
+//		if(year==null || month==null){
+//			render(personMonth);
+//		}
+//		else{
+//			Logger.debug("Sono dentro il ramo else della creazione del personMonth");
+//			Logger.debug("Il month recap è formato da: " +person.id+ ", " +year.intValue()+ ", " +month.intValue());
+//
+//			render(personMonth);
+//		}
+		
 		int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
 		int numberOfInOut = Math.min(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
 
 		Logger.debug("Month recap of person.id %s, year=%s, month=%s", person.id, year, month);
 
-		render(personMonth, numberOfInOut, numberOfCompensatoryRest, previousPersonMonth, overtimeHour);
+		render(personMonth, numberOfInOut, numberOfCompensatoryRest);
 	}
 
-	@Check(Security.VIEW_PERSONAL_SITUATION)
-	private static void show() {
-		LocalDate now = new LocalDate();
-		show(Security.getPerson().getId(), now.getYear(), now.getMonthOfYear());
-	}
+//	@Check(Security.VIEW_PERSONAL_SITUATION)
+//	private static void show() {
+//		LocalDate now = new LocalDate();
+//		show(Security.getPerson().getId(), now.getYear(), now.getMonthOfYear());
+//	}
 
-	@Check(Security.VIEW_PERSONAL_SITUATION)
-	private static void show(Long personId) {
-		LocalDate now = new LocalDate();
-		show(personId, now.getMonthOfYear(), now.getYear());
-	}
+//	@Check(Security.VIEW_PERSONAL_SITUATION)
+//	private static void show(Long personId) {
+//		LocalDate now = new LocalDate();
+//		show(personId, now.getMonthOfYear(), now.getYear());
+//	}
 
 
 
@@ -389,7 +367,9 @@ public class Stampings extends Controller {
 
 		int maxNumberOfInOut = maxNumberOfStampingsInMonth(year, month, day);
 		Logger.debug("Il numero massimo di timbrature tra tutti i dipendenti per questo mese è: %d", maxNumberOfInOut);
-		Table<Person, String, String> tablePersonDailyPresence =  HashBasedTable.create();
+		ImmutableTable.Builder<Person, String, String> builder = ImmutableTable.builder();
+		Table<Person, String, String> tablePersonDailyPresence = null;
+		//Table<Person, String, String> tablePersonDailyPresence =  HashBasedTable.create();
 		//List<Person> persons = Person.findAll();
 		//
 		//List<Person> activePersons = Person.getActivePersons(new LocalDate(year, month, giorno));
@@ -407,13 +387,13 @@ public class Stampings extends Controller {
 
 		
 		Person per = new Person();
-		tablePersonDailyPresence.put(per, "Assenza", "");
+		builder.put(per, "Assenza", "");
 		for(int i = 1; i <= maxNumberOfInOut; i++){
 			if(i % 2 != 0){
-				tablePersonDailyPresence.put(per, (i+1)/2+"^ Ingresso", "");    			
+				builder.put(per, (i+1)/2+"^ Ingresso", "");    			
 			}
 			else{
-				tablePersonDailyPresence.put(per, (i/2)+"^ Uscita", "");
+				builder.put(per, (i/2)+"^ Uscita", "");
 			}
 		}
 
@@ -423,27 +403,27 @@ public class Stampings extends Controller {
 			Logger.debug("Cerco il person day in data %s per %s %s", today, p.name, p.surname);
 			if(pd != null){
 				if(pd.absences.size() > 0)
-					tablePersonDailyPresence.put(p, "Assenza", pd.absences.get(0).absenceType.code);
+					builder.put(p, "Assenza", pd.absences.get(0).absenceType.code);
 				else
-					tablePersonDailyPresence.put(p, "Assenza", " ");
+					builder.put(p, "Assenza", " ");
 				int size = pd.stampings.size();
 
 				for(int i = 0; i < size; i++){
 					if(pd.stampings.get(i).way == WayType.in){
-						tablePersonDailyPresence.put(p, 1+(i+1)/2+"^ Ingresso", PersonTags.toCalendarTime(pd.stampings.get(i).date));
+						builder.put(p, 1+(i+1)/2+"^ Ingresso", PersonTags.toCalendarTime(pd.stampings.get(i).date));
 						Logger.debug("inserisco in tabella l'ingresso per %s %s", p.name, p.surname);
 					}
 					else{
-						tablePersonDailyPresence.put(p, 1+(i/2)+"^ Uscita", PersonTags.toCalendarTime(pd.stampings.get(i).date));
+						builder.put(p, 1+(i/2)+"^ Uscita", PersonTags.toCalendarTime(pd.stampings.get(i).date));
 						Logger.debug("inserisco in tabella l'uscita per %s %s", p.name, p.surname);
 					}
 				}
 
-				tablePersonDailyPresence.put(p, "Tempo Lavoro", PersonTags.toHourTime(pd.timeAtWork));
+				builder.put(p, "Tempo Lavoro", PersonTags.toHourTime(pd.timeAtWork));
 			}
 
 		}
-
+		tablePersonDailyPresence = builder.build();
 		List<Integer> days = new ArrayList<Integer>();
 		for(Integer i = 1; i < today.dayOfMonth().withMaximumValue().getDayOfMonth(); i++){
 			days.add(i);

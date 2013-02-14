@@ -4,13 +4,13 @@
 #*		/										module:secure
 
 # Home page
-GET     /                                       Stampings.show
+GET     /                                       Stampings.stampings
 
 #Home page amministrazione
 GET		/presenze								Application.indexAdmin
 
 #Orario e timbrature
-GET     /stampings/{personId}/{year}/{month}	Stampings.show
+GET     /stampings/{personId}/{year}/{month}	Stampings.stampings
 
 GET		/orarioAdmin/{personId}/{year}/{month}	Stampings.personStamping
 GET 	/orarioAdmin							Stampings.personStamping
