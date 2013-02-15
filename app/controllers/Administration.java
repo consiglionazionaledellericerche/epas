@@ -2,15 +2,21 @@ package controllers;
 
 import it.cnr.iit.epas.FromMysqlToPostgres;
 
+
 import java.sql.SQLException;
 import java.util.List;
+
+import controllers.shib.Shibboleth;
 
 import models.Person;
 import models.PersonMonth;
 import models.WorkingTimeType;
 import play.mvc.Controller;
+import play.mvc.With;
 
+//@With(Shibboleth.class)
 public class Administration extends Controller {
+	
 	
     public static void index() {
         render();
