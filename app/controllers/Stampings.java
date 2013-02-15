@@ -412,7 +412,10 @@ public class Stampings extends Controller {
 				else
 					builder.put(p, "Assenza", " ");
 				int size = pd.stampings.size();
-
+				/**
+				 * TODO: si verificano casi in cui una persona fa due timbratue di uscita (Pinizzotto il 17 gennaio 2013), come lo gestisco?
+				 * 
+				 */
 				for(int i = 0; i < size; i++){
 					if(pd.stampings.get(i).way == WayType.in){
 						builder.put(p, 1+(i+1)/2+"^ Ingresso", PersonTags.toCalendarTime(pd.stampings.get(i).date));
