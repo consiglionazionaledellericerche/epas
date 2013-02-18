@@ -85,9 +85,12 @@ public class YearlyAbsences extends Controller{
 		Person person = null;
 		if(personId == null)
 			person = Security.getPerson();
+		else
+			person = Person.findById(personId);
 		Integer anno = params.get("year", Integer.class);
 		//Long personId = params.get("personId", Long.class);
 		Logger.debug("L'id della persona è: %s", personId);
+		Logger.debug("La persona è: %s %s", person.name, person.surname);
 		//person = Person.findById(personId);
 		Logger.trace("Anno: "+anno);
 
@@ -98,7 +101,7 @@ public class YearlyAbsences extends Controller{
 			render(yearRecap);
 		}
 		else{
-			Logger.info("Sono dentro il ramo else della creazione del month recap");
+			Logger.info("Sono dentro il ramo else della creazione dell'yearRecap");
 			//Integer year = new Integer(params.get("year"));
 		//	PersonMonth personMonth = PersonMonth.byPersonAndYearAndMonth(person, year, month);
 			YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)year);
