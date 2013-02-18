@@ -497,7 +497,7 @@ public class PersonMonth extends Model {
 		for(PersonDay pd : days){
 
 			StampModificationType smt = pd.checkTimeForLunch();
-			Logger.debug("Lo stamp modification type è: %s", smt);
+			Logger.trace("Lo stamp modification type è: %s", smt);
 
 			if(smt != null && !stampCodeList.contains(smt)){
 				Logger.debug("Aggiunto %s alla lista", smt.description);
@@ -506,12 +506,12 @@ public class PersonMonth extends Model {
 			StampModificationType smtMarked = pd.checkMarkedByAdmin();
 			if(smtMarked != null && !stampCodeList.contains(smtMarked)){
 				stampCodeList.add(smtMarked);
-				Logger.debug("Aggiunto %s alla lista", smtMarked.description);
+				Logger.trace("Aggiunto %s alla lista", smtMarked.description);
 			}
 			StampModificationType smtMidnight = pd.checkMissingExitStampBeforeMidnight();
 			if(smtMidnight != null && !stampCodeList.contains(smtMidnight)){
 				stampCodeList.add(smtMidnight);
-				Logger.debug("Aggiunto %s alla lista", smtMidnight.description);
+				Logger.trace("Aggiunto %s alla lista", smtMidnight.description);
 			}
 
 		}
@@ -546,17 +546,17 @@ public class PersonMonth extends Model {
 	 * @return il numero di ore di straordinario fatte dall'inizio dell'anno
 	 */
 	public int getOvertimeHourInYear(){
-		Logger.debug("Chiamata funzione di controllo straordinari...");
+		Logger.trace("Chiamata funzione di controllo straordinari...");
 		int overtimeHour = 0;
 		List<Competence> compList = Competence.find("Select comp from Competence comp, CompetenceCode code where comp.person = ? and comp.year = ? and " +
 				"comp.competenceCode = code and code.code = ?", person, year, "S1").fetch();
-		Logger.debug("La lista degli straordinari da inizio anno : %s", compList);
+		Logger.debug("La lista degli straordinari da inizio anno per %s: %s", person, compList);
 		if(compList != null){
 			for(Competence comp : compList){
 				overtimeHour = overtimeHour + comp.valueApproved;
 			}
 		}
-		Logger.debug("Il numero di ore di straordinari è: ", overtimeHour);
+		Logger.debug("Il numero di ore di straordinari per %s è: %s", person, overtimeHour);
 		return overtimeHour;
 	}
 
