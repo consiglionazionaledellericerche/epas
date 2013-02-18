@@ -442,7 +442,7 @@ public class PersonDay extends Model {
 				progressive = difference + lastPreviousPersonDayInMonth.progressive;
 				Logger.debug("%s - %s. Il PersonDay precedente è %s. Difference di oggi = %s, progressive = %s", person, date, lastPreviousPersonDayInMonth, difference, progressive);
 			}
-			merge();
+			this.save();
 		}
 
 	}
@@ -607,7 +607,7 @@ public class PersonDay extends Model {
 
 		isTicketAvailable = ticketAvailable;
 		Logger.trace("Quindi il valore del buono pasto è %s", isTicketAvailable);
-		merge();
+		save();
 
 	}
 
@@ -620,26 +620,26 @@ public class PersonDay extends Model {
 
 		if((getWorkingTimeTypeDay().holiday) && (date.getDayOfMonth()==1)){
 			difference = 0;
-			merge();
+			save();
 			return;
 		}
 
 		if(absenceList().size() > 0){
 			difference = 0;
-			merge();
+			save();
 			return;
 		}
 
 		if(timeAtWork == 0){
 			difference = 0;
-			merge();
+			save();
 			return;
 		}
 
 		int minTimeWorking = getWorkingTimeTypeDay().workingTime;
 		Logger.debug("Time at work: %s. Tempo di lavoro giornaliero: %s", timeAtWork, minTimeWorking);
 		difference = timeAtWork - minTimeWorking;
-		merge();		
+		save();		
 		Logger.debug("Differenza per %s %s nel giorno %s: %s", person.surname, person.name, date, difference);
 
 	}
