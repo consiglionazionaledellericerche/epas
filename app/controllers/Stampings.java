@@ -1,5 +1,7 @@
 package controllers;
 
+import it.cnr.iit.epas.MainMenu;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -63,19 +65,6 @@ public class Stampings extends Controller {
 		}
 		PersonMonth personMonth = PersonMonth.byPersonAndYearAndMonth(person, year, month);
 
-//		if (personMonth == null) {
-//			personMonth = new PersonMonth(person, year, month);
-//		}
-//		if(year==null || month==null){
-//			render(personMonth);
-//		}
-//		else{
-//			Logger.debug("Sono dentro il ramo else della creazione del personMonth");
-//			Logger.debug("Il month recap è formato da: " +person.id+ ", " +year.intValue()+ ", " +month.intValue());
-//
-//			render(personMonth);
-//		}
-		
 		int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
 		int numberOfInOut = Math.min(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
 
@@ -83,20 +72,6 @@ public class Stampings extends Controller {
 
 		render(personMonth, numberOfInOut, numberOfCompensatoryRest);
 	}
-
-//	@Check(Security.VIEW_PERSONAL_SITUATION)
-//	private static void show() {
-//		LocalDate now = new LocalDate();
-//		show(Security.getPerson().getId(), now.getYear(), now.getMonthOfYear());
-//	}
-
-//	@Check(Security.VIEW_PERSONAL_SITUATION)
-//	private static void show(Long personId) {
-//		LocalDate now = new LocalDate();
-//		show(personId, now.getMonthOfYear(), now.getYear());
-//	}
-
-
 
 
 	@Check(Security.INSERT_AND_UPDATE_STAMPING)
@@ -109,8 +84,6 @@ public class Stampings extends Controller {
 		if (year == 0 || month == 0) {
 			personStamping(personId);
 		}
-		int previousMonth = 0;
-		int previousYear = 0;
 
 		PersonMonth previousPersonMonth = null;
 		Logger.debug("Called personStamping of personId=%s, year=%s, month=%s", personId, year, month);
@@ -136,19 +109,19 @@ public class Stampings extends Controller {
 
 		Logger.debug("Month recap of person.id %s, year=%s, month=%s", person.id, year, month);
 		Logger.debug("PersonMonth of person.id %s, year=%s, month=%s", person.id, year, month);
-		if(month == 1){    		
-			previousMonth = 12;
-			previousYear = year - 1;
-			Logger.debug("Prendo il personMonth relativo al dicembre dell'anno precedente: %s %s", previousMonth, previousYear);
-			previousPersonMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
-					person, previousMonth, previousYear).first();
-		}
-		else{
-			previousMonth = month - 1;
-			Logger.debug("Prendo il personMonth relativo al mese precedente: %s %s", previousMonth, year);
-			previousPersonMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?",
-					person, previousMonth, year).first();
-		}
+//		if(month == 1){    		
+//			previousMonth = 12;
+//			previousYear = year - 1;
+//			Logger.debug("Prendo il personMonth relativo al dicembre dell'anno precedente: %s %s", previousMonth, previousYear);
+//			previousPersonMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
+//					person, previousMonth, previousYear).first();
+//		}
+//		else{
+//			previousMonth = month - 1;
+//			Logger.debug("Prendo il personMonth relativo al mese precedente: %s %s", previousMonth, year);
+//			previousPersonMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?",
+//					person, previousMonth, year).first();
+//		}
 		Logger.debug("Controllo gli straordinari nel corso dell'anno fino ad oggi per %s %s...", person.name, person.surname);
 		int overtimeHour = personMonth.getOvertimeHourInYear();
 		Logger.debug("Le ore di straordinario da inizio anno sono: %s", overtimeHour);
@@ -156,18 +129,18 @@ public class Stampings extends Controller {
 		int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
 		int numberOfInOut = Math.min(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
 
-		render(personMonth, numberOfInOut, previousPersonMonth, numberOfCompensatoryRest, overtimeHour);
+		render(personMonth, numberOfInOut, previousPersonMonth, numberOfCompensatoryRest, overtimeHour, person);
 
 	}
 
 	private static void personStamping() {
 		LocalDate now = new LocalDate();
-		personStamping(Security.getPerson().getId(), now.getMonthOfYear(), now.getYear());
+		personStamping(Security.getPerson().getId(), now.getYear(),now.getMonthOfYear());
 	}
 
 	private static void personStamping(Long personId) {
 		LocalDate now = new LocalDate();
-		personStamping(personId, now.getMonthOfYear(), now.getYear());
+		personStamping(personId, now.getYear(), now.getMonthOfYear());
 	}
 
 	public static void dailyStampings() {
@@ -272,22 +245,31 @@ public class Stampings extends Controller {
 			stamping.personDay.populatePersonDay();
 			stamping.personDay.save();
 			flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(stamping.date.toLocalDate()));	
-			render("@create");
+		
+			Stampings.personStamping();
 		} else {
 			if (hour == null || minute == null) {
 				flash.error("E' necessario specificare sia il campo ore che minuti, oppure nessuno dei due per rimuovere la timbratura.");
 				render("@edit");
 				return;
 			}
-			stamping.date.withHourOfDay(hour).withMinuteOfHour(minute);
+			Logger.debug("Ore: %s Minuti: %s", hour, minute);
+			
+			stamping.date = stamping.date.withHourOfDay(hour);
+			stamping.date = stamping.date.withMinuteOfHour(minute);
+			
+			stamping.markedByAdmin = true;
+			stamping.note = "timbratura modificata dall'amministratore";
 			stamping.save();
+			
 			stamping.personDay.populatePersonDay();
 			stamping.personDay.save();
-
+			Logger.debug("Aggiornata ora della timbratura alle ore: %s", stamping.date);
 			flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name);
-			render("@create");
+			Application.success();
+			//Stampings.personStamping();
 		}
-		//render("@personStamping");
+		
 		Stampings.personStamping();
 	}
 

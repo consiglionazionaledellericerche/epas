@@ -204,7 +204,7 @@ table#competenze {
 }
 
 table#listaPersone {
-	margin: 4em 0em 6em;
+	margin: 2em 0em 6em;
 }
 
 table#listaAmministratori {
@@ -241,6 +241,7 @@ p#nuovoCodiceCompetenza {margin: 4em 0em 2em; align: left}
 p#tipoTimbratura {margin: 3em 0em 2em; align: left; font-weight:bold;}
 p#updateStampingText{margin: 3em 0em 2em; align: left;}
 p#allegaFile{margin:3em 0em 3em; align: center;}
+p#nuovaPersona{margin: 2em 0em 3em; align: left}
 
 div#logout {text-align: right; float: right}
 div#chooseView {text-align: center}
@@ -262,7 +263,7 @@ h2#titoloModificaDatiPersonali {text-align: center}
 h2#titoloTerminazioneRapporto {text-align: center}
 h3#titoloSituazionePresenzeMensili {text-align: center}
 h2#titoloConfigurazioneParametri {text-align: center}
-h2#titoloTotaleAssenzeMensili {margin: 4em 1em 1em; text-align: center}
+h2#titoloTotaleAssenzeMensili {margin: 2em 0em 1em; text-align: center}
 h2#inserimentoNuovoCodiceAssenza {text-align: center}
 h2#titoloGestioneStraordinariCompetenze {margin: 2em; text-align: center}
 h2#titoloControllaTimbratureMancanti {text-align: center}

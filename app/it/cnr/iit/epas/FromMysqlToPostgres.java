@@ -209,8 +209,8 @@ public class FromMysqlToPostgres {
 		FromMysqlToPostgres.updateContract();
 		FromMysqlToPostgres.updateVacationPeriod();
 		FromMysqlToPostgres.updateCompetence();
-		importOreStraordinario();
-		addPermissiontoAll();
+		FromMysqlToPostgres.importOreStraordinario();
+		FromMysqlToPostgres.addPermissiontoAll();
 		JPAPlugin.closeTx(false);
 		Logger.info("Importazione terminata");
 		

@@ -150,27 +150,49 @@ public class Persons extends Controller {
 		Person person = Person.findById(personId);
 		ContactData contactData = person.contactData;
 		Location location = person.location;
-		if(!contactData.email.equals(params.get("email"))){
-			contactData.email = params.get("email");
+		if(contactData != null){
+			if(contactData.email == null || !contactData.email.equals(params.get("email"))){
+				contactData.email = params.get("email");
+			}
+			if(contactData.telephone == null || !contactData.telephone.equals(params.get("telephone"))){
+				contactData.telephone = params.get("telephone");
+			}
+			contactData.save();
 		}
-		if(!contactData.telephone.equals(params.get("telephone"))){
-			contactData.telephone = params.get("telephone");
+		else{
+			contactData = new ContactData();
+			if(params.get("email") != null)
+				contactData.email = params.get("email");
+			if(params.get("telephone") != null)
+				contactData.telephone = params.get("telephone");
+			contactData.save();
 		}
-		contactData.save();
-		if(!location.department.equals(params.get("department"))){
-			location.department = params.get("department");
-		}
-		if(!location.headOffice.equals(params.get("headOffice"))){
-			location.headOffice = params.get("headOffice");
-		}
-		if(!location.room.equals(params.get("room"))){
-			location.room = params.get("room");
-		}
-		location.save();
-		/**
-		 * TODO: da completare
-		 */
 		
+		if(location != null){
+			if(location.department == null || !location.department.equals(params.get("department"))){
+				location.department = params.get("department");
+			}
+			if(location.headOffice == null || !location.headOffice.equals(params.get("headOffice"))){
+				location.headOffice = params.get("headOffice");
+			}
+			if(location.room == null || !location.room.equals(params.get("room"))){
+				location.room = params.get("room");
+			}
+			location.save();
+		}
+		else{
+			location = new Location();
+			if(params.get("department") != null)
+				location.department = params.get("department");
+			if(params.get("headOffice") != null)
+				location.headOffice = params.get("headOffice");
+			if(params.get("room") != null)
+				location.room = params.get("room");
+			location.save();
+		}
+		flash.success("Modificate informazioni di contatto o di locazione per l'utente %s %s", person.name, person.surname);
+		Application.indexAdmin();
+			
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
