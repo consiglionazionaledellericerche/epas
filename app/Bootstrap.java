@@ -26,15 +26,15 @@ import play.test.Fixtures;
 public class Bootstrap extends Job {
 	
 	public void doJob() {
-		if (ShiftType.count() == 0) {
-			Fixtures.loadModels("shiftTypes.yml");
-			Logger.info("Creati i tipi di turno");
-		}
-		
-		if (ShiftTimeTable.count() == 0) {
-			Fixtures.loadModels("shiftTimeTables.yml");
-			Logger.info("Create le fasce di orario dei vari turni");
-		}
+//		if (ShiftType.count() == 0) {
+//			Fixtures.loadModels("shiftTypes.yml");
+//			Logger.info("Creati i tipi di turno");
+//		}
+//		
+//		if (ShiftTimeTable.count() == 0) {
+//			Fixtures.loadModels("shiftTimeTables.yml");
+//			Logger.info("Create le fasce di orario dei vari turni");
+//		}
 		
 		if (Permission.count() == 0) {
 			Fixtures.loadModels("permissions.yml");
