@@ -587,8 +587,8 @@ public class PersonDay extends Model {
 
 		if(isTicketForcedByAdmin)
 			return;
-		Logger.debug("Chiamata della setTicketAvailable, il timeAtWork per %s %s è: %s", person.name, person.surname, timeAtWork);
-		Logger.debug("Il tempo per avere il buono mensa è: %s", getWorkingTimeTypeDay().mealTicketTime);
+		Logger.trace("Chiamata della setTicketAvailable, il timeAtWork per %s %s è: %s", person.name, person.surname, timeAtWork);
+		Logger.trace("Il tempo per avere il buono mensa per %s è: %s", person, getWorkingTimeTypeDay().mealTicketTime);
 		if(timeAtWork == 0 || timeAtWork < getWorkingTimeTypeDay().mealTicketTime){
 			isTicketAvailable = false;
 			return; 
@@ -606,7 +606,7 @@ public class PersonDay extends Model {
 		}
 
 		isTicketAvailable = ticketAvailable;
-		Logger.debug("Quindi il valore del buono pasto è %s", isTicketAvailable);
+		Logger.trace("Quindi il valore del buono pasto è %s", isTicketAvailable);
 		save();
 
 	}
