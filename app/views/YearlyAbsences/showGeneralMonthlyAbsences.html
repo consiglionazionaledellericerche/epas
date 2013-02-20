@@ -1,10 +1,12 @@
 #{extends 'main.html' /}
 
-<h2 id="titoloTotaleAssenzeMensili">Situazione generale delle assenze per ciascun dipendente nel mese di &{'views.tags.display.date.month.' + month} ${year}</h2>
 
 #{logoutForm /}
 
 #{functionalMenuForm mainMenu: mainMenu /} 
+
+<h2 id="titoloTotaleAssenzeMensili">Situazione generale delle assenze per ciascun dipendente nel mese di &{'views.tags.display.date.month.' + month} ${year}</h2>
+
 
 <table id="tabellaPersoneCodiciAssenzaMensili">
 	<tr>
@@ -24,16 +26,8 @@
 		<td>${entry.getKey().name} ${entry.getKey().surname}</td>
 		%{ for(col in tablePersonAbsences.columnKeySet()){
 		}%
-			<td>
-			<a href="@{YearlyAbsences.absencesPerPerson(entry.getKey().id, col, month, year)}" target="_blank">${entry.getValue().get(col)}</a>
-			<script type="text/javascript"> 
-				$('.absencesPerPerson${}'.popupWindow({ 
-				height:600, 
-				width:1000, 
-				top:50, 
-				left:50 
-				}); 
-			</script>
+			<td>${entry.getValue().get(col)}
+			   
 			</td>
 		%{
 		   }

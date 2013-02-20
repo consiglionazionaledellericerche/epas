@@ -69,5 +69,6 @@ public class Administration extends Controller {
 	//	FromMysqlToPostgres.updateCompetence();
 		renderText("Aggiunti gli straordinari diurni feriali alle persone nella tabella competenze");
 	}
+
     
 }
