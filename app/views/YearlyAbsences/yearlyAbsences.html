@@ -10,30 +10,35 @@
 <table id="assenze_annuali">
 
 	<tr>
-		<th>Mese</th>
+		<th rowspan="2">Mese</th>
+		<th class="giorni"colspan="31">Giorni</th>
+		</tr>
 		%{
 			int i =1;
 			while(i<=31){
 		}%
+		
 		<th class="giorni">${i}</th>
 		%{
 			i++;}
 		}%
 
-	</tr>
+	
 	
 	%{
 		for(mese in yearRecap.getMonths()){
 	}%
 	<tr>
 		
-		<td>${mese.toString()}</td>
+		<td class="mese"><span class="capitalized">${mese}</span></td>
                 %{
                   int j=1;
                   while(j <= yearRecap.maxNumberOfDays(yearRecap.year, mese)){
+                  
                 }%
 
-		<td>${yearRecap.getAbsenceInYear(yearRecap.year,mese,j).size() > 0 ? yearRecap.getAbsenceInYear(yearRecap.year,mese,j).get(0).absenceType.code : ''}</td>
+		<td class="giornoAssenza">${yearRecap.getAbsenceInYear(yearRecap.year,mese,j).size() > 0 ? yearRecap.getAbsenceInYear(yearRecap.year,mese,j).get(0).absenceType.code : ''}</td>
+		
                 %{
                  j++;}
                 }%

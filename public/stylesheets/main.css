@@ -234,6 +234,8 @@ td.progressivo {background-color: #FFFF99; text-align:right; width: 6em}
 td.comp {height: 1em; text-align: right}
 td.comp-nome {height: 1em; text-align: left}
 td.inserisciTimbratura {text-align: center}
+td.mese {background-color: #FFFF66;}
+td.giornoAssenza {text-align: center}
 
 p#spiegazioneTabellaTimbrature {margin-top: 2em; margin-bottom: 2em}
 p#validita {margin: 2em 0em 2em}
@@ -242,6 +244,7 @@ p#tipoTimbratura {margin: 3em 0em 2em; align: left; font-weight:bold;}
 p#updateStampingText{margin: 3em 0em 2em; align: left;}
 p#allegaFile{margin:3em 0em 3em; align: center;}
 p#nuovaPersona{margin: 2em 0em 3em; align: left}
+p#nuovoPianoFerie{margin: 1em 0em 2em; align: left}
 
 div#logout {text-align: right; float: right}
 div#chooseView {text-align: center}
@@ -279,7 +282,7 @@ h3#titoloGestioneCompetenze {margin: 2em 0em 0em; text-align: left}
 h3#titoloGestioneParametri {margin: 2em 0em 2em; text-align: center}
 h3#gestioneUtenteAmministrativo {margin: 2em 0em 2em; text-align: center}
 h3#gestioneConfigurazioneParametri {text-align: center}
-h3#titoloPianoFerie {margin: 2em 1em 1em; text-align: left}
+h3#titoloPianoFerie {margin: 1em 0em 1em; text-align: left}
 h3#modificaCodiceCompetenza {margin: 2em 0em 2em; text-align: center}
 h3#monteOreStraordinario {margin: 2em 0em 1em; text-align: left}
 h3#titoloStraordinari {margin: 2em 0em 1em; text-align: left}
