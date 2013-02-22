@@ -37,7 +37,7 @@ public class Administration extends Controller {
     
     public static void importAll() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
     
-    	final int NUMERO_PERSONE_DA_IMPORTARE = 0;
+    	final int NUMERO_PERSONE_DA_IMPORTARE = 40;
     	
     	final int ANNO_DA_CUI_INIZIARE_IMPORTAZIONE = 2007;
     	
