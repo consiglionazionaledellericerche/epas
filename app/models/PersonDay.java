@@ -226,7 +226,13 @@ public class PersonDay extends Model {
 		 */
 		reloadedStampings = Stamping.find("Select st from Stamping st where st.personDay = ? and " +
 				"st.date > ? and st.date < ? order by st.date", this, beginDate, endDate).fetch();
-		if((reloadedStampings.size() == 0 && this.absences.size() != 0) ||(reloadedStampings.size()==1 && reloadedStampings.get(0).way == WayType.in)){
+		if(stampings.size() == 0){
+			timeAtWork = 0;
+			merge();
+			return;
+		}
+		if((reloadedStampings.size() == 0 && this.absences.size() != 0) ||
+				(reloadedStampings.size()==1 && reloadedStampings.get(0).way == WayType.in)){
 			timeAtWork = 0;
 			merge();
 			return;
@@ -459,7 +465,7 @@ public class PersonDay extends Model {
 				Logger.debug("Ci sono sia timbrature che assenze, verifico che le assenze siano giornaliere e non orarie così da" +
 						"evitare di fare i calcoli per questo giorno.");
 				for(Absence abs : absences){
-					if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay){
+					if(abs.absenceType.ignoreStamping == true || abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay){
 						timeAtWork = 0;
 						merge();
 						difference = 0;
@@ -467,6 +473,19 @@ public class PersonDay extends Model {
 						updateProgressive();
 						merge();
 						isTicketAvailable = false;
+						merge();
+						return;
+						
+					}
+					
+					else{
+						timeAtWork = timeAtWork + abs.absenceType.justifiedTimeAtWork.minutesJustified;
+						merge();
+						updateDifference();
+						merge();
+						updateProgressive();
+						merge();
+						setTicketAvailable();
 						merge();
 						return;
 					}
@@ -484,6 +503,22 @@ public class PersonDay extends Model {
 		} else {
 			Logger.info("I calcoli sul giorno %s non vengono effettuati perché %s non ha un contratto attivo in questa data", date, person);
 		}
+	}
+	
+	/**
+	 * chiamo questa funzione quando sto caricando un'assenza (verosimilmente oraria) per un certo personDay e quindi modifico il timeAtWork
+	 * per quella persona in quel giorno. Non ho necessità quindi di ricalcolarmi il timeAtWork, devo solo, sulla base di quello nuovo,
+	 * richiamare le altre tre funzioni di popolamento del personDay.
+	 */
+	public void populatePersonDayAfterJustifiedAbsence(){
+		Logger.debug("Chiamata populatePersonDayAfterJustifiedAbsence per popolare il personDay di %s %s senza il timeAtWork nel giorno %s",
+				person.name, person.surname, date);
+		updateDifference();
+		merge();
+		updateProgressive();	
+		merge();
+		setTicketAvailable();
+		merge();
 	}
 
 
