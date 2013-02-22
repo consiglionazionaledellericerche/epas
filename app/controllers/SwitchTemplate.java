@@ -73,9 +73,9 @@ public class SwitchTemplate extends Controller{
 			break;
 
 		
-		case absencesAdmin:
-			Absences.absences(personId, year, month);
-			break;
+//		case absencesAdmin:
+//			Absences.absences(personId, year, month);
+//			break;
 		case yearlyAbsences:
 			YearlyAbsences.yearlyAbsences(personId, year);
 			break;

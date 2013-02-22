@@ -297,7 +297,7 @@ public class Stampings extends Controller {
 		personStamping();
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	@Check(Security.INSERT_AND_UPDATE_STAMPING)
 	public static void missingStamping(int year, int month){
 
 		Map<Person, List<PersonDay>> personPersonDayMap = new HashMap<Person,List<PersonDay>>();
