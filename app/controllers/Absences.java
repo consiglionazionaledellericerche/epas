@@ -41,7 +41,7 @@ public class Absences extends Controller{
 		return AbsenceType.find("Select abt from AbsenceType abt where abt.validTo > ? order by code", date).fetch();
 	}
 
-	@Check(Security.VIEW_PERSONAL_SITUATION)
+	//@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void absences(Long personId, Integer year, Integer month) {
 		Person person = null;
 		Logger.debug("Il valore tra i params dell'id della persona è: %d", params.get("personId", Long.class));

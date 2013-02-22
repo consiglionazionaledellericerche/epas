@@ -1,10 +1,13 @@
 #{extends 'main.html' /}
+#{logoutForm /}
+
+#{functionalMenuForm mainMenu: mainMenu /} 
 
 <h2 id="titoloGestioneCodiciAssenza">Gestione dei codici di assenza</h2>
 
 <p><a href="@{Absences.insertAbsenceCode}">Definisci nuovo codice di assenza</a></p>
 
-<p>Codici di assenza esistenti:</p>
+<h4>Codici di assenza esistenti:</h4>
 
 <table>
 	<tr>
