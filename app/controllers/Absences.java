@@ -411,8 +411,12 @@ public class Absences extends Controller{
 		String oldAbsenceCode = absence.absenceType.code;
 		String absenceCode = params.get("absenceCode");
 		if (absenceCode == null || absenceCode.isEmpty()) {
+			PersonDay pd = absence.personDay;
 			absence.delete();
-			flash.success("Timbratura di tipo %s per il giorno %s rimossa", oldAbsenceCode, PersonTags.toDateTime(absence.personDay.date));			
+			pd.populatePersonDay();
+			pd.save();
+			flash.success("Timbratura di tipo %s per il giorno %s rimossa per il dipendente %s %s", 
+					oldAbsenceCode, PersonTags.toDateTime(absence.personDay.date), pd.person.name, pd.person.surname);			
 		} 
 		else {
 
@@ -442,7 +446,7 @@ public class Absences extends Controller{
 				}
 
 				if(params.get("buonoMensaCalcolato", Boolean.class) == true){
-					pd.populatePersonDayAfterJustifiedAbsence();
+					pd.populatePersonDay();
 					pd.save();
 				}
 			}
