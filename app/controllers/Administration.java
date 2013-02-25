@@ -2,15 +2,21 @@ package controllers;
 
 import it.cnr.iit.epas.FromMysqlToPostgres;
 
+
 import java.sql.SQLException;
 import java.util.List;
+
+import controllers.shib.Shibboleth;
 
 import models.Person;
 import models.PersonMonth;
 import models.WorkingTimeType;
 import play.mvc.Controller;
+import play.mvc.With;
 
+//@With(Shibboleth.class)
 public class Administration extends Controller {
+	
 	
     public static void index() {
         render();
@@ -31,7 +37,7 @@ public class Administration extends Controller {
     
     public static void importAll() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
     
-    	final int NUMERO_PERSONE_DA_IMPORTARE = 0;
+    	final int NUMERO_PERSONE_DA_IMPORTARE = 40;
     	
     	final int ANNO_DA_CUI_INIZIARE_IMPORTAZIONE = 2007;
     	
@@ -63,5 +69,6 @@ public class Administration extends Controller {
 	//	FromMysqlToPostgres.updateCompetence();
 		renderText("Aggiunti gli straordinari diurni feriali alle persone nella tabella competenze");
 	}
+
     
 }

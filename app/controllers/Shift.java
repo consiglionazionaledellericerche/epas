@@ -197,6 +197,7 @@ public class Shift extends Controller{
 					
 					//Questo giorno è stato assegnato
 					daysOfMonthToAssign.remove(day.getDayOfMonth());
+
 				} else {
 				// cancelled shift
 					// Se non c'è già il turno cancellato lo creo

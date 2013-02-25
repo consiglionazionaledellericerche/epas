@@ -1,7 +1,7 @@
 #{extends 'main.html' /}
-#{set title:monthRecap.person.surname + ' ' + monthRecap.person.name + ', matricola=' + monthRecap.person.number /}
+#{set title:personMonth.person.surname + ' ' + personMonth.person.name + ', matricola=' + personMonth.person.number /}
 
-<h2 id="titoloSituazioneAssenzeMensili">Situazione assenze mensili <span class="capitalized">&{'views.tags.display.date.month.' + monthRecap.month}</span> ${monthRecap.year}</h2>
+<h2 id="titoloSituazioneAssenzeMensili">Situazione assenze mensili <span class="capitalized">&{'views.tags.display.date.month.' + personMonth.month}</span> ${personMonth.year}</h2>
 
 #{logoutForm /}
 
@@ -22,7 +22,7 @@
 	</tr>
 	
 	<tr>
-		<td>${monthRecap.person.surname + ' ' + monthRecap.person.name}</td>
+		<td>${personMonth.person.surname + ' ' + personMonth.person.name}</td>
 		%{
 			for(entry in personMonth.getAbsenceCode().entrySet()){
 		}%

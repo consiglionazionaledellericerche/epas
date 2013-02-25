@@ -13,7 +13,7 @@ public class DateUtility {
 	public static boolean isHoliday(Person person, LocalDate date){
 		Configuration config = Configuration.getConfiguration(date.toDate());	
 		
-		Logger.debug("configurazione: %s con localdate: %s", config, date);
+		Logger.trace("configurazione: %s con localdate: %s", config, date);
 		
 		if(person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).holiday)
 			return true;

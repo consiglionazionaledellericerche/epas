@@ -300,8 +300,8 @@ public class YearRecap extends Model{
 		LocalDate now = new LocalDate();
 		now.withYear(year);
 		
-		int difference = now.getYear()-beginContract.getYear();
-		Logger.warn("difference is:" +difference+ "now.getYear is: "+now.getYear()+ "beginContract.getYear is: "+beginContract.getYear());
+	//	int difference = now.getYear()-beginContract.getYear();
+	//	Logger.warn("difference is:" +difference+ "now.getYear is: "+now.getYear()+ "beginContract.getYear is: "+beginContract.getYear());
 		if(now.getYear()-beginContract.getYear() < 3){
 			if(now.getYear()-beginContract.getYear() < 1 && beginContract.getMonthOfYear() != 1 && beginContract.getDayOfMonth() != 1){
 				LocalDate newDate = now.minusYears(beginContract.getYear()).minusMonths(beginContract.getMonthOfYear()).minusDays(beginContract.getDayOfMonth());
@@ -344,10 +344,7 @@ public class YearRecap extends Model{
 	 * @return il numero di giorni di ferie avanzati da quelli maturati l'anno precedente e non ancora utilizzati
 	 */
 	public int vacationLastYearNotYetUsed(){
-		LocalDate date = new LocalDate(year,1,1);
-		//recupero dal db le assenze fatte quest'anno che hanno codice 4 ovvero quelle con causale "residuo anno precedente"
-//		List<Absence> absence = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? and abs.date > ? " +
-//				"and abs.absenceType = abt and abt.code = ?", person, date, "31").fetch();
+
 		LocalDate beginLastYear = new LocalDate(year-1,1,1);
 		LocalDate endLastYear = new LocalDate(year-1,12,31);
 
@@ -361,13 +358,13 @@ public class YearRecap extends Model{
 		/**
 		 * se la data di inizio del contratto è precedente all'anno scorso
 		 */
-		if(contract.beginContract.getYear()<year-1){
+		if(contract.beginContract != null && contract.beginContract.getYear()<year-1){
 			days = daysBetweenTwoDates(beginLastYear, endLastYear);
 		}
 		/**
 		 * se la data di inizio contratto ricade nell'anno passato
 		 */
-		if(contract.beginContract.getYear()==year-1){
+		if(contract.beginContract != null && contract.beginContract.getYear()==year-1){
 			days = daysBetweenTwoDates(contract.beginContract, endLastYear);
 		}
 		
@@ -380,8 +377,7 @@ public class YearRecap extends Model{
 		
 		//recupero dal db le assenze fatte l'anno precedente che hanno codice 5 ovvero quelle con causale "ferie anno corrente"		
 		int vacationDaysPastYear = 0;
-//		List<Absence> vacationsLastYear = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? and abs.date >= ? and " +
-//				"abs.date < ? and abs.absenceType = abt and abt.code = ?", person, beginLastYear, endLastYear, "32").fetch();
+
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 				person, beginLastYear, endLastYear).fetch();
 		for(PersonDay pd : pdList){
@@ -449,7 +445,10 @@ public class YearRecap extends Model{
 		int vacationDays = 0;
 		VacationCode vacCode = VacationCode.find("Select vc from VacationCode vc, VacationPeriod vp where vp.vacationCode = vc " +
 				"and vp.person = ? order by vp.beginFrom desc", person).first();
-		vacationDays = vacCode.vacationDays;
+		if(vacCode != null)
+			vacationDays = vacCode.vacationDays;
+		else 
+			vacationDays = 0;
 		return vacationDays;
 	}
 	

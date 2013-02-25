@@ -204,7 +204,7 @@ table#competenze {
 }
 
 table#listaPersone {
-	margin: 4em 0em 6em;
+	margin: 2em 0em 6em;
 }
 
 table#listaAmministratori {
@@ -234,6 +234,8 @@ td.progressivo {background-color: #FFFF99; text-align:right; width: 6em}
 td.comp {height: 1em; text-align: right}
 td.comp-nome {height: 1em; text-align: left}
 td.inserisciTimbratura {text-align: center}
+td.mese {background-color: #FFFF66;}
+td.giornoAssenza {text-align: center}
 
 p#spiegazioneTabellaTimbrature {margin-top: 2em; margin-bottom: 2em}
 p#validita {margin: 2em 0em 2em}
@@ -241,6 +243,22 @@ p#nuovoCodiceCompetenza {margin: 4em 0em 2em; align: left}
 p#tipoTimbratura {margin: 3em 0em 2em; align: left; font-weight:bold;}
 p#updateStampingText{margin: 3em 0em 2em; align: left;}
 p#allegaFile{margin:3em 0em 3em; align: center;}
+p#nuovaPersona{margin: 2em 0em 3em; align: left}
+p#nuovoPianoFerie{margin: 1em 0em 2em; align: left}
+p#codice{margin: 1em 0em 0em}
+p#codicePres{margin: 1em 0em 0em}
+p#descrizione{margin: 1em 0em 0em}
+p#usoInterno {margin: 1em 0em 0em}
+p#usoMultiplo {margin: 1em 0em 0em}
+p#inizioValidita {margin: 1em 0em 0em}
+p#fineValidita {margin: 1em 0em 0em}
+p#tempoGiustificato {margin: 1em 0em 0em}
+p#valore {margin: 1em 0em 0em}
+p#minutiEccesso {margin: 1em 0em 0em}
+p#accumulo {margin: 1em 0em 0em}
+p#limiteAccumulo {margin: 1em 0em 0em}
+p#comportamentoAccumulo {margin: 1em 0em 0em}
+p#sostituzione {margin: 1em 0em 0em}
 
 div#logout {text-align: right; float: right}
 div#chooseView {text-align: center}
@@ -251,7 +269,7 @@ div#spiegazioneValoriGrassetto {margin: 1em 4em 1em}
 h2#titoloSituazionePresenzeMensili {text-align: center}
 h2#titoloSituazioneAssenzeMensili {text-align: center}
 h2#titoloSituazioneAssenzeAnnuali {text-align: center}
-h2#titoloSituazioneFerie {text-align: center}
+h3#titoloSituazioneFerie {text-align: center}
 h2#titoloGestionePersonale {text-align: center}
 h2#titoloModificaPersonale {text-align: center}
 h2#titoloCambioPassword {text-align: center}
@@ -262,7 +280,7 @@ h2#titoloModificaDatiPersonali {text-align: center}
 h2#titoloTerminazioneRapporto {text-align: center}
 h3#titoloSituazionePresenzeMensili {text-align: center}
 h2#titoloConfigurazioneParametri {text-align: center}
-h2#titoloTotaleAssenzeMensili {margin: 4em 1em 1em; text-align: center}
+h2#titoloTotaleAssenzeMensili {margin: 2em 0em 1em; text-align: center}
 h2#inserimentoNuovoCodiceAssenza {text-align: center}
 h2#titoloGestioneStraordinariCompetenze {margin: 2em; text-align: center}
 h2#titoloControllaTimbratureMancanti {text-align: center}
@@ -278,16 +296,20 @@ h3#titoloGestioneCompetenze {margin: 2em 0em 0em; text-align: left}
 h3#titoloGestioneParametri {margin: 2em 0em 2em; text-align: center}
 h3#gestioneUtenteAmministrativo {margin: 2em 0em 2em; text-align: center}
 h3#gestioneConfigurazioneParametri {text-align: center}
-h3#titoloPianoFerie {margin: 2em 1em 1em; text-align: left}
+h3#titoloPianoFerie {margin: 1em 0em 1em; text-align: left}
 h3#modificaCodiceCompetenza {margin: 2em 0em 2em; text-align: center}
 h3#monteOreStraordinario {margin: 2em 0em 1em; text-align: left}
 h3#titoloStraordinari {margin: 2em 0em 1em; text-align: left}
 
-fieldset#timbraturaWeb {height: 12em}
-fieldset#stampaPdf {height: 12em}
+h4#configurazioniEsistenti {margin:2em 0em 1em; text-align: left}
+
+fieldset#timbraturaWeb {height: 17em}
+fieldset#stampaPdf {height: 18em;}
 fieldset#fieldsetTerminateContract {height: 30 em}
-textarea#timbraturaWeb {margin: 0em 3em 0em}
-textarea#stampaPdf {margin: 0em 3em 0em}
+fieldset#nuovoCodiceAssenza {height: 37em}
+fieldset#gruppo {height: 25em}
+textarea#timbraturaWeb {margin: 0em 5em 0em}
+textarea#stampaPdf {margin: 2em 1em 0em; width: 40em}
 input#salvaConfigurazione {margin: 2em 60em 0em; align: center}
 input#annullaConfigurazione {margin: 0em 80em 2em; align: center}
 input#submitInsertPerson {margin: 2em 60em 0em; align: center}
@@ -307,6 +329,7 @@ input#discardNuovoCodiceAssenza {margin: 1em 60em 0em; align: center}
 input#submitEditPerson {margin: 2em 60em 0em; align left}
 input#discardEditPerson {margin: 1em 60em 0em; align: center}
 input#deletePerson {margin: 1em 60em 0em; align: right}
+input#modificaContratto {margin: 1em 25em 0em; align: center}
 
 input#updateOldOvertime {margin: 0em 25em 0em; align: center}
 table#tabellaPersoneCodiciAssenzaMensili {margin: 2em 1em 1em; align: left}

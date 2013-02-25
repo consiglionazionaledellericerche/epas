@@ -1,8 +1,5 @@
 package models;
 
-import it.cnr.iit.epas.PersonUtility;
-
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -12,30 +9,22 @@ import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.Query;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import models.Stamping.WayType;
+
 import org.hibernate.envers.Audited;
 import org.joda.time.DateTimeConstants;
-import org.joda.time.DateTimeFieldType;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 
 import play.Logger;
 import play.data.validation.Required;
+import play.data.validation.Valid;
 import play.db.jpa.JPA;
 import play.db.jpa.Model;
-
-import lombok.Cleanup;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import models.Stamping.WayType;
 
 /**
  * @author cristian
@@ -137,7 +126,11 @@ public class PersonMonth extends Model {
 
 	}
 
-
+    public static PersonMonth byPersonAndYearAndMonth(Person person, int year, int month) {
+    	return PersonMonth.find(
+				"Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
+				person, month, year).first();
+    }
 
 	/**
 	 * 
@@ -179,28 +172,6 @@ public class PersonMonth extends Model {
 
 	/**
 	 * 
-	 * @param month
-	 * @param year
-	 * @return il numero di minuti di riposo compensativo utilizzati in quel mese 
-	 */
-	@Deprecated
-	public int getCompensatoryRestInMinutes(){
-
-		int compensatoryRest = getCompensatoryRest();
-
-		Logger.debug("NUmero di giorni di riposo compensativo nel mese: %s", compensatoryRest);
-		int minutesOfCompensatoryRest = compensatoryRest * person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime;
-		if(minutesOfCompensatoryRest != compensatoryRestInMinutes && compensatoryRestInMinutes != null){
-			compensatoryRestInMinutes = minutesOfCompensatoryRest;
-			save();
-		}
-
-		return compensatoryRestInMinutes;
-
-	}
-
-	/**
-	 * 
 	 * @return il numero di giorni di riposo compensativo nel mese
 	 */
 	@Deprecated
@@ -219,31 +190,6 @@ public class PersonMonth extends Model {
 		}
 		return compensatoryRest;
 	}
-
-	/**
-	 * 
-	 * @param month
-	 * @param year
-	 * @return il totale derivante dalla differenza tra le ore residue e le eventuali ore di riposo compensativo
-	 */
-	@Deprecated
-	public int getTotalOfMonth(){
-		int total = 0;
-		int compensatoryRest = getCompensatoryRestInMinutes();
-		//Logger.debug("CompensatoryRest in getTotalOfMonth: %s", compensatoryRest);
-		int monthResidual = getMonthResidual();
-		//Logger.debug("MonthResidual in getTotalOfMonth: %s", monthResidual);
-		LocalDate date = new LocalDate(year, month, 1);
-		/**
-		 * TODO: devo farlo qui il controllo di quale sia la qualifica per poter aggiungere o meno il valore del residuo dell'anno precedente!?!?!?
-		 */
-		int residualFromPastMonth = PersonUtility.getResidual(person, date.dayOfMonth().withMaximumValue());
-
-		total = residualFromPastMonth+monthResidual-(compensatoryRest); 
-
-		return total;
-	}
-
 
 
 	/**
@@ -551,7 +497,7 @@ public class PersonMonth extends Model {
 		for(PersonDay pd : days){
 
 			StampModificationType smt = pd.checkTimeForLunch();
-			Logger.debug("Lo stamp modification type è: %s", smt);
+			Logger.trace("Lo stamp modification type è: %s", smt);
 
 			if(smt != null && !stampCodeList.contains(smt)){
 				Logger.debug("Aggiunto %s alla lista", smt.description);
@@ -560,7 +506,12 @@ public class PersonMonth extends Model {
 			StampModificationType smtMarked = pd.checkMarkedByAdmin();
 			if(smtMarked != null && !stampCodeList.contains(smtMarked)){
 				stampCodeList.add(smtMarked);
-				Logger.debug("Aggiunto %s alla lista", smtMarked.description);
+				Logger.trace("Aggiunto %s alla lista", smtMarked.description);
+			}
+			StampModificationType smtMidnight = pd.checkMissingExitStampBeforeMidnight();
+			if(smtMidnight != null && !stampCodeList.contains(smtMidnight)){
+				stampCodeList.add(smtMidnight);
+				Logger.trace("Aggiunto %s alla lista", smtMidnight.description);
 			}
 
 		}
@@ -595,17 +546,17 @@ public class PersonMonth extends Model {
 	 * @return il numero di ore di straordinario fatte dall'inizio dell'anno
 	 */
 	public int getOvertimeHourInYear(){
-		Logger.debug("Chiamata funzione di controllo straordinari...");
+		Logger.trace("Chiamata funzione di controllo straordinari...");
 		int overtimeHour = 0;
 		List<Competence> compList = Competence.find("Select comp from Competence comp, CompetenceCode code where comp.person = ? and comp.year = ? and " +
 				"comp.competenceCode = code and code.code = ?", person, year, "S1").fetch();
-		Logger.debug("La lista degli straordinari da inizio anno : %s", compList);
+		Logger.debug("La lista degli straordinari da inizio anno per %s: %s", person, compList);
 		if(compList != null){
 			for(Competence comp : compList){
-				overtimeHour = overtimeHour + comp.value;
+				overtimeHour = overtimeHour + comp.valueApproved;
 			}
 		}
-		Logger.debug("Il numero di ore di straordinari è: ", overtimeHour);
+		Logger.debug("Il numero di ore di straordinari per %s è: %s", person, overtimeHour);
 		return overtimeHour;
 	}
 
@@ -638,7 +589,7 @@ public class PersonMonth extends Model {
 	/**
 	 * @return la somma dei minuti dei giorni (entro una certa data) che hanno una differenza negativa rispetto all'orario di lavoro
 	 */
-	public long residuoDelMeseInNegativoAllaData(LocalDate date) {
+	public int residuoDelMeseInNegativoAllaData(LocalDate date) {
 		LocalDate startOfMonth = new LocalDate(year, month, 1);
 		Long residuo = JPA.em().createQuery("SELECT sum(pd.difference) FROM PersonDay pd WHERE pd.date BETWEEN :startOfMonth AND :endOfMonth and pd.person = :person " +
 				"AND pd.difference < 0 and pd.date <= :date", Long.class)
@@ -647,14 +598,17 @@ public class PersonMonth extends Model {
 				.setParameter("person", person)
 				.setParameter("date", date)
 				.getSingleResult();
+		int res = 0;
+		if(residuo != null)
+			res = residuo.intValue();
 		
-		return residuo != null ? residuo : 0;
+		return res;
 	}
 	
 	/**
 	 * @return la somma dei minuti dei giorni (alla fine del mese) che hanno una differenza negativa rispetto all'orario di lavoro
 	 */
-	public long residuoDelMeseInNegativo() {
+	public int residuoDelMeseInNegativo() {
 		LocalDate startOfMonth = new LocalDate(year, month, 1);
 		return residuoDelMeseInNegativoAllaData(startOfMonth.dayOfMonth().withMaximumValue());
 	}
@@ -662,7 +616,7 @@ public class PersonMonth extends Model {
 	/**
 	 * @return la somma dei minuti dei giorni (entro una certa data) che hanno una differenza positiva rispetto all'orario di lavoro
 	 */
-	public long residuoDelMeseInPositivoAllaData(LocalDate date) {
+	public int residuoDelMeseInPositivoAllaData(LocalDate date) {
 		Long residuo = JPA.em().createQuery("SELECT sum(pd.difference) FROM PersonDay pd WHERE pd.date BETWEEN :startOfMonth AND :endOfMonth and pd.person = :person " +
 				"AND pd.difference > 0 and pd.date <= :date", Long.class)
 				.setParameter("startOfMonth", new LocalDate(year, month, 1))
@@ -670,13 +624,16 @@ public class PersonMonth extends Model {
 				.setParameter("person", person)
 				.setParameter("date", date)
 				.getSingleResult();
-		return residuo != null ? residuo : 0;
+		int res = 0;
+		if(residuo != null)
+			res = residuo.intValue();
+		return res;
 	}
 	
 	/**
 	 * @return la somma dei minuti dei giorni (alla fine del mese) che hanno una differenza positiva rispetto all'orario di lavoro
 	 */
-	public long residuoDelMeseInPositivo() {
+	public int residuoDelMeseInPositivo() {
 		return residuoDelMeseInPositivoAllaData(new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
 	}
 	
@@ -721,21 +678,21 @@ public class PersonMonth extends Model {
 		Qualification qualification = Qualification.find("SELECT p.qualification FROM Person p WHERE p = ?", person).first(); 
 		if(qualification == null)
 			return false;
-		// TODO:considerare quando non c'è la qualifica...	
+			
 		return month <= 3 || qualification.qualification <= 3;
 	}
 	
 	/**
 	 * @return la somma dei residui positivi e di quelli negativi
 	 */
-	public long residuoDelMese() {
+	public int residuoDelMese() {
 		return residuoDelMeseInPositivo() + residuoDelMeseInNegativo();
 	}
 
 	/**
 	 * @return la somma dei residui positivi e di quelli negativi alla data specificata
 	 */
-	public long residuoDelMeseAllaData(LocalDate date) {
+	public int residuoDelMeseAllaData(LocalDate date) {
 		return residuoDelMeseInPositivoAllaData(date) + residuoDelMeseInNegativoAllaData(date);
 	}
 	
@@ -743,7 +700,7 @@ public class PersonMonth extends Model {
 	 * @return il tempo di lavoro dai mese precedenti eventualmente comprensivo di quello derivante
 	 * 	dall'anno precedente
 	 */
-	public long totaleResiduoAnnoCorrenteAlMesePrecedente() {
+	public int totaleResiduoAnnoCorrenteAlMesePrecedente() {
 		//Deve esistere un mese precedente ed essere dello stesso anno (quindi a gennaio il mese precedente di questo anno non esiste)
 		if (mesePrecedente() != null && month != 1) {
 			return mesePrecedente().totaleResiduoAnnoCorrenteAFineMese();
@@ -778,15 +735,15 @@ public class PersonMonth extends Model {
 		return residuoAnnoPrecedenteDisponibileAllaFineDelMese;
 	}
 	
-	public long totaleResiduoAnnoCorrenteAFineMese() {
+	public int totaleResiduoAnnoCorrenteAFineMese() {
 		return residuoDelMese() + totaleResiduoAnnoCorrenteAlMesePrecedente() + riposiCompensativiDaAnnoCorrente - straordinari - recuperiOreDaAnnoPrecedente;  
 	}
 	
-	public long totaleResiduoAnnoCorrenteAllaData(LocalDate date) {
+	public int totaleResiduoAnnoCorrenteAllaData(LocalDate date) {
 		return residuoDelMeseAllaData(date) + totaleResiduoAnnoCorrenteAlMesePrecedente() + riposiCompensativiDaAnnoCorrente - straordinari - recuperiOreDaAnnoPrecedente;  
 	}
 	
-	public long totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese() {
+	public int totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese() {
 		return totaleResiduoAnnoCorrenteAFineMese() + residuoAnnoPrecedenteDisponibileAllaFineDelMese();
 	}
 	
@@ -795,8 +752,8 @@ public class PersonMonth extends Model {
 		
 		int residuoAnnoPrecedenteDisponibileAllaFineDelMese = residuoAnnoPrecedenteDisponibileAllaFineDelMese();
 		
-		long residuoDelMeseInNegativo = residuoDelMeseInNegativo();
-		long residuoDelMeseInPositivo = residuoDelMeseInPositivo();
+		int residuoDelMeseInNegativo = residuoDelMeseInNegativo();
+		int residuoDelMeseInPositivo = residuoDelMeseInPositivo();
 		
 		if (residuoDelMeseInNegativo != 0 && residuoAnnoPrecedenteDisponibileAllaFineDelMese > 0) {
 			
@@ -813,6 +770,7 @@ public class PersonMonth extends Model {
 			} else {
 				recuperiOreDaAnnoPrecedente -= residuoAnnoPrecedenteDisponibileAllaFineDelMese;
 			}
+			this.save();
 		}
 		
 		if (residuoDelMeseInPositivo != 0 && residuoAnnoPrecedenteDisponibileAllaFineDelMese < 0) {
@@ -821,16 +779,17 @@ public class PersonMonth extends Model {
 			} else {
 				recuperiOreDaAnnoPrecedente += residuoDelMeseInPositivo;
 			}
+			this.save();
 		}
-		save();
+		this.save();
 	}
 	
-	public long tempoDisponibilePerRecuperi(LocalDate date) {
-		long totaleResiduoAnnoCorrenteAllaData = totaleResiduoAnnoCorrenteAllaData(date);
+	public int tempoDisponibilePerRecuperi(LocalDate date) {
+		int totaleResiduoAnnoCorrenteAllaData = totaleResiduoAnnoCorrenteAllaData(date);
 		
 		//System.out.println("totaleResiduoAnnoCorrenteAllaData = " + totaleResiduoAnnoCorrenteAllaData);
 		
-		long tempoDisponibile = totaleResiduoAnnoCorrenteAllaData + residuoAnnoPrecedenteDisponibileAllaFineDelMese();
+		int tempoDisponibile = totaleResiduoAnnoCorrenteAllaData + residuoAnnoPrecedenteDisponibileAllaFineDelMese();
 		
 		if (tempoDisponibile <= 0) {
 			tempoDisponibile = 0;
@@ -840,17 +799,17 @@ public class PersonMonth extends Model {
 		
 	}	
 	
-	public long tempoDisponibilePerStraordinari() {
+	public int tempoDisponibilePerStraordinari() {
 		
-		long residuoDelMeseInPositivo = residuoDelMeseInPositivo();
+		int residuoDelMeseInPositivo = residuoDelMeseInPositivo();
 		
 		if (residuoDelMeseInPositivo <= 0) {
 			return 0;
 		}
 		
-		long residuoAllaDataRichiesta = residuoDelMese();
+		int residuoAllaDataRichiesta = residuoDelMese();
 		
-		long tempoDisponibile = residuoAnnoPrecedenteDisponibileAllaFineDelMese() + mesePrecedente().totaleResiduoAnnoCorrenteAFineMese() + residuoAllaDataRichiesta;
+		int tempoDisponibile = residuoAnnoPrecedenteDisponibileAllaFineDelMese() + mesePrecedente().totaleResiduoAnnoCorrenteAFineMese() + residuoAllaDataRichiesta;
 		
 		if (tempoDisponibile <= 0) {
 			return 0;
@@ -863,7 +822,7 @@ public class PersonMonth extends Model {
 	public boolean assegnaStraordinari(int ore) {
 		if (tempoDisponibilePerStraordinari() > ore * 60) {
 			straordinari = ore * 60;
-			save();
+			this.save();
 			return true;
 		}
 		return false;
@@ -897,7 +856,7 @@ public class PersonMonth extends Model {
 				riposiCompensativiDaAnnoCorrente += (minutiRiposoCompensativo + residuoAnnoPrecedenteDisponibileAllaFineDelMese);
 			}				
 		}
-		
+		save();
 		//Creare l'assenza etc....
 		aggiornaRiepiloghi();
 		return true;
@@ -911,4 +870,162 @@ public class PersonMonth extends Model {
 		return - person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime;
 
 	}
+	
+	/**
+	 * 
+	 * @return il numero di giorni di indennità di reperibilità festiva per quella persona in quel mese di quell'anno
+	 */
+	public int holidaysAvailability(int year, int month){
+		int holidaysAvailability = 0;
+		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "208").first();
+		Logger.debug("Il codice competenza é: %s", cmpCode);
+		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
+		Logger.warn("competence: " +competence);
+		if(competence != null)
+			holidaysAvailability = competence.valueApproved;
+		else
+			holidaysAvailability = 0;
+		return holidaysAvailability;
+	}
+
+	/**
+	 * 
+	 * @return il numero di giorni di indennità di reperibilità feriale per quella persona in quel mese di quell'anno
+	 */
+	public int weekDayAvailability(@Valid int year, @Valid int month){
+		int weekDayAvailability = 0;
+		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "207").first();
+		Logger.debug("Il codice competenza é: %s", cmpCode);
+		
+		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
+		if(competence != null)
+			weekDayAvailability = competence.valueApproved;
+		else
+			weekDayAvailability = 0;
+		return weekDayAvailability;
+	}
+
+	/**
+	 * 
+	 * @param year
+	 * @param month
+	 * @return il numero di giorni di straordinario diurno nei giorni lavorativi 
+	 */
+	public int daylightWorkingDaysOvertime(int year, int month){
+		int daylightWorkingDaysOvertime = 0;
+		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "S1").first();
+		Logger.debug("Il codice competenza é: %s", cmpCode);
+		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
+		if(competence != null)
+			daylightWorkingDaysOvertime = competence.valueApproved;
+		else
+			daylightWorkingDaysOvertime = 0;
+		return daylightWorkingDaysOvertime;
+	}
+
+	/**
+	 * 
+	 * @param year
+	 * @param month
+	 * @return il numero di giorni di straordinario diurno nei giorni festivi o notturno nei giorni lavorativi
+	 */
+	public int daylightholidaysOvertime(int year, int month){
+		int daylightholidaysOvertime = 0;
+		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "S2").first();
+		Logger.debug("Il codice competenza é: %s", cmpCode);
+		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
+		if(competence != null)
+			daylightholidaysOvertime = competence.valueApproved;
+		else
+			daylightholidaysOvertime = 0;
+		return daylightholidaysOvertime;
+	}
+
+	/**
+	 * 
+	 * @return il numero di giorni di turno ordinario
+	 */
+	public int ordinaryShift(int year, int month){
+		int ordinaryShift = 0;
+		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "T1").first();
+		Logger.debug("Il codice competenza é: %s", cmpCode);
+		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
+		if(competence != null)
+			ordinaryShift = competence.valueApproved;
+		else
+			ordinaryShift = 0;
+		return ordinaryShift;
+	}
+
+	/**
+	 * 
+	 * @return il numero di giorni di turno notturno
+	 */
+	public int nightShift(int year, int month){
+		int nightShift = 0;
+		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "T2").first();
+		Logger.debug("Il codice competenza é: %s", cmpCode);
+		if(cmpCode == null)
+			return 0;
+		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
+				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
+		if(competence != null)
+			nightShift = competence.valueApproved;
+		else
+			nightShift = 0;
+		return nightShift;
+	}
+
+
+	/**
+	 * 
+	 * @return il numero di ore di lavoro in eccesso/difetto dai mesi precedenti, calcolate a partire da gennaio dell'anno corrente.
+	 * nel caso in cui ci trovassimo a gennaio, le ore di lavoro in eccesso/difetto provengono dall'anno precedente
+	 */
+	public int pastRemainingHours(int month, int year){
+		int pastRemainingHours = 0;
+		/**
+		 * per adesso ricorro al metodo di ricerca del progressivo all'ultimo giorno dell'anno precedente, non appena sarà pronta 
+		 * la classe PersonYear, andrò a fare la ricerca direttamente dentro quella classe sulla base della persona e dell'anno che mi
+		 * interessa.
+		 */
+		if(month == DateTimeConstants.JANUARY){
+			LocalDate lastDayOfYear = new LocalDate(year-1,DateTimeConstants.DECEMBER,31);
+			//			PersonYear py = PersonYear.find("Select py from PersonYear py where py.person = ?",person).first();
+			//			pastRemainingHours = py.remainingHours;
+			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, lastDayOfYear).first();
+			pastRemainingHours = pd.progressive;
+		}
+		else{
+			//int month = date.getMonthOfYear();
+			int counter = 0;
+			for(int i = 1; i < month; i++){
+				int day = 0;
+				if(i==1 || i==3 || i==5 || i==7 || i==8 || i==10 || i==12)
+					day = 31;
+				if(i==4 || i==6 || i==9 || i==11)
+					day = 30;
+				if(i==2){
+					if(year==2012 || year==2016 || year==2020)
+						day = 29;
+					else
+						day = 28;
+				}			
+				LocalDate endOfMonth = new LocalDate(year,i,day);	
+				PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? " +
+						"and pd.date = ?", person, endOfMonth).first();
+				counter = counter+pd.progressive;
+			}
+			pastRemainingHours = counter;
+
+		}
+
+		return pastRemainingHours;
+	}
+
 }

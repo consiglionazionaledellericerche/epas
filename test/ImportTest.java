@@ -60,9 +60,7 @@ public class ImportTest extends UnitTest {
 //			FromMysqlToPostgres.createStampings(rs.getLong("ID"), person);
 			
 //			FromMysqlToPostgres.createYearRecap(rs.getLong("ID"), person);
-			
-			FromMysqlToPostgres.createMonthRecap(rs.getLong("ID"), person);
-			
+						
 			
 		}
 	}

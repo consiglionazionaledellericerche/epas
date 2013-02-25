@@ -3,27 +3,30 @@
 # ~~~~
 #*		/										module:secure
 
+#Import Shibboleth routes
+*      /                						module:shibboleth
+
 # Home page
-GET     /                                       Stampings.show
+GET     /                                       Stampings.stampings
 
 #Home page amministrazione
 GET		/presenze								Application.indexAdmin
 
 #Orario e timbrature
-GET     /orario/{personId}/{year}/{month}		Stampings.show
+GET     /stampings/{personId}/{year}/{month}	Stampings.stampings
 
 GET		/orarioAdmin/{personId}/{year}/{month}	Stampings.personStamping
 GET 	/orarioAdmin							Stampings.personStamping
 
 #Assenze
-GET		/assenze/{personId}/{year}/{month}		Absences.show
+#GET		/absences/{personId}/{year}/{month}		Absences.absences
 
 #Assenze annuali
-GET		/assenze-annuali/{personId}/{year}		YearlyAbsences.show
+GET		/yearlyAbsences/{personId}/{year}		YearlyAbsences.yearlyAbsences
 
 #Assenze mensili globali
 GET		/generalMonthlyAbsences/{year}/{month}	YearlyAbsences.showGeneralMonthlyAbsences
-GET		/yearlyAbsences/absencesPerPerson		YearlyAbsences.absencesPerPerson
+GET		/yearlyAbsences/absencesPerPerson/{personId}/{year}		YearlyAbsences.absencesPerPerson
 
 #Ferie
 GET		/vacations								Vacations.show
@@ -31,7 +34,7 @@ POST	/vacations								Vacations.vacations
 GET		/vacationsCurrentYear					Vacations.vacationsCurrentYear		
 
 #Competenze
-GET		/competenze/{personId}/{year}/{month}	Competences.show
+GET		/competences/{personId}/{year}/{month}	Competences.show
 
 #Riepilogo ore
 GET		/hourRecap/{personId}/{year}			PersonMonths.hourRecap
@@ -50,10 +53,6 @@ GET     /favicon.ico                            404
 # Map static resources from the /app/public folder to the /public path
 GET     /public/                                staticDir:public
 
-# Bootstrap
-GET     /public/bootstrap/img/glyphicons-halflings-white.png    staticDir:public  
-GET     /public/bootstrap/img/glyphicons-halflings.png            staticDir:public
-
 # Import Secure routes
 #*       /                						module:secure
 
@@ -67,6 +66,8 @@ GET		/persons/terminatePerson/{personId}		Persons.terminatePerson
 POST	/persons/terminateContract/{personId}	Persons.terminateContract
 GET		/competences/updateOldOvertime/{personId}	Competences.updateOldOvertime
 PUT		/competences/saveOldOvertime			Competences.saveOldOvertime
+GET		/persons/modifyContract/{contractId}	Persons.modifyContract
+POST	/persons/modifyContract					Persons.updateContract
 
 
 # Gestione orari di lavoro
@@ -92,8 +93,7 @@ POST	/persons/changePassword					Persons.savePassword
 GET		/stampings/create						Stampings.create
 POST	/stampings/insert/						Stampings.insert
 GET		/stampings/edit/{stampingId}			Stampings.edit
-POST	/stampings/update						Stampings.update
-GET		/choosePersonAndDate					Stampings.choosePersonAndDate
+POST	/stampings/update/						Stampings.update
 GET		/personStamping							Stampings.personStamping
 GET		/stampings/missingStamping/{year}/{month}			Stampings.missingStamping
 GET		/stampings/dailyPresence/{year}/{month}/{day}		Stampings.dailyPresence

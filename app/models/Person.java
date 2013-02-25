@@ -191,14 +191,6 @@ public class Person extends Model {
 	public List<YearRecap> yearRecaps;
 
 	/**
-	 * relazione con la tabella di storico MonthRecap
-	 */
-	@NotAudited
-	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
-	public List<MonthRecap> monthRecaps;
-
-
-	/**
 	 * relazione con la tabella di vacation_code
 	 */
 	@OneToOne(mappedBy="person", fetch=FetchType.LAZY)
@@ -527,20 +519,36 @@ public class Person extends Model {
 
 		}
 		else{
-			for(Stamping s : pd.stampings){
-				if(!s.date.isEqual(stamping.dateTime)){
-					Stamping stamp = new Stamping();
-					stamp.date = stamping.dateTime;
-					stamp.markedByAdmin = false;
-					if(stamping.inOut == 0)
-						stamp.way = WayType.in;
-					else
-						stamp.way = WayType.out;
-					stamp.badgeReader = stamping.badgeReader;
-					stamp.personDay = pd;
-					stamp.save();
-				}
+			if(checkDuplicateStamping(pd, stamping) == false){
+				Stamping stamp = new Stamping();
+				stamp.date = stamping.dateTime;
+				stamp.markedByAdmin = false;
+				if(stamping.inOut == 0)
+					stamp.way = WayType.in;
+				else
+					stamp.way = WayType.out;
+				stamp.badgeReader = stamping.badgeReader;
+				stamp.personDay = pd;
+				stamp.save();
 			}
+			else{
+				Logger.warn("All'interno della lista di timbrature di %s %s nel giorno %s c'è una timbratura uguale a quella passata dallo" +
+						"stampingsFromClient: %s", person.name, person.surname, pd.date, stamping.dateTime);
+			}
+//			for(Stamping s : pd.stampings){
+//				if(!s.date.isEqual(stamping.dateTime)){
+//					Stamping stamp = new Stamping();
+//					stamp.date = stamping.dateTime;
+//					stamp.markedByAdmin = false;
+//					if(stamping.inOut == 0)
+//						stamp.way = WayType.in;
+//					else
+//						stamp.way = WayType.out;
+//					stamp.badgeReader = stamping.badgeReader;
+//					stamp.personDay = pd;
+//					stamp.save();
+//				}
+//			}
 		}
 
 		pd.populatePersonDay();
@@ -548,5 +556,19 @@ public class Person extends Model {
 		return true;
 	}
 
+	/**
+	 * 
+	 * @param pd
+	 * @param stamping
+	 * @return true se all'interno della lista delle timbrature per quel personDay c'è una timbratura uguale a quella passata come parametro
+	 * false altrimenti
+	 */
+	private static boolean checkDuplicateStamping(PersonDay pd, StampingFromClient stamping){
+		for(Stamping s : pd.stampings){
+			if(s.date.isEqual(stamping.dateTime)){
+				return true;
+			}
+		}return false;
+	}
 
 }

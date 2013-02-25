@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.joda.time.LocalDate;
+
 import controllers.Security;
 
 import play.Logger;
@@ -28,14 +30,16 @@ import models.Person;
 public class MainMenu {
 
 	public static final String PERSON_ID_CACHE_PREFIX = "personId.";
+	
 	@Setter
 	private Long personId = null;
 
 	private int year;
 	private int month;
+	private Integer day;
 	
 	@Setter
-	private ActionMenuItem action = null;
+	private ActionMenuItem method = null;
 
 	private List<Person> persons;
 	
@@ -44,14 +48,27 @@ public class MainMenu {
 		this.month = month;
 	}
 	
-	public MainMenu(Long personId, int year, int month, ActionMenuItem action) {
+	public MainMenu(Long personId, int year, int month, ActionMenuItem method) {
 		this.personId = personId;
 		this.year = year; this.month = month;
-		this.action = action;
+		this.method = method;
+	}
+	
+	public MainMenu(Long personId, int year, int month, int day, ActionMenuItem method){
+		this.personId = personId;
+		this.year = year;
+		this.month = month;
+		this.day = day;
+		this.method = method;
 	}
 	
 	public MainMenu(Long personId, int year, int month, ActionMenuItem action, List<Person> persons) {
 		this(personId, year, month, action);
+		this.persons = persons;
+	}
+	
+	public MainMenu(Long personId, int year, int month, int day, ActionMenuItem action, List<Person> persons) {
+		this(personId, year, month, day, action);
 		this.persons = persons;
 	}
 	
@@ -73,7 +90,7 @@ public class MainMenu {
 		return person;
 	}
 	
-	public List<ActionMenuItem> getActions() {
+	public List<ActionMenuItem> getMethods() {
         
 		List<ActionMenuItem> actions = new ArrayList<ActionMenuItem>();
 		
@@ -89,8 +106,17 @@ public class MainMenu {
             if (permissionDescriptions.contains(menuItem.getPermission())) {
                 actions.add(menuItem);
             }
+            
         }
        
         return actions;
     } 
+	
+	public List<Integer> getDays() {
+		List<Integer> days = new ArrayList<Integer>();
+		for(Integer i = 1; i < LocalDate.now().dayOfMonth().withMaximumValue().getDayOfMonth(); i++){
+			days.add(i);
+		}
+		return days;
+	}
 }

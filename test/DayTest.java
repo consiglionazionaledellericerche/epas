@@ -103,9 +103,7 @@ public class DayTest extends UnitTest{
 	
 	@Test
 	public void testWorkingDay() {
-		
-		LocalDateTime now = new LocalDateTime();
-				
+						
 		LocalDate datao = new LocalDate(2012,06,03);
 		LocalDateTime data = new LocalDateTime(2001,07,03,8,0);
 		

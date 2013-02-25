@@ -1,8 +1,8 @@
 <div align="left">
 #{form @SwitchTemplate.dispatch()}
-	#{select 'action', value:_mainMenu.action, id:'action'}
+	#{select 'method', value:_mainMenu.method, id:'method'}
 	 %{
-	 	for (menuItem in _mainMenu.getActions()) {
+	 	for (menuItem in _mainMenu.getMethods()) {
 	 }%
         #{option menuItem.getAction()}${menuItem.getDescription()}#{/option}
     %{
@@ -33,7 +33,7 @@
 		#{option 11}Novembre#{/option}
 		#{option 12}Dicembre#{/option}
 	#{/select}
-	
+		
 	#{secure.check "viewPersonList"}
 		#{select 'personId', value:_mainMenu.personId, id:'person'}
 		%{
@@ -47,6 +47,18 @@
 		#{/select}
 	#{/secure.check}
 	
+	%{if (_mainMenu.day != null || _mainMenu.method.name() == 'dailyPresence') {
+	}%
+		#{select 'day', value:_mainMenu.day, id: 'day'}
+			%{ for(day in _mainMenu.days){
+				}%
+				#{option day}${day}#{/option}
+				%{
+					}
+				}%		
+		#{/select}		
+	%{}}%
+
 	<input type="submit" value="Submit">
 #{/form}
 
