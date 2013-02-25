@@ -37,11 +37,12 @@ public class PersonMonths extends Controller{
 			 */
 			PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? and pm.month = ?", 
 					person, year, month).first();
+			Logger.debug("PersonMonth = %s", pm);
 			
 			
 			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", 
 					person, date.dayOfMonth().withMaximumValue()).first();
-			Logger.debug("Il person day scansionato è: %s", pd);
+			//Logger.debug("Il person day scansionato è: %s", pd);
 			
 			/**
 			 * cerco nel mese eventuali giorni di riposo compensativo
@@ -66,24 +67,39 @@ public class PersonMonths extends Controller{
 			lista.add(0, 0);
 			if(month == 1)
 				lista.add(1, 0);
-			else
-				lista.add(1, pm.mesePrecedente().residuoDelMese());
-			if(month < 4 || person.qualification.qualification < 4)
+			else{
+				if(pm != null)
+					lista.add(1, pm.mesePrecedente().residuoDelMese());
+				else
+					lista.add(1, 0);
+			}
+			if((month < 4 || person.qualification.qualification < 4) && pm != null)
 				lista.add(2, pm.residuoAnnoPrecedente());
 			else
 				lista.add(2, 0);
-			if(month == 1)
-				lista.add(3, 0+pm.residuoAnnoPrecedente());
-			else
-				lista.add(3, pm.mesePrecedente().residuoDelMese()+pm.residuoAnnoPrecedente());
+			if(pm != null){
+				if(month == 1)
+					lista.add(3, 0+pm.residuoAnnoPrecedente());
+				else
+					lista.add(3, pm.mesePrecedente().residuoDelMese()+pm.residuoAnnoPrecedente());
+			}
+			else{
+				lista.add(3, 0);
+			}
 			if(pd != null){
-				lista.add(4, pm.residuoDelMese());
+				if(pm != null)
+					lista.add(4, pm.residuoDelMese());
+				else
+					lista.add(4, 0);
 				lista.add(5, compensatoryRest);
 				if(comp != null)
 					lista.add(6, comp.valueApproved);
 				else
 					lista.add(6, 0);
-				lista.add(7,pm.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese());
+				if(pm != null)
+					lista.add(7,pm.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese());
+				else
+					lista.add(7, 0);
 				mapMonthSituation.put(date.getMonthOfYear(), lista);
 			}	
 			else{
