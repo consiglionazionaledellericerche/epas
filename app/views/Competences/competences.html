@@ -1,0 +1,40 @@
+#{extends 'main.html' /}
+#{set title:personMonth.person.surname + ' ' + personMonth.person.name + ', matricola=' + personMonth.person.number /}
+
+#{logoutForm /}
+
+#{functionalMenuForm mainMenu: mainMenu /} 
+
+<h3 id="titoloSituazioneFerie">Gestione straordinari e altre competenze</h3>
+
+<div align="left">
+
+<table id="competenze">
+	<tr>
+		<th class="competenze">Cognome nome</th>
+		<th class="competenze">Ind.tà rep.tà feriale (207)</th>
+		<th class="competenze">Ind.tà rep.tà festiva (208)</th>
+		<th class="competenze">Straordinario diurno nei giorni lavorativi</th>
+		<th class="competenze">Straordinario diurno nei giorni festivi o notturno nei giorni lavorativi</th>
+		<th class="competenze">Turno ordinario (T1)</th>
+		<th class="competenze">Turno notturno (T2)</th>
+	</tr>
+	<tr>
+		<td class="comp-nome">${personMonth.person.surname + ' ' + personMonth.person.name + ' (' + personMonth.person.number + ')'}</td>
+		<td class="comp">${personMonth.weekDayAvailability(personMonth.year, personMonth.month)}</td>
+		<td class="comp">${personMonth.holidaysAvailability(personMonth.year, personMonth.month)}</td>
+		<td class="comp">${personMonth.daylightWorkingDaysOvertime(personMonth.year, personMonth.month)}</td>
+		<td class="comp">${personMonth.daylightholidaysOvertime(personMonth.year, personMonth.month)}</td>
+		<td class="comp">${personMonth.ordinaryShift(personMonth.year, personMonth.month)}</td>
+		<td class="comp">${personMonth.nightShift(personMonth.year, personMonth.month)}</td>	
+	</tr>
+	<tr>
+		<td>Totali</td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>	
+	</tr>
+</table>

@@ -20,28 +20,7 @@ import play.templates.GroovyTemplate.ExecutableTemplate;
 import play.templates.JavaExtensions;
 
 public class PersonTags extends JavaExtensions {
-	
-//	public static String toCalendarTime(LocalDateTime ldt) {
-//		Number hour = ldt.getHourOfDay();
-//		Number minute = ldt.getMinuteOfHour();
-//		
-//		Number second = ldt.getSecondOfMinute();
-//		
-//		String format = "HH:mm";
-//		Time tempo = new Time(hour.intValue(),minute.intValue(),second.intValue());
-//		
-//	    return new SimpleDateFormat(format).format(tempo);
-//	  
-//	}
-//	
-//	public static String toHourTime(int minutes){
-//		Number hour = (int)minutes/60;
-//		Number minute = minutes%60;
-//		String format = "HH:mm";
-//		Time tempo = new Time(hour.intValue(),minute.intValue(),0);
-//		
-//		return new SimpleDateFormat(format).format(tempo);
-//	}
+
 
 	public static String toDateTime(LocalDate localDate) {
 		return String.format("%1$td %1$tB %1$tY", localDate.toDate());
@@ -60,6 +39,11 @@ public class PersonTags extends JavaExtensions {
 			
 			return String.format("-%02d:%02d", hour, min);
         return String.format("%02d:%02d", hour, min);
+	}
+	
+	public static String convertIntToHour(int numberOfCompensatoryRest, Person person){
+		int timeAtWork = person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime;
+		return toHourTime(numberOfCompensatoryRest*timeAtWork);
 	}
 	
 

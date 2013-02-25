@@ -1,26 +1,15 @@
 #{extends 'main.html' /}
 #{set title:yearRecap.person.surname + ' ' + yearRecap.person.name + ', matricola=' + yearRecap.person.number /}
 
-
-<h2 id="titoloSituazioneFerie">Situazione ferie ${yearRecap.year}</h2>
-
 #{logoutForm /}
 
 #{functionalMenuForm mainMenu: mainMenu /} 
 
+<h3 id="titoloSituazioneFerie">Situazione ferie ${yearRecap.year}</h3>
+
 <div align="left">
 #{form @Vacations.show()}
-
-#{select 'year', value:yearRecap.year, id:'anno'}
-	#{option 2011}2011#{/option}
-	#{option 2012}2012#{/option}
-	#{option 2013}2013#{/option}
-#{/select}
-
 	
-		<input type="submit" value="Submit">
-
-
 <table id="ferie">
 	<tr>
 		<th colspan=2 class="ferieFatte">Ferie fatte</th>

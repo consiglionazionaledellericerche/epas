@@ -1,7 +1,6 @@
 package it.cnr.iit.epas;
 
 import java.sql.Connection;
-
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,8 +9,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.persistence.EntityManager;
 
 import models.Absence;
 import models.AbsenceType;
@@ -23,7 +20,6 @@ import models.Contract;
 import models.InitializationAbsence;
 import models.InitializationTime;
 import models.Location;
-import models.MonthRecap;
 import models.Permission;
 import models.Person;
 import models.PersonDay;
@@ -41,19 +37,14 @@ import models.VacationPeriod;
 import models.ValuableCompetence;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
-import models.YearRecap;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.StampTypeValues;
 import models.enumerate.WorkingTimeTypeValues;
 
-import org.eclipse.jdt.core.dom.PrimitiveType.Code;
-import org.hibernate.envers.reader.FirstLevelCache;
-import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-import org.joda.time.YearMonth;
 
 import play.Logger;
 import play.Play;
@@ -61,7 +52,6 @@ import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 
 
 public class FromMysqlToPostgres {
@@ -194,7 +184,9 @@ public class FromMysqlToPostgres {
 
 			FromMysqlToPostgres.createVacationType(oldIDPersona, person);	
 
-			FromMysqlToPostgres.createYearRecap(oldIDPersona, person, anno);			
+		//	FromMysqlToPostgres.createYearRecap(oldIDPersona, person, anno);		
+			
+			FromMysqlToPostgres.createPersonYear(oldIDPersona, person);
 
 			JPAPlugin.closeTx(false);
 
@@ -213,11 +205,12 @@ public class FromMysqlToPostgres {
 		JPAPlugin.startTx(false);
 		Logger.info("Terminata l'importazione dei dati di tutte le persone in %d secondi", ((new Date()).getTime() - start.getTime()) / 1000);
 
-		Logger.info("Adesso creo le competenze, il monte ore ed aggiusto i permessi");
-
+		Logger.info("Adesso aggiorno le date di inizio dei contratti, i vacation period, creo le competenze, il monte ore ed aggiusto i permessi");
+		FromMysqlToPostgres.updateContract();
+		FromMysqlToPostgres.updateVacationPeriod();
 		FromMysqlToPostgres.updateCompetence();
-		importOreStraordinario();
-		addPermissiontoAll();
+		FromMysqlToPostgres.importOreStraordinario();
+		FromMysqlToPostgres.addPermissiontoAll();
 		JPAPlugin.closeTx(false);
 		Logger.info("Importazione terminata");
 		
@@ -225,6 +218,45 @@ public class FromMysqlToPostgres {
 
 		
 	}
+
+	/**
+	 * metodo che assegna un "default" di periodo ferie a quelle persone che dall'importazione non hanno ricevuto un vacationPeriod
+	 */
+	public static void updateVacationPeriod() {
+		List<Person> personList = Person.findAll();
+		for(Person p : personList){
+			if(p.vacationPeriod == null){
+				VacationPeriod vp = new VacationPeriod();
+				vp.person = p;
+				vp.vacationCode = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", "28+4").first();
+				vp.beginFrom = new LocalDate(1970,1,1);
+				vp.save();
+			}
+		}
+		
+	}
+	
+	/**
+	 * metodo che assegna un inizio di contratto di default a quelle persone che dall'importazione non hanno ricevuto un beginContract
+	 */
+	public static void updateContract(){
+		List<Person> personList = Person.findAll();
+		for(Person p : personList){
+			Contract con = Contract.find("Select con from Contract con where con.person = ?", p).first();
+			if(con != null && con.beginContract == null){
+				con.beginContract = new LocalDate(1970,1,1);
+				con.save();
+			}
+			else{
+				con = new Contract();
+				con.beginContract = new LocalDate(1970,1,1);
+				con.person = p;
+				con.onCertificate = true;
+				con.save();
+			}
+		}
+	}
+
 
 	/**
 	 * Importa le informazioni del personale dal database Mysql dell'applicazione Orologio.
@@ -687,7 +719,7 @@ public class FromMysqlToPostgres {
 		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT Orario.ID,Orario.Giorno,Orario.TipoGiorno,Orario.TipoTimbratura," + 	
 				"Orario.Ora, Codici.id, Codici.Codice, Codici.Qualifiche " +
 				"FROM Orario, Codici " +
-				"WHERE Orario.TipoGiorno=Codici.id and Orario.Giorno >= '2011-01-01' " +
+				"WHERE Orario.TipoGiorno=Codici.id and Orario.Giorno >= '2012-01-01' " +
 				"and Orario.ID = " + id + " ORDER BY Orario.Giorno");
 		ResultSet rs = stmtOrari.executeQuery();
 
@@ -696,10 +728,6 @@ public class FromMysqlToPostgres {
 		LocalDate newData = null;
 
 		int importedStamping = 0;
-
-		int currentMonth = 0;
-		int currentYear = 0;
-
 
 		while(rs.next()){
 			/**
@@ -859,6 +887,15 @@ public class FromMysqlToPostgres {
 					Logger.info("Creato %s", vacationPeriod.toString());
 				}
 			}
+//			else{
+//				VacationCode vc = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", "28+4").first();
+//				VacationPeriod vp = new VacationPeriod();
+//				vp.vacationCode = vc;
+//				vp.person = person;
+//				vp.beginFrom = new LocalDate(1970,1,1);
+//				vp.save();
+//				Logger.info("Creato vacation perdiod per dipendente %s %s che dal vecchio db non aveva informazione", person.name, person.surname);
+//			}
 		}		
 		catch(SQLException e){
 			e.printStackTrace();
@@ -942,57 +979,20 @@ public class FromMysqlToPostgres {
 		initAbsencePermission.save();
 
 	}
-
-	public static void createMonthRecap(long id, Person person) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
-		/**
-		 * query su totali_mens per recueperare lo storico mensile da mettere su monthRecap
-		 */
-		Logger.debug("Inizio a creare i riepiloghi mensili per %s", person);
+	
+	public static void createPersonYear(long id, Person person) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		Connection mysqlCon = getMysqlConnection();
-		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * FROM totali_mens WHERE ID="+id);
-		ResultSet rs = stmt.executeQuery();
-
+		PreparedStatement stmtResidualAndRecovery = mysqlCon.prepareStatement("SELECT * FROM totali_anno WHERE ID = ? and anno = 2011");
+		stmtResidualAndRecovery.setLong(1, id);
+		
+		ResultSet rs = stmtResidualAndRecovery.executeQuery();
 		while(rs.next()){
-
-			MonthRecap monthRecap = new MonthRecap(person, rs.getInt("anno"), rs.getInt("mese"));
-			monthRecap.workingDays = rs.getShort("giorni_lavorativi");
-			monthRecap.daysWorked = rs.getShort("giorni_lavorati");
-			monthRecap.giorniLavorativiLav = rs.getShort("giorni_lavorativi");
-			monthRecap.workTime = rs.getInt("tempo_lavorato");
-			monthRecap.remaining = rs.getInt("residuo");
-			monthRecap.justifiedAbsence = rs.getShort("assenze_giust");
-			monthRecap.vacationAp = rs.getShort("ferie_ap");
-			monthRecap.vacationAc = rs.getShort("ferie_ac");
-			monthRecap.holidaySop = rs.getShort("festiv_sop");
-			monthRecap.recoveries = rs.getInt("recuperi");
-			monthRecap.recoveriesAp = rs.getShort("recuperiap");
-			monthRecap.recoveriesG = rs.getShort("recuperig");
-			monthRecap.recoveriesGap = rs.getShort("recuperigap");
-			monthRecap.overtime = rs.getInt("ore_str");
-			monthRecap.lastModified = rs.getTimestamp("data_ultimamod");
-			monthRecap.residualApUsed = rs.getInt("residuoap_usato");
-			monthRecap.extraTimeAdmin = rs.getInt("tempo_eccesso_ammin");
-			monthRecap.additionalHours = rs.getInt("ore_aggiuntive");
-			if(rs.getByte("nore_aggiuntive")==0)
-				monthRecap.nadditionalHours = false;
-			else 
-				monthRecap.nadditionalHours = true;
-			monthRecap.residualFine = rs.getInt("residuo_fine");
-			monthRecap.beginWork = rs.getByte("inizio_lavoro");
-			monthRecap.endWork = rs.getByte("fine_lavoro");
-			monthRecap.timeHourVisit = rs.getInt("tempo_visite_orarie");
-			monthRecap.endRecoveries = rs.getShort("recuperi_fine");
-			monthRecap.negative = rs.getInt("negativo");
-			monthRecap.endNegative = rs.getInt("negativo_fine");
-			monthRecap.progressive = rs.getString("progressivo");				
-
-			monthRecap.save();
-			Logger.debug("Creato %s", monthRecap.toString());
+			PersonYear py = new PersonYear(person,2011);
+			py.remainingMinutes = rs.getInt("residuo");
+			py.save();
 		}
-		Logger.debug("Terminati di creare i riepiloghi mensili per %s", person);
-
-
 	}
+
 
 	public static void createCompetence(long id, Person person, int anno) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		/**
@@ -1055,7 +1055,7 @@ public class FromMysqlToPostgres {
 			competence.month = rs.getInt("mese");
 			competence.year = rs.getInt("anno");
 			competence.person = person;
-			competence.value = rs.getInt("valore");
+			competence.valueApproved = rs.getInt("valore");
 			competence.competenceCode = competenceCode;
 			competence.save();
 			Logger.debug("Creato %s", competence.toString());
@@ -1116,7 +1116,7 @@ public class FromMysqlToPostgres {
 			Logger.debug("Il mese di riferimento per il personMonth di %s %s è %s", person.name, person.surname, month);
 			PersonMonth pm = PersonMonth.build(person, year, month);
 			pm.save();
-			if(month == 12){
+			if(month.equals(12)){
 				PersonYear py = PersonYear.build(person, year);
 				py.save();
 			}
@@ -1300,9 +1300,9 @@ public class FromMysqlToPostgres {
 					comp.year = rs.getInt("anno");
 					comp.month = rs.getInt("mese");
 
-					comp.value = rs.getInt("ore_str");
+					comp.valueApproved = rs.getInt("ore_str");
 					comp.save();
-					Logger.debug("Creata competenza per il mese di %s e anno %s con valore: %s", comp.month, comp.year, comp.value);
+					Logger.debug("Creata competenza per il mese di %s e anno %s con valore: %s", comp.month, comp.year, comp.valueApproved);
 				}
 			}
 			Logger.debug("Terminata la update competence per %s %s.", person.name, person.surname);

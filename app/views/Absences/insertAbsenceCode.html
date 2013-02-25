@@ -1,20 +1,22 @@
 #{extends 'main.html' /}
+#{logoutForm /}
 
+#{functionalMenuForm mainMenu: mainMenu /} 
 <h2 id="inserimentoNuovoCodiceAssenza">Inserimento dati per nuovo codice di assenza</h2>
 
 #{form @Absences.saveAbsenceCode()}
-<fieldset>
+<fieldset id="nuovoCodiceAssenza">
 <legend>Nuovo codice di assenza</legend>
-<p>Codice* <input id="codiceNuovoCodiceAssenza"type="text" name="codice" value="${}" size="10" maxlength="10"/> codice di assenza</p>
-<p>Codice per attestati presenza <input id="attPresNuovoCodiceAssenza"type="text" name="codiceAttestati" value="${}" size="10" maxlength="10"/> Usare solo se il codice che deve andare negli attestati di presenza e' diverso da quello definito nella riga precedente (questo diventa il codice vero e quello sulla riga precedente un alias per uso interno)</p>
-<p>Descrizione* <input id="descrizioneNuovoCodiceAssenza" type="text" name="descrizione" value="${}" size="50" maxlength="200"/> Descrizione codice di assenza</p>
-<p>Uso interno Sì<input id="usoInternoNuovoCodiceAssenzaSI" type="radio" name="usoInterno" value="true"/>
+<p id="codice">Codice* <input id="codiceNuovoCodiceAssenza"type="text" name="codice" value="${}" size="10" maxlength="10"/> codice di assenza</p>
+<p id="codicePres">Codice per attestati presenza <input id="attPresNuovoCodiceAssenza"type="text" name="codiceAttestati" value="${}" size="10" maxlength="10"/> Usare solo se il codice che deve andare negli attestati di presenza e' diverso da quello definito nella riga precedente (questo diventa il codice vero e quello sulla riga precedente un alias per uso interno)</p>
+<p id= "descrizione">Descrizione* <input id="descrizioneNuovoCodiceAssenza" type="text" name="descrizione" value="${}" size="50" maxlength="200"/> Descrizione codice di assenza</p>
+<p id="usoInterno">Uso interno Sì<input id="usoInternoNuovoCodiceAssenzaSI" type="radio" name="usoInterno" value="true"/>
      			No<input id="usoInternoNuovoCodiceAssenzaNO" type="radio" name="usoInterno" value="false"/> Seleziona "si" se il codice è solo per uso interno (non previsto dal CNR) non sarà trasferito negli attestati di presenza</p>
-<p>Uso multiplo Sì<input id="usoMultiploNuovoCodiceAssenza"type="radio" name="usoMultiplo" value="true"/>
+<p id="usoMultiplo">Uso multiplo Sì<input id="usoMultiploNuovoCodiceAssenza"type="radio" name="usoMultiplo" value="true"/>
      			No<input type="radio" name="usoMultiplo" value="false"/> Seleziona "si" se il codice può essere usato insieme ad altri codici nello stesso giorno</p>
-<p>Inizio validità <input id="dataInizioNuovoCodiceAssenza" type="date" name="inizioValidita" value="${}" size="10" maxlength="10"/> Data inizio validità di questo codice nel formato aaa/mm/gg (se vuoto valido da sempre)</p>
-<p>Fine validità <input id="dataFineNuovoCodiceAssenza" type="date" name="fineValidita" value="${}" size="10" maxlength="10"/>Data fine validità di questo codice nel formato aaaa/mm/gg (se vuoto valido da sempre)</p>
-<p>Tempo lavoro giustificato #{select 'jwt', value:jwt , id:'jwt.id'}
+<p id="inizioValidita">Inizio validità <input id="dataInizioNuovoCodiceAssenza" type="date" name="inizioValidita" value="${}" size="10" maxlength="10"/> Data inizio validità di questo codice nel formato aaa/mm/gg (se vuoto valido da sempre)</p>
+<p id="fineValidita">Fine validità <input id="dataFineNuovoCodiceAssenza" type="date" name="fineValidita" value="${}" size="10" maxlength="10"/>Data fine validità di questo codice nel formato aaaa/mm/gg (se vuoto valido da sempre)</p>
+<p id="tempoGiustificato">Tempo lavoro giustificato #{select 'jwt', value:jwt , id:'jwt.id'}
 								%{
 									for(jwt in justifiedTimeAtWorkList){
 									}%
@@ -49,12 +51,12 @@
 											}%										
 								#{/select} Nome che raggruppa più codici che devono essere gestiti insieme per gli accumuli (Es. i codici 661h1,661h2,661h3,.. possono essere assegnati a un gruppo 661hx in modo da poter accumulare i valori e controllare il tetto)</p>
 </fieldset>
-<fieldset>
+<fieldset id="gruppo">
 <legend>Da compilare in caso di valorizzazione del campo "Gruppo"</legend>
-<p>Valore <input id="valoreNuovoCodiceAssenza"type="text" name="valore" value="${}" size="5" maxlength="5"/> Valore o peso (Es.codice 661h2 il valore è 2) nel caso di codici a completamento usare 999 per accumulare i minuti mancanti</p>
-<p>Minuti in eccesso Sì<input type="radio" name="minutiEccesso" value="true"/>
+<p id="valore">Valore <input id="valoreNuovoCodiceAssenza"type="text" name="valore" value="${}" size="5" maxlength="5"/> Valore o peso (Es.codice 661h2 il valore è 2) nel caso di codici a completamento usare 999 per accumulare i minuti mancanti</p>
+<p id="minutiEccesso">Minuti in eccesso Sì<input type="radio" name="minutiEccesso" value="true"/>
      			No<input type="radio" name="minutiEccesso" value="false"/> Seleziona "si" se il codice prevede il conteggio dei minuti in eccesso rispetto all'ora intera (Es. codici 18h2,18h3,...)</p>
-<p>Accumulare i valori #{select 'accType', value:accType, id:'accType.id'}
+<p id="accumulo">Accumulare i valori #{select 'accType', value:accType, id:'accType.id'}
 									%{
 										for(accType in accumulationTypeList){
 										}%
@@ -63,8 +65,8 @@
 												}
 											}%										
 								#{/select} Se i valori devono essere sommati per ogni utilizzo. Alla fine del periodo (mese o anno) l'accumulo riparte da zero. (Es. codice 661h2 indicare "Annuale")</p>
-<p>Limite accumulo <input id="limiteAccumuloNuovoCodiceAssenza" type="text" name="limiteAccumulo" value="${}" size="5" maxlength="5"/> Valore massimo accumulo, raggiuntio il quale deve comportarsi come specificato nella definizione successiva (Es. codice 661h2 indicare 18)</p>
-<p>Cosa fare raggiunto il limite #{select 'accBehaviour', value:accBehaviour, id:'accBehaviour.id'}
+<p id="limiteAccumulo">Limite accumulo <input id="limiteAccumuloNuovoCodiceAssenza" type="text" name="limiteAccumulo" value="${}" size="5" maxlength="5"/> Valore massimo accumulo, raggiuntio il quale deve comportarsi come specificato nella definizione successiva (Es. codice 661h2 indicare 18)</p>
+<p id="comportamentoAccumulo">Cosa fare raggiunto il limite #{select 'accBehaviour', value:accBehaviour, id:'accBehaviour.id'}
 									%{
 										for(accBehaviour in accumulationBehaviourList){
 										}%
@@ -73,7 +75,7 @@
 												}
 											}%										
 								#{/select} Comportamento da tenere al raggiungimento del limite (Es. codice 661h2 selezionere "Non accetta ...")</p>
-<p>Codice per sostituzione <input id="codSostNuovoCodiceAssenza" type="text" name="codicePerSostituzione" value="${}" size="10" maxlength="10"/> Codice di assenza da sostituire quando nella definizione precedente si è selezionato "sostituisci ..." (Es. si potrebbe definire un codice ad uso interno per mezza giornata di ferie usando: valore=1, quantità giustificata= mezza giornata, accumulare i valori=sempre,limite=2, cosa fare=sostituisci questo campo=32)</p>
+<p id="sostituzione">Codice per sostituzione <input id="codSostNuovoCodiceAssenza" type="text" name="codicePerSostituzione" value="${}" size="10" maxlength="10"/> Codice di assenza da sostituire quando nella definizione precedente si è selezionato "sostituisci ..." (Es. si potrebbe definire un codice ad uso interno per mezza giornata di ferie usando: valore=1, quantità giustificata= mezza giornata, accumulare i valori=sempre,limite=2, cosa fare=sostituisci questo campo=32)</p>
 </fieldset>
 <input id="submitNuovoCodiceAssenza" type="submit" value="Ok"/>
 #{/form}

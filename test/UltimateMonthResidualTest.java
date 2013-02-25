@@ -51,11 +51,11 @@ public class UltimateMonthResidualTest {
 			return month <= 3 || personLevel <= 3;
 		}
 
-		public long residuoDelMese() {
+		public int residuoDelMese() {
 			return residuoDelMeseInPositivo + residuoDelMeseInNegativo;
 		}
 		
-		public long residuoDelMeseAllaData(LocalDate date) {
+		public int residuoDelMeseAllaData(LocalDate date) {
 			//FIXME: da calcolare in funzione della data
 			//residui in positivo alla data + residui in negativo alla data, ovvero il "progressivo"
 			return residuoDelMese();
@@ -65,7 +65,7 @@ public class UltimateMonthResidualTest {
 		 * @return il tempo di lavoro dai mese precedenti eventualmente comprensivo di quello derivante
 		 * 	dall'anno precedente
 		 */
-		public long totaleResiduoAnnoCorrenteAlMesePrecedente() {
+		public int totaleResiduoAnnoCorrenteAlMesePrecedente() {
 			//Deve esistere un mese precedente ed essere dello stesso anno (quindi a gennaio il mese precedente di questo anno non esiste)
 			if (mesePrecedente != null && month != 1) {
 				return mesePrecedente.totaleResiduoAnnoCorrenteAFineMese();
@@ -100,15 +100,15 @@ public class UltimateMonthResidualTest {
 			return residuoAnnoPrecedenteDisponibileAllaFineDelMese;
 		}
 	
-		public long totaleResiduoAnnoCorrenteAFineMese() {
+		public int totaleResiduoAnnoCorrenteAFineMese() {
 			return residuoDelMese() + totaleResiduoAnnoCorrenteAlMesePrecedente() + riposiCompensativiDaAnnoCorrente - straordinari - recuperiOreDaAnnoPrecedente;  
 		}
 		
-		public long totaleResiduoAnnoCorrenteAllaData(LocalDate date) {
+		public int totaleResiduoAnnoCorrenteAllaData(LocalDate date) {
 			return residuoDelMeseAllaData(date) + totaleResiduoAnnoCorrenteAlMesePrecedente() + riposiCompensativiDaAnnoCorrente - straordinari - recuperiOreDaAnnoPrecedente;  
 		}
 		
-		public long totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese() {
+		public int totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese() {
 			return totaleResiduoAnnoCorrenteAFineMese() + residuoAnnoPrecedenteDisponibileAllaFineDelMese();
 		}
 		
@@ -144,12 +144,12 @@ public class UltimateMonthResidualTest {
 			}
 		}
 		
-		public long tempoDisponibilePerRecuperi(LocalDate date) {
-			long totaleResiduoAnnoCorrenteAllaData = totaleResiduoAnnoCorrenteAllaData(date);
+		public int tempoDisponibilePerRecuperi(LocalDate date) {
+			int totaleResiduoAnnoCorrenteAllaData = totaleResiduoAnnoCorrenteAllaData(date);
 			
 			System.out.println("totaleResiduoAnnoCorrenteAllaData = " + totaleResiduoAnnoCorrenteAllaData);
 			
-			long tempoDisponibile = totaleResiduoAnnoCorrenteAllaData + residuoAnnoPrecedenteDisponibileAllaFineDelMese();
+			int tempoDisponibile = totaleResiduoAnnoCorrenteAllaData + residuoAnnoPrecedenteDisponibileAllaFineDelMese();
 			
 			if (tempoDisponibile <= 0) {
 				tempoDisponibile = 0;
@@ -159,15 +159,15 @@ public class UltimateMonthResidualTest {
 			
 		}
 		
-		public long tempoDisponibilePerStraordinari() {
+		public int tempoDisponibilePerStraordinari() {
 					
 			if (residuoDelMeseInPositivo <= 0) {
 				return 0;
 			}
 			
-			long residuoAllaDataRichiesta = residuoDelMese();
+			int residuoAllaDataRichiesta = residuoDelMese();
 			
-			long tempoDisponibile = residuoAnnoPrecedenteDisponibileAllaFineDelMese() + mesePrecedente.totaleResiduoAnnoCorrenteAFineMese() + residuoAllaDataRichiesta;
+			int tempoDisponibile = residuoAnnoPrecedenteDisponibileAllaFineDelMese() + mesePrecedente.totaleResiduoAnnoCorrenteAFineMese() + residuoAllaDataRichiesta;
 			
 			if (tempoDisponibile <= 0) {
 				return 0;

@@ -8,7 +8,7 @@ public enum ActionMenuItem {
 	stampingsAdmin("Timbrature", "insertAndUpdateStamping"),
     personList("Lista persone", "insertAndUpdatePerson"),
     yearlyAbsences("Assenze annuali", "insertAndUpdateAbsence"),
-    absencesAdmin("Gestione assenze", "insertAndUpdateAbsence"),
+//    absencesAdmin("Gestione assenze", "insertAndUpdateAbsence"),
     vacationsAdmin("Gestione ferie e permessi", "insertAndUpdateVacations"),
     competencesAdmin("Gestione competenze", "insertAndUpdateCompetences"),
     changePassword("Gestione password", "insertAndUpdatePassword"),
@@ -17,16 +17,16 @@ public enum ActionMenuItem {
     administrator("Gestione amministratori", "insertAndUpdateAdministrator"),
     totalMonthlyAbsences("Totale assenze mensili", "insertAndUpdateAbsence"),
     manageAbsenceCode("Gestione codici d'assenza", "insertAndUpdateAbsence"),
-    missingStamping("Timbrature mancanti", "insertAndUpdatePerson"),
+    missingStamping("Timbrature mancanti", "insertAndUpdateStamping"),
     dailyPresence("Presenza giornaliera", "insertAndUpdatePerson"),
     mealTicketSituation("Situazione buoni mensa", "insertAndUpdatePerson"),
     manageCompetence("Gestione codici competenze", "insertAndUpdateCompetences"),
 	stampings("Situazione mensile", "viewPersonalSituation"),
 	absences("Assenze", "viewPersonalSituation"),
-	absencesPerPerson("Assenze per persona", "viewPersonalSituation"),
+	absencesperperson("Assenze per persona", "viewPersonalSituation"),
 	vacations("Ferie", "viewPersonalSituation"),
 	competences("Competenze", "viewPersonalSituation"),
-	hourRecap("Riepilogo orario", "viewPersonalSituation");
+	hourrecap("Riepilogo orario", "viewPersonalSituation");
 	//changePassword("", "");
 
     

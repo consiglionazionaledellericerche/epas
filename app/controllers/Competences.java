@@ -1,16 +1,15 @@
 package controllers;
 
+import it.cnr.iit.epas.PersonUtility;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import it.cnr.iit.epas.ActionMenuItem;
-import it.cnr.iit.epas.PersonUtility;
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
-import models.MonthRecap;
 import models.Person;
 import models.PersonDay;
 import models.PersonMonth;
@@ -18,13 +17,12 @@ import models.TotalOvertime;
 
 import org.joda.time.LocalDate;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
-
 import play.Logger;
-import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
+
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 
 @With( {Secure.class, NavigationMenu.class} )
 public class Competences extends Controller{
@@ -32,36 +30,34 @@ public class Competences extends Controller{
 	/* corrisponde alla voce di menu selezionata */
 	//	private final static ActionMenuItem actionMenuItem = ActionMenuItem.competences;
 	@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void show(Long personId, int year, int month) {
-		Person person = Person.findById(personId); //Security.getPerson();
-		Logger.info("Anno: "+year);
-		Logger.info("Mese: "+month);
+	public static void competences(Long personId, int year, int month) {
+		Person person = null;
+		if(personId != null)
+			person = Person.findById(personId); //Security.getPerson();
+		else
+			person = Security.getPerson();
+		
+		Logger.trace("Year: {}, month: {}", year, month);
+
 		String anno = params.get("year");
-		Logger.info("Anno: "+anno.toString());
 		String mese= params.get("month");
-		Logger.info("Mese: "+mese.toString());
+
 		if(anno==null || mese==null){
 
 			LocalDate now = new LocalDate();
-			MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, now.getYear(), now.getMonthOfYear());
-			render(monthRecap/*, menuItem*/);
+			PersonMonth personMonth = PersonMonth.byPersonAndYearAndMonth(person, now.getYear(), now.getMonthOfYear());
+
+			render(personMonth);
 		}
 		else{
 			Logger.info("Sono dentro il ramo else della creazione del month recap");
-			//		Integer year = new Integer(params.get("year"));
-			//		Integer month = new Integer(params.get("month"));
-			MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, year, month);
-			//		Logger.info("Il month recap è formato da: " +person.id+ ", " +year.intValue()+ ", " +month.intValue());
+			PersonMonth personMonth = PersonMonth.byPersonAndYearAndMonth(person, year, month);
 
-			render(monthRecap/*, menuItem*/);
+			render(personMonth);
+
 		}
 
 	}
-
-	//	@Check(Security.VIEW_PERSONAL_SITUATION)
-	//	public static void show() {
-	//    	show(Security.getPerson());
-	//    }
 
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void showCompetences(Integer year, Integer month){
@@ -188,7 +184,7 @@ public class Competences extends Controller{
 			Integer recoveryDays = 0;
 			Integer timeAtWork = 0;
 			Integer difference = 0;
-			Integer differenceLessOvertime = 0;
+
 			Integer overtime = 0;
 			List<PersonDay> personDayList = PersonDay.find("Select pd from PersonDay pd where pd.date between ? and ? and pd.person = ?", 
 					beginMonth, beginMonth.dayOfMonth().withMaximumValue(), p).fetch();
@@ -212,7 +208,7 @@ public class Competences extends Controller{
 					p, year, month, code.code).first();
 			//Logger.debug("La competenza è: %s", comp);
 			if(comp != null)
-				overtime = comp.value;
+				overtime = comp.valueApproved;
 			else
 				overtime = 0;
 			lista = new ArrayList<Object>();
@@ -248,15 +244,15 @@ public class Competences extends Controller{
 		Competence comp3 = Competence.find("Select comp from Competence comp, CompetenceCode code where comp.competenceCode = code and comp.person = ?" +
 				" and comp.year = ? and comp.month = ? and code = ?", person, date.getYear(), date.getMonthOfYear(), cmpCode3).first();
 		if(comp1 != null)
-			weekDayAvailability = comp1.value;
+			weekDayAvailability = comp1.valueApproved;
 		else
 			weekDayAvailability = 0;
 		if(comp2 != null)
-			holidaysAvailability = comp2.value;
+			holidaysAvailability = comp2.valueApproved;
 		else
 			holidaysAvailability = 0;
 		if(comp3 != null)
-			daylightWorkingDaysOvertime = comp3.value;
+			daylightWorkingDaysOvertime = comp3.valueApproved;
 		else
 			daylightWorkingDaysOvertime = 0;
 		int progressive = 0;
@@ -289,11 +285,11 @@ public class Competences extends Controller{
 					comp.month = month;
 					comp.year = year;
 					comp.competenceCode = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", "S1").first();
-					comp.value = overtime;
+					comp.valueApproved = overtime;
 
 				}
 				else{
-					comp.value = progressive;
+					comp.valueApproved = progressive;
 				}
 				comp.save();
 				flash.success(String.format("Inserite %s ore di straordinario per %s %s il %s/%s", overtime, person.name, person.surname, month, year));

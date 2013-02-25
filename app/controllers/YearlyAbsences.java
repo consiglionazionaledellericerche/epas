@@ -1,33 +1,23 @@
 package controllers;
 
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
-import it.cnr.iit.epas.ActionMenuItem;
 import models.Absence;
 import models.AbsenceType;
-import models.MonthRecap;
 import models.Person;
 import models.PersonDay;
+import models.PersonMonth;
 import models.YearRecap;
 
 import org.joda.time.LocalDate;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
-import com.google.common.collect.TreeBasedTable;
-
 import play.Logger;
-import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
+
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 
 @With( {Secure.class, NavigationMenu.class} )
 public class YearlyAbsences extends Controller{
@@ -90,15 +80,19 @@ public class YearlyAbsences extends Controller{
 		}
 	}
 	
-	@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void show(Long personId, int year, int month) {
-
-
+	@Check(Security.VIEW_PERSON_LIST)
+	public static void yearlyAbsences(Long personId, int year) {
+		Person person = null;
+		if(personId == null)
+			person = Security.getPerson();
+		else
+			person = Person.findById(personId);
 		Integer anno = params.get("year", Integer.class);
 		//Long personId = params.get("personId", Long.class);
 		Logger.debug("L'id della persona è: %s", personId);
-		Person person = Person.findById(personId);
-		Logger.info("Anno: "+anno);
+		Logger.debug("La persona è: %s %s", person.name, person.surname);
+		//person = Person.findById(personId);
+		Logger.trace("Anno: "+anno);
 
 		if(anno==null){
 
@@ -107,33 +101,12 @@ public class YearlyAbsences extends Controller{
 			render(yearRecap);
 		}
 		else{
-			Logger.info("Sono dentro il ramo else della creazione del month recap");
+			Logger.info("Sono dentro il ramo else della creazione dell'yearRecap");
 			//Integer year = new Integer(params.get("year"));
-			MonthRecap monthRecap = MonthRecap.byPersonAndYearAndMonth(person, year, month);
+		//	PersonMonth personMonth = PersonMonth.byPersonAndYearAndMonth(person, year, month);
 			YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)year);
 
-			render(yearRecap, monthRecap);
-		}
-
-	}
-
-	private final class PersonComparator implements Comparator<Person>{
-
-		@Override
-		public int compare(Person p, Person p1) {
-			if(p.surname.equals(p1.surname))
-				return p.name.compareTo(p1.name);
-			return p.surname.compareTo(p1.surname);
-		}
-
-	}
-
-	private final class AbsenceCodeComparator implements Comparator<String>{
-
-		@Override
-		public int compare(String code1, String code2) {
-			return code1.compareTo(code2);
-
+			render(yearRecap);
 		}
 
 	}
@@ -151,7 +124,7 @@ public class YearlyAbsences extends Controller{
 	public static void showGeneralMonthlyAbsences(int year, int month) throws InstantiationException, IllegalAccessException{
 		Table<Person, String, Integer> tablePersonAbsences =  HashBasedTable.create();
 		
-		List<Person> activePersons = Person.getActivePersons(new LocalDate(year, month, 1)).subList(0, 100);
+		List<Person> activePersons = Person.getActivePersons(new LocalDate(year, month, 1));
 		for(Person p : activePersons){
 			List<Absence> absenceInMonth = Absence.find("Select abs from Absence abs, PersonDay pd where abs.personDay = pd and " +
 					"pd.person = ? and pd.date >= ? and pd.date <= ?", 
@@ -181,39 +154,57 @@ public class YearlyAbsences extends Controller{
 	}
 
 	
-	@Check(Security.VIEW_PERSON_LIST)
-	public static void absencesPerPerson(Long personId, String absenceCode, int month, int year){
-		Logger.debug("I parametri passati alla funzione sono: %s %s %s %s", personId, absenceCode, month, year);
-		List<LocalDate> dateAbsenceList = new ArrayList<LocalDate>();
-		List<PersonDay> pdList = null;
-		Person person = Person.findById(personId);
-		List<AbsenceTypeDate> listaAssenzeDate = null;
-		int tipo;
-		if(absenceCode.equalsIgnoreCase("totale")){
-			tipo = 1;
-			listaAssenzeDate = new ArrayList<AbsenceTypeDate>();
-			pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date >= ? and pd.date <= ?", 
-					person, new LocalDate(year,month,1), new LocalDate(year,month,1).monthOfYear().withMaximumValue()).fetch();
-			for(PersonDay pd : pdList){
-				if(pd.absences.size()>0){
-					for(Absence abs : pd.absences){
-						AbsenceTypeDate abtd = new AbsenceTypeDate(abs.absenceType, pd.date);
-						listaAssenzeDate.add(abtd);
-					}
-				}
-			}
-			render(person,year,month,listaAssenzeDate, tipo);
+	@Check(Security.VIEW_PERSONAL_SITUATION)
+	public static void absencesPerPerson(Long personId, int year){
+		Person person = null;
+		if(personId == null)
+			person = Security.getPerson();
+		Integer anno = params.get("year", Integer.class);
+		Logger.debug("L'id della persona è: %s", personId);
+		Logger.trace("Anno: "+anno);
+
+		if(anno==null){
+			LocalDate now = new LocalDate();
+			YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)now.getYear());
+			render(yearRecap);
 		}
 		else{
-			tipo = 0;
-			AbsenceType abt = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", absenceCode).first();
-			pdList = PersonDay.find("Select pd from PersonDay pd, Absence abs where abs.personDay = pd and pd.person = ? and " +
-					"pd.date >= ? and pd.date <= ?", person, new LocalDate(year,month,1), new LocalDate(year, month, 1).monthOfYear().withMaximumValue()).fetch();
-			for(PersonDay pd : pdList){
-				dateAbsenceList.add(pd.date);
-			}
-			render(dateAbsenceList, abt, person, year, month, tipo);		
+			Logger.info("Sono dentro il ramo else della creazione del month recap");
+			YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)year);
+			render(yearRecap);
 		}
+		
+		//Logger.debug("I parametri passati alla funzione sono: %s %s %s %s", personId, absenceCode, month, year);
+//		List<LocalDate> dateAbsenceList = new ArrayList<LocalDate>();
+//		List<PersonDay> pdList = null;
+//		Person person = Person.findById(personId);
+//		List<AbsenceTypeDate> listaAssenzeDate = null;
+//		int tipo;
+//		if(absenceCode.equalsIgnoreCase("totale")){
+//			tipo = 1;
+//			listaAssenzeDate = new ArrayList<AbsenceTypeDate>();
+//			pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date >= ? and pd.date <= ?", 
+//					person, new LocalDate(year,month,1), new LocalDate(year,month,1).monthOfYear().withMaximumValue()).fetch();
+//			for(PersonDay pd : pdList){
+//				if(pd.absences.size()>0){
+//					for(Absence abs : pd.absences){
+//						AbsenceTypeDate abtd = new AbsenceTypeDate(abs.absenceType, pd.date);
+//						listaAssenzeDate.add(abtd);
+//					}
+//				}
+//			}
+//			render(person,year,month,listaAssenzeDate, tipo);
+//		}
+//		else{
+//			tipo = 0;
+//			AbsenceType abt = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", absenceCode).first();
+//			pdList = PersonDay.find("Select pd from PersonDay pd, Absence abs where abs.personDay = pd and pd.person = ? and " +
+//					"pd.date >= ? and pd.date <= ?", person, new LocalDate(year,month,1), new LocalDate(year, month, 1).monthOfYear().withMaximumValue()).fetch();
+//			for(PersonDay pd : pdList){
+//				dateAbsenceList.add(pd.date);
+//			}
+//			render(dateAbsenceList, abt, person, year, month, tipo);		
+//		}
 	}
 
 
