@@ -147,6 +147,7 @@ PUT		/reperibility/{type}/update/{year}/{month}												Reperibility.update
 GET 	/reperibility/{type}/exportYearAsPDF/{<(19|20)\d\d>year}								Reperibility.exportYearAsPDF
 GET 	/reperibility/{type}/exportMonthAsPDF/{<(19|20)\d\d>year}/{<(0[1-9]|1[012])>month}		Reperibility.exportMonthAsPDF
 GET		/reperibility/{type}/iCal/{personId}/{<(19|20)\d\d>year}								Reperibility.iCal
+GET 	/reperibility/{type}/who/{<(19|20)\d\d>yearFrom}/{<(0[1-9]|1[012])>monthFrom}/{<(0[1-9]|[12][0-9]|3[01])>dayFrom}/{<(19|20)\d\d>yearTo}/{<(0[1-9]|1[012])>monthTo}/{<(0[1-9]|[12][0-9]|3[01])>dayTo}	Reperibility.who
 
 GET		/reperibility/{type}/absence/{<(19|20)\d\d>yearFrom}/{<(0[1-9]|1[012])>monthFrom}/{<(0[1-9]|[12][0-9]|3[01])>dayFrom}/{<(19|20)\d\d>yearTo}/{<(0[1-9]|1[012])>monthTo}/{<(0[1-9]|[12][0-9]|3[01])>dayTo}	Reperibility.absence
 
@@ -154,6 +155,7 @@ GET		/reperibility/{type}/absence/{<(19|20)\d\d>yearFrom}/{<(0[1-9]|1[012])>mont
 GET		/shift/{type}/personList																Shift.personList
 GET		/shift/{type}/find/{<(19|20)\d\d>yearFrom}/{<(0[1-9]|1[012])>monthFrom}/{<(0[1-9]|[12][0-9]|3[01])>dayFrom}/{<(19|20)\d\d>yearTo}/{<(0[1-9]|1[012])>monthTo}/{<(0[1-9]|[12][0-9]|3[01])>dayTo}	Shift.find
 GET 	/shift/{type}/exportMonthAsPDF/{<(19|20)\d\d>year}/{<(0[1-9]|1[012])>month}				Shift.exportMonthAsPDF
+GET 	/shift/{type}/exportMonthCalAsPDF/{<(19|20)\d\d>year}/{<(0[1-9]|1[012])>month}			Shift.exportMonthCalAsPDF
 PUT		/shift/{type}/update/{year}/{month}														Shift.update
 
 
