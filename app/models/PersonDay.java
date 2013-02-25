@@ -448,7 +448,7 @@ public class PersonDay extends Model {
 				progressive = difference + lastPreviousPersonDayInMonth.progressive;
 				Logger.debug("%s - %s. Il PersonDay precedente è %s. Difference di oggi = %s, progressive = %s", person, date, lastPreviousPersonDayInMonth, difference, progressive);
 			}
-			this.save();
+			merge();
 		}
 
 	}
@@ -674,7 +674,7 @@ public class PersonDay extends Model {
 		int minTimeWorking = getWorkingTimeTypeDay().workingTime;
 		Logger.debug("Time at work: %s. Tempo di lavoro giornaliero: %s", timeAtWork, minTimeWorking);
 		difference = timeAtWork - minTimeWorking;
-		save();		
+		merge();		
 		Logger.debug("Differenza per %s %s nel giorno %s: %s", person.surname, person.name, date, difference);
 
 	}
