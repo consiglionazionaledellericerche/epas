@@ -1,11 +1,27 @@
 [
   	#{list shiftPeriods, as:'shiftPeriod'}
+  	
+  	%{
+  		if(shiftPeriod.cancelled == false) {
+  	}%
   			{
   			"id" : ${shiftPeriod.person.id},
   			"start" : "${shiftPeriod.start}",
   			"end" : "${shiftPeriod.end}",
+  			"cancelled": "${shiftPeriod.cancelled}",
   			"ttStart": "${shiftPeriod.shiftTimeTable.getStartShift()}",
   			"ttEnd": "${shiftPeriod.shiftTimeTable.getEndShift()}"
   			}${shiftPeriod_isLast ? '' : ','}
+  	%{
+  		} else {
+  	}%
+  			{
+  			"start" : "${shiftPeriod.start}",
+  			"end" : "${shiftPeriod.end}",
+  			"cancelled": "${shiftPeriod.cancelled}"
+  			}${shiftPeriod_isLast ? '' : ','}  	
+	 %{ 
+	 	}
+	 }%	
   	#{/list}
 ]

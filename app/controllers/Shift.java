@@ -23,8 +23,10 @@ import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
 import models.PersonShift;
 import models.PersonShiftDay;
+import models.ShiftCancelled;
 import models.ShiftTimeTable;
 import models.ShiftType;
+import models.exports.ShiftCancelledPeriod;
 import models.exports.ShiftPeriod;
 import models.exports.ShiftPeriods;
 
@@ -59,11 +61,14 @@ public class Shift extends Controller{
 		if (shiftType == null) {
 			notFound(String.format("ShiftType type = %s doesn't exist", type));			
 		}
-		Logger.debug("Trovato shiftType %s", shiftType.type);
+		Logger.debug("Cerco turni di tipo %s", shiftType.type);
 		
 		LocalDate from = new LocalDate(Integer.parseInt(params.get("yearFrom")), Integer.parseInt(params.get("monthFrom")), Integer.parseInt(params.get("dayFrom")));
 		LocalDate to = new LocalDate(Integer.parseInt(params.get("yearTo")), Integer.parseInt(params.get("monthTo")), Integer.parseInt(params.get("dayTo")));
 		
+		List<ShiftPeriod> shiftPeriods = new ArrayList<ShiftPeriod>();
+		
+		// get the normal shift
 		List<PersonShiftDay> personShiftDay = PersonShiftDay.find("" +
 				"SELECT psd FROM PersonShiftDay psd WHERE psd.date BETWEEN ? AND ? " +
 				"AND psd.shiftType = ? " +
@@ -71,22 +76,37 @@ public class Shift extends Controller{
 				from, to, shiftType).fetch();
 		Logger.debug("Shift find called from %s to %s, type %s - found %s shift days", from, to, shiftType.type, personShiftDay.size());
 		
-		List<ShiftPeriod> shiftPeriods = new ArrayList<ShiftPeriod>();
+
 		ShiftPeriod shiftPeriod = null;
-		for (PersonShiftDay psd : personShiftDay){
-			if (shiftPeriod != null) {
-				Logger.trace("(shiftPeriod.person=%s =? psd.personShift.person=%s) || (shiftPeriod.end.plusDays(1)=%s != psd.date=%s) || shiftPeriod.shiftTimeTable.getStartShift()=%s != psd.shiftTimeTable.getStartShift()=%s", shiftPeriod.person, psd.personShift.person, shiftPeriod.end.plusDays(1), psd.date, shiftPeriod.shiftTimeTable.getStartShift(), psd.shiftTimeTable.getStartShift());
-			} else {
-				Logger.trace("shiftPeriod=null");
-			}
-				
+		
+		for (PersonShiftDay psd : personShiftDay) {	
 			if (shiftPeriod == null || !shiftPeriod.person.equals(psd.personShift.person) || !shiftPeriod.end.plusDays(1).equals(psd.date) || !shiftPeriod.shiftTimeTable.getStartShift().equals(psd.shiftTimeTable.getStartShift() )){
-				shiftPeriod = new ShiftPeriod(psd.personShift.person, psd.date, psd.date, psd.shiftType, psd.shiftTimeTable);
+				shiftPeriod = new ShiftPeriod(psd.personShift.person, psd.date, psd.date, psd.shiftType, false, psd.shiftTimeTable);
 				shiftPeriods.add(shiftPeriod);
-				Logger.trace("Creato nuovo shiftPeriod, person=%s, start=%s, end=%s, type=%s, timetable=%s\n" , shiftPeriod.person, shiftPeriod.start, shiftPeriod.end, shiftPeriod.shiftType.type, shiftPeriod.shiftTimeTable);
+				Logger.trace("\nCreato nuovo shiftPeriod, person=%s, start=%s, end=%s, type=%s, timetable=%s" , shiftPeriod.person, shiftPeriod.start, shiftPeriod.end, shiftPeriod.shiftType.type, shiftPeriod.shiftTimeTable);
 			} else {
 				shiftPeriod.end = psd.date;
-				Logger.trace("Aggiornato ShiftPeriod, person=%s, start=%s, end=%s, type=%s, timetable=%s\n", shiftPeriod.person, shiftPeriod.start, shiftPeriod.end, shiftPeriod.shiftType.type, shiftPeriod.shiftTimeTable);
+				Logger.trace("Aggiornato ShiftPeriod, person=%s, start=%s, end=%s, type=%s, timetable=%s", shiftPeriod.person, shiftPeriod.start, shiftPeriod.end, shiftPeriod.shiftType.type, shiftPeriod.shiftTimeTable);
+			}
+		}
+		
+		// get the cancelled shifts of type shiftType
+		List<ShiftCancelled> shiftCancelled = ShiftCancelled.find("SELECT sc FROM ShiftCancelled sc WHERE sc.date BETWEEN ? AND ? " +"" +
+				"AND sc.type = ? " +
+				"ORDER BY sc.date", 
+				from, to, shiftType).fetch();
+		Logger.debug("ShiftCancelled find called from %s to %s, type %s - found %s shift days", from, to, shiftType.type, shiftCancelled.size());
+	
+		shiftPeriod = null;
+		
+		for (ShiftCancelled sc : shiftCancelled) {
+			if (shiftPeriod == null || !shiftPeriod.end.plusDays(1).equals(sc.date)){
+				shiftPeriod = new ShiftPeriod(sc.date, sc.date, sc.type, true);
+				shiftPeriods.add(shiftPeriod);
+				Logger.trace("Creato nuovo shiftPeriod di cancellati, start=%s, end=%s, type=%s" , shiftPeriod.start, shiftPeriod.end, shiftPeriod.shiftType.type);
+			} else {
+				shiftPeriod.end = sc.date;
+				Logger.trace("Aggiornato ShiftPeriod di cancellati, start=%s, end=%s, type=%s\n", shiftPeriod.start, shiftPeriod.end, shiftPeriod.shiftType.type);
 			}
 		}
 		
@@ -101,7 +121,7 @@ public class Shift extends Controller{
 	 * Update shifts read from the sistorg portal calendar
 	 */
 	public static void update(String type, Integer year, Integer month, @As(binder=JsonShiftPeriodsBinder.class) ShiftPeriods body){
-		Logger.debug("update: Received reperebilityPeriods %s", body);
+		Logger.debug("update: Received shiftPeriods %s", body);
 		
 		if (body == null) {
 			badRequest();	
@@ -115,16 +135,17 @@ public class Shift extends Controller{
 		
 		Logger.debug("shiftType=%s", shiftType.description);
 		
-		//Il mese e l'anno ci servono per "azzerare" eventuale giorni di reperibilità rimasti vuoti
+		//Il mese e l'anno ci servono per "azzerare" eventuale giorni di turno rimasti vuoti
 		LocalDate monthToManage = new LocalDate(year, month, 1);
 		
-		//Conterrà i giorni del mese che devono essere attribuiti a qualche reperibile 
+		//Conterrà i giorni del mese che devono essere attribuiti a qualche turnista 
 		Set<Integer> daysOfMonthToAssign = new HashSet<Integer>();	
+		Set<Integer> daysOfMonthForCancelled = new HashSet<Integer>();	
 		for (int i = 1 ; i <= monthToManage.dayOfMonth().withMaximumValue().getDayOfMonth(); i++) {
 			daysOfMonthToAssign.add(i);
+			daysOfMonthForCancelled.add(i);
 		}
 		Logger.trace("Lista dei giorni del mese = %s", daysOfMonthToAssign);
-		
 		
 		LocalDate day = null;
 		for (ShiftPeriod shiftPeriod : body.periods) {
@@ -137,68 +158,104 @@ public class Shift extends Controller{
 			
 			day = shiftPeriod.start;
 			while (day.isBefore(shiftPeriod.end.plusDays(1))) {
+				// normal shift
+				if (!shiftPeriod.cancelled) {
+					//La persona deve essere tra i turnisti 
+					PersonShift personShift = PersonShift.find("SELECT ps FROM PersonShift ps WHERE ps.person = ?", shiftPeriod.person).first();
+					if (personShift == null) {
+						throw new IllegalArgumentException(
+							String.format("Person %s is not a shift person", shiftPeriod.person));
+					}
+					
+					//Se la persona è in ferie questo giorno non può essere in turno (almeno che non sia cancellato)
+					if ((Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date = ? and pd.person = ?", day, shiftPeriod.person).fetch().size() > 0) && (type != "X")){
+						throw new IllegalArgumentException(
+							String.format("ShiftPeriod person.id %d is not compatible with a Absence in the same day %s", shiftPeriod.person.id, day));
+					}
 				
-				//La persona deve essere tra i turnisti 
-				PersonShift personShift = PersonShift.find("SELECT ps FROM PersonShift ps WHERE ps.person = ?", shiftPeriod.person).first();
-				if (personShift == null) {
-					throw new IllegalArgumentException(
-						String.format("Person %s is not a shift person", shiftPeriod.person));
-				}
-				
-				//Se la persona è in ferie questo giorno non può essere in turno (almeno che non sia cancellato)
-				if ((Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date = ? and pd.person = ?", day, shiftPeriod.person).fetch().size() > 0) && (type != "X")){
-					throw new IllegalArgumentException(
-						String.format("ShiftPeriod person.id %d is not compatible with a Absence in the same day %s", shiftPeriod.person.id, day));
-				}
-				
-				//Salvataggio del giorno di turno
-				//Se c'è un turno già presente viene sostituito, altrimenti viene creato un PersonShiftDay nuovo
-				Logger.debug("Cerco turno shiftType = %s AND date = %s AND shiftTimeTable.startShift = %s", shiftType.description, day, shiftPeriod.shiftTimeTable.getStartShift());
-				String[] hmsStart = shiftPeriod.shiftTimeTable.getStartShift().split(":");
-				
-				PersonShiftDay personShiftDay = 
-					PersonShiftDay.find("shiftType = ? AND date = ? AND shiftTimeTable.startShift = ?", shiftType, day, new LocalDateTime(1970, 01, 01, Integer.parseInt(hmsStart[0]), Integer.parseInt(hmsStart[1]))).first();
-				
-				if (personShiftDay == null) {
-					personShiftDay = new PersonShiftDay();
-					Logger.debug("Creo un nuovo personShiftDay per person = %s, day = %s, shiftType = %s", shiftPeriod.person.name, day, shiftType.description);
+					//Salvataggio del giorno di turno
+					//Se c'è un turno già presente viene sostituito, altrimenti viene creato un PersonShiftDay nuovo
+					Logger.debug("Cerco turno shiftType = %s AND date = %s AND shiftTimeTable.startShift = %s", shiftType.description, day, shiftPeriod.shiftTimeTable.getStartShift());
+					String[] hmsStart = shiftPeriod.shiftTimeTable.getStartShift().split(":");
+					
+					PersonShiftDay personShiftDay = 
+						PersonShiftDay.find("shiftType = ? AND date = ? AND shiftTimeTable.startShift = ?", shiftType, day, new LocalDateTime(1970, 01, 01, Integer.parseInt(hmsStart[0]), Integer.parseInt(hmsStart[1]))).first();
+					
+					if (personShiftDay == null) {
+						personShiftDay = new PersonShiftDay();
+						Logger.debug("Creo un nuovo personShiftDay per person = %s, day = %s, shiftType = %s", shiftPeriod.person.name, day, shiftType.description);
+					} else {
+						Logger.debug("Aggiorno il personShiftDay = %s di %s", personShiftDay, personShiftDay.personShift.person.name);
+					}
+					personShiftDay.date = day;
+					personShiftDay.shiftType = shiftType;
+					personShiftDay.shiftTimeTable = shiftPeriod.shiftTimeTable;
+					personShiftDay.personShift = personShift;
+					
+					personShiftDay.save();
+					Logger.info("Aggiornato PersonShiftDay = %s con %s\n", personShiftDay, personShiftDay.personShift.person);
+					
+					//Questo giorno è stato assegnato
+					daysOfMonthToAssign.remove(day.getDayOfMonth());
 				} else {
-					Logger.debug("Aggiorno il personShiftDay = %s di %s", personShiftDay, personShiftDay.personShift.person.name);
+				// cancelled shift
+					// Se non c'è già il turno cancellato lo creo
+					Logger.debug("Cerco turno cancellato shiftType = %s AND date = %s", shiftType.type, day);
+					ShiftCancelled shiftCancelled = 
+							ShiftCancelled.find("type = ? AND date = ?", shiftType, day).first();
+						
+					if (shiftCancelled == null) {
+						shiftCancelled = new ShiftCancelled();
+						shiftCancelled.date = day;
+						shiftCancelled.type = shiftType;
+							
+						shiftCancelled.save();
+						Logger.debug("Creato un nuovo ShiftCancelled per day = %s, shiftType = %s", day, shiftType.description);
+					}
+					
+					//Questo giorno è stato annullato
+					daysOfMonthForCancelled.remove(day.getDayOfMonth());
 				}
-				personShiftDay.date = day;
-				personShiftDay.shiftType = shiftType;
-				personShiftDay.shiftTimeTable = shiftPeriod.shiftTimeTable;
-				personShiftDay.personShift = personShift;
-				
-				personShiftDay.save();
-				Logger.info("Aggiornato PersonShiftDay = %s con %s\n", personShiftDay, personShiftDay.personShift.person);
-				
-				//Questo giorno è stato assegnato
-				daysOfMonthToAssign.remove(day.getDayOfMonth());
-				
+			
 				day = (LocalDate)day.plusDays(1);
 			}
 		}
 		
-		Logger.info("Giorni di reperibilità da rimuovere = %s", daysOfMonthToAssign);
+		Logger.info("Turni da rimuovere = %s", daysOfMonthToAssign);
 		
 		for (int dayToRemove : daysOfMonthToAssign) {
 			LocalDate dateToRemove = new LocalDate(year, month, dayToRemove);
 			Logger.trace("Eseguo la cancellazione del giorno %s", dateToRemove);
 			
 			int cancelled = JPA.em().createQuery("DELETE FROM PersonShiftDay WHERE shiftType = :shiftType AND date = :dateToRemove)")
-			.setParameter("shiftType", shiftType)
-			.setParameter("dateToRemove", dateToRemove)
-			.executeUpdate();
+					.setParameter("shiftType", shiftType)
+					.setParameter("dateToRemove", dateToRemove)
+					.executeUpdate();
 			if (cancelled == 1) {
 				Logger.info("Rimosso turno di tipo %s del giorno %s", shiftType.description, dateToRemove);
 			}
 		}
+		
+		Logger.info("Turni cancellati da rimuovere = %s", daysOfMonthForCancelled);
+		
+		for (int dayToRemove : daysOfMonthForCancelled) {
+			LocalDate dateToRemove = new LocalDate(year, month, dayToRemove);
+			Logger.trace("Eseguo la cancellazione del giorno %s", dateToRemove);
+			
+			int cancelled = JPA.em().createQuery("DELETE FROM ShiftCancelled WHERE type = :shiftType AND date = :dateToRemove)")
+					.setParameter("shiftType", shiftType)
+					.setParameter("dateToRemove", dateToRemove)
+					.executeUpdate();
+			if (cancelled == 1) {
+				Logger.info("Rimosso turno cancellato di tipo %s del giorno %s", shiftType.description, dateToRemove);
+			}
+		}
 	}
+	
 	
 	/**
 	 * @author arianna
-	 * crea il file PDF con il resoconto mensile dei turni di tipo 'A, B e X(annullato)' per
+	 * crea il file PDF con il resoconto mensile dei turni di tipo 'A e B' per
 	 * il mese 'month' dell'anno 'year'
 	 * (portale sistorg)
 	 * 
@@ -292,9 +349,128 @@ public class Shift extends Controller{
 			}
 		}
 	
-		
 		renderPDF(firstOfMonth, shiftSumDays, shiftLabels);
 	}
+
+	/**
+	 * @author arianna
+	 * crea il file PDF con il calendario mensile dei turni di tipo 'A, B' per
+	 * il mese 'month' dell'anno 'year'.
+	 * (portale sistorg)
+	 * 
+	 * T.B.N. che il tipo dei tyrni in questo caso è fisso. Sarà variabile quando si introdurranno
+	 * i gruppi e i tipi di reperibilità associati ad ogni gruppo
+	 */
+	public static void exportMonthCalAsPDF() {
+		int year = params.get("year", Integer.class);
+		int month = params.get("month", Integer.class);
+		Long groupType = params.get("type", Long.class);
+		
+		Logger.debug("sono nella exportMonthCalAsPDF con year=%s e month=%s", year, month);
+		
+		ArrayList<String> shiftTypes = new ArrayList<String>();
+		shiftTypes.add("A"); 
+		shiftTypes.add("B");
+
+		Logger.debug("shiftTypes=%s", shiftTypes);
+		
+		class PSD {
+			String fasciaTurno;
+			String tipoTurno;
+			
+			public PSD (String tipoTurno, String fasciaTurno) {
+				this.tipoTurno = tipoTurno;
+				this.fasciaTurno = fasciaTurno;
+			}
+
+		}
+		
+		class SD {
+			Person mattina;
+			Person pomeriggio;
+			
+			public SD (Person mattina, Person pomeriggio) {
+				this.mattina = mattina;
+				this.pomeriggio = pomeriggio;
+			}
+		}
+		
+		// crea la tabella dei turni (persona, giorno) -> (Tipo turno, fascia, turno)
+		ImmutableTable.Builder<Person, Integer, PSD> builder = ImmutableTable.builder(); 
+		Table<Person, Integer, PSD> shiftCalendarMonth = null;
+		
+		// crea la tabella dei turni mensile (tipo turno, giorno) -> (persona turno mattina, persona turno pomeriggio)
+		ImmutableTable.Builder<String, Integer, SD> builder1 = ImmutableTable.builder(); 
+		Table<String, Integer, SD> shiftCalendar = null;
+		
+		LocalDate firstOfMonth = new LocalDate(year, month, 1);
+		
+		for (String type: shiftTypes)
+		{	
+			Logger.debug("controlla type=%s", type);
+			ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();	
+			if (shiftType == null) {
+				notFound(String.format("ShiftType = %s doesn't exist", shiftType));			
+			}
+			
+			List<PersonShiftDay> personShiftDays = 
+				PersonShiftDay.find("SELECT prd FROM PersonShiftDay prd WHERE date BETWEEN ? AND ? AND prd.shiftType = ? ORDER by date, prd.shiftTimeTable.startShift", firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue(), shiftType).fetch();
+		
+			for (PersonShiftDay personShiftDay : personShiftDays) {
+				Person person = personShiftDay.personShift.person;
+				PSD psd = new PSD(personShiftDay.shiftType.type, personShiftDay.shiftTimeTable.getStartShift());
+					
+				builder.put(person, personShiftDay.date.getDayOfMonth(), psd);
+			}
+			
+			//legge i turni cancellati e li registra nella tabella mensile
+			Logger.debug("Cerco i turni cancellati e li inserisco nella tabella mensile");
+			List<ShiftCancelled> shiftsCancelled = 
+					ShiftCancelled.find("SELECT sc FROM ShiftCancelled sc WHERE date BETWEEN ? AND ? AND sc.type = ? ORDER by date", firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue(), shiftType).fetch();
+			SD shift = new SD (null, null);;
+			for (ShiftCancelled sc: shiftsCancelled) {
+				builder1.put(type, sc.date.getDayOfMonth(), shift);
+				Logger.debug("trovato turno cancellato di tipo %s del %s", type, sc.date);
+			}
+		}
+		
+		shiftCalendarMonth = builder.build();
+		
+	
+		for (int day: shiftCalendarMonth.columnKeySet()) {
+			String currShift = "";
+			String prevShift = "";
+			SD shift = null;
+
+			Logger.debug("giorno %s", day);
+			for (Person person: shiftCalendarMonth.rowKeySet()) {
+				Logger.debug("person %s", person);
+				if (shiftCalendarMonth.contains(person, day)) {
+					currShift = shiftCalendarMonth.get(person, day).tipoTurno;
+					Logger.debug("trovato turno %s per (%s, %s)", currShift, person, day);
+					
+					if ((shift == null) || (currShift != prevShift)) {
+						shift = (shiftCalendarMonth.get(person, day).fasciaTurno.contains("07:00")) ? new SD (person, null) : new SD (null, person);
+						builder1.put(currShift, day, shift);
+						Logger.debug("creato shift (%s, %s) con shift.mattina=%s e shift.pomeriggio=%s", prevShift, day, shift.mattina, shift.pomeriggio);
+					} else {
+						if (shiftCalendarMonth.get(person, day).fasciaTurno.contains("07:00")) {
+							shift.mattina = person;
+						} else {
+							shift.pomeriggio = person;
+						}
+					}
+					prevShift = currShift;
+				}
+			}
+		}
+		
+		shiftCalendar = builder1.build();
+		
+		LocalDate today = new LocalDate();
+		renderPDF(today, firstOfMonth, shiftCalendar);
+	}
+	
 	
 	public static void absence(){
 		

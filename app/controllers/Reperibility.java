@@ -126,6 +126,44 @@ public class Reperibility extends Controller {
 		render(reperibilityPeriods);
 	}
 	
+	/**
+	 * @author arianna
+	 * Fornisce la lista del personale reperibile di tipo 'type' 
+	 * nell'intervallo di tempo da 'yearFrom/monthFrom/dayFrom'  a 'yearTo/monthTo/dayTo'
+	 * 
+	 */
+	public static void who() {
+		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
+
+		List<Person> personList = new ArrayList<Person>();
+		
+		// reperibility type validation
+		Long type = Long.parseLong(params.get("type"));
+		PersonReperibilityType reperibilityType = PersonReperibilityType.findById(type);
+		if (reperibilityType == null) {
+			notFound(String.format("ReperibilityType id = %s doesn't exist", type));			
+		}
+		
+		// date interval construction
+		LocalDate from = new LocalDate(Integer.parseInt(params.get("yearFrom")), Integer.parseInt(params.get("monthFrom")), Integer.parseInt(params.get("dayFrom")));
+		LocalDate to = new LocalDate(Integer.parseInt(params.get("yearTo")), Integer.parseInt(params.get("monthTo")), Integer.parseInt(params.get("dayTo")));
+
+		List<PersonReperibilityDay> reperibilityDays = 
+				PersonReperibilityDay.find("SELECT prd FROM PersonReperibilityDay prd WHERE prd.date BETWEEN ? AND ? AND prd.reperibilityType = ? ORDER BY prd.date", from, to, reperibilityType).fetch();
+
+		Logger.debug("Reperibility who called from %s to %s, found %s reperibility days", from, to, reperibilityDays.size());
+
+		for (PersonReperibilityDay prd : reperibilityDays) {
+			//L'ultima parte dell'if serve per il caso in cui la stessa persona ha due periodi di reperibilità non consecutivi. 
+			if (!personList.contains(prd.personReperibility.person)) {
+				personList.add(prd.personReperibility.person);
+				Logger.trace("trovata person=%s", prd.personReperibility.person);
+			}
+		}
+		Logger.debug("trovati %s reperibili", personList.size());
+		
+		render(personList);
+	}
 	
 	/**
 	 * @author arianna
@@ -534,11 +572,13 @@ public class Reperibility extends Controller {
 			if (reperibilityPeriod != null) {
 				Logger.trace("controlla se %s<>%s (legge %s)", reperibilityPeriod.getEndDate().getDate(), new DateTime(prd.date.minusDays(1).toDate()), new DateTime(prd.date.toDate()));
 			}
+			
 			//L'ultima parte dell'if serve per il caso in cui la stessa persona ha due periodi di reperibilità non consecutivi. 
 			if (reperibilityPeriod == null || !reperibilityPeriod.getEndDate().getDate().equals(new DateTime(prd.date.minusDays(1).toDate()))) {
+				
 				reperibilityPeriod = new VEvent(new DateTime(prd.date.toDate()), new DateTime(prd.date.toDate()), "Reperibilità Registro");
 				Logger.trace("Aggiunge il periodo %s-%s", reperibilityPeriod.getStartDate().getDate(), reperibilityPeriod.getEndDate().getDate());
-				icsCalendar.getComponents().add(reperibilityPeriod.getDuration());
+				icsCalendar.getComponents().add(reperibilityPeriod);
 				Logger.trace("Creato nuovo reperibilityPeriod, start=%s, end=%s", reperibilityPeriod.getStartDate().getDate(), reperibilityPeriod.getEndDate().getDate());
 			} else {
 				reperibilityPeriod.getEndDate().setDate(new DateTime(prd.date.toDate()));
