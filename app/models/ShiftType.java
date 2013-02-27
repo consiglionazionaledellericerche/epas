@@ -21,8 +21,8 @@ public class ShiftType extends Model{
 	public String type;
 	public String description;
 	
-	@ManyToMany(mappedBy="shiftTypes")
-	public List<PersonShift> personShifts = new ArrayList<PersonShift>();
+	@OneToMany(mappedBy="shiftType")
+	public List<PersonShiftShiftType> personShiftShiftTypes = new ArrayList<PersonShiftShiftType>();
 	
 	@OneToMany(mappedBy="shiftType", fetch=FetchType.LAZY)
 	public List<PersonShiftDay> personShiftDays = new ArrayList<PersonShiftDay>();
