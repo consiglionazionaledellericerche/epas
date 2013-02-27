@@ -14,7 +14,6 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -34,6 +33,7 @@ import models.exports.ReperibilityPeriods;
 
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
+import net.fortuna.ical4j.model.Date;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.TimeZoneRegistry;
@@ -156,13 +156,13 @@ public class Reperibility extends Controller {
 		Logger.debug("Reperibility who called from %s to %s, found %s reperibility days", from, to, reperibilityDays.size());
 
 		for (PersonReperibilityDay prd : reperibilityDays) {
-			//L'ultima parte dell'if serve per il caso in cui la stessa persona ha due periodi di reperibilità non consecutivi. 
 			if (!personList.contains(prd.personReperibility.person)) {
+				Logger.trace("inserisco il reperibile ", prd.personReperibility.person);
 				personList.add(prd.personReperibility.person);
 				Logger.trace("trovata person=%s", prd.personReperibility.person);
 			}
 		}
-		Logger.debug("trovati %s reperibili", personList.size());
+		Logger.debug("trovati %s reperibili: %s", personList.size(), personList);
 		
 		render(personList);
 	}
@@ -582,7 +582,7 @@ public class Reperibility extends Controller {
 
 			//L'ultima parte dell'if serve per il caso in cui la stessa persona ha due periodi di reperibilità non consecutivi. 
 			if (reperibilityPeriod == null || !reperibilityPeriod.getEndDate().getDate().equals(new DateTime(prd.date.toDateTimeAtStartOfDay().minusSeconds(1).toDate()))) {
-				reperibilityPeriod = new VEvent(new DateTime(prd.date.toDate()), new DateTime(endDate.toDate()), "Reperibilità Registro");
+				reperibilityPeriod = new VEvent(new Date(prd.date.toDate().getTime()), new Date(endDate.toDate().getTime()), "Reperibilità Registro");
  
 				reperibilityPeriod.getProperties().add(new Uid(UUID.randomUUID().toString()));
 
