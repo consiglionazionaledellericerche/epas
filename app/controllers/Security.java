@@ -51,6 +51,11 @@ public class Security extends Secure.Security {
 	
 	static boolean check(String profile) {
 		String username = connected();
+		if(username == null){
+			Logger.trace("Lo username per la check del profilo %s è null ", profile);
+			return false;
+		}
+			
 		Logger.trace("checking permission %s for user %s", profile, username);
 		
 		for (Permission permission : getPersonAllPermissions(username)) {

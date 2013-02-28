@@ -243,11 +243,46 @@ public class PersonDay extends Model {
 			reloadedStampings.remove(0);
 
 		}
+		
+		/**
+		 * nel caso in cui venga a lavorare in un giorno festivo...
+		 */
+		if(this.isHoliday()==true && this.stampings.size() > 0){
+			int workTime = 0;
+			for(Stamping st : stampings){
+				if(st.way == Stamping.WayType.in){
+					workTime -= toMinute(st.date);									
+					
+				}
+				if(st.way == Stamping.WayType.out){
+					workTime += toMinute(st.date);								
+					Logger.trace("Timbratura di uscita: %s", workTime);
+				}
+			}
+			timeAtWork = workTime;
+			merge();
+			return;
+		}
 
+		/**
+		 * caso in cui un giorno esista solo una timbratura di ingresso
+		 */
+		if(stampings.size()==1 && stampings.get(0).date.getHourOfDay() > config.hourMaxToCalculateWorkTime 
+				&& stampings.get(0).way == WayType.in){
+			if(isHoliday()== false){
+				timeAtWork = -getWorkingTimeTypeDay().workingTime;
+				merge();
+				return;
+			}
+			else{
+				timeAtWork = 0;
+				merge();
+				return;
+			}
+		}
 		/**
 		 * per ora la gestione la facciamo considerando il caso di 3 timbrature nella lista del personDay
 		 */
-
 		if(reloadedStampings.size()==3 && !reloadedStampings.contains(null)){
 			int workingTime = 0;
 			Stamping stamp = reloadedStampings.get(0);
@@ -423,6 +458,7 @@ public class PersonDay extends Model {
 		} else {
 			timeAtWork = tempoLavoro;	
 		}
+		merge();
 
 		Logger.trace("PersonDay[%d] - personId = %s, date = %s. TimeAtWork is %d", id, person.id, date, timeAtWork);
 
@@ -652,14 +688,14 @@ public class PersonDay extends Model {
 	 */
 
 	private void updateDifference(){
-
-		if((getWorkingTimeTypeDay().holiday) && (date.getDayOfMonth()==1)){
+		Logger.debug("Entro nella update difference");
+		if((getWorkingTimeTypeDay().holiday) && (date.getDayOfMonth()==1) && stampings.size() == 0){
 			difference = 0;
 			save();
 			return;
 		}
 
-		if(absenceList().size() > 0){
+		if(absenceList().size() > 0 && stampings.size() == 0){
 			difference = 0;
 			save();
 			return;
@@ -670,11 +706,20 @@ public class PersonDay extends Model {
 			save();
 			return;
 		}
-
-		int minTimeWorking = getWorkingTimeTypeDay().workingTime;
-		Logger.debug("Time at work: %s. Tempo di lavoro giornaliero: %s", timeAtWork, minTimeWorking);
-		difference = timeAtWork - minTimeWorking;
-		save();		
+		
+		if(getWorkingTimeTypeDay().holiday == false){
+			int minTimeWorking = getWorkingTimeTypeDay().workingTime;
+			Logger.debug("Time at work: %s. Tempo di lavoro giornaliero: %s", timeAtWork, minTimeWorking);
+			difference = timeAtWork - minTimeWorking;
+			merge();
+		}
+		else{
+			
+			difference = timeAtWork;
+			merge();
+			Logger.debug("Sto calcolando la differenza in un giorno festivo per %s %s e vale: %d", person.name, person.surname, difference);
+		}		
+				
 		Logger.debug("Differenza per %s %s nel giorno %s: %s", person.surname, person.name, date, difference);
 
 	}
