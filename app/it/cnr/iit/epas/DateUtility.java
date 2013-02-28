@@ -1,5 +1,7 @@
 package it.cnr.iit.epas;
 
+import javax.persistence.EntityManager;
+
 import models.Configuration;
 import models.Person;
 import models.WorkingTimeType;
@@ -7,6 +9,7 @@ import models.WorkingTimeType;
 import org.joda.time.LocalDate;
 
 import play.Logger;
+import play.db.jpa.JPA;
 
 public class DateUtility {
 
@@ -15,6 +18,7 @@ public class DateUtility {
 		
 		Logger.trace("configurazione: %s con localdate: %s", config, date);
 		
+		JPA.em().refresh(person);
 		if(person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).holiday)
 			return true;
 	

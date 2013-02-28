@@ -3,6 +3,7 @@
  */
 package models;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -37,5 +38,6 @@ public class PersonShiftShiftType extends Model {
 	public LocalDate begin;
 	
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	@Column(name="end_date")
 	public LocalDate end;
 }
