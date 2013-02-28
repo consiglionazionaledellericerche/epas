@@ -184,7 +184,7 @@ public class FromMysqlToPostgres {
 
 			FromMysqlToPostgres.createVacationType(oldIDPersona, person);	
 
-			FromMysqlToPostgres.createYearRecap(oldIDPersona, person, anno);		
+			FromMysqlToPostgres.createInitializationTime(oldIDPersona, person, anno);		
 			
 			FromMysqlToPostgres.createPersonYear(oldIDPersona, person);
 
@@ -909,7 +909,7 @@ public class FromMysqlToPostgres {
 	}
 
 	@SuppressWarnings("deprecation")
-	public static void createYearRecap(long id, Person person, int anno) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
+	public static void createInitializationTime(long id, Person person, int anno) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
 
 		/**
 		 * query su totali_anno per recuperare lo storico da mettere in YearRecap
@@ -927,7 +927,7 @@ public class FromMysqlToPostgres {
 				InitializationAbsence initAbsence = new InitializationAbsence();
 				initTime.date = new LocalDate(2011,12,31);
 				initTime.person = person;
-				initTime.residualMinutes = rs.getInt("residuo");
+				initTime.residualMinutesPastYear = rs.getInt("residuo");
 				initTime.save();
 				initAbsence.person = person;
 				initAbsence.date = new LocalDate(2011,12,31);

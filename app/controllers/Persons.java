@@ -11,6 +11,7 @@ import models.Competence;
 import models.CompetenceCode;
 import models.ContactData;
 import models.Contract;
+import models.InitializationTime;
 import models.Location;
 import models.Person;
 import models.PersonDay;
@@ -68,8 +69,10 @@ public class Persons extends Controller {
 				"and pd.date >= ? and pd.date < ? ORDER by pd.date DESC", person, date.dayOfMonth().withMinimumValue(), date).first();
 		if(lastPreviousPersonDayInMonth != null)
 			progressive = lastPreviousPersonDayInMonth.progressive /60;
+		InitializationTime initTime = InitializationTime.find("Select init from InitializationTime init where init.person = ?", person).first();
+		
 				
-		render(person, contractList, weekDayAvailability, holidaysAvailability, daylightWorkingDaysOvertime, progressive);
+		render(person, contractList, weekDayAvailability, holidaysAvailability, daylightWorkingDaysOvertime, progressive, initTime);
 	}
 
 
@@ -88,7 +91,8 @@ public class Persons extends Controller {
 		Contract contract = new Contract();
 		Location location = new Location();
 		ContactData contactData = new ContactData();
-		render(person, contract, location, contactData);
+		InitializationTime initializationTime = new InitializationTime();
+		render(person, contract, location, contactData, initializationTime);
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
@@ -100,6 +104,7 @@ public class Persons extends Controller {
 		Person person = null;
 		Location location = new Location();
 		ContactData contactData = new ContactData();
+		
 		
 		//FIXME: viene sempre creato un contratto nuovo ma ci dovrebbe essere la possibilità
 		//di modificare un contratto esistente. Fare in questo o in un altro metodo?
@@ -138,6 +143,23 @@ public class Persons extends Controller {
 		contract.save();
 		Logger.debug("saving contract, beginContract = %s, endContract = %s", contract.beginContract, contract.expireContract);
 		
+		if(params.get("minutesPastYear", Integer.class) != null || params.get("minutesCurrentYear", Integer.class) != null){
+			InitializationTime initTime = new InitializationTime();
+			initTime.person = person;
+			if(params.get("minutesCurrentYear", Integer.class) != null)
+				initTime.residualMinutesCurrentYear = params.get("minutesCurrentYear", Integer.class);
+			else
+				initTime.residualMinutesCurrentYear = 0;
+			if(params.get("minutesPastYear", Integer.class) != null)
+				initTime.residualMinutesPastYear = params.get("minutesPastYear", Integer.class);
+			else
+				initTime.residualMinutesPastYear = 0;
+			initTime.date = new LocalDate();
+			initTime.save();
+			Logger.debug("Saving initialization time for %s %s with value %s minutes for past year and %s minutes for current year", 
+					person.name, person.surname, initTime.residualMinutesPastYear, initTime.residualMinutesCurrentYear);
+		}		
+		
 		flash.success(String.format("Inserita nuova persona in anagrafica: %s %s ",person.name, person.surname));
 		Application.indexAdmin();
 		
@@ -150,6 +172,7 @@ public class Persons extends Controller {
 		Person person = Person.findById(personId);
 		ContactData contactData = person.contactData;
 		Location location = person.location;
+		InitializationTime initTime = InitializationTime.find("Select init from InitializationTime init where init.person = ?", person).first();
 		if(contactData != null){
 			if(contactData.email == null || !contactData.email.equals(params.get("email"))){
 				contactData.email = params.get("email");
@@ -189,6 +212,22 @@ public class Persons extends Controller {
 			if(params.get("room") != null)
 				location.room = params.get("room");
 			location.save();
+		}
+		
+		if(initTime != null){
+			if(initTime.residualMinutesCurrentYear == null || initTime.residualMinutesCurrentYear != params.get("minutesCurrentYear", Integer.class))
+				initTime.residualMinutesCurrentYear = params.get("minutesCurrentYear", Integer.class);
+			if(initTime.residualMinutesPastYear == null || initTime.residualMinutesPastYear != params.get("minutesPastYear", Integer.class))
+				initTime.residualMinutesPastYear = params.get("minutesPastYear", Integer.class);
+			initTime.save();
+		}
+		else{
+			initTime = new InitializationTime();
+			if(params.get("minutesPastYear") != null)
+				initTime.residualMinutesPastYear = params.get("minutesPastYear", Integer.class);
+			if(params.get("minutesCurrentYear") != null)
+				initTime.residualMinutesCurrentYear = params.get("minutesCurrentYear", Integer.class);
+			initTime.save();
 		}
 		flash.success("Modificate informazioni di contatto o di locazione per l'utente %s %s", person.name, person.surname);
 		Application.indexAdmin();
