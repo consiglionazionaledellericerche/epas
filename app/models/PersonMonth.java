@@ -642,11 +642,16 @@ public class PersonMonth extends Model {
 	 */
 	public int residuoAnnoPrecedente() {
 		Contract contractLastYear = person.getContract(new LocalDate(year - 1, 12, 31));
-		
+//		InitializationTime initTime = InitializationTime.find("Select init from InitializationTime init where init.person = ? and init.date = ?" +
+//				"", person, new LocalDate(year-1,12,31)).first();
+				
 		//Se il contratto della persona era attivo anche l'anno scorso si prende il personYear dell'anno precedente altrimenti il residuo dell'anno precedente
 		if (contractLastYear != null && contractLastYear.equals(person.getCurrentContract())) {
 			PersonYear personYear = PersonYear.find("SELECT py FROM PersonYear py WHERE py.year = ? AND py.person = ?", year - 1, person).first();
-			return personYear != null ? personYear.getRemainingMinutes() : 0;
+			if(personYear != null)
+				return personYear.getRemainingMinutes();
+			else
+				return 0;
 		} else {
 			return 0;
 		}
@@ -670,7 +675,22 @@ public class PersonMonth extends Model {
 		}
 		LocalDate date = new LocalDate(year, month, 1);
 		date = date.minusMonths(1);
-		return PersonMonth.find("SELECT pm FROM PersonMonth pm WHERE pm.year = ? and pm.month = ? AND pm.person = ?", date.getYear(), date.getMonthOfYear(), person).first();
+		PersonMonth pm =PersonMonth.find("SELECT pm FROM PersonMonth pm WHERE pm.year = ? and pm.month = ? AND pm.person = ?", 
+				date.getYear(), date.getMonthOfYear(), person).first(); 
+		if(pm != null)
+			return pm;
+		else{
+//			PersonMonth perMon = new PersonMonth(person, year-1, 12);
+//			InitializationTime initTime = InitializationTime.find("Select init from InitializationTime init where init.person = ? and init.date = ?" +
+//					"", person, new LocalDate(year-1,12,31)).first();
+//			if(initTime != null)
+//				perMon.residualPastYear = initTime.residualMinutes;
+//			else
+//				perMon.residualPastYear = 0;
+//			return perMon;
+			return null;
+		}
+			
 	}
 	
 	public boolean possibileUtilizzareResiduoAnnoPrecedente() {
