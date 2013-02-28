@@ -334,8 +334,8 @@ public class PersonMonth extends Model {
 			 */
 			InitializationTime initTime = InitializationTime.find("Select initTime from InitializationTime initTime where initTime.person = ? " +
 					"and initTime.date = ?", person, new LocalDate(year-1,12,31)).first();
-			if(initTime != null && initTime.residualMinutes > 0)
-				totalRemainingMinutes = initTime.residualMinutes + progressiveAtEndOfMonthInMinutes + totalRemainingMinutesPreviousMonth - compensatoryRestInMinutes;
+			if(initTime != null && initTime.residualMinutesPastYear > 0)
+				totalRemainingMinutes = initTime.residualMinutesPastYear + progressiveAtEndOfMonthInMinutes + totalRemainingMinutesPreviousMonth - compensatoryRestInMinutes;
 			else
 				totalRemainingMinutes = progressiveAtEndOfMonthInMinutes + totalRemainingMinutesPreviousMonth - compensatoryRestInMinutes;
 		}

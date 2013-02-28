@@ -39,17 +39,19 @@
 		<div><b>Inizio contratto</b> <input name="beginContract" type="date" value="${contract.beginContract}" size="10" maxlength="10" /></div>
 		<div>Fine contratto <input name="expireContract" type="date" value="${contract.expireContract}" size="10" maxlength="10" /></div>
 		<div>Obbligo attestato di presenza (per dipendenti CNR) <input name="onCertificate" type="checkbox" value="${contract.onCertificate}"  /></div>
+		<div>Ore di inizializzazione maturate in altro istituto l'anno passato (in minuti): <input name="minutesPastYear" type="text" value="${initializationTime.residualMinutesPastYear}" size="10" /></div>
+		<div>Ore di inizializzazione maturate in altro istituto nell'anno corrente (in minuti): <input name="minutesCurrentYear" type="text" value="${initializationTime.residualMinutesCurrentYear}" size="10" /></div>
 	</fieldset>
 	
 	<fieldset>
 		<legend>Informazioni di ubicazione e contatti</legend>
 		<input type="hidden" name="location.person_id"  value="${person.id}" />
-		<p>Dipartimento <input name="department" type="text" value="${location.department}" size="20" maxlength="100" /></p>
-		<p>Sede <input name="headOffice" type="text" value="${location.headOffice}" size="40" maxlength="200" /></p>
-		<p>Stanza <input name="room" type="text" value="${location.room}" size="40" maxlength="200" /></p>
-		<p>Telefono <input name="telephone" type="text" value="${contactData.telephone}" size="40" maxlength="200" /></p>
-		<p>Email <input name="email" type="text" value="${contactData.email}" size="40" maxlength="200" /></p>
-		<p>Data di nascita <input name="bornDate" type="text" value="${person.bornDate}" size="40" maxlength="200" /></p>
+		<p id="dipartimento">Dipartimento <input name="department" type="text" value="${location.department}" size="20" maxlength="100" /></p>
+		<p id="sede">Sede <input name="headOffice" type="text" value="${location.headOffice}" size="40" maxlength="200" /></p>
+		<p id="stanza">Stanza <input name="room" type="text" value="${location.room}" size="40" maxlength="200" /></p>
+		<p id="telefono">Telefono <input name="telephone" type="text" value="${contactData.telephone}" size="40" maxlength="200" /></p>
+		<p id="email">Email <input name="email" type="text" value="${contactData.email}" size="40" maxlength="200" /></p>
+		<p id="nascita">Data di nascita <input name="bornDate" type="text" value="${person.bornDate}" size="40" maxlength="200" /></p>
 	</fieldset>
 	
 	
