@@ -30,9 +30,15 @@ public class InitializationTime extends Model{
 	public LocalDate date;	
 	
 	/**
-	 * minuti di residuo da inizializzare
+	 * minuti di residuo da inizializzare maturati nell'anno relativo alla data dell'ogggetto 
 	 */
 	@Required
-	public Integer residualMinutes;
+	public Integer residualMinutesCurrentYear;
+
+	/**
+	 * minuti di residuo da inizializzare maturati nell'anno precedente alla data dell'ogggetto 
+	 */
+	@Required
+	public Integer residualMinutesPastYear;
 
 }
