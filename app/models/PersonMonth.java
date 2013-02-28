@@ -60,6 +60,9 @@ public class PersonMonth extends Model {
 	@Column
 	public int straordinari;
 	
+	@Transient
+	public InitializationTime initializationTime;
+	
 	/**
 	 * Minuti derivanti dalla somma dei progressivi giornalieri del mese 
 	 */
@@ -725,9 +728,11 @@ public class PersonMonth extends Model {
 	 * 	dall'anno precedente
 	 */
 	public int totaleResiduoAnnoCorrenteAlMesePrecedente() {
+		int residuo = 0;
 		//Deve esistere un mese precedente ed essere dello stesso anno (quindi a gennaio il mese precedente di questo anno non esiste)
 		if (mesePrecedente() != null && month != 1) {
-			return mesePrecedente().totaleResiduoAnnoCorrenteAFineMese();
+			return residuo + mesePrecedente().totaleResiduoAnnoCorrenteAFineMese();
+			//return mesePrecedente().totaleResiduoAnnoCorrenteAFineMese();
 		}
 		return 0;
 
@@ -760,15 +765,15 @@ public class PersonMonth extends Model {
 	}
 	
 	public int totaleResiduoAnnoCorrenteAFineMese() {
-		return residuoDelMese() + totaleResiduoAnnoCorrenteAlMesePrecedente() + riposiCompensativiDaAnnoCorrente - straordinari - recuperiOreDaAnnoPrecedente;  
+		return residuoDelMese() + totaleResiduoAnnoCorrenteAlMesePrecedente() + residuoAnnoCorrenteDaInizializzazione() + riposiCompensativiDaAnnoCorrente - straordinari - recuperiOreDaAnnoPrecedente;  
 	}
 	
 	public int totaleResiduoAnnoCorrenteAllaData(LocalDate date) {
-		return residuoDelMeseAllaData(date) + totaleResiduoAnnoCorrenteAlMesePrecedente() + riposiCompensativiDaAnnoCorrente - straordinari - recuperiOreDaAnnoPrecedente;  
+		return residuoDelMeseAllaData(date) + totaleResiduoAnnoCorrenteAlMesePrecedente() + residuoAnnoCorrenteDaInizializzazione() + riposiCompensativiDaAnnoCorrente - straordinari - recuperiOreDaAnnoPrecedente;  
 	}
 	
 	public int totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese() {
-		return totaleResiduoAnnoCorrenteAFineMese() + residuoAnnoPrecedenteDisponibileAllaFineDelMese();
+		return totaleResiduoAnnoCorrenteAFineMese() + residuoAnnoPrecedenteDisponibileAllaFineDelMese() + residuoAnnoPrecedenteDaInizializzazione();
 	}
 	
 	public void aggiornaRiepiloghi() {
@@ -884,6 +889,25 @@ public class PersonMonth extends Model {
 		//Creare l'assenza etc....
 		aggiornaRiepiloghi();
 		return true;
+	}
+	
+	public int residuoAnnoCorrenteDaInizializzazione() {
+		initializationTime = InitializationTime.find("Select i from InitializationTime i where i.person = ?" , person).first();
+		if (initializationTime != null && (initializationTime.date.isBefore(new LocalDate(year, month, 1).dayOfMonth().withMaximumValue())) &&
+				initializationTime.date.getYear() == year.intValue() && initializationTime.date.getMonthOfYear() == month.intValue()) {
+				return initializationTime.residualMinutesCurrentYear != null ? initializationTime.residualMinutesCurrentYear : 0;
+		}
+		return 0;
+	}
+
+	public int residuoAnnoPrecedenteDaInizializzazione() {
+		initializationTime = InitializationTime.find("Select i from InitializationTime i where i.person = ?" , person).first();
+		if (initializationTime != null && (initializationTime.date.isBefore(new LocalDate(year, month, 1).dayOfMonth().withMaximumValue())) &&
+				initializationTime.date.getYear() == year.intValue() && initializationTime.date.getMonthOfYear() == month.intValue() && 
+				possibileUtilizzareResiduoAnnoPrecedente()) {
+				return initializationTime.residualMinutesPastYear != null ? initializationTime.residualMinutesPastYear : 0;
+		}
+		return 0;
 	}
 	
 	/**

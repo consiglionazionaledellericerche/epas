@@ -925,12 +925,12 @@ public class FromMysqlToPostgres {
 			while(rs.next()){
 				InitializationTime initTime = new InitializationTime();
 				InitializationAbsence initAbsence = new InitializationAbsence();
-				initTime.date = new LocalDate(2011,12,31);
+				initTime.date = new LocalDate(2012,1,1);
 				initTime.person = person;
 				initTime.residualMinutesPastYear = rs.getInt("residuo");
 				initTime.save();
 				initAbsence.person = person;
-				initAbsence.date = new LocalDate(2011,12,31);
+				initAbsence.date = new LocalDate(2012,1,1);
 				initAbsence.recoveryDays = rs.getInt("recg");
 				initAbsence.absenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", "91").first();
 				initAbsence.save();
