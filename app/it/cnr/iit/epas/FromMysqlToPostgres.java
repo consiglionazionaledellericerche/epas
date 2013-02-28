@@ -184,7 +184,7 @@ public class FromMysqlToPostgres {
 
 			FromMysqlToPostgres.createVacationType(oldIDPersona, person);	
 
-		//	FromMysqlToPostgres.createYearRecap(oldIDPersona, person, anno);		
+			FromMysqlToPostgres.createYearRecap(oldIDPersona, person, anno);		
 			
 			FromMysqlToPostgres.createPersonYear(oldIDPersona, person);
 
@@ -916,67 +916,67 @@ public class FromMysqlToPostgres {
 		 */
 		Logger.debug("Inizio a creare i riepiloghi annuali per %s", person);
 		Connection mysqlCon = getMysqlConnection();
-		PreparedStatement stmtResidualAndRecovery = mysqlCon.prepareStatement("SELECT * FROM totali_anno WHERE ID = ? and anno >= ?");
+		PreparedStatement stmtResidualAndRecovery = mysqlCon.prepareStatement("SELECT * FROM totali_anno WHERE ID = ? and anno = ? limit 1");
 		stmtResidualAndRecovery.setLong(1, id);
-		stmtResidualAndRecovery.setInt(2, anno);
+		stmtResidualAndRecovery.setInt(2, 2011);
 		ResultSet rs = stmtResidualAndRecovery.executeQuery();
 
 		if(rs != null){
 			while(rs.next()){
 				InitializationTime initTime = new InitializationTime();
 				InitializationAbsence initAbsence = new InitializationAbsence();
-				initTime.date = new LocalDate(anno,12,31);
+				initTime.date = new LocalDate(2011,12,31);
 				initTime.person = person;
 				initTime.residualMinutes = rs.getInt("residuo");
 				initTime.save();
 				initAbsence.person = person;
-				initAbsence.date = new LocalDate(anno,12,31);
+				initAbsence.date = new LocalDate(2011,12,31);
 				initAbsence.recoveryDays = rs.getInt("recg");
 				initAbsence.absenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", "91").first();
 				initAbsence.save();
 			}
 		}
-		Logger.info("Terminati di creare i riepiloghi annuali per %s", person);
-
-		java.sql.Date beginDate = (java.sql.Date) new java.sql.Date(2012,1,1);
-		java.sql.Date endDate = (java.sql.Date) new java.sql.Date(2012,12,31);
-		PreparedStatement stmtAbsences = mysqlCon.prepareStatement("SELECT Codici.id,Orario.Giorno,Orario.TipoGiorno,Orario.TipoTimbratura,"+
-				"Codici.id, Codici.Codice " +
-				"FROM Orario, Codici " +
-				"WHERE Orario.TipoGiorno=Codici.id AND Orario.ID="+id+ 
-				" AND (Codici.Codice = '31' OR Codici.Codice = '32' OR Codici.Codice ='91' OR Codici.Codice = '94')"+
-				" AND Giorno >= "+beginDate+ " AND Giorno <= "+endDate);
-
-		ResultSet rsAbsences = stmtAbsences.executeQuery();
-		int countVacation = 0, countVacationPastYear = 0, countRecovery = 0, countPermission = 0;
-		while(rsAbsences.next()){
-			if(rsAbsences.getString("Codice").equals("31"))
-				countVacationPastYear = countVacationPastYear+ 1;
-			if(rsAbsences.getString("Codice").equals("32"))
-				countVacation = countVacation +1;
-			if(rsAbsences.getString("Codice").equals("91"))
-				countRecovery = countRecovery +1;
-			if(rsAbsences.getString("Codice").equals("94"))
-				countPermission = countPermission +1;
-		}
-		InitializationAbsence initAbsenceVacationPastYear = new InitializationAbsence();
-		initAbsenceVacationPastYear.absenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", "31").first();
-		initAbsenceVacationPastYear.person = person;
-		initAbsenceVacationPastYear.date = new LocalDate(anno, 1, 1);
-		initAbsenceVacationPastYear.absenceDays = countVacationPastYear;
-		initAbsenceVacationPastYear.save();
-		InitializationAbsence initAbsenceVacation = new InitializationAbsence();
-		initAbsenceVacation.absenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", "32").first();
-		initAbsenceVacation.person = person;
-		initAbsenceVacation.date = new LocalDate(anno, 1, 1);
-		initAbsenceVacation.absenceDays = countVacation;
-		initAbsenceVacation.save();
-		InitializationAbsence initAbsencePermission = new InitializationAbsence();
-		initAbsencePermission.absenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", "94").first();
-		initAbsencePermission.person = person;
-		initAbsencePermission.date = new LocalDate(anno, 1, 1);
-		initAbsencePermission.absenceDays = countPermission;
-		initAbsencePermission.save();
+		Logger.info("Terminati i riepiloghi annuali per %s", person);
+//
+//		java.sql.Date beginDate = (java.sql.Date) new java.sql.Date(2012,1,1);
+//		java.sql.Date endDate = (java.sql.Date) new java.sql.Date(2012,12,31);
+//		PreparedStatement stmtAbsences = mysqlCon.prepareStatement("SELECT Codici.id,Orario.Giorno,Orario.TipoGiorno,Orario.TipoTimbratura,"+
+//				"Codici.id, Codici.Codice " +
+//				"FROM Orario, Codici " +
+//				"WHERE Orario.TipoGiorno=Codici.id AND Orario.ID="+id+ 
+//				" AND (Codici.Codice = '31' OR Codici.Codice = '32' OR Codici.Codice ='91' OR Codici.Codice = '94')"+
+//				" AND Giorno >= "+beginDate+ " AND Giorno <= "+endDate);
+//
+//		ResultSet rsAbsences = stmtAbsences.executeQuery();
+//		int countVacation = 0, countVacationPastYear = 0, countRecovery = 0, countPermission = 0;
+//		while(rsAbsences.next()){
+//			if(rsAbsences.getString("Codice").equals("31"))
+//				countVacationPastYear = countVacationPastYear+ 1;
+//			if(rsAbsences.getString("Codice").equals("32"))
+//				countVacation = countVacation +1;
+//			if(rsAbsences.getString("Codice").equals("91"))
+//				countRecovery = countRecovery +1;
+//			if(rsAbsences.getString("Codice").equals("94"))
+//				countPermission = countPermission +1;
+//		}
+//		InitializationAbsence initAbsenceVacationPastYear = new InitializationAbsence();
+//		initAbsenceVacationPastYear.absenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", "31").first();
+//		initAbsenceVacationPastYear.person = person;
+//		initAbsenceVacationPastYear.date = new LocalDate(anno, 1, 1);
+//		initAbsenceVacationPastYear.absenceDays = countVacationPastYear;
+//		initAbsenceVacationPastYear.save();
+//		InitializationAbsence initAbsenceVacation = new InitializationAbsence();
+//		initAbsenceVacation.absenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", "32").first();
+//		initAbsenceVacation.person = person;
+//		initAbsenceVacation.date = new LocalDate(anno, 1, 1);
+//		initAbsenceVacation.absenceDays = countVacation;
+//		initAbsenceVacation.save();
+//		InitializationAbsence initAbsencePermission = new InitializationAbsence();
+//		initAbsencePermission.absenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", "94").first();
+//		initAbsencePermission.person = person;
+//		initAbsencePermission.date = new LocalDate(anno, 1, 1);
+//		initAbsencePermission.absenceDays = countPermission;
+//		initAbsencePermission.save();
 
 	}
 	
