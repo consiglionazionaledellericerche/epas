@@ -683,10 +683,14 @@ public class PersonMonth extends Model {
 //			PersonMonth perMon = new PersonMonth(person, year-1, 12);
 //			InitializationTime initTime = InitializationTime.find("Select init from InitializationTime init where init.person = ? and init.date = ?" +
 //					"", person, new LocalDate(year-1,12,31)).first();
-//			if(initTime != null)
+//			if(initTime != null){
 //				perMon.residualPastYear = initTime.residualMinutes;
-//			else
+//				perMon.save();
+//			}
+//			else{
 //				perMon.residualPastYear = 0;
+//				perMon.save();
+//			}
 //			return perMon;
 			return null;
 		}
