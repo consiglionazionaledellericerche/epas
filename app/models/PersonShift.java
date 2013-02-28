@@ -25,8 +25,8 @@ public class PersonShift extends Model{
 	@JoinColumn(name="person_id", unique=true, nullable=false, updatable=false)
 	public Person person;
 
-	@ManyToMany
-	public List<ShiftType> shiftTypes;
+	@OneToMany(mappedBy="personShift")
+	public List<PersonShiftShiftType> personShiftShiftType;
 	
 	@OneToMany(mappedBy="personShift", fetch=FetchType.LAZY)
 	public List<PersonShiftDay> personShiftDays = new ArrayList<PersonShiftDay>();
