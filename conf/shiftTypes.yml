@@ -23,37 +23,34 @@ ShiftType(b):
     type: B
     description: 'turno di tipo b'
 
-ShiftType(x):
-    type: X
-    description: 'turno annullato'
 
 # definizione dei turni
 PersonShift(vannozzi):
     person: 37
-    shiftTypes: [a, x]
+    shiftTypes: [a]
     jolly: false
     description: 'turni di Daniele Vannozzi'
             
 PersonShift(groppioni):
     person: 18
-    shiftTypes: [a, x]
+    shiftTypes: [a]
     jolly: false
     description: 'turni di Stefano Groppioni'
     
 PersonShift(serrecchia):
     person: 143
-    shiftTypes: [b, x]
+    shiftTypes: [b]
     jolly: false
     description: 'turni di Irma Serrecchia'
     
 PersonShift(pancrazi):
     person: 27
-    shiftTypes: [b, x]
+    shiftTypes: [b]
     jolly: false
     description: 'turni di Daniele Pancrazi'
             
 PersonShift(marinai):
     person: 24
-    shiftTypes: [a, b, x]
+    shiftTypes: [a, b]
     jolly: true
     description: 'turni di Mario Marinai'

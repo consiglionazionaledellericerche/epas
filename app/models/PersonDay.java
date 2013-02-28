@@ -265,7 +265,7 @@ public class PersonDay extends Model {
 		}
 
 		/**
-		 * caso in cui un giorno esista solo una timbratura di ingresso
+		 * caso in cui un giorno esista solo una timbratura 
 		 */
 		if(stampings.size()==1 && stampings.get(0).date.getHourOfDay() > config.hourMaxToCalculateWorkTime 
 				&& stampings.get(0).way == WayType.in){
@@ -484,7 +484,7 @@ public class PersonDay extends Model {
 				progressive = difference + lastPreviousPersonDayInMonth.progressive;
 				Logger.debug("%s - %s. Il PersonDay precedente è %s. Difference di oggi = %s, progressive = %s", person, date, lastPreviousPersonDayInMonth, difference, progressive);
 			}
-			this.save();
+			merge();
 		}
 
 	}

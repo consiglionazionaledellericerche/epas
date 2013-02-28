@@ -38,6 +38,7 @@ import com.google.gson.JsonParser;
 /**
  * @author arianna
  *
+ * Read data sent from the sist-org shift calendar
  */
 @Global
 public class JsonShiftPeriodsBinder implements TypeBinder<ShiftPeriods> {
@@ -69,32 +70,37 @@ public class JsonShiftPeriodsBinder implements TypeBinder<ShiftPeriods> {
 				LocalDate start = new LocalDate(jsonObject.get("start").getAsString());
 				LocalDate end = new LocalDate(jsonObject.get("end").getAsString());
 				
-				// validate person id
-				personId = jsonObject.get("id").getAsLong();
-				person = Person.findById(personId);
-				
-				if (person == null) {
-					throw new IllegalArgumentException(String.format("Person with id = %s not found", personId));
+				if (!jsonObject.get("cancelled").getAsBoolean()) {
+					// validate person id
+					personId = jsonObject.get("id").getAsLong();
+					person = Person.findById(personId);
+					Logger.debug("letto id = %s corrispondente a person = %s", personId, person.name);
+					if (person == null) {
+						throw new IllegalArgumentException(String.format("Person with id = %s not found", personId));
+					}
+					
+					// validate the time table
+					String[] hmsStart = jsonObject.get("time_table_start").getAsString().split(":");
+					String[] hmsEnd = jsonObject.get("time_table_end").getAsString().split(":");
+					
+					ShiftTimeTable shiftTimeTable = (ShiftTimeTable) JPA.em().createQuery("SELECT stt FROM ShiftTimeTable stt WHERE stt.startShift = :ldtStart")
+							.setParameter("ldtStart", new LocalDateTime(1970, 01, 01, Integer.parseInt(hmsStart[0]), Integer.parseInt(hmsStart[1])))
+							.getSingleResult();
+	
+					Logger.debug("shiftTimeTable = %s", shiftTimeTable);
+					if (shiftTimeTable == null) {
+						throw new IllegalArgumentException(String.format("shiftTimeTable whith startShift = %s and endShift = %s not found", hmsStart, hmsEnd));
+					}
+					
+					ShiftPeriod shiftPeriod =	new ShiftPeriod(person, start, end, shiftType, false, shiftTimeTable);
+					Logger.debug("Creato ShiftPeriod person = %s, start=%s, end=%s, shiftType=%s, shiftTimeTable=%s", person.name, start, end, shiftType, shiftTimeTable.description);
+					
+					shiftPeriods.add(shiftPeriod);
+				} else {
+					ShiftPeriod shiftPeriod =	new ShiftPeriod(start, end, shiftType, true);
+					shiftPeriods.add(shiftPeriod);
 				}
 				Logger.debug("letto id = %s corrispondente a person = %s", personId, person.name);
-				
-				// validate the time table
-				String[] hmsStart = jsonObject.get("time_table_start").getAsString().split(":");
-				String[] hmsEnd = jsonObject.get("time_table_end").getAsString().split(":");
-				
-				ShiftTimeTable shiftTimeTable = (ShiftTimeTable) JPA.em().createQuery("SELECT stt FROM ShiftTimeTable stt WHERE stt.startShift = :ldtStart")
-						.setParameter("ldtStart", new LocalDateTime(1970, 01, 01, Integer.parseInt(hmsStart[0]), Integer.parseInt(hmsStart[1])))
-						.getSingleResult();
-
-				Logger.debug("shiftTimeTable = %s", shiftTimeTable);
-				if (shiftTimeTable == null) {
-					throw new IllegalArgumentException(
-						String.format("shiftTimeTable whith startShift = %s and endShift = %s not found", hmsStart, hmsEnd));
-				}
-				
-				ShiftPeriod shiftPeriod =	new ShiftPeriod(person, start, end, shiftType, shiftTimeTable);
-				Logger.debug("Creato ShiftPeriod person = %s, start=%s, end=%s, shiftType=%s, shiftTimeTable=%s", person.name, start, end, shiftType, shiftTimeTable.description);
-				shiftPeriods.add(shiftPeriod);
 			}
 			
 			Logger.debug("shiftPeriods = %s", shiftPeriods);

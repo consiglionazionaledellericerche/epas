@@ -3,7 +3,7 @@
 CURRENT_DIR=`dirname "$0"`
 PROJECT_DIR=$CURRENT_DIR/../../
 
-DB_NAME=epas
+DB_NAME=epas-devel
 DB_USER=epas
 
 function log {
@@ -13,6 +13,7 @@ function log {
 cd $PROJECT_DIR
 
 play stop
+rm server.pid
 log "Stoppato il play"
 
 git pull origin master
