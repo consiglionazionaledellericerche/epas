@@ -719,7 +719,7 @@ public class FromMysqlToPostgres {
 		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT Orario.ID,Orario.Giorno,Orario.TipoGiorno,Orario.TipoTimbratura," + 	
 				"Orario.Ora, Codici.id, Codici.Codice, Codici.Qualifiche " +
 				"FROM Orario, Codici " +
-				"WHERE Orario.TipoGiorno=Codici.id and Orario.Giorno >= '2012-01-01' " +
+				"WHERE Orario.TipoGiorno=Codici.id and Orario.Giorno >= '2013-01-01' " +
 				"and Orario.ID = " + id + " ORDER BY Orario.Giorno");
 		ResultSet rs = stmtOrari.executeQuery();
 
@@ -918,19 +918,19 @@ public class FromMysqlToPostgres {
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmtResidualAndRecovery = mysqlCon.prepareStatement("SELECT * FROM totali_anno WHERE ID = ? and anno = ? limit 1");
 		stmtResidualAndRecovery.setLong(1, id);
-		stmtResidualAndRecovery.setInt(2, 2011);
+		stmtResidualAndRecovery.setInt(2, 2012);
 		ResultSet rs = stmtResidualAndRecovery.executeQuery();
 
 		if(rs != null){
 			while(rs.next()){
 				InitializationTime initTime = new InitializationTime();
 				InitializationAbsence initAbsence = new InitializationAbsence();
-				initTime.date = new LocalDate(2012,1,1);
+				initTime.date = new LocalDate(2013,1,1);
 				initTime.person = person;
 				initTime.residualMinutesPastYear = rs.getInt("residuo");
 				initTime.save();
 				initAbsence.person = person;
-				initAbsence.date = new LocalDate(2012,1,1);
+				initAbsence.date = new LocalDate(2013,1,1);
 				initAbsence.recoveryDays = rs.getInt("recg");
 				initAbsence.absenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", "91").first();
 				initAbsence.save();
