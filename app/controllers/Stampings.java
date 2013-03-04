@@ -64,7 +64,8 @@ public class Stampings extends Controller {
 			month = date.getMonthOfYear();
 		}
 		PersonMonth personMonth = PersonMonth.byPersonAndYearAndMonth(person, year, month);
-
+		if(personMonth == null)
+			personMonth = new PersonMonth(person, year, month);
 		int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
 		int numberOfInOut = Math.min(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
 

@@ -18,7 +18,6 @@ public class DateUtility {
 		
 		Logger.trace("configurazione: %s con localdate: %s", config, date);
 		
-		JPA.em().refresh(person);
 		if(person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).holiday)
 			return true;
 	
