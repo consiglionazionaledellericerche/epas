@@ -36,6 +36,8 @@ import org.joda.time.LocalDateTime;
 
 import play.Logger;
 import play.data.validation.Required;
+import play.db.jpa.JPA;
+import play.db.jpa.JPAPlugin;
 import play.db.jpa.Model;
 
 /**
@@ -231,13 +233,13 @@ public class PersonDay extends Model {
 				"st.date > ? and st.date < ? order by st.date", this, beginDate, endDate).fetch();
 		if(stampings.size() == 0){
 			timeAtWork = 0;
-			merge();
+			save();
 			return;
 		}
 		if((reloadedStampings.size() == 0 && this.absences.size() != 0) ||
 				(reloadedStampings.size()==1 && reloadedStampings.get(0).way == WayType.in)){
 			timeAtWork = 0;
-			merge();
+			save();
 			return;
 
 		}
@@ -263,7 +265,7 @@ public class PersonDay extends Model {
 				}
 			}
 			timeAtWork = workTime;
-			merge();
+			save();
 			return;
 		}
 
@@ -274,12 +276,12 @@ public class PersonDay extends Model {
 				&& stampings.get(0).way == WayType.in){
 			if(isHoliday()== false){
 				timeAtWork = -getWorkingTimeTypeDay().workingTime;
-				merge();
+				save();
 				return;
 			}
 			else{
 				timeAtWork = 0;
-				merge();
+				save();
 				return;
 			}
 		}
@@ -293,13 +295,13 @@ public class PersonDay extends Model {
 			if(stamp.way == WayType.in && reloadedStampings.get(1).way == WayType.out){
 				workingTime = -toMinute(stamp.date) + toMinute(reloadedStampings.get(1).date);
 				timeAtWork = workingTime;
-				merge();
+				save();
 				return;
 			}
 			if(stamp.way == WayType.in && reloadedStampings.get(1).way == WayType.in){
 				workingTime = -toMinute(reloadedStampings.get(1).date) + toMinute(reloadedStampings.get(2).date);
 				timeAtWork = workingTime;
-				merge();
+				save();
 				return;
 			}
 
@@ -372,7 +374,7 @@ public class PersonDay extends Model {
 			} else {
 				timeAtWork = tempoLavoro;	
 			}
-			merge();
+			save();
 			return;
 
 		}		
@@ -395,7 +397,7 @@ public class PersonDay extends Model {
 			} else {
 				timeAtWork = 0;	
 			}
-			merge();
+			save();
 			return;
 		}
 
@@ -461,7 +463,7 @@ public class PersonDay extends Model {
 		} else {
 			timeAtWork = tempoLavoro;	
 		}
-		merge();
+		save();
 
 		Logger.trace("PersonDay[%d] - personId = %s, date = %s. TimeAtWork is %d", id, person.id, date, timeAtWork);
 
@@ -487,7 +489,7 @@ public class PersonDay extends Model {
 				progressive = difference + lastPreviousPersonDayInMonth.progressive;
 				Logger.debug("%s - %s. Il PersonDay precedente è %s. Difference di oggi = %s, progressive = %s", person, date, lastPreviousPersonDayInMonth, difference, progressive);
 			}
-			merge();
+			save();
 		}
 
 	}
@@ -496,6 +498,7 @@ public class PersonDay extends Model {
 	 * chiama le funzioni di popolamento
 	 */
 	public void populatePersonDay(){
+		
 		Contract con = person.getContract(date);
 		//Se la persona non ha un contratto attivo non si fanno calcoli per quel giorno
 		//Le timbrature vengono comunque mantenute
@@ -658,7 +661,7 @@ public class PersonDay extends Model {
 	 * fatta all'interno di essa.
 	 */
 	private void setTicketAvailable(){
-
+		
 		if(isTicketForcedByAdmin)
 			return;
 		Logger.trace("Chiamata della setTicketAvailable, il timeAtWork per %s %s è: %s", person.name, person.surname, timeAtWork);
@@ -668,19 +671,22 @@ public class PersonDay extends Model {
 			return; 
 		}		
 
-		boolean ticketAvailable = false;
-
 		if(person.workingTimeType.description.equals("normale-mod") || person.workingTimeType.description.equals("normale")
 				|| person.workingTimeType.description.equals("80%") || person.workingTimeType.description.equals("85%")){
+			Logger.debug("Sono nella setTicketAvailable per %s %s", person.name, person.surname);
+			if(timeAtWork >= getWorkingTimeTypeDay().mealTicketTime){
+				isTicketAvailable=true;
 
-			if(timeAtWork >= getWorkingTimeTypeDay().mealTicketTime)
-				ticketAvailable=true;
-			else
-				ticketAvailable=false;
+			}
+			else{
+				isTicketAvailable=false;
+
+			}
 		}
+		Logger.debug("Per %s %s il buono è: %s", person.name, person.surname, isTicketAvailable);
 
-		isTicketAvailable = ticketAvailable;
-		Logger.trace("Quindi il valore del buono pasto è %s", isTicketAvailable);
+		Logger.debug("Il person day visualizzato è: %s", this);
+		
 		save();
 
 	}
@@ -714,12 +720,12 @@ public class PersonDay extends Model {
 			int minTimeWorking = getWorkingTimeTypeDay().workingTime;
 			Logger.debug("Time at work: %s. Tempo di lavoro giornaliero: %s", timeAtWork, minTimeWorking);
 			difference = timeAtWork - minTimeWorking;
-			merge();
+			save();
 		}
 		else{
 			
 			difference = timeAtWork;
-			merge();
+			save();
 			Logger.debug("Sto calcolando la differenza in un giorno festivo per %s %s e vale: %d", person.name, person.surname, difference);
 		}		
 				

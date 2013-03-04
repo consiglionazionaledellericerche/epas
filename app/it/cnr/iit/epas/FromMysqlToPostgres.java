@@ -705,6 +705,7 @@ public class FromMysqlToPostgres {
 
 	public static void createStampings(long id, Person p, int anno) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 		JPAPlugin.startTx(false);
+		
 		Person person = Person.findById(p.id);
 
 		Logger.debug("Inizio a creare le timbrature per %s", person);
@@ -748,6 +749,7 @@ public class FromMysqlToPostgres {
 					Logger.debug("Nuovo giorno %s per %s, prima si fanno i calcoli sul personday poi si crea quello nuovo", newData, person.toString());
 					Logger.debug("Il progressivo del personday del giorno appena trascorso da cui partire per fare i calcoli è: %s", pd.progressive);
 					PersonDay pdOld = PersonDay.findById(pd.id);
+					
 					pdOld.populatePersonDay();	
 					pdOld.merge();
 
