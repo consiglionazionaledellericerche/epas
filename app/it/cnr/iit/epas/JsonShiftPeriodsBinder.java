@@ -74,10 +74,10 @@ public class JsonShiftPeriodsBinder implements TypeBinder<ShiftPeriods> {
 					// validate person id
 					personId = jsonObject.get("id").getAsLong();
 					person = Person.findById(personId);
-					Logger.debug("letto id = %s corrispondente a person = %s", personId, person.name);
 					if (person == null) {
 						throw new IllegalArgumentException(String.format("Person with id = %s not found", personId));
 					}
+					Logger.debug("letto id = %s corrispondente a person = %s", personId, person.name);
 					
 					// validate the time table
 					String[] hmsStart = jsonObject.get("time_table_start").getAsString().split(":");
