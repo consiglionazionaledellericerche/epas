@@ -259,6 +259,12 @@ p#accumulo {margin: 1em 0em 0em}
 p#limiteAccumulo {margin: 1em 0em 0em}
 p#comportamentoAccumulo {margin: 1em 0em 0em}
 p#sostituzione {margin: 1em 0em 0em}
+p#dipartimento {margin: 1em 0em 0em}
+p#stanza {margin: 1em 0em 0em}
+p#sede {margin: 1em 0em 0em}
+p#telefono {margin: 1em 0em 0em}
+p#email {margin: 1em 0em 0em}
+p#nascita {margin: 1em 0em 0em}
 
 div#logout {text-align: right; float: right}
 div#chooseView {text-align: center}

@@ -184,7 +184,7 @@ public class FromMysqlToPostgres {
 
 			FromMysqlToPostgres.createVacationType(oldIDPersona, person);	
 
-			FromMysqlToPostgres.createYearRecap(oldIDPersona, person, anno);		
+			FromMysqlToPostgres.createInitializationTime(oldIDPersona, person, anno);		
 			
 			FromMysqlToPostgres.createPersonYear(oldIDPersona, person);
 
@@ -705,6 +705,7 @@ public class FromMysqlToPostgres {
 
 	public static void createStampings(long id, Person p, int anno) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 		JPAPlugin.startTx(false);
+		
 		Person person = Person.findById(p.id);
 
 		Logger.debug("Inizio a creare le timbrature per %s", person);
@@ -719,7 +720,7 @@ public class FromMysqlToPostgres {
 		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT Orario.ID,Orario.Giorno,Orario.TipoGiorno,Orario.TipoTimbratura," + 	
 				"Orario.Ora, Codici.id, Codici.Codice, Codici.Qualifiche " +
 				"FROM Orario, Codici " +
-				"WHERE Orario.TipoGiorno=Codici.id and Orario.Giorno >= '2012-01-01' " +
+				"WHERE Orario.TipoGiorno=Codici.id and Orario.Giorno >= '2013-01-01' " +
 				"and Orario.ID = " + id + " ORDER BY Orario.Giorno");
 		ResultSet rs = stmtOrari.executeQuery();
 
@@ -748,6 +749,7 @@ public class FromMysqlToPostgres {
 					Logger.debug("Nuovo giorno %s per %s, prima si fanno i calcoli sul personday poi si crea quello nuovo", newData, person.toString());
 					Logger.debug("Il progressivo del personday del giorno appena trascorso da cui partire per fare i calcoli è: %s", pd.progressive);
 					PersonDay pdOld = PersonDay.findById(pd.id);
+					
 					pdOld.populatePersonDay();	
 					pdOld.merge();
 
@@ -909,7 +911,7 @@ public class FromMysqlToPostgres {
 	}
 
 	@SuppressWarnings("deprecation")
-	public static void createYearRecap(long id, Person person, int anno) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
+	public static void createInitializationTime(long id, Person person, int anno) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
 
 		/**
 		 * query su totali_anno per recuperare lo storico da mettere in YearRecap
@@ -918,19 +920,19 @@ public class FromMysqlToPostgres {
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmtResidualAndRecovery = mysqlCon.prepareStatement("SELECT * FROM totali_anno WHERE ID = ? and anno = ? limit 1");
 		stmtResidualAndRecovery.setLong(1, id);
-		stmtResidualAndRecovery.setInt(2, 2011);
+		stmtResidualAndRecovery.setInt(2, 2012);
 		ResultSet rs = stmtResidualAndRecovery.executeQuery();
 
 		if(rs != null){
 			while(rs.next()){
 				InitializationTime initTime = new InitializationTime();
 				InitializationAbsence initAbsence = new InitializationAbsence();
-				initTime.date = new LocalDate(2011,12,31);
+				initTime.date = new LocalDate(2013,1,1);
 				initTime.person = person;
-				initTime.residualMinutes = rs.getInt("residuo");
+				initTime.residualMinutesPastYear = rs.getInt("residuo");
 				initTime.save();
 				initAbsence.person = person;
-				initAbsence.date = new LocalDate(2011,12,31);
+				initAbsence.date = new LocalDate(2013,1,1);
 				initAbsence.recoveryDays = rs.getInt("recg");
 				initAbsence.absenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", "91").first();
 				initAbsence.save();
