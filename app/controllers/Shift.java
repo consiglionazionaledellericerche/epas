@@ -53,11 +53,10 @@ public class Shift extends Controller{
 	 */
 	public static void find(){
 		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
-		Logger.debug("Sono nella find");
 		
 		// type validation
 		String type = params.get("type");
-		ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();;
+		ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();
 		if (shiftType == null) {
 			notFound(String.format("ShiftType type = %s doesn't exist", type));			
 		}
