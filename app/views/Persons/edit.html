@@ -74,33 +74,35 @@
 		</tr>
 		%{ } }%
 	</table>
-
+	<p id="stanza">Ore di inizializzazione maturate in altro istituto l'anno passato (in minuti): <input name="minutesPastYear" type="text" value="${initTime.residualMinutesPastYear}" size="10" /></p>
+	<p id="stanza">Ore di inizializzazione maturate in altro istituto nell'anno corrente (in minuti): <input name="minutesCurrentYear" type="text" value="${initTime.residualMinutesCurrentYear}" size="10" /></p>
+	
 </fieldset>
 
 <fieldset>
 	<legend>Informazioni di ubicazione e contatti</legend>
 	<input type="hidden" name="location.person_id" value="${person.id}" />
-	<p>
+	<p id="dipartimento">
 		Dipartimento <input name="department" type="text"
 			value="${person.location.department}" size="20" maxlength="100" />
 	</p>
-	<p>
+	<p id="sede">
 		Sede <input name="headOffice" type="text"
 			value="${person.location.headOffice}" size="20" maxlength="200" />
 	</p>
-	<p>
+	<p id="stanza">
 		Stanza <input name="room" type="text" value="${person.location.room}"
 			size="20" maxlength="200" />
 	</p>
-	<p>
+	<p id="telefono">
 		Telefono <input name="telephone" type="text"
 			value="${person.contactData.telephone}" size="20" maxlength="200" />
 	</p>
-	<p>
+	<p id="email">
 		Email <input name="email" type="text"
 			value="${person.contactData.email}" size="20" maxlength="200" />
 	</p>
-	<p>
+	<p id="nascita">
 		Data di nascita <input name="bornDate" type="text"
 			value="${person.bornDate}" size="20" maxlength="200" />
 	</p>

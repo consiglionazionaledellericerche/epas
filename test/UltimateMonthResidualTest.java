@@ -6,6 +6,7 @@ import org.junit.Test;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import models.InitializationTime;
 import models.Person;
 import models.PersonMonth;
 
@@ -41,7 +42,8 @@ public class UltimateMonthResidualTest {
 		@Getter
 		public int straordinari;
 
-			
+		public InitializationTime initializationTime;
+		
 		public PersonMonthUltimate(int year, int month) {
 			super(new Person(),year,month);
 		}
@@ -66,9 +68,10 @@ public class UltimateMonthResidualTest {
 		 * 	dall'anno precedente
 		 */
 		public int totaleResiduoAnnoCorrenteAlMesePrecedente() {
+			int residuo = 0;
 			//Deve esistere un mese precedente ed essere dello stesso anno (quindi a gennaio il mese precedente di questo anno non esiste)
 			if (mesePrecedente != null && month != 1) {
-				return mesePrecedente.totaleResiduoAnnoCorrenteAFineMese();
+				return residuo + mesePrecedente.totaleResiduoAnnoCorrenteAFineMese();
 			}
 			return 0;
 
@@ -100,16 +103,33 @@ public class UltimateMonthResidualTest {
 			return residuoAnnoPrecedenteDisponibileAllaFineDelMese;
 		}
 	
+		public int residuoAnnoCorrenteDaInizializzazione() {
+			if (initializationTime != null && (initializationTime.date.isBefore(new LocalDate(year, month, 1).dayOfMonth().withMaximumValue())) &&
+					initializationTime.date.getYear() == year.intValue() && initializationTime.date.getMonthOfYear() == month.intValue()) {
+					return initializationTime.residualMinutesCurrentYear;
+			}
+			return 0;
+		}
+
+		public int residuoAnnoPrecedenteDaInizializzazione() {
+			if (initializationTime != null && (initializationTime.date.isBefore(new LocalDate(year, month, 1).dayOfMonth().withMaximumValue())) &&
+					initializationTime.date.getYear() == year.intValue() && initializationTime.date.getMonthOfYear() == month.intValue() && 
+					possibileUtilizzareResiduoAnnoPrecedente()) {
+					return initializationTime.residualMinutesPastYear;
+			}
+			return 0;
+		}
+
 		public int totaleResiduoAnnoCorrenteAFineMese() {
-			return residuoDelMese() + totaleResiduoAnnoCorrenteAlMesePrecedente() + riposiCompensativiDaAnnoCorrente - straordinari - recuperiOreDaAnnoPrecedente;  
+			return residuoDelMese() + totaleResiduoAnnoCorrenteAlMesePrecedente() + residuoAnnoCorrenteDaInizializzazione() + riposiCompensativiDaAnnoCorrente - straordinari - recuperiOreDaAnnoPrecedente;  
 		}
 		
 		public int totaleResiduoAnnoCorrenteAllaData(LocalDate date) {
-			return residuoDelMeseAllaData(date) + totaleResiduoAnnoCorrenteAlMesePrecedente() + riposiCompensativiDaAnnoCorrente - straordinari - recuperiOreDaAnnoPrecedente;  
+			return residuoDelMeseAllaData(date) + totaleResiduoAnnoCorrenteAlMesePrecedente() + residuoAnnoCorrenteDaInizializzazione() + riposiCompensativiDaAnnoCorrente - straordinari - recuperiOreDaAnnoPrecedente;  
 		}
 		
 		public int totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese() {
-			return totaleResiduoAnnoCorrenteAFineMese() + residuoAnnoPrecedenteDisponibileAllaFineDelMese();
+			return totaleResiduoAnnoCorrenteAFineMese() + residuoAnnoPrecedenteDisponibileAllaFineDelMese() + residuoAnnoPrecedenteDaInizializzazione();
 		}
 		
 		public void aggiornaRiepiloghi() {
