@@ -45,4 +45,57 @@ public class Competence extends Model {
 		return String.format("Competence[%d] - person.id = %d, competenceCode.id = %d, year = %d, month = %d,value = %d",
 			id, person.id, competenceCode.id, year, month, valueApproved);
 	}
+
+	public Competence(Person person, CompetenceCode competenceCode, int year, int month) {
+		super();
+		this.person = person;
+		this.competenceCode = competenceCode;
+		this.year = year;
+		this.month = month;
+	}
+
+	public Competence() {
+		super();
+	}
+	
+	public int getYear() {
+		return year;
+	}
+
+	public void setYear(int year) {
+		this.year = year;
+	}
+
+	public int getMonth() {
+		return month;
+	}
+
+	public void setMonth(int month) {
+		this.month = month;
+	}
+
+	public int getValueApproved() {
+		return valueApproved;
+	}
+
+	public void setValueApproved(int valueApproved) {
+		this.valueApproved = valueApproved;
+	}
+
+	public int getValueRequest() {
+		return valueRequest;
+	}
+
+	public String getReason() {
+		return reason;
+	}
+	
+	public void setRequest(int valueRequest, String reason) {
+		this.valueRequest = valueRequest;
+		this.reason = reason;
+	}
+
+
+	
+	
 }
