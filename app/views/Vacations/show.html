@@ -9,7 +9,7 @@
 
 <div align="left">
 #{form @Vacations.show()}
-	
+<input type="hidden" name="personId" value="${yearRecap.person.id}" />	
 <table id="ferie">
 	<tr>
 		<th colspan=2 class="ferieFatte">Ferie fatte</th>
@@ -31,7 +31,7 @@
 	</tr>
 	<tr>
 	
-		<td><a href="vacations.html" class="example3demo">${yearRecap.vacationDaysLastYear()}</a> 
+		<td><a href="@{Vacations.vacationsLastYear(yearRecap.person, yearRecap.year)}" class="example3demo">${yearRecap.vacationDaysLastYear()}</a> 
 				<script type="text/javascript"> 
 				$('.example3demo').popupWindow({ 
 					height:500, 
@@ -40,7 +40,7 @@
 					left:50 
 				}); 
 				</script></td>
-		<td><a href="vacationsCurrentYear.html" class="example3demo">${yearRecap.vacationDaysCurrentYear()}</a> 
+		<td><a href="@{Vacations.vacationsCurrentYear(yearRecap.person, yearRecap.year)}" class="example3demo">${yearRecap.vacationDaysCurrentYear()}</a> 
 				<script type="text/javascript"> 
 				$('.example3demo').popupWindow({ 
 					height:500, 
