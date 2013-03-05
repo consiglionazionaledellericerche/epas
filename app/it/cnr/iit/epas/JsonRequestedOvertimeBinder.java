@@ -9,8 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import models.Competence;
+import models.CompetenceCode;
 import models.Person;
-import models.PersonReperibilityType;
+import models.exports.PersonsCompetences;
 import models.exports.ReperibilityPeriod;
 import models.exports.ReperibilityPeriods;
 
@@ -25,12 +27,13 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+
 /**
- * @author cristian
+ * @author arianna
  *
  */
 @Global
-public class JsonReperibilityPeriodsBinder implements TypeBinder<ReperibilityPeriods> {
+public class JsonRequestedOvertimeBinder implements TypeBinder<PersonsCompetences> {
 
 	/**
 	 * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[], java.lang.String, java.lang.Class, java.lang.reflect.Type)
@@ -38,45 +41,43 @@ public class JsonReperibilityPeriodsBinder implements TypeBinder<ReperibilityPer
 	@Override
 	public Object bind(String name, Annotation[] annotations, String value,	Class actualClass, Type genericType) throws Exception {
 		
-		Logger.debug("binding ReperibilityPeriods: %s, %s, %s, %s, %s", name, annotations, value, actualClass, genericType);
+		Logger.debug("binding ReperibilityCompetence: %s, %s, %s, %s, %s", name, annotations, value, actualClass, genericType);
 		try {
-			
-			List<ReperibilityPeriod> reperibilityPeriods = new ArrayList<ReperibilityPeriod>();
+			List<Competence> personsCompetences = new ArrayList<Competence>();
 			
 			JsonArray jsonArray = new JsonParser().parse(value).getAsJsonArray();
 			Logger.debug("jsonArray = %s", jsonArray);
 
 			JsonObject jsonObject = null;
 			Person person = null;
-			//PersonReperibilityType reperibilityType = null;
-			
-			Long personId = null;
-			//Long reperibilityTypeId = null;
+			String personEmail = "";
 			
 			for (JsonElement jsonElement : jsonArray) {
 				
 				jsonObject = jsonElement.getAsJsonObject();
 				Logger.trace("jsonObject = %s", jsonObject);
 				
-				personId = jsonObject.get("id").getAsLong();
-				person = Person.findById(personId);
-				if (person == null) {
-					throw new IllegalArgumentException(String.format("Person with id = %s not found", personId));
-				}
-
-				LocalDate start = new LocalDate(jsonObject.get("start").getAsString());
-				LocalDate end = new LocalDate(jsonObject.get("end").getAsString());
+				personEmail = jsonObject.get("email").getAsString();
 				
-				ReperibilityPeriod reperibilityPeriod =	new ReperibilityPeriod(person, start, end);
-				reperibilityPeriods.add(reperibilityPeriod);
+				person = Person.find("SELECT p FROM Person p WHERE p.contactData.email = ?", personEmail).first();
+				if (person == null) {
+					throw new IllegalArgumentException(String.format("Person with email = %s doesn't exist", personEmail));			
+				}
+				Logger.debug("Find persons %s with email %s", person.name, personEmail);
+				
+				CompetenceCode competenceCode = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", "S1").first();
+				Competence competence =	new Competence(person, competenceCode, 0, 0);
+				competence.setRequest(jsonObject.get("ore").getAsInt(), jsonObject.get("motivazione").getAsString());
+				
+				personsCompetences.add(competence);
 			}
 			
-			Logger.debug("reperibilityPeriods = %s", reperibilityPeriods);
+			Logger.debug("personsCompetence = %s", personsCompetences);
 			
-			return new ReperibilityPeriods(reperibilityPeriods);
+			return new PersonsCompetences(personsCompetences);
 			
 		} catch (Exception e) {
-			Logger.error(e, "Problem during binding List<ReperibilityPeriod>.");
+			Logger.error(e, "Problem during binding List<Competence>.");
 			throw e;
 		}
 	}

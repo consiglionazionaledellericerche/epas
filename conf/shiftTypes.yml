@@ -15,6 +15,7 @@ Person(24):
     id: 24
 
 # tipologie di turno
+#------------------------
 ShiftType(a):
     type: A
     description: 'turno di tipo a'
@@ -24,7 +25,9 @@ ShiftType(b):
     description: 'turno di tipo b'
 
 
-# definizione dei turni
+# definizione dei turnisti
+#------------------------
+
 PersonShift(vannozzi):
     person: 37
     shiftTypes: [a]
@@ -54,3 +57,69 @@ PersonShift(marinai):
     shiftTypes: [a, b]
     jolly: true
     description: 'turni di Mario Marinai'
+
+    	
+# definizione dei turni
+#------------------------
+
+
+
+
+#
+# Turni in corso
+#
+
+# groppioni	
+PersonShiftShiftType (groppioni):
+	personShift: groppioni
+	shiftTypes: [a]
+	beginDate: 2013-01-01
+	endDate
+
+PersonShiftShiftType (serrecchia):
+	personShift: serrecchia
+	shiftTypes: [a]
+	beginDate: 2013-03-01
+	endDate:
+
+PersonShiftShiftType (vannozzi):
+	personShift: vannozzi
+	shiftTypes: [b]
+	beginDate: 2013-03-01
+	endDate:		
+
+# pancrazi		
+PersonShiftShiftType (pancrazi):
+	personShift: pancrazi
+	shiftTypes: [b]
+	beginDate: 2013-01-01
+	endDate: 
+	
+# marinai
+PersonShiftShiftType (marinai):
+	personShift: marinai
+	shiftTypes: [a, b]
+	beginDate: 2013-01-01
+	endDate:
+
+#
+# Turni passati (non più in corso)
+#
+
+# vannozzi
+PersonShiftShiftType (vannozzi_old):
+	personShift: vannozzi
+	shiftTypes: [a]
+	beginDate: 2013-01-01
+	endDate: 2013-02-28
+	
+# serrecchia
+PersonShiftShiftType (serrecchia_old):
+	personShift: serrecchia
+	shiftTypes: [b]
+	beginDate: 2013-01-01
+	endDate: 2013-02-28
+
+	
+
+	

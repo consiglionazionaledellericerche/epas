@@ -16,7 +16,7 @@
 			<table class="mensile">
 			<caption> Reperibilità del personale per il mese di ${firstOfMonth.plusMonths(mm).monthOfYear().getAsText()} ${firstOfMonth.plusMonths(mm).year().getAsText()}</caption>
 			<tr>
-				<td class="no-border"></td><th colspan="2"> Feriali - Cod: ${codFr}</th> <th colspan="2"> Festivi - Cod: ${codFs}</th>
+				<td class="no-border"></td><th colspan="2"> Feriali - Cod: ${codFr}</th> <th colspan="2" class="red"> Festivi - Cod: ${codFs}</th>
 			</tr>
 			<tr>
 				<th>Nome dipendente  </th> <th> Date </th> <th> Num. giorni</th> <th> Date </th> <th>Num. giorni</th>
@@ -45,7 +45,7 @@
     					}
 					}%
 				</td>
-				<td> ${reperibilitySumDays.contains(person, "FS") ? reperibilitySumDays.get(person, "FS") : ''}</td>
+				<td class="red"> ${reperibilitySumDays.contains(person, "FS") ? reperibilitySumDays.get(person, "FS") : ''}</td>
 			</tr>
 
 			%{
@@ -54,7 +54,7 @@
 			</table>
       		</div>
       		<div class="date">
-      			<trong>Data ________________ </trong>
+      			<strong>Data</strong> &nbsp;&nbsp;${today.getDayOfMonth()}/${today.getMonthOfYear()}/${today.getYear()}
       		</div>
       		<div class="firma dir">
       			<strong>Il Direttore</strong> <br />

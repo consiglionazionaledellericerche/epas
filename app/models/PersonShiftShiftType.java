@@ -35,9 +35,10 @@ public class PersonShiftShiftType extends Model {
 	public ShiftType shiftType;
 	
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
-	public LocalDate begin;
+	@Column(name="begin_date")
+	public LocalDate beginDate;
 	
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="end_date")
-	public LocalDate end;
+	public LocalDate endDate;
 }

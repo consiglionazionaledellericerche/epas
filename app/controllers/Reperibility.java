@@ -421,11 +421,13 @@ public class Reperibility extends Controller {
 		class PRP {
 			int inizio;
 			int fine;
+			String mese;
 			String tipo;
 			
-			public PRP (int inizio, int fine, String tipo) {
+			public PRP (int inizio, int fine, String mese, String tipo) {
 				this.inizio = inizio;
 				this.fine = fine;
+				this.mese = mese;
 				this.tipo = tipo;
 			}
 			
@@ -434,8 +436,9 @@ public class Reperibility extends Controller {
 				art.add(1);
 				art.add(11);
 				art.add(8);
-				String articolo = (art.contains(inizio)) ? "l'" : "il";
-				return (inizio == fine) ? String.format("%s%d", articolo, inizio) : String.format("dal %d al %d", inizio, fine);
+				//String articolo = (art.contains(inizio)) ? "l'" : "il";
+				//return (inizio == fine) ? String.format("%s%d", articolo, inizio) : String.format("dal %d al %d", inizio, fine);
+				return (inizio == fine) ? String.format("%d / %s", inizio, mese) : String.format("%d-%d / %s", inizio, fine, mese);
 			}
 		}
 		class PRD {
@@ -454,6 +457,8 @@ public class Reperibility extends Controller {
 		}
 			
 		LocalDate firstOfMonth = new LocalDate(year, month, 1);
+		String shortMonth = firstOfMonth.monthOfYear().getAsShortText();
+		
 		List<PersonReperibilityDay> personReperibilityDays = 
 			JPA.em().createQuery("SELECT prd FROM PersonReperibilityDay prd WHERE date BETWEEN :firstOfMonth AND :endOfMonth AND reperibilityType = :reperibilityType ORDER by date")
 			.setParameter("firstOfMonth", firstOfMonth)
@@ -502,7 +507,7 @@ public class Reperibility extends Controller {
 					if ((previousPersonReperibilityDay == null) || 
 						(!reperibilityMonth.get(person, dayOfMonth).equals(previousPersonReperibilityDay.tipo)) ||
 						((dayOfMonth - 1) != previousPersonReperibilityDay.giorno)) { 		
-							currentPersonReperibilityPeriod = new PRP (dayOfMonth, dayOfMonth, reperibilityMonth.get(person, dayOfMonth));
+							currentPersonReperibilityPeriod = new PRP (dayOfMonth, dayOfMonth, shortMonth, reperibilityMonth.get(person, dayOfMonth));
 					
 							if (currentPersonReperibilityPeriod.tipo == "fs") {
 								fsPeriods.add(currentPersonReperibilityPeriod);
@@ -527,7 +532,9 @@ public class Reperibility extends Controller {
 		String codFr = codeFR.code;
 		String codFs = codeFS.code;
 		
-		renderPDF(firstOfMonth, reperibilitySumDays, reperibilityDateDays, codFs, codFr);
+		LocalDate today = new LocalDate();
+		
+		renderPDF(today, firstOfMonth, reperibilitySumDays, reperibilityDateDays, codFs, codFr);
 	}
 
 	
@@ -599,8 +606,7 @@ public class Reperibility extends Controller {
 			if ( startDate == null) {
 				Logger.trace("Nessun periodo, nuovo periodo: startDate=%s", date);
 				
-				startDate = date;
-				endDate = date;
+				startDate = endDate = date;
 				sequence = 1;
 				continue;
 			} 
@@ -608,8 +614,7 @@ public class Reperibility extends Controller {
 			if ( date.getTime() - endDate.getTime() > 86400*1000 ) {
 				Logger.trace("Termine periodo: startDate=%s, sequence=%s", startDate, sequence);
 				icsCalendar.getComponents().add(createICalEvent(startDate, sequence));
-				startDate = date;
-				endDate = date;
+				startDate = endDate = date;
 				sequence = 1;
 				Logger.trace("Nuovo periodo: startDate=%s", date);
 			} else {
