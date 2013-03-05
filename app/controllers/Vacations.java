@@ -80,30 +80,58 @@ public class Vacations extends Controller{
 //    	vacations(Security.getPerson());
 //    }
 	
-	@Check({Security.VIEW_PERSONAL_SITUATION, Security.INSERT_AND_UPDATE_VACATIONS})
-	private static void vacationsCurrentYear(Person person){
-    	String anno = params.get("year");
+	//@Check({Security.VIEW_PERSONAL_SITUATION, Security.INSERT_AND_UPDATE_VACATIONS})
+	public static void vacationsCurrentYear(Long personId, Integer anno){
+		Person person = null;
+		if(personId != null)
+    		person = Person.findById(personId);
+    	else
+    		person = Security.getPerson();
+		//String year = params.get("year");
     	Logger.trace("Anno: "+anno);
     	
     	if(anno==null){
-    		        	
+    		
         	LocalDate now = new LocalDate();
         	YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)now.getYear());
             render(yearRecap);
     	}
     	else{
     		Logger.info("Sono dentro il ramo else della creazione del month recap");
-    		Integer year = new Integer(params.get("year"));
+    		//Integer year = params.get("year", Integer.class);
 			
-    		YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)year.intValue());
+    		YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)anno.intValue());
     		    		
             render(yearRecap);
     	}
 	}
 	
-	@Check({Security.VIEW_PERSONAL_SITUATION, Security.INSERT_AND_UPDATE_VACATIONS})
-	public static void vacationsCurrentYear() {
-    	vacationsCurrentYear(Security.getPerson());
-    }
+//	@Check({Security.VIEW_PERSONAL_SITUATION, Security.INSERT_AND_UPDATE_VACATIONS})
+//	public static void vacationsCurrentYear() {
+//    	vacationsCurrentYear(Security.getPerson());
+//    }
+	
+	//@Check({Security.VIEW_PERSONAL_SITUATION, Security.INSERT_AND_UPDATE_VACATIONS})
+	public static void vacationsLastYear(Long personId, Integer anno){
+		Person person = null;
+    	if(personId != null)
+    		person = Person.findById(personId);
+    	else
+    		person = Security.getPerson();
+    	if(anno==null){
+        	
+        	LocalDate now = new LocalDate();
+        	YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)now.getYear());
+            render(yearRecap);
+    	}
+    	else{
+    		Logger.info("Sono dentro il ramo else della creazione del month recap");
+    		//Integer year = new Integer(params.get("year"));
+			
+    		YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)anno.intValue());
+    		    		
+            render(yearRecap);
+    	}
+	}
 	
 }

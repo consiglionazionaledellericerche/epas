@@ -494,11 +494,28 @@ public class YearRecap extends Model{
 	public List<Absence> listVacationDaysLastYear(){
 		LocalDate beginLastYear = new LocalDate(year-1,1,1);
 		LocalDate endLastYear = new LocalDate(year-1,12,31);
+		LocalDate beginYear = new LocalDate(year, 1, 1);
 		LocalDate now = new LocalDate();
-		
-		List<Absence> absence = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? " +
-				"and (abs.date between ? and ? and abs.absenceType = abt and abt.code = ? or abs.date between ? and ? and abs.absenceType = abt and abt.code = ?)", 
-				person, beginLastYear, endLastYear, "32", getBeginYear(), now,  "31").fetch();
+		List<Absence> absence = new ArrayList<Absence>();
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+				person, beginLastYear, endLastYear).fetch();
+		for(PersonDay pd : pdList){
+			if(pd.absences.size() > 0){
+				if(pd.absences.get(0).absenceType.equals("32"))
+					absence.add(pd.absences.get(0));
+			}
+		}
+		List<PersonDay> pdListNow = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+				person, beginYear, now).fetch();
+		for(PersonDay pd : pdListNow){
+			if(pd.absences.size() > 0){
+				if(pd.absences.get(0).absenceType.equals("31"))
+					absence.add(pd.absences.get(0));
+			}
+		}
+//		Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? " +
+//				"and (abs.date between ? and ? and abs.absenceType = abt and abt.code = ? or abs.date between ? and ? and abs.absenceType = abt and abt.code = ?)", 
+//				person, beginLastYear, endLastYear, "32", getBeginYear(), now,  "31").fetch();
 		return absence;
 	}
 	
@@ -510,9 +527,16 @@ public class YearRecap extends Model{
 	 */
 	public List<Absence> listVacationDaysCurrentYear(){
 		LocalDate now = new LocalDate();
+		List<Absence> absence = new ArrayList<Absence>();
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+				person, getBeginYear(), now).fetch();
+		for(PersonDay pd : pdList){
+			if(pd.absences.size() > 0){
+				if(pd.absences.get(0).absenceType.equals("32"))
+					absence.add(pd.absences.get(0));
+			}
+		}	
 		
-		List<Absence> absence = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? " +
-				"and abs.date between ? and ? and abs.absenceType = abt and abt.code = ?", person, getBeginYear(), now, "32").fetch();
 		return absence;
 	}
 	
