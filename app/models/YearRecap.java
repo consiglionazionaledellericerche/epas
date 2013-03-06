@@ -45,14 +45,14 @@ import play.db.jpa.Model;
 @Entity
 @Table(name = "year_recaps")
 public class YearRecap extends Model{
-	
+
 	private static final long serialVersionUID = -5721503493068567394L;
 
 	@Required
 	@ManyToOne
 	@JoinColumn(name = "person_id")
 	public Person person;
-	
+
 	@Required
 	@Column
 	public short year;
@@ -74,18 +74,18 @@ public class YearRecap extends Model{
 	public int recm;
 	@Column
 	public Timestamp lastModified;
-	
+
 	@Transient
 	private List<String> months = null;
 	@Transient
 	private Map<AbsenceType,Integer> mappaAssenze = new HashMap<AbsenceType,Integer>();
-	
+
 	@Transient
 	private LocalDate beginYear;
-		
+
 	protected YearRecap(){
-		
-		
+
+
 	}
 	/**
 	 * Construttore di default con i parametri obbligatori
@@ -100,9 +100,9 @@ public class YearRecap extends Model{
 			) {
 		this.person = person;
 		this.year = year;	
-				
+
 	}
-	
+
 	/**
 	 * Preleva dallo storage le il YearRecap relativo ai dati passati.
 	 * Se il yearRecap non è presente sul db ritorna un'istanza vuota
@@ -124,21 +124,21 @@ public class YearRecap extends Model{
 		if (yearRecap == null) {
 			return new YearRecap(person, year);
 		}
-		
+
 		return yearRecap;
 	}
-	
+
 	private LocalDate getBeginYear(){
 		if(beginYear == null)
 			beginYear = new LocalDate(year,1,1);
 		return beginYear;
 	}
-	
+
 
 	/**
 	 * QUI INIZIA LA PARTE DELLE FUNZIONI CHE MI SERVONO PER IL CALCOLO DELLE ASSENZE ANNUALI CHE LA PERSONA HA FATTO
 	 */
-	
+
 	/**
 	 * @return la lista di giorni (PersonDay) associato alla persona nel mese di riferimento
 	 */
@@ -149,7 +149,7 @@ public class YearRecap extends Model{
 		}
 		months = new ArrayList<String>();
 		LocalDate firstMonthOfYear = new LocalDate(year, 1,1);
-		
+
 		for(int month = 1; month <= firstMonthOfYear.getMonthOfYear(); month++){
 			String mese = firstMonthOfYear.monthOfYear().getAsText();
 			months.add(mese);
@@ -157,7 +157,7 @@ public class YearRecap extends Model{
 		}
 		return months;
 	}
-	
+
 	/**
 	 * 
 	 * @param month
@@ -201,10 +201,10 @@ public class YearRecap extends Model{
 		if(month.equalsIgnoreCase("dicembre")){
 			numberOfMonth = 12;
 		}
-		
+
 		return numberOfMonth;
 	}
-	
+
 	/**
 	 * 
 	 * @param year, month
@@ -215,7 +215,7 @@ public class YearRecap extends Model{
 		LocalDate date = new LocalDate(year, numberOfMonth, 1);
 		return date.dayOfMonth().withMaximumValue().getDayOfMonth();
 	}
-	
+
 	/**
 	 * 
 	 * @param year
@@ -240,10 +240,10 @@ public class YearRecap extends Model{
 				}
 			}
 		}		
-		
+
 		return absencesInDay;
 	}
-	
+
 	/**
 	 * 
 	 * @return la mappa contenente le assenze fatte dalla persona nell'anno con i relativi codici d'assenza e descrizioni
@@ -274,20 +274,20 @@ public class YearRecap extends Model{
 					mappaAssenze.remove(absenceType);
 					mappaAssenze.put(absenceType, i+1);
 				}
-				
-					
+
+
 			}
 		}
-		
+
 		Logger.warn("mappaAssenze: " +mappaAssenze);
 		return mappaAssenze;
 	}
-	
+
 	/**
 	 * QUI INIZIA LA PARTE DI FUNZIONI RELATIVE AL CALCOLO DELLE FERIE IN UN ANNO, SIA TRA QUELLE PREVISTE DA CONTRATTO, SIA TRA QUELLE
 	 * CHE NON SONO STATE UTILIZZATE TRA QUELLE DELL'ANNO PRECEDENTE.
 	 */
-	
+
 	/**
 	 * 
 	 * @return il numero di giorni di ferie maturati nell'anno corrente con l'ausilio di un metodo di codifica privato
@@ -299,15 +299,15 @@ public class YearRecap extends Model{
 		LocalDate beginContract = contract.beginContract;
 		LocalDate now = new LocalDate();
 		now.withYear(year);
-		
-	//	int difference = now.getYear()-beginContract.getYear();
-	//	Logger.warn("difference is:" +difference+ "now.getYear is: "+now.getYear()+ "beginContract.getYear is: "+beginContract.getYear());
+
+		//	int difference = now.getYear()-beginContract.getYear();
+		//	Logger.warn("difference is:" +difference+ "now.getYear is: "+now.getYear()+ "beginContract.getYear is: "+beginContract.getYear());
 		if(now.getYear()-beginContract.getYear() < 3){
 			if(now.getYear()-beginContract.getYear() < 1 && beginContract.getMonthOfYear() != 1 && beginContract.getDayOfMonth() != 1){
 				LocalDate newDate = now.minusYears(beginContract.getYear()).minusMonths(beginContract.getMonthOfYear()).minusDays(beginContract.getDayOfMonth());
 				days = newDate.getDayOfMonth();
 				vacationDays = VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysLessThreeYears(days);
-				
+
 			}
 			else{
 				days = now.getDayOfYear();
@@ -318,10 +318,10 @@ public class YearRecap extends Model{
 			days = now.getDayOfYear();
 			vacationDays = VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysMoreThreeYears(days);
 		}
-		
+
 		return vacationDays;
 	}
-	
+
 	/**
 	 * 
 	 * @return il numero di giorni di permesso legge maturati nell'anno corrente
@@ -332,13 +332,13 @@ public class YearRecap extends Model{
 		LocalDate now = new LocalDate();
 		now.withYear(year);
 		days = now.getDayOfYear();
-		
+
 		permissionDays = VacationsPermissionsDaysAccrued.convertWorkDaysToPermissionDays(days);
 		return permissionDays;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * 
 	 * @return il numero di giorni di ferie avanzati da quelli maturati l'anno precedente e non ancora utilizzati
@@ -367,14 +367,14 @@ public class YearRecap extends Model{
 		if(contract.beginContract != null && contract.beginContract.getYear()==year-1){
 			days = daysBetweenTwoDates(contract.beginContract, endLastYear);
 		}
-		
+
 		/**
 		 * a questo punto ho il numero di giorni dell'anno passato in cui quella persona ha lavorato e posso quindi vedere quanti giorni di
 		 * ferie gli spettavano l'anno precedente
 		 */
-		
+
 		int vacationDaysAccrued = VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysLessThreeYears(days);
-		
+
 		//recupero dal db le assenze fatte l'anno precedente che hanno codice 5 ovvero quelle con causale "ferie anno corrente"		
 		int vacationDaysPastYear = 0;
 
@@ -384,15 +384,15 @@ public class YearRecap extends Model{
 			if(pd.absences.size() == 1 && pd.absences.get(0).absenceType.code.equals("32"))
 				vacationDaysPastYear ++;
 		}
-				
+
 		//con questa query vado a prendere il piano ferie previsto per la persona da cui vado a estrarre il numero di giorni di ferie 
 		//ad essa attribuiti
 
 		int residualVacationDays = vacationDaysAccrued-vacationDaysPastYear;
-		
+
 		return residualVacationDays;
 	}
-		
+
 	/**
 	 * 
 	 * @param begin
@@ -401,10 +401,10 @@ public class YearRecap extends Model{
 	 */
 	private int daysBetweenTwoDates(LocalDate begin, LocalDate end){
 		int diffInDays = (int)(end.toDate().getTime() - begin.toDate().getTime()) 
-                / (1000 * 60 * 60 * 24);
+				/ (1000 * 60 * 60 * 24);
 		return diffInDays;
 	}
-	
+
 	/**
 	 * 
 	 * @return il numero di giorni di permesso che la persona ha da contratto
@@ -416,8 +416,8 @@ public class YearRecap extends Model{
 		permissionDays = vacCode.permissionDays;
 		return permissionDays;
 	}
-	
-	
+
+
 	/**
 	 * 
 	 * @return i giorni di permesso che, a oggi, la persona ha utilizzato
@@ -431,12 +431,12 @@ public class YearRecap extends Model{
 			if(pd.absences.size() == 1 && pd.absences.get(0).absenceType.code.equals("94"))
 				permissionDays++;
 		}
-//		List<Absence> absence = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? and " +
-//				"abs.date between ? and ? and abs.absenceType = abt and abt.code = ?", person, getBeginYear(), now, "94").fetch();
-//		permissionDays = absence.size();
+		//		List<Absence> absence = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? and " +
+		//				"abs.date between ? and ? and abs.absenceType = abt and abt.code = ?", person, getBeginYear(), now, "94").fetch();
+		//		permissionDays = absence.size();
 		return permissionDays;
 	}
-	
+
 	/**
 	 * 
 	 * @return il numero di giorni di permesso che la persona ha da contratto
@@ -451,7 +451,7 @@ public class YearRecap extends Model{
 			vacationDays = 0;
 		return vacationDays;
 	}
-	
+
 	/**
 	 * 
 	 * @param currentYear
@@ -467,79 +467,78 @@ public class YearRecap extends Model{
 		List<PersonDay> pdListPast = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 				person, beginLastYear, endLastYear).fetch();
 		for(PersonDay pd : pdListPast){
-			if(pd.absences.size() == 1 && pd.absences.get(0).absenceType.code.equals("31")){
+			if(pd.absences.size() == 1 && pd.absences.get(0).absenceType.code.equals("32")){
 				vacationDaysLastYear++;
 			}
 		}
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 				person, getBeginYear(), now).fetch();
 		for(PersonDay pd : pdList){
-			if(pd.absences.size() == 1 && pd.absences.get(0).absenceType.code.equals("32")){
+			if(pd.absences.size() == 1 && pd.absences.get(0).absenceType.code.equals("31")){
 				vacationDaysLastYear++;
 			}
 		}
-//		List<Absence> absence = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? " +
-//				"and (abs.date between ? and ? and abs.absenceType = abt and abt.code = ? or abs.date between ? and ? and abs.absenceType = abt and abt.code = ?)", 
-//				person, beginLastYear, endLastYear, "32", getBeginYear(), now,  "31").fetch();
-//		vacationDaysLastYear = absence.size();
+
 		return vacationDaysLastYear;
 	}
-	
+
 	/**
 	 * 
 	 * @param currentYear
 	 * @return la lista delle assenze che utilizzerò nella finestra di popup per elencare le date in cui sono state fatte le assenze
 	 * 
 	 */
-	public List<Absence> listVacationDaysLastYear(){
+	public List<PersonDay> listVacationDaysLastYear(){
 		LocalDate beginLastYear = new LocalDate(year-1,1,1);
 		LocalDate endLastYear = new LocalDate(year-1,12,31);
 		LocalDate beginYear = new LocalDate(year, 1, 1);
 		LocalDate now = new LocalDate();
-		List<Absence> absence = new ArrayList<Absence>();
+		List<PersonDay> vacations = new ArrayList<PersonDay>();
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 				person, beginLastYear, endLastYear).fetch();
 		for(PersonDay pd : pdList){
-			if(pd.absences.size() > 0){
-				if(pd.absences.get(0).absenceType.equals("32"))
-					absence.add(pd.absences.get(0));
-			}
+			if(pd.absences.size() > 0 && pd.absences.get(0).absenceType.code.equals("32"))
+				vacations.add(pd);			
 		}
 		List<PersonDay> pdListNow = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 				person, beginYear, now).fetch();
 		for(PersonDay pd : pdListNow){
-			if(pd.absences.size() > 0){
-				if(pd.absences.get(0).absenceType.equals("31"))
-					absence.add(pd.absences.get(0));
-			}
+
+			if(pd.absences.size() > 0 && pd.absences.get(0).absenceType.code.equals("31"))
+				vacations.add(pd);
+
 		}
-//		Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? " +
-//				"and (abs.date between ? and ? and abs.absenceType = abt and abt.code = ? or abs.date between ? and ? and abs.absenceType = abt and abt.code = ?)", 
-//				person, beginLastYear, endLastYear, "32", getBeginYear(), now,  "31").fetch();
-		return absence;
+		//		Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? " +
+		//				"and (abs.date between ? and ? and abs.absenceType = abt and abt.code = ? or abs.date between ? and ? and abs.absenceType = abt and abt.code = ?)", 
+		//				person, beginLastYear, endLastYear, "32", getBeginYear(), now,  "31").fetch();
+		Logger.debug("Il numero di ferie dell'anno  scorso è: %s", vacations.size());
+		return vacations;
 	}
-	
+
 	/**
 	 * 
 	 * @return la lista delle assenze che utilizzerò nella finestra di popup per elencare le date in cui sono state fatte le assenze
 	 * con codice "32"
 	 *  
 	 */
-	public List<Absence> listVacationDaysCurrentYear(){
+	public List<PersonDay> listVacationDaysCurrentYear(){
 		LocalDate now = new LocalDate();
-		List<Absence> absence = new ArrayList<Absence>();
+		List<PersonDay> vacations = new ArrayList<PersonDay>();
+		Logger.debug("La persona di cui si chiedono le ferie di quest'anno è: %s %s", person.name, person.surname);
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 				person, getBeginYear(), now).fetch();
+		
 		for(PersonDay pd : pdList){
-			if(pd.absences.size() > 0){
-				if(pd.absences.get(0).absenceType.equals("32"))
-					absence.add(pd.absences.get(0));
+			
+			if(pd.absences.size() > 0 && pd.absences.get(0).absenceType.code.equals("32")){
+				vacations.add(pd);
+				
 			}
 		}	
-		
-		return absence;
+		Logger.debug("Il numero di ferie di quest'anno è: %s", vacations.size());
+		return vacations;
 	}
-	
+
 	/**
 	 * 
 	 * @return il numero di giorni di ferire per l'anno corrente. Il numero di giorni di ferie corrisponde a tutte quelle giornate di
@@ -554,17 +553,15 @@ public class YearRecap extends Model{
 			if(pd.absences.size() == 1 && pd.absences.get(0).absenceType.code.equals("32"))
 				vacationDaysCurrentYear ++;
 		}
-//		List<Absence> absence = Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? " +
-//				"and abs.date between ? and ? and abs.absenceType = abt and abt.code = ?", person, getBeginYear(), now, "32").fetch();
-//		vacationDaysCurrentYear = absence.size();
+
 		return vacationDaysCurrentYear;
 	}
-	
+
 	@Override
 	public String toString() {
 		return String.format("YearRecap[%d] - person.id = %d, year = %d, overtime = %d, overtimeAp = %d, remaining = %d, remainingAp = %d, recg = %d, recgap = %d, " +
 				"recguap = %d, recm = %d",
 				id, person.id, year, overtime, overtimeAp, remaining, remainingAp, recg, recgap, recguap, recm);
 	}
-	
+
 }

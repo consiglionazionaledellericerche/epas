@@ -164,6 +164,7 @@
 
 <p>Riepilogo delle ore di lavoro in eccesso/difetto:</p> 
 <p> - E' possibile utilizzare il residuo dell'anno precedente? ${personMonth.possibileUtilizzareResiduoAnnoPrecedente()==true ? 'sì' : 'no'}</p>
+<p> - Eventuale residuo da inizializzazione: ${personMonth.residuoAnnoPrecedenteDaInizializzazione().toHourTime()}</p>
 <p> - Residuo anno precedente disponibile a inizio mese: ${personMonth.residuoAnnoPrecedenteDisponibileAllInizioDelMese().toHourTime()}</p>
 <p> - Residuo tempo di lavoro dei mesi precedenti: ${personMonth.totaleResiduoAnnoCorrenteAlMesePrecedente().toHourTime()}</p> 
 <p> - Residuo del mese:  ${personMonth.residuoDelMese().toHourTime()}</p>

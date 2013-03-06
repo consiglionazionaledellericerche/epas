@@ -838,7 +838,11 @@ public class PersonMonth extends Model {
 		
 		int residuoAllaDataRichiesta = residuoDelMese();
 		
-		int tempoDisponibile = residuoAnnoPrecedenteDisponibileAllaFineDelMese() + mesePrecedente().totaleResiduoAnnoCorrenteAFineMese() + residuoAllaDataRichiesta;
+		int tempoDisponibile = 0;
+		if(mesePrecedente() != null)
+			tempoDisponibile = residuoAnnoPrecedenteDisponibileAllaFineDelMese() + mesePrecedente().totaleResiduoAnnoCorrenteAFineMese() + residuoAllaDataRichiesta;
+		else
+			tempoDisponibile = residuoAnnoPrecedenteDisponibileAllaFineDelMese() + residuoAnnoPrecedenteDaInizializzazione() + residuoAllaDataRichiesta;
 		
 		if (tempoDisponibile <= 0) {
 			return 0;
