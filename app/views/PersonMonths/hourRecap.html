@@ -24,7 +24,7 @@
 	%{for(entry in mapMonthSituation.entrySet()){
 	}%<tr>
 		<td><span class="capitalized">&{'views.tags.display.date.month.' + entry.getKey()}</span></td>
-		<td>${entry.getValue().get(0)}</td>
+		<td>${entry.getValue().get(0).toHourTime()}</td>
 		<td>${entry.getValue().get(1).toHourTime()}</td>
 		<td>${entry.getValue().get(2).toHourTime()}</td>
 		<td>${entry.getValue().get(3).toHourTime()}</td>

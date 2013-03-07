@@ -64,9 +64,12 @@ public class PersonMonths extends Controller{
 			 * aggiungo tutti gli elementi alla lista
 			 */
 			lista = new ArrayList<Integer>();
-			lista.add(0, 0);
+			if(pm != null && pm.possibileUtilizzareResiduoAnnoPrecedente() && pm.residuoAnnoPrecedenteDaInizializzazione() != 0)
+				lista.add(0, pm.residuoAnnoPrecedenteDaInizializzazione());
+			else
+				lista.add(0, 0);
 			if(month == 1)
-				lista.add(1, 0);
+				lista.add(1, pm.residuoAnnoCorrenteDaInizializzazione());
 			else{
 				if(pm != null)
 					lista.add(1, pm.mesePrecedente().residuoDelMese());
@@ -81,7 +84,7 @@ public class PersonMonths extends Controller{
 				if(month == 1)
 					lista.add(3, 0+pm.residuoAnnoPrecedente());
 				else
-					lista.add(3, pm.mesePrecedente().residuoDelMese()+pm.residuoAnnoPrecedente());
+					lista.add(3, pm.mesePrecedente().residuoDelMese()+pm.residuoAnnoPrecedente()+pm.residuoAnnoPrecedenteDaInizializzazione());
 			}
 			else{
 				lista.add(3, 0);

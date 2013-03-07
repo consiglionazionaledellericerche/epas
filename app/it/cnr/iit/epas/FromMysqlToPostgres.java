@@ -247,13 +247,13 @@ public class FromMysqlToPostgres {
 				con.beginContract = new LocalDate(1970,1,1);
 				con.save();
 			}
-			else{
-				con = new Contract();
-				con.beginContract = new LocalDate(1970,1,1);
-				con.person = p;
-				con.onCertificate = true;
-				con.save();
-			}
+//			else{
+//				con = new Contract();
+//				con.beginContract = new LocalDate(1970,1,1);
+//				con.person = p;
+//				con.onCertificate = true;
+//				con.save();
+//			}
 		}
 	}
 
@@ -1220,6 +1220,24 @@ public class FromMysqlToPostgres {
 		pd.absences.add(absence);
 		pd.merge();
 		Logger.debug("Creata %s", absence);
+		if(absenceType.code.equals("91")){
+			Logger.debug("Trovato riposo compensativo per %s %s nel giorno %s. Proseguo con i calcoli...", 
+					pd.person.name, pd.person.surname, pd.date);
+			PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? and pm.month = ?", 
+					pd.person, pd.date.getYear(), pd.date.getMonthOfYear()).first();
+			if(pm == null){
+				Logger.debug("Il person month era nullo, lo devo creare");
+				pm = new PersonMonth(pd.person, pd.date.getYear(), pd.date.getMonthOfYear());
+				
+			}
+			pm.prendiRiposoCompensativo(pd.date);
+			pm.save();
+			Logger.debug("Assegnato riposo compensativo e salvato person month per %s %s", pd.person.name, pd.person.surname);
+			Logger.debug("Il valore dei riposi compensativi è: %s per anno corrente e %s per anno passato", 
+					pm.riposiCompensativiDaAnnoCorrente, pm.riposiCompensativiDaAnnoPrecedente);
+			
+		}
+			
 		//createAbsence(pd, absenceType);
 	}
 

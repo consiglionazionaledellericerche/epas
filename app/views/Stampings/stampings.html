@@ -108,7 +108,7 @@
 <p> - Residuo del mese:  ${personMonth.residuoDelMese().toHourTime()}</p>
 <p> - Tempo disponibile per straordinari: ${personMonth.tempoDisponibilePerStraordinari().toHourTime()}</p>
 <p> - Totale residuo anno corrente a fine mese:  ${personMonth.totaleResiduoAnnoCorrenteAFineMese().toHourTime()}</p>
-<p> - Giorni di riposo compensativo: ${personMonth.getCompensatoryRest()} per un totale di: -${(personMonth.getCompensatoryRestInMinutes()).toHourTime()} ore</p>
+<p> - Giorni di riposo compensativo: ${personMonth.getCompensatoryRest()} per un totale di: -${(personMonth.getCompensatoryRestInMinutes(personMonth.getCompensatoryRest())).toHourTime()} ore</p>
 <p> - Totale residuo a fine mese  <strong>${personMonth.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese().toHourTime()} ore</strong></p>
 
 

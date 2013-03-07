@@ -45,10 +45,15 @@ public class NavigationMenu extends Controller {
 			persons = new ArrayList<Person>();
 			List<Person> genericPerson = Person.find("Select p from Person p order by p.surname").fetch();
 			for(Person p : genericPerson){
+				Logger.debug("Cerco il contratto per %s %s per stabilire se metterlo/a in lista", p.name, p.surname);
 				Contract c = Contract.find("Select c from Contract c where c.person = ? and ((c.beginContract != null and c.expireContract = null) or " +
 						"(c.expireContract > ?) or (c.beginContract = null and c.expireContract = null)) order by c.beginContract desc limit 1", p, now).first();
-				if(c != null && c.onCertificate == true)
+				//Logger.debug("Il contratto per %s %s è: %s", p.name, p.surname, c.toString());
+				if(c != null && c.onCertificate == true){
 					persons.add(p);
+					Logger.debug("Il contratto rispecchia i criteri quindi %s %s va in lista", p.name, p.surname);
+				}
+				
 			}
 //			persons = Person.find("Select distinct p from Person p, Contract c where c.person = p and c.onCertificate = ? " +
 //					"order by p.surname", true).fetch();
