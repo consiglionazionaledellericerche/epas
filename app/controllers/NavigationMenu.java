@@ -47,7 +47,7 @@ public class NavigationMenu extends Controller {
 			for(Person p : genericPerson){
 				Logger.debug("Cerco il contratto per %s %s per stabilire se metterlo/a in lista", p.name, p.surname);
 				Contract c = Contract.find("Select c from Contract c where c.person = ? and ((c.beginContract != null and c.expireContract = null) or " +
-						"(c.expireContract > ?) or (c.beginContract = null and c.expireContract = null)) order by c.beginContract desc limit 1", p, now).first();
+						"(c.expireContract > ?) or (c.beginContract = null and c.expireContract = null)) order by c.beginContract desc limit 1", p, new LocalDate(year,month,1)).first();
 				//Logger.debug("Il contratto per %s %s è: %s", p.name, p.surname, c.toString());
 				if(c != null && c.onCertificate == true){
 					persons.add(p);
