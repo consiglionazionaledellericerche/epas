@@ -77,10 +77,10 @@
 			
 			%{
 			if(day.stampingList().size()==2 ){
-	         }% <td class="tempoLavoro">${day.isHoliday()==false ? day.convertTimeAtWork(day.timeAtWork).toCalendarTime() : ''} <strong>${day.timeAtWork>360 ? day.checkTimeForLunch()?.code : ''}</strong></td>
+	         }% <td class="tempoLavoro">${day.isHoliday()==false ? day.timeAtWork.toHourTime() : ''} <strong>${day.timeAtWork>360 ? day.checkTimeForLunch()?.code : ''}</strong></td>
 			%{
 			 }else{
-			 }% <td class="tempoLavoro">${day.isHoliday()==false ? day.convertTimeAtWork(day.timeAtWork).toCalendarTime() : ''} <strong>${day.stampingList().size()==4 && !day.stampingList().contains(null) && day.timeAtWork>300
+			 }% <td class="tempoLavoro">${day.isHoliday()==false ? day.timeAtWork.toHourTime() : ''} <strong>${day.stampingList().size()==4 && !day.stampingList().contains(null) && day.timeAtWork>300
 			 && day.checkMinTimeForLunch()<30 ? day.checkTimeForLunch()?.code : ''}</strong></td>
 			%{
 	         }

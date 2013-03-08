@@ -182,7 +182,11 @@ public class Stampings extends Controller {
 
 		LocalDate date = new LocalDate(year,month,day);
 		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
-
+		if(pd == null){
+			pd = new PersonDay(person, date);
+			pd.create();
+		}
+		
 		if(pd.stampings.size() == 0 && pd.isHoliday()){
 			flash.error("Si sta inserendo una timbratura in un giorno di festa. Errore");
 			render("@create", personId, year, month, day);
@@ -209,6 +213,7 @@ public class Stampings extends Controller {
 		pd.populatePersonDay();
 		pd.save();
 		flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
+		//render("@create");
 		Application.indexAdmin();
 
 	}
