@@ -153,7 +153,8 @@ public class PersonDay extends Model {
 		 */
 		PersonUtility.checkExitStampNextDay(this);
 		if((stampings.size() == 0 && absences.size() == 0) || (stampings.size() == 1 && stampings.get(0).way == WayType.in)){
-			timeAtWork = (-1)*getWorkingTimeTypeDay().workingTime;
+			//timeAtWork = (-1)*getWorkingTimeTypeDay().workingTime;
+			timeAtWork = 0;
 			save();
 			return;
 		}
@@ -579,11 +580,11 @@ public class PersonDay extends Model {
 			return;
 		}
 
-		if(timeAtWork == 0){
-			difference = 0;
-			save();
-			return;
-		}
+//		if(timeAtWork == 0){
+//			difference = 0;
+//			save();
+//			return;
+//		}
 
 		if(getWorkingTimeTypeDay().holiday == false){
 			int minTimeWorking = getWorkingTimeTypeDay().workingTime;
