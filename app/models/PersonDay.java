@@ -288,34 +288,87 @@ public class PersonDay extends Model {
 				Stamping s = reloadedStampings.get(0);
 				if(s.date.getDayOfMonth()==now.getDayOfMonth() && s.date.getMonthOfYear()==now.getMonthOfYear() && 
 						s.date.getYear()==now.getYear()){
-					if(reloadedStampings.size() == 3 || reloadedStampings.size() == 1){	
-						int nowToMinute = toMinute(now);
-						int workingTime=0;
-						for(Stamping st : reloadedStampings){
-							if(st.way == Stamping.WayType.in)
-								workingTime -= toMinute(st.date);				
-							if(st.way == Stamping.WayType.out)
-								workingTime += toMinute(st.date);
+					int workingTime=0;
+					int nowToMinute = toMinute(now);
+					if(reloadedStampings.size() == 3 || reloadedStampings.size() == 1){						
+						//int numberOfServiceExit = 0;
+						for(int i = 0; i < reloadedStampings.size(); i++){
+							if(reloadedStampings.get(i).way == Stamping.WayType.in && reloadedStampings.get(i).stampType != null){
+								if(reloadedStampings.get(i-1) != null && reloadedStampings.get(i-1).stampType != null){
+									//c'è stata un'uscita di servizio, questo è il corrispondente ingresso come lo calcolo?
+									workingTime = workingTime + (toMinute(reloadedStampings.get(i).date) - toMinute(reloadedStampings.get(i-1).date));
+								}
+								else{
+									//si fa un'entrata di servizio...ad esempio quando siamo in reperibilità?
+								}
+							}
+							else{
+								workingTime -= toMinute(reloadedStampings.get(i).date);
+							}
+												
+							if(reloadedStampings.get(i).way == Stamping.WayType.out && reloadedStampings.get(i).stampType != null){
+								if(reloadedStampings.get(i-1) != null && reloadedStampings.get(i-1).stampType != null){
+									//uscita di servizio, dopo un ingresso di servizio...come si gestisce??
+								}
+								else{
+									workingTime += toMinute(reloadedStampings.get(i).date);
+								}
+							}
+								
+							else{
+								workingTime += toMinute(reloadedStampings.get(i).date);
+							}
 							if(workingTime < 0)
 								tempoLavoro = nowToMinute + workingTime;										
 							else 
 								tempoLavoro = nowToMinute - workingTime;																		
 						}								
-					}				
+					}
+					
 				}				
 				else{
 					int workTime=0;
-					for(Stamping st : reloadedStampings){
-						if(st.way == Stamping.WayType.in){
-							workTime -= toMinute(st.date);									
-							Logger.trace("Timbratura di ingresso: %s", workTime);	
+					for(int i = 0; i < reloadedStampings.size(); i++){
+						if(reloadedStampings.get(i).way == Stamping.WayType.in && reloadedStampings.get(i).stampType != null){
+							if(reloadedStampings.get(i-1) != null && reloadedStampings.get(i-1).stampType != null){
+								//c'è stata un'uscita di servizio, questo è il corrispondente ingresso come lo calcolo? aggiungendo il tempo
+								//trascorso fuori per servizio come tempo di lavoro
+								workTime = workTime + (toMinute(reloadedStampings.get(i).date) - toMinute(reloadedStampings.get(i-1).date));
+							}
+							else{
+								//la precedente timbratura non è di servizio, siamo nel caso di un ingresso di servizio...come si fa?
+							}
 						}
-						if(st.way == Stamping.WayType.out){
-							workTime += toMinute(st.date);								
-							Logger.trace("Timbratura di uscita: %s", workTime);
+						else{
+							//timbratura normale di ingresso
+							workTime -= toMinute(reloadedStampings.get(i).date);
 						}
-
+						if(reloadedStampings.get(i).way == Stamping.WayType.out && reloadedStampings.get(i).stampType != null){
+							if(reloadedStampings.get(i-1) != null && reloadedStampings.get(i-1).stampType != null){
+								//come va gestito??
+							}
+							else{
+								//uscita di servizio si gestisce normalmente nel caso la timbratura precedente non fosse un ingresso di 
+								//servizio
+								workTime += toMinute(reloadedStampings.get(i).date);
+							}
+						}
+						else{
+							//timbratura normale di uscita
+							workTime += toMinute(reloadedStampings.get(i).date);
+						}
 					}
+//					for(Stamping st : reloadedStampings){
+//						if(st.way == Stamping.WayType.in){
+//							workTime -= toMinute(st.date);									
+//							Logger.trace("Timbratura di ingresso: %s", workTime);	
+//						}
+//						if(st.way == Stamping.WayType.out){
+//							workTime += toMinute(st.date);								
+//							Logger.trace("Timbratura di uscita: %s", workTime);
+//						}
+//
+//					}
 					int minTimeForLunch = checkMinTimeForLunch();
 					if((reloadedStampings.size()==4) && (minTimeForLunch < getWorkingTimeTypeDay().breakTicketTime) && (!reloadedStampings.contains(null)))
 						tempoLavoro = workTime - (getWorkingTimeTypeDay().breakTicketTime-minTimeForLunch);							

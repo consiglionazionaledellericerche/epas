@@ -85,6 +85,7 @@
 					${day.stampings.get(j).date.toCalendarTime()}
 					</a>
 				<strong>${(day.stampingList().get(j).stampModificationType?.code)}</strong> 
+				<strong>${(day.stampingList().get(j).stampType?.identifier)}</strong>
 				<script type="text/javascript"> 
 				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
 				height:500, 
@@ -107,7 +108,8 @@
 					<a href="@{Stampings.edit(day.getStampings().get(j+1).id)}" class="insertStamping${day.date.dayOfMonth}">
 					${day.stampingList().get(j+1).date.toCalendarTime()}
 					</a>
-					<strong>${(day.stampingList().get(j+1).stampModificationType?.code)}</strong> 
+					<strong>${(day.stampingList().get(j+1).stampModificationType?.code)}</strong>
+					<strong>${(day.stampingList().get(j+1).stampType?.identifier)}</strong> 
 				<script type="text/javascript"> 
 				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
 				height:500, 
@@ -193,7 +195,17 @@
      }
      
 }%
-
+%{	if(personMonth.getStampType() != null){
+	for(type in personMonth.getStampType()) {
+}%
+	<tr>
+		<td>${type.identifier}</td>
+		<td>${type.description}</td>
+	</tr>
+%{  		   
+     }
+    }
+}%
 </table>
 *{Significato codici assenza}*
 <br>
