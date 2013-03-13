@@ -35,7 +35,8 @@ public class StampType extends Model {
 	@Required
 	@MinLength(value=2)
 	public String description;	
-
+	
+	public String identifier;
 	
 	@OneToMany(mappedBy="stampType")
 	public Set<Stamping> stampings; 

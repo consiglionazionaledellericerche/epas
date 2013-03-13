@@ -59,7 +59,7 @@
 					${day.stampings.get(j).date.toCalendarTime()}
 				<!--  	</a> -->
 				${(day.stampingList().get(j).stampModificationType?.code)} 
-
+				${(day.stampingList().get(j).stampType != null ? day.stampingList().get(j).stampType.identifier : '')}
 					%{ } }%
 				</td>
 				
@@ -69,7 +69,7 @@
 					${day.stampingList().get(j+1).date.toCalendarTime()}
 				<!--  	</a> -->
 					${(day.stampingList().get(j+1).stampModificationType?.code)} 
-
+				${(day.stampingList().get(j).stampType != null ? day.stampingList().get(j).stampType.identifier : '')}
 					%{ } }%
 				</td>
 			
@@ -134,7 +134,17 @@
      }
      
 }%
-
+%{	if(personMonth.getStampType() != null){
+	for(type in personMonth.getStampType()) {
+}%
+	<tr>
+		<td>${type.identifier}</td>
+		<td>${type.description}</td>
+	</tr>
+%{  		   
+     }
+    }
+}%
 </table>
 
 <br>

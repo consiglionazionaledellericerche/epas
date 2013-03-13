@@ -528,6 +528,27 @@ public class PersonMonth extends Model {
 		Logger.debug("La lista degli stamping code per questo mese contiene: %s", stampingCodeList);
 		return stampCodeList;
 	}
+	
+	/**
+	 * 
+	 * @return la lista di eventuali stampType presenti nelle timbrature (es.: timbrature per ingresso/uscita di servizio
+	 */
+	public List<StampType> getStampType(){
+		if(days==null){
+			days= getDays();
+		}
+		List<StampType> stampTypeList = new ArrayList<StampType>();
+		StampType type = StampType.find("Select st from StampType st where st.identifier = ?", "s").first();
+		for(PersonDay pd : days){
+			for(Stamping st : pd.stampings){
+				
+				if(st.stampType != null && !stampTypeList.contains(type)){
+					stampTypeList.add(type);
+				}
+			}
+		}
+		return stampTypeList;
+	}
 
 	/**
 	 * 

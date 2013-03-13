@@ -14,6 +14,7 @@ import models.Person;
 import models.PersonDay;
 import models.PersonMonth;
 import models.PersonTags;
+import models.StampType;
 import models.Stamping;
 import models.Stamping.WayType;
 
@@ -196,10 +197,17 @@ public class Stampings extends Controller {
 		Logger.debug("I parametri per costruire la data sono: anno: %s, mese: %s, giorno: %s, ora: %s, minuti: %s", year, month, day, hour, minute);
 
 		String type = params.get("type");
+		String service = params.get("service");
 		Stamping stamp = new Stamping();
 		stamp.date = new LocalDateTime(year, month, day, hour, minute, 0);
 		stamp.markedByAdmin = true;
-		stamp.note = "timbratura inserita dall'amministratore";
+		if(service.equals("true")){
+			stamp.note = "timbratura di servizio";
+			stamp.stampType = StampType.find("Select st from StampType st where st.code = ?", "motiviDiServizio").first();
+		}
+		else{
+			stamp.note = "timbratura inserita dall'amministratore";
+		}
 		if(type.equals("true")){
 			stamp.way = Stamping.WayType.in;
 		}
