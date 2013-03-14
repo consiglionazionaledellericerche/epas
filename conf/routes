@@ -135,6 +135,10 @@ GET		/totalOvertimeHours/{year}/{month}		Competences.totalOvertimeHours
 POST	/totalOvertimeHours/					Competences.saveOvertime
 GET		/overtime/{year}/{month}				Competences.overtime
 
+#Gestione attestati di presenza
+GET		/uploadSituation/						UploadSituation.show
+POST	/uploadSituation/						UploadSituation.uploadSituation
+
 
 
 #Gestione reperibilità

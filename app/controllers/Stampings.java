@@ -129,7 +129,7 @@ public class Stampings extends Controller {
 		Logger.debug("Le ore di straordinario da inizio anno sono: %s", overtimeHour);
 
 		int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
-		int numberOfInOut = Math.min(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
+		int numberOfInOut = Math.max(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
 
 		render(personMonth, numberOfInOut, previousPersonMonth, numberOfCompensatoryRest, overtimeHour, person);
 

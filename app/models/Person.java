@@ -468,6 +468,14 @@ public class Person extends Model {
 		}
 		return false;
 	}
+	
+	public boolean isUploadSituationAvailable(){
+		for(Permission p : this.permissions){
+			if(p.description.equals(Security.UPLOAD_SITUATION))
+				return true;
+		}
+		return false;
+	}
 
 	/**
 	 * 

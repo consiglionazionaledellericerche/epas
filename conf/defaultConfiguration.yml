@@ -4,7 +4,7 @@ Configuration(defaultConfiguration):
     endDate: 2014-01-01
     instituteName: IIT
     emailToContact:
-    seatCode:
+    seatCode: 223400
     urlToPresence:
     userToPresence:
     passwordToPresence:
