@@ -265,6 +265,7 @@ p#sede {margin: 1em 0em 0em}
 p#telefono {margin: 1em 0em 0em}
 p#email {margin: 1em 0em 0em}
 p#nascita {margin: 1em 0em 0em}
+p#caricamentoSituazioneMensile {margin: 1em 0em 2em; text-align: center}
 
 div#logout {text-align: right; float: right}
 div#chooseView {text-align: center}
@@ -272,6 +273,8 @@ div#cambiaPassword {margin: 3em 60em 2em; text-align: left}
 div#annullaPassword {margin: 1em 60em 2em; text-align: left}
 div#gestioneParametri {margin: 1em 4em 1em; text-align: left}
 div#spiegazioneValoriGrassetto {margin: 1em 4em 1em}
+div#caricamentoSituazioneMensile {text-align: center}
+
 h2#titoloSituazionePresenzeMensili {text-align: center}
 h2#titoloSituazioneAssenzeMensili {text-align: center}
 h2#titoloSituazioneAssenzeAnnuali {text-align: center}
@@ -307,6 +310,7 @@ h3#modificaCodiceCompetenza {margin: 2em 0em 2em; text-align: center}
 h3#monteOreStraordinario {margin: 2em 0em 1em; text-align: left}
 h3#titoloStraordinari {margin: 2em 0em 1em; text-align: left}
 h3#titoloCambioPassword {text-align: center}
+h3#caricamentoSituazioneMensile {text-align: center}
 
 h4#configurazioniEsistenti {margin:2em 0em 1em; text-align: left}
 
@@ -337,6 +341,7 @@ input#submitEditPerson {margin: 2em 60em 0em; align left}
 input#discardEditPerson {margin: 1em 60em 0em; align: center}
 input#deletePerson {margin: 1em 60em 0em; align: right}
 input#modificaContratto {margin: 1em 25em 0em; align: center}
+input#submitSituation {margin: 2em 67em 0em; align: center}
 
 input#updateOldOvertime {margin: 0em 25em 0em; align: center}
 table#tabellaPersoneCodiciAssenzaMensili {margin: 2em 1em 1em; align: left}

@@ -61,6 +61,7 @@ public class Administrators extends Controller {
 		String insertAndUpdateAdministrator = params.get("insertAndUpdateAdministrator");
 		String insertAndUpdateCompetences = params.get("insertAndUpdateCompetences");
 		String insertAndUpdateVacations = params.get("insertAndUpdateVacations");
+		String uploadSituation = params.get("uploadSituation");
 		
 		if(person.permissions.size() > 0){
 			person.permissions.clear();
@@ -142,6 +143,12 @@ public class Administrators extends Controller {
 					person.permissions.add(p);
 			}
 		}
+		if(uploadSituation.equals("true")){
+			for(Permission p : permissionList){
+				if(p.description.equals("uploadSituation"))
+					person.permissions.add(p);
+			}
+		}
 		
 		person.save();
 		flash.success(String.format("Aggiornati permessi per %s %s con successo", person.name, person.surname));
@@ -196,6 +203,7 @@ public class Administrators extends Controller {
 		String insertAndUpdateAdministrator = params.get("insertAndUpdateAdministrator");
 		String insertAndUpdateVacations = params.get("insertAndUpdateVacations");
 		String insertAndUpdateCompetences = params.get("insertAndUpdateCompetences");
+		String uploadSituation = params.get("uploadSituation");
 		if(viewPersonList.equals("true") && !person.isViewPersonAvailable()){
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "viewPersonList").first();
 			person.permissions.add(p);
@@ -292,6 +300,14 @@ public class Administrators extends Controller {
 		}
 		else{
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateVacations").first();
+			person.permissions.remove(p);
+		}
+		if(uploadSituation.equals("true") && !person.isUploadSituationAvailable()){
+			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "uploadSituation").first();
+			person.permissions.add(p);
+		}
+		else{
+			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "uploadSituation").first();
 			person.permissions.remove(p);
 		}
 		person.save();

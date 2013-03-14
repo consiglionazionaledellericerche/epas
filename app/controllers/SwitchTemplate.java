@@ -1,5 +1,7 @@
 package controllers;
 
+import java.io.IOException;
+
 import it.cnr.iit.epas.ActionMenuItem;
 import models.Person;
 
@@ -12,7 +14,7 @@ public class SwitchTemplate extends Controller{
 
 	public static final String USERNAME_SESSION_KEY = "username";
 
-	public static void dispatch() throws InstantiationException, IllegalAccessException {
+	public static void dispatch() throws InstantiationException, IllegalAccessException, IOException {
 		LocalDate now = new LocalDate();
 
 		String method = params.get("method");
@@ -117,6 +119,9 @@ public class SwitchTemplate extends Controller{
 			break;
 		case manageCompetence:
 			Competences.manageCompetenceCode();
+			break;
+		case uploadSituation:
+			UploadSituation.uploadSituation(year, month);
 			break;
 		case stampings:
 			Stampings.stampings(personId, year, month);

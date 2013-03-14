@@ -25,6 +25,7 @@ public class Security extends Secure.Security {
 	public final static String INSERT_AND_UPDATE_COMPETENCES = "insertAndUpdateCompetences";
 	public final static String INSERT_AND_UPDATE_VACATIONS = "insertAndUpdateVacations";
 	public final static String VIEW_PERSONAL_SITUATION ="viewPersonalSituation";
+	public final static String UPLOAD_SITUATION = "uploadSituation";
 	
 	private final static String PERMISSION_CACHE_PREFIX = "permission.";
 		

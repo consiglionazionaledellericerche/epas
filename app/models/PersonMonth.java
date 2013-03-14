@@ -1115,5 +1115,39 @@ public class PersonMonth extends Model {
 
 		return pastRemainingHours;
 	}
+	
+	/**
+	 * metodo di utilità per il controller UploadSituation
+	 * @return la lista delle assenze fatte da quella persona in quel mese. Prima di inserirle in lista controlla che le assenze non siano
+	 * a solo uso interno 
+	 */
+	public List<Absence> getAbsenceInMonthForUploadSituation(){
+		List<Absence> absenceList = new ArrayList<Absence>();
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+				person, new LocalDate(year,month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
+		for(PersonDay pd : pdList){
+			if(pd.absences.size() > 0){
+				for(Absence abs : pd.absences){
+					if(!abs.absenceType.internalUse)
+						absenceList.add(abs);
+				}
+			}
+				
+		}
+		
+		return absenceList;
+	}
+	
+	/**
+	 * metodo di utilità per il controller UploadSituation
+	 * @return la lista delle competenze del dipendente in questione per quel mese in quell'anno
+	 */
+	public List<Competence> getCompetenceInMonthForUploadSituation(){
+		List<Competence> competenceList = Competence.find("Select comp from Competence comp where comp.person = ? and comp.month = ? " +
+				"and comp.year = ?", person, month, year).fetch();
+		
+		return competenceList;
+	}
+	
 
 }

@@ -84,6 +84,13 @@
 			Sì <input type="radio" name="insertAndUpdateVacations" value="true"/> No <input type="radio" name="insertAndUpdateVacations" value="false" checked="checked"/>
 			%{ } }%
 	</p>
+	<p>Può caricare attestati di presenza: 
+	%{	if(person.isUploadSituationAvailable()==true){ }%
+			Sì <input type="radio" name="uploadSituation" value="false" checked="checked"/> No <input type="radio" name="uploadSituation" value="true"/>
+			%{ } else {	}%
+			Sì <input type="radio" name="uploadSituation" value="true"/> No <input type="radio" name="uploadSituation" value="false" checked="checked"/>
+			%{ } }%
+	</p>
 </fieldset>
 <input type="submit" value="Ok"/>
 #{/form}
