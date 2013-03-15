@@ -35,7 +35,7 @@ public class UploadSituation extends Controller{
 		Logger.debug("La lista di nomi è composta da %s persone ", personList.size());
 		List<Absence> absenceList = null;
 		List<Competence> competenceList = null;
-		File uploadSituation = new File(config.pathToSavePresenceSituation+year.toString()+month.toString()+".txt");
+		File uploadSituation = new File("situazioneMensile"+year.toString()+month.toString()+".txt");
 		Logger.debug("Creato nuovo file per caricare informazioni mensili sul personale in %s", uploadSituation.getAbsolutePath());
 		FileWriter writer = new FileWriter(uploadSituation, true);
 		try {
@@ -86,6 +86,7 @@ public class UploadSituation extends Controller{
 			out.close();
 			flash.success("Il file contenente le informazioni da caricare su attestati di presenza è stato creato correttamente e si trova in: %s", 
 					uploadSituation.getAbsolutePath());
+			renderBinary(uploadSituation, "situazioneMensile"+year.toString()+month.toString());
 			Application.indexAdmin();
 		} catch (IOException e) {
 			
