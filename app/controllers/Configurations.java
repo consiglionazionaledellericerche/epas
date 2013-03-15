@@ -36,6 +36,7 @@ public class Configurations extends Controller{
 			config.urlToPresence = params.get("urlPresenze");
 			config.userToPresence = params.get("userPresenze");
 			config.passwordToPresence = params.get("passwordPresenze");
+			config.pathToSavePresenceSituation = params.get("pathToSavePresenceSituation");
 			config.numberOfViewingCoupleColumn = params.get("colonneEntrataUscita", Integer.class);
 			config.dayOfPatron = params.get("giornoPatrono", Integer.class);
 			config.monthOfPatron = params.get("mesePatrono", Integer.class);
