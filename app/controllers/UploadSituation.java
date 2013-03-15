@@ -31,7 +31,8 @@ public class UploadSituation extends Controller{
 		Logger.debug("Anno: %s", year);
 		Logger.debug("Mese: %s", month);
 		Configuration config = Configuration.getCurrentConfiguration();
-		List<Person> personList = Person.find("Select p from Person p where p.number is not null order by p.number").fetch();
+		List<Person> personList = Person.find("Select p from Person p where p.number <> ? and p.number is not null order by p.number", 0).fetch();
+		Logger.debug("La lista di nomi è composta da %s persone ", personList.size());
 		List<Absence> absenceList = null;
 		List<Competence> competenceList = null;
 		File uploadSituation = new File("/home/dario/git/epas/caricaSituazioneDipendenti"+year.toString()+month.toString()+".txt");
@@ -44,12 +45,13 @@ public class UploadSituation extends Controller{
 			out.write(new String(month.toString()+year.toString()));
 			out.newLine();
 			for(Person p : personList){
-				out.append(p.number.toString());
-				out.append(' ');
+				
 				PersonMonth pm = new PersonMonth(p, year, month);
 				absenceList = pm.getAbsenceInMonthForUploadSituation();
 				if(absenceList != null){
 					for(Absence abs : absenceList){
+						out.write(p.number.toString());
+						out.append(' ');
 						out.append('A');
 						out.append(' ');
 						out.append(abs.absenceType.code);
