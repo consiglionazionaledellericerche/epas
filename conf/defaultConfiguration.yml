@@ -8,7 +8,6 @@ Configuration(defaultConfiguration):
     urlToPresence:
     userToPresence:
     passwordToPresence:
-    pathToSavePresenceSituation: /home/dario/git/epas/
     monthOfPatron: 6
     dayOfPatron: 17
     numberOfViewingCoupleColumn: 3 
