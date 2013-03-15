@@ -90,6 +90,12 @@ public class Configuration extends Model{
 	public String passwordToPresence;
 	
 	/**
+	 * il path assoluto in cui verrà salvato il file contenente assenze e competenze da inviare alla sede di Roma
+	 */
+	@Column(name="path_to_save_presence_situation")
+	public String pathToSavePresenceSituation;
+	
+	/**
 	 * i prossimi due campi sono il mese e il giorno del santo patrono...per adesso usiamo questa configurazione che è uguale alla 
 	 * precedente per considerare il santo patrono. Poi si vedrà se esistono possibili varianti
 	 */

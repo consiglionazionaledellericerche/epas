@@ -296,7 +296,8 @@ public class PersonDay extends Model {
 							if(reloadedStampings.get(i).way == Stamping.WayType.in && reloadedStampings.get(i).stampType != null){
 								if(reloadedStampings.get(i-1) != null && reloadedStampings.get(i-1).stampType != null){
 									//c'è stata un'uscita di servizio, questo è il corrispondente ingresso come lo calcolo?
-									workingTime = workingTime + (toMinute(reloadedStampings.get(i).date) - toMinute(reloadedStampings.get(i-1).date));
+									//workingTime = workingTime + (toMinute(reloadedStampings.get(i).date) - toMinute(reloadedStampings.get(i-1).date));
+									workingTime = workingTime + 0;
 								}
 								else{
 									//si fa un'entrata di servizio...ad esempio quando siamo in reperibilità?
@@ -309,6 +310,7 @@ public class PersonDay extends Model {
 							if(reloadedStampings.get(i).way == Stamping.WayType.out && reloadedStampings.get(i).stampType != null){
 								if(reloadedStampings.get(i-1) != null && reloadedStampings.get(i-1).stampType != null){
 									//uscita di servizio, dopo un ingresso di servizio...come si gestisce??
+									workingTime = workingTime + 0;
 								}
 								else{
 									workingTime += toMinute(reloadedStampings.get(i).date);
@@ -337,10 +339,11 @@ public class PersonDay extends Model {
 									//trascorso fuori per servizio come tempo di lavoro
 									Logger.debug("Anche la precedente timbratura era di servizio...calcolo il tempo in servizio come tempo a lavoro per %s %s", 
 											person.name, person.surname);
-									workTime = workTime + (toMinute(reloadedStampings.get(i).date) - toMinute(reloadedStampings.get(i-1).date));
+									//workTime = workTime + (toMinute(reloadedStampings.get(i).date) - toMinute(reloadedStampings.get(i-1).date));
+									workTime = workTime + 0;
 								}
 								else{
-									//la timbratura precedente è un uscita normale...oppure non c'è...
+									//la timbratura precedente è un uscita normale...oppure non c'è...e questo è un ingresso di servizio = ???
 								}
 							}
 							else{
@@ -357,13 +360,14 @@ public class PersonDay extends Model {
 							Logger.debug("Timbratura di uscita con stampType diverso da null per %s %s", person.name, person.surname);
 							if(reloadedStampings.get(i).stampType != null){
 								if(reloadedStampings.get(i-1) != null && reloadedStampings.get(i-1).stampType != null){
-									//come va gestito?
+									workTime = workTime + 0;
 								}
 								else{
 									//uscita di servizio si gestisce normalmente nel caso la timbratura precedente non fosse un ingresso di 
 									//servizio
 									Logger.debug("Uscita di servizio dopo un normale ingresso per %s %s", person.name, person.surname);
-									workTime += toMinute(reloadedStampings.get(i).date);
+									//workTime += toMinute(reloadedStampings.get(i).date);
+									workTime = workTime + 0;
 								}
 									
 							}
