@@ -334,17 +334,23 @@ public class PersonDay extends Model {
 						if(reloadedStampings.get(i).way == Stamping.WayType.in){
 
 							if(reloadedStampings.get(i).stampType != null){
-								if(reloadedStampings.get(i-1) != null && reloadedStampings.get(i-1).stampType != null){
-									//c'è stata un'uscita di servizio, questo è il corrispondente ingresso come lo calcolo? aggiungendo il tempo
-									//trascorso fuori per servizio come tempo di lavoro
-									Logger.debug("Anche la precedente timbratura era di servizio...calcolo il tempo in servizio come tempo a lavoro per %s %s", 
-											person.name, person.surname);
-									//workTime = workTime + (toMinute(reloadedStampings.get(i).date) - toMinute(reloadedStampings.get(i-1).date));
-									workTime = workTime + 0;
+								if((i-1) >= 0){
+									if(reloadedStampings.get(i-1).stampType != null){
+										//c'è stata un'uscita di servizio, questo è il corrispondente ingresso come lo calcolo? aggiungendo il tempo
+										//trascorso fuori per servizio come tempo di lavoro
+										Logger.debug("Anche la precedente timbratura era di servizio...calcolo il tempo in servizio come tempo a lavoro per %s %s", 
+												person.name, person.surname);
+										//workTime = workTime + (toMinute(reloadedStampings.get(i).date) - toMinute(reloadedStampings.get(i-1).date));
+										workTime = workTime + 0;
+									}
+									else{
+										//la timbratura precedente è un uscita normale...oppure non c'è...e questo è un ingresso di servizio = ???
+									}
 								}
-								else{
-									//la timbratura precedente è un uscita normale...oppure non c'è...e questo è un ingresso di servizio = ???
-								}
+//							else{
+//								throw new IllegalArgumentException("L'indice richiesto è precedente al primo (-1), pertanto non è presente nell'array di timbrature.");
+//							}
+								
 							}
 							else{
 								//timbratura normale di ingresso
