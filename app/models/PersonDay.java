@@ -359,14 +359,17 @@ public class PersonDay extends Model {
 
 							Logger.debug("Timbratura di uscita con stampType diverso da null per %s %s", person.name, person.surname);
 							if(reloadedStampings.get(i).stampType != null){
-								if(reloadedStampings.get(i-1) != null && ((i-1) >= 0)){
+								if((i-1) >= 0){
 									if(reloadedStampings.get(i-1).stampType != null){
 										workTime = workTime + 0;
 									}
 									else{
 										workTime = workTime +0;
 									}
-								}								
+								}
+//								else{
+//									throw new IllegalArgumentException("L'indice richiesto è precedente al primo (-1), pertanto non è presente nell'array di timbrature.");
+//								}
 
 							}
 							//							else{
