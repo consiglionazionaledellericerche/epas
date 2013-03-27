@@ -139,6 +139,9 @@ GET		/overtime/{year}/{month}				Competences.overtime
 GET		/uploadSituation/						UploadSituation.show
 POST	/uploadSituation/						UploadSituation.uploadSituation
 
+#Clock
+GET		/clocks									Clocks.show
+
 
 
 #Gestione reperibilità

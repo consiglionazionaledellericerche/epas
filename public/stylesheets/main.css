@@ -311,6 +311,8 @@ h3#monteOreStraordinario {margin: 2em 0em 1em; text-align: left}
 h3#titoloStraordinari {margin: 2em 0em 1em; text-align: left}
 h3#titoloCambioPassword {text-align: center}
 h3#caricamentoSituazioneMensile {text-align: center}
+h3#clock {text-align: center}
+iframe#clock {align: center; margin: 3em 58em 0em}
 
 h4#configurazioniEsistenti {margin:2em 0em 1em; text-align: left}
 

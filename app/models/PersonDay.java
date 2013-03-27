@@ -191,7 +191,7 @@ public class PersonDay extends Model {
 				if(reloadedStampings.get(index) == null && (index == 0 || index == 1)){
 					if(reloadedStampings.get(2) != null && reloadedStampings.subList(2, reloadedStampings.size()).size() > 0 
 							&& reloadedStampings.subList(2, reloadedStampings.size()).size() % 2 == 0){
-						
+
 						for(Stamping stamp : reloadedStampings.subList(1, reloadedStampings.size())){
 
 							if(stamp.way == Stamping.WayType.in){
@@ -204,7 +204,7 @@ public class PersonDay extends Model {
 							}
 						}
 					}
-					
+
 				}
 				if(reloadedStampings.get(index) == null && (index == 2 || index == 3)){
 					if(reloadedStampings.size() < 5 || (reloadedStampings.size() > 5 && reloadedStampings.size() % 2 != 0)){
@@ -306,7 +306,7 @@ public class PersonDay extends Model {
 							else{
 								workingTime -= toMinute(reloadedStampings.get(i).date);
 							}
-												
+
 							if(reloadedStampings.get(i).way == Stamping.WayType.out && reloadedStampings.get(i).stampType != null){
 								if(reloadedStampings.get(i-1) != null && reloadedStampings.get(i-1).stampType != null){
 									//uscita di servizio, dopo un ingresso di servizio...come si gestisce??
@@ -316,7 +316,7 @@ public class PersonDay extends Model {
 									workingTime += toMinute(reloadedStampings.get(i).date);
 								}
 							}
-								
+
 							else{
 								workingTime += toMinute(reloadedStampings.get(i).date);
 							}
@@ -326,13 +326,13 @@ public class PersonDay extends Model {
 								tempoLavoro = nowToMinute - workingTime;																		
 						}								
 					}
-					
+
 				}				
 				else{
 					int workTime=0;
 					for(int i = 0; i < reloadedStampings.size(); i++){
 						if(reloadedStampings.get(i).way == Stamping.WayType.in){
-							
+
 							if(reloadedStampings.get(i).stampType != null){
 								if(reloadedStampings.get(i-1) != null && reloadedStampings.get(i-1).stampType != null){
 									//c'è stata un'uscita di servizio, questo è il corrispondente ingresso come lo calcolo? aggiungendo il tempo
@@ -351,46 +351,43 @@ public class PersonDay extends Model {
 								workTime -= toMinute(reloadedStampings.get(i).date);
 								Logger.debug("Normale timbratura di ingresso che mi dà un tempo di lavoro di: %d", workTime);
 							}
-									
-							
+
+
 						}
-						
+
 						if(reloadedStampings.get(i).way == Stamping.WayType.out){
-							
+
 							Logger.debug("Timbratura di uscita con stampType diverso da null per %s %s", person.name, person.surname);
 							if(reloadedStampings.get(i).stampType != null){
-								if(reloadedStampings.get(i-1) != null && reloadedStampings.get(i-1).stampType != null){
-									workTime = workTime + 0;
-								}
-								else{
-									//uscita di servizio si gestisce normalmente nel caso la timbratura precedente non fosse un ingresso di 
-									//servizio
-									Logger.debug("Uscita di servizio dopo un normale ingresso per %s %s", person.name, person.surname);
-									//workTime += toMinute(reloadedStampings.get(i).date);
-									workTime = workTime + 0;
-								}
-									
+								if(reloadedStampings.get(i-1) != null && ((i-1) >= 0)){
+									if(reloadedStampings.get(i-1).stampType != null){
+										workTime = workTime + 0;
+									}
+									else{
+										workTime = workTime +0;
+									}
+								}								
+
 							}
+							//							else{
+							//								//uscita di servizio si gestisce normalmente nel caso la timbratura precedente non fosse un ingresso di 
+							//								//servizio
+							//								Logger.debug("Uscita di servizio dopo un normale ingresso per %s %s", person.name, person.surname);
+							//								//workTime += toMinute(reloadedStampings.get(i).date);
+							//								workTime = workTime + 0;
+							//							}
+							//
+							//						}
 							else{
 								//timbratura normale di uscita
 								workTime += toMinute(reloadedStampings.get(i).date);
 								Logger.debug("Normale timbratura di uscita %s che mi dà un tempo di lavoro di: %d", reloadedStampings.get(i).date, workTime);
 							}
-															
+
 						}
-						
+
 					}
-//					for(Stamping st : reloadedStampings){
-//						if(st.way == Stamping.WayType.in){
-//							workTime -= toMinute(st.date);									
-//							Logger.trace("Timbratura di ingresso: %s", workTime);	
-//						}
-//						if(st.way == Stamping.WayType.out){
-//							workTime += toMinute(st.date);								
-//							Logger.trace("Timbratura di uscita: %s", workTime);
-//						}
-//
-//					}
+
 					int minTimeForLunch = checkMinTimeForLunch();
 					if((reloadedStampings.size()==4) && (minTimeForLunch < getWorkingTimeTypeDay().breakTicketTime) && (!reloadedStampings.contains(null)))
 						tempoLavoro = workTime - (getWorkingTimeTypeDay().breakTicketTime-minTimeForLunch);							
@@ -404,7 +401,7 @@ public class PersonDay extends Model {
 						tempoLavoro = workTime;
 						Logger.debug("tempo di lavoro a fine metodo: %d", tempoLavoro);
 					}
-					
+
 				}
 			}
 			if (stampProfile != null && stampProfile.fixedWorkingTime) {
@@ -412,7 +409,7 @@ public class PersonDay extends Model {
 			} else {
 				timeAtWork = tempoLavoro;	
 			}
-			
+
 			save();				
 		}
 
@@ -660,11 +657,11 @@ public class PersonDay extends Model {
 			return;
 		}
 
-//		if(timeAtWork == 0){
-//			difference = 0;
-//			save();
-//			return;
-//		}
+		//		if(timeAtWork == 0){
+		//			difference = 0;
+		//			save();
+		//			return;
+		//		}
 
 		if(getWorkingTimeTypeDay().holiday == false){
 			int minTimeWorking = getWorkingTimeTypeDay().workingTime;
