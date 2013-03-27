@@ -1,0 +1,15 @@
+#{extends 'main.html' /}
+
+<h3 id="clock">Orologio per firma nel mese di <span class="capitalized">&{'views.tags.display.date.month.' + data.getMonthOfYear()}</span> dell'anno ${data.getYear()}</h3>
+
+
+
+<iframe id="clock" src="http://free.timeanddate.com/clock/i3k862ys/n341/szw350/szh350/hbw10/cf100/hnce1ead6/hhl55/hhw8" frameborder="0" width="352" height="352"></iframe>
+
+<fieldset>
+	<legend>Tipo di timbratura</legend>
+	<p>Timbratura di ingresso: <input type="radio" name="timbraturaIngresso" value="true"/></p>
+	<p>Timbratura di uscita: <input type="radio" name="timbraturaUscita" value="true"/></p>
+</fieldset>
+
+<input type="submit" name ="submit" value="Ok" />
