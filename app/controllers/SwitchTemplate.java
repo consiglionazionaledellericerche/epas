@@ -130,7 +130,7 @@ public class SwitchTemplate extends Controller{
 			Absences.absences(personId, year, month); 
 			break;
 		case absencesperperson:
-			YearlyAbsences.absencesPerPerson(personId, year);
+			YearlyAbsences.absencesPerPerson(year);
 			break;
 		case vacations:
 			Vacations.show(personId, year);
