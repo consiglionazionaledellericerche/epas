@@ -49,13 +49,14 @@ public class Clocks extends Controller{
 		if(person == null)
 			throw new IllegalArgumentException("Persona non trovata!!!! Controllare l'id!");
 		LocalDateTime ldt = new LocalDateTime();
+		LocalDateTime time = new LocalDateTime(ldt.getYear(),ldt.getMonthOfYear(),ldt.getDayOfMonth(),ldt.getHourOfDay(),ldt.getMinuteOfHour(),0);
 		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, ldt.toLocalDate()).first();
 		if(pd == null){
 			pd = new PersonDay(person, ldt.toLocalDate());
 			pd.save();
 		}
 		Stamping stamp = new Stamping();
-		stamp.date = ldt;
+		stamp.date = time;
 		if(params.get("type").equals("true")){
 			stamp.way = WayType.in;
 		}
@@ -63,9 +64,11 @@ public class Clocks extends Controller{
 			stamp.way = WayType.out;
 		stamp.personDay = pd;
 		stamp.save();
-		
+		pd.stampings.add(stamp);
+		pd.merge();
+		Logger.debug("Faccio i calcoli per %s %s sul personday %s chiamando la populatePersonDay", person.name, person.surname, pd);
 		pd.populatePersonDay();
-		pd.save();
+		//pd.save();
 		flash.success("Aggiunta timbratura per %s %s", person.name, person.surname);
 		show();
 	}

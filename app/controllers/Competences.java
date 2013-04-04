@@ -73,12 +73,12 @@ public class Competences extends Controller{
 				Integer value = tablePersonCompetences.row(p).get(comp.competenceCode.description);
 				Logger.debug("Per la persona %s il codice %s vale: %s", p, comp.competenceCode.description, value);
 				if(value == null){
-					Logger.debug("Inserisco in tabella nuova assenza per %s con codice %s", p, comp.competenceCode.description);
+					Logger.debug("Inserisco in tabella nuova competenza per %s con codice %s", p, comp.competenceCode.description);
 					tablePersonCompetences.row(p).put(comp.competenceCode.description, 1);
 				}
 				else{
-					tablePersonCompetences.row(p).put(comp.competenceCode.description, value+1);
-					Logger.debug("Incremento il numero di giorni per l'assenza %s di %s al valore %s", comp.competenceCode.description, p, value+1);
+					tablePersonCompetences.row(p).put(comp.competenceCode.description, 0);
+					Logger.debug("Non ci sono competenze per %s %s relativamente a %s. Quindi inserisco 0 in tabella", p.surname, p.name, comp.competenceCode.description);
 
 				}
 			}
