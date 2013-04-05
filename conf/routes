@@ -1,10 +1,10 @@
 # Routes
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
-#*		/										module:secure
+*		/										module:secure
 
 #Import Shibboleth routes
-*      /                						module:shibboleth
+#*      /                						module:shibboleth
 
 # Home page
 GET     /                                       Stampings.stampings
