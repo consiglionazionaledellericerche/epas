@@ -69,7 +69,7 @@ public class SwitchTemplate extends Controller{
 				Stampings.personStamping(person.getId(), year, month);
 			} else {
 				Logger.debug("sto per chiamare il metodo show con personId = %s, year = %s, month = %s", personId, year, month);
-				Stampings.stampings(person.getId(), year, month);
+				Stampings.stampings(year, month);
 			}
 
 			break;
@@ -124,7 +124,7 @@ public class SwitchTemplate extends Controller{
 			UploadSituation.uploadSituation(year, month);
 			break;
 		case stampings:
-			Stampings.stampings(personId, year, month);
+			Stampings.stampings(year, month);
 			break;
 		case absences:
 			Absences.absences(personId, year, month); 
