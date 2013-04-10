@@ -221,8 +221,8 @@ public class Stampings extends Controller {
 		pd.populatePersonDay();
 		pd.save();
 		flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
-		//render("@create");
-		Application.indexAdmin();
+		render("@create");
+		//Application.indexAdmin();
 
 	}
 

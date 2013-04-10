@@ -512,8 +512,10 @@ public class Person extends Model {
 			/**
 			 * non esiste un personDay per quella data, va creato e quindi salvato
 			 */
+			//Logger.debug("Non esiste il personDay...è il primo personDay per il giorno %s per %s %s", pd.date, person.name, person.surname);
 			pd = new PersonDay(person, stamping.dateTime.toLocalDate());
-			pd.save();			
+			pd.save();		
+			Logger.debug("Salvato il nuovo personDay %s", pd);
 			Stamping stamp = new Stamping();
 			stamp.date = stamping.dateTime;
 			stamp.markedByAdmin = false;
@@ -524,6 +526,8 @@ public class Person extends Model {
 			stamp.badgeReader = stamping.badgeReader;
 			stamp.personDay = pd;
 			stamp.save();
+			pd.stampings.add(stamp);
+			pd.save();
 
 		}
 		else{
@@ -538,11 +542,14 @@ public class Person extends Model {
 				stamp.badgeReader = stamping.badgeReader;
 				stamp.personDay = pd;
 				stamp.save();
+				pd.stampings.add(stamp);
+				pd.save();
 			}
 			else{
 				Logger.warn("All'interno della lista di timbrature di %s %s nel giorno %s c'è una timbratura uguale a quella passata dallo" +
 						"stampingsFromClient: %s", person.name, person.surname, pd.date, stamping.dateTime);
 			}
+			//0113 00004000000000000086063304051407
 //			for(Stamping s : pd.stampings){
 //				if(!s.date.isEqual(stamping.dateTime)){
 //					Stamping stamp = new Stamping();
@@ -557,10 +564,15 @@ public class Person extends Model {
 //					stamp.save();
 //				}
 //			}
+			
 		}
-
+		Logger.debug("Chiamo la populatePersonDay per fare i calcoli sulla nuova timbratura inserita per il personDay %s", pd);
 		pd.populatePersonDay();
-		pd.merge();
+		/**
+		 * controllare se può essere una save qui al posto della merge il problema al fatto che le timbrature prese dal client non permettano
+		 * i calcoli
+		 */
+		pd.save();
 		return true;
 	}
 
