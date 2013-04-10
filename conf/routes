@@ -7,7 +7,7 @@
 #*      /                						module:shibboleth
 
 # Home page
-GET     /                                       Stampings.stampings
+GET     /                                       Application.index
 
 #Home page amministrazione
 GET		/presenze								Application.indexAdmin

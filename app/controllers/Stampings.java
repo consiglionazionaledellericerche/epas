@@ -44,7 +44,7 @@ public class Stampings extends Controller {
 	 * @param month
 	 */
 	@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void stampings(Long personId, Integer year, Integer month){
+	public static void stampings(Integer year, Integer month){
 		
 		if (Security.getPerson().username.equals("admin")) {
 			Application.indexAdmin();
@@ -53,9 +53,7 @@ public class Stampings extends Controller {
 		long id = 1;
 		Configuration confParameters = Configuration.findById(id);
 		
-		Person person = null;
-		Logger.debug("Il valore tra i params dell'id della persona è: %d", params.get("personId", Long.class));
-		person = Security.getPerson();
+		Person person = Security.getPerson();
 		Logger.debug("La persona presa dal security è: %s %s", person.name, person.surname);
 		LocalDate date = new LocalDate();
 		Logger.info("Anno: "+year);    	
@@ -64,6 +62,7 @@ public class Stampings extends Controller {
 			year = date.getYear();
 			month = date.getMonthOfYear();
 		}
+		person.refresh();
 		PersonMonth personMonth = PersonMonth.byPersonAndYearAndMonth(person, year, month);
 		if(personMonth == null)
 			personMonth = new PersonMonth(person, year, month);
