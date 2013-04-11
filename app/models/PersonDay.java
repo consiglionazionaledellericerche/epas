@@ -489,6 +489,15 @@ public class PersonDay extends Model {
 
 				}
 			}
+			if(timeAtWork != null){
+				updateDifference();
+				merge();
+				updateProgressive();	
+				merge();
+				setTicketAvailable();
+				merge();
+				return;
+			}				
 			updateTimeAtWork();
 			merge();
 			updateDifference();
