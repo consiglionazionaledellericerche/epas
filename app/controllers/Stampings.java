@@ -62,14 +62,15 @@ public class Stampings extends Controller {
 			year = date.getYear();
 			month = date.getMonthOfYear();
 		}
-		person.refresh();
+		person = person.findById(person.id);
+		//person.refresh();
 		PersonMonth personMonth = PersonMonth.byPersonAndYearAndMonth(person, year, month);
 		if(personMonth == null)
 			personMonth = new PersonMonth(person, year, month);
 		int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
 		int numberOfInOut = Math.min(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
 
-		Logger.debug("Month recap of person.id %s, year=%s, month=%s", person.id, year, month);
+		//Logger.debug("Month recap of person.id %s, year=%s, month=%s", person.id, year, month);
 
 		render(personMonth, numberOfInOut, numberOfCompensatoryRest);
 	}

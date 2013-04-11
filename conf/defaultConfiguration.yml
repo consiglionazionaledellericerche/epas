@@ -28,6 +28,7 @@ Configuration(defaultConfiguration):
     mealTime: 30
     monthExpiryVacationPastYear: 8
     dayExpiryVacationPastYear: 31
+    minimumRemainingTimeToHaveRecoveryDay: 432
     monthExpireRecoveryDaysOneThree:
     monthExpireRecoveryDaysFourNine: 4
     maxRecoveryDaysOneThree:
