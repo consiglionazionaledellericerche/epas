@@ -192,6 +192,19 @@ public class Stampings extends Controller {
 			flash.error("Si sta inserendo una timbratura in un giorno di festa. Errore");
 			render("@create", personId, year, month, day);
 		}
+		
+		/**
+		 * controllo che il radio button sulla timbratura forzata all'orario di lavoro sia checkato
+		 */
+		
+		if(params.get("timeAtWork", Boolean.class) == true){
+			pd.timeAtWork = person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(new LocalDate(year, month, day).getDayOfWeek()).workingTime;
+			pd.save();
+			pd.populatePersonDay();
+			pd.save();
+			flash.success("Inserita timbratura forzata all'orario di lavoro per %s %s", person.name, person.surname);
+			render("@save");
+		}
 		Integer hour = params.get("hourStamping", Integer.class);
 		Integer minute = params.get("minuteStamping", Integer.class);
 		Logger.debug("I parametri per costruire la data sono: anno: %s, mese: %s, giorno: %s, ora: %s, minuti: %s", year, month, day, hour, minute);
