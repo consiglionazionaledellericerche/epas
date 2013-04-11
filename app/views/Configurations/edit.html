@@ -68,7 +68,7 @@
 			<p>Mese scadenza ferie dell'anno precedente (mm) <input name="meseScadenzaFerieAP" type="text" value="${configurations.monthExpiryVacationPastYear}" size="20" maxlength="100" /></p>
 			<p>Giorno scadenza ferie dell'anno precedente (dd) <input name="giornoScadenzaFerieAP" type="text" value="${configurations.dayExpiryVacationPastYear}" size="20" maxlength="100" /></p>
 			<p>Tempo residuo minimo da avere per poter richiedere un giorno di riposo compensativo (in minuti) 
-				<input name="tempoMinimoPerAvereRiposoCompensativo" type="text" value="minimumRemainingTimeToHaveRecoveryDay" size="10" maxlength="100" /> </p>
+				<input name="tempoMinimoPerAvereRiposoCompensativo" type="text" value="${configurations.minimumRemainingTimeToHaveRecoveryDay.toHourtime()}" size="10" maxlength="100" /> </p>
 			<p>Mese entro il quale devono essere usati i residui dell'anno precedente per i livelli da 1 a 3 (mm) 
 			   00=i recuperi devono essere presi nell'anno. 99=i recuperi non scadono mai <input name="meseUtilizzoResiduiAP13" type="text" value="${configurations.monthExpireRecoveryDaysOneThree}" size="10" maxlength="100" /></p>
 			<p>Mese entro il quale devono essere usati i residui dell'anno precedente per i livelli da 4 a 9 (mm)
