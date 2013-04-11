@@ -221,7 +221,7 @@ public class Stampings extends Controller {
 		pd.populatePersonDay();
 		pd.save();
 		flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
-		render("@create");
+		render("@save");
 		//Application.indexAdmin();
 
 	}
@@ -283,8 +283,8 @@ public class Stampings extends Controller {
 			Application.success();
 			//Stampings.personStamping();
 		}
-		
-		Stampings.personStamping();
+		render("@save");
+		//Stampings.personStamping();
 	}
 
 	/**
