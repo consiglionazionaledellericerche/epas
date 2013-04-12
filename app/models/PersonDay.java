@@ -489,7 +489,7 @@ public class PersonDay extends Model {
 
 				}
 			}
-			if(timeAtWork != null){
+			if(timeAtWork != null && (stampings.size() == 0 || stampings == null)){
 				updateDifference();
 				merge();
 				updateProgressive();	

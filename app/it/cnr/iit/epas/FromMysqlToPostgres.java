@@ -1146,7 +1146,8 @@ public class FromMysqlToPostgres {
 			stamping.date = new LocalDateTime(year,month,day,hour,minute,second);
 
 			stamping.markedByAdmin = false;
-			stamping.stampType = StampType.em().getReference(StampType.class, StampTypeValues.MOTIVI_DI_SERVIZIO.getId());
+			stamping.stampType = StampType.find("Select st from StampType st where st.code = ?", "motiviDiServizio").first();
+			//stamping.stampType = StampType.em().getReference(StampType.class, StampTypeValues.MOTIVI_DI_SERVIZIO.getId());
 		}
 		else{
 
@@ -1168,7 +1169,7 @@ public class FromMysqlToPostgres {
 				int newHour = hour / 60;
 				int min = hour % 60;
 				stamping.date = new LocalDateTime(year,month,day,newHour,min,second);
-
+				stamping.note = "Timbratura inserita dall'amministratore";
 				stamping.markedByAdmin = true;
 			}						
 
