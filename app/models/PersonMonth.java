@@ -576,11 +576,11 @@ public class PersonMonth extends Model {
 	 * 
 	 * @return il numero di ore di straordinario fatte dall'inizio dell'anno
 	 */
-	public int getOvertimeHourInYear(){
+	public int getOvertimeHourInYear(LocalDate date){
 		Logger.trace("Chiamata funzione di controllo straordinari...");
 		int overtimeHour = 0;
 		List<Competence> compList = Competence.find("Select comp from Competence comp, CompetenceCode code where comp.person = ? and comp.year = ? and " +
-				"comp.competenceCode = code and code.code = ?", person, year, "S1").fetch();
+				"comp.competenceCode = code and comp.month = ? and code.code = ?", person, date.getYear(), date.getMonthOfYear(),"S1").fetch();
 		Logger.debug("La lista degli straordinari da inizio anno per %s: %s", person, compList);
 		if(compList != null){
 			for(Competence comp : compList){

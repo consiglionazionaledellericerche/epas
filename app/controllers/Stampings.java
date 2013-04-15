@@ -125,7 +125,7 @@ public class Stampings extends Controller {
 //					person, previousMonth, year).first();
 //		}
 		Logger.debug("Controllo gli straordinari nel corso dell'anno fino ad oggi per %s %s...", person.name, person.surname);
-		int overtimeHour = personMonth.getOvertimeHourInYear();
+		int overtimeHour = personMonth.getOvertimeHourInYear(new LocalDate(year,month,1).dayOfMonth().withMaximumValue());
 		Logger.debug("Le ore di straordinario da inizio anno sono: %s", overtimeHour);
 
 		int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
