@@ -796,7 +796,7 @@ public class PersonMonth extends Model {
 	}
 
 	public int totaleResiduoAnnoCorrenteAFineMese() {
-		return residuoDelMese() + totaleResiduoAnnoCorrenteAlMesePrecedente() + residuoAnnoPrecedenteDaInizializzazione() + riposiCompensativiDaAnnoCorrente - straordinari - recuperiOreDaAnnoPrecedente;  
+		return residuoDelMese() + totaleResiduoAnnoCorrenteAlMesePrecedente() + /*residuoAnnoPrecedenteDaInizializzazione() +*/ riposiCompensativiDaAnnoCorrente - straordinari - recuperiOreDaAnnoPrecedente;  
 	}
 
 	public int totaleResiduoAnnoCorrenteAllaData(LocalDate date) {
@@ -804,7 +804,7 @@ public class PersonMonth extends Model {
 	}
 
 	public int totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese() {
-		return totaleResiduoAnnoCorrenteAFineMese() + residuoAnnoPrecedenteDisponibileAllaFineDelMese();
+		return totaleResiduoAnnoCorrenteAFineMese() + residuoAnnoPrecedenteDisponibileAllaFineDelMese() + residuoAnnoPrecedenteDaInizializzazione();
 	}
 
 	public void aggiornaRiepiloghi() {
