@@ -877,6 +877,26 @@ public class PersonDay extends Model {
 		}
 		return stampProfiles.get(0);
 	}
+	
+	/**
+	 * 
+	 * @return il personday precedente a quello attualmente considerato. Questo metodo è utilizzato nella visualizzazione delle timbrature
+	 * sia in versione utente che amministratore, quando si deve visualizzare il progressivo nei giorni festivi (che altrimenti risulterebbe
+	 * sempre uguale a zero)
+	 */
+	public PersonDay checkPreviousProgressive(){
+		PersonDay pd = null;
+		if(date.getDayOfMonth() != 1){
+			pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date.minusDays(1)).first();
+			if(pd != null)
+				return pd;
+			else{
+				pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date.minusDays(2)).first();
+				return pd;
+			}
+		}
+		return null;
+	}
 
 	@Override
 	public String toString() {
