@@ -87,7 +87,14 @@
 	         }%	
 	         <td class="differenza">${(day.difference).toHourTime()}</td>
 				
-	         <td class="progressivo">${day.progressive.toHourTime()}</td>	
+	         if(day.isHoliday()==false){
+			}% <td class="progressivo">${day.progressive.toHourTime()}</td>
+			%{
+			}else{
+			}%<td class="progressivo">${day.checkPreviousProgressive().progressive.toHourTime()}</td>
+			%{
+			}
+			}%		
 	         <td>${day.person.workingTimeType != null ? day.person.workingTimeType.description : ''}</td>
 		</tr>
 
