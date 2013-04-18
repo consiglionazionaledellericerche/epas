@@ -31,7 +31,7 @@ Configuration(defaultConfiguration):
     minimumRemainingTimeToHaveRecoveryDay: 432
     monthExpireRecoveryDaysOneThree:
     monthExpireRecoveryDaysFourNine: 4
-    maxRecoveryDaysOneThree:
+    maxRecoveryDaysOneThree: 22
     maxRecoveryDaysFourNine:
     residual:
     maximumOvertimeHours:
