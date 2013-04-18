@@ -488,6 +488,21 @@ public class Person extends Model {
 		return activePersons;
 
 	}
+	
+	/**
+	 * 
+	 * @param date
+	 * @return la lista di tecnici che beneficiano di competenze (utilizzata nel controller competences, metodo showCompetences)
+	 */
+	public static List<Person> getTechnicianForCompetences(LocalDate date){
+		List<Person> technicians = new ArrayList<Person>();
+		List<Person> activePersons = getActivePersons(date);
+		for(Person p : activePersons){
+			if(p.qualification != null && p.qualification.qualification > 3)
+				technicians.add(p);
+		}
+		return technicians;
+	}
 
 	/**
 	 * metodo per la creazione di una timbratura a partire dall'oggetto stampModificationType che è stato costruito dal binder del Json
