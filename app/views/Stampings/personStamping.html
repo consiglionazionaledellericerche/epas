@@ -153,7 +153,7 @@
 			}% <td class="progressivo">${day.progressive.toHourTime()}</td>
 			%{
 			}else{
-			}%<td class="progressivo">${day.checkPreviousProgressive().progressive.toHourTime()}</td>
+			}%<td class="progressivo">${day.checkPreviousProgressive() != null ? day.checkPreviousProgressive().progressive.toHourTime() : ''}</td>
 			%{
 			}
 			}%	
