@@ -63,7 +63,7 @@ public class Competences extends Controller{
 	public static void showCompetences(Integer year, Integer month){
 
 		Table<Person, String, Integer> tablePersonCompetences =  HashBasedTable.create();
-		List<Person> activePersons = Person.getActivePersons(new LocalDate(year, month, 1));
+		List<Person> activePersons = Person.getTechnicianForCompetences(new LocalDate(year, month, 1));
 		for(Person p : activePersons){
 			List<Competence> competenceInMonth = Competence.find("Select comp from Competence comp where comp.person = ? and comp.year = ?" +
 					"and comp.month = ?", p, year, month).fetch();
@@ -179,7 +179,7 @@ public class Competences extends Controller{
 		Map<Person, List<Object>> mapPersonFeatures = new HashMap<Person, List<Object>>();
 		List<Object> lista = null;
 		LocalDate beginMonth = new LocalDate(year, month, 1);
-		List<Person> activePersons = Person.getActivePersons(new LocalDate(year, month, 1));
+		List<Person> activePersons = Person.getTechnicianForCompetences(new LocalDate(year, month, 1));
 		for(Person p : activePersons){
 			Integer daysAtWork = 0;
 			Integer recoveryDays = 0;
