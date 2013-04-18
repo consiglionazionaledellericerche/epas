@@ -87,7 +87,8 @@
 	         }%	
 	         <td class="differenza">${(day.difference).toHourTime()}</td>
 				
-	         if(day.isHoliday()==false){
+	        %{
+	        if(day.isHoliday()==false){
 			}% <td class="progressivo">${day.progressive.toHourTime()}</td>
 			%{
 			}else{
