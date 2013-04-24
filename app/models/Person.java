@@ -202,6 +202,14 @@ public class Person extends Model {
 	@NotAudited
 	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
 	public List<Competence> competences;
+	
+	/**
+	 * relazione con la tabella dei codici competenza per stabilire se una persona ha diritto o meno a una certa competenza
+	 */
+	@NotAudited
+	@ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
+	public List<CompetenceCode> competenceCode;
+	
 
 	/**
 	 * relazione con la tabella delle competence valide
