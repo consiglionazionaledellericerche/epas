@@ -22,6 +22,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 
 @With( {Secure.class, NavigationMenu.class} )
@@ -304,6 +305,48 @@ public class Competences extends Controller{
 			}
 		}
 
+	}
+	
+	/**
+	 * funzione che ritorna la tabella contenente le competenze associate a ciascuna persona
+	 */
+	public static void recapCompetences(){
+		LocalDate date = new LocalDate();
+		List<Person> personList = Person.getTechnicianForCompetences(date);
+		ImmutableTable.Builder<Person, String, Boolean> builder = ImmutableTable.builder();
+		Table<Person, String, Boolean> tableRecapCompetence = null;
+		List<CompetenceCode> codeList = CompetenceCode.findAll();
+		for(Person p : personList){
+			
+			for(CompetenceCode comp : codeList){
+				if(p.competenceCode.contains(comp)){
+					builder.put(p, comp.code, true);
+				}
+				else{
+					builder.put(p, comp.code, false);
+				}
+					
+			}
+			
+		}
+		tableRecapCompetence = builder.build();
+		
+		render(tableRecapCompetence);
+	}
+	
+	/**
+	 * 
+	 * @param personId
+	 */
+	public static void updatePersonCompetence(Long personId){
+		if(personId != null){
+			Person person = Person.findById(personId);
+			render(person);
+		}
+	}
+	
+	public static void saveNewCompetenceConfiguration(){
+		
 	}
 
 }

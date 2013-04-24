@@ -412,9 +412,9 @@ public class Stampings extends Controller {
 		}
 
 		for(Person p : persons){
-			Logger.trace("Inizio le operazioni di inserimento in tabella per %s %s ",p.name, p.surname);
+			//Logger.trace("Inizio le operazioni di inserimento in tabella per %s %s ",p.name, p.surname);
 			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.date = ? and pd.person = ?", today, p).first();
-			Logger.trace("Cerco il person day in data %s per %s %s", today, p.name, p.surname);
+			//Logger.trace("Cerco il person day in data %s per %s %s", today, p.name, p.surname);
 			if(pd != null){
 				if(pd.absences.size() > 0)
 					builder.put(p, "Assenza", pd.absences.get(0).absenceType.code);
@@ -428,11 +428,11 @@ public class Stampings extends Controller {
 				for(int i = 0; i < size; i++){
 					if(pd.stampings.get(i).way == WayType.in){
 						builder.put(p, 1+(i+1)/2+"^ Ingresso", PersonTags.toCalendarTime(pd.stampings.get(i).date));
-						Logger.trace("inserisco in tabella l'ingresso per %s %s", p.name, p.surname);
+						//Logger.trace("inserisco in tabella l'ingresso per %s %s", p.name, p.surname);
 					}
 					else{
 						builder.put(p, 1+(i/2)+"^ Uscita", PersonTags.toCalendarTime(pd.stampings.get(i).date));
-						Logger.trace("inserisco in tabella l'uscita per %s %s", p.name, p.surname);
+						//Logger.trace("inserisco in tabella l'uscita per %s %s", p.name, p.surname);
 					}
 				}
 

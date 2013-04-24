@@ -211,6 +211,8 @@ public class FromMysqlToPostgres {
 		FromMysqlToPostgres.updateContract();
 		FromMysqlToPostgres.updateVacationPeriod();
 		FromMysqlToPostgres.updateCompetence();
+		FromMysqlToPostgres.updateCompetenceCode();
+		FromMysqlToPostgres.personToCompetence();
 		FromMysqlToPostgres.importOreStraordinario();
 		
 		FromMysqlToPostgres.addPermissiontoAll();
@@ -1302,6 +1304,50 @@ public class FromMysqlToPostgres {
 			Logger.debug("Terminata la update competence per %s %s.", person.name, person.surname);
 		}
 		
+	}
+	
+	/**
+	 * metodo di riempimento da lanciare al termine della procedura di importazione per completare tutti i codici di competenza presenti
+	 * @throws SQLException
+	 */
+	public static void updateCompetenceCode() throws SQLException{
+		Logger.debug("Lancio la updateCompetenceCode per riempire i codici di competenza con quelli meno usati ma presenti nel vecchio db");
+		
+		PreparedStatement stmt = mysqlCon.prepareStatement("Select * from codici_comp");		
+
+		ResultSet rs = stmt.executeQuery();
+		while(rs.next()){
+			
+			CompetenceCode code = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", 
+					rs.getString("codice")).first();
+			if(code == null){
+				Logger.debug("Non ho trovato il codice di competenza %s nel db, devo crearlo", rs.getString("codice"));
+					code = new CompetenceCode();
+					code.create();
+					code.code = rs.getString("codice");
+					code.codeToPresence = rs.getString("codice_att");
+					code.description = rs.getString("descrizione");
+					code.inactive = rs.getBoolean("inattivo");
+					code.save();
+			}					
+			
+		}
+		Logger.debug("Terminata la update competenceCode.");
+	}
+	
+	public static void personToCompetence() throws SQLException{
+		Logger.debug("PersonToCompetence per dare a ogni dipendente le proprie competenze attive");
+		
+		PreparedStatement stmt = mysqlCon.prepareStatement("Select * from compvalide");
+		ResultSet rs = stmt.executeQuery();
+		
+		while(rs.next()){
+			CompetenceCode code = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", rs.getString("codicecomp")).first();
+			Person person = Person.find("Select p from Person p where p.number = ?", rs.getInt("matricola")).first();
+			person.competenceCode.add(code);
+			person.save();
+		}
+		Logger.debug("Terminazione di PersonToCompetence per dare a ogni dipendente le proprie competenze attive");
 	}
 }
 
