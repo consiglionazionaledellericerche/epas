@@ -613,5 +613,282 @@ public class Person extends Model {
 			}
 		}return false;
 	}
+	
+	
+	/**
+	 * 
+	 * @return se è attiva la reperibilità nei giorni lavorativi
+	 */
+	public boolean isWorkDayReperibilityAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("207"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 
+	 * @return se è attiva la reperibilità festiva
+	 */
+	public boolean isHolidayReperibilityAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("208"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 
+	 * @return se è attivo lo straordinario nei giorni lavorativi
+	 */
+	public boolean isOvertimeInWorkDayAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("S1"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 
+	 * @return se è attivo il turno ordinario
+	 */
+	public boolean isOrdinaryShiftAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("T1"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 
+	 * @return se è attivo il turno notturno
+	 */
+	public boolean isNightlyShiftAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("T2"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 
+	 * @return se è attivo il turno festivo
+	 */
+	public boolean isHolidayShiftAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("T3"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 
+	 * @return se è attivo lo straordinario notturno nei giorni lavorativi o diurno nei festivi
+	 */
+	public boolean isOvertimeInHolidayOrNightlyInWorkDayAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("S2"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 
+	 * @return se è attivo lo straordinario notturno nei giorni festivi
+	 */
+	public boolean isOvertimeInNightlyHolidayAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("S3"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 
+	 * @return se è attiva l'indennità meccanografica
+	 */
+	public boolean isMechanographicalAllowanceAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("050"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 
+	 * @return se è attiva per la persona l'indennità di sede disagiata
+	 */
+	public boolean isHardshipAllowance(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("042"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 
+	 * @return se è attiva l'indennità per maneggio valori
+	 */
+	public boolean isHandleValuesAllowanceAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("203"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 
+	 * @return se è attiva l'indennità natanti
+	 */
+	public boolean isBoatsAllowanceAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("367"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 
+	 * @return se è attiva l'indennità di rischio subacquei
+	 */
+	public boolean isRiskDivingAllowanceAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("356"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	public boolean isRiskDegreeOneAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("351"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	public boolean isRiskDegreeTwoAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("352"))
+				flag = true;
+		}
+		return flag;
+	}
+
+	public boolean isRiskDegreeThreeAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("353"))
+				flag = true;
+		}
+		return flag;
+	}
+
+	public boolean isRiskDegreeFourAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("354"))
+				flag = true;
+		}
+		return flag;
+	}
+
+	public boolean isRiskDegreeFiveAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("355"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 
+	 * @return se è attiva l'indennità mansione
+	 */
+	public boolean isTaskAllowanceAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("106"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 
+	 * @return se è attiva l'indennità mansione maggiorata
+	 */
+	public boolean isTaskAllowanceIncreasedAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("107"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	public boolean isIonicRadianceRiskCom1Available(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("205"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	public boolean isIonicRadianceRiskCom3Available(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("206"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	public boolean isIonicRadianceRiskCom1AvailableBis(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("303"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	public boolean isIonicRadianceRiskCom3AvailableBis(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("304"))
+				flag = true;
+		}
+		return flag;
+	}
 
 }
