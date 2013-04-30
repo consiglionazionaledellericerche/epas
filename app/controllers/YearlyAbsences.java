@@ -155,12 +155,10 @@ public class YearlyAbsences extends Controller{
 
 	
 	@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void absencesPerPerson(Long personId, int year){
-		Person person = null;
-		if(personId == null)
-			person = Security.getPerson();
+	public static void absencesPerPerson(int year){
+		Person person = Security.getPerson();
 		Integer anno = params.get("year", Integer.class);
-		Logger.debug("L'id della persona è: %s", personId);
+		Logger.debug("La persona correntemente loggata è: %s", person);
 		Logger.trace("Anno: "+anno);
 
 		if(anno==null){

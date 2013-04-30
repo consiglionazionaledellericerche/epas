@@ -14,6 +14,7 @@ import models.Person;
 import models.PersonDay;
 import models.PersonMonth;
 import models.PersonTags;
+import models.StampType;
 import models.Stamping;
 import models.Stamping.WayType;
 
@@ -43,7 +44,7 @@ public class Stampings extends Controller {
 	 * @param month
 	 */
 	@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void stampings(Long personId, Integer year, Integer month){
+	public static void stampings(Integer year, Integer month){
 		
 		if (Security.getPerson().username.equals("admin")) {
 			Application.indexAdmin();
@@ -52,9 +53,7 @@ public class Stampings extends Controller {
 		long id = 1;
 		Configuration confParameters = Configuration.findById(id);
 		
-		Person person = null;
-		Logger.debug("Il valore tra i params dell'id della persona è: %d", params.get("personId", Long.class));
-		person = Security.getPerson();
+		Person person = Security.getPerson();
 		Logger.debug("La persona presa dal security è: %s %s", person.name, person.surname);
 		LocalDate date = new LocalDate();
 		Logger.info("Anno: "+year);    	
@@ -63,13 +62,15 @@ public class Stampings extends Controller {
 			year = date.getYear();
 			month = date.getMonthOfYear();
 		}
+		person = person.findById(person.id);
+		//person.refresh();
 		PersonMonth personMonth = PersonMonth.byPersonAndYearAndMonth(person, year, month);
 		if(personMonth == null)
 			personMonth = new PersonMonth(person, year, month);
 		int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
 		int numberOfInOut = Math.min(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
 
-		Logger.debug("Month recap of person.id %s, year=%s, month=%s", person.id, year, month);
+		//Logger.debug("Month recap of person.id %s, year=%s, month=%s", person.id, year, month);
 
 		render(personMonth, numberOfInOut, numberOfCompensatoryRest);
 	}
@@ -124,11 +125,11 @@ public class Stampings extends Controller {
 //					person, previousMonth, year).first();
 //		}
 		Logger.debug("Controllo gli straordinari nel corso dell'anno fino ad oggi per %s %s...", person.name, person.surname);
-		int overtimeHour = personMonth.getOvertimeHourInYear();
+		int overtimeHour = personMonth.getOvertimeHourInYear(new LocalDate(year,month,1).dayOfMonth().withMaximumValue());
 		Logger.debug("Le ore di straordinario da inizio anno sono: %s", overtimeHour);
 
 		int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
-		int numberOfInOut = Math.min(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
+		int numberOfInOut = Math.max(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
 
 		render(personMonth, numberOfInOut, previousPersonMonth, numberOfCompensatoryRest, overtimeHour, person);
 
@@ -182,20 +183,44 @@ public class Stampings extends Controller {
 
 		LocalDate date = new LocalDate(year,month,day);
 		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
-
+		if(pd == null){
+			pd = new PersonDay(person, date);
+			pd.create();
+		}
+		
 		if(pd.stampings.size() == 0 && pd.isHoliday()){
 			flash.error("Si sta inserendo una timbratura in un giorno di festa. Errore");
 			render("@create", personId, year, month, day);
+		}
+		
+		/**
+		 * controllo che il radio button sulla timbratura forzata all'orario di lavoro sia checkato
+		 */
+		
+		if(params.get("timeAtWork", Boolean.class) == true){
+			pd.timeAtWork = person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(new LocalDate(year, month, day).getDayOfWeek()).workingTime;
+			pd.save();
+			pd.populatePersonDay();
+			pd.save();
+			flash.success("Inserita timbratura forzata all'orario di lavoro per %s %s", person.name, person.surname);
+			render("@save");
 		}
 		Integer hour = params.get("hourStamping", Integer.class);
 		Integer minute = params.get("minuteStamping", Integer.class);
 		Logger.debug("I parametri per costruire la data sono: anno: %s, mese: %s, giorno: %s, ora: %s, minuti: %s", year, month, day, hour, minute);
 
 		String type = params.get("type");
+		String service = params.get("service");
 		Stamping stamp = new Stamping();
 		stamp.date = new LocalDateTime(year, month, day, hour, minute, 0);
 		stamp.markedByAdmin = true;
-		stamp.note = "timbratura inserita dall'amministratore";
+		if(service.equals("true")){
+			stamp.note = "timbratura di servizio";
+			stamp.stampType = StampType.find("Select st from StampType st where st.code = ?", "motiviDiServizio").first();
+		}
+		else{
+			stamp.note = "timbratura inserita dall'amministratore";
+		}
 		if(type.equals("true")){
 			stamp.way = Stamping.WayType.in;
 		}
@@ -209,7 +234,8 @@ public class Stampings extends Controller {
 		pd.populatePersonDay();
 		pd.save();
 		flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
-		Application.indexAdmin();
+		render("@save");
+		//Application.indexAdmin();
 
 	}
 
@@ -270,8 +296,8 @@ public class Stampings extends Controller {
 			Application.success();
 			//Stampings.personStamping();
 		}
-		
-		Stampings.personStamping();
+		render("@save");
+		//Stampings.personStamping();
 	}
 
 	/**
@@ -386,9 +412,9 @@ public class Stampings extends Controller {
 		}
 
 		for(Person p : persons){
-			Logger.trace("Inizio le operazioni di inserimento in tabella per %s %s ",p.name, p.surname);
+			//Logger.trace("Inizio le operazioni di inserimento in tabella per %s %s ",p.name, p.surname);
 			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.date = ? and pd.person = ?", today, p).first();
-			Logger.trace("Cerco il person day in data %s per %s %s", today, p.name, p.surname);
+			//Logger.trace("Cerco il person day in data %s per %s %s", today, p.name, p.surname);
 			if(pd != null){
 				if(pd.absences.size() > 0)
 					builder.put(p, "Assenza", pd.absences.get(0).absenceType.code);
@@ -402,11 +428,11 @@ public class Stampings extends Controller {
 				for(int i = 0; i < size; i++){
 					if(pd.stampings.get(i).way == WayType.in){
 						builder.put(p, 1+(i+1)/2+"^ Ingresso", PersonTags.toCalendarTime(pd.stampings.get(i).date));
-						Logger.trace("inserisco in tabella l'ingresso per %s %s", p.name, p.surname);
+						//Logger.trace("inserisco in tabella l'ingresso per %s %s", p.name, p.surname);
 					}
 					else{
 						builder.put(p, 1+(i/2)+"^ Uscita", PersonTags.toCalendarTime(pd.stampings.get(i).date));
-						Logger.trace("inserisco in tabella l'uscita per %s %s", p.name, p.surname);
+						//Logger.trace("inserisco in tabella l'uscita per %s %s", p.name, p.surname);
 					}
 				}
 

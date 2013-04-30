@@ -3,8 +3,11 @@ package controllers;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableSet;
+
 import play.Logger;
 import play.cache.Cache;
+import play.db.jpa.JPA;
 import play.db.jpa.GenericModel.JPAQuery;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -25,24 +28,28 @@ public class Security extends Secure.Security {
 	public final static String INSERT_AND_UPDATE_COMPETENCES = "insertAndUpdateCompetences";
 	public final static String INSERT_AND_UPDATE_VACATIONS = "insertAndUpdateVacations";
 	public final static String VIEW_PERSONAL_SITUATION ="viewPersonalSituation";
+	public final static String UPLOAD_SITUATION = "uploadSituation";
 	
 	private final static String PERMISSION_CACHE_PREFIX = "permission.";
 		
+	private final static String CACHE_DURATION = "30mn";
+	
 	static boolean authenticate(String username, String password) {
 		Person person = Person.find("SELECT p FROM Person p where username = ? and password = md5(?)", username, password).first();
-		
+
 		if(person != null){
-			Cache.set(username, person, "30mn");
-			Cache.set(PERMISSION_CACHE_PREFIX + username, person.getAllPermissions(), "30mn");
-			Cache.set("personId", person.id, "30mn");
+			Cache.set(username, person, CACHE_DURATION);
+			Cache.set(PERMISSION_CACHE_PREFIX + username, person.getAllPermissions(), CACHE_DURATION);
+			Cache.set("personId", person.id, CACHE_DURATION);
 			            
             flash.success("Welcome, " + person.name + person.surname);
             Logger.info("person %s successfully logged in", person.username);
-            //Logger.info("Permission list for %s %s: %s", person.name, person.surname, person.permissions);
+            Logger.trace("Permission list for %s %s: %s", person.name, person.surname, person.permissions);
 			return true;
 		}
 		
         // Oops
+        Logger.info("Failed login for %s using password %s", username, password);
         flash.put("username", username);
         flash.error("Login failed");
         return false;
@@ -51,8 +58,8 @@ public class Security extends Secure.Security {
 	
 	static boolean check(String profile) {
 		String username = connected();
-		if(username == null){
-			Logger.trace("Lo username per la check del profilo %s è null ", profile);
+		if(username == null || username.isEmpty()){
+			Logger.debug("Lo username per la check del profilo %s è null o vuoto", profile);
 			return false;
 		}
 			
@@ -67,22 +74,31 @@ public class Security extends Secure.Security {
     }    
 	
 	private static Person getPerson(String username){
+		if (username == null || username.isEmpty()) {
+			Logger.trace("getPerson failed for username %s", username);
+			return null;
+		}
+		
 		Person person = Cache.get(username, Person.class);
 		if(person == null){
 			person = Person.find("byUsername", username).first();
-			Cache.set(username, person, "30mn");
-			Cache.set(PERMISSION_CACHE_PREFIX + username, person.getAllPermissions(), "30mn");
+			Cache.set(username, person, CACHE_DURATION);
+			Cache.set(PERMISSION_CACHE_PREFIX + username, person.getAllPermissions(), CACHE_DURATION);
+			Logger.debug("Cache filled with %s and his/her permissions", person);
 		}
 		return person;
 	}
 	
 	private static Set<Permission> getPersonAllPermissions(String username) {
 		Person person = getPerson(username);
+		if (person == null) {
+			return ImmutableSet.of();
+		}
 		Set<Permission> permissions = Cache.get(PERMISSION_CACHE_PREFIX + username, Set.class);
 		if (permissions == null) {
 			person.refresh();
 			permissions = person.getAllPermissions();
-			Cache.set(PERMISSION_CACHE_PREFIX + username, permissions, "30mn");
+			Cache.set(PERMISSION_CACHE_PREFIX + username, permissions, CACHE_DURATION);
 		}
 		return permissions;
 	}
@@ -94,4 +110,5 @@ public class Security extends Secure.Security {
 	public static Set<Permission> getPersonAllPermissions() {
 		return getPersonAllPermissions(connected());
 	}
+
 }

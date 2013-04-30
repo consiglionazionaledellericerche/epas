@@ -294,7 +294,7 @@ public class Persons extends Controller {
 
 	/**
 	 * 
-	 * @param personId permette all'utente di cambiare la propria password.
+	 * @param personId permette all'utente amministratore di cambiare la propria password.
 	 */
 	public static void changePassword(Long personId){
 		Person person = Person.findById(personId);

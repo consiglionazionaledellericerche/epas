@@ -202,6 +202,14 @@ public class Person extends Model {
 	@NotAudited
 	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
 	public List<Competence> competences;
+	
+	/**
+	 * relazione con la tabella dei codici competenza per stabilire se una persona ha diritto o meno a una certa competenza
+	 */
+	@NotAudited
+	@ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
+	public List<CompetenceCode> competenceCode;
+	
 
 	/**
 	 * relazione con la tabella delle competence valide
@@ -468,6 +476,14 @@ public class Person extends Model {
 		}
 		return false;
 	}
+	
+	public boolean isUploadSituationAvailable(){
+		for(Permission p : this.permissions){
+			if(p.description.equals(Security.UPLOAD_SITUATION))
+				return true;
+		}
+		return false;
+	}
 
 	/**
 	 * 
@@ -479,6 +495,21 @@ public class Person extends Model {
 				" and (c.expireContract > ? or c.expireContract is null) and (c.beginContract < ? or c.beginContract is null) order by p.surname, p.name", date, date, date).fetch();
 		return activePersons;
 
+	}
+	
+	/**
+	 * 
+	 * @param date
+	 * @return la lista di tecnici che beneficiano di competenze (utilizzata nel controller competences, metodo showCompetences)
+	 */
+	public static List<Person> getTechnicianForCompetences(LocalDate date){
+		List<Person> technicians = new ArrayList<Person>();
+		List<Person> activePersons = getActivePersons(date);
+		for(Person p : activePersons){
+			if(p.qualification != null && p.qualification.qualification > 3)
+				technicians.add(p);
+		}
+		return technicians;
 	}
 
 	/**
@@ -504,8 +535,10 @@ public class Person extends Model {
 			/**
 			 * non esiste un personDay per quella data, va creato e quindi salvato
 			 */
+			//Logger.debug("Non esiste il personDay...è il primo personDay per il giorno %s per %s %s", pd.date, person.name, person.surname);
 			pd = new PersonDay(person, stamping.dateTime.toLocalDate());
-			pd.save();			
+			pd.save();		
+			Logger.debug("Salvato il nuovo personDay %s", pd);
 			Stamping stamp = new Stamping();
 			stamp.date = stamping.dateTime;
 			stamp.markedByAdmin = false;
@@ -516,6 +549,8 @@ public class Person extends Model {
 			stamp.badgeReader = stamping.badgeReader;
 			stamp.personDay = pd;
 			stamp.save();
+			pd.stampings.add(stamp);
+			pd.save();
 
 		}
 		else{
@@ -530,11 +565,14 @@ public class Person extends Model {
 				stamp.badgeReader = stamping.badgeReader;
 				stamp.personDay = pd;
 				stamp.save();
+				pd.stampings.add(stamp);
+				pd.save();
 			}
 			else{
 				Logger.warn("All'interno della lista di timbrature di %s %s nel giorno %s c'è una timbratura uguale a quella passata dallo" +
 						"stampingsFromClient: %s", person.name, person.surname, pd.date, stamping.dateTime);
 			}
+			//0113 00004000000000000086063304051407
 //			for(Stamping s : pd.stampings){
 //				if(!s.date.isEqual(stamping.dateTime)){
 //					Stamping stamp = new Stamping();
@@ -549,10 +587,15 @@ public class Person extends Model {
 //					stamp.save();
 //				}
 //			}
+			
 		}
-
+		Logger.debug("Chiamo la populatePersonDay per fare i calcoli sulla nuova timbratura inserita per il personDay %s", pd);
 		pd.populatePersonDay();
-		pd.merge();
+		/**
+		 * controllare se può essere una save qui al posto della merge il problema al fatto che le timbrature prese dal client non permettano
+		 * i calcoli
+		 */
+		pd.save();
 		return true;
 	}
 
@@ -569,6 +612,283 @@ public class Person extends Model {
 				return true;
 			}
 		}return false;
+	}
+	
+	
+	/**
+	 * 
+	 * @return se è attiva la reperibilità nei giorni lavorativi
+	 */
+	public boolean isWorkDayReperibilityAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("207"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 
+	 * @return se è attiva la reperibilità festiva
+	 */
+	public boolean isHolidayReperibilityAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("208"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 
+	 * @return se è attivo lo straordinario nei giorni lavorativi
+	 */
+	public boolean isOvertimeInWorkDayAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("S1"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 
+	 * @return se è attivo il turno ordinario
+	 */
+	public boolean isOrdinaryShiftAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("T1"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 
+	 * @return se è attivo il turno notturno
+	 */
+	public boolean isNightlyShiftAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("T2"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 
+	 * @return se è attivo il turno festivo
+	 */
+	public boolean isHolidayShiftAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("T3"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 
+	 * @return se è attivo lo straordinario notturno nei giorni lavorativi o diurno nei festivi
+	 */
+	public boolean isOvertimeInHolidayOrNightlyInWorkDayAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("S2"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 
+	 * @return se è attivo lo straordinario notturno nei giorni festivi
+	 */
+	public boolean isOvertimeInNightlyHolidayAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("S3"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 
+	 * @return se è attiva l'indennità meccanografica
+	 */
+	public boolean isMechanographicalAllowanceAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("050"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 
+	 * @return se è attiva per la persona l'indennità di sede disagiata
+	 */
+	public boolean isHardshipAllowance(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("042"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 
+	 * @return se è attiva l'indennità per maneggio valori
+	 */
+	public boolean isHandleValuesAllowanceAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("203"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 
+	 * @return se è attiva l'indennità natanti
+	 */
+	public boolean isBoatsAllowanceAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("367"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 
+	 * @return se è attiva l'indennità di rischio subacquei
+	 */
+	public boolean isRiskDivingAllowanceAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("356"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	public boolean isRiskDegreeOneAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("351"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	public boolean isRiskDegreeTwoAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("352"))
+				flag = true;
+		}
+		return flag;
+	}
+
+	public boolean isRiskDegreeThreeAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("353"))
+				flag = true;
+		}
+		return flag;
+	}
+
+	public boolean isRiskDegreeFourAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("354"))
+				flag = true;
+		}
+		return flag;
+	}
+
+	public boolean isRiskDegreeFiveAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("355"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 
+	 * @return se è attiva l'indennità mansione
+	 */
+	public boolean isTaskAllowanceAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("106"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	/**
+	 * 
+	 * @return se è attiva l'indennità mansione maggiorata
+	 */
+	public boolean isTaskAllowanceIncreasedAvailable(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("107"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	public boolean isIonicRadianceRiskCom1Available(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("205"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	public boolean isIonicRadianceRiskCom3Available(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("206"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	public boolean isIonicRadianceRiskCom1AvailableBis(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("303"))
+				flag = true;
+		}
+		return flag;
+	}
+	
+	public boolean isIonicRadianceRiskCom3AvailableBis(){
+		boolean flag = false;
+		for(CompetenceCode code : this.competenceCode){
+			if(code.code.equals("304"))
+				flag = true;
+		}
+		return flag;
 	}
 
 }

@@ -33,6 +33,9 @@ Permission(insertAndUpdateVacations):
 
 Permission(viewPersonalSituation):
     description: viewPersonalSituation
+    
+Permission(uploadSituation):
+    description: uploadSituation
 
 Person(admin):
     username: admin

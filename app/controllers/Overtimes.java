@@ -56,6 +56,7 @@ public class Overtimes extends Controller {
 		}
 		Logger.debug("Find persons %s with email %s", person.name, email);
 		
+
 		PersonMonth personMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", person, month, year).first();
 		if(personMonth == null)
 			personMonth = new PersonMonth(person, year, month);

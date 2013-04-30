@@ -176,9 +176,6 @@ public class FromMysqlToPostgres {
 			
 			FromMysqlToPostgres.setWorkingTimeType(oldIDPersona, person);
 
-			FromMysqlToPostgres.createValuableCompetence(rs.getInt("Matricola"), person);
-			
-			FromMysqlToPostgres.createCompetence(oldIDPersona, person, anno);
 
 			FromMysqlToPostgres.createContract(oldIDPersona, person);
 
@@ -193,7 +190,12 @@ public class FromMysqlToPostgres {
 			FromMysqlToPostgres.createStampings(oldIDPersona, person, anno);
 			
 			FromMysqlToPostgres.createPersonMonthAndYear(person);
+			
 
+			FromMysqlToPostgres.createValuableCompetence(rs.getInt("Matricola"), person);
+			
+			FromMysqlToPostgres.createCompetence(oldIDPersona, person, anno);
+			
 			Logger.info("Terminata la creazione delle info della persona %s %s", rs.getString("Nome"), rs.getString("Cognome"));
 
 			JPAPlugin.closeTx(false);
@@ -209,7 +211,10 @@ public class FromMysqlToPostgres {
 		FromMysqlToPostgres.updateContract();
 		FromMysqlToPostgres.updateVacationPeriod();
 		FromMysqlToPostgres.updateCompetence();
+		FromMysqlToPostgres.updateCompetenceCode();
+		FromMysqlToPostgres.personToCompetence();
 		FromMysqlToPostgres.importOreStraordinario();
+		
 		FromMysqlToPostgres.addPermissiontoAll();
 		JPAPlugin.closeTx(false);
 		Logger.info("Importazione terminata");
@@ -218,6 +223,7 @@ public class FromMysqlToPostgres {
 
 		
 	}
+
 
 	/**
 	 * metodo che assegna un "default" di periodo ferie a quelle persone che dall'importazione non hanno ricevuto un vacationPeriod
@@ -247,13 +253,13 @@ public class FromMysqlToPostgres {
 				con.beginContract = new LocalDate(1970,1,1);
 				con.save();
 			}
-			else{
-				con = new Contract();
-				con.beginContract = new LocalDate(1970,1,1);
-				con.person = p;
-				con.onCertificate = true;
-				con.save();
-			}
+//			else{
+//				con = new Contract();
+//				con.beginContract = new LocalDate(1970,1,1);
+//				con.person = p;
+//				con.onCertificate = true;
+//				con.save();
+//			}
 		}
 	}
 
@@ -889,15 +895,7 @@ public class FromMysqlToPostgres {
 					Logger.info("Creato %s", vacationPeriod.toString());
 				}
 			}
-//			else{
-//				VacationCode vc = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", "28+4").first();
-//				VacationPeriod vp = new VacationPeriod();
-//				vp.vacationCode = vc;
-//				vp.person = person;
-//				vp.beginFrom = new LocalDate(1970,1,1);
-//				vp.save();
-//				Logger.info("Creato vacation perdiod per dipendente %s %s che dal vecchio db non aveva informazione", person.name, person.surname);
-//			}
+
 		}		
 		catch(SQLException e){
 			e.printStackTrace();
@@ -939,46 +937,6 @@ public class FromMysqlToPostgres {
 			}
 		}
 		Logger.info("Terminati i riepiloghi annuali per %s", person);
-//
-//		java.sql.Date beginDate = (java.sql.Date) new java.sql.Date(2012,1,1);
-//		java.sql.Date endDate = (java.sql.Date) new java.sql.Date(2012,12,31);
-//		PreparedStatement stmtAbsences = mysqlCon.prepareStatement("SELECT Codici.id,Orario.Giorno,Orario.TipoGiorno,Orario.TipoTimbratura,"+
-//				"Codici.id, Codici.Codice " +
-//				"FROM Orario, Codici " +
-//				"WHERE Orario.TipoGiorno=Codici.id AND Orario.ID="+id+ 
-//				" AND (Codici.Codice = '31' OR Codici.Codice = '32' OR Codici.Codice ='91' OR Codici.Codice = '94')"+
-//				" AND Giorno >= "+beginDate+ " AND Giorno <= "+endDate);
-//
-//		ResultSet rsAbsences = stmtAbsences.executeQuery();
-//		int countVacation = 0, countVacationPastYear = 0, countRecovery = 0, countPermission = 0;
-//		while(rsAbsences.next()){
-//			if(rsAbsences.getString("Codice").equals("31"))
-//				countVacationPastYear = countVacationPastYear+ 1;
-//			if(rsAbsences.getString("Codice").equals("32"))
-//				countVacation = countVacation +1;
-//			if(rsAbsences.getString("Codice").equals("91"))
-//				countRecovery = countRecovery +1;
-//			if(rsAbsences.getString("Codice").equals("94"))
-//				countPermission = countPermission +1;
-//		}
-//		InitializationAbsence initAbsenceVacationPastYear = new InitializationAbsence();
-//		initAbsenceVacationPastYear.absenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", "31").first();
-//		initAbsenceVacationPastYear.person = person;
-//		initAbsenceVacationPastYear.date = new LocalDate(anno, 1, 1);
-//		initAbsenceVacationPastYear.absenceDays = countVacationPastYear;
-//		initAbsenceVacationPastYear.save();
-//		InitializationAbsence initAbsenceVacation = new InitializationAbsence();
-//		initAbsenceVacation.absenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", "32").first();
-//		initAbsenceVacation.person = person;
-//		initAbsenceVacation.date = new LocalDate(anno, 1, 1);
-//		initAbsenceVacation.absenceDays = countVacation;
-//		initAbsenceVacation.save();
-//		InitializationAbsence initAbsencePermission = new InitializationAbsence();
-//		initAbsencePermission.absenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", "94").first();
-//		initAbsencePermission.person = person;
-//		initAbsencePermission.date = new LocalDate(anno, 1, 1);
-//		initAbsencePermission.absenceDays = countPermission;
-//		initAbsencePermission.save();
 
 	}
 	
@@ -1061,6 +1019,7 @@ public class FromMysqlToPostgres {
 			competence.competenceCode = competenceCode;
 			competence.save();
 			Logger.debug("Creato %s", competence.toString());
+					
 
 		}	
 		Logger.debug("Terminato di creare le competenze per %s", person);
@@ -1080,6 +1039,8 @@ public class FromMysqlToPostgres {
 	 * funzione che associa a ciascuna persona creata, le corrispettive competenze valide.
 	 */
 	public static void createValuableCompetence(int matricola, Person person) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+		
+		JPAPlugin.startTx(false);
 		Logger.debug("Inizio a creare le competenze valide per %s %s", person.name, person.surname);
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT codicecomp, descrizione FROM compvalide " +
@@ -1124,7 +1085,7 @@ public class FromMysqlToPostgres {
 			}
 
 		}
-	//	JPAPlugin.closeTx(false);
+		JPAPlugin.closeTx(false);
 		Logger.debug("Terminata la creazione dei personMonth e personYear per %s %s", person.name, person.surname);
 	}
 
@@ -1146,7 +1107,8 @@ public class FromMysqlToPostgres {
 			stamping.date = new LocalDateTime(year,month,day,hour,minute,second);
 
 			stamping.markedByAdmin = false;
-			stamping.stampType = StampType.em().getReference(StampType.class, StampTypeValues.MOTIVI_DI_SERVIZIO.getId());
+			stamping.stampType = StampType.find("Select st from StampType st where st.code = ?", "motiviDiServizio").first();
+			//stamping.stampType = StampType.em().getReference(StampType.class, StampTypeValues.MOTIVI_DI_SERVIZIO.getId());
 		}
 		else{
 
@@ -1168,7 +1130,7 @@ public class FromMysqlToPostgres {
 				int newHour = hour / 60;
 				int min = hour % 60;
 				stamping.date = new LocalDateTime(year,month,day,newHour,min,second);
-
+				stamping.note = "Timbratura inserita dall'amministratore";
 				stamping.markedByAdmin = true;
 			}						
 
@@ -1220,6 +1182,24 @@ public class FromMysqlToPostgres {
 		pd.absences.add(absence);
 		pd.merge();
 		Logger.debug("Creata %s", absence);
+		if(absenceType.code.equals("91")){
+			Logger.debug("Trovato riposo compensativo per %s %s nel giorno %s. Proseguo con i calcoli...", 
+					pd.person.name, pd.person.surname, pd.date);
+			PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? and pm.month = ?", 
+					pd.person, pd.date.getYear(), pd.date.getMonthOfYear()).first();
+			if(pm == null){
+				Logger.debug("Il person month era nullo, lo devo creare");
+				pm = new PersonMonth(pd.person, pd.date.getYear(), pd.date.getMonthOfYear());
+				
+			}
+			pm.prendiRiposoCompensativo(pd.date);
+			pm.save();
+			Logger.debug("Assegnato riposo compensativo e salvato person month per %s %s", pd.person.name, pd.person.surname);
+			Logger.debug("Il valore dei riposi compensativi è: %s per anno corrente e %s per anno passato", 
+					pm.riposiCompensativiDaAnnoCorrente, pm.riposiCompensativiDaAnnoPrecedente);
+			
+		}
+			
 		//createAbsence(pd, absenceType);
 	}
 
@@ -1305,11 +1285,69 @@ public class FromMysqlToPostgres {
 					comp.valueApproved = rs.getInt("ore_str");
 					comp.save();
 					Logger.debug("Creata competenza per il mese di %s e anno %s con valore: %s", comp.month, comp.year, comp.valueApproved);
+					
+					/**
+					 * aggiorno i personMonth con il valore degli straordinari solo relativamente a questo anno
+					 */
+					LocalDate date = new LocalDate();
+					if(rs.getInt("anno") == date.getYear()){
+						PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? and pm.month = ?", 
+								person, rs.getInt("anno"), rs.getInt("mese")).first();
+						if(pm == null)
+							pm = new PersonMonth(person, rs.getInt("anno"), rs.getInt("mese"));
+						pm.assegnaStraordinari(comp.valueApproved);
+						pm.save();
+					}
+					
 				}
 			}
 			Logger.debug("Terminata la update competence per %s %s.", person.name, person.surname);
 		}
 		
+	}
+	
+	/**
+	 * metodo di riempimento da lanciare al termine della procedura di importazione per completare tutti i codici di competenza presenti
+	 * @throws SQLException
+	 */
+	public static void updateCompetenceCode() throws SQLException{
+		Logger.debug("Lancio la updateCompetenceCode per riempire i codici di competenza con quelli meno usati ma presenti nel vecchio db");
+		
+		PreparedStatement stmt = mysqlCon.prepareStatement("Select * from codici_comp");		
+
+		ResultSet rs = stmt.executeQuery();
+		while(rs.next()){
+			
+			CompetenceCode code = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", 
+					rs.getString("codice")).first();
+			if(code == null){
+				Logger.debug("Non ho trovato il codice di competenza %s nel db, devo crearlo", rs.getString("codice"));
+					code = new CompetenceCode();
+					code.create();
+					code.code = rs.getString("codice");
+					code.codeToPresence = rs.getString("codice_att");
+					code.description = rs.getString("descrizione");
+					code.inactive = rs.getBoolean("inattivo");
+					code.save();
+			}					
+			
+		}
+		Logger.debug("Terminata la update competenceCode.");
+	}
+	
+	public static void personToCompetence() throws SQLException{
+		Logger.debug("PersonToCompetence per dare a ogni dipendente le proprie competenze attive");
+		
+		PreparedStatement stmt = mysqlCon.prepareStatement("Select * from compvalide");
+		ResultSet rs = stmt.executeQuery();
+		
+		while(rs.next()){
+			CompetenceCode code = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", rs.getString("codicecomp")).first();
+			Person person = Person.find("Select p from Person p where p.number = ?", rs.getInt("matricola")).first();
+			person.competenceCode.add(code);
+			person.save();
+		}
+		Logger.debug("Terminazione di PersonToCompetence per dare a ogni dipendente le proprie competenze attive");
 	}
 }
 

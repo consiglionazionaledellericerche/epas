@@ -9,14 +9,14 @@
 		<th>Anno</th>
 	</tr>
 	%{ 
-		int i = 1;
-		while(i < yearRecap.listVacationDaysLastYear(yearRecap.year).size()){
+		int i = 0;
+		while(i < yearRecap.listVacationDaysLastYear().size()){
 		
 	}%
 	<tr>
-		<td>${yearRecap.listVacationDaysLastYear(yearRecap.year).get(i).date.getDayOfMonth()}</td>
-		<td>${yearRecap.listVacationDaysLastYear(yearRecap.year).get(i).date.getMonthOfYear()}</td>
-		<td>${yearRecap.listVacationDaysLastYear(yearRecap.year).get(i).date.getYear()}</td>
+		<td>${yearRecap.listVacationDaysLastYear().get(i).date.getDayOfMonth()}</td>
+		<td>${yearRecap.listVacationDaysLastYear().get(i).date.getMonthOfYear()}</td>
+		<td>${yearRecap.listVacationDaysLastYear().get(i).date.getYear()}</td>
 	</tr>
 	%{
 		i++;}

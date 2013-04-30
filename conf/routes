@@ -1,13 +1,13 @@
 # Routes
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
-#*		/										module:secure
+*		/										module:secure
 
 #Import Shibboleth routes
-*      /                						module:shibboleth
+#*      /                						module:shibboleth
 
 # Home page
-GET     /                                       Stampings.stampings
+GET     /                                       Application.index
 
 #Home page amministrazione
 GET		/presenze								Application.indexAdmin
@@ -23,7 +23,7 @@ GET		/yearlyAbsences/{personId}/{year}		YearlyAbsences.yearlyAbsences
 
 #Assenze mensili globali
 GET		/generalMonthlyAbsences/{year}/{month}	YearlyAbsences.showGeneralMonthlyAbsences
-GET		/yearlyAbsences/absencesPerPerson/{personId}/{year}		YearlyAbsences.absencesPerPerson
+GET		/yearlyAbsences/absencesPerPerson/{year}		YearlyAbsences.absencesPerPerson
 
 #Ferie
 GET		/vacations								Vacations.show
@@ -134,6 +134,15 @@ GET		/manageCompetenceCode					Competences.discard
 GET		/totalOvertimeHours/{year}/{month}		Competences.totalOvertimeHours
 POST	/totalOvertimeHours/					Competences.saveOvertime
 GET		/overtime/{year}/{month}				Competences.overtime
+GET		/recapCompetences						Competences.recapCompetences
+GET		/recapCompetences/updatePersonCompetence/{personId}		Competences.updatePersonCompetence
+
+#Gestione attestati di presenza
+GET		/uploadSituation/						UploadSituation.show
+POST	/uploadSituation/						UploadSituation.uploadSituation
+
+#Clock
+GET		/clocks									Clocks.show
 
 
 

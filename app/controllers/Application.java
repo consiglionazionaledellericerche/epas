@@ -23,6 +23,13 @@ public class Application extends Controller {
     }
     
 	
+    public static void index() {
+    	if (Security.check(Security.VIEW_PERSONAL_SITUATION)) {
+    		Stampings.stampings(null, null);
+    	} else {
+    		Application.indexAdmin();
+    	}
+    }
 	public static void success(){
 			
 		render();

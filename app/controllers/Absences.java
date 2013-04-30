@@ -9,6 +9,7 @@ import java.util.List;
 import models.Absence;
 import models.AbsenceType;
 import models.AbsenceTypeGroup;
+import models.Configuration;
 import models.Person;
 import models.PersonDay;
 import models.PersonMonth;
@@ -290,6 +291,53 @@ public class Absences extends Controller{
 			}
 		}
 		
+		/**
+		 * controllo che le persone che richiedono il riposo compensativo, che hanno una qualifica compresa tra 1 e 3, non abbiano superato
+		 * il massimo numero di giorni di riposo compensativo consentiti e presenti in configurazione
+		 */
+		if(absenceType.code.equals("94") && person.qualification.qualification > 0 && person.qualification.qualification < 4){
+			Configuration config = Configuration.getCurrentConfiguration();
+			LocalDate actualDate = new LocalDate(yearFrom, monthFrom, dayFrom);
+			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, actualDate).first();
+			if(pd == null){
+					pd = new PersonDay(person, actualDate);
+					pd.create();
+			}
+			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+					person, new LocalDate(yearFrom, 1,1), actualDate).fetch();
+			int counter = 0;
+			for(PersonDay perd : pdList){
+				if(perd != null && (perd.absences != null || perd.absences.size() > 0)){
+					for(Absence abs : perd.absences){
+						if(abs.absenceType.code.equals("94"))
+							counter++;
+					}		
+				}				
+			}
+			Logger.debug("Fino ad oggi, %s, sono stati utilizzati %d giorni di riposo compensativo da %s %s", actualDate, counter, person.name, person.surname);
+			if(counter >= config.maxRecoveryDaysOneThree){
+				flash.error("Il dipendente %s %s non può usufruire del codice di assenza %s poichè ha raggiunto il limite previsto per" +
+						"quel codice", person.name, person.surname, absenceType.code);
+				render("@save");
+			}
+			else{
+				Absence absence = new Absence();
+				if(params.get("datasize", Blob.class) != null){
+					absence.absenceRequest = params.get("datasize", Blob.class);
+				}
+				else 
+					absence.absenceRequest = null;
+				absence.personDay = pd;
+				absence.absenceType = absenceType;
+				absence.save();
+				pd.populatePersonDay();
+				pd.save();
+				flash.success("Inserito codice %s per %s %s in data %s", absenceType.code, person.name, person.surname, actualDate);
+				render("@save");
+			}
+				
+		}
+		
 		LocalDate date = new LocalDate();
 		if(dateFrom.isAfter(date)){
 			/**
@@ -323,65 +371,12 @@ public class Absences extends Controller{
 			}
 			else 
 				absence.absenceRequest = null;
-//			if(absenceType.justifiedTimeAtWork.isFixedJustifiedTime() == true && absenceType.mealTicketCalculation == true){
-//				/**
-//				 * è un'assenza oraria e il calcolo del buono mensa deve essere fatto lo stesso: devo vedere se il tempo di lavoro
-//				 */
-//				Logger.debug("Sono all'interno del controllo su assenze orarie. L'assenza inserita è: %s", absence.absenceType.code);
-//				if(person.workingTimeType.getMinimalTimeForLunch(dateFrom.getDayOfWeek(), person.workingTimeType) < pd.timeAtWork){
-//					/**
-//					 * tolgo dal tempo di lavoro la quantità di ore che il codice di assenza toglie 
-//					 */
-//					Logger.debug("Chiamo la populatePersonDay ridotta perchè il timeAtWork lo calcolo in funzione della assenza oraria");
-//					pd.timeAtWork = pd.timeAtWork-absenceType.justifiedTimeAtWork.minutesJustified;
-//					pd.merge();
-//					pd.populatePersonDayAfterJustifiedAbsence();
-//					pd.save();
-//				}
-//				else{
-//					Logger.debug("Asdsdsdsd");
-//					/**
-//					 * in questo caso il tempo di lavoro è superiore almeno al minimo tempo per ottenere il buono mensa
-//					 */
-//				}
-//			}
+
 			absence.create();
 			absence.personDay.populatePersonDay();
 			absence.personDay.save();
 		}	
 		
-//		flash.success("Aggiunta assenza a %s %s il giorno %s", person.name, person.surname, dateFrom);
-//		render("@save");
-//		if((params.get("buonoMensaSi") != null) || (params.get("buonoMensaNo") != null) || (params.get("buonoMensaCalcolato") != null)){
-//			if(params.get("buonoMensaSi", Boolean.class) == true){
-//
-//				pd.isTicketAvailable = true;
-//				pd.save();
-//
-//			}
-//			if(params.get("buonoMensaNo", Boolean.class) == true){
-//				pd.isTicketAvailable = false;
-//				pd.save();
-//			}
-//
-//			if(params.get("buonoMensaCalcolato", Boolean.class) == true){
-//				pd.populatePersonDayAfterJustifiedAbsence();
-//				pd.save();
-//			}
-//		}
-		
-//		if(absenceType.ignoreStamping == true){
-//			/**
-//			 * deve ignorare le timbrature, quindi per quel giorno vale l'assenza e della timbratura che fare? vanno cancellate? e il personday?
-//			 */
-//			List<Stamping> stList = Stamping.find("Select st from Stamping st, PersonDay pd where st.personDay = pd and pd.date = ?" +
-//					" and pd.person = ?", dateFrom, person).fetch();
-//			for(Stamping st : stList){
-//				st.delete();
-//			}
-//			pd.populatePersonDay();
-//			pd.save();
-//		}
 		flash.success("Assenza di tipo %s inserita per il giorno %s per %s %s", absenceCode, PersonTags.toDateTime(dateFrom), person.surname, person.name);
 		render("@save");
 

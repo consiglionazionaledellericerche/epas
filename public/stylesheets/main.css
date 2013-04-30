@@ -265,20 +265,25 @@ p#sede {margin: 1em 0em 0em}
 p#telefono {margin: 1em 0em 0em}
 p#email {margin: 1em 0em 0em}
 p#nascita {margin: 1em 0em 0em}
+p#caricamentoSituazioneMensile {margin: 1em 0em 2em; text-align: center}
+p#tipoTimbraturaClock {margin: 3em 0em 2em; text-align: center; font-size: 18px; }
+p#choiceClock {text-align: center; font-size: 18px;}
 
 div#logout {text-align: right; float: right}
 div#chooseView {text-align: center}
-div#cambiaPassword {margin: 1em 4em; text-align: left}
-div#annullaPassword {margin: 1em 4em; text-align: left}
+div#cambiaPassword {margin: 3em 60em 2em; text-align: left}
+div#annullaPassword {margin: 1em 60em 2em; text-align: left}
 div#gestioneParametri {margin: 1em 4em 1em; text-align: left}
 div#spiegazioneValoriGrassetto {margin: 1em 4em 1em}
+div#caricamentoSituazioneMensile {text-align: center}
+
 h2#titoloSituazionePresenzeMensili {text-align: center}
 h2#titoloSituazioneAssenzeMensili {text-align: center}
 h2#titoloSituazioneAssenzeAnnuali {text-align: center}
 h3#titoloSituazioneFerie {text-align: center}
 h2#titoloGestionePersonale {text-align: center}
 h2#titoloModificaPersonale {text-align: center}
-h2#titoloCambioPassword {text-align: center}
+
 h2#titoloGestioneOrariLavoro {text-align: center}
 h2#nuovoOrario {text-align: center}
 h2#titoloGestioneTipiFerie {text-align: center}
@@ -306,6 +311,10 @@ h3#titoloPianoFerie {margin: 1em 0em 1em; text-align: left}
 h3#modificaCodiceCompetenza {margin: 2em 0em 2em; text-align: center}
 h3#monteOreStraordinario {margin: 2em 0em 1em; text-align: left}
 h3#titoloStraordinari {margin: 2em 0em 1em; text-align: left}
+h3#titoloCambioPassword {text-align: center}
+h3#caricamentoSituazioneMensile {text-align: center}
+h3#clock {text-align: center}
+iframe#clock {align: center; margin: 3em 58em 0em}
 
 h4#configurazioniEsistenti {margin:2em 0em 1em; text-align: left}
 
@@ -322,13 +331,16 @@ input#submitInsertPerson {margin: 2em 60em 0em; align: center}
 input#resetInsertPerson {margin: 1em 60em 0em; align: center}
 input#submitTerminazioneRapporto {margin: 2em 60em 0em; align: center}
 input#discardTerminazioneRapporto {margin: 1em 60em 0em; align: center}
-input#username {margin: 4 em 2em 2em}
-input#password {margin: 4 em 2em 2em}
-input#nuovaPassword {margin: 3 em 2em 2em}
-input#confermaPassword {margin: 4 em 2em 2em}
+input#username {margin: -2em 9em 2em}
+input#password {margin: -2em 9em 2em}
+input#nuovaPassword {margin: 3em 2em 2em}
+input#confermaPassword {margin: 4em 2em 2em}
 input#submitStamping {margin: 0em 30em 0em; align: center}
 input#discardStamping {margin: 0em 40em 0em; align: center}
 input#updateStamping {margin: 0em 25em 0em; align: center}
+
+p#nome {margin: 0em 1em 0em}
+p#cognome {margin: 1em 1em 2em}
 
 input#submitNuovoCodiceAssenza {margin: 2em 60em 0em; align: center}
 input#discardNuovoCodiceAssenza {margin: 1em 60em 0em; align: center}
@@ -336,6 +348,9 @@ input#submitEditPerson {margin: 2em 60em 0em; align left}
 input#discardEditPerson {margin: 1em 60em 0em; align: center}
 input#deletePerson {margin: 1em 60em 0em; align: right}
 input#modificaContratto {margin: 1em 25em 0em; align: center}
+input#submitSituation {margin: 2em 67em 0em; align: center}
+input#submitStampingClock {margin: 0em 70em 0em; align: center}
+input#saveCompetence {margin: 1em 67em 0em; align: center}
 
 input#updateOldOvertime {margin: 0em 25em 0em; align: center}
 table#tabellaPersoneCodiciAssenzaMensili {margin: 2em 1em 1em; align: left}

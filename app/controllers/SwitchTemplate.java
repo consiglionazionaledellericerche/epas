@@ -1,5 +1,7 @@
 package controllers;
 
+import java.io.IOException;
+
 import it.cnr.iit.epas.ActionMenuItem;
 import models.Person;
 
@@ -12,7 +14,7 @@ public class SwitchTemplate extends Controller{
 
 	public static final String USERNAME_SESSION_KEY = "username";
 
-	public static void dispatch() throws InstantiationException, IllegalAccessException {
+	public static void dispatch() throws InstantiationException, IllegalAccessException, IOException {
 		LocalDate now = new LocalDate();
 
 		String method = params.get("method");
@@ -67,7 +69,7 @@ public class SwitchTemplate extends Controller{
 				Stampings.personStamping(person.getId(), year, month);
 			} else {
 				Logger.debug("sto per chiamare il metodo show con personId = %s, year = %s, month = %s", personId, year, month);
-				Stampings.stampings(person.getId(), year, month);
+				Stampings.stampings(year, month);
 			}
 
 			break;
@@ -118,14 +120,17 @@ public class SwitchTemplate extends Controller{
 		case manageCompetence:
 			Competences.manageCompetenceCode();
 			break;
+		case uploadSituation:
+			UploadSituation.uploadSituation(year, month);
+			break;
 		case stampings:
-			Stampings.stampings(personId, year, month);
+			Stampings.stampings(year, month);
 			break;
 		case absences:
 			Absences.absences(personId, year, month); 
 			break;
 		case absencesperperson:
-			YearlyAbsences.absencesPerPerson(personId, year);
+			YearlyAbsences.absencesPerPerson(year);
 			break;
 		case vacations:
 			Vacations.show(personId, year);

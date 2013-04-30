@@ -81,12 +81,13 @@
 				}%
 				<td class="ingresso">
 				%{ if(day.stampingList().size() > j && day.stampingList().get(j) !=null ) { }%
-					<a href="@{Stampings.edit(day.getStampings().get(j).id)}" class="insertStamping${day.date.dayOfMonth}">
+					<a href="@{Stampings.edit(day.getStampings().get(j).id)}" class="insertStamping${day.date.dayOfMonth}-${j}">
 					${day.stampings.get(j).date.toCalendarTime()}
 					</a>
 				<strong>${(day.stampingList().get(j).stampModificationType?.code)}</strong> 
+				<strong>${(day.stampingList().get(j).stampType?.identifier)}</strong>
 				<script type="text/javascript"> 
-				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
+				$('.insertStamping${day.date.dayOfMonth}-${j}').popupWindow({ 
 				height:500, 
 				width:800, 
 				top:50, 
@@ -104,12 +105,13 @@
 				
 				<td class="uscita">
 				%{ if(day.stampingList().size() > j+1 && day.stampingList().get(j+1) !=null ) { }%
-					<a href="@{Stampings.edit(day.getStampings().get(j+1).id)}" class="insertStamping${day.date.dayOfMonth}">
+					<a href="@{Stampings.edit(day.getStampings().get(j+1).id)}" class="insertStamping${day.date.dayOfMonth}-${j+1}">
 					${day.stampingList().get(j+1).date.toCalendarTime()}
 					</a>
-					<strong>${(day.stampingList().get(j+1).stampModificationType?.code)}</strong> 
+					<strong>${(day.stampingList().get(j+1).stampModificationType?.code)}</strong>
+					<strong>${(day.stampingList().get(j+1).stampType?.identifier)}</strong> 
 				<script type="text/javascript"> 
-				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
+				$('.insertStamping${day.date.dayOfMonth}-${j+1}').popupWindow({ 
 				height:500, 
 				width:800, 
 				top:50, 
@@ -137,17 +139,24 @@
 			</td>			
 			%{
 			if(day.stampingList().size()==2 ){
-	         }% <td class="tempoLavoro">${day.convertTimeAtWork(day.timeAtWork).toCalendarTime()} <strong>${day.timeAtWork>360 ? day.checkTimeForLunch()?.code : ''}</strong></td>
+	         }% <td class="tempoLavoro">${day.timeAtWork.toHourTime()} <strong>${day.timeAtWork>360 ? day.checkTimeForLunch()?.code : ''}</strong></td>
 			%{
 			 }else{
-			 }% <td class="tempoLavoro">${day.convertTimeAtWork(day.timeAtWork).toCalendarTime()} <strong>${day.stampingList().size()==4 && !day.stampingList().contains(null) && day.timeAtWork>300
+			 }% <td class="tempoLavoro">${day.timeAtWork.toHourTime()} <strong>${day.stampingList().size()==4 && !day.stampingList().contains(null) && day.timeAtWork>300
 			 && day.checkMinTimeForLunch()<30 ? day.checkTimeForLunch()?.code : ''}</strong></td>
 			%{
 	         }
 	         }%	
 	         <td class="differenza">${(day.difference).toHourTime()}</td>
-				
-	         <td class="progressivo">${day.progressive.toHourTime()}</td>	
+			%{
+			if(day.isHoliday()==false){
+			}% <td class="progressivo">${day.progressive.toHourTime()}</td>
+			%{
+			}else{
+			}%<td class="progressivo">${day.checkPreviousProgressive() != null ? day.checkPreviousProgressive().progressive.toHourTime() : ''}</td>
+			%{
+			}
+			}%	
 	         <td>${day.person.workingTimeType != null ? day.person.workingTimeType.description : ''}</td>
 		</tr>
 
@@ -164,6 +173,7 @@
 
 <p>Riepilogo delle ore di lavoro in eccesso/difetto:</p> 
 <p> - E' possibile utilizzare il residuo dell'anno precedente? ${personMonth.possibileUtilizzareResiduoAnnoPrecedente()==true ? 'sì' : 'no'}</p>
+<p> - Eventuale residuo da inizializzazione: ${personMonth.residuoAnnoPrecedenteDaInizializzazione().toHourTime()}</p>
 <p> - Residuo anno precedente disponibile a inizio mese: ${personMonth.residuoAnnoPrecedenteDisponibileAllInizioDelMese().toHourTime()}</p>
 <p> - Residuo tempo di lavoro dei mesi precedenti: ${personMonth.totaleResiduoAnnoCorrenteAlMesePrecedente().toHourTime()}</p> 
 <p> - Residuo del mese:  ${personMonth.residuoDelMese().toHourTime()}</p>
@@ -192,7 +202,17 @@
      }
      
 }%
-
+%{	if(personMonth.getStampType() != null){
+	for(type in personMonth.getStampType()) {
+}%
+	<tr>
+		<td>${type.identifier}</td>
+		<td>${type.description}</td>
+	</tr>
+%{  		   
+     }
+    }
+}%
 </table>
 *{Significato codici assenza}*
 <br>

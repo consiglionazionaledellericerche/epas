@@ -59,7 +59,7 @@
 					${day.stampings.get(j).date.toCalendarTime()}
 				<!--  	</a> -->
 				${(day.stampingList().get(j).stampModificationType?.code)} 
-
+				${(day.stampingList().get(j).stampType != null ? day.stampingList().get(j).stampType.identifier : '')}
 					%{ } }%
 				</td>
 				
@@ -69,7 +69,7 @@
 					${day.stampingList().get(j+1).date.toCalendarTime()}
 				<!--  	</a> -->
 					${(day.stampingList().get(j+1).stampModificationType?.code)} 
-
+				${(day.stampingList().get(j).stampType != null ? day.stampingList().get(j).stampType.identifier : '')}
 					%{ } }%
 				</td>
 			
@@ -77,17 +77,25 @@
 			
 			%{
 			if(day.stampingList().size()==2 ){
-	         }% <td class="tempoLavoro">${day.isHoliday()==false ? day.convertTimeAtWork(day.timeAtWork).toCalendarTime() : ''} <strong>${day.timeAtWork>360 ? day.checkTimeForLunch()?.code : ''}</strong></td>
+	         }% <td class="tempoLavoro">${day.isHoliday()==false ? day.timeAtWork.toHourTime() : ''} <strong>${day.timeAtWork>360 ? day.checkTimeForLunch()?.code : ''}</strong></td>
 			%{
 			 }else{
-			 }% <td class="tempoLavoro">${day.isHoliday()==false ? day.convertTimeAtWork(day.timeAtWork).toCalendarTime() : ''} <strong>${day.stampingList().size()==4 && !day.stampingList().contains(null) && day.timeAtWork>300
+			 }% <td class="tempoLavoro">${day.isHoliday()==false ? day.timeAtWork.toHourTime() : ''} <strong>${day.stampingList().size()==4 && !day.stampingList().contains(null) && day.timeAtWork>300
 			 && day.checkMinTimeForLunch()<30 ? day.checkTimeForLunch()?.code : ''}</strong></td>
 			%{
 	         }
 	         }%	
 	         <td class="differenza">${(day.difference).toHourTime()}</td>
 				
-	         <td class="progressivo">${day.progressive.toHourTime()}</td>	
+	        %{
+	        if(day.isHoliday()==false){
+			}% <td class="progressivo">${day.progressive.toHourTime()}</td>
+			%{
+			}else{
+			}%<td class="progressivo">${day.checkPreviousProgressive() != null ? day.checkPreviousProgressive().progressive.toHourTime() : ''}</td>
+			%{
+			}
+			}%		
 	         <td>${day.person.workingTimeType != null ? day.person.workingTimeType.description : ''}</td>
 		</tr>
 
@@ -102,12 +110,13 @@
 
 <p>Riepilogo delle ore di lavoro in eccesso/difetto:</p> 
 <p> - E' possibile utilizzare il residuo dell'anno precedente? ${personMonth.possibileUtilizzareResiduoAnnoPrecedente()==true ? 'sì' : 'no'}</p>
+<p> - Eventuale residuo da inizializzazione: ${personMonth.residuoAnnoPrecedenteDaInizializzazione().toHourTime()}</p>
 <p> - Residuo anno precedente disponibile a inizio mese: ${personMonth.residuoAnnoPrecedenteDisponibileAllInizioDelMese().toHourTime()}</p>
 <p> - Residuo tempo di lavoro dei mesi precedenti: ${personMonth.totaleResiduoAnnoCorrenteAlMesePrecedente().toHourTime()}</p> 
 <p> - Residuo del mese:  ${personMonth.residuoDelMese().toHourTime()}</p>
 <p> - Tempo disponibile per straordinari: ${personMonth.tempoDisponibilePerStraordinari().toHourTime()}</p>
 <p> - Totale residuo anno corrente a fine mese:  ${personMonth.totaleResiduoAnnoCorrenteAFineMese().toHourTime()}</p>
-<p> - Giorni di riposo compensativo: ${personMonth.getCompensatoryRest()} per un totale di: -${(personMonth.getCompensatoryRestInMinutes()).toHourTime()} ore</p>
+<p> - Giorni di riposo compensativo: ${personMonth.getCompensatoryRest()} per un totale di: -${(personMonth.getCompensatoryRestInMinutes(personMonth.getCompensatoryRest())).toHourTime()} ore</p>
 <p> - Totale residuo a fine mese  <strong>${personMonth.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese().toHourTime()} ore</strong></p>
 
 
@@ -133,7 +142,17 @@
      }
      
 }%
-
+%{	if(personMonth.getStampType() != null){
+	for(type in personMonth.getStampType()) {
+}%
+	<tr>
+		<td>${type.identifier}</td>
+		<td>${type.description}</td>
+	</tr>
+%{  		   
+     }
+    }
+}%
 </table>
 
 <br>
