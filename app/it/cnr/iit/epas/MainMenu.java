@@ -108,7 +108,16 @@ public class MainMenu {
             }
             
         }
-       
+        if(actions.size() > 6){
+        	Logger.debug("Ho più di 6 voci di menu, devo inserire il separatore");
+        	for(int i=0; i < actions.size(); i++){
+        		if(actions.get(i).toString().equals("stampings")){
+        			Logger.debug("Inserisco il separatore alla posizione %d della lista", i);
+        			actions.add(i, ActionMenuItem.separateMenu);
+        			return actions;
+        		}
+        	}
+        }
         return actions;
     } 
 	
