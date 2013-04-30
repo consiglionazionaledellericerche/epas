@@ -67,7 +67,9 @@ public class JsonRequestedOvertimeBinder implements TypeBinder<PersonsCompetence
 				
 				CompetenceCode competenceCode = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", "S1").first();
 				Competence competence =	new Competence(person, competenceCode, 0, 0);
-				competence.setRequest(jsonObject.get("ore").getAsInt(), jsonObject.get("motivazione").getAsString());
+				competence.setValueApproved(jsonObject.get("ore").getAsInt(), jsonObject.get("motivazione").getAsString());
+				
+				Logger.debug("Letto ore = %d e motivazione = %s", jsonObject.get("ore").getAsInt(), jsonObject.get("motivazione").getAsString());
 				
 				personsCompetences.add(competence);
 			}

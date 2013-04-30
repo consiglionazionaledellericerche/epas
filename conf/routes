@@ -137,7 +137,7 @@ GET		/overtime/{year}/{month}				Competences.overtime
 
 
 
-#Gestione reperibilità
+#Gestione reperibilità (sist-org)
 GET 	/reperibility/{type}/personList			Reperibility.personList
 
 GET		/reperibility/{type}/find/{<(19|20)\d\d>yearFrom}/{<(0[1-9]|1[012])>monthFrom}/{<(0[1-9]|[12][0-9]|3[01])>dayFrom}/{<(19|20)\d\d>yearTo}/{<(0[1-9]|1[012])>monthTo}/{<(0[1-9]|[12][0-9]|3[01])>dayTo}	Reperibility.find
@@ -151,7 +151,7 @@ GET 	/reperibility/{type}/who/{<(19|20)\d\d>yearFrom}/{<(0[1-9]|1[012])>monthFro
 
 GET		/reperibility/{type}/absence/{<(19|20)\d\d>yearFrom}/{<(0[1-9]|1[012])>monthFrom}/{<(0[1-9]|[12][0-9]|3[01])>dayFrom}/{<(19|20)\d\d>yearTo}/{<(0[1-9]|1[012])>monthTo}/{<(0[1-9]|[12][0-9]|3[01])>dayTo}	Reperibility.absence
 
-#Gestione turni
+#Gestione turni (sist-org)
 GET		/shift/{type}/personList																Shift.personList
 GET		/shift/{type}/find/{<(19|20)\d\d>yearFrom}/{<(0[1-9]|1[012])>monthFrom}/{<(0[1-9]|[12][0-9]|3[01])>dayFrom}/{<(19|20)\d\d>yearTo}/{<(0[1-9]|1[012])>monthTo}/{<(0[1-9]|[12][0-9]|3[01])>dayTo}	Shift.find
 GET 	/shift/{type}/exportMonthAsPDF/{<(19|20)\d\d>year}/{<(0[1-9]|1[012])>month}				Shift.exportMonthAsPDF
@@ -160,7 +160,7 @@ PUT		/shift/{type}/update/{year}/{month}														Shift.update
 
 #Gestione straordinari (sist-org)
 GET		/overtimes/getPersonOvertimes/{email}/{year}/{month}		Overtimes.getPersonOvertimes
-PUT		/overtimes/setRequestedOvertime/{year}/{month}				Overtimes.requestOvertime
+PUT		/overtimes/setRequestedOvertime/{year}/{month}				Overtimes.setRequestOvertime
 
 #Gestione timbrature via json
 PUT		/stampings/create						StampingsFromClient.create
