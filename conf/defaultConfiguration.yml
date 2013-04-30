@@ -4,7 +4,7 @@ Configuration(defaultConfiguration):
     endDate: 2014-01-01
     instituteName: IIT
     emailToContact:
-    seatCode:
+    seatCode: 223400
     urlToPresence:
     userToPresence:
     passwordToPresence:
@@ -28,9 +28,10 @@ Configuration(defaultConfiguration):
     mealTime: 30
     monthExpiryVacationPastYear: 8
     dayExpiryVacationPastYear: 31
+    minimumRemainingTimeToHaveRecoveryDay: 432
     monthExpireRecoveryDaysOneThree:
     monthExpireRecoveryDaysFourNine: 4
-    maxRecoveryDaysOneThree:
+    maxRecoveryDaysOneThree: 22
     maxRecoveryDaysFourNine:
     residual:
     maximumOvertimeHours:

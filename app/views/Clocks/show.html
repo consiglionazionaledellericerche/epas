@@ -1,0 +1,25 @@
+#{extends 'main.html' /}
+
+<h3 id="clock">Orologio per firma nel mese di <span class="capitalized">&{'views.tags.display.date.month.' + data.getMonthOfYear()}</span> dell'anno ${data.getYear()}</h3>
+
+
+#{form @Clocks.insertStamping()}
+#{select 'personId', value:personList.get(0), id:'person'}
+		%{
+			for(person in personList){
+		}%
+			#{option person.id}${person.surname + ' ' + person.name}#{/option}
+			%{
+				}
+			}%
+		
+#{/select}
+<iframe id="clock" src="http://free.timeanddate.com/clock/i3k862ys/n341/szw350/szh350/hbw10/cf100/hnce1ead6/hhl55/hhw8" frameborder="0" width="352" height="352"></iframe>
+
+<fieldset>
+	<legend>Ingresso/uscita</legend>
+	<p id="choiceClock">Ingresso <input type="radio" name="type" value="true"/> Uscita <input type="radio" name="type" value="false"/></p></fieldset>
+
+<input id="submitStampingClock" type="submit" name ="submit" value="Ok" />
+</fieldset>
+#{/form}

@@ -23,6 +23,7 @@
 		<th>Può inserire e modificare utenti amministratori</th>
 		<th>Può inserire e modificare straordinari e competenze</th>
 		<th>Può inserire e modificare ferie e permessi</th>
+		<th>Può caricare la situazione del personale<th>
 		
 	</tr>
 	%{
@@ -129,7 +130,15 @@
 			%{ } }%
 			
 		</td>	
+		<td>
 		
+		%{ if(admin.isUploadSituationAvailable()){ }%
+				<input type="checkbox" name="uploadSituation" value ="" checked="checked"/>
+			%{ } else { }%
+				<input type="checkbox" name="uploadSituation" value=""/>
+			%{ } }%
+			
+		</td>
 	</tr>
 
 	%{

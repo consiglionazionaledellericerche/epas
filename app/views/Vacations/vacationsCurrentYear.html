@@ -9,15 +9,15 @@
 		<th>Anno</th>
 	</tr>
 	%{ 
-		int i = 1;
-		if(yearRecap.listVacationDaysCurrentYear(yearRecap.year).size()>0){
-		while(i < yearRecap.listVacationDaysCurrentYear(yearRecap.year).size()){
+		int i = 0;
+		if(yearRecap.listVacationDaysCurrentYear().size()>0){
+		while(i < yearRecap.listVacationDaysCurrentYear().size()){
 		
 	}%
 	<tr>
-		<td>${yearRecap.listVacationDaysCurrentYear(yearRecap.year).get(i).date.getDayOfMonth()}</td>
-		<td>${yearRecap.listVacationDaysCurrentYear(yearRecap.year).get(i).date.getMonthOfYear()}</td>
-		<td>${yearRecap.listVacationDaysCurrentYear(yearRecap.year).get(i).date.getYear()}</td>
+		<td>${yearRecap.listVacationDaysCurrentYear().get(i).date.getDayOfMonth()}</td>
+		<td>${yearRecap.listVacationDaysCurrentYear().get(i).date.getMonthOfYear()}</td>
+		<td>${yearRecap.listVacationDaysCurrentYear().get(i).date.getYear()}</td>
 	</tr>
 	%{
 		i++;}

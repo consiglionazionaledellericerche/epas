@@ -21,6 +21,7 @@ public enum ActionMenuItem {
     dailyPresence("Presenza giornaliera", "insertAndUpdatePerson"),
     mealTicketSituation("Situazione buoni mensa", "insertAndUpdatePerson"),
     manageCompetence("Gestione codici competenze", "insertAndUpdateCompetences"),
+    uploadSituation("Attestati presenza", "uploadSituation"),
 	stampings("Situazione mensile", "viewPersonalSituation"),
 	absences("Assenze", "viewPersonalSituation"),
 	absencesperperson("Assenze per persona", "viewPersonalSituation"),
