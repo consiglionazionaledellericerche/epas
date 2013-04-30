@@ -339,6 +339,9 @@ input#submitStamping {margin: 0em 30em 0em; align: center}
 input#discardStamping {margin: 0em 40em 0em; align: center}
 input#updateStamping {margin: 0em 25em 0em; align: center}
 
+input.StraordinarioDiurnoLavorativo {length: 5}
+input#feature {length: 5}
+
 p#nome {margin: 0em 1em 0em}
 p#cognome {margin: 1em 1em 2em}
 
