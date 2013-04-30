@@ -130,6 +130,12 @@ public class Person extends Model {
 	 */
 	@OneToOne(mappedBy="person", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
 	public ContactData contactData;
+	
+	/**
+	 * relazione con la tabella delle info di contatto
+	 */
+	@OneToOne(mappedBy="person", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
+	public PersonHourForOvertime personHourForOvertime;
 
 	/**
 	 * relazione con la tabella dei contratti
