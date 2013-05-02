@@ -9,18 +9,26 @@
 <table id="tabellaTimbratureMancanti">
 	<tr>
 		<th>Nome</th>
-		<th>Giorni del mese da controllare</th>
+		%{ for(col in tableMissingStampings.columnKeySet()){
+		}%
+		<th>${col}</th>
+		%{
+		}
+		}%	
+		
 	</tr>
-	%{ for(entry in personPersonDayMap.entrySet()){
+	%{ for(entry in tableMissingStampings.rowMap().entrySet()){
 	}%
 	<tr>
 		<td>${entry.getKey().surname} ${entry.getKey().name}</td>
-		<td>%{ for(pd in entry.getValue()){ 
-			}% ${pd.date.getDayOfMonth() } 
-			%{
-			}
-			}%
+		%{ for(col in tableMissingStampings.columnKeySet()){
+		}%
+		<td>
+			${entry.getValue().get(col).toString()} 
 		</td>
+		%{
+		}
+		}%
 	</tr>
 	%{
 	}

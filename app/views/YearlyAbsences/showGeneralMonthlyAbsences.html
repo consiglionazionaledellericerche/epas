@@ -14,17 +14,17 @@
 		<th colspan="${numberOfDifferentAbsenceType}">Codici di assenza</th>
 		
 	</tr>
-	%{  for(col in tablePersonAbsences.columnKeySet()){
+	%{  for(col in tableMonthlyAbsences.columnKeySet()){
 		}%
 		<th>${col}</th>
 	%{
 		}
 	}%
-	%{  for(entry in tablePersonAbsences.rowMap().entrySet()){
+	%{  for(entry in tableMonthlyAbsences.rowMap().entrySet()){
 		}%
 	<tr>
 		<td>${entry.getKey().name} ${entry.getKey().surname}</td>
-		%{ for(col in tablePersonAbsences.columnKeySet()){
+		%{ for(col in tableMonthlyAbsences.columnKeySet()){
 		}%
 			<td>${entry.getValue().get(col)}
 			   
