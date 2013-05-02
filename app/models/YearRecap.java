@@ -8,6 +8,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -24,6 +25,8 @@ import org.hibernate.envers.query.AuditQuery;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
+
+import com.google.common.collect.Multiset.Entry;
 
 import net.sf.oval.constraint.Min;
 import net.sf.oval.constraint.NotNull;
@@ -226,8 +229,8 @@ public class YearRecap extends Model{
 	 */
 	public List<Absence> getAbsenceInYear(@Valid int year, @Valid String month, @Valid int day){
 		int mese = fromStringToIntMonth(month);
-		Logger.debug("Il mese è :", mese);
-		Logger.debug("Il giorno è: ", day);
+//		Logger.debug("Il mese è :", mese);
+//		Logger.debug("Il giorno è: ", day);
 		List<Absence> absencesInDay = new ArrayList<Absence>();
 		//LocalDate date = new LocalDate(year, 1, 1);
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", 
@@ -281,6 +284,45 @@ public class YearRecap extends Model{
 
 		Logger.warn("mappaAssenze: " +mappaAssenze);
 		return mappaAssenze;
+	}
+	
+	/**
+	 * 
+	 * @param person
+	 * @param year
+	 * @param absenceCode
+	 * @return il totale di assenze fatte con quel codice
+	 */
+	public int totalDaysHourOfAbsenceCode(Person person, int year, String absenceCode){
+		int total = 0;
+		LocalDate date = new LocalDate(year, 1, 1);
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.date between ? and ? and pd.person = ?", 
+				date, date.monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue(), person).fetch();
+		for(PersonDay pd : pdList){
+			if(pd.absences.size() > 0){
+				for(Absence abs : pd.absences){
+					if(abs.absenceType.code.equals(absenceCode))
+						total = total + 1;
+				}
+			}
+		}
+		
+		return total;
+	}
+	
+	/**
+	 * 
+	 * @param person
+	 * @param year
+	 * @param absenceCodes
+	 * @return il numero totale di giorni di assenza fatti nell'anno
+	 */
+	public int totalOfAllAbsences(Person person, int year, Set<AbsenceType> absenceCodes){
+		int total = 0;
+		for(AbsenceType abs : absenceCodes){
+			total = total + totalDaysHourOfAbsenceCode(person, year, abs.code);
+		}
+		return total;
 	}
 
 	/**

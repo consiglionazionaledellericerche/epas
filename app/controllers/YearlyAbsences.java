@@ -176,32 +176,6 @@ public class YearlyAbsences extends Controller{
 		}
 		int numberOfDifferentAbsenceType = tableMonthlyAbsences.columnKeySet().size();
 		render(tableMonthlyAbsences, year, month,numberOfDifferentAbsenceType);
-		//Table<Person, String, Integer> tablePersonAbsences =  HashBasedTable.create();
-//		for(Person p : activePersons){
-//			List<Absence> absenceInMonth = Absence.find("Select abs from Absence abs, PersonDay pd where abs.personDay = pd and " +
-//					"pd.person = ? and pd.date >= ? and pd.date <= ?", 
-//					p, new LocalDate(year, month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
-//			tablePersonAbsences.put(p, "Totale", absenceInMonth.size());
-//			Logger.debug("Inserisco la persona %s in tabella con il codice di assenza %s per la prima volta", p, "");
-//			for(Absence abs : absenceInMonth){
-//				Integer value = tablePersonAbsences.row(p).get(abs.absenceType.code);
-//				Logger.debug("Per la persona %s il codice %s vale: %s", p, abs.absenceType.code, value);
-//				if(value == null){
-//					Logger.debug("Inserisco in tabella nuova assenza per %s con codice %s", p, abs.absenceType.code);
-//					tablePersonAbsences.row(p).put(abs.absenceType.code, 1);
-//				}
-//				else{
-//					tablePersonAbsences.row(p).put(abs.absenceType.code, value+1);
-//					Logger.debug("Incremento il numero di giorni per l'assenza %s di %s al valore %s", abs.absenceType.code, p, value+1);
-//					
-//				}
-//			}
-//
-//		}
-//		int numberOfDifferentAbsenceType = tablePersonAbsences.columnKeySet().size();
-//		
-//		//Logger.debug("Lista dei codici di assenza: %s", tablePersonAbsences.columnKeySet());
-//		render(tablePersonAbsences, year, month,numberOfDifferentAbsenceType);
 
 	}
 
@@ -224,37 +198,7 @@ public class YearlyAbsences extends Controller{
 			render(yearRecap);
 		}
 		
-		//Logger.debug("I parametri passati alla funzione sono: %s %s %s %s", personId, absenceCode, month, year);
-//		List<LocalDate> dateAbsenceList = new ArrayList<LocalDate>();
-//		List<PersonDay> pdList = null;
-//		Person person = Person.findById(personId);
-//		List<AbsenceTypeDate> listaAssenzeDate = null;
-//		int tipo;
-//		if(absenceCode.equalsIgnoreCase("totale")){
-//			tipo = 1;
-//			listaAssenzeDate = new ArrayList<AbsenceTypeDate>();
-//			pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date >= ? and pd.date <= ?", 
-//					person, new LocalDate(year,month,1), new LocalDate(year,month,1).monthOfYear().withMaximumValue()).fetch();
-//			for(PersonDay pd : pdList){
-//				if(pd.absences.size()>0){
-//					for(Absence abs : pd.absences){
-//						AbsenceTypeDate abtd = new AbsenceTypeDate(abs.absenceType, pd.date);
-//						listaAssenzeDate.add(abtd);
-//					}
-//				}
-//			}
-//			render(person,year,month,listaAssenzeDate, tipo);
-//		}
-//		else{
-//			tipo = 0;
-//			AbsenceType abt = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", absenceCode).first();
-//			pdList = PersonDay.find("Select pd from PersonDay pd, Absence abs where abs.personDay = pd and pd.person = ? and " +
-//					"pd.date >= ? and pd.date <= ?", person, new LocalDate(year,month,1), new LocalDate(year, month, 1).monthOfYear().withMaximumValue()).fetch();
-//			for(PersonDay pd : pdList){
-//				dateAbsenceList.add(pd.date);
-//			}
-//			render(dateAbsenceList, abt, person, year, month, tipo);		
-//		}
+
 	}
 
 
