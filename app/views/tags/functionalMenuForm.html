@@ -36,6 +36,7 @@
 		
 	#{secure.check "viewPersonList"}
 		#{select 'personId', value:_mainMenu.personId, id:'person'}
+			#{option}Scegli una persona#{/option}
 		%{
 			for(person in _mainMenu.persons){
 		}%
