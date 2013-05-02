@@ -34,7 +34,7 @@ public class NavigationMenu extends Controller {
 		
 		ActionMenuItem action = flash.get("method") != null && !flash.get("method").equals("") ? ActionMenuItem.valueOf(flash.get("method")) : ActionMenuItem.stampingsAdmin;
 		
-		Logger.debug("nella injectMenu la action è: %s", action);
+//		Logger.debug("nella injectMenu la action è: %s", action);
 		
 		Long personId =  flash.get("personId") != null ? Long.parseLong(flash.get("personId")) : null;
 	
@@ -45,13 +45,13 @@ public class NavigationMenu extends Controller {
 			persons = new ArrayList<Person>();
 			List<Person> genericPerson = Person.find("Select p from Person p order by p.surname").fetch();
 			for(Person p : genericPerson){
-				Logger.debug("Cerco il contratto per %s %s per stabilire se metterlo/a in lista", p.name, p.surname);
+				//Logger.debug("Cerco il contratto per %s %s per stabilire se metterlo/a in lista", p.name, p.surname);
 				Contract c = Contract.find("Select c from Contract c where c.person = ? and ((c.beginContract != null and c.expireContract = null) or " +
 						"(c.expireContract > ?) or (c.beginContract = null and c.expireContract = null)) order by c.beginContract desc limit 1", p, new LocalDate(year,month,1)).first();
 				//Logger.debug("Il contratto per %s %s è: %s", p.name, p.surname, c.toString());
 				if(c != null && c.onCertificate == true){
 					persons.add(p);
-					Logger.debug("Il contratto rispecchia i criteri quindi %s %s va in lista", p.name, p.surname);
+					//Logger.debug("Il contratto rispecchia i criteri quindi %s %s va in lista", p.name, p.surname);
 				}
 				
 			}
@@ -59,7 +59,7 @@ public class NavigationMenu extends Controller {
 //					"order by p.surname", true).fetch();
 			Cache.set("persons", persons, "5mn");
 		}
-		Logger.debug("nella injectMenu la action è: %s", action.getDescription());
+//		Logger.debug("nella injectMenu la action è: %s", action.getDescription());
 		MainMenu mainMenu = null;
 		if(!action.getDescription().equals("Presenza giornaliera"))
 			mainMenu = new MainMenu(personId, year, month, action, persons);

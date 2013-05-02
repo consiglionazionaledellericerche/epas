@@ -60,6 +60,11 @@ public class SwitchTemplate extends Controller{
 		params.flash();
 		
 		switch (menuItem) {
+		
+		case separateMenu:
+			flash.error("Selezionare una delle opzioni possibili");
+			Application.indexAdmin();
+			break;
 
 		case stampingsAdmin:
 			Logger.debug("sto per chiamare il metodo show");
