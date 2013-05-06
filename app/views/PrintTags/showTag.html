@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 
 <html>
-	<head>
-        <title>Situazione presenze mensile di ${month} ${year} per ${person.name} ${person.surname} matr.: ${person.number}</title>
-    </head>
-<body>
+	
+    <h3>Situazione presenze mensile di <span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year} per ${person.name} ${person.surname} matr.: ${person.number}</h3>
+    
+
 	<table id="presenze_mensili">
 		<tr>
 			<th>Buono mensa</th>
@@ -72,5 +72,41 @@
 		%{ } }%
 
 	</table>
-</body>
+	
+	<p id="spiegazioneTabellaTimbrature">Il numero di buoni mensa usabili per questo mese e': <strong>${pm.numberOfMealTicketToUse()}</strong>, mentre quelli da restituire sono <strong>${pm.numberOfMealTicketToRender()}</strong>. Il numero di giorni lavorativi in sede è di: <strong>${pm.basedWorkingDays()}</strong> </p>
+	
+	%{
+     for(smt in pm.getStampingCode()) {
+}%
+	<tr>
+		<td>${smt.code}</td>     
+		<td>${smt.description}</td>		
+	</tr>
+	
+	
+%{  		   
+     }
+     
+}%
+%{	if(pm.getStampType() != null){
+	for(type in pm.getStampType()) {
+}%
+	<tr>
+		<td>${type.identifier}</td>
+		<td>${type.description}</td>
+	</tr>
+%{  		   
+     }
+    }
+}%
+
+<p>SI AUTOCERTIFICA QUANTO SCRITTO NELLE NOTE
+<br>
+
+Firma
+</p>
+
+
+
+
 </html>
