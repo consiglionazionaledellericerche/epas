@@ -348,6 +348,7 @@ input#feature {length: 5}
 
 p#nome {margin: 0em 1em 0em}
 p#cognome {margin: 1em 1em 2em}
+p#firma {margin: 2em 1em 0em}
 
 input#submitNuovoCodiceAssenza {margin: 2em 60em 0em; align: center}
 input#discardNuovoCodiceAssenza {margin: 1em 60em 0em; align: center}
