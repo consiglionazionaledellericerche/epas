@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -141,7 +142,8 @@ public class PersonDay extends Model {
 	 * importa il  numero di minuti in cui una persona è stata a lavoro in quella data
 	 */
 	private void updateTimeAtWork(){
-		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
+		//merge();
+		//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
 		int tempoLavoro = 0;
 		LocalDateTime beginDate = new LocalDateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),0,0);
 		LocalDateTime endDate = new LocalDateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),23,59);
@@ -156,14 +158,14 @@ public class PersonDay extends Model {
 		if((stampings.size() == 0 && absences.size() == 0) || (stampings.size() == 1 && stampings.get(0).way == WayType.in)){
 			//timeAtWork = (-1)*getWorkingTimeTypeDay().workingTime;
 			timeAtWork = 0;
-			pd.save();
+			save();
 			return;
 		}
 
 		if(isHoliday()==true && stampings.size() > 0){
 			if(stampings.size()==1){
 				timeAtWork = 0;
-				pd.save();
+				save();
 				return;
 			}
 			int workTime = 0;
@@ -178,14 +180,14 @@ public class PersonDay extends Model {
 				}
 			}
 			timeAtWork = workTime;
-			pd.save();
+			save();
 			return;
 		}
 
 		if(reloadedStampings.contains(null)){
 			if((reloadedStampings.size() < 3)&& (reloadedStampings.get(0)==null || reloadedStampings.get(1) == null)){
 				timeAtWork = 0;
-				pd.save();
+				save();
 				return;
 			}
 			for(int index = 0; index < reloadedStampings.size(); index ++){
@@ -264,7 +266,7 @@ public class PersonDay extends Model {
 			} else {
 				timeAtWork = tempoLavoro;	
 			}
-			pd.save();
+			save();
 			return;
 		}
 		else{
@@ -281,7 +283,7 @@ public class PersonDay extends Model {
 				} else {
 					timeAtWork = 0;	
 				}
-				pd.save();
+				save();
 				return;
 			}
 			LocalDateTime now = new LocalDateTime();
@@ -360,7 +362,7 @@ public class PersonDay extends Model {
 
 						if(reloadedStampings.get(i).way == Stamping.WayType.out){
 
-							Logger.debug("Timbratura di uscita con stampType diverso da null per %s %s", person.name, person.surname);
+							Logger.trace("Timbratura di uscita con stampType diverso da null per %s %s", person.name, person.surname);
 							if(reloadedStampings.get(i).stampType != null){
 								if((i-1) >= 0){
 									if(reloadedStampings.get(i-1).stampType != null){
@@ -405,7 +407,7 @@ public class PersonDay extends Model {
 				timeAtWork = tempoLavoro;	
 			}
 			
-			pd.save();				
+			save();				
 		}
 
 	}
@@ -415,7 +417,8 @@ public class PersonDay extends Model {
 	 * calcola il valore del progressivo giornaliero e lo salva sul db
 	 */
 	private void updateProgressive(){
-		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
+		//merge();
+		//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
 		Contract con = person.getContract(date);
 
 		if(con.beginContract == null || 
@@ -430,7 +433,7 @@ public class PersonDay extends Model {
 				progressive = difference + lastPreviousPersonDayInMonth.progressive;
 				Logger.debug("%s - %s. Il PersonDay precedente è %s. Difference di oggi = %s, progressive = %s", person, date, lastPreviousPersonDayInMonth, difference, progressive);
 			}
-			pd.save();
+			save();
 		}
 
 	}
@@ -439,7 +442,8 @@ public class PersonDay extends Model {
 	 * chiama le funzioni di popolamento
 	 */
 	public void populatePersonDay(){
-		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
+		//merge();
+		//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
 		Contract con = person.getContract(date);
 		//Se la persona non ha un contratto attivo non si fanno calcoli per quel giorno
 		//Le timbrature vengono comunque mantenute
@@ -450,13 +454,13 @@ public class PersonDay extends Model {
 				for(Absence abs : absences){
 					if(abs.absenceType.ignoreStamping == true || abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay){
 						timeAtWork = 0;
-						pd.merge();
+						//merge();
 						difference = 0;
-						pd.merge();
+						//merge();
 						updateProgressive();
-						pd.merge();
+						//merge();
 						isTicketAvailable = false;
-						pd.merge();
+						//merge();
 						return;
 
 					}
@@ -481,13 +485,13 @@ public class PersonDay extends Model {
 							}
 							timeAtWork = timeAtWork + total;
 						}
-						merge();
+						//merge();
 						updateDifference();
-						merge();
+						//merge();
 						updateProgressive();
-						merge();
+						//merge();
 						setTicketAvailable();
-						merge();
+						//merge();
 						return;
 					}
 
@@ -495,21 +499,21 @@ public class PersonDay extends Model {
 			}
 			if(timeAtWork != null && (stampings.size() == 0 || stampings == null)){
 				updateDifference();
-				merge();
+				//merge();
 				updateProgressive();	
-				merge();
+				//merge();
 				setTicketAvailable();
-				merge();
+				//merge();
 				return;
 			}				
 			updateTimeAtWork();
-			merge();
+			//merge();
 			updateDifference();
-			merge();
+			//merge();
 			updateProgressive();	
-			merge();
+			//merge();
 			setTicketAvailable();
-			merge();
+			//merge();
 		} else {
 			Logger.info("I calcoli sul giorno %s non vengono effettuati perché %s non ha un contratto attivo in questa data", date, person);
 		}
@@ -521,14 +525,14 @@ public class PersonDay extends Model {
 	 * richiamare le altre tre funzioni di popolamento del personDay.
 	 */
 	public void populatePersonDayAfterJustifiedAbsence(){
-		Logger.debug("Chiamata populatePersonDayAfterJustifiedAbsence per popolare il personDay di %s %s senza il timeAtWork nel giorno %s",
+		Logger.trace("Chiamata populatePersonDayAfterJustifiedAbsence per popolare il personDay di %s %s senza il timeAtWork nel giorno %s",
 				person.name, person.surname, date);
 		updateDifference();
-		merge();
+		//merge();
 		updateProgressive();	
-		merge();
+		//merge();
 		setTicketAvailable();
-		merge();
+		//merge();
 	}
 
 
@@ -541,14 +545,14 @@ public class PersonDay extends Model {
 	 */
 	public static int toMinute(LocalDateTime date){
 		int dateToMinute = 0;
-		Logger.debug("La data passata alla toMinute è: %s", date);
+		Logger.trace("La data passata alla toMinute è: %s", date);
 		if (date!=null){
 			int hour = date.get(DateTimeFieldType.hourOfDay());
 			int minute = date.get(DateTimeFieldType.minuteOfHour());
 
 			dateToMinute = (60*hour)+minute;
 		}
-		Logger.debug("Il risultato dell'elaborazione della toMinute sulla data non nulla è: %d minuti", dateToMinute);
+		Logger.trace("Il risultato dell'elaborazione della toMinute sulla data non nulla %s è: %d minuti", date, dateToMinute);
 		return dateToMinute;
 	}
 
@@ -589,7 +593,7 @@ public class PersonDay extends Model {
 			lastStamping = st;
 			localStampings.add(st);
 		}
-		Logger.debug("Lista timbrature per %s in data %s: %s", person, date, localStampings);
+		Logger.trace("Lista timbrature per %s in data %s: %s", person, date, localStampings);
 		return localStampings;
 	}
 
@@ -630,7 +634,8 @@ public class PersonDay extends Model {
 	 * fatta all'interno di essa.
 	 */
 	private void setTicketAvailable(){
-		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
+		//merge();
+		//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
 		if(isTicketForcedByAdmin)
 			return;
 		Logger.trace("Chiamata della setTicketAvailable, il timeAtWork per %s %s è: %s", person.name, person.surname, timeAtWork);
@@ -642,7 +647,7 @@ public class PersonDay extends Model {
 
 		if(person.workingTimeType.description.equals("normale-mod") || person.workingTimeType.description.equals("normale")
 				|| person.workingTimeType.description.equals("80%") || person.workingTimeType.description.equals("85%")){
-			Logger.debug("Sono nella setTicketAvailable per %s %s", person.name, person.surname);
+			Logger.trace("Sono nella setTicketAvailable per %s %s", person.name, person.surname);
 			if(timeAtWork >= getWorkingTimeTypeDay().mealTicketTime){
 				isTicketAvailable=true;
 
@@ -652,11 +657,11 @@ public class PersonDay extends Model {
 
 			}
 		}
-		Logger.debug("Per %s %s il buono è: %s", person.name, person.surname, isTicketAvailable);
+		Logger.debug("Per %s %s il buono del giorno %s è: %s", person.name, person.surname, date, isTicketAvailable);
 
-		Logger.debug("Il person day visualizzato è: %s", this);
+		Logger.trace("Il person day visualizzato è: %s", this);
 
-		pd.save();
+		save();
 
 	}
 
@@ -666,37 +671,31 @@ public class PersonDay extends Model {
 	 */
 
 	private void updateDifference(){
-		Logger.debug("Entro nella update difference");
-		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
+		//merge();
+		//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
 		if((getWorkingTimeTypeDay().holiday) && (date.getDayOfMonth()==1) && stampings.size() == 0){
 			difference = 0;
-			pd.save();
+			save();
 			return;
 		}
 
 		if(absenceList().size() > 0 && stampings.size() == 0){
 			difference = 0;
-			pd.save();
+			save();
 			return;
 		}
 
-		//		if(timeAtWork == 0){
-		//			difference = 0;
-		//			save();
-		//			return;
-		//		}
-
 		if(getWorkingTimeTypeDay().holiday == false){
 			int minTimeWorking = getWorkingTimeTypeDay().workingTime;
-			Logger.debug("Time at work: %s. Tempo di lavoro giornaliero: %s", timeAtWork, minTimeWorking);
+			Logger.trace("Time at work: %s. Tempo di lavoro giornaliero: %s", timeAtWork, minTimeWorking);
 			difference = timeAtWork - minTimeWorking;
-			pd.save();
+			save();
 		}
 		else{
 
 			difference = timeAtWork;
-			pd.save();
-			Logger.debug("Sto calcolando la differenza in un giorno festivo per %s %s e vale: %d", person.name, person.surname, difference);
+			save();
+			Logger.trace("Sto calcolando la differenza in un giorno festivo per %s %s e vale: %d", person.name, person.surname, difference);
 		}		
 
 		Logger.debug("Differenza per %s %s nel giorno %s: %s", person.surname, person.name, date, difference);
