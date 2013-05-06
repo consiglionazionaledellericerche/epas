@@ -141,6 +141,10 @@ GET		/recapCompetences/updatePersonCompetence/{personId}		Competences.updatePers
 GET		/uploadSituation/						UploadSituation.show
 POST	/uploadSituation/						UploadSituation.uploadSituation
 
+#Gestione stampa cartellino
+GET		/printTags/listPersonForPrintTags		PrintTags.listPersonForPrintTags
+POST	/printTags/showTag/{personId}			PrintTags.showTag
+
 #Clock
 GET		/clocks									Clocks.show
 

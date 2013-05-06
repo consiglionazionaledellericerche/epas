@@ -21,6 +21,7 @@ public enum ActionMenuItem {
     dailyPresence("Presenza giornaliera", "insertAndUpdatePerson"),
     mealTicketSituation("Situazione buoni mensa", "insertAndUpdatePerson"),
     manageCompetence("Gestione codici competenze", "insertAndUpdateCompetences"),
+    printTag("Stampa cartellino", "insertAndUpdateStamping"),
     uploadSituation("Attestati presenza", "uploadSituation"),
     separateMenu("-----------------------------------------------",""),
 	stampings("Situazione mensile", "viewPersonalSituation"),

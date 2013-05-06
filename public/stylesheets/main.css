@@ -268,6 +268,7 @@ p#nascita {margin: 1em 0em 0em}
 p#caricamentoSituazioneMensile {margin: 1em 0em 2em; text-align: center}
 p#tipoTimbraturaClock {margin: 3em 0em 2em; text-align: center; font-size: 18px; }
 p#choiceClock {text-align: center; font-size: 18px;}
+p#descrizioneStampaCartellino {margin:3em 0em 4em}
 
 div#logout {text-align: right; float: right}
 div#chooseView {text-align: center}
@@ -277,12 +278,14 @@ div#gestioneParametri {margin: 1em 4em 1em; text-align: left}
 div#spiegazioneValoriGrassetto {margin: 1em 4em 1em}
 div#caricamentoSituazioneMensile {text-align: center}
 
+
 h2#titoloSituazionePresenzeMensili {text-align: center}
 h2#titoloSituazioneAssenzeMensili {text-align: center}
 h2#titoloSituazioneAssenzeAnnuali {text-align: center}
 h3#titoloSituazioneFerie {text-align: center}
 h2#titoloGestionePersonale {text-align: center}
 h2#titoloModificaPersonale {text-align: center}
+h3#stampaCartellino {text-align: center}
 
 h2#titoloGestioneOrariLavoro {text-align: center}
 h2#nuovoOrario {text-align: center}
@@ -338,6 +341,7 @@ input#confermaPassword {margin: 4em 2em 2em}
 input#submitStamping {margin: 0em 30em 0em; align: center}
 input#discardStamping {margin: 0em 40em 0em; align: center}
 input#updateStamping {margin: 0em 25em 0em; align: center}
+input#submitCartellino {margin: 3em 8em 0em; align: center}
 
 input.StraordinarioDiurnoLavorativo {length: 5}
 input#feature {length: 5}
