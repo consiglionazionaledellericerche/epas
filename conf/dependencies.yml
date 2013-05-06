@@ -4,7 +4,7 @@ require:
     - play -> shibboleth 1.2
     - play
     - play -> secure     
-    - org.hibernate -> hibernate-envers 3.6.1.Final:
+    - org.hibernate -> hibernate-envers 3.6.10.Final:
           transitive: false
     - org.projectlombok -> lombok 0.10.4
     - joda-time -> joda-time-hibernate 1.3
