@@ -28,14 +28,7 @@ public class SwitchTemplate extends Controller{
 		ActionMenuItem menuItem = ActionMenuItem.valueOf(method);
 		Logger.debug("Il menuItem è: %s relativo alla action: %s", menuItem, method);
 		Person person = Security.getPerson();
-
-		Long personId = null;
-
-		if (params.get("personId") != null) {
-			personId = params.get("personId", Long.class);
-			person = Person.findById(personId);
-		} 
-
+		
 		int month;
 		if (params.get("month") != null) {
 			month = params.get("month", Integer.class);
@@ -56,6 +49,63 @@ public class SwitchTemplate extends Controller{
 		}
 		else
 			day = now.getDayOfMonth();
+
+		Long personId = null;
+
+		if (params.get("personId") != null) {
+			personId = params.get("personId", Long.class);
+			
+			Logger.debug("L'id selezionato è: %d", personId);
+			
+			if(personId == null){
+				switch (menuItem){
+				case printTag:
+					Logger.debug("sto per chiamare la stampa cartellino");
+					PrintTags.listPersonForPrintTags();
+					break;
+				case manageAbsenceCode:
+					Absences.manageAbsenceCode();
+					break;
+				case vacationsAdmin:
+					VacationsAdmin.manageVacationCode();		
+					break;
+				case changePassword:
+					Persons.changePassword(person.id);
+					break;
+				case missingStamping:
+					Stampings.missingStamping(year, month);
+					break;
+				case mealTicketSituation:
+					Stampings.mealTicketSituation(year, month);
+					break;
+				case manageCompetence:
+					Competences.manageCompetenceCode();
+					break;
+				case confParameters:
+					Configurations.list();
+					break;
+				case personList:
+					Persons.list();
+					break;
+				case administrator:
+					Administrators.list();
+					break;
+				case uploadSituation:
+					UploadSituation.uploadSituation(year, month);
+					break;
+					default:
+						flash.error("Per la form richiesta è necessario specificare anche una persona");
+						Application.indexAdmin();
+						break;
+				}
+				
+				
+			}
+				
+			person = Person.findById(personId);
+		} 
+
+		
 		
 		params.flash();
 		
@@ -78,7 +128,10 @@ public class SwitchTemplate extends Controller{
 			}
 
 			break;
-
+		case printTag:
+			Logger.debug("sto per chiamare la stampa cartellino");
+			PrintTags.listPersonForPrintTags();
+			break;
 		
 //		case absencesAdmin:
 //			Absences.absences(personId, year, month);

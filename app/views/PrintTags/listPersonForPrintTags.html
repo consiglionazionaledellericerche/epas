@@ -1,0 +1,28 @@
+#{extends 'main.html' /}
+
+#{logoutForm /}
+
+<h3 id="stampaCartellino">Stampa cartellini delle presenze mensili di <span class="capitalized">&{'views.tags.display.date.month.' + date.getMonthOfYear()}</span> ${date.getYear()}</h3>
+
+<p id="descrizioneStampaCartellino">Sarà generato un file per la stampa di tipo PDF
+Selezionare "Tutti" o uno dei nomi presenti nella lista e premere invio</p>
+
+#{form @PrintTags.showTag()}
+<input type="hidden" name="month" value="${date.getMonthOfYear()}"/>
+<input type="hidden" name="year" value="${date.getYear()}"/>
+
+#{select 'personId', value:personList.get(0), id:'person'}
+			#{option}Scegli una persona#{/option}
+			#{option -1}Tutti#{/option}
+		%{
+			for(person in personList){
+		}%
+			#{option person.id}${person.surname + ' ' + person.name}#{/option}
+			%{
+				}
+			}%
+		
+#{/select}
+
+<input id="submitCartellino" type="submit" value="Invio"/>
+#{/form}

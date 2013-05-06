@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+        <title>Situazione presenze mensile di ${month} ${year} per ${person.name} ${person.surname} matr.: ${person.number}</title>
+    </head>
+<body>
+	<table id="presenze_mensili">
+		<tr>
+			<th>Buono mensa</th>
+			<th>Giorno</th>
+			<th>Codice di assenza</th> %{ for(int i = 1; i <= numberOfInOut;
+			i++){ }%
+			<th>${i}° entrata</th>
+			<th>${i}° uscita</th> %{ } }%
+			<th>Tempo lavoro</th>
+			<th>Differenza</th>
+			<th>Progressivo</th>
+			<th>Tipo Orario</th>
+		</tr>
+
+		%{ for(day in pm.days) { }%
+
+		<tr>
+			%{ if(day.isHoliday()==false){ }%
+			<td>${String.format(messages.get('views.common.yes_or_no.'+
+				day.mealTicket()))}</td> %{ }else{ }%
+			<td>${String.format(messages.get('views.common.yes_or_no.true'))}</td>
+			%{ } }% %{ if(day.isHoliday()==false){ }%
+			<td class="capitalized">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'),
+				day.date.toDate())}</td> %{ }else{ }%
+			<td class="festivi">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'),
+				day.date.toDate())}</td> %{ } }%
+			<td class="assenza">${day.absenceList().size()>0 ?
+				day.absenceList().get(0).absenceType.code : ''}</td> %{ int j = 0;
+			for(int i = 0; i < numberOfInOut; i++){ j = i*2; }%
+			<td class="ingresso">%{ if(day.stampingList().size() > j &&
+				day.stampingList().get(j) !=null ) { }% <!--  	<a href="@{Stampings.edit(day.getStampings().get(j).id)}" class="insertStamping${day.date.dayOfMonth}"> -->
+				${day.stampings.get(j).date.toCalendarTime()} <!--  	</a> -->
+				${(day.stampingList().get(j).stampModificationType?.code)}
+				${(day.stampingList().get(j).stampType != null ?
+				day.stampingList().get(j).stampType.identifier : '')} %{ } }%
+			</td>
+
+			<td class="uscita">%{ if(day.stampingList().size() > j+1 &&
+				day.stampingList().get(j+1) !=null ) { }% <!--  	<a href="@{Stampings.edit(day.getStampings().get(j+1).id)}" class="insertStamping${day.date.dayOfMonth}"> -->
+				${day.stampingList().get(j+1).date.toCalendarTime()} <!--  	</a> -->
+				${(day.stampingList().get(j+1).stampModificationType?.code)}
+				${(day.stampingList().get(j).stampType != null ?
+				day.stampingList().get(j).stampType.identifier : '')} %{ } }%
+			</td> %{ } }% %{ if(day.stampingList().size()==2 ){ }%
+			<td class="tempoLavoro">${day.isHoliday()==false ?
+				day.timeAtWork.toHourTime() : ''} <strong>${day.timeAtWork>360
+					? day.checkTimeForLunch()?.code : ''}</strong>
+			</td> %{ }else{ }%
+			<td class="tempoLavoro">${day.isHoliday()==false ?
+				day.timeAtWork.toHourTime() : ''} <strong>${day.stampingList().size()==4
+					&& !day.stampingList().contains(null) && day.timeAtWork>300 &&
+					day.checkMinTimeForLunch()<30 ? day.checkTimeForLunch()?.code : ''}</strong>
+			</td> %{ } }%
+			<td class="differenza">${(day.difference).toHourTime()}</td> %{
+			if(day.isHoliday()==false){ }%
+			<td class="progressivo">${day.progressive.toHourTime()}</td> %{
+			}else{ }%
+			<td class="progressivo">${day.checkPreviousProgressive() != null
+				? day.checkPreviousProgressive().progressive.toHourTime() : ''}</td> %{ }
+			}%
+			<td>${day.person.workingTimeType != null ?
+				day.person.workingTimeType.description : ''}</td>
+		</tr>
+
+		%{ } }%
+
+	</table>
+</body>
+</html>
