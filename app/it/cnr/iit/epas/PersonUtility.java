@@ -351,6 +351,44 @@ public class PersonUtility {
 			}
 		}
 	}
+	
+	/**
+	 * 
+	 * @param person
+	 * @param begin
+	 * @param end
+	 * @return il numero di giorni in cui una persona è stata a lavoro in un giorno festivo in un certo intervallo temporale
+	 */
+	public static int workDayInHoliday(Person person, LocalDate begin, LocalDate end){
+		int workDayInHoliday = 0;
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+				person, begin, end).fetch();
+		for(PersonDay pd : pdList){
+			if(pd.date.getDayOfWeek() == DateTimeConstants.SATURDAY || pd.date.getDayOfWeek() == DateTimeConstants.SUNDAY){
+				workDayInHoliday++;
+			}
+		}
+		return workDayInHoliday;
+	}
+	
+	/**
+	 * 
+	 * @param person
+	 * @param begin
+	 * @param end
+	 * @return il numero di giorni lavorativi in cui una persona è stata effettivamente a lavoro in un certo intervallo temporale
+	 */
+	public static int workDayInWorkingDay(Person person, LocalDate begin, LocalDate end){
+		int workDayInWorkingDay = 0;
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+				person, begin, end).fetch();
+		for(PersonDay pd : pdList){
+			if(pd.stampings.size() > 0)
+				workDayInWorkingDay++;
+		}
+		return workDayInWorkingDay;
+	}
+	
 }
 
 

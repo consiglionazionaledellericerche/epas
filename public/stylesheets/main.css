@@ -317,6 +317,7 @@ h3#titoloStraordinari {margin: 2em 0em 1em; text-align: left}
 h3#titoloCambioPassword {text-align: center}
 h3#caricamentoSituazioneMensile {text-align: center}
 h3#clock {text-align: center}
+h3#riepilogoMensile {text-align: center; margin: 2em 0em 1em}
 iframe#clock {align: center; margin: 3em 58em 0em}
 
 h4#configurazioniEsistenti {margin:2em 0em 1em; text-align: left}
@@ -349,6 +350,7 @@ input#feature {length: 5}
 p#nome {margin: 0em 1em 0em}
 p#cognome {margin: 1em 1em 2em}
 p#firma {margin: 2em 1em 0em}
+p#giorniLavorativi {margin: 2em 1em 0em}
 
 input#submitNuovoCodiceAssenza {margin: 2em 60em 0em; align: center}
 input#discardNuovoCodiceAssenza {margin: 1em 60em 0em; align: center}

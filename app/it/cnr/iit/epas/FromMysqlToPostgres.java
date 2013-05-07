@@ -830,7 +830,7 @@ public class FromMysqlToPostgres {
 				JPAPlugin.closeTx(false);
 				JPAPlugin.startTx(false);
 				person = Person.findById(person.id);
-				pd = pd.merge();
+				pd.merge();
 			}
 
 			importedStamping++;
