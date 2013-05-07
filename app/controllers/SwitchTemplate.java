@@ -63,6 +63,9 @@ public class SwitchTemplate extends Controller{
 					Logger.debug("sto per chiamare la stampa cartellino");
 					PrintTags.listPersonForPrintTags();
 					break;
+				case monthRecap:
+					MonthRecaps.show(year, month);
+					break;
 				case manageAbsenceCode:
 					Absences.manageAbsenceCode();
 					break;
@@ -139,6 +142,7 @@ public class SwitchTemplate extends Controller{
 		case yearlyAbsences:
 			YearlyAbsences.yearlyAbsences(personId, year);
 			break;
+		
 		case totalMonthlyAbsences:
 			YearlyAbsences.showGeneralMonthlyAbsences(year, month);
 			break;
