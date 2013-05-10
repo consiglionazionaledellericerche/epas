@@ -18,7 +18,7 @@ public class SwitchTemplate extends Controller{
 		LocalDate now = new LocalDate();
 
 		String method = params.get("method");
-		Logger.debug("La action è: %s", method);
+		Logger.debug("Nella switchTemplate La action è: %s", method);
 		if (method == null) {
 
 			flash.error(String.format("La action da eseguire è: %s", method));
@@ -26,7 +26,7 @@ public class SwitchTemplate extends Controller{
 
 		}
 		ActionMenuItem menuItem = ActionMenuItem.valueOf(method);
-		Logger.debug("Il menuItem è: %s relativo alla action: %s", menuItem, method);
+		Logger.debug("Nella switchTemplate Il menuItem è: %s relativo alla action: %s", menuItem, method);
 		Person person = Security.getPerson();
 		
 		int month;
@@ -64,6 +64,7 @@ public class SwitchTemplate extends Controller{
 					PrintTags.listPersonForPrintTags();
 					break;
 				case monthRecap:
+					Logger.debug("Nella switchTemplate chiamo il metodo monthRecap");
 					MonthRecaps.show(year, month);
 					break;
 				case manageAbsenceCode:
@@ -93,6 +94,7 @@ public class SwitchTemplate extends Controller{
 				case administrator:
 					Administrators.list();
 					break;
+					
 				case uploadSituation:
 					UploadSituation.uploadSituation(year, month);
 					break;
@@ -106,9 +108,7 @@ public class SwitchTemplate extends Controller{
 			}
 				
 			person = Person.findById(personId);
-		} 
-
-		
+		}	
 		
 		params.flash();
 		
@@ -170,9 +170,7 @@ public class SwitchTemplate extends Controller{
 		case administrator:
 			Administrators.list();
 			break;
-		case missingStamping:
-			Stampings.missingStamping(year, month);
-			break;
+		
 		case dailyPresence:
 			Stampings.dailyPresence(year, month, day);
 			break;
@@ -208,6 +206,8 @@ public class SwitchTemplate extends Controller{
 			break;
 
 		}
+		//flash.put("method", menuItem.getDescription());
+		params.flash();
 	}
 }
 

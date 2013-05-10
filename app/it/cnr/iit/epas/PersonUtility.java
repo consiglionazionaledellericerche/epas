@@ -380,12 +380,16 @@ public class PersonUtility {
 	 */
 	public static int workDayInWorkingDay(Person person, LocalDate begin, LocalDate end){
 		int workDayInWorkingDay = 0;
+		
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 				person, begin, end).fetch();
+		
+		
 		for(PersonDay pd : pdList){
-			if(pd.stampings.size() > 0)
-				workDayInWorkingDay++;
+			if(pd.stampings != null)
+				workDayInWorkingDay = workDayInWorkingDay + 1;
 		}
+		
 		return workDayInWorkingDay;
 	}
 	
