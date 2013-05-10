@@ -19,7 +19,15 @@
 		#{option 2015}2015#{/option}
 	#{/select}
 	
+	${_mainMenu.method.name()}
+	
 	#{select 'month', value:_mainMenu.month, id:'month'}
+	%{if (_mainMenu.method.name().equals('monthRecap')){
+	}%
+		#{option 0}Tutti i mesi#{/option}
+	%{
+		}
+	}%	
 		#{option 1}Gennaio#{/option}
 		#{option 2}Febbraio#{/option}
 		#{option 3}Marzo#{/option}
@@ -33,7 +41,7 @@
 		#{option 11}Novembre#{/option}
 		#{option 12}Dicembre#{/option}
 	#{/select}
-		
+			
 	#{secure.check "viewPersonList"}
 		#{select 'personId', value:_mainMenu.personId, id:'person'}
 			#{option}Scegli una persona#{/option}

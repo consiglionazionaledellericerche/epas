@@ -9,11 +9,14 @@ import models.Person;
 import models.PersonDay;
 import models.PersonMonth;
 import play.mvc.Controller;
+import play.mvc.With;
 
 import static play.modules.pdf.PDF.*;
 
+@With( {Secure.class, NavigationMenu.class} )
 public class PrintTags extends Controller{
 	
+	@Check(Security.INSERT_AND_UPDATE_STAMPING)
 	public static void showTag(Long personId){
 		if(personId == null){
 			flash.error("Malissimo! ci vuole un id! Seleziona una persona!");
@@ -40,6 +43,7 @@ public class PrintTags extends Controller{
 		
 	}
 	
+	@Check(Security.INSERT_AND_UPDATE_STAMPING)
 	public static void listPersonForPrintTags(){
 		LocalDate date = new LocalDate();
 		List<Person> personList = Person.getActivePersons(date);

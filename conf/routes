@@ -94,7 +94,9 @@ GET		/stampings/dailyPresence/{year}/{month}/{day}		Stampings.dailyPresence
 GET		/stampings/mealTicketSituation/{year}/{month}		Stampings.mealTicketSituation
 
 #Riepilogo mensile
-GET		/monthrecap/{year}/{month}				MonthRecap.show
+GET		/monthrecaps/show/{year}/{month}		MonthRecaps.show
+GET		/monthRecaps/justifiedAbsences			MonthRecaps.justifiedAbsences
+GET		/monthRecaps/notJustifiedAbsences		MonthRecaps.notJustifiedAbsences
 
 #Orario e timbrature
 GET     /stampings/{personId}/{year}/{month}	Stampings.stampings
