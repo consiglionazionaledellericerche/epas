@@ -1,5 +1,6 @@
 package it.cnr.iit.epas;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.FetchType;
@@ -26,6 +27,7 @@ import models.StampModificationType;
 import models.StampProfile;
 import models.Stamping;
 import models.Stamping.WayType;
+import models.enumerate.JustifiedTimeAtWork;
 
 public class PersonUtility {
 
@@ -197,8 +199,8 @@ public class PersonUtility {
 					return false;
 			}
 			break;
-			
-		
+
+
 		case 122:
 			child = persChildList.get(1);
 			if(child.bornDate.isAfter(date.minusYears(3))){
@@ -210,7 +212,7 @@ public class PersonUtility {
 					return false;
 			}
 			break;
-			
+
 		case 123:
 			child = persChildList.get(2);
 			if(child.bornDate.isAfter(date.minusYears(3))){
@@ -222,7 +224,7 @@ public class PersonUtility {
 					return false;
 			}
 			break;
-			
+
 		case 13:
 			child = persChildList.get(0);
 			if(child.bornDate.isAfter(date.minusYears(8))){
@@ -234,7 +236,7 @@ public class PersonUtility {
 					return false;
 			}	
 			break;
-			
+
 		case 132:
 			child = persChildList.get(1);
 			if(child.bornDate.isAfter(date.minusYears(8))){
@@ -246,7 +248,7 @@ public class PersonUtility {
 					return false;
 			}	
 			break;
-			
+
 		case 133:
 			child = persChildList.get(2);
 			if(child.bornDate.isAfter(date.minusYears(8))){
@@ -258,7 +260,7 @@ public class PersonUtility {
 					return false;
 			}				
 			break;
-			
+
 		case 134:
 			child = persChildList.get(3);
 			if(child.bornDate.isAfter(date.minusYears(8))){
@@ -270,19 +272,19 @@ public class PersonUtility {
 					return false;
 			}			
 			break;
-			
-			default:
-				throw new IllegalArgumentException(String.format("Il codice %s che si tenta di verificare non è compreso nella lista di quelli " +
-						"previsti per la retribuzione dei giorni di malattia dei figli.", code));
+
+		default:
+			throw new IllegalArgumentException(String.format("Il codice %s che si tenta di verificare non è compreso nella lista di quelli " +
+					"previsti per la retribuzione dei giorni di malattia dei figli.", code));
 		}
 		return false;
 	}
-	
-	
+
+
 	public static void checkExitStampNextDay(PersonDay pd){
 		LocalDateTime beginDate = new LocalDateTime(pd.date.getYear(),pd.date.getMonthOfYear(),pd.date.getDayOfMonth(),0,0);
 		LocalDateTime endDate = new LocalDateTime(pd.date.getYear(),pd.date.getMonthOfYear(),pd.date.getDayOfMonth(),23,59);
-		
+
 		Configuration config = Configuration.getCurrentConfiguration();
 		PersonDay pdPastDay = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", pd.person, pd.date.minusDays(1)).first();
 		StampProfile stampProfile = pd.getStampProfile();
@@ -296,7 +298,7 @@ public class PersonUtility {
 						pdPastDay.date);
 				if(stampProfile == null || !stampProfile.fixedWorkingTime){
 					for(Stamping st : pd.stampings){
-						
+
 						if(st != null){
 							//controllo nelle timbrature del giorno attuale se la prima che incontro è una timbratura di uscita sulla base
 							//del confronto con il massimo orario impostato in configurazione per considerarla timbratura di uscita relativa
@@ -317,7 +319,7 @@ public class PersonUtility {
 								correctStamp.save();
 								Logger.debug("Aggiunta nuova timbratura %s con valore %s", correctStamp, correctStamp.date);
 								Logger.debug("Devo rifare i calcoli in funzione di questa timbratura aggiunta");
-								
+
 								pdPastDay.timeAtWork = pd.toMinute(correctStamp.date) - pd.toMinute(reloadedStampingYesterday.get(0).date);
 								pdPastDay.merge();
 								pdPastDay.difference = pdPastDay.timeAtWork - pd.getWorkingTimeTypeDay().workingTime;
@@ -341,7 +343,7 @@ public class PersonUtility {
 								newEntranceStamp.personDay = pd;
 								newEntranceStamp.save();
 								Logger.debug("Aggiunta la timbratura %s con valore %s", newEntranceStamp, newEntranceStamp.date);
-								
+
 								pd.save();
 							}
 						}
@@ -351,7 +353,7 @@ public class PersonUtility {
 			}
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param person
@@ -370,7 +372,7 @@ public class PersonUtility {
 		}
 		return workDayInHoliday;
 	}
-	
+
 	/**
 	 * 
 	 * @param person
@@ -380,19 +382,49 @@ public class PersonUtility {
 	 */
 	public static int workDayInWorkingDay(Person person, LocalDate begin, LocalDate end){
 		int workDayInWorkingDay = 0;
-		
+
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 				person, begin, end).fetch();
-		
-		
+
+
 		for(PersonDay pd : pdList){
 			if(pd.stampings != null)
 				workDayInWorkingDay = workDayInWorkingDay + 1;
 		}
-		
+
 		return workDayInWorkingDay;
 	}
-	
+
+	/**
+	 * 
+	 * @param pdList
+	 * @return il numero di giorni di assenza giustificata presenti nella lista di personDay passata come parametro
+	 */
+	public static List<PersonDay> getJustifiedAbsences(List<PersonDay> pdList){
+		List<PersonDay> justifiedAbsencesPersonDay = new ArrayList<PersonDay>();
+		for(PersonDay pd : pdList){
+
+			if(pd.absences.size() == 1 && pd.absences.get(0).absenceType.justifiedTimeAtWork.minutesJustified == null)
+				justifiedAbsencesPersonDay.add(pd);
+
+		}
+		return justifiedAbsencesPersonDay;
+	}
+
+	/**
+	 * 
+	 * @param pdList
+	 * @return il numero di giorni in cui ci sono assenze non giustificate (niente assenze o timbrature per il personDay)
+	 */
+	public static List<PersonDay> getNotJustifiedAbsences(List<PersonDay> pdList){
+		List<PersonDay> notJustifiedAbsences = new ArrayList<PersonDay>();
+		for(PersonDay pd : pdList){
+			if((pd.stampings.size() == 0 && pd.absences.size() == 0) || (pd.stampings.size() == 1))
+				notJustifiedAbsences.add(pd);
+		}
+		return notJustifiedAbsences;
+	}
+
 }
 
 

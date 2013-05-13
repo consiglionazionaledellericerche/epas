@@ -30,7 +30,9 @@ public class NavigationMenu extends Controller {
 		LocalDate now = new LocalDate();
 		Integer day = flash.get("day") != null ? Integer.valueOf(flash.get("day")) : null;
 		int year = flash.get("year") != null ? Integer.valueOf(flash.get("year")) : now.getYear(); 
-		int month = flash.get("month") != null ? Integer.valueOf(flash.get("month")) : now.getMonthOfYear();		
+		int month = flash.get("month") != null  ? Integer.valueOf(flash.get("month")) : now.getMonthOfYear();
+		if(month == 0)
+			month = now.getMonthOfYear();
 		
 		ActionMenuItem action = flash.get("method") != null && !flash.get("method").equals("") ? ActionMenuItem.valueOf(flash.get("method")) : ActionMenuItem.stampingsAdmin;
 		
