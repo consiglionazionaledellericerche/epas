@@ -831,7 +831,7 @@ public class FromMysqlToPostgres {
 				JPAPlugin.startTx(false);
 				Logger.debug("Importate %d timbrature per %s. Chiusa e riaperta la transazione", importedStamping, person);
 				person = Person.findById(person.id);
-				pd.merge();
+				pd = pd.merge();
 			}
 
 			importedStamping++;
