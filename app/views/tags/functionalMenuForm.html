@@ -19,8 +19,7 @@
 		#{option 2015}2015#{/option}
 	#{/select}
 	
-	${_mainMenu.method.name()}
-	
+		
 	#{select 'month', value:_mainMenu.month, id:'month'}
 	%{if (_mainMenu.method.name().equals('monthRecap')){
 	}%
@@ -44,7 +43,7 @@
 			
 	#{secure.check "viewPersonList"}
 		#{select 'personId', value:_mainMenu.personId, id:'person'}
-			#{option}Scegli una persona#{/option}
+			#{option 0}Scegli una persona#{/option}
 		%{
 			for(person in _mainMenu.persons){
 		}%

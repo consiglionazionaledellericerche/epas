@@ -4,8 +4,17 @@
 
 #{functionalMenuForm mainMenu: mainMenu /} 
 
-<h3 id="riepilogoMensile">Riepilogo Mensile <span class="capitalized">&{'views.tags.display.date.month.' + localDate.getMonthOfYear()}</span> ${localDate.getYear()}</h3>
-
+%{if(localDate != null){
+}%
+	<h3 id="riepilogoMensile">Riepilogo Mensile <span class="capitalized">&{'views.tags.display.date.month.' + localDate.getMonthOfYear()}</span> ${localDate.getYear()}</h3>
+	%{
+	}else{
+	}%
+	<h3 id="riepilogoMensile">Riepilogo di tutti i mesi fino ad oggi</h3>
+	%{
+	}
+	}%
+	
 <p id="numeroGiorniLavorativi">Numero di giorni lavorativi: ${numberOfWorkingDays}</p>
   <table>
 	<tr>
