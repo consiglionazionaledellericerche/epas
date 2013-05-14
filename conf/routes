@@ -168,8 +168,9 @@ GET 	/shift/{type}/exportMonthCalAsPDF/{<(19|20)\d\d>year}/{<(0[1-9]|1[012])>mon
 PUT		/shift/{type}/update/{year}/{month}														Shift.update
 
 #Gestione straordinari (sist-org)
-GET		/overtimes/getPersonOvertimes/{email}/{year}/{month}		Overtimes.getPersonOvertimes
-PUT		/overtimes/setRequestedOvertime/{year}/{month}				Overtimes.setRequestOvertime
+GET		/overtimes/getPersonOvertimes/{email}/{year}/{month}						Overtimes.getPersonOvertimes
+PUT		/overtimes/setRequestedOvertime/{year}/{month}								Overtimes.setRequestOvertime
+POST	/overtimes/exportMonthAsPDF/{<(19|20)\d\d>year}/{<(0[1-9]|1[012])>month}	Overtimes.exportMonthAsPDF
 
 #Gestione timbrature via json
 PUT		/stampings/create						StampingsFromClient.create
