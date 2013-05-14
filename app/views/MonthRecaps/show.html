@@ -1,0 +1,83 @@
+#{extends 'main.html' /}
+
+#{logoutForm /}
+
+#{functionalMenuForm mainMenu: mainMenu /} 
+
+%{if(localDate != null){
+}%
+	<h3 id="riepilogoMensile">Riepilogo Mensile <span class="capitalized">&{'views.tags.display.date.month.' + localDate.getMonthOfYear()}</span> ${localDate.getYear()}</h3>
+	%{
+	}else{
+	}%
+	<h3 id="riepilogoMensile">Riepilogo di tutti i mesi fino ad oggi</h3>
+	%{
+	}
+	}%
+	
+<p id="numeroGiorniLavorativi">Numero di giorni lavorativi: ${numberOfWorkingDays}</p>
+  <table>
+	<tr>
+		<th>Nome</th>
+		%{  for(col in tableMonthRecap.columnKeySet()){
+		}%
+		<th>${col}</th>
+		%{
+			}
+		}%
+		</tr>
+		
+		%{  for(entry in tableMonthRecap.rowMap().entrySet()){
+			}%
+		<tr>
+			<td>${entry.getKey().name} ${entry.getKey().surname}</td>
+			%{ for(col in tableMonthRecap.columnKeySet()){
+				 if(col.equals('Differenza ore (Residuo a fine mese)') || col.equals('Ore di lavoro fatte')){
+			}%
+					<td>${entry.getValue().get(col).toHourTime()}</td>
+			%{
+				}
+				if(col.equals('Assenze giustificate')){
+					
+			}%						
+					<td>
+					<a href="@{MonthRecaps.justifiedAbsences(entry.getKey().id, localDate.getYear(), localDate.getMonthOfYear())}" class="justifiedAbsence${entry.getKey().id}-${localDate.getYear()}-${localDate.getMonthOfYear()}">${entry.getValue().get(col)}</a>
+					<script type="text/javascript"> 
+					$('.justifiedAbsence${entry.getKey().id}-${localDate.getYear()}-${localDate.getMonthOfYear()}').popupWindow({ 
+						height:500, 
+						width:800, 
+						top:50, 
+						left:50 
+					}); 
+					</script></td>
+			%{
+					
+				}
+				if(col.equals('Assenze non giustificate')){
+			}%
+					<td><a href="@{MonthRecaps.notJustifiedAbsences(entry.getKey().id, localDate.getYear(), localDate.getMonthOfYear())}" class="notJustifiedAbsence${entry.getKey().id}-${localDate.getYear()}-${localDate.getMonthOfYear()}">${entry.getValue().get(col)}</a>
+					<script type="text/javascript"> 
+					$('.notJustifiedAbsence${entry.getKey().id}-${localDate.getYear()}-${localDate.getMonthOfYear()}').popupWindow({ 
+						height:500, 
+						width:800, 
+						top:50, 
+						left:50 
+					}); 
+					</script></td>
+			%{
+				}
+				if(col.equals('Ore straord. pagate') || col.equals('Buoni mensa da restituire') || col.equals('Giorni di presenza al lavoro nei giorni festivi') || col.equals('Giorni di presenza al lavoro nei giorni lavorativi')){
+			}%
+			  		<td>${entry.getValue().get(col)}</td>
+			%{
+				}
+	
+				
+			}	
+			}%
+		
+		</tr>
+		%{
+			}
+		}%	
+</table>

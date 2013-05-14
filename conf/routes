@@ -39,9 +39,6 @@ GET		/hourRecap/{personId}/{year}			PersonMonths.hourRecap
 #Dispatcher
 POST	/dispatch								SwitchTemplate.dispatch	
 
-
-GET		/administration/month-recap/{date}		MonthRecap.show
-
 GET		/person/{<[0-9]+>id}/dailyStampings/{<(19|20)\d\d>year}/{<(0[1-9]|1[012])>month}/{<(0[1-9]|[12][0-9]|3[01])>day}				Stampings.dailyStampings
 
 # Ignore favicon requests
@@ -96,6 +93,11 @@ GET		/stampings/missingStamping/{year}/{month}			Stampings.missingStamping
 GET		/stampings/dailyPresence/{year}/{month}/{day}		Stampings.dailyPresence
 GET		/stampings/mealTicketSituation/{year}/{month}		Stampings.mealTicketSituation
 
+#Riepilogo mensile
+GET		/monthrecaps/show/{year}/{month}		MonthRecaps.show
+GET		/monthRecaps/justifiedAbsences			MonthRecaps.justifiedAbsences
+GET		/monthRecaps/notJustifiedAbsences		MonthRecaps.notJustifiedAbsences
+
 #Orario e timbrature
 GET     /stampings/{personId}/{year}/{month}	Stampings.stampings
 
@@ -140,6 +142,10 @@ GET		/recapCompetences/updatePersonCompetence/{personId}		Competences.updatePers
 #Gestione attestati di presenza
 GET		/uploadSituation/						UploadSituation.show
 POST	/uploadSituation/						UploadSituation.uploadSituation
+
+#Gestione stampa cartellino
+GET		/printTags/listPersonForPrintTags		PrintTags.listPersonForPrintTags
+POST	/printTags/showTag/{personId}			PrintTags.showTag
 
 #Clock
 GET		/clocks									Clocks.show

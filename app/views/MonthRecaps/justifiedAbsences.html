@@ -1,0 +1,25 @@
+#{extends 'main.html' /}
+
+<h4>Giorni di Assenza</h4>
+
+<table>
+	<tr>
+		<th>Giorno</th>
+		<th>Codice di assenza</th>
+	</tr>
+	%{ 
+		int i = 0;
+		while(i < justifiedAbsences.size()){
+		
+	}%
+	<tr>
+		<td>${justifiedAbsences.get(i).date}</td>
+		<td>${justifiedAbsences.get(i).absences.get(0).absenceType.code}</td>
+		
+	</tr>
+	%{
+		i++;}
+	}%
+
+
+</table>
