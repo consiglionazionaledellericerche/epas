@@ -77,13 +77,13 @@ public class YearlyAbsences extends Controller{
 	public final static class AbsenceTypeDate{
 		public AbsenceType absenceType;
 		public LocalDate date;
-		
+
 		public AbsenceTypeDate(AbsenceType absenceType, LocalDate date){
 			this.absenceType = absenceType;
 			this.date = date;
 		}
 	}
-	
+
 	@Check(Security.VIEW_PERSON_LIST)
 	public static void yearlyAbsences(Long personId, int year) {
 		Person person = null;
@@ -107,7 +107,7 @@ public class YearlyAbsences extends Controller{
 		else{
 			Logger.info("Sono dentro il ramo else della creazione dell'yearRecap");
 			//Integer year = new Integer(params.get("year"));
-		//	PersonMonth personMonth = PersonMonth.byPersonAndYearAndMonth(person, year, month);
+			//	PersonMonth personMonth = PersonMonth.byPersonAndYearAndMonth(person, year, month);
 			YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)year);
 
 			render(yearRecap);
@@ -123,54 +123,82 @@ public class YearlyAbsences extends Controller{
 	 * fa la render della mappa contenente come chiave la persona e come valore una lista di oggetti di tipo AbsenceTypeDays che contengono
 	 * l'absenceType di una assenza e il numero di volte che quell'assenza viene fatta nel mese e nell'anno passati come parametri del metodo
 	 */
-	
- 
-	private static Comparator<Person> PersonNameComparator = new Comparator<Person>() {
- 
-	    public int compare(Person person1, Person person2) {
- 
-	      String name1 = person1.surname.toUpperCase();
-	      String name2 = person2.surname.toUpperCase();
- 
-	      return name1.compareTo(name2);
 
-	    }
+
+	private static Comparator<Person> PersonNameComparator = new Comparator<Person>() {
+
+		public int compare(Person person1, Person person2) {
+
+			String name1 = person1.surname.toUpperCase();
+			String name2 = person2.surname.toUpperCase();
+
+			return name1.compareTo(name2);
+
+		}
 
 	};	
-	
+
 	private static Comparator<String> AbsenceCodeComparator = new Comparator<String>(){
-		
+
 		public int compare(String absenceCode1, String absenceCode2){
 			return absenceCode1.compareTo(absenceCode2);
-			
+
 		}		
-		
+
 	};
 
 	@Check(Security.VIEW_PERSON_LIST)
 	public static void showGeneralMonthlyAbsences(int year, int month) throws InstantiationException, IllegalAccessException{
-				
-		List<Person> activePersons = Person.getActivePersons(new LocalDate(year, month, 1));
-		//Table<Person, String, Integer> tableMonthlyAbsences = ArrayTable.create(activePersons, absenceInMonth);
+
 		Table<Person, String, Integer> tableMonthlyAbsences = TreeBasedTable.create(PersonNameComparator, AbsenceCodeComparator);
-		
-		for(Person p : activePersons){
-			List<Absence> absenceInMonth = Absence.find("Select abs from Absence abs, PersonDay pd where abs.personDay = pd and " +
-					"pd.person = ? and pd.date >= ? and pd.date <= ?", 
-					p, new LocalDate(year, month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
-			
-			tableMonthlyAbsences.put(p, "Totale", absenceInMonth.size());
-			for(Absence abs : absenceInMonth){
-				Integer value = tableMonthlyAbsences.row(p).get(abs.absenceType.code);
-				Logger.debug("Per la persona %s il codice %s vale: %s", p, abs.absenceType.code, value);
-				if(value == null){
-					Logger.debug("Inserisco in tabella nuova assenza per %s con codice %s", p, abs.absenceType.code);
-					tableMonthlyAbsences.row(p).put(abs.absenceType.code, 1);
+		if(month == 0){
+			/**
+			 * caso in cui si vogliono le assenze di tutti i mesi dell'anno in corso fino alla data attuale
+			 */
+			List<Person> activePersons = Person.getActivePersons(new LocalDate(year, 1, 1));
+			for(Person p : activePersons){
+				List<Absence> absenceInMonth = Absence.find("Select abs from Absence abs, PersonDay pd where abs.personDay = pd and " +
+						"pd.person = ? and pd.date >= ? and pd.date <= ?", 
+						p, new LocalDate(year, 1, 1), new LocalDate()).fetch();
+				tableMonthlyAbsences.put(p, "Totale", absenceInMonth.size());
+				for(Absence abs : absenceInMonth){
+					Integer value = tableMonthlyAbsences.row(p).get(abs.absenceType.code);
+					Logger.debug("Per la persona %s il codice %s vale: %s", p, abs.absenceType.code, value);
+					if(value == null){
+						Logger.debug("Inserisco in tabella nuova assenza per %s con codice %s", p, abs.absenceType.code);
+						tableMonthlyAbsences.row(p).put(abs.absenceType.code, 1);
+					}
+					else{
+						tableMonthlyAbsences.row(p).put(abs.absenceType.code, value+1);
+						Logger.debug("Incremento il numero di giorni per l'assenza %s di %s al valore %s", abs.absenceType.code, p, value+1);
+
+					}
 				}
-				else{
-					tableMonthlyAbsences.row(p).put(abs.absenceType.code, value+1);
-					Logger.debug("Incremento il numero di giorni per l'assenza %s di %s al valore %s", abs.absenceType.code, p, value+1);
-					
+			}
+		}
+		else{
+			List<Person> activePersons = Person.getActivePersons(new LocalDate(year, month, 1));
+			//Table<Person, String, Integer> tableMonthlyAbsences = ArrayTable.create(activePersons, absenceInMonth);
+
+
+			for(Person p : activePersons){
+				List<Absence> absenceInMonth = Absence.find("Select abs from Absence abs, PersonDay pd where abs.personDay = pd and " +
+						"pd.person = ? and pd.date >= ? and pd.date <= ?", 
+						p, new LocalDate(year, month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
+
+				tableMonthlyAbsences.put(p, "Totale", absenceInMonth.size());
+				for(Absence abs : absenceInMonth){
+					Integer value = tableMonthlyAbsences.row(p).get(abs.absenceType.code);
+					Logger.debug("Per la persona %s il codice %s vale: %s", p, abs.absenceType.code, value);
+					if(value == null){
+						Logger.debug("Inserisco in tabella nuova assenza per %s con codice %s", p, abs.absenceType.code);
+						tableMonthlyAbsences.row(p).put(abs.absenceType.code, 1);
+					}
+					else{
+						tableMonthlyAbsences.row(p).put(abs.absenceType.code, value+1);
+						Logger.debug("Incremento il numero di giorni per l'assenza %s di %s al valore %s", abs.absenceType.code, p, value+1);
+
+					}
 				}
 			}
 		}
@@ -179,7 +207,7 @@ public class YearlyAbsences extends Controller{
 
 	}
 
-	
+
 	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void absencesPerPerson(int year){
 		Person person = Security.getPerson();
@@ -197,7 +225,7 @@ public class YearlyAbsences extends Controller{
 			YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)year);
 			render(yearRecap);
 		}
-		
+
 
 	}
 

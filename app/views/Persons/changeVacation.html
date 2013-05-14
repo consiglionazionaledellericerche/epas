@@ -1,0 +1,21 @@
+#{extends 'main.html' /}
+
+<h3>Assegna nuovo piano ferie a ${person.name} ${person.surname}</h3>
+
+#{form @Persons.updateVacation()}
+<input type="hidden" name="personId" value="${person.id}" />
+%{for(int i = 0; i < codeList.size(); i++){
+}%
+<input type="radio" name="code" value="${codeList.get(i).description}"><strong>${codeList.get(i).description}</strong> Giorni di ferie = ${codeList.get(i).vacationDays} Giorni di permesso = ${codeList.get(i).permissionDays}<br>
+%{
+}
+}%
+<p>Data inizio <input type="date" value="" name="dataInizio"></p>
+<p>Data fine <input type="date" value="" name="dataFine"></p>
+
+
+<input id="submitEditPerson"type="submit" value="Ok" />
+#{/form}
+#{form @Persons.discard()}
+<input id="discardEditPerson" type="submit" value="Annulla" />
+#{/form}

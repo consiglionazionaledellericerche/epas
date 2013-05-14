@@ -4,8 +4,16 @@
 #{logoutForm /}
 
 #{functionalMenuForm mainMenu: mainMenu /} 
-
-<h2 id="titoloTotaleAssenzeMensili">Situazione generale delle assenze per ciascun dipendente nel mese di &{'views.tags.display.date.month.' + month} ${year}</h2>
+%{ if(month != 0){
+}%
+	<h2 id="titoloTotaleAssenzeMensili">Situazione generale delle assenze per ciascun dipendente nel mese di &{'views.tags.display.date.month.' + month} ${year}</h2>
+%{
+	}else{
+}%
+	<h2 id="titoloTotaleAssenzeMensili">Situazione assenze per ciascun dipendente da inizio anno</h2>
+%{
+	}
+}%
 
 
 <table id="tabellaPersoneCodiciAssenzaMensili">
