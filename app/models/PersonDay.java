@@ -454,13 +454,13 @@ public class PersonDay extends Model {
 				for(Absence abs : absences){
 					if(abs.absenceType.ignoreStamping == true || abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay){
 						timeAtWork = 0;
-						//merge();
+						merge();
 						difference = 0;
-						//merge();
+						merge();
 						updateProgressive();
-						//merge();
+						merge();
 						isTicketAvailable = false;
-						//merge();
+						merge();
 						return;
 
 					}
@@ -485,13 +485,13 @@ public class PersonDay extends Model {
 							}
 							timeAtWork = timeAtWork + total;
 						}
-						//merge();
+						merge();
 						updateDifference();
-						//merge();
+						merge();
 						updateProgressive();
-						//merge();
+						merge();
 						setTicketAvailable();
-						//merge();
+						merge();
 						return;
 					}
 
@@ -499,21 +499,21 @@ public class PersonDay extends Model {
 			}
 			if(timeAtWork != null && (stampings.size() == 0 || stampings == null)){
 				updateDifference();
-				//merge();
+				merge();
 				updateProgressive();	
-				//merge();
+				merge();
 				setTicketAvailable();
-				//merge();
+				merge();
 				return;
 			}				
 			updateTimeAtWork();
-			//merge();
+			merge();
 			updateDifference();
-			//merge();
+			merge();
 			updateProgressive();	
-			//merge();
+			merge();
 			setTicketAvailable();
-			//merge();
+			merge();
 		} else {
 			Logger.info("I calcoli sul giorno %s non vengono effettuati perché %s non ha un contratto attivo in questa data", date, person);
 		}
@@ -528,11 +528,11 @@ public class PersonDay extends Model {
 		Logger.trace("Chiamata populatePersonDayAfterJustifiedAbsence per popolare il personDay di %s %s senza il timeAtWork nel giorno %s",
 				person.name, person.surname, date);
 		updateDifference();
-		//merge();
+		merge();
 		updateProgressive();	
-		//merge();
+		merge();
 		setTicketAvailable();
-		//merge();
+		merge();
 	}
 
 
