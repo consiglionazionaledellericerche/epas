@@ -40,8 +40,8 @@
 		<td>${person.number}</td>
 		<td>${person.getCurrentContract() != null ? person.getCurrentContract().beginContract : ''}</td>
 		<td>${person.getCurrentContract() != null ? person.getCurrentContract().expireContract : ''}</td>
-		<td>${person.workingTimeType != null && person.workingTimeType.description != null ? person.workingTimeType.description : ''}</td>
-		<td>${person.getVacation() != null ? person.getVacation().description : ''}</td>
+		<td><a href="@{editWorkingTime(person.id)}">${person.workingTimeType != null && person.workingTimeType.description != null ? person.workingTimeType.description : ''}</a></td>
+		<td><a href="@{editVacation(person.id)}">${person.getVacation() != null ? person.getVacation().description : ''}</a></td>
 		<td>${person.getQualification() != null ? person.getQualification().qualification : ''}</td>
 		<td>${''}</td>
 		<td>${person.getLocation() != null ? person.location.department : ''}</td>

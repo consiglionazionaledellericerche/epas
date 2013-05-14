@@ -1,0 +1,18 @@
+#{extends 'main.html' /}
+
+<h3>Piano ferie per ${person.name} ${person.surname}</h3>
+<input type="hidden" name="personId" value="${person.id}" />
+<p><a href="@{changeVacation(person.id)}">Cambia piano ferie</a></p>
+
+<table>
+	<tr>
+		<th>Nome</th>
+		<th>Giorni ferie</th>
+		<th>Giorni permesso</th>
+	</tr>
+	<tr>
+		<td>${person.getVacation().description}</td>
+		<td>${person.getVacation().vacationDays}</td>
+		<td>${person.getVacation().permissionDays}</td>
+	</tr>
+</table>

@@ -16,6 +16,9 @@ import models.Location;
 import models.Person;
 import models.PersonDay;
 import models.Qualification;
+import models.VacationCode;
+import models.VacationPeriod;
+import models.WorkingTimeType;
 
 import org.joda.time.LocalDate;
 
@@ -74,7 +77,86 @@ public class Persons extends Controller {
 				
 		render(person, contractList, weekDayAvailability, holidaysAvailability, daylightWorkingDaysOvertime, progressive, initTime);
 	}
+	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void editVacation(Long personId){
+		Person person = Person.findById(personId);
+		render(person);
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void editWorkingTime(Long personId){
+		Person person = Person.findById(personId);
+		WorkingTimeType wtt = person.workingTimeType;
+		render(person, wtt);
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void changeVacation(Long personId){
+		Person person = Person.findById(personId);
+		List<VacationCode> codeList = VacationCode.findAll();
+		Logger.debug("Lista dei vacationCode: %s", codeList.toString());
+		render(person, codeList);
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void changeWorkingTime(Long personId){
+		Person person = Person.findById(personId);
+		List<WorkingTimeType> wttList = WorkingTimeType.findAll();
+		render(person, wttList);
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void updateVacation(){
+		Long personId = params.get("personId", Long.class);		
+		
+		Person person = Person.findById(personId);
+		LocalDate begin = new LocalDate(params.get("dataInizio", Date.class));
+		LocalDate end = new LocalDate(params.get("dataFine", Date.class));
+		if(begin == null || end == null){
+			flash.error("Le date devono essere entrambe valorizzate");
+			Application.indexAdmin();
+		}
+		if(begin.isAfter(end)){
+			flash.error("La data di fine del piano ferie non può essere precedente alla data di inizio dello stesso");
+			Application.indexAdmin();
+		}
+		person.vacationPeriod.delete();
+		person.save();
+		VacationCode code = VacationCode.find("Select code from VacationCode code where code.description = ?", params.get("code")).first();
+		VacationPeriod period = new VacationPeriod();
+		period.beginFrom = begin;
+		period.endTo = end;
+		period.person = person;
+		period.vacationCode = code;
+		period.save();
+		flash.success("Aggiornato il piano ferie per %s %s", person.name, person.surname);
+		Application.indexAdmin();
+	}
 
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void updateWorkingTime(){
+		Long personId = params.get("personId", Long.class);
+		Person person = Person.findById(personId);
+//		LocalDate begin = new LocalDate(params.get("dataInizio", Date.class));
+//		LocalDate end = new LocalDate(params.get("dataFine", Date.class));
+//		if(begin == null || end == null){
+//			flash.error("Le date devono essere entrambe valorizzate");
+//			Application.indexAdmin();
+//		}
+//		if(begin.isAfter(end)){
+//			flash.error("La data di fine del piano ferie non può essere precedente alla data di inizio dello stesso");
+//			Application.indexAdmin();
+//		}
+		person.workingTimeType = null;
+		person.save();
+		Logger.debug("l'orario selezionato è: %s", params.get("description"));
+		WorkingTimeType wtt = WorkingTimeType.find("Select wtt from WorkingTimeType wtt where wtt.description = ?", params.get("description")).first();
+		person.workingTimeType = wtt;
+		person.save();
+		flash.success("Aggiornato l'orario di lavoro per %s %s", person.name, person.surname);
+		Application.indexAdmin();
+	}
 
 	@Check(Security.VIEW_PERSON_LIST)
 	public static void list(){
