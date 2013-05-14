@@ -326,33 +326,28 @@ public class Stampings extends Controller {
 
 	@Check(Security.INSERT_AND_UPDATE_STAMPING)
 	public static void missingStamping(int year, int month){
+		
+		ImmutableTable.Builder<Person, String, List<Integer>> builder = ImmutableTable.builder();
+		Table<Person, String, List<Integer>> tableMissingStampings = null;
 
-		Map<Person, List<PersonDay>> personPersonDayMap = new HashMap<Person,List<PersonDay>>();
-		List<Person> personList = Person.findAll();
+		List<Person> personList = Person.getActivePersons(new LocalDate(year, month, 1));
+		
 		for(Person p : personList){
-			List<PersonDay> pdMissingStampingList = new ArrayList<PersonDay>();
+			List<Integer> pdMissingStampingList = new ArrayList<Integer>();
 			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date >= ? and pd.date <= ?", 
 					p, new LocalDate(year, month, 1), new LocalDate(year, month,1).dayOfMonth().withMaximumValue()).fetch();
-
 			for(PersonDay pd : pdList){
 				if(pd.stampings.size() == 1 || 
 						(pd.stampings.size() == 0 && pd.absences.size() == 0 && pd.date.getDayOfWeek() != 7 && pd.date.getDayOfWeek() != 6)){
-
-					if(!personPersonDayMap.containsKey(p)){
-						pdMissingStampingList.add(pd);
-						personPersonDayMap.put(p, pdMissingStampingList);
-					}
-					else{
-						pdMissingStampingList = personPersonDayMap.remove(p);
-						pdMissingStampingList.add(pd);
-						personPersonDayMap.put(p, pdMissingStampingList);
-					}    					
-
+					Integer day = pd.date.getDayOfMonth();
+					pdMissingStampingList.add(day);
 				}
 
 			}
+			builder.put(p, "Giorni del mese da controllare", pdMissingStampingList);
 		}
-		render(personPersonDayMap, month, year);
+		tableMissingStampings = builder.build();
+		render(tableMissingStampings, month, year);
 
 	}
 

@@ -19,24 +19,21 @@
 <table id="tabellaPersoneCompetenze">
 	<tr>
 		<th>Nome e cognome</th>
-		%{ for(col in tablePersonCompetences.columnKeySet()){
+		%{ for(col in tableCompetence.columnKeySet()){
 		}%
 		<th>${col}</th>
 		%{
 		}
 		}%	
 	</tr>		
-	%{ for(entry in tablePersonCompetences.rowMap().entrySet()){
+	%{ for(entry in tableCompetence.rowMap().entrySet()){
 	}%
 	<tr>
-		<td>${entry.getKey().name} ${entry.getKey().surname}</td>
-		%{ for(col in tablePersonCompetences.columnKeySet()){
+		<td>${entry.getKey().name} ${entry.getKey().surname} (${entry.getKey().number})</td>
+		%{ for(col in tableCompetence.columnKeySet()){
 		}%
-		<td>%{if(col.equals("Straordinario diurno nei giorni lavorativi")){
-		}%<input name="StraordinarioDiurnoLavorativo" type="text" value="${entry.getValue().get(col)}" size="10" maxlength="10" />
-			%{
-			}
-			}%
+		<td>
+		<input name="StraordinarioDiurnoLavorativo" type="text" value="${entry.getValue().get(col)}" size="5" maxlength="5" />			
 		</td>
 		%{
 		}

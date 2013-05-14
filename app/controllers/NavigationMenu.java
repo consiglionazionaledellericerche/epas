@@ -30,12 +30,13 @@ public class NavigationMenu extends Controller {
 		LocalDate now = new LocalDate();
 		Integer day = flash.get("day") != null ? Integer.valueOf(flash.get("day")) : null;
 		int year = flash.get("year") != null ? Integer.valueOf(flash.get("year")) : now.getYear(); 
-		int month = flash.get("month") != null ? Integer.valueOf(flash.get("month")) : now.getMonthOfYear();		
+		int month = flash.get("month") != null  ? Integer.valueOf(flash.get("month")) : now.getMonthOfYear();
+		if(month == 0)
+			month = now.getMonthOfYear();
 		
 		ActionMenuItem action = flash.get("method") != null && !flash.get("method").equals("") ? ActionMenuItem.valueOf(flash.get("method")) : ActionMenuItem.stampingsAdmin;
 		
-		Logger.debug("nella injectMenu la action è: %s", action);
-		
+		//Logger.debug("Appena assegnata la action nel metodo injectMenu della classe NavigationMenu. La action è: %s", action.getDescription());
 		Long personId =  flash.get("personId") != null ? Long.parseLong(flash.get("personId")) : null;
 	
 		List<Person> persons = (List<Person>) Cache.get("persons");
@@ -45,28 +46,30 @@ public class NavigationMenu extends Controller {
 			persons = new ArrayList<Person>();
 			List<Person> genericPerson = Person.find("Select p from Person p order by p.surname").fetch();
 			for(Person p : genericPerson){
-				Logger.debug("Cerco il contratto per %s %s per stabilire se metterlo/a in lista", p.name, p.surname);
+				
 				Contract c = Contract.find("Select c from Contract c where c.person = ? and ((c.beginContract != null and c.expireContract = null) or " +
 						"(c.expireContract > ?) or (c.beginContract = null and c.expireContract = null)) order by c.beginContract desc limit 1", p, new LocalDate(year,month,1)).first();
-				//Logger.debug("Il contratto per %s %s è: %s", p.name, p.surname, c.toString());
+				
 				if(c != null && c.onCertificate == true){
 					persons.add(p);
-					Logger.debug("Il contratto rispecchia i criteri quindi %s %s va in lista", p.name, p.surname);
+					
 				}
 				
 			}
-//			persons = Person.find("Select distinct p from Person p, Contract c where c.person = p and c.onCertificate = ? " +
-//					"order by p.surname", true).fetch();
 			Cache.set("persons", persons, "5mn");
 		}
 		Logger.debug("nella injectMenu la action è: %s", action.getDescription());
 		MainMenu mainMenu = null;
-		if(!action.getDescription().equals("Presenza giornaliera"))
-			mainMenu = new MainMenu(personId, year, month, action, persons);
-		else{
-			
+		if(action.getDescription().equals("Riepilogo mensile"))
+			mainMenu = new MainMenu(year, month, action);
+		if(action.getDescription().equals("Presenza giornaliera")){
 			day = flash.get("day") != null ? Integer.valueOf(flash.get("day")) : now.getDayOfMonth();
-			mainMenu = new MainMenu(personId, year, month, day, action, persons);
+			mainMenu = new MainMenu(personId, year, month, day, action, persons);			
+		}
+		
+		else{
+			mainMenu = new MainMenu(personId, year, month, action, persons);
+			
 		}		
 		renderArgs.put("mainMenu", mainMenu);
 

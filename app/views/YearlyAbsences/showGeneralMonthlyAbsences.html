@@ -4,8 +4,16 @@
 #{logoutForm /}
 
 #{functionalMenuForm mainMenu: mainMenu /} 
-
-<h2 id="titoloTotaleAssenzeMensili">Situazione generale delle assenze per ciascun dipendente nel mese di &{'views.tags.display.date.month.' + month} ${year}</h2>
+%{ if(month != 0){
+}%
+	<h2 id="titoloTotaleAssenzeMensili">Situazione generale delle assenze per ciascun dipendente nel mese di &{'views.tags.display.date.month.' + month} ${year}</h2>
+%{
+	}else{
+}%
+	<h2 id="titoloTotaleAssenzeMensili">Situazione assenze per ciascun dipendente da inizio anno</h2>
+%{
+	}
+}%
 
 
 <table id="tabellaPersoneCodiciAssenzaMensili">
@@ -14,17 +22,17 @@
 		<th colspan="${numberOfDifferentAbsenceType}">Codici di assenza</th>
 		
 	</tr>
-	%{  for(col in tablePersonAbsences.columnKeySet()){
+	%{  for(col in tableMonthlyAbsences.columnKeySet()){
 		}%
 		<th>${col}</th>
 	%{
 		}
 	}%
-	%{  for(entry in tablePersonAbsences.rowMap().entrySet()){
+	%{  for(entry in tableMonthlyAbsences.rowMap().entrySet()){
 		}%
 	<tr>
 		<td>${entry.getKey().name} ${entry.getKey().surname}</td>
-		%{ for(col in tablePersonAbsences.columnKeySet()){
+		%{ for(col in tableMonthlyAbsences.columnKeySet()){
 		}%
 			<td>${entry.getValue().get(col)}
 			   

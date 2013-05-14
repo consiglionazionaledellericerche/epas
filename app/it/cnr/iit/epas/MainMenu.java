@@ -48,6 +48,12 @@ public class MainMenu {
 		this.month = month;
 	}
 	
+	public MainMenu(int year, int month, ActionMenuItem method){
+		this.year = year;
+		this.month = month;
+		this.method = method;
+	}
+	
 	public MainMenu(Long personId, int year, int month, ActionMenuItem method) {
 		this.personId = personId;
 		this.year = year; this.month = month;
@@ -108,7 +114,16 @@ public class MainMenu {
             }
             
         }
-       
+        if(actions.size() > 6){
+        	//Logger.debug("Ho più di 6 voci di menu, devo inserire il separatore");
+        	for(int i=0; i < actions.size(); i++){
+        		if(actions.get(i).toString().equals("stampings")){
+        			//Logger.debug("Inserisco il separatore alla posizione %d della lista", i);
+        			actions.add(i, ActionMenuItem.separateMenu);
+        			return actions;
+        		}
+        	}
+        }
         return actions;
     } 
 	

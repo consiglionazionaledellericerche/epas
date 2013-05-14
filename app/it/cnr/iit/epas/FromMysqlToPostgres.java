@@ -817,7 +817,7 @@ public class FromMysqlToPostgres {
 				 * in questo caso la data del "giro successivo" è nulla poichè siamo all'ultima riga del ciclo. Quindi bisogna fare 
 				 * i calcoli del personDay relativi a questo ultimo giorno (quello con date = data).
 				 */
-				pd.merge();
+				//pd.merge();
 				pd.populatePersonDay();
 
 				Logger.debug("Il progressivo al termine del resultset è: %s e il differenziale è: %s", pd.progressive, pd.difference);
@@ -829,7 +829,9 @@ public class FromMysqlToPostgres {
 			if (importedStamping % 100 == 0) {
 				JPAPlugin.closeTx(false);
 				JPAPlugin.startTx(false);
+				Logger.debug("Importate %d timbrature per %s. Chiusa e riaperta la transazione", importedStamping, person);
 				person = Person.findById(person.id);
+				pd = pd.merge();
 			}
 
 			importedStamping++;
@@ -908,7 +910,6 @@ public class FromMysqlToPostgres {
 
 	}
 
-	@SuppressWarnings("deprecation")
 	public static void createInitializationTime(long id, Person person, int anno) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
 
 		/**
@@ -1164,8 +1165,8 @@ public class FromMysqlToPostgres {
 		setDateTimeToStamping(stamping, pd.date, s);
 		stamping.personDay = pd;
 		stamping.save();
-		pd.stampings.add(stamping);
-		pd.merge();
+//		pd.stampings.add(stamping);
+//		pd.merge();
 
 		Logger.debug("Creata %s", stamping.toString());	
 
@@ -1179,8 +1180,8 @@ public class FromMysqlToPostgres {
 		absence.personDay = pd;
 		absence.absenceType = absenceType;
 		absence.save();
-		pd.absences.add(absence);
-		pd.merge();
+		//pd.absences.add(absence);
+		//pd.merge();
 		Logger.debug("Creata %s", absence);
 		if(absenceType.code.equals("91")){
 			Logger.debug("Trovato riposo compensativo per %s %s nel giorno %s. Proseguo con i calcoli...", 
@@ -1195,8 +1196,8 @@ public class FromMysqlToPostgres {
 			pm.prendiRiposoCompensativo(pd.date);
 			pm.save();
 			Logger.debug("Assegnato riposo compensativo e salvato person month per %s %s", pd.person.name, pd.person.surname);
-			Logger.debug("Il valore dei riposi compensativi è: %s per anno corrente e %s per anno passato", 
-					pm.riposiCompensativiDaAnnoCorrente, pm.riposiCompensativiDaAnnoPrecedente);
+			Logger.debug("%s %s: il valore dei riposi compensativi è: %s per anno corrente e %s per anno passato", 
+					pd.person.name, pd.person.surname, pm.riposiCompensativiDaAnnoCorrente, pm.riposiCompensativiDaAnnoPrecedente);
 			
 		}
 			

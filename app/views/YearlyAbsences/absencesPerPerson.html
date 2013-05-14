@@ -47,7 +47,7 @@
 	<tr>
 		<th width="80">Codice assenza</th>
 		<th width="200">Descrizione</th>
-					
+		<th width="20">Totale giorni</th>			
 	</tr>
 %{
      for(entry in yearRecap.getYearlyAbsence().entrySet()) {
@@ -55,11 +55,16 @@
 	<tr>
 		<td>${entry.getKey().code}</td>     
 		<td>${entry.getKey().description}</td>	
-		
+		<td>${yearRecap.totalDaysHourOfAbsenceCode(yearRecap.person, yearRecap.year, entry.getKey().code)}</td>
 	</tr>
 
 %{  		   
      }
      
 }%
+	<tr>
+		<td>TOTALE</td>
+		<td></td>
+		<td>${yearRecap.totalOfAllAbsences(yearRecap.person, yearRecap.year, yearRecap.getYearlyAbsence().keySet())}</td>
+	</tr>
 </table>
