@@ -9,7 +9,7 @@ import java.util.List;
 import models.Competence;
 
 /**
- * @author cristian
+ * @author arianna
  *
  */
 public class PersonsCompetences {

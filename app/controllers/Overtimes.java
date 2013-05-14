@@ -1,25 +1,38 @@
 package controllers;
 
+import static play.modules.pdf.PDF.renderPDF;
+
 import org.joda.time.LocalDate;
+
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.ImmutableTable;
+import com.google.common.collect.Table;
 
 
 import play.Logger;
 import play.data.binding.As;
+import play.db.jpa.JPA;
 import play.mvc.Controller;
 
+import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
 import it.cnr.iit.epas.JsonRequestedOvertimeBinder;
+import it.cnr.iit.epas.JsonRequestedPersonsBinder;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import models.Absence;
 import models.Competence;
+import models.CompetenceCode;
 import models.Person;
 import models.PersonMonth;
+import models.PersonReperibilityDay;
+import models.PersonReperibilityType;
 
 import models.exports.OvertimesData;
 import models.exports.PersonsCompetences;
+import models.exports.PersonsList;
 import models.exports.ReperibilityPeriod;
 import models.exports.ReperibilityPeriods;
 import models.PersonTags;
@@ -97,6 +110,48 @@ public class Overtimes extends Controller {
 				Logger.debug("Creata competenza %s", competence);
 			}
 		}
+	}
+	
+	/**
+	 * @author arianna
+	 * crea il file PDF con il resoconto mensile delle ore di straordinario
+	 * di una lista di persone identificate con l'email
+	 * (portale sistorg)
+	 * 
+	 * curl -H "Content-Type: application/json" -X PUT -d '[ {"email" : "stefano.ruberti@iit.cnr.it"}, { "email" : "andrea.vivaldi@iit.cnr.it"} , { "email" : "lorenzo.luconi@iit.cnr.it" } ]' http://scorpio.nic.it:9001/overtimes/exportMonthAsPDF/2013/05
+	 */
+	public static void exportMonthAsPDF(Integer year, Integer month, @As(binder=JsonRequestedPersonsBinder.class) PersonsList body) {
+		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
+		
+		Logger.debug("update: Received PersonsCompetences %s", body);	
+		if (body == null) {
+			badRequest();	
+		}
+			
+		ImmutableTable.Builder<Person, String, Integer> builder = ImmutableTable.builder(); 
+		Table<Person, String, Integer> overtimesMonth = null;
+		
+		CompetenceCode competenceCode = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", "S1").first();
+		Logger.debug("find  CompetenceCode %s con CompetenceCode.code=%s", competenceCode, competenceCode.code);	
+		
+		for (Person person : body.persons) {
+			Competence competence = Competence.find("SELECT c FROM Competence c WHERE c.person = ? AND c.year = ? AND c.month = ? AND c.competenceCode = ?", 
+					person, year, month, competenceCode).first();
+			Logger.debug("find  Competence %s per person=%s, year=%s, month=%s, competenceCode=%s", competence, person, year, month, competenceCode);	
+
+			if (competence != null) {
+				Logger.debug("Competence has reason=%s and  valueApproved=%s", competence.reason, competence.valueApproved);
+				builder.put(person, competence.reason != null ? competence.reason : "", competence.valueApproved);
+			} else {
+				builder.put(person, "", 0);
+			}
+		}
+		overtimesMonth = builder.build();
+		
+		LocalDate today = new LocalDate();
+		LocalDate firstOfMonth = new LocalDate(year, month, 1);
+		
+		renderPDF(today, firstOfMonth, overtimesMonth);
 	}
 
 }
