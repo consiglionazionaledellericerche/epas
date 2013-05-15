@@ -56,8 +56,8 @@ public class Stampings extends Controller {
 		Person person = Security.getPerson();
 		Logger.debug("La persona presa dal security è: %s %s", person.name, person.surname);
 		LocalDate date = new LocalDate();
-		Logger.info("Anno: "+year);    	
-		Logger.info("Mese: "+month);
+		Logger.trace("Anno: "+year);    	
+		Logger.trace("Mese: "+month);
 		if(year == null || month == null){
 			year = date.getYear();
 			month = date.getMonthOfYear();
