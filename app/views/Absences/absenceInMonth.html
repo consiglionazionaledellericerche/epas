@@ -1,0 +1,11 @@
+#{extends 'main.html' /}
+
+<h4>Date in cui è stata effettuata l'assenza ${absenceCode}</h4>
+
+<ul>
+%{for(date in dateAbsences){
+}%<li>${date}</li>
+%{
+}
+}%
+</ul>
