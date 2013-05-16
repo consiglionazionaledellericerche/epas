@@ -118,13 +118,13 @@
 
 <p>Riepilogo delle ore di lavoro in eccesso/difetto:</p> 
 <p> - E' possibile utilizzare il residuo dell'anno precedente? ${personMonth.possibileUtilizzareResiduoAnnoPrecedente()==true ? 'sì' : 'no'}</p>
-<p> - Eventuale residuo da inizializzazione: ${personMonth.residuoAnnoPrecedenteDaInizializzazione().toHourTime()}</p>
-<p> - Residuo anno precedente disponibile a inizio mese: ${personMonth.residuoAnnoPrecedenteDisponibileAllInizioDelMese().toHourTime()}</p>
+<p> - Eventuale residuo da inizializzazione: ${personMonth.residuoAnnoPrecedenteDaInizializzazione() != 0 ? personMonth.residuoAnnoPrecedenteDaInizializzazione().toHourTime() : ''}</p>
+<p> - Residuo anno precedente disponibile a inizio mese: ${personMonth.residuoAnnoPrecedenteDisponibileAllInizioDelMese() != 0 ? personMonth.residuoAnnoPrecedenteDisponibileAllInizioDelMese().toHourTime() : ''}</p>
 <p> - Residuo tempo di lavoro dei mesi precedenti: ${personMonth.totaleResiduoAnnoCorrenteAlMesePrecedente().toHourTime()}</p> 
 <p> - Residuo del mese:  ${personMonth.residuoDelMese().toHourTime()}</p>
 <p> - Tempo disponibile per straordinari: ${personMonth.tempoDisponibilePerStraordinari().toHourTime()}</p>
 <p> - Totale residuo anno corrente a fine mese:  ${personMonth.totaleResiduoAnnoCorrenteAFineMese().toHourTime()}</p>
-<p> - Giorni di riposo compensativo: ${personMonth.getCompensatoryRest()} per un totale di: -${(personMonth.getCompensatoryRestInMinutes(personMonth.getCompensatoryRest())).toHourTime()} ore</p>
+<p> - Giorni di riposo compensativo: ${personMonth.getCompensatoryRest() != 0 ? personMonth.getCompensatoryRest() : ''} per un totale di: ${personMonth.getCompensatoryRestInMinutes() != 0 ? -personMonth.getCompensatoryRestInMinutes().toHourTime() : ''} ore</p>
 <p> - Totale residuo a fine mese  <strong>${personMonth.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese().toHourTime()} ore</strong></p>
 
 
