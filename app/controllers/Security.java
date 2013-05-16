@@ -42,7 +42,7 @@ public class Security extends Secure.Security {
 			Cache.set(PERMISSION_CACHE_PREFIX + username, person.getAllPermissions(), CACHE_DURATION);
 			Cache.set("personId", person.id, CACHE_DURATION);
 			            
-            flash.success("Welcome, " + person.name + person.surname);
+            flash.success("Welcome, " + person.name + ' ' + person.surname);
             Logger.info("person %s successfully logged in", person.username);
             Logger.trace("Permission list for %s %s: %s", person.name, person.surname, person.permissions);
 			return true;
