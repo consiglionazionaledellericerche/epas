@@ -289,10 +289,9 @@ public class PersonDay extends Model {
 			LocalDateTime now = new LocalDateTime();
 			if(reloadedStampings.size() > 0){
 				Stamping s = reloadedStampings.get(0);
-				if(s.date.getDayOfMonth()==now.getDayOfMonth() && s.date.getMonthOfYear()==now.getMonthOfYear() && 
-						s.date.getYear()==now.getYear()){					
+				if(s.date.isEqual(now)){					
 					int nowToMinute = toMinute(now);
-					if(reloadedStampings.size() == 3 || reloadedStampings.size() == 1){	
+					if(reloadedStampings.size() == 3){	
 						int workingTime=0;
 						//int numberOfServiceExit = 0;
 						for(int i = 0; i < reloadedStampings.size(); i++){
@@ -302,6 +301,8 @@ public class PersonDay extends Model {
 									//workingTime = workingTime + (toMinute(reloadedStampings.get(i).date) - toMinute(reloadedStampings.get(i-1).date));
 									workingTime = workingTime + 0;
 								}
+								if(reloadedStampings.get(i-1) == null)
+									workingTime = workingTime - toMinute(reloadedStampings.get(i).date);
 								else{
 									//si fa un'entrata di servizio...ad esempio quando siamo in reperibilità?
 								}
@@ -315,6 +316,7 @@ public class PersonDay extends Model {
 									//uscita di servizio, dopo un ingresso di servizio...come si gestisce??
 									workingTime = workingTime + 0;
 								}
+								
 								else{
 									workingTime += toMinute(reloadedStampings.get(i).date);
 								}
@@ -327,7 +329,14 @@ public class PersonDay extends Model {
 								tempoLavoro = nowToMinute + workingTime;										
 							else 
 								tempoLavoro = nowToMinute - workingTime;																		
-						}								
+						}
+						save();
+						return;
+					}
+					if(reloadedStampings.size() == 1){
+						timeAtWork = 0;
+						save();
+						return;
 					}
 
 				}				
