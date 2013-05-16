@@ -72,6 +72,22 @@ public class Absences extends Controller{
 
 	}
 
+	@Check(Security.VIEW_PERSONAL_SITUATION)
+	public static void absenceInMonth(Long personId, String absenceCode, int year, int month){
+		List<LocalDate> dateAbsences = new ArrayList<LocalDate>();
+		Person person = Person.findById(personId);
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+				person, new LocalDate(year,month,1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
+		for(PersonDay pd : pdList){
+			if(pd.absences != null){
+				for(Absence abs : pd.absences){
+					if(abs.absenceType.code.equals(absenceCode))
+						dateAbsences.add(pd.date);
+				}
+			}
+		}
+		render(dateAbsences, absenceCode);
+	}
 
 	/**
 	 * questa è una funzione solo per admin, quindi va messa con il check administrator

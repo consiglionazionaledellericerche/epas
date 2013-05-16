@@ -26,7 +26,16 @@
 		%{
 			for(entry in personMonth.getAbsenceCode().entrySet()){
 		}%
-		<td>${entry.getValue()}</td>
+		<td><a href="@{Absences.absenceInMonth(personMonth.person.id, entry.getKey().code, personMonth.year, personMonth.month)}" class="example">${entry.getValue()}</a>
+				<script type="text/javascript"> 
+				$('.example').popupWindow({ 
+					height:500, 
+					width:800, 
+					top:50, 
+					left:50 
+				}); 
+				</script>
+		</td>
 		%{
 			}
 		}%
