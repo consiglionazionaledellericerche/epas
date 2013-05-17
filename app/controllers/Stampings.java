@@ -265,7 +265,8 @@ public class Stampings extends Controller {
 		if(hour != null && minute == null || hour == null && minute != null){
 			flash.error("Attribuire valore a ciascun campo se si intende modificare la timbratura o togliere valore a entrambi i campi" +
 					" se si intende cancellarla");
-			Stampings.personStamping();
+			render("@save");
+			//Stampings.personStamping();
 		}
 		if (hour == null && minute == null) {
 			stamping.delete();
@@ -273,7 +274,8 @@ public class Stampings extends Controller {
 			stamping.personDay.save();
 			flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(stamping.date.toLocalDate()));	
 		
-			Stampings.personStamping();
+			render("@save");
+			//Stampings.personStamping();
 		} else {
 			if (hour == null || minute == null) {
 				flash.error("E' necessario specificare sia il campo ore che minuti, oppure nessuno dei due per rimuovere la timbratura.");
@@ -293,7 +295,7 @@ public class Stampings extends Controller {
 			stamping.personDay.save();
 			Logger.debug("Aggiornata ora della timbratura alle ore: %s", stamping.date);
 			flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name);
-			Application.success();
+			//Application.success();
 			//Stampings.personStamping();
 		}
 		render("@save");
