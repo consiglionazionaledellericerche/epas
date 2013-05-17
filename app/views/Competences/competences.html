@@ -23,18 +23,12 @@
 		<td class="comp-nome">${personMonth.person.surname + ' ' + personMonth.person.name + ' (' + personMonth.person.number + ')'}</td>
 		<td class="comp">${personMonth.weekDayAvailability(personMonth.year, personMonth.month)}</td>
 		<td class="comp">${personMonth.holidaysAvailability(personMonth.year, personMonth.month)}</td>
-		<td class="comp">${personMonth.daylightWorkingDaysOvertime(personMonth.year, personMonth.month)}</td>
+		<td class="comp">(${personMonth.residuoDelMeseInPositivo().toHour()}) ${personMonth.daylightWorkingDaysOvertime(personMonth.year, personMonth.month)}</td>
 		<td class="comp">${personMonth.daylightholidaysOvertime(personMonth.year, personMonth.month)}</td>
 		<td class="comp">${personMonth.ordinaryShift(personMonth.year, personMonth.month)}</td>
 		<td class="comp">${personMonth.nightShift(personMonth.year, personMonth.month)}</td>	
 	</tr>
-	<tr>
-		<td>Totali</td>
-		<td></td>
-		<td></td>
-		<td></td>
-		<td></td>
-		<td></td>
-		<td></td>	
-	</tr>
+
 </table>
+
+<p> - Il numero tra parentesi, nella colonna degli straordinari, rappresenta le ore di lavoro fatte in più nel mese sulle quali possono essere pagati gli straordinari  </p>
