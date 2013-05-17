@@ -203,6 +203,11 @@ public class SwitchTemplate extends Controller{
 			Vacations.show(personId, year);
 			break;
 		case competences:
+			if(personId == 0){
+				flash.error("Il metodo %s deve essere chiamato selezionando una persona", menuItem.getDescription());
+				Application.indexAdmin();
+			}
+			else
 			Competences.competences(personId, year, month);
 			break;
 		case hourrecap:
