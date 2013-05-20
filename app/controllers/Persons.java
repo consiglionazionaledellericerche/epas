@@ -349,7 +349,10 @@ public class Persons extends Controller {
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void discard(){
-		render("@list");
+		//List<Person> personList = Person.find("Select p from Person p where p.name <> ? order by p.surname", "Admin").fetch();
+		//Logger.debug("La lista delle persone: %s", personList.toString());
+		Persons.list();
+		//render("@list");
 	}
 
 	/**
