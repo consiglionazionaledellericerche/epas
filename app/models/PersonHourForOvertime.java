@@ -20,4 +20,19 @@ public class PersonHourForOvertime extends Model{
 	@JoinColumn(name = "person_id")
 	public Person person;
 	
+	
+	public PersonHourForOvertime(Person person, Integer numberOfHourForOvertime) {
+		this.person = person;
+		this.numberOfHourForOvertime = numberOfHourForOvertime;
+	}
+
+
+	public Integer getNumberOfHourForOvertime() {
+		return numberOfHourForOvertime;
+	}
+
+
+	public void setNumberOfHourForOvertime(Integer numberOfHourForOvertime) {
+		this.numberOfHourForOvertime = numberOfHourForOvertime;
+	}
 }
