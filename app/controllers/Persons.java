@@ -311,9 +311,12 @@ public class Persons extends Controller {
 				initTime.residualMinutesCurrentYear = params.get("minutesCurrentYear", Integer.class);
 			initTime.save();
 		}
-		flash.success("Modificate informazioni di contatto o di locazione per l'utente %s %s", person.name, person.surname);
-		Application.indexAdmin();
-			
+		if(person.number != null && person.number != params.get("number", Integer.class))
+			person.number = params.get("number", Integer.class);
+		person.save();
+		flash.success("Modificate informazioni per l'utente %s %s", person.name, person.surname);
+		//Application.indexAdmin();
+		Persons.list();	
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
