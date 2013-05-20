@@ -289,12 +289,23 @@ public class PersonDay extends Model {
 			LocalDateTime now = new LocalDateTime();
 			if(reloadedStampings.size() > 0){
 				Stamping s = reloadedStampings.get(0);
-				if(s.date.isEqual(now)){					
+				if(s.date.toLocalDate().isEqual(now.toLocalDate())){					
 					int nowToMinute = toMinute(now);
-					if(reloadedStampings.size() == 3){	
-						int workingTime=0;
-						//int numberOfServiceExit = 0;
+					if(reloadedStampings.size() == 0){
+						timeAtWork = 0;
+						save();
+						return;
+					}
+					if(reloadedStampings.size() == 1){
+						timeAtWork = toMinute(now)-toMinute(reloadedStampings.get(0).date);
+						save();
+						return;
+					}
+					else{
 						for(int i = 0; i < reloadedStampings.size(); i++){
+
+							int workingTime=0;
+
 							if(reloadedStampings.get(i).way == Stamping.WayType.in && reloadedStampings.get(i).stampType != null){
 								if(reloadedStampings.get(i-1) != null && reloadedStampings.get(i-1).stampType != null){
 									//c'è stata un'uscita di servizio, questo è il corrispondente ingresso come lo calcolo?
@@ -316,7 +327,7 @@ public class PersonDay extends Model {
 									//uscita di servizio, dopo un ingresso di servizio...come si gestisce??
 									workingTime = workingTime + 0;
 								}
-								
+
 								else{
 									workingTime += toMinute(reloadedStampings.get(i).date);
 								}
@@ -329,15 +340,13 @@ public class PersonDay extends Model {
 								tempoLavoro = nowToMinute + workingTime;										
 							else 
 								tempoLavoro = nowToMinute - workingTime;																		
+							timeAtWork = tempoLavoro;
+							save();
+							return;
+
 						}
-						save();
-						return;
 					}
-					if(reloadedStampings.size() == 1){
-						timeAtWork = 0;
-						save();
-						return;
-					}
+
 
 				}				
 				else{
@@ -359,7 +368,7 @@ public class PersonDay extends Model {
 
 									}
 								}
-								
+
 							}
 							else{
 								workTime -= toMinute(reloadedStampings.get(i).date);
@@ -383,7 +392,7 @@ public class PersonDay extends Model {
 								}
 
 							}
-	
+
 							else{
 								//timbratura normale di uscita
 								workTime += toMinute(reloadedStampings.get(i).date);
@@ -415,7 +424,7 @@ public class PersonDay extends Model {
 			} else {
 				timeAtWork = tempoLavoro;	
 			}
-			
+
 			save();				
 		}
 
@@ -477,7 +486,7 @@ public class PersonDay extends Model {
 					else{
 						if(!abs.absenceType.code.equals("89")){
 							timeAtWork = timeAtWork + abs.absenceType.justifiedTimeAtWork.minutesJustified;
-							
+
 						}
 						else{
 							int total = 150*60;
@@ -890,7 +899,7 @@ public class PersonDay extends Model {
 		}
 		return stampProfiles.get(0);
 	}
-	
+
 	/**
 	 * 
 	 * @return il personday precedente a quello attualmente considerato. Questo metodo è utilizzato nella visualizzazione delle timbrature
