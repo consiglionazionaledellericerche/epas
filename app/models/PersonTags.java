@@ -51,5 +51,8 @@ public class PersonTags extends JavaExtensions {
 		return String.format("%d", hour);
 	}
 	
+	public static LocalDate convertToLocalDate(Date date){
+		return new LocalDate(date);
+	}
 
 }
