@@ -66,8 +66,16 @@ public class Competences extends Controller{
 
 		ImmutableTable.Builder<Person, String, Integer> builder = ImmutableTable.builder();
 		Table<Person, String, Integer> tableCompetence = null;
-
-		List<Person> activePersons = Person.getTechnicianForCompetences(new LocalDate(year, month, 1));
+		List<Person> activePersons = null;
+		if((year == null && month == null) || (year == 0 && month == 0)){
+			int yearParams = params.get("year", Integer.class);
+			int monthParams = params.get("month", Integer.class);
+			activePersons = Person.getTechnicianForCompetences(new LocalDate(yearParams, monthParams,1));
+		}
+		else{
+			activePersons = Person.getTechnicianForCompetences(new LocalDate(year, month, 1));
+		}
+		
 
 		for(Person p : activePersons){
 			List<Competence> competenceInMonth = Competence.find("Select comp from Competence comp where comp.person = ? and comp.year = ?" +
@@ -179,10 +187,16 @@ public class Competences extends Controller{
 		
 		ImmutableTable.Builder<Person, String, Integer> builder = ImmutableTable.builder();
 		Table<Person, String, Integer> tableFeature = null;
+		LocalDate beginMonth = null;
+		if(year == 0 && month == 0){
+			int yearParams = params.get("year", Integer.class);
+			int monthParams = params.get("month", Integer.class);
+			beginMonth = new LocalDate(yearParams, monthParams, 1);
+		}
+		else{
+			beginMonth = new LocalDate(year, month, 1);
+		}
 		
-		Map<Person, List<Object>> mapPersonFeatures = new HashMap<Person, List<Object>>();
-		List<Object> lista = null;
-		LocalDate beginMonth = new LocalDate(year, month, 1);
 		List<Person> activePersons = Person.getTechnicianForCompetences(new LocalDate(year, month, 1));
 		
 		for(Person p : activePersons){
@@ -223,7 +237,13 @@ public class Competences extends Controller{
 						
 		}
 		tableFeature = builder.build();
-		render(tableFeature, year, month);
+		if(year != 0 && month != 0)
+			render(tableFeature, year, month);
+		else{
+			int yearParams = params.get("year", Integer.class);
+			int monthParams = params.get("month", Integer.class);
+			render(tableFeature,yearParams,monthParams );
+		}
 
 	}
 
@@ -330,8 +350,9 @@ public class Competences extends Controller{
 
 		}
 		tableRecapCompetence = builder.build();
-
-		render(tableRecapCompetence);
+		int month = date.getMonthOfYear();
+		int year = date.getYear();
+		render(tableRecapCompetence, month, year);
 	}
 
 	/**
