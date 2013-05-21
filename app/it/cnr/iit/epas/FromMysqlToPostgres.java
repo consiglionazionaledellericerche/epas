@@ -346,7 +346,7 @@ public class FromMysqlToPostgres {
 		}
 		else{ 
 			Logger.warn("Validazione numero di telefono non avvenuta. No phone number");
-			contactData.telephone = "No phone number";		
+			contactData.telephone = null;		
 		}
 		contactData.save();
 		Logger.info("Creato %s", person);

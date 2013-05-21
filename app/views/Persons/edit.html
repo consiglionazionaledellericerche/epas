@@ -126,16 +126,36 @@
 			size="20" maxlength="200" />
 	</p>
 	<p id="telefono">
+	%{if(person.contactData.telephone != null || !person.contactData.telephone.equals('No phone number')){
+	}%
 		Telefono <input name="telephone" type="text"
 			value="${person.contactData.telephone}" size="20" maxlength="200" />
+	%{
+	}else{
+	}%
+		Telefono <input name="telephone" type="text"
+			value="" size="20" maxlength="200" />
+	%{
+	}
+	}%
 	</p>
 	<p id="email">
 		Email <input name="email" type="text"
 			value="${person.contactData.email}" size="20" maxlength="200" />
 	</p>
 	<p id="nascita">
+	%{if(person.bornDate != null){
+	}%
 		Data di nascita <input name="bornDate" type="text"
 			value="${person.bornDate.convertToLocalDate()}" size="10" maxlength="50" />
+	%{
+	}else{
+	}%
+		Data di nascita <input name="bornDate" type="text"
+			value="" size="10" maxlength="50" />
+	%{
+	}
+	}%
 	</p>
 </fieldset>
 
