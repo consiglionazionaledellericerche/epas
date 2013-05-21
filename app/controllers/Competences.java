@@ -296,7 +296,7 @@ public class Competences extends Controller{
 		int progressive = params.get("progressive", Integer.class);
 		if(overtime > progressive){
 			flash.error(String.format("Impossibile assegnare ore di straordinario."));
-			Persons.list();
+			render("@save");
 		}
 		else{
 			if(PersonUtility.canTakeOvertime(person, year, month)){
@@ -305,23 +305,24 @@ public class Competences extends Controller{
 				if(comp == null){
 					comp = new Competence();
 					comp.month = month;
+					comp.person = person;
 					comp.year = year;
 					comp.competenceCode = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", "S1").first();
 					comp.valueApproved = overtime;
 
 				}
 				else{
-					comp.valueApproved = progressive;
+					comp.valueApproved = overtime;
 				}
 				comp.save();
 				flash.success(String.format("Inserite %s ore di straordinario per %s %s il %s/%s", overtime, person.name, person.surname, month, year));
-				Application.indexAdmin();
+				render("@save");
 
 			}
 			else{
 				flash.error(String.format("Impossibile assegnare ore di straordinario causa residuo mese precedente insufficiente a coprire " +
 						"le ore in negativo fatte in alcuni giorni di questo mese"));
-				Application.indexAdmin();
+				render("@save");
 			}
 		}
 
