@@ -266,6 +266,7 @@ public class Shift extends Controller{
 		int year = params.get("year", Integer.class);
 		int month = params.get("month", Integer.class);
 		Long groupType = params.get("type", Long.class);
+		String mode = params.get("mode", String.class);
 		
 		Logger.debug("sono nella exportMonthAsPDF con year=%s e month=%s", year, month);
 		
@@ -349,7 +350,8 @@ public class Shift extends Controller{
 			}
 		}
 	
-		renderPDF(firstOfMonth, shiftSumDays, shiftLabels);
+		LocalDate today = new LocalDate();
+		renderPDF(mode, today, firstOfMonth, shiftSumDays, shiftLabels);
 	}
 
 	/**

@@ -36,9 +36,15 @@
 				}%	
 					%{
 						if ((shiftSumDays.contains(person, shift) && !shiftSumDays.contains(person, "Jolly")) || (shiftSumDays.contains(person, shift) && (shift == "Jolly"))) {
+						
+						if (mode.equals('ore')) {
+							num = shiftSumDays.get(person, shift)*6 + (int)(shiftSumDays.get(person, shift)/2) + shiftSumDays.get(person, shift)%2 + ' ore'
+						} else {
+							num = shiftSumDays.get(person, shift) + ' gg'
+						}
 					}%
 						<p>
-						${person.surname} ${person.name}: &nbsp; ${shiftSumDays.get(person, shift)} gg
+						${person.surname} ${person.name}: &nbsp; ${num} 
 						</p>
 					%{
 						}
@@ -55,7 +61,7 @@
 			</table>
       		</div>
       		<div class="date">
-      			<trong>Data ________________ </trong>
+      			<strong>Data </strong>&nbsp;&nbsp;${today.getDayOfMonth()}/${today.getMonthOfYear()}/${today.getYear()}
       		</div>
       		<div class="firma dir">
       			<strong>Il Direttore</strong> <br />

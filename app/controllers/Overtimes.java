@@ -204,7 +204,6 @@ public class Overtimes extends Controller {
 				Logger.debug("Inserita riga person=%s reason='' and  valueApproved=0", person);
 			}
 		}
-
 		
 		LocalDate today = new LocalDate();
 		LocalDate firstOfMonth = new LocalDate(year, month, 1);
