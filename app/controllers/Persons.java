@@ -417,12 +417,13 @@ public class Persons extends Controller {
 	 * 
 	 * @param personId permette all'utente amministratore di cambiare la propria password.
 	 */
+	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void changePassword(Long personId){
 		Person person = Person.findById(personId);
 		render(person);
 	}
 	
-//	@Check(Security.INSERT_AND_UPDATE_PASSWORD)
+	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void savePassword(){
 		Long personId = params.get("personId", Long.class);
 		
