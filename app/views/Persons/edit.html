@@ -77,8 +77,8 @@
 			<a href="@{Persons.modifyContract(contract.id)}" class="modifyContract${contract.id}"><input value="Modifica" class="Forminput" type="button"></a>
 			<script type="text/javascript"> 
 				$('.modifyContract${contract.id}').popupWindow({ 
-				height:500, 
-				width:800, 
+				height:600, 
+				width:900, 
 				top:50, 
 				left:50 
 				}); 
@@ -135,7 +135,7 @@
 	</p>
 	<p id="nascita">
 		Data di nascita <input name="bornDate" type="text"
-			value="${person.bornDate}" size="20" maxlength="200" />
+			value="${person.bornDate.convertToLocalDate()}" size="10" maxlength="50" />
 	</p>
 </fieldset>
 
