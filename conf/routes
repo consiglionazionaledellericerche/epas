@@ -61,7 +61,7 @@ POST	/persons/terminateContract/{personId}	Persons.terminateContract
 GET		/competences/updateOldOvertime/{personId}	Competences.updateOldOvertime
 PUT		/competences/saveOldOvertime			Competences.saveOldOvertime
 GET		/persons/modifyContract/{contractId}	Persons.modifyContract
-POST	/persons/modifyContract					Persons.updateContract
+POST	/persons/modifyContract/{contractId}	Persons.updateContract
 
 
 # Gestione orari di lavoro
