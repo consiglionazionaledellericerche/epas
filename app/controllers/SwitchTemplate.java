@@ -107,10 +107,15 @@ public class SwitchTemplate extends Controller{
 			break;
 
 		case yearlyAbsences:
+			if(personId == 0){
+				flash.error("Il metodo %s deve essere chiamato selezionando una persona", menuItem.getDescription());
+				Application.indexAdmin();
+			}
 			YearlyAbsences.yearlyAbsences(personId, year);
 			break;
 		
 		case totalMonthlyAbsences:
+			
 			YearlyAbsences.showGeneralMonthlyAbsences(year, month);
 			break;
 		case manageAbsenceCode:
