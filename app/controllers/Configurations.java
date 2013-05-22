@@ -3,8 +3,11 @@ package controllers;
 import java.util.Date;
 import java.util.List;
 
+import org.joda.time.LocalDate;
+
 import it.cnr.iit.epas.ActionMenuItem;
 import models.WebStampingAddress;
+import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
 import models.Configuration;
@@ -24,7 +27,11 @@ public class Configurations extends Controller{
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_CONFIGURATION)
-	public static void save(Long configId, Configuration configuration){
+	public static void save(Long configId){
+		
+		if(configId == null)
+			configId = params.get("configId", Long.class);
+		Logger.debug("L'id della configurazione è: %d", configId);
 		if(configId == null){
 			Configuration config = new Configuration();
 			config.beginDate = params.get("inizioValiditaParametri", Date.class);
@@ -105,12 +112,24 @@ public class Configurations extends Controller{
 		}
 		else{
 			Configuration config = Configuration.findById(configId);
-			if(params.get("inizioValiditaParametri", Date.class).compareTo(config.beginDate) != 0)
-				config.beginDate = params.get("inizioValiditaParametri", Date.class);
-			if(params.get("fineValiditaParametri", Date.class).compareTo(config.endDate) != 0)
-				config.endDate = params.get("fineValiditaParametri", Date.class);
-			if(params.get("inizioUsoProgramma", Date.class).compareTo(config.initUseProgram) != 0)
-				config.initUseProgram = params.get("inizioUsoProgramma", Date.class);
+			Logger.debug("La configurazione caricata è: %s", config);
+			String dataI = params.get("inizioValiditaParametri");
+			
+			LocalDate dataInizio = new LocalDate(dataI);
+			Logger.debug("Data inizio configurazione: %s", dataInizio);
+			if(dataInizio.toDate().compareTo(config.beginDate) != 0)
+				config.beginDate = dataInizio.toDate();
+			String dataF = params.get("fineValiditaParametri");
+			LocalDate dataFine = new LocalDate(dataF);
+			Logger.debug("Data fine configurazione: %s", dataFine);
+			if(dataFine.toDate().compareTo(config.endDate) != 0)
+				config.endDate = dataFine.toDate();
+			String inizioUsoProgramma = params.get("fineValiditaParametri");
+			LocalDate initUseProgram = new LocalDate(inizioUsoProgramma);
+			Logger.debug("Data inizio uso programma: %s", initUseProgram);
+			if(initUseProgram.toDate().compareTo(config.initUseProgram) != 0)
+				config.initUseProgram = initUseProgram.toDate();
+			
 			if(!params.get("nomeIstituto").equals(config.instituteName))
 				config.instituteName = params.get("nomeIstituto");
 			if(!params.get("email", String.class).equals(config.emailToContact))
@@ -169,11 +188,11 @@ public class Configurations extends Controller{
 			if(params.get("maxGiorniRecupero49", Integer.class) != config.maxRecoveryDaysFourNine)
 				config.maxRecoveryDaysFourNine = params.get("maxGiorniRecupero49", Integer.class);
 			
-			if(params.get("configurazioneCompensazioneResiduiConAnnoPrecedenteEntroMese", Boolean.class) == true)
+			if(params.get("configurazioneCompensazioneResiduiConAnnoPrecedente").equals("entroMese"))
 				config.residual = ResidualWithPastYear.atMonthInWhichCanUse;
-			if(params.get("configurazioneCompensazioneResiduiConAnnoPrecedenteMese", Boolean.class) == true)
+			if(params.get("configurazioneCompensazioneResiduiConAnnoPrecedente").equals("mese"))
 				config.residual = ResidualWithPastYear.atMonth;
-			if(params.get("configurazioneCompensazioneResiduiConAnnoPrecedenteGiorno", Boolean.class) == true)
+			if(params.get("configurazioneCompensazioneResiduiConAnnoPrecedente").equals("giorno"))
 				config.residual = ResidualWithPastYear.atDay;
 			
 			if(params.get("oreMassimeStraordinarioMensili", Integer.class) != config.maximumOvertimeHours)
@@ -181,22 +200,22 @@ public class Configurations extends Controller{
 			if(params.get("configurazioneInserimentoForzatoFeriePermessi", Boolean.class) != config.holydaysAndVacationsOverPermitted)
 				config.holydaysAndVacationsOverPermitted = params.get("configurazioneInserimentoForzatoFeriePermessi", Boolean.class);
 			
-			if(params.get("configurazioneCapienzaRiposi13Giorno", Boolean.class)== true)
+			if(params.get("configurazioneCapienzaRiposi13").equals("residuoGiorno"))
 				config.capacityOneThree = CapacityCompensatoryRestOneThree.onDayResidual;
-			if(params.get("configurazioneCapienzaRiposi13Mese", Boolean.class)== true)
+			if(params.get("configurazioneCapienzaRiposi13").equals("residuoFineMese"))
 				config.capacityOneThree = CapacityCompensatoryRestOneThree.onEndOfMonthResidual;
-			if(params.get("configurazioneCapienzaRiposi13MesePrec", Boolean.class)== true)
+			if(params.get("configurazioneCapienzaRiposi13").equals("residuoFineMesePrecedente"))
 				config.capacityOneThree = CapacityCompensatoryRestOneThree.onEndPastMonthResidual;
-			if(params.get("configurazioneCapienzaRiposi13Trimestre", Boolean.class)== true)
+			if(params.get("configurazioneCapienzaRiposi13").equals("residuoFineTrimestre"))
 				config.capacityOneThree = CapacityCompensatoryRestOneThree.onEndPastQuarterResidual;
 			
-			if(params.get("configurazioneCapienzaRiposi48Giorno", Boolean.class)== true)
+			if(params.get("configurazioneCapienzaRiposi49").equals("residuoGiorno"))
 				config.capacityFourEight = CapacityCompensatoryRestFourEight.onDayResidual;
-			if(params.get("configurazioneCapienzaRiposi48Mese", Boolean.class)== true)
+			if(params.get("configurazioneCapienzaRiposi49").equals("residuoFineMese"))
 				config.capacityFourEight = CapacityCompensatoryRestFourEight.onEndOfMonthResidual;
-			if(params.get("configurazioneCapienzaRiposi48MesePrec", Boolean.class)== true)
+			if(params.get("configurazioneCapienzaRiposi49").equals("residuoFineMesePrecedente"))
 				config.capacityFourEight = CapacityCompensatoryRestFourEight.onEndPastMonthResidual;
-			if(params.get("configurazioneCapienzaRiposi48Trimestre", Boolean.class)== true)
+			if(params.get("configurazioneCapienzaRiposi49").equals("residuoFineTrimestre"))
 				config.capacityFourEight = CapacityCompensatoryRestFourEight.onEndPastQuarterResidual;
 			
 			if(params.get("oraMaxEntroCuiCalcolareUscita", Integer.class) != config.hourMaxToCalculateWorkTime)

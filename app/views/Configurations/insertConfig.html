@@ -3,25 +3,26 @@
 <h2 id="titoloConfigurazioneParametri">Istituto di informatica e telematica</h2>
 <h3 id="titoloGestioneParametri">Gestione parametri</h3>
 
+<p id="warning"><strong>Attenzione!!!</strong> Compila correttamente ciascun fieldset</p>
 #{form @Configurations.save()}
 <div id="gestioneParametri">
 	<p id="validita"><b>Data inizio di validità di questi parametri:</b> <b>inizio</b>: <input name="inizioValiditaParametri" type="text" value="${configurations.beginDate}" size="30" maxlength="100" /> <b>fine</b>: <input name="fineValiditaParametri" type="text" value="${configurations.endDate}" size="30" maxlength="100" /></p>
 	
 	<fieldset>
 		<legend>Dati di connessione e di visualizzazione</legend>
-			<p>Data di inizio uso di questo programma aaaa/mm/gg <input name="inizioUsoProgramma" type="text" value="${configurations.initUseProgram}" size="30" maxlength="100" /><p>
-			<p>Nome dell'istituto <input name="nomeIstituto" type="text" value="${configurations.instituteName}" size="80" maxlength="100" /></p>
-			<p>Email a cui può essere inviato un messaggio in caso di password dimenticata <input name="email" type="text" value="${configurations.emailToContact}" size="40" maxlength="100" /></p>
-			<p>Codice sede <input name="codiceSede" type="text" value="${configurations.seatCode}" size="40" maxlength="100" /></p>
-			<p>URL per gestione attestato presenza dell'amministrazione centrale <input name="urlPresenze" type="text" value="${configurations.urlToPresence}" size="20" maxlength="100" /></p>
-			<p>User per gestione attestato presenza dell'amministrazione centrale <input name="userPresenze" type="text" value="${configurations.userToPresence}" size="20" maxlength="100" /></p>
-			<p>Password per gestione attestato presenza dell'amministrazione centrale <input name="passwordPresenze" type="text" value="${configurations.passwordToPresence}" size="20" maxlength="100" /></p>
-			<p>Numero di colonne di entrata/uscita da visualizzare <input name="colonneEntrataUscita" type="text" value="${configurations.numberOfViewingCoupleColumn}" size="5" maxlength="10"/></p>
+			<p id="descrizione">Data di inizio uso di questo programma aaaa/mm/gg <input name="inizioUsoProgramma" type="text" value="${configurations.initUseProgram}" size="30" maxlength="100" /><p>
+			<p id="descrizione">Nome dell'istituto <input name="nomeIstituto" type="text" value="${configurations.instituteName}" size="80" maxlength="100" /></p>
+			<p id="descrizione">Email a cui può essere inviato un messaggio in caso di password dimenticata <input name="email" type="text" value="${configurations.emailToContact}" size="40" maxlength="100" /></p>
+			<p id="descrizione">Codice sede <input name="codiceSede" type="text" value="${configurations.seatCode}" size="40" maxlength="100" /></p>
+			<p id="descrizione">URL per gestione attestato presenza dell'amministrazione centrale <input name="urlPresenze" type="text" value="${configurations.urlToPresence}" size="20" maxlength="100" /></p>
+			<p id="descrizione">User per gestione attestato presenza dell'amministrazione centrale <input name="userPresenze" type="text" value="${configurations.userToPresence}" size="20" maxlength="100" /></p>
+			<p id="descrizione">Password per gestione attestato presenza dell'amministrazione centrale <input name="passwordPresenze" type="text" value="${configurations.passwordToPresence}" size="20" maxlength="100" /></p>
+			<p id="descrizione">Numero di colonne di entrata/uscita da visualizzare <input name="colonneEntrataUscita" type="text" value="${configurations.numberOfViewingCoupleColumn}" size="5" maxlength="10"/></p>
 	</fieldset>
 	<fieldset>
 		<legend>Festività</legend>
-			<p>Festa del patrono (giorno) <input name="giornoPatrono" type="text" value="${configurations.dayOfPatron}" size="5" maxlength="100" /></p>
-			<p>Festa del patrono (mese) <input name="mesePatrono" type="text" value="${configurations.monthOfPatron}" size="5" maxlength="100" /></p>
+			<p id="descrizione">Festa del patrono (giorno) <input name="giornoPatrono" type="text" value="${configurations.dayOfPatron}" size="5" maxlength="100" /></p>
+			<p id="descrizione">Festa del patrono (mese) <input name="mesePatrono" type="text" value="${configurations.monthOfPatron}" size="5" maxlength="100" /></p>
 	</fieldset>
 	<fieldset>
 		<legend>Pausa pranzo e buoni</legend>
@@ -65,16 +66,16 @@
 	</fieldset>
 	<fieldset>
 		<legend>Ferie, permessi, straordinari e residui</legend>
-			<p>Mese scadenza ferie dell'anno precedente (mm) <input name="meseScadenzaFerieAP" type="text" value="${configurations.monthExpiryVacationPastYear}" size="20" maxlength="100" /></p>
-			<p>Giorno scadenza ferie dell'anno precedente (dd) <input name="giornoScadenzaFerieAP" type="text" value="${configurations.dayExpiryVacationPastYear}" size="20" maxlength="100" /></p>
+			<p id="descrizione">Mese scadenza ferie dell'anno precedente (mm) <input name="meseScadenzaFerieAP" type="text" value="${configurations.monthExpiryVacationPastYear}" size="20" maxlength="100" /></p>
+			<p id="descrizione">Giorno scadenza ferie dell'anno precedente (dd) <input name="giornoScadenzaFerieAP" type="text" value="${configurations.dayExpiryVacationPastYear}" size="20" maxlength="100" /></p>
 			<p>Tempo residuo minimo da avere per poter richiedere un giorno di riposo compensativo (in minuti) 
 				<input name="tempoMinimoPerAvereRiposoCompensativo" type="text" value="minimumRemainingTimeToHaveRecoveryDay" size="10" maxlength="100" /> </p>
-			<p>Mese entro il quale devono essere usati i residui dell'anno precedente per i livelli da 1 a 3 (mm) 
+			<p id="descrizione">Mese entro il quale devono essere usati i residui dell'anno precedente per i livelli da 1 a 3 (mm) 
 			   00=i recuperi devono essere presi nell'anno. 99=i recuperi non scadono mai <input name="meseUtilizzoResiduiAP13" type="text" value="${configurations.monthExpireRecoveryDaysOneThree}" size="10" maxlength="100" /></p>
-			<p>Mese entro il quale devono essere usati i residui dell'anno precedente per i livelli da 4 a 9 (mm)
+			<p id="descrizione">Mese entro il quale devono essere usati i residui dell'anno precedente per i livelli da 4 a 9 (mm)
 			   00=i recuperi devono essere presi nell'anno. 99=i recuperi non scadono mai <input name="meseUtilizzoResiduiAP49" type="text" value="${configurations.monthExpireRecoveryDaysFourNine}" size="10" maxlength="100" /></p>
-			<p>Numero massimo di giorni di recupero in un anno per i livelli da 1 a 3 <input name="maxGiorniRecupero13" type="text" value="${configurations.maxRecoveryDaysOneThree}" size="10" maxlength="100" /></p>
-			<p>Numero massimo di giorni di recupero in un anno per i livelli da 4 a 9 <input name="maxGiorniRecupero49" type="text" value="${configurations.maxRecoveryDaysFourNine}" size="10" maxlength="100" /></p>
+			<p id="descrizione">Numero massimo di giorni di recupero in un anno per i livelli da 1 a 3 <input name="maxGiorniRecupero13" type="text" value="${configurations.maxRecoveryDaysOneThree}" size="10" maxlength="100" /></p>
+			<p id="descrizione">Numero massimo di giorni di recupero in un anno per i livelli da 4 a 9 <input name="maxGiorniRecupero49" type="text" value="${configurations.maxRecoveryDaysFourNine}" size="10" maxlength="100" /></p>
 			<p>Compensazione dei residui con quelli dell'anno precedente Al mese entro il quale sono usabili <input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedenteEntroMese" value="true"/>
      			Al mese<input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedenteMese" value="true"/> Al giorno<input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedenteGiorno" value="true"/></p>
 			<p>Numero massimo di ore di straordinario mensili a persona <input name="oreMassimeStraordinarioMensili" type="text" value="${configurations.maximumOvertimeHours}" size="10" maxlength="100" /></p>

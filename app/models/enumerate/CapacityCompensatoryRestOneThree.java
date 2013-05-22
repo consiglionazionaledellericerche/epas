@@ -6,9 +6,15 @@ package models.enumerate;
  *
  */
 public enum CapacityCompensatoryRestOneThree {
-
-	onDayResidual,
-	onEndOfMonthResidual,
-	onEndPastMonthResidual,
-	onEndPastQuarterResidual
+	
+	onDayResidual("residuo del giorno"),
+	onEndOfMonthResidual("residuo a fine mese"),
+	onEndPastMonthResidual("residuo a fine mese precedente"),
+	onEndPastQuarterResidual("residuo a trimestre precedente");
+	
+	public String description;
+	
+	private CapacityCompensatoryRestOneThree(String description){
+		this.description = description;
+	}
 }

@@ -7,8 +7,14 @@ package models.enumerate;
  */
 public enum CapacityCompensatoryRestFourEight {
 
-	onDayResidual,
-	onEndOfMonthResidual,
-	onEndPastMonthResidual,
-	onEndPastQuarterResidual
+	onDayResidual("residuo del giorno"),
+	onEndOfMonthResidual("residuo a fine mese"),
+	onEndPastMonthResidual("residuo a fine mese precedente"),
+	onEndPastQuarterResidual("residuo a trimestre precedente");
+	
+	public String description;
+	
+	private CapacityCompensatoryRestFourEight(String description){
+		this.description = description;
+	}
 }
