@@ -5,11 +5,11 @@
 
 #{form @Configurations.save()}
 <div id="gestioneParametri">
-	<p id="validita"><b>Data inizio di validità di questi parametri:</b> <b>inizio</b>: <input name="inizioValiditaParametri" type="text" value="${configurations.beginDate}" size="30" maxlength="100" /> <b>fine</b>: <input name="fineValiditaParametri" type="text" value="${configurations.endDate}" size="30" maxlength="100" /></p>
+	<p id="validita"><b>Data inizio di validità di questi parametri:</b> <b>inizio</b>: <input name="inizioValiditaParametri" type="date" value="${configurations.beginDate.convertToLocalDate()}" size="30" maxlength="100" /> <b>fine</b>: <input name="fineValiditaParametri" type="date" value="${configurations.endDate.convertToLocalDate()}" size="30" maxlength="100" /></p>
 	
 	<fieldset>
 		<legend>Dati di connessione e di visualizzazione</legend>
-			<p>Data di inizio uso di questo programma gg/mm/aaaa <input name="inizioUsoProgramma" type="text" value="${configurations.initUseProgram}" size="30" maxlength="100" /><p>
+			<p>Data di inizio uso di questo programma gg/mm/aaaa <input name="inizioUsoProgramma" type="date" value="${configurations.initUseProgram.convertToLocalDate()}" size="30" maxlength="100" /><p>
 			<p>Nome dell'istituto <input name="nomeIstituto" type="text" value="${configurations.instituteName}" size="80" maxlength="100" /></p>
 			<p>Email a cui può essere inviato un messaggio in caso di password dimenticata <input name="email" type="text" value="${configurations.emailToContact}" size="40" maxlength="100" /></p>
 			<p>Codice sede <input name="codiceSede" type="text" value="${configurations.seatCode}" size="40" maxlength="100" /></p>
@@ -68,7 +68,7 @@
 			<p>Mese scadenza ferie dell'anno precedente (mm) <input name="meseScadenzaFerieAP" type="text" value="${configurations.monthExpiryVacationPastYear}" size="20" maxlength="100" /></p>
 			<p>Giorno scadenza ferie dell'anno precedente (dd) <input name="giornoScadenzaFerieAP" type="text" value="${configurations.dayExpiryVacationPastYear}" size="20" maxlength="100" /></p>
 			<p>Tempo residuo minimo da avere per poter richiedere un giorno di riposo compensativo (in minuti) 
-				<input name="tempoMinimoPerAvereRiposoCompensativo" type="text" value="${configurations.minimumRemainingTimeToHaveRecoveryDay.toHourtime()}" size="10" maxlength="100" /> </p>
+				<input name="tempoMinimoPerAvereRiposoCompensativo" type="text" value="${configurations.minimumRemainingTimeToHaveRecoveryDay}" size="10" maxlength="100" /> </p>
 			<p>Mese entro il quale devono essere usati i residui dell'anno precedente per i livelli da 1 a 3 (mm) 
 			   00=i recuperi devono essere presi nell'anno. 99=i recuperi non scadono mai <input name="meseUtilizzoResiduiAP13" type="text" value="${configurations.monthExpireRecoveryDaysOneThree}" size="10" maxlength="100" /></p>
 			<p>Mese entro il quale devono essere usati i residui dell'anno precedente per i livelli da 4 a 9 (mm)
