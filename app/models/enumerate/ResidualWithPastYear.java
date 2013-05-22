@@ -7,8 +7,14 @@ package models.enumerate;
  */
 public enum ResidualWithPastYear {
 	
-	atMonth,
-	atDay,
-	atMonthInWhichCanUse
+	atMonth("al mese"),
+	atDay("al giorno"),
+	atMonthInWhichCanUse("nel mese in cui posso usarla");
+	
+	public String description;
+	
+	private ResidualWithPastYear(String description){
+		this.description = description;
+	}
 
 }

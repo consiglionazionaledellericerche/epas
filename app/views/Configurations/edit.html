@@ -3,28 +3,31 @@
 <h2 id="titoloConfigurazioneParametri">Istituto di informatica e telematica</h2>
 <h3 id="titoloGestioneParametri">Gestione parametri</h3>
 
+<p id="warning"><strong>Attenzione!!!</strong> Compila correttamente ciascun fieldset</p>
 #{form @Configurations.save()}
 <div id="gestioneParametri">
+	<input type="hidden" name="configId" value="${configurations.id}"/>
 	<p id="validita"><b>Data inizio di validità di questi parametri:</b> <b>inizio</b>: <input name="inizioValiditaParametri" type="date" value="${configurations.beginDate.convertToLocalDate()}" size="30" maxlength="100" /> <b>fine</b>: <input name="fineValiditaParametri" type="date" value="${configurations.endDate.convertToLocalDate()}" size="30" maxlength="100" /></p>
 	
 	<fieldset>
 		<legend>Dati di connessione e di visualizzazione</legend>
-			<p>Data di inizio uso di questo programma gg/mm/aaaa <input name="inizioUsoProgramma" type="date" value="${configurations.initUseProgram.convertToLocalDate()}" size="30" maxlength="100" /><p>
-			<p>Nome dell'istituto <input name="nomeIstituto" type="text" value="${configurations.instituteName}" size="80" maxlength="100" /></p>
-			<p>Email a cui può essere inviato un messaggio in caso di password dimenticata <input name="email" type="text" value="${configurations.emailToContact}" size="40" maxlength="100" /></p>
-			<p>Codice sede <input name="codiceSede" type="text" value="${configurations.seatCode}" size="40" maxlength="100" /></p>
-			<p>URL per gestione attestato presenza dell'amministrazione centrale <input name="urlPresenze" type="text" value="${configurations.urlToPresence}" size="20" maxlength="100" /></p>
-			<p>User per gestione attestato presenza dell'amministrazione centrale <input name="userPresenze" type="text" value="${configurations.userToPresence}" size="20" maxlength="100" /></p>
-			<p>Password per gestione attestato presenza dell'amministrazione centrale <input name="passwordPresenze" type="text" value="${configurations.passwordToPresence}" size="20" maxlength="100" /></p>
-			<p>Numero di colonne di entrata/uscita da visualizzare <input name="colonneEntrataUscita" type="text" value="${configurations.numberOfViewingCoupleColumn}" size="5" maxlength="10"/></p>
+			<p id="descrizione">Data di inizio uso di questo programma gg/mm/aaaa <input name="inizioUsoProgramma" type="date" value="${configurations.initUseProgram.convertToLocalDate()}" size="30" maxlength="100" /><p>
+			<p id="descrizione">Nome dell'istituto <input name="nomeIstituto" type="text" value="${configurations.instituteName}" size="80" maxlength="100" /></p>
+			<p id="descrizione">Email a cui può essere inviato un messaggio in caso di password dimenticata <input name="email" type="text" value="${configurations.emailToContact}" size="40" maxlength="100" /></p>
+			<p id="descrizione">Codice sede <input name="codiceSede" type="text" value="${configurations.seatCode}" size="40" maxlength="100" /></p>
+			<p id="descrizione">URL per gestione attestato presenza dell'amministrazione centrale <input name="urlPresenze" type="text" value="${configurations.urlToPresence}" size="20" maxlength="100" /></p>
+			<p id="descrizione">User per gestione attestato presenza dell'amministrazione centrale <input name="userPresenze" type="text" value="${configurations.userToPresence}" size="20" maxlength="100" /></p>
+			<p id="descrizione">Password per gestione attestato presenza dell'amministrazione centrale <input name="passwordPresenze" type="text" value="${configurations.passwordToPresence}" size="20" maxlength="100" /></p>
+			<p id="descrizione">Numero di colonne di entrata/uscita da visualizzare <input name="colonneEntrataUscita" type="text" value="${configurations.numberOfViewingCoupleColumn}" size="5" maxlength="10"/></p>
 	</fieldset>
 	<fieldset>
 		<legend>Festività</legend>
-			<p>Festa del patrono (giorno) <input name="giornoPatrono" type="text" value="${configurations.dayOfPatron}" size="5" maxlength="100" /></p>
-			<p>Festa del patrono (mese) <input name="mesePatrono" type="text" value="${configurations.monthOfPatron}" size="5" maxlength="100" /></p>
+			<p id="descrizione">Festa del patrono (giorno) <input name="giornoPatrono" type="text" value="${configurations.dayOfPatron}" size="5" maxlength="100" /></p>
+			<p id="descrizione">Festa del patrono (mese) <input name="mesePatrono" type="text" value="${configurations.monthOfPatron}" size="5" maxlength="100" /></p>
 	</fieldset>
 	<fieldset>
 		<legend>Pausa pranzo e buoni</legend>
+		
 			<p>Indicare se la durata dell'intervallo pranzo è più corta del minimo deve essere automaticamente spostata l'ora di rientro   Sì<input type="radio" name="configurazionePausaPranzo" value="true"/>
      			No<input type="radio" name="configurazionePausaPranzo" value="false"/></p>
 			<p>Se quando manca l'intervallo pranzo il tempo dell'intervallo deve essere tolto automaticamente dal tempo si lavoro   Sì<input type="radio" name="configurazionePausaToltadaTempoLavoro" value="true"/>
@@ -42,20 +45,92 @@
 	</fieldset>
 	<fieldset>
 		<legend>Orari e tempi di lavoro</legend>
-			<p>Consente all'amministratore di inserire/modificare orari specificando il segno + per ridurre il tempo di lavoro a quello definito nell'orario di lavoro Sì<input type="radio" name="configurazioneSegnoPiuPerModifica" value="true"/>
+		%{if(configurations.insertAndModifyWorkingTimeWithPlusToReduceAtRealWorkingTime == true){
+		}%
+			<p>Consente all'amministratore di inserire/modificare orari specificando il segno + per ridurre il tempo di lavoro a quello definito nell'orario di lavoro Sì<input type="radio" name="configurazioneSegnoPiuPerModifica" value="true" checked="checked"/>
      			No<input type="radio" name="configurazioneSegnoPiuPerModifica" value="false"/></p>
-			<p>Abilita la possibilità per l'amministratore di inserire tempo di lavoro in eccesso Sì<input type="radio" name="configurazioneTempoLavoroInEccesso" value="true"/>
+     			%{
+     			}else{
+     			}%
+     		<p>Consente all'amministratore di inserire/modificare orari specificando il segno + per ridurre il tempo di lavoro a quello definito nell'orario di lavoro Sì<input type="radio" name="configurazioneSegnoPiuPerModifica" value="true"/>
+     			No<input type="radio" name="configurazioneSegnoPiuPerModifica" value="false" checked="checked"/></p>
+     	%{
+     	}
+     	}%
+     	%{if(configurations.addWorkingTimeInExcess == true){
+		}%	
+			<p>Abilita la possibilità per l'amministratore di inserire tempo di lavoro in eccesso Sì<input type="radio" name="configurazioneTempoLavoroInEccesso" value="true" checked="checked"/>
      			No<input type="radio" name="configurazioneTempoLavoroInEccesso" value="false"/></p>
-			<p>L'ultimo giorno lavorativo prima di Natale deve essere considerato intero anche se le ore di lavoro sono minori? Sì<input type="radio" name="configurazioneGiornoInteroPrimaNatale" value="true"/>
+     			%{
+     			}else{
+     			}%
+     		<p>Abilita la possibilità per l'amministratore di inserire tempo di lavoro in eccesso Sì<input type="radio" name="configurazioneTempoLavoroInEccesso" value="true" checked="checked"/>
+     			No<input type="radio" name="configurazioneTempoLavoroInEccesso" value="false" checked="checked"/></p>
+     			
+     	%{
+     	}
+     	}%	
+     	%{if(configurations.isLastDayBeforeXmasEntire == true){
+     	}%	
+			<p>L'ultimo giorno lavorativo prima di Natale deve essere considerato intero anche se le ore di lavoro sono minori? Sì<input type="radio" name="configurazioneGiornoInteroPrimaNatale" value="true" checked="checked"/>
      			No<input type="radio" name="configurazioneGiornoInteroPrimaNatale" value="false"/></p>
-			<p>L'ultimo giorno lavorativo prima di Pasqua deve essere considerato intero anche se le ore di lavoro sono minori? Sì<input type="radio" name="configurazioneGiornoInteroPrimaPasqua" value="true"/>
+     			%{
+     			}else{
+     			}%
+     		<p>L'ultimo giorno lavorativo prima di Natale deve essere considerato intero anche se le ore di lavoro sono minori? Sì<input type="radio" name="configurazioneGiornoInteroPrimaNatale" value="true" checked="checked"/>
+     			No<input type="radio" name="configurazioneGiornoInteroPrimaNatale" value="false" checked="checked"/></p>
+     	%{
+     	}
+     	}%	
+     	%{if(configurations.isLastDayBeforeEasterEntire == true){
+     	}%		
+			<p>L'ultimo giorno lavorativo prima di Pasqua deve essere considerato intero anche se le ore di lavoro sono minori? Sì<input type="radio" name="configurazioneGiornoInteroPrimaPasqua" value="true" checked="checked"/>
      			No<input type="radio" name="configurazioneGiornoInteroPrimaPasqua" value="false"/></p>
-			<p>L'ultimo giorno dell'anno deve essere considerato intero anche se le ore di lavoro sono minori? Sì<input type="radio" name="configurazioneGiornoInteroUltimoDellAnno" value="true"/>
+     			%{
+     			}else{
+     			}%
+     		<p>L'ultimo giorno lavorativo prima di Pasqua deve essere considerato intero anche se le ore di lavoro sono minori? Sì<input type="radio" name="configurazioneGiornoInteroPrimaPasqua" value="true" checked="checked"/>
+     			No<input type="radio" name="configurazioneGiornoInteroPrimaPasqua" value="false" checked="checked"/></p>
+     	%{
+     	}
+     	}%	
+     	%{if(configurations.isLastDayOfTheYearEntire == true){
+     	}%			
+			<p>L'ultimo giorno dell'anno deve essere considerato intero anche se le ore di lavoro sono minori? Sì<input type="radio" name="configurazioneGiornoInteroUltimoDellAnno" value="true" checked="checked"/>
      			No<input type="radio" name="configurazioneGiornoInteroUltimoDellAnno" value="false"/></p>
-			<p>Se il primo o ultimo giorno di missione è festivo deve essere considerato come presenza al lavoro? Sì<input type="radio" name="configurazioneMissioneInizioFineFestivo" value="true"/>
+     			%{
+     			}else{
+     			}%
+     		<p>L'ultimo giorno dell'anno deve essere considerato intero anche se le ore di lavoro sono minori? Sì<input type="radio" name="configurazioneGiornoInteroUltimoDellAnno" value="true" checked="checked"/>
+     			No<input type="radio" name="configurazioneGiornoInteroUltimoDellAnno" value="false" checked="checked"/></p>
+     	%{
+     	}
+     	}%	
+     	%{if(configurations.isFirstOrLastMissionDayAHoliday == true){
+     	}%	
+			<p>Se il primo o ultimo giorno di missione è festivo deve essere considerato come presenza al lavoro? Sì<input type="radio" name="configurazioneMissioneInizioFineFestivo" value="true" checked="checked"/>
      			No<input type="radio" name="configurazioneMissioneInizioFineFestivo" value="false"/></p>
-			<p>Giorno di missione festivo deve essere considerato come presenza al lavoro? Sì<input type="radio" name="configurazioneFestivoMissione" value="true"/>
+     			%{
+     			}else{
+     			}%
+     		<p>Se il primo o ultimo giorno di missione è festivo deve essere considerato come presenza al lavoro? Sì<input type="radio" name="configurazioneMissioneInizioFineFestivo" value="true" checked="checked"/>
+     			No<input type="radio" name="configurazioneMissioneInizioFineFestivo" value="false" checked="checked"/></p>
+     	%{
+     	}
+     	}%
+     	%{if(configurations.isHolidayInMissionAWorkingDay == true){
+     	}%			
+			<p>Giorno di missione festivo deve essere considerato come presenza al lavoro? Sì<input type="radio" name="configurazioneFestivoMissione" value="true" checked="checked"/>
      			No<input type="radio" name="configurazioneFestivoMissione" value="false"/></p>
+     			%{
+     			}else{
+     			}%
+     		<p>Giorno di missione festivo deve essere considerato come presenza al lavoro? Sì<input type="radio" name="configurazioneFestivoMissione" value="true" checked="checked"/>
+     			No<input type="radio" name="configurazioneFestivoMissione" value="false" checked="checked"/></p>
+     	%{
+     	}
+     	}%	
+     		
 			<p>Ignora tempo di lavoro in un giorno con anche un codice di assenza che giustifica tutto il giorno (es. lavoro in ferie o missione ...) Sì<input type="radio" name="configurazioneIgnoraTempoLavoro" value="si"/>
      			No<input type="radio" name="configurazioneIgnoraTempoLavoro" value="false"/></p>
 			<p>Tempo di lavoro giornaliero default (in minuti) valore medio se il tempo di lavoro cambia di giorno in giorno <input name="" type="text" value="${configurations.workingTime}" size="10" maxlength="100" /></p>
@@ -65,25 +140,94 @@
 	</fieldset>
 	<fieldset>
 		<legend>Ferie, permessi, straordinari e residui</legend>
-			<p>Mese scadenza ferie dell'anno precedente (mm) <input name="meseScadenzaFerieAP" type="text" value="${configurations.monthExpiryVacationPastYear}" size="20" maxlength="100" /></p>
-			<p>Giorno scadenza ferie dell'anno precedente (dd) <input name="giornoScadenzaFerieAP" type="text" value="${configurations.dayExpiryVacationPastYear}" size="20" maxlength="100" /></p>
+			<p id="descrizione">Mese scadenza ferie dell'anno precedente (mm) <input name="meseScadenzaFerieAP" type="text" value="${configurations.monthExpiryVacationPastYear}" size="20" maxlength="100" /></p>
+			<p id="descrizione">Giorno scadenza ferie dell'anno precedente (dd) <input name="giornoScadenzaFerieAP" type="text" value="${configurations.dayExpiryVacationPastYear}" size="20" maxlength="100" /></p>
 			<p>Tempo residuo minimo da avere per poter richiedere un giorno di riposo compensativo (in minuti) 
 				<input name="tempoMinimoPerAvereRiposoCompensativo" type="text" value="${configurations.minimumRemainingTimeToHaveRecoveryDay}" size="10" maxlength="100" /> </p>
-			<p>Mese entro il quale devono essere usati i residui dell'anno precedente per i livelli da 1 a 3 (mm) 
+			<p id="descrizione">Mese entro il quale devono essere usati i residui dell'anno precedente per i livelli da 1 a 3 (mm) 
 			   00=i recuperi devono essere presi nell'anno. 99=i recuperi non scadono mai <input name="meseUtilizzoResiduiAP13" type="text" value="${configurations.monthExpireRecoveryDaysOneThree}" size="10" maxlength="100" /></p>
-			<p>Mese entro il quale devono essere usati i residui dell'anno precedente per i livelli da 4 a 9 (mm)
+			<p id="descrizione">Mese entro il quale devono essere usati i residui dell'anno precedente per i livelli da 4 a 9 (mm)
 			   00=i recuperi devono essere presi nell'anno. 99=i recuperi non scadono mai <input name="meseUtilizzoResiduiAP49" type="text" value="${configurations.monthExpireRecoveryDaysFourNine}" size="10" maxlength="100" /></p>
-			<p>Numero massimo di giorni di recupero in un anno per i livelli da 1 a 3 <input name="maxGiorniRecupero13" type="text" value="${configurations.maxRecoveryDaysOneThree}" size="10" maxlength="100" /></p>
-			<p>Numero massimo di giorni di recupero in un anno per i livelli da 4 a 9 <input name="maxGiorniRecupero49" type="text" value="${configurations.maxRecoveryDaysFourNine}" size="10" maxlength="100" /></p>
-			<p>Compensazione dei residui con quelli dell'anno precedente Al mese entro il quale sono usabili <input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedenteEntroMese" value="true"/>
-     			Al mese<input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedenteMese" value="true"/> Al giorno<input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedenteGiorno" value="true"/></p>
+			<p id="descrizione">Numero massimo di giorni di recupero in un anno per i livelli da 1 a 3 <input name="maxGiorniRecupero13" type="text" value="${configurations.maxRecoveryDaysOneThree}" size="10" maxlength="100" /></p>
+			<p id="descrizione">Numero massimo di giorni di recupero in un anno per i livelli da 4 a 9 <input name="maxGiorniRecupero49" type="text" value="${configurations.maxRecoveryDaysFourNine}" size="10" maxlength="100" /></p>
+			
+			%{if(configurations.residual.description.equals('al giorno')){
+			}%
+				<p>Compensazione dei residui con quelli dell'anno precedente: Al mese entro il quale sono usabili <input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedente" value="entroMese"/>
+     				Al mese<input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedente" value="mese"/> Al giorno<input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedente" value="giorno" checked="checked"/></p>
+     		%{
+     			}
+     		if(configurations.residual.description.equals('al mese')){
+   			}%
+     			<p>Compensazione dei residui con quelli dell'anno precedente: Al mese entro il quale sono usabili <input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedente" value="entroMese"/>
+     				Al mese<input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedente" value="mese" checked="checked"/> Al giorno<input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedente" value="giorno" checked="checked"/></p>
+     		%{
+     			}
+     		if(configurations.residual.description.equals('nel mese in cui posso usarla')){
+     		}%
+     				<p>Compensazione dei residui con quelli dell'anno precedente: Al mese entro il quale sono usabili <input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedente" value="entroMese" checked="checked"/>
+     				Al mese<input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedente" value="mese"/> Al giorno<input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedente" value="giorno" checked="checked"/></p>
+     		%{
+     			}
+     		}%
 			<p>Numero massimo di ore di straordinario mensili a persona <input name="oreMassimeStraordinarioMensili" type="text" value="${configurations.maximumOvertimeHours}" size="10" maxlength="100" /></p>
+			
 			<p>Selezionare "si" per permettere l'inserimento forzato di giorni di ferie/permessi che superano il massimo di giorni usufruibili in un anno Sì<input type="radio" name="configurazioneInserimentoForzatoFeriePermessi" value="true"/>
      			No<input type="radio" name="configurazioneInserimentoForzatoFeriePermessi" value="false"/></p>
-			<p>Controllo capienza riposi compensativi livelli 1-3: Sul Residuo al giorno <input type="radio" name="configurazioneCapienzaRiposi13Giorno" value="true"/>
-     			Sul Residuo a fine mese<input type="radio" name="configurazioneCapienzaRiposi13Mese" value="true"/> Sul residuo a fine mese precedente <input type="radio" name="configurazioneCapienzaRiposi13MesePrec" value="true"/> Sul residuo a fine trimestre prec.<input type="radio" name="configurazioneCapienzaRiposi13Trimestre" value="true"/></p>
-			<p>Controllo capienza riposi compensativi livelli 4-8: Sul Residuo al giorno <input type="radio" name="configurazioneCapienzaRiposi49Giorno" value="true"/>
-     			Sul Residuo a fine mese<input type="radio" name="configurazioneCapienzaRiposi49Mese" value="true"/> Sul residuo a fine mese precedente <input type="radio" name="configurazioneCapienzaRiposi49MesePrec" value="true"/> Sul residuo a fine trimestre prec.<input type="radio" name="configurazioneCapienzaRiposi49Trimestre" value="true"/></p>
+     			
+     			
+     		%{if(configurations.capacityOneThree.description.equals('residuo del giorno')){
+			}%
+				<p>Controllo capienza riposi compensativi livelli 1-3: Sul Residuo al giorno <input type="radio" name="configurazioneCapienzaRiposi13" value="residuoGiorno" checked="checked"/>
+     				Sul Residuo a fine mese<input type="radio" name="configurazioneCapienzaRiposi13" value="residuoFineMese"/> Sul residuo a fine mese precedente <input type="radio" name="configurazioneCapienzaRiposi49" value="residuoFineMesePrecedente"/> Sul residuo a fine trimestre prec.<input type="radio" name="configurazioneCapienzaRiposi49" value="residuoFineTrimestre"/></p>
+     		%{
+     			}
+     		if(configurations.capacityOneThree.description.equals('residuo a fine mese')){
+     		}%		
+				<p>Controllo capienza riposi compensativi livelli 1-3: Sul Residuo al giorno <input type="radio" name="configurazioneCapienzaRiposi13" value="residuoGiorno"/>
+     				Sul Residuo a fine mese<input type="radio" name="configurazioneCapienzaRiposi13" value="residuoFineMese" checked="checked"/> Sul residuo a fine mese precedente <input type="radio" name="configurazioneCapienzaRiposi13" value="residuoFineMesePrecedente"/> Sul residuo a fine trimestre prec.<input type="radio" name="configurazioneCapienzaRiposi13" value="residuoFineTrimestre"/></p>
+     		%{
+     			}
+     		if(configurations.capacityOneThree.description.equals('residuo a fine mese precedente')){
+     		}%
+     			<p>Controllo capienza riposi compensativi livelli 1-3: Sul Residuo al giorno <input type="radio" name="configurazioneCapienzaRiposi13" value="residuoGiorno"/>
+     				Sul Residuo a fine mese<input type="radio" name="configurazioneCapienzaRiposi13" value="residuoFineMese" checked="checked"/> Sul residuo a fine mese precedente <input type="radio" name="configurazioneCapienzaRiposi13" value="residuoFineMesePrecedente" checked="checked"/> Sul residuo a fine trimestre prec.<input type="radio" name="configurazioneCapienzaRiposi13" value="residuoFineTrimestre"/></p>
+     		%{
+     			}
+     		if(configurations.capacityOneThree.description.equals('residuo a trimestre precedente')){
+     		}%		
+     			<p>Controllo capienza riposi compensativi livelli 1-3: Sul Residuo al giorno <input type="radio" name="configurazioneCapienzaRiposi13" value="residuoGiorno"/>
+     				Sul Residuo a fine mese<input type="radio" name="configurazioneCapienzaRiposi13" value="residuoFineMese" checked="checked"/> Sul residuo a fine mese precedente <input type="radio" name="configurazioneCapienzaRiposi13" value="residuoFineMesePrecedente" checked="checked"/> Sul residuo a fine trimestre prec.<input type="radio" name="configurazioneCapienzaRiposi13" value="residuoFineTrimestre" checked="checked"/></p>
+     		%{
+     			}
+     		}%	
+     			
+     			
+			%{if(configurations.capacityFourEight.description.equals('residuo del giorno')){
+			}%
+				<p>Controllo capienza riposi compensativi livelli 4-8: Sul Residuo al giorno <input type="radio" name="configurazioneCapienzaRiposi49" value="residuoGiorno" checked="checked"/>
+     				Sul Residuo a fine mese<input type="radio" name="configurazioneCapienzaRiposi49" value="residuoFineMese"/> Sul residuo a fine mese precedente <input type="radio" name="configurazioneCapienzaRiposi49" value="residuoFineMesePrecedente"/> Sul residuo a fine trimestre prec.<input type="radio" name="configurazioneCapienzaRiposi49" value="residuoFineTrimestre"/></p>
+     		%{
+     			}
+     		if(configurations.capacityFourEight.description.equals('residuo a fine mese')){
+     		}%		
+				<p>Controllo capienza riposi compensativi livelli 4-8: Sul Residuo al giorno <input type="radio" name="configurazioneCapienzaRiposi49" value="residuoGiorno"/>
+     				Sul Residuo a fine mese<input type="radio" name="configurazioneCapienzaRiposi49" value="residuoFineMese" checked="checked"/> Sul residuo a fine mese precedente <input type="radio" name="configurazioneCapienzaRiposi49" value="residuoFineMesePrecedente"/> Sul residuo a fine trimestre prec.<input type="radio" name="configurazioneCapienzaRiposi49" value="residuoFineTrimestre"/></p>
+     		%{
+     			}
+     		if(configurations.capacityFourEight.description.equals('residuo a fine mese precedente')){
+     		}%
+     			<p>Controllo capienza riposi compensativi livelli 4-8: Sul Residuo al giorno <input type="radio" name="configurazioneCapienzaRiposi49" value="residuoGiorno"/>
+     				Sul Residuo a fine mese<input type="radio" name="configurazioneCapienzaRiposi49" value="residuoFineMese" checked="checked"/> Sul residuo a fine mese precedente <input type="radio" name="configurazioneCapienzaRiposi49" value="residuoFineMesePrecedente" checked="checked"/> Sul residuo a fine trimestre prec.<input type="radio" name="configurazioneCapienzaRiposi49" value="residuoFineTrimestre"/></p>
+     		%{
+     			}
+     		if(configurations.capacityFourEight.description.equals('residuo a trimestre precedente')){
+     		}%		
+     			<p>Controllo capienza riposi compensativi livelli 4-8: Sul Residuo al giorno <input type="radio" name="configurazioneCapienzaRiposi49" value="residuoGiorno"/>
+     				Sul Residuo a fine mese<input type="radio" name="configurazioneCapienzaRiposi49" value="residuoFineMese" checked="checked"/> Sul residuo a fine mese precedente <input type="radio" name="configurazioneCapienzaRiposi49" value="residuoFineMesePrecedente" checked="checked"/> Sul residuo a fine trimestre prec.<input type="radio" name="configurazioneCapienzaRiposi49" value="residuoFineTrimestre" checked="checked"/></p>
+     		%{
+     			}
+     		}%
 	</fieldset>
 	<fieldset>
 		<legend>Uscite e autodichiarazioni</legend>
