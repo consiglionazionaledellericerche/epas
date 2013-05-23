@@ -4,8 +4,8 @@
 <input type="hidden" name="personId" value="${person.id}"/>
 <fieldset>
 	<legend>Modifica dati amministratore e permessi</legend>
-	<p>Nome: <input type="text" name="nome" value="${person.name}" disabled="disabled"/></p>
-	<p>Cognome: <input type="text" name="cognome" value="${person.surname}" disabled="disabled" /></p>
+	<p id="descrizione">Nome: <input type="text" name="nome" value="${person.name}" disabled="disabled"/></p>
+	<p id="descrizione">Cognome: <input type="text" name="cognome" value="${person.surname}" disabled="disabled" /></p>
 	<p>Può vedere persone: 
 	
 	%{	if(person.isViewPersonAvailable()==true){ }%

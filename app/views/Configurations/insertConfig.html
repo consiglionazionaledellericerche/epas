@@ -24,7 +24,7 @@
 			<p id="descrizione">Festa del patrono (giorno) <input name="giornoPatrono" type="text" value="${configurations.dayOfPatron}" size="5" maxlength="100" /></p>
 			<p id="descrizione">Festa del patrono (mese) <input name="mesePatrono" type="text" value="${configurations.monthOfPatron}" size="5" maxlength="100" /></p>
 	</fieldset>
-	<fieldset>
+	<fieldset disabled="disabled">
 		<legend>Pausa pranzo e buoni</legend>
 			<p>Indicare se la durata dell'intervallo pranzo è più corta del minimo deve essere automaticamente spostata l'ora di rientro   Sì<input type="radio" name="configurazionePausaPranzo" value="true"/>
      			No<input type="radio" name="configurazionePausaPranzo" value="false"/></p>
@@ -76,15 +76,15 @@
 			   00=i recuperi devono essere presi nell'anno. 99=i recuperi non scadono mai <input name="meseUtilizzoResiduiAP49" type="text" value="${configurations.monthExpireRecoveryDaysFourNine}" size="10" maxlength="100" /></p>
 			<p id="descrizione">Numero massimo di giorni di recupero in un anno per i livelli da 1 a 3 <input name="maxGiorniRecupero13" type="text" value="${configurations.maxRecoveryDaysOneThree}" size="10" maxlength="100" /></p>
 			<p id="descrizione">Numero massimo di giorni di recupero in un anno per i livelli da 4 a 9 <input name="maxGiorniRecupero49" type="text" value="${configurations.maxRecoveryDaysFourNine}" size="10" maxlength="100" /></p>
-			<p>Compensazione dei residui con quelli dell'anno precedente Al mese entro il quale sono usabili <input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedenteEntroMese" value="true"/>
-     			Al mese<input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedenteMese" value="true"/> Al giorno<input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedenteGiorno" value="true"/></p>
+			<p>Compensazione dei residui con quelli dell'anno precedente: Al mese entro il quale sono usabili <input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedente" value="entroMese"/>
+     			Al mese<input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedente" value="mese"/> Al giorno<input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedente" value="giorno"/></p>
 			<p>Numero massimo di ore di straordinario mensili a persona <input name="oreMassimeStraordinarioMensili" type="text" value="${configurations.maximumOvertimeHours}" size="10" maxlength="100" /></p>
 			<p>Selezionare "si" per permettere l'inserimento forzato di giorni di ferie/permessi che superano il massimo di giorni usufruibili in un anno Sì<input type="radio" name="configurazioneInserimentoForzatoFeriePermessi" value="true"/>
      			No<input type="radio" name="configurazioneInserimentoForzatoFeriePermessi" value="false"/></p>
-			<p>Controllo capienza riposi compensativi livelli 1-3: Sul Residuo al giorno <input type="radio" name="configurazioneCapienzaRiposi13Giorno" value="true"/>
-     			Sul Residuo a fine mese<input type="radio" name="configurazioneCapienzaRiposi13Mese" value="true"/> Sul residuo a fine mese precedente <input type="radio" name="configurazioneCapienzaRiposi13MesePrec" value="true"/> Sul residuo a fine trimestre prec.<input type="radio" name="configurazioneCapienzaRiposi13Trimestre" value="true"/></p>
-			<p>Controllo capienza riposi compensativi livelli 4-8: Sul Residuo al giorno <input type="radio" name="configurazioneCapienzaRiposi49Giorno" value="true"/>
-     			Sul Residuo a fine mese<input type="radio" name="configurazioneCapienzaRiposi49Mese" value="true"/> Sul residuo a fine mese precedente <input type="radio" name="configurazioneCapienzaRiposi49MesePrec" value="true"/> Sul residuo a fine trimestre prec.<input type="radio" name="configurazioneCapienzaRiposi49Trimestre" value="true"/></p>
+			<p>Controllo capienza riposi compensativi livelli 1-3: Sul Residuo al giorno <input type="radio" name="configurazioneCapienzaRiposi13" value="residuoGiorno"/>
+     			Sul Residuo a fine mese<input type="radio" name="configurazioneCapienzaRiposi13" value="residuoFineMese"/> Sul residuo a fine mese precedente <input type="radio" name="configurazioneCapienzaRiposi13" value="residuoFineMesePrecedente"/> Sul residuo a fine trimestre prec.<input type="radio" name="configurazioneCapienzaRiposi13" value="residuoFineTrimestre"/></p>
+			<p>Controllo capienza riposi compensativi livelli 4-8: Sul Residuo al giorno <input type="radio" name="configurazioneCapienzaRiposi49" value="residuoGiorno"/>
+     			Sul Residuo a fine mese<input type="radio" name="configurazioneCapienzaRiposi49" value="residuoFineMese"/> Sul residuo a fine mese precedente <input type="radio" name="configurazioneCapienzaRiposi49" value="residuoFineMesePrecedente"/> Sul residuo a fine trimestre prec.<input type="radio" name="configurazioneCapienzaRiposi49" value="residuoFineTrimestre"/></p>
 	</fieldset>
 	<fieldset>
 		<legend>Uscite e autodichiarazioni</legend>
