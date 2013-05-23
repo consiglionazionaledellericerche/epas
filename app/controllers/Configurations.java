@@ -100,10 +100,9 @@ public class Configurations extends Controller{
 				config.capacityFourEight = CapacityCompensatoryRestFourEight.onEndPastQuarterResidual;
 			
 			config.hourMaxToCalculateWorkTime = params.get("oraMaxEntroCuiCalcolareUscita", Integer.class);
-			/**
-			 * TODO: la parte di autodichiarazione di assenze e orario di lavoro e autorizzazione timbratura via web e lista degli indirizzi
-			 * autorizzati alla timbratura via web
-			 */
+			config.canPeopleAutoDeclareWorkingTime = params.get("configurazioneAutoDichiarazione", Boolean.class);
+			config.canPeopleAutoDeclareAbsences = params.get("configurazioneAutoAssenze", Boolean.class);
+			config.canPeopleUseWebStamping = params.get("configurazioneTimbraturaWeb", Boolean.class);
 			
 			
 			config.save();
@@ -220,9 +219,13 @@ public class Configurations extends Controller{
 			
 			if(params.get("oraMaxEntroCuiCalcolareUscita", Integer.class) != config.hourMaxToCalculateWorkTime)
 				config.hourMaxToCalculateWorkTime = params.get("oraMaxEntroCuiCalcolareUscita", Integer.class);
-			/**
-			 * TODO: vedi sopra...
-			 */
+			if(params.get("configurazioneAutoDichiarazione", Boolean.class) != config.canPeopleAutoDeclareWorkingTime)
+				config.canPeopleAutoDeclareWorkingTime = params.get("configurazioneAutoDichiarazione", Boolean.class);
+			if(params.get("configurazioneAutoAssenze", Boolean.class) != config.canPeopleAutoDeclareAbsences)
+				config.canPeopleAutoDeclareAbsences = params.get("configurazioneAutoAssenze", Boolean.class);
+			if(params.get("configurazioneTimbraturaWeb", Boolean.class) != config.canPeopleUseWebStamping)
+				config.canPeopleUseWebStamping = params.get("configurazioneTimbraturaWeb", Boolean.class);
+		
 			config.save();
 			flash.success(String.format("Configurazione modificata con successo!"));
 			Application.indexAdmin();
