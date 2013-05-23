@@ -33,15 +33,15 @@ Configuration(defaultConfiguration):
     monthExpireRecoveryDaysFourNine: 4
     maxRecoveryDaysOneThree: 22
     maxRecoveryDaysFourNine:
-    residual:
+    residual: atMonth
     maximumOvertimeHours:
     holydaysAndVacationsOverPermitted: false
     hourMaxToCalculateWorkTime: 5
-    auto:
-    autoAbsence:
-    capacityOneThree:
-    capacityFourEight:
+    canPeopleAutoDeclareWorkingTime: false
+    canPeopleAutoDeclareAbsences: false
+    capacityOneThree: onEndOfMonthResidual
+    capacityFourEight: onEndOfMonthResidual
     canInsertMoreAbsenceCodeInDay: false
     ignoreWorkingTimeWithAbsenceCode: false
-    authWeb:
+    canPeopleUseWebStamping: false
     textForMonthlySituation:

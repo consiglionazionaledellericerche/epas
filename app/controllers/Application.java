@@ -24,10 +24,10 @@ public class Application extends Controller {
     
 	
     public static void index() {
-    	if (Security.check(Security.VIEW_PERSONAL_SITUATION)) {
-    		Stampings.stampings(null, null);
-    	} else {
+    	if (Security.check(Security.INSERT_AND_UPDATE_STAMPING)) {
     		Application.indexAdmin();
+    	} else {
+    		Stampings.stampings(null, null);
     	}
     }
 	public static void success(){

@@ -15,10 +15,46 @@
 		<th>In attestati presenza</th>
 	</tr>
 	<tr>
-		<td><input type="text" value="${contract.beginContract}" name="beginContract"/></td>
-		<td><input type="text" value="${contract.expireContract}" name="expireContract"/></td>
-		<td><input type="text" value="${contract.endContract}" name="endContract"/></td>
-		<td><input type="radio" value="${contract.onCertificate}" name="onCertificate"/></td>
+		%{if(contract.beginContract != null){
+		}%
+			<td><input name="inizio" type="date" value="${contract.beginContract}"/></td>
+		%{
+		}else{
+		}%
+			<td><input name="inizio" type="date" value="${}" /></td>
+		%{
+		}
+		}%
+		%{if(contract.expireContract != null){
+		}%
+			<td><input name="fine" type="date" value="${contract.expireContract}" /></td>
+		%{
+		}else{
+		}%
+			<td><input name="fine" type="date" value="${}" /></td>
+		%{
+		}
+		}%
+		%{if(contract.endContract != null){
+		}%
+			<td><input name="end" type="date" value="${contract.endContract}" /></td>
+		%{
+		}else{
+		}%	
+			<td><input name="end" type="date" value="${}" /></td>
+		%{
+		}
+		}%
+		%{if(contract.onCertificate != null){
+		}%	
+			<td><input name="certificate" type="radio" value="${contract.onCertificate}" /></td>
+		%{
+		}else{
+		}%
+			<td><input name="certificate" type="radio" value="${}" /></td>
+		%{
+		}
+		}%	
 	</tr>
 </table>
 <input id="modificaContratto" type="submit" value="Modifica"/>

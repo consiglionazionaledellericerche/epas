@@ -29,12 +29,25 @@
 		Matricola <input name="number" type="text" value="${person.number}"
 			size="10" maxlength="10" />
 	</div>
+	%{if(person.qualification != null){
+	}%
 	<div>Livello #{select 'person.qualification',
 		value:person.qualification.qualification, id:'qualifica'} #{option null}Seleziona la qualifica#{/option}
 		#{option 1}1#{/option} #{option 2}2#{/option} #{option 3}3#{/option}
 		#{option 4}4#{/option} #{option 5}5#{/option} #{option 6}6#{/option}
 		#{option 7}7#{/option} #{option 8}8#{/option} #{/select}</div>
-
+	%{
+	}else{
+	}%
+	<div>Livello #{select 'qualification', 
+		value:'', id:'qualifica'} #{option null}Seleziona la qualifica#{/option}
+		#{option 1}1#{/option} #{option 2}2#{/option} #{option 3}3#{/option}
+		#{option 4}4#{/option} #{option 5}5#{/option} #{option 6}6#{/option}
+		#{option 7}7#{/option} #{option 8}8#{/option} #{/select} 
+	</div>
+	%{
+	}
+	}%
 </fieldset>
 
 <fieldset>
@@ -64,8 +77,8 @@
 			<a href="@{Persons.modifyContract(contract.id)}" class="modifyContract${contract.id}"><input value="Modifica" class="Forminput" type="button"></a>
 			<script type="text/javascript"> 
 				$('.modifyContract${contract.id}').popupWindow({ 
-				height:500, 
-				width:800, 
+				height:600, 
+				width:900, 
 				top:50, 
 				left:50 
 				}); 
@@ -74,8 +87,26 @@
 		</tr>
 		%{ } }%
 	</table>
-	<p id="stanza">Ore di inizializzazione maturate in altro istituto l'anno passato (in minuti): <input name="minutesPastYear" type="text" value="${initTime.residualMinutesPastYear}" size="10" /></p>
-	<p id="stanza">Ore di inizializzazione maturate in altro istituto nell'anno corrente (in minuti): <input name="minutesCurrentYear" type="text" value="${initTime.residualMinutesCurrentYear}" size="10" /></p>
+	%{if(initTime != null){
+	}%
+		<p id="stanza">Ore di inizializzazione maturate in altro istituto l'anno passato (in minuti): <input name="minutesPastYear" type="text" value="${initTime.residualMinutesPastYear}" size="10" /></p>
+	%{
+	}else{
+	}%
+		<p id="stanza">Ore di inizializzazione maturate in altro istituto l'anno passato (in minuti): <input name="minutesPastYear" type="text" value="" size="10" /></p>
+	%{
+	}
+	}%
+	%{if(initTime != null){
+	}%
+		<p id="stanza">Ore di inizializzazione maturate in altro istituto nell'anno corrente (in minuti): <input name="minutesCurrentYear" type="text" value="${initTime.residualMinutesCurrentYear}" size="10" /></p>
+	%{
+	}else{
+	}%
+		<p id="stanza">Ore di inizializzazione maturate in altro istituto nell'anno corrente (in minuti): <input name="minutesCurrentYear" type="text" value="" size="10" /></p>
+	%{
+	}
+	}%
 	
 </fieldset>
 
@@ -95,16 +126,36 @@
 			size="20" maxlength="200" />
 	</p>
 	<p id="telefono">
+	%{if(person.contactData.telephone != null || !person.contactData.telephone.equals('No phone number')){
+	}%
 		Telefono <input name="telephone" type="text"
 			value="${person.contactData.telephone}" size="20" maxlength="200" />
+	%{
+	}else{
+	}%
+		Telefono <input name="telephone" type="text"
+			value="" size="20" maxlength="200" />
+	%{
+	}
+	}%
 	</p>
 	<p id="email">
 		Email <input name="email" type="text"
 			value="${person.contactData.email}" size="20" maxlength="200" />
 	</p>
 	<p id="nascita">
+	%{if(person.bornDate != null){
+	}%
 		Data di nascita <input name="bornDate" type="text"
-			value="${person.bornDate}" size="20" maxlength="200" />
+			value="${person.bornDate.convertToLocalDate()}" size="10" maxlength="50" />
+	%{
+	}else{
+	}%
+		Data di nascita <input name="bornDate" type="text"
+			value="" size="10" maxlength="50" />
+	%{
+	}
+	}%
 	</p>
 </fieldset>
 

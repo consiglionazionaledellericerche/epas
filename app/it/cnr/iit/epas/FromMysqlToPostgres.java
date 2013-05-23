@@ -346,7 +346,7 @@ public class FromMysqlToPostgres {
 		}
 		else{ 
 			Logger.warn("Validazione numero di telefono non avvenuta. No phone number");
-			contactData.telephone = "No phone number";		
+			contactData.telephone = null;		
 		}
 		contactData.save();
 		Logger.info("Creato %s", person);
@@ -817,7 +817,7 @@ public class FromMysqlToPostgres {
 				 * in questo caso la data del "giro successivo" è nulla poichè siamo all'ultima riga del ciclo. Quindi bisogna fare 
 				 * i calcoli del personDay relativi a questo ultimo giorno (quello con date = data).
 				 */
-				//pd.merge();
+				pd.merge();
 				pd.populatePersonDay();
 
 				Logger.debug("Il progressivo al termine del resultset è: %s e il differenziale è: %s", pd.progressive, pd.difference);
@@ -1165,8 +1165,8 @@ public class FromMysqlToPostgres {
 		setDateTimeToStamping(stamping, pd.date, s);
 		stamping.personDay = pd;
 		stamping.save();
-//		pd.stampings.add(stamping);
-//		pd.merge();
+		pd.stampings.add(stamping);
+		pd.merge();
 
 		Logger.debug("Creata %s", stamping.toString());	
 
@@ -1180,8 +1180,8 @@ public class FromMysqlToPostgres {
 		absence.personDay = pd;
 		absence.absenceType = absenceType;
 		absence.save();
-		//pd.absences.add(absence);
-		//pd.merge();
+		pd.absences.add(absence);
+		pd.merge();
 		Logger.debug("Creata %s", absence);
 		if(absenceType.code.equals("91")){
 			Logger.debug("Trovato riposo compensativo per %s %s nel giorno %s. Proseguo con i calcoli...", 

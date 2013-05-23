@@ -107,10 +107,15 @@ public class SwitchTemplate extends Controller{
 			break;
 
 		case yearlyAbsences:
+			if(personId == 0){
+				flash.error("Il metodo %s deve essere chiamato selezionando una persona", menuItem.getDescription());
+				Application.indexAdmin();
+			}
 			YearlyAbsences.yearlyAbsences(personId, year);
 			break;
 		
 		case totalMonthlyAbsences:
+			
 			YearlyAbsences.showGeneralMonthlyAbsences(year, month);
 			break;
 		case manageAbsenceCode:
@@ -147,12 +152,7 @@ public class SwitchTemplate extends Controller{
 				Configurations.list();
 			break;
 		case personList:
-			if(personId != 0){
-				flash.error("Il metodo %s deve essere chiamato senza selezionare alcuna persona", menuItem.getDescription());
-				Application.indexAdmin();
-			}
-			else
-				Persons.list();
+			Persons.list();
 			break;
 		case administrator:
 			if(personId != 0){
@@ -203,6 +203,11 @@ public class SwitchTemplate extends Controller{
 			Vacations.show(personId, year);
 			break;
 		case competences:
+			if(personId == 0){
+				flash.error("Il metodo %s deve essere chiamato selezionando una persona", menuItem.getDescription());
+				Application.indexAdmin();
+			}
+			else
 			Competences.competences(personId, year, month);
 			break;
 		case hourrecap:

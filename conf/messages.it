@@ -22,5 +22,6 @@ views.tags.display.date.month.9=settembre
 views.tags.display.date.month.10=ottobre
 views.tags.display.date.month.11=novembre
 views.tags.display.date.month.12=dicembre
-
+secure.error=Oops! Username o password sconosciuti
+secure.logout=Utente correttamente sloggato
  

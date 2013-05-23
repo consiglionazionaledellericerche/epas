@@ -41,8 +41,8 @@ Person(admin):
     username: admin
     name: Admin
     surname: Admin
-    # password = orologio
-    password: f5e852552deb0ff9a3899938e77cccde
+    # password = personnelEpasNewVersion
+    password: ec12b5b3f61c4445edc1e8046fe3f24d
     permissions: [viewPersonList, deletePerson, insertAndUpdatePerson, insertAndUpdateConfiguration, insertAndUpdateAdministrator]
 
     

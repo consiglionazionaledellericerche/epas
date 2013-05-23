@@ -289,19 +289,31 @@ public class PersonDay extends Model {
 			LocalDateTime now = new LocalDateTime();
 			if(reloadedStampings.size() > 0){
 				Stamping s = reloadedStampings.get(0);
-				if(s.date.getDayOfMonth()==now.getDayOfMonth() && s.date.getMonthOfYear()==now.getMonthOfYear() && 
-						s.date.getYear()==now.getYear()){					
+				if(s.date.toLocalDate().isEqual(now.toLocalDate())){					
 					int nowToMinute = toMinute(now);
-					if(reloadedStampings.size() == 3 || reloadedStampings.size() == 1){	
-						int workingTime=0;
-						//int numberOfServiceExit = 0;
+					if(reloadedStampings.size() == 0){
+						timeAtWork = 0;
+						save();
+						return;
+					}
+					if(reloadedStampings.size() == 1){
+						timeAtWork = toMinute(now)-toMinute(reloadedStampings.get(0).date);
+						save();
+						return;
+					}
+					else{
 						for(int i = 0; i < reloadedStampings.size(); i++){
+
+							int workingTime=0;
+
 							if(reloadedStampings.get(i).way == Stamping.WayType.in && reloadedStampings.get(i).stampType != null){
 								if(reloadedStampings.get(i-1) != null && reloadedStampings.get(i-1).stampType != null){
 									//c'è stata un'uscita di servizio, questo è il corrispondente ingresso come lo calcolo?
 									//workingTime = workingTime + (toMinute(reloadedStampings.get(i).date) - toMinute(reloadedStampings.get(i-1).date));
 									workingTime = workingTime + 0;
 								}
+								if(reloadedStampings.get(i-1) == null)
+									workingTime = workingTime - toMinute(reloadedStampings.get(i).date);
 								else{
 									//si fa un'entrata di servizio...ad esempio quando siamo in reperibilità?
 								}
@@ -315,6 +327,7 @@ public class PersonDay extends Model {
 									//uscita di servizio, dopo un ingresso di servizio...come si gestisce??
 									workingTime = workingTime + 0;
 								}
+
 								else{
 									workingTime += toMinute(reloadedStampings.get(i).date);
 								}
@@ -327,8 +340,13 @@ public class PersonDay extends Model {
 								tempoLavoro = nowToMinute + workingTime;										
 							else 
 								tempoLavoro = nowToMinute - workingTime;																		
-						}								
+							timeAtWork = tempoLavoro;
+							save();
+							return;
+
+						}
 					}
+
 
 				}				
 				else{
@@ -350,7 +368,7 @@ public class PersonDay extends Model {
 
 									}
 								}
-								
+
 							}
 							else{
 								workTime -= toMinute(reloadedStampings.get(i).date);
@@ -374,7 +392,7 @@ public class PersonDay extends Model {
 								}
 
 							}
-	
+
 							else{
 								//timbratura normale di uscita
 								workTime += toMinute(reloadedStampings.get(i).date);
@@ -406,7 +424,7 @@ public class PersonDay extends Model {
 			} else {
 				timeAtWork = tempoLavoro;	
 			}
-			
+
 			save();				
 		}
 
@@ -454,13 +472,13 @@ public class PersonDay extends Model {
 				for(Absence abs : absences){
 					if(abs.absenceType.ignoreStamping == true || abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay){
 						timeAtWork = 0;
-						//merge();
+						merge();
 						difference = 0;
-						//merge();
+						merge();
 						updateProgressive();
-						//merge();
+						merge();
 						isTicketAvailable = false;
-						//merge();
+						merge();
 						return;
 
 					}
@@ -468,7 +486,7 @@ public class PersonDay extends Model {
 					else{
 						if(!abs.absenceType.code.equals("89")){
 							timeAtWork = timeAtWork + abs.absenceType.justifiedTimeAtWork.minutesJustified;
-							
+
 						}
 						else{
 							int total = 150*60;
@@ -485,13 +503,13 @@ public class PersonDay extends Model {
 							}
 							timeAtWork = timeAtWork + total;
 						}
-						//merge();
+						merge();
 						updateDifference();
-						//merge();
+						merge();
 						updateProgressive();
-						//merge();
+						merge();
 						setTicketAvailable();
-						//merge();
+						merge();
 						return;
 					}
 
@@ -499,21 +517,21 @@ public class PersonDay extends Model {
 			}
 			if(timeAtWork != null && (stampings.size() == 0 || stampings == null)){
 				updateDifference();
-				//merge();
+				merge();
 				updateProgressive();	
-				//merge();
+				merge();
 				setTicketAvailable();
-				//merge();
+				merge();
 				return;
 			}				
 			updateTimeAtWork();
-			//merge();
+			merge();
 			updateDifference();
-			//merge();
+			merge();
 			updateProgressive();	
-			//merge();
+			merge();
 			setTicketAvailable();
-			//merge();
+			merge();
 		} else {
 			Logger.info("I calcoli sul giorno %s non vengono effettuati perché %s non ha un contratto attivo in questa data", date, person);
 		}
@@ -528,11 +546,11 @@ public class PersonDay extends Model {
 		Logger.trace("Chiamata populatePersonDayAfterJustifiedAbsence per popolare il personDay di %s %s senza il timeAtWork nel giorno %s",
 				person.name, person.surname, date);
 		updateDifference();
-		//merge();
+		merge();
 		updateProgressive();	
-		//merge();
+		merge();
 		setTicketAvailable();
-		//merge();
+		merge();
 	}
 
 
@@ -881,7 +899,7 @@ public class PersonDay extends Model {
 		}
 		return stampProfiles.get(0);
 	}
-	
+
 	/**
 	 * 
 	 * @return il personday precedente a quello attualmente considerato. Questo metodo è utilizzato nella visualizzazione delle timbrature

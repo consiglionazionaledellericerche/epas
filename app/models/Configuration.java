@@ -244,15 +244,15 @@ public class Configuration extends Model{
 	 */
 	public Integer hourMaxToCalculateWorkTime;
 	
-	/**
-	 * Permette al personale di autodichiarare gli orari di lavoro (enum dichiarato nel package it.cnr.iit.epas
-	 */
-	public AutoDeclareWorkingTime autoDeclare;
-	
-	/**
-	 * Permette al personale di autodichiarare le assenze
-	 */
-	public AutoDeclareAbsences autoAbsence;
+//	/**
+//	 * Permette al personale di autodichiarare gli orari di lavoro (enum dichiarato nel package it.cnr.iit.epas
+//	 */
+//	public AutoDeclareWorkingTime autoDeclare;
+//	
+//	/**
+//	 * Permette al personale di autodichiarare le assenze
+//	 */
+//	public AutoDeclareAbsences autoAbsence;
 	
 	/**
 	 * Controllo capienza riposi compensativi livelli 1-3
@@ -275,10 +275,24 @@ public class Configuration extends Model{
 	 */
 	public boolean ignoreWorkingTimeWithAbsenceCode;
 	
+//	/**
+//	 * Autorizzazione timbratura via web
+//	 */
+//	public AuthWebStamping authWeb;
 	/**
-	 * Autorizzazione timbratura via web
+	 * concede al personale di timbrare via web
 	 */
-	public AuthWebStamping authWeb;
+	public boolean canPeopleUseWebStamping;
+	
+	/**
+	 * concede al personale di autodichiarare l'orario di lavoro
+	 */
+	public boolean canPeopleAutoDeclareWorkingTime;
+	
+	/**
+	 * concede al personale di autodichiarare le assenze
+	 */
+	public boolean canPeopleAutoDeclareAbsences;
 	
 	/**
 	 * Eventuale testo da scrivere in fondo alla stampa in pdf della situazione mensile (codifica html)
