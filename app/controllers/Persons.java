@@ -311,9 +311,12 @@ public class Persons extends Controller {
 				initTime.residualMinutesCurrentYear = params.get("minutesCurrentYear", Integer.class);
 			initTime.save();
 		}
-		flash.success("Modificate informazioni di contatto o di locazione per l'utente %s %s", person.name, person.surname);
-		Application.indexAdmin();
-			
+		if(person.number != null && person.number != params.get("number", Integer.class))
+			person.number = params.get("number", Integer.class);
+		person.save();
+		flash.success("Modificate informazioni per l'utente %s %s", person.name, person.surname);
+		//Application.indexAdmin();
+		Persons.list();	
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
@@ -334,22 +337,58 @@ public class Persons extends Controller {
 	public static void updateContract(){
 		Long contractId = params.get("contractId", Long.class);
 		Contract contract = Contract.findById(contractId);
-		if(!contract.beginContract.isEqual(params.get("beginContract", LocalDate.class)))
-			contract.beginContract = params.get("beginContract", LocalDate.class);
-		if(!contract.expireContract.isEqual(params.get("expireContract", LocalDate.class)))
-			contract.expireContract = params.get("expireContract", LocalDate.class);
-		if(contract.endContract == null && params.get("endContract", LocalDate.class) != null)
-			contract.endContract = params.get("endContract", LocalDate.class);
+		LocalDate beginContract, expireContract, endContract = null;
+		String begin = params.get("inizio");
+		String end = params.get("end");
+		String expire = params.get("fine");
+		//Logger.debug("BeginContract: %s - ExpireContract: %s - EndContract: %s", begin, expire, end);
+		beginContract = new LocalDate(begin);
+		
+		if(begin.equals("") || begin ==null ){
+			flash.error("Non può esistere un contratto senza data di inizio!");
+			render("@save");
+		}
+		
+		if(expire == null || expire.equals(""))
+			expireContract = null;
+		else
+			expireContract = new LocalDate(expire);
+		if(end == null || end.equals(""))
+			endContract = null;
+		else
+			endContract = new LocalDate(end);
+			
+		if(!contract.beginContract.isEqual(beginContract)){
+			contract.beginContract = beginContract;
+			
+			contract.save();
+		}
+		if((contract.expireContract != null && expireContract == null) || 
+				(contract.expireContract != null && expireContract != null && !contract.expireContract.isEqual(expireContract)) || 
+				(contract.expireContract == null && expireContract != null)){
+			contract.expireContract = expireContract;
+			contract.save();
+		}
+			
+		if(contract.endContract == null && endContract != null){
+			contract.endContract = endContract;
+			contract.save();
+		}
+		
 		
 		contract.save();
+		
 		flash.success("Aggiornato contratto per il dipendente %s %s", contract.person.name, contract.person.surname);
-		Application.indexAdmin();
+		render("@save");
 		
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void discard(){
-		render("@list");
+		//List<Person> personList = Person.find("Select p from Person p where p.name <> ? order by p.surname", "Admin").fetch();
+		//Logger.debug("La lista delle persone: %s", personList.toString());
+		Persons.list();
+		//render("@list");
 	}
 
 	/**
@@ -378,12 +417,13 @@ public class Persons extends Controller {
 	 * 
 	 * @param personId permette all'utente amministratore di cambiare la propria password.
 	 */
+	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void changePassword(Long personId){
 		Person person = Person.findById(personId);
 		render(person);
 	}
 	
-//	@Check(Security.INSERT_AND_UPDATE_PASSWORD)
+	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void savePassword(){
 		Long personId = params.get("personId", Long.class);
 		

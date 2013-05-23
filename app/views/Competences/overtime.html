@@ -12,7 +12,18 @@
     	<li><a href="@{Competences.totalOvertimeHours(year, month)}#">Monte ore</a></li>
     	<li><a href="@{Competences.recapCompetences()}#">Recap competenze</a></li>
     </ul>
-    
+    %{if(year != 0 && month != 0){
+    }%
+	    <input type="hidden" name="year" value="${year}"/>
+		<input type="hidden" name="month" value="${month}"/>
+	%{
+	}else{
+	}%
+		<input type="hidden" name="year" value="${yearParams}"/>
+		<input type="hidden" name="month" value="${monthParams}"/>
+	%{
+	}
+	}%
     <h3 id="titoloStraordinari">Tabella riassuntiva del mese di <span class="capitalized">&{'views.tags.display.date.month.' + month}</span></h3>
     <table>
     	<tr>

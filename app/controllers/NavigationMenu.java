@@ -34,10 +34,13 @@ public class NavigationMenu extends Controller {
 		if(month == 0)
 			month = now.getMonthOfYear();
 		
-		ActionMenuItem action = flash.get("method") != null && !flash.get("method").equals("") ? ActionMenuItem.valueOf(flash.get("method")) : ActionMenuItem.stampingsAdmin;
+		Long personId =  flash.get("personId") != null ? Long.parseLong(flash.get("personId")) : null;
+		//Person person = Person.findById(personId);
+		
+		ActionMenuItem action = flash.get("method") != null && !flash.get("method").equals("") && personId != null ? ActionMenuItem.valueOf(flash.get("method")) : ActionMenuItem.stampingsAdmin;
 		
 		//Logger.debug("Appena assegnata la action nel metodo injectMenu della classe NavigationMenu. La action è: %s", action.getDescription());
-		Long personId =  flash.get("personId") != null ? Long.parseLong(flash.get("personId")) : null;
+		
 	
 		List<Person> persons = (List<Person>) Cache.get("persons");
 		

@@ -46,5 +46,13 @@ public class PersonTags extends JavaExtensions {
 		return toHourTime(numberOfCompensatoryRest*timeAtWork);
 	}
 	
+	public static String toHour(Integer minutes){
+		int hour = Math.abs((int)minutes/60);
+		return String.format("%d", hour);
+	}
+	
+	public static LocalDate convertToLocalDate(Date date){
+		return new LocalDate(date);
+	}
 
 }

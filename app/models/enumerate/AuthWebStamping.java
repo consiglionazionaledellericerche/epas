@@ -6,7 +6,13 @@ package models.enumerate;
  *
  */
 public enum AuthWebStamping {
-	yesToAll,
-	no,
-	perPerson
+	yesToAll("si a tutti"),
+	no("no"),
+	perPerson("a persona");
+	
+	public String description;
+	
+	private AuthWebStamping(String description){
+		this.description = description;
+	}
 }

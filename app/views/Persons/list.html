@@ -46,7 +46,7 @@
 		<td>${''}</td>
 		<td>${person.getLocation() != null ? person.location.department : ''}</td>
 		<td>${person.getLocation() != null ? person.location.headOffice : '' }</td>
-		<td>${person.contactData != null ? person.contactData.telephone : ''}</td>
+		<td>${person.contactData != null && !person.contactData.telephone.equals('No phone number') ? person.contactData.telephone : ''}</td>
 		<td>${person.location != null ? person.location.room : ''}</td>
 		<td>${person.contactData != null ? person.contactData.email : ''}</td>
 		<td>${}</td>

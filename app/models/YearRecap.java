@@ -386,6 +386,8 @@ public class YearRecap extends Model{
 	 * @return il numero di giorni di ferie avanzati da quelli maturati l'anno precedente e non ancora utilizzati
 	 */
 	public int vacationLastYearNotYetUsed(){
+		
+		List<PersonDay> vacationsLastYear = listVacationDaysLastYear();		
 
 		LocalDate beginLastYear = new LocalDate(year-1,1,1);
 		LocalDate endLastYear = new LocalDate(year-1,12,31);
@@ -409,28 +411,11 @@ public class YearRecap extends Model{
 		if(contract.beginContract != null && contract.beginContract.getYear()==year-1){
 			days = daysBetweenTwoDates(contract.beginContract, endLastYear);
 		}
+		VacationPeriod period = VacationPeriod.find("Select vp from VacationPeriod vp where vp.person = ? and vp.beginFrom <= ? and " +
+				"vp.endTo >= ?", person, beginLastYear, endLastYear).first();
+		//int vacationDaysAccrued = VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysLessThreeYears(days);
 
-		/**
-		 * a questo punto ho il numero di giorni dell'anno passato in cui quella persona ha lavorato e posso quindi vedere quanti giorni di
-		 * ferie gli spettavano l'anno precedente
-		 */
-
-		int vacationDaysAccrued = VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysLessThreeYears(days);
-
-		//recupero dal db le assenze fatte l'anno precedente che hanno codice 5 ovvero quelle con causale "ferie anno corrente"		
-		int vacationDaysPastYear = 0;
-
-		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-				person, beginLastYear, endLastYear).fetch();
-		for(PersonDay pd : pdList){
-			if(pd.absences.size() == 1 && pd.absences.get(0).absenceType.code.equals("32"))
-				vacationDaysPastYear ++;
-		}
-
-		//con questa query vado a prendere il piano ferie previsto per la persona da cui vado a estrarre il numero di giorni di ferie 
-		//ad essa attribuiti
-
-		int residualVacationDays = vacationDaysAccrued-vacationDaysPastYear;
+		int residualVacationDays = period.vacationCode.vacationDays-vacationsLastYear.size();
 
 		return residualVacationDays;
 	}
