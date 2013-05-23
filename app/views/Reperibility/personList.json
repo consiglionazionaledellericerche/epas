@@ -1,15 +1,11 @@
 [
-  %{ 
-  	for (person in personList) {
-  		%}
-  			{
-  			"id" : "${person.id}",
+  	#{list personList, as:'person'}
+  		{
+  			"id" : ${person.id},
   			"email" : "${person.contactData.email}",
   			"name" : "${person.name}",
   			"surname" : "${person.surname}",
   			"mobile": "${person.contactData.mobile}"
-  			}${person_isLast ? '' : ','}		
-  		%{
-  	}
-  }% 
+  		}${person_isLast ? '' : ','}	
+  	#{/list}
 ]

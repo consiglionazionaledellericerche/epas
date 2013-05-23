@@ -78,7 +78,10 @@ public class Reperibility extends Controller {
 	public enum SemRep {FS1S, FR1S, FS2S, FR2S}; 
 	
 	public static void personList() {
+		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
+		
 		Long type = Long.parseLong(params.get("type"));
+		Logger.debug("Esegue la personList con type=%s", type);
 		
 		List<Person> personList = Person.find("SELECT p FROM Person p JOIN p.reperibility r WHERE r.personReperibilityType.id = ? AND (r.startDate IS NULL OR r.startDate <= now()) and (r.endDate IS NULL OR r.endDate >= now())", type).fetch();
 		Logger.debug("Reperibility personList called, found %s reperible person", personList.size());
@@ -201,7 +204,7 @@ public class Reperibility extends Controller {
 				if(pd.absences.size() > 0){
 					for(Absence abs : pd.absences){
 						absencePersonReperibilityDays.add(abs);
-						Logger.debug("Type of absence: %s", abs.absenceType);
+						Logger.debug("Type of absence:%s data:%s", abs.absenceType, abs.personDay.date);
 					}
 				}
 			}
@@ -211,10 +214,11 @@ public class Reperibility extends Controller {
 		}
 		
 		AbsenceReperibilityPeriod absenceReperibilityPeriod = null;
-		
-		Logger.trace("Trovati %s giorni di assenza", absencePersonReperibilityDays.size());
+		int i = 0;
+		Logger.trace("Trovati %s giorni di assenza totali", absenceReperibilityDays.size());
 		for (Absence abs : absenceReperibilityDays) {
-			//L'ultima parte dell'if serve per il caso in cui la stessa persona ha due periodi di reperibilità non consecutivi. 
+			i++;
+			//L'ultima parte dell'if serve per il caso in cui la stessa persona ha due periodi di assenza non consecutivi. 
 			if (absenceReperibilityPeriod == null || !absenceReperibilityPeriod.person.equals(abs.personDay.person) || !absenceReperibilityPeriod.end.plusDays(1).equals(abs.personDay.date)) {
 				absenceReperibilityPeriod = new AbsenceReperibilityPeriod(abs.personDay.person, abs.personDay.date, abs.personDay.date, (PersonReperibilityType) PersonReperibilityType.findById(type));
 				absenceReperibilityPeriods.add(absenceReperibilityPeriod);
@@ -224,7 +228,8 @@ public class Reperibility extends Controller {
 				Logger.trace("Aggiornato reperibilityPeriod, person=%s, start=%s, end=%s", absenceReperibilityPeriod.person, absenceReperibilityPeriod.start, absenceReperibilityPeriod.end);
 			}
 		}
-		Logger.debug("Find %s absenceReperibilityDays. AbsenceReperibilityPeriod = %s", absenceReperibilityPeriods.size(), absenceReperibilityPeriods.toString());
+		Logger.debug("contati %s", i);
+		Logger.debug("Find %s absenceReperibilityPeriod. AbsenceReperibilityPeriod = %s", absenceReperibilityPeriods.size(), absenceReperibilityPeriods.toString());
 		render(absenceReperibilityPeriods);
 	}
 	
