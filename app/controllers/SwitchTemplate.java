@@ -51,7 +51,7 @@ public class SwitchTemplate extends Controller{
 			day = now.getDayOfMonth();
 
 		Long personId = null;
-		Logger.debug("Il personId preso dai params vale: %s", params.get("personId"));
+		//Logger.debug("Il personId preso dai params vale: %s", params.get("personId"));
 		if (params.get("personId") != null) {
 			personId = params.get("personId", Long.class);
 			
@@ -59,7 +59,10 @@ public class SwitchTemplate extends Controller{
 
 			if(personId != 0)	
 				person = Person.findById(personId);
-		}	
+		}
+		else{
+			personId = Security.getPerson().id;
+		}
 		
 		params.flash();
 		
@@ -197,17 +200,19 @@ public class SwitchTemplate extends Controller{
 			Absences.absences(personId, year, month); 
 			break;
 		case absencesperperson:
+			if(personId == 0 || personId == null)
+				personId = Security.getPerson().id;
 			YearlyAbsences.absencesPerPerson(personId, year);
 			break;
 		case vacations:
+			if(personId == 0 || personId == null)
+				personId = Security.getPerson().id;
 			Vacations.show(personId, year);
 			break;
 		case competences:
-			if(personId == 0){
-				flash.error("Il metodo %s deve essere chiamato selezionando una persona", menuItem.getDescription());
-				Application.indexAdmin();
-			}
-			else
+			if(personId == 0 || personId == null)				
+				personId = Security.getPerson().id;
+			
 			Competences.competences(personId, year, month);
 			break;
 		case hourrecap:

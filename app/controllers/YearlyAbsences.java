@@ -1,5 +1,7 @@
 package controllers;
 
+import it.cnr.iit.epas.ActionMenuItem;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -206,10 +208,12 @@ public class YearlyAbsences extends Controller{
 		render(tableMonthlyAbsences, year, month,numberOfDifferentAbsenceType);
 
 	}
-
+	//private final static ActionMenuItem actionMenuItem = ActionMenuItem.absencesperperson;
 
 	@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void absencesPerPerson(Long personId, int year){
+	public static void absencesPerPerson(Long personId, Integer year){
+		//String menuItem = actionMenuItem.toString();
+		Logger.debug("Anno: %d Id: %d", year, personId);
 		Person person = null;
 		if(personId == 0 || personId == null)
 			person = Security.getPerson();
@@ -226,7 +230,7 @@ public class YearlyAbsences extends Controller{
 		}
 		else{
 			Logger.info("Sono dentro il ramo else della creazione del month recap");
-			YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)year);
+			YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)anno.intValue());
 			render(yearRecap);
 		}
 
