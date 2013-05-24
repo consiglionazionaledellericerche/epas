@@ -188,32 +188,28 @@ public class Reperibility extends Controller {
 		
 		// Lists of absence for a single reperibility person and for all persons
 		List<Absence> absencePersonReperibilityDays = new ArrayList<Absence>();
-		List<Absence> absenceReperibilityDays = new ArrayList<Absence>();
 		
 		// List of absence periods
 		List<AbsenceReperibilityPeriod> absenceReperibilityPeriods = new ArrayList<AbsenceReperibilityPeriod>();
 		
-		// for each person in the list read the absence days in the DB
-		for (Person person : personList) {
-			
-			List<PersonDay> personDayList = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.date BETWEEN ? AND ? AND pd.person = ? ORDER BY pd.date", from, to, person).fetch();
-			for(PersonDay pd : personDayList){
-				if(pd.absences.size() > 0){
-					for(Absence abs : pd.absences){
-						absencePersonReperibilityDays.add(abs);
-						Logger.debug("Type of absence: %s", abs.absenceType);
-					}
-				}
-			}
-			
-			Logger.debug("Absence of the person %s find called from %s to %s, found %s absence reperibility days", person.id, from, to, absenceReperibilityDays.size());
-			absenceReperibilityDays.addAll(absencePersonReperibilityDays);
-		}
 		
+		if (personList.size() == 0) {
+			render(absenceReperibilityPeriods);
+			return;
+		}
+				
 		AbsenceReperibilityPeriod absenceReperibilityPeriod = null;
 		
-		Logger.trace("Trovati %s giorni di assenza", absencePersonReperibilityDays.size());
-		for (Absence abs : absenceReperibilityDays) {
+		absencePersonReperibilityDays = JPA.em().createQuery("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date BETWEEN :from AND :to AND pd.person IN (:personList) ORDER BY pd.person.id, pd.date")
+			.setParameter("from", from)
+			.setParameter("to", to)
+			.setParameter("personList", personList)
+			.getResultList();
+		
+		
+		Logger.debug("Trovati %s giorni di assenza", absencePersonReperibilityDays.size());
+		
+		for (Absence abs : absencePersonReperibilityDays) {
 			//L'ultima parte dell'if serve per il caso in cui la stessa persona ha due periodi di reperibilità non consecutivi. 
 			if (absenceReperibilityPeriod == null || !absenceReperibilityPeriod.person.equals(abs.personDay.person) || !absenceReperibilityPeriod.end.plusDays(1).equals(abs.personDay.date)) {
 				absenceReperibilityPeriod = new AbsenceReperibilityPeriod(abs.personDay.person, abs.personDay.date, abs.personDay.date, (PersonReperibilityType) PersonReperibilityType.findById(type));
