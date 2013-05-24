@@ -211,7 +211,7 @@ public class YearlyAbsences extends Controller{
 	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void absencesPerPerson(Long personId, int year){
 		Person person = null;
-		if(personId == 0)
+		if(personId == 0 || personId == null)
 			person = Security.getPerson();
 		else
 			person = Person.findById(personId);
