@@ -345,7 +345,7 @@ public class FromMysqlToPostgres {
 
 		}
 		else{ 
-			Logger.warn("Validazione numero di telefono non avvenuta. No phone number");
+			Logger.info("Validazione numero di telefono non avvenuta. No phone number");
 			contactData.telephone = null;		
 		}
 		contactData.save();
@@ -382,7 +382,7 @@ public class FromMysqlToPostgres {
 
 		long absenceTypeCount = AbsenceType.count();
 		if (absenceTypeCount > 0) {
-			Logger.warn("Sono già presenti %s AbsenceType nell'applicazione, non verranno importati nuovi AbsenceType dalla vecchia applicazione");
+			Logger.info("Sono già presenti %s AbsenceType nell'applicazione, non verranno importati nuovi AbsenceType dalla vecchia applicazione");
 			return 0;
 		}
 		int importedAbsenceTypes = 0;
@@ -411,7 +411,7 @@ public class FromMysqlToPostgres {
 
 
 			if (rsCodici.getInt("QuantGiust") == 22) {
-				Logger.warn("Il tipo di assenza %s non e' stato importato perche' le assenze con \"Assegna tempo del'orario di lavoro\" non sono " +
+				Logger.info("Il tipo di assenza %s non e' stato importato perche' le assenze con \"Assegna tempo del'orario di lavoro\" non sono " +
 						"più gestite come assenze ma come casi particolari dei PersonDay (gestiti con appositi boolean isTimeAtWorkAutoCertificated e isWorkingInAnotherPlace)",
 						absenceType.description);
 				continue;
@@ -535,7 +535,7 @@ public class FromMysqlToPostgres {
 
 		Long workingTimeTypeCount = WorkingTimeType.count();
 		if (workingTimeTypeCount > 1) {
-			Logger.warn("Ci sono %s WorkingTimeType presenti nel database, i workingTimeType NON verranno importati dal database MySQL", workingTimeTypeCount);
+			Logger.info("Ci sono %s WorkingTimeType presenti nel database, i workingTimeType NON verranno importati dal database MySQL", workingTimeTypeCount);
 			return 0;
 		}
 
@@ -905,7 +905,7 @@ public class FromMysqlToPostgres {
 		}
 
 		if (vacationPeriod == null) {
-			Logger.warn("Non ci sono Periodi di Ferie impostati per %s", person);
+			Logger.info("Non ci sono Periodi di Ferie impostati per %s", person);
 		}
 
 	}
@@ -1158,7 +1158,7 @@ public class FromMysqlToPostgres {
 			stamping.way = WayType.out;
 
 		if(oldTime == null){
-			Logger.warn("L'ora è nulla nella timbratura del %s per la persona %s e non verrà inserita", pd.date, pd.person.toString());
+			Logger.info("L'ora è nulla nella timbratura del %s per la persona %s e non verrà inserita", pd.date, pd.person.toString());
 			return; 
 		}
 		String s = oldTime != null ? new String(oldTime) : null;
