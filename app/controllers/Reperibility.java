@@ -191,34 +191,28 @@ public class Reperibility extends Controller {
 		
 		// Lists of absence for a single reperibility person and for all persons
 		List<Absence> absencePersonReperibilityDays = new ArrayList<Absence>();
-		List<Absence> absenceReperibilityDays = new ArrayList<Absence>();
 		
 		// List of absence periods
 		List<AbsenceReperibilityPeriod> absenceReperibilityPeriods = new ArrayList<AbsenceReperibilityPeriod>();
-		
-		// for each person in the list read the absence days in the DB
-		for (Person person : personList) {
-			
-			List<PersonDay> personDayList = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.date BETWEEN ? AND ? AND pd.person = ? ORDER BY pd.date", from, to, person).fetch();
-			for(PersonDay pd : personDayList){
-				if(pd.absences.size() > 0){
-					for(Absence abs : pd.absences){
-						absencePersonReperibilityDays.add(abs);
-						Logger.debug("Type of absence:%s data:%s", abs.absenceType, abs.personDay.date);
-					}
-				}
-			}
-			
-			Logger.debug("Absence of the person %s find called from %s to %s, found %s absence reperibility days", person.id, from, to, absenceReperibilityDays.size());
-			absenceReperibilityDays.addAll(absencePersonReperibilityDays);
+
+		if (personList.size() == 0) {
+			render(absenceReperibilityPeriods);
+			return;
 		}
-		
+				
 		AbsenceReperibilityPeriod absenceReperibilityPeriod = null;
-		int i = 0;
-		Logger.trace("Trovati %s giorni di assenza totali", absenceReperibilityDays.size());
-		for (Absence abs : absenceReperibilityDays) {
-			i++;
-			//L'ultima parte dell'if serve per il caso in cui la stessa persona ha due periodi di assenza non consecutivi. 
+		
+		absencePersonReperibilityDays = JPA.em().createQuery("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date BETWEEN :from AND :to AND pd.person IN (:personList) ORDER BY pd.person.id, pd.date")
+			.setParameter("from", from)
+			.setParameter("to", to)
+			.setParameter("personList", personList)
+			.getResultList();
+		
+		
+		Logger.debug("Trovati %s giorni di assenza", absencePersonReperibilityDays.size());
+		
+		for (Absence abs : absencePersonReperibilityDays) {
+			//L'ultima parte dell'if serve per il caso in cui la stessa persona ha due periodi di reperibilità non consecutivi. 
 			if (absenceReperibilityPeriod == null || !absenceReperibilityPeriod.person.equals(abs.personDay.person) || !absenceReperibilityPeriod.end.plusDays(1).equals(abs.personDay.date)) {
 				absenceReperibilityPeriod = new AbsenceReperibilityPeriod(abs.personDay.person, abs.personDay.date, abs.personDay.date, (PersonReperibilityType) PersonReperibilityType.findById(type));
 				absenceReperibilityPeriods.add(absenceReperibilityPeriod);
@@ -228,7 +222,6 @@ public class Reperibility extends Controller {
 				Logger.trace("Aggiornato reperibilityPeriod, person=%s, start=%s, end=%s", absenceReperibilityPeriod.person, absenceReperibilityPeriod.start, absenceReperibilityPeriod.end);
 			}
 		}
-		Logger.debug("contati %s", i);
 		Logger.debug("Find %s absenceReperibilityPeriod. AbsenceReperibilityPeriod = %s", absenceReperibilityPeriods.size(), absenceReperibilityPeriods.toString());
 		render(absenceReperibilityPeriods);
 	}
