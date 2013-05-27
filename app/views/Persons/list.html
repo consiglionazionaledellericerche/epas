@@ -37,13 +37,13 @@
 	<tr>
 	%{if(activePerson.contains(person)){
 	}%
-		<td><a href="@{edit(person.id)}"><font color="#000000">${person.surname}</font></a></td>
+		<td><a href="@{edit(person.id)}"><font color="#0000FF">${person.surname}</font></a></td>
 		<td><font color="#000000">${person.name}</font></td>
 		<td><font color="#000000">${person.number}</font></td>
 		<td><font color="#000000">${person.getCurrentContract() != null ? person.getCurrentContract().beginContract : ''}</font></td>
 		<td><font color="#000000">${person.getCurrentContract() != null ? person.getCurrentContract().expireContract : ''}</font></td>
-		<td><a href="@{editWorkingTime(person.id)}"><font color="#000000">${person.workingTimeType != null && person.workingTimeType.description != null ? person.workingTimeType.description : ''}</font></a></td>
-		<td><a href="@{editVacation(person.id)}"><font color="#000000">${person.getVacation() != null ? person.getVacation().description : ''}</font></a></td>
+		<td><a href="@{editWorkingTime(person.id)}"><font color="#0000FF">${person.workingTimeType != null && person.workingTimeType.description != null ? person.workingTimeType.description : ''}</font></a></td>
+		<td><a href="@{editVacation(person.id)}"><font color="#0000FF">${person.getVacation() != null ? person.getVacation().description : ''}</font></a></td>
 		<td><font color="#000000">${person.getQualification() != null ? person.getQualification().qualification : ''}</font></td>
 		<td>${''}</td>
 		<td><font color="#000000">${person.getLocation() != null ? person.location.department : ''}</font></td>
