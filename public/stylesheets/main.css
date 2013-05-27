@@ -270,6 +270,7 @@ p#caricamentoSituazioneMensile {margin: 1em 0em 2em; text-align: center}
 p#tipoTimbraturaClock {margin: 3em 0em 2em; text-align: center; font-size: 18px; }
 p#choiceClock {text-align: center; font-size: 18px;}
 p#descrizioneStampaCartellino {margin:3em 0em 4em}
+p#inserisciAmministratore {margin: 2em 0em 0em}
 
 div#logout {text-align: right; float: right}
 div#chooseView {text-align: center}
@@ -319,6 +320,7 @@ h3#titoloCambioPassword {text-align: center}
 h3#caricamentoSituazioneMensile {text-align: center}
 h3#clock {text-align: center}
 h3#riepilogoMensile {text-align: center; margin: 2em 0em 1em}
+h3#utentiEsistenti {text-align: center}
 iframe#clock {align: center; margin: 3em 58em 0em}
 
 h4#configurazioniEsistenti {margin:2em 0em 1em; text-align: left}
