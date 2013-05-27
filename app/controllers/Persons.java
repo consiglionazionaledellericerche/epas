@@ -162,9 +162,11 @@ public class Persons extends Controller {
 	public static void list(){
 
 		List<Person> personList = Person.find("Select p from Person p where p.name <> ? order by p.surname", "Admin").fetch();
-		Logger.debug("La lista delle persone: %s", personList.toString());
+		//Logger.debug("La lista delle persone: %s", personList.toString());
+		LocalDate date = new LocalDate();
+		List<Person> activePerson = Person.getActivePersons(date);
 		
-		render(personList);
+		render(personList, activePerson);
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
