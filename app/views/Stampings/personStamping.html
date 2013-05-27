@@ -88,7 +88,7 @@
 				<strong>${(day.stampingList().get(j).stampType?.identifier)}</strong>
 				<script type="text/javascript"> 
 				$('.insertStamping${day.date.dayOfMonth}-${j}').popupWindow({ 
-				height:500, 
+				height:600, 
 				width:800, 
 				top:50, 
 				left:50 
@@ -112,7 +112,7 @@
 					<strong>${(day.stampingList().get(j+1).stampType?.identifier)}</strong> 
 				<script type="text/javascript"> 
 				$('.insertStamping${day.date.dayOfMonth}-${j+1}').popupWindow({ 
-				height:500, 
+				height:600, 
 				width:800, 
 				top:50, 
 				left:50 
@@ -130,8 +130,8 @@
 			<td class="inserisciTimbratura"><a href="@{Stampings.create(day.person.id, day.date.year, day.date.monthOfYear, day.date.dayOfMonth)}" class="insertStamping${day.date.dayOfMonth}">+++</a>
 				<script type="text/javascript"> 
 				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
-				height:600, 
-				width:1000, 
+				height:800, 
+				width:900, 
 				top:50, 
 				left:50 
 				}); 
