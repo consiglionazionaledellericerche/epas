@@ -894,7 +894,7 @@ public class PersonDay extends Model {
 					String.format("E' presente più di uno StampProfile per %s per la data %s", person, date));
 		}
 		if (stampProfiles.isEmpty()) {
-			Logger.warn("Non è presente uno StampProfile per %s con data %s", person, date);
+			Logger.info("Non è presente uno StampProfile per %s con data %s", person, date);
 			return null;
 		}
 		return stampProfiles.get(0);
