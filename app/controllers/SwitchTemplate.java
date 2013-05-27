@@ -216,6 +216,8 @@ public class SwitchTemplate extends Controller{
 			Competences.competences(personId, year, month);
 			break;
 		case hourrecap:
+			if(personId == 0 || personId == null)				
+				personId = Security.getPerson().id;
 			PersonMonths.hourRecap(personId,year);
 			break;
 
