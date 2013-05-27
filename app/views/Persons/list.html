@@ -35,21 +35,44 @@
 }%
 
 	<tr>
-		<td><a href="@{edit(person.id)}">${person.surname}</a></td>
-		<td>${person.name}</td>
-		<td>${person.number}</td>
-		<td>${person.getCurrentContract() != null ? person.getCurrentContract().beginContract : ''}</td>
-		<td>${person.getCurrentContract() != null ? person.getCurrentContract().expireContract : ''}</td>
-		<td><a href="@{editWorkingTime(person.id)}">${person.workingTimeType != null && person.workingTimeType.description != null ? person.workingTimeType.description : ''}</a></td>
-		<td><a href="@{editVacation(person.id)}">${person.getVacation() != null ? person.getVacation().description : ''}</a></td>
-		<td>${person.getQualification() != null ? person.getQualification().qualification : ''}</td>
+	%{if(activePerson.contains(person)){
+	}%
+		<td><a href="@{edit(person.id)}"><font color="#000000">${person.surname}</font></a></td>
+		<td><font color="#000000">${person.name}</font></td>
+		<td><font color="#000000">${person.number}</font></td>
+		<td><font color="#000000">${person.getCurrentContract() != null ? person.getCurrentContract().beginContract : ''}</font></td>
+		<td><font color="#000000">${person.getCurrentContract() != null ? person.getCurrentContract().expireContract : ''}</font></td>
+		<td><a href="@{editWorkingTime(person.id)}"><font color="#000000">${person.workingTimeType != null && person.workingTimeType.description != null ? person.workingTimeType.description : ''}</font></a></td>
+		<td><a href="@{editVacation(person.id)}"><font color="#000000">${person.getVacation() != null ? person.getVacation().description : ''}</font></a></td>
+		<td><font color="#000000">${person.getQualification() != null ? person.getQualification().qualification : ''}</font></td>
 		<td>${''}</td>
-		<td>${person.getLocation() != null ? person.location.department : ''}</td>
-		<td>${person.getLocation() != null ? person.location.headOffice : '' }</td>
-		<td>${person.contactData != null && !person.contactData.telephone.equals('No phone number') ? person.contactData.telephone : ''}</td>
-		<td>${person.location != null ? person.location.room : ''}</td>
-		<td>${person.contactData != null ? person.contactData.email : ''}</td>
+		<td><font color="#000000">${person.getLocation() != null ? person.location.department : ''}</font></td>
+		<td><font color="#000000">${person.getLocation() != null ? person.location.headOffice : '' }</font></td>
+		<td><font color="#000000">${person.contactData != null && !person.contactData.telephone.equals('No phone number') ? person.contactData.telephone : ''}</font></td>
+		<td><font color="#000000">${person.location != null ? person.location.room : ''}</font></td>
+		<td><font color="#000000">${person.contactData != null ? person.contactData.email : ''}</font></td>
 		<td>${}</td>
+	%{
+	}else{
+	}%	
+		<td><a href="@{edit(person.id)}"><font color="#808080">${person.surname}</font></a></td>
+		<td><font color="#808080">${person.name}</font></td>
+		<td><font color="#808080">${person.number}</font></td>
+		<td><font color="#808080">${person.getCurrentContract() != null ? person.getCurrentContract().beginContract : ''}</font></td>
+		<td><font color="#808080">${person.getCurrentContract() != null ? person.getCurrentContract().expireContract : ''}</font></td>
+		<td><a href="@{editWorkingTime(person.id)}"><font color="#808080">${person.workingTimeType != null && person.workingTimeType.description != null ? person.workingTimeType.description : ''}</font></a></td>
+		<td><a href="@{editVacation(person.id)}"><font color="#808080">${person.getVacation() != null ? person.getVacation().description : ''}</font></a></td>
+		<td><font color="#808080">${person.getQualification() != null ? person.getQualification().qualification : ''}</font></td>
+		<td>${''}</td>
+		<td><font color="#808080">${person.getLocation() != null ? person.location.department : ''}</font></td>
+		<td><font color="#808080">${person.getLocation() != null ? person.location.headOffice : '' }</font></td>
+		<td><font color="#808080">${person.contactData != null && !person.contactData.telephone.equals('No phone number') ? person.contactData.telephone : ''}</font></td>
+		<td><font color="#808080">${person.location != null ? person.location.room : ''}</font></td>
+		<td><font color="#808080">${person.contactData != null ? person.contactData.email : ''}</font></td>
+		<td>${}</td>
+	%{
+	}
+	}%
 	</tr>
 
 %{  		   
