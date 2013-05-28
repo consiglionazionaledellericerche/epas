@@ -66,7 +66,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 				if (badgeReader == null) {
 					//throw new IllegalArgumentException(
 					//	String.format("Lettore con codice %s sconosciuto. Abilitare in configurazione", badgeReaderCode));
-					Logger.info("Lettore di badge con codice %s non presente sul database/sconosciuto", badgeReaderCode);
+					Logger.warn("Lettore di badge con codice %s non presente sul database/sconosciuto", badgeReaderCode);
 				}
 				stamping.badgeReader = badgeReader;
 			}
