@@ -893,10 +893,11 @@ public class PersonDay extends Model {
 			throw new IllegalStateException(
 					String.format("E' presente più di uno StampProfile per %s per la data %s", person, date));
 		}
-		if (!stampProfiles.isEmpty()) {
-			Logger.info("E' presente uno StampProfile per %s con data %s", person, date);
+		if (stampProfiles.isEmpty()) {
+			
 			return null;
 		}
+		Logger.info("E' presente uno StampProfile per %s con data %s", person, date);
 		return stampProfiles.get(0);
 	}
 
