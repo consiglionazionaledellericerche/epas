@@ -533,7 +533,7 @@ public class PersonDay extends Model {
 			setTicketAvailable();
 			merge();
 		} else {
-			Logger.info("I calcoli sul giorno %s non vengono effettuati perché %s non ha un contratto attivo in questa data", date, person);
+			Logger.info("I calcoli sul giorno %s non vengono effettuati perche' %s non ha un contratto attivo in questa data", date, person);
 		}
 	}
 
@@ -897,7 +897,7 @@ public class PersonDay extends Model {
 			
 			return null;
 		}
-		Logger.info("E' presente uno StampProfile per %s con data %s", person, date);
+		Logger.trace("E' presente uno StampProfile per %s con data %s", person, date);
 		return stampProfiles.get(0);
 	}
 
