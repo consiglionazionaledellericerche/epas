@@ -897,7 +897,7 @@ public class PersonDay extends Model {
 			
 			return null;
 		}
-		Logger.info("E' presente uno StampProfile per %s con data %s", person, date);
+		Logger.trace("E' presente uno StampProfile per %s con data %s", person, date);
 		return stampProfiles.get(0);
 	}
 
