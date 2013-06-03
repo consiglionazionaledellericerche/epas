@@ -26,6 +26,7 @@ public class StampingsFromClient extends Controller{
 			return "OK";
 		}
 		
+		
 		return "KO";
 	}
 }

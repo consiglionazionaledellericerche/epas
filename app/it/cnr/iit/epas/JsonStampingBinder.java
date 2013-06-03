@@ -95,46 +95,102 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 			 * Nel campo matricolaFirma decido di riportare il valore dell'id con cui viene salvata la persona sul db invece che la 
 			 * matricola
 			 */
-			String matricolaFirma = jsonObject.get("matricolaFirma").getAsString();
-			Logger.debug("La matricola firma è del tipo: %s", matricolaFirma);
-			if(matricolaFirma.contains("INT")){
-				Logger.debug("Sono entrato nel controllo if delle matricole di tipo 000000INT123");
-				/**
-				 * in questo caso dal client arriva la timbratura con la firma specificata secondo lo schema INT123.
-				 * Si fa quindi una substring sulla matricolafirma e ciò che si ottiene è l'id di tipo long per fare la ricerca sulla
-				 * tabella persone per capire a chi è relativa quella timbratura...
-				 * 
-				 * ho aggiunto il campo oldId alla tabella Person e con quello farò la query per recuperare la persona 
-				 */
-				String lessSign = matricolaFirma.substring(14,matricolaFirma.length());
-				Logger.debug("L'id recuperato è: %s", lessSign);
-				long personId = Long.parseLong(lessSign);
-				
-				//person = Person.findById(personId);
-				//if(person == null){
-				person = Person.find("Select p from Person p where p.oldId = ?", personId).first();
-				Logger.debug("La persona è: %s %s", person.name, person.surname);
-					
-				//}
-				
-				stamping.matricolaFirma = person.oldId;
-			}
-			else{
-				/**
-				 * si cerca se quel che è stato passato può essere il campo "number" (matricola) della tabella Person
-				 */
-				int firma = Integer.parseInt(matricolaFirma);
-				person = Person.find("Select p from Person p where p.number = ?", firma).first();
-				if(person == null){
+			JsonArray tipoMatricola = jsonObject.getAsJsonArray("tipoMatricolaFirma");
+			Logger.debug("L'array json di tipoMatricola: %s", tipoMatricola);
+			int i = 0;
+			boolean found = false;
+			while(i < tipoMatricola.size() || found == false){
+				String tipo = tipoMatricola.get(i).getAsString();
+				Logger.debug("Il tipo rilevato è: %s", tipo);
+				if(tipo.equals("matricolaCNR")){
 					/**
-					 * la persona ritornata è null, quindi si cerca sempre su tabella Person però restringendo sul campo badgeNumber
-					 * (matricolaBadge)
+					 * il primo elemento in cui andare a fare la ricerca è la matricolaCNR, quindi vado sul db a fare la ricerca partendo da 
+					 * quel campo. se lo trovo ok ed esco, altrimenti proseguo nel for a cercare con il tipo successivo
 					 */
-					person = Person.find("Select p from Person p where p.badgeNumber = ?", matricolaFirma).first();
+					String matricolaFirma = jsonObject.get("matricolaFirma").getAsString();
+					
+					int firma = Integer.parseInt(matricolaFirma);
+					person = Person.find("Select p from Person p where p.number = ?", firma).first();
+					if(person != null){
+						found = true;
+						stamping.matricolaFirma = (long)firma;
+					}
+					else
+						i++;
+				}
+				if(tipo.equals("idTabellaINT")){
+					String matricolaFirma = jsonObject.get("matricolaFirma").getAsString();
+					/**
+					 * implementare il controllo di come fare a prendere solo i numeri della stringa contenente INT 
+					 */
+					long personId = returnNumber(matricolaFirma);
+					person = Person.find("Select p from Person p where p.oldId = ?", personId).first();
+					if(person != null){
+						found = true;
+						stamping.matricolaFirma = personId;
+					}
+					else
+						i++;
 					
 				}
-				stamping.matricolaFirma = person.id;
-			}						
+				if(tipo.equals("matricolaBadge")){
+					String matricolaFirma = jsonObject.get("matricolaFirma").getAsString();
+					int badgeNumber = Integer.parseInt(matricolaFirma);
+					person = Person.find("Select p from Person p where p.badgeNumber = ?", badgeNumber).first();
+					if(person != null){
+						found = true;
+						stamping.matricolaFirma = new Long(badgeNumber);
+					}
+					else
+						i++;
+				}
+				
+			}	
+			if(stamping.matricolaFirma == null){
+				Logger.warn("Non è stato possibile recuperare l'id della persona a cui si riferisce la timbratura. Controllare il database");
+			}
+			
+			
+//			String matricolaFirma = jsonObject.get("matricolaFirma").getAsString();
+//			Logger.debug("La matricola firma è del tipo: %s", matricolaFirma);
+//			if(matricolaFirma.contains("INT")){
+//				Logger.debug("Sono entrato nel controllo if delle matricole di tipo 000000INT123");
+//				/**
+//				 * in questo caso dal client arriva la timbratura con la firma specificata secondo lo schema INT123.
+//				 * Si fa quindi una substring sulla matricolafirma e ciò che si ottiene è l'id di tipo long per fare la ricerca sulla
+//				 * tabella persone per capire a chi è relativa quella timbratura...
+//				 * 
+//				 * ho aggiunto il campo oldId alla tabella Person e con quello farò la query per recuperare la persona 
+//				 */
+//				String lessSign = matricolaFirma.substring(14,matricolaFirma.length());
+//				Logger.debug("L'id recuperato è: %s", lessSign);
+//				long personId = Long.parseLong(lessSign);
+//				
+//				//person = Person.findById(personId);
+//				//if(person == null){
+//				person = Person.find("Select p from Person p where p.oldId = ?", personId).first();
+//				Logger.debug("La persona è: %s %s", person.name, person.surname);
+//					
+//				//}
+//				
+//				stamping.matricolaFirma = person.oldId;
+//			}
+//			else{
+//				/**
+//				 * si cerca se quel che è stato passato può essere il campo "number" (matricola) della tabella Person
+//				 */
+//				int firma = Integer.parseInt(matricolaFirma);
+//				person = Person.find("Select p from Person p where p.number = ?", firma).first();
+//				if(person == null){
+//					/**
+//					 * la persona ritornata è null, quindi si cerca sempre su tabella Person però restringendo sul campo badgeNumber
+//					 * (matricolaBadge)
+//					 */
+//					person = Person.find("Select p from Person p where p.badgeNumber = ?", matricolaFirma).first();
+//					
+//				}
+//				stamping.matricolaFirma = person.id;
+//			}						
 						
 			Integer anno = jsonObject.get("anno").getAsInt();
 			Integer mese = jsonObject.get("mese").getAsInt();
@@ -150,7 +206,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 				throw new IllegalArgumentException("Uno dei parametri relativi alla data è risultato nullo. Impossibile crearla.");
 			}
 			
-			Logger.debug("Effettuato il binding, stampingFromClient = %s", stamping);
+			Logger.debug("Effettuato il binding, stampingFromClient = %s", stamping.toString());
 			
 			return stamping;
 			
@@ -159,6 +215,40 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 			Logger.error(e, "Problem during binding StampingFromClient.");
 			throw e;
 		}
+	}
+	
+	/**
+	 * 
+	 * @param firma
+	 * @return il long estratto dalla stringa passata come parametro
+	 */
+	private long returnNumber(String firma){
+		String matricola = "";
+		String nuovaMatricola = "";
+		int j = 0;
+		int found = 0;
+		while(j < firma.length()){
+			if(firma.charAt(j)=='I')
+				found = j;
+			if((firma.charAt(j)!='0' && j >= found) || (firma.charAt(j)=='0' && found != 0))
+				nuovaMatricola = nuovaMatricola+firma.charAt(j);
+			j++;
+		}
+		System.out.println(nuovaMatricola);
+		int k = 0;
+		while(k < nuovaMatricola.length()){
+			System.out.println(nuovaMatricola.charAt(k));
+			if((nuovaMatricola.charAt(k)=='I') || (nuovaMatricola.charAt(k)=='N') || (nuovaMatricola.charAt(k)=='T')){
+				System.out.print("Azz");
+				
+			}
+			else
+				matricola = matricola+nuovaMatricola.charAt(k);
+			k++;
+		}
+
+		long convert = Long.parseLong(matricola);
+		return convert;
 	}
 	
 //	public static void main(String[]args){
