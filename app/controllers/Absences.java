@@ -45,9 +45,9 @@ public class Absences extends Controller{
 	//@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void absences(Long personId, Integer year, Integer month) {
 		Person person = null;
-		Logger.debug("Il valore tra i params dell'id della persona è: %d", params.get("personId", Long.class));
+		//Logger.debug("Il valore tra i params dell'id della persona è: %d", params.get("personId", Long.class));
 		person = Security.getPerson();
-		Logger.debug("La persona presa dal security è: %s %s", person.name, person.surname);
+		//Logger.debug("La persona presa dal security è: %s %s", person.name, person.surname);
 		//		if(personId == null)
 		//			person = Person.findById(params.get("personId", Long.class));
 		//		else
@@ -64,8 +64,8 @@ public class Absences extends Controller{
 			render(personMonth);
 		}
 		else{
-			Logger.debug("Sono dentro il ramo else della creazione del month recap");
-			Logger.debug("Il month recap è formato da: " +person.id+ ", " +year.intValue()+ ", " +month.intValue());
+			//Logger.debug("Sono dentro il ramo else della creazione del month recap");
+			//Logger.debug("Il month recap è formato da: " +person.id+ ", " +year.intValue()+ ", " +month.intValue());
 
 			render(personMonth);
 		}

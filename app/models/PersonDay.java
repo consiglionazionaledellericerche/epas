@@ -910,11 +910,12 @@ public class PersonDay extends Model {
 	public PersonDay checkPreviousProgressive(){
 		PersonDay pd = null;
 		if(date.getDayOfMonth() != 1){
+
 			pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date.minusDays(1)).first();
 			if(pd != null)
 				return pd;
 			else{
-				pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date.minusDays(2)).first();
+				pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date < ? order by pd.date desc", person, date.minusDays(1)).first();
 				return pd;
 			}
 		}
