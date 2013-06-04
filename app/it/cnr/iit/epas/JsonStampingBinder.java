@@ -114,6 +114,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 					if(person != null){
 						found = true;
 						stamping.matricolaFirma = (long)firma;
+						continue;
 					}
 					else
 						i++;
@@ -128,6 +129,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 					if(person != null){
 						found = true;
 						stamping.matricolaFirma = personId;
+						continue;
 					}
 					else
 						i++;
@@ -140,6 +142,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 					if(person != null){
 						found = true;
 						stamping.matricolaFirma = new Long(badgeNumber);
+						continue;
 					}
 					else
 						i++;
