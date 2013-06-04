@@ -101,7 +101,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 			boolean found = false;
 			while(i < tipoMatricola.size() || found == false){
 				String tipo = tipoMatricola.get(i).getAsString();
-				Logger.debug("Il tipo rilevato è: %s", tipo);
+				//Logger.debug("Il tipo rilevato è: %s", tipo);
 				if(tipo.equals("matricolaCNR")){
 					/**
 					 * il primo elemento in cui andare a fare la ricerca è la matricolaCNR, quindi vado sul db a fare la ricerca partendo da 
