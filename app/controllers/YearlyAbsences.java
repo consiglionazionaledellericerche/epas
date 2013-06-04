@@ -107,7 +107,7 @@ public class YearlyAbsences extends Controller{
 			render(yearRecap);
 		}
 		else{
-			Logger.info("Sono dentro il ramo else della creazione dell'yearRecap");
+			//Logger.info("Sono dentro il ramo else della creazione dell'yearRecap");
 			//Integer year = new Integer(params.get("year"));
 			//	PersonMonth personMonth = PersonMonth.byPersonAndYearAndMonth(person, year, month);
 			YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)year);
@@ -229,7 +229,7 @@ public class YearlyAbsences extends Controller{
 			render(yearRecap);
 		}
 		else{
-			Logger.info("Sono dentro il ramo else della creazione del month recap");
+			//Logger.info("Sono dentro il ramo else della creazione del month recap");
 			YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)anno.intValue());
 			render(yearRecap);
 		}

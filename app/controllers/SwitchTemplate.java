@@ -28,6 +28,7 @@ public class SwitchTemplate extends Controller{
 		ActionMenuItem menuItem = ActionMenuItem.valueOf(method);
 		Logger.debug("Nella switchTemplate Il menuItem è: %s relativo alla action: %s", menuItem, method);
 		Person person = Security.getPerson();
+		Logger.debug("L'id della persona loggata è: %d", person.id);
 		
 		int month;
 		if (params.get("month") != null) {

@@ -263,7 +263,7 @@ public class YearRecap extends Model{
 				}
 			}
 		}
-		Logger.warn("ListaAssenze: " +listaTipiAssenze);
+		//Logger.warn("ListaAssenze: " +listaTipiAssenze);
 		if(mappaAssenze.isEmpty()){
 			Integer i = 0;
 			for(AbsenceType absenceType : listaTipiAssenze){
@@ -282,7 +282,7 @@ public class YearRecap extends Model{
 			}
 		}
 
-		Logger.warn("mappaAssenze: " +mappaAssenze);
+		//Logger.warn("mappaAssenze: " +mappaAssenze);
 		return mappaAssenze;
 	}
 	
@@ -538,7 +538,7 @@ public class YearRecap extends Model{
 		//		Absence.find("Select abs from Absence abs, AbsenceType abt where abs.person = ? " +
 		//				"and (abs.date between ? and ? and abs.absenceType = abt and abt.code = ? or abs.date between ? and ? and abs.absenceType = abt and abt.code = ?)", 
 		//				person, beginLastYear, endLastYear, "32", getBeginYear(), now,  "31").fetch();
-		Logger.debug("Il numero di ferie dell'anno  scorso è: %s", vacations.size());
+		//Logger.debug("Il numero di ferie dell'anno  scorso è: %s", vacations.size());
 		return vacations;
 	}
 
@@ -562,7 +562,7 @@ public class YearRecap extends Model{
 				
 			}
 		}	
-		Logger.debug("Il numero di ferie di quest'anno è: %s", vacations.size());
+		//Logger.debug("Il numero di ferie di quest'anno è: %s", vacations.size());
 		return vacations;
 	}
 
