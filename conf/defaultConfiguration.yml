@@ -1,7 +1,8 @@
 Configuration(defaultConfiguration):
+    inUse: true
     initUseProgram: 2012-07-30
     beginDate: 2010-01-01
-    endDate: 2014-01-01
+    endDate: 2099-12-31
     instituteName: IIT
     emailToContact:
     seatCode: 223400

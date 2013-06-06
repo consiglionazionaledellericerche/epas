@@ -13,13 +13,23 @@
 <table>
   <tr>
     <th>ID</th>
-    <th>Name</th>
+    <th>Nome</th>
+    <th>In uso</th>
   </tr>
   %{ for(conf in configList){
   }%
   <tr>
     <td>${conf.id}</td>
     <td><a href="@{Configurations.edit(conf.id)}">${conf.beginDate.convertToLocalDate()}</a></td>
+    %{ if(conf.inUse == true){
+    }%
+    <td><input type="checkbox" value="" name="inUse" checked="checked"/></td>
+    %{
+    }else{
+    <td><input type="checkbox" value="" name="inUse" /></td>
+    %{
+    }
+    }%
   </tr>
   %{
   }
