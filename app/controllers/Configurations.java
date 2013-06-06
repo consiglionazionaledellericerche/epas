@@ -33,7 +33,13 @@ public class Configurations extends Controller{
 			configId = params.get("configId", Long.class);
 		Logger.debug("L'id della configurazione è: %d", configId);
 		if(configId == null){
+			Configuration lastConfiguration = Configuration.getCurrentConfiguration();
+			lastConfiguration.inUse = false;
+			lastConfiguration.save();
+			
+			
 			Configuration config = new Configuration();
+			config.inUse = true;
 			config.beginDate = params.get("inizioValiditaParametri", Date.class);
 			config.endDate = params.get("fineValiditaParametri", Date.class);
 			config.initUseProgram = params.get("inizioUsoProgramma", Date.class);
@@ -105,6 +111,7 @@ public class Configurations extends Controller{
 			config.canPeopleUseWebStamping = params.get("configurazioneTimbraturaWeb", Boolean.class);
 			
 			
+			
 			config.save();
 			flash.success(String.format("Configurazione salvata con successo!"));
 			Application.indexAdmin();
@@ -112,8 +119,12 @@ public class Configurations extends Controller{
 		else{
 			Configuration config = Configuration.findById(configId);
 			Logger.debug("La configurazione caricata è: %s", config);
-			String dataI = params.get("inizioValiditaParametri");
 			
+			
+			if(params.get("inUse", Boolean.class) != config.inUse){
+				config.inUse = params.get("inUse", Boolean.class);
+			}
+			String dataI = params.get("inizioValiditaParametri");
 			LocalDate dataInizio = new LocalDate(dataI);
 			Logger.debug("Data inizio configurazione: %s", dataInizio);
 			if(dataInizio.toDate().compareTo(config.beginDate) != 0)
