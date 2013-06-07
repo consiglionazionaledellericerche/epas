@@ -145,24 +145,26 @@ public class PersonDay extends Model {
 		//merge();
 		//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
 		int tempoLavoro = 0;
-		LocalDateTime beginDate = new LocalDateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),0,0);
-		LocalDateTime endDate = new LocalDateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),23,59);
+		LocalDateTime beginDate = new LocalDateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),0,0,0);
+		LocalDateTime endDate = new LocalDateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),23,59,59);
 		StampProfile stampProfile = getStampProfile();
 		List<Stamping> reloadedStampings = Stamping.find("Select st from Stamping st where st.personDay = ? and " +
 				"st.date > ? and st.date < ? order by st.date", this, beginDate, endDate).fetch();
 		/**
-		 * controllo sulla possibilità che esistano timbratrure di ingresso nel giorno precedente senza corrispondenti timbrature di uscita
+		 * controllo sulla possibilità che esistano timbrature di ingresso nel giorno precedente senza corrispondenti timbrature di uscita
 		 * se non la mattina seguente prima dell'orario di scadenza del controllo sulla timbratura stessa
 		 */
 		PersonUtility.checkExitStampNextDay(this);
-		if((stampings.size() == 0 && absences.size() == 0) || (stampings.size() == 1 && stampings.get(0).way == WayType.in)){
-			//timeAtWork = (-1)*getWorkingTimeTypeDay().workingTime;
+		
+
+		//Se non c'è almeno una coppia di timbrature e non ci sono assenze allora sicuramente il tempo di lavoro è zero 
+		if((stampings.size() < 2 && absences.size() == 0)){
 			timeAtWork = 0;
 			save();
 			return;
 		}
 
-		if(isHoliday()==true && stampings.size() > 0){
+		if(isHoliday() && stampings.size() > 0){
 			if(stampings.size()==1){
 				timeAtWork = 0;
 				save();
@@ -286,122 +288,60 @@ public class PersonDay extends Model {
 				save();
 				return;
 			}
-			LocalDateTime now = new LocalDateTime();
 			if(reloadedStampings.size() > 0){
-				Stamping s = reloadedStampings.get(0);
-				if(s.date.toLocalDate().isEqual(now.toLocalDate())){					
-					int nowToMinute = toMinute(now);
-					if(reloadedStampings.size() == 0){
-						timeAtWork = 0;
-						save();
-						return;
-					}
-					if(reloadedStampings.size() == 1){
-						timeAtWork = toMinute(now)-toMinute(reloadedStampings.get(0).date);
-						save();
-						return;
-					}
-					else{
-						for(int i = 0; i < reloadedStampings.size(); i++){
 
-							int workingTime=0;
+				int workTime=0;
+				for(int i = 0; i < reloadedStampings.size(); i++){
+					if(reloadedStampings.get(i).way == Stamping.WayType.in){
 
-							if(reloadedStampings.get(i).way == Stamping.WayType.in && reloadedStampings.get(i).stampType != null){
-								if(reloadedStampings.get(i-1) != null && reloadedStampings.get(i-1).stampType != null){
-									//c'è stata un'uscita di servizio, questo è il corrispondente ingresso come lo calcolo?
-									//workingTime = workingTime + (toMinute(reloadedStampings.get(i).date) - toMinute(reloadedStampings.get(i-1).date));
-									workingTime = workingTime + 0;
+						if(reloadedStampings.get(i).stampType != null){
+							if((i-1) >= 0){
+								if(reloadedStampings.get(i-1).stampType != null){
+									//c'è stata un'uscita di servizio, questo è il corrispondente ingresso come lo calcolo? aggiungendo il tempo
+									//trascorso fuori per servizio come tempo di lavoro
+									Logger.debug("Anche la precedente timbratura era di servizio...calcolo il tempo in servizio come tempo a lavoro per %s %s", 
+											person.name, person.surname);
+
+									workTime = workTime + 0;
 								}
-								if(reloadedStampings.get(i-1) == null)
-									workingTime = workingTime - toMinute(reloadedStampings.get(i).date);
 								else{
-									//si fa un'entrata di servizio...ad esempio quando siamo in reperibilità?
+
 								}
 							}
-							else{
-								workingTime -= toMinute(reloadedStampings.get(i).date);
-							}
 
-							if(reloadedStampings.get(i).way == Stamping.WayType.out && reloadedStampings.get(i).stampType != null){
-								if(reloadedStampings.get(i-1) != null && reloadedStampings.get(i-1).stampType != null){
-									//uscita di servizio, dopo un ingresso di servizio...come si gestisce??
-									workingTime = workingTime + 0;
+						}
+						else{
+							workTime -= toMinute(reloadedStampings.get(i).date);
+							Logger.debug("Normale timbratura di ingresso che mi dà un tempo di lavoro di: %d", workTime);
+						}
+
+
+					}
+
+					if(reloadedStampings.get(i).way == Stamping.WayType.out){
+
+						Logger.trace("Timbratura di uscita con stampType diverso da null per %s %s", person.name, person.surname);
+						if(reloadedStampings.get(i).stampType != null){
+							if((i-1) >= 0){
+								if(reloadedStampings.get(i-1).stampType != null){
+									workTime = workTime + 0;
 								}
-
 								else{
-									workingTime += toMinute(reloadedStampings.get(i).date);
+									workTime = workTime +0;
 								}
 							}
-
-							else{
-								workingTime += toMinute(reloadedStampings.get(i).date);
-							}
-							if(workingTime < 0)
-								tempoLavoro = nowToMinute + workingTime;										
-							else 
-								tempoLavoro = nowToMinute - workingTime;																		
-							timeAtWork = tempoLavoro;
-							save();
-							return;
-
-						}
-					}
-
-
-				}				
-				else{
-					int workTime=0;
-					for(int i = 0; i < reloadedStampings.size(); i++){
-						if(reloadedStampings.get(i).way == Stamping.WayType.in){
-
-							if(reloadedStampings.get(i).stampType != null){
-								if((i-1) >= 0){
-									if(reloadedStampings.get(i-1).stampType != null){
-										//c'è stata un'uscita di servizio, questo è il corrispondente ingresso come lo calcolo? aggiungendo il tempo
-										//trascorso fuori per servizio come tempo di lavoro
-										Logger.debug("Anche la precedente timbratura era di servizio...calcolo il tempo in servizio come tempo a lavoro per %s %s", 
-												person.name, person.surname);
-
-										workTime = workTime + 0;
-									}
-									else{
-
-									}
-								}
-
-							}
-							else{
-								workTime -= toMinute(reloadedStampings.get(i).date);
-								Logger.debug("Normale timbratura di ingresso che mi dà un tempo di lavoro di: %d", workTime);
-							}
-
 
 						}
 
-						if(reloadedStampings.get(i).way == Stamping.WayType.out){
-
-							Logger.trace("Timbratura di uscita con stampType diverso da null per %s %s", person.name, person.surname);
-							if(reloadedStampings.get(i).stampType != null){
-								if((i-1) >= 0){
-									if(reloadedStampings.get(i-1).stampType != null){
-										workTime = workTime + 0;
-									}
-									else{
-										workTime = workTime +0;
-									}
-								}
-
-							}
-
-							else{
-								//timbratura normale di uscita
-								workTime += toMinute(reloadedStampings.get(i).date);
-								Logger.debug("Normale timbratura di uscita %s che mi dà un tempo di lavoro di: %d", reloadedStampings.get(i).date, workTime);
-							}
-
+						else{
+							//timbratura normale di uscita
+							workTime += toMinute(reloadedStampings.get(i).date);
+							Logger.debug("Normale timbratura di uscita %s che mi dà un tempo di lavoro di: %d", reloadedStampings.get(i).date, workTime);
 						}
 
 					}
+
+
 
 					int minTimeForLunch = checkMinTimeForLunch();
 					if((reloadedStampings.size()==4) && (minTimeForLunch < getWorkingTimeTypeDay().breakTicketTime) && (!reloadedStampings.contains(null)))
@@ -472,7 +412,6 @@ public class PersonDay extends Model {
 				for(Absence abs : absences){
 					if(abs.absenceType.ignoreStamping == true || abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay){
 						timeAtWork = 0;
-						merge();
 						difference = 0;
 						merge();
 						updateProgressive();
@@ -894,7 +833,7 @@ public class PersonDay extends Model {
 					String.format("E' presente più di uno StampProfile per %s per la data %s", person, date));
 		}
 		if (stampProfiles.isEmpty()) {
-			
+
 			return null;
 		}
 		Logger.trace("E' presente uno StampProfile per %s con data %s", person, date);
@@ -910,7 +849,7 @@ public class PersonDay extends Model {
 	public PersonDay checkPreviousProgressive(){
 		PersonDay pd = null;
 		if(date.getDayOfMonth() != 1){
-			
+
 			pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date.minusDays(1)).first();
 			if(pd != null)
 				return pd;
