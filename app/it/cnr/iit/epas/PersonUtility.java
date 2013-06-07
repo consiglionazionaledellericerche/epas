@@ -282,8 +282,8 @@ public class PersonUtility {
 
 
 	public static void checkExitStampNextDay(PersonDay pd){
-		LocalDateTime beginDate = new LocalDateTime(pd.date.getYear(),pd.date.getMonthOfYear(),pd.date.getDayOfMonth(),0,0);
-		LocalDateTime endDate = new LocalDateTime(pd.date.getYear(),pd.date.getMonthOfYear(),pd.date.getDayOfMonth(),23,59);
+		LocalDateTime beginDate = new LocalDateTime(pd.date.getYear(),pd.date.getMonthOfYear(),pd.date.getDayOfMonth(),0,0,0);
+		LocalDateTime endDate = new LocalDateTime(pd.date.getYear(),pd.date.getMonthOfYear(),pd.date.getDayOfMonth(),23,59,59);
 
 		Configuration config = Configuration.getCurrentConfiguration();
 		PersonDay pdPastDay = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", pd.person, pd.date.minusDays(1)).first();
