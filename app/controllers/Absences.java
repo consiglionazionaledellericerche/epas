@@ -319,6 +319,7 @@ public class Absences extends Controller{
 					pd = new PersonDay(person, actualDate);
 					pd.create();
 			}
+			//TODO: Fare un'unica select per estrarre il count delle absences con absenceType.code = 94 
 			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 					person, new LocalDate(yearFrom, 1,1), actualDate).fetch();
 			int counter = 0;
@@ -341,8 +342,7 @@ public class Absences extends Controller{
 				if(params.get("datasize", Blob.class) != null){
 					absence.absenceRequest = params.get("datasize", Blob.class);
 				}
-				else 
-					absence.absenceRequest = null;
+
 				absence.personDay = pd;
 				absence.absenceType = absenceType;
 				absence.save();
