@@ -246,15 +246,16 @@ public class Absences extends Controller{
 		LocalDate dateFrom = new LocalDate(yearFrom, monthFrom, dayFrom);
 
 		AbsenceType absenceType = AbsenceType.find("byCode", absenceCode).first();
-		Logger.debug("L'absenceType è: %s", absenceType);
+		Logger.trace("Controllo la presenza dell'absenceType %s richiesto per l'assenza del giorno %s per personId = %s ", absenceType, dateFrom, personId);
 		if (absenceType == null) {
 			validation.keep();
 			params.flash();
+			//TODO: verificare se personalizzare il messaggio di errore per alcuni codici non esistenti come per esempio 124 oppur 135...
 			flash.error("Il codice di assenza %s non esiste", params.get("absenceCode"));
+			Logger.info("E' stato richiesto l'inserimento del codice di assenza %s per l'assenza del giorno %s per personId = %d. Il codice NON esiste.", absenceType, dateFrom, personId);
 			create(personId, yearFrom, monthFrom, dayFrom);
 			render("@create");
 		}
-
 
 		Logger.debug("Richiesto inserimento della assenza codice = %s della persona %s, dataInizio = %s", absenceCode, person, dateFrom);
 
@@ -266,44 +267,25 @@ public class Absences extends Controller{
 			flash.error("Il codice di assenza %s è già presente per la data %s", params.get("absenceCode"), PersonTags.toDateTime(dateFrom));
 			create(personId, yearFrom, monthFrom, dayFrom);
 			render("@create");
-		}	
+		}
 		
 		/**
 		 * controllo sulla possibilità di poter prendere i congedi per malattia dei figli, guardo se il codice di assenza appartiene alla
 		 * lista dei codici di assenza da usare per le malattie dei figli
+		 * TODO: aggiungere anche gli altri codici per i figli, per esempio mettere il controllo sulla sottostringa 12* e 13* perchè
+		 * 	per esempio anche 124 è un codice valido per la malattia del 4° figlio
 		 */
 		if(absenceType.code.equals("12") || absenceType.code.equals("122") || absenceType.code.equals("123") || absenceType.code.equals("13")
 				|| absenceType.code.equals("132") || absenceType.code.equals("133") || absenceType.code.equals("134")){
-			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", 
-					person, new LocalDate(yearFrom, monthFrom, dayFrom)).first();
-			if(pd == null)
-				pd = new PersonDay(person, new LocalDate(yearFrom, monthFrom, dayFrom));
-			if(PersonUtility.canTakePermissionIllnessChild(person, pd.date, absenceType)){
-				/**
-				 * può usufruire del permesso
-				 */
-				Absence absence = new Absence();
-				if(params.get("datasize", Blob.class) != null){
-					absence.absenceRequest = params.get("datasize", Blob.class);
-				}
-				else 
-					absence.absenceRequest = null;
-				absence.personDay = pd;
-
-				absence.absenceType = absenceType;
-
-				absence.save();
-				flash.success(
-						String.format("Assenza di tipo %s inserita per il giorno %s per %s %s", absenceCode, PersonTags.toDateTime(dateFrom), person.surname, person.name));
-				render("@save");	
-			}
-			else{
+			if(!PersonUtility.canTakePermissionIllnessChild(person, dateFrom, absenceType)){
 				/**
 				 * non può usufruire del permesso
 				 */
 				flash.error(String.format("Il dipendente %s %s non può prendere il codice d'assenza %s poichè ha già usufruito del numero" +
 						" massimo di giorni di assenza per quel codice", person.name, person.surname, absenceType.code));
 				render("@save");
+				return;
+				
 			}
 		}
 		
@@ -336,64 +318,36 @@ public class Absences extends Controller{
 				flash.error("Il dipendente %s %s non può usufruire del codice di assenza %s poichè ha raggiunto il limite previsto per" +
 						"quel codice", person.name, person.surname, absenceType.code);
 				render("@save");
-			}
-			else{
-				Absence absence = new Absence();
-				if(params.get("datasize", Blob.class) != null){
-					absence.absenceRequest = params.get("datasize", Blob.class);
-				}
-
-				absence.personDay = pd;
-				absence.absenceType = absenceType;
-				absence.save();
-				pd.populatePersonDay();
-				pd.save();
-				flash.success("Inserito codice %s per %s %s in data %s", absenceType.code, person.name, person.surname, actualDate);
-				render("@save");
-			}
-				
+				return;
+			}	
 		}
-		
-		LocalDate date = new LocalDate();
-		if(dateFrom.isAfter(date)){
-			/**
-			 * la data su cui si deve fare il controllo del personDay è successiva alla data odierna
-			 */
-			PersonDay pd = new PersonDay(person, dateFrom);
+
+		/**
+		 * può usufruire del permesso
+		 */
+		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, dateFrom).first();
+		if(pd == null) {
+			pd = new PersonDay(person, dateFrom);
 			pd.create();
-			Absence absence = new Absence();
-
-			if(params.get("datasize", Blob.class) != null){
-				absence.absenceRequest = params.get("datasize", Blob.class);
-			}
-			else 
-				absence.absenceRequest = null;
-			absence.personDay = pd;
-			absence.absenceType = absenceType;
-			absence.save();
-			absence.personDay.populatePersonDay();
-			absence.personDay.save();
-			
 		}
-		else{
-			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, dateFrom).first();
-			Absence absence = new Absence();
-			
-			absence.personDay = pd;
-			absence.absenceType = absenceType;
 
-			if(params.get("datasize", Blob.class) != null){
-				absence.absenceRequest = params.get("datasize", Blob.class);
-			}
-			else 
-				absence.absenceRequest = null;
+		Absence absence = new Absence();
+		if(params.get("datasize", Blob.class) != null){
+			absence.absenceRequest = params.get("datasize", Blob.class);
+		}
+		else 
+			absence.absenceRequest = null;
+		absence.personDay = pd;
 
-			absence.create();
-			absence.personDay.populatePersonDay();
-			absence.personDay.save();
-		}	
+		absence.absenceType = absenceType;
+
+		absence.create();
 		
-		flash.success("Assenza di tipo %s inserita per il giorno %s per %s %s", absenceCode, PersonTags.toDateTime(dateFrom), person.surname, person.name);
+		pd.populatePersonDay();
+		pd.save();
+
+		flash.success(
+				String.format("Assenza di tipo %s inserita per il giorno %s per %s %s", absenceCode, PersonTags.toDateTime(dateFrom), person.surname, person.name));
 		render("@save");
 
 	}
