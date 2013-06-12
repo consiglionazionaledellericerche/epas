@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.Query;
+
 import models.Absence;
 import models.AbsenceType;
 import models.AbsenceTypeGroup;
@@ -20,11 +22,13 @@ import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
 import models.enumerate.JustifiedTimeAtWork;
 
+import org.hibernate.envers.entities.mapper.relation.lazy.proxy.SetProxy;
 import org.joda.time.LocalDate;
 
 import play.Logger;
 import play.data.validation.Required;
 import play.db.jpa.Blob;
+import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -250,9 +254,9 @@ public class Absences extends Controller{
 		if (absenceType == null) {
 			validation.keep();
 			params.flash();
-			//TODO: verificare se personalizzare il messaggio di errore per alcuni codici non esistenti come per esempio 124 oppur 135...
+			
 			flash.error("Il codice di assenza %s non esiste", params.get("absenceCode"));
-			Logger.info("E' stato richiesto l'inserimento del codice di assenza %s per l'assenza del giorno %s per personId = %d. Il codice NON esiste.", absenceType, dateFrom, personId);
+			Logger.info("E' stato richiesto l'inserimento del codice di assenza %s per l'assenza del giorno %s per personId = %d. Il codice NON esiste. Se si tratta di un codice di assenza per malattia figlio NUOVO, inserire il nuovo codice nella lista e riprovare ad assegnarlo.", absenceType, dateFrom, personId);
 			create(personId, yearFrom, monthFrom, dayFrom);
 			render("@create");
 		}
@@ -293,7 +297,7 @@ public class Absences extends Controller{
 		 * controllo che le persone che richiedono il riposo compensativo, che hanno una qualifica compresa tra 1 e 3, non abbiano superato
 		 * il massimo numero di giorni di riposo compensativo consentiti e presenti in configurazione
 		 */
-		if(absenceType.code.equals("94") && person.qualification.qualification > 0 && person.qualification.qualification < 4){
+		if(absenceType.code.equals("91") && person.qualification.qualification > 0 && person.qualification.qualification < 4){
 			Configuration config = Configuration.getCurrentConfiguration();
 			LocalDate actualDate = new LocalDate(yearFrom, monthFrom, dayFrom);
 			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, actualDate).first();
@@ -302,24 +306,39 @@ public class Absences extends Controller{
 					pd.create();
 			}
 			//TODO: Fare un'unica select per estrarre il count delle absences con absenceType.code = 94 
-			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-					person, new LocalDate(yearFrom, 1,1), actualDate).fetch();
-			int counter = 0;
-			for(PersonDay perd : pdList){
-				if(perd != null && (perd.absences != null || perd.absences.size() > 0)){
-					for(Absence abs : perd.absences){
-						if(abs.absenceType.code.equals("94"))
-							counter++;
-					}		
-				}				
-			}
-			Logger.debug("Fino ad oggi, %s, sono stati utilizzati %d giorni di riposo compensativo da %s %s", actualDate, counter, person.name, person.surname);
-			if(counter >= config.maxRecoveryDaysOneThree){
+			Query query = JPA.em().createNativeQuery("SELECT * FROM person_days pd, absences abs, absence_types abt WHERE abs.personday_id = pd.id AND pd.person_id = :personId"+ 
+					"AND pd.date between :dateStart AND :dateTo AND abs.absence_type_id = abt.id AND abt.code = :code");
+			query.setParameter("personId", pd.person.id).
+				setParameter("dateStart", new LocalDate(yearFrom, 1,1)).
+				setParameter("dateTo",actualDate).
+				setParameter("code", "91");
+			List<Object> resultList = query.getResultList();
+			if(resultList.size() >= config.maxRecoveryDaysOneThree){
 				flash.error("Il dipendente %s %s non può usufruire del codice di assenza %s poichè ha raggiunto il limite previsto per" +
 						"quel codice", person.name, person.surname, absenceType.code);
 				render("@save");
 				return;
-			}	
+			}
+			
+			
+//			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+//					person, new LocalDate(yearFrom, 1,1), actualDate).fetch();
+//			int counter = 0;
+//			for(PersonDay perd : pdList){
+//				if(perd != null && (perd.absences != null || perd.absences.size() > 0)){
+//					for(Absence abs : perd.absences){
+//						if(abs.absenceType.code.equals("91"))
+//							counter++;
+//					}		
+//				}				
+//			}
+//			Logger.debug("Fino ad oggi, %s, sono stati utilizzati %d giorni di riposo compensativo da %s %s", actualDate, counter, person.name, person.surname);
+//			if(counter >= config.maxRecoveryDaysOneThree){
+//				flash.error("Il dipendente %s %s non può usufruire del codice di assenza %s poichè ha raggiunto il limite previsto per" +
+//						"quel codice", person.name, person.surname, absenceType.code);
+//				render("@save");
+//				return;
+//			}	
 		}
 
 		/**

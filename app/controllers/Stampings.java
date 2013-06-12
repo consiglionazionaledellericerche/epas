@@ -51,7 +51,10 @@ public class Stampings extends Controller {
 		}
 		
 		long id = 1;
-		Configuration confParameters = Configuration.findById(id);
+		//Configuration confParameters = Configuration.findById(id);
+		Configuration confParameters = Configuration.getCurrentConfiguration();
+		if(confParameters == null)
+			confParameters = Configuration.find("Select c from Configuration c order by c.id desc").first();
 		
 		Person person = Security.getPerson();
 		Logger.debug("La persona presa dal security è: %s %s", person.name, person.surname);
@@ -130,7 +133,7 @@ public class Stampings extends Controller {
 
 		int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
 		int numberOfInOut = Math.max(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
-
+		Logger.debug("NumberOfInOut: %d, NumberOfCompensatoryRest: %d, OvertimeHour: %d", numberOfInOut, numberOfCompensatoryRest, overtimeHour);
 		render(personMonth, numberOfInOut, previousPersonMonth, numberOfCompensatoryRest, overtimeHour, person);
 
 	}
