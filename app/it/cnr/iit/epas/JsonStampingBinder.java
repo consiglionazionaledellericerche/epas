@@ -43,7 +43,6 @@ import com.google.gson.JsonParser;
 @Global
 public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 
-	public static String mySqldriver = Play.configuration.getProperty("db.old.driver");
 	/**
 	 * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[], java.lang.String, java.lang.Class, java.lang.reflect.Type)
 	 */
@@ -99,8 +98,10 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 			Logger.debug("L'array json di tipoMatricola: %s", tipoMatricola);
 			int i = 0;
 			boolean found = false;
+			String tipo = tipoMatricola.get(i).getAsString();
+			
 			while(i < tipoMatricola.size() || found == false){
-				String tipo = tipoMatricola.get(i).getAsString();
+				
 				//Logger.debug("Il tipo rilevato è: %s", tipo);
 				if(tipo.equals("matricolaCNR")){
 					/**
@@ -113,6 +114,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 					person = Person.find("Select p from Person p where p.number = ?", firma).first();
 					if(person != null){
 						found = true;
+						i++;
 						stamping.matricolaFirma = (long)firma;
 						continue;
 					}
@@ -121,13 +123,23 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 				}
 				if(tipo.equals("idTabellaINT")){
 					String matricolaFirma = jsonObject.get("matricolaFirma").getAsString();
+					
+					if (matricolaFirma.indexOf("INT") > 0) {
+						matricolaFirma = matricolaFirma.substring(matricolaFirma.indexOf("INT") + 3);
+					} else {
+						i++;
+						continue;						
+					}
+					
 					/**
 					 * implementare il controllo di come fare a prendere solo i numeri della stringa contenente INT 
 					 */
-					long personId = returnNumber(matricolaFirma);
+					long personId = Long.parseLong(matricolaFirma);
+					//TODO: verificare se cercare anche nel campo p.id per tutte le nuove persone inserite
 					person = Person.find("Select p from Person p where p.oldId = ?", personId).first();
 					if(person != null){
 						found = true;
+						i++;
 						stamping.matricolaFirma = personId;
 						continue;
 					}
@@ -141,6 +153,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 					person = Person.find("Select p from Person p where p.badgeNumber = ?", badgeNumber).first();
 					if(person != null){
 						found = true;
+						i++;
 						stamping.matricolaFirma = new Long(badgeNumber);
 						continue;
 					}
@@ -254,15 +267,19 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 		return convert;
 	}
 	
-//	public static void main(String[]args){
-//		String s = "00000000000INT252";
+	public static void main(String[] args){
+		String s = "00000000000INT252";
+		System.out.println(s.indexOf("INT"));
+		System.out.println(s.substring(s.indexOf("INT") + 3));
+		
 //		if(s.contains("INT")){
 //			System.out.println("TRovato!");
 //			String lessSign = s.substring(14,s.length());
 //			long personId = Long.parseLong(lessSign);
 //			System.out.println("L'id è: "+personId);
 //		}
-//		
-//	}
+		
+		
+	}
 	
 }
