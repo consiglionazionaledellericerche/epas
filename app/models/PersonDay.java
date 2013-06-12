@@ -428,6 +428,9 @@ public class PersonDay extends Model {
 
 						}
 						else{
+							/**
+							 * in total troviamo il corrispettivo in minuti delle 150 ore previste per il diritto allo studio
+							 */
 							int total = 150*60;
 							List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 									person, date.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), date.minusDays(1)).fetch();

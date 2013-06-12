@@ -38,7 +38,7 @@ public class Configuration extends Model{
 	 * booleano per stabilire se una configurazione è in uso (true) oppure no (false)
 	 */
 	@Column(name = "in_use")
-	public boolean inUse;
+	public boolean inUse = true;
 	
 	
 	/**
