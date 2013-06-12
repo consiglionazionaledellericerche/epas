@@ -142,7 +142,7 @@
 <p> - Totale residuo anno corrente a fine mese:  ${personMonth.totaleResiduoAnnoCorrenteAFineMese().toHourTime()}</p>
 %{if(personMonth.getCompensatoryRest() != 0 ){
 }%
-<p> - Giorni di riposo compensativo: ${personMonth.getCompensatoryRest()} per un totale di: ${-personMonth.getCompensatoryRestInMinutes().toHourTime()} ore</p>
+<p> - Giorni di riposo compensativo: ${personMonth.getCompensatoryRest()} per un totale di: -${personMonth.getCompensatoryRestInMinutes().toHourTime()} ore</p>
 %{
 }
 }%
