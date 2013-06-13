@@ -273,6 +273,13 @@ public class Absences extends Controller{
 			render("@create");
 		}
 		
+		Absence abs = Absence.find("Select abs from Absence abs where abs.personDay.person = ? and abs.personDay.date = ?", person, dateFrom).first();
+		if(abs != null && abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay && 
+				absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay){
+			flash.error("Non si possono inserire per lo stesso giorno due codici di assenza giornaliera");
+			render("@save");
+		}
+		
 		/**
 		 * controllo sulla possibilità di poter prendere i congedi per malattia dei figli, guardo se il codice di assenza appartiene alla
 		 * lista dei codici di assenza da usare per le malattie dei figli
@@ -298,6 +305,7 @@ public class Absences extends Controller{
 		 * il massimo numero di giorni di riposo compensativo consentiti e presenti in configurazione
 		 */
 		if(absenceType.code.equals("91") && person.qualification.qualification > 0 && person.qualification.qualification < 4){
+			Logger.debug("Devo inserire un codice %s per %s %s", absenceType.code, person.name, person.surname);
 			Configuration config = Configuration.getCurrentConfiguration();
 			LocalDate actualDate = new LocalDate(yearFrom, monthFrom, dayFrom);
 			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, actualDate).first();
@@ -306,41 +314,23 @@ public class Absences extends Controller{
 					pd.create();
 			}
 			//TODO: Fare un'unica select per estrarre il count delle absences con absenceType.code = 94 
-			Query query = JPA.em().createNativeQuery("SELECT * FROM person_days pd, absences abs, absence_types abt WHERE abs.personday_id = pd.id AND pd.person_id = :personId"+ 
-					"AND pd.date between :dateStart AND :dateTo AND abs.absence_type_id = abt.id AND abt.code = :code");
-			query.setParameter("personId", pd.person.id).
+			Query query = JPA.em().createQuery("SELECT abs FROM Absence abs WHERE abs.personDay.person = :person "+ 
+					"AND abs.personDay.date between :dateStart AND :dateTo AND abs.absenceType.code = :code");
+			query.setParameter("person", pd.person).
 				setParameter("dateStart", new LocalDate(yearFrom, 1,1)).
 				setParameter("dateTo",actualDate).
 				setParameter("code", "91");
 			List<Object> resultList = query.getResultList();
+			Logger.debug("Il numero di assenze con codice %s fino a oggi è %d", absenceType.code, resultList.size());
 			if(resultList.size() >= config.maxRecoveryDaysOneThree){
 				flash.error("Il dipendente %s %s non può usufruire del codice di assenza %s poichè ha raggiunto il limite previsto per" +
 						"quel codice", person.name, person.surname, absenceType.code);
 				render("@save");
 				return;
 			}
-			
-			
-//			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-//					person, new LocalDate(yearFrom, 1,1), actualDate).fetch();
-//			int counter = 0;
-//			for(PersonDay perd : pdList){
-//				if(perd != null && (perd.absences != null || perd.absences.size() > 0)){
-//					for(Absence abs : perd.absences){
-//						if(abs.absenceType.code.equals("91"))
-//							counter++;
-//					}		
-//				}				
-//			}
-//			Logger.debug("Fino ad oggi, %s, sono stati utilizzati %d giorni di riposo compensativo da %s %s", actualDate, counter, person.name, person.surname);
-//			if(counter >= config.maxRecoveryDaysOneThree){
-//				flash.error("Il dipendente %s %s non può usufruire del codice di assenza %s poichè ha raggiunto il limite previsto per" +
-//						"quel codice", person.name, person.surname, absenceType.code);
-//				render("@save");
-//				return;
-//			}	
+	
 		}
-
+		Logger.debug("%s %s può usufruire del codice %s", person.name, person.surname, absenceType.code);
 		/**
 		 * può usufruire del permesso
 		 */
@@ -349,19 +339,23 @@ public class Absences extends Controller{
 			pd = new PersonDay(person, dateFrom);
 			pd.create();
 		}
-
+		Logger.debug("Creato il personDay %s", pd);
 		Absence absence = new Absence();
 		if(params.get("datasize", Blob.class) != null){
 			absence.absenceRequest = params.get("datasize", Blob.class);
 		}
 		else 
 			absence.absenceRequest = null;
-		absence.personDay = pd;
+		
+		//absence.personDay = pd;
 
 		absence.absenceType = absenceType;
-
-		absence.create();
+		pd.addAbsence(absence);
+		//absence.create();
+		//pd.absences.add(absence);
 		
+		//JPA.em().refresh(pd);
+		Logger.debug("Creata e salvata l'assenza %s con codice %s", absence, absence.absenceType.code);
 		pd.populatePersonDay();
 		pd.save();
 
@@ -397,6 +391,7 @@ public class Absences extends Controller{
 		if (absenceCode == null || absenceCode.isEmpty()) {
 			PersonDay pd = absence.personDay;
 			absence.delete();
+			pd.absences.remove(absence);
 			pd.populatePersonDay();
 			pd.save();
 			flash.success("Timbratura di tipo %s per il giorno %s rimossa per il dipendente %s %s", 

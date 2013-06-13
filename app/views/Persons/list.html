@@ -16,6 +16,7 @@
 		<th>Cognome</th>
 		<th>Nome</th>
 		<th>Matricola</th>
+		<th>Matricola Badge</th>
 		<th>Data inizio lavoro</th>
 		<th>Data fine lavoro</th>
 		<th>Orario</th>
@@ -40,6 +41,7 @@
 		<td><a href="@{edit(person.id)}"><font color="#0000FF">${person.surname}</font></a></td>
 		<td><font color="#000000">${person.name}</font></td>
 		<td><font color="#000000">${person.number}</font></td>
+		<td><font color="#000000">${person.badgeNumber}</font></td>
 		<td><font color="#000000">${person.getCurrentContract() != null ? person.getCurrentContract().beginContract : ''}</font></td>
 		<td><font color="#000000">${person.getCurrentContract() != null ? person.getCurrentContract().expireContract : ''}</font></td>
 		<td><a href="@{editWorkingTime(person.id)}"><font color="#0000FF">${person.workingTimeType != null && person.workingTimeType.description != null ? person.workingTimeType.description : ''}</font></a></td>

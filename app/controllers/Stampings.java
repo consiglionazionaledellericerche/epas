@@ -193,9 +193,13 @@ public class Stampings extends Controller {
 		
 		if(pd.stampings.size() == 0 && pd.isHoliday()){
 			flash.error("Si sta inserendo una timbratura in un giorno di festa. Errore");
-			render("@create", personId, year, month, day);
+			render("@save");
 		}
 		
+		if(date.isAfter(new LocalDate())){
+			flash.error("Non si può inserire una timbratura futura!!!");
+			render("@save");
+		}
 		/**
 		 * controllo che il radio button sulla timbratura forzata all'orario di lavoro sia checkato
 		 */

@@ -82,11 +82,11 @@ public class PersonDay extends Model {
 	@Column(name = "is_working_in_another_place")
 	public boolean isWorkingInAnotherPlace = false;
 
-	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY, cascade=CascadeType.PERSIST)
 	@OrderBy("date")
 	public List<Stamping> stampings = new ArrayList<Stamping>();
 
-	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY, cascade=CascadeType.PERSIST)
 	public List<Absence> absences = new ArrayList<Absence>();
 
 	@Column(name = "modification_type")
@@ -108,8 +108,17 @@ public class PersonDay extends Model {
 	}
 
 
-
-
+	public void addAbsence(Absence abs){
+		this.absences.add(abs);
+		abs.personDay = this;
+	}
+	
+	public void addStamping(Stamping st){
+		this.stampings.add(st);
+		st.personDay = this;
+	}
+	
+	
 	/**	 
 	 * Calcola se un giorno è lavorativo o meno. L'informazione viene calcolata a partire
 	 * dal giorno e dal WorkingTimeType corrente della persona
@@ -406,6 +415,7 @@ public class PersonDay extends Model {
 		//Se la persona non ha un contratto attivo non si fanno calcoli per quel giorno
 		//Le timbrature vengono comunque mantenute
 		if (con != null) {
+			Logger.debug("Dimensione Stampings: %s. Dimensione Absences: %s Per %s %s", stampings.size(), absences.size(), person.name, person.surname);
 			if(stampings.size() != 0 && absences.size() != 0){
 				Logger.debug("Ci sono sia timbrature che assenze, verifico che le assenze siano giornaliere e non orarie così da" +
 						"evitare di fare i calcoli per questo giorno.");
@@ -465,7 +475,8 @@ public class PersonDay extends Model {
 				setTicketAvailable();
 				merge();
 				return;
-			}				
+			}	
+			
 			updateTimeAtWork();
 			merge();
 			updateDifference();
@@ -640,6 +651,12 @@ public class PersonDay extends Model {
 		}
 
 		if(absenceList().size() > 0 && stampings.size() == 0){
+			difference = 0;
+			save();
+			return;
+		}
+		
+		if(this.date.isAfter(new LocalDate()) && stampings.size()==0 && absences.size()==0 && timeAtWork == 0){
 			difference = 0;
 			save();
 			return;

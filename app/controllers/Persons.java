@@ -1,6 +1,7 @@
 package controllers;
 
 import it.cnr.iit.epas.ActionMenuItem;
+import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -196,12 +197,29 @@ public class Persons extends Controller {
 		person = new Person();		
 		Logger.debug("Saving person...");
 		
+		if(params.get("name").equals("") || params.get("surname").equals("")){
+			flash.error("Inserire nome e cognome per la persona che si intende salvare in anagrafica");
+			render("@list");
+		}
 		person.name = params.get("name");
+		
 		person.surname = params.get("surname");
 		person.number = params.get("number", Integer.class);
 		Qualification qual = Qualification.findById(new Long(params.get("person.qualification", Integer.class)));
 		person.qualification = qual;
 		person.save();
+		
+		/**
+		 * qui aggiungo il controllo sull'id generato dalla sequence di postgres rispetto ai vecchi id presenti nel vecchio db
+		 */
+		if(PersonUtility.isIdPresentInOldSoftware(person.id)){
+			/**
+			 * l'id generato è già presente in anagrafica come oldId di qualcuno...questo potrebbe generare dei problemi in fase di acquisizione 
+			 * delle timbrature...
+			 */
+			
+			
+		}
 		
 		Logger.debug("saving location, deparment = %s", location.department);
 		location.department = params.get("department");
@@ -216,6 +234,12 @@ public class Persons extends Controller {
 		contactData.person = person;
 		contactData.save();
 		
+		if(params.get("beginContract", Date.class) == null){
+			flash.error("Il contratto di %s %s deve avere una data di inizio. Utente cancellato. Reinserirlo con la data di inizio contratto valorizzata.", 
+					person.name, person.surname);
+			person.delete();
+			render("@list");
+		}
 		Date begin = params.get("beginContract", Date.class);
 		Date end = params.get("expireContract", Date.class);
 		LocalDate beginContract = new LocalDate(begin);
@@ -256,7 +280,12 @@ public class Persons extends Controller {
 		Person person = Person.findById(personId);
 		ContactData contactData = person.contactData;
 		Location location = person.location;
+		
 		InitializationTime initTime = InitializationTime.find("Select init from InitializationTime init where init.person = ?", person).first();
+		
+		if(!person.badgeNumber.equals(params.get("badgeNumber")))
+			person.badgeNumber = params.get("badgeNumber");
+		
 		if(contactData != null){
 			if(contactData.email == null || !contactData.email.equals(params.get("email"))){
 				contactData.email = params.get("email");
