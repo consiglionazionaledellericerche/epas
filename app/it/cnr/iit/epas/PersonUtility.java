@@ -424,6 +424,22 @@ public class PersonUtility {
 		}
 		return notJustifiedAbsences;
 	}
+	
+	/**
+	 * 
+	 * @return false se l'id passato alla funzione non trova tra le persone presenti in anagrafica, una che avesse nella vecchia applicazione un id
+	 * uguale a quello che la sequence postgres genera automaticamente all'inserimento di una nuova persona in anagrafica.
+	 * In particolare viene controllato il campo oldId presente per ciascuna persona e si verifica che non esista un valore uguale a quello che la 
+	 * sequence postgres ha generato
+	 */
+	public static boolean isIdPresentInOldSoftware(Long id){
+		Person person = Person.find("Select p from Person p where p.oldId = ?", id).first();
+		if(person == null)
+			return false;
+		else
+			return true;
+		
+	}
 
 }
 
