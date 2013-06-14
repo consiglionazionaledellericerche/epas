@@ -47,32 +47,16 @@ public class Absences extends Controller{
 	}
 
 	//@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void absences(Long personId, Integer year, Integer month) {
-		Person person = null;
-		//Logger.debug("Il valore tra i params dell'id della persona è: %d", params.get("personId", Long.class));
-		person = Security.getPerson();
-		//Logger.debug("La persona presa dal security è: %s %s", person.name, person.surname);
-		//		if(personId == null)
-		//			person = Person.findById(params.get("personId", Long.class));
-		//		else
-		//			person = Person.findById(personId);
+	public static void absences(Integer year, Integer month) {
+		Person person = Security.getPerson();
 
-		Logger.trace("Anno: "+year);    	
-		Logger.trace("Mese: "+month);
 		PersonMonth personMonth = PersonMonth.byPersonAndYearAndMonth(person, year, month);
 
 		if (personMonth == null) {
 			personMonth = new PersonMonth(person, year, month);
 		}
-		if(year==null || month==null){
-			render(personMonth);
-		}
-		else{
-			//Logger.debug("Sono dentro il ramo else della creazione del month recap");
-			//Logger.debug("Il month recap è formato da: " +person.id+ ", " +year.intValue()+ ", " +month.intValue());
-
-			render(personMonth);
-		}
+		
+		render(personMonth);
 
 	}
 
@@ -258,7 +242,7 @@ public class Absences extends Controller{
 			flash.error("Il codice di assenza %s non esiste", params.get("absenceCode"));
 			Logger.info("E' stato richiesto l'inserimento del codice di assenza %s per l'assenza del giorno %s per personId = %d. Il codice NON esiste. Se si tratta di un codice di assenza per malattia figlio NUOVO, inserire il nuovo codice nella lista e riprovare ad assegnarlo.", absenceType, dateFrom, personId);
 			create(personId, yearFrom, monthFrom, dayFrom);
-			render("@create");
+			render("@save");
 		}
 
 		Logger.debug("Richiesto inserimento della assenza codice = %s della persona %s, dataInizio = %s", absenceCode, person, dateFrom);
@@ -270,7 +254,7 @@ public class Absences extends Controller{
 			params.flash();
 			flash.error("Il codice di assenza %s è già presente per la data %s", params.get("absenceCode"), PersonTags.toDateTime(dateFrom));
 			create(personId, yearFrom, monthFrom, dayFrom);
-			render("@create");
+			render("@save");
 		}
 		
 		Absence abs = Absence.find("Select abs from Absence abs where abs.personDay.person = ? and abs.personDay.date = ?", person, dateFrom).first();
@@ -330,6 +314,12 @@ public class Absences extends Controller{
 			}
 	
 		}
+		
+		
+		//TODO: implementare i controlli sui gruppi di codici di assenza
+		
+		
+		
 		Logger.debug("%s %s può usufruire del codice %s", person.name, person.surname, absenceType.code);
 		/**
 		 * può usufruire del permesso
