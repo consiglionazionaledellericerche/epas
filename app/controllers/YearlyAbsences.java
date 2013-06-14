@@ -215,7 +215,7 @@ public class YearlyAbsences extends Controller{
 		//String menuItem = actionMenuItem.toString();
 		Logger.debug("Anno: %d Id: %d", year, personId);
 		Person person = null;
-		if(personId == 0 || personId == null)
+		if(personId == null || personId == 0)
 			person = Security.getPerson();
 		else
 			person = Person.findById(personId);
