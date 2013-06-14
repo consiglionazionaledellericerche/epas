@@ -16,7 +16,7 @@ GET		/orarioAdmin/{personId}/{year}/{month}	Stampings.personStamping
 GET 	/orarioAdmin							Stampings.personStamping
 
 #Assenze
-#GET		/absences/{personId}/{year}/{month}		Absences.absences
+#GET		/absences/{year}/{month}		Absences.absences
 
 #Assenze annuali
 GET		/yearlyAbsences/{personId}/{year}		YearlyAbsences.yearlyAbsences
