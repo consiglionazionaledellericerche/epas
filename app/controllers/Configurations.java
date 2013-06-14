@@ -137,20 +137,21 @@ public class Configurations extends Controller{
 			String inizioUsoProgramma = params.get("fineValiditaParametri");
 			LocalDate initUseProgram = new LocalDate(inizioUsoProgramma);
 			Logger.debug("Data inizio uso programma: %s", initUseProgram);
+			
 			if(initUseProgram.toDate().compareTo(config.initUseProgram) != 0)
 				config.initUseProgram = initUseProgram.toDate();
 			
-			if(!params.get("nomeIstituto").equals(config.instituteName))
+			if(! params.get("nomeIstituto").equals(config.instituteName))
 				config.instituteName = params.get("nomeIstituto");
-			if(!params.get("email", String.class).equals(config.emailToContact))
+			if(! params.get("email", String.class).equals(config.emailToContact))
 				config.emailToContact = params.get("email", String.class);
-			if(params.get("codiceSede", Integer.class) != config.seatCode)
+			if(! params.get("codiceSede", Integer.class).equals(config.seatCode))
 				config.seatCode = params.get("codiceSede", Integer.class);
-			if(!params.get("urlPresenze").equals(config.urlToPresence))
+			if(! params.get("urlPresenze").equals(config.urlToPresence))
 				config.urlToPresence = params.get("urlPresenze");
-			if(!params.get("userPresenze").equals(config.userToPresence))
+			if(! params.get("userPresenze").equals(config.userToPresence))
 				config.userToPresence = params.get("userPresenze");
-			if(!params.get("passwordPresenze").equals(config.passwordToPresence))
+			if(! params.get("passwordPresenze").equals(config.passwordToPresence))
 				config.passwordToPresence = params.get("passwordPresenze");
 			if(params.get("colonneEntrataUscita", Integer.class) != config.numberOfViewingCoupleColumn)
 				config.numberOfViewingCoupleColumn = params.get("colonneEntrataUscita", Integer.class);
@@ -161,9 +162,9 @@ public class Configurations extends Controller{
 			/**
 			 * TODO: vedi sopra...
 			 */
-			if(params.get("tempoLavoroGiornalieroPerBuono", Integer.class) != config.workingTime)
+			if(! params.get("tempoLavoroGiornalieroPerBuono", Integer.class).equals(config.workingTime))
 				config.workingTime = params.get("tempoLavoroGiornalieroPerBuono", Integer.class);
-			if(params.get("tempoIntervalloPasto", Integer.class) != config.workingTimeToHaveMealTicket)
+			if(! params.get("tempoIntervalloPasto", Integer.class).equals(config.workingTimeToHaveMealTicket))
 				config.workingTimeToHaveMealTicket = params.get("tempoIntervalloPasto", Integer.class);
 			
 			if(params.get("configurazioneSegnoPiuPerModifica", Boolean.class) != config.insertAndModifyWorkingTimeWithPlusToReduceAtRealWorkingTime)
@@ -183,19 +184,19 @@ public class Configurations extends Controller{
 			/**
 			 * TODO: vedi sopra...
 			 */
-			if(params.get("meseScadenzaFerieAP", Integer.class) != config.monthExpiryVacationPastYear)
+			if(! params.get("meseScadenzaFerieAP", Integer.class).equals(config.monthExpiryVacationPastYear))
 				config.monthExpiryVacationPastYear = params.get("meseScadenzaFerieAP", Integer.class);
-			if(params.get("giornoScadenzaFerieAP", Integer.class) != config.dayExpiryVacationPastYear)
+			if(! params.get("giornoScadenzaFerieAP", Integer.class).equals(config.dayExpiryVacationPastYear))
 				config.dayExpiryVacationPastYear = params.get("giornoScadenzaFerieAP", Integer.class);
-			if(params.get("tempoMinimoPerAvereRiposoCompensativo", Integer.class) != config.minimumRemainingTimeToHaveRecoveryDay)
+			if(! params.get("tempoMinimoPerAvereRiposoCompensativo", Integer.class).equals(config.minimumRemainingTimeToHaveRecoveryDay))
 				config.minimumRemainingTimeToHaveRecoveryDay = params.get("tempoMinimoPerAvereRiposoCompensativo", Integer.class);
-			if(params.get("meseUtilizzoResiduiAP13", Integer.class) != config.monthExpireRecoveryDaysOneThree)
+			if(! params.get("meseUtilizzoResiduiAP13", Integer.class).equals(config.monthExpireRecoveryDaysOneThree))
 				config.monthExpireRecoveryDaysOneThree = params.get("meseUtilizzoResiduiAP13", Integer.class);
-			if(params.get("meseUtilizzoResiduiAP49", Integer.class) != config.monthExpireRecoveryDaysFourNine)
+			if(! params.get("meseUtilizzoResiduiAP49", Integer.class).equals(config.monthExpireRecoveryDaysFourNine))
 				config.monthExpireRecoveryDaysFourNine = params.get("meseUtilizzoResiduiAP49", Integer.class);
-			if(params.get("maxGiorniRecupero13", Integer.class) != config.maxRecoveryDaysOneThree)
+			if(! params.get("maxGiorniRecupero13", Integer.class).equals(config.maxRecoveryDaysOneThree))
 				config.maxRecoveryDaysOneThree = params.get("maxGiorniRecupero13", Integer.class);
-			if(params.get("maxGiorniRecupero49", Integer.class) != config.maxRecoveryDaysFourNine)
+			if(! params.get("maxGiorniRecupero49", Integer.class).equals(config.maxRecoveryDaysFourNine))
 				config.maxRecoveryDaysFourNine = params.get("maxGiorniRecupero49", Integer.class);
 			
 			if(params.get("configurazioneCompensazioneResiduiConAnnoPrecedente").equals("entroMese"))
@@ -205,7 +206,7 @@ public class Configurations extends Controller{
 			if(params.get("configurazioneCompensazioneResiduiConAnnoPrecedente").equals("giorno"))
 				config.residual = ResidualWithPastYear.atDay;
 			
-			if(params.get("oreMassimeStraordinarioMensili", Integer.class) != config.maximumOvertimeHours)
+			if(! params.get("oreMassimeStraordinarioMensili", Integer.class).equals(config.maximumOvertimeHours))
 				config.maximumOvertimeHours = params.get("oreMassimeStraordinarioMensili", Integer.class);
 			if(params.get("configurazioneInserimentoForzatoFeriePermessi", Boolean.class) != config.holydaysAndVacationsOverPermitted)
 				config.holydaysAndVacationsOverPermitted = params.get("configurazioneInserimentoForzatoFeriePermessi", Boolean.class);
@@ -228,7 +229,7 @@ public class Configurations extends Controller{
 			if(params.get("configurazioneCapienzaRiposi49").equals("residuoFineTrimestre"))
 				config.capacityFourEight = CapacityCompensatoryRestFourEight.onEndPastQuarterResidual;
 			
-			if(params.get("oraMaxEntroCuiCalcolareUscita", Integer.class) != config.hourMaxToCalculateWorkTime)
+			if(! params.get("oraMaxEntroCuiCalcolareUscita", Integer.class).equals(config.hourMaxToCalculateWorkTime))
 				config.hourMaxToCalculateWorkTime = params.get("oraMaxEntroCuiCalcolareUscita", Integer.class);
 			if(params.get("configurazioneAutoDichiarazione", Boolean.class) != config.canPeopleAutoDeclareWorkingTime)
 				config.canPeopleAutoDeclareWorkingTime = params.get("configurazioneAutoDichiarazione", Boolean.class);
