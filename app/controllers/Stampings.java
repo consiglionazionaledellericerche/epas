@@ -273,16 +273,26 @@ public class Stampings extends Controller {
 			flash.error("Attribuire valore a ciascun campo se si intende modificare la timbratura o togliere valore a entrambi i campi" +
 					" se si intende cancellarla");
 			render("@save");
-			//Stampings.personStamping();
 		}
 		if (hour == null && minute == null) {
+			PersonDay pd = stamping.personDay;
 			stamping.delete();
+			pd.stampings.remove(stamping);
 			stamping.personDay.populatePersonDay();
 			stamping.personDay.save();
+			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ?", 
+					stamping.personDay.person, stamping.personDay.date).fetch();
+			for(PersonDay p : pdList){
+				if(p.date.getMonthOfYear() == stamping.date.getMonthOfYear()){
+					p.populatePersonDay();
+					p.save();
+				}
+				
+			}
 			flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(stamping.date.toLocalDate()));	
 		
 			render("@save");
-			//Stampings.personStamping();
+
 		} else {
 			if (hour == null || minute == null) {
 				flash.error("E' necessario specificare sia il campo ore che minuti, oppure nessuno dei due per rimuovere la timbratura.");
@@ -301,12 +311,20 @@ public class Stampings extends Controller {
 			stamping.personDay.populatePersonDay();
 			stamping.personDay.save();
 			Logger.debug("Aggiornata ora della timbratura alle ore: %s", stamping.date);
+			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ?", 
+					stamping.personDay.person, stamping.personDay.date).fetch();
+			for(PersonDay p : pdList){
+				if(p.date.getMonthOfYear() == stamping.date.getMonthOfYear()){
+					p.populatePersonDay();
+					p.save();
+				}
+				
+			}
 			flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name);
-			//Application.success();
-			//Stampings.personStamping();
+
 		}
 		render("@save");
-		//Stampings.personStamping();
+
 	}
 
 	/**
