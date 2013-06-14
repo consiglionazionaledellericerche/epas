@@ -315,9 +315,8 @@ public class Absences extends Controller{
 	
 		}
 		
-		
-		//TODO: implementare i controlli sui gruppi di codici di assenza
-		
+		//TODO: implementare i controlli sui gruppi di codici di assenza, i controlli sui gruppi devono anche implementare
+		// le sostituzioni dei codici tramite accumulutatori o query ad hoc
 		
 		
 		Logger.debug("%s %s può usufruire del codice %s", person.name, person.surname, absenceType.code);

@@ -11,6 +11,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
@@ -72,6 +73,16 @@ public class Stamping extends Model {
 	@Column(name = "marked_by_admin")
 	public Boolean markedByAdmin;		
 	
+	@Transient
+	public boolean isIn() {
+		return way.equals(WayType.in);
+	}
+
+	@Transient
+	public boolean isOut() {
+		return way.equals(WayType.out);
+	}
+
 	@Override
 	public String toString() {
 		return String.format("Stamping[%d] - personDay.id = %d, way = %s, date = %s, stampType.id = %s, stampModificationType.id = %s",
