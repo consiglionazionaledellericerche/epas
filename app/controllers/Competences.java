@@ -67,7 +67,7 @@ public class Competences extends Controller{
 		ImmutableTable.Builder<Person, String, Integer> builder = ImmutableTable.builder();
 		Table<Person, String, Integer> tableCompetence = null;
 		List<Person> activePersons = null;
-		if((year == null && month == null) || (year == 0 && month == 0)){
+		if((year == null || month == null) || (year == 0 || month == 0)){
 			int yearParams = params.get("year", Integer.class);
 			int monthParams = params.get("month", Integer.class);
 			activePersons = Person.getTechnicianForCompetences(new LocalDate(yearParams, monthParams,1));

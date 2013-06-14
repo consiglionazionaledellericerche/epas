@@ -328,9 +328,9 @@ public class Persons extends Controller {
 		}
 		
 		if(initTime != null){
-			if(initTime.residualMinutesCurrentYear == null || initTime.residualMinutesCurrentYear != params.get("minutesCurrentYear", Integer.class))
+			if(initTime.residualMinutesCurrentYear == null || ! initTime.residualMinutesCurrentYear.equals(params.get("minutesCurrentYear", Integer.class)))
 				initTime.residualMinutesCurrentYear = params.get("minutesCurrentYear", Integer.class);
-			if(initTime.residualMinutesPastYear == null || initTime.residualMinutesPastYear != params.get("minutesPastYear", Integer.class))
+			if(initTime.residualMinutesPastYear == null || ! initTime.residualMinutesPastYear.equals(params.get("minutesPastYear", Integer.class)))
 				initTime.residualMinutesPastYear = params.get("minutesPastYear", Integer.class);
 			initTime.save();
 		}
@@ -342,7 +342,7 @@ public class Persons extends Controller {
 				initTime.residualMinutesCurrentYear = params.get("minutesCurrentYear", Integer.class);
 			initTime.save();
 		}
-		if(person.number != null && person.number != params.get("number", Integer.class))
+		if(person.number != null && ! person.number.equals(params.get("number", Integer.class)))
 			person.number = params.get("number", Integer.class);
 		person.save();
 		flash.success("Modificate informazioni per l'utente %s %s", person.name, person.surname);
@@ -375,7 +375,7 @@ public class Persons extends Controller {
 		//Logger.debug("BeginContract: %s - ExpireContract: %s - EndContract: %s", begin, expire, end);
 		beginContract = new LocalDate(begin);
 		
-		if(begin.equals("") || begin ==null ){
+		if(begin == null || begin.equals("")){
 			flash.error("Non può esistere un contratto senza data di inizio!");
 			render("@save");
 		}
