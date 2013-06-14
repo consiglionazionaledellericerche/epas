@@ -198,26 +198,26 @@ public class SwitchTemplate extends Controller{
 			Stampings.stampings(year, month);
 			break;
 		case absences:
-			Absences.absences(personId, year, month); 
+			Absences.absences(year, month); 
 			break;
 		case absencesperperson:
-			if(personId == 0 || personId == null)
+			if(personId == null || personId == 0)
 				personId = Security.getPerson().id;
 			YearlyAbsences.absencesPerPerson(personId, year);
 			break;
 		case vacations:
-			if(personId == 0 || personId == null)
+			if(personId == null || personId == 0)
 				personId = Security.getPerson().id;
 			Vacations.show(personId, year);
 			break;
 		case competences:
-			if(personId == 0 || personId == null)				
+			if(personId == null || personId == 0)				
 				personId = Security.getPerson().id;
 			
 			Competences.competences(personId, year, month);
 			break;
 		case hourrecap:
-			if(personId == 0 || personId == null)				
+			if(personId == null || personId == 0)				
 				personId = Security.getPerson().id;
 			PersonMonths.hourRecap(personId,year);
 			break;
