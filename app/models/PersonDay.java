@@ -424,6 +424,8 @@ public class PersonDay extends Model {
 				(date.isAfter(con.beginContract) && (con.expireContract == null || date.isBefore(con.expireContract)))) {
 			PersonDay lastPreviousPersonDayInMonth = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? " +
 					"and pd.date >= ? and pd.date < ? ORDER by pd.date DESC", person, date.dayOfMonth().withMinimumValue(), date).first();
+
+			
 			if (lastPreviousPersonDayInMonth == null || (con != null && con.beginContract != null && lastPreviousPersonDayInMonth.date.isBefore(con.beginContract))) {
 				progressive = difference;
 				Logger.debug("%s - %s. Non c'è nessun personDay nel contratto attuale prima di questa data. Progressive di oggi = %s", person, date, progressive);
@@ -878,17 +880,22 @@ public class PersonDay extends Model {
 	 * sempre uguale a zero)
 	 */
 	public PersonDay checkPreviousProgressive(){
-		PersonDay pd = null;
-		if(date.getDayOfMonth() != 1){
-
-			pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date.minusDays(1)).first();
-			if(pd != null)
-				return pd;
-			else{
-				pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date < ? order by pd.date desc", person, date.minusDays(1)).first();
-				return pd;
-			}
-		}
+		//TODO: controllare il funzionamento nel caso del 2 giugno
+//		PersonDay pd = null;
+		PersonDay lastPreviousPersonDayInMonth = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? " +
+				"and pd.date >= ? and pd.date < ? ORDER by pd.date DESC", person, date.dayOfMonth().withMinimumValue(), date).first();
+		if(lastPreviousPersonDayInMonth != null)
+			return lastPreviousPersonDayInMonth;
+//		if(date.getDayOfMonth() != 1){
+//
+//			pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date.minusDays(1)).first();
+//			if(pd != null)
+//				return pd;
+//			else{
+//				pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date < ? order by pd.date desc", person, date.minusDays(1)).first();
+//				return pd;
+//			}
+//		}
 		return null;
 	}
 
