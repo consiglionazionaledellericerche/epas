@@ -10,6 +10,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -28,6 +29,7 @@ import play.db.jpa.Model;
 @Audited
 @Entity
 @Table(name = "stampings")
+
 public class Stamping extends Model {
 
 	private static final long serialVersionUID = -2422323948436157747L;
@@ -39,6 +41,7 @@ public class Stamping extends Model {
 	
 	@Required
 	@ManyToOne(optional = false)
+		
 	@JoinColumn(name = "personDay_id", nullable = false, updatable = false)
 	public PersonDay personDay;
 	
@@ -53,6 +56,7 @@ public class Stamping extends Model {
 	@Required
 	@InPast
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDateTime")
+	
 	public LocalDateTime date;
 	
 	@Required

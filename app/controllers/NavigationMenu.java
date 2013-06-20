@@ -43,7 +43,7 @@ public class NavigationMenu extends Controller {
 		
 		ActionMenuItem action = flash.get("method") != null && !flash.get("method").equals("") && personId != null ? ActionMenuItem.valueOf(flash.get("method")) : ActionMenuItem.stampingsAdmin;
 		
-		Logger.debug("Appena assegnata la action nel metodo injectMenu della classe NavigationMenu. La action è: %s", action.getDescription());
+		//Logger.debug("Appena assegnata la action nel metodo injectMenu della classe NavigationMenu. La action è: %s", action.getDescription());
 		
 	
 		List<Person> persons = (List<Person>) Cache.get("persons");
@@ -65,7 +65,7 @@ public class NavigationMenu extends Controller {
 			}
 			Cache.set("persons", persons, "5mn");
 		}
-		Logger.debug("nella injectMenu la action è: %s", action.getDescription());
+		//Logger.debug("nella injectMenu la action è: %s", action.getDescription());
 		MainMenu mainMenu = null;
 		if(action.getDescription().equals("Riepilogo mensile"))
 			mainMenu = new MainMenu(year, month, action);

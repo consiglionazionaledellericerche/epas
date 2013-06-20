@@ -43,6 +43,8 @@ public class Stampings extends Controller {
 	 * @param year
 	 * @param month
 	 */
+
+	
 	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void stampings(Integer year, Integer month){
 		
