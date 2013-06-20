@@ -136,17 +136,10 @@
 				left:50 
 				}); 
 				</script>
-			</td>			
-			%{
-			if(day.stampingList().size()==2 ){
-	         }% <td class="tempoLavoro">${day.timeAtWork.toHourTime()} <strong>${day.timeAtWork>360 ? day.checkTimeForLunch()?.code : ''}</strong></td>
-			%{
-			 }else{
-			 }% <td class="tempoLavoro">${day.timeAtWork.toHourTime()} <strong>${day.stampingList().size()==4 && !day.stampingList().contains(null) && day.timeAtWork>300
-			 && day.checkMinTimeForLunch()<30 ? day.checkTimeForLunch()?.code : ''}</strong></td>
-			%{
-	         }
-	         }%	
+			</td>
+			
+			<td class="tempoLavoro">${day.getTimeAtWorkWithToday().timeAtWork.toHourTime()}<strong>${day.checkTimeForLunch()?.code}</strong><strong>${day.getTimeAtWorkWithToday().exitingNow ? 'f' : ''}</strong></td>
+										
 	         %{
 	         if(day.isHoliday()==false){
 			}%
@@ -157,15 +150,26 @@
 			%{
 			}
 			}%
+			 <td class="progressivo">
 			%{
-			if(day.isHoliday()==false){
-			}% <td class="progressivo">${day.progressive.toHourTime()}</td>
-			%{
-			}else{
-			}%<td class="progressivo">${day.checkPreviousProgressive() != null ? day.checkPreviousProgressive().progressive.toHourTime() : ''}</td>
-			%{
-			}
-			}%	
+			    if(!day.isFuture()) {
+			}%
+			     
+				%{
+				    if(day.isHoliday()==false) {
+				 }%
+	  			      ${day.progressive.toHourTime()}
+		  		 %{ 
+		  		    } else {
+		  		  }%
+				      ${day.checkPreviousProgressive() != null ? day.checkPreviousProgressive().progressive.toHourTime() : '00:00'}
+				  %{
+				    }
+				  }%
+		    %{
+		        }
+		     }%
+			</td>	
 	         <td>${day.person.workingTimeType != null ? day.person.workingTimeType.description : ''}</td>
 		</tr>
 
