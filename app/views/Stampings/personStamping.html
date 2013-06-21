@@ -137,9 +137,16 @@
 				}); 
 				</script>
 			</td>
-			
-			<td class="tempoLavoro">${day.getTimeAtWorkWithToday().timeAtWork.toHourTime()}<strong>${day.checkTimeForLunch()?.code}</strong><strong>${day.getTimeAtWorkWithToday().exitingNow ? 'f' : ''}</strong></td>
-										
+			<td class="tempoLavoro">
+			%{
+	         	if(!day.isFuture()){
+	         }%
+					${day.getTimeAtWorkWithToday().timeAtWork.toHourTime()}<strong>${day.checkTimeForLunch()?.code}</strong><strong>${day.getTimeAtWorkWithToday().exitingNow ? 'f' : ''}</strong>
+	        %{ 
+		  		} 
+		  	}%
+		  				 	
+		  	</td>							
 	         %{
 	         if(day.isHoliday()==false){
 			}%
