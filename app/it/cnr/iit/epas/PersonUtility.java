@@ -286,7 +286,8 @@ public class PersonUtility {
 		LocalDateTime endDate = new LocalDateTime(pd.date.getYear(),pd.date.getMonthOfYear(),pd.date.getDayOfMonth(),23,59,59);
 
 		Configuration config = Configuration.getCurrentConfiguration();
-		PersonDay pdPastDay = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", pd.person, pd.date.minusDays(1)).first();
+		PersonDay pdPastDay = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? " +
+				"and pd.date >= ? and pd.date < ? ORDER by pd.date DESC", pd.person, pd.date.dayOfMonth().withMinimumValue(), pd.date).first();
 		StampProfile stampProfile = pd.getStampProfile();
 		if(pdPastDay != null){			
 			//lista delle timbrature del giorno precedente
@@ -320,17 +321,18 @@ public class PersonUtility {
 								Logger.debug("Aggiunta nuova timbratura %s con valore %s", correctStamp, correctStamp.date);
 								Logger.debug("Devo rifare i calcoli in funzione di questa timbratura aggiunta");
 
-								pdPastDay.timeAtWork = pd.toMinute(correctStamp.date) - pd.toMinute(reloadedStampingYesterday.get(0).date);
-								pdPastDay.merge();
-								pdPastDay.difference = pdPastDay.timeAtWork - pd.getWorkingTimeTypeDay().workingTime;
-								pdPastDay.merge();
-								PersonDay pdPast = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date <= ? order by pd.date desc", pd.person, pd.date.minusDays(2)).first();
-								if(pdPast != null)
-									pdPastDay.progressive = pdPast.progressive + pdPastDay.difference;
-
-								else
-									pdPastDay.progressive = pdPastDay.difference;
-								pdPastDay.merge();
+//								pdPastDay.timeAtWork = pd.toMinute(correctStamp.date) - pd.toMinute(reloadedStampingYesterday.get(0).date);
+//								pdPastDay.merge();
+//								pdPastDay.difference = pdPastDay.timeAtWork - pd.getWorkingTimeTypeDay().workingTime;
+//								pdPastDay.merge();
+//								PersonDay pdPast = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date <= ? order by pd.date desc", pd.person, pd.date.minusDays(2)).first();
+//								if(pdPast != null)
+//									pdPastDay.progressive = pdPast.progressive + pdPastDay.difference;
+//
+//								else
+//									pdPastDay.progressive = pdPastDay.difference;
+//								pdPastDay.merge();
+								pdPastDay.populatePersonDay();
 								Logger.debug("Fatti i calcoli, ora aggiungo una timbratura di ingresso alla mezzanotte del giorno %s", pd.date);
 								//a questo punto devo aggiungere una timbratura di ingresso prima della prima timbratura di uscita che è anche
 								//la prima timbratura del giorno attuale
@@ -345,6 +347,7 @@ public class PersonUtility {
 								Logger.debug("Aggiunta la timbratura %s con valore %s", newEntranceStamp, newEntranceStamp.date);
 
 								pd.save();
+								pd.populatePersonDay();
 							}
 						}
 					}
