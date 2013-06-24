@@ -612,16 +612,19 @@ public class FromMysqlToPostgres {
 		}
 
 		Logger.debug("Cerco il workingTimeType per %s", person);
-
+		
 		Connection mysqlCon = getMysqlConnection();
-		PreparedStatement stmt = mysqlCon.prepareStatement("select odl.id, odl.nome from orari_di_lavoro as odl JOIN orario_pers op " +
+		PreparedStatement stmt = mysqlCon.prepareStatement("select odl.id, odl.nome, op.data_inizio, op.data_fine FROM orari_di_lavoro as odl JOIN orario_pers op " +
 				" ON op.oid = odl.id " +
-				" WHERE op.pid = " + oldIDPersona + " order by op.data_fine desc limit 1");
+				" WHERE op.pid = " + oldIDPersona + " AND op.data_inizio < curdate() and op.data_fine > curdate() order by op.data_fine desc limit 1");
 		ResultSet rs = stmt.executeQuery();
 
 		WorkingTimeType wtt = null;
 		if(rs.next()){
+			
 			wtt = mappaCodiciWorkingTimeType.get(rs.getInt("id"));
+			Logger.trace("Esiste il working time. Assegno a %s %s il tempo di lavoro %s", person.name, person.surname, mappaCodiciWorkingTimeType.get(rs.getInt("id")));
+			
 		} else {
 			//Non c'è nessun orario di lavoro impostato per la Persona quindi impostiamo l'orario predefinito che è il normale-mod
 			wtt = WorkingTimeType.em().getReference(WorkingTimeType.class, WorkingTimeTypeValues.NORMALE_MOD.getId());
