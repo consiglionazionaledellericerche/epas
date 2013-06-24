@@ -13,3 +13,7 @@ StampModificationType(m):
 StampModificationType(x):
     code: x
     description: Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte
+
+StampModificationType(f):
+    code: f
+    description: Tempo di lavoro che si avrebbe uscendo adesso
