@@ -430,44 +430,6 @@ public class PersonDay extends Model {
 
 		Logger.trace("Dimensione Stampings: %s. Dimensione Absences: %s Per %s %s", stampings.size(), absences.size(), person.name, person.surname);
 
-		//		if(stampings.size() != 0 && absences.size() != 0){
-		//			Logger.debug("Ci sono sia timbrature che assenze, verifico che le assenze siano giornaliere e non orarie così da" +
-		//					"evitare di fare i calcoli per questo giorno.");
-		//			for(Absence abs : absences){
-		//				//TODO: verificare con Claudio cosa fare con le timbrature in missione
-		//				if(abs.absenceType.ignoreStamping == true || abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay){
-		//					timeAtWork = 0;
-		//					difference = 0;
-		//					merge();
-		//					updateProgressive();
-		//					isTicketAvailable = false;
-		//					merge();
-		//					return;
-		//				} else{
-		//					timeAtWork = timeAtWork + abs.absenceType.justifiedTimeAtWork.minutesJustified;
-		//					
-		//					merge();
-		//					updateDifference();
-		//					merge();
-		//					updateProgressive();
-		//					merge();
-		//					setTicketAvailable();
-		//					merge();
-		//
-		//				}
-		//
-		//			}
-		//		}
-		//		if(timeAtWork != null && (stampings.size() == 0 || stampings == null)){
-		//			updateDifference();
-		//			merge();
-		//			updateProgressive();	
-		//			merge();
-		//			setTicketAvailable();
-		//			merge();
-		//			return;
-		//		}	
-
 		updateTimeAtWork();
 		merge();
 		updateDifference();
@@ -643,6 +605,16 @@ public class PersonDay extends Model {
 			difference = 0;
 			save();
 			return;
+		}
+		
+		if(absences.size() == 1 && stampings.size() > 0){
+			Absence abs = absences.get(0);
+			if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay){
+				difference = 0;
+				save();
+				return;
+			}
+				
 		}
 
 		if(this.date.isAfter(new LocalDate()) && stampings.size()==0 && absences.size()==0 && timeAtWork == 0){
