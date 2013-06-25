@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.FetchType;
+import javax.persistence.Query;
+
 
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
@@ -282,74 +284,66 @@ public class PersonUtility {
 
 
 	public static void checkExitStampNextDay(PersonDay pd){
-		LocalDateTime beginDate = new LocalDateTime(pd.date.getYear(),pd.date.getMonthOfYear(),pd.date.getDayOfMonth(),0,0,0);
-		LocalDateTime endDate = new LocalDateTime(pd.date.getYear(),pd.date.getMonthOfYear(),pd.date.getDayOfMonth(),23,59,59);
 
 		Configuration config = Configuration.getCurrentConfiguration();
 		PersonDay pdPastDay = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? " +
 				"and pd.date >= ? and pd.date < ? ORDER by pd.date DESC", pd.person, pd.date.dayOfMonth().withMinimumValue(), pd.date).first();
+
 		StampProfile stampProfile = pd.getStampProfile();
 		if(pdPastDay != null){			
-			//lista delle timbrature del giorno precedente
-			List<Stamping> reloadedStampingYesterday = Stamping.find("Select st from Stamping st where st.personDay = ? and " +
-					"st.date between ? and ? order by st.date", pdPastDay, beginDate.minusDays(1), endDate.minusDays(1)).fetch();
-			//controllo che la lista di timbrature ne contenga una sola e che sia una timbratura di ingresso
-			if(reloadedStampingYesterday.size() == 1 && reloadedStampingYesterday.get(0).way == WayType.in){
-				Logger.debug("Sono nel caso in cui ci sia una sola timbratura ed è di ingresso nel giorno precedente nel giorno %s", 
+			//lista delle timbrature del giorno precedente ordinate in modo decrescente per vedere se l'ultima del giorno è una timbratura di ingresso
+			//List<Stamping> reloadedStampingYesterday = Stamping.find("Select st from Stamping st where st.personDay = ? order by st.date desc", pdPastDay).fetch();
+			Query query = JPA.em().createQuery("Select st from Stamping st where st.personDay = :pd");
+			query.setParameter("pd", pdPastDay);
+			List<Stamping> reloadedStampingYesterday = query.getResultList();
+			//	List<Stamping> reloadedStampingYesterday = new ArrayList<Stamping>(pdPastDay.stampings);
+			int size = reloadedStampingYesterday.size();
+			if(reloadedStampingYesterday.size() > 0 && reloadedStampingYesterday.get(size-1).way == WayType.in){
+				Logger.debug("Sono nel caso in cui ci sia una timbratura finale ed è di ingresso nel giorno precedente nel giorno %s", 
 						pdPastDay.date);
 				if(stampProfile == null || !stampProfile.fixedWorkingTime){
-					for(Stamping st : pd.stampings){
+					List<Stamping> s = new ArrayList<Stamping>(pd.stampings);
+					if(s.size() > 0 && s.get(0).way == WayType.out && config.hourMaxToCalculateWorkTime > s.get(0).date.getHourOfDay()){
 
-						if(st != null){
-							//controllo nelle timbrature del giorno attuale se la prima che incontro è una timbratura di uscita sulla base
-							//del confronto con il massimo orario impostato in configurazione per considerarla timbratura di uscita relativa
-							//al giorno precedente
-							if(st.way == WayType.out && config.hourMaxToCalculateWorkTime > st.date.getHourOfDay()){
-								Logger.debug("Esiste una timbratura di uscita come prima timbratura del giorno %s", pd.date);
-								//in caso esista quella timbratura di uscita come prima timbratura del giorno attuale, creo una nuova timbratura
-								// di uscita e la inserisco nella lista delle timbrature relative al personDay del giorno precedente.
-								//E svolgo i calcoli su tempo di lavoro, differenza e progressivo
-								Stamping correctStamp = new Stamping();
-								Logger.debug("Aggiungo una nuova timbratura di uscita al giorno precedente alla mezzanotte ");
-								correctStamp.date = new LocalDateTime(pdPastDay.date.getYear(), pdPastDay.date.getMonthOfYear(), pdPastDay.date.getDayOfMonth(), 23, 59);
-								correctStamp.way = WayType.out;
-								correctStamp.markedByAdmin = false;
-								correctStamp.stampModificationType = StampModificationType.findById(4l);
-								correctStamp.note = "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
-								correctStamp.personDay = pdPastDay;
-								correctStamp.save();
-								Logger.debug("Aggiunta nuova timbratura %s con valore %s", correctStamp, correctStamp.date);
-								Logger.debug("Devo rifare i calcoli in funzione di questa timbratura aggiunta");
+						//controllo nelle timbrature del giorno attuale se la prima che incontro è una timbratura di uscita sulla base
+						//del confronto con il massimo orario impostato in configurazione per considerarla timbratura di uscita relativa
+						//al giorno precedente
 
-//								pdPastDay.timeAtWork = pd.toMinute(correctStamp.date) - pd.toMinute(reloadedStampingYesterday.get(0).date);
-//								pdPastDay.merge();
-//								pdPastDay.difference = pdPastDay.timeAtWork - pd.getWorkingTimeTypeDay().workingTime;
-//								pdPastDay.merge();
-//								PersonDay pdPast = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date <= ? order by pd.date desc", pd.person, pd.date.minusDays(2)).first();
-//								if(pdPast != null)
-//									pdPastDay.progressive = pdPast.progressive + pdPastDay.difference;
-//
-//								else
-//									pdPastDay.progressive = pdPastDay.difference;
-//								pdPastDay.merge();
-								pdPastDay.populatePersonDay();
-								Logger.debug("Fatti i calcoli, ora aggiungo una timbratura di ingresso alla mezzanotte del giorno %s", pd.date);
-								//a questo punto devo aggiungere una timbratura di ingresso prima della prima timbratura di uscita che è anche
-								//la prima timbratura del giorno attuale
-								Stamping newEntranceStamp = new Stamping();
-								newEntranceStamp.date = new LocalDateTime(pd.date.getYear(), pd.date.getMonthOfYear(), pd.date.getDayOfMonth(),0,0);
-								newEntranceStamp.way = WayType.in;
-								newEntranceStamp.markedByAdmin = false;
-								newEntranceStamp.stampModificationType = StampModificationType.findById(4l);
-								newEntranceStamp.note = "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
-								newEntranceStamp.personDay = pd;
-								newEntranceStamp.save();
-								Logger.debug("Aggiunta la timbratura %s con valore %s", newEntranceStamp, newEntranceStamp.date);
+						Logger.debug("Esiste una timbratura di uscita come prima timbratura del giorno %s", pd.date);
+						//in caso esista quella timbratura di uscita come prima timbratura del giorno attuale, creo una nuova timbratura
+						// di uscita e la inserisco nella lista delle timbrature relative al personDay del giorno precedente.
+						//E svolgo i calcoli su tempo di lavoro, differenza e progressivo
+						Stamping correctStamp = new Stamping();
+						Logger.debug("Aggiungo una nuova timbratura di uscita al giorno precedente alla mezzanotte ");
+						correctStamp.date = new LocalDateTime(pdPastDay.date.getYear(), pdPastDay.date.getMonthOfYear(), pdPastDay.date.getDayOfMonth(), 23, 59);
+						correctStamp.way = WayType.out;
+						correctStamp.markedByAdmin = false;
+						correctStamp.stampModificationType = StampModificationType.findById(4l);
+						correctStamp.note = "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
+						correctStamp.personDay = pdPastDay;
+						correctStamp.save();
+						Logger.debug("Aggiunta nuova timbratura %s con valore %s", correctStamp, correctStamp.date);
+						Logger.debug("Devo rifare i calcoli in funzione di questa timbratura aggiunta");
 
-								pd.save();
-								pd.populatePersonDay();
-							}
-						}
+
+						pdPastDay.populatePersonDay();
+						Logger.debug("Fatti i calcoli, ora aggiungo una timbratura di ingresso alla mezzanotte del giorno %s", pd.date);
+						//a questo punto devo aggiungere una timbratura di ingresso prima della prima timbratura di uscita che è anche
+						//la prima timbratura del giorno attuale
+						Stamping newEntranceStamp = new Stamping();
+						newEntranceStamp.date = new LocalDateTime(pd.date.getYear(), pd.date.getMonthOfYear(), pd.date.getDayOfMonth(),0,0);
+						newEntranceStamp.way = WayType.in;
+						newEntranceStamp.markedByAdmin = false;
+						newEntranceStamp.stampModificationType = StampModificationType.findById(4l);
+						newEntranceStamp.note = "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
+						newEntranceStamp.personDay = pd;
+						newEntranceStamp.save();
+						Logger.debug("Aggiunta la timbratura %s con valore %s", newEntranceStamp, newEntranceStamp.date);
+
+						pd.save();
+						pd.populatePersonDay();
+
+
 					}
 				}
 
@@ -427,7 +421,7 @@ public class PersonUtility {
 		}
 		return notJustifiedAbsences;
 	}
-	
+
 	/**
 	 * 
 	 * @return false se l'id passato alla funzione non trova tra le persone presenti in anagrafica, una che avesse nella vecchia applicazione un id
@@ -441,7 +435,7 @@ public class PersonUtility {
 			return false;
 		else
 			return true;
-		
+
 	}
 
 }

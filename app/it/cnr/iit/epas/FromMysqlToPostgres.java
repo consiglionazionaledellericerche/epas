@@ -27,6 +27,8 @@ import models.PersonMonth;
 import models.PersonReperibility;
 import models.PersonYear;
 import models.Qualification;
+import models.StampModificationType;
+import models.StampModificationTypeValue;
 import models.StampProfile;
 import models.StampType;
 import models.Stamping;
@@ -728,8 +730,9 @@ public class FromMysqlToPostgres {
 
 		PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT Orario.ID,Orario.Giorno,Orario.TipoGiorno,Orario.TipoTimbratura," + 	
 				"Orario.Ora, Codici.id, Codici.Codice, Codici.Qualifiche " +
-				"FROM Orario, Codici " +
-				"WHERE Orario.TipoGiorno=Codici.id and Orario.Giorno >= '2013-01-01' " +
+				"FROM Orario " +
+				"LEFT JOIN Codici ON Orario.TipoGiorno=Codici.id " +
+				"WHERE Orario.Giorno >= '2013-01-01' " +
 				"and Orario.ID = " + id + " ORDER BY Orario.Giorno");
 		ResultSet rs = stmtOrari.executeQuery();
 
@@ -738,8 +741,15 @@ public class FromMysqlToPostgres {
 		LocalDate newData = null;
 
 		int importedStamping = 0;
-
+		boolean countAdmin = false;
 		while(rs.next()){
+			Logger.debug("Il tipoGiorno è: %s ", rs.getInt("TipoGiorno"));
+			if(rs.getInt("TipoGiorno")==-1){
+				//Logger.debug("Rilevata timbratura modificata dall'amministratore il %s per %s %s", pd.date, pd.person.name, pd.person.surname);
+				countAdmin = true;
+				continue;
+	
+			}
 			/**
 			 * controllo che la data prelevata sia diversa da null, poichè nel vecchio db esiste la possibilità di avere date del tipo 0000-00-00
 			 * in tal caso devo scartarle e continuare l'elaborazione
@@ -750,9 +760,9 @@ public class FromMysqlToPostgres {
 				continue;
 			}
 			newData = new LocalDate(rs.getDate("Giorno"));
-
-
+	
 			if(data != null) {
+				
 				if(newData.isAfter(data)){		
 
 					Logger.debug("Nuovo giorno %s per %s, prima si fanno i calcoli sul personday poi si crea quello nuovo", newData, person.toString());
@@ -767,9 +777,12 @@ public class FromMysqlToPostgres {
 					pd = new PersonDay(person, newData);
 					pd.create();
 					Logger.debug("Creato %s ", pd.toString());
+					//il caso di timbratura modificata/inserita dall'amministratore
+					
 					if(rs.getInt("TipoGiorno")==0){
 
-						createStamping(pd, rs.getLong("TipoTimbratura"), rs.getBytes("Ora"));
+						createStamping(pd, rs.getLong("TipoTimbratura"), rs.getBytes("Ora"), countAdmin);
+						countAdmin = false;
 					}
 					else{
 						createAbsence(pd, rs.getString("Codice"));
@@ -779,10 +792,12 @@ public class FromMysqlToPostgres {
 				if(newData.isEqual(data)){					
 					/**
 					 * si tratta di timbratura
-					 */					
+					 */		
+					
 					if(rs.getInt("TipoGiorno")==0){					
 						Logger.debug("Altra timbratura per %s nel giorno %s", person.toString(), newData);
-						createStamping(pd, rs.getLong("TipoTimbratura"), rs.getBytes("Ora"));
+						createStamping(pd, rs.getLong("TipoTimbratura"), rs.getBytes("Ora"), countAdmin);
+						countAdmin = false;
 					}
 					/**
 					 * si tratta di assenza
@@ -802,9 +817,10 @@ public class FromMysqlToPostgres {
 					pd.create();
 					Logger.debug("Creato %s", pd.toString());
 				}
-
+				
 				if(rs.getInt("TipoGiorno")==0){				
-					createStamping(pd, rs.getLong("TipoTimbratura"), rs.getBytes("Ora")); 
+					createStamping(pd, rs.getLong("TipoTimbratura"), rs.getBytes("Ora"), countAdmin); 
+					countAdmin = false;
 				}
 				/**
 				 * si tratta di assenza
@@ -826,8 +842,9 @@ public class FromMysqlToPostgres {
 				Logger.debug("Il progressivo al termine del resultset è: %s e il differenziale è: %s", pd.progressive, pd.difference);
 				Logger.info("Creato %s", pd);
 			}
+			
 			data = newData;		
-
+			countAdmin = false;
 
 			if (importedStamping % 100 == 0) {
 				JPAPlugin.closeTx(false);
@@ -838,6 +855,7 @@ public class FromMysqlToPostgres {
 			}
 
 			importedStamping++;
+			
 		}
 
 		JPAPlugin.closeTx(false);
@@ -1151,8 +1169,31 @@ public class FromMysqlToPostgres {
 			}
 		}
 	}
+	
+//	private static void createModifiedStamping(PersonDay pd, long tipoTimbratura, ResultSet rs ) throws SQLException{
+//		Stamping stamping = new Stamping();
+//		while(rs.next()){
+//			if(rs.getLong("TipoTimbratura")==tipoTimbratura && rs.getInt("TipoGiorno") != -1){
+//				if(tipoTimbratura % 2 != 0)
+//					stamping.way = WayType.in;	
+//				else
+//					stamping.way = WayType.out;
+//				String s = rs.getString("Ora");
+//				setDateTimeToStamping(stamping, pd.date, s);
+//				stamping.personDay = pd;
+//				stamping.markedByAdmin = true;
+//				stamping.note = "timbratura modificata dall'amministratore";
+//				stamping.stampModificationType = StampModificationType.findById(3L);
+//				stamping.save();
+//				pd.stampings.add(stamping);
+//				pd.merge();
+//				
+//				Logger.debug("Creata timbratura modificata dall'amministratore %s", stamping.toString());
+//			}
+//		}
+//	}
 
-	private static void createStamping(PersonDay pd, long tipoTimbratura, byte[] oldTime){
+	private static void createStamping(PersonDay pd, long tipoTimbratura, byte[] oldTime, boolean countAdmin){
 		Stamping stamping = new Stamping();
 
 		if(tipoTimbratura % 2 != 0)
@@ -1166,6 +1207,9 @@ public class FromMysqlToPostgres {
 		}
 		String s = oldTime != null ? new String(oldTime) : null;
 		setDateTimeToStamping(stamping, pd.date, s);
+		stamping.markedByAdmin = countAdmin;
+		if(countAdmin == true)
+			stamping.stampModificationType = StampModificationTypeValue.MARKED_BY_ADMIN.getStampModificationType();
 		stamping.personDay = pd;
 		stamping.save();
 		pd.stampings.add(stamping);
@@ -1348,8 +1392,10 @@ public class FromMysqlToPostgres {
 		while(rs.next()){
 			CompetenceCode code = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", rs.getString("codicecomp")).first();
 			Person person = Person.find("Select p from Person p where p.number = ?", rs.getInt("matricola")).first();
-			person.competenceCode.add(code);
-			person.save();
+			if(person != null && code != null){
+				person.competenceCode.add(code);
+				person.save();
+			}
 		}
 		Logger.debug("Terminazione di PersonToCompetence per dare a ogni dipendente le proprie competenze attive");
 	}
