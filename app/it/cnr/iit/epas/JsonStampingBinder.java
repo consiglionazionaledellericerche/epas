@@ -96,8 +96,17 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 				
 				if(tipo.equals("matricolaCNR")){
 			
-					int firma = Integer.parseInt(matricolaFirma);
-					person = Person.find("Select p from Person p where p.number = ?", firma).first();
+					if (matricolaFirma.indexOf("INT") > 0) {
+						continue;
+					}
+					try {
+						int firma = Integer.parseInt(matricolaFirma);
+						person = Person.find("Select p from Person p where p.number = ?", firma).first();
+					} catch (NumberFormatException nfe) {
+						Logger.info("Impossibile cercare una persona tramite la matricola se la matricola non e' numerica. Matricola = %s", matricolaFirma);
+						return null;
+					}
+					
 					if(person != null){
 						stamping.personId = person.id;
 						break;
@@ -114,7 +123,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 					if (matricolaFirma.indexOf("INT") > 0) {
 						intMatricolaFirma = matricolaFirma.substring(matricolaFirma.indexOf("INT") + 3);
 					} else {
-					continue;
+						continue;
 					}
 					
 					
@@ -141,7 +150,11 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 				}
 				
 				if(tipo.equals("matricolaBadge")){
-					int badgeNumber = Integer.parseInt(matricolaFirma);
+					
+					//Rimuove tutti gli eventuali 0 iniziali alla stringa
+					// http://stackoverflow.com/questions/2800739/how-to-remove-leading-zeros-from-alphanumeric-text
+					String badgeNumber = matricolaFirma.replaceFirst("^0+(?!$)", "");
+					
 					person = Person.find("Select p from Person p where p.badgeNumber = ?", badgeNumber).first();
 					if(person != null){
 						stamping.personId = person.id;
@@ -183,5 +196,5 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 			return null;
 		}
 	}
-		
+
 }
