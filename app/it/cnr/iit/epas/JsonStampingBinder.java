@@ -103,8 +103,8 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 						int firma = Integer.parseInt(matricolaFirma);
 						person = Person.find("Select p from Person p where p.number = ?", firma).first();
 					} catch (NumberFormatException nfe) {
-						Logger.info("Impossibile cercare una persona tramite la matricola se la matricola non e' numerica. Matricola = %s", matricolaFirma);
-						return null;
+						Logger.debug("Impossibile cercare una persona tramite la matricola se la matricola non e' numerica. Matricola = %s", matricolaFirma);
+						continue;
 					}
 					
 					if(person != null){
