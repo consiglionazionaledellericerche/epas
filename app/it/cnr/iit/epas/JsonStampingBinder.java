@@ -121,7 +121,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 					String intMatricolaFirma = matricolaFirma;
 					
 					if (matricolaFirma.indexOf("INT") > 0) {
-						intMatricolaFirma = matricolaFirma.substring(matricolaFirma.indexOf("INT") + 3);
+						intMatricolaFirma = matricolaFirma.substring(matricolaFirma.indexOf("INT") + 3).trim();
 					} else {
 						continue;
 					}
@@ -196,5 +196,4 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 			return null;
 		}
 	}
-
 }
