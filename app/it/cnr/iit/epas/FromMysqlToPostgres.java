@@ -390,7 +390,9 @@ public class FromMysqlToPostgres {
 		int importedAbsenceTypes = 0;
 
 		Connection mysqlCon = getMysqlConnection();
-		PreparedStatement stmtCodici = mysqlCon.prepareStatement("Select * from Codici where Codici.id != 0");
+		// select ordinata perchè così vengono prima creati i codici che hanno il campo codiceSost = null perchè ci sono codici che possono essere
+		//utilizzati in sostituzione di altri codici
+		PreparedStatement stmtCodici = mysqlCon.prepareStatement("Select * from Codici where Codici.id != 0 order by CodiceSost");
 		ResultSet rsCodici = stmtCodici.executeQuery();
 
 		AbsenceTypeGroup absTypeGroup = null;
@@ -428,6 +430,15 @@ public class FromMysqlToPostgres {
 
 					absTypeGroup.label = gruppo;
 					absTypeGroup.limitInMinute = rsCodici.getInt("Limite");
+									
+					String codSost = rsCodici.getString("CodiceSost");
+					if(codSost != null && !codSost.trim().equals("")){
+						AbsenceType abt = JPA.em().createQuery("Select abt from AbsenceType abt where abt.code = :codSost", AbsenceType.class)
+								.setParameter("codSost", codSost).getSingleResult();
+						
+						absTypeGroup.replacingAbsenceType = abt;
+					}
+					
 					int gestioneLimite = rsCodici.getInt("GestLim");
 					switch (gestioneLimite){
 					case 0:
@@ -480,7 +491,8 @@ public class FromMysqlToPostgres {
 
 			}
 
-			absenceType.save();				
+			absenceType.save();		
+			JPA.em().flush();
 			Logger.info("Creato absenceType %s - %s", absenceType.code, absenceType.description);
 
 			importedAbsenceTypes++;
