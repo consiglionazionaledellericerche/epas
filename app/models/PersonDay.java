@@ -154,6 +154,19 @@ public class PersonDay extends Model {
 			this.lastNotPairedInStamping = lastNotPairedInStamping;
 		}
 	}
+	
+	/**
+	 * 
+	 * @param abt
+	 * @return true se nella lista assenze per un certo giorno esiste un'assenza che appartenga a un gruppo il cui codice di rimpiazzamento non
+	 * sia nullo
+	 */
+	private boolean checkHourlyAbsenceCodeSameGroup(AbsenceType abt){
+		Query query = JPA.em().createQuery("Select abs from Absence abs where abs.absenceType.absenceTypeGroup.replacingAbsenceType = :abt and " +
+				"abs.personDay = :pd");
+		query.setParameter("abt", abt).setParameter("pd", this);
+		return query.getResultList().size() > 0;
+	}
 
 	public TimeAtWork getCalculatedTimeAtWork() {
 		
@@ -174,14 +187,19 @@ public class PersonDay extends Model {
 		 */
 		PersonUtility.checkExitStampNextDay(this);
 
+	
 		for(Absence abs : absences){
 			//TODO: verificare con Claudio cosa fare con le timbrature in missione
-			if(abs.absenceType.ignoreStamping || abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay){
+			if(abs.absenceType.ignoreStamping || 
+					(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay && !checkHourlyAbsenceCodeSameGroup(abs.absenceType))){
 				return new TimeAtWork(0, null);
 			} else{
-				if(!abs.absenceType.code.equals("89"))
+				if(!abs.absenceType.code.equals("89") && abs.absenceType.justifiedTimeAtWork.minutesJustified != null)
+					//ci sono più codici di assenza uno è il codice da inviare a roma dell'assenza oraria corrispondente
 					justifiedTimeAtWork = justifiedTimeAtWork + abs.absenceType.justifiedTimeAtWork.minutesJustified;
 				else{
+					
+					//Da capire cosa fare nel caso del codice 89
 					Logger.trace("Il codice che sto analizzando è: %s", abs.absenceType.code);
 				}
 			}
@@ -273,7 +291,7 @@ public class PersonDay extends Model {
 
 				if(reloadedStampings.get(i).stampType != null && reloadedStampings.get(i).stampType.identifier.equals("s")){
 					if((i-1) >= 0){
-						if(reloadedStampings.get(i-1).stampType != null && reloadedStampings.get(i - 1).stampType.identifier.equals("s")){
+						if(reloadedStampings.get(i-1).stampType != null && reloadedStampings.get(i-1).stampType.identifier.equals("s")){
 							//c'è stata un'uscita di servizio, questo è il corrispondente ingresso come lo calcolo? aggiungendo il tempo
 							//trascorso fuori per servizio come tempo di lavoro
 							Logger.debug("Anche la precedente timbratura era di servizio...calcolo il tempo in servizio come tempo a lavoro per %s %s", 
@@ -700,7 +718,7 @@ public class PersonDay extends Model {
 	public StampModificationType checkMissingExitStampBeforeMidnight(){
 		StampModificationType smt = null;
 		for(Stamping st : stampings){
-			if(st.stampModificationType != null)
+			if(st.stampModificationType != null && st.stampModificationType.equals(StampModificationTypeValue.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getStampModificationType()))
 				smt = StampModificationType.findById(StampModificationTypeValue.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getId());
 		}
 		return smt;

@@ -58,7 +58,7 @@
 				<!--  	<a href="@{Stampings.edit(day.getStampings().get(j).id)}" class="insertStamping${day.date.dayOfMonth}"> -->
 					${day.stampings.get(j).date.toCalendarTime()}
 				<!--  	</a> -->
-				${(day.stampingList().get(j).stampModificationType?.code)} 
+				 
 				${(day.stampingList().get(j).stampType != null ? day.stampingList().get(j).stampType.identifier : '')}
 					%{ } }%
 				</td>
@@ -68,7 +68,7 @@
 				<!--  	<a href="@{Stampings.edit(day.getStampings().get(j+1).id)}" class="insertStamping${day.date.dayOfMonth}"> -->
 					${day.stampingList().get(j+1).date.toCalendarTime()}
 				<!--  	</a> -->
-					${(day.stampingList().get(j+1).stampModificationType?.code)} 
+					 
 				${(day.stampingList().get(j).stampType != null ? day.stampingList().get(j).stampType.identifier : '')}
 					%{ } }%
 				</td>

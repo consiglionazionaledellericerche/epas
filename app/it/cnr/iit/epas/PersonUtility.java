@@ -284,7 +284,7 @@ public class PersonUtility {
 
 
 	public static void checkExitStampNextDay(PersonDay pd){
-
+		Logger.trace("Chiamata la checkExitStampNextDay per %s %s in data %s", pd.person.name, pd.person.surname, pd.date);
 		Configuration config = Configuration.getCurrentConfiguration();
 		PersonDay pdPastDay = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? " +
 				"and pd.date >= ? and pd.date < ? ORDER by pd.date DESC", pd.person, pd.date.dayOfMonth().withMinimumValue(), pd.date).first();
@@ -299,7 +299,7 @@ public class PersonUtility {
 			//	List<Stamping> reloadedStampingYesterday = new ArrayList<Stamping>(pdPastDay.stampings);
 			int size = reloadedStampingYesterday.size();
 			if(reloadedStampingYesterday.size() > 0 && reloadedStampingYesterday.get(size-1).way == WayType.in){
-				Logger.debug("Sono nel caso in cui ci sia una timbratura finale ed è di ingresso nel giorno precedente nel giorno %s", 
+				Logger.trace("Sono nel caso in cui ci sia una timbratura finale di ingresso nel giorno precedente nel giorno %s", 
 						pdPastDay.date);
 				if(stampProfile == null || !stampProfile.fixedWorkingTime){
 					List<Stamping> s = new ArrayList<Stamping>(pd.stampings);
@@ -309,12 +309,12 @@ public class PersonUtility {
 						//del confronto con il massimo orario impostato in configurazione per considerarla timbratura di uscita relativa
 						//al giorno precedente
 
-						Logger.debug("Esiste una timbratura di uscita come prima timbratura del giorno %s", pd.date);
+						Logger.trace("Esiste una timbratura di uscita come prima timbratura del giorno %s", pd.date);
 						//in caso esista quella timbratura di uscita come prima timbratura del giorno attuale, creo una nuova timbratura
 						// di uscita e la inserisco nella lista delle timbrature relative al personDay del giorno precedente.
 						//E svolgo i calcoli su tempo di lavoro, differenza e progressivo
 						Stamping correctStamp = new Stamping();
-						Logger.debug("Aggiungo una nuova timbratura di uscita al giorno precedente alla mezzanotte ");
+						Logger.trace("Aggiungo una nuova timbratura di uscita al giorno precedente alla mezzanotte ");
 						correctStamp.date = new LocalDateTime(pdPastDay.date.getYear(), pdPastDay.date.getMonthOfYear(), pdPastDay.date.getDayOfMonth(), 23, 59);
 						correctStamp.way = WayType.out;
 						correctStamp.markedByAdmin = false;
@@ -322,12 +322,14 @@ public class PersonUtility {
 						correctStamp.note = "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
 						correctStamp.personDay = pdPastDay;
 						correctStamp.save();
-						Logger.debug("Aggiunta nuova timbratura %s con valore %s", correctStamp, correctStamp.date);
-						Logger.debug("Devo rifare i calcoli in funzione di questa timbratura aggiunta");
+						pdPastDay.stampings.add(correctStamp);
+						pdPastDay.save();
+						Logger.trace("Aggiunta nuova timbratura %s con valore %s", correctStamp, correctStamp.date);
+						Logger.trace("Devo rifare i calcoli in funzione di questa timbratura aggiunta");
 
 
 						pdPastDay.populatePersonDay();
-						Logger.debug("Fatti i calcoli, ora aggiungo una timbratura di ingresso alla mezzanotte del giorno %s", pd.date);
+						Logger.trace("Fatti i calcoli, ora aggiungo una timbratura di ingresso alla mezzanotte del giorno %s", pd.date);
 						//a questo punto devo aggiungere una timbratura di ingresso prima della prima timbratura di uscita che è anche
 						//la prima timbratura del giorno attuale
 						Stamping newEntranceStamp = new Stamping();
@@ -338,13 +340,20 @@ public class PersonUtility {
 						newEntranceStamp.note = "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
 						newEntranceStamp.personDay = pd;
 						newEntranceStamp.save();
-						Logger.debug("Aggiunta la timbratura %s con valore %s", newEntranceStamp, newEntranceStamp.date);
-
+						Logger.trace("Aggiunta la timbratura %s con valore %s", newEntranceStamp, newEntranceStamp.date);
+						pd.stampings.add(newEntranceStamp);
 						pd.save();
-						pd.populatePersonDay();
+						//pd.populatePersonDay();
 
 
 					}
+					else{
+						Logger.trace("La prima timbratura del giorno per %s per %s %s non è di uscita", pd.date, pd.person.name, pd.person.surname);
+					}
+				}
+				else{
+					Logger.trace("Non faccio i calcoli per l'uscita perchè c'è il tempo di lavoro giustificato per %s %s in data %s", 
+							pd.person.name, pd.person.surname, pd.date);
 				}
 
 			}
