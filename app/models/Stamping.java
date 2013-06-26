@@ -35,8 +35,18 @@ public class Stamping extends Model {
 	private static final long serialVersionUID = -2422323948436157747L;
 
 	public enum WayType {
-		in,
-		out
+		in("in"),
+		out("out");
+		
+		public String description;
+		
+		private WayType(String description){
+			this.description = description;
+		}
+		
+		public String getDescriptio(){
+			return this.description;
+		}
 	}
 	
 	@Required
