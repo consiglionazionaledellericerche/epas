@@ -266,6 +266,11 @@ public class PersonDay extends Model {
 
 				}
 				else{
+					if(i-1 > 0 && reloadedStampings.get(i-1) != null && reloadedStampings.get(i).stampType != null && reloadedStampings.get(i-1).stampType.identifier.equals("s")){
+						reloadedStampings.get(i).note = "Timbratura di ingresso normale, ci si aspettava invece una timbratura di ingresso di servizio. Contattare il dipendente.";
+						reloadedStampings.get(i).save();
+						continue;
+					}
 					Logger.trace("Tominute di %s: %d", reloadedStampings.get(i).date, toMinute(reloadedStampings.get(i).date));
 					Logger.trace("Tempo di lavoro prima della somma della timbratura: %d", workTime);
 					workTime -= toMinute(reloadedStampings.get(i).date);
@@ -298,9 +303,9 @@ public class PersonDay extends Model {
 									person.name, person.surname);
 						}
 						else{
-							workTime += toMinute(reloadedStampings.get(i).date);
-							reloadedStampings.get(i).note = "Attenzione: timbratura precedente risulta di servizio, mentre questa non lo e', verificare le proprie timbrature di servizio.";
-							reloadedStampings.get(i).save();
+							//workTime += toMinute(reloadedStampings.get(i).date);
+							//reloadedStampings.get(i).note = "Attenzione: timbratura precedente risulta di servizio, mentre questa non lo e', verificare le proprie timbrature di servizio.";
+							//reloadedStampings.get(i).save();
 						}
 					}
 
