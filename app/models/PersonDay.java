@@ -237,7 +237,7 @@ public class PersonDay extends Model {
 		List<Stamping> reloadedStampings = Stamping.find("Select st from Stamping st where st.personDay = ? order by st.date", this).fetch();
 		for(int i = 0; i < reloadedStampings.size(); i++) {
 			Logger.trace("Per il calcolo del tempo di lavoro passo dalla timbratura numero %d", i);
-			if(reloadedStampings.get(i).way == WayType.in){
+			if(reloadedStampings.get(i).way == WayType.in && reloadedStampings.get(i).considerForCounting){
 				Logger.trace("E' timbratura di ingresso per %s alle ore %s", person, reloadedStampings.get(i).date.toString());
 				if (i == reloadedStampings.size() - 1 ) {
 					Logger.trace("Ultima timbratura del %s e' di ingresso per %s %s. Timbratura per adesso ignorata.", date, person.name, person.surname);
@@ -282,7 +282,7 @@ public class PersonDay extends Model {
 
 			}
 
-			if(reloadedStampings.get(i).way == WayType.out){
+			if(reloadedStampings.get(i).way == WayType.out && reloadedStampings.get(i).considerForCounting){
 				Logger.trace("E' timbratura di uscita alle ore %s", reloadedStampings.get(i).date.toString());
 				if (i == 0) {
 					Logger.debug("La prima timbratura del %s e' di uscita per %s %s, quindi viene ignorata nei calcoli", date, person.name, person.surname);

@@ -223,6 +223,7 @@ public class Stampings extends Controller {
 		Stamping stamp = new Stamping();
 		stamp.date = new LocalDateTime(year, month, day, hour, minute, 0);
 		stamp.markedByAdmin = true;
+		stamp.considerForCounting = true;
 		if(service.equals("true")){
 			stamp.note = "timbratura di servizio";
 			stamp.stampType = StampType.find("Select st from StampType st where st.code = ?", "motiviDiServizio").first();

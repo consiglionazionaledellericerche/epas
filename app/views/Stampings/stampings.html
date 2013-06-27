@@ -22,6 +22,7 @@
 		<th>Differenza</th>
 		<th>Progressivo</th>
 		<th>Tipo Orario</th>
+		<th>Note</th>
 	</tr>
 	
 %{
@@ -54,23 +55,36 @@
 					j = i*2;
 				}%
 				<td class="ingresso">
-				%{ if(day.stampingList().size() > j && day.stampingList().get(j) !=null ) { }%
-				<!--  	<a href="@{Stampings.edit(day.getStampings().get(j).id)}" class="insertStamping${day.date.dayOfMonth}"> -->
+				%{ if(day.stampingList().size() > j && day.stampingList().get(j) !=null && day.stampingList().get(j).considerForCounting == true) { }%
+				
 					${day.stampings.get(j).date.toCalendarTime()}
-				<!--  	</a> -->
+				
 				 
-				${(day.stampingList().get(j).stampType != null ? day.stampingList().get(j).stampType.identifier : '')}
-					%{ } }%
+					${(day.stampingList().get(j).stampType != null ? day.stampingList().get(j).stampType.identifier : '')}
+				%{ 
+					}else{ 
+					
+				}%
+					${' '}
+				%{
+					}
+				}%
 				</td>
 				
 				<td class="uscita">
-				%{ if(day.stampingList().size() > j+1 && day.stampingList().get(j+1) !=null ) { }%
-				<!--  	<a href="@{Stampings.edit(day.getStampings().get(j+1).id)}" class="insertStamping${day.date.dayOfMonth}"> -->
+				%{ if(day.stampingList().size() > j+1 && day.stampingList().get(j+1) !=null && day.stampingList().get(j+1).considerForCounting == true) { }%
+				
 					${day.stampingList().get(j+1).date.toCalendarTime()}
-				<!--  	</a> -->
+				
 					 
-				${(day.stampingList().get(j).stampType != null ? day.stampingList().get(j).stampType.identifier : '')}
-					%{ } }%
+					${(day.stampingList().get(j).stampType != null ? day.stampingList().get(j).stampType.identifier : '')}
+				%{ 
+					}else{ 
+				}%
+					${' '}
+				%{
+					}
+				}%
 				</td>
 			
 				%{ } }%
@@ -126,6 +140,7 @@
 		     }%
 			</td>		
 	         <td>${day.person.workingTimeType != null ? day.person.workingTimeType.description : ''}</td>
+	         <td></td>
 		</tr>
 
 %{  		   

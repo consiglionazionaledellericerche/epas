@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.Query;
+
 import models.Absence;
 import models.AbsenceType;
 import models.AbsenceTypeGroup;
@@ -210,6 +212,7 @@ public class FromMysqlToPostgres {
 		Logger.info("Terminata l'importazione dei dati di tutte le persone in %d secondi", ((new Date()).getTime() - start.getTime()) / 1000);
 
 		Logger.info("Adesso aggiorno le date di inizio dei contratti, i vacation period, creo le competenze, il monte ore ed aggiusto i permessi");
+		FromMysqlToPostgres.updateStampings();
 		FromMysqlToPostgres.updateContract();
 		FromMysqlToPostgres.updateVacationPeriod();
 		FromMysqlToPostgres.updateCompetence();
@@ -255,16 +258,57 @@ public class FromMysqlToPostgres {
 				con.beginContract = new LocalDate(1970,1,1);
 				con.save();
 			}
-//			else{
-//				con = new Contract();
-//				con.beginContract = new LocalDate(1970,1,1);
-//				con.person = p;
-//				con.onCertificate = true;
-//				con.save();
-//			}
+
 		}
 	}
 
+	/**
+	 * FIXME: per adesso limitiamo l'impatto alla sola Irene Sannicandro...
+	 */
+	public static void updateStampings(){
+		
+		Person p = JPA.em().createQuery("Select p from Person p where p.surname = :surname", Person.class).setParameter("surname", "Sannicandro").getSingleResult();
+		Logger.debug("Chiamata la funzione di correzione delle timbrature per %s %s", p.name, p.surname);
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? ", p).fetch();
+		for(PersonDay pd : pdList){
+			if(pd.stampings.size() %2 != 0){
+				Logger.debug("Caso di timbrature dispari il %s", pd.date);
+				for(int i=0; i< pd.stampings.size(); i++){
+					if(i-1 >= 0 && pd.stampings.get(i).way == WayType.in && pd.stampings.get(i-1).way == WayType.in){
+						Logger.debug("Trovato caso di doppia timbratura consecutiva di ingresso il giorno %s", pd.date);
+						Stamping s = new Stamping();
+						//s.create();
+						s.way = WayType.out;
+						s.date = pd.stampings.get(i).date.minusMinutes(1);
+						s.markedByAdmin = false;
+						s.considerForCounting = false;
+						s.note = "Timbratura nulla inserita per il corretto posizionamento sulla tabella delle timbrature";
+						s.personDay = pd;
+						s.save();
+						Logger.debug("Creata timbratura nulla di uscita per il giorno %s", pd.date);
+						pd.stampings.add(i, s);
+						pd.save();
+					}
+					if(i-1 >= 0 && pd.stampings.get(i).way == WayType.out && pd.stampings.get(i-1).way == WayType.out){
+						Logger.debug("Trovato caso di doppia timbratura consecutiva di uscita il giorno %s", pd.date);
+						Stamping s = new Stamping();
+						//s.create();
+						s.way = WayType.in;
+						s.date = pd.stampings.get(i).date.minusMinutes(1);
+						s.markedByAdmin = false;
+						s.considerForCounting = false;
+						s.note = "Timbratura nulla inserita per il corretto posizionamento sulla tabella delle timbrature";
+						s.personDay = pd;
+						s.save();
+						Logger.debug("Creata timbratura nulla di ingresso per il giorno %s", pd.date);
+						pd.stampings.add(i, s);
+						pd.save();
+					}
+				}
+			}
+		}
+		
+	}
 
 	/**
 	 * Importa le informazioni del personale dal database Mysql dell'applicazione Orologio.
@@ -1220,6 +1264,7 @@ public class FromMysqlToPostgres {
 		String s = oldTime != null ? new String(oldTime) : null;
 		setDateTimeToStamping(stamping, pd.date, s);
 		stamping.markedByAdmin = countAdmin;
+		stamping.considerForCounting = true;
 		if(countAdmin == true)
 			stamping.stampModificationType = StampModificationTypeValue.MARKED_BY_ADMIN.getStampModificationType();
 		stamping.personDay = pd;
