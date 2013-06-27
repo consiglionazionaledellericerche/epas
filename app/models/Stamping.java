@@ -85,7 +85,15 @@ public class Stamping extends Model {
 	 * in questione non ha potuto effettuare la timbratura (valore = true)
 	 */
 	@Column(name = "marked_by_admin")
-	public Boolean markedByAdmin;		
+	public Boolean markedByAdmin;	
+	
+	/**
+	 * questo campo booleano determina se la timbratura in questione deve essere considerata per i calcoli del tempo di lavoro oppure no.
+	 * In alcuni casi, infatti, vengono inserite timbrature fittizie con orari impostati ad hoc perchè mancano timbrature di uscita corrispondenti
+	 * a timbrature di entrata o viceversa. Queste timbrature non devono essere considerate nel calcolo.
+	 */
+	@Column(name = "consider_for_counting")
+	public Boolean considerForCounting;
 	
 	@Transient
 	public boolean isIn() {
