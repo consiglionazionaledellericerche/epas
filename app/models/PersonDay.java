@@ -343,6 +343,10 @@ public class PersonDay extends Model {
 				(workTime-getWorkingTimeTypeDay().breakTicketTime > getWorkingTimeTypeDay().mealTicketTime)){
 
 			tempoLavoro = workTime-getWorkingTimeTypeDay().breakTicketTime;	
+		if(reloadedStampings.contains(null) && workTime > getWorkingTimeTypeDay().mealTicketTime
+				&& workTime-getWorkingTimeTypeDay().breakTicketTime > getWorkingTimeTypeDay().mealTicketTime){
+			tempoLavoro = workTime-getWorkingTimeTypeDay().breakTicketTime;
+		}
 
 		}
 		else{
@@ -618,6 +622,14 @@ public class PersonDay extends Model {
 	private void updateDifference(){
 		//merge();
 		//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
+		StampProfile stampProfile = getStampProfile();
+		if(stampProfile != null && stampProfile.fixedWorkingTime && timeAtWork == 0){
+			difference = 0;
+			save();
+			return;
+		}
+			
+		
 		if((getWorkingTimeTypeDay().holiday) && (date.getDayOfMonth()==1) && stampings.size() == 0){
 			difference = 0;
 			save();
