@@ -556,7 +556,7 @@ public class Person extends Model {
 			Stamping stamp = new Stamping();
 			stamp.date = stamping.dateTime;
 			stamp.markedByAdmin = false;
-			stamp.considerForCounting = true;
+//			stamp.considerForCounting = true;
 			if(stamping.inOut == 0)
 				stamp.way = WayType.in;
 			else
@@ -573,7 +573,7 @@ public class Person extends Model {
 				Stamping stamp = new Stamping();
 				stamp.date = stamping.dateTime;
 				stamp.markedByAdmin = false;
-				stamp.considerForCounting = true;
+//				stamp.considerForCounting = true;
 				if(stamping.inOut == 0)
 					stamp.way = WayType.in;
 				else

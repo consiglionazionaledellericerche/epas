@@ -55,12 +55,12 @@
 					j = i*2;
 				}%
 				<td class="ingresso">
-				%{ if(day.stampingList().size() > j && day.stampingList().get(j) !=null && day.stampingList().get(j).considerForCounting == true) { }%
+				%{ if(day.getStampingsForTemplate().size() > j && day.getStampingsForTemplate().get(j) !=null) { }%
 				
-					${day.stampings.get(j).date.toCalendarTime()}
+					${day.getStampingsForTemplate().get(j).date.toCalendarTime()}
 				
 				 
-					${(day.stampingList().get(j).stampType != null ? day.stampingList().get(j).stampType.identifier : '')}
+					${(day.getStampingsForTemplate().get(j).stampType != null ? day.getStampingsForTemplate().get(j).stampType.identifier : '')}
 				%{ 
 					}else{ 
 					
@@ -72,12 +72,12 @@
 				</td>
 				
 				<td class="uscita">
-				%{ if(day.stampingList().size() > j+1 && day.stampingList().get(j+1) !=null && day.stampingList().get(j+1).considerForCounting == true) { }%
+				%{ if(day.getStampingsForTemplate().size() > j+1 && day.getStampingsForTemplate().get(j+1) !=null) { }%
 				
-					${day.stampingList().get(j+1).date.toCalendarTime()}
+					${day.getStampingsForTemplate().get(j+1).date.toCalendarTime()}
 				
 					 
-					${(day.stampingList().get(j).stampType != null ? day.stampingList().get(j).stampType.identifier : '')}
+					${(day.getStampingsForTemplate().get(j).stampType != null ? day.getStampingsForTemplate().get(j).stampType.identifier : '')}
 				%{ 
 					}else{ 
 				}%

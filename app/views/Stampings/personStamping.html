@@ -81,12 +81,12 @@
 					j = i*2;
 				}%
 				<td class="ingresso">
-				%{ if(day.stampingList().size() > j && day.stampingList().get(j) !=null && day.stampingList().get(j).considerForCounting == true) { }%
-					<a href="@{Stampings.edit(day.getStampings().get(j).id)}" class="insertStamping${day.date.dayOfMonth}-${j}">
-					${day.stampings.get(j).date.toCalendarTime()}
+				%{ if(day.getStampingsForTemplate().size() > j && day.getStampingsForTemplate().get(j) !=null) { }%
+					<a href="@{Stampings.edit(day.getStampingsForTemplate().get(j).id)}" class="insertStamping${day.date.dayOfMonth}-${j}">
+					${day.getStampingsForTemplate().get(j).date.toCalendarTime()}
 					</a>
 				 
-				<strong>${(day.stampingList().get(j).stampType?.identifier)}</strong>
+				<strong>${(day.getStampingsForTemplate().get(j).stampType?.identifier)}</strong>
 				<script type="text/javascript"> 
 				$('.insertStamping${day.date.dayOfMonth}-${j}').popupWindow({ 
 				height:600, 
@@ -111,12 +111,12 @@
 				</td>
 				
 				<td class="uscita">
-				%{ if(day.stampingList().size() > j+1 && day.stampingList().get(j+1).date !=null  && day.stampingList().get(j+1).considerForCounting == true) { }%
-					<a href="@{Stampings.edit(day.getStampings().get(j+1).id)}" class="insertStamping${day.date.dayOfMonth}-${j+1}">
-					${day.stampingList().get(j+1).date.toCalendarTime()}
+				%{ if(day.getStampingsForTemplate().size() > j+1 && day.getStampingsForTemplate().get(j+1) !=null) { }%
+					<a href="@{Stampings.edit(day.getStampingsForTemplate().get(j+1).id)}" class="insertStamping${day.date.dayOfMonth}-${j+1}">
+					${day.getStampingsForTemplate().get(j+1).date.toCalendarTime()}
 					</a>
 					
-					<strong>${(day.stampingList().get(j+1).stampType?.identifier)}</strong> 
+					<strong>${(day.getStampingsForTemplate().get(j+1).stampType?.identifier)}</strong> 
 				<script type="text/javascript"> 
 				$('.insertStamping${day.date.dayOfMonth}-${j+1}').popupWindow({ 
 				height:600, 
@@ -125,7 +125,7 @@
 				left:50 
 				}); 
 				</script>
-					%{ if(day.stampings.get(j+1).markedByAdmin == true){ }%
+					%{ if(day.getStampingsForTemplate().get(j+1).markedByAdmin == true){ }%
 					  <strong>${day.checkMarkedByAdmin().code}</strong>
 						%{
 						} 

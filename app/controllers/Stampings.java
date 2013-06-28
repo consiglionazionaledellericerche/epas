@@ -202,6 +202,9 @@ public class Stampings extends Controller {
 			flash.error("Non si può inserire una timbratura futura!!!");
 			render("@save");
 		}
+		
+		
+		
 		/**
 		 * controllo che il radio button sulla timbratura forzata all'orario di lavoro sia checkato
 		 */
@@ -223,7 +226,9 @@ public class Stampings extends Controller {
 		Stamping stamp = new Stamping();
 		stamp.date = new LocalDateTime(year, month, day, hour, minute, 0);
 		stamp.markedByAdmin = true;
-		stamp.considerForCounting = true;
+		
+		
+//		stamp.considerForCounting = true;
 		if(service.equals("true")){
 			stamp.note = "timbratura di servizio";
 			stamp.stampType = StampType.find("Select st from StampType st where st.code = ?", "motiviDiServizio").first();
@@ -281,6 +286,8 @@ public class Stampings extends Controller {
 			PersonDay pd = stamping.personDay;
 			stamping.delete();
 			pd.stampings.remove(stamping);
+//			stamping.considerForCounting = true;
+			stamping.save();
 			stamping.personDay.populatePersonDay();
 			stamping.personDay.save();
 			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ?", 
