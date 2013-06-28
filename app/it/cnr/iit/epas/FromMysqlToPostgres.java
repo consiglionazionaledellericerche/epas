@@ -712,7 +712,7 @@ public class FromMysqlToPostgres {
 
 		Connection mysqlCon = getMysqlConnection();	
 		PreparedStatement stmtContratto = mysqlCon.prepareStatement("SELECT id,DataInizio,DataFine,continua,firma,Presenzadefault " +	
-				"FROM Personedate WHERE id=" + id + " order by DataInizio");	
+				"FROM Personedate WHERE id=" + id + " order by DataInizio desc");	
 		ResultSet rs = stmtContratto.executeQuery();       	
 		Contract contract = null;
 		StampProfile stampProfile = null;
