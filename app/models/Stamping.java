@@ -92,8 +92,8 @@ public class Stamping extends Model {
 	 * In alcuni casi, infatti, vengono inserite timbrature fittizie con orari impostati ad hoc perchè mancano timbrature di uscita corrispondenti
 	 * a timbrature di entrata o viceversa. Queste timbrature non devono essere considerate nel calcolo.
 	 */
-	@Column(name = "consider_for_counting")
-	public Boolean considerForCounting;
+//	@Column(name = "consider_for_counting")
+//	public Boolean considerForCounting;
 	
 	@Transient
 	public boolean isIn() {

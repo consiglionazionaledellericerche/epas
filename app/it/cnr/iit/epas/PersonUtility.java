@@ -318,7 +318,7 @@ public class PersonUtility {
 						correctStamp.date = new LocalDateTime(pdPastDay.date.getYear(), pdPastDay.date.getMonthOfYear(), pdPastDay.date.getDayOfMonth(), 23, 59);
 						correctStamp.way = WayType.out;
 						correctStamp.markedByAdmin = false;
-						correctStamp.considerForCounting = true;
+//						correctStamp.considerForCounting = true;
 						correctStamp.stampModificationType = StampModificationType.findById(4l);
 						correctStamp.note = "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
 						correctStamp.personDay = pdPastDay;
@@ -337,7 +337,7 @@ public class PersonUtility {
 						newEntranceStamp.date = new LocalDateTime(pd.date.getYear(), pd.date.getMonthOfYear(), pd.date.getDayOfMonth(),0,0);
 						newEntranceStamp.way = WayType.in;
 						newEntranceStamp.markedByAdmin = false;
-						newEntranceStamp.considerForCounting = true;
+//						newEntranceStamp.considerForCounting = true;
 						newEntranceStamp.stampModificationType = StampModificationType.findById(4l);
 						newEntranceStamp.note = "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
 						newEntranceStamp.personDay = pd;

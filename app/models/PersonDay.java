@@ -237,7 +237,7 @@ public class PersonDay extends Model {
 		List<Stamping> reloadedStampings = Stamping.find("Select st from Stamping st where st.personDay = ? order by st.date", this).fetch();
 		for(int i = 0; i < reloadedStampings.size(); i++) {
 			Logger.trace("Per il calcolo del tempo di lavoro passo dalla timbratura numero %d", i);
-			if(reloadedStampings.get(i).way == WayType.in && reloadedStampings.get(i).considerForCounting){
+			if(reloadedStampings.get(i).way == WayType.in){
 				Logger.trace("E' timbratura di ingresso per %s alle ore %s", person, reloadedStampings.get(i).date.toString());
 				if (i == reloadedStampings.size() - 1 ) {
 					Logger.trace("Ultima timbratura del %s e' di ingresso per %s %s. Timbratura per adesso ignorata.", date, person.name, person.surname);
@@ -282,7 +282,7 @@ public class PersonDay extends Model {
 
 			}
 
-			if(reloadedStampings.get(i).way == WayType.out && reloadedStampings.get(i).considerForCounting){
+			if(reloadedStampings.get(i).way == WayType.out){
 				Logger.trace("E' timbratura di uscita alle ore %s", reloadedStampings.get(i).date.toString());
 				if (i == 0) {
 					Logger.debug("La prima timbratura del %s e' di uscita per %s %s, quindi viene ignorata nei calcoli", date, person.name, person.surname);
@@ -665,6 +665,45 @@ public class PersonDay extends Model {
 
 	/**
 	 * 
+	 * @return true se nella lista delle timbrature per quel personDay c'è una timbratura "nulla" ovvero che non viene considerata per il calcol
+	 * del tempo di lavoro
+	 */
+//	public int checkIndexOfNullStamping(){
+//		for(int i = 0; i < this.stampings.size(); i++){
+//			if(this.stampings.get(i).considerForCounting)
+//				return i;
+//		}
+//		return 0;
+//	}
+	
+	/**
+	 * 
+	 * @param stampings
+	 * @return la lista delle timbrature di quel giorno modificata con l'inserimento di una timbratura nulla nel caso in cui esistano due timbrature
+	 * consecutive di ingresso o di uscita, mettendo tale timbratura nulla in mezzo alle due.
+	 */
+	public List<Stamping> getStampingsForTemplate() {
+		
+		List<Stamping> stampingsForTemplate = new LinkedList<Stamping>();
+		boolean isLastIn = false;
+		
+		for (Stamping s : this.stampings) {
+			if (isLastIn && s.way == WayType.in) {
+				stampingsForTemplate.add(null);
+			}
+			if (!isLastIn && s.way == WayType.out) {
+				stampingsForTemplate.add(null);
+				isLastIn = s.way == WayType.in;
+			}
+			
+			stampingsForTemplate.add(s);
+			isLastIn = s.way == WayType.in;
+		}
+		return stampingsForTemplate;
+	}
+	
+	/**
+	 * 
 	 * @param stamping
 	 * @return l'oggetto StampModificationType che ricorda, eventualmente, se c'è stata la necessità di assegnare la mezz'ora
 	 * di pausa pranzo a una giornata a causa della mancanza di timbrature intermedie oppure se c'è stata la necessità di assegnare
@@ -859,16 +898,7 @@ public class PersonDay extends Model {
 				"and pd.date >= ? and pd.date < ? ORDER by pd.date DESC", person, date.dayOfMonth().withMinimumValue(), date).first();
 		if(lastPreviousPersonDayInMonth != null)
 			return lastPreviousPersonDayInMonth;
-		//		if(date.getDayOfMonth() != 1){
-		//
-		//			pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date.minusDays(1)).first();
-		//			if(pd != null)
-		//				return pd;
-		//			else{
-		//				pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date < ? order by pd.date desc", person, date.minusDays(1)).first();
-		//				return pd;
-		//			}
-		//		}
+
 		return null;
 	}
 
