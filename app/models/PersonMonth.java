@@ -824,7 +824,7 @@ public class PersonMonth extends Model {
 	}
 
 	public int totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese() {
-		return totaleResiduoAnnoCorrenteAFineMese() + residuoAnnoPrecedenteDisponibileAllaFineDelMese() + residuoAnnoPrecedenteDaInizializzazione();
+		return totaleResiduoAnnoCorrenteAFineMese() + residuoAnnoPrecedenteDisponibileAllaFineDelMese() /*+ residuoAnnoPrecedenteDaInizializzazione()*/;
 	}
 
 	public void aggiornaRiepiloghi() {
