@@ -712,7 +712,7 @@ public class FromMysqlToPostgres {
 
 		Connection mysqlCon = getMysqlConnection();	
 		PreparedStatement stmtContratto = mysqlCon.prepareStatement("SELECT id,DataInizio,DataFine,continua,firma,Presenzadefault " +	
-				"FROM Personedate WHERE id=" + id + " order by DataInizio desc");	
+				"FROM Personedate WHERE id=" + id + " order by DataInizio");	
 		ResultSet rs = stmtContratto.executeQuery();       	
 		Contract contract = null;
 		StampProfile stampProfile = null;
@@ -731,11 +731,14 @@ public class FromMysqlToPostgres {
 			if (end != null) {
 				endContract = new LocalDate(end);
 			}
+			else{
+				endContract = null;
+			}
 
 			contract = Contract.find("Select con from Contract con where con.person = ? ", person).first();
 			if(contract == null){
 				contract = new Contract();
-				contract.create();
+				//contract.create();
 				//contract.person = person;
 				contract.beginContract = startContract;
 				contract.expireContract = endContract;
@@ -750,7 +753,10 @@ public class FromMysqlToPostgres {
 				stampProfile.create();
 			}
 			else{
-
+				/**
+				 * TODO: controllare meglio questa parte...
+				 */
+				//contract = new Contract();
 				if(rs.getByte("continua")==1){
 					contract.expireContract = endContract;        			            		
 				}
@@ -762,9 +768,9 @@ public class FromMysqlToPostgres {
 				}
 			}    		   		 
 
-			contract.onCertificate = rs.getInt("firma") == 0 ? true : false;
+			contract.onCertificate = rs.getByte("firma") == 0 ? true : false;
 			contract.person = person;
-			contract.create();
+			//contract.create();
 			contract.save();
 
 			person.save();
