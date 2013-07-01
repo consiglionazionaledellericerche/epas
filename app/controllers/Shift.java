@@ -167,7 +167,7 @@ public class Shift extends Controller{
 					}
 					
 					//Se la persona è in ferie questo giorno non può essere in turno (almeno che non sia cancellato)
-					if ((Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date = ? and pd.person = ?", day, shiftPeriod.person).fetch().size() > 0) && (type != "X")){
+					if ((Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date = ? and pd.person = ?", day, shiftPeriod.person).fetch().size() > 0) && (! "X".equals(type))){
 						throw new IllegalArgumentException(
 							String.format("ShiftPeriod person.id %d is not compatible with a Absence in the same day %s", shiftPeriod.person.id, day));
 					}
@@ -451,7 +451,7 @@ public class Shift extends Controller{
 					currShift = shiftCalendarMonth.get(person, day).tipoTurno;
 					Logger.debug("trovato turno %s per (%s, %s)", currShift, person, day);
 					
-					if ((shift == null) || (currShift != prevShift)) {
+					if ((shift == null) || (! currShift.equals(prevShift))) {
 						shift = (shiftCalendarMonth.get(person, day).fasciaTurno.contains("07:00")) ? new SD (person, null) : new SD (null, person);
 						builder1.put(currShift, day, shift);
 						Logger.debug("creato shift (%s, %s) con shift.mattina=%s e shift.pomeriggio=%s", prevShift, day, shift.mattina, shift.pomeriggio);

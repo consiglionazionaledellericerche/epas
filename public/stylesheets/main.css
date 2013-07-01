@@ -270,6 +270,7 @@ p#caricamentoSituazioneMensile {margin: 1em 0em 2em; text-align: center}
 p#tipoTimbraturaClock {margin: 3em 0em 2em; text-align: center; font-size: 18px; }
 p#choiceClock {text-align: center; font-size: 18px;}
 p#descrizioneStampaCartellino {margin:3em 0em 4em}
+p#inserisciAmministratore {margin: 2em 0em 0em}
 
 div#logout {text-align: right; float: right}
 div#chooseView {text-align: center}
@@ -319,6 +320,7 @@ h3#titoloCambioPassword {text-align: center}
 h3#caricamentoSituazioneMensile {text-align: center}
 h3#clock {text-align: center}
 h3#riepilogoMensile {text-align: center; margin: 2em 0em 1em}
+h3#utentiEsistenti {text-align: center}
 iframe#clock {align: center; margin: 3em 58em 0em}
 
 h4#configurazioniEsistenti {margin:2em 0em 1em; text-align: left}
@@ -340,8 +342,8 @@ input#username {margin: -2em 9em 2em}
 input#password {margin: -2em 9em 2em}
 input#nuovaPassword {margin: 3em 2em 2em}
 input#confermaPassword {margin: 4em 2em 2em}
-input#submitStamping {margin: 0em 30em 0em; align: center}
-input#discardStamping {margin: 0em 40em 0em; align: center}
+input#submitStamping {margin: 0em 30em 2em; align: center}
+input#discardStamping {margin: 0em 30em 0em; align: center}
 input#updateStamping {margin: 0em 25em 0em; align: center}
 input#submitCartellino {margin: 3em 8em 0em; align: center}
 
@@ -362,6 +364,7 @@ input#modificaContratto {margin: 1em 25em 0em; align: center}
 input#submitSituation {margin: 2em 67em 0em; align: center}
 input#submitStampingClock {margin: 0em 70em 0em; align: center}
 input#saveCompetence {margin: 1em 67em 0em; align: center}
+input#salvaVacationCode {margin: 2em 0em 0em}
 
 input#updateOldOvertime {margin: 0em 25em 0em; align: center}
 table#tabellaPersoneCodiciAssenzaMensili {margin: 2em 1em 1em; align: left}

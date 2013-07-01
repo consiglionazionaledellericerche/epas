@@ -5,28 +5,15 @@ package it.cnr.iit.epas;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 import models.BadgeReader;
 import models.Person;
-import models.PersonReperibilityType;
 import models.StampType;
-import models.enumerate.StampTypeValues;
-import models.exports.ReperibilityPeriod;
-import models.exports.ReperibilityPeriods;
 import models.exports.StampingFromClient;
-import models.exports.StampingFromClient.TipoMatricolaFirma;
 
-import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
 import play.Logger;
-import play.Play;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 
@@ -43,7 +30,6 @@ import com.google.gson.JsonParser;
 @Global
 public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 
-	public static String mySqldriver = Play.configuration.getProperty("db.old.driver");
 	/**
 	 * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[], java.lang.String, java.lang.Class, java.lang.reflect.Type)
 	 */
@@ -64,8 +50,6 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 			if (!badgeReaderCode.isEmpty()) {
 				BadgeReader badgeReader = BadgeReader.find("byCode", badgeReaderCode).first();
 				if (badgeReader == null) {
-					//throw new IllegalArgumentException(
-					//	String.format("Lettore con codice %s sconosciuto. Abilitare in configurazione", badgeReaderCode));
 					Logger.warn("Lettore di badge con codice %s non presente sul database/sconosciuto", badgeReaderCode);
 				}
 				stamping.badgeReader = badgeReader;
@@ -95,46 +79,97 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 			 * Nel campo matricolaFirma decido di riportare il valore dell'id con cui viene salvata la persona sul db invece che la 
 			 * matricola
 			 */
+			JsonArray tipoMatricola = jsonObject.getAsJsonArray("tipoMatricolaFirma");
 			String matricolaFirma = jsonObject.get("matricolaFirma").getAsString();
-			Logger.debug("La matricola firma è del tipo: %s", matricolaFirma);
-			if(matricolaFirma.contains("INT")){
-				Logger.debug("Sono entrato nel controllo if delle matricole di tipo 000000INT123");
+			
+			Logger.trace("L'array json di tipoMatricola: %s", tipoMatricola);
+
+			for (int i = 0; i < tipoMatricola.size() ; i++) {
+				String tipo = tipoMatricola.get(i).getAsString();				
+				Logger.trace("Il tipo di matricolaFirma che sto controllando per la matricola %s e': %s", matricolaFirma, tipo);
+
 				/**
-				 * in questo caso dal client arriva la timbratura con la firma specificata secondo lo schema INT123.
-				 * Si fa quindi una substring sulla matricolafirma e ciò che si ottiene è l'id di tipo long per fare la ricerca sulla
-				 * tabella persone per capire a chi è relativa quella timbratura...
-				 * 
-				 * ho aggiunto il campo oldId alla tabella Person e con quello farò la query per recuperare la persona 
-				 */
-				String lessSign = matricolaFirma.substring(14,matricolaFirma.length());
-				Logger.debug("L'id recuperato è: %s", lessSign);
-				long personId = Long.parseLong(lessSign);
+				 * l'ordine con cui faccio le ricerche sul db dipende dall'array tipoMatricola che mi ha passato il client, 
+				 * quindi vado sul db a fare la ricerca partendo dal primo campo dell'array passato. 
+				 * Se lo trovo ok ed esco, altrimenti proseguo nel for a cercare con il tipo successivo
+				 */				
 				
-				//person = Person.findById(personId);
-				//if(person == null){
-				person = Person.find("Select p from Person p where p.oldId = ?", personId).first();
-				Logger.debug("La persona è: %s %s", person.name, person.surname);
+				if(tipo.equals("matricolaCNR")){
+			
+					if (matricolaFirma.indexOf("INT") > 0) {
+						continue;
+					}
+					try {
+						int firma = Integer.parseInt(matricolaFirma);
+						person = Person.find("Select p from Person p where p.number = ?", firma).first();
+					} catch (NumberFormatException nfe) {
+						Logger.debug("Impossibile cercare una persona tramite la matricola se la matricola non e' numerica. Matricola = %s", matricolaFirma);
+						continue;
+					}
 					
-				//}
+					if(person != null){
+						stamping.personId = person.id;
+						break;
+					}
+					continue;
+
+				}
 				
-				stamping.matricolaFirma = person.oldId;
-			}
-			else{
-				/**
-				 * si cerca se quel che è stato passato può essere il campo "number" (matricola) della tabella Person
-				 */
-				int firma = Integer.parseInt(matricolaFirma);
-				person = Person.find("Select p from Person p where p.number = ?", firma).first();
-				if(person == null){
-					/**
-					 * la persona ritornata è null, quindi si cerca sempre su tabella Person però restringendo sul campo badgeNumber
-					 * (matricolaBadge)
-					 */
-					person = Person.find("Select p from Person p where p.badgeNumber = ?", matricolaFirma).first();
+				if(tipo.equals("idTabellaINT")){
+					
+					//Matricola firma derivante dal contatore interno
+					String intMatricolaFirma = matricolaFirma;
+					
+					if (matricolaFirma.indexOf("INT") > 0) {
+						intMatricolaFirma = matricolaFirma.substring(matricolaFirma.indexOf("INT") + 3).trim();
+					} else {
+						continue;
+					}
+					
+					
+					long intMatricolaFirmaAsLong = Long.parseLong(intMatricolaFirma);
+					//Controlla sul campo person oldId
+					person = Person.find("Select p from Person p where p.oldId = ?", intMatricolaFirmaAsLong).first();
+					if(person != null){
+						stamping.personId = person.id;
+						break;
+					}
+					
+					//Nell'inserimento delle persone ci deve essere un controllo che verifichi che non ci
+					//siano casi in cui il campo id possa essere utilizzato per associare il badge alla persona
+					//e lo stesso valore dell'id esista già come oldId, altrimenti questa parte di codice non
+					//funzionerebbe
+					person = Person.find("Select p from Person p where p.id = ?", intMatricolaFirmaAsLong).first();
+					if(person != null){
+						stamping.personId = person.id;
+						break;
+					}
+					
+					continue;
+
+				}
+				
+				if(tipo.equals("matricolaBadge")){
+					
+					//Rimuove tutti gli eventuali 0 iniziali alla stringa
+					// http://stackoverflow.com/questions/2800739/how-to-remove-leading-zeros-from-alphanumeric-text
+					String badgeNumber = matricolaFirma.replaceFirst("^0+(?!$)", "");
+					
+					person = Person.find("Select p from Person p where p.badgeNumber = ?", badgeNumber).first();
+					if(person != null){
+						stamping.personId = person.id;
+						break;
+					}
+					continue;
 					
 				}
-				stamping.matricolaFirma = person.id;
-			}						
+				
+			}
+	
+			if(stamping.personId == null){
+				Logger.warn("Non è stato possibile recuperare l'id della persona a cui si riferisce la timbratura. Controllare il database");
+				return null;
+			}
 						
 			Integer anno = jsonObject.get("anno").getAsInt();
 			Integer mese = jsonObject.get("mese").getAsInt();
@@ -144,32 +179,21 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 			if(anno != null && mese != null && giorno != null && ora != null && minuti != null){
 				LocalDateTime date = new LocalDateTime(anno, mese, giorno, ora, minuti, 0);				
 				stamping.dateTime = date;
-				
 			}	
 			else{
-				throw new IllegalArgumentException("Uno dei parametri relativi alla data è risultato nullo. Impossibile crearla.");
+				Logger.warn("Uno dei parametri relativi alla data è risultato nullo. Impossibile crearla. StampingFromClient: %s, %s, %s, %s, %s", 
+						name, annotations, value, actualClass, genericType);
+				return null;
 			}
 			
-			Logger.debug("Effettuato il binding, stampingFromClient = %s", stamping);
+			Logger.debug("Effettuato il binding, stampingFromClient = %s", stamping.toString());
 			
 			return stamping;
 			
 			
 		} catch (Exception e) {
-			Logger.error(e, "Problem during binding StampingFromClient.");
-			throw e;
+			Logger.error(e, "Problem during binding StampingFromClient: %s, %s, %s, %s, %s", name, annotations, value, actualClass, genericType);
+			return null;
 		}
 	}
-	
-//	public static void main(String[]args){
-//		String s = "00000000000INT252";
-//		if(s.contains("INT")){
-//			System.out.println("TRovato!");
-//			String lessSign = s.substring(14,s.length());
-//			long personId = Long.parseLong(lessSign);
-//			System.out.println("L'id è: "+personId);
-//		}
-//		
-//	}
-	
 }

@@ -35,6 +35,13 @@ import play.db.jpa.Model;
 public class Configuration extends Model{
 	
 	/**
+	 * booleano per stabilire se una configurazione è in uso (true) oppure no (false)
+	 */
+	@Column(name = "in_use")
+	public boolean inUse = true;
+	
+	
+	/**
 	 * Data di inizio uso di questo programma gg/mm/aaaa
 	 */
 	@Column(name = "init_use_program")
@@ -307,8 +314,8 @@ public class Configuration extends Model{
 	
 	
 	public static Configuration getConfiguration(Date date){
-		
-		return Configuration.find("Select conf from Configuration conf where conf.beginDate <= ? and conf.endDate >= ?", date, date).first();
+		return Configuration.find("Select conf from Configuration conf where conf.inUse = ? order by conf.endDate desc", true).first();
+		//return Configuration.find("Select conf from Configuration conf where conf.beginDate <= ? and conf.endDate >= ?", date, date).first();
 	}
 	
 	public static Configuration getCurrentConfiguration(){

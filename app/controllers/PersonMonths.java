@@ -9,6 +9,7 @@ import org.joda.time.LocalDate;
 
 import models.Absence;
 import models.Competence;
+import models.CompetenceCode;
 import models.Person;
 import models.PersonDay;
 import models.PersonMonth;
@@ -57,8 +58,10 @@ public class PersonMonths extends Controller{
 			/**
 			 * cerco nelle competenze del mese eventuali straordinari
 			 */
-			Competence comp = Competence.find("Select comp from Competence comp where comp.person = ? and comp.year = ? " +
-					"and comp.month = ? and comp.competenceCode.description = ?", person, year, date.getMonthOfYear(), "S1").first();
+			//CompetenceCode code = CompetenceCode.find("Select code from CompetenceCode code where code.description = ?", "S1").first();
+			List<Competence> compList = Competence.find("Select comp from Competence comp where comp.person = ? and comp.year = ? " +
+					"and comp.month = ? ", person, year, date.getMonthOfYear()).fetch();
+			Logger.debug("La competenza sugli straordinari per il %s mese è: %s", month, compList.toString());
 			
 			/**
 			 * aggiungo tutti gli elementi alla lista
@@ -90,15 +93,27 @@ public class PersonMonths extends Controller{
 				lista.add(3, 0);
 			}
 			if(pd != null){
+				int valoreStraordinari = 0;
 				if(pm != null)
 					lista.add(4, pm.residuoDelMese());
 				else
 					lista.add(4, 0);
 				lista.add(5, compensatoryRest);
-				if(comp != null)
-					lista.add(6, comp.valueApproved);
-				else
-					lista.add(6, 0);
+				
+//				if(comp.valueApproved != 0)					
+//					lista.add(6, comp.valueApproved);									
+//				else
+//					lista.add(6, 0);
+				for(Competence comp : compList){
+					if(comp.competenceCode.code.equals("S1") || comp.competenceCode.code.equals("S2") || comp.competenceCode.code.equals("S3"))
+						valoreStraordinari = valoreStraordinari + comp.valueApproved;
+						
+					else
+						lista.add(6, 0);
+				}
+				lista.add(6, valoreStraordinari);
+				Logger.debug("Aggiunto alla lista il valore %d per gli straordinari del mese di %d", valoreStraordinari, month);
+				
 				if(pm != null)
 					lista.add(7,pm.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese());
 				else

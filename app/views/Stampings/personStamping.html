@@ -23,6 +23,7 @@
 		<th>Differenza</th>
 		<th>Progressivo</th>
 		<th>Tipo Orario</th>
+		<th>Note</th>
 	</tr>
 	
 %{
@@ -80,15 +81,15 @@
 					j = i*2;
 				}%
 				<td class="ingresso">
-				%{ if(day.stampingList().size() > j && day.stampingList().get(j) !=null ) { }%
-					<a href="@{Stampings.edit(day.getStampings().get(j).id)}" class="insertStamping${day.date.dayOfMonth}-${j}">
-					${day.stampings.get(j).date.toCalendarTime()}
+				%{ if(day.getStampingsForTemplate().size() > j && day.getStampingsForTemplate().get(j) !=null) { }%
+					<a href="@{Stampings.edit(day.getStampingsForTemplate().get(j).id)}" class="insertStamping${day.date.dayOfMonth}-${j}">
+					${day.getStampingsForTemplate().get(j).date.toCalendarTime()}
 					</a>
-				<strong>${(day.stampingList().get(j).stampModificationType?.code)}</strong> 
-				<strong>${(day.stampingList().get(j).stampType?.identifier)}</strong>
+				 
+				<strong>${(day.getStampingsForTemplate().get(j).stampType?.identifier)}</strong>
 				<script type="text/javascript"> 
 				$('.insertStamping${day.date.dayOfMonth}-${j}').popupWindow({ 
-				height:500, 
+				height:600, 
 				width:800, 
 				top:50, 
 				left:50 
@@ -98,75 +99,109 @@
 					  <strong>${day.checkMarkedByAdmin().code}</strong>
 						%{
 						} 
-						}
-						}% 
+					}else{
+				}% 
+					
+					${' '}
+					
+				%{
+					}
+				}%
 					
 				</td>
 				
 				<td class="uscita">
-				%{ if(day.stampingList().size() > j+1 && day.stampingList().get(j+1) !=null ) { }%
-					<a href="@{Stampings.edit(day.getStampings().get(j+1).id)}" class="insertStamping${day.date.dayOfMonth}-${j+1}">
-					${day.stampingList().get(j+1).date.toCalendarTime()}
+				%{ if(day.getStampingsForTemplate().size() > j+1 && day.getStampingsForTemplate().get(j+1) !=null) { }%
+					<a href="@{Stampings.edit(day.getStampingsForTemplate().get(j+1).id)}" class="insertStamping${day.date.dayOfMonth}-${j+1}">
+					${day.getStampingsForTemplate().get(j+1).date.toCalendarTime()}
 					</a>
-					<strong>${(day.stampingList().get(j+1).stampModificationType?.code)}</strong>
-					<strong>${(day.stampingList().get(j+1).stampType?.identifier)}</strong> 
+					
+					<strong>${(day.getStampingsForTemplate().get(j+1).stampType?.identifier)}</strong> 
 				<script type="text/javascript"> 
 				$('.insertStamping${day.date.dayOfMonth}-${j+1}').popupWindow({ 
-				height:500, 
+				height:600, 
 				width:800, 
 				top:50, 
 				left:50 
 				}); 
 				</script>
-					%{ if(day.stampings.get(j+1).markedByAdmin == true){ }%
+					%{ if(day.getStampingsForTemplate().get(j+1).markedByAdmin == true){ }%
 					  <strong>${day.checkMarkedByAdmin().code}</strong>
 						%{
 						} 
-						}
-						}% 
+					}else{
+				}% 
+					
+					${' '}
+					
+				%{
+					}
+				}%
 				</td>
 			
 				%{ } }%
 			<td class="inserisciTimbratura"><a href="@{Stampings.create(day.person.id, day.date.year, day.date.monthOfYear, day.date.dayOfMonth)}" class="insertStamping${day.date.dayOfMonth}">+++</a>
 				<script type="text/javascript"> 
 				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
-				height:600, 
-				width:1000, 
+				height:800, 
+				width:900, 
 				top:50, 
 				left:50 
 				}); 
 				</script>
-			</td>			
+			</td>
+				<td class="tempoLavoro">
 			%{
-			if(day.stampingList().size()==2 ){
-	         }% <td class="tempoLavoro">${day.timeAtWork.toHourTime()} <strong>${day.timeAtWork>360 ? day.checkTimeForLunch()?.code : ''}</strong></td>
-			%{
-			 }else{
-			 }% <td class="tempoLavoro">${day.timeAtWork.toHourTime()} <strong>${day.stampingList().size()==4 && !day.stampingList().contains(null) && day.timeAtWork>300
-			 && day.checkMinTimeForLunch()<30 ? day.checkTimeForLunch()?.code : ''}</strong></td>
-			%{
-	         }
-	         }%	
+	         	if(!day.isFuture()){
+	         }%
+					${day.getTimeAtWorkWithToday().timeAtWork.toHourTime()}<strong>${day.checkTimeForLunch()?.code}</strong><strong>${day.getTimeAtWorkWithToday().exitingNow ? 'f' : ''}</strong>
+	        %{ 
+		  		} 
+		  	}%
+		  				 	
+		  	</td>							
+	       <td class="differenza">
 	         %{
-	         if(day.isHoliday()==false){
+	         	if(!day.isFuture()){
+	         }%
+	         	
+	         	%{
+	        		if(day.isHoliday()==false || day.stampings.size() != 0){
+				}%
+						${(day.difference).toHourTime()}
+				%{ 
+		  		    } else {
+		  		 }%
+		  		 		${'00:00'}
+				 %{
+				    }
+				 }%
+		    %{
+		        }
+		     }%
+			</td>	
+			 <td class="progressivo">
+			%{
+			    if(!day.isFuture()) {
 			}%
-	         <td class="differenza">${(day.difference).toHourTime()}</td>
-			%{
-			}else{
-			}%<td class="differenza"></td>
-			%{
-			}
-			}%
-			%{
-			if(day.isHoliday()==false){
-			}% <td class="progressivo">${day.progressive.toHourTime()}</td>
-			%{
-			}else{
-			}%<td class="progressivo">${day.checkPreviousProgressive() != null ? day.checkPreviousProgressive().progressive.toHourTime() : ''}</td>
-			%{
-			}
-			}%	
+			     
+				%{
+				    if(day.isHoliday()==false) {
+				 }%
+	  			      ${day.progressive.toHourTime()}
+		  		 %{ 
+		  		    } else {
+		  		  }%
+				      ${day.checkPreviousProgressive() != null ? day.checkPreviousProgressive().progressive.toHourTime() : '00:00'}
+				  %{
+				    }
+				  }%
+		    %{
+		        }
+		     }%
+			</td>
 	         <td>${day.person.workingTimeType != null ? day.person.workingTimeType.description : ''}</td>
+	         <td></td>
 		</tr>
 
 %{  		   
@@ -202,11 +237,16 @@
 }%
 <p> - Residuo tempo di lavoro dei mesi precedenti: ${personMonth.totaleResiduoAnnoCorrenteAlMesePrecedente().toHourTime()}</p> 
 <p> - Residuo del mese:  ${personMonth.residuoDelMese().toHourTime()}</p>
+%{if(personMonth.person.qualification.qualification > 3){
+}%
 <p> - Tempo disponibile per straordinari: ${personMonth.tempoDisponibilePerStraordinari().toHourTime()}</p>
+%{
+}
+}%
 <p> - Totale residuo anno corrente a fine mese:  ${personMonth.totaleResiduoAnnoCorrenteAFineMese().toHourTime()}</p>
 %{if(personMonth.getCompensatoryRest() != 0 ){
 }%
-<p> - Giorni di riposo compensativo: ${personMonth.getCompensatoryRest()} per un totale di: ${-personMonth.getCompensatoryRestInMinutes().toHourTime()} ore</p>
+<p> - Giorni di riposo compensativo: ${personMonth.getCompensatoryRest()} per un totale di: -${personMonth.getCompensatoryRestInMinutes().toHourTime()} ore</p>
 %{
 }
 }%<p> - Totale residuo a fine mese  <strong>${personMonth.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese().toHourTime()} ore</strong></p>

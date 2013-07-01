@@ -528,12 +528,20 @@ public class Person extends Model {
 
 		if(stamping == null)
 			return false;
-		long id = stamping.matricolaFirma;
+		
+		Long id = stamping.personId;
+		
+		if(id == null){
+			Logger.warn("L'id della persona passata tramite json non ha trovato corrispondenza nell'anagrafica del personale. Controllare id = null");
+			return false;
+		}
+			
 		Person person = Person.findById(id);
 		if(person == null){
-			Logger.debug("Non ho trovato la persona con la query tramite id, adesso la cerco tramite l'oldId che aveva nel vecchio db");
-			person = Person.find("Select p from Person p where p.oldId = ?", id).first();
+			Logger.warn("L'id della persona passata tramite json non ha trovato corrispondenza nell'anagrafica del personale. Controllare id = %s", id);
+			return false;
 		}
+		
 		Logger.debug("Sto per segnare la timbratura di %s %s", person.name, person.surname);
 		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", 
 				person, stamping.dateTime.toLocalDate() ).first();
@@ -548,6 +556,7 @@ public class Person extends Model {
 			Stamping stamp = new Stamping();
 			stamp.date = stamping.dateTime;
 			stamp.markedByAdmin = false;
+//			stamp.considerForCounting = true;
 			if(stamping.inOut == 0)
 				stamp.way = WayType.in;
 			else
@@ -564,6 +573,7 @@ public class Person extends Model {
 				Stamping stamp = new Stamping();
 				stamp.date = stamping.dateTime;
 				stamp.markedByAdmin = false;
+//				stamp.considerForCounting = true;
 				if(stamping.inOut == 0)
 					stamp.way = WayType.in;
 				else
@@ -575,7 +585,7 @@ public class Person extends Model {
 				pd.save();
 			}
 			else{
-				Logger.warn("All'interno della lista di timbrature di %s %s nel giorno %s c'è una timbratura uguale a quella passata dallo" +
+				Logger.info("All'interno della lista di timbrature di %s %s nel giorno %s c'è una timbratura uguale a quella passata dallo" +
 						"stampingsFromClient: %s", person.name, person.surname, pd.date, stamping.dateTime);
 			}
 			//0113 00004000000000000086063304051407

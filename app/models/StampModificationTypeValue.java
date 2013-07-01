@@ -1,5 +1,7 @@
 package models;
 
+import play.db.jpa.JPA;
+
 public enum StampModificationTypeValue {
 
     FOR_DAILY_LUNCH_TIME(1l),
@@ -16,6 +18,10 @@ public enum StampModificationTypeValue {
     
     public Long getId() {
             return id;
+    }
+    
+    public StampModificationType getStampModificationType(){
+    	return JPA.em().getReference(StampModificationType.class, id);
     }
 
 }

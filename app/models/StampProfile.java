@@ -51,8 +51,5 @@ public class StampProfile extends Model {
 	 * le timbrature presenti
 	 */
 	public boolean fixedWorkingTime = false;
-	
-	@ManyToMany(mappedBy="stampProfiles")
-	public Set<CompetenceProfile> competenceProfiles;
-	
+
 }

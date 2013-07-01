@@ -1,6 +1,7 @@
 package controllers;
 
 import it.cnr.iit.epas.ActionMenuItem;
+import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -162,9 +163,11 @@ public class Persons extends Controller {
 	public static void list(){
 
 		List<Person> personList = Person.find("Select p from Person p where p.name <> ? order by p.surname", "Admin").fetch();
-		Logger.debug("La lista delle persone: %s", personList.toString());
+		//Logger.debug("La lista delle persone: %s", personList.toString());
+		LocalDate date = new LocalDate();
+		List<Person> activePerson = Person.getActivePersons(date);
 		
-		render(personList);
+		render(personList, activePerson);
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
@@ -194,12 +197,29 @@ public class Persons extends Controller {
 		person = new Person();		
 		Logger.debug("Saving person...");
 		
+		if(params.get("name").equals("") || params.get("surname").equals("")){
+			flash.error("Inserire nome e cognome per la persona che si intende salvare in anagrafica");
+			render("@list");
+		}
 		person.name = params.get("name");
+		
 		person.surname = params.get("surname");
 		person.number = params.get("number", Integer.class);
 		Qualification qual = Qualification.findById(new Long(params.get("person.qualification", Integer.class)));
 		person.qualification = qual;
 		person.save();
+		
+		/**
+		 * qui aggiungo il controllo sull'id generato dalla sequence di postgres rispetto ai vecchi id presenti nel vecchio db
+		 */
+		if(PersonUtility.isIdPresentInOldSoftware(person.id)){
+			/**
+			 * l'id generato è già presente in anagrafica come oldId di qualcuno...questo potrebbe generare dei problemi in fase di acquisizione 
+			 * delle timbrature...
+			 */
+			
+			
+		}
 		
 		Logger.debug("saving location, deparment = %s", location.department);
 		location.department = params.get("department");
@@ -214,6 +234,12 @@ public class Persons extends Controller {
 		contactData.person = person;
 		contactData.save();
 		
+		if(params.get("beginContract", Date.class) == null){
+			flash.error("Il contratto di %s %s deve avere una data di inizio. Utente cancellato. Reinserirlo con la data di inizio contratto valorizzata.", 
+					person.name, person.surname);
+			person.delete();
+			render("@list");
+		}
 		Date begin = params.get("beginContract", Date.class);
 		Date end = params.get("expireContract", Date.class);
 		LocalDate beginContract = new LocalDate(begin);
@@ -254,7 +280,12 @@ public class Persons extends Controller {
 		Person person = Person.findById(personId);
 		ContactData contactData = person.contactData;
 		Location location = person.location;
+		
 		InitializationTime initTime = InitializationTime.find("Select init from InitializationTime init where init.person = ?", person).first();
+		
+		if(!person.badgeNumber.equals(params.get("badgeNumber")))
+			person.badgeNumber = params.get("badgeNumber");
+		
 		if(contactData != null){
 			if(contactData.email == null || !contactData.email.equals(params.get("email"))){
 				contactData.email = params.get("email");
@@ -297,9 +328,9 @@ public class Persons extends Controller {
 		}
 		
 		if(initTime != null){
-			if(initTime.residualMinutesCurrentYear == null || initTime.residualMinutesCurrentYear != params.get("minutesCurrentYear", Integer.class))
+			if(initTime.residualMinutesCurrentYear == null || ! initTime.residualMinutesCurrentYear.equals(params.get("minutesCurrentYear", Integer.class)))
 				initTime.residualMinutesCurrentYear = params.get("minutesCurrentYear", Integer.class);
-			if(initTime.residualMinutesPastYear == null || initTime.residualMinutesPastYear != params.get("minutesPastYear", Integer.class))
+			if(initTime.residualMinutesPastYear == null || ! initTime.residualMinutesPastYear.equals(params.get("minutesPastYear", Integer.class)))
 				initTime.residualMinutesPastYear = params.get("minutesPastYear", Integer.class);
 			initTime.save();
 		}
@@ -311,7 +342,7 @@ public class Persons extends Controller {
 				initTime.residualMinutesCurrentYear = params.get("minutesCurrentYear", Integer.class);
 			initTime.save();
 		}
-		if(person.number != null && person.number != params.get("number", Integer.class))
+		if(person.number != null && ! person.number.equals(params.get("number", Integer.class)))
 			person.number = params.get("number", Integer.class);
 		person.save();
 		flash.success("Modificate informazioni per l'utente %s %s", person.name, person.surname);
@@ -344,7 +375,7 @@ public class Persons extends Controller {
 		//Logger.debug("BeginContract: %s - ExpireContract: %s - EndContract: %s", begin, expire, end);
 		beginContract = new LocalDate(begin);
 		
-		if(begin.equals("") || begin ==null ){
+		if(begin == null || begin.equals("")){
 			flash.error("Non può esistere un contratto senza data di inizio!");
 			render("@save");
 		}

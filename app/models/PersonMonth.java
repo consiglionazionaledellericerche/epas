@@ -56,6 +56,10 @@ public class PersonMonth extends Model {
 
 	@Column(name = "riposi_compensativi_da_anno_corrente")
 	public int riposiCompensativiDaAnnoCorrente;
+	
+	@Column(name = "riposi_compensativi_da_inizializzazione")
+	public int riposiCompensativiDaInizializzazione;
+	
 
 	@Column
 	public int straordinari;
@@ -684,8 +688,12 @@ public class PersonMonth extends Model {
 			PersonYear personYear = PersonYear.find("SELECT py FROM PersonYear py WHERE py.year = ? AND py.person = ?", year - 1, person).first();
 			if(personYear != null)
 				return personYear.getRemainingMinutes();
-			else
+			else{
+				InitializationTime initTime = InitializationTime.find("Select init from InitializationTime init where init.person = ?", person).first();
+				if(initTime != null && initTime.date.getYear() - new LocalDate().getYear() == 0)
+					return initTime.residualMinutesPastYear;
 				return 0;
+			}
 		} else {
 			return 0;
 		}
@@ -739,6 +747,7 @@ public class PersonMonth extends Model {
 
 		return month <= 3 || qualification.qualification <= 3;
 	}
+	
 
 	/**
 	 * @return la somma dei residui positivi e di quelli negativi
@@ -793,6 +802,17 @@ public class PersonMonth extends Model {
 
 		//System.out.println("mese: " + month + ". residuoAnnoPrecedenteDisponibileAllaFineDelMese() = " + residuoAnnoPrecedenteDisponibileAllaFineDelMese);
 		return residuoAnnoPrecedenteDisponibileAllaFineDelMese;
+	}
+	
+	public int residuoDaInizializzazioneDisponibileAllaFineDelMese(){
+		int residuoDaInizializzazioneDisponibileAllInizioDelMese = residuoDaInizializzazioneDisponibileAllInizioDelMese();
+		int residuoDaInizializzazioneDisponibileALlaFineDelMese = residuoDaInizializzazioneDisponibileAllInizioDelMese + riposiCompensativiDaInizializzazione;
+		return residuoDaInizializzazioneDisponibileALlaFineDelMese;
+	}
+
+	private int residuoDaInizializzazioneDisponibileAllInizioDelMese() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 	public int totaleResiduoAnnoCorrenteAFineMese() {
@@ -893,8 +913,9 @@ public class PersonMonth extends Model {
 	}
 
 	public boolean prendiRiposoCompensativo(LocalDate date) {
+		
 		int minutiRiposoCompensativo = minutiRiposoCompensativo(date);
-
+		
 		if (-minutiRiposoCompensativo > tempoDisponibilePerRecuperi(date)) {
 			return false;
 		}
