@@ -77,6 +77,10 @@ public class Reperibility extends Controller {
 
 	public enum SemRep {FS1S, FR1S, FS2S, FR2S}; 
 	
+	/*
+	 * @author arianna
+	 * Restituisce la lista dei reperibili attivi al momento di un determinato tipo
+	 */
 	public static void personList() {
 		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 		

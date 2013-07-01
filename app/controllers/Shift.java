@@ -23,9 +23,12 @@ import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
 import models.PersonShift;
 import models.PersonShiftDay;
+import models.PersonShiftShiftType;
 import models.ShiftCancelled;
 import models.ShiftTimeTable;
 import models.ShiftType;
+import models.exports.AbsenceReperibilityPeriod;
+import models.exports.AbsenceShiftPeriod;
 import models.exports.ShiftCancelledPeriod;
 import models.exports.ShiftPeriod;
 import models.exports.ShiftPeriods;
@@ -43,8 +46,32 @@ import play.mvc.Controller;
  */
 public class Shift extends Controller{
 
+	/*
+	 * @author arianna
+	 * Restituisce la lista delle persone in un determinato turno
+	 * 
+	 */
 	public static void personList(){
-		Reperibility.personList();		
+		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
+		
+		String type = params.get("type");		
+		ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();
+		if (shiftType == null) {
+			notFound(String.format("ShiftType type = %s doesn't exist", type));			
+		}
+		Logger.debug("Cerco Turnisti di tipo %s", shiftType.type);
+		
+		List<Person> personList = new ArrayList<Person>();
+		personList = JPA.em().createQuery("SELECT p FROM PersonShiftShiftType psst JOIN psst.personShift ps JOIN ps.person p WHERE psst.shiftType.type = :type AND (psst.beginDate IS NULL OR psst.beginDate <= now()) AND (psst.endDate IS NULL OR psst.endDate >= now())")
+				.setParameter("type", type)
+				.getResultList(); 
+		
+		Logger.debug("Shift personList called, found %s shift person", personList.size());
+		
+		for (Person p: personList) {
+			Logger.debug("name=%s surname=%s id=%di jolly=%s", p.name, p.surname, p.id, p.personShift.jolly);
+		}
+		render(personList);
 	}
 	
 	/*
@@ -259,7 +286,7 @@ public class Shift extends Controller{
 	 * il mese 'month' dell'anno 'year'
 	 * (portale sistorg)
 	 * 
-	 * T.B.N. che il tipo dei tyrni in questo caso è fisso. Sarà variabile quando si introdurranno
+	 * T.B.N. che il tipo dei turni in questo caso è fisso. Sarà variabile quando si introdurranno
 	 * i gruppi e i tipi di reperibilità associati ad ogni gruppo
 	 */
 	public static void exportMonthAsPDF() {
@@ -473,8 +500,67 @@ public class Shift extends Controller{
 		renderPDF(today, firstOfMonth, shiftCalendar);
 	}
 	
-	
-	public static void absence(){
+	/*
+	 * @author arianna
+	 * Restituisce la lista delle assenze delle persone di un certo turno in un certo periodo di tempo
+	 * 
+	 */
+	public static void absence() {
+		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
+
+		String type = params.get("type");
 		
+		LocalDate from = new LocalDate(Integer.parseInt(params.get("yearFrom")), Integer.parseInt(params.get("monthFrom")), Integer.parseInt(params.get("dayFrom")));
+		LocalDate to = new LocalDate(Integer.parseInt(params.get("yearTo")), Integer.parseInt(params.get("monthTo")), Integer.parseInt(params.get("dayTo")));
+		
+		ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();
+		if (shiftType == null) {
+			notFound(String.format("ShiftType type = %s doesn't exist", type));			
+		}
+		Logger.debug("Cerco Turnisti di tipo %s", shiftType.type);
+		
+		List<Person> personList = new ArrayList<Person>();
+		personList = JPA.em().createQuery("SELECT p FROM PersonShiftShiftType psst JOIN psst.personShift ps JOIN ps.person p WHERE psst.shiftType.type = :type AND (psst.beginDate IS NULL OR psst.beginDate <= now()) AND (psst.endDate IS NULL OR psst.endDate >= now())")
+		//personList = JPA.em().createQuery("SELECT p FROM PersonShiftShiftType psst JOIN psst.personShift ps JOIN ps.person p WHERE psst.shiftType.type = :type")
+				.setParameter("type", type)
+				.getResultList(); 
+		
+		Logger.debug("Shift personList called, found %s shift person", personList.size());
+		
+		// Lists of absence for a single shift person and for all persons
+		List<Absence> absencePersonShiftDays = new ArrayList<Absence>();
+				
+		// List of absence periods
+		List<AbsenceShiftPeriod> absenceShiftPeriods = new ArrayList<AbsenceShiftPeriod>();
+
+		if (personList.size() == 0) {
+			render(absenceShiftPeriods);
+			return;
+		}
+				
+		AbsenceShiftPeriod absenceShiftPeriod = null;
+		
+		absencePersonShiftDays = JPA.em().createQuery("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date BETWEEN :from AND :to AND pd.person IN (:personList) ORDER BY pd.person.id, pd.date")
+			.setParameter("from", from)
+			.setParameter("to", to)
+			.setParameter("personList", personList)
+			.getResultList();
+		
+		
+		Logger.debug("Trovati %s giorni di assenza", absencePersonShiftDays.size());
+		
+		for (Absence abs : absencePersonShiftDays) {
+			//L'ultima parte dell'if serve per il caso in cui la stessa persona ha due periodi di reperibilità non consecutivi. 
+			if (absenceShiftPeriod == null || !absenceShiftPeriod.person.equals(abs.personDay.person) || !absenceShiftPeriod.end.plusDays(1).equals(abs.personDay.date)) {
+				absenceShiftPeriod = new AbsenceShiftPeriod(abs.personDay.person, abs.personDay.date, abs.personDay.date, (ShiftType) ShiftType.findById(shiftType.id));
+				absenceShiftPeriods.add(absenceShiftPeriod);
+				Logger.trace("Creato nuovo absenceReperibilityPeriod, person=%s, start=%s, end=%s", absenceShiftPeriod.person, absenceShiftPeriod.start, absenceShiftPeriod.end);
+			} else {
+				absenceShiftPeriod.end = abs.personDay.date;
+				Logger.trace("Aggiornato reperibilityPeriod, person=%s, start=%s, end=%s", absenceShiftPeriod.person, absenceShiftPeriod.start, absenceShiftPeriod.end);
+			}
+		}
+		Logger.debug("Find %s absenceReperibilityPeriod. AbsenceReperibilityPeriod = %s", absenceShiftPeriods.size(), absenceShiftPeriods.toString());
+		render(absenceShiftPeriods);
 	}
 }
