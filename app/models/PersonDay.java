@@ -154,7 +154,7 @@ public class PersonDay extends Model {
 			this.lastNotPairedInStamping = lastNotPairedInStamping;
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param abt
@@ -169,7 +169,7 @@ public class PersonDay extends Model {
 	}
 
 	public TimeAtWork getCalculatedTimeAtWork() {
-		
+
 		//Se hanno il tempo di lavoro fissato non calcolo niente
 		StampProfile stampProfile = getStampProfile();
 		if (stampProfile != null && stampProfile.fixedWorkingTime) {
@@ -187,7 +187,7 @@ public class PersonDay extends Model {
 		 */
 		PersonUtility.checkExitStampNextDay(this);
 
-	
+
 		for(Absence abs : absences){
 			//TODO: verificare con Claudio cosa fare con le timbrature in missione
 			if(abs.absenceType.ignoreStamping || 
@@ -198,7 +198,7 @@ public class PersonDay extends Model {
 					//ci sono più codici di assenza uno è il codice da inviare a roma dell'assenza oraria corrispondente
 					justifiedTimeAtWork = justifiedTimeAtWork + abs.absenceType.justifiedTimeAtWork.minutesJustified;
 				else{
-					
+
 					//Da capire cosa fare nel caso del codice 89
 					Logger.trace("Il codice che sto analizzando è: %s", abs.absenceType.code);
 				}
@@ -343,11 +343,14 @@ public class PersonDay extends Model {
 				(workTime-getWorkingTimeTypeDay().breakTicketTime > getWorkingTimeTypeDay().mealTicketTime)){
 
 			tempoLavoro = workTime-getWorkingTimeTypeDay().breakTicketTime;	
+		}
 		if(reloadedStampings.contains(null) && workTime > getWorkingTimeTypeDay().mealTicketTime
 				&& workTime-getWorkingTimeTypeDay().breakTicketTime > getWorkingTimeTypeDay().mealTicketTime){
 			tempoLavoro = workTime-getWorkingTimeTypeDay().breakTicketTime;
 		}
-
+		if(reloadedStampings.size() %2 != 0 && workTime > getWorkingTimeTypeDay().mealTicketTime 
+				&& workTime-getWorkingTimeTypeDay().breakTicketTime > getWorkingTimeTypeDay().mealTicketTime){
+			tempoLavoro = workTime-getWorkingTimeTypeDay().breakTicketTime;
 		}
 		else{
 			tempoLavoro = workTime;
@@ -360,8 +363,8 @@ public class PersonDay extends Model {
 			Logger.debug("Il tempo di lavoro per %s %s il giorno %s è %s", person.name, person.surname, date, Math.max(tempoLavoro + justifiedTimeAtWork, getWorkingTimeTypeDay().workingTime));
 			return new TimeAtWork(Math.max(tempoLavoro + justifiedTimeAtWork, getWorkingTimeTypeDay().workingTime), lastInNotPaired);
 		} 
-		
-		
+
+
 		Logger.debug("Il tempo di lavoro per %s %s il giorno %s è %s", person.name, person.surname, date, tempoLavoro + justifiedTimeAtWork);
 		return new TimeAtWork(tempoLavoro + justifiedTimeAtWork, lastInNotPaired);
 
@@ -370,13 +373,13 @@ public class PersonDay extends Model {
 	public class TimeAtWorkToday {
 		public Integer timeAtWork;
 		public boolean exitingNow;
-		
+
 		public TimeAtWorkToday(Integer timeAtWork, boolean exitingNow) {
 			this.timeAtWork = timeAtWork;
 			this.exitingNow = exitingNow;
 		}
 	}
-	
+
 	/**
 	 * Da utilizzare solo nel template di visualizzazione!
 	 * @return
@@ -387,7 +390,7 @@ public class PersonDay extends Model {
 		}
 		return new TimeAtWorkToday(timeAtWork, false);
 	}
-	
+
 	private TimeAtWorkToday getTimeAtWorkToday() {
 		if (stampings.size() == 0)
 			return new TimeAtWorkToday(0, false);
@@ -628,8 +631,8 @@ public class PersonDay extends Model {
 			save();
 			return;
 		}
-			
-		
+
+
 		if((getWorkingTimeTypeDay().holiday) && (date.getDayOfMonth()==1) && stampings.size() == 0){
 			difference = 0;
 			save();
@@ -641,7 +644,7 @@ public class PersonDay extends Model {
 			save();
 			return;
 		}
-		
+
 		if(absences.size() == 1 && stampings.size() > 0){
 			Absence abs = absences.get(0);
 			if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay){
@@ -649,7 +652,7 @@ public class PersonDay extends Model {
 				save();
 				return;
 			}
-				
+
 		}
 
 		if(this.date.isAfter(new LocalDate()) && stampings.size()==0 && absences.size()==0 && timeAtWork == 0){
@@ -680,14 +683,14 @@ public class PersonDay extends Model {
 	 * @return true se nella lista delle timbrature per quel personDay c'è una timbratura "nulla" ovvero che non viene considerata per il calcol
 	 * del tempo di lavoro
 	 */
-//	public int checkIndexOfNullStamping(){
-//		for(int i = 0; i < this.stampings.size(); i++){
-//			if(this.stampings.get(i).considerForCounting)
-//				return i;
-//		}
-//		return 0;
-//	}
-	
+	//	public int checkIndexOfNullStamping(){
+	//		for(int i = 0; i < this.stampings.size(); i++){
+	//			if(this.stampings.get(i).considerForCounting)
+	//				return i;
+	//		}
+	//		return 0;
+	//	}
+
 	/**
 	 * 
 	 * @param stampings
@@ -695,10 +698,10 @@ public class PersonDay extends Model {
 	 * consecutive di ingresso o di uscita, mettendo tale timbratura nulla in mezzo alle due.
 	 */
 	public List<Stamping> getStampingsForTemplate() {
-		
+
 		List<Stamping> stampingsForTemplate = new LinkedList<Stamping>();
 		boolean isLastIn = false;
-		
+
 		for (Stamping s : this.stampings) {
 			if (isLastIn && s.way == WayType.in) {
 				stampingsForTemplate.add(null);
@@ -707,13 +710,13 @@ public class PersonDay extends Model {
 				stampingsForTemplate.add(null);
 				isLastIn = s.way == WayType.in;
 			}
-			
+
 			stampingsForTemplate.add(s);
 			isLastIn = s.way == WayType.in;
 		}
 		return stampingsForTemplate;
 	}
-	
+
 	/**
 	 * 
 	 * @param stamping
@@ -748,6 +751,10 @@ public class PersonDay extends Model {
 			}
 			if(((hourEnter*60)+minuteEnter) - ((hourExit*60)+minuteExit) < getWorkingTimeTypeDay().breakTicketTime && workingTime > getWorkingTimeTypeDay().mealTicketTime)
 				smt = StampModificationType.findById(StampModificationTypeValue.FOR_MIN_LUNCH_TIME.getId());
+		}
+		if(stampings.size()%2 != 0){
+			if(timeAtWork >= getWorkingTimeTypeDay().mealTicketTime+getWorkingTimeTypeDay().breakTicketTime)
+				smt = StampModificationType.findById(StampModificationTypeValue.FOR_DAILY_LUNCH_TIME.getId());
 		}
 		return smt;
 	}
@@ -917,11 +924,11 @@ public class PersonDay extends Model {
 	public boolean isToday() {
 		return date.equals(LocalDate.now());
 	}
-	
+
 	public boolean isFuture() {
 		return date.isAfter(LocalDate.now());
 	}
-	
+
 	@Override
 	public String toString() {
 		return String.format("PersonDay[%d] - person.id = %d, date = %s, difference = %s, isTicketAvailable = %s, modificationType = %s, progressive = %s, timeAtWork = %s",
