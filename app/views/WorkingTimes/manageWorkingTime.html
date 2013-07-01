@@ -1,5 +1,6 @@
 #{extends 'main.html' /}
 
+
 <h2 id="titoloGestioneOrariLavoro">Gestione tipi di orario di lavoro</h2>
 
 
@@ -23,7 +24,7 @@
 		for(wtt in wttList){ 
 	}%
 	<tr>
-		<td rowspan=8><a href="@{WorkingTimes.edit(wtt.id)}">${wtt.description}</a></td>
+		<td rowspan=5><a href="@{WorkingTimes.edit(wtt.id)}">${wtt.description}</a></td>
 		<tr>
 			<td>Tempo lavoro</td>
 			<td>${wtt.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime}</td>
@@ -74,41 +75,7 @@
 			<td></td>
 			<td></td>
 		</tr>
-		<tr>
-			<td>Fascia oraria di ingresso</td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-		</tr>
-		<tr>
-			<td>Fascia oraria di uscita</td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-		</tr>
-		<tr>
-			<td>Fascia oraria pranzo</td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>	
-		</tr>
+
 	
 	</tr>
 	%{

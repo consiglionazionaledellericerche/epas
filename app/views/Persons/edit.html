@@ -29,6 +29,10 @@
 		Matricola <input name="number" type="text" value="${person.number}"
 			size="10" maxlength="10" />
 	</div>
+	<div>
+		Numbero badge <input name="badgeNumber" type="text" value="${person.badgeNumber}"
+			size="10" maxlength="20" />
+	</div>
 	%{if(person.qualification != null){
 	}%
 	<div>Livello #{select 'person.qualification',

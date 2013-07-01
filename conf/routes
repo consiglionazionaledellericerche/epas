@@ -16,14 +16,14 @@ GET		/orarioAdmin/{personId}/{year}/{month}	Stampings.personStamping
 GET 	/orarioAdmin							Stampings.personStamping
 
 #Assenze
-#GET		/absences/{personId}/{year}/{month}		Absences.absences
+#GET		/absences/{year}/{month}		Absences.absences
 
 #Assenze annuali
 GET		/yearlyAbsences/{personId}/{year}		YearlyAbsences.yearlyAbsences
 
 #Assenze mensili globali
 GET		/generalMonthlyAbsences/{year}/{month}	YearlyAbsences.showGeneralMonthlyAbsences
-GET		/yearlyAbsences/absencesPerPerson/{year}		YearlyAbsences.absencesPerPerson
+GET		/yearlyAbsences/absencesPerPerson/{personId}/{year}		YearlyAbsences.absencesPerPerson
 
 #Ferie
 GET		/vacations								Vacations.show

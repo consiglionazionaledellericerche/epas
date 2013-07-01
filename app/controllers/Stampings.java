@@ -43,6 +43,8 @@ public class Stampings extends Controller {
 	 * @param year
 	 * @param month
 	 */
+
+	
 	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void stampings(Integer year, Integer month){
 		
@@ -51,7 +53,10 @@ public class Stampings extends Controller {
 		}
 		
 		long id = 1;
-		Configuration confParameters = Configuration.findById(id);
+		//Configuration confParameters = Configuration.findById(id);
+		Configuration confParameters = Configuration.getCurrentConfiguration();
+		if(confParameters == null)
+			confParameters = Configuration.find("Select c from Configuration c order by c.id desc").first();
 		
 		Person person = Security.getPerson();
 		Logger.debug("La persona presa dal security è: %s %s", person.name, person.surname);
@@ -130,7 +135,7 @@ public class Stampings extends Controller {
 
 		int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
 		int numberOfInOut = Math.max(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
-
+		Logger.debug("NumberOfInOut: %d, NumberOfCompensatoryRest: %d, OvertimeHour: %d", numberOfInOut, numberOfCompensatoryRest, overtimeHour);
 		render(personMonth, numberOfInOut, previousPersonMonth, numberOfCompensatoryRest, overtimeHour, person);
 
 	}
@@ -190,8 +195,15 @@ public class Stampings extends Controller {
 		
 		if(pd.stampings.size() == 0 && pd.isHoliday()){
 			flash.error("Si sta inserendo una timbratura in un giorno di festa. Errore");
-			render("@create", personId, year, month, day);
+			render("@save");
 		}
+		
+		if(date.isAfter(new LocalDate())){
+			flash.error("Non si può inserire una timbratura futura!!!");
+			render("@save");
+		}
+		
+		
 		
 		/**
 		 * controllo che il radio button sulla timbratura forzata all'orario di lavoro sia checkato
@@ -214,6 +226,9 @@ public class Stampings extends Controller {
 		Stamping stamp = new Stamping();
 		stamp.date = new LocalDateTime(year, month, day, hour, minute, 0);
 		stamp.markedByAdmin = true;
+		
+		
+//		stamp.considerForCounting = true;
 		if(service.equals("true")){
 			stamp.note = "timbratura di servizio";
 			stamp.stampType = StampType.find("Select st from StampType st where st.code = ?", "motiviDiServizio").first();
@@ -266,16 +281,28 @@ public class Stampings extends Controller {
 			flash.error("Attribuire valore a ciascun campo se si intende modificare la timbratura o togliere valore a entrambi i campi" +
 					" se si intende cancellarla");
 			render("@save");
-			//Stampings.personStamping();
 		}
 		if (hour == null && minute == null) {
+			PersonDay pd = stamping.personDay;
 			stamping.delete();
+			pd.stampings.remove(stamping);
+//			stamping.considerForCounting = true;
+			stamping.save();
 			stamping.personDay.populatePersonDay();
 			stamping.personDay.save();
+			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ?", 
+					stamping.personDay.person, stamping.personDay.date).fetch();
+			for(PersonDay p : pdList){
+				if(p.date.getMonthOfYear() == stamping.date.getMonthOfYear()){
+					p.populatePersonDay();
+					p.save();
+				}
+				
+			}
 			flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(stamping.date.toLocalDate()));	
 		
 			render("@save");
-			//Stampings.personStamping();
+
 		} else {
 			if (hour == null || minute == null) {
 				flash.error("E' necessario specificare sia il campo ore che minuti, oppure nessuno dei due per rimuovere la timbratura.");
@@ -294,12 +321,20 @@ public class Stampings extends Controller {
 			stamping.personDay.populatePersonDay();
 			stamping.personDay.save();
 			Logger.debug("Aggiornata ora della timbratura alle ore: %s", stamping.date);
+			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ?", 
+					stamping.personDay.person, stamping.personDay.date).fetch();
+			for(PersonDay p : pdList){
+				if(p.date.getMonthOfYear() == stamping.date.getMonthOfYear()){
+					p.populatePersonDay();
+					p.save();
+				}
+				
+			}
 			flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name);
-			//Application.success();
-			//Stampings.personStamping();
+
 		}
 		render("@save");
-		//Stampings.personStamping();
+
 	}
 
 	/**

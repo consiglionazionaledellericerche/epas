@@ -24,6 +24,11 @@ public class Application extends Controller {
     
 	
     public static void index() {
+    	if(Security.getPerson().username.equals("admin")){
+    		Persons.list();
+    		return;
+    	}
+    	
     	if (Security.check(Security.INSERT_AND_UPDATE_STAMPING)) {
     		Application.indexAdmin();
     	} else {

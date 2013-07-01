@@ -10,7 +10,9 @@ import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
@@ -27,17 +29,29 @@ import play.db.jpa.Model;
 @Audited
 @Entity
 @Table(name = "stampings")
+
 public class Stamping extends Model {
 
 	private static final long serialVersionUID = -2422323948436157747L;
 
 	public enum WayType {
-		in,
-		out
+		in("in"),
+		out("out");
+		
+		public String description;
+		
+		private WayType(String description){
+			this.description = description;
+		}
+		
+		public String getDescriptio(){
+			return this.description;
+		}
 	}
 	
 	@Required
 	@ManyToOne(optional = false)
+		
 	@JoinColumn(name = "personDay_id", nullable = false, updatable = false)
 	public PersonDay personDay;
 	
@@ -52,6 +66,7 @@ public class Stamping extends Model {
 	@Required
 	@InPast
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDateTime")
+	
 	public LocalDateTime date;
 	
 	@Required
@@ -70,8 +85,26 @@ public class Stamping extends Model {
 	 * in questione non ha potuto effettuare la timbratura (valore = true)
 	 */
 	@Column(name = "marked_by_admin")
-	public Boolean markedByAdmin;		
+	public Boolean markedByAdmin;	
 	
+	/**
+	 * questo campo booleano determina se la timbratura in questione deve essere considerata per i calcoli del tempo di lavoro oppure no.
+	 * In alcuni casi, infatti, vengono inserite timbrature fittizie con orari impostati ad hoc perchè mancano timbrature di uscita corrispondenti
+	 * a timbrature di entrata o viceversa. Queste timbrature non devono essere considerate nel calcolo.
+	 */
+//	@Column(name = "consider_for_counting")
+//	public Boolean considerForCounting;
+	
+	@Transient
+	public boolean isIn() {
+		return way.equals(WayType.in);
+	}
+
+	@Transient
+	public boolean isOut() {
+		return way.equals(WayType.out);
+	}
+
 	@Override
 	public String toString() {
 		return String.format("Stamping[%d] - personDay.id = %d, way = %s, date = %s, stampType.id = %s, stampModificationType.id = %s",

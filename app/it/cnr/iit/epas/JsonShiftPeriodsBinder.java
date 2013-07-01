@@ -6,6 +6,7 @@ package it.cnr.iit.epas;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -89,7 +90,7 @@ public class JsonShiftPeriodsBinder implements TypeBinder<ShiftPeriods> {
 	
 					Logger.debug("shiftTimeTable = %s", shiftTimeTable);
 					if (shiftTimeTable == null) {
-						throw new IllegalArgumentException(String.format("shiftTimeTable whith startShift = %s and endShift = %s not found", hmsStart, hmsEnd));
+						throw new IllegalArgumentException(String.format("shiftTimeTable whith startShift = %s and endShift = %s not found", Arrays.toString(hmsStart), Arrays.toString(hmsEnd)));
 					}
 					
 					ShiftPeriod shiftPeriod =	new ShiftPeriod(person, start, end, shiftType, false, shiftTimeTable);
@@ -112,5 +113,6 @@ public class JsonShiftPeriodsBinder implements TypeBinder<ShiftPeriods> {
 			throw e;
 		}
 	}
-	
+
 }
+

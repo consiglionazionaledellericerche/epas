@@ -35,6 +35,7 @@ public class Security extends Secure.Security {
 	private final static String CACHE_DURATION = "30mn";
 	
 	static boolean authenticate(String username, String password) {
+	    Logger.trace("Richiesta autenticazione di %s",username);
 		Person person = Person.find("SELECT p FROM Person p where username = ? and password = md5(?)", username, password).first();
 
 		if(person != null){
@@ -78,10 +79,17 @@ public class Security extends Secure.Security {
 			Logger.trace("getPerson failed for username %s", username);
 			return null;
 		}
+		Logger.trace("Richiesta getPerson(), username=%s", username);
 		
 		Person person = Cache.get(username, Person.class);
+
 		if(person == null){
 			person = Person.find("byUsername", username).first();
+			Logger.trace("Person.find('byUsername'), username=%s, e' %s", username, person);
+			if (person == null){
+			    Logger.info("Security.getPerson(): Person con username = %s non trovata nel database", username);
+			    return null;
+			}
 			Cache.set(username, person, CACHE_DURATION);
 			Cache.set(PERMISSION_CACHE_PREFIX + username, person.getAllPermissions(), CACHE_DURATION);
 			Logger.debug("Cache filled with %s and his/her permissions", person);

@@ -28,6 +28,7 @@ public class SwitchTemplate extends Controller{
 		ActionMenuItem menuItem = ActionMenuItem.valueOf(method);
 		Logger.debug("Nella switchTemplate Il menuItem è: %s relativo alla action: %s", menuItem, method);
 		Person person = Security.getPerson();
+		Logger.debug("L'id della persona loggata è: %d", person.id);
 		
 		int month;
 		if (params.get("month") != null) {
@@ -51,7 +52,7 @@ public class SwitchTemplate extends Controller{
 			day = now.getDayOfMonth();
 
 		Long personId = null;
-		Logger.debug("Il personId preso dai params vale: %s", params.get("personId"));
+		//Logger.debug("Il personId preso dai params vale: %s", params.get("personId"));
 		if (params.get("personId") != null) {
 			personId = params.get("personId", Long.class);
 			
@@ -59,7 +60,10 @@ public class SwitchTemplate extends Controller{
 
 			if(personId != 0)	
 				person = Person.findById(personId);
-		}	
+		}
+		else{
+			personId = Security.getPerson().id;
+		}
 		
 		params.flash();
 		
@@ -194,23 +198,27 @@ public class SwitchTemplate extends Controller{
 			Stampings.stampings(year, month);
 			break;
 		case absences:
-			Absences.absences(personId, year, month); 
+			Absences.absences(year, month); 
 			break;
 		case absencesperperson:
-			YearlyAbsences.absencesPerPerson(year);
+			if(personId == null || personId == 0)
+				personId = Security.getPerson().id;
+			YearlyAbsences.absencesPerPerson(personId, year);
 			break;
 		case vacations:
+			if(personId == null || personId == 0)
+				personId = Security.getPerson().id;
 			Vacations.show(personId, year);
 			break;
 		case competences:
-			if(personId == 0){
-				flash.error("Il metodo %s deve essere chiamato selezionando una persona", menuItem.getDescription());
-				Application.indexAdmin();
-			}
-			else
+			if(personId == null || personId == 0)				
+				personId = Security.getPerson().id;
+			
 			Competences.competences(personId, year, month);
 			break;
 		case hourrecap:
+			if(personId == null || personId == 0)				
+				personId = Security.getPerson().id;
 			PersonMonths.hourRecap(personId,year);
 			break;
 

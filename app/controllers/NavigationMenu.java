@@ -35,7 +35,11 @@ public class NavigationMenu extends Controller {
 			month = now.getMonthOfYear();
 		
 		Long personId =  flash.get("personId") != null ? Long.parseLong(flash.get("personId")) : null;
+		if(personId == null)
+			personId = Security.getPerson().id;
 		//Person person = Person.findById(personId);
+		Logger.debug("Action= %s",flash.get("method"));
+		Logger.debug("PersonId= %d", personId);
 		
 		ActionMenuItem action = flash.get("method") != null && !flash.get("method").equals("") && personId != null ? ActionMenuItem.valueOf(flash.get("method")) : ActionMenuItem.stampingsAdmin;
 		
@@ -61,7 +65,7 @@ public class NavigationMenu extends Controller {
 			}
 			Cache.set("persons", persons, "5mn");
 		}
-		Logger.debug("nella injectMenu la action è: %s", action.getDescription());
+		//Logger.debug("nella injectMenu la action è: %s", action.getDescription());
 		MainMenu mainMenu = null;
 		if(action.getDescription().equals("Riepilogo mensile"))
 			mainMenu = new MainMenu(year, month, action);
