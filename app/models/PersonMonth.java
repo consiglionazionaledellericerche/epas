@@ -787,9 +787,13 @@ public class PersonMonth extends Model {
 
 	public int residuoAnnoPrecedenteDisponibileAllInizioDelMese() {
 		if (possibileUtilizzareResiduoAnnoPrecedente()) {
-
-			if (month.equals(1)) {
-				return residuoAnnoPrecedente();
+			InitializationTime initTime = InitializationTime.find("Select init from InitializationTime init where init.person = ?", person).first();
+			if(initTime != null && initTime.date.getYear() - new LocalDate().getYear() == 0)
+				return initTime.residualMinutesPastYear;
+			
+			if (month.equals(1) && initTime.date.getYear() - new LocalDate().getYear() != 0) {
+				
+				return residuoAnnoPrecedente(); 
 			} 
 			if (mesePrecedente() == null) {
 				return 0;
@@ -928,7 +932,7 @@ public class PersonMonth extends Model {
 		}
 
 		int residuoAnnoPrecedenteDisponibileAllaFineDelMese = residuoAnnoPrecedenteDisponibileAllaFineDelMese();
-
+		
 		if (residuoAnnoPrecedenteDisponibileAllaFineDelMese < 0) {
 			throw new IllegalStateException(
 					String.format("Richiesto riposo compensativo per l'utente %s nella data %s: ci sono ore disponibili " +
@@ -940,10 +944,11 @@ public class PersonMonth extends Model {
 		//System.out.println("residuoAnnoPrecedenteDisponibileAllaFineDelMese = " + residuoAnnoPrecedenteDisponibileAllaFineDelMese);
 		if (residuoAnnoPrecedenteDisponibileAllaFineDelMese == 0) {
 			//Per esempio per i tecnici/amministrativi da aprile in poi
+			Logger.debug("Passo di qui per %s %s nel mese %s perchè non ha residuo positivo dall'anno precedente!!!", person.name, person.surname, month);
 			riposiCompensativiDaAnnoCorrente += minutiRiposoCompensativo;
 		} else {
-			if (-minutiRiposoCompensativo < residuoAnnoPrecedenteDisponibileAllaFineDelMese) {
-				riposiCompensativiDaAnnoPrecedente = riposiCompensativiDaAnnoPrecedente + minutiRiposoCompensativo;
+			if (residuoAnnoPrecedenteDisponibileAllaFineDelMese > -minutiRiposoCompensativo ) {
+				riposiCompensativiDaAnnoPrecedente += minutiRiposoCompensativo;
 				
 			} else {
 				riposiCompensativiDaAnnoPrecedente += residuoAnnoPrecedenteDisponibileAllaFineDelMese;
