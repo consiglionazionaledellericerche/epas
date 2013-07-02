@@ -345,7 +345,7 @@ public class PersonDay extends Model {
 		if(this.person.surname.equals("Vasarelli"))
 			Logger.debug("Il tempo di lavoro per oggi, %s, prima del controllo sul pranzo è: %d e il minTimeForLunch è %d minuti, mentre il tempo per la mensa " +
 					" è di %d minuti", this.date, tempoLavoro, minTimeForLunch, getWorkingTimeTypeDay().breakTicketTime);
-		
+
 		if((reloadedStampings.size()==4) && (minTimeForLunch < getWorkingTimeTypeDay().breakTicketTime) && (!reloadedStampings.contains(null))){
 			tempoLavoro = workTime - (getWorkingTimeTypeDay().breakTicketTime-minTimeForLunch);		
 		}
@@ -362,13 +362,13 @@ public class PersonDay extends Model {
 				&& workTime-getWorkingTimeTypeDay().breakTicketTime > getWorkingTimeTypeDay().mealTicketTime){
 			tempoLavoro = workTime-getWorkingTimeTypeDay().breakTicketTime;
 		}
-		
+
 		if(this.person.surname.equals("Vasarelli"))
 			Logger.debug("Alla fine del controllo del pranzo il tempo per oggi, %s, è: %d", this.date, tempoLavoro);
-//		else{
-//			tempoLavoro = workTime;
-//			Logger.trace("tempo di lavoro a fine metodo: %d", tempoLavoro);
-//		}
+		//		else{
+		//			tempoLavoro = workTime;
+		//			Logger.trace("tempo di lavoro a fine metodo: %d", tempoLavoro);
+		//		}
 
 
 
@@ -412,8 +412,12 @@ public class PersonDay extends Model {
 		if (calculatedTimeAtWork.lastNotPairedInStamping == null) {
 			return new TimeAtWorkToday(calculatedTimeAtWork.timeAtWork, false); 
 		}
-
-		return new TimeAtWorkToday(calculatedTimeAtWork.timeAtWork - toMinute(calculatedTimeAtWork.lastNotPairedInStamping.date) + toMinute(LocalDateTime.now()), true);
+		if(- toMinute(calculatedTimeAtWork.lastNotPairedInStamping.date) + toMinute(LocalDateTime.now()) > getWorkingTimeTypeDay().mealTicketTime)
+			return new TimeAtWorkToday(
+					calculatedTimeAtWork.timeAtWork - toMinute(calculatedTimeAtWork.lastNotPairedInStamping.date) + toMinute(LocalDateTime.now()) - getWorkingTimeTypeDay().breakTicketTime, true);
+		else
+			return new TimeAtWorkToday(
+					calculatedTimeAtWork.timeAtWork - toMinute(calculatedTimeAtWork.lastNotPairedInStamping.date) + toMinute(LocalDateTime.now()), true); 
 	}
 
 	/**
