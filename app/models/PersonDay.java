@@ -337,25 +337,33 @@ public class PersonDay extends Model {
 
 		//TODO: rivedere bene questa parte
 		int minTimeForLunch = checkMinTimeForLunch();
-		if((reloadedStampings.size()==4) && (minTimeForLunch < getWorkingTimeTypeDay().breakTicketTime) && (!reloadedStampings.contains(null)))
-			tempoLavoro = workTime - (getWorkingTimeTypeDay().breakTicketTime-minTimeForLunch);							
-		if((reloadedStampings.size()==2) && (workTime > getWorkingTimeTypeDay().mealTicketTime) && 
-				(workTime-getWorkingTimeTypeDay().breakTicketTime > getWorkingTimeTypeDay().mealTicketTime)){
+		/**
+		 * alla fine del calcolo del tempo di lavoro, attribuisco a tempoLavoro quel valore...dopo di che inizio a controllare se siamo in uno dei casi
+		 * speciali elencati dagli if sotto...se siamo in uno di quei casi il valore di tempoLavoro verrà modificato dalla sezione specifica.
+		 */
+		tempoLavoro = workTime;
+		
+		if((reloadedStampings.size()==4) && (minTimeForLunch < getWorkingTimeTypeDay().breakTicketTime) && (!reloadedStampings.contains(null))){
+			tempoLavoro = workTime - (getWorkingTimeTypeDay().breakTicketTime-minTimeForLunch);		
+		}
+
+		if(reloadedStampings.size()==2 && workTime > getWorkingTimeTypeDay().mealTicketTime /*&& 
+				(workTime-getWorkingTimeTypeDay().breakTicketTime > getWorkingTimeTypeDay().mealTicketTime)*/){
 
 			tempoLavoro = workTime-getWorkingTimeTypeDay().breakTicketTime;	
 		}
-		if(reloadedStampings.contains(null) && workTime > getWorkingTimeTypeDay().mealTicketTime
-				&& workTime-getWorkingTimeTypeDay().breakTicketTime > getWorkingTimeTypeDay().mealTicketTime){
-			tempoLavoro = workTime-getWorkingTimeTypeDay().breakTicketTime;
-		}
+		//		if(reloadedStampings.contains(null) && workTime > getWorkingTimeTypeDay().mealTicketTime
+		//				&& workTime-getWorkingTimeTypeDay().breakTicketTime > getWorkingTimeTypeDay().mealTicketTime){
+		//			tempoLavoro = workTime-getWorkingTimeTypeDay().breakTicketTime;
+		//		}
 		if(reloadedStampings.size() %2 != 0 && workTime > getWorkingTimeTypeDay().mealTicketTime 
 				&& workTime-getWorkingTimeTypeDay().breakTicketTime > getWorkingTimeTypeDay().mealTicketTime){
 			tempoLavoro = workTime-getWorkingTimeTypeDay().breakTicketTime;
 		}
-		else{
-			tempoLavoro = workTime;
-			Logger.trace("tempo di lavoro a fine metodo: %d", tempoLavoro);
-		}
+//		else{
+//			tempoLavoro = workTime;
+//			Logger.trace("tempo di lavoro a fine metodo: %d", tempoLavoro);
+//		}
 
 
 

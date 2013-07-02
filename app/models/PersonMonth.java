@@ -11,6 +11,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Query;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -203,8 +204,14 @@ public class PersonMonth extends Model {
 	 * @param numberOfCompensatoryRest
 	 * @return il numero di minuti corrispondenti al numero di riposi compensativi
 	 */
-	public int getCompensatoryRestInMinutes(int numberOfCompensatoryRest){
-		return numberOfCompensatoryRest * person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime;
+	public int getCompensatoryRestInMinutes(){
+		LocalDate begin = new LocalDate(year, month, 1);
+		LocalDate end = new LocalDate(year, month, begin.dayOfMonth().withMaximumValue().getDayOfMonth());
+		Query query = JPA.em().createQuery("Select abs from Absence abs where abs.personDay.person = :person and abs.personDay.date between :begin and :end" +
+				" and abs.absenceType.code = :code").setParameter("person", this.person).setParameter("begin", begin).setParameter("end", end)
+				.setParameter("code", "91");
+		List<Object> resultList = query.getResultList();
+		return resultList.size() * person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime;
 	}
 	/**
 	 * 
@@ -816,7 +823,7 @@ public class PersonMonth extends Model {
 	}
 
 	public int totaleResiduoAnnoCorrenteAFineMese() {
-		return residuoDelMese() + totaleResiduoAnnoCorrenteAlMesePrecedente() + /*residuoAnnoPrecedenteDaInizializzazione() +*/ riposiCompensativiDaAnnoCorrente - straordinari - recuperiOreDaAnnoPrecedente;  
+		return residuoDelMese() + totaleResiduoAnnoCorrenteAlMesePrecedente() + riposiCompensativiDaAnnoCorrente - straordinari - recuperiOreDaAnnoPrecedente;  
 	}
 
 	public int totaleResiduoAnnoCorrenteAllaData(LocalDate date) {
@@ -824,7 +831,7 @@ public class PersonMonth extends Model {
 	}
 
 	public int totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese() {
-		return totaleResiduoAnnoCorrenteAFineMese() + residuoAnnoPrecedenteDisponibileAllaFineDelMese() /*+ residuoAnnoPrecedenteDaInizializzazione()*/;
+		return totaleResiduoAnnoCorrenteAFineMese() + residuoAnnoPrecedenteDisponibileAllaFineDelMese();
 	}
 
 	public void aggiornaRiepiloghi() {
@@ -928,14 +935,16 @@ public class PersonMonth extends Model {
 							"ma il residuo dell'anno scorso è negativo, questo non dovrebbe essere possibile, contattare Dario <dario.tagliaferri@iit.cnr.it>",
 							person, date));
 		}
+		
 
 		//System.out.println("residuoAnnoPrecedenteDisponibileAllaFineDelMese = " + residuoAnnoPrecedenteDisponibileAllaFineDelMese);
 		if (residuoAnnoPrecedenteDisponibileAllaFineDelMese == 0) {
 			//Per esempio per i tecnici/amministrativi da aprile in poi
 			riposiCompensativiDaAnnoCorrente += minutiRiposoCompensativo;
 		} else {
-			if (minutiRiposoCompensativo < residuoAnnoPrecedenteDisponibileAllaFineDelMese) {
-				riposiCompensativiDaAnnoPrecedente += minutiRiposoCompensativo;
+			if (-minutiRiposoCompensativo < residuoAnnoPrecedenteDisponibileAllaFineDelMese) {
+				riposiCompensativiDaAnnoPrecedente = riposiCompensativiDaAnnoPrecedente + minutiRiposoCompensativo;
+				
 			} else {
 				riposiCompensativiDaAnnoPrecedente += residuoAnnoPrecedenteDisponibileAllaFineDelMese;
 				riposiCompensativiDaAnnoCorrente += (minutiRiposoCompensativo + residuoAnnoPrecedenteDisponibileAllaFineDelMese);
@@ -944,6 +953,7 @@ public class PersonMonth extends Model {
 		save();
 		//Creare l'assenza etc....
 		aggiornaRiepiloghi();
+		
 		return true;
 	}
 
