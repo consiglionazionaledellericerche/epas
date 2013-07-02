@@ -342,14 +342,16 @@ public class PersonDay extends Model {
 		 * speciali elencati dagli if sotto...se siamo in uno di quei casi il valore di tempoLavoro verrà modificato dalla sezione specifica.
 		 */
 		tempoLavoro = workTime;
+		if(this.person.surname.equals("Vasarelli"))
+			Logger.debug("Il tempo di lavoro per oggi, %s, prima del controllo sul pranzo è: %d e il minTimeForLunch è %d minuti, mentre il tempo per la mensa " +
+					" è di %d minuti", this.date, tempoLavoro, minTimeForLunch, getWorkingTimeTypeDay().breakTicketTime);
 		
 		if((reloadedStampings.size()==4) && (minTimeForLunch < getWorkingTimeTypeDay().breakTicketTime) && (!reloadedStampings.contains(null))){
 			tempoLavoro = workTime - (getWorkingTimeTypeDay().breakTicketTime-minTimeForLunch);		
 		}
 
-		if(reloadedStampings.size()==2 && workTime > getWorkingTimeTypeDay().mealTicketTime /*&& 
-				(workTime-getWorkingTimeTypeDay().breakTicketTime > getWorkingTimeTypeDay().mealTicketTime)*/){
-
+		if(reloadedStampings.size()==2 && workTime > getWorkingTimeTypeDay().mealTicketTime && 
+				workTime-getWorkingTimeTypeDay().breakTicketTime > getWorkingTimeTypeDay().mealTicketTime){
 			tempoLavoro = workTime-getWorkingTimeTypeDay().breakTicketTime;	
 		}
 		//		if(reloadedStampings.contains(null) && workTime > getWorkingTimeTypeDay().mealTicketTime
@@ -360,6 +362,9 @@ public class PersonDay extends Model {
 				&& workTime-getWorkingTimeTypeDay().breakTicketTime > getWorkingTimeTypeDay().mealTicketTime){
 			tempoLavoro = workTime-getWorkingTimeTypeDay().breakTicketTime;
 		}
+		
+		if(this.person.surname.equals("Vasarelli"))
+			Logger.debug("Alla fine del controllo del pranzo il tempo per oggi, %s, è: %d", this.date, tempoLavoro);
 //		else{
 //			tempoLavoro = workTime;
 //			Logger.trace("tempo di lavoro a fine metodo: %d", tempoLavoro);
@@ -820,11 +825,12 @@ public class PersonDay extends Model {
 	 * pranzo intervenendo sulle timbrature
 	 */
 	public int checkMinTimeForLunch(){
+		List<Stamping> reloadedStampings = Stamping.find("Select st from Stamping st where st.personDay = ? order by st.date", this).fetch();
 		int min=0;
-		if(stampings.size()>3 && stampings.size()%2==0 && !stampings.contains(null)){
-			int minuteExit = toMinute(stampings.get(1).date);
+		if(reloadedStampings.size()>3 && reloadedStampings.size()%2==0 && !reloadedStampings.contains(null)){
+			int minuteExit = toMinute(reloadedStampings.get(1).date);
 
-			int minuteEnter = toMinute(stampings.get(2).date);
+			int minuteEnter = toMinute(reloadedStampings.get(2).date);
 
 			min = minuteEnter - minuteExit;			
 
