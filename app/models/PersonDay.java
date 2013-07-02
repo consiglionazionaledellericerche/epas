@@ -461,6 +461,12 @@ public class PersonDay extends Model {
 		}
 
 	}
+	
+	public PersonDay previousPersonDay(){
+		PersonDay lastPreviousPersonDayInMonth = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? " +
+				"and pd.date >= ? and pd.date < ? ORDER by pd.date DESC", person, date.dayOfMonth().withMinimumValue(), date).first();
+		return lastPreviousPersonDayInMonth;
+	}
 
 	/**
 	 * chiama le funzioni di popolamento
