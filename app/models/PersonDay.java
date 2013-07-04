@@ -958,5 +958,7 @@ public class PersonDay extends Model {
 		return String.format("PersonDay[%d] - person.id = %d, date = %s, difference = %s, isTicketAvailable = %s, modificationType = %s, progressive = %s, timeAtWork = %s",
 				id, person.id, date, difference, isTicketAvailable, modificationType, progressive, timeAtWork);
 	}
+	
+
 
 }

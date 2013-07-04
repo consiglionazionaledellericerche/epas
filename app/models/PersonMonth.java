@@ -198,6 +198,23 @@ public class PersonMonth extends Model {
 		}
 		return compensatoryRest;
 	}
+	
+	/**
+	 * 
+	 * @param date
+	 * @return
+	 */
+	public int numberOfCompensatoryRestUntilToday(){
+		
+		Query query = JPA.em().createQuery("Select abs from Absence abs where abs.personDay.person = :person and abs.absenceType.code = :code " +
+				"and abs.personDay.date between :begin and :end");
+		query.setParameter("person", this.person)
+		.setParameter("code", "91")
+		.setParameter("begin", new LocalDate(year,1,1))
+		.setParameter("end", new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
+		
+		return query.getResultList().size();
+	}
 
 	/**
 	 * 
