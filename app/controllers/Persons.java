@@ -1,6 +1,7 @@
 package controllers;
 
 import it.cnr.iit.epas.ActionMenuItem;
+
 import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
@@ -28,6 +29,8 @@ import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.libs.Crypto;
+import play.libs.Codec;
 
 @With( {Secure.class, NavigationMenu.class} )
 public class Persons extends Controller {
@@ -456,13 +459,16 @@ public class Persons extends Controller {
 	
 	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void savePassword(){
+		
 		Long personId = params.get("personId", Long.class);
 		
 		Person p = Person.findById(personId);
 		String nuovaPassword = params.get("nuovaPassword");
 		String confermaPassword = params.get("confermaPassword");
 		if(nuovaPassword.equals(confermaPassword)){
-			p.password = nuovaPassword;
+			Codec codec = new Codec();
+			
+			p.password = codec.hexMD5(nuovaPassword);
 			p.save();
 			Logger.debug("Salvata la nuova password per %s %s", p.surname, p.name);
 			flash.success("Aggiornata la password per %s %s", p.surname, p.name);
