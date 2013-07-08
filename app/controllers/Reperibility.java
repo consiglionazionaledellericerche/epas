@@ -230,6 +230,55 @@ public class Reperibility extends Controller {
 		render(absenceReperibilityPeriods);
 	}
 	
+	
+	/**
+	 * @author arianna
+	 * Restituisce la lista delle persone reperibili di una determinata tipologia in un dato intervallo di tempo
+	 * (portale sistorg)
+	 */
+	public static void whoIsAbsent() {
+		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
+		
+		List<Person> absentPersonsList = new ArrayList<Person>();
+
+		Long type = Long.parseLong(params.get("type"));
+		
+		LocalDate from = new LocalDate(Integer.parseInt(params.get("yearFrom")), Integer.parseInt(params.get("monthFrom")), Integer.parseInt(params.get("dayFrom")));
+		LocalDate to = new LocalDate(Integer.parseInt(params.get("yearTo")), Integer.parseInt(params.get("monthTo")), Integer.parseInt(params.get("dayTo")));
+
+		// read the reperibility person list 
+		List<Person> personList = Person.find("SELECT p FROM Person p JOIN p.reperibility r WHERE r.personReperibilityType.id = ? AND (r.startDate IS NULL OR r.startDate <= now()) and (r.endDate IS NULL OR r.endDate >= now())", type).fetch();
+		Logger.debug("Reperibility personList called, found %s reperible person of type %s", personList.size(), type);
+		
+		// Lists of absence for a single reperibility person and for all persons
+		List<Absence> absencePersonReperibilityDays = new ArrayList<Absence>();
+		
+		if (personList.size() == 0) {
+			render(personList);
+			return;
+		}
+		
+		absencePersonReperibilityDays = JPA.em().createQuery("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date BETWEEN :from AND :to AND pd.person IN (:personList) ORDER BY pd.person.id, pd.date")
+			.setParameter("from", from)
+			.setParameter("to", to)
+			.setParameter("personList", personList)
+			.getResultList();
+		
+		
+		Logger.debug("Trovati %s giorni di assenza", absencePersonReperibilityDays.size());
+		
+		for (Absence abs : absencePersonReperibilityDays) {
+			if (!absentPersonsList.contains(abs.personDay.person)) {
+				Logger.trace("inserisco il reperibile ", abs.personDay.person);
+				absentPersonsList.add(abs.personDay.person);
+				Logger.trace("trovata person=%s", abs.personDay.person);
+			}
+		}
+		Logger.debug("Find %s person. absentPersonsList = %s", absentPersonsList.size(), absentPersonsList.toString());
+		render(absentPersonsList);
+	}
+	
+	
 	/**
 	 * @author cristian, arianna
 	 * Aggiorna le informazioni relative alla Reperibilità del personale
