@@ -1,0 +1,11 @@
+[
+  	#{list absentPersonsList, as:'person'}
+  			{
+   			"id" : ${person.id},
+  			"email" : "${person.contactData.email}",
+  			"name" : "${person.name}",
+  			"surname" : "${person.surname}",
+  			"mobile": "${person.contactData.mobile}"
+  			}${person_isLast ? '' : ','}	
+  	#{/list}
+]
