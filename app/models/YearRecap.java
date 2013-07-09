@@ -146,7 +146,7 @@ public class YearRecap extends Model{
 	 * @return la lista di giorni (PersonDay) associato alla persona nel mese di riferimento
 	 */
 	public List<String> getMonths() {
-
+		//Logger.debug("Chiamata la getMonths");
 		if (months != null) {
 			return months;
 		}
@@ -156,6 +156,7 @@ public class YearRecap extends Model{
 		for(int month = 1; month <= firstMonthOfYear.getMonthOfYear(); month++){
 			String mese = firstMonthOfYear.monthOfYear().getAsText();
 			months.add(mese);
+			//Logger.debug("Aggiunto mese: %s", mese);
 			firstMonthOfYear=firstMonthOfYear.plusMonths(1);
 		}
 		return months;
@@ -214,6 +215,7 @@ public class YearRecap extends Model{
 	 * @return il numero di giorni nel mese e nell'anno considerati. il mese viene calcolato chiamando la funzione fromStringToIntMonth
 	 */
 	public int maxNumberOfDays(int year, String month){
+		Logger.debug("Chiamata la maxNumberOfDays");
 		int numberOfMonth = fromStringToIntMonth(month);
 		LocalDate date = new LocalDate(year, numberOfMonth, 1);
 		return date.dayOfMonth().withMaximumValue().getDayOfMonth();
@@ -391,7 +393,7 @@ public class YearRecap extends Model{
 
 		LocalDate beginLastYear = new LocalDate(year-1,1,1);
 		LocalDate endLastYear = new LocalDate(year-1,12,31);
-
+		VacationPeriod period = null;
 		Contract contract = person.getCurrentContract();		
 		/**
 		 * se l'anno precedente non c'era contratto ritorna zero.
@@ -411,8 +413,12 @@ public class YearRecap extends Model{
 		if(contract.beginContract != null && contract.beginContract.getYear()==year-1){
 			days = daysBetweenTwoDates(contract.beginContract, endLastYear);
 		}
-		VacationPeriod period = VacationPeriod.find("Select vp from VacationPeriod vp where vp.person = ? and vp.beginFrom <= ? and " +
+		period = VacationPeriod.find("Select vp from VacationPeriod vp where vp.person = ? and vp.beginFrom <= ? and " +
 				"vp.endTo >= ?", person, beginLastYear, endLastYear).first();
+		if(period == null){
+			period = VacationPeriod.find("Select vp from VacationPeriod vp where vp.person = ? and vp.beginFrom between ? and ? and vp.endTo >= ?", 
+					person, beginLastYear, endLastYear, endLastYear).first();
+		}
 		//int vacationDaysAccrued = VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysLessThreeYears(days);
 
 		int residualVacationDays = period.vacationCode.vacationDays-vacationsLastYear.size();
