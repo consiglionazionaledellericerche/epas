@@ -28,7 +28,7 @@ public class RemoteOffice extends Model{
 	@Column
 	public String address;
 	
-//	@NotAudited
-//	@OneToMany(mappedBy="remoteOffice", fetch=FetchType.LAZY)
-//	public List<Person> persons;
+	@NotAudited
+	@OneToMany(mappedBy="remoteOffice", fetch=FetchType.LAZY)
+	public List<Person> persons;
 }
