@@ -19,7 +19,7 @@ import play.Logger;
 
 @With( {Secure.class, NavigationMenu.class} )
 public class PersonMonths extends Controller{
-	
+
 	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void hourRecap(Long personId,int year){
 		Person person = null;
@@ -39,12 +39,12 @@ public class PersonMonths extends Controller{
 			PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? and pm.month = ?", 
 					person, year, month).first();
 			Logger.debug("PersonMonth = %s", pm);
-			
-			
-			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", 
-					person, date.dayOfMonth().withMaximumValue()).first();
+
+
+			//			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", 
+			//					person, date.dayOfMonth().withMaximumValue()).first();
 			//Logger.debug("Il person day scansionato è: %s", pd);
-			
+
 			/**
 			 * cerco nel mese eventuali giorni di riposo compensativo
 			 */
@@ -62,7 +62,7 @@ public class PersonMonths extends Controller{
 			List<Competence> compList = Competence.find("Select comp from Competence comp where comp.person = ? and comp.year = ? " +
 					"and comp.month = ? ", person, year, date.getMonthOfYear()).fetch();
 			Logger.debug("La competenza sugli straordinari per il %s mese è: %s", month, compList.toString());
-			
+
 			/**
 			 * aggiungo tutti gli elementi alla lista
 			 */
@@ -74,63 +74,92 @@ public class PersonMonths extends Controller{
 			if(month == 1)
 				lista.add(1, pm.residuoAnnoCorrenteDaInizializzazione());
 			else{
-				if(pm != null)
-					lista.add(1, pm.mesePrecedente().residuoDelMese());
+				if(pm != null){
+					/**
+					 * TODO: qui va messo le somme dei residui dei mesi precedenti - le somme degli straordinari assegnati i mesi precedenti
+					 */
+					int situazioneParziale = 0;
+
+					PersonMonth count = pm;
+					while(count.month > 1){
+						situazioneParziale = situazioneParziale + count.mesePrecedente().residuoDelMese() - count.mesePrecedente().straordinari;
+						count = count.mesePrecedente();
+					}
+					lista.add(1, situazioneParziale);
+				}
+
 				else
 					lista.add(1, 0);
 			}
-			if((month < 4 || person.qualification.qualification < 4) && pm != null)
-				lista.add(2, pm.residuoAnnoPrecedente());
+			if((month < 4 || person.qualification.qualification < 4) && pm != null && pm.mesePrecedente() != null)
+				lista.add(2, pm.residuoAnnoPrecedente() + pm.mesePrecedente().riposiCompensativiDaAnnoPrecedente);
 			else
 				lista.add(2, 0);
 			if(pm != null){
 				if(month == 1)
 					lista.add(3, 0+pm.residuoAnnoPrecedente());
-				else
-					lista.add(3, pm.mesePrecedente().residuoDelMese()+pm.residuoAnnoPrecedente()+pm.residuoAnnoPrecedenteDaInizializzazione());
+
+				else{
+					if(month < 4 || person.qualification.qualification < 4)
+						lista.add(3, pm.mesePrecedente().totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese());
+					else
+						/**
+						 * TODO: da sistemare che ci vuole il valore che c'è nel campo mese precedente dal mese di aprile in poi per i tecnici 
+						 */{
+						int situazioneParziale = 0;
+
+						PersonMonth count = pm;
+						while(count.month > 1){
+							situazioneParziale = situazioneParziale + count.mesePrecedente().residuoDelMese() - count.mesePrecedente().straordinari;
+							count = count.mesePrecedente();
+						}
+						lista.add(3, situazioneParziale);
+					}
+				}
+
 			}
 			else{
 				lista.add(3, 0);
 			}
-			if(pd != null){
-				int valoreStraordinari = 0;
-				if(pm != null)
-					lista.add(4, pm.residuoDelMese());
-				else
-					lista.add(4, 0);
-				lista.add(5, compensatoryRest);
-				
-//				if(comp.valueApproved != 0)					
-//					lista.add(6, comp.valueApproved);									
-//				else
-//					lista.add(6, 0);
-				for(Competence comp : compList){
-					if(comp.competenceCode.code.equals("S1") || comp.competenceCode.code.equals("S2") || comp.competenceCode.code.equals("S3"))
-						valoreStraordinari = valoreStraordinari + comp.valueApproved;
-						
-					else
-						lista.add(6, 0);
-				}
-				lista.add(6, valoreStraordinari);
-				Logger.debug("Aggiunto alla lista il valore %d per gli straordinari del mese di %d", valoreStraordinari, month);
-				
-				if(pm != null)
-					lista.add(7,pm.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese());
-				else
-					lista.add(7, 0);
-				mapMonthSituation.put(date.getMonthOfYear(), lista);
-			}	
-			else{
+			//			if(pd != null){
+			int valoreStraordinari = 0;
+			if(pm != null)
+				lista.add(4, pm.residuoDelMese());
+			else
 				lista.add(4, 0);
-				lista.add(5, 0);
-				lista.add(6, 0);
-				lista.add(7, 0);
-				mapMonthSituation.put(date.getMonthOfYear(), lista);
+			lista.add(5, compensatoryRest);
+
+			//				if(comp.valueApproved != 0)					
+			//					lista.add(6, comp.valueApproved);									
+			//				else
+			//					lista.add(6, 0);
+			for(Competence comp : compList){
+				if(comp.competenceCode.code.equals("S1") || comp.competenceCode.code.equals("S2") || comp.competenceCode.code.equals("S3"))
+					valoreStraordinari = valoreStraordinari + comp.valueApproved;
+
+				else
+					lista.add(6, 0);
 			}
+			lista.add(6, valoreStraordinari);
+			Logger.debug("Aggiunto alla lista il valore %d per gli straordinari del mese di %d", valoreStraordinari, month);
+
+			if(pm != null)
+				lista.add(7,pm.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese());
+			else
+				lista.add(7, 0);
+			mapMonthSituation.put(date.getMonthOfYear(), lista);
+			//			}	
+			//			else{
+			//				lista.add(4, 0);
+			//				lista.add(5, 0);
+			//				lista.add(6, 0);
+			//				lista.add(7, 0);
+			//				mapMonthSituation.put(date.getMonthOfYear(), lista);
+			//			}
 			compensatoryRest = 0;
-			
+
 		}
-		
+
 		render(mapMonthSituation, person, year);	
 	}
 }

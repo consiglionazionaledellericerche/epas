@@ -15,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -241,6 +242,11 @@ public class Person extends Model {
 
 	@OneToOne(mappedBy="person", fetch=FetchType.LAZY)
 	public PersonShift personShift;
+	
+	@NotAudited
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="remote_office_id", nullable=true)
+	public RemoteOffice remoteOffice;
 
 	public String fullName() {
 		return String.format("%s %s", surname, name);
