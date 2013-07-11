@@ -168,7 +168,7 @@ public class YearRecap extends Model{
 	 * @return il numero del mese corrispondente alla stringa passata come parametro
 	 */
 	private int fromStringToIntMonth(String month){
-		int numberOfMonth = 0;
+		int numberOfMonth = -1;
 		if(month.equalsIgnoreCase("gennaio")){
 			numberOfMonth = 1;
 		}
@@ -215,8 +215,9 @@ public class YearRecap extends Model{
 	 * @return il numero di giorni nel mese e nell'anno considerati. il mese viene calcolato chiamando la funzione fromStringToIntMonth
 	 */
 	public int maxNumberOfDays(int year, String month){
-		Logger.debug("Chiamata la maxNumberOfDays");
+		//Logger.debug("Chiamata la maxNumberOfDays");
 		int numberOfMonth = fromStringToIntMonth(month);
+		Logger.debug("Per la persona %s %s per il mese %s il valore corrispondente è: %d", this.person.name, this.person.surname, month, numberOfMonth);
 		LocalDate date = new LocalDate(year, numberOfMonth, 1);
 		return date.dayOfMonth().withMaximumValue().getDayOfMonth();
 	}
