@@ -194,7 +194,8 @@ public class Shift extends Controller{
 					}
 					
 					//Se la persona è in ferie questo giorno non può essere in turno (almeno che non sia cancellato)
-					if ((Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date = ? and pd.person = ?", day, shiftPeriod.person).fetch().size() > 0) && (! "X".equals(type))){
+					//if ((Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date = ? and pd.person = ?", day, shiftPeriod.person).fetch().size() > 0) && (! "X".equals(type))){
+					if (Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date = ? and pd.person = ?", day, shiftPeriod.person).fetch().size() > 0) {
 						throw new IllegalArgumentException(
 							String.format("ShiftPeriod person.id %d is not compatible with a Absence in the same day %s", shiftPeriod.person.id, day));
 					}
@@ -230,12 +231,15 @@ public class Shift extends Controller{
 					Logger.debug("Cerco turno cancellato shiftType = %s AND date = %s", shiftType.type, day);
 					ShiftCancelled shiftCancelled = 
 							ShiftCancelled.find("type = ? AND date = ?", shiftType, day).first();
-						
+					Logger.debug("shiftCancelled = %s", shiftCancelled);
+					
 					if (shiftCancelled == null) {
 						shiftCancelled = new ShiftCancelled();
 						shiftCancelled.date = day;
 						shiftCancelled.type = shiftType;
-							
+						
+						Logger.debug("Creo un nuovo ShiftCancelled=%s per day = %s, shiftType = %s", shiftCancelled, day, shiftType.description);
+						
 						shiftCancelled.save();
 						Logger.debug("Creato un nuovo ShiftCancelled per day = %s, shiftType = %s", day, shiftType.description);
 					}
@@ -554,13 +558,13 @@ public class Shift extends Controller{
 			if (absenceShiftPeriod == null || !absenceShiftPeriod.person.equals(abs.personDay.person) || !absenceShiftPeriod.end.plusDays(1).equals(abs.personDay.date)) {
 				absenceShiftPeriod = new AbsenceShiftPeriod(abs.personDay.person, abs.personDay.date, abs.personDay.date, (ShiftType) ShiftType.findById(shiftType.id));
 				absenceShiftPeriods.add(absenceShiftPeriod);
-				Logger.trace("Creato nuovo absenceReperibilityPeriod, person=%s, start=%s, end=%s", absenceShiftPeriod.person, absenceShiftPeriod.start, absenceShiftPeriod.end);
+				Logger.trace("Creato nuovo absenceShiftPeriod, person=%s, start=%s, end=%s", absenceShiftPeriod.person, absenceShiftPeriod.start, absenceShiftPeriod.end);
 			} else {
 				absenceShiftPeriod.end = abs.personDay.date;
-				Logger.trace("Aggiornato reperibilityPeriod, person=%s, start=%s, end=%s", absenceShiftPeriod.person, absenceShiftPeriod.start, absenceShiftPeriod.end);
+				Logger.trace("Aggiornato absenceShiftPeriod, person=%s, start=%s, end=%s", absenceShiftPeriod.person, absenceShiftPeriod.start, absenceShiftPeriod.end);
 			}
 		}
-		Logger.debug("Find %s absenceReperibilityPeriod. AbsenceReperibilityPeriod = %s", absenceShiftPeriods.size(), absenceShiftPeriods.toString());
+		Logger.debug("Find %s absenceShiftPeriod. AbsenceShiftPeriod = %s", absenceShiftPeriods.size(), absenceShiftPeriods.toString());
 		render(absenceShiftPeriods);
 	}
 }
