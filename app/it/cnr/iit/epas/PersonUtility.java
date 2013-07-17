@@ -29,6 +29,7 @@ import models.StampModificationType;
 import models.StampProfile;
 import models.Stamping;
 import models.Stamping.WayType;
+import models.VacationPeriod;
 import models.enumerate.JustifiedTimeAtWork;
 
 public class PersonUtility {
@@ -447,6 +448,55 @@ public class PersonUtility {
 		else
 			return true;
 
+	}
+	
+	/**
+	 * 
+	 * @return il codice di assenza da utilizzare nel caso in cui l'utente amministratore utilizzi il codice "FER" per assegnare un giorno di ferie 
+	 * alla persona
+	 */
+	public static AbsenceType whichVacationCode(Person person, Integer year, Integer month, Integer day){
+		
+		Configuration config = Configuration.getCurrentConfiguration();
+		AbsenceType vacationFromThisYear = AbsenceType.find("byCode", "32").first();
+		AbsenceType vacationFromLastYear = AbsenceType.find("byCode", "31").first();
+		
+		Query query = JPA.em().createQuery("Select abs from Absence abs where abs.personDay.person = :person and abs.personDay.date between :begin and :end " +
+				"and abs.absenceType = :type");
+		query.setParameter("person", person).setParameter("begin", new LocalDate(year-1,1,1)).setParameter("end", new LocalDate(year-1,12,31)).setParameter("type", vacationFromThisYear);
+		List<Absence> absList = query.getResultList();
+		//Logger.debug("Nell'anno passato %s %s ha usufruito di %d giorni di ferie", person.name, person.surname, absList.size());
+		
+		query.setParameter("person", person).setParameter("begin", new LocalDate().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue())
+			.setParameter("end", new LocalDate()).setParameter("type", vacationFromLastYear);
+		List<Absence> absThisYearList = query.getResultList();
+		//Logger.debug("Quest'anno %s %s ha usufruito di %d giorni di ferie", person.name, person.surname, absThisYearList.size());
+		
+		VacationPeriod vp = VacationPeriod.find("Select vp from VacationPeriod vp where vp.person = ? and ((vp.beginFrom <= ? and vp.endTo >= ?) " +
+				"or (vp.endTo = null)) order by vp.beginFrom desc", person, new LocalDate(year-1,1,1), new LocalDate(year-1,12,31)).first();
+		if((vp.vacationCode.vacationDays > absList.size() + absThisYearList.size()) && 
+				(new LocalDate(year, month, day).isBefore(new LocalDate(year, config.monthExpiryVacationPastYear, config.dayExpiryVacationPastYear)))){
+			return AbsenceType.find("byCode", "31").first();
+		}
+		AbsenceType permissionDay = AbsenceType.find("byCode", "94").first();
+		
+		query.setParameter("begin", new LocalDate().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue())
+			.setParameter("end", new LocalDate(year, month, day)).setParameter("person", person).setParameter("type", permissionDay);
+		List<Absence> absPermissions = query.getResultList();
+		//Logger.debug("%s %s quest'ann ha usufruito di %d giorni di permesso", person.name, person.surname, absPermissions.size());
+		if(vp.vacationCode.permissionDays > absPermissions.size()){
+			return permissionDay;
+		}
+		/**
+		 * bisognerebbe fare il calcolo in base a quanti giorni di ferie sono maturati alla data in cui si chiede l'inserimento dell'assenza
+		 */
+		query.setParameter("begin", new LocalDate().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue())
+			.setParameter("end", new LocalDate().monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue()).setParameter("person", person).setParameter("type", vacationFromThisYear);
+		List<Absence> absVacationThisYear = query.getResultList();
+		if(absVacationThisYear.size() <= vp.vacationCode.vacationDays)
+			return AbsenceType.find("byCode", "32").first();
+		else
+			return null;
 	}
 
 }

@@ -116,6 +116,7 @@ public class FromMysqlToPostgres {
 	 * 
 	 * @param limit se questo parametro è maggiore di 0 allora limita il numero di persone da importare in 
 	 * 	funzione di questo parametro 
+	 * @throws SQLException 
 	 * 
 	 * @throws InstantiationException
 	 * @throws IllegalAccessException
@@ -123,6 +124,33 @@ public class FromMysqlToPostgres {
 	 * @throws SQLExceptiongetMonthResidual
 	 */
 
+	public static void importVacationDaysPastYear() throws SQLException{
+		//Connection mysqlCon = FromMysqlToPostgres.getMysqlConnection();
+		String sql = "SELECT * FROM Orario WHERE Giorno >= '2012-01-01' AND Giorno <= '2012-12-31' AND TipoGiorno = 32 order by ID";
+		PreparedStatement stmt = mysqlCon.prepareStatement(sql);
+		ResultSet rs = stmt.executeQuery();
+		Logger.info("Inizio popolamento dei personDay dell'anno precedente con i giorni di assenza per ciascuna persona");
+		while(rs.next()){
+			long oldId = rs.getLong("ID");
+			Person person = Person.find("Select p from Person p where p.oldId = ?", oldId).first();
+			if(person == null)
+				throw new IllegalArgumentException();
+			PersonDay pd = new PersonDay(person, new LocalDate(rs.getDate("Giorno")));
+			pd.save();
+			Absence abs = new Absence();
+			Integer integer = rs.getInt("TipoGiorno");
+			String code = integer.toString();
+			abs.absenceType = AbsenceType.find("byCode", code).first();
+			abs.personDay = pd;
+			abs.save();
+			
+		
+		}
+		Logger.info("Fine popolamento della tabella dei personDay dell'anno precedente con le assenze dovute a ferie anno corrente");
+	//	mysqlCon.close();
+		
+	}
+	
 	public static void importOreStraordinario() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		Connection mysqlCon = FromMysqlToPostgres.getMysqlConnection();
 		String sql = "SELECT * FROM monteorestr";
@@ -212,11 +240,13 @@ public class FromMysqlToPostgres {
 		Logger.info("Terminata l'importazione dei dati di tutte le persone in %d secondi", ((new Date()).getTime() - start.getTime()) / 1000);
 
 		Logger.info("Adesso aggiorno le date di inizio dei contratti, i vacation period, creo le competenze, il monte ore ed aggiusto i permessi");
-//		FromMysqlToPostgres.updateStampings();
+
 		FromMysqlToPostgres.updateContract();
 		FromMysqlToPostgres.updateVacationPeriod();
 		FromMysqlToPostgres.updateCompetence();
+		
 		FromMysqlToPostgres.updateCompetenceCode();
+		FromMysqlToPostgres.importVacationDaysPastYear();
 		FromMysqlToPostgres.personToCompetence();
 		FromMysqlToPostgres.importOreStraordinario();
 		
@@ -236,13 +266,39 @@ public class FromMysqlToPostgres {
 	public static void updateVacationPeriod() {
 		List<Person> personList = Person.findAll();
 		for(Person p : personList){
+			Logger.debug("Sto controllando il vacation period di %s %s", p.name, p.surname);
+
 			if(p.vacationPeriod == null){
-				VacationPeriod vp = new VacationPeriod();
-				vp.person = p;
-				vp.vacationCode = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", "28+4").first();
-				vp.beginFrom = new LocalDate(1970,1,1);
-				vp.save();
+				if(!p.username.equals("admin") && (p.qualification != null) ){
+					Logger.debug("Per %s %s devo creare un nuovo vacation period", p.name, p.surname);
+					VacationPeriod vp = new VacationPeriod();
+					vp.person = p;
+					vp.vacationCode = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", "28+4").first();
+					vp.beginFrom = new LocalDate(1970,1,1);
+					vp.save();
+				}
+				
 			}
+			else{
+				
+				
+				Logger.debug("Per %s %s devo creare un nuovo vacation period perchè il precedente ha data di fine precedente alla data attuale", p.name, p.surname);
+//				Query query = JPA.em().createQuery("Select c from Contract c where c.person = :person and ((c.expireContract >= :end) or (c.expireContract = null))");
+//				query.setParameter("person", p).setParameter("end", p.vacationPeriod.endTo);
+//				Contract c = (Contract) query.getSingleResult();
+				Contract c = p.getCurrentContract();
+				if(p.vacationPeriod.endTo.isBefore(new LocalDate()) && c != null && (c.expireContract == null || c.expireContract.isAfter(p.vacationPeriod.endTo)) ){
+					VacationPeriod vp = new VacationPeriod();
+					vp.person = p;
+					vp.vacationCode = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", "28+4").first();
+					vp.beginFrom = new LocalDate(p.vacationPeriod.endTo.plusDays(1));
+			
+					p.vacationPeriod.delete();
+					//p.save();
+					vp.save();
+				}
+			}
+			
 		}
 		
 	}
@@ -262,57 +318,6 @@ public class FromMysqlToPostgres {
 		}
 	}
 
-	/**
-	 * metodo provvisorio per la correzione delle timbrature dispari con due timbrature consecutive di ingresso o di uscita
-	 */
-//	public static void updateStampings(){
-//		
-//		List<Person> pList = JPA.em().createQuery("Select p from Person p where p.username <> :username", Person.class).
-//				setParameter("username", "Admin").getResultList();
-//		for(Person p : pList){
-//			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? ", p).fetch();
-//			for(PersonDay pd : pdList){
-//				if(pd.stampings.size() %2 != 0){
-//					Logger.debug("Caso di timbrature dispari il %s", pd.date);
-//					for(int i=0; i< pd.stampings.size(); i++){
-//						if(i-1 >= 0 && pd.stampings.get(i).way == WayType.in && pd.stampings.get(i-1).way == WayType.in){
-//							Logger.debug("Trovato caso di doppia timbratura consecutiva di ingresso il giorno %s", pd.date);
-//							Stamping s = new Stamping();
-//							//s.create();
-//							s.way = WayType.out;
-//							s.date = pd.stampings.get(i).date.minusMinutes(1);
-//							s.markedByAdmin = false;
-////							s.considerForCounting = false;
-//							s.note = "Timbratura nulla inserita per il corretto posizionamento sulla tabella delle timbrature";
-//							s.personDay = pd;
-//							s.save();
-//							Logger.debug("Creata timbratura nulla di uscita per il giorno %s", pd.date);
-//							pd.stampings.add(i, s);
-//							pd.save();
-//						}
-//						if(i-1 >= 0 && pd.stampings.get(i).way == WayType.out && pd.stampings.get(i-1).way == WayType.out){
-//							Logger.debug("Trovato caso di doppia timbratura consecutiva di uscita il giorno %s", pd.date);
-//							Stamping s = new Stamping();
-//							//s.create();
-//							s.way = WayType.in;
-//							s.date = pd.stampings.get(i).date.minusMinutes(1);
-//							s.markedByAdmin = false;
-//							s.considerForCounting = false;
-//							s.note = "Timbratura nulla inserita per il corretto posizionamento sulla tabella delle timbrature";
-//							s.personDay = pd;
-//							s.save();
-//							Logger.debug("Creata timbratura nulla di ingresso per il giorno %s", pd.date);
-//							pd.stampings.add(i, s);
-//							pd.save();
-//						}
-//					}
-//				}
-//			}
-//		}
-//		//Logger.debug("Chiamata la funzione di correzione delle timbrature per %s %s", p.name, p.surname);
-//
-//		
-//	}
 
 	/**
 	 * Importa le informazioni del personale dal database Mysql dell'applicazione Orologio.
