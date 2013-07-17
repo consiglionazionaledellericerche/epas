@@ -84,7 +84,8 @@ public class Shift extends Controller{
 	 * Get shifts from the DB and render to the sistorg portal calendar
 	 */
 	public static void find(){
-		response.setHeader("Access-Control-Allow-Origin", Play.configuration.getProperty("address.sistorg"));
+		response.accessControl("*");
+		//response.setHeader("Access-Control-Allow-Origin", Play.configuration.getProperty("address.sistorg"));
 		
 		// type validation
 		String type = params.get("type");
