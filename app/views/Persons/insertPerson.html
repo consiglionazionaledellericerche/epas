@@ -43,13 +43,7 @@
 		<div>Ore di inizializzazione maturate in altro istituto l'anno passato (in minuti): <input name="minutesPastYear" type="text" value="${initializationTime.residualMinutesPastYear}" size="10" /></div>
 		<div>Ore di inizializzazione maturate in altro istituto nell'anno corrente (in minuti): <input name="minutesCurrentYear" type="text" value="${initializationTime.residualMinutesCurrentYear}" size="10" /></div>
 	</fieldset>
-	
-	<fieldset>
-		<legend>Sede distaccata</legend>
-		<p id="sede">Nome sede <input name="remoteOfficeName" type="text" value="${remoteOffice.name}" size="20" maxlength="100"/></p>
-		<p id="sede">Indirizzo <input name="remoteOfficeAddress" type="text" value="${remoteOffice.address}" size="20" maxlength="100"/></p>		
-	</fieldset>
-	
+
 	<fieldset>
 		<legend>Informazioni di ubicazione e contatti</legend>
 		<input type="hidden" name="location.person_id"  value="${person.id}" />

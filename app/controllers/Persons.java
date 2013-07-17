@@ -18,7 +18,7 @@ import models.Location;
 import models.Person;
 import models.PersonDay;
 import models.Qualification;
-import models.RemoteOffice;
+//import models.RemoteOffice;
 import models.VacationCode;
 import models.VacationPeriod;
 import models.WorkingTimeType;
@@ -181,8 +181,8 @@ public class Persons extends Controller {
 		Location location = new Location();
 		ContactData contactData = new ContactData();
 		InitializationTime initializationTime = new InitializationTime();
-		RemoteOffice remoteOffice = new RemoteOffice();
-		render(person, contract, location, contactData, initializationTime, remoteOffice);
+//		RemoteOffice remoteOffice = new RemoteOffice();
+		render(person, contract, location, contactData, initializationTime/*, remoteOffice*/);
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
