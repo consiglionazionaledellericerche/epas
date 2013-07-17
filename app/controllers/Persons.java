@@ -18,6 +18,7 @@ import models.Location;
 import models.Person;
 import models.PersonDay;
 import models.Qualification;
+import models.RemoteOffice;
 import models.VacationCode;
 import models.VacationPeriod;
 import models.WorkingTimeType;
@@ -180,7 +181,8 @@ public class Persons extends Controller {
 		Location location = new Location();
 		ContactData contactData = new ContactData();
 		InitializationTime initializationTime = new InitializationTime();
-		render(person, contract, location, contactData, initializationTime);
+		RemoteOffice remoteOffice = new RemoteOffice();
+		render(person, contract, location, contactData, initializationTime, remoteOffice);
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
@@ -217,11 +219,20 @@ public class Persons extends Controller {
 		 */
 		if(PersonUtility.isIdPresentInOldSoftware(person.id)){
 			/**
-			 * l'id generato è già presente in anagrafica come oldId di qualcuno...questo potrebbe generare dei problemi in fase di acquisizione 
+			 * TODO:l'id generato è già presente in anagrafica come oldId di qualcuno...questo potrebbe generare dei problemi in fase di acquisizione 
 			 * delle timbrature...
 			 */
 			
 			
+		}
+		
+		/**
+		 * controllo se la persona deve appartenere a una sede distaccata...
+		 */
+		if(!params.get("remoteOfficeName").equals("") || !params.get("remoteOfficeAddress").equals("")){
+			/**
+			 * TODO: query sul db per vedere se esiste già una sede distaccata con quel nome, così da non fare assegnamenti multipli con lo stesso nome
+			 */
 		}
 		
 		Logger.debug("saving location, deparment = %s", location.department);
