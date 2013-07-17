@@ -149,9 +149,10 @@
 }%
 
 </table>
-<p>Il numero di riposi compensativi usati da inizio anno a oggi è: <strong>${numberOfCompensatoryRest}</strong></p>
+
 <p id="spiegazioneTabellaTimbrature">Il numero di buoni mensa usabili per questo mese e': <strong>${personMonth.numberOfMealTicketToUse()}</strong>, mentre quelli da restituire sono <strong>${personMonth.numberOfMealTicketToRender()}</strong>. Il numero di giorni lavorativi in sede è di: <strong>${personMonth.basedWorkingDays()}</strong> </p>
 
+<p> - Il numero di riposi compensativi usati fino ad oggi è: ${personMonth.numberOfCompensatoryRestUntilToday()}</p>
 <p>Riepilogo delle ore di lavoro in eccesso/difetto:</p> 
 <p> - E' possibile utilizzare il residuo dell'anno precedente? ${personMonth.possibileUtilizzareResiduoAnnoPrecedente()==true ? 'sì' : 'no'}</p>
 %{if(personMonth.residuoAnnoPrecedenteDaInizializzazione() != 0){
