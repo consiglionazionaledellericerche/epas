@@ -29,7 +29,7 @@ public class OvertimesData {
 	public final int overtime;
 
 
-public OvertimesData(int yearResidualAtMonth, int monthResidual, int overtime) {
+	public OvertimesData(int yearResidualAtMonth, int monthResidual, int overtime) {
 		this.yearResidualAtMonth = yearResidualAtMonth;
 		this.monthResidual = monthResidual;
 		this.overtime = overtime;

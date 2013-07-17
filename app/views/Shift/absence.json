@@ -1,0 +1,9 @@
+[
+  	#{list absenceShiftPeriods, as:'absenceShiftPeriod'}
+  			{
+  			"id" : ${absenceShiftPeriod.person.id},
+  			"start" : "${absenceShiftPeriod.start}",
+  			"end" : "${absenceShiftPeriod.end}"
+  			}${absenceShiftPeriod_isLast ? '' : ','}
+  	#{/list}
+]
