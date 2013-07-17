@@ -159,10 +159,10 @@ public class Person extends Model {
 	/**
 	 * relazione con la tabella delle eventuali sedi distaccate
 	 */
-	@NotAudited
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="remote_office_id", nullable=true)
-	public RemoteOffice remoteOffice;
+//	@NotAudited
+//	@ManyToOne(fetch=FetchType.LAZY)
+//	@JoinColumn(name="remote_office_id", nullable=true)
+//	public RemoteOffice remoteOffice;
 
 	@ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
 	public List<Permission> permissions;
