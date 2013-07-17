@@ -168,41 +168,41 @@ public class YearRecap extends Model{
 	 * @return il numero del mese corrispondente alla stringa passata come parametro
 	 */
 	private int fromStringToIntMonth(String month){
-		int numberOfMonth = -1;
-		if(month.equalsIgnoreCase("gennaio")){
+		int numberOfMonth = 0;
+		if(month.equalsIgnoreCase("gennaio") || month.equalsIgnoreCase("January")){
 			numberOfMonth = 1;
 		}
-		if(month.equalsIgnoreCase("febbraio")){
+		if(month.equalsIgnoreCase("febbraio") || month.equalsIgnoreCase("February")){
 			numberOfMonth = 2;
 		}	
-		if(month.equalsIgnoreCase("marzo")){
+		if(month.equalsIgnoreCase("marzo") || month.equalsIgnoreCase("March")){
 			numberOfMonth = 3;
 		}	
-		if(month.equalsIgnoreCase("aprile")){
+		if(month.equalsIgnoreCase("aprile") || month.equalsIgnoreCase("April")){
 			numberOfMonth = 4;
 		}
-		if(month.equalsIgnoreCase("maggio")){
+		if(month.equalsIgnoreCase("maggio") || month.equalsIgnoreCase("May")){
 			numberOfMonth = 5;
 		}
-		if(month.equalsIgnoreCase("giugno")){
+		if(month.equalsIgnoreCase("giugno") || month.equalsIgnoreCase("June")){
 			numberOfMonth = 6;
 		}
-		if(month.equalsIgnoreCase("luglio")){
+		if(month.equalsIgnoreCase("luglio") || month.equalsIgnoreCase("July")){
 			numberOfMonth = 7;
 		}
-		if(month.equalsIgnoreCase("agosto")){
+		if(month.equalsIgnoreCase("agosto") || month.equalsIgnoreCase("August")){
 			numberOfMonth = 8;
 		}
-		if(month.equalsIgnoreCase("settembre")){
+		if(month.equalsIgnoreCase("settembre") || month.equalsIgnoreCase("September")){
 			numberOfMonth = 9;
 		}
-		if(month.equalsIgnoreCase("ottobre")){
+		if(month.equalsIgnoreCase("ottobre") || month.equalsIgnoreCase("October")){
 			numberOfMonth = 10;
 		}
-		if(month.equalsIgnoreCase("novembre")){
+		if(month.equalsIgnoreCase("novembre") || month.equalsIgnoreCase("November")){
 			numberOfMonth = 11;
 		}
-		if(month.equalsIgnoreCase("dicembre")){
+		if(month.equalsIgnoreCase("dicembre") || month.equalsIgnoreCase("December")){
 			numberOfMonth = 12;
 		}
 
@@ -395,6 +395,7 @@ public class YearRecap extends Model{
 		LocalDate beginLastYear = new LocalDate(year-1,1,1);
 		LocalDate endLastYear = new LocalDate(year-1,12,31);
 		VacationPeriod period = null;
+		
 		Contract contract = person.getCurrentContract();		
 		/**
 		 * se l'anno precedente non c'era contratto ritorna zero.
@@ -414,8 +415,8 @@ public class YearRecap extends Model{
 		if(contract.beginContract != null && contract.beginContract.getYear()==year-1){
 			days = daysBetweenTwoDates(contract.beginContract, endLastYear);
 		}
-		period = VacationPeriod.find("Select vp from VacationPeriod vp where vp.person = ? and vp.beginFrom <= ? and " +
-				"vp.endTo >= ?", person, beginLastYear, endLastYear).first();
+		period = VacationPeriod.find("Select vp from VacationPeriod vp where vp.person = ? and ((vp.beginFrom <= ? and " +
+				"vp.endTo >= ?) or (vp.endTo = null))", person, beginLastYear, endLastYear).first();
 		if(period == null){
 			period = VacationPeriod.find("Select vp from VacationPeriod vp where vp.person = ? and vp.beginFrom between ? and ? and vp.endTo >= ?", 
 					person, beginLastYear, endLastYear, endLastYear).first();

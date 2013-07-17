@@ -285,6 +285,26 @@ public class Absences extends Controller{
 		}
 		
 		/**
+		 * qui controllare il fatto che l'utente da tastiera possa aver inserito il codice "FER" e con quello, quindi, andare a cercare di 
+		 * inserire il giusto codice di assenza per ferie in base a quante ferie potevano essere rimaste dall'anno precedente, eventualmente passare
+		 * da quelle dell'anno in corso o ancora dai permessi legge...ok ma qual'è l'ordine? :-)
+		 */
+		if(absenceType.code.equals("FER")){
+			AbsenceType abt = PersonUtility.whichVacationCode(person, yearFrom, monthFrom, dayFrom);
+			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, new LocalDate(yearFrom, monthFrom, dayFrom)).first();
+			if(pd == null){
+				pd = new PersonDay(person, new LocalDate(yearFrom, monthFrom, dayFrom));
+				pd.create();
+			}
+			Absence absence = new Absence();
+			absence.absenceType = abt;
+			absence.personDay = pd;
+			absence.save();
+			flash.success("Inserito il codice di assenza %s per il giorno %s", abt.code, pd.date);
+			render("@save");
+		}
+		
+		/**
 		 * controllo che le persone che richiedono il riposo compensativo, che hanno una qualifica compresa tra 1 e 3, non abbiano superato
 		 * il massimo numero di giorni di riposo compensativo consentiti e presenti in configurazione
 		 */
