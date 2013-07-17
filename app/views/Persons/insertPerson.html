@@ -45,6 +45,12 @@
 	</fieldset>
 	
 	<fieldset>
+		<legend>Sede distaccata</legend>
+		<p id="sede">Nome sede <input name="remoteOfficeName" type="text" value="${remoteOffice.name}" size="20" maxlength="100"/></p>
+		<p id="sede">Indirizzo <input name="remoteOfficeAddress" type="text" value="${remoteOffice.address}" size="20" maxlength="100"/></p>		
+	</fieldset>
+	
+	<fieldset>
 		<legend>Informazioni di ubicazione e contatti</legend>
 		<input type="hidden" name="location.person_id"  value="${person.id}" />
 		<p id="dipartimento">Dipartimento <input name="department" type="text" value="${location.department}" size="20" maxlength="100" /></p>
@@ -56,7 +62,8 @@
 	</fieldset>
 	
 	
-	<div id="spiegazioneValoriGrassetto">I valori in <b>grassetto</b> sono obbligatori</iv>
+	<div id="spiegazioneValoriGrassetto">I valori in <b>grassetto</b> sono obbligatori</div>
+	<div id="spiegazioneValoriGrassetto">Il fieldset "sede distaccata" va riempito SOLO SE la nuova persona appartiene a una sede distaccata</div>
 	
 	<input id="submitInsertPerson" type="submit" value="Ok"/>
 		
