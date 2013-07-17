@@ -82,7 +82,8 @@ public class Reperibility extends Controller {
 	 * Restituisce la lista dei reperibili attivi al momento di un determinato tipo
 	 */
 	public static void personList() {
-		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
+		response.accessControl("*");
+		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.devel.iit.cnr.it");
 		
 		Long type = Long.parseLong(params.get("type"));
 		Logger.debug("Esegue la personList con type=%s", type);
@@ -100,7 +101,8 @@ public class Reperibility extends Controller {
 	 * per provarlo: curl -H "Accept: application/json" http://localhost:9001/reperibility/1/find/2012/11/26/2013/01/06
 	 */
 	public static void find() {
-		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
+		response.accessControl("*");
+		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 
 		// reperibility type validation
 		Long type = Long.parseLong(params.get("type"));
@@ -145,7 +147,8 @@ public class Reperibility extends Controller {
 	 * 
 	 */
 	public static void who() {
-		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
+		response.accessControl("*");
+		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 
 		List<Person> personList = new ArrayList<Person>();
 		
@@ -184,7 +187,8 @@ public class Reperibility extends Controller {
 	 * (portale sistorg)
 	 */
 	public static void absence() {
-		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
+		response.accessControl("*");
+		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 
 		Logger.debug("Sono nella absebce");
 		
@@ -241,7 +245,8 @@ public class Reperibility extends Controller {
 	 * (portale sistorg)
 	 */
 	public static void whoIsAbsent() {
-		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
+		response.accessControl("*");
+		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 		
 		List<Person> absentPersonsList = new ArrayList<Person>();
 
