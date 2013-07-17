@@ -78,8 +78,9 @@ public class Competence extends Model {
 		return valueApproved;
 	}
 
-	public void setValueApproved(int valueApproved) {
+	public void setValueApproved(int valueApproved, String reason) {
 		this.valueApproved = valueApproved;
+		this.reason = reason;
 	}
 
 	public int getValueRequest() {
@@ -90,9 +91,8 @@ public class Competence extends Model {
 		return reason;
 	}
 	
-	public void setRequest(int valueRequest, String reason) {
+	public void setRequest(int valueRequest) {
 		this.valueRequest = valueRequest;
-		this.reason = reason;
 	}
 
 

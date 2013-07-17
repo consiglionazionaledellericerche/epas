@@ -13,6 +13,7 @@ import models.Competence;
 import models.CompetenceCode;
 import models.Person;
 import models.exports.PersonsCompetences;
+import models.exports.PersonsList;
 import models.exports.ReperibilityPeriod;
 import models.exports.ReperibilityPeriods;
 
@@ -27,13 +28,15 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import controllers.Persons;
+
 
 /**
  * @author arianna
  *
  */
 @Global
-public class JsonRequestedOvertimeBinder implements TypeBinder<PersonsCompetences> {
+public class JsonRequestedPersonsBinder implements TypeBinder<PersonsList> {
 
 	/**
 	 * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[], java.lang.String, java.lang.Class, java.lang.reflect.Type)
@@ -41,9 +44,10 @@ public class JsonRequestedOvertimeBinder implements TypeBinder<PersonsCompetence
 	@Override
 	public Object bind(String name, Annotation[] annotations, String value,	Class actualClass, Type genericType) throws Exception {
 		
-		Logger.debug("binding ReperibilityCompetence: %s, %s, %s, %s, %s", name, annotations, value, actualClass, genericType);
+		Logger.debug("binding Persons: %s, %s, %s, %s, %s", name, annotations, value, actualClass, genericType);
 		try {
-			List<Competence> personsCompetences = new ArrayList<Competence>();
+			List<Person> persons = new ArrayList<Person>();
+			Logger.debug("letto vaue = %s", value);
 			
 			JsonArray jsonArray = new JsonParser().parse(value).getAsJsonArray();
 			Logger.debug("jsonArray = %s", jsonArray);
@@ -59,27 +63,21 @@ public class JsonRequestedOvertimeBinder implements TypeBinder<PersonsCompetence
 				
 				personEmail = jsonObject.get("email").getAsString();
 				
-				person = Person.find("SELECT p FROM Person p WHERE p.contactData.email = ?", personEmail).first();
+				person = Person.find("SELECT p FROM Person p WHERE p.contactData.email = ? ORDER BY p.surname", personEmail).first();
 				if (person == null) {
 					throw new IllegalArgumentException(String.format("Person with email = %s doesn't exist", personEmail));			
 				}
-				Logger.debug("Find persons %s with email %s", person.name, personEmail);
+				Logger.debug("Find person %s with email %s", person.name, personEmail);
 				
-				CompetenceCode competenceCode = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", "S1").first();
-				Competence competence =	new Competence(person, competenceCode, 0, 0);
-				competence.setValueApproved(jsonObject.get("ore").getAsInt(), jsonObject.get("motivazione").getAsString());
-				
-				Logger.debug("Letto ore = %d e motivazione = %s", jsonObject.get("ore").getAsInt(), jsonObject.get("motivazione").getAsString());
-				
-				personsCompetences.add(competence);
+				persons.add(person);
 			}
 			
-			Logger.debug("personsCompetence = %s", personsCompetences);
+			Logger.debug("persons = %s", persons);
 			
-			return new PersonsCompetences(personsCompetences);
+			return new PersonsList(persons);
 			
 		} catch (Exception e) {
-			Logger.error(e, "Problem during binding List<Competence>.");
+			Logger.error(e, "Problem during binding List<Person>.");
 			throw e;
 		}
 	}

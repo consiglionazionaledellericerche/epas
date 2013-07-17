@@ -77,8 +77,15 @@ public class Reperibility extends Controller {
 
 	public enum SemRep {FS1S, FR1S, FS2S, FR2S}; 
 	
+	/*
+	 * @author arianna
+	 * Restituisce la lista dei reperibili attivi al momento di un determinato tipo
+	 */
 	public static void personList() {
+		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
+		
 		Long type = Long.parseLong(params.get("type"));
+		Logger.debug("Esegue la personList con type=%s", type);
 		
 		List<Person> personList = Person.find("SELECT p FROM Person p JOIN p.reperibility r WHERE r.personReperibilityType.id = ? AND (r.startDate IS NULL OR r.startDate <= now()) and (r.endDate IS NULL OR r.endDate >= now())", type).fetch();
 		Logger.debug("Reperibility personList called, found %s reperible person", personList.size());
@@ -130,6 +137,7 @@ public class Reperibility extends Controller {
 		render(reperibilityPeriods);
 	}
 	
+	
 	/**
 	 * @author arianna
 	 * Fornisce la lista del personale reperibile di tipo 'type' 
@@ -169,6 +177,7 @@ public class Reperibility extends Controller {
 		render(personList);
 	}
 	
+	
 	/**
 	 * @author arianna
 	 * Legge le assenze dei reperibili di una determinata tipologia in un dato intervallo di tempo
@@ -177,6 +186,8 @@ public class Reperibility extends Controller {
 	public static void absence() {
 		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 
+		Logger.debug("Sono nella absebce");
+		
 		Long type = Long.parseLong(params.get("type"));
 		
 		LocalDate from = new LocalDate(Integer.parseInt(params.get("yearFrom")), Integer.parseInt(params.get("monthFrom")), Integer.parseInt(params.get("dayFrom")));
@@ -191,8 +202,7 @@ public class Reperibility extends Controller {
 		
 		// List of absence periods
 		List<AbsenceReperibilityPeriod> absenceReperibilityPeriods = new ArrayList<AbsenceReperibilityPeriod>();
-		
-		
+
 		if (personList.size() == 0) {
 			render(absenceReperibilityPeriods);
 			return;
@@ -220,9 +230,58 @@ public class Reperibility extends Controller {
 				Logger.trace("Aggiornato reperibilityPeriod, person=%s, start=%s, end=%s", absenceReperibilityPeriod.person, absenceReperibilityPeriod.start, absenceReperibilityPeriod.end);
 			}
 		}
-		Logger.debug("Find %s absenceReperibilityDays. AbsenceReperibilityPeriod = %s", absenceReperibilityPeriods.size(), absenceReperibilityPeriods.toString());
+		Logger.debug("Find %s absenceReperibilityPeriod. AbsenceReperibilityPeriod = %s", absenceReperibilityPeriods.size(), absenceReperibilityPeriods.toString());
 		render(absenceReperibilityPeriods);
 	}
+	
+	
+	/**
+	 * @author arianna
+	 * Restituisce la lista delle persone reperibili di una determinata tipologia in un dato intervallo di tempo
+	 * (portale sistorg)
+	 */
+	public static void whoIsAbsent() {
+		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
+		
+		List<Person> absentPersonsList = new ArrayList<Person>();
+
+		Long type = Long.parseLong(params.get("type"));
+		
+		LocalDate from = new LocalDate(Integer.parseInt(params.get("yearFrom")), Integer.parseInt(params.get("monthFrom")), Integer.parseInt(params.get("dayFrom")));
+		LocalDate to = new LocalDate(Integer.parseInt(params.get("yearTo")), Integer.parseInt(params.get("monthTo")), Integer.parseInt(params.get("dayTo")));
+
+		// read the reperibility person list 
+		List<Person> personList = Person.find("SELECT p FROM Person p JOIN p.reperibility r WHERE r.personReperibilityType.id = ? AND (r.startDate IS NULL OR r.startDate <= now()) and (r.endDate IS NULL OR r.endDate >= now())", type).fetch();
+		Logger.debug("Reperibility personList called, found %s reperible person of type %s", personList.size(), type);
+		
+		// Lists of absence for a single reperibility person and for all persons
+		List<Absence> absencePersonReperibilityDays = new ArrayList<Absence>();
+		
+		if (personList.size() == 0) {
+			render(personList);
+			return;
+		}
+		
+		absencePersonReperibilityDays = JPA.em().createQuery("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date BETWEEN :from AND :to AND pd.person IN (:personList) ORDER BY pd.person.id, pd.date")
+			.setParameter("from", from)
+			.setParameter("to", to)
+			.setParameter("personList", personList)
+			.getResultList();
+		
+		
+		Logger.debug("Trovati %s giorni di assenza", absencePersonReperibilityDays.size());
+		
+		for (Absence abs : absencePersonReperibilityDays) {
+			if (!absentPersonsList.contains(abs.personDay.person)) {
+				Logger.trace("inserisco il reperibile ", abs.personDay.person);
+				absentPersonsList.add(abs.personDay.person);
+				Logger.trace("trovata person=%s", abs.personDay.person);
+			}
+		}
+		Logger.debug("Find %s person. absentPersonsList = %s", absentPersonsList.size(), absentPersonsList.toString());
+		render(absentPersonsList);
+	}
+	
 	
 	/**
 	 * @author cristian, arianna
@@ -537,100 +596,121 @@ public class Reperibility extends Controller {
 	/*
 	 * Export the reperibility calendar in iCal for the person with id = personId with reperibility 
 	 * of type 'type' for the 'year' year
+	 * If the personId=0, it exports the calendar for all  the reperibility persons of type 'type'
 	 */
 	private static Calendar createCalendar(Long type, Long personId, int year) {
 		Logger.debug("Crea iCal per l'anno %d della person con id = %d, reperibility type %s", year, personId, type);
 		
+		List<PersonReperibility> personsInTheCalList = new ArrayList<PersonReperibility>();
+		String eventLabel;
+		
 		// check for the parameter
+		//---------------------------
 		PersonReperibilityType reperibilityType = PersonReperibilityType.findById(type);	
 		if (reperibilityType == null) {
 			notFound(String.format("ReperibilityType id = %s doesn't exist", type));			
 		}
 		
-		// read the reperibility person list 
-		PersonReperibility personReperibility = PersonReperibility.find("SELECT pr FROM PersonReperibility pr WHERE pr.personReperibilityType.id = ? AND pr.person.id = ?", type, personId).first();
-		if (personReperibility == null) {
-			notFound(String.format("Person id = %d is not associated to a reperibility of type = %s", personId, reperibilityType));
+		if (personId == 0) {
+			// read the reperibility person 
+			List<PersonReperibility> personsReperibility = PersonReperibility.find("SELECT pr FROM PersonReperibility pr WHERE pr.personReperibilityType.id = ?", type).fetch();
+			if (personsReperibility.isEmpty()) {
+				notFound(String.format("No person associated to a reperibility of type = %s", reperibilityType));
+			}
+			personsInTheCalList = personsReperibility;
+		} else {
+			// read the reperibility person 
+			PersonReperibility personReperibility = PersonReperibility.find("SELECT pr FROM PersonReperibility pr WHERE pr.personReperibilityType.id = ? AND pr.person.id = ?", type, personId).first();
+			if (personReperibility == null) {
+				notFound(String.format("Person id = %d is not associated to a reperibility of type = %s", personId, reperibilityType));
+			}
+			personsInTheCalList.add(personReperibility);
 		}
-		
+
+        // Create a calendar
+		//---------------------------
 		TimeZoneRegistry registry = TimeZoneRegistryFactory.getInstance().createRegistry();
         TimeZone timezone = registry.getTimeZone("Europe/Rome");
 //        timezone.getID();
 
         //Date date = new Date();
         
-        // Create a calendar
         Calendar icsCalendar = new net.fortuna.ical4j.model.Calendar();
         icsCalendar.getProperties().add(new ProdId("-//Events Calendar//iCal4j 1.0//EN"));
         icsCalendar.getProperties().add(CalScale.GREGORIAN);
         icsCalendar.getProperties().add(Version.VERSION_2_0);
-        
-        // read the person reperibility days for the year
-		LocalDate from = new LocalDate(Integer.parseInt(params.get("year")), 1, 1);
-		LocalDate to = new LocalDate(Integer.parseInt(params.get("year")), 12, 31);
-		
-		List<PersonReperibilityDay> reperibilityDays = 
-				PersonReperibilityDay.find("SELECT prd FROM PersonReperibilityDay prd WHERE prd.date BETWEEN ? AND ? AND reperibilityType = ? AND personReperibility = ? ORDER BY prd.date", from, to, reperibilityType, personReperibility).fetch();
-
-		Logger.debug("Reperibility find called from %s to %s, found %s reperibility days for person id = %s", from, to, reperibilityDays.size(), personId);
-
-//		VEvent reperibilityPeriod = null;
-
-		
+        	
 		java.util.Calendar cal = new GregorianCalendar();
 		cal.setTimeZone(timezone);
 		
-		Date startDate = null;
-		Date endDate = null;
-		int sequence = 1;
 		
-		for (PersonReperibilityDay prd : reperibilityDays) {
-						
-
-			cal.set(java.util.Calendar.MONTH, prd.date.getMonthOfYear() - 1);
-			cal.set(java.util.Calendar.DAY_OF_MONTH, prd.date.getDayOfMonth());
-			cal.set(java.util.Calendar.YEAR, prd.date.getYear());
-			cal.set(java.util.Calendar.HOUR, 0);
-			cal.set(java.util.Calendar.MINUTE, 0);
-			cal.set(java.util.Calendar.SECOND, 0);
-			cal.set(java.util.Calendar.MILLISECOND, 0);
+        // read the person(0) reperibility days for the year
+		//-------------------------------------------------
+		LocalDate from = new LocalDate(Integer.parseInt(params.get("year")), 1, 1);
+		LocalDate to = new LocalDate(Integer.parseInt(params.get("year")), 12, 31);
+		
+		
+		for (PersonReperibility personReperibility: personsInTheCalList) {
+			eventLabel = (personsInTheCalList.size() == 0) ? "Reperibilità Registro" : "Reperibilità ".concat(personReperibility.person.surname);
+			List<PersonReperibilityDay> reperibilityDays = 
+					PersonReperibilityDay.find("SELECT prd FROM PersonReperibilityDay prd WHERE prd.date BETWEEN ? AND ? AND reperibilityType = ? AND personReperibility = ? ORDER BY prd.date", from, to, reperibilityType, personReperibility).fetch();
+	
+			Logger.debug("Reperibility find called from %s to %s, found %s reperibility days for person id = %s", from, to, reperibilityDays.size(), personId);
+	
+	//		VEvent reperibilityPeriod = null;
+	
+			Date startDate = null;
+			Date endDate = null;
+			int sequence = 1;
 			
-			Date date = new Date(cal.getTimeInMillis());
-			
-			Logger.trace("Data reperibilita': date=%s", date);
-			
-			if ( startDate == null) {
-				Logger.trace("Nessun periodo, nuovo periodo: startDate=%s", date);
+			for (PersonReperibilityDay prd : reperibilityDays) {
+							
+	
+				cal.set(java.util.Calendar.MONTH, prd.date.getMonthOfYear() - 1);
+				cal.set(java.util.Calendar.DAY_OF_MONTH, prd.date.getDayOfMonth());
+				cal.set(java.util.Calendar.YEAR, prd.date.getYear());
+				cal.set(java.util.Calendar.HOUR, 0);
+				cal.set(java.util.Calendar.MINUTE, 0);
+				cal.set(java.util.Calendar.SECOND, 0);
+				cal.set(java.util.Calendar.MILLISECOND, 0);
 				
-				startDate = endDate = date;
-				sequence = 1;
-				continue;
-			} 
-			
-			if ( date.getTime() - endDate.getTime() > 86400*1000 ) {
-				Logger.trace("Termine periodo: startDate=%s, sequence=%s", startDate, sequence);
-				icsCalendar.getComponents().add(createICalEvent(startDate, sequence));
-				startDate = endDate = date;
-				sequence = 1;
-				Logger.trace("Nuovo periodo: startDate=%s", date);
-			} else {
-				sequence++;
-				endDate = date;
-				Logger.trace("Allungamento periodo: startDate=%s, endDate=%s, sequence.new=%s", startDate, endDate, sequence);
+				Date date = new Date(cal.getTimeInMillis());
+				
+				Logger.trace("Data reperibilita': date=%s", date);
+				
+				if ( startDate == null) {
+					Logger.trace("Nessun periodo, nuovo periodo: startDate=%s", date);
+					
+					startDate = endDate = date;
+					sequence = 1;
+					continue;
+				} 
+				
+				if ( date.getTime() - endDate.getTime() > 86400*1000 ) {
+					Logger.trace("Termine periodo: startDate=%s, sequence=%s", startDate, sequence);
+					icsCalendar.getComponents().add(createICalEvent(startDate, sequence, eventLabel));
+					startDate = endDate = date;
+					sequence = 1;
+					Logger.trace("Nuovo periodo: startDate=%s", date);
+				} else {
+					sequence++;
+					endDate = date;
+					Logger.trace("Allungamento periodo: startDate=%s, endDate=%s, sequence.new=%s", startDate, endDate, sequence);
+				}
+				
 			}
 			
+			Logger.trace("Termine periodo e calendario per %s: startDate=%s, sequence=%s", personId, startDate, sequence);
+			icsCalendar.getComponents().add(createICalEvent(startDate, sequence, eventLabel));
 		}
 		
-		Logger.trace("Termine periodo e calendario: startDate=%s, sequence=%s", startDate, sequence);
-		icsCalendar.getComponents().add(createICalEvent(startDate, sequence));
-
 		Logger.debug("Find %s periodi di reperibilità.", icsCalendar.getComponents().size());
         
         return icsCalendar;
 	}
 	
-	private static VEvent createICalEvent(Date startDate, int sequence) {
-		VEvent reperibilityPeriod = new VEvent(startDate, new Dur(sequence, 0, 0, 0), "Reperibilità Registro");
+	private static VEvent createICalEvent(Date startDate, int sequence, String eventLabel) {
+		VEvent reperibilityPeriod = new VEvent(startDate, new Dur(sequence, 0, 0, 0), eventLabel);
 		reperibilityPeriod.getProperties().add(new Uid(UUID.randomUUID().toString()));
 		
 		return reperibilityPeriod;
