@@ -9,6 +9,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.servlet.ServletRequest;
+
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
@@ -34,6 +36,7 @@ import models.exports.ShiftPeriod;
 import models.exports.ShiftPeriods;
 
 import play.Logger;
+import play.Play;
 import play.data.binding.As;
 import play.db.jpa.JPA;
 import play.mvc.Controller;
@@ -52,7 +55,9 @@ public class Shift extends Controller{
 	 * 
 	 */
 	public static void personList(){
-		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
+		response.accessControl("*");
+		//response.setHeader("Access-Control-Allow-Origin", Play.configuration.getProperty("address.sistorg"));
+
 		
 		String type = params.get("type");		
 		ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();
@@ -79,7 +84,7 @@ public class Shift extends Controller{
 	 * Get shifts from the DB and render to the sistorg portal calendar
 	 */
 	public static void find(){
-		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
+		response.setHeader("Access-Control-Allow-Origin", Play.configuration.getProperty("address.sistorg"));
 		
 		// type validation
 		String type = params.get("type");
