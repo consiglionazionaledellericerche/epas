@@ -97,11 +97,12 @@ public class JsonShiftPeriodsBinder implements TypeBinder<ShiftPeriods> {
 					Logger.debug("Creato ShiftPeriod person = %s, start=%s, end=%s, shiftType=%s, shiftTimeTable=%s", person.name, start, end, shiftType, shiftTimeTable.description);
 					
 					shiftPeriods.add(shiftPeriod);
+					Logger.debug("letto id = %s corrispondente a person = %s", personId, person.name);
 				} else {
 					ShiftPeriod shiftPeriod =	new ShiftPeriod(start, end, shiftType, true);
 					shiftPeriods.add(shiftPeriod);
 				}
-				Logger.debug("letto id = %s corrispondente a person = %s", personId, person.name);
+				
 			}
 			
 			Logger.debug("shiftPeriods = %s", shiftPeriods);
