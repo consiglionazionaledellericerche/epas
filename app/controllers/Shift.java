@@ -516,6 +516,7 @@ public class Shift extends Controller{
 	 * 
 	 */
 	public static void absence() {
+		
 		response.accessControl("*");
 		//response.setHeader("Access-Control-Allow-Origin", "*");
 

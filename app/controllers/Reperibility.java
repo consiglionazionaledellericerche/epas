@@ -728,6 +728,7 @@ public class Reperibility extends Controller {
 		int year = params.get("year", Integer.class);
 		
 		response.accessControl("*");
+		
 		//response.setHeader("Access-Control-Allow-Origin", "*");
 		
 		try {
