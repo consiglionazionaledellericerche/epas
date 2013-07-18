@@ -727,7 +727,9 @@ public class Reperibility extends Controller {
 		Long personId = params.get("personId", Long.class);
 		int year = params.get("year", Integer.class);
 		
-		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
+		response.accessControl("*");
+		
+		//response.setHeader("Access-Control-Allow-Origin", "*");
 		
 		try {
 			Calendar calendar = createCalendar(type, personId, year);
