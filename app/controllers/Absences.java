@@ -82,7 +82,7 @@ public class Absences extends Controller{
 	 */
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void manageAbsenceCode(){
-		List<AbsenceType> absenceList = AbsenceType.findAll();
+		List<AbsenceType> absenceList = AbsenceType.find("Select abt from AbsenceType abt order by abt.code").fetch();
 
 		render(absenceList);
 	}
@@ -290,18 +290,26 @@ public class Absences extends Controller{
 		 * da quelle dell'anno in corso o ancora dai permessi legge...ok ma qual'è l'ordine? :-)
 		 */
 		if(absenceType.code.equals("FER")){
-			AbsenceType abt = PersonUtility.whichVacationCode(person, yearFrom, monthFrom, dayFrom);
-			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, new LocalDate(yearFrom, monthFrom, dayFrom)).first();
-			if(pd == null){
-				pd = new PersonDay(person, new LocalDate(yearFrom, monthFrom, dayFrom));
-				pd.create();
+			if(PersonUtility.canPersonTakeAbsenceInShiftOrReperibility(person, new LocalDate(yearFrom,monthFrom,dayFrom))){
+				AbsenceType abt = PersonUtility.whichVacationCode(person, yearFrom, monthFrom, dayFrom);
+				PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, new LocalDate(yearFrom, monthFrom, dayFrom)).first();
+				if(pd == null){
+					pd = new PersonDay(person, new LocalDate(yearFrom, monthFrom, dayFrom));
+					pd.create();
+				}
+				Absence absence = new Absence();
+				absence.absenceType = abt;
+				absence.personDay = pd;
+				absence.save();
+				flash.success("Inserito il codice di assenza %s per il giorno %s", abt.code, pd.date);
+				render("@save");
 			}
-			Absence absence = new Absence();
-			absence.absenceType = abt;
-			absence.personDay = pd;
-			absence.save();
-			flash.success("Inserito il codice di assenza %s per il giorno %s", abt.code, pd.date);
-			render("@save");
+			else{
+				flash.error("Non si può inserire un giorno di ferie per %s %s che è in turno/reperibilità. \n Contattarlo e chiedere spiegazioni", 
+						person.name, person.surname);
+				render("@save");
+			}
+			
 		}
 		
 		/**

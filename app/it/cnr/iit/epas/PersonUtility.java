@@ -7,6 +7,8 @@ import javax.persistence.FetchType;
 import javax.persistence.Query;
 
 
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -24,6 +26,8 @@ import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
 import models.PersonMonth;
+import models.PersonReperibilityDay;
+import models.PersonShiftDay;
 import models.PersonYear;
 import models.StampModificationType;
 import models.StampProfile;
@@ -497,6 +501,59 @@ public class PersonUtility {
 			return AbsenceType.find("byCode", "32").first();
 		else
 			return null;
+	}
+	
+	/**
+	 * 
+	 * @param person invia una mail al dipendente e al baesso nel caso in cui questa persona, in questo mese abbia avuto giornate in cui non ha 
+	 * fatto timbrature e non ha presentato codici di assenza
+	 * METODO DA INSERIRE IN UN CRON
+	 * @throws EmailException 
+	 */
+	public static void sendEmailForNoAbsenceStamping(Person person, int year, int month) throws EmailException{
+		Person p = Person.find("Select p from Person p where p.surname = ?", "Baesso").first();
+		Query query = JPA.em().createQuery("Select pd from PersonDay pd where pd.person = :person and pd.date between :begin and :end and");
+		query.setParameter("person", person).setParameter("begin", new LocalDate(year, month, 1)).setParameter("end", new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
+		List<PersonDay> pdList = query.getResultList();
+		String daysInTrouble = "";
+		//List<PersonDay> troubleDays = new ArrayList<PersonDay>();
+		for(PersonDay pd : pdList){
+			if((pd.stampings.size() == 0 && pd.absences.size() == 0)||(pd.stampings.size() %2 != 0)){
+				daysInTrouble = daysInTrouble + ' '+pd.date.toString()+'\n';
+			}
+		}
+		SimpleEmail email = new SimpleEmail();
+		if(person.contactData.email.equals(""))
+			email.addTo(person.contactData.email);
+		else
+			email.addTo(person.name+"."+person.surname+"@"+"iit.cnr.it");
+		
+		email.addCc(p.contactData.email);
+		email.setSubject("controllo giorni del mese");
+		email.setMsg("Salve, controllare i giorni: "+daysInTrouble+ " per "+person.name+' '+person.surname);
+		email.send();
+	}
+	
+	
+	/**
+	 * 
+	 * @param person
+	 * @param date
+	 * @return true se in quel giorno quella persona non è in turno nè in reperibilità (metodo chiamato dal controller di inserimento assenza)
+	 */
+	public static boolean canPersonTakeAbsenceInShiftOrReperibility(Person person, LocalDate date){
+		Query queryReperibility = JPA.em().createQuery("Select prd from PersonReperibilityDay prd where prd.date = :date and prd.personReperibility.person = :person");
+		queryReperibility.setParameter("date", date).setParameter("person", person);
+		List<PersonReperibilityDay> prd =  queryReperibility.getResultList();
+		if(prd != null)
+			return false;
+		Query queryShift = JPA.em().createQuery("Select psd from PersonShiftDay psd where psd.date = :date and psd.personShift.person = :person");
+		queryShift.setParameter("date", date).setParameter("person", person);
+		PersonShiftDay psd = (PersonShiftDay) queryShift.getSingleResult();
+		if(psd != null)
+			return false;
+		
+		return true;
 	}
 
 }
