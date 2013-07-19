@@ -72,12 +72,25 @@ public class Stampings extends Controller {
 		PersonMonth personMonth = PersonMonth.byPersonAndYearAndMonth(person, year, month);
 		if(personMonth == null)
 			personMonth = new PersonMonth(person, year, month);
+		int situazioneParziale = 0;
+		if(personMonth.month == 1){
+			situazioneParziale = personMonth.residuoAnnoCorrenteDaInizializzazione();
+		}
+		else{
+			PersonMonth count = personMonth;
+			while(count.month > 1){
+				situazioneParziale = situazioneParziale + count.mesePrecedente().residuoDelMese() - count.mesePrecedente().straordinari;
+				count = count.mesePrecedente();
+			}
+		}
+		
+		
 		int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
 		int numberOfInOut = Math.min(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
 
 		//Logger.debug("Month recap of person.id %s, year=%s, month=%s", person.id, year, month);
 
-		render(personMonth, numberOfInOut, numberOfCompensatoryRest);
+		render(personMonth, numberOfInOut, numberOfCompensatoryRest, situazioneParziale);
 	}
 
 
