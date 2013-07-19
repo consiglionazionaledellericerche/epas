@@ -542,18 +542,30 @@ public class PersonUtility {
 	 * @return true se in quel giorno quella persona non è in turno nè in reperibilità (metodo chiamato dal controller di inserimento assenza)
 	 */
 	public static boolean canPersonTakeAbsenceInShiftOrReperibility(Person person, LocalDate date){
-		Query queryReperibility = JPA.em().createQuery("Select prd from PersonReperibilityDay prd where prd.date = :date and prd.personReperibility.person = :person");
+		Query queryReperibility = JPA.em().createQuery("Select count(*) from PersonReperibilityDay prd where prd.date = :date and prd.personReperibility.person = :person");
 		queryReperibility.setParameter("date", date).setParameter("person", person);
-		List<PersonReperibilityDay> prd =  queryReperibility.getResultList();
-		if(prd != null)
+		int prdCount = queryReperibility.getFirstResult();
+	//	List<PersonReperibilityDay> prd =  queryReperibility.getResultList();
+		if(prdCount != 0)
 			return false;
-		Query queryShift = JPA.em().createQuery("Select psd from PersonShiftDay psd where psd.date = :date and psd.personShift.person = :person");
+		Query queryShift = JPA.em().createQuery("Select count(*) from PersonShiftDay psd where psd.date = :date and psd.personShift.person = :person");
 		queryShift.setParameter("date", date).setParameter("person", person);
-		PersonShiftDay psd = (PersonShiftDay) queryShift.getSingleResult();
-		if(psd != null)
+		int psdCount = queryShift.getFirstResult();
+		if(psdCount != 0)
 			return false;
 		
 		return true;
+	}
+	
+	/**
+	 * 
+	 * @param date
+	 * @return il personDay se la data passata è di un giorno feriale, null altrimenti
+	 */
+	public static PersonDay createPersonDayFromDate(Person person, LocalDate date){
+		if(DateUtility.isHoliday(person,date))
+			return null;
+		return new PersonDay(person, date);
 	}
 
 }
