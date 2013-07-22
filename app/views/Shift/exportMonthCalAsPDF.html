@@ -42,7 +42,7 @@
 						if (shiftCalendar.contains(shift, gg)) {
 					}%
 						%{
-							if (shiftCalendar.get(shift, gg).mattina == null) {
+							if ((shiftCalendar.get(shift, gg).mattina == null) || (shiftCalendar.get(shift, gg).pomeriggio == null)) {
 						}%
 						
 						<td class="${'turno'+shift} annullato" colspan="2">
@@ -55,7 +55,7 @@
 							${shiftCalendar.get(shift, gg).mattina.surname}
 						</td>
 						<td class="${'turno'+shift}"> 
-							${shiftCalendar.get(shift, gg).pomeriggio.surname}
+							${shiftCalendar.contains(shift, gg) ? shiftCalendar.get(shift, gg).pomeriggio.surname : ''}
 						</td>
 						%{
 							}
