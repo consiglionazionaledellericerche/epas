@@ -24,47 +24,7 @@ public class DateUtility {
 			return true;
 		else
 			return false;
-	
-//		LocalDate easter = findEaster(date.getYear());
-//		LocalDate easterMonday = easter.plusDays(1);
-//
-//		if(date.getDayOfMonth() == easter.getDayOfMonth() && date.getMonthOfYear() == easter.getMonthOfYear())
-//			return true;
-//		if(date.getDayOfMonth() == easterMonday.getDayOfMonth() && date.getMonthOfYear() == easterMonday.getMonthOfYear())
-//			return true;
-//		
-//		
-//		if((date.getDayOfWeek() == 7)||(date.getDayOfWeek() == 6))
-//			return true;		
-//		if((date.getMonthOfYear() == 12) && (date.getDayOfMonth() == 25))
-//			return true;
-//		if((date.getMonthOfYear() == 12) && (date.getDayOfMonth() == 26))
-//			return true;
-//		if((date.getMonthOfYear() == 12) && (date.getDayOfMonth() == 8))
-//			return true;
-//		if((date.getMonthOfYear() == 6) && (date.getDayOfMonth() == 2))
-//			return true;
-//		if((date.getMonthOfYear() == 4) && (date.getDayOfMonth() == 25))
-//			return true;
-//		if((date.getMonthOfYear() == 5) && (date.getDayOfMonth() == 1))
-//			return true;
-//		if((date.getMonthOfYear() == 8) && (date.getDayOfMonth() == 15))
-//			return true;
-//		if((date.getMonthOfYear() == 1) && (date.getDayOfMonth() == 1))
-//			return true;
-//		if((date.getMonthOfYear() == 1) && (date.getDayOfMonth() == 6))
-//			return true;
-//		if((date.getMonthOfYear() == 11) && (date.getDayOfMonth() == 1))
-//			return true;
-//		if((date.getMonthOfYear() == config.monthOfPatron && date.getDayOfMonth() == config.dayOfPatron))
-//			return true;
-//		/**
-//		 * ricorrenza centocinquantenario dell'unità d'Italia
-//		 */
-//		if(date.isEqual(new LocalDate(2011,3,17)))
-//			return true;
-//			
-//		return false;
+
 	}
 
 	/**
