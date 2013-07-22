@@ -439,9 +439,9 @@ public class Shift extends Controller{
 		Table<Person, Integer, PSD> shiftCalendarMonth = null;
 		
 		// crea la tabella dei turni mensile (tipo turno, giorno) -> (persona turno mattina, persona turno pomeriggio)
-		ImmutableTable.Builder<String, Integer, SD> builder1 = ImmutableTable.builder(); 
-		Table<String, Integer, SD> shiftCalendar = null;
+		Table<String, Integer, SD> shiftCalendar = HashBasedTable.<String, Integer, SD>create();
 		
+		// prende il primo giorno del mese
 		LocalDate firstOfMonth = new LocalDate(year, month, 1);
 		
 		for (String type: shiftTypes)
@@ -452,23 +452,26 @@ public class Shift extends Controller{
 				notFound(String.format("ShiftType = %s doesn't exist", shiftType));			
 			}
 			
+			// legge i giorni di turno del tipo 'type' da inizio a fine mese 
 			List<PersonShiftDay> personShiftDays = 
 				PersonShiftDay.find("SELECT prd FROM PersonShiftDay prd WHERE date BETWEEN ? AND ? AND prd.shiftType = ? ORDER by date, prd.shiftTimeTable.startShift", firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue(), shiftType).fetch();
-		
+			Logger.debug("Trovati %d turni di tipo %s",personShiftDays.size(), type);
+			
 			for (PersonShiftDay personShiftDay : personShiftDays) {
 				Person person = personShiftDay.personShift.person;
 				PSD psd = new PSD(personShiftDay.shiftType.type, personShiftDay.shiftTimeTable.getStartShift());
 					
 				builder.put(person, personShiftDay.date.getDayOfMonth(), psd);
+				Logger.debug("Inserito in shiftCalendarMonth %s %s turno %s di %s", person, personShiftDay.date.getDayOfMonth(), psd.tipoTurno, psd.fasciaTurno);
 			}
 			
 			//legge i turni cancellati e li registra nella tabella mensile
-			Logger.debug("Cerco i turni cancellati e li inserisco nella tabella mensile");
+			Logger.debug("Cerco i turni cancellati di tipo '%s' e li inserisco nella tabella mensile", type);
 			List<ShiftCancelled> shiftsCancelled = 
 					ShiftCancelled.find("SELECT sc FROM ShiftCancelled sc WHERE date BETWEEN ? AND ? AND sc.type = ? ORDER by date", firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue(), shiftType).fetch();
-			SD shift = new SD (null, null);;
+			SD shift = new SD (null, null);
 			for (ShiftCancelled sc: shiftsCancelled) {
-				builder1.put(type, sc.date.getDayOfMonth(), shift);
+				shiftCalendar.put(type, sc.date.getDayOfMonth(), shift);
 				Logger.debug("trovato turno cancellato di tipo %s del %s", type, sc.date);
 			}
 		}
@@ -476,9 +479,9 @@ public class Shift extends Controller{
 		shiftCalendarMonth = builder.build();
 		
 	
+		Logger.debug("Costruisce il calendario ...");
 		for (int day: shiftCalendarMonth.columnKeySet()) {
 			String currShift = "";
-			String prevShift = "";
 			SD shift = null;
 
 			Logger.debug("giorno %s", day);
@@ -486,25 +489,28 @@ public class Shift extends Controller{
 				Logger.debug("person %s", person);
 				if (shiftCalendarMonth.contains(person, day)) {
 					currShift = shiftCalendarMonth.get(person, day).tipoTurno;
-					Logger.debug("trovato turno %s per (%s, %s)", currShift, person, day);
+					String f = shiftCalendarMonth.get(person, day).fasciaTurno;
+					Logger.debug("trovato turno (%s,%s) per (%s, %s)", currShift, f, person, day);
 					
-					if ((shift == null) || (! currShift.equals(prevShift))) {
+					//if ((shift == null) || (! currShift.equals(prevShift))) {
+					if (!shiftCalendar.contains(currShift, day)) {
 						shift = (shiftCalendarMonth.get(person, day).fasciaTurno.contains("07:00")) ? new SD (person, null) : new SD (null, person);
-						builder1.put(currShift, day, shift);
-						Logger.debug("creato shift (%s, %s) con shift.mattina=%s e shift.pomeriggio=%s", prevShift, day, shift.mattina, shift.pomeriggio);
+						shiftCalendar.put(currShift, day, shift);
+						Logger.debug("creato shift (%s, %s) con shift.mattina=%s e shift.pomeriggio=%s", currShift, day, shift.mattina, shift.pomeriggio);
 					} else {
+						shift = shiftCalendar.get(currShift, day);
 						if (shiftCalendarMonth.get(person, day).fasciaTurno.contains("07:00")) {
+							Logger.debug("Completo turno di %s con la mattina di %s", day, person);
 							shift.mattina = person;
 						} else {
+							Logger.debug("Completo turno di %s con il pomeriggio di %s", day, person);
 							shift.pomeriggio = person;
 						}
+						shiftCalendar.put(currShift, day, shift);
 					}
-					prevShift = currShift;
 				}
 			}
 		}
-		
-		shiftCalendar = builder1.build();
 		
 		LocalDate today = new LocalDate();
 		renderPDF(today, firstOfMonth, shiftCalendar);
