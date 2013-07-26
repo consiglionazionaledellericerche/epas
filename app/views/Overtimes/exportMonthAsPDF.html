@@ -8,12 +8,21 @@
     <body>
     		%{
     			mm = 0;
+    			
+    			mese = firstOfMonth.plusMonths(mm).monthOfYear().getAsText();
+    			if (mese.equals('July')) {
+    				mese = 'luglio';
+    			} else if (mese.equals('June')) {
+    				mese = 'giugno';
+    			} else if (mese.equals('August')) {
+    				mese = 'agosto';
+    			}
     		}%
         	<h1>Istituto di Informatica e Telematica </h1>
         
         	<div class="table">
 			<table class="mensile">
-			<caption> Straordinari del personale per il mese di ${firstOfMonth.plusMonths(mm).monthOfYear().getAsText()} ${firstOfMonth.plusMonths(mm).year().getAsText()}</caption>
+			<caption> Straordinari del personale per il mese di ${mese} ${firstOfMonth.plusMonths(mm).year().getAsText()}</caption>
 			<tr>
 				<th>Nome dipendente  </th> <th> Motivazione </th> <th> Num. ore</th>
 			</tr>
