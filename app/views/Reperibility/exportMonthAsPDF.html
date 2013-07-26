@@ -9,12 +9,21 @@
     <body>
     		%{
     			mm = 0;
+    			
+       			mese = firstOfMonth.plusMonths(mm).monthOfYear().getAsText();
+    			if (mese.equals('July')) {
+    				mese = 'luglio';
+    			} else if (mese.equals('June')) {
+    				mese = 'giugno';
+    			} else if (mese.equals('August')) {
+    				mese = 'agosto';
+    			}
     		}%
         	<h1>Istituto di Informatica e Telematica </h1>
         
         	<div class="table">
 			<table class="mensile">
-			<caption> Reperibilità del personale per il mese di ${firstOfMonth.plusMonths(mm).monthOfYear().getAsText()} ${firstOfMonth.plusMonths(mm).year().getAsText()}</caption>
+			<caption> Reperibilità del personale per il mese di ${mese} ${firstOfMonth.plusMonths(mm).year().getAsText()}</caption>
 			<tr>
 				<td class="no-border"></td><th colspan="2"> Feriali - Cod: ${codFr}</th> <th colspan="2" class="red"> Festivi - Cod: ${codFs}</th>
 			</tr>
