@@ -503,36 +503,7 @@ public class PersonUtility {
 			return null;
 	}
 	
-	/**
-	 * 
-	 * @param person invia una mail al dipendente e al baesso nel caso in cui questa persona, in questo mese abbia avuto giornate in cui non ha 
-	 * fatto timbrature e non ha presentato codici di assenza
-	 * METODO DA INSERIRE IN UN CRON
-	 * @throws EmailException 
-	 */
-	public static void sendEmailForNoAbsenceStamping(Person person, int year, int month) throws EmailException{
-		Person p = Person.find("Select p from Person p where p.surname = ?", "Baesso").first();
-		Query query = JPA.em().createQuery("Select pd from PersonDay pd where pd.person = :person and pd.date between :begin and :end and");
-		query.setParameter("person", person).setParameter("begin", new LocalDate(year, month, 1)).setParameter("end", new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
-		List<PersonDay> pdList = query.getResultList();
-		String daysInTrouble = "";
-		//List<PersonDay> troubleDays = new ArrayList<PersonDay>();
-		for(PersonDay pd : pdList){
-			if((pd.stampings.size() == 0 && pd.absences.size() == 0)||(pd.stampings.size() %2 != 0)){
-				daysInTrouble = daysInTrouble + ' '+pd.date.toString()+'\n';
-			}
-		}
-		SimpleEmail email = new SimpleEmail();
-		if(person.contactData.email.equals(""))
-			email.addTo(person.contactData.email);
-		else
-			email.addTo(person.name+"."+person.surname+"@"+"iit.cnr.it");
-		
-		email.addCc(p.contactData.email);
-		email.setSubject("controllo giorni del mese");
-		email.setMsg("Salve, controllare i giorni: "+daysInTrouble+ " per "+person.name+' '+person.surname);
-		email.send();
-	}
+	
 	
 	
 	/**
