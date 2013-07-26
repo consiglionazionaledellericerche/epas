@@ -56,7 +56,8 @@ public class Overtimes extends Controller {
 	 */
 
 	public static void getPersonOvertimes() {
-		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
+		response.accessControl("*");
+		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 		
 		String email = params.get("email");
 		int year = Integer.parseInt(params.get("year"));
@@ -87,7 +88,8 @@ public class Overtimes extends Controller {
 	 * Get the amount of overtimes the supervisor has for personel distribution
 	 */
 	public static void getSupervisorTotalOvertimes() {
-		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
+		response.accessControl("*");
+		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 		
 		String email = params.get("email");
 		
@@ -114,7 +116,8 @@ public class Overtimes extends Controller {
 	 * Set the overtimes requested by the responsible
 	 */
 	public static void setRequestOvertime(Integer year, Integer month, @As(binder=JsonRequestedOvertimeBinder.class) PersonsCompetences body) {
-		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
+		response.accessControl("*");
+		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 		
 		Logger.debug("update: Received PersonsCompetences %s", body);	
 		if (body == null) {
@@ -145,7 +148,8 @@ public class Overtimes extends Controller {
 	 * Set personnel overtimes requested by the supervisor
 	 */
 	public static void setSupervisorTotalOvertimes(Integer hours, String email) throws Exception {
-		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
+		response.accessControl("*");
+		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 		try {
 			Person person = Person.find("SELECT p FROM Person p WHERE p.contactData.email = ?", email).first();
 			if (person == null) {
@@ -177,7 +181,8 @@ public class Overtimes extends Controller {
 	 * curl -H "Content-Type: application/json" -X PUT -d '[ {"email" : "stefano.ruberti@iit.cnr.it"}, { "email" : "andrea.vivaldi@iit.cnr.it"} , { "email" : "lorenzo.luconi@iit.cnr.it" } ]' http://scorpio.nic.it:9001/overtimes/exportMonthAsPDF/2013/05
 	 */
 	public static void exportMonthAsPDF(Integer year, Integer month, @As(binder=JsonRequestedPersonsBinder.class) PersonsList body) {
-		response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
+		response.accessControl("*");
+		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 		
 		Logger.debug("update: Received PersonsCompetences %s", body);	
 		if (body == null) {
