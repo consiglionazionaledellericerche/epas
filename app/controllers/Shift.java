@@ -303,7 +303,6 @@ public class Shift extends Controller{
 		int year = params.get("year", Integer.class);
 		int month = params.get("month", Integer.class);
 		Long groupType = params.get("type", Long.class);
-		String mode = params.get("mode", String.class);
 		
 		Logger.debug("sono nella exportMonthAsPDF con year=%s e month=%s", year, month);
 		
@@ -326,6 +325,7 @@ public class Shift extends Controller{
 				notFound(String.format("ShiftType = %s doesn't exist", shiftType));			
 			}
 			
+			// seleziona le persone nel turno 'shiftType' da inizio a fine mese
 			List<PersonShiftDay> personShiftDays = 
 				PersonShiftDay.find("SELECT prd FROM PersonShiftDay prd WHERE date BETWEEN ? AND ? AND prd.shiftType = ? ORDER by date", firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue(), shiftType).fetch();
 		
@@ -359,21 +359,14 @@ public class Shift extends Controller{
 			
 		}
 		
-		for(Person person: shiftSumDays.rowKeySet()) {
-			Logger.debug("In shiftSumDays c'è la persona %s", person.name);
-		}
-		
-		List<String> shiftLabels = new ArrayList<String>();
+		// conta i giorni totali di turno per persona
 		for(Person person: shiftSumDays.rowKeySet()) {
 			Logger.debug("controllo person per label", person.name);
 			int ngg = 0;
+			// per ogni turno
 			for (String shiftLabel: shiftSumDays.columnKeySet()) {
 				if (shiftSumDays.contains(person, shiftLabel)) {
 					ngg += shiftSumDays.get(person, shiftLabel);
-				}
-				
-				if (!shiftLabels.contains(shiftLabel)) {
-					shiftLabels.add(shiftLabel);
 				}
 			}
 			
@@ -381,14 +374,13 @@ public class Shift extends Controller{
 			PersonShift personShift = PersonShift.find("SELECT ps FROM PersonShift ps WHERE person = ?", person).first();
 			Logger.debug("c'è un personShift=%s ed è jolly=%s", personShift.person.name, personShift.jolly);
 		
-			if ((personShift.jolly) && !shiftLabels.contains("Jolly")) {
-				shiftLabels.add("Jolly");
+			if (personShift.jolly) {
 				shiftSumDays.put(person, "Jolly", Integer.valueOf(ngg));
 			}
 		}
 	
 		LocalDate today = new LocalDate();
-		renderPDF(mode, today, firstOfMonth, shiftSumDays, shiftLabels);
+		renderPDF(today, firstOfMonth, shiftSumDays);
 	}
 
 	/**
