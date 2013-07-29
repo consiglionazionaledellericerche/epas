@@ -24,49 +24,41 @@
         	<div class="table">
 			<table class="mensile">
 			<caption> Giorni di turno del personale per il mese di ${mese} ${firstOfMonth.plusMonths(mm).year().getAsText()}</caption>
-				
 			<tr>
-			%{
-				for(label in shiftSumDays.columnKeySet()) {
-			}%
-
-					<th> Turno ${label}</th> 
-			%{
-    			}
-			}%
-			</tr>
+			<th>Persona</th><th>Numero di giorni</th><th>Numero di ore</th>
+			</tr>	
 			<tr>	
 			%{
-				for(shift in shiftSumDays.columnKeySet()) {
+				for(person in shiftSumDays.rowKeySet()) {
+				
 			}%
 				<td> 
+					<p>
+						${person.surname} ${person.name}
+					</p>
+				</td>
+
 				%{
-					for(person in shiftSumDays.rowKeySet()) {
-				}%	
-					%{
+					for(shift in shiftSumDays.columnKeySet()) {
+
 						if ((shiftSumDays.contains(person, shift) && !shiftSumDays.contains(person, "Jolly")) || (shiftSumDays.contains(person, shift) && (shift == "Jolly"))) {
-						
-						if (mode.equals('ore')) {
-							num = shiftSumDays.get(person, shift)*6 + (int)(shiftSumDays.get(person, shift)/2) + shiftSumDays.get(person, shift)%2 + ' ore'
-						} else {
-							num = shiftSumDays.get(person, shift) + ' gg'
+							giorni = shiftSumDays.get(person, shift);
+							resto = (shiftSumDays.get(person, shift)%2 == 0) ? ':00' : ':30'; 
+							ore = shiftSumDays.get(person, shift)*6 + (int)(shiftSumDays.get(person, shift)/2) + resto;	
 						}
-					}%
-						<p>
-						${person.surname} ${person.name}: &nbsp; ${num} 
-						</p>
-					%{
-						}
-					}%
-					
-				%{
     				}
 				}%
+				<td>
+					<p>${giorni}</p>
 				</td>
+				<td>
+					<p>${ore}</p>
+				</td>
+			</tr>
 			%{
     			}
 			}%
-			</tr>
+			
 			</table>
       		</div>
       		<div class="date">
