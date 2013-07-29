@@ -178,7 +178,7 @@ public class Overtimes extends Controller {
 	 * di una lista di persone identificate con l'email
 	 * (portale sistorg)
 	 * 
-	 * curl -H "Content-Type: application/json" -X PUT -d '[ {"email" : "stefano.ruberti@iit.cnr.it"}, { "email" : "andrea.vivaldi@iit.cnr.it"} , { "email" : "lorenzo.luconi@iit.cnr.it" } ]' http://scorpio.nic.it:9001/overtimes/exportMonthAsPDF/2013/05
+	 * curl -H "Content-Type: application/json" -X POST -d '[ {"email" : "stefano.ruberti@iit.cnr.it"}, { "email" : "andrea.vivaldi@iit.cnr.it"} , { "email" : "lorenzo.luconi@iit.cnr.it" } ]' http://scorpio.nic.it:9001/overtimes/exportMonthAsPDF/2013/05
 	 */
 	public static void exportMonthAsPDF(Integer year, Integer month, @As(binder=JsonRequestedPersonsBinder.class) PersonsList body) {
 		response.accessControl("*");
