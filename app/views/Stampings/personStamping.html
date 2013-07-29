@@ -240,7 +240,7 @@
 }%
 <p> - Residuo tempo di lavoro dei mesi precedenti: ${(situazioneParziale).toHourTime()}</p> 
 <p> - Residuo del mese:  ${personMonth.residuoDelMese().toHourTime()}</p>
-%{if(personMonth.person.qualification.qualification > 3){
+%{if(personMonth.person.qualification != null && personMonth.person.qualification.qualification > 3){
 }%
 <p> - Tempo disponibile per straordinari: ${personMonth.tempoDisponibilePerStraordinari().toHourTime()}</p>
 %{
