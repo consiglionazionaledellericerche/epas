@@ -40,5 +40,8 @@ log "Creato il nuovo database $DB_NAME"
 psql -U $DB_USER $DB_NAME < db/migrate/create.ddl
 log "Eseguite le create sul database $DB_NAME"
 
+psql -U $DB_USER $DB_NAME < db/badge_readers.sql
+log "Inseriti i lettori di badge sul database $DB_NAME"
+
 play start
 
