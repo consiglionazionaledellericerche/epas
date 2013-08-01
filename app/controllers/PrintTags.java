@@ -44,8 +44,10 @@ public class PrintTags extends Controller{
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_STAMPING)
-	public static void listPersonForPrintTags(){
-		LocalDate date = new LocalDate();
+	public static void listPersonForPrintTags(int year, int month){
+		//int month = params.get("month", Integer.class);
+		//int year = params.get("year", Integer.class);
+		LocalDate date = new LocalDate(year, month,1);
 		List<Person> personList = Person.getActivePersons(date);
 		render(personList, date);
 	}

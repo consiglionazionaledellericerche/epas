@@ -16,7 +16,8 @@ import play.Play;
 import play.db.jpa.JPA;
 import play.jobs.*;
 
-@On("0 0 7 1 * ?")
+//@On("0 0 7 1 * ?")
+//@On("0 /5 * * * ?")
 public class ControlAbsenceStamping extends Job{
 
 	/**
@@ -27,10 +28,10 @@ public class ControlAbsenceStamping extends Job{
 	 * @throws EmailException 
 	 */
 	public void doJob() throws EmailException{
-		Long id = new Long(Play.configuration.getProperty("mail.person.cc"));
-		Person p = null;
-		if(id != null)
-			p = Person.findById(id);
+//		Long id = new Long(Play.configuration.getProperty("mail.person.cc"));
+//		Person p = null;
+//		if(id != null)
+//			p = Person.findById(id);
 		//List<Person> personList = Person.find("Select p from Person p where p.surname in (?,?) ", "Tagliaferri", "Del Soldato").fetch();
 		List<Person> personList = Person.getActivePersons(new LocalDate());
 		LocalDate date = new LocalDate();
@@ -49,10 +50,13 @@ public class ControlAbsenceStamping extends Job{
 			}
 			Logger.debug("La stringa completa è: %s", daysInTrouble);
 			if(!daysInTrouble.equals("")){
-				Logger.debug("Inizio a preparare la mail...");
+				Logger.debug("Inizio a preparare la mail per %s %s...", person.name, person.surname);
 				SimpleEmail email = new SimpleEmail();
-				if(person.contactData != null && person.contactData.email != null)
+				if(person.contactData != null && (!person.contactData.email.trim().isEmpty())){
+					Logger.debug("L'indirizzo a cui inviare la mail è: %s", person.contactData.email);
 					email.addTo(person.contactData.email);
+				}
+					
 				else
 					email.addTo(person.name+"."+person.surname+"@"+"iit.cnr.it");
 				email.setHostName(Play.configuration.getProperty("mail.smtp.host"));
@@ -61,8 +65,8 @@ public class ControlAbsenceStamping extends Job{
 				email.setAuthentication(Play.configuration.getProperty("mail.smtp.user"), Play.configuration.getProperty("mail.smtp.pass"));
 				
 				email.setFrom(Play.configuration.getProperty("mail.from.alias"));
-				if(p != null)
-					email.addCc(p.contactData.email);
+//				if(p != null)
+//					email.addCc(p.contactData.email);
 				email.setSubject("controllo giorni del mese");
 				email.setMsg("Salve, controllare i giorni: "+daysInTrouble+ " per "+person.name+' '+person.surname);
 				email.send();
