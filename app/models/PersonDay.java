@@ -946,7 +946,10 @@ public class PersonDay extends Model {
 	}
 	
 	public int progressiveToday() {
-		return checkPreviousProgressive().progressive + differenceToday();
+		if(checkPreviousProgressive() != null)
+			return checkPreviousProgressive().progressive + differenceToday();
+		else
+			return differenceToday();
 	}
 	
 	public int differenceToday() {
