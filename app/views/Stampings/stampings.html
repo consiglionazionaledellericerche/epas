@@ -100,7 +100,14 @@
 		  	</td>	  
 	         <td class="differenza">
 	         %{
-	         	if(!day.isFuture()){
+	       	 	if(day.isToday()){
+	       	 }%
+	       	 		${day.differenceToday().toHourTime()}
+	       	 %{
+	       	 	}
+	       	 }%
+	         %{
+	         	if(!day.isFuture() && !day.isToday()){
 	         }%
 	         	
 	         	%{
@@ -120,8 +127,15 @@
 			</td>	
 	        
 	         <td class="progressivo">
+	         %{
+			 	if(day.isToday()){
+			 }%
+			 		${day.progressiveToday().toHourTime()}
+			 %{
+			 	}
+			 }%
 			%{
-			    if(!day.isFuture()) {
+			    if(!day.isFuture() && !day.isToday()) {
 			}%
 			     
 				%{

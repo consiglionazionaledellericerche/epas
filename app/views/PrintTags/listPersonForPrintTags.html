@@ -9,7 +9,9 @@ Selezionare "Tutti" o uno dei nomi presenti nella lista e premere invio</p>
 
 #{form @PrintTags.showTag()}
 <input type="hidden" name="month" value="${date.getMonthOfYear()}"/>
+
 <input type="hidden" name="year" value="${date.getYear()}"/>
+
 
 #{select 'personId', value:personList.get(0), id:'person'}
 			#{option}Scegli una persona#{/option}

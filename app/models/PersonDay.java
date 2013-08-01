@@ -944,6 +944,17 @@ public class PersonDay extends Model {
 
 		return null;
 	}
+	
+	public int progressiveToday() {
+		return checkPreviousProgressive().progressive + differenceToday();
+	}
+	
+	public int differenceToday() {
+		if(this.person.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek()).workingTime > getTimeAtWorkWithToday().timeAtWork)
+			return (this.person.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek()).workingTime-getTimeAtWorkWithToday().timeAtWork)* (-1);
+		else
+			return -this.person.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek()).workingTime+getTimeAtWorkWithToday().timeAtWork;
+	}
 
 	public boolean isToday() {
 		return date.equals(LocalDate.now());
