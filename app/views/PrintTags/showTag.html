@@ -8,15 +8,16 @@
 	<table id="presenze_mensili">
 		<tr>
 			<th>Buono mensa</th>
-			<th>Giorno</th>
-			<th>Codice di assenza</th> %{ for(int i = 1; i <= numberOfInOut;
+			<th align="left">Giorno</th>
+			<th>Codice assenza</th> %{ for(int i = 1; i <= numberOfInOut;
 			i++){ }%
 			<th>${i}° entrata</th>
 			<th>${i}° uscita</th> %{ } }%
 			<th>Tempo lavoro</th>
-			<th>Differenza</th>
-			<th>Progressivo</th>
-			<th>Tipo Orario</th>
+			<th>Differ.</th>
+			<th>Progress.</th>
+			<th>Tipo
+			 Orario</th>
 		</tr>
 
 		%{ for(day in pm.days) { }%
@@ -27,10 +28,10 @@
 				day.mealTicket()))}</td> %{ }else{ }%
 			<td>${String.format(messages.get('views.common.yes_or_no.true'))}</td>
 			%{ } }% %{ if(day.isHoliday()==false){ }%
-			<td class="capitalized">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'),
-				day.date.toDate())}</td> %{ }else{ }%
-			<td class="festivi">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'),
-				day.date.toDate())}</td> %{ } }%
+			<td class="capitalized"><font size="3">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'),
+				day.date.toDate())}</font></td> %{ }else{ }%
+			<td class="festivi"><font size ="3">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'),
+				day.date.toDate())}</font></td> %{ } }%
 			<td class="assenza">${day.absenceList().size()>0 ?
 				day.absenceList().get(0).absenceType.code : ''}</td> %{ int j = 0;
 			for(int i = 0; i < numberOfInOut; i++){ j = i*2; }%
@@ -75,14 +76,21 @@
 	
 	<p id="spiegazioneTabellaTimbrature">Il numero di buoni mensa usabili per questo mese e': <strong>${pm.numberOfMealTicketToUse()}</strong>, mentre quelli da restituire sono <strong>${pm.numberOfMealTicketToRender()}</strong>. Il numero di giorni lavorativi in sede è di: <strong>${pm.basedWorkingDays()}</strong> </p>
 	
-	%{
+<div>
+<h4 align="left">Note:</h4>
+<table id="Note timbrature">
+	<tr>
+		<th width="80">Codice timbratura</th>
+		<th width="400">Descrizione</th>
+			
+	</tr>
+%{
      for(smt in pm.getStampingCode()) {
 }%
 	<tr>
-		<td>${smt.code}</td>     
+		<td>${smt.code})</td>     
 		<td>${smt.description}</td>		
 	</tr>
-	
 	
 %{  		   
      }
@@ -92,13 +100,43 @@
 	for(type in pm.getStampType()) {
 }%
 	<tr>
-		<td>${type.identifier}</td>
+		<td>${type.identifier} )</td>
 		<td>${type.description}</td>
 	</tr>
 %{  		   
      }
     }
 }%
+</table>
+*{Significato codici assenza}*
+<br>
+<br>
+<br>
+<br>
+
+<h4 align="left">Codici di assenza</h4>
+<table id="Codici di assenza">
+	<tr>
+		<th width="80">Codice assenza</th>
+		<th width="200">Descrizione</th>
+		<th width="80">Numero giorni</th>
+			
+	</tr>
+%{
+     for(entry in pm.getAbsenceCode().entrySet()) {
+}%
+	<tr>
+		<td>${entry.getKey().code}</td>     
+		<td>${entry.getKey().description}</td>	
+		<td>${entry.getValue()}</td>	
+	</tr>
+
+%{  		   
+     }
+     
+}%
+</table>
+</div>
 
 <p>SI AUTOCERTIFICA QUANTO SCRITTO NELLE NOTE
 <br>
