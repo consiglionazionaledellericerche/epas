@@ -298,11 +298,11 @@ public class Stampings extends Controller {
 			stamping.delete();
 			pd.stampings.remove(stamping);
 //			stamping.considerForCounting = true;
-			stamping.save();
-			stamping.personDay.populatePersonDay();
-			stamping.personDay.save();
+//			stamping.save();
+			pd.populatePersonDay();
+			pd.save();
 			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ?", 
-					stamping.personDay.person, stamping.personDay.date).fetch();
+					pd.person, pd.date).fetch();
 			for(PersonDay p : pdList){
 				if(p.date.getMonthOfYear() == stamping.date.getMonthOfYear()){
 					p.populatePersonDay();

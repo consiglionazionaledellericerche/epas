@@ -55,7 +55,7 @@ public class Absences extends Controller{
 		if (personMonth == null) {
 			personMonth = new PersonMonth(person, year, month);
 		}
-		
+
 		render(personMonth);
 
 	}
@@ -240,7 +240,7 @@ public class Absences extends Controller{
 		if (absenceType == null) {
 			validation.keep();
 			params.flash();
-			
+
 			flash.error("Il codice di assenza %s non esiste", params.get("absenceCode"));
 			Logger.info("E' stato richiesto l'inserimento del codice di assenza %s per l'assenza del giorno %s per personId = %d. Il codice NON esiste. Se si tratta di un codice di assenza per malattia figlio NUOVO, inserire il nuovo codice nella lista e riprovare ad assegnarlo.", absenceType, dateFrom, personId);
 			create(personId, yearFrom, monthFrom, dayFrom);
@@ -258,14 +258,14 @@ public class Absences extends Controller{
 			create(personId, yearFrom, monthFrom, dayFrom);
 			render("@save");
 		}
-		
+
 		Absence abs = Absence.find("Select abs from Absence abs where abs.personDay.person = ? and abs.personDay.date = ?", person, dateFrom).first();
 		if(abs != null && abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay && 
 				absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay){
 			flash.error("Non si possono inserire per lo stesso giorno due codici di assenza giornaliera");
 			render("@save");
 		}
-		
+
 		/**
 		 * controllo sulla possibilità di poter prendere i congedi per malattia dei figli, guardo se il codice di assenza appartiene alla
 		 * lista dei codici di assenza da usare per le malattie dei figli
@@ -282,10 +282,10 @@ public class Absences extends Controller{
 						" massimo di giorni di assenza per quel codice", person.name, person.surname, absenceType.code));
 				render("@save");
 				return;
-				
+
 			}
 		}
-		
+
 		/**
 		 * qui controllare il fatto che l'utente da tastiera possa aver inserito il codice "FER" e con quello, quindi, andare a cercare di 
 		 * inserire il giusto codice di assenza per ferie in base a quante ferie potevano essere rimaste dall'anno precedente, eventualmente passare
@@ -309,7 +309,7 @@ public class Absences extends Controller{
 					render("@save");
 				}
 				else{
-					List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+					List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
 							person, dateFrom, dateTo).fetch();
 					if(pdList.size() != 0){
 						for(PersonDay pd : pdList){
@@ -325,7 +325,7 @@ public class Absences extends Controller{
 						while(!dateFrom.isAfter(dateTo)){
 							PersonDay pd = PersonUtility.createPersonDayFromDate(person, dateFrom);
 							if(pd != null){
-								
+
 								pd.create();
 								Absence absence = new Absence();
 								absence.absenceType = abt;
@@ -337,10 +337,20 @@ public class Absences extends Controller{
 							dateFrom = dateFrom.plusDays(1);
 						}
 					}
+					int size = pdList.size();
+					PersonDay pd = pdList.get(size-1);
+					if(pd.date.isBefore(new LocalDate(pd.date).dayOfMonth().withMaximumValue())){
+						List<PersonDay> pdList2 = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ? and pd.date <= ?", 
+								pd.person, pd.date, new LocalDate(pd.date).dayOfMonth().withMaximumValue()).fetch();
+						for(PersonDay personday : pdList2){
+							personday.populatePersonDay();
+							personday.save();
+						}
+					}
 				}
 				flash.success("Inserito il codice di assenza %s per il periodo richiesto", abt.code);
 				render("@save");
-				
+
 			}
 			else{
 				Logger.debug("%s %s è in turno, reperibilità", person.name, person.surname);
@@ -348,9 +358,9 @@ public class Absences extends Controller{
 						person.name, person.surname);
 				render("@save");
 			}
-			
+
 		}
-		
+
 		/**
 		 * controllo che le persone che richiedono il riposo compensativo, che hanno una qualifica compresa tra 1 e 3, non abbiano superato
 		 * il massimo numero di giorni di riposo compensativo consentiti e presenti in configurazione
@@ -361,16 +371,16 @@ public class Absences extends Controller{
 			LocalDate actualDate = new LocalDate(yearFrom, monthFrom, dayFrom);
 			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, actualDate).first();
 			if(pd == null){
-					pd = new PersonDay(person, actualDate);
-					pd.create();
+				pd = new PersonDay(person, actualDate);
+				pd.create();
 			}
 			//TODO: Fare un'unica select per estrarre il count delle absences con absenceType.code = 94 
 			Query query = JPA.em().createQuery("SELECT abs FROM Absence abs WHERE abs.personDay.person = :person "+ 
 					"AND abs.personDay.date between :dateStart AND :dateTo AND abs.absenceType.code = :code");
 			query.setParameter("person", pd.person).
-				setParameter("dateStart", new LocalDate(yearFrom, 1,1)).
-				setParameter("dateTo",actualDate).
-				setParameter("code", "91");
+			setParameter("dateStart", new LocalDate(yearFrom, 1,1)).
+			setParameter("dateTo",actualDate).
+			setParameter("code", "91");
 			List<Object> resultList = query.getResultList();
 			Logger.debug("Il numero di assenze con codice %s fino a oggi è %d", absenceType.code, resultList.size());
 			if(resultList.size() >= config.maxRecoveryDaysOneThree){
@@ -379,13 +389,13 @@ public class Absences extends Controller{
 				render("@save");
 				return;
 			}
-	
+
 		}
-		
+
 		//TODO: implementare i controlli sui gruppi di codici di assenza, i controlli sui gruppi devono anche implementare
 		// le sostituzioni dei codici tramite accumulutatori o query ad hoc
-		
-		
+
+
 		Logger.debug("%s %s può usufruire del codice %s", person.name, person.surname, absenceType.code);
 		if(dateTo.isBefore(dateFrom) || dateTo.isEqual(dateFrom)){
 			Logger.debug("Si intende inserire un'assenza per un giorno solo");
@@ -407,6 +417,14 @@ public class Absences extends Controller{
 			Logger.debug("Creata e salvata l'assenza %s con codice %s", absence, absence.absenceType.code);
 			pd.populatePersonDay();
 			pd.save();
+			if(pd.date.isBefore(new LocalDate(pd.date).dayOfMonth().withMaximumValue())){
+				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ? and pd.date <= ?", 
+						pd.person, pd.date, new LocalDate(pd.date).dayOfMonth().withMaximumValue()).fetch();
+				for(PersonDay personday : pdList){
+					personday.populatePersonDay();
+					personday.save();
+				}
+			}
 
 			flash.success(
 					String.format("Assenza di tipo %s inserita per il giorno %s per %s %s", absenceCode, PersonTags.toDateTime(dateFrom), person.surname, person.name));
@@ -414,11 +432,11 @@ public class Absences extends Controller{
 
 		}
 		else{
-			//Logger.debug("Si intende inserire l'assenza %s dal %s al %s", absenceType.code, dateFrom, dateTo);
+
 			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 					person, dateFrom, dateTo).fetch();
 			if(pdList.size() != 0){
-				//Logger.debug("La lista dei personDay non è vuota");
+
 				for(PersonDay pd : pdList){
 					Absence absence = new Absence();
 					absence.absenceType = absenceType;
@@ -429,14 +447,14 @@ public class Absences extends Controller{
 				}
 			}
 			else{
-				//Logger.debug("la lista dei personday per i giorni richiesti è vuota");
+
 				while(!dateFrom.isAfter(dateTo)){
 					Logger.debug("Datefrom: %s DateTo: %s", dateFrom, dateTo);
 					PersonDay pd = PersonUtility.createPersonDayFromDate(person, dateFrom);
 					if(pd != null){
 						pd.create();
 						Logger.debug("Creato personDay per il giorno %s ", dateFrom);
-						
+
 						Absence absence = new Absence();
 						absence.absenceType = absenceType;
 						absence.personDay = pd;
@@ -447,10 +465,11 @@ public class Absences extends Controller{
 					dateFrom = dateFrom.plusDays(1);
 				}
 			}
+
 			flash.success("Inserita assenza %s dal %s al %s", absenceType.code, dateFrom, dateTo);
 			render("@save");
 		}
-		
+
 	}
 
 
@@ -482,6 +501,14 @@ public class Absences extends Controller{
 			pd.absences.remove(absence);
 			pd.populatePersonDay();
 			pd.save();
+			if(pd.date.isBefore(new LocalDate(pd.date).dayOfMonth().withMaximumValue())){
+				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ? and pd.date <= ?", 
+						pd.person, pd.date, new LocalDate(pd.date).dayOfMonth().withMaximumValue()).fetch();
+				for(PersonDay personday : pdList){
+					personday.populatePersonDay();
+					personday.save();
+				}
+			}
 			flash.success("Timbratura di tipo %s per il giorno %s rimossa per il dipendente %s %s", 
 					oldAbsenceCode, PersonTags.toDateTime(absence.personDay.date), pd.person.name, pd.person.surname);			
 		} 
@@ -500,23 +527,23 @@ public class Absences extends Controller{
 				edit(absence.id);
 				render("@edit");
 			}
-			if((params.get("buonoMensaSi") != null) || (params.get("buonoMensaNo") != null) || (params.get("buonoMensaCalcolato") != null)){
-				if(params.get("buonoMensaSi", Boolean.class) == true){
 
-					pd.isTicketAvailable = true;
-					pd.save();
+			if((params.get("buonoMensaSi") != null) && params.get("buonoMensaSi", Boolean.class) == true){
 
-				}
-				if(params.get("buonoMensaNo", Boolean.class) == true){
-					pd.isTicketAvailable = false;
-					pd.save();
-				}
+				pd.isTicketAvailable = true;
+				pd.save();
 
-				if(params.get("buonoMensaCalcolato", Boolean.class) == true){
-					pd.populatePersonDay();
-					pd.save();
-				}
 			}
+			if((params.get("buonoMensaNo") != null) && params.get("buonoMensaNo", Boolean.class) == true){
+				pd.isTicketAvailable = false;
+				pd.save();
+			}
+
+			if((params.get("buonoMensaCalcolato") != null) && params.get("buonoMensaCalcolato", Boolean.class) == true){
+				pd.populatePersonDay();
+				pd.save();
+			}
+
 
 
 			if(params.get("datasize", Blob.class) != null){
