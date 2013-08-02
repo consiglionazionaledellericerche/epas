@@ -413,10 +413,12 @@ public class Absences extends Controller{
 				absence.absenceRequest = null;
 
 			absence.absenceType = absenceType;
+			//absence.save();
 			pd.addAbsence(absence);
+			pd.save();
 			Logger.debug("Creata e salvata l'assenza %s con codice %s", absence, absence.absenceType.code);
 			pd.populatePersonDay();
-			pd.save();
+			
 			if(pd.date.isBefore(new LocalDate(pd.date).dayOfMonth().withMaximumValue())){
 				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ? and pd.date <= ?", 
 						pd.person, pd.date, new LocalDate(pd.date).dayOfMonth().withMaximumValue()).fetch();
