@@ -8,6 +8,8 @@ import models.Configuration;
 import models.Person;
 import models.PersonDay;
 import models.PersonMonth;
+import play.Logger;
+import play.i18n.Lang;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -22,7 +24,8 @@ public class PrintTags extends Controller{
 			flash.error("Malissimo! ci vuole un id! Seleziona una persona!");
 			Application.indexAdmin();
 		}
-		
+		Lang.change("it");
+		Logger.debug("Il linguaggio attualmente è: %s", Lang.get());
 		Configuration confParameters = Configuration.getCurrentConfiguration();
 		if(personId == -1){
 			/**
@@ -37,7 +40,7 @@ public class PrintTags extends Controller{
 		PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
 				person, month, year).first();
 		int numberOfInOut = Math.min(confParameters.numberOfViewingCoupleColumn, (int)pm.getMaximumCoupleOfStampings());
-				
+		
 		renderPDF(pdList, person, year, month, pm, numberOfInOut);
 		
 		
