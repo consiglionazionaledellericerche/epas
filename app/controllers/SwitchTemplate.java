@@ -107,7 +107,7 @@ public class SwitchTemplate extends Controller{
 			break;
 		case printTag:
 			Logger.debug("sto per chiamare la stampa cartellino");
-			PrintTags.listPersonForPrintTags();
+			PrintTags.listPersonForPrintTags(year, month);
 			break;
 
 		case yearlyAbsences:
