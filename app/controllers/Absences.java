@@ -249,8 +249,10 @@ public class Absences extends Controller{
 
 		Logger.debug("Richiesto inserimento della assenza codice = %s della persona %s, dataInizio = %s", absenceCode, person, dateFrom);
 
+		//FIXME: ed i giorni successivi al primo? ci potrebbero essere delle assenze anche nei giorni successivi
 		Absence existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where a.personDay = pd and pd.person = ? and pd.date = ?" +
 				" and a.absenceType = ?", person, dateFrom, absenceType).first();
+		//FIXME: se ci sono più assenze orario in quel giorno il "first" fa si che si controlli solo la prima e questo è SBAGLIATO
 		if(existingAbsence != null){
 			validation.keep();
 			params.flash();
@@ -259,6 +261,9 @@ public class Absences extends Controller{
 			render("@save");
 		}
 
+		//FIXME: volendo si potrebbe fare un'unica select, estrarre tutte le assenze per il giorno e poi controllare che non ci siamo assenze con lo stesso
+		//codice o assenze giornaliere
+		//FIXME: COMUNQUE la query è sbagliata perché se ci sono più assenze, per esempio una orario ed una giornaliera, la select prende solo prima -> "first"
 		Absence abs = Absence.find("Select abs from Absence abs where abs.personDay.person = ? and abs.personDay.date = ?", person, dateFrom).first();
 		if(abs != null && abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay && 
 				absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay){
@@ -269,11 +274,9 @@ public class Absences extends Controller{
 		/**
 		 * controllo sulla possibilità di poter prendere i congedi per malattia dei figli, guardo se il codice di assenza appartiene alla
 		 * lista dei codici di assenza da usare per le malattie dei figli
-		 * TODO: aggiungere anche gli altri codici per i figli, per esempio mettere il controllo sulla sottostringa 12* e 13* perchè
-		 * 	per esempio anche 124 è un codice valido per la malattia del 4° figlio
 		 */
-		if(absenceType.code.equals("12") || absenceType.code.equals("122") || absenceType.code.equals("123") || absenceType.code.equals("13")
-				|| absenceType.code.equals("132") || absenceType.code.equals("133") || absenceType.code.equals("134")){
+		//TODO: se il dipendente ha più di 9 figli! non funziona dal 10° in poi
+		if((absenceType.code.startsWith("12") || absenceType.code.startsWith("13")) && absenceType.code.length() == 3){
 			if(!PersonUtility.canTakePermissionIllnessChild(person, dateFrom, absenceType)){
 				/**
 				 * non può usufruire del permesso
@@ -291,7 +294,9 @@ public class Absences extends Controller{
 		 * inserire il giusto codice di assenza per ferie in base a quante ferie potevano essere rimaste dall'anno precedente, eventualmente passare
 		 * da quelle dell'anno in corso o ancora dai permessi legge...ok ma qual'è l'ordine? :-)
 		 */
+		//TODO: sarebbe meglio utilizzare degli ENUM con il mapping tra codici del DB e codici più comuni
 		if(absenceType.code.equals("FER")){
+			//FIXME: perché il controllo successivo è fatto solo per il FER?
 			if(PersonUtility.canPersonTakeAbsenceInShiftOrReperibility(person, new LocalDate(yearFrom,monthFrom,dayFrom))){
 				Logger.debug("%s %s non è in turno o in reperibilità", person.name, person.surname);
 				AbsenceType abt = PersonUtility.whichVacationCode(person, yearFrom, monthFrom, dayFrom);
@@ -356,6 +361,7 @@ public class Absences extends Controller{
 				Logger.debug("%s %s è in turno, reperibilità", person.name, person.surname);
 				flash.error("Non si può inserire un giorno di ferie per %s %s che è in turno/reperibilità. \n Contattarlo e chiedere spiegazioni", 
 						person.name, person.surname);
+				//FIXME: e dopo aver ricevuto le spiegazioni come forzo l'inserimento??
 				render("@save");
 			}
 
