@@ -5,6 +5,7 @@ package models;
 
 
 
+import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
 import it.cnr.iit.epas.JsonStampingBinder;
 
@@ -531,6 +532,17 @@ public class Person extends Model {
 		}
 		return technicians;
 	}
+	
+	/**
+	 * 
+	 * @return la lista delle persone che sono state selezionate per far parte della sperimentazione del nuovo sistema delle presenze
+	 */
+	public static List<Person> getPeopleForTest(){
+		List<Person> peopleForTest = Person.find("Select p from Person p where p.surname in (?,?,?,?,?,?,?)", "Vasarelli", "Lucchesi", "Vivaldi", "Del Soldato",
+				"Martinelli", "Sannicandro", "Ruberti").fetch();
+		return peopleForTest;
+		
+	}
 
 	/**
 	 * metodo per la creazione di una timbratura a partire dall'oggetto stampModificationType che è stato costruito dal binder del Json
@@ -645,6 +657,7 @@ public class Person extends Model {
 	}
 	
 	
+		
 	/**
 	 * 
 	 * @return se è attiva la reperibilità nei giorni lavorativi
