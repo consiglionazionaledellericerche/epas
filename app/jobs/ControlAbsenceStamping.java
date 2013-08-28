@@ -33,7 +33,8 @@ public class ControlAbsenceStamping extends Job{
 //		if(id != null)
 //			p = Person.findById(id);
 		//List<Person> personList = Person.find("Select p from Person p where p.surname in (?,?) ", "Tagliaferri", "Del Soldato").fetch();
-		List<Person> personList = Person.getActivePersons(new LocalDate());
+	//	List<Person> personList = Person.getActivePersons(new LocalDate());
+		List<Person> personList = Person.getPeopleForTest();
 		LocalDate date = new LocalDate();
 		
 		for(Person person : personList){
