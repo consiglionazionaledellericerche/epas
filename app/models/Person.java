@@ -538,8 +538,8 @@ public class Person extends Model {
 	 * @return la lista delle persone che sono state selezionate per far parte della sperimentazione del nuovo sistema delle presenze
 	 */
 	public static List<Person> getPeopleForTest(){
-		List<Person> peopleForTest = Person.find("Select p from Person p where p.surname in (?,?,?,?,?,?,?)", "Vasarelli", "Lucchesi", "Vivaldi", "Del Soldato",
-				"Martinelli", "Sannicandro", "Ruberti").fetch();
+		List<Person> peopleForTest = Person.find("Select p from Person p where p.surname in (?,?,?,?,?,?) or (p.name = ? and p.surname = ?)", 
+				"Vasarelli", "Lucchesi", "Vivaldi", "Del Soldato", "Sannicandro", "Ruberti", "Maurizio", "Martinelli").fetch();
 		return peopleForTest;
 		
 	}
