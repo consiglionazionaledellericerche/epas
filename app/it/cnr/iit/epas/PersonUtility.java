@@ -469,13 +469,14 @@ public class PersonUtility {
 				"and abs.absenceType = :type");
 		query.setParameter("person", person).setParameter("begin", new LocalDate(year-1,1,1)).setParameter("end", new LocalDate(year-1,12,31)).setParameter("type", vacationFromThisYear);
 		List<Absence> absList = query.getResultList();
-		//Logger.debug("Nell'anno passato %s %s ha usufruito di %d giorni di ferie", person.name, person.surname, absList.size());
+		Logger.debug("Nell'anno passato %s %s ha usufruito di %d giorni di ferie", person.name, person.surname, absList.size());
 		
 		query.setParameter("person", person).setParameter("begin", new LocalDate().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue())
 			.setParameter("end", new LocalDate()).setParameter("type", vacationFromLastYear);
 		List<Absence> absThisYearList = query.getResultList();
-		//Logger.debug("Quest'anno %s %s ha usufruito di %d giorni di ferie", person.name, person.surname, absThisYearList.size());
+		Logger.debug("Quest'anno %s %s ha usufruito di %d giorni di ferie", person.name, person.surname, absThisYearList.size());
 		
+		//FIXME: alcuni non hanno vacation period (abraham)
 		VacationPeriod vp = VacationPeriod.find("Select vp from VacationPeriod vp where vp.person = ? and ((vp.beginFrom <= ? and vp.endTo >= ?) " +
 				"or (vp.endTo = null)) order by vp.beginFrom desc", person, new LocalDate(year-1,1,1), new LocalDate(year-1,12,31)).first();
 		if((vp.vacationCode.vacationDays > absList.size() + absThisYearList.size()) && 
@@ -487,7 +488,7 @@ public class PersonUtility {
 		query.setParameter("begin", new LocalDate().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue())
 			.setParameter("end", new LocalDate(year, month, day)).setParameter("person", person).setParameter("type", permissionDay);
 		List<Absence> absPermissions = query.getResultList();
-		//Logger.debug("%s %s quest'ann ha usufruito di %d giorni di permesso", person.name, person.surname, absPermissions.size());
+		Logger.debug("%s %s quest'anno ha usufruito di %d giorni di permesso", person.name, person.surname, absPermissions.size());
 		if(vp.vacationCode.permissionDays > absPermissions.size()){
 			return permissionDay;
 		}

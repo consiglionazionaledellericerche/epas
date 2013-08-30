@@ -48,6 +48,12 @@ public class MainMenu {
 		this.month = month;
 	}
 	
+	public MainMenu(int year, int month, int day){
+		this.year = year;
+		this.month = month;
+		this.day = day;
+	}
+	
 	public MainMenu(int year, int month, ActionMenuItem method){
 		this.year = year;
 		this.month = month;
