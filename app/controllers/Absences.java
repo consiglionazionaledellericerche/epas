@@ -1,5 +1,6 @@
 package controllers;
 
+import it.cnr.iit.epas.MainMenu;
 import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
@@ -219,12 +220,12 @@ public class Absences extends Controller{
 	public static void create(@Required Long personId, @Required Integer year, @Required Integer month, @Required Integer day) {
 		Logger.debug("Insert absence called for personId=%d, year=%d, month=%d, day=%d", personId, year, month, day);
 		List<AbsenceType> frequentAbsenceTypeList = getFrequentAbsenceTypes();
-
+		MainMenu mainMenu = new MainMenu(year,month,day);
 		List<AbsenceType> allCodes = getAllAbsenceTypes(new LocalDate(year,month,day));
 		Person person = Person.em().getReference(Person.class, personId);
 		LocalDate date = new LocalDate(year, month, day);
 		PersonDay personDay = new PersonDay(person, date);
-		render(personDay, frequentAbsenceTypeList, allCodes);
+		render(personDay, frequentAbsenceTypeList, allCodes, mainMenu);
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
@@ -249,21 +250,42 @@ public class Absences extends Controller{
 
 		Logger.debug("Richiesto inserimento della assenza codice = %s della persona %s, dataInizio = %s", absenceCode, person, dateFrom);
 
-		//FIXME: ed i giorni successivi al primo? ci potrebbero essere delle assenze anche nei giorni successivi
-		Absence existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where a.personDay = pd and pd.person = ? and pd.date = ?" +
-				" and a.absenceType = ?", person, dateFrom, absenceType).first();
-		//FIXME: se ci sono più assenze orario in quel giorno il "first" fa si che si controlli solo la prima e questo è SBAGLIATO
-		if(existingAbsence != null){
-			validation.keep();
-			params.flash();
-			flash.error("Il codice di assenza %s è già presente per la data %s", params.get("absenceCode"), PersonTags.toDateTime(dateFrom));
-			create(personId, yearFrom, monthFrom, dayFrom);
-			render("@save");
-		}
+		// è il caso in cui si inserisce lo stesso codice di assenza per più giorni
+		if(dateTo.isAfter(dateFrom)){
 
-		//FIXME: volendo si potrebbe fare un'unica select, estrarre tutte le assenze per il giorno e poi controllare che non ci siamo assenze con lo stesso
-		//codice o assenze giornaliere
-		//FIXME: COMUNQUE la query è sbagliata perché se ci sono più assenze, per esempio una orario ed una giornaliera, la select prende solo prima -> "first"
+			LocalDate dataInizioAssenze = dateFrom;
+			while(dataInizioAssenze.isBefore(dateTo)){
+//				PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, dataInizioAssenze).first();
+				List<Absence> absenceList = Absence.find("Select a from Absence a, PersonDay pd where a.personDay = pd and pd.person = ? and pd.date = ?", 
+						person, dataInizioAssenze).fetch();
+				for(Absence abs : absenceList){
+					if(abs.absenceType.equals(absenceType)){
+						flash.error("Il codice di assenza %s è già presente in almeno uno dei giorni in cui lo si voleva inserire. Controllare", absenceType.code);
+						create(personId, yearFrom, monthFrom, dayFrom);
+						render("@save");
+					}
+											
+				}
+				dataInizioAssenze = dataInizioAssenze.plusDays(1);
+			}		
+			
+		}
+		else{
+			
+			List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where a.personDay = pd and pd.person = ? and pd.date = ?" +
+					" and a.absenceType = ?", person, dateFrom, absenceType).fetch();
+			if(existingAbsence.size() > 0){
+				if((existingAbsence.get(0).absenceType.equals(absenceType) || existingAbsence.get(1).absenceType.equals(absenceType))){
+					validation.keep();
+					params.flash();
+					flash.error("Il codice di assenza %s è già presente per la data %s", params.get("absenceCode"), PersonTags.toDateTime(dateFrom));
+					create(personId, yearFrom, monthFrom, dayFrom);
+					render("@save");
+				}
+			}
+			
+		}
+				
 		Absence abs = Absence.find("Select abs from Absence abs where abs.personDay.person = ? and abs.personDay.date = ?", person, dateFrom).first();
 		if(abs != null && abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay && 
 				absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay){
@@ -288,6 +310,62 @@ public class Absences extends Controller{
 
 			}
 		}
+		
+		/**
+		 * in questo pezzo si controlla il poter inserire i codici per le assenze dovute a malattie o ricoveri anche nei giorni festivi.
+		 * Da risistemare quando verrà cambiato il database anche in produzione e allora bisognerà controllare che il codice d'assenza inserito 
+		 * abbia il campo "considered_week_end" = true
+		 */
+		if(absenceType.code.startsWith("11") || absenceType.code.equals("21") || absenceType.code.equals("38")){
+			if(dateTo.isBefore(dateFrom) || dateTo.isEqual(dateFrom)){
+				PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, new LocalDate(yearFrom, monthFrom, dayFrom)).first();
+				if(pd == null){
+					pd = new PersonDay(person, dateFrom);
+					pd.create();
+				}
+				Absence absence = new Absence();
+				absence.absenceType = absenceType;
+				absence.personDay = pd;
+				absence.save();
+				flash.success("Inserito il codice d'assenza %s nel giorno %s", absenceType.code, pd.date);
+				render("@save");
+			}
+			else{
+				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
+						person, dateFrom, dateTo).fetch();
+				if(pdList.size() != 0){
+					for(PersonDay pd : pdList){
+						Absence absence = new Absence();
+						absence.absenceType = absenceType;
+						absence.personDay = pd;
+						absence.save();
+						pd.absences.add(absence);
+						pd.save();
+						pd.populatePersonDay();
+						
+					}
+				}
+				else{
+					while(!dateFrom.isAfter(dateTo)){
+						PersonDay pd = new PersonDay(person, dateFrom);
+						pd.create();
+						Absence absence = new Absence();
+						absence.absenceType = absenceType;
+						absence.personDay = pd;
+						absence.save();
+						pd.absences.add(absence);
+						pd.merge();
+						
+						pd.populatePersonDay();
+						pd.save();
+						
+						dateFrom = dateFrom.plusDays(1);
+					}
+				}
+				flash.success("Inserito codice d'assenza %s per il periodo richiesto", absenceType.code);
+				render("@save");
+			}
+		}
 
 		/**
 		 * qui controllare il fatto che l'utente da tastiera possa aver inserito il codice "FER" e con quello, quindi, andare a cercare di 
@@ -299,8 +377,9 @@ public class Absences extends Controller{
 			//FIXME: perché il controllo successivo è fatto solo per il FER?
 			if(PersonUtility.canPersonTakeAbsenceInShiftOrReperibility(person, new LocalDate(yearFrom,monthFrom,dayFrom))){
 				Logger.debug("%s %s non è in turno o in reperibilità", person.name, person.surname);
-				AbsenceType abt = PersonUtility.whichVacationCode(person, yearFrom, monthFrom, dayFrom);
+				
 				if(dateTo.isBefore(dateFrom) || dateTo.isEqual(dateFrom)){
+					AbsenceType abt = PersonUtility.whichVacationCode(person, yearFrom, monthFrom, dayFrom);
 					PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, new LocalDate(yearFrom, monthFrom, dayFrom)).first();
 					if(pd == null){
 						pd = new PersonDay(person, new LocalDate(yearFrom, monthFrom, dayFrom));
@@ -314,46 +393,58 @@ public class Absences extends Controller{
 					render("@save");
 				}
 				else{
+					
 					List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
 							person, dateFrom, dateTo).fetch();
+					
 					if(pdList.size() != 0){
 						for(PersonDay pd : pdList){
+							AbsenceType abt = PersonUtility.whichVacationCode(person, yearFrom, monthFrom, dayFrom);
 							Absence absence = new Absence();
 							absence.absenceType = abt;
 							absence.personDay = pd;
 							absence.save();
-							pd.populatePersonDay();
 							pd.save();
+							pd.populatePersonDay();
+							
 						}
 					}
 					else{
 						while(!dateFrom.isAfter(dateTo)){
+							Logger.debug("Devo creare il personDay perchè il giorno è futuro rispetto a oggi");
+							AbsenceType abt = PersonUtility.whichVacationCode(person, yearFrom, monthFrom, dayFrom);
 							PersonDay pd = PersonUtility.createPersonDayFromDate(person, dateFrom);
 							if(pd != null){
-
+								Logger.debug("Nel controller absences vado a creare il personDay e a inserire l'assenza per %s %s nel giorno %s", 
+										person.name, person.surname, dateFrom);
 								pd.create();
 								Absence absence = new Absence();
 								absence.absenceType = abt;
 								absence.personDay = pd;
 								absence.save();
+								pd.absences.add(absence);
+								pd.merge();
+								//Logger.debug("Non ho ancora chiamato la populate personday, la differenza per %s %s è: %d minuti", person.name, person.surname, pd.difference);
 								pd.populatePersonDay();
 								pd.save();
+								
 							}
 							dateFrom = dateFrom.plusDays(1);
 						}
 					}
-					int size = pdList.size();
-					PersonDay pd = pdList.get(size-1);
-					if(pd.date.isBefore(new LocalDate(pd.date).dayOfMonth().withMaximumValue())){
-						List<PersonDay> pdList2 = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ? and pd.date <= ?", 
-								pd.person, pd.date, new LocalDate(pd.date).dayOfMonth().withMaximumValue()).fetch();
-						for(PersonDay personday : pdList2){
-							personday.populatePersonDay();
-							personday.save();
-						}
-					}
+//					int size = pdList.size();
+//					Logger.debug("la dimensione della lista è: %d", size);
+//					PersonDay pd = pdList.get(size-1);
+//					if(pd.date.isBefore(new LocalDate(pd.date).dayOfMonth().withMaximumValue())){
+//						List<PersonDay> pdList2 = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ? and pd.date <= ?", 
+//								pd.person, pd.date, new LocalDate(pd.date).dayOfMonth().withMaximumValue()).fetch();
+//						for(PersonDay personday : pdList2){
+//							personday.populatePersonDay();
+//							personday.save();
+//						}
+//					}
 				}
-				flash.success("Inserito il codice di assenza %s per il periodo richiesto", abt.code);
+				flash.success("Inserito il codice di assenza per il periodo richiesto");
 				render("@save");
 
 			}

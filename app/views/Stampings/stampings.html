@@ -100,9 +100,16 @@
 		  	</td>	  
 	         <td class="differenza">
 	         %{
-	       	 	if(day.isToday()){
+	       	 	if(day.isToday() && day.absences.size() == 0){
 	       	 }%
 	       	 		${day.differenceToday().toHourTime()}
+	       	 %{
+	       	 	}
+	       	 }%
+	       	 %{
+	       	 	if(day.isToday() && day.absences.size() != 0){
+	       	 }%
+	       	 		${(day.difference).toHourTime()}
 	       	 %{
 	       	 	}
 	       	 }%
@@ -128,12 +135,19 @@
 	        
 	         <td class="progressivo">
 	         %{
-			 	if(day.isToday()){
+			 	if(day.isToday() && day.absences.size() == 0){
 			 }%
 			 		${day.progressiveToday().toHourTime()}
 			 %{
 			 	}
 			 }%
+			 %{
+	       	 	if(day.isToday() && day.absences.size() != 0){
+	       	 }%
+	       	 		${(day.progressive).toHourTime()}
+	       	 %{
+	       	 	}
+	       	 }%
 			%{
 			    if(!day.isFuture() && !day.isToday()) {
 			}%
