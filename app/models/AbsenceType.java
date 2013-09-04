@@ -81,6 +81,9 @@ public class AbsenceType extends Model {
 	@Column(name = "ignore_stamping")
 	public boolean ignoreStamping = false;
 	
+	@Column(name = "considered_week_end")
+	public boolean consideredWeekEnd = false;
+	
 	@Enumerated(EnumType.STRING)
 	@Column(name = "justified_time_at_work")
 	public JustifiedTimeAtWork justifiedTimeAtWork;

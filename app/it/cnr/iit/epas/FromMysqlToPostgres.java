@@ -458,6 +458,10 @@ public class FromMysqlToPostgres {
 			if (absenceType.code.startsWith("91")) {
 				absenceType.compensatoryRest = true;
 			}
+			
+			if(absenceType.code.equals("21") || absenceType.code.equals("38") || absenceType.code.startsWith("11")){
+				absenceType.consideredWeekEnd = true;
+			}
 
 			absenceType.description = rsCodici.getString("Descrizione");
 			absenceType.validFrom = new LocalDate(rsCodici.getDate("DataInizio"));
