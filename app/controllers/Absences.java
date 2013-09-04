@@ -316,7 +316,7 @@ public class Absences extends Controller{
 		 * Da risistemare quando verrà cambiato il database anche in produzione e allora bisognerà controllare che il codice d'assenza inserito 
 		 * abbia il campo "considered_week_end" = true
 		 */
-		if(absenceType.code.startsWith("11") || absenceType.code.equals("21") || absenceType.code.equals("38")){
+		if(absenceType.consideredWeekEnd){
 			if(dateTo.isBefore(dateFrom) || dateTo.isEqual(dateFrom)){
 				PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, new LocalDate(yearFrom, monthFrom, dayFrom)).first();
 				if(pd == null){
