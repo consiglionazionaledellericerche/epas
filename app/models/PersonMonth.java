@@ -253,6 +253,7 @@ public class PersonMonth extends Model {
 		.setParameter("begin", begin)
 		.setParameter("end", begin.dayOfMonth().withMaximumValue());
 		Integer maxNumberOfStamping = query.getFirstResult();
+		Logger.debug("Ho trovato %d timbrature come massimo", maxNumberOfStamping);
 		return maxNumberOfStamping%2 == 0 ? maxNumberOfStamping/2 : (maxNumberOfStamping/2 + maxNumberOfStamping%2);
 		
 

@@ -52,7 +52,7 @@ public class Stampings extends Controller {
 			Application.indexAdmin();
 		}
 		
-		long id = 1;
+//		long id = 1;
 		//Configuration confParameters = Configuration.findById(id);
 		Configuration confParameters = Configuration.getCurrentConfiguration();
 		if(confParameters == null)
@@ -86,9 +86,9 @@ public class Stampings extends Controller {
 		
 		
 		int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
-		int numberOfInOut = Math.min(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
+		int numberOfInOut = Math.max(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
 
-		//Logger.debug("Month recap of person.id %s, year=%s, month=%s", person.id, year, month);
+		Logger.debug("Numuero di ingressi/uscite: %d", numberOfInOut);
 
 		render(personMonth, numberOfInOut, numberOfCompensatoryRest, situazioneParziale);
 	}
