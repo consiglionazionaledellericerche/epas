@@ -54,11 +54,10 @@
 			}%
 		
 			<td class="assenza">
-				%{ absenceList = day.absenceList() }%
 				
 					<a href="@{Absences.create(day.person.id, day.date.year, day.date.monthOfYear, day.date.dayOfMonth)}" class="insertAbsence${day.date.dayOfMonth}">___</a>
 				%{	
-					for (absence in absenceList) { 
+					for (absence in day.absences) { 
 				%}
 						<a href="@{Absences.edit(absence.id)}" class="insertAbsence${day.date.dayOfMonth}">
 							${absence.absenceType.code}
