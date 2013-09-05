@@ -184,25 +184,32 @@ public class PersonMonth extends Model {
 	 */
 	@Deprecated
 	public int getCompensatoryRest(){
-		int compensatoryRest = 0;
+//		int compensatoryRest = 0;
 		LocalDate beginMonth = new LocalDate(year, month, 1);
-		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-				person, beginMonth, beginMonth.dayOfMonth().withMaximumValue()).fetch();
-		for(PersonDay pd : pdList){
-			if(pd.absences.size() > 0){
-				for(Absence abs : pd.absences){
-					if(abs.absenceType.code.equals("91"))
-						compensatoryRest = compensatoryRest +1;
-				}
-			}
-		}
-		return compensatoryRest;
+		Query query = JPA.em().createQuery("Select abs from Absence abs where abs.personDay.person = :person and abs.personDay.date between " +
+				":begin and :end and abs.absenceType.code = :code");
+		query.setParameter("person", person)
+		.setParameter("begin", beginMonth)
+		.setParameter("end", beginMonth.dayOfMonth().withMaximumValue())
+		.setParameter("code", "91");
+		List<Absence> absList = query.getResultList();
+//		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+//				person, beginMonth, beginMonth.dayOfMonth().withMaximumValue()).fetch();
+//		for(PersonDay pd : pdList){
+//			if(pd.absences.size() > 0){
+//				for(Absence abs : pd.absences){
+//					if(abs.absenceType.code.equals("91"))
+//						compensatoryRest = compensatoryRest +1;
+//				}
+//			}
+//		}
+		return absList.size();
 	}
 	
 	/**
 	 * 
-	 * @param date
-	 * @return
+	 * @param 
+	 * @return il numero di riposi compensativi per quella persona utilizzati fino ad oggi dall'inizio dell'anno
 	 */
 	public int numberOfCompensatoryRestUntilToday(){
 		
@@ -585,19 +592,12 @@ public class PersonMonth extends Model {
 	public int getCompensatoryRestInYear(){
 		LocalDate beginYear = new LocalDate(year, 1, 1);
 		LocalDate now = new LocalDate();
-		int numberOfCompensatoryRest = 0;
-		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-				person, beginYear, now).fetch();
-		for(PersonDay pd : pdList){
-			if(pd.absences.size() > 0){
-				for(Absence abs : pd.absences){
-					if(abs.absenceType.code.equals("91"))
-						numberOfCompensatoryRest = numberOfCompensatoryRest + 1;
-				}
-			}
-		}
-		return numberOfCompensatoryRest;
 
+		Query query = JPA.em().createQuery("Select abs from Absence abs where abs.personDay.person = :person and abs.personDay.date between " +
+				":dateBegin and :dateEnd and abs.absenceType.code = :code");
+		query.setParameter("person", person).setParameter("dateBegin", beginYear).setParameter("dateEnd", now).setParameter("code", "91");
+		List<Absence> absList = query.getResultList();
+		return absList.size();
 	}
 
 	/**
@@ -607,8 +607,17 @@ public class PersonMonth extends Model {
 	public int getOvertimeHourInYear(LocalDate date){
 		Logger.trace("Chiamata funzione di controllo straordinari...");
 		int overtimeHour = 0;
-		List<Competence> compList = Competence.find("Select comp from Competence comp, CompetenceCode code where comp.person = ? and comp.year = ? and " +
-				"comp.competenceCode = code and comp.month = ? and code.code = ?", person, date.getYear(), date.getMonthOfYear(),"S1").fetch();
+		Query query = JPA.em().createQuery("Select comp from Competence comp where comp.person = :person and " +
+				"comp.year = :year and comp.competenceCode.code = :code and comp.month = :month");
+		query.setParameter("person", person)
+		.setParameter("year", date.getYear())
+		.setParameter("code", "S1")
+		.setParameter("month", date.getMonthOfYear());
+		
+		List<Competence> compList = query.getResultList();
+		
+//		List<Competence> compList = Competence.find("Select comp from Competence comp, CompetenceCode code where comp.person = ? and comp.year = ? and " +
+//				"comp.competenceCode = code and comp.month = ? and code.code = ?", person, date.getYear(), date.getMonthOfYear(),"S1").fetch();
 		Logger.debug("La lista degli straordinari da inizio anno per %s: %s", person, compList);
 		if(compList != null){
 			for(Competence comp : compList){
@@ -993,7 +1002,10 @@ public class PersonMonth extends Model {
 
 	public int residuoAnnoPrecedenteDaInizializzazione() {
 
-		initializationTime = InitializationTime.find("Select i from InitializationTime i where i.person = ?" , person).first();
+		Query query = JPA.em().createQuery("Select i from InitializationTime i where i.person = :person");
+		query.setParameter("person", person);
+		initializationTime = (InitializationTime) query.getSingleResult();
+		//initializationTime = InitializationTime.find("Select i from InitializationTime i where i.person = ?" , person).first();
 		if (initializationTime != null && (initializationTime.date.isBefore(new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()))
 				&& possibileUtilizzareResiduoAnnoPrecedente()) {
 			return initializationTime.residualMinutesPastYear != null ? initializationTime.residualMinutesPastYear : 0;

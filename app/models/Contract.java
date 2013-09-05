@@ -34,7 +34,7 @@ public class Contract extends Model {
 	
 	private static final long serialVersionUID = -4472102414284745470L;
 	
-	@ManyToOne(fetch=FetchType.EAGER)
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="person_id")
 	public Person person;
 	
