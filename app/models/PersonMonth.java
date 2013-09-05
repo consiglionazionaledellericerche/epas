@@ -1,5 +1,6 @@
 package models;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -244,39 +245,21 @@ public class PersonMonth extends Model {
 	 * persona per quel mese
 	 */
 	public long getMaximumCoupleOfStampings(){
-		//EntityManager em = em();
+		
 		LocalDate begin = new LocalDate(year, month, 1);
 		
-		Query query = JPA.em().createNativeQuery("SELECT count(*) FROM person_days, stampings WHERE person_days.person_id = :person_id AND" +
-				" person_days.date BETWEEN :begin AND :end AND stampings.personday_id = person_days.id GROUP BY person_days.id ORDER BY count (*) DESC");
-		query.setParameter("person_id", person.id)
-		.setParameter("begin", begin)
-		.setParameter("end", begin.dayOfMonth().withMaximumValue());
-		Integer maxNumberOfStamping = query.getFirstResult();
-		Logger.debug("Ho trovato %d timbrature come massimo", maxNumberOfStamping);
-		return maxNumberOfStamping%2 == 0 ? maxNumberOfStamping/2 : (maxNumberOfStamping/2 + maxNumberOfStamping%2);
-		
+		List<BigInteger> maxNumberOfStamping = JPA.em().createNativeQuery("SELECT count(*) FROM stampings s JOIN person_days pd ON s.personDay_id=pd.id " +
+				"WHERE pd.date BETWEEN :begin AND :end AND pd.person_id = :person_id GROUP BY pd.id ORDER BY count(*) DESC")
+				.setParameter("begin", begin.toDate())
+				.setParameter("end", begin.dayOfMonth().withMaximumValue().toDate())
+				.setParameter("person_id", person.id)
+				.getResultList();
 
-//		List<PersonDay> personDayList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-//				person, begin, begin.dayOfMonth().withMaximumValue()).fetch();
-//		int maxExitStamp = 0;
-//		int maxInStamp = 0;
-//		for(PersonDay pd : personDayList){
-//			int localMaxExitStamp = 0;
-//			int localMaxInStamp = 0;
-//			for(Stamping st :pd.stampings){
-//				if(st.way == WayType.out)
-//					localMaxExitStamp ++;
-//				if(st.way == WayType.in)
-//					localMaxInStamp ++;
-//			}
-//			if(localMaxExitStamp > maxExitStamp)
-//				maxExitStamp = localMaxExitStamp;			
-//			if(localMaxInStamp > maxInStamp)
-//				maxInStamp = localMaxInStamp;
-//		}
-//		return Math.max(maxExitStamp, maxInStamp);
-
+		Logger.debug("Il massimo di timbrature è: %d", maxNumberOfStamping.get(0));
+		if (maxNumberOfStamping.get(0).intValue()%2 == 0)
+			return maxNumberOfStamping.get(0).intValue()/2;
+		else
+			return (maxNumberOfStamping.get(0).intValue()/2 + maxNumberOfStamping.get(0).intValue()%2);
 	}
 
 
