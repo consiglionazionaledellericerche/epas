@@ -41,7 +41,7 @@ public class VacationPeriod extends Model{
 	
 	@Unique
 	@Required
-	@OneToOne
+	@OneToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="person_id", unique=true, nullable=false, updatable=false)
 	public Person person;
 	

@@ -105,7 +105,7 @@ public class Stampings extends Controller {
 			personStamping(personId);
 		}
 
-		PersonMonth previousPersonMonth = null;
+//		PersonMonth previousPersonMonth = null;
 		Logger.debug("Called personStamping of personId=%s, year=%s, month=%s", personId, year, month);
 
 		Person person = Person.findById(personId);
@@ -137,17 +137,15 @@ public class Stampings extends Controller {
 				count = count.mesePrecedente();
 			}
 		}
-//		Logger.debug("Month recap of person.id %s, year=%s, month=%s", person.id, year, month);
-//		Logger.debug("PersonMonth of person.id %s, year=%s, month=%s", person.id, year, month);
 
-//		Logger.debug("Controllo gli straordinari nel corso dell'anno fino ad oggi per %s %s...", person.name, person.surname);
+
 		int overtimeHour = personMonth.getOvertimeHourInYear(new LocalDate(year,month,1).dayOfMonth().withMaximumValue());
-//		Logger.debug("Le ore di straordinario da inizio anno sono: %s", overtimeHour);
+		int numberOfCompensatoryRestUntilToday = personMonth.numberOfCompensatoryRestUntilToday();
 
 		int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
 		int numberOfInOut = Math.max(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
 //		Logger.debug("NumberOfInOut: %d, NumberOfCompensatoryRest: %d, OvertimeHour: %d", numberOfInOut, numberOfCompensatoryRest, overtimeHour);
-		render(personMonth, numberOfInOut, previousPersonMonth, numberOfCompensatoryRest, overtimeHour, person, situazioneParziale);
+		render(personMonth, numberOfInOut, numberOfCompensatoryRestUntilToday,/*previousPersonMonth,*/ numberOfCompensatoryRest, overtimeHour, /*person,*/ situazioneParziale);
 
 	}
 

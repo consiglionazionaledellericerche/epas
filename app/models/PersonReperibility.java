@@ -5,6 +5,7 @@ package models;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
@@ -31,7 +32,7 @@ public class PersonReperibility extends Model {
 
 	@Unique
 	@Required
-	@OneToOne
+	@OneToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="person_id", unique=true)
 	public Person person;
 	
