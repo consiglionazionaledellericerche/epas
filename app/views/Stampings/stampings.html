@@ -49,7 +49,15 @@
 			%{
 			}
 			}%
-			<td class="assenza">${day.absenceList().size()>0  ? day.absenceList().get(0).absenceType.code : ''}</td>
+			<td class="assenza">
+				%{	
+					for (absence in day.absences) { 
+				%}
+						
+						${absence.absenceType.code}
+																
+				%{ } }%
+			</td>
 			%{  int j = 0;
 				for(int i = 0; i < numberOfInOut; i++){
 					j = i*2;
