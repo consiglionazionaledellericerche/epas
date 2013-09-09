@@ -337,13 +337,14 @@ public class YearRecap extends Model{
 	 * 
 	 * @return il numero di giorni di ferie maturati nell'anno corrente con l'ausilio di un metodo di codifica privato
 	 */
-	public int vacationCurrentYear(){
+	public int vacationCurrentYear(int year){
 		int days = 0;
 		int vacationDays = 0;
-		Contract contract = Contract.find("Select con from Contract con where con.person = ? order by beginContract desc", person).first();
+		Contract contract = person.getContract(new LocalDate(year,1,1));
+		//Contract contract = Contract.find("Select con from Contract con where con.person = ? order by beginContract desc", person).first();
 		LocalDate beginContract = contract.beginContract;
-		LocalDate now = new LocalDate();
-		now.withYear(year);
+		LocalDate now = new LocalDate().withYear(year);
+		
 
 		//	int difference = now.getYear()-beginContract.getYear();
 		//	Logger.warn("difference is:" +difference+ "now.getYear is: "+now.getYear()+ "beginContract.getYear is: "+beginContract.getYear());
@@ -363,7 +364,7 @@ public class YearRecap extends Model{
 			days = now.getDayOfYear();
 			vacationDays = VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysMoreThreeYears(days);
 		}
-
+		Logger.debug("I giorni di ferie maturati per %s %s nell'anno %d sono %d", person.name, person.surname, year, vacationDays);
 		return vacationDays;
 	}
 
@@ -371,11 +372,11 @@ public class YearRecap extends Model{
 	 * 
 	 * @return il numero di giorni di permesso legge maturati nell'anno corrente
 	 */
-	public int permissionCurrentYear(){
+	public int permissionCurrentYear(int year){
 		int days = 0;
 		int permissionDays = 0;
-		LocalDate now = new LocalDate();
-		now.withYear(year);
+		LocalDate now = new LocalDate().withYear(year);
+		
 		days = now.getDayOfYear();
 
 		permissionDays = VacationsPermissionsDaysAccrued.convertWorkDaysToPermissionDays(days);
@@ -388,10 +389,10 @@ public class YearRecap extends Model{
 	 * 
 	 * @return il numero di giorni di ferie avanzati da quelli maturati l'anno precedente e non ancora utilizzati
 	 */
-	public int vacationLastYearNotYetUsed(){
+	public Integer vacationLastYearNotYetUsed(int year){
 		
-		List<PersonDay> vacationsLastYear = listVacationDaysLastYear();		
-
+		List<PersonDay> vacationsLastYear = listVacationDaysLastYear(year);		
+		Logger.debug("Il numero di giorni dell'anno precedente usati è: %d", vacationsLastYear.size());
 		LocalDate beginLastYear = new LocalDate(year-1,1,1);
 		LocalDate endLastYear = new LocalDate(year-1,12,31);
 		VacationPeriod period = null;
@@ -421,11 +422,17 @@ public class YearRecap extends Model{
 			period = VacationPeriod.find("Select vp from VacationPeriod vp where vp.person = ? and vp.beginFrom between ? and ? and vp.endTo >= ?", 
 					person, beginLastYear, endLastYear, endLastYear).first();
 		}
+		Logger.debug("Anno passato come parametro: %d", year);
+		Logger.debug("Period per %s %s: %s", person.name, person.surname, period.toString());
+		
 		//int vacationDaysAccrued = VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysLessThreeYears(days);
-
-		int residualVacationDays = period.vacationCode.vacationDays-vacationsLastYear.size();
-
-		return residualVacationDays;
+		if(period.vacationCode != null){
+			int residualVacationDays = period.vacationCode.vacationDays-vacationsLastYear.size();
+			return residualVacationDays;
+		}
+		else 
+			return null;
+		
 	}
 
 	/**
@@ -455,11 +462,12 @@ public class YearRecap extends Model{
 
 	/**
 	 * 
-	 * @return i giorni di permesso che, a oggi, la persona ha utilizzato
+	 * @return i giorni di permesso che la persona ha utilizzato nell'anno 
+	 * @param year
 	 */
-	public int personalPermissionUsed(){
+	public int personalPermissionUsed(int year){
 		int permissionDays = 0;
-		LocalDate now = new LocalDate();
+		LocalDate now = new LocalDate().withYear(year);
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 				person, getBeginYear(), now).fetch();
 		for(PersonDay pd : pdList){
@@ -494,11 +502,11 @@ public class YearRecap extends Model{
 	 * di assenza registrate sul database con codice 31, ovvero "ferie anno precedente", fatte nell'anno corrente, più le giornate
 	 * di assenza registrate sul database con codice 32, ovvero "ferie anno corrente", fatte nell'anno precedente.
 	 */
-	public int vacationDaysLastYear(){
+	public int vacationDaysLastYear(int year){
 		int vacationDaysLastYear = 0;
 		LocalDate beginLastYear = new LocalDate(year-1,1,1);
 		LocalDate endLastYear = new LocalDate(year-1,12,31);
-		LocalDate now = new LocalDate();
+		LocalDate now = new LocalDate().minusYears(new LocalDate().getYear()-year);
 		List<PersonDay> pdListPast = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 				person, beginLastYear, endLastYear).fetch();
 		for(PersonDay pd : pdListPast){
@@ -523,11 +531,12 @@ public class YearRecap extends Model{
 	 * @return la lista delle assenze che utilizzerò nella finestra di popup per elencare le date in cui sono state fatte le assenze
 	 * 
 	 */
-	public List<PersonDay> listVacationDaysLastYear(){
+	public List<PersonDay> listVacationDaysLastYear(int year){
+		Logger.debug("Anno passato alla funzione listVacationDaysLastYear: %d", year);
 		LocalDate beginLastYear = new LocalDate(year-1,1,1);
 		LocalDate endLastYear = new LocalDate(year-1,12,31);
 		LocalDate beginYear = new LocalDate(year, 1, 1);
-		LocalDate now = new LocalDate();
+		LocalDate now = new LocalDate().minusYears(new LocalDate().getYear()-year);
 		List<PersonDay> vacations = new ArrayList<PersonDay>();
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 				person, beginLastYear, endLastYear).fetch();
