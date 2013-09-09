@@ -996,10 +996,10 @@ public class PersonMonth extends Model {
 
 	public int residuoAnnoPrecedenteDaInizializzazione() {
 
-		Query query = JPA.em().createQuery("Select i from InitializationTime i where i.person = :person");
-		query.setParameter("person", person);
-		initializationTime = (InitializationTime) query.getSingleResult();
-		//initializationTime = InitializationTime.find("Select i from InitializationTime i where i.person = ?" , person).first();
+//		Query query = JPA.em().createQuery("Select i from InitializationTime i where i.person = :person");
+//		query.setParameter("person", person);
+//		initializationTime = (InitializationTime) query.getSingleResult();
+		initializationTime = InitializationTime.find("Select i from InitializationTime i where i.person = ?" , person).first();
 		if (initializationTime != null && (initializationTime.date.isBefore(new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()))
 				&& possibileUtilizzareResiduoAnnoPrecedente()) {
 			return initializationTime.residualMinutesPastYear != null ? initializationTime.residualMinutesPastYear : 0;

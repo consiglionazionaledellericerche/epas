@@ -137,7 +137,8 @@ public class Stampings extends Controller {
 				count = count.mesePrecedente();
 			}
 		}
-
+		Logger.debug("Memoria totale: %d . Memoria libera: %d . Memoria occupata: %d",
+				Runtime.getRuntime().totalMemory(), Runtime.getRuntime().freeMemory(), Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory());
 
 //		int overtimeHour = personMonth.getOvertimeHourInYear(new LocalDate(year,month,1).dayOfMonth().withMaximumValue());
 		int numberOfCompensatoryRestUntilToday = personMonth.numberOfCompensatoryRestUntilToday();
