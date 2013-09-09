@@ -51,9 +51,7 @@ public class Stampings extends Controller {
 		if (Security.getPerson().username.equals("admin")) {
 			Application.indexAdmin();
 		}
-		
-//		long id = 1;
-		//Configuration confParameters = Configuration.findById(id);
+
 		Configuration confParameters = Configuration.getCurrentConfiguration();
 		if(confParameters == null)
 			confParameters = Configuration.find("Select c from Configuration c order by c.id desc").first();
@@ -73,17 +71,22 @@ public class Stampings extends Controller {
 		if(personMonth == null)
 			personMonth = new PersonMonth(person, year, month);
 		int situazioneParziale = 0;
-		if(personMonth.month == 1){
-			situazioneParziale = personMonth.residuoAnnoCorrenteDaInizializzazione();
-		}
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+				Security.getPerson(), new LocalDate(year, month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
+		if(pdList.size() == 0 && year > new LocalDate().getYear())
+			situazioneParziale = 0;
 		else{
-			PersonMonth count = personMonth;
-			while(count.month > 1){
-				situazioneParziale = situazioneParziale + count.mesePrecedente().residuoDelMese() - count.mesePrecedente().straordinari;
-				count = count.mesePrecedente();
+			if(personMonth.month == 1){
+				situazioneParziale = personMonth.residuoAnnoCorrenteDaInizializzazione();
 			}
-		}
-		
+			else{
+				PersonMonth count = personMonth;
+				while(count.month > 1){
+					situazioneParziale = situazioneParziale + count.mesePrecedente().residuoDelMese() - count.mesePrecedente().straordinari;
+					count = count.mesePrecedente();
+				}
+			}
+		}		
 		
 		int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
 		int numberOfInOut = Math.max(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
@@ -127,19 +130,24 @@ public class Stampings extends Controller {
 
 		}
 		int situazioneParziale = 0;
-		if(personMonth.month == 1){
-			situazioneParziale = personMonth.residuoAnnoCorrenteDaInizializzazione();
-		}
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+				Security.getPerson(), new LocalDate(year, month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
+		if(pdList.size() == 0 && year > new LocalDate().getYear())
+			situazioneParziale = 0;
 		else{
-			PersonMonth count = personMonth;
-			while(count.month > 1){
-				situazioneParziale = situazioneParziale + count.mesePrecedente().residuoDelMese() - count.mesePrecedente().straordinari;
-				count = count.mesePrecedente();
+			if(personMonth.month == 1){
+				situazioneParziale = personMonth.residuoAnnoCorrenteDaInizializzazione();
+			}
+			else{
+				PersonMonth count = personMonth;
+				while(count.month > 1){
+					situazioneParziale = situazioneParziale + count.mesePrecedente().residuoDelMese() - count.mesePrecedente().straordinari;
+					count = count.mesePrecedente();
+				}
 			}
 		}
-		Logger.debug("Memoria totale: %d . Memoria libera: %d . Memoria occupata: %d",
-				Runtime.getRuntime().totalMemory(), Runtime.getRuntime().freeMemory(), Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory());
-
+		
+		
 //		int overtimeHour = personMonth.getOvertimeHourInYear(new LocalDate(year,month,1).dayOfMonth().withMaximumValue());
 		int numberOfCompensatoryRestUntilToday = personMonth.numberOfCompensatoryRestUntilToday();
 

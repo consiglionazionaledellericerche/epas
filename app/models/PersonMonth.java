@@ -247,7 +247,8 @@ public class PersonMonth extends Model {
 	public long getMaximumCoupleOfStampings(){
 		
 		LocalDate begin = new LocalDate(year, month, 1);
-		
+		if(begin.isAfter(new LocalDate()))
+			return 0;
 		List<BigInteger> maxNumberOfStamping = JPA.em().createNativeQuery("SELECT count(*) FROM stampings s JOIN person_days pd ON s.personDay_id=pd.id " +
 				"WHERE pd.date BETWEEN :begin AND :end AND pd.person_id = :person_id GROUP BY pd.id ORDER BY count(*) DESC")
 				.setParameter("begin", begin.toDate())
