@@ -92,13 +92,12 @@
 			%{ } }%
 	</p>
 </fieldset>
-<input type="submit" value="Ok"/>
+<div id="frm">
+<input id="insertAdmin" type="submit" value="Ok"/>
 #{/form}
 
 #{form @Administrators.discard()}
-<input type="submit" value="Annulla"/>
+<input id="discardAdmin" type="submit" value="Annulla"/>
 #{/form}
 
-#{form @Administrators.delete()}
-<input type="submit" value="Elimina"/>
-#{/form}
+</div>
