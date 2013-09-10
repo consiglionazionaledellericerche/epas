@@ -3,12 +3,13 @@
 <h2 id="titoloInserimentoTipoFerie">Inserimento dati per nuovo tipo di ferie</h2>
 
 #{form @VacationsAdmin.save()}
-<p id="descrizione">Nome <input name="nome" type="text" value="${vacationCode.description}" size="40" maxlength="200" /></p>
-<p id="descrizione">Giorni ferie <input name="giorniFerie" type="text" value="${vacationCode.vacationDays}" size="10" maxlength="10" /></p>
-<p id="descrizione">Giorni permesso <input name="giorniPermesso" type="text" value="${vacationCode.permissionDays}" size="10" maxlength="10" /></p>
-
+<p id="descrizione"><strong>Nome</strong> <input name="nome" type="text" value="${vacationCode.description}" size="40" maxlength="200" /></p>
+<p id="descrizione"><strong>Giorni ferie</strong> <input name="giorniFerie" type="text" value="${vacationCode.vacationDays}" size="10" maxlength="10" /></p>
+<p id="descrizione"><strong>Giorni permesso</strong> <input name="giorniPermesso" type="text" value="${vacationCode.permissionDays}" size="10" maxlength="10" /></p>
+<div id="frm">
 <input id="salvaVacationCode" type="submit" value="Salva"/>
 #{/form}
 #{form @VacationsAdmin.discard()}
 <input type="submit" value="Annulla"/>
 #{/form}
+</div>
