@@ -257,10 +257,14 @@ public class PersonMonth extends Model {
 				.getResultList();
 
 		Logger.debug("Il massimo di timbrature è: %d", maxNumberOfStamping.get(0));
-		if (maxNumberOfStamping.get(0).intValue()%2 == 0)
-			return maxNumberOfStamping.get(0).intValue()/2;
+		if(maxNumberOfStamping.size() > 0){
+			if (maxNumberOfStamping.get(0).intValue()%2 == 0)
+				return maxNumberOfStamping.get(0).intValue()/2;
+			else
+				return (maxNumberOfStamping.get(0).intValue()/2 + maxNumberOfStamping.get(0).intValue()%2);
+		}
 		else
-			return (maxNumberOfStamping.get(0).intValue()/2 + maxNumberOfStamping.get(0).intValue()%2);
+			return 0;
 	}
 
 
