@@ -1,7 +1,7 @@
 #{extends 'main.html' /}
-#{set title:yearRecap.person.surname + ' ' + yearRecap.person.name + ', matricola=' + yearRecap.person.number /}
+#{set title:yappRender.person.surname + ' ' + yappRender.person.name + ', matricola=' + yappRender.person.number /}
 
-<h2 id="titoloSituazioneAssenzeAnnuali">Situazione assenze per l'anno ${yearRecap.year} di ${yearRecap.person.name} ${yearRecap.person.surname}</h2>
+<h2 id="titoloSituazioneAssenzeAnnuali">Situazione assenze per l'anno ${yappRender.year} di ${yappRender.person.name} ${yappRender.person.surname}</h2>
 
 #{logoutForm /}
 
@@ -9,44 +9,49 @@
 
 <table id="assenze_annuali">
 
+	<!--  Riga di intestazione -->
 	<tr>
 		<th rowspan="2">Mese</th>
 		<th class="giorni"colspan="31">Giorni</th>
 		</tr>
 		%{
-			int i =1;
+			int i=1;
 			while(i<=31){
 		}%
 		
-		<th class="giorni">${i}</th>
+			<th class="giorni">${i}</th>
 		%{
-			i++;}
+				i++;
+			}
 		}%
 
-	
-	
-	%{
-		for(mese in yearRecap.getMonths()){
+	<!-- Contenuto tabella assenze annuali -->
+
+	%{  
+		for(month in yappRender.absenceTable.rowMap()){
 	}%
 	<tr>
 		
-		<td class="mese"><span class="capitalized">${mese}</span></td>
-                %{
-                  int j=1;
-                  while(j <= yearRecap.maxNumberOfDays(yearRecap.year, mese)){
-                  
-                }%
-
-		<td class="giornoAssenza">${yearRecap.getAbsenceInYear(yearRecap.year,mese,j).size() > 0 ? yearRecap.getAbsenceInYear(yearRecap.year,mese,j).get(0).absenceType.code : ''}</td>
-		
-                %{
-                 j++;}
-                }%
-	</tr>
+		<td class="mese"><span class="capitalized">${yappRender.fromIntToStringMonth( month.getKey() )}</td>
 		%{
-			}
+			for(col in yappRender.absenceTable.columnKeySet()) {   				
 		}%
+            <td>${month.getValue().get(col)}</td>
+        %{
+              		
+           	}
+        }%
+	</tr>
+	%{
+		}
+	}%
+	
+	
+	
+	
+	
 </table>
+
 
 <table id="Codici di assenza">
 	<tr>
@@ -55,12 +60,12 @@
 		<th width="20">Totale</th>			
 	</tr>
 %{
-     for(entry in yearRecap.getYearlyAbsence().entrySet()) {
+     for( entry in yappRender.absenceSummary.entrySet() ) {
 }%
 	<tr>
 		<td>${entry.getKey().code}</td>     
 		<td>${entry.getKey().description}</td>	
-		<td>${yearRecap.totalDaysHourOfAbsenceCode(yearRecap.person, yearRecap.year, entry.getKey().code)}</td>
+		<td>${entry.getValue()}</td>
 	</tr>
 
 %{  		   
@@ -70,6 +75,6 @@
 	<tr>
 		<td>TOTALE</td>
 		<td></td>
-		<td>${yearRecap.totalOfAllAbsences(yearRecap.person, yearRecap.year, yearRecap.getYearlyAbsence().keySet())}</td>
+		<td>${yappRender.totalAbsence}</td>
 	</tr>
 </table>
