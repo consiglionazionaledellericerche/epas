@@ -195,9 +195,13 @@
 		
 	</table>
 </fieldset>
+<div id="frm">
 <input id="submitEditPerson"type="submit" value="Ok" />
-#{/form} #{form @Persons.discard()}
+#{/form} 
+#{form @Persons.discard()}
 <input id="discardEditPerson" type="submit" value="Annulla" />
-#{/form} #{form @Persons.deletePerson(person.id)}
+#{/form} 
+#{form @Persons.deletePerson(person.id)}
 <input id="deletePerson" type="submit" value="Elimina" />
 #{/form}
+</div>

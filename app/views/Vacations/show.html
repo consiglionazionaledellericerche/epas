@@ -31,7 +31,7 @@
 	</tr>
 	<tr>
 	
-		<td><a href="@{Vacations.vacationsLastYear(yearRecap.person, yearRecap.year)}" class="example3demo">${yearRecap.vacationDaysLastYear()}</a> 
+		<td><a href="@{Vacations.vacationsLastYear(yearRecap.person, yearRecap.year)}" class="example3demo">${yearRecap.vacationDaysLastYear(yearRecap.year)}</a> 
 				<script type="text/javascript"> 
 				$('.example3demo').popupWindow({ 
 					height:500, 
@@ -49,12 +49,12 @@
 					left:50 
 				});  
 				</script></td>
-		<td>${yearRecap.personalPermissionUsed()}</td>
-		<td>${yearRecap.vacationLastYearNotYetUsed()}</td>
+		<td>${yearRecap.personalPermissionUsed(yearRecap.year)}</td>
+		<td>${yearRecap.vacationLastYearNotYetUsed(yearRecap.year)}</td>
 		<td>${yearRecap.personalVacationDays()}</td>
-		<td>${yearRecap.vacationCurrentYear()}</td>
+		<td>${yearRecap.vacationCurrentYear(yearRecap.year)}</td>
 		<td>${yearRecap.personalPermission()}</td>
-		<td>${yearRecap.permissionCurrentYear()}</td>
+		<td>${yearRecap.permissionCurrentYear(yearRecap.year)}</td>
 	</tr>
 
 </table>
