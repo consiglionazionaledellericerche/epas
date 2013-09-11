@@ -25,6 +25,8 @@ import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
+import controllers.rendering.YearlyAbsencesPerPerson;
+
 @With( {Secure.class, NavigationMenu.class} )
 public class YearlyAbsences extends Controller{
 
@@ -88,33 +90,30 @@ public class YearlyAbsences extends Controller{
 
 	@Check(Security.VIEW_PERSON_LIST)
 	public static void yearlyAbsences(Long personId, int year) {
+		//controllo sui parametri
 		Person person = null;
 		if(personId == null)
 			person = Security.getPerson();
 		else
 			person = Person.findById(personId);
 		Integer anno = params.get("year", Integer.class);
-		//Long personId = params.get("personId", Long.class);
 		Logger.debug("L'id della persona è: %s", personId);
 		Logger.debug("La persona è: %s %s", person.name, person.surname);
-		//person = Person.findById(personId);
 		Logger.trace("Anno: "+anno);
-
+		
+		//rendering 
 		if(anno==null){
-
 			LocalDate now = new LocalDate();
-			YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)now.getYear());
-			render(yearRecap);
+			YearlyAbsencesPerPerson yappRender = new YearlyAbsencesPerPerson(person, (short)now.getYear());
+			render(yappRender);
 		}
 		else{
-			//Logger.info("Sono dentro il ramo else della creazione dell'yearRecap");
-			//Integer year = new Integer(params.get("year"));
-			//	PersonMonth personMonth = PersonMonth.byPersonAndYearAndMonth(person, year, month);
-			YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)year);
-
-			render(yearRecap);
+			YearlyAbsencesPerPerson yappRender = new YearlyAbsencesPerPerson(person, (short)anno.intValue());
+			render(yappRender);
 		}
-
+		
+		
+		
 	}
 
 
@@ -210,28 +209,35 @@ public class YearlyAbsences extends Controller{
 	}
 	//private final static ActionMenuItem actionMenuItem = ActionMenuItem.absencesperperson;
 
+	/**
+	 * 
+	 * @param personId
+	 * @param year
+	 * Render della pagina absencePerPerson.html che riassume le assenze annuali di una persona
+	 */
 	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void absencesPerPerson(Long personId, Integer year){
-		//String menuItem = actionMenuItem.toString();
+		
+		//controllo sui parametri
 		Logger.debug("Anno: %d Id: %d", year, personId);
 		Person person = null;
 		if(personId == null || personId == 0)
-			person = Security.getPerson();
+			person = Security.getPerson();			//prende la persona collegata
 		else
 			person = Person.findById(personId);
 		Integer anno = params.get("year", Integer.class);
 		Logger.debug("La persona correntemente loggata è: %s", person);
 		Logger.trace("Anno: "+anno);
 
+		//rendering 
 		if(anno==null){
 			LocalDate now = new LocalDate();
-			YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)now.getYear());
-			render(yearRecap);
+			YearlyAbsencesPerPerson yappRender = new YearlyAbsencesPerPerson(person, (short)now.getYear());
+			render(yappRender);
 		}
 		else{
-			//Logger.info("Sono dentro il ramo else della creazione del month recap");
-			YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)anno.intValue());
-			render(yearRecap);
+			YearlyAbsencesPerPerson yappRender = new YearlyAbsencesPerPerson(person, (short)anno.intValue());
+			render(yappRender);
 		}
 
 
