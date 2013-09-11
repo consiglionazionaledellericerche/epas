@@ -4,10 +4,10 @@
 
 #{form @Competences.save()}
 
-		<p>Codice <input type="text" name="codice" value="${code.code}"/></p>
-		<p>Codice per attestato di presenza <input type="text" name="codiceAttPres" value="${code.codeToPresence}"/></p>
-		<p>Descrizione <input type="text" name="descrizione" value="${code.description}" size="60" maxlength="100"/></p>
-		<p>Inattivo %{ if(code.inactive == true){
+		<p id="inserimentoCompetenze"><strong>Codice</strong> <input type="text" name="codice" value="${code.code}"/></p>
+		<p id="inserimentoCompetenze"><strong>Codice per attestato di presenza</strong> <input type="text" name="codiceAttPres" value="${code.codeToPresence}"/></p>
+		<p id="inserimentoCompetenze"><strong>Descrizione</strong> <input type="text" name="descrizione" value="${code.description}" size="60" maxlength="100"/></p>
+		<p id="inserimentoCompetenze"><strong>Inattivo</strong> %{ if(code.inactive == true){
 			}%<input type="checkbox" name ="inattivo" value="${code.inactive}" checked="checked"/>
 			%{ }else{
 			}%<input type="checkbox" name ="inattivo" value="${code.inactive}" />
@@ -15,9 +15,10 @@
 			}
 			}%
 		</p>
-
-<input type="submit" value="Ok"/>
+<div id="frm">
+<input id="insertCompetenceCode" type="submit" value="Ok"/>
 #{/form}
 #{form @Competences.discard()}
-<input type="submit" value="Annulla"/>
+<input id="discardCompetenceCode" type="submit" value="Annulla"/>
 #{/form}
+</div>

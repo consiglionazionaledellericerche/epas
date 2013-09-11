@@ -4,13 +4,14 @@
 
 #{form @Competences.save()}
 
-<p>Codice  <input type="text" name="codice" value="${code.code}" size="10" maxlength="20"/></p>
-<p>Codice per attestato di presenza <input type="text" name="codiceAttPres" value="${code.codeToPresence}" size="10" maxlength="20"/>  (solo se diverso da Codice)</p>
-<p>Descrizione <input type="text" name="descrizione" value="${code.description}" size="40" maxlength="100"/></p>
-<p>Inattivo <input name="inattivo" type="checkbox" value="${code.inactive}"  />(checkare per i codici non più usati)</p>
-
-<input type="submit" value="Ok"/>
+<p id="inserimentoCompetenze"><strong>Codice</strong>  <input type="text" name="codice" value="${code.code}" size="10" maxlength="20"/></p>
+<p id="inserimentoCompetenze"><strong>Codice per attestato di presenza</strong> <input type="text" name="codiceAttPres" value="${code.codeToPresence}" size="10" maxlength="20"/>  (solo se diverso da Codice)</p>
+<p id="inserimentoCompetenze"><strong>Descrizione</strong> <input type="text" name="descrizione" value="${code.description}" size="40" maxlength="100"/></p>
+<p id="inserimentoCompetenze"><strong>Inattivo</strong> <input name="inattivo" type="checkbox" value="${code.inactive}"  />(checkare per i codici non più usati)</p>
+<div id="frm">
+<input id="insertCompetenceCode" type="submit" value="Ok"/>
 #{/form}
 #{form @Competences.discard()}
-<input type="submit" value="Annulla"/>
+<input id="discardCompetenceCode" type="submit" value="Annulla"/>
 #{/form}
+</div>

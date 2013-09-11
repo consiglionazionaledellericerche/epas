@@ -35,11 +35,16 @@ public class Vacations extends Controller{
             render(yearRecap, menuItem);
     	}
     	else{
-    		Logger.info("Sono dentro il ramo else della creazione del month recap");
+    		//Logger.info("Sono dentro il ramo else della creazione del month recap");
     		//Integer year = new Integer(params.get("year"));
 			
     		YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)anno.intValue());
-    		    		
+    		if(yearRecap.vacationLastYearNotYetUsed(anno) == null){
+    			flash.error("Per %s %s non esistono informazioni relative al piano ferie per l'anno %d", person.name, person.surname, anno);
+    			render();
+    		}
+    		
+    		
             render(yearRecap, menuItem);
     	}
     	
