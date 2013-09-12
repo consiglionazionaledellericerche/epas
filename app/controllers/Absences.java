@@ -251,11 +251,12 @@ public class Absences extends Controller{
 		Logger.debug("Richiesto inserimento della assenza codice = %s della persona %s, dataInizio = %s", absenceCode, person, dateFrom);
 
 		// è il caso in cui si inserisce lo stesso codice di assenza per più giorni
+		
 		if(dateTo.isAfter(dateFrom)){
 
 			LocalDate dataInizioAssenze = dateFrom;
 			while(dataInizioAssenze.isBefore(dateTo)){
-//				PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, dataInizioAssenze).first();
+
 				List<Absence> absenceList = Absence.find("Select a from Absence a, PersonDay pd where a.personDay = pd and pd.person = ? and pd.date = ?", 
 						person, dataInizioAssenze).fetch();
 				for(Absence abs : absenceList){
@@ -424,7 +425,7 @@ public class Absences extends Controller{
 								absence.save();
 								pd.absences.add(absence);
 								pd.merge();
-								//Logger.debug("Non ho ancora chiamato la populate personday, la differenza per %s %s è: %d minuti", person.name, person.surname, pd.difference);
+								
 								pd.populatePersonDay();
 								pd.save();
 								
@@ -491,18 +492,18 @@ public class Absences extends Controller{
 
 		//TODO: implementare i controlli sui gruppi di codici di assenza, i controlli sui gruppi devono anche implementare
 		// le sostituzioni dei codici tramite accumulutatori o query ad hoc
-
-
+		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, dateFrom).first();
+		if(pd == null) {
+			pd = new PersonDay(person, dateFrom);
+			pd.create();
+		}
+		Logger.debug("Creato il personDay %s", pd);
+		Absence absence = new Absence();
 		Logger.debug("%s %s può usufruire del codice %s", person.name, person.surname, absenceType.code);
 		if(dateTo.isBefore(dateFrom) || dateTo.isEqual(dateFrom)){
 			Logger.debug("Si intende inserire un'assenza per un giorno solo");
-			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, dateFrom).first();
-			if(pd == null) {
-				pd = new PersonDay(person, dateFrom);
-				pd.create();
-			}
-			Logger.debug("Creato il personDay %s", pd);
-			Absence absence = new Absence();
+			
+			
 			if(params.get("datasize", Blob.class) != null){
 				absence.absenceRequest = params.get("datasize", Blob.class);
 			}
@@ -510,7 +511,7 @@ public class Absences extends Controller{
 				absence.absenceRequest = null;
 
 			absence.absenceType = absenceType;
-			//absence.save();
+			
 			pd.addAbsence(absence);
 			pd.save();
 			Logger.debug("Creata e salvata l'assenza %s con codice %s", absence, absence.absenceType.code);
@@ -536,35 +537,43 @@ public class Absences extends Controller{
 					person, dateFrom, dateTo).fetch();
 			if(pdList.size() != 0){
 
-				for(PersonDay pd : pdList){
-					Absence absence = new Absence();
+				for(PersonDay pdInside : pdList){
+					absence = new Absence();
 					absence.absenceType = absenceType;
-					absence.personDay = pd;
+					absence.personDay = pdInside;
 					absence.save();
-					pd.populatePersonDay();
-					pd.save();
+					pdInside.populatePersonDay();
+					pdInside.save();
 				}
 			}
 			else{
 
 				while(!dateFrom.isAfter(dateTo)){
 					Logger.debug("Datefrom: %s DateTo: %s", dateFrom, dateTo);
-					PersonDay pd = PersonUtility.createPersonDayFromDate(person, dateFrom);
-					if(pd != null){
-						pd.create();
+					PersonDay pdInside = PersonUtility.createPersonDayFromDate(person, dateFrom);
+					if(pdInside != null){
+						pdInside.create();
 						Logger.debug("Creato personDay per il giorno %s ", dateFrom);
 
-						Absence absence = new Absence();
+						absence = new Absence();
 						absence.absenceType = absenceType;
-						absence.personDay = pd;
+						absence.personDay = pdInside;
 						absence.save();
-						pd.populatePersonDay();
-						pd.save();
+						pdInside.populatePersonDay();
+						pdInside.save();
 					}
 					dateFrom = dateFrom.plusDays(1);
 				}
 			}
-
+			List<PersonDay> otherPdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ?", 
+					pd.person, pd.date).fetch();
+			for(PersonDay p : otherPdList){
+				if(p.date.getMonthOfYear() == absence.personDay.date.getMonthOfYear()){
+					p.populatePersonDay();
+					p.save();
+				}
+				
+			}
 			flash.success("Inserita assenza %s dal %s al %s", absenceType.code, dateFrom, dateTo);
 			render("@save");
 		}
