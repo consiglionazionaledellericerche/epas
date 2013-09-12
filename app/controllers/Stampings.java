@@ -198,10 +198,7 @@ public class Stampings extends Controller {
 
 	@Check(Security.INSERT_AND_UPDATE_STAMPING)
 	public static void insert(@Valid @Required Long personId, @Required Integer year, @Required Integer month, @Required Integer day) {
-		//		if(validation.hasErrors()) {
-		//			
-		//			render("@create", personId, year, month, day);
-		//		}
+	
 		Person person = Person.em().getReference(Person.class, personId);
 
 		LocalDate date = new LocalDate(year,month,day);
@@ -246,7 +243,7 @@ public class Stampings extends Controller {
 		stamp.markedByAdmin = true;
 		
 		
-//		stamp.considerForCounting = true;
+
 		if(service.equals("true")){
 			stamp.note = "timbratura di servizio";
 			stamp.stampType = StampType.find("Select st from StampType st where st.code = ?", "motiviDiServizio").first();
@@ -263,12 +260,21 @@ public class Stampings extends Controller {
 		stamp.personDay = pd;
 		stamp.save();
 		pd.stampings.add(stamp);
-		pd.merge();
+		pd.save();
 		pd.populatePersonDay();
 		pd.save();
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ?", 
+				pd.person, pd.date).fetch();
+		for(PersonDay p : pdList){
+			if(p.date.getMonthOfYear() == stamp.date.getMonthOfYear()){
+				p.populatePersonDay();
+				p.save();
+			}
+			
+		}
 		flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
 		render("@save");
-		//Application.indexAdmin();
+		
 
 	}
 
@@ -292,7 +298,7 @@ public class Stampings extends Controller {
 		if (stamping == null) {
 			notFound();
 		}
-
+		PersonDay pd = stamping.personDay;
 		Integer hour = params.get("stampingHour", Integer.class);
 		Integer minute = params.get("stampingMinute", Integer.class);
 		if(hour != null && minute == null || hour == null && minute != null){
@@ -301,7 +307,7 @@ public class Stampings extends Controller {
 			render("@save");
 		}
 		if (hour == null && minute == null) {
-			PersonDay pd = stamping.personDay;
+			
 			stamping.delete();
 			pd.stampings.remove(stamping);
 //			stamping.considerForCounting = true;
@@ -335,9 +341,10 @@ public class Stampings extends Controller {
 			stamping.markedByAdmin = true;
 			stamping.note = "timbratura modificata dall'amministratore";
 			stamping.save();
-			
-			stamping.personDay.populatePersonDay();
-			stamping.personDay.save();
+			pd.populatePersonDay();
+			pd.save();
+			//stamping.personDay.populatePersonDay();
+			//stamping.personDay.save();
 			Logger.debug("Aggiornata ora della timbratura alle ore: %s", stamping.date);
 			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ?", 
 					stamping.personDay.person, stamping.personDay.date).fetch();

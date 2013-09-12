@@ -256,7 +256,7 @@ public class PersonMonth extends Model {
 				.setParameter("person_id", person.id)
 				.getResultList();
 
-		Logger.debug("Il massimo di timbrature è: %d", maxNumberOfStamping.get(0));
+		//Logger.debug("Il massimo di timbrature è: %d", maxNumberOfStamping.get(0));
 		if(maxNumberOfStamping.size() > 0){
 			if (maxNumberOfStamping.get(0).intValue()%2 == 0)
 				return maxNumberOfStamping.get(0).intValue()/2;
