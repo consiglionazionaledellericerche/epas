@@ -992,8 +992,10 @@ public class FromMysqlToPostgres {
 
 					vacationPeriod.vacationCode = vacationCode;
 					vacationPeriod.person = person;
+
 					//se il periodo ferie e' scaduto ma la persona e' in firma allora creo un nuovo piano ferie con codice 28+4
 					Contract contract = Contract.find("select c from Contract c where c.person = ? order by c.beginContract DESC", person).first();
+
 					boolean inFirma = contract.onCertificate;
 					
 					LocalDate datafine = new LocalDate(rs.getDate("data_fine"));		
@@ -1003,6 +1005,7 @@ public class FromMysqlToPostgres {
 						vacationPeriod.endTo = null;
 						//cambiare anche il codice
 						VacationCode vc = VacationCode.find("select vc from VacationCode vc where vc.description = ?", "28+4").first();
+
 						if(vc == null){
 							vc = new VacationCode();
 							vc.create();
@@ -1011,15 +1014,19 @@ public class FromMysqlToPostgres {
 							vc.vacationDays = 28;
 							vc.save();
 						}
+
 						vacationPeriod.vacationCode = vc;
 					}
 					else
 					{
 						vacationPeriod.beginFrom = new LocalDate(rs.getDate("data_inizio"));
 						vacationPeriod.endTo = new LocalDate(rs.getDate("data_fine"));
+
 				
 					
 					}				
+
+
 					vacationPeriod.save();		
 
 					Logger.info("Creato %s", vacationPeriod.toString());
