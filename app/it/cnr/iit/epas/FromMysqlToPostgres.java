@@ -174,7 +174,8 @@ public class FromMysqlToPostgres {
 
 	public static void importAll(int limit, int anno) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		Connection mysqlCon = FromMysqlToPostgres.getMysqlConnection();
-
+		
+		String sqlVacationCode = "Select * from ferie";
 
 		String sql = "SELECT ID, Nome, Cognome, DataNascita, Telefono," +
 				"Fax, Email, Stanza, Matricola, Matricolabadge, passwordmd5, Qualifica, Dipartimento, Sede " +
@@ -210,6 +211,8 @@ public class FromMysqlToPostgres {
 
 
 			FromMysqlToPostgres.createContract(oldIDPersona, person);
+			
+			JPAPlugin.closeTx(false);
 
 			FromMysqlToPostgres.createVacationType(oldIDPersona, person);	
 
@@ -280,23 +283,25 @@ public class FromMysqlToPostgres {
 				
 			}
 			else{
-				
-				
-				Logger.debug("Per %s %s devo creare un nuovo vacation period perchè il precedente ha data di fine precedente alla data attuale", p.name, p.surname);
-//				Query query = JPA.em().createQuery("Select c from Contract c where c.person = :person and ((c.expireContract >= :end) or (c.expireContract = null))");
-//				query.setParameter("person", p).setParameter("end", p.vacationPeriod.endTo);
-//				Contract c = (Contract) query.getSingleResult();
-				Contract c = p.getCurrentContract();
-				if(p.vacationPeriod.endTo.isBefore(new LocalDate()) && c != null && (c.expireContract == null || c.expireContract.isAfter(p.vacationPeriod.endTo)) ){
-					VacationPeriod vp = new VacationPeriod();
-					vp.person = p;
-					vp.vacationCode = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", "28+4").first();
-					vp.beginFrom = new LocalDate(p.vacationPeriod.endTo.plusDays(1));
-			
-					p.vacationPeriod.delete();
-					//p.save();
-					vp.save();
+				if(p.vacationPeriod.beginFrom != null && p.vacationPeriod.endTo == null){
+					Logger.debug("Puppa!");
 				}
+				else{
+					Logger.debug("Per %s %s devo creare un nuovo vacation period perchè il precedente ha data di fine precedente alla data attuale", p.name, p.surname);
+//					
+					Contract c = p.getCurrentContract();
+					if(p.vacationPeriod.endTo.isBefore(new LocalDate()) && c != null && (c.expireContract == null || c.expireContract.isAfter(p.vacationPeriod.endTo)) ){
+						VacationPeriod vp = new VacationPeriod();
+						vp.person = p;
+						vp.vacationCode = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", "28+4").first();
+						vp.beginFrom = new LocalDate(p.vacationPeriod.endTo.plusDays(1));
+				
+						p.vacationPeriod.delete();
+						//p.save();
+						vp.save();
+					}
+				}				
+				
 			}
 			
 		}
@@ -940,6 +945,7 @@ public class FromMysqlToPostgres {
 	}
 
 	public static void createVacationType(long id, Person person) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+		JPAPlugin.startTx(false);
 		Logger.debug("Inizio a creare i periodi di ferie per %s", person);
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * " +
@@ -986,8 +992,34 @@ public class FromMysqlToPostgres {
 
 					vacationPeriod.vacationCode = vacationCode;
 					vacationPeriod.person = person;
-					vacationPeriod.beginFrom = new LocalDate(rs.getDate("data_inizio"));
-					vacationPeriod.endTo = new LocalDate(rs.getDate("data_fine"));					
+					//se il periodo ferie e' scaduto ma la persona e' in firma allora creo un nuovo piano ferie con codice 28+4
+					Contract contract = Contract.find("select c from Contract c where c.person = ? order by c.beginContract DESC", person).first();
+					boolean inFirma = contract.onCertificate;
+					
+					LocalDate datafine = new LocalDate(rs.getDate("data_fine"));		
+					if(datafine.isBefore(new LocalDate()) && inFirma)
+					{
+						vacationPeriod.beginFrom = datafine.plusDays(1);
+						vacationPeriod.endTo = null;
+						//cambiare anche il codice
+						VacationCode vc = VacationCode.find("select vc from VacationCode vc where vc.description = ?", "28+4").first();
+						if(vc == null){
+							vc = new VacationCode();
+							vc.create();
+							vc.description = "28+4";
+							vc.permissionDays = 4;
+							vc.vacationDays = 28;
+							vc.save();
+						}
+						vacationPeriod.vacationCode = vc;
+					}
+					else
+					{
+						vacationPeriod.beginFrom = new LocalDate(rs.getDate("data_inizio"));
+						vacationPeriod.endTo = new LocalDate(rs.getDate("data_fine"));
+				
+					
+					}				
 					vacationPeriod.save();		
 
 					Logger.info("Creato %s", vacationPeriod.toString());
