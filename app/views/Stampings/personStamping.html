@@ -160,10 +160,20 @@
 				<td class="tempoLavoro">
 			%{
 	         	if(!day.isFuture()){
+	         	
 	         }%
-					${day.getTimeAtWorkWithToday().timeAtWork.toHourTime()}<strong>${day.checkTimeForLunch()?.code}</strong><strong>${day.getTimeAtWorkWithToday().exitingNow ? 'f' : ''}</strong>
-	        %{ 
-		  		} 
+	         %{
+					if(day.isToday()){
+				}%
+						${day.getTimeAtWorkWithToday().timeAtWork.toHourTime()}<strong>${day.getTodayLunchTime()?.code}</strong><strong>${day.getTimeAtWorkWithToday().exitingNow ? 'f' : ''}</strong>
+	        	%{ 
+		  			} 
+		  			else{
+		  		}%
+		  				${day.getTimeAtWorkWithToday().timeAtWork.toHourTime()}<strong>${day.checkTimeForLunch()?.code}</strong><strong>${day.getTimeAtWorkWithToday().exitingNow ? 'f' : ''}</strong>
+		  		%{
+		  			}
+		  		}
 		  	}%
 		  				 	
 		  	</td>							
