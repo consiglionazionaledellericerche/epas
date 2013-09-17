@@ -1,15 +1,18 @@
 #{extends 'main.html' /}
-#{set title:yearRecap.person.surname + ' ' + yearRecap.person.name + ', matricola=' + yearRecap.person.number /}
+#{set title:vacationsRecap.person.surname + ' ' + vacationsRecap.person.name + ', matricola=' + vacationsRecap.person.number /}
 
 #{logoutForm /}
 
 #{functionalMenuForm mainMenu: mainMenu /} 
 
-<h3 id="titoloSituazioneFerie">Situazione ferie ${yearRecap.year}</h3>
+<h3 id="titoloSituazioneFerie">Situazione ferie ${vacationsRecap.year}</h3>
+
+inizio contratto: ${vacationsRecap.currentContract.beginContract} 
+fine contratto: ${vacationsRecap.currentContract.endContract} 
 
 <div align="left">
 #{form @Vacations.show()}
-<input type="hidden" name="personId" value="${yearRecap.person.id}" />	
+<input type="hidden" name="personId" value="${vacationsRecap.person.id}" />	
 <table id="ferie">
 	<tr>
 		<th colspan=2 class="ferieFatte">Ferie fatte</th>
@@ -17,10 +20,10 @@
 		<th colspan=5 class="residuo">Residuo</th>
 	</tr>
 	<tr>
-		<th rowspan=2>${yearRecap.year-1} anno precedente</th>
-		<th rowspan=2>${yearRecap.year} anno richiesto</th>
-		<th rowspan=2>ferie ${yearRecap.year-1}</th>
-		<th colspan=2>ferie ${yearRecap.year}</th>
+		<th rowspan=2>${vacationsRecap.year-1} anno precedente</th>
+		<th rowspan=2>${vacationsRecap.year} anno richiesto</th>
+		<th rowspan=2>ferie ${vacationsRecap.year-1}</th>
+		<th colspan=2>ferie ${vacationsRecap.year}</th>
 		<th colspan=2>permessi</th>
 	</tr>
 	<tr>
@@ -31,30 +34,41 @@
 	</tr>
 	<tr>
 	
-		<td><a href="@{Vacations.vacationsLastYear(yearRecap.person, yearRecap.year)}" class="example3demo">${yearRecap.vacationDaysLastYear(yearRecap.year)}</a> 
-				<script type="text/javascript"> 
+		<td>
+			<a 	href="@{Vacations.vacationsLastYear(vacationsRecap.person.id, vacationsRecap.year)}" 
+				class="example3demo">
+				${vacationsRecap.vacationDaysLastYear}
+			</a> 
+			<script type="text/javascript"> 
 				$('.example3demo').popupWindow({ 
 					height:500, 
 					width:800, 
 					top:50, 
 					left:50 
 				}); 
-				</script></td>
-		<td><a href="@{Vacations.vacationsCurrentYear(yearRecap.person, yearRecap.year)}" class="example3demo">${yearRecap.vacationDaysCurrentYear()}</a> 
-				<script type="text/javascript"> 
+			</script></td>
+		<td>
+			<a 	href="@{Vacations.vacationsCurrentYear(vacationsRecap.person.id, vacationsRecap.year)}" 
+				class="example3demo">
+				${vacationsRecap.vacationDaysCurrentYear}
+			</a> 
+			<script type="text/javascript"> 
 				$('.example3demo').popupWindow({ 
 					height:500, 
 					width:800, 
 					top:50, 
 					left:50 
 				});  
-				</script></td>
-		<td>${yearRecap.personalPermissionUsed(yearRecap.year)}</td>
-		<td>${yearRecap.vacationLastYearNotYetUsed(yearRecap.year)}</td>
-		<td>${yearRecap.personalVacationDays()}</td>
-		<td>${yearRecap.vacationCurrentYear(yearRecap.year)}</td>
-		<td>${yearRecap.personalPermission()}</td>
-		<td>${yearRecap.permissionCurrentYear(yearRecap.year)}</td>
+			</script></td>
+		<td>${vacationsRecap.permissionUsed}</td>
+		<td>${vacationsRecap.vacationDaysLastYearNotYetUsed}</td>
+		<td>${vacationsRecap.personalVacationDays}</td>
+		<td>${vacationsRecap.vacationAccruedCurrentYear}</td>
+		<td>${vacationsRecap.personalPermission}</td>
+		<td>${vacationsRecap.permissionAccruedCurrentYear}</td>
+		
+
+		
 	</tr>
 
 </table>
