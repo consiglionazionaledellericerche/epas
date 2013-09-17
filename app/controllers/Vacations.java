@@ -6,6 +6,7 @@ import models.YearRecap;
 
 import org.joda.time.LocalDate;
 
+import controllers.rendering.VacationsRecap;
 import play.Logger;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -19,34 +20,42 @@ public class Vacations extends Controller{
 		
 	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void show(Long personId, Integer anno) {
-		String menuItem = actionMenuItem.toString();
+		//String menuItem = actionMenuItem.toString();											//inutile
+		
+		//controllo dei parametri
 		Person person = null;
 		if(personId != null)
+		{
 			person = Person.findById(personId);
+			Logger.debug("Dati persona: %s %s",person.name, person.surname);
+		}
 		else
 			person = Security.getPerson();
-    	//String anno = params.get("year");
-    	Logger.trace("Anno: "+anno);
+    	if(anno==null)
+			anno = new LocalDate().getYear(); //default l'anno corrente
     	
-    	if(anno==null){
-    		        	
-        	LocalDate now = new LocalDate();
-        	YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)now.getYear());
-            render(yearRecap, menuItem);
+    	VacationsRecap vacationsRecap = new VacationsRecap(person, (short)anno.intValue());
+
+    	//vacation period inesistente
+    	if(vacationsRecap.vacationPeriod==null)
+    	{
+    		Logger.debug("Period e' null");
+    		flash.error("Piano ferie inesistente per %s %s", person.name, person.surname);
+    		render(vacationsRecap);
     	}
-    	else{
-    		//Logger.info("Sono dentro il ramo else della creazione del month recap");
-    		//Integer year = new Integer(params.get("year"));
-			
-    		YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)anno.intValue());
-    		if(yearRecap.vacationLastYearNotYetUsed(anno) == null){
-    			flash.error("Per %s %s non esistono informazioni relative al piano ferie per l'anno %d", person.name, person.surname, anno);
-    			render();
-    		}
-    		
-    		
-            render(yearRecap, menuItem);
+    	
+    	//vacation period scaduto
+    	if(vacationsRecap.vacationPeriod.endTo!=null && vacationsRecap.vacationPeriod.endTo.isBefore(new LocalDate()))
+    	{
+    		Logger.debug("Period e' scaduto");
+    		flash.error("Il piano ferie e' scaduto per %s %s", person.name, person.surname);
+    		render(vacationsRecap);
     	}
+
+      	
+    	Logger.debug("QUI6");
+    	render(vacationsRecap);
+    
     	
     }
 	
