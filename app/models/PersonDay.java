@@ -404,6 +404,14 @@ public class PersonDay extends Model {
 		}
 		return new TimeAtWorkToday(timeAtWork, false);
 	}
+	
+	public StampModificationType getTodayLunchTime(){
+		StampModificationType smt = null;
+		TimeAtWorkToday tawd = getTimeAtWorkWithToday();
+		if(tawd.timeAtWork >= getWorkingTimeTypeDay().mealTicketTime+getWorkingTimeTypeDay().breakTicketTime)
+			smt = StampModificationType.findById(StampModificationTypeValue.FOR_DAILY_LUNCH_TIME.getId()); 
+		return smt;
+	}
 
 	private TimeAtWorkToday getTimeAtWorkToday() {
 		if (stampings.size() == 0)
