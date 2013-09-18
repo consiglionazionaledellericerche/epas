@@ -207,11 +207,7 @@ public class Person extends Model {
 	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
 	public List<YearRecap> yearRecaps;
 
-	/**
-	 * relazione con la tabella di vacation_code
-	 */
-	@OneToOne(mappedBy="person", fetch=FetchType.LAZY)
-	public VacationPeriod vacationPeriod;
+
 
 	/**
 	 * relazione con la tabella Competence
@@ -293,7 +289,7 @@ public class Person extends Model {
 						"where vp.vacationCode = vc and vp.person = ?", this).first();
 				if(vacation == null){
 					VacationPeriod vacationPeriod = new VacationPeriod();
-					vacationPeriod.person = this;
+					//contract.person = this;
 					vacationPeriod.beginFrom = contract.beginContract;
 					vacationPeriod.endTo = null;
 					vacationPeriod.vacationCode = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", "28+4").first();
@@ -324,7 +320,7 @@ public class Person extends Model {
 					VacationPeriod period = VacationPeriod.find("Select vp from VacationPeriod vp where vp.person = ?", this).first();
 					if(period == null){
 						period = new VacationPeriod();
-						period.person = this;
+					//	contract.person = this;
 						period.vacationCode = vacation;
 						period.beginFrom = LocalDate.now();
 						period.endTo = null;

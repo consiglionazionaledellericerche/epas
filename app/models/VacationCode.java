@@ -19,7 +19,7 @@ import play.db.jpa.Model;
  * @author cristian
  *
  */
-@Audited
+//@Audited
 @Entity
 @Table(name = "vacation_codes")
 public class VacationCode extends Model {

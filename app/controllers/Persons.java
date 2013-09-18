@@ -111,33 +111,34 @@ public class Persons extends Controller {
 		render(person, wttList);
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void updateVacation(){
-		Long personId = params.get("personId", Long.class);		
-		
-		Person person = Person.findById(personId);
-		LocalDate begin = new LocalDate(params.get("dataInizio", Date.class));
-		LocalDate end = new LocalDate(params.get("dataFine", Date.class));
-		if(begin == null || end == null){
-			flash.error("Le date devono essere entrambe valorizzate");
-			Application.indexAdmin();
-		}
-		if(begin.isAfter(end)){
-			flash.error("La data di fine del piano ferie non può essere precedente alla data di inizio dello stesso");
-			Application.indexAdmin();
-		}
-		person.vacationPeriod.delete();
-		person.save();
-		VacationCode code = VacationCode.find("Select code from VacationCode code where code.description = ?", params.get("code")).first();
-		VacationPeriod period = new VacationPeriod();
-		period.beginFrom = begin;
-		period.endTo = end;
-		period.person = person;
-		period.vacationCode = code;
-		period.save();
-		flash.success("Aggiornato il piano ferie per %s %s", person.name, person.surname);
-		Application.indexAdmin();
-	}
+//	@Check(Security.INSERT_AND_UPDATE_PERSON)
+//	public static void updateVacation(){
+//		Long personId = params.get("personId", Long.class);		
+//		
+//		Person person = Person.findById(personId);
+//		Contract contract = person.getCurrentContract();
+//		LocalDate begin = new LocalDate(params.get("dataInizio", Date.class));
+//		LocalDate end = new LocalDate(params.get("dataFine", Date.class));
+//		if(begin == null || end == null){
+//			flash.error("Le date devono essere entrambe valorizzate");
+//			Application.indexAdmin();
+//		}
+//		if(begin.isAfter(end)){
+//			flash.error("La data di fine del piano ferie non può essere precedente alla data di inizio dello stesso");
+//			Application.indexAdmin();
+//		}
+//		person.vacationPeriod.delete();
+//		person.save();
+//		VacationCode code = VacationCode.find("Select code from VacationCode code where code.description = ?", params.get("code")).first();
+//		VacationPeriod period = new VacationPeriod();
+//		period.beginFrom = begin;
+//		period.endTo = end;
+//		period.person = person;
+//		period.vacationCode = code;
+//		period.save();
+//		flash.success("Aggiornato il piano ferie per %s %s", person.name, person.surname);
+//		Application.indexAdmin();
+//	}
 
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void updateWorkingTime(){
