@@ -1,12 +1,14 @@
 package models;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -37,6 +39,12 @@ public class Contract extends Model {
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="person_id")
 	public Person person;
+	
+	/**
+	 * relazione con la tabella di vacation_code
+	 */
+	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY)
+	public List<VacationPeriod> vacationPeriods;
 	
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="begin_contract")

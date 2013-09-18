@@ -28,7 +28,7 @@ import play.db.jpa.JPA;
 import play.db.jpa.Model;
 
 @Entity
-@Audited
+//@Audited
 @Table(name = "vacation_periods")
 public class VacationPeriod extends Model{
 
@@ -39,11 +39,11 @@ public class VacationPeriod extends Model{
 	@JoinColumn(name="vacation_codes_id", nullable=false)
 	public VacationCode vacationCode;
 	
-	@Unique
+	
 	@Required
-	@OneToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="person_id", unique=true, nullable=false, updatable=false)
-	public Person person;
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="contract_id", nullable=false, updatable=false)
+	public Contract contract;
 	
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="begin_from")
@@ -64,10 +64,10 @@ public class VacationPeriod extends Model{
 		return vacationList;
 	}
 	
-	@Override
-	public String toString() {
-		return String.format("VacactionPeriod[%d] - person.id = %d, vacactionCode.description = %s, beginFrom = %s, endTo = %s",
-			id, person.id, vacationCode.description, beginFrom, endTo);
-	}
+//	@Override
+//	public String toString() {
+//		return String.format("VacactionPeriod[%d] - person.id = %d, vacactionCode.description = %s, beginFrom = %s, endTo = %s",
+//			id, person.id, vacationCode.description, beginFrom, endTo);
+//	}
 	
 }
