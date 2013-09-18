@@ -362,6 +362,16 @@ CREATE SEQUENCE seq_qualifications
 ALTER TABLE public.seq_qualifications OWNER TO epas;
 
 
+CREATE SEQUENCE seq_remote_office
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+    
+ALTER TABLE public.seq_remote_office OWNER TO epas;
+
 
 CREATE SEQUENCE seq_revinfo
     START WITH 1
@@ -1464,6 +1474,17 @@ ALTER TABLE public.qualifications_history OWNER TO epas;
 
 
 
+CREATE TABLE remote_office (
+    id bigint NOT NULL,
+    address character varying(255),
+    name character varying(255)
+);
+
+
+ALTER TABLE public.remote_office OWNER TO epas;
+
+
+
 CREATE TABLE revinfo (
     rev integer NOT NULL DEFAULT nextval('seq_revinfo'),
     revtstmp bigint
@@ -2182,8 +2203,15 @@ ALTER TABLE ONLY qualifications_history
 
 ALTER TABLE ONLY qualifications
     ADD CONSTRAINT qualifications_pkey PRIMARY KEY (id);
+    
+    
+--
+--
 
-
+ALTER TABLE ONLY remote_office
+    ADD CONSTRAINT remote_office_pkey PRIMARY KEY (id);
+    
+    
 --
 --
 
