@@ -202,4 +202,15 @@ public class DateUtility {
 	
 	
 
+	/**
+	 * 
+	 * @param monthNumber
+	 * @return il nome del mese con valore monthNumber
+	 * 			null in caso di argomento non valido 
+	 */
+	public static String fromIntToStringMonth(Integer monthNumber)
+	{
+		LocalDate date = new LocalDate().withMonthOfYear(monthNumber);
+		return date.monthOfYear().getAsText();
+	}
 }
