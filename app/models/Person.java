@@ -143,7 +143,7 @@ public class Person extends Model {
 	 * relazione con la tabella dei contratti
 	 */
 	@NotAudited
-	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	@OneToMany(mappedBy="person", fetch=FetchType.EAGER, cascade = {CascadeType.REMOVE})
 	public List<Contract> contracts = new ArrayList<Contract>(); 
 
 	@NotAudited
@@ -267,7 +267,7 @@ public class Person extends Model {
 		if(contract==null)
 			return null;
 		
-		VacationPeriod vp = VacationsRecap.getCurrentVacationPeriod(contract);
+		VacationPeriod vp = contract.getCurrentVacationPeriod();
 		if(vp==null)
 			return null;
 		

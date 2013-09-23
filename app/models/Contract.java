@@ -1,5 +1,8 @@
 package models;
 
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
+
 import java.util.Date;
 import java.util.List;
 
@@ -19,6 +22,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
+import play.Logger;
 import play.data.validation.Required;
 import play.db.jpa.Model;
 
@@ -81,4 +85,49 @@ public class Contract extends Model {
 		return String.format("Contract[%d] - person.id = %d, beginContract = %s, expireContract = %s, endContract = %s",
 			id, person.id, beginContract, expireContract, endContract);
 	}
+	
+	/**
+	 * @param contract
+	 * @return il vacation period associato al contratto con al suo interno la data di oggi
+	 */
+	public VacationPeriod getCurrentVacationPeriod()
+	{
+		List<VacationPeriod> vpList = this.getContractVacationPeriods();
+		for(VacationPeriod vp : vpList)
+		{
+			
+			LocalDate now = new LocalDate();
+			
+			if(DateUtility.isDateIntoInterval(now, new DateInterval(vp.beginFrom, vp.endTo)))
+				return vp;
+		}
+		return null;
+	}
+	
+	/**
+	 * @param contract
+	 * @return i vacation period associati al contratto, ordinati in ordine crescente per data inizio
+	 * 		 	null in caso di vacation period inesistente
+	 */
+	public List<VacationPeriod> getContractVacationPeriods()
+	{
+		//vacation period piu' recente per la persona
+		List<VacationPeriod> vpList = VacationPeriod.find(  "SELECT vp "
+													+ "FROM VacationPeriod vp "
+													+ "WHERE vp.contract = ? "
+													+ "ORDER BY vp.beginFrom",
+													this).fetch();
+		
+		//se il piano ferie associato al contratto non esiste 
+		if(vpList==null)
+		{
+			Logger.debug("CurrentPersonVacationPeriod: il vacation period è inesistente");
+			return null;
+		}
+		
+		
+		return vpList;
+	}
+	
+	
 }
