@@ -1,6 +1,8 @@
 package controllers;
 
+import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.MainMenu;
+
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -125,13 +127,26 @@ public class Stampings extends Controller {
 						person, month, year).first();
 
 		if (personMonth == null) {
+			/**
+			 * se il personMonth che viene richiesto, è situato nel tempo prima dell'inizio del contratto della persona oppure successivamente 
+			 * ad esso, se quest'ultimo è a tempo determinato (expireContract != null), si rimanda alla pagina iniziale perchè si tenta di accedere
+			 * a un periodo fuori dall'intervallo temporale in cui questa persona ha un contratto attivo
+			 */
+			if(new LocalDate(year, month, 1).dayOfMonth().withMaximumValue().isBefore(person.getCurrentContract().beginContract)
+					 || (person.getCurrentContract().expireContract != null && new LocalDate(year, month, 1).isAfter(person.getCurrentContract().expireContract))){
+				flash.error("Si è cercato di accedere a un mese al di fuori del contratto valido per %s %s. " +
+						"Non esiste situazione mensile per il mese di %s", person.name, person.surname, DateUtility.fromIntToStringMonth(month));
+				render("@redirectToIndex");
+			}
 			personMonth = new PersonMonth(person, year, month);
 			personMonth.create();
 
 		}
+		
 		int situazioneParziale = 0;
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 				Security.getPerson(), new LocalDate(year, month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
+		
 		if(pdList.size() == 0 && year > new LocalDate().getYear())
 			situazioneParziale = 0;
 		else{
@@ -141,8 +156,13 @@ public class Stampings extends Controller {
 			else{
 				PersonMonth count = personMonth;
 				while(count.month > 1){
-					situazioneParziale = situazioneParziale + count.mesePrecedente().residuoDelMese() - count.mesePrecedente().straordinari;
+					Logger.debug("Mese precedente: %s", count.mesePrecedente());
+					if(count.mesePrecedente() != null)
+						situazioneParziale = situazioneParziale + count.mesePrecedente().residuoDelMese() - count.mesePrecedente().straordinari;
+					
 					count = count.mesePrecedente();
+					if(count == null)
+						break;
 				}
 			}
 		}

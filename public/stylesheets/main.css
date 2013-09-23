@@ -324,6 +324,7 @@ h3#caricamentoSituazioneMensile {text-align: center}
 h3#clock {text-align: center}
 h3#riepilogoMensile {text-align: center; margin: 2em 0em 1em}
 h3#utentiEsistenti {text-align: center}
+h3#pianoFerie {text-align: center}
 iframe#clock {align: center; margin: 3em 58em 0em}
 
 h4#configurazioniEsistenti {margin:2em 0em 1em; text-align: left}
@@ -383,6 +384,7 @@ table#tabellaTimbratureMancanti {margin: 2em 1em 1em; align: left}
 table#tabellaPresenzaGiornaliera {margin: 2em 1em 1em; align: left}
 table#tabellaRiepilogoBuoniMensa {margin: 2em; align:left}
 table#tabellaCodiciCompetenza {margin: 2em; align: left}
+table#pianoFerie {margin: auto}
 
 div#frm *{display:inline}
 
