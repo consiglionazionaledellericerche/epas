@@ -118,4 +118,14 @@ public class AbsenceType extends Model {
 		
 		return listQualification;
 	}
+	
+	public static AbsenceType getAbsenceTypeByCode(String code)
+	{
+		AbsenceType ab = AbsenceType.find("Select ab from AbsenceType ab where ab.code = ?", code).first();
+		if(ab==null)
+			return null;
+		else
+			return ab;
+		
+	}
 }

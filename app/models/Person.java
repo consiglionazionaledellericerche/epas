@@ -35,7 +35,7 @@ import lombok.ToString;
 import models.Stamping.WayType;
 import models.exports.ReperibilityPeriods;
 import models.exports.StampingFromClient;
-
+import models.rendering.VacationsRecap;
 import net.spy.memcached.FailureMode;
 
 import org.eclipse.jdt.internal.core.BecomeWorkingCopyOperation;
@@ -53,7 +53,6 @@ import org.joda.time.LocalDate;
 import controllers.Check;
 import controllers.Secure;
 import controllers.Security;
-
 import play.Logger;
 import play.data.binding.As;
 import play.data.validation.Email;
@@ -258,81 +257,22 @@ public class Person extends Model {
 		return String.format("%s %s", surname, name);
 	}
 
-
-
 	/**
 	 * 
-	 * @param person
-	 * @return il piano ferie previsto per quella persona
+	 * @return il piano ferie associato al contratto a sua volta associato alla data di oggi
 	 */
-	@SuppressWarnings("unused")
-
 	public VacationCode getVacation(){
-
-		VacationCode vacation = null;
-
-		Contract contract = Contract.find("Select con from Contract con where con.person = ?", this).first();
-		if(contract == null){
-			Logger.warn("Siamo nel bottino che il contratto è nullo per %s", this);
-			throw new IllegalStateException(String.format("Il contratto della persona %s è nullo", this));
-		}
-		LocalDate now = LocalDate.now();
-		if(contract.expireContract == null && contract.beginContract != null){
-			/**
-			 * il contratto attuale è a tempo indeterminato, controllo che sia in vigore da più di 3 anni 
-			 */
-			int differenzaAnni = now.getYear() - contract.beginContract.getYear();
-			int differenzaMesi = now.getMonthOfYear() - contract.beginContract.getMonthOfYear();
-			int differenzaGiorni = now.getDayOfMonth() - contract.beginContract.getDayOfMonth();
-			if(differenzaAnni > 3 ){
-				vacation = VacationCode.find("Select vc from VacationCode vc, VacationPeriod vp " +
-						"where vp.vacationCode = vc and vp.person = ?", this).first();
-				if(vacation == null){
-					VacationPeriod vacationPeriod = new VacationPeriod();
-					//contract.person = this;
-					vacationPeriod.beginFrom = contract.beginContract;
-					vacationPeriod.endTo = null;
-					vacationPeriod.vacationCode = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", "28+4").first();
-					vacationPeriod.save();
-					vacation = VacationCode.find("Select vc from VacationCode vc, VacationPeriod vp " +
-							"where vp.vacationCode = vc and vp.person = ?", this).first();
-					return vacation;
-				}
-
-			}
-			else{
-				vacation = VacationCode.find("Select vac from VacationCode vac, VacationPeriod per where per.person = ?" +
-						" and per.vacationCode = vac order by per.beginFrom", this).first();
-				return vacation;
-			}
-		}
-		if(contract.expireContract != null && contract.beginContract != null){
-
-			int differenzaAnni = contract.expireContract.getYear() - contract.beginContract.getYear();
-
-			if(this.getQualification() == null){
-				vacation = null;
-			}			
-			else{
-				if(differenzaAnni >= 3){
-
-					vacation = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", "28+4").first();
-					VacationPeriod period = VacationPeriod.find("Select vp from VacationPeriod vp where vp.person = ?", this).first();
-					if(period == null){
-						period = new VacationPeriod();
-					//	contract.person = this;
-						period.vacationCode = vacation;
-						period.beginFrom = LocalDate.now();
-						period.endTo = null;
-						period.save();
-					}
-
-				}					
-				else
-					vacation = VacationCode.find("Select vc from VacationCode vc where vc.description = ?","26+4").first();				
-			}		
-		}
-		return vacation;
+		
+		Contract contract = this.getCurrentContract();
+		if(contract==null)
+			return null;
+		
+		VacationPeriod vp = VacationsRecap.getCurrentVacationPeriod(contract);
+		if(vp==null)
+			return null;
+		
+		return vp.vacationCode;
+		
 	}
 
 	/**

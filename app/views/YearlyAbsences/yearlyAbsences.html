@@ -1,7 +1,7 @@
 #{extends 'main.html' /}
-#{set title:yappRender.person.surname + ' ' + yappRender.person.name + ', matricola=' + yappRender.person.number /}
+#{set title:yearlyAbsencesRecap.person.surname + ' ' + yearlyAbsencesRecap.person.name + ', matricola=' + yearlyAbsencesRecap.person.number /}
 
-<h2 id="titoloSituazioneAssenzeAnnuali">Situazione assenze per l'anno ${yappRender.year} di ${yappRender.person.name} ${yappRender.person.surname}</h2>
+<h2 id="titoloSituazioneAssenzeAnnuali">Situazione assenze per l'anno ${yearlyAbsencesRecap.year} di ${yearlyAbsencesRecap.person.name} ${yearlyAbsencesRecap.person.surname}</h2>
 
 #{logoutForm /}
 
@@ -28,13 +28,13 @@
 	<!-- Contenuto tabella assenze annuali -->
 
 	%{  
-		for(month in yappRender.absenceTable.rowMap()){
+		for(month in yearlyAbsencesRecap.absenceTable.rowMap()){
 	}%
 	<tr>
 		
-		<td class="mese"><span class="capitalized">${yappRender.fromIntToStringMonth( month.getKey() )}</td>
+		<td class="mese"><span class="capitalized">${yearlyAbsencesRecap.fromIntToStringMonth( month.getKey() )}</td>
 		%{
-			for(col in yappRender.absenceTable.columnKeySet()) {   				
+			for(col in yearlyAbsencesRecap.absenceTable.columnKeySet()) {   				
 		}%
             <td>${month.getValue().get(col)}</td>
         %{
@@ -60,7 +60,7 @@
 		<th width="20">Totale</th>			
 	</tr>
 %{
-     for( entry in yappRender.absenceSummary.entrySet() ) {
+     for( entry in yearlyAbsencesRecap.absenceSummary.entrySet() ) {
 }%
 	<tr>
 		<td>${entry.getKey().code}</td>     
@@ -75,6 +75,6 @@
 	<tr>
 		<td>TOTALE</td>
 		<td></td>
-		<td>${yappRender.totalAbsence}</td>
+		<td>${yearlyAbsencesRecap.totalAbsence}</td>
 	</tr>
 </table>

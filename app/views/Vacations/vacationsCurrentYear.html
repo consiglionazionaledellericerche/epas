@@ -1,27 +1,29 @@
 #{extends 'main.html' /}
-#{set title:yearRecap.person.surname + ' ' + yearRecap.person.name + ', matricola=' + yearRecap.person.number /}
+#{set title:vacationsRecap.person.surname + ' ' + vacationsRecap.person.name + ', matricola=' + vacationsRecap.person.number /}
 
-<h3>Ferie fatte da ${yearRecap.person.surname + ' ' + yearRecap.person.name} nel ${yearRecap.year}</h3>
+<h3>Ferie fatte da ${vacationsRecap.person.surname + ' ' + vacationsRecap.person.name} nel ${vacationsRecap.year}</h3>
 <table>
 	<tr>
 		<th>Giorno</th>
 		<th>Mese</th>
 		<th>Anno</th>
+		<th>Descrizione</th>
+		<th>Codice</th>
 	</tr>
 	%{ 
 		int i = 0;
-		if(yearRecap.listVacationDaysCurrentYear().size()>0){
-		while(i < yearRecap.listVacationDaysCurrentYear().size()){
+		while(i < vacationsRecap.vacationDaysCurrentYearUsed.size()){
 		
 	}%
 	<tr>
-		<td>${yearRecap.listVacationDaysCurrentYear().get(i).date.getDayOfMonth()}</td>
-		<td>${yearRecap.listVacationDaysCurrentYear().get(i).date.getMonthOfYear()}</td>
-		<td>${yearRecap.listVacationDaysCurrentYear().get(i).date.getYear()}</td>
+		<td>${vacationsRecap.vacationDaysCurrentYearUsed.get(i).personDay.date.getDayOfMonth()}</td>
+		<td>${vacationsRecap.vacationDaysCurrentYearUsed.get(i).personDay.date.getMonthOfYear()}</td>
+		<td>${vacationsRecap.vacationDaysCurrentYearUsed.get(i).personDay.date.getYear()}</td>
+		<td>${vacationsRecap.vacationDaysCurrentYearUsed.get(i).absenceType.description}</td>
+		<td>${vacationsRecap.vacationDaysCurrentYearUsed.get(i).absenceType.code}</td>
 	</tr>
 	%{
 		i++;}
-		}
 	}%
 
 </table>

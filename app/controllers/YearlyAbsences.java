@@ -11,7 +11,7 @@ import models.AbsenceType;
 import models.Person;
 import models.PersonDay;
 import models.PersonMonth;
-import models.YearRecap;
+import models.rendering.YearlyAbsencesRecap;
 
 import org.joda.time.LocalDate;
 
@@ -24,8 +24,6 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
-
-import controllers.rendering.YearlyAbsencesPerPerson;
 
 @With( {Secure.class, NavigationMenu.class} )
 public class YearlyAbsences extends Controller{
@@ -104,12 +102,12 @@ public class YearlyAbsences extends Controller{
 		//rendering 
 		if(anno==null){
 			LocalDate now = new LocalDate();
-			YearlyAbsencesPerPerson yappRender = new YearlyAbsencesPerPerson(person, (short)now.getYear());
-			render(yappRender);
+			YearlyAbsencesRecap yearlyAbsencesRecap = new YearlyAbsencesRecap(person, (short)now.getYear());
+			render(yearlyAbsencesRecap);
 		}
 		else{
-			YearlyAbsencesPerPerson yappRender = new YearlyAbsencesPerPerson(person, (short)anno.intValue());
-			render(yappRender);
+			YearlyAbsencesRecap yearlyAbsencesRecap = new YearlyAbsencesRecap(person, (short)anno.intValue());
+			render(yearlyAbsencesRecap);
 		}
 		
 		
@@ -232,15 +230,13 @@ public class YearlyAbsences extends Controller{
 		//rendering 
 		if(anno==null){
 			LocalDate now = new LocalDate();
-			YearlyAbsencesPerPerson yappRender = new YearlyAbsencesPerPerson(person, (short)now.getYear());
-			render(yappRender);
+			YearlyAbsencesRecap yearlyAbsencesRecap = new YearlyAbsencesRecap(person, (short)now.getYear());
+			render(yearlyAbsencesRecap);
 		}
 		else{
-			YearlyAbsencesPerPerson yappRender = new YearlyAbsencesPerPerson(person, (short)anno.intValue());
-			render(yappRender);
+			YearlyAbsencesRecap yearlyAbsencesRecap = new YearlyAbsencesRecap(person, (short)anno.intValue());
+			render(yearlyAbsencesRecap);
 		}
-
-
 	}
 
 
