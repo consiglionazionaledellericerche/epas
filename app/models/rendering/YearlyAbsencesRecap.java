@@ -1,4 +1,4 @@
-package controllers.rendering;
+package models.rendering;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -22,23 +22,40 @@ import models.AbsenceType;
 import models.Person;
 import models.PersonDay;
 
-public class YearlyAbsencesPerPerson {
+/**
+ * 
+ * @author alessandro
+ * Classe da utilizzare per il rendering delle assenze annuali effettuate da una persona in un anno
+ */
+public class YearlyAbsencesRecap {
 
-	//variabili necessarie al rendering
 	public Person person;
 	public short year;
 	Table<Integer, Integer, String> absenceTable;
 	public Map<AbsenceType,Integer> absenceSummary = new HashMap<AbsenceType,Integer>();
 	public int totalAbsence = 0;
 
-	//costruttore
-	public YearlyAbsencesPerPerson(Person person, short year)
+	public YearlyAbsencesRecap(Person person, short year)
 	{
 		this.person = person;
 		this.year = year;
 		
-		
-		//Select lista di assenze nell'anno per la persona, ordinate per data
+		List<Absence> yearlyAbsence = getYearlyAbsence(this.person,this.year);
+				
+		this.totalAbsence = yearlyAbsence.size();
+		this.absenceTable = buildYearlyAbsenceTable(yearlyAbsence);
+		this.absenceSummary = buildYearlyAbsenceSummary(yearlyAbsence);		
+
+	}
+	
+	/**
+	 * 
+	 * @param person
+	 * @param year
+	 * @return la lista delle assenze effettuate dalla persona nell'anno
+	 */
+	public static List<Absence> getYearlyAbsence(Person person, int year)
+	{
 		List<Absence> yearlyAbsence = 
 				Absence.find( "SELECT abs "
 							+ "FROM Absence abs "
@@ -47,16 +64,11 @@ public class YearlyAbsencesPerPerson {
 								person, 
 								new LocalDate(year,1,1), 
 								new LocalDate(year,12,31)
-							).fetch(); 
+							).fetch();
 		
-		
-		this.totalAbsence = yearlyAbsence.size();
-		this.absenceTable = buildYearlyAbsenceTable(yearlyAbsence);
-		this.absenceSummary = buildYearlyAbsenceSummary(yearlyAbsence);		
-
+		return yearlyAbsence;
 	}
 	
-	//metodi richiamati nel template
 	/**
 	 * 
 	 * @param monthNumber
@@ -69,9 +81,6 @@ public class YearlyAbsencesPerPerson {
 		return date.monthOfYear().getAsText();
 	}
 	
-	
-	
-	// metodi di supporto
 	/**
 	 * 
 	 * @param yearlyAbsenceList

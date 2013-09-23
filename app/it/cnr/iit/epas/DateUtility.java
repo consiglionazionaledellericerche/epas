@@ -104,4 +104,102 @@ public class DateUtility {
 			
 		return false;
 	}
+
+
+	/**
+	 * 
+	 * @param date
+	 * @param interval
+	 * @return true se date ricade nell'intervallo estremi compresi
+	 */
+	public static boolean isDateIntoInterval(LocalDate date, DateInterval interval)
+	{
+		if(date==null)
+			date = setInfinity();
+		
+		if(date.isBefore(interval.getBegin()) || date.isAfter(interval.getEnd()))
+		{
+			return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * 
+	 * @param inter1
+	 * @param inter2
+	 * @return l'intervallo contenente l'intersezione fra inter1 e inter2,
+	 * null in caso di intersezione vuota
+	 */
+	public static DateInterval intervalIntersection(DateInterval inter1, DateInterval inter2)
+	{
+		//ordino
+		if(!inter1.getBegin().isBefore(inter2.getBegin()))
+		{
+			DateInterval aux = new DateInterval(inter1.getBegin(), inter1.getEnd());
+			inter1 = inter2;
+			inter2 = aux;
+		}
+		
+		
+		//un intervallo contenuto nell'altro
+		if(isIntervalIntoAnother(inter1, inter2) )
+		{
+			return inter1;
+		}
+		
+		if(isIntervalIntoAnother(inter2, inter1) )
+		{
+			return inter2;
+		}
+		
+		//fine di inter1 si interseca con inizio di inter2
+		if(inter1.getEnd().isBefore(inter2.getBegin()))
+		{
+			return null;
+		}
+		else
+		{
+			return new DateInterval(inter2.getBegin(), inter1.getEnd());
+		}
+		
+	}
+	
+	/**
+	 * 
+	 * @param inter
+	 * @return conta il numero di giorni appartenenti all'intervallo estremi compresi
+	 */
+	public static int daysInInterval(DateInterval inter)
+	{
+		return inter.getEnd().getDayOfYear() - inter.getBegin().getDayOfYear();
+	}
+	
+	/**
+	 * 
+	 * @param inter
+	 * @param another
+	 * @return true se l'intervallo inter e' contenuto nell'intervallo another (estremi compresi), false altrimenti
+	 */
+	public static boolean isIntervalIntoAnother(DateInterval inter, DateInterval another)
+	{
+		
+		if(inter.getBegin().isBefore(another.getBegin()) || inter.getEnd().isAfter(another.getEnd()) )
+		{
+			return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * 
+	 * @return la data infinito
+	 */
+	public static LocalDate setInfinity()
+	{
+		return new LocalDate(9999,12,31);
+	}
+	
+	
+
 }
