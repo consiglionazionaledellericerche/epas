@@ -14,6 +14,7 @@ import org.joda.time.LocalDate;
 import play.Logger;
 import models.Absence;
 import models.AbsenceType;
+import models.Configuration;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
@@ -66,7 +67,7 @@ public class VacationsRecap {
 		}
 		
 		//vacation periods list
-		this.vacationPeriodList = getContractVacationPeriods(this.currentContract);
+		this.vacationPeriodList = this.currentContract.getContractVacationPeriods();
 		if(vacationPeriodList == null)
 		{
 			return;
@@ -77,7 +78,8 @@ public class VacationsRecap {
 		LocalDate startYear = new LocalDate(this.year,1,1);
 		LocalDate endYear = new LocalDate(this.year,12,31);
 		LocalDate today = new LocalDate();
-		
+		Configuration config = Configuration.getCurrentConfiguration();
+		LocalDate expireVacation = today.withMonthOfYear(config.monthExpiryVacationPastYear).withDayOfMonth(config.dayExpiryVacationPastYear);
 		//***************************************************************
 		//*** calcolo ferie e permessi utilizzati per year e lastYear ***
 		//***************************************************************
@@ -98,7 +100,15 @@ public class VacationsRecap {
 		//**************************************************************
 		
 		this.vacationDaysLastYearAccrued = getVacationAccruedYear(new DateInterval(startLastYear, endLastYear), this.currentContract, this.vacationPeriodList);
-		this.vacationDaysLastYearNotYetUsed = this.vacationDaysLastYearAccrued - this.vacationDaysLastYearUsed.size();	//TODO considerare quando scadono
+		if(today.isBefore(expireVacation))
+		{
+			this.vacationDaysLastYearNotYetUsed = this.vacationDaysLastYearAccrued - this.vacationDaysLastYearUsed.size();
+		}
+		else
+		{
+			this.vacationDaysLastYearNotYetUsed = 0;
+		}
+		
 		
 		if(endYear.isAfter(today))
 		{
@@ -120,56 +130,10 @@ public class VacationsRecap {
 
 	}
 	
-	/**
-	 * @param person
-	 * @return i vacation period associati al contratto, ordinati in ordine crescente per data inizio
-	 * 		 	null in caso di vacation period inesistente
-	 */
-	public static List<VacationPeriod> getContractVacationPeriods(Contract currentContract)
-	{
-		//vacation period piu' recente per la persona
-		List<VacationPeriod> vpList = VacationPeriod.find(  "SELECT vp "
-													+ "FROM VacationPeriod vp "
-													+ "WHERE vp.contract = ? "
-													+ "ORDER BY vp.beginFrom",
-													currentContract).fetch();
-		
-		//se il piano ferie associato al contratto non esiste 
-		if(vpList==null)
-		{
-			Logger.debug("CurrentPersonVacationPeriod: il vacation period è inesistente");
-			return null;
-		}
-		
-		
-		return vpList;
-	}
-	
-
-	/**
-	 * TODO questo metodo andrebbe messo nella classe VacationPeriod o Contract
-	 * @param contract
-	 * @return il vacation period associato al contratto con al suo interno la data di oggi
-	 */
-	public static VacationPeriod getCurrentVacationPeriod(Contract contract)
-	{
-		List<VacationPeriod> vpList = getContractVacationPeriods(contract);
-		for(VacationPeriod vp : vpList)
-		{
-			
-			LocalDate now = new LocalDate();
-			
-			if(DateUtility.isDateIntoInterval(now, new DateInterval(vp.beginFrom, vp.endTo)))
-				return vp;
-		}
-		return null;
-	}
-	
 	
 	/**
 	 * 
-	 * @param beginYear
-	 * @param endYear
+	 * @param yearInterval
 	 * @param contract
 	 * @param vacationPeriodList
 	 * @return il numero di giorni di ferie maturati nell'anno year 
@@ -179,13 +143,12 @@ public class VacationsRecap {
 		
 		int vacationDays = 0;
 
-		//data iniziale da consideare //TODO usare intersection
-		if(yearInterval.getBegin().isBefore(contract.beginContract))		
-		{
-			yearInterval = new DateInterval(contract.beginContract, yearInterval.getEnd());
-		}
+		//Calcolo l'intersezione fra l'anno e il contratto attuale
+		yearInterval = DateUtility.intervalIntersection(yearInterval, new DateInterval(contract.beginContract, contract.expireContract));
+		if(yearInterval == null)
+			return 0;
 		
-		//per ogni piano ferie conto i giorni trascorsi in year e applico la funzione
+		//per ogni piano ferie conto i giorni trascorsi in yearInterval e applico la funzione di conversione
 		for(VacationPeriod vp : vacationPeriodList)
 		{
 			int days = 0;
@@ -213,29 +176,22 @@ public class VacationsRecap {
 	}
 
 
+
 	/**
 	 * 
-	 * @param start
-	 * @param end
+	 * @param yearInterval
 	 * @param contract
-	 * @return
+	 * @return numero di permessi maturati nel periodo yearInterval associati a contract
 	 */
 	public int getPermissionAccruedYear(DateInterval yearInterval, Contract contract){
 		int days = 0;
 		int permissionDays = 0;
 	
-		//data iniziale da consideare //TODO usare intersection con progressione contratti
-		if(yearInterval.getBegin().isBefore(contract.beginContract))
-		{
-			
-			if(contract.beginContract.isAfter(yearInterval.getEnd()))
-			{
-				return 0;
-			}
-			//TODO importante. Il begin contract che devo considerare e' l'inizio che lavora al cnr?????
-			yearInterval = new DateInterval(contract.beginContract, yearInterval.getEnd());
-		}
-
+		//Calcolo l'intersezione fra l'anno e il contratto attuale
+		yearInterval = DateUtility.intervalIntersection(yearInterval, new DateInterval(contract.beginContract, contract.expireContract));
+		if(yearInterval == null)
+			return 0;
+		
 		days = yearInterval.getEnd().getDayOfYear() - yearInterval.getBegin().getDayOfYear();
 		permissionDays = VacationsPermissionsDaysAccrued.convertWorkDaysToPermissionDays(days);
 		return permissionDays;
@@ -247,7 +203,7 @@ public class VacationsRecap {
 	 * @param inter
 	 * @param contract
 	 * @param ab
-	 * @return a lista di assenze effettuate dal titolare del contratto del tipo ab nell'intervallo temporale inter
+	 * @return la lista di assenze effettuate dal titolare del contratto del tipo ab nell'intervallo temporale inter
 	 */
 	public static List<Absence> getVacationDays(DateInterval inter, Contract contract, AbsenceType ab)
 	{
