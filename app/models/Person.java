@@ -78,11 +78,7 @@ public class Person extends Model {
 	private static final long serialVersionUID = -2293369685203872207L;
 
 
-	/**
-	 * Used for optimisti locking
-	 */
-	@Version
-	public Integer version;
+	
 
 	@Required
 	public String name;
@@ -122,10 +118,11 @@ public class Person extends Model {
 	/**
 	 * relazione con la tabella delle assenze iniziali
 	 */
-	@OneToMany(mappedBy="person", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<InitializationAbsence> initializationAbsences = new ArrayList<InitializationAbsence>();
 
-
+	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	public List<InitializationTime> initializationTimes = new ArrayList<InitializationTime>();
 
 	/**
 	 * relazione con la tabella delle info di contatto
@@ -147,7 +144,7 @@ public class Person extends Model {
 	public List<Contract> contracts = new ArrayList<Contract>(); 
 
 	@NotAudited
-	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<StampProfile> stampProfiles = new ArrayList<StampProfile>();
 
 	/**
@@ -178,32 +175,32 @@ public class Person extends Model {
 	/**
 	 * relazione con la tabella dei figli del personale
 	 */
-	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<PersonChildren> personChildren;
 
 	/**
 	 * relazione con la nuova tabella dei person day
 	 */
-	@OneToMany(mappedBy="person", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<PersonDay> personDays;
 
 	/**
 	 * relazione con la nuova tabella dei person_month
 	 */
-	@OneToMany(mappedBy="person", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<PersonMonth> personMonths;
 
 	/**
 	 * relazione con la nuova tabella dei person_year
 	 */
-	@OneToMany(mappedBy="person", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<PersonYear> personYears;
 
 	/**
 	 * relazione con la tabella di storico YearRecap
 	 */
 	@NotAudited
-	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<YearRecap> yearRecaps;
 
 
@@ -212,7 +209,7 @@ public class Person extends Model {
 	 * relazione con la tabella Competence
 	 */
 	@NotAudited
-	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<Competence> competences;
 	
 	/**
@@ -227,7 +224,7 @@ public class Person extends Model {
 	 * relazione con la tabella delle competence valide
 	 */
 	@NotAudited
-	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<ValuableCompetence> valuableCompetences;
 
 	/**
@@ -238,14 +235,14 @@ public class Person extends Model {
 	public Location location;
 
 
-	@OneToOne(mappedBy="person", fetch=FetchType.LAZY)
+	@OneToOne(mappedBy="person", fetch=FetchType.LAZY,  cascade = {CascadeType.REMOVE} )
 	public PersonReperibility reperibility;
 
 	@ManyToOne( fetch=FetchType.EAGER )
 	@JoinColumn(name="qualification_id")
 	public Qualification qualification;
 
-	@OneToOne(mappedBy="person", fetch=FetchType.LAZY)
+	@OneToOne(mappedBy="person", fetch=FetchType.LAZY,  cascade = {CascadeType.REMOVE})
 	public PersonShift personShift;
 	
 //	@NotAudited
