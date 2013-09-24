@@ -129,5 +129,46 @@ public class Contract extends Model {
 		return vpList;
 	}
 	
+	public void setVacationPeriods(){
+		if(this.expireContract == null){
+			VacationPeriod first = new VacationPeriod();
+			first.beginFrom = this.beginContract;
+			first.endTo = this.beginContract.plusYears(3).minusDays(1);
+			first.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "26+4").first();
+			first.contract = this;
+			first.save();
+			VacationPeriod second = new VacationPeriod();
+			second.beginFrom = this.beginContract.plusYears(3);
+			second.endTo = null;
+			second.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "28+4").first();
+			second.contract =this;
+			second.save();
+		}
+		else{
+			if(this.expireContract.isAfter(this.beginContract.plusYears(3).minusDays(1))){
+				VacationPeriod first = new VacationPeriod();
+				first.beginFrom = this.beginContract;
+				first.endTo = this.beginContract.plusYears(3).minusDays(1);
+				first.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "26+4").first();
+				first.contract = this;
+				first.save();
+				VacationPeriod second = new VacationPeriod();
+				second.beginFrom = this.beginContract.plusYears(3);
+				second.endTo = this.expireContract;
+				second.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "28+4").first();
+				second.contract =this;
+				second.save();
+			}
+			else{
+				VacationPeriod first = new VacationPeriod();
+				first.beginFrom = this.beginContract;
+				first.endTo = this.expireContract;
+				first.contract = this;
+				first.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "26+4").first();
+				first.save();
+			}
+		}
+		this.save();
+	}
 	
 }

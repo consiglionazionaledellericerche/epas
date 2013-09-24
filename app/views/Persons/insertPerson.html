@@ -1,5 +1,14 @@
 #{extends 'main.html' /}
+<head>
+<script language="javascript">
+var newwindow;
+var url = '/insertUsername/'+${person.id};
+function popit(url){
+    newwindow = window.open(url, '', "status=yes, height=500; width=500; resizeable=0");
+}
+</script>
 
+</head>
 <h2 id="titoloModificaPersonale">
 	%{ if (person.id == null) { }% 
 		Inserisci dati per una nuova persona
@@ -14,11 +23,11 @@
 	
 	<fieldset>
 		<legend>Dati personali</legend>
-		<div><b>Cognome</b> <input name="surname" type="text" value="${person.surname}" size="20" maxlength="100" /></div>
-		<div><b>Nome</b> <input name="name" type="text" value="${person.name}" size="20" maxlength="50" /></div>
+		<div><b>Cognome</b> <input name="surname" type="text" size="20" maxlength="100" /></div>
+		<div><b>Nome</b> <input name="name" type="text" size="20" maxlength="50" /></div>
 		<!--  <div>Password <input name="person.password" type="text" value="" size="10" maxlength="10" /></div>-->
-		<div>Matricola <input name="number" type="text" value="${person.number}" size="10" maxlength="10" /></div>
-		<div>Numero badge <input name="badgeNumber" type="text" value="${person.badgeNumber}" size="10" maxlength="20" /></div>
+		<div>Matricola <input name="number" type="text" size="10" maxlength="10" /></div>
+		<div>Numero badge <input name="badgeNumber" type="text" size="10" maxlength="20" /></div>
 		<div>Livello 
 			#{select 'person.qualification', value:person.qualification, id:'qualifica'} 
 				#{option 0}0#{/option}
@@ -37,11 +46,11 @@
 	
 	<fieldset>
 		<legend>Dati Contrattuali</legend>
-		<div><b>Inizio contratto</b> <input name="beginContract" type="date" value="${contract.beginContract}" size="10" maxlength="10" /></div>
-		<div>Fine contratto <input name="expireContract" type="date" value="${contract.expireContract}" size="10" maxlength="10" /></div>
-		<div>Obbligo attestato di presenza (per dipendenti CNR) <input name="onCertificate" type="checkbox" value="${contract.onCertificate}"  /></div>
-		<div>Ore di inizializzazione maturate in altro istituto l'anno passato (in minuti): <input name="minutesPastYear" type="text" value="${initializationTime.residualMinutesPastYear}" size="10" /></div>
-		<div>Ore di inizializzazione maturate in altro istituto nell'anno corrente (in minuti): <input name="minutesCurrentYear" type="text" value="${initializationTime.residualMinutesCurrentYear}" size="10" /></div>
+		<div><b>Inizio contratto</b> <input name="beginContract" type="date"/></div>
+		<div>Fine contratto <input name="expireContract" type="date" size="10" maxlength="10" /></div>
+		<div>Obbligo attestato di presenza (per dipendenti CNR) <input name="onCertificate" type="checkbox" /></div>
+		<div>Ore di inizializzazione maturate in altro istituto l'anno passato (in minuti): <input name="minutesPastYear" type="text" size="10" /></div>
+		<div>Ore di inizializzazione maturate in altro istituto nell'anno corrente (in minuti): <input name="minutesCurrentYear" type="text" size="10" /></div>
 	</fieldset>
 
 	<fieldset>
@@ -59,7 +68,8 @@
 	<div id="spiegazioneValoriGrassetto">I valori in <b>grassetto</b> sono obbligatori</div>
 	<div id="spiegazioneValoriGrassetto">Il fieldset "sede distaccata" va riempito SOLO SE la nuova persona appartiene a una sede distaccata</div>
 <div id="frm">	
-	<input id="submitInsertPerson" type="submit" value="Ok"/>
+
+	<input id="submitInsertPerson" type="submit" value="Ok" href="#" onclick="popit(url);"/>
 		
 
 #{/form}

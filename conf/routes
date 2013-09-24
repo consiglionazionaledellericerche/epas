@@ -54,6 +54,7 @@ GET     /public/                                staticDir:public
 GET		/personList								Persons.list
 POST	/persons								Persons.save
 GET		/persons								Persons.insertPerson
+GET		/insertUsername/{personId}				Persons.insertUsername
 GET		/persons/edit/{personId}				Persons.edit
 POST	/persons/deletePerson/{personId}		Persons.deletePerson
 GET		/persons/terminatePerson/{personId}		Persons.terminatePerson

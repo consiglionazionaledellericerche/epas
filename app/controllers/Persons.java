@@ -196,9 +196,6 @@ public class Persons extends Controller {
 		Location location = new Location();
 		ContactData contactData = new ContactData();
 		
-		
-		//FIXME: viene sempre creato un contratto nuovo ma ci dovrebbe essere la possibilità
-		//di modificare un contratto esistente. Fare in questo o in un altro metodo?
 		Contract contract = new Contract();		
 		person = new Person();		
 		Logger.debug("Saving person...");
@@ -211,6 +208,7 @@ public class Persons extends Controller {
 		
 		person.surname = params.get("surname");
 		person.number = params.get("number", Integer.class);
+		person.username = params.get("name").toLowerCase()+'.'+params.get("surname").toLowerCase();
 		Qualification qual = Qualification.findById(new Long(params.get("person.qualification", Integer.class)));
 		person.qualification = qual;
 		person.save();
@@ -230,11 +228,11 @@ public class Persons extends Controller {
 		/**
 		 * controllo se la persona deve appartenere a una sede distaccata...
 		 */
-		if(!params.get("remoteOfficeName").equals("") || !params.get("remoteOfficeAddress").equals("")){
-			/**
-			 * TODO: query sul db per vedere se esiste già una sede distaccata con quel nome, così da non fare assegnamenti multipli con lo stesso nome
-			 */
-		}
+//		if(!params.get("remoteOfficeName").equals("") || !params.get("remoteOfficeAddress").equals("")){
+//			/**
+//			 * TODO: query sul db per vedere se esiste già una sede distaccata con quel nome, così da non fare assegnamenti multipli con lo stesso nome
+//			 */
+//		}
 		
 		Logger.debug("saving location, deparment = %s", location.department);
 		location.department = params.get("department");
@@ -248,22 +246,28 @@ public class Persons extends Controller {
 		contactData.telephone = params.get("telephone");
 		contactData.person = person;
 		contactData.save();
-		
-		if(params.get("beginContract", Date.class) == null){
+		Logger.debug("Begin contract: %s", params.get("beginContract"));
+		if(params.get("beginContract") == null){
 			flash.error("Il contratto di %s %s deve avere una data di inizio. Utente cancellato. Reinserirlo con la data di inizio contratto valorizzata.", 
 					person.name, person.surname);
-			person.delete();
+			//person.delete();
 			render("@list");
 		}
-		Date begin = params.get("beginContract", Date.class);
-		Date end = params.get("expireContract", Date.class);
-		LocalDate beginContract = new LocalDate(begin);
-		LocalDate expireContract = new LocalDate(end);
+		LocalDate expireContract = null;
+		LocalDate beginContract = new LocalDate(params.get("beginContract"));
+		if(params.get("expireContract").equals("") || params.get("expireContract") == null)
+			contract.expireContract = null;
+		else			
+			expireContract = new LocalDate(params.get("expireContract"));
+		
 				
 		contract.beginContract = beginContract;
 		contract.expireContract = expireContract;
 		contract.person = person;
+		contract.onCertificate = params.get("onCertificate", Boolean.class);
 		contract.save();
+		contract.setVacationPeriods();
+				
 		Logger.debug("saving contract, beginContract = %s, endContract = %s", contract.beginContract, contract.expireContract);
 		
 		if(params.get("minutesPastYear", Integer.class) != null || params.get("minutesCurrentYear", Integer.class) != null){
@@ -286,6 +290,18 @@ public class Persons extends Controller {
 		flash.success(String.format("Inserita nuova persona in anagrafica: %s %s ",person.name, person.surname));
 		Application.indexAdmin();
 		
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void insertUsername(Long personId){
+		Person person = Person.findById(personId);
+		
+		List<String> usernameList = new ArrayList<String>();
+		usernameList.add(person.username);
+		usernameList.add(person.name.substring(0, 2)+'.'+person.surname);
+		usernameList.add(person.surname+'.'+person.name);
+		
+		render(usernameList);
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
@@ -452,12 +468,9 @@ public class Persons extends Controller {
 	public static void deletePerson(Long personId){
 		Person person = Person.findById(personId);
 		if(person != null){
-			List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ?", person).fetch();
-			contractList.clear();
+			person.permissions.clear();
 			person.delete();
-			flash.success(String.format("Eliminato %s %s", person.name, person.surname + "dall'anagrafica insieme alle sue info su locazione" +
-					", contatti e lista contratti."));
-			Application.indexAdmin();
+			flash.success("Rimossa la persona %s %s", person.name, person.surname);
 		}
 		else{
 			flash.error("L'id passato come parametro non corrisponde a nessuna persona in anagrafica. Controllare id = %s", personId);
