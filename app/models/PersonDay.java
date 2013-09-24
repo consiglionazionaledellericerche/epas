@@ -83,11 +83,11 @@ public class PersonDay extends Model {
 	@Column(name = "is_working_in_another_place")
 	public boolean isWorkingInAnotherPlace = false;
 
-	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY, cascade=CascadeType.PERSIST)
+	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY, cascade= {CascadeType.PERSIST, CascadeType.REMOVE})
 	@OrderBy("date ASC")
 	public List<Stamping> stampings = new ArrayList<Stamping>();
 
-	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY, cascade=CascadeType.PERSIST)
+	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY, cascade= {CascadeType.PERSIST, CascadeType.REMOVE})
 	public List<Absence> absences = new ArrayList<Absence>();
 
 	@Column(name = "modification_type")

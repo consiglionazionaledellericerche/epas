@@ -6,6 +6,7 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -47,7 +48,7 @@ public class Contract extends Model {
 	/**
 	 * relazione con la tabella di vacation_code
 	 */
-	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY, cascade = CascadeType.REMOVE)
 	public List<VacationPeriod> vacationPeriods;
 	
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
