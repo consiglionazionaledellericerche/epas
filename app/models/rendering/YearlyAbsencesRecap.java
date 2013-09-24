@@ -1,5 +1,7 @@
 package models.rendering;
 
+import it.cnr.iit.epas.DateUtility;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -77,8 +79,9 @@ public class YearlyAbsencesRecap {
 	 */
 	public String fromIntToStringMonth(Integer monthNumber)
 	{
-		LocalDate date = new LocalDate().withMonthOfYear(monthNumber);
-		return date.monthOfYear().getAsText();
+		return DateUtility.fromIntToStringMonth(monthNumber);
+		
+		
 	}
 	
 	/**
