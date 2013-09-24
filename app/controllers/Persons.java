@@ -451,18 +451,9 @@ public class Persons extends Controller {
 	@Check(Security.DELETE_PERSON)
 	public static void deletePerson(Long personId){
 		Person person = Person.findById(personId);
-		if(person != null){
-			List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ?", person).fetch();
-			contractList.clear();
-			person.delete();
-			flash.success(String.format("Eliminato %s %s", person.name, person.surname + "dall'anagrafica insieme alle sue info su locazione" +
-					", contatti e lista contratti."));
-			Application.indexAdmin();
-		}
-		else{
-			flash.error("L'id passato come parametro non corrisponde a nessuna persona in anagrafica. Controllare id = %s", personId);
-			Application.indexAdmin();
-		}
+		person.delete();
+		flash.success("La persona %s %s e' stata terminata.", person.surname, person.name);
+		Application.indexAdmin();
 	}
 	
 
