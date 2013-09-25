@@ -1,14 +1,5 @@
 #{extends 'main.html' /}
-<head>
-<script language="javascript">
-var newwindow;
-var url = '/insertUsername/'+${person.id};
-function popit(url){
-    newwindow = window.open(url, '', "status=yes, height=500; width=500; resizeable=0");
-}
-</script>
 
-</head>
 <h2 id="titoloModificaPersonale">
 	%{ if (person.id == null) { }% 
 		Inserisci dati per una nuova persona
@@ -69,7 +60,7 @@ function popit(url){
 	<div id="spiegazioneValoriGrassetto">Il fieldset "sede distaccata" va riempito SOLO SE la nuova persona appartiene a una sede distaccata</div>
 <div id="frm">	
 
-	<input id="submitInsertPerson" type="submit" value="Ok" href="#" onclick="popit(url);"/>
+	<input id="submitInsertPerson" type="submit" value="Avanti"/>
 		
 
 #{/form}

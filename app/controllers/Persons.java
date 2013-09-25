@@ -207,6 +207,7 @@ public class Persons extends Controller {
 		person.name = params.get("name");
 		
 		person.surname = params.get("surname");
+		
 		person.number = params.get("number", Integer.class);
 		person.username = params.get("name").toLowerCase()+'.'+params.get("surname").toLowerCase();
 		Qualification qual = Qualification.findById(new Long(params.get("person.qualification", Integer.class)));
@@ -216,14 +217,14 @@ public class Persons extends Controller {
 		/**
 		 * qui aggiungo il controllo sull'id generato dalla sequence di postgres rispetto ai vecchi id presenti nel vecchio db
 		 */
-		if(PersonUtility.isIdPresentInOldSoftware(person.id)){
-			/**
-			 * TODO:l'id generato è già presente in anagrafica come oldId di qualcuno...questo potrebbe generare dei problemi in fase di acquisizione 
-			 * delle timbrature...
-			 */
-			
-			
-		}
+//		if(PersonUtility.isIdPresentInOldSoftware(person.id)){
+//			/**
+//			 * TODO:l'id generato è già presente in anagrafica come oldId di qualcuno...questo potrebbe generare dei problemi in fase di acquisizione 
+//			 * delle timbrature...
+//			 */
+//			
+//			
+//		}
 		
 		/**
 		 * controllo se la persona deve appartenere a una sede distaccata...
@@ -269,9 +270,9 @@ public class Persons extends Controller {
 		contract.setVacationPeriods();
 				
 		Logger.debug("saving contract, beginContract = %s, endContract = %s", contract.beginContract, contract.expireContract);
-		
+		InitializationTime initTime = new InitializationTime();
 		if(params.get("minutesPastYear", Integer.class) != null || params.get("minutesCurrentYear", Integer.class) != null){
-			InitializationTime initTime = new InitializationTime();
+			
 			initTime.person = person;
 			if(params.get("minutesCurrentYear", Integer.class) != null)
 				initTime.residualMinutesCurrentYear = params.get("minutesCurrentYear", Integer.class);
@@ -287,23 +288,38 @@ public class Persons extends Controller {
 					person.name, person.surname, initTime.residualMinutesPastYear, initTime.residualMinutesCurrentYear);
 		}		
 		
-		flash.success(String.format("Inserita nuova persona in anagrafica: %s %s ",person.name, person.surname));
-		Application.indexAdmin();
+		//flash.success(String.format("Inserita nuova persona in anagrafica: %s %s ",person.name, person.surname));
+		Long personId = person.id;
+		Logger.debug("Person id: %d", personId);
+		List<String> usernameList = PersonUtility.composeUsername(person.name, person.surname);
+		render("@insertUsername", personId, usernameList, person);
+		//Application.indexAdmin();
 		
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void insertUsername(Long personId){
-		Person person = Person.findById(personId);
-		
+	public static void insertUsername(Person person){
+		//Logger.debug("Id persona: %d", personId);
+		//Person person = Person.findById(personId);
 		List<String> usernameList = new ArrayList<String>();
-		usernameList.add(person.username);
-		usernameList.add(person.name.substring(0, 2)+'.'+person.surname);
-		usernameList.add(person.surname+'.'+person.name);
-		
-		render(usernameList);
+		usernameList = PersonUtility.composeUsername(person.name, person.surname);
+		render(person, usernameList);
 	}
 	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void updateUsername(){
+		Long id = params.get("person", Long.class);
+		Person person = Person.findById(id);
+		Logger.debug("Il valore selezionato come username è: %s", params.get("username"));
+		Logger.debug("La persona che si vuole modificare è: %s %s", person.name, person.surname);
+		person.username = params.get("username");
+		person.save();
+		
+		flash.success("%s %s inserito in anagrafica con il valore %s come username", person.name, person.surname, person.username);
+		render("@Stampings.redirectToIndex");
+		
+	}
+
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void update(){
 		Long personId = params.get("personId", Long.class);		
@@ -470,7 +486,9 @@ public class Persons extends Controller {
 		
 		person.delete();
 		flash.success("La persona %s %s e' stata terminata.", person.surname, person.name);
-		Application.indexAdmin();
+		//Application.indexAdmin();
+		
+		render("@Stampings.redirectToIndex");
 
 	}
 	
