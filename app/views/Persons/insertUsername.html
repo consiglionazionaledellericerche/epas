@@ -1,0 +1,18 @@
+#{extends 'main.html' /}
+
+<h3>Inserisci un username per l'utente ${person.name} ${person.surname} selezionandolo dalla lista sottostante</h3>
+#{form @Persons.updateUsername()}
+<input type="hidden" name="person" value="${person.id}"/>
+<ul>
+%{	
+	for(string in usernameList){
+}%
+	<li>${string}</li> <input type="radio" name="username" value="${string}" />
+	
+%{
+	}
+}%
+</ul>
+
+<input type="submit" name="submitPerson" value="Ok"/>
+#{/form}
