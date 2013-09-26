@@ -469,13 +469,14 @@ public class PersonUtility {
 				"and abs.absenceType = :type");
 		query.setParameter("person", person).setParameter("begin", new LocalDate(year-1,1,1)).setParameter("end", new LocalDate(year-1,12,31)).setParameter("type", vacationFromThisYear);
 		List<Absence> absList = query.getResultList();
-		//Logger.debug("Nell'anno passato %s %s ha usufruito di %d giorni di ferie", person.name, person.surname, absList.size());
+		Logger.debug("Nell'anno passato %s %s ha usufruito di %d giorni di ferie", person.name, person.surname, absList.size());
 		
 		query.setParameter("person", person).setParameter("begin", new LocalDate().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue())
 			.setParameter("end", new LocalDate()).setParameter("type", vacationFromLastYear);
 		List<Absence> absThisYearList = query.getResultList();
-		//Logger.debug("Quest'anno %s %s ha usufruito di %d giorni di ferie", person.name, person.surname, absThisYearList.size());
+		Logger.debug("Quest'anno %s %s ha usufruito di %d giorni di ferie", person.name, person.surname, absThisYearList.size());
 		
+		//FIXME: alcuni non hanno vacation period (abraham)
 		VacationPeriod vp = VacationPeriod.find("Select vp from VacationPeriod vp where vp.person = ? and ((vp.beginFrom <= ? and vp.endTo >= ?) " +
 				"or (vp.endTo = null)) order by vp.beginFrom desc", person, new LocalDate(year-1,1,1), new LocalDate(year-1,12,31)).first();
 		if((vp.vacationCode.vacationDays > absList.size() + absThisYearList.size()) && 
@@ -487,7 +488,7 @@ public class PersonUtility {
 		query.setParameter("begin", new LocalDate().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue())
 			.setParameter("end", new LocalDate(year, month, day)).setParameter("person", person).setParameter("type", permissionDay);
 		List<Absence> absPermissions = query.getResultList();
-		//Logger.debug("%s %s quest'ann ha usufruito di %d giorni di permesso", person.name, person.surname, absPermissions.size());
+		Logger.debug("%s %s quest'anno ha usufruito di %d giorni di permesso", person.name, person.surname, absPermissions.size());
 		if(vp.vacationCode.permissionDays > absPermissions.size()){
 			return permissionDay;
 		}
@@ -537,6 +538,61 @@ public class PersonUtility {
 		if(DateUtility.isHoliday(person,date))
 			return null;
 		return new PersonDay(person, date);
+	}
+	
+	/**
+	 * 
+	 * @param name
+	 * @param surname
+	 * @return una lista di stringhe ottenute concatenando nome e cognome in vari modi per proporre lo username per il 
+	 * nuovo dipendente inserito 
+	 */
+	public static List<String> composeUsername(String name, String surname){
+		List<String> usernameList = new ArrayList<String>();
+		usernameList.add(name.replace(' ', '_').toLowerCase()+'.'+surname.replace(' ','_').toLowerCase());
+		usernameList.add(name.trim().toLowerCase().substring(0,1)+'.'+surname.replace(' ','_').toLowerCase());
+		
+	
+		int blankNamePosition = whichBlankPosition(name);
+		int blankSurnamePosition = whichBlankPosition(surname);
+		if(blankSurnamePosition > 4 && blankNamePosition == 0){
+			usernameList.add(name.toLowerCase().replace(' ','_')+'.'+surname.substring(0, blankSurnamePosition).toLowerCase());
+			usernameList.add(name.toLowerCase().replace(' ','_')+'.'+surname.substring(blankSurnamePosition+1, surname.length()).toLowerCase());
+		}
+		if(blankNamePosition > 3 && blankSurnamePosition == 0){
+			usernameList.add(name.substring(0, blankNamePosition).toLowerCase()+'.'+surname.toLowerCase().replace(' ','_'));
+			usernameList.add(name.substring(blankNamePosition+1, name.length()).toLowerCase()+'.'+surname.toLowerCase());
+			usernameList.add(name.toLowerCase().replace(' ','_')+'.'+surname.toLowerCase().replace(' ','_'));
+		}
+		if(blankSurnamePosition < 4 && blankNamePosition == 0){
+			usernameList.add(name.toLowerCase()+'.'+surname.trim().toLowerCase());
+		}
+		if(blankSurnamePosition > 4 && blankNamePosition > 3){
+			usernameList.add(name.toLowerCase().replace(' ','_')+'.'+surname.toLowerCase().replace(' ','_'));
+			usernameList.add(name.toLowerCase().substring(0, blankNamePosition)+'.'+surname.replace(' ','_').toLowerCase());
+			usernameList.add(name.substring(blankNamePosition+1, name.length()).toLowerCase()+'.'+surname.replace(' ','_').toLowerCase());
+			usernameList.add(name.replace(' ','_').toLowerCase()+'.'+surname.substring(0, blankSurnamePosition).toLowerCase());
+			usernameList.add(name.replace(' ','_').toLowerCase()+'.'+surname.substring(blankSurnamePosition+1, surname.length()).toLowerCase());
+			usernameList.add(name.substring(0, blankNamePosition).toLowerCase()+'.'+surname.substring(0, blankSurnamePosition).toLowerCase());
+			usernameList.add(name.substring(0, blankNamePosition).toLowerCase()+'.'+surname.substring(blankSurnamePosition+1, surname.length()).toLowerCase());
+			usernameList.add(name.substring(blankNamePosition+1, name.length()).toLowerCase()+'.'+surname.substring(0, blankSurnamePosition).toLowerCase());
+			usernameList.add(name.substring(blankNamePosition+1, name.length()).toLowerCase()+'.'+surname.substring(blankSurnamePosition+1, surname.length()).toLowerCase());
+		}
+		return usernameList;
+	}
+	
+	/**
+	 * 
+	 * @param s
+	 * @return la posizione in una stringa in cui si trova un eventuale spazio (più cognomi, più nomi...)
+	 */
+	private static int whichBlankPosition(String s){
+		int position = 0;
+		for(int i = 0; i < s.length(); i++){
+			if(s.charAt(i) == ' ')
+				position = i;
+		}
+		return position;
 	}
 
 }

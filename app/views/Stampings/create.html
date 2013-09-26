@@ -22,9 +22,10 @@ Lasciare la casella vuota per eliminare una entrata/uscita.
 			<p id="tipoTimbratura"> Forza l'orario di lavoro al tempo di lavoro previsto (non inserire valori nei campi ore e minuti): </p><p id="choice"> Si <input type="radio" name="timeAtWork" value="true" /> No <input type="radio" name="timeAtWork" value="false" checked="checked"/></p>
 	</fieldset>
 	
-	
+<div id="frm">	
 <input id="submitStamping" type="submit" value="Inserisci"/>
 #{/form}
 #{form @Stampings.discard()}
 <input id="discardStamping" type=reset value="Annulla">
 #{/form}
+</div>

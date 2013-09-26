@@ -1,8 +1,12 @@
 package controllers;
 
+import java.util.List;
+
 import it.cnr.iit.epas.ActionMenuItem;
 import models.Person;
+import models.PersonDay;
 import models.YearRecap;
+import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
 
@@ -19,29 +23,32 @@ public class Vacations extends Controller{
 		
 	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void show(Long personId, Integer anno) {
-		String menuItem = actionMenuItem.toString();
+		//String menuItem = actionMenuItem.toString();											//inutile
+		
+		//controllo dei parametri
 		Person person = null;
 		if(personId != null)
+		{
 			person = Person.findById(personId);
+			Logger.debug("Dati persona: %s %s",person.name, person.surname);
+		}
 		else
 			person = Security.getPerson();
-    	//String anno = params.get("year");
-    	Logger.trace("Anno: "+anno);
+    	if(anno==null)
+			anno = new LocalDate().getYear(); //default l'anno corrente
+
+    	//Costruzione oggetto di riepilogo per la persona
+    	VacationsRecap vacationsRecap = new VacationsRecap(person, (short)anno.intValue());
+    	if(vacationsRecap.vacationPeriodList==null)
+    	{
+    		Logger.debug("Period e' null");
+    		flash.error("Piano ferie inesistente per %s %s", person.name, person.surname);
+    		render(vacationsRecap);
+    	}
     	
-    	if(anno==null){
-    		        	
-        	LocalDate now = new LocalDate();
-        	YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)now.getYear());
-            render(yearRecap, menuItem);
-    	}
-    	else{
-    		Logger.info("Sono dentro il ramo else della creazione del month recap");
-    		//Integer year = new Integer(params.get("year"));
-			
-    		YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)anno.intValue());
-    		    		
-            render(yearRecap, menuItem);
-    	}
+    	//rendering
+       	render(vacationsRecap);
+    
     	
     }
 	
@@ -90,20 +97,17 @@ public class Vacations extends Controller{
 		//String year = params.get("year");
     	Logger.trace("Anno: "+anno);
     	
-    	if(anno==null){
-    		
-        	LocalDate now = new LocalDate();
-        	YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)now.getYear());
-            render(yearRecap);
+    	//Costruzione oggetto di riepilogo per la persona
+    	VacationsRecap vacationsRecap = new VacationsRecap(person, (short)anno.intValue());
+    	if(vacationsRecap.vacationPeriodList==null)
+    	{
+    		Logger.debug("Period e' null");
+    		flash.error("Piano ferie inesistente per %s %s", person.name, person.surname);
+    		render(vacationsRecap);
     	}
-    	else{
-    		Logger.info("Sono dentro il ramo else della creazione del month recap");
-    		//Integer year = params.get("year", Integer.class);
-			
-    		YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)anno.intValue());
-    		    		
-            render(yearRecap);
-    	}
+    	
+    	//rendering
+       	render(vacationsRecap);
 	}
 	
 //	@Check({Security.VIEW_PERSONAL_SITUATION, Security.INSERT_AND_UPDATE_VACATIONS})
@@ -118,20 +122,18 @@ public class Vacations extends Controller{
     		person = Person.findById(personId);
     	else
     		person = Security.getPerson();
-    	if(anno==null){
-        	
-        	LocalDate now = new LocalDate();
-        	YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)now.getYear());
-            render(yearRecap);
+    	
+    	//Costruzione oggetto di riepilogo per la persona
+    	VacationsRecap vacationsRecap = new VacationsRecap(person, (short)anno.intValue());
+    	if(vacationsRecap.vacationPeriodList==null)
+    	{
+    		Logger.debug("Period e' null");
+    		flash.error("Piano ferie inesistente per %s %s", person.name, person.surname);
+    		render(vacationsRecap);
     	}
-    	else{
-    		Logger.info("Sono dentro il ramo else della creazione del month recap");
-    		//Integer year = new Integer(params.get("year"));
-			
-    		YearRecap yearRecap = YearRecap.byPersonAndYear(person, (short)anno.intValue());
-    		    		
-            render(yearRecap);
-    	}
+    	
+    	//rendering
+       	render(vacationsRecap);
 	}
 	
 }

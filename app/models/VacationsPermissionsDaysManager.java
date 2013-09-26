@@ -151,7 +151,7 @@ public class VacationsPermissionsDaysManager {
 			return new AvailabilityInfo(false);
 		}
 		YearRecap yr = new YearRecap();
-		int vacationDaysPastYearAvailable = yr.vacationLastYearNotYetUsed();
+		int vacationDaysPastYearAvailable = yr.vacationLastYearNotYetUsed(date.getYear());
 		if(vacationDaysPastYearAvailable>0)
 			return new AvailabilityInfo(true);
 		return new AvailabilityInfo(false);
@@ -245,7 +245,7 @@ public class VacationsPermissionsDaysManager {
 	
 	public static AvailabilityInfo isPermissionCurrentYearAvailable(){
 		YearRecap yr = new YearRecap();
-		int permissionDaysAvailable = yr.permissionCurrentYear() - yr.personalPermissionUsed();
+		int permissionDaysAvailable = yr.permissionCurrentYear(yr.year) - yr.personalPermissionUsed(yr.year);
 		if(permissionDaysAvailable > 0)
 			return new AvailabilityInfo(true);
 		

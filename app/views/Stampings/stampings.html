@@ -49,7 +49,15 @@
 			%{
 			}
 			}%
-			<td class="assenza">${day.absenceList().size()>0  ? day.absenceList().get(0).absenceType.code : ''}</td>
+			<td class="assenza">
+				%{	
+					for (absence in day.absences) { 
+				%}
+						
+						${absence.absenceType.code}
+																
+				%{ } }%
+			</td>
 			%{  int j = 0;
 				for(int i = 0; i < numberOfInOut; i++){
 					j = i*2;
@@ -91,18 +99,35 @@
 				<td class="tempoLavoro">
 			%{
 	         	if(!day.isFuture()){
+	         	
 	         }%
-					${day.getTimeAtWorkWithToday().timeAtWork.toHourTime()}<strong>${day.checkTimeForLunch()?.code}</strong><strong>${day.getTimeAtWorkWithToday().exitingNow ? 'f' : ''}</strong>
-	        %{ 
-		  		} 
+	         %{
+					if(day.isToday()){
+				}%
+						${day.getTimeAtWorkWithToday().timeAtWork.toHourTime()}<strong>${day.getTodayLunchTime()?.code}</strong><strong>${day.getTimeAtWorkWithToday().exitingNow ? 'f' : ''}</strong>
+	        	%{ 
+		  			} 
+		  			else{
+		  		}%
+		  				${day.getTimeAtWorkWithToday().timeAtWork.toHourTime()}<strong>${day.checkTimeForLunch()?.code}</strong><strong>${day.getTimeAtWorkWithToday().exitingNow ? 'f' : ''}</strong>
+		  		%{
+		  			}
+		  		}
 		  	}%
 		  				 	
 		  	</td>	  
 	         <td class="differenza">
 	         %{
-	       	 	if(day.isToday()){
+	       	 	if(day.isToday() && day.absences.size() == 0){
 	       	 }%
 	       	 		${day.differenceToday().toHourTime()}
+	       	 %{
+	       	 	}
+	       	 }%
+	       	 %{
+	       	 	if(day.isToday() && day.absences.size() != 0){
+	       	 }%
+	       	 		${(day.difference).toHourTime()}
 	       	 %{
 	       	 	}
 	       	 }%
@@ -128,12 +153,19 @@
 	        
 	         <td class="progressivo">
 	         %{
-			 	if(day.isToday()){
+			 	if(day.isToday() && day.absences.size() == 0){
 			 }%
 			 		${day.progressiveToday().toHourTime()}
 			 %{
 			 	}
 			 }%
+			 %{
+	       	 	if(day.isToday() && day.absences.size() != 0){
+	       	 }%
+	       	 		${(day.progressive).toHourTime()}
+	       	 %{
+	       	 	}
+	       	 }%
 			%{
 			    if(!day.isFuture() && !day.isToday()) {
 			}%

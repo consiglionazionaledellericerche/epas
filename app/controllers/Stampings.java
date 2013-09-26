@@ -1,6 +1,8 @@
 package controllers;
 
+import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.MainMenu;
+
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -51,9 +53,7 @@ public class Stampings extends Controller {
 		if (Security.getPerson().username.equals("admin")) {
 			Application.indexAdmin();
 		}
-		
-		long id = 1;
-		//Configuration confParameters = Configuration.findById(id);
+
 		Configuration confParameters = Configuration.getCurrentConfiguration();
 		if(confParameters == null)
 			confParameters = Configuration.find("Select c from Configuration c order by c.id desc").first();
@@ -73,22 +73,27 @@ public class Stampings extends Controller {
 		if(personMonth == null)
 			personMonth = new PersonMonth(person, year, month);
 		int situazioneParziale = 0;
-		if(personMonth.month == 1){
-			situazioneParziale = personMonth.residuoAnnoCorrenteDaInizializzazione();
-		}
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+				Security.getPerson(), new LocalDate(year, month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
+		if(pdList.size() == 0 && year > new LocalDate().getYear())
+			situazioneParziale = 0;
 		else{
-			PersonMonth count = personMonth;
-			while(count.month > 1){
-				situazioneParziale = situazioneParziale + count.mesePrecedente().residuoDelMese() - count.mesePrecedente().straordinari;
-				count = count.mesePrecedente();
+			if(personMonth.month == 1){
+				situazioneParziale = personMonth.residuoAnnoCorrenteDaInizializzazione();
 			}
-		}
-		
+			else{
+				PersonMonth count = personMonth;
+				while(count.month > 1){
+					situazioneParziale = situazioneParziale + count.mesePrecedente().residuoDelMese() - count.mesePrecedente().straordinari;
+					count = count.mesePrecedente();
+				}
+			}
+		}		
 		
 		int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
-		int numberOfInOut = Math.min(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
+		int numberOfInOut = Math.max(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
 
-		//Logger.debug("Month recap of person.id %s, year=%s, month=%s", person.id, year, month);
+		Logger.debug("Numuero di ingressi/uscite: %d", numberOfInOut);
 
 		render(personMonth, numberOfInOut, numberOfCompensatoryRest, situazioneParziale);
 	}
@@ -105,7 +110,7 @@ public class Stampings extends Controller {
 			personStamping(personId);
 		}
 
-		PersonMonth previousPersonMonth = null;
+//		PersonMonth previousPersonMonth = null;
 		Logger.debug("Called personStamping of personId=%s, year=%s, month=%s", personId, year, month);
 
 		Person person = Person.findById(personId);
@@ -122,32 +127,54 @@ public class Stampings extends Controller {
 						person, month, year).first();
 
 		if (personMonth == null) {
+			/**
+			 * se il personMonth che viene richiesto, è situato nel tempo prima dell'inizio del contratto della persona oppure successivamente 
+			 * ad esso, se quest'ultimo è a tempo determinato (expireContract != null), si rimanda alla pagina iniziale perchè si tenta di accedere
+			 * a un periodo fuori dall'intervallo temporale in cui questa persona ha un contratto attivo
+			 */
+			if(new LocalDate(year, month, 1).dayOfMonth().withMaximumValue().isBefore(person.getCurrentContract().beginContract)
+					 || (person.getCurrentContract().expireContract != null && new LocalDate(year, month, 1).isAfter(person.getCurrentContract().expireContract))){
+				flash.error("Si è cercato di accedere a un mese al di fuori del contratto valido per %s %s. " +
+						"Non esiste situazione mensile per il mese di %s", person.name, person.surname, DateUtility.fromIntToStringMonth(month));
+				render("@redirectToIndex");
+			}
 			personMonth = new PersonMonth(person, year, month);
 			personMonth.create();
 
 		}
+		
 		int situazioneParziale = 0;
-		if(personMonth.month == 1){
-			situazioneParziale = personMonth.residuoAnnoCorrenteDaInizializzazione();
-		}
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+				Security.getPerson(), new LocalDate(year, month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
+		
+		if(pdList.size() == 0 && year > new LocalDate().getYear())
+			situazioneParziale = 0;
 		else{
-			PersonMonth count = personMonth;
-			while(count.month > 1){
-				situazioneParziale = situazioneParziale + count.mesePrecedente().residuoDelMese() - count.mesePrecedente().straordinari;
-				count = count.mesePrecedente();
+			if(personMonth.month == 1){
+				situazioneParziale = personMonth.residuoAnnoCorrenteDaInizializzazione();
+			}
+			else{
+				PersonMonth count = personMonth;
+				while(count.month > 1){
+					Logger.debug("Mese precedente: %s", count.mesePrecedente());
+					if(count.mesePrecedente() != null)
+						situazioneParziale = situazioneParziale + count.mesePrecedente().residuoDelMese() - count.mesePrecedente().straordinari;
+					
+					count = count.mesePrecedente();
+					if(count == null)
+						break;
+				}
 			}
 		}
-//		Logger.debug("Month recap of person.id %s, year=%s, month=%s", person.id, year, month);
-//		Logger.debug("PersonMonth of person.id %s, year=%s, month=%s", person.id, year, month);
-
-//		Logger.debug("Controllo gli straordinari nel corso dell'anno fino ad oggi per %s %s...", person.name, person.surname);
-		int overtimeHour = personMonth.getOvertimeHourInYear(new LocalDate(year,month,1).dayOfMonth().withMaximumValue());
-//		Logger.debug("Le ore di straordinario da inizio anno sono: %s", overtimeHour);
+		
+		
+//		int overtimeHour = personMonth.getOvertimeHourInYear(new LocalDate(year,month,1).dayOfMonth().withMaximumValue());
+		int numberOfCompensatoryRestUntilToday = personMonth.numberOfCompensatoryRestUntilToday();
 
 		int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
 		int numberOfInOut = Math.max(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
 //		Logger.debug("NumberOfInOut: %d, NumberOfCompensatoryRest: %d, OvertimeHour: %d", numberOfInOut, numberOfCompensatoryRest, overtimeHour);
-		render(personMonth, numberOfInOut, previousPersonMonth, numberOfCompensatoryRest, overtimeHour, person, situazioneParziale);
+		render(personMonth, numberOfInOut, numberOfCompensatoryRestUntilToday, numberOfCompensatoryRest,/* overtimeHour, */situazioneParziale);
 
 	}
 
@@ -191,10 +218,7 @@ public class Stampings extends Controller {
 
 	@Check(Security.INSERT_AND_UPDATE_STAMPING)
 	public static void insert(@Valid @Required Long personId, @Required Integer year, @Required Integer month, @Required Integer day) {
-		//		if(validation.hasErrors()) {
-		//			
-		//			render("@create", personId, year, month, day);
-		//		}
+	
 		Person person = Person.em().getReference(Person.class, personId);
 
 		LocalDate date = new LocalDate(year,month,day);
@@ -239,7 +263,7 @@ public class Stampings extends Controller {
 		stamp.markedByAdmin = true;
 		
 		
-//		stamp.considerForCounting = true;
+
 		if(service.equals("true")){
 			stamp.note = "timbratura di servizio";
 			stamp.stampType = StampType.find("Select st from StampType st where st.code = ?", "motiviDiServizio").first();
@@ -256,12 +280,21 @@ public class Stampings extends Controller {
 		stamp.personDay = pd;
 		stamp.save();
 		pd.stampings.add(stamp);
-		pd.merge();
+		pd.save();
 		pd.populatePersonDay();
 		pd.save();
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ?", 
+				pd.person, pd.date).fetch();
+		for(PersonDay p : pdList){
+			if(p.date.getMonthOfYear() == stamp.date.getMonthOfYear()){
+				p.populatePersonDay();
+				p.save();
+			}
+			
+		}
 		flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
 		render("@save");
-		//Application.indexAdmin();
+		
 
 	}
 
@@ -285,7 +318,7 @@ public class Stampings extends Controller {
 		if (stamping == null) {
 			notFound();
 		}
-
+		PersonDay pd = stamping.personDay;
 		Integer hour = params.get("stampingHour", Integer.class);
 		Integer minute = params.get("stampingMinute", Integer.class);
 		if(hour != null && minute == null || hour == null && minute != null){
@@ -294,7 +327,7 @@ public class Stampings extends Controller {
 			render("@save");
 		}
 		if (hour == null && minute == null) {
-			PersonDay pd = stamping.personDay;
+			
 			stamping.delete();
 			pd.stampings.remove(stamping);
 //			stamping.considerForCounting = true;
@@ -328,9 +361,10 @@ public class Stampings extends Controller {
 			stamping.markedByAdmin = true;
 			stamping.note = "timbratura modificata dall'amministratore";
 			stamping.save();
-			
-			stamping.personDay.populatePersonDay();
-			stamping.personDay.save();
+			pd.populatePersonDay();
+			pd.save();
+			//stamping.personDay.populatePersonDay();
+			//stamping.personDay.save();
 			Logger.debug("Aggiornata ora della timbratura alle ore: %s", stamping.date);
 			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ?", 
 					stamping.personDay.person, stamping.personDay.date).fetch();

@@ -31,12 +31,12 @@ import com.google.common.collect.Multiset.Entry;
 import net.sf.oval.constraint.Min;
 import net.sf.oval.constraint.NotNull;
 import net.sf.oval.constraint.Range;
-
 import play.Logger;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.db.jpa.JPA;
 import play.db.jpa.Model;
+
 
 /**
  * 
@@ -138,195 +138,7 @@ public class YearRecap extends Model{
 	}
 
 
-	/**
-	 * QUI INIZIA LA PARTE DELLE FUNZIONI CHE MI SERVONO PER IL CALCOLO DELLE ASSENZE ANNUALI CHE LA PERSONA HA FATTO
-	 */
-
-	/**
-	 * @return la lista di giorni (PersonDay) associato alla persona nel mese di riferimento
-	 */
-	public List<String> getMonths() {
-		//Logger.debug("Chiamata la getMonths");
-		if (months != null) {
-			return months;
-		}
-		months = new ArrayList<String>();
-		LocalDate firstMonthOfYear = new LocalDate(year, 1,1);
-
-		for(int month = 1; month <= firstMonthOfYear.getMonthOfYear(); month++){
-			String mese = firstMonthOfYear.monthOfYear().getAsText();
-			months.add(mese);
-			//Logger.debug("Aggiunto mese: %s", mese);
-			firstMonthOfYear=firstMonthOfYear.plusMonths(1);
-		}
-		return months;
-	}
-
-	/**
-	 * 
-	 * @param month
-	 * @return il numero del mese corrispondente alla stringa passata come parametro
-	 */
-	private int fromStringToIntMonth(String month){
-		int numberOfMonth = 0;
-		if(month.equalsIgnoreCase("gennaio") || month.equalsIgnoreCase("January")){
-			numberOfMonth = 1;
-		}
-		if(month.equalsIgnoreCase("febbraio") || month.equalsIgnoreCase("February")){
-			numberOfMonth = 2;
-		}	
-		if(month.equalsIgnoreCase("marzo") || month.equalsIgnoreCase("March")){
-			numberOfMonth = 3;
-		}	
-		if(month.equalsIgnoreCase("aprile") || month.equalsIgnoreCase("April")){
-			numberOfMonth = 4;
-		}
-		if(month.equalsIgnoreCase("maggio") || month.equalsIgnoreCase("May")){
-			numberOfMonth = 5;
-		}
-		if(month.equalsIgnoreCase("giugno") || month.equalsIgnoreCase("June")){
-			numberOfMonth = 6;
-		}
-		if(month.equalsIgnoreCase("luglio") || month.equalsIgnoreCase("July")){
-			numberOfMonth = 7;
-		}
-		if(month.equalsIgnoreCase("agosto") || month.equalsIgnoreCase("August")){
-			numberOfMonth = 8;
-		}
-		if(month.equalsIgnoreCase("settembre") || month.equalsIgnoreCase("September")){
-			numberOfMonth = 9;
-		}
-		if(month.equalsIgnoreCase("ottobre") || month.equalsIgnoreCase("October")){
-			numberOfMonth = 10;
-		}
-		if(month.equalsIgnoreCase("novembre") || month.equalsIgnoreCase("November")){
-			numberOfMonth = 11;
-		}
-		if(month.equalsIgnoreCase("dicembre") || month.equalsIgnoreCase("December")){
-			numberOfMonth = 12;
-		}
-
-		return numberOfMonth;
-	}
-
-	/**
-	 * 
-	 * @param year, month
-	 * @return il numero di giorni nel mese e nell'anno considerati. il mese viene calcolato chiamando la funzione fromStringToIntMonth
-	 */
-	public int maxNumberOfDays(int year, String month){
-		//Logger.debug("Chiamata la maxNumberOfDays");
-		int numberOfMonth = fromStringToIntMonth(month);
-		Logger.debug("Per la persona %s %s per il mese %s il valore corrispondente è: %d", this.person.name, this.person.surname, month, numberOfMonth);
-		LocalDate date = new LocalDate(year, numberOfMonth, 1);
-		return date.dayOfMonth().withMaximumValue().getDayOfMonth();
-	}
-
-	/**
-	 * 
-	 * @param year
-	 * @param month
-	 * @param day
-	 * @return la totalità delle assenze per quella persona in un anno, in più aggiorna la lista privata yearlyAbsences nel caso in 
-	 * cui trova un assenza con un codice che ancora non è stato inserito
-	 */
-	public List<Absence> getAbsenceInYear(@Valid int year, @Valid String month, @Valid int day){
-		int mese = fromStringToIntMonth(month);
-//		Logger.debug("Il mese è :", mese);
-//		Logger.debug("Il giorno è: ", day);
-		List<Absence> absencesInDay = new ArrayList<Absence>();
-		//LocalDate date = new LocalDate(year, 1, 1);
-		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", 
-				person, new LocalDate(year, mese, day)).fetch();
-		for(PersonDay pd : pdList){
-			if(pd.absences.size() > 0){
-				for(Absence abs : pd.absences){
-					if(abs != null)
-						absencesInDay.add(abs);
-				}
-			}
-		}		
-
-		return absencesInDay;
-	}
-
-	/**
-	 * 
-	 * @return la mappa contenente le assenze fatte dalla persona nell'anno con i relativi codici d'assenza e descrizioni
-	 */
-	public Map<AbsenceType,Integer> getYearlyAbsence(){
-		List<AbsenceType> listaTipiAssenze = new ArrayList<AbsenceType>();
-		List<PersonDay> personDayInYear = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date >= ? and pd.date <= ?", 
-				person, new LocalDate(year,1,1), new LocalDate(year,12,31)).fetch();
-		for(PersonDay pd : personDayInYear){
-			if(pd.absences.size() > 0){
-				for(Absence abs : pd.absences){
-					if(abs != null)
-						listaTipiAssenze.add(abs.absenceType);
-				}
-			}
-		}
-		//Logger.warn("ListaAssenze: " +listaTipiAssenze);
-		if(mappaAssenze.isEmpty()){
-			Integer i = 0;
-			for(AbsenceType absenceType : listaTipiAssenze){
-				boolean stato = mappaAssenze.containsKey(absenceType);
-				if(stato==false){
-					i=1;
-					mappaAssenze.put(absenceType, i);
-				}
-				else{
-					i = mappaAssenze.get(absenceType);
-					mappaAssenze.remove(absenceType);
-					mappaAssenze.put(absenceType, i+1);
-				}
-
-
-			}
-		}
-
-		//Logger.warn("mappaAssenze: " +mappaAssenze);
-		return mappaAssenze;
-	}
 	
-	/**
-	 * 
-	 * @param person
-	 * @param year
-	 * @param absenceCode
-	 * @return il totale di assenze fatte con quel codice
-	 */
-	public int totalDaysHourOfAbsenceCode(Person person, int year, String absenceCode){
-		int total = 0;
-		LocalDate date = new LocalDate(year, 1, 1);
-		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.date between ? and ? and pd.person = ?", 
-				date, date.monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue(), person).fetch();
-		for(PersonDay pd : pdList){
-			if(pd.absences.size() > 0){
-				for(Absence abs : pd.absences){
-					if(abs.absenceType.code.equals(absenceCode))
-						total = total + 1;
-				}
-			}
-		}
-		
-		return total;
-	}
-	
-	/**
-	 * 
-	 * @param person
-	 * @param year
-	 * @param absenceCodes
-	 * @return il numero totale di giorni di assenza fatti nell'anno
-	 */
-	public int totalOfAllAbsences(Person person, int year, Set<AbsenceType> absenceCodes){
-		int total = 0;
-		for(AbsenceType abs : absenceCodes){
-			total = total + totalDaysHourOfAbsenceCode(person, year, abs.code);
-		}
-		return total;
-	}
 
 	/**
 	 * QUI INIZIA LA PARTE DI FUNZIONI RELATIVE AL CALCOLO DELLE FERIE IN UN ANNO, SIA TRA QUELLE PREVISTE DA CONTRATTO, SIA TRA QUELLE
@@ -337,13 +149,14 @@ public class YearRecap extends Model{
 	 * 
 	 * @return il numero di giorni di ferie maturati nell'anno corrente con l'ausilio di un metodo di codifica privato
 	 */
-	public int vacationCurrentYear(){
+	public int vacationCurrentYear(int year){
 		int days = 0;
 		int vacationDays = 0;
-		Contract contract = Contract.find("Select con from Contract con where con.person = ? order by beginContract desc", person).first();
+		Contract contract = person.getContract(new LocalDate(year,1,1));
+		//Contract contract = Contract.find("Select con from Contract con where con.person = ? order by beginContract desc", person).first();
 		LocalDate beginContract = contract.beginContract;
-		LocalDate now = new LocalDate();
-		now.withYear(year);
+		LocalDate now = new LocalDate().withYear(year);
+		
 
 		//	int difference = now.getYear()-beginContract.getYear();
 		//	Logger.warn("difference is:" +difference+ "now.getYear is: "+now.getYear()+ "beginContract.getYear is: "+beginContract.getYear());
@@ -363,7 +176,7 @@ public class YearRecap extends Model{
 			days = now.getDayOfYear();
 			vacationDays = VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysMoreThreeYears(days);
 		}
-
+		Logger.debug("I giorni di ferie maturati per %s %s nell'anno %d sono %d", person.name, person.surname, year, vacationDays);
 		return vacationDays;
 	}
 
@@ -371,11 +184,11 @@ public class YearRecap extends Model{
 	 * 
 	 * @return il numero di giorni di permesso legge maturati nell'anno corrente
 	 */
-	public int permissionCurrentYear(){
+	public int permissionCurrentYear(int year){
 		int days = 0;
 		int permissionDays = 0;
-		LocalDate now = new LocalDate();
-		now.withYear(year);
+		LocalDate now = new LocalDate().withYear(year);
+		
 		days = now.getDayOfYear();
 
 		permissionDays = VacationsPermissionsDaysAccrued.convertWorkDaysToPermissionDays(days);
@@ -388,10 +201,10 @@ public class YearRecap extends Model{
 	 * 
 	 * @return il numero di giorni di ferie avanzati da quelli maturati l'anno precedente e non ancora utilizzati
 	 */
-	public int vacationLastYearNotYetUsed(){
+	public Integer vacationLastYearNotYetUsed(int year){
 		
-		List<PersonDay> vacationsLastYear = listVacationDaysLastYear();		
-
+		List<PersonDay> vacationsLastYear = listVacationDaysLastYear(year);		
+		Logger.debug("Il numero di giorni dell'anno precedente usati è: %d", vacationsLastYear.size());
 		LocalDate beginLastYear = new LocalDate(year-1,1,1);
 		LocalDate endLastYear = new LocalDate(year-1,12,31);
 		VacationPeriod period = null;
@@ -421,11 +234,17 @@ public class YearRecap extends Model{
 			period = VacationPeriod.find("Select vp from VacationPeriod vp where vp.person = ? and vp.beginFrom between ? and ? and vp.endTo >= ?", 
 					person, beginLastYear, endLastYear, endLastYear).first();
 		}
+		Logger.debug("Anno passato come parametro: %d", year);
+		Logger.debug("Period per %s %s: %s", person.name, person.surname, period.toString());
+		
 		//int vacationDaysAccrued = VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysLessThreeYears(days);
-
-		int residualVacationDays = period.vacationCode.vacationDays-vacationsLastYear.size();
-
-		return residualVacationDays;
+		if(period.vacationCode != null){
+			int residualVacationDays = period.vacationCode.vacationDays-vacationsLastYear.size();
+			return residualVacationDays;
+		}
+		else 
+			return null;
+		
 	}
 
 	/**
@@ -455,11 +274,12 @@ public class YearRecap extends Model{
 
 	/**
 	 * 
-	 * @return i giorni di permesso che, a oggi, la persona ha utilizzato
+	 * @return i giorni di permesso che la persona ha utilizzato nell'anno 
+	 * @param year
 	 */
-	public int personalPermissionUsed(){
+	public int personalPermissionUsed(int year){
 		int permissionDays = 0;
-		LocalDate now = new LocalDate();
+		LocalDate now = new LocalDate().withYear(year);
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 				person, getBeginYear(), now).fetch();
 		for(PersonDay pd : pdList){
@@ -494,11 +314,11 @@ public class YearRecap extends Model{
 	 * di assenza registrate sul database con codice 31, ovvero "ferie anno precedente", fatte nell'anno corrente, più le giornate
 	 * di assenza registrate sul database con codice 32, ovvero "ferie anno corrente", fatte nell'anno precedente.
 	 */
-	public int vacationDaysLastYear(){
+	public int vacationDaysLastYear(int year){
 		int vacationDaysLastYear = 0;
 		LocalDate beginLastYear = new LocalDate(year-1,1,1);
 		LocalDate endLastYear = new LocalDate(year-1,12,31);
-		LocalDate now = new LocalDate();
+		LocalDate now = new LocalDate().minusYears(new LocalDate().getYear()-year);
 		List<PersonDay> pdListPast = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 				person, beginLastYear, endLastYear).fetch();
 		for(PersonDay pd : pdListPast){
@@ -523,11 +343,12 @@ public class YearRecap extends Model{
 	 * @return la lista delle assenze che utilizzerò nella finestra di popup per elencare le date in cui sono state fatte le assenze
 	 * 
 	 */
-	public List<PersonDay> listVacationDaysLastYear(){
+	public List<PersonDay> listVacationDaysLastYear(int year){
+		Logger.debug("Anno passato alla funzione listVacationDaysLastYear: %d", year);
 		LocalDate beginLastYear = new LocalDate(year-1,1,1);
 		LocalDate endLastYear = new LocalDate(year-1,12,31);
 		LocalDate beginYear = new LocalDate(year, 1, 1);
-		LocalDate now = new LocalDate();
+		LocalDate now = new LocalDate().minusYears(new LocalDate().getYear()-year);
 		List<PersonDay> vacations = new ArrayList<PersonDay>();
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 				person, beginLastYear, endLastYear).fetch();

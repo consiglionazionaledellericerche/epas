@@ -1,7 +1,7 @@
 #{extends 'main.html' /}
-#{set title:yearRecap.person.surname + ' ' + yearRecap.person.name + ', matricola=' + yearRecap.person.number /}
+#{set title:yearlyAbsencesRecap.person.surname + ' ' + yearlyAbsencesRecap.person.name + ', matricola=' + yearlyAbsencesRecap.person.number /}
 
-<h2 id="titoloSituazioneAssenzeAnnuali">Situazione assenze per l'anno ${yearRecap.year} di ${yearRecap.person.name} ${yearRecap.person.surname}</h2>
+<h2 id="titoloSituazioneAssenzeAnnuali">Situazione assenze per l'anno ${yearlyAbsencesRecap.year} di ${yearlyAbsencesRecap.person.name} ${yearlyAbsencesRecap.person.surname}</h2>
 
 #{logoutForm /}
 
@@ -10,37 +10,44 @@
 <table id="assenze_annuali">
 
 	<tr>
-		<th>Mese</th>
+		<th rowspan="2">Mese</th>
+		<th class="giorni"colspan="31">Giorni</th>
+		</tr>
 		%{
-			int i =1;
+			int i=1;
 			while(i<=31){
 		}%
+		
 		<th class="giorni">${i}</th>
 		%{
 			i++;}
 		}%
 
-	</tr>
-	
-	%{
-		for(mese in yearRecap.getMonths()){
+
+
+	%{  
+		for(month in yearlyAbsencesRecap.absenceTable.rowMap()){
 	}%
 	<tr>
 		
-		<td>${mese.toString()}</td>
-                %{
-                  int j=1;
-                  while(j <= yearRecap.maxNumberOfDays(yearRecap.year, mese)){
-                }%
-
-		<td>${yearRecap.getAbsenceInYear(yearRecap.year,mese,j).size() > 0 ? yearRecap.getAbsenceInYear(yearRecap.year,mese,j).get(0).absenceType.code : ''}</td>
-                %{
-                 j++;}
-                }%
-	</tr>
+		<td class="mese"><span class="capitalized">${yearlyAbsencesRecap.fromIntToStringMonth( month.getKey() )}</td>
 		%{
-			}
+			for(col in yearlyAbsencesRecap.absenceTable.columnKeySet()) {   				
 		}%
+            <td>${month.getValue().get(col)}</td>
+        %{
+              		
+           	}
+        }%
+	</tr>
+	%{
+		}
+	}%
+	
+	
+	
+	
+	
 </table>
 
 <table id="Codici di assenza">
@@ -50,12 +57,12 @@
 		<th width="20">Totale giorni</th>			
 	</tr>
 %{
-     for(entry in yearRecap.getYearlyAbsence().entrySet()) {
+     for( entry in yearlyAbsencesRecap.absenceSummary.entrySet() ) {
 }%
 	<tr>
 		<td>${entry.getKey().code}</td>     
 		<td>${entry.getKey().description}</td>	
-		<td>${yearRecap.totalDaysHourOfAbsenceCode(yearRecap.person, yearRecap.year, entry.getKey().code)}</td>
+		<td>${entry.getValue()}</td>
 	</tr>
 
 %{  		   
@@ -65,6 +72,6 @@
 	<tr>
 		<td>TOTALE</td>
 		<td></td>
-		<td>${yearRecap.totalOfAllAbsences(yearRecap.person, yearRecap.year, yearRecap.getYearlyAbsence().keySet())}</td>
+		<td>${yearlyAbsencesRecap.totalAbsence}</td>
 	</tr>
 </table>

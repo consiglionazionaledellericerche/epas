@@ -29,9 +29,13 @@
 	<p>Può inserire e modificare utenti amministratori: Sì <input type="radio" name="insertAndUpdateAdministrator" value="true"/> No <input type="radio" name="insertAndUpdateAdministrator" value="false"/></p>
 	<p>Può caricare le situazioni del personale: Sì <input type="radio" name="uploadSituation" value="true"/> No <input type="radio" name="uploadSituation" value="false"/> 
 </fieldset>
-<input type="submit" value="Ok"/>
+<div id="frm">
+<input id="insertAdmin" type="submit" value="Ok"/>
+
 #{/form}
 
 #{form @Administrators.discard()}
-<input type="submit" value="Annulla"/>
+<input id="discardAdmin" type="submit" value="Annulla"/>
+
 #{/form}
+</div>

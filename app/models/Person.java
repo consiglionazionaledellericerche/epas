@@ -5,6 +5,7 @@ package models;
 
 
 
+import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
 import it.cnr.iit.epas.JsonStampingBinder;
 
@@ -34,7 +35,7 @@ import lombok.ToString;
 import models.Stamping.WayType;
 import models.exports.ReperibilityPeriods;
 import models.exports.StampingFromClient;
-
+import models.rendering.VacationsRecap;
 import net.spy.memcached.FailureMode;
 
 import org.eclipse.jdt.internal.core.BecomeWorkingCopyOperation;
@@ -52,7 +53,6 @@ import org.joda.time.LocalDate;
 import controllers.Check;
 import controllers.Secure;
 import controllers.Security;
-
 import play.Logger;
 import play.data.binding.As;
 import play.data.validation.Email;
@@ -77,12 +77,9 @@ public class Person extends Model {
 	 */
 	private static final long serialVersionUID = -2293369685203872207L;
 
-
-	/**
-	 * Used for optimisti locking
-	 */
 	@Version
 	public Integer version;
+	
 
 	@Required
 	public String name;
@@ -111,6 +108,7 @@ public class Person extends Model {
 	/**
 	 * numero di matricola sul badge
 	 */
+	
 	public String badgeNumber;
 
 	/**
@@ -121,21 +119,22 @@ public class Person extends Model {
 	/**
 	 * relazione con la tabella delle assenze iniziali
 	 */
-	@OneToMany(mappedBy="person", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<InitializationAbsence> initializationAbsences = new ArrayList<InitializationAbsence>();
 
-
+	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	public List<InitializationTime> initializationTimes = new ArrayList<InitializationTime>();
 
 	/**
 	 * relazione con la tabella delle info di contatto
 	 */
-	@OneToOne(mappedBy="person", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
+	@OneToOne(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE}, orphanRemoval=true)
 	public ContactData contactData;
 	
 	/**
 	 * relazione con la tabella delle info di contatto
 	 */
-	@OneToOne(mappedBy="person", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
+	@OneToOne(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public PersonHourForOvertime personHourForOvertime;
 
 	/**
@@ -146,7 +145,7 @@ public class Person extends Model {
 	public List<Contract> contracts = new ArrayList<Contract>(); 
 
 	@NotAudited
-	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<StampProfile> stampProfiles = new ArrayList<StampProfile>();
 
 	/**
@@ -177,45 +176,41 @@ public class Person extends Model {
 	/**
 	 * relazione con la tabella dei figli del personale
 	 */
-	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<PersonChildren> personChildren;
 
 	/**
 	 * relazione con la nuova tabella dei person day
 	 */
-	@OneToMany(mappedBy="person", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<PersonDay> personDays;
 
 	/**
 	 * relazione con la nuova tabella dei person_month
 	 */
-	@OneToMany(mappedBy="person", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<PersonMonth> personMonths;
 
 	/**
 	 * relazione con la nuova tabella dei person_year
 	 */
-	@OneToMany(mappedBy="person", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<PersonYear> personYears;
 
 	/**
 	 * relazione con la tabella di storico YearRecap
 	 */
 	@NotAudited
-	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<YearRecap> yearRecaps;
 
-	/**
-	 * relazione con la tabella di vacation_code
-	 */
-	@OneToOne(mappedBy="person", fetch=FetchType.LAZY)
-	public VacationPeriod vacationPeriod;
+
 
 	/**
 	 * relazione con la tabella Competence
 	 */
 	@NotAudited
-	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<Competence> competences;
 	
 	/**
@@ -230,25 +225,25 @@ public class Person extends Model {
 	 * relazione con la tabella delle competence valide
 	 */
 	@NotAudited
-	@OneToMany(mappedBy="person", fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<ValuableCompetence> valuableCompetences;
 
 	/**
 	 * relazione con la tabella delle locazioni degli utenti
 	 */
 	@NotAudited
-	@OneToOne(mappedBy="person", fetch=FetchType.EAGER, cascade = {CascadeType.REMOVE})
+	@OneToOne(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE}, orphanRemoval=true)
 	public Location location;
 
 
-	@OneToOne(mappedBy="person", fetch=FetchType.LAZY)
+	@OneToOne(mappedBy="person", fetch=FetchType.LAZY,  cascade = {CascadeType.REMOVE} )
 	public PersonReperibility reperibility;
 
 	@ManyToOne( fetch=FetchType.EAGER )
 	@JoinColumn(name="qualification_id")
 	public Qualification qualification;
 
-	@OneToOne(mappedBy="person", fetch=FetchType.LAZY)
+	@OneToOne(mappedBy="person", fetch=FetchType.LAZY,  cascade = {CascadeType.REMOVE})
 	public PersonShift personShift;
 	
 //	@NotAudited
@@ -260,81 +255,22 @@ public class Person extends Model {
 		return String.format("%s %s", surname, name);
 	}
 
-
-
 	/**
 	 * 
-	 * @param person
-	 * @return il piano ferie previsto per quella persona
+	 * @return il piano ferie associato al contratto a sua volta associato alla data di oggi
 	 */
-	@SuppressWarnings("unused")
-
 	public VacationCode getVacation(){
-
-		VacationCode vacation = null;
-
-		Contract contract = Contract.find("Select con from Contract con where con.person = ?", this).first();
-		if(contract == null){
-			Logger.warn("Siamo nel bottino che il contratto è nullo per %s", this);
-			throw new IllegalStateException(String.format("Il contratto della persona %s è nullo", this));
-		}
-		LocalDate now = LocalDate.now();
-		if(contract.expireContract == null && contract.beginContract != null){
-			/**
-			 * il contratto attuale è a tempo indeterminato, controllo che sia in vigore da più di 3 anni 
-			 */
-			int differenzaAnni = now.getYear() - contract.beginContract.getYear();
-			int differenzaMesi = now.getMonthOfYear() - contract.beginContract.getMonthOfYear();
-			int differenzaGiorni = now.getDayOfMonth() - contract.beginContract.getDayOfMonth();
-			if(differenzaAnni > 3 ){
-				vacation = VacationCode.find("Select vc from VacationCode vc, VacationPeriod vp " +
-						"where vp.vacationCode = vc and vp.person = ?", this).first();
-				if(vacation == null){
-					VacationPeriod vacationPeriod = new VacationPeriod();
-					vacationPeriod.person = this;
-					vacationPeriod.beginFrom = contract.beginContract;
-					vacationPeriod.endTo = null;
-					vacationPeriod.vacationCode = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", "28+4").first();
-					vacationPeriod.save();
-					vacation = VacationCode.find("Select vc from VacationCode vc, VacationPeriod vp " +
-							"where vp.vacationCode = vc and vp.person = ?", this).first();
-					return vacation;
-				}
-
-			}
-			else{
-				vacation = VacationCode.find("Select vac from VacationCode vac, VacationPeriod per where per.person = ?" +
-						" and per.vacationCode = vac order by per.beginFrom", this).first();
-				return vacation;
-			}
-		}
-		if(contract.expireContract != null && contract.beginContract != null){
-
-			int differenzaAnni = contract.expireContract.getYear() - contract.beginContract.getYear();
-
-			if(this.getQualification() == null){
-				vacation = null;
-			}			
-			else{
-				if(differenzaAnni >= 3){
-
-					vacation = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", "28+4").first();
-					VacationPeriod period = VacationPeriod.find("Select vp from VacationPeriod vp where vp.person = ?", this).first();
-					if(period == null){
-						period = new VacationPeriod();
-						period.person = this;
-						period.vacationCode = vacation;
-						period.beginFrom = LocalDate.now();
-						period.endTo = null;
-						period.save();
-					}
-
-				}					
-				else
-					vacation = VacationCode.find("Select vc from VacationCode vc where vc.description = ?","26+4").first();				
-			}		
-		}
-		return vacation;
+		
+		Contract contract = this.getCurrentContract();
+		if(contract==null)
+			return null;
+		
+		VacationPeriod vp = contract.getCurrentVacationPeriod();
+		if(vp==null)
+			return null;
+		
+		return vp.vacationCode;
+		
 	}
 
 	/**
@@ -531,6 +467,17 @@ public class Person extends Model {
 		}
 		return technicians;
 	}
+	
+	/**
+	 * 
+	 * @return la lista delle persone che sono state selezionate per far parte della sperimentazione del nuovo sistema delle presenze
+	 */
+	public static List<Person> getPeopleForTest(){
+		List<Person> peopleForTest = Person.find("Select p from Person p where p.surname in (?,?,?,?,?,?) or (p.name = ? and p.surname = ?)", 
+				"Vasarelli", "Lucchesi", "Vivaldi", "Del Soldato", "Sannicandro", "Ruberti", "Maurizio", "Martinelli").fetch();
+		return peopleForTest;
+		
+	}
 
 	/**
 	 * metodo per la creazione di una timbratura a partire dall'oggetto stampModificationType che è stato costruito dal binder del Json
@@ -645,6 +592,7 @@ public class Person extends Model {
 	}
 	
 	
+		
 	/**
 	 * 
 	 * @return se è attiva la reperibilità nei giorni lavorativi

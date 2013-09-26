@@ -83,11 +83,11 @@ public class PersonDay extends Model {
 	@Column(name = "is_working_in_another_place")
 	public boolean isWorkingInAnotherPlace = false;
 
-	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY, cascade=CascadeType.PERSIST)
+	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY, cascade= {CascadeType.PERSIST, CascadeType.REMOVE})
 	@OrderBy("date ASC")
 	public List<Stamping> stampings = new ArrayList<Stamping>();
 
-	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY, cascade=CascadeType.PERSIST)
+	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY, cascade= {CascadeType.PERSIST, CascadeType.REMOVE})
 	public List<Absence> absences = new ArrayList<Absence>();
 
 	@Column(name = "modification_type")
@@ -192,6 +192,7 @@ public class PersonDay extends Model {
 			//TODO: verificare con Claudio cosa fare con le timbrature in missione
 			if(abs.absenceType.ignoreStamping || 
 					(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay && !checkHourlyAbsenceCodeSameGroup(abs.absenceType))){
+				Logger.debug("Sto inserendo un'assenza giornaliera per %s %s in data %s", person.name, person.surname, date);
 				return new TimeAtWork(0, null);
 			} else{
 				if(!abs.absenceType.code.equals("89") && abs.absenceType.justifiedTimeAtWork.minutesJustified != null)
@@ -403,6 +404,14 @@ public class PersonDay extends Model {
 		}
 		return new TimeAtWorkToday(timeAtWork, false);
 	}
+	
+	public StampModificationType getTodayLunchTime(){
+		StampModificationType smt = null;
+		TimeAtWorkToday tawd = getTimeAtWorkWithToday();
+		if(tawd.timeAtWork >= getWorkingTimeTypeDay().mealTicketTime+getWorkingTimeTypeDay().breakTicketTime)
+			smt = StampModificationType.findById(StampModificationTypeValue.FOR_DAILY_LUNCH_TIME.getId()); 
+		return smt;
+	}
 
 	private TimeAtWorkToday getTimeAtWorkToday() {
 		if (stampings.size() == 0)
@@ -426,7 +435,9 @@ public class PersonDay extends Model {
 	 */
 	private void updateTimeAtWork(){
 		timeAtWork = getCalculatedTimeAtWork().timeAtWork;
+		
 		save();
+		//Logger.debug("Tempo di lavoro per %s %s nel giorno %s: %d minuti", person.name, person.surname, date, timeAtWork);
 	}
 
 
@@ -648,6 +659,9 @@ public class PersonDay extends Model {
 	private void updateDifference(){
 		//merge();
 		//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
+		Logger.debug("Il tempo di lavoro per %s %s in data %s è: %d", person.name, person.surname, date, timeAtWork);
+		Logger.debug("La lista delle assenze per %s contiene %d elementi", date, absences.size());
+		Logger.debug("La lista delle timbrature per %s contiene %d elementi", date, stampings.size());
 		StampProfile stampProfile = getStampProfile();
 		if(stampProfile != null && stampProfile.fixedWorkingTime && timeAtWork == 0){
 			difference = 0;
@@ -667,7 +681,17 @@ public class PersonDay extends Model {
 			save();
 			return;
 		}
-
+		
+		if(timeAtWork == 0 && absences.size() > 0){
+			Logger.debug("Tempo di lavoro = 0 e assenza per %s %s in data %s", person.name, person.surname, date);
+			Absence abs = absences.get(0);
+			if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay){
+				difference = 0;
+				save();
+				return;
+			}
+		}
+		
 		if(absences.size() == 1 && stampings.size() > 0){
 			Absence abs = absences.get(0);
 			if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay){

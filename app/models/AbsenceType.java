@@ -81,6 +81,9 @@ public class AbsenceType extends Model {
 	@Column(name = "ignore_stamping")
 	public boolean ignoreStamping = false;
 	
+	@Column(name = "considered_week_end")
+	public boolean consideredWeekEnd = false;
+	
 	@Enumerated(EnumType.STRING)
 	@Column(name = "justified_time_at_work")
 	public JustifiedTimeAtWork justifiedTimeAtWork;
@@ -114,5 +117,15 @@ public class AbsenceType extends Model {
 		List<Qualification> listQualification = Qualification.find("Select q from Qualification q where q.absenceType = ?", abt).fetch();
 		
 		return listQualification;
+	}
+	
+	public static AbsenceType getAbsenceTypeByCode(String code)
+	{
+		AbsenceType ab = AbsenceType.find("Select ab from AbsenceType ab where ab.code = ?", code).first();
+		if(ab==null)
+			return null;
+		else
+			return ab;
+		
 	}
 }
