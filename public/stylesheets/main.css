@@ -1,5 +1,6 @@
 html {
     background: #e0e0e0;
+    
 }
 
 body {
@@ -271,6 +272,8 @@ p#tipoTimbraturaClock {margin: 3em 0em 2em; text-align: center; font-size: 18px;
 p#choiceClock {text-align: center; font-size: 18px;}
 p#descrizioneStampaCartellino {margin:3em 0em 4em}
 p#inserisciAmministratore {margin: 2em 0em 0em}
+p#nuovoOrario {margin: 0em 0em 2em 0em}
+p#inserimentoCompetenze {margin: 0em 0em 1em 2em; align: center}
 
 div#logout {text-align: right; float: right}
 div#chooseView {text-align: center}
@@ -321,6 +324,7 @@ h3#caricamentoSituazioneMensile {text-align: center}
 h3#clock {text-align: center}
 h3#riepilogoMensile {text-align: center; margin: 2em 0em 1em}
 h3#utentiEsistenti {text-align: center}
+h3#pianoFerie {text-align: center}
 iframe#clock {align: center; margin: 3em 58em 0em}
 
 h4#configurazioniEsistenti {margin:2em 0em 1em; text-align: left}
@@ -332,20 +336,24 @@ fieldset#nuovoCodiceAssenza {height: 37em}
 fieldset#gruppo {height: 25em}
 textarea#timbraturaWeb {margin: 0em 5em 0em}
 textarea#stampaPdf {margin: 2em 1em 0em; width: 40em}
-input#salvaConfigurazione {margin: 2em 60em 0em; align: center}
-input#annullaConfigurazione {margin: 0em 80em 2em; align: center}
-input#submitInsertPerson {margin: 2em 60em 0em; align: center}
-input#resetInsertPerson {margin: 1em 60em 0em; align: center}
+input#salvaConfigurazione {margin: 2em 3em 0em 60em; align: center}
+input#annullaConfigurazione {margin: 0em 3em 0em; align: center}
+input#submitInsertPerson {margin: 2em 3em 0em 55em; align: center}
+input#resetInsertPerson {margin: 0em 3em 0em; align: center}
 input#submitTerminazioneRapporto {margin: 2em 60em 0em; align: center}
 input#discardTerminazioneRapporto {margin: 1em 60em 0em; align: center}
 input#username {margin: -2em 9em 2em}
 input#password {margin: -2em 9em 2em}
 input#nuovaPassword {margin: 3em 2em 2em}
 input#confermaPassword {margin: 4em 2em 2em}
-input#submitStamping {margin: 0em 30em 2em; align: center}
-input#discardStamping {margin: 0em 30em 0em; align: center}
+input#submitStamping {margin: 1em 5em 0em 20em; align: center}
+input#updateAbsence {margin: 0em 35em 0em; align: center}
+input#discardStamping {margin: 0em 3em 0em; align: center}
 input#updateStamping {margin: 0em 25em 0em; align: center}
 input#submitCartellino {margin: 3em 8em 0em; align: center}
+input#insertAdmin {margin: 2em 3em 0em 60em; align:center}
+input#insertCompetenceCode {margin: 2em 3em 0em 60em; align: center}
+input#discardCompetenceCode {margin: 0em 3em 0em; align: center}
 
 input.StraordinarioDiurnoLavorativo {length: 5}
 input#feature {length: 5}
@@ -357,15 +365,17 @@ p#giorniLavorativi {margin: 2em 1em 0em}
 
 input#submitNuovoCodiceAssenza {margin: 2em 60em 0em; align: center}
 input#discardNuovoCodiceAssenza {margin: 1em 60em 0em; align: center}
-input#submitEditPerson {margin: 2em 60em 0em; align: left}
-input#discardEditPerson {margin: 1em 60em 0em; align: center}
-input#deletePerson {margin: 1em 60em 0em; align: right}
+input#submitEditPerson {margin: 2em 3em 0em 55em; align: center}
+input#discardEditPerson {margin: 0em 3em 0em; align: center}
+input#deletePerson {margin: 0em 3em 0em; align: center}
 input#modificaContratto {margin: 1em 25em 0em; align: center}
 input#submitSituation {margin: 2em 67em 0em; align: center}
 input#submitStampingClock {margin: 0em 70em 0em; align: center}
 input#saveCompetence {margin: 1em 67em 0em; align: center}
-input#salvaVacationCode {margin: 2em 0em 0em}
+input#salvaVacationCode {margin: 3em 2em 0em 10em}
 input#inserisciAssenza {margin: 1em 33em 0em; align: center}
+input#updateWorkingTime {margin: 2em 3em 0em 65em; align: center}
+input#insertWorkingTime {margin: 2em 3em 0em 65em; align: center}
 
 input#updateOldOvertime {margin: 0em 25em 0em; align: center}
 table#tabellaPersoneCodiciAssenzaMensili {margin: 2em 1em 1em; align: left}
@@ -374,6 +384,9 @@ table#tabellaTimbratureMancanti {margin: 2em 1em 1em; align: left}
 table#tabellaPresenzaGiornaliera {margin: 2em 1em 1em; align: left}
 table#tabellaRiepilogoBuoniMensa {margin: 2em; align:left}
 table#tabellaCodiciCompetenza {margin: 2em; align: left}
+table#pianoFerie {margin: auto}
+
+div#frm *{display:inline}
 
 
 select#assenzaFrequente {margin-bottom: 1em}

@@ -54,11 +54,10 @@
 			}%
 		
 			<td class="assenza">
-				%{ absenceList = day.absenceList() }%
 				
 					<a href="@{Absences.create(day.person.id, day.date.year, day.date.monthOfYear, day.date.dayOfMonth)}" class="insertAbsence${day.date.dayOfMonth}">___</a>
 				%{	
-					for (absence in absenceList) { 
+					for (absence in day.absences) { 
 				%}
 						<a href="@{Absences.edit(absence.id)}" class="insertAbsence${day.date.dayOfMonth}">
 							${absence.absenceType.code}
@@ -69,7 +68,9 @@
 				<script type="text/javascript"> 
 				$('.insertAbsence${day.date.dayOfMonth}').popupWindow({ 
 				height:600, 
-				width:1000, 
+				width:1000,
+				scrollbars:1,
+				resizable:0,
 				top:50, 
 				left:50 
 				}); 
@@ -90,7 +91,9 @@
 				<script type="text/javascript"> 
 				$('.insertStamping${day.date.dayOfMonth}-${j}').popupWindow({ 
 				height:600, 
-				width:800, 
+				width:800,
+				scrollbars:1,
+				resizable:0,
 				top:50, 
 				left:50 
 				}); 
@@ -121,6 +124,8 @@
 				$('.insertStamping${day.date.dayOfMonth}-${j+1}').popupWindow({ 
 				height:600, 
 				width:800, 
+				scrollbars:1,
+				resizable:0,
 				top:50, 
 				left:50 
 				}); 
@@ -143,28 +148,47 @@
 			<td class="inserisciTimbratura"><a href="@{Stampings.create(day.person.id, day.date.year, day.date.monthOfYear, day.date.dayOfMonth)}" class="insertStamping${day.date.dayOfMonth}">+++</a>
 				<script type="text/javascript"> 
 				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
-				height:800, 
-				width:900, 
+				height:600, 
+				width:800,
+				scrollbars:1,
+				resizable:0,
 				top:50, 
-				left:50 
+				left:50
 				}); 
 				</script>
 			</td>
 				<td class="tempoLavoro">
 			%{
 	         	if(!day.isFuture()){
+	         	
 	         }%
-					${day.getTimeAtWorkWithToday().timeAtWork.toHourTime()}<strong>${day.checkTimeForLunch()?.code}</strong><strong>${day.getTimeAtWorkWithToday().exitingNow ? 'f' : ''}</strong>
-	        %{ 
-		  		} 
+	         %{
+					if(day.isToday()){
+				}%
+						${day.getTimeAtWorkWithToday().timeAtWork.toHourTime()}<strong>${day.getTodayLunchTime()?.code}</strong><strong>${day.getTimeAtWorkWithToday().exitingNow ? 'f' : ''}</strong>
+	        	%{ 
+		  			} 
+		  			else{
+		  		}%
+		  				${day.getTimeAtWorkWithToday().timeAtWork.toHourTime()}<strong>${day.checkTimeForLunch()?.code}</strong><strong>${day.getTimeAtWorkWithToday().exitingNow ? 'f' : ''}</strong>
+		  		%{
+		  			}
+		  		}
 		  	}%
 		  				 	
 		  	</td>							
 	       <td class="differenza">
 	       	 %{
-	       	 	if(day.isToday()){
+	       	 	if(day.isToday() && day.absences.size() == 0){
 	       	 }%
 	       	 		${day.differenceToday().toHourTime()}
+	       	 %{
+	       	 	}
+	       	 }%
+	       	 %{
+	       	 	if(day.isToday() && day.absences.size() != 0){
+	       	 }%
+	       	 		${(day.difference).toHourTime()}
 	       	 %{
 	       	 	}
 	       	 }%
@@ -190,12 +214,19 @@
 			</td>	
 			 <td class="progressivo">
 			 %{
-			 	if(day.isToday()){
+			 	if(day.isToday() && day.absences.size() == 0){
 			 }%
 			 		${day.progressiveToday().toHourTime()}
 			 %{
 			 	}
 			 }%
+			 %{
+	       	 	if(day.isToday() && day.absences.size() != 0){
+	       	 }%
+	       	 		${(day.progressive).toHourTime()}
+	       	 %{
+	       	 	}
+	       	 }%
 			%{
 			    if(!day.isFuture() && !day.isToday()) {
 			}%
@@ -231,7 +262,7 @@
 
 <p id="spiegazioneTabellaTimbrature">Il numero di buoni mensa usabili per questo mese e': <strong>${personMonth.numberOfMealTicketToUse()}</strong>, mentre quelli da restituire sono <strong>${personMonth.numberOfMealTicketToRender()}</strong>. Il numero di giorni lavorativi in sede è di: <strong>${personMonth.basedWorkingDays()}</strong> </p>
 
-<p> - Il numero di riposi compensativi usati fino ad oggi è: ${personMonth.numberOfCompensatoryRestUntilToday()}</p>
+<p> - Il numero di riposi compensativi usati fino ad oggi è: ${numberOfCompensatoryRestUntilToday}</p>
 <p>Riepilogo delle ore di lavoro in eccesso/difetto:</p> 
 <p> - E' possibile utilizzare il residuo dell'anno precedente? ${personMonth.possibileUtilizzareResiduoAnnoPrecedente()==true ? 'sì' : 'no'}</p>
 %{if(personMonth.residuoAnnoPrecedenteDaInizializzazione() != 0){

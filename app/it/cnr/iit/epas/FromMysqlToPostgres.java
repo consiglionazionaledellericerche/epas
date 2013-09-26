@@ -121,7 +121,7 @@ public class FromMysqlToPostgres {
 	 * @throws InstantiationException
 	 * @throws IllegalAccessException
 	 * @throws ClassNotFoundException
-	 * @throws SQLExceptiongetMonthResidual
+	 * @throws SQLExceptiongetMonthResidualcreateContract
 	 */
 
 	public static void importVacationDaysPastYear() throws SQLException{
@@ -143,14 +143,14 @@ public class FromMysqlToPostgres {
 			abs.absenceType = AbsenceType.find("byCode", code).first();
 			abs.personDay = pd;
 			abs.save();
-			
-		
+
+
 		}
 		Logger.info("Fine popolamento della tabella dei personDay dell'anno precedente con le assenze dovute a ferie anno corrente");
-	//	mysqlCon.close();
-		
+		//	mysqlCon.close();
+
 	}
-	
+
 	public static void importOreStraordinario() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		Connection mysqlCon = FromMysqlToPostgres.getMysqlConnection();
 		String sql = "SELECT * FROM monteorestr";
@@ -175,7 +175,21 @@ public class FromMysqlToPostgres {
 	public static void importAll(int limit, int anno) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		Connection mysqlCon = FromMysqlToPostgres.getMysqlConnection();
 
-
+		String sqlVacationCode = "Select * from ferie";
+		
+		PreparedStatement stmtCode = mysqlCon.prepareStatement(sqlVacationCode);
+		ResultSet rsCode = stmtCode.executeQuery();
+		JPAPlugin.startTx(false);
+		while(rsCode.next()){
+			VacationCode code = new VacationCode();
+			code.description = rsCode.getString("nome");
+			code.permissionDays = rsCode.getInt("giorni_pl");
+			code.vacationDays = rsCode.getInt("giorni_ferie");
+			code.save();
+		}
+			
+		JPAPlugin.closeTx(false);
+		JPAPlugin.startTx(false);
 		String sql = "SELECT ID, Nome, Cognome, DataNascita, Telefono," +
 				"Fax, Email, Stanza, Matricola, Matricolabadge, passwordmd5, Qualifica, Dipartimento, Sede " +
 				"FROM Persone order by ID";
@@ -205,29 +219,31 @@ public class FromMysqlToPostgres {
 			FromMysqlToPostgres.createContactData(rs, person);
 
 			FromMysqlToPostgres.createLocation(rs, person);
-			
+
 			FromMysqlToPostgres.setWorkingTimeType(oldIDPersona, person);
 
 
 			FromMysqlToPostgres.createContract(oldIDPersona, person);
 
-			FromMysqlToPostgres.createVacationType(oldIDPersona, person);	
+			JPAPlugin.closeTx(false);
+
+//			FromMysqlToPostgres.createVacationType(oldIDPersona, person);	
 
 			FromMysqlToPostgres.createInitializationTime(oldIDPersona, person, anno);		
-			
+
 			FromMysqlToPostgres.createPersonYear(oldIDPersona, person);
 
 			JPAPlugin.closeTx(false);
 
 			FromMysqlToPostgres.createStampings(oldIDPersona, person, anno);
-			
+
 			FromMysqlToPostgres.createPersonMonthAndYear(person);
-			
+
 
 			FromMysqlToPostgres.createValuableCompetence(rs.getInt("Matricola"), person);
-			
+
 			FromMysqlToPostgres.createCompetence(oldIDPersona, person, anno);
-			
+
 			Logger.info("Terminata la creazione delle info della persona %s %s", rs.getString("Nome"), rs.getString("Cognome"));
 
 			JPAPlugin.closeTx(false);
@@ -241,68 +257,69 @@ public class FromMysqlToPostgres {
 
 		Logger.info("Adesso aggiorno le date di inizio dei contratti, i vacation period, creo le competenze, il monte ore ed aggiusto i permessi");
 
-		FromMysqlToPostgres.updateContract();
-		FromMysqlToPostgres.updateVacationPeriod();
+//		FromMysqlToPostgres.updateContract();
+		//		FromMysqlToPostgres.updateVacationPeriod();
 		FromMysqlToPostgres.updateCompetence();
-		
+
 		FromMysqlToPostgres.updateCompetenceCode();
 		FromMysqlToPostgres.importVacationDaysPastYear();
 		FromMysqlToPostgres.personToCompetence();
 		FromMysqlToPostgres.importOreStraordinario();
-		
+
 		FromMysqlToPostgres.addPermissiontoAll();
 		JPAPlugin.closeTx(false);
 		Logger.info("Importazione terminata");
-		
+
 		mysqlCon.close();
 
-		
+
 	}
 
 
 	/**
 	 * metodo che assegna un "default" di periodo ferie a quelle persone che dall'importazione non hanno ricevuto un vacationPeriod
 	 */
-	public static void updateVacationPeriod() {
-		List<Person> personList = Person.findAll();
-		for(Person p : personList){
-			Logger.debug("Sto controllando il vacation period di %s %s", p.name, p.surname);
+	//	public static void updateVacationPeriod() {
+	//		List<Person> personList = Person.findAll();
+	//		for(Person p : personList){
+	//			Logger.debug("Sto controllando il vacation period di %s %s", p.name, p.surname);
+	//			Contract c = p.getCurrentContract();
+	//			if(c.vacationPeriod == null){
+	//				if(!p.username.equals("admin") && (p.qualification != null) ){
+	//					Logger.debug("Per %s %s devo creare un nuovo vacation period", p.name, p.surname);
+	//					VacationPeriod vp = new VacationPeriod();
+	//					vp.vacationCode = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", "28+4").first();
+	//					vp.beginFrom = new LocalDate(1970,1,1);
+	//					vp.save();
+	//				}
+	//				
+	//			}
+	//			else{
+	//				if(c.vacationPeriod.beginFrom != null && c.vacationPeriod.endTo == null){
+	//					Logger.debug("------");
+	//				}
+	//				else{
+	//					Logger.debug("Per %s %s devo creare un nuovo vacation period perchè il precedente ha data di fine precedente alla data attuale", p.name, p.surname);
+	////					
+	//					//Contract c = p.getCurrentContract();
+	//					if(c.vacationPeriod.endTo.isBefore(new LocalDate()) && c != null && (c.expireContract == null || c.expireContract.isAfter(c.vacationPeriod.endTo)) ){
+	//						VacationPeriod vp = new VacationPeriod();
+	//						
+	//						vp.vacationCode = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", "28+4").first();
+	//						vp.beginFrom = new LocalDate(c.vacationPeriod.endTo.plusDays(1));
+	//				
+	//						c.vacationPeriod.delete();
+	//						//p.save();
+	//						vp.save();
+	//					}
+	//				}				
+	//				
+	//			}
+	//			
+	//		}
+	//		
+	//	}
 
-			if(p.vacationPeriod == null){
-				if(!p.username.equals("admin") && (p.qualification != null) ){
-					Logger.debug("Per %s %s devo creare un nuovo vacation period", p.name, p.surname);
-					VacationPeriod vp = new VacationPeriod();
-					vp.person = p;
-					vp.vacationCode = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", "28+4").first();
-					vp.beginFrom = new LocalDate(1970,1,1);
-					vp.save();
-				}
-				
-			}
-			else{
-				
-				
-				Logger.debug("Per %s %s devo creare un nuovo vacation period perchè il precedente ha data di fine precedente alla data attuale", p.name, p.surname);
-//				Query query = JPA.em().createQuery("Select c from Contract c where c.person = :person and ((c.expireContract >= :end) or (c.expireContract = null))");
-//				query.setParameter("person", p).setParameter("end", p.vacationPeriod.endTo);
-//				Contract c = (Contract) query.getSingleResult();
-				Contract c = p.getCurrentContract();
-				if(p.vacationPeriod.endTo.isBefore(new LocalDate()) && c != null && (c.expireContract == null || c.expireContract.isAfter(p.vacationPeriod.endTo)) ){
-					VacationPeriod vp = new VacationPeriod();
-					vp.person = p;
-					vp.vacationCode = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", "28+4").first();
-					vp.beginFrom = new LocalDate(p.vacationPeriod.endTo.plusDays(1));
-			
-					p.vacationPeriod.delete();
-					//p.save();
-					vp.save();
-				}
-			}
-			
-		}
-		
-	}
-	
 	/**
 	 * metodo che assegna un inizio di contratto di default a quelle persone che dall'importazione non hanno ricevuto un beginContract
 	 */
@@ -459,6 +476,10 @@ public class FromMysqlToPostgres {
 				absenceType.compensatoryRest = true;
 			}
 
+			if(absenceType.code.equals("21") || absenceType.code.equals("38") || absenceType.code.startsWith("11")){
+				absenceType.consideredWeekEnd = true;
+			}
+
 			absenceType.description = rsCodici.getString("Descrizione");
 			absenceType.validFrom = new LocalDate(rsCodici.getDate("DataInizio"));
 			absenceType.validTo = new LocalDate(rsCodici.getDate("DataFine"));
@@ -483,15 +504,15 @@ public class FromMysqlToPostgres {
 
 					absTypeGroup.label = gruppo;
 					absTypeGroup.limitInMinute = rsCodici.getInt("Limite");
-									
+
 					String codSost = rsCodici.getString("CodiceSost");
 					if(codSost != null && !codSost.trim().equals("")){
 						AbsenceType abt = JPA.em().createQuery("Select abt from AbsenceType abt where abt.code = :codSost", AbsenceType.class)
 								.setParameter("codSost", codSost).getSingleResult();
-						
+
 						absTypeGroup.replacingAbsenceType = abt;
 					}
-					
+
 					int gestioneLimite = rsCodici.getInt("GestLim");
 					switch (gestioneLimite){
 					case 0:
@@ -679,7 +700,7 @@ public class FromMysqlToPostgres {
 		}
 
 		Logger.debug("Cerco il workingTimeType per %s", person);
-		
+
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmt = mysqlCon.prepareStatement("select odl.id, odl.nome, op.data_inizio, op.data_fine FROM orari_di_lavoro as odl JOIN orario_pers op " +
 				" ON op.oid = odl.id " +
@@ -688,10 +709,10 @@ public class FromMysqlToPostgres {
 
 		WorkingTimeType wtt = null;
 		if(rs.next()){
-			
+
 			wtt = mappaCodiciWorkingTimeType.get(rs.getInt("id"));
 			Logger.trace("Esiste il working time. Assegno a %s %s il tempo di lavoro %s", person.name, person.surname, mappaCodiciWorkingTimeType.get(rs.getInt("id")));
-			
+
 		} else {
 			//Non c'è nessun orario di lavoro impostato per la Persona quindi impostiamo l'orario predefinito che è il normale-mod
 			wtt = WorkingTimeType.em().getReference(WorkingTimeType.class, WorkingTimeTypeValues.NORMALE_MOD.getId());
@@ -719,75 +740,107 @@ public class FromMysqlToPostgres {
 		PreparedStatement stmtContratto = mysqlCon.prepareStatement("SELECT id,DataInizio,DataFine,continua,firma,Presenzadefault " +	
 				"FROM Personedate WHERE id=" + id + " order by DataInizio");	
 		ResultSet rs = stmtContratto.executeQuery();       	
-		Contract contract = null;
+
+		Contract previousContract = null;
 		StampProfile stampProfile = null;
-		LocalDate startContract;
-		LocalDate endContract;
-
+		int mysqlPresenceDefault = 0;
 		while(rs.next()){
-			startContract = null;
-			endContract = null;
-
-			Date begin = rs.getDate("DataInizio");
-			Date end = rs.getDate("DataFine");
-			if (begin != null) {
-				startContract = new LocalDate(begin);
+			//dati contratto mysql
+			if(person.id == 40L){
+				int i = 0;
 			}
-			if (end != null) {
-				endContract = new LocalDate(end);
-			}
-			else{
-				endContract = null;
-			}
-
-			contract = Contract.find("Select con from Contract con where con.person = ? ", person).first();
-			if(contract == null){
-				contract = new Contract();
-				//contract.create();
-				//contract.person = person;
-				contract.beginContract = startContract;
-				contract.expireContract = endContract;
-
-				//Un nuovo StampProfile per ogni contratto in modo da mantenere lo storico che
-				//abbiamo dei tipi di timbratura
-				stampProfile = new StampProfile();
-				stampProfile.person = person;
-				stampProfile.fixedWorkingTime = rs.getInt("Presenzadefault") == 0 ? false : true;
-				stampProfile.startFrom = startContract;
-				stampProfile.endTo = endContract;
-				stampProfile.create();
+			LocalDate mysqlStartContract = null;
+			Date mysqlBegin = rs.getDate("DataInizio");
+			Date mysqlEnd = rs.getDate("DataFine");
+			Byte mysqlContinua = rs.getByte("continua"); //==1			//continua
+			Byte mysqlFirma = rs.getByte("firma");						//firma
+			mysqlPresenceDefault = rs.getInt("Presenzadefault");		//presenzadefault
+			if(mysqlBegin != null)
+				mysqlStartContract = new LocalDate(mysqlBegin);			//start contract
+			else
+				mysqlStartContract = new LocalDate(1970,1,1);
+			
+			LocalDate mysqlEndContract;									//end contract
+			if (mysqlEnd != null) 
+			{
+				mysqlEndContract = new LocalDate(mysqlEnd);
 			}
 			else{
-				/**
-				 * TODO: controllare meglio questa parte...
-				 */
-				//contract = new Contract();
-				if(rs.getByte("continua")==1){
-					contract.expireContract = endContract;        			            		
+				mysqlEndContract = null;
+			}
+			
+
+			//postgres
+			if(previousContract==null)
+			{
+				//prima iterazione
+				Contract contract = new Contract();
+				contract.onCertificate = mysqlFirma == 0 ? true : false;
+				contract.person = person;
+				contract.beginContract = mysqlStartContract;
+				contract.expireContract = mysqlEndContract;
+				contract.endContract = null;
+				previousContract = contract;
+			}
+			else
+			{
+				//continua dal precedente
+				if(mysqlContinua==1)
+				{
+					//aggiorno i campi
+					previousContract.expireContract = mysqlEndContract;
 				}
-				else{
-					contract = new Contract();
-					//contract.person = person;
-					contract.beginContract = startContract;
-					contract.expireContract = endContract;            		            		
+
+				//storicizzo il previous contract e creo il nuovo contratto
+				if(mysqlContinua==0)
+				{
+
+					previousContract.save();
+
+					stampProfile = new StampProfile();
+					stampProfile.person = person;
+					stampProfile.fixedWorkingTime = mysqlPresenceDefault == 0 ? false : true;
+					stampProfile.startFrom = previousContract.beginContract;
+					stampProfile.endTo = previousContract.expireContract;
+					stampProfile.create();
+					person.stampProfiles.add(stampProfile);
+					person.save();
+
+					Contract contract = new Contract();
+					contract.onCertificate = mysqlFirma == 0 ? true : false;
+					contract.person = person;
+					contract.beginContract = mysqlStartContract;
+					contract.expireContract = mysqlEndContract;
+					contract.endContract = null;
+					previousContract = contract;
 				}
-			}    		   		 
-
-			contract.onCertificate = rs.getByte("firma") == 0 ? true : false;
-			contract.person = person;
-			//contract.create();
-			contract.save();
-
-			person.save();
-			Logger.info("Creato %s ", contract);
-
+			}
 		}
 
+		//storicizzo l'ultimo contratto
+		if(previousContract!=null)
+		{
+			previousContract.save();
+			stampProfile = new StampProfile();
+			stampProfile.person = person;
+			stampProfile.fixedWorkingTime = mysqlPresenceDefault == 0 ? false : true;
+			stampProfile.startFrom = previousContract.beginContract;
+			stampProfile.endTo = previousContract.expireContract;
+			stampProfile.create();
+			person.stampProfiles.add(stampProfile);
+			person.save();
+			JPAPlugin.closeTx(false);
+			FromMysqlToPostgres.createVacationType(previousContract);
+		}
+		
+		
 	}
+
+
 
 	public static void createStampings(long id, Person p, int anno) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 		JPAPlugin.startTx(false);
-		
+
 		Person person = Person.findById(p.id);
 
 		Logger.debug("Inizio a creare le timbrature per %s", person);
@@ -819,7 +872,7 @@ public class FromMysqlToPostgres {
 				//Logger.debug("Rilevata timbratura modificata dall'amministratore il %s per %s %s", pd.date, pd.person.name, pd.person.surname);
 				countAdmin = true;
 				continue;
-	
+
 			}
 			/**
 			 * controllo che la data prelevata sia diversa da null, poichè nel vecchio db esiste la possibilità di avere date del tipo 0000-00-00
@@ -831,15 +884,15 @@ public class FromMysqlToPostgres {
 				continue;
 			}
 			newData = new LocalDate(rs.getDate("Giorno"));
-	
+
 			if(data != null) {
-				
+
 				if(newData.isAfter(data)){		
 
 					Logger.debug("Nuovo giorno %s per %s, prima si fanno i calcoli sul personday poi si crea quello nuovo", newData, person.toString());
 					Logger.debug("Il progressivo del personday del giorno appena trascorso da cui partire per fare i calcoli è: %s", pd.progressive);
 					PersonDay pdOld = PersonDay.findById(pd.id);
-					
+
 					pdOld.populatePersonDay();	
 					pdOld.merge();
 
@@ -849,7 +902,7 @@ public class FromMysqlToPostgres {
 					pd.create();
 					Logger.debug("Creato %s ", pd.toString());
 					//il caso di timbratura modificata/inserita dall'amministratore
-					
+
 					if(rs.getInt("TipoGiorno")==0){
 
 						createStamping(pd, rs.getLong("TipoTimbratura"), rs.getBytes("Ora"), countAdmin);
@@ -864,7 +917,7 @@ public class FromMysqlToPostgres {
 					/**
 					 * si tratta di timbratura
 					 */		
-					
+
 					if(rs.getInt("TipoGiorno")==0){					
 						Logger.debug("Altra timbratura per %s nel giorno %s", person.toString(), newData);
 						createStamping(pd, rs.getLong("TipoTimbratura"), rs.getBytes("Ora"), countAdmin);
@@ -888,7 +941,7 @@ public class FromMysqlToPostgres {
 					pd.create();
 					Logger.debug("Creato %s", pd.toString());
 				}
-				
+
 				if(rs.getInt("TipoGiorno")==0){				
 					createStamping(pd, rs.getLong("TipoTimbratura"), rs.getBytes("Ora"), countAdmin); 
 					countAdmin = false;
@@ -913,7 +966,7 @@ public class FromMysqlToPostgres {
 				Logger.debug("Il progressivo al termine del resultset è: %s e il differenziale è: %s", pd.progressive, pd.difference);
 				Logger.info("Creato %s", pd);
 			}
-			
+
 			data = newData;		
 			countAdmin = false;
 
@@ -926,7 +979,7 @@ public class FromMysqlToPostgres {
 			}
 
 			importedStamping++;
-			
+
 		}
 
 		JPAPlugin.closeTx(false);
@@ -935,75 +988,53 @@ public class FromMysqlToPostgres {
 
 	}
 
-	public static void createVacationType(long id, Person person) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-		Logger.debug("Inizio a creare i periodi di ferie per %s", person);
-		Connection mysqlCon = getMysqlConnection();
-		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT * " +
-				"FROM ferie f,ferie_pers fp " +
-				"WHERE f.id=fp.fid AND fp.pid = " +id + 
-				" ORDER BY data_fine");
-		ResultSet rs = stmt.executeQuery();
-
-		VacationPeriod vacationPeriod = null;
-		VacationCode vacationCode = null;
-
-		try{
-			if(rs != null){
-				while(rs.next()){
-
-					int idCodiciFerie = rs.getInt("id");
-					Logger.trace("l'id del tipo ferie è %s ed è relativo alla persona con id=%d", rs.getInt("id"), id);
-					Logger.trace("Nella mappacodici l'id relativo al codiceferie "+ idCodiciFerie + " è " + mappaCodiciVacationType.get(idCodiciFerie));
-
-					if (vacationPeriod != null) {
-						vacationPeriod.delete();
-					}
-
-					vacationPeriod = new VacationPeriod();
-
-					if(mappaCodiciVacationType.get(idCodiciFerie)==null){
-						Logger.trace("Creo un nuovo vacation code perchè nella mappa il codice ferie non era presente");
-
-						vacationCode = new VacationCode();
-						vacationCode.description = rs.getString("nome");
-						vacationCode.vacationDays = rs.getInt("giorni_ferie");
-						vacationCode.permissionDays = rs.getInt("giorni_pl");
-
-						vacationCode.save();
-						mappaCodiciVacationType.put(idCodiciFerie,vacationCode);
-
-						Logger.debug("Creato %s", vacationCode.toString());
-
-					}
-					else {
-						Logger.trace("Il codice era presente, devo quindi fare una find per recuperare l'oggetto vacationCode");
-						vacationCode = mappaCodiciVacationType.get(idCodiciFerie);
-					}
-
-					vacationPeriod.vacationCode = vacationCode;
-					vacationPeriod.person = person;
-					vacationPeriod.beginFrom = new LocalDate(rs.getDate("data_inizio"));
-					vacationPeriod.endTo = new LocalDate(rs.getDate("data_fine"));					
-					vacationPeriod.save();		
-
-					Logger.info("Creato %s", vacationPeriod.toString());
-				}
-			}
-
-		}		
-		catch(SQLException e){
-			e.printStackTrace();
-			Logger.error("Periodi di ferie errati. Persona con id="+id);			
+	public static void createVacationType(Contract con) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+		JPAPlugin.startTx(false);
+		Logger.debug("Inizio a creare i periodi di ferie per %s", con.person);
+		if(con.expireContract == null){
+			VacationPeriod first = new VacationPeriod();
+			first.beginFrom = con.beginContract;
+			first.endTo = con.beginContract.plusYears(3).minusDays(1);
+			first.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "26+4").first();
+			first.contract = con;
+			first.save();
+			VacationPeriod second = new VacationPeriod();
+			second.beginFrom = con.beginContract.plusYears(3);
+			second.endTo = null;
+			second.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "28+4").first();
+			second.contract =con;
+			second.save();
 		}
-
-		if (vacationPeriod == null) {
-			Logger.info("Non ci sono Periodi di Ferie impostati per %s", person);
+		else{
+			if(con.expireContract.isAfter(con.beginContract.plusYears(3).minusDays(1))){
+				VacationPeriod first = new VacationPeriod();
+				first.beginFrom = con.beginContract;
+				first.endTo = con.beginContract.plusYears(3).minusDays(1);
+				first.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "26+4").first();
+				first.contract = con;
+				first.save();
+				VacationPeriod second = new VacationPeriod();
+				second.beginFrom = con.beginContract.plusYears(3);
+				second.endTo = con.expireContract;
+				second.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "28+4").first();
+				second.contract =con;
+				second.save();
+			}
+			else{
+				VacationPeriod first = new VacationPeriod();
+				first.beginFrom = con.beginContract;
+				first.endTo = con.expireContract;
+				first.contract = con;
+				first.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "26+4").first();
+				first.save();
+			}
 		}
 
 	}
 
 	public static void createInitializationTime(long id, Person person, int anno) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
 
+		JPAPlugin.startTx(false);
 		/**
 		 * query su totali_anno per recuperare lo storico da mettere in YearRecap
 		 */
@@ -1032,12 +1063,12 @@ public class FromMysqlToPostgres {
 		Logger.info("Terminati i riepiloghi annuali per %s", person);
 
 	}
-	
+
 	public static void createPersonYear(long id, Person person) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		Connection mysqlCon = getMysqlConnection();
 		PreparedStatement stmtResidualAndRecovery = mysqlCon.prepareStatement("SELECT * FROM totali_anno WHERE ID = ? and anno = 2011");
 		stmtResidualAndRecovery.setLong(1, id);
-		
+
 		ResultSet rs = stmtResidualAndRecovery.executeQuery();
 		while(rs.next()){
 			PersonYear py = new PersonYear(person,2011);
@@ -1066,7 +1097,7 @@ public class FromMysqlToPostgres {
 		CompetenceCode competenceCode = null;
 
 		while(rs.next()){			
-			
+
 			/**
 			 * per popolare la personReperibility controllo che quando inserisco un nuovo codice, quella persona abbia anche già
 			 * una entry nella tabella PersonReperibility: in tal caso non la inserisco, altrimenti devo aggiungerla.
@@ -1085,7 +1116,7 @@ public class FromMysqlToPostgres {
 				}
 
 			}
-			
+
 			int idCodiciCompetenza = rs.getInt("id");	
 			if(mappaCodiciCompetence.get(idCodiciCompetenza)== null){
 				Logger.debug("Non esiste ancora il codice competenza %s, lo creo.", rs.getString("codice"));
@@ -1112,7 +1143,7 @@ public class FromMysqlToPostgres {
 			competence.competenceCode = competenceCode;
 			competence.save();
 			Logger.debug("Creato %s", competence.toString());
-					
+
 
 		}	
 		Logger.debug("Terminato di creare le competenze per %s", person);
@@ -1132,7 +1163,7 @@ public class FromMysqlToPostgres {
 	 * funzione che associa a ciascuna persona creata, le corrispettive competenze valide.
 	 */
 	public static void createValuableCompetence(int matricola, Person person) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-		
+
 		JPAPlugin.startTx(false);
 		Logger.debug("Inizio a creare le competenze valide per %s %s", person.name, person.surname);
 		Connection mysqlCon = getMysqlConnection();
@@ -1240,29 +1271,29 @@ public class FromMysqlToPostgres {
 			}
 		}
 	}
-	
-//	private static void createModifiedStamping(PersonDay pd, long tipoTimbratura, ResultSet rs ) throws SQLException{
-//		Stamping stamping = new Stamping();
-//		while(rs.next()){
-//			if(rs.getLong("TipoTimbratura")==tipoTimbratura && rs.getInt("TipoGiorno") != -1){
-//				if(tipoTimbratura % 2 != 0)
-//					stamping.way = WayType.in;	
-//				else
-//					stamping.way = WayType.out;
-//				String s = rs.getString("Ora");
-//				setDateTimeToStamping(stamping, pd.date, s);
-//				stamping.personDay = pd;
-//				stamping.markedByAdmin = true;
-//				stamping.note = "timbratura modificata dall'amministratore";
-//				stamping.stampModificationType = StampModificationType.findById(3L);
-//				stamping.save();
-//				pd.stampings.add(stamping);
-//				pd.merge();
-//				
-//				Logger.debug("Creata timbratura modificata dall'amministratore %s", stamping.toString());
-//			}
-//		}
-//	}
+
+	//	private static void createModifiedStamping(PersonDay pd, long tipoTimbratura, ResultSet rs ) throws SQLException{
+	//		Stamping stamping = new Stamping();
+	//		while(rs.next()){
+	//			if(rs.getLong("TipoTimbratura")==tipoTimbratura && rs.getInt("TipoGiorno") != -1){
+	//				if(tipoTimbratura % 2 != 0)
+	//					stamping.way = WayType.in;	
+	//				else
+	//					stamping.way = WayType.out;
+	//				String s = rs.getString("Ora");
+	//				setDateTimeToStamping(stamping, pd.date, s);
+	//				stamping.personDay = pd;
+	//				stamping.markedByAdmin = true;
+	//				stamping.note = "timbratura modificata dall'amministratore";
+	//				stamping.stampModificationType = StampModificationType.findById(3L);
+	//				stamping.save();
+	//				pd.stampings.add(stamping);
+	//				pd.merge();
+	//				
+	//				Logger.debug("Creata timbratura modificata dall'amministratore %s", stamping.toString());
+	//			}
+	//		}
+	//	}
 
 	private static void createStamping(PersonDay pd, long tipoTimbratura, byte[] oldTime, boolean countAdmin){
 		Stamping stamping = new Stamping();
@@ -1279,7 +1310,7 @@ public class FromMysqlToPostgres {
 		String s = oldTime != null ? new String(oldTime) : null;
 		setDateTimeToStamping(stamping, pd.date, s);
 		stamping.markedByAdmin = countAdmin;
-//		stamping.considerForCounting = true;
+		//		stamping.considerForCounting = true;
 		if(countAdmin == true)
 			stamping.stampModificationType = StampModificationTypeValue.MARKED_BY_ADMIN.getStampModificationType();
 		stamping.personDay = pd;
@@ -1310,16 +1341,16 @@ public class FromMysqlToPostgres {
 			if(pm == null){
 				Logger.debug("Il person month era nullo, lo devo creare");
 				pm = new PersonMonth(pd.person, pd.date.getYear(), pd.date.getMonthOfYear());
-				
+
 			}
 			pm.prendiRiposoCompensativo(pd.date);
 			pm.save();
 			Logger.debug("Assegnato riposo compensativo e salvato person month per %s %s", pd.person.name, pd.person.surname);
 			Logger.debug("%s %s: il valore dei riposi compensativi è: %s per anno corrente e %s per anno passato", 
 					pd.person.name, pd.person.surname, pm.riposiCompensativiDaAnnoCorrente, pm.riposiCompensativiDaAnnoPrecedente);
-			
+
 		}
-			
+
 		//createAbsence(pd, absenceType);
 	}
 
@@ -1368,7 +1399,7 @@ public class FromMysqlToPostgres {
 	 */
 	public static void updateCompetence() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		//Logger.debug("Chiamata la funzione update competence per %s %s per impostare gli straordinari", person.name, person.surname);
-		
+
 		List<Person> personList = Person.findAll();
 		CompetenceCode code = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?","S1").first();
 		Logger.debug("Il codice competenze è: %s", code);
@@ -1382,7 +1413,7 @@ public class FromMysqlToPostgres {
 			code.save();
 			Logger.debug("Il codice creato: %s", code.code);
 		}
-		
+
 		for(Person person : personList){
 			Logger.debug("Prendo il vecchio id di %s %s: %s", person.name, person.surname, person.oldId);
 			if(person.oldId != null){
@@ -1395,7 +1426,7 @@ public class FromMysqlToPostgres {
 				ResultSet rs = stmt.executeQuery();
 				Logger.debug("Risultato della interrogazione sul vecchio db per le competenze: %s", rs.toString());
 				while(rs.next()){
-					
+
 					Competence comp = new Competence();
 					comp.competenceCode = code;
 					comp.person = person;
@@ -1405,7 +1436,7 @@ public class FromMysqlToPostgres {
 					comp.valueApproved = rs.getInt("ore_str");
 					comp.save();
 					Logger.debug("Creata competenza per il mese di %s e anno %s con valore: %s", comp.month, comp.year, comp.valueApproved);
-					
+
 					/**
 					 * aggiorno i personMonth con il valore degli straordinari solo relativamente a questo anno
 					 */
@@ -1418,49 +1449,49 @@ public class FromMysqlToPostgres {
 						pm.assegnaStraordinari(comp.valueApproved);
 						pm.save();
 					}
-					
+
 				}
 			}
 			Logger.debug("Terminata la update competence per %s %s.", person.name, person.surname);
 		}
-		
+
 	}
-	
+
 	/**
 	 * metodo di riempimento da lanciare al termine della procedura di importazione per completare tutti i codici di competenza presenti
 	 * @throws SQLException
 	 */
 	public static void updateCompetenceCode() throws SQLException{
 		Logger.debug("Lancio la updateCompetenceCode per riempire i codici di competenza con quelli meno usati ma presenti nel vecchio db");
-		
+
 		PreparedStatement stmt = mysqlCon.prepareStatement("Select * from codici_comp");		
 
 		ResultSet rs = stmt.executeQuery();
 		while(rs.next()){
-			
+
 			CompetenceCode code = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", 
 					rs.getString("codice")).first();
 			if(code == null){
 				Logger.debug("Non ho trovato il codice di competenza %s nel db, devo crearlo", rs.getString("codice"));
-					code = new CompetenceCode();
-					code.create();
-					code.code = rs.getString("codice");
-					code.codeToPresence = rs.getString("codice_att");
-					code.description = rs.getString("descrizione");
-					code.inactive = rs.getBoolean("inattivo");
-					code.save();
+				code = new CompetenceCode();
+				code.create();
+				code.code = rs.getString("codice");
+				code.codeToPresence = rs.getString("codice_att");
+				code.description = rs.getString("descrizione");
+				code.inactive = rs.getBoolean("inattivo");
+				code.save();
 			}					
-			
+
 		}
 		Logger.debug("Terminata la update competenceCode.");
 	}
-	
+
 	public static void personToCompetence() throws SQLException{
 		Logger.debug("PersonToCompetence per dare a ogni dipendente le proprie competenze attive");
-		
+
 		PreparedStatement stmt = mysqlCon.prepareStatement("Select * from compvalide");
 		ResultSet rs = stmt.executeQuery();
-		
+
 		while(rs.next()){
 			CompetenceCode code = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", rs.getString("codicecomp")).first();
 			Person person = Person.find("Select p from Person p where p.number = ?", rs.getInt("matricola")).first();

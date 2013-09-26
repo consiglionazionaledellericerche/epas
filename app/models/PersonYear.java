@@ -14,6 +14,7 @@ import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 
 import play.Logger;
+import play.db.jpa.JPA;
 import play.db.jpa.Model;
 
 /**
@@ -70,30 +71,30 @@ public class PersonYear extends Model{
 	/**
 	 * conta quanti giorni di ferie sono rimasti da utilizzare dalle ferie dell'anno corrente
 	 */
-	public int getRemainingVacationDays(){
-		List<Absence> absList = new ArrayList<Absence>();
-		if(remainingVacationDays == null){
-			remainingVacationDays = 0;
-			LocalDate date = new LocalDate(year, 1, 1);
-			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-					person, date, date.plusYears(1)).fetch();
-			for(PersonDay pd : pdList){
-				if(pd.absences.size() > 0){
-					for(Absence abs : pd.absences){
-						if(abs.absenceType.code.equals("32"))
-							absList.add(abs);
-					}
-				}
-			}
-			if(person.vacationPeriod != null)
-				remainingVacationDays = person.vacationPeriod.vacationCode.vacationDays - absList.size();
-			else 
-				remainingVacationDays = 0;
-			save();
-		}
-		
-		return remainingVacationDays;
-	}
+//	public int getRemainingVacationDays(){
+//		List<Absence> absList = new ArrayList<Absence>();
+//		if(remainingVacationDays == null){
+//			remainingVacationDays = 0;
+//			LocalDate date = new LocalDate(year, 1, 1);
+//			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+//					person, date, date.plusYears(1)).fetch();
+//			for(PersonDay pd : pdList){
+//				if(pd.absences.size() > 0){
+//					for(Absence abs : pd.absences){
+//						if(abs.absenceType.code.equals("32"))
+//							absList.add(abs);
+//					}
+//				}
+//			}
+//			if(person.getCurrentContract().vacationPeriod != null)
+//				remainingVacationDays = person.getCurrentContract().vacationPeriod.vacationCode.vacationDays - absList.size();
+//			else 
+//				remainingVacationDays = 0;
+//			save();
+//		}
+//		
+//		return remainingVacationDays;
+//	}
 	
 	/**
 	 * ritorna quanti minuti sono in più/in meno alla fine dell'anno
@@ -155,12 +156,13 @@ public class PersonYear extends Model{
 	 			}
 	 		}
 			
-	 		VacationPeriod per = VacationPeriod.find("Select per from VacationPeriod per where per.person = ? and per.beginFrom < ? " +
-	 				"and per.endTo > ?", person, date, date.monthOfYear().withMaximumValue().dayOfYear().withMaximumValue()).first();
-	 		if(per != null)
-	 			py.remainingVacationDays = per.vacationCode.vacationDays - vacationDaysActualYear;
-	 		else 
-	 			py.remainingVacationDays = 0;
+//	 		VacationPeriod per = VacationPeriod.find("Select per from VacationPeriod per where per.person = ? and per.beginFrom < ? " +
+//	 				"and per.endTo > ?", person, date, date.monthOfYear().withMaximumValue().dayOfYear().withMaximumValue()).first();
+//	 		if(per != null)
+//	 			py.remainingVacationDays = per.vacationCode.vacationDays - vacationDaysActualYear;
+//	 		else 
+//	 			py.remainingVacationDays = 0;
+			//TODO: capire a cosa serviva questa roba
 
 		}
 				

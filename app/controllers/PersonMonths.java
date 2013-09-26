@@ -22,6 +22,11 @@ public class PersonMonths extends Controller{
 
 	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void hourRecap(Long personId,int year){
+		
+		if(year > new LocalDate().getYear()){
+			flash.error("Richiesto riepilogo orario di un anno futuro. Impossibile soddisfare la richiesta");
+			renderTemplate("Application/indexAdmin.html");
+		}
 		Person person = null;
 		if(personId != null)
 			person = Person.findById(personId);
