@@ -105,6 +105,10 @@ public class DateUtility {
 		return false;
 	}
 
+	public static boolean isFebruary29th(int month, int day)
+	{
+		return (month==2 && day==29);
+	}
 
 	/**
 	 * 

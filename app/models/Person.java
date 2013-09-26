@@ -77,7 +77,8 @@ public class Person extends Model {
 	 */
 	private static final long serialVersionUID = -2293369685203872207L;
 
-
+	@Version
+	public Integer version;
 	
 
 	@Required

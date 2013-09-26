@@ -7,7 +7,7 @@
 #{form @Configurations.save()}
 <div id="gestioneParametri">
 	<input type="hidden" name="configId" value="${configurations.id}"/>
-	<p id="validita"><b>Data inizio di validità di questi parametri:</b> <b>inizio</b>: <input name="inizioValiditaParametri" type="date" value="${configurations.beginDate.convertToLocalDate()}" size="30" maxlength="100" /> <b>fine</b>: <input name="fineValiditaParametri" type="date" value="${configurations.endDate.convertToLocalDate()}" size="30" maxlength="100" /></p>
+	<p id="validita"><b>Data inizio di validità di questi parametri:</b> <b>inizio</b>: <input name="inizioValiditaParametri" type="date" value="${configurations.beginDate}" size="30" maxlength="100" /> <b>fine</b>: <input name="fineValiditaParametri" type="date" value="${configurations.endDate}" size="30" maxlength="100" /></p>
 	
 	<fieldset>
 		<legend>Dati di connessione e di visualizzazione</legend>
@@ -23,9 +23,9 @@
      	%{
      	}
      	}%
-			<p id="descrizione">Data di inizio uso di questo programma gg/mm/aaaa <input name="inizioUsoProgramma" type="date" value="${configurations.initUseProgram.convertToLocalDate()}" size="30" maxlength="100" /><p>
+			<p id="descrizione">Data di inizio uso di questo programma gg/mm/aaaa <input name="inizioUsoProgramma" type="date" value="${configurations.initUseProgram}" size="30" maxlength="100" /><p>
 			<p id="descrizione">Nome dell'istituto <input name="nomeIstituto" type="text" value="${configurations.instituteName}" size="80" maxlength="100" /></p>
-			<p id="descrizione">Email a cui può essere inviato un messaggio in caso di password dimenticata <input name="email" type="text" value="${configurations.emailToContact}" size="40" maxlength="100" /></p>
+			<p id="descrizione">Email a cui può essere inviato un messaggio in caso di password dimenticata <input name="email" type="email" value="${configurations.emailToContact}" size="40" maxlength="100" /></p>
 			<p id="descrizione">Codice sede <input name="codiceSede" type="text" value="${configurations.seatCode}" size="40" maxlength="100" /></p>
 			<p id="descrizione">URL per gestione attestato presenza dell'amministrazione centrale <input name="urlPresenze" type="text" value="${configurations.urlToPresence}" size="20" maxlength="100" /></p>
 			<p id="descrizione">User per gestione attestato presenza dell'amministrazione centrale <input name="userPresenze" type="text" value="${configurations.userToPresence}" size="20" maxlength="100" /></p>
@@ -37,23 +37,10 @@
 			<p id="descrizione">Festa del patrono (giorno) <input name="giornoPatrono" type="text" value="${configurations.dayOfPatron}" size="5" maxlength="100" /></p>
 			<p id="descrizione">Festa del patrono (mese) <input name="mesePatrono" type="text" value="${configurations.monthOfPatron}" size="5" maxlength="100" /></p>
 	</fieldset>
-	<fieldset disabled="disabled">
+	<fieldset>
 		<legend>Pausa pranzo e buoni</legend>
-		
-	<!--  		<p>Indicare se la durata dell'intervallo pranzo è più corta del minimo deve essere automaticamente spostata l'ora di rientro   Sì<input type="radio" name="configurazionePausaPranzo" value="true"/>
-     			No<input type="radio" name="configurazionePausaPranzo" value="false"/></p>
-			<p>Se quando manca l'intervallo pranzo il tempo dell'intervallo deve essere tolto automaticamente dal tempo si lavoro   Sì<input type="radio" name="configurazionePausaToltadaTempoLavoro" value="true"/>
-     			No<input type="radio" name="configurazionePausaToltadaTempoLavoro" value="false"/></p>
-     		<p>Se manca l'intervallo pranzo e il tempo di lavoro è compreso tra il "tempo minimo per intervallo pranzo" e "tempo minimo per intervallo pranzo + durata intervallo" assegna il buono mensa? Sì<input type="radio" name="configurazioneAssegnoBuono" value="true"/>
-     			No<input type="radio" name="configurazioneAssegnoBuono" value="false"/></p>
-			<p>Se quando manca l'ora di rientro dopo l'intervallo pranzo essa deve essere calcolata automaticamente Sì<input type="radio" name="configurazioneAutoCalcPausaPranzo" value="true"/>
-     			No<input type="radio" name="configurazioneAutoCalcPausaPranzo" value="false"/></p>
-			<p>Buono mensa assegnato solo se c'è un intervallo pranzo reale (non calcolato automaticamente) Sì<input type="radio" name="configurazioneAssegnaBuonoSoloConInterv" value="true"/>
-     			No<input type="radio" name="configurazioneAssegnaBuonoSoloConInterv" value="false"/></p>
-			<p>Buono mensa assegnato solo se c'è un intervallo reale con causale pausa mensa Sì<input type="radio" name="configurazioneAssegnaBuonoConCausalePausaMensa" value="true"/>
-     			No<input type="radio" name="configurazioneAssegnaBuonoConCausalePausaMensa" value="false"/></p>-->
-     		<p>Default tempo di lavoro giornaliero per avere il buono pasto (in minuti) <input name="tempoLavoroGiornalieroPerBuono" type="text" value="${configurations.workingTimeToHaveMealTicket}" size="10" maxlength="100" /></p></p>
-			<p>Default tempo intervallo pasto (in minuti) <input name="tempoIntervalloPasto" type="text" value="${configurations.mealTime}" size="10" maxlength="100" /></p></p>	
+     		<p id="descrizione">Default tempo di lavoro giornaliero per avere il buono pasto (in minuti) <input name="tempoLavoroGiornalieroPerBuono" type="text" value="${configurations.workingTimeToHaveMealTicket}" size="10" maxlength="100" disabled="disabled"/>  (non modificabile) </p></p>
+			<p id="descrizione">Default tempo intervallo pasto (in minuti) <input name="tempoIntervalloPasto" type="text" value="${configurations.mealTime}" size="10" maxlength="100" disabled="disabled"/>  (non modificabile)</p></p>	
 	</fieldset>
 	<fieldset>
 		<legend>Orari e tempi di lavoro</legend>
@@ -154,7 +141,7 @@
      	%{
      		}
      	}%
-			<p>Tempo di lavoro giornaliero default (in minuti) valore medio se il tempo di lavoro cambia di giorno in giorno <input name="" type="text" value="${configurations.workingTime}" size="10" maxlength="100" /></p>
+			<p>Tempo di lavoro giornaliero default (in minuti) valore medio se il tempo di lavoro cambia di giorno in giorno <input name="tempoMedioLavoroGiornaliero" type="text" value="${configurations.workingTime}" size="10" maxlength="100" /></p>
 			
 		%{if(configurations.canInsertMoreAbsenceCodeInDay == true){
 		}%	
@@ -176,9 +163,9 @@
 			<p>Tempo residuo minimo da avere per poter richiedere un giorno di riposo compensativo (in minuti) 
 				<input name="tempoMinimoPerAvereRiposoCompensativo" type="text" value="${configurations.minimumRemainingTimeToHaveRecoveryDay}" size="10" maxlength="100" /> </p>
 			<p id="descrizione">Mese entro il quale devono essere usati i residui dell'anno precedente per i livelli da 1 a 3 (mm) 
-			   00=i recuperi devono essere presi nell'anno. 99=i recuperi non scadono mai <input name="meseUtilizzoResiduiAP13" type="text" value="${configurations.monthExpireRecoveryDaysOneThree}" size="10" maxlength="100" /></p>
+			   <input name="meseUtilizzoResiduiAP13" type="text" value="${configurations.monthExpireRecoveryDaysOneThree}" size="10" maxlength="100" /></p>
 			<p id="descrizione">Mese entro il quale devono essere usati i residui dell'anno precedente per i livelli da 4 a 9 (mm)
-			   00=i recuperi devono essere presi nell'anno. 99=i recuperi non scadono mai <input name="meseUtilizzoResiduiAP49" type="text" value="${configurations.monthExpireRecoveryDaysFourNine}" size="10" maxlength="100" /></p>
+			  <input name="meseUtilizzoResiduiAP49" type="text" value="${configurations.monthExpireRecoveryDaysFourNine}" size="10" maxlength="100" /></p>
 			<p id="descrizione">Numero massimo di giorni di recupero in un anno per i livelli da 1 a 3 <input name="maxGiorniRecupero13" type="text" value="${configurations.maxRecoveryDaysOneThree}" size="10" maxlength="100" /></p>
 			<p id="descrizione">Numero massimo di giorni di recupero in un anno per i livelli da 4 a 9 <input name="maxGiorniRecupero49" type="text" value="${configurations.maxRecoveryDaysFourNine}" size="10" maxlength="100" /></p>
 			
@@ -202,11 +189,29 @@
      			}
      		}%
 			<p>Numero massimo di ore di straordinario mensili a persona <input name="oreMassimeStraordinarioMensili" type="text" value="${configurations.maximumOvertimeHours}" size="10" maxlength="100" /></p>
-			
-			<p>Selezionare "si" per permettere l'inserimento forzato di giorni di ferie/permessi che superano il massimo di giorni usufruibili in un anno Sì<input type="radio" name="configurazioneInserimentoForzatoFeriePermessi" value="true"/>
+
+
+
+
+			%{
+			if(configurations.holydaysAndVacationsOverPermitted==true)
+			{
+     		}%
+			<p>Selezionare "si" per permettere l'inserimento forzato di giorni di ferie/permessi che superano il massimo di giorni usufruibili in un anno Sì<input type="radio" name="configurazioneInserimentoForzatoFeriePermessi" value="true" checked="checked"/>
      			No<input type="radio" name="configurazioneInserimentoForzatoFeriePermessi" value="false"/></p>
-     			
-     			
+     		%{
+     			}else{
+     		}%
+     		<p>Selezionare "si" per permettere l'inserimento forzato di giorni di ferie/permessi che superano il massimo di giorni usufruibili in un anno Sì<input type="radio" name="configurazioneInserimentoForzatoFeriePermessi" value="true" />
+     			No<input type="radio" name="configurazioneInserimentoForzatoFeriePermessi" value="false" checked="checked"/></p>
+     		%{
+     		}
+     		}%
+     		
+     		
+     		
+     		
+     		
      		%{if(configurations.capacityOneThree.description.equals('residuo del giorno')){
 			}%
 				<p>Controllo capienza riposi compensativi livelli 1-3: Sul Residuo al giorno <input type="radio" name="configurazioneCapienzaRiposi13" value="residuoGiorno" checked="checked"/>
@@ -266,12 +271,12 @@
 			%{if(configurations.canPeopleAutoDeclareWorkingTime == true){
 			}%
 				<p>Permette al personale di autodichiarare gli orari di lavoro Sì<input type="radio" name="configurazioneAutoDichiarazione" value="true" checked="checked"/>
-     				No<input type="radio" name="linguaggio" value="false"/></p>
+     				No<input type="radio" name="configurazioneAutoDichiarazione" value="false"/></p>
      		%{
      			}else{
     		}%
     		<p>Permette al personale di autodichiarare gli orari di lavoro Sì<input type="radio" name="configurazioneAutoDichiarazione" value="true"/>
-     				No<input type="radio" name="linguaggio" value="false" checked="checked"/></p>
+     				No<input type="radio" name="configurazioneAutoDichiarazione" value="false" checked="checked"/></p>
      		%{
      			}
      		}%
