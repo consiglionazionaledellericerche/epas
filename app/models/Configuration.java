@@ -45,19 +45,19 @@ public class Configuration extends Model{
 	 * Data di inizio uso di questo programma gg/mm/aaaa
 	 */
 	@Column(name = "init_use_program")
-	//@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
-	public Date initUseProgram;
+	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	public LocalDate initUseProgram;
 	
 	/**
 	 * date di inizio e fine validità della configurazione
 	 */
 	@Column(name = "begin_date")
-	//@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
-	public Date beginDate;
+	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	public LocalDate beginDate;
 	
 	@Column(name = "end_date")
-	//@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
-	public Date endDate;
+	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	public LocalDate endDate;
 		
 	/**
 	 * Nome dell'Istituto
@@ -323,4 +323,8 @@ public class Configuration extends Model{
 		return getConfiguration(new Date());
 	}
 	
+	public static List<Configuration> getAllConfiguration()
+	{
+		return Configuration.find("Select conf from Configuration conf").fetch();
+	}
 }
