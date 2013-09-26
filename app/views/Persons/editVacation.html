@@ -16,7 +16,7 @@
 		<td>${person.getVacation().description}</td>
 		<td>${person.getVacation().vacationDays}</td>
 		<td>${person.getVacation().permissionDays}</td>
-		<td>${person.getCurrentContract().beginContract}</td>
-		<td></td>
+		<td>${person.getCurrentContract().getCurrentVacationPeriod().beginFrom}</td>
+		<td>${person.getCurrentContract().getCurrentVacationPeriod().endTo}</td>
 	</tr>
 </table>
