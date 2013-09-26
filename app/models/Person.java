@@ -128,7 +128,7 @@ public class Person extends Model {
 	/**
 	 * relazione con la tabella delle info di contatto
 	 */
-	@OneToOne(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	@OneToOne(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE}, orphanRemoval=true)
 	public ContactData contactData;
 	
 	/**
@@ -232,7 +232,7 @@ public class Person extends Model {
 	 * relazione con la tabella delle locazioni degli utenti
 	 */
 	@NotAudited
-	@OneToOne(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	@OneToOne(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE}, orphanRemoval=true)
 	public Location location;
 
 
