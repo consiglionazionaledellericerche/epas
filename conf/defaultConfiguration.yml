@@ -30,12 +30,12 @@ Configuration(defaultConfiguration):
     monthExpiryVacationPastYear: 8
     dayExpiryVacationPastYear: 31
     minimumRemainingTimeToHaveRecoveryDay: 432
-    monthExpireRecoveryDaysOneThree:
+    monthExpireRecoveryDaysOneThree: 0
     monthExpireRecoveryDaysFourNine: 4
     maxRecoveryDaysOneThree: 22
-    maxRecoveryDaysFourNine:
+    maxRecoveryDaysFourNine: 0
     residual: atMonth
-    maximumOvertimeHours:
+    maximumOvertimeHours: 0
     holydaysAndVacationsOverPermitted: false
     hourMaxToCalculateWorkTime: 5
     canPeopleAutoDeclareWorkingTime: false

@@ -1,0 +1,14 @@
+#{extends 'main_admin.html' /}
+
+#{set title: 'Amministrazione del personale' /}
+
+
+<div id="frm">
+
+	<input id = "salvaConfigurazione" action="action" type="button" value="Indietro" onclick="history.go(-1);" />
+
+	#{form @Configurations.list()}
+	<input id="annullaConfigurazione" type="submit" value="Annulla"/>
+	#{/form}
+
+</div>
