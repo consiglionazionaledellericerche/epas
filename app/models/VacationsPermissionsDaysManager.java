@@ -111,7 +111,7 @@ public class VacationsPermissionsDaysManager {
 		if(pd.progressive + pm.progressiveAtEndOfMonthInMinutes > workingTime){
 			if(person.qualification.qualification == 1 || person.qualification.qualification == 2 || person.qualification.qualification == 3){
 				Integer expireMonth = config.monthExpireRecoveryDaysOneThree;
-				if(expireMonth == null || expireMonth > date.getMonthOfYear())
+				if(expireMonth == 0 || expireMonth > date.getMonthOfYear())
 					return new AvailabilityInfo(true);
 				else{
 					return new AvailabilityInfo("Il giorno di recupero non può essere preso poichè la data è superiore alla scadenza" +
