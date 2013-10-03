@@ -33,11 +33,11 @@ package controllers;
  * minimumRemainingTime					|											|
  * ToHaveRecoveryDay					|	tempoMinimoPerAvereRiposoCompensativo	|	>0
  * 
- * monthExpireRecoveryDaysOneThree		|	meseUtilizzoResiduiAP13					|	null || mese valido
- * monthExpireRecoveryDaysFourNine		|	meseUtilizzoResiduiAP49					|	null || mese valido
- * maxRecoveryDaysOneThree				|	maxGiorniRecupero13						|	null || >0
- * maxRecoveryDaysFourNine				|	maxGiorniRecupero49						|	null || >0
- * maximumOvertimeHours					|	oreMassimeStraordinarioMensili			|	null || >0
+ * monthExpireRecoveryDaysOneThree		|	meseUtilizzoResiduiAP13					|	0 || mese valido
+ * monthExpireRecoveryDaysFourNine		|	meseUtilizzoResiduiAP49					|	0 || mese valido
+ * maxRecoveryDaysOneThree				|	maxGiorniRecupero13						|	0 || >0
+ * maxRecoveryDaysFourNine				|	maxGiorniRecupero49						|	0 || >0
+ * maximumOvertimeHours					|	oreMassimeStraordinarioMensili			|	0 || >0
  * 
  * residual								|	configurazioneCompensazioneResidui		|
  * 										|	ConAnnoPrecedente						|	ResidualWithPastYear Enum
@@ -213,27 +213,27 @@ public class Configurations extends Controller{
 			flash.error(String.format("Errore nell'inserimento dati del campo 'tempo minimo per avere riposo compensativo'"));
 			render("@goback");
 		}	
-		if(!isParamZero("meseUtilizzoResiduiAP13") && !isParamProperMonth("meseUtilizzoResiduiAP13"))	//ne null ne mese
+		if(!isParamZero("meseUtilizzoResiduiAP13") && !isParamProperMonth("meseUtilizzoResiduiAP13"))	//ne 0 ne mese
 		{
 			flash.error(String.format("Errore nell'inserimento dati del campo 'mese utilizzo residui livelli 1-3'"));
 			render("@goback");
 		}
-		if(!isParamZero("meseUtilizzoResiduiAP49") && !isParamProperMonth("meseUtilizzoResiduiAP49"))	//ne null ne mese
+		if(!isParamZero("meseUtilizzoResiduiAP49") && !isParamProperMonth("meseUtilizzoResiduiAP49"))	//ne 0 ne mese
 		{
 			flash.error(String.format("Errore nell'inserimento dati del campo 'mese utilizzo residui livelli 4-9'"));
 			render("@goback");
 		}
-		if(!isParamZero("maxGiorniRecupero13") && !isParamPositiveNumber("maxGiorniRecupero13"))		//ne null ne positivo
+		if(!isParamZero("maxGiorniRecupero13") && !isParamPositiveNumber("maxGiorniRecupero13"))		//ne 0 ne positivo
 		{
 			flash.error(String.format("Errore nell'inserimento dati del campo 'massimo giorni di recupero livelli 1-3'"));
 			render("@goback");
 		}
-		if(!isParamZero("maxGiorniRecupero49") && !isParamPositiveNumber("maxGiorniRecupero49"))		//ne null ne positivo
+		if(!isParamZero("maxGiorniRecupero49") && !isParamPositiveNumber("maxGiorniRecupero49"))		//ne 0 ne positivo
 		{
 			flash.error(String.format("Errore nell'inserimento dati del campo 'massimo giorni di recupero livelli 4-9'"));
 			render("@goback");
 		}
-		if(!isParamZero("oreMassimeStraordinarioMensili") && !isParamPositiveNumber("oreMassimeStraordinarioMensili"))		//ne null ne positivo
+		if(!isParamZero("oreMassimeStraordinarioMensili") && !isParamPositiveNumber("oreMassimeStraordinarioMensili"))		//ne 0 ne positivo
 		{
 			flash.error(String.format("Errore nell'inserimento dati del campo 'ore massime straordinario mensili'"));
 			render("@goback");
@@ -243,39 +243,10 @@ public class Configurations extends Controller{
 		config.monthExpiryVacationPastYear = Integer.parseInt(params.get("meseScadenzaFerieAP"));										
 		config.dayExpiryVacationPastYear = Integer.parseInt(params.get("giornoScadenzaFerieAP"));		
 		config.minimumRemainingTimeToHaveRecoveryDay = Integer.parseInt(params.get("tempoMinimoPerAvereRiposoCompensativo"));	
-		if(params.get("meseUtilizzoResiduiAP13").equals(""))
-		{
-			config.monthExpireRecoveryDaysOneThree = null;
-		}
-		else
-		{
-			config.monthExpireRecoveryDaysOneThree = Integer.parseInt(params.get("meseUtilizzoResiduiAP13"));	
-		}
-		if(params.get("meseUtilizzoResiduiAP49").equals(""))
-		{
-			config.monthExpireRecoveryDaysFourNine = null;
-		}
-		else
-		{
-			config.monthExpireRecoveryDaysFourNine = Integer.parseInt(params.get("meseUtilizzoResiduiAP49"));	
-		}
-		if(params.get("maxGiorniRecupero13").equals(""))
-		{
-			config.maxRecoveryDaysOneThree = null;
-		}
-		else
-		{
-			config.maxRecoveryDaysOneThree = Integer.parseInt(params.get("maxGiorniRecupero13"));	
-
-		}
-		if(params.get("maxGiorniRecupero49").equals(""))
-		{
-			config.maxRecoveryDaysFourNine = null;
-		}
-		else
-		{
-			config.maxRecoveryDaysFourNine = Integer.parseInt(params.get("maxGiorniRecupero49"));	
-		}
+		config.monthExpireRecoveryDaysOneThree = Integer.parseInt(params.get("meseUtilizzoResiduiAP13"));	
+		config.monthExpireRecoveryDaysFourNine = Integer.parseInt(params.get("meseUtilizzoResiduiAP49"));	
+		config.maxRecoveryDaysOneThree = Integer.parseInt(params.get("maxGiorniRecupero13"));	
+		config.maxRecoveryDaysFourNine = Integer.parseInt(params.get("maxGiorniRecupero49"));	
 
 		String configurazioneCompensazioneResiduiConAnnoPrecedente = params.get("configurazioneCompensazioneResiduiConAnnoPrecedente");	
 		if(configurazioneCompensazioneResiduiConAnnoPrecedente.equals("entroMese"))
@@ -285,15 +256,7 @@ public class Configurations extends Controller{
 		if(configurazioneCompensazioneResiduiConAnnoPrecedente.equals("giorno"))
 			config.residual = ResidualWithPastYear.atDay;
 
-		if(params.get("oreMassimeStraordinarioMensili").equals(""))
-		{
-			config.maximumOvertimeHours = null;
-		}
-		else
-		{
-			config.maximumOvertimeHours = Integer.parseInt(params.get("oreMassimeStraordinarioMensili"));	
-		}
-		
+		config.maximumOvertimeHours = Integer.parseInt(params.get("oreMassimeStraordinarioMensili"));	
 		config.holydaysAndVacationsOverPermitted  = params.get("configurazioneInserimentoForzatoFeriePermessi", Boolean.class);
 
 		String configurazioneCapienzaRiposi13 = params.get("configurazioneCapienzaRiposi13");	
