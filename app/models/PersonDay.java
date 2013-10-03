@@ -405,6 +405,10 @@ public class PersonDay extends Model {
 		return new TimeAtWorkToday(timeAtWork, false);
 	}
 	
+	/**
+	 * 
+	 * @return lo stampmodificationtype relativo al pranzo per la persona
+	 */
 	public StampModificationType getTodayLunchTime(){
 		StampModificationType smt = null;
 		TimeAtWorkToday tawd = getTimeAtWorkWithToday();
@@ -412,7 +416,26 @@ public class PersonDay extends Model {
 			smt = StampModificationType.findById(StampModificationTypeValue.FOR_DAILY_LUNCH_TIME.getId()); 
 		return smt;
 	}
+	
+	/**
+	 * 
+	 * @return lo stamp modification type relativo al tempo di lavoro fisso 
+	 */
+	public StampModificationType getFixedWorkingTime(){
+		StampModificationType smt = null;
+		if(this.person.getCurrentStampProfile(this.date).fixedWorkingTime)
+			smt = StampModificationType.findById(StampModificationTypeValue.FIXED_WORKINGTIME.getId());
+		
+		return smt;
+	}
 
+	public boolean isFixedWorkingTime(){
+		if(this.person.getCurrentStampProfile(this.date).fixedWorkingTime)
+			return true;
+		return false;
+	}
+	
+	
 	private TimeAtWorkToday getTimeAtWorkToday() {
 		if (stampings.size() == 0)
 			return new TimeAtWorkToday(0, false);

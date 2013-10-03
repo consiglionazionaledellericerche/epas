@@ -298,7 +298,7 @@ public class PersonUtility {
 		if(pdPastDay != null){			
 			//lista delle timbrature del giorno precedente ordinate in modo decrescente per vedere se l'ultima del giorno è una timbratura di ingresso
 			//List<Stamping> reloadedStampingYesterday = Stamping.find("Select st from Stamping st where st.personDay = ? order by st.date desc", pdPastDay).fetch();
-			Query query = JPA.em().createQuery("Select st from Stamping st where st.personDay = :pd");
+			Query query = JPA.em().createQuery("Select st from Stamping st where st.personDay = :pd order by st.date asc");
 			query.setParameter("pd", pdPastDay);
 			List<Stamping> reloadedStampingYesterday = query.getResultList();
 			//	List<Stamping> reloadedStampingYesterday = new ArrayList<Stamping>(pdPastDay.stampings);
@@ -307,7 +307,7 @@ public class PersonUtility {
 				Logger.trace("Sono nel caso in cui ci sia una timbratura finale di ingresso nel giorno precedente nel giorno %s", 
 						pdPastDay.date);
 				if(stampProfile == null || !stampProfile.fixedWorkingTime){
-					List<Stamping> s = new ArrayList<Stamping>(pd.stampings);
+					List<Stamping> s = Stamping.find("Select s from Stamping s where s.personDay = ? order by s.date asc", pd).fetch();
 					if(s.size() > 0 && s.get(0).way == WayType.out && config.hourMaxToCalculateWorkTime > s.get(0).date.getHourOfDay()){
 
 						//controllo nelle timbrature del giorno attuale se la prima che incontro è una timbratura di uscita sulla base
