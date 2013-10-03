@@ -51,5 +51,7 @@ public class StampProfile extends Model {
 	 * le timbrature presenti
 	 */
 	public boolean fixedWorkingTime = false;
+	
+	
 
 }

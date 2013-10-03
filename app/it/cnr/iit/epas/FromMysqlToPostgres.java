@@ -267,6 +267,8 @@ public class FromMysqlToPostgres {
 		FromMysqlToPostgres.importOreStraordinario();
 
 		FromMysqlToPostgres.addPermissiontoAll();
+		
+		FromMysqlToPostgres.checkFixedWorkingTime();
 		JPAPlugin.closeTx(false);
 		Logger.info("Importazione terminata");
 
@@ -275,51 +277,42 @@ public class FromMysqlToPostgres {
 
 	}
 
-
 	/**
-	 * metodo che assegna un "default" di periodo ferie a quelle persone che dall'importazione non hanno ricevuto un vacationPeriod
+	 * controlla tutte le persone che hanno timbrature fisse 
 	 */
-	//	public static void updateVacationPeriod() {
-	//		List<Person> personList = Person.findAll();
-	//		for(Person p : personList){
-	//			Logger.debug("Sto controllando il vacation period di %s %s", p.name, p.surname);
-	//			Contract c = p.getCurrentContract();
-	//			if(c.vacationPeriod == null){
-	//				if(!p.username.equals("admin") && (p.qualification != null) ){
-	//					Logger.debug("Per %s %s devo creare un nuovo vacation period", p.name, p.surname);
-	//					VacationPeriod vp = new VacationPeriod();
-	//					vp.vacationCode = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", "28+4").first();
-	//					vp.beginFrom = new LocalDate(1970,1,1);
-	//					vp.save();
-	//				}
-	//				
-	//			}
-	//			else{
-	//				if(c.vacationPeriod.beginFrom != null && c.vacationPeriod.endTo == null){
-	//					Logger.debug("------");
-	//				}
-	//				else{
-	//					Logger.debug("Per %s %s devo creare un nuovo vacation period perchè il precedente ha data di fine precedente alla data attuale", p.name, p.surname);
-	////					
-	//					//Contract c = p.getCurrentContract();
-	//					if(c.vacationPeriod.endTo.isBefore(new LocalDate()) && c != null && (c.expireContract == null || c.expireContract.isAfter(c.vacationPeriod.endTo)) ){
-	//						VacationPeriod vp = new VacationPeriod();
-	//						
-	//						vp.vacationCode = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", "28+4").first();
-	//						vp.beginFrom = new LocalDate(c.vacationPeriod.endTo.plusDays(1));
-	//				
-	//						c.vacationPeriod.delete();
-	//						//p.save();
-	//						vp.save();
-	//					}
-	//				}				
-	//				
-	//			}
-	//			
-	//		}
-	//		
-	//	}
+	public static void checkFixedWorkingTime() {
+		Logger.debug("Controllo delle persone con timbratura fissa");
+		List<Person> activePerson = Person.getActivePersons(new LocalDate(2013,1,1));
+		
+		for(Person p : activePerson){
+			Logger.debug("Analizzo %s %s", p.name, p.surname);
+			LocalDate date = new LocalDate().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue();
+			if(p.getCurrentStampProfile(date).fixedWorkingTime){
+				
+				while(date.isBefore(new LocalDate())){
+					if(!DateUtility.isHoliday(p, date)){
+						
+						PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", p, date).first();
+						if(pd == null){
+							pd = new PersonDay(p, date);
+							pd.create();
+							Logger.debug("Creato person day per %s %s in data %s", p.name, p.surname, date);
+							pd.populatePersonDay();
+							pd.save();
+							Logger.debug("Persistito il tempo di lavoro = %d per %s %s in data %s", pd.timeAtWork, p.name, p.surname, date);
+						}
+						
+					}
+					
+					date = date.plusDays(1);
+				}
+				
+			}
+		}
+	}
 
+
+	
 	/**
 	 * metodo che assegna un inizio di contratto di default a quelle persone che dall'importazione non hanno ricevuto un beginContract
 	 */
@@ -900,6 +893,7 @@ public class FromMysqlToPostgres {
 
 					pd = new PersonDay(person, newData);
 					pd.create();
+					
 					Logger.debug("Creato %s ", pd.toString());
 					//il caso di timbratura modificata/inserita dall'amministratore
 
