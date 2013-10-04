@@ -17,3 +17,7 @@ StampModificationType(x):
 StampModificationType(f):
     code: f
     description: Tempo di lavoro che si avrebbe uscendo adesso
+    
+StampModificationType(d):
+    code: d
+    description: Considerato presente se non ci sono codici di assenza (orario di lavoro autodichiarato)

@@ -85,14 +85,32 @@
 					${day.getStampingsForTemplate().get(j+1).date.toCalendarTime()}
 				
 					 
-					${(day.getStampingsForTemplate().get(j).stampType != null ? day.getStampingsForTemplate().get(j).stampType.identifier : '')}
+					${(day.getStampingsForTemplate().get(j) != null && day.getStampingsForTemplate().get(j).stampType != null ? day.getStampingsForTemplate().get(j).stampType.identifier : '')}
 				%{ 
 					}else{ 
 				}%
 					${' '}
 				%{
+				 	if(day.getStampingsForTemplate().size() > j+1 && day.getStampingsForTemplate().get(j+1).markedByAdmin == true){ 
+					}%
+					  	<strong>${day.checkMarkedByAdmin().code}</strong>
+					%{
+					} 
+					if(day.getStampingsForTemplate().size() > j+1 && day.getStampingsForTemplate().get(j+1).stampModificationType != null){
+					}%
+						<strong>${day.checkMissingExitStampBeforeMidnight().code}</strong>
+					%{
 					}
+					else{
+					}% 
+						${' '}
+					
+					%{
+					}
+					
+				}
 				}%
+				
 				</td>
 			
 				%{ } }%

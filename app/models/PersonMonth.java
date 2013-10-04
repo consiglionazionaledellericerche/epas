@@ -557,6 +557,11 @@ public class PersonMonth extends Model {
 				stampCodeList.add(smtMidnight);
 				Logger.trace("Aggiunto %s alla lista", smtMidnight.description);
 			}
+			StampModificationType smtFixedWorkingTime = pd.getFixedWorkingTime();
+			if(smtFixedWorkingTime != null && !stampCodeList.contains(smtFixedWorkingTime)){
+				stampCodeList.add(smtFixedWorkingTime);
+				Logger.trace("Aggiunto %s alla lista", smtFixedWorkingTime.description);
+			}
 
 		}
 		Logger.debug("La lista degli stamping code per questo mese contiene: %s", stampingCodeList);
