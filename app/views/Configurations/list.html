@@ -20,7 +20,7 @@
   }%
   <tr>
     <td>${conf.id}</td>
-    <td><a href="@{Configurations.edit(conf.id)}">${conf.beginDate}</a></td>
+    <td><a href="@{Configurations.edit(conf.id)}">${conf.beginDate.convertToLocalDate()}</a></td>
     %{ if(conf.inUse == true){
     }%
     <td><input type="checkbox" value="" name="inUse" checked="checked"/></td>
