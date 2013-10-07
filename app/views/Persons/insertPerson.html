@@ -17,8 +17,8 @@
 		<div><b>Cognome</b> <input name="surname" type="text" size="20" maxlength="100" /></div>
 		<div><b>Nome</b> <input name="name" type="text" size="20" maxlength="50" /></div>
 		<!--  <div>Password <input name="person.password" type="text" value="" size="10" maxlength="10" /></div>-->
-		<div>Matricola <input name="number" type="text" size="10" maxlength="10" /></div>
-		<div>Numero badge <input name="badgeNumber" type="text" size="10" maxlength="20" /></div>
+		<div>Matricola <input name="number" type="number" size="10" maxlength="10" /></div>
+		<div>Numero badge <input name="badgeNumber" type="number" size="10" maxlength="20" /></div>
 		<div>Livello 
 			#{select 'person.qualification', value:person.qualification, id:'qualifica'} 
 				#{option 0}0#{/option}
@@ -40,8 +40,8 @@
 		<div><b>Inizio contratto</b> <input name="beginContract" type="date"/></div>
 		<div>Fine contratto <input name="expireContract" type="date" size="10" maxlength="10" /></div>
 		<div>Obbligo attestato di presenza (per dipendenti CNR) <input name="onCertificate" type="checkbox" /></div>
-		<div>Ore di inizializzazione maturate in altro istituto l'anno passato (in minuti): <input name="minutesPastYear" type="text" size="10" /></div>
-		<div>Ore di inizializzazione maturate in altro istituto nell'anno corrente (in minuti): <input name="minutesCurrentYear" type="text" size="10" /></div>
+		<div>Ore di inizializzazione maturate in altro istituto l'anno passato (in minuti): <input name="minutesPastYear" type="number" size="10" /></div>
+		<div>Ore di inizializzazione maturate in altro istituto nell'anno corrente (in minuti): <input name="minutesCurrentYear" type="number" size="10" /></div>
 	</fieldset>
 
 	<fieldset>
@@ -51,8 +51,8 @@
 		<p id="sede">Sede <input name="headOffice" type="text" value="${location.headOffice}" size="40" maxlength="200" /></p>
 		<p id="stanza">Stanza <input name="room" type="text" value="${location.room}" size="40" maxlength="200" /></p>
 		<p id="telefono">Telefono <input name="telephone" type="text" value="${contactData.telephone}" size="40" maxlength="200" /></p>
-		<p id="email">Email <input name="email" type="text" value="${contactData.email}" size="40" maxlength="200" /></p>
-		<p id="nascita">Data di nascita <input name="bornDate" type="text" value="${person.bornDate}" size="40" maxlength="200" /></p>
+		<p id="email">Email <input name="email" type="email" value="${contactData.email}" size="40" maxlength="200" /></p>
+		<p id="nascita">Data di nascita <input name="bornDate" type="date" value="${person.bornDate}" size="40" maxlength="200" /></p>
 	</fieldset>
 	
 	
