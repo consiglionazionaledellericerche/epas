@@ -287,7 +287,7 @@ public class FromMysqlToPostgres {
 		for(Person p : activePerson){
 			Logger.debug("Analizzo %s %s", p.name, p.surname);
 			LocalDate date = new LocalDate().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue();
-			if(p.getCurrentStampProfile(date).fixedWorkingTime){
+			if(StampProfile.getCurrentStampProfile(p,date).fixedWorkingTime){
 				
 				while(date.isBefore(new LocalDate())){
 					if(!DateUtility.isHoliday(p, date)){
