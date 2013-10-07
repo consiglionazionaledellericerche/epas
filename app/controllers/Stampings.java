@@ -1,32 +1,46 @@
 package controllers;
 
+import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.MainMenu;
 
-
+import java.sql.Connection;
+import java.sql.Timestamp;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import models.Absence;
+import models.AbsenceType;
 import models.Configuration;
 import models.Contract;
+import models.InitializationAbsence;
+import models.InitializationTime;
 import models.Person;
 import models.PersonDay;
 import models.PersonMonth;
 import models.PersonTags;
+import models.StampProfile;
 import models.StampType;
 import models.Stamping;
 import models.Stamping.WayType;
+import models.WorkingTimeTypeDay;
+import models.exports.AbsenceReperibilityPeriod;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
 import play.Logger;
+import play.Play;
 import play.cache.Cache;
 import play.data.validation.Required;
 import play.data.validation.Valid;
+import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -35,6 +49,8 @@ import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.ImmutableTable.Builder;
 import com.google.common.collect.Table;
 import com.ning.http.util.DateUtil.DateParseException;
+
+
 
 @With( {Secure.class, NavigationMenu.class} )
 public class Stampings extends Controller {
@@ -406,31 +422,288 @@ public class Stampings extends Controller {
 		personStamping();
 	}
 
+	
+	/**
+	 * 	Classe che modella il result set del prepared statement nel controller missingStampings
+	 * @author alessandro
+	 *
+	 */
+	private final static class PersonDayResultSet {
+		LocalDate date;
+		boolean fixing;
+		List<String> way;
+		String justified;
+		
+		PersonDayResultSet(LocalDate date, boolean fixing, String justified, String way)
+		{
+			this.date = date;
+			this.fixing = fixing;
+			this.justified = justified;
+			this.way = new ArrayList<String>();
+			if(way!=null)
+				this.way.add(way);
+		}
+	}
+	
+	/**
+	 * Controller che attua la verifica di timbrature mancanti per il mese selezionato per tutte quelle persone
+	 * che avevano almeno un contratto attivo in tale mese
+	 * @param year
+	 * @param month
+	 */
 	@Check(Security.INSERT_AND_UPDATE_STAMPING)
 	public static void missingStamping(int year, int month){
 		
-		ImmutableTable.Builder<Person, String, List<Integer>> builder = ImmutableTable.builder();
-		Table<Person, String, List<Integer>> tableMissingStampings = null;
+		//Immutable table per rendering
+		ImmutableTable.Builder<Person, String, List<Integer>>  builder = ImmutableTable
+				.<Person, String, List<Integer>>builder()
+				.orderRowsBy(new Comparator<Person>(){
+			public int compare(Person p1, Person p2) {
 
-		List<Person> personList = Person.getActivePersons(new LocalDate(year, month, 1));
-		
-		for(Person p : personList){
-			List<Integer> pdMissingStampingList = new ArrayList<Integer>();
-			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date >= ? and pd.date <= ?", 
-					p, new LocalDate(year, month, 1), new LocalDate(year, month,1).dayOfMonth().withMaximumValue()).fetch();
-			for(PersonDay pd : pdList){
-				if(pd.stampings.size() == 1 || 
-						(pd.stampings.size() == 0 && pd.absences.size() == 0 && pd.date.getDayOfWeek() != 7 && pd.date.getDayOfWeek() != 6)){
-					Integer day = pd.date.getDayOfMonth();
-					pdMissingStampingList.add(day);
-				}
-
+				return p1.surname.compareTo(p2.surname);
 			}
-			builder.put(p, "Giorni del mese da controllare", pdMissingStampingList);
-		}
-		tableMissingStampings = builder.build();
-		render(tableMissingStampings, month, year);
 
+		});
+		Table<Person, String, List<Integer>> tableMissingStampings = null;
+		
+		//Genero la lista dei giorni lavorativi generici per il mese
+		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
+		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
+		DateInterval monthInterval = new DateInterval(monthBegin, monthEnd);
+		LocalDate day = monthBegin;
+		List<LocalDate> generalWorkingDaysOfMonth = new ArrayList<LocalDate>();
+		while(!day.isAfter(monthEnd))
+		{
+			if( ! DateUtility.isGeneralHoliday(day) )
+				generalWorkingDaysOfMonth.add(day);
+			day = day.plusDays(1);
+		}
+
+		//lista delle persone che sono state attive nel mese
+		List<Person> persons = Person.find("SELECT p FROM Person p ORDER BY p.id").fetch();
+		List<Person> activePersons = new ArrayList<Person>();
+		for(Person person : persons)
+		{
+			List<Contract> monthContracts = person.getMonthContracts(month, year);
+			if(monthContracts!=null)
+				activePersons.add(person);
+		}
+				
+		Connection connection = null;
+		try
+		{
+			Class.forName("org.postgresql.Driver");
+			connection = DriverManager.getConnection(
+					Play.configuration.getProperty("db.new.url"),
+					Play.configuration.getProperty("db.new.user"),
+					Play.configuration.getProperty("db.new.password"));
+
+			String query = 
+					  "SELECT p.id, pd.date, sp.fixedworkingtime, s.way, abt.justified_time_at_work "
+					+ "FROM persons p LEFT OUTER JOIN person_days pd ON p.id = pd.person_id AND pd.date BETWEEN ? AND ? "
+					+ "LEFT OUTER JOIN stamp_profiles sp ON sp.person_id = p.id "
+					+ "LEFT OUTER JOIN stampings s ON s.personday_id = pd.id "
+					+ "LEFT OUTER JOIN absences abs ON abs.personday_id = pd.id "
+					+ "LEFT OUTER JOIN absence_types abt ON abs.absence_type_id = abt.id "
+					+ "WHERE ( pd.date BETWEEN sp.start_from AND sp.end_to) OR ( pd.date >= sp.start_from AND sp.end_to IS NULL) " 
+					+ "ORDER BY p.id, pd.date, s.date;";
+					
+			PreparedStatement ps = connection.prepareStatement( query,
+					ResultSet.TYPE_SCROLL_INSENSITIVE,
+					ResultSet.CONCUR_READ_ONLY);
+			
+			ps.setTimestamp(1,  new Timestamp(monthBegin.toDateMidnight().getMillis()));
+			ps.setTimestamp(2,  new Timestamp(monthEnd.toDateMidnight().getMillis()));
+			ResultSet rs = ps.executeQuery();
+			
+			//parsing del result set
+			Person currentPerson = null;
+			List<Contract> monthContracts = null;
+			List<WorkingTimeTypeDay> currentWttd = null;
+			List<PersonDayResultSet> personDayRsList = new ArrayList<PersonDayResultSet>();
+			PersonDayResultSet lastPersonDayRs = null;
+			
+			while(rs.next())
+			{
+				//record data------------------------------------------------------
+				int personId = rs.getInt("id");
+				LocalDate date = new LocalDate(rs.getTimestamp("date").getTime());
+				boolean fixing = rs.getBoolean("fixedworkingtime");
+				String way = rs.getString("way");
+				String justified = rs.getString("justified_time_at_work");
+				//------------------------------------------------------------------
+				
+				//prima persona
+				if(currentPerson==null)
+				{
+					currentPerson = Person.findById(new Long(personId));
+					currentWttd = currentPerson.workingTimeType.workingTimeTypeDays;
+					monthContracts = currentPerson.getMonthContracts(month, year);
+					personDayRsList = new ArrayList<PersonDayResultSet>();
+					lastPersonDayRs = null;
+				}
+				//prossima persona
+				if(currentPerson.id!=personId)
+				{
+					personDayRsList.add(lastPersonDayRs);
+					checkPersonMissingStampings(monthInterval, generalWorkingDaysOfMonth, currentPerson, monthContracts, currentWttd, personDayRsList, builder, activePersons);
+					
+					//init prossima persona
+					currentPerson = Person.findById(new Long(personId));
+					currentWttd = currentPerson.workingTimeType.workingTimeTypeDays;
+					personDayRsList = new ArrayList<PersonDayResultSet>();
+					lastPersonDayRs = null;
+				}
+				
+				if(lastPersonDayRs==null)
+				{
+					lastPersonDayRs = new PersonDayResultSet(date, fixing, justified, way);
+					
+				}
+				else if( lastPersonDayRs.date.isEqual(date))
+				{
+					if(way!=null)
+						lastPersonDayRs.way.add(way);
+				}
+				else if(!lastPersonDayRs.date.isEqual(date))
+				{
+					personDayRsList.add(lastPersonDayRs);
+					lastPersonDayRs = new PersonDayResultSet(date, fixing, justified, way);
+				
+				}
+				
+				//ultima persona
+				if(rs.next()==false)
+				{
+					personDayRsList.add(lastPersonDayRs);
+					checkPersonMissingStampings(monthInterval, generalWorkingDaysOfMonth, currentPerson, monthContracts, currentWttd, personDayRsList, builder, activePersons);
+					break;
+				}
+				else
+				{
+					rs.previous();
+				}
+				
+				
+			}
+			
+			tableMissingStampings = builder.build();
+			render(tableMissingStampings, month, year);
+
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			Logger.debug("porcaccia");
+		}
+		
+
+	
+	}
+	
+	/**
+	 * Metodo privato che verifica per ogni giorno lavorativo del mese se la persona ha timbrature mancanti
+	 * In caso affermativo il giorno individuato viene inserito in una lista nella tabella ImmutableTable
+	 * @param monthInterval
+	 * @param generalWorkingDaysOfMonth
+	 * @param currentPerson
+	 * @param monthContracts
+	 * @param currentWttd
+	 * @param personDayRsList
+	 * @param builder
+	 * @param activePersons
+	 */
+	private static void checkPersonMissingStampings(
+			DateInterval monthInterval,
+			List<LocalDate> generalWorkingDaysOfMonth, 
+			Person currentPerson, 
+			List<Contract> monthContracts, 
+			List<WorkingTimeTypeDay> currentWttd, 
+			List<PersonDayResultSet> personDayRsList, 
+			ImmutableTable.Builder<Person, String, List<Integer>> builder, 
+			List<Person> activePersons)
+	{
+		
+		List<Integer> pdMissingStampingList = new ArrayList<Integer>();
+		int personDayRsListIndex = 0;
+		for(int generalDayIndex = 0; generalDayIndex<generalWorkingDaysOfMonth.size(); generalDayIndex++)
+		{
+			LocalDate currentDate = generalWorkingDaysOfMonth.get(generalDayIndex);
+			
+			//general day fuori dal contratto, lo scarto subito dall'analisi
+			boolean isDateIntoContract = false;
+			for(Contract contract : monthContracts)
+			{
+				if( DateUtility.isDateIntoInterval(currentDate, new DateInterval(contract.beginContract, contract.expireContract)))
+				{
+					isDateIntoContract = true;
+				}
+			}
+			if(!isDateIntoContract)
+				continue;
+			
+			
+			if(currentWttd.get(currentDate.getDayOfWeek()-1).holiday == false)
+			{
+				//seek person date
+				boolean finded = false;
+				PersonDayResultSet currentPersonDayRs = null;
+				while(!finded)
+				{
+					if(personDayRsListIndex==personDayRsList.size())
+					{
+						pdMissingStampingList.add(currentDate.getDayOfMonth());
+						break;
+					}
+					currentPersonDayRs = personDayRsList.get(personDayRsListIndex);
+					if(currentPersonDayRs==null)
+					{
+						pdMissingStampingList.add(currentDate.getDayOfMonth());
+						break;
+					}
+					else if(currentPersonDayRs.date.isAfter(currentDate))
+					{
+						pdMissingStampingList.add(currentDate.getDayOfMonth());
+						break;
+					}
+					else if(currentPersonDayRs.date.isBefore(currentDate))
+					{
+						personDayRsListIndex++;
+					}
+					else if(currentPersonDayRs.date.isEqual(currentDate))
+					{
+						finded = true;
+					}
+				}
+				if(currentPersonDayRs==null)
+				{
+					continue;
+				}
+						
+				//controllo 
+				if(currentPersonDayRs.fixing==true)
+					continue;
+				if(currentPersonDayRs.justified!=null && currentPersonDayRs.justified.equals("AllDay"))
+					continue;
+				if(currentPersonDayRs.way.size()==0 || currentPersonDayRs.way.size()%2==1)
+				{
+					pdMissingStampingList.add(currentDate.getDayOfMonth());
+				}
+			}
+		}
+		builder.put(currentPerson, "Giorni del mese da controllare", pdMissingStampingList);
+		
+		//rimozione persona dall'elenco persone attive
+		Person activePersonToRemove = null;
+		for(Person activePerson : activePersons)
+		{
+			if(activePerson.id==currentPerson.id)
+			{
+				activePersonToRemove = activePerson;
+				break;
+			}
+		}
+		activePersons.remove(activePersonToRemove);
 	}
 
 	private static int maxNumberOfStampingsInMonth(Integer year, Integer month, Integer day){
@@ -563,6 +836,8 @@ public class Stampings extends Controller {
 		Table<Person, LocalDate, String> tablePersonTicket = builder.build();
 		render(year, month, tablePersonTicket, numberOfDays);
 	}
+	
+	
 
 
 }
