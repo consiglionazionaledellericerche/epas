@@ -869,14 +869,6 @@ public class Person extends Model {
 		return flag;
 	}
 
-	/**
-	 * 
-	 * @param date
-	 * @return lo stamp profile attivo alla data passata come parametro
-	 */
-	public static StampProfile getCurrentStampProfile(LocalDate date){
-		return StampProfile.find("Select sp from StampProfile sp where (sp.startFrom < ? and sp.endTo > ?) or (sp.startFrom < ? and sp.endTo is null)", 
-				date, date, date).first();
-	}
+
 
 }

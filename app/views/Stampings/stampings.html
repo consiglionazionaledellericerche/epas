@@ -127,7 +127,7 @@
 		  			} 
 		  			else{
 		  		}%
-		  				${day.getTimeAtWorkWithToday().timeAtWork.toHourTime()}<strong>${day.checkTimeForLunch()?.code}</strong><strong>${day.getTimeAtWorkWithToday().exitingNow ? 'f' : ''}</strong>
+		  				${day.getTimeAtWorkWithToday().timeAtWork.toHourTime()}<strong>${day.checkTimeForLunch()?.code}</strong><strong>${day.getFixedWorkingTime() != null && !day.isHoliday() ? day.getFixedWorkingTime().code : ''}</strong>
 		  		%{
 		  			}
 		  		}

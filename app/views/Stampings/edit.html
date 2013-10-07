@@ -10,8 +10,8 @@ Lasciare le caselle vuote per eliminare una entrata/uscita.</p>
 
 	<input type="hidden" name="stampingId" value="${stamping.id}"/>
 
-	<input type="text" name="stampingHour" value="${hourMinute.get(0)}" size="5" maxlength="5"/>
-	<input type="text" name="stampingMinute" value="${hourMinute.get(1)}" size="5" maxlength="5"/>
+	<input type="number" min="0" max="23" name="stampingHour" value="${hourMinute.get(0)}" size="5" maxlength="5"/>
+	<input type="number" min="0" max="59" name="stampingMinute" value="${hourMinute.get(1)}" size="5" maxlength="5"/>
 	
 
 

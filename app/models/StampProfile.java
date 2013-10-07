@@ -51,6 +51,17 @@ public class StampProfile extends Model {
 	 * le timbrature presenti
 	 */
 	public boolean fixedWorkingTime = false;
+
+	/**
+	 * 
+	 * @param date
+	 * @return lo stamp profile attivo alla data passata come parametro
+	 */
+	public static StampProfile getCurrentStampProfile(Person person, LocalDate date){
+		StampProfile sp = StampProfile.find("Select sp from StampProfile sp where sp.person = ? and (sp.startFrom < ? and sp.endTo > ? " +
+				"or sp.startFrom < ? and sp.endTo is null) order by sp.startFrom desc", person, date, date, date).first(); 
+		return sp;
+	}
 	
 	
 
