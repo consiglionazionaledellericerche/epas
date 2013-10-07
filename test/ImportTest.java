@@ -53,7 +53,7 @@ public class ImportTest extends UnitTest {
 			
 			FromMysqlToPostgres.createContract(rs.getLong("ID"), person);
 			
-			FromMysqlToPostgres.createVacationType(rs.getLong("ID"), person);
+//			FromMysqlToPostgres.createVacationType(rs.getLong("ID"), person);
 	
 //			FromMysqlToPostgres.createAbsences(rs.getLong("ID"), person, em);
 			

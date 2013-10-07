@@ -6,7 +6,7 @@
 <div id="caricamentoSituazioneMensile">
 <p id="caricamentoSituazioneMensile">Scegli anno e mese di assenze e competenze con cui vuoi popolare il file da inviare agli attestati di presenza</p>
 	
-	#{select 'year', value: year, id:'year'}
+	#{select 'year', value: mainMenu.year, id:'year'}
 		#{option 2011}2011#{/option}
 		#{option 2012}2012#{/option}
 		#{option 2013}2013#{/option}
@@ -14,7 +14,7 @@
 		#{option 2015}2015#{/option}
 	#{/select}
 	
-	#{select 'month', value: month, id:'month'}
+	#{select 'month', value: mainMenu.month, id:'month'}
 		#{option 1}Gennaio#{/option}
 		#{option 2}Febbraio#{/option}
 		#{option 3}Marzo#{/option}
@@ -29,7 +29,9 @@
 		#{option 12}Dicembre#{/option}
 	#{/select}
 </div>
+<div id="frm">
 <input id="submitSituation" type="submit" value="Carica"/>
+<input id="indietro" action="action" type="button" value="Indietro" onclick="history.go(-1);" />
 #{/form}
-
+</div>
 

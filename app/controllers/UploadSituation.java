@@ -1,5 +1,7 @@
 package controllers;
 
+import it.cnr.iit.epas.MainMenu;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -19,7 +21,8 @@ public class UploadSituation extends Controller{
 	
 	
 	public static void show(Integer month, Integer year){
-		render();
+		MainMenu mainMenu = new MainMenu(year, month, 1);
+		render(mainMenu);
 	}
 
 	@Check(Security.UPLOAD_SITUATION)
