@@ -5,6 +5,7 @@ package models;
 
 
 
+import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
 import it.cnr.iit.epas.JsonStampingBinder;
@@ -321,6 +322,36 @@ public class Person extends Model {
 	 */
 	public Contract getCurrentContract(){
 		return getContract(LocalDate.now());
+	}
+	
+	/**
+	 * La lista dei contratti in essere per la persona in month
+	 * @param month
+	 * @param year
+	 * @return
+	 */
+	public List<Contract> getMonthContracts(Integer month, Integer year)
+	{
+		List<Contract> monthContracts = new ArrayList<Contract>();
+		List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ?",this).fetch();
+		if(contractList == null){
+			return null;
+		}
+		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
+		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
+		DateInterval monthInterval = new DateInterval(monthBegin, monthEnd);
+		for(Contract contract : contractList)
+		{
+			DateInterval contractInterval = new DateInterval(contract.beginContract, contract.expireContract);
+			if(DateUtility.intervalIntersection(monthInterval, contractInterval)!=null)
+			{
+				monthContracts.add(contract);
+			}
+		}
+		if(monthContracts.size()==0)
+			return null;
+		
+		return monthContracts;
 	}
 
 	/**
