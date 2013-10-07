@@ -50,7 +50,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 			if (!badgeReaderCode.isEmpty()) {
 				BadgeReader badgeReader = BadgeReader.find("byCode", badgeReaderCode).first();
 				if (badgeReader == null) {
-					Logger.warn("Lettore di badge con codice %s non presente sul database/sconosciuto", badgeReaderCode);
+					//Logger.warn("Lettore di badge con codice %s non presente sul database/sconosciuto", badgeReaderCode);
 				}
 				stamping.badgeReader = badgeReader;
 			}
