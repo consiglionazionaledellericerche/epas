@@ -17,13 +17,10 @@ public class DateUtility {
 		Configuration config = Configuration.getConfiguration(date.toDate());	
 		
 		Logger.trace("configurazione: %s con localdate: %s", config, date);
-		
-		if(person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).holiday)
-			return true;
 		if(isGeneralHoliday(date))
 			return true;
-		else
-			return false;
+	
+		return person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).holiday;
 
 	}
 
@@ -72,8 +69,8 @@ public class DateUtility {
 			return true;
 		if(date.getDayOfMonth() == easterMonday.getDayOfMonth() && date.getMonthOfYear() == easterMonday.getMonthOfYear())
 			return true;
-		if((date.getDayOfWeek() == 7)||(date.getDayOfWeek() == 6))
-			return true;		
+		//if((date.getDayOfWeek() == 7)||(date.getDayOfWeek() == 6))
+		//	return true;		
 		if((date.getMonthOfYear() == 12) && (date.getDayOfMonth() == 25))
 			return true;
 		if((date.getMonthOfYear() == 12) && (date.getDayOfMonth() == 26))
