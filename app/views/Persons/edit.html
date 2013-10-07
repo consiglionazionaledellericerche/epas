@@ -26,11 +26,11 @@
 	</div>
 	<!--  <div>Password <input name="person.password" type="text" value="" size="10" maxlength="10" /></div>-->
 	<div>
-		Matricola <input name="number" type="text" value="${person.number}"
+		Matricola <input name="number" type="number" value="${person.number}"
 			size="10" maxlength="10" />
 	</div>
 	<div>
-		Numbero badge <input name="badgeNumber" type="text" value="${person.badgeNumber}"
+		Numbero badge <input name="badgeNumber" type="number" value="${person.badgeNumber}"
 			size="10" maxlength="20" />
 	</div>
 	%{if(person.qualification != null){
@@ -93,21 +93,21 @@
 	</table>
 	%{if(initTime != null){
 	}%
-		<p id="stanza">Ore di inizializzazione maturate in altro istituto l'anno passato (in minuti): <input name="minutesPastYear" type="text" value="${initTime.residualMinutesPastYear}" size="10" /></p>
+		<p id="stanza">Ore di inizializzazione maturate in altro istituto l'anno passato (in minuti): <input name="minutesPastYear" type="number" value="${initTime.residualMinutesPastYear}" size="10" /></p>
 	%{
 	}else{
 	}%
-		<p id="stanza">Ore di inizializzazione maturate in altro istituto l'anno passato (in minuti): <input name="minutesPastYear" type="text" value="" size="10" /></p>
+		<p id="stanza">Ore di inizializzazione maturate in altro istituto l'anno passato (in minuti): <input name="minutesPastYear" type="number" value="" size="10" /></p>
 	%{
 	}
 	}%
 	%{if(initTime != null){
 	}%
-		<p id="stanza">Ore di inizializzazione maturate in altro istituto nell'anno corrente (in minuti): <input name="minutesCurrentYear" type="text" value="${initTime.residualMinutesCurrentYear}" size="10" /></p>
+		<p id="stanza">Ore di inizializzazione maturate in altro istituto nell'anno corrente (in minuti): <input name="minutesCurrentYear" type="number" value="${initTime.residualMinutesCurrentYear}" size="10" /></p>
 	%{
 	}else{
 	}%
-		<p id="stanza">Ore di inizializzazione maturate in altro istituto nell'anno corrente (in minuti): <input name="minutesCurrentYear" type="text" value="" size="10" /></p>
+		<p id="stanza">Ore di inizializzazione maturate in altro istituto nell'anno corrente (in minuti): <input name="minutesCurrentYear" type="number" value="" size="10" /></p>
 	%{
 	}
 	}%
