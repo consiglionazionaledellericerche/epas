@@ -55,7 +55,7 @@
 		<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.accumulationType.description : ''}</td>
 		<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.limitInMinute : ''}</td>
 		<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.accumulationBehaviour.description : ''}</td>
-		<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.replacingAbsenceType : ''}</td>
+		<td>${absenceCode.absenceTypeGroup != null && absenceCode.absenceTypeGroup.replacingAbsenceType != null ? absenceCode.absenceTypeGroup.replacingAbsenceType.code : ''}</td>
 	</tr>
 	%{
 		}
