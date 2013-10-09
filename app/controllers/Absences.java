@@ -617,22 +617,38 @@ public class Absences extends Controller{
 		AbsenceType absence = AbsenceType.findById(params.get("absenceTypeId", Long.class));
 		if(absence == null)
 			notFound();
+		Logger.debug("Il codice d'assenza da modificare è %s", absence.code);
 		absence.description = params.get("descrizione");
-		absence.internalUse = params.get("usoInterno", Boolean.class);
+		Logger.debug("Il valore di uso interno è: %s", params.get("usoInterno", Boolean.class));
+		Logger.debug("Il valore di uso multiplo è: %s", params.get("usoMultiplo", Boolean.class));
+		Logger.debug("Il valore di tempo giustificato è: %s", params.get("abt.justifiedTimeAtWork"));
+		absence.internalUse = params.get("usoInterno", Boolean.class);		
 		absence.multipleUse = params.get("usoMultiplo", Boolean.class);
 		absence.validFrom = new LocalDate(params.get("inizio"));
 		absence.validTo = new LocalDate(params.get("fine"));
-		String justifiedTimeAtWork = params.get("abt.justifiedTimeAtWork");		
-		absence.justifiedTimeAtWork = JustifiedTimeAtWork.valueOf(justifiedTimeAtWork);
-		/**
-		 * TODO: come implementare la parte di legame tra absenceType e qualifications?
-		 */
+		String justifiedTimeAtWork = params.get("abt.justifiedTimeAtWork");			
+		absence.justifiedTimeAtWork = JustifiedTimeAtWork.getByDescription(justifiedTimeAtWork);
+		
+		for(int i = 1; i <= 10; i++){
+			if(params.get("qualification"+i) != null){
+				Qualification q = Qualification.findById(new Long(i));
+				if(!absence.qualifications.contains(q))
+					absence.qualifications.add(q);
+			}
+			else{
+				Qualification q = Qualification.findById(new Long(i));
+				if(absence.qualifications.contains(q))
+					absence.qualifications.remove(q);
+			}
+		}
+		
+			
 		absence.mealTicketCalculation = params.get("calcolaBuonoPasto", Boolean.class);
 		absence.ignoreStamping = params.get("ignoraTimbrature", Boolean.class);
 		if(!params.get("gruppo").equals("")){
 			absence.absenceTypeGroup.label = params.get("gruppo");
-			absence.absenceTypeGroup.accumulationBehaviour = AccumulationBehaviour.valueOf(params.get("abt.absenceTypeGroup.accumulationBehaviour"));
-			absence.absenceTypeGroup.accumulationType = AccumulationType.valueOf(params.get("abt.absenceTypeGroup.accumulationType"));
+			absence.absenceTypeGroup.accumulationBehaviour = AccumulationBehaviour.getByDescription((params.get("abt.absenceTypeGroup.accumulationBehaviour")));
+			absence.absenceTypeGroup.accumulationType = AccumulationType.getByDescription((params.get("abt.absenceTypeGroup.accumulationType")));
 			absence.absenceTypeGroup.limitInMinute = params.get("limiteAccumulo", Integer.class);
 			absence.absenceTypeGroup.minutesExcess = params.get("minutiEccesso", Boolean.class);
 			String codeToReplace = params.get("codiceSostituzione");
@@ -640,7 +656,9 @@ public class Absences extends Controller{
 			absence.absenceTypeGroup = abtg;
 		}
 		absence.save();
-		render();
+		
+		flash.success("Modificato codice di assenza %s", absence.code);
+		render("@Stampings.redirectToIndex");
 		
 	}
 	
