@@ -1,0 +1,173 @@
+#{extends 'main.html' /}
+#{logoutForm /}
+
+<h3 id="inserimentoNuovoCodiceAssenza">Modifica dati per codice di assenza: ${abt.code} (${abt.description})</h3>
+#{form @Absences.updateCode()}
+<div>
+<input type="hidden" name="absenceTypeId" value="${abt.id}"/>
+<p>Codice: <input type="text" name="codice" value="${abt.code}" disabled="disabled"/></p> 
+<p>Codice per attestati di presenza: <input type="text" name="codicePresenza" value="${abt.certificateCode}" disabled="disabled"/></p></p>
+<p>Descrizione: <input type="text" name="descrizione" value="${abt.description}" size="100"/></p></p>
+<p>Uso interno:
+%{	if(abt.internalUse == false){
+}%		Sì <input type="radio" name="usoInterno" value="true" /> 
+		No <input type="radio" name="usoInterno" value="false" checked="checked"/>
+%{
+	}else{
+}%		Sì <input type="radio" name="usoInterno" value="true" checked="checked"/> 
+		No <input type="radio" name="usoInterno" value="false"/>
+%{
+	}
+	
+}%
+ 
+</p>
+<p>Uso multiplo: %{	if(abt.multipleUse == false){
+}%		Sì <input type="radio" name="usoMultiplo" value="true" /> 
+		No <input type="radio" name="usoMultiplo" value="false" checked="checked"/>
+%{
+	}else{
+}%		Sì <input type="radio" name="usoMultiplo" value="true" checked="checked"/> 
+		No <input type="radio" name="usoMultiplo" value="false"/>
+%{
+	}
+	
+}%
+</p>
+<p>Inizio validità: <input type="date" name="inizio" value="${abt.validFrom}" /></p></p></p>
+<p>Fine validità: <input type="date" name="fine" value="${abt.validTo}" /></p></p></p>
+
+<p>Tempo di lavoro giustificato: #{select 'abt.justifiedTimeAtWork', value:abt.justifiedTimeAtWork.description, id:'tempoGiustificato'}
+									#{option null}#{/option}
+									#{option justList.get(0).description}${justList.get(0).description}#{/option}
+									#{option justList.get(1).description}${justList.get(1).description}#{/option}
+									#{option justList.get(2).description}${justList.get(2).description}#{/option}
+									#{option justList.get(3).description}${justList.get(3).description}#{/option}
+									#{option justList.get(4).description}${justList.get(4).description}#{/option}
+									#{option justList.get(5).description}${justList.get(5).description}#{/option}
+									#{option justList.get(6).description}${justList.get(6).description}#{/option}
+									#{option justList.get(7).description}${justList.get(7).description}#{/option}
+									#{option justList.get(8).description}${justList.get(8).description}#{/option}
+									#{option justList.get(9).description}${justList.get(9).description}#{/option}
+									#{option justList.get(10).description}${justList.get(10).description}#{/option}
+									#{option justList.get(11).description}${justList.get(11).description}#{/option}
+									#{option justList.get(12).description}${justList.get(12).description}#{/option}								
+									#{/select}</p>
+<p>Livelli:
+			%{	for(qual in qualList){
+				if(abt.qualifications.contains(qual)){
+				}%
+						${qual.qualification}: <input type="checkbox" name="qualification${qual.qualification}" value ="si" checked="checked"/>
+				%{
+					}else{
+				}%
+						${qual.qualification}: <input type="checkbox" name="qualification${qual.qualification}" value ="no"/>
+				%{
+					}
+				}
+			}%		
+</p>
+<p>Calcola buono pasto: %{	if(abt.mealTicketCalculation == false){
+}%		Sì <input type="radio" name="calcolaBuonoPasto" value="true" /> 
+		No <input type="radio" name="calcolaBuonoPasto" value="false" checked="checked"/>
+%{
+	}else{
+}%		Sì <input type="radio" name="calcolaBuonoPasto" value="true" checked="checked"/> 
+		No <input type="radio" name="calcolaBuonoPasto" value="false"/>
+%{
+	}
+	
+}%
+</p>
+<p>Ignora timbrature: %{	if(abt.ignoreStamping == false){
+}%		Sì <input type="radio" name="ignoraTimbrature" value="true" /> 
+		No <input type="radio" name="ignoraTimbrature" value="false" checked="checked"/>
+%{
+	}else{
+}%		Sì <input type="radio" name="ignoraTimbrature" value="true" checked="checked"/> 
+		No <input type="radio" name="ignoraTimbrature" value="false"/>
+%{
+	}
+	
+}%
+</p>
+<p>Gruppo: 
+%{	if(abt.absenceTypeGroup != null){
+}%		<input type="text" name="gruppo" value="${abt.absenceTypeGroup.label}"/>
+%{
+	}else{
+}%	
+		<input type="text" name="gruppo" value=""/>
+%{
+	}
+}%
+</p>
+
+<p>---------- i seguenti campi si riferiscono al gruppo e vanno compilati solo in presenza di un nome gruppo ---------</p>
+
+<p>Valore:</p>
+<p>Minuti in eccesso: 
+%{	if(abt.absenceTypeGroup != null){
+}%		<input type="text" name="minutiEccesso" value="${abt.absenceTypeGroup.minutesExcess}"/>
+%{
+	}else{
+}%	
+		<input type="text" name="minutiEccesso" value=""/>
+%{
+	}
+}%
+</p>
+<p>Accumulare i valori:
+%{	if(abt.absenceTypeGroup != null){
+}%
+	#{select 'abt.absenceTypeGroup.accumulationType', value:abt.absenceTypeGroup.accumulationType.description, id:'tipoAccumulo'}
+		#{option accType.get(0).description}${accType.get(0).description}#{/option}
+		#{option accType.get(1).description}${accType.get(1).description}#{/option}
+		#{option accType.get(2).description}${accType.get(2).description}#{/option}
+		#{option accType.get(3).description}${accType.get(3).description}#{/option}
+	#{/select}
+%{
+	}
+}%
+</p>
+<p>Limite accumulo:
+%{	if(abt.absenceTypeGroup != null){
+}%		<input type="number" name="limiteAccumulo" value="${abt.absenceTypeGroup.limitInMinute}"/>
+%{
+	}else{
+}%	
+		<input type="number" name="limiteAccumulo" value=""/>
+%{
+	}
+}%
+</p>
+<p>Cosa fare raggiunto il limite:
+%{	if(abt.absenceTypeGroup != null){
+}%
+	#{select 'abt.absenceTypeGroup.accumulationBehaviour', value:abt.absenceTypeGroup.accumulationBehaviour.description, id:'comportamentoAccumulo'}
+		#{option behaviourType.get(0).description}${behaviourType.get(0).description}#{/option}
+		#{option behaviourType.get(1).description}${behaviourType.get(1).description}#{/option}
+		#{option behaviourType.get(2).description}${behaviourType.get(2).description}#{/option}
+		
+	#{/select}
+%{
+	}
+}%
+</p>
+<p>Codice per sostituzione:
+%{	if(abt.absenceTypeGroup != null){
+}%		<input type="text" name="codiceSostituzione" value="${abt.absenceTypeGroup.replacingAbsenceType.code}"/>
+%{
+	}else{
+}%	
+		<input type="text" name="codiceSostituzione" value=""/>
+%{
+	}
+}%
+</p>
+</div>
+<div id="frm">
+<input id="updateAbsenceCode" type="submit" value="Modifica"/>
+#{/form}
+<input id = "indietroAbsenceList" action="action" type="button" value="Indietro" onclick="history.go(-1);" />
+</div>
