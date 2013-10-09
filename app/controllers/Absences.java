@@ -580,7 +580,71 @@ public class Absences extends Controller{
 
 	}
 
+	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
+	public static void editCode(@Required Long absenceCodeId) throws InstantiationException, IllegalAccessException{
+		AbsenceType abt = AbsenceType.findById(absenceCodeId);
+		List<JustifiedTimeAtWork> justList = new ArrayList<JustifiedTimeAtWork>();
+		justList.add(0,JustifiedTimeAtWork.AllDay);
+		justList.add(1,JustifiedTimeAtWork.HalfDay);
+		justList.add(2,JustifiedTimeAtWork.OneHour);
+		justList.add(3,JustifiedTimeAtWork.TwoHours);
+		justList.add(4,JustifiedTimeAtWork.ThreeHours);
+		justList.add(5,JustifiedTimeAtWork.FourHours);
+		justList.add(6,JustifiedTimeAtWork.FiveHours);
+		justList.add(7,JustifiedTimeAtWork.SixHours);
+		justList.add(8,JustifiedTimeAtWork.SevenHours);
+		justList.add(9,JustifiedTimeAtWork.EightHours);
+		justList.add(10,JustifiedTimeAtWork.Nothing);
+		justList.add(11,JustifiedTimeAtWork.TimeToComplete);
+		justList.add(12,JustifiedTimeAtWork.ReduceWorkingTimeOfTwoHours);
+		
+		List<Qualification> qualList = Qualification.findAll();
+		List<AccumulationType> accType = new ArrayList<AccumulationType>();
+		accType.add(0, AccumulationType.always);
+		accType.add(1, AccumulationType.monthly);
+		accType.add(2, AccumulationType.no);
+		accType.add(3, AccumulationType.yearly);
+		List<AccumulationBehaviour> behaviourType = new ArrayList<AccumulationBehaviour>();
+		behaviourType.add(0, AccumulationBehaviour.nothing);
+		behaviourType.add(1, AccumulationBehaviour.noMoreAbsencesAccepted);
+		behaviourType.add(2, AccumulationBehaviour.replaceCodeAndDecreaseAccumulation);
+		
+		render(abt, justList, qualList, accType, behaviourType);
+	}
 
+	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
+	public static void updateCode(){
+		AbsenceType absence = AbsenceType.findById(params.get("absenceTypeId", Long.class));
+		if(absence == null)
+			notFound();
+		absence.description = params.get("descrizione");
+		absence.internalUse = params.get("usoInterno", Boolean.class);
+		absence.multipleUse = params.get("usoMultiplo", Boolean.class);
+		absence.validFrom = new LocalDate(params.get("inizio"));
+		absence.validTo = new LocalDate(params.get("fine"));
+		String justifiedTimeAtWork = params.get("abt.justifiedTimeAtWork");		
+		absence.justifiedTimeAtWork = JustifiedTimeAtWork.valueOf(justifiedTimeAtWork);
+		/**
+		 * TODO: come implementare la parte di legame tra absenceType e qualifications?
+		 */
+		absence.mealTicketCalculation = params.get("calcolaBuonoPasto", Boolean.class);
+		absence.ignoreStamping = params.get("ignoraTimbrature", Boolean.class);
+		if(!params.get("gruppo").equals("")){
+			absence.absenceTypeGroup.label = params.get("gruppo");
+			absence.absenceTypeGroup.accumulationBehaviour = AccumulationBehaviour.valueOf(params.get("abt.absenceTypeGroup.accumulationBehaviour"));
+			absence.absenceTypeGroup.accumulationType = AccumulationType.valueOf(params.get("abt.absenceTypeGroup.accumulationType"));
+			absence.absenceTypeGroup.limitInMinute = params.get("limiteAccumulo", Integer.class);
+			absence.absenceTypeGroup.minutesExcess = params.get("minutiEccesso", Boolean.class);
+			String codeToReplace = params.get("codiceSostituzione");
+			AbsenceTypeGroup abtg = AbsenceTypeGroup.find("Select abtg from AbsenceTypeGroup abtg where abtg.code = ?", codeToReplace).first();
+			absence.absenceTypeGroup = abtg;
+		}
+		absence.save();
+		render();
+		
+	}
+	
+	
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void edit(@Required Long absenceId) {
 		Logger.debug("Edit absence called for absenceId=%d", absenceId);

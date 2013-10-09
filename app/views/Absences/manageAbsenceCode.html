@@ -34,11 +34,11 @@
 		for(absenceCode in absenceList){			
 	}%
 	<tr>
-		<td>${absenceCode.code}</td>
+		<td><a href="@{Absences.editCode(absenceCode.id)}">${absenceCode.code}</a></td>
 		<td>${absenceCode.certificateCode}</td>
 		<td>${absenceCode.description}</td>
-		<td>${absenceCode.internalUse}</td>
-		<td>${absenceCode.multipleUse}</td>
+		<td>${absenceCode.internalUse == true ? 'Sì' : 'No'}</td>
+		<td>${absenceCode.multipleUse == true ? 'Sì' : 'No'}</td>
 		<td>${absenceCode.validFrom}</td>
 		<td>${absenceCode.validTo}</td>
 		<td>${absenceCode.justifiedTimeAtWork != null ? absenceCode.justifiedTimeAtWork.description : ''}</td>
@@ -47,14 +47,14 @@
 				${qualification.qualification},
 			%{ } }%
 		</td> 
-		<td>${absenceCode.mealTicketCalculation}</td>
-		<td>${absenceCode.ignoreStamping}</td>
+		<td>${absenceCode.mealTicketCalculation == true ? 'Sì' : 'No'}</td>
+		<td>${absenceCode.ignoreStamping == true ? 'Sì' : 'No'}</td>
 		<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.label : ''}</td>
 		<td>${}</td> <!-- cos'è??? -->
 		<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.minutesExcess : ''}</td>
-		<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.accumulationType : ''}</td>
+		<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.accumulationType.description : ''}</td>
 		<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.limitInMinute : ''}</td>
-		<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.accumulationBehaviour : ''}</td>
+		<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.accumulationBehaviour.description : ''}</td>
 		<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.replacingAbsenceType : ''}</td>
 	</tr>
 	%{

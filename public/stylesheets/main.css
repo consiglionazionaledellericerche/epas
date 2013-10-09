@@ -350,10 +350,14 @@ input#submitStamping {margin: 1em 5em 0em 20em; align: center}
 input#updateAbsence {margin: 0em 35em 0em; align: center}
 input#discardStamping {margin: 0em 3em 0em; align: center}
 input#updateStamping {margin: 0em 25em 0em; align: center}
-input#submitCartellino {margin: 3em 8em 0em; align: center}
+input#submitCartellino {margin: 2em 1em 0em; align: center}
+input#indietroCartellino {margin: 2em 3em 0em; align: center}
 input#insertAdmin {margin: 2em 3em 0em 60em; align:center}
 input#insertCompetenceCode {margin: 2em 3em 0em 60em; align: center}
 input#discardCompetenceCode {margin: 0em 3em 0em; align: center}
+input#updateAbsenceCode {margin: 2em 50em 0em; align:center}
+input#indietroAbsenceList {margin: 2em -32em 0em; align:center}
+
 
 input.StraordinarioDiurnoLavorativo {length: 5}
 input#feature {length: 5}
