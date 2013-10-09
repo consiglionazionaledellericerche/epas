@@ -267,6 +267,7 @@ public class FromMysqlToPostgres {
 		FromMysqlToPostgres.importOreStraordinario();
 
 		FromMysqlToPostgres.addPermissiontoAll();
+		FromMysqlToPostgres.createAbsenceTypeToQualificationRelations();
 		
 		FromMysqlToPostgres.checkFixedWorkingTime();
 		JPAPlugin.closeTx(false);
@@ -576,7 +577,7 @@ public class FromMysqlToPostgres {
 	public static void createAbsenceTypeToQualificationRelations(){
 		Logger.debug("Aggiungo le qualfiche possibili agli AbsenceType");
 
-		JPAPlugin.startTx(false);
+//		JPAPlugin.startTx(false);
 
 		List<AbsenceType> listaAssenze = AbsenceType.findAll();
 		for(AbsenceType absenceType : listaAssenze){
@@ -596,6 +597,7 @@ public class FromMysqlToPostgres {
 					absenceType.qualifications.add(qual1);
 					absenceType.qualifications.add(qual2);
 					absenceType.qualifications.add(qual3);
+					absenceType.save();
 					Logger.debug("Aggiunte le qualifiche 1-2-3 all'AbsenceCode %s", absenceType.code);
 				}
 
@@ -603,10 +605,11 @@ public class FromMysqlToPostgres {
 			else{
 				List<Qualification> listaQual = Qualification.findAll();
 				absenceType.qualifications.addAll(listaQual);
+				absenceType.save();
 				Logger.debug("Aggiunte tutte le qualifiche all'AbsenceCode %s", absenceType.code);
 			}
 		}		
-		JPAPlugin.closeTx(false);
+//		JPAPlugin.closeTx(false);
 	}
 
 	public static int importWorkingTimeTypes() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {

@@ -6,7 +6,6 @@ package controllers;
 import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
 
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -31,7 +30,6 @@ import models.PersonReperibilityType;
 import models.exports.AbsenceReperibilityPeriod;
 import models.exports.ReperibilityPeriod;
 import models.exports.ReperibilityPeriods;
-
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Date;
@@ -51,6 +49,7 @@ import net.fortuna.ical4j.model.property.Version;
 import net.fortuna.ical4j.util.UidGenerator;
 
 import org.h2.command.ddl.CreateAggregate;
+import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.ReadablePeriod;
@@ -65,7 +64,6 @@ import play.Logger;
 import play.data.binding.As;
 import play.db.jpa.JPA;
 import play.mvc.Controller;
-
 import static play.modules.pdf.PDF.*;
 
 
@@ -633,21 +631,12 @@ public class Reperibility extends Controller {
 		}
 
         // Create a calendar
-		//---------------------------
-		TimeZoneRegistry registry = TimeZoneRegistryFactory.getInstance().createRegistry();
-        TimeZone timezone = registry.getTimeZone("Europe/Rome");
-//        timezone.getID();
-
-        //Date date = new Date();
-        
+		//---------------------------       
         Calendar icsCalendar = new net.fortuna.ical4j.model.Calendar();
         icsCalendar.getProperties().add(new ProdId("-//Events Calendar//iCal4j 1.0//EN"));
         icsCalendar.getProperties().add(CalScale.GREGORIAN);
         icsCalendar.getProperties().add(Version.VERSION_2_0);
-        	
-		java.util.Calendar cal = new GregorianCalendar();
-		cal.setTimeZone(timezone);
-		
+        		
 		
         // read the person(0) reperibility days for the year
 		//-------------------------------------------------
@@ -662,26 +651,14 @@ public class Reperibility extends Controller {
 	
 			Logger.debug("Reperibility find called from %s to %s, found %s reperibility days for person id = %s", from, to, reperibilityDays.size(), personId);
 	
-	//		VEvent reperibilityPeriod = null;
-	
 			Date startDate = null;
 			Date endDate = null;
 			int sequence = 1;
 			
 			for (PersonReperibilityDay prd : reperibilityDays) {
 							
-	
-				cal.set(java.util.Calendar.MONTH, prd.date.getMonthOfYear() - 1);
-				cal.set(java.util.Calendar.DAY_OF_MONTH, prd.date.getDayOfMonth());
-				cal.set(java.util.Calendar.YEAR, prd.date.getYear());
-				cal.set(java.util.Calendar.HOUR, 0);
-				cal.set(java.util.Calendar.MINUTE, 0);
-				cal.set(java.util.Calendar.SECOND, 0);
-				cal.set(java.util.Calendar.MILLISECOND, 0);
-				
-				Date date = new Date(cal.getTimeInMillis());
-				
-				Logger.trace("Data reperibilita': date=%s", date);
+				Date date = new Date(prd.date.toDateTimeAtStartOfDay(DateTimeZone.UTC).toDate().getTime());				
+				Logger.trace("Data reperibilita' per %s, date=%s", prd.personReperibility.person.surname, date);
 				
 				if ( startDate == null) {
 					Logger.trace("Nessun periodo, nuovo periodo: startDate=%s", date);

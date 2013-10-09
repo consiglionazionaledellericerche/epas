@@ -12,7 +12,7 @@ Selezionare "Tutti" o uno dei nomi presenti nella lista e premere invio</p>
 
 <input type="hidden" name="year" value="${date.getYear()}"/>
 
-
+<div id="frm">
 #{select 'personId', value:personList.get(0), id:'person'}
 			#{option}Scegli una persona#{/option}
 			#{option -1}Tutti#{/option}
@@ -26,5 +26,8 @@ Selezionare "Tutti" o uno dei nomi presenti nella lista e premere invio</p>
 		
 #{/select}
 
-<input id="submitCartellino" type="submit" value="Invio"/>
+
+	<input id="submitCartellino" type="submit" value="Invio"/>
+	<input id = "indietroCartellino" action="action" type="button" value="Indietro" onclick="history.go(-1);" />
 #{/form}
+</div>
