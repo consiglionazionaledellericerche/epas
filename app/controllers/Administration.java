@@ -42,7 +42,7 @@ public class Administration extends Controller {
     	final int ANNO_DA_CUI_INIZIARE_IMPORTAZIONE = 2007;
     	
     	int absenceTypes = FromMysqlToPostgres.importAbsenceTypes();
-    	FromMysqlToPostgres.createAbsenceTypeToQualificationRelations();
+    	//FromMysqlToPostgres.createAbsenceTypeToQualificationRelations();
     	int workingTimeTypes = FromMysqlToPostgres.importWorkingTimeTypes();
     	
     	FromMysqlToPostgres.importAll(NUMERO_PERSONE_DA_IMPORTARE, ANNO_DA_CUI_INIZIARE_IMPORTAZIONE);
