@@ -39,4 +39,35 @@ public enum JustifiedTimeAtWork {
 	}
 
 	
+	public static JustifiedTimeAtWork getByDescription(String description){
+		if(description.equals("Tutto il giorno"))
+			return JustifiedTimeAtWork.AllDay;
+		if(description.equals("Mezza giornata"))
+			return JustifiedTimeAtWork.HalfDay;
+		if(description.equals("1 ora"))
+			return JustifiedTimeAtWork.OneHour;
+		if(description.equals("2 ore"))
+			return JustifiedTimeAtWork.TwoHours;
+		if(description.equals("3 ore"))
+			return JustifiedTimeAtWork.ThreeHours;
+		if(description.equals("4 ore"))
+			return JustifiedTimeAtWork.FourHours;
+		if(description.equals("5 ore"))
+			return JustifiedTimeAtWork.FiveHours;
+		if(description.equals("6 ore"))
+			return JustifiedTimeAtWork.SixHours;
+		if(description.equals("7 ore"))
+			return JustifiedTimeAtWork.SevenHours;
+		if(description.equals("8 ore"))
+			return JustifiedTimeAtWork.EightHours;
+		if(description.equals("Niente"))
+			return JustifiedTimeAtWork.Nothing;
+		if(description.equals("Quello che manca"))
+			return JustifiedTimeAtWork.TimeToComplete;
+		if(description.equals("Riduce orario di lavoro di 2 ore"))
+			return JustifiedTimeAtWork.ReduceWorkingTimeOfTwoHours;
+		return null;
+		
+	}
+	
 }
