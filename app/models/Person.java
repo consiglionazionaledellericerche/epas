@@ -485,6 +485,26 @@ public class Person extends Model {
 	}
 	
 	/**
+	 *  La lista delle persone che abbiano almeno un giorno lavorativo coperto da contratto nel mese month
+	 *  ordinate per id
+	 * @param month
+	 * @param year
+	 * @return
+	 */
+	public static List<Person> getActivePersonsInMonth(int month, int year)
+	{
+		List<Person> persons = Person.find("SELECT p FROM Person p ORDER BY p.id").fetch();
+		List<Person> activePersons = new ArrayList<Person>();
+		for(Person person : persons)
+		{
+			List<Contract> monthContracts = person.getMonthContracts(month, year);
+			if(monthContracts!=null)
+				activePersons.add(person);
+		}
+		return activePersons;
+	}
+	
+	/**
 	 * 
 	 * @param date
 	 * @return la lista di tecnici che beneficiano di competenze (utilizzata nel controller competences, metodo showCompetences)
