@@ -64,9 +64,10 @@ public class StampProfile extends Model {
 		StampProfile sp = StampProfile.find("Select sp from StampProfile sp where sp.person = ? and (sp.startFrom < ? and sp.endTo > ? " +
 				"or sp.startFrom < ? and sp.endTo is null) order by sp.startFrom desc", person, date, date, date).first(); 
 		if(sp == null){
+			StampProfile spOld = StampProfile.find("Select sp from StampProfile sp where sp.person = ? order by sp.startFrom desc", person).first();
 			StampProfile nuovoStampProfile = new StampProfile();
 			nuovoStampProfile.person = person;
-			nuovoStampProfile.startFrom = c.beginContract;
+			nuovoStampProfile.startFrom = sp.endTo.plusDays(1);
 			nuovoStampProfile.endTo = c.expireContract;
 			nuovoStampProfile.fixedWorkingTime = false;
 			nuovoStampProfile.save();
