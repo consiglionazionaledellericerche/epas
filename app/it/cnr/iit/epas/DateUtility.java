@@ -1,5 +1,8 @@
 package it.cnr.iit.epas;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import models.Configuration;
@@ -102,11 +105,37 @@ public class DateUtility {
 		return false;
 	}
 
+	/**
+	 * 
+	 * @param month
+	 * @param day
+	 * @return
+	 */
 	public static boolean isFebruary29th(int month, int day)
 	{
 		return (month==2 && day==29);
 	}
 
+
+	/**
+	 *  * La lista di tutti i giorni fisici contenuti nell'intervallo [begin,end] estremi compresi, escluse le general holiday
+	 * @param begin
+	 * @param end
+	 * @return
+	 */
+	public static List<LocalDate> getGeneralWorkingDays(LocalDate begin, LocalDate end)
+	{
+		LocalDate day = begin;
+		List<LocalDate> generalWorkingDays = new ArrayList<LocalDate>();
+		while(!day.isAfter(end))
+		{
+			if( ! DateUtility.isGeneralHoliday(day) )
+				generalWorkingDays.add(day);
+			day = day.plusDays(1);
+		}
+		return generalWorkingDays;
+	}
+	
 	/**
 	 * 
 	 * @param date

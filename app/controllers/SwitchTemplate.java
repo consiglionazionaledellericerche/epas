@@ -1,6 +1,7 @@
 package controllers;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 import it.cnr.iit.epas.ActionMenuItem;
 import models.Person;
@@ -14,7 +15,7 @@ public class SwitchTemplate extends Controller{
 
 	public static final String USERNAME_SESSION_KEY = "username";
 
-	public static void dispatch() throws InstantiationException, IllegalAccessException, IOException {
+	public static void dispatch() throws InstantiationException, IllegalAccessException, IOException, ClassNotFoundException, SQLException {
 		LocalDate now = new LocalDate();
 
 		String method = params.get("method");
