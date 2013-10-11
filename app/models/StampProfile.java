@@ -58,8 +58,20 @@ public class StampProfile extends Model {
 	 * @return lo stamp profile attivo alla data passata come parametro
 	 */
 	public static StampProfile getCurrentStampProfile(Person person, LocalDate date){
+		Contract c = person.getContract(date);
+		if (c == null)
+			return null;
 		StampProfile sp = StampProfile.find("Select sp from StampProfile sp where sp.person = ? and (sp.startFrom < ? and sp.endTo > ? " +
 				"or sp.startFrom < ? and sp.endTo is null) order by sp.startFrom desc", person, date, date, date).first(); 
+		if(sp == null){
+			StampProfile nuovoStampProfile = new StampProfile();
+			nuovoStampProfile.person = person;
+			nuovoStampProfile.startFrom = c.beginContract;
+			nuovoStampProfile.endTo = c.expireContract;
+			nuovoStampProfile.fixedWorkingTime = false;
+			nuovoStampProfile.save();
+			return nuovoStampProfile;
+		}
 		return sp;
 	}
 	
