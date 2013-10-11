@@ -274,6 +274,28 @@ p#descrizioneStampaCartellino {margin:3em 0em 4em}
 p#inserisciAmministratore {margin: 2em 0em 0em}
 p#nuovoOrario {margin: 0em 0em 2em 0em}
 p#inserimentoCompetenze {margin: 0em 0em 1em 2em; align: center}
+p#separatore {margin: 4em 1em 2em; align:center}
+p#livelli {margin: 5em 0em 4em}
+p#limiteAccumulo {margin: 2em 0em 2em}
+p#codiceSost {margin: 2em 0em 2em}
+p#sino {margin: 0em 26em 1em}
+p#sinoBuono {margin: 0em 22em 1em}
+p#sinoTimbrature {margin: 0em 24em 1em}
+p#level {margin: 9em 3em 1em}
+input#absenceTypeCodice {margin: 1em 20em 1em; align: left}
+input#absenceTypeCodiceSost {margin: 1em 10em 1em; align: left}
+input#absenceTypeDescrizione {margin: 1em 18em 1em; align: left}
+input#absenceTypeInizioValidita {margin: 0em 18em 1em}
+input#absenceTypeFineValidita {margin: 0em 18em 2em}
+input#minutiEccesso {margin: 1em 16em 1em}
+input#calcolaBuono {margin: 1em 18em 1em}
+input#gruppo {margin: 1em 20em 2em}
+input#limiteAccumulo {margin: 1em 16em 1em}
+input#codiceSostituzione {margin: 1em 13em 1em}
+select#tempoGiustificato {margin: 1em 12em 1em}
+select#tipoAccumulo {margin: 1em 16em 1em}
+select#comportamentoAccumulo {margin: 1em 12em 1em}
+input#qualifica {margin: 1em 0em 1em}
 
 div#logout {text-align: right; float: right}
 div#chooseView {text-align: center}

@@ -1,8 +1,15 @@
 package controllers;
 
+import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.PersonUtility;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -14,15 +21,21 @@ import models.CompetenceCode;
 import models.Person;
 import models.PersonDay;
 import models.PersonMonth;
+import models.StampProfile;
+import models.Stamping;
+import models.WorkingTimeTypeDay;
+import models.efficiency.EfficientPersonDay;
 import models.enumerate.JustifiedTimeAtWork;
 
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 
+import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
 import play.Logger;
+import play.Play;
 import play.data.binding.As;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -34,8 +47,8 @@ public class MonthRecaps extends Controller{
 
 		public int compare(Person person1, Person person2) {
 
-			String name1 = person1.surname.toUpperCase();
-			String name2 = person2.surname.toUpperCase();
+			String name1 = person1.surname.toUpperCase() + " " + person1.name.toUpperCase();
+			String name2 = person2.surname.toUpperCase() + " " + person2.name.toUpperCase();
 
 			return name1.compareTo(name2);
 
@@ -53,173 +66,291 @@ public class MonthRecaps extends Controller{
 	};
 
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void show(int year, int month) {
-		
-		if(month != 0){
-			Table<Person, String, Integer> tableMonthRecap = TreeBasedTable.create(PersonNameComparator, AbsenceCodeComparator);
-			int numberOfWorkingDays = 0;
-			int timeAtWork = 0;
-			int difference = 0;
-			int justifiedAbsence = 0;
-			int notJustifiedAbsence = 0;
-			int mealTicketToRender = 0;
-			LocalDate localDate = new LocalDate(year, month, 1);
-			LocalDate today = new LocalDate();
-			List<Person> persons = Person.getActivePersons(localDate);
-			//Logger.debug("Voglio il riepilogo di %d %d", month, year);		
+	public static void show(int year, int month) throws ClassNotFoundException, SQLException {
 
-			if(today.getMonthOfYear() == localDate.getMonthOfYear()){
-				while(localDate.isBefore(today)){
-					//Logger.debug("Il giorno è: %s", localDate);
-					if(!DateUtility.isGeneralHoliday(localDate))
-						numberOfWorkingDays = numberOfWorkingDays +1;
-					localDate = localDate.plusDays(1);
-				}
-				//Logger.debug("In questo mese ci sono fino ad oggi %d giorni lavorativi", numberOfWorkingDays);
+		LocalDate today = new LocalDate();
+		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
+		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
+		LocalDate lastDayOfMonth = monthBegin;
+
+		//numero di giorni lavorativi in month
+		int generalWorkingDaysOfMonth = 0;
+		while(!lastDayOfMonth.isAfter(monthEnd))
+		{
+			if(!lastDayOfMonth.isBefore(today))
+				break;
+			if(lastDayOfMonth.getDayOfWeek()==6 || lastDayOfMonth.getDayOfWeek()==7)
+			{
+				lastDayOfMonth = lastDayOfMonth.plusDays(1);
+				continue;
 			}
-			else{
-				while(localDate.isBefore(localDate.dayOfMonth().withMaximumValue())){
-					//Logger.debug("Il giorno è: %s", localDate);
-					if(!DateUtility.isGeneralHoliday(localDate))
-						numberOfWorkingDays = numberOfWorkingDays +1;
-					localDate = localDate.plusDays(1);
-				}
-				//Logger.debug("Nel mese di %d ci sono %d giorni lavorativi", localDate.getMonthOfYear(), numberOfWorkingDays);
+			if( ! DateUtility.isGeneralHoliday(lastDayOfMonth) )
+			{
+				generalWorkingDaysOfMonth++;
 			}
-
-			for(Person p : persons){
-				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-						p, localDate.dayOfMonth().withMinimumValue(), localDate.dayOfMonth().withMaximumValue()).fetch();
-				Logger.debug("I personDay per %s %s tra %s e %s sono %d", p.name, p.surname, localDate.dayOfMonth().withMinimumValue(), localDate.dayOfMonth().withMaximumValue(), pdList.size());
-				PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
-						p, month, year).first();
-				if(pm == null)
-					pm = new PersonMonth(p, year, month);
-				
-				tableMonthRecap.put(p, "Giorni di presenza al lavoro nei giorni festivi".intern(), new Integer(PersonUtility.workDayInHoliday(p, localDate.dayOfMonth().withMinimumValue(), localDate.dayOfMonth().withMaximumValue())));
-				tableMonthRecap.put(p, "Giorni di presenza al lavoro nei giorni lavorativi".intern(), new Integer(PersonUtility.workDayInWorkingDay(p, localDate.dayOfMonth().withMinimumValue(), localDate.dayOfMonth().withMaximumValue())));
-
-
-				for(PersonDay pd : pdList){
-					//Logger.debug("La lista assenze per %s %s è: %d. La lista timbrature invece è: %d", pd.person.name, pd.person.surname, pd.absences.size(), pd.stampings.size());
-					timeAtWork = timeAtWork + pd.timeAtWork;
-					difference = difference + pd.difference;
-				}
-				//Logger.debug("Il numero di assenze giustificate è: %d le assenze ingiustificate invece sono: %d", justifiedAbsence, notJustifiedAbsence);
-				CompetenceCode code = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", "S1").first();
-				Competence comp = Competence.find("Select comp from Competence comp where comp.person = ? and comp.month = ? and comp.year = ? " +
-						"and comp.competenceCode = ?", p, localDate.getMonthOfYear(), localDate.getYear(), code).first();
-
-				justifiedAbsence = PersonUtility.getJustifiedAbsences(pdList).size();
-				//Logger.debug("Per %s %s i giorni con assenza giustificata sono: %d", p.name, p.surname, justifiedAbsence);
-				notJustifiedAbsence = PersonUtility.getNotJustifiedAbsences(pdList).size();
-				mealTicketToRender = mealTicketToRender + pm.numberOfMealTicketToRender();
-				//Logger.debug("Il numero di buoni mensa per %s %s è %d", p.name, p.surname, mealTicketToRender);
-				tableMonthRecap.put(p, "Ore di lavoro fatte".intern(), new Integer(timeAtWork));
-				tableMonthRecap.put(p, "Differenza ore (Residuo a fine mese)".intern(), new Integer(difference));
-				tableMonthRecap.put(p, "Assenze giustificate".intern(), new Integer(justifiedAbsence));
-				tableMonthRecap.put(p, "Assenze non giustificate".intern(), new Integer(notJustifiedAbsence));
-				tableMonthRecap.put(p, "Ore straord. pagate".intern(), new Integer(comp.valueApproved));
-				tableMonthRecap.put(p, "Buoni mensa da restituire".intern(), new Integer(mealTicketToRender));
-				timeAtWork = 0;
-				difference = 0;
-				mealTicketToRender = 0;
-				justifiedAbsence = 0;
-				notJustifiedAbsence = 0;
-
-			}
-			render(tableMonthRecap, numberOfWorkingDays, today, localDate);
+			lastDayOfMonth = lastDayOfMonth.plusDays(1);
 		}
-		else{
-			Table<Person, String, Integer> tableMonthRecap = TreeBasedTable.create(PersonNameComparator, AbsenceCodeComparator);
-			int numberOfWorkingDays = 0;
-			int timeAtWork = 0;
-			int difference = 0;
-			int justifiedAbsence = 0;
-			int notJustifiedAbsence = 0;
-			int mealTicketToRender = 0;
-			LocalDate localDate = new LocalDate(year, 1, 1);
-			LocalDate today = new LocalDate();
-			List<Person> persons = Person.getActivePersons(localDate);
-			while(localDate.isBefore(today)){
-				//Logger.debug("Il giorno è: %s", localDate);
-				if(DateUtility.isGeneralHoliday(localDate))
-					numberOfWorkingDays = numberOfWorkingDays +1;
-				localDate = localDate.plusDays(1);
-			}
-			for(Person p : persons){
-				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-						p, localDate.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), today).fetch();
-				List<PersonMonth> pmList = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ?", 
-						p, year).fetch();
+		lastDayOfMonth = lastDayOfMonth.minusDays(1);
+		
+		Table<Person, String, Integer> tableMonthRecap = TreeBasedTable.create(PersonNameComparator, AbsenceCodeComparator);
 
-				tableMonthRecap.put(p, "Giorni di presenza al lavoro nei giorni festivi".intern(), new Integer(PersonUtility.workDayInHoliday(p, localDate.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), today)));
-				tableMonthRecap.put(p, "Giorni di presenza al lavoro nei giorni lavorativi".intern(), new Integer(PersonUtility.workDayInWorkingDay(p, localDate.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), today)));
-				for(PersonDay pd : pdList){
-					timeAtWork = timeAtWork + pd.timeAtWork;
-					difference = difference + pd.difference;
+		List<Person> activePersons = Person.getActivePersonsInMonth(month, year);
+		
+		//diagnosi
+		//boolean dbConsistentControl = PersonDay.diagnosticPersonDay(year, month, activePersons);
+		
+		//Se mese attuale considero i person day fino a ieri
+		if(today.getMonthOfYear()==month)
+		{
+			monthEnd = today.minusDays(2);
+		}
+		//Se oggi e' il primo giorno del mese stampo la tabella vuota 
+		if(today.getDayOfMonth()==1)
+		{
+			for(Person person : activePersons)
+			{
+				tableMonthRecap.put(person, "Giorni di presenza al lavoro nei giorni festivi".intern(), 0);
+				tableMonthRecap.put(person, "Giorni di presenza al lavoro nei giorni lavorativi".intern(), 0);
+				tableMonthRecap.put(person, "Ore di lavoro fatte".intern(), 0);
+				tableMonthRecap.put(person, "Differenza ore (Residuo a fine mese)".intern(), 0);
+				tableMonthRecap.put(person, "Assenze giustificate".intern(), 0);
+				tableMonthRecap.put(person, "Assenze non giustificate".intern(), 0);
+				tableMonthRecap.put(person, "Ore straord. pagate".intern(), 0);
+				tableMonthRecap.put(person, "Buoni mensa da restituire".intern(),0);
+			}
+			render(tableMonthRecap, generalWorkingDaysOfMonth, today, lastDayOfMonth);
+		}
+	
+		for(Person person : activePersons){
+
+			List<EfficientPersonDay> personDayRsList = EfficientPersonDay.getEfficientPersonDays(person, monthBegin, monthEnd);
+			//personDayRsList di norma non e' vuoto, capita per esempio per Cresci/DiPietro/Conti etc che non dovrebbero esistere
+			if(personDayRsList.size()!=0)
+			{
+				checkPersonMonthRecap(person, personDayRsList, tableMonthRecap);
+			}
+
+		}
+		render(tableMonthRecap, generalWorkingDaysOfMonth, today, lastDayOfMonth);
+
+	}
+	
+	/**
+	 * Metodo privato che calcola il riepilogo mensile per la persona e lo inserisce nella ImmutableTable
+	 * @param person
+	 * @param personDayRsList
+	 * @param tableMonthRecap
+	 */
+	private static void checkPersonMonthRecap(
+			Person person, 
+			List<EfficientPersonDay> personDayRsList, 
+			Table<Person, String, Integer> tableMonthRecap)
+	{
+		
+		Integer workingDayHoliday = 0;
+		Integer workingDayNotHoliday = 0;
+		int totalTimeAtWork = 0;
+		int difference = 0;
+		int justifiedAbsence = 0;
+		int notJustifiedAbsence = 0;
+		int mealTicketToRender = 0;
+		int valueApproved = personDayRsList.get(0).valueApproved;
+		
+		for(EfficientPersonDay pdRecap : personDayRsList)
+		{
+			//total time at work -----------------------------------------------------------------------------------------------------
+			totalTimeAtWork = totalTimeAtWork + pdRecap.timeAtWork;
+			difference = difference + pdRecap.difference;
+			
+			//meal ticket to render --------------------------------------------------------------------------------------------------
+			if(!pdRecap.isHoliday && pdRecap.timeAtWork - pdRecap.mealTicketTime < 0)
+			{
+				mealTicketToRender++;
+			}
+		
+			//holiday at work ---------------------------------------------------------------------------------------------------------
+			if(pdRecap.isHoliday)
+			{
+				if (!pdRecap.fixed && !pdRecap.justified.equals("AllDay") && pdRecap.isProperSequence)		
+				{
+					workingDayHoliday++;
 				}
-				CompetenceCode code = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", "S1").first();
-				List<Competence> compList = Competence.find("Select comp from Competence comp where comp.person = ? and comp.year = ? and " +
-						"comp.competenceCode = ?", p, year, code).fetch();
-				int valueCompetence = 0;
-				for(Competence c : compList){
-					valueCompetence = valueCompetence + c.valueApproved;
+				continue;						
+			}
+			//not holiday at work -----------------------------------------------------------------------------------------------------
+			//persone fixed
+			if(pdRecap.fixed)
+			{
+				if(!pdRecap.justified.equals("AllDay"))
+				{	
+					workingDayNotHoliday++;
+					continue;
 				}
-				for(PersonMonth pm : pmList){
-					mealTicketToRender = mealTicketToRender + pm.numberOfMealTicketToRender();
+				if(pdRecap.justified.equals("AllDay"))
+				{
+					justifiedAbsence++;
+					continue;
 				}
 				
-				justifiedAbsence = PersonUtility.getJustifiedAbsences(pdList).size();
-				
-				notJustifiedAbsence = PersonUtility.getNotJustifiedAbsences(pdList).size();
-				tableMonthRecap.put(p, "Ore di lavoro fatte".intern(), new Integer(timeAtWork));
-				tableMonthRecap.put(p, "Differenza ore (Residuo a fine mese)".intern(), new Integer(difference));
-				tableMonthRecap.put(p, "Assenze giustificate".intern(), new Integer(justifiedAbsence));
-				tableMonthRecap.put(p, "Assenze non giustificate".intern(), new Integer(notJustifiedAbsence));
-				tableMonthRecap.put(p, "Ore straord. pagate".intern(), new Integer(valueCompetence));
-				tableMonthRecap.put(p, "Buoni mensa da restituire".intern(), new Integer(mealTicketToRender));
-				timeAtWork = 0;
-				difference = 0;
-				mealTicketToRender = 0;
-				justifiedAbsence = 0;
-				notJustifiedAbsence = 0;
 			}
-			localDate = null;
-			render(tableMonthRecap, numberOfWorkingDays, today, localDate);
-		}				
-
+			//persone non fixed
+			if(!pdRecap.fixed)
+			{
+				if(pdRecap.isProperSequence && !pdRecap.justified.equals("AllDay"))
+				{
+					workingDayNotHoliday++;
+					continue;
+				}
+				if(pdRecap.justified.equals("AllDay"))
+				{
+					justifiedAbsence++;
+					continue;
+				}
+				if(!pdRecap.isProperSequence && !pdRecap.justified.equals("AllDay"))
+				{
+					notJustifiedAbsence++;
+					continue;
+				}
+					
+			}
+		}
+		
+		tableMonthRecap.put(person, "Giorni di presenza al lavoro nei giorni festivi".intern(), workingDayHoliday);
+		tableMonthRecap.put(person, "Giorni di presenza al lavoro nei giorni lavorativi".intern(), workingDayNotHoliday);
+		tableMonthRecap.put(person, "Ore di lavoro fatte".intern(), new Integer(totalTimeAtWork));
+		tableMonthRecap.put(person, "Differenza ore (Residuo a fine mese)".intern(), new Integer(difference));
+		tableMonthRecap.put(person, "Assenze giustificate".intern(), new Integer(justifiedAbsence));
+		tableMonthRecap.put(person, "Assenze non giustificate".intern(), new Integer(notJustifiedAbsence));
+		tableMonthRecap.put(person, "Ore straord. pagate".intern(), new Integer(valueApproved));
+		tableMonthRecap.put(person, "Buoni mensa da restituire".intern(), mealTicketToRender);
+		
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void notJustifiedAbsences(Long id, int year, int month){
-		Person person = Person.findById(id);
-		LocalDate date = new LocalDate(year, month, 1);
-		List<PersonDay> notJustifiedAbsences = new ArrayList<PersonDay>();
-		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-				person, date, date.dayOfMonth().withMaximumValue()).fetch();
-		for(PersonDay pd : pdList){
-			if((pd.stampings.size() == 0 && pd.absences.size() == 0) || (pd.stampings.size() == 1))
-				notJustifiedAbsences.add(pd);
-		}
+		List<PersonDay> notJustifiedAbsences = getPersonDayListRecap(id, year, month, "notJustifiedAbsences");
 
 		render(notJustifiedAbsences);
 	}
-
+	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void justifiedAbsences(Long id, int year, int month){
-		Person person = Person.findById(id);
-		LocalDate date = new LocalDate(year, month, 1);
-		List<PersonDay> justifiedAbsences = new ArrayList<PersonDay>();
-		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-				person, date, date.dayOfMonth().withMaximumValue()).fetch();
-		for(PersonDay pd : pdList){
-			if(pd.absences.size() == 1 && pd.absences.get(0).absenceType.justifiedTimeAtWork.minutesJustified == null){
-				justifiedAbsences.add(pd);
-			}
-		}
+		List<PersonDay> justifiedAbsences = getPersonDayListRecap(id, year, month, "justifiedAbsences");
 
 		render(justifiedAbsences);
 	}
+
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void workingDayHoliday(Long id, int year, int month){
+		List<PersonDay> workingDayHoliday = getPersonDayListRecap(id, year, month, "workingDayHoliday");
+
+		render(workingDayHoliday);
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void workingDayNotHoliday(Long id, int year, int month){
+		List<PersonDay> workingDayNotHoliday = getPersonDayListRecap(id, year, month, "workingDayNotHoliday");
+
+		render(workingDayNotHoliday);
+	}
+
+	private static List<PersonDay> getPersonDayListRecap(Long id, int year, int month, String listType)
+	{
+		List<PersonDay> notJustifiedAbsences = new ArrayList<PersonDay>();
+		List<PersonDay> justifiedAbsences = new ArrayList<PersonDay>();
+		List<PersonDay> workingDayHoliday = new ArrayList<PersonDay>();
+		List<PersonDay> workingDayNotHoliday = new ArrayList<PersonDay>();
+		Person person = Person.findById(id);
+		List<StampProfile> personStampProfiles = person.stampProfiles;
+		
+		LocalDate today = new LocalDate();
+		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
+		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
+		//Se mese attuale considero i person day fino a ieri
+		if(today.getMonthOfYear()==month)
+		{
+			monthEnd = today.minusDays(2);
+		}
+		//Se oggi e' il primo giorno del mese stampo la tabella vuota 
+		if(today.getDayOfMonth()==1)
+		{
+			render(notJustifiedAbsences);
+		}
+
+		List<PersonDay> pdList = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? AND pd.date between ? and ?", 
+			person, 
+			monthBegin, 
+			monthEnd).fetch();
+		
+		for(PersonDay pd : pdList)
+		{
+			//holiday at work ---------------------------------------------------------------------------------------------------------
+			if(pd.isHoliday())
+			{
+				if (!pd.isFixedTimeAtWork(personStampProfiles) && !pd.containsAllDayAbsence() && pd.containsProperStampingSequence())		
+				{
+					workingDayHoliday.add(pd);
+					//workingDayHoliday++;
+				}
+				continue;						
+			}
+			//not holiday at work -----------------------------------------------------------------------------------------------------
+			//persone fixed
+			if(pd.isFixedTimeAtWork(personStampProfiles))
+			{
+				if(!pd.containsAllDayAbsence())
+				{	
+					workingDayNotHoliday.add(pd);
+					//workingDayNotHoliday++;
+					continue;
+				}
+				if(pd.containsAllDayAbsence())
+				{
+					justifiedAbsences.add(pd);
+					//justifiedAbsence++;
+					continue;
+				}
+				
+			}
+			//persone non fixed
+			if(!pd.isFixedTimeAtWork(personStampProfiles))
+			{
+				if(pd.containsProperStampingSequence() && !pd.containsAllDayAbsence())
+				{
+					workingDayNotHoliday.add(pd);
+					//workingDayNotHoliday++;
+					continue;
+				}
+				if(pd.containsAllDayAbsence())
+				{
+					justifiedAbsences.add(pd);
+					//justifiedAbsence++;
+					continue;
+				}
+				if(!pd.containsProperStampingSequence() && !pd.containsAllDayAbsence())
+				{
+					notJustifiedAbsences.add(pd);
+					//notJustifiedAbsence++;
+					continue;
+				}
+					
+			}
+			
+		}
+		
+		if(listType.equals("notJustifiedAbsences"))
+			return notJustifiedAbsences;
+		if(listType.equals("justifiedAbsences"))
+			return justifiedAbsences;
+		if(listType.equals("workingDayHoliday"))
+			return workingDayHoliday;
+		if(listType.equals("workingDayNotHoliday"))
+			return workingDayNotHoliday;
+		
+		return null;
+	}
+
+	
+	
 
 }

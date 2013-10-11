@@ -99,6 +99,8 @@ GET		/stampings/mealTicketSituation/{year}/{month}		Stampings.mealTicketSituatio
 GET		/monthrecaps/show/{year}/{month}		MonthRecaps.show
 GET		/monthRecaps/justifiedAbsences			MonthRecaps.justifiedAbsences
 GET		/monthRecaps/notJustifiedAbsences		MonthRecaps.notJustifiedAbsences
+GET		/monthRecaps/workingDayHoliday			MonthRecaps.workingDayHoliday
+GET		/monthRecaps/workingDayNotHoliday		MonthRecaps.workingDayNotHoliday
 
 #Orario e timbrature
 GET     /stampings/{personId}/{year}/{month}	Stampings.stampings

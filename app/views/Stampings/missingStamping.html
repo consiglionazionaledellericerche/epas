@@ -5,7 +5,12 @@
 #{functionalMenuForm mainMenu: mainMenu /} 
 
 <h2 id="titoloControllaTimbratureMancanti">Controllo delle timbrature mancanti di <span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year}</h2>
-
+%{if(dbConsistentControl==true){
+}%
+Warning: il database ha riscontrato errori, contattare gli amministratori. Potrebbero esistere ulteriori timbrature mancanti non visualizzate in questo report.
+%{
+}
+}%
 <table id="tabellaTimbratureMancanti">
 	<tr>
 		<th>Nome</th>
