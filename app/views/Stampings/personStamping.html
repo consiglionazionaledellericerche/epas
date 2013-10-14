@@ -98,7 +98,7 @@
 				left:50 
 				}); 
 				</script>
-					%{ if(day.stampings.get(j).markedByAdmin == true){ 
+					%{ if(j < day.getStampingsForTemplate().size() && day.getStampingsForTemplate().get(j).markedByAdmin == true){ 
 					}%
 					  	<strong>${day.checkMarkedByAdmin().code}</strong>
 					%{
@@ -136,7 +136,7 @@
 				left:50 
 				}); 
 				</script>
-					%{ 	if(day.getStampingsForTemplate().get(j+1).markedByAdmin == true){ 
+					%{ 	if(j+1 < day.getStampingsForTemplate().size() && day.getStampingsForTemplate().get(j+1).markedByAdmin == true){ 
 					}%
 					  	<strong>${day.checkMarkedByAdmin().code}</strong>
 					%{
