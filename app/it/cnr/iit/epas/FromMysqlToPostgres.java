@@ -257,8 +257,7 @@ public class FromMysqlToPostgres {
 
 		Logger.info("Adesso aggiorno le date di inizio dei contratti, i vacation period, creo le competenze, il monte ore ed aggiusto i permessi");
 
-//		FromMysqlToPostgres.updateContract();
-		//		FromMysqlToPostgres.updateVacationPeriod();
+
 		FromMysqlToPostgres.updateCompetence();
 
 		FromMysqlToPostgres.updateCompetenceCode();
@@ -497,7 +496,18 @@ public class FromMysqlToPostgres {
 					absTypeGroup = new AbsenceTypeGroup();
 
 					absTypeGroup.label = gruppo;
-					absTypeGroup.limitInMinute = rsCodici.getInt("Limite");
+					/**
+					 * WARN: in questo caso, siccome nella vecchia applicazione alcuni limiti erano gestiti in minuti e altri in ore, allora ripiano
+					 * tutto gestendo tutti i limiti in minuti 
+					 */
+					if(rsCodici.getInt("Limite") < 433){
+						if(rsCodici.getInt("Limite") == 2)
+							absTypeGroup.limitInMinute = 216;
+						else
+							absTypeGroup.limitInMinute = rsCodici.getInt("Limite")*60;
+					}
+					else
+						absTypeGroup.limitInMinute = rsCodici.getInt("Limite");
 
 					String codSost = rsCodici.getString("CodiceSost");
 					if(codSost != null && !codSost.trim().equals("")){

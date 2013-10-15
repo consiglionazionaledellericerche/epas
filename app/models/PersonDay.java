@@ -431,7 +431,7 @@ public class PersonDay extends Model {
 	 */
 	public StampModificationType getFixedWorkingTime(){
 		StampModificationType smt = null;
-		if(StampProfile.getCurrentStampProfile(this.person, this.date).fixedWorkingTime)
+		if(StampProfile.getCurrentStampProfile(this.person, this.date) != null && StampProfile.getCurrentStampProfile(this.person, this.date).fixedWorkingTime)
 			smt = StampModificationType.findById(StampModificationTypeValue.FIXED_WORKINGTIME.getId());
 		
 		return smt;
