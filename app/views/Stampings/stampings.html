@@ -62,7 +62,17 @@
 				for(int i = 0; i < numberOfInOut; i++){
 					j = i*2;
 				}%
-				<td class="ingresso">
+				%{
+					if(day.getStampingsForTemplate().size() > j && day.getStampingsForTemplate().get(j) != null && !day.getStampingsForTemplate().get(j).isValid()){
+					}%
+						<td class="ingressowarn">
+					%{
+					}else{
+					}%
+						<td class="ingresso">
+					%{
+					}
+				}%
 				%{ if(day.getStampingsForTemplate().size() > j && day.getStampingsForTemplate().get(j) !=null) { }%
 				
 					${day.getStampingsForTemplate().get(j).date.toCalendarTime()}
@@ -79,7 +89,17 @@
 				}%
 				</td>
 				
-				<td class="uscita">
+				%{
+					if(day.getStampingsForTemplate().size() > j+1 && day.getStampingsForTemplate().get(j+1) != null && !day.getStampingsForTemplate().get(j+1).isValid()){
+					}%
+						<td class="uscitawarn">
+					%{
+					}else{
+					}%
+						<td class="uscita">
+					%{
+					}
+				}%
 				%{ if(day.getStampingsForTemplate().size() > j+1 && day.getStampingsForTemplate().get(j+1) !=null) { }%
 				
 					${day.getStampingsForTemplate().get(j+1).date.toCalendarTime()}
@@ -91,12 +111,12 @@
 				}%
 					${' '}
 				%{
-				 	if(day.getStampingsForTemplate().size() > j+1 && day.getStampingsForTemplate().get(j+1).markedByAdmin == true){ 
+				 	if(day.getStampingsForTemplate().size() > j+1 && day.getStampingsForTemplate().get(j+1)!=null && day.getStampingsForTemplate().get(j+1).markedByAdmin == true){ 
 					}%
 					  	<strong>${day.checkMarkedByAdmin().code}</strong>
 					%{
 					} 
-					if(day.getStampingsForTemplate().size() > j+1 && day.getStampingsForTemplate().get(j+1).stampModificationType != null){
+					if(day.getStampingsForTemplate().size() > j+1 && day.getStampingsForTemplate().get(j+1)!= null && day.getStampingsForTemplate().get(j+1).stampModificationType != null){
 					}%
 						<strong>${day.checkMissingExitStampBeforeMidnight().code}</strong>
 					%{

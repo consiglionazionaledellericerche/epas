@@ -114,6 +114,13 @@ public class Stampings extends Controller {
 
 		Logger.debug("Numuero di ingressi/uscite: %d", numberOfInOut);
 
+		//calcolo del valore valid per le stamping del mese
+		personMonth.getDays();
+		for(PersonDay pd : personMonth.days)
+		{
+			pd.computeValidStampings();
+		}
+		
 		render(personMonth, numberOfInOut, numberOfCompensatoryRest, situazioneParziale);
 	}
 

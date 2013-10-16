@@ -567,28 +567,45 @@ public class PersonDay extends Model {
 
 		List<PairStamping> gapLunchPairs = getGapLunchPairs(validPairs);
 		
-		//non ha timbrato per il pranzo
-		if(gapLunchPairs.size()==0 && workTime > mealTicketTime && 	workTime - breakTicketTime > mealTicketTime)
+		//non ha timbrato per il pranzo (due sole timbrature)
+		if(validPairs.size()==1 && workTime > mealTicketTime && 	workTime - breakTicketTime > mealTicketTime)
 		{
 			workTime = workTime - breakTicketTime;	
+			this.isTicketAvailable = true;
 		}
-		//ha timbrato per il pranzo //(TODO per adesso considero il primo gap, poi si vedrà)
-		else if(gapLunchPairs.size()>0)
+		
+		//potrebbe aver timbrato per il pranzo (più di due timbrature)
+		else if(validPairs.size()>1)
 		{
-			int minTimeForLunch = 0;
-			for(PairStamping gapLunchPair : gapLunchPairs)
+			//ha timbrato per il pranzo //(TODO per adesso considero il primo gap, poi si vedrà)
+			if(gapLunchPairs.size()>0)
 			{
-				minTimeForLunch = minTimeForLunch - toMinute(gapLunchPair.in.date);
-				minTimeForLunch = minTimeForLunch + toMinute(gapLunchPair.out.date);
-				break;
+				int minTimeForLunch = 0;
+				for(PairStamping gapLunchPair : gapLunchPairs)
+				{
+					minTimeForLunch = minTimeForLunch - toMinute(gapLunchPair.in.date);
+					minTimeForLunch = minTimeForLunch + toMinute(gapLunchPair.out.date);
+					break;
+				}
+				if(workTime - breakTicketTime > mealTicketTime)
+				{
+					if( minTimeForLunch < breakTicketTime ) 
+					{
+						workTime = workTime - breakTicketTime - minTimeForLunch;
+					}
+					this.isTicketAvailable = true;
+				}
+				else
+				{
+					this.isTicketAvailable = false;
+				}
 			}
-			if( minTimeForLunch < breakTicketTime )
+			else
 			{
-				workTime = workTime - breakTicketTime - minTimeForLunch;		
+				this.isTicketAvailable = false;
 			}
-		
+			
 		}
-		
 		return new TimeAtWork(workTime + justifiedTimeAtWork, lastInNotPaired);
 
 
@@ -651,11 +668,6 @@ public class PersonDay extends Model {
 	private TimeAtWorkToday getTimeAtWorkToday() {
 		if (stampings.size() == 0)
 			return new TimeAtWorkToday(0, false);
-		//aggiungo la timbratura di uscita fittizia in questo momento
-		Stamping exit = new Stamping();
-		exit.way = WayType.out;
-		exit.date = LocalDateTime.now();
-		//stampings.add(exit);
 		
 		
 		
@@ -745,7 +757,12 @@ public class PersonDay extends Model {
 		merge();
 		updateProgressive();	
 		merge();
-		setTicketAvailable();
+		
+		//il pranzo
+		if(this.isTicketForcedByAdmin)
+			this.isTicketAvailable = true;
+		else
+			this.isTicketAvailable = this.isTicketAvailable && checkTicketAvailableForWorkingTime();
 		merge();
 
 	}
@@ -755,6 +772,7 @@ public class PersonDay extends Model {
 	 * per quella persona in quel giorno. Non ho necessità quindi di ricalcolarmi il timeAtWork, devo solo, sulla base di quello nuovo,
 	 * richiamare le altre tre funzioni di popolamento del personDay.
 	 */
+	/*
 	public void populatePersonDayAfterJustifiedAbsence(){
 		Logger.trace("Chiamata populatePersonDayAfterJustifiedAbsence per popolare il personDay di %s %s senza il timeAtWork nel giorno %s",
 				person.name, person.surname, date);
@@ -762,9 +780,10 @@ public class PersonDay extends Model {
 		merge();
 		updateProgressive();	
 		merge();
-		setTicketAvailable();
+		checkTicketAvailable();
 		merge();
 	}
+	*/
 
 
 
@@ -853,46 +872,22 @@ public class PersonDay extends Model {
 	 */
 	public boolean mealTicket(){
 
-		setTicketAvailable();
-		return isTicketAvailable;
+		if(this.isTicketForcedByAdmin)
+			return true;
+		
+		return this.isTicketAvailable && checkTicketAvailableForWorkingTime();
 
 	}
 
-	/**
-	 * setta il campo booleano della tabella PersonDay relativo al mealticket a true se nella giornata è stato raggiunto il tempo 
-	 * minimo per l'assegnazione del buono pasto, false altrimenti. Serve a rendere persistenti le info sulla disponibilità del buono
-	 * pasto evitando così di doverlo ricalcolare ogni volta. Viene chiamata all'interno della populate personDay e la save() viene
-	 * fatta all'interno di essa.
-	 */
-	private void setTicketAvailable(){
-		//merge();
-		//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
-		if(isTicketForcedByAdmin)
-			return;
-		Logger.trace("Chiamata della setTicketAvailable, il timeAtWork per %s %s è: %s", person.name, person.surname, timeAtWork);
-		Logger.trace("Il tempo per avere il buono mensa per %s è: %s", person, getWorkingTimeTypeDay().mealTicketTime);
-		if(timeAtWork == 0 || timeAtWork < getWorkingTimeTypeDay().mealTicketTime){
-			isTicketAvailable = false;
-			return; 
-		}		
-
+	private boolean checkTicketAvailableForWorkingTime(){
+		
 		if(person.workingTimeType.description.equals("normale-mod") || person.workingTimeType.description.equals("normale")
-				|| person.workingTimeType.description.equals("80%") || person.workingTimeType.description.equals("85%")){
-			Logger.trace("Sono nella setTicketAvailable per %s %s", person.name, person.surname);
-			if(timeAtWork >= getWorkingTimeTypeDay().mealTicketTime){
-				isTicketAvailable=true;
-
-			}
-			else{
-				isTicketAvailable=false;
-
-			}
+				|| person.workingTimeType.description.equals("80%") || person.workingTimeType.description.equals("85%"))
+		{
+			return true;
 		}
-		Logger.debug("Per %s %s il buono del giorno %s è: %s", person.name, person.surname, date, isTicketAvailable);
-
-		Logger.trace("Il person day visualizzato è: %s", this);
-
-		save();
+		
+		return false;
 
 	}
 
