@@ -81,7 +81,17 @@
 				for(int i = 0; i < numberOfInOut; i++){
 					j = i*2;
 				}%
-				<td class="ingresso">
+				%{
+					if(day.getStampingsForTemplate().size() > j && day.getStampingsForTemplate().get(j) != null && !day.getStampingsForTemplate().get(j).isValid()){
+					}%
+						<td class="ingressowarn">
+					%{
+					}else{
+					}%
+						<td class="ingresso">
+					%{
+					}
+				}%
 				%{ if(day.getStampingsForTemplate().size() > j && day.getStampingsForTemplate().get(j) !=null) { }%
 					<a href="@{Stampings.edit(day.getStampingsForTemplate().get(j).id)}" class="insertStamping${day.date.dayOfMonth}-${j}">
 					${day.getStampingsForTemplate().get(j).date.toCalendarTime()}
@@ -118,8 +128,17 @@
 				}%
 					
 				</td>
-				
-				<td class="uscita">
+				%{
+					if(day.getStampingsForTemplate().size() > j+1 && day.getStampingsForTemplate().get(j+1) != null && !day.getStampingsForTemplate().get(j+1).isValid()){
+					}%
+						<td class="uscitawarn">
+					%{
+					}else{
+					}%
+						<td class="uscita">
+					%{
+					}
+				}%
 				%{ if(day.getStampingsForTemplate().size() > j+1 && day.getStampingsForTemplate().get(j+1) !=null) { }%
 					<a href="@{Stampings.edit(day.getStampingsForTemplate().get(j+1).id)}" class="insertStamping${day.date.dayOfMonth}-${j+1}">
 					${day.getStampingsForTemplate().get(j+1).date.toCalendarTime()}

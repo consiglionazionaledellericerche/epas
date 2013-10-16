@@ -228,7 +228,9 @@ td.noWrap {white-space:nowrap}
 td.festivi {background-color: #F88017; width: 6em}
 td.assenza {background-color: #FFFF99; text-align: center; width: 6em}
 td.ingresso {background-color: #FFEEFF}
+td.ingressowarn {background-color: yellow}
 td.uscita {background-color: #CCFFCC}
+td.uscitawarn {background-color: yellow}
 td.tempoLavoro {width: 6em}
 td.differenza {text-align: right; width: 6em}
 td.progressivo {background-color: #FFFF99; text-align:right; width: 6em}
