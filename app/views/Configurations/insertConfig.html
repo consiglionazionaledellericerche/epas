@@ -24,6 +24,12 @@
 		<legend>Festività</legend>
 			<p id="descrizione">Festa del patrono (giorno) <input name="giornoPatrono" type="number" min="1" max="31" value="${configurations.dayOfPatron}" size="5" maxlength="100" /></p>
 			<p id="descrizione">Festa del patrono (mese) <input name="mesePatrono" type="number" min="1" max="12" value="${configurations.monthOfPatron}" size="5" maxlength="100" /></p>
+			<p id="descrizione">Inizio orario pausa pranzo Ore: <input name="pausaPranzoInizioOre" type="number" min="0" max="23" value="${configurations.mealTimeStartHour}" size="5" maxlength="100" />
+			Min: <input name="pausaPranzoInizioMinuti" type="number" min="0" max="59" value="${configurations.mealTimeStartMinute}" size="5" maxlength="100" />
+			</p>
+			<p id="descrizione">Fine orario pausa pranzo &nbsp;Ore: <input name="pausaPranzoFineOre" type="number" min="0" max="23" value="${configurations.mealTimeEndHour}" size="5" maxlength="100" />
+			Min: <input name="pausaPranzoFineMinuti" type="number" min="0" max="59" value="${configurations.mealTimeEndMinute}" size="5" maxlength="100" />
+			</p>
 	</fieldset>
 	<fieldset disabled="disabled">
 		<legend>Pausa pranzo e buoni</legend>

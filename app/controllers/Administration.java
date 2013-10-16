@@ -6,11 +6,17 @@ import it.cnr.iit.epas.FromMysqlToPostgres;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.joda.time.LocalDate;
+
 import controllers.shib.Shibboleth;
 
+import models.Contract;
 import models.Person;
 import models.PersonMonth;
+import models.VacationCode;
+import models.VacationPeriod;
 import models.WorkingTimeType;
+import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -73,6 +79,59 @@ public class Administration extends Controller {
 	public static void updatePersonDay(){
 		FromMysqlToPostgres.checkFixedWorkingTime();
 		renderText("Aggiornati i person day delle persone con timbratura fissa");
+	}
+	
+	public static void updateVacationPeriodRelation() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+		
+		List<Person> personList = Person.getActivePersons(new LocalDate());
+		for(Person p : personList){
+			Logger.debug("Cerco i contratti per %s %s", p.name, p.surname);
+			List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ?", p).fetch();
+			for(Contract con : contractList){
+				Logger.debug("Sto analizzando il contratto %s", con.toString());
+				Logger.debug("Inizio a creare i periodi di ferie per %s", con.person);
+				if(con.expireContract == null){
+					VacationPeriod first = new VacationPeriod();
+					first.beginFrom = con.beginContract;
+					first.endTo = con.beginContract.plusYears(3).minusDays(1);
+					first.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "26+4").first();
+					first.contract = con;
+					first.save();
+					VacationPeriod second = new VacationPeriod();
+					second.beginFrom = con.beginContract.plusYears(3);
+					second.endTo = null;
+					second.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "28+4").first();
+					second.contract =con;
+					second.save();
+				}
+				else{
+					if(con.expireContract.isAfter(con.beginContract.plusYears(3).minusDays(1))){
+						VacationPeriod first = new VacationPeriod();
+						first.beginFrom = con.beginContract;
+						first.endTo = con.beginContract.plusYears(3).minusDays(1);
+						first.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "26+4").first();
+						first.contract = con;
+						first.save();
+						VacationPeriod second = new VacationPeriod();
+						second.beginFrom = con.beginContract.plusYears(3);
+						second.endTo = con.expireContract;
+						second.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "28+4").first();
+						second.contract =con;
+						second.save();
+					}
+					else{
+						VacationPeriod first = new VacationPeriod();
+						first.beginFrom = con.beginContract;
+						first.endTo = con.expireContract;
+						first.contract = con;
+						first.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "26+4").first();
+						first.save();
+					}
+				}
+				
+			}
+		}
+		
 	}
 
     

@@ -1,8 +1,15 @@
 package controllers;
 
+import it.cnr.iit.epas.CheckMessage;
 import it.cnr.iit.epas.MainMenu;
 import it.cnr.iit.epas.PersonUtility;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -19,6 +26,8 @@ import models.PersonMonth;
 import models.PersonTags;
 import models.Qualification;
 import models.Stamping;
+import models.WorkingTimeTypeDay;
+import models.efficiency.EfficientPersonDay;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
 import models.enumerate.JustifiedTimeAtWork;
@@ -27,6 +36,7 @@ import org.hibernate.envers.entities.mapper.relation.lazy.proxy.SetProxy;
 import org.joda.time.LocalDate;
 
 import play.Logger;
+import play.Play;
 import play.data.validation.Required;
 import play.db.jpa.Blob;
 import play.db.jpa.JPA;
@@ -37,8 +47,44 @@ import play.mvc.With;
 public class Absences extends Controller{
 
 	private static List<AbsenceType> getFrequentAbsenceTypes(){
-		return AbsenceType.find("Select abt from AbsenceType abt, Absence abs " +
-				"where abs.absenceType = abt group by abt order by sum(abt.id) desc limit 20").fetch();
+		
+		List<AbsenceType> absenceTypeList = new ArrayList<AbsenceType>();
+		try
+		{
+			//prepared statement
+			Connection connection = null;
+			if(connection == null)
+			{
+				Class.forName("org.postgresql.Driver");
+				connection = DriverManager.getConnection(
+						Play.configuration.getProperty("db.new.url"),
+						Play.configuration.getProperty("db.new.user"),
+						Play.configuration.getProperty("db.new.password"));
+			}
+
+			String query = "select abt.id "
+					+ "from absences ab left outer join absence_types abt on ab.absence_type_id = abt.id "
+					+ "group by abt.id "
+					+ "order by count(*) desc "
+					+ "limit 20;";
+
+			PreparedStatement ps = connection.prepareStatement(query);
+			ResultSet rs = ps.executeQuery();
+
+			while(rs.next())
+			{
+				long absenceTypeId = rs.getLong("id");
+				AbsenceType abt = AbsenceType.findById(absenceTypeId);
+				absenceTypeList.add(abt);
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+
+		return absenceTypeList;
 
 	}
 
@@ -489,9 +535,50 @@ public class Absences extends Controller{
 			}
 
 		}
-
+		
 		//TODO: implementare i controlli sui gruppi di codici di assenza, i controlli sui gruppi devono anche implementare
 		// le sostituzioni dei codici tramite accumulutatori o query ad hoc
+	
+		if(absenceType.absenceTypeGroup != null){
+			CheckMessage checkMessage = PersonUtility.checkAbsenceGroup(absenceType, person, dateFrom);
+			if(checkMessage.check == false){
+				flash.error("Impossibile inserire il codice %s per %s %s. "+checkMessage.message, absenceType.code, person.name, person.surname);
+				render("@save");
+			}
+			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, dateFrom).first();
+			if(pd == null){
+				pd = new PersonDay(person, dateFrom);
+				pd.create();
+			}
+			if(checkMessage.check == true && checkMessage.absenceType ==  null){
+				
+				Absence absence = new Absence();
+				absence.absenceType = absenceType;
+				absence.personDay = pd;
+				pd.absences.add(absence);
+				pd.save();
+				pd.populatePersonDay();
+				flash.success("Aggiunto codice di assenza %s "+checkMessage.message, absenceType.code);
+				render("@save");
+	
+			}
+			if(checkMessage.check == true && checkMessage.absenceType != null){
+				Absence absence = new Absence();
+				absence.absenceType = absenceType;
+				absence.personDay = pd;
+				absence.save();
+				pd.absences.add(absence);
+				Absence compAbsence = new Absence();
+				compAbsence.absenceType = checkMessage.absenceType;
+				compAbsence.personDay = pd;
+				compAbsence.save();
+				pd.absences.add(compAbsence);
+				pd.save();
+				pd.populatePersonDay();
+				flash.success("Aggiunto codice di assenza %s "+checkMessage.message, absenceType.code);
+				render("@save");
+			}
+		}
 		
 		Absence absence = new Absence();
 		Logger.debug("%s %s può usufruire del codice %s", person.name, person.surname, absenceType.code);

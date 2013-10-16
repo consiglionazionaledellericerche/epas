@@ -3,6 +3,8 @@
  */
 package models;
 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -30,7 +32,7 @@ import play.db.jpa.Model;
 @Entity
 @Table(name = "stampings")
 
-public class Stamping extends Model {
+public class Stamping extends Model implements Comparable<Stamping> {
 
 	private static final long serialVersionUID = -2422323948436157747L;
 
@@ -78,7 +80,7 @@ public class Stamping extends Model {
 	public BadgeReader badgeReader;
 	
 	public String note;
-	
+		
 	/**
 	 * questo campo booleano consente di determinare se la timbratura è stata effettuata dall'utente all'apposita
 	 * macchinetta (valore = false) o se è stato l'amministratore a settare l'orario di timbratura poichè la persona 
@@ -88,12 +90,19 @@ public class Stamping extends Model {
 	public Boolean markedByAdmin;	
 	
 	/**
-	 * questo campo booleano determina se la timbratura in questione deve essere considerata per i calcoli del tempo di lavoro oppure no.
-	 * In alcuni casi, infatti, vengono inserite timbrature fittizie con orari impostati ad hoc perchè mancano timbrature di uscita corrispondenti
-	 * a timbrature di entrata o viceversa. Queste timbrature non devono essere considerate nel calcolo.
+	 * true, cella bianca; false, cella gialla
 	 */
-//	@Column(name = "consider_for_counting")
-//	public Boolean considerForCounting;
+	@Transient
+	public boolean valid;
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public boolean isValid()
+	{
+		return this.valid;
+	}
 	
 	@Transient
 	public boolean isIn() {
@@ -110,4 +119,21 @@ public class Stamping extends Model {
 		return String.format("Stamping[%d] - personDay.id = %d, way = %s, date = %s, stampType.id = %s, stampModificationType.id = %s",
 			id, personDay.id, way, date, stampType != null ? stampType.id : "null", stampModificationType != null ? stampModificationType.id : "null");
 	}
+
+	/**
+	 * Comparator Stamping
+	 */
+	public int compareTo(Stamping compareStamping)
+	{
+		if (date.isBefore(compareStamping.date))
+			return -1;
+		else if (date.isAfter(compareStamping.date))
+			return 1;
+		else
+			return 0; 
+	}
+
+
+
+
 }

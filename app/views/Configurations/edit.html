@@ -41,6 +41,12 @@
 		<legend>Pausa pranzo e buoni</legend>
      		<p id="descrizione">Default tempo di lavoro giornaliero per avere il buono pasto (in minuti) <input name="tempoLavoroGiornalieroPerBuono" type="text" value="${configurations.workingTimeToHaveMealTicket}" size="10" maxlength="100" disabled="disabled"/>  (non modificabile) </p></p>
 			<p id="descrizione">Default tempo intervallo pasto (in minuti) <input name="tempoIntervalloPasto" type="text" value="${configurations.mealTime}" size="10" maxlength="100" disabled="disabled"/>  (non modificabile)</p></p>	
+			<p id="descrizione">Inizio orario pausa pranzo Ore: <input name="pausaPranzoInizioOre" type="number" min="0" max="23" value="${configurations.mealTimeStartHour}" size="5" maxlength="100" />
+			Min: <input name="pausaPranzoInizioMinuti" type="number" min="0" max="59" value="${configurations.mealTimeStartMinute}" size="5" maxlength="100" />
+			</p>
+			<p id="descrizione">Fine orario pausa pranzo &nbsp;Ore: <input name="pausaPranzoFineOre" type="number" min="0" max="23" value="${configurations.mealTimeEndHour}" size="5" maxlength="100" />
+			Min: <input name="pausaPranzoFineMinuti" type="number" min="0" max="59" value="${configurations.mealTimeEndMinute}" size="5" maxlength="100" />
+			</p>
 	</fieldset>
 	<fieldset>
 		<legend>Orari e tempi di lavoro</legend>
