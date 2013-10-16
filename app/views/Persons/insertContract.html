@@ -1,0 +1,32 @@
+#{extends 'main.html' /}
+
+<h3 id="nuovoContratto">Inserimento dati nuovo contratto per ${person.name} ${person.surname}</h3>
+
+#{form @Persons.saveContract()}
+<input type="hidden" name="personId" value="${person.id}"/>
+	<table>
+		<tr>
+			<th>Data inizio</th>
+			<th>Data fine</th>
+			
+			<th>Attestato presenza</th>
+			
+		</tr>
+		
+		<tr>
+			<td><input name="beginContract" type="date" value="" size="10" maxlength="10" /></td>
+			<td><input name="expireContract" type="date" value="" size="10" maxlength="10" /></td>
+					
+			<td>
+				<input name="onCertificate" type="checkbox" value="true"/>
+				
+			</td>
+			
+		</tr>
+		
+	</table>
+	
+	<input id="submitContractPerson"type="submit" value="Ok" />
+
+	
+#{/form}

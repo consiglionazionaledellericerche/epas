@@ -8,7 +8,7 @@
 	${person.name} ${person.surname}</h2>
 
 #{form @Persons.update()}
-<input type="hidden" name="personId" value="${person.id}" />
+<input type="hidden" name="personId" value="${person.id}"/>
 
 <fieldset>
 	<legend>Dati personali</legend>
@@ -56,6 +56,18 @@
 
 <fieldset>
 	<legend>Dati Contrattuali</legend>
+	<p>
+		
+		<a href="@{Persons.insertContract(person.id)}" class="insertContract${person.id}">Inserisci</a> un nuovo contratto
+		<script type="text/javascript"> 
+				$('.insertContract${person.id}').popupWindow({ 
+				height:600, 
+				width:900, 
+				top:50, 
+				left:50 
+				}); 
+		</script>
+	</p>
 	<table>
 		<tr>
 			<th>Data inizio</th>

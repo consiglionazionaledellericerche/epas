@@ -405,6 +405,7 @@ input#salvaVacationCode {margin: 3em 2em 0em 10em}
 input#inserisciAssenza {margin: 1em 33em 0em; align: center}
 input#updateWorkingTime {margin: 2em 3em 0em 65em; align: center}
 input#insertWorkingTime {margin: 2em 3em 0em 65em; align: center}
+input#submitContractPerson {margin: 2em 25em 0em; align:center}
 
 input#updateOldOvertime {margin: 0em 25em 0em; align: center}
 table#tabellaPersoneCodiciAssenzaMensili {margin: 2em 1em 1em; align: left}
