@@ -1,5 +1,6 @@
 package controllers;
 
+import it.cnr.iit.epas.CheckMessage;
 import it.cnr.iit.epas.MainMenu;
 import it.cnr.iit.epas.PersonUtility;
 
@@ -534,9 +535,50 @@ public class Absences extends Controller{
 			}
 
 		}
-
+		
 		//TODO: implementare i controlli sui gruppi di codici di assenza, i controlli sui gruppi devono anche implementare
 		// le sostituzioni dei codici tramite accumulutatori o query ad hoc
+	
+		if(absenceType.absenceTypeGroup != null){
+			CheckMessage checkMessage = PersonUtility.checkAbsenceGroup(absenceType, person, dateFrom);
+			if(checkMessage.check == false){
+				flash.error("Impossibile inserire il codice %s per %s %s. "+checkMessage.message, absenceType.code, person.name, person.surname);
+				render("@save");
+			}
+			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, dateFrom).first();
+			if(pd == null){
+				pd = new PersonDay(person, dateFrom);
+				pd.create();
+			}
+			if(checkMessage.check == true && checkMessage.absenceType ==  null){
+				
+				Absence absence = new Absence();
+				absence.absenceType = absenceType;
+				absence.personDay = pd;
+				pd.absences.add(absence);
+				pd.save();
+				pd.populatePersonDay();
+				flash.success("Aggiunto codice di assenza %s "+checkMessage.message, absenceType.code);
+				render("@save");
+	
+			}
+			if(checkMessage.check == true && checkMessage.absenceType != null){
+				Absence absence = new Absence();
+				absence.absenceType = absenceType;
+				absence.personDay = pd;
+				absence.save();
+				pd.absences.add(absence);
+				Absence compAbsence = new Absence();
+				compAbsence.absenceType = checkMessage.absenceType;
+				compAbsence.personDay = pd;
+				compAbsence.save();
+				pd.absences.add(compAbsence);
+				pd.save();
+				pd.populatePersonDay();
+				flash.success("Aggiunto codice di assenza %s "+checkMessage.message, absenceType.code);
+				render("@save");
+			}
+		}
 		
 		Absence absence = new Absence();
 		Logger.debug("%s %s può usufruire del codice %s", person.name, person.surname, absenceType.code);
