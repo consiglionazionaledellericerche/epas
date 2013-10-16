@@ -249,22 +249,50 @@ public class PersonMonth extends Model {
 		LocalDate begin = new LocalDate(year, month, 1);
 		if(begin.isAfter(new LocalDate()))
 			return 0;
-		List<BigInteger> maxNumberOfStamping = JPA.em().createNativeQuery("SELECT count(*) FROM stampings s JOIN person_days pd ON s.personDay_id=pd.id " +
-				"WHERE pd.date BETWEEN :begin AND :end AND pd.person_id = :person_id GROUP BY pd.id ORDER BY count(*) DESC")
-				.setParameter("begin", begin.toDate())
-				.setParameter("end", begin.dayOfMonth().withMaximumValue().toDate())
-				.setParameter("person_id", person.id)
-				.getResultList();
+		List<PersonDay> pdList = PersonDay.find("Select pd From PersonDay pd where pd.person = ? and pd.date between ? and ?", this.person,begin,begin.dayOfMonth().withMaximumValue() ).fetch();
 
-		//Logger.debug("Il massimo di timbrature è: %d", maxNumberOfStamping.get(0));
-		if(maxNumberOfStamping.size() > 0){
-			if (maxNumberOfStamping.get(0).intValue()%2 == 0)
-				return maxNumberOfStamping.get(0).intValue()/2;
-			else
-				return (maxNumberOfStamping.get(0).intValue()/2 + maxNumberOfStamping.get(0).intValue()%2);
+		long max = 0;
+		for(PersonDay pd : pdList)
+		{
+			List<Stamping> orderedStampingList = Stamping.find("Select s from Stamping s where s.personDay = ? order by s.date", pd).fetch();
+			
+			int coupleOfStampings = 0;
+			
+			String lastWay = "out";
+			for(Stamping s : orderedStampingList)
+			{
+				if(lastWay.equals("out") && s.way.description.equals("out"))
+				{
+					coupleOfStampings++;
+					continue;
+				}
+				if(lastWay.equals("out") && s.way.description.equals("in"))
+				{
+					lastWay = "in";
+					continue;
+				}
+				if(lastWay.equals("in") && s.way.description.equals("out"))
+				{
+					coupleOfStampings++;
+					lastWay = "out";
+					continue;
+				}
+				if(lastWay.equals("in") && s.way.description.equals("in"))
+				{
+					coupleOfStampings++;
+					continue;
+				}
+			}
+			if(lastWay.equals("in"))
+			{
+				coupleOfStampings++;
+				continue;
+			}
+			if(max<coupleOfStampings)
+				max = coupleOfStampings;
 		}
-		else
-			return 0;
+		
+		return max;
 	}
 
 

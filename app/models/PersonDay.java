@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -162,6 +163,8 @@ public class PersonDay extends Model {
 			this.lastNotPairedInStamping = lastNotPairedInStamping;
 		}
 	}
+	
+	
 
 	/**
 	 * 
@@ -175,74 +178,280 @@ public class PersonDay extends Model {
 		query.setParameter("abt", abt).setParameter("pd", this);
 		return query.getResultList().size() > 0;
 	}
-
+	
+	
+	/**
+	 * 
+	 * @author alessandro
+	 *
+	 */
+	private final static class PairStamping
+	{
+		Stamping in;
+		Stamping out;
+		PairStamping(Stamping in, Stamping out)
+		{
+			this.in = in;
+			this.out = out;
+		}
+	}
+	
+	/**
+	 * (alessandro)
+	 * Ritorna le coppie di stampings valide al fine del calcolo del time at work. All'interno del metodo
+	 * viene anche settato il campo valid di ciascuna stampings contenuta nel person day
+	 * @return
+	 */
+	public List<PairStamping> getValidPairStamping()
+	{
+		Collections.sort(this.stampings);
+		//(1)Costruisco le coppie valide per calcolare il worktime
+		List<PairStamping> validPairs = new ArrayList<PersonDay.PairStamping>();
+		List<Stamping> serviceStampings = new ArrayList<Stamping>();
+		Stamping stampEnter = null;
+		for(Stamping stamping : this.stampings)
+		{
+			//le stampings di servizio non entrano a far parte del calcolo del work time ma le controllo successivamente
+			//per segnalare eventuali errori di accoppiamento e appartenenza a orario di lavoro valido
+			if(stamping.stampType!= null && stamping.stampType.identifier.equals("s"))
+			{
+				serviceStampings.add(stamping);
+				continue;
+			}
+			//cerca l'entrata
+			if(stampEnter==null)
+			{
+				if(stamping.isIn())
+				{
+					stampEnter = stamping;
+					continue;
+				}
+				if(stamping.isOut())
+				{
+					//una uscita prima di una entrata e' come se non esistesse
+					stamping.valid = false;
+					continue;
+				}
+			
+			}
+			//cerca l'uscita
+			if(stampEnter!=null)
+			{
+				if(stamping.isOut())
+				{
+					validPairs.add(new PairStamping(stampEnter, stamping));
+					stampEnter.valid = true;
+					stamping.valid = true;
+					stampEnter = null;
+					continue;
+				}
+				//trovo un secondo ingresso, butto via il primo
+				if(stamping.isIn())
+				{
+					stampEnter.valid = false;
+					stampEnter = stamping;
+					continue;
+				}
+			}
+		}
+		//(2) scarto le stamping di servizio che non appartengono ad alcuna coppia valida
+		List<Stamping> serviceStampingsInValidPair = new ArrayList<Stamping>();
+		for(Stamping stamping : serviceStampings)
+		{
+			boolean belongToValidPair = false;
+			for(PairStamping validPair : validPairs)
+			{
+				LocalDateTime outTime = validPair.out.date;
+				LocalDateTime inTime = validPair.in.date;
+				if(stamping.date.isAfter(inTime) && stamping.date.isBefore(outTime))
+				{
+					belongToValidPair = true;
+					break;
+				}		
+			}
+			if(belongToValidPair)
+			{
+				serviceStampingsInValidPair.add(stamping);
+			}
+			else
+			{
+				stamping.valid = false;
+			}
+		}
+		
+		//(3)aggrego le stamping di servizio per coppie valide ed eseguo il check di sequenza valida
+		for(PairStamping validPair : validPairs)
+		{
+			LocalDateTime outTime = validPair.out.date;
+			LocalDateTime inTime = validPair.in.date;
+			List<Stamping> serviceStampingsInSinglePair = new ArrayList<Stamping>();
+			for(Stamping stamping : serviceStampingsInValidPair)
+			{
+				if(stamping.date.isAfter(inTime) && stamping.date.isBefore(outTime))
+				{
+					serviceStampingsInSinglePair.add(stamping);
+				}	
+			}
+			//check		
+			Stamping serviceExit = null;
+			for(Stamping stamping : serviceStampingsInSinglePair)
+			{
+				//cerca l'uscita di servizio
+				if(serviceExit==null)
+				{
+					if(stamping.isOut())
+					{
+						serviceExit = stamping;
+						continue;
+					}
+					if(stamping.isIn())
+					{
+						//una entrata di servizio prima di una uscita di servizio e' come se non esistesse
+						stamping.valid = false;
+						continue;
+					}
+				}
+				//cerca l'entrata di servizio
+				if(serviceExit!=null)
+				{
+					if(stamping.isIn())
+					{
+						stamping.valid = true;
+						serviceExit.valid = true;
+						serviceExit = null;
+						continue;
+					}
+					//trovo una seconda uscita di servizio, butto via la prima
+					if(stamping.isOut())
+					{
+						serviceExit.valid = false;
+						serviceExit = stamping;
+						continue;
+					}
+				}
+			}
+		}
+		
+		return validPairs;
+	}
+	
+	/**
+	 * (alessandro)
+	 * Setta il campo valid per ciascuna stamping contenuta in orderedStampings
+	 */
+	public void computeValidStampings()
+	{
+		getValidPairStamping();
+	}
+	
+	/**
+	 * (alessandro)
+	 * Ordina per orario la lista delle stamping nel person day
+	 */
+	public void orderStampings()
+	{
+		Collections.sort(this.stampings);
+	}
+	
 	public TimeAtWork getCalculatedTimeAtWork() {
 
+		int justifiedTimeAtWork = 0;
+		Stamping lastInNotPaired = null;
+		int workTime=0;
+		
+		
 		//Se hanno il tempo di lavoro fissato non calcolo niente
 		StampProfile stampProfile = getStampProfile();
-		if (stampProfile != null && stampProfile.fixedWorkingTime) {
+		if (stampProfile != null && stampProfile.fixedWorkingTime) 
+		{
 			return new TimeAtWork(getWorkingTimeTypeDay().workingTime, null);
 		} 
 
-		int tempoLavoro = 0;
-		int justifiedTimeAtWork = 0;
+	
+		this.timeAtWork = 0;	//vedere se serve
 
-		timeAtWork = 0;
-
-		/**
-		 * controllo sulla possibilità che esistano timbrature di ingresso nel giorno precedente senza corrispondenti timbrature di uscita
-		 * se non la mattina seguente prima dell'orario di scadenza del controllo sulla timbratura stessa
-		 */
+		
+		//controllo sulla possibilità che esistano timbrature di ingresso nel giorno precedente senza corrispondenti timbrature di uscita
+		//se non la mattina seguente prima dell'orario di scadenza del controllo sulla timbratura stessa
 		PersonUtility.checkExitStampNextDay(this);
 
-
+		
+		//assenze all day piu' altri casi di assenze
 		for(Absence abs : absences){
+			Logger.trace("Il codice che sto analizzando è: %s", abs.absenceType.code);
 			//TODO: verificare con Claudio cosa fare con le timbrature in missione
-			if(abs.absenceType.ignoreStamping || 
-					(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay && !checkHourlyAbsenceCodeSameGroup(abs.absenceType))){
+			
+			if(abs.absenceType.ignoreStamping || (abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay && !checkHourlyAbsenceCodeSameGroup(abs.absenceType)))
+			{
 				Logger.debug("Sto inserendo un'assenza giornaliera per %s %s in data %s", person.name, person.surname, date);
 				return new TimeAtWork(0, null);
-			} else{
-				if(!abs.absenceType.code.equals("89") && abs.absenceType.justifiedTimeAtWork.minutesJustified != null)
-					//ci sono più codici di assenza uno è il codice da inviare a roma dell'assenza oraria corrispondente
-					justifiedTimeAtWork = justifiedTimeAtWork + abs.absenceType.justifiedTimeAtWork.minutesJustified;
-				else{
-
-					//Da capire cosa fare nel caso del codice 89
-					Logger.trace("Il codice che sto analizzando è: %s", abs.absenceType.code);
-				}
 			}
+			
+			if(!abs.absenceType.code.equals("89") && abs.absenceType.justifiedTimeAtWork.minutesJustified != null)
+			{
+				//ci sono più codici di assenza uno è il codice da inviare a roma dell'assenza oraria corrispondente
+				justifiedTimeAtWork = justifiedTimeAtWork + abs.absenceType.justifiedTimeAtWork.minutesJustified;
+				continue;
+			}
+			
+			if(!abs.absenceType.code.equals("89"))
+			{
+				//Da capire cosa fare nel caso del codice 89
+				continue;
+			}
+			
 
 		}
 
-		if (stampings.size() == 0) {
+		//in caso di assenza di timbrature considero il justifiedTimeAtwork
+		if (stampings.size() == 0) 
+		{
 			return new TimeAtWork(justifiedTimeAtWork, null);
 		}
-		//Se non c'è almeno una coppia di timbrature allora il tempo di lavoro è giustificato solo dalle assenze
-		//precendente calcolate
-		if(stampings.size() == 1){
-			return new TimeAtWork(justifiedTimeAtWork, stampings.get(0).way == WayType.in ? stampings.get(0) : null);
+		
+		//Se non c'è almeno una coppia di timbrature allora il tempo di lavoro è giustificato solo dalle assenze precendente calcolate
+		if(stampings.size() == 1)
+		{
+			if(stampings.get(0).way == WayType.in)
+			{
+				lastInNotPaired = stampings.get(0);
+			}
+			return new TimeAtWork(justifiedTimeAtWork, lastInNotPaired);
 		}
 
 		if(isHoliday()){
-			int workTime = 0;
+			workTime = 0;
 			for(Stamping st : stampings){
-				if(st.way == Stamping.WayType.in){
-					workTime -= toMinute(st.date);									
-
+				if(st.way == Stamping.WayType.in)
+				{
+					workTime = workTime - toMinute(st.date);									
 				}
-				if(st.way == Stamping.WayType.out){
-					workTime += toMinute(st.date);								
+				if(st.way == Stamping.WayType.out)
+				{
+					workTime = workTime + toMinute(st.date);								
 					Logger.trace("Timbratura di uscita: %s", workTime);
 				}
 			}
 			return new TimeAtWork(justifiedTimeAtWork + workTime, null);
 		}
 
-		int workTime=0;
-		boolean atLeastOnePairedStamping = false;
-		Stamping lastInNotPaired = null;
-
+		//IO*********************************************************************************************************************************
+		
+		//List<Stamping> orderedStampings = Stamping.find("Select st from Stamping st where st.personDay = ? order by st.date", this).fetch();
+		Collections.sort(this.stampings);
+		List<PairStamping> validPairs = this.getValidPairStamping();
+	
+		int myWorkTime=0;
+		{
+			for(PairStamping validPair : validPairs)
+			{
+				myWorkTime = myWorkTime - toMinute(validPair.in.date);
+				myWorkTime = myWorkTime + toMinute(validPair.out.date);
+			}
+		}
+		
+		//**********************************************************************************************************************************
+		
 		List<Stamping> reloadedStampings = Stamping.find("Select st from Stamping st where st.personDay = ? order by st.date", this).fetch();
 		for(int i = 0; i < reloadedStampings.size(); i++) {
 			Logger.trace("Per il calcolo del tempo di lavoro passo dalla timbratura numero %d", i);
@@ -298,7 +507,7 @@ public class PersonDay extends Model {
 					continue;
 				}
 
-				if (i >= 1 && reloadedStampings.get(i-i).way == WayType.out) {
+				if (i >= 1 && reloadedStampings.get(i-1).way == WayType.out) {
 					Logger.debug("Timbratura di uscita del %s per %s %s ignorata perche' la precedente era di uscita", date, person.name, person.surname);
 					continue;
 				}
@@ -326,14 +535,19 @@ public class PersonDay extends Model {
 					Logger.trace("Tempo di lavoro prima della somma della timbratura: %d", workTime);
 					workTime += toMinute(reloadedStampings.get(i).date);
 					Logger.trace("Tempo di lavoro dopo la somma della timbratura: %d", workTime);
-					atLeastOnePairedStamping = true;
 					lastInNotPaired = null;
 					Logger.debug("Normale timbratura di uscita %s che mi dà un tempo di lavoro di: %d", reloadedStampings.get(i).date, workTime);
 				}
 
 			}
+
 		}
 
+		workTime = myWorkTime;
+
+		//in più fa questo
+		
+		/*
 		//Viene conteggiato solo il tempo derivante da assenze giustificate precedentemente calcolato
 		if (!atLeastOnePairedStamping) {
 			return new TimeAtWork(justifiedTimeAtWork, lastInNotPaired);
@@ -343,54 +557,44 @@ public class PersonDay extends Model {
 		if (lastInNotPaired != null) {
 			workTime += toMinute(lastInNotPaired.date);
 		}
+		*/
+		
+		
 
-		//TODO: rivedere bene questa parte
-		int minTimeForLunch = checkMinTimeForLunch();
-		/**
-		 * alla fine del calcolo del tempo di lavoro, attribuisco a tempoLavoro quel valore...dopo di che inizio a controllare se siamo in uno dei casi
-		 * speciali elencati dagli if sotto...se siamo in uno di quei casi il valore di tempoLavoro verrà modificato dalla sezione specifica.
-		 */
-		tempoLavoro = workTime;
-		if(this.person.surname.equals("Vasarelli"))
-			Logger.debug("Il tempo di lavoro per oggi, %s, prima del controllo sul pranzo è: %d e il minTimeForLunch è %d minuti, mentre il tempo per la mensa " +
-					" è di %d minuti", this.date, tempoLavoro, minTimeForLunch, getWorkingTimeTypeDay().breakTicketTime);
+		//Il pranzo e' servito? 		
+		int breakTicketTime = getWorkingTimeTypeDay().breakTicketTime;	//30 minuti
+		int mealTicketTime = getWorkingTimeTypeDay().mealTicketTime;	//6 ore
 
-		if((reloadedStampings.size()==4) && (minTimeForLunch < getWorkingTimeTypeDay().breakTicketTime) && (!reloadedStampings.contains(null))){
-			tempoLavoro = workTime - (getWorkingTimeTypeDay().breakTicketTime-minTimeForLunch);		
+		List<PairStamping> gapLunchPairs = getGapLunchPairs(validPairs);
+		
+		//non ha timbrato per il pranzo
+		if(gapLunchPairs.size()==0 && workTime > mealTicketTime && 	workTime - breakTicketTime > mealTicketTime)
+		{
+			workTime = workTime - breakTicketTime;	
 		}
-
-		if(reloadedStampings.size()==2 && workTime > getWorkingTimeTypeDay().mealTicketTime && 
-				workTime-getWorkingTimeTypeDay().breakTicketTime > getWorkingTimeTypeDay().mealTicketTime){
-			tempoLavoro = workTime-getWorkingTimeTypeDay().breakTicketTime;	
+		//ha timbrato per il pranzo //(TODO per adesso considero il primo gap, poi si vedrà)
+		else if(gapLunchPairs.size()>0)
+		{
+			int minTimeForLunch = 0;
+			for(PairStamping gapLunchPair : gapLunchPairs)
+			{
+				minTimeForLunch = minTimeForLunch - toMinute(gapLunchPair.in.date);
+				minTimeForLunch = minTimeForLunch + toMinute(gapLunchPair.out.date);
+				break;
+			}
+			if( minTimeForLunch < breakTicketTime )
+			{
+				workTime = workTime - breakTicketTime - minTimeForLunch;		
+			}
+		
 		}
-		//		if(reloadedStampings.contains(null) && workTime > getWorkingTimeTypeDay().mealTicketTime
-		//				&& workTime-getWorkingTimeTypeDay().breakTicketTime > getWorkingTimeTypeDay().mealTicketTime){
-		//			tempoLavoro = workTime-getWorkingTimeTypeDay().breakTicketTime;
-		//		}
-		if(reloadedStampings.size() %2 != 0 && workTime > getWorkingTimeTypeDay().mealTicketTime 
-				&& workTime-getWorkingTimeTypeDay().breakTicketTime > getWorkingTimeTypeDay().mealTicketTime){
-			tempoLavoro = workTime-getWorkingTimeTypeDay().breakTicketTime;
-		}
+		
+		return new TimeAtWork(workTime + justifiedTimeAtWork, lastInNotPaired);
 
-		if(this.person.surname.equals("Vasarelli"))
-			Logger.debug("Alla fine del controllo del pranzo il tempo per oggi, %s, è: %d", this.date, tempoLavoro);
-		//		else{
-		//			tempoLavoro = workTime;
-		//			Logger.trace("tempo di lavoro a fine metodo: %d", tempoLavoro);
-		//		}
-
-
-
-		if (stampProfile != null && stampProfile.fixedWorkingTime) {
-			Logger.debug("Il tempo di lavoro per %s %s il giorno %s è %s", person.name, person.surname, date, Math.max(tempoLavoro + justifiedTimeAtWork, getWorkingTimeTypeDay().workingTime));
-			return new TimeAtWork(Math.max(tempoLavoro + justifiedTimeAtWork, getWorkingTimeTypeDay().workingTime), lastInNotPaired);
-		} 
-
-
-		Logger.debug("Il tempo di lavoro per %s %s il giorno %s è %s", person.name, person.surname, date, tempoLavoro + justifiedTimeAtWork);
-		return new TimeAtWork(tempoLavoro + justifiedTimeAtWork, lastInNotPaired);
 
 	}
+	
+	
 
 	public class TimeAtWorkToday {
 		public Integer timeAtWork;
@@ -447,9 +651,19 @@ public class PersonDay extends Model {
 	private TimeAtWorkToday getTimeAtWorkToday() {
 		if (stampings.size() == 0)
 			return new TimeAtWorkToday(0, false);
+		//aggiungo la timbratura di uscita fittizia in questo momento
+		Stamping exit = new Stamping();
+		exit.way = WayType.out;
+		exit.date = LocalDateTime.now();
+		//stampings.add(exit);
+		
+		
+		
 		TimeAtWork calculatedTimeAtWork = getCalculatedTimeAtWork();
 		Logger.debug("getTimeAtWorkToday. calculatedTimeAtWork = %s, lastNotPairedInStamping = %s", calculatedTimeAtWork.timeAtWork, calculatedTimeAtWork.lastNotPairedInStamping);
-		if (calculatedTimeAtWork.lastNotPairedInStamping == null) {
+		
+		if (calculatedTimeAtWork.lastNotPairedInStamping == null) 
+		{
 			return new TimeAtWorkToday(calculatedTimeAtWork.timeAtWork, false); 
 		}
 		if(- toMinute(calculatedTimeAtWork.lastNotPairedInStamping.date) + toMinute(LocalDateTime.now()) > getWorkingTimeTypeDay().mealTicketTime)
@@ -889,18 +1103,49 @@ public class PersonDay extends Model {
 	 * dopo la pausa pranzo. Questo valore verrà poi controllato per stabilire se c'è la necessità di aumentare la durata della pausa
 	 * pranzo intervenendo sulle timbrature
 	 */
-	public int checkMinTimeForLunch(){
-		List<Stamping> reloadedStampings = Stamping.find("Select st from Stamping st where st.personDay = ? order by st.date", this).fetch();
-		int min=0;
-		if(reloadedStampings.size()>3 && reloadedStampings.size()%2==0 && !reloadedStampings.contains(null)){
-			int minuteExit = toMinute(reloadedStampings.get(1).date);
-
-			int minuteEnter = toMinute(reloadedStampings.get(2).date);
-
-			min = minuteEnter - minuteExit;			
-
+	public List<PairStamping> getGapLunchPairs(List<PairStamping> validPairs)
+	{
+		//Assumo che la timbratura di uscita e di ingresso debbano appartenere alla finestra 12:00 - 15:00
+		LocalDateTime startLunch = new LocalDateTime()
+		.withYear(this.date.getYear())
+		.withMonthOfYear(this.date.getMonthOfYear())
+		.withDayOfMonth(this.date.getDayOfMonth())
+		.withHourOfDay(12)
+		.withMinuteOfHour(0);
+		
+		LocalDateTime endLunch = new LocalDateTime()
+		.withYear(this.date.getYear())
+		.withMonthOfYear(this.date.getMonthOfYear())
+		.withDayOfMonth(this.date.getDayOfMonth())
+		.withHourOfDay(15)
+		.withMinuteOfHour(0);
+		
+		List<PairStamping> lunchPairs = new ArrayList<PersonDay.PairStamping>();
+		for(PairStamping validPair : validPairs)
+		{
+			 LocalDateTime in = validPair.in.date;
+			 LocalDateTime out = validPair.out.date;
+			 
+			 if( (out.isAfter(startLunch) && out.isBefore(endLunch)) || (in.isAfter(startLunch) && in.isBefore(endLunch)) )
+				 lunchPairs.add(validPair);
+				 
 		}
-		return min;
+		
+		//costruisco le nuove coppie che sono gli intervalli fra le lunchPair
+		List<PairStamping> gapPairs = new ArrayList<PersonDay.PairStamping>();
+		PairStamping lastPair = null;
+		for(PairStamping lunchPair : lunchPairs)
+		{
+			//prima coppia
+			if(lastPair==null)
+			{
+				lastPair = lunchPair;
+				continue;
+			}
+			gapPairs.add( new PairStamping(lastPair.out, lunchPair.in) );
+		}
+		
+		return gapPairs;
 	}
 
 	/**
