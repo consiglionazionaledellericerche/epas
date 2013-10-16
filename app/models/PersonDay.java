@@ -591,7 +591,7 @@ public class PersonDay extends Model {
 				{
 					if( minTimeForLunch < breakTicketTime ) 
 					{
-						workTime = workTime - breakTicketTime - minTimeForLunch;
+						workTime = workTime - (breakTicketTime - minTimeForLunch);
 					}
 					this.isTicketAvailable = true;
 				}
@@ -1101,19 +1101,20 @@ public class PersonDay extends Model {
 	public List<PairStamping> getGapLunchPairs(List<PairStamping> validPairs)
 	{
 		//Assumo che la timbratura di uscita e di ingresso debbano appartenere alla finestra 12:00 - 15:00
+		Configuration config = Configuration.getCurrentConfiguration();
 		LocalDateTime startLunch = new LocalDateTime()
 		.withYear(this.date.getYear())
 		.withMonthOfYear(this.date.getMonthOfYear())
 		.withDayOfMonth(this.date.getDayOfMonth())
-		.withHourOfDay(12)
-		.withMinuteOfHour(0);
+		.withHourOfDay(config.mealTimeStartHour)
+		.withMinuteOfHour(config.mealTimeStartMinute);
 		
 		LocalDateTime endLunch = new LocalDateTime()
 		.withYear(this.date.getYear())
 		.withMonthOfYear(this.date.getMonthOfYear())
 		.withDayOfMonth(this.date.getDayOfMonth())
-		.withHourOfDay(15)
-		.withMinuteOfHour(0);
+		.withHourOfDay(config.mealTimeEndHour)
+		.withMinuteOfHour(config.mealTimeEndMinute);
 		
 		List<PairStamping> lunchPairs = new ArrayList<PersonDay.PairStamping>();
 		for(PairStamping validPair : validPairs)

@@ -255,41 +255,54 @@ public class PersonMonth extends Model {
 		for(PersonDay pd : pdList)
 		{
 			List<Stamping> orderedStampingList = Stamping.find("Select s from Stamping s where s.personDay = ? order by s.date", pd).fetch();
-			
+
 			int coupleOfStampings = 0;
 			
-			String lastWay = "out";
+			String lastWay = null;
 			for(Stamping s : orderedStampingList)
 			{
-				if(lastWay.equals("out") && s.way.description.equals("out"))
+				if(lastWay==null)
 				{
-					coupleOfStampings++;
-					continue;
+					//trovo out chiudo una coppia
+					if(s.way.description.equals("out"))
+					{
+						coupleOfStampings++;
+						lastWay = null;
+						continue;
+					}
+					//trovo in lastWay diventa in
+					if(s.way.description.equals("in"))
+					{
+						lastWay = s.way.description;
+						continue;
+					}
+					
 				}
-				if(lastWay.equals("out") && s.way.description.equals("in"))
+				//lastWay in
+				if(lastWay.equals("in"))
 				{
-					lastWay = "in";
-					continue;
-				}
-				if(lastWay.equals("in") && s.way.description.equals("out"))
-				{
-					coupleOfStampings++;
-					lastWay = "out";
-					continue;
-				}
-				if(lastWay.equals("in") && s.way.description.equals("in"))
-				{
-					coupleOfStampings++;
-					continue;
+					//trovo out chiudo una coppia
+					if(s.way.description.equals("out"))
+					{
+						coupleOfStampings++;
+						lastWay = null;
+						continue;
+					}
+					//trovo in chiudo una coppia e lastWay resta in
+					if(s.way.description.equals("in"))
+					{
+						coupleOfStampings++;
+						continue;
+					}
 				}
 			}
-			if(lastWay.equals("in"))
-			{
+			//l'ultima stampings e' in chiudo una coppia
+			if(lastWay!=null)
 				coupleOfStampings++;
-				continue;
-			}
+			
 			if(max<coupleOfStampings)
 				max = coupleOfStampings;
+
 		}
 		
 		return max;
