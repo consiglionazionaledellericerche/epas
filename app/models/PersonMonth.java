@@ -249,22 +249,63 @@ public class PersonMonth extends Model {
 		LocalDate begin = new LocalDate(year, month, 1);
 		if(begin.isAfter(new LocalDate()))
 			return 0;
-		List<BigInteger> maxNumberOfStamping = JPA.em().createNativeQuery("SELECT count(*) FROM stampings s JOIN person_days pd ON s.personDay_id=pd.id " +
-				"WHERE pd.date BETWEEN :begin AND :end AND pd.person_id = :person_id GROUP BY pd.id ORDER BY count(*) DESC")
-				.setParameter("begin", begin.toDate())
-				.setParameter("end", begin.dayOfMonth().withMaximumValue().toDate())
-				.setParameter("person_id", person.id)
-				.getResultList();
+		List<PersonDay> pdList = PersonDay.find("Select pd From PersonDay pd where pd.person = ? and pd.date between ? and ?", this.person,begin,begin.dayOfMonth().withMaximumValue() ).fetch();
 
-		//Logger.debug("Il massimo di timbrature è: %d", maxNumberOfStamping.get(0));
-		if(maxNumberOfStamping.size() > 0){
-			if (maxNumberOfStamping.get(0).intValue()%2 == 0)
-				return maxNumberOfStamping.get(0).intValue()/2;
-			else
-				return (maxNumberOfStamping.get(0).intValue()/2 + maxNumberOfStamping.get(0).intValue()%2);
+		long max = 0;
+		for(PersonDay pd : pdList)
+		{
+			List<Stamping> orderedStampingList = Stamping.find("Select s from Stamping s where s.personDay = ? order by s.date", pd).fetch();
+
+			int coupleOfStampings = 0;
+			
+			String lastWay = null;
+			for(Stamping s : orderedStampingList)
+			{
+				if(lastWay==null)
+				{
+					//trovo out chiudo una coppia
+					if(s.way.description.equals("out"))
+					{
+						coupleOfStampings++;
+						lastWay = null;
+						continue;
+					}
+					//trovo in lastWay diventa in
+					if(s.way.description.equals("in"))
+					{
+						lastWay = s.way.description;
+						continue;
+					}
+					
+				}
+				//lastWay in
+				if(lastWay.equals("in"))
+				{
+					//trovo out chiudo una coppia
+					if(s.way.description.equals("out"))
+					{
+						coupleOfStampings++;
+						lastWay = null;
+						continue;
+					}
+					//trovo in chiudo una coppia e lastWay resta in
+					if(s.way.description.equals("in"))
+					{
+						coupleOfStampings++;
+						continue;
+					}
+				}
+			}
+			//l'ultima stampings e' in chiudo una coppia
+			if(lastWay!=null)
+				coupleOfStampings++;
+			
+			if(max<coupleOfStampings)
+				max = coupleOfStampings;
+
 		}
-		else
-			return 0;
+		
+		return max;
 	}
 
 

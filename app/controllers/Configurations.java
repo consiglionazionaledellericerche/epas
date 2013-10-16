@@ -18,6 +18,11 @@ package controllers;
  * dayOfPatron							|	giornoPatrono							|	data valida					
  * monthOfPatron						|	mesePatrono								|	data valida
  * 
+ * mealTimeStartHour					|	pausaPranzoInizioOre					|											html5
+ * mealTimeStartMinute 					|	pausaPranzoInizioMinuti					|											html5	
+ * mealTimeEndHour 						|	pausaPranzoFineOre						|											html5
+ * mealTimeEndMinute 					|	pausaPranzoFineMinuti					|											html5
+ *
  * insertAndModifyWorkingTimeWith		|											|
  * PlusToReduceAtRealWorkingTime		|	configurazioneSegnoPiuPerModifica		|					
  * 
@@ -182,7 +187,10 @@ public class Configurations extends Controller{
 		//		config.workingTime = Integer.parseInt(params.get("tempoLavoroGiornalieroPerBuono"));
 		//		config.workingTimeToHaveMealTicket = Integer.parseInt(params.get("tempoIntervalloPasto"));	
 		
-		
+		config.mealTimeStartHour = Integer.parseInt(params.get("pausaPranzoInizioOre"));
+		config.mealTimeStartMinute = Integer.parseInt(params.get("pausaPranzoInizioMinuti"));
+		config.mealTimeEndHour = Integer.parseInt(params.get("pausaPranzoFineOre"));
+		config.mealTimeEndMinute = Integer.parseInt(params.get("pausaPranzoFineMinuti"));
 		
 		//**********************************//
 		//	Orari e tempi di lavoro			//

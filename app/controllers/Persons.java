@@ -405,6 +405,49 @@ public class Persons extends Controller {
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void insertContract(Long personId){
+		if(personId == null)
+			personId = params.get("personId", Long.class);
+		Logger.debug("PersonId = %d", personId);
+		Person person = Person.findById(personId);
+		Contract con = new Contract();
+		render(con, person);
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void saveContract(){
+		Person person = Person.findById(params.get("personId", Long.class));
+		Contract contract = new Contract();
+		String dataInizio = params.get("beginContract");
+		String dataFine = params.get("expireContract");
+		Contract oldContract = person.getCurrentContract();
+		if(oldContract == null || (oldContract.expireContract != null && oldContract.expireContract.isBefore(new LocalDate(dataInizio)))){
+			contract.beginContract = new LocalDate(dataInizio);
+			if(!dataFine.equals(""))
+				contract.expireContract = new LocalDate(dataFine);
+			else
+				contract.expireContract = null;
+			if(params.get("onCertificate", Boolean.class))
+				contract.onCertificate = true;
+			else
+				contract.onCertificate = false;
+			contract.person = person;
+			contract.save();
+			person.save();
+			contract.setVacationPeriods();
+			contract.save();
+			flash.success("Il contratto per %s %s è stato correttamente salvato", person.name, person.surname);
+			render("@save");
+			
+		}
+		else{
+			flash.error("Le date di contratto che si vogliono inserire non sono coerenti con quelle del contratto precedente. Verificare");
+			render("@save");
+		}		
+		
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void modifyContract(Long contractId){
 		if(contractId != null){
 			Contract contract = Contract.findById(contractId);
@@ -470,10 +513,7 @@ public class Persons extends Controller {
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void discard(){
-		//List<Person> personList = Person.find("Select p from Person p where p.name <> ? order by p.surname", "Admin").fetch();
-		//Logger.debug("La lista delle persone: %s", personList.toString());
 		Persons.list();
-		//render("@list");
 	}
 
 	/**

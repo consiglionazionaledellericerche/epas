@@ -114,6 +114,13 @@ public class Stampings extends Controller {
 
 		Logger.debug("Numuero di ingressi/uscite: %d", numberOfInOut);
 
+		//calcolo del valore valid per le stamping del mese
+		personMonth.getDays();
+		for(PersonDay pd : personMonth.days)
+		{
+			pd.computeValidStampings();
+		}
+		
 		render(personMonth, numberOfInOut, numberOfCompensatoryRest, situazioneParziale);
 	}
 
@@ -193,6 +200,14 @@ public class Stampings extends Controller {
 		int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
 		int numberOfInOut = Math.max(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
 //		Logger.debug("NumberOfInOut: %d, NumberOfCompensatoryRest: %d, OvertimeHour: %d", numberOfInOut, numberOfCompensatoryRest, overtimeHour);
+		
+		//calcolo del valore valid per le stamping del mese
+		personMonth.getDays();
+		for(PersonDay pd : personMonth.days)
+		{
+			pd.computeValidStampings();
+		}
+		
 		render(personMonth, numberOfInOut, numberOfCompensatoryRestUntilToday, numberOfCompensatoryRest,/* overtimeHour, */situazioneParziale);
 
 	}
