@@ -194,6 +194,15 @@ public class Configuration extends Model{
 	public Integer mealTime;
 	
 	/**
+	 * Finestra ammessa per pausa pranzo
+	 */
+	public Integer mealTimeStartHour;
+	public Integer mealTimeStartMinute;
+	public Integer mealTimeEndHour;
+	public Integer mealTimeEndMinute;
+	
+	
+	/**
 	 * Scadenza ferie dell'anno precedente mese
 	 */
 	public Integer monthExpiryVacationPastYear;
