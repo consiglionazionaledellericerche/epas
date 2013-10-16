@@ -1,8 +1,5 @@
 #{extends 'main.html' /}
 
-#{logoutForm /}
-
-#{functionalMenuForm mainMenu: mainMenu /} 
 
 <h3 id="titoloModificaDatiContrattuali">Modifica dati contrattuali per l'utente ${contract.person.name} ${contract.person.surname}</h3>
 #{form @Persons.updateContract()}
