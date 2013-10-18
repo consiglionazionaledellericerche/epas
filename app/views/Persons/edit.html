@@ -1,14 +1,19 @@
-#{extends 'main.html' /}
-
-#{logoutForm /}
+#{extends 'main_admin.html' /}
 
 #{functionalMenuForm mainMenu: mainMenu /} 
 
-<h2 id="titoloModificaDatiPersonali">Modifica dati per l'utente
-	${person.name} ${person.surname}</h2>
+    <ul class="nav nav-tabs">
+    	<li class="active"><a href="@{Persons.edit(person.id)}#">Anagrafica</a></li>
+    	<li><a href="@{Persons.personCompetence(person.id, month, year)}#">Competenze</a></li>
+    </ul>
 
+<h2 id="titoloModificaDatiPersonali">Modifica dati anagrafici per l'utente
+	${person.name} ${person.surname}</h2>
+<input type="hidden" name="id" value="${id}"/>
 #{form @Persons.update()}
 <input type="hidden" name="personId" value="${person.id}"/>
+<input type="hidden" name="year" value="${year}"/>
+<input type="hidden" name="month" value="${month}"/>
 
 <fieldset>
 	<legend>Dati personali</legend>
@@ -175,38 +180,7 @@
 	</p>
 </fieldset>
 
-<fieldset>
-	<legend>Informazioni su straordinari e reperibilità</legend>
-	<p>Fra parentesi nella cella relativa agli straordinari diurni, il numero di ore disponibili nel mese da poter essere utilizzate per gli
-	straordinari</p>
-	<p>Nel caso si volessero modificare i valori degli straordinari del mese precedente, clicca qui ---> <a href="@{Competences.updateOldOvertime(person.id)}" class="updateOldOvertime${person.id}">Modifica gli straordinari per il mese precedente</a><script type="text/javascript"> 
-				$('.updateOldOvertime${person.id}').popupWindow({ 
-				height:500, 
-				width:800, 
-				top:50, 
-				left:50 
-				}); 
-				</script></p>
-	
-	
-	<table id="competenze">
-		<tr>
-			
-			<th class="competenze">Ind.tà rep.tà feriale (207)</th>
-			<th class="competenze">Ind.tà rep.tà festiva (208)</th>
-			<th class="competenze">Straordinario diurno nei giorni lavorativi (S1)</th>
-			
-		</tr>
-		<tr>
-			
-			<td class="comp"><input type="text" value="${weekDayAvailability}" size="4" maxlength="4"/></td>
-			<td class="comp"><input type="text" value="${holidaysAvailability}"size="4" maxlength="4"/></td>
-			<td class="comp">(${progressive})<input type="text" value="${daylightWorkingDaysOvertime}"size="4" maxlength="4"/></td>
-			
-		</tr>
-		
-	</table>
-</fieldset>
+
 <div id="frm">
 <input id="submitEditPerson"type="submit" value="Ok" />
 #{/form} 
