@@ -291,7 +291,7 @@ public class PersonUtility {
 
 
 	public static void checkExitStampNextDay(PersonDay pd){
-		Logger.trace("Chiamata la checkExitStampNextDay per %s %s in data %s", pd.person.name, pd.person.surname, pd.date);
+		Logger.debug("Chiamata la checkExitStampNextDay per %s %s in data %s", pd.person.name, pd.person.surname, pd.date);
 		Configuration config = Configuration.getCurrentConfiguration();
 		PersonDay pdPastDay = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? " +
 				"and pd.date >= ? and pd.date < ? ORDER by pd.date DESC", pd.person, pd.date.dayOfMonth().withMinimumValue(), pd.date).first();
@@ -306,7 +306,7 @@ public class PersonUtility {
 			//	List<Stamping> reloadedStampingYesterday = new ArrayList<Stamping>(pdPastDay.stampings);
 			int size = reloadedStampingYesterday.size();
 			if(reloadedStampingYesterday.size() > 0 && reloadedStampingYesterday.get(size-1).way == WayType.in){
-				Logger.trace("Sono nel caso in cui ci sia una timbratura finale di ingresso nel giorno precedente nel giorno %s", 
+				Logger.debug("Sono nel caso in cui ci sia una timbratura finale di ingresso nel giorno precedente nel giorno %s", 
 						pdPastDay.date);
 				if(stampProfile == null || !stampProfile.fixedWorkingTime){
 					List<Stamping> s = Stamping.find("Select s from Stamping s where s.personDay = ? order by s.date asc", pd).fetch();
@@ -635,8 +635,13 @@ public class PersonUtility {
 		List<Absence> absList = null;
 		//trovo nella storia dei personDay l'ultima occorrenza in ordine temporale del codice di rimpiazzamento relativo al codice di assenza
 		//che intendo inserire, di modo da fare i calcoli sulla possibilità di inserire quel codice di assenza da quel giorno in poi.
-		Absence absence = Absence.find("Select abs from Absence abs where abs.absenceType = ? and abs.personday.person = ? " +
-				" order by absence.personDay.date desc", absenceType.absenceTypeGroup.replacingAbsenceType).first();
+		Absence absence = Absence.find(
+				"Select abs "
+				+ "from Absence abs "
+				+ "where abs.absenceType = ? and abs.personDay.person = ? " 
+				+ "order by abs.personDay.date desc",
+				absenceType.absenceTypeGroup.replacingAbsenceType, 
+				person).first();
 		
 		if(absenceType.absenceTypeGroup.accumulationType.equals(AccumulationType.yearly)){
 			absList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup.label = ? and abs.personDay.person = ? and" +
