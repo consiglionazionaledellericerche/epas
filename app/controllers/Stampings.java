@@ -27,13 +27,16 @@ import models.Person;
 import models.PersonDay;
 import models.PersonMonth;
 import models.PersonTags;
+import models.StampModificationType;
 import models.StampProfile;
 import models.StampType;
 import models.Stamping;
 import models.Stamping.WayType;
+import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import models.efficiency.EfficientPersonDay;
 import models.exports.AbsenceReperibilityPeriod;
+import models.rendering.PersonStampingDayRecap;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -73,46 +76,78 @@ public class Stampings extends Controller {
 			Application.indexAdmin();
 		}
 
-		Configuration confParameters = Configuration.getCurrentConfiguration();
-		if(confParameters == null)
-			confParameters = Configuration.find("Select c from Configuration c order by c.id desc").first();
-		
 		Person person = Security.getPerson();
-		Logger.debug("La persona presa dal security è: %s %s", person.name, person.surname);
-		LocalDate date = new LocalDate();
-		Logger.trace("Anno: "+year);    	
-		Logger.trace("Mese: "+month);
-		if(year == null || month == null){
-			year = date.getYear();
-			month = date.getMonthOfYear();
-		}
-		person = person.findById(person.id);
-		//person.refresh();
-		PersonMonth personMonth = PersonMonth.byPersonAndYearAndMonth(person, year, month);
-		if(personMonth == null)
+		//numero di colonne da visualizzare
+		Configuration conf = Configuration.getCurrentConfiguration();
+		int minInOutColumn = conf.numberOfViewingCoupleColumn;
+
+		//TODO 18/10 creare un metodo statico in models.person getPersonMonth(int year, int month)
+		PersonMonth personMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?",
+				person, 
+				month, 
+				year)
+				.first();
+
+		//TODO 18/10 usare metodo in models.person getMonthContract() per implementare questo controllo
+		if (personMonth == null) {
+			/**
+			 * se il personMonth che viene richiesto, è situato nel tempo prima dell'inizio del contratto della persona oppure successivamente 
+			 * ad esso, se quest'ultimo è a tempo determinato (expireContract != null), si rimanda alla pagina iniziale perchè si tenta di accedere
+			 * a un periodo fuori dall'intervallo temporale in cui questa persona ha un contratto attivo
+			 */
+			if(new LocalDate(year, month, 1).dayOfMonth().withMaximumValue().isBefore(person.getCurrentContract().beginContract)
+					|| (person.getCurrentContract().expireContract != null && new LocalDate(year, month, 1).isAfter(person.getCurrentContract().expireContract))){
+				flash.error("Si è cercato di accedere a un mese al di fuori del contratto valido per %s %s. " +
+						"Non esiste situazione mensile per il mese di %s", person.name, person.surname, DateUtility.fromIntToStringMonth(month));
+				render("@redirectToIndex");
+			}
 			personMonth = new PersonMonth(person, year, month);
+			personMonth.create();
+
+		}
+
+		//calcolo situazione parziale (Residuo tempo di lavoro dei mesi precedenti)
+		//TODO 18/10 implementare metodo statico in models.person
 		int situazioneParziale = 0;
-		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-				Security.getPerson(), new LocalDate(year, month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?",
+				Security.getPerson(), 
+				new LocalDate(year, month, 1), 
+				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue())
+				.fetch();
+
 		if(pdList.size() == 0 && year > new LocalDate().getYear())
+		{
 			situazioneParziale = 0;
-		else{
-			if(personMonth.month == 1){
+		}
+		else
+		{
+			//gennaio
+			if(personMonth.month == 1)
+			{
 				situazioneParziale = personMonth.residuoAnnoCorrenteDaInizializzazione();
 			}
-			else{
+			else
+			{
 				PersonMonth count = personMonth;
-				while(count.month > 1){
-					situazioneParziale = situazioneParziale + count.mesePrecedente().residuoDelMese() - count.mesePrecedente().straordinari;
+				while(count.month > 1)
+				{
+					if(count.mesePrecedente() != null)
+						situazioneParziale = situazioneParziale + count.mesePrecedente().residuoDelMese() - count.mesePrecedente().straordinari;
 					count = count.mesePrecedente();
+					if(count == null)
+						break;
 				}
 			}
-		}		
-		
-		int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
-		int numberOfInOut = Math.max(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
+		}
 
-		Logger.debug("Numuero di ingressi/uscite: %d", numberOfInOut);
+		//calcolo Il numero di riposi compensativi usati fino ad oggi
+		int numberOfCompensatoryRestUntilToday = personMonth.numberOfCompensatoryRestUntilToday();
+
+		//non piu' usato
+		int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
+
+		//numero di colonne da stampare
+		int numberOfInOut = Math.max(minInOutColumn, (int)personMonth.getMaximumCoupleOfStampings());
 
 		//calcolo del valore valid per le stamping del mese
 		personMonth.getDays();
@@ -120,8 +155,15 @@ public class Stampings extends Controller {
 		{
 			pd.computeValidStampings();
 		}
-		
-		render(personMonth, numberOfInOut, numberOfCompensatoryRest, situazioneParziale);
+
+		//Nuova struttura dati per stampare
+		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
+		for(PersonDay pd : personMonth.days)
+		{
+			PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(pd,numberOfInOut);
+			daysRecap.add(dayRecap);
+		}
+		render(personMonth, numberOfInOut, numberOfCompensatoryRestUntilToday, numberOfCompensatoryRest, situazioneParziale, daysRecap);
 	}
 
 
@@ -136,22 +178,20 @@ public class Stampings extends Controller {
 			personStamping(personId);
 		}
 
-//		PersonMonth previousPersonMonth = null;
-		Logger.debug("Called personStamping of personId=%s, year=%s, month=%s", personId, year, month);
-
 		Person person = Person.findById(personId);
-		/**
-		 * il conf parameters serve per recuperare il parametro di quante colonne entrata/uscita far visualizzare.
-		 * Deve essere popolata una riga di quella tabella prima però....
-		 */
-		long id = 1;
-		Configuration confParameters = Configuration.findById(id);
+		
+		//numero di colonne da visualizzare
+		Configuration conf = Configuration.getCurrentConfiguration();
+		int minInOutColumn = conf.numberOfViewingCoupleColumn;
+		
+		//TODO 18/10 creare un metodo statico in models.person getPersonMonth(int year, int month)
+		PersonMonth personMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?",
+				person, 
+				month, 
+				year)
+				.first();
 
-		PersonMonth personMonth =
-				PersonMonth.find(
-						"Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
-						person, month, year).first();
-
+		//TODO 18/10 usare metodo in models.person getMonthContract() per implementare questo controllo
 		if (personMonth == null) {
 			/**
 			 * se il personMonth che viene richiesto, è situato nel tempo prima dell'inizio del contratto della persona oppure successivamente 
@@ -169,23 +209,33 @@ public class Stampings extends Controller {
 
 		}
 		
+		//calcolo situazione parziale (Residuo tempo di lavoro dei mesi precedenti)
+		//TODO 18/10 implementare metodo statico in models.person
 		int situazioneParziale = 0;
-		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-				Security.getPerson(), new LocalDate(year, month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?",
+				Security.getPerson(), 
+				new LocalDate(year, month, 1), 
+				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue())
+				.fetch();
 		
 		if(pdList.size() == 0 && year > new LocalDate().getYear())
+		{
 			situazioneParziale = 0;
-		else{
-			if(personMonth.month == 1){
+		}
+		else
+		{
+			//gennaio
+			if(personMonth.month == 1)
+			{
 				situazioneParziale = personMonth.residuoAnnoCorrenteDaInizializzazione();
 			}
-			else{
+			else
+			{
 				PersonMonth count = personMonth;
-				while(count.month > 1){
-					Logger.debug("Mese precedente: %s", count.mesePrecedente());
+				while(count.month > 1)
+				{
 					if(count.mesePrecedente() != null)
 						situazioneParziale = situazioneParziale + count.mesePrecedente().residuoDelMese() - count.mesePrecedente().straordinari;
-					
 					count = count.mesePrecedente();
 					if(count == null)
 						break;
@@ -193,13 +243,14 @@ public class Stampings extends Controller {
 			}
 		}
 		
-		
-//		int overtimeHour = personMonth.getOvertimeHourInYear(new LocalDate(year,month,1).dayOfMonth().withMaximumValue());
+		//calcolo Il numero di riposi compensativi usati fino ad oggi
 		int numberOfCompensatoryRestUntilToday = personMonth.numberOfCompensatoryRestUntilToday();
-
+		
+		//non piu' usato
 		int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
-		int numberOfInOut = Math.max(confParameters.numberOfViewingCoupleColumn, (int)personMonth.getMaximumCoupleOfStampings());
-//		Logger.debug("NumberOfInOut: %d, NumberOfCompensatoryRest: %d, OvertimeHour: %d", numberOfInOut, numberOfCompensatoryRest, overtimeHour);
+		
+		//numero di colonne da stampare
+		int numberOfInOut = Math.max(minInOutColumn, (int)personMonth.getMaximumCoupleOfStampings());
 		
 		//calcolo del valore valid per le stamping del mese
 		personMonth.getDays();
@@ -208,10 +259,17 @@ public class Stampings extends Controller {
 			pd.computeValidStampings();
 		}
 		
-		render(personMonth, numberOfInOut, numberOfCompensatoryRestUntilToday, numberOfCompensatoryRest,/* overtimeHour, */situazioneParziale);
+		//Nuova struttura dati per stampare
+		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
+		for(PersonDay pd : personMonth.days)
+		{
+			PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(pd,numberOfInOut);
+			daysRecap.add(dayRecap);
+		}
+		render(personMonth, numberOfInOut, numberOfCompensatoryRestUntilToday, numberOfCompensatoryRest, situazioneParziale, daysRecap);
 
 	}
-
+	
 	private static void personStamping() {
 		LocalDate now = new LocalDate();
 		personStamping(Security.getPerson().getId(), now.getYear(),now.getMonthOfYear());
@@ -221,6 +279,8 @@ public class Stampings extends Controller {
 		LocalDate now = new LocalDate();
 		personStamping(personId, now.getYear(), now.getMonthOfYear());
 	}
+
+	
 
 	public static void dailyStampings() {
 		Person person = Person.findById(params.get("id", Long.class));
@@ -404,8 +464,13 @@ public class Stampings extends Controller {
 					stamping.personDay.person, stamping.personDay.date).fetch();
 			for(PersonDay p : pdList){
 				if(p.date.getMonthOfYear() == stamping.date.getMonthOfYear()){
-					p.populatePersonDay();
-					p.save();
+					//ricomputo il progressivo per ogni giorno del mese successivo (eccetto oggi)
+					LocalDate today = new LocalDate();
+					if( !p.date.isEqual(today) )
+					{
+						p.populatePersonDay();
+						p.save();
+					}	
 				}
 				
 			}
@@ -529,6 +594,10 @@ public class Stampings extends Controller {
 		List<Integer> pdMissingStampingList = new ArrayList<Integer>();
 		for(EfficientPersonDay currentPersonDayRs : personDayRsList)
 		{
+			if(currentPerson.surname.equals("Mainetto") && currentPersonDayRs.date.getDayOfMonth()==25)
+			{
+				System.out.println();
+			}
 			//controllo 
 			if(currentPersonDayRs.fixed==true)
 				continue;
