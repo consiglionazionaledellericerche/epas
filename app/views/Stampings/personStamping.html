@@ -26,47 +26,45 @@
 		<th>Note</th>
 	</tr>
 	
-%{
-     for(day in personMonth.days) {
+	%{
+     for(dayRecap in daysRecap) {
      		
 			
-}%
+	}%
 		
-<tr>
+	<tr>
+			<td>${dayRecap.mealTicket}</td>
 			%{
-			if(day.isHoliday()==false){
-			}%	<td>${String.format(messages.get('views.common.yes_or_no.'+ day.mealTicket()))}</td>
-			%{
-			}else{
-			}%	<td>${String.format(messages.get('views.common.yes_or_no.true'))}</td>
+			if(dayRecap.holiday==false)
+			{
+			}%	
+				<td class="capitalized">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</td>
 			%{
 			}
-			}%
-			%{
-			if(day.isHoliday()==false){
-			}%	<td class="capitalized">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), day.date.toDate())}</td>
-			
-			%{
-			}else{
-			}%	<td class="festivi">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), day.date.toDate())}</td>
+			else
+			{
+			}%	
+				<td class="festivi">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</td>
 			%{
 			}
 			}%
 		
 			<td class="assenza">
-				
-					<a href="@{Absences.create(day.person.id, day.date.year, day.date.monthOfYear, day.date.dayOfMonth)}" class="insertAbsence${day.date.dayOfMonth}">___</a>
+				<a href="@{Absences.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" class="insertAbsence${dayRecap.date.dayOfMonth}">___</a>
 				%{	
-					for (absence in day.absences) { 
+				for (absence in dayRecap.absences) 
+				{ 
 				%}
-						<a href="@{Absences.edit(absence.id)}" class="insertAbsence${day.date.dayOfMonth}">
-							${absence.absenceType.code}
-						</a>
+				 <a href="@{Absences.edit(absence.id)}" class="insertAbsence${dayRecap.date.dayOfMonth}">
+					${absence.absenceType.code}
+				 </a>
 										
-				%{ } }%
+				%{
+				 }
+				 }%
 				
 				<script type="text/javascript"> 
-				$('.insertAbsence${day.date.dayOfMonth}').popupWindow({ 
+				$('.insertAbsence${dayRecap.date.dayOfMonth}').popupWindow({ 
 				height:600, 
 				width:1000,
 				scrollbars:1,
@@ -77,108 +75,72 @@
 				</script>			
 			</td>
 
-			%{  int j = 0;
-				for(int i = 0; i < numberOfInOut; i++){
-					j = i*2;
-				}%
-				%{
-					if(day.getStampingsForTemplate().size() > j && day.getStampingsForTemplate().get(j) != null && !day.getStampingsForTemplate().get(j).isValid()){
-					}%
-						<td class="ingressowarn">
-					%{
-					}else{
+
+			%{  
+			for(stampingTemplate in dayRecap.stampingsTemplate){
+			}%
+			%{
+					if(stampingTemplate.colour.equals("in"))
+					{
 					}%
 						<td class="ingresso">
 					%{
 					}
-				}%
-				%{ if(day.getStampingsForTemplate().size() > j && day.getStampingsForTemplate().get(j) !=null) { }%
-					<a href="@{Stampings.edit(day.getStampingsForTemplate().get(j).id)}" class="insertStamping${day.date.dayOfMonth}-${j}">
-					${day.getStampingsForTemplate().get(j).date.toCalendarTime()}
-					</a>
-				 
-				<strong>${(day.getStampingsForTemplate().get(j).stampType?.identifier)}</strong>
-				<script type="text/javascript"> 
-				$('.insertStamping${day.date.dayOfMonth}-${j}').popupWindow({ 
-				height:600, 
-				width:800,
-				scrollbars:1,
-				resizable:0,
-				top:50, 
-				left:50 
-				}); 
-				</script>
-					%{ if(j < day.getStampingsForTemplate().size() && day.getStampingsForTemplate().get(j).markedByAdmin == true){ 
-					}%
-					  	<strong>${day.checkMarkedByAdmin().code}</strong>
-					%{
-						}
-						if(day.getStampingsForTemplate().get(j).stampModificationType != null){
-						}%
-							<strong>${day.checkMissingExitStampBeforeMidnight() != null ? day.checkMissingExitStampBeforeMidnight().code : ''}</strong>
-					%{ 
-						}
-					}else{
-				}% 
-					
-					${' '}
-					
-				%{
-					}
-				}%
-					
-				</td>
-				%{
-					if(day.getStampingsForTemplate().size() > j+1 && day.getStampingsForTemplate().get(j+1) != null && !day.getStampingsForTemplate().get(j+1).isValid()){
-					}%
-						<td class="uscitawarn">
-					%{
-					}else{
+					else if (stampingTemplate.colour.equals("out"))
+					{
 					}%
 						<td class="uscita">
 					%{
 					}
-				}%
-				%{ if(day.getStampingsForTemplate().size() > j+1 && day.getStampingsForTemplate().get(j+1) !=null) { }%
-					<a href="@{Stampings.edit(day.getStampingsForTemplate().get(j+1).id)}" class="insertStamping${day.date.dayOfMonth}-${j+1}">
-					${day.getStampingsForTemplate().get(j+1).date.toCalendarTime()}
-					</a>
-					
-					<strong>${(day.getStampingsForTemplate().get(j+1).stampType?.identifier)}</strong> 
-				<script type="text/javascript"> 
-				$('.insertStamping${day.date.dayOfMonth}-${j+1}').popupWindow({ 
-				height:600, 
-				width:800, 
-				scrollbars:1,
-				resizable:0,
-				top:50, 
-				left:50 
-				}); 
-				</script>
-					%{ 	if(j+1 < day.getStampingsForTemplate().size() && day.getStampingsForTemplate().get(j+1).markedByAdmin == true){ 
+					else if (stampingTemplate.colour.equals("warn"))
+					{
 					}%
-					  	<strong>${day.checkMarkedByAdmin().code}</strong>
-					%{
-						} 
-						if(day.getStampingsForTemplate().get(j+1).stampModificationType != null){
-						}%
-							<strong>${day.checkMissingExitStampBeforeMidnight() != null ? day.checkMissingExitStampBeforeMidnight().code : ''}</strong>
+						<td class="warn">
 					%{
 					}
-					}	else{
-					}% 
-					
-					${' '}
-					
-					%{
-						}
-					}%
+				}%
+				%{ if(stampingTemplate.date!=null) { }%
+					<a href="@{Stampings.edit(stampingTemplate.stampingId)}" class="${stampingTemplate.insertStampingClass}">
+					${stampingTemplate.hour}
+					</a>
+					 <script type="text/javascript"> 
+						$('.${stampingTemplate.insertStampingClass}').popupWindow({ 
+						height:600, 
+						width:800,
+						scrollbars:1,
+						resizable:0,
+						top:50, 
+						left:50 
+						}); 
+					</script>		
+				 
+				 %{
+				 }
+				 }%
+				 
+				<strong>${stampingTemplate.identifier}</strong>
+				<strong>${stampingTemplate.markedByAdminCode}</strong>
+				<strong>${stampingTemplate.missingExitStampBeforeMidnightCode}</strong>
+
 				</td>
 			
-				%{ } }%
-			<td class="inserisciTimbratura"><a href="@{Stampings.create(day.person.id, day.date.year, day.date.monthOfYear, day.date.dayOfMonth)}" class="insertStamping${day.date.dayOfMonth}">+++</a>
+			%{ 
+			} 
+			}%
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+			<td class="inserisciTimbratura"><a href="@{Stampings.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" class="insertStamping${dayRecap.date.dayOfMonth}">+++</a>
 				<script type="text/javascript"> 
-				$('.insertStamping${day.date.dayOfMonth}').popupWindow({ 
+				$('.insertStamping${dayRecap.date.dayOfMonth}').popupWindow({ 
 				height:600, 
 				width:800,
 				scrollbars:1,
@@ -188,108 +150,28 @@
 				}); 
 				</script>
 			</td>
-				<td class="tempoLavoro">
-			%{
-	         	if(!day.isFuture()){
-	         	
-	         }%
-	         %{
-					if(day.isToday()){
-				}%
-						${day.getTimeAtWorkWithToday().timeAtWork.toHourTime()}<strong>${day.getTodayLunchTime()?.code}</strong><strong>${day.getTimeAtWorkWithToday().exitingNow ? 'f' : ''}</strong>
-						
-	        	%{ 
-		  			} 
-		  			else{
-		  		}%
-		  				${day.getTimeAtWorkWithToday().timeAtWork.toHourTime()}<strong>${day.checkTimeForLunch()?.code}</strong><strong>${day.getFixedWorkingTime() != null && !day.isHoliday() ? day.getFixedWorkingTime().code : ''}</strong>
-		  				
-		  		%{
-		  			}
-		  			
-		  		}
-		  	}%
-		  		
-		  		 	
-		  	</td>							
-	       <td class="differenza">
-	       	 %{
-	       	 	if(day.isToday() && day.absences.size() == 0){
-	       	 }%
-	       	 		${day.differenceToday().toHourTime()}
-	       	 %{
-	       	 	}
-	       	 }%
-	       	 %{
-	       	 	if(day.isToday() && day.absences.size() != 0){
-	       	 }%
-	       	 		${(day.difference).toHourTime()}
-	       	 %{
-	       	 	}
-	       	 }%
-	         %{
-	         	if(!day.isFuture() && !day.isToday()){
-	         }%
-	         	
-	         	%{
-	        		if(day.isHoliday()==false || day.stampings.size() != 0){
-				}%
-						${(day.difference).toHourTime()}
-				%{ 
-		  		    } else {
-		  		 }%
-		  		 		${'00:00'}
-				 %{
-				    }
-				 }%
-		    %{
-		        }
-		     }%
-		     
-			</td>	
-			 <td class="progressivo">
-			 %{
-			 	if(day.isToday() && day.absences.size() == 0){
-			 }%
-			 		${day.progressiveToday().toHourTime()}
-			 %{
-			 	}
-			 }%
-			 %{
-	       	 	if(day.isToday() && day.absences.size() != 0){
-	       	 }%
-	       	 		${(day.progressive).toHourTime()}
-	       	 %{
-	       	 	}
-	       	 }%
-			%{
-			    if(!day.isFuture() && !day.isToday()) {
-			}%
-			     
-				%{
-				    if(day.isHoliday()==false) {
-				 }%
-	  			      ${day.progressive.toHourTime()}
-		  		 %{ 
-		  		    } else {
-		  		  }%
-				      ${day.checkPreviousProgressive() != null ? day.checkPreviousProgressive().progressive.toHourTime() : '00:00'}
-				  %{
-				    }
-				  }%
-		    %{
-		        }
-		     }%
-		    	
-			</td>
-	         <td>${day.person.workingTimeType != null ? day.person.workingTimeType.description : ''}</td>
-	         <td></td>
-		</tr>
+			<td class="tempoLavoro">
+				${dayRecap.workTime}
+				<strong>${dayRecap.todayLunchTimeCode}</strong>
+				<strong>${dayRecap.fixedWorkingTimeCode}</strong>
+				<strong>${dayRecap.exitingNowCode}</strong>
+			</td>							
+	       	<td class="differenza">
+	       		${dayRecap.difference}
+	       	</td>	
+			<td class="progressivo">
+			 	${dayRecap.progressive}
+		    </td>
+	        
+	        <td>${dayRecap.workingTimeTypeDescription}</td>
+	        <td>${dayRecap.note}</td>
+	       
+	</tr>
 
-%{  		   
-     }
-     
-}%
+	%{  		   
+ 	}
+   
+	}%
 
 </table>
 
