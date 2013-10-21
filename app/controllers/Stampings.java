@@ -130,7 +130,7 @@ public class Stampings extends Controller {
 		if (personId == null) {
 			personStamping();
 		}
-
+		
 		if (year == 0 || month == 0) {
 			personStamping(personId);
 		}

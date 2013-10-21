@@ -9,6 +9,7 @@ import models.Person;
 import org.joda.time.LocalDate;
 
 import play.Logger;
+import play.cache.Cache;
 import play.mvc.Controller;
 
 public class SwitchTemplate extends Controller{
@@ -17,9 +18,10 @@ public class SwitchTemplate extends Controller{
 
 	public static void dispatch() throws InstantiationException, IllegalAccessException, IOException, ClassNotFoundException, SQLException {
 		LocalDate now = new LocalDate();
-
+		
+		
 		String method = params.get("method");
-		Logger.debug("Nella switchTemplate La action è: %s", method);
+	//	Logger.debug("Nella switchTemplate La action è: %s", method);
 		if (method == null) {
 
 			flash.error(String.format("La action da eseguire è: %s", method));
@@ -27,9 +29,9 @@ public class SwitchTemplate extends Controller{
 
 		}
 		ActionMenuItem menuItem = ActionMenuItem.valueOf(method);
-		Logger.debug("Nella switchTemplate Il menuItem è: %s relativo alla action: %s", menuItem, method);
+	//	Logger.debug("Nella switchTemplate Il menuItem è: %s relativo alla action: %s", menuItem, method);
 		Person person = Security.getPerson();
-		Logger.debug("L'id della persona loggata è: %d", person.id);
+	//	Logger.debug("L'id della persona loggata è: %d", person.id);
 		
 		int month;
 		if (params.get("month") != null) {
@@ -65,7 +67,10 @@ public class SwitchTemplate extends Controller{
 		else{
 			personId = Security.getPerson().id;
 		}
-		
+		session.put("methodSelected", method);
+		session.put("monthSelected", month);
+		session.put("yearSelected", year);
+		session.put("personSelected", personId);
 		params.flash();
 		
 		switch (menuItem) {
@@ -228,6 +233,7 @@ public class SwitchTemplate extends Controller{
 
 		}
 		//flash.put("method", menuItem.getDescription());
+		
 		params.flash();
 	}
 }
