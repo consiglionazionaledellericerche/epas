@@ -22,8 +22,8 @@ public class DateUtility {
 		Logger.trace("configurazione: %s con localdate: %s", config, date);
 		if(isGeneralHoliday(date))
 			return true;
-	
-		return person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).holiday;
+		boolean holiday = person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).holiday;
+		return holiday;
 
 	}
 
