@@ -57,6 +57,8 @@ GET		/persons								Persons.insertPerson
 GET		/insertUsername							Persons.insertUsername
 POST	/insertUsername							Persons.updateUsername
 GET		/persons/edit/{personId}				Persons.edit
+GET		/persons/personCompetence/{personId}/{year}/{month}			Person.personCompetence
+POST	/person/saveCompetence/					Persons.saveCompetence
 POST	/persons/deletePerson/{personId}		Persons.deletePerson
 GET		/persons/terminatePerson/{personId}		Persons.terminatePerson
 POST	/persons/terminateContract/{personId}	Persons.terminateContract
