@@ -190,7 +190,7 @@ public class PersonDay extends Model {
 	
 	
 	/**
-	 * 
+	 * Classe che modella due stampings logicamente accoppiate nel personday (una di ingresso ed una di uscita)
 	 * @author alessandro
 	 *
 	 */
@@ -408,7 +408,7 @@ public class PersonDay extends Model {
 			
 			if(!abs.absenceType.code.equals("89"))
 			{
-				//Da capire cosa fare nel caso del codice 89
+				//TODO Da capire cosa fare nel caso del codice 89
 				continue;
 			}
 			
@@ -455,12 +455,10 @@ public class PersonDay extends Model {
 				myWorkTime = myWorkTime + toMinute(validPair.out.date);
 			}
 		}
-		
-		
 	
 		workTime = myWorkTime;
 
-		//Il pranzo e' servito? 		
+		//Il pranzo e' servito??		
 		int breakTicketTime = getWorkingTimeTypeDay().breakTicketTime;	//30 minuti
 		int mealTicketTime = getWorkingTimeTypeDay().mealTicketTime;	//6 ore
 
@@ -485,7 +483,7 @@ public class PersonDay extends Model {
 		//potrebbe aver timbrato per il pranzo (più di due timbrature)
 		if(validPairs.size()>1)
 		{
-			//ha timbrato per il pranzo //(TODO per adesso considero il primo gap, poi si vedrà)
+			//ha timbrato per il pranzo //(TODO considero il primo gap in orario pranzo)
 			if(gapLunchPairs.size()>0)
 			{
 				int minTimeForLunch = 0;
@@ -818,9 +816,13 @@ public class PersonDay extends Model {
 
 	/**
 	 * (checked 18/10 personStamping)
+	 * la lista delle timbrature del person day modificata con 
+	 * (1) l'inserimento di una timbratura null nel caso in cui esistano due timbrature consecutive di ingresso o di uscita, 
+	 * mettendo tale timbratura nulla in mezzo alle due
+	 * (2) l'inserimento di una timbratura di uscita fittizia nel caso di today per calcolare il tempo di lavoro provvisorio
+	 * (3) l'inserimento di timbrature null per arrivare alla dimensione del numberOfInOut
 	 * @param stampings
-	 * @return la lista delle timbrature di quel giorno modificata con l'inserimento di una timbratura nulla nel caso in cui esistano due timbrature
-	 * consecutive di ingresso o di uscita, mettendo tale timbratura nulla in mezzo alle due.
+	 * @return 
 	 */
 	public List<Stamping> getStampingsForTemplate(int numberOfInOut, boolean today) {
 
