@@ -55,6 +55,10 @@ public class PersonStampingDayRecap {
 	
 	public PersonStampingDayRecap(PersonDay pd, int numberOfInOut)
 	{
+		if(pd.date.getDayOfMonth()==22)
+		{
+			System.out.println("");
+		}
 		this.personDayId = pd.id;
 		this.holiday = pd.isHoliday();
 		this.person = pd.person;
@@ -160,7 +164,7 @@ public class PersonStampingDayRecap {
 			addStampModificationTypeToList(pd.lunchTimeStampModificationType);
 		}
 		//----------------------------------------------- uscita adesso f ---------------------------------------------------------------
-		if(!this.holiday && !pd.isAllDayAbsences() && this.today)
+		if(!this.holiday && !pd.isAllDayAbsences() && this.today) //TODO
 		{
 			smt = StampModificationType.findById(StampModificationTypeValue.ACTUAL_TIME_AT_WORK.getId());
 			this.exitingNowCode = smt.code;
@@ -269,9 +273,15 @@ public class PersonStampingDayRecap {
 	
 	private static void addStampModificationTypeToList(StampModificationType smt)
 	{
+		try
+		{
 		if(!stampModificationTypeList.contains(smt))
 		{
 			stampModificationTypeList.add(smt);
+		}
+		}catch(Exception e)
+		{
+			e.printStackTrace();
 		}
 	}
 	
@@ -281,6 +291,7 @@ public class PersonStampingDayRecap {
 		{
 			stampTypeList.add(st);
 		}
+		
 	}
 	
 	
@@ -310,7 +321,7 @@ public class PersonStampingDayRecap {
 				this.insertStampingClass = "";
 				this.missingExitStampBeforeMidnightCode = "";
 				this.valid = true;
-				setColour(stamping);
+				setColor(stamping);
 				return;
 			}
 			
@@ -368,11 +379,11 @@ public class PersonStampingDayRecap {
 			{
 				this.valid = stamping.isValid();
 			}
-			setColour(stamping);
+			setColor(stamping);
 			//-----------------------------------------------------------------------------------------------------------------------
 		}
 		
-		protected void setColour(Stamping stamping)
+		protected void setColor(Stamping stamping)
 		{
 			this.colour = stamping.way.description;
 			if(this.valid==false)

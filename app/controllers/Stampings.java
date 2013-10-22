@@ -161,6 +161,9 @@ public class Stampings extends Controller {
 		}
 
 		//Nuova struttura dati per stampare
+		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
+		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();							
+		
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 		for(PersonDay pd : personMonth.days)
 		{
@@ -168,7 +171,10 @@ public class Stampings extends Controller {
 			daysRecap.add(dayRecap);
 		}
 		
-		render(personMonth, numberOfInOut, numberOfCompensatoryRestUntilToday, numberOfCompensatoryRest, situazioneParziale, daysRecap, totaleResiduo);
+		//tabella riassuntiva codici
+		List<StampModificationType> stampModificationTypeList = PersonStampingDayRecap.stampModificationTypeList;
+		List<StampType> stampTypeList = PersonStampingDayRecap.stampTypeList;
+		render(personMonth, numberOfInOut, numberOfCompensatoryRestUntilToday, numberOfCompensatoryRest, situazioneParziale, daysRecap, totaleResiduo,stampModificationTypeList, stampTypeList);
 
 	}
 
@@ -270,6 +276,7 @@ public class Stampings extends Controller {
 		//Nuova struttura dati per stampare la riga giornaliera della tabella
 		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	//svuoto variabile statica	//TODO forse da mettere come transiente in personMonth
 		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();							//svuoto variabile statica  //TODO forse da mettere come transiente in personMonth
+		
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 		for(PersonDay pd : personMonth.days)
 		{
