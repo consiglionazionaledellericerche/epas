@@ -19,7 +19,7 @@ import org.joda.time.LocalDate;
 import play.Play;
 
 /**
- * 	Classe che modella un person day calcolato attraverso PreparedStatemente che permette di 
+ * 	Classe che modella un person day calcolato attraverso PreparedStatement che permette di 
  * aumentare l'efficienza dei controller di riepilogo
  * @author alessandro
  *

@@ -9,6 +9,7 @@ import models.PersonDay;
 import models.StampModificationType;
 import models.StampModificationTypeValue;
 import models.StampProfile;
+import models.StampType;
 import models.Stamping;
 import models.WorkingTimeType;
 import models.Stamping.WayType;
@@ -19,6 +20,9 @@ import org.xhtmlrenderer.css.style.CalculatedStyle;
 
 public class PersonStampingDayRecap {
 
+	public static List<StampModificationType> stampModificationTypeList;
+	public static List<StampType> stampTypeList;
+	
 	public Long personDayId;
 	public Person person;
 		
@@ -68,6 +72,7 @@ public class PersonStampingDayRecap {
 			else
 			{
 				this.fixedWorkingTimeCode = smt.code;
+				addStampModificationTypeToList(smt);
 				pd.save(); //TODO toglierlo quando il db sarà consistente
 				int temporaryWorkTime = pd.getCalculatedTimeAtWork();
 				this.setWorkingTime( temporaryWorkTime );
@@ -114,31 +119,19 @@ public class PersonStampingDayRecap {
 			pd.save();	//TODO toglierlo quando il db sarà consistente
 			pd.updateDifference(); //TODO toglierlo quando il db sarà consistente
 			pd.updateProgressive(); 
-						
-			if(!this.holiday || pd.stampings.size() != 0)
+	
+			this.setDifference( pd.difference );
+	
+			PersonDay previousPd = pd.checkPreviousProgressive();
+			if(previousPd!=null)
 			{
-				this.setDifference( pd.difference );
+				this.setProgressive(pd.difference + previousPd.progressive);
 			}
 			else
 			{
-				this.setDifference(0);
+				this.setProgressive(0);
 			}
-			if(!this.holiday)
-			{
-				this.setProgressive(pd.progressive);
-			}
-			else
-			{
-				PersonDay previousPd = pd.checkPreviousProgressive();
-				if(previousPd!=null)
-				{
-					this.setProgressive(previousPd.progressive);
-				}
-				else
-				{
-					this.setProgressive(0);
-				}
-			}
+		
 			pd.save();	//TODO poi va rimosso
 		}
 		//---------------------------------------- worktime, difference, progressive for future ----------------------------------------
@@ -156,13 +149,18 @@ public class PersonStampingDayRecap {
 			this.setMealTicket(true);
 		
 		//----------------------------------------------- lunch (p,e) ------------------------------------------------------------------
-		if(pd.lunchTimeCode!=null && !this.future)
+		if(pd.lunchTimeStampModificationType!=null && !this.future)
 		{
-			this.todayLunchTimeCode = pd.lunchTimeCode;		
+			this.todayLunchTimeCode = pd.lunchTimeStampModificationType.code;
+			addStampModificationTypeToList(pd.lunchTimeStampModificationType);
 		}
 		//----------------------------------------------- uscita adesso f ---------------------------------------------------------------
 		if(!this.holiday && !pd.isAllDayAbsences() && this.today)
-			this.exitingNowCode = "f";
+		{
+			smt = StampModificationType.findById(StampModificationTypeValue.ACTUAL_TIME_AT_WORK.getId());
+			this.exitingNowCode = smt.code;
+			addStampModificationTypeToList(smt);
+		}
 		//------------------------------------------------description work time type ----------------------------------------------------
 		WorkingTimeType wtt = pd.person.workingTimeType;
 		if(wtt!=null)
@@ -213,7 +211,8 @@ public class PersonStampingDayRecap {
 		this.stampingsTemplate = new ArrayList<StampingTemplate>();
 		for(int i = 0; i<stampings.size(); i++)
 		{
-			this.stampingsTemplate.add(new StampingTemplate(stampings.get(i), i, pd));
+			Stamping stamping = stampings.get(i);
+			this.stampingsTemplate.add(new StampingTemplate(stamping, i, pd));
 		}
 	}
 	
@@ -263,6 +262,22 @@ public class PersonStampingDayRecap {
 		return s;
 	}
 	
+	private static void addStampModificationTypeToList(StampModificationType smt)
+	{
+		if(!stampModificationTypeList.contains(smt))
+		{
+			stampModificationTypeList.add(smt);
+		}
+	}
+	
+	private static void addStampTypeToList(StampType st)
+	{
+		if(!stampTypeList.contains(st))
+		{
+			stampTypeList.add(st);
+		}
+	}
+	
 	
 	protected static class StampingTemplate
 	{
@@ -281,7 +296,8 @@ public class PersonStampingDayRecap {
 		{
 			this.stampingId = stamping.id;
 
-			if(stamping.date == null)
+			//stamping nulle o exiting now non sono visualizzate
+			if(stamping.date == null  || stamping.exitingNow)
 			{
 				this.hour = ""; 
 				this.markedByAdminCode = "";
@@ -293,8 +309,6 @@ public class PersonStampingDayRecap {
 				return;
 			}
 			
-			
-			
 			this.date = stamping.date;
 			
 			this.way = stamping.way.description;
@@ -303,35 +317,54 @@ public class PersonStampingDayRecap {
 			
 			this.insertStampingClass = "insertStamping" + stamping.date.getDayOfMonth() + "-" + index;
 			
+			//----------------------------------------- timbratura di servizio ---------------------------------------------------
 			if(stamping.stampType!=null && stamping.stampType.identifier!=null)
+			{
 				this.identifier = stamping.stampType.identifier;
+				addStampTypeToList(stamping.stampType);
+			}
 			else
 				this.identifier = "";
 			
+			//----------------------------------------- timbratura modificata dall'amministatore ---------------------------------
 			if(stamping.markedByAdmin) 
 			{
 				StampModificationType smt = StampModificationType.findById(StampModificationTypeValue.MARKED_BY_ADMIN.getId());
 				this.markedByAdminCode = smt.code;
+				addStampModificationTypeToList(smt);
 			}
 			else
+			{
 				this.markedByAdminCode = "";
+			}
 			
-			//missingExitStampBeforeMidnightCode ??
+			//----------------------------------------- missingExitStampBeforeMidnightCode ?? --------------------------------------
 			if(stamping.stampModificationType!=null)
 			{
 				StampModificationType smt = pd.checkMissingExitStampBeforeMidnight();
 				if(smt!=null)
 				{
 					this.missingExitStampBeforeMidnightCode = smt.code;
+					addStampModificationTypeToList(smt);
 				}
 				else
 				{
 					this.missingExitStampBeforeMidnightCode = "";
 				}
 			}
-			
-			this.valid = stamping.isValid();
+			//------------------------------------------- timbratura valida (colore cella) -----------------------------------------
+			LocalDate today = new LocalDate();
+			LocalDate stampingDate = new LocalDate(this.date.getYear(), this.date.getMonthOfYear(), this.date.getDayOfMonth());
+			if(today.isEqual(stampingDate))
+			{
+				this.valid = true;
+			}
+			else
+			{
+				this.valid = stamping.isValid();
+			}
 			setColour(stamping);
+			//-----------------------------------------------------------------------------------------------------------------------
 		}
 		
 		protected void setColour(Stamping stamping)

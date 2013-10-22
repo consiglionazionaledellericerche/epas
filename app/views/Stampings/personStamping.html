@@ -7,7 +7,7 @@
 	di ${personMonth.person.surname} ${personMonth.person.name}</h2>
 
 #{functionalMenuForm mainMenu: mainMenu /}
-
+${prova}
 <table id="presenze_mensili">
 	<tr>
 		<th>Buono mensa</th>
@@ -226,30 +226,32 @@
 		<th width="400">Descrizione</th>
 			
 	</tr>
-%{
-     for(smt in personMonth.getStampingCode()) {
-}%
-	<tr>
-		<td>${smt.code}</td>     
-		<td>${smt.description}</td>		
-	</tr>
+	%{
+     for(smt in stampModificationTypeList) {
+	}%
+		<tr>
+			<td>${smt.code}</td>     
+			<td>${smt.description}</td>		
+		</tr>
 	
-%{  		   
+	%{  		   
      }
      
-}%
-%{	if(personMonth.getStampType() != null){
-	for(type in personMonth.getStampType()) {
-}%
-	<tr>
-		<td>${type.identifier}</td>
-		<td>${type.description}</td>
-	</tr>
-%{  		   
-     }
+	}%
+	%{
+	for(type in stampTypeList) 
+	{
+	}%
+		<tr>
+			<td>${type.identifier}</td>
+			<td>${type.description}</td>
+		</tr>
+	%{  		   
     }
-}%
+    }%
 </table>
+
+
 *{Significato codici assenza}*
 <br>
 <br>

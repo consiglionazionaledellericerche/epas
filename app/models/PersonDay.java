@@ -104,10 +104,10 @@ public class PersonDay extends Model {
 	public PersonDayModificationType modificationType;
 	
 	/**
-	 * true se il person day presenta la situazione di pausa pranzo troppo breve
+	 * lo StampModificationType se il person day presenta situazioni di pausa mensa troppo breve o pausa automaticamente calcolata (e, p)
 	 */
 	@Transient
-	public String lunchTimeCode = null;
+	public StampModificationType lunchTimeStampModificationType = null;
 
 
 	public PersonDay(Person person, LocalDate date, int timeAtWork, int difference, int progressive) {
@@ -474,7 +474,7 @@ public class PersonDay extends Model {
 				workTime = workTime - breakTicketTime;
 				this.isTicketAvailable = true;
 				StampModificationType smt = StampModificationType.findById(StampModificationTypeValue.FOR_DAILY_LUNCH_TIME.getId());
-				this.lunchTimeCode = smt.code;
+				this.lunchTimeStampModificationType = smt;
 			}
 			else
 			{
@@ -501,7 +501,7 @@ public class PersonDay extends Model {
 					{
 						workTime = workTime - (breakTicketTime - minTimeForLunch);
 						StampModificationType smt = StampModificationType.findById(StampModificationTypeValue.FOR_MIN_LUNCH_TIME.getId());
-						this.lunchTimeCode = smt.code;
+						this.lunchTimeStampModificationType = smt;
 					}
 					this.isTicketAvailable = true;
 				}
@@ -850,6 +850,7 @@ public class PersonDay extends Model {
 				stamping.way = WayType.out;
 				stamping.date = new LocalDateTime();
 				stamping.markedByAdmin = false;
+				stamping.exitingNow = true;
 				this.stampings.add(stamping);
 			}
 		}

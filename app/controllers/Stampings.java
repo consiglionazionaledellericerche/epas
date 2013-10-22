@@ -167,6 +167,7 @@ public class Stampings extends Controller {
 			PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(pd,numberOfInOut);
 			daysRecap.add(dayRecap);
 		}
+		
 		render(personMonth, numberOfInOut, numberOfCompensatoryRestUntilToday, numberOfCompensatoryRest, situazioneParziale, daysRecap, totaleResiduo);
 
 	}
@@ -266,14 +267,22 @@ public class Stampings extends Controller {
 
 		int totaleResiduo = situazioneParziale+personMonth.residuoDelMese();
 	
-		//Nuova struttura dati per stampare
+		//Nuova struttura dati per stampare la riga giornaliera della tabella
+		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	//svuoto variabile statica	//TODO forse da mettere come transiente in personMonth
+		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();							//svuoto variabile statica  //TODO forse da mettere come transiente in personMonth
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 		for(PersonDay pd : personMonth.days)
 		{
 			PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(pd,numberOfInOut);
 			daysRecap.add(dayRecap);
 		}
-		render(personMonth, numberOfInOut, numberOfCompensatoryRestUntilToday, numberOfCompensatoryRest, situazioneParziale, daysRecap, totaleResiduo);
+		
+		//tabella riassuntiva codici
+		List<StampModificationType> stampModificationTypeList = PersonStampingDayRecap.stampModificationTypeList;
+		List<StampType> stampTypeList = PersonStampingDayRecap.stampTypeList;
+		
+		//render
+		render(personMonth, numberOfInOut, numberOfCompensatoryRestUntilToday, numberOfCompensatoryRest, situazioneParziale, daysRecap, totaleResiduo, stampModificationTypeList, stampTypeList);
 
 
 	}
@@ -610,6 +619,8 @@ public class Stampings extends Controller {
 			if(currentPersonDayRs.fixed==true)
 				continue;
 			if(currentPersonDayRs.justified!=null && currentPersonDayRs.justified.equals("AllDay"))
+				continue;
+			if(currentPersonDayRs.isHoliday)
 				continue;
 			if(currentPersonDayRs.way.size()==0 || currentPersonDayRs.way.size()%2==1)		//zero timbrature o timbrature dispari
 			{
