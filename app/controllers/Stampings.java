@@ -673,10 +673,7 @@ public class Stampings extends Controller {
 		Logger.debug("Il numero massimo di timbrature tra tutti i dipendenti per questo mese è: %d", maxNumberOfInOut);
 		ImmutableTable.Builder<Person, String, String> builder = ImmutableTable.builder();
 		Table<Person, String, String> tablePersonDailyPresence = null;
-		//Table<Person, String, String> tablePersonDailyPresence =  HashBasedTable.create();
-		//List<Person> persons = Person.findAll();
-		//
-		//List<Person> activePersons = Person.getActivePersons(new LocalDate(year, month, giorno));
+		
 		LocalDate today = new LocalDate(year, month, day);
 		List<Person> persons = new ArrayList<Person>();
 			List<Person> genericPerson = Person.find("Select p from Person p order by p.surname").fetch();
@@ -688,7 +685,6 @@ public class Stampings extends Controller {
 					persons.add(p);
 			}
 		Logger.trace("Gli utenti attivi in questo giorno sono: %d", persons.size());
-
 		
 		Person per = new Person();
 		builder.put(per, "Assenza", "");
@@ -700,30 +696,31 @@ public class Stampings extends Controller {
 				builder.put(per, (i/2)+"^ Uscita", "");
 			}
 		}
-
+		List<Stamping> stampings = null;
 		for(Person p : persons){
 			//Logger.trace("Inizio le operazioni di inserimento in tabella per %s %s ",p.name, p.surname);
 			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.date = ? and pd.person = ?", today, p).first();
 			//Logger.trace("Cerco il person day in data %s per %s %s", today, p.name, p.surname);
 			if(pd != null){
+				stampings = pd.getStampingsForTemplate(maxNumberOfInOut/2, false);
 				if(pd.absences.size() > 0)
 					builder.put(p, "Assenza", pd.absences.get(0).absenceType.code);
 				else
 					builder.put(p, "Assenza", " ");
-				int size = pd.stampings.size();
-				/**
-				 * TODO: si verificano casi in cui una persona fa due timbratue di uscita (Pinizzotto il 17 gennaio 2013), come lo gestisco?
-				 * 
-				 */
+				int size = stampings.size();
+				
 				for(int i = 0; i < size; i++){
-					if(pd.stampings.get(i).way == WayType.in){
-						builder.put(p, 1+(i+1)/2+"^ Ingresso", PersonTags.toCalendarTime(pd.stampings.get(i).date));
-						//Logger.trace("inserisco in tabella l'ingresso per %s %s", p.name, p.surname);
+					if(stampings.get(i).date != null){
+						if(stampings.get(i).way == WayType.in ){
+							builder.put(p, 1+(i+1)/2+"^ Ingresso", PersonTags.toCalendarTime(stampings.get(i).date));
+							Logger.debug("inserisco in tabella il " +1+(i+1)/2+" ingresso per %s %s", p.name, p.surname);
+						}
+						else{
+							builder.put(p, 1+(i/2)+"^ Uscita", PersonTags.toCalendarTime(stampings.get(i).date));
+							Logger.debug("inserisco in tabella la "+1+(i/2)+ " uscita per %s %s", p.name, p.surname);
+						}
 					}
-					else{
-						builder.put(p, 1+(i/2)+"^ Uscita", PersonTags.toCalendarTime(pd.stampings.get(i).date));
-						//Logger.trace("inserisco in tabella l'uscita per %s %s", p.name, p.surname);
-					}
+					
 				}
 
 				builder.put(p, "Tempo Lavoro", PersonTags.toHourTime(pd.timeAtWork));

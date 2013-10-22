@@ -239,6 +239,7 @@ td.comp-nome {height: 1em; text-align: left}
 td.inserisciTimbratura {text-align: center}
 td.mese {background-color: #FFFF66;}
 td.giornoAssenza {text-align: center}
+td.nomeCognome {background-color: #CCFFCC}
 
 p#spiegazioneTabellaTimbrature {margin-top: 2em; margin-bottom: 2em}
 p#validita {margin: 3em 2em 3em}

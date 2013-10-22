@@ -19,7 +19,7 @@
 	%{  for(entry in tablePersonDailyPresence.rowMap().entrySet()){
 		}%
 	<tr>
-		<td>${entry.getKey().name} ${entry.getKey().surname}</td>
+		<td class="nomeCognome">${entry.getKey().name} ${entry.getKey().surname}</td>
 		%{ for(col in tablePersonDailyPresence.columnKeySet()){
 		}%
 			<td>

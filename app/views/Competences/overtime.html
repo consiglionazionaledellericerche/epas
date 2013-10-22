@@ -38,7 +38,7 @@
     	%{  for(entry in tableFeature.rowMap().entrySet()){
 		}%
     	<tr>
-    		<td>${entry.getKey().surname} ${entry.getKey().name} (${entry.getKey().number})</td>
+    		<td class="nomeCognome">${entry.getKey().surname} ${entry.getKey().name} (${entry.getKey().number})</td>
     		%{ for(col in tableFeature.columnKeySet()){
 			}%
 			%{if(col.equals('Giorni di Presenza') || col.equals('Ore straordinario pagate') || col.equals('Riposi compens.')){

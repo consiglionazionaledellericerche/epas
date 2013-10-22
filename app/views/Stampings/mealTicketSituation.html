@@ -18,7 +18,7 @@
 	%{  for(entry in tablePersonTicket.rowMap().entrySet()){
 		}%
 	<tr>
-		<td>${entry.getKey().surname} ${entry.getKey().name}</td>
+		<td class="nomeCognome">${entry.getKey().surname} ${entry.getKey().name}</td>
 		%{ for(col in tablePersonTicket.columnKeySet()){
 		}%
 			<td>${entry.getValue().get(col)}</td>

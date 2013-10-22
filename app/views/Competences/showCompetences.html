@@ -28,7 +28,7 @@
 	%{ for(entry in tableCompetence.rowMap().entrySet()){
 	}%
 	<tr>
-		<td>${entry.getKey().name} ${entry.getKey().surname} (${entry.getKey().number})</td>
+		<td class="nomeCognome">${entry.getKey().name} ${entry.getKey().surname} (${entry.getKey().number})</td>
 		%{ for(col in tableCompetence.columnKeySet()){
 		}%
 		<td>
