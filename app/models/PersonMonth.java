@@ -1,5 +1,7 @@
 package models;
 
+import it.cnr.iit.epas.PersonUtility;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -254,55 +256,10 @@ public class PersonMonth extends Model {
 		long max = 0;
 		for(PersonDay pd : pdList)
 		{
-			List<Stamping> orderedStampingList = Stamping.find("Select s from Stamping s where s.personDay = ? order by s.date", pd).fetch();
-
-			int coupleOfStampings = 0;
-			
-			String lastWay = null;
-			for(Stamping s : orderedStampingList)
-			{
-				if(lastWay==null)
-				{
-					//trovo out chiudo una coppia
-					if(s.way.description.equals("out"))
-					{
-						coupleOfStampings++;
-						lastWay = null;
-						continue;
-					}
-					//trovo in lastWay diventa in
-					if(s.way.description.equals("in"))
-					{
-						lastWay = s.way.description;
-						continue;
-					}
-					
-				}
-				//lastWay in
-				if(lastWay.equals("in"))
-				{
-					//trovo out chiudo una coppia
-					if(s.way.description.equals("out"))
-					{
-						coupleOfStampings++;
-						lastWay = null;
-						continue;
-					}
-					//trovo in chiudo una coppia e lastWay resta in
-					if(s.way.description.equals("in"))
-					{
-						coupleOfStampings++;
-						continue;
-					}
-				}
-			}
-			//l'ultima stampings e' in chiudo una coppia
-			if(lastWay!=null)
-				coupleOfStampings++;
+			int coupleOfStampings = PersonUtility.numberOfInOutInPersonDay(pd);
 			
 			if(max<coupleOfStampings)
 				max = coupleOfStampings;
-
 		}
 		
 		return max;

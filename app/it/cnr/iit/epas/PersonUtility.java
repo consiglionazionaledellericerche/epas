@@ -6,7 +6,6 @@ import java.util.List;
 import javax.persistence.FetchType;
 import javax.persistence.Query;
 
-
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.DateTimeConstants;
@@ -17,7 +16,6 @@ import play.Logger;
 import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 import play.db.jpa.Transactional;
-
 import models.Absence;
 import models.AbsenceType;
 import models.Configuration;
@@ -746,6 +744,58 @@ public class PersonUtility {
 		
 		 
 		return new CheckMessage(true, "E' possibile prendere il codice d'assenza", null);
+	}
+	
+	
+	public static int numberOfInOutInPersonDay(PersonDay pd)
+	{
+		pd.orderStampings();
+
+		int coupleOfStampings = 0;
+		
+		String lastWay = null;
+		for(Stamping s : pd.stampings)
+		{
+			if(lastWay==null)
+			{
+				//trovo out chiudo una coppia
+				if(s.way.description.equals("out"))
+				{
+					coupleOfStampings++;
+					lastWay = null;
+					continue;
+				}
+				//trovo in lastWay diventa in
+				if(s.way.description.equals("in"))
+				{
+					lastWay = s.way.description;
+					continue;
+				}
+				
+			}
+			//lastWay in
+			if(lastWay.equals("in"))
+			{
+				//trovo out chiudo una coppia
+				if(s.way.description.equals("out"))
+				{
+					coupleOfStampings++;
+					lastWay = null;
+					continue;
+				}
+				//trovo in chiudo una coppia e lastWay resta in
+				if(s.way.description.equals("in"))
+				{
+					coupleOfStampings++;
+					continue;
+				}
+			}
+		}
+		//l'ultima stampings e' in chiudo una coppia
+		if(lastWay!=null)
+			coupleOfStampings++;
+		
+		return coupleOfStampings;
 	}
 
 }

@@ -175,30 +175,29 @@
 		<th width="400">Descrizione</th>
 			
 	</tr>
-%{
-     for(smt in personMonth.getStampingCode()) {
-}%
-	<tr>
-		<td>${smt.code}</td>     
-		<td>${smt.description}</td>		
-	</tr>
+	%{
+     for(smt in stampModificationTypeList) {
+	}%
+		<tr>
+			<td>${smt.code}</td>     
+			<td>${smt.description}</td>		
+		</tr>
 	
-	
-%{  		   
+	%{  		   
      }
      
-}%
-%{	if(personMonth.getStampType() != null){
-	for(type in personMonth.getStampType()) {
-}%
-	<tr>
-		<td>${type.identifier}</td>
-		<td>${type.description}</td>
-	</tr>
-%{  		   
-     }
+	}%
+	%{
+	for(type in stampTypeList) 
+	{
+	}%
+		<tr>
+			<td>${type.identifier}</td>
+			<td>${type.description}</td>
+		</tr>
+	%{  		   
     }
-}%
+    }%
 </table>
 
 <br>
