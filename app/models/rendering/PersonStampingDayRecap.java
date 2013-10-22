@@ -18,6 +18,11 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.xhtmlrenderer.css.style.CalculatedStyle;
 
+/**
+ * Oggetto che modella il giorno di una persona nelle viste personStamping e stampings.
+ * @author alessandro
+ *
+ */
 public class PersonStampingDayRecap {
 
 	public static List<StampModificationType> stampModificationTypeList;
