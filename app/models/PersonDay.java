@@ -169,7 +169,7 @@ public class PersonDay extends Model {
 	{
 		for(Absence ab : absences)
 		{
-			if(ab.absenceType.justifiedTimeAtWork.equals("AllDay"))
+			if(ab.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay))
 				return true;
 		}
 		return false;
@@ -1325,12 +1325,102 @@ public class PersonDay extends Model {
 				if(!finded)
 				{
 					//diagnosi
-					return false;
+					System.out.println(person.surname + " " + generalWorkingDay.toString());
+					//return false;
 				}
 			}
 		}
 
 		return true;
+	}
+	
+	public static void jobYesterdayCheck()
+	{
+		System.out.println("*********************************************************************************");
+		LocalDate yesterday = new LocalDate().minusDays(10);
+		List<Person> active = Person.getActivePersons(new LocalDate());
+		for(Person person : active)
+		{
+			PersonDay pd = PersonDay.find(""
+					+ "SELECT pd "
+					+ "FROM PersonDay pd "
+					+ "WHERE pd.person = ? AND pd.date = ? ", 
+					person, 
+					yesterday)
+					.first();
+			
+			if(pd!=null)
+			{
+				//check for error
+				PersonDay.checkForError(pd, yesterday, person);
+				continue;
+			}
+			
+			if(pd==null)
+			{
+				if(DateUtility.isGeneralHoliday(yesterday))
+				{
+					continue;
+				}
+				if(person.workingTimeType.workingTimeTypeDays.get(yesterday.getDayOfWeek()-1).holiday)
+				{
+					continue;
+				}
+				
+				pd = new PersonDay(person, yesterday);
+				pd.create();
+				pd.populatePersonDay();
+				pd.save();
+				//check for error
+				PersonDay.checkForError(pd, yesterday, person);
+				continue;
+				
+			}
+		}
+	}
+	
+	private static boolean checkForError(PersonDay pd, LocalDate yesterday, Person person)
+	{
+		//fixed
+		StampModificationType smt = pd.getFixedWorkingTime();
+		if(smt !=null)
+		{
+			if(pd.stampings.size()!=0)
+			{
+				pd.computeValidStampings();
+				for(Stamping s : pd.stampings)
+				{
+					if(!s.valid)
+					{
+						System.out.println( "A " + yesterday.toString() +  " " + person.surname + " " +person.name +" non valido. (cella gialla)");
+						return false;
+					}
+				}
+			}
+			return true;
+			
+		}
+		else
+		{
+			if(!pd.isAllDayAbsences() && pd.stampings.size()==0)
+			{
+				System.out.println( "A " + yesterday.toString() +  " " + person.surname + " " +person.name +" non valido. (zero timbrature)");
+				return false;
+			}
+			pd.computeValidStampings();
+			for(Stamping s : pd.stampings)
+			{
+				if(!s.valid)
+				{
+					System.out.println( "A " + yesterday.toString() +  " " + person.surname + " " +person.name +" non valido. (cella gialla)");
+					return false;
+				}
+			}
+			return true;
+		}
+		
+		
+		
 	}
 
 	@Override

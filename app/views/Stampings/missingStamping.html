@@ -3,7 +3,7 @@
 #{functionalMenuForm mainMenu: mainMenu /} 
 
 <h2 id="titoloControllaTimbratureMancanti">Controllo delle timbrature mancanti di <span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year}</h2>
-%{if(dbConsistentControl==true){
+%{if(dbConsistentControl==false){
 }%
 Warning: il database ha riscontrato errori, contattare gli amministratori. Potrebbero esistere ulteriori timbrature mancanti non visualizzate in questo report.
 %{
@@ -23,7 +23,7 @@ Warning: il database ha riscontrato errori, contattare gli amministratori. Potre
 	%{ for(entry in tableMissingStampings.rowMap().entrySet()){
 	}%
 	<tr>
-		<td>${entry.getKey().surname} ${entry.getKey().name}</td>
+		<td><a href="@{Stampings.personStamping(entry.getKey().id,year,month)}">${entry.getKey().surname} ${entry.getKey().name}</a></td>
 		%{ for(col in tableMissingStampings.columnKeySet()){
 		}%
 		<td>
