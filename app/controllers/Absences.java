@@ -545,7 +545,8 @@ public class Absences extends Controller{
 			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, dateFrom).first();
 			if(pd == null){
 				pd = new PersonDay(person, dateFrom);
-				pd.create();
+				pd.populatePersonDay();
+				pd.save();
 			}
 			if(checkMessage.check == true && checkMessage.absenceType ==  null){
 
@@ -553,8 +554,9 @@ public class Absences extends Controller{
 				absence.absenceType = absenceType;
 				absence.personDay = pd;
 				pd.absences.add(absence);
-				pd.save();
+				
 				pd.populatePersonDay();
+				pd.save();
 				flash.success("Aggiunto codice di assenza %s "+checkMessage.message, absenceType.code);
 				render("@save");
 
