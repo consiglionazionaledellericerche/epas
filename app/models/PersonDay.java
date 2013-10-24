@@ -779,7 +779,18 @@ public class PersonDay extends Model {
 		}
 
 		if(absenceList().size() > 0 && stampings.size() == 0){
-			difference = 0;
+			int diff = 0;
+			for(Absence abs : absenceList()){
+				if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay){
+					difference = 0;
+					save();
+					return;
+				}
+				else{
+					diff = diff+abs.absenceType.justifiedTimeAtWork.minutesJustified;
+				}
+			}
+			difference = diff - this.person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(this.date.getDayOfWeek()).workingTime;
 			save();
 			return;
 		}
