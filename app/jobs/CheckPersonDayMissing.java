@@ -13,7 +13,7 @@ import play.jobs.Job;
 import play.jobs.On;
 
 //@On("0 /5 * * * ?")
-@On("0 0 2 * * ?")
+//@On("0 0 2 * * ?")
 public class CheckPersonDayMissing extends Job{
 
 	/**
