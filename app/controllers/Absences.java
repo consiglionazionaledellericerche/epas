@@ -47,7 +47,7 @@ import play.mvc.With;
 public class Absences extends Controller{
 
 	private static List<AbsenceType> getFrequentAbsenceTypes(){
-		
+
 		List<AbsenceType> absenceTypeList = new ArrayList<AbsenceType>();
 		try
 		{
@@ -297,7 +297,7 @@ public class Absences extends Controller{
 		Logger.debug("Richiesto inserimento della assenza codice = %s della persona %s, dataInizio = %s", absenceCode, person, dateFrom);
 
 		// è il caso in cui si inserisce lo stesso codice di assenza per più giorni
-		
+
 		if(dateTo.isAfter(dateFrom)){
 
 			LocalDate dataInizioAssenze = dateFrom;
@@ -311,14 +311,14 @@ public class Absences extends Controller{
 						create(personId, yearFrom, monthFrom, dayFrom);
 						render("@save");
 					}
-											
+
 				}
 				dataInizioAssenze = dataInizioAssenze.plusDays(1);
 			}		
-			
+
 		}
 		else{
-			
+
 			List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where a.personDay = pd and pd.person = ? and pd.date = ?" +
 					" and a.absenceType = ?", person, dateFrom, absenceType).fetch();
 			if(existingAbsence.size() > 0){
@@ -330,9 +330,9 @@ public class Absences extends Controller{
 					render("@save");
 				}
 			}
-			
+
 		}
-				
+
 		Absence abs = Absence.find("Select abs from Absence abs where abs.personDay.person = ? and abs.personDay.date = ?", person, dateFrom).first();
 		if(abs != null && abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay && 
 				absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay){
@@ -357,7 +357,7 @@ public class Absences extends Controller{
 
 			}
 		}
-		
+
 		/**
 		 * in questo pezzo si controlla il poter inserire i codici per le assenze dovute a malattie o ricoveri anche nei giorni festivi.
 		 * Da risistemare quando verrà cambiato il database anche in produzione e allora bisognerà controllare che il codice d'assenza inserito 
@@ -389,7 +389,7 @@ public class Absences extends Controller{
 						pd.absences.add(absence);
 						pd.save();
 						pd.populatePersonDay();
-						
+
 					}
 				}
 				else{
@@ -402,10 +402,10 @@ public class Absences extends Controller{
 						absence.save();
 						pd.absences.add(absence);
 						pd.merge();
-						
+
 						pd.populatePersonDay();
 						pd.save();
-						
+
 						dateFrom = dateFrom.plusDays(1);
 					}
 				}
@@ -424,7 +424,7 @@ public class Absences extends Controller{
 			//FIXME: perché il controllo successivo è fatto solo per il FER?
 			if(PersonUtility.canPersonTakeAbsenceInShiftOrReperibility(person, new LocalDate(yearFrom,monthFrom,dayFrom))){
 				Logger.debug("%s %s non è in turno o in reperibilità", person.name, person.surname);
-				
+
 				if(dateTo.isBefore(dateFrom) || dateTo.isEqual(dateFrom)){
 					AbsenceType abt = PersonUtility.whichVacationCode(person, yearFrom, monthFrom, dayFrom);
 					PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, new LocalDate(yearFrom, monthFrom, dayFrom)).first();
@@ -440,10 +440,10 @@ public class Absences extends Controller{
 					render("@save");
 				}
 				else{
-					
+
 					List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
 							person, dateFrom, dateTo).fetch();
-					
+
 					if(pdList.size() != 0){
 						for(PersonDay pd : pdList){
 							AbsenceType abt = PersonUtility.whichVacationCode(person, yearFrom, monthFrom, dayFrom);
@@ -453,7 +453,7 @@ public class Absences extends Controller{
 							absence.save();
 							pd.save();
 							pd.populatePersonDay();
-							
+
 						}
 					}
 					else{
@@ -471,25 +471,25 @@ public class Absences extends Controller{
 								absence.save();
 								pd.absences.add(absence);
 								pd.merge();
-								
+
 								pd.populatePersonDay();
 								pd.save();
-								
+
 							}
 							dateFrom = dateFrom.plusDays(1);
 						}
 					}
-//					int size = pdList.size();
-//					Logger.debug("la dimensione della lista è: %d", size);
-//					PersonDay pd = pdList.get(size-1);
-//					if(pd.date.isBefore(new LocalDate(pd.date).dayOfMonth().withMaximumValue())){
-//						List<PersonDay> pdList2 = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ? and pd.date <= ?", 
-//								pd.person, pd.date, new LocalDate(pd.date).dayOfMonth().withMaximumValue()).fetch();
-//						for(PersonDay personday : pdList2){
-//							personday.populatePersonDay();
-//							personday.save();
-//						}
-//					}
+					//					int size = pdList.size();
+					//					Logger.debug("la dimensione della lista è: %d", size);
+					//					PersonDay pd = pdList.get(size-1);
+					//					if(pd.date.isBefore(new LocalDate(pd.date).dayOfMonth().withMaximumValue())){
+					//						List<PersonDay> pdList2 = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ? and pd.date <= ?", 
+					//								pd.person, pd.date, new LocalDate(pd.date).dayOfMonth().withMaximumValue()).fetch();
+					//						for(PersonDay personday : pdList2){
+					//							personday.populatePersonDay();
+					//							personday.save();
+					//						}
+					//					}
 				}
 				flash.success("Inserito il codice di assenza per il periodo richiesto");
 				render("@save");
@@ -534,11 +534,8 @@ public class Absences extends Controller{
 				return;
 			}
 
-		}
-		
-		//TODO: implementare i controlli sui gruppi di codici di assenza, i controlli sui gruppi devono anche implementare
-		// le sostituzioni dei codici tramite accumulutatori o query ad hoc
-	
+		}		
+
 		if(absenceType.absenceTypeGroup != null){
 			CheckMessage checkMessage = PersonUtility.checkAbsenceGroup(absenceType, person, dateFrom);
 			if(checkMessage.check == false){
@@ -551,7 +548,7 @@ public class Absences extends Controller{
 				pd.create();
 			}
 			if(checkMessage.check == true && checkMessage.absenceType ==  null){
-				
+
 				Absence absence = new Absence();
 				absence.absenceType = absenceType;
 				absence.personDay = pd;
@@ -560,7 +557,7 @@ public class Absences extends Controller{
 				pd.populatePersonDay();
 				flash.success("Aggiunto codice di assenza %s "+checkMessage.message, absenceType.code);
 				render("@save");
-	
+
 			}
 			if(checkMessage.check == true && checkMessage.absenceType != null){
 				Absence absence = new Absence();
@@ -579,7 +576,7 @@ public class Absences extends Controller{
 				render("@save");
 			}
 		}
-		
+
 		Absence absence = new Absence();
 		Logger.debug("%s %s può usufruire del codice %s", person.name, person.surname, absenceType.code);
 		if(dateTo.isBefore(dateFrom) || dateTo.isEqual(dateFrom)){
@@ -590,7 +587,7 @@ public class Absences extends Controller{
 				pd.create();
 			}
 			Logger.debug("Creato il personDay %s", pd);
-			
+
 			if(params.get("datasize", Blob.class) != null){
 				absence.absenceRequest = params.get("datasize", Blob.class);
 			}
@@ -598,12 +595,12 @@ public class Absences extends Controller{
 				absence.absenceRequest = null;
 
 			absence.absenceType = absenceType;
-			
+
 			pd.addAbsence(absence);
 			pd.save();
 			Logger.debug("Creata e salvata l'assenza %s con codice %s", absence, absence.absenceType.code);
 			pd.populatePersonDay();
-			
+
 			if(pd.date.isBefore(new LocalDate(pd.date).dayOfMonth().withMaximumValue())){
 				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ? and pd.date <= ?", 
 						pd.person, pd.date, new LocalDate(pd.date).dayOfMonth().withMaximumValue()).fetch();
@@ -653,15 +650,15 @@ public class Absences extends Controller{
 					dateFrom = dateFrom.plusDays(1);
 				}
 			}
-//			List<PersonDay> otherPdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ?", 
-//					pd.person, pd.date).fetch();
-//			for(PersonDay p : otherPdList){
-//				if(p.date.getMonthOfYear() == absence.personDay.date.getMonthOfYear()){
-//					p.populatePersonDay();
-//					p.save();
-//				}
-//				
-//			}
+			//			List<PersonDay> otherPdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ?", 
+			//					pd.person, pd.date).fetch();
+			//			for(PersonDay p : otherPdList){
+			//				if(p.date.getMonthOfYear() == absence.personDay.date.getMonthOfYear()){
+			//					p.populatePersonDay();
+			//					p.save();
+			//				}
+			//				
+			//			}
 			flash.success("Inserita assenza %s dal %s al %s", absenceType.code, dateFrom, dateTo);
 			render("@save");
 		}
@@ -685,7 +682,7 @@ public class Absences extends Controller{
 		justList.add(10,JustifiedTimeAtWork.Nothing);
 		justList.add(11,JustifiedTimeAtWork.TimeToComplete);
 		justList.add(12,JustifiedTimeAtWork.ReduceWorkingTimeOfTwoHours);
-		
+
 		List<Qualification> qualList = Qualification.findAll();
 		List<AccumulationType> accType = new ArrayList<AccumulationType>();
 		accType.add(0, AccumulationType.always);
@@ -696,7 +693,7 @@ public class Absences extends Controller{
 		behaviourType.add(0, AccumulationBehaviour.nothing);
 		behaviourType.add(1, AccumulationBehaviour.noMoreAbsencesAccepted);
 		behaviourType.add(2, AccumulationBehaviour.replaceCodeAndDecreaseAccumulation);
-		
+
 		render(abt, justList, qualList, accType, behaviourType);
 	}
 
@@ -716,7 +713,7 @@ public class Absences extends Controller{
 		absence.validTo = new LocalDate(params.get("fine"));
 		String justifiedTimeAtWork = params.get("abt.justifiedTimeAtWork");			
 		absence.justifiedTimeAtWork = JustifiedTimeAtWork.getByDescription(justifiedTimeAtWork);
-		
+
 		for(int i = 1; i <= 10; i++){
 			if(params.get("qualification"+i) != null){
 				Qualification q = Qualification.findById(new Long(i));
@@ -729,8 +726,8 @@ public class Absences extends Controller{
 					absence.qualifications.remove(q);
 			}
 		}
-		
-			
+
+
 		absence.mealTicketCalculation = params.get("calcolaBuonoPasto", Boolean.class);
 		absence.ignoreStamping = params.get("ignoraTimbrature", Boolean.class);
 		if(!params.get("gruppo").equals("")){
@@ -744,13 +741,13 @@ public class Absences extends Controller{
 			absence.absenceTypeGroup = abtg;
 		}
 		absence.save();
-		
+
 		flash.success("Modificato codice di assenza %s", absence.code);
 		render("@Stampings.redirectToIndex");
-		
+
 	}
-	
-	
+
+
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void edit(@Required Long absenceId) {
 		Logger.debug("Edit absence called for absenceId=%d", absenceId);
@@ -759,10 +756,11 @@ public class Absences extends Controller{
 		if (absence == null) {
 			notFound();
 		}
+		LocalDate date = absence.personDay.date;
 		List<AbsenceType> frequentAbsenceTypeList = getFrequentAbsenceTypes();
-
+		MainMenu mainMenu = new MainMenu(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth());
 		List<AbsenceType> allCodes = getAllAbsenceTypes(absence.personDay.date);
-		render(absence, frequentAbsenceTypeList, allCodes);				
+		render(absence, frequentAbsenceTypeList, allCodes, mainMenu);				
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
@@ -771,72 +769,154 @@ public class Absences extends Controller{
 		if (absence == null) {
 			notFound();
 		}
+		int year = params.get("annoFine", Integer.class);
+		int month = params.get("meseFine", Integer.class);
+		int day = params.get("giornoFine", Integer.class);
 		String oldAbsenceCode = absence.absenceType.code;
 		String absenceCode = params.get("absenceCode");
-		if (absenceCode == null || absenceCode.isEmpty()) {
-			PersonDay pd = absence.personDay;
-			absence.delete();
-			pd.absences.remove(absence);
-			pd.populatePersonDay();
-			pd.save();
-			if(pd.date.isBefore(new LocalDate(pd.date).dayOfMonth().withMaximumValue())){
-				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ? and pd.date <= ?", 
-						pd.person, pd.date, new LocalDate(pd.date).dayOfMonth().withMaximumValue()).fetch();
-				for(PersonDay personday : pdList){
-					personday.populatePersonDay();
-					personday.save();
-				}
-			}
-			flash.success("Timbratura di tipo %s per il giorno %s rimossa per il dipendente %s %s", 
-					oldAbsenceCode, PersonTags.toDateTime(absence.personDay.date), pd.person.name, pd.person.surname);			
-		} 
-		else {
 
-			AbsenceType absenceType = AbsenceType.find("byCode", absenceCode).first();
-			Logger.debug("AbsenceType: %s", absenceType.code);
-			PersonDay pd = absence.personDay;
-			Logger.debug("PersonDay: %s", pd);
-			Absence existingAbsence = Absence.find("Select a from Absence a where a.personDay = ? and a.id <> ?", pd, absence.id).first();
+		/*Controllo che l'assenza sia relativa a un solo giorno*/
+		if(absence.personDay.date.isEqual(new LocalDate(year, month, day))){
 
-			if(existingAbsence != null){
-				validation.keep();
-				params.flash();
-				flash.error("Il codice di assenza %s è già presente per la data %s", params.get("absenceCode"), PersonTags.toDateTime(absence.personDay.date));
-				edit(absence.id);
-				render("@edit");
-			}
 
-			if((params.get("buonoMensaSi") != null) && params.get("buonoMensaSi", Boolean.class) == true){
-
-				pd.isTicketAvailable = true;
-				pd.save();
-
-			}
-			if((params.get("buonoMensaNo") != null) && params.get("buonoMensaNo", Boolean.class) == true){
-				pd.isTicketAvailable = false;
-				pd.save();
-			}
-
-			if((params.get("buonoMensaCalcolato") != null) && params.get("buonoMensaCalcolato", Boolean.class) == true){
+			if (absenceCode == null || absenceCode.isEmpty()) {
+				PersonDay pd = absence.personDay;
+				absence.delete();
+				pd.absences.remove(absence);
 				pd.populatePersonDay();
 				pd.save();
+				if(pd.date.isBefore(new LocalDate(pd.date).dayOfMonth().withMaximumValue())){
+					List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ? and pd.date <= ?", 
+							pd.person, pd.date, new LocalDate(pd.date).dayOfMonth().withMaximumValue()).fetch();
+					for(PersonDay personday : pdList){
+						personday.populatePersonDay();
+						personday.save();
+					}
+				}
+				flash.success("Timbratura di tipo %s per il giorno %s rimossa per il dipendente %s %s", 
+						oldAbsenceCode, PersonTags.toDateTime(absence.personDay.date), pd.person.name, pd.person.surname);			
+			} 
+			else {
+
+				AbsenceType absenceType = AbsenceType.find("byCode", absenceCode).first();
+				Logger.debug("AbsenceType: %s", absenceType.code);
+				PersonDay pd = absence.personDay;
+				Logger.debug("PersonDay: %s", pd);
+				Absence existingAbsence = Absence.find("Select a from Absence a where a.personDay = ? and a.id <> ?", pd, absence.id).first();
+
+				if(existingAbsence != null){
+					validation.keep();
+					params.flash();
+					flash.error("Il codice di assenza %s è già presente per la data %s", params.get("absenceCode"), PersonTags.toDateTime(absence.personDay.date));
+					edit(absence.id);
+					render("@edit");
+				}
+				String mealTicket =  params.get("buonoMensa");
+				//Logger.debug("Il valore di buono mensa da param: %s", mealTicket);
+				checkMealTicket(pd, mealTicket);
+
+
+				if(params.get("datasize", Blob.class) != null){
+					absence.absenceRequest = params.get("datasize", Blob.class);
+				}
+				absence.absenceType = absenceType;
+				absence.save();
+
+				flash.success(
+						String.format("Assenza per il giorno %s per %s %s aggiornata con codice %s", 
+								PersonTags.toDateTime(absence.personDay.date), absence.personDay.person.surname, absence.personDay.person.name, absenceCode));
+
 			}
 
-
-
-			if(params.get("datasize", Blob.class) != null){
-				absence.absenceRequest = params.get("datasize", Blob.class);
+		}
+		else{
+			/*L'assenza è per più giorni*/
+			LocalDate dataInizioAssenze = absence.personDay.date;
+			LocalDate dataFineAssenze = new LocalDate(year, month, day);
+			Logger.debug("Data fine assenze: %s", dataFineAssenze);
+			Logger.debug("Data inizio assenze %s", dataInizioAssenze);
+			PersonDay pd = null;
+			if(absenceCode.equals("") || absenceCode == null){
+				while(!dataInizioAssenze.isEqual(dataFineAssenze)){
+					Logger.debug("Intendo cancellare assenza per il giorno %s ", dataInizioAssenze);
+					pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", absence.personDay.person, dataInizioAssenze).first();
+					Absence abs = Absence.find("Select a from Absence a, PersonDay pd where a.personDay = pd and pd.person = ? and pd.date = ?", 
+							absence.personDay.person, dataInizioAssenze).first();
+					abs.delete();
+					pd.absences.remove(abs);
+					pd.populatePersonDay();
+					pd.save();				
+					
+					dataInizioAssenze = dataInizioAssenze.plusDays(1);
+				}
+				
+				
 			}
-			absence.absenceType = absenceType;
-			absence.save();
+			else{
+				AbsenceType absenceType = AbsenceType.find("byCode", absenceCode).first();
+				while(!dataInizioAssenze.isEqual(dataFineAssenze)){
+					pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", absence.personDay.person, dataInizioAssenze).first();
+					Absence existingAbsence = Absence.find("Select a from Absence a where a.personDay = ? and a.id <> ?", pd, absence.id).first();
+					if(existingAbsence != null){
+						validation.keep();
+						params.flash();
+						flash.error("Il codice di assenza %s è già presente per la data %s", params.get("absenceCode"), PersonTags.toDateTime(absence.personDay.date));
+						edit(absence.id);
+						render("@edit");
+					}
+					else{
+						Absence abs = Absence.find("Select a from Absence a, PersonDay pd where a.personDay = pd and pd.person = ? and pd.date = ?", 
+								absence.personDay.person, dataInizioAssenze).first();
+						abs.delete();
+						pd.absences.remove(abs);
+						pd.populatePersonDay();
+						pd.save();
+						Absence absenceNew = new Absence();
+						absenceNew.absenceType = absenceType;
+						absenceNew.personDay = pd;
+						absenceNew.save();
+						pd.absences.add(absenceNew);
+						pd.populatePersonDay();
+						pd.save();
+						
+					}
+					String mealTicket =  params.get("buonoMensa");
+					//Logger.debug("Il valore di buono mensa da param: %s", mealTicket);
+					checkMealTicket(pd, mealTicket);
+					dataInizioAssenze = dataInizioAssenze.plusDays(1);
+				}
+				
 
-			flash.success(
-					String.format("Assenza per il giorno %s per %s %s aggiornata con codice %s", 
-							PersonTags.toDateTime(absence.personDay.date), absence.personDay.person.surname, absence.personDay.person.name, absenceCode));
+				
+			}
+			flash.success("Rimossi i codici di assenza per il periodo %s %s", absence.personDay.date, dataFineAssenze);
 		}
 		render("@save");
 	}
+	
+	private static void checkMealTicket(PersonDay pd, String mealTicket){
+		
+		if(mealTicket.equals("si")){
 
+			pd.isTicketAvailable = true;
+			pd.save();
+			
 
+		}
+		if(mealTicket.equals("no")){
+			pd.isTicketAvailable = false;
+			pd.save();
+			
+		}
 
+		if(mealTicket.equals("calcolato")){
+			pd.populatePersonDay();
+			pd.save();
+			
+		}
+	}
 }
+
+
+
+

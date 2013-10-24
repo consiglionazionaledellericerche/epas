@@ -75,20 +75,20 @@ public class PersonStampingDayRecap {
 			{
 				this.fixedWorkingTimeCode = "";
 				this.setWorkingTime(0);
-				pd.timeAtWork = 0;
-				pd.save();
+			//	pd.timeAtWork = 0;
+			//	pd.save();
 			}
 			else
 			{
 				this.fixedWorkingTimeCode = smt.code;
 				addStampModificationTypeToList(smt);
-				pd.save(); //TODO toglierlo quando il db sarà consistente
+			//	pd.save(); //TODO toglierlo quando il db sarà consistente
 				int temporaryWorkTime = pd.getCalculatedTimeAtWork();
 				this.setWorkingTime( temporaryWorkTime );
-				pd.timeAtWork = temporaryWorkTime;
-				pd.save();	//TODO toglierlo quando il db sarà consistente
-				pd.updateDifference(); //TODO toglierlo quando il db sarà consistente 
-				pd.updateProgressive(); 
+			//	pd.timeAtWork = temporaryWorkTime;
+			//	pd.save();	//TODO toglierlo quando il db sarà consistente
+			//	pd.updateDifference(); //TODO toglierlo quando il db sarà consistente 
+			//	pd.updateProgressive(); 
 			}
 			this.setDifference(0);
 			this.setProgressive(0);
@@ -121,13 +121,13 @@ public class PersonStampingDayRecap {
 		//---------------------------------------- not fixed:  worktime, difference, progressive for past-----------------------------
 		else if(this.past)
 		{
-			pd.save();	//TODO toglierlo quando il db sarà consistente
+		//	pd.save();	//TODO toglierlo quando il db sarà consistente
 			int temporaryWorkTime = pd.getCalculatedTimeAtWork();
 			this.setWorkingTime(temporaryWorkTime);
-			pd.timeAtWork = temporaryWorkTime;
-			pd.save();	//TODO toglierlo quando il db sarà consistente
-			pd.updateDifference(); //TODO toglierlo quando il db sarà consistente
-			pd.updateProgressive(); 
+		//	pd.timeAtWork = temporaryWorkTime;
+		//	pd.save();	//TODO toglierlo quando il db sarà consistente
+		//	pd.updateDifference(); //TODO toglierlo quando il db sarà consistente
+		//	pd.updateProgressive(); 
 	
 			this.setDifference( pd.difference );
 	
@@ -141,7 +141,7 @@ public class PersonStampingDayRecap {
 				this.setProgressive(0);
 			}
 		
-			pd.save();	//TODO poi va rimosso
+		//	pd.save();	//TODO poi va rimosso
 		}
 		//---------------------------------------- worktime, difference, progressive for future ----------------------------------------
 		if(this.future)

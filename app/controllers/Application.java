@@ -36,7 +36,7 @@ public class Application extends Controller {
     		Application.indexAdmin();
     		session.put("methodSelected", ActionMenuItem.stampingsAdmin.getDescription());
     	} else {
-    		Stampings.stampings(null, null);
+    		Stampings.stampings(new LocalDate().getYear(), new LocalDate().getMonthOfYear());
     		session.put("methodSelected", ActionMenuItem.stampings.getDescription());
     	}
     }
