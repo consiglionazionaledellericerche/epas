@@ -1335,49 +1335,6 @@ public class PersonDay extends Model {
 	}
 	
 	
-	public static boolean checkForError(PersonDay pd, LocalDate yesterday, Person person)
-	{
-		//fixed
-		StampModificationType smt = pd.getFixedWorkingTime();
-		if(smt !=null)
-		{
-			if(pd.stampings.size()!=0)
-			{
-				pd.computeValidStampings();
-				for(Stamping s : pd.stampings)
-				{
-					if(!s.valid)
-					{
-						Logger.debug( "A " + yesterday.toString() +  " " + person.surname + " " +person.name +" non valido. (cella gialla)");
-						return false;
-					}
-				}
-			}
-			return true;
-			
-		}
-		else
-		{
-			if(!pd.isAllDayAbsences() && pd.stampings.size()==0)
-			{
-				Logger.debug( "A " + yesterday.toString() +  " " + person.surname + " " +person.name +" non valido. (zero timbrature)");
-				return false;
-			}
-			pd.computeValidStampings();
-			for(Stamping s : pd.stampings)
-			{
-				if(!s.valid)
-				{
-					Logger.debug( "A " + yesterday.toString() +  " " + person.surname + " " +person.name +" non valido. (cella gialla)");
-					return false;
-				}
-			}
-			return true;
-		}
-		
-		
-		
-	}
 	
 	
 	
