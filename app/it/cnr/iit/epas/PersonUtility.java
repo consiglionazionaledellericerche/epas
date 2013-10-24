@@ -797,6 +797,108 @@ public class PersonUtility {
 		
 		return coupleOfStampings;
 	}
+	
+	/**
+	 * Verifica per ogni persona attiva che alla data 
+	 * 	(1) in caso di giorno lavorativo il person day esista. 
+	 * 		Altrimenti viene creato e persistito un personday vuoto e inserito un record nella tabella PersonDayInTrouble.
+	 * 	(2) il person day presenti una situazione di timbrature corretta dal punto di vista logico. 
+	 * 		In caso contrario viene inserito un record nella tabella PersonDayInTrouble. Situazioni di timbrature errate si verificano nei casi 
+	 *  	(a) che vi sia almeno una timbratura non accoppiata logicamente con nessun'altra timbratura 
+	 * 		(b) che le persone not fixed non presentino ne' assenze AllDay ne' timbrature. 
+	 * @param date
+	 */
+	public static void checkDay(LocalDate dayToCheck)
+	{
+		List<Person> active = Person.getActivePersons(new LocalDate());
+		for(Person person : active)
+		{
+			PersonDay pd = PersonDay.find(""
+					+ "SELECT pd "
+					+ "FROM PersonDay pd "
+					+ "WHERE pd.person = ? AND pd.date = ? ", 
+					person, 
+					dayToCheck)
+					.first();
+			
+			if(pd!=null)
+			{
+				//check for error
+				checkForError(pd, person);
+				continue;
+			}
+			
+			if(pd==null)
+			{
+				if(DateUtility.isGeneralHoliday(dayToCheck))
+				{
+					continue;
+				}
+				if(person.workingTimeType.workingTimeTypeDays.get(dayToCheck.getDayOfWeek()-1).holiday)
+				{
+					continue;
+				}
+				
+				pd = new PersonDay(person, dayToCheck);
+				pd.create();
+				pd.populatePersonDay();
+				pd.save();
+				//check for error
+				checkForError(pd, person);
+				continue;
+				
+			}
+		}
+	}
+	
+	/**
+	 * Verifica che nel person day vi sia una situazione coerente di timbrature. Situazioni errate si verificano nei casi 
+	 *  (1) che vi sia almeno una timbratura non accoppiata logicamente con nessun'altra timbratura 
+	 * 	(2) che le persone not fixed non presentino ne' assenze AllDay ne' timbrature. 
+	 * In caso di situazione errata viene aggiunto un record nella tabella PersonDayInTrouble.
+	 * @param pd
+	 * @param person
+	 */
+	private static void checkForError(PersonDay pd, Person person)
+	{
+		//persona fixed
+		StampModificationType smt = pd.getFixedWorkingTime();
+		if(smt !=null)
+		{
+			if(pd.stampings.size()!=0)
+			{
+				pd.computeValidStampings();
+				for(Stamping s : pd.stampings)
+				{
+					if(!s.valid)
+					{
+						Logger.debug( "A " + pd.date.toString() +  " " + person.surname + " " +person.name +" non valido. (cella gialla)");
+						return;
+					}
+				}
+			}			
+		}
+		//persona not fixed
+		else
+		{
+			if(!pd.isAllDayAbsences() && pd.stampings.size()==0)
+			{
+				Logger.debug( "A " + pd.date.toString() +  " " + person.surname + " " +person.name +" non valido. (zero timbrature)");
+				return;
+			}
+			pd.computeValidStampings();
+			for(Stamping s : pd.stampings)
+			{
+				if(!s.valid)
+				{
+					Logger.debug( "A " + pd.date.toString() +  " " + person.surname + " " +person.name +" non valido. (cella gialla)");
+					return;
+				}
+			}
+		}
+	}
+	
+	
 
 }
 
