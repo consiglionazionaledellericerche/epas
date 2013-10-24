@@ -27,6 +27,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.Query;
 import javax.persistence.Table;
@@ -103,6 +104,9 @@ public class PersonDay extends Model {
 	@Enumerated(EnumType.STRING)
 	public PersonDayModificationType modificationType;
 	
+	@OneToOne(mappedBy="personDay", fetch = FetchType.LAZY)
+	public PersonDayInTrouble trouble;
+	
 	/**
 	 * lo StampModificationType se il person day presenta situazioni di pausa mensa troppo breve o pausa automaticamente calcolata (e, p)
 	 */
@@ -158,7 +162,16 @@ public class PersonDay extends Model {
 	 * @return true se il personDay è un giorno di festa per la persona. False altrimenti
 	 */
 	public boolean isHoliday(){
-		return DateUtility.isHoliday(this.person, this.date);
+		if(DateUtility.isHoliday(this.person, this.date))
+		{
+			return true;
+		}
+		if(this.person.workingTimeType.workingTimeTypeDays.get(this.date.getDayOfWeek()-1).holiday)
+		{
+			return true;
+		}
+		return false;
+		
 	}
 	
 	/**
