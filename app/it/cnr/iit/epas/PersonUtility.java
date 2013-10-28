@@ -934,7 +934,7 @@ public class PersonUtility {
 	
 	public static void checkAllDaysYear()
 	{
-		LocalDate date = new LocalDate(2013,10,1);
+		LocalDate date = new LocalDate(2013,1,1);
 		LocalDate today = new LocalDate();
 		while(true)
 		{

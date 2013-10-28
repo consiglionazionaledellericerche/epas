@@ -269,6 +269,7 @@ public class FromMysqlToPostgres {
 		FromMysqlToPostgres.createAbsenceTypeToQualificationRelations();
 		
 		FromMysqlToPostgres.checkFixedWorkingTime();
+		FromMysqlToPostgres.fixMissingPersonDay();
 		JPAPlugin.closeTx(false);
 		Logger.info("Importazione terminata");
 
@@ -310,7 +311,19 @@ public class FromMysqlToPostgres {
 			}
 		}
 	}
+	
+	/**
+	 * controlla tutti i personday mancanti dall'inizio dell'anno e li aggiunge
+	 */
+	public static void fixMissingPersonDay(){
+		Logger.debug("Controllo i personday che mancano...");
+		PersonUtility.checkAllDaysYear();
+		
+		Logger.debug("Terminato controllo sui person day mancanti");
+	}
 
+	
+	
 
 	
 	/**

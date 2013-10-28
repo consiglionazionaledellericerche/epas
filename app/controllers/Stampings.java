@@ -371,22 +371,24 @@ public class Stampings extends Controller {
 		}
 		Integer hour = params.get("hourStamping", Integer.class);
 		Integer minute = params.get("minuteStamping", Integer.class);
-		Logger.debug("I parametri per costruire la data sono: anno: %s, mese: %s, giorno: %s, ora: %s, minuti: %s", year, month, day, hour, minute);
+		//Logger.debug("I parametri per costruire la data sono: anno: %s, mese: %s, giorno: %s, ora: %s, minuti: %s", year, month, day, hour, minute);
 
 		String type = params.get("type");
 		String service = params.get("service");
 		Stamping stamp = new Stamping();
 		stamp.date = new LocalDateTime(year, month, day, hour, minute, 0);
-		stamp.markedByAdmin = true;
-
-
+		stamp.markedByAdmin = true;		
 
 		if(service.equals("true")){
 			stamp.note = "timbratura di servizio";
 			stamp.stampType = StampType.find("Select st from StampType st where st.code = ?", "motiviDiServizio").first();
 		}
 		else{
-			stamp.note = "timbratura inserita dall'amministratore";
+			String note = params.get("note");
+			if(!note.equals(""))
+				stamp.note = note;
+			else
+				stamp.note = "timbratura inserita dall'amministratore";
 		}
 		if(type.equals("true")){
 			stamp.way = Stamping.WayType.in;
@@ -476,7 +478,10 @@ public class Stampings extends Controller {
 			stamping.date = stamping.date.withMinuteOfHour(minute);
 
 			stamping.markedByAdmin = true;
-			stamping.note = "timbratura modificata dall'amministratore";
+			if(!params.get("note").equals(""))
+				stamping.note = params.get("note");
+			else
+				stamping.note = "timbratura modificata dall'amministratore";
 			stamping.save();
 			pd.populatePersonDay();
 			pd.save();
