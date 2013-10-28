@@ -269,7 +269,7 @@ public class FromMysqlToPostgres {
 		FromMysqlToPostgres.createAbsenceTypeToQualificationRelations();
 		
 		FromMysqlToPostgres.checkFixedWorkingTime();
-		FromMysqlToPostgres.fixMissingPersonDay();
+		//FromMysqlToPostgres.fixMissingPersonDay();
 		JPAPlugin.closeTx(false);
 		Logger.info("Importazione terminata");
 
@@ -374,7 +374,7 @@ public class FromMysqlToPostgres {
 			person = new Person();
 			person.name = rs.getString("Nome");
 			person.surname = rs.getString("Cognome");
-			person.username = String.format("%s.%s", person.name.toLowerCase(), person.surname.toLowerCase() );
+			person.username = String.format("%s.%s", person.name.toLowerCase().replace(" ", ""), person.surname.toLowerCase().replace(" ", "") );
 			person.password = rs.getString("passwordmd5");
 			person.bornDate = rs.getDate("DataNascita");
 			person.number = rs.getInt("Matricola");

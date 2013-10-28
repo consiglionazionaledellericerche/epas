@@ -104,8 +104,8 @@ public class PersonDay extends Model {
 	@Enumerated(EnumType.STRING)
 	public PersonDayModificationType modificationType;
 	
-	@OneToOne(mappedBy="personDay", fetch = FetchType.LAZY)
-	public PersonDayInTrouble trouble;
+	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY)
+	public List<PersonDayInTrouble> troubles = new ArrayList<PersonDayInTrouble>();
 	
 	/**
 	 * lo StampModificationType se il person day presenta situazioni di pausa mensa troppo breve o pausa automaticamente calcolata (e, p)
