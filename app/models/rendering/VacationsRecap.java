@@ -27,9 +27,6 @@ import com.google.common.collect.Table;
 /**
  * @author alessandro
  * Classe da utilizzare per il riepilogo delle informazioni relative al piano ferie di una persona.
- * Contiene inoltre due metodi statici di utilità 
- * 1) getContractVacationPeriods(Contract) per estrarre dal contratto i vacation period associati
- * 2) getCurrentVacationPeriod(Contract) per estrarre dal contratto il vacation period attuale
  */
 public class VacationsRecap {
 	

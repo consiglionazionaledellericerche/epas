@@ -28,11 +28,16 @@ public class Application extends Controller {
     		Persons.list();
     		return;
     	}
-    	
+		
+		session.put("monthSelected", new LocalDate().getMonthOfYear());
+		session.put("yearSelected", new LocalDate().getYear());
+		session.put("personSelected", Security.getPerson().id);
     	if (Security.check(Security.INSERT_AND_UPDATE_STAMPING)) {
     		Application.indexAdmin();
+    		session.put("methodSelected", ActionMenuItem.stampingsAdmin.getDescription());
     	} else {
-    		Stampings.stampings(null, null);
+    		Stampings.stampings(new LocalDate().getYear(), new LocalDate().getMonthOfYear());
+    		session.put("methodSelected", ActionMenuItem.stampings.getDescription());
     	}
     }
 	public static void success(){

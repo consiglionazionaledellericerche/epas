@@ -6,7 +6,6 @@ import java.util.List;
 import javax.persistence.FetchType;
 import javax.persistence.Query;
 
-
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.DateTimeConstants;
@@ -17,7 +16,6 @@ import play.Logger;
 import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 import play.db.jpa.Transactional;
-
 import models.Absence;
 import models.AbsenceType;
 import models.Configuration;
@@ -25,6 +23,7 @@ import models.Contract;
 import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
+import models.PersonDayInTrouble;
 import models.PersonMonth;
 import models.PersonReperibilityDay;
 import models.PersonShiftDay;
@@ -291,7 +290,7 @@ public class PersonUtility {
 
 
 	public static void checkExitStampNextDay(PersonDay pd){
-		Logger.trace("Chiamata la checkExitStampNextDay per %s %s in data %s", pd.person.name, pd.person.surname, pd.date);
+		Logger.debug("Chiamata la checkExitStampNextDay per %s %s in data %s", pd.person.name, pd.person.surname, pd.date);
 		Configuration config = Configuration.getCurrentConfiguration();
 		PersonDay pdPastDay = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? " +
 				"and pd.date >= ? and pd.date < ? ORDER by pd.date DESC", pd.person, pd.date.dayOfMonth().withMinimumValue(), pd.date).first();
@@ -306,7 +305,7 @@ public class PersonUtility {
 			//	List<Stamping> reloadedStampingYesterday = new ArrayList<Stamping>(pdPastDay.stampings);
 			int size = reloadedStampingYesterday.size();
 			if(reloadedStampingYesterday.size() > 0 && reloadedStampingYesterday.get(size-1).way == WayType.in){
-				Logger.trace("Sono nel caso in cui ci sia una timbratura finale di ingresso nel giorno precedente nel giorno %s", 
+				Logger.debug("Sono nel caso in cui ci sia una timbratura finale di ingresso nel giorno precedente nel giorno %s", 
 						pdPastDay.date);
 				if(stampProfile == null || !stampProfile.fixedWorkingTime){
 					List<Stamping> s = Stamping.find("Select s from Stamping s where s.personDay = ? order by s.date asc", pd).fetch();
@@ -635,8 +634,13 @@ public class PersonUtility {
 		List<Absence> absList = null;
 		//trovo nella storia dei personDay l'ultima occorrenza in ordine temporale del codice di rimpiazzamento relativo al codice di assenza
 		//che intendo inserire, di modo da fare i calcoli sulla possibilità di inserire quel codice di assenza da quel giorno in poi.
-		Absence absence = Absence.find("Select abs from Absence abs where abs.absenceType = ? and abs.personday.person = ? " +
-				" order by absence.personDay.date desc", absenceType.absenceTypeGroup.replacingAbsenceType).first();
+		Absence absence = Absence.find(
+				"Select abs "
+				+ "from Absence abs "
+				+ "where abs.absenceType = ? and abs.personDay.person = ? " 
+				+ "order by abs.personDay.date desc",
+				absenceType.absenceTypeGroup.replacingAbsenceType, 
+				person).first();
 		
 		if(absenceType.absenceTypeGroup.accumulationType.equals(AccumulationType.yearly)){
 			absList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup.label = ? and abs.personDay.person = ? and" +
@@ -742,6 +746,208 @@ public class PersonUtility {
 		 
 		return new CheckMessage(true, "E' possibile prendere il codice d'assenza", null);
 	}
+	
+	
+	public static int numberOfInOutInPersonDay(PersonDay pd)
+	{
+		pd.orderStampings();
+
+		int coupleOfStampings = 0;
+		
+		String lastWay = null;
+		for(Stamping s : pd.stampings)
+		{
+			if(lastWay==null)
+			{
+				//trovo out chiudo una coppia
+				if(s.way.description.equals("out"))
+				{
+					coupleOfStampings++;
+					lastWay = null;
+					continue;
+				}
+				//trovo in lastWay diventa in
+				if(s.way.description.equals("in"))
+				{
+					lastWay = s.way.description;
+					continue;
+				}
+				
+			}
+			//lastWay in
+			if(lastWay.equals("in"))
+			{
+				//trovo out chiudo una coppia
+				if(s.way.description.equals("out"))
+				{
+					coupleOfStampings++;
+					lastWay = null;
+					continue;
+				}
+				//trovo in chiudo una coppia e lastWay resta in
+				if(s.way.description.equals("in"))
+				{
+					coupleOfStampings++;
+					continue;
+				}
+			}
+		}
+		//l'ultima stampings e' in chiudo una coppia
+		if(lastWay!=null)
+			coupleOfStampings++;
+		
+		return coupleOfStampings;
+	}
+	
+	/**
+	 * Verifica per ogni persona attiva che alla data 
+	 * 	(1) in caso di giorno lavorativo il person day esista. 
+	 * 		Altrimenti viene creato e persistito un personday vuoto e inserito un record nella tabella PersonDayInTrouble.
+	 * 	(2) il person day presenti una situazione di timbrature corretta dal punto di vista logico. 
+	 * 		In caso contrario viene inserito un record nella tabella PersonDayInTrouble. Situazioni di timbrature errate si verificano nei casi 
+	 *  	(a) che vi sia almeno una timbratura non accoppiata logicamente con nessun'altra timbratura 
+	 * 		(b) che le persone not fixed non presentino ne' assenze AllDay ne' timbrature. 
+	 * @param date
+	 */
+	public static void checkDay(LocalDate dayToCheck)
+	{
+		List<Person> active = Person.getActivePersons(new LocalDate());
+		for(Person person : active)
+		{
+			PersonDay pd = PersonDay.find(""
+					+ "SELECT pd "
+					+ "FROM PersonDay pd "
+					+ "WHERE pd.person = ? AND pd.date = ? ", 
+					person, 
+					dayToCheck)
+					.first();
+			
+			if(pd!=null)
+			{
+				//check for error
+				checkForError(pd, person);
+				continue;
+			}
+			
+			if(pd==null)
+			{
+				if(DateUtility.isGeneralHoliday(dayToCheck))
+				{
+					continue;
+				}
+				if(person.workingTimeType.workingTimeTypeDays.get(dayToCheck.getDayOfWeek()-1).holiday)
+				{
+					continue;
+				}
+				
+				pd = new PersonDay(person, dayToCheck);
+				pd.create();
+				pd.populatePersonDay();
+				pd.save();
+				//check for error
+				checkForError(pd, person);
+				continue;
+				
+			}
+		}
+	}
+	
+	/**
+	 * Verifica che nel person day vi sia una situazione coerente di timbrature. Situazioni errate si verificano nei casi 
+	 *  (1) che vi sia almeno una timbratura non accoppiata logicamente con nessun'altra timbratura 
+	 * 	(2) che le persone not fixed non presentino ne' assenze AllDay ne' timbrature. 
+	 * In caso di situazione errata viene aggiunto un record nella tabella PersonDayInTrouble.
+	 * @param pd
+	 * @param person
+	 */
+	private static void checkForError(PersonDay pd, Person person)
+	{
+		//persona fixed
+		StampModificationType smt = pd.getFixedWorkingTime();
+		if(smt !=null)
+		{
+			if(pd.stampings.size()!=0)
+			{
+				pd.computeValidStampings();
+				for(Stamping s : pd.stampings)
+				{
+					if(!s.valid)
+					{
+						insertPersonDayInTrouble(pd, "timbratura disaccoppiata");
+						return;
+					}
+				}
+			}			
+		}
+		//persona not fixed
+		else
+		{
+			if(!pd.isAllDayAbsences() && pd.stampings.size()==0)
+			{
+				if(!pd.isHoliday())	
+					//TODO questo e' un controllo aggiuntivo in quanto in teoria i person day senza assenze e timbrature nei giorni di festa 
+					//non dovrebbero esistere ma nel database attuale a volte sono presenti e persistiti. Cancellarli e togliere questo controllo
+				{
+					insertPersonDayInTrouble(pd, "no assenze giornaliere e no timbrature");
+				}
+				return;
+			}
+			pd.computeValidStampings();
+			for(Stamping s : pd.stampings)
+			{
+				if(!s.valid)
+				{
+					insertPersonDayInTrouble(pd, "timbratura disaccoppiata");
+					return;
+				}
+			}
+		}
+	}
+	
+	private static void insertPersonDayInTrouble(PersonDay pd, String cause)
+	{
+		//TODO Controllo che non esista già, in quel caso decidere cosa fare (forse solo aggiornare la causa)
+		//System.out.println( "A " + pd.date.toString() +  " " + person.surname + " " +person.name +" non valido. (cella gialla)");
+		
+		PersonDayInTrouble pdt = PersonDayInTrouble.find(""
+				+ "Select pdt "
+				+ "from PersonDayInTrouble pdt "
+				+ "where pdt.personDay = ?"
+				, pd)
+				.first();
+		
+		if(pdt==null)
+		{
+			PersonDayInTrouble trouble = new PersonDayInTrouble();
+			trouble.personDay = pd;
+			trouble.cause = cause;
+			trouble.save();
+			return;
+		}
+		
+		if(pdt!=null)
+		{
+			//??
+		}
+		
+	}
+	
+	public static void checkAllDaysYear()
+	{
+		LocalDate date = new LocalDate(2013,1,1);
+		LocalDate today = new LocalDate();
+		while(true)
+		{
+			//Logger.debug("******************************** Controllo di %s*******************", date);
+			System.out.println("******************************** Controllo di "+date+"*******************");
+			PersonUtility.checkDay(date);
+			date = date.plusDays(1);
+			if(date.isEqual(today))
+				break;
+		}
+	}
+	
+	
 
 }
 

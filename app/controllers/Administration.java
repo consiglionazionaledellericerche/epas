@@ -12,11 +12,13 @@ import controllers.shib.Shibboleth;
 
 import models.Contract;
 import models.Person;
+import models.PersonDay;
 import models.PersonMonth;
 import models.VacationCode;
 import models.VacationPeriod;
 import models.WorkingTimeType;
 import play.Logger;
+import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -79,6 +81,25 @@ public class Administration extends Controller {
 	public static void updatePersonDay(){
 		FromMysqlToPostgres.checkFixedWorkingTime();
 		renderText("Aggiornati i person day delle persone con timbratura fissa");
+	}
+	
+	/**
+	 * metodo da lanciare per ricalcolare tutti i valori nei personday dall'inizio dell'anno alla fine dello stesso.
+	 * Questo metodo viene lanciato attraverso una chiamata da browser. 
+	 */
+	public static void updatePersonDaysValue(){
+		
+		List<Person> personList = Person.findAll();
+		LocalDate date = new LocalDate();
+		for(Person p : personList){
+			for(int month = 1; month <=12; month++){
+				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
+						p, new LocalDate(date.getYear(), month, 1), new LocalDate(date.getYear(), month, 1).dayOfMonth().withMaximumValue()).fetch();
+				for(PersonDay pd : pdList){
+					pd.populatePersonDay();
+				}
+			}			
+		}		
 	}
 	
 	public static void updateVacationPeriodRelation() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
