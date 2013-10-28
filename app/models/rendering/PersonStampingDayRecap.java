@@ -232,7 +232,7 @@ public class PersonStampingDayRecap {
 			StampingTemplate st = new StampingTemplate(stamping, i, pd);
 			this.stampingsTemplate.add(st);
 			if(stamping.note!=null && !stamping.note.equals("")){
-				note.add(stamping.note);
+				note.add(st.hour + ": " + stamping.note);
 			}
 			
 		}
