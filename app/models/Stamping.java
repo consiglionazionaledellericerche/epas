@@ -96,6 +96,12 @@ public class Stamping extends Model implements Comparable<Stamping> {
 	public boolean valid;
 	
 	/**
+	 * true, la cella fittizia di uscita adesso
+	 */
+	@Transient
+	public boolean exitingNow = false;
+	
+	/**
 	 * 
 	 * @return
 	 */

@@ -27,6 +27,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.Query;
 import javax.persistence.Table;
@@ -102,6 +103,15 @@ public class PersonDay extends Model {
 	@Column(name = "modification_type")
 	@Enumerated(EnumType.STRING)
 	public PersonDayModificationType modificationType;
+	
+	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY)
+	public List<PersonDayInTrouble> troubles = new ArrayList<PersonDayInTrouble>();
+	
+	/**
+	 * lo StampModificationType se il person day presenta situazioni di pausa mensa troppo breve o pausa automaticamente calcolata (e, p)
+	 */
+	@Transient
+	public StampModificationType lunchTimeStampModificationType = null;
 
 
 	public PersonDay(Person person, LocalDate date, int timeAtWork, int difference, int progressive) {
@@ -147,24 +157,36 @@ public class PersonDay extends Model {
 
 
 	/**
-	 * 
+	 * (checked 17/10 personStamping)
 	 * @param data
-	 * @return true se il giorno in questione è un giorno di festa. False altrimenti
+	 * @return true se il personDay è un giorno di festa per la persona. False altrimenti
 	 */
 	public boolean isHoliday(){
-		return DateUtility.isHoliday(person, date);
-	}
-
-	private final static class TimeAtWork {
-		Stamping lastNotPairedInStamping;
-		Integer timeAtWork;
-		TimeAtWork(Integer timeAtWork, Stamping lastNotPairedInStamping) {
-			this.timeAtWork = timeAtWork;
-			this.lastNotPairedInStamping = lastNotPairedInStamping;
+		if(DateUtility.isHoliday(this.person, this.date))
+		{
+			return true;
 		}
+		if(this.person.workingTimeType.workingTimeTypeDays.get(this.date.getDayOfWeek()-1).holiday)
+		{
+			return true;
+		}
+		return false;
+		
 	}
 	
-	
+	/**
+	 * (cheked 21/10 PersonStampingDayRecap)
+	 * @return true se nel giorno vi e' una assenza giornaliera
+	 */
+	public boolean isAllDayAbsences()
+	{
+		for(Absence ab : absences)
+		{
+			if(ab.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay))
+				return true;
+		}
+		return false;
+	}
 
 	/**
 	 * 
@@ -181,7 +203,7 @@ public class PersonDay extends Model {
 	
 	
 	/**
-	 * 
+	 * Classe che modella due stampings logicamente accoppiate nel personday (una di ingresso ed una di uscita)
 	 * @author alessandro
 	 *
 	 */
@@ -202,7 +224,7 @@ public class PersonDay extends Model {
 	 * viene anche settato il campo valid di ciascuna stampings contenuta nel person day
 	 * @return
 	 */
-	public List<PairStamping> getValidPairStamping()
+	private List<PairStamping> getValidPairStamping()
 	{
 		Collections.sort(this.stampings);
 		//(1)Costruisco le coppie valide per calcolare il worktime
@@ -351,12 +373,16 @@ public class PersonDay extends Model {
 	public void orderStampings()
 	{
 		Collections.sort(this.stampings);
+		this.save();
 	}
 	
-	public TimeAtWork getCalculatedTimeAtWork() {
-
+	/**
+	 * (Alessandro)
+	 * Algoritmo definitivo per il calcolo dei minuti lavorati nel person day
+	 * @return
+	 */
+	public int getCalculatedTimeAtWork() {
 		int justifiedTimeAtWork = 0;
-		Stamping lastInNotPaired = null;
 		int workTime=0;
 		
 		
@@ -364,17 +390,16 @@ public class PersonDay extends Model {
 		StampProfile stampProfile = getStampProfile();
 		if (stampProfile != null && stampProfile.fixedWorkingTime) 
 		{
-			return new TimeAtWork(getWorkingTimeTypeDay().workingTime, null);
+			return getWorkingTimeTypeDay().workingTime;
 		} 
 
 	
-		this.timeAtWork = 0;	//vedere se serve
-
-		
-		//controllo sulla possibilità che esistano timbrature di ingresso nel giorno precedente senza corrispondenti timbrature di uscita
-		//se non la mattina seguente prima dell'orario di scadenza del controllo sulla timbratura stessa
-		PersonUtility.checkExitStampNextDay(this);
-
+		//if(!this.date.isEqual(new LocalDate()))	//tranne oggi
+		//{
+			//controllo sulla possibilità che esistano timbrature di ingresso nel giorno precedente senza corrispondenti timbrature di uscita
+			//se non la mattina seguente prima dell'orario di scadenza del controllo sulla timbratura stessa
+			PersonUtility.checkExitStampNextDay(this);
+		//}
 		
 		//assenze all day piu' altri casi di assenze
 		for(Absence abs : absences){
@@ -384,7 +409,7 @@ public class PersonDay extends Model {
 			if(abs.absenceType.ignoreStamping || (abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay && !checkHourlyAbsenceCodeSameGroup(abs.absenceType)))
 			{
 				Logger.debug("Sto inserendo un'assenza giornaliera per %s %s in data %s", person.name, person.surname, date);
-				return new TimeAtWork(0, null);
+				return 0;
 			}
 			
 			if(!abs.absenceType.code.equals("89") && abs.absenceType.justifiedTimeAtWork.minutesJustified != null)
@@ -393,30 +418,18 @@ public class PersonDay extends Model {
 				justifiedTimeAtWork = justifiedTimeAtWork + abs.absenceType.justifiedTimeAtWork.minutesJustified;
 				continue;
 			}
-			
-			if(!abs.absenceType.code.equals("89"))
-			{
-				//Da capire cosa fare nel caso del codice 89
-				continue;
-			}
-			
-
 		}
 
 		//in caso di assenza di timbrature considero il justifiedTimeAtwork
 		if (stampings.size() == 0) 
 		{
-			return new TimeAtWork(justifiedTimeAtWork, null);
+			return justifiedTimeAtWork;
 		}
 		
 		//Se non c'è almeno una coppia di timbrature allora il tempo di lavoro è giustificato solo dalle assenze precendente calcolate
 		if(stampings.size() == 1)
 		{
-			if(stampings.get(0).way == WayType.in)
-			{
-				lastInNotPaired = stampings.get(0);
-			}
-			return new TimeAtWork(justifiedTimeAtWork, lastInNotPaired);
+			return justifiedTimeAtWork;
 		}
 
 		if(isHoliday()){
@@ -432,12 +445,10 @@ public class PersonDay extends Model {
 					Logger.trace("Timbratura di uscita: %s", workTime);
 				}
 			}
-			return new TimeAtWork(justifiedTimeAtWork + workTime, null);
+			return justifiedTimeAtWork + workTime;
 		}
 
-		//IO*********************************************************************************************************************************
-		
-		//List<Stamping> orderedStampings = Stamping.find("Select st from Stamping st where st.personDay = ? order by st.date", this).fetch();
+			
 		Collections.sort(this.stampings);
 		List<PairStamping> validPairs = this.getValidPairStamping();
 	
@@ -449,135 +460,35 @@ public class PersonDay extends Model {
 				myWorkTime = myWorkTime + toMinute(validPair.out.date);
 			}
 		}
-		
-		//**********************************************************************************************************************************
-		
-		List<Stamping> reloadedStampings = Stamping.find("Select st from Stamping st where st.personDay = ? order by st.date", this).fetch();
-		for(int i = 0; i < reloadedStampings.size(); i++) {
-			Logger.trace("Per il calcolo del tempo di lavoro passo dalla timbratura numero %d", i);
-			if(reloadedStampings.get(i).way == WayType.in){
-				Logger.trace("E' timbratura di ingresso per %s alle ore %s", person, reloadedStampings.get(i).date.toString());
-				if (i == reloadedStampings.size() - 1 ) {
-					Logger.trace("Ultima timbratura del %s e' di ingresso per %s %s. Timbratura per adesso ignorata.", date, person.name, person.surname);
-					break;
-				}
-				if (i >= 1 && reloadedStampings.get(i - 1).way == WayType.in) {
-					Logger.trace("Timbratura di ingresso del %s per %s %s ignorata perche' la precedente era di ingresso", date, person.name, person.surname);
-					continue;
-				}
-
-				if(reloadedStampings.get(i).stampType != null && reloadedStampings.get(i).stampType.identifier.equals("s")){
-					if((i-1) >= 0){
-						//TODO: mettere ENUM per mappare gli StampType tra db e codice 
-						if(reloadedStampings.get(i-1).stampType != null && reloadedStampings.get(i-1).stampType.identifier.equals("s")){
-							//c'è stata un'uscita di servizio, questo è il corrispondente ingresso come lo calcolo? aggiungendo il tempo
-							//trascorso fuori per servizio come tempo di lavoro
-							Logger.debug("Anche la precedente timbratura era di servizio...calcolo il tempo in servizio come tempo a lavoro per %s %s", 
-									person.name, person.surname);
-						}
-						else{
-							workTime -= toMinute(reloadedStampings.get(i).date);
-							reloadedStampings.get(i).note = "Attenzione: timbratura precedente risulta di servizio, mentre questa non lo e', verificare le proprie timbrature di servizio.";
-							reloadedStampings.get(i).save();
-						}
-					}
-
-				}
-				else{
-					if(i-1 > 0 && reloadedStampings.get(i-1) != null && reloadedStampings.get(i).stampType != null && reloadedStampings.get(i-1).stampType.identifier.equals("s")){
-						reloadedStampings.get(i).note = "Timbratura di ingresso normale, ci si aspettava invece una timbratura di ingresso di servizio. Contattare il dipendente.";
-						reloadedStampings.get(i).save();
-						continue;
-					}
-					Logger.trace("Tominute di %s: %d", reloadedStampings.get(i).date, toMinute(reloadedStampings.get(i).date));
-					Logger.trace("Tempo di lavoro prima della somma della timbratura: %d", workTime);
-					workTime -= toMinute(reloadedStampings.get(i).date);
-					Logger.debug("Tempo di lavoro dopo della somma della timbratura: %d", workTime);
-					lastInNotPaired = reloadedStampings.get(i);
-					Logger.trace("Normale timbratura di ingresso %s che mi dà un tempo di lavoro di: %d", reloadedStampings.get(i).date, workTime);
-				}
-
-
-			}
-
-			if(reloadedStampings.get(i).way == WayType.out){
-				Logger.trace("E' timbratura di uscita alle ore %s", reloadedStampings.get(i).date.toString());
-				if (i == 0) {
-					Logger.debug("La prima timbratura del %s e' di uscita per %s %s, quindi viene ignorata nei calcoli", date, person.name, person.surname);
-					continue;
-				}
-
-				if (i >= 1 && reloadedStampings.get(i-1).way == WayType.out) {
-					Logger.debug("Timbratura di uscita del %s per %s %s ignorata perche' la precedente era di uscita", date, person.name, person.surname);
-					continue;
-				}
-
-				if(reloadedStampings.get(i).stampType != null && reloadedStampings.get(i).stampType.identifier.equals("s")){
-					if((i-1) >= 0){
-						if(reloadedStampings.get(i-1).stampType != null && reloadedStampings.get(i-1).stampType.identifier.equals("s")){
-							//c'è stata un'uscita di servizio, questo è il corrispondente ingresso come lo calcolo? aggiungendo il tempo
-							//trascorso fuori per servizio come tempo di lavoro
-							Logger.debug("Anche la precedente timbratura era di servizio...calcolo il tempo in servizio come tempo a lavoro per %s %s", 
-									person.name, person.surname);
-						}
-						else{
-							//workTime += toMinute(reloadedStampings.get(i).date);
-							//reloadedStampings.get(i).note = "Attenzione: timbratura precedente risulta di servizio, mentre questa non lo e', verificare le proprie timbrature di servizio.";
-							//reloadedStampings.get(i).save();
-						}
-					}
-
-				}
-
-				else{
-					//timbratura normale di uscita
-					Logger.trace("Tominute di %s: %d", reloadedStampings.get(i).date, toMinute(reloadedStampings.get(i).date));
-					Logger.trace("Tempo di lavoro prima della somma della timbratura: %d", workTime);
-					workTime += toMinute(reloadedStampings.get(i).date);
-					Logger.trace("Tempo di lavoro dopo la somma della timbratura: %d", workTime);
-					lastInNotPaired = null;
-					Logger.debug("Normale timbratura di uscita %s che mi dà un tempo di lavoro di: %d", reloadedStampings.get(i).date, workTime);
-				}
-
-			}
-
-		}
-
+	
 		workTime = myWorkTime;
 
-		//in più fa questo
-		
-		/*
-		//Viene conteggiato solo il tempo derivante da assenze giustificate precedentemente calcolato
-		if (!atLeastOnePairedStamping) {
-			return new TimeAtWork(justifiedTimeAtWork, lastInNotPaired);
-		}
-
-		//C'è un ingresso che non ha trovato corrispondenze in timbrature di uscita ci ri-aggiungo quello che ci avevo precedentemente tolto...
-		if (lastInNotPaired != null) {
-			workTime += toMinute(lastInNotPaired.date);
-		}
-		*/
-		
-		
-
-		//Il pranzo e' servito? 		
+		//Il pranzo e' servito??		
 		int breakTicketTime = getWorkingTimeTypeDay().breakTicketTime;	//30 minuti
 		int mealTicketTime = getWorkingTimeTypeDay().mealTicketTime;	//6 ore
 
 		List<PairStamping> gapLunchPairs = getGapLunchPairs(validPairs);
 		
 		//non ha timbrato per il pranzo (due sole timbrature)
-		if(validPairs.size()==1 && workTime > mealTicketTime && 	workTime - breakTicketTime > mealTicketTime)
+		if(validPairs.size()==1) 
 		{
-			workTime = workTime - breakTicketTime;	
-			this.isTicketAvailable = true;
+			if( workTime > mealTicketTime && workTime - breakTicketTime > mealTicketTime )
+			{
+				workTime = workTime - breakTicketTime;
+				this.isTicketAvailable = true;
+				StampModificationType smt = StampModificationType.findById(StampModificationTypeValue.FOR_DAILY_LUNCH_TIME.getId());
+				this.lunchTimeStampModificationType = smt;
+			}
+			else
+			{
+				this.isTicketAvailable = false;
+			}
 		}
 		
 		//potrebbe aver timbrato per il pranzo (più di due timbrature)
-		else if(validPairs.size()>1)
+		if(validPairs.size()>1)
 		{
-			//ha timbrato per il pranzo //(TODO per adesso considero il primo gap, poi si vedrà)
+			//ha timbrato per il pranzo //(TODO considero il primo gap in orario pranzo)
 			if(gapLunchPairs.size()>0)
 			{
 				int minTimeForLunch = 0;
@@ -592,6 +503,8 @@ public class PersonDay extends Model {
 					if( minTimeForLunch < breakTicketTime ) 
 					{
 						workTime = workTime - (breakTicketTime - minTimeForLunch);
+						StampModificationType smt = StampModificationType.findById(StampModificationTypeValue.FOR_MIN_LUNCH_TIME.getId());
+						this.lunchTimeStampModificationType = smt;
 					}
 					this.isTicketAvailable = true;
 				}
@@ -606,45 +519,12 @@ public class PersonDay extends Model {
 			}
 			
 		}
-		return new TimeAtWork(workTime + justifiedTimeAtWork, lastInNotPaired);
+		
+		return workTime + justifiedTimeAtWork;
 
 
 	}
 	
-	
-
-	public class TimeAtWorkToday {
-		public Integer timeAtWork;
-		public boolean exitingNow;
-
-		public TimeAtWorkToday(Integer timeAtWork, boolean exitingNow) {
-			this.timeAtWork = timeAtWork;
-			this.exitingNow = exitingNow;
-		}
-	}
-
-	/**
-	 * Da utilizzare solo nel template di visualizzazione!
-	 * @return
-	 */
-	public TimeAtWorkToday getTimeAtWorkWithToday() {
-		if (isToday()) {
-			return getTimeAtWorkToday();
-		}
-		return new TimeAtWorkToday(timeAtWork, false);
-	}
-	
-	/**
-	 * 
-	 * @return lo stampmodificationtype relativo al pranzo per la persona
-	 */
-	public StampModificationType getTodayLunchTime(){
-		StampModificationType smt = null;
-		TimeAtWorkToday tawd = getTimeAtWorkWithToday();
-		if(tawd.timeAtWork >= getWorkingTimeTypeDay().mealTicketTime+getWorkingTimeTypeDay().breakTicketTime)
-			smt = StampModificationType.findById(StampModificationTypeValue.FOR_DAILY_LUNCH_TIME.getId()); 
-		return smt;
-	}
 	
 	/**
 	 * 
@@ -658,40 +538,23 @@ public class PersonDay extends Model {
 		return smt;
 	}
 
+	/* (eliminato perchè sostituito da isFixedTimeAtWork
 	public boolean isFixedWorkingTime(){
 		if(StampProfile.getCurrentStampProfile(this.person, this.date).fixedWorkingTime)
 			return true;
 		return false;
 	}
+	*/
 	
 	
-	private TimeAtWorkToday getTimeAtWorkToday() {
-		if (stampings.size() == 0)
-			return new TimeAtWorkToday(0, false);
-		
-		
-		
-		TimeAtWork calculatedTimeAtWork = getCalculatedTimeAtWork();
-		Logger.debug("getTimeAtWorkToday. calculatedTimeAtWork = %s, lastNotPairedInStamping = %s", calculatedTimeAtWork.timeAtWork, calculatedTimeAtWork.lastNotPairedInStamping);
-		
-		if (calculatedTimeAtWork.lastNotPairedInStamping == null) 
-		{
-			return new TimeAtWorkToday(calculatedTimeAtWork.timeAtWork, false); 
-		}
-		if(- toMinute(calculatedTimeAtWork.lastNotPairedInStamping.date) + toMinute(LocalDateTime.now()) > getWorkingTimeTypeDay().mealTicketTime)
-			return new TimeAtWorkToday(
-					calculatedTimeAtWork.timeAtWork - toMinute(calculatedTimeAtWork.lastNotPairedInStamping.date) + toMinute(LocalDateTime.now()) - getWorkingTimeTypeDay().breakTicketTime, true);
-		else
-			return new TimeAtWorkToday(
-					calculatedTimeAtWork.timeAtWork - toMinute(calculatedTimeAtWork.lastNotPairedInStamping.date) + toMinute(LocalDateTime.now()), true); 
-	}
+	
 
 	/**
 	 * 
 	 * importa il  numero di minuti in cui una persona è stata a lavoro in quella data
 	 */
 	private void updateTimeAtWork(){
-		timeAtWork = getCalculatedTimeAtWork().timeAtWork;
+		timeAtWork = getCalculatedTimeAtWork();
 		
 		save();
 		//Logger.debug("Tempo di lavoro per %s %s nel giorno %s: %d minuti", person.name, person.surname, date, timeAtWork);
@@ -701,7 +564,7 @@ public class PersonDay extends Model {
 	/**
 	 * calcola il valore del progressivo giornaliero e lo salva sul db
 	 */
-	private void updateProgressive(){
+	public void updateProgressive(){
 		//merge();
 		//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
 		Contract con = person.getContract(date);
@@ -730,6 +593,10 @@ public class PersonDay extends Model {
 
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
 	public PersonDay previousPersonDay(){
 		PersonDay lastPreviousPersonDayInMonth = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? " +
 				"and pd.date >= ? and pd.date < ? ORDER by pd.date DESC", person, date.dayOfMonth().withMinimumValue(), date).first();
@@ -768,32 +635,12 @@ public class PersonDay extends Model {
 	}
 
 	/**
-	 * chiamo questa funzione quando sto caricando un'assenza (verosimilmente oraria) per un certo personDay e quindi modifico il timeAtWork
-	 * per quella persona in quel giorno. Non ho necessità quindi di ricalcolarmi il timeAtWork, devo solo, sulla base di quello nuovo,
-	 * richiamare le altre tre funzioni di popolamento del personDay.
-	 */
-	/*
-	public void populatePersonDayAfterJustifiedAbsence(){
-		Logger.trace("Chiamata populatePersonDayAfterJustifiedAbsence per popolare il personDay di %s %s senza il timeAtWork nel giorno %s",
-				person.name, person.surname, date);
-		updateDifference();
-		merge();
-		updateProgressive();	
-		merge();
-		checkTicketAvailable();
-		merge();
-	}
-	*/
-
-
-
-	/**
 	 * 
 	 * @param date
 	 * @return calcola il numero di minuti di cui è composta la data passata come parametro (di cui considera solo
 	 * ora e minuti
 	 */
-	public static int toMinute(LocalDateTime date){
+	private static int toMinute(LocalDateTime date){
 		int dateToMinute = 0;
 		Logger.trace("La data passata alla toMinute è: %s", date);
 		if (date!=null){
@@ -864,7 +711,7 @@ public class PersonDay extends Model {
 	}
 
 	/**
-	 * 
+	 * (checked 18/10 personStamping stampare SI/NO nel tamplate)
 	 * @param date
 	 * @param timeAtWork
 	 * @param person
@@ -879,6 +726,10 @@ public class PersonDay extends Model {
 
 	}
 
+	/**
+	 * (checked 18/10 personStamping stampare SI/NO nel tamplate)
+	 * @return 
+	 */
 	private boolean checkTicketAvailableForWorkingTime(){
 		
 		if(person.workingTimeType.description.equals("normale-mod") || person.workingTimeType.description.equals("normale")
@@ -896,13 +747,16 @@ public class PersonDay extends Model {
 	 * @return la differenza tra l'orario di lavoro giornaliero e l'orario standard in minuti
 	 */
 
-	private void updateDifference(){
+	public void updateDifference(){
 		//merge();
 		//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
 		Logger.debug("Il tempo di lavoro per %s %s in data %s è: %d", person.name, person.surname, date, timeAtWork);
 		Logger.debug("La lista delle assenze per %s contiene %d elementi", date, absences.size());
 		Logger.debug("La lista delle timbrature per %s contiene %d elementi", date, stampings.size());
+		
 		StampProfile stampProfile = getStampProfile();
+		
+		
 		if(stampProfile != null && stampProfile.fixedWorkingTime && timeAtWork == 0){
 			difference = 0;
 			save();
@@ -917,7 +771,18 @@ public class PersonDay extends Model {
 		}
 
 		if(absenceList().size() > 0 && stampings.size() == 0){
-			difference = 0;
+			int diff = 0;
+			for(Absence abs : absenceList()){
+				if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay){
+					difference = 0;
+					save();
+					return;
+				}
+				else{
+					diff = diff+abs.absenceType.justifiedTimeAtWork.minutesJustified;
+				}
+			}
+			difference = diff - this.person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(this.date.getDayOfWeek()).workingTime;
 			save();
 			return;
 		}
@@ -966,46 +831,155 @@ public class PersonDay extends Model {
 	}
 
 	/**
-	 * 
-	 * @return true se nella lista delle timbrature per quel personDay c'è una timbratura "nulla" ovvero che non viene considerata per il calcol
-	 * del tempo di lavoro
-	 */
-	//	public int checkIndexOfNullStamping(){
-	//		for(int i = 0; i < this.stampings.size(); i++){
-	//			if(this.stampings.get(i).considerForCounting)
-	//				return i;
-	//		}
-	//		return 0;
-	//	}
-
-	/**
-	 * 
+	 * (checked 18/10 personStamping)
+	 * la lista delle timbrature del person day modificata con 
+	 * (1) l'inserimento di una timbratura null nel caso in cui esistano due timbrature consecutive di ingresso o di uscita, 
+	 * mettendo tale timbratura nulla in mezzo alle due
+	 * (2) l'inserimento di una timbratura di uscita fittizia nel caso di today per calcolare il tempo di lavoro provvisorio
+	 * (3) l'inserimento di timbrature null per arrivare alla dimensione del numberOfInOut
 	 * @param stampings
-	 * @return la lista delle timbrature di quel giorno modificata con l'inserimento di una timbratura nulla nel caso in cui esistano due timbrature
-	 * consecutive di ingresso o di uscita, mettendo tale timbratura nulla in mezzo alle due.
+	 * @return 
 	 */
-	public List<Stamping> getStampingsForTemplate() {
+	public List<Stamping> getStampingsForTemplate(int numberOfInOut, boolean today) {
 
-		List<Stamping> stampingsForTemplate = new LinkedList<Stamping>();
+		if(today)
+		{
+			//aggiungo l'uscita fittizia 'now' nel caso risulti dentro il cnr non di servizio 
+			boolean lastStampingIsIn = false;
+			this.orderStampings();
+			for(Stamping stamping : this.stampings)
+			{
+				if(stamping.stampType!= null && stamping.stampType.identifier.equals("s"))
+					continue;
+				if(stamping.isIn())
+				{
+					lastStampingIsIn = true;
+					continue;
+				}
+				if(stamping.isOut())
+				{
+					lastStampingIsIn = false;
+					continue;
+				}
+			}
+			if(lastStampingIsIn)
+			{
+				Stamping stamping = new Stamping();
+				stamping.way = WayType.out;
+				stamping.date = new LocalDateTime();
+				stamping.markedByAdmin = false;
+				stamping.exitingNow = true;
+				this.stampings.add(stamping);
+			}
+		}
+		List<Stamping> stampingsForTemplate = new ArrayList<Stamping>();
 		boolean isLastIn = false;
 
 		for (Stamping s : this.stampings) {
-			if (isLastIn && s.way == WayType.in) {
-				stampingsForTemplate.add(null);
+			//sono dentro e trovo una uscita 
+			if (isLastIn && s.way == WayType.out) 
+			{
+				//salvo l'uscita
+				stampingsForTemplate.add(s);
+				isLastIn=false;
+				continue;
 			}
-			if (!isLastIn && s.way == WayType.out) {
-				stampingsForTemplate.add(null);
-				isLastIn = s.way == WayType.in;
+			//sono dentro e trovo una entrata
+			if (isLastIn && s.way == WayType.in) 
+			{
+				//creo l'uscita fittizia
+				Stamping stamping = new Stamping();
+				stamping.way = WayType.out;
+				stamping.date = null;
+				stampingsForTemplate.add(stamping);
+				//salvo l'entrata
+				stampingsForTemplate.add(s);
+				isLastIn=true;
+				continue;
 			}
-
-			stampingsForTemplate.add(s);
-			isLastIn = s.way == WayType.in;
+			
+			//sono fuori e trovo una entrata
+			if (!isLastIn && s.way == WayType.in) 
+			{
+				//salvo l'entrata
+				stampingsForTemplate.add(s);
+				isLastIn = true;
+				continue;
+			}
+			
+			//sono fuori e trovo una uscita
+			if (!isLastIn && s.way == WayType.out) 
+			{
+				//creo l'entrata fittizia
+				Stamping stamping = new Stamping();
+				stamping.way = WayType.in;
+				stamping.date = null;
+				stampingsForTemplate.add(stamping);
+				//salvo l'uscita
+				stampingsForTemplate.add(s);
+				isLastIn = false;
+				continue;
+			}
 		}
+		while(stampingsForTemplate.size()<numberOfInOut*2)
+		{
+			if(isLastIn)
+			{
+				//creo l'uscita fittizia
+				Stamping stamping = new Stamping();
+				stamping.way = WayType.out;
+				stamping.date = null;
+				stampingsForTemplate.add(stamping);
+				isLastIn = false;
+				continue;
+			}
+			if(!isLastIn)
+			{
+				//creo l'entrata fittizia
+				Stamping stamping = new Stamping();
+				stamping.way = WayType.in;
+				stamping.date = null;
+				stampingsForTemplate.add(stamping);
+				isLastIn = true;
+				continue;
+			}
+		}
+		
 		return stampingsForTemplate;
 	}
 
+	
+	
 	/**
-	 * 
+	 * (TODO questo metodo viene usato in personMonth.getStampingCode() che a sua volta è usato nei template. Controllarlo)
+	 * @return lo stamp modification type relativo alla timbratura aggiunta dal sistema nel caso mancasse la timbratura d'uscita prima
+	 * della mezzanotte del giorno in questione
+	 */
+	public StampModificationType checkMissingExitStampBeforeMidnight(){
+		StampModificationType smt = null;
+		for(Stamping st : stampings){
+			if(st.stampModificationType != null && st.stampModificationType.equals(StampModificationTypeValue.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getStampModificationType()))
+				smt = StampModificationType.findById(StampModificationTypeValue.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getId());
+		}
+		return smt;
+	}
+	
+	/**
+	 * (TODO questo metodo viene usato in personMonth.getStampingCode() che a sua volta è usato nei template. Controllarlo)
+	 * @return lo stamp modification type relativo alla timbratura modificata/inserita dall'amministratore
+	 */
+	public StampModificationType checkMarkedByAdmin(){
+		StampModificationType smt = null;
+		for(Stamping st : stampings){
+			if(st.markedByAdmin == true)
+				smt = StampModificationType.findById(StampModificationTypeValue.MARKED_BY_ADMIN.getId());
+		}
+
+		return smt;
+	}
+	
+	/**
+	 * (TODO questo metodo viene usato in personMonth.getStampingCode() che a sua volta è usato nei template. Controllarlo)
 	 * @param stamping
 	 * @return l'oggetto StampModificationType che ricorda, eventualmente, se c'è stata la necessità di assegnare la mezz'ora
 	 * di pausa pranzo a una giornata a causa della mancanza di timbrature intermedie oppure se c'è stata la necessità di assegnare
@@ -1048,34 +1022,6 @@ public class PersonDay extends Model {
 
 	/**
 	 * 
-	 * @return lo stamp modification type relativo alla timbratura modificata/inserita dall'amministratore
-	 */
-	public StampModificationType checkMarkedByAdmin(){
-		StampModificationType smt = null;
-		for(Stamping st : stampings){
-			if(st.markedByAdmin == true)
-				smt = StampModificationType.findById(StampModificationTypeValue.MARKED_BY_ADMIN.getId());
-		}
-
-		return smt;
-	}
-
-	/**
-	 * 
-	 * @return lo stamp modification type relativo alla timbratura aggiunta dal sistema nel caso mancasse la timbratura d'uscita prima
-	 * della mezzanotte del giorno in questione
-	 */
-	public StampModificationType checkMissingExitStampBeforeMidnight(){
-		StampModificationType smt = null;
-		for(Stamping st : stampings){
-			if(st.stampModificationType != null && st.stampModificationType.equals(StampModificationTypeValue.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getStampModificationType()))
-				smt = StampModificationType.findById(StampModificationTypeValue.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getId());
-		}
-		return smt;
-	}
-
-	/**
-	 * 
 	 * @param timeAtWork
 	 * @return il localdatetime corrispondente al numero di minuti di lavoro giornaliero.
 	 * Questo metodo mi occorre per normalizzare il tempo di lavoro secondo il metodo toCalendarTime() creato nella PersonTags
@@ -1098,7 +1044,7 @@ public class PersonDay extends Model {
 	 * dopo la pausa pranzo. Questo valore verrà poi controllato per stabilire se c'è la necessità di aumentare la durata della pausa
 	 * pranzo intervenendo sulle timbrature
 	 */
-	public List<PairStamping> getGapLunchPairs(List<PairStamping> validPairs)
+	private List<PairStamping> getGapLunchPairs(List<PairStamping> validPairs)
 	{
 		//Assumo che la timbratura di uscita e di ingresso debbano appartenere alla finestra 12:00 - 15:00
 		Configuration config = Configuration.getCurrentConfiguration();
@@ -1239,28 +1185,6 @@ public class PersonDay extends Model {
 			return lastPreviousPersonDayInMonth;
 
 		return null;
-	}
-	
-	public int progressiveToday() {
-		if(checkPreviousProgressive() != null)
-			return checkPreviousProgressive().progressive + differenceToday();
-		else
-			return differenceToday();
-	}
-	
-	public int differenceToday() {
-		if(this.person.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek()).workingTime > getTimeAtWorkWithToday().timeAtWork)
-			return (this.person.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek()).workingTime-getTimeAtWorkWithToday().timeAtWork)* (-1);
-		else
-			return -this.person.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek()).workingTime+getTimeAtWorkWithToday().timeAtWork;
-	}
-
-	public boolean isToday() {
-		return date.equals(LocalDate.now());
-	}
-
-	public boolean isFuture() {
-		return date.isAfter(LocalDate.now());
 	}
 	
 	/** (alessandro)
@@ -1417,14 +1341,19 @@ public class PersonDay extends Model {
 				if(!finded)
 				{
 					//diagnosi
-					return false;
+					System.out.println(person.surname + " " + generalWorkingDay.toString());
+					//return false;
 				}
 			}
 		}
 
 		return true;
 	}
-
+	
+	
+	
+	
+	
 	@Override
 	public String toString() {
 		return String.format("PersonDay[%d] - person.id = %d, date = %s, difference = %s, isTicketAvailable = %s, modificationType = %s, progressive = %s, timeAtWork = %s",

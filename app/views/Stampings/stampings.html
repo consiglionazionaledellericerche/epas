@@ -25,212 +25,112 @@
 		<th>Note</th>
 	</tr>
 	
-%{
-     for(day in personMonth.days) {
-}%
-		
-<tr>
-			%{
-			if(day.isHoliday()==false){
-			}%	<td>${String.format(messages.get('views.common.yes_or_no.'+ day.mealTicket()))}</td>
-			%{
-			}else{
-			}%	<td>${String.format(messages.get('views.common.yes_or_no.true'))}</td>
-			%{
-			}
-			}%
-			%{
-			if(day.isHoliday()==false){
-			}%	<td class="capitalized">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), day.date.toDate())}</td>
+	%{
+     for(dayRecap in daysRecap) {
+     		
 			
+	}%
+		
+	<tr>
+			<td>${dayRecap.mealTicket}</td>
 			%{
-			}else{
-			}%	<td class="festivi">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), day.date.toDate())}</td>
+			if(dayRecap.holiday==false)
+			{
+			}%	
+				<td class="capitalized">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</td>
+			%{
+			}
+			else
+			{
+			}%	
+				<td class="festivi">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</td>
 			%{
 			}
 			}%
+		
 			<td class="assenza">
 				%{	
-					for (absence in day.absences) { 
+				for (absence in dayRecap.absences) 
+				{ 
 				%}
-						
-						${absence.absenceType.code}
-																
-				%{ } }%
+				 	${absence.absenceType.code}
+				 %{
+				 }
+				 }%
 			</td>
-			%{  int j = 0;
-				for(int i = 0; i < numberOfInOut; i++){
-					j = i*2;
-				}%
-				%{
-					if(day.getStampingsForTemplate().size() > j && day.getStampingsForTemplate().get(j) != null && !day.getStampingsForTemplate().get(j).isValid()){
-					}%
-						<td class="ingressowarn">
-					%{
-					}else{
+
+
+			%{  
+			for(stampingTemplate in dayRecap.stampingsTemplate){
+			}%
+			%{
+					if(stampingTemplate.colour.equals("in"))
+					{
 					}%
 						<td class="ingresso">
 					%{
 					}
-				}%
-				%{ if(day.getStampingsForTemplate().size() > j && day.getStampingsForTemplate().get(j) !=null) { }%
-				
-					${day.getStampingsForTemplate().get(j).date.toCalendarTime()}
-				
-				 
-					${(day.getStampingsForTemplate().get(j).stampType != null ? day.getStampingsForTemplate().get(j).stampType.identifier : '')}
-				%{ 
-					}else{ 
-					
-				}%
-					${' '}
-				%{
-					}
-				}%
-				</td>
-				
-				%{
-					if(day.getStampingsForTemplate().size() > j+1 && day.getStampingsForTemplate().get(j+1) != null && !day.getStampingsForTemplate().get(j+1).isValid()){
-					}%
-						<td class="uscitawarn">
-					%{
-					}else{
+					else if (stampingTemplate.colour.equals("out"))
+					{
 					}%
 						<td class="uscita">
 					%{
 					}
-				}%
-				%{ if(day.getStampingsForTemplate().size() > j+1 && day.getStampingsForTemplate().get(j+1) !=null) { }%
-				
-					${day.getStampingsForTemplate().get(j+1).date.toCalendarTime()}
-				
-					 
-					${(day.getStampingsForTemplate().get(j) != null && day.getStampingsForTemplate().get(j).stampType != null ? day.getStampingsForTemplate().get(j).stampType.identifier : '')}
-				%{ 
-					}else{ 
-				}%
-					${' '}
-				%{
-				 	if(day.getStampingsForTemplate().size() > j+1 && day.getStampingsForTemplate().get(j+1)!=null && day.getStampingsForTemplate().get(j+1).markedByAdmin == true){ 
+					else if (stampingTemplate.colour.equals("warn"))
+					{
 					}%
-					  	<strong>${day.checkMarkedByAdmin().code}</strong>
-					%{
-					} 
-					if(day.getStampingsForTemplate().size() > j+1 && day.getStampingsForTemplate().get(j+1)!= null && day.getStampingsForTemplate().get(j+1).stampModificationType != null){
-					}%
-						<strong>${day.checkMissingExitStampBeforeMidnight().code}</strong>
+						<td class="warn">
 					%{
 					}
-					else{
-					}% 
-						${' '}
-					
-					%{
-					}
-					
-				}
 				}%
-				
+				%{ if(stampingTemplate.date!=null) 
+				{ 
+				}%
+					${stampingTemplate.hour}
+				 %{
+				 }
+				 }%
+				 
+				<strong>${stampingTemplate.identifier}</strong>
+				<strong>${stampingTemplate.markedByAdminCode}</strong>
+				<strong>${stampingTemplate.missingExitStampBeforeMidnightCode}</strong>
+
 				</td>
 			
-				%{ } }%
-				<td class="tempoLavoro">
-			%{
-	         	if(!day.isFuture()){
-	         	
-	         }%
-	         %{
-					if(day.isToday()){
-				}%
-						${day.getTimeAtWorkWithToday().timeAtWork.toHourTime()}<strong>${day.getTodayLunchTime()?.code}</strong><strong>${day.getTimeAtWorkWithToday().exitingNow ? 'f' : ''}</strong>
-	        	%{ 
-		  			} 
-		  			else{
-		  		}%
-		  				${day.getTimeAtWorkWithToday().timeAtWork.toHourTime()}<strong>${day.checkTimeForLunch()?.code}</strong><strong>${day.getFixedWorkingTime() != null && !day.isHoliday() ? day.getFixedWorkingTime().code : ''}</strong>
-		  		%{
-		  			}
-		  		}
-		  	}%
-		  				 	
-		  	</td>	  
-	         <td class="differenza">
-	         %{
-	       	 	if(day.isToday() && day.absences.size() == 0){
-	       	 }%
-	       	 		${day.differenceToday().toHourTime()}
-	       	 %{
-	       	 	}
-	       	 }%
-	       	 %{
-	       	 	if(day.isToday() && day.absences.size() != 0){
-	       	 }%
-	       	 		${(day.difference).toHourTime()}
-	       	 %{
-	       	 	}
-	       	 }%
-	         %{
-	         	if(!day.isFuture() && !day.isToday()){
-	         }%
-	         	
-	         	%{
-	        		if(day.isHoliday()==false || day.stampings.size() != 0){
-				}%
-						${(day.difference).toHourTime()}
-				%{ 
-		  		    } else {
-		  		 }%
-		  		 		${'00:00'}
-				 %{
-				    }
-				 }%
-		    %{
-		        }
-		     }%
-			</td>	
-	        
-	         <td class="progressivo">
-	         %{
-			 	if(day.isToday() && day.absences.size() == 0){
-			 }%
-			 		${day.progressiveToday().toHourTime()}
-			 %{
-			 	}
-			 }%
-			 %{
-	       	 	if(day.isToday() && day.absences.size() != 0){
-	       	 }%
-	       	 		${(day.progressive).toHourTime()}
-	       	 %{
-	       	 	}
-	       	 }%
-			%{
-			    if(!day.isFuture() && !day.isToday()) {
+			%{ 
+			} 
 			}%
-			     
-				%{
-				    if(day.isHoliday()==false) {
-				 }%
-	  			      ${day.progressive.toHourTime()}
-		  		 %{ 
-		  		    } else {
-		  		  }%
-				      ${day.checkPreviousProgressive() != null ? day.checkPreviousProgressive().progressive.toHourTime() : '00:00'}
-				  %{
-				    }
-				  }%
-		    %{
-		        }
-		     }%
-			</td>		
-	         <td>${day.person.workingTimeType != null ? day.person.workingTimeType.description : ''}</td>
-	         <td></td>
-		</tr>
+			<td class="tempoLavoro">
+				${dayRecap.workTime}
+				<strong>${dayRecap.todayLunchTimeCode}</strong>
+				<strong>${dayRecap.fixedWorkingTimeCode}</strong>
+				<strong>${dayRecap.exitingNowCode}</strong>
+			</td>							
+	       	<td class="differenza">
+	       		${dayRecap.difference}
+	       	</td>	
+			<td class="progressivo">
+			 	${dayRecap.progressive}
+		    </td>
+	        
+	        <td>${dayRecap.workingTimeTypeDescription}</td>
+	        <td>
+	    	%{
+    		for(n in dayRecap.note) 
+    		{
+			}%
+	       		${n}<br>
+	        %{
+	        }
+	        }%
+	        </td>
+	        
+	</tr>
 
-%{  		   
-     }
-     
-}%
+	%{  		   
+ 	}
+   
+	}%
 
 </table>
 
@@ -272,7 +172,7 @@
 %{
 }
 }%
-<p> - Totale residuo a fine mese  <strong>${personMonth.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese().toHourTime()} ore</strong></p>
+<p> - Totale residuo a fine mese  <strong>${totaleResiduo.toHourTime()} ore</strong></p>
 
 
 *{Significato codici assenza}*
@@ -284,30 +184,29 @@
 		<th width="400">Descrizione</th>
 			
 	</tr>
-%{
-     for(smt in personMonth.getStampingCode()) {
-}%
-	<tr>
-		<td>${smt.code}</td>     
-		<td>${smt.description}</td>		
-	</tr>
+	%{
+     for(smt in stampModificationTypeList) {
+	}%
+		<tr>
+			<td>${smt.code}</td>     
+			<td>${smt.description}</td>		
+		</tr>
 	
-	
-%{  		   
+	%{  		   
      }
      
-}%
-%{	if(personMonth.getStampType() != null){
-	for(type in personMonth.getStampType()) {
-}%
-	<tr>
-		<td>${type.identifier}</td>
-		<td>${type.description}</td>
-	</tr>
-%{  		   
-     }
+	}%
+	%{
+	for(type in stampTypeList) 
+	{
+	}%
+		<tr>
+			<td>${type.identifier}</td>
+			<td>${type.description}</td>
+		</tr>
+	%{  		   
     }
-}%
+    }%
 </table>
 
 <br>
