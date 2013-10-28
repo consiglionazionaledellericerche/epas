@@ -418,14 +418,6 @@ public class PersonDay extends Model {
 				justifiedTimeAtWork = justifiedTimeAtWork + abs.absenceType.justifiedTimeAtWork.minutesJustified;
 				continue;
 			}
-			
-			if(!abs.absenceType.code.equals("89"))
-			{
-				//TODO Da capire cosa fare nel caso del codice 89
-				continue;
-			}
-			
-
 		}
 
 		//in caso di assenza di timbrature considero il justifiedTimeAtwork
