@@ -114,7 +114,16 @@
 		    </td>
 	        
 	        <td>${dayRecap.workingTimeTypeDescription}</td>
-	        <td>${dayRecap.note}</td>
+	        <td>
+	    	%{
+    		for(n in dayRecap.note) 
+    		{
+			}%
+	       		${n}<br>
+	        %{
+	        }
+	        }%
+	        </td>
 	        
 	</tr>
 
