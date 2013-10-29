@@ -26,6 +26,7 @@ import models.InitializationAbsence;
 import models.InitializationTime;
 import models.Person;
 import models.PersonDay;
+import models.PersonDayInTrouble;
 import models.PersonMonth;
 import models.PersonTags;
 import models.StampModificationType;
@@ -567,10 +568,28 @@ public class Stampings extends Controller {
 		//lista delle persone che sono state attive nel mese
 		List<Person> activePersons = Person.getActivePersonsInMonth(month, year);
 
+		
+		
+		//lista dei trouble di una persona
+		for(Person person : activePersons)
+		{
+			List<PersonDayInTrouble> troubles = PersonDayInTrouble.find
+					("select trouble from PersonDayInTrouble trouble, PersonDay pd where trouble.personDay = pd and pd.person = ? and trouble.fixed = false and pd.date between ? and ? order by pd.date", person, monthBegin, monthEnd).fetch();
+			Logger.debug("Persona %s %s Number of trouble %s", person.surname, person.name, troubles.size());
+			List<Integer> pdMissingStampingList = new ArrayList<Integer>();
+			for(PersonDayInTrouble trouble : troubles)
+			{
+				pdMissingStampingList.add(trouble.personDay.date.getDayOfMonth());
+			}
+			builder.put(person, "Giorni del mese da controllare", pdMissingStampingList);
+			
+		}
+		
+		
 		//diagnosi
-		boolean dbConsistentControl = PersonDay.diagnosticPersonDay(year, month, activePersons);
+		boolean dbConsistentControl = true;//PersonDay.diagnosticPersonDay(year, month, activePersons);
 
-
+		/*
 		//Se mese attuale considero i person day fino a ieri
 		if(today.getMonthOfYear()==month)
 		{
@@ -598,6 +617,7 @@ public class Stampings extends Controller {
 			}
 
 		}
+		*/
 		tableMissingStampings = builder.build();
 		render(tableMissingStampings, month, year, dbConsistentControl);
 
