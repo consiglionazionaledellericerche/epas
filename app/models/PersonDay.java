@@ -754,22 +754,36 @@ public class PersonDay extends Model {
 		Logger.debug("La lista delle timbrature per %s contiene %d elementi", date, stampings.size());
 		
 		StampProfile stampProfile = getStampProfile();
+				
+		int worktime = this.person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(this.date.getDayOfWeek()).workingTime;
 		
-		
+		//persona fixed
 		if(stampProfile != null && stampProfile.fixedWorkingTime && timeAtWork == 0){
 			difference = 0;
 			save();
 			return;
 		}
 
+		//festivo
 		if(this.isHoliday())
+		{
+			difference = timeAtWork;
+			save();
+			return;
+		}
+		
+		//assenze giornaliere
+		if(this.isAllDayAbsences())
 		{
 			difference = 0;
 			save();
 			return;
 		}
 		
-
+		//feriale
+		difference = timeAtWork - worktime;
+		
+		/*
 		if((getWorkingTimeTypeDay().holiday) && (date.getDayOfMonth()==1) && stampings.size() == 0){
 			difference = 0;
 			save();
@@ -831,7 +845,7 @@ public class PersonDay extends Model {
 			save();
 			Logger.trace("Sto calcolando la differenza in un giorno festivo per %s %s e vale: %d", person.name, person.surname, difference);
 		}		
-
+		 */
 		Logger.debug("Differenza per %s %s nel giorno %s: %s", person.surname, person.name, date, difference);
 
 	}
