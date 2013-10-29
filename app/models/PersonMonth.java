@@ -663,19 +663,34 @@ public class PersonMonth extends Model {
 	 * @return la somma dei minuti dei giorni (entro una certa data) che hanno una differenza negativa rispetto all'orario di lavoro
 	 */
 	public int residuoDelMeseInNegativoAllaData(LocalDate date) {
-		LocalDate startOfMonth = new LocalDate(year, month, 1);
-		Long residuo = JPA.em().createQuery("SELECT sum(pd.difference) FROM PersonDay pd WHERE pd.date BETWEEN :startOfMonth AND :endOfMonth and pd.person = :person " +
-				"AND pd.difference < 0 and pd.date <= :date", Long.class)
-				.setParameter("startOfMonth", startOfMonth)
-				.setParameter("endOfMonth", startOfMonth.dayOfMonth().withMaximumValue())
-				.setParameter("person", person)
-				.setParameter("date", date)
-				.getSingleResult();
+//		LocalDate startOfMonth = new LocalDate(year, month, 1);
+//		Long residuo = JPA.em().createQuery("SELECT sum(pd.difference) FROM PersonDay pd WHERE pd.date BETWEEN :startOfMonth AND :endOfMonth and pd.person = :person " +
+//				"AND pd.difference < 0 and pd.date <= :date", Long.class)
+//				.setParameter("startOfMonth", startOfMonth)
+//				.setParameter("endOfMonth", startOfMonth.dayOfMonth().withMaximumValue())
+//				.setParameter("person", person)
+//				.setParameter("date", date)
+//				.getSingleResult();
 		int res = 0;
-		if(residuo != null)
-			res = residuo.intValue();
-
+//		if(residuo != null)
+//			res = residuo.intValue();
+//
+//		return res;
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? " +
+				"order by pd.date ", 
+				this.person, date.dayOfMonth().withMinimumValue(), date.dayOfMonth().withMaximumValue()).fetch();
+		if(pdList == null || pdList.size() == 0)
+			return 0;
+		for(PersonDay pd : pdList){
+			if(pd.difference < 0 && pd.date.isBefore(new LocalDate()))
+				res = res + pd.difference;
+		}
+//		if(pdList.get(0).date.isEqual(new LocalDate()))
+//			return pdList.get(0).previousPersonDay().progressive;
+//		else			
+//			return pdList.get(0).progressive;
 		return res;
+		
 	}
 
 	/**
@@ -690,16 +705,32 @@ public class PersonMonth extends Model {
 	 * @return la somma dei minuti dei giorni (entro una certa data) che hanno una differenza positiva rispetto all'orario di lavoro
 	 */
 	public int residuoDelMeseInPositivoAllaData(LocalDate date) {
-		Long residuo = JPA.em().createQuery("SELECT sum(pd.difference) FROM PersonDay pd WHERE pd.date BETWEEN :startOfMonth AND :endOfMonth and pd.person = :person " +
-				"AND pd.difference > 0 and pd.date <= :date", Long.class)
-				.setParameter("startOfMonth", new LocalDate(year, month, 1))
-				.setParameter("endOfMonth", (new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()))
-				.setParameter("person", person)
-				.setParameter("date", date)
-				.getSingleResult();
+//		Long residuo = JPA.em().createQuery("SELECT sum(pd.difference) FROM PersonDay pd WHERE pd.date BETWEEN :startOfMonth AND :endOfMonth and pd.person = :person " +
+//				"AND pd.difference > 0 and pd.date <= :date", Long.class)
+//				.setParameter("startOfMonth", new LocalDate(year, month, 1))
+//				.setParameter("endOfMonth", (new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()))
+//				.setParameter("person", person)
+//				.setParameter("date", date)
+//				.getSingleResult();
+		//PersonDay pd = null;
 		int res = 0;
-		if(residuo != null)
-			res = residuo.intValue();
+		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? " +
+				" order by pd.date desc", 
+				this.person, date.dayOfMonth().withMinimumValue(), date.dayOfMonth().withMaximumValue()).fetch();
+		if(pdList == null || pdList.size() == 0)
+			return 0;
+		for(PersonDay pd : pdList){
+			if(pd.difference >= 0 && pd.date.isBefore(new LocalDate()))
+				res = res+ pd.difference;
+		}
+//		if(pdList.get(0).date.isEqual(new LocalDate()))
+//			return pdList.get(0).previousPersonDay().progressive;
+
+//		if(residuo != null)
+//			res = residuo.intValue();
+//		return res;
+//		else
+//			return pdList.get(0).progressive;
 		return res;
 	}
 
