@@ -51,8 +51,9 @@ public class PersonStampingDayRecap {
 	public String difference = "";
 	public String progressive = "";
 	public String workingTimeTypeDescription = "";
-	public String note = "";
 	
+	public List<String> note = new ArrayList<String>();
+		
 	public PersonStampingDayRecap(PersonDay pd, int numberOfInOut)
 	{
 		if(pd.date.getDayOfMonth()==22)
@@ -67,6 +68,7 @@ public class PersonStampingDayRecap {
 		List<Stamping> stampingsForTemplate = pd.getStampingsForTemplate(numberOfInOut, today);
 		this.setStampingTemplate( stampingsForTemplate, pd );
 		
+			
 		//----------------------------------------------- fixed:  worktime, difference, progressive, p---------------------------------
 		StampModificationType smt = pd.getFixedWorkingTime();
 		if(smt !=null)
@@ -121,18 +123,22 @@ public class PersonStampingDayRecap {
 		//---------------------------------------- not fixed:  worktime, difference, progressive for past-----------------------------
 		else if(this.past)
 		{
-		//	pd.save();	//TODO toglierlo quando il db sarà consistente
-			int temporaryWorkTime = pd.getCalculatedTimeAtWork();
-			this.setWorkingTime(temporaryWorkTime);
-		//	pd.timeAtWork = temporaryWorkTime;
-		//	pd.save();	//TODO toglierlo quando il db sarà consistente
-		//	pd.updateDifference(); //TODO toglierlo quando il db sarà consistente
-		//	pd.updateProgressive(); 
+			//pd.save();	//TODO toglierlo quando il db sarà consistente
+			//int temporaryWorkTime = pd.getCalculatedTimeAtWork();
+			this.setWorkingTime(pd.timeAtWork);
+			//pd.timeAtWork = temporaryWorkTime;
+			//pd.save();	//TODO toglierlo quando il db sarà consistente
+			//pd.updateDifference(); //TODO toglierlo quando il db sarà consistente
+			//pd.updateProgressive(); 
 	
 			this.setDifference( pd.difference );
 	
 			PersonDay previousPd = pd.checkPreviousProgressive();
-			if(previousPd!=null)
+			if(pd.date.getDayOfMonth()==1)
+			{
+				this.setProgressive(pd.progressive);
+			}
+			else if(previousPd!=null)
 			{
 				this.setProgressive(pd.difference + previousPd.progressive);
 			}
@@ -141,7 +147,7 @@ public class PersonStampingDayRecap {
 				this.setProgressive(0);
 			}
 		
-		//	pd.save();	//TODO poi va rimosso
+			//pd.save();	//TODO poi va rimosso
 		}
 		//---------------------------------------- worktime, difference, progressive for future ----------------------------------------
 		if(this.future)
@@ -164,7 +170,7 @@ public class PersonStampingDayRecap {
 			addStampModificationTypeToList(pd.lunchTimeStampModificationType);
 		}
 		//----------------------------------------------- uscita adesso f ---------------------------------------------------------------
-		if(!this.holiday && !pd.isAllDayAbsences() && this.today) //TODO
+		if(!this.holiday && !pd.isAllDayAbsences() && this.today) //TODO 
 		{
 			smt = StampModificationType.findById(StampModificationTypeValue.ACTUAL_TIME_AT_WORK.getId());
 			this.exitingNowCode = smt.code;
@@ -221,7 +227,14 @@ public class PersonStampingDayRecap {
 		for(int i = 0; i<stampings.size(); i++)
 		{
 			Stamping stamping = stampings.get(i);
-			this.stampingsTemplate.add(new StampingTemplate(stamping, i, pd));
+			
+			//nuova stamping for template
+			StampingTemplate st = new StampingTemplate(stamping, i, pd);
+			this.stampingsTemplate.add(st);
+			if(stamping.note!=null && !stamping.note.equals("")){
+				note.add(st.hour + ": " + stamping.note);
+			}
+			
 		}
 	}
 	
@@ -240,6 +253,11 @@ public class PersonStampingDayRecap {
 		this.progressive = fromMinuteToHourMinute(progressive);
 	}
 	
+	/**
+	 * TODO sostituirlo con PersonTags.toHourTime
+	 * @param minute
+	 * @return
+	 */
 	private static String fromMinuteToHourMinute(int minute)
 	{
 		String s = "";
@@ -332,6 +350,7 @@ public class PersonStampingDayRecap {
 			setHour(stamping.date);//stamping.date.getHourOfDay() + ":" + stamping.date.getMinuteOfHour();
 			
 			this.insertStampingClass = "insertStamping" + stamping.date.getDayOfMonth() + "-" + index;
+			
 			
 			//----------------------------------------- timbratura di servizio ---------------------------------------------------
 			if(stamping.stampType!=null && stamping.stampType.identifier!=null)
