@@ -308,8 +308,9 @@ public class PersonUtility {
 				Logger.debug("Sono nel caso in cui ci sia una timbratura finale di ingresso nel giorno precedente nel giorno %s", 
 						pdPastDay.date);
 				if(stampProfile == null || !stampProfile.fixedWorkingTime){
-					List<Stamping> s = Stamping.find("Select s from Stamping s where s.personDay = ? order by s.date asc", pd).fetch();
-					if(s.size() > 0 && s.get(0).way == WayType.out && config.hourMaxToCalculateWorkTime > s.get(0).date.getHourOfDay()){
+					//List<Stamping> s = Stamping.find("Select s from Stamping s where s.personDay = ? order by s.date asc", pd).fetch();
+					pd.orderStampings();
+					if(pd.stampings.size() > 0 && pd.stampings.get(0).way == WayType.out && config.hourMaxToCalculateWorkTime > pd.stampings.get(0).date.getHourOfDay()){
 
 						//controllo nelle timbrature del giorno attuale se la prima che incontro è una timbratura di uscita sulla base
 						//del confronto con il massimo orario impostato in configurazione per considerarla timbratura di uscita relativa
