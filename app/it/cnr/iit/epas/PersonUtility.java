@@ -23,6 +23,7 @@ import models.Contract;
 import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
+import models.PersonDayInTrouble;
 import models.PersonMonth;
 import models.PersonReperibilityDay;
 import models.PersonShiftDay;
@@ -307,8 +308,9 @@ public class PersonUtility {
 				Logger.debug("Sono nel caso in cui ci sia una timbratura finale di ingresso nel giorno precedente nel giorno %s", 
 						pdPastDay.date);
 				if(stampProfile == null || !stampProfile.fixedWorkingTime){
-					List<Stamping> s = Stamping.find("Select s from Stamping s where s.personDay = ? order by s.date asc", pd).fetch();
-					if(s.size() > 0 && s.get(0).way == WayType.out && config.hourMaxToCalculateWorkTime > s.get(0).date.getHourOfDay()){
+					//List<Stamping> s = Stamping.find("Select s from Stamping s where s.personDay = ? order by s.date asc", pd).fetch();
+					pd.orderStampings();
+					if(pd.stampings.size() > 0 && pd.stampings.get(0).way == WayType.out && config.hourMaxToCalculateWorkTime > pd.stampings.get(0).date.getHourOfDay()){
 
 						//controllo nelle timbrature del giorno attuale se la prima che incontro è una timbratura di uscita sulla base
 						//del confronto con il massimo orario impostato in configurazione per considerarla timbratura di uscita relativa
@@ -872,7 +874,7 @@ public class PersonUtility {
 				{
 					if(!s.valid)
 					{
-						Logger.debug( "A " + pd.date.toString() +  " " + person.surname + " " +person.name +" non valido. (cella gialla)");
+						insertPersonDayInTrouble(pd, "timbratura disaccoppiata");
 						return;
 					}
 				}
@@ -883,7 +885,12 @@ public class PersonUtility {
 		{
 			if(!pd.isAllDayAbsences() && pd.stampings.size()==0)
 			{
-				Logger.debug( "A " + pd.date.toString() +  " " + person.surname + " " +person.name +" non valido. (zero timbrature)");
+				if(!pd.isHoliday())	
+					//TODO questo e' un controllo aggiuntivo in quanto in teoria i person day senza assenze e timbrature nei giorni di festa 
+					//non dovrebbero esistere ma nel database attuale a volte sono presenti e persistiti. Cancellarli e togliere questo controllo
+				{
+					insertPersonDayInTrouble(pd, "no assenze giornaliere e no timbrature");
+				}
 				return;
 			}
 			pd.computeValidStampings();
@@ -891,10 +898,53 @@ public class PersonUtility {
 			{
 				if(!s.valid)
 				{
-					Logger.debug( "A " + pd.date.toString() +  " " + person.surname + " " +person.name +" non valido. (cella gialla)");
+					insertPersonDayInTrouble(pd, "timbratura disaccoppiata");
 					return;
 				}
 			}
+		}
+	}
+	
+	private static void insertPersonDayInTrouble(PersonDay pd, String cause)
+	{
+		//TODO Controllo che non esista già, in quel caso decidere cosa fare (forse solo aggiornare la causa)
+		//System.out.println( "A " + pd.date.toString() +  " " + person.surname + " " +person.name +" non valido. (cella gialla)");
+		
+		PersonDayInTrouble pdt = PersonDayInTrouble.find(""
+				+ "Select pdt "
+				+ "from PersonDayInTrouble pdt "
+				+ "where pdt.personDay = ?"
+				, pd)
+				.first();
+		
+		if(pdt==null)
+		{
+			PersonDayInTrouble trouble = new PersonDayInTrouble();
+			trouble.personDay = pd;
+			trouble.cause = cause;
+			trouble.save();
+			return;
+		}
+		
+		if(pdt!=null)
+		{
+			//??
+		}
+		
+	}
+	
+	public static void checkAllDaysYear()
+	{
+		LocalDate date = new LocalDate(2013,1,1);
+		LocalDate today = new LocalDate();
+		while(true)
+		{
+			//Logger.debug("******************************** Controllo di %s*******************", date);
+			System.out.println("******************************** Controllo di "+date+"*******************");
+			PersonUtility.checkDay(date);
+			date = date.plusDays(1);
+			if(date.isEqual(today))
+				break;
 		}
 	}
 	
