@@ -762,6 +762,13 @@ public class PersonDay extends Model {
 			return;
 		}
 
+		if(this.isHoliday())
+		{
+			difference = 0;
+			save();
+			return;
+		}
+		
 
 		if((getWorkingTimeTypeDay().holiday) && (date.getDayOfMonth()==1) && stampings.size() == 0){
 			difference = 0;
