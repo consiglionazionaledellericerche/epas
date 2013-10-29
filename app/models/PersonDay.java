@@ -373,7 +373,6 @@ public class PersonDay extends Model {
 	public void orderStampings()
 	{
 		Collections.sort(this.stampings);
-		this.save();
 	}
 	
 	/**
@@ -398,7 +397,7 @@ public class PersonDay extends Model {
 		//{
 			//controllo sulla possibilità che esistano timbrature di ingresso nel giorno precedente senza corrispondenti timbrature di uscita
 			//se non la mattina seguente prima dell'orario di scadenza del controllo sulla timbratura stessa
-			PersonUtility.checkExitStampNextDay(this);
+		PersonUtility.checkExitStampNextDay(this);
 		//}
 		
 		//assenze all day piu' altri casi di assenze
