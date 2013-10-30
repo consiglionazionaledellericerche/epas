@@ -563,7 +563,7 @@ public class PersonDay extends Model {
 	/**
 	 * calcola il valore del progressivo giornaliero e lo salva sul db
 	 */
-	public void updateProgressive(){
+	private void updateProgressive(){
 		//merge();
 		//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
 		Contract con = person.getContract(date);
@@ -667,11 +667,13 @@ public class PersonDay extends Model {
 		return this.stampings;
 	}
 
+	
 	/**
 	 * 
 	 * @return la lista di timbrature comprensiva di timbrature nulle nel caso in cui manchino timbrature di ingresso tra quelle di uscita
 	 * o che manchino timbrature di uscita tra quelle di ingresso
 	 */
+	/*disabilitato da alessandro il 28 ottobre perchè non utilizzato
 	public List<Stamping> returnStampingsList(List<Stamping> stampingList) {	
 
 		List<Stamping> localStampings = new LinkedList<Stamping>();
@@ -692,6 +694,7 @@ public class PersonDay extends Model {
 		Logger.trace("Lista timbrature per %s in data %s: %s", person, date, localStampings);
 		return localStampings;
 	}
+	*/
 
 	/**
 	 * 
@@ -746,7 +749,7 @@ public class PersonDay extends Model {
 	 * @return la differenza tra l'orario di lavoro giornaliero e l'orario standard in minuti
 	 */
 
-	public void updateDifference(){
+	private void updateDifference(){
 		//merge();
 		//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
 		Logger.debug("Il tempo di lavoro per %s %s in data %s è: %d", person.name, person.surname, date, timeAtWork);
@@ -1236,7 +1239,10 @@ public class PersonDay extends Model {
 		return true;
 	}
 	
-	/** (alessandro)
+	/**
+	 * TODO appena riscrivo il metodo di riepilogo mensile con PersonDaysInTrouble si puo' cancellare
+	 * ed il metodo ufficiale diventa isAllDayAbsences
+	 *  (alessandro)
 	 * True se il personDay contiene una assenza con tempo giustificato AllDay, false altrimenti
 	 * @return
 	 */
@@ -1257,6 +1263,7 @@ public class PersonDay extends Model {
 	 * @param personWttd
 	 * @return
 	 */
+	/*disabilitato da alessandro il 28 ottobre perche' non piu' utilizzato
 	public boolean isPersonHoliday(List<WorkingTimeTypeDay> personWttd)
 	{
 		if(DateUtility.isGeneralHoliday(this.date) || personWttd.get(this.date.getDayOfWeek()-1).holiday==true)
@@ -1265,6 +1272,7 @@ public class PersonDay extends Model {
 		}
 		return false;
 	}
+	*/
 	
 	/** (alessandro)
 	 * True se il personDay cade in uno stampProfile con fixedTimeAtWork = true;
@@ -1284,93 +1292,6 @@ public class PersonDay extends Model {
 		}
 		return fixedWorkingType;
 	}
-	
-	/** (alessandro)
-	 * Controllo necessario per la correttezza dell'algoritmo di ricerca timbrature mancanti. Si occupa di verificare che per ogni
-	 * persona attiva nel mese esista un person day per ogni giorno di lavoro previsto dal contratto.
-	 * @param year
-	 * @param month
-	 * @param activePersons	vedi Person.getActivePersonsInMonth(month, year);
-	 * @return
-	 * @throws ClassNotFoundException
-	 * @throws SQLException
-	 */
-	public static boolean diagnosticPersonDay(int year, int month, List<Person> activePersons) throws ClassNotFoundException, SQLException
-	{
-		//Genero la lista dei giorni lavorativi generici per il mese
-		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
-		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
-		List<LocalDate> generalWorkingDaysOfMonth = DateUtility.getGeneralWorkingDays(monthBegin, monthEnd);
-			
-		//prepared statement
-		Connection connection = null;
-
-		Class.forName("org.postgresql.Driver");
-		connection = DriverManager.getConnection(
-				Play.configuration.getProperty("db.new.url"),
-				Play.configuration.getProperty("db.new.user"),
-				Play.configuration.getProperty("db.new.password"));
-
-		String query =    "SELECT p.id, pd.date "
-						+ "FROM persons p LEFT OUTER JOIN person_days pd ON p.id = pd.person_id AND pd.date BETWEEN ? AND ?  "
-						+ "ORDER BY p.id, pd.date";
-		
-		PreparedStatement ps = connection.prepareStatement(query);
-		ps.setTimestamp(1,  new Timestamp(monthBegin.toDateMidnight().getMillis()));
-		ps.setTimestamp(2,  new Timestamp(monthEnd.toDateMidnight().getMillis()));
-		ResultSet rs = ps.executeQuery();
-		
-		for(Person person : activePersons)
-		{
-			List<WorkingTimeTypeDay> wttd = person.workingTimeType.workingTimeTypeDays;
-			List<Contract> monthContracts = person.getMonthContracts(month, year);
-			for(LocalDate generalWorkingDay : generalWorkingDaysOfMonth)
-			{
-				//generalWorkingDay e' un giorno lavorativo per la persona
-				if( wttd.get(generalWorkingDay.getDayOfWeek()-1).holiday)
-				{
-					continue;
-				}
-				boolean isWorkingDayIntoContract = false;
-				for(Contract c : monthContracts)
-				{
-					DateInterval contractInterval = new DateInterval(c.beginContract, c.expireContract);
-					if(DateUtility.isDateIntoInterval(generalWorkingDay, contractInterval))
-					{
-						isWorkingDayIntoContract = true;
-					}
-				}
-				if(!isWorkingDayIntoContract)
-					continue;
-				
-				//devo trovare nel result set <id | date>
-				boolean finded = false;
-				while(rs.next())
-				{
-					int personId = rs.getInt("id");
-					Timestamp time = rs.getTimestamp("date");
-					if(time==null)
-						continue;
-					LocalDate date = new LocalDate(time.getTime());
-					if(personId==person.id && date.isEqual(generalWorkingDay))
-					{
-						finded = true;
-						break;
-					}
-				}
-				if(!finded)
-				{
-					//diagnosi
-					System.out.println(person.surname + " " + generalWorkingDay.toString());
-					//return false;
-				}
-			}
-		}
-
-		return true;
-	}
-	
-	
 	
 	
 	
