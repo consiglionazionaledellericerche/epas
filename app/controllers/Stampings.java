@@ -255,8 +255,8 @@ public class Stampings extends Controller {
 			}
 		}
 
-		//calcolo Il numero di riposi compensativi usati fino ad oggi
-		int numberOfCompensatoryRestUntilToday = personMonth.numberOfCompensatoryRestUntilToday();
+		
+		
 
 		//non piu' usato
 		int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
@@ -271,7 +271,7 @@ public class Stampings extends Controller {
 			pd.computeValidStampings();
 		}
 
-		int totaleResiduo = situazioneParziale+personMonth.residuoDelMese();
+		
 
 		//Nuova struttura dati per stampare la riga giornaliera della tabella
 		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	//svuoto variabile statica	//TODO forse da mettere come transiente in personMonth
@@ -288,6 +288,72 @@ public class Stampings extends Controller {
 		List<StampModificationType> stampModificationTypeList = PersonStampingDayRecap.stampModificationTypeList;
 		List<StampType> stampTypeList = PersonStampingDayRecap.stampTypeList;
 
+		
+
+		//Il numero di buoni mensa usabili per questo mese e': personMonth.numberOfMealTicketToUse()
+		int numberOfMealTicketToUse = personMonth.numberOfMealTicketToUse();
+		
+		//mentre quelli da restituire sono: personMonth.numberOfMealTicketToRender()
+		int numberOfMealTicketToRender = personMonth.numberOfMealTicketToRender();
+		
+		//Il numero di giorni lavorativi in sede è di: personMonth.basedWorkingDays()
+		int basedWorkingDays = personMonth.basedWorkingDays();
+		
+		//Il numero di riposi compensativi usati fino ad oggi è: numberOfCompensatoryRestUntilToday
+		int numberOfCompensatoryRestUntilToday = personMonth.numberOfCompensatoryRestUntilToday();
+		
+		//E' possibile utilizzare il residuo dell'anno precedente? personMonth.possibileUtilizzareResiduoAnnoPrecedente()==true ? 'sì' : 'no'
+		boolean possibileUtilizzareResiduoAnnoPrecedente = personMonth.possibileUtilizzareResiduoAnnoPrecedente();
+		
+		/*
+		if(personMonth.residuoAnnoPrecedenteDaInizializzazione() != 0){
+			Eventuale residuo da inizializzazione: personMonth.residuoAnnoPrecedenteDaInizializzazione().toHourTime()
+		}
+		*/
+		int residuoAnnoPrecedenteDaInizializzazione = personMonth.residuoAnnoPrecedenteDaInizializzazione();
+		
+		/*
+		if(personMonth.straordinari != 0){
+			Straordinari: personMonth.straordinari / 60 ore
+		}
+		*/
+		int straordinari = personMonth.straordinari;
+		
+		/*
+		if(personMonth.residuoAnnoPrecedenteDisponibileAllInizioDelMese() != 0){
+			Residuo anno precedente disponibile a inizio mese: personMonth.residuoAnnoPrecedenteDisponibileAllInizioDelMese().toHourTime()
+		}
+		*/
+		int residuoAnnoPrecedenteDisponibileAllInizioDelMese = personMonth.residuoAnnoPrecedenteDisponibileAllInizioDelMese();
+		
+		//Residuo tempo di lavoro dei mesi precedenti: (situazioneParziale).toHourTime() 
+		
+		
+		//Residuo del mese:  personMonth.residuoDelMese().toHourTime()
+		int residuoDelMese = personMonth.residuoDelMese();
+		
+		/*
+		if(personMonth.person.qualification != null && personMonth.person.qualification.qualification > 3){
+			Tempo disponibile per straordinari: personMonth.tempoDisponibilePerStraordinari().toHourTime()
+		}
+		*/
+		int tempoDisponibilePerStraordinari = personMonth.tempoDisponibilePerStraordinari();
+		
+		//Totale residuo anno corrente a fine mese:  personMonth.totaleResiduoAnnoCorrenteAFineMese().toHourTime()
+		int totaleResiduoAnnoCorrenteAFineMese = personMonth.totaleResiduoAnnoCorrenteAFineMese();
+		
+		/*
+		if(personMonth.getCompensatoryRest() != 0 ){
+			Giorni di riposo compensativo: personMonth.getCompensatoryRest()
+			per un totale di: -   personMonth.getCompensatoryRestInMinutes().toHourTime() ore
+		}
+		*/
+		int compensatoryRest = personMonth.getCompensatoryRest();
+		int compensatoryRestInMinutes = personMonth.getCompensatoryRestInMinutes();
+		
+		//Totale residuo a fine mese  totaleResiduo.toHourTime() ore
+		int totaleResiduo = situazioneParziale + personMonth.residuoDelMese();
+		
 		//render
 		render(personMonth, numberOfInOut, numberOfCompensatoryRestUntilToday, numberOfCompensatoryRest, situazioneParziale, daysRecap, totaleResiduo, stampModificationTypeList, stampTypeList);
 
@@ -563,7 +629,6 @@ public class Stampings extends Controller {
 
 		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
 		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
-		LocalDate today = new LocalDate();
 
 		//lista delle persone che sono state attive nel mese
 		List<Person> activePersons = Person.getActivePersonsInMonth(month, year);
@@ -626,55 +691,7 @@ public class Stampings extends Controller {
 
 	}
 
-	/**
-	 * Metodo privato che verifica per ogni giorno lavorativo del mese se la persona ha timbrature mancanti
-	 * In caso affermativo il giorno individuato viene inserito in una lista nella tabella ImmutableTable
-	 * @param currentPerson
-	 * @param personDayRsList
-	 * @param builder
-	 */
-	private static void checkPersonMissingStampings(
-			Person currentPerson, 
-			List<EfficientPersonDay> personDayRsList, 
-			ImmutableTable.Builder<Person, String, List<Integer>> builder)
-	{
-
-		List<Integer> pdMissingStampingList = new ArrayList<Integer>();
-		for(EfficientPersonDay currentPersonDayRs : personDayRsList)
-		{
-			if(currentPerson.surname.equals("Mainetto") && currentPersonDayRs.date.getDayOfMonth()==25)
-			{
-				System.out.println();
-			}
-			//controllo 
-			if(currentPersonDayRs.fixed==true)
-				continue;
-			if(currentPersonDayRs.justified!=null && currentPersonDayRs.justified.equals("AllDay"))
-				continue;
-			if(currentPersonDayRs.isHoliday)
-				continue;
-			if(currentPersonDayRs.way.size()==0 || currentPersonDayRs.way.size()%2==1)		//zero timbrature o timbrature dispari
-			{
-				pdMissingStampingList.add(currentPersonDayRs.date.getDayOfMonth());
-			}
-			else 																			//timbrature pari ma due consecutive uguali
-			{
-				String lastWay = "out";						
-				for(String way : currentPersonDayRs.way)
-				{
-					if(way.equals(lastWay))
-					{
-						pdMissingStampingList.add(currentPersonDayRs.date.getDayOfMonth());
-						break;
-					}
-					lastWay = way;
-				}
-			}
-		}
-		builder.put(currentPerson, "Giorni del mese da controllare", pdMissingStampingList);
-
-	}
-
+	
 
 	/**
 	 * 
