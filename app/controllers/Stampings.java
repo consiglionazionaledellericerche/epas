@@ -170,11 +170,12 @@ public class Stampings extends Controller {
 			PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(pd,numberOfInOut);
 			daysRecap.add(dayRecap);
 		}
-
+		int totale = personMonth.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese();
 		//tabella riassuntiva codici
 		List<StampModificationType> stampModificationTypeList = PersonStampingDayRecap.stampModificationTypeList;
 		List<StampType> stampTypeList = PersonStampingDayRecap.stampTypeList;
-		render(personMonth, numberOfInOut, numberOfCompensatoryRestUntilToday, numberOfCompensatoryRest, situazioneParziale, daysRecap, totaleResiduo,stampModificationTypeList, stampTypeList);
+		render(personMonth, numberOfInOut, numberOfCompensatoryRestUntilToday, numberOfCompensatoryRest, 
+				situazioneParziale, daysRecap, totaleResiduo,stampModificationTypeList, stampTypeList, totale);
 
 	}
 
@@ -342,6 +343,7 @@ public class Stampings extends Controller {
 		//Totale residuo anno corrente a fine mese:  personMonth.totaleResiduoAnnoCorrenteAFineMese().toHourTime()
 		int totaleResiduoAnnoCorrenteAFineMese = personMonth.totaleResiduoAnnoCorrenteAFineMese();
 		
+		int totale = personMonth.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese();
 		/*
 		if(personMonth.getCompensatoryRest() != 0 ){
 			Giorni di riposo compensativo: personMonth.getCompensatoryRest()
@@ -355,7 +357,8 @@ public class Stampings extends Controller {
 		int totaleResiduo = situazioneParziale + personMonth.residuoDelMese();
 		
 		//render
-		render(personMonth, numberOfInOut, numberOfCompensatoryRestUntilToday, numberOfCompensatoryRest, situazioneParziale, daysRecap, totaleResiduo, stampModificationTypeList, stampTypeList);
+		render(personMonth, numberOfInOut, numberOfCompensatoryRestUntilToday, numberOfCompensatoryRest, 
+				situazioneParziale, daysRecap, totaleResiduo, stampModificationTypeList, stampTypeList, totale);
 
 
 	}
