@@ -518,7 +518,7 @@ public class Absences extends Controller{
 				pd = new PersonDay(person, actualDate);
 				pd.create();
 			}
-			//TODO: Fare un'unica select per estrarre il count delle absences con absenceType.code = 94 
+			 
 			Query query = JPA.em().createQuery("SELECT abs FROM Absence abs WHERE abs.personDay.person = :person "+ 
 					"AND abs.personDay.date between :dateStart AND :dateTo AND abs.absenceType.code = :code");
 			query.setParameter("person", pd.person).
@@ -533,6 +533,20 @@ public class Absences extends Controller{
 				render("@save");
 				return;
 			}
+			Absence absence = new Absence();
+			absence.absenceType = absenceType;
+			absence.personDay = pd;
+			pd.absences.add(absence);
+			PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
+					pd.person, pd.date.getMonthOfYear(), pd.date.getYear()).first();
+			if(pm == null)
+				pm = new PersonMonth(pd.person, pd.date.getMonthOfYear(), pd.date.getYear());
+			pm.prendiRiposoCompensativo(dateFrom);
+			pm.save();
+			pd.populatePersonDay();
+			pd.save();
+			flash.success("Aggiunto codice di assenza %s ", absenceType.code);
+			render("@save");
 
 		}		
 

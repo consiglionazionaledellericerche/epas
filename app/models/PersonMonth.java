@@ -886,15 +886,22 @@ public class PersonMonth extends Model {
 	}
 
 	public int totaleResiduoAnnoCorrenteAFineMese() {
-		return residuoDelMese() + totaleResiduoAnnoCorrenteAlMesePrecedente() + riposiCompensativiDaAnnoCorrente - straordinari - recuperiOreDaAnnoPrecedente;  
+		int residuoMese = residuoDelMese();
+		int totaleResiduoAnnoCorrenteAlMesePrecedente = totaleResiduoAnnoCorrenteAlMesePrecedente();
+		return residuoMese + totaleResiduoAnnoCorrenteAlMesePrecedente + riposiCompensativiDaAnnoCorrente - straordinari - recuperiOreDaAnnoPrecedente;  
 	}
 
 	public int totaleResiduoAnnoCorrenteAllaData(LocalDate date) {
-		return residuoDelMeseAllaData(date) + totaleResiduoAnnoCorrenteAlMesePrecedente() + residuoAnnoPrecedenteDaInizializzazione() + riposiCompensativiDaAnnoCorrente - straordinari - recuperiOreDaAnnoPrecedente;  
+		int residuoDelMeseAllaData = residuoDelMeseAllaData(date);
+		int totaleResiduoAnnoCorrenteAlMesePrecedente = totaleResiduoAnnoCorrenteAlMesePrecedente();
+		int residuoAnnoPrecedenteDaInizializzazione = residuoAnnoPrecedenteDaInizializzazione();
+		return residuoDelMeseAllaData + totaleResiduoAnnoCorrenteAlMesePrecedente + residuoAnnoPrecedenteDaInizializzazione + riposiCompensativiDaAnnoCorrente - straordinari - recuperiOreDaAnnoPrecedente;  
 	}
 
 	public int totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese() {
-		return totaleResiduoAnnoCorrenteAFineMese() + residuoAnnoPrecedenteDisponibileAllaFineDelMese();
+		int totaleResiduoAnnoCorrenteAFineMese = totaleResiduoAnnoCorrenteAFineMese();
+		int residuoAnnoPrecedenteDisponibileAllaFineDelMese = residuoAnnoPrecedenteDisponibileAllaFineDelMese();
+		return totaleResiduoAnnoCorrenteAFineMese + residuoAnnoPrecedenteDisponibileAllaFineDelMese;
 	}
 
 	public void aggiornaRiepiloghi() {
