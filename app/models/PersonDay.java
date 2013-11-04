@@ -545,6 +545,40 @@ public class PersonDay extends Model {
 	}
 	*/
 	
+	/** (alessandro)
+	 * True se il personDay cade in uno stampProfile con fixedTimeAtWork = true;
+	 * @return
+	 */
+	public boolean isFixedTimeAtWork()
+	{
+		boolean fixedWorkingType = false;
+		
+		for(StampProfile sp : this.person.stampProfiles)
+		{
+			if(DateUtility.isDateIntoInterval(this.date, new DateInterval(sp.startFrom,sp.endTo)))
+			{
+				fixedWorkingType = sp.fixedWorkingTime;
+			}
+		}
+		return fixedWorkingType;
+	}
+	
+
+	/** (alessandro)
+	 * True se il personDay appartiene a un giorno festivo per la persona
+	 * @param personWttd
+	 * @return
+	 */
+	/*disabilitato da alessandro il 28 ottobre perche' non piu' utilizzato
+	public boolean isPersonHoliday(List<WorkingTimeTypeDay> personWttd)
+	{
+		if(DateUtility.isGeneralHoliday(this.date) || personWttd.get(this.date.getDayOfWeek()-1).holiday==true)
+		{
+			return true;
+		}
+		return false;
+	}
+	*/
 	
 	
 
@@ -720,10 +754,18 @@ public class PersonDay extends Model {
 	 * @return se la persona può usufruire del buono pasto per quella data
 	 */
 	public boolean mealTicket(){
-
+		
+		//caso forced by admin
 		if(this.isTicketForcedByAdmin)
 			return true;
 		
+		//caso persone fixed
+		if(!this.isHoliday() && this.isFixedTimeAtWork() && !this.isAllDayAbsences()) 
+			return true;
+		if(!this.isHoliday() && this.isFixedTimeAtWork() && this.isAllDayAbsences())
+			return false;
+		
+		//caso generale
 		return this.isTicketAvailable && checkTicketAvailableForWorkingTime();
 
 	}
@@ -1273,27 +1315,6 @@ public class PersonDay extends Model {
 		return false;
 	}
 	*/
-	
-	/** (alessandro)
-	 * True se il personDay cade in uno stampProfile con fixedTimeAtWork = true;
-	 * @param personStampProfiles gli stampProfile della persona associata al personday
-	 * @return
-	 */
-	public boolean isFixedTimeAtWork(List<StampProfile> personStampProfiles)
-	{
-		boolean fixedWorkingType = false;
-		
-		for(StampProfile sp : personStampProfiles)
-		{
-			if(DateUtility.isDateIntoInterval(this.date, new DateInterval(sp.startFrom,sp.endTo)))
-			{
-				fixedWorkingType = sp.fixedWorkingTime;
-			}
-		}
-		return fixedWorkingType;
-	}
-	
-	
 	
 	@Override
 	public String toString() {
