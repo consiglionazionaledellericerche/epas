@@ -67,8 +67,11 @@ public class PersonStampingDayRecap {
 		this.absences = pd.absences;
 		List<Stamping> stampingsForTemplate = pd.getStampingsForTemplate(numberOfInOut, today);
 		this.setStampingTemplate( stampingsForTemplate, pd );
-		
-			
+		int previousProgressive;
+		if(pd.previousPersonDay() == null)
+			previousProgressive = 0;
+		else
+			previousProgressive = pd.previousPersonDay().progressive;
 		//----------------------------------------------- fixed:  worktime, difference, progressive, p---------------------------------
 		StampModificationType smt = pd.getFixedWorkingTime();
 		if(smt !=null)
@@ -112,12 +115,13 @@ public class PersonStampingDayRecap {
 					dif = temporaryWorkTime - this.person.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek()).workingTime;
 				}
 				this.setDifference( dif );
-				this.setProgressive( pd.previousPersonDay().progressive + dif);
+				
+				this.setProgressive( previousProgressive + dif);
 			}
-			if(pd.absences.size()!=0)
+			else if(pd.absences.size()!=0)
 			{
 				this.setDifference( pd.difference );
-				this.setProgressive(pd.difference + pd.previousPersonDay().progressive);	
+				this.setProgressive(pd.difference + previousProgressive);	
 			}
 		}
 		//---------------------------------------- not fixed:  worktime, difference, progressive for past-----------------------------
