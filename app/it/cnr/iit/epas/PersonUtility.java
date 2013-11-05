@@ -939,8 +939,7 @@ public class PersonUtility {
 		LocalDate today = new LocalDate();
 		while(true)
 		{
-			//Logger.debug("******************************** Controllo di %s*******************", date);
-			System.out.println("******************************** Controllo di "+date+"*******************");
+			Logger.info("Check missing for %s", date.toString());
 			PersonUtility.checkDay(date);
 			date = date.plusDays(1);
 			if(date.isEqual(today))
