@@ -988,6 +988,24 @@ public class PersonMonth extends Model {
 		}
 		return false;
 	}
+	
+	/**
+	 * Aggiorna il campo straordinari. TODO da inserire nel job??
+	 */
+	public void updateOvertimesFromCompetences()
+	{
+		
+		Competence comp = Competence.find("Select comp from Competence comp where comp.person = ? and comp.year = ? and comp.month = ? and comp.competenceCode.code = ?",
+				this.person,
+				this.year,
+				this.month,
+				"S1").first();
+		if(comp.competenceCode.code.equals("S1"))
+			this.straordinari = comp.valueApproved;
+		
+		this.save();
+		
+	}
 
 	public boolean prendiRiposoCompensativo(LocalDate date) {
 		
