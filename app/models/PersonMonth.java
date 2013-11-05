@@ -1000,7 +1000,7 @@ public class PersonMonth extends Model {
 				this.year,
 				this.month,
 				"S1").first();
-		if(comp.competenceCode.code.equals("S1"))
+		if(comp!=null && comp.competenceCode.code.equals("S1"))
 			this.straordinari = comp.valueApproved;
 		
 		this.save();
