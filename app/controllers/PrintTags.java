@@ -1,5 +1,8 @@
 package controllers;
 
+import it.cnr.iit.epas.DateUtility;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.LocalDate;
@@ -8,6 +11,9 @@ import models.Configuration;
 import models.Person;
 import models.PersonDay;
 import models.PersonMonth;
+import models.StampModificationType;
+import models.StampType;
+import models.rendering.PersonStampingDayRecap;
 import play.Logger;
 import play.i18n.Lang;
 import play.mvc.Controller;
@@ -24,8 +30,8 @@ public class PrintTags extends Controller{
 			flash.error("Malissimo! ci vuole un id! Seleziona una persona!");
 			Application.indexAdmin();
 		}
-		Lang.change("it");
-		Logger.debug("Il linguaggio attualmente è: %s", Lang.get());
+//		Lang.change("it");
+//		Logger.debug("Il linguaggio attualmente è: %s", Lang.get());
 		Configuration confParameters = Configuration.getCurrentConfiguration();
 		if(personId == -1){
 			/**
@@ -37,11 +43,43 @@ public class PrintTags extends Controller{
 		int year = params.get("year", Integer.class);
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?",
 				person, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue()).fetch();
+		
 		PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
 				person, month, year).first();
 		int numberOfInOut = Math.min(confParameters.numberOfViewingCoupleColumn, (int)pm.getMaximumCoupleOfStampings());
+		PersonMonth personMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?",
+				person, month, year).first();
+
+		//TODO 18/10 usare metodo in models.person getMonthContract() per implementare questo controllo
+		if (personMonth == null) {
+			/**
+			 * se il personMonth che viene richiesto, è situato nel tempo prima dell'inizio del contratto della persona oppure successivamente 
+			 * ad esso, se quest'ultimo è a tempo determinato (expireContract != null), si rimanda alla pagina iniziale perchè si tenta di accedere
+			 * a un periodo fuori dall'intervallo temporale in cui questa persona ha un contratto attivo
+			 */
+			if(new LocalDate(year, month, 1).dayOfMonth().withMaximumValue().isBefore(person.getCurrentContract().beginContract)
+					|| (person.getCurrentContract().expireContract != null && new LocalDate(year, month, 1).isAfter(person.getCurrentContract().expireContract))){
+				flash.error("Si è cercato di accedere a un mese al di fuori del contratto valido per %s %s. " +
+						"Non esiste situazione mensile per il mese di %s", person.name, person.surname, DateUtility.fromIntToStringMonth(month));
+				render("@redirectToIndex");
+			}
+			personMonth = new PersonMonth(person, year, month);
+			personMonth.create();
+
+		}		
 		
-		renderPDF(pdList, person, year, month, pm, numberOfInOut);
+		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
+		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();							
+
+		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
+		for(PersonDay pd : personMonth.days)
+		{
+			PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(pd,numberOfInOut);
+			daysRecap.add(dayRecap);
+		}
+		
+			
+		renderPDF(pdList, person, year, month, pm, numberOfInOut, daysRecap, personMonth);
 		
 		
 	}
