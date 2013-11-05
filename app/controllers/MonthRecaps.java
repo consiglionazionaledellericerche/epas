@@ -152,6 +152,7 @@ public class MonthRecaps extends Controller{
 			}
 			
 			PersonMonth pm = PersonMonth.getInstance(person, year, month);
+			pm.updateOvertimesFromCompetences();
 			valueApproved = pm.straordinari / 60;			
 
 		}
@@ -195,29 +196,33 @@ public class MonthRecaps extends Controller{
 
 		List<Person> activePersons = Person.getActivePersonsInMonth(month, year);
 
-
-		//Se mese attuale considero i person day fino a ieri
-		if(today.getMonthOfYear()==month)
+		//logica mese attuale
+		if(today.getYear()==year && today.getMonthOfYear()==month)
 		{
-			monthEnd = today.minusDays(2);	//TODO perchè due?
-		}
-		
-		//Se oggi e' il primo giorno del mese stampo la tabella vuota 
-		if(today.getDayOfMonth()==1)
-		{
-			for(Person person : activePersons)
+			//Se oggi e' il primo giorno del mese stampo la tabella vuota 
+			if(today.getDayOfMonth()==1)
 			{
-				tableMonthRecap.put(person, "Giorni di presenza al lavoro nei giorni festivi".intern(), 0);
-				tableMonthRecap.put(person, "Giorni di presenza al lavoro nei giorni lavorativi".intern(), 0);
-				tableMonthRecap.put(person, "Ore di lavoro fatte".intern(), 0);
-				tableMonthRecap.put(person, "Differenza ore (Residuo a fine mese)".intern(), 0);
-				tableMonthRecap.put(person, "Assenze giustificate".intern(), 0);
-				tableMonthRecap.put(person, "Assenze non giustificate".intern(), 0);
-				tableMonthRecap.put(person, "Ore straord. pagate".intern(), 0);
-				tableMonthRecap.put(person, "Buoni mensa da restituire".intern(),0);
+				for(Person person : activePersons)
+				{
+					tableMonthRecap.put(person, "Giorni di presenza al lavoro nei giorni festivi".intern(), 0);
+					tableMonthRecap.put(person, "Giorni di presenza al lavoro nei giorni lavorativi".intern(), 0);
+					tableMonthRecap.put(person, "Ore di lavoro fatte".intern(), 0);
+					tableMonthRecap.put(person, "Differenza ore (Residuo a fine mese)".intern(), 0);
+					tableMonthRecap.put(person, "Assenze giustificate".intern(), 0);
+					tableMonthRecap.put(person, "Assenze non giustificate".intern(), 0);
+					tableMonthRecap.put(person, "Ore straord. pagate".intern(), 0);
+					tableMonthRecap.put(person, "Buoni mensa da restituire".intern(),0);
+				}
+				render(tableMonthRecap, generalWorkingDaysOfMonth, today, lastDayOfMonth);
+				return;
 			}
-			render(tableMonthRecap, generalWorkingDaysOfMonth, today, lastDayOfMonth);
+			
+			//Considero il riepilogo fino a ieri
+			monthEnd = today.minusDays(1);
+			
 		}
+			
+		
 
 		for(Person person : activePersons)
 		{
@@ -317,19 +322,22 @@ public class MonthRecaps extends Controller{
 		LocalDate today = new LocalDate();
 		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
 		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
-		
-		//Se mese attuale considero i person day fino a ieri
-		if(today.getMonthOfYear()==month)
-		{
-			monthEnd = today.minusDays(2);
-		}
-		//Se oggi e' il primo giorno del mese stampo la tabella vuota 
-		if(today.getDayOfMonth()==1)
-		{
-			List<PersonDay> notJustifiedAbsences = new ArrayList<PersonDay>();
-			render(notJustifiedAbsences);
-		}
 
+		//logica mese attuale
+		if(today.getYear()==year && today.getMonthOfYear()==month)
+		{
+			//Se oggi e' il primo giorno del mese stampo la tabella vuota 
+			if(today.getDayOfMonth()==1)
+			{
+				List<PersonDay> notJustifiedAbsences = new ArrayList<PersonDay>();
+				render(notJustifiedAbsences);
+			}
+			
+			//Considero il riepilogo fino a ieri
+			monthEnd = today.minusDays(1);
+
+		}
+		
 		List<PersonDay> pdList = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? AND pd.date between ? and ?", 
 			person, 
 			monthBegin, 
