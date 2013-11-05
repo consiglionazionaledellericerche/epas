@@ -1,7 +1,7 @@
 package controllers;
 
 import it.cnr.iit.epas.FromMysqlToPostgres;
-
+import it.cnr.iit.epas.PersonUtility;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -9,7 +9,6 @@ import java.util.List;
 import org.joda.time.LocalDate;
 
 import controllers.shib.Shibboleth;
-
 import models.Contract;
 import models.Person;
 import models.PersonDay;
@@ -84,21 +83,37 @@ public class Administration extends Controller {
 	}
 	
 	/**
-	 * metodo da lanciare per ricalcolare tutti i valori nei personday dall'inizio dell'anno alla fine dello stesso.
+	 * Verifica e creazione di tutti i person days mancanti all'interno del database
 	 * Questo metodo viene lanciato attraverso una chiamata da browser. 
+	 */
+	public static void checkAllDaysForError(){
+		//Creo tutti i person day
+		PersonUtility.checkAllDaysYear();
+	}
+	
+	/**
+	 * metodo da lanciare per ricalcolare tutti i valori nei personday dall'inizio dell'anno alla fine dello stesso.
+	 * 
 	 */
 	public static void updatePersonDaysValue(){
 		
+		//Ricalcolo i valori 
 		List<Person> personList = Person.findAll();
 		LocalDate date = new LocalDate();
+		int i = 1;
 		for(Person p : personList){
+			
+			Logger.info("Update person %s (%s di %s)", p.surname, i, personList.size());
+			i++;
+			
 			for(int month = 1; month <=12; month++){
 				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
 						p, new LocalDate(date.getYear(), month, 1), new LocalDate(date.getYear(), month, 1).dayOfMonth().withMaximumValue()).fetch();
 				for(PersonDay pd : pdList){
 					pd.populatePersonDay();
 				}
-			}			
+			}
+			
 		}		
 	}
 	
