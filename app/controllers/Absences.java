@@ -618,7 +618,7 @@ public class Absences extends Controller{
 			pd.populatePersonDay();
 
 			if(pd.date.isBefore(new LocalDate(pd.date).dayOfMonth().withMaximumValue())){
-				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ? and pd.date <= ?", 
+				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ? and pd.date <= ? order by pd.date", 
 						pd.person, pd.date, new LocalDate(pd.date).dayOfMonth().withMaximumValue()).fetch();
 				for(PersonDay personday : pdList){
 					personday.populatePersonDay();
@@ -802,14 +802,14 @@ public class Absences extends Controller{
 				pd.populatePersonDay();
 				pd.save();
 				if(pd.date.isBefore(new LocalDate(pd.date).dayOfMonth().withMaximumValue())){
-					List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ? and pd.date <= ?", 
+					List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ? and pd.date <= ? order by pd.date", 
 							pd.person, pd.date, new LocalDate(pd.date).dayOfMonth().withMaximumValue()).fetch();
 					for(PersonDay personday : pdList){
 						personday.populatePersonDay();
 						personday.save();
 					}
 				}
-				flash.success("Timbratura di tipo %s per il giorno %s rimossa per il dipendente %s %s", 
+				flash.success("Assenza di tipo %s per il giorno %s rimossa per il dipendente %s %s", 
 						oldAbsenceCode, PersonTags.toDateTime(absence.personDay.date), pd.person.name, pd.person.surname);			
 			} 
 			else {

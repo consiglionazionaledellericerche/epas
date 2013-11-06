@@ -209,7 +209,8 @@ ${prova}
 %{
 }
 }%
-<p> - Residuo tempo di lavoro dei mesi precedenti: ${(situazioneParziale).toHourTime()}</p> 
+<!--  <p> - Residuo tempo di lavoro dei mesi precedenti: ${(situazioneParziale).toHourTime()}</p>-->
+<p> - Residuo a fine mese precedente: ${personMonth.mesePrecedente().totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese().toHourTime()}</p> 
 <p> - Residuo del mese:  ${personMonth.residuoDelMese().toHourTime()}</p>
 %{if(personMonth.person.qualification != null && personMonth.person.qualification.qualification > 3){
 }%
@@ -223,7 +224,8 @@ ${prova}
 <p> - Giorni di riposo compensativo: ${personMonth.getCompensatoryRest()} per un totale di: -${personMonth.getCompensatoryRestInMinutes().toHourTime()} ore</p>
 %{
 }
-}%<p> - Totale residuo a fine mese  <strong>${totaleResiduo.toHourTime()} ore</strong></p>
+}%
+<!--  <p> - Totale residuo a fine mese  <strong>${totaleResiduo.toHourTime()} ore</strong></p>-->
 
 <p> - Totale residuo del mese + residuo mesi precedenti: <strong>${totale.toHourTime()} ore</strong></p>
 
