@@ -56,10 +56,7 @@ public class PersonStampingDayRecap {
 		
 	public PersonStampingDayRecap(PersonDay pd, int numberOfInOut)
 	{
-		if(pd.date.getDayOfMonth()==22)
-		{
-			System.out.println("");
-		}
+		
 		this.personDayId = pd.id;
 		this.holiday = pd.isHoliday();
 		this.person = pd.person;
