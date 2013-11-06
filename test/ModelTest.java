@@ -12,12 +12,14 @@ import javax.persistence.EntityManager;
 
 import models.Absence;
 import models.AbsenceType;
-
+import models.Configuration;
 import models.Person;
 import models.PersonDay;
 import models.StampType;
 import models.Stamping;
+import models.WorkingTimeTypeDay;
 import models.Stamping.WayType;
+import models.WorkingTimeType;
 
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
@@ -27,6 +29,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import play.Logger;
+import play.Play;
 import play.db.jpa.JPA;
 import play.test.Fixtures;
 import play.test.UnitTest;
@@ -61,15 +64,19 @@ public class ModelTest extends UnitTest {
 		st.description = "assente per motivi miei";
 		em.persist(st);
 		assertNotNull(st.id);
-		
+
+		PersonDay pd = new PersonDay(p, LocalDate.now());
+		pd.save();
+		assertNotNull(pd.id);
+
 		Stamping s = new Stamping();
-		s.personDay.person = p;
+		s.personDay = pd;
 		s.way = WayType.in;
 		s.stampType = st;
 		em.persist(s);
 		assertNotNull(s.id);
 		
-		System.out.println("nuovo stamping id = " + s.id);
+		Logger.debug("nuovo stamping id = %s", s.id);
 		
 	}
 
@@ -82,45 +89,22 @@ public class ModelTest extends UnitTest {
 		assertEquals(null, p.id);
 		em.persist(p);
 		assertNotNull(p.id);
-		
-		Person p2 = new Person();
-		p2.name= "Andrea";
-		p2.surname= "Bargnani";
-		assertEquals(null, p2.id);
-		em.persist(p2);
-		assertNotNull(p2.id);
-//		
-//		HourlyAbsenceType hat = new HourlyAbsenceType();
-//		hat.ignoreStamping = false;
-//		hat.justifiedWorkTime = 3;
-//		hat.mealTicketCalculation = true;		
-//		
-//		DailyAbsenceType dat = new DailyAbsenceType();		
-//		dat.ignoreStamping = true;
-//		dat.mealTicketCalculation = false;		
-		
+				
 		AbsenceType absenceType = new AbsenceType();
 		absenceType.code = "09s";
-		//absenceType.dailyAbsenceType = dat;
+		absenceType.save();
+		assertNotNull(absenceType.id);
+				
+		PersonDay pd = new PersonDay(p, LocalDate.now());
+		pd.save();
+		assertNotNull(pd.id);
 		
-		AbsenceType absenceType2 = new AbsenceType();
-		absenceType2.code = "20t";
-		//absenceType2.hourlyAbsenceType = hat;
-		
-		//dat.absenceType = absenceType;
-		//em.persist(dat);
-		//hat.absenceType = absenceType2;
-		//em.persist(hat);
-		
-		Absence absence = new Absence();	
-		//absence.date = new LocalDate(GregorianCalendar.getInstance().getTime());
-		absence.personDay.person = p;
-		absence.personDay.person = p2;
+		Absence absence = new Absence();
+		absence.personDay = pd;
 		absence.absenceType = absenceType;
-		absence.absenceType = absenceType2;
+
 		em.persist(absence);
-		em.persist(absenceType);
-		em.persist(absenceType2);
+		assertNotNull(absence.id);
 	}
 	
 	
@@ -128,16 +112,24 @@ public class ModelTest extends UnitTest {
 	public void testPersonDayIsWorkingDay() {
 		Person p = Person.find("name = ?", "Cristian").first();
 		assertEquals("Lucchesi", p.surname);
-		//assertEquals("normal", p.workingTimeType.);
+		
+		assertEquals("normal", p.workingTimeType.description);
+		
+		for(WorkingTimeTypeDay wttd : p.workingTimeType.workingTimeTypeDays) {
+			Logger.info("WorkingTimeTypeDay = %s", wttd);
+		}
+		
 		LocalDate aMonday = new LocalDate(2011, 12, 19);
 		assertEquals(DateTimeConstants.MONDAY, aMonday.getDayOfWeek());
-		PersonDay personMondayDay = new PersonDay(p, aMonday);
-		assertTrue(personMondayDay.isWorkingDay());
+//		PersonDay personMondayDay = new PersonDay(p, aMonday);
 		
-		LocalDate aSaturday = new LocalDate(2011, 12, 17);
-		assertEquals(DateTimeConstants.SATURDAY, aSaturday.getDayOfWeek());
-		PersonDay personSaturdayDay = new PersonDay(p, aSaturday);
-		assertFalse(personSaturdayDay.isWorkingDay());		
+//		Logger.info("dayOfWeek = %s", personMondayDay.date.getDayOfWeek());
+//		assertFalse(personMondayDay.isHoliday());
+//		
+//		LocalDate aSaturday = new LocalDate(2011, 12, 17);
+//		assertEquals(DateTimeConstants.SATURDAY, aSaturday.getDayOfWeek());
+//		PersonDay personSaturdayDay = new PersonDay(p, aSaturday);
+//		assertTrue(personSaturdayDay.isHoliday());		
 	}
 	
 	@Test 
@@ -145,7 +137,10 @@ public class ModelTest extends UnitTest {
 		Person p = Person.find("name = ?", "Cristian").first();
 		Stamping s = new Stamping();
 		s.stampType = StampType.findById(1l);
-		s.personDay.person = p;
+		PersonDay pd = new PersonDay(p, LocalDate.now());
+		pd.save();
+		assertNotNull(pd.id);
+		s.personDay = pd;
 		s.way = WayType.in;
 		LocalDateTime date = new LocalDateTime();
 		s.date = date;
@@ -154,8 +149,5 @@ public class ModelTest extends UnitTest {
 		assertNotNull(s.date.hourOfDay());
 		
 	}
-//	@Test
-//	public void testGetStampings() {
-//		Fixtures.loadModels("data.yml");
-//	}
+
 }
