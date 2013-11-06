@@ -819,6 +819,14 @@ public class PersonMonth extends Model {
 	 * @return la somma dei residui positivi e di quelli negativi
 	 */
 	public int residuoDelMese() {
+		/**
+		 * nel caso di persone con timbratura fissa, il residuo del mese è OBBLIGATORIAMENTE forzato a zero.
+		 * Nel caso in cui ci fossero nuove disposizioni, intervenendo qui si può ovviare al comportamento attuale
+		 */
+		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date" , 
+				this.person, new LocalDate(year, month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).first();
+		if(pd.isFixedTimeAtWork())
+			return 0;
 		return residuoDelMeseInPositivo() + residuoDelMeseInNegativo();
 	}
 
