@@ -14,7 +14,8 @@ require:
     - com.google.guava -> guava 13.0.1
     - play -> pdf 0.9
     - org.mnode.ical4j -> ical4j 1.0.+    
-
+    - org.jsoup -> jsoup 1.7+
+    
 # My custom repository
 
 repositories:
