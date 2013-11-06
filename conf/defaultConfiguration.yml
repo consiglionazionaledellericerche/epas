@@ -6,7 +6,7 @@ Configuration(defaultConfiguration):
     instituteName: IIT
     emailToContact:
     seatCode: 223400
-    urlToPresence:
+    urlToPresence: https://attestati.rm.cnr.it/attestati/
     userToPresence:
     passwordToPresence:
     monthOfPatron: 6

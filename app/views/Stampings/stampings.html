@@ -134,45 +134,47 @@
 
 </table>
 
-<p id="spiegazioneTabellaTimbrature">Il numero di buoni mensa usabili per questo mese e': <strong>${personMonth.numberOfMealTicketToUse()}</strong>, mentre quelli da restituire sono <strong>${personMonth.numberOfMealTicketToRender()}</strong>. Il numero di giorni lavorativi in sede è di: <strong>${personMonth.basedWorkingDays()}</strong> </p>
+<p id="spiegazioneTabellaTimbrature">Il numero di buoni mensa usabili per questo mese e': <strong>${numberOfMealTicketToUse}</strong>, mentre quelli da restituire sono <strong>${numberOfMealTicketToRender}</strong>. Il numero di giorni lavorativi in sede è di: <strong>${personMonth.basedWorkingDays()}</strong> </p>
 
-<p> - Il numero di riposi compensativi usati fino ad oggi è: ${personMonth.numberOfCompensatoryRestUntilToday()}</p>
+<p> - Il numero di riposi compensativi usati fino ad oggi è: ${numberOfCompensatoryRestUntilToday}</p>
 <p>Riepilogo delle ore di lavoro in eccesso/difetto:</p> 
-<p> - E' possibile utilizzare il residuo dell'anno precedente? ${personMonth.possibileUtilizzareResiduoAnnoPrecedente()==true ? 'sì' : 'no'}</p>
+<p> - E' possibile utilizzare il residuo dell'anno precedente? ${possibileUtilizzareResiduoAnnoPrecedente==true ? 'sì' : 'no'}</p>
 %{if(personMonth.residuoAnnoPrecedenteDaInizializzazione() != 0){
 }%
-<p> - Eventuale residuo da inizializzazione: ${personMonth.residuoAnnoPrecedenteDaInizializzazione().toHourTime()}</p>
+<p> - Eventuale residuo da inizializzazione: ${residuoAnnoPrecedenteDaInizializzazione.toHourTime()}</p>
 %{
 }
 }%
 %{if(personMonth.straordinari != 0){
 }%
-<p> - Straordinari: ${personMonth.straordinari / 60} ore</p>
+<p> - Straordinari: ${straordinari / 60} ore</p>
 %{
 }
 }%
+<!--  
 %{if(personMonth.residuoAnnoPrecedenteDisponibileAllInizioDelMese() != 0){
 }%
 <p> - Residuo anno precedente disponibile a inizio mese: ${personMonth.residuoAnnoPrecedenteDisponibileAllInizioDelMese().toHourTime()}</p>
 %{
 }
 }%
-<p> - Residuo tempo di lavoro dei mesi precedenti: ${(situazioneParziale).toHourTime()}</p> 
-<p> - Residuo del mese:  ${personMonth.residuoDelMese().toHourTime()}</p>
-%{if(personMonth.person.qualification.qualification > 3){
+-->
+<p> - Residuo a fine mese precedente: ${residuoAlMesePrecedente.toHourTime()}</p> 
+<p> - Residuo del mese:  ${residuoDelMese.toHourTime()}</p>
+%{if(personMonth.person.qualification != null && personMonth.person.qualification.qualification > 3){
 }%
 <p> - Tempo disponibile per straordinari: ${personMonth.tempoDisponibilePerStraordinari().toHourTime()}</p>
 %{
 }
 }%
-<p> - Totale residuo anno corrente a fine mese:  ${personMonth.totaleResiduoAnnoCorrenteAFineMese().toHourTime()}</p>
-%{if(personMonth.getCompensatoryRest() != 0 ){
+<!--  <p> - Totale residuo anno corrente a fine mese:  ${personMonth.totaleResiduoAnnoCorrenteAFineMese().toHourTime()}</p>-->
+%{if(compensatoryRest != 0 ){
 }%
-<p> - Giorni di riposo compensativo: ${personMonth.getCompensatoryRest()} per un totale di: -${personMonth.getCompensatoryRestInMinutes().toHourTime()} ore</p>
+<p> - Giorni di riposo compensativo: ${compensatoryRest} per un totale di: -${compensatoryRestInMinutes.toHourTime()} ore</p>
 %{
 }
 }%
-<p> - Totale residuo a fine mese  <strong>${totaleResiduo.toHourTime()} ore</strong></p>
+
 <p> - Totale residuo del mese + residuo mesi precedenti: <strong>${totale.toHourTime()} ore</strong></p>
 
 
