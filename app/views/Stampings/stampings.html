@@ -157,9 +157,10 @@
 %{
 }
 }%
-<p> - Residuo tempo di lavoro dei mesi precedenti: ${(situazioneParziale).toHourTime()}</p> 
+<!--  <p> - Residuo tempo di lavoro dei mesi precedenti: ${(situazioneParziale).toHourTime()}</p>--> 
+<p> - Residuo a fine mese precedente: ${personMonth.mesePrecedente().totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese().toHourTime()}</p> 
 <p> - Residuo del mese:  ${personMonth.residuoDelMese().toHourTime()}</p>
-%{if(personMonth.person.qualification.qualification > 3){
+%{if(personMonth.person.qualification != null && personMonth.person.qualification.qualification > 3){
 }%
 <p> - Tempo disponibile per straordinari: ${personMonth.tempoDisponibilePerStraordinari().toHourTime()}</p>
 %{
@@ -172,7 +173,8 @@
 %{
 }
 }%
-<p> - Totale residuo a fine mese  <strong>${totaleResiduo.toHourTime()} ore</strong></p>
+<!--  <p> - Totale residuo a fine mese  <strong>${totaleResiduo.toHourTime()} ore</strong></p>-->
+
 <p> - Totale residuo del mese + residuo mesi precedenti: <strong>${totale.toHourTime()} ore</strong></p>
 
 
