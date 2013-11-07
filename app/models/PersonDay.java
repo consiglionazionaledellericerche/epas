@@ -553,6 +553,8 @@ public class PersonDay extends Model {
 	{
 		boolean fixedWorkingType = false;
 		
+		//FIXME: invece che ciclare su tutti non si poteva con una select prendere lo
+		//stampProfile alla data attuale?
 		for(StampProfile sp : this.person.stampProfiles)
 		{
 			if(DateUtility.isDateIntoInterval(this.date, new DateInterval(sp.startFrom,sp.endTo)))
