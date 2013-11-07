@@ -57,6 +57,8 @@ import play.db.jpa.JPAPlugin;
 
 import com.google.common.collect.ImmutableMap;
 
+import controllers.Administration;
+
 
 public class FromMysqlToPostgres {
 
@@ -272,6 +274,9 @@ public class FromMysqlToPostgres {
 		//FromMysqlToPostgres.fixMissingPersonDay();
 		JPAPlugin.closeTx(false);
 		Logger.info("Importazione terminata");
+		
+		//il fix conclusivo
+		Administration.updatePersonDaysValue();
 
 		mysqlCon.close();
 
