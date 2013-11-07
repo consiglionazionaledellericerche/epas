@@ -101,8 +101,7 @@ public class PersonDay extends Model {
 	public List<Absence> absences = new ArrayList<Absence>();
 
 	@Column(name = "modification_type")
-	@Enumerated(EnumType.STRING)
-	public PersonDayModificationType modificationType;
+	public String modificationType;
 	
 	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY)
 	public List<PersonDayInTrouble> troubles = new ArrayList<PersonDayInTrouble>();
@@ -463,6 +462,7 @@ public class PersonDay extends Model {
 		workTime = myWorkTime;
 
 		//Il pranzo e' servito??		
+		this.modificationType = null;
 		int breakTicketTime = getWorkingTimeTypeDay().breakTicketTime;	//30 minuti
 		int mealTicketTime = getWorkingTimeTypeDay().mealTicketTime;	//6 ore
 
@@ -476,7 +476,8 @@ public class PersonDay extends Model {
 				workTime = workTime - breakTicketTime;
 				this.isTicketAvailable = true;
 				StampModificationType smt = StampModificationType.findById(StampModificationTypeValue.FOR_DAILY_LUNCH_TIME.getId());
-				this.lunchTimeStampModificationType = smt;
+				//this.lunchTimeStampModificationType = smt;
+				this.modificationType = smt.code;
 			}
 			else
 			{
@@ -503,7 +504,8 @@ public class PersonDay extends Model {
 					{
 						workTime = workTime - (breakTicketTime - minTimeForLunch);
 						StampModificationType smt = StampModificationType.findById(StampModificationTypeValue.FOR_MIN_LUNCH_TIME.getId());
-						this.lunchTimeStampModificationType = smt;
+						//this.lunchTimeStampModificationType = smt;
+						this.modificationType = smt.code;
 					}
 					this.isTicketAvailable = true;
 				}
@@ -653,8 +655,13 @@ public class PersonDay extends Model {
 
 		Logger.trace("Dimensione Stampings: %s. Dimensione Absences: %s Per %s %s", stampings.size(), absences.size(), person.name, person.surname);
 
+		
 		updateTimeAtWork();
+		
+		Logger.debug("StampModification prima per %s %s %s %s", person.name, person.surname, this.date, this.modificationType);
+		
 		merge();
+		Logger.debug("StampModification dopo per %s %s %s %s", person.name, person.surname, this.date, this.modificationType);
 		updateDifference();
 		merge();
 		updateProgressive();	
