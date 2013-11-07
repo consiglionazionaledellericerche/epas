@@ -29,6 +29,7 @@ import play.Logger;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.db.jpa.JPA;
+import play.db.jpa.JPAPlugin;
 import play.db.jpa.Model;
 
 /**
@@ -519,6 +520,7 @@ public class PersonMonth extends Model {
 			pm = new PersonMonth(person, year, month);
 			pm.create();
 		}
+		
 		pm.aggiornaRiepiloghi();
 		return pm;
 
@@ -629,8 +631,13 @@ public class PersonMonth extends Model {
 			if(personYear != null)
 				return personYear.getRemainingMinutes();
 			else{
-				InitializationTime initTime = InitializationTime.find("Select init from InitializationTime init where init.person = ? and init.year = ?", 
-						person, year).first();
+				/**
+				 * siccome è cambiata la tabella InitializationTime, non contentendo più il campo intero YEAR ma contenendo invece
+				 * il campo date DATE, anche la find seguente è stata modificata facendo cercare l'eventuale inizializzazione 
+				 * settata al primo gennaio dell'anno in corso
+				 */
+				InitializationTime initTime = InitializationTime.find("Select init from InitializationTime init where init.person = ? and init.date = ?", 
+						person, new LocalDate(year, month,1).monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue()).first();
 				if(initTime != null)
 					return initTime.residualMinutesPastYear;
 				return 0;
@@ -682,10 +689,22 @@ public class PersonMonth extends Model {
 
 	public boolean possibileUtilizzareResiduoAnnoPrecedente() {
 		//Dipende dal livello.... e da
-		if(person.qualification == null)
+//		Qualification q = this.person.qualification;
+//		if(q == null)
+//			return false;
+//		if(month <= 3)
+//			return true;
+//		if (q.qualification <= 3)
+//			return true;
+//		return false;
+		
+		Qualification qualification = Qualification.find("SELECT p.qualification FROM Person p WHERE p = ?", person).first(); 
+		if(qualification == null)
 			return false;
 
-		return month <= 3 || person.qualification.qualification <= 3;
+		return month <= 3 || qualification.qualification <= 3;
+
+		//return month <= 3 || ;
 	}
 	
 
@@ -703,9 +722,15 @@ public class PersonMonth extends Model {
 		//Cosi come fatto adesso se il primo giorno non timbravo perdo tutti le differenze nei giorni precedenti.
 		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date" , 
 				this.person, new LocalDate(year, month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).first();
-		if(pd.isFixedTimeAtWork())
-			return 0;
-		return residuoDelMeseInPositivo() + residuoDelMeseInNegativo();
+		if(pd != null){
+			if(pd.isFixedTimeAtWork())
+				return 0;
+			else
+				return residuoDelMeseInPositivo() + residuoDelMeseInNegativo();
+		}
+		return 0;
+		
+		
 	}
 
 	/**
