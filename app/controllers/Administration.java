@@ -93,7 +93,7 @@ public class Administration extends Controller {
 		PersonUtility.checkAllDaysYear();
 		JPAPlugin.closeTx(false);
 		
-		//Ricalcolo i valori 
+		//Ricalcolo i valori dei person day
 		JPAPlugin.startTx(true);
 		List<Person> personList = Person.findAll();
 		JPAPlugin.closeTx(false);
@@ -114,7 +114,25 @@ public class Administration extends Controller {
 			}
 			JPAPlugin.closeTx(false);
 			
-		}		
+		}
+		
+		//Ricalcolo dei residui mensili
+		LocalDate today = new LocalDate();
+		i = 1;
+		for(Person p: personList)
+		{
+			Logger.info("Update residui per %s (%s di %s)", p.surname, i, personList.size());
+			i++;
+			JPAPlugin.startTx(false);
+			for(int month = 1; month <=12; month++)
+			{
+				PersonMonth pm = PersonMonth.build(p, today.getYear(), month);
+				pm.aggiornaRiepiloghi();
+				pm.save();
+				
+			}
+			JPAPlugin.closeTx(false);
+		}
 	}
 	
 	public static void updateVacationPeriodRelation() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
