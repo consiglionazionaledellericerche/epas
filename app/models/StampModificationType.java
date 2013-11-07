@@ -27,5 +27,19 @@ public class StampModificationType extends Model{
 	
 	@OneToMany(mappedBy="stampModificationType")
 	public Set<Stamping> stampings; 
+	
+	
+	public static StampModificationType getStampModificationTypeByCode(String code)
+	{
+		if(code==null)
+			return null;
+		
+		StampModificationType smt = StampModificationType.find("byCode", code).first();
+		if(smt==null)
+		{
+			return null;
+		}
+		return smt;
+	}
 
 }

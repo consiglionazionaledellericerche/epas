@@ -84,13 +84,8 @@ public class PersonStampingDayRecap {
 			{
 				this.fixedWorkingTimeCode = smt.code;
 				addStampModificationTypeToList(smt);
-			//	pd.save(); //TODO toglierlo quando il db sarà consistente
 				int temporaryWorkTime = pd.getCalculatedTimeAtWork();
 				this.setWorkingTime( temporaryWorkTime );
-			//	pd.timeAtWork = temporaryWorkTime;
-			//	pd.save();	//TODO toglierlo quando il db sarà consistente
-			//	pd.updateDifference(); //TODO toglierlo quando il db sarà consistente 
-			//	pd.updateProgressive(); 
 			}
 			this.setDifference(0);
 			this.setProgressive(0);
@@ -124,14 +119,8 @@ public class PersonStampingDayRecap {
 		//---------------------------------------- not fixed:  worktime, difference, progressive for past-----------------------------
 		else if(this.past)
 		{
-			//pd.save();	//TODO toglierlo quando il db sarà consistente
-			//int temporaryWorkTime = pd.getCalculatedTimeAtWork();
 			this.setWorkingTime(pd.timeAtWork);
-			//pd.timeAtWork = temporaryWorkTime;
-			//pd.save();	//TODO toglierlo quando il db sarà consistente
-			//pd.updateDifference(); //TODO toglierlo quando il db sarà consistente
-			//pd.updateProgressive(); 
-	
+				
 			this.setDifference( pd.difference );
 	
 			PersonDay previousPd = pd.checkPreviousProgressive();
@@ -148,7 +137,6 @@ public class PersonStampingDayRecap {
 				this.setProgressive(0);
 			}
 		
-			//pd.save();	//TODO poi va rimosso
 		}
 		//---------------------------------------- worktime, difference, progressive for future ----------------------------------------
 		if(this.future)
@@ -165,10 +153,13 @@ public class PersonStampingDayRecap {
 			this.setMealTicket(true);
 		
 		//----------------------------------------------- lunch (p,e) ------------------------------------------------------------------
-		if(pd.lunchTimeStampModificationType!=null && !this.future)
+		if(pd.modificationType!=null && !this.future)
 		{
-			this.todayLunchTimeCode = pd.lunchTimeStampModificationType.code;
-			addStampModificationTypeToList(pd.lunchTimeStampModificationType);
+			//TODO urgente. Creare il campo in personDay con relazione verso StampModificatioType per 
+			//mantenere persistita l'informazione (p || e || null). Adesso è persistito solo il codice da stampare.
+			StampModificationType smtlunch = StampModificationType.getStampModificationTypeByCode(pd.modificationType);
+			this.todayLunchTimeCode = smtlunch.code;
+			addStampModificationTypeToList(smtlunch);
 		}
 		//----------------------------------------------- uscita adesso f ---------------------------------------------------------------
 		if(!this.holiday && !pd.isAllDayAbsences() && this.today) //TODO 
