@@ -812,7 +812,11 @@ public class PersonUtility {
 	 */
 	public static void checkDay(LocalDate dayToCheck)
 	{
+		JPAPlugin.closeTx(false);
+		JPAPlugin.startTx(false);
 		List<Person> active = Person.getActivePersons(new LocalDate());
+		
+		
 		for(Person person : active)
 		{
 			PersonDay pd = PersonDay.find(""
@@ -826,7 +830,7 @@ public class PersonUtility {
 			if(pd!=null)
 			{
 				//check for error
-				checkForError(pd, person);
+				//checkForError(pd, person); //TODO riabilitarlo
 				continue;
 			}
 			
@@ -846,7 +850,7 @@ public class PersonUtility {
 				pd.populatePersonDay();
 				pd.save();
 				//check for error
-				checkForError(pd, person);
+				//checkForError(pd, person);
 				continue;
 				
 			}
@@ -919,6 +923,7 @@ public class PersonUtility {
 		
 		if(pdt==null)
 		{
+			Logger.info("Nuovo PersonDayInTrouble %s %s %s - %s - %s", pd.person.id, pd.person.name, pd.person.surname, pd.date, cause);
 			PersonDayInTrouble trouble = new PersonDayInTrouble();
 			trouble.personDay = pd;
 			trouble.cause = cause;
@@ -933,6 +938,10 @@ public class PersonUtility {
 		
 	}
 	
+	/**
+	 * Per ogni giorno dell'anno chiama il metodo checkDay(LocalDate) per inserire nella tabella
+	 * PersonDayInTrouble i giorni con timbrature disaccoppiate o mancanti.
+	 */
 	public static void checkAllDaysYear()
 	{
 		LocalDate date = new LocalDate(2013,1,1);
@@ -941,6 +950,7 @@ public class PersonUtility {
 		{
 			Logger.info("Check missing for %s", date.toString());
 			PersonUtility.checkDay(date);
+			
 			date = date.plusDays(1);
 			if(date.isEqual(today))
 				break;
