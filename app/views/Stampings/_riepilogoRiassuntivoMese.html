@@ -10,7 +10,7 @@
 
 %{if (possibileUtilizzareResiduoAnnoPrecedente) { }%
 <table class="table table-bordered table-condensed table-striped riepilogo-ore">
-	<caption>Situazione residuo da anno precedente</caption>
+	<caption>Situazione residuo derivanete dall'anno precedente</caption>
 	<tr>
 		<td>Residuo da anno precedente disponibile all'inizio del mese</td>
 		<td class="ore">${personMonth.residuoAnnoPrecedenteDisponibileAllInizioDelMese().toHourTimeWithPlus()}</td>
@@ -31,7 +31,7 @@
 %{ } }%
  
 <table class="table table-bordered table-condensed table-striped riepilogo-ore">
-	<caption>Riepilogo delle ore di lavoro di questo anno</caption>
+	<caption>Riepilogo delle ore di lavoro dell'anno corrente</caption>
 	<tr>
 		<td>Residuo dai mesi precedenti</td>
 		<td class="ore">${personMonth.totaleResiduoAnnoCorrenteAlMesePrecedente().toHourTimeWithPlus()}</td>
@@ -43,8 +43,8 @@
 
 	%{if (possibileUtilizzareResiduoAnnoPrecedente) { }%
 	<tr>
-		<td>Ore recuperate dall'anno precedente (riposi compensativi + recupero ore)</td>
-		<td class="ore">${(personMonth.totaleRecuperiDaAnnoPrecedente() * -1).toHourTimeWithPlus()}</td>
+		<td>Ore recuperate dal monte ore dell'anno precedente</td>
+		<td class="ore">${(personMonth.recuperiOreDaAnnoPrecedente * -1).toHourTimeWithPlus()}</td>
 	</tr>
 	%{ } }%
 
@@ -57,7 +57,7 @@
 	%{if(personMonth.riposiCompensativiDaAnnoCorrente != 0 ){ }%
 	<tr>
 		<td>Riposi compensativi</td>
-		<td class="ore">${(personMonth.riposiCompensativiDaAnnoCorrente * -1).toHourTimeWithPlus()}</td>
+		<td class="ore">${personMonth.riposiCompensativiDaAnnoCorrente.toHourTimeWithPlus()}</td>
 	</tr>		
 	%{ } }%
 	<tr>
