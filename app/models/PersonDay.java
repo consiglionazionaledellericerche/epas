@@ -468,9 +468,36 @@ public class PersonDay extends Model {
 
 		List<PairStamping> gapLunchPairs = getGapLunchPairs(validPairs);
 		
-		//non ha timbrato per il pranzo (due sole timbrature)
-		if(validPairs.size()==1) 
+		//ha timbrato per il pranzo 
+		if(gapLunchPairs.size()>0)
 		{
+			int minTimeForLunch = 0;
+			for(PairStamping gapLunchPair : gapLunchPairs)
+			{
+				//(TODO considero il primo gap in orario pranzo)
+				minTimeForLunch = minTimeForLunch - toMinute(gapLunchPair.in.date);
+				minTimeForLunch = minTimeForLunch + toMinute(gapLunchPair.out.date);
+				break;
+			}
+			if(workTime - breakTicketTime > mealTicketTime)
+			{
+				if( minTimeForLunch < breakTicketTime ) 
+				{
+					workTime = workTime - (breakTicketTime - minTimeForLunch);
+					StampModificationType smt = StampModificationType.findById(StampModificationTypeValue.FOR_MIN_LUNCH_TIME.getId());
+					//this.lunchTimeStampModificationType = smt;
+					this.modificationType = smt.code;
+				}
+				this.isTicketAvailable = true;
+			}
+			else
+			{
+				this.isTicketAvailable = false;
+			}
+		}
+		else
+		{
+			//this.isTicketAvailable = false;
 			if( workTime > mealTicketTime && workTime - breakTicketTime > mealTicketTime )
 			{
 				workTime = workTime - breakTicketTime;
@@ -484,43 +511,9 @@ public class PersonDay extends Model {
 				this.isTicketAvailable = false;
 			}
 		}
-		
-		//potrebbe aver timbrato per il pranzo (più di due timbrature)
-		if(validPairs.size()>1)
-		{
-			//ha timbrato per il pranzo //(TODO considero il primo gap in orario pranzo)
-			if(gapLunchPairs.size()>0)
-			{
-				int minTimeForLunch = 0;
-				for(PairStamping gapLunchPair : gapLunchPairs)
-				{
-					minTimeForLunch = minTimeForLunch - toMinute(gapLunchPair.in.date);
-					minTimeForLunch = minTimeForLunch + toMinute(gapLunchPair.out.date);
-					break;
-				}
-				if(workTime - breakTicketTime > mealTicketTime)
-				{
-					if( minTimeForLunch < breakTicketTime ) 
-					{
-						workTime = workTime - (breakTicketTime - minTimeForLunch);
-						StampModificationType smt = StampModificationType.findById(StampModificationTypeValue.FOR_MIN_LUNCH_TIME.getId());
-						//this.lunchTimeStampModificationType = smt;
-						this.modificationType = smt.code;
-					}
-					this.isTicketAvailable = true;
-				}
-				else
-				{
-					this.isTicketAvailable = false;
-				}
-			}
-			else
-			{
-				this.isTicketAvailable = false;
-			}
-			
-		}
-		
+
+	
+
 		return workTime + justifiedTimeAtWork;
 
 
@@ -1136,29 +1129,29 @@ public class PersonDay extends Model {
 		.withHourOfDay(config.mealTimeEndHour)
 		.withMinuteOfHour(config.mealTimeEndMinute);
 		
-		List<PairStamping> lunchPairs = new ArrayList<PersonDay.PairStamping>();
+		//List<PairStamping> lunchPairs = new ArrayList<PersonDay.PairStamping>();
+		List<PairStamping> gapPairs = new ArrayList<PersonDay.PairStamping>();
+		Stamping outForLunch = null;
+		
 		for(PairStamping validPair : validPairs)
 		{
-			 LocalDateTime in = validPair.in.date;
 			 LocalDateTime out = validPair.out.date;
-			 
-			 if( (out.isAfter(startLunch) && out.isBefore(endLunch)) || (in.isAfter(startLunch) && in.isBefore(endLunch)) )
-				 lunchPairs.add(validPair);
-				 
-		}
-		
-		//costruisco le nuove coppie che sono gli intervalli fra le lunchPair
-		List<PairStamping> gapPairs = new ArrayList<PersonDay.PairStamping>();
-		PairStamping lastPair = null;
-		for(PairStamping lunchPair : lunchPairs)
-		{
-			//prima coppia
-			if(lastPair==null)
-			{
-				lastPair = lunchPair;
-				continue;
-			}
-			gapPairs.add( new PairStamping(lastPair.out, lunchPair.in) );
+			 if(outForLunch==null)
+			 {
+				 if( (out.isAfter(startLunch) && out.isBefore(endLunch)) )
+				 {
+					 outForLunch = validPair.out;
+				 }
+			 }
+			 else
+			 {
+				 gapPairs.add( new PairStamping(outForLunch, validPair.in) );
+				 outForLunch = null;
+				 if( (out.isAfter(startLunch) && out.isBefore(endLunch)) )
+				 {
+					 outForLunch = validPair.out;
+				 }
+			 }
 		}
 		
 		return gapPairs;
