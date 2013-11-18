@@ -861,7 +861,7 @@ public class PersonUtility {
 			if(pd!=null)
 			{
 				//check for error
-				//checkForError(pd, person); //TODO riabilitarlo
+				checkForError(pd, personToCheck); //TODO riabilitarlo
 				continue;
 			}
 			else
@@ -880,7 +880,7 @@ public class PersonUtility {
 				pd.populatePersonDay();
 				pd.save();
 				//check for error
-				//checkForError(pd, person);
+				checkForError(pd, personToCheck);
 				continue;
 				
 			}

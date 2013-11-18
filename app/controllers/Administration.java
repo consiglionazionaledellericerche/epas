@@ -145,8 +145,8 @@ public class Administration extends Controller {
 	 * Ricalcolo della situazione di ogni persona a partire da gennaio 2013
 	 */
 	public static void fixPersonSituationBrowser()
-	{
-		fixPersonSituation(null, 2013, 1);
+	{ 
+		fixPersonSituation(146l, 2013, 1);
 	}
 	
 	/**
