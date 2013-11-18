@@ -119,6 +119,7 @@ public class PersonStampingDayRecap {
 		//---------------------------------------- not fixed:  worktime, difference, progressive for past-----------------------------
 		else if(this.past)
 		{
+			//pd.getCalculatedTimeAtWork();
 			this.setWorkingTime(pd.timeAtWork);
 				
 			this.setDifference( pd.difference );

@@ -23,10 +23,10 @@ import play.jobs.OnApplicationStart;
 public class TestJob extends Job{
 	
 	public void doJob(){
-		Logger.debug("*********************************************************************************");
+		Logger.info("Lanciato Job checkDay");
 		LocalDate yesterday = new LocalDate().minusDays(1);
-		PersonUtility.checkDay(yesterday);
-		Logger.debug("Fine metodo");
+		PersonUtility.checkDay(null, yesterday);
+		Logger.info("Concluso Job checkDay");
 	}
 	
 	

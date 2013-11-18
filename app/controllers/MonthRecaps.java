@@ -24,7 +24,6 @@ import models.PersonMonth;
 import models.StampProfile;
 import models.Stamping;
 import models.WorkingTimeTypeDay;
-import models.efficiency.EfficientPersonDay;
 import models.enumerate.JustifiedTimeAtWork;
 
 import org.joda.time.DateTimeConstants;
@@ -101,7 +100,7 @@ public class MonthRecaps extends Controller{
 		{
 			for(PersonDay pd : pdList)
 			{
-				pd.getStampProfile();
+				//pd.getStampProfile();
 				totalTimeAtWork = totalTimeAtWork + pd.timeAtWork;
 				difference = difference + pd.difference;
 				
@@ -233,7 +232,7 @@ public class MonthRecaps extends Controller{
 					monthEnd).fetch();
 			
 			
-			
+			Logger.info("Costruisco riepilogo mensile per %s %s %s",person.id, person.name, person.surname);
 			PersonMonthRecapFieldSet mr = new PersonMonthRecapFieldSet();
 			mr.populatePersonMonthRecap(person, pdList, year, month);
 

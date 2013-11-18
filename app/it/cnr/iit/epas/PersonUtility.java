@@ -292,14 +292,15 @@ public class PersonUtility {
 	public static void checkExitStampNextDay(PersonDay pd){
 		Logger.debug("Chiamata la checkExitStampNextDay per %s %s in data %s", pd.person.name, pd.person.surname, pd.date);
 		Configuration config = Configuration.getCurrentConfiguration();
-//		PersonDay pdPastDay = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? " +
-//				"and pd.date >= ? and pd.date < ? ORDER by pd.date DESC", pd.person, pd.date.dayOfMonth().withMinimumValue(), pd.date).first();
+		//PersonDay pdPastDay = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? " +
+		//		"and pd.date >= ? and pd.date < ? ORDER by pd.date DESC", pd.person, pd.date.dayOfMonth().withMinimumValue(), pd.date).first();
 
 		PersonDay pdPastDay = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? " +
 				"and pd.date < ? ORDER by pd.date DESC", pd.person, pd.date).first();
 
 		StampProfile stampProfile = pd.getStampProfile();
-		if(pdPastDay != null){			
+		if(pdPastDay != null)
+		{			
 			//lista delle timbrature del giorno precedente ordinate in modo decrescente per vedere se l'ultima del giorno è una timbratura di ingresso
 			//List<Stamping> reloadedStampingYesterday = Stamping.find("Select st from Stamping st where st.personDay = ? order by st.date desc", pdPastDay).fetch();
 			Query query = JPA.em().createQuery("Select st from Stamping st where st.personDay = :pd order by st.date asc");
@@ -307,13 +308,15 @@ public class PersonUtility {
 			List<Stamping> reloadedStampingYesterday = query.getResultList();
 			//	List<Stamping> reloadedStampingYesterday = new ArrayList<Stamping>(pdPastDay.stampings);
 			int size = reloadedStampingYesterday.size();
-			if(reloadedStampingYesterday.size() > 0 && reloadedStampingYesterday.get(size-1).way == WayType.in){
-				Logger.debug("Sono nel caso in cui ci sia una timbratura finale di ingresso nel giorno precedente nel giorno %s", 
-						pdPastDay.date);
-				if(stampProfile == null || !stampProfile.fixedWorkingTime){
+			if(reloadedStampingYesterday.size() > 0 && reloadedStampingYesterday.get(size-1).way == WayType.in)
+			{
+				Logger.debug("Sono nel caso in cui ci sia una timbratura finale di ingresso nel giorno precedente nel giorno %s", pdPastDay.date);
+				if(stampProfile == null || !stampProfile.fixedWorkingTime)
+				{
 					//List<Stamping> s = Stamping.find("Select s from Stamping s where s.personDay = ? order by s.date asc", pd).fetch();
 					pd.orderStampings();
-					if(pd.stampings.size() > 0 && pd.stampings.get(0).way == WayType.out && config.hourMaxToCalculateWorkTime > pd.stampings.get(0).date.getHourOfDay()){
+					if(pd.stampings.size() > 0 && pd.stampings.get(0).way == WayType.out && config.hourMaxToCalculateWorkTime > pd.stampings.get(0).date.getHourOfDay())
+					{
 
 						//controllo nelle timbrature del giorno attuale se la prima che incontro è una timbratura di uscita sulla base
 						//del confronto con il massimo orario impostato in configurazione per considerarla timbratura di uscita relativa
@@ -328,7 +331,7 @@ public class PersonUtility {
 						correctStamp.date = new LocalDateTime(pdPastDay.date.getYear(), pdPastDay.date.getMonthOfYear(), pdPastDay.date.getDayOfMonth(), 23, 59);
 						correctStamp.way = WayType.out;
 						correctStamp.markedByAdmin = false;
-//						correctStamp.considerForCounting = true;
+						//correctStamp.considerForCounting = true;
 						correctStamp.stampModificationType = StampModificationType.findById(4l);
 						correctStamp.note = "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
 						correctStamp.personDay = pdPastDay;
@@ -347,7 +350,7 @@ public class PersonUtility {
 						newEntranceStamp.date = new LocalDateTime(pd.date.getYear(), pd.date.getMonthOfYear(), pd.date.getDayOfMonth(),0,0);
 						newEntranceStamp.way = WayType.in;
 						newEntranceStamp.markedByAdmin = false;
-//						newEntranceStamp.considerForCounting = true;
+						//newEntranceStamp.considerForCounting = true;
 						newEntranceStamp.stampModificationType = StampModificationType.findById(4l);
 						newEntranceStamp.note = "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
 						newEntranceStamp.personDay = pd;
@@ -359,11 +362,13 @@ public class PersonUtility {
 
 
 					}
-					else{
+					else
+					{
 						Logger.trace("La prima timbratura del giorno per %s per %s %s non è di uscita", pd.date, pd.person.name, pd.person.surname);
 					}
 				}
-				else{
+				else
+				{
 					Logger.trace("Non faccio i calcoli per l'uscita perchè c'è il tempo di lavoro giustificato per %s %s in data %s", 
 							pd.person.name, pd.person.surname, pd.date);
 				}
@@ -803,30 +808,53 @@ public class PersonUtility {
 		return coupleOfStampings;
 	}
 	
-	/**
-	 * Verifica per ogni persona attiva che alla data 
+
+	 /**
+	 * Verifica per la persona (se attiva) che alla data 
 	 * 	(1) in caso di giorno lavorativo il person day esista. 
 	 * 		Altrimenti viene creato e persistito un personday vuoto e inserito un record nella tabella PersonDayInTrouble.
 	 * 	(2) il person day presenti una situazione di timbrature corretta dal punto di vista logico. 
 	 * 		In caso contrario viene inserito un record nella tabella PersonDayInTrouble. Situazioni di timbrature errate si verificano nei casi 
 	 *  	(a) che vi sia almeno una timbratura non accoppiata logicamente con nessun'altra timbratura 
 	 * 		(b) che le persone not fixed non presentino ne' assenze AllDay ne' timbrature. 
-	 * @param date
+	 * @param personid la persona da controllare, null se si desidera controllare tutte le persone attive
+	 * @param dayToCheck il giorno da controllare
 	 */
-	public static void checkDay(LocalDate dayToCheck)
+	public static void checkDay(Long personid, LocalDate dayToCheck)
 	{
-		JPAPlugin.closeTx(false);
-		JPAPlugin.startTx(false);
-		List<Person> active = Person.getActivePersons(new LocalDate());
 		
 		
-		for(Person person : active)
+		//Costruisco la lista delle persone da controllare
+		List<Person> activeList = new ArrayList<Person>();
+		if(personid==null)
+		{
+			JPAPlugin.closeTx(false);
+			JPAPlugin.startTx(false);
+			activeList =  Person.getActivePersons(new LocalDate());
+		}
+		else
+		{
+			JPAPlugin.closeTx(false);
+			JPAPlugin.startTx(false);
+			Person person = Person.findById(personid);
+			if(person.isActive(dayToCheck))
+			{
+				activeList.add(person);
+			}
+			else
+			{
+				return;
+			}
+		}
+		
+		
+		for(Person personToCheck : activeList)
 		{
 			PersonDay pd = PersonDay.find(""
 					+ "SELECT pd "
 					+ "FROM PersonDay pd "
 					+ "WHERE pd.person = ? AND pd.date = ? ", 
-					person, 
+					personToCheck, 
 					dayToCheck)
 					.first();
 			
@@ -836,19 +864,18 @@ public class PersonUtility {
 				//checkForError(pd, person); //TODO riabilitarlo
 				continue;
 			}
-			
-			if(pd==null)
+			else
 			{
 				if(DateUtility.isGeneralHoliday(dayToCheck))
 				{
 					continue;
 				}
-				if(person.workingTimeType.workingTimeTypeDays.get(dayToCheck.getDayOfWeek()-1).holiday)
+				if(personToCheck.workingTimeType.workingTimeTypeDays.get(dayToCheck.getDayOfWeek()-1).holiday)
 				{
 					continue;
 				}
 				
-				pd = new PersonDay(person, dayToCheck);
+				pd = new PersonDay(personToCheck, dayToCheck);
 				pd.create();
 				pd.populatePersonDay();
 				pd.save();
@@ -941,19 +968,27 @@ public class PersonUtility {
 		
 	}
 	
+	
 	/**
-	 * Per ogni giorno dell'anno chiama il metodo checkDay(LocalDate) per inserire nella tabella
-	 * PersonDayInTrouble i giorni con timbrature disaccoppiate o mancanti.
+	 * A partire dal mese e anno passati al metodo fino al giorno di ieri 
+	 * controlla la presenza di errori nelle timbrature 
+	 * ed eventualmente inserisce i giorni problematici nella tabella PersonDayInTrouble.
+	 * @param personid la persona da controllare, null se si vuole controllare ogni persona
+	 * @param year l'anno di partenza
+	 * @param month il mese di partenza
 	 */
-	public static void checkAllDaysYear()
+	public static void checkHistoryError(Long personid, int year, int month)
 	{
-		LocalDate date = new LocalDate(2013,1,1);
+		
+		LocalDate date = new LocalDate(year,month,1);
 		LocalDate today = new LocalDate();
 		while(true)
 		{
 			Logger.info("Check missing for %s", date.toString());
-			PersonUtility.checkDay(date);
-			
+			if(personid==null)
+				PersonUtility.checkDay(null, date);
+			else
+				PersonUtility.checkDay(personid, date);
 			date = date.plusDays(1);
 			if(date.isEqual(today))
 				break;
