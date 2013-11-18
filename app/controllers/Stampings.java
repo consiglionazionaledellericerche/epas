@@ -424,7 +424,10 @@ public class Stampings extends Controller {
 		stamp.save();
 		pd.stampings.add(stamp);
 		pd.save();
+			
 		pd.populatePersonDay();
+		pd.updatePersonDay();
+		/*
 		pd.save();
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ?", 
 				pd.person, pd.date).fetch();
@@ -435,6 +438,7 @@ public class Stampings extends Controller {
 			}
 
 		}
+		*/
 		flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
 		render("@save");
 
@@ -464,19 +468,23 @@ public class Stampings extends Controller {
 		PersonDay pd = stamping.personDay;
 		Integer hour = params.get("stampingHour", Integer.class);
 		Integer minute = params.get("stampingMinute", Integer.class);
-		if(hour != null && minute == null || hour == null && minute != null){
+		
+		if(hour != null && minute == null || hour == null && minute != null)
+		{
 			flash.error("Attribuire valore a ciascun campo se si intende modificare la timbratura o togliere valore a entrambi i campi" +
 					" se si intende cancellarla");
 			render("@save");
 		}
-		if (hour == null && minute == null) {
+		if (hour == null && minute == null) 
+		{
 
 			stamping.delete();
 			pd.stampings.remove(stamping);
 			//			stamping.considerForCounting = true;
 			//			stamping.save();
 			pd.populatePersonDay();
-			pd.save();
+			pd.updatePersonDay();
+			/*
 			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ?", 
 					pd.person, pd.date).fetch();
 			for(PersonDay p : pdList){
@@ -486,11 +494,14 @@ public class Stampings extends Controller {
 				}
 
 			}
+			*/
 			flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(stamping.date.toLocalDate()));	
 
 			render("@save");
 
-		} else {
+		} 
+		else 
+		{
 			if (hour == null || minute == null) {
 				flash.error("E' necessario specificare sia il campo ore che minuti, oppure nessuno dei due per rimuovere la timbratura.");
 				render("@edit");
@@ -507,6 +518,7 @@ public class Stampings extends Controller {
 			else
 				stamping.note = "timbratura modificata dall'amministratore";
 			stamping.save();
+			/*
 			pd.populatePersonDay();
 			pd.save();
 			//stamping.personDay.populatePersonDay();
@@ -526,6 +538,9 @@ public class Stampings extends Controller {
 				}
 
 			}
+			*/
+			pd.populatePersonDay();
+			pd.updatePersonDay();
 			flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name);
 
 		}
