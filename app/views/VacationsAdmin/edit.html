@@ -7,9 +7,9 @@
 <p id="descrizione"><strong>Giorni ferie</strong> <input name="giorniFerie" type="number" value="${vc.vacationDays}" size="10" maxlength="10" /></p>
 <p id="descrizione"><strong>Giorni permesso</strong> <input name="giorniPermesso" type="number" value="${vc.permissionDays}" size="10" maxlength="10" /></p>
 <div id="frm">
-<input  id="salvaVacationCode" type="submit" value="Salva"/>
+<input class="btn btn-primary" id="salvaVacationCode" type="submit" value="Salva"/>
 #{/form}
 #{form @VacationsAdmin.discard()}
-<input type="submit" value="Annulla"/>
+<input class="btn" id="annullaVacationCode"type="submit" value="Annulla"/>
 #{/form}
 </div>
