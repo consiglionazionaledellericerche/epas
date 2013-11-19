@@ -212,6 +212,10 @@ table#listaAmministratori {
 	margin: 4em 0em 6em;
 }
 
+table#withoutborder{border-style: none}
+tr#withoutborder{border-style: none}
+td#withoutborder{border-style: none}
+
 .capitalized {
 	text-transform: capitalize;	
 }
@@ -416,7 +420,6 @@ table#tabellaCodiciCompetenza {margin: 2em; align: left}
 table#pianoFerie {margin: auto}
 
 div#frm *{display:inline}
-
 
 select#assenzaFrequente {margin-bottom: 1em}
 
