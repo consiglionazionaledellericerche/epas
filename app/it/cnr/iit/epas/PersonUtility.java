@@ -759,6 +759,8 @@ public class PersonUtility {
 	
 	public static int numberOfInOutInPersonDay(PersonDay pd)
 	{
+		if(pd == null)
+			return 0;
 		pd.orderStampings();
 
 		int coupleOfStampings = 0;
