@@ -1159,11 +1159,13 @@ public class PersonMonth extends Model {
 	
 	/**
 	 * Utilizzare il metodo getAbsencesInMonth()
-	 * 
+	 * TODO: rimuovere questo metodo
+	 *  
 	 * metodo di utilità per il controller UploadSituation
 	 * @return la lista delle assenze fatte da quella persona in quel mese. Prima di inserirle in lista controlla che le assenze non siano
 	 * a solo uso interno 
 	 */
+
 	@Deprecated
 	public List<Absence> getAbsenceInMonthForUploadSituation(){
 		List<Absence> absenceList = new ArrayList<Absence>();
