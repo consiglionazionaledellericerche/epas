@@ -723,6 +723,7 @@ public class Stampings extends Controller {
 				builder.put(per, (i/2)+"^ Uscita", "");
 			}
 		}
+		builder.put(per, "Tempo Lavoro", "");
 		List<Stamping> stampings = null;
 		for(Person p : persons){
 			//Logger.trace("Inizio le operazioni di inserimento in tabella per %s %s ",p.name, p.surname);

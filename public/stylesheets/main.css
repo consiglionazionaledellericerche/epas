@@ -360,7 +360,7 @@ textarea#stampaPdf {margin: 2em 1em 0em; width: 40em}
 input#salvaConfigurazione {margin: 2em 3em 0em 60em; align: center}
 input#annullaConfigurazione {margin: 0em 3em 0em; align: center}
 input#submitInsertPerson {margin: 2em 3em 0em 55em; align: center}
-input#resetInsertPerson {margin: 0em 3em 0em; align: center}
+input#resetInsertPerson {margin: 0em 3em -2em; align: center}
 input#submitTerminazioneRapporto {margin: 2em 60em 0em; align: center}
 input#discardTerminazioneRapporto {margin: 1em 60em 0em; align: center}
 input#username {margin: -2em 9em 2em}
@@ -387,12 +387,13 @@ p#nome {margin: 0em 1em 0em}
 p#cognome {margin: 1em 1em 2em}
 p#firma {margin: 2em 1em 0em}
 p#giorniLavorativi {margin: 2em 1em 0em}
+p#annoPrecedente {margin: 5em 50em 5em}
 
 input#submitNuovoCodiceAssenza {margin: 2em 60em 0em; align: center}
 input#discardNuovoCodiceAssenza {margin: 1em 60em 0em; align: center}
 input#submitEditPerson {margin: 2em 3em 0em 55em; align: center}
-input#discardEditPerson {margin: 0em 3em 0em; align: center}
-input#deletePerson {margin: 0em 3em 0em; align: center}
+input#discardEditPerson {margin: 0em 3em -2em; align: center}
+input#deletePerson {margin: 0em 3em -2em; align: center}
 input#modificaContratto {margin: 1em 25em 0em; align: center}
 input#submitSituation {margin: 2em 67em 0em; align: center}
 input#indietro {margin: 2em 67em 0em; align: center}

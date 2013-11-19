@@ -3,7 +3,7 @@
 <h2 id="titoloConfigurazioneParametri">Istituto di informatica e telematica</h2>
 <h3 id="titoloGestioneParametri">Gestione parametri</h3>
 
-<p id="warning"><strong>Attenzione!!!</strong> Compila correttamente ciascun fieldset</p>
+<p class="lead warning" id="warning"><strong>Attenzione!!!</strong> Compila correttamente ciascun fieldset</p>
 #{form @Configurations.save()}
 <div id="gestioneParametri">
 	<input type="hidden" name="configId" value="${configurations.id}"/>
@@ -26,26 +26,26 @@
 			<p id="descrizione">Data di inizio uso di questo programma gg/mm/aaaa <input name="inizioUsoProgramma" type="date" value="${configurations.initUseProgram.convertToLocalDate()}" size="30" maxlength="100" /><p>
 			<p id="descrizione">Nome dell'istituto <input name="nomeIstituto" type="text" value="${configurations.instituteName}" size="80" maxlength="100" /></p>
 			<p id="descrizione">Email a cui può essere inviato un messaggio in caso di password dimenticata <input name="email" type="email" value="${configurations.emailToContact}" size="40" maxlength="100" /></p>
-			<p id="descrizione">Codice sede <input name="codiceSede" type="number" min="0" value="${configurations.seatCode}" size="40" maxlength="100" /></p>
-			<p id="descrizione">URL per gestione attestato presenza dell'amministrazione centrale <input name="urlPresenze" type="text" value="${configurations.urlToPresence}" size="20" maxlength="100" /></p>
+			<p id="descrizione">Codice sede <input class="span2"name="codiceSede" type="number" min="0" value="${configurations.seatCode}" size="40" maxlength="100" /></p>
+			<p id="descrizione">URL per gestione attestato presenza dell'amministrazione centrale <input class="span3" name="urlPresenze" type="text" value="${configurations.urlToPresence}" size="20" maxlength="100" /></p>
 			<p id="descrizione">User per gestione attestato presenza dell'amministrazione centrale <input name="userPresenze" type="text" value="${configurations.userToPresence}" size="20" maxlength="100" /></p>
 			<p id="descrizione">Password per gestione attestato presenza dell'amministrazione centrale <input name="passwordPresenze" type="text" value="${configurations.passwordToPresence}" size="20" maxlength="100" /></p>
-			<p id="descrizione">Numero di colonne di entrata/uscita da visualizzare <input name="colonneEntrataUscita" type="number" min="0" max="5" value="${configurations.numberOfViewingCoupleColumn}" size="5" maxlength="10"/></p>
+			<p id="descrizione">Numero di colonne di entrata/uscita da visualizzare <input class="span1" name="colonneEntrataUscita" type="number" min="0" max="5" value="${configurations.numberOfViewingCoupleColumn}" size="5" maxlength="10"/></p>
 	</fieldset>
 	<fieldset>
 		<legend>Festività</legend>
-			<p id="descrizione">Festa del patrono (giorno) <input name="giornoPatrono" type="number" min="1" max="31" value="${configurations.dayOfPatron}" size="5" maxlength="100" /></p>
-			<p id="descrizione">Festa del patrono (mese) <input name="mesePatrono" type="number" min="1" max="12" value="${configurations.monthOfPatron}" size="5" maxlength="100" /></p>
+			<p id="descrizione">Festa del patrono (giorno) <input class="span1" name="giornoPatrono" type="number" min="1" max="31" value="${configurations.dayOfPatron}" size="5" maxlength="100" /></p>
+			<p id="descrizione">Festa del patrono (mese) <input class="span1" name="mesePatrono" type="number" min="1" max="12" value="${configurations.monthOfPatron}" size="5" maxlength="100" /></p>
 	</fieldset>
 	<fieldset>
 		<legend>Pausa pranzo e buoni</legend>
-     		<p id="descrizione">Default tempo di lavoro giornaliero per avere il buono pasto (in minuti) <input name="tempoLavoroGiornalieroPerBuono" type="text" value="${configurations.workingTimeToHaveMealTicket}" size="10" maxlength="100" disabled="disabled"/>  (non modificabile) </p></p>
-			<p id="descrizione">Default tempo intervallo pasto (in minuti) <input name="tempoIntervalloPasto" type="text" value="${configurations.mealTime}" size="10" maxlength="100" disabled="disabled"/>  (non modificabile)</p></p>	
-			<p id="descrizione">Inizio orario pausa pranzo Ore: <input name="pausaPranzoInizioOre" type="number" min="0" max="23" value="${configurations.mealTimeStartHour}" size="5" maxlength="100" />
-			Min: <input name="pausaPranzoInizioMinuti" type="number" min="0" max="59" value="${configurations.mealTimeStartMinute}" size="5" maxlength="100" />
+     		<p id="descrizione">Default tempo di lavoro giornaliero per avere il buono pasto (in minuti) <input class="span1" name="tempoLavoroGiornalieroPerBuono" type="text" value="${configurations.workingTimeToHaveMealTicket}" size="10" maxlength="100" disabled="disabled"/>  (non modificabile) </p></p>
+			<p id="descrizione">Default tempo intervallo pasto (in minuti) <input class="span1" name="tempoIntervalloPasto" type="text" value="${configurations.mealTime}" size="10" maxlength="100" disabled="disabled"/>  (non modificabile)</p></p>	
+			<p id="descrizione">Inizio orario pausa pranzo Ore: <input class="span1" name="pausaPranzoInizioOre" type="number" min="0" max="23" value="${configurations.mealTimeStartHour}" size="5" maxlength="100" />
+			Min: <input class="span1" name="pausaPranzoInizioMinuti" type="number" min="0" max="59" value="${configurations.mealTimeStartMinute}" size="5" maxlength="100" />
 			</p>
-			<p id="descrizione">Fine orario pausa pranzo &nbsp;Ore: <input name="pausaPranzoFineOre" type="number" min="0" max="23" value="${configurations.mealTimeEndHour}" size="5" maxlength="100" />
-			Min: <input name="pausaPranzoFineMinuti" type="number" min="0" max="59" value="${configurations.mealTimeEndMinute}" size="5" maxlength="100" />
+			<p id="descrizione">Fine orario pausa pranzo &nbsp;Ore: <input class="span1" name="pausaPranzoFineOre" type="number" min="0" max="23" value="${configurations.mealTimeEndHour}" size="5" maxlength="100" />
+			Min: <input class="span1" name="pausaPranzoFineMinuti" type="number" min="0" max="59" value="${configurations.mealTimeEndMinute}" size="5" maxlength="100" />
 			</p>
 	</fieldset>
 	<fieldset>
@@ -147,7 +147,7 @@
      	%{
      		}
      	}%
-			<p>Tempo di lavoro giornaliero default (in minuti) valore medio se il tempo di lavoro cambia di giorno in giorno <input name="tempoMedioLavoroGiornaliero" type="number" min="0" value="${configurations.workingTime}" size="10" maxlength="100" /></p>
+			<p>Tempo di lavoro giornaliero default (in minuti) valore medio se il tempo di lavoro cambia di giorno in giorno <input class="span1" name="tempoMedioLavoroGiornaliero" type="number" min="0" value="${configurations.workingTime}" size="10" maxlength="100" /></p>
 			
 		%{if(configurations.canInsertMoreAbsenceCodeInDay == true){
 		}%	
@@ -164,17 +164,17 @@
 	</fieldset>
 	<fieldset>
 		<legend>Ferie, permessi, straordinari e residui</legend>
-			<p id="descrizione">Mese scadenza ferie dell'anno precedente (mm) <input name="meseScadenzaFerieAP" type="number" min="1" max="12" value="${configurations.monthExpiryVacationPastYear}" size="20" maxlength="100" /></p>
-			<p id="descrizione">Giorno scadenza ferie dell'anno precedente (dd) <input name="giornoScadenzaFerieAP" type="number" min="1" max="31" value="${configurations.dayExpiryVacationPastYear}" size="20" maxlength="100" /></p>
+			<p id="descrizione">Mese scadenza ferie dell'anno precedente (mm) <input class="span1" name="meseScadenzaFerieAP" type="number" min="1" max="12" value="${configurations.monthExpiryVacationPastYear}" size="20" maxlength="100" /></p>
+			<p id="descrizione">Giorno scadenza ferie dell'anno precedente (dd) <input class="span1" name="giornoScadenzaFerieAP" type="number" min="1" max="31" value="${configurations.dayExpiryVacationPastYear}" size="20" maxlength="100" /></p>
 			<br>
 			<p>Tempo residuo minimo da avere per poter richiedere un giorno di riposo compensativo (in minuti) 
-				<input name="tempoMinimoPerAvereRiposoCompensativo" type="number" min="1" max="${configurations.workingTime}" value="${configurations.minimumRemainingTimeToHaveRecoveryDay}" size="10" maxlength="100" /> </p>
+				<input class="span1" name="tempoMinimoPerAvereRiposoCompensativo" type="number" min="1" max="${configurations.workingTime}" value="${configurations.minimumRemainingTimeToHaveRecoveryDay}" size="10" maxlength="100" /> </p>
 			<p id="descrizione">Mese entro il quale devono essere usati i residui dell'anno precedente per i livelli da 1 a 3 (0 == indefinito) 
-			   <input name="meseUtilizzoResiduiAP13" type="number" min="0" max="12" value="${configurations.monthExpireRecoveryDaysOneThree}" size="10" maxlength="100" /></p>
+			   <input class="span1" name="meseUtilizzoResiduiAP13" type="number" min="0" max="12" value="${configurations.monthExpireRecoveryDaysOneThree}" size="10" maxlength="100" /></p>
 			<p id="descrizione">Mese entro il quale devono essere usati i residui dell'anno precedente per i livelli da 4 a 9 (0 == indefinito)
-			  <input name="meseUtilizzoResiduiAP49" type="number" min="0" max="12" value="${configurations.monthExpireRecoveryDaysFourNine}" size="10" maxlength="100" /></p>
-			<p id="descrizione">Numero massimo di giorni di recupero in un anno per i livelli da 1 a 3 (0 == indefinito)<input name="maxGiorniRecupero13" type="number" min="0" max="365" value="${configurations.maxRecoveryDaysOneThree}" size="10" maxlength="100" /></p>
-			<p id="descrizione">Numero massimo di giorni di recupero in un anno per i livelli da 4 a 9 (0 == indefinito)<input name="maxGiorniRecupero49" type="number" min="0" max="365" value="${configurations.maxRecoveryDaysFourNine}" size="10" maxlength="100" /></p>
+			  <input class="span1" name="meseUtilizzoResiduiAP49" type="number" min="0" max="12" value="${configurations.monthExpireRecoveryDaysFourNine}" size="10" maxlength="100" /></p>
+			<p id="descrizione">Numero massimo di giorni di recupero in un anno per i livelli da 1 a 3 (0 == indefinito)<input class="span1" name="maxGiorniRecupero13" type="number" min="0" max="365" value="${configurations.maxRecoveryDaysOneThree}" size="10" maxlength="100" /></p>
+			<p id="descrizione">Numero massimo di giorni di recupero in un anno per i livelli da 4 a 9 (0 == indefinito)<input class="span1" name="maxGiorniRecupero49" type="number" min="0" max="365" value="${configurations.maxRecoveryDaysFourNine}" size="10" maxlength="100" /></p>
 			
 			%{if(configurations.residual != null && configurations.residual.description.equals('al giorno')){
 			}%
@@ -195,7 +195,7 @@
      		%{
      			}
      		}%
-			<p>Numero massimo di ore di straordinario mensili a persona (0 == indefinito)<input name="oreMassimeStraordinarioMensili" type="number" min="0" value="${configurations.maximumOvertimeHours}" size="10" maxlength="100" /></p>
+			<p>Numero massimo di ore di straordinario mensili a persona (0 == indefinito)<input class="span1" name="oreMassimeStraordinarioMensili" type="number" min="0" value="${configurations.maximumOvertimeHours}" size="10" maxlength="100" /></p>
 
 
 
@@ -274,7 +274,7 @@
 	</fieldset>
 	<fieldset>
 		<legend>Uscite e autodichiarazioni</legend>
-			<p>Se c'è una uscita prima di questa ora e manca l'uscita finale del giorno precedente, considera lavoro a cavallo della mezzanotte <input name="oraMaxEntroCuiCalcolareUscita" type="number" min="0" max="23" value="${configurations.hourMaxToCalculateWorkTime}"/></p>
+			<p>Se c'è una uscita prima di questa ora e manca l'uscita finale del giorno precedente, considera lavoro a cavallo della mezzanotte <input class="span1" name="oraMaxEntroCuiCalcolareUscita" type="number" min="0" max="23" value="${configurations.hourMaxToCalculateWorkTime}"/></p>
 			%{if(configurations.canPeopleAutoDeclareWorkingTime == true){
 			}%
 				<p>Permette al personale di autodichiarare gli orari di lavoro Sì<input type="radio" name="configurazioneAutoDichiarazione" value="true" checked="checked"/>
