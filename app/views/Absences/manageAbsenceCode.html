@@ -4,11 +4,11 @@
 
 <h2 id="titoloGestioneCodiciAssenza">Gestione dei codici di assenza</h2>
 
-<p><a href="@{Absences.insertAbsenceCode}">Definisci nuovo codice di assenza</a></p>
+<p class="lead"><a href="@{Absences.insertAbsenceCode}">Definisci nuovo codice di assenza</a></p>
 
 <h4>Codici di assenza esistenti:</h4>
 
-<table class="table table-condensed">
+<table class="table table-striped">
 	<tr>
 		<th>Codice</th>
 		<th>Codice per att. presenza</th>
@@ -32,7 +32,7 @@
 	%{
 		for(absenceCode in absenceList){			
 	}%
-	<tr class="info">
+	<tr>
 		<td><a href="@{Absences.editCode(absenceCode.id)}">${absenceCode.code}</a></td>
 		<td>${absenceCode.certificateCode}</td>
 		<td>${absenceCode.description}</td>

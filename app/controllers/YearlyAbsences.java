@@ -148,7 +148,9 @@ public class YearlyAbsences extends Controller{
 
 	@Check(Security.VIEW_PERSON_LIST)
 	public static void showGeneralMonthlyAbsences(int year, int month) throws InstantiationException, IllegalAccessException{
-
+/**
+ * TODO: cambiare il campo colonna da stringa a AbsenceType per poter richiamare nel template il campo descrizione nell'abbreviazione
+ */
 		Table<Person, String, Integer> tableMonthlyAbsences = TreeBasedTable.create(PersonNameComparator, AbsenceCodeComparator);
 		if(month == 0){
 			/**
