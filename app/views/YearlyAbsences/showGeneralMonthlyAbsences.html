@@ -32,7 +32,7 @@
 		<td>${entry.getKey().name} ${entry.getKey().surname}</td>
 		%{ for(col in tableMonthlyAbsences.columnKeySet()){
 		}%
-			<td>${entry.getValue().get(col)}
+			<td><abbr title="${col}" class="initialism">${entry.getValue().get(col)}</abbr>
 			   
 			</td>
 		%{

@@ -381,7 +381,8 @@ input#discardStamping {margin: 0em 1em -1em; align: center}
 input#updateStamping {margin: 0em 25em 0em; align: center}
 input#submitCartellino {margin: 2em 1em 0em; align: center}
 input#indietroCartellino {margin: 2em 3em 0em; align: center}
-input#insertAdmin {margin: 2em 3em 0em 60em; align:center}
+input#insertAdmin {margin: 2em 45em 6em}
+input#discardAdmin {margin:2em -15em 6em}
 input#insertCompetenceCode {margin: 2em 3em 0em 60em; align: center}
 input#discardCompetenceCode {margin: 0em 3em 0em; align: center}
 input#updateAbsenceCode {margin: 2em 50em 0em; align:center}
