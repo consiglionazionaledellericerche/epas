@@ -1158,10 +1158,13 @@ public class PersonMonth extends Model {
 	}
 	
 	/**
+	 * Utilizzare il metodo getAbsencesInMonth()
+	 * 
 	 * metodo di utilità per il controller UploadSituation
 	 * @return la lista delle assenze fatte da quella persona in quel mese. Prima di inserirle in lista controlla che le assenze non siano
 	 * a solo uso interno 
 	 */
+	@Deprecated
 	public List<Absence> getAbsenceInMonthForUploadSituation(){
 		List<Absence> absenceList = new ArrayList<Absence>();
 		//TODO: andrebbero prese solo le assenze delle persone che per questo mese devono inviare le assenza/competenze al CNR
@@ -1183,6 +1186,14 @@ public class PersonMonth extends Model {
 		}
 		
 		return absenceList;
+	}
+	
+	public List<Absence> getAbsencesInMonth() {
+		List<Absence> absences = 
+			Absence.find("SELECT abs from Absence abs JOIN FETCH abs.absenceType abt JOIN FETCH abs.personDay pd JOIN pd.person p "
+					+ "WHERE p = ? AND pd.date BETWEEN ? AND ? AND abt.internalUse = false ORDER BY pd.date, abs.id", 
+					person, new LocalDate(year,month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
+		return absences;
 	}
 	
 	/**
