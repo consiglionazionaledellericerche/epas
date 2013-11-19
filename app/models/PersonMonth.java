@@ -1162,6 +1162,11 @@ public class PersonMonth extends Model {
 	 * @return la lista delle assenze fatte da quella persona in quel mese. Prima di inserirle in lista controlla che le assenze non siano
 	 * a solo uso interno 
 	 */
+	/**
+	 * 
+	 * FIXME: riscrivere la query in modo che sia un attimo più efficiente di così...
+	 * 
+	 */
 	public List<Absence> getAbsenceInMonthForUploadSituation(){
 		List<Absence> absenceList = new ArrayList<Absence>();
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 

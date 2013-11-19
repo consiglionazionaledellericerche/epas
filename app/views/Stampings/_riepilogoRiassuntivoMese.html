@@ -1,4 +1,4 @@
-<div id="spiegazioneTabellaTimbrature">
+<div class="span10" id="spiegazioneTabellaTimbrature">
 	<p>
 		Il numero di buoni mensa usabili per questo mese e': <strong>${numberOfMealTicketToUse}</strong>, mentre quelli da restituire sono <strong>${numberOfMealTicketToRender}</strong>. 
 		Il numero di giorni lavorativi in sede è di: <strong>${personMonth.basedWorkingDays()}</strong> 
@@ -8,6 +8,7 @@
 	<p>E' possibile utilizzare il residuo dell'anno precedente? <strong>${possibileUtilizzareResiduoAnnoPrecedente==true ? 'sì' : 'no'}</strong></p>
 </div>
 
+<div id="tabelleRiassuntive">
 %{if (possibileUtilizzareResiduoAnnoPrecedente) { }%
 <table class="table table-bordered table-condensed table-striped riepilogo-ore">
 	<caption>Situazione residuo derivanete dall'anno precedente</caption>
@@ -29,6 +30,8 @@
 	</tr>	
 </table>
 %{ } }%
+
+
  
 <table class="table table-bordered table-condensed table-striped riepilogo-ore">
 	<caption>Riepilogo delle ore di lavoro dell'anno corrente</caption>
@@ -81,8 +84,9 @@
 		<td class="ore totale">${personMonth.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese().toHourTime()}</td>
 	</tr>
 </table>
+</div>
 
-
+<div id="tabelleRiassuntive">
 %{if(!stampModificationTypeList.isEmpty()) { }%
 
 	<h3 style="margin-top: 2em">Note:</h3>
@@ -142,3 +146,4 @@
      
 }%
 </table>
+</div>
