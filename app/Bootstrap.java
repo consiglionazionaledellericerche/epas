@@ -27,43 +27,51 @@ public class Bootstrap extends Job {
 	
 	public void doJob() {
 //		if (ShiftType.count() == 0) {
-//			Fixtures.loadModels("shiftTypes.yml");
-//			Logger.info("Creati i tipi di turno");
-//		}
-//		
-//		if (ShiftTimeTable.count() == 0) {
-//			Fixtures.loadModels("shiftTimeTables.yml");
-//			Logger.info("Create le fasce di orario dei vari turni");
-//		}
-		
-		if (Permission.count() == 0) {
-			Fixtures.loadModels("permissions.yml");
-			Logger.info("Creati i permessi predefiniti e creato un utente amministratore con associati questi permessi");
-		}
-		
-		if (Qualification.count() == 0)	{
-			Fixtures.loadModels("qualifications.yml");
-			Logger.info("Create le qualifiche predefinite");
-		}
-		
-		if (WorkingTimeType.count() == 0) {
-			createWorkinTimeTypeNormaleMod();
-			Logger.info("Creato il workingTimeType predefinito \"normale-mod\" con i rispettivi WorkingTimeTypeDay");
-		}
-		
-		if (StampModificationType.count() == 0)	{
-			Fixtures.loadModels("stampModificationTypes.yml");
-			Logger.info("Creati gli StampModificationType predefiniti");
-		}
+		//			Fixtures.loadModels("shiftTypes.yml");
+		//			Logger.info("Creati i tipi di turno");
+		//		}
+		//		
+		//		if (ShiftTimeTable.count() == 0) {
+		//			Fixtures.loadModels("shiftTimeTables.yml");
+		//			Logger.info("Create le fasce di orario dei vari turni");
+		//		}
 
-		if (StampType.count() == 0)	{
-			Fixtures.loadModels("stampTypes.yml");
-			Logger.info("Creati gli StampType predefiniti");
+		try
+		{
+
+			if (Permission.count() == 0) {
+				Fixtures.loadModels("permissions.yml");
+				Logger.info("Creati i permessi predefiniti e creato un utente amministratore con associati questi permessi");
+			}
+
+			if (Qualification.count() == 0)	{
+				Fixtures.loadModels("qualifications.yml");
+				Logger.info("Create le qualifiche predefinite");
+			}
+
+			if (WorkingTimeType.count() == 0) {
+				createWorkinTimeTypeNormaleMod();
+				Logger.info("Creato il workingTimeType predefinito \"normale-mod\" con i rispettivi WorkingTimeTypeDay");
+			}
+
+			if (StampModificationType.count() == 0)	{
+				Fixtures.loadModels("stampModificationTypes.yml");
+				Logger.info("Creati gli StampModificationType predefiniti");
+			}
+
+			if (StampType.count() == 0)	{
+				Fixtures.loadModels("stampTypes.yml");
+				Logger.info("Creati gli StampType predefiniti");
+			}
+
+			if(Configuration.count() == 0){
+				Fixtures.loadModels("defaultConfiguration.yml");
+				Logger.info("Creata la configurazione iniziale per il programma");
+			}
 		}
-		
-		if(Configuration.count() == 0){
-			Fixtures.loadModels("defaultConfiguration.yml");
-			Logger.info("Creata la configurazione iniziale per il programma");
+		catch(RuntimeException e)
+		{
+			//to nothing (test exception)
 		}
 
 	}

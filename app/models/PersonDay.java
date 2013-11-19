@@ -125,7 +125,11 @@ public class PersonDay extends Model {
 	public PersonDay(Person person, LocalDate date){
 		this(person, date, 0, 0, 0);
 	}
-
+	
+	//setter implementato per yaml parser TODO toglierlo configurando snakeyaml
+	public void setDate(String date){
+		this.date = new LocalDate(date);
+	}
 
 	public void addAbsence(Absence abs){
 		this.absences.add(abs);
@@ -376,7 +380,12 @@ public class PersonDay extends Model {
 	
 	/**
 	 * (Alessandro)
-	 * Algoritmo definitivo per il calcolo dei minuti lavorati nel person day
+	 * Algoritmo definitivo per il calcolo dei minuti lavorati nel person day.
+	 * Ritorna i minuti di lavoro per la persona nel person day. 
+	 * Modifica i seguenti campi del person day:
+	 * modificationType
+	 * isTicketAvailable
+	 * 
 	 * @return
 	 */
 	public int getCalculatedTimeAtWork() {
@@ -440,14 +449,13 @@ public class PersonDay extends Model {
 				if(st.way == Stamping.WayType.out)
 				{
 					workTime = workTime + toMinute(st.date);								
-					Logger.trace("Timbratura di uscita: %s", workTime);
 				}
 			}
 			return justifiedTimeAtWork + workTime;
 		}
 
 			
-		Collections.sort(this.stampings);
+		orderStampings();
 		List<PairStamping> validPairs = this.getValidPairStamping();
 	
 		int myWorkTime=0;
@@ -484,7 +492,7 @@ public class PersonDay extends Model {
 				if( minTimeForLunch < breakTicketTime ) 
 				{
 					workTime = workTime - (breakTicketTime - minTimeForLunch);
-					StampModificationType smt = StampModificationType.findById(StampModificationTypeValue.FOR_MIN_LUNCH_TIME.getId());
+					StampModificationType smt = StampModificationType.getStampModificationTypeByCode(StampModificationTypeCode.FOR_MIN_LUNCH_TIME.getCode());
 					//this.lunchTimeStampModificationType = smt;
 					this.modificationType = smt.code;
 				}
@@ -502,7 +510,7 @@ public class PersonDay extends Model {
 			{
 				workTime = workTime - breakTicketTime;
 				this.isTicketAvailable = true;
-				StampModificationType smt = StampModificationType.findById(StampModificationTypeValue.FOR_DAILY_LUNCH_TIME.getId());
+				StampModificationType smt = StampModificationType.getStampModificationTypeByCode(StampModificationTypeCode.FOR_DAILY_LUNCH_TIME.getCode());
 				//this.lunchTimeStampModificationType = smt;
 				this.modificationType = smt.code;
 			}
@@ -634,7 +642,7 @@ public class PersonDay extends Model {
 	}
 
 	/**
-	 * chiama le funzioni di popolamento
+	 * Chiama le funzioni di popolamento sul singolo personDay
 	 */
 	public void populatePersonDay(){
 		Contract con = person.getContract(date);
@@ -646,15 +654,8 @@ public class PersonDay extends Model {
 			return;
 		}
 
-		Logger.trace("Dimensione Stampings: %s. Dimensione Absences: %s Per %s %s", stampings.size(), absences.size(), person.name, person.surname);
-
-		
 		updateTimeAtWork();
-		
-		Logger.debug("StampModification prima per %s %s %s %s", person.name, person.surname, this.date, this.modificationType);
-		
 		merge();
-		Logger.debug("StampModification dopo per %s %s %s %s", person.name, person.surname, this.date, this.modificationType);
 		updateDifference();
 		merge();
 		updateProgressive();	
@@ -667,6 +668,26 @@ public class PersonDay extends Model {
 			this.isTicketAvailable = this.isTicketAvailable && checkTicketAvailableForWorkingTime();
 		merge();
 
+	}
+	
+	/**
+	 * Metodo da utilizzare per la modifica del personDay che impatta su tutto il mese
+	 */
+	public void updatePersonDay()
+	{
+		Logger.info("Update Person Day %s", this.date);
+		LocalDate monthBegin = new LocalDate(this.date.getYear(), this.date.getMonthOfYear(), 1);
+		LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
+		
+		List<PersonDay> pdList = PersonDay.find(
+				"select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date asc",
+				this.person,
+				monthBegin,
+				monthEnd).fetch();
+		for(PersonDay pd : pdList)
+		{
+			pd.populatePersonDay();
+		}
 	}
 
 	/**

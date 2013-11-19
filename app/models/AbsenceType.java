@@ -104,7 +104,7 @@ public class AbsenceType extends Model {
 	 * giorno.
 	 */
 	@Column(name = "replacing_absence")
-	public boolean replacingAbsence = false;
+	public boolean replacingAbsence = false; //FIXME inutile????
 	
 	@Transient
 	public String getShortDescription(){
