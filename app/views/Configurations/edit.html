@@ -50,117 +50,192 @@
 	</fieldset>
 	<fieldset>
 		<legend>Orari e tempi di lavoro</legend>
-		%{if(configurations.insertAndModifyWorkingTimeWithPlusToReduceAtRealWorkingTime == true){
-		}%
-			<p>Consente all'amministratore di inserire/modificare orari specificando il segno + per ridurre il tempo di lavoro a quello definito nell'orario di lavoro Sì<input type="radio" name="configurazioneSegnoPiuPerModifica" value="true" checked="checked"/>
-     			No<input type="radio" name="configurazioneSegnoPiuPerModifica" value="false"/></p>
-     			%{
-     			}else{
-     			}%
-     		<p>Consente all'amministratore di inserire/modificare orari specificando il segno + per ridurre il tempo di lavoro a quello definito nell'orario di lavoro Sì<input type="radio" name="configurazioneSegnoPiuPerModifica" value="true"/>
-     			No<input type="radio" name="configurazioneSegnoPiuPerModifica" value="false" checked="checked"/></p>
-     	%{
-     	}
-     	}%
-     	%{if(configurations.addWorkingTimeInExcess == true){
-		}%	
-			<p>Abilita la possibilità per l'amministratore di inserire tempo di lavoro in eccesso Sì<input type="radio" name="configurazioneTempoLavoroInEccesso" value="true" checked="checked"/>
-     			No<input type="radio" name="configurazioneTempoLavoroInEccesso" value="false"/></p>
-     			%{
-     			}else{
-     			}%
-     		<p>Abilita la possibilità per l'amministratore di inserire tempo di lavoro in eccesso Sì<input type="radio" name="configurazioneTempoLavoroInEccesso" value="true" checked="checked"/>
-     			No<input type="radio" name="configurazioneTempoLavoroInEccesso" value="false" checked="checked"/></p>
-     			
-     	%{
-     	}
-     	}%	
-     	%{if(configurations.isLastDayBeforeXmasEntire == true){
-     	}%	
-			<p>L'ultimo giorno lavorativo prima di Natale deve essere considerato intero anche se le ore di lavoro sono minori? Sì<input type="radio" name="configurazioneGiornoInteroPrimaNatale" value="true" checked="checked"/>
-     			No<input type="radio" name="configurazioneGiornoInteroPrimaNatale" value="false"/></p>
-     			%{
-     			}else{
-     			}%
-     		<p>L'ultimo giorno lavorativo prima di Natale deve essere considerato intero anche se le ore di lavoro sono minori? Sì<input type="radio" name="configurazioneGiornoInteroPrimaNatale" value="true" checked="checked"/>
-     			No<input type="radio" name="configurazioneGiornoInteroPrimaNatale" value="false" checked="checked"/></p>
-     	%{
-     	}
-     	}%	
-     	%{if(configurations.isLastDayBeforeEasterEntire == true){
-     	}%		
-			<p>L'ultimo giorno lavorativo prima di Pasqua deve essere considerato intero anche se le ore di lavoro sono minori? Sì<input type="radio" name="configurazioneGiornoInteroPrimaPasqua" value="true" checked="checked"/>
-     			No<input type="radio" name="configurazioneGiornoInteroPrimaPasqua" value="false"/></p>
-     			%{
-     			}else{
-     			}%
-     		<p>L'ultimo giorno lavorativo prima di Pasqua deve essere considerato intero anche se le ore di lavoro sono minori? Sì<input type="radio" name="configurazioneGiornoInteroPrimaPasqua" value="true" checked="checked"/>
-     			No<input type="radio" name="configurazioneGiornoInteroPrimaPasqua" value="false" checked="checked"/></p>
-     	%{
-     	}
-     	}%	
-     	%{if(configurations.isLastDayOfTheYearEntire == true){
-     	}%			
-			<p>L'ultimo giorno dell'anno deve essere considerato intero anche se le ore di lavoro sono minori? Sì<input type="radio" name="configurazioneGiornoInteroUltimoDellAnno" value="true" checked="checked"/>
-     			No<input type="radio" name="configurazioneGiornoInteroUltimoDellAnno" value="false"/></p>
-     			%{
-     			}else{
-     			}%
-     		<p>L'ultimo giorno dell'anno deve essere considerato intero anche se le ore di lavoro sono minori? Sì<input type="radio" name="configurazioneGiornoInteroUltimoDellAnno" value="true" checked="checked"/>
-     			No<input type="radio" name="configurazioneGiornoInteroUltimoDellAnno" value="false" checked="checked"/></p>
-     	%{
-     	}
-     	}%	
-     	%{if(configurations.isFirstOrLastMissionDayAHoliday == true){
-     	}%	
-			<p>Se il primo o ultimo giorno di missione è festivo deve essere considerato come presenza al lavoro? Sì<input type="radio" name="configurazioneMissioneInizioFineFestivo" value="true" checked="checked"/>
-     			No<input type="radio" name="configurazioneMissioneInizioFineFestivo" value="false"/></p>
-     			%{
-     			}else{
-     			}%
-     		<p>Se il primo o ultimo giorno di missione è festivo deve essere considerato come presenza al lavoro? Sì<input type="radio" name="configurazioneMissioneInizioFineFestivo" value="true" checked="checked"/>
-     			No<input type="radio" name="configurazioneMissioneInizioFineFestivo" value="false" checked="checked"/></p>
-     	%{
-     	}
-     	}%
-     	%{if(configurations.isHolidayInMissionAWorkingDay == true){
-     	}%			
-			<p>Giorno di missione festivo deve essere considerato come presenza al lavoro? Sì<input type="radio" name="configurazioneFestivoMissione" value="true" checked="checked"/>
-     			No<input type="radio" name="configurazioneFestivoMissione" value="false"/></p>
-     			%{
-     			}else{
-     			}%
-     		<p>Giorno di missione festivo deve essere considerato come presenza al lavoro? Sì<input type="radio" name="configurazioneFestivoMissione" value="true" checked="checked"/>
-     			No<input type="radio" name="configurazioneFestivoMissione" value="false" checked="checked"/></p>
-     	%{
-     	}
-     	}%	
-     	%{if(configurations.ignoreWorkingTimeWithAbsenceCode == true){
-     	}%	
-			<p>Ignora tempo di lavoro in un giorno con anche un codice di assenza che giustifica tutto il giorno (es. lavoro in ferie o missione ...) Sì<input type="radio" name="configurazioneIgnoraTempoLavoro" value="true" checked ="checked"/>
-     			No<input type="radio" name="configurazioneIgnoraTempoLavoro" value="false"/></p>
-     	%{
-     		}else{
-     	}%
-     		<p>Ignora tempo di lavoro in un giorno con anche un codice di assenza che giustifica tutto il giorno (es. lavoro in ferie o missione ...) Sì<input type="radio" name="configurazioneIgnoraTempoLavoro" value="true"/>
-     			No<input type="radio" name="configurazioneIgnoraTempoLavoro" value="false" checked="checked"/></p>
-     	%{
-     		}
-     	}%
-			<p>Tempo di lavoro giornaliero default (in minuti) valore medio se il tempo di lavoro cambia di giorno in giorno <input class="span1" name="tempoMedioLavoroGiornaliero" type="number" min="0" value="${configurations.workingTime}" size="10" maxlength="100" /></p>
+		
+		<table id="withoutborder">
+			<tr  id="withoutborder">
+				<td id="withoutborder">
+				%{
+				if(configurations.insertAndModifyWorkingTimeWithPlusToReduceAtRealWorkingTime == true){
+				}%
+						Sì<input type="radio" name="configurazioneSegnoPiuPerModifica" value="true" checked="checked"/>
+		     			No<input type="radio" name="configurazioneSegnoPiuPerModifica" value="false"/>	     		
+		     	%{
+		     	}else{
+		     	}%
+		     			Sì<input type="radio" name="configurazioneSegnoPiuPerModifica" value="true"/>
+		     			No<input type="radio" name="configurazioneSegnoPiuPerModifica" value="false" checked="checked"/>
+		     	%{
+		     	}
+		     	}%
+		     	</td>
+		     	<td id="withoutborder">Consente all'amministratore di inserire/modificare orari specificando il segno + per ridurre il tempo di lavoro a quello definito nell'orario di lavoro</td> 
+			</tr>
+			<tr id="withoutborder">
+				<td id="withoutborder">
+		     	%{
+		     	if(configurations.addWorkingTimeInExcess == true){
+				}%	
+					Sì<input type="radio" name="configurazioneTempoLavoroInEccesso" value="true" checked="checked"/>
+		     		No<input type="radio" name="configurazioneTempoLavoroInEccesso" value="false"/> 
+		     	%{
+		     	}else{
+		     	}%
+	 	     		Sì<input type="radio" name="configurazioneTempoLavoroInEccesso" value="true" checked="checked"/>
+		     		No<input type="radio" name="configurazioneTempoLavoroInEccesso" value="false" checked="checked"/>
+		     	%{
+		     	}
+		     	}%	
+		     	</td>
+		     	<td id="withoutborder">Abilita la possibilità per l'amministratore di inserire tempo di lavoro in eccesso</td>
+		     </tr>	
+			<tr id="withoutborder">
+				<td id="withoutborder">
+		     	%{
+		     	if(configurations.isLastDayBeforeXmasEntire == true){
+		     	}%	
+					Sì<input type="radio" name="configurazioneGiornoInteroPrimaNatale" value="true" checked="checked"/>
+		     		No<input type="radio" name="configurazioneGiornoInteroPrimaNatale" value="false"/>
+		     	%{
+		     	}else{
+		     	}%
+		     		Sì<input type="radio" name="configurazioneGiornoInteroPrimaNatale" value="true" checked="checked"/>
+		     		No<input type="radio" name="configurazioneGiornoInteroPrimaNatale" value="false" checked="checked"/>
+		     	%{
+		     	}
+		     	}%
+		     	</td>	
+				<td id="withoutborder">L'ultimo giorno lavorativo prima di Natale deve essere considerato intero anche se le ore di lavoro sono minori?</td>
+			</tr>	
+				
+			<tr id="withoutborder">
+				<td id="withoutborder">	
+		     	%{
+		     	if(configurations.isLastDayBeforeEasterEntire == true){
+		     	}%		
+					Sì<input type="radio" name="configurazioneGiornoInteroPrimaPasqua" value="true" checked="checked"/>
+		     		No<input type="radio" name="configurazioneGiornoInteroPrimaPasqua" value="false"/>
+		     	%{
+		     	}else{
+		     	}%
+		     		Sì<input type="radio" name="configurazioneGiornoInteroPrimaPasqua" value="true" checked="checked"/>
+		     		No<input type="radio" name="configurazioneGiornoInteroPrimaPasqua" value="false" checked="checked"/>
+		     	%{
+		     	}
+		     	}%	
+		     	</td>
+				<td id="withoutborder">L'ultimo giorno lavorativo prima di Pasqua deve essere considerato intero anche se le ore di lavoro sono minori?</td>
+			</tr>
 			
-		%{if(configurations.canInsertMoreAbsenceCodeInDay == true){
-		}%	
-			<p>Abilita possibilita' di inserire piu' di un codice di assenza per giorno Sì<input type="radio" name="configurazionePiuCodiciAssenza" value="true" checked="checked"/>
-     			No<input type="radio" name="configurazionePiuCodiciAssenza" value="false"/></p>
-     	%{
-     		}else{
-     	}%
-			<p>Abilita possibilita' di inserire piu' di un codice di assenza per giorno Sì<input type="radio" name="configurazionePiuCodiciAssenza" value="true" />
-     			No<input type="radio" name="configurazionePiuCodiciAssenza" value="false" checked="checked"/></p>
-     	%{
-     		}
-     	}%
+			<tr id="withoutborder">
+				<td id="withoutborder">				
+		     	%{
+		     	if(configurations.isLastDayOfTheYearEntire == true){
+		     	}%			
+					Sì<input type="radio" name="configurazioneGiornoInteroUltimoDellAnno" value="true" checked="checked"/>
+		     		No<input type="radio" name="configurazioneGiornoInteroUltimoDellAnno" value="false"/>	
+		     	%{
+		     	}else{
+		     	}%
+		     		Sì<input type="radio" name="configurazioneGiornoInteroUltimoDellAnno" value="true" checked="checked"/>
+		     		No<input type="radio" name="configurazioneGiornoInteroUltimoDellAnno" value="false" checked="checked"/>
+		     	%{
+		     	}
+		     	}%	
+		     	</td>
+				<td id="withoutborder">L'ultimo giorno dell'anno deve essere considerato intero anche se le ore di lavoro sono minori?</td>
+			</tr>
+
+
+
+			<tr id="withoutborder">
+				<td id="withoutborder">
+		     	%{
+		     	if(configurations.isFirstOrLastMissionDayAHoliday == true){
+		     	}%	
+					Sì<input type="radio" name="configurazioneMissioneInizioFineFestivo" value="true" checked="checked"/>
+		     		No<input type="radio" name="configurazioneMissioneInizioFineFestivo" value="false"/>
+		     	%{
+		     	}else{
+		     	}%
+		     		Sì<input type="radio" name="configurazioneMissioneInizioFineFestivo" value="true" checked="checked"/>
+		     		No<input type="radio" name="configurazioneMissioneInizioFineFestivo" value="false" checked="checked"/>
+		     	%{
+		     	}
+		     	}%
+		     	</td>
+ 		     	<td id="withoutborder">Se il primo o ultimo giorno di missione è festivo deve essere considerato come presenza al lavoro?</td>
+ 			</tr>
+ 
+ 
+ 			<tr id="withoutborder">
+ 				<td id="withoutborder">
+		     	%{
+		     	if(configurations.isHolidayInMissionAWorkingDay == true){
+		     	}%			
+					Sì<input type="radio" name="configurazioneFestivoMissione" value="true" checked="checked"/>
+		     		No<input type="radio" name="configurazioneFestivoMissione" value="false"/>
+		     	%{
+		     	}else{
+		     	}%
+		     		Sì<input type="radio" name="configurazioneFestivoMissione" value="true" checked="checked"/>
+		     		No<input type="radio" name="configurazioneFestivoMissione" value="false" checked="checked"/>
+		     	%{
+		     	}
+		     	}%	
+		     	</td>
+		     	<td id="withoutborder">Giorno di missione festivo deve essere considerato come presenza al lavoro?</td>
+			</tr>
+
+
+			<tr id="withoutborder">
+				<td id="withoutborder">
+		     	%{
+		     	if(configurations.ignoreWorkingTimeWithAbsenceCode == true){
+		     	}%	
+					Sì<input type="radio" name="configurazioneIgnoraTempoLavoro" value="true" checked ="checked"/>
+		     		No<input type="radio" name="configurazioneIgnoraTempoLavoro" value="false"/>
+		     	%{
+		     	}else{
+		     	}%
+		     		Sì<input type="radio" name="configurazioneIgnoraTempoLavoro" value="true"/>
+		     		No<input type="radio" name="configurazioneIgnoraTempoLavoro" value="false" checked="checked"/>
+		     	%{
+		     	}
+		     	}%
+		     	</td>
+		  		<td id="withoutborder">Ignora tempo di lavoro in un giorno con anche un codice di assenza che giustifica tutto il giorno (es. lavoro in ferie o missione ...)</td>
+			</tr>
+
+
+
+			<tr id="withoutborder">
+				<td id="withoutborder"><input class="span1" name="tempoMedioLavoroGiornaliero" type="number" min="0" value="${configurations.workingTime}" size="10" maxlength="100" /></td>
+				<td id="withoutborder">Tempo di lavoro giornaliero default (in minuti) valore medio se il tempo di lavoro cambia di giorno in giorno</td>
+			</tr>
+	
+	
+	
+			<tr id="withoutborder">
+				<td id="withoutborder">
+				%{
+				if(configurations.canInsertMoreAbsenceCodeInDay == true){
+				}%	
+					Sì<input type="radio" name="configurazionePiuCodiciAssenza" value="true" checked="checked"/>
+		     		No<input type="radio" name="configurazionePiuCodiciAssenza" value="false"/>
+		     	%{
+		     	}else{
+		     	}%
+					Sì<input type="radio" name="configurazionePiuCodiciAssenza" value="true" />
+		     		No<input type="radio" name="configurazionePiuCodiciAssenza" value="false" checked="checked"/>
+		     	%{
+		     	}
+		     	}%
+		     	</td>
+		     	<td id="withoutborder">Abilita possibilita' di inserire piu' di un codice di assenza per giorno</td>
+			</tr>
+
+
+		</table>
 	</fieldset>
 	<fieldset>
 		<legend>Ferie, permessi, straordinari e residui</legend>

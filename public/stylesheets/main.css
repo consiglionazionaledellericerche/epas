@@ -212,6 +212,10 @@ table#listaAmministratori {
 	margin: 4em 0em 6em;
 }
 
+table#withoutborder{border-style: none}
+tr#withoutborder{border-style: none}
+td#withoutborder{border-style: none}
+
 .capitalized {
 	text-transform: capitalize;	
 }
@@ -270,7 +274,6 @@ p#sede {margin: 1em 0em 0em}
 p#telefono {margin: 1em 0em 0em}
 p#email {margin: 1em 0em 0em}
 p#nascita {margin: 1em 0em 0em}
-p#caricamentoSituazioneMensile {margin: 1em 0em 2em; text-align: center}
 p#tipoTimbraturaClock {margin: 3em 0em 2em; text-align: center; font-size: 18px; }
 p#choiceClock {text-align: center; font-size: 18px;}
 p#descrizioneStampaCartellino {margin:3em 0em 4em}
@@ -306,10 +309,10 @@ div#cambiaPassword {margin: 3em 60em 2em; text-align: left}
 div#annullaPassword {margin: 1em 60em 2em; text-align: left}
 div#gestioneParametri {margin: 1em 4em 1em; text-align: left}
 div#spiegazioneValoriGrassetto {margin: 1em 4em 1em}
+
 div#caricamentoSituazioneMensile {text-align: center}
 div#tabelleRiassuntive {margin: 1em 2em 1em}
 div#tabellaPianoFerie {margin: 2em 20em 1em; align:center}
-
 
 h2#titoloSituazionePresenzeMensili {text-align: center}
 h2#titoloSituazioneAssenzeMensili {text-align: center}
@@ -347,7 +350,6 @@ h3#modificaCodiceCompetenza {margin: 2em 0em 2em; text-align: center}
 h3#monteOreStraordinario {margin: 2em 0em 1em; text-align: left}
 h3#titoloStraordinari {margin: 2em 0em 1em; text-align: left}
 h3#titoloCambioPassword {text-align: center}
-h3#caricamentoSituazioneMensile {text-align: center}
 h3#clock {text-align: center}
 h3#riepilogoMensile {text-align: center; margin: 2em 0em 1em}
 h3#utentiEsistenti {text-align: center}
@@ -423,7 +425,6 @@ table#tabellaCodiciCompetenza {margin: 2em; align: left}
 table#pianoFerie {margin: auto}
 
 div#frm *{display:inline}
-
 
 select#assenzaFrequente {margin-bottom: 1em}
 
