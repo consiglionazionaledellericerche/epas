@@ -60,12 +60,12 @@
 	<div id="spiegazioneValoriGrassetto">Il fieldset "sede distaccata" va riempito SOLO SE la nuova persona appartiene a una sede distaccata</div>
 <div id="frm">	
 
-	<input id="submitInsertPerson" type="submit" value="Avanti"/>
+	<input class="btn btn-primary" id="submitInsertPerson" type="submit" value="Avanti"/>
 		
 
 #{/form}
 
 #{form @Persons.discard()}
-	<input id="resetInsertPerson"type=reset value="Annulla">
+	<input class="btn" id="resetInsertPerson"type=reset value="Annulla">
 #{/form}
 </div>
