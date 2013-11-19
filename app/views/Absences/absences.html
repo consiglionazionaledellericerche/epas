@@ -12,11 +12,13 @@
 	<tr>
 		<th>Nome</th>
 		%{
-			for(entry in personMonth.getAbsenceCode().entrySet()){
+		for(entry in personMonth.getAbsenceCode().entrySet()){
 		}%
-		<th>${entry.getKey().code}</th>
+			<th>
+				<abbr title="${entry.getKey().description}" class="initialism">${entry.getKey().code}</abbr>
+			</th>
 		%{
-			}
+		}
 		}%
 
 	</tr>

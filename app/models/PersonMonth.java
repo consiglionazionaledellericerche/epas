@@ -1169,8 +1169,14 @@ public class PersonMonth extends Model {
 	 */
 	public List<Absence> getAbsenceInMonthForUploadSituation(){
 		List<Absence> absenceList = new ArrayList<Absence>();
+		//TODO: andrebbero prese solo le assenze delle persone che per questo mese devono inviare le assenza/competenze al CNR
+		//per esempio ci potrebbero essere erroneamente assenze/competenze di persone in pensione
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 				person, new LocalDate(year,month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
+		//FIXME: questo ciclo è inutile e comporta una select per ogni personDay ed una ulteriore select per ogni absence per 
+		//capire il tipo dell'assenza!
+		//Si potrebbe scrivere un'unica select per prendere direttamente le assenze di questo mese che sono non sono di tipo
+		//"internalUse"
 		for(PersonDay pd : pdList){
 			if(pd.absences.size() > 0){
 				for(Absence abs : pd.absences){
@@ -1195,12 +1201,4 @@ public class PersonMonth extends Model {
 		return competenceList;
 	}
 	
-	public static void main(String[] args) {
-		Integer a = 1;
-		if (a > 2)
-			System.out.println("a > 2");
-		else
-			System.out.println("a < 2");
-	}
-
 }

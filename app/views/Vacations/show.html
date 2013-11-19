@@ -7,9 +7,14 @@
 
 <h3 id="titoloSituazioneFerie">Situazione ferie ${vacationsRecap.year}</h3>
 
-inizio contratto: ${vacationsRecap.currentContract.beginContract} 
-fine contratto: ${vacationsRecap.currentContract.endContract} 
-
+<table>
+	<tr>
+		<td>Inizio contratto: </td><td><strong>${vacationsRecap.currentContract.beginContract}</strong></td> 
+	</tr>
+	<tr>	
+		<td>Fine contratto: </td><td><strong>${vacationsRecap.currentContract.expireContract}</strong></td> 
+	</tr>
+</table>
 <div align="left">
 #{form @Vacations.show()}
 <input type="hidden" name="personId" value="${vacationsRecap.person.id}" />	
