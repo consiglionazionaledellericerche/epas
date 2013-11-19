@@ -1,14 +1,18 @@
 package controllers;
 
+import it.cnr.iit.epas.ExportToYaml;
 import it.cnr.iit.epas.FromMysqlToPostgres;
 import it.cnr.iit.epas.PersonUtility;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.yaml.snakeyaml.Yaml;
 
 import controllers.shib.Shibboleth;
+import models.AbsenceType;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
@@ -20,6 +24,7 @@ import play.Logger;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
+
 
 //@With(Shibboleth.class)
 public class Administration extends Controller {
@@ -82,59 +87,6 @@ public class Administration extends Controller {
 		renderText("Aggiornati i person day delle persone con timbratura fissa");
 	}
 	
-	/**
-	 * metodo da lanciare per ricalcolare tutti i valori nei personday dall'inizio dell'anno alla fine dello stesso.
-	 * 
-	 */
-	public static void updatePersonDaysValue(){
-		
-		JPAPlugin.startTx(false);
-		//Creo tutti i person day mancanti
-		PersonUtility.checkAllDaysYear();
-		JPAPlugin.closeTx(false);
-		
-		//Ricalcolo i valori dei person day
-		JPAPlugin.startTx(true);
-		List<Person> personList = Person.findAll();
-		JPAPlugin.closeTx(false);
-		
-		LocalDate date = new LocalDate();
-		int i = 1;
-		for(Person p : personList){
-			
-			Logger.info("Update person %s (%s di %s)", p.surname, i, personList.size());
-			i++;
-			JPAPlugin.startTx(false);
-			for(int month = 1; month <=12; month++){
-				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
-						p, new LocalDate(date.getYear(), month, 1), new LocalDate(date.getYear(), month, 1).dayOfMonth().withMaximumValue()).fetch();
-				for(PersonDay pd : pdList){
-					pd.populatePersonDay();
-				}
-			}
-			JPAPlugin.closeTx(false);
-			
-		}
-		
-		//Ricalcolo dei residui mensili
-		LocalDate today = new LocalDate();
-		i = 1;
-		for(Person p: personList)
-		{
-			Logger.info("Update residui per %s (%s di %s)", p.surname, i, personList.size());
-			i++;
-			JPAPlugin.startTx(false);
-			for(int month = 1; month <=12; month++)
-			{
-				PersonMonth pm = PersonMonth.build(p, today.getYear(), month);
-				pm.aggiornaRiepiloghi();
-				pm.save();
-				
-			}
-			JPAPlugin.closeTx(false);
-		}
-	}
-	
 	public static void updateVacationPeriodRelation() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		
 		List<Person> personList = Person.getActivePersons(new LocalDate());
@@ -185,6 +137,115 @@ public class Administration extends Controller {
 				
 			}
 		}
+		
+	}
+
+
+	/**
+	 * Ricalcolo della situazione di ogni persona a partire da gennaio 2013
+	 */
+	public static void fixPersonSituationBrowser()
+	{ 
+		fixPersonSituation(146l, 2013, 1);
+	}
+	
+	/**
+	 * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
+	 * @param personid la persona da fixare, null per fixare tutte le persone
+	 * @param year l'anno dal quale far partire il fix
+	 * @param month il mese dal quale far partire il fix
+	 */
+	public static void fixPersonSituation(Long personid, int year, int month){
+		
+		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
+		JPAPlugin.startTx(false);
+		if(personid==null)
+			PersonUtility.checkHistoryError(null, year, month);
+		else
+			PersonUtility.checkHistoryError(personid, year, month);
+		JPAPlugin.closeTx(false);
+		
+		// (2) Ricalcolo i valori dei person day aggregandoli per mese
+		JPAPlugin.startTx(true);
+		List<Person> personList = new ArrayList<Person>();
+		if(personid == null)
+		{
+			personList = Person.findAll();
+		}
+		else
+		{
+			Person person = Person.findById(personid);
+			personList.add(person);
+		}
+		JPAPlugin.closeTx(false);
+		
+		int i = 1;
+		
+		for(Person p : personList){
+			Logger.info("Update person %s (%s di %s)", p.surname, i++, personList.size());
+			
+			LocalDate actualMonth = new LocalDate(year, month, 1);
+			LocalDate endMonth = new LocalDate().withDayOfMonth(1);
+			JPAPlugin.startTx(false);
+			while(!actualMonth.isAfter(endMonth))
+			{
+			
+				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
+						p,
+						actualMonth, 
+						actualMonth.dayOfMonth().withMaximumValue())
+						.fetch();
+				for(PersonDay pd : pdList){
+					pd.populatePersonDay();
+				}
+				actualMonth = actualMonth.plusMonths(1);
+				
+			}
+			JPAPlugin.closeTx(false);
+		}
+		
+		// (3) Ricalcolo dei residui mensili
+		i = 1;
+		for(Person p: personList)
+		{
+			Logger.info("Update residui per %s (%s di %s)", p.surname, i++, personList.size());
+			LocalDate actualMonth = new LocalDate(year, month, 1);
+			LocalDate endMonth = new LocalDate().withDayOfMonth(1);
+			JPAPlugin.startTx(false);
+
+			while(!actualMonth.isAfter(endMonth))
+			{
+				PersonMonth pm = PersonMonth.build(p, actualMonth.getYear(), actualMonth.getMonthOfYear());
+				pm.aggiornaRiepiloghi();
+				pm.save();
+				
+				actualMonth = actualMonth.plusMonths(1);
+				
+			}
+			JPAPlugin.closeTx(false);
+		}
+	}
+	
+	
+	
+	
+	public static void buildYaml()
+	{
+		//general
+		ExportToYaml.buildAbsences("test/dataTest/general/absences.yml");
+		ExportToYaml.buildCompetenceCodes("test/dataTest/general/competenceCodes.yml");
+		
+		//person
+		Person person = Person.findById(146l);
+		ExportToYaml.buildPerson(person, "test/dataTest/persons/lucchesi.yml");
+		
+		//test stampings
+		ExportToYaml.buildPersonMonth(person, 2013,  9, "test/dataTest/stampings/lucchesiStampingsSettembre2013.yml");
+		ExportToYaml.buildPersonMonth(person, 2013, 10, "test/dataTest/stampings/lucchesiStampingsOttobre2013.yml");
+		
+		//test vacations
+		ExportToYaml.buildYearlyAbsences(person, 2012, "test/dataTest/absences/lucchesiAbsences2012.yml");
+		ExportToYaml.buildYearlyAbsences(person, 2013, "test/dataTest/absences/lucchesiAbsences2013.yml");
 		
 	}
 

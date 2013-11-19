@@ -66,6 +66,19 @@ public class Contract extends Model {
 	@Column(name="end_contract")
 	public LocalDate endContract;
 	
+	//TODO eliminare e configurare yaml
+	public void setBeginContract(String date){
+		this.beginContract = new LocalDate(date);
+	}
+	//TODO eliminare e configurare yaml
+	public void setEndContract(String date){
+		this.endContract = new LocalDate(date);
+	}
+	//TODO eliminare e configurare yaml
+	public void setExpireContract(String date){
+		this.expireContract = new LocalDate(date);
+	}
+	
 	/**
 	 * I contratti con onCertificate = true sono quelli dei dipendenti CNR e 
 	 * corrispondono a quelli con l'obbligo dell'attestato di presenza 
