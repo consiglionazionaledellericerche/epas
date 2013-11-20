@@ -702,30 +702,32 @@ public class Stampings extends Controller {
 		Table<Person, String, String> tablePersonDailyPresence = null;
 
 		LocalDate today = new LocalDate(year, month, day);
-		List<Person> persons = new ArrayList<Person>();
-		List<Person> genericPerson = Person.find("Select p from Person p order by p.surname").fetch();
-		for(Person p : genericPerson){
-			Contract c = Contract.find("Select c from Contract c where c.person = ? and ((c.beginContract != null and c.expireContract = null) or " +
-					"(c.expireContract > ?) or (c.beginContract = null and c.expireContract = null)) order by c.beginContract desc limit 1", 
-					p, today).first();
-			if(c != null && c.onCertificate == true)
-				persons.add(p);
-		}
-		Logger.trace("Gli utenti attivi in questo giorno sono: %d", persons.size());
+		List<Person> activePerson = Person.getActivePersons(new LocalDate(year, month, day));
+//		List<Person> persons = new ArrayList<Person>();
+//		List<Person> genericPerson = Person.find("Select p from Person p order by p.surname").fetch();
+		
+//		for(Person p : genericPerson){
+//			Contract c = Contract.find("Select c from Contract c where c.person = ? and ((c.beginContract != null and c.expireContract = null) or " +
+//					"(c.expireContract > ?) or (c.beginContract = null and c.expireContract = null)) order by c.beginContract desc limit 1", 
+//					p, today).first();
+//			if(c != null && c.onCertificate == true)
+//				persons.add(p);
+//		}
+//		Logger.trace("Gli utenti attivi in questo giorno sono: %d", persons.size());
 
-		Person per = new Person();
-		builder.put(per, "Assenza", "");
-		for(int i = 1; i <= maxNumberOfInOut; i++){
-			if(i % 2 != 0){
-				builder.put(per, (i+1)/2+"^ Ingresso", "");    			
-			}
-			else{
-				builder.put(per, (i/2)+"^ Uscita", "");
-			}
-		}
-		builder.put(per, "Tempo Lavoro", "");
+//		Person per = new Person();
+//		builder.put(per, "Assenza", "");
+//		for(int i = 1; i <= maxNumberOfInOut; i++){
+//			if(i % 2 != 0){
+//				builder.put(per, (i+1)/2+"^ Ingresso", "");    			
+//			}
+//			else{
+//				builder.put(per, (i/2)+"^ Uscita", "");
+//			}
+//		}
+		//builder.put(per, "Tempo Lavoro", "");
 		List<Stamping> stampings = null;
-		for(Person p : persons){
+		for(Person p : activePerson){
 			//Logger.trace("Inizio le operazioni di inserimento in tabella per %s %s ",p.name, p.surname);
 			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.date = ? and pd.person = ?", today, p).first();
 			//Logger.trace("Cerco il person day in data %s per %s %s", today, p.name, p.surname);

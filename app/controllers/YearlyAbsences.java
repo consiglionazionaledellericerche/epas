@@ -137,10 +137,10 @@ public class YearlyAbsences extends Controller{
 
 	};	
 
-	private static Comparator<String> AbsenceCodeComparator = new Comparator<String>(){
+	private static Comparator<AbsenceType> AbsenceCodeComparator = new Comparator<AbsenceType>(){
 
-		public int compare(String absenceCode1, String absenceCode2){
-			return absenceCode1.compareTo(absenceCode2);
+		public int compare(AbsenceType absenceCode1, AbsenceType absenceCode2){
+			return absenceCode1.code.compareTo(absenceCode2.code);
 
 		}		
 
@@ -148,10 +148,10 @@ public class YearlyAbsences extends Controller{
 
 	@Check(Security.VIEW_PERSON_LIST)
 	public static void showGeneralMonthlyAbsences(int year, int month) throws InstantiationException, IllegalAccessException{
-/**
- * TODO: cambiare il campo colonna da stringa a AbsenceType per poter richiamare nel template il campo descrizione nell'abbreviazione
- */
-		Table<Person, String, Integer> tableMonthlyAbsences = TreeBasedTable.create(PersonNameComparator, AbsenceCodeComparator);
+
+		Table<Person, AbsenceType, Integer> tableMonthlyAbsences = TreeBasedTable.create(PersonNameComparator, AbsenceCodeComparator);
+		AbsenceType abt = new AbsenceType();
+		abt.code = "Totale";
 		if(month == 0){
 			/**
 			 * caso in cui si vogliono le assenze di tutti i mesi dell'anno in corso fino alla data attuale
@@ -161,16 +161,17 @@ public class YearlyAbsences extends Controller{
 				List<Absence> absenceInMonth = Absence.find("Select abs from Absence abs, PersonDay pd where abs.personDay = pd and " +
 						"pd.person = ? and pd.date >= ? and pd.date <= ?", 
 						p, new LocalDate(year, 1, 1), new LocalDate()).fetch();
-				tableMonthlyAbsences.put(p, "Totale", absenceInMonth.size());
+				
+				tableMonthlyAbsences.put(p, abt, absenceInMonth.size());
 				for(Absence abs : absenceInMonth){
-					Integer value = tableMonthlyAbsences.row(p).get(abs.absenceType.code);
+					Integer value = tableMonthlyAbsences.row(p).get(abs.absenceType);
 					Logger.debug("Per la persona %s il codice %s vale: %s", p, abs.absenceType.code, value);
 					if(value == null){
 						Logger.debug("Inserisco in tabella nuova assenza per %s con codice %s", p, abs.absenceType.code);
-						tableMonthlyAbsences.row(p).put(abs.absenceType.code, 1);
+						tableMonthlyAbsences.row(p).put(abs.absenceType, 1);
 					}
 					else{
-						tableMonthlyAbsences.row(p).put(abs.absenceType.code, value+1);
+						tableMonthlyAbsences.row(p).put(abs.absenceType, value+1);
 						Logger.debug("Incremento il numero di giorni per l'assenza %s di %s al valore %s", abs.absenceType.code, p, value+1);
 
 					}
@@ -187,16 +188,16 @@ public class YearlyAbsences extends Controller{
 						"pd.person = ? and pd.date >= ? and pd.date <= ?", 
 						p, new LocalDate(year, month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
 
-				tableMonthlyAbsences.put(p, "Totale", absenceInMonth.size());
+				tableMonthlyAbsences.put(p, abt, absenceInMonth.size());
 				for(Absence abs : absenceInMonth){
-					Integer value = tableMonthlyAbsences.row(p).get(abs.absenceType.code);
+					Integer value = tableMonthlyAbsences.row(p).get(abs.absenceType);
 					Logger.debug("Per la persona %s il codice %s vale: %s", p, abs.absenceType.code, value);
 					if(value == null){
 						Logger.debug("Inserisco in tabella nuova assenza per %s con codice %s", p, abs.absenceType.code);
-						tableMonthlyAbsences.row(p).put(abs.absenceType.code, 1);
+						tableMonthlyAbsences.row(p).put(abs.absenceType, 1);
 					}
 					else{
-						tableMonthlyAbsences.row(p).put(abs.absenceType.code, value+1);
+						tableMonthlyAbsences.row(p).put(abs.absenceType, value+1);
 						Logger.debug("Incremento il numero di giorni per l'assenza %s di %s al valore %s", abs.absenceType.code, p, value+1);
 
 					}
