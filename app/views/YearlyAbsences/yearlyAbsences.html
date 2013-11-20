@@ -1,11 +1,13 @@
 #{extends 'main_admin.html' /}
 #{set title:yearlyAbsencesRecap.person.surname + ' ' + yearlyAbsencesRecap.person.name + ', matricola=' + yearlyAbsencesRecap.person.number /}
 
+#{functionalMenuForm mainMenu: mainMenu /}
+
 <h2 id="titoloSituazioneAssenzeAnnuali">Situazione assenze per l'anno ${yearlyAbsencesRecap.year} di ${yearlyAbsencesRecap.person.name} ${yearlyAbsencesRecap.person.surname}</h2>
-
-#{functionalMenuForm mainMenu: mainMenu /} 
-
-<table id="assenze_annuali">
+ 
+<div class="container">
+<div class="span12">
+<table class="table table-bordered" id="assenze_annuali">
 
 	<!--  Riga di intestazione -->
 	<tr>
@@ -76,3 +78,5 @@
 		<td>${yearlyAbsencesRecap.totalAbsence}</td>
 	</tr>
 </table>
+</div>
+</div>
