@@ -122,6 +122,20 @@ td, th {
     border-bottom: 1px solid #aaa;
 }
 
+/** Tabella senza bordi **/
+
+.tablenoborder {
+	border-style: none
+}
+.tablenoborder tr{
+	border-style: none
+}
+
+.tablenoborder td{
+	border-style: none
+}
+
+
 /** Forms **/
 
 label {
