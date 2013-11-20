@@ -3,11 +3,26 @@
 <h2 id="titoloConfigurazioneParametri">Istituto di informatica e telematica</h2>
 <h3 id="titoloGestioneParametri">Gestione parametri</h3>
 
-<p class="lead warning" id="warning"><strong>Attenzione!!!</strong> Compila correttamente ciascun fieldset</p>
+<p class="lead warning" id="warning" fontcolor="red"><strong>Attenzione!!!</strong> Compila correttamente ciascun fieldset</p>
 #{form @Configurations.save()}
 <div id="gestioneParametri">
+
 	<input type="hidden" name="configId" value="${configurations.id}"/>
-	<p id="validita"><b>Data inizio di validità di questi parametri:</b> <b>inizio</b>: <input name="inizioValiditaParametri" type="date" value="${configurations.beginDate.convertToLocalDate()}" size="30" maxlength="100" /> <b>fine</b>: <input name="fineValiditaParametri" type="date" value="${configurations.endDate.convertToLocalDate()}" size="30" maxlength="100" /></p>
+	
+	<fieldset>
+		<legend>Validità della configurazione</legend>
+	
+		<table class="tablenoborder">
+			<tr>
+				<td><b>inizio</b></td>
+				<td><input name="inizioValiditaParametri" type="date" value="${configurations.beginDate.convertToLocalDate()}" size="30" maxlength="100" /></td>
+			</tr>
+			<tr>
+				<td><b>fine</b></td>
+				<td><input name="fineValiditaParametri" type="date" value="${configurations.endDate.convertToLocalDate()}" size="30" maxlength="100" /></td>
+			</tr>	
+		</table>
+	</fieldset>
 	
 	<fieldset>
 		<legend>Dati di connessione e di visualizzazione</legend>
@@ -65,6 +80,10 @@
 			</tr>	
 		</table>	
 	</fieldset>
+	
+	
+	
+	
 	<fieldset>
 		<legend>Festività</legend>
 		<table class="tablenoborder">	
@@ -78,17 +97,21 @@
 			</tr>
 		</table>
 	</fieldset>
+	
+	
+	
+	
 	<fieldset>
 		<legend>Pausa pranzo e buoni</legend>
 		<table class="tablenoborder">
 			<tr>
 	     		<td>Default tempo di lavoro giornaliero per avere il buono pasto (in minuti)</td>
-	     		<td><input class="span1" name="tempoLavoroGiornalieroPerBuono" type="text" value="${configurations.workingTimeToHaveMealTicket}" size="10" maxlength="100" disabled="disabled"/>  (non modificabile)</td> 
+	     		<td><input class="span1" name="tempoLavoroGiornalieroPerBuono" type="number" value="${configurations.workingTimeToHaveMealTicket}" size="10" maxlength="100" disabled="disabled"/>  (non modificabile)</td> 
 			</tr>	
 				
 			<tr>	
 				<td>Default tempo intervallo pasto (in minuti)</td>
-				<td><input class="span1" name="tempoIntervalloPasto" type="text" value="${configurations.mealTime}" size="10" maxlength="100" disabled="disabled"/>  (non modificabile)	</td>
+				<td><input class="span1" name="tempoIntervalloPasto" type="number" value="${configurations.mealTime}" size="10" maxlength="100" disabled="disabled"/>  (non modificabile)	</td>
 			</tr>	
 				
 			<tr>	
@@ -141,7 +164,7 @@
 		     	%{
 		     	}else{
 		     	}%
-	 	     		Sì<input type="radio" name="configurazioneTempoLavoroInEccesso" value="true" checked="checked"/>
+	 	     		Sì<input type="radio" name="configurazioneTempoLavoroInEccesso" value="true"/>
 		     		No<input type="radio" name="configurazioneTempoLavoroInEccesso" value="false" checked="checked"/>
 		     	%{
 		     	}
@@ -159,7 +182,7 @@
 		     	%{
 		     	}else{
 		     	}%
-		     		Sì<input type="radio" name="configurazioneGiornoInteroPrimaNatale" value="true" checked="checked"/>
+		     		Sì<input type="radio" name="configurazioneGiornoInteroPrimaNatale" value="true"/>
 		     		No<input type="radio" name="configurazioneGiornoInteroPrimaNatale" value="false" checked="checked"/>
 		     	%{
 		     	}
@@ -178,7 +201,7 @@
 		     	%{
 		     	}else{
 		     	}%
-		     		Sì<input type="radio" name="configurazioneGiornoInteroPrimaPasqua" value="true" checked="checked"/>
+		     		Sì<input type="radio" name="configurazioneGiornoInteroPrimaPasqua" value="true"/>
 		     		No<input type="radio" name="configurazioneGiornoInteroPrimaPasqua" value="false" checked="checked"/>
 		     	%{
 		     	}
@@ -197,7 +220,7 @@
 		     	%{
 		     	}else{
 		     	}%
-		     		Sì<input type="radio" name="configurazioneGiornoInteroUltimoDellAnno" value="true" checked="checked"/>
+		     		Sì<input type="radio" name="configurazioneGiornoInteroUltimoDellAnno" value="true"/>
 		     		No<input type="radio" name="configurazioneGiornoInteroUltimoDellAnno" value="false" checked="checked"/>
 		     	%{
 		     	}
@@ -218,7 +241,7 @@
 		     	%{
 		     	}else{
 		     	}%
-		     		Sì<input type="radio" name="configurazioneMissioneInizioFineFestivo" value="true" checked="checked"/>
+		     		Sì<input type="radio" name="configurazioneMissioneInizioFineFestivo" value="true"/>
 		     		No<input type="radio" name="configurazioneMissioneInizioFineFestivo" value="false" checked="checked"/>
 		     	%{
 		     	}
@@ -238,7 +261,7 @@
 		     	%{
 		     	}else{
 		     	}%
-		     		Sì<input type="radio" name="configurazioneFestivoMissione" value="true" checked="checked"/>
+		     		Sì<input type="radio" name="configurazioneFestivoMissione" value="true"/>
 		     		No<input type="radio" name="configurazioneFestivoMissione" value="false" checked="checked"/>
 		     	%{
 		     	}
@@ -373,14 +396,14 @@
 	   			}%
 	     			<input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedente" value="entroMese"/>Al mese entro il quale sono usabili<br>
 	     			<input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedente" value="mese" checked="checked"/>Al mese<br>
-	     			<input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedente" value="giorno" checked="checked"/>Al giorno
+	     			<input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedente" value="giorno"/>Al giorno
 	     		%{
 	     		}
 	     		if(configurations.residual != null && configurations.residual.description.equals('nel mese in cui posso usarla')){
 	     		}%
 					<input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedente" value="entroMese" checked="checked"/>Al mese entro il quale sono usabili<br>
 	     			<input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedente" value="mese"/>Al mese<br>
-	     			<input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedente" value="giorno" checked="checked"/>Al giorno
+	     			<input type="radio" name="configurazioneCompensazioneResiduiConAnnoPrecedente" value="giorno"/>Al giorno
 	     		%{
 	     		}
 	     		}%
@@ -409,7 +432,7 @@
 	     		if(configurations.capacityOneThree.description.equals('residuo a fine mese precedente')){
 	     		}%
 	     			<input type="radio" name="configurazioneCapienzaRiposi13" value="residuoGiorno"/>Sul Residuo al giorno<br>
-	     			<input type="radio" name="configurazioneCapienzaRiposi13" value="residuoFineMese" checked="checked"/>Sul Residuo a fine mese<br>
+	     			<input type="radio" name="configurazioneCapienzaRiposi13" value="residuoFineMese"/>Sul Residuo a fine mese<br>
 	     			<input type="radio" name="configurazioneCapienzaRiposi13" value="residuoFineMesePrecedente" checked="checked"/>Sul residuo a fine mese precedente<br>
 	     			<input type="radio" name="configurazioneCapienzaRiposi13" value="residuoFineTrimestre"/>Sul residuo a fine trimestre prec.
 	     		%{
@@ -417,8 +440,8 @@
 	     		if(configurations.capacityOneThree.description.equals('residuo a trimestre precedente')){
 	     		}%		
 	     			<input type="radio" name="configurazioneCapienzaRiposi13" value="residuoGiorno"/>Sul Residuo al giorno<br>
-	     			<input type="radio" name="configurazioneCapienzaRiposi13" value="residuoFineMese" checked="checked"/>Sul Residuo a fine mese<br>
-	     			<input type="radio" name="configurazioneCapienzaRiposi13" value="residuoFineMesePrecedente" checked="checked"/>Sul residuo a fine mese precedente <br>
+	     			<input type="radio" name="configurazioneCapienzaRiposi13" value="residuoFineMese"/>Sul Residuo a fine mese<br>
+	     			<input type="radio" name="configurazioneCapienzaRiposi13" value="residuoFineMesePrecedente"/>Sul residuo a fine mese precedente <br>
 	     			<input type="radio" name="configurazioneCapienzaRiposi13" value="residuoFineTrimestre" checked="checked"/>Sul residuo a fine trimestre prec.
 	     		%{
 	     		}
@@ -448,7 +471,7 @@
 	     		if(configurations.capacityFourEight.description.equals('residuo a fine mese precedente')){
 	     		}%
 	     			<input type="radio" name="configurazioneCapienzaRiposi49" value="residuoGiorno"/>Sul Residuo al giorno<br>
-	     			<input type="radio" name="configurazioneCapienzaRiposi49" value="residuoFineMese" checked="checked"/>Sul Residuo a fine mese<br>
+	     			<input type="radio" name="configurazioneCapienzaRiposi49" value="residuoFineMese"/>Sul Residuo a fine mese<br>
 	     			<input type="radio" name="configurazioneCapienzaRiposi49" value="residuoFineMesePrecedente" checked="checked"/>Sul residuo a fine mese precedente<br>
 	     			<input type="radio" name="configurazioneCapienzaRiposi49" value="residuoFineTrimestre"/>Sul residuo a fine trimestre prec.
 	     		%{
@@ -456,8 +479,8 @@
 	     		if(configurations.capacityFourEight.description.equals('residuo a trimestre precedente')){
 	     		}%		
 	     			<input type="radio" name="configurazioneCapienzaRiposi49" value="residuoGiorno"/>Sul Residuo al giorno<br>
-	     			<input type="radio" name="configurazioneCapienzaRiposi49" value="residuoFineMese" checked="checked"/>Sul Residuo a fine mese<br>
-					<input type="radio" name="configurazioneCapienzaRiposi49" value="residuoFineMesePrecedente" checked="checked"/>Sul residuo a fine mese precedente<br>
+	     			<input type="radio" name="configurazioneCapienzaRiposi49" value="residuoFineMese"/>Sul Residuo a fine mese<br>
+					<input type="radio" name="configurazioneCapienzaRiposi49" value="residuoFineMesePrecedente"/>Sul residuo a fine mese precedente<br>
 					<input type="radio" name="configurazioneCapienzaRiposi49" value="residuoFineTrimestre" checked="checked"/>Sul residuo a fine trimestre prec.
 	     		%{
 	     		}

@@ -14,45 +14,103 @@
 	
 	<fieldset>
 		<legend>Dati personali</legend>
-		<div><b>Cognome</b> <input name="surname" type="text" size="20" maxlength="100" /></div>
-		<div><b>Nome</b> <input name="name" type="text" size="20" maxlength="50" /></div>
-		<!--  <div>Password <input name="person.password" type="text" value="" size="10" maxlength="10" /></div>-->
-		<div>Matricola <input name="number" type="number" size="10" maxlength="10" /></div>
-		<div>Numero badge <input name="badgeNumber" type="number" size="10" maxlength="20" /></div>
-		<div>Livello 
-			#{select 'person.qualification', value:person.qualification, id:'qualifica'} 
-				#{option 0}0#{/option}
-				#{option 1}1#{/option}
-				#{option 2}2#{/option}
-				#{option 3}3#{/option}
-				#{option 4}4#{/option}
-				#{option 5}5#{/option}
-				#{option 6}6#{/option}
-				#{option 7}7#{/option}
-				#{option 8}8#{/option}
-			#{/select}
-		</div>
-		
+		<table class="tablenoborder">
+			<tr>
+				<td><b>Cognome</b> </td>
+				<td><input name="surname" type="text" size="20" maxlength="100" /></td>
+			</tr>	
+			<tr>	
+				<td><b>Nome</b></td>
+				<td><input name="name" type="text" size="20" maxlength="50" /></td>
+			</tr>		
+			<tr>	
+				<td>Matricola</td>
+				<td><input name="number" type="number" size="10" maxlength="10" /></td>
+			</tr>		
+			<tr>	
+				<td>Numero badge</td>
+				<td><input name="badgeNumber" type="number" size="10" maxlength="20" /></td>
+			</tr>		
+			<tr>	
+				<td>Livello </td>
+				<td>
+					#{select 'person.qualification', value:person.qualification, id:'qualifica'} 
+						#{option 0}0#{/option}
+						#{option 1}1#{/option}
+						#{option 2}2#{/option}
+						#{option 3}3#{/option}
+						#{option 4}4#{/option}
+						#{option 5}5#{/option}
+						#{option 6}6#{/option}
+						#{option 7}7#{/option}
+						#{option 8}8#{/option}
+					#{/select}
+				</td>
+			</tr>	
+		</table>	
 	</fieldset>
 	
 	<fieldset>
+	
 		<legend>Dati Contrattuali</legend>
-		<div><b>Inizio contratto</b> <input name="beginContract" type="date"/></div>
-		<div>Fine contratto <input name="expireContract" type="date" size="10" maxlength="10" /></div>
-		<div>Obbligo attestato di presenza (per dipendenti CNR) <input name="onCertificate" type="checkbox" /></div>
-		<div>Ore di inizializzazione maturate in altro istituto l'anno passato (in minuti): <input name="minutesPastYear" type="number" size="10" /></div>
-		<div>Ore di inizializzazione maturate in altro istituto nell'anno corrente (in minuti): <input name="minutesCurrentYear" type="number" size="10" /></div>
+		<table class="tablenoborder">
+			<tr>	
+				<td><b>Inizio contratto</b></td>
+				<td><input name="beginContract" type="date"/></td>
+			</tr>	
+				
+			<tr>	
+				<td>Fine contratto</td>
+				<td><input name="expireContract" type="date" size="10" maxlength="10" /></td>
+				
+				
+			<tr>	
+				<td>Obbligo attestato di presenza (per dipendenti CNR)</td>
+				<td><input name="onCertificate" type="checkbox" /></td>
+			</tr>	
+				
+			<tr>	
+				<td>Ore di inizializzazione maturate in altro istituto l'anno passato (in minuti)</td>
+				<td><input name="minutesPastYear" type="number" size="10" /></td>
+			</tr>	
+				
+			<tr>	
+				<td>Ore di inizializzazione maturate in altro istituto nell'anno corrente (in minuti)</td>
+				<td><input name="minutesCurrentYear" type="number" size="10" /></td>
+			</tr>
+		</table>	
 	</fieldset>
 
 	<fieldset>
 		<legend>Informazioni di ubicazione e contatti</legend>
 		<input type="hidden" name="location.person_id"  value="${person.id}" />
-		<p id="dipartimento">Dipartimento <input name="department" type="text" value="${location.department}" size="20" maxlength="100" /></p>
-		<p id="sede">Sede <input name="headOffice" type="text" value="${location.headOffice}" size="40" maxlength="200" /></p>
-		<p id="stanza">Stanza <input name="room" type="text" value="${location.room}" size="40" maxlength="200" /></p>
-		<p id="telefono">Telefono <input name="telephone" type="text" value="${contactData.telephone}" size="40" maxlength="200" /></p>
-		<p id="email">Email <input name="email" type="email" value="${contactData.email}" size="40" maxlength="200" /></p>
-		<p id="nascita">Data di nascita <input name="bornDate" type="date" value="${person.bornDate}" size="40" maxlength="200" /></p>
+		<table class="tablenoborder">
+			<tr>
+				<td>Dipartimento</td>
+				<td><input name="department" type="text" value="${location.department}" size="20" maxlength="100" /></td>
+			</tr>	
+			<tr>	
+				<td>Sede</td>
+				<td><input name="headOffice" type="text" value="${location.headOffice}" size="40" maxlength="200" /></td>
+			</tr>		
+			<tr>	
+				<td>Stanza</td>
+				<td><input name="room" type="text" value="${location.room}" size="40" maxlength="200" /></td>
+			</tr>		
+			<tr>	
+				<td>Telefono</td>
+				<td><input name="telephone" type="text" value="${contactData.telephone}" size="40" maxlength="200" /></td>
+			</tr>		
+			<tr>	
+				<td>Email</td>
+				<td><input name="email" type="email" value="${contactData.email}" size="40" maxlength="200" /></td>
+			</tr>		
+			<tr>	
+				<td>Data di nascita</td>
+				<td><input name="bornDate" type="date" value="${person.bornDate}" size="40" maxlength="200" /></td>
+			</tr>	
+	
+		</table>
 	</fieldset>
 	
 	
