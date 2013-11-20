@@ -522,7 +522,10 @@ public class Person extends Model {
 	 */
 	public static List<Person> getActivePersonsInMonth(int month, int year)
 	{
-		List<Person> persons = Person.find("SELECT p FROM Person p ORDER BY p.id").fetch();
+		/**
+		 * FIXME: rivedere le select in modo da renderle più efficienti
+		 */
+		List<Person> persons = Person.find("SELECT p FROM Person p ORDER BY p.surname, p.othersSurnames, p.name").fetch();
 		List<Person> activePersons = new ArrayList<Person>();
 		for(Person person : persons)
 		{
@@ -949,6 +952,13 @@ public class Person extends Model {
 		return flag;
 	}
 
-
+	/**
+	 * Cerca per numero di matricola
+	 * @param number
+	 * @return
+	 */
+	public static Person findByNumber(Integer number) {
+		return Person.find("SELECT p FROM Person p WHERE number = ?", number).first();
+	}
 
 }

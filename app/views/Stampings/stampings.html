@@ -8,6 +8,7 @@
 
 #{functionalMenuForm mainMenu: mainMenu /} 
 <input type="hidden" name="personId" value="${personMonth.person.id}"  />
+<div class="span14">
 <table class="table table-bordered" id="presenze_mensili">
 	<tr>
 		<th>Buono mensa</th>
@@ -133,5 +134,6 @@
 	}%
 
 </table>
+</div>
 
 #{include './_riepilogoRiassuntivoMese.html' /}

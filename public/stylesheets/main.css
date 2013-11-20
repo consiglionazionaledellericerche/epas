@@ -310,6 +310,10 @@ div#annullaPassword {margin: 1em 60em 2em; text-align: left}
 div#gestioneParametri {margin: 1em 4em 1em; text-align: left}
 div#spiegazioneValoriGrassetto {margin: 1em 4em 1em}
 
+div#caricamentoSituazioneMensile {text-align: center}
+div#tabelleRiassuntive {margin: 1em 2em 1em}
+div#tabellaPianoFerie {margin: 2em 20em 1em; align:center}
+
 h2#titoloSituazionePresenzeMensili {text-align: center}
 h2#titoloSituazioneAssenzeMensili {text-align: center}
 h2#titoloSituazioneAssenzeAnnuali {text-align: center}
@@ -373,11 +377,12 @@ input#nuovaPassword {margin: 3em 2em 2em}
 input#confermaPassword {margin: 4em 2em 2em}
 input#submitStamping {margin: 1em 5em 0em 20em; align: center}
 input#updateAbsence {margin: 0em 35em 0em; align: center}
-input#discardStamping {margin: 0em 3em 0em; align: center}
+input#discardStamping {margin: 0em 1em -1em; align: center}
 input#updateStamping {margin: 0em 25em 0em; align: center}
 input#submitCartellino {margin: 2em 1em 0em; align: center}
 input#indietroCartellino {margin: 2em 3em 0em; align: center}
-input#insertAdmin {margin: 2em 3em 0em 60em; align:center}
+input#insertAdmin {margin: 2em 45em 6em}
+input#discardAdmin {margin:2em -15em 6em}
 input#insertCompetenceCode {margin: 2em 3em 0em 60em; align: center}
 input#discardCompetenceCode {margin: 0em 3em 0em; align: center}
 input#updateAbsenceCode {margin: 2em 50em 0em; align:center}
@@ -404,6 +409,7 @@ input#indietro {margin: 2em 67em 0em; align: center}
 input#submitStampingClock {margin: 0em 70em 0em; align: center}
 input#saveCompetence {margin: 1em 67em 0em; align: center}
 input#salvaVacationCode {margin: 3em 2em 0em 10em}
+input#annullaVacationCode {margin: 3em 2em 0em 10em}
 input#inserisciAssenza {margin: 1em 33em 0em; align: center}
 input#updateWorkingTime {margin: 2em 3em 0em 65em; align: center}
 input#insertWorkingTime {margin: 2em 3em 0em 65em; align: center}
