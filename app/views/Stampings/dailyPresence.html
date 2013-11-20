@@ -1,10 +1,10 @@
 #{extends 'main_admin.html' /}
 
 #{functionalMenuForm mainMenu: mainMenu /} 
-
+<div class="container">
 <h2 id="situazionePresenzaGiornaliera">Situazione presenze del giorno ${day} <span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year}</h2>
-
-<table id="tabellaPresenzaGiornaliera">
+<div class="span8">
+<table class="table table-bordered" id="tabellaPresenzaGiornaliera">
 	<tr>
 		<th>Nome</th>
 		
@@ -35,3 +35,5 @@
 		}
 	}%
 </table>
+</div>
+</div>

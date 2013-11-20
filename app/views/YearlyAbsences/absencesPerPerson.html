@@ -6,8 +6,9 @@
 #{logoutForm /}
 
 #{functionalMenuForm mainMenu: mainMenu /} 
-
-<table id="assenze_annuali">
+<div class="container">
+<div class="span12">
+<table class="table table-bordered" id="assenze_annuali">
 
 	<tr>
 		<th rowspan="2">Mese</th>
@@ -49,8 +50,9 @@
 	
 	
 </table>
-
-<table id="Codici di assenza">
+</div>
+<div class="span7">
+<table class="table table-striped" id="Codici di assenza">
 	<tr>
 		<th width="80">Codice assenza</th>
 		<th width="200">Descrizione</th>
@@ -75,3 +77,5 @@
 		<td>${yearlyAbsencesRecap.totalAbsence}</td>
 	</tr>
 </table>
+</div>
+</div>

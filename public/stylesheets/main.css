@@ -262,7 +262,7 @@ td.nomeCognome {background-color: #CCFFCC}
 #spiegazioneTabellaTimbrature {margin-top: 2em; margin-bottom: 2em}
 p#validita {margin: 3em 2em 3em}
 p#warning {margin: 2em 6em 2em}
-p#nuovoCodiceCompetenza {margin: 4em 0em 2em; align: left}
+p#nuovoCodiceCompetenza {margin: 4em 3em 2em; align: left}
 p#tipoTimbratura {margin: 3em 0em 2em; align: left; font-weight:bold;}
 p#updateStampingText{margin: 3em 0em 2em; align: left;}
 p#allegaFile{margin:3em 0em 3em; align: center;}
@@ -368,6 +368,7 @@ h3#clock {text-align: center}
 h3#riepilogoMensile {text-align: center; margin: 2em 0em 1em}
 h3#utentiEsistenti {text-align: center}
 h3#pianoFerie {text-align: center}
+h3#riepilogoOrarioLavoro {margin: 2em 2em 1em; align: center}
 iframe#clock {align: center; margin: 3em 58em 0em}
 
 h4#configurazioniEsistenti {margin:2em 0em 1em; text-align: left}
