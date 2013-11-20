@@ -6,16 +6,17 @@
 
 <table id="tabellaPresenzaGiornaliera">
 	<tr>
-		<th rowspan="2">Nome</th>
-		<th colspan="${maxNumberOfInOut+2}"></th>
+		<th>Nome</th>
 		
-	</tr>
+		
+	
 	%{  for(col in tablePersonDailyPresence.columnKeySet()){
 		}%
-		<th>${col}</th>
+		<th border-style="solid">${col}</th>
 	%{
 		}
 	}%
+	</tr>
 	%{  for(entry in tablePersonDailyPresence.rowMap().entrySet()){
 		}%
 	<tr>

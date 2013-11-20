@@ -22,7 +22,7 @@
 	</tr>
 	%{  for(col in tableMonthlyAbsences.columnKeySet()){
 		}%
-		<th>${col}</th>
+		<th>${col.code}</th>
 	%{
 		}
 	}%
@@ -32,7 +32,7 @@
 		<td>${entry.getKey().name} ${entry.getKey().surname}</td>
 		%{ for(col in tableMonthlyAbsences.columnKeySet()){
 		}%
-			<td>${entry.getValue().get(col)}
+			<td><abbr title="${col.code} ${col.description}" class="initialism">${entry.getValue().get(col)}</abbr>
 			   
 			</td>
 		%{
