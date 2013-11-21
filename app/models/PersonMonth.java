@@ -1156,46 +1156,20 @@ public class PersonMonth extends Model {
 
 		return pastRemainingHours;
 	}
-	
-	/**
-	 * Utilizzare il metodo getAbsencesInMonth()
-	 * TODO: rimuovere questo metodo
-	 *  
-	 * metodo di utilità per il controller UploadSituation
-	 * @return la lista delle assenze fatte da quella persona in quel mese. Prima di inserirle in lista controlla che le assenze non siano
-	 * a solo uso interno 
-	 */
-
-	@Deprecated
-	public List<Absence> getAbsenceInMonthForUploadSituation(){
-		List<Absence> absenceList = new ArrayList<Absence>();
-		//TODO: andrebbero prese solo le assenze delle persone che per questo mese devono inviare le assenza/competenze al CNR
-		//per esempio ci potrebbero essere erroneamente assenze/competenze di persone in pensione
-		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-				person, new LocalDate(year,month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
-		//FIXME: questo ciclo è inutile e comporta una select per ogni personDay ed una ulteriore select per ogni absence per 
-		//capire il tipo dell'assenza!
-		//Si potrebbe scrivere un'unica select per prendere direttamente le assenze di questo mese che sono non sono di tipo
-		//"internalUse"
-		for(PersonDay pd : pdList){
-			if(pd.absences.size() > 0){
-				for(Absence abs : pd.absences){
-					if(!abs.absenceType.internalUse)
-						absenceList.add(abs);
-				}
-			}
-				
-		}
 		
-		return absenceList;
-	}
-	
-	public List<Absence> getAbsencesInMonth() {
-		List<Absence> absences = 
-			Absence.find("SELECT abs from Absence abs JOIN FETCH abs.absenceType abt JOIN FETCH abs.personDay pd JOIN pd.person p "
-					+ "WHERE p = ? AND pd.date BETWEEN ? AND ? AND abt.internalUse = false ORDER BY pd.date, abs.id", 
+	/**
+	 * La lista delle assenze restituite è prelevata in FETCH JOIN con le absenceType i personDay e la person 
+	 * in modo da non effettuare ulteriori select.
+	 * 
+	 * @return la lista delle assenze che non sono di tipo internalUse effettuate in questo mese dalla persona relativa
+	 * 	a questo personMonth.
+	 * 
+	 */
+	public List<Absence> getAbsencesNotInternalUseInMonth() {
+		return Absence.find(
+				"SELECT abs from Absence abs JOIN FETCH abs.absenceType abt JOIN FETCH abs.personDay pd JOIN FETCH pd.person p "
+					+ "WHERE p = ? AND pd.date BETWEEN ? AND ? AND abt.internalUse = false ORDER BY abt.code, pd.date, abs.id", 
 					person, new LocalDate(year,month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
-		return absences;
 	}
 	
 	/**
@@ -1204,8 +1178,8 @@ public class PersonMonth extends Model {
 	 */
 	public List<Competence> getCompetenceInMonthForUploadSituation(){
 		List<Competence> competenceList = Competence.find("Select comp from Competence comp where comp.person = ? and comp.month = ? " +
-				"and comp.year = ?", person, month, year).fetch();
-		
+				"and comp.year = ? and comp.valueApproved > 0", person, month, year).fetch();
+		Logger.trace("Per la persona %s %s trovate %d competenze approvate nei mesi di %d/%d", person.surname, person.name, competenceList.size(), month, year );
 		return competenceList;
 	}
 	
