@@ -27,26 +27,26 @@
 		<td rowspan=5><a href="@{WorkingTimes.edit(wtt.id)}">${wtt.description}</a></td>
 		<tr>
 			<td>Tempo lavoro</td>
-			<td>${wtt.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime}</td>
-			<td>${wtt.getWorkingTimeTypeDayFromDayOfWeek(2).workingTime}</td>
-			<td>${wtt.getWorkingTimeTypeDayFromDayOfWeek(3).workingTime}</td>
-			<td>${wtt.getWorkingTimeTypeDayFromDayOfWeek(4).workingTime}</td>
-			<td>${wtt.getWorkingTimeTypeDayFromDayOfWeek(5).workingTime}</td>
-			<td>${wtt.getWorkingTimeTypeDayFromDayOfWeek(6).workingTime}</td>
-			<td>${wtt.getWorkingTimeTypeDayFromDayOfWeek(7).workingTime}</td>
+			<td>${wtt.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime.toHourTime()}</td>
+			<td>${wtt.getWorkingTimeTypeDayFromDayOfWeek(2).workingTime.toHourTime()}</td>
+			<td>${wtt.getWorkingTimeTypeDayFromDayOfWeek(3).workingTime.toHourTime()}</td>
+			<td>${wtt.getWorkingTimeTypeDayFromDayOfWeek(4).workingTime.toHourTime()}</td>
+			<td>${wtt.getWorkingTimeTypeDayFromDayOfWeek(5).workingTime.toHourTime()}</td>
+			<td>${wtt.getWorkingTimeTypeDayFromDayOfWeek(6).workingTime.toHourTime()}</td>
+			<td>${wtt.getWorkingTimeTypeDayFromDayOfWeek(7).workingTime.toHourTime()}</td>
 			<td></td>
 			<td></td>
 			
 		</tr>
 		<tr>
 			<td>Tempo minimo di lavoro per diritto a intervallo pranzo</td>
-			<td>${wtt.getMinimalTimeForLunch(1, wtt)}</td>
-			<td>${wtt.getMinimalTimeForLunch(2, wtt)}</td>
-			<td>${wtt.getMinimalTimeForLunch(3, wtt)}</td>
-			<td>${wtt.getMinimalTimeForLunch(4, wtt)}</td>
-			<td>${wtt.getMinimalTimeForLunch(5, wtt)}</td>
-			<td>${wtt.getMinimalTimeForLunch(6, wtt)}</td>
-			<td>${wtt.getMinimalTimeForLunch(7, wtt)}</td>
+			<td>${wtt.getMinimalTimeForLunch(1, wtt).toHourTime()}</td>
+			<td>${wtt.getMinimalTimeForLunch(2, wtt).toHourTime()}</td>
+			<td>${wtt.getMinimalTimeForLunch(3, wtt).toHourTime()}</td>
+			<td>${wtt.getMinimalTimeForLunch(4, wtt).toHourTime()}</td>
+			<td>${wtt.getMinimalTimeForLunch(5, wtt).toHourTime()}</td>
+			<td>${wtt.getMinimalTimeForLunch(6, wtt).toHourTime()}</td>
+			<td>${wtt.getMinimalTimeForLunch(7, wtt).toHourTime()}</td>
 			<td></td>
 			<td></td>
 			

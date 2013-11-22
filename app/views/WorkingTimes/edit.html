@@ -1,13 +1,14 @@
 #{extends 'main.html' /}
 
-<h3>Modifica dati dell'orario di lavoro ${wtt.description}</h3>
+<h3 id="pianoFerie">Modifica dati dell'orario di lavoro ${wtt.description}</h3>
 
 
 #{form @WorkingTimes.updateWorkingTime()}
 
-Nome di questo tipo di orario: <input type="text" name="workingTimeTypeDescription" value="${wtt.description}"/>
+<p id="nuovoOrario" class="lead">Nome di questo tipo di orario: <input type="text" name="workingTimeTypeDescription" value="${wtt.description}"/></p>
 <input type="hidden" name="wttId" value="${wtt.id}"/>
-<table>
+<div class="span9">
+<table class="table" id="nuovoOrarioLavoro">
 	<tr>
 		<th></th>
 		<th>Lunedì</th>
@@ -21,35 +22,35 @@ Nome di questo tipo di orario: <input type="text" name="workingTimeTypeDescripti
 	</tr>
 	<tr>
 			<td>Tempo lavoro (in minuti)</td>
-			<td><input type="number" name="mondayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime}"/></td>
-			<td><input type="number" name="tuesdayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(2).workingTime}"/></td>
-			<td><input type="number" name="wednesdayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(3).workingTime}"/></td>
-			<td><input type="number" name="thursdayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(4).workingTime}"/></td>
-			<td><input type="number" name="fridayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(5).workingTime}"/></td>
-			<td><input type="number" name="saturdayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(6).workingTime}"/></td>
-			<td><input type="number" name="sundayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(7).workingTime}"/></td>
+			<td><input class="span1" type="number" name="mondayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime}"/></td>
+			<td><input class="span1" type="number" name="tuesdayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(2).workingTime}"/></td>
+			<td><input class="span1" type="number" name="wednesdayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(3).workingTime}"/></td>
+			<td><input class="span1" type="number" name="thursdayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(4).workingTime}"/></td>
+			<td><input class="span1" type="number" name="fridayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(5).workingTime}"/></td>
+			<td><input class="span1" type="number" name="saturdayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(6).workingTime}"/></td>
+			<td><input class="span1" type="number" name="sundayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(7).workingTime}"/></td>
 			
 		</tr>
 		<tr>
 			<td>Tempo minimo di lavoro per diritto a intervallo pranzo (in minuti)</td>
-			<td><input type="number" name="mondayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(1, wtt)}"/></td>
-			<td><input type="number" name="tuesdayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(2, wtt)}"/></td>
-			<td><input type="number" name="wednesdayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(3, wtt)}"/></td>
-			<td><input type="number" name="thursdayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(4, wtt)}"/></td>
-			<td><input type="number" name="fridayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(5, wtt)}"/></td>
-			<td><input type="number" name="saturdayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(6, wtt)}"/></td>
-			<td><input type="number" name="sundayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(7, wtt)}"/></td>
+			<td><input class="span1" type="number" name="mondayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(1, wtt)}"/></td>
+			<td><input class="span1" type="number" name="tuesdayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(2, wtt)}"/></td>
+			<td><input class="span1" type="number" name="wednesdayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(3, wtt)}"/></td>
+			<td><input class="span1" type="number" name="thursdayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(4, wtt)}"/></td>
+			<td><input class="span1" type="number" name="fridayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(5, wtt)}"/></td>
+			<td><input class="span1" type="number" name="saturdayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(6, wtt)}"/></td>
+			<td><input class="span1" type="number" name="sundayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(7, wtt)}"/></td>
 			
 		</tr>
 		<tr>
 			<td>Intervallo pranzo (in minuti)</td>
-			<td><input type="number" name="mondayBreakTime" value="${wtt.getBreakTime(1, wtt)}"/></td>
-			<td><input type="number" name="tuesdayBreakTime" value="${wtt.getBreakTime(2, wtt)}"/></td>
-			<td><input type="number" name="wednesdayBreakTime" value="${wtt.getBreakTime(3, wtt)}"/></td>
-			<td><input type="number" name="thursdayBreakTime" value="${wtt.getBreakTime(4, wtt)}"/></td>
-			<td><input type="number" name="fridayBreakTime" value="${wtt.getBreakTime(5, wtt)}"/></td>
-			<td><input type="number" name="saturdayBreakTime" value="${wtt.getBreakTime(6, wtt)}"/></td>
-			<td><input type="number" name="sundayBreakTime" value="${wtt.getBreakTime(7, wtt)}"/></td>
+			<td><input class="span1" type="number" name="mondayBreakTime" value="${wtt.getBreakTime(1, wtt)}"/></td>
+			<td><input class="span1" type="number" name="tuesdayBreakTime" value="${wtt.getBreakTime(2, wtt)}"/></td>
+			<td><input class="span1" type="number" name="wednesdayBreakTime" value="${wtt.getBreakTime(3, wtt)}"/></td>
+			<td><input class="span1" type="number" name="thursdayBreakTime" value="${wtt.getBreakTime(4, wtt)}"/></td>
+			<td><input class="span1" type="number" name="fridayBreakTime" value="${wtt.getBreakTime(5, wtt)}"/></td>
+			<td><input class="span1" type="number" name="saturdayBreakTime" value="${wtt.getBreakTime(6, wtt)}"/></td>
+			<td><input class="span1" type="number" name="sundayBreakTime" value="${wtt.getBreakTime(7, wtt)}"/></td>
 
 		</tr>
 		<tr>
@@ -91,10 +92,11 @@ Nome di questo tipo di orario: <input type="text" name="workingTimeTypeDescripti
 			%{ } }%
 		</tr>	
 </table>
+</div>
 
-<p>Può fare i turni Sì <input type="radio" name="turni" value="true"/>
+<p id="puoFareTurni">Può fare i turni Sì <input type="radio" name="turni" value="true"/>
  No<input type="radio" name="turni" value="false"/></p>
 
 
-<input id="updateWorkingTime" type="submit" value="Aggiorna"/>
+<input class="btn btn-primary" id="updateWorkingTime" type="submit" value="Aggiorna"/>
 #{/form}

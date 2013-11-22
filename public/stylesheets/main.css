@@ -292,7 +292,8 @@ p#tipoTimbraturaClock {margin: 3em 0em 2em; text-align: center; font-size: 18px;
 p#choiceClock {text-align: center; font-size: 18px;}
 p#descrizioneStampaCartellino {margin:3em 0em 4em}
 p#inserisciAmministratore {margin: 2em 0em 0em}
-p#nuovoOrario {margin: 0em 0em 2em 0em}
+p#nuovoOrario {margin: 2em 20em 1em}
+p#puoFareTurni {margin:2em 32em 1em}
 p#inserimentoCompetenze {margin: 0em 0em 1em 2em; align: center}
 p#separatore {margin: 4em 1em 2em; align:center}
 p#livelli {margin: 5em 0em 4em}
@@ -427,7 +428,7 @@ input#salvaVacationCode {margin: 3em 2em 0em 10em}
 input#annullaVacationCode {margin: 3em 2em 0em 10em}
 input#inserisciAssenza {margin: 1em 33em 0em; align: center}
 input#updateWorkingTime {margin: 2em 3em 0em 65em; align: center}
-input#insertWorkingTime {margin: 2em 3em 0em 65em; align: center}
+input#insertWorkingTime {margin: 25em -4em 15em; align: center}
 input#submitContractPerson {margin: 2em 25em 0em; align:center}
 input#note {margin: 1em 4em 0em; align: left}
 
@@ -443,6 +444,8 @@ table#pianoFerie {margin: auto}
 div#frm *{display:inline}
 
 select#assenzaFrequente {margin-bottom: 1em}
+
+table#nuovoOrarioLavoro {margin: 2em 30em 1em; align:center}
 
 table.riepilogo-ore {
 	width: 60%;
