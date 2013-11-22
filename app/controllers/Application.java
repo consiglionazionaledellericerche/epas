@@ -19,7 +19,14 @@ public class Application extends Controller {
     
     public static void indexAdmin() {
 		Logger.debug("chiamato metodo indexAdmin dell'Application controller");
-       	render();
+		
+		session.put("monthSelected", new LocalDate().getMonthOfYear());
+		session.put("yearSelected", new LocalDate().getYear());
+		session.put("personSelected", Security.getPerson().id);
+		session.put("methodSelected", ActionMenuItem.stampingsAdmin.getDescription());
+
+		render();
+       
     }
     
 	
