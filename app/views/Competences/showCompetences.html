@@ -1,8 +1,9 @@
 #{extends 'main_admin.html' /}
+
    
 #{functionalMenuForm mainMenu: mainMenu /} 
-
 <h2 id="titoloGestioneStraordinariCompetenze">Gestione straordinari e altre competenze</h2>
+
     <ul class="nav nav-tabs">
     	<li class="active"><a href="@{Competences.showCompetences(year, month)}#">Competenze</a></li>
     	<li><a href="@{Competences.overtime(year, month)}#">Straordinari</a></li>
