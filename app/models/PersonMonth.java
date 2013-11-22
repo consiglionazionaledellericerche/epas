@@ -351,10 +351,15 @@ public class PersonMonth extends Model {
 		if(days==null){
 			days= getDays();
 		}
+		
 		for(PersonDay pd : days){
-			List<Stamping> stamp = pd.stampings;
-			if(stamp.size()>0 && pd.isHoliday()==false)
+			boolean fixed = pd.isFixedTimeAtWork();
+			if(fixed && !pd.isAllDayAbsences() && !pd.isHoliday())
 				basedDays++;
+			else if(!fixed && !pd.isAllDayAbsences() && pd.stampings.size()>0 && pd.isHoliday()==false)
+					basedDays++;
+			
+			
 		}
 		return basedDays;
 	}
