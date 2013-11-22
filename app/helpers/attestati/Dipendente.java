@@ -33,27 +33,23 @@ public final class Dipendente implements Comparable<Dipendente> {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		//Se è presente una matricola si usa quella per i confronti, altrimeni si utilizza il nome e cognome
-		if (matricola == null || matricola.isEmpty()) {
-			result = prime * result
-					+ ((cognomeNome == null) ? 0 : cognomeNome.toUpperCase().replace(" ",  "").hashCode());				
-		} else {
-			result = prime * result
-					+ ((matricola == null || matricola.equals("")) ? 0 : matricola.hashCode());
-		}
+		result = prime * result
+				+ ((cognomeNome == null) ? 0 : cognomeNome.toUpperCase().replace(" ",  "").hashCode());
+				//((cognomeNome == null) ? 0 : cognomeNome.hashCode());
+		result = prime * result
+				+ ((matricola == null || matricola.equals("0")) ? 0 : matricola.hashCode());
 		return result;
 	}
-
 
 	/**
 	 * Metodo necessario per i controlli di "contains" dei Set
 	 * Se per entrambi gli oggetti confrontati è presente una matricola 
 	 * si usa quella per i confronti, altrimeni si utilizza il nome e cognome
-
+	
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(final Object obj) {
+	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -61,15 +57,11 @@ public final class Dipendente implements Comparable<Dipendente> {
 		if (!(obj instanceof Dipendente))
 			return false;
 		Dipendente other = (Dipendente) obj;
-		//Se per entrambi gli oggetti confrontati è presente una matricola 
-		//si usa quella per i confronti, altrimeni si utilizza il nome e cognome
-		if (matricola != null && !matricola.isEmpty() && other.matricola != null && !other.matricola.isEmpty())
-			return matricola.equals(other.matricola);
-		
 		if (cognomeNome == null) {
 			if (other.cognomeNome != null)
 				return false;
 		} else if (!cognomeNome.toUpperCase().replace(" ",  "").equals(other.cognomeNome.toUpperCase().replace(" ", "")))
+				 //!cognomeNome.equals(other.cognomeNome))
 			return false;
 		if (matricola == null) {
 			if (other.matricola != null)
@@ -78,7 +70,6 @@ public final class Dipendente implements Comparable<Dipendente> {
 			return false;
 		return true;
 	}
-
 
 	@Override
 	public int compareTo(final Dipendente other) {
