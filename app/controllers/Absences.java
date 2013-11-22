@@ -551,6 +551,7 @@ public class Absences extends Controller{
 			pm.prendiRiposoCompensativo(dateFrom);
 			pm.save();
 			pd.populatePersonDay();
+			pd.updatePersonDay();
 			pd.save();
 			flash.success("Aggiunto codice di assenza %s ", absenceType.code);
 			render("@save");

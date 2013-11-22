@@ -543,7 +543,7 @@ public class PersonMonth extends Model {
 	/**
 	 * @return la somma dei minuti dei giorni (entro una certa data) che hanno una differenza negativa rispetto all'orario di lavoro
 	 */
-	public int residuoDelMeseInNegativoAllaData(LocalDate date) {
+	private int residuoDelMeseInNegativoAllaData(LocalDate date) {
 //		LocalDate startOfMonth = new LocalDate(year, month, 1);
 //		Long residuo = JPA.em().createQuery("SELECT sum(pd.difference) FROM PersonDay pd WHERE pd.date BETWEEN :startOfMonth AND :endOfMonth and pd.person = :person " +
 //				"AND pd.difference < 0 and pd.date <= :date", Long.class)
@@ -559,7 +559,7 @@ public class PersonMonth extends Model {
 //		return res;
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? " +
 				"order by pd.date ", 
-				this.person, date.dayOfMonth().withMinimumValue(), date.dayOfMonth().withMaximumValue()).fetch();
+				this.person, date.dayOfMonth().withMinimumValue(), date).fetch();
 		if(pdList == null || pdList.size() == 0)
 			return 0;
 		for(PersonDay pd : pdList){
@@ -585,7 +585,7 @@ public class PersonMonth extends Model {
 	/**
 	 * @return la somma dei minuti dei giorni (entro una certa data) che hanno una differenza positiva rispetto all'orario di lavoro
 	 */
-	public int residuoDelMeseInPositivoAllaData(LocalDate date) {
+	private int residuoDelMeseInPositivoAllaData(LocalDate date) {
 //		Long residuo = JPA.em().createQuery("SELECT sum(pd.difference) FROM PersonDay pd WHERE pd.date BETWEEN :startOfMonth AND :endOfMonth and pd.person = :person " +
 //				"AND pd.difference > 0 and pd.date <= :date", Long.class)
 //				.setParameter("startOfMonth", new LocalDate(year, month, 1))
@@ -597,7 +597,7 @@ public class PersonMonth extends Model {
 		int res = 0;
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? " +
 				" order by pd.date desc", 
-				this.person, date.dayOfMonth().withMinimumValue(), date.dayOfMonth().withMaximumValue()).fetch();
+				this.person, date.dayOfMonth().withMinimumValue(), date).fetch();
 		if(pdList == null || pdList.size() == 0)
 			return 0;
 		for(PersonDay pd : pdList){
@@ -769,7 +769,7 @@ public class PersonMonth extends Model {
 			if(initTime != null)
 				return initTime.residualMinutesPastYear;
 			
-			if (month.equals(1)) {
+			if (month==1) {
 				return residuoAnnoPrecedente(); 
 			} 
 			if (mesePrecedente() == null) {
@@ -810,6 +810,7 @@ public class PersonMonth extends Model {
 	}
 
 	public int totaleResiduoAnnoCorrenteAllaData(LocalDate date) {
+		
 		int residuoDelMeseAllaData = residuoDelMeseAllaData(date);
 		int totaleResiduoAnnoCorrenteAlMesePrecedente = totaleResiduoAnnoCorrenteAlMesePrecedente();
 		int residuoAnnoPrecedenteDaInizializzazione = residuoAnnoPrecedenteDaInizializzazione();
@@ -934,7 +935,11 @@ public class PersonMonth extends Model {
 		
 		int minutiRiposoCompensativo = minutiRiposoCompensativo(date);
 		
-		if (-minutiRiposoCompensativo > tempoDisponibilePerRecuperi(date)) {
+		int tempoDisponibilePerRecuperi = 0;
+		if(date.getDayOfMonth()>1)
+			tempoDisponibilePerRecuperi = tempoDisponibilePerRecuperi(date.minusDays(1));
+		
+		if (-minutiRiposoCompensativo > tempoDisponibilePerRecuperi) {
 			return false;
 		}
 
