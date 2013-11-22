@@ -46,6 +46,7 @@ import play.mvc.Controller;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
@@ -127,12 +128,12 @@ public class UploadSituation extends Controller{
 
 		//Lista delle persone con un contratto attivo questo mese
 		final List<Person> activePersons = Person.getActivePersonsInMonth(month, year);
-
+		
 		final Set<Dipendente> activeDipendenti = FluentIterable.from(activePersons).transform(new Function<Person, Dipendente>() {
 			@Override
 			public Dipendente apply(Person person) {
 				Dipendente dipendente = 
-						new Dipendente(person.number.toString(), Joiner.on(" ").skipNulls().join(person.surname, person.othersSurnames, person.name));
+						new Dipendente(person.number == null ? "" : person.number.toString(), Joiner.on(" ").skipNulls().join(person.surname, person.othersSurnames, person.name));
 				return dipendente;
 			}
 		}).toImmutableSet();
