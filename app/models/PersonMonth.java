@@ -811,7 +811,15 @@ public class PersonMonth extends Model {
 
 	public int totaleResiduoAnnoCorrenteAllaData(LocalDate date) {
 		
-		int residuoDelMeseAllaData = residuoDelMeseAllaData(date);
+		
+		
+		int residuoDelMeseAllaData  = 0;
+		if(date.getDayOfMonth()>1)
+			residuoDelMeseAllaData = residuoDelMeseAllaData(date.minusDays(1));
+		
+		
+		
+		
 		int totaleResiduoAnnoCorrenteAlMesePrecedente = totaleResiduoAnnoCorrenteAlMesePrecedente();
 		int residuoAnnoPrecedenteDaInizializzazione = residuoAnnoPrecedenteDaInizializzazione();
 		return residuoDelMeseAllaData + totaleResiduoAnnoCorrenteAlMesePrecedente + residuoAnnoPrecedenteDaInizializzazione + riposiCompensativiDaAnnoCorrente - straordinari - recuperiOreDaAnnoPrecedente;  
@@ -935,9 +943,8 @@ public class PersonMonth extends Model {
 		
 		int minutiRiposoCompensativo = minutiRiposoCompensativo(date);
 		
-		int tempoDisponibilePerRecuperi = 0;
-		if(date.getDayOfMonth()>1)
-			tempoDisponibilePerRecuperi = tempoDisponibilePerRecuperi(date.minusDays(1));
+		
+		int tempoDisponibilePerRecuperi = tempoDisponibilePerRecuperi(date);
 		
 		if (-minutiRiposoCompensativo > tempoDisponibilePerRecuperi) {
 			return false;
