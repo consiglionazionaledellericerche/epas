@@ -20,11 +20,43 @@ public class Application extends Controller {
     public static void indexAdmin() {
 		Logger.debug("chiamato metodo indexAdmin dell'Application controller");
 		
-		session.put("monthSelected", new LocalDate().getMonthOfYear());
-		session.put("yearSelected", new LocalDate().getYear());
-		session.put("personSelected", Security.getPerson().id);
-		session.put("methodSelected", ActionMenuItem.stampingsAdmin.getDescription());
-
+		//inizializzazione functional menu
+		//month
+		String monthSelected = session.get("monthSelected");
+		if(monthSelected!=null && !monthSelected.equals("")){
+			session.put("monthSelected", monthSelected);
+		}
+		else{
+			session.put("monthSelected", new LocalDate().getMonthOfYear());
+		}
+		
+		//year
+		String yearSelected = session.get("yearSelected");
+		if(yearSelected!=null && !yearSelected.equals("")){
+			session.put("yearSelected", yearSelected);
+		}
+		else{
+			session.put("yearSelected", new LocalDate().getYear());
+		}
+		
+		//person
+		String personSelected = session.get("personSelected");
+		if(personSelected!=null && !personSelected.equals("")){
+			session.put("personSelected", personSelected);
+		}
+		else{
+			session.put("personSelected", Security.getPerson().id);
+		}
+		
+		//method
+		String methodSelected = session.get("methodSelected");
+		if(methodSelected!=null && !methodSelected.equals("")){
+			session.put("methodSelected", methodSelected);
+		}
+		else{
+			session.put("methodSelected", ActionMenuItem.stampingsAdmin.getDescription());
+		}
+		
 		render();
        
     }
@@ -36,9 +68,13 @@ public class Application extends Controller {
     		return;
     	}
 		
+    	//inizializzazione functional menu dopo login
+    	
 		session.put("monthSelected", new LocalDate().getMonthOfYear());
 		session.put("yearSelected", new LocalDate().getYear());
 		session.put("personSelected", Security.getPerson().id);
+		
+		//method
     	if (Security.check(Security.INSERT_AND_UPDATE_STAMPING)) {
     		Application.indexAdmin();
     		session.put("methodSelected", ActionMenuItem.stampingsAdmin.getDescription());
@@ -47,6 +83,8 @@ public class Application extends Controller {
     		session.put("methodSelected", ActionMenuItem.stampings.getDescription());
     	}
     }
+    
+    
 	public static void success(){
 			
 		render();
