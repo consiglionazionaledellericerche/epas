@@ -397,6 +397,8 @@ public class PersonDay extends Model {
 		StampProfile stampProfile = getStampProfile();
 		if (stampProfile != null && stampProfile.fixedWorkingTime) 
 		{
+			if(this.isHoliday())
+				return 0;
 			return getWorkingTimeTypeDay().workingTime;
 		} 
 
