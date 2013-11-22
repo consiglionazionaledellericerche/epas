@@ -27,9 +27,9 @@ Configuration(defaultConfiguration):
     workingTime: 432
     workingTimeToHaveMealTicket: 360
     mealTime: 30
-    mealTimeStartHour: 12
+    mealTimeStartHour: 1
     mealTimeStartMinute: 00
-    mealTimeEndHour: 15
+    mealTimeEndHour: 23
     mealTimeEndMinute: 00
     monthExpiryVacationPastYear: 8
     dayExpiryVacationPastYear: 31
