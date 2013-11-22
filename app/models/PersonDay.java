@@ -508,7 +508,7 @@ public class PersonDay extends Model {
 		else
 		{
 			//this.isTicketAvailable = false;
-			if( workTime > mealTicketTime && workTime - breakTicketTime > mealTicketTime )
+			if( workTime > mealTicketTime && workTime - breakTicketTime >= mealTicketTime )
 			{
 				workTime = workTime - breakTicketTime;
 				this.isTicketAvailable = true;
