@@ -470,7 +470,7 @@ public class PersonDay extends Model {
 		}
 	
 		workTime = myWorkTime;
-
+		workTime = workTime + justifiedTimeAtWork;
 		//Il pranzo e' servito??		
 		this.modificationType = null;
 		int breakTicketTime = getWorkingTimeTypeDay().breakTicketTime;	//30 minuti
@@ -524,7 +524,7 @@ public class PersonDay extends Model {
 
 	
 
-		return workTime + justifiedTimeAtWork;
+		return workTime;
 
 
 	}

@@ -853,7 +853,7 @@ public class PersonMonth extends Model {
 				Logger.debug("mese = %s. residuoAnnoPrecedenteDisponibileAllaFineDelMese > del residuo del mese in negativo, aumento i recuperiOreDaAnnoPrecedente (adesso %s) di %s minuti",
 						month, recuperiOreDaAnnoPrecedente, residuoDelMeseInNegativo);
 
-				recuperiOreDaAnnoPrecedente += residuoDelMeseInNegativo;
+				recuperiOreDaAnnoPrecedente = residuoDelMeseInNegativo;
 
 				Logger.debug("mese = %s. recuperiOreDaAnnoPrecedente = %s minuti", month, recuperiOreDaAnnoPrecedente);
 			} else {
@@ -866,7 +866,7 @@ public class PersonMonth extends Model {
 			if (residuoDelMeseInPositivo > -residuoAnnoPrecedenteDisponibileAllaFineDelMese) {
 				recuperiOreDaAnnoPrecedente -= residuoAnnoPrecedenteDisponibileAllaFineDelMese;
 			} else {
-				recuperiOreDaAnnoPrecedente += residuoDelMeseInPositivo;
+				recuperiOreDaAnnoPrecedente = residuoDelMeseInPositivo;
 			}
 			this.save();
 		}
@@ -912,6 +912,11 @@ public class PersonMonth extends Model {
 
 	}
 
+	/**
+	 * Per la procedura di importazione
+	 * @param ore
+	 * @return
+	 */
 	public boolean assegnaStraordinari(int ore) {
 		if (tempoDisponibilePerStraordinari() > ore * 60) {
 			straordinari = ore * 60;
@@ -933,7 +938,7 @@ public class PersonMonth extends Model {
 				this.month,
 				"S1").first();
 		if(comp!=null && comp.competenceCode.code.equals("S1"))
-			this.straordinari = comp.valueApproved;
+			this.straordinari = comp.valueApproved * 60;
 		
 		this.save();
 		
