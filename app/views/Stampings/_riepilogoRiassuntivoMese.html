@@ -3,7 +3,8 @@
 		Il numero di buoni mensa usabili per questo mese e': <strong>${numberOfMealTicketToUse}</strong>, mentre quelli da restituire sono <strong>${numberOfMealTicketToRender}</strong>. 
 		Il numero di giorni lavorativi in sede è di: <strong>${personMonth.basedWorkingDays()}</strong> 
 	</p>
-	<p>Tempo disponibile per straordinari: <strong>${personMonth.tempoDisponibilePerStraordinari().toHourTime()}</strong></p>
+	<p>Tempo disponibile per straordinari: 
+		<strong>${(mese.progressivoFinalePositivoMese + mese.straordinariMinuti).toHourTime()}</strong></p>
 	<p>Il numero di riposi compensativi usati fino ad oggi è: <strong>${numberOfCompensatoryRestUntilToday}</strong></p>
 	<p>E' possibile utilizzare il residuo dell'anno precedente? <strong>${possibileUtilizzareResiduoAnnoPrecedente==true ? 'sì' : 'no'}</strong></p>
 </div>
@@ -14,19 +15,23 @@
 	<caption>Situazione residuo derivanete dall'anno precedente</caption>
 	<tr>
 		<td>Residuo da anno precedente disponibile all'inizio del mese</td>
-		<td class="ore">${personMonth.residuoAnnoPrecedenteDisponibileAllInizioDelMese().toHourTimeWithPlus()}</td>
+		%{if (mese.mesePrecedente==null) { }%
+			<td class="ore">${mese.tempoInizializzazione.toHourTimeWithPlus()}</td>
+		%{ } else { }%
+			<td class="ore">${mese.mesePrecedente.monteOreAnnoPassato.toHourTimeWithPlus()}</td>
+		%{ } }%
 	</tr>
 	<tr>
 		<td>Residuo da anno precedente utilizzato questo mese come riposo compensativo</td>
-		<td class="ore">${personMonth.riposiCompensativiDaAnnoPrecedente.toHourTimeWithPlus()}</td>
+		<td class="ore">${mese.riposiCompensativiMinutiImputatoAnnoPassato.toHourTimeWithMinus()}</td>
 	</tr>
 	<tr>
 		<td>Residuo da anno precedente utilizzato questo mese come recupero ore</td>
-		<td class="ore">${personMonth.recuperiOreDaAnnoPrecedente.toHourTimeWithPlus()}</td>
+		<td class="ore">${mese.progressivoFinaleNegativoMeseImputatoAnnoPassato.toHourTimeWithMinus()}</td>
 	</tr>
 	<tr>
 		<td class="totale">Residuo da anno precedente disponibile alla fine del mese</td>
-		<td class="ore totale">${personMonth.residuoAnnoPrecedenteDisponibileAllaFineDelMese().toHourTime()}</td>
+		<td class="ore totale">${mese.monteOreAnnoPassato.toHourTime()}</td>
 	</tr>	
 </table>
 %{ } }%
@@ -37,35 +42,41 @@
 	<caption>Riepilogo delle ore di lavoro dell'anno corrente</caption>
 	<tr>
 		<td>Residuo dai mesi precedenti</td>
-		<td class="ore">${personMonth.totaleResiduoAnnoCorrenteAlMesePrecedente().toHourTimeWithPlus()}</td>
+		%{if (mese.mesePrecedente==null) { }%
+			<td class="ore">+00:00</td>
+		%{ } else { }%
+			<td class="ore">${mese.mesePrecedente.monteOreAnnoCorrente.toHourTimeWithPlus()}</td>
+		%{ } }%
+		
 	</tr>
 	<tr>
-		<td>Residuo del mese</td>
-		<td class="ore">${residuoDelMese.toHourTimeWithPlus()}</td>
+		<td>Residuo del mese positivo</td>
+		<td class="ore">${mese.progressivoFinalePositivoMesePrint.toHourTimeWithPlus()}</td>
 	</tr>
 
-	%{if (possibileUtilizzareResiduoAnnoPrecedente) { }%
-	<tr>
-		<td>Ore recuperate dal monte ore dell'anno precedente</td>
-		<td class="ore">${(personMonth.recuperiOreDaAnnoPrecedente * -1).toHourTimeWithPlus()}</td>
-	</tr>
-	%{ } }%
-
-	%{if(personMonth.straordinari != 0) { }%
+	%{if(mese.straordinariMinuti != 0) { }%
 	<tr>
 		<td>Straordinari</td>
-		<td class="ore">${(personMonth.straordinari * -1).toHourTimeWithPlus()}</td>
+		<td class="ore">${mese.straordinariMinuti.toHourTimeWithMinus()}</td>
 	</tr>
 	%{ } }%
-	%{if(personMonth.riposiCompensativiDaAnnoCorrente != 0 ){ }%
+	%{if(mese.riposiCompensativiMinutiImputatoAnnoCorrente != 0 ){ }%
 	<tr>
-		<td>Riposi compensativi</td>
-		<td class="ore">${personMonth.riposiCompensativiDaAnnoCorrente.toHourTimeWithPlus()}</td>
+		<td>Residuo da anno corrente utilizzato come riposo compensativi</td>
+		<td class="ore">${mese.riposiCompensativiMinutiImputatoAnnoCorrente.toHourTimeWithMinus()}</td>
+	</tr>		
+	%{ } }%
+	
+
+	%{if(mese.progressivoFinaleNegativoMeseImputatoAnnoCorrente != 0 ){ }%
+	<tr>
+		<td>Residuo da anno corrente utilizzato come recupero ore</td>
+		<td class="ore">${mese.progressivoFinaleNegativoMeseImputatoAnnoCorrente.toHourTimeWithMinus()}</td>
 	</tr>		
 	%{ } }%
 	<tr>
 		<td class="totale">Residuo di questo anno a fine mese</td>
-		<td class="ore totale">${personMonth.totaleResiduoAnnoCorrenteAFineMese().toHourTime()}</td>
+		<td class="ore totale">${mese.monteOreAnnoCorrente.toHourTime()}</td>
 	</tr>
 </table>
 
@@ -73,15 +84,15 @@
 	<caption>Riepilogo generale delle ore di lavoro</caption>
 	<tr>
 		<td>Residuo da anno precedente</td>
-		<td class="ore">${personMonth.residuoAnnoPrecedenteDisponibileAllaFineDelMese().toHourTimeWithPlus()}</td>
+		<td class="ore">${mese.monteOreAnnoPassato.toHourTimeWithPlus()}</td>
 	</tr>
 	<tr>
 		<td>Residuo di questo anno</td>
-		<td class="ore">${personMonth.totaleResiduoAnnoCorrenteAFineMese().toHourTimeWithPlus()}</td>
+		<td class="ore">${mese.monteOreAnnoCorrente.toHourTimeWithPlus()}</td>
 	</tr>
 	<tr>
 		<td class="totale">Residuo ore ad oggi</td>
-		<td class="ore totale">${personMonth.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese().toHourTime()}</td>
+		<td class="ore totale">${(mese.monteOreAnnoPassato+mese.monteOreAnnoCorrente).toHourTime()}</td>
 	</tr>
 </table>
 </div>

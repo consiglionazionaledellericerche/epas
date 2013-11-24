@@ -38,6 +38,8 @@ import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import models.efficiency.EfficientPersonDay;
 import models.exports.AbsenceReperibilityPeriod;
+import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
+import models.personalMonthSituation.Mese;
 import models.rendering.PersonStampingDayRecap;
 
 import org.joda.time.LocalDate;
@@ -180,12 +182,14 @@ public class Stampings extends Controller {
 		int compensatoryRest = personMonth.getCompensatoryRest();
 		int compensatoryRestInMinutes = personMonth.getCompensatoryRestInMinutes();
 
-
+		InitializationTime initializationTime = InitializationTime.find("Select i from InitializationTime i where i.person = ?" , person).first();
+		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, 2013, initializationTime.residualMinutesPastYear);
+		Mese mese = c.getMese(year, month);
 
 		//render
 		render(personMonth, numberOfInOut, numberOfCompensatoryRestUntilToday, numberOfCompensatoryRest, numberOfMealTicketToUse,numberOfMealTicketToRender,
 				daysRecap, stampModificationTypeList, stampTypeList, totale, possibileUtilizzareResiduoAnnoPrecedente,
-				tempoDisponibilePerStraordinari,residuoAlMesePrecedente, compensatoryRestInMinutes,residuoAnnoPrecedenteDaInizializzazione, compensatoryRest,straordinari, residuoDelMese);
+				tempoDisponibilePerStraordinari,residuoAlMesePrecedente, compensatoryRestInMinutes,residuoAnnoPrecedenteDaInizializzazione, compensatoryRest,straordinari, residuoDelMese, mese);
 
 	}
 
@@ -279,7 +283,7 @@ public class Stampings extends Controller {
 
 
 		int residuoAnnoPrecedenteDaInizializzazione = personMonth.residuoAnnoPrecedenteDaInizializzazione();
-
+		
 
 		int straordinari = personMonth.straordinari;
 
@@ -308,11 +312,15 @@ public class Stampings extends Controller {
 
 		//Totale residuo a fine mese  totaleResiduo.toHourTime() ore
 		
+		
+		InitializationTime initializationTime = InitializationTime.find("Select i from InitializationTime i where i.person = ?" , person).first();
+		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, 2013, initializationTime.residualMinutesPastYear);
+		Mese mese = c.getMese(year, month);
 
 		//render
 		render(personMonth, numberOfInOut, numberOfCompensatoryRestUntilToday, numberOfCompensatoryRest, numberOfMealTicketToUse, numberOfMealTicketToRender,
 				daysRecap, stampModificationTypeList, stampTypeList, totale, possibileUtilizzareResiduoAnnoPrecedente,
-				tempoDisponibilePerStraordinari,residuoAlMesePrecedente, compensatoryRestInMinutes,residuoAnnoPrecedenteDaInizializzazione, compensatoryRest,straordinari, residuoDelMese);
+				tempoDisponibilePerStraordinari,residuoAlMesePrecedente, compensatoryRestInMinutes,residuoAnnoPrecedenteDaInizializzazione, compensatoryRest,straordinari, residuoDelMese, mese);
 
 
 	}

@@ -443,17 +443,20 @@ public class PersonDay extends Model {
 
 		if(isHoliday()){
 			workTime = 0;
-			for(Stamping st : stampings){
-				if(st.way == Stamping.WayType.in)
+			
+			orderStampings();
+			List<PairStamping> validPairs = this.getValidPairStamping();
+		
+			int myWorkTime=0;
+			{
+				for(PairStamping validPair : validPairs)
 				{
-					workTime = workTime - toMinute(st.date);									
-				}
-				if(st.way == Stamping.WayType.out)
-				{
-					workTime = workTime + toMinute(st.date);								
+					myWorkTime = myWorkTime - toMinute(validPair.in.date);
+					myWorkTime = myWorkTime + toMinute(validPair.out.date);
 				}
 			}
-			return justifiedTimeAtWork + workTime;
+			
+			return justifiedTimeAtWork + myWorkTime;
 		}
 
 			
@@ -845,6 +848,7 @@ public class PersonDay extends Model {
 		//assenze giornaliere
 		if(this.isAllDayAbsences())
 		{
+			//FIXME 10 aprile sannicandro 18 ottobre sannicandro 
 			difference = 0;
 			save();
 			return;
