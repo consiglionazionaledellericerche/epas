@@ -146,7 +146,7 @@ public class Administration extends Controller {
 	 */
 	public static void fixPersonSituationBrowser()
 	{ 
-		fixPersonSituation(25l, 2013, 1);
+		fixPersonSituation(null, 2013, 1);
 	}
 	
 	/**
@@ -205,45 +205,42 @@ public class Administration extends Controller {
 			}
 			JPAPlugin.closeTx(false);
 		}
-		
-		
-	}
-	
-	public static void fixRiepiloghi(List<Person> personList, int year, int month)
-	{
+		/*
 		// (3) Ricalcolo dei residui mensili
-		int i = 1;
+		i = 1;
 		for(Person p: personList)
 		{
 			Logger.info("Update residui per %s (%s di %s)", p.surname, i++, personList.size());
 			LocalDate actualMonth = new LocalDate(year, month, 1);
 			LocalDate endMonth = new LocalDate().withDayOfMonth(1);
 			JPAPlugin.startTx(false);
-
-
+			
+			
 			//distruggere i personMonth
-			List<PersonMonth> pmList = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = 2013 and pm.month > 1", p).fetch();
-			for(PersonMonth pm : pmList)
-			{
-				pm.delete();
-
-			}
-
+			//List<PersonMonth> pmList = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = 2013 and pm.month > 0", p).fetch();
+			//for(PersonMonth pm : pmList)
+			//{
+			//	pm.delete();
+			
+			//}
+			
 			while(!actualMonth.isAfter(endMonth))
 			{
 				PersonMonth pm = PersonMonth.build(p, actualMonth.getYear(), actualMonth.getMonthOfYear());
 				//pm.aggiornaRiepiloghi();
 				pm.save();
-
+				
 				actualMonth = actualMonth.plusMonths(1);
-
+				
 			}
 			JPAPlugin.closeTx(false);
+			
 		}
+		*/
 	}
-
-
-
+	
+	
+	
 	
 	public static void buildYaml()
 	{
