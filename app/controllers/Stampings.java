@@ -182,14 +182,12 @@ public class Stampings extends Controller {
 		int compensatoryRest = personMonth.getCompensatoryRest();
 		int compensatoryRestInMinutes = personMonth.getCompensatoryRestInMinutes();
 
-		
-		WorkingTimeType wtt = person.workingTimeType;
-		Logger.debug("Working test "+  wtt.toString());
-		WorkingTimeTypeDay wttd =wtt.getWorkingTimeTypeDayFromDayOfWeek(1);
-		Logger.debug("WorkingTTD test "+  wttd.toString());
-		
+		CalcoloSituazioneAnnualePersona c = null;
 		InitializationTime initializationTime = InitializationTime.find("Select i from InitializationTime i where i.person = ?" , person).first();
-		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, 2013, initializationTime.residualMinutesPastYear);
+		if(initializationTime == null)
+			c = new CalcoloSituazioneAnnualePersona(person, 2013, 0);
+		else
+			c = new CalcoloSituazioneAnnualePersona(person, 2013, initializationTime.residualMinutesPastYear);
 		Mese mese = c.getMese(year, month);
 
 		
@@ -318,10 +316,13 @@ public class Stampings extends Controller {
 		int compensatoryRestInMinutes = personMonth.getCompensatoryRestInMinutes();
 
 		//Totale residuo a fine mese  totaleResiduo.toHourTime() ore
-		
-		
+		CalcoloSituazioneAnnualePersona c = null;
 		InitializationTime initializationTime = InitializationTime.find("Select i from InitializationTime i where i.person = ?" , person).first();
-		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, 2013, initializationTime.residualMinutesPastYear);
+		if(initializationTime == null)
+			c = new CalcoloSituazioneAnnualePersona(person, 2013, 0);
+		else
+			c = new CalcoloSituazioneAnnualePersona(person, 2013, initializationTime.residualMinutesPastYear);
+				
 		Mese mese = c.getMese(year, month);
 
 		//render
