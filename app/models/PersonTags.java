@@ -48,6 +48,13 @@ public class PersonTags extends JavaExtensions {
 		return "+" + toHourTime(minutes);
 	}
 	
+	public static String toHourTimeWithMinus(Integer minutes) {
+		if (minutes < 0) {
+			return toHourTime(minutes);
+		}
+		return "-" + toHourTime(minutes);
+	}
+	
 	public static String convertIntToHour(int numberOfCompensatoryRest, Person person){
 		int timeAtWork = person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime;
 		return toHourTime(numberOfCompensatoryRest*timeAtWork);

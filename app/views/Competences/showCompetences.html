@@ -1,9 +1,8 @@
 #{extends 'main_admin.html' /}
 
-
-<h2 id="titoloGestioneStraordinariCompetenze">Gestione straordinari e altre competenze</h2>
-    
+   
 #{functionalMenuForm mainMenu: mainMenu /} 
+<h2 id="titoloGestioneStraordinariCompetenze">Gestione straordinari e altre competenze</h2>
 
     <ul class="nav nav-tabs">
     	<li class="active"><a href="@{Competences.showCompetences(year, month)}#">Competenze</a></li>
@@ -32,7 +31,7 @@
 		%{ for(col in tableCompetence.columnKeySet()){
 		}%
 		<td>
-		<input name="StraordinarioDiurnoLavorativo" type="text" value="${entry.getValue().get(col)}" size="5" maxlength="5" />			
+		<input class="span2" name="StraordinarioDiurnoLavorativo" type="text" value="${entry.getValue().get(col)}" size="5" maxlength="5" />			
 		</td>
 		%{
 		}

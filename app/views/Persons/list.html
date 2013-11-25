@@ -1,17 +1,13 @@
 #{extends 'main_admin.html' /}
 
-<h2 id="titoloGestionePersonale">Gestione dati del personale per rilevazione presenze</h2>
-
-#{logoutForm /}
-
 #{functionalMenuForm mainMenu: mainMenu /}
 
-
-<p id="nuovaPersona"><a href="@{Persons.insertPerson}">Inserisci una nuova persona</a></p>
+<h2 id="titoloGestionePersonale">Gestione dati del personale per rilevazione presenze</h2>
+<p class="lead" id="nuovaPersona"><a href="@{Persons.insertPerson}">Inserisci una nuova persona</a></p>
 
 <p>Personale esistente</p>
 
-<table id="listaPersone"><!-- Da aggiungere come entry nel file main.css dove dovrò sistemare le caratteristiche della tabella  -->
+<table class="table table-striped" id="listaPersone"><!-- Da aggiungere come entry nel file main.css dove dovrò sistemare le caratteristiche della tabella  -->
 	<tr>
 		<th>Cognome</th>
 		<th>Nome</th>

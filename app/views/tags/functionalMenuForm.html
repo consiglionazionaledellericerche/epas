@@ -1,7 +1,7 @@
 
 <div align="left">
 #{form @SwitchTemplate.dispatch()}
-	#{select 'method', value:session.get("methodSelected"), id:'method', onChange:'javascript:this.form.submit()'}
+	#{select 'method', value:session.get("methodSelected"), class:'span3', id:'method', onChange:'javascript:this.form.submit()' }
 	 %{
 	 	for (menuItem in _mainMenu.getMethods()) {
 	 }%
@@ -12,7 +12,7 @@
 		
 	#{/select}
 	
-	#{select 'year', value:session.get("yearSelected"), id:'year', onChange:'javascript:this.form.submit()'}
+	#{select 'year', value:session.get("yearSelected"), class:'span1', id:'year', onChange:'javascript:this.form.submit()'}
 		#{option 2011}2011#{/option}
 		#{option 2012}2012#{/option}
 		#{option 2013}2013#{/option}
@@ -21,7 +21,7 @@
 	#{/select}
 	
 		
-	#{select 'month', value:session.get("monthSelected"), id:'month', onChange:'javascript:this.form.submit()'}
+	#{select 'month', value:session.get("monthSelected"), class:'span2', id:'month', onChange:'javascript:this.form.submit()'}
 	%{if (_mainMenu.method.name().equals('monthRecap') || _mainMenu.method.name().equals('totalMonthlyAbsences')){
 	}%
 		#{option 0}Tutti i mesi#{/option}
@@ -44,7 +44,7 @@
 			
 	
 	#{secure.check "viewPersonList"}
-		#{select 'personId', value:session.get("personSelected"), id:'person', onChange:'javascript:this.form.submit()'}
+		#{select 'personId', value:session.get("personSelected"), class:'span3', id:'person', onChange:'javascript:this.form.submit()'}
 			#{option 0}Scegli una persona#{/option}
 		%{
 			for(person in _mainMenu.persons){
@@ -59,7 +59,7 @@
 	
 	%{if (_mainMenu.day != null || _mainMenu.method.name() == 'dailyPresence') {
 	}%
-		#{select 'day', value:_mainMenu.day, id: 'day', onChange:'javascript:this.form.submit()'}
+		#{select 'day', value:_mainMenu.day, class:'span1', id: 'day', onChange:'javascript:this.form.submit()'}
 			%{ for(day in _mainMenu.days){
 				}%
 				#{option day}${day}#{/option}
@@ -69,7 +69,7 @@
 		#{/select}		
 	%{}}%
 
-	<input type="submit" value="Invio">
+	<input class="btn" type="submit" value="Invio">
 #{/form}
 
 </div>

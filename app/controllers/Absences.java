@@ -509,30 +509,37 @@ public class Absences extends Controller{
 		 * controllo che le persone che richiedono il riposo compensativo, che hanno una qualifica compresa tra 1 e 3, non abbiano superato
 		 * il massimo numero di giorni di riposo compensativo consentiti e presenti in configurazione
 		 */
-		if(absenceType.code.equals("91") && person.qualification.qualification > 0 && person.qualification.qualification < 4){
+		if(absenceType.code.equals("91")){
 			Logger.debug("Devo inserire un codice %s per %s %s", absenceType.code, person.name, person.surname);
-			Configuration config = Configuration.getCurrentConfiguration();
 			LocalDate actualDate = new LocalDate(yearFrom, monthFrom, dayFrom);
 			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, actualDate).first();
 			if(pd == null){
 				pd = new PersonDay(person, actualDate);
 				pd.create();
 			}
-			 
-			Query query = JPA.em().createQuery("SELECT abs FROM Absence abs WHERE abs.personDay.person = :person "+ 
-					"AND abs.personDay.date between :dateStart AND :dateTo AND abs.absenceType.code = :code");
-			query.setParameter("person", pd.person).
-			setParameter("dateStart", new LocalDate(yearFrom, 1,1)).
-			setParameter("dateTo",actualDate).
-			setParameter("code", "91");
-			List<Object> resultList = query.getResultList();
-			Logger.debug("Il numero di assenze con codice %s fino a oggi è %d", absenceType.code, resultList.size());
-			if(resultList.size() >= config.maxRecoveryDaysOneThree){
-				flash.error("Il dipendente %s %s non può usufruire del codice di assenza %s poichè ha raggiunto il limite previsto per" +
-						"quel codice", person.name, person.surname, absenceType.code);
-				render("@save");
-				return;
+			
+			if(person.qualification.qualification > 0 && person.qualification.qualification < 4){
+				Configuration config = Configuration.getCurrentConfiguration();
+				
+				
+				 
+				Query query = JPA.em().createQuery("SELECT abs FROM Absence abs WHERE abs.personDay.person = :person "+ 
+						"AND abs.personDay.date between :dateStart AND :dateTo AND abs.absenceType.code = :code");
+				query.setParameter("person", pd.person).
+				setParameter("dateStart", new LocalDate(yearFrom, 1,1)).
+				setParameter("dateTo",actualDate).
+				setParameter("code", "91");
+				List<Object> resultList = query.getResultList();
+				Logger.debug("Il numero di assenze con codice %s fino a oggi è %d", absenceType.code, resultList.size());
+				if(resultList.size() >= config.maxRecoveryDaysOneThree){
+					flash.error("Il dipendente %s %s non può usufruire del codice di assenza %s poichè ha raggiunto il limite previsto per" +
+							"quel codice", person.name, person.surname, absenceType.code);
+					render("@save");
+					return;
+				}
 			}
+			
+			
 			Absence absence = new Absence();
 			absence.absenceType = absenceType;
 			absence.personDay = pd;
@@ -544,6 +551,7 @@ public class Absences extends Controller{
 			pm.prendiRiposoCompensativo(dateFrom);
 			pm.save();
 			pd.populatePersonDay();
+			pd.updatePersonDay();
 			pd.save();
 			flash.success("Aggiunto codice di assenza %s ", absenceType.code);
 			render("@save");

@@ -246,6 +246,30 @@ public class Person extends Model {
 
 	@OneToOne(mappedBy="person", fetch=FetchType.LAZY,  cascade = {CascadeType.REMOVE})
 	public PersonShift personShift;
+
+	
+	
+	public String getName(){
+		return this.name;
+	}
+	
+	public String getSurname(){
+		return this.surname;
+	}
+	
+	public void setCompetenceCodes(List<CompetenceCode> competenceCode)
+	{
+		this.competenceCode = competenceCode;
+	}
+	
+	
+	/*
+	public WorkingTimeType getWorkingTimeType(){
+		return this.workingTimeType;
+	}
+	*/
+	
+	
 	
 //	@NotAudited
 //	@ManyToOne(fetch=FetchType.LAZY)
@@ -256,6 +280,7 @@ public class Person extends Model {
 		return String.format("%s %s", surname, name);
 	}
 
+	
 	/**
 	 * 
 	 * @return il piano ferie associato al contratto a sua volta associato alla data di oggi
@@ -298,27 +323,19 @@ public class Person extends Model {
 	 */
 	public Contract getContract(LocalDate date){
 
-		Contract contract = Contract.find("Select con from Contract con where con.person = ? and (con.beginContract IS NULL or con.beginContract <= ?) and " +
-				"(con.expireContract > ? or con.expireContract is null )",this, date, date).first();
+		Contract contract = Contract.find("Select con from Contract con where con.person = ? and (con.beginContract IS NULL or con.beginContract <= ?) and (con.expireContract > ? or con.expireContract is null )",
+				this,
+				date,
+				date).first();
 		if(contract == null){
 			return null;
 		}
-//		Logger.debug("La lista contratti è %s", contracts);
-//		Logger.debug("Il primo contratto è: %s", contracts.get(0));
-//		
-//		if (contracts.size() > 1) {
-//
-//			throw new IllegalStateException(
-//					String.format("Trovati più contratti in contemporanea per la persona %s nella data %s", this, date));
-//			
-//		}
-//		else
 		return contract;
 
 	}
 	/**
 	 * 
-	 * @return il contratto attualmente attivo per quella persona
+	 * @return il contratto attualmente attivo per quella persona, null se la persona non ha contratto attivo
 	 */
 	public Contract getCurrentContract(){
 		return getContract(LocalDate.now());
@@ -364,8 +381,7 @@ public class Person extends Model {
 		else
 			return null;
 	}
-
-
+	
 	@Override
 	public String toString() {
 		return String.format("Person[%d] - %s %s", id, name, surname);
@@ -485,6 +501,19 @@ public class Person extends Model {
 	}
 	
 	/**
+	 * True se la persona alla data ha un contratto attivo, False altrimenti
+	 * @param date
+	 */
+	public boolean isActive(LocalDate date)
+	{
+		Contract c = this.getCurrentContract();
+		if(c==null)
+			return false;
+		else
+			return true;
+	}
+	
+	/**
 	 *  La lista delle persone che abbiano almeno un giorno lavorativo coperto da contratto nel mese month
 	 *  ordinate per id
 	 * @param month
@@ -493,7 +522,10 @@ public class Person extends Model {
 	 */
 	public static List<Person> getActivePersonsInMonth(int month, int year)
 	{
-		List<Person> persons = Person.find("SELECT p FROM Person p ORDER BY p.id").fetch();
+		/**
+		 * FIXME: rivedere le select in modo da renderle più efficienti
+		 */
+		List<Person> persons = Person.find("SELECT p FROM Person p ORDER BY p.surname, p.othersSurnames, p.name").fetch();
 		List<Person> activePersons = new ArrayList<Person>();
 		for(Person person : persons)
 		{
@@ -920,6 +952,13 @@ public class Person extends Model {
 		return flag;
 	}
 
-
+	/**
+	 * Cerca per numero di matricola
+	 * @param number
+	 * @return
+	 */
+	public static Person findByNumber(Integer number) {
+		return Person.find("SELECT p FROM Person p WHERE number = ?", number).first();
+	}
 
 }

@@ -1,12 +1,25 @@
 #{extends 'main_admin.html' /}
 #{functionalMenuForm mainMenu: mainMenu /} 
-
+<div class="container">
 <h2 id="titoloGestioneTipiFerie">Gestione dei tipi di ferie e dei permessi legge</h2>
-
-<p id="nuovoPianoFerie"><a href="@{VacationsAdmin.insertVacationCode}">Nuovo</a></p>
+<div id="tabellaPianoFerie"class="span7">
+<p class="text-info" id="nuovoPianoFerie"><a href="@{VacationsAdmin.insertVacationCode}" class="insertVacationCode${}">Nuovo piano ferie</a>
+		<script type="text/javascript"> 
+				$('.insertVacationCode${}').popupWindow({ 
+				height:500, 
+				width:600,
+				scrollbars:1,
+				resizable:0,
+				top:50, 
+				left:50 
+				}); 
+		</script>
+</p>
 
 <h3 id="titoloPianoFerie">Tipi di piano ferie definiti</h3>
-<table>
+
+<table class="table table-striped">
+
 	<tr>
 		<th>Nome</th>
 		<th>Giorni di ferie</th>
@@ -17,7 +30,18 @@
 		for(vacationCode in vacationCodeList){
 	}%
 	<tr>
-		<td><a href="@{VacationsAdmin.edit(vacationCode.id)}">${vacationCode.description}</a></td>
+		<td><a href="@{VacationsAdmin.edit(vacationCode.id)}" class="editVacationCode${vacationCode.id}">${vacationCode.description}</a>
+		<script type="text/javascript"> 
+				$('.editVacationCode${vacationCode.id}').popupWindow({ 
+				height:500, 
+				width:600,
+				scrollbars:1,
+				resizable:0,
+				top:50, 
+				left:50 
+				}); 
+				</script>
+		</td>
 		<td>${vacationCode.vacationDays}</td>
 		<td>${vacationCode.permissionDays}</td>
 		<td></td>		
@@ -27,3 +51,5 @@
 	}%
 
 </table>
+</div>
+</div>

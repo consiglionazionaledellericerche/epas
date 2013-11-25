@@ -3,10 +3,10 @@
 #{logoutForm /}
 
 #{functionalMenuForm mainMenu: mainMenu /} 
-
-<h3>Riepilogo ore di lavoro, straordinario e recuperi (${person.surname} ${person.name} anno: ${year})</h3>
-
-<table>
+<div class="container">
+<h3 id="riepilogoOrarioLavoro">Riepilogo ore di lavoro, straordinario e recuperi (${person.surname} ${person.name} anno: ${year})</h3>
+<div class="span11">
+<table class="table table-hover">
 	<tr>
 		<th rowspan=2>Mese</th>
 		<th rowspan=2>Da iniz.</th>
@@ -38,5 +38,5 @@
 	}%
 
 </table>
-
-
+</div>
+</div>
