@@ -59,6 +59,7 @@ public class Mese {
 			setPersonDayInformation();
 			setPersonMonthInformation();
 			
+			
 			//se il residuo iniziale e' negativo lo tolgo dal residio mensile positivo
 			if(this.monteOreAnnoPassato<0)
 			{
@@ -155,12 +156,27 @@ public class Mese {
 	public void setPersonDayInformation()
 	{
 		LocalDate monthBegin = new LocalDate(this.anno, this.mese, 1);
+		
 		LocalDate monthEnd = new LocalDate(this.anno, this.mese, 1).dayOfMonth().withMaximumValue();
+		if(new LocalDate().isBefore(monthEnd))
+			monthEnd = new LocalDate().minusDays(1);
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date desc",
 				this.person, monthBegin, monthEnd).fetch();
 		
 		//progressivo finale fine mese
-		this.progressivoFinaleMese = pdList.get(0).progressive;
+		for(PersonDay pd : pdList){
+			if(pd != null){
+				this.progressivoFinaleMese = pd.progressive;
+				break;
+			}
+			else{
+				//
+			}
+		}
+//		if(pdList.get(0) != null)
+//			this.progressivoFinaleMese = pdList.get(0).progressive;
+//		else
+//			this.progressivoFinaleMese = p;
 		
 		//progressivo finale positivo e negativo mese
 		for(PersonDay pd : pdList)
