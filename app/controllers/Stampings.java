@@ -79,9 +79,9 @@ public class Stampings extends Controller {
 		if (Security.getPerson().username.equals("admin")) {
 			Application.indexAdmin();
 		}
-
+		
 		Person person = Security.getPerson();
-		Logger.debug("Person: %s, month %d, year: %d", person, month, year);
+
 		//numero di colonne da visualizzare
 		Configuration conf = Configuration.getCurrentConfiguration();
 		int minInOutColumn = conf.numberOfViewingCoupleColumn;
@@ -182,10 +182,17 @@ public class Stampings extends Controller {
 		int compensatoryRest = personMonth.getCompensatoryRest();
 		int compensatoryRestInMinutes = personMonth.getCompensatoryRestInMinutes();
 
+		
+		WorkingTimeType wtt = person.workingTimeType;
+		Logger.debug("Working test "+  wtt.toString());
+		WorkingTimeTypeDay wttd =wtt.getWorkingTimeTypeDayFromDayOfWeek(1);
+		Logger.debug("WorkingTTD test "+  wttd.toString());
+		
 		InitializationTime initializationTime = InitializationTime.find("Select i from InitializationTime i where i.person = ?" , person).first();
 		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, 2013, initializationTime.residualMinutesPastYear);
 		Mese mese = c.getMese(year, month);
 
+		
 		//render
 		render(personMonth, numberOfInOut, numberOfCompensatoryRestUntilToday, numberOfCompensatoryRest, numberOfMealTicketToUse,numberOfMealTicketToRender,
 				daysRecap, stampModificationTypeList, stampTypeList, totale, possibileUtilizzareResiduoAnnoPrecedente,
