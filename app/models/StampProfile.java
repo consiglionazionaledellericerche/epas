@@ -52,6 +52,15 @@ public class StampProfile extends Model {
 	 */
 	public boolean fixedWorkingTime = false;
 
+	//TODO eliminare e configurare yaml
+	public void setStartFrom(String date){
+		this.startFrom = new LocalDate(date);
+	}
+	//TODO eliminare e configurare yaml
+	public void setEndTo(String date){
+		this.endTo = new LocalDate(date);
+	}
+	
 	/**
 	 * 
 	 * @param date

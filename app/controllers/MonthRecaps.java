@@ -24,7 +24,6 @@ import models.PersonMonth;
 import models.StampProfile;
 import models.Stamping;
 import models.WorkingTimeTypeDay;
-import models.efficiency.EfficientPersonDay;
 import models.enumerate.JustifiedTimeAtWork;
 
 import org.joda.time.DateTimeConstants;
@@ -101,7 +100,7 @@ public class MonthRecaps extends Controller{
 		{
 			for(PersonDay pd : pdList)
 			{
-				pd.getStampProfile();
+				//pd.getStampProfile();
 				totalTimeAtWork = totalTimeAtWork + pd.timeAtWork;
 				difference = difference + pd.difference;
 				
@@ -150,8 +149,11 @@ public class MonthRecaps extends Controller{
 					}
 				}
 			}
-			
-			PersonMonth pm = PersonMonth.getInstance(person, year, month);
+			if(person.surname.equals("De Vita"))
+			{
+				int gfff = 0 ;
+			}
+			PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? and pm.month = ?", person, year, month).first();
 			pm.updateOvertimesFromCompetences();
 			valueApproved = pm.straordinari / 60;			
 
@@ -233,10 +235,13 @@ public class MonthRecaps extends Controller{
 					monthEnd).fetch();
 			
 			
-			
+			Logger.info("Costruisco riepilogo mensile per %s %s %s",person.id, person.name, person.surname);
 			PersonMonthRecapFieldSet mr = new PersonMonthRecapFieldSet();
 			mr.populatePersonMonthRecap(person, pdList, year, month);
-
+			if(person.id.equals(206l))
+			{
+				int gfff = 0 ;
+			}
 			tableMonthRecap.put(person, "Giorni di presenza al lavoro nei giorni festivi".intern(), mr.workingDayHoliday.size());
 			tableMonthRecap.put(person, "Giorni di presenza al lavoro nei giorni lavorativi".intern(), mr.workingDayNotHoliday.size());
 			tableMonthRecap.put(person, "Ore di lavoro fatte".intern(), new Integer(mr.totalTimeAtWork));

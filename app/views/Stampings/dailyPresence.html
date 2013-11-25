@@ -1,21 +1,22 @@
 #{extends 'main_admin.html' /}
 
 #{functionalMenuForm mainMenu: mainMenu /} 
-
+<div class="container">
 <h2 id="situazionePresenzaGiornaliera">Situazione presenze del giorno ${day} <span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year}</h2>
-
-<table id="tabellaPresenzaGiornaliera">
+<div class="span10">
+<table class="table table-bordered" id="tabellaPresenzaGiornaliera">
 	<tr>
-		<th rowspan="2">Nome</th>
-		<th colspan="${maxNumberOfInOut+2}"></th>
+		<th>Nome</th>
 		
-	</tr>
+		
+	
 	%{  for(col in tablePersonDailyPresence.columnKeySet()){
 		}%
-		<th>${col}</th>
+		<th border-style="solid">${col}</th>
 	%{
 		}
 	}%
+	</tr>
 	%{  for(entry in tablePersonDailyPresence.rowMap().entrySet()){
 		}%
 	<tr>
@@ -34,3 +35,5 @@
 		}
 	}%
 </table>
+</div>
+</div>

@@ -15,8 +15,8 @@ Lasciare la casella vuota per eliminare una entrata/uscita.
 	<input type="hidden" name="day" value="${personDay.date.dayOfMonth}"/>
 	<fieldset>
 		<legend>Inserimento timbratura nel formato HH:MM</legend>
-			Ore <input type="number" min="0" max="23" name="hourStamping" value="${hourStamping}" size="5" maxlength="5"/>
-			Minuti <input type="number" min="0" max="59" name="minuteStamping" value="${minuteStamping}" size="5" maxlength="5"/>		
+			Ore <input class="span2" type="number" min="0" max="23" name="hourStamping" value="${hourStamping}" size="5" maxlength="5"/>
+			Minuti <input class="span2" type="number" min="0" max="59" name="minuteStamping" value="${minuteStamping}" size="5" maxlength="5"/>		
 			<p id="tipoTimbratura">Tipologia di timbratura: </p> <p id="choice">Ingresso <input type="radio" name="type" value="true" /> Uscita <input type="radio" name="type" value="false"/></p>
 			<p id="tipoTimbratura"> Timbratura di servizio: </p> <p id="choice"> Si <input type="radio" name="service" value="true" /> No <input type="radio" name="service" value="false" checked="checked"/></p>
 			<p id="tipoTimbratura"> Forza l'orario di lavoro al tempo di lavoro previsto (non inserire valori nei campi ore e minuti): </p><p id="choice"> Si <input type="radio" name="timeAtWork" value="true" /> No <input type="radio" name="timeAtWork" value="false" checked="checked"/></p>
@@ -24,9 +24,9 @@ Lasciare la casella vuota per eliminare una entrata/uscita.
 	</fieldset>
 	
 <div id="frm">	
-<input id="submitStamping" type="submit" value="Inserisci"/>
+<input class="btn btn-primary" id="submitStamping" type="submit" value="Inserisci"/>
 #{/form}
 #{form @Stampings.discard()}
-<input id="discardStamping" type=reset value="Annulla">
+<input class="btn" id="discardStamping" type=reset value="Annulla">
 #{/form}
 </div>
