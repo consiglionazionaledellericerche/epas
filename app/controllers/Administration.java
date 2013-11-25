@@ -146,7 +146,7 @@ public class Administration extends Controller {
 	 */
 	public static void fixPersonSituationBrowser()
 	{ 
-		fixPersonSituation(null, 2013, 1);
+		fixPersonSituation(152l, 2013, 1);
 	}
 	
 	/**

@@ -50,7 +50,7 @@ public class Security extends Secure.Security {
 		}
 		
         // Oops
-        Logger.info("Failed login for %s using password %s", username, password);
+        Logger.info("Failed login for %s ", username);
         flash.put("username", username);
         flash.error("Login failed");
         return false;

@@ -185,12 +185,13 @@ public class PersonDay extends Model {
 	{
 		for(Absence ab : absences)
 		{
-			if(ab.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay))
+			if(ab.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay) && !checkHourlyAbsenceCodeSameGroup(ab.absenceType))
 				return true;
 		}
 		return false;
 	}
 
+	
 	/**
 	 * 
 	 * @param abt
@@ -473,7 +474,7 @@ public class PersonDay extends Model {
 		}
 	
 		workTime = myWorkTime;
-		workTime = workTime + justifiedTimeAtWork;
+		//workTime = workTime;
 		//Il pranzo e' servito??		
 		this.modificationType = null;
 		int breakTicketTime = getWorkingTimeTypeDay().breakTicketTime;	//30 minuti
@@ -527,7 +528,7 @@ public class PersonDay extends Model {
 
 	
 
-		return workTime;
+		return workTime + justifiedTimeAtWork;
 
 
 	}
@@ -849,6 +850,7 @@ public class PersonDay extends Model {
 		if(this.isAllDayAbsences())
 		{
 			//FIXME 10 aprile sannicandro 18 ottobre sannicandro 
+			
 			difference = 0;
 			save();
 			return;
@@ -857,69 +859,7 @@ public class PersonDay extends Model {
 		//feriale
 		difference = timeAtWork - worktime;
 		save();
-		/*
-		if((getWorkingTimeTypeDay().holiday) && (date.getDayOfMonth()==1) && stampings.size() == 0){
-			difference = 0;
-			save();
-			return;
-		}
-
-		if(absenceList().size() > 0 && stampings.size() == 0){
-			int diff = 0;
-			for(Absence abs : absenceList()){
-				if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay){
-					difference = 0;
-					save();
-					return;
-				}
-				else{
-					diff = diff+abs.absenceType.justifiedTimeAtWork.minutesJustified;
-				}
-			}
-			difference = diff - this.person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(this.date.getDayOfWeek()).workingTime;
-			save();
-			return;
-		}
 		
-		if(timeAtWork == 0 && absences.size() > 0){
-			Logger.debug("Tempo di lavoro = 0 e assenza per %s %s in data %s", person.name, person.surname, date);
-			Absence abs = absences.get(0);
-			if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay){
-				difference = 0;
-				save();
-				return;
-			}
-		}
-		
-		if(absences.size() == 1 && stampings.size() > 0){
-			Absence abs = absences.get(0);
-			if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay){
-				difference = 0;
-				save();
-				return;
-			}
-
-		}
-
-		if(this.date.isAfter(new LocalDate()) && stampings.size()==0 && absences.size()==0 && timeAtWork == 0){
-			difference = 0;
-			save();
-			return;
-		}
-
-		if(getWorkingTimeTypeDay().holiday == false){
-			int minTimeWorking = getWorkingTimeTypeDay().workingTime;
-			Logger.trace("Time at work: %s. Tempo di lavoro giornaliero: %s", timeAtWork, minTimeWorking);
-			difference = timeAtWork - minTimeWorking;
-			save();
-		}
-		else{
-
-			difference = timeAtWork;
-			save();
-			Logger.trace("Sto calcolando la differenza in un giorno festivo per %s %s e vale: %d", person.name, person.surname, difference);
-		}		
-		 */
 		Logger.debug("Differenza per %s %s nel giorno %s: %s", person.surname, person.name, date, difference);
 
 	}
