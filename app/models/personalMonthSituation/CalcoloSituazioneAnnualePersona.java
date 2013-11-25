@@ -28,6 +28,7 @@ public class CalcoloSituazioneAnnualePersona {
 			Mese settembre  = new Mese(agosto, 2013, 9, person, initializationTime, false);
 			Mese ottobre 	= new Mese(settembre, 2013, 10, person, initializationTime, false);
 			Mese novembre   = new Mese(ottobre, 2013, 11, person, initializationTime, false);
+			Mese dicembre   = new Mese(novembre, 2013, 12, person, initializationTime, false);
 			
 			this.mesi = new ArrayList<Mese>();
 			this.mesi.add(gennaio);
@@ -41,6 +42,7 @@ public class CalcoloSituazioneAnnualePersona {
 			this.mesi.add(settembre);
 			this.mesi.add(ottobre);
 			this.mesi.add(novembre);
+			this.mesi.add(dicembre);
 			
 			
 		
