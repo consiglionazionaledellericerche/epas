@@ -449,6 +449,7 @@ table#nuovoOrarioLavoro {margin: 2em 30em 1em; align:center}
 
 table.riepilogo-ore {
 	width: 60%;
+	clear: left;
 }
 
 table.riepilogo-ore caption {
