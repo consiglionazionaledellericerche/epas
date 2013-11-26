@@ -40,6 +40,7 @@ import models.enumerate.PersonDayModificationType;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.LocalDate;
@@ -103,6 +104,7 @@ public class PersonDay extends Model {
 	@Column(name = "modification_type")
 	public String modificationType;
 	
+	@NotAudited
 	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY)
 	public List<PersonDayInTrouble> troubles = new ArrayList<PersonDayInTrouble>();
 	
