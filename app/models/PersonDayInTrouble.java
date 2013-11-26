@@ -16,7 +16,7 @@ import play.data.validation.Unique;
 import play.db.jpa.Model;
 
 @Entity
-@Audited
+//@Audited
 @Table(name="person_days_in_trouble")
 public class PersonDayInTrouble extends Model
 {
@@ -25,7 +25,7 @@ public class PersonDayInTrouble extends Model
 	public boolean fixed;
 	public boolean emailSent;
 	
-	@Audited
+	@NotAudited
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="personday_id", nullable=false, updatable=false)
 	public PersonDay personDay;

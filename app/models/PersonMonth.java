@@ -37,13 +37,12 @@ import play.db.jpa.Model;
  * @author cristian
  *
  */
-@Audited
+//@Audited
 @Table(name="person_months")
 @Entity
 public class PersonMonth extends Model {
 
 	@Required
-	@Audited
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "person_id", nullable = false, updatable = false)
 	public Person person;	
