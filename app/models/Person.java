@@ -189,6 +189,7 @@ public class Person extends Model {
 	/**
 	 * relazione con la nuova tabella dei person_month
 	 */
+	@NotAudited
 	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<PersonMonth> personMonths;
 
