@@ -90,7 +90,7 @@ GET		/persons/{personId}/changePassword		Persons.changePassword
 POST	/persons/changePassword					Persons.savePassword
 
 # Gestione timbrature
-GET		/stampings/create						Stampings.create
+GET		/stampings/new							Stampings.create
 POST	/stampings/insert/						Stampings.insert
 GET		/stampings/edit/{stampingId}			Stampings.edit
 POST	/stampings/update/						Stampings.update
