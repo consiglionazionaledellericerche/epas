@@ -43,14 +43,14 @@ import play.db.jpa.Model;
 public class PersonMonth extends Model {
 
 	@Required
-	@NotAudited
+	@Audited
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "person_id", nullable = false)
+	@JoinColumn(name = "person_id", nullable = false, updatable = false)
 	public Person person;	
 
-	@Column
+	
 	public Integer year;
-	@Column
+	
 	public Integer month;
 
 	@Transient
@@ -68,8 +68,6 @@ public class PersonMonth extends Model {
 	@Column(name = "riposi_compensativi_da_inizializzazione")
 	public int riposiCompensativiDaInizializzazione;
 	
-
-	@Column
 	public int straordinari;
 
 	@Transient
@@ -371,7 +369,6 @@ public class PersonMonth extends Model {
 	 * @param days lista di PersonDay
 	 * @return la lista contenente le assenze fatte nell'arco di tempo dalla persona
 	 */
-
 	public Map<AbsenceType,Integer> getAbsenceCode(){
 
 		if(days == null){
@@ -533,6 +530,7 @@ public class PersonMonth extends Model {
 
 	}
 
+	
 	public static PersonMonth getInstance(Person person, int year, int month) {
 		PersonMonth personMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? and pm.month = ?", person, year, month).first();
 		if (personMonth == null) {
