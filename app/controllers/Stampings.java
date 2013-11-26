@@ -517,11 +517,11 @@ public class Stampings extends Controller {
 			stamping.date = stamping.date.withHourOfDay(hour);
 			stamping.date = stamping.date.withMinuteOfHour(minute);
 			String service = params.get("service");
-			if(service.equals("false") && (stamping.stampType == null || !stamping.stampType.code.equals("s"))){
+			if(service.equals("false") && (stamping.stampType == null || !stamping.stampType.identifier.equals("s"))){
 				String note = params.get("note");
 				stamping.note = note;
 			}
-			if(service.equals("true") && (stamping.stampType == null || !stamping.stampType.code.equals("s"))){
+			if(service.equals("true") && (stamping.stampType == null || !stamping.stampType.identifier.equals("s"))){
 				stamping.note = "timbratura di servizio";
 				stamping.stampType = StampType.find("Select st from StampType st where st.code = ?", "motiviDiServizio").first();
 			}
@@ -530,7 +530,7 @@ public class Stampings extends Controller {
 				stamping.note = "timbratura inserita dall'amministratore";
 			}
 			
-			if(service.equals("true") && (stamping.stampType != null || stamping.stampType.code.equals("s"))){
+			if(service.equals("true") && (stamping.stampType != null || stamping.stampType.identifier.equals("s"))){
 				String note = params.get("note");
 				stamping.note = note;
 			}
