@@ -1,4 +1,6 @@
-#{extends 'main.html' /}
+#{extends 'main_admin.html' /}
+
+#{functionalMenuForm mainMenu: mainMenu /}
 
 #{form @Administrators.update()}
 <input type="hidden" name="personId" value="${person.id}"/>
