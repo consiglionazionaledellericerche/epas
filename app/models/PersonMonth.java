@@ -22,6 +22,7 @@ import javax.persistence.Transient;
 import models.Stamping.WayType;
 
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 
@@ -42,6 +43,7 @@ import play.db.jpa.Model;
 public class PersonMonth extends Model {
 
 	@Required
+	@NotAudited
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "person_id", nullable = false)
 	public Person person;	
