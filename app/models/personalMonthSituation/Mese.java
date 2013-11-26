@@ -170,12 +170,12 @@ public class Mese {
 
 		this.straordinariMinuti = pm.straordinari;
 
-		/*
+		
 		List<Absence> riposiCompensativi = Absence.find("Select abs from Absence abs, AbsenceType abt, PersonDay pd where abs.personDay = pd and abs.absenceType = abt and abt.code = ? and pd.person = ? "
 				+ "and pd.date between ? and ?", "91", this.person, new LocalDate(this.anno, this.mese, 1), new LocalDate(this.anno, this.mese, 1).dayOfMonth().withMaximumValue()).fetch();
 		
 		this.riposiCompensativiMinuti = riposiCompensativi.size() * this.workingTime;
-		*/
+		
 		this.riposiCompensativiMinuti = pm.riposiCompensativiDaAnnoCorrente + pm.riposiCompensativiDaAnnoPrecedente;
 	}
 	
