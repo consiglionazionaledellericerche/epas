@@ -64,7 +64,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 			JsonElement jsel = jsonObject.get("causale");
 			if(!jsel.isJsonNull()){
 				String stampTypeCode = jsel.getAsString();
-				Logger.info("Arrivata causale: %s", stampTypeCode);
+				//Logger.info("Arrivata causale: %s", stampTypeCode);
 				if (!stampTypeCode.isEmpty()) {					
 					StampType stampType = StampType.find("Select st from StampType st where st.code = ?", stampTypeCode).first();
 					
