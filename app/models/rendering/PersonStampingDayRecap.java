@@ -1,5 +1,7 @@
 package models.rendering;
 
+import it.cnr.iit.epas.DateUtility;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -233,53 +235,17 @@ public class PersonStampingDayRecap {
 	
 	private void setWorkingTime(int workTime)
 	{
-		this.workTime = fromMinuteToHourMinute(workTime);
+		this.workTime = DateUtility.fromMinuteToHourMinute(workTime);
 	}
 	
 	private void setDifference(int difference)
 	{
-		this.difference = fromMinuteToHourMinute(difference);
+		this.difference = DateUtility.fromMinuteToHourMinute(difference);
 	}
 	
 	private void setProgressive(int progressive)
 	{
-		this.progressive = fromMinuteToHourMinute(progressive);
-	}
-	
-	/**
-	 * TODO sostituirlo con PersonTags.toHourTime
-	 * @param minute
-	 * @return
-	 */
-	private static String fromMinuteToHourMinute(int minute)
-	{
-		String s = "";
-		if(minute<0)
-		{
-			s = s + "-";
-			minute = minute * -1;
-		}
-		int hour = minute / 60;
-		int min  = minute % 60;
-		
-		if(hour<10)
-		{
-			s = s + "0" + hour;
-		}
-		else
-		{
-			s = s + hour;
-		}
-		s = s + ":";
-		if(min<10)
-		{
-			s = s + "0" + min;
-		}
-		else
-		{
-			s = s + min;
-		}
-		return s;
+		this.progressive = DateUtility.fromMinuteToHourMinute(progressive);
 	}
 	
 	private static void addStampModificationTypeToList(StampModificationType smt)

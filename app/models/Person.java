@@ -606,6 +606,7 @@ public class Person extends Model {
 				stamp.way = WayType.in;
 			else
 				stamp.way = WayType.out;
+			stamp.stampType = stamping.stampType;
 			stamp.badgeReader = stamping.badgeReader;
 			stamp.personDay = pd;
 			stamp.save();
@@ -623,6 +624,7 @@ public class Person extends Model {
 					stamp.way = WayType.in;
 				else
 					stamp.way = WayType.out;
+				stamp.stampType = stamping.stampType;
 				stamp.badgeReader = stamping.badgeReader;
 				stamp.personDay = pd;
 				stamp.save();
@@ -652,10 +654,7 @@ public class Person extends Model {
 		}
 		Logger.debug("Chiamo la populatePersonDay per fare i calcoli sulla nuova timbratura inserita per il personDay %s", pd);
 		pd.populatePersonDay();
-		/**
-		 * controllare se può essere una save qui al posto della merge il problema al fatto che le timbrature prese dal client non permettano
-		 * i calcoli
-		 */
+
 		pd.save();
 		return true;
 	}
