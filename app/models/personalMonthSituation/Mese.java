@@ -119,11 +119,11 @@ public class Mese {
 		
 		// AGGIORNAMENTO DEL PERSON MONTH
 		
-//		PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? and pm.month = ?", this.person, this.anno, this.mese).first();
-//		pm.riposiCompensativiDaAnnoPrecedente = this.riposiCompensativiMinutiImputatoAnnoPassato;
-//		pm.riposiCompensativiDaAnnoCorrente = this.riposiCompensativiMinutiImputatoAnnoCorrente;
-//		pm.save();
-//		Logger.info("Persistito person month %s %s per la persona %s %s %s", this.anno, this.mese, this.person.id, this.person.surname, this.person.name);
+		PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? and pm.month = ?", this.person, this.anno, this.mese).first();
+		pm.riposiCompensativiDaAnnoPrecedente = this.riposiCompensativiMinutiImputatoAnnoPassato;
+		pm.riposiCompensativiDaAnnoCorrente = this.riposiCompensativiMinutiImputatoAnnoCorrente;
+		pm.save();
+		Logger.info("Persistito person month %s %s per la persona %s %s %s", this.anno, this.mese, this.person.id, this.person.surname, this.person.name);
 		
 		return;
 	}
