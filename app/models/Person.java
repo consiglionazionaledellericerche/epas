@@ -189,9 +189,9 @@ public class Person extends Model {
 	/**
 	 * relazione con la nuova tabella dei person_month
 	 */
-	@Audited
+	@NotAudited
 	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<PersonMonth> personMonths;
+	public List<PersonMonth> personMonths = new ArrayList<PersonMonth>();
 
 	/**
 	 * relazione con la nuova tabella dei person_year
