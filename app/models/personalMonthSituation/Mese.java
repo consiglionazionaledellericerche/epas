@@ -177,8 +177,7 @@ public class Mese {
 				+ "and pd.date between ? and ?", "91", this.person, new LocalDate(this.anno, this.mese, 1), new LocalDate(this.anno, this.mese, 1).dayOfMonth().withMaximumValue()).fetch();
 		
 		this.riposiCompensativiMinuti = riposiCompensativi.size() * this.workingTime;
-		
-		this.riposiCompensativiMinuti = pm.riposiCompensativiDaAnnoCorrente + pm.riposiCompensativiDaAnnoPrecedente;
+		//this.riposiCompensativiMinuti = pm.riposiCompensativiDaAnnoCorrente + pm.riposiCompensativiDaAnnoPrecedente;
 	}
 	
 	public void assegnaProgressivoFinaleNegativo()
