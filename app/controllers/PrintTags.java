@@ -18,7 +18,6 @@ import play.Logger;
 import play.i18n.Lang;
 import play.mvc.Controller;
 import play.mvc.With;
-
 import static play.modules.pdf.PDF.*;
 
 @With( {Secure.class, NavigationMenu.class} )
@@ -46,10 +45,13 @@ public class PrintTags extends Controller{
 		
 		PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
 				person, month, year).first();
-		int numberOfInOut = Math.min(confParameters.numberOfViewingCoupleColumn, (int)pm.getMaximumCoupleOfStampings());
+		
 		PersonMonth personMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?",
 				person, month, year).first();
 
+		//int numberOfInOut = Math.min(confParameters.numberOfViewingCoupleColumn, (int)pm.getMaximumCoupleOfStampings());
+		int numberOfInOut = Math.max(0, (int)personMonth.getMaximumCoupleOfStampings());
+				
 		//TODO 18/10 usare metodo in models.person getMonthContract() per implementare questo controllo
 		if (personMonth == null) {
 			/**
