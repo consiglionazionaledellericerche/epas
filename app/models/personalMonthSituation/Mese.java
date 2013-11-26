@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.joda.time.LocalDate;
 
+import play.Logger;
 import models.Absence;
 import models.Person;
 import models.PersonDay;
@@ -39,26 +40,25 @@ public class Mese {
 	public int monteOreAnnoPassato;
 	public int monteOreAnnoCorrente;
 	
-	//public int residuoMesiPrecedentiAnnoCorrente;
-	
 	public Mese(Mese mesePrecedente, int anno, int mese, Person person, int tempoInizializzazione, boolean febmar)
 	{
+		
+		this.person = person;
+		this.workingTime = this.person.workingTimeType.workingTimeTypeDays.get(1).workingTime;
+		this.qualifica = person.qualification.qualification;
+		this.anno = anno;
+		this.mese = mese;
+		
 		//Gennaio
 		if(mesePrecedente==null)
 		{
-			this.person = person;
-			this.workingTime = this.person.workingTimeType.workingTimeTypeDays.get(1).workingTime;
-			this.qualifica = person.qualification.qualification;
-			this.anno = anno;
-			this.mese = mese;
+			
 			this.mesePrecedente = null;
 			this.tempoInizializzazione = tempoInizializzazione;
 			this.monteOreAnnoPassato = tempoInizializzazione;
 			
-			
 			setPersonDayInformation();
 			setPersonMonthInformation();
-			
 			
 			//se il residuo iniziale e' negativo lo tolgo dal residio mensile positivo
 			if(this.monteOreAnnoPassato<0)
@@ -67,25 +67,12 @@ public class Mese {
 				this.monteOreAnnoPassato = 0;
 			}
 			
-			assegnaProgressivoFinaleNegativo();
-			assegnaStraordinari();
-			assegnaRiposiCompensativi();
-			
-			this.progressivoFinaleNegativoMeseImputatoAnnoCorrente = this.progressivoFinaleNegativoMeseImputatoAnnoCorrente + this.progressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese;
-			this.riposiCompensativiMinutiImputatoAnnoCorrente = this.riposiCompensativiMinutiImputatoAnnoCorrente + this.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese;
-			
-			this.monteOreAnnoCorrente = this.monteOreAnnoCorrente + this.progressivoFinalePositivoMese;
-			return;
+
 		}
 		
 		//Febbraio / Marzo
-		if(febmar)
+		else if(febmar)
 		{
-			this.person = person;
-			this.workingTime = this.person.workingTimeType.workingTimeTypeDays.get(1).workingTime;
-			this.qualifica = person.qualification.qualification;
-			this.anno = anno;
-			this.mese = mese;
 			this.mesePrecedente = mesePrecedente;
 			this.tempoInizializzazione = tempoInizializzazione;
 			this.monteOreAnnoPassato = mesePrecedente.monteOreAnnoPassato;
@@ -93,34 +80,12 @@ public class Mese {
 			
 			setPersonDayInformation();
 			setPersonMonthInformation();
-			
-			/*dopo gennaio non accade più (speriamo)
-			//se il residuo iniziale e' negativo lo tolgo dal residio mensile positivo
-			if(this.monteOreAnnoPassato<0)
-			{
-				this.progressivoFinalePositivoMese = this.progressivoFinalePositivoMese + this.tempoInizializzazione;
-				this.monteOreAnnoPassato = 0;
-			}
-			*/
-			
-			assegnaProgressivoFinaleNegativo();
-			assegnaStraordinari();
-			assegnaRiposiCompensativi();
-			
-			this.progressivoFinaleNegativoMeseImputatoAnnoCorrente = this.progressivoFinaleNegativoMeseImputatoAnnoCorrente + this.progressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese;
-			this.riposiCompensativiMinutiImputatoAnnoCorrente = this.riposiCompensativiMinutiImputatoAnnoCorrente + this.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese;
-			
-			this.monteOreAnnoCorrente = this.monteOreAnnoCorrente + this.progressivoFinalePositivoMese;
-			return;
+
 		}
 		
-		if(!febmar)
+		// Aprile -> Dicembre
+		else if(!febmar)
 		{
-			this.person = person;
-			this.workingTime = this.person.workingTimeType.workingTimeTypeDays.get(1).workingTime;
-			this.qualifica = person.qualification.qualification;
-			this.anno = anno;
-			this.mese = mese;
 			this.mesePrecedente = mesePrecedente;
 			this.tempoInizializzazione = tempoInizializzazione;
 			this.monteOreAnnoPassato = mesePrecedente.monteOreAnnoPassato;
@@ -132,34 +97,41 @@ public class Mese {
 			setPersonDayInformation();
 			setPersonMonthInformation();
 			
-			/*dopo gennaio non accade più (speriamo)
-			//se il residuo iniziale e' negativo lo tolgo dal residio mensile positivo
-			if(this.monteOreAnnoPassato<0)
-			{
-				this.progressivoFinalePositivoMese = this.progressivoFinalePositivoMese + this.tempoInizializzazione;
-				this.monteOreAnnoPassato = 0;
-			}
-			*/
-			
-			assegnaProgressivoFinaleNegativo();
-			assegnaStraordinari();
-			assegnaRiposiCompensativi();
-			
-			this.progressivoFinaleNegativoMeseImputatoAnnoCorrente = this.progressivoFinaleNegativoMeseImputatoAnnoCorrente + this.progressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese;
-			this.riposiCompensativiMinutiImputatoAnnoCorrente = this.riposiCompensativiMinutiImputatoAnnoCorrente + this.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese;
-			
-			this.monteOreAnnoCorrente = this.monteOreAnnoCorrente + this.progressivoFinalePositivoMese;
-			return;
 		}
+		
+
+		assegnaProgressivoFinaleNegativo();
+		assegnaStraordinari();
+		assegnaRiposiCompensativi();
+		
+		//All'anno corrente imputo sia ciò che ho imputato al residuo del mese precedente dell'anno corrente sia ciò che ho imputato al progressivo finale positivo del mese
+		//perchè non ho interesse a visualizzarli separati nel template. 
+		this.progressivoFinaleNegativoMeseImputatoAnnoCorrente = this.progressivoFinaleNegativoMeseImputatoAnnoCorrente + this.progressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese;
+		this.riposiCompensativiMinutiImputatoAnnoCorrente = this.riposiCompensativiMinutiImputatoAnnoCorrente + this.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese;
+		
+		//Al monte ore dell'anno corrente aggingo ciò che non ho utilizzato del progressivo finale positivo del mese
+		this.monteOreAnnoCorrente = this.monteOreAnnoCorrente + this.progressivoFinalePositivoMese;
+		
+		
+		
+		
+		// AGGIORNAMENTO DEL PERSON MONTH
+		PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? and pm.month = ?", this.person, this.anno, this.mese).first();
+		pm.riposiCompensativiDaAnnoPrecedente = this.riposiCompensativiMinutiImputatoAnnoPassato;
+		pm.riposiCompensativiDaAnnoCorrente = this.riposiCompensativiMinutiImputatoAnnoCorrente;
+		pm.save();
+		Logger.info("Persistito person month %s %s per la persona %s %s %s", this.anno, this.mese, this.person.id, this.person.surname, this.person.name);
+		return;
 	}
 	
 	public void setPersonDayInformation()
 	{
 		LocalDate monthBegin = new LocalDate(this.anno, this.mese, 1);
-		
 		LocalDate monthEnd = new LocalDate(this.anno, this.mese, 1).dayOfMonth().withMaximumValue();
+		
 		if(new LocalDate().isBefore(monthEnd))
 			monthEnd = new LocalDate().minusDays(1);
+		
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date desc",
 				this.person, monthBegin, monthEnd).fetch();
 		
@@ -173,11 +145,7 @@ public class Mese {
 				//
 			}
 		}
-//		if(pdList.get(0) != null)
-//			this.progressivoFinaleMese = pdList.get(0).progressive;
-//		else
-//			this.progressivoFinaleMese = p;
-		
+
 		//progressivo finale positivo e negativo mese
 		for(PersonDay pd : pdList)
 		{
@@ -200,10 +168,13 @@ public class Mese {
 
 		this.straordinariMinuti = pm.straordinari;
 
+		/*
 		List<Absence> riposiCompensativi = Absence.find("Select abs from Absence abs, AbsenceType abt, PersonDay pd where abs.personDay = pd and abs.absenceType = abt and abt.code = ? and pd.person = ? "
 				+ "and pd.date between ? and ?", "91", this.person, new LocalDate(this.anno, this.mese, 1), new LocalDate(this.anno, this.mese, 1).dayOfMonth().withMaximumValue()).fetch();
 		
 		this.riposiCompensativiMinuti = riposiCompensativi.size() * this.workingTime;
+		*/
+		this.riposiCompensativiMinuti = pm.riposiCompensativiDaAnnoCorrente + pm.riposiCompensativiDaAnnoPrecedente;
 	}
 	
 	public void assegnaProgressivoFinaleNegativo()
@@ -236,41 +207,12 @@ public class Mese {
 			this.monteOreAnnoCorrente = 0;
 			this.progressivoFinaleNegativoMese = this.progressivoFinaleNegativoMese - this.progressivoFinaleNegativoMeseImputatoAnnoCorrente;
 		}
+		
 		//quello che assegno al progressivo positivo del mese
-		/*
-		if(this.progressivoFinaleNegativoMese < this.progressivoFinalePositivoMese)
-		{
-			this.progressivoFinalePositivoMese = this.progressivoFinalePositivoMese - this.progressivoFinaleNegativoMese;
-			this.progressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese = this.progressivoFinaleNegativoMese;
-			return;
-		}
-		else
-		{
-			this.progressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese = this.progressivoFinalePositivoMese;
-			this.progressivoFinalePositivoMese = 0;
-			this.progressivoFinaleNegativoMese = this.progressivoFinaleNegativoMese - this.progressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese;
-		}
-		*/
 		this.progressivoFinalePositivoMese = this.progressivoFinalePositivoMese - this.progressivoFinaleNegativoMese;
 		this.progressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese = this.progressivoFinaleNegativoMese;
 		return;
 		
-		
-		/*
-		this.monteOreAnnoPassato = this.monteOreAnnoPassato - this.progressivoFinaleNegativoMese;
-		if(this.monteOreAnnoPassato<0)
-		{
-			this.progressivoFinaleNegativoMeseImputatoAnnoCorrente = -1 * this.monteOreAnnoPassato; //** solo per debug
-			this.monteOreAnnoCorrente = this.monteOreAnnoCorrente + this.monteOreAnnoPassato;
-			this.monteOreAnnoPassato = 0;
-			if(this.monteOreAnnoCorrente<0)
-			{
-				this.progressivoFinalePositivoMese = this.progressivoFinalePositivoMese + this.monteOreAnnoCorrente;
-				this.progressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese = -1 * this.monteOreAnnoCorrente; //** solo per debug
-			}
-		}
-		this.progressivoFinaleNegativoMeseImputatoAnnoPassato = this.progressivoFinaleNegativoMese - this.progressivoFinaleNegativoMeseImputatoAnnoCorrente - this.progressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese; //solo per debug
-		*/
 	}
 	
 	public void assegnaStraordinari()
@@ -308,42 +250,9 @@ public class Mese {
 			this.riposiCompensativiMinuti = this.riposiCompensativiMinuti - this.riposiCompensativiMinutiImputatoAnnoCorrente;
 		}
 		//quello che assegno al progressivo positivo del mese
-		/*
-		if(this.riposiCompensativiMinuti < this.progressivoFinalePositivoMese)
-		{
-			this.progressivoFinalePositivoMese = this.progressivoFinalePositivoMese - this.riposiCompensativiMinuti;
-			this.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese = this.riposiCompensativiMinuti;
-			return;
-		}
-		else
-		{
-			this.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese = this.progressivoFinalePositivoMese;
-			this.progressivoFinalePositivoMese = 0;
-			this.riposiCompensativiMinuti = this.riposiCompensativiMinuti - this.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese;
-		}
-		*/
 		this.progressivoFinalePositivoMese = this.progressivoFinalePositivoMese - this.riposiCompensativiMinuti;
 		this.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese = this.riposiCompensativiMinuti;
-		//this.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese = this.progressivoFinalePositivoMese;
-		//this.riposiCompensativiMinuti = this.riposiCompensativiMinuti - this.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese;
-		
-		
-		/*
-		this.monteOreAnnoPassato = this.monteOreAnnoPassato - this.riposiCompensativiMinuti;
-		if(this.monteOreAnnoPassato<0)
-		{
-			this.riposiCompensativiMinutiImputatoAnnoCorrente = -1 * this.monteOreAnnoPassato; //** solo per debug
-			this.monteOreAnnoCorrente = this.monteOreAnnoCorrente + this.monteOreAnnoPassato;
-			this.monteOreAnnoPassato = 0;
-			if(this.monteOreAnnoCorrente<0)
-			{
-				this.progressivoFinalePositivoMese = this.progressivoFinalePositivoMese + this.monteOreAnnoCorrente;
-				this.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese = -1 * this.monteOreAnnoCorrente; //** solo per debug
-			}
-			
-		}
-		this.riposiCompensativiMinutiImputatoAnnoPassato = this.riposiCompensativiMinuti - this.riposiCompensativiMinutiImputatoAnnoCorrente - this.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese; //solo per debug
-		*/
+	
 	}
 	
 }
