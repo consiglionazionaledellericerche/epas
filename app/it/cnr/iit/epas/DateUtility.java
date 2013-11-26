@@ -243,4 +243,40 @@ public class DateUtility {
 		LocalDate date = new LocalDate().withMonthOfYear(monthNumber);
 		return date.monthOfYear().getAsText();
 	}
+
+	/**
+	 * 
+	 * @param minute
+	 * @return
+	 */
+	public static String fromMinuteToHourMinute(int minute)
+	{
+		String s = "";
+		if(minute<0)
+		{
+			s = s + "-";
+			minute = minute * -1;
+		}
+		int hour = minute / 60;
+		int min  = minute % 60;
+		
+		if(hour<10)
+		{
+			s = s + "0" + hour;
+		}
+		else
+		{
+			s = s + hour;
+		}
+		s = s + ":";
+		if(min<10)
+		{
+			s = s + "0" + min;
+		}
+		else
+		{
+			s = s + min;
+		}
+		return s;
+	}
 }
