@@ -186,12 +186,12 @@ public class Administration extends Controller {
 	public static void fixPersonSituation(Long personid, int year, int month){
 		
 		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
-		JPAPlugin.startTx(false);
-		if(personid==null)
-			PersonUtility.checkHistoryError(null, year, month);
-		else
-			PersonUtility.checkHistoryError(personid, year, month);
-		JPAPlugin.closeTx(false);
+//		JPAPlugin.startTx(false);
+//		if(personid==null)
+//			PersonUtility.checkHistoryError(null, year, month);
+//		else
+//			PersonUtility.checkHistoryError(personid, year, month);
+//		JPAPlugin.closeTx(false);
 		
 		// (2) Ricalcolo i valori dei person day aggregandoli per mese
 		JPAPlugin.startTx(true);
