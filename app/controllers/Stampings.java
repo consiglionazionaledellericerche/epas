@@ -496,21 +496,10 @@ public class Stampings extends Controller {
 
 			stamping.delete();
 			pd.stampings.remove(stamping);
-			//			stamping.considerForCounting = true;
-			//			stamping.save();
+
 			pd.populatePersonDay();
 			pd.updatePersonDay();
-			/*
-			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ?", 
-					pd.person, pd.date).fetch();
-			for(PersonDay p : pdList){
-				if(p.date.getMonthOfYear() == stamping.date.getMonthOfYear()){
-					p.populatePersonDay();
-					p.save();
-				}
-
-			}
-			*/
+	
 			flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(stamping.date.toLocalDate()));	
 
 			render("@save");
@@ -527,34 +516,29 @@ public class Stampings extends Controller {
 
 			stamping.date = stamping.date.withHourOfDay(hour);
 			stamping.date = stamping.date.withMinuteOfHour(minute);
-
-			stamping.markedByAdmin = true;
-			if(!params.get("note").equals(""))
-				stamping.note = params.get("note");
-			else
-				stamping.note = "timbratura modificata dall'amministratore";
-			stamping.save();
-			/*
-			pd.populatePersonDay();
-			pd.save();
-			//stamping.personDay.populatePersonDay();
-			//stamping.personDay.save();
-			Logger.debug("Aggiornata ora della timbratura alle ore: %s", stamping.date);
-			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ?", 
-					stamping.personDay.person, stamping.personDay.date).fetch();
-			for(PersonDay p : pdList){
-				if(p.date.getMonthOfYear() == stamping.date.getMonthOfYear()){
-					//ricomputo il progressivo per ogni giorno del mese successivo (eccetto oggi)
-					LocalDate today = new LocalDate();
-					if( !p.date.isEqual(today) )
-					{
-						p.populatePersonDay();
-						p.save();
-					}	
-				}
-
+			String service = params.get("service");
+			if(service.equals("false") && (stamping.stampType == null || !stamping.stampType.code.equals("s"))){
+				String note = params.get("note");
+				stamping.note = note;
 			}
-			*/
+			if(service.equals("true") && (stamping.stampType == null || !stamping.stampType.code.equals("s"))){
+				stamping.note = "timbratura di servizio";
+				stamping.stampType = StampType.find("Select st from StampType st where st.code = ?", "motiviDiServizio").first();
+			}
+			if(service.equals("false") && (stamping.stampType != null)){
+				stamping.stampType = null;
+				stamping.note = "timbratura inserita dall'amministratore";
+			}
+			
+			if(service.equals("true") && (stamping.stampType != null || stamping.stampType.code.equals("s"))){
+				String note = params.get("note");
+				stamping.note = note;
+			}
+			
+			stamping.markedByAdmin = true;
+			
+			stamping.save();
+		
 			pd.populatePersonDay();
 			pd.updatePersonDay();
 			flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name);

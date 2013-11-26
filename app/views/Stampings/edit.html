@@ -13,6 +13,8 @@ Lasciare le caselle vuote per eliminare una entrata/uscita.</p>
 
 	<input class="span2" type="number" min="0" max="23" name="stampingHour" value="${hourMinute.get(0)}" size="5" maxlength="5"/>
 	<input class="span2" type="number" min="0" max="59" name="stampingMinute" value="${hourMinute.get(1)}" size="5" maxlength="5"/>
+	
+	<p id="tipoTimbratura"> Timbratura di servizio: </p> <p id="choice"> Si <input type="radio" name="service" value="true" /> No <input type="radio" name="service" value="false" checked="checked"/></p>
 	<p id="tipoTimbratura">Note amministratore: <input id="note" type="text" name="note" value="" /></p>
 
 </fieldset>
