@@ -172,6 +172,7 @@ public class Administration extends Controller {
 	/**
 	 * Ricalcolo della situazione di ogni persona a partire da gennaio 2013
 	 */
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void fixPersonSituationBrowser()
 	{ 
 		fixPersonSituation(236l, 2013, 1);
@@ -196,6 +197,7 @@ public class Administration extends Controller {
 	public static void fixPersonSituation(Long personId, int year, int month){
 		if(personId==-1)
 			personId=null;
+
 		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
 		JPAPlugin.startTx(false);
 		if(personId==null)
