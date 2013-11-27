@@ -374,6 +374,8 @@ public class Absences extends Controller{
 				absence.absenceType = absenceType;
 				absence.personDay = pd;
 				absence.save();
+				pd.updatePersonDay();
+				//Administration.fixPersonSituation(person.id, yearFrom, monthFrom);
 				flash.success("Inserito il codice d'assenza %s nel giorno %s", absenceType.code, pd.date);
 				render("@save");
 			}
@@ -405,10 +407,13 @@ public class Absences extends Controller{
 
 						pd.populatePersonDay();
 						pd.save();
-
+						
 						dateFrom = dateFrom.plusDays(1);
 					}
+					
 				}
+				pdList.get(0).updatePersonDay();
+				//Administration.fixPersonSituation(person.id, yearFrom, monthFrom);
 				flash.success("Inserito codice d'assenza %s per il periodo richiesto", absenceType.code);
 				render("@save");
 			}
@@ -436,6 +441,8 @@ public class Absences extends Controller{
 					absence.absenceType = abt;
 					absence.personDay = pd;
 					absence.save();
+					pd.updatePersonDay();
+					//Administration.fixPersonSituation(person.id, yearFrom, monthFrom);
 					flash.success("Inserito il codice di assenza %s per il giorno %s", abt.code, pd.date);
 					render("@save");
 				}
@@ -479,18 +486,9 @@ public class Absences extends Controller{
 							dateFrom = dateFrom.plusDays(1);
 						}
 					}
-					//					int size = pdList.size();
-					//					Logger.debug("la dimensione della lista è: %d", size);
-					//					PersonDay pd = pdList.get(size-1);
-					//					if(pd.date.isBefore(new LocalDate(pd.date).dayOfMonth().withMaximumValue())){
-					//						List<PersonDay> pdList2 = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ? and pd.date <= ?", 
-					//								pd.person, pd.date, new LocalDate(pd.date).dayOfMonth().withMaximumValue()).fetch();
-					//						for(PersonDay personday : pdList2){
-					//							personday.populatePersonDay();
-					//							personday.save();
-					//						}
-					//					}
+					pdList.get(0).updatePersonDay();
 				}
+				//Administration.fixPersonSituation(person.id, yearFrom, monthFrom);
 				flash.success("Inserito il codice di assenza per il periodo richiesto");
 				render("@save");
 
@@ -553,6 +551,7 @@ public class Absences extends Controller{
 			pd.populatePersonDay();
 			pd.updatePersonDay();
 			pd.save();
+			//Administration.fixPersonSituation(person.id, yearFrom, monthFrom);
 			flash.success("Aggiunto codice di assenza %s ", absenceType.code);
 			render("@save");
 
@@ -579,6 +578,8 @@ public class Absences extends Controller{
 				
 				pd.populatePersonDay();
 				pd.save();
+				pd.updatePersonDay();
+				//Administration.fixPersonSituation(person.id, yearFrom, monthFrom);
 				flash.success("Aggiunto codice di assenza %s "+checkMessage.message, absenceType.code);
 				render("@save");
 
@@ -596,9 +597,12 @@ public class Absences extends Controller{
 				pd.absences.add(compAbsence);
 				pd.save();
 				pd.populatePersonDay();
+				pd.updatePersonDay();
+				//Administration.fixPersonSituation(person.id, yearFrom, monthFrom);
 				flash.success("Aggiunto codice di assenza %s "+checkMessage.message, absenceType.code);
 				render("@save");
 			}
+			
 		}
 
 		Absence absence = new Absence();
@@ -624,7 +628,7 @@ public class Absences extends Controller{
 			pd.save();
 			Logger.debug("Creata e salvata l'assenza %s con codice %s", absence, absence.absenceType.code);
 			pd.populatePersonDay();
-
+			
 			if(pd.date.isBefore(new LocalDate(pd.date).dayOfMonth().withMaximumValue())){
 				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ? and pd.date <= ? order by pd.date", 
 						pd.person, pd.date, new LocalDate(pd.date).dayOfMonth().withMaximumValue()).fetch();
@@ -633,9 +637,11 @@ public class Absences extends Controller{
 					personday.save();
 				}
 			}
-
+			pd.updatePersonDay();
+			//Administration.fixPersonSituation(person.id, yearFrom, monthFrom);
 			flash.success(
 					String.format("Assenza di tipo %s inserita per il giorno %s per %s %s", absenceCode, PersonTags.toDateTime(dateFrom), person.surname, person.name));
+			
 			render("@save");
 
 		}
@@ -674,16 +680,9 @@ public class Absences extends Controller{
 					dateFrom = dateFrom.plusDays(1);
 				}
 			}
-			//			List<PersonDay> otherPdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ?", 
-			//					pd.person, pd.date).fetch();
-			//			for(PersonDay p : otherPdList){
-			//				if(p.date.getMonthOfYear() == absence.personDay.date.getMonthOfYear()){
-			//					p.populatePersonDay();
-			//					p.save();
-			//				}
-			//				
-			//			}
+			pdList.get(0).updatePersonDay();
 			flash.success("Inserita assenza %s dal %s al %s", absenceType.code, dateFrom, dateTo);
+			//Administration.fixPersonSituation(person.id, yearFrom, monthFrom);
 			render("@save");
 		}
 
