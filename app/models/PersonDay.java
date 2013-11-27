@@ -696,6 +696,10 @@ public class PersonDay extends Model {
 		{
 			pd.populatePersonDay();
 		}
+		/**
+		 * TODO: inserire qui una chiamata alla fixPersonSituation di Administration quando le modifiche dovranno ripercuotersi anche 
+		 * sui personMonth
+		 */
 	}
 
 	/**
