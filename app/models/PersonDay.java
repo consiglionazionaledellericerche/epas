@@ -495,7 +495,7 @@ public class PersonDay extends Model {
 				minTimeForLunch = minTimeForLunch + toMinute(gapLunchPair.out.date);
 				break;
 			}
-			if(workTime - breakTicketTime > mealTicketTime)
+			if(workTime - breakTicketTime >= mealTicketTime)
 			{
 				if( minTimeForLunch < breakTicketTime ) 
 				{

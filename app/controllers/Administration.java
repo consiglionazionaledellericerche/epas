@@ -177,32 +177,43 @@ public class Administration extends Controller {
 		fixPersonSituation(236l, 2013, 1);
 	}
 	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void utilities(){
+		List<Person> pdList = Person.getActivePersons(new LocalDate());
+		render(pdList);
+	}
+	
+	
 	/**
 	 * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
-	 * @param personid la persona da fixare, null per fixare tutte le persone
+	 * @param personId la persona da fixare, null per fixare tutte le persone
 	 * @param year l'anno dal quale far partire il fix
 	 * @param month il mese dal quale far partire il fix
-	 */
-	public static void fixPersonSituation(Long personid, int year, int month){
-		
+	 * 
+	 * 
+	 */	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void fixPersonSituation(Long personId, int year, int month){
+		if(personId==-1)
+			personId=null;
 		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
-//		JPAPlugin.startTx(false);
-//		if(personid==null)
-//			PersonUtility.checkHistoryError(null, year, month);
-//		else
-//			PersonUtility.checkHistoryError(personid, year, month);
-//		JPAPlugin.closeTx(false);
+		JPAPlugin.startTx(false);
+		if(personId==null)
+			PersonUtility.checkHistoryError(null, year, month);
+		else
+			PersonUtility.checkHistoryError(personId, year, month);
+		JPAPlugin.closeTx(false);
 		
 		// (2) Ricalcolo i valori dei person day aggregandoli per mese
 		JPAPlugin.startTx(true);
 		List<Person> personList = new ArrayList<Person>();
-		if(personid == null)
+		if(personId == null)
 		{
 			personList = Person.findAll();
 		}
 		else
 		{
-			Person person = Person.findById(personid);
+			Person person = Person.findById(personId);
 			personList.add(person);
 		}
 		JPAPlugin.closeTx(false);
@@ -265,6 +276,8 @@ public class Administration extends Controller {
 			
 		}
 		*/
+		flash.success("fixPersonSituation applicato con successo");
+		Application.indexAdmin();
 	}
 	
 	

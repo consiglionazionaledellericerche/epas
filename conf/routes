@@ -15,6 +15,9 @@ GET		/presenze								Application.indexAdmin
 GET		/orarioAdmin/{personId}/{year}/{month}	Stampings.personStamping
 GET 	/orarioAdmin							Stampings.personStamping
 
+GET		/utilities								Administration.utilities
+POST	/utilities/{personId}/{year}/{month}	Administration.fixPersonSituation
+
 #Assenze
 #GET		/absences/{year}/{month}		Absences.absences
 
