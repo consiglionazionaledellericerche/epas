@@ -278,8 +278,8 @@ public class Administration extends Controller {
 			
 		}
 		*/
-		flash.success("fixPersonSituation applicato con successo");
-		Application.indexAdmin();
+		//flash.success("fixPersonSituation applicato con successo");
+		//Application.indexAdmin();
 	}
 	
 	
