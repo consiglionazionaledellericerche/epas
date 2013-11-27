@@ -30,26 +30,26 @@
 			<tr>	
 			%{
 				for(person in shiftSumDays.rowKeySet()) {
-				
+				giorniTot = 0;
 			}%
 				<td> 
 					<p>
-						${person.surname} ${person.name}
+						${person}
 					</p>
 				</td>
 
 				%{
 					for(shift in shiftSumDays.columnKeySet()) {
 
-						if ((shiftSumDays.contains(person, shift) && !shiftSumDays.contains(person, "Jolly")) || (shiftSumDays.contains(person, shift) && (shift == "Jolly"))) {
-							giorni = shiftSumDays.get(person, shift);
-							resto = (shiftSumDays.get(person, shift)%2 == 0) ? ':00' : ':30'; 
-							ore = shiftSumDays.get(person, shift)*6 + (int)(shiftSumDays.get(person, shift)/2) + resto;	
+						if (shiftSumDays.contains(person, shift)) {
+							giorniTot += shiftSumDays.get(person, shift);
 						}
     				}
+    				resto = (giorniTot%2 == 0) ? ':00' : ':30'; 
+					ore = giorniTot*6 + (int)(giorniTot/2) + resto;	
 				}%
 				<td>
-					<p>${giorni}</p>
+					<p>${giorniTot}</p>
 				</td>
 				<td>
 					<p>${ore}</p>

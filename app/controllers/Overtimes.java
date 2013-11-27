@@ -7,6 +7,7 @@ import org.joda.time.LocalDate;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
+import com.google.common.collect.TreeBasedTable;
 
 
 
@@ -190,7 +191,8 @@ public class Overtimes extends Controller {
 			badRequest();	
 		}
 			
-		Table<Person, String, Integer> overtimesMonth = HashBasedTable.<Person, String, Integer>create();
+		//Table<Person, String, Integer> overtimesMonth = HashBasedTable.<Person, String, Integer>create();
+		Table<String, String, Integer> overtimesMonth = TreeBasedTable.<String, String, Integer>create();
 		
 		CompetenceCode competenceCode = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", "S1").first();
 		Logger.debug("find  CompetenceCode %s con CompetenceCode.code=%s", competenceCode, competenceCode.code);	
@@ -200,15 +202,14 @@ public class Overtimes extends Controller {
 					person, year, month, competenceCode).first();
 			Logger.debug("find  Competence %s per person=%s, year=%s, month=%s, competenceCode=%s", competence, person, year, month, competenceCode);	
 
-			if (competence != null) {
+			if ((competence != null) && (competence.valueApproved != 0)) {
 				
-				overtimesMonth.put(person, competence.reason != null ? competence.reason : "", competence.valueApproved);
+				overtimesMonth.put(person.surname + " " + person.name, competence.reason != null ? competence.reason : "", competence.valueApproved);
 				Logger.debug("Inserita riga person=%s reason=%s and  valueApproved=%s", person, competence.reason, competence.valueApproved);
-			} else {
-				
-				overtimesMonth.put(person, "", 0);
+			} /*else {
+				overtimesMonth.put(person.surname + " " + person.name, "cancella", 0);
 				Logger.debug("Inserita riga person=%s reason='' and  valueApproved=0", person);
-			}
+			} */
 		}
 		
 		LocalDate today = new LocalDate();
