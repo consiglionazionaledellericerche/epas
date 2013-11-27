@@ -17,6 +17,7 @@ import org.joda.time.LocalDateTime;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
+import com.google.common.collect.TreeBasedTable;
 
 import models.Absence;
 import models.CompetenceCode;
@@ -309,7 +310,7 @@ public class Shift extends Controller{
 		 ArrayList<String> shiftTypes = new ArrayList<String>();
 		 shiftTypes.add("A"); 
 		 shiftTypes.add("B");
-		Logger.debug("shiftTypes=%s", shiftTypes);
+		 Logger.debug("shiftTypes=%s", shiftTypes);
 		
 		
 		// crea la tabella
@@ -337,12 +338,15 @@ public class Shift extends Controller{
 		}
 		shiftMonth = builder.build();
 		
-		Table<Person, String, Integer> shiftSumDays = HashBasedTable.<Person, String, Integer>create();
+		//Table<Person, String, Integer> shiftSumDays = HashBasedTable.<Person, String, Integer>create();
+		Table<String, String, Integer> shiftSumDays = TreeBasedTable.<String, String, Integer>create();
 		
 		
 		// for each person
 		for (Person person: shiftMonth.rowKeySet()) {
-			Logger.debug("Conto turni di %s", person.name);
+			String personName = person.surname + " " + person.name;
+			
+			Logger.debug("Conto turni di %s", personName);
 			
 			// for each day of month
 			for (Integer dayOfMonth: shiftMonth.columnKeySet()) {
@@ -351,32 +355,12 @@ public class Shift extends Controller{
 				if (shiftMonth.contains(person, dayOfMonth)) { 
 					String col = String.format("%s", shiftMonth.get(person, dayOfMonth).toUpperCase());
 						
-					int n = shiftSumDays.contains(person, col) ? shiftSumDays.get(person, col) + 1 : 1;
-					shiftSumDays.put(person, col, Integer.valueOf(n));
+					int n = shiftSumDays.contains(personName, col) ? shiftSumDays.get(personName, col) + 1 : 1;
+					shiftSumDays.put(personName, col, Integer.valueOf(n));
 					Logger.debug("inserita riga %s, %s %s", person, col, n);
 				} 
 			}
 			
-		}
-		
-		// conta i giorni totali di turno per persona
-		for(Person person: shiftSumDays.rowKeySet()) {
-			Logger.debug("controllo person per label", person.name);
-			int ngg = 0;
-			// per ogni turno
-			for (String shiftLabel: shiftSumDays.columnKeySet()) {
-				if (shiftSumDays.contains(person, shiftLabel)) {
-					ngg += shiftSumDays.get(person, shiftLabel);
-				}
-			}
-			
-			Logger.debug("cerco personShift di %s", person.name);
-			PersonShift personShift = PersonShift.find("SELECT ps FROM PersonShift ps WHERE person = ?", person).first();
-			Logger.debug("c'è un personShift=%s ed è jolly=%s", personShift.person.name, personShift.jolly);
-		
-			if (personShift.jolly) {
-				shiftSumDays.put(person, "Jolly", Integer.valueOf(ngg));
-			}
 		}
 	
 		LocalDate today = new LocalDate();
@@ -396,7 +380,6 @@ public class Shift extends Controller{
 		int year = params.get("year", Integer.class);
 		int month = params.get("month", Integer.class);
 		Long groupType = params.get("type", Long.class);
-		
 		Logger.debug("sono nella exportMonthCalAsPDF con year=%s e month=%s", year, month);
 		
 		ArrayList<String> shiftTypes = new ArrayList<String>();
