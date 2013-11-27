@@ -151,7 +151,7 @@ public class Administration extends Controller {
 			Logger.debug("Processo la persona %s - %s %s", person.id, person.surname, person.name);
 			try {
 				InitializationTime initializationTime = InitializationTime.find("Select i from InitializationTime i where i.person = ?" , person).first();
-				CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, 2013, initializationTime.residualMinutesPastYear);
+				CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, 2013, initializationTime.residualMinutesPastYear, null);
 				int monteOreInizioAnno = c.getMese(2013, 1).monteOreAnnoCorrente;
 				int monteOreFineOttobre = c.getMese(2013, 10).monteOreAnnoCorrente;
 				Logger.debug("MonteOreInizioAnno = %s - MonteOreFineOttobre = %s,  differenza = %s", monteOreInizioAnno / 60, monteOreFineOttobre / 60, (monteOreFineOttobre - monteOreInizioAnno) / 60);
