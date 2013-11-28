@@ -944,9 +944,10 @@ public class PersonUtility {
 		{
 			for(PersonDayInTrouble pdt : pd.troubles)
 			{
+				Logger.info("Il problema %s %s %s e' risultato da fixare", pd.date, pd.person.surname, pd.person.name);
 				pdt.fixed = true;
 				pdt.save();
-				Logger.info("Fixato problema %s %s %s", pd.date, pd.person.surname, pd.person.name);
+				
 			}
 		}
 	}
