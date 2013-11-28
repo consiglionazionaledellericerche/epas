@@ -170,14 +170,6 @@ public class Administration extends Controller {
 		}
 	}
 
-	/**
-	 * Ricalcolo della situazione di ogni persona a partire da gennaio 2013
-	 */
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void fixPersonSituationBrowser()
-	{ 
-		fixPersonSituation(236l, 2013, 1);
-	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void utilities(){
@@ -188,7 +180,7 @@ public class Administration extends Controller {
 	
 	/**
 	 * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
-	 * @param personId la persona da fixare, null per fixare tutte le persone
+	 * @param personId l'id univoco della persona da fixare, -1 per fixare tutte le persone
 	 * @param year l'anno dal quale far partire il fix
 	 * @param month il mese dal quale far partire il fix
 	 * 
@@ -200,17 +192,27 @@ public class Administration extends Controller {
 		if(personId==-1)
 			personId=null;
 
+		
+		
+		
 		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
 		JPAPlugin.startTx(false);
 		if(personId==null)
 		{
 			List<Person> personList = Person.getActivePersonsInMonth(month, year);
 			for(Person person : personList)
+			{
 				PersonUtility.checkHistoryError(person.id, year, month);
+			}
 		}
 		else
+		{
 			PersonUtility.checkHistoryError(personId, year, month);
+		}
 		JPAPlugin.closeTx(false);
+		
+		
+		
 		
 		// (2) Ricalcolo i valori dei person day aggregandoli per mese
 		JPAPlugin.startTx(true);
@@ -229,7 +231,7 @@ public class Administration extends Controller {
 		int i = 1;
 		
 		for(Person p : personList){
-			Logger.info("Update person %s (%s di %s)", p.surname, i++, personList.size());
+			Logger.info("Update person situation %s (%s di %s) dal %s-%s-01 a oggi", p.surname, i++, personList.size(), year, month);
 			
 			LocalDate actualMonth = new LocalDate(year, month, 1);
 			LocalDate endMonth = new LocalDate().withDayOfMonth(1);
