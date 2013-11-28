@@ -185,9 +185,9 @@ public class Stampings extends Controller {
 		CalcoloSituazioneAnnualePersona c = null;
 		InitializationTime initializationTime = InitializationTime.find("Select i from InitializationTime i where i.person = ?" , person).first();
 		if(initializationTime == null)
-			c = new CalcoloSituazioneAnnualePersona(person, 2013, 0);
+			c = new CalcoloSituazioneAnnualePersona(person, 2013, 0, null);
 		else
-			c = new CalcoloSituazioneAnnualePersona(person, 2013, initializationTime.residualMinutesPastYear);
+			c = new CalcoloSituazioneAnnualePersona(person, 2013, initializationTime.residualMinutesPastYear, null);
 		Mese mese = c.getMese(year, month);
 
 		
@@ -316,12 +316,13 @@ public class Stampings extends Controller {
 		int compensatoryRestInMinutes = personMonth.getCompensatoryRestInMinutes();
 
 		//Totale residuo a fine mese  totaleResiduo.toHourTime() ore
+
 		CalcoloSituazioneAnnualePersona c = null;
 		InitializationTime initializationTime = InitializationTime.find("Select i from InitializationTime i where i.person = ?" , person).first();
 		if(initializationTime == null)
-			c = new CalcoloSituazioneAnnualePersona(person, 2013, 0);
+			c = new CalcoloSituazioneAnnualePersona(person, 2013, 0, null);
 		else
-			c = new CalcoloSituazioneAnnualePersona(person, 2013, initializationTime.residualMinutesPastYear);
+			c = new CalcoloSituazioneAnnualePersona(person, 2013, initializationTime.residualMinutesPastYear, null);
 				
 		Mese mese = c.getMese(year, month);
 

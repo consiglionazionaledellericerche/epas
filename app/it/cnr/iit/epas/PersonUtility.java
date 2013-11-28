@@ -821,73 +821,44 @@ public class PersonUtility {
 	 * 		In caso contrario viene inserito un record nella tabella PersonDayInTrouble. Situazioni di timbrature errate si verificano nei casi 
 	 *  	(a) che vi sia almeno una timbratura non accoppiata logicamente con nessun'altra timbratura 
 	 * 		(b) che le persone not fixed non presentino ne' assenze AllDay ne' timbrature. 
-	 * @param personid la persona da controllare, null se si desidera controllare tutte le persone attive
+	 * @param personid la persona da controllare
 	 * @param dayToCheck il giorno da controllare
 	 */
-	public static void checkDay(Long personid, LocalDate dayToCheck)
+	public static void checkPersonDay(Long personid, LocalDate dayToCheck)
 	{
-		
-		
-		//Costruisco la lista delle persone da controllare
-		List<Person> activeList = new ArrayList<Person>();
-		if(personid==null)
+		JPAPlugin.closeTx(false);
+		JPAPlugin.startTx(false);
+
+		Person personToCheck = Person.findById(personid);
+		if(!personToCheck.isActive(dayToCheck))
 		{
-			JPAPlugin.closeTx(false);
-			JPAPlugin.startTx(false);
-			activeList =  Person.getActivePersons(new LocalDate());
+			return;
+		}
+
+		PersonDay pd = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? AND pd.date = ? ", 
+				personToCheck,dayToCheck).first();
+
+		if(pd!=null)
+		{
+			checkForPersonDayInTrouble(pd, personToCheck); 
+			return;
 		}
 		else
 		{
-			JPAPlugin.closeTx(false);
-			JPAPlugin.startTx(false);
-			Person person = Person.findById(personid);
-			if(person.isActive(dayToCheck))
-			{
-				activeList.add(person);
-			}
-			else
+			if(DateUtility.isGeneralHoliday(dayToCheck))
 			{
 				return;
 			}
-		}
-		
-		
-		for(Person personToCheck : activeList)
-		{
-			PersonDay pd = PersonDay.find(""
-					+ "SELECT pd "
-					+ "FROM PersonDay pd "
-					+ "WHERE pd.person = ? AND pd.date = ? ", 
-					personToCheck, 
-					dayToCheck)
-					.first();
-			
-			if(pd!=null)
+			if(personToCheck.workingTimeType.workingTimeTypeDays.get(dayToCheck.getDayOfWeek()-1).holiday)
 			{
-				//check for error
-				checkForError(pd, personToCheck); //TODO riabilitarlo
-				continue;
+				return;
 			}
-			else
-			{
-				if(DateUtility.isGeneralHoliday(dayToCheck))
-				{
-					continue;
-				}
-				if(personToCheck.workingTimeType.workingTimeTypeDays.get(dayToCheck.getDayOfWeek()-1).holiday)
-				{
-					continue;
-				}
-				
-				pd = new PersonDay(personToCheck, dayToCheck);
-				pd.create();
-				pd.populatePersonDay();
-				pd.save();
-				//check for error
-				checkForError(pd, personToCheck);
-				continue;
-				
-			}
+			pd = new PersonDay(personToCheck, dayToCheck);
+			pd.create();
+			pd.populatePersonDay();
+			pd.save();
+			checkForPersonDayInTrouble(pd, personToCheck);
+			return;
 		}
 	}
 	
@@ -896,10 +867,12 @@ public class PersonUtility {
 	 *  (1) che vi sia almeno una timbratura non accoppiata logicamente con nessun'altra timbratura 
 	 * 	(2) che le persone not fixed non presentino ne' assenze AllDay ne' timbrature. 
 	 * In caso di situazione errata viene aggiunto un record nella tabella PersonDayInTrouble.
+	 * Se il PersonDay era presente nella tabella PersonDayInTroubled ed è stato fixato, viene settato a true il campo
+	 * fixed.
 	 * @param pd
 	 * @param person
 	 */
-	private static void checkForError(PersonDay pd, Person person)
+	private static void checkForPersonDayInTrouble(PersonDay pd, Person person)
 	{
 		//persona fixed
 		StampModificationType smt = pd.getFixedWorkingTime();
@@ -923,9 +896,9 @@ public class PersonUtility {
 		{
 			if(!pd.isAllDayAbsences() && pd.stampings.size()==0)
 			{
+				//TODO questo e' un controllo aggiuntivo in quanto in teoria i person day senza assenze e timbrature nei giorni di festa 
+				//non dovrebbero esistere ma nel database attuale a volte sono presenti e persistiti. Cancellarli e togliere questo controllo
 				if(!pd.isHoliday())	
-					//TODO questo e' un controllo aggiuntivo in quanto in teoria i person day senza assenze e timbrature nei giorni di festa 
-					//non dovrebbero esistere ma nel database attuale a volte sono presenti e persistiti. Cancellarli e togliere questo controllo
 				{
 					insertPersonDayInTrouble(pd, "no assenze giornaliere e no timbrature");
 				}
@@ -941,22 +914,25 @@ public class PersonUtility {
 				}
 			}
 		}
+		//giorno senza problemi, se era in trouble lo fixo
+		if(pd.troubles!=null && pd.troubles.size()>0)
+		{
+			for(PersonDayInTrouble pdt : pd.troubles)
+			{
+				Logger.info("Il problema %s %s %s e' risultato fixato", pd.date, pd.person.surname, pd.person.name);
+				pdt.fixed = true;
+				pdt.save();
+				
+			}
+		}
 	}
 	
 	private static void insertPersonDayInTrouble(PersonDay pd, String cause)
 	{
-		//TODO Controllo che non esista già, in quel caso decidere cosa fare (forse solo aggiornare la causa)
-		//System.out.println( "A " + pd.date.toString() +  " " + person.surname + " " +person.name +" non valido. (cella gialla)");
-		
-		PersonDayInTrouble pdt = PersonDayInTrouble.find(""
-				+ "Select pdt "
-				+ "from PersonDayInTrouble pdt "
-				+ "where pdt.personDay = ?"
-				, pd)
-				.first();
-		
+		PersonDayInTrouble pdt = PersonDayInTrouble.find("Select pdt from PersonDayInTrouble pdt where pdt.personDay = ?", pd).first();
 		if(pdt==null)
-		{
+		{	
+			//se non esiste lo creo
 			Logger.info("Nuovo PersonDayInTrouble %s %s %s - %s - %s", pd.person.id, pd.person.name, pd.person.surname, pd.date, cause);
 			PersonDayInTrouble trouble = new PersonDayInTrouble();
 			trouble.personDay = pd;
@@ -964,35 +940,34 @@ public class PersonUtility {
 			trouble.save();
 			return;
 		}
-		
 		if(pdt!=null)
 		{
-			//??
+			//se esiste lo setto fixed = false;
+			pdt.fixed = false;
+			pdt.cause = cause;
+			pdt.save();
 		}
 		
 	}
 	
 	
 	/**
-	 * A partire dal mese e anno passati al metodo fino al giorno di ieri 
-	 * controlla la presenza di errori nelle timbrature 
-	 * ed eventualmente inserisce i giorni problematici nella tabella PersonDayInTrouble.
-	 * @param personid la persona da controllare, null se si vuole controllare ogni persona
+	 * A partire dal mese e anno passati al metodo fino al giorno di ieri (yesterday)
+	 * controlla la presenza di errori nelle timbrature, inserisce i giorni problematici nella tabella PersonDayInTrouble
+	 * e setta a fixed true quelli che in passato avevano problemi e che invece sono stati risolti.
+	 * @param personid la persona da controllare
 	 * @param year l'anno di partenza
 	 * @param month il mese di partenza
 	 */
 	public static void checkHistoryError(Long personid, int year, int month)
 	{
-		
+		Person person = Person.findById(personid);
+		Logger.info("Check history error %s dal %s-%s-1 a oggi", person.surname, year, month);
 		LocalDate date = new LocalDate(year,month,1);
 		LocalDate today = new LocalDate();
 		while(true)
 		{
-			Logger.info("Check missing for %s", date.toString());
-			if(personid==null)
-				PersonUtility.checkDay(null, date);
-			else
-				PersonUtility.checkDay(personid, date);
+			PersonUtility.checkPersonDay(personid, date);
 			date = date.plusDays(1);
 			if(date.isEqual(today))
 				break;

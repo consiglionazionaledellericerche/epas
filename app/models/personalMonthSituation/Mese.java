@@ -6,6 +6,7 @@ import org.joda.time.LocalDate;
 
 import play.Logger;
 import models.Absence;
+import models.Competence;
 import models.Person;
 import models.PersonDay;
 import models.PersonMonth;
@@ -26,8 +27,11 @@ public class Mese {
 	
 	public int progressivoFinalePositivoMesePrint = 0;	//per il template
 
-	public int straordinariMinuti 			 = 0;	//person month
-	public int riposiCompensativiMinuti 	 = 0;	//person month
+	public int straordinariMinuti 			= 0;	//competences
+	public int straordinariMinutiS1Print	= 0;	//per il template
+	public int straordinariMinutiS2Print	= 0;	//per il template
+	public int straordinariMinutiS3Print	= 0;	//per il template
+	public int riposiCompensativiMinuti 	= 0;	//absences
 	
 	public int progressivoFinaleNegativoMeseImputatoAnnoPassato;
 	public int progressivoFinaleNegativoMeseImputatoAnnoCorrente;
@@ -40,7 +44,7 @@ public class Mese {
 	public int monteOreAnnoPassato;
 	public int monteOreAnnoCorrente;
 	
-	public Mese(Mese mesePrecedente, int anno, int mese, Person person, int tempoInizializzazione, boolean febmar)
+	public Mese(Mese mesePrecedente, int anno, int mese, Person person, int tempoInizializzazione, boolean febmar, LocalDate calcolaFinoA)
 	{
 		
 		this.person = person;
@@ -57,8 +61,8 @@ public class Mese {
 			this.tempoInizializzazione = tempoInizializzazione;
 			this.monteOreAnnoPassato = tempoInizializzazione;
 			
-			setPersonDayInformation();
-			setPersonMonthInformation();
+			setPersonDayInformation(calcolaFinoA);
+			setPersonMonthInformation(calcolaFinoA);
 			
 			//se il residuo iniziale e' negativo lo tolgo dal residio mensile positivo
 			if(this.monteOreAnnoPassato<0)
@@ -78,8 +82,8 @@ public class Mese {
 			this.monteOreAnnoPassato = mesePrecedente.monteOreAnnoPassato;
 			this.monteOreAnnoCorrente= mesePrecedente.monteOreAnnoCorrente;
 			
-			setPersonDayInformation();
-			setPersonMonthInformation();
+			setPersonDayInformation(calcolaFinoA);
+			setPersonMonthInformation(calcolaFinoA);
 
 		}
 		
@@ -96,8 +100,8 @@ public class Mese {
 				this.monteOreAnnoPassato = 0;
 				this.tempoInizializzazione = 0;			}
 			
-			setPersonDayInformation();
-			setPersonMonthInformation();
+			setPersonDayInformation(calcolaFinoA);
+			setPersonMonthInformation(calcolaFinoA);
 			
 		}
 		
@@ -128,10 +132,12 @@ public class Mese {
 		return;
 	}
 	
-	public void setPersonDayInformation()
+	public void setPersonDayInformation(LocalDate calcolaFinoA)
 	{
 		LocalDate monthBegin = new LocalDate(this.anno, this.mese, 1);
 		LocalDate monthEnd = new LocalDate(this.anno, this.mese, 1).dayOfMonth().withMaximumValue();
+		if(calcolaFinoA!=null && monthEnd.isAfter(calcolaFinoA))
+			monthEnd = calcolaFinoA;
 		
 		if(new LocalDate().isBefore(monthEnd))
 			monthEnd = new LocalDate().minusDays(1);
@@ -164,17 +170,42 @@ public class Mese {
 		 this.progressivoFinalePositivoMesePrint = this.progressivoFinalePositivoMese;
 	}
 	
-	public void setPersonMonthInformation()
+	public void setPersonMonthInformation(LocalDate calcolaFinoA)
 	{
-		PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? and pm.month = ?", person, this.anno, this.mese).first();
-		if(pm==null)
-			return;
-
-		this.straordinariMinuti = pm.straordinari;
-
+		//straordinari s1
+		List<Competence> competenceList = Competence.find("Select comp from Competence comp, CompetenceCode compCode where comp.competenceCode = compCode and comp.person = ?"
+				+ "and comp.year = ? and comp.month = ? and compCode.code = ?", this.person, this.anno, this.mese, "S1").fetch();
+		for(Competence comp : competenceList)
+		{
+			this.straordinariMinutiS1Print = this.straordinariMinutiS1Print + (comp.valueApproved * 60);
+		}
+		
+		//straordinari s2
+		competenceList = Competence.find("Select comp from Competence comp, CompetenceCode compCode where comp.competenceCode = compCode and comp.person = ?"
+				+ "and comp.year = ? and comp.month = ? and compCode.code = ?", this.person, this.anno, this.mese, "S2").fetch();
+		for(Competence comp : competenceList)
+		{
+			this.straordinariMinutiS2Print = this.straordinariMinutiS2Print + (comp.valueApproved * 60);
+		}
+		
+		//straordinari s3
+		competenceList = Competence.find("Select comp from Competence comp, CompetenceCode compCode where comp.competenceCode = compCode and comp.person = ?"
+				+ "and comp.year = ? and comp.month = ? and compCode.code = ?", this.person, this.anno, this.mese, "S3").fetch();
+		for(Competence comp : competenceList)
+		{
+			this.straordinariMinutiS3Print = this.straordinariMinutiS3Print + (comp.valueApproved * 60);
+		}
+		
+		this.straordinariMinuti = this.straordinariMinutiS1Print + this.straordinariMinutiS2Print + this.straordinariMinutiS3Print;
+		
+		//intervallo per calcolare i riposi compensativi
+		LocalDate monthBegin = new LocalDate(this.anno, this.mese, 1);
+		LocalDate monthEnd = new LocalDate(new LocalDate(this.anno, this.mese, 1).dayOfMonth().withMaximumValue());
+		if(calcolaFinoA!=null && monthEnd.isAfter(calcolaFinoA))
+			monthEnd = calcolaFinoA;
 		
 		List<Absence> riposiCompensativi = Absence.find("Select abs from Absence abs, AbsenceType abt, PersonDay pd where abs.personDay = pd and abs.absenceType = abt and abt.code = ? and pd.person = ? "
-				+ "and pd.date between ? and ?", "91", this.person, new LocalDate(this.anno, this.mese, 1), new LocalDate(this.anno, this.mese, 1).dayOfMonth().withMaximumValue()).fetch();
+				+ "and pd.date between ? and ?", "91", this.person, monthBegin, monthEnd).fetch();
 		
 		this.riposiCompensativiMinuti = riposiCompensativi.size() * this.workingTime;
 		//this.riposiCompensativiMinuti = pm.riposiCompensativiDaAnnoCorrente + pm.riposiCompensativiDaAnnoPrecedente;
