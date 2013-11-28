@@ -195,6 +195,7 @@ public class Administration extends Controller {
 	 */	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void fixPersonSituation(Long personId, int year, int month){
+		
 		if(personId==-1)
 			personId=null;
 
