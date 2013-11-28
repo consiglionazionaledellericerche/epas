@@ -825,7 +825,7 @@ public class PersonUtility {
 	public static void checkDay(Long personid, LocalDate dayToCheck)
 	{
 		
-		Logger.info("Lanciata checkDay per personid % e giorno %s" ,personid, dayToCheck.toString());
+		Logger.info("Lanciata checkDay per personid %s e giorno %s" ,personid+"", dayToCheck);
 		//Costruisco la lista delle persone da controllare
 		List<Person> activeList = new ArrayList<Person>();
 		if(personid==null)
@@ -996,7 +996,7 @@ public class PersonUtility {
 	 */
 	public static void checkHistoryError(Long personid, int year, int month)
 	{
-		Logger.info("Check history error for personid %s month %", personid, month);
+		Logger.info("Check history error for personid %s month %s", personid+"", month);
 		LocalDate date = new LocalDate(year,month,1);
 		LocalDate today = new LocalDate();
 		while(true)
