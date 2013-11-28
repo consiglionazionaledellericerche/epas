@@ -135,7 +135,7 @@ public class MonthRecaps extends Controller{
 				//persone non fixed
 				else if(!pd.isFixedTimeAtWork())
 				{
-					if(pd.troubles!=null && pd.troubles.size()>0)
+					if(pd.isInTrouble()) 
 					{
 						notJustifiedAbsences.add(pd);
 					}
