@@ -192,6 +192,20 @@ public class PersonDay extends Model {
 		}
 		return false;
 	}
+	
+	/**
+	 * 
+	 * @return true se il person day è in trouble
+	 */
+	public boolean isInTrouble()
+	{
+		for(PersonDayInTrouble pdt : this.troubles)
+		{
+			if(pdt.fixed==false)
+				return true;
+		}
+		return false;
+	}
 
 	
 	/**
