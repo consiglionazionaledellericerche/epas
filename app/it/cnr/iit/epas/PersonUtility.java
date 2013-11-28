@@ -939,6 +939,16 @@ public class PersonUtility {
 				}
 			}
 		}
+		//giorno senza problemi, se era in trouble lo fixo
+		if(pd.troubles!=null && pd.troubles.size()>0)
+		{
+			for(PersonDayInTrouble pdt : pd.troubles)
+			{
+				pdt.fixed = true;
+				pdt.save();
+				Logger.info("Fixato problema %s %s %s", pd.date, pd.person.surname, pd.person.name);
+			}
+		}
 	}
 	
 	private static void insertPersonDayInTrouble(PersonDay pd, String cause)
@@ -954,7 +964,8 @@ public class PersonUtility {
 				.first();
 		
 		if(pdt==null)
-		{
+		{	
+			//se non esiste lo creo
 			Logger.info("Nuovo PersonDayInTrouble %s %s %s - %s - %s", pd.person.id, pd.person.name, pd.person.surname, pd.date, cause);
 			PersonDayInTrouble trouble = new PersonDayInTrouble();
 			trouble.personDay = pd;
@@ -965,7 +976,10 @@ public class PersonUtility {
 		
 		if(pdt!=null)
 		{
-			//??
+			//se esiste lo setto fixed = false;
+			pdt.fixed = false;
+			pdt.cause = cause;
+			pdt.save();
 		}
 		
 	}
