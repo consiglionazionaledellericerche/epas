@@ -825,7 +825,7 @@ public class PersonUtility {
 	public static void checkDay(Long personid, LocalDate dayToCheck)
 	{
 		
-		
+		Logger.info("Lanciata checkDay per personid % e giorno %s" ,personid, dayToCheck.toString());
 		//Costruisco la lista delle persone da controllare
 		List<Person> activeList = new ArrayList<Person>();
 		if(personid==null)
@@ -939,11 +939,9 @@ public class PersonUtility {
 				}
 			}
 		}
-		Logger.info("Giorno corretto, verifico se era in trouble1");
 		//giorno senza problemi, se era in trouble lo fixo
 		if(pd.troubles!=null && pd.troubles.size()>0)
 		{
-			Logger.info("Giorno corretto, verifico se era in trouble2");
 			for(PersonDayInTrouble pdt : pd.troubles)
 			{
 				Logger.info("Il problema %s %s %s e' risultato da fixare", pd.date, pd.person.surname, pd.person.name);
@@ -998,12 +996,11 @@ public class PersonUtility {
 	 */
 	public static void checkHistoryError(Long personid, int year, int month)
 	{
-		
+		Logger.info("Check history error for personid %s month %", personid, month);
 		LocalDate date = new LocalDate(year,month,1);
 		LocalDate today = new LocalDate();
 		while(true)
 		{
-			Logger.info("Check missing for %s", date.toString());
 			if(personid==null)
 				PersonUtility.checkDay(null, date);
 			else
