@@ -19,9 +19,15 @@ import models.TotalOvertime;
 import org.joda.time.LocalDate;
 
 import play.Logger;
+import play.data.validation.IsTrue;
+import play.data.validation.Min;
+import play.data.validation.Required;
+import play.data.validation.Valid;
+import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
@@ -60,12 +66,29 @@ public class Competences extends Controller{
 		}
 
 	}
+	
+	
+	/*
+	 * <input type="hidden" name="items.${i}.person.id" value="${person.id}">
+	 * <select name="items.${i}.competenceCode.id"><....</select>
+	 * <input type="text" name="items.${i}.value" value="...">
+	 * 
+	 * static void modifica(@Valid @Required List<CompetenceBean> items)  
+	 */
 
+	public static class CompetenceBean {
+		@Required
+		public Person person;
+		public CompetenceCode code;
+		public Integer value;
+		
+	}
+	
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void showCompetences(Integer year, Integer month){
 
-		ImmutableTable.Builder<Person, String, Integer> builder = ImmutableTable.builder();
-		Table<Person, String, Integer> tableCompetence = null;
+		ImmutableTable.Builder<Person, CompetenceCode, Integer> builder = ImmutableTable.builder();
+		Table<Person, CompetenceCode, Integer> tableCompetence = null;
 		List<Person> activePersons = null;
 		if((year == null || month == null) || (year == 0 || month == 0)){
 			int yearParams = params.get("year", Integer.class);
@@ -75,27 +98,32 @@ public class Competences extends Controller{
 		else{
 			activePersons = Person.getTechnicianForCompetences(new LocalDate(year, month, 1));
 		}
+
+		List<CompetenceCode> competenceCodes = PersonUtility.activeCompetence();
 		
-
-		for(Person p : activePersons){
-			List<Competence> competenceInMonth = Competence.find("Select comp from Competence comp where comp.person = ? and comp.year = ?" +
-					"and comp.month = ?", p, year, month).fetch();
-			for(Competence comp : competenceInMonth){
-
-				Integer value = comp.valueApproved;
-				if(value != null)
-					builder.put(p, comp.competenceCode.description+'\n'+comp.competenceCode.code, value);
-				else
-					builder.put(p, comp.competenceCode.description+'\n'+comp.competenceCode.code, 0);
-
-			}
-
-		}
-		tableCompetence = builder.build();
-		int numberOfDifferentCompetenceType = tableCompetence.columnKeySet().size();
-		render(tableCompetence, year, month, numberOfDifferentCompetenceType);
+		render(tableCompetence, year, month, activePersons, competenceCodes);
 
 	}
+	
+	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	public static void updateCompetence(long pk, String name, @Valid @Min(1) Integer value){
+		final Competence competence = Competence.findById(pk);
+		notFoundIfNull(competence);
+		if (validation.hasErrors()) {
+			error(Messages.get(Joiner.on(",").join(validation.errors())));
+		}
+		Logger.info("value approved before = %s", competence.valueApproved);
+		competence.valueApproved = value;
+		Logger.info("saved id=%s (person=%s) code=%s (value=%s)", competence.id, competence.person, 
+				competence.competenceCode.code, competence.valueApproved);
+		competence.merge();
+		renderText("ok");
+	}
+	
+	public static void prova(){
+		render();
+	}
+	
 
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void manageCompetenceCode(){

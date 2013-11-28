@@ -18,6 +18,8 @@ import play.db.jpa.JPAPlugin;
 import play.db.jpa.Transactional;
 import models.Absence;
 import models.AbsenceType;
+import models.Competence;
+import models.CompetenceCode;
 import models.Configuration;
 import models.Contract;
 import models.Person;
@@ -997,6 +999,19 @@ public class PersonUtility {
 		}
 	}
 	
+	/**
+	 * 
+	 * @return la lista dei codici competenza attivi per le persone nell'anno in corso
+	 */
+	public static List<CompetenceCode> activeCompetence(){
+		List<CompetenceCode> competenceCodeList = new ArrayList<CompetenceCode>();
+		List<Competence> competenceList = Competence.find("Select comp from Competence comp where comp.year = ?", new LocalDate().getYear()).fetch();
+		for(Competence comp : competenceList){
+			if(!competenceCodeList.contains(comp.competenceCode))
+				competenceCodeList.add(comp.competenceCode);
+		}
+		return competenceCodeList;
+	}
 	
 
 }
