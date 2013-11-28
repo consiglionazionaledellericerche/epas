@@ -21,6 +21,7 @@ import models.PersonMonth;
 import models.VacationCode;
 import models.VacationPeriod;
 import models.WorkingTimeType;
+import models.exports.PersonsList;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
 import play.Logger;
@@ -202,7 +203,11 @@ public class Administration extends Controller {
 		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
 		JPAPlugin.startTx(false);
 		if(personId==null)
-			PersonUtility.checkHistoryError(null, year, month);
+		{
+			List<Person> personList = Person.getActivePersonsInMonth(month, year);
+			for(Person person : personList)
+				PersonUtility.checkHistoryError(person.id, year, month);
+		}
 		else
 			PersonUtility.checkHistoryError(personId, year, month);
 		JPAPlugin.closeTx(false);
