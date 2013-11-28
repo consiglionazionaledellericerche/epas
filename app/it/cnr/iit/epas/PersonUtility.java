@@ -939,9 +939,11 @@ public class PersonUtility {
 				}
 			}
 		}
+		Logger.info("Giorno corretto, verifico se era in trouble1");
 		//giorno senza problemi, se era in trouble lo fixo
 		if(pd.troubles!=null && pd.troubles.size()>0)
 		{
+			Logger.info("Giorno corretto, verifico se era in trouble2");
 			for(PersonDayInTrouble pdt : pd.troubles)
 			{
 				Logger.info("Il problema %s %s %s e' risultato da fixare", pd.date, pd.person.surname, pd.person.name);
