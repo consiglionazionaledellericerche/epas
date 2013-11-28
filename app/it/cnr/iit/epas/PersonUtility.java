@@ -862,6 +862,8 @@ public class PersonUtility {
 			
 			if(pd!=null)
 			{
+				Logger.info("personToChek nel metodo checkday %s %s %s con PersonDay !null", personToCheck.id, personToCheck.surname, personToCheck.name);
+				
 				//check for error
 				checkForError(pd, personToCheck); //TODO riabilitarlo
 				continue;
@@ -876,6 +878,8 @@ public class PersonUtility {
 				{
 					continue;
 				}
+				
+				Logger.info("personToChek nel metodo checkday %s %s %s con PersonDay null", personToCheck.id, personToCheck.surname, personToCheck.name);
 				
 				pd = new PersonDay(personToCheck, dayToCheck);
 				pd.create();
@@ -899,6 +903,7 @@ public class PersonUtility {
 	 */
 	private static void checkForError(PersonDay pd, Person person)
 	{
+		Logger.info("Check For Error %s %s %s alla data", person.id, person.surname, pd.date);
 		//persona fixed
 		StampModificationType smt = pd.getFixedWorkingTime();
 		if(smt !=null)
@@ -910,6 +915,7 @@ public class PersonUtility {
 				{
 					if(!s.valid)
 					{
+						Logger.info("Check For Error1");
 						insertPersonDayInTrouble(pd, "timbratura disaccoppiata");
 						return;
 					}
@@ -925,6 +931,7 @@ public class PersonUtility {
 					//TODO questo e' un controllo aggiuntivo in quanto in teoria i person day senza assenze e timbrature nei giorni di festa 
 					//non dovrebbero esistere ma nel database attuale a volte sono presenti e persistiti. Cancellarli e togliere questo controllo
 				{
+					Logger.info("Check For Error2");
 					insertPersonDayInTrouble(pd, "no assenze giornaliere e no timbrature");
 				}
 				return;
@@ -934,6 +941,7 @@ public class PersonUtility {
 			{
 				if(!s.valid)
 				{
+					Logger.info("Check For Error3");
 					insertPersonDayInTrouble(pd, "timbratura disaccoppiata");
 					return;
 				}
