@@ -127,18 +127,25 @@ public class PersonStampingDayRecap {
 			this.setDifference( pd.difference );
 	
 			PersonDay previousPd = pd.checkPreviousProgressive();
+			//caso del primo giorno del mese
 			if(pd.date.getDayOfMonth()==1)
 			{
 				this.setProgressive(pd.progressive);
 			}
+			//caso giorno precedente esiste
 			else if(previousPd!=null)
 			{
 				this.setProgressive(pd.difference + previousPd.progressive);
 			}
-			else
+			//TODO verificare se funziona
+			else //if(pd.progressive!=0)
 			{
-				this.setProgressive(0);
+				this.setProgressive(pd.progressive);
 			}
+			//else
+			//{
+			//	this.setProgressive(0);
+			//}
 		
 		}
 		//---------------------------------------- worktime, difference, progressive for future ----------------------------------------
