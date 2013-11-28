@@ -52,7 +52,7 @@ ${prova}
 			}%
 		
 			<td class="assenza">
-				<a href="@{Absences.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" class="insertAbsence${dayRecap.date.dayOfMonth}">___</a>
+				<a href="@{Absences.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" class="popup_window">___</a>
 				%{	
 				for (absence in dayRecap.absences) 
 				{ 
