@@ -687,7 +687,7 @@ public class Person extends Model {
 		if (competenceCode.contains(code)) {
 			Optional<Competence> o = FluentIterable.from(competences)
 					.firstMatch(new Predicate<Competence>() {
-				//TODO sistemare con query su mese anno
+				
 				@Override
 				public boolean apply(Competence input) {
 					
