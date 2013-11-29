@@ -15,7 +15,6 @@ import models.CompetenceCode;
 import models.InitializationTime;
 import models.Person;
 import models.PersonDay;
-import models.PersonMonth;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
 import play.mvc.Controller;

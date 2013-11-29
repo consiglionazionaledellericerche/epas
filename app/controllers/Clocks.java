@@ -11,7 +11,6 @@ import org.joda.time.LocalDateTime;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
-import models.PersonMonth;
 import models.Stamping;
 import models.Stamping.WayType;
 import play.Logger;
