@@ -545,6 +545,7 @@ public class Absences extends Controller{
 			Absence absence = new Absence();
 			absence.absenceType = absenceType;
 			absence.personDay = pd;
+			absence.save();
 			pd.absences.add(absence);
 			pd.populatePersonDay();
 			pd.updatePersonDay();

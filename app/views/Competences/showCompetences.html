@@ -32,7 +32,7 @@
 	  <td class="nomeCognome">${person.name} ${person.surname}</td>
 	    #{list items:competenceCodes, as:'code'}
 	     <td>
-	     #{if person.competence(code, year, month)}
+	     #{if person.competenceCode.contains(code)}
 	     <a data-x-editable href="#" data-type="number" data-pk="${person.competence(code,year,month).id}" data-name="value"
 	     	data-url="@{updateCompetence()}" 
 	     	data-title="Modifica ${code.description} per ${person.name} ${person.surname}">${person.competence(code,year,month).valueApproved}</a>
