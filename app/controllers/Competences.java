@@ -90,17 +90,18 @@ public class Competences extends Controller{
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
-	public static void updateCompetence(long pk, String name, @Valid @Min(1) Integer value){
+	public static void updateCompetence(long pk, String name, Integer value){
 		final Competence competence = Competence.findById(pk);
 		notFoundIfNull(competence);
 		if (validation.hasErrors()) {
 			error(Messages.get(Joiner.on(",").join(validation.errors())));
 		}
+		Logger.info("Anno competenza: %s Mese competenza: %s", competence.year, competence.month);
 		Logger.info("value approved before = %s", competence.valueApproved);
 		competence.valueApproved = value;
 		Logger.info("saved id=%s (person=%s) code=%s (value=%s)", competence.id, competence.person, 
 				competence.competenceCode.code, competence.valueApproved);
-		competence.merge();
+		competence.save();
 		renderText("ok");
 	}
 	
