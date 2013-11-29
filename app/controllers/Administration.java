@@ -144,32 +144,6 @@ public class Administration extends Controller {
 		
 	}
 
-	public static void checkForNegativeResidual()
-	{
-		List<Person> persons = Person.getActivePersonsInMonth(11, 2013);
-		for(Person person : persons)
-		{
-			Logger.debug("Processo la persona %s - %s %s", person.id, person.surname, person.name);
-			try {
-				InitializationTime initializationTime = InitializationTime.find("Select i from InitializationTime i where i.person = ?" , person).first();
-				CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, 2013, initializationTime.residualMinutesPastYear, null);
-				int monteOreInizioAnno = c.getMese(2013, 1).monteOreAnnoCorrente;
-				int monteOreFineOttobre = c.getMese(2013, 10).monteOreAnnoCorrente;
-				Logger.debug("MonteOreInizioAnno = %s - MonteOreFineOttobre = %s,  differenza = %s", monteOreInizioAnno / 60, monteOreFineOttobre / 60, (monteOreFineOttobre - monteOreInizioAnno) / 60);
-				
-				for(Mese mese : c.mesi)
-				{
-					//if(mese.monteOreAnnoCorrente<0)
-						//Logger.debug("Persona con residuo negativo nel mese %s: %s - %s %s", mese.mese, person.id, person.surname, person.name);
-				}
-			}
-			catch(Exception e)
-			{
-				//Logger.debug("Eccezione nella computazione della person %s -%s %s", person.id, person.surname, person.name);
-			}
-		}
-	}
-
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void utilities(){
