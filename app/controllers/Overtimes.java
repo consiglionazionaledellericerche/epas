@@ -80,15 +80,8 @@ public class Overtimes extends Controller {
 		
 		/*OvertimesData personOvertimesData = new OvertimesData(PersonTags.toHourTime(new Integer(personMonth.totaleResiduoAnnoCorrenteAFineMese())), PersonTags.toHourTime(new Integer(personMonth.residuoDelMese())), PersonTags.toHourTime(new Integer(personMonth.tempoDisponibilePerStraordinari())));*/		
 		/* temporaneamente tutti i dati vengono presi dalle nuove classi CalcoloSituazioneAnnualePersona e Mese */
-		CalcoloSituazioneAnnualePersona c = null;
-		InitializationTime initializationTime = InitializationTime.find("Select i from InitializationTime i where i.person = ?" , person).first();
-		if(initializationTime == null)
-			c = new CalcoloSituazioneAnnualePersona(person, 2013, 0, null);
-		else
-			c = new CalcoloSituazioneAnnualePersona(person, 2013, initializationTime.residualMinutesPastYear, null);
-				
+		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, 2013, null);
 		Mese mese = c.getMese(year, month);
-		
 		
 		int totaleResiduoAnnoCorrenteAFineMese = mese.monteOreAnnoCorrente;
 		int residuoDelMese = mese.progressivoFinaleMese;

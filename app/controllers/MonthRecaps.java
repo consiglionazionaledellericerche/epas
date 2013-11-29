@@ -149,13 +149,18 @@ public class MonthRecaps extends Controller{
 					}
 				}
 			}
-			if(person.surname.equals("De Vita"))
+
+			//straordinari s1/s2/s3
+			List<Competence> competenceList = 
+					Competence.find("Select comp from Competence comp, CompetenceCode compCode where comp.competenceCode = compCode and comp.person = ?"
+					+ "and comp.year = ? and comp.month = ? and (compCode.code = ? or compCode.code = ? or compCode.code = ?)",
+					person, year, month, "S1", "S2", "S3").fetch();
+			valueApproved = 0;
+			for(Competence comp : competenceList)
 			{
-				int gfff = 0 ;
+				valueApproved = valueApproved + comp.valueApproved;
 			}
-			PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? and pm.month = ?", person, year, month).first();
-			pm.updateOvertimesFromCompetences();
-			valueApproved = pm.straordinari / 60;			
+			
 
 		}
 	}
