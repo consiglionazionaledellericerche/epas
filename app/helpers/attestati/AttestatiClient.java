@@ -114,7 +114,17 @@ public class AttestatiClient {
 			Document loginDoc = loginResponse.parse();
 			Logger.debug("Risposta alla login = \n%s", loginDoc);
 
-			return new LoginResponse(loginResponse.statusCode() == 200, loginResponse.cookies());			
+
+			Elements loginMessages = loginDoc.select("h5[align=center]>font");
+			
+			if (loginResponse.statusCode() != 200 || 
+					loginMessages.isEmpty() || 
+					! loginMessages.first().ownText().contains("Login completata con successo.")) {
+				return new LoginResponse(false, loginResponse.cookies());
+			} else {
+				return new LoginResponse(true, loginResponse.cookies());
+			}
+			
 		} catch (IOException e) {
 			Logger.error("Errore durante la login sul sistema di invio degli attestati. Eccezione = %s", e);
 			return new LoginResponse(false, null);
