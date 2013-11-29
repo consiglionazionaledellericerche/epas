@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.management.Query;
+
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
@@ -23,6 +25,7 @@ import play.data.validation.IsTrue;
 import play.data.validation.Min;
 import play.data.validation.Required;
 import play.data.validation.Valid;
+import play.db.jpa.JPA;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -84,7 +87,19 @@ public class Competences extends Controller{
 		}
 
 		List<CompetenceCode> competenceCodes = PersonUtility.activeCompetence();
-		
+		for(Person p : activePersons){
+			for(CompetenceCode c : p.competenceCode){
+				Competence comp = Competence.find("Select comp from Competence comp where comp.person = ? and comp.month = ? and comp.year = ?" +
+						"and comp.competenceCode = ?", p, month, year, c).first();
+				if(comp == null){
+					comp = new Competence(p, c, year, month);
+					comp.valueApproved = 0;
+					comp.save();
+				}
+					
+			}
+			
+		}
 		render(tableCompetence, year, month, activePersons, competenceCodes);
 
 	}
