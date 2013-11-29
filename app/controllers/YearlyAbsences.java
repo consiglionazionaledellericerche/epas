@@ -10,7 +10,6 @@ import models.Absence;
 import models.AbsenceType;
 import models.Person;
 import models.PersonDay;
-import models.PersonMonth;
 import models.rendering.YearlyAbsencesRecap;
 
 import org.joda.time.LocalDate;

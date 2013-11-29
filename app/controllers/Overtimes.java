@@ -29,7 +29,6 @@ import models.CompetenceCode;
 import models.InitializationTime;
 import models.Person;
 import models.PersonHourForOvertime;
-import models.PersonMonth;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
 import models.exports.OvertimesData;
