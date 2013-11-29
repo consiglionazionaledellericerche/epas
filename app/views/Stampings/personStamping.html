@@ -52,29 +52,18 @@ ${prova}
 			}%
 		
 			<td class="assenza">
-				<a href="@{Absences.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" class="insertAbsence${dayRecap.date.dayOfMonth}">___</a>
+				<a href="@{Absences.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" class="popup_window">___</a>
 				%{	
 				for (absence in dayRecap.absences) 
 				{ 
 				%}
-				 <a href="@{Absences.edit(absence.id)}" class="insertAbsence${dayRecap.date.dayOfMonth}">
+				 <a href="@{Absences.edit(absence.id)}" class="popup_window">
 					${absence.absenceType.code}
 				 </a>
 										
 				%{
 				 }
 				 }%
-				
-				<script type="text/javascript"> 
-				$('.insertAbsence${dayRecap.date.dayOfMonth}').popupWindow({ 
-				height:600, 
-				width:1000,
-				scrollbars:1,
-				resizable:0,
-				top:50, 
-				left:50 
-				}); 
-				</script>			
 			</td>
 
 
@@ -102,19 +91,9 @@ ${prova}
 					}
 				}%
 				%{ if(stampingTemplate.date!=null) { }%
-					<a href="@{Stampings.edit(stampingTemplate.stampingId)}" class="${stampingTemplate.insertStampingClass}">
+					<a href="@{Stampings.edit(stampingTemplate.stampingId)}" class="popup_window_mini">
 					${stampingTemplate.hour}
-					</a>
-					 <script type="text/javascript"> 
-						$('.${stampingTemplate.insertStampingClass}').popupWindow({ 
-						height:600, 
-						width:800,
-						scrollbars:1,
-						resizable:0,
-						top:50, 
-						left:50 
-						}); 
-					</script>		
+					</a>	
 				 
 				 %{
 				 }
@@ -129,28 +108,9 @@ ${prova}
 			%{ 
 			} 
 			}%
+	
+			<td class="inserisciTimbratura"><a href="@{Stampings.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" class="popup_window_mini">+++</a>
 				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-			<td class="inserisciTimbratura"><a href="@{Stampings.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" class="insertStamping${dayRecap.date.dayOfMonth}">+++</a>
-				<script type="text/javascript"> 
-				$('.insertStamping${dayRecap.date.dayOfMonth}').popupWindow({ 
-				height:600, 
-				width:800,
-				scrollbars:1,
-				resizable:0,
-				top:50, 
-				left:50
-				}); 
-				</script>
 			</td>
 			<td class="tempoLavoro">
 				${dayRecap.workTime}

@@ -15,7 +15,6 @@ import models.CompetenceCode;
 import models.InitializationTime;
 import models.Person;
 import models.PersonDay;
-import models.PersonMonth;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
 import play.mvc.Controller;
@@ -40,12 +39,7 @@ public class PersonMonths extends Controller{
 		Map<Integer, List<String>> mapMonthSituation = new HashMap<Integer, List<String>>();
 		List<String> lista = null;
 				
-		CalcoloSituazioneAnnualePersona c = null;
-		InitializationTime initializationTime = InitializationTime.find("Select i from InitializationTime i where i.person = ?" , person).first();
-		if(initializationTime == null)
-			c = new CalcoloSituazioneAnnualePersona(person, 2013, 0);
-		else
-			c = new CalcoloSituazioneAnnualePersona(person, 2013, initializationTime.residualMinutesPastYear);
+		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, 2013, null);
 		
 		for(int month = 1; month < 13; month++){
 			Mese mese = c.getMese(year, month);

@@ -51,6 +51,10 @@ import org.hibernate.envers.query.criteria.AuditConjunction;
 import org.hibernate.envers.query.criteria.AuditCriterion;
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
+
 import controllers.Check;
 import controllers.Secure;
 import controllers.Security;
@@ -675,6 +679,27 @@ public class Person extends Model {
 	}
 	
 	
+	/**
+	 * @param code
+	 * @return
+	 */
+	public Competence competence(final CompetenceCode code, final int year, final int month) {
+		if (competenceCode.contains(code)) {
+			Optional<Competence> o = FluentIterable.from(competences)
+					.firstMatch(new Predicate<Competence>() {
+				
+				@Override
+				public boolean apply(Competence input) {
+					
+					return input.competenceCode.equals(code) && input.year == year && input.month == month;
+				}
+				
+			});
+			return o.orNull();
+		} else {
+			return null;
+		}
+	}
 		
 	/**
 	 * 
