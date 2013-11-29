@@ -683,13 +683,15 @@ public class Person extends Model {
 	 * @param code
 	 * @return
 	 */
-	public Competence competence(final CompetenceCode code) {
+	public Competence competence(final CompetenceCode code, final int year, final int month) {
 		if (competenceCode.contains(code)) {
-			Optional<Competence> o = FluentIterable.from(competences).firstMatch(new Predicate<Competence>() {
-
+			Optional<Competence> o = FluentIterable.from(competences)
+					.firstMatch(new Predicate<Competence>() {
+				//TODO sistemare con query su mese anno
 				@Override
 				public boolean apply(Competence input) {
-					return input.competenceCode.equals(code);
+					
+					return input.competenceCode.equals(code) && input.year == year && input.month == month;
 				}
 				
 			});
