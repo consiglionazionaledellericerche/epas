@@ -66,24 +66,8 @@ public class Competences extends Controller{
 		}
 
 	}
-	
-	
-	/*
-	 * <input type="hidden" name="items.${i}.person.id" value="${person.id}">
-	 * <select name="items.${i}.competenceCode.id"><....</select>
-	 * <input type="text" name="items.${i}.value" value="...">
-	 * 
-	 * static void modifica(@Valid @Required List<CompetenceBean> items)  
-	 */
 
-	public static class CompetenceBean {
-		@Required
-		public Person person;
-		public CompetenceCode code;
-		public Integer value;
-		
-	}
-	
+
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void showCompetences(Integer year, Integer month){
 
