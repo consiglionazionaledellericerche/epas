@@ -424,9 +424,9 @@ public class Absences extends Controller{
 		 * inserire il giusto codice di assenza per ferie in base a quante ferie potevano essere rimaste dall'anno precedente, eventualmente passare
 		 * da quelle dell'anno in corso o ancora dai permessi legge...ok ma qual'è l'ordine? :-)
 		 */
-		//TODO: sarebbe meglio utilizzare degli ENUM con il mapping tra codici del DB e codici più comuni
+		
 		if(absenceType.code.equals("FER")){
-			//FIXME: perché il controllo successivo è fatto solo per il FER?
+			
 			if(PersonUtility.canPersonTakeAbsenceInShiftOrReperibility(person, new LocalDate(yearFrom,monthFrom,dayFrom))){
 				Logger.debug("%s %s non è in turno o in reperibilità", person.name, person.surname);
 
@@ -442,7 +442,7 @@ public class Absences extends Controller{
 					absence.personDay = pd;
 					absence.save();
 					pd.updatePersonDay();
-					//Administration.fixPersonSituation(person.id, yearFrom, monthFrom);
+					
 					flash.success("Inserito il codice di assenza %s per il giorno %s", abt.code, pd.date);
 					render("@save");
 				}
@@ -460,17 +460,17 @@ public class Absences extends Controller{
 							absence.save();
 							pd.save();
 							pd.populatePersonDay();
-
+							pd.updatePersonDay();
 						}
 					}
 					else{
 						while(!dateFrom.isAfter(dateTo)){
-							Logger.debug("Devo creare il personDay perchè il giorno è futuro rispetto a oggi");
+							//Logger.debug("Devo creare il personDay perchè il giorno è futuro rispetto a oggi");
 							AbsenceType abt = PersonUtility.whichVacationCode(person, yearFrom, monthFrom, dayFrom);
 							PersonDay pd = PersonUtility.createPersonDayFromDate(person, dateFrom);
 							if(pd != null){
-								Logger.debug("Nel controller absences vado a creare il personDay e a inserire l'assenza per %s %s nel giorno %s", 
-										person.name, person.surname, dateFrom);
+								//Logger.debug("Nel controller absences vado a creare il personDay e a inserire l'assenza per %s %s nel giorno %s", 
+									//	person.name, person.surname, dateFrom);
 								pd.create();
 								Absence absence = new Absence();
 								absence.absenceType = abt;
@@ -481,12 +481,12 @@ public class Absences extends Controller{
 
 								pd.populatePersonDay();
 								pd.save();
-
+								pd.updatePersonDay();
 							}
 							dateFrom = dateFrom.plusDays(1);
 						}
 					}
-					pdList.get(0).updatePersonDay();
+					
 				}
 				//Administration.fixPersonSituation(person.id, yearFrom, monthFrom);
 				flash.success("Inserito il codice di assenza per il periodo richiesto");
@@ -574,6 +574,7 @@ public class Absences extends Controller{
 				Absence absence = new Absence();
 				absence.absenceType = absenceType;
 				absence.personDay = pd;
+				absence.save();
 				pd.absences.add(absence);
 				
 				pd.populatePersonDay();

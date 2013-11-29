@@ -486,28 +486,31 @@ public class PersonUtility {
 		query.setParameter("person", person).setParameter("begin", new LocalDate().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue())
 			.setParameter("end", new LocalDate()).setParameter("type", vacationFromLastYear);
 		List<Absence> absThisYearList = query.getResultList();
-		Logger.debug("Quest'anno %s %s ha usufruito di %d giorni di ferie", person.name, person.surname, absThisYearList.size());
+		Logger.debug("Quest'anno %s %s ha usufruito di %d giorni di ferie con codice %s relativo alle ferie dell'anno passato", person.name, person.surname, absThisYearList.size(), vacationFromLastYear.code);
 		
-		//FIXME: alcuni non hanno vacation period (abraham)
-//		VacationPeriod vp = VacationPeriod.find("Select vp from VacationPeriod vp where vp.person = ? and ((vp.beginFrom <= ? and vp.endTo >= ?) " +
-//				"or (vp.endTo = null)) order by vp.beginFrom desc", person, new LocalDate(year-1,1,1), new LocalDate(year-1,12,31)).first();
+
 		VacationPeriod vp = person.getCurrentContract().getCurrentVacationPeriod();
 		if((vp.vacationCode.vacationDays > absList.size() + absThisYearList.size()) && 
 				(new LocalDate(year, month, day).isBefore(new LocalDate(year, config.monthExpiryVacationPastYear, config.dayExpiryVacationPastYear)))){
 			return AbsenceType.find("byCode", "31").first();
 		}
+		else{
+			Logger.debug("%s %s ha finito i giorni di ferie dell'anno passato, passo a controllare se può prendere dei permessi legge...", person.name, person.surname);
+		}
 		AbsenceType permissionDay = AbsenceType.find("byCode", "94").first();
 		
 		query.setParameter("begin", new LocalDate().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue())
-			.setParameter("end", new LocalDate(year, month, day)).setParameter("person", person).setParameter("type", permissionDay);
+			.setParameter("end", new LocalDate().monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue()).setParameter("person", person).setParameter("type", permissionDay);
 		List<Absence> absPermissions = query.getResultList();
 		Logger.debug("%s %s quest'anno ha usufruito di %d giorni di permesso", person.name, person.surname, absPermissions.size());
 		if(vp.vacationCode.permissionDays > absPermissions.size()){
 			return permissionDay;
 		}
-		/**
-		 * bisognerebbe fare il calcolo in base a quanti giorni di ferie sono maturati alla data in cui si chiede l'inserimento dell'assenza
-		 */
+		else{
+			Logger.debug("%s %s ha terminato i suoi permessi legge. Controllo se può prendere ferie dell'anno corrente", person.name, person.surname);
+			
+		}
+	
 		query.setParameter("begin", new LocalDate().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue())
 			.setParameter("end", new LocalDate().monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue()).setParameter("person", person).setParameter("type", vacationFromThisYear);
 		List<Absence> absVacationThisYear = query.getResultList();
