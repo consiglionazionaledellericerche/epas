@@ -80,7 +80,7 @@ public class UploadSituation extends Controller{
 		String urlToPresence = conf.urlToPresence;
 		String attestatiLogin = params.get("attestatiLogin") == null ? conf.userToPresence : params.get("attestatiLogin"); 
 
-		renderTemplate("@checkAttestati", year, month, urlToPresence, attestatiLogin);
+		render(year, month, urlToPresence, attestatiLogin);
 	}
 
 	@Check(Security.UPLOAD_SITUATION)
@@ -88,8 +88,13 @@ public class UploadSituation extends Controller{
 			throws AttestatiException, MalformedURLException, URISyntaxException {
 
 		if (params.get("back") != null) {
-			redirect("UploadSituation.show", month, year);
+			loginAttestati(year, month);
 		}
+
+		if (params.get("home") != null) {
+			redirect("Application.indexAdmin");
+		}
+
 		
 		String urlToPresence = Configuration.getCurrentConfiguration().urlToPresence;
 
