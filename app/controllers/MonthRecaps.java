@@ -20,7 +20,6 @@ import models.Competence;
 import models.CompetenceCode;
 import models.Person;
 import models.PersonDay;
-import models.PersonMonth;
 import models.StampProfile;
 import models.Stamping;
 import models.WorkingTimeTypeDay;

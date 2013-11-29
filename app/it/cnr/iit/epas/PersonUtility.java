@@ -29,7 +29,6 @@ import models.PersonDayInTrouble;
 import models.PersonMonth;
 import models.PersonReperibilityDay;
 import models.PersonShiftDay;
-import models.PersonYear;
 import models.StampModificationType;
 import models.StampProfile;
 import models.Stamping;

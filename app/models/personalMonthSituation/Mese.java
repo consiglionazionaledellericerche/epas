@@ -9,7 +9,6 @@ import models.Absence;
 import models.Competence;
 import models.Person;
 import models.PersonDay;
-import models.PersonMonth;
 
 public class Mese {
 
