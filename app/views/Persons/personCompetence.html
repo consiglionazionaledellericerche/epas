@@ -14,16 +14,7 @@
 	<legend>Informazioni su straordinari e reperibilità</legend>
 	<p>Fra parentesi nella cella relativa agli straordinari diurni, il numero di ore disponibili nel mese da poter essere utilizzate per gli
 	straordinari</p>
-	<p>Nel caso si volessero modificare i valori degli straordinari del mese precedente, clicca qui ---> <a href="@{Competences.updateOldOvertime(person.id)}" class="updateOldOvertime${person.id}">Modifica gli straordinari per il mese precedente</a><script type="text/javascript"> 
-				$('.updateOldOvertime${person.id}').popupWindow({ 
-				height:500, 
-				width:800, 
-				scrollbars:1,
-				resizable:0,
-				top:50, 
-				left:50 
-				}); 
-				</script></p>
+	<p>Nel caso si volessero modificare i valori degli straordinari del mese precedente, clicca qui ---> <a href="@{Competences.updateOldOvertime(person.id)}" class="popup_window_mini">Modifica gli straordinari per il mese precedente</a></p>
 	
 	<input type="hidden" name="personId" value="${person.id}"/>
 	<input type="hidden" name="year" value="${year}"/>

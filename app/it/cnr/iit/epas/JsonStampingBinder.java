@@ -73,7 +73,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 								
 							String.format("Causale con codice %s sconosciuta.", stampTypeCode));
 					}
-					Logger.info("StampType con codice: %s", stampType.code);
+					//Logger.info("StampType con codice: %s", stampType.code);
 					stamping.stampType = stampType;
 				}
 			}

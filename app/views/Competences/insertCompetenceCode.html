@@ -9,9 +9,7 @@
 <p id="inserimentoCompetenze"><strong>Descrizione</strong> <input type="text" name="descrizione" value="${code.description}" size="40" maxlength="100"/></p>
 <p id="inserimentoCompetenze"><strong>Inattivo</strong> <input name="inattivo" type="checkbox" value="${code.inactive}"  />(checkare per i codici non più usati)</p>
 <div id="frm">
-<input id="insertCompetenceCode" type="submit" value="Ok"/>
+<input class="btn btn-primary" id="insertCompetenceCode" type="submit" value="Ok"/>
 #{/form}
-#{form @Competences.discard()}
-<input id="discardCompetenceCode" type="submit" value="Annulla"/>
-#{/form}
+
 </div>

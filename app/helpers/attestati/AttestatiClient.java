@@ -15,7 +15,6 @@ import models.Absence;
 import models.Competence;
 import models.Configuration;
 import models.Person;
-import models.PersonMonth;
 
 import org.joda.time.LocalDate;
 import org.jsoup.Connection;

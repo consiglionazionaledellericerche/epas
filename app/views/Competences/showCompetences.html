@@ -1,3 +1,5 @@
+
+
 #{extends 'main_admin.html' /}
 
    
@@ -14,30 +16,38 @@
 <h3 id="titoloGestioneCompetenze">Competenze del mese di <span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year}</h3>
 <input type="hidden" name="year" value="${year}"/>
 <input type="hidden" name="month" value="${month}"/>
-<table id="tabellaPersoneCompetenze">
+<p class="lead">I valori per le reperibilità sono espressi in GIORNI, quelli per straordinari e turni in ORE</p>
+<table class="table table-hover">
 	<tr>
-		<th>Nome e cognome</th>
-		%{ for(col in tableCompetence.columnKeySet()){
-		}%
-		<th>${col}</th>
-		%{
-		}
-		}%	
-	</tr>		
-	%{ for(entry in tableCompetence.rowMap().entrySet()){
-	}%
-	<tr>
-		<td class="nomeCognome">${entry.getKey().name} ${entry.getKey().surname} (${entry.getKey().number})</td>
-		%{ for(col in tableCompetence.columnKeySet()){
-		}%
-		<td>
-		<input class="span2" name="StraordinarioDiurnoLavorativo" type="text" value="${entry.getValue().get(col)}" size="5" maxlength="5" />			
-		</td>
-		%{
-		}
-		}%	
+	  <th class="span2">Nome e cognome</th>
+	#{list items:competenceCodes, as:'code'}
+	     <th class="span2">
+	      ${code.description}<br>
+	      ${code.code}
+	     </th>
+	#{/list}
 	</tr>
-	%{
-	}
-	}%
+	
+	#{list items:activePersons, as:'person'}
+	  <tr>
+	  <td class="nomeCognome">${person.name} ${person.surname}</td>
+	    #{list items:competenceCodes, as:'code'}
+	     <td>
+	     #{if person.competenceCode.contains(code)}
+	     <a data-x-editable href="#" data-type="number" data-pk="${person.competence(code,year,month).id}" data-name="value"
+	     	data-url="@{updateCompetence()}" 
+	     	data-title="Modifica ${code.description} per ${person.name} ${person.surname}">${person.competence(code,year,month).valueApproved}</a>
+	     </td>
+	     #{/if}
+	     #{else}
+	      <input class="span1" type="number" disabled="disabled"/>
+	      <abbr title="La competenza ${code.code}-${code.description} non è attiva per l'utente ${person.name} ${person.surname}" class="initialism">.</abbr>
+	     #{/else}
+	    #{/list}
+	  </tr>  
+	#{/list}
+
 </table>
+
+
+

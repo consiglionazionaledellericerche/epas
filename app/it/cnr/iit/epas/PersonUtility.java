@@ -18,6 +18,8 @@ import play.db.jpa.JPAPlugin;
 import play.db.jpa.Transactional;
 import models.Absence;
 import models.AbsenceType;
+import models.Competence;
+import models.CompetenceCode;
 import models.Configuration;
 import models.Contract;
 import models.Person;
@@ -27,7 +29,6 @@ import models.PersonDayInTrouble;
 import models.PersonMonth;
 import models.PersonReperibilityDay;
 import models.PersonShiftDay;
-import models.PersonYear;
 import models.StampModificationType;
 import models.StampProfile;
 import models.Stamping;
@@ -36,6 +37,8 @@ import models.VacationPeriod;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
 import models.enumerate.JustifiedTimeAtWork;
+import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
+import models.personalMonthSituation.Mese;
 
 public class PersonUtility {
 
@@ -484,28 +487,31 @@ public class PersonUtility {
 		query.setParameter("person", person).setParameter("begin", new LocalDate().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue())
 			.setParameter("end", new LocalDate()).setParameter("type", vacationFromLastYear);
 		List<Absence> absThisYearList = query.getResultList();
-		Logger.debug("Quest'anno %s %s ha usufruito di %d giorni di ferie", person.name, person.surname, absThisYearList.size());
+		Logger.debug("Quest'anno %s %s ha usufruito di %d giorni di ferie con codice %s relativo alle ferie dell'anno passato", person.name, person.surname, absThisYearList.size(), vacationFromLastYear.code);
 		
-		//FIXME: alcuni non hanno vacation period (abraham)
-//		VacationPeriod vp = VacationPeriod.find("Select vp from VacationPeriod vp where vp.person = ? and ((vp.beginFrom <= ? and vp.endTo >= ?) " +
-//				"or (vp.endTo = null)) order by vp.beginFrom desc", person, new LocalDate(year-1,1,1), new LocalDate(year-1,12,31)).first();
+
 		VacationPeriod vp = person.getCurrentContract().getCurrentVacationPeriod();
 		if((vp.vacationCode.vacationDays > absList.size() + absThisYearList.size()) && 
 				(new LocalDate(year, month, day).isBefore(new LocalDate(year, config.monthExpiryVacationPastYear, config.dayExpiryVacationPastYear)))){
 			return AbsenceType.find("byCode", "31").first();
 		}
+		else{
+			Logger.debug("%s %s ha finito i giorni di ferie dell'anno passato, passo a controllare se può prendere dei permessi legge...", person.name, person.surname);
+		}
 		AbsenceType permissionDay = AbsenceType.find("byCode", "94").first();
 		
 		query.setParameter("begin", new LocalDate().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue())
-			.setParameter("end", new LocalDate(year, month, day)).setParameter("person", person).setParameter("type", permissionDay);
+			.setParameter("end", new LocalDate().monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue()).setParameter("person", person).setParameter("type", permissionDay);
 		List<Absence> absPermissions = query.getResultList();
 		Logger.debug("%s %s quest'anno ha usufruito di %d giorni di permesso", person.name, person.surname, absPermissions.size());
 		if(vp.vacationCode.permissionDays > absPermissions.size()){
 			return permissionDay;
 		}
-		/**
-		 * bisognerebbe fare il calcolo in base a quanti giorni di ferie sono maturati alla data in cui si chiede l'inserimento dell'assenza
-		 */
+		else{
+			Logger.debug("%s %s ha terminato i suoi permessi legge. Controllo se può prendere ferie dell'anno corrente", person.name, person.surname);
+			
+		}
+	
 		query.setParameter("begin", new LocalDate().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue())
 			.setParameter("end", new LocalDate().monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue()).setParameter("person", person).setParameter("type", vacationFromThisYear);
 		List<Absence> absVacationThisYear = query.getResultList();
@@ -756,6 +762,31 @@ public class PersonUtility {
 		return new CheckMessage(true, "E' possibile prendere il codice d'assenza", null);
 	}
 	
+	/**
+	 * 
+	 * @param person
+	 * @param date
+	 * @return true se la persona ha sufficiente residuo al giorno precedente per prendere un riposo compensativo
+	 */
+	public static boolean canTakeCompensatoryRest(Person person, LocalDate date)
+	{
+		if(date.getDayOfMonth()>1)
+			date = date.minusDays(1);
+		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, date.getYear(), date);
+		Mese mese = c.getMese(date.getYear(), date.getMonthOfYear());
+		Logger.info("monteOreAnnoCorrente=%s ,  monteOreAnnoPassato=%s, workingTime=%s", mese.monteOreAnnoCorrente, mese.monteOreAnnoPassato, mese.workingTime);
+		if(mese.monteOreAnnoCorrente + mese.monteOreAnnoPassato > mese.workingTime)
+		{
+			Logger.info("decido si");
+			return true;
+		}
+		else
+		{
+			Logger.info("decido no");
+			return false;
+		}
+	}
+	
 	
 	public static int numberOfInOutInPersonDay(PersonDay pd)
 	{
@@ -819,73 +850,44 @@ public class PersonUtility {
 	 * 		In caso contrario viene inserito un record nella tabella PersonDayInTrouble. Situazioni di timbrature errate si verificano nei casi 
 	 *  	(a) che vi sia almeno una timbratura non accoppiata logicamente con nessun'altra timbratura 
 	 * 		(b) che le persone not fixed non presentino ne' assenze AllDay ne' timbrature. 
-	 * @param personid la persona da controllare, null se si desidera controllare tutte le persone attive
+	 * @param personid la persona da controllare
 	 * @param dayToCheck il giorno da controllare
 	 */
-	public static void checkDay(Long personid, LocalDate dayToCheck)
+	public static void checkPersonDay(Long personid, LocalDate dayToCheck)
 	{
-		
-		
-		//Costruisco la lista delle persone da controllare
-		List<Person> activeList = new ArrayList<Person>();
-		if(personid==null)
+		JPAPlugin.closeTx(false);
+		JPAPlugin.startTx(false);
+
+		Person personToCheck = Person.findById(personid);
+		if(!personToCheck.isActive(dayToCheck))
 		{
-			JPAPlugin.closeTx(false);
-			JPAPlugin.startTx(false);
-			activeList =  Person.getActivePersons(new LocalDate());
+			return;
+		}
+
+		PersonDay pd = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? AND pd.date = ? ", 
+				personToCheck,dayToCheck).first();
+
+		if(pd!=null)
+		{
+			checkForPersonDayInTrouble(pd, personToCheck); 
+			return;
 		}
 		else
 		{
-			JPAPlugin.closeTx(false);
-			JPAPlugin.startTx(false);
-			Person person = Person.findById(personid);
-			if(person.isActive(dayToCheck))
-			{
-				activeList.add(person);
-			}
-			else
+			if(DateUtility.isGeneralHoliday(dayToCheck))
 			{
 				return;
 			}
-		}
-		
-		
-		for(Person personToCheck : activeList)
-		{
-			PersonDay pd = PersonDay.find(""
-					+ "SELECT pd "
-					+ "FROM PersonDay pd "
-					+ "WHERE pd.person = ? AND pd.date = ? ", 
-					personToCheck, 
-					dayToCheck)
-					.first();
-			
-			if(pd!=null)
+			if(personToCheck.workingTimeType.workingTimeTypeDays.get(dayToCheck.getDayOfWeek()-1).holiday)
 			{
-				//check for error
-				checkForError(pd, personToCheck); //TODO riabilitarlo
-				continue;
+				return;
 			}
-			else
-			{
-				if(DateUtility.isGeneralHoliday(dayToCheck))
-				{
-					continue;
-				}
-				if(personToCheck.workingTimeType.workingTimeTypeDays.get(dayToCheck.getDayOfWeek()-1).holiday)
-				{
-					continue;
-				}
-				
-				pd = new PersonDay(personToCheck, dayToCheck);
-				pd.create();
-				pd.populatePersonDay();
-				pd.save();
-				//check for error
-				checkForError(pd, personToCheck);
-				continue;
-				
-			}
+			pd = new PersonDay(personToCheck, dayToCheck);
+			pd.create();
+			pd.populatePersonDay();
+			pd.save();
+			checkForPersonDayInTrouble(pd, personToCheck);
+			return;
 		}
 	}
 	
@@ -894,10 +896,12 @@ public class PersonUtility {
 	 *  (1) che vi sia almeno una timbratura non accoppiata logicamente con nessun'altra timbratura 
 	 * 	(2) che le persone not fixed non presentino ne' assenze AllDay ne' timbrature. 
 	 * In caso di situazione errata viene aggiunto un record nella tabella PersonDayInTrouble.
+	 * Se il PersonDay era presente nella tabella PersonDayInTroubled ed è stato fixato, viene settato a true il campo
+	 * fixed.
 	 * @param pd
 	 * @param person
 	 */
-	private static void checkForError(PersonDay pd, Person person)
+	private static void checkForPersonDayInTrouble(PersonDay pd, Person person)
 	{
 		//persona fixed
 		StampModificationType smt = pd.getFixedWorkingTime();
@@ -921,9 +925,9 @@ public class PersonUtility {
 		{
 			if(!pd.isAllDayAbsences() && pd.stampings.size()==0)
 			{
+				//TODO questo e' un controllo aggiuntivo in quanto in teoria i person day senza assenze e timbrature nei giorni di festa 
+				//non dovrebbero esistere ma nel database attuale a volte sono presenti e persistiti. Cancellarli e togliere questo controllo
 				if(!pd.isHoliday())	
-					//TODO questo e' un controllo aggiuntivo in quanto in teoria i person day senza assenze e timbrature nei giorni di festa 
-					//non dovrebbero esistere ma nel database attuale a volte sono presenti e persistiti. Cancellarli e togliere questo controllo
 				{
 					insertPersonDayInTrouble(pd, "no assenze giornaliere e no timbrature");
 				}
@@ -939,22 +943,25 @@ public class PersonUtility {
 				}
 			}
 		}
+		//giorno senza problemi, se era in trouble lo fixo
+		if(pd.troubles!=null && pd.troubles.size()>0)
+		{
+			for(PersonDayInTrouble pdt : pd.troubles)
+			{
+				Logger.info("Il problema %s %s %s e' risultato fixato", pd.date, pd.person.surname, pd.person.name);
+				pdt.fixed = true;
+				pdt.save();
+				
+			}
+		}
 	}
 	
 	private static void insertPersonDayInTrouble(PersonDay pd, String cause)
 	{
-		//TODO Controllo che non esista già, in quel caso decidere cosa fare (forse solo aggiornare la causa)
-		//System.out.println( "A " + pd.date.toString() +  " " + person.surname + " " +person.name +" non valido. (cella gialla)");
-		
-		PersonDayInTrouble pdt = PersonDayInTrouble.find(""
-				+ "Select pdt "
-				+ "from PersonDayInTrouble pdt "
-				+ "where pdt.personDay = ?"
-				, pd)
-				.first();
-		
+		PersonDayInTrouble pdt = PersonDayInTrouble.find("Select pdt from PersonDayInTrouble pdt where pdt.personDay = ?", pd).first();
 		if(pdt==null)
-		{
+		{	
+			//se non esiste lo creo
 			Logger.info("Nuovo PersonDayInTrouble %s %s %s - %s - %s", pd.person.id, pd.person.name, pd.person.surname, pd.date, cause);
 			PersonDayInTrouble trouble = new PersonDayInTrouble();
 			trouble.personDay = pd;
@@ -962,41 +969,53 @@ public class PersonUtility {
 			trouble.save();
 			return;
 		}
-		
 		if(pdt!=null)
 		{
-			//??
+			//se esiste lo setto fixed = false;
+			pdt.fixed = false;
+			pdt.cause = cause;
+			pdt.save();
 		}
 		
 	}
 	
 	
 	/**
-	 * A partire dal mese e anno passati al metodo fino al giorno di ieri 
-	 * controlla la presenza di errori nelle timbrature 
-	 * ed eventualmente inserisce i giorni problematici nella tabella PersonDayInTrouble.
-	 * @param personid la persona da controllare, null se si vuole controllare ogni persona
+	 * A partire dal mese e anno passati al metodo fino al giorno di ieri (yesterday)
+	 * controlla la presenza di errori nelle timbrature, inserisce i giorni problematici nella tabella PersonDayInTrouble
+	 * e setta a fixed true quelli che in passato avevano problemi e che invece sono stati risolti.
+	 * @param personid la persona da controllare
 	 * @param year l'anno di partenza
 	 * @param month il mese di partenza
 	 */
 	public static void checkHistoryError(Long personid, int year, int month)
 	{
-		
+		Person person = Person.findById(personid);
+		Logger.info("Check history error %s dal %s-%s-1 a oggi", person.surname, year, month);
 		LocalDate date = new LocalDate(year,month,1);
 		LocalDate today = new LocalDate();
 		while(true)
 		{
-			Logger.info("Check missing for %s", date.toString());
-			if(personid==null)
-				PersonUtility.checkDay(null, date);
-			else
-				PersonUtility.checkDay(personid, date);
+			PersonUtility.checkPersonDay(personid, date);
 			date = date.plusDays(1);
 			if(date.isEqual(today))
 				break;
 		}
 	}
 	
+	/**
+	 * 
+	 * @return la lista dei codici competenza attivi per le persone nell'anno in corso
+	 */
+	public static List<CompetenceCode> activeCompetence(){
+		List<CompetenceCode> competenceCodeList = new ArrayList<CompetenceCode>();
+		List<Competence> competenceList = Competence.find("Select comp from Competence comp where comp.year = ?", new LocalDate().getYear()).fetch();
+		for(Competence comp : competenceList){
+			if(!competenceCodeList.contains(comp.competenceCode))
+				competenceCodeList.add(comp.competenceCode);
+		}
+		return competenceCodeList;
+	}
 	
 
 }

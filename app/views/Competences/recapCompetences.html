@@ -5,7 +5,7 @@
   <div class="span0"></div>
   <div class="span11">
 
-	<h2 id="titoloGestioneStraordinariCompetenze">Gestione straordinari e altre competenze</h2>    
+<h2 id="titoloGestioneStraordinariCompetenze">Gestione straordinari e altre competenze</h2>    
 
  <ul class="nav nav-tabs">
     	<li><a href="@{Competences.showCompetences(year, month)}#">Competenze</a></li>
@@ -14,7 +14,7 @@
     	<li class="active"><a href="@{Competences.recapCompetences()}#">Recap competenze</a></li>
  </ul>
  
-<h3 id="titoloGestioneStraordinariCompetenze">Da questa pagina puoi definire quali competenze spettano ad ogni persona</h3>
+<h3 id="titoloGestioneCompetenze">Da questa pagina puoi definire quali competenze spettano ad ogni persona</h3>
 
 <input type="hidden" name="year" value="${year}"/>
 <input type="hidden" name="month" value="${month}"/>
@@ -39,13 +39,13 @@
 		}%
 		%{ if(entry.getValue().get(col) == true){
 		}%	<td>	
-				<input type="checkbox" name="name" value ="true" checked="checked"/>
+				<input type="checkbox" name="name" value ="true" checked="checked" disabled="disabled"/>
 			</td>
 		%{ 
 		}else{
 		}%
 			<td>	
-				<input type="checkbox" name="name" value ="false" />
+				<input type="checkbox" name="name" value ="false" disabled="disabled"/>
 			</td>
 		%{
 			}

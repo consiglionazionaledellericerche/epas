@@ -21,6 +21,7 @@ import models.PersonMonth;
 import models.VacationCode;
 import models.VacationPeriod;
 import models.WorkingTimeType;
+import models.exports.PersonsList;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
 import play.Logger;
@@ -143,40 +144,6 @@ public class Administration extends Controller {
 		
 	}
 
-	public static void checkForNegativeResidual()
-	{
-		List<Person> persons = Person.getActivePersonsInMonth(11, 2013);
-		for(Person person : persons)
-		{
-			Logger.debug("Processo la persona %s - %s %s", person.id, person.surname, person.name);
-			try {
-				InitializationTime initializationTime = InitializationTime.find("Select i from InitializationTime i where i.person = ?" , person).first();
-				CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, 2013, initializationTime.residualMinutesPastYear);
-				int monteOreInizioAnno = c.getMese(2013, 1).monteOreAnnoCorrente;
-				int monteOreFineOttobre = c.getMese(2013, 10).monteOreAnnoCorrente;
-				Logger.debug("MonteOreInizioAnno = %s - MonteOreFineOttobre = %s,  differenza = %s", monteOreInizioAnno / 60, monteOreFineOttobre / 60, (monteOreFineOttobre - monteOreInizioAnno) / 60);
-				
-				for(Mese mese : c.mesi)
-				{
-					//if(mese.monteOreAnnoCorrente<0)
-						//Logger.debug("Persona con residuo negativo nel mese %s: %s - %s %s", mese.mese, person.id, person.surname, person.name);
-				}
-			}
-			catch(Exception e)
-			{
-				//Logger.debug("Eccezione nella computazione della person %s -%s %s", person.id, person.surname, person.name);
-			}
-		}
-	}
-
-	/**
-	 * Ricalcolo della situazione di ogni persona a partire da gennaio 2013
-	 */
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void fixPersonSituationBrowser()
-	{ 
-		fixPersonSituation(236l, 2013, 1);
-	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void utilities(){
@@ -187,7 +154,7 @@ public class Administration extends Controller {
 	
 	/**
 	 * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
-	 * @param personId la persona da fixare, null per fixare tutte le persone
+	 * @param personId l'id univoco della persona da fixare, -1 per fixare tutte le persone
 	 * @param year l'anno dal quale far partire il fix
 	 * @param month il mese dal quale far partire il fix
 	 * 
@@ -195,16 +162,31 @@ public class Administration extends Controller {
 	 */	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void fixPersonSituation(Long personId, int year, int month){
+		
 		if(personId==-1)
 			personId=null;
 
+		
+		
+		
 		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
 		JPAPlugin.startTx(false);
 		if(personId==null)
-			PersonUtility.checkHistoryError(null, year, month);
+		{
+			List<Person> personList = Person.getActivePersonsInMonth(month, year);
+			for(Person person : personList)
+			{
+				PersonUtility.checkHistoryError(person.id, year, month);
+			}
+		}
 		else
+		{
 			PersonUtility.checkHistoryError(personId, year, month);
+		}
 		JPAPlugin.closeTx(false);
+		
+		
+		
 		
 		// (2) Ricalcolo i valori dei person day aggregandoli per mese
 		JPAPlugin.startTx(true);
@@ -223,7 +205,7 @@ public class Administration extends Controller {
 		int i = 1;
 		
 		for(Person p : personList){
-			Logger.info("Update person %s (%s di %s)", p.surname, i++, personList.size());
+			Logger.info("Update person situation %s (%s di %s) dal %s-%s-01 a oggi", p.surname, i++, personList.size(), year, month);
 			
 			LocalDate actualMonth = new LocalDate(year, month, 1);
 			LocalDate endMonth = new LocalDate().withDayOfMonth(1);
@@ -278,8 +260,8 @@ public class Administration extends Controller {
 			
 		}
 		*/
-		flash.success("fixPersonSituation applicato con successo");
-		Application.indexAdmin();
+		//flash.success("fixPersonSituation applicato con successo");
+		//Application.indexAdmin();
 	}
 	
 	
