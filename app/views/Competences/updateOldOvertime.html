@@ -1,4 +1,4 @@
-#{extends 'main.html' /}
+#{extends 'main_admin.html' /}
 #{form @Competences.saveOldOvertime()}
 <h3>Tabella contenente le informazioni su straordinari e reperibilità del mese di <span class="capitalized">&{'views.tags.display.date.month.' + date.getMonthOfYear()}</span> ${date.getYear()}</h3>
 <input type="hidden" name="person.id" value="${person.id}" />
