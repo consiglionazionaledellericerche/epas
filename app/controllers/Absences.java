@@ -536,18 +536,16 @@ public class Absences extends Controller{
 					return;
 				}
 			}
-			
+			if(!PersonUtility.canTakeCompensatoryRest(person, pd.date))
+			{
+				flash.error("Impossibile aggiungere Riposo Compensativo perchè alla data il residuo positivo è insufficiente.");
+				render("@save");
+			}
 			
 			Absence absence = new Absence();
 			absence.absenceType = absenceType;
 			absence.personDay = pd;
 			pd.absences.add(absence);
-			PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
-					pd.person, pd.date.getMonthOfYear(), pd.date.getYear()).first();
-			if(pm == null)
-				pm = new PersonMonth(pd.person, pd.date.getMonthOfYear(), pd.date.getYear());
-			pm.prendiRiposoCompensativo(dateFrom);
-			pm.save();
 			pd.populatePersonDay();
 			pd.updatePersonDay();
 			pd.save();

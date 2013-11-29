@@ -38,6 +38,8 @@ import models.VacationPeriod;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
 import models.enumerate.JustifiedTimeAtWork;
+import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
+import models.personalMonthSituation.Mese;
 
 public class PersonUtility {
 
@@ -759,6 +761,31 @@ public class PersonUtility {
 		
 		 
 		return new CheckMessage(true, "E' possibile prendere il codice d'assenza", null);
+	}
+	
+	/**
+	 * 
+	 * @param person
+	 * @param date
+	 * @return true se la persona ha sufficiente residuo al giorno precedente per prendere un riposo compensativo
+	 */
+	public static boolean canTakeCompensatoryRest(Person person, LocalDate date)
+	{
+		if(date.getDayOfMonth()>1)
+			date = date.minusDays(1);
+		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, date.getYear(), date);
+		Mese mese = c.getMese(date.getYear(), date.getMonthOfYear());
+		Logger.info("monteOreAnnoCorrente=%s ,  monteOreAnnoPassato=%s, workingTime=%s", mese.monteOreAnnoCorrente, mese.monteOreAnnoPassato, mese.workingTime);
+		if(mese.monteOreAnnoCorrente + mese.monteOreAnnoPassato > mese.workingTime)
+		{
+			Logger.info("decido si");
+			return true;
+		}
+		else
+		{
+			Logger.info("decido no");
+			return false;
+		}
 	}
 	
 	
