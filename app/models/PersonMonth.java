@@ -20,6 +20,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import models.Stamping.WayType;
+import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
+import models.personalMonthSituation.Mese;
 
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -943,8 +945,10 @@ public class PersonMonth extends Model {
 		
 	}
 
+	@Deprecated
 	public boolean prendiRiposoCompensativo(LocalDate date) {
 		
+	
 		int minutiRiposoCompensativo = minutiRiposoCompensativo(date);
 		
 		
@@ -983,6 +987,7 @@ public class PersonMonth extends Model {
 		aggiornaRiepiloghi();
 		
 		return true;
+	
 	}
 
 	public int residuoAnnoCorrenteDaInizializzazione() {

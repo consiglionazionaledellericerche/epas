@@ -132,6 +132,10 @@ public class Mese {
 		return;
 	}
 	
+	/**
+	 * 
+	 * @param calcolaFinoA
+	 */
 	public void setPersonDayInformation(LocalDate calcolaFinoA)
 	{
 		LocalDate monthBegin = new LocalDate(this.anno, this.mese, 1);
@@ -167,9 +171,13 @@ public class Mese {
 		}
 		this.progressivoFinaleNegativoMese = this.progressivoFinaleNegativoMese*-1;
 	
-		 this.progressivoFinalePositivoMesePrint = this.progressivoFinalePositivoMese;
+		this.progressivoFinalePositivoMesePrint = this.progressivoFinalePositivoMese;
 	}
 	
+	/**
+	 * 
+	 * @param calcolaFinoA, la data fino alla quale cercare riposi compensativi gia' assegnati
+	 */
 	public void setPersonMonthInformation(LocalDate calcolaFinoA)
 	{
 		//straordinari s1
