@@ -290,8 +290,9 @@ public class Absences extends Controller{
 
 			flash.error("Il codice di assenza %s non esiste", params.get("absenceCode"));
 			Logger.info("E' stato richiesto l'inserimento del codice di assenza %s per l'assenza del giorno %s per personId = %d. Il codice NON esiste. Se si tratta di un codice di assenza per malattia figlio NUOVO, inserire il nuovo codice nella lista e riprovare ad assegnarlo.", absenceType, dateFrom, personId);
-			create(personId, yearFrom, monthFrom, dayFrom);
-			render("@save");
+			//create(personId, yearFrom, monthFrom, dayFrom);
+			//render("@save");
+			Stampings.personStamping(personId, yearFrom, monthFrom);
 		}
 
 		Logger.debug("Richiesto inserimento della assenza codice = %s della persona %s, dataInizio = %s", absenceCode, person, dateFrom);
@@ -308,8 +309,9 @@ public class Absences extends Controller{
 				for(Absence abs : absenceList){
 					if(abs.absenceType.equals(absenceType)){
 						flash.error("Il codice di assenza %s è già presente in almeno uno dei giorni in cui lo si voleva inserire. Controllare", absenceType.code);
-						create(personId, yearFrom, monthFrom, dayFrom);
-						render("@save");
+						//create(personId, yearFrom, monthFrom, dayFrom);
+						//render("@save");
+						Stampings.personStamping(personId, yearFrom, monthFrom);
 					}
 
 				}
@@ -326,8 +328,9 @@ public class Absences extends Controller{
 					validation.keep();
 					params.flash();
 					flash.error("Il codice di assenza %s è già presente per la data %s", params.get("absenceCode"), PersonTags.toDateTime(dateFrom));
-					create(personId, yearFrom, monthFrom, dayFrom);
-					render("@save");
+					//create(personId, yearFrom, monthFrom, dayFrom);
+					//render("@save");
+					Stampings.personStamping(personId, yearFrom, monthFrom);
 				}
 			}
 
@@ -337,7 +340,8 @@ public class Absences extends Controller{
 		if(abs != null && abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay && 
 				absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay){
 			flash.error("Non si possono inserire per lo stesso giorno due codici di assenza giornaliera");
-			render("@save");
+			//render("@save");
+			Stampings.personStamping(personId, dateFrom.getYear(), dateFrom.getMonthOfYear());
 		}
 
 		/**
@@ -352,7 +356,8 @@ public class Absences extends Controller{
 				 */
 				flash.error(String.format("Il dipendente %s %s non può prendere il codice d'assenza %s poichè ha già usufruito del numero" +
 						" massimo di giorni di assenza per quel codice", person.name, person.surname, absenceType.code));
-				render("@save");
+				//render("@save");
+				Stampings.personStamping(personId, yearFrom, monthFrom);
 				return;
 
 			}
@@ -377,7 +382,8 @@ public class Absences extends Controller{
 				pd.updatePersonDay();
 				//Administration.fixPersonSituation(person.id, yearFrom, monthFrom);
 				flash.success("Inserito il codice d'assenza %s nel giorno %s", absenceType.code, pd.date);
-				render("@save");
+				//render("@save");
+				Stampings.personStamping(personId, pd.date.getYear(), pd.date.getMonthOfYear());
 			}
 			else{
 				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
@@ -415,7 +421,8 @@ public class Absences extends Controller{
 				pdList.get(0).updatePersonDay();
 				//Administration.fixPersonSituation(person.id, yearFrom, monthFrom);
 				flash.success("Inserito codice d'assenza %s per il periodo richiesto", absenceType.code);
-				render("@save");
+				//render("@save");
+				Stampings.personStamping(personId, yearFrom, monthFrom);
 			}
 		}
 
@@ -444,7 +451,8 @@ public class Absences extends Controller{
 					pd.updatePersonDay();
 					
 					flash.success("Inserito il codice di assenza %s per il giorno %s", abt.code, pd.date);
-					render("@save");
+					//render("@save");
+					Stampings.personStamping(personId, pd.date.getYear(), pd.date.getMonthOfYear());
 				}
 				else{
 
@@ -490,7 +498,8 @@ public class Absences extends Controller{
 				}
 				//Administration.fixPersonSituation(person.id, yearFrom, monthFrom);
 				flash.success("Inserito il codice di assenza per il periodo richiesto");
-				render("@save");
+				//render("@save");
+				Stampings.personStamping(personId, yearFrom, monthFrom);
 
 			}
 			else{
@@ -498,7 +507,8 @@ public class Absences extends Controller{
 				flash.error("Non si può inserire un giorno di ferie per %s %s che è in turno/reperibilità. \n Contattarlo e chiedere spiegazioni", 
 						person.name, person.surname);
 				//FIXME: e dopo aver ricevuto le spiegazioni come forzo l'inserimento??
-				render("@save");
+				//render("@save");
+				Stampings.personStamping(personId, yearFrom, monthFrom);
 			}
 
 		}
@@ -532,14 +542,16 @@ public class Absences extends Controller{
 				if(resultList.size() >= config.maxRecoveryDaysOneThree){
 					flash.error("Il dipendente %s %s non può usufruire del codice di assenza %s poichè ha raggiunto il limite previsto per" +
 							"quel codice", person.name, person.surname, absenceType.code);
-					render("@save");
-					return;
+					//render("@save");
+					//return;
+					Stampings.personStamping(personId, yearFrom, monthFrom);
 				}
 			}
 			if(!PersonUtility.canTakeCompensatoryRest(person, pd.date))
 			{
 				flash.error("Impossibile aggiungere Riposo Compensativo perchè alla data il residuo positivo è insufficiente.");
-				render("@save");
+				//render("@save");
+				Stampings.personStamping(personId, yearFrom, monthFrom);
 			}
 			
 			Absence absence = new Absence();
@@ -552,7 +564,8 @@ public class Absences extends Controller{
 			pd.save();
 			//Administration.fixPersonSituation(person.id, yearFrom, monthFrom);
 			flash.success("Aggiunto codice di assenza %s ", absenceType.code);
-			render("@save");
+			//render("@save");
+			Stampings.personStamping(personId, yearFrom, monthFrom);
 
 		}		
 
@@ -581,7 +594,8 @@ public class Absences extends Controller{
 				pd.updatePersonDay();
 				//Administration.fixPersonSituation(person.id, yearFrom, monthFrom);
 				flash.success("Aggiunto codice di assenza %s "+checkMessage.message, absenceType.code);
-				render("@save");
+				//render("@save");
+				Stampings.personStamping(personId, yearFrom, monthFrom);
 
 			}
 			if(checkMessage.check == true && checkMessage.absenceType != null){
@@ -600,7 +614,8 @@ public class Absences extends Controller{
 				pd.updatePersonDay();
 				//Administration.fixPersonSituation(person.id, yearFrom, monthFrom);
 				flash.success("Aggiunto codice di assenza %s "+checkMessage.message, absenceType.code);
-				render("@save");
+				//render("@save");
+				Stampings.personStamping(personId, yearFrom, monthFrom);
 			}
 			
 		}
@@ -638,11 +653,11 @@ public class Absences extends Controller{
 				}
 			}
 			pd.updatePersonDay();
-			//Administration.fixPersonSituation(person.id, yearFrom, monthFrom);
+			
 			flash.success(
 					String.format("Assenza di tipo %s inserita per il giorno %s per %s %s", absenceCode, PersonTags.toDateTime(dateFrom), person.surname, person.name));
 			
-			render("@save");
+			Stampings.personStamping(personId, pd.date.getYear(), pd.date.getMonthOfYear());
 
 		}
 		else{
@@ -659,7 +674,9 @@ public class Absences extends Controller{
 					absence.save();
 					pdInside.populatePersonDay();
 					pdInside.save();
+					
 				}
+				pdList.get(0).updatePersonDay();
 			}
 			else{
 
@@ -676,14 +693,15 @@ public class Absences extends Controller{
 						absence.save();
 						pdInside.populatePersonDay();
 						pdInside.save();
+						pdInside.updatePersonDay();
 					}
 					dateFrom = dateFrom.plusDays(1);
 				}
 			}
-			pdList.get(0).updatePersonDay();
+			
 			flash.success("Inserita assenza %s dal %s al %s", absenceType.code, dateFrom, dateTo);
 			//Administration.fixPersonSituation(person.id, yearFrom, monthFrom);
-			render("@save");
+			Stampings.personStamping(personId, dateFrom.getYear(), dateFrom.getMonthOfYear());
 		}
 
 	}
@@ -817,7 +835,8 @@ public class Absences extends Controller{
 					}
 				}
 				flash.success("Assenza di tipo %s per il giorno %s rimossa per il dipendente %s %s", 
-						oldAbsenceCode, PersonTags.toDateTime(absence.personDay.date), pd.person.name, pd.person.surname);			
+						oldAbsenceCode, PersonTags.toDateTime(absence.personDay.date), pd.person.name, pd.person.surname);	
+				Stampings.personStamping(pd.person.id, year, month);
 			} 
 			else {
 
@@ -832,7 +851,7 @@ public class Absences extends Controller{
 					params.flash();
 					flash.error("Il codice di assenza %s è già presente per la data %s", params.get("absenceCode"), PersonTags.toDateTime(absence.personDay.date));
 					edit(absence.id);
-					render("@edit");
+					Stampings.personStamping(pd.person.id, year, month);
 				}
 				String mealTicket =  params.get("buonoMensa");
 				//Logger.debug("Il valore di buono mensa da param: %s", mealTicket);
@@ -848,7 +867,7 @@ public class Absences extends Controller{
 				flash.success(
 						String.format("Assenza per il giorno %s per %s %s aggiornata con codice %s", 
 								PersonTags.toDateTime(absence.personDay.date), absence.personDay.person.surname, absence.personDay.person.name, absenceCode));
-
+				Stampings.personStamping(pd.person.id, year, month);
 			}
 
 		}
@@ -885,7 +904,8 @@ public class Absences extends Controller{
 						params.flash();
 						flash.error("Il codice di assenza %s è già presente per la data %s", params.get("absenceCode"), PersonTags.toDateTime(absence.personDay.date));
 						edit(absence.id);
-						render("@edit");
+						//render("@edit");
+						Stampings.personStamping(pd.person.id, year, month);
 					}
 					else{
 						Absence abs = Absence.find("Select a from Absence a, PersonDay pd where a.personDay = pd and pd.person = ? and pd.date = ?", 
@@ -913,8 +933,9 @@ public class Absences extends Controller{
 				
 			}
 			flash.success("Rimossi i codici di assenza per il periodo %s %s", absence.personDay.date, dataFineAssenze);
+			Stampings.personStamping(pd.person.id, year, month);
 		}
-		render("@save");
+		
 	}
 	
 	private static void checkMealTicket(PersonDay pd, String mealTicket){

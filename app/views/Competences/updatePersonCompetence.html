@@ -4,8 +4,8 @@
 <input type="hidden" name="personId" value="${person.id}"/>
 <fieldset>
 	<legend>Modifica competenze</legend>
-	<p id="nome"><strong>Nome: </strong><input type="text" name="nome" value="${person.name}" disabled="disabled"/></p>
-	<p id="cognome"><strong>Cognome: </strong><input type="text" name="cognome" value="${person.surname}" disabled="disabled" /></p>
+	<p id="nome"><input type="text" class="span2" name="nome" value="${person.name}" disabled="disabled"/></p>
+	<p id="cognome"><input type="text" class="span2" name="cognome" value="${person.surname}" disabled="disabled" /></p>
 	<table class="tablenoborder">
 	<tr>
 		<td>%{	if(person.isOvertimeInWorkDayAvailable()==true){ }%

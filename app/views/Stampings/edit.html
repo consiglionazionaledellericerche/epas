@@ -1,7 +1,7 @@
-#{extends 'main_admin.html' /}
+
 #{set title:stamping.personDay.person.surname + ' ' + stamping.personDay.person.name + ', matricola=' + stamping.personDay.person.number /}
 
-<h3>Modifica Entrate/Uscite del ${stamping.personDay.date}</h3>
+<h3>${stamping.personDay.date}</h3>
 
 <p id="updateStampingText">Inserire ore e minuti nelle caselle seguenti nel formato HH.MM 
 Lasciare le caselle vuote per eliminare una entrata/uscita.</p>
@@ -11,13 +11,13 @@ Lasciare le caselle vuote per eliminare una entrata/uscita.</p>
 <legend>Modifica ore/minuti</legend>
 	<input type="hidden" name="stampingId" value="${stamping.id}"/>
 
-	<input class="span2" type="number" min="0" max="23" name="stampingHour" value="${hourMinute.get(0)}" size="5" maxlength="5"/>
-	<input class="span2" type="number" min="0" max="59" name="stampingMinute" value="${hourMinute.get(1)}" size="5" maxlength="5"/>
+	<input class="span1" type="number" min="0" max="23" name="stampingHour" value="${hourMinute.get(0)}" size="5" maxlength="5"/>
+	<input class="span1" type="number" min="0" max="59" name="stampingMinute" value="${hourMinute.get(1)}" size="5" maxlength="5"/>
 	
 	<p id="tipoTimbratura"> Timbratura di servizio: </p> <p id="choice"> Si <input type="radio" name="service" value="true" /> No <input type="radio" name="service" value="false" checked="checked"/></p>
 	<p id="tipoTimbratura">Note amministratore: <input id="note" type="text" name="note" value="" /></p>
 
 </fieldset>
 
-<input class="btn btn-primary" id="updateStamping" type="submit" value="Aggiorna"/>
+<input class="btn btn-primary" id="inserisciAssenza" type="submit" value="Aggiorna"/>
 #{/form}
