@@ -697,7 +697,7 @@ public class PersonDay extends Model {
 	 */
 	public void updatePersonDay()
 	{
-		Logger.info("Update Person Day %s", this.date);
+		Logger.info("Update Person Day %s by %s %s", this.date, this.person.name, this.person.surname);
 		LocalDate monthBegin = new LocalDate(this.date.getYear(), this.date.getMonthOfYear(), 1);
 		LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
 		

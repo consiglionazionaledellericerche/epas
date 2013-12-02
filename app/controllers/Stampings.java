@@ -377,19 +377,13 @@ public class Stampings extends Controller {
 
 		if(pd.stampings.size() == 0 && pd.isHoliday()){
 			flash.error("Si sta inserendo una timbratura in un giorno di festa. Errore");
-			render("@save");
+			Stampings.personStamping(personId, year, month);
 		}
 
 		if(date.isAfter(new LocalDate())){
 			flash.error("Non si può inserire una timbratura futura!!!");
-			render("@save");
+			Stampings.personStamping(personId, year, month);
 		}
-
-
-
-		/**
-		 * controllo che il radio button sulla timbratura forzata all'orario di lavoro sia checkato
-		 */
 
 		if(params.get("timeAtWork", Boolean.class) == true){
 			pd.timeAtWork = person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(new LocalDate(year, month, day).getDayOfWeek()).workingTime;
@@ -397,7 +391,7 @@ public class Stampings extends Controller {
 			pd.populatePersonDay();
 			pd.save();
 			flash.success("Inserita timbratura forzata all'orario di lavoro per %s %s", person.name, person.surname);
-			render("@save");
+			Stampings.personStamping(personId, year, month);
 		}
 		Integer hour = params.get("hourStamping", Integer.class);
 		Integer minute = params.get("minuteStamping", Integer.class);
@@ -433,20 +427,9 @@ public class Stampings extends Controller {
 			
 		pd.populatePersonDay();
 		pd.updatePersonDay();
-		/*
-		pd.save();
-		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ?", 
-				pd.person, pd.date).fetch();
-		for(PersonDay p : pdList){
-			if(p.date.getMonthOfYear() == stamp.date.getMonthOfYear()){
-				p.populatePersonDay();
-				p.save();
-			}
-
-		}
-		*/
+		
 		flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
-		render("@save");
+		Stampings.personStamping(personId, year, month);
 
 
 	}
@@ -479,7 +462,7 @@ public class Stampings extends Controller {
 		{
 			flash.error("Attribuire valore a ciascun campo se si intende modificare la timbratura o togliere valore a entrambi i campi" +
 					" se si intende cancellarla");
-			render("@save");
+			Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
 		}
 		if (hour == null && minute == null) 
 		{
@@ -492,15 +475,15 @@ public class Stampings extends Controller {
 	
 			flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(stamping.date.toLocalDate()));	
 
-			render("@save");
+			Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
 
 		} 
 		else 
 		{
 			if (hour == null || minute == null) {
 				flash.error("E' necessario specificare sia il campo ore che minuti, oppure nessuno dei due per rimuovere la timbratura.");
-				render("@edit");
-				return;
+				Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
+				
 			}
 			Logger.debug("Ore: %s Minuti: %s", hour, minute);
 
@@ -534,7 +517,7 @@ public class Stampings extends Controller {
 			flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name);
 
 		}
-		render("@save");
+		Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
 
 	}
 
