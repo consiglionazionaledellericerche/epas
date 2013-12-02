@@ -160,6 +160,10 @@ public class Person extends Model {
 	@JoinColumn(name="working_time_type_id")
 	public WorkingTimeType workingTimeType;
 	
+	@NotAudited
+	@OneToMany(mappedBy = "person", fetch=FetchType.LAZY)
+	public List<PersonWorkingTimeType> personWorkingTimeType = new ArrayList<PersonWorkingTimeType>();
+	
 	/**
 	 * relazione con la tabella delle eventuali sedi distaccate
 	 */
@@ -984,6 +988,28 @@ public class Person extends Model {
 	 */
 	public static Person findByNumber(Integer number) {
 		return Person.find("SELECT p FROM Person p WHERE number = ?", number).first();
+	}
+	
+	
+	/**
+	 * 
+	 * @return l'attuale orario di lavoro
+	 */
+	public  WorkingTimeType getCurrentWorkingTimeType(){
+		return getWorkingTimeType(LocalDate.now());
+	}
+
+	/**
+	 * 
+	 * @param date
+	 * @return il tipo di orario di lavoro utilizzato in date
+	 */
+	public  WorkingTimeType getWorkingTimeType(LocalDate date) {
+		WorkingTimeType wtt = PersonWorkingTimeType.find("Select wtt from PersonWorkingTimeType pwtt, WorkingTimeType wtt " +
+				"where pwtt.beginDate <= ? and (pwtt.endDate >= ? or pwtt.endDate is null) and pwtt.person = ? and pwtt.workingTimeType = wtt", 
+				date, date, this).first();
+				
+		return wtt;
 	}
 
 }
