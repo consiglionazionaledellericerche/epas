@@ -535,12 +535,17 @@ public class Reperibility extends Controller {
 		
 		reperibilityMonth = builder.build();
 		
-		Table<Person, String, Integer> reperibilitySumDays = HashBasedTable.<Person, String, Integer>create();
-		Table<Person, String, List<PRP>> reperibilityDateDays = HashBasedTable.<Person, String, List<PRP>>create();
+		//Table<Person, String, Integer> reperibilitySumDays = HashBasedTable.<Person, String, Integer>create();
+		//Table<Person, String, List<PRP>> reperibilityDateDays = HashBasedTable.<Person, String, List<PRP>>create();
+		
+		Table<String, String, Integer> reperibilitySumDays = TreeBasedTable.<String, String, Integer>create();
+		Table<String, String, List<PRP>> reperibilityDateDays = TreeBasedTable.<String, String, List<PRP>>create();
 		
 		
 		// for each person
 		for (Person person: reperibilityMonth.rowKeySet()) {
+			
+			String personName = person.surname + "  " + person.name;
 			
 			// lista dei periodi di reperibilità ferieali e festivi
 			List<PRP> fsPeriods = new ArrayList<PRP>();
@@ -556,8 +561,8 @@ public class Reperibility extends Controller {
 				if (reperibilityMonth.contains(person, dayOfMonth)) { 
 					String col = String.format("%s", reperibilityMonth.get(person, dayOfMonth).toUpperCase());
 						
-					int n = reperibilitySumDays.contains(person, col) ? reperibilitySumDays.get(person, col) + 1 : 1;
-					reperibilitySumDays.put(person, col, Integer.valueOf(n));
+					int n = reperibilitySumDays.contains(personName, col) ? reperibilitySumDays.get(personName, col) + 1 : 1;
+					reperibilitySumDays.put(personName, col, Integer.valueOf(n));
 				} 
 				
 				// create the reperibility periods divided by fs and fr
@@ -580,8 +585,8 @@ public class Reperibility extends Controller {
 				}
 			}
 			
-			reperibilityDateDays.put(person, "FS", fsPeriods);
-			reperibilityDateDays.put(person, "FR", frPeriods);
+			reperibilityDateDays.put(personName, "FS", fsPeriods);
+			reperibilityDateDays.put(personName, "FR", frPeriods);
 		}
 		
 		// read the reperebility type codes
