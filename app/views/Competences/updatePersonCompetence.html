@@ -9,27 +9,27 @@
 	<table class="tablenoborder">
 	<tr>
 		<td>%{	if(person.isOvertimeInWorkDayAvailable()==true){ }%
-			Sì <input type="radio" value="false" checked="checked"/> No <input type="radio" value="true"/>
+			Sì <input type="radio" value="false" name="overtimeWorkDay" checked="checked"/> No <input type="radio" value="true" name="overtimeWorkDay"/>
 			%{ } else {	}% 
-			Sì <input type="radio" value="true"/> No <input type="radio" value="false" checked="checked"/>
+			Sì <input type="radio" value="true" name="overtimeWorkDay"/> No <input type="radio" value="false" checked="checked" name="overtimeWorkDay"/>
 			%{ } }%</td>
 		<td><p>Straordinario diurno nei giorni lavorativi</p>
 		</td>
 	</tr>
 	<tr>
 		<td>%{	if(person.isOvertimeInHolidayOrNightlyInWorkDayAvailable()==true){ }%
-			Sì <input type="radio" value="false" checked="checked"/> No <input type="radio" name="nightlyOvertime" value="true"/>
+			Sì <input type="radio" value="false" name="nightlyOvertime" checked="checked"/> No <input type="radio" name="nightlyOvertime" value="true"/>
 			%{ } else {	}% 
-			Sì <input type="radio" value="true"/> No <input type="radio" name="nightlyOvertime" value="false" checked="checked"/>
+			Sì <input type="radio" name="nightlyOvertime" value="true"/> No <input type="radio" name="nightlyOvertime" value="false" checked="checked"/>
 			%{ } }%</td>
 		<td><p>Straordinario diurno nei giorni festivi o notturno nei giorni lavorativi</p>
 		</td>
 	</tr>
 	<tr>
 		<td>%{	if(person.isOvertimeInNightlyHolidayAvailable()==true){ }%
-			Sì <input type="radio" value="false" checked="checked"/> No <input type="radio" value="true"/>
+			Sì <input type="radio" value="false" name="nightlyHolidayOvertime" checked="checked"/> No <input type="radio" name="nightlyHolidayOvertime" value="true"/>
 			%{ } else {	}% 
-			Sì <input type="radio" value="true"/> No <input type="radio" value="false" checked="checked"/>
+			Sì <input type="radio" name="nightlyHolidayOvertime" value="true"/> No <input type="radio" value="false" name="nightlyHolidayOvertime" checked="checked"/>
 			%{ } }%</td>
 		<td><p>Straordinario notturno nei giorni festivi
 	
@@ -38,9 +38,9 @@
 	<tr>
 		<td>
 	%{	if(person.isWorkDayReperibilityAvailable()==true){ }%
-			Sì <input type="radio" value="false" checked="checked"/> No <input type="radio" value="true"/>
+			Sì <input type="radio" value="false" name="workdayReperibility" checked="checked"/> No <input type="radio" name="workdayReperibility" value="true"/>
 			%{ } else {	}% 
-			Sì <input type="radio" value="true"/> No <input type="radio" value="false" checked="checked"/>
+			Sì <input type="radio" value="true" name="workdayReperibility"/> No <input type="radio" value="false" name="workdayReperibility" checked="checked"/>
 			%{ } }%
 	</td>
 		<td><p>Ind.tà rep.tà feriale</p></td>
@@ -48,9 +48,9 @@
 	<tr>
 		<td>
 	%{	if(person.isHolidayReperibilityAvailable()==true){ }%
-			Sì <input type="radio" value="false" checked="checked"/> No <input type="radio" value="true"/>
+			Sì <input type="radio" name="holidayReperebility" value="false" checked="checked"/> No <input type="radio" name="holidayReperebility" value="true"/>
 			%{ } else {	}% 
-			Sì <input type="radio" value="true"/> No <input type="radio" value="false" checked="checked"/>
+			Sì <input type="radio" name="holidayReperebility" value="true"/> No <input type="radio" name="holidayReperebility" value="false" checked="checked"/>
 			%{ } }%
 	</td>
 		<td><p>Ind.tà rep.tà festiva</p></td>
@@ -58,9 +58,9 @@
 	<tr>
 		<td>
 	%{	if(person.isOrdinaryShiftAvailable()==true){ }%
-			Sì <input type="radio" value="false" checked="checked"/> No <input type="radio" value="true"/>
+			Sì <input type="radio" value="false" name="ordinaryShift" checked="checked"/> No <input type="radio" name="ordinaryShift" value="true"/>
 			%{ } else {	}% 
-			Sì <input type="radio" value="true"/> No <input type="radio" value="false" checked="checked"/>
+			Sì <input type="radio" name="ordinaryShift" value="true"/> No <input type="radio" name="ordinaryShift" value="false" checked="checked"/>
 			%{ } }%
 	</td>
 		<td><p>Turno ordinario</p></td>
@@ -68,9 +68,9 @@
 	<tr>
 		<td>
 	%{	if(person.isHolidayShiftAvailable()==true){ }%
-			Sì <input type="radio" value="false" checked="checked"/> No <input type="radio" value="true"/>
+			Sì <input type="radio" name="holidayShift"value="false" checked="checked"/> No <input type="radio" name="holidayShift" value="true"/>
 			%{ } else {	}% 
-			Sì <input type="radio" value="true"/> No <input type="radio" value="false" checked="checked"/>
+			Sì <input type="radio" name="holidayShift" value="true"/> No <input type="radio" value="false" name="holidayShift" checked="checked"/>
 			%{ } }%
 	</td>
 		<td><p>Turno festivo</p></td>
@@ -78,9 +78,9 @@
 	<tr>
 		<td>
 	%{	if(person.isNightlyShiftAvailable()==true){ }%
-			Sì <input type="radio" value="false" checked="checked"/> No <input type="radio" value="true"/>
+			Sì <input type="radio" name="nightlyShift" value="false" checked="checked"/> No <input type="radio" name="nightlyShift" value="true"/>
 			%{ } else {	}% 
-			Sì <input type="radio" value="true"/> No <input type="radio" value="false" checked="checked"/>
+			Sì <input type="radio" name="nightlyShift" value="true"/> No <input type="radio" name="nightlyShift" value="false" checked="checked"/>
 			%{ } }%
 	</td>
 		<td><p>Turno notturno</p></td>
@@ -88,9 +88,9 @@
 	<tr>
 		<td>
 	%{	if(person.isHardshipAllowance()==true){ }%
-			Sì <input type="radio" value="false" checked="checked"/> No <input type="radio" value="true"/>
+			Sì <input type="radio" name="hardship" value="false" checked="checked"/> No <input type="radio" name="hardship" value="true"/>
 			%{ } else {	}% 
-			Sì <input type="radio" value="true"/> No <input type="radio" value="false" checked="checked"/>
+			Sì <input type="radio" name="hardship" value="true"/> No <input type="radio" value="false"  name="hardship" checked="checked"/>
 			%{ } }%
 	</td>
 		<td><p>Ind.tà sede disagiata</p></td>
@@ -98,9 +98,9 @@
 	<tr>
 		<td>
 	%{	if(person.isHandleValuesAllowanceAvailable()==true){ }%
-			Sì <input type="radio" value="false" checked="checked"/> No <input type="radio" value="true"/>
+			Sì <input type="radio" name="handleValues" value="false" checked="checked"/> No <input type="radio" name="handleValues" value="true"/>
 			%{ } else {	}% 
-			Sì <input type="radio" value="true"/> No <input type="radio" value="false" checked="checked"/>
+			Sì <input type="radio" name="handleValues" value="true"/> No <input type="radio" name="handleValues" value="false" checked="checked"/>
 			%{ } }%
 	</td>
 		<td><p>Ind.tà maneggio valori</p></td>
@@ -108,9 +108,9 @@
 	<tr>
 		<td>
 	%{	if(person.isTaskAllowanceAvailable()==true){ }%
-			Sì <input type="radio" value="false" checked="checked"/> No <input type="radio" value="true"/>
+			Sì <input type="radio" name="task" value="false" checked="checked"/> No <input type="radio" name="task" value="true"/>
 			%{ } else {	}% 
-			Sì <input type="radio" value="true"/> No <input type="radio" value="false" checked="checked"/>
+			Sì <input type="radio" name="task" value="true"/> No <input type="radio" name="task" value="false" checked="checked"/>
 			%{ } }%
 	</td>
 		<td><p>Ind.ta'mansione L.397/71</p></td>
@@ -118,9 +118,9 @@
 	<tr>
 		<td>
 	%{	if(person.isTaskAllowanceIncreasedAvailable()==true){ }%
-			Sì <input type="radio" value="false" checked="checked"/> No <input type="radio" value="true"/>
+			Sì <input type="radio" name="taskIncreased" value="false" checked="checked"/> No <input type="radio" name="taskIncreased" value="true"/>
 			%{ } else {	}% 
-			Sì <input type="radio" value="true"/> No <input type="radio" value="false" checked="checked"/>
+			Sì <input type="radio" name="taskIncreased" value="true"/> No <input type="radio" name="taskIncreased" value="false" checked="checked"/>
 			%{ } }%
 	</td>
 		<td><p>Ind.ta' mansione L.397/71 Magg.</p></td>
