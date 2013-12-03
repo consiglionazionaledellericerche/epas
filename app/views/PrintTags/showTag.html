@@ -5,91 +5,163 @@
     <h3>Situazione presenze mensile di <span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year} per ${person.name} ${person.surname} matr.: ${person.number}</h3>
     
 
-	<table id="presenze_mensili">
-		<tr>
-			<th>Buono mensa</th>
-			<th align="left">Giorno</th>
-			<th>Codice assenza</th> %{ for(int i = 1; i <= numberOfInOut;
-			i++){ }%
-			<th>${i}° entrata</th>
-			<th>${i}° uscita</th> %{ } }%
-			<th>Tempo lavoro</th>
-			<th>Differ.</th>
-			<th>Progress.</th>
-			<th>Tipo
-			 Orario</th>
-		</tr>
-
-		%{ for(day in pm.days) { }%
-
-		<tr>
-			%{ if(day.isHoliday()==false){ }%
-			<td>${String.format(messages.get('views.common.yes_or_no.'+
-				day.mealTicket()))}</td> %{ }else{ }%
-			<td>${String.format(messages.get('views.common.yes_or_no.true'))}</td>
-			%{ } }% %{ if(day.isHoliday()==false){ }%
-			<td class="capitalized"><font size="3">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'),
-				day.date.toDate())}</font></td> %{ }else{ }%
-			<td class="festivi"><font size ="3">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'),
-				day.date.toDate())}</font></td> %{ } }%
-			<td class="assenza">${day.absenceList().size()>0 ?
-				day.absenceList().get(0).absenceType.code : ''}</td> %{ int j = 0;
-			for(int i = 0; i < numberOfInOut; i++){ j = i*2; }%
-			<td class="ingresso">%{ if(day.stampingList().size() > j &&
-				day.stampingList().get(j) !=null ) { }% <!--  	<a href="@{Stampings.edit(day.getStampings().get(j).id)}" class="insertStamping${day.date.dayOfMonth}"> -->
-				${day.stampings.get(j).date.toCalendarTime()} <!--  	</a> -->
-				${(day.stampingList().get(j).stampModificationType?.code)}
-				${(day.stampingList().get(j).stampType != null ?
-				day.stampingList().get(j).stampType.identifier : '')} %{ } }%
+<table>
+	<tr>
+		<th><font size="0.5">Buono mensa</font></th>
+		<th><font size="0.5">Giorno</font></th>
+		<th><font size="0.5">Codice di assenza</font></th>
+		%{ for(int i = 1; i <= numberOfInOut; i++){
+		}%
+		<th><font size="0.5">${i}° entrata</font></th>
+		<th><font size="0.5">${i}° uscita</font></th>
+		%{ } }%
+		<th><font size="0.5">Tempo lavoro</font></th>
+		<th><font size="0.5">Differenza</font></th>
+		<th><font size="0.5">Progressivo</font></th>
+		<th><font size="0.5">Tipo Orario</font></th>
+		<th><font size="0.5">Note</font></th>
+	</tr>
+	
+	%{
+     for(dayRecap in daysRecap) {
+     		
+			
+	}%
+		
+	<tr >
+			<td><font size="0.5">${dayRecap.mealTicket}</font></td>
+			%{
+			if(dayRecap.holiday==false)
+			{
+			}%	
+				<td><font size="0.5">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</font></td>
+			%{
+			}
+			else
+			{
+			}%	
+				<td><font size="0.5">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</font></td>
+			%{
+			}
+			}%
+		
+			<td>
+				<font size="0.5">
+				%{	
+				for (absence in dayRecap.absences) 
+				{ 
+				%}
+				 	${absence.absenceType.code}
+				 %{
+				 }
+				 }%
+				 </font>
 			</td>
 
-			<td class="uscita">%{ if(day.stampingList().size() > j+1 &&
-				day.stampingList().get(j+1) !=null ) { }% <!--  	<a href="@{Stampings.edit(day.getStampings().get(j+1).id)}" class="insertStamping${day.date.dayOfMonth}"> -->
-				${day.stampingList().get(j+1).date.toCalendarTime()} <!--  	</a> -->
-				${(day.stampingList().get(j+1).stampModificationType?.code)}
-				${(day.stampingList().get(j).stampType != null ?
-				day.stampingList().get(j).stampType.identifier : '')} %{ } }%
-			</td> %{ } }% %{ if(day.stampingList().size()==2 ){ }%
-			<td class="tempoLavoro">${day.isHoliday()==false ?
-				day.timeAtWork.toHourTime() : ''} <strong>${day.timeAtWork>360
-					? day.checkTimeForLunch()?.code : ''}</strong>
-			</td> %{ }else{ }%
-			<td class="tempoLavoro">${day.isHoliday()==false ?
-				day.timeAtWork.toHourTime() : ''} <strong>${day.stampingList().size()==4
-					&& !day.stampingList().contains(null) && day.timeAtWork>300 &&
-					day.checkMinTimeForLunch()<30 ? day.checkTimeForLunch()?.code : ''}</strong>
-			</td> %{ } }%
-			<td class="differenza">${(day.difference).toHourTime()}</td> %{
-			if(day.isHoliday()==false){ }%
-			<td class="progressivo">${day.progressive.toHourTime()}</td> %{
-			}else{ }%
-			<td class="progressivo">${day.checkPreviousProgressive() != null
-				? day.checkPreviousProgressive().progressive.toHourTime() : ''}</td> %{ }
+
+			%{  
+			for(stampingTemplate in dayRecap.stampingsTemplate){
 			}%
-			<td>${day.person.workingTimeType != null ?
-				day.person.workingTimeType.description : ''}</td>
-		</tr>
+			%{
+					if(stampingTemplate.colour.equals("in"))
+					{
+					}%
+						<td><font size="0.5">
+					%{
+					}
+					else if (stampingTemplate.colour.equals("out"))
+					{
+					}%
+						<td><font size="0.5">
+					%{
+					}
+					else if (stampingTemplate.colour.equals("warn"))
+					{
+					}%
+						<td><font size="0.5">
+					%{
+					}
+				}%
+				%{ if(stampingTemplate.date!=null) 
+				{ 
+				}%
+					${stampingTemplate.hour}
+				 %{
+				 }
+				 }%
+				 
+				<strong>${stampingTemplate.identifier}</strong>
+				<strong>${stampingTemplate.markedByAdminCode}</strong>
+				<strong>${stampingTemplate.missingExitStampBeforeMidnightCode}</strong>
+				</font>
+				</td>
+			
+			%{ 
+			} 
+			}%
+			<td>
+			<font size="0.5">
+				${dayRecap.workTime}
+				<strong>${dayRecap.todayLunchTimeCode}</strong>
+				<strong>${dayRecap.fixedWorkingTimeCode}</strong>
+				<strong>${dayRecap.exitingNowCode}</strong>
+			</font>
+			</td>							
+	       	<td>
+	       	<font size="0.5">
+	       		${dayRecap.difference}
+	       	</font>
+	       	</td>	
+			<td>
+			<font size="0.5">
+			 	${dayRecap.progressive}
+			</font>
+		    </td>
+	        
+	        <td><font size="0.5">${dayRecap.workingTimeTypeDescription}</font></td>
+	        <td>
+	        <font size="0.5">
+	    	%{
+    		for(n in dayRecap.note) 
+    		{
+			}%
+	       		${n}<br>
+	        %{
+	        }
+	        }%
+	        </font>
+	        </td>
+	        
+	</tr>
 
-		%{ } }%
+	%{  		   
+ 	}
+   
+	}%
 
-	</table>
+</table>
 	
-	<p id="spiegazioneTabellaTimbrature">Il numero di buoni mensa usabili per questo mese e': <strong>${pm.numberOfMealTicketToUse()}</strong>, mentre quelli da restituire sono <strong>${pm.numberOfMealTicketToRender()}</strong>. Il numero di giorni lavorativi in sede è di: <strong>${pm.basedWorkingDays()}</strong> </p>
+<p id="spiegazioneTabellaTimbrature">
+<font size="2">
+Il numero di buoni mensa usabili per questo mese e': <strong>${pm.numberOfMealTicketToUse()}</strong>, mentre quelli da restituire sono <strong>${pm.numberOfMealTicketToRender()}</strong>. 
+<br>Il numero di giorni lavorativi in sede è di: <strong>${pm.basedWorkingDays()}</strong> 
+</font>
+</p>
 	
 <div>
-<h4 align="left">Note:</h4>
-<table id="Note timbrature">
+<h4 align="left"><font size="3">Note:</font></h4>
+<table>
 	<tr>
-		<th width="80">Codice timbratura</th>
-		<th width="400">Descrizione</th>
+		<th width="80"><font size="2">Codice timbratura</font></th>
+		<th width="400"><font size="2">Descrizione</font></th>
 			
 	</tr>
 %{
      for(smt in pm.getStampingCode()) {
 }%
 	<tr>
-		<td>${smt.code})</td>     
-		<td>${smt.description}</td>		
+		<td><font size="2">${smt.code})</font></td>     
+		<td><font size="2">${smt.description}</font></td>		
 	</tr>
 	
 %{  		   
@@ -100,8 +172,8 @@
 	for(type in pm.getStampType()) {
 }%
 	<tr>
-		<td>${type.identifier} )</td>
-		<td>${type.description}</td>
+		<td><font size="2">${type.identifier} )</font></td>
+		<td><font size="2">${type.description}</font></td>
 	</tr>
 %{  		   
      }
@@ -111,24 +183,22 @@
 *{Significato codici assenza}*
 <br>
 <br>
-<br>
-<br>
 
-<h4 align="left">Codici di assenza</h4>
+<h4 align="left"><font size="3">Codici di assenza</font></h4>
 <table id="Codici di assenza">
 	<tr>
-		<th width="80">Codice assenza</th>
-		<th width="200">Descrizione</th>
-		<th width="80">Numero giorni</th>
+		<th width="80"><font size="2">Codice assenza</font></th>
+		<th width="200"><font size="2">Descrizione</font></th>
+		<th width="80"><font size="2">Numero giorni</font></th>
 			
 	</tr>
 %{
      for(entry in pm.getAbsenceCode().entrySet()) {
 }%
 	<tr>
-		<td>${entry.getKey().code}</td>     
-		<td>${entry.getKey().description}</td>	
-		<td>${entry.getValue()}</td>	
+		<td><font size="2">${entry.getKey().code}</font></td>     
+		<td><font size="2">${entry.getKey().description}</font></td>	
+		<td><font size="2">${entry.getValue()}</font></td>	
 	</tr>
 
 %{  		   

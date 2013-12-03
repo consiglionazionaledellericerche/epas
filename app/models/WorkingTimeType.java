@@ -22,6 +22,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import play.data.validation.Required;
 import play.db.jpa.Model;
@@ -62,6 +63,9 @@ public class WorkingTimeType extends Model {
 //	@OneToMany(mappedBy="workingTimeType")
 //	public List<Person> person = new ArrayList<Person>();
 		
+	@NotAudited
+	@OneToMany(mappedBy="workingTimeType", fetch=FetchType.LAZY)
+	public List<PersonWorkingTimeType> personWorkingTimeType = new ArrayList<PersonWorkingTimeType>();
 	
 	/**
 	 * relazione con la tabella di specifiche di orario di lavoro

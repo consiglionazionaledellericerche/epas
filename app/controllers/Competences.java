@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.management.Query;
+
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
@@ -19,9 +21,16 @@ import models.TotalOvertime;
 import org.joda.time.LocalDate;
 
 import play.Logger;
+import play.data.validation.IsTrue;
+import play.data.validation.Min;
+import play.data.validation.Required;
+import play.data.validation.Valid;
+import play.db.jpa.JPA;
+import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
@@ -61,11 +70,12 @@ public class Competences extends Controller{
 
 	}
 
+
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void showCompetences(Integer year, Integer month){
 
-		ImmutableTable.Builder<Person, String, Integer> builder = ImmutableTable.builder();
-		Table<Person, String, Integer> tableCompetence = null;
+		ImmutableTable.Builder<Person, CompetenceCode, Integer> builder = ImmutableTable.builder();
+		Table<Person, CompetenceCode, Integer> tableCompetence = null;
 		List<Person> activePersons = null;
 		if((year == null || month == null) || (year == 0 || month == 0)){
 			int yearParams = params.get("year", Integer.class);
@@ -75,27 +85,45 @@ public class Competences extends Controller{
 		else{
 			activePersons = Person.getTechnicianForCompetences(new LocalDate(year, month, 1));
 		}
-		
 
+		List<CompetenceCode> competenceCodes = PersonUtility.activeCompetence();
 		for(Person p : activePersons){
-			List<Competence> competenceInMonth = Competence.find("Select comp from Competence comp where comp.person = ? and comp.year = ?" +
-					"and comp.month = ?", p, year, month).fetch();
-			for(Competence comp : competenceInMonth){
-
-				Integer value = comp.valueApproved;
-				if(value != null)
-					builder.put(p, comp.competenceCode.description+'\n'+comp.competenceCode.code, value);
-				else
-					builder.put(p, comp.competenceCode.description+'\n'+comp.competenceCode.code, 0);
-
+			for(CompetenceCode c : p.competenceCode){
+				Competence comp = Competence.find("Select comp from Competence comp where comp.person = ? and comp.month = ? and comp.year = ?" +
+						"and comp.competenceCode = ?", p, month, year, c).first();
+				if(comp == null){
+					comp = new Competence(p, c, year, month);
+					comp.valueApproved = 0;
+					comp.save();
+				}
+					
 			}
-
+			
 		}
-		tableCompetence = builder.build();
-		int numberOfDifferentCompetenceType = tableCompetence.columnKeySet().size();
-		render(tableCompetence, year, month, numberOfDifferentCompetenceType);
+		render(tableCompetence, year, month, activePersons, competenceCodes);
 
 	}
+	
+	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	public static void updateCompetence(long pk, String name, Integer value){
+		final Competence competence = Competence.findById(pk);
+		notFoundIfNull(competence);
+		if (validation.hasErrors()) {
+			error(Messages.get(Joiner.on(",").join(validation.errors())));
+		}
+		Logger.info("Anno competenza: %s Mese competenza: %s", competence.year, competence.month);
+		Logger.info("value approved before = %s", competence.valueApproved);
+		competence.valueApproved = value;
+		Logger.info("saved id=%s (person=%s) code=%s (value=%s)", competence.id, competence.person, 
+				competence.competenceCode.code, competence.valueApproved);
+		competence.save();
+		renderText("ok");
+	}
+	
+	public static void prova(){
+		render();
+	}
+	
 
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void manageCompetenceCode(){

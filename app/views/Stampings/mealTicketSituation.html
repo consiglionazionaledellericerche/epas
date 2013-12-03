@@ -1,10 +1,10 @@
 #{extends 'main_admin.html' /}
 
 #{functionalMenuForm mainMenu: mainMenu /}
-
+<div class="container">
 <h2 id="titoloRiepilogoBuoniMensa">Riepilogo buoni mensa di <span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year}</h2>
-
-<table id="tabellaRiepilogoBuoniMensa">
+<div class="span10">
+<table class="table table-bordered" id="tabellaRiepilogoBuoniMensa">
 	<tr>
 		<th rowspan="2">Nome</th>
 		<th colspan="${numberOfDays}">Giorni</th>
@@ -21,7 +21,7 @@
 		<td class="nomeCognome">${entry.getKey().surname} ${entry.getKey().name}</td>
 		%{ for(col in tablePersonTicket.columnKeySet()){
 		}%
-			<td>${entry.getValue().get(col)}</td>
+			<td><abbr title="${col}" class="initialism">${entry.getValue().get(col)}</abbr></td>
 		%{
 		   }
 		}%
@@ -31,3 +31,5 @@
 	}%
 	
 </table>
+</div>
+</div>

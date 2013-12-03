@@ -38,6 +38,8 @@ import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import models.efficiency.EfficientPersonDay;
 import models.exports.AbsenceReperibilityPeriod;
+import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
+import models.personalMonthSituation.Mese;
 import models.rendering.PersonStampingDayRecap;
 
 import org.joda.time.LocalDate;
@@ -77,9 +79,9 @@ public class Stampings extends Controller {
 		if (Security.getPerson().username.equals("admin")) {
 			Application.indexAdmin();
 		}
-
+		
 		Person person = Security.getPerson();
-		Logger.debug("Person: %s, month %d, year: %d", person, month, year);
+
 		//numero di colonne da visualizzare
 		Configuration conf = Configuration.getCurrentConfiguration();
 		int minInOutColumn = conf.numberOfViewingCoupleColumn;
@@ -106,49 +108,12 @@ public class Stampings extends Controller {
 
 		}
 
-		//calcolo situazione parziale (Residuo tempo di lavoro dei mesi precedenti)
-		//TODO 18/10 implementare metodo statico in models.person
-		int situazioneParziale = 0;
-		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?",
-				Security.getPerson(), 
-				new LocalDate(year, month, 1), 
-				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue())
-				.fetch();
-
-		if(pdList.size() == 0 && year > new LocalDate().getYear())
-		{
-			situazioneParziale = 0;
-		}
-		else
-		{
-			//gennaio
-			if(personMonth.month == 1)
-			{
-				situazioneParziale = personMonth.residuoAnnoCorrenteDaInizializzazione();
-			}
-			else
-			{
-				PersonMonth count = personMonth;
-				while(count.month > 1)
-				{
-					if(count.mesePrecedente() != null)
-						situazioneParziale = situazioneParziale + count.mesePrecedente().residuoDelMese() - count.mesePrecedente().straordinari;
-					count = count.mesePrecedente();
-					if(count == null)
-						break;
-				}
-			}
-		}
-
 		//calcolo Il numero di riposi compensativi usati fino ad oggi
 		int numberOfCompensatoryRestUntilToday = personMonth.numberOfCompensatoryRestUntilToday();
 
 		//non piu' usato
 		int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
-
-
-		int totaleResiduo = situazioneParziale+personMonth.residuoDelMese();
-
+	
 		//numero di colonne da stampare
 		int numberOfInOut = Math.max(minInOutColumn, (int)personMonth.getMaximumCoupleOfStampings());
 
@@ -170,12 +135,61 @@ public class Stampings extends Controller {
 			PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(pd,numberOfInOut);
 			daysRecap.add(dayRecap);
 		}
-		int totale = personMonth.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese();
-		//tabella riassuntiva codici
+		
 		List<StampModificationType> stampModificationTypeList = PersonStampingDayRecap.stampModificationTypeList;
 		List<StampType> stampTypeList = PersonStampingDayRecap.stampTypeList;
-		render(personMonth, numberOfInOut, numberOfCompensatoryRestUntilToday, numberOfCompensatoryRest, 
-				situazioneParziale, daysRecap, totaleResiduo,stampModificationTypeList, stampTypeList, totale);
+		//Il numero di buoni mensa usabili per questo mese e': personMonth.numberOfMealTicketToUse()
+		int numberOfMealTicketToUse = personMonth.numberOfMealTicketToUse();
+
+		//mentre quelli da restituire sono: personMonth.numberOfMealTicketToRender()
+		int numberOfMealTicketToRender = personMonth.numberOfMealTicketToRender();
+
+		//Il numero di giorni lavorativi in sede è di: personMonth.basedWorkingDays()
+		int basedWorkingDays = personMonth.basedWorkingDays();
+
+		//Il numero di riposi compensativi usati fino ad oggi è: numberOfCompensatoryRestUntilToday
+
+
+		//E' possibile utilizzare il residuo dell'anno precedente? personMonth.possibileUtilizzareResiduoAnnoPrecedente()==true ? 'sì' : 'no'
+		boolean possibileUtilizzareResiduoAnnoPrecedente = personMonth.possibileUtilizzareResiduoAnnoPrecedente();
+
+
+		int residuoAnnoPrecedenteDaInizializzazione = personMonth.residuoAnnoPrecedenteDaInizializzazione();
+
+
+		int straordinari = personMonth.straordinari;
+
+		int residuoAnnoPrecedenteDisponibileAllInizioDelMese = personMonth.residuoAnnoPrecedenteDisponibileAllInizioDelMese();
+
+		//Residuo tempo di lavoro dei mesi precedenti: 
+		int residuoAlMesePrecedente;
+		if(personMonth.mesePrecedente() != null)
+			residuoAlMesePrecedente = personMonth.mesePrecedente().totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese();
+		else
+			residuoAlMesePrecedente = 0;
+
+		//Residuo del mese:  personMonth.residuoDelMese().toHourTime()
+		int residuoDelMese = personMonth.residuoDelMese();
+
+
+		int tempoDisponibilePerStraordinari = personMonth.tempoDisponibilePerStraordinari();
+
+		//Totale residuo anno corrente a fine mese:  personMonth.totaleResiduoAnnoCorrenteAFineMese().toHourTime()
+		int totaleResiduoAnnoCorrenteAFineMese = personMonth.totaleResiduoAnnoCorrenteAFineMese();
+
+		int totale = personMonth.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese();
+
+		int compensatoryRest = personMonth.getCompensatoryRest();
+		int compensatoryRestInMinutes = personMonth.getCompensatoryRestInMinutes();
+
+		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, 2013, null);
+		Mese mese = c.getMese(year, month);
+
+		
+		//render
+		render(personMonth, numberOfInOut, numberOfCompensatoryRestUntilToday, numberOfCompensatoryRest, numberOfMealTicketToUse,numberOfMealTicketToRender,
+				daysRecap, stampModificationTypeList, stampTypeList, totale, possibileUtilizzareResiduoAnnoPrecedente,
+				tempoDisponibilePerStraordinari,residuoAlMesePrecedente, compensatoryRestInMinutes,residuoAnnoPrecedenteDaInizializzazione, compensatoryRest,straordinari, residuoDelMese, mese);
 
 	}
 
@@ -221,44 +235,7 @@ public class Stampings extends Controller {
 			personMonth.create();
 
 		}
-
-		//calcolo situazione parziale (Residuo tempo di lavoro dei mesi precedenti)
-		//TODO 18/10 implementare metodo statico in models.person
-		int situazioneParziale = 0;
-		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?",
-				Security.getPerson(), 
-				new LocalDate(year, month, 1), 
-				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue())
-				.fetch();
-
-		if(pdList.size() == 0 && year > new LocalDate().getYear())
-		{
-			situazioneParziale = 0;
-		}
-		else
-		{
-			//gennaio
-			if(personMonth.month == 1)
-			{
-				situazioneParziale = personMonth.residuoAnnoCorrenteDaInizializzazione();
-			}
-			else
-			{
-				PersonMonth count = personMonth;
-				while(count.month > 1)
-				{
-					if(count.mesePrecedente() != null)
-						situazioneParziale = situazioneParziale + count.mesePrecedente().residuoDelMese() - count.mesePrecedente().straordinari;
-					count = count.mesePrecedente();
-					if(count == null)
-						break;
-				}
-			}
-		}
-
 		
-		
-
 		//non piu' usato
 		int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
 
@@ -272,7 +249,7 @@ public class Stampings extends Controller {
 			pd.computeValidStampings();
 		}
 
-		
+
 
 		//Nuova struttura dati per stampare la riga giornaliera della tabella
 		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	//svuoto variabile statica	//TODO forse da mettere come transiente in personMonth
@@ -289,76 +266,59 @@ public class Stampings extends Controller {
 		List<StampModificationType> stampModificationTypeList = PersonStampingDayRecap.stampModificationTypeList;
 		List<StampType> stampTypeList = PersonStampingDayRecap.stampTypeList;
 
-		
-
 		//Il numero di buoni mensa usabili per questo mese e': personMonth.numberOfMealTicketToUse()
 		int numberOfMealTicketToUse = personMonth.numberOfMealTicketToUse();
-		
+
 		//mentre quelli da restituire sono: personMonth.numberOfMealTicketToRender()
 		int numberOfMealTicketToRender = personMonth.numberOfMealTicketToRender();
-		
+
 		//Il numero di giorni lavorativi in sede è di: personMonth.basedWorkingDays()
 		int basedWorkingDays = personMonth.basedWorkingDays();
-		
+
 		//Il numero di riposi compensativi usati fino ad oggi è: numberOfCompensatoryRestUntilToday
 		int numberOfCompensatoryRestUntilToday = personMonth.numberOfCompensatoryRestUntilToday();
-		
+
 		//E' possibile utilizzare il residuo dell'anno precedente? personMonth.possibileUtilizzareResiduoAnnoPrecedente()==true ? 'sì' : 'no'
 		boolean possibileUtilizzareResiduoAnnoPrecedente = personMonth.possibileUtilizzareResiduoAnnoPrecedente();
-		
-		/*
-		if(personMonth.residuoAnnoPrecedenteDaInizializzazione() != 0){
-			Eventuale residuo da inizializzazione: personMonth.residuoAnnoPrecedenteDaInizializzazione().toHourTime()
-		}
-		*/
+
+
 		int residuoAnnoPrecedenteDaInizializzazione = personMonth.residuoAnnoPrecedenteDaInizializzazione();
 		
-		/*
-		if(personMonth.straordinari != 0){
-			Straordinari: personMonth.straordinari / 60 ore
-		}
-		*/
+
 		int straordinari = personMonth.straordinari;
-		
-		/*
-		if(personMonth.residuoAnnoPrecedenteDisponibileAllInizioDelMese() != 0){
-			Residuo anno precedente disponibile a inizio mese: personMonth.residuoAnnoPrecedenteDisponibileAllInizioDelMese().toHourTime()
-		}
-		*/
+
 		int residuoAnnoPrecedenteDisponibileAllInizioDelMese = personMonth.residuoAnnoPrecedenteDisponibileAllInizioDelMese();
-		
-		//Residuo tempo di lavoro dei mesi precedenti: (situazioneParziale).toHourTime() 
-		
-		
+
+		//Residuo tempo di lavoro dei mesi precedenti: 
+		int residuoAlMesePrecedente;
+		if(personMonth.mesePrecedente() != null)
+			residuoAlMesePrecedente = personMonth.mesePrecedente().totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese();
+		else
+			residuoAlMesePrecedente = 0;
+
 		//Residuo del mese:  personMonth.residuoDelMese().toHourTime()
 		int residuoDelMese = personMonth.residuoDelMese();
-		
-		/*
-		if(personMonth.person.qualification != null && personMonth.person.qualification.qualification > 3){
-			Tempo disponibile per straordinari: personMonth.tempoDisponibilePerStraordinari().toHourTime()
-		}
-		*/
+
+
 		int tempoDisponibilePerStraordinari = personMonth.tempoDisponibilePerStraordinari();
-		
+
 		//Totale residuo anno corrente a fine mese:  personMonth.totaleResiduoAnnoCorrenteAFineMese().toHourTime()
 		int totaleResiduoAnnoCorrenteAFineMese = personMonth.totaleResiduoAnnoCorrenteAFineMese();
-		
-		int totale = personMonth.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese();
-		/*
-		if(personMonth.getCompensatoryRest() != 0 ){
-			Giorni di riposo compensativo: personMonth.getCompensatoryRest()
-			per un totale di: -   personMonth.getCompensatoryRestInMinutes().toHourTime() ore
-		}
-		*/
+
+		int totale = personMonth.totaleResiduoAnnoCorrenteAFineMese();
+
 		int compensatoryRest = personMonth.getCompensatoryRest();
 		int compensatoryRestInMinutes = personMonth.getCompensatoryRestInMinutes();
-		
+
 		//Totale residuo a fine mese  totaleResiduo.toHourTime() ore
-		int totaleResiduo = situazioneParziale + personMonth.residuoDelMese();
-		
+
+		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, 2013, null);
+		Mese mese = c.getMese(year, month);
+
 		//render
-		render(personMonth, numberOfInOut, numberOfCompensatoryRestUntilToday, numberOfCompensatoryRest, 
-				situazioneParziale, daysRecap, totaleResiduo, stampModificationTypeList, stampTypeList, totale);
+		render(personMonth, numberOfInOut, numberOfCompensatoryRestUntilToday, numberOfCompensatoryRest, numberOfMealTicketToUse, numberOfMealTicketToRender,
+				daysRecap, stampModificationTypeList, stampTypeList, totale, possibileUtilizzareResiduoAnnoPrecedente,
+				tempoDisponibilePerStraordinari,residuoAlMesePrecedente, compensatoryRestInMinutes,residuoAnnoPrecedenteDaInizializzazione, compensatoryRest,straordinari, residuoDelMese, mese);
 
 
 	}
@@ -417,19 +377,13 @@ public class Stampings extends Controller {
 
 		if(pd.stampings.size() == 0 && pd.isHoliday()){
 			flash.error("Si sta inserendo una timbratura in un giorno di festa. Errore");
-			render("@save");
+			Stampings.personStamping(personId, year, month);
 		}
 
 		if(date.isAfter(new LocalDate())){
 			flash.error("Non si può inserire una timbratura futura!!!");
-			render("@save");
+			Stampings.personStamping(personId, year, month);
 		}
-
-
-
-		/**
-		 * controllo che il radio button sulla timbratura forzata all'orario di lavoro sia checkato
-		 */
 
 		if(params.get("timeAtWork", Boolean.class) == true){
 			pd.timeAtWork = person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(new LocalDate(year, month, day).getDayOfWeek()).workingTime;
@@ -437,7 +391,7 @@ public class Stampings extends Controller {
 			pd.populatePersonDay();
 			pd.save();
 			flash.success("Inserita timbratura forzata all'orario di lavoro per %s %s", person.name, person.surname);
-			render("@save");
+			Stampings.personStamping(personId, year, month);
 		}
 		Integer hour = params.get("hourStamping", Integer.class);
 		Integer minute = params.get("minuteStamping", Integer.class);
@@ -470,19 +424,12 @@ public class Stampings extends Controller {
 		stamp.save();
 		pd.stampings.add(stamp);
 		pd.save();
+			
 		pd.populatePersonDay();
-		pd.save();
-		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ?", 
-				pd.person, pd.date).fetch();
-		for(PersonDay p : pdList){
-			if(p.date.getMonthOfYear() == stamp.date.getMonthOfYear()){
-				p.populatePersonDay();
-				p.save();
-			}
-
-		}
+		pd.updatePersonDay();
+		
 		flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
-		render("@save");
+		Stampings.personStamping(personId, year, month);
 
 
 	}
@@ -510,72 +457,67 @@ public class Stampings extends Controller {
 		PersonDay pd = stamping.personDay;
 		Integer hour = params.get("stampingHour", Integer.class);
 		Integer minute = params.get("stampingMinute", Integer.class);
-		if(hour != null && minute == null || hour == null && minute != null){
+		
+		if(hour != null && minute == null || hour == null && minute != null)
+		{
 			flash.error("Attribuire valore a ciascun campo se si intende modificare la timbratura o togliere valore a entrambi i campi" +
 					" se si intende cancellarla");
-			render("@save");
+			Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
 		}
-		if (hour == null && minute == null) {
+		if (hour == null && minute == null) 
+		{
 
 			stamping.delete();
 			pd.stampings.remove(stamping);
-			//			stamping.considerForCounting = true;
-			//			stamping.save();
-			pd.populatePersonDay();
-			pd.save();
-			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ?", 
-					pd.person, pd.date).fetch();
-			for(PersonDay p : pdList){
-				if(p.date.getMonthOfYear() == stamping.date.getMonthOfYear()){
-					p.populatePersonDay();
-					p.save();
-				}
 
-			}
+			pd.populatePersonDay();
+			pd.updatePersonDay();
+	
 			flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(stamping.date.toLocalDate()));	
 
-			render("@save");
+			Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
 
-		} else {
+		} 
+		else 
+		{
 			if (hour == null || minute == null) {
 				flash.error("E' necessario specificare sia il campo ore che minuti, oppure nessuno dei due per rimuovere la timbratura.");
-				render("@edit");
-				return;
+				Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
+				
 			}
 			Logger.debug("Ore: %s Minuti: %s", hour, minute);
 
 			stamping.date = stamping.date.withHourOfDay(hour);
 			stamping.date = stamping.date.withMinuteOfHour(minute);
-
-			stamping.markedByAdmin = true;
-			if(!params.get("note").equals(""))
-				stamping.note = params.get("note");
-			else
-				stamping.note = "timbratura modificata dall'amministratore";
-			stamping.save();
-			pd.populatePersonDay();
-			pd.save();
-			//stamping.personDay.populatePersonDay();
-			//stamping.personDay.save();
-			Logger.debug("Aggiornata ora della timbratura alle ore: %s", stamping.date);
-			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ?", 
-					stamping.personDay.person, stamping.personDay.date).fetch();
-			for(PersonDay p : pdList){
-				if(p.date.getMonthOfYear() == stamping.date.getMonthOfYear()){
-					//ricomputo il progressivo per ogni giorno del mese successivo (eccetto oggi)
-					LocalDate today = new LocalDate();
-					if( !p.date.isEqual(today) )
-					{
-						p.populatePersonDay();
-						p.save();
-					}	
-				}
-
+			String service = params.get("service");
+			if(service.equals("false") && (stamping.stampType == null || !stamping.stampType.identifier.equals("s"))){
+				String note = params.get("note");
+				stamping.note = note;
 			}
+			if(service.equals("true") && (stamping.stampType == null || !stamping.stampType.identifier.equals("s"))){
+				stamping.note = "timbratura di servizio";
+				stamping.stampType = StampType.find("Select st from StampType st where st.code = ?", "motiviDiServizio").first();
+			}
+			if(service.equals("false") && (stamping.stampType != null)){
+				stamping.stampType = null;
+				stamping.note = "timbratura inserita dall'amministratore";
+			}
+			
+			if(service.equals("true") && (stamping.stampType != null || stamping.stampType.identifier.equals("s"))){
+				String note = params.get("note");
+				stamping.note = note;
+			}
+			
+			stamping.markedByAdmin = true;
+			
+			stamping.save();
+		
+			pd.populatePersonDay();
+			pd.updatePersonDay();
 			flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name);
 
 		}
-		render("@save");
+		Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
 
 	}
 
@@ -636,8 +578,8 @@ public class Stampings extends Controller {
 		//lista delle persone che sono state attive nel mese
 		List<Person> activePersons = Person.getActivePersonsInMonth(month, year);
 
-		
-		
+
+
 		//lista dei trouble di una persona
 		for(Person person : activePersons)
 		{
@@ -650,10 +592,10 @@ public class Stampings extends Controller {
 				pdMissingStampingList.add(trouble.personDay.date.getDayOfMonth());
 			}
 			builder.put(person, "Giorni del mese da controllare", pdMissingStampingList);
-			
+
 		}
-		
-		
+
+
 		//diagnosi
 		boolean dbConsistentControl = true;//PersonDay.diagnosticPersonDay(year, month, activePersons);
 
@@ -685,7 +627,7 @@ public class Stampings extends Controller {
 			}
 
 		}
-		*/
+		 */
 		tableMissingStampings = builder.build();
 		render(tableMissingStampings, month, year, dbConsistentControl);
 
@@ -694,7 +636,7 @@ public class Stampings extends Controller {
 
 	}
 
-	
+
 
 	/**
 	 * 
@@ -733,29 +675,32 @@ public class Stampings extends Controller {
 		Table<Person, String, String> tablePersonDailyPresence = null;
 
 		LocalDate today = new LocalDate(year, month, day);
-		List<Person> persons = new ArrayList<Person>();
-		List<Person> genericPerson = Person.find("Select p from Person p order by p.surname").fetch();
-		for(Person p : genericPerson){
-			Contract c = Contract.find("Select c from Contract c where c.person = ? and ((c.beginContract != null and c.expireContract = null) or " +
-					"(c.expireContract > ?) or (c.beginContract = null and c.expireContract = null)) order by c.beginContract desc limit 1", 
-					p, today).first();
-			if(c != null && c.onCertificate == true)
-				persons.add(p);
-		}
-		Logger.trace("Gli utenti attivi in questo giorno sono: %d", persons.size());
+		List<Person> activePerson = Person.getActivePersons(new LocalDate(year, month, day));
+//		List<Person> persons = new ArrayList<Person>();
+//		List<Person> genericPerson = Person.find("Select p from Person p order by p.surname").fetch();
+		
+//		for(Person p : genericPerson){
+//			Contract c = Contract.find("Select c from Contract c where c.person = ? and ((c.beginContract != null and c.expireContract = null) or " +
+//					"(c.expireContract > ?) or (c.beginContract = null and c.expireContract = null)) order by c.beginContract desc limit 1", 
+//					p, today).first();
+//			if(c != null && c.onCertificate == true)
+//				persons.add(p);
+//		}
+//		Logger.trace("Gli utenti attivi in questo giorno sono: %d", persons.size());
 
-		Person per = new Person();
-		builder.put(per, "Assenza", "");
-		for(int i = 1; i <= maxNumberOfInOut; i++){
-			if(i % 2 != 0){
-				builder.put(per, (i+1)/2+"^ Ingresso", "");    			
-			}
-			else{
-				builder.put(per, (i/2)+"^ Uscita", "");
-			}
-		}
+//		Person per = new Person();
+//		builder.put(per, "Assenza", "");
+//		for(int i = 1; i <= maxNumberOfInOut; i++){
+//			if(i % 2 != 0){
+//				builder.put(per, (i+1)/2+"^ Ingresso", "");    			
+//			}
+//			else{
+//				builder.put(per, (i/2)+"^ Uscita", "");
+//			}
+//		}
+		//builder.put(per, "Tempo Lavoro", "");
 		List<Stamping> stampings = null;
-		for(Person p : persons){
+		for(Person p : activePerson){
 			//Logger.trace("Inizio le operazioni di inserimento in tabella per %s %s ",p.name, p.surname);
 			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.date = ? and pd.person = ?", today, p).first();
 			//Logger.trace("Cerco il person day in data %s per %s %s", today, p.name, p.surname);

@@ -1,0 +1,172 @@
+<div class="span10" id="spiegazioneTabellaTimbrature">
+	<p>
+		Il numero di buoni mensa usabili per questo mese e': <strong>${numberOfMealTicketToUse}</strong>, mentre quelli da restituire sono <strong>${numberOfMealTicketToRender}</strong>. 
+		Il numero di giorni lavorativi in sede è di: <strong>${personMonth.basedWorkingDays()}</strong> 
+	</p>
+	<p>Tempo disponibile per straordinari: 
+		<strong>${mese.progressivoFinalePositivoMese.toHourTime()}</strong></p>
+	<p>Il numero di riposi compensativi usati fino ad oggi è: <strong>${numberOfCompensatoryRestUntilToday}</strong></p>
+	<p>E' possibile utilizzare il residuo dell'anno precedente? <strong>${possibileUtilizzareResiduoAnnoPrecedente==true ? 'sì' : 'no'}</strong></p>
+</div>
+
+<div id="tabelleRiassuntive">
+%{if (possibileUtilizzareResiduoAnnoPrecedente) { }%
+<table class="table table-bordered table-condensed table-striped riepilogo-ore">
+	<caption>Situazione residuo derivanete dall'anno precedente</caption>
+	<tr>
+		<td>Residuo da anno precedente disponibile all'inizio del mese</td>
+		%{if (mese.mesePrecedente==null) { }%
+			<td class="ore">${mese.tempoInizializzazione.toHourTimeWithPlus()}</td>
+		%{ } else { }%
+			<td class="ore">${mese.mesePrecedente.monteOreAnnoPassato.toHourTimeWithPlus()}</td>
+		%{ } }%
+	</tr>
+	<tr>
+		<td>Residuo da anno precedente utilizzato questo mese come riposo compensativo</td>
+		<td class="ore">${mese.riposiCompensativiMinutiImputatoAnnoPassato.toHourTimeWithMinus()}</td>
+	</tr>
+	<tr>
+		<td>Residuo da anno precedente utilizzato questo mese come recupero ore</td>
+		<td class="ore">${mese.progressivoFinaleNegativoMeseImputatoAnnoPassato.toHourTimeWithMinus()}</td>
+	</tr>
+	<tr>
+		<td class="totale">Residuo da anno precedente disponibile alla fine del mese</td>
+		<td class="ore totale">${mese.monteOreAnnoPassato.toHourTime()}</td>
+	</tr>	
+</table>
+%{ } }%
+
+
+ 
+<table class="table table-bordered table-condensed table-striped riepilogo-ore">
+	<caption>Riepilogo delle ore di lavoro dell'anno corrente</caption>
+	<tr>
+		<td>Residuo dai mesi precedenti</td>
+		%{if (mese.mesePrecedente==null) { }%
+			<td class="ore">+00:00</td>
+		%{ } else { }%
+			<td class="ore">${mese.mesePrecedente.monteOreAnnoCorrente.toHourTimeWithPlus()}</td>
+		%{ } }%
+		
+	</tr>
+	<tr>
+		<td>Residuo del mese positivo</td>
+		<td class="ore">${mese.progressivoFinalePositivoMesePrint.toHourTimeWithPlus()}</td>
+	</tr>
+
+	%{if(mese.straordinariMinutiS1Print != 0) { }%
+	<tr>
+		<td>Straordinario diurno nei giorni lavorativi</td>
+		<td class="ore">${mese.straordinariMinutiS1Print.toHourTimeWithMinus()}</td>
+	</tr>
+	%{ } }%
+	%{if(mese.straordinariMinutiS2Print != 0) { }%
+	<tr>
+		<td>Straordinario diurno nei giorni festivi o notturno nei giorni lavorativi</td>
+		<td class="ore">${mese.straordinariMinutiS2Print.toHourTimeWithMinus()}</td>
+	</tr>
+	%{ } }%
+	%{if(mese.straordinariMinutiS3Print != 0) { }%
+	<tr>
+		<td>Straordinario notturno nei giorni festivi</td>
+		<td class="ore">${mese.straordinariMinutiS3Print.toHourTimeWithMinus()}</td>
+	</tr>
+	%{ } }%
+	%{if(mese.riposiCompensativiMinutiImputatoAnnoCorrente != 0 ){ }%
+	<tr>
+		<td>Residuo da anno corrente utilizzato come riposo compensativi</td>
+		<td class="ore">${mese.riposiCompensativiMinutiImputatoAnnoCorrente.toHourTimeWithMinus()}</td>
+	</tr>		
+	%{ } }%
+	
+
+	%{if(mese.progressivoFinaleNegativoMeseImputatoAnnoCorrente != 0 ){ }%
+	<tr>
+		<td>Residuo da anno corrente utilizzato come recupero ore</td>
+		<td class="ore">${mese.progressivoFinaleNegativoMeseImputatoAnnoCorrente.toHourTimeWithMinus()}</td>
+	</tr>		
+	%{ } }%
+	<tr>
+		<td class="totale">Residuo di questo anno a fine mese</td>
+		<td class="ore totale">${mese.monteOreAnnoCorrente.toHourTime()}</td>
+	</tr>
+</table>
+
+<table class="table table-bordered table-condensed table-striped riepilogo-ore">
+	<caption>Riepilogo generale delle ore di lavoro</caption>
+	<tr>
+		<td>Residuo da anno precedente</td>
+		<td class="ore">${mese.monteOreAnnoPassato.toHourTimeWithPlus()}</td>
+	</tr>
+	<tr>
+		<td>Residuo di questo anno</td>
+		<td class="ore">${mese.monteOreAnnoCorrente.toHourTimeWithPlus()}</td>
+	</tr>
+	<tr>
+		<td class="totale">Residuo ore ad oggi</td>
+		<td class="ore totale">${(mese.monteOreAnnoPassato+mese.monteOreAnnoCorrente).toHourTime()}</td>
+	</tr>
+</table>
+</div>
+
+<div id="tabelleRiassuntive">
+%{if(!stampModificationTypeList.isEmpty()) { }%
+
+	<h3 style="margin-top: 2em">Note:</h3>
+	<table id="Note timbrature">
+		<tr>
+			<th width="80">Codice timbratura</th>
+			<th width="400">Descrizione</th>
+				
+		</tr>
+		%{
+	     for(smt in stampModificationTypeList) {
+		}%
+			<tr>
+				<td>${smt.code}</td>     
+				<td>${smt.description}</td>		
+			</tr>
+		
+		%{  		   
+	     }
+	     
+		}%
+		%{
+		for(type in stampTypeList) 
+		{
+		}%
+			<tr>
+				<td>${type.identifier}</td>
+				<td>${type.description}</td>
+			</tr>
+		%{  		   
+	    }
+	    }%
+	</table>
+%{ } }%
+
+
+*{Significato codici assenza}*
+<h3 style="margin-top: 2em">Tabella codici di assenza</h3>
+<table id="Codici di assenza">
+	<tr>
+		<th width="80">Codice assenza</th>
+		<th width="200">Descrizione</th>
+		<th width="80">Numero giorni</th>
+			
+	</tr>
+%{
+     for(entry in personMonth.getAbsenceCode().entrySet()) {
+}%
+	<tr>
+		<td>${entry.getKey().code}</td>     
+		<td>${entry.getKey().description}</td>	
+		<td>${entry.getValue()}</td>	
+	</tr>
+
+%{  		   
+     }
+     
+}%
+</table>
+</div>

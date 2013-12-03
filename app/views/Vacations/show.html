@@ -4,16 +4,22 @@
 #{logoutForm /}
 
 #{functionalMenuForm mainMenu: mainMenu /} 
-
+<div class="container">
 <h3 id="titoloSituazioneFerie">Situazione ferie ${vacationsRecap.year}</h3>
-
-inizio contratto: ${vacationsRecap.currentContract.beginContract} 
-fine contratto: ${vacationsRecap.currentContract.endContract} 
-
-<div align="left">
+<div class="span4"align="left">
+<table class="table table-hover">
+	<tr>
+		<td>Inizio contratto: </td><td><strong>${vacationsRecap.currentContract.beginContract}</strong></td> 
+	</tr>
+	<tr>	
+		<td>Fine contratto: </td><td><strong>${vacationsRecap.currentContract.expireContract}</strong></td> 
+	</tr>
+</table>
+</div>
+<div class="span10"align="left">
 #{form @Vacations.show()}
 <input type="hidden" name="personId" value="${vacationsRecap.person.id}" />	
-<table id="ferie">
+<table class="table table-hover" id="ferie">
 	<tr>
 		<th colspan=2 class="ferieFatte">Ferie fatte</th>
 		<th rowspan=3>Permessi legge 937/77 fatti</th>
@@ -92,3 +98,4 @@ fine contratto: ${vacationsRecap.currentContract.endContract}
 
 </div>
 #{/form}
+</div>

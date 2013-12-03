@@ -122,6 +122,20 @@ td, th {
     border-bottom: 1px solid #aaa;
 }
 
+/** Tabella senza bordi **/
+
+.tablenoborder {
+	border-style: none
+}
+.tablenoborder tr{
+	border-style: none
+}
+
+.tablenoborder td{
+	border-style: none
+}
+
+
 /** Forms **/
 
 label {
@@ -212,6 +226,10 @@ table#listaAmministratori {
 	margin: 4em 0em 6em;
 }
 
+table#withoutborder{border-style: none}
+tr#withoutborder{border-style: none}
+td#withoutborder{border-style: none}
+
 .capitalized {
 	text-transform: capitalize;	
 }
@@ -241,10 +259,10 @@ td.mese {background-color: #FFFF66;}
 td.giornoAssenza {text-align: center}
 td.nomeCognome {background-color: #CCFFCC}
 
-p#spiegazioneTabellaTimbrature {margin-top: 2em; margin-bottom: 2em}
+#spiegazioneTabellaTimbrature {margin-top: 2em; margin-bottom: 2em}
 p#validita {margin: 3em 2em 3em}
 p#warning {margin: 2em 6em 2em}
-p#nuovoCodiceCompetenza {margin: 4em 0em 2em; align: left}
+p#nuovoCodiceCompetenza {margin: 4em 3em 2em; align: left}
 p#tipoTimbratura {margin: 3em 0em 2em; align: left; font-weight:bold;}
 p#updateStampingText{margin: 3em 0em 2em; align: left;}
 p#allegaFile{margin:3em 0em 3em; align: center;}
@@ -270,12 +288,12 @@ p#sede {margin: 1em 0em 0em}
 p#telefono {margin: 1em 0em 0em}
 p#email {margin: 1em 0em 0em}
 p#nascita {margin: 1em 0em 0em}
-p#caricamentoSituazioneMensile {margin: 1em 0em 2em; text-align: center}
 p#tipoTimbraturaClock {margin: 3em 0em 2em; text-align: center; font-size: 18px; }
 p#choiceClock {text-align: center; font-size: 18px;}
 p#descrizioneStampaCartellino {margin:3em 0em 4em}
 p#inserisciAmministratore {margin: 2em 0em 0em}
-p#nuovoOrario {margin: 0em 0em 2em 0em}
+p#nuovoOrario {margin: 2em 20em 1em}
+p#puoFareTurni {margin:2em 32em 1em}
 p#inserimentoCompetenze {margin: 0em 0em 1em 2em; align: center}
 p#separatore {margin: 4em 1em 2em; align:center}
 p#livelli {margin: 5em 0em 4em}
@@ -306,8 +324,10 @@ div#cambiaPassword {margin: 3em 60em 2em; text-align: left}
 div#annullaPassword {margin: 1em 60em 2em; text-align: left}
 div#gestioneParametri {margin: 1em 4em 1em; text-align: left}
 div#spiegazioneValoriGrassetto {margin: 1em 4em 1em}
-div#caricamentoSituazioneMensile {text-align: center}
 
+div#caricamentoSituazioneMensile {text-align: center}
+div#tabelleRiassuntive {margin: 1em 2em 1em}
+div#tabellaPianoFerie {margin: 2em 20em 1em; align:center}
 
 h2#titoloSituazionePresenzeMensili {text-align: center}
 h2#titoloSituazioneAssenzeMensili {text-align: center}
@@ -345,11 +365,11 @@ h3#modificaCodiceCompetenza {margin: 2em 0em 2em; text-align: center}
 h3#monteOreStraordinario {margin: 2em 0em 1em; text-align: left}
 h3#titoloStraordinari {margin: 2em 0em 1em; text-align: left}
 h3#titoloCambioPassword {text-align: center}
-h3#caricamentoSituazioneMensile {text-align: center}
 h3#clock {text-align: center}
 h3#riepilogoMensile {text-align: center; margin: 2em 0em 1em}
 h3#utentiEsistenti {text-align: center}
 h3#pianoFerie {text-align: center}
+h3#riepilogoOrarioLavoro {margin: 2em 2em 1em; align: center}
 iframe#clock {align: center; margin: 3em 58em 0em}
 
 h4#configurazioniEsistenti {margin:2em 0em 1em; text-align: left}
@@ -364,7 +384,7 @@ textarea#stampaPdf {margin: 2em 1em 0em; width: 40em}
 input#salvaConfigurazione {margin: 2em 3em 0em 60em; align: center}
 input#annullaConfigurazione {margin: 0em 3em 0em; align: center}
 input#submitInsertPerson {margin: 2em 3em 0em 55em; align: center}
-input#resetInsertPerson {margin: 0em 3em 0em; align: center}
+input#resetInsertPerson {margin: 0em 3em -2em; align: center}
 input#submitTerminazioneRapporto {margin: 2em 60em 0em; align: center}
 input#discardTerminazioneRapporto {margin: 1em 60em 0em; align: center}
 input#username {margin: -2em 9em 2em}
@@ -373,11 +393,12 @@ input#nuovaPassword {margin: 3em 2em 2em}
 input#confermaPassword {margin: 4em 2em 2em}
 input#submitStamping {margin: 1em 5em 0em 20em; align: center}
 input#updateAbsence {margin: 0em 35em 0em; align: center}
-input#discardStamping {margin: 0em 3em 0em; align: center}
+input#discardStamping {margin: 0em 1em -1em; align: center}
 input#updateStamping {margin: 0em 25em 0em; align: center}
 input#submitCartellino {margin: 2em 1em 0em; align: center}
 input#indietroCartellino {margin: 2em 3em 0em; align: center}
-input#insertAdmin {margin: 2em 3em 0em 60em; align:center}
+input#insertAdmin {margin: 2em 45em 6em}
+input#discardAdmin {margin:2em -15em 6em}
 input#insertCompetenceCode {margin: 2em 3em 0em 60em; align: center}
 input#discardCompetenceCode {margin: 0em 3em 0em; align: center}
 input#updateAbsenceCode {margin: 2em 50em 0em; align:center}
@@ -391,21 +412,23 @@ p#nome {margin: 0em 1em 0em}
 p#cognome {margin: 1em 1em 2em}
 p#firma {margin: 2em 1em 0em}
 p#giorniLavorativi {margin: 2em 1em 0em}
+p#annoPrecedente {margin: 5em 50em 5em}
 
 input#submitNuovoCodiceAssenza {margin: 2em 60em 0em; align: center}
 input#discardNuovoCodiceAssenza {margin: 1em 60em 0em; align: center}
 input#submitEditPerson {margin: 2em 3em 0em 55em; align: center}
-input#discardEditPerson {margin: 0em 3em 0em; align: center}
-input#deletePerson {margin: 0em 3em 0em; align: center}
+input#discardEditPerson {margin: 0em 3em -2em; align: center}
+input#deletePerson {margin: 0em 3em -2em; align: center}
 input#modificaContratto {margin: 1em 25em 0em; align: center}
 input#submitSituation {margin: 2em 67em 0em; align: center}
 input#indietro {margin: 2em 67em 0em; align: center}
 input#submitStampingClock {margin: 0em 70em 0em; align: center}
 input#saveCompetence {margin: 1em 67em 0em; align: center}
 input#salvaVacationCode {margin: 3em 2em 0em 10em}
+input#annullaVacationCode {margin: 3em 2em 0em 10em}
 input#inserisciAssenza {margin: 1em 33em 0em; align: center}
 input#updateWorkingTime {margin: 2em 3em 0em 65em; align: center}
-input#insertWorkingTime {margin: 2em 3em 0em 65em; align: center}
+input#insertWorkingTime {margin: 25em -4em 15em; align: center}
 input#submitContractPerson {margin: 2em 25em 0em; align:center}
 input#note {margin: 1em 4em 0em; align: left}
 
@@ -420,5 +443,23 @@ table#pianoFerie {margin: auto}
 
 div#frm *{display:inline}
 
-
 select#assenzaFrequente {margin-bottom: 1em}
+
+table#nuovoOrarioLavoro {margin: 2em 30em 1em; align:center}
+
+table.riepilogo-ore {
+	width: 60%;
+	clear: left;
+}
+
+table.riepilogo-ore caption {
+	font-weight: bold;
+}
+
+table.riepilogo-ore td.ore {
+	text-align: right;
+}
+
+table.riepilogo-ore td.totale {
+	font-weight: bold;
+}

@@ -1,14 +1,13 @@
 #{extends 'main_admin.html' /}
 
-<h3 id="gestioneUtenteAmministrativo">Gestione user per accesso amministrativo</h3>
-
 #{functionalMenuForm mainMenu: mainMenu /}
 
-<p id="inserisciAmministratore"><a href="@{Administrators.insertAdmin}">Inserisci un nuovo amministratore</a></p>
+<h3 id="gestioneUtenteAmministrativo">Gestione user per accesso amministrativo</h3>
+<p class="lead" id="inserisciAmministratore"><a href="@{Administrators.insertAdmin}">Inserisci un nuovo amministratore</a></p>
 
 <h3 id="utentiEsistenti">User esistenti</h3>
 
-<table id="listaAmministratori">
+<table class="table table-striped" id="listaAmministratori">
 	<tr>
 		<th>Nome</th>
 		<th>Cognome</th>

@@ -40,6 +40,7 @@ import models.enumerate.PersonDayModificationType;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.LocalDate;
@@ -101,9 +102,9 @@ public class PersonDay extends Model {
 	public List<Absence> absences = new ArrayList<Absence>();
 
 	@Column(name = "modification_type")
-	@Enumerated(EnumType.STRING)
-	public PersonDayModificationType modificationType;
+	public String modificationType;
 	
+	@NotAudited
 	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY)
 	public List<PersonDayInTrouble> troubles = new ArrayList<PersonDayInTrouble>();
 	
@@ -126,7 +127,11 @@ public class PersonDay extends Model {
 	public PersonDay(Person person, LocalDate date){
 		this(person, date, 0, 0, 0);
 	}
-
+	
+	//setter implementato per yaml parser TODO toglierlo configurando snakeyaml
+	public void setDate(String date){
+		this.date = new LocalDate(date);
+	}
 
 	public void addAbsence(Absence abs){
 		this.absences.add(abs);
@@ -182,12 +187,27 @@ public class PersonDay extends Model {
 	{
 		for(Absence ab : absences)
 		{
-			if(ab.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay))
+			if(ab.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay) && !checkHourlyAbsenceCodeSameGroup(ab.absenceType))
+				return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * 
+	 * @return true se il person day è in trouble
+	 */
+	public boolean isInTrouble()
+	{
+		for(PersonDayInTrouble pdt : this.troubles)
+		{
+			if(pdt.fixed==false)
 				return true;
 		}
 		return false;
 	}
 
+	
 	/**
 	 * 
 	 * @param abt
@@ -377,7 +397,12 @@ public class PersonDay extends Model {
 	
 	/**
 	 * (Alessandro)
-	 * Algoritmo definitivo per il calcolo dei minuti lavorati nel person day
+	 * Algoritmo definitivo per il calcolo dei minuti lavorati nel person day.
+	 * Ritorna i minuti di lavoro per la persona nel person day. 
+	 * Modifica i seguenti campi del person day:
+	 * modificationType
+	 * isTicketAvailable
+	 * 
 	 * @return
 	 */
 	public int getCalculatedTimeAtWork() {
@@ -389,6 +414,8 @@ public class PersonDay extends Model {
 		StampProfile stampProfile = getStampProfile();
 		if (stampProfile != null && stampProfile.fixedWorkingTime) 
 		{
+			if(this.isHoliday())
+				return 0;
 			return getWorkingTimeTypeDay().workingTime;
 		} 
 
@@ -433,22 +460,24 @@ public class PersonDay extends Model {
 
 		if(isHoliday()){
 			workTime = 0;
-			for(Stamping st : stampings){
-				if(st.way == Stamping.WayType.in)
+			
+			orderStampings();
+			List<PairStamping> validPairs = this.getValidPairStamping();
+		
+			int myWorkTime=0;
+			{
+				for(PairStamping validPair : validPairs)
 				{
-					workTime = workTime - toMinute(st.date);									
-				}
-				if(st.way == Stamping.WayType.out)
-				{
-					workTime = workTime + toMinute(st.date);								
-					Logger.trace("Timbratura di uscita: %s", workTime);
+					myWorkTime = myWorkTime - toMinute(validPair.in.date);
+					myWorkTime = myWorkTime + toMinute(validPair.out.date);
 				}
 			}
-			return justifiedTimeAtWork + workTime;
+			
+			return justifiedTimeAtWork + myWorkTime;
 		}
 
 			
-		Collections.sort(this.stampings);
+		orderStampings();
 		List<PairStamping> validPairs = this.getValidPairStamping();
 	
 		int myWorkTime=0;
@@ -461,64 +490,60 @@ public class PersonDay extends Model {
 		}
 	
 		workTime = myWorkTime;
-
+		//workTime = workTime;
 		//Il pranzo e' servito??		
+		this.modificationType = null;
 		int breakTicketTime = getWorkingTimeTypeDay().breakTicketTime;	//30 minuti
 		int mealTicketTime = getWorkingTimeTypeDay().mealTicketTime;	//6 ore
 
 		List<PairStamping> gapLunchPairs = getGapLunchPairs(validPairs);
 		
-		//non ha timbrato per il pranzo (due sole timbrature)
-		if(validPairs.size()==1) 
+		//ha timbrato per il pranzo 
+		if(gapLunchPairs.size()>0)
 		{
-			if( workTime > mealTicketTime && workTime - breakTicketTime > mealTicketTime )
+			int minTimeForLunch = 0;
+			for(PairStamping gapLunchPair : gapLunchPairs)
+			{
+				//(TODO considero il primo gap in orario pranzo)
+				minTimeForLunch = minTimeForLunch - toMinute(gapLunchPair.in.date);
+				minTimeForLunch = minTimeForLunch + toMinute(gapLunchPair.out.date);
+				break;
+			}
+			if(workTime - breakTicketTime >= mealTicketTime)
+			{
+				if( minTimeForLunch < breakTicketTime ) 
+				{
+					workTime = workTime - (breakTicketTime - minTimeForLunch);
+					StampModificationType smt = StampModificationType.getStampModificationTypeByCode(StampModificationTypeCode.FOR_MIN_LUNCH_TIME.getCode());
+					//this.lunchTimeStampModificationType = smt;
+					this.modificationType = smt.code;
+				}
+				this.isTicketAvailable = true;
+			}
+			else
+			{
+				this.isTicketAvailable = false;
+			}
+		}
+		else
+		{
+			//this.isTicketAvailable = false;
+			if( workTime > mealTicketTime && workTime - breakTicketTime >= mealTicketTime )
 			{
 				workTime = workTime - breakTicketTime;
 				this.isTicketAvailable = true;
-				StampModificationType smt = StampModificationType.findById(StampModificationTypeValue.FOR_DAILY_LUNCH_TIME.getId());
-				this.lunchTimeStampModificationType = smt;
+				StampModificationType smt = StampModificationType.getStampModificationTypeByCode(StampModificationTypeCode.FOR_DAILY_LUNCH_TIME.getCode());
+				//this.lunchTimeStampModificationType = smt;
+				this.modificationType = smt.code;
 			}
 			else
 			{
 				this.isTicketAvailable = false;
 			}
 		}
-		
-		//potrebbe aver timbrato per il pranzo (più di due timbrature)
-		if(validPairs.size()>1)
-		{
-			//ha timbrato per il pranzo //(TODO considero il primo gap in orario pranzo)
-			if(gapLunchPairs.size()>0)
-			{
-				int minTimeForLunch = 0;
-				for(PairStamping gapLunchPair : gapLunchPairs)
-				{
-					minTimeForLunch = minTimeForLunch - toMinute(gapLunchPair.in.date);
-					minTimeForLunch = minTimeForLunch + toMinute(gapLunchPair.out.date);
-					break;
-				}
-				if(workTime - breakTicketTime > mealTicketTime)
-				{
-					if( minTimeForLunch < breakTicketTime ) 
-					{
-						workTime = workTime - (breakTicketTime - minTimeForLunch);
-						StampModificationType smt = StampModificationType.findById(StampModificationTypeValue.FOR_MIN_LUNCH_TIME.getId());
-						this.lunchTimeStampModificationType = smt;
-					}
-					this.isTicketAvailable = true;
-				}
-				else
-				{
-					this.isTicketAvailable = false;
-				}
-			}
-			else
-			{
-				this.isTicketAvailable = false;
-			}
-			
-		}
-		
+
+	
+
 		return workTime + justifiedTimeAtWork;
 
 
@@ -553,6 +578,8 @@ public class PersonDay extends Model {
 	{
 		boolean fixedWorkingType = false;
 		
+		//FIXME: invece che ciclare su tutti non si poteva con una select prendere lo
+		//stampProfile alla data attuale?
 		for(StampProfile sp : this.person.stampProfiles)
 		{
 			if(DateUtility.isDateIntoInterval(this.date, new DateInterval(sp.startFrom,sp.endTo)))
@@ -637,7 +664,7 @@ public class PersonDay extends Model {
 	}
 
 	/**
-	 * chiama le funzioni di popolamento
+	 * Chiama le funzioni di popolamento sul singolo personDay
 	 */
 	public void populatePersonDay(){
 		Contract con = person.getContract(date);
@@ -648,8 +675,6 @@ public class PersonDay extends Model {
 			Logger.info("I calcoli sul giorno %s non vengono effettuati perche' %s non ha un contratto attivo in questa data", date, person);
 			return;
 		}
-
-		Logger.trace("Dimensione Stampings: %s. Dimensione Absences: %s Per %s %s", stampings.size(), absences.size(), person.name, person.surname);
 
 		updateTimeAtWork();
 		merge();
@@ -665,6 +690,30 @@ public class PersonDay extends Model {
 			this.isTicketAvailable = this.isTicketAvailable && checkTicketAvailableForWorkingTime();
 		merge();
 
+	}
+	
+	/**
+	 * Metodo da utilizzare per la modifica del personDay che impatta su tutto il mese
+	 */
+	public void updatePersonDay()
+	{
+		Logger.info("Update Person Day %s by %s %s", this.date, this.person.name, this.person.surname);
+		LocalDate monthBegin = new LocalDate(this.date.getYear(), this.date.getMonthOfYear(), 1);
+		LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
+		
+		List<PersonDay> pdList = PersonDay.find(
+				"select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date asc",
+				this.person,
+				monthBegin,
+				monthEnd).fetch();
+		for(PersonDay pd : pdList)
+		{
+			pd.populatePersonDay();
+		}
+		/**
+		 * TODO: inserire qui una chiamata alla fixPersonSituation di Administration quando le modifiche dovranno ripercuotersi anche 
+		 * sui personMonth
+		 */
 	}
 
 	/**
@@ -820,6 +869,8 @@ public class PersonDay extends Model {
 		//assenze giornaliere
 		if(this.isAllDayAbsences())
 		{
+			//FIXME 10 aprile sannicandro 18 ottobre sannicandro 
+			
 			difference = 0;
 			save();
 			return;
@@ -827,70 +878,8 @@ public class PersonDay extends Model {
 		
 		//feriale
 		difference = timeAtWork - worktime;
+		save();
 		
-		/*
-		if((getWorkingTimeTypeDay().holiday) && (date.getDayOfMonth()==1) && stampings.size() == 0){
-			difference = 0;
-			save();
-			return;
-		}
-
-		if(absenceList().size() > 0 && stampings.size() == 0){
-			int diff = 0;
-			for(Absence abs : absenceList()){
-				if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay){
-					difference = 0;
-					save();
-					return;
-				}
-				else{
-					diff = diff+abs.absenceType.justifiedTimeAtWork.minutesJustified;
-				}
-			}
-			difference = diff - this.person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(this.date.getDayOfWeek()).workingTime;
-			save();
-			return;
-		}
-		
-		if(timeAtWork == 0 && absences.size() > 0){
-			Logger.debug("Tempo di lavoro = 0 e assenza per %s %s in data %s", person.name, person.surname, date);
-			Absence abs = absences.get(0);
-			if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay){
-				difference = 0;
-				save();
-				return;
-			}
-		}
-		
-		if(absences.size() == 1 && stampings.size() > 0){
-			Absence abs = absences.get(0);
-			if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay){
-				difference = 0;
-				save();
-				return;
-			}
-
-		}
-
-		if(this.date.isAfter(new LocalDate()) && stampings.size()==0 && absences.size()==0 && timeAtWork == 0){
-			difference = 0;
-			save();
-			return;
-		}
-
-		if(getWorkingTimeTypeDay().holiday == false){
-			int minTimeWorking = getWorkingTimeTypeDay().workingTime;
-			Logger.trace("Time at work: %s. Tempo di lavoro giornaliero: %s", timeAtWork, minTimeWorking);
-			difference = timeAtWork - minTimeWorking;
-			save();
-		}
-		else{
-
-			difference = timeAtWork;
-			save();
-			Logger.trace("Sto calcolando la differenza in un giorno festivo per %s %s e vale: %d", person.name, person.surname, difference);
-		}		
-		 */
 		Logger.debug("Differenza per %s %s nel giorno %s: %s", person.surname, person.name, date, difference);
 
 	}
@@ -1127,29 +1116,29 @@ public class PersonDay extends Model {
 		.withHourOfDay(config.mealTimeEndHour)
 		.withMinuteOfHour(config.mealTimeEndMinute);
 		
-		List<PairStamping> lunchPairs = new ArrayList<PersonDay.PairStamping>();
+		//List<PairStamping> lunchPairs = new ArrayList<PersonDay.PairStamping>();
+		List<PairStamping> gapPairs = new ArrayList<PersonDay.PairStamping>();
+		Stamping outForLunch = null;
+		
 		for(PairStamping validPair : validPairs)
 		{
-			 LocalDateTime in = validPair.in.date;
 			 LocalDateTime out = validPair.out.date;
-			 
-			 if( (out.isAfter(startLunch) && out.isBefore(endLunch)) || (in.isAfter(startLunch) && in.isBefore(endLunch)) )
-				 lunchPairs.add(validPair);
-				 
-		}
-		
-		//costruisco le nuove coppie che sono gli intervalli fra le lunchPair
-		List<PairStamping> gapPairs = new ArrayList<PersonDay.PairStamping>();
-		PairStamping lastPair = null;
-		for(PairStamping lunchPair : lunchPairs)
-		{
-			//prima coppia
-			if(lastPair==null)
-			{
-				lastPair = lunchPair;
-				continue;
-			}
-			gapPairs.add( new PairStamping(lastPair.out, lunchPair.in) );
+			 if(outForLunch==null)
+			 {
+				 if( (out.isAfter(startLunch) && out.isBefore(endLunch)) )
+				 {
+					 outForLunch = validPair.out;
+				 }
+			 }
+			 else
+			 {
+				 gapPairs.add( new PairStamping(outForLunch, validPair.in) );
+				 outForLunch = null;
+				 if( (out.isAfter(startLunch) && out.isBefore(endLunch)) )
+				 {
+					 outForLunch = validPair.out;
+				 }
+			 }
 		}
 		
 		return gapPairs;

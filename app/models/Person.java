@@ -51,6 +51,10 @@ import org.hibernate.envers.query.criteria.AuditConjunction;
 import org.hibernate.envers.query.criteria.AuditCriterion;
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
+
 import controllers.Check;
 import controllers.Secure;
 import controllers.Security;
@@ -156,6 +160,10 @@ public class Person extends Model {
 	@JoinColumn(name="working_time_type_id")
 	public WorkingTimeType workingTimeType;
 	
+	@NotAudited
+	@OneToMany(mappedBy = "person", fetch=FetchType.LAZY)
+	public List<PersonWorkingTimeType> personWorkingTimeType = new ArrayList<PersonWorkingTimeType>();
+	
 	/**
 	 * relazione con la tabella delle eventuali sedi distaccate
 	 */
@@ -189,8 +197,9 @@ public class Person extends Model {
 	/**
 	 * relazione con la nuova tabella dei person_month
 	 */
+	@NotAudited
 	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<PersonMonth> personMonths;
+	public List<PersonMonth> personMonths = new ArrayList<PersonMonth>();
 
 	/**
 	 * relazione con la nuova tabella dei person_year
@@ -246,6 +255,30 @@ public class Person extends Model {
 
 	@OneToOne(mappedBy="person", fetch=FetchType.LAZY,  cascade = {CascadeType.REMOVE})
 	public PersonShift personShift;
+
+	
+	
+	public String getName(){
+		return this.name;
+	}
+	
+	public String getSurname(){
+		return this.surname;
+	}
+	
+	public void setCompetenceCodes(List<CompetenceCode> competenceCode)
+	{
+		this.competenceCode = competenceCode;
+	}
+	
+	
+	/*
+	public WorkingTimeType getWorkingTimeType(){
+		return this.workingTimeType;
+	}
+	*/
+	
+	
 	
 //	@NotAudited
 //	@ManyToOne(fetch=FetchType.LAZY)
@@ -256,6 +289,7 @@ public class Person extends Model {
 		return String.format("%s %s", surname, name);
 	}
 
+	
 	/**
 	 * 
 	 * @return il piano ferie associato al contratto a sua volta associato alla data di oggi
@@ -298,27 +332,19 @@ public class Person extends Model {
 	 */
 	public Contract getContract(LocalDate date){
 
-		Contract contract = Contract.find("Select con from Contract con where con.person = ? and (con.beginContract IS NULL or con.beginContract <= ?) and " +
-				"(con.expireContract > ? or con.expireContract is null )",this, date, date).first();
+		Contract contract = Contract.find("Select con from Contract con where con.person = ? and (con.beginContract IS NULL or con.beginContract <= ?) and (con.expireContract > ? or con.expireContract is null )",
+				this,
+				date,
+				date).first();
 		if(contract == null){
 			return null;
 		}
-//		Logger.debug("La lista contratti è %s", contracts);
-//		Logger.debug("Il primo contratto è: %s", contracts.get(0));
-//		
-//		if (contracts.size() > 1) {
-//
-//			throw new IllegalStateException(
-//					String.format("Trovati più contratti in contemporanea per la persona %s nella data %s", this, date));
-//			
-//		}
-//		else
 		return contract;
 
 	}
 	/**
 	 * 
-	 * @return il contratto attualmente attivo per quella persona
+	 * @return il contratto attualmente attivo per quella persona, null se la persona non ha contratto attivo
 	 */
 	public Contract getCurrentContract(){
 		return getContract(LocalDate.now());
@@ -364,8 +390,7 @@ public class Person extends Model {
 		else
 			return null;
 	}
-
-
+	
 	@Override
 	public String toString() {
 		return String.format("Person[%d] - %s %s", id, name, surname);
@@ -485,6 +510,19 @@ public class Person extends Model {
 	}
 	
 	/**
+	 * True se la persona alla data ha un contratto attivo, False altrimenti
+	 * @param date
+	 */
+	public boolean isActive(LocalDate date)
+	{
+		Contract c = this.getCurrentContract();
+		if(c==null)
+			return false;
+		else
+			return true;
+	}
+	
+	/**
 	 *  La lista delle persone che abbiano almeno un giorno lavorativo coperto da contratto nel mese month
 	 *  ordinate per id
 	 * @param month
@@ -493,7 +531,10 @@ public class Person extends Model {
 	 */
 	public static List<Person> getActivePersonsInMonth(int month, int year)
 	{
-		List<Person> persons = Person.find("SELECT p FROM Person p ORDER BY p.id").fetch();
+		/**
+		 * FIXME: rivedere le select in modo da renderle più efficienti
+		 */
+		List<Person> persons = Person.find("SELECT p FROM Person p ORDER BY p.surname, p.othersSurnames, p.name").fetch();
 		List<Person> activePersons = new ArrayList<Person>();
 		for(Person person : persons)
 		{
@@ -573,6 +614,7 @@ public class Person extends Model {
 				stamp.way = WayType.in;
 			else
 				stamp.way = WayType.out;
+			stamp.stampType = stamping.stampType;
 			stamp.badgeReader = stamping.badgeReader;
 			stamp.personDay = pd;
 			stamp.save();
@@ -590,6 +632,7 @@ public class Person extends Model {
 					stamp.way = WayType.in;
 				else
 					stamp.way = WayType.out;
+				stamp.stampType = stamping.stampType;
 				stamp.badgeReader = stamping.badgeReader;
 				stamp.personDay = pd;
 				stamp.save();
@@ -619,10 +662,7 @@ public class Person extends Model {
 		}
 		Logger.debug("Chiamo la populatePersonDay per fare i calcoli sulla nuova timbratura inserita per il personDay %s", pd);
 		pd.populatePersonDay();
-		/**
-		 * controllare se può essere una save qui al posto della merge il problema al fatto che le timbrature prese dal client non permettano
-		 * i calcoli
-		 */
+
 		pd.save();
 		return true;
 	}
@@ -643,6 +683,27 @@ public class Person extends Model {
 	}
 	
 	
+	/**
+	 * @param code
+	 * @return
+	 */
+	public Competence competence(final CompetenceCode code, final int year, final int month) {
+		if (competenceCode.contains(code)) {
+			Optional<Competence> o = FluentIterable.from(competences)
+					.firstMatch(new Predicate<Competence>() {
+				
+				@Override
+				public boolean apply(Competence input) {
+					
+					return input.competenceCode.equals(code) && input.year == year && input.month == month;
+				}
+				
+			});
+			return o.orNull();
+		} else {
+			return null;
+		}
+	}
 		
 	/**
 	 * 
@@ -920,6 +981,35 @@ public class Person extends Model {
 		return flag;
 	}
 
+	/**
+	 * Cerca per numero di matricola
+	 * @param number
+	 * @return
+	 */
+	public static Person findByNumber(Integer number) {
+		return Person.find("SELECT p FROM Person p WHERE number = ?", number).first();
+	}
+	
+	
+	/**
+	 * 
+	 * @return l'attuale orario di lavoro
+	 */
+	public  WorkingTimeType getCurrentWorkingTimeType(){
+		return getWorkingTimeType(LocalDate.now());
+	}
 
+	/**
+	 * 
+	 * @param date
+	 * @return il tipo di orario di lavoro utilizzato in date
+	 */
+	public  WorkingTimeType getWorkingTimeType(LocalDate date) {
+		WorkingTimeType wtt = PersonWorkingTimeType.find("Select wtt from PersonWorkingTimeType pwtt, WorkingTimeType wtt " +
+				"where pwtt.beginDate <= ? and (pwtt.endDate >= ? or pwtt.endDate is null) and pwtt.person = ? and pwtt.workingTimeType = wtt", 
+				date, date, this).first();
+				
+		return wtt;
+	}
 
 }

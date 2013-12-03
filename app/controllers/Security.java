@@ -50,7 +50,7 @@ public class Security extends Secure.Security {
 		}
 		
         // Oops
-        Logger.info("Failed login for %s using password %s", username, password);
+        Logger.info("Failed login for %s ", username);
         flash.put("username", username);
         flash.error("Login failed");
         return false;
@@ -81,18 +81,12 @@ public class Security extends Secure.Security {
 		}
 		Logger.trace("Richiesta getPerson(), username=%s", username);
 		
-		Person person = Cache.get(username, Person.class);
 
-		if(person == null){
-			person = Person.find("byUsername", username).first();
-			Logger.trace("Person.find('byUsername'), username=%s, e' %s", username, person);
-			if (person == null){
-			    Logger.info("Security.getPerson(): Person con username = %s non trovata nel database", username);
-			    return null;
-			}
-			Cache.set(username, person, CACHE_DURATION);
-			Cache.set(PERMISSION_CACHE_PREFIX + username, person.getAllPermissions(), CACHE_DURATION);
-			Logger.debug("Cache filled with %s and his/her permissions", person);
+		Person person = Person.find("byUsername", username).first();
+		Logger.trace("Person.find('byUsername'), username=%s, e' %s", username, person);
+		if (person == null){
+			Logger.info("Security.getPerson(): Person con username = %s non trovata nel database", username);
+			return null;
 		}
 		return person;
 	}
