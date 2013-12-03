@@ -596,10 +596,6 @@ public class Competences extends Controller{
 			person.competenceCode.remove(c);
 		}
 
-		/**
-		 * manca la parte di gestione sui codici diversi ma con uguale descrizione...così come mancano i metodi booleani nella classe Person
-		 * per ritornare la loro presenza tra i competence code associati a quella persona
-		 */
 
 		if(ionicRadiance1.equals("true") && !person.isIonicRadianceRiskCom1Available()){
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.code = ? ", "205").first();
