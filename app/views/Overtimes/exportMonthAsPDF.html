@@ -31,7 +31,7 @@
 				for(person in overtimesMonth.rowKeySet()) {
 			}%
 			<tr>
-				<td>${person.name} ${person.surname}</td>
+				<td>${person}</td>
 				%{
 					for (reason in overtimesMonth.columnKeySet()) {
 						if (overtimesMonth.contains(person, reason)) {
