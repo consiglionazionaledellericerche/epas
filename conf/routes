@@ -15,6 +15,11 @@ GET		/presenze								Application.indexAdmin
 GET		/orarioAdmin/{personId}/{year}/{month}	Stampings.personStamping
 GET 	/orarioAdmin							Stampings.personStamping
 
+GET		/competences/prova						Competences.prova
+
+GET		/utilities								Administration.utilities
+POST	/utilities/{personId}/{year}/{month}	Administration.fixPersonSituation
+
 #Assenze
 #GET		/absences/{year}/{month}		Absences.absences
 
@@ -90,7 +95,7 @@ GET		/persons/{personId}/changePassword		Persons.changePassword
 POST	/persons/changePassword					Persons.savePassword
 
 # Gestione timbrature
-GET		/stampings/create						Stampings.create
+GET		/stampings/new							Stampings.create
 POST	/stampings/insert/						Stampings.insert
 GET		/stampings/edit/{stampingId}			Stampings.edit
 POST	/stampings/update/						Stampings.update

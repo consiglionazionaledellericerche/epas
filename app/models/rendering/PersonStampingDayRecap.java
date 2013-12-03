@@ -1,5 +1,7 @@
 package models.rendering;
 
+import it.cnr.iit.epas.DateUtility;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,10 +58,7 @@ public class PersonStampingDayRecap {
 		
 	public PersonStampingDayRecap(PersonDay pd, int numberOfInOut)
 	{
-		if(pd.date.getDayOfMonth()==22)
-		{
-			System.out.println("");
-		}
+		
 		this.personDayId = pd.id;
 		this.holiday = pd.isHoliday();
 		this.person = pd.person;
@@ -87,13 +86,8 @@ public class PersonStampingDayRecap {
 			{
 				this.fixedWorkingTimeCode = smt.code;
 				addStampModificationTypeToList(smt);
-			//	pd.save(); //TODO toglierlo quando il db sarà consistente
 				int temporaryWorkTime = pd.getCalculatedTimeAtWork();
 				this.setWorkingTime( temporaryWorkTime );
-			//	pd.timeAtWork = temporaryWorkTime;
-			//	pd.save();	//TODO toglierlo quando il db sarà consistente
-			//	pd.updateDifference(); //TODO toglierlo quando il db sarà consistente 
-			//	pd.updateProgressive(); 
 			}
 			this.setDifference(0);
 			this.setProgressive(0);
@@ -127,31 +121,32 @@ public class PersonStampingDayRecap {
 		//---------------------------------------- not fixed:  worktime, difference, progressive for past-----------------------------
 		else if(this.past)
 		{
-			//pd.save();	//TODO toglierlo quando il db sarà consistente
-			//int temporaryWorkTime = pd.getCalculatedTimeAtWork();
+			//pd.getCalculatedTimeAtWork();
 			this.setWorkingTime(pd.timeAtWork);
-			//pd.timeAtWork = temporaryWorkTime;
-			//pd.save();	//TODO toglierlo quando il db sarà consistente
-			//pd.updateDifference(); //TODO toglierlo quando il db sarà consistente
-			//pd.updateProgressive(); 
-	
+				
 			this.setDifference( pd.difference );
 	
 			PersonDay previousPd = pd.checkPreviousProgressive();
+			//caso del primo giorno del mese
 			if(pd.date.getDayOfMonth()==1)
 			{
 				this.setProgressive(pd.progressive);
 			}
+			//caso giorno precedente esiste
 			else if(previousPd!=null)
 			{
 				this.setProgressive(pd.difference + previousPd.progressive);
 			}
-			else
+			//TODO verificare se funziona
+			else //if(pd.progressive!=0)
 			{
-				this.setProgressive(0);
+				this.setProgressive(pd.progressive);
 			}
+			//else
+			//{
+			//	this.setProgressive(0);
+			//}
 		
-			//pd.save();	//TODO poi va rimosso
 		}
 		//---------------------------------------- worktime, difference, progressive for future ----------------------------------------
 		if(this.future)
@@ -168,10 +163,13 @@ public class PersonStampingDayRecap {
 			this.setMealTicket(true);
 		
 		//----------------------------------------------- lunch (p,e) ------------------------------------------------------------------
-		if(pd.lunchTimeStampModificationType!=null && !this.future)
+		if(pd.modificationType!=null && !this.future)
 		{
-			this.todayLunchTimeCode = pd.lunchTimeStampModificationType.code;
-			addStampModificationTypeToList(pd.lunchTimeStampModificationType);
+			//TODO urgente. Creare il campo in personDay con relazione verso StampModificatioType per 
+			//mantenere persistita l'informazione (p || e || null). Adesso è persistito solo il codice da stampare.
+			StampModificationType smtlunch = StampModificationType.getStampModificationTypeByCode(pd.modificationType);
+			this.todayLunchTimeCode = smtlunch.code;
+			addStampModificationTypeToList(smtlunch);
 		}
 		//----------------------------------------------- uscita adesso f ---------------------------------------------------------------
 		if(!this.holiday && !pd.isAllDayAbsences() && this.today) //TODO 
@@ -244,53 +242,17 @@ public class PersonStampingDayRecap {
 	
 	private void setWorkingTime(int workTime)
 	{
-		this.workTime = fromMinuteToHourMinute(workTime);
+		this.workTime = DateUtility.fromMinuteToHourMinute(workTime);
 	}
 	
 	private void setDifference(int difference)
 	{
-		this.difference = fromMinuteToHourMinute(difference);
+		this.difference = DateUtility.fromMinuteToHourMinute(difference);
 	}
 	
 	private void setProgressive(int progressive)
 	{
-		this.progressive = fromMinuteToHourMinute(progressive);
-	}
-	
-	/**
-	 * TODO sostituirlo con PersonTags.toHourTime
-	 * @param minute
-	 * @return
-	 */
-	private static String fromMinuteToHourMinute(int minute)
-	{
-		String s = "";
-		if(minute<0)
-		{
-			s = s + "-";
-			minute = minute * -1;
-		}
-		int hour = minute / 60;
-		int min  = minute % 60;
-		
-		if(hour<10)
-		{
-			s = s + "0" + hour;
-		}
-		else
-		{
-			s = s + hour;
-		}
-		s = s + ":";
-		if(min<10)
-		{
-			s = s + "0" + min;
-		}
-		else
-		{
-			s = s + min;
-		}
-		return s;
+		this.progressive = DateUtility.fromMinuteToHourMinute(progressive);
 	}
 	
 	private static void addStampModificationTypeToList(StampModificationType smt)

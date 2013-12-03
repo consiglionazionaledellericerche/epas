@@ -20,11 +20,9 @@ import models.Competence;
 import models.CompetenceCode;
 import models.Person;
 import models.PersonDay;
-import models.PersonMonth;
 import models.StampProfile;
 import models.Stamping;
 import models.WorkingTimeTypeDay;
-import models.efficiency.EfficientPersonDay;
 import models.enumerate.JustifiedTimeAtWork;
 
 import org.joda.time.DateTimeConstants;
@@ -101,7 +99,7 @@ public class MonthRecaps extends Controller{
 		{
 			for(PersonDay pd : pdList)
 			{
-				pd.getStampProfile();
+				//pd.getStampProfile();
 				totalTimeAtWork = totalTimeAtWork + pd.timeAtWork;
 				difference = difference + pd.difference;
 				
@@ -136,7 +134,7 @@ public class MonthRecaps extends Controller{
 				//persone non fixed
 				else if(!pd.isFixedTimeAtWork())
 				{
-					if(pd.troubles!=null && pd.troubles.size()>0)
+					if(pd.isInTrouble()) 
 					{
 						notJustifiedAbsences.add(pd);
 					}
@@ -150,9 +148,18 @@ public class MonthRecaps extends Controller{
 					}
 				}
 			}
+
+			//straordinari s1/s2/s3
+			List<Competence> competenceList = 
+					Competence.find("Select comp from Competence comp, CompetenceCode compCode where comp.competenceCode = compCode and comp.person = ?"
+					+ "and comp.year = ? and comp.month = ? and (compCode.code = ? or compCode.code = ? or compCode.code = ?)",
+					person, year, month, "S1", "S2", "S3").fetch();
+			valueApproved = 0;
+			for(Competence comp : competenceList)
+			{
+				valueApproved = valueApproved + comp.valueApproved;
+			}
 			
-			PersonMonth pm = PersonMonth.getInstance(person, year, month);
-			valueApproved = pm.straordinari / 60;			
 
 		}
 	}
@@ -195,29 +202,33 @@ public class MonthRecaps extends Controller{
 
 		List<Person> activePersons = Person.getActivePersonsInMonth(month, year);
 
-
-		//Se mese attuale considero i person day fino a ieri
-		if(today.getMonthOfYear()==month)
+		//logica mese attuale
+		if(today.getYear()==year && today.getMonthOfYear()==month)
 		{
-			monthEnd = today.minusDays(2);	//TODO perchè due?
-		}
-		
-		//Se oggi e' il primo giorno del mese stampo la tabella vuota 
-		if(today.getDayOfMonth()==1)
-		{
-			for(Person person : activePersons)
+			//Se oggi e' il primo giorno del mese stampo la tabella vuota 
+			if(today.getDayOfMonth()==1)
 			{
-				tableMonthRecap.put(person, "Giorni di presenza al lavoro nei giorni festivi".intern(), 0);
-				tableMonthRecap.put(person, "Giorni di presenza al lavoro nei giorni lavorativi".intern(), 0);
-				tableMonthRecap.put(person, "Ore di lavoro fatte".intern(), 0);
-				tableMonthRecap.put(person, "Differenza ore (Residuo a fine mese)".intern(), 0);
-				tableMonthRecap.put(person, "Assenze giustificate".intern(), 0);
-				tableMonthRecap.put(person, "Assenze non giustificate".intern(), 0);
-				tableMonthRecap.put(person, "Ore straord. pagate".intern(), 0);
-				tableMonthRecap.put(person, "Buoni mensa da restituire".intern(),0);
+				for(Person person : activePersons)
+				{
+					tableMonthRecap.put(person, "Giorni di presenza al lavoro nei giorni festivi".intern(), 0);
+					tableMonthRecap.put(person, "Giorni di presenza al lavoro nei giorni lavorativi".intern(), 0);
+					tableMonthRecap.put(person, "Ore di lavoro fatte".intern(), 0);
+					tableMonthRecap.put(person, "Differenza ore (Residuo a fine mese)".intern(), 0);
+					tableMonthRecap.put(person, "Assenze giustificate".intern(), 0);
+					tableMonthRecap.put(person, "Assenze non giustificate".intern(), 0);
+					tableMonthRecap.put(person, "Ore straord. pagate".intern(), 0);
+					tableMonthRecap.put(person, "Buoni mensa da restituire".intern(),0);
+				}
+				render(tableMonthRecap, generalWorkingDaysOfMonth, today, lastDayOfMonth);
+				return;
 			}
-			render(tableMonthRecap, generalWorkingDaysOfMonth, today, lastDayOfMonth);
+			
+			//Considero il riepilogo fino a ieri
+			monthEnd = today.minusDays(1);
+			
 		}
+			
+		
 
 		for(Person person : activePersons)
 		{
@@ -228,10 +239,13 @@ public class MonthRecaps extends Controller{
 					monthEnd).fetch();
 			
 			
-			
+			Logger.info("Costruisco riepilogo mensile per %s %s %s",person.id, person.name, person.surname);
 			PersonMonthRecapFieldSet mr = new PersonMonthRecapFieldSet();
 			mr.populatePersonMonthRecap(person, pdList, year, month);
-
+			if(person.id.equals(206l))
+			{
+				int gfff = 0 ;
+			}
 			tableMonthRecap.put(person, "Giorni di presenza al lavoro nei giorni festivi".intern(), mr.workingDayHoliday.size());
 			tableMonthRecap.put(person, "Giorni di presenza al lavoro nei giorni lavorativi".intern(), mr.workingDayNotHoliday.size());
 			tableMonthRecap.put(person, "Ore di lavoro fatte".intern(), new Integer(mr.totalTimeAtWork));
@@ -317,19 +331,22 @@ public class MonthRecaps extends Controller{
 		LocalDate today = new LocalDate();
 		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
 		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
-		
-		//Se mese attuale considero i person day fino a ieri
-		if(today.getMonthOfYear()==month)
-		{
-			monthEnd = today.minusDays(2);
-		}
-		//Se oggi e' il primo giorno del mese stampo la tabella vuota 
-		if(today.getDayOfMonth()==1)
-		{
-			List<PersonDay> notJustifiedAbsences = new ArrayList<PersonDay>();
-			render(notJustifiedAbsences);
-		}
 
+		//logica mese attuale
+		if(today.getYear()==year && today.getMonthOfYear()==month)
+		{
+			//Se oggi e' il primo giorno del mese stampo la tabella vuota 
+			if(today.getDayOfMonth()==1)
+			{
+				List<PersonDay> notJustifiedAbsences = new ArrayList<PersonDay>();
+				render(notJustifiedAbsences);
+			}
+			
+			//Considero il riepilogo fino a ieri
+			monthEnd = today.minusDays(1);
+
+		}
+		
 		List<PersonDay> pdList = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? AND pd.date between ? and ?", 
 			person, 
 			monthBegin, 

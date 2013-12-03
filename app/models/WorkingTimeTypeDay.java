@@ -4,6 +4,7 @@
 package models;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -30,7 +31,7 @@ public class WorkingTimeTypeDay extends Model {
 	private static final long serialVersionUID = 4622948996966018754L;
 
 	@Required
-	@ManyToOne(optional = false)
+	@ManyToOne(optional = false, fetch=FetchType.LAZY)
 	@JoinColumn(name = "working_time_type_id", nullable = false)
 	public WorkingTimeType workingTimeType;
 	

@@ -100,6 +100,23 @@ public class Stamping extends Model implements Comparable<Stamping> {
 	 */
 	@Transient
 	public boolean exitingNow = false;
+
+	//setter implementato per yaml parser TODO toglierlo configurando snakeyaml
+	public void setDate(String date){
+		
+		//2013-10-03T19:18:00.000
+		String data = date.split("T")[0];
+		String time = date.split("T")[1];
+		//2013-10-03
+		int year = Integer.parseInt(data.split("-")[0]);
+		int month= Integer.parseInt(data.split("-")[1]);
+		int day  = Integer.parseInt(data.split("-")[2]);
+		//19:18:00.000
+		int hour = Integer.parseInt(time.split(":")[0]);
+		int min  = Integer.parseInt(time.split(":")[1]);
+		//int sec  = Integer.parseInt( (time.split(":")[2]).split(".")[0] );
+		this.date = new LocalDateTime(year,month,day,hour,min,0);
+	}
 	
 	/**
 	 * 

@@ -1,47 +1,66 @@
-#{extends 'main.html' /}
-#{logoutForm /}
+#{extends 'main_admin.html' /}
+
+#{functionalMenuForm mainMenu: mainMenu /}
 
 <h3 id="inserimentoNuovoCodiceAssenza">Modifica dati per codice di assenza: ${abt.code} (${abt.description})</h3>
 #{form @Absences.updateCode()}
 <div>
 <input type="hidden" name="absenceTypeId" value="${abt.id}"/>
-<p id="codice">Codice: <input id="absenceTypeCodice" type="text" name="codice" value="${abt.code}" disabled="disabled"/></p> 
-<p id="codice">Codice per attestati di presenza: <input id="absenceTypeCodiceSost" type="text" name="codicePresenza" value="${abt.certificateCode}" disabled="disabled"/></p></p>
-<p id="codice">Descrizione: <input id="absenceTypeDescrizione" type="text" name="descrizione" value="${abt.description}" size="100"/></p></p>
-<div id="frm">
-<p>Uso interno:
-%{	if(abt.internalUse == false){
-}%		<p id="sino">Sì <input type="radio" name="usoInterno" value="true" /> 
+<form class="form-horizontal">
+<fieldset>
+<legend>Codice di assenza</legend>
+<table class="tablenoborder">
+	<tr>
+		<td><p>Codice: </p></td>
+		<td><input type="text" name="codice" value="${abt.code}" disabled="disabled"/></td>
+	</tr>
+ 	<tr>
+ 		<td><p>Codice per attestati di presenza: </p></td>
+ 		<td><input type="text" name="codicePresenza" value="${abt.certificateCode}" disabled="disabled"/></td>
+ 	</tr>
+	<tr>
+		<td><p>Descrizione: </p></td>
+		<td><input type="text" name="descrizione" value="${abt.description}" size="100"/></td>
+	</tr>
+	<tr>
+		<td><p>Uso interno:</p></td>
+		<td>%{	if(abt.internalUse == false){
+}%		<p>Sì <input type="radio" name="usoInterno" value="true" /> 
 		No <input type="radio" name="usoInterno" value="false" checked="checked"/></p>
 %{
 	}else{
-}%		<p id="sino">Sì <input type="radio" name="usoInterno" value="true" checked="checked"/> 
+}%		<p>Sì <input type="radio" name="usoInterno" value="true" checked="checked"/> 
 		No <input type="radio" name="usoInterno" value="false"/></p>
 %{
 	}
 	
-}%
- 
-</p>
-</div>
-<div id="frm">
-<p>Uso multiplo: %{	if(abt.multipleUse == false){
-}%		<p id="sino">Sì <input type="radio" name="usoMultiplo" value="true" /> 
+}%</td>
+	</tr>
+	<tr>
+		<td><p>Uso multiplo: </p></td>
+		<td>%{	if(abt.multipleUse == false){
+}%		<p>Sì <input type="radio" name="usoMultiplo" value="true" /> 
 		No <input type="radio" name="usoMultiplo" value="false" checked="checked"/></p>
 %{
 	}else{
-}%		<p id="sino">Sì <input type="radio" name="usoMultiplo" value="true" checked="checked"/> 
+}%		<p>Sì <input type="radio" name="usoMultiplo" value="true" checked="checked"/> 
 		No <input type="radio" name="usoMultiplo" value="false"/></p>
 %{
 	}
 	
-}%
-</p>
-</div>
-<p id="codice">Inizio validita': <input id="absenceTypeInizioValidita" type="date" name="inizio" value="${abt.validFrom}" /></p>
-<p id="codice">Fine validita': <input id="absenceTypeFineValidita" type="date" name="fine" value="${abt.validTo}" /></p>
-
-<p id="codice">Tempo di lavoro giustificato: #{select 'abt.justifiedTimeAtWork', value:abt.justifiedTimeAtWork.description, id:'tempoGiustificato'}
+}%</td>
+	</tr>
+	<tr>
+		<td><p >Inizio validita': </p></td>
+		<td><input type="date" name="inizio" value="${abt.validFrom}" /></td>
+	</tr>
+	<tr>
+		<td><p >Fine validita': </p></td>
+		<td><input type="date" name="fine" value="${abt.validTo}" /></td>
+	</tr>
+	<tr>
+		<td><p id="codice">Tempo di lavoro giustificato: </p></td>
+		<td>#{select 'abt.justifiedTimeAtWork', value:abt.justifiedTimeAtWork.description}
 									#{option null}#{/option}
 									#{option justList.get(0).description}${justList.get(0).description}#{/option}
 									#{option justList.get(1).description}${justList.get(1).description}#{/option}
@@ -56,13 +75,14 @@
 									#{option justList.get(10).description}${justList.get(10).description}#{/option}
 									#{option justList.get(11).description}${justList.get(11).description}#{/option}
 									#{option justList.get(12).description}${justList.get(12).description}#{/option}								
-									#{/select}</p>
-
-<p id="livelli">Livelli: 
-			%{	for(qual in qualList){
+									#{/select}</td>
+	</tr>
+	<tr>
+		<td><p>Livelli:</p></td>
+		<td>%{	for(qual in qualList){
 				if(abt.qualifications.contains(qual)){
 				}%
-						${qual.qualification}: <input id="qualifica" type="checkbox" name="qualification${qual.qualification}" value ="si" checked="checked"/>
+						${qual.qualification}: <input type="checkbox" name="qualification${qual.qualification}" value ="si" checked="checked"/>
 				%{
 					}else{
 				}%
@@ -70,132 +90,150 @@
 				%{
 					}
 				}
-			}%		
-</p>
-
-<div id="frm">
-<p id="codice">Calcola buono pasto: %{	if(abt.mealTicketCalculation == false){
-}%		<p id="sinoBuono">Sì <input type="radio" name="calcolaBuonoPasto" value="true" /> 
+			}%</td>
+	</tr>
+	<tr>
+		<td><p>Calcola buono pasto:</p></td>
+		<td>%{	if(abt.mealTicketCalculation == false){
+}%		<p>Sì <input type="radio" name="calcolaBuonoPasto" value="true" /> 
 		No <input type="radio" name="calcolaBuonoPasto" value="false" checked="checked"/></p>
 %{
 	}else{
-}%		<p id="sinoBuono">Sì <input type="radio" name="calcolaBuonoPasto" value="true" checked="checked"/> 
+}%		<p>Sì <input type="radio" name="calcolaBuonoPasto" value="true" checked="checked"/> 
 		No <input type="radio" name="calcolaBuonoPasto" value="false"/></p>
 %{
 	}
 	
-}%
-</p>
-</div>
-<div id="frm">
-<p id="codice">Ignora timbrature: %{	if(abt.ignoreStamping == false){
-}%		<p id="sinoTimbrature">Sì <input type="radio" name="ignoraTimbrature" value="true" /> 
+}%</td>
+	</tr>
+	<tr>
+		<td><p>Ignora timbrature:</p></td>
+		<td>%{	if(abt.ignoreStamping == false){
+}%		<p>Sì <input type="radio" name="ignoraTimbrature" value="true" /> 
 		No <input type="radio" name="ignoraTimbrature" value="false" checked="checked"/></p>
 %{
 	}else{
-}%		<p id="sinoTimbrature">Sì <input type="radio" name="ignoraTimbrature" value="true" checked="checked"/> 
+}%		<p>Sì <input type="radio" name="ignoraTimbrature" value="true" checked="checked"/> 
 		No <input type="radio" name="ignoraTimbrature" value="false"/></p>
 %{
 	}
 	
-}%
-</p>
-</div>
-<p id="codice">Gruppo: 
-%{	if(abt.absenceTypeGroup != null){
-}%		<input id="gruppo" type="text" name="gruppo" value="${abt.absenceTypeGroup.label}"/>
+}%</td>
+	</tr>
+	<tr>
+		<td><p>Gruppo:</td>
+		<td>%{	if(abt.absenceTypeGroup != null){
+}%		<input type="text" name="gruppo" value="${abt.absenceTypeGroup.label}"/>
 %{
 	}else{
 }%	
-		<input id="gruppo" type="text" name="gruppo" value=""/>
+		<input type="text" name="gruppo" value=""/>
 %{
 	}
-}%
+}%</td>
+	</tr>
+</table>
+
+ 
+
 </p>
+</fieldset>
+</form>
 
-<p id="separatore">---------- i seguenti campi si riferiscono al gruppo e vanno compilati solo in presenza di un nome gruppo ---------</p>
+<fieldset>
+<legend>Da riempire in caso di gruppo valorizzato</legend>
 
+<table class="tablenoborder">
+	<tr>
+		<td><p>Minuti in eccesso:</p></td>
+		<td>%{	if(abt.absenceTypeGroup != null){
+}%		<input type="text" name="minutiEccesso" value="${abt.absenceTypeGroup.minutesExcess}"/>
+%{
+	}else{
+}%	
+		<input type="text" name="minutiEccesso" value="" disabled="disabled"/>
+%{
+	}
+}%</td>
+	</tr>
+	<tr>
+		<td><p>Accumulare i valori:</p></td>
+		<td>%{	if(abt.absenceTypeGroup != null){
+}%
+	#{select 'abt.absenceTypeGroup.accumulationType', value:abt.absenceTypeGroup.accumulationType.description}
+		#{option accType.get(0).description}${accType.get(0).description}#{/option}
+		#{option accType.get(1).description}${accType.get(1).description}#{/option}
+		#{option accType.get(2).description}${accType.get(2).description}#{/option}
+		#{option accType.get(3).description}${accType.get(3).description}#{/option}
+	#{/select}
+%{
+	}else{
+}%
+	#{select 'abt.absenceTypeGroup.accumulationType', disabled:disabled}
+		#{option accType.get(0).description}${accType.get(0).description}#{/option}
+		#{option accType.get(1).description}${accType.get(1).description}#{/option}
+		#{option accType.get(2).description}${accType.get(2).description}#{/option}
+		#{option accType.get(3).description}${accType.get(3).description}#{/option}
+	#{/select}
+%{
+	}
+}%</td>
+	</tr>
+	<tr>
+		<td><p>Limite accumulo:</p></td>
+		<td>%{	if(abt.absenceTypeGroup != null){
+}%		<input type="number" name="limiteAccumulo" value="${abt.absenceTypeGroup.limitInMinute}"/>
+%{
+	}else{
+}%	
+		<input type="number" name="limiteAccumulo" value="" disabled="disabled"/>
+%{
+	}
+}%</td>
+	</tr>
+	<tr>
+		<td><p>Cosa fare raggiunto il limite:</p></td>
+		<td>%{	if(abt.absenceTypeGroup != null){
+}%
+	#{select 'abt.absenceTypeGroup.accumulationBehaviour', value:abt.absenceTypeGroup.accumulationBehaviour.description}
+		#{option behaviourType.get(0).description}${behaviourType.get(0).description}#{/option}
+		#{option behaviourType.get(1).description}${behaviourType.get(1).description}#{/option}
+		#{option behaviourType.get(2).description}${behaviourType.get(2).description}#{/option}
+		
+	#{/select}
+%{
+	}else{
+}%
+	#{select 'abt.absenceTypeGroup.accumulationBehaviour', disabled:disabled}
+		#{option behaviourType.get(0).description}${behaviourType.get(0).description}#{/option}
+		#{option behaviourType.get(1).description}${behaviourType.get(1).description}#{/option}
+		#{option behaviourType.get(2).description}${behaviourType.get(2).description}#{/option}
+		
+	#{/select}
+%{
+	}
+}%</td>
+	</tr>
+	<tr>
+		<td><p>Codice per sostituzione:</p></td>
+		<td>%{	if(abt.absenceTypeGroup != null){
+}%		<input type="text" name="codiceSostituzione" value="${abt.absenceTypeGroup.replacingAbsenceType.code}"/>
+%{
+	}else{
+}%	
+		<input type="text" name="codiceSostituzione" value="" disabled="disabled"/>
+%{
+	}
+}%</td>
+	</tr>
+</table>
 <!--  <p>Valore:</p> -->
-<p id="codice">Minuti in eccesso: 
-%{	if(abt.absenceTypeGroup != null){
-}%		<input id="minutiEccesso" type="text" name="minutiEccesso" value="${abt.absenceTypeGroup.minutesExcess}"/>
-%{
-	}else{
-}%	
-		<input id="minutiEccesso" type="text" name="minutiEccesso" value="" disabled="disabled"/>
-%{
-	}
-}%
-</p>
-<p id="codice">Accumulare i valori:
-%{	if(abt.absenceTypeGroup != null){
-}%
-	#{select 'abt.absenceTypeGroup.accumulationType', value:abt.absenceTypeGroup.accumulationType.description, id:'tipoAccumulo'}
-		#{option accType.get(0).description}${accType.get(0).description}#{/option}
-		#{option accType.get(1).description}${accType.get(1).description}#{/option}
-		#{option accType.get(2).description}${accType.get(2).description}#{/option}
-		#{option accType.get(3).description}${accType.get(3).description}#{/option}
-	#{/select}
-%{
-	}else{
-}%
-	#{select 'abt.absenceTypeGroup.accumulationType', id:'tipoAccumulo', disabled:disabled}
-		#{option accType.get(0).description}${accType.get(0).description}#{/option}
-		#{option accType.get(1).description}${accType.get(1).description}#{/option}
-		#{option accType.get(2).description}${accType.get(2).description}#{/option}
-		#{option accType.get(3).description}${accType.get(3).description}#{/option}
-	#{/select}
-%{
-	}
-}%
-</p>
-<p id="limiteAccumulo">Limite accumulo:
-%{	if(abt.absenceTypeGroup != null){
-}%		<input id="limiteAccumulo" type="number" name="limiteAccumulo" value="${abt.absenceTypeGroup.limitInMinute}"/>
-%{
-	}else{
-}%	
-		<input id="limiteAccumulo" type="number" name="limiteAccumulo" value="" disabled="disabled"/>
-%{
-	}
-}%
-</p>
-<p id="codice">Cosa fare raggiunto il limite:
-%{	if(abt.absenceTypeGroup != null){
-}%
-	#{select 'abt.absenceTypeGroup.accumulationBehaviour', value:abt.absenceTypeGroup.accumulationBehaviour.description, id:'comportamentoAccumulo'}
-		#{option behaviourType.get(0).description}${behaviourType.get(0).description}#{/option}
-		#{option behaviourType.get(1).description}${behaviourType.get(1).description}#{/option}
-		#{option behaviourType.get(2).description}${behaviourType.get(2).description}#{/option}
-		
-	#{/select}
-%{
-	}else{
-}%
-	#{select 'abt.absenceTypeGroup.accumulationBehaviour', id:'comportamentoAccumulo', disabled:disabled}
-		#{option behaviourType.get(0).description}${behaviourType.get(0).description}#{/option}
-		#{option behaviourType.get(1).description}${behaviourType.get(1).description}#{/option}
-		#{option behaviourType.get(2).description}${behaviourType.get(2).description}#{/option}
-		
-	#{/select}
-%{
-	}
-}%
-</p>
-<p id="codiceSost">Codice per sostituzione:
-%{	if(abt.absenceTypeGroup != null){
-}%		<input id="codiceSostituzione" type="text" name="codiceSostituzione" value="${abt.absenceTypeGroup.replacingAbsenceType.code}"/>
-%{
-	}else{
-}%	
-		<input id="codiceSostituzione" type="text" name="codiceSostituzione" value="" disabled="disabled"/>
-%{
-	}
-}%
-</p>
+
+</fieldset>
 </div>
+
 <div id="frm">
-<input id="updateAbsenceCode" type="submit" value="Modifica"/>
+<input class="btn btn-primary" id="updateAbsenceCode" type="submit" value="Modifica"/>
 #{/form}
-<input id = "indietroAbsenceList" action="action" type="button" value="Indietro" onclick="history.go(-1);" />
+<input class="btn" id="indietroAbsenceList" action="action" type="button" value="Indietro" onclick="history.go(-1);" />
 </div>

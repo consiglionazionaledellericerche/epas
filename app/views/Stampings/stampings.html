@@ -7,8 +7,10 @@
 #{logoutForm /}
 
 #{functionalMenuForm mainMenu: mainMenu /} 
+<p id="annoPrecedente">Per vedere la situazione degli anni precedenti clicca <a href="http://orologio-history.iit.cnr.it" target="_blank">qui</a></p>
 <input type="hidden" name="personId" value="${personMonth.person.id}"  />
-<table id="presenze_mensili">
+<div class="span15">
+<table class="table table-bordered" id="presenze_mensili">
 	<tr>
 		<th>Buono mensa</th>
 		<th>Giorno</th>
@@ -133,106 +135,6 @@
 	}%
 
 </table>
-
-<p id="spiegazioneTabellaTimbrature">Il numero di buoni mensa usabili per questo mese e': <strong>${personMonth.numberOfMealTicketToUse()}</strong>, mentre quelli da restituire sono <strong>${personMonth.numberOfMealTicketToRender()}</strong>. Il numero di giorni lavorativi in sede è di: <strong>${personMonth.basedWorkingDays()}</strong> </p>
-
-<p> - Il numero di riposi compensativi usati fino ad oggi è: ${personMonth.numberOfCompensatoryRestUntilToday()}</p>
-<p>Riepilogo delle ore di lavoro in eccesso/difetto:</p> 
-<p> - E' possibile utilizzare il residuo dell'anno precedente? ${personMonth.possibileUtilizzareResiduoAnnoPrecedente()==true ? 'sì' : 'no'}</p>
-%{if(personMonth.residuoAnnoPrecedenteDaInizializzazione() != 0){
-}%
-<p> - Eventuale residuo da inizializzazione: ${personMonth.residuoAnnoPrecedenteDaInizializzazione().toHourTime()}</p>
-%{
-}
-}%
-%{if(personMonth.straordinari != 0){
-}%
-<p> - Straordinari: ${personMonth.straordinari / 60} ore</p>
-%{
-}
-}%
-%{if(personMonth.residuoAnnoPrecedenteDisponibileAllInizioDelMese() != 0){
-}%
-<p> - Residuo anno precedente disponibile a inizio mese: ${personMonth.residuoAnnoPrecedenteDisponibileAllInizioDelMese().toHourTime()}</p>
-%{
-}
-}%
-<p> - Residuo tempo di lavoro dei mesi precedenti: ${(situazioneParziale).toHourTime()}</p> 
-<p> - Residuo del mese:  ${personMonth.residuoDelMese().toHourTime()}</p>
-%{if(personMonth.person.qualification.qualification > 3){
-}%
-<p> - Tempo disponibile per straordinari: ${personMonth.tempoDisponibilePerStraordinari().toHourTime()}</p>
-%{
-}
-}%
-<p> - Totale residuo anno corrente a fine mese:  ${personMonth.totaleResiduoAnnoCorrenteAFineMese().toHourTime()}</p>
-%{if(personMonth.getCompensatoryRest() != 0 ){
-}%
-<p> - Giorni di riposo compensativo: ${personMonth.getCompensatoryRest()} per un totale di: -${personMonth.getCompensatoryRestInMinutes().toHourTime()} ore</p>
-%{
-}
-}%
-<p> - Totale residuo a fine mese  <strong>${totaleResiduo.toHourTime()} ore</strong></p>
-<p> - Totale residuo del mese + residuo mesi precedenti: <strong>${totale.toHourTime()}</strong> ore</p>
-
-
-
-*{Significato codici assenza}*
-<div>
-<h3 align="left">Note:</h3>
-<table id="Note timbrature">
-	<tr>
-		<th width="80">Codice timbratura</th>
-		<th width="400">Descrizione</th>
-			
-	</tr>
-	%{
-     for(smt in stampModificationTypeList) {
-	}%
-		<tr>
-			<td>${smt.code}</td>     
-			<td>${smt.description}</td>		
-		</tr>
-	
-	%{  		   
-     }
-     
-	}%
-	%{
-	for(type in stampTypeList) 
-	{
-	}%
-		<tr>
-			<td>${type.identifier}</td>
-			<td>${type.description}</td>
-		</tr>
-	%{  		   
-    }
-    }%
-</table>
-
-<br>
-<br>
-<h3 align="left">Tabella codici di assenza</h3>
-<table id="Codici di assenza">
-	<tr>
-		<th width="80">Codice assenza</th>
-		<th width="200">Descrizione</th>
-		<th width="80">Numero giorni</th>
-			
-	</tr>
-%{
-     for(entry in personMonth.getAbsenceCode().entrySet()) {
-}%
-	<tr>
-		<td>${entry.getKey().code}</td>     
-		<td>${entry.getKey().description}</td>	
-		<td>${entry.getValue()}</td>	
-	</tr>
-
-%{  		   
-     }
-     
-}%
-</table>
 </div>
+
+#{include './_riepilogoRiassuntivoMese.html' /}

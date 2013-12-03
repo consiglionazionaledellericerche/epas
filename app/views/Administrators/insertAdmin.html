@@ -1,5 +1,6 @@
-#{extends 'main.html' /}
+#{extends 'main_admin.html' /}
 
+#{functionalMenuForm mainMenu: mainMenu /}
 <h2 id="nuovoAdmin">Inserimento dati per nuovo amministratore</h2>
 
 #{form @Administrators.save()}
@@ -30,12 +31,12 @@
 	<p>Può caricare le situazioni del personale: Sì <input type="radio" name="uploadSituation" value="true"/> No <input type="radio" name="uploadSituation" value="false"/> 
 </fieldset>
 <div id="frm">
-<input id="insertAdmin" type="submit" value="Ok"/>
+<input class="btn btn-primary" id="insertAdmin" type="submit" value="Ok"/>
 
 #{/form}
 
 #{form @Administrators.discard()}
-<input id="discardAdmin" type="submit" value="Annulla"/>
+<input class="btn" id="discardAdmin" type="submit" value="Annulla"/>
 
 #{/form}
 </div>

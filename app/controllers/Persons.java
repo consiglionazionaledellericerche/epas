@@ -440,6 +440,12 @@ public class Persons extends Controller {
 		
 		InitializationTime initTime = InitializationTime.find("Select init from InitializationTime init where init.person = ?", person).first();
 		
+		if(!params.get("name").equals(person.name))
+			person.name = params.get("name");
+		
+		if(!params.get("surname").equals(person.surname))
+			person.surname = params.get("surname");
+		
 		if(!person.badgeNumber.equals(params.get("badgeNumber")))
 			person.badgeNumber = params.get("badgeNumber");
 		

@@ -1,12 +1,12 @@
 #{extends 'main_admin.html' /}
 
 #{functionalMenuForm mainMenu: mainMenu /}
-
+<div class="container">
 <h2 id="titoloGestisciCodiceCompetenza">Gestione Codici competenze</h2>
 
-<p id="nuovoCodiceCompetenza"><a href="@{Competences.insertCompetenceCode}">Nuovo codice competenza</a></p>
-
-<table id="tabellaCodiciCompetenza">
+<p class="lead" id="nuovoCodiceCompetenza"><a href="@{Competences.insertCompetenceCode}" class="popup_window_mini">Nuovo codice competenza</a></p>
+<div class="span10">
+<table class="table table-striped" id="tabellaCodiciCompetenza">
 	<tr>
 		<th>Codice</th>
 		<th>Codice per attestato di presenza</th>
@@ -16,7 +16,7 @@
 	%{ for(compCode in compCodeList){
 	}%
 	<tr>
-		<td><a href="@{Competences.edit(compCode.id)}">${compCode.code}</a></td>
+		<td><a href="@{Competences.edit(compCode.id)}" class="popup_window_mini">${compCode.code}</a></td>
 		<td>${compCode.codeToPresence}</td>
 		<td>${compCode.description}</td>
 		<td>${compCode.inactive}</td>
@@ -26,3 +26,5 @@
 	}%
 
 </table>
+</div>
+</div>

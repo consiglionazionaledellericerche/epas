@@ -16,20 +16,22 @@ import models.WorkingTimeTypeDay;
 import play.Logger;
 import play.data.validation.Required;
 import play.mvc.Controller;
+import play.mvc.With;
 
+@With( {Secure.class, NavigationMenu.class} )
 public class WorkingTimes extends Controller{
 
-	private final static ActionMenuItem actionMenuItem = ActionMenuItem.manageWorkingTime;
+	//private final static ActionMenuItem actionMenuItem = ActionMenuItem.manageWorkingTime;
 	/**
 	 * ritorna la lista dei workingTimeType da cui posso accedere ai workingTimeTypeDays per le caratteristiche che devo evidenziare
 	 * nella view
 	 */
 	@Check(Security.INSERT_AND_UPDATE_WORKINGTIME)
 	public static void manageWorkingTime(){
-		String menuItem = actionMenuItem.toString();
+	//	String menuItem = actionMenuItem.toString();
 		List<WorkingTimeType> wttList = WorkingTimeType.findAll();
 		
-		render(wttList,menuItem);
+		render(wttList);
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_WORKINGTIME)

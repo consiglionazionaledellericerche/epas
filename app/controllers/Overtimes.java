@@ -11,11 +11,11 @@ import com.google.common.collect.TreeBasedTable;
 
 
 
+
 import play.Logger;
 import play.data.binding.As;
 import play.db.jpa.JPA;
 import play.mvc.Controller;
-
 import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
 import it.cnr.iit.epas.JsonRequestedOvertimeBinder;
@@ -27,17 +27,18 @@ import java.util.List;
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
+import models.InitializationTime;
 import models.Person;
 import models.PersonHourForOvertime;
-import models.PersonMonth;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
-
 import models.exports.OvertimesData;
 import models.exports.PersonsCompetences;
 import models.exports.PersonsList;
 import models.exports.ReperibilityPeriod;
 import models.exports.ReperibilityPeriods;
+import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
+import models.personalMonthSituation.Mese;
 import models.PersonTags;
 
 
@@ -51,7 +52,6 @@ import models.PersonTags;
 public class Overtimes extends Controller {
 	
 	/*
-	 * keeps person overtimes: 
 	 * (residuo del mese, totale residuo anno precedente, tempo disponibile x straordinario)
 	 * 
 	 */
@@ -74,14 +74,24 @@ public class Overtimes extends Controller {
 		Logger.debug("Find persons %s with email %s", person.name, email);
 		
 
-		PersonMonth personMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", person, month, year).first();
-		if(personMonth == null)
-			personMonth = new PersonMonth(person, year, month);
+//		PersonMonth personMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", person, month, year).first();
+//		if(personMonth == null)
+//			personMonth = new PersonMonth(person, year, month);
 		
-		/*OvertimesData personOvertimesData = new OvertimesData(PersonTags.toHourTime(new Integer(personMonth.totaleResiduoAnnoCorrenteAFineMese())), PersonTags.toHourTime(new Integer(personMonth.residuoDelMese())), PersonTags.toHourTime(new Integer(personMonth.tempoDisponibilePerStraordinari())));*/
-		OvertimesData personOvertimesData = new OvertimesData(personMonth.totaleResiduoAnnoCorrenteAFineMese(), personMonth.residuoDelMese(), personMonth.tempoDisponibilePerStraordinari());
-		Logger.debug("Trovato totaleResiduoAnnoCorrenteAFineMese=%s, residuoDelMese()=%s, tempoDisponibilePerStraordinari()=%s", personMonth.totaleResiduoAnnoCorrenteAFineMese(), personMonth.residuoDelMese(), personMonth.tempoDisponibilePerStraordinari());
+		/*OvertimesData personOvertimesData = new OvertimesData(PersonTags.toHourTime(new Integer(personMonth.totaleResiduoAnnoCorrenteAFineMese())), PersonTags.toHourTime(new Integer(personMonth.residuoDelMese())), PersonTags.toHourTime(new Integer(personMonth.tempoDisponibilePerStraordinari())));*/		
+		/* temporaneamente tutti i dati vengono presi dalle nuove classi CalcoloSituazioneAnnualePersona e Mese */
+		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, 2013, null);
+		Mese mese = c.getMese(year, month);
 		
+		int totaleResiduoAnnoCorrenteAFineMese = mese.monteOreAnnoCorrente;
+		int residuoDelMese = mese.progressivoFinaleMese;
+		int tempoDisponibilePerStraordinari = mese.progressivoFinalePositivoMese;
+
+		//OvertimesData personOvertimesData = new OvertimesData(personMonth.totaleResiduoAnnoCorrenteAFineMese(), personMonth.residuoDelMese(), personMonth.tempoDisponibilePerStraordinari());
+		//Logger.debug("Trovato totaleResiduoAnnoCorrenteAFineMese=%s, residuoDelMese()=%s, tempoDisponibilePerStraordinari()=%s", personMonth.totaleResiduoAnnoCorrenteAFineMese(), personMonth.residuoDelMese(), personMonth.tempoDisponibilePerStraordinari());
+		OvertimesData personOvertimesData = new OvertimesData(totaleResiduoAnnoCorrenteAFineMese, residuoDelMese, tempoDisponibilePerStraordinari);
+		Logger.debug("Trovato totaleResiduoAnnoCorrenteAFineMese=%s, residuoDelMese()=%s, tempoDisponibilePerStraordinari()=%s", totaleResiduoAnnoCorrenteAFineMese, residuoDelMese, tempoDisponibilePerStraordinari);
+
 		render(personOvertimesData);
 		
 	}
