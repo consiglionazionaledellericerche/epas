@@ -234,15 +234,19 @@ public class PersonMonth extends Model {
 	 * @param numberOfCompensatoryRest
 	 * @return il numero di minuti corrispondenti al numero di riposi compensativi
 	 */
-	public int getCompensatoryRestInMinutes(){
-		LocalDate begin = new LocalDate(year, month, 1);
-		LocalDate end = new LocalDate(year, month, begin.dayOfMonth().withMaximumValue().getDayOfMonth());
-		Query query = JPA.em().createQuery("Select abs from Absence abs where abs.personDay.person = :person and abs.personDay.date between :begin and :end" +
-				" and abs.absenceType.code = :code").setParameter("person", this.person).setParameter("begin", begin).setParameter("end", end)
-				.setParameter("code", "91");
-		List<Object> resultList = query.getResultList();
-		return resultList.size() * person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime;
-	}
+//	public int getCompensatoryRestInMinutes(){
+//		int minutes;
+//		LocalDate begin = new LocalDate(year, month, 1);
+//		LocalDate end = new LocalDate(year, month, begin.dayOfMonth().withMaximumValue().getDayOfMonth());
+//		Query query = JPA.em().createQuery("Select abs from Absence abs where abs.personDay.person = :person and abs.personDay.date between :begin and :end" +
+//				" and abs.absenceType.code = :code").setParameter("person", this.person).setParameter("begin", begin).setParameter("end", end)
+//				.setParameter("code", "91");
+//		List<Absence> resultList = query.getResultList();
+//		for(Absence abs : resultList){
+//			
+//		}
+//		return resultList.size() * person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime;
+//	}
 	/**
 	 * 
 	 * @return il numero massimo di coppie di colonne ingresso/uscita ricavato dal numero di timbrature di ingresso e di uscita di quella
@@ -1022,7 +1026,7 @@ public class PersonMonth extends Model {
 	 */
 	public int minutiRiposoCompensativo(LocalDate date) {
 		//Cambia in funzione del tipo di orario di lavoro
-		return - person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime;
+		return - person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime;
 
 	}
 

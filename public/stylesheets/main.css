@@ -346,7 +346,7 @@ h3#titoloSituazionePresenzeMensili {text-align: center}
 h2#titoloConfigurazioneParametri {text-align: center}
 h2#titoloTotaleAssenzeMensili {margin: 2em 0em 1em; text-align: center}
 h2#inserimentoNuovoCodiceAssenza {text-align: center}
-h2#titoloGestioneStraordinariCompetenze {margin: 2em; text-align: center}
+h2#titoloGestioneStraordinariCompetenze {margin: 2em 0em 2em; text-align: center}
 h2#titoloControllaTimbratureMancanti {text-align: center}
 h2#titoloInserimentoTipoFerie {text-align: center}
 h2#titoloModificaTipoFerie {text-align: center}
@@ -356,7 +356,7 @@ h2#titoloGestisciCodiceCompetenza {text-align: center}
 h2#titoloInserisciCodiceCompetenza {text-align: center}
 h2#titoloGestioneCodiciAssenza {text-align: center}
 
-h3#titoloGestioneCompetenze {margin: 2em 0em 0em; text-align: left}
+h3#titoloGestioneCompetenze {margin: 2em 0em 2em; text-align: center}
 h3#titoloGestioneParametri {margin: 2em 0em 2em; text-align: center}
 h3#gestioneUtenteAmministrativo {margin: 2em 0em 2em; text-align: center}
 h3#gestioneConfigurazioneParametri {text-align: center}
@@ -399,8 +399,8 @@ input#submitCartellino {margin: 2em 1em 0em; align: center}
 input#indietroCartellino {margin: 2em 3em 0em; align: center}
 input#insertAdmin {margin: 2em 45em 6em}
 input#discardAdmin {margin:2em -15em 6em}
-input#insertCompetenceCode {margin: 2em 3em 0em 60em; align: center}
-input#discardCompetenceCode {margin: 0em 3em 0em; align: center}
+input#insertCompetenceCode {margin: 2em 25em 6em; align: center}
+
 input#updateAbsenceCode {margin: 2em 50em 0em; align:center}
 input#indietroAbsenceList {margin: 2em -32em 0em; align:center}
 
@@ -416,17 +416,17 @@ p#annoPrecedente {margin: 5em 50em 5em}
 
 input#submitNuovoCodiceAssenza {margin: 2em 60em 0em; align: center}
 input#discardNuovoCodiceAssenza {margin: 1em 60em 0em; align: center}
-input#submitEditPerson {margin: 2em 3em 0em 55em; align: center}
-input#discardEditPerson {margin: 0em 3em -2em; align: center}
+input#submitEditPerson {margin: 2em 20em 0em; align: center}
+input#discardEditPerson {margin: 2em -4em 0em; align: center}
 input#deletePerson {margin: 0em 3em -2em; align: center}
 input#modificaContratto {margin: 1em 25em 0em; align: center}
 input#submitSituation {margin: 2em 67em 0em; align: center}
 input#indietro {margin: 2em 67em 0em; align: center}
 input#submitStampingClock {margin: 0em 70em 0em; align: center}
 input#saveCompetence {margin: 1em 67em 0em; align: center}
-input#salvaVacationCode {margin: 3em 2em 0em 10em}
-input#annullaVacationCode {margin: 3em 2em 0em 10em}
-input#inserisciAssenza {margin: 1em 33em 0em; align: center}
+input#salvaVacationCode {margin: 4em 25em 6em}
+
+input#inserisciAssenza {margin: 1em 15em 0em; align: center}
 input#updateWorkingTime {margin: 2em 3em 0em 65em; align: center}
 input#insertWorkingTime {margin: 25em -4em 15em; align: center}
 input#submitContractPerson {margin: 2em 25em 0em; align:center}

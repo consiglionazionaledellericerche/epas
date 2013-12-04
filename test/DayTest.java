@@ -114,9 +114,9 @@ public class DayTest extends UnitTest{
 		long id = 1;
 		Person person = Person.findById(id);
 		assertNotNull(person);
-		assertNotNull(person.workingTimeType);
-		assertEquals(WorkingTimeType.findById(id), person.workingTimeType);
-		System.out.println("La persona con id " +id+ "ha la seguente tipologia di lavoro: " + person.workingTimeType.description);
+		assertNotNull(person.getCurrentWorkingTimeType());
+		assertEquals(WorkingTimeType.findById(id), person.getCurrentWorkingTimeType());
+		System.out.println("La persona con id " +id+ "ha la seguente tipologia di lavoro: " + person.getCurrentWorkingTimeType().description);
 
 		PersonDay giorno = new PersonDay(person, datao);
 //		List<Stamping> timbrature = new ArrayList<Stamping>();
