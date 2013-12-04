@@ -869,7 +869,7 @@ public class PersonUtility {
 
 		if(pd!=null)
 		{
-			checkForPersonDayInTrouble(pd, personToCheck); 
+			pd.checkForPersonDayInTrouble(); 
 			return;
 		}
 		else
@@ -887,77 +887,14 @@ public class PersonUtility {
 			pd.create();
 			pd.populatePersonDay();
 			pd.save();
-			checkForPersonDayInTrouble(pd, personToCheck);
+			pd.checkForPersonDayInTrouble();
 			return;
 		}
 	}
 	
-	/**
-	 * Verifica che nel person day vi sia una situazione coerente di timbrature. Situazioni errate si verificano nei casi 
-	 *  (1) che vi sia almeno una timbratura non accoppiata logicamente con nessun'altra timbratura 
-	 * 	(2) che le persone not fixed non presentino ne' assenze AllDay ne' timbrature. 
-	 * In caso di situazione errata viene aggiunto un record nella tabella PersonDayInTrouble.
-	 * Se il PersonDay era presente nella tabella PersonDayInTroubled ed è stato fixato, viene settato a true il campo
-	 * fixed.
-	 * @param pd
-	 * @param person
-	 */
-	private static void checkForPersonDayInTrouble(PersonDay pd, Person person)
-	{
-		//persona fixed
-		StampModificationType smt = pd.getFixedWorkingTime();
-		if(smt !=null)
-		{
-			if(pd.stampings.size()!=0)
-			{
-				pd.computeValidStampings();
-				for(Stamping s : pd.stampings)
-				{
-					if(!s.valid)
-					{
-						insertPersonDayInTrouble(pd, "timbratura disaccoppiata");
-						return;
-					}
-				}
-			}			
-		}
-		//persona not fixed
-		else
-		{
-			if(!pd.isAllDayAbsences() && pd.stampings.size()==0)
-			{
-				//TODO questo e' un controllo aggiuntivo in quanto in teoria i person day senza assenze e timbrature nei giorni di festa 
-				//non dovrebbero esistere ma nel database attuale a volte sono presenti e persistiti. Cancellarli e togliere questo controllo
-				if(!pd.isHoliday())	
-				{
-					insertPersonDayInTrouble(pd, "no assenze giornaliere e no timbrature");
-				}
-				return;
-			}
-			pd.computeValidStampings();
-			for(Stamping s : pd.stampings)
-			{
-				if(!s.valid)
-				{
-					insertPersonDayInTrouble(pd, "timbratura disaccoppiata");
-					return;
-				}
-			}
-		}
-		//giorno senza problemi, se era in trouble lo fixo
-		if(pd.troubles!=null && pd.troubles.size()>0)
-		{
-			for(PersonDayInTrouble pdt : pd.troubles)
-			{
-				Logger.info("Il problema %s %s %s e' risultato fixato", pd.date, pd.person.surname, pd.person.name);
-				pdt.fixed = true;
-				pdt.save();
-				
-			}
-		}
-	}
 	
-	private static void insertPersonDayInTrouble(PersonDay pd, String cause)
+	
+	public static void insertPersonDayInTrouble(PersonDay pd, String cause)
 	{
 		PersonDayInTrouble pdt = PersonDayInTrouble.find("Select pdt from PersonDayInTrouble pdt where pdt.personDay = ?", pd).first();
 		if(pdt==null)
