@@ -379,6 +379,8 @@ public class Person extends Model {
 		
 		return monthContracts;
 	}
+	
+	
 
 	/**
 	 * 
@@ -685,7 +687,7 @@ public class Person extends Model {
 	
 	/**
 	 * @param code
-	 * @return
+	 * @return la competenza di quella persona nell'anno year e nel mese month con il codice competenza code
 	 */
 	public Competence competence(final CompetenceCode code, final int year, final int month) {
 		if (competenceCode.contains(code)) {
@@ -704,7 +706,24 @@ public class Person extends Model {
 			return null;
 		}
 	}
-		
+	
+	/**
+	 * 
+	 * @param code
+	 * @param month
+	 * @param year
+	 * @return il totale per quel mese e quell'anno di ore/giorni relativi a quel codice competenza
+	 */
+	public int totalFromCompetenceCode(CompetenceCode code, int month, int year){
+		int totale = 0;
+		List<Competence> compList = Competence.find("Select comp from Competence comp where comp.competenceCode = ? " +
+				"and comp.month = ? and comp.year = ?", code, month, year).fetch();
+		for(Competence comp : compList){
+			totale = totale+comp.valueApproved;
+		}
+		return totale;
+	}
+	
 	/**
 	 * 
 	 * @return se è attiva la reperibilità nei giorni lavorativi
