@@ -691,8 +691,8 @@ public class PersonDay extends Model {
 			this.isTicketAvailable = this.isTicketAvailable && checkTicketAvailableForWorkingTime();
 		merge();
 
-		if(this.date.isBefore(new LocalDate()))
-			this.checkForPersonDayInTrouble();
+		//if(this.date.isBefore(new LocalDate()))
+			//this.checkForPersonDayInTrouble();
 	}
 	
 	/**
