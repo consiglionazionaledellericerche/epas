@@ -171,7 +171,8 @@ public class PersonDay extends Model {
 		{
 			return true;
 		}
-		if(this.person.workingTimeType.workingTimeTypeDays.get(this.date.getDayOfWeek()-1).holiday)
+		//if(this.person.workingTimeType.workingTimeTypeDays.get(this.date.getDayOfWeek()-1).holiday)
+		if(this.person.getWorkingTimeType(this.date).workingTimeTypeDays.get(this.date.getDayOfWeek()-1).holiday)
 		{
 			return true;
 		}
@@ -785,7 +786,7 @@ public class PersonDay extends Model {
 	 */
 	public WorkingTimeTypeDay getWorkingTimeTypeDay(){
 		int day = date.getDayOfWeek();
-		WorkingTimeType wtt = person.workingTimeType;
+		WorkingTimeType wtt = person.getWorkingTimeType(date);
 		if (wtt == null)
 			throw new IllegalStateException(String.format("Person %s has no working time type set", person));
 		for(WorkingTimeTypeDay wttd : wtt.workingTimeTypeDays){
@@ -824,9 +825,9 @@ public class PersonDay extends Model {
 	 * @return 
 	 */
 	private boolean checkTicketAvailableForWorkingTime(){
-		
-		if(person.workingTimeType.description.equals("normale-mod") || person.workingTimeType.description.equals("normale")
-				|| person.workingTimeType.description.equals("80%") || person.workingTimeType.description.equals("85%"))
+		WorkingTimeType wtt = person.getWorkingTimeType(date);
+		if(wtt.description.equals("normale-mod") || wtt.description.equals("normale")
+				|| wtt.description.equals("80%") || wtt.description.equals("85%"))
 		{
 			return true;
 		}
@@ -849,7 +850,8 @@ public class PersonDay extends Model {
 		
 		StampProfile stampProfile = getStampProfile();
 				
-		int worktime = this.person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(this.date.getDayOfWeek()).workingTime;
+		//int worktime = this.person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(this.date.getDayOfWeek()).workingTime;
+		int worktime = this.person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(this.date.getDayOfWeek()).workingTime;
 		
 		//persona fixed
 		if(stampProfile != null && stampProfile.fixedWorkingTime && timeAtWork == 0){

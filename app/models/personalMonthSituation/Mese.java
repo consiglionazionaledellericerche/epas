@@ -13,7 +13,7 @@ import models.PersonDay;
 public class Mese {
 
 	public Person person;
-	public int workingTime;
+//	public int workingTime;
 	public int qualifica;
 	public Mese mesePrecedente;
 	public int anno;
@@ -42,12 +42,13 @@ public class Mese {
 	
 	public int monteOreAnnoPassato;
 	public int monteOreAnnoCorrente;
+	public int numeroRiposiCompensativi;
 	
 	public Mese(Mese mesePrecedente, int anno, int mese, Person person, int tempoInizializzazione, boolean febmar, LocalDate calcolaFinoA)
 	{
 		
 		this.person = person;
-		this.workingTime = this.person.workingTimeType.workingTimeTypeDays.get(1).workingTime;
+		//this.workingTime = this.person.workingTimeType.workingTimeTypeDays.get(1).workingTime;
 		this.qualifica = person.qualification.qualification;
 		this.anno = anno;
 		this.mese = mese;
@@ -213,8 +214,13 @@ public class Mese {
 		
 		List<Absence> riposiCompensativi = Absence.find("Select abs from Absence abs, AbsenceType abt, PersonDay pd where abs.personDay = pd and abs.absenceType = abt and abt.code = ? and pd.person = ? "
 				+ "and pd.date between ? and ?", "91", this.person, monthBegin, monthEnd).fetch();
-		
-		this.riposiCompensativiMinuti = riposiCompensativi.size() * this.workingTime;
+		this.riposiCompensativiMinuti = 0;
+		this.numeroRiposiCompensativi = 0;
+		for(Absence abs : riposiCompensativi){
+			this.riposiCompensativiMinuti = this.riposiCompensativiMinuti + this.person.getWorkingTimeType(abs.personDay.date).getWorkingTimeTypeDayFromDayOfWeek(abs.personDay.date.getDayOfWeek()).workingTime;
+			this.numeroRiposiCompensativi++;
+		}
+		//this.riposiCompensativiMinuti = riposiCompensativi.size() * this.workingTime;
 		//this.riposiCompensativiMinuti = pm.riposiCompensativiDaAnnoCorrente + pm.riposiCompensativiDaAnnoPrecedente;
 	}
 	
@@ -295,6 +301,8 @@ public class Mese {
 		this.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese = this.riposiCompensativiMinuti;
 	
 	}
+	
+	
 	
 }
 

@@ -27,6 +27,7 @@ import models.Person;
 import models.PersonDay;
 import models.PersonMonth;
 import models.PersonReperibility;
+import models.PersonWorkingTimeType;
 import models.PersonYear;
 import models.Qualification;
 import models.StampModificationType;
@@ -728,7 +729,15 @@ public class FromMysqlToPostgres {
 			//Non c'è nessun orario di lavoro impostato per la Persona quindi impostiamo l'orario predefinito che è il normale-mod
 			wtt = WorkingTimeType.em().getReference(WorkingTimeType.class, WorkingTimeTypeValues.NORMALE_MOD.getId());
 		}
-		person.workingTimeType = wtt;
+		//person.workingTimeType = wtt;
+		Contract c = person.getCurrentContract();
+		PersonWorkingTimeType pwtt = new PersonWorkingTimeType();
+		pwtt.person = person;
+		pwtt.workingTimeType = wtt;
+		pwtt.beginDate = c.beginContract;
+		pwtt.endDate = c.expireContract;
+		pwtt.save();
+		person.personWorkingTimeType.add(pwtt);
 		person.save();
 		Logger.info("Assegnato %s a %s. Il tipo di orario ha questi giorni impostati %s", wtt, person, wtt.workingTimeTypeDays);
 	}

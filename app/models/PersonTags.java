@@ -55,10 +55,10 @@ public class PersonTags extends JavaExtensions {
 		return "-" + toHourTime(minutes);
 	}
 	
-	public static String convertIntToHour(int numberOfCompensatoryRest, Person person){
-		int timeAtWork = person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime;
-		return toHourTime(numberOfCompensatoryRest*timeAtWork);
-	}
+//	public static String convertIntToHour(int numberOfCompensatoryRest, Person person){
+//		int timeAtWork = person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime;
+//		return toHourTime(numberOfCompensatoryRest*timeAtWork);
+//	}
 	
 	public static String toHour(Integer minutes){
 		int hour = Math.abs((int)minutes/60);

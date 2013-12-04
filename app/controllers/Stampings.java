@@ -180,7 +180,7 @@ public class Stampings extends Controller {
 		int totale = personMonth.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese();
 
 		int compensatoryRest = personMonth.getCompensatoryRest();
-		int compensatoryRestInMinutes = personMonth.getCompensatoryRestInMinutes();
+//		int compensatoryRestInMinutes = personMonth.getCompensatoryRestInMinutes();
 
 		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, 2013, null);
 		Mese mese = c.getMese(year, month);
@@ -189,7 +189,7 @@ public class Stampings extends Controller {
 		//render
 		render(personMonth, numberOfInOut, numberOfCompensatoryRestUntilToday, numberOfCompensatoryRest, numberOfMealTicketToUse,numberOfMealTicketToRender,
 				daysRecap, stampModificationTypeList, stampTypeList, totale, possibileUtilizzareResiduoAnnoPrecedente,
-				tempoDisponibilePerStraordinari,residuoAlMesePrecedente, compensatoryRestInMinutes,residuoAnnoPrecedenteDaInizializzazione, compensatoryRest,straordinari, residuoDelMese, mese);
+				tempoDisponibilePerStraordinari,residuoAlMesePrecedente, /*compensatoryRestInMinutes,*/residuoAnnoPrecedenteDaInizializzazione, compensatoryRest,straordinari, residuoDelMese, mese);
 
 	}
 
@@ -308,7 +308,7 @@ public class Stampings extends Controller {
 		int totale = personMonth.totaleResiduoAnnoCorrenteAFineMese();
 
 		int compensatoryRest = personMonth.getCompensatoryRest();
-		int compensatoryRestInMinutes = personMonth.getCompensatoryRestInMinutes();
+//		int compensatoryRestInMinutes = personMonth.getCompensatoryRestInMinutes();
 
 		//Totale residuo a fine mese  totaleResiduo.toHourTime() ore
 
@@ -318,7 +318,7 @@ public class Stampings extends Controller {
 		//render
 		render(personMonth, numberOfInOut, numberOfCompensatoryRestUntilToday, numberOfCompensatoryRest, numberOfMealTicketToUse, numberOfMealTicketToRender,
 				daysRecap, stampModificationTypeList, stampTypeList, totale, possibileUtilizzareResiduoAnnoPrecedente,
-				tempoDisponibilePerStraordinari,residuoAlMesePrecedente, compensatoryRestInMinutes,residuoAnnoPrecedenteDaInizializzazione, compensatoryRest,straordinari, residuoDelMese, mese);
+				tempoDisponibilePerStraordinari,residuoAlMesePrecedente, /*compensatoryRestInMinutes, */residuoAnnoPrecedenteDaInizializzazione, compensatoryRest,straordinari, residuoDelMese, mese);
 
 
 	}
@@ -386,7 +386,8 @@ public class Stampings extends Controller {
 		}
 
 		if(params.get("timeAtWork", Boolean.class) == true){
-			pd.timeAtWork = person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(new LocalDate(year, month, day).getDayOfWeek()).workingTime;
+			//pd.timeAtWork = person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(new LocalDate(year, month, day).getDayOfWeek()).workingTime;
+			pd.timeAtWork = person.getWorkingTimeType(new LocalDate(year,month,day)).getWorkingTimeTypeDayFromDayOfWeek(new LocalDate(year, month, day).getDayOfWeek()).workingTime;
 			pd.save();
 			pd.populatePersonDay();
 			pd.save();

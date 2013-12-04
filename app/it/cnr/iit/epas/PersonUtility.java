@@ -774,8 +774,8 @@ public class PersonUtility {
 			date = date.minusDays(1);
 		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, date.getYear(), date);
 		Mese mese = c.getMese(date.getYear(), date.getMonthOfYear());
-		Logger.info("monteOreAnnoCorrente=%s ,  monteOreAnnoPassato=%s, workingTime=%s", mese.monteOreAnnoCorrente, mese.monteOreAnnoPassato, mese.workingTime);
-		if(mese.monteOreAnnoCorrente + mese.monteOreAnnoPassato > mese.workingTime)
+		Logger.info("monteOreAnnoCorrente=%s ,  monteOreAnnoPassato=%s, workingTime=%s", mese.monteOreAnnoCorrente, mese.monteOreAnnoPassato, mese.person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime);
+		if(mese.monteOreAnnoCorrente + mese.monteOreAnnoPassato > mese.person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime)
 		{
 			Logger.info("decido si");
 			return true;
@@ -878,7 +878,8 @@ public class PersonUtility {
 			{
 				return;
 			}
-			if(personToCheck.workingTimeType.workingTimeTypeDays.get(dayToCheck.getDayOfWeek()-1).holiday)
+			//if(personToCheck.workingTimeType.workingTimeTypeDays.get(dayToCheck.getDayOfWeek()-1).holiday)
+			if(personToCheck.getWorkingTimeType(dayToCheck).workingTimeTypeDays.get(dayToCheck.getDayOfWeek()-1).holiday)
 			{
 				return;
 			}

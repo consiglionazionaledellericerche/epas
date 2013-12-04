@@ -71,6 +71,8 @@ public class PersonStampingDayRecap {
 			previousProgressive = 0;
 		else
 			previousProgressive = pd.previousPersonDay().progressive;
+		WorkingTimeType wtt = pd.person.getWorkingTimeType(pd.date);
+		int workingTime = this.person.getWorkingTimeType(pd.date).getWorkingTimeTypeDayFromDayOfWeek(pd.date.getDayOfWeek()).workingTime;
 		//----------------------------------------------- fixed:  worktime, difference, progressive, p---------------------------------
 		StampModificationType smt = pd.getFixedWorkingTime();
 		if(smt !=null)
@@ -100,13 +102,13 @@ public class PersonStampingDayRecap {
 			if(pd.absences.size() == 0)
 			{
 				int dif = 0;
-				if(pd.person.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek()).workingTime > temporaryWorkTime)
+				if(workingTime > temporaryWorkTime)
 				{
-					dif = - (this.person.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek()).workingTime - temporaryWorkTime);
+					dif = - (workingTime - temporaryWorkTime);
 				}
 				else
 				{
-					dif = temporaryWorkTime - this.person.workingTimeType.workingTimeTypeDays.get(date.getDayOfWeek()).workingTime;
+					dif = temporaryWorkTime - workingTime;
 				}
 				this.setDifference( dif );
 				
@@ -179,7 +181,7 @@ public class PersonStampingDayRecap {
 			addStampModificationTypeToList(smt);
 		}
 		//------------------------------------------------description work time type ----------------------------------------------------
-		WorkingTimeType wtt = pd.person.workingTimeType;
+		
 		if(wtt!=null)
 		{
 			this.workingTimeTypeDescription = wtt.description; 

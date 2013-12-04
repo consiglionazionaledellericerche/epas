@@ -113,9 +113,9 @@ public class ModelTest extends UnitTest {
 		Person p = Person.find("name = ?", "Cristian").first();
 		assertEquals("Lucchesi", p.surname);
 		
-		assertEquals("normal", p.workingTimeType.description);
+		assertEquals("normal", p.getCurrentWorkingTimeType().description);
 		
-		for(WorkingTimeTypeDay wttd : p.workingTimeType.workingTimeTypeDays) {
+		for(WorkingTimeTypeDay wttd : p.getCurrentWorkingTimeType().workingTimeTypeDays) {
 			Logger.info("WorkingTimeTypeDay = %s", wttd);
 		}
 		

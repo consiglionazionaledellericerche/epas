@@ -24,6 +24,7 @@ import play.Play;
  * @author alessandro
  *
  */
+@Deprecated
 public class EfficientPersonDay {
 	private static Connection connection = null;
 	
@@ -66,7 +67,8 @@ public class EfficientPersonDay {
 							Play.configuration.getProperty("db.new.password"));
 		}
 
-		List<WorkingTimeTypeDay> personWttd = person.workingTimeType.workingTimeTypeDays;
+		//List<WorkingTimeTypeDay> personWttd = person.workingTimeType.workingTimeTypeDays;
+		List<WorkingTimeTypeDay> personWttd = null;
 	
 		List<EfficientPersonDay> personDayRsList = new ArrayList<EfficientPersonDay>();
 		EfficientPersonDay actualPersonDayRs = null;
