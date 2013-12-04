@@ -524,7 +524,7 @@ public class Person extends Model {
 	
 	/**
 	 *  La lista delle persone che abbiano almeno un giorno lavorativo coperto da contratto nel mese month
-	 *  ordinate per id
+	 *  ordinate per nome
 	 * @param month
 	 * @param year
 	 * @return
