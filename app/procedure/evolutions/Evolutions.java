@@ -98,7 +98,7 @@ public class Evolutions {
 					pwtt.person = p;
 					pwtt.workingTimeType = wtt;
 					pwtt.beginDate = c.beginContract;
-					pwtt.endDate = c.expireContract;
+					pwtt.endDate = null;
 					pwtt.save();
 					Logger.debug("Inserito person_working_time_type per %s %s con date %s %s", p.name, p.surname, pwtt.beginDate, pwtt.endDate);
 				}
