@@ -869,7 +869,7 @@ public class PersonUtility {
 
 		if(pd!=null)
 		{
-			checkForPersonDayInTrouble(pd, personToCheck); 
+			checkForPersonDayInTrouble(pd); 
 			return;
 		}
 		else
@@ -886,7 +886,7 @@ public class PersonUtility {
 			pd.create();
 			pd.populatePersonDay();
 			pd.save();
-			checkForPersonDayInTrouble(pd, personToCheck);
+			checkForPersonDayInTrouble(pd);
 			return;
 		}
 	}
@@ -901,7 +901,7 @@ public class PersonUtility {
 	 * @param pd
 	 * @param person
 	 */
-	private static void checkForPersonDayInTrouble(PersonDay pd, Person person)
+	public static void checkForPersonDayInTrouble(PersonDay pd)
 	{
 		//persona fixed
 		StampModificationType smt = pd.getFixedWorkingTime();
@@ -914,7 +914,7 @@ public class PersonUtility {
 				{
 					if(!s.valid)
 					{
-						insertPersonDayInTrouble(pd, "timbratura disaccoppiata");
+						insertPersonDayInTrouble(pd, "timbratura disaccoppiata persona fixed");
 						return;
 					}
 				}
@@ -923,14 +923,9 @@ public class PersonUtility {
 		//persona not fixed
 		else
 		{
-			if(!pd.isAllDayAbsences() && pd.stampings.size()==0)
+			if(!pd.isAllDayAbsences() && pd.stampings.size()==0 && !pd.isHoliday())
 			{
-				//TODO questo e' un controllo aggiuntivo in quanto in teoria i person day senza assenze e timbrature nei giorni di festa 
-				//non dovrebbero esistere ma nel database attuale a volte sono presenti e persistiti. Cancellarli e togliere questo controllo
-				if(!pd.isHoliday())	
-				{
-					insertPersonDayInTrouble(pd, "no assenze giornaliere e no timbrature");
-				}
+				insertPersonDayInTrouble(pd, "no assenze giornaliere e no timbrature");
 				return;
 			}
 			pd.computeValidStampings();

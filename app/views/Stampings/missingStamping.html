@@ -3,37 +3,28 @@
 #{functionalMenuForm mainMenu: mainMenu /} 
 
 <h2 id="titoloControllaTimbratureMancanti">Controllo delle timbrature mancanti di <span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year}</h2>
-%{if(dbConsistentControl==false){
-}%
-Warning: il database ha riscontrato errori, contattare gli amministratori. Potrebbero esistere ulteriori timbrature mancanti non visualizzate in questo report.
-%{
-}
-}%
+
 <table id="tabellaTimbratureMancanti">
 	<tr>
 		<th>Nome</th>
-		%{ for(col in tableMissingStampings.columnKeySet()){
-		}%
-		<th>${col}</th>
-		%{
-		}
-		}%	
-		
+		<th>No assenze e timbrature</th>
+		<th>Timbrature disaccoppiate</th>
+		<th>Timbrature disaccoppiate persone autocertificate</th>
 	</tr>
-	%{ for(entry in tableMissingStampings.rowMap().entrySet()){
-	}%
+	
+	#{list items:missingStampings, as:'personMissingStampings'}
 	<tr>
-		<td><a href="@{Stampings.personStamping(entry.getKey().id,year,month)}">${entry.getKey().surname} ${entry.getKey().name}</a></td>
-		%{ for(col in tableMissingStampings.columnKeySet()){
-		}%
+		<td><a href="@{Stampings.personStamping(personMissingStampings.person.id,year,month)}">${personMissingStampings.person.surname} ${personMissingStampings.person.name}</a></td>
+		
 		<td>
-			${entry.getValue().get(col).toString()} 
-		</td>
-		%{
-		}
-		}%
+			${personMissingStampings.troublesNoAbsenceNoStampings}
+	    </td>
+	    <td>
+			${personMissingStampings.troublesUncoupledStampings}
+	    </td>
+	    <td>
+			${personMissingStampings.troublesAutoFixed}
+	    </td>
+	#{/list}
 	</tr>
-	%{
-	}
-	}%
 </table>

@@ -40,6 +40,7 @@ import models.efficiency.EfficientPersonDay;
 import models.exports.AbsenceReperibilityPeriod;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
+import models.rendering.PersonTroublesInMonthRecap;
 import models.rendering.PersonStampingDayRecap;
 
 import org.joda.time.LocalDate;
@@ -559,77 +560,21 @@ public class Stampings extends Controller {
 	@Check(Security.INSERT_AND_UPDATE_STAMPING)
 	public static void missingStamping(int year, int month) throws ClassNotFoundException, SQLException{
 
-		//Immutable table per rendering
-		ImmutableTable.Builder<Person, String, List<Integer>>  builder = ImmutableTable
-				.<Person, String, List<Integer>>builder()
-				.orderRowsBy(new Comparator<Person>(){
-					public int compare(Person p1, Person p2) {
-
-						return p1.surname.compareTo(p2.surname);
-					}
-
-				});
-		Table<Person, String, List<Integer>> tableMissingStampings = null;
-
-
 		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
 		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
 
 		//lista delle persone che sono state attive nel mese
 		List<Person> activePersons = Person.getActivePersonsInMonth(month, year);
 
-
-
-		//lista dei trouble di una persona
+		List<PersonTroublesInMonthRecap> missingStampings = new ArrayList<PersonTroublesInMonthRecap>();
+		
 		for(Person person : activePersons)
 		{
-			List<PersonDayInTrouble> troubles = PersonDayInTrouble.find
-					("select trouble from PersonDayInTrouble trouble, PersonDay pd where trouble.personDay = pd and pd.person = ? and trouble.fixed = false and pd.date between ? and ? order by pd.date", person, monthBegin, monthEnd).fetch();
-			Logger.debug("Persona %s %s Number of trouble %s", person.surname, person.name, troubles.size());
-			List<Integer> pdMissingStampingList = new ArrayList<Integer>();
-			for(PersonDayInTrouble trouble : troubles)
-			{
-				pdMissingStampingList.add(trouble.personDay.date.getDayOfMonth());
-			}
-			builder.put(person, "Giorni del mese da controllare", pdMissingStampingList);
-
+			PersonTroublesInMonthRecap pt = new PersonTroublesInMonthRecap(person, monthBegin, monthEnd);
+			missingStampings.add(pt);
 		}
 
-
-		//diagnosi
-		boolean dbConsistentControl = true;//PersonDay.diagnosticPersonDay(year, month, activePersons);
-
-		/*
-		//Se mese attuale considero i person day fino a ieri
-		if(today.getMonthOfYear()==month)
-		{
-			monthEnd = today.minusDays(1);
-		}
-		//Se oggi e' il primo giorno del mese stampo la tabella vuota 
-		if(today.getDayOfMonth()==1)
-		{
-			for(Person person : activePersons)
-			{
-				List<Integer> pdMissingStampingList = new ArrayList<Integer>();
-				builder.put(person, "Giorni del mese da controllare", pdMissingStampingList);
-			}
-			tableMissingStampings = builder.build();
-			render(tableMissingStampings, month, year, dbConsistentControl);
-		}
-
-		for(Person person : activePersons)
-		{
-			List<EfficientPersonDay> personDayRsList = EfficientPersonDay.getEfficientPersonDays(person, monthBegin, monthEnd);
-			//personDayRsList di norma non e' vuoto, capita per esempio per Cresci/DiPietro/Conti etc che non dovrebbero esistere
-			if(personDayRsList.size()!=0)
-			{
-				checkPersonMissingStampings(person, personDayRsList, builder);
-			}
-
-		}
-		 */
-		tableMissingStampings = builder.build();
-		render(tableMissingStampings, month, year, dbConsistentControl);
+		render(month, year, missingStampings);
 
 
 
