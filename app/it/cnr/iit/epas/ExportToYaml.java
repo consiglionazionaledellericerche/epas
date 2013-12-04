@@ -116,7 +116,7 @@ public class ExportToYaml {
 	{
 		String personYaml = "";
 		personYaml = personYaml + appendWorkingTimeType(person);
-		personYaml = personYaml + appendWorkingTimeTypeDays(person.workingTimeType);
+	//	personYaml = personYaml + appendWorkingTimeTypeDays(person.workingTimeType);
 		personYaml = personYaml + appendPerson(person);
 		personYaml = personYaml + appendStampProfiles(person);
 		personYaml = personYaml + appendContracts(person);
@@ -291,8 +291,8 @@ public class ExportToYaml {
 	private static String appendWorkingTimeType(Person person)
 	{
 		String out = "";
-		out = out + getFormattedHeader("WorkingTimeType", person.workingTimeType.description);
-		out = out + getFormattedProperty("description", person.workingTimeType.description);
+	//	out = out + getFormattedHeader("WorkingTimeType", person.workingTimeType.description);
+	//	out = out + getFormattedProperty("description", person.workingTimeType.description);
 		return out;
 	}
 	
@@ -318,7 +318,7 @@ public class ExportToYaml {
 		out = out + getFormattedHeader("Person", "person" + person.id);
 		out = out + getFormattedProperty("name", person.name);
 		out = out + getFormattedProperty("surname", person.surname);
-		out = out + getFormattedProperty("workingTimeType", person.workingTimeType.description);
+	//	out = out + getFormattedProperty("workingTimeType", person.workingTimeType.description);
 		out = out + appendPersonCompetenceAdmitted(person);
 		return out;
 	}

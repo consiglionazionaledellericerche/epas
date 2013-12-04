@@ -17,6 +17,7 @@ import models.InitializationTime;
 import models.Location;
 import models.Person;
 import models.PersonDay;
+import models.PersonWorkingTimeType;
 import models.Qualification;
 //import models.RemoteOffice;
 import models.VacationCode;
@@ -202,8 +203,10 @@ public class Persons extends Controller {
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void editWorkingTime(Long personId){
 		Person person = Person.findById(personId);
-		WorkingTimeType wtt = person.workingTimeType;
+		//WorkingTimeType wtt = person.gworkingTimeType;
+		WorkingTimeType wtt = person.getCurrentWorkingTimeType();
 		render(person, wtt);
+		
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
@@ -252,23 +255,40 @@ public class Persons extends Controller {
 
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void updateWorkingTime(){
+		if(params.get("description") == null || params.get("description").equals("")){
+			flash.error("Selezionare un orario di lavoro!!");
+			render("@save");
+		}
+		if(WorkingTimeType.find("byDescription", params.get("description")).first() == null){
+			flash.error("L'orario di lavoro selezionato è inesistente in anagrafica");
+			render("@save");
+		}
 		Long personId = params.get("personId", Long.class);
 		Person person = Person.findById(personId);
-//		LocalDate begin = new LocalDate(params.get("dataInizio", Date.class));
-//		LocalDate end = new LocalDate(params.get("dataFine", Date.class));
-//		if(begin == null || end == null){
-//			flash.error("Le date devono essere entrambe valorizzate");
-//			Application.indexAdmin();
-//		}
-//		if(begin.isAfter(end)){
-//			flash.error("La data di fine del piano ferie non può essere precedente alla data di inizio dello stesso");
-//			Application.indexAdmin();
-//		}
-		person.workingTimeType = null;
-		person.save();
+		
+		Date date = new LocalDate(params.get("dataInizio")).toDate();
+		LocalDate dataInizio = new LocalDate(date);
+//		person.workingTimeType = null;
+		//person.save();
 		Logger.debug("l'orario selezionato è: %s", params.get("description"));
-		WorkingTimeType wtt = WorkingTimeType.find("Select wtt from WorkingTimeType wtt where wtt.description = ?", params.get("description")).first();
-		person.workingTimeType = wtt;
+		
+		PersonWorkingTimeType pwtt = PersonWorkingTimeType.find("Select pwtt from PersonWorkingTimeType pwtt where pwtt.person = ? and " +
+				"pwtt.beginDate < ? and pwtt.endDate is null", 
+				person, dataInizio).first();
+		if(pwtt == null){
+			flash.error("L'orario di lavoro alla data %s è immodificabile.", dataInizio);
+			render("@save");
+		}
+		pwtt.endDate = dataInizio.minusDays(1);
+		pwtt.save();
+		PersonWorkingTimeType nuovoPwtt = new PersonWorkingTimeType();
+		nuovoPwtt.person = person;
+		nuovoPwtt.workingTimeType = WorkingTimeType.find("byDescription", params.get("description")).first(); 
+				
+		nuovoPwtt.beginDate = dataInizio;
+		nuovoPwtt.endDate = null;
+		nuovoPwtt.save();
+		
 		person.save();
 		flash.success("Aggiornato l'orario di lavoro per %s %s", person.name, person.surname);
 		Application.indexAdmin();

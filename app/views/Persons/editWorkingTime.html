@@ -1,5 +1,5 @@
 #{extends 'main.html' /}
-
+#{functionalMenuForm mainMenu: mainMenu /}
 <h3>Orario di lavoro per ${person.name} ${person.surname}</h3>
 <input type="hidden" name="personId" value="${person.id}" />
 <p><a href="@{changeWorkingTime(person.id)}">Cambia orario di lavoro</a></p>
@@ -17,73 +17,73 @@
 	</tr>
 	<tr>
 			<td>Tempo lavoro </td>
-			<td><input type="text" width="7" disabled="disabled" name="mondayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime.toHourTime()}"/></td>
-			<td><input type="text" width="7" disabled="disabled" name="tuesdayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(2).workingTime.toHourTime()}"/></td>
-			<td><input type="text" width="7" disabled="disabled" name="wednesdayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(3).workingTime.toHourTime()}"/></td>
-			<td><input type="text" width="7" disabled="disabled" name="thursdayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(4).workingTime.toHourTime()}"/></td>
-			<td><input type="text" width="7" disabled="disabled" name="fridayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(5).workingTime.toHourTime()}"/></td>
-			<td><input type="text" width="7" disabled="disabled" name="saturdayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(6).workingTime.toHourTime()}"/></td>
-			<td><input type="text" width="7" disabled="disabled" name="sundayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(7).workingTime.toHourTime()}"/></td>
+			<td><input type="text" class="span2" width="7" disabled="disabled" name="mondayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime.toHourTime()}"/></td>
+			<td><input type="text" class="span2" width="7" disabled="disabled" name="tuesdayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(2).workingTime.toHourTime()}"/></td>
+			<td><input type="text" class="span2" width="7" disabled="disabled" name="wednesdayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(3).workingTime.toHourTime()}"/></td>
+			<td><input type="text" class="span2" width="7" disabled="disabled" name="thursdayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(4).workingTime.toHourTime()}"/></td>
+			<td><input type="text" class="span2" width="7" disabled="disabled" name="fridayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(5).workingTime.toHourTime()}"/></td>
+			<td><input type="text" class="span2" width="7" disabled="disabled" name="saturdayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(6).workingTime.toHourTime()}"/></td>
+			<td><input type="text" class="span2" width="7" disabled="disabled" name="sundayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(7).workingTime.toHourTime()}"/></td>
 			
 		</tr>
 		<tr>
 			<td>Tempo minimo di lavoro per diritto a intervallo pranzo </td>
-			<td><input type="text" width="2" disabled="disabled" name="mondayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(1, wtt).toHourTime()}"/></td>
-			<td><input type="text" width="2" disabled="disabled" name="tuesdayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(2, wtt).toHourTime()}"/></td>
-			<td><input type="text" width="2" disabled="disabled" name="wednesdayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(3, wtt).toHourTime()}"/></td>
-			<td><input type="text" width="2" disabled="disabled" name="thursdayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(4, wtt).toHourTime()}"/></td>
-			<td><input type="text" width="2" disabled="disabled" name="fridayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(5, wtt).toHourTime()}"/></td>
-			<td><input type="text" width="2" disabled="disabled" name="saturdayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(6, wtt).toHourTime()}"/></td>
-			<td><input type="text" width="2" disabled="disabled" name="sundayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(7, wtt).toHourTime()}"/></td>
+			<td><input type="text" class="span2" width="2" disabled="disabled" name="mondayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(1, wtt).toHourTime()}"/></td>
+			<td><input type="text" class="span2" width="2" disabled="disabled" name="tuesdayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(2, wtt).toHourTime()}"/></td>
+			<td><input type="text" class="span2" width="2" disabled="disabled" name="wednesdayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(3, wtt).toHourTime()}"/></td>
+			<td><input type="text" class="span2" width="2" disabled="disabled" name="thursdayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(4, wtt).toHourTime()}"/></td>
+			<td><input type="text" class="span2" width="2" disabled="disabled" name="fridayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(5, wtt).toHourTime()}"/></td>
+			<td><input type="text" class="span2" width="2" disabled="disabled" name="saturdayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(6, wtt).toHourTime()}"/></td>
+			<td><input type="text" class="span2" width="2" disabled="disabled" name="sundayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(7, wtt).toHourTime()}"/></td>
 			
 		</tr>
 		<tr>
 			<td>Intervallo pranzo </td>
-			<td><input type="text" size="7" disabled="disabled" name="mondayBreakTime" value="${wtt.getBreakTime(1, wtt).toHourTime()}"/></td>
-			<td><input type="text" size="7" disabled="disabled" name="tuesdayBreakTime" value="${wtt.getBreakTime(2, wtt).toHourTime()}"/></td>
-			<td><input type="text" size="7" disabled="disabled" name="wednesdayBreakTime" value="${wtt.getBreakTime(3, wtt).toHourTime()}"/></td>
-			<td><input type="text" size="7" disabled="disabled" name="thursdayBreakTime" value="${wtt.getBreakTime(4, wtt).toHourTime()}"/></td>
-			<td><input type="text" size="7" disabled="disabled" name="fridayBreakTime" value="${wtt.getBreakTime(5, wtt).toHourTime()}"/></td>
-			<td><input type="text" size="7" disabled="disabled" name="saturdayBreakTime" value="${wtt.getBreakTime(6, wtt).toHourTime()}"/></td>
-			<td><input type="text" size="7" disabled="disabled" name="sundayBreakTime" value="${wtt.getBreakTime(7, wtt).toHourTime()}"/></td>
+			<td><input type="text" class="span2" size="7" disabled="disabled" name="mondayBreakTime" value="${wtt.getBreakTime(1, wtt).toHourTime()}"/></td>
+			<td><input type="text" class="span2" size="7" disabled="disabled" name="tuesdayBreakTime" value="${wtt.getBreakTime(2, wtt).toHourTime()}"/></td>
+			<td><input type="text" class="span2" size="7" disabled="disabled" name="wednesdayBreakTime" value="${wtt.getBreakTime(3, wtt).toHourTime()}"/></td>
+			<td><input type="text" class="span2" size="7" disabled="disabled" name="thursdayBreakTime" value="${wtt.getBreakTime(4, wtt).toHourTime()}"/></td>
+			<td><input type="text" class="span2" size="7" disabled="disabled" name="fridayBreakTime" value="${wtt.getBreakTime(5, wtt).toHourTime()}"/></td>
+			<td><input type="text" class="span2" size="7" disabled="disabled" name="saturdayBreakTime" value="${wtt.getBreakTime(6, wtt).toHourTime()}"/></td>
+			<td><input type="text" class="span2" size="7" disabled="disabled" name="sundayBreakTime" value="${wtt.getBreakTime(7, wtt).toHourTime()}"/></td>
 
 		</tr>
 				<tr>
 			<td>Giorno festivo</td>
 			%{ if(wtt.getHolidayFromWorkinTimeType(1, wtt)==true){ }%
-				<td><input type="checkbox" size="7" disabled="disabled" name="mondayHoliday" value ="si" checked="checked"/></td>
+				<td><input type="checkbox" class="span2" size="7" disabled="disabled" name="mondayHoliday" value ="si" checked="checked"/></td>
 			%{ } else { }%
-				<td><input type="checkbox" size="7" disabled="disabled" name="mondayHoliday" value="no"/></td>
+				<td><input type="checkbox" class="span2" size="7" disabled="disabled" name="mondayHoliday" value="no"/></td>
 			%{ } }%
 			%{ if(wtt.getHolidayFromWorkinTimeType(2, wtt)==true){ }%
-				<td><input type="checkbox" size="7" disabled="disabled" name="tuesdayHoliday" value="si" checked="checked"/></td>
+				<td><input type="checkbox" class="span2" size="7" disabled="disabled" name="tuesdayHoliday" value="si" checked="checked"/></td>
 			%{ } else { }%
-				<td><input type="checkbox" size="7" disabled="disabled" name="tuesdayHoliday" value="no"/></td>
+				<td><input type="checkbox" class="span2" size="7" disabled="disabled" name="tuesdayHoliday" value="no"/></td>
 			%{ } }%
 			%{ if(wtt.getHolidayFromWorkinTimeType(3, wtt)==true){ }%
-				<td><input type="checkbox" size="7" disabled="disabled" name="wednesdayHoliday" value="si"  checked="checked"/></td>
+				<td><input type="checkbox" class="span2" size="7" disabled="disabled" name="wednesdayHoliday" value="si"  checked="checked"/></td>
 			%{ } else { }%
-				<td><input type="checkbox" size="7" disabled="disabled" name="wednesdayHoliday" value="no"/></td>
+				<td><input type="checkbox" class="span2" size="7" disabled="disabled" name="wednesdayHoliday" value="no"/></td>
 			%{ } }%
 			%{ if(wtt.getHolidayFromWorkinTimeType(4, wtt)==true){ }%
-				<td><input type="checkbox" size="7" disabled="disabled" name="thursdayHoliday" value="si" checked="checked"/></td>
+				<td><input type="checkbox" class="span2" size="7" disabled="disabled" name="thursdayHoliday" value="si" checked="checked"/></td>
 			%{ } else { }%
-				<td><input type="checkbox" size="7" disabled="disabled" name="thursdayHoliday" value="no"/></td>
+				<td><input type="checkbox" class="span2" size="7" disabled="disabled" name="thursdayHoliday" value="no"/></td>
 			%{ } }%
 			%{ if(wtt.getHolidayFromWorkinTimeType(5, wtt)==true){ }%
-				<td><input type="checkbox" size="7" disabled="disabled" name="fridayHoliday" value= "si}" checked="checked"/></td>
+				<td><input type="checkbox" class="span2" size="7" disabled="disabled" name="fridayHoliday" value= "si}" checked="checked"/></td>
 			%{ } else { }%
-				<td><input type="checkbox" size="7" disabled="disabled" name="fridayHoliday" value="no"/></td>
+				<td><input type="checkbox" class="span2" size="7" disabled="disabled" name="fridayHoliday" value="no"/></td>
 			%{ } }%
 			%{ if(wtt.getHolidayFromWorkinTimeType(6, wtt)==true){ }%
-				<td><input type="checkbox" size="7" disabled="disabled" name="saturdayHoliday" value="si" checked="checked"/></td>
+				<td><input type="checkbox" class="span2" size="7" disabled="disabled" name="saturdayHoliday" value="si" checked="checked"/></td>
 			%{ } else { }%
-				<td><input type="checkbox" size="7" disabled="disabled" name="saturdayHoliday" value="no"/></td>
+				<td><input type="checkbox" class="span2" size="7" disabled="disabled" name="saturdayHoliday" value="no"/></td>
 			%{ } }%
 			%{ if(wtt.getHolidayFromWorkinTimeType(7, wtt)==true){ }%
-				<td><input type="checkbox" size="7" disabled="disabled" name="sundayHoliday" value="si" checked="checked"/></td>
+				<td><input type="checkbox" class="span2" size="7" disabled="disabled" name="sundayHoliday" value="si" checked="checked"/></td>
 			%{ } else { }%
-				<td><input type="checkbox" size="7" disabled="disabled" name="sundayHoliday" value="no"/></td>
+				<td><input type="checkbox" class="span2" size="7" disabled="disabled" name="sundayHoliday" value="no"/></td>
 			%{ } }%
 		</tr>	
 </table>

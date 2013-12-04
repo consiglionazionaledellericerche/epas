@@ -156,9 +156,9 @@ public class Person extends Model {
 	/**
 	 * relazione con la tabella delle tipologie di orario di lavoro
 	 */
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="working_time_type_id")
-	public WorkingTimeType workingTimeType;
+//	@ManyToOne(fetch=FetchType.LAZY)
+//	@JoinColumn(name="working_time_type_id")
+//	public WorkingTimeType workingTimeType;
 	
 	@NotAudited
 	@OneToMany(mappedBy = "person", fetch=FetchType.LAZY)

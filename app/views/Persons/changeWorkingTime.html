@@ -1,10 +1,11 @@
 #{extends 'main.html' /}
-
+#{functionalMenuForm mainMenu: mainMenu /}
 <h3>Assegna un nuovo orario di lavoro a ${person.name} ${person.surname}</h3>
 #{form @Persons.updateWorkingTime()}
 <input type="hidden" name="personId" value="${person.id}" />
 
-
+<p>Data inizio nuovo orario: <input type="date" name="dataInizio" class="span2"/></p>
+<br>
 <table>
 	<tr>
 		<th>Nome tipo orario</th>
@@ -77,8 +78,10 @@
 		}
 	}%
 </table>
-<input id="submitEditPerson"type="submit" value="Ok" />
+<div id="frm">
+<input id="submitEditPerson"type="submit" class="btn btn-primary" value="Ok" />
 #{/form}
 #{form @Persons.discard()}
-<input id="discardEditPerson" type="submit" value="Annulla" />
+<input id="discardEditPerson" type="submit" class="btn" value="Annulla" />
 #{/form}
+</div> 

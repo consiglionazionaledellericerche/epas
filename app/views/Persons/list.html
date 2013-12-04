@@ -40,7 +40,7 @@
 		<td><font color="#000000">${person.badgeNumber}</font></td>
 		<td><font color="#000000">${person.getCurrentContract() != null ? person.getCurrentContract().beginContract : ''}</font></td>
 		<td><font color="#000000">${person.getCurrentContract() != null ? person.getCurrentContract().expireContract : ''}</font></td>
-		<td><a href="@{editWorkingTime(person.id)}"><font color="#0000FF">${person.workingTimeType != null && person.workingTimeType.description != null ? person.workingTimeType.description : ''}</font></a></td>
+		<td><a href="@{editWorkingTime(person.id)}"><font color="#0000FF">${person.getCurrentWorkingTimeType() != null && person.getCurrentWorkingTimeType().description != null ? person.getCurrentWorkingTimeType().description : ''}</font></a></td>
 		<td><a href="@{editVacation(person.id)}"><font color="#0000FF">${person.getVacation() != null ? person.getVacation().description : ''}</font></a></td>
 		<td><font color="#000000">${person.getQualification() != null ? person.getQualification().qualification : ''}</font></td>
 		<td>${''}</td>
@@ -59,7 +59,7 @@
 		<td><font color="#000000">${person.badgeNumber}</font></td>
 		<td><font color="#808080">${person.getCurrentContract() != null ? person.getCurrentContract().beginContract : ''}</font></td>
 		<td><font color="#808080">${person.getCurrentContract() != null ? person.getCurrentContract().expireContract : ''}</font></td>
-		<td><a href="@{editWorkingTime(person.id)}"><font color="#808080">${person.workingTimeType != null && person.workingTimeType.description != null ? person.workingTimeType.description : ''}</font></a></td>
+		<td><a href="@{editWorkingTime(person.id)}"><font color="#808080">${person.getCurrentWorkingTimeType() != null && person.getCurrentWorkingTimeType().description != null ? person.getCurrentWorkingTimeType().description : ''}</font></a></td>
 		<td><a href="@{editVacation(person.id)}"><font color="#808080">${person.getVacation() != null ? person.getVacation().description : ''}</font></a></td>
 		<td><font color="#808080">${person.getQualification() != null ? person.getQualification().qualification : ''}</font></td>
 		<td>${''}</td>

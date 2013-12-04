@@ -100,7 +100,26 @@ public class Competences extends Controller{
 			}
 			
 		}
-		render(tableCompetence, year, month, activePersons, competenceCodes);
+		List<Competence> competenceList = Competence.find("Select comp from Competence comp, CompetenceCode code where comp.year = ? and comp.month = ? " +
+				"and comp.competenceCode = code and code.code in (?,?,?)", 
+				year, month, "S1", "S2", "S3").fetch();
+		int totaleOreStraordinarioMensile = 0;
+		int totaleOreStraordinarioAnnuale = 0;
+		int totaleMonteOre = 0;
+		for(Competence comp : competenceList){
+			totaleOreStraordinarioMensile = totaleOreStraordinarioMensile + comp.valueApproved;
+		}
+		List<Competence> competenceYearList = Competence.find("Select comp from Competence comp, CompetenceCode code where comp.year = ? and comp.month <= ? " +
+				"and comp.competenceCode = code and code.code in (?,?,?)", 
+				year, month, "S1", "S2", "S3").fetch();
+		for(Competence comp : competenceYearList){
+			totaleOreStraordinarioAnnuale = totaleOreStraordinarioAnnuale + comp.valueApproved;
+		}
+		List<TotalOvertime> total = TotalOvertime.find("Select tot from TotalOvertime tot where tot.year = ?", year).fetch();
+		for(TotalOvertime tot : total){
+			totaleMonteOre = totaleMonteOre+tot.numberOfHours;
+		}
+		render(tableCompetence, year, month, activePersons, competenceCodes, totaleOreStraordinarioMensile, totaleOreStraordinarioAnnuale, totaleMonteOre);
 
 	}
 	

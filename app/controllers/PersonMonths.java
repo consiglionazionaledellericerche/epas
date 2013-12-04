@@ -59,8 +59,8 @@ public class PersonMonths extends Controller{
 			}			
 			lista.add(4, DateUtility.fromMinuteToHourMinute(mese.progressivoFinaleMese));
 			Integer minutiRiposiCompensativi = mese.riposiCompensativiMinutiImputatoAnnoCorrente + mese.riposiCompensativiMinutiImputatoAnnoPassato + mese.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese; 
-			Integer riposiCompensativi = minutiRiposiCompensativi/mese.workingTime;
-			lista.add(5, riposiCompensativi + " ("+ DateUtility.fromMinuteToHourMinute(minutiRiposiCompensativi)+")");
+			//Integer riposiCompensativi = minutiRiposiCompensativi/mese.workingTime;
+			lista.add(5, mese.numeroRiposiCompensativi + " ("+ DateUtility.fromMinuteToHourMinute(minutiRiposiCompensativi)+")");
 			lista.add(6, mese.straordinariMinuti /60+"");
 			lista.add(7, DateUtility.fromMinuteToHourMinute(mese.monteOreAnnoCorrente + mese.monteOreAnnoPassato));
 			mapMonthSituation.put(date.getMonthOfYear(), lista);
