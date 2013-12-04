@@ -16,6 +16,7 @@ import models.AbsenceType;
 import models.InitializationTime;
 import models.Person;
 import models.PersonDay;
+import models.PersonDayInTrouble;
 import models.PersonMonth;
 import models.WorkingTimeType;
 import models.exports.PersonsList;
@@ -221,7 +222,18 @@ public class Administration extends Controller {
 	}
 	
 	
-	
+	public static void updateCauseInTrouble()
+	{
+		List<PersonDayInTrouble> tList = PersonDayInTrouble.findAll();
+		for(PersonDayInTrouble t : tList)
+		{
+			if(t.personDay.isFixedTimeAtWork())
+			{
+				t.cause = "timbratura disaccoppiata persona fixed";
+				t.save();
+			}
+		}
+	}
 	
 	public static void buildYaml()
 	{
