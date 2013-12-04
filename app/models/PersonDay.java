@@ -692,7 +692,67 @@ public class PersonDay extends Model {
 		merge();
 
 		if(this.date.isBefore(new LocalDate()))
-			PersonUtility.checkForPersonDayInTrouble(this);
+			this.checkForPersonDayInTrouble();
+	}
+	
+	/**
+	 * Verifica che nel person day vi sia una situazione coerente di timbrature. Situazioni errate si verificano nei casi 
+	 *  (1) che vi sia almeno una timbratura non accoppiata logicamente con nessun'altra timbratura 
+	 * 	(2) che le persone not fixed non presentino ne' assenze AllDay ne' timbrature. 
+	 * In caso di situazione errata viene aggiunto un record nella tabella PersonDayInTrouble.
+	 * Se il PersonDay era presente nella tabella PersonDayInTroubled ed è stato fixato, viene settato a true il campo
+	 * fixed.
+	 * @param pd
+	 * @param person
+	 */
+	public void checkForPersonDayInTrouble()
+	{
+		//persona fixed
+		StampModificationType smt = this.getFixedWorkingTime();
+		if(smt !=null)
+		{
+			if(this.stampings.size()!=0)
+			{
+				this.computeValidStampings();
+				for(Stamping s : this.stampings)
+				{
+					if(!s.valid)
+					{
+						PersonUtility.insertPersonDayInTrouble(this, "timbratura disaccoppiata persona fixed");
+						return;
+					}
+				}
+			}			
+		}
+		//persona not fixed
+		else
+		{
+			if(!this.isAllDayAbsences() && this.stampings.size()==0 && !this.isHoliday())
+			{
+				PersonUtility.insertPersonDayInTrouble(this, "no assenze giornaliere e no timbrature");
+				return;
+			}
+			this.computeValidStampings();
+			for(Stamping s : this.stampings)
+			{
+				if(!s.valid)
+				{
+					PersonUtility.insertPersonDayInTrouble(this, "timbratura disaccoppiata");
+					return;
+				}
+			}
+		}
+		//giorno senza problemi, se era in trouble lo fixo
+		if(this.troubles!=null && this.troubles.size()>0)
+		{
+			for(PersonDayInTrouble pdt : this.troubles)
+			{
+				Logger.info("Il problema %s %s %s e' risultato fixato", this.date, this.person.surname, this.person.name);
+				pdt.fixed = true;
+				pdt.save();
+				
+			}
+		}
 	}
 	
 	/**
