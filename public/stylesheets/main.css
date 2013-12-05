@@ -416,9 +416,9 @@ p#annoPrecedente {margin: 5em 50em 5em}
 
 input#submitNuovoCodiceAssenza {margin: 2em 60em 0em; align: center}
 input#discardNuovoCodiceAssenza {margin: 1em 60em 0em; align: center}
-input#submitEditPerson {margin: 2em 20em 0em; align: center}
-input#discardEditPerson {margin: 2em -4em 0em; align: center}
-input#deletePerson {margin: 0em 3em -2em; align: center}
+input#submitEditPerson {margin: 2em 4em 0em 50em; align: center}
+input#discardEditPerson {margin: 2em 0em 0em 0em; align: center}
+input#deletePerson {margin: 2em 0em 0em 4em; align: center}
 input#modificaContratto {margin: 1em 25em 0em; align: center}
 input#submitSituation {margin: 2em 67em 0em; align: center}
 input#indietro {margin: 2em 67em 0em; align: center}
