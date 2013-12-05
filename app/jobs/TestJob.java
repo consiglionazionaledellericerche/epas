@@ -12,18 +12,23 @@ import models.Stamping;
 
 import org.joda.time.LocalDate;
 
+import controllers.Administration;
 import play.Logger;
 import play.jobs.Job;
 import play.jobs.On;
 import play.jobs.OnApplicationStart;
 
 
-//@OnApplicationStart
+
 @On("0 1 5 * * ?")
+//@OnApplicationStart
 public class TestJob extends Job{
 	
 	public void doJob(){
 		Logger.info("Lanciato Job checkDay");
+		
+		PersonUtility.fixPersonSituation(-1l, 2013, 1);
+		/*
 		LocalDate yesterday = new LocalDate().minusDays(1);
 		
 		List<Person> activePersons = Person.getActivePersonsInMonth(yesterday.getMonthOfYear(), yesterday.getYear());
@@ -31,7 +36,7 @@ public class TestJob extends Job{
 		{
 			PersonUtility.checkPersonDay(person.id, yesterday);
 		}
-		
+		*/
 		Logger.info("Concluso Job checkDay");
 	}
 	
