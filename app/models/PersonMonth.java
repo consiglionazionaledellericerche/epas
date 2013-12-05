@@ -409,46 +409,46 @@ public class PersonMonth extends Model {
 		return absenceCodeMap;
 	}
 
-	/**
-	 * 
-	 * @param days
-	 * @return lista dei codici delle timbrature nel caso in cui ci siano particolarità sulle timbrature dovute a mancate timbrature
-	 * per pausa mensa ecc ecc...
-	 */
-	public List<StampModificationType> getStampingCode(){
-		if(days==null){
-			days= getDays();
-		}
-		List<StampModificationType> stampCodeList = new ArrayList<StampModificationType>();
-		for(PersonDay pd : days){
-
-			StampModificationType smt = pd.checkTimeForLunch();
-			Logger.trace("Lo stamp modification type è: %s", smt);
-
-			if(smt != null && !stampCodeList.contains(smt)){
-				Logger.debug("Aggiunto %s alla lista", smt.description);
-				stampCodeList.add(smt);
-			}
-			StampModificationType smtMarked = pd.checkMarkedByAdmin();
-			if(smtMarked != null && !stampCodeList.contains(smtMarked)){
-				stampCodeList.add(smtMarked);
-				Logger.trace("Aggiunto %s alla lista", smtMarked.description);
-			}
-			StampModificationType smtMidnight = pd.checkMissingExitStampBeforeMidnight();
-			if(smtMidnight != null && !stampCodeList.contains(smtMidnight)){
-				stampCodeList.add(smtMidnight);
-				Logger.trace("Aggiunto %s alla lista", smtMidnight.description);
-			}
-			StampModificationType smtFixedWorkingTime = pd.getFixedWorkingTime();
-			if(smtFixedWorkingTime != null && !stampCodeList.contains(smtFixedWorkingTime)){
-				stampCodeList.add(smtFixedWorkingTime);
-				Logger.trace("Aggiunto %s alla lista", smtFixedWorkingTime.description);
-			}
-
-		}
-		Logger.debug("La lista degli stamping code per questo mese contiene: %s", stampingCodeList);
-		return stampCodeList;
-	}
+//	/**
+//	 * 
+//	 * @param days
+//	 * @return lista dei codici delle timbrature nel caso in cui ci siano particolarità sulle timbrature dovute a mancate timbrature
+//	 * per pausa mensa ecc ecc...
+//	 */
+//	public List<StampModificationType> getStampingCode(){
+//		if(days==null){
+//			days= getDays();
+//		}
+//		List<StampModificationType> stampCodeList = new ArrayList<StampModificationType>();
+//		for(PersonDay pd : days){
+//
+//			StampModificationType smt = pd.checkTimeForLunch();
+//			Logger.trace("Lo stamp modification type è: %s", smt);
+//
+//			if(smt != null && !stampCodeList.contains(smt)){
+//				Logger.debug("Aggiunto %s alla lista", smt.description);
+//				stampCodeList.add(smt);
+//			}
+//			StampModificationType smtMarked = pd.checkMarkedByAdmin();
+//			if(smtMarked != null && !stampCodeList.contains(smtMarked)){
+//				stampCodeList.add(smtMarked);
+//				Logger.trace("Aggiunto %s alla lista", smtMarked.description);
+//			}
+//			StampModificationType smtMidnight = pd.checkMissingExitStampBeforeMidnight();
+//			if(smtMidnight != null && !stampCodeList.contains(smtMidnight)){
+//				stampCodeList.add(smtMidnight);
+//				Logger.trace("Aggiunto %s alla lista", smtMidnight.description);
+//			}
+//			StampModificationType smtFixedWorkingTime = pd.getFixedWorkingTime();
+//			if(smtFixedWorkingTime != null && !stampCodeList.contains(smtFixedWorkingTime)){
+//				stampCodeList.add(smtFixedWorkingTime);
+//				Logger.trace("Aggiunto %s alla lista", smtFixedWorkingTime.description);
+//			}
+//
+//		}
+//		Logger.debug("La lista degli stamping code per questo mese contiene: %s", stampingCodeList);
+//		return stampCodeList;
+//	}
 	
 	/**
 	 * 
