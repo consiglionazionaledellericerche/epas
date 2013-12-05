@@ -1,6 +1,7 @@
 package controllers;
 
 import it.cnr.iit.epas.CheckMessage;
+import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.MainMenu;
 import it.cnr.iit.epas.PersonUtility;
 
@@ -31,6 +32,7 @@ import models.efficiency.EfficientPersonDay;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
 import models.enumerate.JustifiedTimeAtWork;
+import models.rendering.VacationsRecap;
 
 import org.hibernate.envers.entities.mapper.relation.lazy.proxy.SetProxy;
 import org.joda.time.LocalDate;
@@ -618,6 +620,35 @@ public class Absences extends Controller{
 				Stampings.personStamping(personId, yearFrom, monthFrom);
 			}
 			
+		}
+		
+		/**
+		 * è il caso delle ferie anno passato di cui poter godere oltre il 31/8 (previa autorizzazione).
+		 */
+		if(absenceType.code.equals("37")){
+			 int days = VacationsRecap.remainingPastVacations(yearFrom, person, absenceType);
+			 if(days == 0){
+				 flash.error("Non si possono inserire ulteriori giorni di assenza perchè è stato raggiunto il limite previsto dal piano" +
+				 		"ferie per %s %s, oppure l'anno passato %s %s non aveva un contratto attivo", person.name, person.surname, person.name, person.surname);
+				 Stampings.personStamping(personId, yearFrom, monthFrom);
+			 }
+			 PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", 
+					 person, new LocalDate(yearFrom, monthFrom, dayFrom)).first();
+			 
+			 Absence absence = new Absence();
+			 absence.absenceType = absenceType;
+			 if(pd == null){
+				 pd = new PersonDay(person, new LocalDate(yearFrom, monthFrom, dayFrom));
+				 pd.save();
+			 }
+			 absence.personDay = pd;
+			 absence.save();
+			 pd.absences.add(absence);
+			 pd.save();
+			 pd.populatePersonDay();
+			 pd.updatePersonDay();
+			 flash.success("Inserito codice di assenza %s per %s %s in data %s", absenceType.code, person.name, person.surname,new LocalDate(yearFrom, monthFrom, dayFrom));
+			 Stampings.personStamping(personId, yearFrom, monthFrom);
 		}
 
 		Absence absence = new Absence();
