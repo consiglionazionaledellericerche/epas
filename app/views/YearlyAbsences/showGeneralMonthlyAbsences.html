@@ -20,29 +20,45 @@
 		<th colspan="${numberOfDifferentAbsenceType}">Codici di assenza</th>
 		
 	</tr>
-	%{  for(col in tableMonthlyAbsences.columnKeySet()){
-		}%
+	%{  
+	for(col in tableMonthlyAbsences.columnKeySet()){
+	}%
 		<th>${col.code}</th>
 	%{
-		}
+	}
 	}%
-	%{  for(entry in tableMonthlyAbsences.rowMap().entrySet()){
-		}%
+	
+	
+	%{  
+	for(entry in tableMonthlyAbsences.rowMap().entrySet()){
+	}%
 	<tr>
 		<td>${entry.getKey().name} ${entry.getKey().surname}</td>
-		%{ for(col in tableMonthlyAbsences.columnKeySet()){
+		%{ 
+		for(col in tableMonthlyAbsences.columnKeySet()){
 		}%
-			<td><abbr title="${col.code} ${col.description}" class="initialism">${entry.getValue().get(col)}</abbr>
-			   
+			<td>
+			 	<a data-toggle="modal" href="@{YearlyAbsences.showPersonMonthlyAbsences(entry.getKey().id, year, month, col.code)}" data-target="#myModal3">
+				<abbr title="${col.code} ${col.description}" class="initialism">${entry.getValue().get(col)}</abbr>
+				</a>
 			</td>
 		%{
-		   }
-		}%
+		 }
+		 }%
 	</tr>	
 	%{
-		}
+	}
 	}%
 </table>
 
+<div id="myModal3" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-body">
+    <p></p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+   <!--   <button class="btn btn-primary">Save changes</button>-->
+  </div>
+</div>
 
 

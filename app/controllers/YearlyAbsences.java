@@ -240,6 +240,30 @@ public class YearlyAbsences extends Controller{
 			render(yearlyAbsencesRecap);
 		}
 	}
+	
+	@Check(Security.VIEW_PERSONAL_SITUATION)
+	public static void showPersonMonthlyAbsences(Long personId, Integer year, Integer month, String absenceTypeCode) throws InstantiationException, IllegalAccessException
+	{
+		LocalDate monthBegin = new LocalDate(year, month, 1);
+		LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
+		
+		Person person = Person.findById(personId);	
+		
+		List<Absence> absenceToRender = new ArrayList<Absence>();
+		
+		if(absenceTypeCode.equals("Totale"))
+		{
+			absenceToRender = Absence.find("Select ab from Absence ab, PersonDay pd where ab.personDay = pd and pd.date between ? and ? and pd.person = ? order by pd.date", 
+					monthBegin, monthEnd, person).fetch();
+		}
+		else
+		{
+			absenceToRender = Absence.find("Select ab from Absence ab, PersonDay pd where ab.personDay = pd and pd.date between ? and ? and pd.person = ? and ab.absenceType.code = ? order by pd.date", 
+					monthBegin, monthEnd, person, absenceTypeCode).fetch();
+		}
+		
+		render(person, absenceToRender);
+	}
 
 
 }
