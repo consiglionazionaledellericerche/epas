@@ -1,0 +1,18 @@
+<h3 align="center">Assenze mensili per ${person.name} ${person.surname}</h3> 
+
+<table align="center">
+	<tr>
+		<th>Giorno del mese</th>
+		<th>Codice</th>
+	</tr>
+
+	#{list items:absenceToRender, as:'ab'}
+	<tr>
+		<td>${ab.personDay.date.getDayOfMonth()}</td>
+		<td>${ab.absenceType.code}</td>
+	</tr>
+	#{/list}
+
+</table>
+
+
