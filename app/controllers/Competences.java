@@ -74,8 +74,7 @@ public class Competences extends Controller{
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void showCompetences(Integer year, Integer month){
 
-		ImmutableTable.Builder<Person, CompetenceCode, Integer> builder = ImmutableTable.builder();
-		Table<Person, CompetenceCode, Integer> tableCompetence = null;
+		
 		List<Person> activePersons = null;
 		if((year == null || month == null) || (year == 0 || month == 0)){
 			int yearParams = params.get("year", Integer.class);
@@ -100,6 +99,7 @@ public class Competences extends Controller{
 			}
 			
 		}
+		
 		List<Competence> competenceList = Competence.find("Select comp from Competence comp, CompetenceCode code where comp.year = ? and comp.month = ? " +
 				"and comp.competenceCode = code and code.code in (?,?,?)", 
 				year, month, "S1", "S2", "S3").fetch();
@@ -119,7 +119,8 @@ public class Competences extends Controller{
 		for(TotalOvertime tot : total){
 			totaleMonteOre = totaleMonteOre+tot.numberOfHours;
 		}
-		render(tableCompetence, year, month, activePersons, competenceCodes, totaleOreStraordinarioMensile, totaleOreStraordinarioAnnuale, totaleMonteOre);
+		
+		render(year, month, activePersons, competenceCodes, totaleOreStraordinarioMensile, totaleOreStraordinarioAnnuale, totaleMonteOre);
 
 	}
 	
