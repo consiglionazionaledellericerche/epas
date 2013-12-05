@@ -79,9 +79,11 @@ public class PrintTags extends Controller{
 			PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(pd,numberOfInOut);
 			daysRecap.add(dayRecap);
 		}
+		List<StampModificationType> stampModificationTypeList = PersonStampingDayRecap.stampModificationTypeList;
+		List<StampType> stampTypeList = PersonStampingDayRecap.stampTypeList;
 		
 			
-		renderPDF(pdList, person, year, month, pm, numberOfInOut, daysRecap, personMonth);
+		renderPDF(pdList, person, year, month, pm, numberOfInOut, daysRecap, personMonth, stampModificationTypeList, stampTypeList);
 		
 		
 	}

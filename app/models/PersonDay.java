@@ -144,25 +144,24 @@ public class PersonDay extends Model {
 	}
 
 
-	/**	 
-	 * Calcola se un giorno è lavorativo o meno. L'informazione viene calcolata a partire
-	 * dal giorno e dal WorkingTimeType corrente della persona
-	 * 
-	 * @return true se il giorno corrente è un giorno lavorativo, false altrimenti.
-	 */
-	public boolean isWorkingDay() {
-		boolean isWorkingDay = false;
-
-		WorkingTimeTypeDay wttd2 = WorkingTimeTypeDay.find("Select wttd from WorkingTimeType wtt, WorkingTimeTypeDay wttd, Person p " +
-				"where p.workingTimeType = wtt and wttd.workingTimeType = wtt and p = ? and wttd.dayOfWeek = ? ", person, date.getDayOfWeek()).first();
-		isWorkingDay = wttd2.holiday;
-		Logger.trace("%s. isWorkingDay = %s", this.toString(), isWorkingDay);
-		return isWorkingDay;
-	}
+//	/**	 
+//	 * Calcola se un giorno è lavorativo o meno. L'informazione viene calcolata a partire
+//	 * dal giorno e dal WorkingTimeType corrente della persona
+//	 * 
+//	 * @return true se il giorno corrente è un giorno lavorativo, false altrimenti.
+//	 */
+//	public boolean isWorkingDay() {
+//		boolean isWorkingDay = false;
+//
+//		WorkingTimeTypeDay wttd2 = WorkingTimeTypeDay.find("Select wttd from WorkingTimeType wtt, WorkingTimeTypeDay wttd, Person p " +
+//				"where p.workingTimeType = wtt and wttd.workingTimeType = wtt and p = ? and wttd.dayOfWeek = ? ", person, date.getDayOfWeek()).first();
+//		isWorkingDay = wttd2.holiday;
+//		Logger.trace("%s. isWorkingDay = %s", this.toString(), isWorkingDay);
+//		return isWorkingDay;
+//	}
 
 
 	/**
-	 * (checked 17/10 personStamping)
 	 * @param data
 	 * @return true se il personDay è un giorno di festa per la persona. False altrimenti
 	 */
@@ -181,7 +180,6 @@ public class PersonDay extends Model {
 	}
 	
 	/**
-	 * (cheked 21/10 PersonStampingDayRecap)
 	 * @return true se nel giorno vi e' una assenza giornaliera
 	 */
 	public boolean isAllDayAbsences()
@@ -397,7 +395,6 @@ public class PersonDay extends Model {
 	}
 	
 	/**
-	 * (Alessandro)
 	 * Algoritmo definitivo per il calcolo dei minuti lavorati nel person day.
 	 * Ritorna i minuti di lavoro per la persona nel person day. 
 	 * Modifica i seguenti campi del person day:
@@ -505,7 +502,7 @@ public class PersonDay extends Model {
 			int minTimeForLunch = 0;
 			for(PairStamping gapLunchPair : gapLunchPairs)
 			{
-				//(TODO considero il primo gap in orario pranzo)
+				//per adesso considero il primo gap in orario pranzo)
 				minTimeForLunch = minTimeForLunch - toMinute(gapLunchPair.in.date);
 				minTimeForLunch = minTimeForLunch + toMinute(gapLunchPair.out.date);
 				break;
@@ -571,7 +568,7 @@ public class PersonDay extends Model {
 	}
 	*/
 	
-	/** (alessandro)
+	/** 
 	 * True se il personDay cade in uno stampProfile con fixedTimeAtWork = true;
 	 * @return
 	 */
@@ -592,21 +589,20 @@ public class PersonDay extends Model {
 	}
 	
 
-	/** (alessandro)
-	 * True se il personDay appartiene a un giorno festivo per la persona
-	 * @param personWttd
-	 * @return
-	 */
-	/*disabilitato da alessandro il 28 ottobre perche' non piu' utilizzato
-	public boolean isPersonHoliday(List<WorkingTimeTypeDay> personWttd)
-	{
-		if(DateUtility.isGeneralHoliday(this.date) || personWttd.get(this.date.getDayOfWeek()-1).holiday==true)
-		{
-			return true;
-		}
-		return false;
-	}
-	*/
+//	/** (alessandro)
+//	 * True se il personDay appartiene a un giorno festivo per la persona
+//	 * @param personWttd
+//	 * @return
+//	 */
+//	public boolean isPersonHoliday(List<WorkingTimeTypeDay> personWttd)
+//	{
+//		if(DateUtility.isGeneralHoliday(this.date) || personWttd.get(this.date.getDayOfWeek()-1).holiday==true)
+//		{
+//			return true;
+//		}
+//		return false;
+//	}
+	
 	
 	
 
@@ -718,7 +714,7 @@ public class PersonDay extends Model {
 				{
 					if(!s.valid)
 					{
-						PersonUtility.insertPersonDayInTrouble(this, "timbratura disaccoppiata persona fixed");
+						PersonDayInTrouble.insertPersonDayInTrouble(this, "timbratura disaccoppiata persona fixed");
 						return;
 					}
 				}
@@ -729,7 +725,7 @@ public class PersonDay extends Model {
 		{
 			if(!this.isAllDayAbsences() && this.stampings.size()==0 && !this.isHoliday())
 			{
-				PersonUtility.insertPersonDayInTrouble(this, "no assenze giornaliere e no timbrature");
+				PersonDayInTrouble.insertPersonDayInTrouble(this, "no assenze giornaliere e no timbrature");
 				return;
 			}
 			this.computeValidStampings();
@@ -737,7 +733,7 @@ public class PersonDay extends Model {
 			{
 				if(!s.valid)
 				{
-					PersonUtility.insertPersonDayInTrouble(this, "timbratura disaccoppiata");
+					PersonDayInTrouble.insertPersonDayInTrouble(this, "timbratura disaccoppiata");
 					return;
 				}
 			}
@@ -814,33 +810,32 @@ public class PersonDay extends Model {
 	}
 
 	
-	/**
-	 * 
-	 * @return la lista di timbrature comprensiva di timbrature nulle nel caso in cui manchino timbrature di ingresso tra quelle di uscita
-	 * o che manchino timbrature di uscita tra quelle di ingresso
-	 */
-	/*disabilitato da alessandro il 28 ottobre perchè non utilizzato
-	public List<Stamping> returnStampingsList(List<Stamping> stampingList) {	
-
-		List<Stamping> localStampings = new LinkedList<Stamping>();
-
-		Stamping lastStamping = null;
-		for(Stamping st : stampingList){
-			if(st.way == WayType.out && (lastStamping == null || lastStamping.way == WayType.out)){
-				localStampings.add(null);
-
-			}
-			if(st.way == WayType.in && (lastStamping != null && lastStamping.way == WayType.in)){
-				localStampings.add(null);
-
-			}
-			lastStamping = st;
-			localStampings.add(st);
-		}
-		Logger.trace("Lista timbrature per %s in data %s: %s", person, date, localStampings);
-		return localStampings;
-	}
-	*/
+//	/**
+//	 * 
+//	 * @return la lista di timbrature comprensiva di timbrature nulle nel caso in cui manchino timbrature di ingresso tra quelle di uscita
+//	 * o che manchino timbrature di uscita tra quelle di ingresso
+//	 */
+//	public List<Stamping> returnStampingsList(List<Stamping> stampingList) {	
+//
+//		List<Stamping> localStampings = new LinkedList<Stamping>();
+//
+//		Stamping lastStamping = null;
+//		for(Stamping st : stampingList){
+//			if(st.way == WayType.out && (lastStamping == null || lastStamping.way == WayType.out)){
+//				localStampings.add(null);
+//
+//			}
+//			if(st.way == WayType.in && (lastStamping != null && lastStamping.way == WayType.in)){
+//				localStampings.add(null);
+//
+//			}
+//			lastStamping = st;
+//			localStampings.add(st);
+//		}
+//		Logger.trace("Lista timbrature per %s in data %s: %s", person, date, localStampings);
+//		return localStampings;
+//	}
+	
 
 	/**
 	 * 
@@ -933,8 +928,6 @@ public class PersonDay extends Model {
 		//assenze giornaliere
 		if(this.isAllDayAbsences())
 		{
-			//FIXME 10 aprile sannicandro 18 ottobre sannicandro 
-			
 			difference = 0;
 			save();
 			return;
@@ -1069,7 +1062,6 @@ public class PersonDay extends Model {
 	
 	
 	/**
-	 * (TODO questo metodo viene usato in personMonth.getStampingCode() che a sua volta è usato nei template. Controllarlo)
 	 * @return lo stamp modification type relativo alla timbratura aggiunta dal sistema nel caso mancasse la timbratura d'uscita prima
 	 * della mezzanotte del giorno in questione
 	 */
@@ -1082,78 +1074,75 @@ public class PersonDay extends Model {
 		return smt;
 	}
 	
-	/**
-	 * (TODO questo metodo viene usato in personMonth.getStampingCode() che a sua volta è usato nei template. Controllarlo)
-	 * @return lo stamp modification type relativo alla timbratura modificata/inserita dall'amministratore
-	 */
-	public StampModificationType checkMarkedByAdmin(){
-		StampModificationType smt = null;
-		for(Stamping st : stampings){
-			if(st.markedByAdmin == true)
-				smt = StampModificationType.findById(StampModificationTypeValue.MARKED_BY_ADMIN.getId());
-		}
-
-		return smt;
-	}
+//	/**
+//	 * @return lo stamp modification type relativo alla timbratura modificata/inserita dall'amministratore
+//	 */
+//	public StampModificationType checkMarkedByAdmin(){
+//		StampModificationType smt = null;
+//		for(Stamping st : stampings){
+//			if(st.markedByAdmin == true)
+//				smt = StampModificationType.findById(StampModificationTypeValue.MARKED_BY_ADMIN.getId());
+//		}
+//
+//		return smt;
+//	}
 	
-	/**
-	 * (TODO questo metodo viene usato in personMonth.getStampingCode() che a sua volta è usato nei template. Controllarlo)
-	 * @param stamping
-	 * @return l'oggetto StampModificationType che ricorda, eventualmente, se c'è stata la necessità di assegnare la mezz'ora
-	 * di pausa pranzo a una giornata a causa della mancanza di timbrature intermedie oppure se c'è stata la necessità di assegnare
-	 * minuti in più a una timbratura di ingresso dopo la pausa pranzo poichè il tempo di pausa è stato minore di 30 minuti e il tempo
-	 * di lavoro giornaliero è stato maggiore stretto di 6 ore.
-	 */
-	public StampModificationType checkTimeForLunch(){
-		StampModificationType smt = null;
-		//TODO: verificare anche i casi con timbrature diverse da 2 che hanno per esempio due ingressi consecutivi ed una uscita
-		if(stampings.size() == 2){
-			if(timeAtWork >= getWorkingTimeTypeDay().mealTicketTime+getWorkingTimeTypeDay().breakTicketTime) {
-				smt = StampModificationType.findById(StampModificationTypeValue.FOR_DAILY_LUNCH_TIME.getId());
-			}
-		}
-		if(stampings.size()==4 && !stampings.contains(null)){
-			int hourExit = stampings.get(1).date.getHourOfDay();
-			int minuteExit = stampings.get(1).date.getMinuteOfHour();
-			int hourEnter = stampings.get(2).date.getHourOfDay();
-			int minuteEnter = stampings.get(2).date.getMinuteOfHour();
-			int workingTime=0;
-			for(Stamping st : stampings){
-				if(st.way == Stamping.WayType.in){
-					workingTime -= toMinute(st.date);
+//	/**
+//	 * @param stamping
+//	 * @return l'oggetto StampModificationType che ricorda, eventualmente, se c'è stata la necessità di assegnare la mezz'ora
+//	 * di pausa pranzo a una giornata a causa della mancanza di timbrature intermedie oppure se c'è stata la necessità di assegnare
+//	 * minuti in più a una timbratura di ingresso dopo la pausa pranzo poichè il tempo di pausa è stato minore di 30 minuti e il tempo
+//	 * di lavoro giornaliero è stato maggiore stretto di 6 ore.
+//	 */
+//	public StampModificationType checkTimeForLunch(){
+//		StampModificationType smt = null;
+//		if(stampings.size() == 2){
+//			if(timeAtWork >= getWorkingTimeTypeDay().mealTicketTime+getWorkingTimeTypeDay().breakTicketTime) {
+//				smt = StampModificationType.findById(StampModificationTypeValue.FOR_DAILY_LUNCH_TIME.getId());
+//			}
+//		}
+//		if(stampings.size()==4 && !stampings.contains(null)){
+//			int hourExit = stampings.get(1).date.getHourOfDay();
+//			int minuteExit = stampings.get(1).date.getMinuteOfHour();
+//			int hourEnter = stampings.get(2).date.getHourOfDay();
+//			int minuteEnter = stampings.get(2).date.getMinuteOfHour();
+//			int workingTime=0;
+//			for(Stamping st : stampings){
+//				if(st.way == Stamping.WayType.in){
+//					workingTime -= toMinute(st.date);
+//
+//				}
+//				if(st.way == Stamping.WayType.out){
+//					workingTime += toMinute(st.date);
+//
+//				}
+//			}
+//			if(((hourEnter*60)+minuteEnter) - ((hourExit*60)+minuteExit) < getWorkingTimeTypeDay().breakTicketTime && workingTime > getWorkingTimeTypeDay().mealTicketTime)
+//				smt = StampModificationType.findById(StampModificationTypeValue.FOR_MIN_LUNCH_TIME.getId());
+//		}
+//		if(stampings.size()%2 != 0){
+//			if(timeAtWork >= getWorkingTimeTypeDay().mealTicketTime+getWorkingTimeTypeDay().breakTicketTime)
+//				smt = StampModificationType.findById(StampModificationTypeValue.FOR_DAILY_LUNCH_TIME.getId());
+//		}
+//		return smt;
+//	}
 
-				}
-				if(st.way == Stamping.WayType.out){
-					workingTime += toMinute(st.date);
-
-				}
-			}
-			if(((hourEnter*60)+minuteEnter) - ((hourExit*60)+minuteExit) < getWorkingTimeTypeDay().breakTicketTime && workingTime > getWorkingTimeTypeDay().mealTicketTime)
-				smt = StampModificationType.findById(StampModificationTypeValue.FOR_MIN_LUNCH_TIME.getId());
-		}
-		if(stampings.size()%2 != 0){
-			if(timeAtWork >= getWorkingTimeTypeDay().mealTicketTime+getWorkingTimeTypeDay().breakTicketTime)
-				smt = StampModificationType.findById(StampModificationTypeValue.FOR_DAILY_LUNCH_TIME.getId());
-		}
-		return smt;
-	}
-
-	/**
-	 * 
-	 * @param timeAtWork
-	 * @return il localdatetime corrispondente al numero di minuti di lavoro giornaliero.
-	 * Questo metodo mi occorre per normalizzare il tempo di lavoro secondo il metodo toCalendarTime() creato nella PersonTags
-	 */
-	public LocalDateTime convertTimeAtWork(int timeAtWork){
-		int hour = (int)timeAtWork/60;
-		if(hour <0)
-			hour=Math.abs(hour);
-		int minute = (int)timeAtWork%60;
-		if(minute <0)
-			minute=Math.abs(minute);
-		LocalDateTime ldt = new LocalDateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),hour,minute,0);
-		return ldt;
-	}
+//	/**
+//	 * 
+//	 * @param timeAtWork
+//	 * @return il localdatetime corrispondente al numero di minuti di lavoro giornaliero.
+//	 * Questo metodo mi occorre per normalizzare il tempo di lavoro secondo il metodo toCalendarTime() creato nella PersonTags
+//	 */
+//	public LocalDateTime convertTimeAtWork(int timeAtWork){
+//		int hour = (int)timeAtWork/60;
+//		if(hour <0)
+//			hour=Math.abs(hour);
+//		int minute = (int)timeAtWork%60;
+//		if(minute <0)
+//			minute=Math.abs(minute);
+//		LocalDateTime ldt = new LocalDateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),hour,minute,0);
+//		return ldt;
+//	}
 
 	/**
 	 * 
@@ -1208,68 +1197,68 @@ public class PersonDay extends Model {
 		return gapPairs;
 	}
 
-	/**
-	 * funzione che restituisce la timbratura di ingresso dopo la pausa pranzo incrementata del numero di minuti 
-	 * che occorrono per arrivare ai 30 minimi per la pausa stessa.
-	 * @param ldt1
-	 * @param ldt2
-	 * @return
-	 */
-	public LocalDateTime adjustedStamp(LocalDateTime ldt1, LocalDateTime ldt2){
-		if(ldt1== null || ldt2 == null)
-			throw new RuntimeException("parameters localdatetime1 and localdatetime2 must be not null");
-		LocalDateTime ld2mod = null;
+//	/**
+//	 * funzione che restituisce la timbratura di ingresso dopo la pausa pranzo incrementata del numero di minuti 
+//	 * che occorrono per arrivare ai 30 minimi per la pausa stessa.
+//	 * @param ldt1
+//	 * @param ldt2
+//	 * @return
+//	 */
+//	public LocalDateTime adjustedStamp(LocalDateTime ldt1, LocalDateTime ldt2){
+//		if(ldt1== null || ldt2 == null)
+//			throw new RuntimeException("parameters localdatetime1 and localdatetime2 must be not null");
+//		LocalDateTime ld2mod = null;
+//
+//		int minuti1 = toMinute(ldt1);
+//		int minuti2 = toMinute(ldt2);
+//		int difference = minuti2-minuti1;
+//		if(difference<30){
+//			Integer adjust = 30-difference;
+//			ld2mod = ldt2.plusMinutes(adjust);
+//			return ld2mod;
+//		}
+//
+//		return ld2mod;
+//	}
 
-		int minuti1 = toMinute(ldt1);
-		int minuti2 = toMinute(ldt2);
-		int difference = minuti2-minuti1;
-		if(difference<30){
-			Integer adjust = 30-difference;
-			ld2mod = ldt2.plusMinutes(adjust);
-			return ld2mod;
-		}
+//	/**
+//	 * 
+//	 * @param ldt1
+//	 * @param ldt2
+//	 * @return il numero di minuti di differenza tra i 30 minuti minimi di pausa pranzo e quelli effettivamente fatti tra la timbratura
+//	 * d'uscita per la pausa pranzo e quella di ingresso dopo la pausa stessa
+//	 */
+//	public int timeAdjust(LocalDateTime ldt1, LocalDateTime ldt2){
+//		int timeAdjust=0;
+//		int minuti1 = toMinute(ldt1);
+//		int minuti2 = toMinute(ldt2);
+//		int difference = minuti2-minuti1;
+//		timeAdjust = getWorkingTimeTypeDay().breakTicketTime-difference;
+//		return timeAdjust;
+//
+//	}
 
-		return ld2mod;
-	}
-
-	/**
-	 * 
-	 * @param ldt1
-	 * @param ldt2
-	 * @return il numero di minuti di differenza tra i 30 minuti minimi di pausa pranzo e quelli effettivamente fatti tra la timbratura
-	 * d'uscita per la pausa pranzo e quella di ingresso dopo la pausa stessa
-	 */
-	public int timeAdjust(LocalDateTime ldt1, LocalDateTime ldt2){
-		int timeAdjust=0;
-		int minuti1 = toMinute(ldt1);
-		int minuti2 = toMinute(ldt2);
-		int difference = minuti2-minuti1;
-		timeAdjust = getWorkingTimeTypeDay().breakTicketTime-difference;
-		return timeAdjust;
-
-	}
-
-	/**
-	 * 
-	 * @param difference
-	 * @return
-	 */
-	public LocalDateTime convertDifference(int difference){
-
-		if(difference>=0){
-			int hour = (int)difference/60;
-			int minute = (int)difference%60;
-			LocalDateTime ldt = new LocalDateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),hour,minute,0);
-			return ldt;
-		}
-		else{
-			difference = -difference;
-			int hour = (int)difference/60;
-			int minute = (int)difference%60;
-			LocalDateTime ldt = new LocalDateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),hour,minute,0);
-			return ldt;
-		}
-	}
+//	/**
+//	 * 
+//	 * @param difference
+//	 * @return
+//	 */
+//	public LocalDateTime convertDifference(int difference){
+//
+//		if(difference>=0){
+//			int hour = (int)difference/60;
+//			int minute = (int)difference%60;
+//			LocalDateTime ldt = new LocalDateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),hour,minute,0);
+//			return ldt;
+//		}
+//		else{
+//			difference = -difference;
+//			int hour = (int)difference/60;
+//			int minute = (int)difference%60;
+//			LocalDateTime ldt = new LocalDateTime(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth(),hour,minute,0);
+//			return ldt;
+//		}
+//	}
 
 	public StampProfile getStampProfile() {
 		List<StampProfile> stampProfiles = 
@@ -1305,54 +1294,53 @@ public class PersonDay extends Model {
 		return null;
 	}
 	
-	/** (alessandro)
-	 * True se il personDay contiene una sequenza corretta di stampings
-	 * @return false in caso di nessuna timbratura, timbrature dispari, timbrature consecutive
-	 */
-	public boolean containsProperStampingSequence()
-	{
-		if(this.stampings.size() == 0)					//zero timbrature
-		{
-			return false;
-		}
-		else if(this.stampings.size()%2==1)				//timbrature dispari
-		{
-			return false;
-		}
-		else											//timbrature pari ma in/in oppure out/out
-		{
-			String lastWay = "out";						
-			for(Stamping s : this.stampings)
-			{
-				if(s.way.description.equals(lastWay))
-				{
-					return false;
-				}
-				lastWay = s.way.description;
-			}
-		}
-		return true;
-	}
+//	/** (alessandro)
+//	 * True se il personDay contiene una sequenza corretta di stampings
+//	 * @return false in caso di nessuna timbratura, timbrature dispari, timbrature consecutive
+//	 */
+//	public boolean containsProperStampingSequence()
+//	{
+//		if(this.stampings.size() == 0)					//zero timbrature
+//		{
+//			return false;
+//		}
+//		else if(this.stampings.size()%2==1)				//timbrature dispari
+//		{
+//			return false;
+//		}
+//		else											//timbrature pari ma in/in oppure out/out
+//		{
+//			String lastWay = "out";						
+//			for(Stamping s : this.stampings)
+//			{
+//				if(s.way.description.equals(lastWay))
+//				{
+//					return false;
+//				}
+//				lastWay = s.way.description;
+//			}
+//		}
+//		return true;
+//	}
 	
-	/**
-	 * TODO appena riscrivo il metodo di riepilogo mensile con PersonDaysInTrouble si puo' cancellare
-	 * ed il metodo ufficiale diventa isAllDayAbsences
-	 *  (alessandro)
-	 * True se il personDay contiene una assenza con tempo giustificato AllDay, false altrimenti
-	 * @return
-	 */
-	public boolean containsAllDayAbsence()
-	{
-		for(Absence ab : this.absences)
-		{
-			if(ab.absenceType.justifiedTimeAtWork.description.equals("Tutto il giorno"))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-	
+//	/**
+//	 * ed il metodo ufficiale diventa isAllDayAbsences
+//	 *  (alessandro)
+//	 * True se il personDay contiene una assenza con tempo giustificato AllDay, false altrimenti
+//	 * @return
+//	 */
+//	public boolean containsAllDayAbsence()
+//	{
+//		for(Absence ab : this.absences)
+//		{
+//			if(ab.absenceType.justifiedTimeAtWork.description.equals("Tutto il giorno"))
+//			{
+//				return true;
+//			}
+//		}
+//		return false;
+//	}
+//	
 	/** (alessandro)
 	 * True se il personDay appartiene a un giorno festivo per la persona
 	 * @param personWttd

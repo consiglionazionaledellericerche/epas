@@ -120,121 +120,23 @@ public class Administration extends Controller {
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void fixPersonSituation(Long personId, int year, int month){
 		
-		if(personId==-1)
-			personId=null;
+		PersonUtility.fixPersonSituation(personId, year, month);
+	}
+	
+	
+//	public static void updateCauseInTrouble()
+//	{
+//		List<PersonDayInTrouble> tList = PersonDayInTrouble.findAll();
+//		for(PersonDayInTrouble t : tList)
+//		{
+//			if(t.personDay.isFixedTimeAtWork())
+//			{
+//				t.cause = "timbratura disaccoppiata persona fixed";
+//				t.save();
+//			}
+//		}
+//	}
 
-		
-		
-		
-		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
-		JPAPlugin.startTx(false);
-		if(personId==null)
-		{
-			List<Person> personList = Person.getActivePersonsInMonth(month, year);
-			for(Person person : personList)
-			{
-				PersonUtility.checkHistoryError(person.id, year, month);
-			}
-		}
-		else
-		{
-			PersonUtility.checkHistoryError(personId, year, month);
-		}
-		JPAPlugin.closeTx(false);
-		
-		
-		
-		
-		// (2) Ricalcolo i valori dei person day aggregandoli per mese
-		JPAPlugin.startTx(true);
-		List<Person> personList = new ArrayList<Person>();
-		if(personId == null)
-		{
-			personList = Person.findAll();
-		}
-		else
-		{
-			Person person = Person.findById(personId);
-			personList.add(person);
-		}
-		JPAPlugin.closeTx(false);
-		
-		int i = 1;
-		
-		for(Person p : personList){
-			Logger.info("Update person situation %s (%s di %s) dal %s-%s-01 a oggi", p.surname, i++, personList.size(), year, month);
-			
-			LocalDate actualMonth = new LocalDate(year, month, 1);
-			LocalDate endMonth = new LocalDate().withDayOfMonth(1);
-			JPAPlugin.startTx(false);
-			while(!actualMonth.isAfter(endMonth))
-			{
-			
-				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
-						p,
-						actualMonth, 
-						actualMonth.dayOfMonth().withMaximumValue())
-						.fetch();
-				for(PersonDay pd : pdList){
-					pd.populatePersonDay();
-				}
-				actualMonth = actualMonth.plusMonths(1);
-				
-				
-				
-			}
-			JPAPlugin.closeTx(false);
-		}
-		/*
-		// (3) Ricalcolo dei residui mensili
-		i = 1;
-		for(Person p: personList)
-		{
-			Logger.info("Update residui per %s (%s di %s)", p.surname, i++, personList.size());
-			LocalDate actualMonth = new LocalDate(year, month, 1);
-			LocalDate endMonth = new LocalDate().withDayOfMonth(1);
-			JPAPlugin.startTx(false);
-			
-			
-			//distruggere i personMonth
-			//List<PersonMonth> pmList = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = 2013 and pm.month > 0", p).fetch();
-			//for(PersonMonth pm : pmList)
-			//{
-			//	pm.delete();
-			
-			//}
-			
-			while(!actualMonth.isAfter(endMonth))
-			{
-				PersonMonth pm = PersonMonth.build(p, actualMonth.getYear(), actualMonth.getMonthOfYear());
-				//pm.aggiornaRiepiloghi();
-				pm.save();
-				
-				actualMonth = actualMonth.plusMonths(1);
-				
-			}
-			JPAPlugin.closeTx(false);
-			
-		}
-		*/
-		//flash.success("fixPersonSituation applicato con successo");
-		//Application.indexAdmin();
-	}
-	
-	
-	public static void updateCauseInTrouble()
-	{
-		List<PersonDayInTrouble> tList = PersonDayInTrouble.findAll();
-		for(PersonDayInTrouble t : tList)
-		{
-			if(t.personDay.isFixedTimeAtWork())
-			{
-				t.cause = "timbratura disaccoppiata persona fixed";
-				t.save();
-			}
-		}
-	}
-	
 	public static void buildYaml()
 	{
 		//general

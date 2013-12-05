@@ -12,6 +12,7 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
+import play.Logger;
 import play.data.validation.Unique;
 import play.db.jpa.Model;
 
@@ -34,5 +35,28 @@ public class PersonDayInTrouble extends Model
 	{
 		this.fixed = false;
 		this.emailSent = false;
+	}
+	
+	public static void insertPersonDayInTrouble(PersonDay pd, String cause)
+	{
+		PersonDayInTrouble pdt = PersonDayInTrouble.find("Select pdt from PersonDayInTrouble pdt where pdt.personDay = ?", pd).first();
+		if(pdt==null)
+		{	
+			//se non esiste lo creo
+			Logger.info("Nuovo PersonDayInTrouble %s %s %s - %s - %s", pd.person.id, pd.person.name, pd.person.surname, pd.date, cause);
+			PersonDayInTrouble trouble = new PersonDayInTrouble();
+			trouble.personDay = pd;
+			trouble.cause = cause;
+			trouble.save();
+			return;
+		}
+		if(pdt!=null)
+		{
+			//se esiste lo setto fixed = false;
+			pdt.fixed = false;
+			pdt.cause = cause;
+			pdt.save();
+		}
+		
 	}
 }

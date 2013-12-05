@@ -147,71 +147,73 @@ Il numero di buoni mensa usabili per questo mese e': <strong>${pm.numberOfMealTi
 <br>Il numero di giorni lavorativi in sede è di: <strong>${pm.basedWorkingDays()}</strong> 
 </font>
 </p>
-	
-<div>
-<h4 align="left"><font size="3">Note:</font></h4>
-<table>
-	<tr>
-		<th width="80"><font size="2">Codice timbratura</font></th>
-		<th width="400"><font size="2">Descrizione</font></th>
-			
-	</tr>
-%{
-     for(smt in pm.getStampingCode()) {
-}%
-	<tr>
-		<td><font size="2">${smt.code})</font></td>     
-		<td><font size="2">${smt.description}</font></td>		
-	</tr>
-	
-%{  		   
-     }
-     
-}%
-%{	if(pm.getStampType() != null){
-	for(type in pm.getStampType()) {
-}%
-	<tr>
-		<td><font size="2">${type.identifier} )</font></td>
-		<td><font size="2">${type.description}</font></td>
-	</tr>
-%{  		   
-     }
-    }
-}%
-</table>
-*{Significato codici assenza}*
-<br>
-<br>
+<p id="spiegazioneTabellaTimbrature"/>
+<div id="tabelleRiassuntive">
+%{if(!stampModificationTypeList.isEmpty()) { }%
 
-<h4 align="left"><font size="3">Codici di assenza</font></h4>
+	<h3 style="margin-top: 2em">Note:</h3>
+	<table id="Note timbrature">
+		<tr>
+			<th width="80">Codice timbratura</th>
+			<th width="400">Descrizione</th>
+				
+		</tr>
+		%{
+	     for(smt in stampModificationTypeList) {
+		}%
+			<tr>
+				<td>${smt.code}</td>     
+				<td>${smt.description}</td>		
+			</tr>
+		
+		%{  		   
+	     }
+	     
+		}%
+		%{
+		for(type in stampTypeList) 
+		{
+		}%
+			<tr>
+				<td>${type.identifier}</td>
+				<td>${type.description}</td>
+			</tr>
+		%{  		   
+	    }
+	    }%
+	</table>
+%{ 
+}
+}%
+
+*{Significato codici assenza}*
+<h3 style="margin-top: 2em">Tabella codici di assenza</h3>
 <table id="Codici di assenza">
 	<tr>
-		<th width="80"><font size="2">Codice assenza</font></th>
-		<th width="200"><font size="2">Descrizione</font></th>
-		<th width="80"><font size="2">Numero giorni</font></th>
+		<th width="80">Codice assenza</th>
+		<th width="200">Descrizione</th>
+		<th width="80">Numero giorni</th>
 			
 	</tr>
-%{
-     for(entry in pm.getAbsenceCode().entrySet()) {
-}%
+	%{
+     for(entry in personMonth.getAbsenceCode().entrySet()) {
+	}%
 	<tr>
-		<td><font size="2">${entry.getKey().code}</font></td>     
-		<td><font size="2">${entry.getKey().description}</font></td>	
-		<td><font size="2">${entry.getValue()}</font></td>	
+		<td>${entry.getKey().code}</td>     
+		<td>${entry.getKey().description}</td>	
+		<td>${entry.getValue()}</td>	
 	</tr>
 
 %{  		   
-     }
-     
-}%
+ }
+}%     
 </table>
 </div>
 
-<p>SI AUTOCERTIFICA QUANTO SCRITTO NELLE NOTE
-<br>
-
-Firma
+<p>
+	SI AUTOCERTIFICA QUANTO SCRITTO NELLE NOTE
+	<br>
+	Firma
 </p>
 
 
