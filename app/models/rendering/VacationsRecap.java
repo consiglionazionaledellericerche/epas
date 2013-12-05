@@ -172,7 +172,8 @@ public class VacationsRecap {
 
 	}
 
-
+	
+	
 
 	/**
 	 * 
@@ -225,7 +226,42 @@ public class VacationsRecap {
 
 	}
 	
-
-	
+	/**
+	 * metodo che ritorna il numero di giorni di ferie dell'anno scorso ancora disponibili dopo il 31/8
+	 * controlla anche se dei "37" sono stati utilizzati fino alla data in cui si chiama il metodo di inserimento.
+	 */
+	public static int remainingPastVacations(int year, Person person, AbsenceType abt){
+		int days = 0;
+		Configuration config = Configuration.getCurrentConfiguration();
+		Contract contractLastYear = person.getContract(new LocalDate(year-1,12,31));
+		if(contractLastYear == null)
+			return 0;
+		
+		VacationCode code = VacationCode.find("Select code from VacationCode code, VacationPeriod period where period.vacationCode = code" +
+				" and period.contract = ? ", contractLastYear).first();
+		if(code == null)
+			return 0;
+		DateInterval inter = new DateInterval(new LocalDate(year,1,1), new LocalDate(year, config.monthExpiryVacationPastYear, config.dayExpiryVacationPastYear));
+		DateInterval pastInter = new DateInterval(new LocalDate(year-1,1,1), new LocalDate(year-1,12,31));
+		DateInterval inter37 = new DateInterval(
+				new LocalDate(year, config.monthExpiryVacationPastYear,config.dayExpiryVacationPastYear).plusDays(1), new LocalDate().monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue());
+		Contract contract = person.getCurrentContract();
+		AbsenceType ab32 = AbsenceType.find("byCode", "32").first();
+		AbsenceType ab31 = AbsenceType.find("byCode", "31").first();
+		AbsenceType ab37 = AbsenceType.find("byCode", "37").first();
+		Logger.debug("Il tipo di assenza è: %s", ab37.description);
+		List<Absence> absencePastYearThisYear = getVacationDays(inter, contract, ab31);
+		List<Absence> absencePastYearLastYear = getVacationDays(pastInter, contractLastYear, ab32);
+		List<Absence> absence37 = getVacationDays(inter37, contract, ab37);
+		
+		Logger.debug("La somma dei giorni di ferie tra anno passato e anno attuale è: %d", absencePastYearThisYear.size()+absencePastYearLastYear.size());
+		Logger.debug("I codici %s già usati quest'anno sono: %d", ab37.code,  absence37.size());
+		Logger.debug("I giorni da usare di ferie per un anno sono: %d", code.vacationDays);
+		if(absencePastYearThisYear.size()+absencePastYearLastYear.size()+ absence37.size() < code.vacationDays)
+			return code.vacationDays - absencePastYearThisYear.size()+absencePastYearLastYear.size()+ absence37.size();
+		else
+			
+		return days;
+	}
 
 }
