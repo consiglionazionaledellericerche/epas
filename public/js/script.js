@@ -32,6 +32,9 @@ $('#myModal2').on('hidden', function(){
     $(this).data('modal', null);
 });
 
+$('#myModal3').on('hidden', function(){
+    $(this).data('modal', null);
+});
 
 
 
