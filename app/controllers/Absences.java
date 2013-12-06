@@ -450,6 +450,9 @@ public class Absences extends Controller{
 					absence.absenceType = abt;
 					absence.personDay = pd;
 					absence.save();
+					pd.absences.add(absence);
+					pd.populatePersonDay();
+					pd.save();
 					pd.updatePersonDay();
 					
 					flash.success("Inserito il codice di assenza %s per il giorno %s", abt.code, pd.date);
@@ -468,6 +471,7 @@ public class Absences extends Controller{
 							absence.absenceType = abt;
 							absence.personDay = pd;
 							absence.save();
+							pd.absences.add(absence);
 							pd.save();
 							pd.populatePersonDay();
 							pd.updatePersonDay();
@@ -487,7 +491,7 @@ public class Absences extends Controller{
 								absence.personDay = pd;
 								absence.save();
 								pd.absences.add(absence);
-								pd.merge();
+								pd.save();
 
 								pd.populatePersonDay();
 								pd.save();
@@ -703,6 +707,7 @@ public class Absences extends Controller{
 					absence.absenceType = absenceType;
 					absence.personDay = pdInside;
 					absence.save();
+					pdInside.addAbsence(absence);
 					pdInside.populatePersonDay();
 					pdInside.save();
 					
@@ -722,6 +727,7 @@ public class Absences extends Controller{
 						absence.absenceType = absenceType;
 						absence.personDay = pdInside;
 						absence.save();
+						pdInside.absences.add(absence);
 						pdInside.populatePersonDay();
 						pdInside.save();
 						pdInside.updatePersonDay();
@@ -910,17 +916,25 @@ public class Absences extends Controller{
 			Logger.debug("Data inizio assenze %s", dataInizioAssenze);
 			PersonDay pd = null;
 			if(absenceCode.equals("") || absenceCode == null){
-				while(!dataInizioAssenze.isEqual(dataFineAssenze)){
+				while(!dataInizioAssenze.isAfter(dataFineAssenze)){
 					Logger.debug("Intendo cancellare assenza per il giorno %s ", dataInizioAssenze);
 					pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", absence.personDay.person, dataInizioAssenze).first();
-					Absence abs = Absence.find("Select a from Absence a, PersonDay pd where a.personDay = pd and pd.person = ? and pd.date = ?", 
-							absence.personDay.person, dataInizioAssenze).first();
-					abs.delete();
-					pd.absences.remove(abs);
-					pd.populatePersonDay();
-					pd.save();				
+					if(pd == null){
+						dataInizioAssenze = dataInizioAssenze.plusDays(1);
+					}
+					else{
+						Absence abs = Absence.find("Select a from Absence a, PersonDay pd where a.personDay = pd and pd.person = ? and pd.date = ?", 
+								pd.person, dataInizioAssenze).first();
+						if(abs != null){
+							abs.delete();
+							pd.absences.remove(abs);
+							pd.populatePersonDay();
+							pd.save();
+						}									
+						
+						dataInizioAssenze = dataInizioAssenze.plusDays(1);
+					}
 					
-					dataInizioAssenze = dataInizioAssenze.plusDays(1);
 				}
 				
 				
