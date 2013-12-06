@@ -135,6 +135,35 @@ td, th {
 	border-style: none
 }
 
+/** Modal inserimento assenza **/
+div#myModal1 {
+    width: 600px;
+    /* must be half of the width, minus scrollbar on the left (30px) */
+    margin-left: -300px;
+}
+#myModal1 .modal-body {
+    max-height: 1000px;
+}
+/** Modal inserimento timbratura **/
+div#myModal2 {
+    width: 600px;
+    /* must be half of the width, minus scrollbar on the left (30px) */
+    margin-left: -300px;
+    margin-top: -400px;
+}
+#myModal2 .modal-body {
+    max-height: 800px;
+}
+/** Modal visualizzazione riepilogo assenze **/
+div#myModal3 {
+    width: 600px;
+    /* must be half of the width, minus scrollbar on the left (30px) */
+    margin-left: -300px;
+    margin-top: -400px;
+}
+#myModal3 .modal-body {
+    max-height: 720px;
+}
 
 /** Forms **/
 
