@@ -779,6 +779,7 @@ public class PersonDay extends Model {
 		 * TODO: inserire qui una chiamata alla fixPersonSituation di Administration quando le modifiche dovranno ripercuotersi anche 
 		 * sui personMonth
 		 */
+		Logger.info("Update Person Day %s by %s %s Completata", this.date, this.person.name, this.person.surname);
 	}
 
 	/**
