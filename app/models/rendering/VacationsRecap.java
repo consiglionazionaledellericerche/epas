@@ -83,10 +83,13 @@ public class VacationsRecap {
 		
 		AbsenceType ab32 = AbsenceType.getAbsenceTypeByCode("32");
 		AbsenceType ab31 = AbsenceType.getAbsenceTypeByCode("31");
+		AbsenceType ab37 = AbsenceType.getAbsenceTypeByCode("37");
 		AbsenceType ab94 = AbsenceType.getAbsenceTypeByCode("94");
 
 		this.vacationDaysLastYearUsed.addAll(getVacationDays(new DateInterval(startLastYear, endLastYear), currentContract, ab32));
 		this.vacationDaysLastYearUsed.addAll(getVacationDays(new DateInterval(startYear, endYear), currentContract, ab31));
+		this.vacationDaysLastYearUsed.addAll(getVacationDays(new DateInterval(startYear, endYear), currentContract, ab37));
+		
 										 
 		this.vacationDaysCurrentYearUsed.addAll(getVacationDays(new DateInterval(startYear, endYear), currentContract, ab32));
 		
