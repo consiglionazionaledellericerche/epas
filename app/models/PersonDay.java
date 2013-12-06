@@ -666,6 +666,14 @@ public class PersonDay extends Model {
 	public void populatePersonDay(){
 		Contract con = person.getContract(date);
 
+		try {
+			if(this.date.isBefore(new LocalDate()))
+				this.checkForPersonDayInTrouble();
+		} 
+		catch(Exception e) {
+			Logger.info("Catturata eccezione checkForPersonDayInTrouble person=%s, giorno=%s", this.person, this.date);
+		}
+		
 		//Se la persona non ha un contratto attivo non si fanno calcoli per quel giorno
 		//Le timbrature vengono comunque mantenute
 		if (con == null) {
@@ -688,13 +696,7 @@ public class PersonDay extends Model {
 		//merge();
 		save();
 		
-		try {
-			if(this.date.isBefore(new LocalDate()))
-				this.checkForPersonDayInTrouble();
-		} 
-		catch(Exception e) {
-			Logger.info("Catturata eccezione checkForPersonDayInTrouble person=%s, giorno=%s", this.person, this.date);
-		}
+		
 	}
 	
 	/**
@@ -747,6 +749,11 @@ public class PersonDay extends Model {
 		//giorno senza problemi, se era in trouble lo fixo
 		if(this.troubles!=null && this.troubles.size()>0)
 		{
+			PersonDayInTrouble pdt = troubles.get(0);
+			Logger.info("Il problema %s %s %s e' risultato fixato", this.date, this.person.surname, this.person.name);
+			pdt.fixed = true;
+			pdt.save();
+			/*
 			for(PersonDayInTrouble pdt : this.troubles)
 			{
 				Logger.info("Il problema %s %s %s e' risultato fixato", this.date, this.person.surname, this.person.name);
@@ -754,6 +761,7 @@ public class PersonDay extends Model {
 				pdt.save();
 				
 			}
+			*/
 		}
 	}
 	

@@ -431,6 +431,7 @@ public class Stampings extends Controller {
 		pd.updatePersonDay();
 		
 		flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
+
 		Stampings.personStamping(personId, year, month);
 
 
