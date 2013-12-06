@@ -734,12 +734,22 @@ public class PersonUtility {
 					absenceType.absenceTypeGroup.label, person, date.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), date).fetch();
 			Logger.debug("List size: %d", absList.size());
 			for(Absence abs : absList){
-				
-				totalMinutesJustified = totalMinutesJustified+abs.absenceType.justifiedTimeAtWork.minutesJustified;
+				if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay)
+					totalMinutesJustified = person.getCurrentWorkingTimeType().getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime;
+				else{
+					
+					totalMinutesJustified = totalMinutesJustified+abs.absenceType.justifiedTimeAtWork.minutesJustified;
+				}
+					
 				
 			}
 			Logger.debug("TotalMinutesJustified= %d. Minuti giustificati: %d", totalMinutesJustified, absenceType.justifiedTimeAtWork.minutesJustified);
-			if(absenceType.absenceTypeGroup.limitInMinute >= totalMinutesJustified+absenceType.justifiedTimeAtWork.minutesJustified)
+			int quantitaGiustificata;
+			if(absenceType.justifiedTimeAtWork != JustifiedTimeAtWork.AllDay)
+				quantitaGiustificata = absenceType.justifiedTimeAtWork.minutesJustified;
+			else
+				quantitaGiustificata = person.getCurrentWorkingTimeType().getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime;
+			if(absenceType.absenceTypeGroup.limitInMinute >= totalMinutesJustified+quantitaGiustificata)
 				return new CheckMessage(true, "E' possibile prendere il codice di assenza", null);
 			else
 				return new CheckMessage(false, "La quantità usata nell'arco dell'anno per questo codice ha raggiunto il limite. Non si può usarne un altro.", null);
