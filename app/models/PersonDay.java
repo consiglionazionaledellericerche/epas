@@ -674,21 +674,27 @@ public class PersonDay extends Model {
 		}
 
 		updateTimeAtWork();
-		merge();
+		//merge();
 		updateDifference();
-		merge();
+		//merge();
 		updateProgressive();	
-		merge();
+		//merge();
 		
 		//il pranzo
 		if(this.isTicketForcedByAdmin)
 			this.isTicketAvailable = true;
 		else
 			this.isTicketAvailable = this.isTicketAvailable && checkTicketAvailableForWorkingTime();
-		merge();
-
-		//if(this.date.isBefore(new LocalDate()))
-			//this.checkForPersonDayInTrouble();
+		//merge();
+		save();
+		
+		try {
+			if(this.date.isBefore(new LocalDate()))
+				this.checkForPersonDayInTrouble();
+		} 
+		catch(Exception e) {
+			Logger.info("Catturata eccezione checkForPersonDayInTrouble person=%s, giorno=%s", this.person, this.date);
+		}
 	}
 	
 	/**
