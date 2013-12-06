@@ -738,7 +738,7 @@ public class PersonDay extends Model {
 				return;
 			}
 			//caso no festa, no assenze, timbrature disaccoppiate
-			else if(!this.isAllDayAbsences() && !this.isHoliday())
+			if(!this.isAllDayAbsences() && !this.isHoliday())
 			{
 				this.computeValidStampings();
 				for(Stamping s : this.stampings)
