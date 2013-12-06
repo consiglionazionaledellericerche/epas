@@ -18,7 +18,9 @@ public class PersonTroublesInMonthRecap {
 	public Person person;
 	public String troublesAutoFixed = "";
 	public String troublesNoAbsenceNoStampings = "";
-	public String troublesUncoupledStampings = "";
+	public String troublesNoAbsenceUncoupledStampingsNotHoliday = "";
+	public String troublesNoAbsenceUncoupledStampingsHoliday = "";
+	
 
 	
 	/**
@@ -45,9 +47,14 @@ public class PersonTroublesInMonthRecap {
 				this.troublesNoAbsenceNoStampings = this.troublesNoAbsenceNoStampings + trouble.personDay.date.getDayOfMonth() + ", ";
 			}
 			
-			if(trouble.cause.equals("timbratura disaccoppiata"))
+			if(trouble.cause.equals("timbratura disaccoppiata giorno feriale"))
 			{
-				this.troublesUncoupledStampings = this.troublesUncoupledStampings + trouble.personDay.date.getDayOfMonth() + ", ";
+				this.troublesNoAbsenceUncoupledStampingsNotHoliday = this.troublesNoAbsenceUncoupledStampingsNotHoliday + trouble.personDay.date.getDayOfMonth() + ", ";
+			}
+			
+			if(trouble.cause.equals("timbratura disaccoppiata giorno festivo"))
+			{
+				this.troublesNoAbsenceUncoupledStampingsHoliday = this.troublesNoAbsenceUncoupledStampingsHoliday + trouble.personDay.date.getDayOfMonth() + ", ";
 			}
 				
 				
@@ -59,8 +66,10 @@ public class PersonTroublesInMonthRecap {
 		if(this.troublesNoAbsenceNoStampings.endsWith(", "))
 			this.troublesNoAbsenceNoStampings = this.troublesNoAbsenceNoStampings.substring(0, this.troublesNoAbsenceNoStampings.length()-2);
 		
-		if(this.troublesUncoupledStampings.endsWith(", "))
-			this.troublesUncoupledStampings = this.troublesUncoupledStampings.substring(0, this.troublesUncoupledStampings.length()-2);
+		if(this.troublesNoAbsenceUncoupledStampingsNotHoliday.endsWith(", "))
+			this.troublesNoAbsenceUncoupledStampingsNotHoliday = this.troublesNoAbsenceUncoupledStampingsNotHoliday.substring(0, this.troublesNoAbsenceUncoupledStampingsNotHoliday.length()-2);
+		if(this.troublesNoAbsenceUncoupledStampingsHoliday.endsWith(", "))
+			this.troublesNoAbsenceUncoupledStampingsHoliday = this.troublesNoAbsenceUncoupledStampingsHoliday.substring(0, this.troublesNoAbsenceUncoupledStampingsHoliday.length()-2);
 	} 
 	
 	
