@@ -8,8 +8,9 @@
 	<tr>
 		<th>Nome</th>
 		<th>No assenze e timbrature</th>
-		<th>Timbrature disaccoppiate</th>
-		<th>Timbrature disaccoppiate persone autocertificate</th>
+		<th>Timbrature disaccoppiate giorno feriale</th>
+		<th>Timbrature disaccoppiate giorno festivo</th>
+		
 	</tr>
 	
 	#{list items:missingStampings, as:'personMissingStampings'}
@@ -20,10 +21,10 @@
 			${personMissingStampings.troublesNoAbsenceNoStampings}
 	    </td>
 	    <td>
-			${personMissingStampings.troublesUncoupledStampings}
+			${personMissingStampings.troublesNoAbsenceUncoupledStampingsNotHoliday}
 	    </td>
 	    <td>
-			${personMissingStampings.troublesAutoFixed}
+			${personMissingStampings.troublesNoAbsenceUncoupledStampingsHoliday}
 	    </td>
 	#{/list}
 	</tr>

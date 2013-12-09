@@ -731,37 +731,47 @@ public class PersonDay extends Model {
 		//persona not fixed
 		else
 		{
+			//caso no festa, no assenze, no timbrature
 			if(!this.isAllDayAbsences() && this.stampings.size()==0 && !this.isHoliday())
 			{
 				PersonDayInTrouble.insertPersonDayInTrouble(this, "no assenze giornaliere e no timbrature");
 				return;
 			}
-			this.computeValidStampings();
-			for(Stamping s : this.stampings)
+			//caso no festa, no assenze, timbrature disaccoppiate
+			if(!this.isAllDayAbsences() && !this.isHoliday())
 			{
-				if(!s.valid)
+				this.computeValidStampings();
+				for(Stamping s : this.stampings)
 				{
-					PersonDayInTrouble.insertPersonDayInTrouble(this, "timbratura disaccoppiata");
-					return;
+					if(!s.valid)
+					{
+						PersonDayInTrouble.insertPersonDayInTrouble(this, "timbratura disaccoppiata giorno feriale");
+						return;
+					}
+				}
+			}
+			//caso festa, no assenze, timbrature disaccoppiate
+			else if(!this.isAllDayAbsences() && this.isHoliday())
+			{
+				this.computeValidStampings();
+				for(Stamping s : this.stampings)
+				{
+					if(!s.valid)
+					{
+						PersonDayInTrouble.insertPersonDayInTrouble(this, "timbratura disaccoppiata giorno festivo");
+						return;
+					}
 				}
 			}
 		}
 		//giorno senza problemi, se era in trouble lo fixo
 		if(this.troubles!=null && this.troubles.size()>0)
 		{
+			//per adesso no storia, unico record
 			PersonDayInTrouble pdt = troubles.get(0);
 			Logger.info("Il problema %s %s %s e' risultato fixato", this.date, this.person.surname, this.person.name);
 			pdt.fixed = true;
 			pdt.save();
-			/*
-			for(PersonDayInTrouble pdt : this.troubles)
-			{
-				Logger.info("Il problema %s %s %s e' risultato fixato", this.date, this.person.surname, this.person.name);
-				pdt.fixed = true;
-				pdt.save();
-				
-			}
-			*/
 		}
 	}
 	
