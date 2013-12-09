@@ -63,6 +63,10 @@ public class Application extends Controller {
     
 	
     public static void index() {
+    	if(Security.getPerson().username.equals("epas.clocks")){
+    		Clocks.show();
+    		return;
+    	}
     	if(Security.getPerson().username.equals("admin")){
     		Persons.list();
     		return;
