@@ -65,9 +65,11 @@ public class Clocks extends Controller{
 		stamp.personDay = pd;
 		stamp.save();
 		pd.stampings.add(stamp);
-		pd.merge();
+		pd.save();
+		
 		Logger.debug("Faccio i calcoli per %s %s sul personday %s chiamando la populatePersonDay", person.name, person.surname, pd);
 		pd.populatePersonDay();
+		pd.updatePersonDay();
 		//pd.save();
 		flash.success("Aggiunta timbratura per %s %s", person.name, person.surname);
 		show();
