@@ -1,6 +1,7 @@
 package controllers;
 
 import it.cnr.iit.epas.MainMenu;
+import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,11 +9,17 @@ import java.util.List;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
+import models.Configuration;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
+import models.PersonMonth;
+import models.StampModificationType;
+import models.StampType;
 import models.Stamping;
 import models.Stamping.WayType;
+import models.exports.StampingFromClient;
+import models.rendering.PersonStampingDayRecap;
 import play.Logger;
 import play.cache.Cache;
 import play.mvc.Controller;
@@ -21,23 +28,71 @@ public class Clocks extends Controller{
 
 	public static void show(){
 		LocalDate data = new LocalDate();
-		List<Person> personList = new ArrayList<Person>();
 		MainMenu mainMenu = new MainMenu(data.getYear(),data.getMonthOfYear());
-		List<Person> genericPerson = Person.find("Select p from Person p order by p.surname").fetch();
-		for(Person p : genericPerson){
-			Logger.debug("Cerco il contratto per %s %s per stabilire se metterlo/a in lista", p.name, p.surname);
-			Contract c = Contract.find("Select c from Contract c where c.person = ? and ((c.beginContract != null and c.expireContract = null) or " +
-					"(c.expireContract > ?)) order by c.beginContract desc limit 1", p, new LocalDate()).first();
-			//Logger.debug("Il contratto per %s %s è: %s", p.name, p.surname, c.toString());
-			if(c != null && c.onCertificate == true){
-				personList.add(p);
-				Logger.debug("Il contratto rispecchia i criteri quindi %s %s va in lista", p.name, p.surname);
-			}
-
-		}
-		
+		List<Person> personList = Person.getActivePersonsInMonth(data.getMonthOfYear(), data.getYear());
 		render(data, personList,mainMenu);
 	}
+	
+	
+	public static void clockLogin(Long personId, String password)
+	{
+		LocalDate today = new LocalDate();
+		
+		if(personId==0)
+		{
+			flash.error("Utente non selezionato");
+			Clocks.show();
+		}
+		
+		
+		
+		Person person = Person.find("SELECT p FROM Person p where id = ? and password = md5(?)",personId, password).first();
+		if(person == null)
+		{
+			flash.error("Password non corretta");
+			Clocks.show();
+		}
+		
+	
+		//TODO 18/10 creare un metodo statico in models.person getPersonMonth(int year, int month)
+		PersonMonth personMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?",
+				person, today.getMonthOfYear(), today.getYear()).first();
+		
+		//calcolo del valore valid per le stamping del mese
+		personMonth.getDays();
+		for(PersonDay pd : personMonth.days)
+		{
+			pd.computeValidStampings();
+		}		
+
+		//numero di colonne da visualizzare
+		Configuration conf = Configuration.getCurrentConfiguration();
+		int minInOutColumn = conf.numberOfViewingCoupleColumn;
+
+	
+
+		
+		//Nuova struttura dati per stampare
+		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
+		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();							
+
+		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, today).first();
+		if(pd == null){
+			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", person.name, person.surname);
+			pd = new PersonDay(person, today);
+			pd.save();
+		}
+		
+		//numero di colonne da stampare
+		int numberOfInOut = Math.max(minInOutColumn,  PersonUtility.numberOfInOutInPersonDay(pd));
+		
+	
+		PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(pd,numberOfInOut);
+		
+		render(person, dayRecap, numberOfInOut);
+	}
+	
+	
 
 	/**
 	 * 
@@ -55,6 +110,25 @@ public class Clocks extends Controller{
 			pd = new PersonDay(person, ldt.toLocalDate());
 			pd.save();
 		}
+		
+		//Se la stamping esiste già mostro il riepilogo
+		int minNew = time.getMinuteOfHour();
+		for(Stamping s : pd.stampings){
+			int min = s.date.getMinuteOfHour();
+			int minMinusOne = s.date.plusMinutes(1).getMinuteOfHour();
+			if(minNew==min || minNew==minMinusOne)
+			{
+				
+				flash.error("Timbratura ore %s:%s gia' inserita, prossima timbratura accettata a partire da %s:%s",
+						s.date.getHourOfDay(), s.date.getMinuteOfHour(),
+						s.date.plusMinutes(2).getHourOfDay(), s.date.plusMinutes(2).getMinuteOfHour());
+				
+				Clocks.showRecap(personId);
+			}
+		}
+
+		
+		//Altrimenti la inserisco
 		Stamping stamp = new Stamping();
 		stamp.date = time;
 		if(params.get("type").equals("true")){
@@ -63,6 +137,7 @@ public class Clocks extends Controller{
 		else
 			stamp.way = WayType.out;
 		stamp.personDay = pd;
+		stamp.markedByAdmin = false;
 		stamp.save();
 		pd.stampings.add(stamp);
 		pd.save();
@@ -72,6 +147,54 @@ public class Clocks extends Controller{
 		pd.updatePersonDay();
 		//pd.save();
 		flash.success("Aggiunta timbratura per %s %s", person.name, person.surname);
-		show();
+		
+		Clocks.showRecap(personId);
 	}
+	
+	public static void showRecap(Long personId)
+	{
+		Person person = Person.findById(personId);
+		if(person == null)
+			throw new IllegalArgumentException("Persona non trovata!!!! Controllare l'id!");
+		
+		LocalDate today = new LocalDate();
+		//TODO 18/10 creare un metodo statico in models.person getPersonMonth(int year, int month)
+		PersonMonth personMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?",
+				person, today.getMonthOfYear(), today.getYear()).first();
+		
+		//calcolo del valore valid per le stamping del mese
+		personMonth.getDays();
+		for(PersonDay pd : personMonth.days)
+		{
+			pd.computeValidStampings();
+		}		
+
+		//numero di colonne da visualizzare
+		Configuration conf = Configuration.getCurrentConfiguration();
+		int minInOutColumn = conf.numberOfViewingCoupleColumn;
+
+	
+
+		
+		//Nuova struttura dati per stampare
+		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
+		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();							
+
+		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, today).first();
+		if(pd == null){
+			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", person.name, person.surname);
+			pd = new PersonDay(person, today);
+			pd.save();
+		}
+		
+		//numero di colonne da stampare
+		int numberOfInOut = Math.max(minInOutColumn,  PersonUtility.numberOfInOutInPersonDay(pd));
+		
+	
+		PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(pd,numberOfInOut);
+		
+		render(person, dayRecap, numberOfInOut);
+		
+	}
+
 }
