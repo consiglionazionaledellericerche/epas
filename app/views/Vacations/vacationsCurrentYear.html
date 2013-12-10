@@ -1,8 +1,5 @@
-#{extends 'main.html' /}
-#{set title:vacationsRecap.person.surname + ' ' + vacationsRecap.person.name + ', matricola=' + vacationsRecap.person.number /}
-
-<h3>Ferie fatte da ${vacationsRecap.person.surname + ' ' + vacationsRecap.person.name} nel ${vacationsRecap.year}</h3>
-<table>
+<h3 id="ferieFatte">Ferie fatte da ${vacationsRecap.person.surname + ' ' + vacationsRecap.person.name} nel ${vacationsRecap.year}</h3>
+<table class="table table-striped">
 	<tr>
 		<th>Giorno</th>
 		<th>Mese</th>

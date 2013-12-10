@@ -261,6 +261,7 @@ td#withoutborder{border-style: none}
 
 .capitalized {
 	text-transform: capitalize;	
+	text-align: center
 }
 
 th.giorni {width: 3em; text-align: center}
@@ -399,6 +400,7 @@ h3#riepilogoMensile {text-align: center; margin: 2em 0em 1em}
 h3#utentiEsistenti {text-align: center}
 h3#pianoFerie {text-align: center}
 h3#riepilogoOrarioLavoro {margin: 2em 2em 1em; align: center}
+h3#ferieFatte{text-align:center}
 iframe#clock {align: center; margin: 3em 58em 0em}
 
 h4#configurazioniEsistenti {margin:2em 0em 1em; text-align: left}
@@ -458,7 +460,7 @@ input#salvaVacationCode {margin: 4em 25em 6em}
 input#inserisciAssenza {margin: 1em 15em 0em; align: center}
 input#updateWorkingTime {margin: 2em 3em 0em 65em; align: center}
 input#insertWorkingTime {margin: 25em -4em 15em; align: center}
-input#submitContractPerson {margin: 2em 25em 0em; align:center}
+input#submitContractPerson {margin: 2em 17em 0em; align:center}
 input#note {margin: 1em 4em 0em; align: left}
 
 input#updateOldOvertime {margin: 0em 25em 0em; align: center}

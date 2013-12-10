@@ -76,7 +76,7 @@
 	<legend>Dati Contrattuali</legend>
 	<p>
 		
-		<a href="@{Persons.insertContract(person.id)}" class="insertContract${person.id}">Inserisci</a> un nuovo contratto
+		<a data-toggle="modal" href="@{Persons.insertContract(person.id)}" data-target="#myModal1" >Inserisci</a> un nuovo contratto
 		<script type="text/javascript"> 
 				$('.insertContract${person.id}').popupWindow({ 
 				height:480, 
@@ -98,9 +98,9 @@
 		</tr>
 		%{ for(contract in contractList){ }%
 		<tr>
-			<td><input name="beginContract" type="date" readOnly="readOnly"
+			<td><input name="beginContract" class="span2" type="date" readOnly="readOnly"
 				value="${contract.beginContract}" size="10" maxlength="10" /></td>
-			<td><input name="expireContract" type="date" readOnly="readOnly"
+			<td><input name="expireContract" class="span2" type="date" readOnly="readOnly"
 				value="${contract.expireContract}" size="10" maxlength="10" /></td> %{
 			if(contract.endContract == null){ }%
 			<td><a href="@{Persons.terminatePerson(person.id)}">Termina
@@ -110,7 +110,7 @@
 			<td><input name="onCertificate" type="checkbox" readOnly="readOnly"
 				value="${contract.onCertificate}" /></td>
 			<td>
-			<a href="@{Persons.modifyContract(contract.id)}" class="modifyContract${contract.id}"><input value="Modifica" class="Forminput" type="button"></a>
+			<a href="@{Persons.modifyContract(contract.id)}" class="modifyContract${contract.id}"><input value="Modifica" class="btn" type="button"></a>
 			<script type="text/javascript"> 
 				$('.modifyContract${contract.id}').popupWindow({ 
 				height:600, 
@@ -222,4 +222,19 @@
 #{form @Persons.deletePerson(person.id)}
 <input class="btn btn-danger" id="deletePerson" type="submit" value="Elimina" />
 #{/form}
+</div>
+
+
+<div id="myModal1" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Inserisci nuovo contratto per ${person.name} ${person.surname}</h3>
+  </div>
+  <div class="modal-body">
+    <p></p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+   <!--   <button class="btn btn-primary">Save changes</button>-->
+  </div>
 </div>
