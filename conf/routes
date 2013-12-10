@@ -163,6 +163,7 @@ POST	/printTags/showTag/{personId}			PrintTags.showTag
 
 #Clock
 GET		/clocks									Clocks.show
+POST	/clocks/clocklogin						Clocks.clockLogin
 
 
 

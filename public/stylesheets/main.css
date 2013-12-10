@@ -1,6 +1,6 @@
 html {
-    background: #e0e0e0;
-    
+    /* background: #e0e0e0; */
+    backgroung: white;
 }
 
 body {
@@ -399,7 +399,7 @@ h3#riepilogoMensile {text-align: center; margin: 2em 0em 1em}
 h3#utentiEsistenti {text-align: center}
 h3#pianoFerie {text-align: center}
 h3#riepilogoOrarioLavoro {margin: 2em 2em 1em; align: center}
-iframe#clock {align: center; margin: 3em 58em 0em}
+
 
 h4#configurazioniEsistenti {margin:2em 0em 1em; text-align: left}
 
@@ -492,3 +492,20 @@ table.riepilogo-ore td.ore {
 table.riepilogo-ore td.totale {
 	font-weight: bold;
 }
+
+/* clock */
+
+
+iframe#clock {align: center; margin: 3em 58em 0em}
+
+#clockBase{
+	text-align: center;
+	font-size:180px;
+	font-weight:bold;
+	text-shadow: 5px 5px 5px black;
+	
+}
+
+form#formClockLogin{ font-size: 30px; }
+input#formClockPassword{ font-size: 25px; height: 35px;}
+input#formClockPerson{ size: 100; }

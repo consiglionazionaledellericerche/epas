@@ -1,0 +1,145 @@
+#{extends 'main_clock1.html' /}
+
+<div id="clockBase" style></div>
+<fieldset>
+	<legend>Situazione ${person.name} ${person.surname} giorno ${dayRecap.date}</legend>
+	
+	<table class="table table-bordered" id="presenze_mensili">
+	<tr>
+		<th>Buono mensa</th>
+		<th>Giorno</th>
+		<th>Codice di assenza</th>
+		%{ for(int i = 1; i <= numberOfInOut; i++){
+		}%
+		<th>${i}° entrata</th>
+		<th>${i}° uscita</th>
+		%{ } }%
+		<th>Tempo lavoro</th>
+		<th>Differenza</th>
+		<th>Progressivo</th>
+		<th>Tipo Orario</th>
+		<th>Note</th>
+	</tr>
+	
+
+		
+	<tr>
+			<td>${dayRecap.mealTicket}</td>
+			%{
+			if(dayRecap.holiday==false)
+			{
+			}%	
+				<td class="capitalized">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</td>
+			%{
+			}
+			else
+			{
+			}%	
+				<td class="festivi">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</td>
+			%{
+			}
+			}%
+		
+			<td class="assenza">
+				%{	
+				for (absence in dayRecap.absences) 
+				{ 
+				%}
+				 	${absence.absenceType.code}
+				 %{
+				 }
+				 }%
+			</td>
+
+
+			%{  
+			for(stampingTemplate in dayRecap.stampingsTemplate){
+			}%
+			%{
+					if(stampingTemplate.colour.equals("in"))
+					{
+					}%
+						<td class="ingresso">
+					%{
+					}
+					else if (stampingTemplate.colour.equals("out"))
+					{
+					}%
+						<td class="uscita">
+					%{
+					}
+					else if (stampingTemplate.colour.equals("warn"))
+					{
+					}%
+						<td class="warn">
+					%{
+					}
+				}%
+				%{ if(stampingTemplate.date!=null) 
+				{ 
+				}%
+					${stampingTemplate.hour}
+				 %{
+				 }
+				 }%
+				 
+				<strong>${stampingTemplate.identifier}</strong>
+				<strong>${stampingTemplate.markedByAdminCode}</strong>
+				<strong>${stampingTemplate.missingExitStampBeforeMidnightCode}</strong>
+
+				</td>
+			
+			%{ 
+			} 
+			}%
+			<td class="tempoLavoro">
+				${dayRecap.workTime}
+				<strong>${dayRecap.todayLunchTimeCode}</strong>
+				<strong>${dayRecap.fixedWorkingTimeCode}</strong>
+				<strong>${dayRecap.exitingNowCode}</strong>
+			</td>							
+	       	<td class="differenza">
+	       		${dayRecap.difference}
+	       	</td>	
+			<td class="progressivo">
+			 	${dayRecap.progressive}
+		    </td>
+	        
+	        <td>${dayRecap.workingTimeTypeDescription}</td>
+	        <td>
+	    	%{
+    		for(n in dayRecap.note) 
+    		{
+			}%
+	       		${n}<br>
+	        %{
+	        }
+	        }%
+	        </td>
+	        
+	</tr>
+
+</table>
+
+
+
+	<table class="tablenoborder" align="center" >
+	<tr>
+	
+
+	
+
+	<td>
+		#{form @Clocks.show()}
+			<input type="submit" class="btn btn-large btn-primary" name ="submit" value="Logout" />
+
+		#{/form}
+	</td>
+	
+	
+	
+	
+	</tr>
+	</table>
+	
+</fieldset>

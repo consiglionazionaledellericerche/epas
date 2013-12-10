@@ -534,13 +534,15 @@ public class Person extends Model {
 	public static List<Person> getActivePersonsInMonth(int month, int year)
 	{
 		/**
-		 * FIXME: rivedere le select in modo da renderle più efficienti
+		 * FIXME: rivedere le select in modo da renderle più efficienti (e togliere epas.clocks)
 		 */
 		List<Person> persons = Person.find("SELECT p FROM Person p ORDER BY p.surname, p.othersSurnames, p.name").fetch();
 		List<Person> activePersons = new ArrayList<Person>();
 		for(Person person : persons)
 		{
 			List<Contract> monthContracts = person.getMonthContracts(month, year);
+			if(person.username.equals("epas.clocks"))
+				continue;
 			if(monthContracts!=null)
 				activePersons.add(person);
 		}
