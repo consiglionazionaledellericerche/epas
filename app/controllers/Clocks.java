@@ -1,5 +1,6 @@
 package controllers;
 
+import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.MainMenu;
 import it.cnr.iit.epas.PersonUtility;
 
@@ -119,9 +120,9 @@ public class Clocks extends Controller{
 			if(minNew==min || minNew==minMinusOne)
 			{
 				
-				flash.error("Timbratura ore %s:%s gia' inserita, prossima timbratura accettata a partire da %s:%s",
-						s.date.getHourOfDay(), s.date.getMinuteOfHour(),
-						s.date.plusMinutes(2).getHourOfDay(), s.date.plusMinutes(2).getMinuteOfHour());
+				flash.error("Timbratura ore %s gia' inserita, prossima timbratura accettata a partire da %s",
+						DateUtility.fromLocalDateTimeHourTime(s.date),
+						DateUtility.fromLocalDateTimeHourTime(s.date.plusMinutes(2)));
 				
 				Clocks.showRecap(personId);
 			}

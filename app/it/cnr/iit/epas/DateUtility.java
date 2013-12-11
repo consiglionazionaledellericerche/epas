@@ -10,6 +10,7 @@ import models.Person;
 import models.WorkingTimeType;
 
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 
 import play.Logger;
 import play.db.jpa.JPA;
@@ -279,5 +280,12 @@ public class DateUtility {
 			s = s + min;
 		}
 		return s;
+	}
+	
+	public static String fromLocalDateTimeHourTime(LocalDateTime time)
+	{
+		int min = time.getMinuteOfHour();
+		int hour = time.getHourOfDay();
+		return String.format("%02d:%02d", hour, min);    
 	}
 }
