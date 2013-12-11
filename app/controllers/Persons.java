@@ -466,7 +466,7 @@ public class Persons extends Controller {
 		if(!params.get("surname").equals(person.surname))
 			person.surname = params.get("surname");
 		
-		if(!person.badgeNumber.equals(params.get("badgeNumber")))
+		if(person.badgeNumber == null || !person.badgeNumber.equals(params.get("badgeNumber")))
 			person.badgeNumber = params.get("badgeNumber");
 		
 		if(contactData != null){
@@ -639,7 +639,7 @@ public class Persons extends Controller {
 			contract.save();
 		}
 		
-		
+		contract.setVacationPeriods();
 		contract.save();
 		
 		flash.success("Aggiornato contratto per il dipendente %s %s", contract.person.name, contract.person.surname);
