@@ -43,12 +43,12 @@
 	<tr>
 	
 		<td>
-			<a data-toggle="modal" href="@{Vacations.vacationsLastYear(vacationsRecap.person.id, vacationsRecap.year)}" data-target="#myModal1">
+			<a data-toggle="modal" href="@{Vacations.vacationsLastYear(vacationsRecap.person.id, vacationsRecap.year)}" data-target="#myModal3">
 				${vacationsRecap.vacationDaysLastYearUsed.size()}
 			</a> 
 			</td>
 		<td>
-			<a data-toggle="modal" href="@{Vacations.vacationsCurrentYear(vacationsRecap.person.id, vacationsRecap.year)}" data-target="#myModal1">
+			<a data-toggle="modal" href="@{Vacations.vacationsCurrentYear(vacationsRecap.person.id, vacationsRecap.year)}" data-target="#myModal3">
 				${vacationsRecap.vacationDaysCurrentYearUsed.size()}
 			</a> 
 			</td>
@@ -84,7 +84,7 @@
 
 </div>
 </div>
-<div id="myModal1" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div id="myModal3" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
     <h3 id="myModalLabel">Ferie</h3>
