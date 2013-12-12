@@ -368,6 +368,8 @@ public class Person extends Model {
 		DateInterval monthInterval = new DateInterval(monthBegin, monthEnd);
 		for(Contract contract : contractList)
 		{
+			if(!contract.onCertificate)
+				continue;
 			DateInterval contractInterval = new DateInterval(contract.beginContract, contract.expireContract);
 			if(DateUtility.intervalIntersection(monthInterval, contractInterval)!=null)
 			{
@@ -532,8 +534,9 @@ public class Person extends Model {
 	 */
 	public boolean isActiveInMonth(int month, int year)
 	{
+		
 		List<Contract> monthContracts = this.getMonthContracts(month, year);
-		if(monthContracts!=null)
+		if(monthContracts!=null)				
 			return true;
 		else
 			return false;
