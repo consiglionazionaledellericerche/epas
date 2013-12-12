@@ -170,7 +170,7 @@ public class Competences extends Controller{
 			code.code = params.get("codice");
 			code.codeToPresence = params.get("codiceAttPres");
 			code.description = params.get("descrizione");
-			code.inactive = params.get("inattivo", Boolean.class);
+			code.inactive = params.get("inattivo", Boolean.class) != null ? params.get("inattivo", Boolean.class) : false;
 			CompetenceCode codeControl = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", 
 					params.get("codice")).first();
 			if(codeControl == null){
