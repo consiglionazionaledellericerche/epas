@@ -3,7 +3,7 @@
 <div class="container">
 <h2 id="titoloGestioneTipiFerie">Gestione dei tipi di ferie e dei permessi legge</h2>
 <div id="tabellaPianoFerie"class="span7">
-<p class="text-info" id="nuovoPianoFerie"><a href="@{VacationsAdmin.insertVacationCode}" class="popup_window_mini">Nuovo piano ferie</a>
+<p class="text-info" id="nuovoPianoFerie"><a data-toggle="modal" href="@{VacationsAdmin.insertVacationCode}" data-target="#myModal1">Nuovo piano ferie</a>
 		
 </p>
 
@@ -21,7 +21,7 @@
 		for(vacationCode in vacationCodeList){
 	}%
 	<tr>
-		<td><a href="@{VacationsAdmin.edit(vacationCode.id)}" class="popup_window_mini">${vacationCode.description}</a>
+		<td><a data-toggle="modal" href="@{VacationsAdmin.edit(vacationCode.id)}" data-target="#myModal1">${vacationCode.description}</a>
 		
 		</td>
 		<td>${vacationCode.vacationDays}</td>
@@ -34,4 +34,18 @@
 
 </table>
 </div>
+</div>
+
+<div id="myModal1" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Inserimento/modifica assenza</h3>
+  </div>
+  <div class="modal-body">
+    <p></p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+   <!--   <button class="btn btn-primary">Save changes</button>-->
+  </div>
 </div>

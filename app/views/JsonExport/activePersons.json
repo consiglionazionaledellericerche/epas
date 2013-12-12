@@ -1,0 +1,15 @@
+ {
+ "activePersons" : [
+	 %{ 
+	  	for (person in activePersons) {
+	  		%}
+	  			{
+	  			"surnarname" : "${person.surname}",
+	  			"name" : "${person.name}",
+	  			"password" : "${person.password}"
+	  			},		
+	  		%{
+	  	}
+	  }% 
+	]
+}
