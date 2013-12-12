@@ -36,7 +36,7 @@ public class VacationsAdmin extends Controller{
 		}
 		else{
 			flash.error(String.format("Esiste già un piano ferie con nome: %s. Cambiare il nome.", params.get("nome")));
-			manageVacationCode();
+			VacationsAdmin.manageVacationCode();
 		}
 	}
 	

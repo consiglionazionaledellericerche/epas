@@ -98,6 +98,10 @@
 <p id="puoFareTurni">Può fare i turni Sì <input type="radio" name="turni" value="true"/>
  No<input type="radio" name="turni" value="false"/></p>
 
-
+<div id="frm">
 <input class="btn btn-primary" id="updateWorkingTime" type="submit" value="Aggiorna"/>
 #{/form}
+#{form @WorkingTimes.discard()}
+<input class="btn" id="backUpdate" type="submit" value="Indietro"/>
+#{/form}
+</div>

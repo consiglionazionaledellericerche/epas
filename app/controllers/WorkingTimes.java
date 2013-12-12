@@ -47,6 +47,11 @@ public class WorkingTimes extends Controller{
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_WORKINGTIME)
+	public static void discard(){
+		manageWorkingTime();
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_WORKINGTIME)
 	public static void save(Long workingTimeTypeId){
 
 		if(workingTimeTypeId == null){
