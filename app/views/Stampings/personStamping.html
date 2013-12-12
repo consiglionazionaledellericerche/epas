@@ -1,10 +1,10 @@
 #{extends 'main_admin.html' /}
-#{set title:personMonth.person.surname + ' ' + personMonth.person.name + ', matricola=' + personMonth.person.number /}
+#{set title:person.surname + ' ' + person.name + ', matricola=' + person.number /}
 
 <h2 id="titoloSituazionePresenzeMensili">
 	Situazione presenze mensile 
-	<span class="capitalized">&{'views.tags.display.date.month.' + personMonth.month}</span> ${personMonth.year} 
-	di ${personMonth.person.surname} ${personMonth.person.name}</h2>
+	<span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year} 
+	di ${person.surname} ${person.name}</h2>
 
 #{functionalMenuForm mainMenu: mainMenu /}
 ${prova}

@@ -525,8 +525,23 @@ public class Person extends Model {
 	}
 	
 	/**
+	 *  true se la persona ha almeno un giorno lavorativo coperto da contratto nel mese month
+	 * @param month
+	 * @param year
+	 * @return 
+	 */
+	public boolean isActiveInMonth(int month, int year)
+	{
+		List<Contract> monthContracts = this.getMonthContracts(month, year);
+		if(monthContracts!=null)
+			return true;
+		else
+			return false;
+	}
+	
+	/**
 	 *  La lista delle persone che abbiano almeno un giorno lavorativo coperto da contratto nel mese month
-	 *  ordinate per nome
+	 *  ordinate per id
 	 * @param month
 	 * @param year
 	 * @return
@@ -534,20 +549,23 @@ public class Person extends Model {
 	public static List<Person> getActivePersonsInMonth(int month, int year)
 	{
 		/**
-		 * FIXME: rivedere le select in modo da renderle più efficienti (e togliere epas.clocks)
+		 * FIXME: rivedere le select in modo da renderle più efficienti
 		 */
 		List<Person> persons = Person.find("SELECT p FROM Person p ORDER BY p.surname, p.othersSurnames, p.name").fetch();
 		List<Person> activePersons = new ArrayList<Person>();
 		for(Person person : persons)
 		{
-			List<Contract> monthContracts = person.getMonthContracts(month, year);
-			if(person.username.equals("epas.clocks"))
-				continue;
-			if(monthContracts!=null)
+			if(person.isActiveInMonth(month, year))
+			{
+				if(person.username.equals("epas.clocks"))
+					continue;
 				activePersons.add(person);
+			}
 		}
 		return activePersons;
 	}
+	
+	
 	
 	/**
 	 * 

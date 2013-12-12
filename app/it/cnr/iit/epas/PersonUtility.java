@@ -1,7 +1,11 @@
 package it.cnr.iit.epas;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.FetchType;
 import javax.persistence.Query;
@@ -798,7 +802,11 @@ public class PersonUtility {
 		}
 	}
 	
-	
+	/**
+	 * Il numero di coppie ingresso/uscita da stampare per il personday
+	 * @param pd
+	 * @return
+	 */
 	public static int numberOfInOutInPersonDay(PersonDay pd)
 	{
 		if(pd == null)
@@ -852,6 +860,172 @@ public class PersonUtility {
 		return coupleOfStampings;
 	}
 	
+	/**
+	 * Calcola il numero massimo di coppie di colonne ingresso/uscita da stampare nell'intero mese
+	 * @param person
+	 * @param year
+	 * @param month
+	 * @return
+	 */
+	public static int getMaximumCoupleOfStampings(Person person, int year, int month){
+		
+		LocalDate begin = new LocalDate(year, month, 1);
+		if(begin.isAfter(new LocalDate()))
+			return 0;
+		List<PersonDay> pdList = PersonDay.find("Select pd From PersonDay pd where pd.person = ? and pd.date between ? and ?", person,begin,begin.dayOfMonth().withMaximumValue() ).fetch();
+
+		int max = 0;
+		for(PersonDay pd : pdList)
+		{
+			int coupleOfStampings = PersonUtility.numberOfInOutInPersonDay(pd);
+			
+			if(max<coupleOfStampings)
+				max = coupleOfStampings;
+		}
+		
+		return max;
+	}
+	
+	/**
+	 * Genera una lista di PersonDay aggiungendo elementi fittizzi per coprire ogni giorno del mese
+	 * @param person
+	 * @param year
+	 * @param month
+	 * @return
+	 */
+	public static List<PersonDay> getTotalPersonDayInMonth(Person person, int year, int month)
+	{
+		LocalDate beginMonth = new LocalDate(year, month, 1);
+		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
+		
+		List<PersonDay> totalDays = new ArrayList<PersonDay>();
+		List<PersonDay> workingDays = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date",
+				person, beginMonth, endMonth).fetch();
+		
+		int currentWorkingDays = 0;
+		LocalDate currentDate = beginMonth;
+		while(!currentDate.isAfter(endMonth))
+		{
+			if(currentWorkingDays<workingDays.size() && workingDays.get(currentWorkingDays).date.isEqual(currentDate))
+			{
+				totalDays.add(workingDays.get(currentWorkingDays));
+				currentWorkingDays++;
+			}
+			else
+			{
+				totalDays.add(new PersonDay(person, new LocalDate(year, month, currentDate.getDayOfMonth()), 0, 0, 0));
+			}
+			currentDate = currentDate.plusDays(1);
+		}
+
+		return totalDays;
+	}
+	
+	/**
+	 * //TODO utilizzare jpa per prendere direttamente i codici (e migrare ad una lista)
+	 * @param days lista di PersonDay
+	 * @return la lista contenente le assenze fatte nell'arco di tempo dalla persona
+	 */
+	public static Map<AbsenceType,Integer> getAllAbsenceCodeInMonth(List<PersonDay> personDays){
+
+		Map<AbsenceType, Integer> absenceCodeMap = new HashMap<AbsenceType, Integer>();
+		if(absenceCodeMap.isEmpty()){
+			int i = 0;
+			for(PersonDay pd : personDays){
+				for (Absence absence : pd.absences) {
+					AbsenceType absenceType = absence.absenceType;
+					if(absenceType != null){
+						boolean stato = absenceCodeMap.containsKey(absenceType);
+						if(stato==false){
+							i=1;
+							absenceCodeMap.put(absenceType,i);            	 
+						} else{
+							i = absenceCodeMap.get(absenceType);
+							absenceCodeMap.remove(absenceType);
+							absenceCodeMap.put(absenceType, i+1);
+						}
+					}            
+				}	 
+			}       
+		}
+
+		return absenceCodeMap;	
+
+	}
+	
+	/**
+	 * Il numero di buoni pasto usabili all'interno della lista di person day passata come parametro
+	 * @param personDays
+	 * @return
+	 */
+	public static int numberOfMealTicketToUse(List<PersonDay> personDays){
+		int tickets=0;
+		for(PersonDay pd : personDays){
+			if(pd.mealTicket()==true)
+				tickets++;
+		}
+		return tickets;
+	}
+	
+	
+
+	/**
+	 * Il numero di buoni pasto da restituire all'interno della lista di person day passata come parametro
+	 * @param personDays
+	 * @return
+	 */
+	public static int numberOfMealTicketToRender(List<PersonDay> personDays){
+		int ticketsToRender=0;
+		for(PersonDay pd : personDays)
+		{
+			if(pd.mealTicket()==false && (pd.isHoliday()==false))
+			{
+				ticketsToRender++;
+			}
+		}
+		return ticketsToRender;
+	}
+	
+	/**
+	 * 
+	 * @return il numero di giorni lavorati in sede. Per stabilirlo si controlla che per ogni giorno lavorativo, esista almeno una 
+	 * timbratura.
+	 */
+	public static int basedWorkingDays(List<PersonDay> personDays){
+		int basedDays=0;
+		for(PersonDay pd : personDays)
+		{
+			boolean fixed = pd.isFixedTimeAtWork();
+			if(fixed && !pd.isAllDayAbsences() && !pd.isHoliday())
+			{
+				basedDays++;
+			}
+			else if(!fixed && !pd.isAllDayAbsences() && pd.stampings.size()>0 && pd.isHoliday()==false)
+			{
+				basedDays++;
+			}
+		}
+		return basedDays;
+	}
+	
+	/**
+	 * Il numero di riposi compensativi utilizzati nell'anno dalla persona
+	 * @param person
+	 * @param year
+	 * @param month
+	 * @return
+	 */
+	public static int numberOfCompensatoryRestUntilToday(Person person, int year, int month){
+		
+		Query query = JPA.em().createQuery("Select abs from Absence abs where abs.personDay.person = :person and abs.absenceType.code = :code " +
+				"and abs.personDay.date between :begin and :end");
+		query.setParameter("person", person)
+		.setParameter("code", "91")
+		.setParameter("begin", new LocalDate(year,1,1))
+		.setParameter("end", new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
+		
+		return query.getResultList().size();
+	}
 	
 	/**
 	 * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.

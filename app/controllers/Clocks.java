@@ -6,10 +6,12 @@ import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
+import models.AbsenceType;
 import models.Configuration;
 import models.Contract;
 import models.Person;
@@ -20,6 +22,8 @@ import models.StampType;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.exports.StampingFromClient;
+import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
+import models.personalMonthSituation.Mese;
 import models.rendering.PersonStampingDayRecap;
 import play.Logger;
 import play.cache.Cache;
@@ -38,45 +42,19 @@ public class Clocks extends Controller{
 	public static void clockLogin(Long personId, String password)
 	{
 		LocalDate today = new LocalDate();
-		
 		if(personId==0)
 		{
 			flash.error("Utente non selezionato");
 			Clocks.show();
 		}
-		
-		
-		
 		Person person = Person.find("SELECT p FROM Person p where id = ? and password = md5(?)",personId, password).first();
 		if(person == null)
 		{
 			flash.error("Password non corretta");
 			Clocks.show();
 		}
-		
 	
-		//TODO 18/10 creare un metodo statico in models.person getPersonMonth(int year, int month)
-		PersonMonth personMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?",
-				person, today.getMonthOfYear(), today.getYear()).first();
-		
-		//calcolo del valore valid per le stamping del mese
-		personMonth.getDays();
-		for(PersonDay pd : personMonth.days)
-		{
-			pd.computeValidStampings();
-		}		
-
-		//numero di colonne da visualizzare
-		Configuration conf = Configuration.getCurrentConfiguration();
-		int minInOutColumn = conf.numberOfViewingCoupleColumn;
-
-	
-
-		
-		//Nuova struttura dati per stampare
-		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
-		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();							
-
+					
 		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, today).first();
 		if(pd == null){
 			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", person.name, person.surname);
@@ -84,10 +62,13 @@ public class Clocks extends Controller{
 			pd.save();
 		}
 		
-		//numero di colonne da stampare
+		//numero di colonne da visualizzare
+		Configuration conf = Configuration.getCurrentConfiguration();
+		int minInOutColumn = conf.numberOfViewingCoupleColumn;
 		int numberOfInOut = Math.max(minInOutColumn,  PersonUtility.numberOfInOutInPersonDay(pd));
 		
-	
+		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
+		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();				
 		PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(pd,numberOfInOut);
 		
 		render(person, dayRecap, numberOfInOut);
@@ -114,10 +95,12 @@ public class Clocks extends Controller{
 		
 		//Se la stamping esiste già mostro il riepilogo
 		int minNew = time.getMinuteOfHour();
+		int hourNew = time.getHourOfDay();
 		for(Stamping s : pd.stampings){
+			int hour = s.date.getHourOfDay();
 			int min = s.date.getMinuteOfHour();
 			int minMinusOne = s.date.plusMinutes(1).getMinuteOfHour();
-			if(minNew==min || minNew==minMinusOne)
+			if( hour==hourNew && (minNew==min || minNew==minMinusOne) )
 			{
 				
 				flash.error("Timbratura ore %s gia' inserita, prossima timbratura accettata a partire da %s",
@@ -159,28 +142,6 @@ public class Clocks extends Controller{
 			throw new IllegalArgumentException("Persona non trovata!!!! Controllare l'id!");
 		
 		LocalDate today = new LocalDate();
-		//TODO 18/10 creare un metodo statico in models.person getPersonMonth(int year, int month)
-		PersonMonth personMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?",
-				person, today.getMonthOfYear(), today.getYear()).first();
-		
-		//calcolo del valore valid per le stamping del mese
-		personMonth.getDays();
-		for(PersonDay pd : personMonth.days)
-		{
-			pd.computeValidStampings();
-		}		
-
-		//numero di colonne da visualizzare
-		Configuration conf = Configuration.getCurrentConfiguration();
-		int minInOutColumn = conf.numberOfViewingCoupleColumn;
-
-	
-
-		
-		//Nuova struttura dati per stampare
-		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
-		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();							
-
 		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, today).first();
 		if(pd == null){
 			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", person.name, person.surname);
@@ -188,10 +149,13 @@ public class Clocks extends Controller{
 			pd.save();
 		}
 		
-		//numero di colonne da stampare
+		//numero di colonne da visualizzare
+		Configuration conf = Configuration.getCurrentConfiguration();
+		int minInOutColumn = conf.numberOfViewingCoupleColumn;
 		int numberOfInOut = Math.max(minInOutColumn,  PersonUtility.numberOfInOutInPersonDay(pd));
 		
-	
+		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
+		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();				
 		PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(pd,numberOfInOut);
 		
 		render(person, dayRecap, numberOfInOut);
