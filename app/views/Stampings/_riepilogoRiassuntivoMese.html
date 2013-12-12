@@ -1,7 +1,7 @@
 <div class="span10" id="spiegazioneTabellaTimbrature">
 	<p>
 		Il numero di buoni mensa usabili per questo mese e': <strong>${numberOfMealTicketToUse}</strong>, mentre quelli da restituire sono <strong>${numberOfMealTicketToRender}</strong>. 
-		Il numero di giorni lavorativi in sede è di: <strong>${personMonth.basedWorkingDays()}</strong> 
+		Il numero di giorni lavorativi in sede è di: <strong>${basedWorkingDays}</strong> 
 	</p>
 	<p>Tempo disponibile per straordinari: 
 		<strong>${mese.progressivoFinalePositivoMese.toHourTime()}</strong></p>
@@ -156,7 +156,7 @@
 			
 	</tr>
 %{
-     for(entry in personMonth.getAbsenceCode().entrySet()) {
+     for(entry in absenceCodeMap.entrySet()) {
 }%
 	<tr>
 		<td>${entry.getKey().code}</td>     

@@ -212,22 +212,7 @@ public class PersonMonth extends Model {
 		return absList.size();
 	}
 	
-	/**
-	 * 
-	 * @param 
-	 * @return il numero di riposi compensativi per quella persona utilizzati fino ad oggi dall'inizio dell'anno
-	 */
-	public int numberOfCompensatoryRestUntilToday(){
-		
-		Query query = JPA.em().createQuery("Select abs from Absence abs where abs.personDay.person = :person and abs.absenceType.code = :code " +
-				"and abs.personDay.date between :begin and :end");
-		query.setParameter("person", this.person)
-		.setParameter("code", "91")
-		.setParameter("begin", new LocalDate(year,1,1))
-		.setParameter("end", new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
-		
-		return query.getResultList().size();
-	}
+	
 
 	/**
 	 * 
@@ -248,10 +233,11 @@ public class PersonMonth extends Model {
 //		return resultList.size() * person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime;
 //	}
 	/**
-	 * 
+	 * migrare a metodo statico in PersonUtility getMaximumCoupleOfStampings(Person person, int year, int month)
 	 * @return il numero massimo di coppie di colonne ingresso/uscita ricavato dal numero di timbrature di ingresso e di uscita di quella
 	 * persona per quel mese
 	 */
+	@Deprecated
 	public long getMaximumCoupleOfStampings(){
 		
 		LocalDate begin = new LocalDate(year, month, 1);
@@ -276,6 +262,7 @@ public class PersonMonth extends Model {
 	/**
 	 * @return la lista di giorni (PersonDay) associato alla persona nel mese di riferimento
 	 */
+	@Deprecated
 	public List<PersonDay> getDays() {
 
 		if (days != null) {
@@ -316,6 +303,7 @@ public class PersonMonth extends Model {
 	 * 
 	 * @return il numero di buoni pasto usabili per quel mese
 	 */
+	@Deprecated
 	public int numberOfMealTicketToUse(){
 		int tickets=0;
 		if(days==null){
@@ -333,6 +321,7 @@ public class PersonMonth extends Model {
 	 * 
 	 * @return il numero di buoni pasto da restituire per quel mese
 	 */
+	@Deprecated
 	public int numberOfMealTicketToRender(){
 		int ticketsToRender=0;
 		if(days==null){
@@ -351,6 +340,7 @@ public class PersonMonth extends Model {
 	 * @return il numero di giorni lavorati in sede. Per stabilirlo si controlla che per ogni giorno lavorativo, esista almeno una 
 	 * timbratura.
 	 */
+	@Deprecated
 	public int basedWorkingDays(){
 		int basedDays=0;
 		if(days==null){
@@ -374,6 +364,7 @@ public class PersonMonth extends Model {
 	 * @param days lista di PersonDay
 	 * @return la lista contenente le assenze fatte nell'arco di tempo dalla persona
 	 */
+	@Deprecated
 	public Map<AbsenceType,Integer> getAbsenceCode(){
 
 		if(days == null){
@@ -471,20 +462,7 @@ public class PersonMonth extends Model {
 		return stampTypeList;
 	}
 
-	/**
-	 * 
-	 * @return il numero di riposi compensativi fatti dall'inizio dell'anno a quel momento
-	 */
-	public int getCompensatoryRestInYear(){
-		LocalDate beginYear = new LocalDate(year, 1, 1);
-		LocalDate now = new LocalDate();
 
-		Query query = JPA.em().createQuery("Select abs from Absence abs where abs.personDay.person = :person and abs.personDay.date between " +
-				":dateBegin and :dateEnd and abs.absenceType.code = :code");
-		query.setParameter("person", person).setParameter("dateBegin", beginYear).setParameter("dateEnd", now).setParameter("code", "91");
-		List<Absence> absList = query.getResultList();
-		return absList.size();
-	}
 
 	/**
 	 * 

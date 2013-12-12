@@ -5,95 +5,153 @@
 #{form @Administrators.update()}
 <input type="hidden" name="personId" value="${person.id}"/>
 <fieldset>
-	<legend>Modifica dati amministratore e permessi</legend>
-	<p id="descrizione">Nome: <input type="text" name="nome" value="${person.name}" disabled="disabled"/></p>
-	<p id="descrizione">Cognome: <input type="text" name="cognome" value="${person.surname}" disabled="disabled" /></p>
-	<p>Può vedere persone: 
+	<legend>Modifica dati amministratore e permessi per ${person.name} ${person.surname} </legend>
 	
-	%{	if(person.isViewPersonAvailable()==true){ }%
+	
+	
+		
+
+	
+	<table class="tablenoborder">
+		<tr>
+		<td>
+			%{ if(person.isViewPersonAvailable()==true){ }%
 			Sì <input type="radio" name="viewPersonList" value="false" checked="checked"/> No <input type="radio" name="viewPersonList" value="true"/>
 			%{ } else {	}% 
 			Sì <input type="radio" name="viewPersonList" value="true"/> No <input type="radio" name="viewPersonList" value="false" checked="checked"/>
 			%{ } }%
-	</p>
-	<p>Può inserire e modificare persone: 
-	%{	if(person.isInsertAndUpdatePersonAvailable()==true){ }%
+		</td>
+		<td>Può vedere persone</td>
+		<tr>
+	
+		<tr>
+		<td>
+			%{	if(person.isInsertAndUpdatePersonAvailable()==true){ }%
 			Sì <input type="radio" name="insertAndUpdatePerson" value="false" checked="checked"/> No <input type="radio" name="insertAndUpdatePerson" value="true"/>
 			%{ } else {	}%
 			Sì <input type="radio" name="insertAndUpdatePerson" value="true"/> No <input type="radio" name="insertAndUpdatePerson" value ="false" checked="checked"/>
 			%{ } }%
-	</p>
-	<p>	Può cancellare persone: 
-	%{	if(person.isDeletePersonAvailable()==true){ }%
+		</td>
+		<td>Può inserire e modificare persone</td>
+		<tr>
+		
+	
+		
+		<tr>
+		<td>
+			%{	if(person.isDeletePersonAvailable()==true){ }%
 			Sì <input type="radio" name="deletePerson" value="false" checked="checked"/> No <input type="radio" name="deletePerson" value="true"/>
 			%{ } else {	}%
 			Sì <input type="radio" name="deletePerson" value="true"/> No <input type="radio" name="deletePerson" value="false" checked="checked"/>
 			%{ } }%
-	</p>
-	<p>Può inserire e modificare timbrature: 
-	%{	if(person.isInsertAndUpdateStampingAvailable()==true){ }%
+		</td>
+		<td>Può cancellare persone</td>
+		<tr>
+		
+		<tr>
+		<td>
+			%{	if(person.isInsertAndUpdateStampingAvailable()==true){ }%
 			Sì <input type="radio" name="insertAndUpdateStamping" value="false" checked="checked"/> No <input type="radio" name="insertAndUpdateStamping" value="true"/>
 			%{ } else {	}%
 			Sì <input type="radio" name="insertAndUpdateStamping" value="true"/> No <input type="radio" name="insertAndUpdateStamping" value="false" checked="checked"/>
 			%{ } }%
-	</p>
-	<p>Può inserire e moficare password: 
-	%{	if(person.isInsertAndUpdatePasswordAvailable()==true){ }%
+		</td>
+		<td>Può inserire e modificare timbrature</td>
+		<tr>
+		
+		<tr>
+		<td>
+			%{	if(person.isInsertAndUpdatePasswordAvailable()==true){ }%
 			Sì <input type="radio" name="insertAndUpdatePassword" value="false" checked="checked"/> No <input type="radio" name="insertAndUpdatePassword" value="true"/>
 			%{ } else {	}%
 			Sì <input type="radio" name="insertAndUpdatePassword" value="true"/> No <input type="radio" name="insertAndUpdatePassword" value="false" checked="checked"/>
 			%{ } }%
-	</p>
-	<p>Può inserire e modifcare orari di lavoro: 
-	%{	if(person.isInsertAndUpdateWorkinTimeAvailable()==true){ }%
+		</td>
+		<td>Può inserire e moficare password</td>
+		<tr>
+		
+		<tr>
+		<td>
+			%{	if(person.isInsertAndUpdateWorkinTimeAvailable()==true){ }%
 			Sì <input type="radio" name="insertAndUpdateWorkingTime" value="false" checked="checked"/> No <input type="radio" name="insertAndUpdateWorkingTime" value="true"/>
 			%{ } else {	}%
 			Sì <input type="radio" name="insertAndUpdateWorkingTime" value="true"/> No <input type="radio" name="insertAndUpdateWorkingTime" value="false" checked="checked"/>
 			%{ } }%
-	</p>
-	<p>Può inserire e modificare assenze: 
-	%{	if(person.isInsertAndUpdateAbsenceAvailable()==true){ }%
+		</td>
+		<td>Può inserire e modifcare orari di lavoro</td>
+		<tr>
+		
+		<tr>
+		<td>
+			%{	if(person.isInsertAndUpdateAbsenceAvailable()==true){ }%
 			Sì <input type="radio" name="insertAndUpdateAbsence" value="false" checked="checked"/> No <input type="radio" name="insertAndUpdateAbsence" value="true"/>
 			%{ } else {	}%
 			Sì <input type="radio" name="insertAndUpdateAbsence" value="true"/> No <input type="radio" name="insertAndUpdateAbsence" value="false" checked="checked"/>
 			%{ } }%
-	</p>
-	<p>Può inserire e modificare configurazioni di sistema: 
-	%{	if(person.isInsertAndUpdateConfigurationAvailable()==true){ }%
+		</td>
+		<td>Può inserire e modificare assenze</td>
+		<tr>
+		
+		<tr>
+		<td>
+			%{	if(person.isInsertAndUpdateConfigurationAvailable()==true){ }%
 			Sì <input type="radio" name="insertAndUpdateConfiguration" value="false" checked="checked"/> No <input type="radio" name="insertAndUpdateConfiguration" value="true"/>
 			%{ } else {	}%
 			Sì <input type="radio" name="insertAndUpdateConfiguration" value="true"/> No <input type="radio" name="insertAndUpdateConfiguration" value="false" checked="checked"/>
 			%{ } }%
-	</p>
-	<p>Può inserire e modificare utenti amministratori: 
-	%{	if(person.isInsertAndUpdateAdministratorAvailable()==true){ }%
+		</td>
+		<td>Può inserire e modificare configurazioni di sistema</td>
+		<tr>
+		
+		<tr>
+		<td>
+			%{	if(person.isInsertAndUpdateAdministratorAvailable()==true){ }%
 			Sì <input type="radio" name="insertAndUpdateAdministrator" value="false" checked="checked"/> No <input type="radio" name="insertAndUpdateAdministrator" value="true"/>
 			%{ } else {	}%
 			Sì <input type="radio" name="insertAndUpdateAdministrator" value="true"/> No <input type="radio" name="insertAndUpdateAdministrator" value="false" checked="checked"/>
 			%{ } }%
-	</p>
-	<p>Può inserire e modificare straordinari e competenze: 
-	%{	if(person.isInsertAndUpdateCompetenceAndOvertimeAvailable()==true){ }%
+		</td>
+		<td>Può inserire e modificare utenti amministratori</td>
+		<tr>
+		
+		<tr>
+		<td>
+			%{	if(person.isInsertAndUpdateCompetenceAndOvertimeAvailable()==true){ }%
 			Sì <input type="radio" name="insertAndUpdateCompetences" value="false" checked="checked"/> No <input type="radio" name="insertAndUpdateCompetences" value="true"/>
 			%{ } else {	}%
 			Sì <input type="radio" name="insertAndUpdateCompetences" value="true"/> No <input type="radio" name="insertAndUpdateCompetences" value="false" checked="checked"/>
 			%{ } }%
-	</p>
-	<p>Può inserire e modificare ferie e permessi: 
-	%{	if(person.isInsertAndUpdateVacationsAvailable()==true){ }%
+		</td>
+		<td>Può inserire e modificare straordinari e competenze</td>
+		<tr>
+		
+		<tr>
+		<td>
+			%{	if(person.isInsertAndUpdateVacationsAvailable()==true){ }%
 			Sì <input type="radio" name="insertAndUpdateVacations" value="false" checked="checked"/> No <input type="radio" name="insertAndUpdateVacations" value="true"/>
 			%{ } else {	}%
 			Sì <input type="radio" name="insertAndUpdateVacations" value="true"/> No <input type="radio" name="insertAndUpdateVacations" value="false" checked="checked"/>
 			%{ } }%
-	</p>
-	<p>Può caricare attestati di presenza: 
-	%{	if(person.isUploadSituationAvailable()==true){ }%
+		</td>
+		<td>Può inserire e modificare ferie e permessi</td>
+		<tr>
+		
+	<tr>
+		<td>
+			%{	if(person.isUploadSituationAvailable()==true){ }%
 			Sì <input type="radio" name="uploadSituation" value="false" checked="checked"/> No <input type="radio" name="uploadSituation" value="true"/>
 			%{ } else {	}%
 			Sì <input type="radio" name="uploadSituation" value="true"/> No <input type="radio" name="uploadSituation" value="false" checked="checked"/>
 			%{ } }%
-	</p>
+		</td>
+		<td>Può caricare attestati di presenza</td>
+		<tr>
+	
+	</table>
+	
+	
 </fieldset>
+
 <div id="frm">
 <input class="btn btn-primary" id="insertAdmin" type="submit" value="Ok"/>
 #{/form}

@@ -51,7 +51,7 @@ public class NavigationMenu extends Controller {
 		if (persons == null) {
 			
 			persons = new ArrayList<Person>();
-			List<Person> genericPerson = Person.find("Select p from Person p order by p.surname").fetch();
+			List<Person> genericPerson = Person.find("Select p from Person p where p.name <> ? and p.name <> ? order by p.surname", "Admin", "epas").fetch();
 			for(Person p : genericPerson){
 				
 				Contract c = Contract.find("Select c from Contract c where c.person = ? and ((c.beginContract != null and c.expireContract = null) or " +

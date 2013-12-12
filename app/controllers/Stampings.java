@@ -36,7 +36,6 @@ import models.Stamping;
 import models.Stamping.WayType;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
-import models.efficiency.EfficientPersonDay;
 import models.exports.AbsenceReperibilityPeriod;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
@@ -72,256 +71,116 @@ public class Stampings extends Controller {
 	 * @param year
 	 * @param month
 	 */
-
-
 	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void stampings(Integer year, Integer month){
 
 		if (Security.getPerson().username.equals("admin")) {
 			Application.indexAdmin();
 		}
-		
 		Person person = Security.getPerson();
-
-		//numero di colonne da visualizzare
+		if(!person.isActiveInMonth(month, year))
+		{
+			flash.error("Si è cercato di accedere a un mese al di fuori del contratto valido per %s %s. " +
+					"Non esiste situazione mensile per il mese di %s", person.name, person.surname, DateUtility.fromIntToStringMonth(month));
+			render("@redirectToIndex");
+		}
+	
+		
 		Configuration conf = Configuration.getCurrentConfiguration();
 		int minInOutColumn = conf.numberOfViewingCoupleColumn;
+		int numberOfInOut = Math.max(minInOutColumn, PersonUtility.getMaximumCoupleOfStampings(person, year, month));
 
-		//TODO 18/10 creare un metodo statico in models.person getPersonMonth(int year, int month)
-		PersonMonth personMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?",
-				person, month, year).first();
-
-		//TODO 18/10 usare metodo in models.person getMonthContract() per implementare questo controllo
-		if (personMonth == null) {
-			/**
-			 * se il personMonth che viene richiesto, è situato nel tempo prima dell'inizio del contratto della persona oppure successivamente 
-			 * ad esso, se quest'ultimo è a tempo determinato (expireContract != null), si rimanda alla pagina iniziale perchè si tenta di accedere
-			 * a un periodo fuori dall'intervallo temporale in cui questa persona ha un contratto attivo
-			 */
-			if(new LocalDate(year, month, 1).dayOfMonth().withMaximumValue().isBefore(person.getCurrentContract().beginContract)
-					|| (person.getCurrentContract().expireContract != null && new LocalDate(year, month, 1).isAfter(person.getCurrentContract().expireContract))){
-				flash.error("Si è cercato di accedere a un mese al di fuori del contratto valido per %s %s. " +
-						"Non esiste situazione mensile per il mese di %s", person.name, person.surname, DateUtility.fromIntToStringMonth(month));
-				render("@redirectToIndex");
-			}
-			personMonth = new PersonMonth(person, year, month);
-			personMonth.create();
-
-		}
-
-		//calcolo Il numero di riposi compensativi usati fino ad oggi
-		int numberOfCompensatoryRestUntilToday = personMonth.numberOfCompensatoryRestUntilToday();
-
-		//non piu' usato
-		int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
-	
-		//numero di colonne da stampare
-		int numberOfInOut = Math.max(minInOutColumn, (int)personMonth.getMaximumCoupleOfStampings());
-
-
-		//calcolo del valore valid per le stamping del mese
-		personMonth.getDays();
-		for(PersonDay pd : personMonth.days)
+		//Lista person day contente tutti i giorni fisici del mese
+		List<PersonDay> totalPersonDays = PersonUtility.getTotalPersonDayInMonth(person, year, month);
+		
+		//Costruzione dati da renderizzare
+		for(PersonDay pd : totalPersonDays)
 		{
-			pd.computeValidStampings();
+			pd.computeValidStampings(); //calcolo del valore valid per le stamping del mese (persistere??)
 		}
-
-		//Nuova struttura dati per stampare
 		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
 		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();							
 
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
-		for(PersonDay pd : personMonth.days)
+		for(PersonDay pd : totalPersonDays )
 		{
 			PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(pd,numberOfInOut);
 			daysRecap.add(dayRecap);
 		}
-		
 		List<StampModificationType> stampModificationTypeList = PersonStampingDayRecap.stampModificationTypeList;
 		List<StampType> stampTypeList = PersonStampingDayRecap.stampTypeList;
-		//Il numero di buoni mensa usabili per questo mese e': personMonth.numberOfMealTicketToUse()
-		int numberOfMealTicketToUse = personMonth.numberOfMealTicketToUse();
-
-		//mentre quelli da restituire sono: personMonth.numberOfMealTicketToRender()
-		int numberOfMealTicketToRender = personMonth.numberOfMealTicketToRender();
-
-		//Il numero di giorni lavorativi in sede è di: personMonth.basedWorkingDays()
-		int basedWorkingDays = personMonth.basedWorkingDays();
-
-		//Il numero di riposi compensativi usati fino ad oggi è: numberOfCompensatoryRestUntilToday
-
-
-		//E' possibile utilizzare il residuo dell'anno precedente? personMonth.possibileUtilizzareResiduoAnnoPrecedente()==true ? 'sì' : 'no'
-		boolean possibileUtilizzareResiduoAnnoPrecedente = personMonth.possibileUtilizzareResiduoAnnoPrecedente();
-
-
-		int residuoAnnoPrecedenteDaInizializzazione = personMonth.residuoAnnoPrecedenteDaInizializzazione();
-
-
-		int straordinari = personMonth.straordinari;
-
-		int residuoAnnoPrecedenteDisponibileAllInizioDelMese = personMonth.residuoAnnoPrecedenteDisponibileAllInizioDelMese();
-
-		//Residuo tempo di lavoro dei mesi precedenti: 
-		int residuoAlMesePrecedente;
-		if(personMonth.mesePrecedente() != null)
-			residuoAlMesePrecedente = personMonth.mesePrecedente().totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese();
-		else
-			residuoAlMesePrecedente = 0;
-
-		//Residuo del mese:  personMonth.residuoDelMese().toHourTime()
-		int residuoDelMese = personMonth.residuoDelMese();
-
-
-		int tempoDisponibilePerStraordinari = personMonth.tempoDisponibilePerStraordinari();
-
-		//Totale residuo anno corrente a fine mese:  personMonth.totaleResiduoAnnoCorrenteAFineMese().toHourTime()
-		int totaleResiduoAnnoCorrenteAFineMese = personMonth.totaleResiduoAnnoCorrenteAFineMese();
-
-		int totale = personMonth.totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese();
-
-		int compensatoryRest = personMonth.getCompensatoryRest();
-//		int compensatoryRestInMinutes = personMonth.getCompensatoryRestInMinutes();
+		
+		int numberOfCompensatoryRestUntilToday = PersonUtility.numberOfCompensatoryRestUntilToday(person, year, month);
+		int numberOfMealTicketToUse = PersonUtility.numberOfMealTicketToUse(totalPersonDays);
+		int numberOfMealTicketToRender = PersonUtility.numberOfMealTicketToRender(totalPersonDays);
+		int basedWorkingDays = PersonUtility.basedWorkingDays(totalPersonDays);
+		Map<AbsenceType,Integer> absenceCodeMap = PersonUtility.getAllAbsenceCodeInMonth(totalPersonDays);
 
 		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, 2013, null);
 		Mese mese = c.getMese(year, month);
-
 		
-		//render
-		render(personMonth, numberOfInOut, numberOfCompensatoryRestUntilToday, numberOfCompensatoryRest, numberOfMealTicketToUse,numberOfMealTicketToRender,
-				daysRecap, stampModificationTypeList, stampTypeList, totale, possibileUtilizzareResiduoAnnoPrecedente,
-				tempoDisponibilePerStraordinari,residuoAlMesePrecedente, /*compensatoryRestInMinutes,*/residuoAnnoPrecedenteDaInizializzazione, compensatoryRest,straordinari, residuoDelMese, mese);
+		//Render
+		render(person, year, month, numberOfInOut, numberOfCompensatoryRestUntilToday,numberOfMealTicketToUse,numberOfMealTicketToRender,
+				daysRecap, stampModificationTypeList, stampTypeList, basedWorkingDays, absenceCodeMap, mese);
 
 	}
 
 
 	@Check(Security.INSERT_AND_UPDATE_STAMPING)
 	public static void personStamping(Long personId, int year, int month) {
-
+		
 		if (personId == null) {
 			personStamping();
 		}
-
 		if (year == 0 || month == 0) {
 			personStamping(personId);
 		}
-
 		Person person = Person.findById(personId);
-
-		//numero di colonne da visualizzare
-		Configuration conf = Configuration.getCurrentConfiguration();
-		int minInOutColumn = conf.numberOfViewingCoupleColumn;
-
-		//TODO 18/10 creare un metodo statico in models.person getPersonMonth(int year, int month)
-		PersonMonth personMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?",
-				person, 
-				month, 
-				year)
-				.first();
-
-		//TODO 18/10 usare metodo in models.person getMonthContract() per implementare questo controllo
-		if (personMonth == null) {
-			/**
-			 * se il personMonth che viene richiesto, è situato nel tempo prima dell'inizio del contratto della persona oppure successivamente 
-			 * ad esso, se quest'ultimo è a tempo determinato (expireContract != null), si rimanda alla pagina iniziale perchè si tenta di accedere
-			 * a un periodo fuori dall'intervallo temporale in cui questa persona ha un contratto attivo
-			 */
-			if(new LocalDate(year, month, 1).dayOfMonth().withMaximumValue().isBefore(person.getCurrentContract().beginContract)
-					|| (person.getCurrentContract().expireContract != null && new LocalDate(year, month, 1).isAfter(person.getCurrentContract().expireContract))){
-				flash.error("Si è cercato di accedere a un mese al di fuori del contratto valido per %s %s. " +
-						"Non esiste situazione mensile per il mese di %s", person.name, person.surname, DateUtility.fromIntToStringMonth(month));
-				render("@redirectToIndex");
-			}
-			personMonth = new PersonMonth(person, year, month);
-			personMonth.create();
-
+		if(!person.isActiveInMonth(month, year))
+		{
+			flash.error("Si è cercato di accedere a un mese al di fuori del contratto valido per %s %s. " +
+					"Non esiste situazione mensile per il mese di %s", person.name, person.surname, DateUtility.fromIntToStringMonth(month));
+			render("@redirectToIndex");
 		}
 		
-		//non piu' usato
-		int numberOfCompensatoryRest = personMonth.getCompensatoryRestInYear();
+		Configuration conf = Configuration.getCurrentConfiguration();
+		int minInOutColumn = conf.numberOfViewingCoupleColumn;
+		int numberOfInOut = Math.max(minInOutColumn, PersonUtility.getMaximumCoupleOfStampings(person, year, month));
 
-		//numero di colonne da stampare
-		int numberOfInOut = Math.max(minInOutColumn, (int)personMonth.getMaximumCoupleOfStampings());
-
-		//calcolo del valore valid per le stamping del mese
-		personMonth.getDays();
-		for(PersonDay pd : personMonth.days)
+		//Lista person day contente tutti i giorni fisici del mese
+		List<PersonDay> totalPersonDays = PersonUtility.getTotalPersonDayInMonth(person, year, month);
+		
+		//Costruzione dati da renderizzare
+		for(PersonDay pd : totalPersonDays)
 		{
-			pd.computeValidStampings();
+			pd.computeValidStampings(); //calcolo del valore valid per le stamping del mese
 		}
-
-
-
-		//Nuova struttura dati per stampare la riga giornaliera della tabella
-		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	//svuoto variabile statica	//TODO forse da mettere come transiente in personMonth
-		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();							//svuoto variabile statica  //TODO forse da mettere come transiente in personMonth
+		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
+		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();							
 
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
-		for(PersonDay pd : personMonth.days)
+		for(PersonDay pd : totalPersonDays )
 		{
 			PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(pd,numberOfInOut);
 			daysRecap.add(dayRecap);
 		}
-
-		//tabella riassuntiva codici
 		List<StampModificationType> stampModificationTypeList = PersonStampingDayRecap.stampModificationTypeList;
 		List<StampType> stampTypeList = PersonStampingDayRecap.stampTypeList;
-
-		//Il numero di buoni mensa usabili per questo mese e': personMonth.numberOfMealTicketToUse()
-		int numberOfMealTicketToUse = personMonth.numberOfMealTicketToUse();
-
-		//mentre quelli da restituire sono: personMonth.numberOfMealTicketToRender()
-		int numberOfMealTicketToRender = personMonth.numberOfMealTicketToRender();
-
-		//Il numero di giorni lavorativi in sede è di: personMonth.basedWorkingDays()
-		int basedWorkingDays = personMonth.basedWorkingDays();
-
-		//Il numero di riposi compensativi usati fino ad oggi è: numberOfCompensatoryRestUntilToday
-		int numberOfCompensatoryRestUntilToday = personMonth.numberOfCompensatoryRestUntilToday();
-
-		//E' possibile utilizzare il residuo dell'anno precedente? personMonth.possibileUtilizzareResiduoAnnoPrecedente()==true ? 'sì' : 'no'
-		boolean possibileUtilizzareResiduoAnnoPrecedente = personMonth.possibileUtilizzareResiduoAnnoPrecedente();
-
-
-		int residuoAnnoPrecedenteDaInizializzazione = personMonth.residuoAnnoPrecedenteDaInizializzazione();
 		
-
-		int straordinari = personMonth.straordinari;
-
-		int residuoAnnoPrecedenteDisponibileAllInizioDelMese = personMonth.residuoAnnoPrecedenteDisponibileAllInizioDelMese();
-
-		//Residuo tempo di lavoro dei mesi precedenti: 
-		int residuoAlMesePrecedente;
-		if(personMonth.mesePrecedente() != null)
-			residuoAlMesePrecedente = personMonth.mesePrecedente().totaleResiduoAnnoCorrenteAFineMesePiuResiduoAnnoPrecedenteDisponibileAFineMese();
-		else
-			residuoAlMesePrecedente = 0;
-
-		//Residuo del mese:  personMonth.residuoDelMese().toHourTime()
-		int residuoDelMese = personMonth.residuoDelMese();
-
-
-		int tempoDisponibilePerStraordinari = personMonth.tempoDisponibilePerStraordinari();
-
-		//Totale residuo anno corrente a fine mese:  personMonth.totaleResiduoAnnoCorrenteAFineMese().toHourTime()
-		int totaleResiduoAnnoCorrenteAFineMese = personMonth.totaleResiduoAnnoCorrenteAFineMese();
-
-		int totale = personMonth.totaleResiduoAnnoCorrenteAFineMese();
-
-		int compensatoryRest = personMonth.getCompensatoryRest();
-//		int compensatoryRestInMinutes = personMonth.getCompensatoryRestInMinutes();
-
-		//Totale residuo a fine mese  totaleResiduo.toHourTime() ore
+		int numberOfCompensatoryRestUntilToday = PersonUtility.numberOfCompensatoryRestUntilToday(person, year, month);
+		int numberOfMealTicketToUse = PersonUtility.numberOfMealTicketToUse(totalPersonDays);
+		int numberOfMealTicketToRender = PersonUtility.numberOfMealTicketToRender(totalPersonDays);
+		int basedWorkingDays = PersonUtility.basedWorkingDays(totalPersonDays);
+		Map<AbsenceType,Integer> absenceCodeMap = PersonUtility.getAllAbsenceCodeInMonth(totalPersonDays);
 
 		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, 2013, null);
 		Mese mese = c.getMese(year, month);
+		
+		//Render
+		render(person, year, month, numberOfInOut, numberOfCompensatoryRestUntilToday,numberOfMealTicketToUse,numberOfMealTicketToRender,
+				daysRecap, stampModificationTypeList, stampTypeList, basedWorkingDays, absenceCodeMap, mese);
 
-		//render
-		render(personMonth, numberOfInOut, numberOfCompensatoryRestUntilToday, numberOfCompensatoryRest, numberOfMealTicketToUse, numberOfMealTicketToRender,
-				daysRecap, stampModificationTypeList, stampTypeList, totale, possibileUtilizzareResiduoAnnoPrecedente,
-				tempoDisponibilePerStraordinari,residuoAlMesePrecedente, /*compensatoryRestInMinutes, */residuoAnnoPrecedenteDaInizializzazione, compensatoryRest,straordinari, residuoDelMese, mese);
-
-
+		 
 	}
 
 	private static void personStamping() {
