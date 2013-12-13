@@ -527,8 +527,11 @@ public class Persons extends Controller {
 		}
 		if(person.number != null && ! person.number.equals(params.get("number", Integer.class)))
 			person.number = params.get("number", Integer.class);
-		if(person.qualification != null && person.qualification.qualification != params.get("person.qualification", Integer.class))
-			person.qualification.qualification = params.get("person.qualification", Integer.class);
+		//Logger.debug("Qualifica: %d", params.get("person.qualification", Integer.class));
+		if(person.qualification != null && person.qualification.qualification != params.get("person.qualification", Integer.class)){
+			Qualification q = Qualification.find("Select q from Qualification q where q.qualification = ?", params.get("person.qualification", Integer.class)).first();
+			person.qualification = q;
+		}
 		if(person.qualification == null){
 			Qualification q = Qualification.find("Select q from Qualification q where q.qualification = ?", params.get("person.qualification", Integer.class)).first();
 			person.qualification = q;
