@@ -654,7 +654,7 @@ public class Competences extends Controller{
 		}
 		person.save();
 		flash.success(String.format("Aggiornate con successo le competenze per %s %s", person.name, person.surname));
-		Application.indexAdmin();
+		Competences.recapCompetences();
 
 	}
 

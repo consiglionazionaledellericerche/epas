@@ -505,8 +505,15 @@ public class Person extends Model {
 	 * @return la lista di persone attive a quella data
 	 */
 	public static List<Person> getActivePersons(LocalDate date){
-		List<Person> activePersons = Person.find("Select distinct (p) from Person p, Contract c where c.person = p and (c.endContract is null or c.endContract > ?)" +
-				" and (c.expireContract > ? or c.expireContract is null) and (c.beginContract < ? or c.beginContract is null) order by p.surname, p.name", date, date, date).fetch();
+		List<Person> activePersons = Person.find(
+				"Select distinct (p) " +
+				"from Person p, Contract c " +
+				"where c.person = p "
+				+ "and (c.endContract is null or c.endContract > ?) "
+				+ "and (c.expireContract > ? or c.expireContract is null) "
+				+ "and (c.beginContract < ? or c.beginContract is null) "
+				+ "and p.username <> ? " + 
+				"order by p.surname, p.name", date, date, date, "epas.clocks").fetch();
 		return activePersons;
 
 	}
