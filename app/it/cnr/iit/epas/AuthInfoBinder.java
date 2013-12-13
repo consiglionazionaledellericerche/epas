@@ -39,7 +39,7 @@ public class AuthInfoBinder implements TypeBinder<AuthInfo> {
 	@Override
 	public Object bind(String name, Annotation[] annotations, String value,	Class actualClass, Type genericType) throws Exception {
 		
-		Logger.info("binding AuthInfo: %s, %s, %s, %s, %s", name, annotations, value, actualClass, genericType);
+		Logger.trace("binding AuthInfo: %s, %s, %s, %s, %s", name, annotations, value, actualClass, genericType);
 		JsonObject jsonObject = new JsonParser().parse(value).getAsJsonObject();
 		
 		return new AuthInfo(jsonObject.get("username").getAsString(), jsonObject.get("password").getAsString());
