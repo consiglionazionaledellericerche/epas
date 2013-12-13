@@ -342,6 +342,8 @@ public class Persons extends Controller {
 		person.username = params.get("name").toLowerCase()+'.'+params.get("surname").toLowerCase();
 		Qualification qual = Qualification.findById(new Long(params.get("person.qualification", Integer.class)));
 		person.qualification = qual;
+		Codec codec = new Codec();
+		person.password = codec.hexMD5("epas");
 		person.save();
 		
 		/**
