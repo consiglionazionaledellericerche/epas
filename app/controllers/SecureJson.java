@@ -25,22 +25,22 @@ public class SecureJson extends Controller {
 	 * @param body json nella forma {"username": "cristian.lucchesi", "password": "lapassword"}
 	 * 
 	 * Restituisce {"login" : "ok"} se il logout è andato a buon fine, 
-	 * 	altrimenti {"login" : "ko"}
+	 * 	altrimenti ritorno un codice HTTP 401
 
 	 */
 	public static void login(@As(binder=AuthInfoBinder.class) AuthInfo body) {
 		Logger.trace("Chiamata SecureJson.login, authInfo=%s", body);
 
-		String login = "ko";
 		if (body != null && 
 				Security.authenticate(body.getUsername(), body.getPassword())) {
 			// Mark user as connected
 			session.put("username", body.getUsername());
-			login = "ok";
+			renderJSON("{\"login\":\"ok\"}");
+			Logger.debug("Login Json utente: %s completato con successo", body.getUsername());
+		} else {
+			unauthorized();
 		} 
-		Logger.debug("Login Json utente: %s, status=%s", body.getUsername(), login);
 
-		renderJSON("{\"login\":\"" + login +"\"}");
 	}
 
 	/**
@@ -52,15 +52,13 @@ public class SecureJson extends Controller {
 	 * 	altrimenti {"logout" : "ko"}
 	 */
 	public static void logout() {
-		String logout = "ko";
 
 		if(session.contains("username")) {
 			session.clear();
-			logout = "ok";
-			Logger.debug("Logout Json utente: %s, status=%s", session.contains("username"), logout);
+			renderJSON("{\"logout\":\"ok\"}");        
+			Logger.debug("Logout Json utente: %s completata con successo", session.contains("username"));
+		} else {
+			unauthorized();
 		}
-
-		renderJSON("{\"logout\":\"" + logout +"\"}");        
-
 	}
 }
