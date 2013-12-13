@@ -76,12 +76,7 @@ public class SwitchTemplate extends Controller{
 		switch (menuItem) {
 
 		case missingStamping:
-			if(personId != 0){
-				flash.error("Il metodo %s deve essere chiamato senza selezionare alcuna persona", menuItem.getDescription());
-				Application.indexAdmin();
-			}
-			else
-				Stampings.missingStamping(year, month);
+			Stampings.missingStamping(year, month);
 			break;
 			
 		case monthRecap:
@@ -117,10 +112,6 @@ public class SwitchTemplate extends Controller{
 			break;
 
 		case yearlyAbsences:
-			if(personId == 0){
-				flash.error("Il metodo %s deve essere chiamato selezionando una persona", menuItem.getDescription());
-				Application.indexAdmin();
-			}
 			YearlyAbsences.yearlyAbsences(personId, year);
 			break;
 		
@@ -129,12 +120,7 @@ public class SwitchTemplate extends Controller{
 			YearlyAbsences.showGeneralMonthlyAbsences(year, month);
 			break;
 		case manageAbsenceCode:
-			if(personId != 0){
-				flash.error("Il metodo %s deve essere chiamato senza selezionare alcuna persona", menuItem.getDescription());
-				Application.indexAdmin();
-			}
-			else
-				Absences.manageAbsenceCode();
+			Absences.manageAbsenceCode();
 			break;
 		case vacationsAdmin:
 			VacationsAdmin.manageVacationCode();		
@@ -146,59 +132,29 @@ public class SwitchTemplate extends Controller{
 			Persons.changePassword(person.id);
 			break;
 		case manageWorkingTime:
-			if(personId != 0){
-				flash.error("Il metodo %s deve essere chiamato senza selezionare alcuna persona", menuItem.getDescription());
-				Application.indexAdmin();
-			}
-			else
-				WorkingTimes.manageWorkingTime();
+			WorkingTimes.manageWorkingTime();
 			break;
 		case confParameters:
-			if(personId != 0){
-				flash.error("Il metodo %s deve essere chiamato senza selezionare alcuna persona", menuItem.getDescription());
-				Application.indexAdmin();
-			}
-			else
-				Configurations.list();
+			Configurations.list();
 			break;
 		case personList:
 			Persons.list();
 			break;
 		case administrator:
-			if(personId != 0){
-				flash.error("Il metodo %s deve essere chiamato senza selezionare alcuna persona", menuItem.getDescription());
-				Application.indexAdmin();
-			}
-			else
-				Administrators.list();
+			Administrators.list();
 			break;
 		
 		case dailyPresence:
-			if(personId != 0){
-				flash.error("Il metodo %s deve essere chiamato senza selezionare alcuna persona", menuItem.getDescription());
-				Application.indexAdmin();
-			}
-			else
-				Stampings.dailyPresence(year, month, day);
+			Stampings.dailyPresence(year, month, day);
 			break;
 		case mealTicketSituation:
-			if(personId != 0){
-				flash.error("Il metodo %s deve essere chiamato senza selezionare alcuna persona", menuItem.getDescription());
-				Application.indexAdmin();
-			}
-			else
-				Stampings.mealTicketSituation(year, month);
+			Stampings.mealTicketSituation(year, month);
 			break;
 		case manageCompetence:
 			Competences.manageCompetenceCode();
 			break;
 		case uploadSituation:
-			if(personId != 0){
-				flash.error("Il metodo %s deve essere chiamato senza selezionare alcuna persona", menuItem.getDescription());
-				Application.indexAdmin();
-			}
-			else
-				UploadSituation.uploadSituation(year, month);
+			UploadSituation.uploadSituation(year, month);
 			break;
 		case stampings:
 			Stampings.stampings(year, month);
