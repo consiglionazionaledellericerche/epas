@@ -9,6 +9,8 @@
     	<li><a href="@{Competences.recapCompetences()}#">Recap competenze</a></li>
     </ul>
     #{form @Competences.saveOvertime()}
+    <input type="hidden" name="year" value="${year}"/>
+	<input type="hidden" name="month" value="${month}"/>
     <h3 id="monteOreStraordinario">Modifica del monte ore di straordinario del ${year}</h3>
     <table>
 	    <tr>

@@ -28,9 +28,9 @@ public class NavigationMenu extends Controller {
 	@Before
 	public static void injectMenu() { 
 		LocalDate now = new LocalDate();
-		Integer day = flash.get("day") != null ? Integer.valueOf(flash.get("day")) : null;
-		int year = params.get("year") != null ? Integer.valueOf(flash.get("year")) : now.getYear(); 
-		int month = params.get("month") != null  ? Integer.valueOf(flash.get("month")) : now.getMonthOfYear();
+		Integer day = params.get("day") != null ? Integer.valueOf(params.get("day")) : null;
+		int year = params.get("year") != null ? Integer.valueOf(params.get("year")) : now.getYear(); 
+		int month = params.get("month") != null  ? Integer.valueOf(params.get("month")) : now.getMonthOfYear();
 		if(month == 0)
 			month = now.getMonthOfYear();
 		
@@ -42,7 +42,7 @@ public class NavigationMenu extends Controller {
 		Logger.debug("PersonId= %d", personId);
 		Logger.debug("month=%s", month);
 		
-		ActionMenuItem action = flash.get("method") != null && !flash.get("method").equals("") && personId != null ? ActionMenuItem.valueOf(flash.get("method")) : ActionMenuItem.stampingsAdmin;
+		ActionMenuItem action = params.get("method") != null && !params.get("method").equals("") && personId != null ? ActionMenuItem.valueOf(params.get("method")) : ActionMenuItem.stampingsAdmin;
 		
 		//Logger.debug("Appena assegnata la action nel metodo injectMenu della classe NavigationMenu. La action è: %s", action.getDescription());
 		
