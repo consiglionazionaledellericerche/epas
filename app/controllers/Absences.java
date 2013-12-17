@@ -299,6 +299,17 @@ public class Absences extends Controller{
 
 		Logger.debug("Richiesto inserimento della assenza codice = %s della persona %s, dataInizio = %s", absenceCode, person, dateFrom);
 
+		
+		
+		if(absenceType.code.equals("91"))
+		{
+			handlerCompensatoryRest(person, dateFrom, dateTo, absenceType);
+			return; //inutile
+		}
+		
+		
+		
+		
 		// è il caso in cui si inserisce lo stesso codice di assenza per più giorni
 
 		if(dateTo.isAfter(dateFrom)){
@@ -523,7 +534,9 @@ public class Absences extends Controller{
 		 * controllo che le persone che richiedono il riposo compensativo, che hanno una qualifica compresa tra 1 e 3, non abbiano superato
 		 * il massimo numero di giorni di riposo compensativo consentiti e presenti in configurazione
 		 */
+		/*
 		if(absenceType.code.equals("91")){
+			
 			Logger.debug("Devo inserire un codice %s per %s %s", absenceType.code, person.name, person.surname);
 			LocalDate actualDate = new LocalDate(yearFrom, monthFrom, dayFrom);
 			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, actualDate).first();
@@ -572,9 +585,11 @@ public class Absences extends Controller{
 			flash.success("Aggiunto codice di assenza %s ", absenceType.code);
 			//render("@save");
 			Stampings.personStamping(personId, yearFrom, monthFrom);
-
+			
 		}		
-
+		*/
+		
+		
 		if(absenceType.absenceTypeGroup != null){
 			CheckMessage checkMessage = PersonUtility.checkAbsenceGroup(absenceType, person, dateFrom);
 			if(checkMessage.check == false){
@@ -1003,6 +1018,80 @@ public class Absences extends Controller{
 			pd.save();
 			
 		}
+	}
+	
+	
+	private static void handlerCompensatoryRest(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType)
+	{
+		Logger.debug("Devo inserire un codice %s per %s %s", absenceType.code, person.name, person.surname);
+		Configuration config = Configuration.getCurrentConfiguration();
+		LocalDate actualDate = dateFrom;
+		int taken = 0;
+		while(!actualDate.isAfter(dateTo))
+		{
+			//Costruisco se non esiste il person day
+			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, actualDate).first();
+			if(pd == null){
+				pd = new PersonDay(person, actualDate);
+				pd.create();
+			}
+			
+			//se e' festa vado oltre
+			if(pd.isHoliday())
+			{
+				actualDate = actualDate.plusDays(1);
+				continue;
+			}
+			
+			//verifica se ha esaurito il bonus per l'anno
+			if(person.qualification.qualification > 0 && person.qualification.qualification < 4){
+				Query query = JPA.em().createQuery("SELECT abs FROM Absence abs WHERE abs.personDay.person = :person "+ 
+						"AND abs.personDay.date between :dateStart AND :dateTo AND abs.absenceType.code = :code");
+				query.setParameter("person", pd.person).
+				setParameter("dateStart", new LocalDate(actualDate.getYear(), 1,1)).
+				setParameter("dateTo",actualDate).
+				setParameter("code", "91");
+				List<Object> resultList = query.getResultList();
+				Logger.debug("Il numero di assenze con codice %s fino a oggi è %d", absenceType.code, resultList.size());
+				if(resultList.size() >= config.maxRecoveryDaysOneThree){
+					actualDate = actualDate.plusDays(1);
+					continue;
+				}
+			}
+
+			//Controllo del residuo
+
+			if(!PersonUtility.canTakeCompensatoryRest(person, pd.date))
+			{
+				actualDate = actualDate.plusDays(1);
+				continue;
+			}
+			Absence absence = new Absence();
+			absence.absenceType = absenceType;
+			absence.personDay = pd;
+			absence.save();
+			pd.absences.add(absence);
+			pd.populatePersonDay();
+			pd.updatePersonDay();
+			pd.save();
+			taken++;
+
+
+			actualDate = actualDate.plusDays(1);
+		}
+
+		
+		
+		
+		//Administration.fixPersonSituation(person.id, yearFrom, monthFrom);
+		//flash.success("Operazione agginta riposi compensativi ", absenceType.code);
+		//render("@save");
+		if(taken==0)
+			flash.error("Non e' stato possibile inserire alcun riposo compensativo");
+		else
+			flash.success("Inseriti %s riposi compensativi per la persona", taken);
+		
+		Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
 	}
 }
 
