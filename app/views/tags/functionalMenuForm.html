@@ -39,7 +39,19 @@
 		#{option 11}Novembre#{/option}
 		#{option 12}Dicembre#{/option}
 	#{/select}
-			
+	
+	
+	%{if (_mainMenu.day != null || _mainMenu.method.name() == 'dailyPresence') {
+	}%
+		#{select 'day', value:_mainMenu.day, class:'span1', id: 'day', onChange:'javascript:this.form.submit()'}
+			%{ for(day in _mainMenu.days){
+				}%
+				#{option day}${day}#{/option}
+				%{
+					}
+				}%		
+		#{/select}		
+	%{}}%		
 	
 	#{secure.check "viewPersonList"}
 		#{select 'personId', value:session.get("personSelected"), class:'span3', id:'person', onChange:'javascript:this.form.submit()'}
@@ -55,17 +67,7 @@
 		#{/select}
 	#{/secure.check}
 	
-	%{if (_mainMenu.day != null || _mainMenu.method.name() == 'dailyPresence') {
-	}%
-		#{select 'day', value:_mainMenu.day, class:'span1', id: 'day', onChange:'javascript:this.form.submit()'}
-			%{ for(day in _mainMenu.days){
-				}%
-				#{option day}${day}#{/option}
-				%{
-					}
-				}%		
-		#{/select}		
-	%{}}%
+	
 
 	<input class="btn" type="submit" value="Invio">
 #{/form}

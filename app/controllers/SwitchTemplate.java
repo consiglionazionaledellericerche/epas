@@ -17,60 +17,52 @@ public class SwitchTemplate extends Controller{
 	public static final String USERNAME_SESSION_KEY = "username";
 
 	public static void dispatch() throws InstantiationException, IllegalAccessException, IOException, ClassNotFoundException, SQLException {
-		LocalDate now = new LocalDate();
 		
+		Person person = Security.getPerson();
+		
+		LocalDate now = new LocalDate();
+		int month = now.getMonthOfYear();
+		int year = now.getYear();
+		int day = now.getDayOfMonth();
+		Long personId = Security.getPerson().id;
 		
 		String method = params.get("method");
-	//	Logger.debug("Nella switchTemplate La action è: %s", method);
-		if (method == null) {
-
+		if (method == null)
+		{
 			flash.error(String.format("La action da eseguire è: %s", method));
 			Application.indexAdmin();
-
 		}
-		ActionMenuItem menuItem = ActionMenuItem.valueOf(method);
-	//	Logger.debug("Nella switchTemplate Il menuItem è: %s relativo alla action: %s", menuItem, method);
-		Person person = Security.getPerson();
-	//	Logger.debug("L'id della persona loggata è: %d", person.id);
+		session.put("methodSelected", method);
 		
-		int month;
-		if (params.get("month") != null) {
+		ActionMenuItem menuItem = ActionMenuItem.valueOf(method);
+	
+		//get month selected
+		if (params.get("month") != null) 
 			month = params.get("month", Integer.class);
-		}
-		else 
-			month = now.getMonthOfYear();
-
-		int year;
-		if (params.get("year") != null) {
+		session.put("monthSelected", month);
+		
+		//get year selected
+		if (params.get("year") != null)
 			year = params.get("year", Integer.class);
-		}
-		else 
-			year = now.getYear();
-
-		int day ;
-		if(params.get("day") != null){
+		session.put("yearSelected", year);
+		
+		//get day selected
+		if(params.get("day") != null)
 			day = params.get("day", Integer.class);
-		}
-		else
-			day = now.getDayOfMonth();
-
-		Long personId = null;
-		//Logger.debug("Il personId preso dai params vale: %s", params.get("personId"));
-		if (params.get("personId") != null) {
+		session.put("daySelected", day);
+		
+		//get person selected
+		if (params.get("personId") != null) 
+		{
 			personId = params.get("personId", Long.class);
-			
 			Logger.debug("L'id selezionato è: %d", personId);
-
 			if(personId != 0)	
 				person = Person.findById(personId);
 		}
-		else{
-			personId = Security.getPerson().id;
-		}
-		session.put("methodSelected", method);
-		session.put("monthSelected", month);
-		session.put("yearSelected", year);
 		session.put("personSelected", personId);
+
+		
+		
 		params.flash();
 		
 		switch (menuItem) {
@@ -183,6 +175,15 @@ public class SwitchTemplate extends Controller{
 				personId = Security.getPerson().id;
 			PersonMonths.hourRecap(personId,year);
 			break;
+		case printPersonTag:
+			if(personId == null || personId == 0)				
+				personId = Security.getPerson().id;
+			PrintTags.showPersonTag(year, month);
+			break;
+			
+			
+			
+			
 
 		default: 
 			break;
