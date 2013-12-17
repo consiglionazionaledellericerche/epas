@@ -157,9 +157,12 @@ GET		/recapCompetences/updatePersonCompetence/{personId}		Competences.updatePers
 GET		/uploadSituation/						UploadSituation.show
 POST	/uploadSituation/						UploadSituation.uploadSituation
 
-#Gestione stampa cartellino
+#Gestione stampa cartellino amministratore
 GET		/printTags/listPersonForPrintTags/{year}/{month}		PrintTags.listPersonForPrintTags
 POST	/printTags/showTag/{personId}			PrintTags.showTag
+
+#Gestione stampa cartellino dipendente
+GET     /printTags/{personId}/{year}/{month}	PrintTags.showPersonTag
 
 #Clock
 GET		/clocks									Clocks.show

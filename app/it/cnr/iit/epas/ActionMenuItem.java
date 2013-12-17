@@ -30,7 +30,8 @@ public enum ActionMenuItem {
 	absencesperperson("Assenze per persona", "viewPersonalSituation"),
 	vacations("Ferie", "viewPersonalSituation"),
 	competences("Competenze", "viewPersonalSituation"),
-	hourrecap("Riepilogo orario", "viewPersonalSituation");
+	hourrecap("Riepilogo orario", "viewPersonalSituation"),
+	printPersonTag("Stampa cartellino presenze", "viewPersonalSituation");
 	//changePassword("", "");
 
     
