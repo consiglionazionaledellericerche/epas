@@ -769,7 +769,7 @@ public class PersonDay extends Model {
 		{
 			//per adesso no storia, unico record
 			PersonDayInTrouble pdt = troubles.get(0);
-			Logger.info("Il problema %s %s %s e' risultato fixato", this.date, this.person.surname, this.person.name);
+			//Logger.info("Il problema %s %s %s e' risultato fixato", this.date, this.person.surname, this.person.name);
 			pdt.fixed = true;
 			pdt.save();
 		}
@@ -780,6 +780,7 @@ public class PersonDay extends Model {
 	 */
 	public void updatePersonDay()
 	{
+		/*
 		Logger.info("Update Person Day %s by %s %s", this.date, this.person.name, this.person.surname);
 		LocalDate monthBegin = new LocalDate(this.date.getYear(), this.date.getMonthOfYear(), 1);
 		LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
@@ -793,11 +794,16 @@ public class PersonDay extends Model {
 		{
 			pd.populatePersonDay();
 		}
+		
+		//Logger.info("Update Person Day %s by %s %s Completata", this.date, this.person.name, this.person.surname);
+		*/
+		
+		PersonUtility.updatePersonDaysIntoInterval(this.person, this.date, this.date);
+		
 		/**
 		 * TODO: inserire qui una chiamata alla fixPersonSituation di Administration quando le modifiche dovranno ripercuotersi anche 
 		 * sui personMonth
 		 */
-		Logger.info("Update Person Day %s by %s %s Completata", this.date, this.person.name, this.person.surname);
 	}
 
 	/**
