@@ -43,6 +43,7 @@ import models.enumerate.AccumulationType;
 import models.enumerate.JustifiedTimeAtWork;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
+import models.rendering.VacationsRecap;
 
 public class PersonUtility {
 
@@ -479,6 +480,20 @@ public class PersonUtility {
 	 */
 	public static AbsenceType whichVacationCode(Person person, Integer year, Integer month, Integer day){
 		
+		
+		VacationsRecap vr = new VacationsRecap(person, (short)year.intValue());	
+		
+		if(vr.persmissionNotYetUsed>0)
+			return AbsenceType.find("byCode", "94").first();
+		
+		if(vr.vacationDaysLastYearNotYetUsed>0)
+			return AbsenceType.find("byCode", "31").first();
+		
+		if(vr.vacationDaysCurrentYearNotYetUsed>0)
+			return AbsenceType.find("byCode", "32").first();
+		
+		return null;
+		/*
 		Configuration config = Configuration.getCurrentConfiguration();
 		AbsenceType vacationFromThisYear = AbsenceType.find("byCode", "32").first();
 		AbsenceType vacationFromLastYear = AbsenceType.find("byCode", "31").first();
@@ -524,6 +539,7 @@ public class PersonUtility {
 			return AbsenceType.find("byCode", "32").first();
 		else
 			return null;
+			*/
 	}
 	
 	
@@ -1026,6 +1042,36 @@ public class PersonUtility {
 		
 		return query.getResultList().size();
 	}
+	
+	/**
+	 * Aggiorna i person day della persona dei mesi che cadono entro l'intervallo temporale [dateFrom,dateTo]
+	 * @param person
+	 * @param dateFrom
+	 * @param dateTo
+	 */
+	public static void updatePersonDaysIntoInterval(Person person, LocalDate dateFrom, LocalDate dateTo)
+	{
+		LocalDate monthBegin = new LocalDate(dateFrom.getYear(), dateFrom.getMonthOfYear(), 1);
+		LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
+		while(true)
+		{
+			List<PersonDay> pdList = PersonDay.find(
+					"select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date asc",
+					person,
+					monthBegin,
+					monthEnd).fetch();
+			for(PersonDay pd : pdList)
+			{
+				pd.populatePersonDay();
+			}
+			if(monthEnd.isEqual(dateTo) || monthEnd.isAfter(dateTo))
+				return;
+			monthBegin = monthBegin.plusMonths(1);
+			monthEnd = monthBegin.dayOfMonth().withMaximumValue();
+		}
+
+	}
+
 	
 	/**
 	 * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.

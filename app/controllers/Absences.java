@@ -28,7 +28,6 @@ import models.PersonTags;
 import models.Qualification;
 import models.Stamping;
 import models.WorkingTimeTypeDay;
-import models.efficiency.EfficientPersonDay;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
 import models.enumerate.JustifiedTimeAtWork;
@@ -292,71 +291,48 @@ public class Absences extends Controller{
 
 			flash.error("Il codice di assenza %s non esiste", params.get("absenceCode"));
 			Logger.info("E' stato richiesto l'inserimento del codice di assenza %s per l'assenza del giorno %s per personId = %d. Il codice NON esiste. Se si tratta di un codice di assenza per malattia figlio NUOVO, inserire il nuovo codice nella lista e riprovare ad assegnarlo.", absenceType, dateFrom, personId);
-			//create(personId, yearFrom, monthFrom, dayFrom);
-			//render("@save");
 			Stampings.personStamping(personId, yearFrom, monthFrom);
 		}
 
 		Logger.debug("Richiesto inserimento della assenza codice = %s della persona %s, dataInizio = %s", absenceCode, person, dateFrom);
 
+		//CONTROLLO INTERVALLO REGOLARE 
+		if(dateTo.isBefore(dateFrom))
+		{
+			flash.error("Data fine precedente alla data inizio. Operazione annullata.");
+			Stampings.personStamping(personId, yearFrom, monthFrom);
+		}
 		
 		
+		//CONTROLLO CHE IL CODICE INSERITO NON ESISTA GIA IN ALMENO UN GIORNO
+		if(absenceTypeAlreadyExist(person, dateFrom, dateTo, absenceType))
+		{
+			flash.error("Il codice di assenza %s è già presente in almeno uno dei giorni in cui lo si voleva inserire. Controllare", absenceType.code);
+			Stampings.personStamping(personId, yearFrom, monthFrom);
+		}
+		
+		//NO DUE CODICI DI ASSENZA GIORNALIERA
+		if(allDayAbsenceAlreadyExist(person, dateFrom, dateTo, absenceType))
+		{
+			flash.error("Non si possono inserire per lo stesso giorno due codici di assenza giornaliera. Operazione annullata.");
+			Stampings.personStamping(personId, yearFrom, monthFrom);
+		}
+	
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
 		if(absenceType.code.equals("91"))
 		{
 			handlerCompensatoryRest(person, dateFrom, dateTo, absenceType);
 			return; //inutile
 		}
 		
+		if(absenceType.code.equals("FER"))
+		{
+			handlerFER(person, dateFrom, dateTo, absenceType);
+			return; //inutile
+		}
 		
 		
-		
-		// è il caso in cui si inserisce lo stesso codice di assenza per più giorni
-
-		if(dateTo.isAfter(dateFrom)){
-
-			LocalDate dataInizioAssenze = dateFrom;
-			while(dataInizioAssenze.isBefore(dateTo)){
-
-				List<Absence> absenceList = Absence.find("Select a from Absence a, PersonDay pd where a.personDay = pd and pd.person = ? and pd.date = ?", 
-						person, dataInizioAssenze).fetch();
-				for(Absence abs : absenceList){
-					if(abs.absenceType.equals(absenceType)){
-						flash.error("Il codice di assenza %s è già presente in almeno uno dei giorni in cui lo si voleva inserire. Controllare", absenceType.code);
-						//create(personId, yearFrom, monthFrom, dayFrom);
-						//render("@save");
-						Stampings.personStamping(personId, yearFrom, monthFrom);
-					}
-
-				}
-				dataInizioAssenze = dataInizioAssenze.plusDays(1);
-			}		
-
-		}
-		else{
-
-			List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where a.personDay = pd and pd.person = ? and pd.date = ?" +
-					" and a.absenceType = ?", person, dateFrom, absenceType).fetch();
-			if(existingAbsence.size() > 0){
-				if((existingAbsence.get(0).absenceType.equals(absenceType) || existingAbsence.get(1).absenceType.equals(absenceType))){
-					validation.keep();
-					params.flash();
-					flash.error("Il codice di assenza %s è già presente per la data %s", params.get("absenceCode"), PersonTags.toDateTime(dateFrom));
-					//create(personId, yearFrom, monthFrom, dayFrom);
-					//render("@save");
-					Stampings.personStamping(personId, yearFrom, monthFrom);
-				}
-			}
-
-		}
-
-		Absence abs = Absence.find("Select abs from Absence abs where abs.personDay.person = ? and abs.personDay.date = ?", person, dateFrom).first();
-		if(abs != null && abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay && 
-				absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay){
-			flash.error("Non si possono inserire per lo stesso giorno due codici di assenza giornaliera");
-			//render("@save");
-			Stampings.personStamping(personId, dateFrom.getYear(), dateFrom.getMonthOfYear());
-		}
-
 		/**
 		 * controllo sulla possibilità di poter prendere i congedi per malattia dei figli, guardo se il codice di assenza appartiene alla
 		 * lista dei codici di assenza da usare per le malattie dei figli
@@ -444,7 +420,6 @@ public class Absences extends Controller{
 		 * inserire il giusto codice di assenza per ferie in base a quante ferie potevano essere rimaste dall'anno precedente, eventualmente passare
 		 * da quelle dell'anno in corso o ancora dai permessi legge...ok ma qual'è l'ordine? :-)
 		 */
-		
 		if(absenceType.code.equals("FER")){
 			
 			if(PersonUtility.canPersonTakeAbsenceInShiftOrReperibility(person, new LocalDate(yearFrom,monthFrom,dayFrom))){
@@ -670,6 +645,17 @@ public class Absences extends Controller{
 			 Stampings.personStamping(personId, yearFrom, monthFrom);
 		}
 
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		Absence absence = new Absence();
 		Logger.debug("%s %s può usufruire del codice %s", person.name, person.surname, absenceType.code);
 		if(dateTo.isBefore(dateFrom) || dateTo.isEqual(dateFrom)){
@@ -862,6 +848,8 @@ public class Absences extends Controller{
 		if (absence == null) {
 			notFound();
 		}
+		Person person = absence.personDay.person;
+		
 		int year = params.get("annoFine", Integer.class);
 		int month = params.get("meseFine", Integer.class);
 		int day = params.get("giornoFine", Integer.class);
@@ -888,7 +876,7 @@ public class Absences extends Controller{
 				}
 				flash.success("Assenza di tipo %s per il giorno %s rimossa per il dipendente %s %s", 
 						oldAbsenceCode, PersonTags.toDateTime(absence.personDay.date), pd.person.name, pd.person.surname);	
-				Stampings.personStamping(pd.person.id, year, month);
+				Stampings.personStamping(person.id, year, month);
 			} 
 			else {
 
@@ -903,7 +891,7 @@ public class Absences extends Controller{
 					params.flash();
 					flash.error("Il codice di assenza %s è già presente per la data %s", params.get("absenceCode"), PersonTags.toDateTime(absence.personDay.date));
 					edit(absence.id);
-					Stampings.personStamping(pd.person.id, year, month);
+					Stampings.personStamping(person.id, year, month);
 				}
 				String mealTicket =  params.get("buonoMensa");
 				//Logger.debug("Il valore di buono mensa da param: %s", mealTicket);
@@ -919,7 +907,7 @@ public class Absences extends Controller{
 				flash.success(
 						String.format("Assenza per il giorno %s per %s %s aggiornata con codice %s", 
 								PersonTags.toDateTime(absence.personDay.date), absence.personDay.person.surname, absence.personDay.person.name, absenceCode));
-				Stampings.personStamping(pd.person.id, year, month);
+				Stampings.personStamping(person.id, year, month);
 			}
 
 		}
@@ -965,7 +953,7 @@ public class Absences extends Controller{
 						flash.error("Il codice di assenza %s è già presente per la data %s", params.get("absenceCode"), PersonTags.toDateTime(absence.personDay.date));
 						edit(absence.id);
 						//render("@edit");
-						Stampings.personStamping(pd.person.id, year, month);
+						Stampings.personStamping(person.id, year, month);
 					}
 					else{
 						Absence abs = Absence.find("Select a from Absence a, PersonDay pd where a.personDay = pd and pd.person = ? and pd.date = ?", 
@@ -993,7 +981,7 @@ public class Absences extends Controller{
 				
 			}
 			flash.success("Rimossi i codici di assenza per il periodo %s %s", absence.personDay.date, dataFineAssenze);
-			Stampings.personStamping(pd.person.id, year, month);
+			Stampings.personStamping(person.id, year, month);
 		}
 		
 	}
@@ -1020,7 +1008,13 @@ public class Absences extends Controller{
 		}
 	}
 	
-	
+	/**
+	 * Gestisce l'inserimento dei codici 91 (1 o più consecutivi)
+	 * @param person
+	 * @param dateFrom
+	 * @param dateTo
+	 * @param absenceType
+	 */
 	private static void handlerCompensatoryRest(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType)
 	{
 		Logger.debug("Devo inserire un codice %s per %s %s", absenceType.code, person.name, person.surname);
@@ -1071,8 +1065,8 @@ public class Absences extends Controller{
 			absence.personDay = pd;
 			absence.save();
 			pd.absences.add(absence);
-			pd.populatePersonDay();
-			pd.updatePersonDay();
+			//pd.populatePersonDay();
+			//pd.updatePersonDay();
 			pd.save();
 			taken++;
 
@@ -1090,9 +1084,146 @@ public class Absences extends Controller{
 			flash.error("Non e' stato possibile inserire alcun riposo compensativo");
 		else
 			flash.success("Inseriti %s riposi compensativi per la persona", taken);
-		
+
+		PersonUtility.updatePersonDaysIntoInterval(person, dateFrom, dateTo);
 		Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
 	}
+
+	
+	/**
+	 * Gestisce l'inserimento dei codici FER, 94-31-32 nell'ordine. Fino ad esaurimento.
+	 * @param person
+	 * @param dateFrom
+	 * @param dateTo
+	 * @param absenceType
+	 */
+	private static void handlerFER(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType)
+	{
+		//controllo reperibilita'
+		LocalDate actualDate = dateFrom;
+		while(!actualDate.isAfter(dateTo))
+		{
+			if(!PersonUtility.canPersonTakeAbsenceInShiftOrReperibility(person, actualDate))	
+			{
+				flash.error("Operazione annullata in quanto %s %s al giorno %s si trova in turno/reperibilità. \n Contattarlo e chiedere spiegazioni", person.name, person.surname, actualDate);
+				Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
+			}
+			
+			actualDate = actualDate.plusDays(1);
+		}
+		
+		//inserimento
+		int taken = 0;
+		actualDate = dateFrom;
+		while(!actualDate.isAfter(dateTo))
+		{
+						
+			AbsenceType abt = PersonUtility.whichVacationCode(person, actualDate.getYear(), actualDate.getMonthOfYear() ,actualDate.getDayOfMonth());
+			
+			//FER esauriti
+			if(abt==null)
+			{
+				if(taken==0)
+				{
+					flash.error("Il dipendente %s %s ha esaurito tutti i codici FER", person.name, person.surname);
+					Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
+				}
+				flash.error("Aggiunti %s codici assenza FER da %s a %s. In data %s il dipendente ha esaurito tutti i codici FER a disposizione.", taken, dateFrom, actualDate.minusDays(1), actualDate);
+				PersonUtility.updatePersonDaysIntoInterval(person,dateFrom,dateTo);
+				Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
+			}
+				
+			//Insert nuovo FER
+			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, actualDate).first();
+			if(pd == null){
+				pd = new PersonDay(person, actualDate);
+				pd.create();
+			}
+			
+			//se e' festa vado oltre
+			if(pd.isHoliday())
+			{
+				actualDate = actualDate.plusDays(1);
+				continue;
+			}
+			
+			Absence absence = new Absence();
+			absence.absenceType = abt;
+			absence.personDay = pd;
+			absence.save();
+			pd.absences.add(absence);
+			pd.save();
+			
+			taken++;
+			actualDate = actualDate.plusDays(1);
+		}
+		if(taken==1)
+			flash.success("Aggiunto codice assenza FER per il giorno %s", actualDate);
+		if(taken>1)
+			flash.success("Aggiunti %s codici assenza FER da %s a %s.", taken, dateFrom, dateTo);
+		
+		PersonUtility.updatePersonDaysIntoInterval(person,dateFrom,dateTo);
+		Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
+
+	}
+	
+	/**
+	 * Controlla che nell'intervallo passato in args non esistano già assenze per quel tipo
+	 * @param person
+	 * @param dateFrom
+	 * @param dateTo
+	 * @param absenceType
+	 * @return
+	 */
+	private static boolean absenceTypeAlreadyExist(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType)
+	{
+		LocalDate actualDate = dateFrom;
+		
+		while(!actualDate.isAfter(dateTo))
+		{
+			List<Absence> absenceList = Absence.find("Select a from Absence a, PersonDay pd where a.personDay = pd and pd.person = ? and pd.date = ?", person, actualDate).fetch();
+			for(Absence abs : absenceList)
+			{
+				if(abs.absenceType.equals(absenceType)){
+					return true;
+				}
+
+			}
+			actualDate = actualDate.plusDays(1);
+		}
+		return false;
+	}
+	
+	/**
+	 * Controlla che nell'intervallo passato in args non esista gia' una assenza giornaliera
+	 * @param person
+	 * @param dateFrom
+	 * @param dateTo
+	 * @param absenceType
+	 * @return
+	 */
+	private static boolean allDayAbsenceAlreadyExist(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType)
+	{
+		LocalDate actualDate = dateFrom;
+		
+		while(!actualDate.isAfter(dateTo))
+		{
+			List<Absence> absenceList = Absence.find("Select a from Absence a, PersonDay pd where a.personDay = pd and pd.person = ? and pd.date = ?", person, actualDate).fetch();
+			for(Absence abs : absenceList)
+			{
+				if(abs != null && abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay && absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay)
+				{
+					return true;
+				}
+			}
+			actualDate = actualDate.plusDays(1);
+		}
+		return false;
+
+	}
+
+	
+	
 }
 
 

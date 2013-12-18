@@ -36,19 +36,20 @@ public class VacationsRecap {
 	public List<VacationPeriod>vacationPeriodList = null;	//lista vacation period del current contract
 	
 	public List<Absence> vacationDaysLastYearUsed = new ArrayList<Absence>();
-	public Integer vacationDaysLastYearAccrued = 0;
-	public Integer vacationDaysLastYearNotYetUsed = 0;
-	
 	public List<Absence> vacationDaysCurrentYearUsed = new ArrayList<Absence>();
-	public Integer vacationDaysCurrentYearAccrued = 0;
-	
 	public Integer permissionUsed = 0;
+	
+	public Integer vacationDaysLastYearAccrued = 0;
+	public Integer vacationDaysCurrentYearAccrued = 0;
+	public Integer permissionCurrentYearAccrued = 0;
+	
+	public Integer vacationDaysLastYearNotYetUsed = 0;
+	public Integer vacationDaysCurrentYearNotYetUsed = 0;
+	public Integer persmissionNotYetUsed = 0;
 		
 	public Integer vacationDaysCurrentYearTotal = 0;
 	public Integer permissionCurrentYearTotal = 0;
-	
-	
-	public Integer permissionCurrentYearAccrued = 0;
+
 	
 	
 	public VacationsRecap(Person person, short year)
@@ -77,6 +78,7 @@ public class VacationsRecap {
 		LocalDate today = new LocalDate();
 		Configuration config = Configuration.getCurrentConfiguration();
 		LocalDate expireVacation = today.withMonthOfYear(config.monthExpiryVacationPastYear).withDayOfMonth(config.dayExpiryVacationPastYear);
+		
 		//***************************************************************
 		//*** calcolo ferie e permessi utilizzati per year e lastYear ***
 		//***************************************************************
@@ -90,26 +92,16 @@ public class VacationsRecap {
 		this.vacationDaysLastYearUsed.addAll(getVacationDays(new DateInterval(startYear, endYear), currentContract, ab31));
 		this.vacationDaysLastYearUsed.addAll(getVacationDays(new DateInterval(startYear, endYear), currentContract, ab37));
 		
-										 
 		this.vacationDaysCurrentYearUsed.addAll(getVacationDays(new DateInterval(startYear, endYear), currentContract, ab32));
 		
 		this.permissionUsed = getVacationDays(new DateInterval(startYear, endYear), currentContract, ab94).size();
 		
-		//**************************************************************
-		//*** calcolo giorni e permessi maturali per year e lastYear ***
-		//**************************************************************
+		
+		//***************************************************************
+		//*** calcolo ferie e permessi maturati per year e lastyear	  ***
+		//***************************************************************
 		
 		this.vacationDaysLastYearAccrued = getVacationAccruedYear(new DateInterval(startLastYear, endLastYear), this.currentContract, this.vacationPeriodList);
-		if(today.isBefore(expireVacation))
-		{
-			this.vacationDaysLastYearNotYetUsed = this.vacationDaysLastYearAccrued - this.vacationDaysLastYearUsed.size();
-		}
-		else
-		{
-			this.vacationDaysLastYearNotYetUsed = 0;
-		}
-		
-		
 		if(endYear.isAfter(today))
 		{
 			//se la query e' per l'anno corrente considero fino a today
@@ -124,10 +116,23 @@ public class VacationsRecap {
 			
 		}
 		
-		
+		//******************************************************************************************************
+		//*** calcolo ferie e permessi non ancora utilizzati  per year e last year 							 ***
+		//******************************************************************************************************
 		this.permissionCurrentYearTotal = getPermissionAccruedYear(new DateInterval(startYear, endYear), this.currentContract);
 		this.vacationDaysCurrentYearTotal = getVacationAccruedYear(new DateInterval(startYear, endYear), this.currentContract, this.vacationPeriodList);		//a cristian da 27 perchè è passato da 26 a 28 durante l'anno
-
+		
+		
+		if(today.isBefore(expireVacation))
+		{
+			this.vacationDaysLastYearNotYetUsed = this.vacationDaysLastYearAccrued - this.vacationDaysLastYearUsed.size();
+		}
+		else
+		{
+			this.vacationDaysLastYearNotYetUsed = 0;
+		}
+		this.vacationDaysCurrentYearNotYetUsed = this.vacationDaysCurrentYearTotal - this.vacationDaysCurrentYearUsed.size();									//per adesso quelli non utilizzati li considero tutti
+		this.persmissionNotYetUsed = this.permissionCurrentYearTotal - this.permissionUsed;
 	}
 	
 	
