@@ -83,7 +83,7 @@ public class AttestatiClient {
 	 * Effettua la login sul sistema degli attestati facendo una post con i parametri passati.
 	 * 
 	 * @param connection
-	 * @param attestatiLogin nome utente 
+	 * @param attestatiLogin nome utente epas
 	 * @param attestatiPassword password
 	 * @return la LoginResponse contiene l'ok se la login è andata a buon fine ed in questo caso anche
 	 * 	i cookies necessari per le richieste successive.
@@ -232,6 +232,8 @@ public class AttestatiClient {
 
 		int codAssAssoCounter = 0;
 		for (AssenzaPerPost assenzaPerPost : getAssenzePerPost(absences)) {
+			
+			
 			connection.data("codass" + codAssAssoCounter, assenzaPerPost.getCodice());
 			connection.data("gg_inizio" + codAssAssoCounter, assenzaPerPost.getGgInizio().toString());
 			connection.data("gg_fine" + codAssAssoCounter, assenzaPerPost.getGgFine().toString());
@@ -324,8 +326,11 @@ public class AttestatiClient {
 		AssenzaPerPost assenza = null;
 
 		for (Absence absence : absences) {
+			String absenceCodeToSend = 
+					(absence.absenceType.certificateCode == null || absence.absenceType.certificateCode == "") ? absence.absenceType.code : absence.absenceType.certificateCode;	
+			
 			if (previousDate == null || previousAbsenceCode == null) { 
-				assenza = new AssenzaPerPost(absence.absenceType.code, absence.personDay.date.getDayOfMonth());
+				assenza = new AssenzaPerPost(absenceCodeToSend.toUpperCase(), absence.personDay.date.getDayOfMonth());
 				assenze.add(assenza);
 				previousDate = absence.personDay.date;
 				previousAbsenceCode = absence.absenceType.code;
