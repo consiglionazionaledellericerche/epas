@@ -15,6 +15,7 @@ public class Mese {
 	public Person person;
 //	public int workingTime;
 	public int qualifica;
+	public boolean possibileUtilizzareResiduoAnnoPrecedente = true;
 	public Mese mesePrecedente;
 	public int anno;
 	public int mese;
@@ -96,9 +97,13 @@ public class Mese {
 			this.monteOreAnnoPassato = mesePrecedente.monteOreAnnoPassato;
 			this.monteOreAnnoCorrente= mesePrecedente.monteOreAnnoCorrente;
 			
-			if(qualifica>3){
+			if(qualifica>3)
+			{
+				this.possibileUtilizzareResiduoAnnoPrecedente = false;
 				this.monteOreAnnoPassato = 0;
-				this.tempoInizializzazione = 0;			}
+				this.tempoInizializzazione = 0;
+				
+			}
 			
 			setPersonDayInformation(calcolaFinoA);
 			setPersonMonthInformation(calcolaFinoA);
