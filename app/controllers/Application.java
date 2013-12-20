@@ -50,11 +50,15 @@ public class Application extends Controller {
 		
 		//method
 		String methodSelected = session.get("methodSelected");
-		if(methodSelected!=null && !methodSelected.equals("")){
+		if(methodSelected!=null && !methodSelected.equals(""))
+		{
+			Logger.info("put1: %s ", methodSelected);
 			session.put("methodSelected", methodSelected);
 		}
-		else{
-			session.put("methodSelected", ActionMenuItem.stampingsAdmin.getDescription());
+		else
+		{
+			Logger.info("put2: %s", methodSelected);
+			session.put("methodSelected", "stampingsAdmin");
 		}
 		
 		render();
@@ -80,11 +84,14 @@ public class Application extends Controller {
 		
 		//method
     	if (Security.check(Security.INSERT_AND_UPDATE_STAMPING)) {
+    		Logger.info("put3:%s ", "stampingsAdmin");
+    		session.put("methodSelected", "stampingsAdmin");
     		Application.indexAdmin();
-    		session.put("methodSelected", ActionMenuItem.stampingsAdmin.getDescription());
     	} else {
+    		Logger.info("put4:%s ", "stampings");
+    		session.put("methodSelected", "stampings");
     		Stampings.stampings(new LocalDate().getYear(), new LocalDate().getMonthOfYear());
-    		session.put("methodSelected", ActionMenuItem.stampings.getDescription());
+    		
     	}
     }
     
