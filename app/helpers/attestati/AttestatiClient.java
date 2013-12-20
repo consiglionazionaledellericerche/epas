@@ -83,7 +83,7 @@ public class AttestatiClient {
 	 * Effettua la login sul sistema degli attestati facendo una post con i parametri passati.
 	 * 
 	 * @param connection
-	 * @param attestatiLogin nome utente 
+	 * @param attestatiLogin nome utente epas
 	 * @param attestatiPassword password
 	 * @return la LoginResponse contiene l'ok se la login è andata a buon fine ed in questo caso anche
 	 * 	i cookies necessari per le richieste successive.
@@ -232,6 +232,7 @@ public class AttestatiClient {
 
 		int codAssAssoCounter = 0;
 		for (AssenzaPerPost assenzaPerPost : getAssenzePerPost(absences)) {
+			
 			connection.data("codass" + codAssAssoCounter, assenzaPerPost.getCodice());
 			connection.data("gg_inizio" + codAssAssoCounter, assenzaPerPost.getGgInizio().toString());
 			connection.data("gg_fine" + codAssAssoCounter, assenzaPerPost.getGgFine().toString());
@@ -324,19 +325,23 @@ public class AttestatiClient {
 		AssenzaPerPost assenza = null;
 
 		for (Absence absence : absences) {
+			String absenceCodeToSend = 
+					(absence.absenceType.certificateCode == null || absence.absenceType.certificateCode == "") 
+						? absence.absenceType.code.toUpperCase() : absence.absenceType.certificateCode.toUpperCase();	
+			
 			if (previousDate == null || previousAbsenceCode == null) { 
-				assenza = new AssenzaPerPost(absence.absenceType.code, absence.personDay.date.getDayOfMonth());
+				assenza = new AssenzaPerPost(absenceCodeToSend, absence.personDay.date.getDayOfMonth());
 				assenze.add(assenza);
 				previousDate = absence.personDay.date;
-				previousAbsenceCode = absence.absenceType.code;
+				previousAbsenceCode = absenceCodeToSend;
 				continue;
 			} 
 
-			if (previousDate.plusDays(1).equals(absence.personDay.date) && previousAbsenceCode.equals(absence.absenceType.code)) {
+			if (previousDate.plusDays(1).equals(absence.personDay.date) && previousAbsenceCode.equals(absenceCodeToSend)) {
 				assenza.setGgFine(absence.personDay.date.getDayOfMonth());
 			} else {
-				assenza = new AssenzaPerPost(absence.absenceType.code, absence.personDay.date.getDayOfMonth());
-				previousAbsenceCode = absence.absenceType.code;
+				assenza = new AssenzaPerPost(absenceCodeToSend, absence.personDay.date.getDayOfMonth());
+				previousAbsenceCode = absenceCodeToSend;
 				assenze.add(assenza);
 			}
 			previousDate = absence.personDay.date;
