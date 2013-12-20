@@ -914,7 +914,7 @@ public class PersonDay extends Model {
 	 */
 	private boolean checkTicketAvailableForWorkingTime(){
 		WorkingTimeType wtt = person.getWorkingTimeType(date);
-		if(wtt.description.equals("normale-mod") || wtt.description.equals("normale")
+		if(wtt.description.equals("Normale-asd") || wtt.description.equals("Normale")
 				|| wtt.description.equals("80%") || wtt.description.equals("85%"))
 		{
 			return true;
