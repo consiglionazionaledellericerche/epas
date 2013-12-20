@@ -19,7 +19,8 @@
 	<p>Tempo disponibile per straordinari: 
 		<strong>${mese.progressivoFinalePositivoMese.toHourTime()}</strong></p>
 	<p>Il numero di riposi compensativi usati fino ad oggi è: <strong>${numberOfCompensatoryRestUntilToday}</strong></p>
-	<p>E' possibile utilizzare il residuo dell'anno precedente? <strong>${possibileUtilizzareResiduoAnnoPrecedente==true ? 'sì' : 'no'}</strong></p>
+
+	<p>E' possibile utilizzare il residuo dell'anno precedente? <strong>${mese.possibileUtilizzareResiduoAnnoPrecedente==true ? 'sì' : 'no'}</strong></p>
       </div>
     </div>
   </div>
@@ -31,7 +32,11 @@
     </div>
     <div id="collapseLast" class="accordion-body collapse">
       <div class="accordion-inner">
-        %{if (possibileUtilizzareResiduoAnnoPrecedente) { }%
+        
+
+<div id="tabelleRiassuntive">
+%{if (mese.possibileUtilizzareResiduoAnnoPrecedente) { }%
+
 <table class="table table-bordered table-condensed table-striped riepilogo-ore">
 	
 	<tr>
@@ -56,6 +61,7 @@
 	</tr>	
 </table>
 %{ } }%
+</div>
       </div>
     </div>
   </div>

@@ -69,7 +69,12 @@ public class NavigationMenu extends Controller {
 		
 		ActionMenuItem action;
 		if(method != null && !method.equals("")) 
-			action = ActionMenuItem.valueOf(method);
+		{	
+			if(method.equals("Timbrature"))
+				action = ActionMenuItem.stampingsAdmin;
+			else
+				action = ActionMenuItem.valueOf(method);
+		}
 		else
 			action = ActionMenuItem.stampingsAdmin;
 		

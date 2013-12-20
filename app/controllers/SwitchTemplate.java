@@ -32,6 +32,7 @@ public class SwitchTemplate extends Controller{
 			flash.error(String.format("La action da eseguire è: %s", method));
 			Application.indexAdmin();
 		}
+		Logger.info("aaa %s", method);
 		session.put("methodSelected", method);
 		
 		ActionMenuItem menuItem = ActionMenuItem.valueOf(method);

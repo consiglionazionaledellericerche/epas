@@ -39,7 +39,7 @@ public class PersonMonths extends Controller{
 		Map<Integer, List<String>> mapMonthSituation = new HashMap<Integer, List<String>>();
 		List<String> lista = null;
 				
-		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, 2013, null);
+		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, year, null);
 		
 		for(int month = 1; month < 13; month++){
 			Mese mese = c.getMese(year, month);
