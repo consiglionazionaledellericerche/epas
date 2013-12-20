@@ -1,11 +1,7 @@
-#{extends 'main.html' /}
+#{extends 'main_admin.html' /}
 #{set title:personMonth.person.surname + ' ' + personMonth.person.name + ', matricola=' + personMonth.person.number /}
 
 <h2 id="titoloSituazioneAssenzeMensili">Situazione assenze mensili <span class="capitalized">&{'views.tags.display.date.month.' + personMonth.month}</span> ${personMonth.year}</h2>
-
-#{logoutForm /}
-
-#{functionalMenuForm mainMenu: mainMenu /} 
 
 <table id="assenze_mensili">
 

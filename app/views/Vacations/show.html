@@ -1,9 +1,6 @@
-#{extends 'main.html' /}
+#{extends 'main_admin.html' /}
 #{set title:vacationsRecap.person.surname + ' ' + vacationsRecap.person.name + ', matricola=' + vacationsRecap.person.number /}
 
-#{logoutForm /}
-
-#{functionalMenuForm mainMenu: mainMenu /} 
 <div class="container">
 <h3 id="titoloSituazioneFerie">Situazione ferie ${vacationsRecap.year}</h3>
 <div class="span4"align="left">

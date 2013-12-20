@@ -1,9 +1,9 @@
 
 
-#{form @SwitchTemplate.dispatch()}
+#{form @SwitchTemplate.dispatch(), class: 'navbar-form' }
 	#{select 'method', value:session.get("methodSelected"), class:'span3', id:'method', onChange:'javascript:this.form.submit()' }
 	 %{
-	 	for (menuItem in _mainMenu.getMethods()) {
+	 	for (menuItem in mainMenu.getMethods()) {
 	 }%
         #{option menuItem.getAction()}${menuItem.getDescription()}#{/option}
     %{
@@ -20,7 +20,7 @@
 	
 		
 	#{select 'month', value:session.get("monthSelected"), class:'span2', id:'month', onChange:'javascript:this.form.submit()'}
-	%{if (_mainMenu.method.name().equals('monthRecap') || _mainMenu.method.name().equals('totalMonthlyAbsences')){
+	%{if (mainMenu.method.name().equals('monthRecap') || mainMenu.method.name().equals('totalMonthlyAbsences')){
 	}%
 		#{option 0}Tutti i mesi#{/option}
 	%{
@@ -41,10 +41,10 @@
 	#{/select}
 	
 	
-	%{if (_mainMenu.day != null || _mainMenu.method.name() == 'dailyPresence') {
+	%{if (mainMenu.day != null || mainMenu.method.name() == 'dailyPresence') {
 	}%
-		#{select 'day', value:_mainMenu.day, class:'span1', id: 'day', onChange:'javascript:this.form.submit()'}
-			%{ for(day in _mainMenu.days){
+		#{select 'day', value:mainMenu.day, class:'span1', id: 'day', onChange:'javascript:this.form.submit()'}
+			%{ for(day in mainMenu.days){
 				}%
 				#{option day}${day}#{/option}
 				%{
@@ -57,7 +57,7 @@
 		#{select 'personId', value:session.get("personSelected"), class:'span3', id:'person', onChange:'javascript:this.form.submit()'}
 			#{option 0}Scegli una persona#{/option}
 		%{
-			for(person in _mainMenu.persons){
+			for(person in mainMenu.persons){
 		}%
 			#{option person.id}${person.surname + ' ' + person.name}#{/option}
 			%{
@@ -70,6 +70,11 @@
 	
 
 	<input class="btn" type="submit" value="Invio">
+            #{if session.username}
+            
+              <a href="@{Secure.logout()}" class="pull-right btn btn-warning">Logout</a>
+             
+            #{/if}
 #{/form}
 
 

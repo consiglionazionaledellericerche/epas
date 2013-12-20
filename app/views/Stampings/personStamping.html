@@ -6,10 +6,11 @@
 	<span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year} 
 	di ${person.surname} ${person.name}</h2>
 
-#{functionalMenuForm mainMenu: mainMenu /}
-${prova}
+
+
+
 <div class="span14">
-<table class="table table-bordered" id="presenze_mensili">
+<table class="table table-bordered table-condensed" id="presenze_mensili">
 	
 	<tr>
 		<th class="span1">Buono mensa</th>
@@ -148,12 +149,14 @@ ${prova}
 </table>
 
 </div>
+
+
 #{include './_riepilogoRiassuntivoMese.html' /}
 
 <div id="myModal1" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">Inserimento/modifica assenza</h3>
+    <h3>Inserimento/modifica assenza</h3>
   </div>
   <div class="modal-body">
     <p></p>
@@ -167,7 +170,7 @@ ${prova}
 <div id="myModal2" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">Inserimento/modifica timbratura</h3>
+    <h3>Inserimento/modifica timbratura</h3>
   </div>
   <div class="modal-body">
     <p></p>
