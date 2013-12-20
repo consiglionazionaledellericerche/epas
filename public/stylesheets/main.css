@@ -1,8 +1,8 @@
-html {
-    /* background: #e0e0e0; */
-    backgroung: white;
+body {
+    padding-top: 60px;
+    padding-bottom: 40px;
 }
-
+    
 body {
 	/*margin: 20px auto;*/
     /*width: 690px;*/
@@ -227,7 +227,7 @@ footer {
 }
 
 table#presenze_mensili {
-	margin: 4em 0em 6em;
+	margin: 4em 0em 2em;
 }
 
 table#assenze_mensili {

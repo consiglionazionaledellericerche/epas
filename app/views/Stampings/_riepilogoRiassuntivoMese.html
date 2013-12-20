@@ -1,5 +1,18 @@
-<div class="span10" id="spiegazioneTabellaTimbrature">
-	<p>
+
+
+
+<div class="span8" id="tabelleRiassuntive">
+<div class="accordion" id="accordion2">
+
+<div class="accordion-group">
+    <div class="accordion-heading">
+      <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseFirst"><strong>
+        Riepilogo generale</strong>
+      </a>
+    </div>
+    <div id="collapseFirst" class="accordion-body collapse in">
+      <div class="accordion-inner">
+        <p>
 		Il numero di buoni mensa usabili per questo mese e': <strong>${numberOfMealTicketToUse}</strong>, mentre quelli da restituire sono <strong>${numberOfMealTicketToRender}</strong>. 
 		Il numero di giorni lavorativi in sede è di: <strong>${basedWorkingDays}</strong> 
 	</p>
@@ -7,12 +20,20 @@
 		<strong>${mese.progressivoFinalePositivoMese.toHourTime()}</strong></p>
 	<p>Il numero di riposi compensativi usati fino ad oggi è: <strong>${numberOfCompensatoryRestUntilToday}</strong></p>
 	<p>E' possibile utilizzare il residuo dell'anno precedente? <strong>${possibileUtilizzareResiduoAnnoPrecedente==true ? 'sì' : 'no'}</strong></p>
-</div>
-
-<div id="tabelleRiassuntive">
-%{if (possibileUtilizzareResiduoAnnoPrecedente) { }%
+      </div>
+    </div>
+  </div>
+  <div class="accordion-group">
+    <div class="accordion-heading">
+      <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseLast"><strong>
+        Situazione residuo derivante dall'anno precedente</strong>
+      </a>
+    </div>
+    <div id="collapseLast" class="accordion-body collapse">
+      <div class="accordion-inner">
+        %{if (possibileUtilizzareResiduoAnnoPrecedente) { }%
 <table class="table table-bordered table-condensed table-striped riepilogo-ore">
-	<caption>Situazione residuo derivanete dall'anno precedente</caption>
+	
 	<tr>
 		<td>Residuo da anno precedente disponibile all'inizio del mese</td>
 		%{if (mese.mesePrecedente==null) { }%
@@ -35,11 +56,19 @@
 	</tr>	
 </table>
 %{ } }%
-
-
- 
-<table class="table table-bordered table-condensed table-striped riepilogo-ore">
-	<caption>Riepilogo delle ore di lavoro dell'anno corrente</caption>
+      </div>
+    </div>
+  </div>
+<div class="accordion-group">
+    <div class="accordion-heading">
+      <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseBest"><strong>
+        Riepilogo delle ore di lavoro dell'anno corrente</strong>
+      </a>
+    </div>
+    <div id="collapseBest" class="accordion-body collapse">
+      <div class="accordion-inner">
+        <table class="table table-bordered table-condensed table-striped riepilogo-ore">
+	
 	<tr>
 		<td>Residuo dai mesi precedenti</td>
 		%{if (mese.mesePrecedente==null) { }%
@@ -91,9 +120,19 @@
 		<td class="ore totale">${mese.monteOreAnnoCorrente.toHourTime()}</td>
 	</tr>
 </table>
-
-<table class="table table-bordered table-condensed table-striped riepilogo-ore">
-	<caption>Riepilogo generale delle ore di lavoro</caption>
+      </div>
+    </div>
+  </div>
+<div class="accordion-group">
+    <div class="accordion-heading">
+      <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseZero"><strong>
+        Riepilogo generale ore di lavoro</strong>
+      </a>
+    </div>
+    <div id="collapseZero" class="accordion-body collapse">
+      <div class="accordion-inner">
+        <table class="table table-bordered table-condensed table-striped riepilogo-ore">
+	
 	<tr>
 		<td>Residuo da anno precedente</td>
 		<td class="ore">${mese.monteOreAnnoPassato.toHourTimeWithPlus()}</td>
@@ -107,13 +146,21 @@
 		<td class="ore totale">${(mese.monteOreAnnoPassato+mese.monteOreAnnoCorrente).toHourTime()}</td>
 	</tr>
 </table>
-</div>
+      </div>
+    </div>
+  </div>
+  <div class="accordion-group">
+    <div class="accordion-heading">
+      <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne"><strong>
+        Note</strong>
+      </a>
+    </div>
+    <div id="collapseOne" class="accordion-body collapse">
+      <div class="accordion-inner">
+        %{if(!stampModificationTypeList.isEmpty()) { }%
 
-<div id="tabelleRiassuntive">
-%{if(!stampModificationTypeList.isEmpty()) { }%
-
-	<h3 style="margin-top: 2em">Note:</h3>
-	<table id="Note timbrature">
+	
+	<table>
 		<tr>
 			<th width="80">Codice timbratura</th>
 			<th width="400">Descrizione</th>
@@ -144,11 +191,18 @@
 	    }%
 	</table>
 %{ } }%
-
-
-*{Significato codici assenza}*
-<h3 style="margin-top: 2em">Tabella codici di assenza</h3>
-<table id="Codici di assenza">
+      </div>
+    </div>
+  </div>
+  <div class="accordion-group">
+    <div class="accordion-heading">
+      <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseTwo"><strong>
+        Tabella codici assenza</strong>
+      </a>
+    </div>
+    <div id="collapseTwo" class="accordion-body collapse">
+      <div class="accordion-inner">
+        <table>
 	<tr>
 		<th width="80">Codice assenza</th>
 		<th width="200">Descrizione</th>
@@ -169,4 +223,8 @@
      
 }%
 </table>
+      </div>
+    </div>
+  </div>
+</div>
 </div>

@@ -22,8 +22,7 @@
 	<!-- CSS: implied media=all -->
 	<!-- CSS concatenated and minified via ant build script-->
 	<link rel="stylesheet" media="screen" href="@{'/public/bootstrap/css/bootstrap.min.css'}" />
-	<link rel="stylesheet" media="screen" href="@{'/public/bootstrap/css/bootstrap-responsive.min.css'}" />
-  		<link rel="stylesheet" href="@{'/public/stylesheets/style.css'}">  		
+	<link rel="stylesheet" media="screen" href="@{'/public/bootstrap/css/bootstrap-responsive.min.css'}" />  		
 		<link rel="stylesheet" media="screen" href="@{'/public/stylesheets/main.css'}">      
 		<link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap-editable/css/bootstrap-editable.css" rel="stylesheet"/>  
         #{get 'moreStyles' /}  		
@@ -35,26 +34,36 @@
 	       Modernizr enables HTML5 elements & feature detects; Respond is a polyfill for min/max-width CSS3 Media Queries
 	       For optimal performance, use a custom Modernizr build: www.modernizr.com/download/ -->
 		<script src="@{'/public/js/libs/modernizr-2.0.6.min.js'}"></script>
-	<head>
-	
-</head>
+
     </head>
 
     <body>
-    
-		<div id="container">
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="brand" href="#" style="display:none">ePAS</a>
+          <div class="nav-collapse collapse">
+            #{include '/main_menu.html' /}
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+		<div class="container-fluid">
 		
+			<!--
+			FIXME: Spostare il solo nome utente + matricola nella barra sopra per i non amministratori.
+			
 			<header class="${session.username != null ? 'loggedIn' : 'notLoggedIn'}">
 				<h1>#{get 'title' /}</h1>
 			</header>
-			#{if session.username}
-				<div id="options">
-					logged in as: ${session.username}
-					#{logoutForm /}
-				</div>
-			#{/if}
+			-->
 			
-			<div id="main" role="main">
+			<div id="main" class="row">
 
 				#{if flash.error}
                 <p class="fError">
