@@ -510,3 +510,25 @@ table.riepilogo-ore td.totale {
 form#formClockLogin{ font-size: 30px; }
 input#formClockPassword{ font-size: 25px; height: 35px;}
 input#formClockPerson{ size: 100; }
+
+#myCarousel{
+  background-color: white;
+
+}
+
+#myContainer1{
+  height: 200px;
+  background: url('/public/images/time_banner.jpg') -0px -180px;
+  background-color: white;
+  background-repeat: no-repeat;
+}
+
+#myContainer2{
+	padding-top: 250px;
+}
+
+#myh2{
+	text-align: center;
+	line-height: 0px;
+}
+
