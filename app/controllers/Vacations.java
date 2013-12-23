@@ -38,7 +38,7 @@ public class Vacations extends Controller{
 			anno = new LocalDate().getYear(); //default l'anno corrente
 
     	//Costruzione oggetto di riepilogo per la persona
-    	VacationsRecap vacationsRecap = new VacationsRecap(person, (short)anno.intValue());
+    	VacationsRecap vacationsRecap = new VacationsRecap(person, (short)anno.intValue(), new LocalDate());
     	if(vacationsRecap.vacationPeriodList==null)
     	{
     		Logger.debug("Period e' null");
@@ -98,7 +98,7 @@ public class Vacations extends Controller{
     	Logger.trace("Anno: "+anno);
     	
     	//Costruzione oggetto di riepilogo per la persona
-    	VacationsRecap vacationsRecap = new VacationsRecap(person, (short)anno.intValue());
+    	VacationsRecap vacationsRecap = new VacationsRecap(person, (short)anno.intValue(), new LocalDate());
     	if(vacationsRecap.vacationPeriodList==null)
     	{
     		Logger.debug("Period e' null");
@@ -124,7 +124,7 @@ public class Vacations extends Controller{
     		person = Security.getPerson();
     	
     	//Costruzione oggetto di riepilogo per la persona
-    	VacationsRecap vacationsRecap = new VacationsRecap(person, (short)anno.intValue());
+    	VacationsRecap vacationsRecap = new VacationsRecap(person, (short)anno.intValue(), new LocalDate());
     	if(vacationsRecap.vacationPeriodList==null)
     	{
     		Logger.debug("Period e' null");
