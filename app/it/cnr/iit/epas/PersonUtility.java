@@ -478,16 +478,17 @@ public class PersonUtility {
 	 * @return il codice di assenza da utilizzare da scegliere tra 31,32 e 94 nel caso in cui l'utente amministratore utilizzi il codice "FER" per assegnare un giorno di ferie 
 	 * alla persona
 	 */
-	public static AbsenceType whichVacationCode(Person person, Integer year, Integer month, Integer day){
+	public static AbsenceType whichVacationCode(Person person, LocalDate actualDate){
 		
 		
-		VacationsRecap vr = new VacationsRecap(person, (short)year.intValue());	
-		
-		if(vr.persmissionNotYetUsed>0)
-			return AbsenceType.find("byCode", "94").first();
+		VacationsRecap vr = new VacationsRecap(person, (short) actualDate.getYear(), actualDate);	
 		
 		if(vr.vacationDaysLastYearNotYetUsed>0)
 			return AbsenceType.find("byCode", "31").first();
+		
+		if(vr.persmissionNotYetUsed>0)
+			return AbsenceType.find("byCode", "94").first();	
+		
 		
 		if(vr.vacationDaysCurrentYearNotYetUsed>0)
 			return AbsenceType.find("byCode", "32").first();
