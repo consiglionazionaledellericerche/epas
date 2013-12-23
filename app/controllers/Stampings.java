@@ -236,10 +236,10 @@ public class Stampings extends Controller {
 			pd.create();
 		}
 
-		if(pd.stampings.size() == 0 && pd.isHoliday()){
-			flash.error("Si sta inserendo una timbratura in un giorno di festa. Errore");
-			Stampings.personStamping(personId, year, month);
-		}
+//		if(pd.stampings.size() == 0 && pd.isHoliday()){
+//			flash.error("Si sta inserendo una timbratura in un giorno di festa. Errore");
+//			Stampings.personStamping(personId, year, month);
+//		}
 
 		if(date.isAfter(new LocalDate())){
 			flash.error("Non si può inserire una timbratura futura!!!");
