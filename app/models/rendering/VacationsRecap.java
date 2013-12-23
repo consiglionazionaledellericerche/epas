@@ -52,7 +52,7 @@ public class VacationsRecap {
 
 	
 	
-	public VacationsRecap(Person person, short year)
+	public VacationsRecap(Person person, short year, LocalDate today)
 	{
 		this.person = person;
 		this.year = year;
@@ -75,7 +75,7 @@ public class VacationsRecap {
 		LocalDate endLastYear = new LocalDate(this.year-1,12,31);
 		LocalDate startYear = new LocalDate(this.year,1,1);
 		LocalDate endYear = new LocalDate(this.year,12,31);
-		LocalDate today = new LocalDate();
+		//LocalDate today = new LocalDate();
 		Configuration config = Configuration.getCurrentConfiguration();
 		LocalDate expireVacation = today.withMonthOfYear(config.monthExpiryVacationPastYear).withDayOfMonth(config.dayExpiryVacationPastYear);
 		
