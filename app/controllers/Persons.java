@@ -562,7 +562,9 @@ public class Persons extends Controller {
 		String dataInizio = params.get("beginContract");
 		String dataFine = params.get("expireContract");
 		Contract oldContract = person.getCurrentContract();
-		if(oldContract == null || (oldContract.expireContract != null && oldContract.expireContract.isBefore(new LocalDate(dataInizio)))){
+		if(oldContract == null || 
+				(oldContract.expireContract != null && oldContract.expireContract.isBefore(new LocalDate(dataInizio)))
+				|| (oldContract.endContract != null && oldContract.endContract.isBefore(new LocalDate(dataInizio)))){
 			contract.beginContract = new LocalDate(dataInizio);
 			if(!dataFine.equals(""))
 				contract.expireContract = new LocalDate(dataFine);
@@ -723,8 +725,9 @@ public class Persons extends Controller {
 	
 	@Check(Security.DELETE_PERSON)
 	public static void terminateContract(Long personId){
-		Date end = params.get("endContract", Date.class);
-		
+
+		String end = params.get("endContract");
+
 		if(end != null){
 			LocalDate endContract = new LocalDate(end);
 			Logger.debug("La data di terminazione anticipata è %s", endContract);
@@ -741,7 +744,7 @@ public class Persons extends Controller {
 			flash.error(String.format("Errore nel parametro passato dalla form, la data è nulla o non corretta"));
 			
 		}
-		Application.indexAdmin();
+		edit(personId);
 	}
 	
 	
