@@ -1,6 +1,6 @@
 #{extends 'main_admin.html' /}
 
-#{functionalMenuForm mainMenu: mainMenu /} 
+
     <ul class="nav nav-tabs">
     	<li class="active"><a href="@{Persons.edit(person.id)}#">Anagrafica</a></li>
     	<li><a href="@{Persons.personCompetence(person.id, month, year)}#">Competenze</a></li>
@@ -98,8 +98,14 @@
 					contratto</a></td> %{ } else{ }%
 			<td><input name="endContract" type="date" readOnly="readOnly"
 				value="${contract.endContract}" /></td> %{ } }%
-			<td><input name="onCertificate" type="checkbox" readOnly="readOnly"
-				value="${contract.onCertificate}" /></td>
+			<td>
+				#{if contract.onCertificate == true}
+				<input name="onCertificate" type="checkbox" disabled="disabled"	checked="checked" />
+				#{/if}
+				#{else}
+				<input name="onCertificate" type="checkbox" disabled="disabled" />
+				#{/else}
+			</td>
 			<td>
 			<a data-toggle="modal" href="@{Persons.modifyContract(contract.id)}" data-target="#myModal1"><input value="Modifica" class="btn" type="button"></a>
 			

@@ -570,7 +570,7 @@ public class Persons extends Controller {
 				contract.expireContract = new LocalDate(dataFine);
 			else
 				contract.expireContract = null;
-			if(params.get("onCertificate", Boolean.class))
+			if(params.get("onCertificate", Boolean.class) != null && params.get("onCertificate", Boolean.class))
 				contract.onCertificate = true;
 			else
 				contract.onCertificate = false;
