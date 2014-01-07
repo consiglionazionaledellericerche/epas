@@ -47,13 +47,13 @@
 	</tr>
 	<tr>
 		<td><strong>In attestati presenza</strong></td>
-		<td>%{if(contract.onCertificate != null){
+		<td>%{if(contract.onCertificate){
 		}%	
-			<td><input name="certificate" type="radio" value="${contract.onCertificate}" /></td>
+			<td><input name="certificate" type="checkbox" checked="checked" /></td>
 		%{
 		}else{
 		}%
-			<td><input name="certificate" type="radio" value="${}" /></td>
+			<td><input name="certificate" type="checkbox" /></td>
 		%{
 		}
 		}%	</td>

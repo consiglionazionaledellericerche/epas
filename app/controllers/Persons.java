@@ -615,7 +615,7 @@ public class Persons extends Controller {
 		String expire = params.get("fine");
 		//Logger.debug("BeginContract: %s - ExpireContract: %s - EndContract: %s", begin, expire, end);
 		beginContract = new LocalDate(begin);
-		
+		Logger.info("On certificate: %s", params.get("certificate", Boolean.class));
 		if(begin == null || begin.equals("")){
 			flash.error("Non può esistere un contratto senza data di inizio!");
 			render("@save");
@@ -646,6 +646,12 @@ public class Persons extends Controller {
 			contract.endContract = endContract;
 			contract.save();
 		}
+		
+		if(params.get("certificate", Boolean.class) == null  && contract.onCertificate == true)
+			contract.onCertificate = false;
+		else 
+			if(params.get("certificate", Boolean.class) == true && contract.onCertificate == false)
+				contract.onCertificate = true;
 		
 		contract.setVacationPeriods();
 		contract.save();
