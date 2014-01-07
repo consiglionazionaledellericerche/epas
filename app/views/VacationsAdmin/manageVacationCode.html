@@ -1,13 +1,12 @@
-#{extends 'main_admin.html' /}
+#{extends 'main_admin_no_menu.html' /}
+#{set titolo: 'Gestione dei tipi di ferie e dei permessi legge' /}
 
 <div class="container">
-<h2 id="titoloGestioneTipiFerie">Gestione dei tipi di ferie e dei permessi legge</h2>
-<div id="tabellaPianoFerie"class="span7">
-<p class="text-info" id="nuovoPianoFerie"><a data-toggle="modal" href="@{VacationsAdmin.insertVacationCode}" data-target="#myModal1">Nuovo piano ferie</a>
-		
-</p>
+  <p class="lead"><a data-toggle="modal" href="@{VacationsAdmin.insertVacationCode}" data-target="#modal-insert-vacationperiod">Inserisci nuovo piano ferie</a></p>
+</div>
+<div class="container centered">
 
-<h3 id="titoloPianoFerie">Tipi di piano ferie definiti</h3>
+<h3>Tipi di piano ferie definiti</h3>
 
 <table class="table table-striped">
 
@@ -21,7 +20,7 @@
 		for(vacationCode in vacationCodeList){
 	}%
 	<tr>
-		<td><a data-toggle="modal" href="@{VacationsAdmin.edit(vacationCode.id)}" data-target="#myModal1">${vacationCode.description}</a>
+		<td><a data-toggle="modal" href="@{VacationsAdmin.edit(vacationCode.id)}" data-target="#modal-edit-vacationperiod">${vacationCode.description}</a>
 		
 		</td>
 		<td>${vacationCode.vacationDays}</td>
@@ -33,13 +32,27 @@
 	}%
 
 </table>
-</div>
+
 </div>
 
-<div id="myModal1" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div id="modal-edit-vacationperiod" class="modal hide fade modal-medium" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">Inserimento/modifica assenza</h3>
+    <h3 id="myModalLabel">Modifica piano ferie</h3>
+  </div>
+  <div class="modal-body">
+    <p></p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+   <!--   <button class="btn btn-primary">Save changes</button>-->
+  </div>
+</div>
+
+<div id="modal-insert-vacationperiod" class="modal hide fade modal-medium" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Inserimento nuovo piano ferie</h3>
   </div>
   <div class="modal-body">
     <p></p>

@@ -94,6 +94,9 @@ public class Stamping extends Model implements Comparable<Stamping> {
 	 */
 	@Transient
 	public boolean valid;
+	@Transient
+	public int pairId = 0;
+
 	
 	/**
 	 * true, la cella fittizia di uscita adesso

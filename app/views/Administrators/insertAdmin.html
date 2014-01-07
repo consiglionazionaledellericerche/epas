@@ -1,6 +1,3 @@
-#{extends 'main_admin.html' /}
-
-<h2 id="nuovoAdmin">Inserimento dati per nuovo amministratore</h2>
 
 #{form @Administrators.save()}
 <fieldset>
@@ -29,7 +26,7 @@
 	<p>Può inserire e modificare utenti amministratori: Sì <input type="radio" name="insertAndUpdateAdministrator" value="true"/> No <input type="radio" name="insertAndUpdateAdministrator" value="false"/></p>
 	<p>Può caricare le situazioni del personale: Sì <input type="radio" name="uploadSituation" value="true"/> No <input type="radio" name="uploadSituation" value="false"/> 
 </fieldset>
-<div id="frm">
+<div class="buttoncenter forminline">
 <input class="btn btn-primary" id="insertAdmin" type="submit" value="Ok"/>
 
 #{/form}

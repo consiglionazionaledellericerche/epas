@@ -1,15 +1,10 @@
-#{extends 'main_admin.html' /}
 
 #{form @Administrators.update()}
 <input type="hidden" name="personId" value="${person.id}"/>
 <fieldset>
-	<legend>Modifica dati amministratore e permessi per ${person.name} ${person.surname} </legend>
+	<legend>Modifica permessi per ${person.name} ${person.surname} </legend>
 	
-	
-	
-		
 
-	
 	<table class="tablenoborder">
 		<tr>
 		<td>
@@ -150,7 +145,7 @@
 	
 </fieldset>
 
-<div id="frm">
+<div class="buttoncenter forminline">
 <input class="btn btn-primary" id="insertAdmin" type="submit" value="Ok"/>
 #{/form}
 

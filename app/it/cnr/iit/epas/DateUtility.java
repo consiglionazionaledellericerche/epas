@@ -17,15 +17,16 @@ import play.db.jpa.JPA;
 
 public class DateUtility {
 
-	public static boolean isHoliday(Person person, LocalDate date){
-		Configuration config = Configuration.getConfiguration(date.toDate());	
-		
-		Logger.trace("configurazione: %s con localdate: %s", config, date);
+	/**
+	 * Controlla che il giorno sia festivo o lavorativo per la persona sulla base delle Feste Generali e del piano di lavoro
+	 * @param person
+	 * @param date
+	 * @return
+	 */
+	public static boolean isHoliday(Person person, LocalDate date){	
 		if(isGeneralHoliday(date))
 			return true;
-		//boolean holiday = person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).holiday;
-		boolean holiday = person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).holiday;
-		return holiday;
+		return person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).holiday;
 
 	}
 

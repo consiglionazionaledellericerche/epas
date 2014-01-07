@@ -1,12 +1,12 @@
-#{extends 'main_admin.html' /}
+#{extends 'main_admin_no_menu.html' /}
+#{set titolo: 'Gestione straordinari e altre competenze' /}
 
-<h2 id="titoloGestioneStraordinariCompetenze">Gestione straordinari e altre competenze</h2>
-    <ul class="nav nav-tabs">
-    	<li ><a href="@{Competences.showCompetences(year, month)}#">Competenze</a></li>
-    	<li class="active"><a href="@{Competences.overtime(year, month)}#">Straordinari</a></li>
-    	<li><a href="@{Competences.totalOvertimeHours(year, month)}#">Monte ore</a></li>
-    	<li><a href="@{Competences.recapCompetences()}#">Recap competenze</a></li>
-    </ul>
+<ul class="nav nav-tabs">
+  <li ><a href="@{Competences.showCompetences(year, month)}#">Competenze</a></li>
+  <li class="active"><a href="@{Competences.overtime(year, month)}#">Straordinari</a></li>
+  <li><a href="@{Competences.totalOvertimeHours(year, month)}#">Monte ore</a></li>
+  <li><a href="@{Competences.recapCompetences()}#">Recap competenze</a></li>
+</ul>
     %{if(year != 0 && month != 0){
     }%
 	    <input type="hidden" name="year" value="${year}"/>
@@ -20,7 +20,7 @@
 	}
 	}%
     <h3 id="titoloStraordinari">Tabella riassuntiva del mese di <span class="capitalized">&{'views.tags.display.date.month.' + month}</span></h3>
-    <table class="table">
+    <table class="table overtime-big table-hover">
     	<tr>
 	    	<th>Nome e cognome</th>
 	    	%{for(col in tableFeature.columnKeySet()){
@@ -34,7 +34,7 @@
     	%{  for(entry in tableFeature.rowMap().entrySet()){
 		}%
     	<tr>
-    		<td class="nomeCognome">${entry.getKey().surname} ${entry.getKey().name} (${entry.getKey().number})</td>
+    		<td class="person">${entry.getKey().surname} ${entry.getKey().name} (${entry.getKey().number})</td>
     		%{ for(col in tableFeature.columnKeySet()){
 			}%
 			%{if(col.equals('Giorni di Presenza') || col.equals('Ore straordinario pagate') || col.equals('Riposi compens.')){

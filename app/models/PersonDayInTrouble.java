@@ -39,9 +39,11 @@ public class PersonDayInTrouble extends Model
 	
 	public static void insertPersonDayInTrouble(PersonDay pd, String cause)
 	{
+		//Logger.info("insertPersonDayInTrouble1");
 		PersonDayInTrouble pdt = PersonDayInTrouble.find("Select pdt from PersonDayInTrouble pdt where pdt.personDay = ?", pd).first();
 		if(pdt==null)
 		{	
+			//Logger.info("insertPersonDayInTrouble2");
 			//se non esiste lo creo
 			Logger.info("Nuovo PersonDayInTrouble %s %s %s - %s - %s", pd.person.id, pd.person.name, pd.person.surname, pd.date, cause);
 			PersonDayInTrouble trouble = new PersonDayInTrouble();
@@ -52,6 +54,7 @@ public class PersonDayInTrouble extends Model
 		}
 		if(pdt!=null)
 		{
+			//Logger.info("insertPersonDayInTrouble3");
 			//se esiste lo setto fixed = false;
 			pdt.fixed = false;
 			pdt.cause = cause;

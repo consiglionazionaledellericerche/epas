@@ -1,35 +1,27 @@
-#{extends 'main_admin.html' /}
+#{extends 'main_admin_no_menu.html' /}
+#{set titolo: 'Gestione parametri di configurazione' /}
 
-<h3 id="gestioneConfigurazioneParametri">Gestione configurazione parametri</h3>
+<p  class="lead"><a href="@{Configurations.insertConfig}">Inserisci una nuova configurazione</a></p>
 
-<h4 id="configurazioniEsistenti">Configurazioni esistenti</h4>
+<h4>Modifica configurazioni esistenti</h4>
 
-<p><a href="@{Configurations.insertConfig}">Inserisci una nuova configurazione</a></p>
-
-<table>
+<table class="table custom1 table-medium table-centered">
   <tr>
     <th>ID</th>
     <th>Nome</th>
     <th>In uso</th>
   </tr>
-  %{ for(conf in configList){
-  }%
+  #{list items: configList, as:'conf'}
+  
   <tr>
     <td>${conf.id}</td>
     <td><a href="@{Configurations.edit(conf.id)}">${conf.beginDate.convertToLocalDate()}</a></td>
-    %{ if(conf.inUse == true){
-    }%
-    <td><input type="checkbox" value="" name="inUse" checked="checked"/></td>
-    %{
-    }else{
-    }%
-    <td><input type="checkbox" value="" name="inUse" /></td>
-    %{
-    }
-    }%
+    #{if conf.inUse}
+       <td><input type="checkbox" value="" name="inUse" checked="checked"/></td>
+    #{/if}
+    #{else}
+      <td><input type="checkbox" value="" name="inUse" /></td>
+    #{/else}
   </tr>
-  %{
-  }
-  }%
+  #{/list}
 </table>
-

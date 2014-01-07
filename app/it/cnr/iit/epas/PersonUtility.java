@@ -14,7 +14,6 @@ import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 
 import play.Logger;
 import play.db.jpa.JPA;
@@ -24,7 +23,6 @@ import models.Absence;
 import models.AbsenceType;
 import models.Competence;
 import models.CompetenceCode;
-import models.Configuration;
 import models.Contract;
 import models.Person;
 import models.PersonChildren;
@@ -33,10 +31,8 @@ import models.PersonDayInTrouble;
 import models.PersonMonth;
 import models.PersonReperibilityDay;
 import models.PersonShiftDay;
-import models.StampModificationType;
 import models.StampProfile;
 import models.Stamping;
-import models.Stamping.WayType;
 import models.VacationPeriod;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
@@ -298,93 +294,7 @@ public class PersonUtility {
 	}
 
 
-	public static void checkExitStampNextDay(PersonDay pd){
-		Logger.debug("Chiamata la checkExitStampNextDay per %s %s in data %s", pd.person.name, pd.person.surname, pd.date);
-		Configuration config = Configuration.getCurrentConfiguration();
-		//PersonDay pdPastDay = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? " +
-		//		"and pd.date >= ? and pd.date < ? ORDER by pd.date DESC", pd.person, pd.date.dayOfMonth().withMinimumValue(), pd.date).first();
-
-		PersonDay pdPastDay = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? " +
-				"and pd.date < ? ORDER by pd.date DESC", pd.person, pd.date).first();
-
-		StampProfile stampProfile = pd.getStampProfile();
-		if(pdPastDay != null)
-		{			
-			//lista delle timbrature del giorno precedente ordinate in modo decrescente per vedere se l'ultima del giorno è una timbratura di ingresso
-			//List<Stamping> reloadedStampingYesterday = Stamping.find("Select st from Stamping st where st.personDay = ? order by st.date desc", pdPastDay).fetch();
-			Query query = JPA.em().createQuery("Select st from Stamping st where st.personDay = :pd order by st.date asc");
-			query.setParameter("pd", pdPastDay);
-			List<Stamping> reloadedStampingYesterday = query.getResultList();
-			//	List<Stamping> reloadedStampingYesterday = new ArrayList<Stamping>(pdPastDay.stampings);
-			int size = reloadedStampingYesterday.size();
-			if(reloadedStampingYesterday.size() > 0 && reloadedStampingYesterday.get(size-1).way == WayType.in)
-			{
-				Logger.debug("Sono nel caso in cui ci sia una timbratura finale di ingresso nel giorno precedente nel giorno %s", pdPastDay.date);
-				if(stampProfile == null || !stampProfile.fixedWorkingTime)
-				{
-					//List<Stamping> s = Stamping.find("Select s from Stamping s where s.personDay = ? order by s.date asc", pd).fetch();
-					pd.orderStampings();
-					if(pd.stampings.size() > 0 && pd.stampings.get(0).way == WayType.out && config.hourMaxToCalculateWorkTime > pd.stampings.get(0).date.getHourOfDay())
-					{
-
-						//controllo nelle timbrature del giorno attuale se la prima che incontro è una timbratura di uscita sulla base
-						//del confronto con il massimo orario impostato in configurazione per considerarla timbratura di uscita relativa
-						//al giorno precedente
-
-						Logger.trace("Esiste una timbratura di uscita come prima timbratura del giorno %s", pd.date);
-						//in caso esista quella timbratura di uscita come prima timbratura del giorno attuale, creo una nuova timbratura
-						// di uscita e la inserisco nella lista delle timbrature relative al personDay del giorno precedente.
-						//E svolgo i calcoli su tempo di lavoro, differenza e progressivo
-						Stamping correctStamp = new Stamping();
-						Logger.trace("Aggiungo una nuova timbratura di uscita al giorno precedente alla mezzanotte ");
-						correctStamp.date = new LocalDateTime(pdPastDay.date.getYear(), pdPastDay.date.getMonthOfYear(), pdPastDay.date.getDayOfMonth(), 23, 59);
-						correctStamp.way = WayType.out;
-						correctStamp.markedByAdmin = false;
-						//correctStamp.considerForCounting = true;
-						correctStamp.stampModificationType = StampModificationType.findById(4l);
-						correctStamp.note = "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
-						correctStamp.personDay = pdPastDay;
-						correctStamp.save();
-						pdPastDay.stampings.add(correctStamp);
-						pdPastDay.save();
-						Logger.trace("Aggiunta nuova timbratura %s con valore %s", correctStamp, correctStamp.date);
-						Logger.trace("Devo rifare i calcoli in funzione di questa timbratura aggiunta");
-
-
-						pdPastDay.populatePersonDay();
-						Logger.trace("Fatti i calcoli, ora aggiungo una timbratura di ingresso alla mezzanotte del giorno %s", pd.date);
-						//a questo punto devo aggiungere una timbratura di ingresso prima della prima timbratura di uscita che è anche
-						//la prima timbratura del giorno attuale
-						Stamping newEntranceStamp = new Stamping();
-						newEntranceStamp.date = new LocalDateTime(pd.date.getYear(), pd.date.getMonthOfYear(), pd.date.getDayOfMonth(),0,0);
-						newEntranceStamp.way = WayType.in;
-						newEntranceStamp.markedByAdmin = false;
-						//newEntranceStamp.considerForCounting = true;
-						newEntranceStamp.stampModificationType = StampModificationType.findById(4l);
-						newEntranceStamp.note = "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
-						newEntranceStamp.personDay = pd;
-						newEntranceStamp.save();
-						Logger.trace("Aggiunta la timbratura %s con valore %s", newEntranceStamp, newEntranceStamp.date);
-						pd.stampings.add(newEntranceStamp);
-						pd.save();
-						//pd.populatePersonDay();
-
-
-					}
-					else
-					{
-						Logger.trace("La prima timbratura del giorno per %s per %s %s non è di uscita", pd.date, pd.person.name, pd.person.surname);
-					}
-				}
-				else
-				{
-					Logger.trace("Non faccio i calcoli per l'uscita perchè c'è il tempo di lavoro giustificato per %s %s in data %s", 
-							pd.person.name, pd.person.surname, pd.date);
-				}
-
-			}
-		}
-	}
+	
 
 //	/**
 //	 * 
@@ -930,11 +840,25 @@ public class PersonUtility {
 			}
 			else
 			{
-				totalDays.add(new PersonDay(person, new LocalDate(year, month, currentDate.getDayOfMonth()), 0, 0, 0));
+				PersonDay previusPersonDay = null;
+				if(totalDays.size()>0)
+					previusPersonDay = totalDays.get(totalDays.size()-1);
+				
+				PersonDay newPersonDay; 
+				//primo giorno del mese festivo 
+				if(previusPersonDay==null)
+					newPersonDay = new PersonDay(person, new LocalDate(year, month, currentDate.getDayOfMonth()), 0, 0, 0);
+				//altri giorni festivi
+				else
+				{
+					newPersonDay = new PersonDay(person, new LocalDate(year, month, currentDate.getDayOfMonth()), 0, 0, previusPersonDay.progressive);
+				}
+					
+				totalDays.add(newPersonDay);
+				
 			}
 			currentDate = currentDate.plusDays(1);
 		}
-
 		return totalDays;
 	}
 	
@@ -944,8 +868,29 @@ public class PersonUtility {
 	 * @return la lista contenente le assenze fatte nell'arco di tempo dalla persona
 	 */
 	public static Map<AbsenceType,Integer> getAllAbsenceCodeInMonth(List<PersonDay> personDays){
-
+		int month = personDays.get(0).date.getMonthOfYear();
+		int year = personDays.get(0).date.getYear();
+		LocalDate beginMonth = new LocalDate(year, month, 1);
+		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
+		Person person = personDays.get(0).person;
+		
+		List<AbsenceType> abtList = AbsenceType.find("Select abt from AbsenceType abt, Absence ab, PersonDay pd where ab.personDay = pd and ab.absenceType = abt and pd.person = ? and pd.date between ? and ?", person, beginMonth, endMonth ).fetch();
 		Map<AbsenceType, Integer> absenceCodeMap = new HashMap<AbsenceType, Integer>();
+		int i = 0;
+		for(AbsenceType abt : abtList)
+		{
+			boolean stato = absenceCodeMap.containsKey(abt);
+			if(stato==false){
+				i=1;
+				absenceCodeMap.put(abt,i);            	 
+			} else{
+				i = absenceCodeMap.get(abt);
+				absenceCodeMap.remove(abt);
+				absenceCodeMap.put(abt, i+1);
+			}
+		}
+		return absenceCodeMap;
+		/*
 		if(absenceCodeMap.isEmpty()){
 			int i = 0;
 			for(PersonDay pd : personDays){
@@ -967,40 +912,59 @@ public class PersonUtility {
 		}
 
 		return absenceCodeMap;	
-
+		*/
 	}
 	
 	/**
 	 * Il numero di buoni pasto usabili all'interno della lista di person day passata come parametro
-	 * @param personDays
 	 * @return
 	 */
-	public static int numberOfMealTicketToUse(List<PersonDay> personDays){
+	public static int numberOfMealTicketToUse(Person person, int year, int month){
+		
+		LocalDate beginMonth = new LocalDate(year, month, 1);
+		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
+		
+		List<PersonDay> workingDays = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? and pd.isTicketAvailable = ? order by pd.date",
+				person, beginMonth, endMonth, true).fetch();
+		int number = 0;
+		for(PersonDay pd : workingDays)
+		{
+			if(!pd.isHoliday())
+				number++;
+		}
+		return number;
+		//return workingDays.size();
+		/*
 		int tickets=0;
-		for(PersonDay pd : personDays){
-			if(pd.mealTicket()==true)
+		for(PersonDay pd : workingDays)
+		{
+			if(pd.isTicketAvailable==true)
 				tickets++;
 		}
 		return tickets;
+		*/
 	}
 	
 	
 
 	/**
 	 * Il numero di buoni pasto da restituire all'interno della lista di person day passata come parametro
-	 * @param personDays
 	 * @return
 	 */
-	public static int numberOfMealTicketToRender(List<PersonDay> personDays){
-		int ticketsToRender=0;
-		for(PersonDay pd : personDays)
-		{
-			if(pd.mealTicket()==false && (pd.isHoliday()==false))
-			{
-				ticketsToRender++;
-			}
-		}
-		return ticketsToRender;
+	public static int numberOfMealTicketToRender(Person person, int year, int month){
+		LocalDate beginMonth = new LocalDate(year, month, 1);
+		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
+		
+		List<PersonDay> pdListNoTicket = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? and pd.isTicketAvailable = ? order by pd.date",
+				person, beginMonth, endMonth, false).fetch();
+		int ticketTorender = pdListNoTicket.size();
+		
+		//tolgo da ticket da restituire i giorni festivi
+		for(PersonDay pd : pdListNoTicket)
+			if(pd.isHoliday())
+				ticketTorender--;
+		
+		return ticketTorender;
 	}
 	
 	/**
@@ -1013,11 +977,14 @@ public class PersonUtility {
 		for(PersonDay pd : personDays)
 		{
 			boolean fixed = pd.isFixedTimeAtWork();
-			if(fixed && !pd.isAllDayAbsences() && !pd.isHoliday())
+			if(pd.isHoliday())
+				continue;
+			
+			if(fixed && !pd.isAllDayAbsences() )
 			{
 				basedDays++;
 			}
-			else if(!fixed && !pd.isAllDayAbsences() && pd.stampings.size()>0 && pd.isHoliday()==false)
+			else if(!fixed && pd.stampings.size()>0 && !pd.isAllDayAbsences() )
 			{
 				basedDays++;
 			}
@@ -1125,18 +1092,24 @@ public class PersonUtility {
 			JPAPlugin.startTx(false);
 			while(!actualMonth.isAfter(endMonth))
 			{
-			
+				Logger.info("Mese inizio %s", actualMonth);
+				JPAPlugin.closeTx(false);
+				JPAPlugin.startTx(false);
 				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
 						p,
 						actualMonth, 
 						actualMonth.dayOfMonth().withMaximumValue())
 						.fetch();
 				for(PersonDay pd : pdList){
+					if(pd.date.getMonthOfYear()==6)Logger.info("Giorno inizio %s", pd.date);
+					
 					pd.populatePersonDay();
+					if(pd.date.getMonthOfYear()==6)Logger.info("Giorno fine %s", pd.date);
 				}
 				actualMonth = actualMonth.plusMonths(1);
-				
-				
+				JPAPlugin.closeTx(false);
+				JPAPlugin.startTx(false);
+				Logger.info("Mese fine %s", actualMonth);
 				
 			}
 			JPAPlugin.closeTx(false);
@@ -1160,31 +1133,22 @@ public class PersonUtility {
 		JPAPlugin.startTx(false);
 
 		Person personToCheck = Person.findById(personid);
-		if(!personToCheck.isActive(dayToCheck))
-		{
+		if(!personToCheck.isActive(dayToCheck)) {
 			return;
 		}
 
 		PersonDay pd = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? AND pd.date = ? ", 
 				personToCheck,dayToCheck).first();
 
-		if(pd!=null)
-		{
+		if(pd!=null){
 			pd.checkForPersonDayInTrouble(); 
 			return;
 		}
-		else
-		{
-			if(DateUtility.isGeneralHoliday(dayToCheck))
-			{
-				return;
-			}
-			//if(personToCheck.workingTimeType.workingTimeTypeDays.get(dayToCheck.getDayOfWeek()-1).holiday)
-			if(personToCheck.getWorkingTimeType(dayToCheck).workingTimeTypeDays.get(dayToCheck.getDayOfWeek()-1).holiday)
-			{
-				return;
-			}
+		else {
 			pd = new PersonDay(personToCheck, dayToCheck);
+			if(pd.isHoliday()) {
+				return;
+			}
 			pd.create();
 			pd.populatePersonDay();
 			pd.save();

@@ -1,15 +1,16 @@
-#{extends 'main_admin.html' /}
-
-
-<h3 id="pianoFerie">Modifica dati dell'orario di lavoro ${wtt.description}</h3>
-
-
 #{form @WorkingTimes.updateWorkingTime()}
 
-<p id="nuovoOrario" class="lead">Nome di questo tipo di orario: <input type="text" name="workingTimeTypeDescription" value="${wtt.description}"/></p>
+<fieldset>
+<legend>Modifica dati dell'orario di lavoro ${wtt.description}</legend>
+
+
+
+
+<p class="lead">Nome di questo tipo di orario: <input type="text" name="workingTimeTypeDescription" value="${wtt.description}"/></p>
+
 <input type="hidden" name="wttId" value="${wtt.id}"/>
-<div class="span9">
-<table class="table" id="nuovoOrarioLavoro">
+
+<table class="table custom1">
 	<tr>
 		<th></th>
 		<th>Lunedì</th>
@@ -22,7 +23,7 @@
 
 	</tr>
 	<tr>
-			<td>Tempo lavoro (in minuti)</td>
+			<td class="caratteristica">Tempo lavoro (in minuti)</td>
 			<td><input class="span1" type="number" name="mondayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime}"/></td>
 			<td><input class="span1" type="number" name="tuesdayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(2).workingTime}"/></td>
 			<td><input class="span1" type="number" name="wednesdayWorkingTime" value="${wtt.getWorkingTimeTypeDayFromDayOfWeek(3).workingTime}"/></td>
@@ -33,7 +34,7 @@
 			
 		</tr>
 		<tr>
-			<td>Tempo minimo di lavoro per diritto a intervallo pranzo (in minuti)</td>
+			<td class="caratteristica">Tempo minimo di lavoro per diritto a intervallo pranzo (in minuti)</td>
 			<td><input class="span1" type="number" name="mondayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(1, wtt)}"/></td>
 			<td><input class="span1" type="number" name="tuesdayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(2, wtt)}"/></td>
 			<td><input class="span1" type="number" name="wednesdayMinimalTimeLunch" value="${wtt.getMinimalTimeForLunch(3, wtt)}"/></td>
@@ -44,7 +45,7 @@
 			
 		</tr>
 		<tr>
-			<td>Intervallo pranzo (in minuti)</td>
+			<td class="caratteristica">Intervallo pranzo (in minuti)</td>
 			<td><input class="span1" type="number" name="mondayBreakTime" value="${wtt.getBreakTime(1, wtt)}"/></td>
 			<td><input class="span1" type="number" name="tuesdayBreakTime" value="${wtt.getBreakTime(2, wtt)}"/></td>
 			<td><input class="span1" type="number" name="wednesdayBreakTime" value="${wtt.getBreakTime(3, wtt)}"/></td>
@@ -55,7 +56,7 @@
 
 		</tr>
 		<tr>
-			<td>Giorno festivo</td>
+			<td class="caratteristica">Giorno festivo</td>
 			%{ if(wtt.getHolidayFromWorkinTimeType(1, wtt)==true){ }%
 				<td><input type="checkbox" name="mondayHoliday" value ="si" checked="checked"/></td>
 			%{ } else { }%
@@ -93,15 +94,21 @@
 			%{ } }%
 		</tr>	
 </table>
-</div>
 
-<p id="puoFareTurni">Può fare i turni Sì <input type="radio" name="turni" value="true"/>
- No<input type="radio" name="turni" value="false"/></p>
+<p style="margin-left: 10px; font-weight:bold;">Può fare i turni
+  Sì<input type="radio" name="turni" value="true"/>
+  No<input type="radio" name="turni" value="false"/>
+</p>
 
-<div id="frm">
+</fieldset>
+
+
+
+<div class="buttoncenter forminline">
 <input class="btn btn-primary" id="updateWorkingTime" type="submit" value="Aggiorna"/>
 #{/form}
 #{form @WorkingTimes.discard()}
 <input class="btn" id="backUpdate" type="submit" value="Indietro"/>
 #{/form}
+</div>
 </div>

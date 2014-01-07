@@ -139,79 +139,79 @@ public class PersonMonth extends Model {
 		this.month = month;
 
 	}
+//
+//	public static PersonMonth byPersonAndYearAndMonth(Person person, int year, int month) {
+//		return PersonMonth.find(
+//				"Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
+//				person, month, year).first();
+//	}
 
-	public static PersonMonth byPersonAndYearAndMonth(Person person, int year, int month) {
-		return PersonMonth.find(
-				"Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
-				person, month, year).first();
-	}
-
-	/**
-	 * 
-	 * @param month, year
-	 * @return il residuo di ore all'ultimo giorno del mese se visualizzo un mese passato, al giorno attuale se visualizzo il mese
-	 * attuale, ovvero il progressivo orario all'ultimo giorno del mese (se passato) o al giorno attuale (se il mese è quello attuale)
-	 */
-	@Deprecated
-	public int getMonthResidual(){
-		int residual = 0;
-		LocalDate date = new LocalDate();
-
-		if(month == date.getMonthOfYear() && year == date.getYear()){
-			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date < ? and pd.progressive != ? " +
-					"order by pd.date desc", person, date, 0).first();
-			if(pd == null){
-				pd = new PersonDay(person, date.minusDays(1));
-			}
-			residual = pd.progressive;
-		}
-		else{
-			LocalDate hotDate = new LocalDate(year,month,1).dayOfMonth().withMaximumValue();
-			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date <= ? and pd.date > ?" +
-					" order by pd.date desc", person, hotDate, hotDate.dayOfMonth().withMinimumValue()).first();
-			if(pd == null){
-				/**
-				 * si sta cercando il personDay di una data ancora non realizzata (ad esempio il personDay dell'ultimo giorno di un mese ancora da 
-				 * completare...es.: siamo al 4 gennaio 2013 e si cerca il personDay del 31 gennaio, che ancora non è stato realizzato
-				 */
-				residual = 0;
-			}
-			else
-				residual = pd.progressive;
-
-		}
-
-		return residual;
-	}
-
-	/**
-	 * 
-	 * @return il numero di giorni di riposo compensativo nel mese
-	 */
-	@Deprecated
-	public int getCompensatoryRest(){
-//		int compensatoryRest = 0;
-		LocalDate beginMonth = new LocalDate(year, month, 1);
-		Query query = JPA.em().createQuery("Select abs from Absence abs where abs.personDay.person = :person and abs.personDay.date between " +
-				":begin and :end and abs.absenceType.code = :code");
-		query.setParameter("person", person)
-		.setParameter("begin", beginMonth)
-		.setParameter("end", beginMonth.dayOfMonth().withMaximumValue())
-		.setParameter("code", "91");
-		List<Absence> absList = query.getResultList();
-//		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-//				person, beginMonth, beginMonth.dayOfMonth().withMaximumValue()).fetch();
-//		for(PersonDay pd : pdList){
-//			if(pd.absences.size() > 0){
-//				for(Absence abs : pd.absences){
-//					if(abs.absenceType.code.equals("91"))
-//						compensatoryRest = compensatoryRest +1;
-//				}
+//	/**
+//	 * 
+//	 * @param month, year
+//	 * @return il residuo di ore all'ultimo giorno del mese se visualizzo un mese passato, al giorno attuale se visualizzo il mese
+//	 * attuale, ovvero il progressivo orario all'ultimo giorno del mese (se passato) o al giorno attuale (se il mese è quello attuale)
+//	 */
+//	@Deprecated
+//	public int getMonthResidual(){
+//		int residual = 0;
+//		LocalDate date = new LocalDate();
+//
+//		if(month == date.getMonthOfYear() && year == date.getYear()){
+//			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date < ? and pd.progressive != ? " +
+//					"order by pd.date desc", person, date, 0).first();
+//			if(pd == null){
+//				pd = new PersonDay(person, date.minusDays(1));
 //			}
+//			residual = pd.progressive;
 //		}
-		return absList.size();
-	}
-	
+//		else{
+//			LocalDate hotDate = new LocalDate(year,month,1).dayOfMonth().withMaximumValue();
+//			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date <= ? and pd.date > ?" +
+//					" order by pd.date desc", person, hotDate, hotDate.dayOfMonth().withMinimumValue()).first();
+//			if(pd == null){
+//				/**
+//				 * si sta cercando il personDay di una data ancora non realizzata (ad esempio il personDay dell'ultimo giorno di un mese ancora da 
+//				 * completare...es.: siamo al 4 gennaio 2013 e si cerca il personDay del 31 gennaio, che ancora non è stato realizzato
+//				 */
+//				residual = 0;
+//			}
+//			else
+//				residual = pd.progressive;
+//
+//		}
+//
+//		return residual;
+//	}
+
+//	/**
+//	 * 
+//	 * @return il numero di giorni di riposo compensativo nel mese
+//	 */
+//	@Deprecated
+//	public int getCompensatoryRest(){
+////		int compensatoryRest = 0;
+//		LocalDate beginMonth = new LocalDate(year, month, 1);
+//		Query query = JPA.em().createQuery("Select abs from Absence abs where abs.personDay.person = :person and abs.personDay.date between " +
+//				":begin and :end and abs.absenceType.code = :code");
+//		query.setParameter("person", person)
+//		.setParameter("begin", beginMonth)
+//		.setParameter("end", beginMonth.dayOfMonth().withMaximumValue())
+//		.setParameter("code", "91");
+//		List<Absence> absList = query.getResultList();
+////		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+////				person, beginMonth, beginMonth.dayOfMonth().withMaximumValue()).fetch();
+////		for(PersonDay pd : pdList){
+////			if(pd.absences.size() > 0){
+////				for(Absence abs : pd.absences){
+////					if(abs.absenceType.code.equals("91"))
+////						compensatoryRest = compensatoryRest +1;
+////				}
+////			}
+////		}
+//		return absList.size();
+//	}
+//	
 	
 
 	/**
@@ -232,63 +232,63 @@ public class PersonMonth extends Model {
 //		}
 //		return resultList.size() * person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime;
 //	}
-	/**
-	 * migrare a metodo statico in PersonUtility getMaximumCoupleOfStampings(Person person, int year, int month)
-	 * @return il numero massimo di coppie di colonne ingresso/uscita ricavato dal numero di timbrature di ingresso e di uscita di quella
-	 * persona per quel mese
-	 */
-	@Deprecated
-	public long getMaximumCoupleOfStampings(){
-		
-		LocalDate begin = new LocalDate(year, month, 1);
-		if(begin.isAfter(new LocalDate()))
-			return 0;
-		List<PersonDay> pdList = PersonDay.find("Select pd From PersonDay pd where pd.person = ? and pd.date between ? and ?", this.person,begin,begin.dayOfMonth().withMaximumValue() ).fetch();
+//	/**
+//	 * migrare a metodo statico in PersonUtility getMaximumCoupleOfStampings(Person person, int year, int month)
+//	 * @return il numero massimo di coppie di colonne ingresso/uscita ricavato dal numero di timbrature di ingresso e di uscita di quella
+//	 * persona per quel mese
+//	 */
+//	@Deprecated
+//	public long getMaximumCoupleOfStampings(){
+//		
+//		LocalDate begin = new LocalDate(year, month, 1);
+//		if(begin.isAfter(new LocalDate()))
+//			return 0;
+//		List<PersonDay> pdList = PersonDay.find("Select pd From PersonDay pd where pd.person = ? and pd.date between ? and ?", this.person,begin,begin.dayOfMonth().withMaximumValue() ).fetch();
+//
+//		long max = 0;
+//		for(PersonDay pd : pdList)
+//		{
+//			int coupleOfStampings = PersonUtility.numberOfInOutInPersonDay(pd);
+//			
+//			if(max<coupleOfStampings)
+//				max = coupleOfStampings;
+//		}
+//		
+//		return max;
+//	}
 
-		long max = 0;
-		for(PersonDay pd : pdList)
-		{
-			int coupleOfStampings = PersonUtility.numberOfInOutInPersonDay(pd);
-			
-			if(max<coupleOfStampings)
-				max = coupleOfStampings;
-		}
-		
-		return max;
-	}
 
 
-
-	/**
-	 * @return la lista di giorni (PersonDay) associato alla persona nel mese di riferimento
-	 */
-	@Deprecated
-	public List<PersonDay> getDays() {
-
-		if (days != null) {
-			return days;
-		}
-		days = new ArrayList<PersonDay>();
-		Calendar firstDayOfMonth = GregorianCalendar.getInstance();
-		//Nel calendar i mesi cominciano da zero
-		firstDayOfMonth.set(year, month - 1, 1);
-
-		Logger.trace(" %s-%s-%s : maximum day of month = %s", 
-				year, month, 1, firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH));
-
-		for (int day = 1; day <= firstDayOfMonth.getActualMaximum(Calendar.DAY_OF_MONTH); day++) {
-
-			Logger.trace("generating PersonDay: person = %s, year = %d, month = %d, day = %d", person.username, year, month, day);
-			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", 
-					person, new LocalDate(year, month, day)).first();
-			if(pd == null)
-				days.add(new PersonDay(person, new LocalDate(year, month, day), 0, 0, 0));
-			else
-				days.add(pd);
-			Logger.debug("Inserito in days il person day: %s", pd);
-		}
-		return days;
-	}	
+//	/**
+//	 * @return la lista di giorni (PersonDay) associato alla persona nel mese di riferimento
+//	 */
+//	@Deprecated
+//	public List<PersonDay> getDays() {
+//
+//		if (days != null) {
+//			return days;
+//		}
+//		days = new ArrayList<PersonDay>();
+//		Calendar firstDayOfMonth = GregorianCalendar.getInstance();
+//		//Nel calendar i mesi cominciano da zero
+//		firstDayOfMonth.set(year, month - 1, 1);
+//
+//		Logger.trace(" %s-%s-%s : maximum day of month = %s", 
+//				year, month, 1, firstDayOfMonth.getMaximum(Calendar.DAY_OF_MONTH));
+//
+//		for (int day = 1; day <= firstDayOfMonth.getActualMaximum(Calendar.DAY_OF_MONTH); day++) {
+//
+//			Logger.trace("generating PersonDay: person = %s, year = %d, month = %d, day = %d", person.username, year, month, day);
+//			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", 
+//					person, new LocalDate(year, month, day)).first();
+//			if(pd == null)
+//				days.add(new PersonDay(person, new LocalDate(year, month, day), 0, 0, 0));
+//			else
+//				days.add(pd);
+//			Logger.debug("Inserito in days il person day: %s", pd);
+//		}
+//		return days;
+//	}	
 
 	/**
 	 * 
@@ -299,198 +299,157 @@ public class PersonMonth extends Model {
 	 */
 
 
-	/**
-	 * 
-	 * @return il numero di buoni pasto usabili per quel mese
-	 */
-	@Deprecated
-	public int numberOfMealTicketToUse(){
-		int tickets=0;
-		if(days==null){
-			days= getDays();
-		}
-		for(PersonDay pd : days){
-			if(pd.mealTicket()==true)
-				tickets++;
-		}
-
-		return tickets;
-	}
-
-	/**
-	 * 
-	 * @return il numero di buoni pasto da restituire per quel mese
-	 */
-	@Deprecated
-	public int numberOfMealTicketToRender(){
-		int ticketsToRender=0;
-		if(days==null){
-			days= getDays();
-		}
-		for(PersonDay pd : days){
-			if(pd.mealTicket()==false && (pd.isHoliday()==false))
-				ticketsToRender++;
-		}
-
-		return ticketsToRender;
-	}
-
-	/**
-	 * 
-	 * @return il numero di giorni lavorati in sede. Per stabilirlo si controlla che per ogni giorno lavorativo, esista almeno una 
-	 * timbratura.
-	 */
-	@Deprecated
-	public int basedWorkingDays(){
-		int basedDays=0;
-		if(days==null){
-			days= getDays();
-		}
-		
-		for(PersonDay pd : days){
-			boolean fixed = pd.isFixedTimeAtWork();
-			if(fixed && !pd.isAllDayAbsences() && !pd.isHoliday())
-				basedDays++;
-			else if(!fixed && !pd.isAllDayAbsences() && pd.stampings.size()>0 && pd.isHoliday()==false)
-					basedDays++;
-			
-			
-		}
-		return basedDays;
-	}
-
-	/**
-	 * 
-	 * @param days lista di PersonDay
-	 * @return la lista contenente le assenze fatte nell'arco di tempo dalla persona
-	 */
-	@Deprecated
-	public Map<AbsenceType,Integer> getAbsenceCode(){
-
-		if(days == null){
-			days = getDays();
-		}
-		absenceCodeMap = new HashMap<AbsenceType, Integer>();
-		if(absenceCodeMap.isEmpty()){
-			int i = 0;
-			for(PersonDay pd : days){
-				for (Absence absence : pd.absences) {
-					AbsenceType absenceType = absence.absenceType;
-					if(absenceType != null){
-						boolean stato = absenceCodeMap.containsKey(absenceType);
-						if(stato==false){
-							i=1;
-							absenceCodeMap.put(absenceType,i);            	 
-						} else{
-							i = absenceCodeMap.get(absenceType);
-							absenceCodeMap.remove(absenceType);
-							absenceCodeMap.put(absenceType, i+1);
-						}
-					}            
-				}	 
-			}       
-		}
-
-		return absenceCodeMap;	
-
-	}
-
-
-	public Map<AbsenceType, Integer> getAbsenceCodeMap() {
-		return absenceCodeMap;
-	}
-
 //	/**
 //	 * 
-//	 * @param days
-//	 * @return lista dei codici delle timbrature nel caso in cui ci siano particolarità sulle timbrature dovute a mancate timbrature
-//	 * per pausa mensa ecc ecc...
+//	 * @return il numero di buoni pasto usabili per quel mese
 //	 */
-//	public List<StampModificationType> getStampingCode(){
+//	@Deprecated
+//	public int numberOfMealTicketToUse(){
+//		int tickets=0;
 //		if(days==null){
 //			days= getDays();
 //		}
-//		List<StampModificationType> stampCodeList = new ArrayList<StampModificationType>();
 //		for(PersonDay pd : days){
-//
-//			StampModificationType smt = pd.checkTimeForLunch();
-//			Logger.trace("Lo stamp modification type è: %s", smt);
-//
-//			if(smt != null && !stampCodeList.contains(smt)){
-//				Logger.debug("Aggiunto %s alla lista", smt.description);
-//				stampCodeList.add(smt);
-//			}
-//			StampModificationType smtMarked = pd.checkMarkedByAdmin();
-//			if(smtMarked != null && !stampCodeList.contains(smtMarked)){
-//				stampCodeList.add(smtMarked);
-//				Logger.trace("Aggiunto %s alla lista", smtMarked.description);
-//			}
-//			StampModificationType smtMidnight = pd.checkMissingExitStampBeforeMidnight();
-//			if(smtMidnight != null && !stampCodeList.contains(smtMidnight)){
-//				stampCodeList.add(smtMidnight);
-//				Logger.trace("Aggiunto %s alla lista", smtMidnight.description);
-//			}
-//			StampModificationType smtFixedWorkingTime = pd.getFixedWorkingTime();
-//			if(smtFixedWorkingTime != null && !stampCodeList.contains(smtFixedWorkingTime)){
-//				stampCodeList.add(smtFixedWorkingTime);
-//				Logger.trace("Aggiunto %s alla lista", smtFixedWorkingTime.description);
-//			}
-//
+//			if(pd.mealTicket()==true)
+//				tickets++;
 //		}
-//		Logger.debug("La lista degli stamping code per questo mese contiene: %s", stampingCodeList);
-//		return stampCodeList;
+//
+//		return tickets;
+//	}
+
+//	/**
+//	 * 
+//	 * @return il numero di buoni pasto da restituire per quel mese
+//	 */
+//	@Deprecated
+//	public int numberOfMealTicketToRender(){
+//		int ticketsToRender=0;
+//		if(days==null){
+//			days= getDays();
+//		}
+//		for(PersonDay pd : days){
+//			if(pd.mealTicket()==false && (pd.isHoliday()==false))
+//				ticketsToRender++;
+//		}
+//
+//		return ticketsToRender;
+//	}
+
+//	/**
+//	 * 
+//	 * @return il numero di giorni lavorati in sede. Per stabilirlo si controlla che per ogni giorno lavorativo, esista almeno una 
+//	 * timbratura.
+//	 */
+//	@Deprecated
+//	public int basedWorkingDays(){
+//		int basedDays=0;
+//		if(days==null){
+//			days= getDays();
+//		}
+//		
+//		for(PersonDay pd : days){
+//			boolean fixed = pd.isFixedTimeAtWork();
+//			if(fixed && !pd.isAllDayAbsences() && !pd.isHoliday())
+//				basedDays++;
+//			else if(!fixed && !pd.isAllDayAbsences() && pd.stampings.size()>0 && pd.isHoliday()==false)
+//					basedDays++;
+//			
+//			
+//		}
+//		return basedDays;
+//	}
+
+//	/**
+//	 * 
+//	 * @param days lista di PersonDay
+//	 * @return la lista contenente le assenze fatte nell'arco di tempo dalla persona
+//	 */
+//	@Deprecated
+//	public Map<AbsenceType,Integer> getAbsenceCode(){
+//
+//		if(days == null){
+//			days = getDays();
+//		}
+//		absenceCodeMap = new HashMap<AbsenceType, Integer>();
+//		if(absenceCodeMap.isEmpty()){
+//			int i;
+//			for(PersonDay pd : days){
+//				for (Absence absence : pd.absences) {
+//					AbsenceType absenceType = absence.absenceType;
+//					if(absenceType != null){
+//						boolean stato = absenceCodeMap.containsKey(absenceType);
+//						if(stato==false){
+//							i=1;
+//							absenceCodeMap.put(absenceType,i);            	 
+//						} else{
+//							i = absenceCodeMap.get(absenceType);
+//							absenceCodeMap.remove(absenceType);
+//							absenceCodeMap.put(absenceType, i+1);
+//						}
+//					}            
+//				}	 
+//			}       
+//		}
+//
+//		return absenceCodeMap;	
+//
+//	}
+
+
+//	public Map<AbsenceType, Integer> getAbsenceCodeMap() {
+//		return absenceCodeMap;
 //	}
 	
-	/**
-	 * 
-	 * @return la lista di eventuali stampType presenti nelle timbrature (es.: timbrature per ingresso/uscita di servizio
-	 */
-	public List<StampType> getStampType(){
-		if(days==null){
-			days= getDays();
-		}
-		List<StampType> stampTypeList = new ArrayList<StampType>();
-		StampType type = StampType.find("Select st from StampType st where st.identifier = ?", "s").first();
-		for(PersonDay pd : days){
-			for(Stamping st : pd.stampings){
-				
-				if(st.stampType != null && !stampTypeList.contains(type)){
-					stampTypeList.add(type);
-				}
-			}
-		}
-		return stampTypeList;
-	}
+//	/**
+//	 * 
+//	 * @return la lista di eventuali stampType presenti nelle timbrature (es.: timbrature per ingresso/uscita di servizio
+//	 */
+//	public List<StampType> getStampType(){
+//		if(days==null){
+//			days= getDays();
+//		}
+//		List<StampType> stampTypeList = new ArrayList<StampType>();
+//		StampType type = StampType.find("Select st from StampType st where st.identifier = ?", "s").first();
+//		for(PersonDay pd : days){
+//			for(Stamping st : pd.stampings){
+//				
+//				if(st.stampType != null && !stampTypeList.contains(type)){
+//					stampTypeList.add(type);
+//				}
+//			}
+//		}
+//		return stampTypeList;
+//	}
 
 
 
-	/**
-	 * 
-	 * @return il numero di ore di straordinario fatte dall'inizio dell'anno
-	 */
-	public int getOvertimeHourInYear(LocalDate date){
-		Logger.trace("Chiamata funzione di controllo straordinari...");
-		int overtimeHour = 0;
-		Query query = JPA.em().createQuery("Select comp from Competence comp where comp.person = :person and " +
-				"comp.year = :year and comp.competenceCode.code = :code and comp.month = :month");
-		query.setParameter("person", person)
-		.setParameter("year", date.getYear())
-		.setParameter("code", "S1")
-		.setParameter("month", date.getMonthOfYear());
-		
-		List<Competence> compList = query.getResultList();
-		
-//		List<Competence> compList = Competence.find("Select comp from Competence comp, CompetenceCode code where comp.person = ? and comp.year = ? and " +
-//				"comp.competenceCode = code and comp.month = ? and code.code = ?", person, date.getYear(), date.getMonthOfYear(),"S1").fetch();
-		Logger.debug("La lista degli straordinari da inizio anno per %s: %s", person, compList);
-		if(compList != null){
-			for(Competence comp : compList){
-				overtimeHour = overtimeHour + comp.valueApproved;
-			}
-		}
-		Logger.debug("Il numero di ore di straordinari per %s è: %s", person, overtimeHour);
-		return overtimeHour;
-	}
+//	/**
+//	 * 
+//	 * @return il numero di ore di straordinario fatte dall'inizio dell'anno
+//	 */
+//	public int getOvertimeHourInYear(LocalDate date){
+//		Logger.trace("Chiamata funzione di controllo straordinari...");
+//		int overtimeHour = 0;
+//		Query query = JPA.em().createQuery("Select comp from Competence comp where comp.person = :person and " +
+//				"comp.year = :year and comp.competenceCode.code = :code and comp.month = :month");
+//		query.setParameter("person", person)
+//		.setParameter("year", date.getYear())
+//		.setParameter("code", "S1")
+//		.setParameter("month", date.getMonthOfYear());
+//		
+//		List<Competence> compList = query.getResultList();
+//		
+////		List<Competence> compList = Competence.find("Select comp from Competence comp, CompetenceCode code where comp.person = ? and comp.year = ? and " +
+////				"comp.competenceCode = code and comp.month = ? and code.code = ?", person, date.getYear(), date.getMonthOfYear(),"S1").fetch();
+//		Logger.debug("La lista degli straordinari da inizio anno per %s: %s", person, compList);
+//		if(compList != null){
+//			for(Competence comp : compList){
+//				overtimeHour = overtimeHour + comp.valueApproved;
+//			}
+//		}
+//		Logger.debug("Il numero di ore di straordinari per %s è: %s", person, overtimeHour);
+//		return overtimeHour;
+//	}
 
 	@Override
 	public String toString() {
@@ -527,19 +486,9 @@ public class PersonMonth extends Model {
 	 * @return la somma dei minuti dei giorni (entro una certa data) che hanno una differenza negativa rispetto all'orario di lavoro
 	 */
 	private int residuoDelMeseInNegativoAllaData(LocalDate date) {
-//		LocalDate startOfMonth = new LocalDate(year, month, 1);
-//		Long residuo = JPA.em().createQuery("SELECT sum(pd.difference) FROM PersonDay pd WHERE pd.date BETWEEN :startOfMonth AND :endOfMonth and pd.person = :person " +
-//				"AND pd.difference < 0 and pd.date <= :date", Long.class)
-//				.setParameter("startOfMonth", startOfMonth)
-//				.setParameter("endOfMonth", startOfMonth.dayOfMonth().withMaximumValue())
-//				.setParameter("person", person)
-//				.setParameter("date", date)
-//				.getSingleResult();
+
 		int res = 0;
-//		if(residuo != null)
-//			res = residuo.intValue();
-//
-//		return res;
+
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? " +
 				"order by pd.date ", 
 				this.person, date.dayOfMonth().withMinimumValue(), date).fetch();
@@ -549,10 +498,7 @@ public class PersonMonth extends Model {
 			if(pd.difference < 0 && pd.date.isBefore(new LocalDate()))
 				res = res + pd.difference;
 		}
-//		if(pdList.get(0).date.isEqual(new LocalDate()))
-//			return pdList.get(0).previousPersonDay().progressive;
-//		else			
-//			return pdList.get(0).progressive;
+
 		return res;
 		
 	}
@@ -569,14 +515,7 @@ public class PersonMonth extends Model {
 	 * @return la somma dei minuti dei giorni (entro una certa data) che hanno una differenza positiva rispetto all'orario di lavoro
 	 */
 	private int residuoDelMeseInPositivoAllaData(LocalDate date) {
-//		Long residuo = JPA.em().createQuery("SELECT sum(pd.difference) FROM PersonDay pd WHERE pd.date BETWEEN :startOfMonth AND :endOfMonth and pd.person = :person " +
-//				"AND pd.difference > 0 and pd.date <= :date", Long.class)
-//				.setParameter("startOfMonth", new LocalDate(year, month, 1))
-//				.setParameter("endOfMonth", (new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()))
-//				.setParameter("person", person)
-//				.setParameter("date", date)
-//				.getSingleResult();
-		//PersonDay pd = null;
+
 		int res = 0;
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? " +
 				" order by pd.date desc", 
@@ -587,14 +526,7 @@ public class PersonMonth extends Model {
 			if(pd.difference >= 0 && pd.date.isBefore(new LocalDate()))
 				res = res+ pd.difference;
 		}
-//		if(pdList.get(0).date.isEqual(new LocalDate()))
-//			return pdList.get(0).previousPersonDay().progressive;
 
-//		if(residuo != null)
-//			res = residuo.intValue();
-//		return res;
-//		else
-//			return pdList.get(0).progressive;
 		return res;
 	}
 
@@ -1008,115 +940,7 @@ public class PersonMonth extends Model {
 
 	}
 
-	/**
-	 * 
-	 * @return il numero di giorni di indennità di reperibilità festiva per quella persona in quel mese di quell'anno
-	 */
-	public int holidaysAvailability(int year, int month){
-		int holidaysAvailability = 0;
-		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "208").first();
-		Logger.debug("Il codice competenza é: %s", cmpCode);
-		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
-				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
-		Logger.warn("competence: " +competence);
-		if(competence != null)
-			holidaysAvailability = competence.valueApproved;
-		else
-			holidaysAvailability = 0;
-		return holidaysAvailability;
-	}
 
-	/**
-	 * 
-	 * @return il numero di giorni di indennità di reperibilità feriale per quella persona in quel mese di quell'anno
-	 */
-	public int weekDayAvailability(@Valid int year, @Valid int month){
-		int weekDayAvailability = 0;
-		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "207").first();
-		Logger.debug("Il codice competenza é: %s", cmpCode);
-
-		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
-				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
-		if(competence != null)
-			weekDayAvailability = competence.valueApproved;
-		else
-			weekDayAvailability = 0;
-		return weekDayAvailability;
-	}
-
-	/**
-	 * 
-	 * @param year
-	 * @param month
-	 * @return il numero di giorni di straordinario diurno nei giorni lavorativi 
-	 */
-	public int daylightWorkingDaysOvertime(int year, int month){
-		int daylightWorkingDaysOvertime = 0;
-		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "S1").first();
-		Logger.debug("Il codice competenza é: %s", cmpCode);
-		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
-				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
-		if(competence != null)
-			daylightWorkingDaysOvertime = competence.valueApproved;
-		else
-			daylightWorkingDaysOvertime = 0;
-		return daylightWorkingDaysOvertime;
-	}
-
-	/**
-	 * 
-	 * @param year
-	 * @param month
-	 * @return il numero di giorni di straordinario diurno nei giorni festivi o notturno nei giorni lavorativi
-	 */
-	public int daylightholidaysOvertime(int year, int month){
-		int daylightholidaysOvertime = 0;
-		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "S2").first();
-		Logger.debug("Il codice competenza é: %s", cmpCode);
-		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
-				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
-		if(competence != null)
-			daylightholidaysOvertime = competence.valueApproved;
-		else
-			daylightholidaysOvertime = 0;
-		return daylightholidaysOvertime;
-	}
-
-	/**
-	 * 
-	 * @return il numero di giorni di turno ordinario
-	 */
-	public int ordinaryShift(int year, int month){
-		int ordinaryShift = 0;
-		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "T1").first();
-		Logger.debug("Il codice competenza é: %s", cmpCode);
-		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
-				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
-		if(competence != null)
-			ordinaryShift = competence.valueApproved;
-		else
-			ordinaryShift = 0;
-		return ordinaryShift;
-	}
-
-	/**
-	 * 
-	 * @return il numero di giorni di turno notturno
-	 */
-	public int nightShift(int year, int month){
-		int nightShift = 0;
-		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "T2").first();
-		Logger.debug("Il codice competenza é: %s", cmpCode);
-		if(cmpCode == null)
-			return 0;
-		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
-				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
-		if(competence != null)
-			nightShift = competence.valueApproved;
-		else
-			nightShift = 0;
-		return nightShift;
-	}
 
 
 	/**

@@ -104,10 +104,10 @@ public class MonthRecaps extends Controller{
 				difference = difference + pd.difference;
 				
 				//meal ticket to render --------------------------------------------------------------------------------------------------
-				if(pd.mealTicket())
+				if(pd.isTicketAvailable)
 					mealTicketToUse++;
 				
-				if(pd.mealTicket()==false && (pd.isHoliday()==false))
+				if(!pd.isTicketAvailable && !pd.isHoliday())
 					mealTicketToRender++;
 				
 				//holiday at work ---------------------------------------------------------------------------------------------------------
@@ -242,10 +242,7 @@ public class MonthRecaps extends Controller{
 			Logger.info("Costruisco riepilogo mensile per %s %s %s",person.id, person.name, person.surname);
 			PersonMonthRecapFieldSet mr = new PersonMonthRecapFieldSet();
 			mr.populatePersonMonthRecap(person, pdList, year, month);
-			if(person.id.equals(206l))
-			{
-				int gfff = 0 ;
-			}
+
 			tableMonthRecap.put(person, "Giorni di presenza al lavoro nei giorni festivi".intern(), mr.workingDayHoliday.size());
 			tableMonthRecap.put(person, "Giorni di presenza al lavoro nei giorni lavorativi".intern(), mr.workingDayNotHoliday.size());
 			tableMonthRecap.put(person, "Ore di lavoro fatte".intern(), new Integer(mr.totalTimeAtWork));
@@ -256,9 +253,10 @@ public class MonthRecaps extends Controller{
 			tableMonthRecap.put(person, "Buoni mensa da restituire".intern(), mr.mealTicketToRender);
 		}
 		
-		
-
-		render(tableMonthRecap, generalWorkingDaysOfMonth, today, lastDayOfMonth);
+		String month_capitalized  = null;
+		if(month>0)
+			month_capitalized = DateUtility.fromIntToStringMonth(month);
+		render(tableMonthRecap, generalWorkingDaysOfMonth, today, lastDayOfMonth, month_capitalized, year);
 
 	}
 	
