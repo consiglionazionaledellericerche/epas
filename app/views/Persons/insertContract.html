@@ -1,17 +1,19 @@
-<h3 id="nuovoContratto">Inserimento dati nuovo contratto per ${person.name} ${person.surname}</h3>
-
 #{form @Persons.saveContract()}
-<input type="hidden" name="personId" value="${person.id}"/>
-	<table>
-		<tr>
+  <fieldset>
+  <legend>Inserimento dati nuovo contratto per ${person.name} ${person.surname}</legend>
+
+
+  <input type="hidden" name="personId" value="${person.id}"/>
+  <table class="table table-display-contract table-striped">
+    <tr>
 			<th>Data inizio</th>
 			<th>Data fine</th>
 			
 			<th>Attestato presenza</th>
 			
-		</tr>
-		
-		<tr>
+	</tr>
+	
+	<tr>
 			<td><input name="beginContract" type="date" value="" size="10" maxlength="10" /></td>
 			<td><input name="expireContract" type="date" value="" size="10" maxlength="10" /></td>
 					
@@ -20,11 +22,14 @@
 				
 			</td>
 			
-		</tr>
+	</tr>
 		
-	</table>
-	
-	<input class="btn btn-primary" id="submitContractPerson"type="submit" value="Inserisci" />
+  </table>
+</fieldset>
 
+<div class="buttoncenter">
+  <input class="btn btn-primary" id="submitContractPerson"type="submit" value="Inserisci" />
+</div>
 	
 #{/form}
+

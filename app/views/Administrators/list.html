@@ -1,14 +1,16 @@
-#{extends 'main_admin.html' /}
+#{extends 'main_admin_no_menu.html' /}
+#{set titolo: 'Gestione user per accesso amministrativo' /}
 
-<h3 id="gestioneUtenteAmministrativo">Gestione user per accesso amministrativo</h3>
-<p class="lead" id="inserisciAmministratore"><a href="@{Administrators.insertAdmin}">Inserisci un nuovo amministratore</a></p>
+<p class="lead">
+  <a data-toggle="modal" href="@{Administrators.insertAdmin}" data-target="#myModal1">
+    Inserisci un nuovo amministratore
+  </a>
+</p>
+<h3>User esistenti</h3>
 
-<h3 id="utentiEsistenti">User esistenti</h3>
-
-<table class="table table-striped" id="listaAmministratori">
+<table class="table table-condensed table-hover custom2 " id="listaAmministratori">
 	<tr>
-		<th>Nome</th>
-		<th>Cognome</th>
+		<th>Nome Cognome</th>
 		<th>Può vedere persone</th>
 		<th>Può inserire e modificare persone</th>
 		<th>Può cancellare persone</th>
@@ -20,15 +22,18 @@
 		<th>Può inserire e modificare utenti amministratori</th>
 		<th>Può inserire e modificare straordinari e competenze</th>
 		<th>Può inserire e modificare ferie e permessi</th>
-		<th>Può caricare la situazione del personale<th>
+		<th>Può caricare la situazione del personale</th>
 		
 	</tr>
 	%{
 		for(admin in administratorList){ 
 	}%
 	<tr>
-		<td><a href="@{Administrators.edit(admin.id)}">${admin.name}</a></td>
-		<td>${admin.surname}</td>
+		<td class="caratteristica span3">
+		  <a data-toggle="modal" href="@{Administrators.edit(admin.id)}" data-target="#myModal2">
+		    ${admin.name} ${admin.surname}
+		  </a>
+		</td>
 		<td>
 		
 		%{ if(admin.isViewPersonAvailable() == true){ }%
@@ -142,3 +147,33 @@
 		}
 	}%
 </table>
+
+<div id="myModal1" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3>Inserimento nuovo amministratore</h3>
+  </div>
+  <div class="modal-body">
+    <p></p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+   <!--   <button class="btn btn-primary">Save changes</button>-->
+  </div>
+</div>
+ 
+
+
+<div id="myModal2" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3>Modifica permessi</h3>
+  </div>
+  <div class="modal-body">
+    <p></p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+   <!--   <button class="btn btn-primary">Save changes</button>-->
+  </div>
+</div>

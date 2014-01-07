@@ -93,10 +93,13 @@ public class WorkingTimeType extends Model {
 	 */
 	public WorkingTimeTypeDay getWorkingTimeTypeDayFromDayOfWeek(int dayOfWeek){
 		
+		return this.workingTimeTypeDays.get(dayOfWeek-1);
+		/*
 		WorkingTimeTypeDay wttd = WorkingTimeTypeDay.find("Select wttd from WorkingTimeTypeDay wttd where wttd.workingTimeType = ?" +
 				" and wttd.dayOfWeek = ?", this, dayOfWeek).first();
 		
 		return wttd;
+		*/
 	}
 	
 	/**

@@ -1,22 +1,15 @@
-#{extends 'main_admin.html' /}
+#{extends 'main_admin_no_menu.html' /}
 #{set title:vacationsRecap.person.surname + ' ' + vacationsRecap.person.name + ', matricola=' + vacationsRecap.person.number /}
+#{set titolo: 'Situazione ferie e permessi anno ' + vacationsRecap.year + ' di ' + vacationsRecap.person.surname + ' ' + vacationsRecap.person.name /}
+
+<br>
 
 <div class="container">
-<h3 id="titoloSituazioneFerie">Situazione ferie ${vacationsRecap.year}</h3>
-<div class="span4"align="left">
-<table class="table table-hover">
-	<tr>
-		<td>Inizio contratto: </td><td><strong>${vacationsRecap.currentContract.beginContract}</strong></td> 
-	</tr>
-	<tr>	
-		<td>Fine contratto: </td><td><strong>${vacationsRecap.currentContract.expireContract}</strong></td> 
-	</tr>
-</table>
-</div>
-<div class="span10"align="left">
 
-<input type="hidden" name="personId" value="${vacationsRecap.person.id}" />	
-<table class="table table-hover" id="ferie">
+<div class="span10">
+
+  <input type="hidden" name="personId" value="${vacationsRecap.person.id}" />	
+  <table class="table vacation-recap" id="ferie">
 	<tr>
 		<th colspan=2 class="ferieFatte">Ferie fatte</th>
 		<th rowspan=3>Permessi legge 937/77 fatti</th>
@@ -69,18 +62,42 @@
 		
 	</tr>
 
-</table>
+  </table>
 
-<div>
-<p class="lead">I residui di ferie e permessi per l'anno in corso sono indicati su 2 colonne:</p>
-<p><b>tot.</b>: Giorni residui totali di ferie o permessi</p>
-<p><b>mat.</b>: Giorni di ferie o permesso maturati fino ad oggi</p>
-
+  <div>
+    <br>
+    <p><h4>I residui di ferie e permessi per l'anno in corso sono indicati su 2 colonne:</h4></p>
+    <p><b>tot.</b>: Giorni residui totali di ferie o permessi</p>
+    <p><b>mat.</b>: Giorni di ferie o permesso maturati fino ad oggi</p>
+  </div>
 
 </div>
 
+<div class="span4">
+  <br>
+  <p><h4>Piani ferie associati al contratto corrente</h4></p>
+  <table class="table table-hover table-condensed vacation-recap">
+    <tr>
+      <th>Descrizione</th>
+      <th>Data inizio</th>
+      <th>Data fine</th>
+    </tr>
+    
+    #{list items: vacationsRecap.vacationPeriodList, as: 'vp'}
+    <tr>
+      <td>${vp.vacationCode.description}</td>
+      <td>${vp.beginFrom}</td>
+      <td>${vp.endTo}</td>
+    </tr>
+    #{/list}
+    
+  </table>
 </div>
+
 </div>
+
+
+
 <div id="myModal3" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>

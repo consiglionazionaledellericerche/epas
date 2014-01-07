@@ -1,12 +1,11 @@
-#{extends 'main_admin.html' /}
-#{set title:personMonth.person.surname + ' ' + personMonth.person.name + ', matricola=' + personMonth.person.number /}
+#{extends 'main_admin_no_menu.html' /}
+#{set titolo: 'Riepilogo straordinari e altre competenze ' + person.surname + ' ' + person.name + ' ' + month_capitalized + ' ' + personMonthCompetenceRecap.year /}
 
 <div class="container">
-<h3 id="titoloSituazioneFerie">Gestione straordinari e altre competenze</h3>
 
-<div class="span11"align="left">
-
-<table class="table table-hover" id="competenze">
+<div class="span11">
+<br>
+<table class="table table-hover table-bordered competence-recap">
 	<tr>
 		<th class="competenze">Cognome nome</th>
 		<th class="competenze">Ind.tà rep.tà feriale (207)</th>
@@ -17,13 +16,13 @@
 		<th class="competenze">Turno notturno (T2)</th>
 	</tr>
 	<tr>
-		<td class="comp-nome">${personMonth.person.surname + ' ' + personMonth.person.name + ' (' + personMonth.person.number + ')'}</td>
-		<td class="comp">${personMonth.weekDayAvailability(personMonth.year, personMonth.month)}</td>
-		<td class="comp">${personMonth.holidaysAvailability(personMonth.year, personMonth.month)}</td>
-		<td class="comp">(${personMonth.residuoDelMeseInPositivo().toHour()}) ${personMonth.daylightWorkingDaysOvertime(personMonth.year, personMonth.month)}</td>
-		<td class="comp">${personMonth.daylightholidaysOvertime(personMonth.year, personMonth.month)}</td>
-		<td class="comp">${personMonth.ordinaryShift(personMonth.year, personMonth.month)}</td>
-		<td class="comp">${personMonth.nightShift(personMonth.year, personMonth.month)}</td>	
+		<td class="comp-nome">${person.surname + ' ' + person.name + ' (' + person.number + ')'}</td>
+		<td class="comp">${personMonthCompetenceRecap.weekDayAvailability}</td>
+		<td class="comp">${personMonthCompetenceRecap.holidaysAvailability}</td>
+		<td class="comp">(${personMonthCompetenceRecap.progressivoFinalePositivoMese.toHour()}) ${personMonthCompetenceRecap.daylightWorkingDaysOvertime}</td>
+		<td class="comp">${personMonthCompetenceRecap.daylightholidaysOvertime}</td>
+		<td class="comp">${personMonthCompetenceRecap.ordinaryShift}</td>
+		<td class="comp">${personMonthCompetenceRecap.nightShift}</td>	
 	</tr>
 
 </table>

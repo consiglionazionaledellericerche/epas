@@ -128,7 +128,7 @@ public class Clocks extends Controller{
 		
 		Logger.debug("Faccio i calcoli per %s %s sul personday %s chiamando la populatePersonDay", person.name, person.surname, pd);
 		pd.populatePersonDay();
-		pd.updatePersonDay();
+		pd.updatePersonDaysInMonth();
 		//pd.save();
 		flash.success("Aggiunta timbratura per %s %s", person.name, person.surname);
 		

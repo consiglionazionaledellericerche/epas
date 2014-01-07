@@ -65,6 +65,11 @@ public class UploadSituation extends Controller{
 
 	@Check(Security.UPLOAD_SITUATION)
 	public static void show(final Integer month, final Integer year){
+		
+		NavigationMenu.injectMenu();
+		
+		render();
+		/*
 		MainMenu mainMenu = null;
 		if (month == null || year == null) {
 			LocalDate prevMonth = LocalDate.now().minusMonths(1);
@@ -72,6 +77,7 @@ public class UploadSituation extends Controller{
 		} else 
 			mainMenu = new MainMenu(year, month, 1);
 		render(mainMenu);
+		*/
 	}
 
 	@Check(Security.UPLOAD_SITUATION)

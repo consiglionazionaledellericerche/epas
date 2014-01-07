@@ -37,7 +37,7 @@ public class MainMenu {
 	private int year;
 	private int month;
 	private Integer day;
-	
+
 	@Setter
 	private ActionMenuItem method = null;
 
@@ -120,11 +120,9 @@ public class MainMenu {
             }
             
         }
-        if(actions.size() > 7){
-        	//Logger.debug("Ho più di 6 voci di menu, devo inserire il separatore");
+        if(actions.size() > 8){
         	for(int i=0; i < actions.size(); i++){
         		if(actions.get(i).toString().equals("stampings")){
-        			//Logger.debug("Inserisco il separatore alla posizione %d della lista", i);
         			actions.add(i, ActionMenuItem.separateMenu);
         			return actions;
         		}

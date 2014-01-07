@@ -68,12 +68,12 @@ public class Administration extends Controller {
     }
     
     
-	public static void test(){
-		PersonMonth pm = new PersonMonth(Person.em().getReference(Person.class, 140L), 2012,6);
-		long n = pm.getMaximumCoupleOfStampings();
-		render(n);
-	}
-	
+//	public static void test(){
+//		PersonMonth pm = new PersonMonth(Person.em().getReference(Person.class, 140L), 2012,6);
+//		long n = pm.getMaximumCoupleOfStampings();
+//		render(n);
+//	}
+//	
 	public static void upgradePerson(){
 		FromMysqlToPostgres.upgradePerson();
 		renderText("Modificati i permessi per l'utente");

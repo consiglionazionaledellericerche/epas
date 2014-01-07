@@ -1,17 +1,19 @@
-#{extends 'main_admin.html' /}
+#{extends 'main_admin_no_menu.html' /}
+#{set titolo: 'Gestione straordinari e altre competenze' /}
 
-<div class="row">
+
+  
+
+<ul class="nav nav-tabs">
+  <li><a href="@{Competences.showCompetences(year, month)}#">Competenze</a></li>
+  <li><a href="@{Competences.overtime(year, month)}#">Straordinari</a></li>
+  <li><a href="@{Competences.totalOvertimeHours(year, month)}#">Monte ore</a></li>
+  <li class="active"><a href="@{Competences.recapCompetences()}#">Recap competenze</a></li>
+</ul>
+ 
+ <div class="row">
   <div class="span0"></div>
   <div class="span11">
-
-<h2 id="titoloGestioneStraordinariCompetenze">Gestione straordinari e altre competenze</h2>    
-
- <ul class="nav nav-tabs">
-    	<li><a href="@{Competences.showCompetences(year, month)}#">Competenze</a></li>
-    	<li><a href="@{Competences.overtime(year, month)}#">Straordinari</a></li>
-    	<li><a href="@{Competences.totalOvertimeHours(year, month)}#">Monte ore</a></li>
-    	<li class="active"><a href="@{Competences.recapCompetences()}#">Recap competenze</a></li>
- </ul>
  
 <h3 id="titoloGestioneCompetenze">Da questa pagina puoi definire quali competenze spettano ad ogni persona</h3>
 

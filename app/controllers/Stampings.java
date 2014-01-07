@@ -111,18 +111,18 @@ public class Stampings extends Controller {
 		List<StampType> stampTypeList = PersonStampingDayRecap.stampTypeList;
 		
 		int numberOfCompensatoryRestUntilToday = PersonUtility.numberOfCompensatoryRestUntilToday(person, year, month);
-		int numberOfMealTicketToUse = PersonUtility.numberOfMealTicketToUse(totalPersonDays);
-		int numberOfMealTicketToRender = PersonUtility.numberOfMealTicketToRender(totalPersonDays);
+		int numberOfMealTicketToUse = PersonUtility.numberOfMealTicketToUse(person, year, month);
+		int numberOfMealTicketToRender = PersonUtility.numberOfMealTicketToRender(person, year, month);
 		int basedWorkingDays = PersonUtility.basedWorkingDays(totalPersonDays);
 		Map<AbsenceType,Integer> absenceCodeMap = PersonUtility.getAllAbsenceCodeInMonth(totalPersonDays);
 
 		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, year, null);
 		Mese mese = c.getMese(year, month);
-		
+		String month_capitalized = DateUtility.fromIntToStringMonth(month);
 		
 		//Render
 		render(person, year, month, numberOfInOut, numberOfCompensatoryRestUntilToday,numberOfMealTicketToUse,numberOfMealTicketToRender,
-				daysRecap, stampModificationTypeList, stampTypeList, basedWorkingDays, absenceCodeMap, mese);
+				daysRecap, stampModificationTypeList, stampTypeList, basedWorkingDays, absenceCodeMap, mese, month_capitalized);
 
 	}
 
@@ -130,7 +130,7 @@ public class Stampings extends Controller {
 	@Check(Security.INSERT_AND_UPDATE_STAMPING)
 	public static void personStamping(Long personId, int year, int month) {
 		
-		if (personId == null) {
+		if (personId == null){
 			personStamping();
 		}
 		if (year == 0 || month == 0) {
@@ -144,17 +144,17 @@ public class Stampings extends Controller {
 			render("@redirectToIndex");
 		}
 		
-		Configuration conf = Configuration.getCurrentConfiguration();
+		Configuration conf = Configuration.getCurrentConfiguration();													//0 sql (se già in cache)
 		int minInOutColumn = conf.numberOfViewingCoupleColumn;
-		int numberOfInOut = Math.max(minInOutColumn, PersonUtility.getMaximumCoupleOfStampings(person, year, month));
+		int numberOfInOut = Math.max(minInOutColumn, PersonUtility.getMaximumCoupleOfStampings(person, year, month));	//30 sql
 
 		//Lista person day contente tutti i giorni fisici del mese
-		List<PersonDay> totalPersonDays = PersonUtility.getTotalPersonDayInMonth(person, year, month);
+		List<PersonDay> totalPersonDays = PersonUtility.getTotalPersonDayInMonth(person, year, month);					//1 sql
 		
 		//Costruzione dati da renderizzare
 		for(PersonDay pd : totalPersonDays)
 		{
-			pd.computeValidStampings(); //calcolo del valore valid per le stamping del mese
+			pd.computeValidStampings(); //calcolo del valore valid per le stamping del mese								//0 sql
 		}
 		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
 		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();							
@@ -162,24 +162,26 @@ public class Stampings extends Controller {
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 		for(PersonDay pd : totalPersonDays )
 		{
-			PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(pd,numberOfInOut);
+			PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(pd,numberOfInOut);								//1 quando non e' festa (absence)						
 			daysRecap.add(dayRecap);
 		}
-		List<StampModificationType> stampModificationTypeList = PersonStampingDayRecap.stampModificationTypeList;
-		List<StampType> stampTypeList = PersonStampingDayRecap.stampTypeList;
+		List<StampModificationType> stampModificationTypeList = PersonStampingDayRecap.stampModificationTypeList;		//0 sql
+		List<StampType> stampTypeList = PersonStampingDayRecap.stampTypeList;											//0 sql
 		
-		int numberOfCompensatoryRestUntilToday = PersonUtility.numberOfCompensatoryRestUntilToday(person, year, month);
-		int numberOfMealTicketToUse = PersonUtility.numberOfMealTicketToUse(totalPersonDays);
-		int numberOfMealTicketToRender = PersonUtility.numberOfMealTicketToRender(totalPersonDays);
-		int basedWorkingDays = PersonUtility.basedWorkingDays(totalPersonDays);
-		Map<AbsenceType,Integer> absenceCodeMap = PersonUtility.getAllAbsenceCodeInMonth(totalPersonDays);
+		int numberOfCompensatoryRestUntilToday = PersonUtility.numberOfCompensatoryRestUntilToday(person, year, month); //1 sql
+		int numberOfMealTicketToUse = PersonUtility.numberOfMealTicketToUse(person, year, month);						//1 sql
+		int numberOfMealTicketToRender = PersonUtility.numberOfMealTicketToRender(person, year, month);					//1 sql
+		int basedWorkingDays = PersonUtility.basedWorkingDays(totalPersonDays);											//0 sql
+		Map<AbsenceType,Integer> absenceCodeMap = PersonUtility.getAllAbsenceCodeInMonth(totalPersonDays);				//1 sql
 
 		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, year, null);
 		Mese mese = c.getMese(year, month);
 		
-		//Render
+		String month_capitalized = DateUtility.fromIntToStringMonth(month);
+		
+		//Render	//0 sql
 		render(person, year, month, numberOfInOut, numberOfCompensatoryRestUntilToday,numberOfMealTicketToUse,numberOfMealTicketToRender,
-				daysRecap, stampModificationTypeList, stampTypeList, basedWorkingDays, absenceCodeMap, mese);
+				daysRecap, stampModificationTypeList, stampTypeList, basedWorkingDays, absenceCodeMap, mese, month_capitalized);
 
 		 
 	}
@@ -288,7 +290,7 @@ public class Stampings extends Controller {
 		pd.save();
 			
 		pd.populatePersonDay();
-		pd.updatePersonDay();
+		pd.updatePersonDaysInMonth();
 		
 		flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
 
@@ -334,7 +336,7 @@ public class Stampings extends Controller {
 			pd.stampings.remove(stamping);
 
 			pd.populatePersonDay();
-			pd.updatePersonDay();
+			pd.updatePersonDaysInMonth();
 	
 			flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(stamping.date.toLocalDate()));	
 
@@ -376,7 +378,7 @@ public class Stampings extends Controller {
 			stamping.save();
 		
 			pd.populatePersonDay();
-			pd.updatePersonDay();
+			pd.updatePersonDaysInMonth();
 			flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name);
 
 		}
@@ -435,8 +437,8 @@ public class Stampings extends Controller {
 			PersonTroublesInMonthRecap pt = new PersonTroublesInMonthRecap(person, monthBegin, monthEnd);
 			missingStampings.add(pt);
 		}
-
-		render(month, year, missingStampings);
+		String month_capitalized = DateUtility.fromIntToStringMonth(month);
+		render(month, year, missingStampings, month_capitalized);
 
 
 
@@ -454,7 +456,7 @@ public class Stampings extends Controller {
 	 * di persone attive a quella data
 	 */
 	private static int maxNumberOfStampingsInMonth(Integer year, Integer month, Integer day){
-		LocalDate date = new LocalDate(year, month,1);
+		LocalDate date = new LocalDate(year, month, day);
 		int max = 0;
 		List<Person> activePersons = null;
 		if(day != null)
@@ -476,40 +478,29 @@ public class Stampings extends Controller {
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void dailyPresence(Integer year, Integer month, Integer day) {
 
-		int maxNumberOfInOut = maxNumberOfStampingsInMonth(year, month, day);
-		Logger.debug("Il numero massimo di timbrature tra tutti i dipendenti per questo mese è: %d", maxNumberOfInOut);
-		ImmutableTable.Builder<Person, String, String> builder = ImmutableTable.builder();
-		Table<Person, String, String> tablePersonDailyPresence = null;
-
-		LocalDate today = new LocalDate(year, month, day);
-		List<Person> activePerson = Person.getActivePersons(new LocalDate(year, month, day));
-//		List<Person> persons = new ArrayList<Person>();
-//		List<Person> genericPerson = Person.find("Select p from Person p order by p.surname").fetch();
+		LocalDate dayPresence = new LocalDate(year, month, day);
+		int numberOfInOut = maxNumberOfStampingsInMonth(year, month, day);
 		
-//		for(Person p : genericPerson){
-//			Contract c = Contract.find("Select c from Contract c where c.person = ? and ((c.beginContract != null and c.expireContract = null) or " +
-//					"(c.expireContract > ?) or (c.beginContract = null and c.expireContract = null)) order by c.beginContract desc limit 1", 
-//					p, today).first();
-//			if(c != null && c.onCertificate == true)
-//				persons.add(p);
-//		}
-//		Logger.trace("Gli utenti attivi in questo giorno sono: %d", persons.size());
+		List<Person> activePerson = Person.getActivePersons(new LocalDate(year, month, day));
+		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
+		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();						
+		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
+		for(Person person : activePerson){
+			
+			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.date = ? and pd.person = ?", dayPresence, person).first();
+			if(pd==null)
+				pd = new PersonDay(person, dayPresence);
 
-//		Person per = new Person();
-//		builder.put(per, "Assenza", "");
-//		for(int i = 1; i <= maxNumberOfInOut; i++){
-//			if(i % 2 != 0){
-//				builder.put(per, (i+1)/2+"^ Ingresso", "");    			
-//			}
-//			else{
-//				builder.put(per, (i/2)+"^ Uscita", "");
-//			}
-//		}
-		//builder.put(per, "Tempo Lavoro", "");
+			pd.computeValidStampings();
+			daysRecap.add(new PersonStampingDayRecap(pd, numberOfInOut));
+			
+		}
+
+		/*
 		List<Stamping> stampings = null;
 		for(Person p : activePerson){
 			//Logger.trace("Inizio le operazioni di inserimento in tabella per %s %s ",p.name, p.surname);
-			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.date = ? and pd.person = ?", today, p).first();
+			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.date = ? and pd.person = ?", dayPresence, p).first();
 			//Logger.trace("Cerco il person day in data %s per %s %s", today, p.name, p.surname);
 			if(pd != null){
 				stampings = pd.getStampingsForTemplate(maxNumberOfInOut/2, false);
@@ -538,7 +529,11 @@ public class Stampings extends Controller {
 
 		}
 		tablePersonDailyPresence = builder.build();
-		render(tablePersonDailyPresence, year, month, day, maxNumberOfInOut);
+		*/
+		
+		
+		String month_capitalized = DateUtility.fromIntToStringMonth(month);
+		render(daysRecap, year, month, day, numberOfInOut, month_capitalized);
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
@@ -581,7 +576,8 @@ public class Stampings extends Controller {
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
 		int numberOfDays = endMonth.getDayOfMonth();
 		Table<Person, LocalDate, String> tablePersonTicket = builder.build();
-		render(year, month, tablePersonTicket, numberOfDays);
+		String month_capitalized = DateUtility.fromIntToStringMonth(month);
+		render(year, month, tablePersonTicket, numberOfDays, month_capitalized);
 	}
 
 

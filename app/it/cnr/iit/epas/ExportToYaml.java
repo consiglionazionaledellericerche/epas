@@ -274,7 +274,7 @@ public class ExportToYaml {
 			out = out + getFormattedProperty("date", "'"+pd.date+"'");
 		out = out + getFormattedProperty("isTicketForcedByAdmin", pd.isTicketForcedByAdmin+"");
 		out = out + getFormattedProperty("isTicketAvailable", pd.isTicketAvailable+"");
-		out = out + getFormattedProperty("isTimeAtWorkAutoCertificated", pd.isTimeAtWorkAutoCertificated+"");
+		out = out + getFormattedProperty("isTimeAtWorkAutoCertificated", pd.isFixedTimeAtWork()+"");
 		out = out + getFormattedProperty("isWorkingInAnotherPlace", pd.isWorkingInAnotherPlace+"");
 		out = out + getFormattedProperty("modificationType", pd.modificationType);
 		out = out + getFormattedProperty("progressive", pd.progressive+"");
