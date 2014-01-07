@@ -150,7 +150,11 @@ public class NavigationMenu extends Controller {
 		if(controller.equals("MonthRecaps.show"))
 			return "monthRecap";
 		
+		if(controller.equals("Absences.manageAbsenceCode") || controller.equals("Absences.editCode"))
+			return "manageAbsenceCode";
 		
+		if(controller.equals("Competences.manageCompetence"))
+			return "manageCompetenceCode";
 		
 		if(controller.equals("Persons.changePassword"))
 			return "changePassword";

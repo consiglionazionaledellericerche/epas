@@ -1,12 +1,13 @@
-#{extends 'main_admin.html' /}
+#{extends 'main_admin_no_menu.html' /}
+#{set titolo: 'Gestione dei codici di assenza' /}
 
-<h3 id="inserimentoNuovoCodiceAssenza">Modifica dati per codice di assenza: ${abt.code} (${abt.description})</h3>
+
 #{form @Absences.updateCode()}
 <div>
 <input type="hidden" name="absenceTypeId" value="${abt.id}"/>
 <form class="form-horizontal">
 <fieldset>
-<legend>Codice di assenza</legend>
+<legend>Modifica dati per codice di assenza: ${abt.code} (${abt.description})</legend>
 <table class="tablenoborder">
 	<tr>
 		<td><p>Codice: </p></td>
