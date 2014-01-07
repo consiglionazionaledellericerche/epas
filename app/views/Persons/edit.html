@@ -5,7 +5,6 @@
   <li><a href="@{Persons.personCompetence(person.id, month, year)}#">Competenze &{'views.tags.display.date.month.' + month} ${year} - ${person.name} ${person.surname}</a></li>
 </ul>
 
-<!--  <h2 id="titoloModificaDatiPersonali">Modifica dati anagrafici per l'utente	${person.name} ${person.surname}</h2>-->
 <input type="hidden" name="id" value="${id}"/>
 #{form @Persons.update()}
 <input type="hidden" name="personId" value="${person.id}"/>
@@ -99,8 +98,14 @@
 			%{ } else{ }%
 			<td><input name="endContract" type="date" readOnly="readOnly"
 				value="${contract.endContract}" /></td> %{ } }%
-			<td><input name="onCertificate" type="checkbox" readOnly="readOnly"
-				value="${contract.onCertificate}" /></td>
+			<td>
+				#{if contract.onCertificate == true}
+				<input name="onCertificate" type="checkbox" disabled="disabled"	checked="checked" />
+				#{/if}
+				#{else}
+				<input name="onCertificate" type="checkbox" disabled="disabled" />
+				#{/else}
+			</td>
 			<td>
 			<a data-toggle="modal" href="@{Persons.modifyContract(contract.id)}" data-target="#modal-edit-contract"><input value="Modifica" class="btn" type="button"></a>
 			

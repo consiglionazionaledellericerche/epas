@@ -1,6 +1,6 @@
 body {
-    padding-top: 60px;
-    padding-bottom: 40px;
+    padding-top: 0px;
+    padding-bottom: 0px;
 }
     
 body {
@@ -256,9 +256,6 @@ table#listaAmministratori {
 	margin: 4em 0em 6em;
 }
 
-table#withoutborder{border-style: none}
-tr#withoutborder{border-style: none}
-td#withoutborder{border-style: none}
 
 .capitalized {
 	text-transform: capitalize;	
@@ -273,13 +270,51 @@ th.residuo {text-align: center}
 th.competenze {width: 6em; text-align: center}
 td.noWrap {white-space:nowrap}
 
+table#tabellonetimbrature th{
+	text-align: center;
+}
+
+table#tabellonetimbrature td{
+	text-align: center;
+}
+td.positionleft{
+	border-radius: 10px 0px 0px 10px;
+	border-color: black;
+	border-right-style: none;
+	background-color: lightblue;
+}
+
+td.positionright{
+	border-radius: 0px 10px 10px 0px;
+	border-color: black;
+	border-left-style: none;
+	background-color: lightblue;
+}
+
+td.positioncenter{
+	border-left-style: none;
+	border-right-style: none;	
+	border-color: black;
+	background-color: lightblue;
+}
+
+td.positioncenter.warn{
+	border-left-style: none;
+	border-right-style: none;	
+	border-color: black;
+	background-color: lightblue;
+}
+
+td.positionnone.warn{
+	border-radius: 10px 10px 10px 10px;
+	border-color: black;
+	background-color: yellow;
+}
 
 td.festivi {background-color: #F88017; width: 6em}
 td.assenza {background-color: #FFFF99; text-align: center; width: 6em}
 td.ingresso {background-color: #FFEEFF}
-td.warn {background-color: yellow}
 td.uscita {background-color: #CCFFCC}
-td.warn {background-color: yellow}
 td.tempoLavoro {width: 6em}
 td.differenza {text-align: right; width: 6em}
 td.progressivo {background-color: #FFFF99; text-align:right; width: 6em}
@@ -446,7 +481,7 @@ p#nome {margin: 0em 1em 0em}
 p#cognome {margin: 1em 1em 2em}
 p#firma {margin: 2em 1em 0em}
 p#giorniLavorativi {margin: 2em 1em 0em}
-p#annoPrecedente {margin: 5em 50em 5em}
+p#annoPrecedente {margin: 1em 1em 1em; text-align: center;}
 
 input#submitNuovoCodiceAssenza {margin: 2em 60em 0em; align: center}
 input#discardNuovoCodiceAssenza {margin: 1em 60em 0em; align: center}
@@ -527,11 +562,16 @@ input#formClockPerson{ size: 100; }
 }
 
 #myContainer2{
-	padding-top: 250px;
+	padding-top: 80px;
 }
 
 #myh2{
 	text-align: center;
 	line-height: 0px;
+}
+
+#myCarouselCaption{
+	padding: 4px;
+	color: white;
 }
 
