@@ -493,7 +493,12 @@ public class PersonDay extends Model {
 		this.modificationType = null;
 		int breakTicketTime = getWorkingTimeTypeDay().breakTicketTime;	//30 minuti
 		int mealTicketTime = getWorkingTimeTypeDay().mealTicketTime;	//6 ore
-
+		if(mealTicketTime == 0){
+			isTicketAvailable = false;
+			return workTime + justifiedTimeAtWork;
+		}
+			
+		
 		List<PairStamping> gapLunchPairs = getGapLunchPairs(validPairs);
 		
 		//ha timbrato per il pranzo 
@@ -1209,7 +1214,7 @@ public class PersonDay extends Model {
 			 LocalDateTime out = validPair.out.date;
 			 if(outForLunch==null)
 			 {
-				 if( (out.isEqual(startLunch) || out.isAfter(startLunch)) && (out.isEqual(endLunch) || out.isBefore(endLunch)) )
+				 if( (out.isAfter(startLunch.minusMinutes(1))) && (out.isBefore(endLunch.plusMinutes(1))) )
 				 {
 					 outForLunch = validPair.out;
 				 }
@@ -1218,7 +1223,7 @@ public class PersonDay extends Model {
 			 {
 				 gapPairs.add( new PairStamping(outForLunch, validPair.in) );
 				 outForLunch = null;
-				 if( (out.isEqual(startLunch) || out.isAfter(startLunch)) && (out.isEqual(endLunch) || out.isBefore(endLunch)) )
+				 if( (out.isAfter(startLunch.minusMinutes(1))) && (out.isBefore(endLunch.plusMinutes(1))) )
 				 {
 					 outForLunch = validPair.out;
 				 }
