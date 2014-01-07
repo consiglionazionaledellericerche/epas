@@ -1,8 +1,9 @@
-#{extends 'main_admin.html' /}
-
-<h2 id="titoloControllaTimbratureMancanti">Controllo delle timbrature mancanti di <span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year}</h2>
-
-<table id="tabellaTimbratureMancanti">
+#{extends 'main_admin_no_menu.html' /}
+#{set titolo: 'Controllo delle timbrature mancanti di ' + month_capitalized + ' ' + year/}
+<br>
+<div class="container">
+<div class="span8">
+<table class="table table-hover custom2">
 	<tr>
 		<th>Nome</th>
 		<th>No assenze e timbrature</th>
@@ -13,17 +14,26 @@
 	
 	#{list items:missingStampings, as:'personMissingStampings'}
 	<tr>
-		<td><a href="@{Stampings.personStamping(personMissingStampings.person.id,year,month)}">${personMissingStampings.person.surname} ${personMissingStampings.person.name}</a></td>
+		<td class="caratteristica span3"><a href="@{Stampings.personStamping(personMissingStampings.person.id,year,month)}">${personMissingStampings.person.surname} ${personMissingStampings.person.name}</a></td>
 		
 		<td>
-			${personMissingStampings.troublesNoAbsenceNoStampings}
+		    
+			#{list items:personMissingStampings.troublesNoAbsenceNoStampingsL, as:'day'}
+			  <span class="badge badge-important">${day}</span>
+			#{/list}
 	    </td>
 	    <td>
-			${personMissingStampings.troublesNoAbsenceUncoupledStampingsNotHoliday}
+	        #{list items:personMissingStampings.troublesNoAbsenceUncoupledStampingsNotHolidayL, as:'day'}
+			  <span class="badge badge-inverse">${day}</span>
+			#{/list}
 	    </td>
 	    <td>
-			${personMissingStampings.troublesNoAbsenceUncoupledStampingsHoliday}
+	        #{list items:personMissingStampings.troublesNoAbsenceUncoupledStampingsHolidayL, as:'day'}
+			  <span class="badge badge-inverse">${day}</span>
+			#{/list}
 	    </td>
 	#{/list}
 	</tr>
 </table>
+</div>
+</div>

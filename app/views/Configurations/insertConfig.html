@@ -1,10 +1,10 @@
-#{extends 'main_admin.html' /}
+#{extends 'main_admin_no_menu.html' /}
+#{set titolo: 'Gestione parametri di configurazione' /}
 
-#{functionalMenuForm mainMenu: mainMenu /} 
-<h2 id="titoloConfigurazioneParametri">Istituto di informatica e telematica</h2>
-<h3 id="titoloGestioneParametri">Gestione parametri</h3>
+<h2 style="text-align:center;">Creazione nuova configurazione</h2>
 
-<p class="lead warning" id="warning"><strong>Attenzione!!!</strong> Compila correttamente ciascun fieldset</p>
+<p class="lead warning" style="text-align:center;"><strong>Attenzione!!!</strong> Compila correttamente ciascun fieldset</p>
+
 #{form @Configurations.save()}
 <div id="gestioneParametri">
 
@@ -23,15 +23,6 @@
 			</tr>	
 		</table>
 	</fieldset>
-
-
-
-
-
-
-
-
-
 
 	<fieldset>
 		<legend>Dati di connessione e di visualizzazione</legend>
@@ -132,7 +123,7 @@
 
 	<fieldset>
 		<legend>Orari e tempi di lavoro</legend>
-		<table class="tablenoborder">
+		<table class="tablenoborder tablenoborder-bottompadding">
 			<tr>	
 				<td>
 				Sì<input type="radio" name="configurazioneSegnoPiuPerModifica" value="true"/>
@@ -262,8 +253,8 @@
 				<td>Selezionare "si" per permettere l'inserimento forzato di giorni di ferie/permessi che superano il massimo di giorni usufruibili in un anno</td>
 			</tr>
 		</table>
-			
-		<table class="tablenoborder">
+		<br>	
+		<table class="tablenoborder tablenoborder-bottompadding">
 		
 			<tr>
 				<td>Compensazione dei residui con quelli dell'anno precedente</td>
@@ -321,11 +312,12 @@
 	</fieldset>
 		
 </div>
-<div id="frm">
-	<input id="salvaConfigurazione" type="submit" value="Salva"/>
+<div class="buttoncenter forminline">
+	<input class="btn btn-large" type="submit" value="Salva"/>
 #{/form}
 
 #{form @Configurations.discard()}
-	<input id="annullaConfigurazione" type="submit" value="Annulla"/>
+	<input class="btn btn-large" type="submit" value="Annulla"/>
 #{/form}
 </div>
+

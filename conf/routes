@@ -95,14 +95,14 @@ GET		/persons/{personId}/changePassword		Persons.changePassword
 POST	/persons/changePassword					Persons.savePassword
 
 # Gestione timbrature
-GET		/stampings/new							Stampings.create
-POST	/stampings/insert/						Stampings.insert
-GET		/stampings/edit/{stampingId}			Stampings.edit
-POST	/stampings/update/						Stampings.update
-GET		/personStamping							Stampings.personStamping
-GET		/stampings/missingStamping/{year}/{month}			Stampings.missingStamping
-GET		/stampings/dailyPresence/{year}/{month}/{day}		Stampings.dailyPresence
-GET		/stampings/mealTicketSituation/{year}/{month}		Stampings.mealTicketSituation
+GET		/stampings/new									Stampings.create
+POST	/stampings/insert/								Stampings.insert
+GET		/stampings/edit/{stampingId}					Stampings.edit
+POST	/stampings/update/								Stampings.update
+GET		/personStamping									Stampings.personStamping
+GET		/stampings/missingStamping/{year}/{month}		Stampings.missingStamping
+GET		/stampings/dailyPresence/{year}/{month}/{day}	Stampings.dailyPresence
+GET		/stampings/mealTicketSituation/{year}/{month}	Stampings.mealTicketSituation
 
 #Riepilogo mensile
 GET		/monthrecaps/show/{year}/{month}		MonthRecaps.show

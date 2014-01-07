@@ -1,68 +1,38 @@
-#{extends 'main_admin.html' /}
-#{set title:personMonth.person.surname + ' ' + personMonth.person.name + ', matricola=' + personMonth.person.number /}
+#{extends 'main_admin_no_menu.html' /}
+#{set title: person.surname + ' ' + person.name + ', matricola=' + person.number /}
+#{set titolo: 'Situazione assenze mensili ' +  month_capitalized + ' ' + year /}
+<br>
+<div class="row">
+  <div class="container"  style="text-align: center;">
+    <div class="span8">
+      <table class="table table-striped table-border table-condensed">
+	    <tr>
+		  <th>Descrizione</th>
+		  <th>Codice</th>
+		  <th>Numero giorni</th>
+	    <tr>
+	    
+	    #{list items:absenceTypeInMonth.entrySet(), as:'entry'}
+	    <tr>
+	        <td>${entry.getKey().description}</td>
+	        <td>${entry.getKey().code}</td>
+	        <td>
+	         <a data-toggle="modal" data-backdrop="false" href="@{Absences.absenceInMonth(person.id, entry.getKey().code, year, month)}" data-target="#modal-absencetype-month">${entry.getValue()}</a>
+			</td>
+		</tr>
+		 #{/list}
+      </table>
 
-<h2 id="titoloSituazioneAssenzeMensili">Situazione assenze mensili <span class="capitalized">&{'views.tags.display.date.month.' + personMonth.month}</span> ${personMonth.year}</h2>
+    </div>
+  </div>
+</div>
 
-<table id="assenze_mensili">
-
-	<tr>
-		<th>Nome</th>
-		%{
-		for(entry in personMonth.getAbsenceCode().entrySet()){
-		}%
-			<th>
-				<abbr title="${entry.getKey().description}" class="initialism">${entry.getKey().code}</abbr>
-			</th>
-		%{
-		}
-		}%
-
-	</tr>
-	
-	<tr>
-		<td>${personMonth.person.surname + ' ' + personMonth.person.name}</td>
-		%{
-			for(entry in personMonth.getAbsenceCode().entrySet()){
-		}%
-		<td><a href="@{Absences.absenceInMonth(personMonth.person.id, entry.getKey().code, personMonth.year, personMonth.month)}" class="example">${entry.getValue()}</a>
-				<script type="text/javascript"> 
-				$('.example').popupWindow({ 
-					height:500, 
-					width:800, 
-					top:50, 
-					left:50 
-				}); 
-				</script>
-		</td>
-		%{
-			}
-		}%
-
-	</tr>
-
-</table>
-
-
-*{Significato codici assenza}*
-
-<h3 align="left">Significato codici di assenza</h3>
-<table id="Codici di assenza">
-	<tr>
-		<th width="80">Codice assenza</th>
-		<th width="200">Descrizione</th>
-					
-	</tr>
-%{
-     for(entry in personMonth.getAbsenceCode().entrySet()) {
-}%
-	<tr>
-		<td>${entry.getKey().code}</td>     
-		<td>${entry.getKey().description}</td>	
-		
-	</tr>
-
-%{  		   
-     }
-     
-}%
-</table>
+<div id="modal-absencetype-month" class="modal hide fade mymodal-medium" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-body">
+    <p></p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+   <!--   <button class="btn btn-primary">Save changes</button>-->
+  </div>
+</div>

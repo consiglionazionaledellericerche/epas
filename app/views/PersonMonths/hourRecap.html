@@ -1,9 +1,10 @@
-#{extends 'main_admin.html' /}
+#{extends 'main_admin_no_menu.html' /}
+#{set titolo: 'Riepilogo ore di lavoro, straordinario e recuperi ' + person.surname + ' ' + person.name + ' anno: ' + year /}
 
 <div class="container">
-<h3 id="riepilogoOrarioLavoro">Riepilogo ore di lavoro, straordinario e recuperi (${person.surname} ${person.name} anno: ${year})</h3>
 <div class="span11">
-<table class="table table-hover">
+<br>
+<table class="table table-hover hour-recap table-condensed">
 	<tr>
 		<th rowspan=2>Mese</th>
 		<th rowspan=2>Da iniz.</th>
@@ -20,7 +21,7 @@
 	</tr>
 	%{for(entry in mapMonthSituation.entrySet()){
 	}%<tr>
-		<td><span class="capitalized">&{'views.tags.display.date.month.' + entry.getKey()}</span></td>
+		<td class="capitalized">&{'views.tags.display.date.month.' + entry.getKey()}</td>
 		<td>${entry.getValue().get(0)}</td>
 		<td>${entry.getValue().get(1)}</td>
 		<td>${entry.getValue().get(2)}</td>

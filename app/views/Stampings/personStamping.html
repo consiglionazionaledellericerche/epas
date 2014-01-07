@@ -1,157 +1,130 @@
-#{extends 'main_admin.html' /}
+#{extends 'main_admin_no_menu.html' /}
 #{set title:person.surname + ' ' + person.name + ', matricola=' + person.number /}
+#{set titolo: 'Situazione presenze mensile ' +  month_capitalized + ' ' + year + ' di ' + person.surname + ' ' + person.name /}
 
-<h2 id="titoloSituazionePresenzeMensili">
-	Situazione presenze mensile 
-	<span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year} 
-	di ${person.surname} ${person.name}</h2>
-
-
-
-<div id="presenze_mensili">
-<div class="span14">
-<table class="table table-bordered table-condensed" >
-	
-	<tr>
-		<th class="span1">Buono mensa</th>
-		<th class="span1">Giorno</th>
-		<th>Codice di assenza</th>
-		%{ for(int i = 1; i <= numberOfInOut; i++){
-		}%
-		<th>${i}° entrata</th>
-		<th>${i}° uscita</th>
-		%{ } }%
-		<th class="span1">Inserisci timbratura</th>
-		<th>Tempo lavoro</th>
-		<th class="span1">Differenza</th>
-		<th class="span1">Progressivo</th>
-		<th>Tipo Orario</th>
+<div class="row-fluid first-row">
+  <div class="span8" style="min-width: 900px;">
+    <table id="tabellonetimbrature" class="table table-bordered table-condensed">
+      <tr>
+		<th>Buono<br>mensa</th>
+		<th>Giorno</th>
+		<th>Codice di<br>assenza</th>
+		#{list items:1..numberOfInOut, as:'i'}
+			<th>${i}° entrata</th>
+			<th>${i}° uscita</th>
+		#{/list}
+		<th>Inserisci<br>timbratura</th>
+		<th>Tempo<br>lavoro</th>
+		<th>Differenza</th>
+		<th>Progressivo</th>
+		<th>Tipo<br>Orario</th>
 		<th>Note</th>
-	</tr>
-	
-	%{
-     for(dayRecap in daysRecap) {
-     		
+	  </tr>
+	  
+	  #{list items:daysRecap, as:'dayRecap'}
+	  <tr>
+	    <td>
+		#{if dayRecap.mealTicket.equals("NO")}
+		  <i class="icon-remove"></i>
+		#{/if} 
+		</td>
 			
-	}%
+		#{if dayRecap.holiday==false}
+		  <td class="capitalized">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</td>
+		#{/if}
+		#{else}
+		  <td class="festivi">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</td>
+		#{/else}
 		
-	<tr>
-			<td>${dayRecap.mealTicket}</td>
-			%{
-			if(dayRecap.holiday==false)
-			{
-			}%	
-				<td class="capitalized">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</td>
-			%{
-			}
-			else
-			{
-			}%	
-				<td class="festivi">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</td>
-			%{
-			}
-			}%
+		<td class="assenza">
+		  <a data-toggle="modal" data-backdrop="false" href="@{Absences.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" data-target="#myModal1">___</a>
+		  #{list items:dayRecap.absences, as:'absence'}
+		    <a data-toggle="modal" href="@{Absences.edit(absence.id)}" data-target="#myModal1">
+			  ${absence.absenceType.code}
+			</a>
+		  #{/list}	
+		</td>
 		
-			<td class="assenza">
+		#{list items:dayRecap.stampingsTemplate, as:'stampingTemplate'}
+		  #{if stampingTemplate.colour.equals("in")}
+			<td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} ">
+		  #{/if}
+		  #{elseif stampingTemplate.colour.equals("out")}
+		    <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} ">
+		  #{/elseif}
+		  #{elseif stampingTemplate.colour.equals("warn")}
+		    <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} warn">
+	      #{/elseif}
+					
+		  #{if stampingTemplate.date!=null}
+		    <a data-toggle="modal" href="@{Stampings.edit(stampingTemplate.stampingId)}" data-target="#myModal2">
+			  ${stampingTemplate.hour}
+			</a>
+		  #{/if}
+		  #{elseif stampingTemplate.pairPosition.equals("center")}
+		    <abbr title="Timbratura di servizio mancante" class="initialism"><i class="icon-warning-sign"></i></abbr>
+		  #{/elseif}
+
+		  #{ifnot stampingTemplate.identifier.equals("")}
+			<strong>${stampingTemplate.identifier}</strong>
+		  #{/ifnot}	
+		  #{ifnot stampingTemplate.markedByAdminCode.equals("")}
+			<strong>${stampingTemplate.markedByAdminCode}</strong>
+		  #{/ifnot}	
+		  #{ifnot stampingTemplate.missingExitStampBeforeMidnightCode.equals("")}
+			<strong>${stampingTemplate.missingExitStampBeforeMidnightCode}</strong>
+		  #{/ifnot}	
+		  <!--  ${stampingTemplate.pairId}${stampingTemplate.pairPosition}  -->		
+		  </td>
+	    #{/list}
+	    <td class="inserisciTimbratura">
+		    <a data-toggle="modal" data-backdrop="false" href="@{Stampings.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" data-target="#myModal2">
+		      +++
+		    </a>
+		</td>
+	    <td class="tempoLavoro">
+		  ${dayRecap.workTime}
+		  #{ifnot dayRecap.todayLunchTimeCode.equals("")}
+		    <strong>${dayRecap.todayLunchTimeCode}</strong>
+		  #{/ifnot}
+		  #{ifnot dayRecap.fixedWorkingTimeCode.equals("")}
+		  	<strong>${dayRecap.fixedWorkingTimeCode}</strong>
+		  #{/ifnot}	
+		  #{ifnot dayRecap.exitingNowCode.equals("")}
+		    <strong>${dayRecap.exitingNowCode}</strong>
+		  #{/ifnot}
+		</td>	
 			
-				<a data-toggle="modal" href="@{Absences.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" data-target="#myModal1">___</a>
-				%{	
-				for (absence in dayRecap.absences) 
-				{ 
-				%}
-				 <a data-toggle="modal" href="@{Absences.edit(absence.id)}" data-target="#myModal1">
-					${absence.absenceType.code}
-				 </a>
-										
-				%{
-				 }
-				 }%
-			</td>
-
-
-			%{  
-			for(stampingTemplate in dayRecap.stampingsTemplate){
-			}%
-			%{
-					if(stampingTemplate.colour.equals("in"))
-					{
-					}%
-						<td class="ingresso">
-					%{
-					}
-					else if (stampingTemplate.colour.equals("out"))
-					{
-					}%
-						<td class="uscita">
-					%{
-					}
-					else if (stampingTemplate.colour.equals("warn"))
-					{
-					}%
-						<td class="warn">
-					%{
-					}
-				}%
-				%{ if(stampingTemplate.date!=null) { }%
-					<a data-toggle="modal" href="@{Stampings.edit(stampingTemplate.stampingId)}" data-target="#myModal2">
-					${stampingTemplate.hour}
-					</a>	
-				 
-				 %{
-				 }
-				 }%
-				 
-				<strong>${stampingTemplate.identifier}</strong>
-				<strong>${stampingTemplate.markedByAdminCode}</strong>
-				<strong>${stampingTemplate.missingExitStampBeforeMidnightCode}</strong>
-
-				</td>
+		#{if dayRecap.differenceNegative}
+		  <td class="differenza" style="color: red;">${dayRecap.difference}</td>
+		#{/if}
+		#{else}
+		  <td class="differenza">&nbsp;${dayRecap.difference}</td>
+		#{/else}
 			
-			%{ 
-			} 
-			}%
-	
-			<td class="inserisciTimbratura"><a data-toggle="modal" href="@{Stampings.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" data-target="#myModal2">+++</a>
-				
-			</td>
-			<td class="tempoLavoro">
-				${dayRecap.workTime}
-				<strong>${dayRecap.todayLunchTimeCode}</strong>
-				<strong>${dayRecap.fixedWorkingTimeCode}</strong>
-				<strong>${dayRecap.exitingNowCode}</strong>
-			</td>							
-	       	<td class="differenza">
-	       		${dayRecap.difference}
-	       	</td>	
-			<td class="progressivo">
-			 	${dayRecap.progressive}
-		    </td>
-	        
-	        <td>${dayRecap.workingTimeTypeDescription}</td>
-	        
-	        <td>
-	    	%{
-    		for(n in dayRecap.note) 
-    		{
-			}%
-	       		${n}<br>
-	        %{
-	        }
-	        }%
-	        </td>
-	</tr>
-
-	%{  		   
- 	}
-   
-	}%
-
-</table>
-
-</div>
+		#{if dayRecap.progressiveNegative}
+		  <td class="progressivo" style="color: red;">${dayRecap.progressive}</td>
+		#{/if}
+		#{else}
+		  <td class="progressivo">&nbsp;${dayRecap.progressive}</td>
+		#{/else}
+												
+	    <td>${dayRecap.workingTimeTypeDescription}</td>
+	    <td>
+	    #{list items:dayRecap.note, as:'n'}
+	      <!--  ${n}<br> -->
+	     #{/list}
+	    </td>
+		
+	  </tr>
+	  #{/list}
+    </table>
+  </div>
+  <div class="span4">
+     #{include './_riepilogoRiassuntivoMese.html' /}
+  </div>
 </div>
 
-#{include './_riepilogoRiassuntivoMese.html' /}
 
 <div id="myModal1" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-header">
@@ -166,6 +139,8 @@
    <!--   <button class="btn btn-primary">Save changes</button>-->
   </div>
 </div>
+ 
+
 
 <div id="myModal2" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-header">

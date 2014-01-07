@@ -1,12 +1,15 @@
-#{extends 'main_admin.html' /}
+#{extends 'main_admin_no_menu.html' /}
+#{set titolo: 'Gestione tipi di orario di lavoro' /}
 
 <div class="container">
-<h2 id="titoloGestioneOrariLavoro">Gestione tipi di orario di lavoro</h2>
 
-
-<p class="text-info lead"><a href="insertWorkingTime.html">Nuovo orario di lavoro</a></p>
+<p class="text-info lead">
+  <a data-toggle="modal" href="@{WorkingTimes.insertWorkingTime()}" data-target="#myModal1">
+    Inserisci nuovo orario di lavoro
+  </a>
+</p>
 <div class="span11">
-<table class="table table-hover">
+<table  class="table table-hover table-working-type">
 	<tr>
 		<th>Nome tipo orario</th>
 		<th></th>
@@ -24,22 +27,26 @@
 		for(wtt in wttList){ 
 	}%
 	<tr>
-		<td rowspan=5><a href="@{WorkingTimes.edit(wtt.id)}">${wtt.description}</a></td>
+		<td class="tipo-orario first-line" rowspan=5>
+		  <a data-toggle="modal" href="@{WorkingTimes.edit(wtt.id)}" data-target="#myModal2">
+		    ${wtt.description}
+		  </a>
+		</td>
 		<tr>
-			<td>Tempo lavoro</td>
-			<td>${wtt.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime.toHourTime()}</td>
-			<td>${wtt.getWorkingTimeTypeDayFromDayOfWeek(2).workingTime.toHourTime()}</td>
-			<td>${wtt.getWorkingTimeTypeDayFromDayOfWeek(3).workingTime.toHourTime()}</td>
-			<td>${wtt.getWorkingTimeTypeDayFromDayOfWeek(4).workingTime.toHourTime()}</td>
-			<td>${wtt.getWorkingTimeTypeDayFromDayOfWeek(5).workingTime.toHourTime()}</td>
-			<td>${wtt.getWorkingTimeTypeDayFromDayOfWeek(6).workingTime.toHourTime()}</td>
-			<td>${wtt.getWorkingTimeTypeDayFromDayOfWeek(7).workingTime.toHourTime()}</td>
-			<td></td>
-			<td></td>
+			<td class="caratteristica first-line">Tempo lavoro</td>
+			<td class="first-line">${wtt.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime.toHourTime()}</td>
+			<td class="first-line">${wtt.getWorkingTimeTypeDayFromDayOfWeek(2).workingTime.toHourTime()}</td>
+			<td class="first-line">${wtt.getWorkingTimeTypeDayFromDayOfWeek(3).workingTime.toHourTime()}</td>
+			<td class="first-line">${wtt.getWorkingTimeTypeDayFromDayOfWeek(4).workingTime.toHourTime()}</td>
+			<td class="first-line">${wtt.getWorkingTimeTypeDayFromDayOfWeek(5).workingTime.toHourTime()}</td>
+			<td class="first-line">${wtt.getWorkingTimeTypeDayFromDayOfWeek(6).workingTime.toHourTime()}</td>
+			<td class="first-line">${wtt.getWorkingTimeTypeDayFromDayOfWeek(7).workingTime.toHourTime()}</td>
+			<td class="first-line"></td>
+			<td class="first-line"></td>
 			
 		</tr>
 		<tr>
-			<td>Tempo minimo di lavoro per diritto a intervallo pranzo</td>
+			<td class="caratteristica">Tempo minimo di lavoro per diritto a intervallo pranzo</td>
 			<td>${wtt.getMinimalTimeForLunch(1, wtt).toHourTime()}</td>
 			<td>${wtt.getMinimalTimeForLunch(2, wtt).toHourTime()}</td>
 			<td>${wtt.getMinimalTimeForLunch(3, wtt).toHourTime()}</td>
@@ -52,7 +59,7 @@
 			
 		</tr>
 		<tr>
-			<td>Intervallo pranzo</td>
+			<td class="caratteristica">Intervallo pranzo</td>
 			<td></td>
 			<td></td>
 			<td></td>
@@ -64,7 +71,7 @@
 			<td></td>
 		</tr>
 		<tr>
-			<td>Giorno festivo</td>
+			<td class="caratteristica">Giorno festivo</td>
 			<td>${wtt.getHolidayFromWorkinTimeType(1, wtt)}</td>
 			<td>${wtt.getHolidayFromWorkinTimeType(2, wtt)}</td>
 			<td>${wtt.getHolidayFromWorkinTimeType(3, wtt)}</td>
@@ -83,4 +90,34 @@
 	}%
 </table>
 </div>
+</div>
+
+<div id="myModal1" class="modal hide fade mymodal-large" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3>Inserimento nuovo Tipo Orario</h3>
+  </div>
+  <div class="modal-body">
+    <p></p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+   <!--   <button class="btn btn-primary">Save changes</button>-->
+  </div>
+</div>
+ 
+
+
+<div id="myModal2" class="modal hide fade mymodal-large" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3>Modifica Tipo Orario</h3>
+  </div>
+  <div class="modal-body">
+    <p></p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+   <!--   <button class="btn btn-primary">Save changes</button>-->
+  </div>
 </div>

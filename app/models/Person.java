@@ -39,6 +39,7 @@ import models.exports.StampingFromClient;
 import models.rendering.VacationsRecap;
 import net.spy.memcached.FailureMode;
 
+import org.apache.commons.lang.time.DateUtils;
 import org.eclipse.jdt.internal.core.BecomeWorkingCopyOperation;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
@@ -336,11 +337,24 @@ public class Person extends Model {
 				this,
 				date,
 				date).first();
-		if(contract == null){
-			return null;
-		}
 		return contract;
 
+	}
+	
+	/**
+	 * Il contratto attivo alla data, se esiste. Ciclando su tutti i contratti della persona (no query sql)
+	 * Da utilizzare se si intende ripetere la query per la persona su più giorni
+	 * @param date
+	 * @return
+	 */
+	public Contract getContractFromHeap(LocalDate date)
+	{
+		for(Contract c : this.contracts)
+		{
+			if(DateUtility.isDateIntoInterval(date, new DateInterval(c.beginContract, c.expireContract)))
+				return c;
+		}
+		return null;
 	}
 	/**
 	 * 
@@ -1054,11 +1068,14 @@ public class Person extends Model {
 	 * @return il tipo di orario di lavoro utilizzato in date
 	 */
 	public  WorkingTimeType getWorkingTimeType(LocalDate date) {
-		WorkingTimeType wtt = PersonWorkingTimeType.find("Select wtt from PersonWorkingTimeType pwtt, WorkingTimeType wtt " +
-				"where pwtt.beginDate <= ? and (pwtt.endDate >= ? or pwtt.endDate is null) and pwtt.person = ? and pwtt.workingTimeType = wtt", 
-				date, date, this).first();
-				
-		return wtt;
+		for(PersonWorkingTimeType personWtt : this.personWorkingTimeType)
+		{
+			if(DateUtility.isDateIntoInterval(date, new DateInterval(personWtt.beginDate, personWtt.endDate)))
+			{
+				return personWtt.workingTimeType;
+			}
+		}
+		return null;
 	}
 
 }

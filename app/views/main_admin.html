@@ -23,21 +23,21 @@
 	<!-- CSS concatenated and minified via ant build script-->
 	<link rel="stylesheet" media="screen" href="@{'/public/bootstrap/css/bootstrap.min.css'}" />
 	<link rel="stylesheet" media="screen" href="@{'/public/bootstrap/css/bootstrap-responsive.min.css'}" />  		
-		<link rel="stylesheet" media="screen" href="@{'/public/stylesheets/main.css'}">      
-		<link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap-editable/css/bootstrap-editable.css" rel="stylesheet"/>  
-        #{get 'moreStyles' /}  		
-  		<!-- end CSS-->
+	<link rel="stylesheet" media="screen" href="@{'/public/stylesheets/main.css'}">      
+	<link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap-editable/css/bootstrap-editable.css" rel="stylesheet"/>  
+    #{get 'moreStyles' /}  		
+  	<!-- end CSS-->
 		
-		<!-- More ideas for your <head> here: h5bp.com/d/head-Tips -->
+	<!-- More ideas for your <head> here: h5bp.com/d/head-Tips -->
 	
-		<!-- All JavaScript at the bottom, except for Modernizr / Respond.
-	       Modernizr enables HTML5 elements & feature detects; Respond is a polyfill for min/max-width CSS3 Media Queries
-	       For optimal performance, use a custom Modernizr build: www.modernizr.com/download/ -->
-		<script src="@{'/public/js/libs/modernizr-2.0.6.min.js'}"></script>
+	<!-- All JavaScript at the bottom, except for Modernizr / Respond.
+	   Modernizr enables HTML5 elements & feature detects; Respond is a polyfill for min/max-width CSS3 Media Queries
+	   For optimal performance, use a custom Modernizr build: www.modernizr.com/download/ -->
+	<script src="@{'/public/js/libs/modernizr-2.0.6.min.js'}"></script>
 
-    </head>
+</head>
 
-    <body>
+<body>
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container">
@@ -60,8 +60,12 @@
           </div>
           
           <div class="container">
-            <div class="carousel-caption">
-              <h2 id="myh2">ePas - electronic Personnel Attendence System</h2>
+            <div id="myCarouselCaption" class="carousel-caption">
+          	  %{ if(titolo==null || titolo.equals("")) { }%
+              <h3 id="myh2">ePas</h3>
+              %{ } else { }% 
+          	  <h3 id="myh2">${titolo}</h3>	
+              %{ } }%
             </div>
           </div>
         </div>
@@ -124,5 +128,5 @@
 		<script>window.attachEvent('onload',function(){CFInstall.check({mode:'overlay'})})</script>
 		<![endif]-->
   
-    </body>
+</body>
 </html>

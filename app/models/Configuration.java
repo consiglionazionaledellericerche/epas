@@ -1,7 +1,11 @@
 package models;
 
 
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
+
 import java.sql.Blob;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -24,7 +28,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
-
+import play.cache.Cache;
 import play.data.validation.Email;
 import play.db.jpa.Model;
 
@@ -322,14 +326,52 @@ public class Configuration extends Model{
 	public List<WebStampingAddress> webStampingAddress;
 	
 	
-	public static Configuration getConfiguration(Date date){
+	public static Configuration getConfiguration(Date date)
+	{
+		//FIXME controllare se le configurazioni possono sovrapporsi. In questo momento lo escludo, altrimenti come faccio a capire quale utilizzare??
+		List<Configuration> allConfigurations = (List<Configuration>)Cache.get("allConfigurations");
+		if(allConfigurations==null)
+		{
+			allConfigurations = Configuration.find("Select conf from Configuration conf order by conf.endDate ").fetch();
+			Cache.set("allConfigurations", allConfigurations);
+		}
+		for(Configuration conf : allConfigurations)
+		{
+			LocalDate beginConf = new LocalDate(conf.beginDate);
+			LocalDate endConf = new LocalDate(conf.endDate);
+			if(DateUtility.isDateIntoInterval(new LocalDate(date), new DateInterval(beginConf, endConf)))
+			{
+				return conf;
+			}
+		}
+		return null;
+		/*
 		return Configuration.find("Select conf from Configuration conf where conf.inUse = ? order by conf.endDate desc", true).first();
 		//return Configuration.find("Select conf from Configuration conf where conf.beginDate <= ? and conf.endDate >= ?", date, date).first();
+		 */
 	}
 	
 	public static Configuration getCurrentConfiguration(){
-		//TODO: metterla nella cache
-		return getConfiguration(new Date());
+
+		Configuration currentConfiguration = (Configuration)Cache.get("currentConfiguration"); 
+		
+		//non trovata la metto in cache
+		if(currentConfiguration == null)
+		{
+			currentConfiguration = getConfiguration(new Date());
+			Cache.set("currentConfiguration", currentConfiguration);
+			return currentConfiguration;
+		}
+		
+		LocalDate beginConf = new LocalDate(currentConfiguration.beginDate);
+		LocalDate endConf = new LocalDate(currentConfiguration.endDate);
+		//trovata scaduta la ricarico
+		if(! DateUtility.isDateIntoInterval(new LocalDate(), new DateInterval(beginConf, endConf)))
+		{
+			currentConfiguration = getConfiguration(new Date());
+			Cache.set("currentConfiguration", currentConfiguration);
+		}
+		return currentConfiguration;
 	}
 	
 	public static List<Configuration> getAllConfiguration()

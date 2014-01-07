@@ -1,10 +1,11 @@
-#{extends 'main.html' /}
+#{extends 'main_no_menu.html' /}
 
 #{set title:'ePAS - electronic Personnel Attendance System' /}
 
-<h2>Benvenuto in ePAS</h2>
+<div class="container" style="text-align:center;">
+  <h2>Benvenuto in ePAS</h2>
 
-<div id="login">
+  <div>
 
 	#{form @authenticate(), id:'formLogin'}
 		
@@ -19,20 +20,19 @@
 			</p>
 		#{/if}
 	
-		<p id="username-field">
-			<label for="username">&{'secure.username'}</label>
-			<input type="text" name="username" id="username" value="${flash.username}" />
+		<p>
+			<input placeholder="Username" type="text" name="username" id="username" value="${flash.username}" />
 		</p>
-		<p id="password-field">
-			<label for="password">&{'secure.password'}</label>
-			<input type="password" name="password" id="password" value="" />
+		<p>
+			<input placeholder="Password" type="password" name="password" id="password" value="" />
 		</p>
-		<p id="remember-field">
+		<p>
 			<input type="checkbox" name="remember" id="remember" value="true" ${flash.remember ? 'checked="true"' : ''} />
 			<label for="remember">&{'secure.remember'}</label>
 		</p>
-		<p id="signin-field">
-			<input type="submit" id="signin" value="&{'secure.signin'}" />
+		<p>
+			<input class="btn" type="submit" id="signin" value="&{'secure.signin'}" />
 		</p>
 	#{/form}
+  </div>
 </div>

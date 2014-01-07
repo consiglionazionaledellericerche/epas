@@ -24,6 +24,25 @@ $(function($) {
 		}); 
 });
 
+$('#myModal1').on('show', function () {
+	$('#myModal2').modal('hide');
+})
+
+$('#myModal2').on('show', function () {
+	$('#myModal1').modal('hide');
+})
+
+$('#myModal1').on('hide', function(){
+    $(this).data('modal', null);
+});
+
+$('#myModal2').on('hide', function(){
+    $(this).data('modal', null);
+});
+
+
+
+
 $('#myModal1').on('hidden', function(){
     $(this).data('modal', null);
 });
@@ -36,13 +55,33 @@ $('#myModal3').on('hidden', function(){
     $(this).data('modal', null);
 });
 
+$('#myModal4').on('hidden', function(){
+    $(this).data('modal', null);
+});
 
+$('#modal-insert-contract').on('hidden', function(){
+    $(this).data('modal', null);
+});
 
+$('#modal-edit-contract').on('hidden', function(){
+    $(this).data('modal', null);
+});
 
+$('#modal-terminate-person').on('hidden', function(){
+    $(this).data('modal', null);
+});
 
+$('#modal-edit-vacationperiod').on('hidden', function(){
+    $(this).data('modal', null);
+});
 
+$('#modal-insert-vacationperiod').on('hidden', function(){
+    $(this).data('modal', null);
+});
 
-
+$('#modal-absencetype-month').on('hidden', function(){
+    $(this).data('modal', null);
+});
 
 
 

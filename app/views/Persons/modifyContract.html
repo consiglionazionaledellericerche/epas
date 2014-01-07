@@ -1,8 +1,10 @@
-<h3 id="titoloModificaDatiContrattuali">Modifica dati contrattuali per l'utente ${contract.person.name} ${contract.person.surname}</h3>
-#{form @Persons.updateContract()}
-<input type="hidden" name="contractId" value="${contract.id}" />
 
-<table class="tablenoborder">
+#{form @Persons.updateContract()}
+<fieldset>
+  <legend>Modifica dati contrattuali per ${contract.person.name} ${contract.person.surname}</legend>
+  <input type="hidden" name="contractId" value="${contract.id}" />
+
+  <table class="tablenoborder">
 	<tr>
 		<td><strong>Data inizio contratto</strong></td>
 		<td>%{if(contract.beginContract != null){
@@ -58,6 +60,9 @@
 		}
 		}%	</td>
 	</tr>
-</table>
-<input id="modificaContratto" class="btn btn-primary" type="submit" value="Modifica"/>
+  </table>
+</fieldset>
+<div class="buttoncenter">
+  <input id="modificaContratto" class="btn btn-primary" type="submit" value="Modifica"/>
+</div>
 #{/form}

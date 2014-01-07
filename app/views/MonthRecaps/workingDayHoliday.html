@@ -1,24 +1,13 @@
-#{extends 'main.html' /}
-
-<h4>Giorni di presenza al lavoro nei giorni festivi</h4>
-
 <table>
 	<tr>
 		<th>Giorno</th>
 		<th>Ore di lavoro fatte</th>
 	</tr>
-	%{ 
-		int i = 0;
-		while(i < workingDayHoliday.size()){
-		
-	}%
+	#{list items:0 .. workingDayHoliday.size()-1, as:'i'}
 	<tr>
 		<td>${workingDayHoliday.get(i).date}</td>
 		<td>${workingDayHoliday.get(i).timeAtWork.toHourTime()}</td>
 	</tr>
-	%{
-		i++;}
-	}%
-
+	#{/list}
 
 </table>
