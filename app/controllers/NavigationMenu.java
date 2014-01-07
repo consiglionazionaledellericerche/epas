@@ -18,6 +18,8 @@ import play.cache.Cache;
 import play.mvc.After;
 import play.mvc.Before;
 import play.mvc.Controller;
+import play.mvc.Http;
+import play.mvc.Scope;
 
 /**
  * @author cristian
@@ -28,77 +30,174 @@ public class NavigationMenu extends Controller {
 	@Before
 	public static void injectMenu() { 
 		LocalDate now = new LocalDate();
-		Integer month;
+
+
+		
 		Integer year;
+		Integer month;
 		Integer day;
-		
-		String method = session.get("methodSelected");
-		
-		if(session.get("monthSelected")==null)
-			month = now.getMonthOfYear();
-		else
-			month = Integer.parseInt(session.get("monthSelected"));
-		
-		if(session.get("yearSelected")==null)
-			year = now.getYear();
-		else
-			year = Integer.parseInt(session.get("yearSelected"));
-		
-		if(session.get("daySelected")==null)
-			day = now.getDayOfMonth();
-		else
-			day = Integer.parseInt(session.get("daySelected"));
-		
-		
-		
-		/*
-		Integer day = params.get("day") != null ? Integer.valueOf(params.get("day")) : null;
-		int year 	= params.get("year") != null ? Integer.valueOf(params.get("year")) : now.getYear(); 
-		int month 	= params.get("month") != null  ? Integer.valueOf(params.get("month")) : now.getMonthOfYear();
-		if(month == 0)
-			month = now.getMonthOfYear();
-		*/
 		Long personId;
-		if( flash.get("personId") != null )
-			personId = Long.parseLong(flash.get("personId"));
+		String method = "";
+		
+		if(session.get("dispatched")!= null && session.get("dispatched").equals("true"))
+		{
+			year = Integer.parseInt(session.get("yearSelected"));
+			month = Integer.parseInt(session.get("monthSelected"));
+			day = Integer.parseInt(session.get("daySelected"));
+			personId = Long.parseLong(session.get("personSelected"));
+			method = session.get("methodSelected");
+			
+		}
 		else
-			personId = Security.getPerson().id;
-
-
+		{
+			//Year from routes (otherwise now)
+			year = params.get("year") != null ? Integer.valueOf(params.get("year")) : now.getYear(); 
+			session.put("yearSelected", year);
+			
+			//Month from routes (otherwise now)
+			month = params.get("month") != null  ? Integer.valueOf(params.get("month")) : now.getMonthOfYear();
+			session.put("monthSelected", month);
+			
+			//Day from routes (otherwise now)
+			day = params.get("day") != null ? Integer.valueOf(params.get("day")) : now.getDayOfMonth();
+			session.put("daySelected", day);
+			
+			//personId from routes (otherwise security)
+			personId = params.get("personId") != null ? Long.parseLong(params.get("personId")) : Security.getPerson().id; 
+			session.put("personSelected", personId);
+			
+			//Method from Http.Request
+			method = getFormAction(Http.Request.current().action);
+			session.put("methodSelected", method);
+			
+		}
+		session.put("dispatched", "false");
+		
+		List<Person> persons = (List<Person>)Cache.get("persons" + year + month); 
+		if(persons == null)
+		{
+			persons = new ArrayList<Person>();
+			persons = Person.getActivePersonsInMonth(month, year);
+			Cache.set("persons" + year + month, persons);
+		}
 	
 		
 		ActionMenuItem action;
 		if(method != null && !method.equals("")) 
-		{	
-			if(method.equals("Timbrature"))
-				action = ActionMenuItem.stampingsAdmin;
-			else
-				action = ActionMenuItem.valueOf(method);
-		}
+			action = ActionMenuItem.valueOf(method);
 		else
 			action = ActionMenuItem.stampingsAdmin;
 		
-		//lista delle persone 
-		List<Person> persons = new ArrayList<Person>();
-		persons = Person.getActivePersonsInMonth(month, year);
-
-		
-		
 		MainMenu mainMenu = null;
 		if(action.getDescription().equals("Riepilogo mensile"))
+		{
 			mainMenu = new MainMenu(year, month, action);
-		if(action.getDescription().equals("Presenza giornaliera")){
-			day = flash.get("day") != null ? Integer.valueOf(flash.get("day")) : now.getDayOfMonth();
+		}
+		if(action.getDescription().equals("Presenza giornaliera"))
+		{
 			mainMenu = new MainMenu(personId, year, month, day, action, persons);			
 		}
-		
-		else{
+		else
+		{
 			mainMenu = new MainMenu(personId, year, month, action, persons);
-			
 		}		
-		
+
 		renderArgs.put("mainMenu", mainMenu);
 
 	}
 	
+	private static String getFormAction(String controller)
+	{
+		if(controller.equals("Stampings.personStamping"))
+			return "stampingsAdmin";
+		if(controller.equals("Stampings.stampings"))
+			return "stampings";
+		
+		
+		if(controller.equals("Persons.list") || controller.equals("Persons.edit") || controller.equals("Persons.personCompetence") || controller.equals("Persons.insertPerson"))
+			return "personList";
+		
+		if(controller.equals("YearlyAbsences.yearlyAbsences"))
+			return "yearlyAbsences";
+		
+		if(controller.equals("VacationsAdmin.manageVacationCode"))
+			return  "vacationsAdmin";
+		
+		if(controller.equals("Competences.showCompetences") || controller.equals("Competences.overtime") || controller.equals("Competences.totalOvertimeHours") || controller.equals("Competences.recapCompetences"))
+			return "competencesAdmin";
+		
+		if(controller.equals("WorkingTimes.manageWorkingTime"))
+			return "manageWorkingTime";
+		
+		if(controller.equals("Configurations.list") || controller.equals("Configurations.insertConfig") || controller.equals("Configurations.edit"))
+			return "confParameters";
+			
+		if(controller.equals("Stampings.mealTicketSituation"))
+			return "mealTicketSituation";
+		
+		if(controller.equals("Stampings.missingStamping"))
+			return "missingStamping";
+		
+		if(controller.equals("Stampings.dailyPresence"))
+			return "dailyPresence";
+		
+		if(controller.equals("Administrators.list"))
+			return "administrator";
+		
+		if(controller.equals("YearlyAbsences.showGeneralMonthlyAbsences"))
+			return "totalMonthlyAbsences";
+		
+		if(controller.equals("MonthRecaps.show"))
+			return "monthRecap";
+		
+		
+		
+		if(controller.equals("Persons.changePassword"))
+			return "changePassword";
+		
+		if(controller.equals("Absences.absences"))
+			return "absences";
+		
+		if(controller.equals("YearlyAbsences.absencesPerPerson"))
+			return "absencesperperson";
+		
+		if(controller.equals("Vacations.show"))
+			return "vacations";
+		
+		if(controller.equals("PersonMonths.hourRecap"))
+			return "hourrecap";
+		
+		return null;
+		
+		/*
+		 stampingsAdmin("Timbrature", "insertAndUpdateStamping"),
+    personList("Lista persone", "insertAndUpdatePerson"),
+    yearlyAbsences("Assenze annuali", "insertAndUpdateAbsence"),
+//    absencesAdmin("Gestione assenze", "insertAndUpdateAbsence"),
+    vacationsAdmin("Gestione ferie e permessi", "insertAndUpdateVacations"),
+    competencesAdmin("Gestione competenze", "insertAndUpdateCompetences"),    
+    manageWorkingTime("Gestione orari di lavoro", "insertAndUpdateWorkingTime"),
+    confParameters("Configurazione parametri", "insertAndUpdateConfiguration"),
+    administrator("Gestione amministratori", "insertAndUpdateAdministrator"),
+    totalMonthlyAbsences("Totale assenze mensili", "insertAndUpdateAbsence"),
+    monthRecap("Riepilogo mensile", "insertAndUpdatePerson"),
+    missingStamping("Timbrature mancanti", "insertAndUpdateStamping"),
+    dailyPresence("Presenza giornaliera", "insertAndUpdatePerson"),
+    mealTicketSituation("Situazione buoni mensa", "insertAndUpdatePerson"),
+    manageAbsenceCode("Gestione codici d'assenza", "insertAndUpdateAbsence"),
+    manageCompetence("Gestione codici competenze", "insertAndUpdateCompetences"),
+    printTag("Stampa cartellino", "insertAndUpdateStamping"),
+    uploadSituation("Attestati presenza", "uploadSituation"),
+    separateMenu("-----------------------------------------------",""),    
+	stampings("Situazione mensile", "viewPersonalSituation"),
+	changePassword("Gestione password", "viewPersonalSituation"),
+	absences("Assenze", "viewPersonalSituation"),
+	absencesperperson("Assenze per persona", "viewPersonalSituation"),
+	vacations("Ferie", "viewPersonalSituation"),
+	competences("Competenze", "viewPersonalSituation"),
+	hourrecap("Riepilogo orario", "viewPersonalSituation"),
+	printPersonTag("Stampa cartellino presenze", "viewPersonalSituation"); 
+		 */
+	}
+		
 }

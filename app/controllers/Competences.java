@@ -1,5 +1,6 @@
 package controllers;
 
+import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import models.Person;
 import models.PersonDay;
 import models.PersonMonth;
 import models.TotalOvertime;
+import models.rendering.PersonMonthCompetenceRecap;
 
 import org.joda.time.LocalDate;
 
@@ -38,8 +40,6 @@ import com.google.common.collect.Table;
 @With( {Secure.class, NavigationMenu.class} )
 public class Competences extends Controller{
 
-	/* corrisponde alla voce di menu selezionata */
-	//	private final static ActionMenuItem actionMenuItem = ActionMenuItem.competences;
 	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void competences(Long personId, int year, int month) {
 		Person person = null;
@@ -48,25 +48,10 @@ public class Competences extends Controller{
 		else
 			person = Security.getPerson();
 
-		Logger.trace("Year: {}, month: {}", year, month);
-
-		String anno = params.get("year");
-		String mese= params.get("month");
-
-		if(anno==null || mese==null){
-
-			LocalDate now = new LocalDate();
-			PersonMonth personMonth = PersonMonth.byPersonAndYearAndMonth(person, now.getYear(), now.getMonthOfYear());
-
-			render(personMonth);
-		}
-		else{
-			Logger.info("Sono dentro il ramo else della creazione del month recap");
-			PersonMonth personMonth = PersonMonth.byPersonAndYearAndMonth(person, year, month);
-
-			render(personMonth);
-
-		}
+		PersonMonthCompetenceRecap personMonthCompetenceRecap = new PersonMonthCompetenceRecap(person, month, year);
+		String month_capitalized = DateUtility.fromIntToStringMonth(month);
+		
+		render(personMonthCompetenceRecap, person, month_capitalized);
 
 	}
 
@@ -203,9 +188,15 @@ public class Competences extends Controller{
 
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void totalOvertimeHours(int year, int month){
-		List<TotalOvertime> total = TotalOvertime.find("Select tot from TotalOvertime tot where tot.year = ?", year).fetch();
-		Logger.debug("la lista di monte ore per l'anno %s è %s", year, total);
-		render(total, year, month);
+		List<TotalOvertime> totalList = TotalOvertime.find("Select tot from TotalOvertime tot where tot.year = ?", year).fetch();
+
+		int totale = 0;
+		for(TotalOvertime tot : totalList) {
+			totale = totale+tot.numberOfHours;
+		}
+
+		Logger.debug("la lista di monte ore per l'anno %s è %s", year, totalList);
+		render(totalList, totale, year, month);
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
@@ -221,13 +212,17 @@ public class Competences extends Controller{
 			total.numberOfHours = - new Integer(numeroOre.substring(1, numeroOre.length()));
 
 		}
-		if(numeroOre.startsWith("+")){
+		else if(numeroOre.startsWith("+")){
 
 			total.numberOfHours = new Integer(numeroOre.substring(1, numeroOre.length()));
 		}
+		else {
+			flash.error(String.format("Format unexpected"));
+			Competences.totalOvertimeHours(year, month);
+		}
 		total.save();
 		flash.success(String.format("Aggiornato monte ore per l'anno %s", data.getYear()));
-		Application.indexAdmin();
+		Competences.totalOvertimeHours(year, month);
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
@@ -445,7 +440,7 @@ public class Competences extends Controller{
 		String ionicRadiance1bis = params.get("ionicRadiance1bis");
 		String ionicRadiance3bis = params.get("ionicRadiance3bis");
 
-		if(overtimeWorkDay.equals("true") && !person.isOvertimeInWorkDayAvailable()){
+		if(overtimeWorkDay.equals("true") && person.isOvertimeInWorkDayAvailable()){
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Straordinario diurno nei giorni lavorativi").first();
 			person.competenceCode.add(c);
 		}

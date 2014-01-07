@@ -81,17 +81,5 @@
 
 #{set 'moreScripts'}
 #{get 'moreScripts'/}
-<script>
-    $(function(){
-      // bind change event to select
-      $('#method').bind('change', function () {
-          var url = $(this).val(); // get selected value
-          if (url == 'yearlyAbsences') { // require a URL
-    	  		var nuovoUrl = '/yearlyAbsences/'+$('#personId').val()+'/'+$('#year').val();
-              	window.location = nuovoUrl; // redirect
-          }
-          return false;
-      });
-    });
-</script> 
+
 #{/set}

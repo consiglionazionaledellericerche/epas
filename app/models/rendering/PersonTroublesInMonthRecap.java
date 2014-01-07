@@ -21,6 +21,11 @@ public class PersonTroublesInMonthRecap {
 	public String troublesNoAbsenceUncoupledStampingsNotHoliday = "";
 	public String troublesNoAbsenceUncoupledStampingsHoliday = "";
 	
+	public List<Integer> troublesAutoFixedL = new ArrayList<Integer>();
+	public List<Integer> troublesNoAbsenceNoStampingsL = new ArrayList<Integer>();
+	public List<Integer> troublesNoAbsenceUncoupledStampingsNotHolidayL = new ArrayList<Integer>();
+	public List<Integer> troublesNoAbsenceUncoupledStampingsHolidayL = new ArrayList<Integer>();
+	
 
 	
 	/**
@@ -70,6 +75,31 @@ public class PersonTroublesInMonthRecap {
 			this.troublesNoAbsenceUncoupledStampingsNotHoliday = this.troublesNoAbsenceUncoupledStampingsNotHoliday.substring(0, this.troublesNoAbsenceUncoupledStampingsNotHoliday.length()-2);
 		if(this.troublesNoAbsenceUncoupledStampingsHoliday.endsWith(", "))
 			this.troublesNoAbsenceUncoupledStampingsHoliday = this.troublesNoAbsenceUncoupledStampingsHoliday.substring(0, this.troublesNoAbsenceUncoupledStampingsHoliday.length()-2);
+		
+		
+		
+		for(PersonDayInTrouble trouble : troubles)
+		{
+			if(trouble.cause.equals("timbratura disaccoppiata persona fixed"))
+			{
+				this.troublesAutoFixedL.add(trouble.personDay.date.getDayOfMonth());
+			}
+			
+			if(trouble.cause.equals("no assenze giornaliere e no timbrature"))
+			{
+				this.troublesNoAbsenceNoStampingsL.add(trouble.personDay.date.getDayOfMonth());
+			}
+			
+			if(trouble.cause.equals("timbratura disaccoppiata giorno feriale"))
+			{
+				this.troublesNoAbsenceUncoupledStampingsNotHolidayL.add(trouble.personDay.date.getDayOfMonth());
+			}
+			
+			if(trouble.cause.equals("timbratura disaccoppiata giorno festivo"))
+			{
+				this.troublesNoAbsenceUncoupledStampingsHolidayL.add(trouble.personDay.date.getDayOfMonth());
+			}
+		}
 	} 
 	
 	

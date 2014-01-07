@@ -32,7 +32,7 @@ public class VacationsAdmin extends Controller{
 		if(vc == null){
 			vacationCode.save();
 			flash.success(String.format("Inserito nuovo piano ferie con nome %s", vacationCode.description));
-			Application.indexAdmin();
+			VacationsAdmin.manageVacationCode();
 		}
 		else{
 			flash.error(String.format("Esiste già un piano ferie con nome: %s. Cambiare il nome.", params.get("nome")));

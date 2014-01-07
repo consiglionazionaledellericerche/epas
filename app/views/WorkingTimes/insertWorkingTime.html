@@ -1,12 +1,13 @@
-#{extends 'main_admin.html' /}
-
-<h2 id="nuovoOrario">Inserimento dati per nuovo tipo di orario</h2>
-
 #{form @WorkingTimes.save()}
-<p class="lead" id="nuovoOrario">Nome nuovo tipo di orario <input name="nuovoOrario" type="text" value="${wtt.description}" size="40" maxlength="200" /></p>
 
-<div class="span9">
-<table id="nuovoOrarioLavoro"class="table">
+<fieldset>
+<legend>Nuovo tipo orario</legend>
+
+
+<p class="lead">Nome nuovo tipo di orario <input name="nuovoOrario" type="text" value="${wtt.description}" size="40" maxlength="200" /></p>
+
+
+<table class="table custom1">
 	<tr>
 		<th></th>
 		<th>Lunedì</th>
@@ -18,7 +19,7 @@
 		<th>Domenica</th>
 	</tr>
 	<tr>
-		<td>Tempo di lavoro giornaliero (in minuti)</td>
+		<td class="caratteristica">Tempo di lavoro giornaliero (in minuti)</td>
 		<td><input class="span1" name="tempoLavoroLunedi" type="number" value="${wttd.get(0).workingTime}" size="10" maxlength="50" /></td>
 		<td><input class="span1" name="tempoLavoroMartedi" type="number" value="${wttd.get(1).workingTime}" size="10" maxlength="50" /></td>
 		<td><input class="span1" name="tempoLavoroMercoledi" type="number" value="${wttd.get(2).workingTime}" size="10" maxlength="50" /></td>
@@ -28,7 +29,7 @@
 		<td><input class="span1" name="tempoLavoroDomenica" type="number" value="${wttd.get(6).workingTime}" size="10" maxlength="50" /></td>
 	</tr>
 		<tr>
-		<td>Tempo di lavoro minimo per diritto a intervallo pranzo (in minuti)</td>
+		<td class="caratteristica">Tempo di lavoro minimo per diritto a intervallo pranzo (in minuti)</td>
 		<td><input class="span1" name="tempoMinimoPranzoLunedi" type="number" value="${wttd.get(0).mealTicketTime}" size="10" maxlength="50" /></td>
 		<td><input class="span1" name="tempoMinimoPranzoMartedi" type="number" value="${wttd.get(1).mealTicketTime}" size="10" maxlength="50" /></td>
 		<td><input class="span1" name="tempoMinimoPranzoMercoledi" type="number" value="${wttd.get(2).mealTicketTime}" size="10" maxlength="50" /></td>
@@ -38,7 +39,7 @@
 		<td><input class="span1" name="tempoMinimoPranzoDomenica" type="number" value="${wttd.get(6).mealTicketTime}" size="10" maxlength="50" /></td>
 	</tr>
 		<tr>
-		<td>Tempo minimo intervallo pranzo (in minuti)</td>
+		<td class="caratteristica">Tempo minimo intervallo pranzo (in minuti)</td>
 		<td><input class="span1" name="tempoPerPranzoLunedi" type="number" value="${wttd.get(0).breakTicketTime}" size="10" maxlength="50" /></td>
 		<td><input class="span1" name="tempoPerPranzoMartedi" type="number" value="${wttd.get(1).breakTicketTime}" size="10" maxlength="50" /></td>
 		<td><input class="span1" name="tempoPerPranzoMercoledi" type="number" value="${wttd.get(2).breakTicketTime}" size="10" maxlength="50" /></td>
@@ -48,7 +49,7 @@
 		<td><input class="span1" name="tempoPerPranzoDomenica" type="number" value="${wttd.get(6).breakTicketTime}" size="10" maxlength="50" /></td>
 	</tr>
 		<tr>
-		<td>Giorno festivo</td>
+		<td class="caratteristica">Giorno festivo</td>
 		<td><input class="span1" name="festivoLunedi" type="radio" value="${wttd.get(0).holiday}" size="10" maxlength="50" /></td>
 		<td><input class="span1" name="festivoMartedi" type="radio" value="${wttd.get(1).holiday}" size="10" maxlength="50" /></td>
 		<td><input class="span1" name="festivoMercoledi" type="radio" value="${wttd.get(2).holiday}" size="10" maxlength="50" /></td>
@@ -59,11 +60,11 @@
 	</tr>
 
 </table>
-</div>
-<div id="frm">
+</fieldset>
+<div class="buttoncenter forminline">
 <input class="btn btn-primary" id="insertWorkingTime" type="submit" value="Ok"/>
 #{/form}
 #{form @WorkingTimes.discard()}
 <input class="btn" id="back" type="submit" value="Indietro"/>
-#{/form}
 </div>
+#{/form}

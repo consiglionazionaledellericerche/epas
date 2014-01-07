@@ -1,6 +1,7 @@
 package controllers;
 
 import it.cnr.iit.epas.ActionMenuItem;
+import it.cnr.iit.epas.DateUtility;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -204,7 +205,11 @@ public class YearlyAbsences extends Controller{
 			}
 		}
 		int numberOfDifferentAbsenceType = tableMonthlyAbsences.columnKeySet().size();
-		render(tableMonthlyAbsences, year, month,numberOfDifferentAbsenceType);
+		String month_capitalized = null;
+		if(month>0)
+			month_capitalized = DateUtility.fromIntToStringMonth(month);
+		
+		render(tableMonthlyAbsences, year, month,numberOfDifferentAbsenceType, month_capitalized);
 
 	}
 	//private final static ActionMenuItem actionMenuItem = ActionMenuItem.absencesperperson;

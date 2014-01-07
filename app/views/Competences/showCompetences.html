@@ -1,13 +1,12 @@
-#{extends 'main_admin.html' /}
+#{extends 'main_admin_no_menu.html' /}
+#{set titolo: 'Gestione straordinari e altre competenze' /}
 
-<h2 id="titoloGestioneStraordinariCompetenze">Gestione straordinari e altre competenze</h2>
-
-    <ul class="nav nav-tabs">
-    	<li class="active"><a href="@{Competences.showCompetences(year, month)}#">Competenze</a></li>
-    	<li><a href="@{Competences.overtime(year, month)}#">Straordinari</a></li>
-    	<li><a href="@{Competences.totalOvertimeHours(year, month)}#">Monte ore</a></li>
-    	<li><a href="@{Competences.recapCompetences()}#">Recap competenze</a></li>
-    </ul>
+<ul class="nav nav-tabs">
+  <li class="active"><a href="@{Competences.showCompetences(year, month)}#">Competenze</a></li>
+  <li><a href="@{Competences.overtime(year, month)}#">Straordinari</a></li>
+  <li><a href="@{Competences.totalOvertimeHours(year, month)}#">Monte ore</a></li>
+  <li><a href="@{Competences.recapCompetences()}#">Recap competenze</a></li>
+</ul>
 
 <h3 id="titoloGestioneCompetenze">Competenze del mese di <span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year}</h3>
 <input type="hidden" name="year" value="${year}"/>
@@ -16,7 +15,7 @@
 <p>Totale ore di straordinario pagate nell'anno: <strong>${totaleOreStraordinarioAnnuale}</strong></p>
 <p>Totale monte ore nell'anno ${year}: <strong>${totaleMonteOre}</strong></p>
 <p class="lead">I valori per le reperibilità sono espressi in GIORNI, quelli per straordinari e turni in ORE</p>
-<table class="table table-hover">
+<table class="table table-hover competence-big" >
 	<tr>
 	  <th class="span2">Nome e cognome</th>
 	#{list items:competenceCodes, as:'code'}
@@ -29,7 +28,7 @@
 	
 	#{list items:activePersons, as:'person'}
 	  <tr>
-	  <td class="nomeCognome">${person.name} ${person.surname}</td>
+	  <td class="person">${person.name} ${person.surname}</td>
 	    #{list items:competenceCodes, as:'code'}
 	     <td>
 	     #{if person.competenceCode.contains(code)}

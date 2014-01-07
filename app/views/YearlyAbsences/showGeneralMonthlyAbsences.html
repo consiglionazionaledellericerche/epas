@@ -1,20 +1,15 @@
-#{extends 'main_admin.html' /}
+#{extends 'main_admin_no_menu.html' /}
 
+#{if month != 0}
+  #{set titolo: 'Situazione generale delle assenze per ciascun dipendente nel mese di ' + month_capitalized + ' ' + year /}
+#{/if}
+#{else}
+  #{set titolo: 'Situazione assenze per ciascun dipendente da inizio anno' /}
+#{/else}
 
-
-%{ if(month != 0){
-}%
-	<h2 id="titoloTotaleAssenzeMensili">Situazione generale delle assenze per ciascun dipendente nel mese di &{'views.tags.display.date.month.' + month} ${year}</h2>
-%{
-	}else{
-}%
-	<h2 id="titoloTotaleAssenzeMensili">Situazione assenze per ciascun dipendente da inizio anno</h2>
-%{
-	}
-}%
-
-
-<table id="tabellaPersoneCodiciAssenzaMensili">
+<br>
+<div class="container">
+<table class="table table-hover custom2 span9">
 	<tr>
 		<th rowspan="2">Nome</th>
 		<th colspan="${numberOfDifferentAbsenceType}">Codici di assenza</th>
@@ -33,7 +28,7 @@
 	for(entry in tableMonthlyAbsences.rowMap().entrySet()){
 	}%
 	<tr>
-		<td>${entry.getKey().name} ${entry.getKey().surname}</td>
+		<td class="caratteristica">${entry.getKey().name} ${entry.getKey().surname}</td>
 		%{ 
 		for(col in tableMonthlyAbsences.columnKeySet()){
 		}%
@@ -50,6 +45,7 @@
 	}
 	}%
 </table>
+</div>
 
 <div id="myModal3" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-body">

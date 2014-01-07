@@ -1,7 +1,8 @@
-#{extends 'main_admin.html' /}
+#{extends 'main_admin_no_menu.html' /}
 
-#{functionalMenuForm mainMenu: mainMenu /} 
+#{set titolo: 'Inserimento nuova persona' /}
 
+<!-- secondo me questo controllo è inutile perchè c'è il template apposito di modifica
 <h2 id="titoloModificaPersonale">
 	%{ if (person.id == null) { }% 
 		Inserisci dati per una nuova persona
@@ -9,7 +10,8 @@
 		Modifica dati di ${person.name + ' ' + person.surname}
 	%{ } }%
 </h2>
-
+ -->
+ 
 #{form @Persons.save()}
 
 	<input type="hidden" name="person.id"  value="${person.id}" />
@@ -115,17 +117,13 @@
 		</table>
 	</fieldset>
 	
+    <p>I valori in <b>grassetto</b> sono obbligatori</p>
+    <p>Il fieldset "sede distaccata" va riempito SOLO SE la nuova persona appartiene a una sede distaccata</p>	
 	
-	<div id="spiegazioneValoriGrassetto">I valori in <b>grassetto</b> sono obbligatori</div>
-	<div id="spiegazioneValoriGrassetto">Il fieldset "sede distaccata" va riempito SOLO SE la nuova persona appartiene a una sede distaccata</div>
-<div id="frm">	
-
-	<input class="btn btn-primary" id="submitInsertPerson" type="submit" value="Avanti"/>
-		
-
-#{/form}
-
-#{form @Persons.discard()}
-	<input class="btn" id="resetInsertPerson"type="submit" value="Annulla">
-#{/form}
-</div>
+  <div class="forminline buttoncenter">	
+    <input class="btn btn-primary" id="submitInsertPerson" type="submit" value="Avanti"/>
+    #{/form}
+    #{form @Persons.discard()}
+      <input class="btn" id="resetInsertPerson"type="submit" value="Annulla">
+    #{/form}
+  </div>

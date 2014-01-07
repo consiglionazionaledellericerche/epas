@@ -143,8 +143,8 @@
 	
 <p id="spiegazioneTabellaTimbrature">
 <font size="2">
-Il numero di buoni mensa usabili per questo mese e': <strong>${pm.numberOfMealTicketToUse()}</strong>, mentre quelli da restituire sono <strong>${pm.numberOfMealTicketToRender()}</strong>. 
-<br>Il numero di giorni lavorativi in sede è di: <strong>${pm.basedWorkingDays()}</strong> 
+Il numero di buoni mensa usabili per questo mese e': <strong>${numberOfMealTicketToUse}</strong>, mentre quelli da restituire sono <strong>${numberOfMealTicketToRender}</strong>. 
+<br>Il numero di giorni lavorativi in sede è di: <strong>${basedWorkingDays}</strong> 
 </font>
 </p>
 <p id="spiegazioneTabellaTimbrature"/>
@@ -196,17 +196,17 @@ Il numero di buoni mensa usabili per questo mese e': <strong>${pm.numberOfMealTi
 			
 	</tr>
 	%{
-     for(entry in personMonth.getAbsenceCode().entrySet()) {
+	for(entry in absenceCodeMap.entrySet()) 
+	{
 	}%
 	<tr>
-		<td>${entry.getKey().code}</td>     
-		<td>${entry.getKey().description}</td>	
-		<td>${entry.getValue()}</td>	
+		<td><font size="2">${entry.getKey().code}</font></td>     
+		<td><font size="2">${entry.getKey().description}</font></td>	
+		<td><font size="2">${entry.getValue()}</font></td>	
 	</tr>
-
-%{  		   
- }
-}%     
+	%{
+	 }
+	}%
 </table>
 </div>
 

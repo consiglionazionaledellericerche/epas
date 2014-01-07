@@ -1,36 +1,39 @@
-#{extends 'main_admin.html' /}
+#{extends 'main_admin_no_menu.html' /}
+#{set titolo: 'Gestione straordinari e altre competenze' /}
+  
+ <ul class="nav nav-tabs">
+  <li><a href="@{Competences.showCompetences(year,month)}#">Competenze</a></li>
+  <li><a href="@{Competences.overtime(year, month)}#">Straordinari</a></li>
+  <li class="active"><a href="@{Competences.totalOvertimeHours(year, month)}#">Monte ore</a></li>
+  <li><a href="@{Competences.recapCompetences()}#">Recap competenze</a></li>
+</ul>
 
-<h2 id="titoloGestioneStraordinariCompetenze">Gestione straordinari e altre competenze</h2>
-    <ul class="nav nav-tabs">
-    	<li ><a href="@{Competences.showCompetences(year,month)}#">Competenze</a></li>
-    	<li><a href="@{Competences.overtime(year, month)}#">Straordinari</a></li>
-    	<li class="active"><a href="@{Competences.totalOvertimeHours(year, month)}#">Monte ore</a></li>
-    	<li><a href="@{Competences.recapCompetences()}#">Recap competenze</a></li>
-    </ul>
-    #{form @Competences.saveOvertime()}
-    <input type="hidden" name="year" value="${year}"/>
+#{form @Competences.saveOvertime()}
+
+<fieldset>
+  <legend>Modifica del monte ore di straordinario del ${year}</legend>
+ <input type="hidden" name="year" value="${year}"/>
 	<input type="hidden" name="month" value="${month}"/>
-    <h3 id="monteOreStraordinario">Modifica del monte ore di straordinario del ${year}</h3>
-    <table>
+    #{if totalList.size()!=0}
+      <table class="table table-condensed table-striped table-small">
 	    <tr>
-	    	<th>Quando</th>
-	    	<th>Ore definite</th>
+	      <th>Quando</th>
+	      <th>Ore definite</th>
 	    </tr>
-	    %{for(tot in total){
-	    }%
+		#{list items:totalList, as:'tot'}
 	    <tr>
-	    	<td>${tot.date}</td>
-	    	<td>${tot.numberOfHours}</td>
+	      <td>${tot.date}</td>
+	      <td>${tot.numberOfHours}</td>
 	    </tr>
-	    	%{
-	    	}
-	    	}%	
-    </table>
-    <p>Totale monte ore definite: %{int totale = 0;
-    								for(tot in total) {
-    								    totale = totale+tot.numberOfHours;
-    								    }
-    							   }% <b>${totale}</b>
+	    #{/list}
+      </table>
+	#{/if}
+	    
+
+		
+	    
+	    	
+    <p>Totale monte ore definite:<b>${totale}</b>
     </p>
     
     <p id="inserimentoMonteOre">Inserire un incremento (segno +) o una diminuizione (segno -) rispetto al totale già disponibile prima del numero di ore da inserire</p>
@@ -38,6 +41,8 @@
     <input type="text" name="numeroOre" value="${}"/>
     
     <input id="" type="submit" value="Salva" />
-    #{/form}
+    
+</fieldset>
+   #{/form}
     
     

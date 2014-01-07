@@ -1,26 +1,27 @@
-#{extends 'main_admin.html' /}
+#{extends 'main_admin_no_menu.html' /}
+#{set titolo: 'Modifica dati per la persona ' + person.name + ' ' + person.surname /}
+<ul class="nav nav-tabs">
+  <li><a href="@{Persons.edit(person.id)}#">Dati Anagrafici ${person.name} ${person.surname}</a></li>
+  <li  class="active"><a href="@{Persons.personCompetence(person.id, month, year)}#">Competenze &{'views.tags.display.date.month.' + month} ${year} - ${person.name} ${person.surname}</a></li>
 
-#{functionalMenuForm mainMenu: mainMenu /}
+</ul>
 
-    <ul class="nav nav-tabs">
-    	<li><a href="@{Persons.edit(person.id)}#">Anagrafica</a></li>
-    	<li class="active"><a href="@{Persons.personCompetence(person.id, month, year)}#">Competenze</a></li>
-    </ul>
 
-<h2>Situazione competenze per ${person.name} ${person.surname} nel mese di <span class="capitalized">&{'views.tags.display.date.month.' + mese}</span></h2>
 
-#{form @Persons.saveCompetence()}
-<fieldset>
-	<legend>Informazioni su straordinari e reperibilità</legend>
-	<p>Fra parentesi nella cella relativa agli straordinari diurni, il numero di ore disponibili nel mese da poter essere utilizzate per gli
-	straordinari</p>
-	<p>Nel caso si volessero modificare i valori degli straordinari del mese precedente, clicca qui ---> <a href="@{Competences.updateOldOvertime(person.id)}" class="popup_window_mini">Modifica gli straordinari per il mese precedente</a></p>
+
+  <fieldset>
+    
+	<legend>Straordinari e reperibilità nel mese di <span class="capitalized">&{'views.tags.display.date.month.' + mese}</span></legend>
 	
-	<input type="hidden" name="personId" value="${person.id}"/>
-	<input type="hidden" name="year" value="${year}"/>
-	<input type="hidden" name="month" value="${month}"/>
-	<input type="hidden" name="progressive" value="${progressive}"/>
-	<table id="competenze">
+	<p>Fra parentesi nella cella relativa agli straordinari diurni, il numero di ore disponibili nel mese da poter essere utilizzate per gli straordinari</p>
+
+	<div class="forminline">
+	#{form @Persons.saveCompetence() }
+	  <input type="hidden" name="personId" value="${person.id}"/>
+	  <input type="hidden" name="year" value="${year}"/>
+	  <input type="hidden" name="month" value="${month}"/>
+	  <input type="hidden" name="progressive" value="${progressive}"/>
+	  <table class="table table-display-contract">
 		<tr>
 			
 			<th class="competenze">Ind.tà rep.tà feriale (207)</th>
@@ -32,12 +33,18 @@
 
 			<td class="comp"><br><input type="number" name="weekDayAvailability" value="${weekDayAvailability}" size="4" maxlength="4"/></td>
 			<td class="comp"><br><input type="number" name="holidaysAvailability" value="${holidaysAvailability}"size="4" maxlength="4"/></td>
-			<td class="comp">(${progressive})<input type="number" name="daylightWorkingDaysOvertime" value="${daylightWorkingDaysOvertime}"size="4" maxlength="4"/></td>
+			<td class="comp"><br>(${progressive})<input type="number" name="daylightWorkingDaysOvertime" value="${daylightWorkingDaysOvertime}"size="4" maxlength="4"/></td>
 			
 		</tr>
 		
-	</table>
-	
-	<input class="btn btn-primary" id="submitEditPerson" type="submit" value="Ok">
-</fieldset> 
-#{/form}
+	  </table>
+	  <div class="buttoncenter">
+	    <input class="btn btn-primary" id="submitEditPerson" type="submit" value="Ok">
+	  </div>
+	#{/form}
+	</div>
+	<br>
+	<p>Nel caso si volessero modificare i valori degli straordinari del mese precedente, clicca qui ---> <a href="@{Competences.updateOldOvertime(person.id)}" class="popup_window_mini">Modifica gli straordinari per il mese precedente</a></p>
+  
+  </fieldset> 
+

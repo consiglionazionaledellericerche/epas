@@ -111,7 +111,7 @@ public class WorkingTimes extends Controller{
 								
 			}
 			flash.success(String.format("Inserito nuovo orario di lavoro denominato %s '", nameWorkingTime + "'"));
-			Application.indexAdmin();
+			WorkingTimes.manageWorkingTime();
 		}
 		else{
 			
@@ -327,7 +327,7 @@ public class WorkingTimes extends Controller{
 		wtt.save();
 		
 		flash.success("Aggiornato orario di lavoro con nuovo nome %s '", description + "'");
-		Application.indexAdmin();
+		WorkingTimes.manageWorkingTime();
 		
 	}
 	

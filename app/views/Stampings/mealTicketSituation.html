@@ -1,9 +1,9 @@
-#{extends 'main_admin.html' /}
-
+#{extends 'main_admin_no_menu.html' /}
+#{set titolo: 'Riepilogo buoni mensa di ' + month_capitalized + ' ' + year/}
+<br>
 <div class="container">
-<h2 id="titoloRiepilogoBuoniMensa">Riepilogo buoni mensa di <span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year}</h2>
 <div class="span10">
-<table class="table table-bordered" id="tabellaRiepilogoBuoniMensa">
+<table class="table table-hover custom2">
 	<tr>
 		<th rowspan="2">Nome</th>
 		<th colspan="${numberOfDays}">Giorni</th>
@@ -17,7 +17,7 @@
 	%{  for(entry in tablePersonTicket.rowMap().entrySet()){
 		}%
 	<tr>
-		<td class="nomeCognome">${entry.getKey().surname} ${entry.getKey().name}</td>
+		<td class="caratteristica">${entry.getKey().surname} ${entry.getKey().name}</td>
 		%{ for(col in tablePersonTicket.columnKeySet()){
 		}%
 			<td><abbr title="${col}" class="initialism">${entry.getValue().get(col)}</abbr></td>
