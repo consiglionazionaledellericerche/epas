@@ -36,6 +36,7 @@ import lombok.ToString;
 import models.Stamping.WayType;
 import models.exports.ReperibilityPeriods;
 import models.exports.StampingFromClient;
+import models.personalMonthSituation.Mese;
 import models.rendering.VacationsRecap;
 import net.spy.memcached.FailureMode;
 
@@ -1059,6 +1060,17 @@ public class Person extends Model {
 				date, date, this).first();
 				
 		return wtt;
+	}
+	
+	/**
+	 * 
+	 * @param year
+	 * @param month
+	 * @return le ore di residuo positivo fatte nel mese/anno da this. Metodo usato nel template showCompetences
+	 */
+	public Integer getPositiveResidualInMonth(int year, int month){
+		
+		return Mese.positiveResidualInMonth(this, year, month)/60; 
 	}
 
 }

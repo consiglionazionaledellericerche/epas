@@ -33,11 +33,15 @@
 	    #{list items:competenceCodes, as:'code'}
 	     <td>
 	     #{if person.competenceCode.contains(code)}
+	     	#{if code.code.equals('S1')}
+	     	(${person.getPositiveResidualInMonth(year,month)})
+	     #{/if}
 	     <a data-x-editable href="#" data-type="number" data-pk="${person.competence(code,year,month).id}" data-name="value"
 	     	data-url="@{updateCompetence()}" 
 	     	data-title="Modifica ${code.description} per ${person.name} ${person.surname}">${person.competence(code,year,month).valueApproved}</a>
 	     </td>
 	     #{/if}
+	     
 	     #{else}
 	      <input class="span1" type="number" disabled="disabled"/>
 	      <abbr title="La competenza ${code.code}-${code.description} non è attiva per l'utente ${person.name} ${person.surname}" class="initialism">.</abbr>
