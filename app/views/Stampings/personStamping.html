@@ -37,7 +37,7 @@
 		#{/else}
 		
 		<td class="assenza">
-		  <a data-toggle="modal" data-backdrop="false" href="@{Absences.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" data-target="#myModal1">___</a>
+		  <a data-toggle="modal" data-backdrop="true" href="@{Absences.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" data-target="#myModal1">___</a>
 		  #{list items:dayRecap.absences, as:'absence'}
 		    <a data-toggle="modal" href="@{Absences.edit(absence.id)}" data-target="#myModal1">
 			  ${absence.absenceType.code}
@@ -78,7 +78,7 @@
 		  </td>
 	    #{/list}
 	    <td class="inserisciTimbratura">
-		    <a data-toggle="modal" data-backdrop="false" href="@{Stampings.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" data-target="#myModal2">
+		    <a data-toggle="modal" data-backdrop="true" href="@{Stampings.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" data-target="#myModal2">
 		      +++
 		    </a>
 		</td>
