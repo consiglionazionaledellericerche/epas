@@ -1209,7 +1209,7 @@ public class PersonDay extends Model {
 			 LocalDateTime out = validPair.out.date;
 			 if(outForLunch==null)
 			 {
-				 if( (out.isAfter(startLunch) && out.isBefore(endLunch)) )
+				 if( (out.isEqual(startLunch) || out.isAfter(startLunch)) && (out.isEqual(endLunch) || out.isBefore(endLunch)) )
 				 {
 					 outForLunch = validPair.out;
 				 }
@@ -1218,7 +1218,7 @@ public class PersonDay extends Model {
 			 {
 				 gapPairs.add( new PairStamping(outForLunch, validPair.in) );
 				 outForLunch = null;
-				 if( (out.isAfter(startLunch) && out.isBefore(endLunch)) )
+				 if( (out.isEqual(startLunch) || out.isAfter(startLunch)) && (out.isEqual(endLunch) || out.isBefore(endLunch)) )
 				 {
 					 outForLunch = validPair.out;
 				 }
