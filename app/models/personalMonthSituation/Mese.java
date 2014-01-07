@@ -45,6 +45,14 @@ public class Mese {
 	public int monteOreAnnoCorrente;
 	public int numeroRiposiCompensativi;
 	
+	
+	public Mese(int anno, int mese, Person person){
+		this.anno = anno;
+		this.mese = mese;
+		this.person = person;
+		this.setPersonDayInformation(new LocalDate());
+	}
+	
 	public Mese(Mese mesePrecedente, int anno, int mese, Person person, int tempoInizializzazione, boolean febmar, LocalDate calcolaFinoA)
 	{
 		
@@ -307,7 +315,17 @@ public class Mese {
 	
 	}
 	
-	
+	/**
+	 * 
+	 * @param person
+	 * @param year
+	 * @param month
+	 * @return il valore di quanti minuti positivi sono stati fatti da quella persona in quel mese/anno
+	 */
+	public static Integer positiveResidualInMonth(Person person, int year, int month){
+		Mese mese = new Mese(year, month, person);
+		return mese.progressivoFinalePositivoMese;
+	}
 	
 }
 

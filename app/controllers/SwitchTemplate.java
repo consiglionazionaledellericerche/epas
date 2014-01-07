@@ -23,6 +23,14 @@ public class SwitchTemplate extends Controller{
 		session.put("dispatched", "true");
 		
 		String method = params.get("method");
+		if (method == null)
+		{
+			flash.error(String.format("La action da eseguire è: %s", method));
+			Application.indexAdmin();
+		}
+
+		
+		
 		session.put("methodSelected", method);
 		ActionMenuItem menuItem = ActionMenuItem.valueOf(method);
 	
