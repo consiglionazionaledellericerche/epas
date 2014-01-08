@@ -366,17 +366,17 @@ public class Person extends Model {
 	}
 	
 	/**
-	 * La lista dei contratti in essere per la persona in month
+	 * True se la persona ha almeno un contratto attivo in month
 	 * @param month
 	 * @param year
 	 * @return
 	 */
-	public List<Contract> getMonthContracts(Integer month, Integer year)
+	public boolean hasMonthContracts(Integer month, Integer year)
 	{
 		List<Contract> monthContracts = new ArrayList<Contract>();
 		List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ?",this).fetch();
 		if(contractList == null){
-			return null;
+			return false;
 		}
 		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
 		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
@@ -392,9 +392,24 @@ public class Person extends Model {
 			}
 		}
 		if(monthContracts.size()==0)
-			return null;
+			return false;
 		
-		return monthContracts;
+		return true;
+	}
+	
+	/**
+	 * True se la persona ha almeno un contratto attivo in year
+	 * @param year
+	 * @return
+	 */
+	public boolean hasYearContracts(Integer year)
+	{
+		for(int month=1; month<=12; month++)
+		{
+			if(this.hasMonthContracts(month, year))
+				return true;
+		}
+		return false;
 	}
 	
 	
@@ -557,11 +572,17 @@ public class Person extends Model {
 	public boolean isActiveInMonth(int month, int year)
 	{
 		
-		List<Contract> monthContracts = this.getMonthContracts(month, year);
-		if(monthContracts!=null)				
-			return true;
-		else
-			return false;
+		return this.hasMonthContracts(month, year);
+	}
+	
+	/**
+	 * true se la persona ha almeno un giorno lavorativo coperto da contratto in year
+	 * @param year
+	 * @return
+	 */
+	public boolean isActiveInYear(int year)
+	{
+		return this.hasYearContracts(year);
 	}
 	
 	/**
