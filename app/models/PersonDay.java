@@ -280,12 +280,14 @@ public class PersonDay extends Model {
 		//in caso di assenza di timbrature considero il justifiedTimeAtwork
 		if (stampings.size() == 0) 
 		{
+			this.isTicketAvailable = false;
 			return justifiedTimeAtWork;
 		}
 		
 		//Se non c'è almeno una coppia di timbrature allora il tempo di lavoro è giustificato solo dalle assenze precendente calcolate
 		if(stampings.size() == 1)
 		{
+			this.isTicketAvailable = false;
 			return justifiedTimeAtWork;
 		}
 
@@ -428,6 +430,7 @@ public class PersonDay extends Model {
 	 */
 	private void updateProgressive()
 	{
+
 		//primo giorno del mese
 		if(previousPersonDayInMonth==null)
 		{
@@ -456,7 +459,7 @@ public class PersonDay extends Model {
 		LocalDate beginMonth = this.date.dayOfMonth().withMinimumValue();
 		LocalDate endMonth = this.date.dayOfMonth().withMaximumValue();
 		
-		List<PersonDay> pdList = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? and pd.date >= ? and pd.date < ? ORDER by pd.date",
+		List<PersonDay> pdList = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? and pd.date >= ? and pd.date <= ? ORDER by pd.date",
 				person, beginMonth, endMonth).fetch();
 		for(int i=1; i<pdList.size(); i++)
 		{
@@ -557,6 +560,7 @@ public class PersonDay extends Model {
 		updateProgressive();	
 		updateTicketAvailable();
 		
+		//this.merge();
 		this.save();
 		
 	}
