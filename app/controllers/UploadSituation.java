@@ -43,6 +43,7 @@ import org.jsoup.select.Elements;
 
 import play.Logger;
 import play.mvc.Controller;
+import play.mvc.With;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
@@ -61,12 +62,11 @@ import com.google.common.collect.Sets;
  * @author cristian
  *
  */
+@With( {Secure.class, NavigationMenu.class} )
 public class UploadSituation extends Controller{
 
 	@Check(Security.UPLOAD_SITUATION)
 	public static void show(final Integer month, final Integer year){
-		
-		NavigationMenu.injectMenu();
 		
 		render();
 		/*
