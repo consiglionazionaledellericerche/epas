@@ -3,6 +3,12 @@ package controllers;
 import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.PersonUtility;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -652,5 +658,38 @@ public class Competences extends Controller{
 		Competences.recapCompetences();
 
 	}
+	
+	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	public static void exportCompetences(){
+		render();
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	public static void getOvertimeInYear(int year) throws IOException{
+		
+		List<Person> personList = Person.getActivePersonsinYear(year, true);
+		FileInputStream inputStream = null;
+		File tempFile = File.createTempFile("straordinari"+year,".csv" );
+		inputStream = new FileInputStream( tempFile );
+		FileWriter writer = new FileWriter(tempFile, true);
+		BufferedWriter out = new BufferedWriter(writer);
+		out.write("Cognome Nome,Totale straordinari"+' '+year);
+		out.newLine();
+		for(Person p : personList){
+			Long totale = Competence.find("Select sum(comp.valueApproved) from Competence comp, CompetenceCode code " +
+					"where comp.person = ?" +
+					"and comp.year = ? " +
+					"and comp.competenceCode = code " +
+					"and code.code = ? ", p, year, "S1").first();			
+			Logger.debug("Totale per %s %s vale %d", p.name, p.surname, totale);
+			out.write(p.surname+' '+p.name+',');
+						
+			out.append(totale.toString());
+			out.newLine();
+		}
+		out.close();
+		renderBinary(inputStream, "straordinari"+year+".csv");
+	}
+	
 
 }
