@@ -4,6 +4,7 @@ import it.cnr.iit.epas.ExportToYaml;
 import it.cnr.iit.epas.FromMysqlToPostgres;
 import it.cnr.iit.epas.PersonUtility;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -121,6 +122,13 @@ public class Administration extends Controller {
 	public static void fixPersonSituation(Long personId, int year, int month){
 		
 		PersonUtility.fixPersonSituation(personId, year, month);
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	public static void createOvertimeFile(int year) throws IOException{
+		Logger.debug("Chiamo overtime in year...");
+		Competences.getOvertimeInYear(year);
+		
 	}
 	
 	

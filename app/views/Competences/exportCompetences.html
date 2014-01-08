@@ -1,0 +1,18 @@
+#{extends 'main_admin_no_menu.html' /}
+#{set titolo: 'Gestione straordinari e altre competenze' /}
+
+<ul class="nav nav-tabs">
+  <li ><a href="@{Competences.showCompetences(year, month)}#">Competenze</a></li>
+  <li><a href="@{Competences.overtime(year, month)}#">Straordinari</a></li>
+  <li><a href="@{Competences.totalOvertimeHours(year, month)}#">Monte ore</a></li>
+  <li><a href="@{Competences.recapCompetences()}#">Recap competenze</a></li>
+  <li class="active"><a href="@{Competences.exportCompetences()}#">Esporta competenze</a></li>
+</ul>
+
+<p class="lead">Esporta in formato .csv la situazione annuale degli straordinari</p>
+#{form @Competences.getOvertimeInYear()}
+<br><br>
+<br>
+Anno per straordinari <input class="span1" type="number" name="year"/>
+<br><br><input class="btn btn-primary" type="submit" value="Calcola straordinari"/>
+#{/form}
