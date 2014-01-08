@@ -611,7 +611,28 @@ public class Person extends Model {
 		return activePersons;
 	}
 	
-	
+	/**
+	 * 
+	 * @param year, onlyTechnician
+	 * @return le persone attive in un anno se il booleano è true ritorna solo la lista dei tecnici (per competenze)
+	 */
+	public static List<Person> getActivePersonsinYear(int year, boolean onlyTechnician){
+		List<Person> persons = Person.find("SELECT p FROM Person p ORDER BY p.surname, p.othersSurnames, p.name").fetch();
+		List<Person> activePersons = new ArrayList<Person>();
+		for(Person person : persons){
+			if(person.isActiveInYear(year)){
+				if(person.username.equals("epas.clocks"))
+					continue;
+				if(onlyTechnician){
+					if(person.qualification.qualification > 3)
+						activePersons.add(person);
+				}
+				else
+					activePersons.add(person);
+			}
+		}
+		return activePersons;
+	}
 	
 	/**
 	 * 

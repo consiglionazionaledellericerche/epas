@@ -4,7 +4,7 @@
 #{form @Administration.fixPersonSituation()}
 
 
-<div id="frm">
+
 	#{select 'personId', value:pdList.get(0), id:'person'}
 	
 		#{option -1}Tutti#{/option}
@@ -21,4 +21,8 @@
 	<br><input id="submitCartellino" type="submit" value="Invio"/>
 	<input id = "indietroCartellino" action="action" type="button" value="Indietro" onclick="history.go(-1);" />
 #{/form}
-</div>
+#{form @Administration.createOvertimeFile()}
+<br><br>
+<br><input type="number" name="year"/>Anno per straordinari
+<input id="submitCartellino" type="submit" value="Calcola straordinari"/>
+#{/form}
