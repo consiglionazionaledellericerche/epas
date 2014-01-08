@@ -19,6 +19,7 @@ GET		/competences/prova						Competences.prova
 
 GET		/utilities								Administration.utilities
 POST	/utilities/{personId}/{year}/{month}	Administration.fixPersonSituation
+POST	/utilities/{year}						Administration.createOvertimeFile
 
 #Assenze
 #GET		/absences/{year}/{month}		Absences.absences
@@ -152,6 +153,8 @@ POST	/totalOvertimeHours/					Competences.saveOvertime
 GET		/overtime/{year}/{month}				Competences.overtime
 GET		/recapCompetences						Competences.recapCompetences
 GET		/recapCompetences/updatePersonCompetence/{personId}		Competences.updatePersonCompetence
+GET		/exportCompetences						Competences.exportCompetences
+POST	/exportCompetences/{year}				Competences.getOvertimeInYear
 
 #Gestione attestati di presenza
 GET		/uploadSituation/						UploadSituation.show
