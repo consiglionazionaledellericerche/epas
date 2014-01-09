@@ -1,10 +1,13 @@
-#{extends 'main.html' /}
-#{functionalMenuForm mainMenu: mainMenu /}
-<h3>Assegna un nuovo orario di lavoro a ${person.name} ${person.surname}</h3>
+#{extends 'main_admin_no_menu.html' /}
+#{set titolo: 'Assegna un nuovo orario di lavoro' /}
+
+
 #{form @Persons.updateWorkingTime()}
 <input type="hidden" name="personId" value="${person.id}" />
 
-<p>Data inizio nuovo orario: <input type="date" name="dataInizio" class="span2"/></p>
+<p><strong>Data inizio nuovo orario:</strong> <input type="date" name="dataInizio" class="span2"/></p>
+
+<p>(La data inizio del nuovo orario di lavoro è obbligatoria, deve essere valorizzata)</p>
 <br>
 <table>
 	<tr>
@@ -78,10 +81,11 @@
 		}
 	}%
 </table>
-<div id="frm">
+<br>
+<div class="forminline">
 <input id="submitEditPerson"type="submit" class="btn btn-primary" value="Ok" />
 #{/form}
 #{form @Persons.discard()}
 <input id="discardEditPerson" type="submit" class="btn" value="Annulla" />
 #{/form}
-</div> 
+</div>
