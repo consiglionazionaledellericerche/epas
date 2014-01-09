@@ -265,7 +265,10 @@ public class Persons extends Controller {
 		}
 		Long personId = params.get("personId", Long.class);
 		Person person = Person.findById(personId);
-		
+		if(params.get("dataInizio").equals("") || params.get("dataInizio") == null){
+			flash.error("Il campo data inizio deve essere valorizzato con la data da cui parte il nuovo orario di lavoro per %s %s", person.name, person.surname);
+			Persons.changeWorkingTime(personId);
+		}
 		Date date = new LocalDate(params.get("dataInizio")).toDate();
 		LocalDate dataInizio = new LocalDate(date);
 //		person.workingTimeType = null;

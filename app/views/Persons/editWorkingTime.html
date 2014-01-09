@@ -1,8 +1,9 @@
-#{extends 'main.html' /}
-#{functionalMenuForm mainMenu: mainMenu /}
-<h3>Orario di lavoro per ${person.name} ${person.surname}</h3>
+#{extends 'main_admin_no_menu.html' /}
+#{set titolo: 'Cambia orario di lavoro' /}
+<fieldset>
+<legend>Orario di lavoro per ${person.name} ${person.surname}</legend>
 <input type="hidden" name="personId" value="${person.id}" />
-<p><a href="@{changeWorkingTime(person.id)}">Cambia orario di lavoro</a></p>
+<p class="lead"><a href="@{changeWorkingTime(person.id)}">Cambia orario di lavoro</a></p>
 <table>
 	<tr>
 		<th>Nome</th>
@@ -87,3 +88,5 @@
 			%{ } }%
 		</tr>	
 </table>
+
+</fieldset>
