@@ -167,6 +167,14 @@ public class PersonDay extends Model {
 	}
 	
 	/**
+	 * Controlla che il personDay cada nel giorno attuale
+	 * @return
+	 */
+	public boolean isToday(){
+		return this.date.isEqual(new LocalDate());
+	}
+	
+	/**
 	 * @return true se nel giorno vi e' una assenza giornaliera
 	 */
 	public boolean isAllDayAbsences()
@@ -247,13 +255,12 @@ public class PersonDay extends Model {
 	
 	/**
 	 * Algoritmo definitivo per il calcolo dei minuti lavorati nel person day.
-	 * Ritorna i minuti di lavoro per la persona nel person day. 
+	 * Ritorna i minuti di lavoro per la persona nel person day ed in base ad essi assegna il campo isTicketAvailable.
 	 * 
-	 * @return
+	 * @return il numero di minuti trascorsi a lavoro
 	 */
 	public int getCalculatedTimeAtWork() {
 		int justifiedTimeAtWork = 0;
-		int workTime=0;
 		
 		//Se hanno il tempo di lavoro fissato non calcolo niente
 		if (this.isFixedTimeAtWork()) 
@@ -267,64 +274,58 @@ public class PersonDay extends Model {
 		for(Absence abs : absences){
 			if(abs.absenceType.ignoreStamping || (abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay && !checkHourlyAbsenceCodeSameGroup(abs.absenceType)))
 			{
+				this.isTicketAvailable = false;
 				return 0;
 			}
 			
 			if(!abs.absenceType.code.equals("89") && abs.absenceType.justifiedTimeAtWork.minutesJustified != null)
 			{
+				//TODO CASO STRANO qua il buono mensa non si capisce se ci deve essere o no
 				justifiedTimeAtWork = justifiedTimeAtWork + abs.absenceType.justifiedTimeAtWork.minutesJustified;
 				continue;
 			}
 		}
 
-		//in caso di assenza di timbrature considero il justifiedTimeAtwork
-		if (stampings.size() == 0) 
+		//se non c'è almeno una coppia di timbrature considero il justifiedTimeAtwork 
+		//(che però non contribuisce all'attribuzione del buono mensa che quindi è certamente non assegnato)
+		if (stampings.size() < 2) 
 		{
 			this.isTicketAvailable = false;
 			return justifiedTimeAtWork;
 		}
 		
-		//Se non c'è almeno una coppia di timbrature allora il tempo di lavoro è giustificato solo dalle assenze precendente calcolate
-		if(stampings.size() == 1)
-		{
-			this.isTicketAvailable = false;
-			return justifiedTimeAtWork;
-		}
-
+		//TODO se è festa si dovrà capire se il tempo di lavoro deve essere assegnato oppure no 
 		if(this.isHoliday()){
-			workTime = 0;
-			
 			orderStampings();
 			
 			List<PairStamping> validPairs = PairStamping.getValidPairStamping(this.stampings);
-		
-			int myWorkTime=0;
+			
+			int holidayWorkTime=0;
 			{
 				for(PairStamping validPair : validPairs)
 				{
-					myWorkTime = myWorkTime - toMinute(validPair.in.date);
-					myWorkTime = myWorkTime + toMinute(validPair.out.date);
+					holidayWorkTime = holidayWorkTime - toMinute(validPair.in.date);
+					holidayWorkTime = holidayWorkTime + toMinute(validPair.out.date);
 				}
 			}
 			
-			return justifiedTimeAtWork + myWorkTime;
+			this.isTicketAvailable = false;
+			return justifiedTimeAtWork + holidayWorkTime;
 		}
 
 			
 		orderStampings();
 		List<PairStamping> validPairs = PairStamping.getValidPairStamping(this.stampings);
 	
-		int myWorkTime=0;
+		int workTime=0;
 		{
 			for(PairStamping validPair : validPairs)
 			{
-				myWorkTime = myWorkTime - toMinute(validPair.in.date);
-				myWorkTime = myWorkTime + toMinute(validPair.out.date);
+				workTime = workTime - toMinute(validPair.in.date);
+				workTime = workTime + toMinute(validPair.out.date);
 			}
 		}
 	
-		workTime = myWorkTime;
-		//workTime = workTime;
 		//Il pranzo e' servito??		
 		this.modificationType = null;
 		int breakTicketTime = getWorkingTimeTypeDay().breakTicketTime;	//30 minuti
@@ -337,7 +338,7 @@ public class PersonDay extends Model {
 		
 		List<PairStamping> gapLunchPairs = getGapLunchPairs(validPairs);
 		
-		//ha timbrato per il pranzo 
+		//ha timbrato per il pranzo ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		if(gapLunchPairs.size()>0)
 		{
 			int minTimeForLunch = 0;
@@ -348,40 +349,49 @@ public class PersonDay extends Model {
 				minTimeForLunch = minTimeForLunch + toMinute(gapLunchPair.out.date);
 				break;
 			}
+			
+			//gap e worktime sufficienti
+			if(minTimeForLunch >= breakTicketTime && workTime >= mealTicketTime)
+			{
+				this.isTicketAvailable = true;
+				return workTime + justifiedTimeAtWork;
+			}
+			
+			//worktime sufficiente gap insufficiente (e)
 			if(workTime - breakTicketTime >= mealTicketTime)
 			{
-				if( minTimeForLunch < breakTicketTime ) 
+				if( minTimeForLunch < breakTicketTime ) //dovrebbe essere certamente true
 				{
 					workTime = workTime - (breakTicketTime - minTimeForLunch);
 					StampModificationType smt = StampModificationType.getStampModificationTypeByCode(StampModificationTypeCode.FOR_MIN_LUNCH_TIME.getCode());
 					this.modificationType = smt.code;
 				}
 				this.isTicketAvailable = true;
+				return workTime + justifiedTimeAtWork;
 			}
-			else
-			{
-				this.isTicketAvailable = false;
-			}
+			
+			//worktime insufficiente
+			this.isTicketAvailable = false;
+			return workTime + justifiedTimeAtWork;
+			
+		}
+		
+		//non ha timbrato per il pranzo //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		if( workTime > mealTicketTime && workTime - breakTicketTime >= mealTicketTime )
+		{
+			//worktime sufficiente (p)
+			workTime = workTime - breakTicketTime;
+			this.isTicketAvailable = true;
+			StampModificationType smt = StampModificationType.getStampModificationTypeByCode(StampModificationTypeCode.FOR_DAILY_LUNCH_TIME.getCode());
+			this.modificationType = smt.code;
+			return workTime + justifiedTimeAtWork;
 		}
 		else
 		{
-			//this.isTicketAvailable = false;
-			if( workTime > mealTicketTime && workTime - breakTicketTime >= mealTicketTime )
-			{
-				workTime = workTime - breakTicketTime;
-				this.isTicketAvailable = true;
-				StampModificationType smt = StampModificationType.getStampModificationTypeByCode(StampModificationTypeCode.FOR_DAILY_LUNCH_TIME.getCode());
-				this.modificationType = smt.code;
-			}
-			else
-			{
-				this.isTicketAvailable = false;
-			}
+			//worktime insufficiente
+			this.isTicketAvailable = false;
+			return workTime + justifiedTimeAtWork;
 		}
-
-		return workTime + justifiedTimeAtWork;
-
-
 	}
 	
 	/**

@@ -959,9 +959,9 @@ public class PersonUtility {
 				person, beginMonth, endMonth, false).fetch();
 		int ticketTorender = pdListNoTicket.size();
 		
-		//tolgo da ticket da restituire i giorni festivi
+		//tolgo da ticket da restituire i giorni festivi e oggi
 		for(PersonDay pd : pdListNoTicket)
-			if(pd.isHoliday())
+			if(pd.isHoliday() || pd.isToday())
 				ticketTorender--;
 		
 		return ticketTorender;

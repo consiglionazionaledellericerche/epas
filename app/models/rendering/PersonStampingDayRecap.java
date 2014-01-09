@@ -67,9 +67,9 @@ public class PersonStampingDayRecap {
 		this.person = pd.person;
 		setDate(pd.date); 
 		this.absences = pd.absences;
-		//List<PairStamping> pairStamping = PairStamping.getValidPairStamping(pd.stampings);
+		
 		List<Stamping> stampingsForTemplate = pd.getStampingsForTemplate(numberOfInOut, today);
-		//List<PairStamping> pairStamping = PairStamping.getValidPairStamping(stampingsForTemplate);
+
 		this.setStampingTemplate( stampingsForTemplate, pd );
 		
 		
@@ -155,8 +155,14 @@ public class PersonStampingDayRecap {
 		}
 
 		//----------------------------------------------- meal ticket (NO)--------------------------------------------------------------
-		if(!this.holiday)
+		if(this.today && !pd.isAllDayAbsences())
+			this.setMealTicket(true);
+		else if(this.today && pd.isAllDayAbsences())
+			this.setMealTicket(false);
+		
+		else if(!this.holiday)
 			this.setMealTicket(pd.isTicketAvailable);	
+	
 		else
 			this.setMealTicket(true);
 
@@ -170,7 +176,7 @@ public class PersonStampingDayRecap {
 			addStampModificationTypeToList(smtlunch);
 		}
 		//----------------------------------------------- uscita adesso f ---------------------------------------------------------------
-		if(!this.holiday && !pd.isAllDayAbsences() && this.today) 
+		if(this.today && !this.holiday && !pd.isAllDayAbsences()) 
 		{
 			StampModificationType smt = StampModificationType.findById(StampModificationTypeValue.ACTUAL_TIME_AT_WORK.getId());
 			this.exitingNowCode = smt.code;
