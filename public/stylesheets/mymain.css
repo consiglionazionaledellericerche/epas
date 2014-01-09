@@ -22,36 +22,36 @@ table#tabellonetimbrature td{
 }
 table#tabellonetimbrature td.positionleft{
 	border-radius: 10px 0px 0px 10px;
-	border-color: black;
+	border-color: #bbb;
 	border-right-style: none;
 	background-color: rgba(205, 245, 255, 0.48);
 }
 table#tabellonetimbrature td.positionright{
 	border-radius: 0px 10px 10px 0px;
-	border-color: black;
+	border-color: #bbb;
 	border-left-style: none;
 	background-color: rgba(205, 245, 255, 0.48);
 }
 table#tabellonetimbrature td.positioncenter{
 	border-left-style: none;
 	border-right-style: none;	
-	border-color: black;
+	border-color: #bbb;
 	background-color: rgba(205, 245, 255, 0.48);
 }
 table#tabellonetimbrature td.positioncenter.warn{
 	border-left-style: none;
 	border-right-style: none;	
-	border-color: black;
+	border-color: #bbb;
 	background-color: rgba(205, 245, 255, 0.48);
 }
 table#tabellonetimbrature td.positionnone.warn{
 	border-radius: 10px 10px 10px 10px;
-	border-color: black;
+	border-color: #bbb;
 	background-color: yellow;
 }
-table#tabellonetimbrature td.festivi {background-color: #F88017;}
-table#tabellonetimbrature td.assenza {background-color: #FFFF99;}
-table#tabellonetimbrature td.progressivo {background-color: #FFFF99;}
+table#tabellonetimbrature td.festivi {background-color: #fac08d;}
+table#tabellonetimbrature td.assenza {background-color: #ffffcf;}
+table#tabellonetimbrature td.progressivo {background-color: #ffffcf;}
 table#tabellonetimbrature td.capitalized {text-transform: capitalize;}
 
 /* modali */
@@ -133,3 +133,159 @@ fError, .fSuccess {text-align: center; }
 .fSuccess {color: #0c0;}
 
 
+
+
+/*
+table#tabellonetimbrature th, table#tabellonetimbrature td {
+	padding: 2px;
+	line-height: 14px;
+}
+*/
+table#tabellonetimbrature th:first-child {
+	max-width: 3em;
+}
+
+table#tabellonetimbrature th:nth-child(3) {
+  max-width: 4em;
+}
+
+table#tabellonetimbrature th:nth-child(1),
+table#tabellonetimbrature th:nth-child(2),
+table#tabellonetimbrature th:nth-child(3),
+table#tabellonetimbrature th:nth-child(4),
+table#tabellonetimbrature th:nth-child(5),
+table#tabellonetimbrature th:nth-child(6),
+table#tabellonetimbrature th:nth-child(7),
+table#tabellonetimbrature th:nth-child(8),
+table#tabellonetimbrature th:nth-child(9) {
+  max-width: 4em;
+	min-width: 4em;
+  text-align: center;
+}
+
+table#tabellonetimbrature td:nth-child(1),
+table#tabellonetimbrature td:nth-child(2),
+table#tabellonetimbrature td:nth-child(3),
+table#tabellonetimbrature td:nth-child(4),
+table#tabellonetimbrature td:nth-child(5),
+table#tabellonetimbrature td:nth-child(11),
+table#tabellonetimbrature td:nth-child(12),
+table#tabellonetimbrature td:nth-child(13)  {
+  text-align: center;
+}
+
+table#tabellonetimbrature th:nth-child(10),
+table#tabellonetimbrature th:nth-child(11),
+table#tabellonetimbrature th:nth-child(12),
+table#tabellonetimbrature th:nth-child(13) {
+  max-width: 5em;
+	min-width: 4em;
+  text-wrap: nowrap;
+  word-wrap: break-word; /* Crome */
+  text-align: center;
+}
+
+h3#titoloSituazionePresenzeMensili {
+  margin-top: -3.2em;
+  margin-bottom: 1.5em;
+  text-align: right;
+	font-size: 18px;
+}
+
+/**
+ * Css per background colonne tabella #tabellonetimbrature 
+ */
+td.ingresso, td:nth-child(1), td:nth-child(10) {
+	background-color: #f8f8f8;
+}
+
+td.uscita {
+	background-color: #fff;
+}
+
+td.assenza, td.progressivo {
+	background-color: #ffffcf;
+}
+td.festivi {
+	background-color: #fac08d;
+}
+/**
+ * Css per bordatura colonne tabella #tabellonetimbrature 
+ */
+
+table#tabellonetimbrature {
+	border-right: 0;
+	border-top: 0;
+	border-spacing: 1px 1px;
+}
+
+table#tabellonetimbrature th,
+table#tabellonetimbrature td {
+  border: 1px solid #bbb;
+}
+
+table#tabellonetimbrature th:nth-child(1),
+table#tabellonetimbrature td:nth-child(1),
+table#tabellonetimbrature th:nth-child(4),
+table#tabellonetimbrature td:nth-child(4),
+table#tabellonetimbrature th:nth-child(6),
+table#tabellonetimbrature td:nth-child(6),
+table#tabellonetimbrature th:nth-child(8),
+table#tabellonetimbrature td:nth-child(8),
+table#tabellonetimbrature th:nth-child(10),
+table#tabellonetimbrature td:nth-child(10) {
+	border-radius: 5px 0 0 5px;
+}
+
+table#tabellonetimbrature th:nth-child(3),
+table#tabellonetimbrature td:nth-child(3),
+table#tabellonetimbrature th:nth-child(5),
+table#tabellonetimbrature td:nth-child(5),
+table#tabellonetimbrature th:nth-child(7),
+table#tabellonetimbrature td:nth-child(7),
+table#tabellonetimbrature th:nth-child(9),
+table#tabellonetimbrature td:nth-child(9),
+table#tabellonetimbrature th:nth-child(12),
+table#tabellonetimbrature td:nth-child(12) {
+	border-radius: 0 5px 5px 0;
+}
+table#tabellonetimbrature th:nth-child(13),
+table#tabellonetimbrature td:nth-child(13),
+table#tabellonetimbrature th:nth-child(14),
+table#tabellonetimbrature td:nth-child(14) {
+	border-radius: 5px;
+}
+
+table#tabellonetimbrature th:nth-child(1),
+table#tabellonetimbrature td:nth-child(1),
+table#tabellonetimbrature th:nth-child(2),
+table#tabellonetimbrature td:nth-child(2),
+table#tabellonetimbrature th:nth-child(4),
+table#tabellonetimbrature td:nth-child(4),
+table#tabellonetimbrature th:nth-child(6),
+table#tabellonetimbrature td:nth-child(6),
+table#tabellonetimbrature th:nth-child(8),
+table#tabellonetimbrature td:nth-child(8),
+table#tabellonetimbrature th:nth-child(10),
+table#tabellonetimbrature td:nth-child(10),
+table#tabellonetimbrature th:nth-child(11),
+table#tabellonetimbrature td:nth-child(11) {
+	border-right: 1px dashed #ccc;
+}
+
+table#tabellonetimbrature th:nth-child(2),
+table#tabellonetimbrature td:nth-child(2),
+table#tabellonetimbrature th:nth-child(3),
+table#tabellonetimbrature td:nth-child(3),
+table#tabellonetimbrature th:nth-child(5),
+table#tabellonetimbrature td:nth-child(5),
+table#tabellonetimbrature th:nth-child(7),
+table#tabellonetimbrature td:nth-child(7),
+table#tabellonetimbrature th:nth-child(9),
+table#tabellonetimbrature td:nth-child(9),
+table#tabellonetimbrature th:nth-child(11),
+table#tabellonetimbrature td:nth-child(11),
+table#tabellonetimbrature th:nth-child(12),
+table#tabellonetimbrature td:nth-child(12) {
+	border-left: 1px dashed #ccc;
+}

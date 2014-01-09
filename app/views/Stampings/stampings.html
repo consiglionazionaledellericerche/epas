@@ -10,16 +10,16 @@
     <table id="tabellonetimbrature" class="table table-bordered table-condensed">
 
 	<tr>
-		<th>Buono<br>mensa</th>
 		<th>Giorno</th>
-		<th>Codice di<br>assenza</th>
+		<th>Buono<br>mensa</th>
+		<th>Codice <br>assenza</th>
 		#{list items:1..numberOfInOut, as:'i'}
-			<th>${i}° entrata</th>
-			<th>${i}° uscita</th>
+			<th>${i}<sup>a</sup> <br/>entrata</th>
+			<th>${i}<sup>a</sup> <br/>uscita</th>
 		#{/list}
 		<th>Tempo<br>lavoro</th>
-		<th>Differenza</th>
-		<th>Progressivo</th>
+		<th>Diffe-</div><br/>renza</th>
+		<th>Progres-<br/>sivo</th>
 		<th>Tipo<br>Orario</th>
 		<th>Note</th>
 	</tr>
@@ -27,11 +27,7 @@
 
 	#{list items:daysRecap, as:'dayRecap'}
 	<tr>
-			<td>
-			#{if dayRecap.mealTicket.equals("NO")}
-			  <i class="icon-remove"></i>
-			#{/if} 
-			</td>
+
 			
 			#{if dayRecap.holiday==false}
 				<td class="capitalized">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</td>
@@ -39,7 +35,13 @@
 			#{else}
 				<td class="festivi">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</td>
 			#{/else}
-			
+
+			<td>
+			#{if dayRecap.mealTicket.equals("NO")}
+			  <i class="icon-ban-circle"></i>
+			#{/if} 
+			</td>
+						
 			<td class="assenza">
 				#{list items:dayRecap.absences, as:'absence'}
 				 	${absence.absenceType.code}
