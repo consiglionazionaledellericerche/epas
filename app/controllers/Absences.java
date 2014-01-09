@@ -605,7 +605,8 @@ public class Absences extends Controller{
 			CheckMessage checkMessage = PersonUtility.checkAbsenceGroup(absenceType, person, dateFrom);
 			if(checkMessage.check == false){
 				flash.error("Impossibile inserire il codice %s per %s %s. "+checkMessage.message, absenceType.code, person.name, person.surname);
-				render("@save");
+				//render("@save");
+				Stampings.personStamping(personId, yearFrom, monthFrom);
 			}
 			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, dateFrom).first();
 			if(pd == null){
