@@ -216,6 +216,7 @@ td.festivi {
 table#tabellonetimbrature {
 	border-right: 0;
 	border-top: 0;
+	border-bottom: 0;
 	border-spacing: 1px 1px;
 }
 
@@ -288,4 +289,12 @@ table#tabellonetimbrature td:nth-child(11),
 table#tabellonetimbrature th:nth-child(12),
 table#tabellonetimbrature td:nth-child(12) {
 	border-left: 1px dashed #ccc;
+}
+
+div.accordion-group {
+	border-color: #bbb;
+}
+
+div.accordion-inner {
+	border-top: 1px solid #bbb;
 }
