@@ -37,11 +37,11 @@
 		<td><strong>Data terminazione contratto (causa morte, pensione...)</strong></td>
 		<td>%{if(contract.endContract != null){
 		}%
-			<td><input name="end" type="date" value="${contract.endContract}" /></td>
+			<td><input name="end" type="date" id="datepicker" value="${contract.endContract}" /></td>
 		%{
 		}else{
 		}%	
-			<td><input name="end" type="date" value="${}" /></td>
+			<td><input name="end" type="date" id="datepicker" value="${}" /></td>
 		%{
 		}
 		}%

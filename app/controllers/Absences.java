@@ -859,7 +859,7 @@ public class Absences extends Controller{
 		absence.save();
 
 		flash.success("Modificato codice di assenza %s", absence.code);
-		render("@Stampings.redirectToIndex");
+		Absences.manageAbsenceCode();
 
 	}
 

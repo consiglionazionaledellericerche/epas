@@ -125,7 +125,9 @@ GET		/absences/manageAbsenceCode				Absences.manageAbsenceCode
 GET		/absences/absenceCodeList				Absences.absenceCodeList
 GET		/absences/insertAbsenceCode				Absences.insertAbsenceCode
 POST	/absences/insertAbsenceCode				Absences.saveAbsenceCode
-GET		/absences/manageAbsenceCode				Absences.discard
+
+POST	/absences/updateCode					Absences.updateCode
+GET		/absences/editCode/{absenceCodeId}		Absences.editCode
 
 #Gestione configurazione parametri
 GET		/listConfigurations						Configurations.list
