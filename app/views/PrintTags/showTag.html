@@ -29,7 +29,11 @@
 	}%
 		
 	<tr >
-			<td><font size="0.5">${dayRecap.mealTicket}</font></td>
+	        <td>
+			#{if dayRecap.mealTicket.equals('NO')}
+			  <font size="0.5">${dayRecap.mealTicket}</font>
+			#{/if}
+			</td>
 			%{
 			if(dayRecap.holiday==false)
 			{

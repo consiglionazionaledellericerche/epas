@@ -59,6 +59,7 @@ public class PersonStampingDayRecap {
 	public boolean progressiveNegative;
 	public String workingTimeTypeDescription = "";
 	
+	
 	public List<String> note = new ArrayList<String>();
 		
 	public PersonStampingDayRecap(PersonDay pd, int numberOfInOut){			
@@ -156,15 +157,16 @@ public class PersonStampingDayRecap {
 
 		//----------------------------------------------- meal ticket (NO)--------------------------------------------------------------
 		if(this.today && !pd.isAllDayAbsences())
-			this.setMealTicket(true);
+			this.setMealTicket(pd.isTicketAvailable, true);
+		
 		else if(this.today && pd.isAllDayAbsences())
-			this.setMealTicket(false);
+			this.setMealTicket(false, false);
 		
 		else if(!this.holiday)
-			this.setMealTicket(pd.isTicketAvailable);	
+			this.setMealTicket(pd.isTicketAvailable, false);	
 	
 		else
-			this.setMealTicket(true);
+			this.setMealTicket(true, false);
 
 		//----------------------------------------------- lunch (p,e) ------------------------------------------------------------------
 		if(pd.modificationType!=null && !this.future)
@@ -193,9 +195,24 @@ public class PersonStampingDayRecap {
 	
 	
 
-	private void setMealTicket(boolean mealTicket) {
-		if(!mealTicket)
+	private void setMealTicket(boolean mealTicket, boolean todayInProgress) {
+		
+		if(todayInProgress)
+		{
+			if(!mealTicket)
+			{
+				this.mealTicket = "NOT_YET";
+			}
+			else
+			{
+				this.mealTicket = "YES";
+			}
+			return;
+		}
+			
+		if(!mealTicket){
 			this.mealTicket = "NO";
+		}
 		else
 			this.mealTicket = "";
 	}
@@ -301,6 +318,7 @@ public class PersonStampingDayRecap {
 		this.progressive = DateUtility.fromMinuteToHourMinute(progressive);
 	}
 	
+
 	private static void addStampModificationTypeToList(StampModificationType smt)
 	{
 		try
