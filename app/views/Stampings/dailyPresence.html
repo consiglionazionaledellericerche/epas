@@ -13,6 +13,7 @@
 			<th>${i}° entrata</th>
 			<th>${i}° uscita</th>
 		#{/list}
+		<th>Buono Mensa</th>
 	  </tr>
 
 
@@ -70,6 +71,19 @@
 		  <!--  ${stampingTemplate.pairId}${stampingTemplate.pairPosition}  -->		
 		  </td>
 	    #{/list}
+	    
+	      <td>
+			#{if dayRecap.mealTicket.equals("NO")}
+			  <i class="icon-ban-circle"></i>
+			#{/if} 
+			#{if dayRecap.mealTicket.equals("NOT_YET")}
+			  <i class="icon-remove"></i>
+			#{/if} 
+			#{if dayRecap.mealTicket.equals("YES")}
+			  <i class="icon-ok"></i>
+			#{/if} 
+		  </td>
+	    
 		
 	</tr>	
 	#{/list}

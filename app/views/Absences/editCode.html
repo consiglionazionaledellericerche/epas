@@ -1,9 +1,8 @@
 #{extends 'main_admin_no_menu.html' /}
 #{set titolo: 'Gestione dei codici di assenza' /}
 
-
 #{form @Absences.updateCode()}
-<div>
+
 <input type="hidden" name="absenceTypeId" value="${abt.id}"/>
 <form class="form-horizontal">
 <fieldset>
@@ -229,10 +228,9 @@
 <!--  <p>Valore:</p> -->
 
 </fieldset>
-</div>
 
-<div id="frm">
-<input class="btn btn-primary" id="updateAbsenceCode" type="submit" value="Modifica"/>
-#{/form}
-<input class="btn" id="indietroAbsenceList" action="action" type="button" value="Indietro" onclick="history.go(-1);" />
+<div class="buttoncenter">
+<input class="btn btn-primary" type="submit" value="Modifica"/>
+<input class="btn inputinline" id="indietroAbsenceList" action="action" type="button" value="Indietro" onclick="history.go(-1);" />
 </div>
+#{/form}
