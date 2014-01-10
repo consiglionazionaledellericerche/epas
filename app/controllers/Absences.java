@@ -422,7 +422,7 @@ public class Absences extends Controller{
 						pd.absences.add(absence);
 						pd.save();
 						pd.populatePersonDay();
-
+						pd.updatePersonDaysInMonth();
 					}
 				}
 				else{
@@ -438,12 +438,13 @@ public class Absences extends Controller{
 
 						pd.populatePersonDay();
 						pd.save();
-						
+						pd.updatePersonDaysInMonth();
 						dateFrom = dateFrom.plusDays(1);
 					}
 					
 				}
-				pdList.get(0).updatePersonDaysInMonth();
+				
+				
 				//Administration.fixPersonSituation(person.id, yearFrom, monthFrom);
 				flash.success("Inserito codice d'assenza %s per il periodo richiesto", absenceType.code);
 				//render("@save");
@@ -680,18 +681,7 @@ public class Absences extends Controller{
 			 pd.updatePersonDaysInMonth();
 			 flash.success("Inserito codice di assenza %s per %s %s in data %s", absenceType.code, person.name, person.surname,new LocalDate(yearFrom, monthFrom, dayFrom));
 			 Stampings.personStamping(personId, yearFrom, monthFrom);
-		}
-
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
+		}		
 		
 		Absence absence = new Absence();
 		Logger.debug("%s %s può usufruire del codice %s", person.name, person.surname, absenceType.code);
