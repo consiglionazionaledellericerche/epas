@@ -22,7 +22,21 @@ $(function($) {
 		top:50, 
 		left:50 
 		}); 
+	
+	//$(':input[type=date]').datepicker();
+	
+	
 });
+
+$(function () {
+    $("a[data-popover]").popover();
+});
+
+$(function() {
+    $( "#datepicker" ).datepicker();
+  });
+
+
 
 $('#myModal1').on('show', function () {
 	$('#myModal2').modal('hide');
