@@ -162,28 +162,13 @@ fError, .fSuccess {text-align: center; }
 .fError { color: #c00;}
 .fSuccess {color: #0c0;}
 
+/* menu form */
+input#pastYear{width: 100px; margin-left: 10px;}
+select#year{width: 90px;}
 
 
 
 
-
-/**
- * Css per background colonne tabella #tabellonetimbrature 
- */
-td.ingresso, td:nth-child(1), td:nth-child(10) {
-	background-color: #f8f8f8;
-}
-
-td.uscita {
-	background-color: #fff;
-}
-
-td.assenza, td.progressivo {
-	background-color: #ffffcf;
-}
-td.festivi {
-	background-color: #fac08d;
-}
 /**
  * Css per bordatura colonne tabella #tabellonetimbrature 
  */
