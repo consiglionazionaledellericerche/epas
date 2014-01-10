@@ -53,26 +53,26 @@ table#tabellonetimbrature td.positionleft{
 	border-radius: 10px 0px 0px 10px;
 	border-color: #808080;
 	border-right-style: none;
-	background-color: lightblue;
+	background-color: rgba(205, 245, 255, 0.48);;
 }
 table#tabellonetimbrature td.positionright{
 	border-radius: 0px 10px 10px 0px;
 	border-color: #808080;
 	border-left-style: none;
-	background-color: lightblue;
+	background-color: rgba(205, 245, 255, 0.48);;
 }
 table#tabellonetimbrature td.positioncenter.default-left, table#tabellonetimbrature td.positioncenter.default-right{
 	border-radius: 0px 0px 0px 0px;
 	border-left-style: none;
 	border-right-style: none;	
 	border-color: #808080;
-	background-color: lightblue;
+	background-color: rgba(205, 245, 255, 0.48);;
 }
 table#tabellonetimbrature td.positioncenter.warn{
 	border-left-style: none;
 	border-right-style: none;	
 	border-color: #808080;
-	background-color: lightblue;
+	background-color: rgba(205, 245, 255, 0.48);;
 }
 table#tabellonetimbrature td.positionnone.warn{
 	border-radius: 10px 10px 10px 10px;
