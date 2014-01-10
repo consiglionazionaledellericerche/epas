@@ -111,9 +111,16 @@
 												
 	    <td>${dayRecap.workingTimeTypeDescription}</td>
 	    <td>
-	    #{list items:dayRecap.note, as:'n'}
-	      <!--  ${n}<br> -->
-	     #{/list}
+	    #{if dayRecap.note.size != 0}
+	    
+	    	<a href="#" class="btn btn-small" data-popover
+	    		data-trigger="hover" data-toggle="popover" 
+	    		data-placement="right"
+	    		data-html="true"
+	    		data-content="${('<ul><li>'+dayRecap.note.join('</li><li>')+'</li></ul>').escape()}"
+	    		title="Info timbrature">Info</a>    
+	    
+	    #{/if}
 	    </td>
 		
 	  </tr>
