@@ -143,7 +143,7 @@ public class DayTest extends UnitTest{
 //			System.out.println("Festa!");
 		
 		
-		List<Absence> listaAssenze = giorno.absenceList();
+		List<Absence> listaAssenze = giorno.absences;
 		assertNotNull(listaAssenze);
 		if(listaAssenze != null){
 			for (Absence abt : listaAssenze) {
