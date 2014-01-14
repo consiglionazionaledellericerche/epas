@@ -257,7 +257,11 @@ public class Person extends Model {
 
 	@OneToOne(mappedBy="person", fetch=FetchType.LAZY,  cascade = {CascadeType.REMOVE})
 	public PersonShift personShift;
-
+	
+	@ManyToOne( fetch=FetchType.EAGER )
+	@JoinColumn(name="id")
+	public Office office;
+	
 	
 	
 	public String getName(){
