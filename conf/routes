@@ -58,6 +58,8 @@ GET     /public/                                staticDir:public
 
 # Gestioni sede e sedi distaccate
 GET		/offices/showOffices					Offices.showOffices
+GET		/offices/insertRemoteOffice				Offices.insertRemoteOffice
+POST	/insertRemoteOffice						Offices.save
 
 
 # Gestione persone
