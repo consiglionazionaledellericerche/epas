@@ -46,7 +46,7 @@ public class Mese {
 	
 	/**
 	 * Costruttore privato da utilizzare per esportare informazioni parziali del mese (come ad esempio il residuo positivo del mese) 
-	 * che non necessitano del calcolo di tutta la situazione annuale
+	 * che non necessitano del calcolo di tutta la situazione annuale.
 	 * @param anno
 	 * @param mese
 	 * @param person
@@ -59,7 +59,8 @@ public class Mese {
 	}
 	
 	/**
-	 * Costruisce un oggetto mese con tutte le informazioni necessarie al calcolo della situazione residuo annuale della persona
+	 * Costruisce un oggetto mese con tutte le informazioni necessarie al calcolo della situazione residuo annuale della persona.
+	 * Visibile solo all'interno del package models.personalMonthSituation.
 	 * @param mesePrecedente
 	 * @param anno
 	 * @param mese
@@ -68,7 +69,7 @@ public class Mese {
 	 * @param febmar
 	 * @param calcolaFinoA
 	 */
-	public Mese(Mese mesePrecedente, int anno, int mese, Person person, int tempoInizializzazione, boolean febmar, LocalDate calcolaFinoA)
+	protected Mese(Mese mesePrecedente, int anno, int mese, Person person, int tempoInizializzazione, boolean febmar, LocalDate calcolaFinoA)
 	{
 		
 		this.person = person;
