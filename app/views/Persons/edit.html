@@ -60,6 +60,16 @@
 			}%
 			</td>
 		</tr>
+		<tr>
+			<td>Sede</td>
+			<td>
+			    #{select 'office', value:'person.office.name', id:'office'} 
+					#{list items: officeList, as: 'office'}
+						#{option office.id}${office.name}#{/option}
+					#{/list}
+			    #{/select}
+			</td>
+		</tr>
 	
 	
 	</table>

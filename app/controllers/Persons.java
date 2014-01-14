@@ -48,13 +48,13 @@ public class Persons extends Controller {
 		LocalDate date = new LocalDate();
 		List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract", person).fetch();
 
-		
+		List<Office> officeList = Office.findAll();
 		
 		InitializationTime initTime = InitializationTime.find("Select init from InitializationTime init where init.person = ?", person).first();
 		Integer month = date.getMonthOfYear();
 		Integer year = date.getYear();
 		Long id = person.id;		
-		render(person, contractList, initTime, month, year, id);
+		render(person, contractList, initTime, month, year, id, officeList);
 	}
 	
 	
