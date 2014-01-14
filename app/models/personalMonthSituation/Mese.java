@@ -13,7 +13,6 @@ import models.PersonDay;
 public class Mese {
 
 	public Person person;
-//	public int workingTime;
 	public int qualifica;
 	public boolean possibileUtilizzareResiduoAnnoPrecedente = true;
 	public Mese mesePrecedente;
@@ -45,19 +44,34 @@ public class Mese {
 	public int monteOreAnnoCorrente;
 	public int numeroRiposiCompensativi;
 	
-	
-	public Mese(int anno, int mese, Person person){
+	/**
+	 * Costruttore privato da utilizzare per esportare informazioni parziali del mese (come ad esempio il residuo positivo del mese) 
+	 * che non necessitano del calcolo di tutta la situazione annuale
+	 * @param anno
+	 * @param mese
+	 * @param person
+	 */
+	private Mese(int anno, int mese, Person person){
 		this.anno = anno;
 		this.mese = mese;
 		this.person = person;
 		this.setPersonDayInformation(new LocalDate());
 	}
 	
+	/**
+	 * Costruisce un oggetto mese con tutte le informazioni necessarie al calcolo della situazione residuo annuale della persona
+	 * @param mesePrecedente
+	 * @param anno
+	 * @param mese
+	 * @param person
+	 * @param tempoInizializzazione
+	 * @param febmar
+	 * @param calcolaFinoA
+	 */
 	public Mese(Mese mesePrecedente, int anno, int mese, Person person, int tempoInizializzazione, boolean febmar, LocalDate calcolaFinoA)
 	{
 		
 		this.person = person;
-		//this.workingTime = this.person.workingTimeType.workingTimeTypeDays.get(1).workingTime;
 		this.qualifica = person.qualification.qualification;
 		this.anno = anno;
 		this.mese = mese;
@@ -128,19 +142,8 @@ public class Mese {
 		this.progressivoFinaleNegativoMeseImputatoAnnoCorrente = this.progressivoFinaleNegativoMeseImputatoAnnoCorrente + this.progressivoFinaleNegativoMeseImputatoProgressivoFinalePositivoMese;
 		this.riposiCompensativiMinutiImputatoAnnoCorrente = this.riposiCompensativiMinutiImputatoAnnoCorrente + this.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese;
 		
-		//Al monte ore dell'anno corrente aggingo ciò che non ho utilizzato del progressivo finale positivo del mese
+		//Al monte ore dell'anno corrente aggiungo ciò che non ho utilizzato del progressivo finale positivo del mese
 		this.monteOreAnnoCorrente = this.monteOreAnnoCorrente + this.progressivoFinalePositivoMese;
-		
-		
-		
-		
-		// AGGIORNAMENTO DEL PERSON MONTH
-		
-		//PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? and pm.month = ?", this.person, this.anno, this.mese).first();
-		//pm.riposiCompensativiDaAnnoPrecedente = this.riposiCompensativiMinutiImputatoAnnoPassato;
-		//pm.riposiCompensativiDaAnnoCorrente = this.riposiCompensativiMinutiImputatoAnnoCorrente;
-		//pm.save();
-		//Logger.info("Persistito person month %s %s per la persona %s %s %s", this.anno, this.mese, this.person.id, this.person.surname, this.person.name);
 		
 		return;
 	}
@@ -233,8 +236,7 @@ public class Mese {
 			this.riposiCompensativiMinuti = this.riposiCompensativiMinuti + this.person.getWorkingTimeType(abs.personDay.date).getWorkingTimeTypeDayFromDayOfWeek(abs.personDay.date.getDayOfWeek()).workingTime;
 			this.numeroRiposiCompensativi++;
 		}
-		//this.riposiCompensativiMinuti = riposiCompensativi.size() * this.workingTime;
-		//this.riposiCompensativiMinuti = pm.riposiCompensativiDaAnnoCorrente + pm.riposiCompensativiDaAnnoPrecedente;
+
 	}
 	
 	public void assegnaProgressivoFinaleNegativo()
