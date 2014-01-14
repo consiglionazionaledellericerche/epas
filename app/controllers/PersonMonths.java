@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hibernate.envers.reader.FirstLevelCache;
 import org.joda.time.LocalDate;
 
 import models.Absence;
@@ -41,6 +42,9 @@ public class PersonMonths extends Controller{
 				
 		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, year, null);
 		
+		int firstYear = 2013;	//TODO provvisorio fin quando non verranno persistiti i valori iniziali
+		
+		
 		for(int month = 1; month < 13; month++){
 			Mese mese = c.getMese(year, month);
 			LocalDate date = new LocalDate(year, month, 1);
@@ -52,10 +56,20 @@ public class PersonMonths extends Controller{
 				lista.add(3, DateUtility.fromMinuteToHourMinute(mese.mesePrecedente.monteOreAnnoPassato + mese.mesePrecedente.monteOreAnnoCorrente));
 			}
 			else{
-				lista.add(0, DateUtility.fromMinuteToHourMinute(mese.tempoInizializzazione));
-				lista.add(1, 0+"");
-				lista.add(2, 0+"");
-				lista.add(3, DateUtility.fromMinuteToHourMinute(mese.tempoInizializzazione));
+				if(year==firstYear)
+				{
+					lista.add(0, DateUtility.fromMinuteToHourMinute(mese.tempoInizializzazione));
+					lista.add(1, 0+"");
+					lista.add(2, 0+"");
+					lista.add(3, DateUtility.fromMinuteToHourMinute(mese.tempoInizializzazione));
+				}
+				else
+				{
+					lista.add(0, 0+"");
+					lista.add(1, 0+"");
+					lista.add(2, DateUtility.fromMinuteToHourMinute(mese.tempoInizializzazione));
+					lista.add(3, DateUtility.fromMinuteToHourMinute(mese.tempoInizializzazione));
+				}
 			}			
 			lista.add(4, DateUtility.fromMinuteToHourMinute(mese.progressivoFinaleMese));
 			Integer minutiRiposiCompensativi = mese.riposiCompensativiMinutiImputatoAnnoCorrente + mese.riposiCompensativiMinutiImputatoAnnoPassato + mese.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese; 
