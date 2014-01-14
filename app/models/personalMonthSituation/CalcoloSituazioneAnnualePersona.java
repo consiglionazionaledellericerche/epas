@@ -25,7 +25,7 @@ public class CalcoloSituazioneAnnualePersona {
 			if(year==2014)
 			{
 				CalcoloSituazioneAnnualePersona csap2013 = new CalcoloSituazioneAnnualePersona(person, 2013, null);
-				initializationTimeMinute = csap2013.getMese(2013, 12).monteOreAnnoCorrente;
+				initializationTimeMinute = csap2013.getMese(2013, 12).monteOreAnnoCorrente + csap2013.getMese(2013, 12).monteOreAnnoPassato;
 			}
 			else
 			{
