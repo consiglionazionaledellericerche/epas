@@ -56,6 +56,10 @@ GET     /public/                                staticDir:public
 # Import Secure routes
 #*       /                						module:secure
 
+# Gestioni sede e sedi distaccate
+GET		/offices/showOffices					Offices.showOffices
+
+
 # Gestione persone
 GET		/personList								Persons.list
 POST	/persons								Persons.save

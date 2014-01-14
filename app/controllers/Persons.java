@@ -15,10 +15,12 @@ import models.ContactData;
 import models.Contract;
 import models.InitializationTime;
 import models.Location;
+import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.PersonWorkingTimeType;
 import models.Qualification;
+import models.RemoteOffice;
 //import models.RemoteOffice;
 import models.VacationCode;
 import models.VacationPeriod;
@@ -309,14 +311,41 @@ public class Persons extends Controller {
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void insertPerson() {
+	public static void insertPerson() throws InstantiationException, IllegalAccessException {
 		Person person = new Person();
 		Contract contract = new Contract();
 		Location location = new Location();
 		ContactData contactData = new ContactData();
 		InitializationTime initializationTime = new InitializationTime();
+		List<Office> officeList = Office.find("Select office from Office office").fetch();
+		if(officeList == null || officeList.size() == 0){
+			Office office = new Office();
+			office.address = "Via Moruzzi 1, Pisa";
+			office.name = "IIT";
+			office.code = 1000;
+			
+			office.save();
+			officeList.add(office);
+			RemoteOffice remote = new RemoteOffice();
+			remote.address = "via le mani dal naso 12";
+			remote.code = 2000;
+			remote.joiningDate = new LocalDate();
+			remote.name = "asd";
+			remote.office = office;
+			remote.save();
+			officeList.add(remote);
+			
+			
+		}
+		else{
+			List<Office> office = Office.find("Select office from Office office where office.office is null").fetch();
+			Logger.debug("Lista office: %s", office.get(0).name);
+//			List<RemoteOffice> remote = RemoteOffice.findAll();
+//			Logger.debug("Lista remote: %s", remote.toString());
+		}
+		
 //		RemoteOffice remoteOffice = new RemoteOffice();
-		render(person, contract, location, contactData, initializationTime/*, remoteOffice*/);
+		render(person, contract, location, contactData, initializationTime, officeList/*, remoteOffice*/);
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)

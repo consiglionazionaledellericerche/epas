@@ -90,6 +90,14 @@
 		<input type="hidden" name="location.person_id"  value="${person.id}" />
 		<table class="tablenoborder">
 			<tr>
+				<td>Sede centrale/distaccata</td>
+				<td>#{select 'office', value:'', id:'office'} 
+						#{list items: officeList, as: 'office'}
+							#{option office.id}${office.name}#{/option}
+						#{/list} 
+					#{/select}</td>
+			</tr>
+			<tr>
 				<td>Dipartimento</td>
 				<td><input name="department" type="text" value="${location.department}" size="20" maxlength="100" /></td>
 			</tr>	
