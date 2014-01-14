@@ -5,44 +5,59 @@
 <div class="row-fluid first-row">
   <div class="span8" style="min-width: 900px;">
     <table id="tabellonetimbrature" class="table table-bordered table-condensed">
+      
+      
       <tr>
-		<th>Buono<br>mensa</th>
-		<th>Giorno</th>
-		<th>Codice di<br>assenza</th>
+		<th class="group-single">Giorno</th>
+		<th class="group-single">Buono<br>mensa</th>
+		
+		<th class="invisible"></th>
+		
+		<th class="group-single">Codice <br>assenza</th>
+		
+		
+		
 		#{list items:1..numberOfInOut, as:'i'}
-			<th>${i}° entrata</th>
-			<th>${i}° uscita</th>
+			<th class="group-left">${i}<sup>a</sup> <br/>entrata</th>
+			<th class="group-right">${i}<sup>a</sup> <br/>uscita</th>
 		#{/list}
-		<th>Inserisci<br>timbratura</th>
-		<th>Tempo<br>lavoro</th>
-		<th>Differenza</th>
-		<th>Progressivo</th>
-		<th>Tipo<br>Orario</th>
-		<th>Note</th>
+		<th class="group-single">Inserisci<br>timbratura</th>
+		
+		<th class="invisible"></th>
+		
+		<th class="group-single">Tempo<br>lavoro</th>
+		<th class="group-single">Diffe-</div><br/>renza</th>
+		<th class="group-single">Progres-<br/>sivo</th>		
+		<th class="group-single">Tipo<br>Orario</th>
+		<th class="group-single">Note</th>
 	  </tr>
+      
+      
 	  
 	  #{list items:daysRecap, as:'dayRecap'}
 	  <tr>
-	    <td>
-		  #{if dayRecap.mealTicket.equals("NO")}
-		    <i class="icon-ban-circle"></i>
-		  #{/if} 
-		  #{if dayRecap.mealTicket.equals("NOT_YET")}
-			<i class="icon-remove"></i>
-		  #{/if} 
-		  #{if dayRecap.mealTicket.equals("YES")}
-			<i class="icon-ok"></i>
-		  #{/if} 
-		</td>
-			
-		#{if dayRecap.holiday==false}
-		  <td class="capitalized">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</td>
+	    #{if dayRecap.holiday==false}
+		  <td class="capitalized default-single">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</td>
 		#{/if}
 		#{else}
-		  <td class="festivi">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</td>
+		  <td class="festivi default-single">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</td>
 		#{/else}
+
+        <td class="default-single">
+		#{if dayRecap.mealTicket.equals("NO")}
+		  <i class="icon-ban-circle"></i>
+		#{/if} 
+		#{if dayRecap.mealTicket.equals("NOT_YET")}
+		  <i class="icon-remove"></i>
+		#{/if} 
+		#{if dayRecap.mealTicket.equals("YES")}
+		  <i class="icon-ok"></i>
+		#{/if} 
+		</td>
+
+		<td class="invisible"></td>
 		
-		<td class="assenza">
+		<td class="assenza default-single">
 		  <a data-toggle="modal" data-backdrop="true" href="@{Absences.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" data-target="#myModal1">___</a>
 		  #{list items:dayRecap.absences, as:'absence'}
 		    <a data-toggle="modal" href="@{Absences.edit(absence.id)}" data-target="#myModal1">
@@ -53,10 +68,10 @@
 		
 		#{list items:dayRecap.stampingsTemplate, as:'stampingTemplate'}
 		  #{if stampingTemplate.colour.equals("in")}
-			<td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} ">
+			<td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-left">
 		  #{/if}
 		  #{elseif stampingTemplate.colour.equals("out")}
-		    <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} ">
+		    <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-right">
 		  #{/elseif}
 		  #{elseif stampingTemplate.colour.equals("warn")}
 		    <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} warn">
@@ -83,12 +98,15 @@
 		  <!--  ${stampingTemplate.pairId}${stampingTemplate.pairPosition}  -->		
 		  </td>
 	    #{/list}
-	    <td class="inserisciTimbratura">
+	    <td class="inserisciTimbratura default-single">
 		    <a data-toggle="modal" data-backdrop="true" href="@{Stampings.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" data-target="#myModal2">
 		      +++
 		    </a>
 		</td>
-	    <td class="tempoLavoro">
+		
+		<td class="invisible"></td>
+		
+	    <td class="tempoLavoro default-single">
 		  ${dayRecap.workTime}
 		  #{ifnot dayRecap.todayLunchTimeCode.equals("")}
 		    <strong>${dayRecap.todayLunchTimeCode}</strong>
@@ -102,21 +120,21 @@
 		</td>	
 			
 		#{if dayRecap.differenceNegative}
-		  <td class="differenza" style="color: red;">${dayRecap.difference}</td>
+		  <td class="differenza  default-single" style="color: red;">${dayRecap.difference}</td>
 		#{/if}
 		#{else}
-		  <td class="differenza">&nbsp;${dayRecap.difference}</td>
+		  <td class="differenza default-single">&nbsp;${dayRecap.difference}</td>
 		#{/else}
 			
 		#{if dayRecap.progressiveNegative}
-		  <td class="progressivo" style="color: red;">${dayRecap.progressive}</td>
+		  <td class="progressivo default-single" style="color: red;">${dayRecap.progressive}</td>
 		#{/if}
 		#{else}
-		  <td class="progressivo">&nbsp;${dayRecap.progressive}</td>
+		  <td class="progressivo default-single">&nbsp;${dayRecap.progressive}</td>
 		#{/else}
 												
-	    <td>${dayRecap.workingTimeTypeDescription}</td>
-	    <td>
+	    <td class="default-single">${dayRecap.workingTimeTypeDescription}</td>
+	    <td class="default-single">
 	    #{if dayRecap.note.size != 0}
 	    
 	    	<a href="#" class="btn btn-small" data-popover
