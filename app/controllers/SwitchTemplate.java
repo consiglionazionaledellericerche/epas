@@ -53,6 +53,10 @@ public class SwitchTemplate extends Controller{
 
 		switch (menuItem) {
 
+		case offices:
+			Offices.showOffices();
+			break;
+		
 		case missingStamping:
 			Stampings.missingStamping(year, month);
 			break;

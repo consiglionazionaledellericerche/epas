@@ -23,6 +23,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
@@ -258,9 +259,11 @@ public class Person extends Model {
 	@OneToOne(mappedBy="person", fetch=FetchType.LAZY,  cascade = {CascadeType.REMOVE})
 	public PersonShift personShift;
 	
-	@ManyToOne( fetch=FetchType.EAGER )
-	@JoinColumn(name="id")
+	//@NotAudited
+	@ManyToOne( fetch=FetchType.LAZY )
+	@JoinColumn(name="office_id")	
 	public Office office;
+
 	
 	
 	
@@ -511,6 +514,14 @@ public class Person extends Model {
 		return false;
 	}
 
+	public boolean isInsertAndUpdateOfficesAvailable(){
+		for(Permission p : this.permissions){
+			if(p.description.equals(Security.INSERT_AND_UPDATE_OFFICES))
+				return true;
+		}
+		return false;
+	}
+	
 	public boolean isInsertAndUpdateCompetenceAndOvertimeAvailable(){
 		for(Permission p : this.permissions){
 			if(p.description.equals(Security.INSERT_AND_UPDATE_COMPETENCES))

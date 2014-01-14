@@ -19,6 +19,7 @@
 		<th>Può inserire e modifcare orari di lavoro</th>
 		<th>Può inserire e modificare assenze</th>
 		<th>Può inserire e modificare configurazioni di sistema</th>
+		<th>Può inserire e modificare sedi e sedi distaccate</th>
 		<th>Può inserire e modificare utenti amministratori</th>
 		<th>Può inserire e modificare straordinari e competenze</th>
 		<th>Può inserire e modificare ferie e permessi</th>
@@ -36,110 +37,124 @@
 		</td>
 		<td>
 		
-		%{ if(admin.isViewPersonAvailable() == true){ }%
-				<input type="checkbox" name="viewPersonList" value ="" checked="checked"/>
-			%{ } else { }%
-				<input type="checkbox" name="viewPersonList" value=""/>
-			%{ } }%		
+		#{if admin.isViewPersonAvailable()}
+			<input type="checkbox" name="viewPersonList" value ="" checked="checked"/>
+		#{/if}
+		#{else}
+			<input type="checkbox" name="viewPersonList" value=""/>
+		#{/else}		
 		</td>
 		<td>
 		
-		%{ if(admin.isInsertAndUpdatePersonAvailable()==true){ }%
+		#{if admin.isInsertAndUpdatePersonAvailable()}
 				<input type="checkbox" name="insertAndUpdatePerson" value ="" checked="checked"/>
-			%{ } else { }%
+		#{/if}
+		#{else}
 				<input type="checkbox" name="insertAndUpdatePerson" value=""/>
-			%{ } }%
+		#{/else}
 		
 		</td>
-		<td>
 		
-		%{ if(admin.isDeletePersonAvailable()){ }%
+		<td>
+		#{if admin.isDeletePersonAvailable()}
 				<input type="checkbox" name="deletePerson" value ="" checked="checked"/>
-			%{ } else { }%
+		#{/if}
+		#{else}
 				<input type="checkbox" name="deletePerson" value=""/>
-			%{ } }%
-		
+		#{/else}
 		</td>
 		<td>
-		
-		%{ if(admin.isInsertAndUpdateStampingAvailable()){ }%
+		#{if admin.isInsertAndUpdateStampingAvailable()}
 				<input type="checkbox" name="insertAndUpdateStamping" value ="" checked="checked"/>
-			%{ } else { }%
+		#{/if}
+		#{else}
 				<input type="checkbox" name="insertAndUpdateStamping" value=""/>
-			%{ } }%
-		
+		#{/else}		
 		</td>
-		<td>
 		
-		%{ if(admin.isInsertAndUpdatePasswordAvailable()){ }%
+		<td>
+		#{if admin.isInsertAndUpdatePasswordAvailable()}
 				<input type="checkbox" name="insertAndUpdatePassword" value ="" checked="checked"/>
-			%{ } else { }%
+		#{/if}
+		#{else}
 				<input type="checkbox" name="insertAndUpdatePassword" value=""/>
-			%{ } }%
-		
+		#{/else}		
 		</td>
-		<td>
 		
-		%{ if(admin.isInsertAndUpdateWorkinTimeAvailable()){ }%
+		<td>
+		#{if admin.isInsertAndUpdateWorkinTimeAvailable()}
 				<input type="checkbox" name="insertAndUpdateWorkingTime" value ="" checked="checked"/>
-			%{ } else { }%
+		#{/if}
+		#{else}
 				<input type="checkbox" name="insertAndUpdateWorkingTime" value=""/>
-			%{ } }%
-		
+		#{/else}		
 		</td>
-		<td>
 		
-		%{ if(admin.isInsertAndUpdateAbsenceAvailable()){ }%
+		<td>
+		#{if admin.isInsertAndUpdateAbsenceAvailable()}
 				<input type="checkbox" name="insertAndUpdateAbsence" value ="" checked="checked"/>
-			%{ } else { }%
+		#{/if}
+		#{else}
 				<input type="checkbox" name="insertAndUpdateAbsence" value=""/>
-			%{ } }%
-			
+		#{/else}	
+		
 		</td>
 		<td>
-		
-		%{ if(admin.isInsertAndUpdateConfigurationAvailable()){ }%
+		#{if admin.isInsertAndUpdateConfigurationAvailable()}
 				<input type="checkbox" name="insertAndUpdateConfiguration" value ="" checked="checked"/>
-			%{ } else { }%
+		#{/if}
+		#{else}
 				<input type="checkbox" name="insertAndUpdateConfiguration" value=""/>
-			%{ } }%
+		#{/else}		
+		</td>
+		
+		<td>
+		#{if admin.isInsertAndUpdateOfficesAvailable()}
+				<input type="checkbox" name="insertAndUpdateOffices" value ="" checked="checked"/>
+		#{/if}
+		#{else}
+				<input type="checkbox" name="insertAndUpdateOffices" value=""/>
+		#{/else}
 		
 		</td>
-		<td>
 		
-		%{ if(admin.isInsertAndUpdateAdministratorAvailable()){ }%
+		<td>
+		#{if admin.isInsertAndUpdateAdministratorAvailable()}
 				<input type="checkbox" name="insertAndUpdateAdministrator" value ="" checked="checked"/>
-			%{ } else { }%
+		#{/if}
+		#{else}
 				<input type="checkbox" name="insertAndUpdateAdministrator" value=""/>
-			%{ } }%
-			
-		</td>	
-		<td>
+		#{/else}
 		
-		%{ if(admin.isInsertAndUpdateCompetenceAndOvertimeAvailable()){ }%
+		</td>	
+		
+		
+		<td>
+		#{if admin.isInsertAndUpdateCompetenceAndOvertimeAvailable()}
 				<input type="checkbox" name="insertAndUpdateCompetences" value ="" checked="checked"/>
-			%{ } else { }%
+		#{/if}
+		#{else}
 				<input type="checkbox" name="insertAndUpdateCompetences" value=""/>
-			%{ } }%
-			
+		#{/else}
+		
 		</td>	
 		<td>
-		
-		%{ if(admin.isInsertAndUpdateVacationsAvailable()){ }%
+		#{if admin.isInsertAndUpdateVacationsAvailable()}
 				<input type="checkbox" name="insertAndUpdateVacations" value ="" checked="checked"/>
-			%{ } else { }%
+		#{/if}
+		#{else}
 				<input type="checkbox" name="insertAndUpdateVacations" value=""/>
-			%{ } }%
-			
+		#{/else}
+					
 		</td>	
 		<td>
-		
-		%{ if(admin.isUploadSituationAvailable()){ }%
+		#{if admin.isUploadSituationAvailable()}
 				<input type="checkbox" name="uploadSituation" value ="" checked="checked"/>
-			%{ } else { }%
+		#{/if}
+		#{else}
 				<input type="checkbox" name="uploadSituation" value=""/>
-			%{ } }%
-			
+		#{/else}
+		
 		</td>
 	</tr>
 

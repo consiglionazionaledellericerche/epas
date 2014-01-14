@@ -59,13 +59,22 @@ public class Administrators extends Controller {
 		String insertAndUpdateAbsence = params.get("insertAndUpdateAbsence");
 		String insertAndUpdateConfiguration = params.get("insertAndUpdateConfiguration");
 		String insertAndUpdateAdministrator = params.get("insertAndUpdateAdministrator");
+		String insertAndUpdateOffices = params.get("insertAndUpdateOffices");
 		String insertAndUpdateCompetences = params.get("insertAndUpdateCompetences");
 		String insertAndUpdateVacations = params.get("insertAndUpdateVacations");
 		String uploadSituation = params.get("uploadSituation");
 		
+		/*
 		if(person.permissions.size() > 0){
 			person.permissions.clear();
 			person.save();
+		}
+		
+		if(insertAndUpdateOffices.equals("true")){
+			for(Permission p : permissionList){
+				if(p.description.equals("insertAndUpdateOffices"))
+					person.permissions.add(p);
+			}
 		}
 		
 		if(viewPersonList.equals("true")){
@@ -151,6 +160,7 @@ public class Administrators extends Controller {
 		}
 		
 		person.save();
+		*/
 		flash.success(String.format("Aggiornati permessi per %s %s con successo", person.name, person.surname));
 		Application.indexAdmin();
 
@@ -201,6 +211,7 @@ public class Administrators extends Controller {
 		String insertAndUpdateAbsence = params.get("insertAndUpdateAbsence");
 		String insertAndUpdateConfiguration = params.get("insertAndUpdateConfiguration");
 		String insertAndUpdateAdministrator = params.get("insertAndUpdateAdministrator");
+		String insertAndUpdateOffices = params.get("insertAndUpdateOffices");
 		String insertAndUpdateVacations = params.get("insertAndUpdateVacations");
 		String insertAndUpdateCompetences = params.get("insertAndUpdateCompetences");
 		String uploadSituation = params.get("uploadSituation");
@@ -208,7 +219,7 @@ public class Administrators extends Controller {
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "viewPersonList").first();
 			person.permissions.add(p);
 		}
-		else{
+		else if(viewPersonList.equals("false") && person.isViewPersonAvailable()){
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "viewPersonList").first();
 			person.permissions.remove(p);
 		}
@@ -217,7 +228,7 @@ public class Administrators extends Controller {
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdatePerson").first();
 			person.permissions.add(p);
 		}
-		else{
+		else if(insertAndUpdatePerson.equals("false") && person.isInsertAndUpdatePersonAvailable()){
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdatePerson").first();
 			person.permissions.remove(p);
 		}
@@ -226,7 +237,7 @@ public class Administrators extends Controller {
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "deletePerson").first();
 			person.permissions.add(p);
 		}
-		else{
+		else if(deletePerson.equals("false") && person.isDeletePersonAvailable()){
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "deletePerson").first();
 			person.permissions.remove(p);
 		}
@@ -235,7 +246,7 @@ public class Administrators extends Controller {
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateStamping").first();
 			person.permissions.add(p);
 		}
-		else{
+		else if(insertAndUpdateStamping.equals("false") && person.isInsertAndUpdateStampingAvailable()){
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateStamping").first();
 			person.permissions.remove(p);
 		}
@@ -244,7 +255,7 @@ public class Administrators extends Controller {
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdatePassword").first();
 			person.permissions.add(p);
 		}	
-		else{
+		else if(insertAndUpdatePassword.equals("false") && person.isInsertAndUpdatePasswordAvailable()){
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdatePassword").first();
 			person.permissions.remove(p);
 		}
@@ -253,7 +264,7 @@ public class Administrators extends Controller {
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateWorkingTime").first();
 			person.permissions.add(p);
 		}	
-		else{
+		else if(insertAndUpdateWorkingTime.equals("false") && person.isInsertAndUpdateWorkinTimeAvailable()){
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateWorkingTime").first();
 			person.permissions.remove(p);
 		}
@@ -262,7 +273,7 @@ public class Administrators extends Controller {
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateAbsence").first();
 			person.permissions.add(p);
 		}
-		else{
+		else if(insertAndUpdateAbsence.equals("false") && person.isInsertAndUpdateAbsenceAvailable()){
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateAbsence").first();
 			person.permissions.remove(p);
 		}
@@ -271,7 +282,7 @@ public class Administrators extends Controller {
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateConfiguration").first();
 			person.permissions.add(p);
 		}
-		else{
+		else if(insertAndUpdateConfiguration.equals("false") && person.isInsertAndUpdateConfigurationAvailable()){
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateConfiguration").first();
 			person.permissions.remove(p);
 		}
@@ -280,8 +291,17 @@ public class Administrators extends Controller {
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateAdministrator").first();
 			person.permissions.add(p);
 		}
-		else{
+		else if(insertAndUpdateAdministrator.equals("false") && person.isInsertAndUpdateAdministratorAvailable()){
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateAdministrator").first();
+			person.permissions.remove(p);
+		}
+		
+		if(insertAndUpdateOffices.equals("true") && !person.isInsertAndUpdateOfficesAvailable()){
+			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateOffices").first();
+			person.permissions.add(p);
+		}
+		else if(insertAndUpdateOffices.equals("false") && person.isInsertAndUpdateOfficesAvailable()){
+			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateOffices").first();
 			person.permissions.remove(p);
 		}
 		
@@ -289,7 +309,7 @@ public class Administrators extends Controller {
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateCompetences").first();
 			person.permissions.add(p);
 		}
-		else{
+		else if(insertAndUpdateCompetences.equals("false") && person.isInsertAndUpdateCompetenceAndOvertimeAvailable()){
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateCompetences").first();
 			person.permissions.remove(p);
 		}
@@ -298,7 +318,7 @@ public class Administrators extends Controller {
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateVacations").first();
 			person.permissions.add(p);
 		}
-		else{
+		else if(insertAndUpdateVacations.equals("false") && person.isInsertAndUpdateVacationsAvailable()){
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateVacations").first();
 			person.permissions.remove(p);
 		}
@@ -306,7 +326,7 @@ public class Administrators extends Controller {
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "uploadSituation").first();
 			person.permissions.add(p);
 		}
-		else{
+		else if(uploadSituation.equals("false") && person.isUploadSituationAvailable()){
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "uploadSituation").first();
 			person.permissions.remove(p);
 		}

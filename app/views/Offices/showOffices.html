@@ -1,0 +1,23 @@
+#{extends 'main_admin_no_menu.html' /}
+
+#{set titolo: 'Inserimento/modifica nuova sede' /}
+
+<fieldset>
+	<legend>Lista sedi</legend>
+	<table>
+		<tr>
+			<th>Nome</th>
+			<th>Codice</th>
+			<th>Indirizzo</th>
+		</tr>
+		#{list items: officeList, as: 'office'}
+		<tr>
+			<td>${office.name}</td>
+			<td>${office.code}</td>
+			<td>${office.address}</td>
+		</tr>	
+		#{/list}
+	
+	</table>
+
+</fieldset>
