@@ -81,8 +81,8 @@ public class Configurations extends Controller{
 	
 	@Check(Security.INSERT_AND_UPDATE_CONFIGURATION)
 	public static void show(){
-		Date now = new Date();
-		Configuration configurations = Configuration.getConfiguration(now);
+
+		Configuration configurations = Configuration.getConfiguration(new LocalDate());
 
 		render(configurations);
 	}
