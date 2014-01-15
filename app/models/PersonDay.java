@@ -544,23 +544,23 @@ public class PersonDay extends Model {
 		}
 		
 		//Strutture dati transienti necessarie al calcolo
+		
 		if(personDayContract==null)
 		{
 			this.personDayContract = this.person.getContractFromHeap(date);
+			//Se la persona non ha un contratto attivo non si fanno calcoli per quel giorno, le timbrature vengono comunque mantenute
+			if(personDayContract==null)
+				return;
 		}
 		if(previousPersonDayInMonth==null)
 		{
 			associatePreviousInMonth();
 		}
-		
-		//Se la persona non ha un contratto attivo non si fanno calcoli per quel giorno, le timbrature vengono comunque mantenute
-		if (personDayContract == null) 
+		if(previousPersonDayInMonth.personDayContract==null)
 		{
-			return;
+			this.previousPersonDayInMonth.personDayContract = this.person.getContractFromHeap(this.previousPersonDayInMonth.date);
 		}
-
-		//this.isTimeAtWorkAutoCertificated = this.isFixedTimeAtWork(); rmAutoCertificate
-		//this.isHoliday = this.isHoliday();	rmHoliday
+		
 		
 		//controllo uscita notturna
 		this.checkExitStampNextDay();
