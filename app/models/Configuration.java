@@ -326,7 +326,7 @@ public class Configuration extends Model{
 	public List<WebStampingAddress> webStampingAddress;
 	
 	
-	public static Configuration getConfiguration(Date date)
+	public static Configuration getConfiguration(LocalDate date)
 	{
 		//FIXME controllare se le configurazioni possono sovrapporsi. In questo momento lo escludo, altrimenti come faccio a capire quale utilizzare??
 		List<Configuration> allConfigurations = (List<Configuration>)Cache.get("allConfigurations");
@@ -339,7 +339,7 @@ public class Configuration extends Model{
 		{
 			LocalDate beginConf = new LocalDate(conf.beginDate);
 			LocalDate endConf = new LocalDate(conf.endDate);
-			if(DateUtility.isDateIntoInterval(new LocalDate(date), new DateInterval(beginConf, endConf)))
+			if(DateUtility.isDateIntoInterval(date, new DateInterval(beginConf, endConf)))
 			{
 				return conf;
 			}
@@ -358,7 +358,7 @@ public class Configuration extends Model{
 		//non trovata la metto in cache
 		if(currentConfiguration == null)
 		{
-			currentConfiguration = getConfiguration(new Date());
+			currentConfiguration = getConfiguration(new LocalDate());
 			Cache.set("currentConfiguration", currentConfiguration);
 			return currentConfiguration;
 		}
@@ -368,7 +368,7 @@ public class Configuration extends Model{
 		//trovata scaduta la ricarico
 		if(! DateUtility.isDateIntoInterval(new LocalDate(), new DateInterval(beginConf, endConf)))
 		{
-			currentConfiguration = getConfiguration(new Date());
+			currentConfiguration = getConfiguration(new LocalDate());
 			Cache.set("currentConfiguration", currentConfiguration);
 		}
 		return currentConfiguration;
