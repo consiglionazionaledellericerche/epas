@@ -1092,36 +1092,12 @@ public class PersonUtility {
 			JPAPlugin.startTx(false);
 			while(!actualMonth.isAfter(endMonth))
 			{
-				//Logger.info("Mese inizio %s", actualMonth);
-				JPAPlugin.closeTx(false);
-				JPAPlugin.startTx(false);
 				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
-						p,
-						actualMonth, 
-						actualMonth.dayOfMonth().withMaximumValue())
-						.fetch();
-				for(PersonDay pd : pdList){
-					
-					//JPAPlugin.closeTx(false);
-					//JPAPlugin.startTx(false);
-					
-					//pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", pd.person, pd.date).first();
-					pd.populatePersonDay();
-					
-					//JPAPlugin.closeTx(false);
-					//JPAPlugin.startTx(false);
-					
-				}
-				
-				try{
-					JPAPlugin.closeTx(false);
-				}catch(Exception e)
+						p, actualMonth, actualMonth.dayOfMonth().withMaximumValue()).fetch();
+				for(PersonDay pd : pdList)
 				{
-					Logger.error("Impossibile fixare Mese %s", actualMonth.getMonthOfYear());
-				}
-				JPAPlugin.startTx(false);
-				//Logger.info("Mese fine %s", actualMonth);
-				
+					pd.populatePersonDay();
+				}				
 				actualMonth = actualMonth.plusMonths(1);
 			}
 			JPAPlugin.closeTx(false);
