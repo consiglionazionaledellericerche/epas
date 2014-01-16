@@ -47,8 +47,15 @@ public class Persons extends Controller {
 	
 		LocalDate date = new LocalDate();
 		List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract", person).fetch();
-
-		List<Office> officeList = Office.findAll();
+		List<Office> officeList = null;
+		Person personLogged = Security.getPerson();
+		if(!personLogged.office.remoteOffices.isEmpty()){
+			officeList = Office.findAll();
+		}
+		else{
+			officeList = RemoteOffice.find("Select office from RemoteOffice office where office.joiningDate is not null").fetch();
+		}
+		
 		
 		InitializationTime initTime = InitializationTime.find("Select init from InitializationTime init where init.person = ?", person).first();
 		Integer month = date.getMonthOfYear();
@@ -301,8 +308,15 @@ public class Persons extends Controller {
 
 	@Check(Security.VIEW_PERSON_LIST)
 	public static void list(){
-
-		List<Person> personList = Person.find("Select p from Person p where p.name <> ? and p.name <> ? order by p.surname", "Admin", "epas").fetch();
+		Person person = Security.getPerson();
+		List<Person> personList = null;
+		if(!person.office.remoteOffices.isEmpty()){
+			personList = Person.find("Select p from Person p where p.name <> ? and p.name <> ? order by p.surname", "Admin", "epas").fetch();
+		}
+		else{
+			personList = Person.find("SELECT p FROM Person p where p.office = ? ORDER BY p.surname, p.othersSurnames, p.name", person.office).fetch();
+		}
+		
 		//Logger.debug("La lista delle persone: %s", personList.toString());
 		LocalDate date = new LocalDate();
 		List<Person> activePerson = Person.getActivePersons(date);
@@ -317,7 +331,15 @@ public class Persons extends Controller {
 		Location location = new Location();
 		ContactData contactData = new ContactData();
 		InitializationTime initializationTime = new InitializationTime();
-		List<Office> officeList = Office.find("Select office from Office office").fetch();
+		List<Office> officeList = null;
+		Person personLogged = Security.getPerson();
+		if(!personLogged.office.remoteOffices.isEmpty()){
+			officeList = Office.find("Select office from Office office").fetch();
+		}
+		else{
+			officeList = RemoteOffice.find("Select office from RemoteOffice office where office.joiningDate is not null").fetch();
+		}
+		
 		if(officeList == null || officeList.size() == 0){
 			Office office = new Office();
 			office.address = "Via Moruzzi 1, Pisa";
@@ -502,6 +524,12 @@ public class Persons extends Controller {
 		
 		if(person.badgeNumber == null || !person.badgeNumber.equals(params.get("badgeNumber")))
 			person.badgeNumber = params.get("badgeNumber");
+		
+		Logger.debug("Sede: %s", params.get("person.office"));
+		if(person.office == null || !person.office.id.equals(new Long(params.get("person.office")))){
+			person.office = Office.findById(Long.parseLong((params.get("person.office"))));
+		}
+		
 		
 		if(contactData != null){
 			if(contactData.email == null || !contactData.email.equals(params.get("email"))){
