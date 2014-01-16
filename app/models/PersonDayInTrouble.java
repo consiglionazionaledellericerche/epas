@@ -30,36 +30,35 @@ public class PersonDayInTrouble extends Model
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="personday_id", nullable=false, updatable=false)
 	public PersonDay personDay;
-	
-	public PersonDayInTrouble()
+
+	public PersonDayInTrouble(PersonDay pd, String cause)
 	{
+		this.personDay = pd;
+		this.cause = cause;
 		this.fixed = false;
 		this.emailSent = false;
 	}
-	
+
 	public static void insertPersonDayInTrouble(PersonDay pd, String cause)
 	{
-		//Logger.info("insertPersonDayInTrouble1");
-		PersonDayInTrouble pdt = PersonDayInTrouble.find("Select pdt from PersonDayInTrouble pdt where pdt.personDay = ?", pd).first();
-		if(pdt==null)
+		if(pd.troubles==null || pd.troubles.size()==0)
 		{	
-			//Logger.info("insertPersonDayInTrouble2");
 			//se non esiste lo creo
 			Logger.info("Nuovo PersonDayInTrouble %s %s %s - %s - %s", pd.person.id, pd.person.name, pd.person.surname, pd.date, cause);
-			PersonDayInTrouble trouble = new PersonDayInTrouble();
-			trouble.personDay = pd;
-			trouble.cause = cause;
+			PersonDayInTrouble trouble = new PersonDayInTrouble(pd, cause);
 			trouble.save();
+			pd.troubles.add(trouble);
+			pd.save();
 			return;
 		}
-		if(pdt!=null)
+		else
 		{
-			//Logger.info("insertPersonDayInTrouble3");
 			//se esiste lo setto fixed = false;
-			pdt.fixed = false;
-			pdt.cause = cause;
-			pdt.save();
+			pd.troubles.get(0).fixed = false;
+			pd.troubles.get(0).cause = cause;
+			pd.troubles.get(0).save();
+			pd.save();
 		}
-		
+
 	}
 }
