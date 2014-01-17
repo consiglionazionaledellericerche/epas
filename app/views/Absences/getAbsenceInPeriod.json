@@ -1,0 +1,8 @@
+
+  		{
+   			"nome" : ${personPeriodAbsenceCode.name},
+  			"cognome" : ${personPeriodAbsenceCode.surname},
+  			"tipo_assenza" : ${personPeriodAbsenceCode.code},
+  			"da" : ${personPeriodAbsenceCode.dateFrom},
+  			"a" : ${personPeriodAbsenceCode.dateTo}
+  		}

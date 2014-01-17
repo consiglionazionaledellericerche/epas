@@ -216,6 +216,10 @@ PUT 	/overtimes/setSupervisorTotalOvertimes/{email}/{hours}						Overtimes.setSu
 #Gestione timbrature via json
 PUT		/stampings/create						StampingsFromClient.create
 
+#Invio periodi di assenza 
+GET		/absences/absenceInPeriod				Absences.absenceInPeriod
+POST	/absences/setPersonEmailForAbsence		Absences.setPersonEmailForAbsence
+
 # Catch all
 *       /{controller}/{action}                  {controller}.{action}
 
