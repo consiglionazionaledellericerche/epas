@@ -3,6 +3,7 @@ package controllers;
 import it.cnr.iit.epas.CheckMessage;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
+import it.cnr.iit.epas.JsonPersonEmailBinder;
 import it.cnr.iit.epas.MainMenu;
 import it.cnr.iit.epas.PersonUtility;
 
@@ -34,6 +35,8 @@ import models.WorkingTimeTypeDay;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
 import models.enumerate.JustifiedTimeAtWork;
+import models.exports.PersonEmailFromJson;
+import models.exports.PersonPeriodAbsenceCode;
 import models.rendering.VacationsRecap;
 
 import org.hibernate.envers.entities.mapper.relation.lazy.proxy.SetProxy;
@@ -41,6 +44,7 @@ import org.joda.time.LocalDate;
 
 import play.Logger;
 import play.Play;
+import play.data.binding.As;
 import play.data.validation.Required;
 import play.db.jpa.Blob;
 import play.db.jpa.JPA;
@@ -451,156 +455,6 @@ public class Absences extends Controller{
 				Stampings.personStamping(personId, yearFrom, monthFrom);
 			}
 		}
-
-		/**
-		 * qui controllare il fatto che l'utente da tastiera possa aver inserito il codice "FER" e con quello, quindi, andare a cercare di 
-		 * inserire il giusto codice di assenza per ferie in base a quante ferie potevano essere rimaste dall'anno precedente, eventualmente passare
-		 * da quelle dell'anno in corso o ancora dai permessi legge...ok ma qual'è l'ordine? :-)
-		 */
-//		if(absenceType.code.equals("FER")){
-//			
-//			if(PersonUtility.canPersonTakeAbsenceInShiftOrReperibility(person, new LocalDate(yearFrom,monthFrom,dayFrom))){
-//				Logger.debug("%s %s non è in turno o in reperibilità", person.name, person.surname);
-//
-//				if(dateTo.isBefore(dateFrom) || dateTo.isEqual(dateFrom)){
-//					AbsenceType abt = PersonUtility.whichVacationCode(person, yearFrom, monthFrom, dayFrom);
-//					PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, new LocalDate(yearFrom, monthFrom, dayFrom)).first();
-//					if(pd == null){
-//						pd = new PersonDay(person, new LocalDate(yearFrom, monthFrom, dayFrom));
-//						pd.create();
-//					}
-//					Absence absence = new Absence();
-//					absence.absenceType = abt;
-//					absence.personDay = pd;
-//					absence.save();
-//					pd.absences.add(absence);
-//					pd.populatePersonDay();
-//					pd.save();
-//					pd.updatePersonDay();
-//					
-//					flash.success("Inserito il codice di assenza %s per il giorno %s", abt.code, pd.date);
-//					//render("@save");
-//					Stampings.personStamping(personId, pd.date.getYear(), pd.date.getMonthOfYear());
-//				}
-//				else{
-//
-//					List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
-//							person, dateFrom, dateTo).fetch();
-//
-//					if(pdList.size() != 0){
-//						for(PersonDay pd : pdList){
-//							AbsenceType abt = PersonUtility.whichVacationCode(person, yearFrom, monthFrom, dayFrom);
-//							Absence absence = new Absence();
-//							absence.absenceType = abt;
-//							absence.personDay = pd;
-//							absence.save();
-//							pd.absences.add(absence);
-//							pd.save();
-//							pd.populatePersonDay();
-//							pd.updatePersonDay();
-//						}
-//					}
-//					else{
-//						while(!dateFrom.isAfter(dateTo)){
-//							//Logger.debug("Devo creare il personDay perchè il giorno è futuro rispetto a oggi");
-//							AbsenceType abt = PersonUtility.whichVacationCode(person, yearFrom, monthFrom, dayFrom);
-//							PersonDay pd = PersonUtility.createPersonDayFromDate(person, dateFrom);
-//							if(pd != null){
-//								//Logger.debug("Nel controller absences vado a creare il personDay e a inserire l'assenza per %s %s nel giorno %s", 
-//									//	person.name, person.surname, dateFrom);
-//								pd.create();
-//								Absence absence = new Absence();
-//								absence.absenceType = abt;
-//								absence.personDay = pd;
-//								absence.save();
-//								pd.absences.add(absence);
-//								pd.save();
-//
-//								pd.populatePersonDay();
-//								pd.save();
-//								pd.updatePersonDay();
-//							}
-//							dateFrom = dateFrom.plusDays(1);
-//						}
-//					}
-//					
-//				}
-//				//Administration.fixPersonSituation(person.id, yearFrom, monthFrom);
-//				flash.success("Inserito il codice di assenza per il periodo richiesto");
-//				//render("@save");
-//				Stampings.personStamping(personId, yearFrom, monthFrom);
-//
-//			}
-//			else{
-//				Logger.debug("%s %s è in turno, reperibilità", person.name, person.surname);
-//				flash.error("Non si può inserire un giorno di ferie per %s %s che è in turno/reperibilità. \n Contattarlo e chiedere spiegazioni", 
-//						person.name, person.surname);
-//				//FIXME: e dopo aver ricevuto le spiegazioni come forzo l'inserimento??
-//				//render("@save");
-//				Stampings.personStamping(personId, yearFrom, monthFrom);
-//			}
-//
-//		}
-
-		/**
-		 * controllo che le persone che richiedono il riposo compensativo, che hanno una qualifica compresa tra 1 e 3, non abbiano superato
-		 * il massimo numero di giorni di riposo compensativo consentiti e presenti in configurazione
-		 */
-		/*
-		if(absenceType.code.equals("91")){
-			
-			Logger.debug("Devo inserire un codice %s per %s %s", absenceType.code, person.name, person.surname);
-			LocalDate actualDate = new LocalDate(yearFrom, monthFrom, dayFrom);
-			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, actualDate).first();
-			if(pd == null){
-				pd = new PersonDay(person, actualDate);
-				pd.create();
-			}
-			
-			if(person.qualification.qualification > 0 && person.qualification.qualification < 4){
-				Configuration config = Configuration.getCurrentConfiguration();
-				
-				
-				 
-				Query query = JPA.em().createQuery("SELECT abs FROM Absence abs WHERE abs.personDay.person = :person "+ 
-						"AND abs.personDay.date between :dateStart AND :dateTo AND abs.absenceType.code = :code");
-				query.setParameter("person", pd.person).
-				setParameter("dateStart", new LocalDate(yearFrom, 1,1)).
-				setParameter("dateTo",actualDate).
-				setParameter("code", "91");
-				List<Object> resultList = query.getResultList();
-				Logger.debug("Il numero di assenze con codice %s fino a oggi è %d", absenceType.code, resultList.size());
-				if(resultList.size() >= config.maxRecoveryDaysOneThree){
-					flash.error("Il dipendente %s %s non può usufruire del codice di assenza %s poichè ha raggiunto il limite previsto per" +
-							"quel codice", person.name, person.surname, absenceType.code);
-					//render("@save");
-					//return;
-					Stampings.personStamping(personId, yearFrom, monthFrom);
-				}
-			}
-			if(!PersonUtility.canTakeCompensatoryRest(person, pd.date))
-			{
-				flash.error("Impossibile aggiungere Riposo Compensativo perchè alla data il residuo positivo è insufficiente.");
-				//render("@save");
-				Stampings.personStamping(personId, yearFrom, monthFrom);
-			}
-			
-			Absence absence = new Absence();
-			absence.absenceType = absenceType;
-			absence.personDay = pd;
-			absence.save();
-			pd.absences.add(absence);
-			pd.populatePersonDay();
-			pd.updatePersonDay();
-			pd.save();
-			//Administration.fixPersonSituation(person.id, yearFrom, monthFrom);
-			flash.success("Aggiunto codice di assenza %s ", absenceType.code);
-			//render("@save");
-			Stampings.personStamping(personId, yearFrom, monthFrom);
-			
-		}		
-		*/
-		
 		
 		if(absenceType.absenceTypeGroup != null){
 			CheckMessage checkMessage = PersonUtility.checkAbsenceGroup(absenceType, person, dateFrom);
@@ -1249,7 +1103,33 @@ public class Absences extends Controller{
 		return false;
 
 	}
+	
+	/**
+	 * metodo da chiamare per inviare via json al chiamante la lista di persone con, per ogni codice di assenza, il periodo nel quale
+	 * quel codice è stato utilizzato
+	 */
+	public static void absenceInPeriod(@As(binder=JsonPersonEmailBinder.class) PersonEmailFromJson body){
+		
+		Logger.debug("Entrato nel metodo getAbsenceInPeriod...");
+		PersonPeriodAbsenceCode personPeriodAbsenceCode = new PersonPeriodAbsenceCode();
+		Person person = Person.find("Select p from Person p, ContactData cd where cd.person = p and cd.email = ?", body.email).first();
+		//Person person = Person.findById(146L);
+		personPeriodAbsenceCode.name = person.name;
+		personPeriodAbsenceCode.surname = person.surname;
+		personPeriodAbsenceCode.dateFrom = body.dateFrom != null ? body.dateFrom : new Date();
+		personPeriodAbsenceCode.dateTo = body.dateTo != null ? body.dateFrom : new Date();
+		Absence absence = Absence.find("Select abs from Absence abs, PersonDay pd " +
+				"where abs.personDay = pd and pd.date between ? and ? and pd.person = ?", body.dateFrom, body.dateTo, person).first();
+		
+		personPeriodAbsenceCode.code = absence.absenceType.code;
+		
+		renderJSON(personPeriodAbsenceCode);
 
+	}
+
+	public static void setPersonEmailForAbsence(){
+		
+	}
 	
 	
 }
