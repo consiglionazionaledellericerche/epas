@@ -136,12 +136,8 @@ public class Stampings extends Controller {
 		if (year == 0 || month == 0) {
 			personStamping(personId);
 		}
-		//Person person = Person.findById(personId);
-		Person person = PersonUtility.getPersonRightsBased(Security.getPerson(), personId);
-		if(person == null){
-			flash.error("Non si può accedere a una persona che non fa parte della propria sede distaccata!!!");
-			Application.indexAdmin();
-		}
+		Person person = Person.findById(personId);
+		
 		if(!person.isActiveInMonth(month, year))
 		{
 			flash.error("Si è cercato di accedere a un mese al di fuori del contratto valido per %s %s. " +
