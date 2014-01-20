@@ -39,15 +39,12 @@ public class JsonPersonEmailBinder implements TypeBinder<PersonEmailFromJson>{
 			List<Person> persons = new ArrayList<Person>();
 			Logger.debug("Aha!");
 			
-			//Logger.debug("JsonArray---");
+			
 			Person person = null;
 			JsonObject macroJsonObject = new JsonParser().parse(value).getAsJsonObject();
-			Logger.debug("Macro json: %s", macroJsonObject.toString());
+
 			String dataInizio = macroJsonObject.get("dateFrom").getAsString();
 			String dataFine = macroJsonObject.get("dateTo").getAsString();
-			Logger.debug("Date inizio e fine...%s %s", dataInizio, dataFine);
-			//String dateFrom = new Date(dataInizio);
-			//Date dateTo = new Date(dataFine);
 			PersonEmailFromJson pefjl = new PersonEmailFromJson(persons, dataInizio, dataFine);
 			JsonObject jsonObject = null;
 			JsonArray jsonArray = macroJsonObject.get("emails").getAsJsonArray();
@@ -56,18 +53,14 @@ public class JsonPersonEmailBinder implements TypeBinder<PersonEmailFromJson>{
 				
 				jsonObject = jsonElement.getAsJsonObject();
 				email = jsonObject.get("email").getAsString();
-				Logger.debug("Email corretta: %s", email);
+
 				person = Person.find("SELECT p FROM Person p WHERE p.contactData.email = ?", email).first();
-				Logger.debug("Trovata persona: %s %s", person.name, person.surname);								
-				
 				persons.add(person);
 			}
 			Logger.debug("Ritorno lista persone...%s", persons);
 			pefjl.persons = persons;
 			pefjl.dateFrom = dataInizio;
 			pefjl.dateTo = dataFine;
-			Logger.debug("Data inizio: %s", dataInizio);
-			Logger.debug("Data fine: %s", dataFine);
 			return pefjl;
 		}
 		catch(Exception e){
