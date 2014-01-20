@@ -35,7 +35,7 @@ import models.WorkingTimeTypeDay;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
 import models.enumerate.JustifiedTimeAtWork;
-import models.exports.PersonEmailFromJson;
+import models.exports.PersonEmailFromJsonList;
 import models.exports.PersonPeriodAbsenceCode;
 import models.rendering.VacationsRecap;
 
@@ -1108,22 +1108,29 @@ public class Absences extends Controller{
 	 * metodo da chiamare per inviare via json al chiamante la lista di persone con, per ogni codice di assenza, il periodo nel quale
 	 * quel codice è stato utilizzato
 	 */
-	public static void absenceInPeriod(@As(binder=JsonPersonEmailBinder.class) PersonEmailFromJson body){
+	public static void absenceInPeriod(@As(binder=JsonPersonEmailBinder.class) PersonEmailFromJsonList body){
 		
 		Logger.debug("Entrato nel metodo getAbsenceInPeriod...");
+		List<PersonPeriodAbsenceCode> personsToRender = new ArrayList<PersonPeriodAbsenceCode>();
 		PersonPeriodAbsenceCode personPeriodAbsenceCode = new PersonPeriodAbsenceCode();
-		Person person = Person.find("Select p from Person p, ContactData cd where cd.person = p and cd.email = ?", body.email).first();
+		for(Person person : body.persons){
+			personPeriodAbsenceCode.name = person.name;
+			personPeriodAbsenceCode.surname = person.surname;
+			personPeriodAbsenceCode.dateFrom = body.dateFrom != null ? body.dateFrom : new LocalDate();
+			personPeriodAbsenceCode.dateTo = body.dateTo != null ? body.dateFrom : new LocalDate();
+			Absence absence = Absence.find("Select abs from Absence abs, PersonDay pd " +
+					"where abs.personDay = pd and pd.date between ? and ? and pd.person = ?", body.dateFrom, body.dateTo, person).first();
+			
+			personPeriodAbsenceCode.code = absence.absenceType.code;
+			personsToRender.add(personPeriodAbsenceCode);
+			Logger.debug("asdsadsdasdsd");
+		}
+		
 		//Person person = Person.findById(146L);
-		personPeriodAbsenceCode.name = person.name;
-		personPeriodAbsenceCode.surname = person.surname;
-		personPeriodAbsenceCode.dateFrom = body.dateFrom != null ? body.dateFrom : new Date();
-		personPeriodAbsenceCode.dateTo = body.dateTo != null ? body.dateFrom : new Date();
-		Absence absence = Absence.find("Select abs from Absence abs, PersonDay pd " +
-				"where abs.personDay = pd and pd.date between ? and ? and pd.person = ?", body.dateFrom, body.dateTo, person).first();
 		
-		personPeriodAbsenceCode.code = absence.absenceType.code;
+		renderJSON(personsToRender);
 		
-		renderJSON(personPeriodAbsenceCode);
+		
 
 	}
 
