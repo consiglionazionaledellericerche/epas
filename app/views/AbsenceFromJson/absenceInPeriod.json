@@ -1,0 +1,17 @@
+ {
+ "personsToRender" : [
+	 %{ 
+	  	for (person in personsToRender) {
+	  		}%
+  			{
+   				"nome" : ${person.name},
+  				"cognome" : ${person.surname},
+  				"tipo_assenza" : ${person.code},
+  				"da" : ${person.dateFrom.toString()},
+  				"a" : ${person.dateTo.toString()}
+ 	  		},		
+	  		%{
+	  	}
+	  }% 
+	]
+}
