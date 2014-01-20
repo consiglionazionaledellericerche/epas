@@ -19,47 +19,47 @@ public class Application extends Controller {
     
     public static void indexAdmin() {
 		Logger.debug("chiamato metodo indexAdmin dell'Application controller");
-		
-		//inizializzazione functional menu
-		//month
-		String monthSelected = session.get("monthSelected");
-		if(monthSelected!=null && !monthSelected.equals("")){
-			session.put("monthSelected", monthSelected);
-		}
-		else{
-			session.put("monthSelected", new LocalDate().getMonthOfYear());
-		}
-		
-		//year
-		String yearSelected = session.get("yearSelected");
-		if(yearSelected!=null && !yearSelected.equals("")){
-			session.put("yearSelected", yearSelected);
-		}
-		else{
-			session.put("yearSelected", new LocalDate().getYear());
-		}
-		
-		//person
-		String personSelected = session.get("personSelected");
-		if(personSelected!=null && !personSelected.equals("")){
-			session.put("personSelected", personSelected);
-		}
-		else{
-			session.put("personSelected", Security.getPerson().id);
-		}
-		
-		//method
-		String methodSelected = session.get("methodSelected");
-		if(methodSelected!=null && !methodSelected.equals(""))
-		{
-			Logger.debug("put1: %s ", methodSelected);
-			session.put("methodSelected", methodSelected);
-		}
-		else
-		{
-			Logger.debug("put2: %s", methodSelected);
-			session.put("methodSelected", "stampingsAdmin");
-		}
+//		
+//		//inizializzazione functional menu
+//		//month
+//		String monthSelected = session.get("monthSelected");
+//		if(monthSelected!=null && !monthSelected.equals("")){
+//			session.put("monthSelected", monthSelected);
+//		}
+//		else{
+//			session.put("monthSelected", new LocalDate().getMonthOfYear());
+//		}
+//		
+//		//year
+//		String yearSelected = session.get("yearSelected");
+//		if(yearSelected!=null && !yearSelected.equals("")){
+//			session.put("yearSelected", yearSelected);
+//		}
+//		else{
+//			session.put("yearSelected", new LocalDate().getYear());
+//		}
+//		
+//		//person
+//		String personSelected = session.get("personSelected");
+//		if(personSelected!=null && !personSelected.equals("")){
+//			session.put("personSelected", personSelected);
+//		}
+//		else{
+//			session.put("personSelected", Security.getPerson().id);
+//		}
+//		
+//		//method
+//		String methodSelected = session.get("methodSelected");
+//		if(methodSelected!=null && !methodSelected.equals(""))
+//		{
+//			Logger.debug("put1: %s ", methodSelected);
+//			session.put("methodSelected", methodSelected);
+//		}
+//		else
+//		{
+//			Logger.debug("put2: %s", methodSelected);
+//			session.put("methodSelected", "stampingsAdmin");
+//		}
 		
 		render();
        

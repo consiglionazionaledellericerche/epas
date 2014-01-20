@@ -137,6 +137,7 @@ public class Stampings extends Controller {
 			personStamping(personId);
 		}
 		Person person = Person.findById(personId);
+		
 		if(!person.isActiveInMonth(month, year))
 		{
 			flash.error("Si è cercato di accedere a un mese al di fuori del contratto valido per %s %s. " +

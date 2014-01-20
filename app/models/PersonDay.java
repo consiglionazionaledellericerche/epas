@@ -534,33 +534,29 @@ public class PersonDay extends Model {
 	 */
 	public void populatePersonDay()
 	{
-		//Check
-		try {
-			if(this.date.isBefore(new LocalDate()))
-				this.checkForPersonDayInTrouble();
-		} 
-		catch(Exception e) {
-			Logger.info("Catturata eccezione checkForPersonDayInTrouble person=%s, giorno=%s", this.person, this.date);
-		}
 		
+		//controllo problemi strutturali del person day
+		if(this.date.isBefore(new LocalDate()))
+			this.checkForPersonDayInTrouble();
+
 		//Strutture dati transienti necessarie al calcolo
+		
 		if(personDayContract==null)
 		{
 			this.personDayContract = this.person.getContractFromHeap(date);
+			//Se la persona non ha un contratto attivo non si fanno calcoli per quel giorno, le timbrature vengono comunque mantenute
+			if(personDayContract==null)
+				return;
 		}
 		if(previousPersonDayInMonth==null)
 		{
 			associatePreviousInMonth();
 		}
-		
-		//Se la persona non ha un contratto attivo non si fanno calcoli per quel giorno, le timbrature vengono comunque mantenute
-		if (personDayContract == null) 
+		if(previousPersonDayInMonth!=null && previousPersonDayInMonth.personDayContract==null)
 		{
-			return;
+			this.previousPersonDayInMonth.personDayContract = this.person.getContractFromHeap(this.previousPersonDayInMonth.date);
 		}
-
-		//this.isTimeAtWorkAutoCertificated = this.isFixedTimeAtWork(); rmAutoCertificate
-		//this.isHoliday = this.isHoliday();	rmHoliday
+		
 		
 		//controllo uscita notturna
 		this.checkExitStampNextDay();
@@ -639,15 +635,18 @@ public class PersonDay extends Model {
 				}
 			}
 		}
+		
 		//giorno senza problemi, se era in trouble lo fixo
 		if(this.troubles!=null && this.troubles.size()>0)
 		{
 			//per adesso no storia, unico record
-			PersonDayInTrouble pdt = troubles.get(0);
-			//Logger.info("Il problema %s %s %s e' risultato fixato", this.date, this.person.surname, this.person.name);
+			PersonDayInTrouble pdt = troubles.get(0);	
 			pdt.fixed = true;
 			pdt.save();
+			//this.troubles.add(pdt);
+			this.save();
 		}
+
 	}
 	
 	/**
@@ -874,7 +873,7 @@ public class PersonDay extends Model {
 	private List<PairStamping> getGapLunchPairs(List<PairStamping> validPairs)
 	{
 		//Assumo che la timbratura di uscita e di ingresso debbano appartenere alla finestra 12:00 - 15:00
-		Configuration config = Configuration.getCurrentConfiguration();
+		Configuration config = Configuration.getConfiguration(this.date);
 		LocalDateTime startLunch = new LocalDateTime()
 		.withYear(this.date.getYear())
 		.withMonthOfYear(this.date.getMonthOfYear())

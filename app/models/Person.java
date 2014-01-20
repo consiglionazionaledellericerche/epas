@@ -67,7 +67,10 @@ import play.data.validation.Email;
 import play.data.validation.Required;
 import play.db.jpa.JPA;
 import play.db.jpa.Model;
+import play.mvc.Controller;
 import play.mvc.Http.Request;
+import play.mvc.Scope.Params;
+import play.mvc.Scope.Session;
 import play.mvc.With;
 
 /**
@@ -552,15 +555,32 @@ public class Person extends Model {
 	 * @return la lista di persone attive a quella data
 	 */
 	public static List<Person> getActivePersons(LocalDate date){
-		List<Person> activePersons = Person.find(
-				"Select distinct (p) " +
-				"from Person p, Contract c " +
-				"where c.person = p "
-				+ "and (c.endContract is null or c.endContract > ?) "
-				+ "and (c.expireContract > ? or c.expireContract is null) "
-				+ "and (c.beginContract < ? or c.beginContract is null) "
-				+ "and p.username <> ? " + 
-				"order by p.surname, p.name", date, date, date, "epas.clocks").fetch();
+		List<Person> activePersons = null;
+		Person person = Security.getPerson();
+		if(person.office.remoteOffices.isEmpty()){
+			activePersons = Person.find(
+					"Select distinct (p) " +
+					"from Person p, Contract c " +
+					"where c.person = p "
+					+ "and (c.endContract is null or c.endContract > ?) "
+					+ "and (c.expireContract > ? or c.expireContract is null) "
+					+ "and (c.beginContract < ? or c.beginContract is null) "
+					+ "and p.username <> ? " + 
+					"order by p.surname, p.name", date, date, date, "epas.clocks").fetch();
+			
+		}
+		else{
+			activePersons =Person.find(
+					"Select distinct (p) " +
+					"from Person p, Contract c " +
+					"where c.person = p " +
+					"and p.office = ?" 
+					+ "and (c.endContract is null or c.endContract > ?) "
+					+ "and (c.expireContract > ? or c.expireContract is null) "
+					+ "and (c.beginContract < ? or c.beginContract is null) "
+					+ "and p.username <> ? " + 
+					"order by p.surname, p.name", person.office, date, date, date, "epas.clocks").fetch();
+		}
 		return activePersons;
 
 	}
@@ -612,15 +632,26 @@ public class Person extends Model {
 		/**
 		 * FIXME: rivedere le select in modo da renderle più efficienti
 		 */
-		List<Person> persons = Person.find("SELECT p FROM Person p ORDER BY p.surname, p.othersSurnames, p.name").fetch();
+		//List<Person> persons = Person.find("SELECT p FROM Person p ORDER BY p.surname, p.othersSurnames, p.name").fetch();
+		List<Person> persons = null;
+		Logger.debug("Id persona loggata attualmente: %s", Security.getPerson().id);
+		Person person = Security.getPerson();
+		
+		if(!person.office.remoteOffices.isEmpty()){
+			persons = Person.find("SELECT p FROM Person p ORDER BY p.surname, p.othersSurnames, p.name").fetch();
+		}
+		else{
+			persons = Person.find("SELECT p FROM Person p where p.office = ? ORDER BY p.surname, p.othersSurnames, p.name", person.office).fetch();
+		}
+		
 		List<Person> activePersons = new ArrayList<Person>();
-		for(Person person : persons)
+		for(Person p : persons)
 		{
-			if(person.isActiveInMonth(month, year))
+			if(p.isActiveInMonth(month, year))
 			{
-				if(person.username.equals("epas.clocks"))
+				if(p.username.equals("epas.clocks"))
 					continue;
-				activePersons.add(person);
+				activePersons.add(p);
 			}
 		}
 		return activePersons;
