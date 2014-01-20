@@ -217,7 +217,7 @@ PUT 	/overtimes/setSupervisorTotalOvertimes/{email}/{hours}						Overtimes.setSu
 PUT		/stampings/create						StampingsFromClient.create
 
 #Invio periodi di assenza 
-GET		/absences/absenceInPeriod				Absences.absenceInPeriod
+POST	/absences/absenceInPeriod				Absences.absenceInPeriod
 POST	/absences/setPersonEmailForAbsence		Absences.setPersonEmailForAbsence
 
 # Catch all
