@@ -22,14 +22,14 @@ import com.google.gson.JsonParser;
 
 import models.Person;
 
-import models.exports.PersonEmailFromJsonList;
+import models.exports.PersonEmailFromJson;
 import models.exports.StampingFromClient;
 import play.Logger;
 import play.data.binding.TypeBinder;
 import play.mvc.Http.Request;
 
 
-public class JsonPersonEmailBinder implements TypeBinder<PersonEmailFromJsonList>{
+public class JsonPersonEmailBinder implements TypeBinder<PersonEmailFromJson>{
 
 	@Override
 	public Object bind(String name, Annotation[] annotations, String value,
@@ -39,22 +39,23 @@ public class JsonPersonEmailBinder implements TypeBinder<PersonEmailFromJsonList
 			List<Person> persons = new ArrayList<Person>();
 			Logger.debug("Aha!");
 			
-			Logger.debug("JsonArray---");
+			//Logger.debug("JsonArray---");
 			Person person = null;
 			JsonObject macroJsonObject = new JsonParser().parse(value).getAsJsonObject();
 			Logger.debug("Macro json: %s", macroJsonObject.toString());
 			String dataInizio = macroJsonObject.get("dateFrom").getAsString();
 			String dataFine = macroJsonObject.get("dateTo").getAsString();
 			Logger.debug("Date inizio e fine...%s %s", dataInizio, dataFine);
-			LocalDate dateFrom = new LocalDate(dataInizio);
-			LocalDate dateTo = new LocalDate(dataFine);
-			PersonEmailFromJsonList pefjl = new PersonEmailFromJsonList();
+			//String dateFrom = new Date(dataInizio);
+			//Date dateTo = new Date(dataFine);
+			PersonEmailFromJson pefjl = new PersonEmailFromJson(persons, dataInizio, dataFine);
 			JsonObject jsonObject = null;
 			JsonArray jsonArray = macroJsonObject.get("emails").getAsJsonArray();
+			String email = "";
 			for(JsonElement jsonElement : jsonArray){
 				
 				jsonObject = jsonElement.getAsJsonObject();
-				String email = jsonObject.get("email").getAsString();
+				email = jsonObject.get("email").getAsString();
 				Logger.debug("Email corretta: %s", email);
 				person = Person.find("SELECT p FROM Person p WHERE p.contactData.email = ?", email).first();
 				Logger.debug("Trovata persona: %s %s", person.name, person.surname);								
@@ -63,10 +64,10 @@ public class JsonPersonEmailBinder implements TypeBinder<PersonEmailFromJsonList
 			}
 			Logger.debug("Ritorno lista persone...%s", persons);
 			pefjl.persons = persons;
-			pefjl.dateFrom = dateFrom;
-			pefjl.dateTo = dateTo;
-			Logger.debug("Data inizio: %s", dateFrom);
-			Logger.debug("Data fine: %s", dateTo);
+			pefjl.dateFrom = dataInizio;
+			pefjl.dateTo = dataFine;
+			Logger.debug("Data inizio: %s", dataInizio);
+			Logger.debug("Data fine: %s", dataFine);
 			return pefjl;
 		}
 		catch(Exception e){

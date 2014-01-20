@@ -15,8 +15,8 @@ public class PersonPeriodAbsenceCode {
 	public String name;
 	public String surname;
 	public String code;
-	public LocalDate dateFrom;
-	public LocalDate dateTo;
+	public String dateFrom;
+	public String dateTo;
 	
 	
 }
