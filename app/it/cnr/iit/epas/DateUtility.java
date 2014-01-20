@@ -68,7 +68,7 @@ public class DateUtility {
 	
 	public static boolean isGeneralHoliday(LocalDate date){
 		
-		Configuration config = Configuration.getConfiguration(date.toDate());
+		Configuration config = Configuration.getConfiguration(date);
 		LocalDate easter = findEaster(date.getYear());
 		LocalDate easterMonday = easter.plusDays(1);
 		if(date.getDayOfMonth() == easter.getDayOfMonth() && date.getMonthOfYear() == easter.getMonthOfYear())
