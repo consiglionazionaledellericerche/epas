@@ -49,12 +49,7 @@ public class Persons extends Controller {
 		List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract", person).fetch();
 		List<Office> officeList = null;
 		Person personLogged = Security.getPerson();
-		if(!personLogged.office.remoteOffices.isEmpty()){
-			officeList = Office.findAll();
-		}
-		else{
-			officeList = RemoteOffice.find("Select office from RemoteOffice office where office.joiningDate is not null").fetch();
-		}
+		officeList = personLogged.getOfficeAllowed();
 		
 		
 		InitializationTime initTime = InitializationTime.find("Select init from InitializationTime init where init.person = ?", person).first();

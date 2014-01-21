@@ -28,6 +28,10 @@ public class Administrators extends Controller {
 
 	@Check(Security.INSERT_AND_UPDATE_ADMINISTRATOR)
 	public static void list(){
+		/**
+		 * TODO: cambiare i permessi in relazione al fatto che l'utente loggato sia effettivamente attivo nella data in cui visita
+		 * la pagina di lista amministratori
+		 */
 		List<Person> administratorList = new ArrayList<Person>();
 		List<Person> personList = Person.find("Select p from Person p where p.name <> ? order by p.surname", "Admin").fetch();
 		for(Person p : personList){
