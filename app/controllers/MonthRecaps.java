@@ -200,7 +200,7 @@ public class MonthRecaps extends Controller{
 		
 		Table<Person, String, Integer> tableMonthRecap = TreeBasedTable.create(PersonNameComparator, AbsenceCodeComparator);
 
-		List<Person> activePersons = Person.getActivePersonsInMonth(month, year);
+		List<Person> activePersons = Person.getActivePersonsInMonth(month, year, false);
 
 		//logica mese attuale
 		if(today.getYear()==year && today.getMonthOfYear()==month)

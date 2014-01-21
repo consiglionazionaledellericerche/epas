@@ -815,7 +815,7 @@ public class PersonUtility {
 		JPAPlugin.startTx(false);
 		if(personId==null)
 		{
-			List<Person> personList = Person.getActivePersonsInMonth(month, year);
+			List<Person> personList = Person.getActivePersonsInMonth(month, year, false);
 			for(Person person : personList)
 			{
 				PersonUtility.checkHistoryError(person.id, year, month);
@@ -880,7 +880,7 @@ public class PersonUtility {
 		JPAPlugin.startTx(false);
 
 		Person personToCheck = Person.findById(personid);
-		if(!personToCheck.isActive(dayToCheck)) {
+		if(!personToCheck.isActiveInDay(dayToCheck)) {
 			return;
 		}
 
