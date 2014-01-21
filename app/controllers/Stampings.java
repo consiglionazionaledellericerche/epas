@@ -482,7 +482,7 @@ public class Stampings extends Controller {
 		LocalDate dayPresence = new LocalDate(year, month, day);
 		int numberOfInOut = maxNumberOfStampingsInMonth(year, month, day);
 		
-		List<Person> activePerson = Person.getActivePersons(new LocalDate(year, month, day));
+		List<Person> activePerson = Person.getActivePersonsInDay(day, month, year);
 		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
 		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();						
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
@@ -497,40 +497,6 @@ public class Stampings extends Controller {
 			
 		}
 
-		/*
-		List<Stamping> stampings = null;
-		for(Person p : activePerson){
-			//Logger.trace("Inizio le operazioni di inserimento in tabella per %s %s ",p.name, p.surname);
-			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.date = ? and pd.person = ?", dayPresence, p).first();
-			//Logger.trace("Cerco il person day in data %s per %s %s", today, p.name, p.surname);
-			if(pd != null){
-				stampings = pd.getStampingsForTemplate(maxNumberOfInOut/2, false);
-				if(pd.absences.size() > 0)
-					builder.put(p, "Assenza", pd.absences.get(0).absenceType.code);
-				else
-					builder.put(p, "Assenza", " ");
-				int size = stampings.size();
-
-				for(int i = 0; i < size; i++){
-					if(stampings.get(i).date != null){
-						if(stampings.get(i).way == WayType.in ){
-							builder.put(p, 1+(i+1)/2+"^ Ingresso", PersonTags.toCalendarTime(stampings.get(i).date));
-							Logger.debug("inserisco in tabella il " +1+(i+1)/2+" ingresso per %s %s", p.name, p.surname);
-						}
-						else{
-							builder.put(p, 1+(i/2)+"^ Uscita", PersonTags.toCalendarTime(stampings.get(i).date));
-							Logger.debug("inserisco in tabella la "+1+(i/2)+ " uscita per %s %s", p.name, p.surname);
-						}
-					}
-
-				}
-
-				builder.put(p, "Tempo Lavoro", PersonTags.toHourTime(pd.timeAtWork));
-			}
-
-		}
-		tablePersonDailyPresence = builder.build();
-		*/
 		
 		
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);
@@ -542,7 +508,7 @@ public class Stampings extends Controller {
 
 		LocalDate beginMonth = new LocalDate(year, month, 1);
 
-		List<Person> activePersons = Person.getActivePersons(new LocalDate(year, month, 1));
+		List<Person> activePersons = Person.getActivePersonsInMonth(month, year);
 		Builder<Person, LocalDate, String> builder = ImmutableTable.<Person, LocalDate, String>builder().orderColumnsBy(new Comparator<LocalDate>() {
 
 			public int compare(LocalDate date1, LocalDate date2) {
