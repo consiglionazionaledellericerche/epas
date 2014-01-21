@@ -74,12 +74,21 @@ public class NavigationMenu extends Controller {
 		
 		session.put("dispatched", "false");
 		
-		List<Person> persons = (List<Person>)Cache.get("persons" + year + month + personLogged.id); 
-		if(persons == null)
+		List<Person> persons = new ArrayList<Person>(); 
+		if(personLogged.isViewPersonAvailable())
 		{
-			persons = new ArrayList<Person>();
-			persons = Person.getActivePersonsInMonth(month, year, false);
-			Cache.set("persons" + year + month + personLogged.id, persons);
+			String cacheParam = "persons" + year + month + "-" +personLogged.id;
+			persons = (List<Person>)Cache.get(cacheParam); 
+			if(persons == null)
+			{
+				persons = new ArrayList<Person>();
+				persons = Person.getActivePersonsInMonth(month, year, false);
+				Cache.set(cacheParam, persons);
+			}
+		}
+		else
+		{
+			// ?? tanto non mi serve
 		}
 	
 		
