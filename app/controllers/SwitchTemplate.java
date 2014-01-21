@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import it.cnr.iit.epas.ActionMenuItem;
+import it.cnr.iit.epas.PersonUtility;
 import models.Person;
 
 import org.joda.time.LocalDate;
@@ -50,9 +51,20 @@ public class SwitchTemplate extends Controller{
 		Long personId = params.get("personId") != null ? Long.parseLong(params.get("personId")) : Security.getPerson().id; 
 		session.put("personSelected", personId);
 		
-
+		//controllo se una certa funzionalità viene chiamata tramite curl 
+		Person personLogged = Security.getPerson();
+		Person p = PersonUtility.getPersonRightsBased(personLogged, personId);
+		if(p == null){
+			flash.error("Non si può accedere alla funzionalità per la persona con id %d", personId);
+			Application.indexAdmin();
+		}
+		
 		switch (menuItem) {
 
+		case offices:
+			Offices.showOffices();
+			break;
+		
 		case missingStamping:
 			Stampings.missingStamping(year, month);
 			break;

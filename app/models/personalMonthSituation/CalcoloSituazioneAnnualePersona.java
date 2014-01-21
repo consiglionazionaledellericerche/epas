@@ -13,11 +13,13 @@ public class CalcoloSituazioneAnnualePersona {
 		public List<Mese> mesi;
 		
 		/**
-		 * 
+		 * Costruisce la situazione annuale residuale della persona.
 		 * @param person
 		 * @param year
 		 * @param initializationTime
-		 * @param calcolaFinoA 
+		 * @param calcolaFinoA valorizzare questo campo per fotografare la situazione residuale in un certo momento 
+		 *   (ad esempio se si vuole verificare la possibilità di prendere riposo compensativo in un determinato giorno). 
+		 *   Null se si desidera la situazione residuale a oggi. 
 		 */
 		public CalcoloSituazioneAnnualePersona(Person person, int year, LocalDate calcolaFinoA)
 		{

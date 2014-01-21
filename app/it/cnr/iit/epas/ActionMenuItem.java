@@ -13,6 +13,7 @@ public enum ActionMenuItem {
     competencesAdmin("Gestione competenze", "insertAndUpdateCompetences"),    
     manageWorkingTime("Gestione orari di lavoro", "insertAndUpdateWorkingTime"),
     confParameters("Configurazione parametri", "insertAndUpdateConfiguration"),
+    offices("Gestione sedi", "insertAndUpdateOffices"),
     administrator("Gestione amministratori", "insertAndUpdateAdministrator"),
     totalMonthlyAbsences("Totale assenze mensili", "insertAndUpdateAbsence"),
     monthRecap("Riepilogo mensile", "insertAndUpdatePerson"),

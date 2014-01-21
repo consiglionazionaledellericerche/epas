@@ -15,10 +15,12 @@ import models.ContactData;
 import models.Contract;
 import models.InitializationTime;
 import models.Location;
+import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.PersonWorkingTimeType;
 import models.Qualification;
+import models.RemoteOffice;
 //import models.RemoteOffice;
 import models.VacationCode;
 import models.VacationPeriod;
@@ -45,14 +47,16 @@ public class Persons extends Controller {
 	
 		LocalDate date = new LocalDate();
 		List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract", person).fetch();
-
+		List<Office> officeList = null;
+		Person personLogged = Security.getPerson();
+		officeList = personLogged.getOfficeAllowed();
 		
 		
 		InitializationTime initTime = InitializationTime.find("Select init from InitializationTime init where init.person = ?", person).first();
 		Integer month = date.getMonthOfYear();
 		Integer year = date.getYear();
 		Long id = person.id;		
-		render(person, contractList, initTime, month, year, id);
+		render(person, contractList, initTime, month, year, id, officeList);
 	}
 	
 	
@@ -299,8 +303,15 @@ public class Persons extends Controller {
 
 	@Check(Security.VIEW_PERSON_LIST)
 	public static void list(){
-
-		List<Person> personList = Person.find("Select p from Person p where p.name <> ? and p.name <> ? order by p.surname", "Admin", "epas").fetch();
+		Person person = Security.getPerson();
+		List<Person> personList = null;
+		if(!person.office.remoteOffices.isEmpty()){
+			personList = Person.find("Select p from Person p where p.name <> ? and p.name <> ? order by p.surname", "Admin", "epas").fetch();
+		}
+		else{
+			personList = Person.find("SELECT p FROM Person p where p.office = ? ORDER BY p.surname, p.othersSurnames, p.name", person.office).fetch();
+		}
+		
 		//Logger.debug("La lista delle persone: %s", personList.toString());
 		LocalDate date = new LocalDate();
 		List<Person> activePerson = Person.getActivePersons(date);
@@ -309,14 +320,49 @@ public class Persons extends Controller {
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void insertPerson() {
+	public static void insertPerson() throws InstantiationException, IllegalAccessException {
 		Person person = new Person();
 		Contract contract = new Contract();
 		Location location = new Location();
 		ContactData contactData = new ContactData();
 		InitializationTime initializationTime = new InitializationTime();
+		List<Office> officeList = null;
+		Person personLogged = Security.getPerson();
+		if(!personLogged.office.remoteOffices.isEmpty()){
+			officeList = Office.find("Select office from Office office").fetch();
+		}
+		else{
+			officeList = RemoteOffice.find("Select office from RemoteOffice office where office.joiningDate is not null").fetch();
+		}
+		
+		if(officeList == null || officeList.size() == 0){
+			Office office = new Office();
+			office.address = "Via Moruzzi 1, Pisa";
+			office.name = "IIT";
+			office.code = 1000;
+			
+			office.save();
+			officeList.add(office);
+			RemoteOffice remote = new RemoteOffice();
+			remote.address = "via le mani dal naso 12";
+			remote.code = 2000;
+			remote.joiningDate = new LocalDate();
+			remote.name = "asd";
+			remote.office = office;
+			remote.save();
+			officeList.add(remote);
+			
+			
+		}
+		else{
+			List<Office> office = Office.find("Select office from Office office where office.office is null").fetch();
+			Logger.debug("Lista office: %s", office.get(0).name);
+//			List<RemoteOffice> remote = RemoteOffice.findAll();
+//			Logger.debug("Lista remote: %s", remote.toString());
+		}
+		
 //		RemoteOffice remoteOffice = new RemoteOffice();
-		render(person, contract, location, contactData, initializationTime/*, remoteOffice*/);
+		render(person, contract, location, contactData, initializationTime, officeList/*, remoteOffice*/);
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
@@ -473,6 +519,12 @@ public class Persons extends Controller {
 		
 		if(person.badgeNumber == null || !person.badgeNumber.equals(params.get("badgeNumber")))
 			person.badgeNumber = params.get("badgeNumber");
+		
+		Logger.debug("Sede: %s", params.get("person.office"));
+		if(person.office == null || !person.office.id.equals(new Long(params.get("person.office")))){
+			person.office = Office.findById(Long.parseLong((params.get("person.office"))));
+		}
+		
 		
 		if(contactData != null){
 			if(contactData.email == null || !contactData.email.equals(params.get("email"))){

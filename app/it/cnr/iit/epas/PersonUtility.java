@@ -31,6 +31,7 @@ import models.PersonDayInTrouble;
 import models.PersonMonth;
 import models.PersonReperibilityDay;
 import models.PersonShiftDay;
+import models.RemoteOffice;
 import models.StampProfile;
 import models.Stamping;
 import models.VacationPeriod;
@@ -42,83 +43,6 @@ import models.personalMonthSituation.Mese;
 import models.rendering.VacationsRecap;
 
 public class PersonUtility {
-
-//	/**
-//	 * @param actualMonth, actualYear
-//	 * @return la somma dei residui mensili passati fino a questo momento; nel caso di dipendenti con qualifica da 4 a 9 
-//	 * se siamo in un mese prima di aprile i residui da calcolare sono su quello relativo all'anno precedente + i residui mensili fino a 
-//	 * quel mese; se siamo in un mese dopo aprile, invece, i residui da considerare sono solo quelli da aprile fino a quel momento.
-//	 * Nel caso invece la qualifica del dipendente sia da 1 a 3, i residui sono sempre validi e non terminano al 31/3
-//	 * 
-//	 * !!!IMPORTANTE!!! nel momento in cui si cambia la qualifica (da 4-9 a 1-3), viene cambiato anche il contratto. 
-//	 * 
-//	 */
-//
-//	public static int getResidual(Person person, LocalDate date){
-//		Logger.debug("Chiamata la funzione getResidual per %s %s alla data %s", person.name, person.surname, date);
-//		person = Person.findById(person.id);
-//		int residual = 0;
-//		if(person.qualification == null){
-//			/**
-//			 * questa persona non ha qualifica...come bisogna agire in questo caso? di norma dovrebbe essere un collaboratore...quindi non inquadrato
-//			 * come contratto cnr...
-//			 */
-//			residual = 0;
-//		}
-//		else{
-//			if(person.qualification.qualification == 1 || person.qualification.qualification == 2 || person.qualification.qualification == 3){
-//				if(person.getCurrentContract().beginContract != null && person.getCurrentContract().beginContract.isAfter(date)){
-//					residual = 0;
-//				}
-//				else{
-//					PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month < ? and pm.year = ? order by pm.month desc",
-//							person, date.getMonthOfYear(), date.getYear()).first();
-//					if(pm != null)
-//						residual = pm.totalRemainingMinutes;
-//					else
-//						/**
-//						 * TODO: controllare se questa dicitura è corretta...
-//						 */
-//						residual = 0;
-//				}
-//
-//			}
-//			else{
-//				/**
-//				 * in questo caso ritorna il residuo totale del mese precedente comprendente anche i residui derivanti dall'anno precedente
-//				 */
-//				if(date.getMonthOfYear() < Configuration.getCurrentConfiguration().monthExpireRecoveryDaysFourNine ){
-//					PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month < ? " +
-//							"and pm.year = ? order by pm.month desc", person, date.getMonthOfYear(), date.getYear()).first();			
-//					if(pm != null)		
-//						residual = residual + pm.totalRemainingMinutes;
-//					else
-//						residual = 0;
-//
-//					//					PersonYear py = PersonYear.find("Select py from PersonYear py where py.person = ? and py.year = ?", 
-//					//							person, date.getYear()-1).first();
-//					//					if(py != null)
-//					//						residual = residual + py.remainingMinutes;
-//					//					else
-//					//						residual = 0;
-//				}
-//				else{
-//					/**
-//					 * qui siamo nel caso in cui il mese è successivo a quello impostato in configurazione entro il quale poter usare le ore dell'
-//					 * anno precedente...
-//					 */
-//					List<PersonMonth> pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ?", 
-//							person, date.getYear()).fetch();
-//					for(PersonMonth personMonth : pm){
-//						residual = residual+personMonth.progressiveAtEndOfMonthInMinutes;
-//					}
-//				}
-//			}
-//		}
-//
-//		return residual;
-//
-//	}
 
 
 	/** TODO usato in Competences.java ma riscritto più volte con nuovi algoritmi, rimuoverlo dopo averlo sostituito
@@ -141,15 +65,6 @@ public class PersonUtility {
 		return positiveDifference;
 	}
 
-//	public int getOvertimeAvailable(PersonMonth personMonth) {
-//		int positiveDaysForOvertime = getPositiveDaysForOvertime(personMonth);
-//		if (positiveDaysForOvertime <= 0) {
-//			return 0;
-//		}
-//		//TODO calcolare il tempo disponibile sottraendo al positiveDaysForOvertime le eventuali ore da recuperare
-//		//dall'anno precedente, dal mese precedente e dal mese corrente
-//		return 0;
-//	}
 
 	/** TODO usato in Competences.java ma utilizza dati del person month, sostituirlo */
 	public static boolean canTakeOvertime(Person person, int year, int month){
@@ -294,79 +209,6 @@ public class PersonUtility {
 	}
 
 
-	
-
-//	/**
-//	 * 
-//	 * @param person
-//	 * @param begin
-//	 * @param end
-//	 * @return il numero di giorni in cui una persona è stata a lavoro in un giorno festivo in un certo intervallo temporale
-//	 */
-//	public static int workDayInHoliday(Person person, LocalDate begin, LocalDate end){
-//		int workDayInHoliday = 0;
-//		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-//				person, begin, end).fetch();
-//		for(PersonDay pd : pdList){
-//			if(pd.date.getDayOfWeek() == DateTimeConstants.SATURDAY || pd.date.getDayOfWeek() == DateTimeConstants.SUNDAY){
-//				workDayInHoliday++;
-//			}
-//		}
-//		return workDayInHoliday;
-//	}
-
-//	/**
-//	 * 
-//	 * @param person
-//	 * @param begin
-//	 * @param end
-//	 * @return il numero di giorni lavorativi in cui una persona è stata effettivamente a lavoro in un certo intervallo temporale
-//	 */
-//	public static int workDayInWorkingDay(Person person, LocalDate begin, LocalDate end){
-//		int workDayInWorkingDay = 0;
-//
-//		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-//				person, begin, end).fetch();
-//
-//
-//		for(PersonDay pd : pdList){
-//			if(pd.stampings != null)
-//				workDayInWorkingDay = workDayInWorkingDay + 1;
-//		}
-//
-//		return workDayInWorkingDay;
-//	}
-
-//	/**
-//	 * 
-//	 * @param pdList
-//	 * @return il numero di giorni di assenza giustificata presenti nella lista di personDay passata come parametro
-//	 */
-//	public static List<PersonDay> getJustifiedAbsences(List<PersonDay> pdList){
-//		List<PersonDay> justifiedAbsencesPersonDay = new ArrayList<PersonDay>();
-//		for(PersonDay pd : pdList){
-//
-//			if(pd.absences.size() == 1 && pd.absences.get(0).absenceType.justifiedTimeAtWork.minutesJustified == null)
-//				justifiedAbsencesPersonDay.add(pd);
-//
-//		}
-//		return justifiedAbsencesPersonDay;
-//	}
-
-//	/**
-//	 * 
-//	 * @param pdList
-//	 * @return il numero di giorni in cui ci sono assenze non giustificate (niente assenze o timbrature per il personDay)
-//	 */
-//	public static List<PersonDay> getNotJustifiedAbsences(List<PersonDay> pdList){
-//		List<PersonDay> notJustifiedAbsences = new ArrayList<PersonDay>();
-//		for(PersonDay pd : pdList){
-//			if((pd.stampings.size() == 0 && pd.absences.size() == 0) || (pd.stampings.size() == 1))
-//				notJustifiedAbsences.add(pd);
-//		}
-//		return notJustifiedAbsences;
-//	}
-
 	/**
 	 * 
 	 * @return false se l'id passato alla funzione non trova tra le persone presenti in anagrafica, una che avesse nella vecchia applicazione un id
@@ -404,57 +246,7 @@ public class PersonUtility {
 			return AbsenceType.find("byCode", "32").first();
 		
 		return null;
-		/*
-		Configuration config = Configuration.getCurrentConfiguration();
-		AbsenceType vacationFromThisYear = AbsenceType.find("byCode", "32").first();
-		AbsenceType vacationFromLastYear = AbsenceType.find("byCode", "31").first();
-		
-		Query query = JPA.em().createQuery("Select abs from Absence abs where abs.personDay.person = :person and abs.personDay.date between :begin and :end " +
-				"and abs.absenceType = :type");
-		query.setParameter("person", person).setParameter("begin", new LocalDate(year-1,1,1)).setParameter("end", new LocalDate(year-1,12,31)).setParameter("type", vacationFromThisYear);
-		List<Absence> absList = query.getResultList();
-		Logger.debug("Nell'anno passato %s %s ha usufruito di %d giorni di ferie", person.name, person.surname, absList.size());
-		
-		query.setParameter("person", person).setParameter("begin", new LocalDate().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue())
-			.setParameter("end", new LocalDate()).setParameter("type", vacationFromLastYear);
-		List<Absence> absThisYearList = query.getResultList();
-		Logger.debug("Quest'anno %s %s ha usufruito di %d giorni di ferie con codice %s relativo alle ferie dell'anno passato", person.name, person.surname, absThisYearList.size(), vacationFromLastYear.code);
-		
-
-		VacationPeriod vp = person.getCurrentContract().getCurrentVacationPeriod();
-		if((vp.vacationCode.vacationDays > absList.size() + absThisYearList.size()) && 
-				(new LocalDate(year, month, day).isBefore(new LocalDate(year, config.monthExpiryVacationPastYear, config.dayExpiryVacationPastYear)))){
-			return AbsenceType.find("byCode", "31").first();
-		}
-		else{
-			Logger.debug("%s %s ha finito i giorni di ferie dell'anno passato, passo a controllare se può prendere dei permessi legge...", person.name, person.surname);
-		}
-		AbsenceType permissionDay = AbsenceType.find("byCode", "94").first();
-		
-		query.setParameter("begin", new LocalDate().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue())
-			.setParameter("end", new LocalDate().monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue()).setParameter("person", person).setParameter("type", permissionDay);
-		List<Absence> absPermissions = query.getResultList();
-		Logger.debug("%s %s quest'anno ha usufruito di %d giorni di permesso", person.name, person.surname, absPermissions.size());
-		if(vp.vacationCode.permissionDays > absPermissions.size()){
-			return permissionDay;
-		}
-		else{
-			Logger.debug("%s %s ha terminato i suoi permessi legge. Controllo se può prendere ferie dell'anno corrente", person.name, person.surname);
-			
-		}
-	
-		query.setParameter("begin", new LocalDate().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue())
-			.setParameter("end", new LocalDate().monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue()).setParameter("person", person).setParameter("type", vacationFromThisYear);
-		List<Absence> absVacationThisYear = query.getResultList();
-		if(absVacationThisYear.size() <= vp.vacationCode.vacationDays)
-			return AbsenceType.find("byCode", "32").first();
-		else
-			return null;
-			*/
 	}
-	
-	
-	
 	
 	/**
 	 * 
@@ -890,29 +682,6 @@ public class PersonUtility {
 			}
 		}
 		return absenceCodeMap;
-		/*
-		if(absenceCodeMap.isEmpty()){
-			int i = 0;
-			for(PersonDay pd : personDays){
-				for (Absence absence : pd.absences) {
-					AbsenceType absenceType = absence.absenceType;
-					if(absenceType != null){
-						boolean stato = absenceCodeMap.containsKey(absenceType);
-						if(stato==false){
-							i=1;
-							absenceCodeMap.put(absenceType,i);            	 
-						} else{
-							i = absenceCodeMap.get(absenceType);
-							absenceCodeMap.remove(absenceType);
-							absenceCodeMap.put(absenceType, i+1);
-						}
-					}            
-				}	 
-			}       
-		}
-
-		return absenceCodeMap;	
-		*/
 	}
 	
 	/**
@@ -933,16 +702,6 @@ public class PersonUtility {
 				number++;
 		}
 		return number;
-		//return workingDays.size();
-		/*
-		int tickets=0;
-		for(PersonDay pd : workingDays)
-		{
-			if(pd.isTicketAvailable==true)
-				tickets++;
-		}
-		return tickets;
-		*/
 	}
 	
 	
@@ -1051,7 +810,7 @@ public class PersonUtility {
 		
 		if(personId==-1)
 			personId=null;
-
+		
 		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
 		JPAPlugin.startTx(false);
 		if(personId==null)
@@ -1094,10 +853,12 @@ public class PersonUtility {
 			{
 				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
 						p, actualMonth, actualMonth.dayOfMonth().withMaximumValue()).fetch();
-				for(PersonDay pd : pdList)
-				{
+
+
+				for(PersonDay pd : pdList){
 					pd.populatePersonDay();
-				}				
+				}
+
 				actualMonth = actualMonth.plusMonths(1);
 			}
 			JPAPlugin.closeTx(false);
@@ -1145,11 +906,6 @@ public class PersonUtility {
 		}
 	}
 	
-	
-	
-
-	
-	
 	/**
 	 * A partire dal mese e anno passati al metodo fino al giorno di ieri (yesterday)
 	 * controlla la presenza di errori nelle timbrature, inserisce i giorni problematici nella tabella PersonDayInTrouble
@@ -1187,6 +943,26 @@ public class PersonUtility {
 		return competenceCodeList;
 	}
 	
+	
+	/**
+	 * 
+	 * @param administrator
+	 * @param personId
+	 * @return la persona se l'amministratore che la vuole estrarre ha i diritti in termini di appartenenza alla stessa sede. 
+	 * Null altrimenti
+	 */
+	public static Person getPersonRightsBased(Person administrator, Long personId){
+		Person person = Person.findById(personId);
+		if(person == null)
+			return null;
+		if(person.office.id == administrator.office.id)
+			return person;
+		for(RemoteOffice remote : administrator.office.remoteOffices){
+			if(remote.id == person.office.id)
+				return person;
+		}
+		return null;
+	}
 
 }
 

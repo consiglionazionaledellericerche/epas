@@ -8,6 +8,7 @@ import java.util.List;
 
 import it.cnr.iit.epas.ActionMenuItem;
 import it.cnr.iit.epas.MainMenu;
+import it.cnr.iit.epas.PersonUtility;
 import models.Contract;
 import models.Person;
 
@@ -71,6 +72,7 @@ public class NavigationMenu extends Controller {
 			session.put("methodSelected", method);
 			
 		}
+		
 		session.put("dispatched", "false");
 		
 		List<Person> persons = (List<Person>)Cache.get("persons" + year + month); 
@@ -101,7 +103,15 @@ public class NavigationMenu extends Controller {
 		{
 			mainMenu = new MainMenu(personId, year, month, action, persons);
 		}		
-
+		
+		
+		Person personLogged = Security.getPerson();
+		Person p = PersonUtility.getPersonRightsBased(personLogged, personId);
+		if(p == null){
+			flash.error("Non si può accedere alla funzionalità per la persona con id %d", personId);
+			renderArgs.put("mainMenu", mainMenu);
+			Application.indexAdmin();
+		}
 		renderArgs.put("mainMenu", mainMenu);
 
 	}
@@ -173,35 +183,7 @@ public class NavigationMenu extends Controller {
 		
 		return null;
 		
-		/*
-		 stampingsAdmin("Timbrature", "insertAndUpdateStamping"),
-    personList("Lista persone", "insertAndUpdatePerson"),
-    yearlyAbsences("Assenze annuali", "insertAndUpdateAbsence"),
-//    absencesAdmin("Gestione assenze", "insertAndUpdateAbsence"),
-    vacationsAdmin("Gestione ferie e permessi", "insertAndUpdateVacations"),
-    competencesAdmin("Gestione competenze", "insertAndUpdateCompetences"),    
-    manageWorkingTime("Gestione orari di lavoro", "insertAndUpdateWorkingTime"),
-    confParameters("Configurazione parametri", "insertAndUpdateConfiguration"),
-    administrator("Gestione amministratori", "insertAndUpdateAdministrator"),
-    totalMonthlyAbsences("Totale assenze mensili", "insertAndUpdateAbsence"),
-    monthRecap("Riepilogo mensile", "insertAndUpdatePerson"),
-    missingStamping("Timbrature mancanti", "insertAndUpdateStamping"),
-    dailyPresence("Presenza giornaliera", "insertAndUpdatePerson"),
-    mealTicketSituation("Situazione buoni mensa", "insertAndUpdatePerson"),
-    manageAbsenceCode("Gestione codici d'assenza", "insertAndUpdateAbsence"),
-    manageCompetence("Gestione codici competenze", "insertAndUpdateCompetences"),
-    printTag("Stampa cartellino", "insertAndUpdateStamping"),
-    uploadSituation("Attestati presenza", "uploadSituation"),
-    separateMenu("-----------------------------------------------",""),    
-	stampings("Situazione mensile", "viewPersonalSituation"),
-	changePassword("Gestione password", "viewPersonalSituation"),
-	absences("Assenze", "viewPersonalSituation"),
-	absencesperperson("Assenze per persona", "viewPersonalSituation"),
-	vacations("Ferie", "viewPersonalSituation"),
-	competences("Competenze", "viewPersonalSituation"),
-	hourrecap("Riepilogo orario", "viewPersonalSituation"),
-	printPersonTag("Stampa cartellino presenze", "viewPersonalSituation"); 
-		 */
+	
 	}
 		
 }
