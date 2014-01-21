@@ -31,8 +31,7 @@ public class NavigationMenu extends Controller {
 	@Before
 	public static void injectMenu() { 
 		LocalDate now = new LocalDate();
-
-
+		Person personLogged = Security.getPerson();
 		
 		Integer year;
 		Integer month;
@@ -75,12 +74,12 @@ public class NavigationMenu extends Controller {
 		
 		session.put("dispatched", "false");
 		
-		List<Person> persons = (List<Person>)Cache.get("persons" + year + month); 
+		List<Person> persons = (List<Person>)Cache.get("persons" + year + month + personLogged.id); 
 		if(persons == null)
 		{
 			persons = new ArrayList<Person>();
-			persons = Person.getActivePersonsInMonth(month, year);
-			Cache.set("persons" + year + month, persons);
+			persons = Person.getActivePersonsInMonth(month, year, false);
+			Cache.set("persons" + year + month + personLogged.id, persons);
 		}
 	
 		
@@ -105,7 +104,7 @@ public class NavigationMenu extends Controller {
 		}		
 		
 		
-		Person personLogged = Security.getPerson();
+		
 		Person p = PersonUtility.getPersonRightsBased(personLogged, personId);
 		if(p == null){
 			flash.error("Non si può accedere alla funzionalità per la persona con id %d", personId);
