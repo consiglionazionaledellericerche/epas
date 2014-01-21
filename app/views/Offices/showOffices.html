@@ -1,0 +1,78 @@
+#{extends 'main_admin_no_menu.html' /}
+
+#{set titolo: 'Inserimento/modifica nuova sede' /}
+
+<fieldset>
+	<legend>Sede Suprema</legend>
+	<table>
+		<tr>
+			<th>Nome</th>
+			<th>Codice</th>
+			<th>Indirizzo</th>
+		</tr>
+
+		<tr>
+			<td>${office.name}</td>
+			<td>${office.code}</td>
+			<td>${office.address}</td>
+		</tr>	
+	
+	</table>
+
+</fieldset>
+
+<br>
+
+<fieldset>
+  <legend>Sedi Distaccate associate alla sede suprema</legend>
+  #{if remoteOffices.size()>0 }
+    <table>
+	  <tr>
+		<th>Nome</th>
+		<th>Codice</th>
+		<th>Indirizzo</th>
+	  </tr>
+      #{list items: remoteOffices, as: 'remoteOffice'}
+      <tr>
+        <td>${remoteOffice.name}</td>
+        <td>${remoteOffice.code}</td>
+        <td>${remoteOffice.address}</td>
+      </tr>	
+      #{/list}
+    </table>  
+  #{/if}
+
+  #{else}
+    <!-- Non è stata ancora definita alcuna sede distaccata -->
+  #{/else}
+  
+  <br>
+  <br>
+  <p class="text-info lead">
+    <a data-toggle="modal" href="@{Offices.insertRemoteOffice()}" data-target="#myModal1">
+      Inserisci nuova sede distaccata
+    </a>
+  </p>
+  
+  
+</fieldset>
+
+
+
+
+
+
+
+<div id="myModal1" class="modal hide fade mymodal-small" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3>Inserimento nuova sede distaccata</h3>
+  </div>
+  <div class="modal-body">
+    <p></p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+   <!--   <button class="btn btn-primary">Save changes</button>-->
+  </div>
+</div>
