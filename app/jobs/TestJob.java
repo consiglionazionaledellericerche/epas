@@ -31,7 +31,7 @@ public class TestJob extends Job{
 		/*
 		LocalDate yesterday = new LocalDate().minusDays(1);
 		
-		List<Person> activePersons = Person.getActivePersonsInMonth(yesterday.getMonthOfYear(), yesterday.getYear());
+		List<Person> activePersons = Person.getActivePersonsInMonth(yesterday.getMonthOfYear(), yesterday.getYear(), false);
 		for(Person person : activePersons)
 		{
 			PersonUtility.checkPersonDay(person.id, yesterday);

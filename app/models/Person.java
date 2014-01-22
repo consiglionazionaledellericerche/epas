@@ -62,6 +62,7 @@ import controllers.Check;
 import controllers.Secure;
 import controllers.Security;
 import play.Logger;
+import play.cache.Cache;
 import play.data.binding.As;
 import play.data.validation.Email;
 import play.data.validation.Required;
@@ -317,7 +318,17 @@ public class Person extends Model {
 			return null;
 		
 		return vp.vacationCode;
-		
+	}
+	
+	/**
+	 * 
+	 * @return la qualifica della persona
+	 */
+	public Qualification getQualification(){
+		if(this.qualification != null)
+			return this.qualification;
+		else
+			return null;
 	}
 
 	/**
@@ -377,39 +388,6 @@ public class Person extends Model {
 	
 	
 	/**
-	 * 
-	 * @param day
-	 * @param month
-	 * @param year
-	 * @return
-	 */
-	public boolean hasDayContracts(Integer day, Integer month, Integer year)
-	{
-		List<Contract> dayContracts = new ArrayList<Contract>();
-		List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ?",this).fetch();
-		if(contractList == null){
-			return false;
-		}
-		LocalDate dayDate = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(day);
-		DateInterval monthInterval = new DateInterval(dayDate, dayDate);
-		for(Contract contract : contractList)
-		{
-			if(!contract.onCertificate)
-				continue;
-			DateInterval contractInterval = new DateInterval(contract.beginContract, contract.expireContract);
-			if(DateUtility.intervalIntersection(monthInterval, contractInterval)!=null)
-			{
-				dayContracts.add(contract);
-			}
-		}
-		if(dayContracts.size()==0)
-			return false;
-		
-		return true;
-	}
-	
-	
-	/**
 	 * True se la persona ha almeno un contratto attivo in month
 	 * @param month
 	 * @param year
@@ -459,15 +437,266 @@ public class Person extends Model {
 	
 
 	/**
-	 * 
-	 * @return la qualifica della persona
-	 */
-	public Qualification getQualification(){
-		if(this.qualification != null)
-			return this.qualification;
-		else
-			return null;
+	 * Ritorna la lista delle persone visibili dall'amministratore attive nel mese richiesto.
+	 * Questa lista viene salvata in cache e ricalcolata solo se la copia non esiste o è scaduta.
+	 * Il nome della variabile in cache è persons-year-month-personLogged.id (esempio 'persons-2014-01-146')
+	 * @param year
+	 * @return
+	 
+	public static List getCachedActivePersonInMonth(Integer year, Integer month, Person personLogged)
+	{
+		return null;
 	}
+	*/
+	
+	/**
+	 * Metodo deprecato, usare getActivePersonsInDay
+	 * @param date
+	 * @return la lista di persone attive a quella data
+	 */
+	@Deprecated 
+	public static List<Person> getActivePersons(LocalDate date){
+		List<Person> activePersons = null;
+		Person person = Security.getPerson();
+		if(person.office.remoteOffices.isEmpty())
+		{
+			//List<Person> personOffice = new ArrayList<Person>();
+			
+			activePersons = Person.find(
+					"Select distinct (p) " +
+					"from Person p, Contract c " +
+					"where c.person = p "
+					+ "and (c.endContract is null or c.endContract > ?) "
+					+ "and (c.expireContract > ? or c.expireContract is null) "
+					+ "and (c.beginContract < ? or c.beginContract is null) "
+					+ "and p.username <> ? " + 
+					"order by p.surname, p.name", date, date, date, "epas.clocks").fetch();
+			
+		}
+		else
+		{
+			activePersons =Person.find(
+					"Select distinct (p) " +
+					"from Person p, Contract c " +
+					"where c.person = p " +
+					"and p.office = ?" 
+					+ "and (c.endContract is null or c.endContract > ?) "
+					+ "and (c.expireContract > ? or c.expireContract is null) "
+					+ "and (c.beginContract < ? or c.beginContract is null) "
+					+ "and p.username <> ? " + 
+					"order by p.surname, p.name", person.office, date, date, date, "epas.clocks").fetch();
+		}
+		
+		return activePersons;
+	
+	}
+
+	/**
+	 * 
+	 * @return la lista delle sedi visibili alla persona che ha chiamato il metodo
+	 */
+	public List<Office> getOfficeAllowed(){
+		List<Office> officeList = new ArrayList<Office>();
+		if(!this.office.remoteOffices.isEmpty()){
+			
+			for(Office office : this.office.remoteOffices){
+				officeList.add(office);
+			}
+		}
+		officeList.add(this.office);
+		return officeList;
+	}
+	
+	/**
+	 * 
+	 * @param administrator
+	 * @return true se la persona è visibile al parametro amministratore
+	 */
+	public boolean isAllowedBy(Person administrator)
+	{
+		List<Office> officeAllowed = administrator.getOfficeAllowed();
+		for(Office office : officeAllowed)
+		{
+			if(office.id == this.office.id)
+				return true;
+		}
+		return false;
+	}
+
+	/**
+	 * True se la persona alla data ha un contratto attivo, False altrimenti
+	 * @param date
+	 */
+	public boolean isActiveInDay(LocalDate date)
+	{
+		Contract c = this.getCurrentContract();
+		if(c==null)
+			return false;
+		else
+			return true;
+	}
+
+	/**
+	 *  true se la persona ha almeno un giorno lavorativo coperto da contratto nel mese month
+	 * @param month
+	 * @param year
+	 * @return 
+	 */
+	public boolean isActiveInMonth(int month, int year)
+	{
+		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
+		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
+		return this.isActiveInPeriod(monthBegin, monthEnd);
+	}
+
+	/**
+	 * true se la persona ha almeno un giorno lavorativo coperto da contratto in year
+	 * @param year
+	 * @return
+	 */
+	public boolean isActiveInYear(int year)
+	{
+		LocalDate yearBegin = new LocalDate().withYear(year).withMonthOfYear(1).withDayOfMonth(1);
+		LocalDate yearEnd = new LocalDate().withYear(year).withMonthOfYear(12).dayOfMonth().withMaximumValue();
+		return this.isActiveInPeriod(yearBegin, yearEnd);
+	}
+
+	
+	private static List<Person> getAllPersonsCached()
+	{
+		//all person with contract cached
+		List<Person> allPersonsCached = (List<Person>)Cache.get("allPersonsCached"); 
+		if(allPersonsCached==null)
+		{
+			allPersonsCached = new ArrayList<Person>();
+			allPersonsCached = Person.find("SELECT p FROM Person p ORDER BY p.surname, p.othersSurnames, p.name").fetch();
+			Cache.set("allPersonsCached", allPersonsCached);
+		}
+		return allPersonsCached;
+	}
+
+	/**
+	 * La lista delle persone attive in uno specifico giorno (per presenza giornaliera)
+	 *  sulle quali l'amministratore loggato detiene i diritti di amministrazione.
+	 * @param day
+	 * @param month
+	 * @param year
+	 * @param onlyTechnician true se si desiderano solo tecnici, false altrimenti
+	 * @return
+	 */
+	public static List<Person> getActivePersonsInDay(int day, int month, int year, boolean onlyTechnician)
+	{
+		LocalDate date = new LocalDate(year, month, day);
+		Person personLogged = Security.getPerson();
+		return Person.getActivePersonInPeriod(date, date, personLogged, onlyTechnician);
+	}
+
+	/**
+	 * La lista delle persone che abbiano almeno un giorno lavorativo coperto da contratto nel mese month
+	 *  sulle quali l'amministratore loggato detiene i diritti di amministrazione.
+	 * @param month
+	 * @param year
+	 * @param onlyTechnician true se si desiderano solo tecnici, false altrimenti
+	 * @return
+	 */
+	public static List<Person> getActivePersonsInMonth(int month, int year, boolean onlyTechnician)
+	{
+
+		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
+		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
+		Person personLogged = Security.getPerson();
+		return Person.getActivePersonInPeriod(monthBegin, monthEnd, personLogged, onlyTechnician);
+	}
+
+	/**
+	 * La lista delle persone che abbiano almeno un giorno lavorativo coperto da contratto nell'anno year
+	 *  sulle quali l'amministratore loggato detiene i diritti di amministrazione.
+	 * @param year, onlyTechnician
+	 * @return le persone attive in un anno se il booleano è true ritorna solo la lista dei tecnici (per competenze)
+	 */
+	public static List<Person> getActivePersonsinYear(int year, boolean onlyTechnician){
+
+		LocalDate yearBegin = new LocalDate().withYear(year).withMonthOfYear(1).withDayOfMonth(1);
+		LocalDate yearEnd = new LocalDate().withYear(year).withMonthOfYear(12).dayOfMonth().withMaximumValue();
+		Person personLogged = Security.getPerson();
+		return Person.getActivePersonInPeriod(yearBegin, yearEnd, personLogged, onlyTechnician);
+	
+	}
+
+	/**
+	 * La lista delle persone attive nel periodo specificati sui quali personLogged detiene i diritti di amministrazione.
+	 * @param startPeriod
+	 * @param endPeriod
+	 * @param personLogged l'amministratore
+	 * @return
+	 */
+	private static List<Person> getActivePersonInPeriod(LocalDate startPeriod, LocalDate endPeriod, Person personLogged, boolean onlyTechnician)
+	{
+		List<Person> persons = Person.getAllPersonsCached();	//per velocizzare i calcoli sono mantenute nello heap le informazioni essenziali
+		List<Person> activePersons = new ArrayList<Person>();
+		for(Person person : persons)
+		{
+			//scarto non tecnici
+			if(onlyTechnician)
+			{
+				if(person.qualification != null && person.qualification.qualification <= 3)
+					continue;
+			}
+			//scarto persone non attive
+			if(!person.isActiveInPeriod(startPeriod, endPeriod))
+				continue;
+			
+			//scarto epas.clocks
+			if(person.username.equals("epas.clocks"))
+				continue;
+			
+			//scarto officeAllowed
+			if(!person.isAllowedBy(personLogged))
+				continue;
+
+			Person personToAdd = Person.em().getReference(Person.class, person.id); //nel caso caricato dalla cache riaggancio la persona all'entityM 
+			activePersons.add(personToAdd);	
+		}
+		return activePersons;
+	}
+
+	/**
+	 * 
+	 * @param startPeriod
+	 * @param endPeriod
+	 * @return
+	 */
+	private boolean isActiveInPeriod(LocalDate startPeriod, LocalDate endPeriod)
+	{
+		List<Contract> periodContracts = new ArrayList<Contract>();
+		DateInterval periodInterval = new DateInterval(startPeriod, endPeriod);
+		for(Contract contract : this.contracts)
+		{
+			if(!contract.onCertificate)
+				continue;
+			DateInterval contractInterval = new DateInterval(contract.beginContract, contract.expireContract); //TODO è sbagliato bisogna considerare anche endContract
+			if(DateUtility.intervalIntersection(periodInterval, contractInterval)!=null)
+			{
+				periodContracts.add(contract);
+			}
+		}
+		if(periodContracts.size()==0)
+			return false;
+		
+		return true;
+	}
+
+
+	/**
+	 * Ritorna la lista dei tecnici che beneficiano di competenze, attive alla data passata come argomento,
+	 *  sulle quali l'amministratore detiene i diritti di amministrazione.
+	 * @param date
+	 * @return
+	 */
+	public static List<Person> getTechnicianForCompetences(LocalDate date){
+		return getActivePersonsInDay(date.getDayOfMonth(), date.getMonthOfYear(), date.getYear(), true);
+	}
+
 	
 	@Override
 	public String toString() {
@@ -583,205 +812,6 @@ public class Person extends Model {
 		return false;
 	}
 
-	/**
-	 * 
-	 * @param date
-	 * @return la lista di persone attive a quella data
-	 */
-	public static List<Person> getActivePersons(LocalDate date){
-		List<Person> activePersons = null;
-		Person person = Security.getPerson();
-		if(person.office.remoteOffices.isEmpty()){
-			//List<Person> personOffice = new ArrayList<Person>();
-			
-			activePersons = Person.find(
-					"Select distinct (p) " +
-					"from Person p, Contract c " +
-					"where c.person = p "
-					+ "and (c.endContract is null or c.endContract > ?) "
-					+ "and (c.expireContract > ? or c.expireContract is null) "
-					+ "and (c.beginContract < ? or c.beginContract is null) "
-					+ "and p.username <> ? " + 
-					"order by p.surname, p.name", date, date, date, "epas.clocks").fetch();
-			
-		}
-		else{
-			activePersons =Person.find(
-					"Select distinct (p) " +
-					"from Person p, Contract c " +
-					"where c.person = p " +
-					"and p.office = ?" 
-					+ "and (c.endContract is null or c.endContract > ?) "
-					+ "and (c.expireContract > ? or c.expireContract is null) "
-					+ "and (c.beginContract < ? or c.beginContract is null) "
-					+ "and p.username <> ? " + 
-					"order by p.surname, p.name", person.office, date, date, date, "epas.clocks").fetch();
-		}
-		
-		return activePersons;
-
-	}
-	
-	/**
-	 * True se la persona alla data ha un contratto attivo, False altrimenti
-	 * @param date
-	 */
-	public boolean isActive(LocalDate date)
-	{
-		Contract c = this.getCurrentContract();
-		if(c==null)
-			return false;
-		else
-			return true;
-	}
-	
-	
-	
-	public boolean isActiveInDay(int day, int month, int year)
-	{
-		
-		return this.hasDayContracts(day, month, year);
-	}
-	
-	
-	/**
-	 *  true se la persona ha almeno un giorno lavorativo coperto da contratto nel mese month
-	 * @param month
-	 * @param year
-	 * @return 
-	 */
-	public boolean isActiveInMonth(int month, int year)
-	{
-		
-		return this.hasMonthContracts(month, year);
-	}
-	
-	/**
-	 * true se la persona ha almeno un giorno lavorativo coperto da contratto in year
-	 * @param year
-	 * @return
-	 */
-	public boolean isActiveInYear(int year)
-	{
-		return this.hasYearContracts(year);
-	}
-	
-	/**
-	 * 
-	 * @param day
-	 * @param month
-	 * @param year
-	 * @return la lista delle persone attive in uno specifico giorno (per presenza giornaliera)
-	 */
-	public static List<Person> getActivePersonsInDay(int day, int month, int year)
-	{
-		/**
-		 * FIXME: rivedere le select in modo da renderle più efficienti
-		 */
-		//List<Person> persons = Person.find("SELECT p FROM Person p ORDER BY p.surname, p.othersSurnames, p.name").fetch();
-		List<Person> persons = new ArrayList<Person>();
-		Logger.debug("Id persona loggata attualmente: %s", Security.getPerson().id);
-		Person person = Security.getPerson();
-		
-		for(Office office : person.getOfficeAllowed()){
-			List<Person> personOffice = Person.find("SELECT p FROM Person p where p.office = ? ORDER BY p.surname, p.othersSurnames, p.name", office).fetch();
-			persons.addAll(personOffice);
-		}
-				
-		List<Person> activePersons = new ArrayList<Person>();
-		for(Person p : persons)
-		{
-			if(p.isActiveInDay(day, month, year))
-			{
-				if(p.username.equals("epas.clocks"))
-					continue;
-				activePersons.add(p);
-			}
-		}
-		return activePersons;
-	}
-	
-	
-	/**
-	 *  La lista delle persone che abbiano almeno un giorno lavorativo coperto da contratto nel mese month
-	 *  ordinate per id
-	 * @param month
-	 * @param year
-	 * @return
-	 */
-	public static List<Person> getActivePersonsInMonth(int month, int year)
-	{
-		/**
-		 * FIXME: rivedere le select in modo da renderle più efficienti
-		 */
-		//List<Person> persons = Person.find("SELECT p FROM Person p ORDER BY p.surname, p.othersSurnames, p.name").fetch();
-		List<Person> persons = new ArrayList<Person>();
-		Logger.debug("Id persona loggata attualmente: %s", Security.getPerson().id);
-		Person person = Security.getPerson();
-		
-		for(Office office : person.getOfficeAllowed()){
-			List<Person> personOffice = Person.find("SELECT p FROM Person p where p.office = ? ORDER BY p.surname, p.othersSurnames, p.name", office).fetch();
-			persons.addAll(personOffice);
-		}
-				
-		List<Person> activePersons = new ArrayList<Person>();
-		for(Person p : persons)
-		{
-			if(p.isActiveInMonth(month, year))
-			{
-				if(p.username.equals("epas.clocks"))
-					continue;
-				activePersons.add(p);
-			}
-		}
-		return activePersons;
-	}
-	
-	/**
-	 * 
-	 * @param year, onlyTechnician
-	 * @return le persone attive in un anno se il booleano è true ritorna solo la lista dei tecnici (per competenze)
-	 */
-	public static List<Person> getActivePersonsinYear(int year, boolean onlyTechnician){
-//		List<Person> persons = Person.find("SELECT p FROM Person p ORDER BY p.surname, p.othersSurnames, p.name").fetch();
-		List<Person> activePersons = new ArrayList<Person>();
-		List<Person> persons = new ArrayList<Person>();
-		Person personLogged = Security.getPerson();
-		
-		for(Office office : personLogged.getOfficeAllowed()){
-			List<Person> personOffice = Person.find("SELECT p FROM Person p where p.office = ? ORDER BY p.surname, p.othersSurnames, p.name", office).fetch();
-			persons.addAll(personOffice);
-		}
-		for(Person person : persons){
-			if(person.isActiveInYear(year)){
-				if(person.username.equals("epas.clocks"))
-					continue;
-				if(onlyTechnician){
-					if(person.qualification.qualification > 3)
-						activePersons.add(person);
-				}
-				else
-					activePersons.add(person);
-			}
-		}
-		return activePersons;
-	}
-	
-	/**
-	 * 
-	 * @param date
-	 * @return la lista di tecnici che beneficiano di competenze (utilizzata nel controller competences, metodo showCompetences)
-	 */
-	public static List<Person> getTechnicianForCompetences(LocalDate date){
-		List<Person> technicians = new ArrayList<Person>();
-		List<Person> activePersons = getActivePersonsInDay(date.getDayOfMonth(), date.getMonthOfYear(), date.getYear());
-		for(Person p : activePersons){
-			if(p.qualification != null && p.qualification.qualification > 3)
-				technicians.add(p);
-		}
-		return technicians;
-	}
-	
 	/**
 	 * 
 	 * @return la lista delle persone che sono state selezionate per far parte della sperimentazione del nuovo sistema delle presenze
@@ -1263,23 +1293,6 @@ public class Person extends Model {
 	public Integer getPositiveResidualInMonth(int year, int month){
 		
 		return Mese.positiveResidualInMonth(this, year, month)/60; 
-	}
-	
-	/**
-	 * 
-	 * @return la lista delle sedi visibili alla persona che ha chiamato il metodo
-	 */
-	public List<Office> getOfficeAllowed(){
-		List<Office> officeList = new ArrayList<Office>();
-		if(!this.office.remoteOffices.isEmpty()){
-			
-			for(Office office : this.office.remoteOffices){
-				officeList.add(office);
-			}
-		}
-		
-		officeList.add(this.office);
-		return officeList;
 	}
 
 }
