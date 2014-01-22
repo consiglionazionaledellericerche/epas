@@ -274,7 +274,7 @@ public class PersonDay extends Model {
 		for(Absence abs : absences){
 			if(abs.absenceType.ignoreStamping || (abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay && !checkHourlyAbsenceCodeSameGroup(abs.absenceType)))
 			{
-				this.isTicketAvailable = false;
+				setIsTickeAvailable(false);
 				return 0;
 			}
 			
@@ -290,7 +290,7 @@ public class PersonDay extends Model {
 		//(che però non contribuisce all'attribuzione del buono mensa che quindi è certamente non assegnato)
 		if (stampings.size() < 2) 
 		{
-			this.isTicketAvailable = false;
+			setIsTickeAvailable(false);
 			return justifiedTimeAtWork;
 		}
 		
@@ -308,8 +308,7 @@ public class PersonDay extends Model {
 					holidayWorkTime = holidayWorkTime + toMinute(validPair.out.date);
 				}
 			}
-			
-			this.isTicketAvailable = false;
+			setIsTickeAvailable(false);
 			return justifiedTimeAtWork + holidayWorkTime;
 		}
 
@@ -331,7 +330,7 @@ public class PersonDay extends Model {
 		int breakTicketTime = getWorkingTimeTypeDay().breakTicketTime;	//30 minuti
 		int mealTicketTime = getWorkingTimeTypeDay().mealTicketTime;	//6 ore
 		if(mealTicketTime == 0){
-			isTicketAvailable = false;
+			setIsTickeAvailable(false);
 			return workTime + justifiedTimeAtWork;
 		}
 			
@@ -353,7 +352,7 @@ public class PersonDay extends Model {
 			//gap e worktime sufficienti
 			if(minTimeForLunch >= breakTicketTime && workTime >= mealTicketTime)
 			{
-				this.isTicketAvailable = true;
+				setIsTickeAvailable(true);
 				return workTime + justifiedTimeAtWork;
 			}
 			
@@ -362,16 +361,17 @@ public class PersonDay extends Model {
 			{
 				if( minTimeForLunch < breakTicketTime ) //dovrebbe essere certamente true
 				{
-					workTime = workTime - (breakTicketTime - minTimeForLunch);
+					if(!isTicketForcedByAdmin || isTicketForcedByAdmin&&isTicketAvailable )		//TODO decidere la situazione intricata se l'amministratore forza a true
+						workTime = workTime - (breakTicketTime - minTimeForLunch);
 					StampModificationType smt = StampModificationType.getStampModificationTypeByCode(StampModificationTypeCode.FOR_MIN_LUNCH_TIME.getCode());
 					this.modificationType = smt.code;
 				}
-				this.isTicketAvailable = true;
+				setIsTickeAvailable(true);
 				return workTime + justifiedTimeAtWork;
 			}
 			
 			//worktime insufficiente
-			this.isTicketAvailable = false;
+			setIsTickeAvailable(false);
 			return workTime + justifiedTimeAtWork;
 			
 		}
@@ -380,8 +380,9 @@ public class PersonDay extends Model {
 		if( workTime > mealTicketTime && workTime - breakTicketTime >= mealTicketTime )
 		{
 			//worktime sufficiente (p)
-			workTime = workTime - breakTicketTime;
-			this.isTicketAvailable = true;
+			if(!isTicketForcedByAdmin || isTicketForcedByAdmin&&isTicketAvailable )			//TODO decidere la situazione intricata se l'amministratore forza a true
+				workTime = workTime - breakTicketTime;
+			setIsTickeAvailable(true);
 			StampModificationType smt = StampModificationType.getStampModificationTypeByCode(StampModificationTypeCode.FOR_DAILY_LUNCH_TIME.getCode());
 			this.modificationType = smt.code;
 			return workTime + justifiedTimeAtWork;
@@ -389,7 +390,7 @@ public class PersonDay extends Model {
 		else
 		{
 			//worktime insufficiente
-			this.isTicketAvailable = false;
+			setIsTickeAvailable(false);
 			return workTime + justifiedTimeAtWork;
 		}
 	}
@@ -434,6 +435,38 @@ public class PersonDay extends Model {
 		timeAtWork = getCalculatedTimeAtWork();
 	}
 
+
+	/**
+	 * 
+	 * @return la differenza tra l'orario di lavoro giornaliero e l'orario standard in minuti
+	 */
+	private void updateDifference(){
+	
+		//int worktime = this.person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(this.date.getDayOfWeek()).workingTime;
+		int worktime = this.person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(this.date.getDayOfWeek()).workingTime;
+		
+		//persona fixed
+		if(this.isFixedTimeAtWork() && timeAtWork == 0){
+			difference = 0;
+			return;
+		}
+	
+		//festivo
+		if(this.isHoliday()){
+			difference = timeAtWork;
+			return;
+		}
+		
+		//assenze giornaliere
+		if(this.isAllDayAbsences()){
+			difference = 0;
+			return;
+		}
+		
+		//feriale
+		difference = timeAtWork - worktime;
+	
+	}
 
 	/**
 	 * calcola il valore del progressivo giornaliero e lo salva sul db
@@ -485,7 +518,7 @@ public class PersonDay extends Model {
 		//caso forced by admin
 		if(this.isTicketForcedByAdmin)
 		{
-			this.isTicketAvailable = true;
+			//this.isTicketAvailable = true; SBAGLIATO non devo fare niente
 			this.save();
 			return;
 		}
@@ -514,6 +547,16 @@ public class PersonDay extends Model {
 		//caso persone normali
 		this.isTicketAvailable = this.isTicketAvailable && isTicketAvailableForWorkingTime();
 		return; 
+	}
+	
+	/**
+	 * Setta il valore della variabile isTicketAvailable solo se isTicketForcedByAdmin è false
+	 * @param value
+	 */
+	private void setIsTickeAvailable(boolean isTicketAvailable)
+	{
+		if(!this.isTicketForcedByAdmin)
+			this.isTicketAvailable = isTicketAvailable;
 	}
 	
 	/**
@@ -695,38 +738,6 @@ public class PersonDay extends Model {
 			return true;
 		}
 		return false;
-	}
-
-	/**
-	 * 
-	 * @return la differenza tra l'orario di lavoro giornaliero e l'orario standard in minuti
-	 */
-	private void updateDifference(){
-
-		//int worktime = this.person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(this.date.getDayOfWeek()).workingTime;
-		int worktime = this.person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(this.date.getDayOfWeek()).workingTime;
-		
-		//persona fixed
-		if(this.isFixedTimeAtWork() && timeAtWork == 0){
-			difference = 0;
-			return;
-		}
-
-		//festivo
-		if(this.isHoliday()){
-			difference = timeAtWork;
-			return;
-		}
-		
-		//assenze giornaliere
-		if(this.isAllDayAbsences()){
-			difference = 0;
-			return;
-		}
-		
-		//feriale
-		difference = timeAtWork - worktime;
-
 	}
 
 	/**

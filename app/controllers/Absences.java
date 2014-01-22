@@ -876,17 +876,17 @@ public class Absences extends Controller{
 			notFound();
 		}
 		Person person = absence.personDay.person;
-		
+
 		int year = params.get("annoFine", Integer.class);
 		int month = params.get("meseFine", Integer.class);
 		int day = params.get("giornoFine", Integer.class);
 		String oldAbsenceCode = absence.absenceType.code;
 		String absenceCode = params.get("absenceCode");
 
-		/*Controllo che l'assenza sia relativa a un solo giorno*/
+		//Update assenza un giorno solo
 		if(absence.personDay.date.isEqual(new LocalDate(year, month, day))){
 
-
+			//cancellazione
 			if (absenceCode == null || absenceCode.isEmpty()) {
 				PersonDay pd = absence.personDay;
 				absence.delete();
@@ -905,9 +905,11 @@ public class Absences extends Controller{
 				flash.success("Assenza di tipo %s per il giorno %s rimossa per il dipendente %s %s", 
 						oldAbsenceCode, PersonTags.toDateTime(absence.personDay.date), pd.person.name, pd.person.surname);	
 				Stampings.personStamping(person.id, year, month);
+				//return;
 			} 
-			else {
-
+			//aggiornamento
+			else 
+			{
 				AbsenceType absenceType = AbsenceType.find("byCode", absenceCode).first();
 				Logger.debug("AbsenceType: %s", absenceType.code);
 				PersonDay pd = absence.personDay;
@@ -923,9 +925,11 @@ public class Absences extends Controller{
 				}
 				String mealTicket =  params.get("buonoMensa");
 				//Logger.debug("Il valore di buono mensa da param: %s", mealTicket);
-				checkMealTicket(pd, mealTicket);
-
-
+				checkMealTicket(pd, mealTicket, absenceType);
+				
+				
+				
+				
 				if(params.get("datasize", Blob.class) != null){
 					absence.absenceRequest = params.get("datasize", Blob.class);
 				}
@@ -936,102 +940,119 @@ public class Absences extends Controller{
 						String.format("Assenza per il giorno %s per %s %s aggiornata con codice %s", 
 								PersonTags.toDateTime(absence.personDay.date), absence.personDay.person.surname, absence.personDay.person.name, absenceCode));
 				Stampings.personStamping(person.id, year, month);
+				//return;
 			}
 
 		}
-		else{
-			/*L'assenza è per più giorni*/
-			LocalDate dataInizioAssenze = absence.personDay.date;
-			LocalDate dataFineAssenze = new LocalDate(year, month, day);
-			Logger.debug("Data fine assenze: %s", dataFineAssenze);
-			Logger.debug("Data inizio assenze %s", dataInizioAssenze);
-			PersonDay pd = null;
-			if(absenceCode.equals("") || absenceCode == null){
-				while(!dataInizioAssenze.isAfter(dataFineAssenze)){
-					Logger.debug("Intendo cancellare assenza per il giorno %s ", dataInizioAssenze);
-					pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", absence.personDay.person, dataInizioAssenze).first();
-					if(pd == null){
-						dataInizioAssenze = dataInizioAssenze.plusDays(1);
-					}
-					else{
-						Absence abs = Absence.find("Select a from Absence a, PersonDay pd where a.personDay = pd and pd.person = ? and pd.date = ?", 
-								pd.person, dataInizioAssenze).first();
-						if(abs != null){
-							abs.delete();
-							pd.absences.remove(abs);
-							pd.populatePersonDay();
-							pd.save();
-						}									
-						
-						dataInizioAssenze = dataInizioAssenze.plusDays(1);
-					}
-					
+
+		/*L'assenza è per più giorni*/
+		LocalDate dataInizioAssenze = absence.personDay.date;
+		LocalDate dataFineAssenze = new LocalDate(year, month, day);
+		Logger.debug("Data fine assenze: %s", dataFineAssenze);
+		Logger.debug("Data inizio assenze %s", dataInizioAssenze);
+		PersonDay pd = null;
+		if(absenceCode.equals("") || absenceCode == null){
+			while(!dataInizioAssenze.isAfter(dataFineAssenze)){
+				Logger.debug("Intendo cancellare assenza per il giorno %s ", dataInizioAssenze);
+				pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", absence.personDay.person, dataInizioAssenze).first();
+				if(pd == null){
+					dataInizioAssenze = dataInizioAssenze.plusDays(1);
 				}
-				
-				
-			}
-			else{
-				AbsenceType absenceType = AbsenceType.find("byCode", absenceCode).first();
-				while(!dataInizioAssenze.isEqual(dataFineAssenze)){
-					pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", absence.personDay.person, dataInizioAssenze).first();
-					Absence existingAbsence = Absence.find("Select a from Absence a where a.personDay = ? and a.id <> ?", pd, absence.id).first();
-					if(existingAbsence != null){
-						validation.keep();
-						params.flash();
-						flash.error("Il codice di assenza %s è già presente per la data %s", params.get("absenceCode"), PersonTags.toDateTime(absence.personDay.date));
-						edit(absence.id);
-						//render("@edit");
-						Stampings.personStamping(person.id, year, month);
-					}
-					else{
-						Absence abs = Absence.find("Select a from Absence a, PersonDay pd where a.personDay = pd and pd.person = ? and pd.date = ?", 
-								absence.personDay.person, dataInizioAssenze).first();
+				else{
+					Absence abs = Absence.find("Select a from Absence a, PersonDay pd where a.personDay = pd and pd.person = ? and pd.date = ?", 
+							pd.person, dataInizioAssenze).first();
+					if(abs != null){
 						abs.delete();
 						pd.absences.remove(abs);
 						pd.populatePersonDay();
 						pd.save();
-						Absence absenceNew = new Absence();
-						absenceNew.absenceType = absenceType;
-						absenceNew.personDay = pd;
-						absenceNew.save();
-						pd.absences.add(absenceNew);
-						pd.populatePersonDay();
-						pd.save();
-						
-					}
-					String mealTicket =  params.get("buonoMensa");
-					//Logger.debug("Il valore di buono mensa da param: %s", mealTicket);
-					checkMealTicket(pd, mealTicket);
+					}									
+
 					dataInizioAssenze = dataInizioAssenze.plusDays(1);
 				}
-				
 
-				
 			}
-			flash.success("Rimossi i codici di assenza per il periodo %s %s", absence.personDay.date, dataFineAssenze);
-			Stampings.personStamping(person.id, year, month);
+
+
 		}
-		
+		else{
+			AbsenceType absenceType = AbsenceType.find("byCode", absenceCode).first();
+			while(!dataInizioAssenze.isEqual(dataFineAssenze)){
+				pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", absence.personDay.person, dataInizioAssenze).first();
+				Absence existingAbsence = Absence.find("Select a from Absence a where a.personDay = ? and a.id <> ?", pd, absence.id).first();
+				if(existingAbsence != null){
+					validation.keep();
+					params.flash();
+					flash.error("Il codice di assenza %s è già presente per la data %s", params.get("absenceCode"), PersonTags.toDateTime(absence.personDay.date));
+					edit(absence.id);
+					//render("@edit");
+					Stampings.personStamping(person.id, year, month);
+				}
+				else{
+					Absence abs = Absence.find("Select a from Absence a, PersonDay pd where a.personDay = pd and pd.person = ? and pd.date = ?", 
+							absence.personDay.person, dataInizioAssenze).first();
+					abs.delete();
+					pd.absences.remove(abs);
+					pd.populatePersonDay();
+					pd.save();
+					Absence absenceNew = new Absence();
+					absenceNew.absenceType = absenceType;
+					absenceNew.personDay = pd;
+					absenceNew.save();
+					pd.absences.add(absenceNew);
+					pd.populatePersonDay();
+					pd.save();
+
+				}
+				String mealTicket =  params.get("buonoMensa");
+				//Logger.debug("Il valore di buono mensa da param: %s", mealTicket);
+				//checkMealTicket(pd, mealTicket);
+				dataInizioAssenze = dataInizioAssenze.plusDays(1);
+			}
+
+
+
+		}
+		flash.success("Rimossi i codici di assenza per il periodo %s %s", absence.personDay.date, dataFineAssenze);
+		Stampings.personStamping(person.id, year, month);
+
+
 	}
 	
-	private static void checkMealTicket(PersonDay pd, String mealTicket){
+	/**
+	 * Gestore della logica ticket forzato dall'amministratore, risponde solo in caso di codice 92
+	 * @param pd
+	 * @param mealTicket
+	 */
+	private static void checkMealTicket(PersonDay pd, String mealTicket, AbsenceType abt){
 		
-		if(mealTicket.equals("si")){
-
-			pd.isTicketAvailable = true;
-			pd.save();
-			
-
-		}
-		if(mealTicket.equals("no")){
-			pd.isTicketAvailable = false;
-			pd.save();
-			
-		}
-
-		if(mealTicket.equals("calcolato")){
+		if(abt==null || !abt.code.equals("92"))
+		{
+			pd.isTicketForcedByAdmin = false;	//una assenza diversa da 92 ha per forza campo calcolato
 			pd.populatePersonDay();
-			pd.save();
+			return;
+		}
+			
+		
+		if(mealTicket!= null && mealTicket.equals("si")){
+			pd.isTicketForcedByAdmin = true;
+			pd.isTicketAvailable = true;
+			pd.populatePersonDay();
+			
+			
+
+		}
+		if(mealTicket!= null && mealTicket.equals("no")){
+			pd.isTicketForcedByAdmin = true;
+			pd.isTicketAvailable = false;
+			pd.populatePersonDay();
+			
+			
+		}
+
+		if(mealTicket!= null && mealTicket.equals("calcolato")){
+			pd.isTicketForcedByAdmin = false;
+			pd.populatePersonDay();
 			
 		}
 	}
