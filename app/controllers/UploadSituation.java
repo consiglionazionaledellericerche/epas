@@ -138,7 +138,7 @@ public class UploadSituation extends Controller{
 				year, month, listaDipendenti.size()));
 
 		//Lista delle persone con un contratto attivo questo mese
-		final List<Person> activePersons = Person.getActivePersonsInMonth(month, year);
+		final List<Person> activePersons = Person.getActivePersonsInMonth(month, year, false);
 		
 		final Set<Dipendente> activeDipendenti = FluentIterable.from(activePersons).transform(new Function<Person, Dipendente>() {
 			@Override

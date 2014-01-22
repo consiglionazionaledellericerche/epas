@@ -28,7 +28,18 @@ public class TestJob extends Job{
 	public void doJob(){
 		
 		PersonUtility.fixPersonSituation(-1l, 2013, 1);
-		Logger.info("------------------------------------------------------------------------------------------------------>");
+
+		/*
+		LocalDate yesterday = new LocalDate().minusDays(1);
+		
+		List<Person> activePersons = Person.getActivePersonsInMonth(yesterday.getMonthOfYear(), yesterday.getYear(), false);
+		for(Person person : activePersons)
+		{
+			PersonUtility.checkPersonDay(person.id, yesterday);
+		}
+		*/
+		Logger.info("Concluso Job checkDay");
+
 	}
 		
 
