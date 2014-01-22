@@ -305,6 +305,7 @@ public class Persons extends Controller {
 	public static void list(){
 		Person person = Security.getPerson();
 		List<Person> personList = null;
+		//TODO da qui questi controlli vanno tolti
 		if(!person.office.remoteOffices.isEmpty()){
 			personList = Person.find("Select p from Person p where p.name <> ? and p.name <> ? order by p.surname", "Admin", "epas").fetch();
 		}
@@ -314,7 +315,7 @@ public class Persons extends Controller {
 		
 		//Logger.debug("La lista delle persone: %s", personList.toString());
 		LocalDate date = new LocalDate();
-		List<Person> activePerson = Person.getActivePersons(date);
+		List<Person> activePerson = Person.getActivePersonsInDay(date.getDayOfMonth(), date.getMonthOfYear(), date.getYear(), false);
 		
 		render(personList, activePerson);
 	}
