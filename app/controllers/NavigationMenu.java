@@ -74,23 +74,9 @@ public class NavigationMenu extends Controller {
 		
 		session.put("dispatched", "false");
 		
-		List<Person> persons = new ArrayList<Person>(); 
-		if(personLogged.isViewPersonAvailable())
-		{
-			String cacheParam = "persons" + year + month + "-" +personLogged.id;
-			persons = (List<Person>)Cache.get(cacheParam); 
-			if(persons == null)
-			{
-				persons = new ArrayList<Person>();
-				persons = Person.getActivePersonsInMonth(month, year, false);
-				Cache.set(cacheParam, persons);
-			}
-		}
-		else
-		{
-			// ?? tanto non mi serve
-		}
-	
+		
+		List<Person> persons = Person.getActivePersonsInMonth(month, year, false);
+		
 		
 		ActionMenuItem action;
 		if(method != null && !method.equals("")) 
