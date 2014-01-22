@@ -62,6 +62,7 @@ import controllers.Check;
 import controllers.Secure;
 import controllers.Security;
 import play.Logger;
+import play.cache.Cache;
 import play.data.binding.As;
 import play.data.validation.Email;
 import play.data.validation.Required;
@@ -435,13 +436,25 @@ public class Person extends Model {
 	
 	
 
-	
+	/**
+	 * Ritorna la lista delle persone visibili dall'amministratore attive nel mese richiesto.
+	 * Questa lista viene salvata in cache e ricalcolata solo se la copia non esiste o è scaduta.
+	 * Il nome della variabile in cache è persons-year-month-personLogged.id (esempio 'persons-2014-01-146')
+	 * @param year
+	 * @return
+	 
+	public static List getCachedActivePersonInMonth(Integer year, Integer month, Person personLogged)
+	{
+		return null;
+	}
+	*/
 	
 	/**
-	 * 
+	 * Metodo deprecato, usare getActivePersonsInDay
 	 * @param date
 	 * @return la lista di persone attive a quella data
 	 */
+	@Deprecated 
 	public static List<Person> getActivePersons(LocalDate date){
 		List<Person> activePersons = null;
 		Person person = Security.getPerson();
@@ -493,6 +506,22 @@ public class Person extends Model {
 		officeList.add(this.office);
 		return officeList;
 	}
+	
+	/**
+	 * 
+	 * @param administrator
+	 * @return true se la persona è visibile al parametro amministratore
+	 */
+	public boolean isAllowedBy(Person administrator)
+	{
+		List<Office> officeAllowed = administrator.getOfficeAllowed();
+		for(Office office : officeAllowed)
+		{
+			if(office.id == this.office.id)
+				return true;
+		}
+		return false;
+	}
 
 	/**
 	 * True se la persona alla data ha un contratto attivo, False altrimenti
@@ -530,6 +559,20 @@ public class Person extends Model {
 		LocalDate yearBegin = new LocalDate().withYear(year).withMonthOfYear(1).withDayOfMonth(1);
 		LocalDate yearEnd = new LocalDate().withYear(year).withMonthOfYear(12).dayOfMonth().withMaximumValue();
 		return this.isActiveInPeriod(yearBegin, yearEnd);
+	}
+
+	
+	private static List<Person> getAllPersonsCached()
+	{
+		//all person with contract cached
+		List<Person> allPersonsCached = (List<Person>)Cache.get("allPersonsCached"); 
+		if(allPersonsCached==null)
+		{
+			allPersonsCached = new ArrayList<Person>();
+			allPersonsCached = Person.find("SELECT p FROM Person p ORDER BY p.surname, p.othersSurnames, p.name").fetch();
+			Cache.set("allPersonsCached", allPersonsCached);
+		}
+		return allPersonsCached;
 	}
 
 	/**
@@ -589,13 +632,7 @@ public class Person extends Model {
 	 */
 	private static List<Person> getActivePersonInPeriod(LocalDate startPeriod, LocalDate endPeriod, Person personLogged, boolean onlyTechnician)
 	{
-		//La lista delle persone di cui personLogged detiene i diritti
-		List<Person> persons = new ArrayList<Person>();
-		for(Office office : personLogged.getOfficeAllowed())
-		{
-			List<Person> personOffice = Person.find("SELECT p FROM Person p where p.office = ? ORDER BY p.surname, p.othersSurnames, p.name", office).fetch();
-			persons.addAll(personOffice);
-		}
+		List<Person> persons = Person.getAllPersonsCached();	//per velocizzare i calcoli sono mantenute nello heap le informazioni essenziali
 		List<Person> activePersons = new ArrayList<Person>();
 		for(Person person : persons)
 		{
@@ -608,11 +645,17 @@ public class Person extends Model {
 			//scarto persone non attive
 			if(!person.isActiveInPeriod(startPeriod, endPeriod))
 				continue;
+			
 			//scarto epas.clocks
 			if(person.username.equals("epas.clocks"))
 				continue;
+			
+			//scarto officeAllowed
+			if(!person.isAllowedBy(personLogged))
+				continue;
 
-			activePersons.add(person);
+			Person personToAdd = Person.em().getReference(Person.class, person.id); //nel caso caricato dalla cache riaggancio la persona all'entityM 
+			activePersons.add(personToAdd);	
 		}
 		return activePersons;
 	}
@@ -625,14 +668,9 @@ public class Person extends Model {
 	 */
 	private boolean isActiveInPeriod(LocalDate startPeriod, LocalDate endPeriod)
 	{
-		//FIXME tentare di passare dallo heap prima di fare direttamente la query
 		List<Contract> periodContracts = new ArrayList<Contract>();
-		List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ?", this).fetch();
-		if(contractList == null){
-			return false;
-		}
 		DateInterval periodInterval = new DateInterval(startPeriod, endPeriod);
-		for(Contract contract : contractList)
+		for(Contract contract : this.contracts)
 		{
 			if(!contract.onCertificate)
 				continue;
