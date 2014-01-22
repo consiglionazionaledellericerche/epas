@@ -179,7 +179,7 @@ public class YearlyAbsences extends Controller{
 			}
 		}
 		else{
-			List<Person> activePersons = Person.getActivePersonsInMonth(month, year);
+			List<Person> activePersons = Person.getActivePersonsInMonth(month, year, false);
 			//Table<Person, String, Integer> tableMonthlyAbsences = ArrayTable.create(activePersons, absenceInMonth);
 
 
