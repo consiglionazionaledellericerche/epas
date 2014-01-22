@@ -6,4 +6,8 @@ public class FrequentAbsenceCode {
 	
 	public String description;
 	
+	public FrequentAbsenceCode(String code, String description){
+		this.code = code;
+		this.description = description;
+	}
 }

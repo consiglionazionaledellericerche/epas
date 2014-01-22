@@ -220,6 +220,9 @@ PUT		/stampings/create						StampingsFromClient.create
 POST	/absenceFromJson/absenceInPeriod				AbsenceFromJson.absenceInPeriod
 POST	/absences/setPersonEmailForAbsence		Absences.setPersonEmailForAbsence
 
+#Ricezione richiesta codici frequenti di assenza
+GET		/absenceFromJson/frequentAbsence		AbsenceFromJson.frequentAbsence
+
 # Catch all
 *       /{controller}/{action}                  {controller}.{action}
 
