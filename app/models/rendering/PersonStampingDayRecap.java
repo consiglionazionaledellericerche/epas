@@ -160,7 +160,7 @@ public class PersonStampingDayRecap {
 			this.setMealTicket(pd.isTicketAvailable, true);
 		
 		else if(this.today && pd.isAllDayAbsences())
-			this.setMealTicket(false, false);
+			this.setMealTicket(pd.isTicketAvailable, false);	//c'è una assenza giornaliera, la decisione è già presa
 		
 		else if(!this.holiday)
 			this.setMealTicket(pd.isTicketAvailable, false);	

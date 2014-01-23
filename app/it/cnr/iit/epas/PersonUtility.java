@@ -818,12 +818,13 @@ public class PersonUtility {
 			List<Person> personList = Person.getActivePersonsInMonth(month, year, false);
 			for(Person person : personList)
 			{
-				PersonUtility.checkHistoryError(person.id, year, month);
+				PersonUtility.checkHistoryError(person, year, month);
 			}
 		}
 		else
 		{
-			PersonUtility.checkHistoryError(personId, year, month);
+			Person person = Person.findById(personId);
+			PersonUtility.checkHistoryError(person, year, month);
 		}
 		JPAPlugin.closeTx(false);
 		
@@ -878,9 +879,6 @@ public class PersonUtility {
 	 */
 	private static void checkPersonDay(Long personid, LocalDate dayToCheck)
 	{
-		JPAPlugin.closeTx(false);
-		JPAPlugin.startTx(false);
-
 		Person personToCheck = Person.findById(personid);
 		if(!personToCheck.isActiveInDay(dayToCheck)) {
 			return;
@@ -914,15 +912,15 @@ public class PersonUtility {
 	 * @param year l'anno di partenza
 	 * @param month il mese di partenza
 	 */
-	private static void checkHistoryError(Long personid, int year, int month)
+	private static void checkHistoryError(Person person, int year, int month)
 	{
-		Person person = Person.findById(personid);
+		//Person person = Person.findById(personid);
 		Logger.info("Check history error %s dal %s-%s-1 a oggi", person.surname, year, month);
 		LocalDate date = new LocalDate(year,month,1);
 		LocalDate today = new LocalDate();
 		while(true)
 		{
-			PersonUtility.checkPersonDay(personid, date);
+			PersonUtility.checkPersonDay(person.id, date);
 			date = date.plusDays(1);
 			if(date.isEqual(today))
 				break;
