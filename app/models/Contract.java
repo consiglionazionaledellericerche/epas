@@ -143,10 +143,29 @@ public class Contract extends Model {
 		return vpList;
 	}
 	
+	/**
+	 * Costruisce la struttura valida dei vacation period associati al contratto.
+	 */
 	public void setVacationPeriods(){
 		
 		
-		if(this.expireContract == null && this.endContract == null){
+		//Distruggo i vacation period precedenti
+		for(VacationPeriod vp : this.vacationPeriods)
+		{
+			vp.delete();
+		}
+		
+		//Contratto terminato nessun vacation period
+		if(this.endContract!=null)
+		{
+			this.save();
+			return;
+		}
+
+		//Tempo indeterminato, creo due vacatio 3 anni più infinito
+		if(this.expireContract == null)
+		{
+			
 			VacationPeriod first = new VacationPeriod();
 			first.beginFrom = this.beginContract;
 			first.endTo = this.beginContract.plusYears(3).minusDays(1);
@@ -159,35 +178,36 @@ public class Contract extends Model {
 			second.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "28+4").first();
 			second.contract =this;
 			second.save();
+			this.save();
+			return;
 		}
-		else{
-			LocalDate finishDate = this.expireContract;
-			if(this.endContract != null)
-				finishDate = this.endContract;
-			if(finishDate.isAfter(this.beginContract.plusYears(3).minusDays(1))){
-				VacationPeriod first = new VacationPeriod();
-				first.beginFrom = this.beginContract;
-				first.endTo = this.beginContract.plusYears(3).minusDays(1);
-				first.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "26+4").first();
-				first.contract = this;
-				first.save();
-				VacationPeriod second = new VacationPeriod();
-				second.beginFrom = this.beginContract.plusYears(3);
-				second.endTo = finishDate;
-				second.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "28+4").first();
-				second.contract =this;
-				second.save();
-			}
-			else{
-				VacationPeriod first = new VacationPeriod();
-				first.beginFrom = this.beginContract;
-				first.endTo = finishDate;
-				first.contract = this;
-				first.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "26+4").first();
-				first.save();
-			}
+
+		//Tempo determinato più lungo di 3 anni
+		if(this.expireContract.isAfter(this.beginContract.plusYears(3).minusDays(1))){
+			VacationPeriod first = new VacationPeriod();
+			first.beginFrom = this.beginContract;
+			first.endTo = this.beginContract.plusYears(3).minusDays(1);
+			first.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "26+4").first();
+			first.contract = this;
+			first.save();
+			VacationPeriod second = new VacationPeriod();
+			second.beginFrom = this.beginContract.plusYears(3);
+			second.endTo = this.expireContract;
+			second.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "28+4").first();
+			second.contract =this;
+			second.save();
+			this.save();
+			return;
 		}
+
+		//Tempo determinato più corto di 3 anni
+		VacationPeriod first = new VacationPeriod();
+		first.beginFrom = this.beginContract;
+		first.endTo = this.expireContract;
+		first.contract = this;
+		first.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "26+4").first();
+		first.save();
 		this.save();
 	}
-	
+
 }
