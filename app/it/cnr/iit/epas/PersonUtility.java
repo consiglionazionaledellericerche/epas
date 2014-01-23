@@ -879,6 +879,9 @@ public class PersonUtility {
 	 */
 	private static void checkPersonDay(Long personid, LocalDate dayToCheck)
 	{
+		JPAPlugin.closeTx(false);
+		JPAPlugin.startTx(false);
+
 		Person personToCheck = Person.findById(personid);
 		if(!personToCheck.isActiveInDay(dayToCheck)) {
 			return;
