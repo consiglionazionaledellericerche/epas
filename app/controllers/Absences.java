@@ -27,7 +27,6 @@ import javax.persistence.Query;
 import models.Absence;
 import models.AbsenceType;
 import models.AbsenceTypeGroup;
-import models.AbsenceFile;
 import models.Configuration;
 import models.Person;
 import models.PersonDay;
@@ -50,7 +49,6 @@ import play.data.Upload;
 import play.data.validation.Required;
 import play.db.jpa.Blob;
 import play.db.jpa.JPA;
-import play.libs.MimeTypes;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -699,30 +697,19 @@ public class Absences extends Controller{
 				pd = new PersonDay(person, dateFrom);
 				pd.create();
 			}
+			
 			Logger.debug("Creato il personDay %s", pd);
+						
+			Upload file = params.get("absenceFile" , Upload.class);
+			if (file != null && (file.getContentType().equals("application/pdf"))) {
 
-			AbsenceFile absenceFile = new AbsenceFile();
-			absenceFile.file = params.get("absenceFile" , Blob.class);
-			
-			if (absenceFile.file != null){
-				
-				absenceFile.fileName = params.get("absenceFile" ,Upload.class).getFileName();
-				absenceFile.uploadDate = new LocalDate();
-													
-				Logger.debug("file ricevuto: %s %s %s", absenceFile.fileName, absenceFile.file.length() , absenceFile.file.type() );
-				
-				absence.absenceFile = absenceFile;
-				absenceFile.absence = absence;
-				absenceFile.save();	
+				absence.absenceFile = params.get("absenceFile", Blob.class);
 
-		}
-		
-		else{ 
-			
-			absence.absenceFile = null;
-			
+				Logger.debug("file ricevuto: %s %s %s", file.getFileName(), file.getSize(),file.getContentType());
 			}
 
+			else if (file != null)	flash.error("Il tipo di file inserito non è supportato");	
+				
 			absence.absenceType = absenceType;
 
 			pd.addAbsence(absence);
@@ -948,28 +935,17 @@ public class Absences extends Controller{
 				//Logger.debug("Il valore di buono mensa da param: %s", mealTicket);
 				checkMealTicket(pd, mealTicket);
 				
-				AbsenceFile absenceFile = new AbsenceFile();
-				absenceFile.file = params.get("absenceFile" , Blob.class);
 				
-				if (absenceFile.file != null){
-									
-						absenceFile.fileName = params.get("absenceFile" ,Upload.class).getFileName();
-						absenceFile.uploadDate = new LocalDate();
-															
-						Logger.debug("file ricevuto: %s %s %s", absenceFile.fileName, absenceFile.file.length() , absenceFile.file.type() );
-						
-						absence.absenceFile = absenceFile;
-						absenceFile.absence = absence;
-						absenceFile.save();	
-	
+				Upload file = params.get("absenceFile" , Upload.class);
+				if (file != null && (file.getContentType().equals("application/pdf"))) {
+
+					absence.absenceFile = params.get("absenceFile", Blob.class);
+
+					Logger.debug("file ricevuto: %s %s %s", file.getFileName(), file.getSize(),file.getContentType());
 				}
-				
-				else{ 
+
+				else if (file != null)	flash.error("Il tipo di file inserito non è supportato");				
 					
-					absence.absenceFile = null;
-					
-					}				
-		
 				absence.absenceType = absenceType;
 				absence.save();
 
