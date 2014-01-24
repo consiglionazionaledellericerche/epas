@@ -7,6 +7,10 @@ import it.cnr.iit.epas.JsonPersonEmailBinder;
 import it.cnr.iit.epas.MainMenu;
 import it.cnr.iit.epas.PersonUtility;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -44,6 +48,7 @@ import org.joda.time.LocalDate;
 
 import play.Logger;
 import play.Play;
+import play.data.Upload;
 import play.data.binding.As;
 import play.data.validation.Required;
 import play.db.jpa.Blob;
@@ -546,14 +551,19 @@ public class Absences extends Controller{
 				pd = new PersonDay(person, dateFrom);
 				pd.create();
 			}
+			
 			Logger.debug("Creato il personDay %s", pd);
+						
+			Upload file = params.get("absenceFile" , Upload.class);
+			if (file != null && (file.getContentType().equals("application/pdf"))) {
 
-			if(params.get("datasize", Blob.class) != null){
-				absence.absenceRequest = params.get("datasize", Blob.class);
+				absence.absenceFile = params.get("absenceFile", Blob.class);
+
+				Logger.debug("file ricevuto: %s %s %s", file.getFileName(), file.getSize(),file.getContentType());
 			}
-			else 
-				absence.absenceRequest = null;
 
+			else if (file != null)	flash.error("Il tipo di file inserito non è supportato");	
+				
 			absence.absenceType = absenceType;
 
 			pd.addAbsence(absence);
@@ -781,12 +791,16 @@ public class Absences extends Controller{
 				//Logger.debug("Il valore di buono mensa da param: %s", mealTicket);
 				checkMealTicket(pd, mealTicket, absenceType);
 				
-				
-				
-				
-				if(params.get("datasize", Blob.class) != null){
-					absence.absenceRequest = params.get("datasize", Blob.class);
+				Upload file = params.get("absenceFile" , Upload.class);
+				if (file != null && (file.getContentType().equals("application/pdf"))) {
+
+					absence.absenceFile = params.get("absenceFile", Blob.class);
+					Logger.debug("file ricevuto: %s %s %s", file.getFileName(), file.getSize(),file.getContentType());
+
+				} else if (file != null) {
+					flash.error("Il tipo di file inserito non è supportato");
 				}
+					
 				absence.absenceType = absenceType;
 				absence.save();
 
