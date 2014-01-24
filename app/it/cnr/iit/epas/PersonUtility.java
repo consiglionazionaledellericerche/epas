@@ -807,43 +807,32 @@ public class PersonUtility {
 	 * @param month il mese dal quale far partire il fix
 	 */	
 	public static void fixPersonSituation(Long personId, int year, int month){
-		
+		//Costruisco la lista di persone su cui voglio operare
+		List<Person> personList = new ArrayList<Person>();
 		if(personId==-1)
 			personId=null;
-		
-		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
-		JPAPlugin.startTx(false);
 		if(personId==null)
 		{
-			List<Person> personList = Person.getActivePersonsInMonth(month, year, false);
-			for(Person person : personList)
-			{
-				PersonUtility.checkHistoryError(person, year, month);
-			}
+			//List<Person> personList = Person.getActivePersonsInMonth(month, year, false);
+			personList = Person.getActivePersons(new LocalDate());	//TODO usare un metodo cristiano
 		}
 		else
 		{
-			Person person = Person.findById(personId);
+			personList.add((Person)Person.findById(personId));
+		}
+		
+		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
+		JPAPlugin.startTx(false);
+		for(Person person : personList)
+		{
 			PersonUtility.checkHistoryError(person, year, month);
 		}
 		JPAPlugin.closeTx(false);
 		
 		// (2) Ricalcolo i valori dei person day aggregandoli per mese
 		JPAPlugin.startTx(true);
-		List<Person> personList = new ArrayList<Person>();
-		if(personId == null)
-		{
-			personList = Person.findAll();
-		}
-		else
-		{
-			Person person = Person.findById(personId);
-			personList.add(person);
-		}
 		JPAPlugin.closeTx(false);
-		
 		int i = 1;
-		
 		for(Person p : personList){
 			Logger.info("Update person situation %s (%s di %s) dal %s-%s-01 a oggi", p.surname, i++, personList.size(), year, month);
 			
