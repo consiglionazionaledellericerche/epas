@@ -43,9 +43,8 @@ public class JsonPersonEmailBinder implements TypeBinder<PersonEmailFromJson>{
 			Person person = null;
 			JsonObject macroJsonObject = new JsonParser().parse(value).getAsJsonObject();
 
-			String dataInizio = macroJsonObject.get("dateFrom").getAsString();
-			String dataFine = macroJsonObject.get("dateTo").getAsString();
-			PersonEmailFromJson pefjl = new PersonEmailFromJson(persons, dataInizio, dataFine);
+			
+			PersonEmailFromJson pefjl = new PersonEmailFromJson(persons);
 			JsonObject jsonObject = null;
 			JsonArray jsonArray = macroJsonObject.get("emails").getAsJsonArray();
 			String email = "";
@@ -59,8 +58,7 @@ public class JsonPersonEmailBinder implements TypeBinder<PersonEmailFromJson>{
 			}
 			Logger.debug("Ritorno lista persone...%s", persons);
 			pefjl.persons = persons;
-			pefjl.dateFrom = dataInizio;
-			pefjl.dateTo = dataFine;
+
 			return pefjl;
 		}
 		catch(Exception e){

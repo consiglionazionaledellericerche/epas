@@ -32,7 +32,8 @@ import play.mvc.Controller;
  */
 public class AbsenceFromJson extends Controller{
 
-	public static void absenceInPeriod(@As(binder=JsonPersonEmailBinder.class) PersonEmailFromJson body){
+	public static void absenceInPeriod(Integer yearFrom, Integer monthFrom, Integer dayFrom, Integer yearTo, Integer monthTo, Integer dayTo,
+			@As(binder=JsonPersonEmailBinder.class) PersonEmailFromJson body){
 
 		Logger.debug("Received personEmailFromJson %s", body);
 		if(body == null)
@@ -41,8 +42,17 @@ public class AbsenceFromJson extends Controller{
 		Logger.debug("Entrato nel metodo getAbsenceInPeriod...");
 		List<PersonPeriodAbsenceCode> personsToRender = new ArrayList<PersonPeriodAbsenceCode>();
 		PersonPeriodAbsenceCode personPeriodAbsenceCode = null;
-		LocalDate dateFrom = new LocalDate(body.dateFrom);
-		LocalDate dateTo = new LocalDate(body.dateTo);
+		LocalDate dateFrom = null;
+		LocalDate dateTo  = null;
+		if(yearFrom != null && monthFrom != null && dayFrom != null)
+			dateFrom = new LocalDate(yearFrom, monthFrom, dayFrom);
+		else 
+			dateFrom = new LocalDate(params.get("yearFrom", Integer.class), params.get("monthFrom", Integer.class), params.get("dayFrom", Integer.class));
+		if(yearTo != null && monthTo != null && dayTo != null)
+			dateTo = new LocalDate(yearTo, monthTo, dayTo);
+		else
+			dateTo = new LocalDate(params.get("yearTo", Integer.class), params.get("monthTo", Integer.class), params.get("dayTo", Integer.class));
+			
 
 		for(Person person : body.persons){
 			personPeriodAbsenceCode = new PersonPeriodAbsenceCode();
@@ -101,18 +111,23 @@ public class AbsenceFromJson extends Controller{
 	}
 
 
-	public static void frequentAbsence(@As(binder=JsonRequestedFrequentAbsenceBinder.class) PeriodAbsenceCode body){
-		Logger.debug("Received PeriodAbsenceCode %s", body);
-		if(body == null)
-			badRequest();
+	/**
+	 * metodo esposto per ritornare la lista dei codici di assenza presi 
+	 */
+	public static void frequentAbsence(Integer yearFrom, Integer monthFrom, Integer dayFrom, Integer yearTo, Integer monthTo, Integer dayTo){
+//		Logger.debug("Received PeriodAbsenceCode %s", body);
+//		if(body == null)
+//			badRequest();
 		List<FrequentAbsenceCode> frequentAbsenceCodeList = new ArrayList<FrequentAbsenceCode>();
 		List<String> listaFerie = new ArrayList<String>();
 		List<String> listaMalattie = new ArrayList<String>();
 		List<String> listaMissioni = new ArrayList<String>();
 		List<String> listaRiposiCompensativi = new ArrayList<String>();
 		List<String> listaAltri = new ArrayList<String>();
+		LocalDate dateFrom = new LocalDate(params.get("yearFrom", Integer.class), params.get("monthFrom", Integer.class), params.get("dayFrom", Integer.class));
+		LocalDate dateTo = new LocalDate(params.get("yearTo", Integer.class), params.get("monthTo", Integer.class), params.get("dayTo", Integer.class));
 		List<Absence> absList = Absence.find("Select abs from Absence abs, PersonDay pd " +
-				"where abs.personDay = pd and abs.absenceType.absenceTypeGroup is null and pd.date between ? and ?", new LocalDate(body.dateFrom), new LocalDate(body.dateTo)).fetch();
+				"where abs.personDay = pd and abs.absenceType.absenceTypeGroup is null and pd.date between ? and ?", dateFrom, dateTo).fetch();
 		for(Absence abs : absList){
 			
 			Logger.debug("Trovato codice di assenza %s in data %s", abs.absenceType.code, abs.personDay.date);
@@ -140,14 +155,11 @@ public class AbsenceFromJson extends Controller{
 					listaMissioni.add(abs.absenceType.code);
 				continue;
 			}
-			/*
-			if((!abs.absenceType.code.equals("92") || abs.absenceType.code.equals("94") || !abs.absenceType.description.contains("Riposo compensativo")
-					|| !abs.absenceType.description.contains("malattia") || !abs.absenceType.description.contains("ferie")) && (!listaAltri.contains(abs.absenceType.code))){
-			*/
+			
 			if(!listaAltri.contains(abs.absenceType.code))
 				listaAltri.add(abs.absenceType.code);
 
-			//}
+			
 		}		
 
 		Logger.debug("Liste di codici di assenza completate con dimensioni: %d %d %d %d %d", 
