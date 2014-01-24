@@ -45,10 +45,8 @@ public class Absence extends Model {
 	@JoinColumn(name="personDay_id", nullable=false)
 	public PersonDay personDay;
 	
-	@OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE}, orphanRemoval=true , optional = true)
-	@JoinColumn(name = "absenceFile_id")
-	@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
-	public AbsenceFile absenceFile;
+	@Column (name = "absence_file", nullable = true )
+	public Blob absenceFile;
 
 	@Override
 	public String toString() {
