@@ -3,7 +3,7 @@
 
 <h3>${absence.personDay.date.toDateTime()}</h3>
 
-#{form @Absences.update()}
+#{form @Absences.update(), enctype:'multipart/form-data'}
 	
 
 	<input type="hidden" name="absenceId" value="${absence.id}"/>
@@ -117,7 +117,7 @@
 
 <p id="allegaFile">
 Allega il file contenente la dichiarazione di assenza:<br>
-<input type="file" name="datasize" size="30">
+<input type="file" name="absenceFile">
 </p>
 
 <input class="btn btn-primary" id="inserisciAssenza" type="submit" value="Aggiorna"/>
