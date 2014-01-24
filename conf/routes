@@ -80,6 +80,9 @@ GET		/persons/modifyContract/{contractId}	Persons.modifyContract
 POST	/persons/modifyContract/{contractId}	Persons.updateContract
 GET		/persons/insertContract/{personId}		Persons.insertContract
 POST 	/persons/saveContract					Persons.saveContract
+GET		/persons/personChildrenList/{personId}	Persons.personChildrenList
+GET		/persons/insertChild/{personId}			Persons.insertChild
+POST	/persons/insertChild					Persons.saveChild
 
 
 # Gestione orari di lavoro
@@ -134,6 +137,9 @@ POST	/absences/insertAbsenceCode				Absences.saveAbsenceCode
 
 POST	/absences/updateCode					Absences.updateCode
 GET		/absences/editCode/{absenceCodeId}		Absences.editCode
+
+GET		/absences/manageAttachment				Absences.manageAttachment
+
 
 #Gestione configurazione parametri
 GET		/listConfigurations						Configurations.list
@@ -215,6 +221,13 @@ PUT 	/overtimes/setSupervisorTotalOvertimes/{email}/{hours}						Overtimes.setSu
 
 #Gestione timbrature via json
 PUT		/stampings/create						StampingsFromClient.create
+
+#Invio periodi di assenza 
+POST	/absenceFromJson/absenceInPeriod				AbsenceFromJson.absenceInPeriod
+POST	/absences/setPersonEmailForAbsence		Absences.setPersonEmailForAbsence
+
+#Ricezione richiesta codici frequenti di assenza
+GET		/absenceFromJson/frequentAbsence		AbsenceFromJson.frequentAbsence
 
 # Catch all
 *       /{controller}/{action}                  {controller}.{action}
