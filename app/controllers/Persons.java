@@ -17,6 +17,7 @@ import models.InitializationTime;
 import models.Location;
 import models.Office;
 import models.Person;
+import models.PersonChildren;
 import models.PersonDay;
 import models.PersonWorkingTimeType;
 import models.Qualification;
@@ -305,6 +306,7 @@ public class Persons extends Controller {
 	public static void list(){
 		Person person = Security.getPerson();
 		List<Person> personList = null;
+		//TODO da qui questi controlli vanno tolti
 		if(!person.office.remoteOffices.isEmpty()){
 			personList = Person.find("Select p from Person p where p.name <> ? and p.name <> ? order by p.surname", "Admin", "epas").fetch();
 		}
@@ -314,7 +316,7 @@ public class Persons extends Controller {
 		
 		//Logger.debug("La lista delle persone: %s", personList.toString());
 		LocalDate date = new LocalDate();
-		List<Person> activePerson = Person.getActivePersons(date);
+		List<Person> activePerson = Person.getActivePersonsInDay(date.getDayOfMonth(), date.getMonthOfYear(), date.getYear(), false);
 		
 		render(personList, activePerson);
 	}
@@ -808,5 +810,34 @@ public class Persons extends Controller {
 		edit(personId);
 	}
 	
+	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void insertChild(Long personId){
+		Person person = Person.findById(personId);
+		PersonChildren personChildren = new PersonChildren();
+//		render(personChildren);
+		render(person, personChildren);
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void saveChild(){
+		PersonChildren personChildren = new PersonChildren();
+		Person person = Person.findById(params.get("personId", Long.class));
+		personChildren.name = params.get("name");
+		personChildren.surname = params.get("surname");
+		personChildren.bornDate = new LocalDate(params.get("bornDate"));
+		personChildren.person = person;
+		personChildren.save();
+		person.save();
+		flash.success("Aggiunto %s %s nell'anagrafica dei figli di %s %s", personChildren.name, personChildren.surname, person.name, person.surname);
+		Application.indexAdmin();
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void personChildrenList(Long personId){
+		Person person = Person.findById(personId);
+		List<PersonChildren> personChildren = person.personChildren;
+		render(person);
+	}
 	
 }
