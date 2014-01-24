@@ -223,11 +223,10 @@ PUT 	/overtimes/setSupervisorTotalOvertimes/{email}/{hours}						Overtimes.setSu
 PUT		/stampings/create						StampingsFromClient.create
 
 #Invio periodi di assenza 
-POST	/absenceFromJson/absenceInPeriod				AbsenceFromJson.absenceInPeriod
-POST	/absences/setPersonEmailForAbsence		Absences.setPersonEmailForAbsence
+POST	/absenceFromJson/absenceInPeriod/{yearFrom}/{monthFrom}/{dayFrom}/{yearTo}/{monthTo}/{dayTo}				AbsenceFromJson.absenceInPeriod
 
 #Ricezione richiesta codici frequenti di assenza
-GET		/absenceFromJson/frequentAbsence		AbsenceFromJson.frequentAbsence
+GET		/absenceFromJson/frequentAbsence/{yearFrom}/{monthFrom}/{dayFrom}/{yearTo}/{monthTo}/{dayTo}		AbsenceFromJson.frequentAbsence
 
 # Catch all
 *       /{controller}/{action}                  {controller}.{action}
