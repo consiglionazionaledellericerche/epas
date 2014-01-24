@@ -247,7 +247,6 @@ public class Competences extends Controller{
 		}
 		
 		List<Person> activePersons = Person.getTechnicianForCompetences(new LocalDate(year, month, 1));
-		
 		for(Person p : activePersons){
 			Integer daysAtWork = 0;
 			Integer recoveryDays = 0;

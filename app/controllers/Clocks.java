@@ -34,7 +34,7 @@ public class Clocks extends Controller{
 	public static void show(){
 		LocalDate data = new LocalDate();
 		MainMenu mainMenu = new MainMenu(data.getYear(),data.getMonthOfYear());
-		List<Person> personList = Person.getActivePersonsInMonth(data.getMonthOfYear(), data.getYear());
+		List<Person> personList = Person.getActivePersonsInMonth(data.getMonthOfYear(), data.getYear(), false);
 		render(data, personList,mainMenu);
 	}
 	

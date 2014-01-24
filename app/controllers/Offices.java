@@ -74,7 +74,7 @@ public class Offices extends Controller {
 		remoteOffice.address = address;
 		remoteOffice.code = getInteger(code);
 		remoteOffice.joiningDate = getLocalDate(date);
-		remoteOffice.office = Office.find("Select o from Office o where o.office is null").first();
+		remoteOffice.office = Office.find("Select o from Office o where o.joiningDate is null").first();
 
 		remoteOffice.save();
 		flash.success("Sede distaccatta correttamente inserita.");
