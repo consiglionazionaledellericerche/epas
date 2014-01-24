@@ -1272,7 +1272,16 @@ public class Absences extends Controller{
 	}
 
 	
+	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
+	public static void insertPersonChildren(){
+		List<Person> personList = Person.getActivePersonsInMonth(new LocalDate().getMonthOfYear(), new LocalDate().getYear(), false);
+		render(personList);
+	}
 	
+	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
+	public static void manageAttachment(){
+		render();
+	}
 }
 
 
