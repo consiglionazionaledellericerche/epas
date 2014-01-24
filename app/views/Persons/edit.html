@@ -2,7 +2,7 @@
 #{set titolo: 'Modifica dati per la persona ' + person.name + ' ' + person.surname /}
 <ul class="nav nav-tabs">
   <li class="active"><a href="@{Persons.edit(person.id)}#">Dati Anagrafici ${person.name} ${person.surname}</a></li>
-  <li><a href="@{Persons.personCompetence(person.id, month, year)}#">Competenze &{'views.tags.display.date.month.' + month} ${year} - ${person.name} ${person.surname}</a></li>
+  <li><a href="@{Persons.insertChild(person.id)}#">Inserisci figlio per ${person.name} ${person.surname}</a></li>
 </ul>
 
 <input type="hidden" name="id" value="${id}"/>
