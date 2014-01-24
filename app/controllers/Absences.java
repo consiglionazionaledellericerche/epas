@@ -6,6 +6,10 @@ import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.MainMenu;
 import it.cnr.iit.epas.PersonUtility;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -23,6 +27,7 @@ import javax.persistence.Query;
 import models.Absence;
 import models.AbsenceType;
 import models.AbsenceTypeGroup;
+import models.AbsenceFile;
 import models.Configuration;
 import models.Person;
 import models.PersonDay;
@@ -41,9 +46,11 @@ import org.joda.time.LocalDate;
 
 import play.Logger;
 import play.Play;
+import play.data.Upload;
 import play.data.validation.Required;
 import play.db.jpa.Blob;
 import play.db.jpa.JPA;
+import play.libs.MimeTypes;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -694,11 +701,27 @@ public class Absences extends Controller{
 			}
 			Logger.debug("Creato il personDay %s", pd);
 
-			if(params.get("datasize", Blob.class) != null){
-				absence.absenceRequest = params.get("datasize", Blob.class);
+			AbsenceFile absenceFile = new AbsenceFile();
+			absenceFile.file = params.get("absenceFile" , Blob.class);
+			
+			if (absenceFile.file != null){
+				
+				absenceFile.fileName = params.get("absenceFile" ,Upload.class).getFileName();
+				absenceFile.uploadDate = new LocalDate();
+													
+				Logger.debug("file ricevuto: %s %s %s", absenceFile.fileName, absenceFile.file.length() , absenceFile.file.type() );
+				
+				absence.absenceFile = absenceFile;
+				absenceFile.absence = absence;
+				absenceFile.save();	
+
+		}
+		
+		else{ 
+			
+			absence.absenceFile = null;
+			
 			}
-			else 
-				absence.absenceRequest = null;
 
 			absence.absenceType = absenceType;
 
@@ -924,11 +947,29 @@ public class Absences extends Controller{
 				String mealTicket =  params.get("buonoMensa");
 				//Logger.debug("Il valore di buono mensa da param: %s", mealTicket);
 				checkMealTicket(pd, mealTicket);
-
-
-				if(params.get("datasize", Blob.class) != null){
-					absence.absenceRequest = params.get("datasize", Blob.class);
+				
+				AbsenceFile absenceFile = new AbsenceFile();
+				absenceFile.file = params.get("absenceFile" , Blob.class);
+				
+				if (absenceFile.file != null){
+									
+						absenceFile.fileName = params.get("absenceFile" ,Upload.class).getFileName();
+						absenceFile.uploadDate = new LocalDate();
+															
+						Logger.debug("file ricevuto: %s %s %s", absenceFile.fileName, absenceFile.file.length() , absenceFile.file.type() );
+						
+						absence.absenceFile = absenceFile;
+						absenceFile.absence = absence;
+						absenceFile.save();	
+	
 				}
+				
+				else{ 
+					
+					absence.absenceFile = null;
+					
+					}				
+		
 				absence.absenceType = absenceType;
 				absence.save();
 
