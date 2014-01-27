@@ -56,30 +56,46 @@ public class AbsenceFromJson extends Controller{
 
 		for(Person person : body.persons){
 			personPeriodAbsenceCode = new PersonPeriodAbsenceCode();
+			if(person != null){
+				Logger.debug("Controllo %s %s", person.name, person.surname);
 
-			Logger.debug("Controllo %s %s", person.name, person.surname);
+				List<Absence> absences = Absence.find("Select abs from Absence abs, PersonDay pd " +
+						"where abs.personDay = pd and pd.date between ? and ? and pd.person = ? order by abs.personDay.date", 
+						dateFrom, dateTo, person).fetch();
+				Logger.debug("Lista assenze per %s %s: %s", person.name, person.surname, absences.toString());
 
-			List<Absence> absences = Absence.find("Select abs from Absence abs, PersonDay pd " +
-					"where abs.personDay = pd and pd.date between ? and ? and pd.person = ? order by abs.personDay.date", 
-					dateFrom, dateTo, person).fetch();
-			Logger.debug("Lista assenze per %s %s: %s", person.name, person.surname, absences.toString());
+				LocalDate startCurrentPeriod = null;
+				LocalDate endCurrentPeriod = null;
+				Absence previousAbsence = null;
+				for(Absence abs : absences){
 
-			LocalDate startCurrentPeriod = null;
-			LocalDate endCurrentPeriod = null;
-			Absence previousAbsence = null;
-			for(Absence abs : absences){
+					if(previousAbsence == null){
+						previousAbsence = abs;
+						startCurrentPeriod = abs.personDay.date;
+						endCurrentPeriod = abs.personDay.date;
+						continue;
+					}
+					if(abs.absenceType.code.equals(previousAbsence.absenceType.code)){
+						endCurrentPeriod = abs.personDay.date;
+						continue;
+					}
+					else
+					{
+						personPeriodAbsenceCode = new PersonPeriodAbsenceCode();
+						personPeriodAbsenceCode.name = person.name;
+						personPeriodAbsenceCode.surname = person.surname;
+						personPeriodAbsenceCode.code = previousAbsence.absenceType.code;
+						personPeriodAbsenceCode.dateFrom = new String(startCurrentPeriod.getYear()+"-"+startCurrentPeriod.getMonthOfYear()+"-"+startCurrentPeriod.getDayOfMonth());
+						personPeriodAbsenceCode.dateTo = new String(endCurrentPeriod.getYear()+"-"+endCurrentPeriod.getMonthOfYear()+"-"+endCurrentPeriod.getDayOfMonth());
+						personsToRender.add(personPeriodAbsenceCode);
 
-				if(previousAbsence == null){
-					previousAbsence = abs;
-					startCurrentPeriod = abs.personDay.date;
-					endCurrentPeriod = abs.personDay.date;
-					continue;
+						previousAbsence = abs;
+						startCurrentPeriod = abs.personDay.date;
+						endCurrentPeriod = abs.personDay.date;
+					}
 				}
-				if(abs.absenceType.code.equals(previousAbsence.absenceType.code)){
-					endCurrentPeriod = abs.personDay.date;
-					continue;
-				}
-				else
+
+				if(previousAbsence!=null)
 				{
 					personPeriodAbsenceCode = new PersonPeriodAbsenceCode();
 					personPeriodAbsenceCode.name = person.name;
@@ -88,23 +104,13 @@ public class AbsenceFromJson extends Controller{
 					personPeriodAbsenceCode.dateFrom = new String(startCurrentPeriod.getYear()+"-"+startCurrentPeriod.getMonthOfYear()+"-"+startCurrentPeriod.getDayOfMonth());
 					personPeriodAbsenceCode.dateTo = new String(endCurrentPeriod.getYear()+"-"+endCurrentPeriod.getMonthOfYear()+"-"+endCurrentPeriod.getDayOfMonth());
 					personsToRender.add(personPeriodAbsenceCode);
-
-					previousAbsence = abs;
-					startCurrentPeriod = abs.personDay.date;
-					endCurrentPeriod = abs.personDay.date;
 				}
 			}
-
-			if(previousAbsence!=null)
-			{
-				personPeriodAbsenceCode = new PersonPeriodAbsenceCode();
-				personPeriodAbsenceCode.name = person.name;
-				personPeriodAbsenceCode.surname = person.surname;
-				personPeriodAbsenceCode.code = previousAbsence.absenceType.code;
-				personPeriodAbsenceCode.dateFrom = new String(startCurrentPeriod.getYear()+"-"+startCurrentPeriod.getMonthOfYear()+"-"+startCurrentPeriod.getDayOfMonth());
-				personPeriodAbsenceCode.dateTo = new String(endCurrentPeriod.getYear()+"-"+endCurrentPeriod.getMonthOfYear()+"-"+endCurrentPeriod.getDayOfMonth());
-				personsToRender.add(personPeriodAbsenceCode);
+			else{
+				Logger.error("Richiesta persona non presente in anagrafica. Possibile sia un non strutturato.");
+				
 			}
+			
 		}
 
 		renderJSON(personsToRender);
