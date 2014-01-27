@@ -53,7 +53,10 @@ public class AbsenceFromJson extends Controller{
 		else
 			dateTo = new LocalDate(params.get("yearTo", Integer.class), params.get("monthTo", Integer.class), params.get("dayTo", Integer.class));
 			
-
+		String meseInizio = "";
+		String meseFine = "";
+		String giornoInizio = "";
+		String giornoFine = "";
 		for(Person person : body.persons){
 			personPeriodAbsenceCode = new PersonPeriodAbsenceCode();
 			if(person != null){
@@ -85,8 +88,26 @@ public class AbsenceFromJson extends Controller{
 						personPeriodAbsenceCode.name = person.name;
 						personPeriodAbsenceCode.surname = person.surname;
 						personPeriodAbsenceCode.code = previousAbsence.absenceType.code;
-						personPeriodAbsenceCode.dateFrom = new String(startCurrentPeriod.getYear()+"-"+startCurrentPeriod.getMonthOfYear()+"-"+startCurrentPeriod.getDayOfMonth());
-						personPeriodAbsenceCode.dateTo = new String(endCurrentPeriod.getYear()+"-"+endCurrentPeriod.getMonthOfYear()+"-"+endCurrentPeriod.getDayOfMonth());
+						
+						if(startCurrentPeriod.getMonthOfYear() < 10)
+							meseInizio = new String("0"+startCurrentPeriod.getMonthOfYear());
+						else
+							meseInizio = new String(""+startCurrentPeriod.getMonthOfYear());
+						if(endCurrentPeriod.getMonthOfYear() < 10)
+							meseFine = new String("0"+endCurrentPeriod.getMonthOfYear());
+						else
+							meseFine = new String(""+endCurrentPeriod.getMonthOfYear());
+						
+						if(startCurrentPeriod.getDayOfMonth() < 10)
+							giornoInizio = new String("0"+startCurrentPeriod.getDayOfMonth());
+						else
+							giornoInizio = new String(""+startCurrentPeriod.getDayOfMonth());
+						if(endCurrentPeriod.getDayOfMonth() < 10)
+							giornoFine = new String("0"+endCurrentPeriod.getDayOfMonth());
+						else
+							giornoFine = new String(""+endCurrentPeriod.getDayOfMonth());
+						personPeriodAbsenceCode.dateFrom = new String(startCurrentPeriod.getYear()+"-"+meseInizio+"-"+giornoInizio);
+						personPeriodAbsenceCode.dateTo = new String(endCurrentPeriod.getYear()+"-"+meseFine+"-"+giornoFine);
 						personsToRender.add(personPeriodAbsenceCode);
 
 						previousAbsence = abs;
@@ -101,8 +122,25 @@ public class AbsenceFromJson extends Controller{
 					personPeriodAbsenceCode.name = person.name;
 					personPeriodAbsenceCode.surname = person.surname;
 					personPeriodAbsenceCode.code = previousAbsence.absenceType.code;
-					personPeriodAbsenceCode.dateFrom = new String(startCurrentPeriod.getYear()+"-"+startCurrentPeriod.getMonthOfYear()+"-"+startCurrentPeriod.getDayOfMonth());
-					personPeriodAbsenceCode.dateTo = new String(endCurrentPeriod.getYear()+"-"+endCurrentPeriod.getMonthOfYear()+"-"+endCurrentPeriod.getDayOfMonth());
+					if(startCurrentPeriod.getMonthOfYear() < 10)
+						meseInizio = new String("0"+startCurrentPeriod.getMonthOfYear());
+					else
+						meseInizio = new String(""+startCurrentPeriod.getMonthOfYear());
+					if(endCurrentPeriod.getMonthOfYear() < 10)
+						meseFine = new String("0"+endCurrentPeriod.getMonthOfYear());
+					else
+						meseFine = new String(""+endCurrentPeriod.getMonthOfYear());
+					
+					if(startCurrentPeriod.getDayOfMonth() < 10)
+						giornoInizio = new String("0"+startCurrentPeriod.getDayOfMonth());
+					else
+						giornoInizio = new String(""+startCurrentPeriod.getDayOfMonth());
+					if(endCurrentPeriod.getDayOfMonth() < 10)
+						giornoFine = new String("0"+endCurrentPeriod.getDayOfMonth());
+					else
+						giornoFine = new String(""+endCurrentPeriod.getDayOfMonth());
+					personPeriodAbsenceCode.dateFrom = new String(startCurrentPeriod.getYear()+"-"+meseInizio+"-"+giornoInizio);
+					personPeriodAbsenceCode.dateTo = new String(endCurrentPeriod.getYear()+"-"+meseFine+"-"+giornoFine);
 					personsToRender.add(personPeriodAbsenceCode);
 				}
 			}
