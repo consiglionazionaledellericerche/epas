@@ -6,6 +6,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
@@ -26,6 +27,7 @@ public class PersonChildren extends Model{
 	
 	public String surname;
 	
+	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate bornDate;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
