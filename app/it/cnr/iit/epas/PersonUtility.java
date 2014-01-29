@@ -802,47 +802,37 @@ public class PersonUtility {
 	
 	/**
 	 * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
-	 * @param personId l'id univoco della persona da fixare, -1 per fixare tutte le persone
+	 * @param personId l'id univoco della persona da fixare, -1 per fixare tutte le persone attive alla data di ieri
 	 * @param year l'anno dal quale far partire il fix
 	 * @param month il mese dal quale far partire il fix
 	 */	
 	public static void fixPersonSituation(Long personId, int year, int month){
-		
+		//Costruisco la lista di persone su cui voglio operare
+		List<Person> personList = new ArrayList<Person>();
 		if(personId==-1)
 			personId=null;
-		
-		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
-		JPAPlugin.startTx(false);
 		if(personId==null)
 		{
-			List<Person> personList = Person.getActivePersonsInMonth(month, year, false);
-			for(Person person : personList)
-			{
-				PersonUtility.checkHistoryError(person.id, year, month);
-			}
+			//List<Person> personList = Person.getActivePersonsInMonth(month, year, false);
+			personList = Person.getActivePersonsInDay(new LocalDate().minusDays(1), false);	//TODO usare un metodo cristiano
 		}
 		else
 		{
-			PersonUtility.checkHistoryError(personId, year, month);
+			personList.add((Person)Person.findById(personId));
+		}
+		
+		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
+		JPAPlugin.startTx(false);
+		for(Person person : personList)
+		{
+			PersonUtility.checkHistoryError(person, year, month);
 		}
 		JPAPlugin.closeTx(false);
 		
 		// (2) Ricalcolo i valori dei person day aggregandoli per mese
 		JPAPlugin.startTx(true);
-		List<Person> personList = new ArrayList<Person>();
-		if(personId == null)
-		{
-			personList = Person.findAll();
-		}
-		else
-		{
-			Person person = Person.findById(personId);
-			personList.add(person);
-		}
 		JPAPlugin.closeTx(false);
-		
 		int i = 1;
-		
 		for(Person p : personList){
 			Logger.info("Update person situation %s (%s di %s) dal %s-%s-01 a oggi", p.surname, i++, personList.size(), year, month);
 			
@@ -853,6 +843,8 @@ public class PersonUtility {
 			{
 				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
 						p, actualMonth, actualMonth.dayOfMonth().withMaximumValue()).fetch();
+
+
 				for(PersonDay pd : pdList){
 					pd.populatePersonDay();
 				}
@@ -912,15 +904,15 @@ public class PersonUtility {
 	 * @param year l'anno di partenza
 	 * @param month il mese di partenza
 	 */
-	private static void checkHistoryError(Long personid, int year, int month)
+	private static void checkHistoryError(Person person, int year, int month)
 	{
-		Person person = Person.findById(personid);
+		//Person person = Person.findById(personid);
 		Logger.info("Check history error %s dal %s-%s-1 a oggi", person.surname, year, month);
 		LocalDate date = new LocalDate(year,month,1);
 		LocalDate today = new LocalDate();
 		while(true)
 		{
-			PersonUtility.checkPersonDay(personid, date);
+			PersonUtility.checkPersonDay(person.id, date);
 			date = date.plusDays(1);
 			if(date.isEqual(today))
 				break;
