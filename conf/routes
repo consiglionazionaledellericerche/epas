@@ -138,7 +138,9 @@ POST	/absences/insertAbsenceCode				Absences.saveAbsenceCode
 POST	/absences/updateCode					Absences.updateCode
 GET		/absences/editCode/{absenceCodeId}		Absences.editCode
 
-GET		/absences/manageAttachment				Absences.manageAttachment
+GET		/absences/manageAttachmentsPerCode/{year}/{month}				Absences.manageAttachmentsPerCode
+GET		/absences/manageAttachmentsPerPerson/{personSelected}/{year}/{month}				Absences.manageAttachmentsPerPerson
+*		/absences/personAttachments/									Absences.personAttachments
 
 
 #Gestione configurazione parametri

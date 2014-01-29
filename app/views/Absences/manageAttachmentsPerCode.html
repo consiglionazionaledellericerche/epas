@@ -1,0 +1,45 @@
+#{extends 'main_admin_no_menu.html' /}
+#{set titolo: 'Gestione allegati ai codici di assenza' /}
+
+<ul class="nav nav-tabs">
+  	<li class="active"><a href="@{Absences.manageAttachmentsPerCode(year, month)}#">Gestione attachment per codice di assenza</a></li>
+  	<li ><a href="@{Absences.manageAttachmentsPerPerson(0, year, month)}#">Gestione attachment per persona</a></li>
+</ul>
+<input type="hidden" name="year" value="${year}"/>
+<input type="hidden" name="month" value="${month}"/>
+<div class="span12">
+<table class="table table-bordered table-hover table-condensed table-yearly-absence">
+	<tr>
+	   	
+	   	%{for(col in tableAbsences.columnKeySet()){
+		}%
+		<th>${col}</th>
+		%{
+		}
+		}%
+   	</tr>
+	%{  for(entry in tableAbsences.rowMap().entrySet()){
+		}%
+    	<tr>
+    		
+    	%{ for(col in tableAbsences.columnKeySet()){
+			}%
+			<td>
+				#{if entry.getValue().get(col) != null}
+					#{list items:entry.getValue().get(col), as:'absence'}
+					<a href="@{Absences.downloadAttachment(absence.id)}"><i class="icon-envelope"></i></a>
+					
+						
+					#{/list} 			
+				#{/if}
+			</td>
+		%{
+			}
+			
+		}%
+    	</tr> 
+    	%{
+    	}
+    	}%   
+</table>
+</div>
