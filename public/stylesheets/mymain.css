@@ -166,6 +166,10 @@ fError, .fSuccess {text-align: center; }
 input#pastYear{width: 100px; margin-left: 10px;}
 select#year{width: 90px;}
 
+li.distanziato{
+	padding-bottom: 5px;
+}
+
 
 
 
@@ -186,3 +190,4 @@ div.accordion-group {
 div.accordion-inner {
 	border-top: 1px solid #bbb;
 }
+
