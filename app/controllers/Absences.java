@@ -47,7 +47,6 @@ import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
-import Validators.isPdf;
 import play.Logger;
 import play.Play;
 import play.data.Upload;
