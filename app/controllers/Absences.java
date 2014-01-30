@@ -592,8 +592,6 @@ public class Absences extends Controller{
 			if(absenceFile.exists()){
 				absence.absenceFile = absenceFile;
 			}	
-
-			Stampings.personStamping(personId, pd.date.getYear(), pd.date.getMonthOfYear());
 				
 			absence.absenceType = absenceType;
 
@@ -601,6 +599,7 @@ public class Absences extends Controller{
 			pd.save();
 			Logger.debug("Creata e salvata l'assenza %s con codice %s", absence, absence.absenceType.code);
 			pd.populatePersonDay();
+			Stampings.personStamping(personId, pd.date.getYear(), pd.date.getMonthOfYear());
 			
 			if(pd.date.isBefore(new LocalDate(pd.date).dayOfMonth().withMaximumValue())){
 				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ? and pd.date <= ? order by pd.date", 
@@ -779,6 +778,7 @@ public class Absences extends Controller{
 		if (absence == null) {
 			notFound();
 		}
+		
 		Blob absenceFile = new Blob();
 		if (file != null && (file.getContentType().equals("application/pdf"))) {
 			absenceFile = params.get("file", Blob.class);
