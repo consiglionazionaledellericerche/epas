@@ -1175,22 +1175,19 @@ public class Absences extends Controller{
 		List<Absence> absenceList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup is null and " +
 				"abs.personDay.date between ? and ?", 
 				beginMonth, beginMonth.dayOfMonth().withMaximumValue()).fetch();
-		List<Absence> listaAssenze = null;
+		
 		for(Absence abs : absenceList){
-			if(abs.absenceFile != null){
+			List<Absence> listaAssenze = null;
+			if(abs.absenceFile.get() != null){
 				if(!tableAbsences.containsColumn(abs.absenceType.code)){
+					Logger.debug("Absence type per assenza %s : %s", abs, abs.absenceType.code);
 					listaAssenze = new ArrayList<Absence>();
 					listaAssenze.add(abs);
 					tableAbsences.put(abs.personDay.date.getDayOfMonth(), abs.absenceType.code, listaAssenze);
 				}
 				else{
 					listaAssenze = tableAbsences.get(abs.personDay.date.getDayOfMonth(), abs.absenceType.code);
-					if(listaAssenze != null)
-						listaAssenze.add(abs);
-					else{
-						listaAssenze = new ArrayList<Absence>();
-						listaAssenze.add(abs);
-					}
+					listaAssenze.add(abs);
 					tableAbsences.put(abs.personDay.date.getDayOfMonth(), abs.absenceType.code, listaAssenze);
 				}					
 					
