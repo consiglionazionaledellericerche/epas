@@ -802,7 +802,7 @@ public class PersonUtility {
 	
 	/**
 	 * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
-	 * @param personId l'id univoco della persona da fixare, -1 per fixare tutte le persone
+	 * @param personId l'id univoco della persona da fixare, -1 per fixare tutte le persone attive alla data di ieri
 	 * @param year l'anno dal quale far partire il fix
 	 * @param month il mese dal quale far partire il fix
 	 */	
@@ -814,7 +814,11 @@ public class PersonUtility {
 		if(personId==null)
 		{
 			//List<Person> personList = Person.getActivePersonsInMonth(month, year, false);
-			personList = Person.getActivePersons(new LocalDate());	//TODO usare un metodo cristiano
+
+
+
+			personList = Person.getActivePersonsInDay(new LocalDate().minusDays(1), false);	//TODO usare un metodo cristiano
+
 		}
 		else
 		{

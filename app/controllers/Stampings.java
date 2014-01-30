@@ -520,20 +520,33 @@ public class Stampings extends Controller {
 			}
 
 		});
-		for(Person p : activePersons){
+		for(Person p : activePersons)
+		{
 			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
 					p, beginMonth, beginMonth.dayOfMonth().withMaximumValue()).fetch();
 			Logger.debug("La lista dei personDay: ", pdList);
 			for(PersonDay pd : pdList){
-
-				Logger.debug("Per la persona %s nel personDay %s il buono mensa è: %s", p, pd, pd.isTicketAvailable);
-				if(pd.isTicketAvailable == true){
-					Logger.debug("Per il giorno %s il valore del ticket è: ", pd.date, "si");
-					builder.put(p, pd.date, "si");
+				if(pd.isTicketForcedByAdmin)
+				{
+					if(pd.isTicketAvailable)
+					{
+						builder.put(p, pd.date, "siAd");
+					}
+					else
+					{
+						builder.put(p, pd.date, "noAd");
+					}
 				}
-				else{
-					Logger.debug("Per il giorno %s il valore del ticket è: ", pd.date, "");
-					builder.put(p, pd.date, "");
+				else
+				{
+					if(pd.isTicketAvailable)
+					{
+						builder.put(p, pd.date, "si");
+					}
+					else
+					{
+						builder.put(p, pd.date, "");
+					}
 				}    			
 
 			}
