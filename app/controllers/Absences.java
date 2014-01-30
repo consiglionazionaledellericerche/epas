@@ -411,6 +411,25 @@ public class Absences extends Controller{
 				return;
 
 			}
+			else{
+				PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?",
+						person, new LocalDate(yearFrom, monthFrom, dayFrom)).first();
+				if(pd == null){
+					pd = new PersonDay(person, dateFrom);
+					pd.create();
+				}
+				Absence absence = new Absence();
+				absence.absenceType = absenceType;
+				absence.personDay = pd;
+				absence.save();
+				pd.absences.add(absence);
+				pd.save();
+				pd.updatePersonDaysInMonth();
+				flash.success("Inserito il codice d'assenza %s nel giorno %s", absenceType.code, pd.date);
+				Stampings.personStamping(personId, yearFrom, monthFrom);
+				return;
+			}
+			
 		}
 
 		/**
