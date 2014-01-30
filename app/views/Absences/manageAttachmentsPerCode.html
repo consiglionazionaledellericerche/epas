@@ -27,7 +27,7 @@
 			<td>
 				#{if entry.getValue().get(col) != null}
 					#{list items:entry.getValue().get(col), as:'absence'}
-					<a href="@{Absences.downloadAttachment(absence.id)}"><i class="icon-envelope"></i></a>
+					<a href="@{Absences.downloadAttachment(absence.id)}" data-toggle="tooltip" title="${absence.personDay.date} di ${absence.personDay.person.name} ${absence.personDay.person.surname}"><i class="icon-envelope"></i></a>
 					
 						
 					#{/list} 			
