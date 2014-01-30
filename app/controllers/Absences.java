@@ -427,7 +427,7 @@ public class Absences extends Controller{
 				pd.updatePersonDaysInMonth();
 				flash.success("Inserito il codice d'assenza %s nel giorno %s", absenceType.code, pd.date);
 				Stampings.personStamping(personId, yearFrom, monthFrom);
-				return;
+				//return;
 			}
 			
 		}
