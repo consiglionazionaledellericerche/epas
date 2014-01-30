@@ -60,6 +60,10 @@ public class SwitchTemplate extends Controller{
 		}
 		
 		switch (menuItem) {
+		
+		case manageAttachments:
+			Absences.manageAttachmentsPerCode(year, month);
+			break;
 
 		case offices:
 			Offices.showOffices();
