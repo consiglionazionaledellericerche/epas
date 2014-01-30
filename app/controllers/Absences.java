@@ -529,7 +529,7 @@ public class Absences extends Controller{
 				}
 				
 				absence.save();
-				pd.absences.add(absence);
+				//pd.absences.add(absence); //TODO ce n'era due
 				
 				pd.populatePersonDay();
 				pd.save();
@@ -857,7 +857,7 @@ public class Absences extends Controller{
 				}
 				String mealTicket =  params.get("buonoMensa");
 				//Logger.debug("Il valore di buono mensa da param: %s", mealTicket);
-				checkMealTicket(pd, mealTicket, absenceType);
+				
 				
 				if(absenceFile.exists()){
 					absence.absenceFile = absenceFile;
@@ -866,6 +866,8 @@ public class Absences extends Controller{
 				absence.absenceType = absenceType;
 				absence.save();
 
+				checkMealTicket(pd, mealTicket, absenceType);
+				
 				flash.success(
 						String.format("Assenza per il giorno %s per %s %s aggiornata con codice %s", 
 								PersonTags.toDateTime(absence.personDay.date), absence.personDay.person.surname, absence.personDay.person.name, absenceCode));
