@@ -388,19 +388,19 @@ public class Absences extends Controller{
 		 * lista dei codici di assenza da usare per le malattie dei figli
 		 */
 		//TODO: se il dipendente ha più di 9 figli! non funziona dal 10° in poi
-//		if((absenceType.code.startsWith("12") || absenceType.code.startsWith("13")) && absenceType.code.length() == 3){
-//			if(!PersonUtility.canTakePermissionIllnessChild(person, dateFrom, absenceType)){
-//				/**
-//				 * non può usufruire del permesso
-//				 */
-//				flash.error(String.format("Il dipendente %s %s non può prendere il codice d'assenza %s poichè ha già usufruito del numero" +
-//						" massimo di giorni di assenza per quel codice", person.name, person.surname, absenceType.code));
-//				//render("@save");
-//				Stampings.personStamping(personId, yearFrom, monthFrom);
-//				return;
-//
-//			}
-//		}
+		if((absenceType.code.startsWith("12") || absenceType.code.startsWith("13")) && absenceType.code.length() == 3){
+			if(!PersonUtility.canTakePermissionIllnessChild(person, dateFrom, absenceType)){
+				/**
+				 * non può usufruire del permesso
+				 */
+				flash.error(String.format("Il dipendente %s %s non può prendere il codice d'assenza %s poichè ha già usufruito del numero" +
+						" massimo di giorni di assenza per quel codice o non ha figli che possono usufruire di quel codice", person.name, person.surname, absenceType.code));
+				//render("@save");
+				Stampings.personStamping(personId, yearFrom, monthFrom);
+				return;
+
+			}
+		}
 
 		/**
 		 * in questo pezzo si controlla il poter inserire i codici per le assenze dovute a malattie o ricoveri anche nei giorni festivi.
