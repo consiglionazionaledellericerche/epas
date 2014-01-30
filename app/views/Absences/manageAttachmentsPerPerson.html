@@ -1,0 +1,39 @@
+#{extends 'main_admin_no_menu.html' /}
+#{set titolo: 'Gestione allegati ai codici di assenza' /}
+
+<ul class="nav nav-tabs">
+  	<li><a href="@{Absences.manageAttachmentsPerCode(year, month)}#">Gestione attachment per codice di assenza</a></li>
+  	<li class="active"><a href="@{Absences.manageAttachmentsPerPerson(0,year, month)}#">Gestione attachment per persona</a></li>
+</ul>
+#{form @Absences.manageAttachmentsPerPerson()}
+
+<input type="hidden" name="year" value="${year}"/>
+<input type="hidden" name="month" value="${month}"/>
+#{select 'personSelected', value:personListForAttachments.get(0), id:'person'}
+			#{option}Scegli una persona#{/option}
+			
+		%{
+			for(person in personListForAttachments){
+		}%
+			#{option person.id}${person.surname + ' ' + person.name}#{/option}
+			%{
+				}
+			}%
+		
+#{/select}
+
+
+<input class="btn btn-primary" type="submit" value="Ok"/>
+#{/form}
+#{if personSelected != null && personSelected > 0 }
+<fieldset>
+	<legend>Allegati di &{'views.tags.display.date.month.' +month} ${year}</legend>
+		<ul class="icons-ul">
+			#{list items:personAbsenceListWithFile, as:'personAbsence'}
+				<li class="distanziato"> <i class="icon-li icon-ok"></i>Allegato del ${personAbsence.personDay.date} <a href="@{Absences.downloadAttachment(personAbsence.id)}"><i class="icon-paper-clip icon-large"></i></a></li>
+			#{/list}
+		</ul>
+
+</fieldset>
+#{/if}
+

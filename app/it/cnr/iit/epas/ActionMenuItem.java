@@ -9,6 +9,7 @@ public enum ActionMenuItem {
     personList("Lista persone", "insertAndUpdatePerson"),
     yearlyAbsences("Assenze annuali", "insertAndUpdateAbsence"),
 //    absencesAdmin("Gestione assenze", "insertAndUpdateAbsence"),
+    manageAttachments("Gestione allegati", "insertAndUpdateAbsence"),
     vacationsAdmin("Gestione ferie e permessi", "insertAndUpdateVacations"),
     competencesAdmin("Gestione competenze", "insertAndUpdateCompetences"),    
     manageWorkingTime("Gestione orari di lavoro", "insertAndUpdateWorkingTime"),
