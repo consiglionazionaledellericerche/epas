@@ -29,7 +29,7 @@
 <fieldset>
 	<legend>Allegati di &{'views.tags.display.date.month.' +month} ${year}</legend>
 		<ul class="icons-ul">
-			#{list items:personAbsenceList, as:'personAbsence'}
+			#{list items:personAbsenceListWithFile, as:'personAbsence'}
 				<li class="distanziato"> <i class="icon-li icon-ok"></i>Allegato del ${personAbsence.personDay.date} <a href="@{Absences.downloadAttachment(personAbsence.id)}"><i class="icon-paper-clip icon-large"></i></a></li>
 			#{/list}
 		</ul>
