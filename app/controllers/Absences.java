@@ -1217,10 +1217,16 @@ public class Absences extends Controller{
 		}
 		else{
 			Person person = Person.findById(personSelected);
+			List<Absence> personAbsenceListWithFile = new ArrayList<Absence>();
 			List<Absence> personAbsenceList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
 					"and abs.personDay.date between ? and ?", 
 					person, new LocalDate(year, month,1), new LocalDate(year, month,1).dayOfMonth().withMaximumValue()).fetch();
-			render(personAbsenceList, year, month, personSelected, personListForAttachments);
+			for(Absence abs : personAbsenceList){
+				if (abs.absenceFile.get() != null){
+					personAbsenceListWithFile.add(abs);
+				}
+			}
+			render(personAbsenceListWithFile, year, month, personSelected, personListForAttachments);
 		}
 		
 	}	
