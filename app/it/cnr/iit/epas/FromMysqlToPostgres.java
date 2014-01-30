@@ -1523,5 +1523,38 @@ public class FromMysqlToPostgres {
 		}
 		Logger.debug("Terminazione di PersonToCompetence per dare a ogni dipendente le proprie competenze attive");
 	}
+	
+	/**
+	 * Metodo che inizializza il codice attestati per ogni occorrenza della tabella AbsenceType
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws ClassNotFoundException
+	 * @throws SQLException
+	 */
+	public static void importCodesAtt() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException
+	{
+		Connection mysqlCon = FromMysqlToPostgres.getMysqlConnection();
+		String attCodes = "select Codice, Codice_att from Codici order by Codice;";
+		
+		PreparedStatement stmtCode = mysqlCon.prepareStatement(attCodes);
+		ResultSet rsAttCodes = stmtCode.executeQuery();
+		while(rsAttCodes.next())
+		{
+			String code = rsAttCodes.getString("Codice");
+			String attCode = rsAttCodes.getString("Codice_att");
+			
+			AbsenceType abt = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", code).first();
+			if(abt==null)
+			{
+				Logger.debug("Errore, il codice %s presente in mysql non esiste come AbsenceType", code);
+				continue;
+			}
+			abt.certificateCode = attCode;
+			abt.save();
+			Logger.debug("Nuova associazione assenze per attestati %s | %s", code,attCode);
+			
+		}
+		
+	}
 }
 
