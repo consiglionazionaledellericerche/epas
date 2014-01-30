@@ -1531,7 +1531,7 @@ public class FromMysqlToPostgres {
 	 * @throws SQLException
 	 */
 	public static void importCodesAtt() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException
-    {
+	{
             FromMysqlToPostgres.getMysqlConnection();
             String attCodes = "select * from Codici";
 
@@ -1559,7 +1559,10 @@ public class FromMysqlToPostgres {
 
             }
 
-    }
+        }   	
 
+
+	
+	
 }
 

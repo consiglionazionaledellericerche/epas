@@ -214,15 +214,19 @@
 	</tr>
 	<tr>
 		<td><p>Codice per sostituzione:</p></td>
-		<td>%{	if(abt.absenceTypeGroup != null){
-}%		<input type="text" name="codiceSostituzione" value="${abt.absenceTypeGroup.replacingAbsenceType.code}"/>
-%{
-	}else{
-}%	
-		<input type="text" name="codiceSostituzione" value="" disabled="disabled"/>
-%{
-	}
-}%</td>
+		<td>
+		#{if (abt.absenceTypeGroup != null)}
+			#{if abt.absenceTypeGroup.replacingAbsenceType != null}
+				<input type="text" name="codiceSostituzione" value="${abt.absenceTypeGroup.replacingAbsenceType.code}"/>
+			#{/if}
+			#{else}
+				<input type="text" name="codiceSostituzione" value="" />
+			#{/else}
+		#{/if}
+		#{else}
+			<input type="text" name="codiceSostituzione" value="" disabled="disabled"/>
+		#{/else}
+		</td>
 	</tr>
 </table>
 <!--  <p>Valore:</p> -->
