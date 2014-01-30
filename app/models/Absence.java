@@ -18,7 +18,10 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
 import org.joda.time.LocalDate;
 
+import Validators.isPdf;
 import play.data.Upload;
+import play.data.validation.CheckWith;
+import play.data.validation.MinSize;
 import play.data.validation.Required;
 import play.data.validation.Unique;
 import play.db.jpa.Blob;
