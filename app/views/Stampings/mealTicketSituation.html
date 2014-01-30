@@ -8,26 +8,31 @@
 		<th rowspan="2">Nome</th>
 		<th colspan="${numberOfDays}">Giorni</th>
 	</tr>
-	%{  for(col in tablePersonTicket.columnKeySet()){
-		}%
-		<th>${col.getDayOfMonth()}</th>
-	%{
-		}
-	}%
-	%{  for(entry in tablePersonTicket.rowMap().entrySet()){
-		}%
-	<tr>
-		<td class="caratteristica">${entry.getKey().surname} ${entry.getKey().name}</td>
-		%{ for(col in tablePersonTicket.columnKeySet()){
-		}%
-			<td><abbr title="${col}" class="initialism">${entry.getValue().get(col)}</abbr></td>
-		%{
-		   }
-		}%
-	</tr>
-	%{
-	   }
-	}%
+	#{list items:tablePersonTicket.columnKeySet(), as:'header'}
+	   <th>${header.getDayOfMonth()}</th>
+	#{/list}
+	
+	#{list items:tablePersonTicket.rowMap().entrySet(), as:'row'}
+	  <tr>
+		<td class="caratteristica">${row.getKey().surname} ${row.getKey().name}</td>
+		#{list items:tablePersonTicket.columnKeySet(), as:'day'}
+		  <td>
+		      #{if row.getValue().get(day).equals("si")}
+		        <a href="#" data-toggle="tooltip" title="${day}"><i class="icon-food muted"></i></a>
+		      #{/if}
+		      #{if row.getValue().get(day).equals("siAd")}
+		        <a href="#" data-toggle="tooltip" title="${day}"><i class="icon-food icon-large text-error"></i></a>
+		      #{/if}
+		      #{if row.getValue().get(day).equals("noAd")}
+		        <a href="#" data-toggle="tooltip" title="${day}"><i class="icon-ban-circle icon-large text-error"></i></a>
+		      #{/if}
+		    </abbr>
+		  </td>
+		#{/list}
+	  </tr>
+	#{/list}
+	
+
 	
 </table>
 </div>
