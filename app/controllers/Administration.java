@@ -68,6 +68,11 @@ public class Administration extends Controller {
         			absenceTypes, workingTimeTypes, NUMERO_PERSONE_DA_IMPORTARE));
     }
     
+    public static void importAttCodes() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException
+    {
+    	FromMysqlToPostgres.importCodesAtt();
+    }
+    
     
 //	public static void test(){
 //		PersonMonth pm = new PersonMonth(Person.em().getReference(Person.class, 140L), 2012,6);
