@@ -153,7 +153,8 @@ public class Administration extends Controller {
 	public static void buildYaml()
 	{
 		//general
-		ExportToYaml.buildAbsences("test/dataTest/general/absences.yml");
+		ExportToYaml.buildAbsences("/test/dataTest/general/absences.yml");
+		
 		ExportToYaml.buildCompetenceCodes("test/dataTest/general/competenceCodes.yml");
 		
 		//person
