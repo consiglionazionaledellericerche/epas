@@ -94,7 +94,6 @@ public class FromMysqlToPostgres {
 			return mysqlCon;
 		}
 		Class.forName(mySqldriver).newInstance();
-
 		mysqlCon = DriverManager.getConnection(
 				Play.configuration.getProperty("db.old.url"),
 				Play.configuration.getProperty("db.old.user"),
@@ -1523,5 +1522,44 @@ public class FromMysqlToPostgres {
 		}
 		Logger.debug("Terminazione di PersonToCompetence per dare a ogni dipendente le proprie competenze attive");
 	}
+	
+	/**
+	 * Metodo che inizializza il codice attestati per ogni occorrenza della tabella AbsenceType
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws ClassNotFoundException
+	 * @throws SQLException
+	 */
+	public static void importCodesAtt() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException
+    {
+            FromMysqlToPostgres.getMysqlConnection();
+            String attCodes = "select * from Codici";
+
+            PreparedStatement stmtCode = mysqlCon.prepareStatement(attCodes);
+            ResultSet rsAttCodes = stmtCode.executeQuery();
+            while(rsAttCodes.next())
+            {
+                    String code = rsAttCodes.getString("Codice");
+                    if(code==null)
+                    {
+                            Logger.debug("Il codice e' null");
+                            continue;
+                    }
+                    String attCode = rsAttCodes.getString("Codice_att");
+                    Logger.debug("I codici sono %s - %s",code, attCode);
+                    AbsenceType abt = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", code.toString()).first();
+                    if(abt==null)
+                    {
+                            Logger.debug("Errore, il codice %s presente in mysql non esiste come AbsenceType", code);
+                            continue;
+                    }
+                    abt.certificateCode = attCode;
+                    abt.save();
+                    Logger.debug("Nuova associazione assenze per attestati %s | %s", code,attCode);
+
+            }
+
+    }
+
 }
 
