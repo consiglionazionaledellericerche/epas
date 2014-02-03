@@ -53,6 +53,7 @@ import org.hibernate.envers.query.AuditQueryCreator;
 import org.hibernate.envers.query.criteria.AuditConjunction;
 import org.hibernate.envers.query.criteria.AuditCriterion;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -867,6 +868,10 @@ public class Person extends Model {
 		if(stamping == null)
 			return false;
 		
+		if(stamping.dateTime.isBefore(new LocalDateTime().minusMonths(1))){
+			Logger.warn("La timbratura che si cerca di inserire è troppo precedente rispetto alla data odierna. Controllare il server!");
+			return false;
+		}
 		Long id = stamping.personId;
 		
 		if(id == null){
@@ -928,21 +933,7 @@ public class Person extends Model {
 				Logger.info("All'interno della lista di timbrature di %s %s nel giorno %s c'è una timbratura uguale a quella passata dallo" +
 						"stampingsFromClient: %s", person.name, person.surname, pd.date, stamping.dateTime);
 			}
-			//0113 00004000000000000086063304051407
-//			for(Stamping s : pd.stampings){
-//				if(!s.date.isEqual(stamping.dateTime)){
-//					Stamping stamp = new Stamping();
-//					stamp.date = stamping.dateTime;
-//					stamp.markedByAdmin = false;
-//					if(stamping.inOut == 0)
-//						stamp.way = WayType.in;
-//					else
-//						stamp.way = WayType.out;
-//					stamp.badgeReader = stamping.badgeReader;
-//					stamp.personDay = pd;
-//					stamp.save();
-//				}
-//			}
+
 			
 		}
 		Logger.debug("Chiamo la populatePersonDay per fare i calcoli sulla nuova timbratura inserita per il personDay %s", pd);
