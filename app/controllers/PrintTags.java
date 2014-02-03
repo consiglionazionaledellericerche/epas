@@ -92,7 +92,7 @@ public class PrintTags extends Controller{
 		//int month = params.get("month", Integer.class);
 		//int year = params.get("year", Integer.class);
 		LocalDate date = new LocalDate(year, month,1);
-		List<Person> personList = Person.getActivePersons(date);
+		List<Person> personList = Person.getActivePersonsInMonth(month, year, false);
 		render(personList, date);
 	}
 	
