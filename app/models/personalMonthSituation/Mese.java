@@ -45,20 +45,6 @@ public class Mese {
 	public int numeroRiposiCompensativi;
 	
 	/**
-	 * Costruttore privato da utilizzare per esportare informazioni parziali del mese (come ad esempio il residuo positivo del mese) 
-	 * che non necessitano del calcolo di tutta la situazione annuale.
-	 * @param anno
-	 * @param mese
-	 * @param person
-	 */
-	private Mese(int anno, int mese, Person person){
-		this.anno = anno;
-		this.mese = mese;
-		this.person = person;
-		this.setPersonDayInformation(new LocalDate());
-	}
-	
-	/**
 	 * Costruisce un oggetto mese con tutte le informazioni necessarie al calcolo della situazione residuo annuale della persona.
 	 * Visibile solo all'interno del package models.personalMonthSituation.
 	 * @param mesePrecedente
@@ -326,7 +312,8 @@ public class Mese {
 	 * @return il valore di quanti minuti positivi sono stati fatti da quella persona in quel mese/anno
 	 */
 	public static Integer positiveResidualInMonth(Person person, int year, int month){
-		Mese mese = new Mese(year, month, person);
+		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, year, null);
+		Mese mese = c.getMese(year, month);
 		return mese.progressivoFinalePositivoMese;
 	}
 	
