@@ -193,7 +193,7 @@ public class ExportToYaml {
 		out = out + getFormattedHeader("CompetenceCode", "compCode"+comp.id);
 		out = out + getFormattedProperty("code", comp.code);
 		out = out + getFormattedProperty("codeToPresence", comp.codeToPresence);
-		out = out + getFormattedProperty("description", "TODOdescription");
+		out = out + getFormattedProperty("description", comp.description);
 		out = out + getFormattedProperty("inactive", comp.inactive+"");
 		return out;
 	}
@@ -220,7 +220,7 @@ public class ExportToYaml {
 		out = out + getFormattedProperty("code", abt.code);
 		out = out + getFormattedProperty("compensatoryRest", abt.compensatoryRest+"");
 		out = out + getFormattedProperty("consideredWeekEnd", abt.consideredWeekEnd+"");
-		out = out + getFormattedProperty("description", "TODOdescription");
+		out = out + getFormattedProperty("description", abt.description);
 		out = out + getFormattedProperty("ignoreStamping", abt.ignoreStamping+"");
 		out = out + getFormattedProperty("internalUse", abt.internalUse+"");
 		out = out + getFormattedProperty("justifiedTimeAtWork", abt.justifiedTimeAtWork.toString());
@@ -445,6 +445,8 @@ public class ExportToYaml {
 	
 	private static String getFormattedProperty(String name, String value)
 	{
+		if(value!=null && value.contains(":"))
+			value = value.replace(":", "-");
 		return "    " + name + ": " + value + "\r\n";
 	}
 
