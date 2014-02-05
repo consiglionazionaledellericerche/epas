@@ -153,11 +153,13 @@ public class Administration extends Controller {
 	public static void buildYaml()
 	{
 		//general
-		ExportToYaml.buildAbsences("/test/dataTest/general/absences.yml");
+		ExportToYaml.buildAbsences("test/dataTest/general/absenceTypes.yml");
+		
 		
 		ExportToYaml.buildCompetenceCodes("test/dataTest/general/competenceCodes.yml");
 		
 		//person
+		/*
 		Person person = Person.findById(146l);
 		ExportToYaml.buildPerson(person, "test/dataTest/persons/lucchesi.yml");
 		
@@ -168,6 +170,7 @@ public class Administration extends Controller {
 		//test vacations
 		ExportToYaml.buildYearlyAbsences(person, 2012, "test/dataTest/absences/lucchesiAbsences2012.yml");
 		ExportToYaml.buildYearlyAbsences(person, 2013, "test/dataTest/absences/lucchesiAbsences2013.yml");
+		*/
 		
 	}
 
