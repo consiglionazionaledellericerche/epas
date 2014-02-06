@@ -1,4 +1,6 @@
 import it.cnr.iit.epas.FromMysqlToPostgres;
+import models.AbsenceType;
+import models.CompetenceCode;
 import models.Configuration;
 import models.Office;
 import models.Permission;
@@ -39,12 +41,16 @@ public class Bootstrap extends Job {
 
 		try
 		{
+
 			if(Office.count() == 0){
 				Fixtures.loadModels("");
 				Logger.info("Creato ufficio di default");
 			}
 
-			if (Permission.count() == 0) {
+
+
+			if (Permission.count() <= 1) {
+
 				Fixtures.loadModels("permissions.yml");
 				Logger.info("Creati i permessi predefiniti e creato un utente amministratore con associati questi permessi");
 			}
@@ -73,10 +79,25 @@ public class Bootstrap extends Job {
 				Fixtures.loadModels("defaultConfiguration.yml");
 				Logger.info("Creata la configurazione iniziale per il programma");
 			}
+			
+			if(AbsenceType.count() == 0)
+			{
+				Fixtures.loadModels("absenceTypes.yml");
+				Logger.info("Creata la struttura dati dei tipi assenza predefiniti");
+			}
+			
+			if(CompetenceCode.count() == 0)
+			{
+				Fixtures.loadModels("competenceCodes.yml");
+				Logger.info("Creata la struttura dati dei tipi competenze");
+			}
+
+	
 		}
 		catch(RuntimeException e)
 		{
-			//to nothing (test exception)
+			//do nothing (test exception)
+			e.printStackTrace();
 		}
 
 	}
