@@ -195,6 +195,7 @@ GET 	/reperibility/{type}/personList															Reperibility.personList
 GET		/reperibility/{type}/find/{<(19|20)\d\d>yearFrom}/{<(0[1-9]|1[012])>monthFrom}/{<(0[1-9]|[12][0-9]|3[01])>dayFrom}/{<(19|20)\d\d>yearTo}/{<(0[1-9]|1[012])>monthTo}/{<(0[1-9]|[12][0-9]|3[01])>dayTo}	Reperibility.find
 
 PUT		/reperibility/{type}/update/{year}/{month}												Reperibility.update
+PUT		/reperibility/{type}/changePeriods														Reperibility.changePeriods	
 
 GET 	/reperibility/{type}/exportYearAsPDF/{<(19|20)\d\d>year}								Reperibility.exportYearAsPDF
 GET 	/reperibility/{type}/exportMonthAsPDF/{<(19|20)\d\d>year}/{<(0[1-9]|1[012])>month}		Reperibility.exportMonthAsPDF
