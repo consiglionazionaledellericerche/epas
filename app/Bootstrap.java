@@ -44,10 +44,30 @@ public class Bootstrap extends Job {
 				Fixtures.loadModels("permissions.yml");
 				Logger.info("Creati i permessi predefiniti e creato un utente amministratore con associati questi permessi");
 			}
-
+			
+			/*
+			if(AbsenceType.count() == 0)
+			{
+				Fixtures.loadModels("absenceTypes.yml");
+				Logger.info("Creata la struttura dati dei tipi assenza predefiniti");
+			}
+			
 			if (Qualification.count() == 0)	{
 				Fixtures.loadModels("qualifications.yml");
 				Logger.info("Create le qualifiche predefinite");
+			}
+			*/
+			
+			if(AbsenceType.count() == 0)
+			{
+				Fixtures.loadModels("absenceTypesAndQualifications.yml");
+				Logger.info("Creata la struttura dati dei tipi assenza predefiniti e delle qualifiche");
+			}
+			
+			if(CompetenceCode.count() == 0)
+			{
+				Fixtures.loadModels("competenceCodes.yml");
+				Logger.info("Creata la struttura dati dei tipi competenze");
 			}
 
 			if (WorkingTimeType.count() == 0) {
@@ -70,17 +90,7 @@ public class Bootstrap extends Job {
 				Logger.info("Creata la configurazione iniziale per il programma");
 			}
 			
-			if(AbsenceType.count() == 0)
-			{
-				Fixtures.loadModels("absenceTypes.yml");
-				Logger.info("Creata la struttura dati dei tipi assenza predefiniti");
-			}
 			
-			if(CompetenceCode.count() == 0)
-			{
-				Fixtures.loadModels("competenceCodes.yml");
-				Logger.info("Creata la struttura dati dei tipi competenze");
-			}
 
 	
 		}

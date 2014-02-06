@@ -13,6 +13,7 @@ import models.Stamping;
 import org.joda.time.LocalDate;
 
 import controllers.Administration;
+import controllers.Secure.Security;
 import play.Logger;
 import play.jobs.Job;
 import play.jobs.On;
@@ -27,7 +28,8 @@ public class TestJob extends Job{
 	public void doJob(){
 		Logger.info("Lanciato Job checkDay");
 		
-		PersonUtility.fixPersonSituation(-1l, 2013, 1);
+		Person person = Person.find("byUsername", "admin").first();	
+		PersonUtility.fixPersonSituation(-1l, 2013, 1, person);
 		/*
 		LocalDate yesterday = new LocalDate().minusDays(1);
 		
