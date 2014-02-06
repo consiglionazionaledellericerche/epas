@@ -450,6 +450,7 @@ public class Persons extends Controller {
 		contract.person = person;
 		contract.onCertificate = params.get("onCertificate", Boolean.class);
 		contract.save();
+		Logger.debug("Salvato contratto...%s", contract.toString());
 		contract.setVacationPeriods();
 				
 		Logger.debug("saving contract, beginContract = %s, endContract = %s", contract.beginContract, contract.expireContract);
