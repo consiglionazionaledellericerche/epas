@@ -41,6 +41,18 @@ public class VacationsAdmin extends Controller{
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_VACATIONS)
+	public static void update(){
+		Long vacationCodeId = params.get("vacationCodeId", Long.class);
+		VacationCode code = VacationCode.findById(vacationCodeId);
+		code.description = params.get("nome");
+		code.vacationDays = params.get("giorniFerie", Integer.class);
+		code.permissionDays = params.get("giorniPermesso", Integer.class);
+		code.save();
+		flash.success("Aggiornato valore del piano ferie %s", code.description);
+		VacationsAdmin.manageVacationCode();
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_VACATIONS)
 	public static void insertVacationCode(){
 		VacationCode vacationCode = new VacationCode();
 		render(vacationCode);
