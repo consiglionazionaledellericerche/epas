@@ -1,5 +1,6 @@
 import it.cnr.iit.epas.FromMysqlToPostgres;
 import models.Configuration;
+import models.Office;
 import models.Permission;
 import models.Person;
 import models.PersonShift;
@@ -38,6 +39,10 @@ public class Bootstrap extends Job {
 
 		try
 		{
+			if(Office.count() == 0){
+				Fixtures.loadModels("");
+				Logger.info("Creato ufficio di default");
+			}
 
 			if (Permission.count() == 0) {
 				Fixtures.loadModels("permissions.yml");
