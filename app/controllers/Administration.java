@@ -126,7 +126,7 @@ public class Administration extends Controller {
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void fixPersonSituation(Long personId, int year, int month){
 		
-		PersonUtility.fixPersonSituation(personId, year, month);
+		PersonUtility.fixPersonSituation(personId, year, month, Security.getPerson());
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
@@ -137,26 +137,13 @@ public class Administration extends Controller {
 	}
 	
 	
-//	public static void updateCauseInTrouble()
-//	{
-//		List<PersonDayInTrouble> tList = PersonDayInTrouble.findAll();
-//		for(PersonDayInTrouble t : tList)
-//		{
-//			if(t.personDay.isFixedTimeAtWork())
-//			{
-//				t.cause = "timbratura disaccoppiata persona fixed";
-//				t.save();
-//			}
-//		}
-//	}
-
 	public static void buildYaml()
 	{
 		//general
-		ExportToYaml.buildAbsences("test/dataTest/general/absenceTypes.yml");
+		ExportToYaml.buildAbsenceTypesAndQualifications("conf/absenceTypesAndQualifications.yml");
+		//ExportToYaml.buildQualifications("conf/qualifications.yml");
+		ExportToYaml.buildCompetenceCodes("conf/competenceCodes.yml");
 		
-		
-		ExportToYaml.buildCompetenceCodes("test/dataTest/general/competenceCodes.yml");
 		
 		//person
 		/*

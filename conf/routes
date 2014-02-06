@@ -98,6 +98,7 @@ GET		/insertVacationCode						VacationsAdmin.insertVacationCode
 POST	/insertVacationCode						VacationsAdmin.save
 GET		/manageVacationCode						VacationsAdmin.discard
 GET		/vacationsAdmin/edit/{vacationCodeId}	VacationsAdmin.edit
+POST	/vacationsAdmin/edit					VacationsAdmin.update
 
 
 # Gestione password

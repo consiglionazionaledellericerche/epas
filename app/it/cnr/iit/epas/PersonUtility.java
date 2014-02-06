@@ -848,23 +848,31 @@ public class PersonUtility {
 	 * @param personId l'id univoco della persona da fixare, -1 per fixare tutte le persone attive alla data di ieri
 	 * @param year l'anno dal quale far partire il fix
 	 * @param month il mese dal quale far partire il fix
-	 */	
-	public static void fixPersonSituation(Long personId, int year, int month){
+	 * @param personLogged
+	 */
+	public static void fixPersonSituation(Long personId, int year, int month, Person personLogged){
 		//Costruisco la lista di persone su cui voglio operare
 		List<Person> personList = new ArrayList<Person>();
 		if(personId==-1)
 			personId=null;
 		if(personId==null)
 		{
+
 			//List<Person> personList = Person.getActivePersonsInMonth(month, year, false);
 
 
 
 			personList = Person.getActivePersonsInDay(new LocalDate().minusDays(1), false);	//TODO usare un metodo cristiano
 
+
+			LocalDate begin = new LocalDate(year, month, 1);
+			LocalDate end = new LocalDate().minusDays(1);
+			personList = Person.getActivePersonsSpeedyInPeriod(begin, end, personLogged, false);	
+
 		}
 		else
 		{
+			//TODO controllare che personLogged abbia i diritti sulla persona
 			personList.add((Person)Person.findById(personId));
 		}
 		
