@@ -98,6 +98,7 @@ GET		/insertVacationCode						VacationsAdmin.insertVacationCode
 POST	/insertVacationCode						VacationsAdmin.save
 GET		/manageVacationCode						VacationsAdmin.discard
 GET		/vacationsAdmin/edit/{vacationCodeId}	VacationsAdmin.edit
+POST	/vacationsAdmin/edit					VacationsAdmin.update
 
 
 # Gestione password
@@ -230,6 +231,10 @@ POST	/absenceFromJson/absenceInPeriod/{yearFrom}/{monthFrom}/{dayFrom}/{yearTo}/
 
 #Ricezione richiesta codici frequenti di assenza
 GET		/absenceFromJson/frequentAbsence/{yearFrom}/{monthFrom}/{dayFrom}/{yearTo}/{monthTo}/{dayTo}		AbsenceFromJson.frequentAbsence
+
+# Visualizzazione Versione
+
+GET 	/version								Version.showVersion
 
 # Catch all
 *       /{controller}/{action}                  {controller}.{action}
