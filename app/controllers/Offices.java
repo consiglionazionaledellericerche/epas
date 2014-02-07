@@ -25,6 +25,13 @@ public class Offices extends Controller {
 		
 	}
 	
+	@Check(Security.INSERT_AND_UPDATE_OFFICES)
+	public static void editOffice(Long officeId){
+		Office office = Office.findById(officeId);
+		render(office);
+		
+	}
+	
 	
 	@Check(Security.INSERT_AND_UPDATE_OFFICES)
 	public static void insertRemoteOffice()
@@ -81,8 +88,24 @@ public class Offices extends Controller {
 		Offices.showOffices();
 	}
 	
-	
-	
+	@Check(Security.INSERT_AND_UPDATE_OFFICES)
+	public static void update(){
+		String name = params.get("name");
+		String address = params.get("address");
+		
+		Integer code = params.get("code", Integer.class);
+		if(code == null){
+			flash.error("Il campo codice deve essere valorizzato SOLO con valori interi");
+			Offices.showOffices();
+		}
+		Office office = Office.findById(params.get("officeId", Long.class));
+		office.name = name;
+		office.address = address;
+		office.code = code;
+		office.save();
+		flash.success("Sede modificata. Nuovo nome: %s. Nuovo codice: %d", name, code);
+		Offices.showOffices();
+	}
 	
 	
 	
