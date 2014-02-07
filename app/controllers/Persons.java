@@ -304,15 +304,11 @@ public class Persons extends Controller {
 
 	@Check(Security.VIEW_PERSON_LIST)
 	public static void list(){
-		Person person = Security.getPerson();
-		List<Person> personList = null;
-		//TODO da qui questi controlli vanno tolti
-		if(!person.office.remoteOffices.isEmpty()){
-			personList = Person.find("Select p from Person p where p.name <> ? and p.name <> ? order by p.surname", "Admin", "epas").fetch();
-		}
-		else{
-			personList = Person.find("SELECT p FROM Person p where p.office = ? ORDER BY p.surname, p.othersSurnames, p.name", person.office).fetch();
-		}
+		Person personLogged = Security.getPerson();
+
+		LocalDate startEra = new LocalDate(1900,1,1);
+		LocalDate endEra = new LocalDate(9999,1,1);
+		List<Person> personList = Person.getActivePersonsSpeedyInPeriod(startEra, endEra, personLogged, false);
 		
 		//Logger.debug("La lista delle persone: %s", personList.toString());
 		LocalDate date = new LocalDate();
@@ -337,33 +333,8 @@ public class Persons extends Controller {
 			officeList = RemoteOffice.find("Select office from RemoteOffice office where office.joiningDate is not null").fetch();
 		}
 		
-		if(officeList == null || officeList.size() == 0){
-			Office office = new Office();
-			office.address = "Via Moruzzi 1, Pisa";
-			office.name = "IIT";
-			office.code = 1000;
-			
-			office.save();
-			officeList.add(office);
-			RemoteOffice remote = new RemoteOffice();
-			remote.address = "via le mani dal naso 12";
-			remote.code = 2000;
-			remote.joiningDate = new LocalDate();
-			remote.name = "asd";
-			remote.office = office;
-			remote.save();
-			officeList.add(remote);
-			
-			
-		}
-		else{
-			List<Office> office = Office.find("Select office from Office office where office.office is null").fetch();
-			Logger.debug("Lista office: %s", office.get(0).name);
-//			List<RemoteOffice> remote = RemoteOffice.findAll();
-//			Logger.debug("Lista remote: %s", remote.toString());
-		}
-		
-//		RemoteOffice remoteOffice = new RemoteOffice();
+		List<Office> office = Office.find("Select office from Office office where office.office is null").fetch();
+		Logger.debug("Lista office: %s", office.get(0).name);
 		render(person, contract, location, contactData, initializationTime, officeList/*, remoteOffice*/);
 	}
 	

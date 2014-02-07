@@ -584,6 +584,10 @@ public class Person extends Model {
 			Logger.info("La lista delle persone attive visibili dall'amministratore e' vuota perchè personLogged e' null.");
 			return new ArrayList<Person>();
 		}
+		if(personLogged.name.equals("Admin"))
+		{
+			return Person.find("Select p from Person p order by p.surname, p.name").fetch();
+		}
 
 		//Filtro sulla sede
 		List<Office> officeAllowed = personLogged.getOfficeAllowed();
@@ -596,7 +600,7 @@ public class Person extends Model {
 			qualificationRequested = Qualification.findAll();
 				
 		//Query //TODO QueryDsl
-		List<Person> personList = Person.find("Select p from Person p "
+		List<Person> personList = Person.find("Select distinct p from Person p "
 				+ "left outer join fetch p.contactData "				//OneToOne			//TODO ISSUE discutere dell'opzionalità di queste relazioni OneToOne
 				+ "left outer join fetch p.personHourForOvertime "		//OneToOne
 				+ "left outer join fetch p.location "					//OneToOne
@@ -609,6 +613,7 @@ public class Person extends Model {
 				+ "c.onCertificate = true "
 				
 				+ "and "
+				
 				
 				//contratto attivo nel periodo
 				+ "( "
