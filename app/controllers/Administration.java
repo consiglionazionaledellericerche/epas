@@ -141,8 +141,10 @@ public class Administration extends Controller {
 	{
 		//general
 		ExportToYaml.buildAbsenceTypesAndQualifications("conf/absenceTypesAndQualifications.yml");
-		//ExportToYaml.buildQualifications("conf/qualifications.yml");
+		
 		ExportToYaml.buildCompetenceCodes("conf/competenceCodes.yml");
+		
+		ExportToYaml.buildVacationCodes("conf/vacationCodes.yml");
 		
 		
 		//person
