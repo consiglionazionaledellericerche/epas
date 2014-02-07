@@ -857,18 +857,9 @@ public class PersonUtility {
 			personId=null;
 		if(personId==null)
 		{
-
-			//List<Person> personList = Person.getActivePersonsInMonth(month, year, false);
-
-
-
-			personList = Person.getActivePersonsInDay(new LocalDate().minusDays(1), false);	//TODO usare un metodo cristiano
-
-
 			LocalDate begin = new LocalDate(year, month, 1);
 			LocalDate end = new LocalDate().minusDays(1);
 			personList = Person.getActivePersonsSpeedyInPeriod(begin, end, personLogged, false);	
-
 		}
 		else
 		{
