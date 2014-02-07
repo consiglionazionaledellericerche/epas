@@ -114,91 +114,134 @@ public class PersonUtility {
 		List<PersonChildren> persChildList = PersonChildren.find("Select pc from PersonChildren pc where pc.person = ? order by pc.bornDate", 
 				person).fetch();
 		int code = new Integer(abt.code).intValue();
+		Logger.debug("Person children list size: %d", persChildList.size());
 		PersonChildren child = null;
 		switch(code){
 		case 12:
-			child = persChildList.get(0);
-			if(child.bornDate.isAfter(date.minusYears(3))){
-				List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date between ? and ?" +
-						"and a.absenceType = ?", person, date.minusYears(3), date, abt).fetch();
-				if(existingAbsence.size() < 30)
-					return true;
-				else
-					return false;
+			child = persChildList.get(0) != null ? persChildList.get(0) : null;
+			if(child != null){
+				if(child.bornDate.isAfter(date.minusYears(3))){
+					List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date between ? and ?" +
+							"and a.absenceType = ?", person, date.minusYears(3), date, abt).fetch();
+					if(existingAbsence.size() < 30)
+						return true;
+					else
+						return false;
+				}
 			}
+			else{
+				return false;
+			}
+			
 			break;
 
 
 		case 122:
-			child = persChildList.get(1);
-			if(child.bornDate.isAfter(date.minusYears(3))){
-				List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date between ? and ?" +
-						"and a.absenceType = ?", person, date.minusYears(3), date, abt).fetch();
-				if(existingAbsence.size() < 30)
-					return true;
-				else
-					return false;
+			child = persChildList.get(1) != null ? persChildList.get(1) : null;
+			if(child != null){
+				if(child.bornDate.isAfter(date.minusYears(3))){
+					List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date between ? and ?" +
+							"and a.absenceType = ?", person, date.minusYears(3), date, abt).fetch();
+					if(existingAbsence.size() < 30)
+						return true;
+					else
+						return false;
+				}
 			}
+			else{
+				return false;
+			}
+			
 			break;
 
 		case 123:
-			child = persChildList.get(2);
-			if(child.bornDate.isAfter(date.minusYears(3))){
-				List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date between ? and ?" +
-						"and a.absenceType = ?", person, date.minusYears(3), date, abt).fetch();
-				if(existingAbsence.size() < 30)
-					return true;
-				else
-					return false;
+			child = persChildList.get(2) != null ? persChildList.get(2) : null;
+			if(child != null){
+				if(child.bornDate.isAfter(date.minusYears(3))){
+					List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date between ? and ?" +
+							"and a.absenceType = ?", person, date.minusYears(3), date, abt).fetch();
+					if(existingAbsence.size() < 30)
+						return true;
+					else
+						return false;
+				}
 			}
+			else{
+				return false;
+				
+			}
+			
 			break;
 
 		case 13:
-			child = persChildList.get(0);
-			if(child.bornDate.isAfter(date.minusYears(8))){
-				List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date between ? and ?" +
-						"and a.absenceType = ?", person, date.minusYears(8), date, abt).fetch();
-				if(existingAbsence.size() < 5)
-					return true;
-				else
-					return false;
-			}	
+			child = persChildList.get(0) != null ? persChildList.get(0) : null;
+			if(child != null){
+				if(child.bornDate.isAfter(date.minusYears(8))){
+					List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date between ? and ?" +
+							"and a.absenceType = ?", person, date.minusYears(8), date, abt).fetch();
+					if(existingAbsence.size() < 5)
+						return true;
+					else
+						return false;
+				}	
+			}
+			
+			else{
+				return false;
+			}
 			break;
 
 		case 132:
-			child = persChildList.get(1);
-			if(child.bornDate.isAfter(date.minusYears(8))){
-				List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date between ? and ?" +
-						"and a.absenceType = ?", person, date.minusYears(8), date, abt).fetch();
-				if(existingAbsence.size() < 5)
-					return true;
-				else
-					return false;
-			}	
+			child = persChildList.get(1) != null ? persChildList.get(1) : null;
+			if(child != null){
+				if(child.bornDate.isAfter(date.minusYears(8))){
+					List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date between ? and ?" +
+							"and a.absenceType = ?", person, date.minusYears(8), date, abt).fetch();
+					if(existingAbsence.size() < 5)
+						return true;
+					else
+						return false;
+				}	
+			}
+			else{
+				return false;
+			}
+			
 			break;
 
 		case 133:
-			child = persChildList.get(2);
-			if(child.bornDate.isAfter(date.minusYears(8))){
-				List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date between ? and ?" +
-						"and a.absenceType = ?", person, date.minusYears(8), date, abt).fetch();
-				if(existingAbsence.size() < 5)
-					return true;
-				else
-					return false;
-			}				
+			child = persChildList.get(2) != null ? persChildList.get(2) : null;
+			if(child != null){
+				if(child.bornDate.isAfter(date.minusYears(8))){
+					List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date between ? and ?" +
+							"and a.absenceType = ?", person, date.minusYears(8), date, abt).fetch();
+					if(existingAbsence.size() < 5)
+						return true;
+					else
+						return false;
+				}	
+			}
+			else{
+				return false;
+			}
 			break;
 
 		case 134:
-			child = persChildList.get(3);
-			if(child.bornDate.isAfter(date.minusYears(8))){
-				List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date between ? and ?" +
-						"and a.absenceType = ?", person, date.minusYears(8), date, abt).fetch();
-				if(existingAbsence.size() < 5)
-					return true;
-				else
-					return false;
-			}			
+			child = persChildList.get(3) != null ? persChildList.get(3) : null;
+			if(child != null){
+				if(child.bornDate.isAfter(date.minusYears(8))){
+					List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date between ? and ?" +
+							"and a.absenceType = ?", person, date.minusYears(8), date, abt).fetch();
+					if(existingAbsence.size() < 5)
+						return true;
+					else
+						return false;
+				}	
+			}
+			else{
+				return false;
+			}
+					
 			break;
 
 		default:
@@ -805,19 +848,22 @@ public class PersonUtility {
 	 * @param personId l'id univoco della persona da fixare, -1 per fixare tutte le persone attive alla data di ieri
 	 * @param year l'anno dal quale far partire il fix
 	 * @param month il mese dal quale far partire il fix
-	 */	
-	public static void fixPersonSituation(Long personId, int year, int month){
+	 * @param personLogged
+	 */
+	public static void fixPersonSituation(Long personId, int year, int month, Person personLogged){
 		//Costruisco la lista di persone su cui voglio operare
 		List<Person> personList = new ArrayList<Person>();
 		if(personId==-1)
 			personId=null;
 		if(personId==null)
 		{
-			//List<Person> personList = Person.getActivePersonsInMonth(month, year, false);
-			personList = Person.getActivePersonsInDay(new LocalDate().minusDays(1), false);	//TODO usare un metodo cristiano
+			LocalDate begin = new LocalDate(year, month, 1);
+			LocalDate end = new LocalDate().minusDays(1);
+			personList = Person.getActivePersonsSpeedyInPeriod(begin, end, personLogged, false);	
 		}
 		else
 		{
+			//TODO controllare che personLogged abbia i diritti sulla persona
 			personList.add((Person)Person.findById(personId));
 		}
 		

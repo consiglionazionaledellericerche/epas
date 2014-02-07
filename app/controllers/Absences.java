@@ -7,10 +7,6 @@ import it.cnr.iit.epas.JsonPersonEmailBinder;
 import it.cnr.iit.epas.MainMenu;
 import it.cnr.iit.epas.PersonUtility;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -55,7 +51,9 @@ import play.Logger;
 import play.Play;
 import play.data.Upload;
 import play.data.binding.As;
+import play.data.validation.CheckWith;
 import play.data.validation.Required;
+import play.data.validation.Valid;
 import play.db.jpa.Blob;
 import play.db.jpa.JPA;
 import play.mvc.Controller;
@@ -327,7 +325,7 @@ public class Absences extends Controller{
 
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void insert(@Required Long personId, @Required Integer yearFrom, 
-			@Required Integer monthFrom, @Required Integer dayFrom, @Required String absenceCode, Integer annoFine, Integer meseFine, Integer giornoFine){
+			@Required Integer monthFrom, @Required Integer dayFrom, @Required String absenceCode, Integer annoFine, Integer meseFine, Integer giornoFine,Upload file){
 
 		Person person = Person.em().getReference(Person.class, personId);
 		LocalDate dateFrom = new LocalDate(yearFrom, monthFrom, dayFrom);
@@ -335,6 +333,17 @@ public class Absences extends Controller{
 		Logger.debug("La data fine è: %s", dateTo);
 		AbsenceType absenceType = AbsenceType.find("byCode", absenceCode).first();
 		Logger.trace("Controllo la presenza dell'absenceType %s richiesto per l'assenza del giorno %s per personId = %s ", absenceType, dateFrom, personId);
+		
+		Blob absenceFile = new Blob();
+		if (file != null && (file.getContentType().equals("application/pdf"))) {
+			absenceFile = params.get("file", Blob.class);
+			Logger.debug("file ricevuto: %s %s %s", file.getFileName(), file.getSize(),file.getContentType());
+		}
+		
+		else if(file !=null){
+			flash.error("Il tipo di file inserito non è supportato");
+		}
+		
 		if (absenceType == null) {
 			validation.keep();
 			params.flash();
@@ -372,13 +381,15 @@ public class Absences extends Controller{
 	
 		if(absenceType.code.equals("91"))
 		{
-			handlerCompensatoryRest(person, dateFrom, dateTo, absenceType);
+	
+			handlerCompensatoryRest(person, dateFrom, dateTo, absenceType, absenceFile);
 			return; //inutile
 		}
 		
 		if(absenceType.code.equals("FER"))
 		{
-			handlerFER(person, dateFrom, dateTo, absenceType);
+			
+			handlerFER(person, dateFrom, dateTo, absenceType, absenceFile);
 			return; //inutile
 		}
 		
@@ -388,19 +399,38 @@ public class Absences extends Controller{
 		 * lista dei codici di assenza da usare per le malattie dei figli
 		 */
 		//TODO: se il dipendente ha più di 9 figli! non funziona dal 10° in poi
-//		if((absenceType.code.startsWith("12") || absenceType.code.startsWith("13")) && absenceType.code.length() == 3){
-//			if(!PersonUtility.canTakePermissionIllnessChild(person, dateFrom, absenceType)){
-//				/**
-//				 * non può usufruire del permesso
-//				 */
-//				flash.error(String.format("Il dipendente %s %s non può prendere il codice d'assenza %s poichè ha già usufruito del numero" +
-//						" massimo di giorni di assenza per quel codice", person.name, person.surname, absenceType.code));
-//				//render("@save");
-//				Stampings.personStamping(personId, yearFrom, monthFrom);
-//				return;
-//
-//			}
-//		}
+		if((absenceType.code.startsWith("12") || absenceType.code.startsWith("13")) && absenceType.code.length() == 3){
+			if(!PersonUtility.canTakePermissionIllnessChild(person, dateFrom, absenceType)){
+				/**
+				 * non può usufruire del permesso
+				 */
+				flash.error(String.format("Il dipendente %s %s non può prendere il codice d'assenza %s poichè ha già usufruito del numero" +
+						" massimo di giorni di assenza per quel codice o non ha figli che possono usufruire di quel codice", person.name, person.surname, absenceType.code));
+				//render("@save");
+				Stampings.personStamping(personId, yearFrom, monthFrom);
+				return;
+
+			}
+			else{
+				PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?",
+						person, new LocalDate(yearFrom, monthFrom, dayFrom)).first();
+				if(pd == null){
+					pd = new PersonDay(person, dateFrom);
+					pd.create();
+				}
+				Absence absence = new Absence();
+				absence.absenceType = absenceType;
+				absence.personDay = pd;
+				absence.save();
+				pd.absences.add(absence);
+				pd.save();
+				pd.updatePersonDaysInMonth();
+				flash.success("Inserito il codice d'assenza %s nel giorno %s", absenceType.code, pd.date);
+				Stampings.personStamping(personId, yearFrom, monthFrom);
+				//return;
+			}
+			
+		}
 
 		/**
 		 * in questo pezzo si controlla il poter inserire i codici per le assenze dovute a malattie o ricoveri anche nei giorni festivi.
@@ -414,9 +444,14 @@ public class Absences extends Controller{
 					pd = new PersonDay(person, dateFrom);
 					pd.create();
 				}
+				
 				Absence absence = new Absence();
 				absence.absenceType = absenceType;
 				absence.personDay = pd;
+				
+				if(absenceFile.exists()){
+					absence.absenceFile = absenceFile;
+				}
 				absence.save();
 				pd.updatePersonDaysInMonth();
 				flash.success("Inserito il codice d'assenza %s nel giorno %s", absenceType.code, pd.date);
@@ -430,6 +465,10 @@ public class Absences extends Controller{
 						Absence absence = new Absence();
 						absence.absenceType = absenceType;
 						absence.personDay = pd;
+						
+						if(absenceFile.exists()){
+							absence.absenceFile = absenceFile;
+						}
 						absence.save();
 						pd.absences.add(absence);
 						pd.save();
@@ -444,6 +483,11 @@ public class Absences extends Controller{
 						Absence absence = new Absence();
 						absence.absenceType = absenceType;
 						absence.personDay = pd;
+						
+						if(absenceFile.exists()){
+							absence.absenceFile = absenceFile;
+						}
+						
 						absence.save();
 						pd.absences.add(absence);
 						pd.merge();
@@ -467,6 +511,7 @@ public class Absences extends Controller{
 				flash.error("Impossibile inserire il codice %s per %s %s. "+checkMessage.message, absenceType.code, person.name, person.surname);
 				Stampings.personStamping(personId, yearFrom, monthFrom);
 			}
+			
 			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, dateFrom).first();
 			if(pd == null){
 				pd = new PersonDay(person, dateFrom);
@@ -478,8 +523,13 @@ public class Absences extends Controller{
 				Absence absence = new Absence();
 				absence.absenceType = absenceType;
 				absence.personDay = pd;
+				
+				if(absenceFile.exists()){
+					absence.absenceFile = absenceFile;
+				}
+				
 				absence.save();
-				pd.absences.add(absence);
+				//pd.absences.add(absence); //TODO ce n'era due
 				
 				pd.populatePersonDay();
 				pd.save();
@@ -492,6 +542,11 @@ public class Absences extends Controller{
 				Absence absence = new Absence();
 				absence.absenceType = absenceType;
 				absence.personDay = pd;
+				
+				if(absenceFile.exists()){
+					absence.absenceFile = absenceFile;
+				}
+				
 				absence.save();
 				pd.absences.add(absence);
 				Absence compAbsence = new Absence();
@@ -527,6 +582,9 @@ public class Absences extends Controller{
 				 pd = new PersonDay(person, new LocalDate(yearFrom, monthFrom, dayFrom));
 				 pd.save();
 			 }
+				if(absenceFile.exists()){
+					absence.absenceFile = absenceFile;
+				}
 			 absence.personDay = pd;
 			 absence.save();
 			 pd.absences.add(absence);
@@ -548,19 +606,10 @@ public class Absences extends Controller{
 			}
 			
 			Logger.debug("Creato il personDay %s", pd);
-						
-			Upload file = params.get("absenceFile" , Upload.class);
-			if (file != null && (file.getContentType().equals("application/pdf"))) {
-
-				absence.absenceFile = params.get("absenceFile", Blob.class);
-
-				Logger.debug("file ricevuto: %s %s %s", file.getFileName(), file.getSize(),file.getContentType());
-			}
-
-			else if (file != null){
-				flash.error("Il tipo di file inserito non è supportato");
-				Stampings.personStamping(personId, pd.date.getYear(), pd.date.getMonthOfYear());
-			}
+		
+			if(absenceFile.exists()){
+				absence.absenceFile = absenceFile;
+			}	
 				
 			absence.absenceType = absenceType;
 
@@ -568,6 +617,7 @@ public class Absences extends Controller{
 			pd.save();
 			Logger.debug("Creata e salvata l'assenza %s con codice %s", absence, absence.absenceType.code);
 			pd.populatePersonDay();
+			Stampings.personStamping(personId, pd.date.getYear(), pd.date.getMonthOfYear());
 			
 			if(pd.date.isBefore(new LocalDate(pd.date).dayOfMonth().withMaximumValue())){
 				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date > ? and pd.date <= ? order by pd.date", 
@@ -596,6 +646,11 @@ public class Absences extends Controller{
 					absence = new Absence();
 					absence.absenceType = absenceType;
 					absence.personDay = pdInside;
+					
+					if(absenceFile.exists()){
+						absence.absenceFile = absenceFile;
+					}	
+					
 					absence.save();
 					pdInside.addAbsence(absence);
 					pdInside.populatePersonDay();
@@ -616,6 +671,11 @@ public class Absences extends Controller{
 						absence = new Absence();
 						absence.absenceType = absenceType;
 						absence.personDay = pdInside;
+						
+						if(absenceFile.exists()){
+							absence.absenceFile = absenceFile;
+						}
+						
 						absence.save();
 						pdInside.absences.add(absence);
 						pdInside.populatePersonDay();
@@ -731,11 +791,22 @@ public class Absences extends Controller{
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
-	public static void update() {
+	public static void update(Upload file) {
 		Absence absence = Absence.findById(params.get("absenceId", Long.class));
 		if (absence == null) {
 			notFound();
 		}
+		
+		Blob absenceFile = new Blob();
+		if (file != null && (file.getContentType().equals("application/pdf"))) {
+			absenceFile = params.get("file", Blob.class);
+			Logger.debug("file ricevuto: %s %s %s", file.getFileName(), file.getSize(),file.getContentType());
+		}
+		
+		else if(file !=null){
+			flash.error("Il tipo di file inserito non è supportato");
+		}
+	
 		Person person = absence.personDay.person;
 
 		int year = params.get("annoFine", Integer.class);
@@ -786,21 +857,17 @@ public class Absences extends Controller{
 				}
 				String mealTicket =  params.get("buonoMensa");
 				//Logger.debug("Il valore di buono mensa da param: %s", mealTicket);
-				checkMealTicket(pd, mealTicket, absenceType);
 				
-				Upload file = params.get("absenceFile" , Upload.class);
-				if (file != null && (file.getContentType().equals("application/pdf"))) {
-
-					absence.absenceFile = params.get("absenceFile", Blob.class);
-					Logger.debug("file ricevuto: %s %s %s", file.getFileName(), file.getSize(),file.getContentType());
-
-				} else if (file != null) {
-					flash.error("Il tipo di file inserito non è supportato");
+				
+				if(absenceFile.exists()){
+					absence.absenceFile = absenceFile;
 				}
-					
+						
 				absence.absenceType = absenceType;
 				absence.save();
 
+				checkMealTicket(pd, mealTicket, absenceType);
+				
 				flash.success(
 						String.format("Assenza per il giorno %s per %s %s aggiornata con codice %s", 
 								PersonTags.toDateTime(absence.personDay.date), absence.personDay.person.surname, absence.personDay.person.name, absenceCode));
@@ -863,6 +930,11 @@ public class Absences extends Controller{
 					Absence absenceNew = new Absence();
 					absenceNew.absenceType = absenceType;
 					absenceNew.personDay = pd;
+					
+					if(absenceFile.exists()){
+						absence.absenceFile = absenceFile;
+					}
+				
 					absenceNew.save();
 					pd.absences.add(absenceNew);
 					pd.populatePersonDay();
@@ -929,12 +1001,13 @@ public class Absences extends Controller{
 	 * @param dateTo
 	 * @param absenceType
 	 */
-	private static void handlerCompensatoryRest(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType)
+	private static void handlerCompensatoryRest(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType,Blob absenceFile)
 	{
 		Logger.debug("Devo inserire un codice %s per %s %s", absenceType.code, person.name, person.surname);
 		Configuration config = Configuration.getCurrentConfiguration();
 		LocalDate actualDate = dateFrom;
 		int taken = 0;
+		
 		while(!actualDate.isAfter(dateTo))
 		{
 			//Costruisco se non esiste il person day
@@ -977,6 +1050,10 @@ public class Absences extends Controller{
 			Absence absence = new Absence();
 			absence.absenceType = absenceType;
 			absence.personDay = pd;
+
+			if(absenceFile.exists()){
+				absence.absenceFile = absenceFile;
+			}
 			absence.save();
 			pd.absences.add(absence);
 			//pd.populatePersonDay();
@@ -1011,7 +1088,7 @@ public class Absences extends Controller{
 	 * @param dateTo
 	 * @param absenceType
 	 */
-	private static void handlerFER(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType)
+	private static void handlerFER(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, Blob absenceFile)
 	{
 		//controllo reperibilita'
 		LocalDate actualDate = dateFrom;
@@ -1064,6 +1141,11 @@ public class Absences extends Controller{
 			Absence absence = new Absence();
 			absence.absenceType = abt;
 			absence.personDay = pd;
+			
+			if(absenceFile.exists()){
+				absence.absenceFile = absenceFile;
+			}
+			
 			absence.save();
 			pd.absences.add(absence);
 			pd.save();
@@ -1177,20 +1259,19 @@ public class Absences extends Controller{
 				beginMonth, beginMonth.dayOfMonth().withMaximumValue()).fetch();
 		List<Absence> listaAssenze = null;
 		for(Absence abs : absenceList){
-			if(abs.absenceFile != null){
+			
+			if(abs.absenceFile.get() != null){
 				if(!tableAbsences.containsColumn(abs.absenceType.code)){
+					Logger.debug("Absence type per assenza %s : %s", abs, abs.absenceType.code);
 					listaAssenze = new ArrayList<Absence>();
 					listaAssenze.add(abs);
 					tableAbsences.put(abs.personDay.date.getDayOfMonth(), abs.absenceType.code, listaAssenze);
 				}
 				else{
-					listaAssenze = tableAbsences.get(abs.personDay.date.getDayOfMonth(), abs.absenceType.code);
-					if(listaAssenze != null)
-						listaAssenze.add(abs);
-					else{
+					listaAssenze = tableAbsences.remove(abs.personDay.date.getDayOfMonth(), abs.absenceType.code);
+					if(listaAssenze == null)
 						listaAssenze = new ArrayList<Absence>();
-						listaAssenze.add(abs);
-					}
+					listaAssenze.add(abs);
 					tableAbsences.put(abs.personDay.date.getDayOfMonth(), abs.absenceType.code, listaAssenze);
 				}					
 					
@@ -1220,14 +1301,19 @@ public class Absences extends Controller{
 		}
 		else{
 			Person person = Person.findById(personSelected);
+			List<Absence> personAbsenceListWithFile = new ArrayList<Absence>();
 			List<Absence> personAbsenceList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
 					"and abs.personDay.date between ? and ?", 
 					person, new LocalDate(year, month,1), new LocalDate(year, month,1).dayOfMonth().withMaximumValue()).fetch();
-			render(personAbsenceList, year, month, personSelected, personListForAttachments);
+			for(Absence abs : personAbsenceList){
+				if (abs.absenceFile.get() != null){
+					personAbsenceListWithFile.add(abs);
+				}
+			}
+			render(personAbsenceListWithFile, year, month, personSelected, personListForAttachments);
 		}
 		
 	}	
-	
 	
 }
 

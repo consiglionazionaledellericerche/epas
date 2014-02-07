@@ -1,5 +1,8 @@
 import it.cnr.iit.epas.FromMysqlToPostgres;
+import models.AbsenceType;
+import models.CompetenceCode;
 import models.Configuration;
+import models.Office;
 import models.Permission;
 import models.Person;
 import models.PersonShift;
@@ -8,6 +11,7 @@ import models.ShiftTimeTable;
 import models.ShiftType;
 import models.StampModificationType;
 import models.StampType;
+import models.VacationCode;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import play.Logger;
@@ -39,14 +43,48 @@ public class Bootstrap extends Job {
 		try
 		{
 
-			if (Permission.count() == 0) {
+			if(Office.count() == 0){
+				Fixtures.loadModels("");
+				Logger.info("Creato ufficio di default");
+			}
+
+
+
+			if (Permission.count() <= 1) {
+
 				Fixtures.loadModels("permissions.yml");
 				Logger.info("Creati i permessi predefiniti e creato un utente amministratore con associati questi permessi");
 			}
-
+			
+			/*
+			if(AbsenceType.count() == 0)
+			{
+				Fixtures.loadModels("absenceTypes.yml");
+				Logger.info("Creata la struttura dati dei tipi assenza predefiniti");
+			}
+			
 			if (Qualification.count() == 0)	{
 				Fixtures.loadModels("qualifications.yml");
 				Logger.info("Create le qualifiche predefinite");
+			}
+			*/
+			
+			if(AbsenceType.count() == 0)
+			{
+				Fixtures.loadModels("absenceTypesAndQualifications.yml");
+				Logger.info("Creata la struttura dati dei tipi assenza predefiniti e delle qualifiche");
+			}
+			
+			if(CompetenceCode.count() == 0)
+			{
+				Fixtures.loadModels("competenceCodes.yml");
+				Logger.info("Creata la struttura dati dei tipi competenze");
+			}
+			
+			if(VacationCode.count() == 0)
+			{
+				Fixtures.loadModels("vacationCodes.yml");
+				Logger.info("Creata la struttura dati dei piani ferie predefiniti");
 			}
 
 			if (WorkingTimeType.count() == 0) {
@@ -68,10 +106,15 @@ public class Bootstrap extends Job {
 				Fixtures.loadModels("defaultConfiguration.yml");
 				Logger.info("Creata la configurazione iniziale per il programma");
 			}
+			
+			
+
+	
 		}
 		catch(RuntimeException e)
 		{
-			//to nothing (test exception)
+			//do nothing (test exception)
+			e.printStackTrace();
 		}
 
 	}

@@ -577,13 +577,13 @@ public class PersonDay extends Model {
 	 */
 	public void populatePersonDay()
 	{
-		
+
 		//controllo problemi strutturali del person day
 		if(this.date.isBefore(new LocalDate()))
 			this.checkForPersonDayInTrouble();
 
 		//Strutture dati transienti necessarie al calcolo
-		
+
 		if(personDayContract==null)
 		{
 			this.personDayContract = this.person.getContractFromHeap(date);
@@ -599,8 +599,7 @@ public class PersonDay extends Model {
 		{
 			this.previousPersonDayInMonth.personDayContract = this.person.getContractFromHeap(this.previousPersonDayInMonth.date);
 		}
-		
-		
+
 		//controllo uscita notturna
 		this.checkExitStampNextDay();
 		

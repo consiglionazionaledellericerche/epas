@@ -53,6 +53,7 @@ import org.hibernate.envers.query.AuditQueryCreator;
 import org.hibernate.envers.query.criteria.AuditConjunction;
 import org.hibernate.envers.query.criteria.AuditCriterion;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -497,6 +498,10 @@ public class Person extends Model {
 	 * @return la lista delle sedi visibili alla persona che ha chiamato il metodo
 	 */
 	public List<Office> getOfficeAllowed(){
+		
+		if(this.username.equals("admin"))
+			return Office.findAll();
+		
 		List<Office> officeList = new ArrayList<Office>();
 		if(!this.office.remoteOffices.isEmpty()){
 			
@@ -568,27 +573,28 @@ public class Person extends Model {
 	 * 
 	 * @param startPeriod
 	 * @param endPeriod
-	 * @param personLogged null se non voglio applicare alcun filtro sulla sede
+	 * @param personLogged la persona loggata, cannot be null
 	 * @param onlyTechnician true se voglio solo i tecnici con qualifica <= 3
 	 * @return
 	 */
 	public static List<Person> getActivePersonsSpeedyInPeriod(LocalDate startPeriod, LocalDate endPeriod, Person personLogged, boolean onlyTechnician)
 	{
-		
+		if(personLogged==null)
+		{
+			Logger.info("La lista delle persone attive visibili dall'amministratore e' vuota perchè personLogged e' null.");
+			return new ArrayList<Person>();
+		}
+
+		//Filtro sulla sede
+		List<Office> officeAllowed = personLogged.getOfficeAllowed();
+				
 		//Filtro sulla qualifica
 		List<Qualification> qualificationRequested;
 		if(onlyTechnician)
 			qualificationRequested = Qualification.find("Select q from Qualification q where q.qualification >= ?", 4).fetch();
 		else
 			qualificationRequested = Qualification.findAll();
-		
-		//Filtro sulla sede
-		List<Office> officeAllowed;
-		if(personLogged!=null)
-			officeAllowed = personLogged.getOfficeAllowed();
-		else
-			officeAllowed = Office.findAll();
-		
+				
 		//Query //TODO QueryDsl
 		List<Person> personList = Person.find("Select p from Person p "
 				+ "left outer join fetch p.contactData "				//OneToOne			//TODO ISSUE discutere dell'opzionalità di queste relazioni OneToOne
@@ -654,7 +660,7 @@ public class Person extends Model {
 	 * @return
 	 */
 	public static List<Person> getActivePersonsInDay(LocalDate day, boolean onlyTechnician)
-	{
+	{	
 		Person personLogged = Security.getPerson();
 		return Person.getActivePersonsSpeedyInPeriod(day, day, personLogged, onlyTechnician);
 	}
@@ -867,6 +873,10 @@ public class Person extends Model {
 		if(stamping == null)
 			return false;
 		
+		if(stamping.dateTime.isBefore(new LocalDateTime().minusMonths(1))){
+			Logger.warn("La timbratura che si cerca di inserire è troppo precedente rispetto alla data odierna. Controllare il server!");
+			return false;
+		}
 		Long id = stamping.personId;
 		
 		if(id == null){
@@ -928,21 +938,7 @@ public class Person extends Model {
 				Logger.info("All'interno della lista di timbrature di %s %s nel giorno %s c'è una timbratura uguale a quella passata dallo" +
 						"stampingsFromClient: %s", person.name, person.surname, pd.date, stamping.dateTime);
 			}
-			//0113 00004000000000000086063304051407
-//			for(Stamping s : pd.stampings){
-//				if(!s.date.isEqual(stamping.dateTime)){
-//					Stamping stamp = new Stamping();
-//					stamp.date = stamping.dateTime;
-//					stamp.markedByAdmin = false;
-//					if(stamping.inOut == 0)
-//						stamp.way = WayType.in;
-//					else
-//						stamp.way = WayType.out;
-//					stamp.badgeReader = stamping.badgeReader;
-//					stamp.personDay = pd;
-//					stamp.save();
-//				}
-//			}
+
 			
 		}
 		Logger.debug("Chiamo la populatePersonDay per fare i calcoli sulla nuova timbratura inserita per il personDay %s", pd);

@@ -28,7 +28,7 @@ import play.mvc.Scope;
  */
 public class NavigationMenu extends Controller {
 
-	@Before
+	@Before 
 	public static void injectMenu() { 
 		LocalDate now = new LocalDate();
 		Person personLogged = Security.getPerson();

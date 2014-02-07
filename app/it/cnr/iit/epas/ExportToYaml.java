@@ -21,20 +21,31 @@ import models.Contract;
 import models.Person;
 import models.PersonDay;
 import models.PersonMonth;
+import models.Qualification;
 import models.StampProfile;
 import models.Stamping;
+import models.VacationCode;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 
 public class ExportToYaml {
 
-
+	
 	/**
 	 * Builder Yaml della tabella AbsenceType e AbsenceTypeGroup
 	 * @param fileName
 	 */
-	public static void buildAbsences(String fileName)
+	public static void buildAbsenceTypesAndQualifications(String fileName)
 	{
+		
+		//Qualifiche relazionate anche ad absenceTypes
+		String qualificationsYaml = "";
+		List<Qualification> qualificationList = Qualification.findAll();
+		for(Qualification qualification : qualificationList)
+		{
+			qualificationsYaml = qualificationsYaml + appendQualification(qualification);
+		}
+		
 		String absencesYaml = "";
 		
 		//AbsenceType senza AbsenceTypeGroup
@@ -87,8 +98,25 @@ public class ExportToYaml {
 				Logger.info("abtList2: Scartata AbsenceType duplicata %s", abt.code);
 			}
 		}
-
-		writeToYamlFile(fileName, absencesYaml);
+		
+		
+		
+		writeToYamlFile(fileName, qualificationsYaml + absencesYaml);
+	}
+	
+	/**
+	 * 
+	 * @param fileName
+	 */
+	public static void buildQualifications(String fileName)
+	{
+		String qualificationsYaml = "";
+		List<Qualification> qualificationList = Qualification.findAll();
+		for(Qualification qualification : qualificationList)
+		{
+			qualificationsYaml = qualificationsYaml + appendQualification(qualification);
+		}
+		writeToYamlFile(fileName, qualificationsYaml);
 	}
 	
 	/**
@@ -107,6 +135,23 @@ public class ExportToYaml {
 	}
 	
 	/**
+	 * Builder Yaml della tabella VacationCodes
+	 * @param fileName
+	 */
+	public static void buildVacationCodes(String fileName)
+	{
+		String vacationCodesYaml = "";
+		List<VacationCode>  vacCodeList = VacationCode.findAll();
+		for(VacationCode vacCode : vacCodeList)
+		{
+			if(vacCode.description.equals("28+4") || vacCode.description.equals("26+4"))
+				vacationCodesYaml = vacationCodesYaml + appendVacationCode(vacCode);
+		}
+		writeToYamlFile(fileName, vacationCodesYaml);
+		
+	}
+	
+	/**
 	 * Builder Yaml della persona contente WorkingTimeType, WorkingTimeTypeDays, StampProfiles, Contracts
 	 * //TODO Person_CompetenceCode assegnabili 
 	 * @param person
@@ -116,7 +161,7 @@ public class ExportToYaml {
 	{
 		String personYaml = "";
 		personYaml = personYaml + appendWorkingTimeType(person);
-	//	personYaml = personYaml + appendWorkingTimeTypeDays(person.workingTimeType);
+		//personYaml = personYaml + appendWorkingTimeTypeDays(person.workingTimeType);
 		personYaml = personYaml + appendPerson(person);
 		personYaml = personYaml + appendStampProfiles(person);
 		personYaml = personYaml + appendContracts(person);
@@ -187,14 +232,33 @@ public class ExportToYaml {
 		return out;
 	}
 	
+	private static String appendQualification(Qualification qual)
+	{
+		String out = "";
+		out = out + getFormattedHeader("Qualification", "qual"+qual.id);
+		out = out + getFormattedProperty("description", qual.description);
+		out = out + getFormattedProperty("qualification", qual.qualification+"");
+		return out;
+	}
+	
 	private static String appendCompetenceCode(CompetenceCode comp)
 	{
 		String out = "";
 		out = out + getFormattedHeader("CompetenceCode", "compCode"+comp.id);
 		out = out + getFormattedProperty("code", comp.code);
 		out = out + getFormattedProperty("codeToPresence", comp.codeToPresence);
-		out = out + getFormattedProperty("description", "TODOdescription");
+		out = out + getFormattedProperty("description", comp.description);
 		out = out + getFormattedProperty("inactive", comp.inactive+"");
+		return out;
+	}
+	
+	private static String appendVacationCode(VacationCode vacCode)
+	{
+		String out = "";
+		out = out + getFormattedHeader("VacationCode", "vacCode"+vacCode.id);
+		out = out + getFormattedProperty("description", vacCode.description);
+		out = out + getFormattedProperty("vacationDays", vacCode.vacationDays+"");
+		out = out + getFormattedProperty("permissionDays", vacCode.permissionDays+"");
 		return out;
 	}
 	
@@ -206,6 +270,8 @@ public class ExportToYaml {
 		out = out + getFormattedProperty("label", abtg.label);
 		out = out + getFormattedProperty("limitInMinute", abtg.limitInMinute+"");
 		out = out + getFormattedProperty("minutesExcess", abtg.minutesExcess+"");
+		out = out + getFormattedProperty("accumulationBehaviour", abtg.accumulationBehaviour.name());
+		out = out + getFormattedProperty("accumulationType", abtg.accumulationType.name());
 		if(abtg.replacingAbsenceType!=null)
 			out = out + getFormattedProperty("replacingAbsenceType", "abt"+abtg.replacingAbsenceType.id);
 	
@@ -220,19 +286,27 @@ public class ExportToYaml {
 		out = out + getFormattedProperty("code", abt.code);
 		out = out + getFormattedProperty("compensatoryRest", abt.compensatoryRest+"");
 		out = out + getFormattedProperty("consideredWeekEnd", abt.consideredWeekEnd+"");
-		out = out + getFormattedProperty("description", "TODOdescription");
+		out = out + getFormattedProperty("description", abt.description);
 		out = out + getFormattedProperty("ignoreStamping", abt.ignoreStamping+"");
 		out = out + getFormattedProperty("internalUse", abt.internalUse+"");
 		out = out + getFormattedProperty("justifiedTimeAtWork", abt.justifiedTimeAtWork.toString());
 		out = out + getFormattedProperty("mealTicketCalculation", abt.mealTicketCalculation+"");
 		out = out + getFormattedProperty("multipleUse", abt.multipleUse+"");
-		//out = out + getFormattedProperty("replacingAbsence", abt.replacingAbsence+"");
+		
 		if(abt.validFrom!=null)
 			out = out + getFormattedProperty("validFrom", "'"+abt.validFrom+"'");
 		if(abt.validTo!=null)
-			out = out + getFormattedProperty("validFrom", "'"+abt.validTo+"'");
+			out = out + getFormattedProperty("validTo", "'"+abt.validTo+"'");
 		if(abt.absenceTypeGroup!=null)
 			out = out + getFormattedProperty("absenceTypeGroup", "abtg"+abt.absenceTypeGroup.id);
+		
+		String value = "[";
+		for(Qualification qual : abt.qualifications)
+		{	
+			value = value + "qual"+qual.id + ", ";
+		}
+		value = value.substring(0,value.length()-2) + "]";
+		out = out + getFormattedProperty("qualifications", value);
 		return out;
 	}
 	
@@ -445,6 +519,8 @@ public class ExportToYaml {
 	
 	private static String getFormattedProperty(String name, String value)
 	{
+		if(value!=null && value.contains(":"))
+			value = value.replace(":", "-");
 		return "    " + name + ": " + value + "\r\n";
 	}
 
