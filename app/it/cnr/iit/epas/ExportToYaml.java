@@ -24,6 +24,7 @@ import models.PersonMonth;
 import models.Qualification;
 import models.StampProfile;
 import models.Stamping;
+import models.VacationCode;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 
@@ -134,6 +135,23 @@ public class ExportToYaml {
 	}
 	
 	/**
+	 * Builder Yaml della tabella VacationCodes
+	 * @param fileName
+	 */
+	public static void buildVacationCodes(String fileName)
+	{
+		String vacationCodesYaml = "";
+		List<VacationCode>  vacCodeList = VacationCode.findAll();
+		for(VacationCode vacCode : vacCodeList)
+		{
+			if(vacCode.description.equals("28+4") || vacCode.description.equals("26+4"))
+				vacationCodesYaml = vacationCodesYaml + appendVacationCode(vacCode);
+		}
+		writeToYamlFile(fileName, vacationCodesYaml);
+		
+	}
+	
+	/**
 	 * Builder Yaml della persona contente WorkingTimeType, WorkingTimeTypeDays, StampProfiles, Contracts
 	 * //TODO Person_CompetenceCode assegnabili 
 	 * @param person
@@ -220,15 +238,6 @@ public class ExportToYaml {
 		out = out + getFormattedHeader("Qualification", "qual"+qual.id);
 		out = out + getFormattedProperty("description", qual.description);
 		out = out + getFormattedProperty("qualification", qual.qualification+"");
-		/*
-		String value = "[";
-		for(AbsenceType abt : qual.absenceTypes)
-		{	
-			value = value + "abt"+abt.id + ", ";
-		}
-		value = value.substring(0,value.length()-2) + "]";
-		out = out + getFormattedProperty("absenceTypes", value);
-		*/
 		return out;
 	}
 	
@@ -240,6 +249,16 @@ public class ExportToYaml {
 		out = out + getFormattedProperty("codeToPresence", comp.codeToPresence);
 		out = out + getFormattedProperty("description", comp.description);
 		out = out + getFormattedProperty("inactive", comp.inactive+"");
+		return out;
+	}
+	
+	private static String appendVacationCode(VacationCode vacCode)
+	{
+		String out = "";
+		out = out + getFormattedHeader("VacationCode", "vacCode"+vacCode.id);
+		out = out + getFormattedProperty("description", vacCode.description);
+		out = out + getFormattedProperty("vacationDays", vacCode.vacationDays+"");
+		out = out + getFormattedProperty("permissionDays", vacCode.permissionDays+"");
 		return out;
 	}
 	

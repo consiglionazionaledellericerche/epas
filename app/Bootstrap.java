@@ -11,6 +11,7 @@ import models.ShiftTimeTable;
 import models.ShiftType;
 import models.StampModificationType;
 import models.StampType;
+import models.VacationCode;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import play.Logger;
@@ -78,6 +79,12 @@ public class Bootstrap extends Job {
 			{
 				Fixtures.loadModels("competenceCodes.yml");
 				Logger.info("Creata la struttura dati dei tipi competenze");
+			}
+			
+			if(VacationCode.count() == 0)
+			{
+				Fixtures.loadModels("vacationCodes.yml");
+				Logger.info("Creata la struttura dati dei piani ferie predefiniti");
 			}
 
 			if (WorkingTimeType.count() == 0) {
