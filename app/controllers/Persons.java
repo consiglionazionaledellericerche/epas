@@ -324,15 +324,8 @@ public class Persons extends Controller {
 		Location location = new Location();
 		ContactData contactData = new ContactData();
 		InitializationTime initializationTime = new InitializationTime();
-		List<Office> officeList = null;
 		Person personLogged = Security.getPerson();
-		if(!personLogged.office.remoteOffices.isEmpty()){
-			officeList = Office.find("Select office from Office office").fetch();
-		}
-		else{
-			officeList = RemoteOffice.find("Select office from RemoteOffice office where office.joiningDate is not null").fetch();
-		}
-		
+		List<Office> officeList = personLogged.getOfficeAllowed();
 		List<Office> office = Office.find("Select office from Office office where office.office is null").fetch();
 		Logger.debug("Lista office: %s", office.get(0).name);
 		render(person, contract, location, contactData, initializationTime, officeList/*, remoteOffice*/);
