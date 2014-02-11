@@ -33,6 +33,10 @@ public class Bootstrap extends Job {
 
 		try
 		{
+			if(Qualification.count() == 0){
+				Fixtures.loadModels("absenceTypesAndQualifications.yml");
+				Logger.info("Create qualifiche e codici di assenza");
+			}
 			if (Permission.count() <= 1) {
 
 				Fixtures.loadModels("permissions.yml");
