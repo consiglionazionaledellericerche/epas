@@ -486,14 +486,16 @@ public class Stampings extends Controller {
 		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();						
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 		for(Person person : activePersonsInDay){
-			
-			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.date = ? and pd.person = ?", dayPresence, person).first();
-			if(pd==null)
-				pd = new PersonDay(person, dayPresence);
+			if(!person.username.equals("epas.clocks")){
+				PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.date = ? and pd.person = ?", dayPresence, person).first();
+				if(pd==null)
+					pd = new PersonDay(person, dayPresence);
 
-			pd.computeValidStampings();
-			daysRecap.add(new PersonStampingDayRecap(pd, numberOfInOut));
-			
+				pd.computeValidStampings();
+				daysRecap.add(new PersonStampingDayRecap(pd, numberOfInOut));
+
+			}
+						
 		}
 
 		

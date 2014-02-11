@@ -33,9 +33,11 @@ $(function () {
 });
 
 $(function() {
-    $( "#datepicker" ).datepicker();
+    $( "#datepicker1" ).datepicker();
   });
-
+$(function() {
+    $( "#datepicker2" ).datepicker();
+  });
 
 
 $('#myModal1').on('show', function () {

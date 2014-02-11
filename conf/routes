@@ -22,7 +22,7 @@ POST	/utilities/{personId}/{year}/{month}	Administration.fixPersonSituation
 POST	/utilities/{year}						Administration.createOvertimeFile
 
 #Assenze
-#GET		/absences/{year}/{month}		Absences.absences
+#GET		/absences/{year}/{month}			Absences.absences
 
 #Assenze annuali
 GET		/yearlyAbsences/{personId}/{year}		YearlyAbsences.yearlyAbsences
@@ -179,7 +179,9 @@ POST	/uploadSituation/						UploadSituation.uploadSituation
 
 #Gestione stampa cartellino amministratore
 GET		/printTags/listPersonForPrintTags/{year}/{month}		PrintTags.listPersonForPrintTags
-POST	/printTags/showTag/{personId}			PrintTags.showTag
+POST	/printTags/showTag/{personId}				PrintTags.showTag
+GET		/printTags/absenceInPeriod/{personSelected}/{year}/{month}	Absences.absenceInPeriod
+
 
 #Gestione stampa cartellino dipendente
 GET     /printTags/{personId}/{year}/{month}	PrintTags.showPersonTag
