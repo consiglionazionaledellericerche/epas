@@ -32,14 +32,14 @@ public class Administrators extends Controller {
 		 * TODO: cambiare i permessi in relazione al fatto che l'utente loggato sia effettivamente attivo nella data in cui visita
 		 * la pagina di lista amministratori
 		 */
-		List<Person> administratorList = new ArrayList<Person>();
-		List<Person> personList = Person.find("Select p from Person p where p.name <> ? order by p.surname", "Admin").fetch();
-		for(Person p : personList){
-			if(p.permissions.size() > 0){
-				administratorList.add(p);
-			}
-
-		}
+//		List<Person> administratorList = new ArrayList<Person>();
+		List<Person> administratorList = Person.find("Select p from Person p where p.name <> ? order by p.surname", "Admin").fetch();
+//		for(Person p : personList){
+//			if(p.permissions.size() > 0){
+//				administratorList.add(p);
+//			}
+//
+//		}
 
 		render(administratorList);
 	}
