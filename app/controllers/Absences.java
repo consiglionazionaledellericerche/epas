@@ -1315,6 +1315,28 @@ public class Absences extends Controller{
 		
 	}	
 	
+	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
+	public static void absenceInPeriod(Long personSelected, int year, int month){
+		
+		List<Person> personList = Person.getActivePersonsInMonth(month, year, false);
+		if(personSelected == null || personSelected == 0)
+			render(personList, year, month);
+		else{
+			String dataInizio = params.get("dataInizio");
+			String dataFine = params.get("dataFine");
+			LocalDate dateFrom = new LocalDate(dataInizio);
+			LocalDate dateTo = new LocalDate(dataFine);
+			
+			Person person = Person.findById(personSelected);
+			List<Absence> absenceList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
+					"and abs.personDay.date between ? and ? ", person, dateFrom, dateTo).fetch();
+			Logger.debug("La lista di assenze di %s %s per il periodo richiesto contiene %d elementi", person.name, person.surname, 
+					absenceList.size());
+			render(person, absenceList, personList, year, month, personSelected, dateFrom, dateTo);
+		}
+	}
+	
+	
 }
 
 

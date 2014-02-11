@@ -980,7 +980,8 @@ public class PersonDay extends Model {
 				this.save();
 			}
 
-
+			if(this.date.getDayOfMonth() == 1)
+				this.previousPersonDayInMonth = null;
 		}
 
 	}
