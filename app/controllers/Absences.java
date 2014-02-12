@@ -1038,7 +1038,7 @@ public class Absences extends Controller{
 			absence.absenceType = absenceType;
 			absence.personDay = pd;
 
-			if (file.exists()) {
+			if (file != null && file.exists()) {
 				absence.absenceFile = file;
 			}
 			absence.save();
@@ -1129,7 +1129,7 @@ public class Absences extends Controller{
 			absence.absenceType = abt;
 			absence.personDay = pd;
 			
-			if (file.exists()) {
+			if (file != null && file.exists()) {
 				absence.absenceFile = file;
 			}
 			
