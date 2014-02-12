@@ -541,14 +541,14 @@ public class Persons extends Controller {
 				initTime.residualMinutesPastYear = params.get("minutesPastYear", Integer.class);
 			initTime.save();
 		}
-		else{
-			initTime = new InitializationTime();
-			if(params.get("minutesPastYear") != null)
-				initTime.residualMinutesPastYear = params.get("minutesPastYear", Integer.class);
-			if(params.get("minutesCurrentYear") != null)
-				initTime.residualMinutesCurrentYear = params.get("minutesCurrentYear", Integer.class);
-			initTime.save();
-		}
+//		else{
+//			initTime = new InitializationTime();
+//			if(params.get("minutesPastYear") != null)
+//				initTime.residualMinutesPastYear = params.get("minutesPastYear", Integer.class);
+//			if(params.get("minutesCurrentYear") != null)
+//				initTime.residualMinutesCurrentYear = params.get("minutesCurrentYear", Integer.class);
+//			initTime.save();
+//		}
 		if(person.number != null && ! person.number.equals(params.get("number", Integer.class)))
 			person.number = params.get("number", Integer.class);
 		//Logger.debug("Qualifica: %d", params.get("person.qualification", Integer.class));
