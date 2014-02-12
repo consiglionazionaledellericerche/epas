@@ -130,6 +130,20 @@
 	}
 }%</td>
 	</tr>
+	<tr>
+		<td>Inseribile anche nei week end e festivi:</td>
+		<td>%{	if(abt.consideredWeekEnd == false){
+}%		<p>Sì <input type="radio" name="weekEnd" value="true" /> 
+		No <input type="radio" name="weekEnd" value="false" checked="checked"/></p>
+%{
+	}else{
+}%		<p>Sì <input type="radio" name="weekEnd" value="true" checked="checked"/> 
+		No <input type="radio" name="weekEnd" value="false"/></p>
+%{
+	}
+	
+}%</td>
+	</tr>
 </table>
 </fieldset>
 

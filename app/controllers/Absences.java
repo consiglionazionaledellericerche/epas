@@ -235,6 +235,7 @@ public class Absences extends Controller{
 		abt.description = params.get("descrizione");
 		abt.ignoreStamping = params.get("ignoraTimbrature", Boolean.class);
 		abt.internalUse = params.get("usoInterno", Boolean.class);
+		abt.consideredWeekEnd = params.get("weekEnd", Boolean.class);
 		abt.mealTicketCalculation = params.get("calcoloBuono", Boolean.class);
 		if(params.get("inizioValidita", Date.class) != null){
 			Date validFrom = params.get("inizioValidita", Date.class);
@@ -456,7 +457,7 @@ public class Absences extends Controller{
 						absence.absenceType = absenceType;
 						absence.personDay = pd;
 						
-						if (file.exists()) {
+						if (file != null && file.exists()) {
 							absence.absenceFile = file;
 						}
 						absence.save();
@@ -474,7 +475,7 @@ public class Absences extends Controller{
 						absence.absenceType = absenceType;
 						absence.personDay = pd;
 						
-						if (file.exists()) {
+						if (file != null && file.exists()) {
 							absence.absenceFile = file;
 						}
 						
@@ -663,7 +664,7 @@ public class Absences extends Controller{
 						absence.absenceType = absenceType;
 						absence.personDay = pdInside;
 						
-						if (file.exists()) {
+						if (file != null && file.exists()) {
 							absence.absenceFile = file;
 						}
 						
@@ -727,6 +728,7 @@ public class Absences extends Controller{
 		Logger.debug("Il valore di tempo giustificato è: %s", params.get("abt.justifiedTimeAtWork"));
 		absence.internalUse = params.get("usoInterno", Boolean.class);		
 		absence.multipleUse = params.get("usoMultiplo", Boolean.class);
+		absence.consideredWeekEnd = params.get("weekEnd", Boolean.class);
 		absence.validFrom = new LocalDate(params.get("inizio"));
 		absence.validTo = new LocalDate(params.get("fine"));
 		String justifiedTimeAtWork = params.get("abt.justifiedTimeAtWork");			
@@ -788,7 +790,7 @@ public class Absences extends Controller{
 			notFound();
 		}
 		
-		if(file.exists()){
+		if(file != null && file.exists()){
 			Logger.debug("ricevuto file di tipo: %s", file.type());
 		}
 			
