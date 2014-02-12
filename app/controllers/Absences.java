@@ -440,7 +440,7 @@ public class Absences extends Controller{
 				absence.absenceType = absenceType;
 				absence.personDay = pd;
 				
-				if (file.exists()) {
+				if (file != null && file.exists()) {
 					absence.absenceFile = file;
 				}
 				absence.save();
@@ -515,7 +515,7 @@ public class Absences extends Controller{
 				absence.absenceType = absenceType;
 				absence.personDay = pd;
 				
-				if (file.exists()) {
+				if (file != null && file.exists()) {
 					absence.absenceFile = file;
 				}
 				
@@ -534,7 +534,7 @@ public class Absences extends Controller{
 				absence.absenceType = absenceType;
 				absence.personDay = pd;
 				
-				if (file.exists()) {
+				if (file != null && file.exists()) {
 					absence.absenceFile = file;
 				}
 				
@@ -574,7 +574,7 @@ public class Absences extends Controller{
 				 pd.save();
 			 }
 			 
-			 if (file.exists()) {
+			 if (file != null && file.exists()) {
 					absence.absenceFile = file;
 				}
 			 absence.personDay = pd;
@@ -599,7 +599,7 @@ public class Absences extends Controller{
 			
 			Logger.debug("Creato il personDay %s", pd);
 		
-			if (file.exists()) {
+			if (file != null && file.exists()) {
 				absence.absenceFile = file;
 			}	
 				
@@ -639,7 +639,7 @@ public class Absences extends Controller{
 					absence.absenceType = absenceType;
 					absence.personDay = pdInside;
 					
-					if (file.exists()) {
+					if (file != null && file.exists()) {
 						absence.absenceFile = file;
 					}	
 					
@@ -846,7 +846,7 @@ public class Absences extends Controller{
 				//Logger.debug("Il valore di buono mensa da param: %s", mealTicket);
 				
 				
-				if (file.exists()) {
+				if (file != null && file.exists()) {
 					absence.absenceFile = file;
 				}
 						
@@ -918,7 +918,7 @@ public class Absences extends Controller{
 					absenceNew.absenceType = absenceType;
 					absenceNew.personDay = pd;
 					
-					if (file.exists()) {
+					if (file != null && file.exists()) {
 						absence.absenceFile = file;
 					}
 				
@@ -928,7 +928,7 @@ public class Absences extends Controller{
 					pd.save();
 
 				}
-				String mealTicket =  params.get("buonoMensa");
+				
 				//Logger.debug("Il valore di buono mensa da param: %s", mealTicket);
 				//checkMealTicket(pd, mealTicket);
 				dataInizioAssenze = dataInizioAssenze.plusDays(1);
