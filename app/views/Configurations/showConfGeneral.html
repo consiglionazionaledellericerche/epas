@@ -1,0 +1,104 @@
+#{extends 'main_admin_no_menu.html' /}
+#{set titolo: 'Gestione parametri di configurazione' /}
+
+<ul class="nav nav-tabs">
+  <li class="active"><a href="@{Configurations.showConfGeneral()}#">Parametri Istituto</a></li>
+  <li><a href="@{Configurations.showConfYear()}#">Parametri Annuali</a></li>
+</ul>
+
+
+<fieldset style="margin-left:100px; margin-right:100px;">
+  <legend>Configurazione Generale Istituto (Parametri non modificabili)</legend>
+  <table class="table tablenoborder">
+    <tr>
+	  <td class="span7">Data di inizio uso di questo programma</td>
+	  <td><strong>${confGeneral.initUseProgram}</strong></td>
+    </tr>
+    <tr>	
+	  <td class="span7">Nome dell'istituto</td>
+	  <td><strong>${confGeneral.instituteName}</strong></td>
+    </tr>	
+    <tr>	
+      <td class="span7">Codice sede</td>
+      <td><strong>${confGeneral.seatCode}</strong></td>
+    </tr>
+    <tr>
+      <td>Festa del patrono</td>
+      <td><strong>${confGeneral.dayOfPatron} / ${confGeneral.monthOfPatron}</strong></td>
+    </tr>
+  </table>  
+</fieldset>
+
+<br>
+
+<fieldset style="margin-left:100px; margin-right:100px;">
+  <legend>Gestione Timbrature</legend>
+  <table class="table tablenoborder">
+    <tr>
+      <td class="span7">Autorizzazione timbratura via web</td>
+      <td>
+        <strong>
+          <a href="#" 
+          id="select1" 
+          data-type="select" 
+          data-pk="webStampingAllowed" 
+          data-value="['${confGeneral.webStampingAllowed}']"
+          data-source="[{'true': 'SI'},{'false': 'NO'}]" 
+          data-url="@{saveConfGeneral()}" 
+          class="editable editable-click"></a>
+        </strong>
+      </td>
+    </tr>
+    <tr>
+      <td class="span7">Indirizzi IP autorizzati per timbratura via web</td>
+      <td>
+        <strong>
+      	  <a href="#" 
+      	    id="textComments1" 
+      	    data-type="textarea" 
+      	    data-pk="todo" 
+      	    data-title="Inserire un indirizzo IP per linea"
+      	    data-url="@{saveConfGeneral()}" 
+      	    class="editable editable-pre-wrapped editable-click">
+      	    
+      	  </a>  
+        </strong>
+      </td>
+    </tr>
+  </table>  
+</fieldset>
+
+<br>
+
+<fieldset style="margin-left:100px; margin-right:100px;">
+  <legend>Parametri applicazione</legend>
+  <table class="table tablenoborder">
+    <tr>	
+      <td class="span7">URL per gestione attestato presenza dell'amministrazione centrale </td>
+      <td><strong><a href="#" id="simpleText1" data-type="text" data-pk="urlToPresence" data-url="@{saveConfGeneral()}" class="editable editable-click">${confGeneral.urlToPresence}</a></strong></td>
+    </tr>
+    <tr>	
+      <td class="span7">User per gestione attestato presenza dell'amministrazione centrale</td>
+      <td><strong><a href="#" id="simpleText2" data-type="text" data-pk="userToPresence" data-url="@{saveConfGeneral()}" class="editable editable-click">${confGeneral.userToPresence}</a></strong></td>
+    </tr>
+    <tr>	
+      <td class="span7">Password per gestione attestato presenza dell'amministrazione centrale</td>
+      <td><strong><a href="#" id="simpleText3" data-type="text" data-pk="passwordToPresence" data-url="@{saveConfGeneral()}" class="editable editable-click">${confGeneral.passwordToPresence}</a></strong></td>
+    </tr>
+    <tr>	
+      <td class="span7">Numero di colonne di entrata/uscita da visualizzare</td>
+      <td>
+        <strong>
+      	   <a href="#" 
+	          id="select2" 
+              data-type="select" 
+              data-pk="numberOfViewingCoupleColumn" 
+              data-value="[${confGeneral.numberOfViewingCoupleColumn}]"
+              data-source="[{1: '1'},{2: '2'},{3: '3'},{4: '4'},{5: '5'}]" 
+              data-url="@{saveConfGeneral()}" 
+              class="editable editable-click"></a>
+        </strong>
+      </td>
+    </tr>
+  </table>  
+</fieldset>
