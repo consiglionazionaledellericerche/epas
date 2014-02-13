@@ -91,7 +91,7 @@
 		<table class="tablenoborder">
 			<tr>
 				<td>Sede centrale/distaccata</td>
-				<td>#{select 'office', value:'', id:'office'} 
+				<td>#{select 'person.office', value:'', id:'office'} 
 						#{list items: officeList, as: 'office'}
 							#{option office.id}${office.name}#{/option}
 						#{/list} 

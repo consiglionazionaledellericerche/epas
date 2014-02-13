@@ -111,7 +111,7 @@ public class PersonDay extends Model {
 	public String modificationType;
 	
 	@NotAudited
-	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY, cascade= {CascadeType.PERSIST, CascadeType.REMOVE})
 	public List<PersonDayInTrouble> troubles = new ArrayList<PersonDayInTrouble>();
 	
 	@Transient
