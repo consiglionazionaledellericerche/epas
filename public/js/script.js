@@ -44,8 +44,6 @@ $(function() {
     $( "#datepicker3" ).datepicker();
   });
 
-
-
 $('#myModal1').on('show', function () {
 	$('#myModal2').modal('hide');
 })

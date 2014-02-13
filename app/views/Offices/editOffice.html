@@ -1,0 +1,30 @@
+
+#{form @Offices.update()}
+<input type="hidden" name="officeId" value="${office.id}"/>
+<fieldset>
+  <legend>Sede ${office.name}</legend>
+
+  <table class="tablenoborder">
+    <tr>
+      <td><strong>Nome</strong></td>
+      <td><input name="name" value="${office.name}"/></td>
+    </tr>
+    
+    <tr>
+      <td><strong>Indirizzo</strong></td>
+      <td><input name="address" value="${office.address}"/></td>
+    </tr>
+    
+    <tr>
+      <td><strong>Codice</strong></td>
+      <td><input name="code" value="${office.code}"/></td>
+    </tr>
+
+
+  </table>
+
+
+</fieldset>
+<div class="buttoncenter">
+  <input class="btn btn-primary" id="insertWorkingTime" type="submit" value="Aggiorna"/>
+  #{/form}

@@ -111,7 +111,7 @@ public class PersonDay extends Model {
 	public String modificationType;
 	
 	@NotAudited
-	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY, cascade= {CascadeType.PERSIST, CascadeType.REMOVE})
 	public List<PersonDayInTrouble> troubles = new ArrayList<PersonDayInTrouble>();
 	
 	@Transient
@@ -978,7 +978,8 @@ public class PersonDay extends Model {
 				this.save();
 			}
 
-
+			if(this.date.getDayOfMonth() == 1)
+				this.previousPersonDayInMonth = null;
 		}
 		
 		if(this.date.getDayOfMonth() == 1)
