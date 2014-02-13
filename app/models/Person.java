@@ -167,7 +167,7 @@ public class Person extends Model {
 //	public WorkingTimeType workingTimeType;
 	
 	@NotAudited
-	@OneToMany(mappedBy = "person", fetch=FetchType.LAZY)
+	@OneToMany(mappedBy = "person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<PersonWorkingTimeType> personWorkingTimeType = new ArrayList<PersonWorkingTimeType>();
 	
 	/**
@@ -178,13 +178,13 @@ public class Person extends Model {
 //	@JoinColumn(name="remote_office_id", nullable=true)
 //	public RemoteOffice remoteOffice;
 
-	@ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
+	@ManyToMany(cascade = {CascadeType.REFRESH, CascadeType.REMOVE}, fetch = FetchType.LAZY)
 	public List<Permission> permissions;
 
 	/**
 	 * relazione con la tabella dei gruppi
 	 */
-	@ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
+	@ManyToMany(cascade = {CascadeType.REFRESH, CascadeType.REMOVE}, fetch = FetchType.LAZY)
 	public List<Group> groups;
 
 
@@ -233,7 +233,7 @@ public class Person extends Model {
 	 * relazione con la tabella dei codici competenza per stabilire se una persona ha diritto o meno a una certa competenza
 	 */
 	@NotAudited
-	@ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
+	@ManyToMany(cascade = {CascadeType.REFRESH, CascadeType.REMOVE}, fetch = FetchType.LAZY)
 	public List<CompetenceCode> competenceCode;
 	
 
@@ -255,7 +255,7 @@ public class Person extends Model {
 	@OneToOne(mappedBy="person", fetch=FetchType.EAGER,  cascade = {CascadeType.REMOVE} )
 	public PersonReperibility reperibility;
 
-	@ManyToOne( fetch=FetchType.LAZY )
+	@ManyToOne( fetch=FetchType.LAZY)
 	@JoinColumn(name="qualification_id")
 	public Qualification qualification;
 
@@ -605,7 +605,7 @@ public class Person extends Model {
 				+ "left outer join fetch p.personHourForOvertime "		//OneToOne
 				+ "left outer join fetch p.location "					//OneToOne
 				+ "left outer join fetch p.reperibility "				//OneToOne
-				+ "left outer join fetch p.personShift "				//OneToOne
+				+ "left outer join fetch p.personShift "				//OneToOne 
 				+ "left outer join fetch p.contracts as c "
 				+ "where "
 				
@@ -630,12 +630,13 @@ public class Person extends Model {
 				+ ") "
 				
 				//persona allowed
-				+"and p.office in :officeList "
+				/*+"and p.office in :officeList "*/
 				
 				//only technician
 				+"and p.qualification in :qualificationList "
 								
-				+ "order by p.surname, p.name", endPeriod, endPeriod, startPeriod, endPeriod, startPeriod).bind("officeList", officeAllowed).bind("qualificationList", qualificationRequested).fetch();
+				+ "order by p.surname, p.name", endPeriod, endPeriod, startPeriod, endPeriod, startPeriod).bind("qualificationList", qualificationRequested).fetch();
+		//+ "order by p.surname, p.name", endPeriod, endPeriod, startPeriod, endPeriod, startPeriod).bind("officeList", officeAllowed).bind("qualificationList", qualificationRequested).fetch();
 
 		return personList;
 	}
