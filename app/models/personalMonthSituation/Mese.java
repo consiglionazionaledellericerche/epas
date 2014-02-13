@@ -66,7 +66,6 @@ public class Mese {
 		//Gennaio
 		if(mesePrecedente==null)
 		{
-			
 			this.mesePrecedente = null;
 			this.tempoInizializzazione = tempoInizializzazione;
 			this.monteOreAnnoPassato = tempoInizializzazione;
@@ -80,8 +79,6 @@ public class Mese {
 				this.progressivoFinalePositivoMese = this.progressivoFinalePositivoMese + this.tempoInizializzazione;
 				this.monteOreAnnoPassato = 0;
 			}
-			
-
 		}
 		
 		//Febbraio / Marzo
@@ -302,21 +299,7 @@ public class Mese {
 		this.progressivoFinalePositivoMese = this.progressivoFinalePositivoMese - this.riposiCompensativiMinuti;
 		this.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese = this.riposiCompensativiMinuti;
 	
-	}
-	
-	/**
-	 * 
-	 * @param person
-	 * @param year
-	 * @param month
-	 * @return il valore di quanti minuti positivi sono stati fatti da quella persona in quel mese/anno
-	 */
-	public static Integer positiveResidualInMonth(Person person, int year, int month){
-		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, year, null);
-		Mese mese = c.getMese(year, month);
-		return mese.progressivoFinalePositivoMese;
-	}
-	
+	}	
 }
 
 

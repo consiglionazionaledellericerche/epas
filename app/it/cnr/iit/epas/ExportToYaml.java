@@ -370,6 +370,7 @@ public class ExportToYaml {
 		return out;
 	}
 	
+	/*
 	private static String appendWorkingTimeTypeDays(WorkingTimeType wtt)
 	{
 		String out = "";
@@ -385,7 +386,7 @@ public class ExportToYaml {
 		}
 		return out;
 	}
-	
+	*/
 	private static String appendPerson(Person person)
 	{
 		String out = "";

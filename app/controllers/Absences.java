@@ -25,7 +25,7 @@ import javax.persistence.Query;
 import models.Absence;
 import models.AbsenceType;
 import models.AbsenceTypeGroup;
-import models.Configuration;
+import models.ConfYear;
 import models.Person;
 import models.PersonDay;
 import models.PersonMonth;
@@ -567,7 +567,7 @@ public class Absences extends Controller{
 		 * è il caso delle ferie anno passato di cui poter godere oltre il 31/8 (previa autorizzazione).
 		 */
 		if(absenceType.code.equals("37")){
-			 int days = VacationsRecap.remainingPastVacations(yearFrom, person, absenceType);
+			 int days = VacationsRecap.remainingPastVacationsAs37(yearFrom, person);
 			 if(days == 0){
 				 flash.error("Non si possono inserire ulteriori giorni di assenza perchè è stato raggiunto il limite previsto dal piano" +
 				 		"ferie per %s %s, oppure l'anno passato %s %s non aveva un contratto attivo", person.name, person.surname, person.name, person.surname);
@@ -1004,12 +1004,15 @@ public class Absences extends Controller{
 	private static void handlerCompensatoryRest(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType,Blob absenceFile)
 	{
 		Logger.debug("Devo inserire un codice %s per %s %s", absenceType.code, person.name, person.surname);
-		Configuration config = Configuration.getCurrentConfiguration();
+		//Configuration config = Configuration.getCurrentConfiguration();
+		
 		LocalDate actualDate = dateFrom;
 		int taken = 0;
 		
 		while(!actualDate.isAfter(dateTo))
 		{
+			ConfYear config = ConfYear.getConfYear(actualDate.getYear());
+			
 			//Costruisco se non esiste il person day
 			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, actualDate).first();
 			if(pd == null){

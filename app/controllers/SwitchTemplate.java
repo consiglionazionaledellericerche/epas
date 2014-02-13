@@ -119,7 +119,7 @@ public class SwitchTemplate extends Controller{
 			break;
 
 		case confParameters:
-			Configurations.list();
+			Configurations.showConfGeneral();
 			break;
 
 		case personList:

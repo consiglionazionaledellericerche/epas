@@ -13,7 +13,7 @@ import java.util.Map;
 
 import models.Absence;
 import models.Competence;
-import models.Configuration;
+import models.ConfGeneral;
 import models.Person;
 
 import org.joda.time.LocalDate;
@@ -94,7 +94,8 @@ public class AttestatiClient {
 	 */
 	public static LoginResponse login(String attestatiLogin, String attestatiPassword) throws AttestatiException, MalformedURLException, URISyntaxException {
 		
-		URI baseUri = new URI(Configuration.getCurrentConfiguration().urlToPresence);
+		//URI baseUri = new URI(Configuration.getCurrentConfiguration().urlToPresence);
+		URI baseUri = new URI(ConfGeneral.getConfGeneral().urlToPresence);
 		URL loginUrl = baseUri.resolve(BASE_LOGIN_URL).toURL();
 		
 		Connection connection = Jsoup.connect(loginUrl.toString());
@@ -141,7 +142,8 @@ public class AttestatiClient {
 	 */
 	public static List<Dipendente> listaDipendenti(Map<String, String> cookies, Integer year, Integer month) throws URISyntaxException, MalformedURLException {
 		Response listaDipendentiResponse;
-		Configuration conf = Configuration.getCurrentConfiguration();
+		//Configuration conf = Configuration.getCurrentConfiguration();
+		ConfGeneral conf = ConfGeneral.getConfGeneral();
 		URI baseUri = new URI(conf.urlToPresence);
 		final URL listaDipendentiUrl = baseUri.resolve(BASE_LISTA_DIPENDENTI_URL).toURL();
 		Connection connection = Jsoup.connect(listaDipendentiUrl.toString());
@@ -210,7 +212,8 @@ public class AttestatiClient {
 			List<Absence> absences, List<Competence> competences) 
 					throws URISyntaxException, MalformedURLException {
 		
-		Configuration conf = Configuration.getCurrentConfiguration();
+		//Configuration conf = Configuration.getCurrentConfiguration();
+		ConfGeneral conf = ConfGeneral.getConfGeneral();
 		URI baseUri = new URI(conf.urlToPresence);
 		final URL elaboraDatiUrl = baseUri.resolve(BASE_ELABORA_DATI_URL).toURL();
 

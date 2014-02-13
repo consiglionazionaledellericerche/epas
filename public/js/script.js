@@ -33,7 +33,15 @@ $(function () {
 });
 
 $(function() {
-    $( "#datepicker" ).datepicker();
+    $( "#datepicker1" ).datepicker();
+  });
+
+$(function() {
+    $( "#datepicker2" ).datepicker();
+  });
+
+$(function() {
+    $( "#datepicker3" ).datepicker();
   });
 
 
@@ -98,7 +106,28 @@ $('#modal-absencetype-month').on('hidden', function(){
 });
 
 
+$('#select1').editable(); 
 
+$('#select2').editable(); 
+
+$('#select3').editable(); 
+
+$('#select4').editable(); 
+
+$('#select5').editable(); 
+
+$('#select6').editable(); 
+
+$('#simpleText1').editable(); 
+
+$('#simpleText2').editable();
+
+$('#simpleText3').editable(); 
+
+
+$('#textComments1').editable({
+    showbuttons: 'bottom'
+}); 
 
 
 
