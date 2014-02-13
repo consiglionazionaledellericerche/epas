@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
-import models.Configuration;
+import models.ConfGeneral;
 import models.Person;
 import models.WorkingTimeType;
 
@@ -68,7 +68,9 @@ public class DateUtility {
 	
 	public static boolean isGeneralHoliday(LocalDate date){
 		
-		Configuration config = Configuration.getConfiguration(date);
+		//Configuration config = Configuration.getConfiguration(date);
+		ConfGeneral confGeneral = ConfGeneral.getConfGeneral();
+		
 		LocalDate easter = findEaster(date.getYear());
 		LocalDate easterMonday = easter.plusDays(1);
 		if(date.getDayOfMonth() == easter.getDayOfMonth() && date.getMonthOfYear() == easter.getMonthOfYear())
@@ -97,7 +99,7 @@ public class DateUtility {
 			return true;
 		if((date.getMonthOfYear() == 11) && (date.getDayOfMonth() == 1))
 			return true;
-		if((date.getMonthOfYear() == config.monthOfPatron && date.getDayOfMonth() == config.dayOfPatron))
+		if((date.getMonthOfYear() == confGeneral.monthOfPatron && date.getDayOfMonth() == confGeneral.dayOfPatron))
 			return true;
 		/**
 		 * ricorrenza centocinquantenario dell'unità d'Italia

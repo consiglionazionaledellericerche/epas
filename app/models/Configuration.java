@@ -36,6 +36,7 @@ import play.db.jpa.Model;
 @Audited
 @Entity
 @Table(name="configurations")
+@Deprecated
 public class Configuration extends Model{
 	
 	/**
@@ -345,10 +346,6 @@ public class Configuration extends Model{
 			}
 		}
 		return null;
-		/*
-		return Configuration.find("Select conf from Configuration conf where conf.inUse = ? order by conf.endDate desc", true).first();
-		//return Configuration.find("Select conf from Configuration conf where conf.beginDate <= ? and conf.endDate >= ?", date, date).first();
-		 */
 	}
 	
 	public static Configuration getCurrentConfiguration(){

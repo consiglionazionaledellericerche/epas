@@ -166,9 +166,7 @@ fError, .fSuccess {text-align: center; }
 input#pastYear{width: 100px; margin-left: 10px;}
 select#year{width: 90px;}
 
-li.distanziato{
-	padding-bottom: 5px;
-}
+li.distanziato{padding-bottom: 5px;}
 
 
 
@@ -178,16 +176,12 @@ li.distanziato{
  */
 
 table#tabellonetimbrature th,
-table#tabellonetimbrature td {
-  border: 1px solid #bbb;
-}
+table#tabellonetimbrature td {border: 1px solid #bbb;}
 
 
-div.accordion-group {
-	border-color: #bbb;
-}
+div.accordion-group { border-color: #bbb;}
 
-div.accordion-inner {
-	border-top: 1px solid #bbb;
-}
+div.accordion-inner {border-top: 1px solid #bbb;}
+
+.popover{width:300px;}
 

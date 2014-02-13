@@ -12,7 +12,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
 import models.AbsenceType;
-import models.Configuration;
+import models.ConfGeneral;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
@@ -63,7 +63,8 @@ public class Clocks extends Controller{
 		}
 		
 		//numero di colonne da visualizzare
-		Configuration conf = Configuration.getCurrentConfiguration();
+		//Configuration conf = Configuration.getCurrentConfiguration();
+		ConfGeneral conf = ConfGeneral.getConfGeneral();
 		int minInOutColumn = conf.numberOfViewingCoupleColumn;
 		int numberOfInOut = Math.max(minInOutColumn,  PersonUtility.numberOfInOutInPersonDay(pd));
 		
@@ -150,7 +151,8 @@ public class Clocks extends Controller{
 		}
 		
 		//numero di colonne da visualizzare
-		Configuration conf = Configuration.getCurrentConfiguration();
+		//Configuration conf = Configuration.getCurrentConfiguration();
+		ConfGeneral conf = ConfGeneral.getConfGeneral();
 		int minInOutColumn = conf.numberOfViewingCoupleColumn;
 		int numberOfInOut = Math.max(minInOutColumn,  PersonUtility.numberOfInOutInPersonDay(pd));
 		

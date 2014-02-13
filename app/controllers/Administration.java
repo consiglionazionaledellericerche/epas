@@ -110,7 +110,7 @@ public class Administration extends Controller {
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void utilities(){
-		List<Person> pdList = Person.getActivePersons(new LocalDate());
+		List<Person> pdList = Person.getActivePersonsInDay(new LocalDate(), false);
 		render(pdList);
 	}
 	

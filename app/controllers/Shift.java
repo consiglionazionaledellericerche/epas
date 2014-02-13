@@ -303,7 +303,7 @@ public class Shift extends Controller{
 	public static void exportMonthAsPDF() {
 		int year = params.get("year", Integer.class);
 		int month = params.get("month", Integer.class);
-		Long groupType = params.get("type", Long.class);
+//		Long groupType = params.get("type", Long.class);
 		
 		Logger.debug("sono nella exportMonthAsPDF con year=%s e month=%s", year, month);
 		
@@ -379,7 +379,7 @@ public class Shift extends Controller{
 	public static void exportMonthCalAsPDF() {
 		int year = params.get("year", Integer.class);
 		int month = params.get("month", Integer.class);
-		Long groupType = params.get("type", Long.class);
+//		Long groupType = params.get("type", Long.class);
 		Logger.debug("sono nella exportMonthCalAsPDF con year=%s e month=%s", year, month);
 		
 		ArrayList<String> shiftTypes = new ArrayList<String>();
