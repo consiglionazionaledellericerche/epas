@@ -300,6 +300,19 @@ public class Mese {
 		this.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese = this.riposiCompensativiMinuti;
 	
 	}	
+	
+	/**
+	 * 
+	 * @param person
+	 * @param year
+	 * @param month
+	 * @return il valore di quanti minuti positivi sono stati fatti da quella persona in quel mese/anno
+	 */
+	public static Integer positiveResidualInMonth(Person person, int year, int month){
+		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, year, null);
+		Mese mese = c.getMese(year, month);
+		return mese.progressivoFinalePositivoMese;
+	}
 }
 
 

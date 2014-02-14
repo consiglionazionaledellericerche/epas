@@ -900,6 +900,7 @@ public class PersonUtility {
 			JPAPlugin.closeTx(false);
 		}
 		
+		/*
 		//(3)persistere in Initialization Time il resudo
 		int currentYear = new LocalDate().getYear();
 		int actualYear = year;	//2014
@@ -937,6 +938,7 @@ public class PersonUtility {
 			actualYear++;
 			
 		}
+		*/
 	}
 	
 	 /**
