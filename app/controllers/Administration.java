@@ -162,6 +162,11 @@ public class Administration extends Controller {
 		*/
 		
 	}
+	
+	public static void importStampings() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
+		FromMysqlToPostgres.importStamping();
+		renderText("E' fatta");
+	}
 
     
 }
