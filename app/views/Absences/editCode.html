@@ -4,7 +4,7 @@
 #{form @Absences.updateCode()}
 
 <input type="hidden" name="absenceTypeId" value="${abt.id}"/>
-<form class="form-horizontal">
+
 <fieldset>
 <legend>Modifica dati per codice di assenza: ${abt.code} (${abt.description})</legend>
 <table class="tablenoborder">
@@ -130,13 +130,23 @@
 	}
 }%</td>
 	</tr>
+	<tr>
+		<td>Inseribile anche nei week end e festivi:</td>
+		<td>%{	if(abt.consideredWeekEnd == false){
+}%		<p>Sì <input type="radio" name="weekEnd" value="true" /> 
+		No <input type="radio" name="weekEnd" value="false" checked="checked"/></p>
+%{
+	}else{
+}%		<p>Sì <input type="radio" name="weekEnd" value="true" checked="checked"/> 
+		No <input type="radio" name="weekEnd" value="false"/></p>
+%{
+	}
+	
+}%</td>
+	</tr>
 </table>
-
- 
-
-</p>
 </fieldset>
-</form>
+
 
 <fieldset>
 <legend>Da riempire in caso di gruppo valorizzato</legend>

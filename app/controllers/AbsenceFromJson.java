@@ -175,24 +175,28 @@ public class AbsenceFromJson extends Controller{
 		for(Absence abs : absList){
 			
 			Logger.debug("Trovato codice di assenza %s in data %s", abs.absenceType.code, abs.personDay.date);
+			
 			if((abs.absenceType.description.contains("ferie") || abs.absenceType.code.equals("94")) )
 			{
 				if(!listaFerie.contains(abs.absenceType.code))
 					listaFerie.add(abs.absenceType.code);
 				continue;
 			}
+			
 			if(abs.absenceType.description.contains("malattia") )
 			{ 
 				if(!listaMalattie.contains(abs.absenceType.code))
 					listaMalattie.add(abs.absenceType.code);
 				continue;
 			}
+			
 			if(abs.absenceType.description.contains("Riposo compensativo") )
 			{ 
 				if(!listaRiposiCompensativi.contains(abs.absenceType.code))
 					listaRiposiCompensativi.add(abs.absenceType.code);
 				continue;
 			}
+			
 			if(abs.absenceType.code.equals("92")) 
 			{
 				if(!listaMissioni.contains(abs.absenceType.code))
@@ -202,12 +206,11 @@ public class AbsenceFromJson extends Controller{
 			
 			if(!listaAltri.contains(abs.absenceType.code))
 				listaAltri.add(abs.absenceType.code);
-
-			
 		}		
 
 		Logger.debug("Liste di codici di assenza completate con dimensioni: %d %d %d %d %d", 
 				listaFerie.size(), listaMalattie.size(), listaMissioni.size(), listaRiposiCompensativi.size(), listaAltri.size());
+		
 		FrequentAbsenceCode frequentAbsenceCodeFerie = new FrequentAbsenceCode("","");
 		int ferieSize = listaFerie.size();
 		for(String abs : listaFerie){
@@ -219,7 +222,7 @@ public class AbsenceFromJson extends Controller{
 			ferieSize--;
 		}
 		if(listaFerie.size() > 0){
-			frequentAbsenceCodeFerie.description = "ferie";
+			frequentAbsenceCodeFerie.description = "Ferie";
 			if(frequentAbsenceCodeFerie.code.endsWith("-"))
 				frequentAbsenceCodeFerie.code = frequentAbsenceCodeFerie.code.substring(0, frequentAbsenceCodeFerie.code.length()-1);
 			frequentAbsenceCodeList.add(frequentAbsenceCodeFerie);
@@ -236,7 +239,7 @@ public class AbsenceFromJson extends Controller{
 			malattiaSize--;
 		}
 		if(listaMalattie.size() > 0){
-			frequentAbsenceCodeMalattia.description = "malattia";
+			frequentAbsenceCodeMalattia.description = "Malattia";
 			if(frequentAbsenceCodeMalattia.code.endsWith("-"))
 				frequentAbsenceCodeMalattia.code = frequentAbsenceCodeMalattia.code.substring(0, frequentAbsenceCodeMalattia.code.length()-1);
 			frequentAbsenceCodeList.add(frequentAbsenceCodeMalattia);
@@ -253,7 +256,7 @@ public class AbsenceFromJson extends Controller{
 			compensativiSize--;
 		}
 		if(listaRiposiCompensativi.size() > 0){
-			frequentAbsenceCodeCompensativi.description = "riposi compensativi";
+			frequentAbsenceCodeCompensativi.description = "Riposo compensativo";
 			if(frequentAbsenceCodeCompensativi.code.endsWith("-"))
 				frequentAbsenceCodeCompensativi.code = frequentAbsenceCodeCompensativi.code.substring(0, frequentAbsenceCodeCompensativi.code.length()-1);
 			
@@ -274,7 +277,7 @@ public class AbsenceFromJson extends Controller{
 			if(frequentAbsenceCodeMissione.code.endsWith("-"))
 				frequentAbsenceCodeMissione.code = frequentAbsenceCodeMissione.code.substring(0, frequentAbsenceCodeMissione.code.length()-1);
 
-			frequentAbsenceCodeMissione.description = "missione";
+			frequentAbsenceCodeMissione.description = "Missione";
 			frequentAbsenceCodeList.add(frequentAbsenceCodeMissione);
 		}
 
@@ -288,13 +291,15 @@ public class AbsenceFromJson extends Controller{
 
 			altriSize--;
 		}
-		if(listaAltri.size() > 0){
-			frequentAbsenceCodeAltri.description = "altri";
+		
+		/* Arianna */
+		/*if(listaAltri.size() > 0){
+			frequentAbsenceCodeAltri.description = "Assenza generica";
 			if(frequentAbsenceCodeAltri.code.endsWith("-"))
 				frequentAbsenceCodeAltri.code = frequentAbsenceCodeAltri.code.substring(0, frequentAbsenceCodeAltri.code.length()-1);
 
 			frequentAbsenceCodeList.add(frequentAbsenceCodeAltri);
-		}
+		}*/
 
 		renderJSON(frequentAbsenceCodeList);
 	}

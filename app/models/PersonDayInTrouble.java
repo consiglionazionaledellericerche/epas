@@ -30,7 +30,7 @@ public class PersonDayInTrouble extends Model
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="personday_id", nullable=false, updatable=false)
 	public PersonDay personDay;
-	
+
 	public PersonDayInTrouble(PersonDay pd, String cause)
 	{
 		this.personDay = pd;
@@ -38,7 +38,7 @@ public class PersonDayInTrouble extends Model
 		this.fixed = false;
 		this.emailSent = false;
 	}
-	
+
 	public static void insertPersonDayInTrouble(PersonDay pd, String cause)
 	{
 		if(pd.troubles==null || pd.troubles.size()==0)
@@ -59,6 +59,6 @@ public class PersonDayInTrouble extends Model
 			pd.troubles.get(0).save();
 			pd.save();
 		}
-		
+
 	}
 }

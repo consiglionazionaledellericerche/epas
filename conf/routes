@@ -22,7 +22,7 @@ POST	/utilities/{personId}/{year}/{month}	Administration.fixPersonSituation
 POST	/utilities/{year}						Administration.createOvertimeFile
 
 #Assenze
-#GET		/absences/{year}/{month}		Absences.absences
+#GET		/absences/{year}/{month}			Absences.absences
 
 #Assenze annuali
 GET		/yearlyAbsences/{personId}/{year}		YearlyAbsences.yearlyAbsences
@@ -98,6 +98,7 @@ GET		/insertVacationCode						VacationsAdmin.insertVacationCode
 POST	/insertVacationCode						VacationsAdmin.save
 GET		/manageVacationCode						VacationsAdmin.discard
 GET		/vacationsAdmin/edit/{vacationCodeId}	VacationsAdmin.edit
+POST	/vacationsAdmin/edit					VacationsAdmin.update
 
 
 # Gestione password
@@ -178,7 +179,9 @@ POST	/uploadSituation/						UploadSituation.uploadSituation
 
 #Gestione stampa cartellino amministratore
 GET		/printTags/listPersonForPrintTags/{year}/{month}		PrintTags.listPersonForPrintTags
-POST	/printTags/showTag/{personId}			PrintTags.showTag
+POST	/printTags/showTag/{personId}				PrintTags.showTag
+GET		/printTags/absenceInPeriod/{personSelected}/{year}/{month}	Absences.absenceInPeriod
+
 
 #Gestione stampa cartellino dipendente
 GET     /printTags/{personId}/{year}/{month}	PrintTags.showPersonTag
@@ -195,6 +198,7 @@ GET 	/reperibility/{type}/personList															Reperibility.personList
 GET		/reperibility/{type}/find/{<(19|20)\d\d>yearFrom}/{<(0[1-9]|1[012])>monthFrom}/{<(0[1-9]|[12][0-9]|3[01])>dayFrom}/{<(19|20)\d\d>yearTo}/{<(0[1-9]|1[012])>monthTo}/{<(0[1-9]|[12][0-9]|3[01])>dayTo}	Reperibility.find
 
 PUT		/reperibility/{type}/update/{year}/{month}												Reperibility.update
+PUT		/reperibility/{type}/changePeriods														Reperibility.changePeriods	
 
 GET 	/reperibility/{type}/exportYearAsPDF/{<(19|20)\d\d>year}								Reperibility.exportYearAsPDF
 GET 	/reperibility/{type}/exportMonthAsPDF/{<(19|20)\d\d>year}/{<(0[1-9]|1[012])>month}		Reperibility.exportMonthAsPDF
