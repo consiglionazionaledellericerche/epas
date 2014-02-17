@@ -1316,13 +1316,29 @@ public class Absences extends Controller{
 			String dataFine = params.get("dataFine");
 			LocalDate dateFrom = new LocalDate(dataInizio);
 			LocalDate dateTo = new LocalDate(dataFine);
-			
+			List<Absence> missioni = new ArrayList<Absence>();
+			List<Absence> ferie = new ArrayList<Absence>();
+			List<Absence> riposiCompensativi = new ArrayList<Absence>();
+			List<Absence> altreAssenze = new ArrayList<Absence>();
 			Person person = Person.findById(personSelected);
 			List<Absence> absenceList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
-					"and abs.personDay.date between ? and ? ", person, dateFrom, dateTo).fetch();
-			Logger.debug("La lista di assenze di %s %s per il periodo richiesto contiene %d elementi", person.name, person.surname, 
-					absenceList.size());
-			render(person, absenceList, personList, year, month, personSelected, dateFrom, dateTo);
+					"and abs.personDay.date between ? and ? and abs.absenceType.justifiedTimeAtWork = ?", person, dateFrom, dateTo, JustifiedTimeAtWork.AllDay).fetch();
+//			Logger.debug("La lista di assenze di %s %s per il periodo richiesto contiene %d elementi", person.name, person.surname, 
+//					absenceList.size());
+			for(Absence abs : absenceList){
+				if(abs.absenceType.code.equals("92")){
+					missioni.add(abs);
+				}
+				else if(abs.absenceType.code.equals("31") || abs.absenceType.code.equals("32") || abs.absenceType.code.equals("94")){
+					ferie.add(abs);
+				}
+				else if(abs.absenceType.code.equals("91")){
+					riposiCompensativi.add(abs);
+				}
+				else
+					altreAssenze.add(abs);
+			}
+			render(person, absenceList, personList, year, month, personSelected, dateFrom, dateTo, missioni, ferie, riposiCompensativi, altreAssenze);
 		}
 	}
 	
