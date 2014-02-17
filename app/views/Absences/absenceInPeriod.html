@@ -61,4 +61,39 @@
 		
 		</table>
 </fieldset>
+
+<fieldset>
+	<legend>Totali giorni d'assenza</legend>
+		<table>
+		<tr>
+			<th>Codice</th>
+			<th>Numero giorni</th>
+			
+		</tr>
+		#{if ferie.size() > 0}
+		<tr>
+			<td>Ferie</td>
+			<td>${ferie.size()}</td>
+		</tr>
+		#{/if}
+		#{if missioni.size() > 0}
+		<tr>
+			<td>Missioni</td>
+			<td>${missioni.size()}</td>
+		</tr>
+		#{/if}
+		#{if riposiCompensativi.size() > 0}
+		<tr>
+			<td>Riposi Compensativi</td>
+			<td>${riposiCompensativi.size()}</td>
+		</tr>
+		#{/if}
+		#{if altreAssenze.size() > 0}
+		<tr>
+			<td>Altre assenze</td>
+			<td>${altreAssenze.size()}</td>
+		</tr>
+		#{/if}
+		</table>
+</fieldset>
 #{/if}
