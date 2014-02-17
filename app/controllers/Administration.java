@@ -126,7 +126,7 @@ public class Administration extends Controller {
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void fixPersonSituation(Long personId, int year, int month){
 		
-		PersonUtility.fixPersonSituation(personId, year, month);
+		PersonUtility.fixPersonSituation(personId, year, month, Security.getPerson());
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
@@ -137,27 +137,18 @@ public class Administration extends Controller {
 	}
 	
 	
-//	public static void updateCauseInTrouble()
-//	{
-//		List<PersonDayInTrouble> tList = PersonDayInTrouble.findAll();
-//		for(PersonDayInTrouble t : tList)
-//		{
-//			if(t.personDay.isFixedTimeAtWork())
-//			{
-//				t.cause = "timbratura disaccoppiata persona fixed";
-//				t.save();
-//			}
-//		}
-//	}
-
 	public static void buildYaml()
 	{
 		//general
-		ExportToYaml.buildAbsences("/test/dataTest/general/absences.yml");
+		ExportToYaml.buildAbsenceTypesAndQualifications("conf/absenceTypesAndQualifications.yml");
 		
-		ExportToYaml.buildCompetenceCodes("test/dataTest/general/competenceCodes.yml");
+		ExportToYaml.buildCompetenceCodes("conf/competenceCodes.yml");
+		
+		ExportToYaml.buildVacationCodes("conf/vacationCodes.yml");
+		
 		
 		//person
+		/*
 		Person person = Person.findById(146l);
 		ExportToYaml.buildPerson(person, "test/dataTest/persons/lucchesi.yml");
 		
@@ -168,6 +159,7 @@ public class Administration extends Controller {
 		//test vacations
 		ExportToYaml.buildYearlyAbsences(person, 2012, "test/dataTest/absences/lucchesiAbsences2012.yml");
 		ExportToYaml.buildYearlyAbsences(person, 2013, "test/dataTest/absences/lucchesiAbsences2013.yml");
+		*/
 		
 	}
 

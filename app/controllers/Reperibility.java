@@ -5,6 +5,7 @@ package controllers;
 
 import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
+import it.cnr.iit.epas.JsonReperibilityChangePeriodsBinder;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -394,6 +395,154 @@ public class Reperibility extends Controller {
 			}
 		}
 
+	}
+	
+	/**
+	 * @author arianna
+	 * Scambia due periodi di reperibilità di due persone reperibili diverse
+	 * 
+	 * Per provarlo è possibile effettuare una chiamata JSON come questa:
+	 * 	$  curl -H "Content-Type: application/json" -X PUT \
+	 * 			-d '[ {"mail_req" : "ruberti@iit.cnr.it", "mail_sub" : "lorenzo.rossi@iit.cnr.it", "req_start_date" : "2012-12-10", "req_end_date" : "2012-12-10", "sub_start_date" : "2012-12-10", "sub_end_date" : "2012-12-10"} ]' \ 
+	 * 			http://scorpio.nic.it:9001/reperibility/1/changePeriods
+	 * 
+	 * @param body
+	 */
+	public static void changePeriods(Long type, @As(binder=JsonReperibilityChangePeriodsBinder.class) ReperibilityPeriods body) {
+
+		Logger.debug("update: Received reperebilityPeriods %s", body);	
+		if (body == null) {
+			badRequest();	
+		}
+		
+		PersonReperibilityType reperibilityType = PersonReperibilityType.findById(type);	
+		if (reperibilityType == null) {
+			throw new IllegalArgumentException(String.format("ReperibilityType id = %s doesn't exist", type));			
+		}
+		
+		LocalDate reqStartDay = null;
+		LocalDate subStartDay = null;
+		LocalDate reqEndDay = null;
+		LocalDate subEndDay = null;
+		Person requestor = null;
+		Person substitute = null;
+		
+		Boolean repChanged = true;
+		
+		for (ReperibilityPeriod reperibilityPeriod : body.periods) {
+			
+			reperibilityPeriod.reperibilityType = reperibilityType;
+			
+			if (reperibilityPeriod.start.isAfter(reperibilityPeriod.end)) {
+				throw new IllegalArgumentException(
+					String.format("ReperibilityPeriod person.id = %s has start date %s after end date %s", reperibilityPeriod.person.id, reperibilityPeriod.start, reperibilityPeriod.end));
+			}
+			
+			//La persona deve essere tra i reperibili 
+			if (reperibilityPeriod.person.reperibility == null) {
+				throw new IllegalArgumentException(
+					String.format("Person %s is not a reperible person", reperibilityPeriod.person));
+			}
+			
+			// intervallo del richiedente
+			if (repChanged) {
+				reqStartDay = reperibilityPeriod.start;
+				reqEndDay = reperibilityPeriod.end;
+				requestor = reperibilityPeriod.person;
+				
+				Logger.debug("RICHIEDENTE: requestor=%s inizio=%s, fine=%s", requestor, reqStartDay, reqEndDay);
+				repChanged = !repChanged;
+			} else {
+				subStartDay = reperibilityPeriod.start;
+				subEndDay = reperibilityPeriod.end;
+				substitute = reperibilityPeriod.person;
+				
+				Logger.debug("SOSTITUTO: substitute=%s inizio=%s, fine=%s", substitute, subStartDay, subEndDay);
+				
+				int day = 1000*60*60*24;
+				
+				// controlla che il numero dei giorni da scambiare coincida
+				if (((reqEndDay.toDate().getTime() - reqStartDay.toDate().getTime())/day) != ((subEndDay.toDate().getTime() - subStartDay.toDate().getTime())/day)) {
+					throw new IllegalArgumentException(
+							String.format("Different number of days betrween two intervals!"));
+				}
+				
+				Logger.debug("Aggiorno i giorni del richiedente");
+				
+				// Esegue il cambio sui giorni del richiedente
+				while (reqStartDay.isBefore(reqEndDay.plusDays(1))) {
+					
+					//Se il sostituto è in ferie questo giorno non può essere reperibile 
+					if (Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date = ? and pd.person = ?", reqStartDay, substitute).fetch().size() > 0) {
+						throw new IllegalArgumentException(
+							String.format("ReperibilityPeriod substitute.id %s is not compatible with a Absence in the same day %s", substitute, reqStartDay));
+					}
+
+					// cambia le reperibilità mettendo quelle del sostituto al posto di quelle del richiedente
+					PersonReperibilityDay personReperibilityDay = 
+						PersonReperibilityDay.find("reperibilityType = ? AND date = ?", reperibilityPeriod.reperibilityType, reqStartDay).first();
+					
+					Logger.debug("trovato personReperibilityDay.personReperibility.person=%s e reqStartDay=%s", personReperibilityDay.personReperibility.person, reqStartDay);
+					
+					if ((personReperibilityDay.personReperibility.person != requestor) || (personReperibilityDay == null)) {
+						throw new IllegalArgumentException(
+								String.format("Impossible to offer the day %s because is not associated to the right requestor %s", reqStartDay, requestor));
+					} else {
+						Logger.debug("Aggiorno il personReperibilityDay = %s", personReperibilityDay);
+						PersonReperibility substituteRep = PersonReperibility.find("SELECT pr FROM PersonReperibility pr WHERE pr.person = ? AND pr.personReperibilityType = ?", substitute, reperibilityPeriod.reperibilityType).first();
+						personReperibilityDay.personReperibility = substituteRep;
+						
+						Logger.debug("aggiornato con personReperibilityDay.personReperibility.person=%s e reqStartDay=%s", personReperibilityDay.personReperibility.person, personReperibilityDay.date);
+					}
+					
+					personReperibilityDay.save();
+					
+					Logger.info("Aggiornato PersonReperibilityDay del richiedente= %s", personReperibilityDay);
+					
+					reqStartDay = reqStartDay.plusDays(1);
+				}
+				
+				Logger.debug("Aggiorno i giorni del sostituto");
+				
+				// Esegue il cambio sui giorni del sostituto
+				while (subStartDay.isBefore(subEndDay.plusDays(1))) {
+					Logger.debug("subStartDay=%s", subStartDay);
+					
+					//Se la persona è in ferie questo giorno non può essere reperibile 
+					if (Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date = ? and pd.person = ?", subStartDay, requestor).fetch().size() > 0) {
+						throw new IllegalArgumentException(
+							String.format("ReperibilityPeriod requestor.id %s is not compatible with a Absence in the same day %s", requestor, subStartDay));
+					}
+
+					// cambia la persona mettendo il richiedente ai giorni di reperibilità del sostituto
+					PersonReperibilityDay personReperibilityDay = 
+						PersonReperibilityDay.find("reperibilityType = ? AND date = ?", reperibilityPeriod.reperibilityType, subStartDay).first();
+					
+					Logger.debug("trovato personReperibilityDay.personReperibility.person=%s e subStartDay=%s", personReperibilityDay.personReperibility.person, subStartDay);
+					
+					if ((personReperibilityDay.personReperibility.person != substitute) || (personReperibilityDay == null)) {
+						throw new IllegalArgumentException(
+								String.format("Impossible to take the day %s because is not associated to the substitute given %s", subStartDay, substitute));
+					} else {
+						Logger.debug("Aggiorno il personReperibilityDay = %s", personReperibilityDay);
+						PersonReperibility requestorRep = PersonReperibility.find("SELECT pr FROM PersonReperibility pr WHERE pr.person=? AND pr.personReperibilityType=?", requestor, reperibilityPeriod.reperibilityType).first();
+						personReperibilityDay.personReperibility = requestorRep;
+						
+						Logger.debug("cambiato con personReperibilityDay.personReperibility.person=%s e subStartDay=%s", personReperibilityDay.personReperibility.person, subStartDay);
+					}
+					
+					personReperibilityDay.save();
+					
+					Logger.info("Aggiornato PersonReperibilityDay = %s", personReperibilityDay);
+					
+					subStartDay = subStartDay.plusDays(1);
+				}
+				
+				repChanged = !repChanged;
+			}
+		}
+		
+		Logger.info("Periodo cambiato");
 	}
 	
 	

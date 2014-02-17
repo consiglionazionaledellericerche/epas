@@ -112,6 +112,16 @@ public class AbsenceType extends Model {
 			return description.substring(0, 60)+"...";
 		return description;
 	}
+	
+	//TODO eliminare e configurare yaml
+	public void setValidFrom(String date){
+		this.validFrom = new LocalDate(date);
+	}
+	
+	//TODO eliminare e configurare yaml
+	public void setValidTo(String date){
+		this.validTo = new LocalDate(date);
+	}
 		
 	public List<Qualification> getQualification(AbsenceType abt){
 		List<Qualification> listQualification = Qualification.find("Select q from Qualification q where q.absenceType = ?", abt).fetch();

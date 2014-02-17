@@ -37,10 +37,10 @@ public class Office extends Model{
     public String name;
      
     @Column(name = "address")
-    public String address;
+    public String address = "";
     
     @Column(name = "code")
-    public Integer code;
+    public Integer code = 0;
     
     @OneToMany(mappedBy="office", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
     public List<RemoteOffice> remoteOffices = new ArrayList<RemoteOffice>();

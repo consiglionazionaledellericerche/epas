@@ -1,7 +1,7 @@
-#{form @VacationsAdmin.save()}
+#{form @VacationsAdmin.update()}
 <fieldset>
   <legend>Modifica dati per tipo ferie: ${vc.description}</legend>
-
+	<input type="hidden" name="vacationCodeId" value="${vc.id}"/>
 
   
   <table class="tablenoborder">

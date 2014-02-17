@@ -14,6 +14,7 @@
 		<th>Descrizione</th>
 		<th>uso interno</th>
 		<th>uso multiplo</th>
+		<th>Usabile w.e. e festivi</th>
 		<th>inizio validità</th>
 		<th>fine validità</th>
 		<th>tempo di lavoro giustificato</th>
@@ -37,6 +38,7 @@
 		<td>${absenceCode.description}</td>
 		<td>${absenceCode.internalUse == true ? 'Sì' : 'No'}</td>
 		<td>${absenceCode.multipleUse == true ? 'Sì' : 'No'}</td>
+		<td>${absenceCode.consideredWeekEnd == true ? 'Sì' : 'No'}</td>
 		<td>${absenceCode.validFrom}</td>
 		<td>${absenceCode.validTo}</td>
 		<td>${absenceCode.justifiedTimeAtWork != null ? absenceCode.justifiedTimeAtWork.description : ''}</td>
