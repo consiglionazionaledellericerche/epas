@@ -29,7 +29,7 @@ public class TestJob extends Job{
 	public void doJob(){
 		
 
-		
+		Logger.info("Start Job checkDay");
 		Person person = Person.find("byUsername", "admin").first();	
 		PersonUtility.fixPersonSituation(-1l, 2013, 1, person);
 

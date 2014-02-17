@@ -1321,5 +1321,16 @@ public class Person extends Model {
 		}
 		return null;
 	}
+	
+	/**
+	 * 
+	 * @param year
+	 * @param month
+	 * @return le ore di residuo positivo fatte nel mese/anno da this. Metodo usato nel template showCompetences
+	 */
+	public Integer getPositiveResidualInMonth(int year, int month){
+		
+		return Mese.positiveResidualInMonth(this, year, month)/60; 
+	}
 
 }
