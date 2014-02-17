@@ -4,7 +4,7 @@
 *		/										module:secure
 
 #Import Shibboleth routes
-#*      /                						module:shibboleth
+*      /                						module:shibboleth
 
 # Home page
 GET     /                                       Application.index
