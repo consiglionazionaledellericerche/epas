@@ -688,7 +688,6 @@ public class Absences extends Controller{
 	
 	/**
 	 * Gestisce una richiesta di inserimento codice 37 (utilizzo ferie anno precedente scadute)
-	 *  //TODO più giorni
 	 * @param person
 	 * @param dateFrom
 	 * @param dateTo

@@ -90,7 +90,7 @@ public class Overtimes extends Controller {
 		//OvertimesData personOvertimesData = new OvertimesData(personMonth.totaleResiduoAnnoCorrenteAFineMese(), personMonth.residuoDelMese(), personMonth.tempoDisponibilePerStraordinari());
 		//Logger.debug("Trovato totaleResiduoAnnoCorrenteAFineMese=%s, residuoDelMese()=%s, tempoDisponibilePerStraordinari()=%s", personMonth.totaleResiduoAnnoCorrenteAFineMese(), personMonth.residuoDelMese(), personMonth.tempoDisponibilePerStraordinari());
 		OvertimesData personOvertimesData = new OvertimesData(totaleResiduoAnnoCorrenteAFineMese, residuoDelMese, tempoDisponibilePerStraordinari);
-		Logger.debug("Trovato totaleResiduoAnnoCorrenteAFineMese=%s, residuoDelMese()=%s, tempoDisponibilePerStraordinari()=%s", totaleResiduoAnnoCorrenteAFineMese, residuoDelMese, tempoDisponibilePerStraordinari);
+		//Logger.debug("Trovato totaleResiduoAnnoCorrenteAFineMese=%s, residuoDelMese()=%s, tempoDisponibilePerStraordinari()=%s", totaleResiduoAnnoCorrenteAFineMese, residuoDelMese, tempoDisponibilePerStraordinari);
 
 		render(personOvertimesData);
 		
