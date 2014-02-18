@@ -1,9 +1,7 @@
 
 #{set title:personDay.person.surname + ' ' + personDay.person.name + ', matricola=' + personDay.person.number /}
 
-<h3> ${personDay.date}</h3>
-
-Inserire il codice di assenza per la persona
+<p class="lead"> Inserimento codice assenza in data ${personDay.date.toDateTime()}</p>
 
 #{form @Absences.insert(),  enctype:'multipart/form-data'}
 	
@@ -12,17 +10,16 @@ Inserire il codice di assenza per la persona
 	<input type="hidden" name="monthFrom" value="${personDay.date.monthOfYear}"/>
 	<input type="hidden" name="dayFrom" value="${personDay.date.dayOfMonth}"/>
 
-<table>
+<table class="table table-hover">
 	<tr>
-		<th>Codice da inserire</th>
-		<th>Codici</th>
-		<th>Fino a</th>
-		
+		<th class="span2">Nuovo codice</th>
+		<th class="span2">Elenco dei codici</th>
+		<th class="span2">Fino a</th>
 	</tr>
 	<tr>
 		<td>
-			<input name="absenceCode" class="span1" id="absenceCode" type="text" value="${absenceCode}" size="10" maxlength="10" />
-			<script type="text/javascript">
+		  <input name="absenceCode" class="span1"type="text" id="absenceCode"/>
+		  <script type="text/javascript">
    			function Change()
     		{
         		var assenzaFrequente = document.getElementById("assenzaFrequente");
@@ -38,33 +35,22 @@ Inserire il codice di assenza per la persona
 				absenceCode.value = tuttiCodici.value;
     		}
 			</script>
-		</td>
-		<td>
-		
+		</td>	
+		<td>		
 			#{select 'code', value: '', class:'span2', id:'assenzaFrequente', onclick:'Change();'}
-			<option value="">Codici più usati</option>
-			%{ 
-			for(absenceType in frequentAbsenceTypeList)
-			{
-			}%
-				#{option absenceType.code}${absenceType.code} ${absenceType.getShortDescription()}#{/option}
-			%{
-			}
-			}%
-			#{/select}	
-		
+			  <option value="">Codici più usati</option>
+			  #{list items: frequentAbsenceTypeList, as:'absenceType'} 
+	    	    #{option absenceType.code}${absenceType.code} ${absenceType.getShortDescription()}#{/option}
+			  #{/list}
+			#{/select}
 							
 			#{select 'code', value: '', class:'span2',id:'tuttiCodici', onclick:'Change2();'}
-			<option value="">Tutti i codici</option>
-			%{ 
-				for(absenceType in allCodes){
-			}%
-			#{option absenceType.code}${absenceType.code} ${absenceType.getShortDescription()}#{/option}
-			%{
-				}
-			}%
-			#{/select}		
-		</td>
+			  <option value="">Tutti i codici</option>
+			  #{list items: allCodes, as:'absenceType'}
+			    #{option absenceType.code}${absenceType.code} ${absenceType.getShortDescription()}#{/option}
+ 			  #{/list}
+ 			#{/select}		
+		</td>	
 		<td>
 			#{select 'annoFine', class:'span2',value:mainMenu.year, id:'annoFine'}
 				#{option 2011}2011#{/option}
@@ -122,21 +108,47 @@ Inserire il codice di assenza per la persona
 			#{/select}
 		</td>
 	</tr>
-</table>
-<p>Se si vuole inserire un'assenza per più giorni, selezionare dal menu a tendina qui sopra il giorno, il mese e l'anno fino a cui quel codice deve essere inserito</p>
+  </table>
+  
+<div class="accordion" id="accordionEditAbsence1" style="margin-top: 10px;">
+  <div class="accordion-group">
+    <div class="accordion-heading">
+      <a class="accordion-toggle" data-toggle="collapse" href="#collapseEditAbsence1">
+        Suggerimenti
+      </a>
+    </div>
+    <div id="collapseEditAbsence1" class="accordion-body collapse out">
+      <div class="accordion-inner">
+        <ul>
+          <li>Se si vuole inserire un'assenza per più giorni, selezionare dal menu a tendina qui sopra il giorno, il mese e l'anno fino a cui quel codice deve essere inserito</li>
+          <li><p class="text-info" style="margin-top: 5px;"><em>N.B. Non e' possibile inserire in uno stesso giorno due codici di assenza che giustificano tutto il giorno</em></p></li>
+          <li>Utilizzando il codice <em>FER</em> il software provvederà ad assegnare ferie e permessi fin quando disponibili nel seguente ordine di priorità: 
+		    <ul>
+		      <li>31 (recupero ferie anno precedente)</li>
+     	      <li>32 (ferie anno corrente)</li>
+     	      <li>94 (permesso)</li>
+		    </ul>
+		  </li>
+        </ul>
+				
+      </div>
+    </div>
+  </div>
+  <div class="accordion-group">
+    <div class="accordion-heading">
+      <a class="accordion-toggle" data-toggle="collapse" href="#collapseEditAbsence2">
+        Inserisci file allegato
+      </a>
+    </div>
+    <div id="collapseEditAbsence2" class="accordion-body collapse out">
+      <div class="accordion-inner">
+	     <p>Allega il file contenente la dichiarazione di assenza:<br>
+	       <input type="file" name="file">
+         </p> 	
+      </div>
+    </div>
+  </div>
+</div>  
 
-<!--	per adesso solo in modifica assenza
-<fieldset>
-	<legend>Buono mensa:</legend>
-	  	calcolato<input type="radio" name="buonoMensaCalcolato" value="true" checked="checked"/>
-	  	No <input type="radio" name="buonoMensaNo" value="true"/>
-	  	Sì <input type="radio" name="buonoMensaSi" value="true"/>
-</fieldset>
--->
-<p id="allegaFile">
-Allega il file contenente la dichiarazione di assenza:<br>
-<input type="file" name="file">
-</p>
-
-<input class="btn btn-primary" type="submit" id="inserisciAssenza" value="Inserisci"/>
+<input style="margin-left: 200px; margin-top: 10px; margin-bottom: 15px;" class="btn btn-primary" type="submit" id="inserisciAssenza" value="Inserisci"/>
 #{/form}

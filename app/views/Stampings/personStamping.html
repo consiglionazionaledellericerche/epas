@@ -60,7 +60,7 @@
 		<td class="assenza default-single">
 		  <a data-toggle="modal" data-backdrop="true" href="@{Absences.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" data-target="#myModal1">___</a>
 		  #{list items:dayRecap.absences, as:'absence'}
-		    <a data-toggle="modal" href="@{Absences.edit(absence.id)}" data-target="#myModal1">
+		    <a data-toggle="modal" href="@{Absences.edit(absence.id)}" data-target="#myModal3">
 			  ${absence.absenceType.code}
 			</a>
 		  #{/list}	
@@ -176,7 +176,21 @@
 <div id="myModal1" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3>Inserimento/modifica assenza</h3>
+    <h3>Inserimento assenza ${person.surname} ${person.name}</h3>
+  </div>
+  <div class="modal-body">
+    <p></p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+   <!--   <button class="btn btn-primary">Save changes</button>-->
+  </div>
+</div>
+
+<div id="myModal3" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabe3" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3>Modifica assenza ${person.surname} ${person.name}</h3>
   </div>
   <div class="modal-body">
     <p></p>
