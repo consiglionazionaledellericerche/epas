@@ -1,45 +1,20 @@
 #{extends 'main_admin_no_menu.html' /}
 #{set titolo: 'Grafici'/}
 
-<p class="lead">Seleziona anno e mese di cui ti interessa vedere il grafico</p>
-<form class="form-inline">
-#{select 'yearChart', value:session.get("yearSelected"), class:'span1', id:'year'}
-		#{option 2013}2013#{/option}
-		#{option 2014}2014#{/option}
-		#{option 2015}2015#{/option}
-	#{/select}
 	
-		
-	#{select 'monthChart', value:session.get("monthSelected"), class:'span2', id:'month'}
-	
-		#{option 0}Tutti i mesi#{/option}
-	
-		#{option 1}Gennaio#{/option}
-		#{option 2}Febbraio#{/option}
-		#{option 3}Marzo#{/option}
-		#{option 4}Aprile#{/option}
-		#{option 5}Maggio#{/option}
-		#{option 6}Giugno#{/option}
-		#{option 7}Luglio#{/option}
-		#{option 8}Agosto#{/option}
-		#{option 9}Settembre#{/option}
-		#{option 10}Ottobre#{/option}
-		#{option 11}Novembre#{/option}
-		#{option 12}Dicembre#{/option}
-	#{/select}
-	
-</form>
-
-
 <p class="lead">Seleziona il grafico che ti interessa visualizzare</p>
 
 <ul>
-	<li><a href=""></a></li>
-	<li><a href=""></a></li>
+	<li><a href="@{Charts.overtimeOnPositiveResidual()}">Straordinari su residuo positivo MENSILE</a></li>
+	<li><a href="@{Charts.overtimeOnPositiveResidualInYear(yearChart)}">Straordinari su residuo positivo ANNUALE</a></li>
 	<li><a href=""></a></li>
 	<li><a href=""></a></li>
 	<li><a href=""></a></li>
 </ul>
+
+
+
+
 
 <ul class="pager">
   <li><a href="/application/indexAdmin">Home</a></li>
