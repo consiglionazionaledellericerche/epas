@@ -639,6 +639,37 @@ public class PersonDay extends Model {
 	}
 	
 	/**
+	 * Stessa logica di populatePersonDay ma senza persistere i calcoli (usato per il giorno di oggi)
+	 */
+	public void queSeraSera()
+	{
+		//Strutture dati transienti necessarie al calcolo
+		if(personDayContract==null)
+		{
+			this.personDayContract = this.person.getContractFromHeap(date);
+			//Se la persona non ha un contratto attivo non si fanno calcoli per quel giorno, le timbrature vengono comunque mantenute
+			if(personDayContract==null)
+				return;
+		}
+		
+		if(previousPersonDayInMonth==null)
+		{
+			associatePreviousInMonth();
+		}
+		
+		if(previousPersonDayInMonth!=null && previousPersonDayInMonth.personDayContract==null)
+		{
+			this.previousPersonDayInMonth.personDayContract = this.person.getContractFromHeap(this.previousPersonDayInMonth.date);
+		}
+		
+		updateTimeAtWork();
+		updateDifference();
+		updateProgressive();
+		updateTicketAvailable();
+
+	}
+	
+	/**
 	 * Verifica che nel person day vi sia una situazione coerente di timbrature. Situazioni errate si verificano nei casi 
 	 *  (1) che vi sia almeno una timbratura non accoppiata logicamente con nessun'altra timbratura 
 	 * 	(2) che le persone not fixed non presentino ne' assenze AllDay ne' timbrature. 
