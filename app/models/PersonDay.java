@@ -578,13 +578,13 @@ public class PersonDay extends Model {
 	public void populatePersonDay()
 	{
 			
-		if(this.person.id == 45) Logger.debug("  *PopulatePersonDay date=%s", this.date);
+		//if(this.person.id == 45) Logger.info("  *PopulatePersonDay date=%s", this.date);
 		//controllo problemi strutturali del person day
 		if(this.date.isBefore(new LocalDate()))
 			this.checkForPersonDayInTrouble();
 
-		if(this.person.id == 45 && this.troubles.size()==0) Logger.debug("  *  Check Trouble                 NO");
-		if(this.person.id == 45 && this.troubles.size()==1) Logger.debug("  *  Check Trouble                 SI");
+		//if(this.person.id == 45 && this.troubles.size()==0) Logger.info("  *  Check Trouble                 NO");
+		//if(this.person.id == 45 && this.troubles.size()==1) Logger.info("  *  Check Trouble                 SI");
 		
 		//Strutture dati transienti necessarie al calcolo
 		if(personDayContract==null)
@@ -595,7 +595,7 @@ public class PersonDay extends Model {
 				return;
 		}
 		
-		if(this.person.id == 45) Logger.debug("  *  Associa contratto             contract=%s", this.personDayContract.id);
+		//if(this.person.id == 45) Logger.info("  *  Associa contratto             contract=%s", this.personDayContract.id);
 	
 		
 		if(previousPersonDayInMonth==null)
@@ -603,8 +603,8 @@ public class PersonDay extends Model {
 			associatePreviousInMonth();
 		}
 		
-		if(this.person.id == 45 && this.previousPersonDayInMonth!=null) Logger.debug("  *  Associa previous in month     previous=%s", this.previousPersonDayInMonth.date);
-		if(this.person.id == 45 && this.previousPersonDayInMonth==null) Logger.debug("  *  Associa previous in month     previous=null");
+		//if(this.person.id == 45 && this.previousPersonDayInMonth!=null) Logger.info("  *  Associa previous in month     previous=%s", this.previousPersonDayInMonth.date);
+		//if(this.person.id == 45 && this.previousPersonDayInMonth==null) Logger.info("  *  Associa previous in month     previous=null");
 		
 		
 		
@@ -617,24 +617,24 @@ public class PersonDay extends Model {
 		//controllo uscita notturna
 		this.checkExitStampNextDay();
 		
-		if(this.person.id == 45 && this.previousPersonDayInMonth!=null) Logger.debug("  *  After check midnight          previous=%s", this.previousPersonDayInMonth.date);
-		if(this.person.id == 45 && this.previousPersonDayInMonth==null) Logger.debug("  *  After check midnight          previous=null");
+		//if(this.person.id == 45 && this.previousPersonDayInMonth!=null) Logger.info("  *  After check midnight          previous=%s", this.previousPersonDayInMonth.date);
+		//if(this.person.id == 45 && this.previousPersonDayInMonth==null) Logger.info("  *  After check midnight          previous=null");
 		
 		
 		updateTimeAtWork();
 		
-		if(this.person.id == 45) Logger.debug("  *  Time at work                  %s", this.timeAtWork);
+		//if(this.person.id == 45) Logger.info("  *  Time at work                  %s", this.timeAtWork);
 		updateDifference();
-		if(this.person.id == 45) Logger.debug("  *  Difference                    %s", this.difference);
+		//if(this.person.id == 45) Logger.info("  *  Difference                    %s", this.difference);
 		updateProgressive();
-		if(this.person.id == 45) Logger.debug("  *  Progressive                   %s", this.progressive);
+		//if(this.person.id == 45) Logger.info("  *  Progressive                   %s", this.progressive);
 		updateTicketAvailable();
-		if(this.person.id == 45) Logger.debug("  *  Ticket                        %s", this.isTicketAvailable);
+		//if(this.person.id == 45) Logger.info("  *  Ticket                        %s", this.isTicketAvailable);
 		
 		//this.merge();
 		this.save();
 		
-		if(this.person.id == 45) Logger.debug("  **********************************************************************");
+		//if(this.person.id == 45) Logger.info("  **********************************************************************");
 		
 	}
 	
