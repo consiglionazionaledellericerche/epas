@@ -61,6 +61,10 @@ public class SwitchTemplate extends Controller{
 		
 		switch (menuItem) {
 		
+		case charts:
+			Charts.indexCharts();
+			break;
+		
 		case manageAttachments:
 			Absences.manageAttachmentsPerCode(year, month);
 			break;
