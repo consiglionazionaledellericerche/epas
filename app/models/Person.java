@@ -217,7 +217,7 @@ public class Person extends Model {
 	public List<PersonYear> personYears;
 
 	/**
-	 * relazione con la tabella di storico YearRecap
+	 * relazione con la tabella di storico YearRecap	//TODO db.evolutions remove, tenere solo PersonYear
 	 */
 	@NotAudited
 	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
@@ -617,7 +617,6 @@ public class Person extends Model {
 				
 				+ "and "
 				
-				
 				//contratto attivo nel periodo
 				+ "( "
 				//caso contratto non terminato
@@ -633,13 +632,12 @@ public class Person extends Model {
 				+ ") "
 				
 				//persona allowed
-				/*+"and p.office in :officeList "*/
+				+"and p.office in :officeList "
 				
 				//only technician
 				+"and p.qualification in :qualificationList "
 								
-				+ "order by p.surname, p.name", endPeriod, endPeriod, startPeriod, endPeriod, startPeriod).bind("qualificationList", qualificationRequested).fetch();
-		//+ "order by p.surname, p.name", endPeriod, endPeriod, startPeriod, endPeriod, startPeriod).bind("officeList", officeAllowed).bind("qualificationList", qualificationRequested).fetch();
+				+ "order by p.surname, p.name", endPeriod, endPeriod, startPeriod, endPeriod, startPeriod).bind("officeList", officeAllowed).bind("qualificationList", qualificationRequested).fetch();
 
 		return personList;
 	}
