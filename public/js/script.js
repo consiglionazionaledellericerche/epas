@@ -131,5 +131,3 @@ $('#textComments1').editable({
 
 
 
-
-
