@@ -1576,7 +1576,7 @@ public class FromMysqlToPostgres {
 					"Orario.Ora, Codici.id, Codici.Codice, Codici.Qualifiche " +
 					"FROM Orario " +
 					"LEFT JOIN Codici ON Orario.TipoGiorno=Codici.id " +
-					"LEFT JOIN Persone ON Orario.ID=Persone.ID" +
+					"LEFT JOIN Persone ON Orario.ID=Persone.ID " +
 					"WHERE Orario.Giorno >= '2013-01-01' " +
 					"and Persone.MatricolaBadge = " + p.badgeNumber + " ORDER BY Orario.Giorno");
 			ResultSet rs = stmtOrari.executeQuery();
@@ -1659,9 +1659,13 @@ public class FromMysqlToPostgres {
 					Logger.debug("Prima timbratura o assenza per %s", p.toString());
 
 					if(pd == null){
-						pd = new PersonDay(p,newData);
-						pd.create();
-						Logger.debug("Creato %s", pd.toString());
+						pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", p, newData).first();
+						if(pd == null){
+							pd = new PersonDay(p,newData);
+							pd.create();
+							Logger.debug("Creato %s", pd.toString());
+						}
+						
 					}
 
 					if(rs.getInt("TipoGiorno")==0){				
