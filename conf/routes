@@ -182,6 +182,10 @@ GET		/printTags/listPersonForPrintTags/{year}/{month}		PrintTags.listPersonForPr
 POST	/printTags/showTag/{personId}				PrintTags.showTag
 GET		/printTags/absenceInPeriod/{personSelected}/{year}/{month}	Absences.absenceInPeriod
 
+#Gestione grafici
+GET		/charts/indexCharts						Charts.indexCharts		
+GET		/charts/overtimeOnPositiveResidual		Charts.overtimeOnPositiveResidual
+
 
 #Gestione stampa cartellino dipendente
 GET     /printTags/{personId}/{year}/{month}	PrintTags.showPersonTag
