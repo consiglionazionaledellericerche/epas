@@ -31,9 +31,9 @@ public class Security extends Secure.Security {
 	public final static String UPLOAD_SITUATION = "uploadSituation";
 	public final static String INSERT_AND_UPDATE_OFFICES = "insertAndUpdateOffices";
 	
-	private final static String PERMISSION_CACHE_PREFIX = "permission.";
+	public final static String PERMISSION_CACHE_PREFIX = "permission.";
 		
-	private final static String CACHE_DURATION = "30mn";
+	public final static String CACHE_DURATION = "30mn";
 	
 	static boolean authenticate(String username, String password) {
 	    Logger.trace("Richiesta autenticazione di %s",username);
