@@ -59,10 +59,14 @@ public class ShibbolethSecurity extends controllers.shib.Security {
 	static void onAuthenticated() {
 		Logger.debug("Security: Security.onAuthenticated()");
 		
-		String email = session.get("email");
-	    Logger.debug("Trasformazione dell'utente shibboleth in utente locale, email = %s", email);
+		String eppn = session.get("eppn");
+	    Logger.debug("Trasformazione dell'utente shibboleth in utente locale, email = %s", eppn);
 	    
-		Person person = Person.find("SELECT p FROM Person p where email = ?", email).first();
+	    //FIXME: invece del campo email di ContactData andrebbe utilizzato solo campo email della persona
+	    //	meglio se ci fossero due campi email, l'email di istituto e l'email del CNR e fossero controllate
+	    //  entrambe
+		Person person = Person.find("SELECT p FROM Person p LEFT JOIN p.contactData cd where cd.email = ? OR p.email = ?", 
+				eppn, eppn).first();
 		
 		if(person != null){
 			Cache.set(person.username, person, Security.CACHE_DURATION);
@@ -75,7 +79,7 @@ public class ShibbolethSecurity extends controllers.shib.Security {
             Logger.info("Person %s successfully logged in", person.username);
             Logger.trace("Permission list for %s %s: %s", person.name, person.surname, person.permissions);
 		} else {
-			Logger.warn("Person with email %s successfully logged in Shibboleth but unknonw to ePAS", email);
+			Logger.warn("Person with email %s successfully logged in Shibboleth but unknonw to ePAS", eppn);
 		}
 		        
 	}
