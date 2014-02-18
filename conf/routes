@@ -4,7 +4,9 @@
 *		/										module:secure
 
 #Import Shibboleth routes
-#*      /                						module:shibboleth
+GET		/shibboleth/login                  shib.Shibboleth.login
+GET		/shibboleth/authenticate           shib.Shibboleth.authenticate
+GET		/shibboleth/logout                 shib.Shibboleth.logout
 
 # Home page
 GET     /                                       Application.index
