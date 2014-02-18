@@ -178,7 +178,7 @@ public class FromMysqlToPostgres {
 		Connection mysqlCon = FromMysqlToPostgres.getMysqlConnection();
 
 		String sqlVacationCode = "Select * from ferie";
-		
+
 		PreparedStatement stmtCode = mysqlCon.prepareStatement(sqlVacationCode);
 		ResultSet rsCode = stmtCode.executeQuery();
 		JPAPlugin.startTx(false);
@@ -189,7 +189,7 @@ public class FromMysqlToPostgres {
 			code.vacationDays = rsCode.getInt("giorni_ferie");
 			code.save();
 		}
-			
+
 		JPAPlugin.closeTx(false);
 		JPAPlugin.startTx(false);
 		String sql = "SELECT ID, Nome, Cognome, DataNascita, Telefono," +
@@ -229,7 +229,7 @@ public class FromMysqlToPostgres {
 
 			JPAPlugin.closeTx(false);
 
-//			FromMysqlToPostgres.createVacationType(oldIDPersona, person);	
+			//			FromMysqlToPostgres.createVacationType(oldIDPersona, person);	
 
 			FromMysqlToPostgres.createInitializationTime(oldIDPersona, person, anno);		
 
@@ -269,11 +269,11 @@ public class FromMysqlToPostgres {
 
 		FromMysqlToPostgres.addPermissiontoAll();
 		FromMysqlToPostgres.createAbsenceTypeToQualificationRelations();
-		
+
 		FromMysqlToPostgres.checkFixedWorkingTime();
 		JPAPlugin.closeTx(false);
 		Logger.info("Importazione terminata");
-		
+
 		//il fix conclusivo
 		Administration.fixPersonSituation(null, 2013, 1);
 		mysqlCon.close();
@@ -287,15 +287,15 @@ public class FromMysqlToPostgres {
 	public static void checkFixedWorkingTime() {
 		Logger.debug("Controllo delle persone con timbratura fissa");
 		List<Person> activePerson = Person.getActivePersons(new LocalDate(2013,1,1));
-		
+
 		for(Person p : activePerson){
 			Logger.debug("Analizzo %s %s", p.name, p.surname);
 			LocalDate date = new LocalDate().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue();
 			if(StampProfile.getCurrentStampProfile(p,date).fixedWorkingTime){
-				
+
 				while(date.isBefore(new LocalDate())){
 					if(!DateUtility.isHoliday(p, date)){
-						
+
 						PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", p, date).first();
 						if(pd == null){
 							pd = new PersonDay(p, date);
@@ -305,19 +305,19 @@ public class FromMysqlToPostgres {
 							pd.save();
 							Logger.debug("Persistito il tempo di lavoro = %d per %s %s in data %s", pd.timeAtWork, p.name, p.surname, date);
 						}
-						
+
 					}
-					
+
 					date = date.plusDays(1);
 				}
-				
+
 			}
 		}
 	}
-	
-	
 
-	
+
+
+
 	/**
 	 * metodo che assegna un inizio di contratto di default a quelle persone che dall'importazione non hanno ricevuto un beginContract
 	 */
@@ -592,7 +592,7 @@ public class FromMysqlToPostgres {
 	public static void createAbsenceTypeToQualificationRelations(){
 		Logger.debug("Aggiungo le qualfiche possibili agli AbsenceType");
 
-//		JPAPlugin.startTx(false);
+		//		JPAPlugin.startTx(false);
 
 		List<AbsenceType> listaAssenze = AbsenceType.findAll();
 		for(AbsenceType absenceType : listaAssenze){
@@ -624,7 +624,7 @@ public class FromMysqlToPostgres {
 				Logger.debug("Aggiunte tutte le qualifiche all'AbsenceCode %s", absenceType.code);
 			}
 		}		
-//		JPAPlugin.closeTx(false);
+		//		JPAPlugin.closeTx(false);
 	}
 
 	public static int importWorkingTimeTypes() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
@@ -778,7 +778,7 @@ public class FromMysqlToPostgres {
 				mysqlStartContract = new LocalDate(mysqlBegin);			//start contract
 			else
 				mysqlStartContract = new LocalDate(1970,1,1);
-			
+
 			LocalDate mysqlEndContract;									//end contract
 			if (mysqlEnd != null) 
 			{
@@ -787,7 +787,7 @@ public class FromMysqlToPostgres {
 			else{
 				mysqlEndContract = null;
 			}
-			
+
 
 			//postgres
 			if(previousContract==null)
@@ -851,8 +851,8 @@ public class FromMysqlToPostgres {
 			JPAPlugin.closeTx(false);
 			FromMysqlToPostgres.createVacationType(previousContract);
 		}
-		
-		
+
+
 	}
 
 
@@ -919,7 +919,7 @@ public class FromMysqlToPostgres {
 
 					pd = new PersonDay(person, newData);
 					pd.create();
-					
+
 					Logger.debug("Creato %s ", pd.toString());
 					//il caso di timbratura modificata/inserita dall'amministratore
 
@@ -1522,7 +1522,7 @@ public class FromMysqlToPostgres {
 		}
 		Logger.debug("Terminazione di PersonToCompetence per dare a ogni dipendente le proprie competenze attive");
 	}
-	
+
 	/**
 	 * Metodo che inizializza il codice attestati per ogni occorrenza della tabella AbsenceType
 	 * @throws InstantiationException
@@ -1532,37 +1532,180 @@ public class FromMysqlToPostgres {
 	 */
 	public static void importCodesAtt() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException
 	{
-            FromMysqlToPostgres.getMysqlConnection();
-            String attCodes = "select * from Codici";
+		FromMysqlToPostgres.getMysqlConnection();
+		String attCodes = "select * from Codici";
 
-            PreparedStatement stmtCode = mysqlCon.prepareStatement(attCodes);
-            ResultSet rsAttCodes = stmtCode.executeQuery();
-            while(rsAttCodes.next())
-            {
-                    String code = rsAttCodes.getString("Codice");
-                    if(code==null)
-                    {
-                            Logger.debug("Il codice e' null");
-                            continue;
-                    }
-                    String attCode = rsAttCodes.getString("Codice_att");
-                    Logger.debug("I codici sono %s - %s",code, attCode);
-                    AbsenceType abt = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", code.toString()).first();
-                    if(abt==null)
-                    {
-                            Logger.debug("Errore, il codice %s presente in mysql non esiste come AbsenceType", code);
-                            continue;
-                    }
-                    abt.certificateCode = attCode;
-                    abt.save();
-                    Logger.debug("Nuova associazione assenze per attestati %s | %s", code,attCode);
+		PreparedStatement stmtCode = mysqlCon.prepareStatement(attCodes);
+		ResultSet rsAttCodes = stmtCode.executeQuery();
+		while(rsAttCodes.next())
+		{
+			String code = rsAttCodes.getString("Codice");
+			if(code==null)
+			{
+				Logger.debug("Il codice e' null");
+				continue;
+			}
+			String attCode = rsAttCodes.getString("Codice_att");
+			Logger.debug("I codici sono %s - %s",code, attCode);
+			AbsenceType abt = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", code.toString()).first();
+			if(abt==null)
+			{
+				Logger.debug("Errore, il codice %s presente in mysql non esiste come AbsenceType", code);
+				continue;
+			}
+			abt.certificateCode = attCode;
+			abt.save();
+			Logger.debug("Nuova associazione assenze per attestati %s | %s", code,attCode);
 
-            }
+		}
 
-        }   	
+	}   	
+
+	public static void importStamping() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
+		String mySqldriver = "com.mysql.jdbc.Driver";
+		Connection mysqlCon = null;
+		Class.forName(mySqldriver).newInstance();
+		mysqlCon = DriverManager.getConnection(
+				Play.configuration.getProperty("db.old.url"),
+				Play.configuration.getProperty("db.old.user"),
+				Play.configuration.getProperty("db.old.password"));
+		
+		List<Person> personList = Person.find("Select p from Person p where p.username <>", "admin").fetch();
+		for(Person p : personList){
+			PreparedStatement stmtOrari = mysqlCon.prepareStatement("SELECT Orario.ID,Orario.Giorno,Orario.TipoGiorno,Orario.TipoTimbratura," + 	
+					"Orario.Ora, Codici.id, Codici.Codice, Codici.Qualifiche " +
+					"FROM Orario " +
+					"LEFT JOIN Codici ON Orario.TipoGiorno=Codici.id " +
+					"LEFT JOIN Persone ON Orario.ID=Persone.ID " +
+					"WHERE Orario.Giorno >= '2013-01-01' " +
+					"and Persone.MatricolaBadge = " + p.badgeNumber + " ORDER BY Orario.Giorno");
+			ResultSet rs = stmtOrari.executeQuery();
+			
+			PersonDay pd = null;
+			LocalDate data = null;
+			LocalDate newData = null;
+
+			
+			boolean countAdmin = false;
+			while(rs.next()){
+				Logger.debug("Il tipoGiorno è: %s ", rs.getInt("TipoGiorno"));
+				if(rs.getInt("TipoGiorno")==-1){
+					//Logger.debug("Rilevata timbratura modificata dall'amministratore il %s per %s %s", pd.date, pd.person.name, pd.person.surname);
+					countAdmin = true;
+					continue;
+
+				}
+				/**
+				 * controllo che la data prelevata sia diversa da null, poichè nel vecchio db esiste la possibilità di avere date del tipo 0000-00-00
+				 * in tal caso devo scartarle e continuare l'elaborazione
+				 */
+				if(rs.getDate("Giorno") == null){
+					Logger.warn("Impossibile importare la timbratura in quanto la data è nulla." +
+							"Timbratura e PersonDay non creati per %s", p.toString());
+					continue;
+				}
+				newData = new LocalDate(rs.getDate("Giorno"));
+
+				if(data != null) {
+
+					if(newData.isAfter(data)){		
+
+						Logger.debug("Nuovo giorno %s per %s, prima si fanno i calcoli sul personday poi si crea quello nuovo", newData, p.toString());
+						Logger.debug("Il progressivo del personday del giorno appena trascorso da cui partire per fare i calcoli è: %s", pd.progressive);
+						PersonDay pdOld = PersonDay.findById(pd.id);
+
+						pdOld.populatePersonDay();	
+						pdOld.merge();
+
+						Logger.debug("Il progressivo del personday del giorno appena trascorso assegnato a un nuovo personDay è: %s", pdOld.progressive);
+
+						pd = new PersonDay(p, newData);
+						pd.create();
+						
+						Logger.debug("Creato %s ", pd.toString());
+						//il caso di timbratura modificata/inserita dall'amministratore
+
+						if(rs.getInt("TipoGiorno")==0){
+
+							createStamping(pd, rs.getLong("TipoTimbratura"), rs.getBytes("Ora"), countAdmin);
+							countAdmin = false;
+						}
+						else{
+							createAbsence(pd, rs.getString("Codice"));
+						}
+
+					}
+					if(newData.isEqual(data)){					
+						/**
+						 * si tratta di timbratura
+						 */		
+
+						if(rs.getInt("TipoGiorno")==0){					
+							Logger.debug("Altra timbratura per %s nel giorno %s", p.toString(), newData);
+							createStamping(pd, rs.getLong("TipoTimbratura"), rs.getBytes("Ora"), countAdmin);
+							countAdmin = false;
+						}
+						/**
+						 * si tratta di assenza
+						 */
+						else{
+							Logger.debug("Assenza verosimilmente oraria per %s nel giorno %s", p.toString(), newData);					
+							createAbsence(pd, rs.getString("codice"));
+						}
+					}
+				}
+				else {
+
+					Logger.debug("Prima timbratura o assenza per %s", p.toString());
+
+					if(pd == null){
+						pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", p, newData).first();
+						if(pd == null){
+							pd = new PersonDay(p,newData);
+							pd.create();
+							Logger.debug("Creato %s", pd.toString());
+						}
+						
+					}
+
+					if(rs.getInt("TipoGiorno")==0){				
+						createStamping(pd, rs.getLong("TipoTimbratura"), rs.getBytes("Ora"), countAdmin); 
+						countAdmin = false;
+					}
+					/**
+					 * si tratta di assenza
+					 */
+					else{										
+						createAbsence(pd, rs.getString("codice"));
+					}	
+				}
+
+				if(rs.isLast()){
+					Logger.info("Creazione dell'ultimo person day per %s", p.toString());
+					/**
+					 * in questo caso la data del "giro successivo" è nulla poichè siamo all'ultima riga del ciclo. Quindi bisogna fare 
+					 * i calcoli del personDay relativi a questo ultimo giorno (quello con date = data).
+					 */
+					pd.merge();
+					pd.populatePersonDay();
+
+					Logger.debug("Il progressivo al termine del resultset è: %s e il differenziale è: %s", pd.progressive, pd.difference);
+					Logger.info("Creato %s", pd);
+				}
+
+				data = newData;		
+				countAdmin = false;
+
+			}
+			
+		}
+		
+		
+		
+	}
 
 
-	
-	
+
+
 }
 
