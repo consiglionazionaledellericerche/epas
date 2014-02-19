@@ -89,7 +89,6 @@ public class PersonStampingDayRecap {
 		this.setWorkingTime(this.wttd.workingTime);
 		this.setMealTicketTime(this.wttd.mealTicketTime);
 		this.setBreakTicketTime(this.wttd.breakTicketTime);
-		//Configuration conf = Configuration.getConfiguration(pd.date);
 		ConfGeneral conf = ConfGeneral.getConfGeneral();
 		this.setTimeMealFrom(conf.mealTimeStartHour, conf.mealTimeStartMinute);
 		this.setTimeMealTo(conf.mealTimeEndHour, conf.mealTimeEndMinute);
@@ -128,43 +127,10 @@ public class PersonStampingDayRecap {
 		//----------------------------------------  not fixed:  worktime, difference, progressive for today-------------------------------
 		else if(this.today)
 		{
-			int previousProgressive;
-			PersonDay previousPersonDay = pd.previousPersonDay(); 
-			if(previousPersonDay == null)
-				previousProgressive = 0;
-			else
-				previousProgressive = previousPersonDay.progressive;
-			int workingTime = this.person.getWorkingTimeType(pd.date).getWorkingTimeTypeDayFromDayOfWeek(pd.date.getDayOfWeek()).workingTime;
-			int temporaryWorkTime = pd.getCalculatedTimeAtWork();
-			this.setWorkTime( temporaryWorkTime );
-			if(this.holiday)
-			{
-				this.setDifference( 0 );
-				this.setProgressive( previousProgressive );
-			}
-			else
-			{
-				if(pd.absences.size() == 0)
-				{
-					int dif = 0;
-					if(workingTime > temporaryWorkTime)
-					{
-						dif = - (workingTime - temporaryWorkTime);
-					}
-					else
-					{
-						dif = temporaryWorkTime - workingTime;
-					}
-					this.setDifference( dif );
-
-					this.setProgressive( previousProgressive + dif);
-				}
-				else if(pd.absences.size()!=0)
-				{
-					this.setDifference( pd.difference );
-					this.setProgressive(pd.difference + previousProgressive);	
-				}
-			}
+			pd.queSeraSera();
+			this.setWorkTime(pd.timeAtWork);
+			this.setDifference( pd.difference );
+			this.setProgressive(pd.progressive);
 		}
 		//---------------------------------------- worktime, difference, progressive for future ----------------------------------------
 		if(this.future)
