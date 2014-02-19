@@ -40,9 +40,7 @@ public class Charts extends Controller{
 		meseList.add(new Month(10,"Ottobre"));
 		meseList.add(new Month(11,"Novembre"));
 		meseList.add(new Month(12,"Dicembre"));
-		/**
-		 * TODO: per adesso, per prova, anno e mese sono statici, a regime dovranno essere passati come parametro al controller
-		 */
+	
 		if(params.get("yearChart") == null || params.get("monthChart") == null){
 			Logger.debug("Params year: %s", params.get("yearChart", Integer.class));
 			Logger.debug("Chiamato metodo con anno e mese nulli");
@@ -134,29 +132,26 @@ public class Charts extends Controller{
 		List<Absence> altre = new ArrayList<Absence>();
 		year = params.get("yearChart", Integer.class);
 		Logger.debug("Anno preso dai params: %d", year);
-		List<Absence> yearlyAbsences = Absence.find("Select abs from Absence abs where abs.personDay.date between ? and ?", 
-				new LocalDate(year,1,1), new LocalDate(year,1,1).monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue()).fetch();
-		Logger.debug("Totale assenze %d: %d", year, yearlyAbsences.size());
-		for(Absence abs : yearlyAbsences){
-			if(abs.absenceType.code.equals("92"))
-				missioni.add(abs);
-			else if(abs.absenceType.code.equals("91"))
-				riposiCompensativi.add(abs);
-			else if(abs.absenceType.code.equals("111"))
-				malattia.add(abs);
-			else
-				altre.add(abs);
-		}
-		int missioniSize = missioni.size();
-		int riposiCompensativiSize = riposiCompensativi.size();
-		int malattiaSize = malattia.size();
-		int altreSize = altre.size();
-		Logger.debug("Missioni size: %d", missioni.size());
-		Logger.debug("RiposiCompensativi size: %d", riposiCompensativi.size());
-		Logger.debug("Malattia size: %d", malattia.size());
-		Logger.debug("Altre size: %d", altre.size());
+
+		Long missioniSize = Absence.find("Select count(abs) from Absence abs where abs.personDay.date between ? and ? and abs.absenceType.code = ?", 
+				new LocalDate(year,1,1), new LocalDate(year,1,1).monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue(), "92").first();
+		Long riposiCompensativiSize = Absence.find("Select count(abs) from Absence abs where abs.personDay.date between ? and ? and abs.absenceType.code = ?", 
+				new LocalDate(year,1,1), new LocalDate(year,1,1).monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue(), "91").first();
+		Long malattiaSize = Absence.find("Select count(abs) from Absence abs where abs.personDay.date between ? and ? and abs.absenceType.code = ?", 
+				new LocalDate(year,1,1), new LocalDate(year,1,1).monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue(), "111").first();
+		Long altreSize = Absence.find("Select count(abs) from Absence abs where abs.personDay.date between ? and ? and abs.absenceType.code not in(?,?,?)", 
+				new LocalDate(year,1,1), new LocalDate(year,1,1).monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue(), "92","91","111").first();
+
+		//int missioniSize = missioni.size();
+		//int riposiCompensativiSize = riposiCompensativi.size();
+		//int malattiaSize = malattia.size();
+		//int altreSize = altre.size();
+		Logger.debug("Missioni size: %d", missioniSize);
+		Logger.debug("RiposiCompensativi size: %d", riposiCompensativiSize);
+		Logger.debug("Malattia size: %d", malattiaSize);
+		Logger.debug("Altre size: %d", altreSize);
 		
-		render(annoList, missioniSize, riposiCompensativiSize, malattiaSize, altreSize, yearlyAbsences);
+		render(annoList, missioniSize, riposiCompensativiSize, malattiaSize, altreSize);
 		
 	}
 
