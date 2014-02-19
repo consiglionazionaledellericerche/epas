@@ -7,7 +7,7 @@
 		%{
 			for(anno in annoList){
 		}%
-			#{option anno.id}${anno.anno}#{/option}
+			#{option anno.anno}${anno.anno}#{/option}
 			%{
 				}
 			}%
@@ -31,7 +31,7 @@
 
 #{if yearChart != 0 && monthChart != 0 }
 <div id="myfirstchart" style="height: 450px;">
-<p>Ore straordinario su ore positive per persona a &{'views.tags.display.date.month.' +month} ${year}</p>
+
 </div>
 
  	#{set 'moreScripts'}
