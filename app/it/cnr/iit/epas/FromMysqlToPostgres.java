@@ -1224,8 +1224,10 @@ public class FromMysqlToPostgres {
 			PersonMonth pm = PersonMonth.build(person, year, month);
 			pm.save();
 			if(month.equals(12)){
-				PersonYear py = PersonYear.build(person, year);
-				py.save();
+				//TODO Questa era la vecchia creazione di person year, riscriverla utilizzando la nuova modellazione
+				//Il person month non serve più
+				//PersonYear py = PersonYear.build(person, year);
+				//py.save();
 			}
 
 		}
@@ -1363,7 +1365,7 @@ public class FromMysqlToPostgres {
 				pm = new PersonMonth(pd.person, pd.date.getYear(), pd.date.getMonthOfYear());
 
 			}
-			pm.prendiRiposoCompensativo(pd.date);
+			//pm.prendiRiposoCompensativo(pd.date);	//TODO prima controllava se poteva prenderlo, in realtà è una decisione storica quindi non si controlla più niente
 			pm.save();
 			Logger.debug("Assegnato riposo compensativo e salvato person month per %s %s", pd.person.name, pd.person.surname);
 			Logger.debug("%s %s: il valore dei riposi compensativi è: %s per anno corrente e %s per anno passato", 
@@ -1466,7 +1468,8 @@ public class FromMysqlToPostgres {
 								person, rs.getInt("anno"), rs.getInt("mese")).first();
 						if(pm == null)
 							pm = new PersonMonth(person, rs.getInt("anno"), rs.getInt("mese"));
-						pm.assegnaStraordinari(comp.valueApproved);
+						//pm.assegnaStraordinari(comp.valueApproved);
+						pm.straordinari = comp.valueApproved * 60; //TODO utilizzare eventualmente il nuovo algoritmo
 						pm.save();
 					}
 

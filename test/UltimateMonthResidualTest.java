@@ -3,6 +3,9 @@ import junit.framework.Assert;
 
 import org.joda.time.LocalDate;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -15,37 +18,57 @@ import models.PersonMonth;
  * @author dario
  *
  */
-@Slf4j
 public class UltimateMonthResidualTest {
 
+	private final static Logger log = LoggerFactory.getLogger(UltimateMonthResidualTest.class);
+	
 	private static final class PersonMonthUltimate extends PersonMonth {
 
-		@Getter @Setter
+
 		private int personLevel = 2;
 
-		@Getter @Setter
 		private PersonMonthUltimate mesePrecedente = null;
 
-		@Getter @Setter
 		private int residuoAnnoPrecedente = 0;
 
-		@Getter @Setter
 		public int residuoDelMeseInPositivo;
 		
-		@Getter @Setter
+
 		public int residuoDelMeseInNegativo;
 		
 		public int recuperiOreDaAnnoPrecedente;
 		public int riposoCompensativiDaAnnoPrecedente;
 		public int riposiCompensativiDaAnnoCorrente;
 		
-		@Getter
 		public int straordinari;
 
 		public InitializationTime initializationTime;
 		
 		public PersonMonthUltimate(int year, int month) {
 			super(new Person(),year,month);
+		}
+
+	
+		public void setMesePrecedente(PersonMonthUltimate mesePrecedente) {
+			this.mesePrecedente = mesePrecedente;
+		}
+
+
+		public void setResiduoAnnoPrecedente(int residuoAnnoPrecedente) {
+			this.residuoAnnoPrecedente = residuoAnnoPrecedente;
+		}
+
+
+		public void setResiduoDelMeseInPositivo(int residuoDelMeseInPositivo) {
+			this.residuoDelMeseInPositivo = residuoDelMeseInPositivo;
+		}
+
+		public void setResiduoDelMeseInNegativo(int residuoDelMeseInNegativo) {
+			this.residuoDelMeseInNegativo = residuoDelMeseInNegativo;
+		}
+
+		public int getStraordinari() {
+			return straordinari;
 		}
 
 		public boolean possibileUtilizzareResiduoAnnoPrecedente() {
