@@ -116,7 +116,7 @@ public class YearRecap extends Model{
 	 * @return il riepilogo annuale, se non è presente nello storage viene 
 	 * 	restituito un riepilogo annuale vuoto
 	 */
-	public static YearRecap byPersonAndYear(
+	private static YearRecap byPersonAndYear(
 			@NotNull Person person, 
 			@Min(1970) short year
 			) {

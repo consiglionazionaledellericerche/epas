@@ -1,0 +1,99 @@
+#{extends 'main_admin_no_menu.html' /}
+#{set titolo: 'Assenze in periodo'/}
+
+
+<ul class="nav nav-tabs">
+  <li><a href="@{PrintTags.listPersonForPrintTags(year, month)}#">Stampa cartellino</a></li>
+  <li class="active"><a href="@{Absences.absenceInPeriod(0)}#">Assenze in periodo</a></li>
+</ul>
+#{form @Absences.absenceInPeriod()}
+<input type="hidden" name="year" value="${year}"/>
+<input type="hidden" name="month" value="${month}"/>
+<table class="tablenoborder">
+<tr>
+<td><strong>Dipendente</strong></td>
+<td>#{select 'personSelected', value:personList.get(0), id:'person'}
+			#{option}Scegli una persona#{/option}
+			
+		%{
+			for(person in personList){
+		}%
+			#{option person.id}${person.surname + ' ' + person.name}#{/option}
+			%{
+				}
+			}%
+		
+#{/select}
+</td>
+</tr>
+<tr>
+<td><strong>Da:</strong></td>
+<td><input class="span2" type="text" name="dataInizio" id="datepicker1" data-date-format="yyyy-mm-dd"/></td>
+</tr>
+<tr>
+<td><strong>A:</strong></td>
+<td><input class="span2" type="text" name="dataFine" id="datepicker2" data-date-format="yyyy-mm-dd"/></td>
+</tr>
+<tr>
+<td></td>
+<td><input class="btn btn-primary span1" type="submit" value="Ok"/></td>
+</tr>
+</table>
+#{/form}
+
+#{if personSelected != null && personSelected > 0 }
+<fieldset>
+	<legend>Assenze di ${person.name} ${person.surname} nel periodo ${dateFrom} - ${dateTo}</legend>
+		<table>
+		<tr>
+			<th>Giorno</th>
+			<th>Assenza</th>
+			<th>Descrizione</th>
+		</tr>
+		
+			#{list items:absenceList, as:'absence'}
+			<tr>
+				<td>${absence.personDay.date}</td>
+				<td>${absence.absenceType.code}</td>
+				<td>${absence.absenceType.description}</td>
+			</tr>				
+			#{/list}
+		
+		</table>
+</fieldset>
+
+<fieldset>
+	<legend>Totali giorni d'assenza</legend>
+		<table>
+		<tr>
+			<th>Codice</th>
+			<th>Numero giorni</th>
+			
+		</tr>
+		#{if ferie.size() > 0}
+		<tr>
+			<td>Ferie</td>
+			<td>${ferie.size()}</td>
+		</tr>
+		#{/if}
+		#{if missioni.size() > 0}
+		<tr>
+			<td>Missioni</td>
+			<td>${missioni.size()}</td>
+		</tr>
+		#{/if}
+		#{if riposiCompensativi.size() > 0}
+		<tr>
+			<td>Riposi Compensativi</td>
+			<td>${riposiCompensativi.size()}</td>
+		</tr>
+		#{/if}
+		#{if altreAssenze.size() > 0}
+		<tr>
+			<td>Altre assenze</td>
+			<td>${altreAssenze.size()}</td>
+		</tr>
+		#{/if}
+		</table>
+</fieldset>
+#{/if}

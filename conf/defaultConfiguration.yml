@@ -3,9 +3,9 @@ Configuration(defaultConfiguration):
     initUseProgram: 2012-07-30
     beginDate: 2010-01-01
     endDate: 2099-12-31
-    instituteName: IIT
+    instituteName: NOME-DA-DEFINIRE
     emailToContact:
-    seatCode: 223400
+    seatCode: 0
     urlToPresence: https://attestati.rm.cnr.it/attestati/
     userToPresence:
     passwordToPresence:

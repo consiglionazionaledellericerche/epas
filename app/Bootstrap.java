@@ -1,6 +1,7 @@
 import it.cnr.iit.epas.FromMysqlToPostgres;
 import models.AbsenceType;
 import models.CompetenceCode;
+import models.ConfGeneral;
 import models.Configuration;
 import models.Office;
 import models.Permission;
@@ -30,51 +31,19 @@ import play.test.Fixtures;
 public class Bootstrap extends Job {
 	
 	public void doJob() {
-//		if (ShiftType.count() == 0) {
-		//			Fixtures.loadModels("shiftTypes.yml");
-		//			Logger.info("Creati i tipi di turno");
-		//		}
-		//		
-		//		if (ShiftTimeTable.count() == 0) {
-		//			Fixtures.loadModels("shiftTimeTables.yml");
-		//			Logger.info("Create le fasce di orario dei vari turni");
-		//		}
 
 		try
 		{
-
-			if(Office.count() == 0){
-				Fixtures.loadModels("");
-				Logger.info("Creato ufficio di default");
+			if(Qualification.count() == 0){
+				Fixtures.loadModels("absenceTypesAndQualifications.yml");
+				Logger.info("Create qualifiche e codici di assenza");
 			}
-
-
-
 			if (Permission.count() <= 1) {
 
 				Fixtures.loadModels("permissions.yml");
 				Logger.info("Creati i permessi predefiniti e creato un utente amministratore con associati questi permessi");
 			}
-			
-			/*
-			if(AbsenceType.count() == 0)
-			{
-				Fixtures.loadModels("absenceTypes.yml");
-				Logger.info("Creata la struttura dati dei tipi assenza predefiniti");
-			}
-			
-			if (Qualification.count() == 0)	{
-				Fixtures.loadModels("qualifications.yml");
-				Logger.info("Create le qualifiche predefinite");
-			}
-			*/
-			
-			if(AbsenceType.count() == 0)
-			{
-				Fixtures.loadModels("absenceTypesAndQualifications.yml");
-				Logger.info("Creata la struttura dati dei tipi assenza predefiniti e delle qualifiche");
-			}
-			
+
 			if(CompetenceCode.count() == 0)
 			{
 				Fixtures.loadModels("competenceCodes.yml");
@@ -105,6 +74,23 @@ public class Bootstrap extends Job {
 			if(Configuration.count() == 0){
 				Fixtures.loadModels("defaultConfiguration.yml");
 				Logger.info("Creata la configurazione iniziale per il programma");
+			}
+			
+			if(Office.count() == 0){
+				//Configuration conf = (Configuration)Configuration.findAll().get(0);
+				ConfGeneral conf = ConfGeneral.getConfGeneral();
+				Office office = new Office();
+				office.code = conf.seatCode;
+				office.name = conf.instituteName;
+				office.save();
+				Logger.info("Creato ufficio di default con nome %s e codice %s", conf.instituteName, conf.seatCode);
+			}
+			
+			Person admin = Person.find("byUsername", "admin").first();
+			if(admin!=null && admin.office==null){
+				admin.office = (Office)Office.findAll().get(0);
+				admin.save();
+				
 			}
 			
 			

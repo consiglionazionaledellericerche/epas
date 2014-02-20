@@ -66,7 +66,6 @@ public class Mese {
 		//Gennaio
 		if(mesePrecedente==null)
 		{
-			
 			this.mesePrecedente = null;
 			this.tempoInizializzazione = tempoInizializzazione;
 			this.monteOreAnnoPassato = tempoInizializzazione;
@@ -80,8 +79,6 @@ public class Mese {
 				this.progressivoFinalePositivoMese = this.progressivoFinalePositivoMese + this.tempoInizializzazione;
 				this.monteOreAnnoPassato = 0;
 			}
-			
-
 		}
 		
 		//Febbraio / Marzo
@@ -302,7 +299,7 @@ public class Mese {
 		this.progressivoFinalePositivoMese = this.progressivoFinalePositivoMese - this.riposiCompensativiMinuti;
 		this.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese = this.riposiCompensativiMinuti;
 	
-	}
+	}	
 	
 	/**
 	 * 
@@ -316,7 +313,6 @@ public class Mese {
 		Mese mese = c.getMese(year, month);
 		return mese.progressivoFinalePositivoMese;
 	}
-	
 }
 
 

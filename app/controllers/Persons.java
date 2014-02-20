@@ -228,36 +228,55 @@ public class Persons extends Controller {
 		List<WorkingTimeType> wttList = WorkingTimeType.findAll();
 		render(person, wttList);
 	}
-	
-//	@Check(Security.INSERT_AND_UPDATE_PERSON)
-//	public static void updateVacation(){
-//		Long personId = params.get("personId", Long.class);		
-//		
-//		Person person = Person.findById(personId);
-//		Contract contract = person.getCurrentContract();
-//		LocalDate begin = new LocalDate(params.get("dataInizio", Date.class));
-//		LocalDate end = new LocalDate(params.get("dataFine", Date.class));
-//		if(begin == null || end == null){
-//			flash.error("Le date devono essere entrambe valorizzate");
-//			Application.indexAdmin();
-//		}
-//		if(begin.isAfter(end)){
-//			flash.error("La data di fine del piano ferie non può essere precedente alla data di inizio dello stesso");
-//			Application.indexAdmin();
-//		}
-//		person.vacationPeriod.delete();
-//		person.save();
-//		VacationCode code = VacationCode.find("Select code from VacationCode code where code.description = ?", params.get("code")).first();
-//		VacationPeriod period = new VacationPeriod();
-//		period.beginFrom = begin;
-//		period.endTo = end;
-//		period.person = person;
-//		period.vacationCode = code;
-//		period.save();
-//		flash.success("Aggiornato il piano ferie per %s %s", person.name, person.surname);
-//		Application.indexAdmin();
-//	}
 
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void setWorkingTime(Long personId){
+		Person person = Person.findById(personId);
+		List<WorkingTimeType> wttList = WorkingTimeType.findAll();
+		render(person,wttList);
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void saveWorkingTime(){
+		Long personId = params.get("personId", Long.class);
+		if(params.get("description") == null || params.get("description").equals("")){
+			flash.error("Selezionare un orario di lavoro!!");
+			render("@save");
+		}
+		PersonWorkingTimeType nuovoPwtt = new PersonWorkingTimeType();
+		Person person = Person.findById(personId);
+		Date date = null;
+		LocalDate dataInizio = null;
+		if(!params.get("dataInizio").equals("")){
+			date = new LocalDate(params.get("dataInizio")).toDate();
+			dataInizio = new LocalDate(date);
+		}
+		else{
+			flash.error("La data di inizio dell'orario di lavoro deve essere valorizzata!!!");
+			Persons.list();
+		}
+		
+		Date dateEnd = null;
+		LocalDate dataFine = null;
+		if(!params.get("dataFine").equals("")){
+			dateEnd = new LocalDate(params.get("dataFine")).toDate();
+			dataFine = new LocalDate(dateEnd);
+		}
+		else{
+			dataFine = null;
+		}
+		
+		nuovoPwtt.person = person;
+		nuovoPwtt.workingTimeType = WorkingTimeType.find("byDescription", params.get("description")).first();
+		nuovoPwtt.beginDate = dataInizio;		
+		nuovoPwtt.endDate = dataFine;
+		nuovoPwtt.save();
+		person.save();
+		flash.success("Salvato nuovo orario di lavoro per %s %s", person.name, person.surname);
+		Application.indexAdmin();
+	}
+	
+	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void updateWorkingTime(){
 		if(params.get("description") == null || params.get("description").equals("")){
@@ -304,15 +323,11 @@ public class Persons extends Controller {
 
 	@Check(Security.VIEW_PERSON_LIST)
 	public static void list(){
-		Person person = Security.getPerson();
-		List<Person> personList = null;
-		//TODO da qui questi controlli vanno tolti
-		if(!person.office.remoteOffices.isEmpty()){
-			personList = Person.find("Select p from Person p where p.name <> ? and p.name <> ? order by p.surname", "Admin", "epas").fetch();
-		}
-		else{
-			personList = Person.find("SELECT p FROM Person p where p.office = ? ORDER BY p.surname, p.othersSurnames, p.name", person.office).fetch();
-		}
+		Person personLogged = Security.getPerson();
+
+		LocalDate startEra = new LocalDate(1900,1,1);
+		LocalDate endEra = new LocalDate(9999,1,1);
+		List<Person> personList = Person.getActivePersonsSpeedyInPeriod(startEra, endEra, personLogged, false);
 		
 		//Logger.debug("La lista delle persone: %s", personList.toString());
 		LocalDate date = new LocalDate();
@@ -328,42 +343,10 @@ public class Persons extends Controller {
 		Location location = new Location();
 		ContactData contactData = new ContactData();
 		InitializationTime initializationTime = new InitializationTime();
-		List<Office> officeList = null;
 		Person personLogged = Security.getPerson();
-		if(!personLogged.office.remoteOffices.isEmpty()){
-			officeList = Office.find("Select office from Office office").fetch();
-		}
-		else{
-			officeList = RemoteOffice.find("Select office from RemoteOffice office where office.joiningDate is not null").fetch();
-		}
-		
-		if(officeList == null || officeList.size() == 0){
-			Office office = new Office();
-			office.address = "Via Moruzzi 1, Pisa";
-			office.name = "IIT";
-			office.code = 1000;
-			
-			office.save();
-			officeList.add(office);
-			RemoteOffice remote = new RemoteOffice();
-			remote.address = "via le mani dal naso 12";
-			remote.code = 2000;
-			remote.joiningDate = new LocalDate();
-			remote.name = "asd";
-			remote.office = office;
-			remote.save();
-			officeList.add(remote);
-			
-			
-		}
-		else{
-			List<Office> office = Office.find("Select office from Office office where office.office is null").fetch();
-			Logger.debug("Lista office: %s", office.get(0).name);
-//			List<RemoteOffice> remote = RemoteOffice.findAll();
-//			Logger.debug("Lista remote: %s", remote.toString());
-		}
-		
-//		RemoteOffice remoteOffice = new RemoteOffice();
+		List<Office> officeList = personLogged.getOfficeAllowed();
+		List<Office> office = Office.find("Select office from Office office where office.office is null").fetch();
+		Logger.debug("Lista office: %s", office.get(0).name);
 		render(person, contract, location, contactData, initializationTime, officeList/*, remoteOffice*/);
 	}
 	
@@ -395,6 +378,15 @@ public class Persons extends Controller {
 		person.qualification = qual;
 		Codec codec = new Codec();
 		person.password = codec.hexMD5("epas");
+		
+		Office office = Office.findById(new Long(params.get("person.office", Integer.class)));
+		if(office != null)
+			person.office = office;
+		else{
+			Logger.debug("L'ufficio che si tenta di inserire per %s %s è nullo. Non inserisco niente", person.name, person.surname);
+			flash.error("L'ufficio di appartenenza non può essere nullo.");
+			render("@list");
+		}
 		person.save();
 		
 		/**
@@ -417,6 +409,7 @@ public class Persons extends Controller {
 //			 * TODO: query sul db per vedere se esiste già una sede distaccata con quel nome, così da non fare assegnamenti multipli con lo stesso nome
 //			 */
 //		}
+		
 		
 		Logger.debug("saving location, deparment = %s", location.department);
 		location.department = params.get("department");
@@ -577,14 +570,14 @@ public class Persons extends Controller {
 				initTime.residualMinutesPastYear = params.get("minutesPastYear", Integer.class);
 			initTime.save();
 		}
-		else{
-			initTime = new InitializationTime();
-			if(params.get("minutesPastYear") != null)
-				initTime.residualMinutesPastYear = params.get("minutesPastYear", Integer.class);
-			if(params.get("minutesCurrentYear") != null)
-				initTime.residualMinutesCurrentYear = params.get("minutesCurrentYear", Integer.class);
-			initTime.save();
-		}
+//		else{
+//			initTime = new InitializationTime();
+//			if(params.get("minutesPastYear") != null)
+//				initTime.residualMinutesPastYear = params.get("minutesPastYear", Integer.class);
+//			if(params.get("minutesCurrentYear") != null)
+//				initTime.residualMinutesCurrentYear = params.get("minutesCurrentYear", Integer.class);
+//			initTime.save();
+//		}
 		if(person.number != null && ! person.number.equals(params.get("number", Integer.class)))
 			person.number = params.get("number", Integer.class);
 		//Logger.debug("Qualifica: %d", params.get("person.qualification", Integer.class));
@@ -732,10 +725,13 @@ public class Persons extends Controller {
 	@Check(Security.DELETE_PERSON)
 	public static void deletePerson(Long personId){
 		Person person = Person.findById(personId);
-		
+		//person.contactData.delete();
+		//person.location.delete();
+		//person.personShift.delete();
+		//person.reperibility.delete();
+		//person.save();
 		person.delete();
 		flash.success("La persona %s %s e' stata terminata.", person.surname, person.name);
-		//Application.indexAdmin();
 		
 		render("@Stampings.redirectToIndex");
 

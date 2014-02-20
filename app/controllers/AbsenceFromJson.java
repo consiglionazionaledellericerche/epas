@@ -53,7 +53,7 @@ public class AbsenceFromJson extends Controller{
 			dateTo = new LocalDate(yearTo, monthTo, dayTo);
 		else
 			dateTo = new LocalDate(params.get("yearTo", Integer.class), params.get("monthTo", Integer.class), params.get("dayTo", Integer.class));
-			
+
 		String meseInizio = "";
 		String meseFine = "";
 		String giornoInizio = "";
@@ -80,8 +80,42 @@ public class AbsenceFromJson extends Controller{
 						continue;
 					}
 					if(abs.absenceType.code.equals(previousAbsence.absenceType.code)){
-						endCurrentPeriod = abs.personDay.date;
-						continue;
+						if(!endCurrentPeriod.isEqual(abs.personDay.date.minusDays(1))){
+							personPeriodAbsenceCode = new PersonPeriodAbsenceCode();
+							personPeriodAbsenceCode.name = person.name;
+							personPeriodAbsenceCode.surname = person.surname;
+							personPeriodAbsenceCode.code = previousAbsence.absenceType.code;
+							if(startCurrentPeriod.getMonthOfYear() < 10)
+								meseInizio = new String("0"+startCurrentPeriod.getMonthOfYear());
+							else
+								meseInizio = new String(""+startCurrentPeriod.getMonthOfYear());
+							if(endCurrentPeriod.getMonthOfYear() < 10)
+								meseFine = new String("0"+endCurrentPeriod.getMonthOfYear());
+							else
+								meseFine = new String(""+endCurrentPeriod.getMonthOfYear());
+
+							if(startCurrentPeriod.getDayOfMonth() < 10)
+								giornoInizio = new String("0"+startCurrentPeriod.getDayOfMonth());
+							else
+								giornoInizio = new String(""+startCurrentPeriod.getDayOfMonth());
+							if(endCurrentPeriod.getDayOfMonth() < 10)
+								giornoFine = new String("0"+endCurrentPeriod.getDayOfMonth());
+							else
+								giornoFine = new String(""+endCurrentPeriod.getDayOfMonth());
+							personPeriodAbsenceCode.dateFrom = new String(startCurrentPeriod.getYear()+"-"+meseInizio+"-"+giornoInizio);
+							personPeriodAbsenceCode.dateTo = new String(endCurrentPeriod.getYear()+"-"+meseFine+"-"+giornoFine);
+							personsToRender.add(personPeriodAbsenceCode);
+
+							previousAbsence = abs;
+							startCurrentPeriod = abs.personDay.date;
+							endCurrentPeriod = abs.personDay.date;
+							continue;
+
+						}
+						else{
+							endCurrentPeriod = abs.personDay.date;
+							continue;
+						}
 					}
 					else
 					{
@@ -90,7 +124,7 @@ public class AbsenceFromJson extends Controller{
 						personPeriodAbsenceCode.name = person.name;
 						personPeriodAbsenceCode.surname = person.surname;
 						personPeriodAbsenceCode.code = previousAbsence.absenceType.code;
-						
+
 						if(startCurrentPeriod.getMonthOfYear() < 10)
 							meseInizio = new String("0"+startCurrentPeriod.getMonthOfYear());
 						else
@@ -99,7 +133,7 @@ public class AbsenceFromJson extends Controller{
 							meseFine = new String("0"+endCurrentPeriod.getMonthOfYear());
 						else
 							meseFine = new String(""+endCurrentPeriod.getMonthOfYear());
-						
+
 						if(startCurrentPeriod.getDayOfMonth() < 10)
 							giornoInizio = new String("0"+startCurrentPeriod.getDayOfMonth());
 						else
@@ -133,7 +167,7 @@ public class AbsenceFromJson extends Controller{
 						meseFine = new String("0"+endCurrentPeriod.getMonthOfYear());
 					else
 						meseFine = new String(""+endCurrentPeriod.getMonthOfYear());
-					
+
 					if(startCurrentPeriod.getDayOfMonth() < 10)
 						giornoInizio = new String("0"+startCurrentPeriod.getDayOfMonth());
 					else
@@ -149,9 +183,9 @@ public class AbsenceFromJson extends Controller{
 			}
 			else{
 				Logger.error("Richiesta persona non presente in anagrafica. Possibile sia un non strutturato.");
-				
+
 			}
-			
+
 		}
 
 		renderJSON(personsToRender);
@@ -162,9 +196,9 @@ public class AbsenceFromJson extends Controller{
 	 * metodo esposto per ritornare la lista dei codici di assenza presi 
 	 */
 	public static void frequentAbsence(Integer yearFrom, Integer monthFrom, Integer dayFrom, Integer yearTo, Integer monthTo, Integer dayTo){
-//		Logger.debug("Received PeriodAbsenceCode %s", body);
-//		if(body == null)
-//			badRequest();
+		//		Logger.debug("Received PeriodAbsenceCode %s", body);
+		//		if(body == null)
+		//			badRequest();
 		List<FrequentAbsenceCode> frequentAbsenceCodeList = new ArrayList<FrequentAbsenceCode>();
 		List<String> listaFerie = new ArrayList<String>();
 		List<String> listaMalattie = new ArrayList<String>();
@@ -176,44 +210,44 @@ public class AbsenceFromJson extends Controller{
 		List<Absence> absList = Absence.find("Select abs from Absence abs, PersonDay pd " +
 				"where abs.personDay = pd and abs.absenceType.absenceTypeGroup is null and pd.date between ? and ?", dateFrom, dateTo).fetch();
 		for(Absence abs : absList){
-			
+
 			Logger.debug("Trovato codice di assenza %s in data %s", abs.absenceType.code, abs.personDay.date);
-			
+
 			if((abs.absenceType.description.contains("ferie") || abs.absenceType.code.equals("94")) )
 			{
 				if(!listaFerie.contains(abs.absenceType.code))
 					listaFerie.add(abs.absenceType.code);
 				continue;
 			}
-			
+
 			if(abs.absenceType.description.contains("malattia") )
 			{ 
 				if(!listaMalattie.contains(abs.absenceType.code))
 					listaMalattie.add(abs.absenceType.code);
 				continue;
 			}
-			
+
 			if(abs.absenceType.description.contains("Riposo compensativo") )
 			{ 
 				if(!listaRiposiCompensativi.contains(abs.absenceType.code))
 					listaRiposiCompensativi.add(abs.absenceType.code);
 				continue;
 			}
-			
+
 			if(abs.absenceType.code.equals("92")) 
 			{
 				if(!listaMissioni.contains(abs.absenceType.code))
 					listaMissioni.add(abs.absenceType.code);
 				continue;
 			}
-			
+
 			if(!listaAltri.contains(abs.absenceType.code))
 				listaAltri.add(abs.absenceType.code);
 		}		
 
 		Logger.debug("Liste di codici di assenza completate con dimensioni: %d %d %d %d %d", 
 				listaFerie.size(), listaMalattie.size(), listaMissioni.size(), listaRiposiCompensativi.size(), listaAltri.size());
-		
+
 		FrequentAbsenceCode frequentAbsenceCodeFerie = new FrequentAbsenceCode("","");
 		int ferieSize = listaFerie.size();
 		for(String abs : listaFerie){
@@ -262,7 +296,7 @@ public class AbsenceFromJson extends Controller{
 			frequentAbsenceCodeCompensativi.description = "Riposo compensativo";
 			if(frequentAbsenceCodeCompensativi.code.endsWith("-"))
 				frequentAbsenceCodeCompensativi.code = frequentAbsenceCodeCompensativi.code.substring(0, frequentAbsenceCodeCompensativi.code.length()-1);
-			
+
 			frequentAbsenceCodeList.add(frequentAbsenceCodeCompensativi);
 		}
 
@@ -294,7 +328,7 @@ public class AbsenceFromJson extends Controller{
 
 			altriSize--;
 		}
-		
+
 		/* Arianna */
 		/*if(listaAltri.size() > 0){
 			frequentAbsenceCodeAltri.description = "Assenza generica";

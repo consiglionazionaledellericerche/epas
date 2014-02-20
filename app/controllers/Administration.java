@@ -110,7 +110,7 @@ public class Administration extends Controller {
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void utilities(){
-		List<Person> pdList = Person.getActivePersons(new LocalDate());
+		List<Person> pdList = Person.getActivePersonsInDay(new LocalDate(), false);
 		render(pdList);
 	}
 	
@@ -161,6 +161,11 @@ public class Administration extends Controller {
 		ExportToYaml.buildYearlyAbsences(person, 2013, "test/dataTest/absences/lucchesiAbsences2013.yml");
 		*/
 		
+	}
+	
+	public static void importStampings() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
+		FromMysqlToPostgres.importStamping();
+		renderText("E' fatta");
 	}
 
     

@@ -133,7 +133,7 @@ public class NavigationMenu extends Controller {
 		if(controller.equals("WorkingTimes.manageWorkingTime"))
 			return "manageWorkingTime";
 		
-		if(controller.equals("Configurations.list") || controller.equals("Configurations.insertConfig") || controller.equals("Configurations.edit"))
+		if(controller.equals("Configurations.showConfGeneral") || controller.equals("Configurations.showConfYear"))
 			return "confParameters";
 			
 		if(controller.equals("Stampings.mealTicketSituation"))

@@ -60,7 +60,7 @@
 		<td class="assenza default-single">
 		  <a data-toggle="modal" data-backdrop="true" href="@{Absences.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" data-target="#myModal1">___</a>
 		  #{list items:dayRecap.absences, as:'absence'}
-		    <a data-toggle="modal" href="@{Absences.edit(absence.id)}" data-target="#myModal1">
+		    <a data-toggle="modal" href="@{Absences.edit(absence.id)}" data-target="#myModal3">
 			  ${absence.absenceType.code}
 			</a>
 		  #{/list}	
@@ -133,7 +133,23 @@
 		  <td class="progressivo default-single">&nbsp;${dayRecap.progressive}</td>
 		#{/else}
 												
-	    <td class="default-single">${dayRecap.workingTimeTypeDescription}</td>
+	    <td class="default-single">
+	      #{if dayRecap.wtt!=null && dayRecap.wttd!=null}
+	        <a href="#" data-popover
+	    		data-trigger="hover" data-toggle="popover" 
+	    		data-placement="bottom"
+	    		data-html="true"
+	    		data-content="${(
+	    		'Tempo Lavoro: <strong>'+dayRecap.workingTime+'</strong>'+
+	    		'<br>Tempo lavoro per buono pasto: <strong>'+dayRecap.mealTicketTime+'</strong>'+
+	    		'<br>Durata minima intervallo pranzo: <strong>'+dayRecap.breakTicketTime+'</strong>'+
+	    		'<br>Finestra intervallo pranzo: <strong>'+dayRecap.timeMealFrom+' - ' +dayRecap.timeMealTo+'</strong>'+
+	    		' (estremi compresi)').escape()}"
+	    		title="Info orario giornaliero">${dayRecap.workingTimeTypeDescription}</a>
+	      #{/if}
+	      
+	      
+	    </td>
 	    <td class="default-single">
 	    #{if dayRecap.note.size != 0}
 	    
@@ -160,7 +176,21 @@
 <div id="myModal1" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3>Inserimento/modifica assenza</h3>
+    <h3>Inserimento assenza ${person.surname} ${person.name}</h3>
+  </div>
+  <div class="modal-body">
+    <p></p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+   <!--   <button class="btn btn-primary">Save changes</button>-->
+  </div>
+</div>
+
+<div id="myModal3" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabe3" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3>Modifica assenza ${person.surname} ${person.name}</h3>
   </div>
   <div class="modal-body">
     <p></p>

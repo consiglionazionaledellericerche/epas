@@ -24,6 +24,7 @@ import models.AbsenceType;
 import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
+import models.InitializationTime;
 import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
@@ -66,43 +67,43 @@ public class PersonUtility {
 	}
 
 
-	/** TODO usato in Competences.java ma utilizza dati del person month, sostituirlo */
-	public static boolean canTakeOvertime(Person person, int year, int month){
-		boolean canOrNot = false;
-		int positiveDifference = 0;
-		int negativeDifference = 0;
-		LocalDate date = new LocalDate(year, month, 1);
-		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-				person, date, date.dayOfMonth().withMaximumValue()).fetch();
-		for(PersonDay pd : pdList){
-			if(pd.difference > 0)
-				positiveDifference = positiveDifference + pd.difference;
-			else
-				negativeDifference = negativeDifference + pd.difference;
-		}
-		if(positiveDifference > -negativeDifference)
-			canOrNot = true;
-		else{
-			/**
-			 * per "bilanciare" i residui negativi del mese, si va a vedere se esistono residui positivi dal mese precedente o dall'anno precedente
-			 */
-			PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
-					person, year, month-1).first();
-
-			if(pm != null){
-				if(pm.totalRemainingMinutes > -negativeDifference)
-					canOrNot = true;
-				else 
-					canOrNot = false;
-			}
-			else
-				canOrNot = false;
-
-
-		}
-		return canOrNot;
-
-	}
+//	/** TODO usato in Competences.java ma utilizza dati del person month, sostituirlo */
+//	public static boolean canTakeOvertime(Person person, int year, int month){
+//		boolean canOrNot = false;
+//		int positiveDifference = 0;
+//		int negativeDifference = 0;
+//		LocalDate date = new LocalDate(year, month, 1);
+//		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+//				person, date, date.dayOfMonth().withMaximumValue()).fetch();
+//		for(PersonDay pd : pdList){
+//			if(pd.difference > 0)
+//				positiveDifference = positiveDifference + pd.difference;
+//			else
+//				negativeDifference = negativeDifference + pd.difference;
+//		}
+//		if(positiveDifference > -negativeDifference)
+//			canOrNot = true;
+//		else{
+//			/**
+//			 * per "bilanciare" i residui negativi del mese, si va a vedere se esistono residui positivi dal mese precedente o dall'anno precedente
+//			 */
+//			PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
+//					person, year, month-1).first();
+//
+//			if(pm != null){
+//				if(pm.totalRemainingMinutes > -negativeDifference)
+//					canOrNot = true;
+//				else 
+//					canOrNot = false;
+//			}
+//			else
+//				canOrNot = false;
+//
+//
+//		}
+//		return canOrNot;
+//
+//	}
 
 	/**
 	 * metodo per stabilire se una persona può ancora prendere o meno giorni di permesso causa malattia del figlio
@@ -121,8 +122,8 @@ public class PersonUtility {
 			child = persChildList.get(0) != null ? persChildList.get(0) : null;
 			if(child != null){
 				if(child.bornDate.isAfter(date.minusYears(3))){
-					List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date between ? and ?" +
-							"and a.absenceType = ?", person, date.minusYears(3), date, abt).fetch();
+					List<Absence> existingAbsence = Absence.find("Select a from Absence a where a.personDay.person = ? and a.personDay.date between ? and ?" +
+							"and a.absenceType.code = ?", person, date.minusYears(3), date, abt.code).fetch();
 					if(existingAbsence.size() < 30)
 						return true;
 					else
@@ -138,10 +139,13 @@ public class PersonUtility {
 
 		case 122:
 			child = persChildList.get(1) != null ? persChildList.get(1) : null;
+			Logger.debug("Il riferimento del codice è per %s %s. Nato il %s", child.surname, child.name, child.bornDate);
 			if(child != null){
 				if(child.bornDate.isAfter(date.minusYears(3))){
-					List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date between ? and ?" +
-							"and a.absenceType = ?", person, date.minusYears(3), date, abt).fetch();
+					Logger.debug("La data di nascita del figlio è inferiore ai 3 anni necessari per prendere il codice");
+					List<Absence> existingAbsence = Absence.find("Select a from Absence a where a.personDay.person = ? and a.personDay.date between ? and ?" +
+							"and a.absenceType.code = ?", person, date.minusYears(3), date, abt.code).fetch();
+					Logger.debug("Il dipendente ha già preso %d giorni con codice %s", existingAbsence.size(), abt.code);
 					if(existingAbsence.size() < 30)
 						return true;
 					else
@@ -158,8 +162,8 @@ public class PersonUtility {
 			child = persChildList.get(2) != null ? persChildList.get(2) : null;
 			if(child != null){
 				if(child.bornDate.isAfter(date.minusYears(3))){
-					List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date between ? and ?" +
-							"and a.absenceType = ?", person, date.minusYears(3), date, abt).fetch();
+					List<Absence> existingAbsence = Absence.find("Select a from Absence a where a.personDay.person = ? and a.personDay.date between ? and ?" +
+							"and a.absenceType.code = ?", person, date.minusYears(3), date, abt.code).fetch();
 					if(existingAbsence.size() < 30)
 						return true;
 					else
@@ -177,8 +181,8 @@ public class PersonUtility {
 			child = persChildList.get(0) != null ? persChildList.get(0) : null;
 			if(child != null){
 				if(child.bornDate.isAfter(date.minusYears(8))){
-					List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date between ? and ?" +
-							"and a.absenceType = ?", person, date.minusYears(8), date, abt).fetch();
+					List<Absence> existingAbsence = Absence.find("Select a from Absence a where a.personDay.person = ? and a.personDay.date between ? and ?" +
+							"and a.absenceType.code = ?", person, date.minusYears(8), date, abt.code).fetch();
 					if(existingAbsence.size() < 5)
 						return true;
 					else
@@ -195,8 +199,8 @@ public class PersonUtility {
 			child = persChildList.get(1) != null ? persChildList.get(1) : null;
 			if(child != null){
 				if(child.bornDate.isAfter(date.minusYears(8))){
-					List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date between ? and ?" +
-							"and a.absenceType = ?", person, date.minusYears(8), date, abt).fetch();
+					List<Absence> existingAbsence = Absence.find("Select a from Absence a where a.personDay.person = ? and a.personDay.date between ? and ?" +
+							"and a.absenceType.code = ?", person, date.minusYears(8), date, abt.code).fetch();
 					if(existingAbsence.size() < 5)
 						return true;
 					else
@@ -213,8 +217,8 @@ public class PersonUtility {
 			child = persChildList.get(2) != null ? persChildList.get(2) : null;
 			if(child != null){
 				if(child.bornDate.isAfter(date.minusYears(8))){
-					List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date between ? and ?" +
-							"and a.absenceType = ?", person, date.minusYears(8), date, abt).fetch();
+					List<Absence> existingAbsence = Absence.find("Select a from Absence a where a.personDay.person = ? and a.personDay.date between ? and ?" +
+							"and a.absenceType.code = ?", person, date.minusYears(8), date, abt.code).fetch();
 					if(existingAbsence.size() < 5)
 						return true;
 					else
@@ -230,8 +234,8 @@ public class PersonUtility {
 			child = persChildList.get(3) != null ? persChildList.get(3) : null;
 			if(child != null){
 				if(child.bornDate.isAfter(date.minusYears(8))){
-					List<Absence> existingAbsence = Absence.find("Select a from Absence a, PersonDay pd where pd.person = ? and pd.date between ? and ?" +
-							"and a.absenceType = ?", person, date.minusYears(8), date, abt).fetch();
+					List<Absence> existingAbsence = Absence.find("Select a from Absence a where a.personDay.person = ? and a.personDay.date between ? and ?" +
+							"and a.absenceType.code = ?", person, date.minusYears(8), date, abt.code).fetch();
 					if(existingAbsence.size() < 5)
 						return true;
 					else
@@ -269,24 +273,23 @@ public class PersonUtility {
 	}
 	
 	/**
-	 * 
-	 * @return il codice di assenza da utilizzare da scegliere tra 31,32 e 94 nel caso in cui l'utente amministratore utilizzi il codice "FER" per assegnare un giorno di ferie 
-	 * alla persona
+	 * Il primo codice utilizzabile per l'anno selezionato come assenza nel seguente ordine 31,32,94
+	 * @param person
+	 * @param actualDate
+	 * @return
 	 */
 	public static AbsenceType whichVacationCode(Person person, LocalDate actualDate){
 		
-		
-		VacationsRecap vr = new VacationsRecap(person, (short) actualDate.getYear(), actualDate);	
+		VacationsRecap vr = new VacationsRecap(person, (short) actualDate.getYear(), actualDate, true);	
 		
 		if(vr.vacationDaysLastYearNotYetUsed>0)
 			return AbsenceType.find("byCode", "31").first();
+
+		if(vr.vacationDaysCurrentYearNotYetUsed>0)
+			return AbsenceType.find("byCode", "32").first();
 		
 		if(vr.persmissionNotYetUsed>0)
 			return AbsenceType.find("byCode", "94").first();	
-		
-		
-		if(vr.vacationDaysCurrentYearNotYetUsed>0)
-			return AbsenceType.find("byCode", "32").first();
 		
 		return null;
 	}
@@ -899,6 +902,46 @@ public class PersonUtility {
 			}
 			JPAPlugin.closeTx(false);
 		}
+		
+		/*
+		//(3)persistere in Initialization Time il resudo
+		int currentYear = new LocalDate().getYear();
+		int actualYear = year;	//2014
+		while(actualYear<=currentYear)
+		{
+			LocalDate beginYear = new LocalDate(actualYear, 1, 1);
+			LocalDate endYear = new LocalDate(actualYear, 12, 31);
+			for(Person p: personList)
+			{
+				
+				List<InitializationTime> initializationTimeList = InitializationTime.find("Select i from InitializationTime i where i.person = ? and i.date between ? and ?" , p, beginYear, endYear).fetch();
+				InitializationTime initializationTime;
+				if(initializationTimeList.size()>1)
+				{
+					//siamo nella merda perche' per ogni anno deve essercene uno solo
+					continue;
+				}
+				if(initializationTimeList.size()==0)
+				{
+					initializationTime = new InitializationTime();
+					initializationTime.person = p;
+					initializationTime.date = beginYear;
+					initializationTime.residualMinutesCurrentYear = 3;
+					initializationTime.residualMinutesPastYear = 0;
+				}
+				else
+				{
+					initializationTime = initializationTimeList.get(0);
+					initializationTime.residualMinutesCurrentYear = 4;
+				}
+				CalcoloSituazioneAnnualePersona csap = new CalcoloSituazioneAnnualePersona(p, actualYear-1, null);	//2013
+				initializationTime.residualMinutesPastYear = csap.getMese(actualYear, 12).monteOreAnnoCorrente;
+				initializationTime.save();
+			}
+			actualYear++;
+			
+		}
+		*/
 	}
 	
 	 /**

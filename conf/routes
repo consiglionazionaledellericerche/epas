@@ -4,7 +4,9 @@
 *		/										module:secure
 
 #Import Shibboleth routes
-#*      /                						module:shibboleth
+GET		/shibboleth/login                  shib.Shibboleth.login
+GET		/shibboleth/authenticate           shib.Shibboleth.authenticate
+GET		/shibboleth/logout                 shib.Shibboleth.logout
 
 # Home page
 GET     /                                       Application.index
@@ -22,7 +24,7 @@ POST	/utilities/{personId}/{year}/{month}	Administration.fixPersonSituation
 POST	/utilities/{year}						Administration.createOvertimeFile
 
 #Assenze
-#GET		/absences/{year}/{month}		Absences.absences
+#GET		/absences/{year}/{month}			Absences.absences
 
 #Assenze annuali
 GET		/yearlyAbsences/{personId}/{year}		YearlyAbsences.yearlyAbsences
@@ -179,7 +181,14 @@ POST	/uploadSituation/						UploadSituation.uploadSituation
 
 #Gestione stampa cartellino amministratore
 GET		/printTags/listPersonForPrintTags/{year}/{month}		PrintTags.listPersonForPrintTags
-POST	/printTags/showTag/{personId}			PrintTags.showTag
+POST	/printTags/showTag/{personId}				PrintTags.showTag
+GET		/printTags/absenceInPeriod/{personSelected}/{year}/{month}	Absences.absenceInPeriod
+
+#Gestione grafici
+GET		/charts/indexCharts						Charts.indexCharts		
+GET		/charts/overtimeOnPositiveResidual		Charts.overtimeOnPositiveResidual
+
+
 
 #Gestione stampa cartellino dipendente
 GET     /printTags/{personId}/{year}/{month}	PrintTags.showPersonTag

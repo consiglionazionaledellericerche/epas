@@ -59,18 +59,27 @@ package controllers;
  *  
  */
 
+import java.awt.image.renderable.RenderContext;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.Column;
+
+import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
 import it.cnr.iit.epas.ActionMenuItem;
 import it.cnr.iit.epas.DateUtility;
+import models.ConfGeneral;
+import models.ConfYear;
 import models.WebStampingAddress;
 import models.WorkingTimeType;
 import play.Logger;
+import play.cache.Cache;
+import play.data.validation.Email;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.mvc.results.Error;
 import models.Configuration;
 import models.enumerate.CapacityCompensatoryRestFourEight;
 import models.enumerate.CapacityCompensatoryRestOneThree;
@@ -79,12 +88,187 @@ import models.enumerate.ResidualWithPastYear;
 @With( {Secure.class, NavigationMenu.class} )
 public class Configurations extends Controller{
 	
+	
+
+	@Check(Security.INSERT_AND_UPDATE_CONFIGURATION)
+	public static void showConfGeneral(){
+		
+		ConfGeneral confGeneral = ConfGeneral.find("select cg from ConfGeneral cg").first();
+		render(confGeneral);
+		
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_CONFIGURATION)
+	public static void showConfYear(){
+		
+		//last year (non modificabile)
+		ConfYear lastConfYear = ConfYear.getConfYear(new LocalDate().getYear()-1);
+		
+		//current year (modificabile)
+		ConfYear confYear = ConfYear.getConfYear(new LocalDate().getYear());
+		
+		Integer nextYear = new LocalDate().getYear()+1;
+		render(lastConfYear, confYear, nextYear);
+
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_CONFIGURATION)
+	public static void saveConfGeneral(String pk, String value){
+		ConfGeneral confGeneral = ConfGeneral.find("select cg from ConfGeneral cg").first();
+
+		try
+		{
+			if(pk.equals("webStampingAllowed"))
+			{
+				Boolean webStampingAllowed = Boolean.parseBoolean(value);
+				if(webStampingAllowed!=null)
+					confGeneral.webStampingAllowed = webStampingAllowed;
+				confGeneral.save();
+			}
+			if(pk.equals("urlToPresence"))
+			{
+				confGeneral.urlToPresence = value;
+				confGeneral.save();
+			}
+			if(pk.equals("userToPresence"))
+			{
+				confGeneral.userToPresence = value;
+				confGeneral.save();
+			}
+			if(pk.equals("passwordToPresence"))
+			{
+				confGeneral.passwordToPresence = value;
+				confGeneral.save();
+			}
+			if(pk.equals("numberOfViewingCoupleColumn"))
+			{
+				Integer numberOfViewingCoupleColumn = Integer.parseInt(value);
+				confGeneral.numberOfViewingCoupleColumn = numberOfViewingCoupleColumn;
+				confGeneral.save();
+			}
+		}
+		catch(Exception e)
+		{
+			response.status = 500;
+			renderText("Bad request");
+		}	
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_CONFIGURATION)
+	public static void saveConfYear(String pk, String value){
+		Integer year = new LocalDate().getYear();
+		ConfYear confYear = ConfGeneral.find("select cy from ConfYear cy where cy.year = ?", year).first();
+		if(confYear==null)
+		{
+			//TODO va creato
+			return;
+		}
+		
+		try
+		{
+			if(pk.equals("dayExpiryVacationPastYear"))
+			{
+				Integer day = Integer.parseInt(value);
+				try
+				{
+					new LocalDate(year, confYear.monthExpiryVacationPastYear, day);
+					confYear.dayExpiryVacationPastYear = day;
+					confYear.save();
+					Cache.set("confYear"+year, confYear);
+				}
+				catch(Exception e)
+				{
+					response.status = 500;
+					renderText(day+"/"+confYear.monthExpiryVacationPastYear+"/"+year+" data non valida. Settare correttamente i parametri.");
+				}
+				
+			}
+			if(pk.equals("monthExpiryVacationPastYear"))
+			{
+				Integer month = Integer.parseInt(value);
+				try
+				{
+					new LocalDate(year, month, confYear.dayExpiryVacationPastYear);
+					confYear.monthExpiryVacationPastYear = month;
+					confYear.save();
+					Cache.set("confYear"+year, confYear);
+				}
+				catch(Exception e)
+				{
+					response.status = 500;
+					renderText(confYear.dayExpiryVacationPastYear+"/"+month+"/"+year+" data non valida. Settare correttamente i parametri.");
+				}
+			}
+			if(pk.equals("monthExpireRecoveryDaysOneThree"))
+			{
+				Integer val = Integer.parseInt(value);
+				if(val<0||val>12)
+				{
+					response.status = 500;
+					renderText("Bad request");
+				}
+				confYear.monthExpireRecoveryDaysOneThree = val;
+				confYear.save();
+				Cache.set("confYear"+year, confYear);
+			}
+			if(pk.equals("monthExpireRecoveryDaysFourNine"))
+			{
+				Integer val = Integer.parseInt(value);
+				if(val<0||val>12)
+				{
+					response.status = 500;
+					renderText("Bad request");
+				}
+				confYear.monthExpireRecoveryDaysFourNine = val;
+				confYear.save();
+				Cache.set("confYear"+year, confYear);
+			}
+			if(pk.equals("maxRecoveryDaysOneThree"))
+			{
+				Integer val = Integer.parseInt(value);
+				if(val<0||val>31)
+				{
+					response.status = 500;
+					renderText("Bad request");
+				}
+				confYear.maxRecoveryDaysOneThree = val;
+				confYear.save();
+				Cache.set("confYear"+year, confYear);
+			}
+			if(pk.equals("maxRecoveryDaysFourNine"))
+			{
+				Integer val = Integer.parseInt(value);
+				if(val<0||val>31)
+				{
+					response.status = 500;
+					renderText("Bad request");
+				}
+				confYear.maxRecoveryDaysFourNine = val;
+				confYear.save();
+				Cache.set("confYear"+year, confYear);
+			}
+		}
+		catch(Exception e)
+		{
+			response.status = 500;
+			renderText("Bad request");
+		}	
+		
+	}
+	
+	
 	@Check(Security.INSERT_AND_UPDATE_CONFIGURATION)
 	public static void show(){
 
 		Configuration configurations = Configuration.getConfiguration(new LocalDate());
 
 		render(configurations);
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_CONFIGURATION)
+	public static void update(Configuration conf)
+	{
+		System.out.println();
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_CONFIGURATION)

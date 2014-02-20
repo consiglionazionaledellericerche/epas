@@ -44,17 +44,26 @@
 			</td>
 			<td>Seleziona "si" se il codice può essere usato insieme ad altri codici nello stesso giorno</td>
 		</tr>
+		
+		<tr>
+			<td>Uso w.e. e festivi </td>
+			<td>
+				Sì<input id="usoMultiploNuovoCodiceAssenza"type="radio" name="weekEnd" value="true"/>
+     			No<input type="radio" name="weekEnd" value="false"/>
+			</td>
+			<td>Seleziona "si" se il codice può essere inserito anche nel week end e nei festivi</td>		
+		</tr>
 
 		<tr>
 			<td>Inizio validità</td>
-			<td><input id="dataInizioNuovoCodiceAssenza" type="date" name="inizioValidita" value="${}" size="10" maxlength="10"/></td>
+			<td><input  type="text" name="inizioValidita" id="datepicker1" data-date-format="yyyy-mm-dd"/></td>
 			<td>Data inizio validità di questo codice nel formato aaa/mm/gg (se vuoto valido da sempre)	</td>
 		</tr>
 
 		
 		<tr>
 			<td>Fine validità</td>
-			<td><input id="dataFineNuovoCodiceAssenza" type="date" name="fineValidita" value="${}" size="10" maxlength="10"/></td>
+			<td><input  type="text" name="fineValidita" id="datepicker2" data-date-format="yyyy-mm-dd"/></td>
 			<td>Data fine validità di questo codice nel formato aaaa/mm/gg (se vuoto valido da sempre)</td>
 		</tr>
 		

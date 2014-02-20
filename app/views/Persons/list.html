@@ -40,7 +40,12 @@
 		<td><font color="#000000">${person.badgeNumber}</font></td>
 		<td><font color="#000000">${person.getCurrentContract() != null ? person.getCurrentContract().beginContract : ''}</font></td>
 		<td><font color="#000000">${person.getCurrentContract() != null ? person.getCurrentContract().expireContract : ''}</font></td>
-		<td><a href="@{editWorkingTime(person.id)}"><font color="#0000FF">${person.getCurrentWorkingTimeType() != null && person.getCurrentWorkingTimeType().description != null ? person.getCurrentWorkingTimeType().description : ''}</font></a></td>
+		#{if person.getCurrentWorkingTimeType() != null && person.getCurrentWorkingTimeType().description != null}
+			<td><a href="@{editWorkingTime(person.id)}"><font color="#0000FF">${person.getCurrentWorkingTimeType().description}</font></a></td>
+		#{/if}
+		#{else}
+			<td><a href="@{setWorkingTime(person.id)}"><font color="#0000FF">____</font></a></td>
+		#{/else}
 		<td><a  data-toggle="modal" href="@{Persons.editVacation(person.id)}" data-target="#myModal1"><font color="#0000FF">${person.getVacation() != null ? person.getVacation().description : ''}</font></a></td>
 		<td><font color="#000000">${person.getQualification() != null ? person.getQualification().qualification : ''}</font></td>
 		<td>${''}</td>
@@ -59,7 +64,12 @@
 		<td><font color="#000000">${person.badgeNumber}</font></td>
 		<td><font color="#808080">${person.getCurrentContract() != null ? person.getCurrentContract().beginContract : ''}</font></td>
 		<td><font color="#808080">${person.getCurrentContract() != null ? person.getCurrentContract().expireContract : ''}</font></td>
-		<td><a href="@{editWorkingTime(person.id)}"><font color="#808080">${person.getCurrentWorkingTimeType() != null && person.getCurrentWorkingTimeType().description != null ? person.getCurrentWorkingTimeType().description : ''}</font></a></td>
+		#{if person.getCurrentWorkingTimeType() != null && person.getCurrentWorkingTimeType().description != null}
+			<td><a href="@{editWorkingTime(person.id)}"><font color="#808080">${person.getCurrentWorkingTimeType().description}</font></a></td>
+		#{/if}
+		#{else}
+			<td><a href="@{setWorkingTime(person.id)}"><font color="#0000FF">____</font></a></td>
+		#{/else}
 		<td><a data-toggle="modal" href="@{Persons.editVacation(person.id)}" data-target="#myModal1"><font color="#808080">${person.getVacation() != null ? person.getVacation().description : ''}</font></a></td>
 		<td><font color="#808080">${person.getQualification() != null ? person.getQualification().qualification : ''}</font></td>
 		<td>${''}</td>

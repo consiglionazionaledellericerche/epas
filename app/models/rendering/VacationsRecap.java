@@ -14,7 +14,7 @@ import org.joda.time.LocalDate;
 import play.Logger;
 import models.Absence;
 import models.AbsenceType;
-import models.Configuration;
+import models.ConfYear;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
@@ -51,8 +51,15 @@ public class VacationsRecap {
 	public Integer permissionCurrentYearTotal = 0;
 
 	
-	
-	public VacationsRecap(Person person, short year, LocalDate today)
+	/**
+	 * La situazione sui residui e maturazioni di ferie e permessi nell'anno.
+	 * @param person
+	 * @param year l'anno in considerazione
+	 * @param actualDate la data specifica nell'anno in cui si desidera fotografare la situazione, tipicamente oggi
+	 * @param considerExpireLastYear impostare true se non si vuole considerare il limite di scadenza per l'utilizzo
+	 * delle ferie dell'anno precedente (utile per assegnare il codice 37)
+	 */
+	public VacationsRecap(Person person, short year, LocalDate actualDate, boolean considerExpireLastYear)
 	{
 		this.person = person;
 		this.year = year;
@@ -75,9 +82,9 @@ public class VacationsRecap {
 		LocalDate endLastYear = new LocalDate(this.year-1,12,31);
 		LocalDate startYear = new LocalDate(this.year,1,1);
 		LocalDate endYear = new LocalDate(this.year,12,31);
-		//LocalDate today = new LocalDate();
-		Configuration config = Configuration.getCurrentConfiguration();
-		LocalDate expireVacation = today.withMonthOfYear(config.monthExpiryVacationPastYear).withDayOfMonth(config.dayExpiryVacationPastYear);
+
+		ConfYear conf = ConfYear.getConfYear((int)year);
+		LocalDate expireVacation = actualDate.withMonthOfYear(conf.monthExpiryVacationPastYear).withDayOfMonth(conf.dayExpiryVacationPastYear);
 		
 		//***************************************************************
 		//*** calcolo ferie e permessi utilizzati per year e lastYear ***
@@ -102,11 +109,11 @@ public class VacationsRecap {
 		//***************************************************************
 		
 		this.vacationDaysLastYearAccrued = getVacationAccruedYear(new DateInterval(startLastYear, endLastYear), this.currentContract, this.vacationPeriodList);
-		if(endYear.isAfter(today))
+		if(endYear.isAfter(actualDate))
 		{
-			//se la query e' per l'anno corrente considero fino a today
-			this.permissionCurrentYearAccrued = getPermissionAccruedYear(new DateInterval(startYear, today), this.currentContract);
-			this.vacationDaysCurrentYearAccrued = getVacationAccruedYear(new DateInterval(startYear, today), this.currentContract, this.vacationPeriodList);
+			//se la query e' per l'anno corrente considero fino a actualDate
+			this.permissionCurrentYearAccrued = getPermissionAccruedYear(new DateInterval(startYear, actualDate), this.currentContract);
+			this.vacationDaysCurrentYearAccrued = getVacationAccruedYear(new DateInterval(startYear, actualDate), this.currentContract, this.vacationPeriodList);
 		}
 		else
 		{
@@ -123,7 +130,7 @@ public class VacationsRecap {
 		this.vacationDaysCurrentYearTotal = getVacationAccruedYear(new DateInterval(startYear, endYear), this.currentContract, this.vacationPeriodList);		//a cristian da 27 perchè è passato da 26 a 28 durante l'anno
 		
 		
-		if(today.isBefore(expireVacation))
+		if(actualDate.isBefore(expireVacation) || !considerExpireLastYear)
 		{
 			this.vacationDaysLastYearNotYetUsed = this.vacationDaysLastYearAccrued - this.vacationDaysLastYearUsed.size();
 		}
@@ -235,41 +242,21 @@ public class VacationsRecap {
 	}
 	
 	/**
-	 * metodo che ritorna il numero di giorni di ferie dell'anno scorso ancora disponibili dopo il 31/8
-	 * controlla anche se dei "37" sono stati utilizzati fino alla data in cui si chiama il metodo di inserimento.
+	 * Il numero di giorni di ferie dell'anno passato non ancora utilizzati (senza considerare l'expire limit di utilizzo)
+	 * Il valore ritornato contiene i giorni ferie maturati previsti dal contratto nell'anno passato meno 
+	 * i 32 utilizzati in past year
+	 * i 31 utilizzati in current year
+	 * i 37 utilizzati in current year
+	 * @param year
+	 * @param person
+	 * @param abt
+	 * @return
 	 */
-	public static int remainingPastVacations(int year, Person person, AbsenceType abt){
-		int days = 0;
-		Configuration config = Configuration.getCurrentConfiguration();
-		Contract contractLastYear = person.getContract(new LocalDate(year-1,12,31));
-		if(contractLastYear == null)
-			return 0;
+	public static int remainingPastVacationsAs37(int year, Person person){
 		
-		VacationCode code = VacationCode.find("Select code from VacationCode code, VacationPeriod period where period.vacationCode = code" +
-				" and period.contract = ? ", contractLastYear).first();
-		if(code == null)
-			return 0;
-		DateInterval inter = new DateInterval(new LocalDate(year,1,1), new LocalDate(year, config.monthExpiryVacationPastYear, config.dayExpiryVacationPastYear));
-		DateInterval pastInter = new DateInterval(new LocalDate(year-1,1,1), new LocalDate(year-1,12,31));
-		DateInterval inter37 = new DateInterval(
-				new LocalDate(year, config.monthExpiryVacationPastYear,config.dayExpiryVacationPastYear).plusDays(1), new LocalDate().monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue());
-		Contract contract = person.getCurrentContract();
-		AbsenceType ab32 = AbsenceType.find("byCode", "32").first();
-		AbsenceType ab31 = AbsenceType.find("byCode", "31").first();
-		AbsenceType ab37 = AbsenceType.find("byCode", "37").first();
-		Logger.debug("Il tipo di assenza è: %s", ab37.description);
-		List<Absence> absencePastYearThisYear = getVacationDays(inter, contract, ab31);
-		List<Absence> absencePastYearLastYear = getVacationDays(pastInter, contractLastYear, ab32);
-		List<Absence> absence37 = getVacationDays(inter37, contract, ab37);
+		VacationsRecap vc = new VacationsRecap(person, (short)(year), new LocalDate(), false);
+		return vc.vacationDaysLastYearNotYetUsed;
 		
-		Logger.debug("La somma dei giorni di ferie tra anno passato e anno attuale è: %d", absencePastYearThisYear.size()+absencePastYearLastYear.size());
-		Logger.debug("I codici %s già usati quest'anno sono: %d", ab37.code,  absence37.size());
-		Logger.debug("I giorni da usare di ferie per un anno sono: %d", code.vacationDays);
-		if(absencePastYearThisYear.size()+absencePastYearLastYear.size()+ absence37.size() < code.vacationDays)
-			return code.vacationDays - absencePastYearThisYear.size()+absencePastYearLastYear.size()+ absence37.size();
-		else
-			
-		return days;
 	}
 
 }

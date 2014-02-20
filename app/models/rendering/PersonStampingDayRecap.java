@@ -9,6 +9,7 @@ import models.Absence;
 import models.Person;
 import models.PersonDay;
 import models.PersonDay.PairStamping;
+import models.ConfGeneral;
 import models.StampModificationType;
 import models.StampModificationTypeValue;
 import models.StampProfile;
@@ -16,6 +17,7 @@ import models.StampType;
 import models.Stamping;
 import models.WorkingTimeType;
 import models.Stamping.WayType;
+import models.WorkingTimeTypeDay;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -35,7 +37,14 @@ public class PersonStampingDayRecap {
 	
 	public Long personDayId;
 	public Person person;
-		
+	public WorkingTimeTypeDay wttd;
+	public WorkingTimeType wtt;
+	public String workingTime = "";
+	public String mealTicketTime = "";
+	public String timeMealFrom = "";
+	public String timeMealTo = "";
+	public String breakTicketTime = "";
+	
 	public String mealTicket;
 	
 	public LocalDate date;
@@ -43,6 +52,7 @@ public class PersonStampingDayRecap {
 	public boolean past;
 	public boolean today;
 	public boolean future;
+	
 	
 	public List<Absence> absences;
 	
@@ -74,7 +84,15 @@ public class PersonStampingDayRecap {
 		this.setStampingTemplate( stampingsForTemplate, pd );
 		
 		
-		WorkingTimeType wtt = pd.person.getWorkingTimeType(pd.date);
+		this.wtt = pd.person.getWorkingTimeType(pd.date);
+		this.wttd = this.wtt.getWorkingTimeTypeDayFromDayOfWeek(pd.date.getDayOfWeek());
+		this.setWorkingTime(this.wttd.workingTime);
+		this.setMealTicketTime(this.wttd.mealTicketTime);
+		this.setBreakTicketTime(this.wttd.breakTicketTime);
+		ConfGeneral conf = ConfGeneral.getConfGeneral();
+		this.setTimeMealFrom(conf.mealTimeStartHour, conf.mealTimeStartMinute);
+		this.setTimeMealTo(conf.mealTimeEndHour, conf.mealTimeEndMinute);
+		
 		
 		//----------------------------------------------- fixed:  worktime, difference, progressive, p---------------------------------
 		
@@ -86,7 +104,7 @@ public class PersonStampingDayRecap {
 			}
 			else
 			{
-				this.setWorkingTime( pd.timeAtWork );
+				this.setWorkTime( pd.timeAtWork );
 				this.setDifference( pd.difference );
 				this.setProgressive( pd.progressive );
 				if(pd.timeAtWork!=0)
@@ -102,50 +120,17 @@ public class PersonStampingDayRecap {
 		//---------------------------------------- not fixed:  worktime, difference, progressive for past-----------------------------
 		else if(this.past)
 		{
-			this.setWorkingTime(pd.timeAtWork);
+			this.setWorkTime(pd.timeAtWork);
 			this.setDifference( pd.difference );
 			this.setProgressive(pd.progressive);
 		}
 		//----------------------------------------  not fixed:  worktime, difference, progressive for today-------------------------------
 		else if(this.today)
 		{
-			int previousProgressive;
-			PersonDay previousPersonDay = pd.previousPersonDay(); 
-			if(previousPersonDay == null)
-				previousProgressive = 0;
-			else
-				previousProgressive = previousPersonDay.progressive;
-			int workingTime = this.person.getWorkingTimeType(pd.date).getWorkingTimeTypeDayFromDayOfWeek(pd.date.getDayOfWeek()).workingTime;
-			int temporaryWorkTime = pd.getCalculatedTimeAtWork();
-			this.setWorkingTime( temporaryWorkTime );
-			if(this.holiday)
-			{
-				this.setDifference( 0 );
-				this.setProgressive( previousProgressive );
-			}
-			else
-			{
-				if(pd.absences.size() == 0)
-				{
-					int dif = 0;
-					if(workingTime > temporaryWorkTime)
-					{
-						dif = - (workingTime - temporaryWorkTime);
-					}
-					else
-					{
-						dif = temporaryWorkTime - workingTime;
-					}
-					this.setDifference( dif );
-
-					this.setProgressive( previousProgressive + dif);
-				}
-				else if(pd.absences.size()!=0)
-				{
-					this.setDifference( pd.difference );
-					this.setProgressive(pd.difference + previousProgressive);	
-				}
-			}
+			pd.queSeraSera();
+			this.setWorkTime(pd.timeAtWork);
+			this.setDifference( pd.difference );
+			this.setProgressive(pd.progressive);
 		}
 		//---------------------------------------- worktime, difference, progressive for future ----------------------------------------
 		if(this.future)
@@ -285,7 +270,53 @@ public class PersonStampingDayRecap {
 		}
 	}
 	
-	private void setWorkingTime(int workTime)
+	private void setWorkingTime(int workingTime)
+	{
+		if(workingTime==0)
+			this.workingTime = "";
+		else
+			this.workingTime = DateUtility.fromMinuteToHourMinute(workingTime);
+	}
+	
+	private void setMealTicketTime(int mealTicketTime)
+	{
+		if(mealTicketTime==0)
+			this.mealTicketTime = "";
+		else
+			this.mealTicketTime = DateUtility.fromMinuteToHourMinute(mealTicketTime);
+	}
+	
+	private void setBreakTicketTime(int breakTicketTime)
+	{
+		if(breakTicketTime==0)
+			this.breakTicketTime = "";
+		else
+			this.breakTicketTime = DateUtility.fromMinuteToHourMinute(breakTicketTime);
+	}
+	
+	private void setTimeMealFrom(int timeMealFromHour, int timeMealFromMinute)
+	{
+		String hour = timeMealFromHour + "";
+		if(hour.length() == 1)
+			hour="0"+hour;
+		String minute = timeMealFromMinute+"";
+		if(minute.length() == 1)
+			minute="0"+minute;
+		this.timeMealFrom = hour + ":" + minute;
+	}
+	
+	private void setTimeMealTo(int timeMealToHour, int timeMealToMinute)
+	{
+		String hour = timeMealToHour + "";
+		if(hour.length() == 1)
+			hour="0"+hour;
+		String minute = timeMealToMinute+"";
+		if(minute.length() == 1)
+			minute="0"+minute;
+		this.timeMealTo = hour + ":" + minute;
+	}
+	
+	private void setWorkTime(int workTime)
 	{
 		this.workTime = DateUtility.fromMinuteToHourMinute(workTime);
 	}
