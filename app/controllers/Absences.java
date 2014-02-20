@@ -514,7 +514,8 @@ public class Absences extends Controller{
 		if(file != null && file.exists()){
 			Logger.debug("ricevuto file di tipo: %s", file.type());
 		}
-			
+		
+
 		Person person = absence.personDay.person;
 		int yearTo = params.get("annoFine", Integer.class);
 		int monthTo = params.get("meseFine", Integer.class);
@@ -1132,6 +1133,9 @@ public class Absences extends Controller{
 					pd.populatePersonDay();
 					deleted++;
 				}
+			}
+			if(pd.absences.isEmpty() && pd.absences.isEmpty()){
+				pd.delete();
 			}
 			actualDate = actualDate.plusDays(1);
 		}
