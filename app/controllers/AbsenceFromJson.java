@@ -102,8 +102,8 @@ public class AbsenceFromJson extends Controller{
 								giornoFine = new String("0"+endCurrentPeriod.getDayOfMonth());
 							else
 								giornoFine = new String(""+endCurrentPeriod.getDayOfMonth());
-							personPeriodAbsenceCode.dateFrom = new String(startCurrentPeriod.getYear()+"-"+meseInizio+"-"+giornoInizio);
-							personPeriodAbsenceCode.dateTo = new String(endCurrentPeriod.getYear()+"-"+meseFine+"-"+giornoFine);
+							personPeriodAbsenceCode.start = new String(startCurrentPeriod.getYear()+"-"+meseInizio+"-"+giornoInizio);
+							personPeriodAbsenceCode.end = new String(endCurrentPeriod.getYear()+"-"+meseFine+"-"+giornoFine);
 							personsToRender.add(personPeriodAbsenceCode);
 
 							previousAbsence = abs;
