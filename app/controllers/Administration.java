@@ -14,6 +14,8 @@ import org.yaml.snakeyaml.Yaml;
 
 import controllers.shib.Shibboleth;
 import models.AbsenceType;
+import models.ConfGeneral;
+import models.Contract;
 import models.InitializationTime;
 import models.Person;
 import models.PersonDay;
@@ -166,6 +168,27 @@ public class Administration extends Controller {
 	public static void importStampings() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
 		FromMysqlToPostgres.importStamping();
 		renderText("E' fatta");
+	}
+	
+	
+	public static void prove()
+	{
+		
+		LocalDate initUse = ConfGeneral.getConfGeneral().initUseProgram;
+		//Prendo tutte le persone che hanno un contratto attivo nell'anno di initUse
+		List<Person> personList = Person.getActivePersonsinYear(initUse.getYear(), false);
+		for(Person person : personList)
+		{
+			InitializationTime initPerson = person.initializationTimes.get(0);	//TODO relazione e' 1:1	
+			for(Contract c : person.contracts)
+			{
+				c.setRecapPeriods(initUse, initPerson);
+				
+			}
+						
+		}
+		
+		
 	}
 
     
