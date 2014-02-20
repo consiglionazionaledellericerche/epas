@@ -1,0 +1,37 @@
+#{extends 'main_admin_no_menu.html' /}
+#{form @Charts.overtimeOnPositiveResidualInYear()}
+<p class="lead">Seleziona l'anno</p>
+#{select 'yearChart', value:annoList.get(0), id:'yearChart'}
+					
+		%{
+			for(anno in annoList){
+		}%
+			#{option anno.anno}${anno.anno}#{/option}
+			%{
+				}
+			}%
+		
+#{/select}
+<input class="btn btn-primary span1" type="submit" value="Ok"/>
+#{/form}
+
+#{if yearChart != 0}
+
+<div id="mysecondchart" style="height: 450px;">
+
+</div>
+
+	#{set 'moreScripts'}
+	<script type="text/javascript">
+	new Morris.Donut({
+	  element: 'mysecondchart',
+	  data: [
+		{label: "Ore annuali totali di straordinario", value: '${val}'},
+    	{label: "Ore annuali totali per straordinario", value: '${totaleOreResidue}'}    	
+	  ]	  
+	});
+
+	</script>
+	
+	#{/set}
+#{/if}

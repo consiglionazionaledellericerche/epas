@@ -1,0 +1,40 @@
+#{extends 'main_admin_no_menu.html' /}
+#{form @Charts.whichAbsenceInYear()}
+<p class="lead">Seleziona l'anno</p>
+#{select 'yearChart', value:annoList.get(0), id:'yearChart'}
+					
+		%{
+			for(anno in annoList){
+		}%
+			#{option anno.anno}${anno.anno}#{/option}
+			%{
+				}
+			}%
+		
+#{/select}
+<input class="btn btn-primary span1" type="submit" value="Ok"/>
+#{/form}
+
+#{if yearChart != 0}
+
+<div id="mythirdchart" style="height: 400px;">
+<p>Ecco il grafico delle assenze</p>
+</div>
+
+	#{set 'moreScripts'}
+	<script type="text/javascript">
+	new Morris.Donut({
+	  element: 'mythirdchart',
+	  data: [
+		{label: "Assenze per missione", value: '${missioniSize}'},
+    	{label: "Assenze per riposo compensativo", value: '${riposiCompensativiSize}'},
+		{label: "Assenze per malattia", value: '${malattiaSize}'},
+		{label: "Altre assenze", value: '${altreSize}'}
+		
+	  ]	  
+	});
+
+</script>
+	
+	#{/set}
+#{/if}
