@@ -189,6 +189,7 @@ GET		/charts/indexCharts						Charts.indexCharts
 GET		/charts/overtimeOnPositiveResidual		Charts.overtimeOnPositiveResidual
 
 
+
 #Gestione stampa cartellino dipendente
 GET     /printTags/{personId}/{year}/{month}	PrintTags.showPersonTag
 
