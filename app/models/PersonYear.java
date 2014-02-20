@@ -38,9 +38,6 @@ public class PersonYear extends Model{
 	@Column(name = "remaining_vacation_days")
 	public Integer remainingVacationDays;
 	
-	/**
-	 * Tempo in minuti residuo alla fine dell'anno
-	 */
 	@Column(name = "remaining_minutes")
 	public Integer remainingMinutes;
 	

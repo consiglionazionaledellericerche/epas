@@ -45,11 +45,11 @@ public class Contract extends Model {
 	@JoinColumn(name="person_id")
 	public Person person;
 
-	/**
-	 * relazione con la tabella di vacation_code
-	 */
 	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY, cascade = CascadeType.REMOVE)
 	public List<VacationPeriod> vacationPeriods;
+	
+	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY, cascade = CascadeType.REMOVE)
+	public List<ContractYearRecap> recapPeriods;
 
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="begin_contract")
@@ -59,9 +59,7 @@ public class Contract extends Model {
 	@Column(name="expire_contract")
 	public LocalDate expireContract;
 
-	/**
-	 * data di termine contratto in casi di licenziamento, pensione, morte, ecc ecc...
-	 */
+	//data di termine contratto in casi di licenziamento, pensione, morte, ecc ecc...
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="end_contract")
 	public LocalDate endContract;
@@ -210,6 +208,54 @@ public class Contract extends Model {
 		first.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "26+4").first();
 		first.save();
 		this.save();
+	}
+	
+	
+	public void setRecapPeriods(LocalDate initUse, InitializationTime initPerson)
+	{
+		//Calcolo intervallo con dati utili database
+		DateInterval personDatabaseInterval;
+		if(initPerson.date.isAfter(initUse))
+			personDatabaseInterval = new DateInterval(initPerson.date, new LocalDate());
+		else
+			personDatabaseInterval = new DateInterval(initUse, new LocalDate());
+
+		//Calcolo intervallo esistenza contratto
+		DateInterval contractInterval;
+		if(this.endContract!=null)
+			contractInterval = new DateInterval(this.beginContract, this.endContract);
+		else
+			contractInterval = new DateInterval(this.beginContract, this.endContract);
+		
+		
+		//Calcolo intersezione fra contratto e dati utili database
+		DateInterval intersection = DateUtility.intervalIntersection(contractInterval, personDatabaseInterval);
+		
+		//se vuota non costruisco alcun contractYearRecap
+		if(intersection==null)
+			return;
+		
+		//altrimenti almeno uno lo devo costruire
+		if(personDatabaseInterval.getBegin().isBefore(contractInterval.getBegin()))
+		{
+			//contratto interamente contenuto nel database
+			
+			
+		}
+		else
+		{
+			//una parte di contratto non ha dati presenti nel db, devo sfruttare init time se è relativo a tale contratto
+			if(DateUtility.isDateIntoInterval(initPerson.date, contractInterval))
+			{
+				//se init è il primo gennaio costruisco 
+			}
+			
+			
+			
+		}
+			
+		
+
 	}
 
 }
