@@ -48,6 +48,7 @@ public class AbsenceFromJson extends Controller{
 			dateFrom = new LocalDate(yearFrom, monthFrom, dayFrom);
 		else 
 			dateFrom = new LocalDate(params.get("yearFrom", Integer.class), params.get("monthFrom", Integer.class), params.get("dayFrom", Integer.class));
+		
 		if(yearTo != null && monthTo != null && dayTo != null)
 			dateTo = new LocalDate(yearTo, monthTo, dayTo);
 		else
