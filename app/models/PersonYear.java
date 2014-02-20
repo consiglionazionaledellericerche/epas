@@ -129,7 +129,7 @@ public class PersonYear extends Model{
 			int vacationDaysActualYear = 0;
 			PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? " +
 					"order by pm.month desc ", person, year).first();
-			py.remainingMinutes = pm.totaleResiduoAnnoCorrenteAFineMese();
+			//py.remainingMinutes = pm.totaleResiduoAnnoCorrenteAFineMese();
 			
 			List<PersonDay> pdList = null;
 			if(contract.beginContract != null && contract.expireContract != null){

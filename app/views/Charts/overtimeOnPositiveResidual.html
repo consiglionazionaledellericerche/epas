@@ -1,0 +1,58 @@
+#{extends 'main_admin_no_menu.html' /}
+#{form @Charts.overtimeOnPositiveResidual()}
+<p class="lead">Seleziona mese e anno</p>
+
+#{select 'yearChart', value:annoList.get(0), id:'yearChart'}
+					
+		%{
+			for(anno in annoList){
+		}%
+			#{option anno.anno}${anno.anno}#{/option}
+			%{
+				}
+			}%
+		
+#{/select}
+
+#{select 'monthChart', value:meseList.get(0).mese, id:'meseChart'}
+			
+			
+		%{
+			for(mese in meseList){
+		}%
+			#{option mese.id}${mese.mese}#{/option}
+			%{
+				}
+			}%
+		
+#{/select}
+<input class="btn btn-primary span1" type="submit" value="Ok"/>
+#{/form}
+
+#{if yearChart != 0 && monthChart != 0 }
+<div id="myfirstchart" style="height: 450px;">
+
+</div>
+
+ 	#{set 'moreScripts'}
+<script type="text/javascript">
+	new Morris.Bar({
+	  element: 'myfirstchart',
+	  data: [
+		#{list poList, as:'person'}
+	    {y: '${person.surname}', a: '${person.overtimeHour}', b: '${person.positiveHourForOvertime}'},
+	    #{/list}
+	  ],
+	  xkey: 'y',
+	  ykeys: ['a', 'b'],
+	  labels: ['Ore straordinario', 'Ore positive usabili'],
+	  xLabelAngle: 80.0,
+	  gridTextSize: 14
+	});
+
+</script>
+	
+	#{/set}
+#{/if}
+	
+	

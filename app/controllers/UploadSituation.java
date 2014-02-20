@@ -24,9 +24,10 @@ import javax.persistence.criteria.Join;
 
 import lombok.Data;
 import models.Absence;
+import models.CertificatedData;
 import models.Competence;
 import models.CompetenceCode;
-import models.Configuration;
+import models.ConfGeneral;
 import models.Person;
 import models.PersonMonth;
 
@@ -82,7 +83,8 @@ public class UploadSituation extends Controller{
 
 	@Check(Security.UPLOAD_SITUATION)
 	public static void loginAttestati(Integer year, Integer month) {
-		Configuration conf = Configuration.getCurrentConfiguration();
+		//Configuration conf = Configuration.getCurrentConfiguration();
+		ConfGeneral conf = ConfGeneral.getConfGeneral();
 		String urlToPresence = conf.urlToPresence;
 		String attestatiLogin = params.get("attestatiLogin") == null ? conf.userToPresence : params.get("attestatiLogin"); 
 
@@ -102,7 +104,8 @@ public class UploadSituation extends Controller{
 		}
 
 		
-		String urlToPresence = Configuration.getCurrentConfiguration().urlToPresence;
+		//String urlToPresence = Configuration.getCurrentConfiguration().urlToPresence;
+		String urlToPresence = ConfGeneral.getConfGeneral().urlToPresence;
 
 		List<String> actions = Lists.newLinkedList();
 
@@ -193,7 +196,8 @@ public class UploadSituation extends Controller{
 			flash.error("Il valore dei parametri su cui fare il caricamento dei dati non può essere nullo");
 			Application.indexAdmin();
 		}
-		Configuration config = Configuration.getCurrentConfiguration();
+		//Configuration conf = Configuration.getCurrentConfiguration();
+		ConfGeneral conf = ConfGeneral.getConfGeneral();
 		List<Person> personList = Person.find("Select p from Person p where p.number <> ? and p.number is not null order by p.number", 0).fetch();
 		Logger.debug("La lista di nomi è composta da %s persone ", personList.size());
 		List<Absence> absenceList = null;
@@ -206,7 +210,7 @@ public class UploadSituation extends Controller{
 		FileWriter writer = new FileWriter(tempFile, true);
 		try {
 			BufferedWriter out = new BufferedWriter(writer);
-			out.write(config.seatCode.toString());
+			out.write(conf.seatCode.toString());
 			out.write(' ');
 			out.write(new String(month.toString()+year.toString()));
 			out.newLine();
@@ -259,12 +263,36 @@ public class UploadSituation extends Controller{
 		for (Dipendente dipendente : dipendenti) {
 			person = Person.findByNumber(Integer.parseInt(dipendente.getMatricola()));
 			pm = new PersonMonth(person, year, month);
-			checks.add(
-					AttestatiClient.elaboraDatiDipendente(
-							cookies, dipendente, year, month, 
-							pm.getAbsencesNotInternalUseInMonth(),
-							pm.getCompetenceInMonthForUploadSituation()));
+			
+			
+			//vedere se l'ho gia' inviato con successo
+			CertificatedData cert = CertificatedData.find("Select cert from CertificatedData cert where cert.person = ? and cert.year = ? and cert.month = ?", person, year, month).first();
+			if(cert!=null && cert.isOk) 
+			{
+				//già spedito senza errori
+				continue;
+			}
+			
+			RispostaElaboraDati rispostaElaboraDati = AttestatiClient.elaboraDatiDipendente(
+					cookies, dipendente, year, month, 
+					pm.getAbsencesNotInternalUseInMonth(),
+					pm.getCompetenceInMonthForUploadSituation());
+			
+			
+			if(cert==null)
+			{
+				cert = new CertificatedData(person, dipendente.getCognomeNome(), dipendente.getMatricola(), year, month);				
+			}
+			cert.absencesSent = rispostaElaboraDati.getAbsencesSent();
+			cert.competencesSent = rispostaElaboraDati.getCompetencesSent();
+			cert.mealTicketSent = rispostaElaboraDati.getMealTicketSent();
+			cert.problems = rispostaElaboraDati.getProblems();
+			cert.isOk = rispostaElaboraDati.getOk();
+			cert.save();
+			
+			checks.add(rispostaElaboraDati);
 		}
+		
 		return checks;
 	}
 

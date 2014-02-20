@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.mail.Session;
+
 import org.joda.time.LocalDate;
 
 import controllers.Security;
@@ -132,8 +134,9 @@ public class MainMenu {
     } 
 	
 	public List<Integer> getDays() {
-		List<Integer> days = new ArrayList<Integer>();
-		for(Integer i = 1; i < LocalDate.now().dayOfMonth().withMaximumValue().getDayOfMonth(); i++){
+		List<Integer> days = new ArrayList<Integer>();	
+		LocalDate date = new LocalDate().withYear(year).withMonthOfYear(month);
+		for(Integer i = 1; i <= date.dayOfMonth().withMaximumValue().getDayOfMonth(); i++){
 			days.add(i);
 		}
 		return days;

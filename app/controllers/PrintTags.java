@@ -10,7 +10,7 @@ import java.util.Map;
 import org.joda.time.LocalDate;
 
 import models.AbsenceType;
-import models.Configuration;
+import models.ConfGeneral;
 import models.Person;
 import models.PersonDay;
 import models.PersonMonth;
@@ -36,7 +36,7 @@ public class PrintTags extends Controller{
 		}
 //		Lang.change("it");
 //		Logger.debug("Il linguaggio attualmente è: %s", Lang.get());
-		Configuration confParameters = Configuration.getCurrentConfiguration();
+//		Configuration confParameters = Configuration.getCurrentConfiguration();
 		if(personId == -1){
 			/**
 			 * è il caso in cui ho chiesto la stampa cartellino di tutti...vediamo come gestirla in un secondo momento
@@ -47,7 +47,8 @@ public class PrintTags extends Controller{
 		int year = params.get("year", Integer.class);
 		
 	
-		Configuration conf = Configuration.getCurrentConfiguration();
+		//Configuration conf = Configuration.getCurrentConfiguration();
+		ConfGeneral conf = ConfGeneral.getConfGeneral();
 		int minInOutColumn = conf.numberOfViewingCoupleColumn;
 		int numberOfInOut = Math.max(minInOutColumn, PersonUtility.getMaximumCoupleOfStampings(person, year, month));
 
@@ -93,7 +94,7 @@ public class PrintTags extends Controller{
 		//int year = params.get("year", Integer.class);
 		LocalDate date = new LocalDate(year, month,1);
 		List<Person> personList = Person.getActivePersonsInMonth(month, year, false);
-		render(personList, date);
+		render(personList, date, year, month);
 	}
 	
 	
@@ -112,7 +113,8 @@ public class PrintTags extends Controller{
 		}
 	
 		
-		Configuration conf = Configuration.getCurrentConfiguration();
+		//Configuration conf = Configuration.getCurrentConfiguration();
+		ConfGeneral conf = ConfGeneral.getConfGeneral();
 		int minInOutColumn = conf.numberOfViewingCoupleColumn;
 		int numberOfInOut = Math.max(minInOutColumn, PersonUtility.getMaximumCoupleOfStampings(person, year, month));
 

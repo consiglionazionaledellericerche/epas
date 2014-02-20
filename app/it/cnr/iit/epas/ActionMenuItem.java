@@ -25,6 +25,7 @@ public enum ActionMenuItem {
     manageCompetence("Gestione codici competenze", "insertAndUpdateCompetences"),
     printTag("Stampa cartellino", "insertAndUpdateStamping"),
     uploadSituation("Attestati presenza", "uploadSituation"),
+    charts("Grafici", "insertAndUpdateCompetences"),
     separateMenu("-----------------------------------------------",""),    
 	stampings("Situazione mensile", "viewPersonalSituation"),
 	changePassword("Gestione password", "viewPersonalSituation"),

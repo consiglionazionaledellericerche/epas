@@ -20,7 +20,7 @@ import java.util.Map;
 
 import models.Absence;
 import models.AbsenceType;
-import models.Configuration;
+import models.ConfGeneral;
 import models.Contract;
 import models.InitializationAbsence;
 import models.InitializationTime;
@@ -86,7 +86,8 @@ public class Stampings extends Controller {
 		}
 	
 		
-		Configuration conf = Configuration.getCurrentConfiguration();
+		//Configuration conf = Configuration.getCurrentConfiguration();
+		ConfGeneral conf = ConfGeneral.getConfGeneral();
 		int minInOutColumn = conf.numberOfViewingCoupleColumn;
 		int numberOfInOut = Math.max(minInOutColumn, PersonUtility.getMaximumCoupleOfStampings(person, year, month));
 
@@ -145,7 +146,8 @@ public class Stampings extends Controller {
 			render("@redirectToIndex");
 		}
 		
-		Configuration conf = Configuration.getCurrentConfiguration();													//0 sql (se già in cache)
+		//Configuration conf = Configuration.getCurrentConfiguration();													//0 sql (se già in cache)
+		ConfGeneral conf = ConfGeneral.getConfGeneral();
 		int minInOutColumn = conf.numberOfViewingCoupleColumn;
 		int numberOfInOut = Math.max(minInOutColumn, PersonUtility.getMaximumCoupleOfStampings(person, year, month));	//30 sql
 
@@ -486,14 +488,16 @@ public class Stampings extends Controller {
 		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();						
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 		for(Person person : activePersonsInDay){
-			
-			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.date = ? and pd.person = ?", dayPresence, person).first();
-			if(pd==null)
-				pd = new PersonDay(person, dayPresence);
+			if(!person.username.equals("epas.clocks")){
+				PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.date = ? and pd.person = ?", dayPresence, person).first();
+				if(pd==null)
+					pd = new PersonDay(person, dayPresence);
 
-			pd.computeValidStampings();
-			daysRecap.add(new PersonStampingDayRecap(pd, numberOfInOut));
-			
+				pd.computeValidStampings();
+				daysRecap.add(new PersonStampingDayRecap(pd, numberOfInOut));
+
+			}
+						
 		}
 
 		

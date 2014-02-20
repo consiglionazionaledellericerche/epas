@@ -32,14 +32,14 @@ public class Administrators extends Controller {
 		 * TODO: cambiare i permessi in relazione al fatto che l'utente loggato sia effettivamente attivo nella data in cui visita
 		 * la pagina di lista amministratori
 		 */
-		List<Person> administratorList = new ArrayList<Person>();
-		List<Person> personList = Person.find("Select p from Person p where p.name <> ? order by p.surname", "Admin").fetch();
-		for(Person p : personList){
-			if(p.permissions.size() > 0){
-				administratorList.add(p);
-			}
-
-		}
+//		List<Person> administratorList = new ArrayList<Person>();
+		List<Person> administratorList = Person.find("Select p from Person p where p.name <> ? order by p.surname", "Admin").fetch();
+//		for(Person p : personList){
+//			if(p.permissions.size() > 0){
+//				administratorList.add(p);
+//			}
+//
+//		}
 
 		render(administratorList);
 	}
@@ -51,7 +51,7 @@ public class Administrators extends Controller {
 			if(request.isAjax()) error("Invalid value");
 			render("@list");
 		}
-
+		/*
 		List<Permission> permissionList = Permission.findAll();
 		Person person = Person.em().getReference(Person.class, personId);
 		String viewPersonList = params.get("viewPersonList");
@@ -67,7 +67,7 @@ public class Administrators extends Controller {
 		String insertAndUpdateCompetences = params.get("insertAndUpdateCompetences");
 		String insertAndUpdateVacations = params.get("insertAndUpdateVacations");
 		String uploadSituation = params.get("uploadSituation");
-		
+		*/
 		/*
 		if(person.permissions.size() > 0){
 			person.permissions.clear();
@@ -164,10 +164,10 @@ public class Administrators extends Controller {
 		}
 		
 		person.save();
-		*/
+		
 		flash.success(String.format("Aggiornati permessi per %s %s con successo", person.name, person.surname));
 		Application.indexAdmin();
-
+		 */
 	}
 
 

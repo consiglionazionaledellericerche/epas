@@ -111,7 +111,7 @@ public class PersonDay extends Model {
 	public String modificationType;
 	
 	@NotAudited
-	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY, cascade= {CascadeType.PERSIST, CascadeType.REMOVE})
 	public List<PersonDayInTrouble> troubles = new ArrayList<PersonDayInTrouble>();
 	
 	@Transient
@@ -577,13 +577,16 @@ public class PersonDay extends Model {
 	 */
 	public void populatePersonDay()
 	{
-
+			
+		//if(this.person.id == 45) Logger.info("  *PopulatePersonDay date=%s", this.date);
 		//controllo problemi strutturali del person day
 		if(this.date.isBefore(new LocalDate()))
 			this.checkForPersonDayInTrouble();
 
+		//if(this.person.id == 45 && this.troubles.size()==0) Logger.info("  *  Check Trouble                 NO");
+		//if(this.person.id == 45 && this.troubles.size()==1) Logger.info("  *  Check Trouble                 SI");
+		
 		//Strutture dati transienti necessarie al calcolo
-
 		if(personDayContract==null)
 		{
 			this.personDayContract = this.person.getContractFromHeap(date);
@@ -591,26 +594,79 @@ public class PersonDay extends Model {
 			if(personDayContract==null)
 				return;
 		}
+		
+		//if(this.person.id == 45) Logger.info("  *  Associa contratto             contract=%s", this.personDayContract.id);
+	
+		
 		if(previousPersonDayInMonth==null)
 		{
 			associatePreviousInMonth();
 		}
+		
+		//if(this.person.id == 45 && this.previousPersonDayInMonth!=null) Logger.info("  *  Associa previous in month     previous=%s", this.previousPersonDayInMonth.date);
+		//if(this.person.id == 45 && this.previousPersonDayInMonth==null) Logger.info("  *  Associa previous in month     previous=null");
+		
+		
+		
+		
 		if(previousPersonDayInMonth!=null && previousPersonDayInMonth.personDayContract==null)
 		{
 			this.previousPersonDayInMonth.personDayContract = this.person.getContractFromHeap(this.previousPersonDayInMonth.date);
 		}
-
+	
 		//controllo uscita notturna
 		this.checkExitStampNextDay();
 		
+		//if(this.person.id == 45 && this.previousPersonDayInMonth!=null) Logger.info("  *  After check midnight          previous=%s", this.previousPersonDayInMonth.date);
+		//if(this.person.id == 45 && this.previousPersonDayInMonth==null) Logger.info("  *  After check midnight          previous=null");
+		
+		
 		updateTimeAtWork();
+		
+		//if(this.person.id == 45) Logger.info("  *  Time at work                  %s", this.timeAtWork);
 		updateDifference();
-		updateProgressive();	
+		//if(this.person.id == 45) Logger.info("  *  Difference                    %s", this.difference);
+		updateProgressive();
+		//if(this.person.id == 45) Logger.info("  *  Progressive                   %s", this.progressive);
 		updateTicketAvailable();
+		//if(this.person.id == 45) Logger.info("  *  Ticket                        %s", this.isTicketAvailable);
 		
 		//this.merge();
 		this.save();
 		
+		//if(this.person.id == 45) Logger.info("  **********************************************************************");
+		
+	}
+	
+	/**
+	 * Stessa logica di populatePersonDay ma senza persistere i calcoli (usato per il giorno di oggi)
+	 */
+	public void queSeraSera()
+	{
+		//Strutture dati transienti necessarie al calcolo
+		if(personDayContract==null)
+		{
+			this.personDayContract = this.person.getContractFromHeap(date);
+			//Se la persona non ha un contratto attivo non si fanno calcoli per quel giorno, le timbrature vengono comunque mantenute
+			if(personDayContract==null)
+				return;
+		}
+		
+		if(previousPersonDayInMonth==null)
+		{
+			associatePreviousInMonth();
+		}
+		
+		if(previousPersonDayInMonth!=null && previousPersonDayInMonth.personDayContract==null)
+		{
+			this.previousPersonDayInMonth.personDayContract = this.person.getContractFromHeap(this.previousPersonDayInMonth.date);
+		}
+		
+		updateTimeAtWork();
+		updateDifference();
+		updateProgressive();
+		updateTicketAvailable();
+
 	}
 	
 	/**
@@ -883,20 +939,21 @@ public class PersonDay extends Model {
 	private List<PairStamping> getGapLunchPairs(List<PairStamping> validPairs)
 	{
 		//Assumo che la timbratura di uscita e di ingresso debbano appartenere alla finestra 12:00 - 15:00
-		Configuration config = Configuration.getConfiguration(this.date);
+		//Configuration conf = Configuration.getConfiguration(this.date);
+		ConfGeneral conf = ConfGeneral.getConfGeneral();
 		LocalDateTime startLunch = new LocalDateTime()
 		.withYear(this.date.getYear())
 		.withMonthOfYear(this.date.getMonthOfYear())
 		.withDayOfMonth(this.date.getDayOfMonth())
-		.withHourOfDay(config.mealTimeStartHour)
-		.withMinuteOfHour(config.mealTimeStartMinute);
+		.withHourOfDay(conf.mealTimeStartHour)
+		.withMinuteOfHour(conf.mealTimeStartMinute);
 		
 		LocalDateTime endLunch = new LocalDateTime()
 		.withYear(this.date.getYear())
 		.withMonthOfYear(this.date.getMonthOfYear())
 		.withDayOfMonth(this.date.getDayOfMonth())
-		.withHourOfDay(config.mealTimeEndHour)
-		.withMinuteOfHour(config.mealTimeEndMinute);
+		.withHourOfDay(conf.mealTimeEndHour)
+		.withMinuteOfHour(conf.mealTimeEndMinute);
 		
 		//List<PairStamping> lunchPairs = new ArrayList<PersonDay.PairStamping>();
 		List<PairStamping> gapPairs = new ArrayList<PersonDay.PairStamping>();
@@ -937,8 +994,6 @@ public class PersonDay extends Model {
 		if(this.isFixedTimeAtWork())
 			return;
 		
-		Configuration config = Configuration.getCurrentConfiguration();
-		
 		if(this.date.getDayOfMonth()==1)
 			this.previousPersonDayInMonth = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? and pd.date < ? ORDER by pd.date DESC", this.person, this.date).first();
 		
@@ -951,9 +1006,8 @@ public class PersonDay extends Model {
 		
 		if(lastStampingPreviousDay != null && lastStampingPreviousDay.isIn())
 		{
-			Logger.debug("Sono nel caso in cui ci sia una timbratura finale di ingresso nel giorno precedente nel giorno %s", this.previousPersonDayInMonth.date);
-
 			this.orderStampings();
+			ConfYear config = ConfYear.getConfYear(this.date.getYear());
 			if(this.stampings.size() > 0 && this.stampings.get(0).way == WayType.out && config.hourMaxToCalculateWorkTime > this.stampings.get(0).date.getHourOfDay())
 			{
 				Stamping correctStamp = new Stamping();
@@ -980,8 +1034,12 @@ public class PersonDay extends Model {
 				this.save();
 			}
 
-
+			if(this.date.getDayOfMonth() == 1)
+				this.previousPersonDayInMonth = null;
 		}
+		
+		if(this.date.getDayOfMonth() == 1)
+			this.previousPersonDayInMonth = null;
 
 	}
 	
