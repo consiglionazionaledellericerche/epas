@@ -636,8 +636,11 @@ public class Person extends Model {
 				
 				//only technician
 				+"and p.qualification in :qualificationList "
+				
+				//utenti di sistema
+				+"and p.username != ? "
 								
-				+ "order by p.surname, p.name", endPeriod, endPeriod, startPeriod, endPeriod, startPeriod).bind("officeList", officeAllowed).bind("qualificationList", qualificationRequested).fetch();
+				+ "order by p.surname, p.name", endPeriod, endPeriod, startPeriod, endPeriod, startPeriod, "epas.clocks").bind("officeList", officeAllowed).bind("qualificationList", qualificationRequested).fetch();
 
 		return personList;
 	}
