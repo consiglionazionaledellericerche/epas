@@ -11,7 +11,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import models.InitializationTime;
 import models.Person;
-import models.PersonMonth;
+import models.PersonMonthRecap;
 
 /**
  * 
@@ -22,7 +22,7 @@ public class UltimateMonthResidualTest {
 
 	private final static Logger log = LoggerFactory.getLogger(UltimateMonthResidualTest.class);
 	
-	private static final class PersonMonthUltimate extends PersonMonth {
+	private static final class PersonMonthUltimate extends PersonMonthRecap {
 
 
 		private int personLevel = 2;

@@ -43,6 +43,8 @@ GET		/competences/{personId}/{year}/{month}	Competences.show
 
 #Riepilogo ore
 GET		/hourRecap/{personId}/{year}			PersonMonths.hourRecap
+GET		/hourRecap/trainingHours				PersonMonths.trainingHours
+
 
 #Dispatcher
 POST	/dispatch								SwitchTemplate.dispatch	

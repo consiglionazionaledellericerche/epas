@@ -18,7 +18,7 @@ import models.InitializationTime;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
-import models.PersonMonth;
+import models.PersonMonthRecap;
 import models.WorkingTimeType;
 import models.exports.PersonsList;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
