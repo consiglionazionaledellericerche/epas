@@ -28,7 +28,7 @@ import models.AbsenceTypeGroup;
 import models.ConfYear;
 import models.Person;
 import models.PersonDay;
-import models.PersonMonth;
+import models.PersonMonthRecap;
 import models.PersonTags;
 import models.Qualification;
 import models.Stamping;

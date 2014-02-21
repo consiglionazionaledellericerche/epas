@@ -22,7 +22,7 @@ import models.CompetenceCode;
 import models.Permission;
 import models.Person;
 import models.PersonDay;
-import models.PersonMonth;
+import models.PersonMonthRecap;
 import models.TotalOvertime;
 import models.rendering.PersonMonthCompetenceRecap;
 

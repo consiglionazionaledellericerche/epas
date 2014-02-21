@@ -29,7 +29,7 @@ import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
 import models.PersonDayInTrouble;
-import models.PersonMonth;
+import models.PersonMonthRecap;
 import models.PersonReperibilityDay;
 import models.PersonShiftDay;
 import models.RemoteOffice;
@@ -52,7 +52,7 @@ public class PersonUtility {
 	 * di straordinari
 	 * @return la somma delle differenze positive dei giorni del mese
 	 */
-	public static int getPositiveDaysForOvertime(PersonMonth personMonth){
+	public static int getPositiveDaysForOvertime(PersonMonthRecap personMonth){
 		int positiveDifference = 0;
 		LocalDate date = new LocalDate(personMonth.year, personMonth.month, 1);
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 

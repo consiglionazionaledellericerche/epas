@@ -16,6 +16,7 @@ import models.CompetenceCode;
 import models.InitializationTime;
 import models.Person;
 import models.PersonDay;
+import models.PersonMonthRecap;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
 import play.mvc.Controller;
@@ -81,5 +82,14 @@ public class PersonMonths extends Controller{
 		}
 
 		render(mapMonthSituation, person, year);	
+	}
+	
+	@Check(Security.VIEW_PERSONAL_SITUATION)
+	public static void trainingHours(Long personId, int year, int month){
+		Person person = Person.findById(personId);
+		List<PersonMonthRecap> pmList = PersonMonthRecap.find("Select pm from PersonMonthRecap pm where pm.year = ? and pm.person = ?", year, person).fetch(); 
+		
+		render(person, year, month, pmList);
+		
 	}
 }
