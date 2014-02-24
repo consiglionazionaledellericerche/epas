@@ -12,11 +12,12 @@ import org.joda.time.LocalDate;
  */
 public class PersonPeriodAbsenceCode {
 
+	public long personId;
 	public String name;
 	public String surname;
 	public String code;
-	public String dateFrom;
-	public String dateTo;
+	public String start;
+	public String end;
 	
 	
 }
