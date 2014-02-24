@@ -5,7 +5,7 @@ import play.Logger;
 import models.Absence;
 import models.AbsenceType;
 import models.Person;
-import models.PersonMonth;
+import models.PersonMonthRecap;
 import models.StampType;
 import models.Stamping;
 import models.Stamping.WayType;
