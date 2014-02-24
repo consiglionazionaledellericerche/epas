@@ -46,6 +46,5 @@ public class PersonYear extends Model{
 		this.person = person;
 		this.year = year;
 	}
-	
-			
+				
 }

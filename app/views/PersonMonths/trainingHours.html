@@ -1,0 +1,19 @@
+#{extends 'main_admin_no_menu.html' /}
+#{set titolo: 'Ore di formazione per ' + person.surname + ' ' + person.name + ' anno: ' + year /}
+
+<p class="lead">Le ore di formazione possono essere inserite solo per il mese selezionabile. Nel momento in cui l'amministratore le approva non potranno più essere modificate.</p>
+
+<table>
+	<tr>
+		<th>Mese</th>
+		<th>Ore di formazione</th>
+		<th>Approvate</th>
+	</tr>
+	#{list items: pmList, as: 'personMonth'}
+	<tr>
+		<td>&{'views.tags.display.date.month.' +month}</td>
+		<td>${personMonth.trainingHours != null ? personMonth.trainingHours : 0}</td>
+		<td>${personMonth.hoursApproved != null ? personMonth.hoursApproved : 0}</td>
+	</tr>	
+	#{/list}
+</table>
