@@ -1,5 +1,7 @@
 package controllers;
 
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.ExportToYaml;
 import it.cnr.iit.epas.FromMysqlToPostgres;
 import it.cnr.iit.epas.PersonUtility;
@@ -16,6 +18,7 @@ import controllers.shib.Shibboleth;
 import models.AbsenceType;
 import models.ConfGeneral;
 import models.Contract;
+import models.InitializationAbsence;
 import models.InitializationTime;
 import models.Person;
 import models.PersonDay;
@@ -25,6 +28,7 @@ import models.WorkingTimeType;
 import models.exports.PersonsList;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
+import models.rendering.VacationsRecap;
 import play.Logger;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
@@ -33,6 +37,8 @@ import procedure.evolutions.Evolutions;
 
 
 //@With(Shibboleth.class)
+
+@With( {Secure.class, NavigationMenu.class} )
 public class Administration extends Controller {
 	
 	
@@ -175,20 +181,97 @@ public class Administration extends Controller {
 	{
 		
 		LocalDate initUse = ConfGeneral.getConfGeneral().initUseProgram;
-		//Prendo tutte le persone che hanno un contratto attivo nell'anno di initUse
-		List<Person> personList = Person.getActivePersonsinYear(initUse.getYear(), false);
+		Person personLogged = Security.getPerson();
+		
+		//Prendo tutte le persone che hanno almeno un contratto attivo dal momento di initUse a oggi
+		List<Person> personList = Person.getActivePersonsSpeedyInPeriod(initUse, new LocalDate(), personLogged, false);
+		
 		for(Person person : personList)
 		{
-			InitializationTime initPerson = person.initializationTimes.get(0);	//TODO relazione e' 1:1	
-			for(Contract c : person.contracts)
+			if(person.id!=131)
+				continue;
+			
+			
+			Logger.debug("Processo %s %s (%s di %s)", person.name, person.surname, personList.indexOf(person), personList.size());
+			
+			InitializationTime initPerson = null; ;	//TODO relazione e' 1:1
+			if(person.initializationTimes!=null && person.initializationTimes.size()>0)
+				initPerson = person.initializationTimes.get(0);
+			List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ?", person).fetch();
+			for(Contract c : contractList)
 			{
 				c.setRecapPeriods(initUse, initPerson);
-				
 			}
 						
 		}
 		
+		render(personList);
 		
+	}
+
+	public static void logvariecose()
+	{
+		LocalDate initUse = ConfGeneral.getConfGeneral().initUseProgram;
+		Person personLogged = Security.getPerson();
+		
+		//Prendo tutte le persone che hanno almeno un contratto attivo dal momento di initUse a oggi
+		List<Person> personList = Person.getActivePersonsSpeedyInPeriod(initUse, new LocalDate(), personLogged, false);
+		
+		for(Person person : personList)
+		{
+			try
+			{
+				//2013
+				/*
+				CalcoloSituazioneAnnualePersona csap2013 = new CalcoloSituazioneAnnualePersona(person, 2013, new LocalDate());
+				//2014
+				CalcoloSituazioneAnnualePersona csap2014 = new CalcoloSituazioneAnnualePersona(person, 2014, new LocalDate());
+				*/
+			}
+			catch(Exception e)
+			{
+				Logger.debug("ECCEZIONEEEE per la person %s %s ", person.name, person.surname);
+			}
+		}
+		
+	}
+	
+	/**
+	 * Successivamente la procedura di importazione sono rimaste alcune computazioni da effettuare.
+	 * Occorre completare la valorizzazione di initializationTime contenente i dati pre importazione (quelli fino a 2012/12/31)
+	 */
+	public static void mysqlIntegration()
+	{
+		LocalDate mysqlInitTime = new LocalDate(2013,1,1);
+		List<Person> personList = Person.getActivePersonsinYear(mysqlInitTime.getYear(), false);
+		for(Person person : personList)
+		{
+			
+			if(person.initializationTimes==null || person.initializationTimes.size()==0)
+			{
+				Logger.debug("%s %s : no initialization time 2013-01-01", person.name, person.surname);
+				continue;
+			}
+			InitializationTime initPerson = person.initializationTimes.get(0);	//TODO relazione e' 1:1	
+			
+			//ferie anno corrente fatte nel 2012 imputate al contratto attivo alla data
+			Contract contract = person.getContract(mysqlInitTime);
+			if(contract==null)
+			{
+				Logger.debug("%s %s : no active contract 2013-01-01", person.name, person.surname);
+				initPerson.vacationLastYearUsed = null;
+				initPerson.save();
+				continue;
+			}
+			
+			
+			DateInterval year2012 = new DateInterval(new LocalDate(2012,1,1), new LocalDate(2012,12,31));
+			AbsenceType ab32 = AbsenceType.getAbsenceTypeByCode("32");
+			initPerson.vacationLastYearUsed = VacationsRecap.getVacationDays(year2012, contract, ab32).size();
+			Logger.debug("%s %s : %s", person.name, person.surname, initPerson.vacationLastYearUsed);
+			initPerson.save();
+						
+		}
 	}
 
     

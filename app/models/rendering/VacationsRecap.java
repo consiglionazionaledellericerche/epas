@@ -31,8 +31,8 @@ import com.google.common.collect.Table;
 public class VacationsRecap {
 	
 	public Person person;
-	public short year;
-	public Contract currentContract = null;
+	public int year;
+	public Contract activeContract = null;
 	public List<VacationPeriod>vacationPeriodList = null;	//lista vacation period del current contract
 	
 	public List<Absence> vacationDaysLastYearUsed = new ArrayList<Absence>();
@@ -59,20 +59,20 @@ public class VacationsRecap {
 	 * @param considerExpireLastYear impostare true se non si vuole considerare il limite di scadenza per l'utilizzo
 	 * delle ferie dell'anno precedente (utile per assegnare il codice 37)
 	 */
-	public VacationsRecap(Person person, short year, LocalDate actualDate, boolean considerExpireLastYear)
+	public VacationsRecap(Person person, int year, Contract contract, LocalDate actualDate, boolean considerExpireLastYear)
 	{
 		this.person = person;
 		this.year = year;
 		
-		//current contract
-		this.currentContract = person.getCurrentContract();
-		if(currentContract == null)
+		//active contract
+		this.activeContract = contract;
+		if(activeContract == null)
 		{
 			return;
 		}
 		
 		//vacation periods list
-		this.vacationPeriodList = this.currentContract.getContractVacationPeriods();
+		this.vacationPeriodList = this.activeContract.getContractVacationPeriods();
 		if(vacationPeriodList == null)
 		{
 			return;
@@ -95,39 +95,39 @@ public class VacationsRecap {
 		AbsenceType ab37 = AbsenceType.getAbsenceTypeByCode("37");
 		AbsenceType ab94 = AbsenceType.getAbsenceTypeByCode("94");
 
-		this.vacationDaysLastYearUsed.addAll(getVacationDays(new DateInterval(startLastYear, endLastYear), currentContract, ab32));
-		this.vacationDaysLastYearUsed.addAll(getVacationDays(new DateInterval(startYear, endYear), currentContract, ab31));
-		this.vacationDaysLastYearUsed.addAll(getVacationDays(new DateInterval(startYear, endYear), currentContract, ab37));
+		this.vacationDaysLastYearUsed.addAll(getVacationDays(new DateInterval(startLastYear, endLastYear), activeContract, ab32));
+		this.vacationDaysLastYearUsed.addAll(getVacationDays(new DateInterval(startYear, endYear), activeContract, ab31));
+		this.vacationDaysLastYearUsed.addAll(getVacationDays(new DateInterval(startYear, endYear), activeContract, ab37));
 		
-		this.vacationDaysCurrentYearUsed.addAll(getVacationDays(new DateInterval(startYear, endYear), currentContract, ab32));
+		this.vacationDaysCurrentYearUsed.addAll(getVacationDays(new DateInterval(startYear, endYear), activeContract, ab32));
 		
-		this.permissionUsed = getVacationDays(new DateInterval(startYear, endYear), currentContract, ab94).size();
+		this.permissionUsed = getVacationDays(new DateInterval(startYear, endYear), activeContract, ab94).size();
 		
 		
 		//***************************************************************
 		//*** calcolo ferie e permessi maturati per year e lastyear	  ***
 		//***************************************************************
 		
-		this.vacationDaysLastYearAccrued = getVacationAccruedYear(new DateInterval(startLastYear, endLastYear), this.currentContract, this.vacationPeriodList);
+		this.vacationDaysLastYearAccrued = getVacationAccruedYear(new DateInterval(startLastYear, endLastYear), this.activeContract, this.vacationPeriodList);
 		if(endYear.isAfter(actualDate))
 		{
 			//se la query e' per l'anno corrente considero fino a actualDate
-			this.permissionCurrentYearAccrued = getPermissionAccruedYear(new DateInterval(startYear, actualDate), this.currentContract);
-			this.vacationDaysCurrentYearAccrued = getVacationAccruedYear(new DateInterval(startYear, actualDate), this.currentContract, this.vacationPeriodList);
+			this.permissionCurrentYearAccrued = getPermissionAccruedYear(new DateInterval(startYear, actualDate), this.activeContract);
+			this.vacationDaysCurrentYearAccrued = getVacationAccruedYear(new DateInterval(startYear, actualDate), this.activeContract, this.vacationPeriodList);
 		}
 		else
 		{
 			//se la query e' per gli anni passati considero fino a endYear
-			this.permissionCurrentYearAccrued = getPermissionAccruedYear(new DateInterval(startYear, endYear), this.currentContract);
-			this.vacationDaysCurrentYearAccrued = getVacationAccruedYear(new DateInterval(startYear, endYear), this.currentContract, this.vacationPeriodList);
+			this.permissionCurrentYearAccrued = getPermissionAccruedYear(new DateInterval(startYear, endYear), this.activeContract);
+			this.vacationDaysCurrentYearAccrued = getVacationAccruedYear(new DateInterval(startYear, endYear), this.activeContract, this.vacationPeriodList);
 			
 		}
 		
 		//******************************************************************************************************
 		//*** calcolo ferie e permessi non ancora utilizzati  per year e last year 							 ***
 		//******************************************************************************************************
-		this.permissionCurrentYearTotal = getPermissionAccruedYear(new DateInterval(startYear, endYear), this.currentContract);
-		this.vacationDaysCurrentYearTotal = getVacationAccruedYear(new DateInterval(startYear, endYear), this.currentContract, this.vacationPeriodList);		//a cristian da 27 perchè è passato da 26 a 28 durante l'anno
+		this.permissionCurrentYearTotal = getPermissionAccruedYear(new DateInterval(startYear, endYear), this.activeContract);
+		this.vacationDaysCurrentYearTotal = getVacationAccruedYear(new DateInterval(startYear, endYear), this.activeContract, this.vacationPeriodList);		//a cristian da 27 perchè è passato da 26 a 28 durante l'anno
 		
 		
 		if(actualDate.isBefore(expireVacation) || !considerExpireLastYear)
@@ -253,8 +253,8 @@ public class VacationsRecap {
 	 * @return
 	 */
 	public static int remainingPastVacationsAs37(int year, Person person){
-		
-		VacationsRecap vc = new VacationsRecap(person, (short)(year), new LocalDate(), false);
+		Contract contract = person.getCurrentContract();
+		VacationsRecap vc = new VacationsRecap(person, year, contract, new LocalDate(), false);
 		return vc.vacationDaysLastYearNotYetUsed;
 		
 	}

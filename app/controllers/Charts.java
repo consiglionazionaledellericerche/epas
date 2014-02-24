@@ -6,6 +6,7 @@ import java.util.List;
 import org.joda.time.LocalDate;
 
 import models.Competence;
+import models.Contract;
 import models.Person;
 import models.exports.PersonOvertime;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
@@ -31,7 +32,9 @@ public class Charts extends Controller{
 			Long val = Competence.find("Select sum(c.valueApproved) from Competence c where c.competenceCode.code in (?,?,?) and c.year = ? and c.month = ? and c.person = ?",
 					"S1","S2","S3", year, month, p).first();
 
-			CalcoloSituazioneAnnualePersona sit = new CalcoloSituazioneAnnualePersona(p, year, new LocalDate(year,month,1));
+			//RTODO contratto attivo??
+			Contract contract = p.getCurrentContract();
+			CalcoloSituazioneAnnualePersona sit = new CalcoloSituazioneAnnualePersona(contract, year, new LocalDate(year,month,1));
 			Mese mese = sit.getMese(year,month);
 			po.month = 1;
 			po.year = 2013;

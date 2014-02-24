@@ -256,6 +256,9 @@ public class DateUtility {
 	 */
 	public static String fromMinuteToHourMinute(int minute)
 	{
+		if(minute==0)
+			return "00:00";
+		
 		String s = "";
 		if(minute<0)
 		{

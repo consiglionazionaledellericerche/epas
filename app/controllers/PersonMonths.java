@@ -13,6 +13,7 @@ import org.joda.time.LocalDate;
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
+import models.Contract;
 import models.InitializationTime;
 import models.Person;
 import models.PersonDay;
@@ -40,7 +41,9 @@ public class PersonMonths extends Controller{
 		Map<Integer, List<String>> mapMonthSituation = new HashMap<Integer, List<String>>();
 		List<String> lista = null;
 				
-		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, year, null);
+		//RTODO
+		Contract contract = person.getCurrentContract();
+		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, year, null);
 		
 		int firstYear = 2013;	//TODO provvisorio fin quando non verranno persistiti i valori iniziali
 		
