@@ -280,7 +280,8 @@ public class PersonUtility {
 	 */
 	public static AbsenceType whichVacationCode(Person person, LocalDate actualDate){
 		
-		VacationsRecap vr = new VacationsRecap(person, (short) actualDate.getYear(), actualDate, true);	
+		Contract contract = person.getCurrentContract();
+		VacationsRecap vr = new VacationsRecap(person, actualDate.getYear(), contract, actualDate, true);	
 		
 		if(vr.vacationDaysLastYearNotYetUsed>0)
 			return AbsenceType.find("byCode", "31").first();
@@ -552,7 +553,8 @@ public class PersonUtility {
 	{
 		if(date.getDayOfMonth()>1)
 			date = date.minusDays(1);
-		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, date.getYear(), date);
+		Contract contract = person.getContract(date);
+		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, date.getYear(), date);
 		Mese mese = c.getMese(date.getYear(), date.getMonthOfYear());
 		Logger.info("monteOreAnnoCorrente=%s ,  monteOreAnnoPassato=%s, workingTime=%s", mese.monteOreAnnoCorrente, mese.monteOreAnnoPassato, mese.person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime);
 		if(mese.monteOreAnnoCorrente + mese.monteOreAnnoPassato > mese.person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime)

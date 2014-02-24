@@ -1,5 +1,8 @@
 package models.personalMonthSituation;
 
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
+
 import java.util.List;
 
 import org.joda.time.LocalDate;
@@ -7,12 +10,14 @@ import org.joda.time.LocalDate;
 import play.Logger;
 import models.Absence;
 import models.Competence;
+import models.Contract;
 import models.Person;
 import models.PersonDay;
 
 public class Mese {
 
 	public Person person;
+	public Contract contract;
 	public int qualifica;
 	public boolean possibileUtilizzareResiduoAnnoPrecedente = true;
 	public Mese mesePrecedente;
@@ -20,7 +25,7 @@ public class Mese {
 	public int mese;
 
 	public int tempoInizializzazione;
-	public int progressivoFinaleMese;				//person day
+	public int progressivoFinaleMese		 = 0;	//person day
 	public int progressivoFinalePositivoMese = 0;	//person day
 	public int progressivoFinaleNegativoMese = 0;	//person day
 	
@@ -45,20 +50,20 @@ public class Mese {
 	public int numeroRiposiCompensativi;
 	
 	/**
-	 * Costruisce un oggetto mese con tutte le informazioni necessarie al calcolo della situazione residuo annuale della persona.
+	 * Costruisce un oggetto mese con tutte le informazioni necessarie al calcolo della situazione residuo annuale della persona nell'ambito del contratto passato come argomento.
 	 * Visibile solo all'interno del package models.personalMonthSituation.
 	 * @param mesePrecedente
 	 * @param anno
 	 * @param mese
-	 * @param person
+	 * @param contract
 	 * @param tempoInizializzazione
 	 * @param febmar
 	 * @param calcolaFinoA
 	 */
-	protected Mese(Mese mesePrecedente, int anno, int mese, Person person, int tempoInizializzazione, boolean febmar, LocalDate calcolaFinoA)
+	protected Mese(Mese mesePrecedente, int anno, int mese, Contract contract, int tempoInizializzazione, boolean febmar, LocalDate calcolaFinoA)
 	{
-		
-		this.person = person;
+		this.contract = contract;
+		this.person = contract.person;
 		this.qualifica = person.qualification.qualification;
 		this.anno = anno;
 		this.mese = mese;
@@ -138,6 +143,7 @@ public class Mese {
 	 */
 	public void setPersonDayInformation(LocalDate calcolaFinoA)
 	{
+		//Costruisco l'intervallo mese
 		LocalDate monthBegin = new LocalDate(this.anno, this.mese, 1);
 		LocalDate monthEnd = new LocalDate(this.anno, this.mese, 1).dayOfMonth().withMaximumValue();
 		if(calcolaFinoA!=null && monthEnd.isAfter(calcolaFinoA))
@@ -145,33 +151,41 @@ public class Mese {
 		
 		if(new LocalDate().isBefore(monthEnd))
 			monthEnd = new LocalDate().minusDays(1);
-		
-		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date desc",
-				this.person, monthBegin, monthEnd).fetch();
-		
-		//progressivo finale fine mese
-		for(PersonDay pd : pdList){
-			if(pd != null){
-				this.progressivoFinaleMese = pd.progressive;
-				break;
-			}
-			else{
-				//
-			}
-		}
-
-		//progressivo finale positivo e negativo mese
-		for(PersonDay pd : pdList)
-		{
-			if(pd.difference>=0)
-				this.progressivoFinalePositivoMese += pd.difference;
-			else
-				this.progressivoFinaleNegativoMese += pd.difference;
-
-		}
-		this.progressivoFinaleNegativoMese = this.progressivoFinaleNegativoMese*-1;
 	
-		this.progressivoFinalePositivoMesePrint = this.progressivoFinalePositivoMese;
+		//Interseco l'intervallo mese con contratto
+		DateInterval intervalloMese = new DateInterval(monthBegin, monthEnd);
+		DateInterval intervalloContratto = this.contract.getContractDateInterval();
+		intervalloMese = DateUtility.intervalIntersection(intervalloMese, intervalloContratto);
+		
+		if(intervalloMese!=null)
+		{
+			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date desc",
+					this.person, intervalloMese.getBegin(), intervalloMese.getEnd()).fetch();
+
+			//progressivo finale fine mese
+			for(PersonDay pd : pdList){
+				if(pd != null){
+					this.progressivoFinaleMese = pd.progressive;
+					break;
+				}
+				else{
+					//
+				}
+			}
+
+			//progressivo finale positivo e negativo mese
+			for(PersonDay pd : pdList)
+			{
+				if(pd.difference>=0)
+					this.progressivoFinalePositivoMese += pd.difference;
+				else
+					this.progressivoFinaleNegativoMese += pd.difference;
+
+			}
+			this.progressivoFinaleNegativoMese = this.progressivoFinaleNegativoMese*-1;
+
+			this.progressivoFinalePositivoMesePrint = this.progressivoFinalePositivoMese;
+		}
 	}
 	
 	/**
@@ -180,45 +194,54 @@ public class Mese {
 	 */
 	public void setPersonMonthInformation(LocalDate calcolaFinoA)
 	{
-		//straordinari s1
-		List<Competence> competenceList = Competence.find("Select comp from Competence comp, CompetenceCode compCode where comp.competenceCode = compCode and comp.person = ?"
-				+ "and comp.year = ? and comp.month = ? and compCode.code = ?", this.person, this.anno, this.mese, "S1").fetch();
-		for(Competence comp : competenceList)
+		
+		//Computo intervallo mese intersecato con contratto
+		LocalDate dateFrom = new LocalDate(this.anno, this.mese, 1);
+		LocalDate dateTo = new LocalDate(new LocalDate(this.anno, this.mese, 1).dayOfMonth().withMaximumValue());
+		if(calcolaFinoA!=null && dateTo.isAfter(calcolaFinoA))
+			dateTo = calcolaFinoA;
+
+		DateInterval intervalloMese = new DateInterval(dateFrom, dateTo);
+		DateInterval intervalloContratto = this.contract.getContractDateInterval();
+		intervalloMese = DateUtility.intervalIntersection(intervalloMese, intervalloContratto);
+
+		if(intervalloMese!=null)
 		{
-			this.straordinariMinutiS1Print = this.straordinariMinutiS1Print + (comp.valueApproved * 60);
-		}
+			//straordinari s1
+			List<Competence> competenceList = Competence.find("Select comp from Competence comp, CompetenceCode compCode where comp.competenceCode = compCode and comp.person = ?"
+					+ "and comp.year = ? and comp.month = ? and compCode.code = ?", this.person, this.anno, this.mese, "S1").fetch();
+			for(Competence comp : competenceList)
+			{
+				this.straordinariMinutiS1Print = this.straordinariMinutiS1Print + (comp.valueApproved * 60);
+			}
+
+			//straordinari s2
+			competenceList = Competence.find("Select comp from Competence comp, CompetenceCode compCode where comp.competenceCode = compCode and comp.person = ?"
+					+ "and comp.year = ? and comp.month = ? and compCode.code = ?", this.person, this.anno, this.mese, "S2").fetch();
+			for(Competence comp : competenceList)
+			{
+				this.straordinariMinutiS2Print = this.straordinariMinutiS2Print + (comp.valueApproved * 60);
+			}
+
+			//straordinari s3
+			competenceList = Competence.find("Select comp from Competence comp, CompetenceCode compCode where comp.competenceCode = compCode and comp.person = ?"
+					+ "and comp.year = ? and comp.month = ? and compCode.code = ?", this.person, this.anno, this.mese, "S3").fetch();
+			for(Competence comp : competenceList)
+			{
+				this.straordinariMinutiS3Print = this.straordinariMinutiS3Print + (comp.valueApproved * 60);
+			}
+
+			this.straordinariMinuti = this.straordinariMinutiS1Print + this.straordinariMinutiS2Print + this.straordinariMinutiS3Print;
 		
-		//straordinari s2
-		competenceList = Competence.find("Select comp from Competence comp, CompetenceCode compCode where comp.competenceCode = compCode and comp.person = ?"
-				+ "and comp.year = ? and comp.month = ? and compCode.code = ?", this.person, this.anno, this.mese, "S2").fetch();
-		for(Competence comp : competenceList)
-		{
-			this.straordinariMinutiS2Print = this.straordinariMinutiS2Print + (comp.valueApproved * 60);
-		}
-		
-		//straordinari s3
-		competenceList = Competence.find("Select comp from Competence comp, CompetenceCode compCode where comp.competenceCode = compCode and comp.person = ?"
-				+ "and comp.year = ? and comp.month = ? and compCode.code = ?", this.person, this.anno, this.mese, "S3").fetch();
-		for(Competence comp : competenceList)
-		{
-			this.straordinariMinutiS3Print = this.straordinariMinutiS3Print + (comp.valueApproved * 60);
-		}
-		
-		this.straordinariMinuti = this.straordinariMinutiS1Print + this.straordinariMinutiS2Print + this.straordinariMinutiS3Print;
-		
-		//intervallo per calcolare i riposi compensativi
-		LocalDate monthBegin = new LocalDate(this.anno, this.mese, 1);
-		LocalDate monthEnd = new LocalDate(new LocalDate(this.anno, this.mese, 1).dayOfMonth().withMaximumValue());
-		if(calcolaFinoA!=null && monthEnd.isAfter(calcolaFinoA))
-			monthEnd = calcolaFinoA;
-		
-		List<Absence> riposiCompensativi = Absence.find("Select abs from Absence abs, AbsenceType abt, PersonDay pd where abs.personDay = pd and abs.absenceType = abt and abt.code = ? and pd.person = ? "
-				+ "and pd.date between ? and ?", "91", this.person, monthBegin, monthEnd).fetch();
-		this.riposiCompensativiMinuti = 0;
-		this.numeroRiposiCompensativi = 0;
-		for(Absence abs : riposiCompensativi){
-			this.riposiCompensativiMinuti = this.riposiCompensativiMinuti + this.person.getWorkingTimeType(abs.personDay.date).getWorkingTimeTypeDayFromDayOfWeek(abs.personDay.date.getDayOfWeek()).workingTime;
-			this.numeroRiposiCompensativi++;
+			//riposi compensativi
+			List<Absence> riposiCompensativi = Absence.find("Select abs from Absence abs, AbsenceType abt, PersonDay pd where abs.personDay = pd and abs.absenceType = abt and abt.code = ? and pd.person = ? "
+					+ "and pd.date between ? and ?", "91", this.person, intervalloMese.getBegin(), intervalloMese.getEnd()).fetch();
+			this.riposiCompensativiMinuti = 0;
+			this.numeroRiposiCompensativi = 0;
+			for(Absence abs : riposiCompensativi){
+				this.riposiCompensativiMinuti = this.riposiCompensativiMinuti + this.person.getWorkingTimeType(abs.personDay.date).getWorkingTimeTypeDayFromDayOfWeek(abs.personDay.date.getDayOfWeek()).workingTime;
+				this.numeroRiposiCompensativi++;
+			}
 		}
 
 	}
@@ -309,7 +332,9 @@ public class Mese {
 	 * @return il valore di quanti minuti positivi sono stati fatti da quella persona in quel mese/anno
 	 */
 	public static Integer positiveResidualInMonth(Person person, int year, int month){
-		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, year, null);
+		//RTODO capire che contratto prendere!!!!!!
+		Contract contract = person.getCurrentContract();
+		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, year, null);
 		Mese mese = c.getMese(year, month);
 		return mese.progressivoFinalePositivoMese;
 	}

@@ -117,7 +117,9 @@ public class Stampings extends Controller {
 		int basedWorkingDays = PersonUtility.basedWorkingDays(totalPersonDays);
 		Map<AbsenceType,Integer> absenceCodeMap = PersonUtility.getAllAbsenceCodeInMonth(totalPersonDays);
 
-		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, year, null);
+		//RTODO il contratto attivo nel mese (quello più recente)
+		Contract contract = person.getCurrentContract();
+		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, year, null);
 		Mese mese = c.getMese(year, month);
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);
 		
@@ -177,7 +179,9 @@ public class Stampings extends Controller {
 		int basedWorkingDays = PersonUtility.basedWorkingDays(totalPersonDays);											//0 sql
 		Map<AbsenceType,Integer> absenceCodeMap = PersonUtility.getAllAbsenceCodeInMonth(totalPersonDays);				//1 sql
 
-		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, year, null);
+		//RTODO il contratto attivo nel mese (quello più recente)
+		Contract contract = person.getCurrentContract();
+		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, year, null);
 		Mese mese = c.getMese(year, month);
 		
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);
