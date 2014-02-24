@@ -1,9 +1,9 @@
 # ---!Ups
 
 
-drop table person_months_history;
+--drop table person_months_history;
 
-drop table person_months;
+drop sequence person_months;
 
 
 create sequence seq_person_months_recap
@@ -13,7 +13,7 @@ create sequence seq_person_months_recap
     NO MAXVALUE;
 
 create table person_months_recap (
-	id bigint NOT NULL DEFAULT nextval('seq_person_months'::regclass),
+	id bigint NOT NULL DEFAULT nextval('seq_person_months_recap'::regclass),
 	year integer,
 	month integer,
 	training_hours integer,
@@ -40,7 +40,7 @@ create table person_months_recap_history (
 
 # ---!Downs
 
-drop sequence person_months_recap;
+drop sequence seq_person_months_recap;
 
 drop table person_months_recap_history;
 drop table person_months_recap;
@@ -52,7 +52,7 @@ create sequence person_months
     NO MAXVALUE;
 
 create table person_months (
-	id bigint NOT NULL DEFAULT nextval('seq_person_months'::regclass),
+	id bigint NOT NULL DEFAULT nextval('seq_person_months_recap'::regclass),
 	compensatory_rest_in_minutes integer,
 	month integer,
 	progressiveatendofmonthinminutes integer,
