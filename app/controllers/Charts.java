@@ -106,7 +106,9 @@ public class Charts extends Controller{
 		int totaleOreResidue = 0;
 		for(Person p : personeProva){
 			for(int month=1; month<13;month++){
-				CalcoloSituazioneAnnualePersona sit = new CalcoloSituazioneAnnualePersona(p, year, new LocalDate(year,month,1).dayOfMonth().withMaximumValue());
+				//RTODO contratto attivo??
+				Contract contract = p.getCurrentContract();
+				CalcoloSituazioneAnnualePersona sit = new CalcoloSituazioneAnnualePersona(contract, year, new LocalDate(year,month,1).dayOfMonth().withMaximumValue());
 				Mese mese = sit.getMese(year,month);
 				totaleOreResidue = totaleOreResidue+(mese.positiveResidualInMonth(p, year, month)/60);
 			}
