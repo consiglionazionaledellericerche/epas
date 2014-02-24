@@ -1,0 +1,40 @@
+#{extends 'main_admin_no_menu.html' /}
+#{set titolo: 'Prove per contractYearRecap' /}
+
+#{list items:personList, as:'person'}
+  <p class="lead">${person.name} ${person.surname}</p>
+  <table class="table table-condensed">
+    <tr>
+      <th class="span2">Inizio Contratto</th>
+  	  <th class="span2">Fine Contratto</th>
+  	  <th class="span2">Killato</th>
+  	  <th>Year Recap</th>
+  	<tr>
+  	#{list items:person.contracts, as:'contract'}
+  	<tr>
+  	  <td>${contract.beginContract}</td>
+  	  <td>${contract.expireContract}</td>
+  	  <td>${contract.endContract}</td>
+  	  <td>
+  	    <ul>
+  	    #{list items:contract.recapPeriods, as:'yearRecap'}
+  	      
+  	      <li>
+  	        <ul>
+  	          <li>${yearRecap.year}</li>
+  	          <li>Ferie anno passato: ${yearRecap.vacationLastYearUsed}</li>
+  	          <li>Ferie anno corrente: ${yearRecap.vacationCurrentYearUsed}</li>
+  	          <li>Permessi anno corrente: ${yearRecap.permissionUsed}</li>
+  	          <li>Monte anno passato: ${yearRecap.remainingMinutesLastYear}</li>
+  	          <li>Monte anno corrente: ${yearRecap.remainingMinutesCurrentYear}</li>
+  	          <li>Riposi compensativi: ${yearRecap.recoveryDayUsed}</li>
+  	        </ul>
+  	      </li>     
+  	    #{/list}
+  	    </ul>
+  	  </td>
+  	
+  	</tr>
+  	#{/list}
+  </table>
+#{/list}
