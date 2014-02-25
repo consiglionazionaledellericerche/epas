@@ -40,7 +40,7 @@ import play.db.jpa.Model;
  *
  */
 //@Audited
-@Table(name="person_months")
+@Table(name="person_months_recap")
 @Entity
 public class PersonMonthRecap extends Model {
 
