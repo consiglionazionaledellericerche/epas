@@ -87,9 +87,38 @@ public class PersonMonths extends Controller{
 	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void trainingHours(Long personId, int year, int month){
 		Person person = Person.findById(personId);
-		List<PersonMonthRecap> pmList = PersonMonthRecap.find("Select pm from PersonMonthRecap pm where pm.year = ? and pm.person = ?", year, person).fetch(); 
+		Logger.debug("Ore di formazione per %s %s nel mese %d dell'anno %d", person.name, person.surname, month, year);
+		List<PersonMonthRecap> pmList = null;
+		pmList = PersonMonthRecap.find("Select pm from PersonMonthRecap pm where pm.year = ? and pm.person = ?", year, person).fetch();
 		
+		if(pmList == null || pmList.size() == 0){
+			Logger.debug("Lista nulla, la popolo");
+			pmList = new ArrayList<PersonMonthRecap>();
+			for(int i=1; i< 13; i++){
+				PersonMonthRecap pm = new PersonMonthRecap(person, year, i);
+				pm.trainingHours = 0;
+				pm.hoursApproved = false;
+				pm.save();
+				pmList.add(new PersonMonthRecap(person,year,i));
+				Logger.debug("Aggiunto elemento alla lista dei person month recap con valore del mese %d", i);
+			}
+		}
 		render(person, year, month, pmList);
 		
+	}
+	
+	@Check(Security.VIEW_PERSONAL_SITUATION)
+	public static void insertTrainingHours(long pk, Integer value){
+		
+		
+		PersonMonthRecap pm = PersonMonthRecap.findById(pk);
+//		if(pm == null)
+//			pm = new PersonMonthRecap(person, year, month);
+		Logger.debug("Recuperato person month recap con valori: %s %s %s", pm.person, pm.year, pm.month);
+		pm.trainingHours = value;
+		pm.hoursApproved = false;
+		pm.save();
+		flash.success("Aggiornato il valore per le ore di formazione");
+		Stampings.stampings(pm.year, pm.month);
 	}
 }
