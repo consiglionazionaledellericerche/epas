@@ -1,9 +1,9 @@
 # ---!Ups
 
+drop sequence seq_person_months;
+drop table person_months_history;
+drop table person_months;
 
---drop table person_months_history;
-
-drop sequence person_months;
 
 
 create sequence seq_person_months_recap
@@ -45,14 +45,14 @@ drop sequence seq_person_months_recap;
 drop table person_months_recap_history;
 drop table person_months_recap;
 
-create sequence person_months
+create sequence seq_person_months
 	START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE;
 
 create table person_months (
-	id bigint NOT NULL DEFAULT nextval('seq_person_months_recap'::regclass),
+	id bigint NOT NULL DEFAULT nextval('seq_person_months'::regclass),
 	compensatory_rest_in_minutes integer,
 	month integer,
 	progressiveatendofmonthinminutes integer,
