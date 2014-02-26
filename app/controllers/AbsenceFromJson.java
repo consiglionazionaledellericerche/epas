@@ -82,6 +82,7 @@ public class AbsenceFromJson extends Controller{
 					if(abs.absenceType.code.equals(previousAbsence.absenceType.code)){
 						if(!endCurrentPeriod.isEqual(abs.personDay.date.minusDays(1))){
 							personPeriodAbsenceCode = new PersonPeriodAbsenceCode();
+							personPeriodAbsenceCode.personId = person.id;
 							personPeriodAbsenceCode.name = person.name;
 							personPeriodAbsenceCode.surname = person.surname;
 							personPeriodAbsenceCode.code = previousAbsence.absenceType.code;
