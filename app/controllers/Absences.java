@@ -28,7 +28,7 @@ import models.AbsenceTypeGroup;
 import models.ConfYear;
 import models.Person;
 import models.PersonDay;
-import models.PersonMonth;
+import models.PersonMonthRecap;
 import models.PersonTags;
 import models.Qualification;
 import models.Stamping;
@@ -796,60 +796,66 @@ public class Absences extends Controller{
 	 */
 	private static void handlerAbsenceTypeGroup(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, Blob file)
 	{
-		CheckMessage checkMessage = PersonUtility.checkAbsenceGroup(absenceType, person, dateFrom);
-		if(checkMessage.check == false){
-			flash.error("Impossibile inserire il codice %s per %s %s. "+checkMessage.message, absenceType.code, person.name, person.surname);
-			Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
+		LocalDate actualDate = dateFrom;
+		while(actualDate.isBefore(dateTo) || actualDate.isEqual(dateTo)){
+			CheckMessage checkMessage = PersonUtility.checkAbsenceGroup(absenceType, person, actualDate);
+			if(checkMessage.check == false){
+				flash.error("Impossibile inserire il codice %s per %s %s. "+checkMessage.message, absenceType.code, person.name, person.surname);
+				Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
+			}
+			
+			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, actualDate).first();
+			if(pd == null){
+				pd = new PersonDay(person, actualDate);
+				pd.populatePersonDay();
+				pd.save();
+			}
+			if(checkMessage.check == true && checkMessage.absenceType ==  null){
+
+				Absence absence = new Absence();
+				absence.absenceType = absenceType;
+				absence.personDay = pd;
+				
+				if (file != null && file.exists()) {
+					absence.absenceFile = file;
+				}
+				
+				absence.save();
+				//pd.absences.add(absence); //TODO ce n'era due
+				
+				pd.populatePersonDay();
+				pd.save();
+				pd.updatePersonDaysInMonth();
+				//flash.success("Aggiunto codice di assenza %s "+checkMessage.message, absenceType.code);
+				//Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
+
+			}
+			else if(checkMessage.check == true && checkMessage.absenceType != null){
+				Absence absence = new Absence();
+				absence.absenceType = absenceType;
+				absence.personDay = pd;
+				
+				if (file != null && file.exists()) {
+					absence.absenceFile = file;
+				}
+				
+				absence.save();
+				pd.absences.add(absence);
+				Absence compAbsence = new Absence();
+				compAbsence.absenceType = checkMessage.absenceType;
+				compAbsence.personDay = pd;
+				compAbsence.save();
+				pd.absences.add(compAbsence);
+				pd.save();
+				pd.populatePersonDay();
+				pd.updatePersonDaysInMonth();
+				
+			}
+			actualDate = actualDate.plusDays(1);
 		}
+		flash.success("Aggiunto codice di assenza %s ", absenceType.code);
+		Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
 		
-		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, dateFrom).first();
-		if(pd == null){
-			pd = new PersonDay(person, dateFrom);
-			pd.populatePersonDay();
-			pd.save();
-		}
-		if(checkMessage.check == true && checkMessage.absenceType ==  null){
-
-			Absence absence = new Absence();
-			absence.absenceType = absenceType;
-			absence.personDay = pd;
-			
-			if (file != null && file.exists()) {
-				absence.absenceFile = file;
-			}
-			
-			absence.save();
-			//pd.absences.add(absence); //TODO ce n'era due
-			
-			pd.populatePersonDay();
-			pd.save();
-			pd.updatePersonDaysInMonth();
-			flash.success("Aggiunto codice di assenza %s "+checkMessage.message, absenceType.code);
-			Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
-
-		}
-		if(checkMessage.check == true && checkMessage.absenceType != null){
-			Absence absence = new Absence();
-			absence.absenceType = absenceType;
-			absence.personDay = pd;
-			
-			if (file != null && file.exists()) {
-				absence.absenceFile = file;
-			}
-			
-			absence.save();
-			pd.absences.add(absence);
-			Absence compAbsence = new Absence();
-			compAbsence.absenceType = checkMessage.absenceType;
-			compAbsence.personDay = pd;
-			compAbsence.save();
-			pd.absences.add(compAbsence);
-			pd.save();
-			pd.populatePersonDay();
-			pd.updatePersonDaysInMonth();
-			flash.success("Aggiunto codice di assenza %s "+checkMessage.message, absenceType.code);
-			Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
-		}
 	}
 	
 	private static void handlerGenericAbsenceType(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, Blob file, String mealTicket)

@@ -29,7 +29,7 @@ import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
 import models.PersonDayInTrouble;
-import models.PersonMonth;
+import models.PersonMonthRecap;
 import models.PersonReperibilityDay;
 import models.PersonShiftDay;
 import models.RemoteOffice;
@@ -52,7 +52,7 @@ public class PersonUtility {
 	 * di straordinari
 	 * @return la somma delle differenze positive dei giorni del mese
 	 */
-	public static int getPositiveDaysForOvertime(PersonMonth personMonth){
+	public static int getPositiveDaysForOvertime(PersonMonthRecap personMonth){
 		int positiveDifference = 0;
 		LocalDate date = new LocalDate(personMonth.year, personMonth.month, 1);
 		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
@@ -460,12 +460,32 @@ public class PersonUtility {
 			}
 				
 		}
-		else{
-			return new CheckMessage(true, "Si può prendere il codice di assenza richiesto.", null);	
+		else if(absenceType.absenceTypeGroup.accumulationType.equals(AccumulationType.always)){
 			
+			absList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup.label = ? and abs.personDay.person = ? and" +
+					" abs.personDay.date between ? and ?", 
+					absenceType.absenceTypeGroup.label, person, absence.personDay.date, date).fetch();
+			for(Absence abs : absList){
+				if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay)
+					totalMinutesJustified = person.getCurrentWorkingTimeType().getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime;
+				else{
+					
+					totalMinutesJustified = totalMinutesJustified+abs.absenceType.justifiedTimeAtWork.minutesJustified;
+				}
+				
+			}
+			if(absenceType.absenceTypeGroup.limitInMinute > totalMinutesJustified + absenceType.justifiedTimeAtWork.minutesJustified)
+				/**
+				 * in questo caso non si è arrivati a raggiungere il limite previsto per quella assenza oraria 
+				 */
+				return new CheckMessage(true, "Si può utilizzare il codice di assenza e non c'è necessità di rimpiazzare il codice con il codice " +
+						"di rimpiazzamento", null);
+			else{		
+				return new CheckMessage(true, "Si può prendere il codice di assenza richiesto e viene inserito anche il codice di rimpiazzamento", absenceType.absenceTypeGroup.replacingAbsenceType);
+			}
 			
 		}
-		
+		return new CheckMessage(true, "Si può prendere il codice di assenza richiesto.", null);	
 	}
 
 	/**

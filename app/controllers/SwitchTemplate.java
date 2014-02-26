@@ -177,6 +177,10 @@ public class SwitchTemplate extends Controller{
 		case printPersonTag:
 			PrintTags.showPersonTag(year, month);
 			break;
+		
+		case trainingHours:
+			PersonMonths.trainingHours(personId, year, month);
+			break;
 
 		default: 
 			break;
