@@ -20,7 +20,7 @@ import models.CompetenceCode;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
-import models.PersonMonth;
+import models.PersonMonthRecap;
 import models.Qualification;
 import models.StampProfile;
 import models.Stamping;
@@ -489,7 +489,7 @@ public class ExportToYaml {
 		String out = "";
 		LocalDate actualMonth = new LocalDate(year, month, 1);
 		LocalDate previousMonth = actualMonth.minusMonths(1);
-		for(PersonMonth pm : person.personMonths)
+		for(PersonMonthRecap pm : person.personMonths)
 		{
 			LocalDate pmDate = new LocalDate(pm.year, pm.month, 1);
 			if( pmDate.isEqual(previousMonth) )
@@ -498,15 +498,15 @@ public class ExportToYaml {
 				out = out + getFormattedProperty("person", "person"+person.id);
 				out = out + getFormattedProperty("year", pm.year+"");
 				out = out + getFormattedProperty("month", pm.month+"");
-				out = out + getFormattedProperty("compensatoryRestInMinutes", pm.compensatoryRestInMinutes+"");
-				out = out + getFormattedProperty("recuperiOreDaAnnoPrecedente", pm.recuperiOreDaAnnoPrecedente+"");
-				out = out + getFormattedProperty("remainingMinutesPastYearTaken", pm.remainingMinutesPastYearTaken+"");
-				out = out + getFormattedProperty("residualPastYear", pm.residualPastYear+"");
-				out = out + getFormattedProperty("riposiCompensativiDaAnnoCorrente", pm.riposiCompensativiDaAnnoCorrente+"");
-				out = out + getFormattedProperty("riposiCompensativiDaAnnoPrecedente", pm.riposiCompensativiDaAnnoPrecedente+"");
-				out = out + getFormattedProperty("riposiCompensativiDaInizializzazione", pm.riposiCompensativiDaInizializzazione+"");
-				out = out + getFormattedProperty("straordinari", pm.straordinari+"");
-				//out = out + getFormattedProperty("", pm.totalRemainingMinutes); deprecated
+//				out = out + getFormattedProperty("compensatoryRestInMinutes", pm.compensatoryRestInMinutes+"");
+//				out = out + getFormattedProperty("recuperiOreDaAnnoPrecedente", pm.recuperiOreDaAnnoPrecedente+"");
+//				out = out + getFormattedProperty("remainingMinutesPastYearTaken", pm.remainingMinutesPastYearTaken+"");
+//				out = out + getFormattedProperty("residualPastYear", pm.residualPastYear+"");
+//				out = out + getFormattedProperty("riposiCompensativiDaAnnoCorrente", pm.riposiCompensativiDaAnnoCorrente+"");
+//				out = out + getFormattedProperty("riposiCompensativiDaAnnoPrecedente", pm.riposiCompensativiDaAnnoPrecedente+"");
+//				out = out + getFormattedProperty("riposiCompensativiDaInizializzazione", pm.riposiCompensativiDaInizializzazione+"");
+//				out = out + getFormattedProperty("straordinari", pm.straordinari+"");
+//				//out = out + getFormattedProperty("", pm.totalRemainingMinutes); deprecated
 			}
 		}
 		return out;

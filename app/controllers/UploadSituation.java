@@ -29,7 +29,7 @@ import models.Competence;
 import models.CompetenceCode;
 import models.ConfGeneral;
 import models.Person;
-import models.PersonMonth;
+import models.PersonMonthRecap;
 
 import org.hibernate.ejb.criteria.path.AbstractFromImpl.JoinScope;
 import org.hibernate.type.OrderedSetType;
@@ -216,7 +216,7 @@ public class UploadSituation extends Controller{
 			out.newLine();
 			for(Person p : personList){
 
-				PersonMonth pm = new PersonMonth(p, year, month);
+				PersonMonthRecap pm = new PersonMonthRecap(p, year, month);
 				absenceList = pm.getAbsencesNotInternalUseInMonth();
 				for(Absence abs : absenceList){
 					out.write(p.number.toString());
@@ -259,10 +259,10 @@ public class UploadSituation extends Controller{
 	private static List<RispostaElaboraDati> elaboraDatiDipendenti(Map<String, String> cookies, Set<Dipendente> dipendenti, int year, int month) throws MalformedURLException, URISyntaxException {
 		List<RispostaElaboraDati> checks = Lists.newLinkedList();
 		Person person = null;
-		PersonMonth pm = null;
+		PersonMonthRecap pm = null;
 		for (Dipendente dipendente : dipendenti) {
 			person = Person.findByNumber(Integer.parseInt(dipendente.getMatricola()));
-			pm = new PersonMonth(person, year, month);
+			pm = new PersonMonthRecap(person, year, month);
 			
 			
 			//vedere se l'ho gia' inviato con successo
