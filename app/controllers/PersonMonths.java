@@ -62,17 +62,17 @@ public class PersonMonths extends Controller{
 			else{
 				if(year==firstYear)
 				{
-					lista.add(0, DateUtility.fromMinuteToHourMinute(mese.tempoInizializzazione));
+					lista.add(0, DateUtility.fromMinuteToHourMinute(mese.initMonteOreAnnoPassato + mese.initMonteOreAnnoCorrente));
 					lista.add(1, 0+"");
 					lista.add(2, 0+"");
-					lista.add(3, DateUtility.fromMinuteToHourMinute(mese.tempoInizializzazione));
+					lista.add(3, DateUtility.fromMinuteToHourMinute(mese.initMonteOreAnnoPassato + mese.initMonteOreAnnoCorrente));
 				}
 				else
 				{
 					lista.add(0, 0+"");
 					lista.add(1, 0+"");
-					lista.add(2, DateUtility.fromMinuteToHourMinute(mese.tempoInizializzazione));
-					lista.add(3, DateUtility.fromMinuteToHourMinute(mese.tempoInizializzazione));
+					lista.add(2, DateUtility.fromMinuteToHourMinute(mese.initMonteOreAnnoPassato + mese.initMonteOreAnnoCorrente));
+					lista.add(3, DateUtility.fromMinuteToHourMinute(mese.initMonteOreAnnoPassato + mese.initMonteOreAnnoCorrente));
 				}
 			}			
 			lista.add(4, DateUtility.fromMinuteToHourMinute(mese.progressivoFinaleMese));

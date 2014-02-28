@@ -18,6 +18,7 @@ import controllers.shib.Shibboleth;
 import models.AbsenceType;
 import models.ConfGeneral;
 import models.Contract;
+import models.ContractYearRecap;
 import models.InitializationAbsence;
 import models.InitializationTime;
 import models.Person;
@@ -177,102 +178,96 @@ public class Administration extends Controller {
 	}
 	
 	
-	public static void prove()
-	{
-		
-		LocalDate initUse = ConfGeneral.getConfGeneral().initUseProgram;
-		Person personLogged = Security.getPerson();
-		
-		//Prendo tutte le persone che hanno almeno un contratto attivo dal momento di initUse a oggi
-		List<Person> personList = Person.getActivePersonsSpeedyInPeriod(initUse, new LocalDate(), personLogged, false);
-		
-		for(Person person : personList)
-		{
-			if(person.id!=131)
-				continue;
-			
-			
-			Logger.debug("Processo %s %s (%s di %s)", person.name, person.surname, personList.indexOf(person), personList.size());
-			
-			InitializationTime initPerson = null; ;	//TODO relazione e' 1:1
-			if(person.initializationTimes!=null && person.initializationTimes.size()>0)
-				initPerson = person.initializationTimes.get(0);
-			List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ?", person).fetch();
-			for(Contract c : contractList)
-			{
-				c.setRecapPeriods(initUse, initPerson);
-			}
-						
-		}
-		
-		render(personList);
-		
-	}
-
-	public static void logvariecose()
-	{
-		LocalDate initUse = ConfGeneral.getConfGeneral().initUseProgram;
-		Person personLogged = Security.getPerson();
-		
-		//Prendo tutte le persone che hanno almeno un contratto attivo dal momento di initUse a oggi
-		List<Person> personList = Person.getActivePersonsSpeedyInPeriod(initUse, new LocalDate(), personLogged, false);
-		
-		for(Person person : personList)
-		{
-			try
-			{
-				//2013
-				/*
-				CalcoloSituazioneAnnualePersona csap2013 = new CalcoloSituazioneAnnualePersona(person, 2013, new LocalDate());
-				//2014
-				CalcoloSituazioneAnnualePersona csap2014 = new CalcoloSituazioneAnnualePersona(person, 2014, new LocalDate());
-				*/
-			}
-			catch(Exception e)
-			{
-				Logger.debug("ECCEZIONEEEE per la person %s %s ", person.name, person.surname);
-			}
-		}
-		
-	}
-	
 	/**
-	 * Successivamente la procedura di importazione sono rimaste alcune computazioni da effettuare.
-	 * Occorre completare la valorizzazione di initializationTime contenente i dati pre importazione (quelli fino a 2012/12/31)
+	 * Questo metodo e' da lanciare nel caso di procedura di importazione che preleva i dati dal 2013-01-01, 
+	 * (in cui anche initUse è 2013-01-01)
+	 * Computazioni integrative da compiere:
+	 * 1) Inserire nell'oggetto InitializationTime le ferie effettuate nell'anno precedente
+	 * 2) Costruire per ogni contratto attivo alla data 2013-01-01 l'oggetto sourceData
+	 * 3) Costruire per ogni contratto di cui si dispone di sufficiente informazione i riepiloghi annuali
+	 * 
 	 */
 	public static void mysqlIntegration()
 	{
-		LocalDate mysqlInitTime = new LocalDate(2013,1,1);
-		List<Person> personList = Person.getActivePersonsinYear(mysqlInitTime.getYear(), false);
+		
+		JPAPlugin.startTx(false);
+		//Distruggere quello che c'è prima (adesso in fase di sviluppo)
+		List<Contract> allContract = Contract.findAll();
+		for(Contract contract : allContract)
+		{
+			contract.sourceDate = null;
+			contract.save();
+			for(ContractYearRecap yearRecap : contract.recapPeriods)
+			{
+				yearRecap.delete();
+			}
+			contract.recapPeriods = new ArrayList<ContractYearRecap>();
+			contract.save();
+		}
+		JPAPlugin.closeTx(false);
+		
+		//1) Rimodellare il contenuto di InitializationTime (con ferie e residuo)
+		LocalDate mySqlImportation = new LocalDate(2013,1,1);
+		JPAPlugin.startTx(false);
+		List<Person> personList = Person.findAll();
 		for(Person person : personList)
 		{
+			Logger.debug("%s %s", person.name, person.surname);
+			if(person.name.equals("Admin"))
+				continue;
+			//TODO epasclocks
 			
 			if(person.initializationTimes==null || person.initializationTimes.size()==0)
-			{
-				Logger.debug("%s %s : no initialization time 2013-01-01", person.name, person.surname);
 				continue;
-			}
-			InitializationTime initPerson = person.initializationTimes.get(0);	//TODO relazione e' 1:1	
-			
-			//ferie anno corrente fatte nel 2012 imputate al contratto attivo alla data
-			Contract contract = person.getContract(mysqlInitTime);
+
+			InitializationTime mysqlInitPerson = person.initializationTimes.get(0);			
+			Contract contract = person.getContract(mySqlImportation);
 			if(contract==null)
-			{
-				Logger.debug("%s %s : no active contract 2013-01-01", person.name, person.surname);
-				initPerson.vacationLastYearUsed = null;
-				initPerson.save();
 				continue;
-			}
-			
-			
+	
+			//AGGIORNAMENTO RISPETTO ALLA PROCEDURA DI IMPORTAZIONE
 			DateInterval year2012 = new DateInterval(new LocalDate(2012,1,1), new LocalDate(2012,12,31));
 			AbsenceType ab32 = AbsenceType.getAbsenceTypeByCode("32");
-			initPerson.vacationLastYearUsed = VacationsRecap.getVacationDays(year2012, contract, ab32).size();
-			Logger.debug("%s %s : %s", person.name, person.surname, initPerson.vacationLastYearUsed);
-			initPerson.save();
-						
+			mysqlInitPerson.vacationCurrentYearUsed = VacationsRecap.getVacationDays(year2012, contract, ab32).size();
+			mysqlInitPerson.save();
+	
+			//2) Costruire per ogni contratto attivo alla data 2013-01-01 l'oggetto sourceData
+			contract.sourceDate = mySqlImportation.minusDays(1);
+			contract.sourceRemainingMinutesLastYear = 0;
+			contract.sourceRemainingMinutesCurrentYear = mysqlInitPerson.residualMinutesPastYear;
+			contract.sourcePermissionUsed = 0;
+			contract.sourceVacationCurrentYearUsed = mysqlInitPerson.vacationCurrentYearUsed;
+			contract.sourceVacationLastYearUsed = 0;
+			contract.save();
 		}
-	}
+		JPAPlugin.closeTx(false);
+		
+		
+		JPAPlugin.startTx(false);
+		//3) Costruire per ogni contratto di cui si dispone di sufficiente informazione i riepiloghi annuali
+		for(Person person : personList)
+		{
+			if(person.name.equals("Admin"))
+				continue;
+			//TODO epasclocks
+			List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ?", person).fetch();
+			for(Contract contract : contractList)
+			{
+				try
+				{
+					contract.populateContractYearRecap();
+				}
+				catch(Exception e)
+				{
+					Logger.debug("Eccezione per il contratto %s", contract.id);
+				}
+			}
+		}
+		JPAPlugin.closeTx(false);
 
+		
+	}
+	
+	
     
 }

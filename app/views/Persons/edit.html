@@ -81,49 +81,118 @@
 
 <fieldset>
 	<legend>Dati Contrattuali</legend>
-	<p>
-		
-		<a data-toggle="modal" href="@{Persons.insertContract(person.id)}" data-target="#modal-insert-contract" >Inserisci</a> un nuovo contratto
-		
-	</p>
-	  <table class="table table-striped table-display-contract">
+	<div class="row" style="margin-left: 30px;">
+	  <p class="lead"><a data-toggle="modal" href="@{Persons.insertContract(person.id)}" data-target="#modal-insert-contract" >Inserisci</a> un nuovo contratto</p>
+	</div>
+	<div class="row" style="margin-left: 10px;">
+	  <table class="table table-striped table-display-contract span12">
 		<tr>
-			<th>Data inizio</th>
-			<th>Data fine</th>
+		    <th>Dati iniziali</th>
+			<th>Data inizio contratto</th>
+			<th>Data fine contratto</th>
 			<th>Data terminazione esperienza lavorativa</th>
 			<th>Attestato presenza</th>
 			<th>Modifica</th>
+			
 		</tr>
-		%{ for(contract in contractList){ }%
+		
+		#{list items:contractList, as:'contract'}
+		
 		<tr>
-			<td><input name="beginContract" class="span2" type="date" readOnly="readOnly"
-				value="${contract.beginContract}" size="10" maxlength="10" /></td>
-			<td><input name="expireContract" class="span2" type="date" readOnly="readOnly"
-				value="${contract.expireContract}" size="10" maxlength="10" /></td> %{
-			if(contract.endContract == null){ }%
-			  <td>
+		
+		 <td class="span4" style="text-align: center;">
+			 #{if contract.sourceDate!=null}
+			     Situazione alla data
+			     <strong class="text-error">${contract.sourceDate}</strong><br>
+			   #{if contract.sourceRemainingMinutesLastYear>0 }
+			     Residuo ${contract.sourceDate.getYear()-1} 
+			     <strong class="text-error">${contract.sourceRemainingMinutesLastYear}</strong><br>
+			   #{/if}
+			   #{if contract.sourceRemainingMinutesCurrentYear>0}
+			     Residuo ${contract.sourceDate.getYear()} 
+			     <strong class="text-error">${contract.sourceRemainingMinutesCurrentYear}</strong><br>
+			   #{/if}
+			   #{if contract.sourceVacationLastYearUsed>0}
+			     Ferie usate ${contract.sourceDate.getYear()-1}
+			     <strong class="text-error">${contract.sourceVacationLastYearUsed}</strong><br>
+			   #{/if}
+			   #{if contract.sourceVacationCurrentYearUsed>0}
+			     Ferie usate ${contract.sourceDate.getYear()} 
+			     <strong class="text-error">${contract.sourceVacationCurrentYearUsed}</strong><br>
+			   #{/if}
+			   #{if contract.sourcePermissionUsed>0}
+			     Permessi usati ${contract.sourceDate.getYear()} 
+			     <strong class="text-error">${contract.sourcePermissionUsed}</strong><br>
+			   #{/if}
+			   #{if contract.sourceRecoveryDayUsed!=null && contract.sourceRecoveryDayUsed>0}
+			     Riposi compensativi usati ${contract.sourceDate.getYear()} 
+			     <strong class="text-error">${contract.sourceRecoveryDayUsed}</strong><br>
+			   #{/if}
+			   
+			   <a data-toggle="modal" href="@{Persons.updateSourceContract(contract.id)}" data-target="#modal-edit-source-contract"><input value="Modifica" class="btn-small" type="button"></a>
+			
+			 #{/if}
+			 #{else}
+			   <a data-toggle="modal" href="@{Persons.updateSourceContract(contract.id)}" data-target="#modal-edit-source-contract"><input value="Definisci Inizializzazione" class="btn-small" type="button"></a>
+			 #{/else}
+			</td>
+		
+		
+		
+			<td>
+			  ${contract.beginContract}
+			</td>
+			<td>
+			  ${contract.expireContract}
+			</td>
+			
+			<td>
+			  #{if contract.endContract==null } 
 			    <!-- <a href="@{Persons.terminatePerson(person.id)}">Termina contratto</a> -->
 			    <a data-toggle="modal" href="@{Persons.terminatePerson(person.id)}" data-target="#modal-terminate-person">Termina contratto</a>
-		 	  </td>
-			%{ } else{ }%
-			<td><input name="endContract" type="date" readOnly="readOnly"
-				value="${contract.endContract}" /></td> %{ } }%
-			<td>
-				#{if contract.onCertificate == true}
-				<input name="onCertificate" type="checkbox" disabled="disabled"	checked="checked" />
-				#{/if}
-				#{else}
-				<input name="onCertificate" type="checkbox" disabled="disabled" />
-				#{/else}
+			  #{/if}
+			  #{else}
+			    ${contract.endContract}
+			  #{/else}
 			</td>
-			<td>
-			<a data-toggle="modal" href="@{Persons.modifyContract(contract.id)}" data-target="#modal-edit-contract"><input value="Modifica" class="btn" type="button"></a>
 			
+			<td>
+			  #{if contract.onCertificate == true}
+				<i class="icon-check"></i>
+			  #{/if}
+			  #{else}
+				<i class="icon-check-empty"></i>
+			  #{/else}
 			</td>
+			<td>
+			  <a data-toggle="modal" href="@{Persons.modifyContract(contract.id)}" data-target="#modal-edit-contract"><input value="Modifica" class="btn" type="button"></a>
+			</td>
+			
 		</tr>
-		%{ } }%
+		#{/list}
+		
 	  </table>
-	<br>
+	</div>
+	<div class="row" style="margin-left:10px;">
+	  <br>
+	  <table class="table table-condensed table-border span8">
+	    <tr>
+	      <th>Data Importazione da vecchio orologio</th>
+	      <th>Monte ore inizio 2013</th>
+	      <th>Ferie fatte dell'anno 2012</th>	  
+	    </tr>
+  
+	    #{if initTime!=null }
+	    <tr>
+	      <td>${initTime.date}</td>
+	      <td>${initTime.residualMinutesPastYear}</td>
+	      <td>${initTime.vacationCurrentYearUsed}</td>
+	    </tr>	  
+	    #{/if}
+
+	  </table>
+	</div>
+	<!-- 
 	<table class="tablenoborder">
 		<tr>
 			<td>Ore di inizializzazione maturate in altro istituto l'anno passato (in minuti):</td>
@@ -154,6 +223,7 @@
 			}%
 		</tr>	
 	</table>
+	 -->
 </fieldset>
 
 <fieldset>
@@ -253,6 +323,19 @@
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
     <h3 id="myModalLabel">Terminazione rapporto</h3>
+  </div>
+  <div class="modal-body">
+    <p></p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+  </div>
+</div>
+
+<div id="modal-edit-source-contract" class="modal hide fade mymodal-medium" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Imposta dati iniziali Contratto</h3>
   </div>
   <div class="modal-body">
     <p></p>

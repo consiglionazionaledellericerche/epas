@@ -3,6 +3,7 @@ package models.personalMonthSituation;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.LocalDate;
@@ -18,13 +19,18 @@ public class Mese {
 
 	public Person person;
 	public Contract contract;
+	
+	public String contractDescription;
+	
 	public int qualifica;
 	public boolean possibileUtilizzareResiduoAnnoPrecedente = true;
 	public Mese mesePrecedente;
 	public int anno;
 	public int mese;
+	
+	public int initMonteOreAnnoPassato;
+	public int initMonteOreAnnoCorrente;
 
-	public int tempoInizializzazione;
 	public int progressivoFinaleMese		 = 0;	//person day
 	public int progressivoFinalePositivoMese = 0;	//person day
 	public int progressivoFinaleNegativoMese = 0;	//person day
@@ -56,70 +62,62 @@ public class Mese {
 	 * @param anno
 	 * @param mese
 	 * @param contract
-	 * @param tempoInizializzazione
-	 * @param febmar
-	 * @param calcolaFinoA
+	 * @param initMonteOreAnnoPassato
+	 * @param initMonteOreAnnoCorrente
+	 * @param validData
 	 */
-	protected Mese(Mese mesePrecedente, int anno, int mese, Contract contract, int tempoInizializzazione, boolean febmar, LocalDate calcolaFinoA)
+	protected Mese(Mese mesePrecedente, int anno, int mese, Contract contract, int initMonteOreAnnoPassato, int initMonteOreAnnoCorrente, DateInterval validData)
 	{
 		this.contract = contract;
 		this.person = contract.person;
 		this.qualifica = person.qualification.qualification;
 		this.anno = anno;
 		this.mese = mese;
+
+		this.initMonteOreAnnoCorrente = initMonteOreAnnoCorrente;
+		this.initMonteOreAnnoPassato = initMonteOreAnnoPassato;
+		
+		setContractDescription();
 		
 		//Gennaio
-		if(mesePrecedente==null)
+		if(mese==1)
 		{
 			this.mesePrecedente = null;
-			this.tempoInizializzazione = tempoInizializzazione;
-			this.monteOreAnnoPassato = tempoInizializzazione;
-			
-			setPersonDayInformation(calcolaFinoA);
-			setPersonMonthInformation(calcolaFinoA);
+			this.monteOreAnnoPassato = initMonteOreAnnoPassato;
+			this.monteOreAnnoCorrente = initMonteOreAnnoCorrente;
 			
 			//se il residuo iniziale e' negativo lo tolgo dal residio mensile positivo
 			if(this.monteOreAnnoPassato<0)
 			{
-				this.progressivoFinalePositivoMese = this.progressivoFinalePositivoMese + this.tempoInizializzazione;
+				this.progressivoFinalePositivoMese = this.progressivoFinalePositivoMese + this.monteOreAnnoPassato;
 				this.monteOreAnnoPassato = 0;
 			}
 		}
 		
 		//Febbraio / Marzo
-		else if(febmar)
+		else if(mese==2 || mese==3)
 		{
 			this.mesePrecedente = mesePrecedente;
-			this.tempoInizializzazione = tempoInizializzazione;
-			this.monteOreAnnoPassato = mesePrecedente.monteOreAnnoPassato;
-			this.monteOreAnnoCorrente= mesePrecedente.monteOreAnnoCorrente;
-			
-			setPersonDayInformation(calcolaFinoA);
-			setPersonMonthInformation(calcolaFinoA);
-
+			this.monteOreAnnoPassato = initMonteOreAnnoPassato;
+			this.monteOreAnnoCorrente= initMonteOreAnnoCorrente;
 		}
 		
 		// Aprile -> Dicembre
-		else if(!febmar)
+		else
 		{
 			this.mesePrecedente = mesePrecedente;
-			
-			this.tempoInizializzazione = tempoInizializzazione;
-			this.monteOreAnnoPassato = mesePrecedente.monteOreAnnoPassato;
-			this.monteOreAnnoCorrente= mesePrecedente.monteOreAnnoCorrente;
+			this.monteOreAnnoPassato = initMonteOreAnnoPassato;
+			this.monteOreAnnoCorrente= initMonteOreAnnoCorrente;
 			
 			if(qualifica>3)
 			{
 				this.possibileUtilizzareResiduoAnnoPrecedente = false;
 				this.monteOreAnnoPassato = 0;
-				this.tempoInizializzazione = 0;
-				
 			}
-			
-			setPersonDayInformation(calcolaFinoA);
-			setPersonMonthInformation(calcolaFinoA);
-			
 		}
+		
+		setPersonDayInformation(validData);
+		setPersonMonthInformation(validData);
 		
 
 		assegnaProgressivoFinaleNegativo();
@@ -141,26 +139,12 @@ public class Mese {
 	 * 
 	 * @param calcolaFinoA
 	 */
-	public void setPersonDayInformation(LocalDate calcolaFinoA)
+	public void setPersonDayInformation(DateInterval validData)
 	{
-		//Costruisco l'intervallo mese
-		LocalDate monthBegin = new LocalDate(this.anno, this.mese, 1);
-		LocalDate monthEnd = new LocalDate(this.anno, this.mese, 1).dayOfMonth().withMaximumValue();
-		if(calcolaFinoA!=null && monthEnd.isAfter(calcolaFinoA))
-			monthEnd = calcolaFinoA;
-		
-		if(new LocalDate().isBefore(monthEnd))
-			monthEnd = new LocalDate().minusDays(1);
-	
-		//Interseco l'intervallo mese con contratto
-		DateInterval intervalloMese = new DateInterval(monthBegin, monthEnd);
-		DateInterval intervalloContratto = this.contract.getContractDateInterval();
-		intervalloMese = DateUtility.intervalIntersection(intervalloMese, intervalloContratto);
-		
-		if(intervalloMese!=null)
+		if(validData!=null)
 		{
 			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date desc",
-					this.person, intervalloMese.getBegin(), intervalloMese.getEnd()).fetch();
+					this.person, validData.getBegin(), validData.getEnd()).fetch();
 
 			//progressivo finale fine mese
 			for(PersonDay pd : pdList){
@@ -192,20 +176,10 @@ public class Mese {
 	 * 
 	 * @param calcolaFinoA, la data fino alla quale cercare riposi compensativi gia' assegnati
 	 */
-	public void setPersonMonthInformation(LocalDate calcolaFinoA)
+	public void setPersonMonthInformation(DateInterval validData)
 	{
 		
-		//Computo intervallo mese intersecato con contratto
-		LocalDate dateFrom = new LocalDate(this.anno, this.mese, 1);
-		LocalDate dateTo = new LocalDate(new LocalDate(this.anno, this.mese, 1).dayOfMonth().withMaximumValue());
-		if(calcolaFinoA!=null && dateTo.isAfter(calcolaFinoA))
-			dateTo = calcolaFinoA;
-
-		DateInterval intervalloMese = new DateInterval(dateFrom, dateTo);
-		DateInterval intervalloContratto = this.contract.getContractDateInterval();
-		intervalloMese = DateUtility.intervalIntersection(intervalloMese, intervalloContratto);
-
-		if(intervalloMese!=null)
+		if(validData!=null && this.contract.isLastInMonth(mese, anno))	//gli straordinari li assegno solo all'ultimo contratto attivo del mese
 		{
 			//straordinari s1
 			List<Competence> competenceList = Competence.find("Select comp from Competence comp, CompetenceCode compCode where comp.competenceCode = compCode and comp.person = ?"
@@ -232,10 +206,13 @@ public class Mese {
 			}
 
 			this.straordinariMinuti = this.straordinariMinutiS1Print + this.straordinariMinutiS2Print + this.straordinariMinutiS3Print;
+		}
 		
+		if(validData!=null)
+		{
 			//riposi compensativi
 			List<Absence> riposiCompensativi = Absence.find("Select abs from Absence abs, AbsenceType abt, PersonDay pd where abs.personDay = pd and abs.absenceType = abt and abt.code = ? and pd.person = ? "
-					+ "and pd.date between ? and ?", "91", this.person, intervalloMese.getBegin(), intervalloMese.getEnd()).fetch();
+					+ "and pd.date between ? and ?", "91", this.person, validData.getBegin(), validData.getEnd()).fetch();
 			this.riposiCompensativiMinuti = 0;
 			this.numeroRiposiCompensativi = 0;
 			for(Absence abs : riposiCompensativi){
@@ -325,18 +302,45 @@ public class Mese {
 	}	
 	
 	/**
-	 * 
+	 * Costruisce una stringa di descrizione per il contratto utilizzata in stampings.html e personStampings.html
+	 */
+	public void setContractDescription()
+	{
+		LocalDate beginMonth = new LocalDate(this.anno, this.mese, 1);
+		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
+		DateInterval monthInterval = new DateInterval(beginMonth, endMonth);	
+		LocalDate endContract = this.contract.expireContract;
+		if(contract.endContract!=null)
+			endContract = contract.endContract;
+		
+		if(DateUtility.isDateIntoInterval(endContract, monthInterval))
+			this.contractDescription = "(contratto scaduto in data " + endContract+")";
+		else
+			this.contractDescription = "";
+		
+	}
+	
+	/**
+	 * Ritorna il numero di ore disponibili per straordinari per la persona nel mese.
+	 * Calcola il residuo positivo del mese per straordinari inerente il contratto attivo nel mese.
+	 * Nel caso di due contratti attivi nel mese viene ritornato il valore per il contratto più recente.
+	 * Nel caso di nessun contratto attivo nel mese viene ritornato il valore 0.
 	 * @param person
 	 * @param year
 	 * @param month
-	 * @return il valore di quanti minuti positivi sono stati fatti da quella persona in quel mese/anno
 	 */
 	public static Integer positiveResidualInMonth(Person person, int year, int month){
-		//RTODO capire che contratto prendere!!!!!!
-		Contract contract = person.getCurrentContract();
-		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, year, null);
-		Mese mese = c.getMese(year, month);
-		return mese.progressivoFinalePositivoMese;
+		List<Contract> monthContracts = person.getMonthContracts(month, year);
+		for(Contract contract : monthContracts)
+		{
+			if(contract.isLastInMonth(month, year))
+			{
+				CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, year, null);
+				if(c.getMese(year, month)!=null)
+					return c.getMese(year, month).progressivoFinalePositivoMese;
+			}
+		}
+		return 0;
 	}
 }
 
