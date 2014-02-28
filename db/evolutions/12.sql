@@ -1,10 +1,8 @@
 # ---!Ups
 
+drop table person_months;
 drop sequence seq_person_months;
 drop table person_months_history;
-drop table person_months;
-
-
 
 create sequence seq_person_months_recap
 	START WITH 1
@@ -40,10 +38,9 @@ create table person_months_recap_history (
 
 # ---!Downs
 
-drop sequence seq_person_months_recap;
-
-drop table person_months_recap_history;
 drop table person_months_recap;
+drop sequence seq_person_months_recap;
+drop table person_months_recap_history;
 
 create sequence seq_person_months
 	START WITH 1
@@ -74,5 +71,4 @@ create table person_months (
 create table person_months_history
 (
 	id bigint not null
-	
 );
