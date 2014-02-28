@@ -211,6 +211,13 @@ public class Mese {
 		LocalDate monthEnd = new LocalDate(new LocalDate(this.anno, this.mese, 1).dayOfMonth().withMaximumValue());
 		if(calcolaFinoA!=null && monthEnd.isAfter(calcolaFinoA))
 			monthEnd = calcolaFinoA;
+
+		//con questo si controlla la richiesta di un riposo compensativo in un mese successivo al mese attuale.
+		//In questo modo il riposo compensativo viene conteggiato sul residuo del mese attualmente in essere.
+		//es.: sono a febbraio e prendo un riposo compensativo per il 5 marzo. Nel "riepilogo ore di lavoro anno corrente" vedrò visualizzato
+		//il numero di riposi compensativi presi sia nel mese di febbraio che nel mese di marzo.
+		if(new LocalDate().getMonthOfYear()==this.mese)
+			monthEnd = new LocalDate(this.anno, this.mese+1,1).dayOfMonth().withMaximumValue();
 		
 		List<Absence> riposiCompensativi = Absence.find("Select abs from Absence abs, AbsenceType abt, PersonDay pd where abs.personDay = pd and abs.absenceType = abt and abt.code = ? and pd.person = ? "
 				+ "and pd.date between ? and ?", "91", this.person, monthBegin, monthEnd).fetch();
