@@ -170,42 +170,7 @@
   <div class="span4">
      #{include './_riepilogoRiassuntivoMese.html' /}
   </div>
-  <div class="span6">
- <table class="table table-condensed">
-    <tr>
-      <th class="span1">Inizio Contratto</th>
-  	  <th class="span1">Fine Contratto</th>
-  	  <th class="span1">Killato</th>
-  	  <th>Year Recap</th>
-  	<tr>
-  	#{list items:person.contracts, as:'contract'}
-  	<tr>
-  	  <td>${contract.beginContract}</td>
-  	  <td>${contract.expireContract}</td>
-  	  <td>${contract.endContract}</td>
-  	  <td>
-  	    <ul>
-  	    #{list items:contract.recapPeriods, as:'yearRecap'}
-  	      
-  	      <li>
-  	        <ul>
-  	          <li>${yearRecap.year}</li>
-  	          <li>Ferie anno passato: ${yearRecap.vacationLastYearUsed}</li>
-  	          <li>Ferie anno corrente: ${yearRecap.vacationCurrentYearUsed}</li>
-  	          <li>Permessi anno corrente: ${yearRecap.permissionUsed}</li>
-  	          <li>Monte anno passato: ${yearRecap.remainingMinutesLastYear.toHourTime()}</li>
-  	          <li>Monte anno corrente: ${yearRecap.remainingMinutesCurrentYear.toHourTime()}</li>
-  	          <li>Riposi compensativi: ${yearRecap.recoveryDayUsed}</li>
-  	        </ul>
-  	      </li>     
-  	    #{/list}
-  	    </ul>
-  	  </td>
-  	
-  	</tr>
-  	#{/list}
-  </table>
-</div>
+
 </div>
 
 
