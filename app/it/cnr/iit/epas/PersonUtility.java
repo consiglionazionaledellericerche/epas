@@ -120,6 +120,8 @@ public class PersonUtility {
 		PersonChildren child = null;
 		switch(code){
 		case 12:
+			if(persChildList.size()<1)
+				return null;
 			child = persChildList.get(0) != null ? persChildList.get(0) : null;
 			if(child != null){
 				if(child.bornDate.isAfter(date.minusYears(3))){
@@ -139,6 +141,8 @@ public class PersonUtility {
 
 
 		case 122:
+			if(persChildList.size()<2)
+				return null;
 			child = persChildList.get(1) != null ? persChildList.get(1) : null;
 			Logger.debug("Il riferimento del codice è per %s %s. Nato il %s", child.surname, child.name, child.bornDate);
 			if(child != null){
@@ -152,9 +156,6 @@ public class PersonUtility {
 					else
 						return false;
 				}
-			}
-			else{
-				return false;
 			}
 			
 			break;
@@ -180,6 +181,8 @@ public class PersonUtility {
 			break;
 
 		case 13:
+			if(persChildList.size()<1)
+				return null;
 			child = persChildList.get(0) != null ? persChildList.get(0) : null;
 			if(child != null){
 				if(child.bornDate.isAfter(date.minusYears(8))){
@@ -198,6 +201,8 @@ public class PersonUtility {
 			break;
 
 		case 132:
+			if(persChildList.size()<2)
+				return null;
 			child = persChildList.get(1) != null ? persChildList.get(1) : null;
 			if(child != null){
 				if(child.bornDate.isAfter(date.minusYears(8))){
@@ -216,6 +221,8 @@ public class PersonUtility {
 			break;
 
 		case 133:
+			if(persChildList.size()<3)
+				return null;
 			child = persChildList.get(2) != null ? persChildList.get(2) : null;
 			if(child != null){
 				if(child.bornDate.isAfter(date.minusYears(8))){
@@ -233,6 +240,8 @@ public class PersonUtility {
 			break;
 
 		case 134:
+			if(persChildList.size()<4)
+				return null;
 			child = persChildList.get(3) != null ? persChildList.get(3) : null;
 			if(child != null){
 				if(child.bornDate.isAfter(date.minusYears(8))){
