@@ -25,7 +25,7 @@ import models.Location;
 import models.Permission;
 import models.Person;
 import models.PersonDay;
-import models.PersonMonth;
+import models.PersonMonthRecap;
 import models.PersonReperibility;
 import models.PersonWorkingTimeType;
 import models.PersonYear;
@@ -1221,7 +1221,7 @@ public class FromMysqlToPostgres {
 			Logger.debug("L'anno di riferimento per il personMonth di %s %s è %s", person.name, person.surname, year);
 			Integer month  = new Integer(s.substring(4, s.length()));
 			Logger.debug("Il mese di riferimento per il personMonth di %s %s è %s", person.name, person.surname, month);
-			PersonMonth pm = PersonMonth.build(person, year, month);
+			PersonMonthRecap pm = PersonMonthRecap.build(person, year, month);
 			pm.save();
 			if(month.equals(12)){
 				//TODO Questa era la vecchia creazione di person year, riscriverla utilizzando la nuova modellazione
@@ -1358,18 +1358,18 @@ public class FromMysqlToPostgres {
 		if(absenceType.code.equals("91")){
 			Logger.debug("Trovato riposo compensativo per %s %s nel giorno %s. Proseguo con i calcoli...", 
 					pd.person.name, pd.person.surname, pd.date);
-			PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? and pm.month = ?", 
+			PersonMonthRecap pm = PersonMonthRecap.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? and pm.month = ?", 
 					pd.person, pd.date.getYear(), pd.date.getMonthOfYear()).first();
 			if(pm == null){
 				Logger.debug("Il person month era nullo, lo devo creare");
-				pm = new PersonMonth(pd.person, pd.date.getYear(), pd.date.getMonthOfYear());
+				pm = new PersonMonthRecap(pd.person, pd.date.getYear(), pd.date.getMonthOfYear());
 
 			}
 			//pm.prendiRiposoCompensativo(pd.date);	//TODO prima controllava se poteva prenderlo, in realtà è una decisione storica quindi non si controlla più niente
 			pm.save();
 			Logger.debug("Assegnato riposo compensativo e salvato person month per %s %s", pd.person.name, pd.person.surname);
-			Logger.debug("%s %s: il valore dei riposi compensativi è: %s per anno corrente e %s per anno passato", 
-					pd.person.name, pd.person.surname, pm.riposiCompensativiDaAnnoCorrente, pm.riposiCompensativiDaAnnoPrecedente);
+	//		Logger.debug("%s %s: il valore dei riposi compensativi è: %s per anno corrente e %s per anno passato", 
+			//		pd.person.name, pd.person.surname, pm.riposiCompensativiDaAnnoCorrente, pm.riposiCompensativiDaAnnoPrecedente);
 
 		}
 
@@ -1464,12 +1464,12 @@ public class FromMysqlToPostgres {
 					 */
 					LocalDate date = new LocalDate();
 					if(rs.getInt("anno") == date.getYear()){
-						PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? and pm.month = ?", 
+						PersonMonthRecap pm = PersonMonthRecap.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? and pm.month = ?", 
 								person, rs.getInt("anno"), rs.getInt("mese")).first();
 						if(pm == null)
-							pm = new PersonMonth(person, rs.getInt("anno"), rs.getInt("mese"));
+							pm = new PersonMonthRecap(person, rs.getInt("anno"), rs.getInt("mese"));
 						//pm.assegnaStraordinari(comp.valueApproved);
-						pm.straordinari = comp.valueApproved * 60; //TODO utilizzare eventualmente il nuovo algoritmo
+				//		pm.straordinari = comp.valueApproved * 60; //TODO utilizzare eventualmente il nuovo algoritmo
 						pm.save();
 					}
 

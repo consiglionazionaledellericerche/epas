@@ -27,7 +27,7 @@ import models.InitializationTime;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
-import models.PersonMonth;
+import models.PersonMonthRecap;
 import models.PersonTags;
 import models.StampModificationType;
 import models.StampProfile;

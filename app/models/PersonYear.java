@@ -55,18 +55,18 @@ public class PersonYear extends Model{
 	 * aggiorna le variabili di istanza in funzione dei valori presenti sul db
 	 * non fa il salvataggio dei dati (speculare al refreshPersonMonth
 	 */
-	public void refreshPersonYear(){
-		//Configuration config = Configuration.getCurrentConfiguration();
-		LocalDate data = new LocalDate();
-		if(data.getDayOfMonth() == 1 && data.getMonthOfYear() == DateTimeConstants.JANUARY){
-			List<PersonMonth> personMonthList = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ?",
-					person, year).fetch();
-			for(PersonMonth pm : personMonthList){
-				remainingMinutes = remainingMinutes + pm.totalRemainingMinutes;
-			}
-		}
-		this.save();
-	}
+//	public void refreshPersonYear(){
+//		//Configuration config = Configuration.getCurrentConfiguration();
+//		LocalDate data = new LocalDate();
+//		if(data.getDayOfMonth() == 1 && data.getMonthOfYear() == DateTimeConstants.JANUARY){
+//			List<PersonMonth> personMonthList = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ?",
+//					person, year).fetch();
+//			for(PersonMonth pm : personMonthList){
+//				remainingMinutes = remainingMinutes + pm.totalRemainingMinutes;
+//			}
+//		}
+//		this.save();
+//	}
 	
 	/**
 	 * conta quanti giorni di ferie sono rimasti da utilizzare dalle ferie dell'anno corrente
@@ -99,24 +99,24 @@ public class PersonYear extends Model{
 	/**
 	 * ritorna quanti minuti sono in più/in meno alla fine dell'anno
 	 */
-	public int getRemainingMinutes(){
-		if(remainingMinutes == null){
-			remainingMinutes = 0;
-			List<PersonMonth> personMonthList = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ?",
-					person, year).fetch();
-			Logger.debug("La lista dei personMonth per %s %s: %s",person.name, person.surname, personMonthList);
-			if(personMonthList != null){
-				for(PersonMonth pm : personMonthList){
-					remainingMinutes = remainingMinutes + pm.totalRemainingMinutes;
-				}
-				
-			}
-			else
-				remainingMinutes = 0;
-			this.save();
-		}
-		return remainingMinutes;
-	}
+//	public int getRemainingMinutes(){
+//		if(remainingMinutes == null){
+//			remainingMinutes = 0;
+//			List<PersonMonth> personMonthList = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ?",
+//					person, year).fetch();
+//			Logger.debug("La lista dei personMonth per %s %s: %s",person.name, person.surname, personMonthList);
+//			if(personMonthList != null){
+//				for(PersonMonth pm : personMonthList){
+//					remainingMinutes = remainingMinutes + pm.totalRemainingMinutes;
+//				}
+//				
+//			}
+//			else
+//				remainingMinutes = 0;
+//			this.save();
+//		}
+//		return remainingMinutes;
+//	}
 	
 	
 	public static PersonYear build(Person person, int year){
@@ -127,7 +127,7 @@ public class PersonYear extends Model{
 		
 		if(contract != null){
 			int vacationDaysActualYear = 0;
-			PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? " +
+			PersonMonthRecap pm = PersonMonthRecap.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? " +
 					"order by pm.month desc ", person, year).first();
 			//py.remainingMinutes = pm.totaleResiduoAnnoCorrenteAFineMese();
 			

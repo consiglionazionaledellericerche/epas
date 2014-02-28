@@ -580,8 +580,11 @@ public class PersonDay extends Model {
 			
 		//if(this.person.id == 45) Logger.info("  *PopulatePersonDay date=%s", this.date);
 		//controllo problemi strutturali del person day
-		if(this.date.isBefore(new LocalDate()))
+		if(this.date.isBefore(new LocalDate())){
+			this.save();
 			this.checkForPersonDayInTrouble();
+		}
+			//this.checkForPersonDayInTrouble();
 
 		//if(this.person.id == 45 && this.troubles.size()==0) Logger.info("  *  Check Trouble                 NO");
 		//if(this.person.id == 45 && this.troubles.size()==1) Logger.info("  *  Check Trouble                 SI");

@@ -16,7 +16,7 @@ import models.ConfGeneral;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
-import models.PersonMonth;
+import models.PersonMonthRecap;
 import models.StampModificationType;
 import models.StampType;
 import models.Stamping;
