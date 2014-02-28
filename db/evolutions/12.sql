@@ -2,8 +2,8 @@
 
 
 drop table person_months_history;
-
 drop table person_months;
+drop sequence seq_person_months;
 
 
 create sequence seq_person_months_recap
@@ -40,11 +40,13 @@ create table person_months_recap_history (
 
 # ---!Downs
 
-drop sequence seq_person_months_recap;
+
+
 drop table person_months_recap_history;
 drop table person_months_recap;
+drop sequence seq_person_months_recap;
 
-create sequence person_months
+create sequence seq_person_months
 	START WITH 1
     INCREMENT BY 1
     NO MINVALUE
