@@ -737,36 +737,38 @@ public class Absences extends Controller{
 		 */
 		//TODO: se il dipendente ha più di 9 figli! non funziona dal 10° in poi
 		
-		if(!PersonUtility.canTakePermissionIllnessChild(person, dateFrom, absenceType))
+		Boolean esito = PersonUtility.canTakePermissionIllnessChild(person, dateFrom, absenceType);
+
+		if(esito==null)
 		{
-			/**
-			 * non può usufruire del permesso
-			 */
+			flash.error("ATTENZIONE! In anagrafica la persona selezionata non ha il numero di figli sufficienti per valutare l'assegnazione del codice di assenza nel periodo selezionato. "
+					+ "Accertarsi che la persona disponga dei privilegi per usufruire dal codice e nel caso rimuovere le assenze inserite.");
+		}
+		else if(!esito)
+		{
 			flash.error(String.format("Il dipendente %s %s non può prendere il codice d'assenza %s poichè ha già usufruito del numero" +
 					" massimo di giorni di assenza per quel codice o non ha figli che possono usufruire di quel codice", person.name, person.surname, absenceType.code));
-			//render("@save");
 			Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
 			return;
-
 		}
-		else
-		{
-			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?",
-					person, dateFrom).first();
-			if(pd == null){
-				pd = new PersonDay(person, dateFrom);
-				pd.create();
-			}
-			Absence absence = new Absence();
-			absence.absenceType = absenceType;
-			absence.personDay = pd;
-			absence.save();
-			pd.absences.add(absence);
-			pd.save();
-			pd.updatePersonDaysInMonth();
-			flash.success("Inserito il codice d'assenza %s nel giorno %s", absenceType.code, pd.date);
-			Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
+		
+		
+		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?",
+				person, dateFrom).first();
+		if(pd == null){
+			pd = new PersonDay(person, dateFrom);
+			pd.create();
 		}
+		Absence absence = new Absence();
+		absence.absenceType = absenceType;
+		absence.personDay = pd;
+		absence.save();
+		pd.absences.add(absence);
+		pd.save();
+		pd.updatePersonDaysInMonth();
+		flash.success("Inserito il codice d'assenza %s nel giorno %s", absenceType.code, pd.date);
+		Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
+		
 	}
 	
 	/**
