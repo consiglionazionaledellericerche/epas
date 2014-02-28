@@ -807,7 +807,8 @@ public class PersonUtility {
 	 * @return
 	 */
 	public static int numberOfCompensatoryRestUntilToday(Person person, int year, int month){
-		
+		//TODO questo metodo è delicato. Prendere comunque il numero di riposi nell'anno solare. Ciclare a ritroso sui 
+		//Contratti per cercare se esiste un sourceContract
 		Query query = JPA.em().createQuery("Select abs from Absence abs where abs.personDay.person = :person and abs.absenceType.code = :code " +
 				"and abs.personDay.date between :begin and :end");
 		query.setParameter("person", person)

@@ -4,6 +4,7 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.PersonUtility;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -45,31 +46,28 @@ import play.db.jpa.Model;
 @Table(name="contracts")
 public class Contract extends Model {
 
-	@Embeddable
-	public static class SourceData
-	{
-		@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
-		@Column(name="source_date")
-		public LocalDate sourceDate;
-		
-		@Column(name="source_vacation_last_year_used")
-		public Integer sourceVacationLastYearUsed = 0;
-		
-		@Column(name="source_vacation_current_year_used")
-		public Integer sourceVacationCurrentYearUsed = 0;
-		
-		@Column(name="source_permission_used")
-		public Integer sourcePermissionUsed = 0;
-		
-		@Column(name="source_recovery_day_used")
-		public Integer sourceRecoveryDayUsed = 0;
-		
-		@Column(name="source_remaining_minutes_last_year")
-		public Integer sourceRemainingMinutesLastYear = 0;
-		
-		@Column(name="source_remaining_minutes_current_year")
-		public Integer sourceRemainingMinutesCurrentYear = 0;
-	}
+	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	@Column(name="source_date")
+	public LocalDate sourceDate = null;
+	
+	@Column(name="source_vacation_last_year_used")
+	public Integer sourceVacationLastYearUsed = null;
+	
+	@Column(name="source_vacation_current_year_used")
+	public Integer sourceVacationCurrentYearUsed = null;
+	
+	@Column(name="source_permission_used")
+	public Integer sourcePermissionUsed = null;
+	
+	@Column(name="source_recovery_day_used")
+	public Integer sourceRecoveryDayUsed = null;
+	
+	@Column(name="source_remaining_minutes_last_year")
+	public Integer sourceRemainingMinutesLastYear = null;
+	
+	@Column(name="source_remaining_minutes_current_year")
+	public Integer sourceRemainingMinutesCurrentYear = null;
+
 	
 	private static final long serialVersionUID = -4472102414284745470L;
 
@@ -77,9 +75,6 @@ public class Contract extends Model {
 	@JoinColumn(name="person_id")
 	public Person person;
 	
-	@Embedded
-	public SourceData sourceData;
-
 	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY, cascade = CascadeType.REMOVE)
 	public List<VacationPeriod> vacationPeriods;
 	
@@ -111,7 +106,11 @@ public class Contract extends Model {
 	public void setExpireContract(String date){
 		this.expireContract = new LocalDate(date);
 	}
-
+	
+	public void setSourceDate(String date){
+		this.sourceDate = new LocalDate(date);
+	}
+	
 	/**
 	 * I contratti con onCertificate = true sono quelli dei dipendenti CNR e 
 	 * corrispondono a quelli con l'obbligo dell'attestato di presenza 
@@ -245,139 +244,6 @@ public class Contract extends Model {
 		this.save();
 	}
 	
-	
-	public void setRecapPeriods(LocalDate initUse, InitializationTime initPerson)
-	{
-		//Distruggere quello che c'è prima
-		for(ContractYearRecap yearRecap : this.recapPeriods)
-		{
-			yearRecap.delete();
-		}
-		
-		//Calcolo intervallo con dati utili database
-		DateInterval personDatabaseInterval;
-		if(initPerson!=null && initPerson.date.isAfter(initUse))
-			personDatabaseInterval = new DateInterval(initPerson.date, new LocalDate());
-		else
-			personDatabaseInterval = new DateInterval(initUse, new LocalDate());
-
-		//Calcolo intervallo esistenza contratto
-		DateInterval contractInterval = this.getContractDateInterval();		
-		
-		//Calcolo intersezione fra contratto e dati utili database
-		DateInterval intersection = DateUtility.intervalIntersection(contractInterval, personDatabaseInterval);
-		
-		//se vuota non costruisco alcun contractYearRecap
-		if(intersection==null)
-			return;
-		
-		//verifico quanta informazione ho sul contratto
-		if(personDatabaseInterval.getBegin().isBefore(contractInterval.getBegin()))
-		{
-			//contratto interamente contenuto nel database
-			populateContractYearRecapFromDatabase(contractInterval.getBegin().getYear());
-		}
-		else
-		{
-			//una parte di contratto non ha dati presenti nel db, devo sfruttare init time se è relativo a tale contratto
-			if(initPerson!=null && DateUtility.isDateIntoInterval(initPerson.date, contractInterval))
-			{
-				if(initPerson.date.getMonthOfYear()==1 && initPerson.date.getDayOfMonth()==1)
-				{
-					//se init è il primo gennaio costruisco il ContractYearRecap dell'anno precedente con i dati di lastYear
-					ContractYearRecap cyr = new ContractYearRecap();
-					cyr.year = initPerson.date.getYear()-1;
-					cyr.contract = this;
-					cyr.remainingMinutesCurrentYear = initPerson.residualMinutesPastYear;
-					cyr.vacationCurrentYearUsed = initPerson.vacationLastYearUsed;
-					cyr.save();
-					
-					populateContractYearRecapFromDatabase(cyr.year + 1);
-					
-				}
-				else
-				{
-					//TODO per irpi
-					/*
-					//se init time e' a metà anno costruisco ContractYearRecap dell'anno attuale con i campi source
-					ContractYearRecap cyr = new ContractYearRecap();
-					cyr.year = initPerson.date.getYear();
-					cyr.contract = this;
-					cyr.sourceRemainingMinutesLastYear = initPerson.residualMinutesPastYear;
-					cyr.sourceRemainingMinutesLastYear = initPerson.residualMinutesCurrentYear;
-					//TODO quando ho tutti i campi in init
-					
-					//BUILD ALL PAST YEAR RECAP FROM DB
-					*/
-				}
-			}
-			//init time non si riferisce al contratto, non ho sufficienti dati per creare i riepiloghi
-			else
-			{
-				
-				return;
-			}
-		}
-	}
-	
-	
-	private void populateContractYearRecapFromDatabase(int yearFrom)
-	{
-		
-		int actualYear = yearFrom;
-		int currentYear = new LocalDate().getYear();
-		
-		//popolo ogni anno dal 1 gennaio
-		while(actualYear<=currentYear)
-		{
-			
-			ContractYearRecap cyr = new ContractYearRecap();
-			cyr.year = actualYear;
-			cyr.contract = this;
-			
-			//FERIE E PERMESSI
-			VacationsRecap vacationRecap = new VacationsRecap(this.person, actualYear, this, new LocalDate(), true);
-			cyr.vacationLastYearUsed = vacationRecap.vacationDaysLastYearUsed.size();
-			cyr.vacationCurrentYearUsed = vacationRecap.vacationDaysCurrentYearUsed.size();
-			cyr.permissionUsed = vacationRecap.permissionUsed;
-			
-			//RESIDUI
-			CalcoloSituazioneAnnualePersona csap = new CalcoloSituazioneAnnualePersona(this, actualYear, new LocalDate());
-			Mese lastComputedMonthInYear;
-			if(actualYear!=currentYear)
-				lastComputedMonthInYear = csap.getMese(actualYear, 12);
-			else
-				lastComputedMonthInYear = csap.getMese(actualYear, new LocalDate().getMonthOfYear());
-			
-			cyr.remainingMinutesLastYear = lastComputedMonthInYear.monteOreAnnoPassato;
-			cyr.remainingMinutesCurrentYear = lastComputedMonthInYear.monteOreAnnoCorrente;
-			
-			//RIPOSI COMPENSATIVI
-			cyr.recoveryDayUsed = PersonUtility.numberOfCompensatoryRestUntilToday(this.person, actualYear, 12);
-			
-			cyr.save();
-			
-			actualYear++;
-		}
-		
-	}
-	
-	/**
-	 * Ritorna il riepilogo annule del contatto.
-	 * @param year
-	 * @return
-	 */
-	public ContractYearRecap getYearRecap(int year)
-	{
-		for(ContractYearRecap cyr : this.recapPeriods)
-		{
-			if(cyr.year==year)
-				return cyr;
-		}
-		return null;
-			
-	}
-	
 	/**
 	 * Utilizza la libreria DateUtils per costruire l'intervallo attivo per il contratto.
 	 * @return
@@ -392,32 +258,132 @@ public class Contract extends Model {
 		return contractInterval;
 	}
 	
-	
 	/**
-	 * Ritorna la lista ordinata di riepiloghi annuali per il contratto. Se il contratto ha dati di inizializzazione forzati
-	 * il primo elemento della lista ha i campi source valorizzati.
+	 * Ritorna il riepilogo annule del contatto.
+	 * @param year
 	 * @return
 	 */
-	public List<ContractYearRecap> getAllContractYearRecap()
-	{
-		
-		
-		return null;
-		
-	}
-	
-	/**
-	 * True se il contratto ha dati di inizializzazione forzati dall'amministratore
-	 * @return
-	 */
-	public boolean hasInitializationData()
+	public ContractYearRecap getContractYearRecap(int year)
 	{
 		for(ContractYearRecap cyr : this.recapPeriods)
 		{
-			if(cyr.hasSource)
-				return true;
+			if(cyr.year==year)
+				return cyr;
 		}
-		return false;
+		return null;
+			
 	}
+	
+	public void populateContractYearRecap()
+	{
+		Logger.info("PopulateContractYearRecap %s %s contract id = %s", this.person.name, this.person.surname, this.id);
+		//Distruggere quello che c'è prima (adesso in fase di sviluppo)
+		for(ContractYearRecap yearRecap : this.recapPeriods)
+		{
+			yearRecap.delete();
+		}
+		this.recapPeriods = new ArrayList<ContractYearRecap>();
 
+		//Controllo se ho sufficienti dati
+		LocalDate initUse = ConfGeneral.getConfGeneral().initUseProgram;
+		if(this.sourceDate!=null)
+			initUse = sourceDate.plusDays(1);
+		DateInterval personDatabaseInterval = new DateInterval(initUse, new LocalDate());
+		DateInterval contractInterval = this.getContractDateInterval();
+
+		//Se intersezione fra contratto e dati utili database vuota non costruisco alcun contractYearRecap
+		if(DateUtility.intervalIntersection(contractInterval, personDatabaseInterval)==null)
+			return;
+
+		int yearToCompute = this.beginContract.getYear();
+		
+		//verifico quanta informazione ho sul contratto
+		if(contractInterval.getBegin().isBefore(personDatabaseInterval.getBegin()))
+		{
+			//contratto non interamente contenuto nel database (serve sourceContract)
+			if(this.sourceDate==null)
+				return;
+			yearToCompute = this.populateContractYearFromSource();
+		}
+		
+		//TODO capire se popolare da yearToCompute ad oggi (oppure l'ultimo anno del contratto se è scaduto) oppure fino all'anno passato
+		int currentYear = new LocalDate().getYear();
+		if(currentYear>contractInterval.getEnd().getYear())
+			currentYear = contractInterval.getEnd().getYear();
+		while(yearToCompute<currentYear)
+		{
+			Logger.debug("yearToCompute %s", yearToCompute);
+			ContractYearRecap cyr = new ContractYearRecap();
+			cyr.year = yearToCompute;
+			cyr.contract = this;
+			
+			//FERIE E PERMESSI
+			VacationsRecap vacationRecap = new VacationsRecap(this.person, yearToCompute, this, new LocalDate(), true);
+			cyr.vacationLastYearUsed = vacationRecap.vacationDaysLastYearUsed.size();
+			cyr.vacationCurrentYearUsed = vacationRecap.vacationDaysCurrentYearUsed.size();
+			cyr.permissionUsed = vacationRecap.permissionUsed;
+			
+			//RESIDUI
+			CalcoloSituazioneAnnualePersona csap = new CalcoloSituazioneAnnualePersona(this, yearToCompute, new LocalDate().minusDays(1));
+			Mese lastComputedMonthInYear;
+			if(yearToCompute!=currentYear)
+				lastComputedMonthInYear = csap.getMese(yearToCompute, 12);
+			else
+				lastComputedMonthInYear = csap.getMese(yearToCompute, new LocalDate().getMonthOfYear());
+			
+			cyr.remainingMinutesLastYear = lastComputedMonthInYear.monteOreAnnoPassato;
+			cyr.remainingMinutesCurrentYear = lastComputedMonthInYear.monteOreAnnoCorrente;
+			
+			//RIPOSI COMPENSATIVI
+			//cyr.recoveryDayUsed = PersonUtility.numberOfCompensatoryRestUntilToday(this.person, yearToCompute, 12);
+			
+			cyr.save();
+			this.recapPeriods.add(cyr);
+			
+			yearToCompute++;
+		}
+	}
+	
+	
+	public int populateContractYearFromSource()
+	{
+		LocalDate lastDayInYear = new LocalDate(this.sourceDate.getYear(), 12, 31);
+		if(! lastDayInYear.isEqual(this.sourceDate))
+			return this.sourceDate.getYear()+1;
+			
+		int yearToCompute = this.sourceDate.getYear();
+		ContractYearRecap cyr = new ContractYearRecap();
+		cyr.year = yearToCompute;
+		cyr.contract = this;
+		cyr.remainingMinutesCurrentYear = this.sourceRemainingMinutesCurrentYear;
+		cyr.remainingMinutesLastYear = 0; //NULL
+		cyr.vacationLastYearUsed = 0; //NULL
+		cyr.vacationCurrentYearUsed = this.sourceVacationCurrentYearUsed;
+		cyr.recoveryDayUsed = 0;  //NULL
+		cyr.permissionUsed = 0;  //NULL
+		cyr.save();
+		this.recapPeriods.add(cyr);
+		return yearToCompute+1;
+	}
+	
+	/**
+	 * True se il contratto è l'ultimo contratto per mese e anno selezionati.
+	 * @param month
+	 * @param year
+	 * @return
+	 */
+	public boolean isLastInMonth(Integer month, Integer year)
+	{
+		List<Contract> contractInMonth = this.person.getMonthContracts(month, year);
+		if(contractInMonth.size()==0)
+			return false;
+		if(contractInMonth.get(contractInMonth.size()-1).id == this.id)
+			return true;
+		else
+			return false;
+	}
+	
 }
+	
+	
+

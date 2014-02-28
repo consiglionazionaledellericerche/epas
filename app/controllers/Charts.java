@@ -58,7 +58,6 @@ public class Charts extends Controller{
 			Long val = Competence.find("Select sum(c.valueApproved) from Competence c where c.competenceCode.code in (?,?,?) and c.year = ? and c.month = ? and c.person = ?",
 					"S1","S2","S3", year, month, p).first();
 
-			//RTODO contratto attivo??
 			Contract contract = p.getCurrentContract();
 			CalcoloSituazioneAnnualePersona sit = new CalcoloSituazioneAnnualePersona(contract, year, new LocalDate(year,month,1));
 			Mese mese = sit.getMese(year,month);

@@ -168,6 +168,8 @@ public class DateUtility {
 	 */
 	public static DateInterval intervalIntersection(DateInterval inter1, DateInterval inter2)
 	{
+		if(inter1==null || inter2==null)
+			return null;
 		//ordino
 		if(!inter1.getBegin().isBefore(inter2.getBegin()))
 		{

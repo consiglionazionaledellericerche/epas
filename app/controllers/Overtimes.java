@@ -82,7 +82,6 @@ public class Overtimes extends Controller {
 		
 		/*OvertimesData personOvertimesData = new OvertimesData(PersonTags.toHourTime(new Integer(personMonth.totaleResiduoAnnoCorrenteAFineMese())), PersonTags.toHourTime(new Integer(personMonth.residuoDelMese())), PersonTags.toHourTime(new Integer(personMonth.tempoDisponibilePerStraordinari())));*/		
 		/* temporaneamente tutti i dati vengono presi dalle nuove classi CalcoloSituazioneAnnualePersona e Mese */
-		//RTODO
 		Contract contract = person.getCurrentContract();
 		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, year, null);
 		Mese mese = c.getMese(year, month);
