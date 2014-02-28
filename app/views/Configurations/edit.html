@@ -16,11 +16,11 @@
 		<table class="tablenoborder">
 			<tr>
 				<td><b>inizio</b></td>
-				<td><input name="conf.beginDate" type="date" value="${configurations.beginDate.convertToLocalDate()}" size="30" maxlength="100" /></td>
+				<td><input name="conf.beginDate" type="text" value="${configurations.beginDate.convertToLocalDate()}" id="datepicker1" data-date-format="yyyy-mm-dd" /></td>
 			</tr>
 			<tr>
 				<td><b>fine</b></td>
-				<td><input name="conf.endDate" type="date" value="${configurations.endDate.convertToLocalDate()}" size="30" maxlength="100" /></td>
+				<td><input name="conf.endDate" type="date" value="${configurations.endDate.convertToLocalDate()}" id="datepicker2" data-date-format="yyyy-mm-dd"/></td>
 			</tr>	
 		</table>
 	</fieldset>

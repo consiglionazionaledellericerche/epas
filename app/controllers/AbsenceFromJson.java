@@ -26,7 +26,7 @@ import play.mvc.Controller;
 /**
  * 
  * @author dario
- * curl -H "Content-Type: application/json" -X POST -d '{ "dateFrom" : "2014-01-01", "dateTo" : "2014-01-20", "emails" : 
+ * curl -H "Content-Type: application/json" -X POST -d '{"emails" : 
  * [{"email" : "cristian.lucchesi@iit.cnr.it"},{"email" : "stefano.ruberti@iit.cnr.it"}]}' 
  * http://localhost:8888/absenceFromJson/absenceInPeriod
  */
@@ -48,6 +48,7 @@ public class AbsenceFromJson extends Controller{
 			dateFrom = new LocalDate(yearFrom, monthFrom, dayFrom);
 		else 
 			dateFrom = new LocalDate(params.get("yearFrom", Integer.class), params.get("monthFrom", Integer.class), params.get("dayFrom", Integer.class));
+		
 		if(yearTo != null && monthTo != null && dayTo != null)
 			dateTo = new LocalDate(yearTo, monthTo, dayTo);
 		else
@@ -81,6 +82,7 @@ public class AbsenceFromJson extends Controller{
 					if(abs.absenceType.code.equals(previousAbsence.absenceType.code)){
 						if(!endCurrentPeriod.isEqual(abs.personDay.date.minusDays(1))){
 							personPeriodAbsenceCode = new PersonPeriodAbsenceCode();
+							personPeriodAbsenceCode.personId = person.id;
 							personPeriodAbsenceCode.name = person.name;
 							personPeriodAbsenceCode.surname = person.surname;
 							personPeriodAbsenceCode.code = previousAbsence.absenceType.code;
@@ -101,8 +103,8 @@ public class AbsenceFromJson extends Controller{
 								giornoFine = new String("0"+endCurrentPeriod.getDayOfMonth());
 							else
 								giornoFine = new String(""+endCurrentPeriod.getDayOfMonth());
-							personPeriodAbsenceCode.dateFrom = new String(startCurrentPeriod.getYear()+"-"+meseInizio+"-"+giornoInizio);
-							personPeriodAbsenceCode.dateTo = new String(endCurrentPeriod.getYear()+"-"+meseFine+"-"+giornoFine);
+							personPeriodAbsenceCode.start = new String(startCurrentPeriod.getYear()+"-"+meseInizio+"-"+giornoInizio);
+							personPeriodAbsenceCode.end = new String(endCurrentPeriod.getYear()+"-"+meseFine+"-"+giornoFine);
 							personsToRender.add(personPeriodAbsenceCode);
 
 							previousAbsence = abs;
@@ -119,6 +121,7 @@ public class AbsenceFromJson extends Controller{
 					else
 					{
 						personPeriodAbsenceCode = new PersonPeriodAbsenceCode();
+						personPeriodAbsenceCode.personId = person.id;
 						personPeriodAbsenceCode.name = person.name;
 						personPeriodAbsenceCode.surname = person.surname;
 						personPeriodAbsenceCode.code = previousAbsence.absenceType.code;
@@ -140,8 +143,8 @@ public class AbsenceFromJson extends Controller{
 							giornoFine = new String("0"+endCurrentPeriod.getDayOfMonth());
 						else
 							giornoFine = new String(""+endCurrentPeriod.getDayOfMonth());
-						personPeriodAbsenceCode.dateFrom = new String(startCurrentPeriod.getYear()+"-"+meseInizio+"-"+giornoInizio);
-						personPeriodAbsenceCode.dateTo = new String(endCurrentPeriod.getYear()+"-"+meseFine+"-"+giornoFine);
+						personPeriodAbsenceCode.start = new String(startCurrentPeriod.getYear()+"-"+meseInizio+"-"+giornoInizio);
+						personPeriodAbsenceCode.end = new String(endCurrentPeriod.getYear()+"-"+meseFine+"-"+giornoFine);
 						personsToRender.add(personPeriodAbsenceCode);
 
 						previousAbsence = abs;
@@ -153,6 +156,7 @@ public class AbsenceFromJson extends Controller{
 				if(previousAbsence!=null)
 				{
 					personPeriodAbsenceCode = new PersonPeriodAbsenceCode();
+					personPeriodAbsenceCode.personId = person.id;
 					personPeriodAbsenceCode.name = person.name;
 					personPeriodAbsenceCode.surname = person.surname;
 					personPeriodAbsenceCode.code = previousAbsence.absenceType.code;
@@ -173,8 +177,8 @@ public class AbsenceFromJson extends Controller{
 						giornoFine = new String("0"+endCurrentPeriod.getDayOfMonth());
 					else
 						giornoFine = new String(""+endCurrentPeriod.getDayOfMonth());
-					personPeriodAbsenceCode.dateFrom = new String(startCurrentPeriod.getYear()+"-"+meseInizio+"-"+giornoInizio);
-					personPeriodAbsenceCode.dateTo = new String(endCurrentPeriod.getYear()+"-"+meseFine+"-"+giornoFine);
+					personPeriodAbsenceCode.start = new String(startCurrentPeriod.getYear()+"-"+meseInizio+"-"+giornoInizio);
+					personPeriodAbsenceCode.end = new String(endCurrentPeriod.getYear()+"-"+meseFine+"-"+giornoFine);
 					personsToRender.add(personPeriodAbsenceCode);
 				}
 			}
