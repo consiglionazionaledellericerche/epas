@@ -376,7 +376,7 @@ public class Absences extends Controller{
 		}	
 
 		if((absenceType.code.startsWith("12") || absenceType.code.startsWith("13")) && absenceType.code.length() == 3){
-			handlerChildIllness(person, dateFrom, absenceType, file);
+			handlerChildIllness(person, dateFrom, dateTo, absenceType, file);
 			return;
 		}
 
@@ -535,6 +535,7 @@ public class Absences extends Controller{
 		if(newAbsenceType==null)
 		{
 			flash.success("Rimossi %s codici assenza di tipo %s", deleted, absence.absenceType.code);
+			PersonUtility.updatePersonDaysIntoInterval(person, dateFrom, dateTo);
 			Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
 		}
 		insertAbsence(person.id, yearFrom, monthFrom, dayFrom, newAbsenceType.code, yearTo, monthTo, dayTo, (Blob)file, mealTicket);
@@ -730,7 +731,7 @@ public class Absences extends Controller{
 	 * @param dateFrom
 	 * @param absenceType
 	 */
-	private static void handlerChildIllness(Person person, LocalDate dateFrom, AbsenceType absenceType, Blob file)
+	private static void handlerChildIllness(Person person, LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, Blob file)
 	{
 		/**
 		 * controllo sulla possibilità di poter prendere i congedi per malattia dei figli, guardo se il codice di assenza appartiene alla
@@ -753,23 +754,17 @@ public class Absences extends Controller{
 			return;
 		}
 		
-		
-		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?",
-				person, dateFrom).first();
-		if(pd == null){
-			pd = new PersonDay(person, dateFrom);
-			pd.create();
+		LocalDate actualDate = dateFrom;
+		int taken = 0;
+		while(!actualDate.isAfter(dateTo))
+		{
+			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, true, file);
+			actualDate = actualDate.plusDays(1);
 		}
-		Absence absence = new Absence();
-		absence.absenceType = absenceType;
-		absence.personDay = pd;
-		absence.save();
-		pd.absences.add(absence);
-		pd.save();
-		pd.updatePersonDaysInMonth();
-		flash.success("Inserito il codice d'assenza %s nel giorno %s", absenceType.code, pd.date);
+		flash.success("Inseriti %s codici assenza per la persona", taken);
+		PersonUtility.updatePersonDaysIntoInterval(person, dateFrom, dateTo);
 		Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
-		
+	
 	}
 	
 	/**
@@ -1119,6 +1114,7 @@ public class Absences extends Controller{
 	 */
 	private static int removeAbsencesInPeriod(Person person, LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType)
 	{
+		LocalDate today = new LocalDate();
 		LocalDate actualDate = dateFrom;
 		int deleted = 0;
 		while(!actualDate.isAfter(dateTo))
@@ -1142,7 +1138,7 @@ public class Absences extends Controller{
 					deleted++;
 				}
 			}
-			if(pd.absences.isEmpty() && pd.absences.isEmpty()){
+			if(pd.date.isAfter(today) && pd.absences.isEmpty() && pd.absences.isEmpty()){
 				pd.delete();
 			}
 			actualDate = actualDate.plusDays(1);
