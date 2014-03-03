@@ -136,6 +136,20 @@ public class Administration extends Controller {
 		
 	}
 	
+	public static void personalResidualSituation()
+	{
+		List<Person> listPerson = Person.getActivePersonsInDay(new LocalDate(), false);
+		List<Mese> listMese = new ArrayList<Mese>();
+		for(Person person : listPerson)
+		{
+			LocalDate today = new LocalDate().minusMonths(1);
+			CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, today.getYear(), null);
+			Mese mese = c.getMese(today.getYear(), today.getMonthOfYear());
+			listMese.add(mese);
+		}
+		render(listMese);
+	} 
+	
 	
 	public static void buildYaml()
 	{

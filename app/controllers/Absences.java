@@ -376,7 +376,7 @@ public class Absences extends Controller{
 		}	
 
 		if((absenceType.code.startsWith("12") || absenceType.code.startsWith("13")) && absenceType.code.length() == 3){
-			handlerChildIllness(person, dateFrom, absenceType, file);
+			handlerChildIllness(person, dateFrom, dateTo, absenceType, file);
 			return;
 		}
 
@@ -535,6 +535,7 @@ public class Absences extends Controller{
 		if(newAbsenceType==null)
 		{
 			flash.success("Rimossi %s codici assenza di tipo %s", deleted, absence.absenceType.code);
+			PersonUtility.updatePersonDaysIntoInterval(person, dateFrom, dateTo);
 			Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
 		}
 		insertAbsence(person.id, yearFrom, monthFrom, dayFrom, newAbsenceType.code, yearTo, monthTo, dayTo, (Blob)file, mealTicket);
@@ -730,7 +731,7 @@ public class Absences extends Controller{
 	 * @param dateFrom
 	 * @param absenceType
 	 */
-	private static void handlerChildIllness(Person person, LocalDate dateFrom, AbsenceType absenceType, Blob file)
+	private static void handlerChildIllness(Person person, LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, Blob file)
 	{
 		/**
 		 * controllo sulla possibilità di poter prendere i congedi per malattia dei figli, guardo se il codice di assenza appartiene alla
@@ -738,36 +739,32 @@ public class Absences extends Controller{
 		 */
 		//TODO: se il dipendente ha più di 9 figli! non funziona dal 10° in poi
 		
-		if(!PersonUtility.canTakePermissionIllnessChild(person, dateFrom, absenceType))
+		Boolean esito = PersonUtility.canTakePermissionIllnessChild(person, dateFrom, absenceType);
+
+		if(esito==null)
 		{
-			/**
-			 * non può usufruire del permesso
-			 */
+			flash.error("ATTENZIONE! In anagrafica la persona selezionata non ha il numero di figli sufficienti per valutare l'assegnazione del codice di assenza nel periodo selezionato. "
+					+ "Accertarsi che la persona disponga dei privilegi per usufruire dal codice e nel caso rimuovere le assenze inserite.");
+		}
+		else if(!esito)
+		{
 			flash.error(String.format("Il dipendente %s %s non può prendere il codice d'assenza %s poichè ha già usufruito del numero" +
 					" massimo di giorni di assenza per quel codice o non ha figli che possono usufruire di quel codice", person.name, person.surname, absenceType.code));
-			//render("@save");
 			Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
 			return;
-
 		}
-		else
+		
+		LocalDate actualDate = dateFrom;
+		int taken = 0;
+		while(!actualDate.isAfter(dateTo))
 		{
-			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?",
-					person, dateFrom).first();
-			if(pd == null){
-				pd = new PersonDay(person, dateFrom);
-				pd.create();
-			}
-			Absence absence = new Absence();
-			absence.absenceType = absenceType;
-			absence.personDay = pd;
-			absence.save();
-			pd.absences.add(absence);
-			pd.save();
-			pd.updatePersonDaysInMonth();
-			flash.success("Inserito il codice d'assenza %s nel giorno %s", absenceType.code, pd.date);
-			Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
+			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, true, file);
+			actualDate = actualDate.plusDays(1);
 		}
+		flash.success("Inseriti %s codici assenza per la persona", taken);
+		PersonUtility.updatePersonDaysIntoInterval(person, dateFrom, dateTo);
+		Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
+	
 	}
 	
 	/**
@@ -1117,6 +1114,7 @@ public class Absences extends Controller{
 	 */
 	private static int removeAbsencesInPeriod(Person person, LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType)
 	{
+		LocalDate today = new LocalDate();
 		LocalDate actualDate = dateFrom;
 		int deleted = 0;
 		while(!actualDate.isAfter(dateTo))
@@ -1140,7 +1138,7 @@ public class Absences extends Controller{
 					deleted++;
 				}
 			}
-			if(pd.absences.isEmpty() && pd.absences.isEmpty()){
+			if(pd.date.isAfter(today) && pd.absences.isEmpty() && pd.absences.isEmpty()){
 				pd.delete();
 			}
 			actualDate = actualDate.plusDays(1);
