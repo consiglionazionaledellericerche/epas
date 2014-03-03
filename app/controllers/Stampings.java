@@ -431,7 +431,7 @@ public class Stampings extends Controller {
 		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
 
 		//lista delle persone che sono state attive nel mese
-		List<Person> activePersons = Person.getActivePersonsInMonth(month, year, false);
+		List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getPerson().getOfficeAllowed(), false);
 
 		List<PersonTroublesInMonthRecap> missingStampings = new ArrayList<PersonTroublesInMonthRecap>();
 		
@@ -480,7 +480,7 @@ public class Stampings extends Controller {
 	public static void dailyPresence(Integer year, Integer month, Integer day) {
 
 		LocalDate dayPresence = new LocalDate(year, month, day);
-		List<Person> activePersonsInDay = Person.getActivePersonsInDay(day, month, year, false);
+		List<Person> activePersonsInDay = Person.getActivePersonsInDay(day, month, year, Security.getPerson().getOfficeAllowed(), false);
 		int numberOfInOut = maxNumberOfStampingsInMonth(year, month, day, activePersonsInDay);
 		
 		
@@ -511,7 +511,7 @@ public class Stampings extends Controller {
 
 		LocalDate beginMonth = new LocalDate(year, month, 1);
 
-		List<Person> activePersons = Person.getActivePersonsInMonth(month, year, false);
+		List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getPerson().getOfficeAllowed(), false);
 		Builder<Person, LocalDate, String> builder = ImmutableTable.<Person, LocalDate, String>builder().orderColumnsBy(new Comparator<LocalDate>() {
 
 			public int compare(LocalDate date1, LocalDate date2) {
