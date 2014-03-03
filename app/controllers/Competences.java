@@ -70,10 +70,10 @@ public class Competences extends Controller{
 		if((year == null || month == null) || (year == 0 || month == 0)){
 			int yearParams = params.get("year", Integer.class);
 			int monthParams = params.get("month", Integer.class);
-			activePersons = Person.getTechnicianForCompetences(new LocalDate(yearParams, monthParams,1));
+			activePersons = Person.getTechnicianForCompetences(new LocalDate(yearParams, monthParams,1), Security.getPerson().getOfficeAllowed());
 		}
 		else{
-			activePersons = Person.getTechnicianForCompetences(new LocalDate(year, month, 1));
+			activePersons = Person.getTechnicianForCompetences(new LocalDate(year, month, 1), Security.getPerson().getOfficeAllowed());
 		}
 
 		List<CompetenceCode> competenceCodes = PersonUtility.activeCompetence();
@@ -246,7 +246,7 @@ public class Competences extends Controller{
 			beginMonth = new LocalDate(year, month, 1);
 		}
 		
-		List<Person> activePersons = Person.getTechnicianForCompetences(new LocalDate(year, month, 1));
+		List<Person> activePersons = Person.getTechnicianForCompetences(new LocalDate(year, month, 1), Security.getPerson().getOfficeAllowed());
 		for(Person p : activePersons){
 			Integer daysAtWork = 0;
 			Integer recoveryDays = 0;
@@ -295,93 +295,12 @@ public class Competences extends Controller{
 
 	}
 
-//	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
-//	public static void updateOldOvertime(Long personId){
-//		LocalDate date = new LocalDate().minusMonths(1);
-//		Logger.debug("La data è: ", date);
-//		Person person = Person.findById(personId);
-//		int weekDayAvailability;
-//		int holidaysAvailability;
-//		int daylightWorkingDaysOvertime;
-//		CompetenceCode cmpCode1 = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "207").first();
-//		CompetenceCode cmpCode2 = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "208").first();
-//		CompetenceCode cmpCode3 = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "S1").first();
-//		Logger.debug("Anno e mese: %s %s", date.getYear(), date.getMonthOfYear());
-//		Competence comp1 = Competence.find("Select comp from Competence comp, CompetenceCode code where comp.competenceCode = code and comp.person = ?" +
-//				" and comp.year = ? and comp.month = ? and code = ?", person, date.getYear(), date.getMonthOfYear(), cmpCode1).first();
-//		Competence comp2 = Competence.find("Select comp from Competence comp, CompetenceCode code where comp.competenceCode = code and comp.person = ?" +
-//				" and comp.year = ? and comp.month = ? and code = ?", person, date.getYear(), date.getMonthOfYear(), cmpCode2).first();
-//		Competence comp3 = Competence.find("Select comp from Competence comp, CompetenceCode code where comp.competenceCode = code and comp.person = ?" +
-//				" and comp.year = ? and comp.month = ? and code = ?", person, date.getYear(), date.getMonthOfYear(), cmpCode3).first();
-//		if(comp1 != null)
-//			weekDayAvailability = comp1.valueApproved;
-//		else
-//			weekDayAvailability = 0;
-//		if(comp2 != null)
-//			holidaysAvailability = comp2.valueApproved;
-//		else
-//			holidaysAvailability = 0;
-//		if(comp3 != null)
-//			daylightWorkingDaysOvertime = comp3.valueApproved;
-//		else
-//			daylightWorkingDaysOvertime = 0;
-//		int progressive = 0;
-//		progressive = PersonUtility.getPositiveDaysForOvertime(PersonMonth.getInstance(person, date.getYear(), date.getMonthOfYear()));
-//		//		PersonDay lastPreviousPersonDayInMonth = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? " +
-//		//				"and pd.date >= ? and pd.date < ? ORDER by pd.date DESC", person, date.dayOfMonth().withMinimumValue(), date).first();
-//		//		if(lastPreviousPersonDayInMonth != null)
-//		progressive = progressive /60;
-//		render(weekDayAvailability,holidaysAvailability,daylightWorkingDaysOvertime, progressive, date, person);
-//	}
-//
-//	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
-//	public static void saveOldOvertime(){
-//		long personId = params.get("person.id", Long.class);
-//		Person person = Person.findById(personId);
-//		int year = params.get("year", Integer.class);
-//		int month = params.get("month", Integer.class);
-//		int overtime = params.get("straordinari", Integer.class);
-//		int progressive = params.get("progressive", Integer.class);
-//		if(overtime > progressive){
-//			flash.error(String.format("Impossibile assegnare ore di straordinario."));
-//			render("@save");
-//		}
-//		else{
-//			if(PersonUtility.canTakeOvertime(person, year, month)){
-//				Competence comp = Competence.find("Select comp from Competence comp where comp.person = ? and comp.month = ? and comp.year = ?", 
-//						person, month, year).first();
-//				if(comp == null){
-//					comp = new Competence();
-//					comp.month = month;
-//					comp.person = person;
-//					comp.year = year;
-//					comp.competenceCode = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", "S1").first();
-//					comp.valueApproved = overtime;
-//
-//				}
-//				else{
-//					comp.valueApproved = overtime;
-//				}
-//				comp.save();
-//				flash.success(String.format("Inserite %s ore di straordinario per %s %s il %s/%s", overtime, person.name, person.surname, month, year));
-//				render("@save");
-//
-//			}
-//			else{
-//				flash.error(String.format("Impossibile assegnare ore di straordinario causa residuo mese precedente insufficiente a coprire " +
-//						"le ore in negativo fatte in alcuni giorni di questo mese"));
-//				render("@save");
-//			}
-//		}
-//
-//	}
-
 	/**
 	 * funzione che ritorna la tabella contenente le competenze associate a ciascuna persona
 	 */
 	public static void recapCompetences(){
 		LocalDate date = new LocalDate();
-		List<Person> personList = Person.getTechnicianForCompetences(date);
+		List<Person> personList = Person.getTechnicianForCompetences(date, Security.getPerson().getOfficeAllowed());
 		ImmutableTable.Builder<Person, String, Boolean> builder = ImmutableTable.builder();
 		Table<Person, String, Boolean> tableRecapCompetence = null;
 		List<CompetenceCode> codeList = CompetenceCode.findAll();
@@ -666,7 +585,7 @@ public class Competences extends Controller{
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void getOvertimeInYear(int year) throws IOException{
 		
-		List<Person> personList = Person.getActivePersonsinYear(year, true);
+		List<Person> personList = Person.getActivePersonsinYear(year, Security.getPerson().getOfficeAllowed(), true);
 		FileInputStream inputStream = null;
 		File tempFile = File.createTempFile("straordinari"+year,".csv" );
 		inputStream = new FileInputStream( tempFile );

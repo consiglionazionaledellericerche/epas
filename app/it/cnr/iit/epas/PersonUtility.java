@@ -26,6 +26,7 @@ import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
 import models.InitializationTime;
+import models.Office;
 import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
@@ -885,6 +886,10 @@ public class PersonUtility {
 	 * @param personLogged
 	 */
 	public static void fixPersonSituation(Long personId, int year, int month, Person personLogged){
+		
+		if(personLogged==null)
+			return;
+		
 		//Costruisco la lista di persone su cui voglio operare
 		List<Person> personList = new ArrayList<Person>();
 		if(personId==-1)
@@ -893,7 +898,8 @@ public class PersonUtility {
 		{
 			LocalDate begin = new LocalDate(year, month, 1);
 			LocalDate end = new LocalDate().minusDays(1);
-			personList = Person.getActivePersonsSpeedyInPeriod(begin, end, personLogged, false);	
+			List<Office> officeAllowed = personLogged.getOfficeAllowed();
+			personList = Person.getActivePersonsSpeedyInPeriod(begin, end, officeAllowed, false);	
 		}
 		else
 		{

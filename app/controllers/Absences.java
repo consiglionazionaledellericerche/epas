@@ -932,7 +932,9 @@ public class Absences extends Controller{
 	
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void insertPersonChildren(){
-		List<Person> personList = Person.getActivePersonsInMonth(new LocalDate().getMonthOfYear(), new LocalDate().getYear(), false);
+		int month = new LocalDate().getMonthOfYear();
+		int year = new LocalDate().getYear();
+		List<Person> personList = Person.getActivePersonsInMonth(month, year, Security.getPerson().getOfficeAllowed(), false);
 		render(personList);
 	}
 	
@@ -1001,7 +1003,7 @@ public class Absences extends Controller{
 	
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void manageAttachmentsPerPerson(Long personSelected, Integer year, Integer month){
-		List<Person> personListForAttachments = Person.getActivePersonsInMonth(month, year, false);
+		List<Person> personListForAttachments = Person.getActivePersonsInMonth(month, year, Security.getPerson().getOfficeAllowed(), false);
 		if(personSelected == null || personSelected == 0){
 			
 			render(personListForAttachments, year, month);
@@ -1025,7 +1027,7 @@ public class Absences extends Controller{
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void absenceInPeriod(Long personSelected, int year, int month){
 		
-		List<Person> personList = Person.getActivePersonsInMonth(month, year, false);
+		List<Person> personList = Person.getActivePersonsInMonth(month, year, Security.getPerson().getOfficeAllowed(), false);
 		if(personSelected == null || personSelected == 0)
 			render(personList, year, month);
 		else{
