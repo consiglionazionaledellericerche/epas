@@ -501,7 +501,8 @@
   
   <!-- password = epas2014 -->
   <persons id="146" badgenumber="" born_date="1974-09-10 00:00:00.0" name="Cristian" number="9802" oldid="146" 
-    password="68282c330c1295804047ff193d70b858" surname="Lucchesi" username="cristian.lucchesi" version="10" 
+    password="68282c330c1295804047ff193d70b858" surname="Lucchesi" username="cristian.lucchesi" version="10"
+    email="cristian.lucchesi@cnr.it" 
     qualification_id="6" office_id="1"/>
 
   <contact_data id="145" email="cristian.lucchesi@iit.cnr.it" telephone="No internal number" person_id="146"/>
