@@ -44,8 +44,5 @@ public class ContractYearRecap extends Model{
 	
 	@Column(name="remaining_minutes_current_year")
 	public Integer remainingMinutesCurrentYear = 0;
-	
-	@Column(name="has_source")
-	public Boolean hasSource = false;
 
 }
