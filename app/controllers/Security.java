@@ -3,7 +3,9 @@ package controllers;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.hash.Hashing;
 
 import play.Logger;
 import play.cache.Cache;
@@ -35,9 +37,13 @@ public class Security extends Secure.Security {
 		
 	public final static String CACHE_DURATION = "30mn";
 	
+
 	static boolean authenticate(String username, String password) {
 	    Logger.trace("Richiesta autenticazione di %s",username);
-		Person person = Person.find("SELECT p FROM Person p where username = ? and password = md5(?)", username, password).first();
+
+		Person person = 
+			Person.find("SELECT p FROM Person p where username = ? and password = ?", 
+					username, Hashing.md5().hashString(password,  Charsets.UTF_8).toString()).first();
 
 		if(person != null){
 			Cache.set(username, person, CACHE_DURATION);

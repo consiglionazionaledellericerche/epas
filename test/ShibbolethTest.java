@@ -21,10 +21,6 @@ import play.mvc.Http.*;
 public class ShibbolethTest extends FunctionalTest {
 
 
-	@Before
-	public void loadModels() {
-    	Fixtures.loadModels("persons.yml");
-	}
 	/**
 	 * The basic test to authenticate as a user using Shibboleth.
 	 */
