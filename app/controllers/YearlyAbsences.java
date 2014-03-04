@@ -156,7 +156,7 @@ public class YearlyAbsences extends Controller{
 			/**
 			 * caso in cui si vogliono le assenze di tutti i mesi dell'anno in corso fino alla data attuale
 			 */
-			List<Person> activePersons = Person.getActivePersonsinYear(year, false);
+			List<Person> activePersons = Person.getActivePersonsinYear(year, Security.getPerson().getOfficeAllowed(), false);
 			for(Person p : activePersons){
 				List<Absence> absenceInMonth = Absence.find("Select abs from Absence abs, PersonDay pd where abs.personDay = pd and " +
 						"pd.person = ? and pd.date >= ? and pd.date <= ?", 
@@ -179,7 +179,7 @@ public class YearlyAbsences extends Controller{
 			}
 		}
 		else{
-			List<Person> activePersons = Person.getActivePersonsInMonth(month, year, false);
+			List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getPerson().getOfficeAllowed(), false);
 			//Table<Person, String, Integer> tableMonthlyAbsences = ArrayTable.create(activePersons, absenceInMonth);
 
 
