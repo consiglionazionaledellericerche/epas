@@ -303,10 +303,9 @@ public class Contract extends Model {
 			//contratto non interamente contenuto nel database (serve sourceContract)
 			if(this.sourceDate==null)
 				return;
-			yearToCompute = this.populateContractYearFromSource();
+			yearToCompute = this.populateContractYearFromSourceWhenSourceIsEndOfYear();
 		}
 		
-		//TODO capire se popolare da yearToCompute ad oggi (oppure l'ultimo anno del contratto se è scaduto) oppure fino all'anno passato
 		int currentYear = new LocalDate().getYear();
 		if(currentYear>contractInterval.getEnd().getYear())
 			currentYear = contractInterval.getEnd().getYear();
@@ -335,6 +334,8 @@ public class Contract extends Model {
 			cyr.remainingMinutesCurrentYear = lastComputedMonthInYear.monteOreAnnoCorrente;
 			
 			//RIPOSI COMPENSATIVI
+			//TODO la logica che persiste il dato sui riposi compensativi utilizzati deve essere ancora implementata in quanto non banale.
+			//I riposi compensativi utilizzati sono in funzione del contratto?
 			//cyr.recoveryDayUsed = PersonUtility.numberOfCompensatoryRestUntilToday(this.person, yearToCompute, 12);
 			
 			cyr.save();
@@ -345,7 +346,14 @@ public class Contract extends Model {
 	}
 	
 	
-	public int populateContractYearFromSource()
+	/**
+	 * Costruisce il contractYearRecap se contract.SourceDate è l'ultimo giorno dell'anno.
+	 * N.B. se source non è l'ultimo giorno dell'anno il contractYearRecap non viene costruito perchè non utile agli algoritmi
+	 * di calcolo dei residui e delle ferie che utilizzano direttamente i dati di contract.source. Verificare se per motivi di report
+	 * ha senso persistere anche il riepilogo di tale anno.
+	 * @return l'anno di cui si deve costruire il prossimo contractYearRecap
+	 */
+	public int populateContractYearFromSourceWhenSourceIsEndOfYear()
 	{
 		LocalDate lastDayInYear = new LocalDate(this.sourceDate.getYear(), 12, 31);
 		if(! lastDayInYear.isEqual(this.sourceDate))
@@ -356,11 +364,11 @@ public class Contract extends Model {
 		cyr.year = yearToCompute;
 		cyr.contract = this;
 		cyr.remainingMinutesCurrentYear = this.sourceRemainingMinutesCurrentYear;
-		cyr.remainingMinutesLastYear = 0; //NULL
-		cyr.vacationLastYearUsed = 0; //NULL
+		cyr.remainingMinutesLastYear = this.sourceRemainingMinutesLastYear;
+		cyr.vacationLastYearUsed = this.sourceVacationLastYearUsed;
 		cyr.vacationCurrentYearUsed = this.sourceVacationCurrentYearUsed;
-		cyr.recoveryDayUsed = 0;  //NULL
-		cyr.permissionUsed = 0;  //NULL
+		cyr.recoveryDayUsed = this.sourceRecoveryDayUsed;
+		cyr.permissionUsed = this.sourcePermissionUsed;
 		cyr.save();
 		this.recapPeriods.add(cyr);
 		return yearToCompute+1;

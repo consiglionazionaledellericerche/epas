@@ -251,6 +251,7 @@ public class Administration extends Controller {
 			contract.sourcePermissionUsed = 0;
 			contract.sourceVacationCurrentYearUsed = mysqlInitPerson.vacationCurrentYearUsed;
 			contract.sourceVacationLastYearUsed = 0;
+			contract.sourceRecoveryDayUsed = 0;
 			contract.save();
 		}
 		JPAPlugin.closeTx(false);

@@ -589,7 +589,7 @@ public class PersonDay extends Model {
 		//Strutture dati transienti necessarie al calcolo
 		if(personDayContract==null)
 		{
-			this.personDayContract = this.person.getContractFromHeap(date);
+			this.personDayContract = this.person.getContract(date);
 			//Se la persona non ha un contratto attivo non si fanno calcoli per quel giorno, le timbrature vengono comunque mantenute
 			if(personDayContract==null)
 				return;
@@ -611,7 +611,7 @@ public class PersonDay extends Model {
 		
 		if(previousPersonDayInMonth!=null && previousPersonDayInMonth.personDayContract==null)
 		{
-			this.previousPersonDayInMonth.personDayContract = this.person.getContractFromHeap(this.previousPersonDayInMonth.date);
+			this.previousPersonDayInMonth.personDayContract = this.person.getContract(this.previousPersonDayInMonth.date);
 		}
 	
 		//controllo uscita notturna
@@ -646,7 +646,7 @@ public class PersonDay extends Model {
 		//Strutture dati transienti necessarie al calcolo
 		if(personDayContract==null)
 		{
-			this.personDayContract = this.person.getContractFromHeap(date);
+			this.personDayContract = this.person.getContract(date);
 			//Se la persona non ha un contratto attivo non si fanno calcoli per quel giorno, le timbrature vengono comunque mantenute
 			if(personDayContract==null)
 				return;
@@ -659,7 +659,7 @@ public class PersonDay extends Model {
 		
 		if(previousPersonDayInMonth!=null && previousPersonDayInMonth.personDayContract==null)
 		{
-			this.previousPersonDayInMonth.personDayContract = this.person.getContractFromHeap(this.previousPersonDayInMonth.date);
+			this.previousPersonDayInMonth.personDayContract = this.person.getContract(this.previousPersonDayInMonth.date);
 		}
 		
 		updateTimeAtWork();
