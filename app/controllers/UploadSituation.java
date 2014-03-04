@@ -150,7 +150,7 @@ public class UploadSituation extends Controller{
 						new Dipendente(person.number == null ? "" : person.number.toString(), Joiner.on(" ").skipNulls().join(person.surname, person.othersSurnames, person.name));
 				return dipendente;
 			}
-		}).toImmutableSet();
+		}).toSet();
 
 		Logger.trace("Lista dipendenti attivi nell'anno %d, mese %d e': %s", year, month, activeDipendenti);
 
@@ -174,8 +174,8 @@ public class UploadSituation extends Controller{
 				return risposta.getProblems() == null || risposta.getProblems().isEmpty();
 			}
 		};
-		List<RispostaElaboraDati> risposteOk = FluentIterable.from(checks).filter(rispostaOk).toImmutableList();
-		List<RispostaElaboraDati> risposteNotOk = FluentIterable.from(checks).filter(Predicates.not(rispostaOk)).toImmutableList();
+		List<RispostaElaboraDati> risposteOk = FluentIterable.from(checks).filter(rispostaOk).toList();
+		List<RispostaElaboraDati> risposteNotOk = FluentIterable.from(checks).filter(Predicates.not(rispostaOk)).toList();
 
 		render(attestatiLogin, attestatiPassword, year, month, actions, dipendentiNonInEpas, dipendentiNonInCNR, risposteOk, risposteNotOk);
 
