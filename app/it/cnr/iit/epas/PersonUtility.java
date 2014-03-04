@@ -19,12 +19,14 @@ import play.Logger;
 import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 import play.db.jpa.Transactional;
+import play.mvc.Scope.Flash;
 import models.Absence;
 import models.AbsenceType;
 import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
 import models.InitializationTime;
+import models.Office;
 import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
@@ -108,7 +110,7 @@ public class PersonUtility {
 	/**
 	 * metodo per stabilire se una persona può ancora prendere o meno giorni di permesso causa malattia del figlio
 	 */
-	public static boolean canTakePermissionIllnessChild(Person person, LocalDate date, AbsenceType abt){
+	public static Boolean canTakePermissionIllnessChild(Person person, LocalDate date, AbsenceType abt){
 		/**
 		 * controllo che la persona abbia un figlio in età per poter usufruire del congedo
 		 */
@@ -119,6 +121,8 @@ public class PersonUtility {
 		PersonChildren child = null;
 		switch(code){
 		case 12:
+			if(persChildList.size()<1)
+				return null;
 			child = persChildList.get(0) != null ? persChildList.get(0) : null;
 			if(child != null){
 				if(child.bornDate.isAfter(date.minusYears(3))){
@@ -138,6 +142,8 @@ public class PersonUtility {
 
 
 		case 122:
+			if(persChildList.size()<2)
+				return null;
 			child = persChildList.get(1) != null ? persChildList.get(1) : null;
 			Logger.debug("Il riferimento del codice è per %s %s. Nato il %s", child.surname, child.name, child.bornDate);
 			if(child != null){
@@ -152,13 +158,12 @@ public class PersonUtility {
 						return false;
 				}
 			}
-			else{
-				return false;
-			}
 			
 			break;
 
 		case 123:
+			if(persChildList.size()<3)	//TODO implementare un sistema di ritorno messaggio al chiamante (esempio ritorno un oggetto Message con esito booleano e una stringa stato)
+				return null;
 			child = persChildList.get(2) != null ? persChildList.get(2) : null;
 			if(child != null){
 				if(child.bornDate.isAfter(date.minusYears(3))){
@@ -172,12 +177,13 @@ public class PersonUtility {
 			}
 			else{
 				return false;
-				
 			}
 			
 			break;
 
 		case 13:
+			if(persChildList.size()<1)
+				return null;
 			child = persChildList.get(0) != null ? persChildList.get(0) : null;
 			if(child != null){
 				if(child.bornDate.isAfter(date.minusYears(8))){
@@ -196,6 +202,8 @@ public class PersonUtility {
 			break;
 
 		case 132:
+			if(persChildList.size()<2)
+				return null;
 			child = persChildList.get(1) != null ? persChildList.get(1) : null;
 			if(child != null){
 				if(child.bornDate.isAfter(date.minusYears(8))){
@@ -214,6 +222,8 @@ public class PersonUtility {
 			break;
 
 		case 133:
+			if(persChildList.size()<3)
+				return null;
 			child = persChildList.get(2) != null ? persChildList.get(2) : null;
 			if(child != null){
 				if(child.bornDate.isAfter(date.minusYears(8))){
@@ -231,6 +241,8 @@ public class PersonUtility {
 			break;
 
 		case 134:
+			if(persChildList.size()<4)
+				return null;
 			child = persChildList.get(3) != null ? persChildList.get(3) : null;
 			if(child != null){
 				if(child.bornDate.isAfter(date.minusYears(8))){
@@ -874,6 +886,10 @@ public class PersonUtility {
 	 * @param personLogged
 	 */
 	public static void fixPersonSituation(Long personId, int year, int month, Person personLogged){
+		
+		if(personLogged==null)
+			return;
+		
 		//Costruisco la lista di persone su cui voglio operare
 		List<Person> personList = new ArrayList<Person>();
 		if(personId==-1)
@@ -882,7 +898,8 @@ public class PersonUtility {
 		{
 			LocalDate begin = new LocalDate(year, month, 1);
 			LocalDate end = new LocalDate().minusDays(1);
-			personList = Person.getActivePersonsSpeedyInPeriod(begin, end, personLogged, false);	
+			List<Office> officeAllowed = personLogged.getOfficeAllowed();
+			personList = Person.getActivePersonsSpeedyInPeriod(begin, end, officeAllowed, false);	
 		}
 		else
 		{

@@ -14,6 +14,7 @@ import org.joda.time.LocalDateTime;
 import models.AbsenceType;
 import models.ConfGeneral;
 import models.Contract;
+import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.PersonMonthRecap;
@@ -33,8 +34,10 @@ public class Clocks extends Controller{
 
 	public static void show(){
 		LocalDate data = new LocalDate();
+		//TODO Capire quali office saranno visibili a questo livello 
+		List<Office> officeAllowed = Office.findAll();
 		MainMenu mainMenu = new MainMenu(data.getYear(),data.getMonthOfYear());
-		List<Person> personList = Person.getActivePersonsInMonth(data.getMonthOfYear(), data.getYear(), false);
+		List<Person> personList = Person.getActivePersonsInMonth(data.getMonthOfYear(), data.getYear(), officeAllowed, false);
 		render(data, personList,mainMenu);
 	}
 	
