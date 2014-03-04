@@ -11,11 +11,15 @@ require:
     - org.yaml -> snakeyaml 1.9:
           force: true
     - play -> db 1.1.1
-    - com.google.guava -> guava 13.0.1
+    - com.google.guava -> guava 16.+
     - play -> pdf 0.9
     - org.mnode.ical4j -> ical4j 1.0.+    
     - org.jsoup -> jsoup 1.7+
-    
+    - org.dbunit -> dbunit 2.4.9
+    - org.hamcrest -> hamcrest-library 1.2.1
+    - org.hamcrest -> hamcrest-integration 1.2.1
+    - org.mockito -> mockito-core 1.9.0
+
 # My custom repository
 
 repositories:
