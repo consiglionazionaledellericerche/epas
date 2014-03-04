@@ -74,12 +74,6 @@ public class Administration extends Controller {
     }
     
     
-//	public static void test(){
-//		PersonMonth pm = new PersonMonth(Person.em().getReference(Person.class, 140L), 2012,6);
-//		long n = pm.getMaximumCoupleOfStampings();
-//		render(n);
-//	}
-//	
 	public static void upgradePerson(){
 		FromMysqlToPostgres.upgradePerson();
 		renderText("Modificati i permessi per l'utente");
@@ -110,7 +104,7 @@ public class Administration extends Controller {
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void utilities(){
-		List<Person> pdList = Person.getActivePersonsInDay(new LocalDate(), false);
+		List<Person> pdList = Person.getActivePersonsInDay(new LocalDate(), Security.getPerson().getOfficeAllowed(), false);
 		render(pdList);
 	}
 	
@@ -135,6 +129,21 @@ public class Administration extends Controller {
 		Competences.getOvertimeInYear(year);
 		
 	}
+	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void personalResidualSituation()
+	{
+		List<Person> listPerson = Person.getActivePersonsInDay(new LocalDate(), Security.getPerson().getOfficeAllowed(), false);
+		List<Mese> listMese = new ArrayList<Mese>();
+		for(Person person : listPerson)
+		{
+			LocalDate today = new LocalDate().minusMonths(1);
+			CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, today.getYear(), null);
+			Mese mese = c.getMese(today.getYear(), today.getMonthOfYear());
+			listMese.add(mese);
+		}
+		render(listMese);
+	} 
 	
 	
 	public static void buildYaml()
