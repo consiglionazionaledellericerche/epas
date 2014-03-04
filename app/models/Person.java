@@ -159,12 +159,6 @@ public class Person extends Model {
 	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<StampProfile> stampProfiles = new ArrayList<StampProfile>();
 
-	/**
-	 * relazione con la tabella delle tipologie di orario di lavoro
-	 */
-//	@ManyToOne(fetch=FetchType.LAZY)
-//	@JoinColumn(name="working_time_type_id")
-//	public WorkingTimeType workingTimeType;
 	
 	@NotAudited
 	@OneToMany(mappedBy = "person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
