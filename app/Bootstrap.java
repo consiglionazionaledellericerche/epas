@@ -16,6 +16,7 @@ import models.VacationCode;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import play.Logger;
+import play.Play;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 import play.test.Fixtures;
@@ -30,8 +31,14 @@ import play.test.Fixtures;
 @OnApplicationStart
 public class Bootstrap extends Job {
 	
+	
 	public void doJob() {
 
+		if (Play.id.equals("test")) {
+			Logger.info("Application in test mode, default boostrap job not started");
+			return;
+		}
+		
 		try
 		{
 			if(Qualification.count() == 0){
