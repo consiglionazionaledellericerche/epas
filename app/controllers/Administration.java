@@ -1,5 +1,7 @@
 package controllers;
 
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.ExportToYaml;
 import it.cnr.iit.epas.FromMysqlToPostgres;
 import it.cnr.iit.epas.PersonUtility;
@@ -14,6 +16,8 @@ import org.yaml.snakeyaml.Yaml;
 
 import controllers.shib.Shibboleth;
 import models.AbsenceType;
+import models.ConfGeneral;
+import models.Contract;
 import models.InitializationTime;
 import models.Person;
 import models.PersonDay;
@@ -144,6 +148,38 @@ public class Administration extends Controller {
 		}
 		render(listMese);
 	} 
+	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void troublesLog()
+	{
+		Person personLogged = Person.find("byUsername", "admin").first();	
+		List<Person> personList = Person.getActivePersonsInDay(LocalDate.now(), personLogged.getOfficeAllowed(), false);
+		for(Person person : personList)
+		{
+			Contract currentContract = person.getCurrentContract();
+			DateInterval troubleInterval = new DateInterval(ConfGeneral.getConfGeneral().initUseProgram, LocalDate.now());
+			DateInterval contractInterval = new DateInterval(contract.)
+			troubleInterval = DateUtility.intervalIntersection(troubleInterval, )
+			//TODO quando sarà entrata in fuzione l'implementazione init use prendere tutti i person day da quando la persona ha dati in db
+			
+			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date",
+					person, initUse, LocalDate.now()).fetch();
+			List<PersonDayInTrouble> troubles = new ArrayList<PersonDayInTrouble>();
+			for(PersonDay pd : pdList)
+			{
+				for(PersonDayInTrouble trouble : pd.troubles)
+				{
+					if(!trouble.fixed)
+						troubles.add(trouble);
+				}
+			}
+			for(PersonDayInTrouble trouble : troubles)
+			{
+				Logger.debug("%s %s %s %s", person.name, person.surname, trouble.personDay.date, trouble.cause);
+			}
+		}	
+	}
+	
 	
 	
 	public static void buildYaml()
