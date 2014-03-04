@@ -70,10 +70,10 @@ public class Competences extends Controller{
 		if((year == null || month == null) || (year == 0 || month == 0)){
 			int yearParams = params.get("year", Integer.class);
 			int monthParams = params.get("month", Integer.class);
-			activePersons = Person.getTechnicianForCompetences(new LocalDate(yearParams, monthParams,1));
+			activePersons = Person.getTechnicianForCompetences(new LocalDate(yearParams, monthParams,1), Security.getPerson().getOfficeAllowed());
 		}
 		else{
-			activePersons = Person.getTechnicianForCompetences(new LocalDate(year, month, 1));
+			activePersons = Person.getTechnicianForCompetences(new LocalDate(year, month, 1), Security.getPerson().getOfficeAllowed());
 		}
 
 		List<CompetenceCode> competenceCodes = PersonUtility.activeCompetence();
@@ -246,7 +246,7 @@ public class Competences extends Controller{
 			beginMonth = new LocalDate(year, month, 1);
 		}
 		
-		List<Person> activePersons = Person.getTechnicianForCompetences(new LocalDate(year, month, 1));
+		List<Person> activePersons = Person.getTechnicianForCompetences(new LocalDate(year, month, 1), Security.getPerson().getOfficeAllowed());
 		for(Person p : activePersons){
 			Integer daysAtWork = 0;
 			Integer recoveryDays = 0;
@@ -295,93 +295,12 @@ public class Competences extends Controller{
 
 	}
 
-//	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
-//	public static void updateOldOvertime(Long personId){
-//		LocalDate date = new LocalDate().minusMonths(1);
-//		Logger.debug("La data è: ", date);
-//		Person person = Person.findById(personId);
-//		int weekDayAvailability;
-//		int holidaysAvailability;
-//		int daylightWorkingDaysOvertime;
-//		CompetenceCode cmpCode1 = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "207").first();
-//		CompetenceCode cmpCode2 = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "208").first();
-//		CompetenceCode cmpCode3 = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "S1").first();
-//		Logger.debug("Anno e mese: %s %s", date.getYear(), date.getMonthOfYear());
-//		Competence comp1 = Competence.find("Select comp from Competence comp, CompetenceCode code where comp.competenceCode = code and comp.person = ?" +
-//				" and comp.year = ? and comp.month = ? and code = ?", person, date.getYear(), date.getMonthOfYear(), cmpCode1).first();
-//		Competence comp2 = Competence.find("Select comp from Competence comp, CompetenceCode code where comp.competenceCode = code and comp.person = ?" +
-//				" and comp.year = ? and comp.month = ? and code = ?", person, date.getYear(), date.getMonthOfYear(), cmpCode2).first();
-//		Competence comp3 = Competence.find("Select comp from Competence comp, CompetenceCode code where comp.competenceCode = code and comp.person = ?" +
-//				" and comp.year = ? and comp.month = ? and code = ?", person, date.getYear(), date.getMonthOfYear(), cmpCode3).first();
-//		if(comp1 != null)
-//			weekDayAvailability = comp1.valueApproved;
-//		else
-//			weekDayAvailability = 0;
-//		if(comp2 != null)
-//			holidaysAvailability = comp2.valueApproved;
-//		else
-//			holidaysAvailability = 0;
-//		if(comp3 != null)
-//			daylightWorkingDaysOvertime = comp3.valueApproved;
-//		else
-//			daylightWorkingDaysOvertime = 0;
-//		int progressive = 0;
-//		progressive = PersonUtility.getPositiveDaysForOvertime(PersonMonth.getInstance(person, date.getYear(), date.getMonthOfYear()));
-//		//		PersonDay lastPreviousPersonDayInMonth = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? " +
-//		//				"and pd.date >= ? and pd.date < ? ORDER by pd.date DESC", person, date.dayOfMonth().withMinimumValue(), date).first();
-//		//		if(lastPreviousPersonDayInMonth != null)
-//		progressive = progressive /60;
-//		render(weekDayAvailability,holidaysAvailability,daylightWorkingDaysOvertime, progressive, date, person);
-//	}
-//
-//	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
-//	public static void saveOldOvertime(){
-//		long personId = params.get("person.id", Long.class);
-//		Person person = Person.findById(personId);
-//		int year = params.get("year", Integer.class);
-//		int month = params.get("month", Integer.class);
-//		int overtime = params.get("straordinari", Integer.class);
-//		int progressive = params.get("progressive", Integer.class);
-//		if(overtime > progressive){
-//			flash.error(String.format("Impossibile assegnare ore di straordinario."));
-//			render("@save");
-//		}
-//		else{
-//			if(PersonUtility.canTakeOvertime(person, year, month)){
-//				Competence comp = Competence.find("Select comp from Competence comp where comp.person = ? and comp.month = ? and comp.year = ?", 
-//						person, month, year).first();
-//				if(comp == null){
-//					comp = new Competence();
-//					comp.month = month;
-//					comp.person = person;
-//					comp.year = year;
-//					comp.competenceCode = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", "S1").first();
-//					comp.valueApproved = overtime;
-//
-//				}
-//				else{
-//					comp.valueApproved = overtime;
-//				}
-//				comp.save();
-//				flash.success(String.format("Inserite %s ore di straordinario per %s %s il %s/%s", overtime, person.name, person.surname, month, year));
-//				render("@save");
-//
-//			}
-//			else{
-//				flash.error(String.format("Impossibile assegnare ore di straordinario causa residuo mese precedente insufficiente a coprire " +
-//						"le ore in negativo fatte in alcuni giorni di questo mese"));
-//				render("@save");
-//			}
-//		}
-//
-//	}
-
 	/**
 	 * funzione che ritorna la tabella contenente le competenze associate a ciascuna persona
 	 */
 	public static void recapCompetences(){
 		LocalDate date = new LocalDate();
-		List<Person> personList = Person.getTechnicianForCompetences(date);
+		List<Person> personList = Person.getTechnicianForCompetences(date, Security.getPerson().getOfficeAllowed());
 		ImmutableTable.Builder<Person, String, Boolean> builder = ImmutableTable.builder();
 		Table<Person, String, Boolean> tableRecapCompetence = null;
 		List<CompetenceCode> codeList = CompetenceCode.findAll();
@@ -445,11 +364,11 @@ public class Competences extends Controller{
 		String ionicRadiance1bis = params.get("ionicRadiance1bis");
 		String ionicRadiance3bis = params.get("ionicRadiance3bis");
 
-		if(overtimeWorkDay.equals("true") && person.isOvertimeInWorkDayAvailable()){
+		if(overtimeWorkDay.equals("true") && !person.isOvertimeInWorkDayAvailable()){
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Straordinario diurno nei giorni lavorativi").first();
 			person.competenceCode.add(c);
 		}
-		else{
+		else if(overtimeWorkDay.equals("false") && person.isOvertimeInWorkDayAvailable()){
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Straordinario diurno nei giorni lavorativi").first();
 			person.competenceCode.remove(c);
 		}
@@ -458,7 +377,7 @@ public class Competences extends Controller{
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Straordinario diurno nei giorni festivi o notturno nei giorni lavorativi").first();
 			person.competenceCode.add(c);
 		}
-		else{
+		else if(nightlyOvertime.equals("false") && person.isOvertimeInHolidayOrNightlyInWorkDayAvailable()){
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Straordinario diurno nei giorni festivi o notturno nei giorni lavorativi").first();
 			person.competenceCode.remove(c);
 		}
@@ -467,7 +386,7 @@ public class Competences extends Controller{
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Straordinario notturno nei giorni festivi").first();
 			person.competenceCode.add(c);
 		}
-		else{
+		else if(nightlyHolidayOvertime.equals("false") && person.isOvertimeInNightlyHolidayAvailable()){
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Straordinario notturno nei giorni festivi").first();
 			person.competenceCode.remove(c);
 		}
@@ -476,7 +395,7 @@ public class Competences extends Controller{
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Reper.ta' Feriale").first();
 			person.competenceCode.add(c);
 		}
-		else{
+		else if(workdayReperibility.equals("false") && person.isWorkDayReperibilityAvailable()){
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Reper.ta' Feriale").first();
 			person.competenceCode.remove(c);
 		}
@@ -485,7 +404,7 @@ public class Competences extends Controller{
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Reper.ta' Festiva").first();
 			person.competenceCode.add(c);
 		}
-		else{
+		else if(holidayReperebility.equals("false") && person.isHolidayReperibilityAvailable()){
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Reper.ta' Festiva").first();
 			person.competenceCode.remove(c);
 		}
@@ -494,7 +413,7 @@ public class Competences extends Controller{
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Turno ordinario").first();
 			person.competenceCode.add(c);
 		}
-		else{
+		else if(ordinaryShift.equals("false") && person.isOrdinaryShiftAvailable()){
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Turno ordinario").first();
 			person.competenceCode.remove(c);
 		}
@@ -503,7 +422,7 @@ public class Competences extends Controller{
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Turno festivo").first();
 			person.competenceCode.add(c);
 		}
-		else{
+		else if(holidayShift.equals("false") && person.isHolidayShiftAvailable()){
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Turno festivo").first();
 			person.competenceCode.remove(c);
 		}
@@ -512,7 +431,7 @@ public class Competences extends Controller{
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Turno notturno").first();
 			person.competenceCode.add(c);
 		}
-		else{
+		else if(nightlyShift.equals("false") && person.isNightlyShiftAvailable()){
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Turno notturno").first();
 			person.competenceCode.remove(c);
 		}
@@ -521,7 +440,7 @@ public class Competences extends Controller{
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.tà Sede Disagiata").first();
 			person.competenceCode.add(c);
 		}
-		else{
+		else if(hardship.equals("false") && person.isHardshipAllowance()){
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.tà Sede Disagiata").first();
 			person.competenceCode.remove(c);
 		}
@@ -530,7 +449,7 @@ public class Competences extends Controller{
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Maneggio Valori").first();
 			person.competenceCode.add(c);
 		}
-		else{
+		else if(handleValues.equals("false") && person.isHandleValuesAllowanceAvailable()){
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Maneggio Valori").first();
 			person.competenceCode.remove(c);
 		}
@@ -539,7 +458,7 @@ public class Competences extends Controller{
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' mansione L.397/71").first();
 			person.competenceCode.add(c);
 		}
-		else{
+		else if(task.equals("false") && person.isTaskAllowanceAvailable()){
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' mansione L.397/71").first();
 			person.competenceCode.remove(c);
 		}
@@ -548,7 +467,7 @@ public class Competences extends Controller{
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' mansione L.397/71 Magg.").first();
 			person.competenceCode.add(c);
 		}
-		else{
+		else if(taskIncreased.equals("false") && person.isTaskAllowanceIncreasedAvailable()){
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' mansione L.397/71 Magg.").first();
 			person.competenceCode.remove(c);
 		}
@@ -557,7 +476,7 @@ public class Competences extends Controller{
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Natanti").first();
 			person.competenceCode.add(c);
 		}
-		else{
+		else if(boats.equals("false") && person.isBoatsAllowanceAvailable()){
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Natanti").first();
 			person.competenceCode.remove(c);
 		}
@@ -566,7 +485,7 @@ public class Competences extends Controller{
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.1 DPR.146").first();
 			person.competenceCode.add(c);
 		}
-		else{
+		else if(riskOne.equals("false") && person.isRiskDegreeOneAvailable()){
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.1 DPR.146").first();
 			person.competenceCode.remove(c);
 		}
@@ -575,7 +494,7 @@ public class Competences extends Controller{
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.2 DPR.146").first();
 			person.competenceCode.add(c);
 		}
-		else{
+		else if(riskTwo.equals("false") && person.isRiskDegreeTwoAvailable()){
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.2 DPR.146").first();
 			person.competenceCode.remove(c);
 		}
@@ -584,7 +503,7 @@ public class Competences extends Controller{
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.3 DPR.146").first();
 			person.competenceCode.add(c);
 		}
-		else{
+		else if(riskThree.equals("false") && person.isRiskDegreeThreeAvailable()){
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.3 DPR.146").first();
 			person.competenceCode.remove(c);
 		}
@@ -593,7 +512,7 @@ public class Competences extends Controller{
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.4 DPR.146").first();
 			person.competenceCode.add(c);
 		}
-		else{
+		else if(riskFour.equals("false") && person.isRiskDegreeFourAvailable()){
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.4 DPR.146").first();
 			person.competenceCode.remove(c);
 		}
@@ -602,7 +521,7 @@ public class Competences extends Controller{
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.5 DPR.146").first();
 			person.competenceCode.add(c);
 		}
-		else{
+		else if(riskFive.equals("false") && person.isRiskDegreeFiveAvailable()){
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.5 DPR.146").first();
 			person.competenceCode.remove(c);
 		}
@@ -611,7 +530,7 @@ public class Competences extends Controller{
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio Subacquei").first();
 			person.competenceCode.add(c);
 		}
-		else{
+		else if(riskDiving.equals("false") && person.isRiskDivingAllowanceAvailable()){
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio Subacquei").first();
 			person.competenceCode.remove(c);
 		}
@@ -621,7 +540,7 @@ public class Competences extends Controller{
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.code = ? ", "205").first();
 			person.competenceCode.add(c);
 		}
-		else{
+		else if(ionicRadiance1.equals("false") && person.isIonicRadianceRiskCom1Available()){
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.code = ? ", "205").first();
 			person.competenceCode.remove(c);
 		}
@@ -630,7 +549,7 @@ public class Competences extends Controller{
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.code = ? ", "206").first();
 			person.competenceCode.add(c);
 		}
-		else{
+		else if(ionicRadiance3.equals("false") && person.isIonicRadianceRiskCom3Available()){
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.code = ? ", "206").first();
 			person.competenceCode.remove(c);
 		}
@@ -639,7 +558,7 @@ public class Competences extends Controller{
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.code = ? ", "303").first();
 			person.competenceCode.add(c);
 		}
-		else{
+		else if(ionicRadiance1bis.equals("false") && person.isIonicRadianceRiskCom1AvailableBis()){
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.code = ? ", "303").first();
 			person.competenceCode.remove(c);
 		}
@@ -648,7 +567,7 @@ public class Competences extends Controller{
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.code = ? ", "304").first();
 			person.competenceCode.add(c);
 		}
-		else{
+		else if(ionicRadiance3bis.equals("false") && person.isIonicRadianceRiskCom3AvailableBis()){
 			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.code = ? ", "304").first();
 			person.competenceCode.remove(c);
 		}
@@ -666,7 +585,7 @@ public class Competences extends Controller{
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void getOvertimeInYear(int year) throws IOException{
 		
-		List<Person> personList = Person.getActivePersonsinYear(year, true);
+		List<Person> personList = Person.getActivePersonsinYear(year, Security.getPerson().getOfficeAllowed(), true);
 		FileInputStream inputStream = null;
 		File tempFile = File.createTempFile("straordinari"+year,".csv" );
 		inputStream = new FileInputStream( tempFile );
