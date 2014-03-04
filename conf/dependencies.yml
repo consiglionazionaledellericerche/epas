@@ -16,6 +16,9 @@ require:
     - org.mnode.ical4j -> ical4j 1.0.+    
     - org.jsoup -> jsoup 1.7+
     - org.dbunit -> dbunit 2.4.9
+    - org.hamcrest -> hamcrest-library 1.2.1
+    - org.hamcrest -> hamcrest-integration 1.2.1
+    - org.mockito -> mockito-core 1.9.0
 
 # My custom repository
 
