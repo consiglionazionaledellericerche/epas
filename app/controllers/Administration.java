@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.LocalDate;
 import org.yaml.snakeyaml.Yaml;
 
@@ -28,6 +29,7 @@ import models.exports.PersonsList;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
 import play.Logger;
+import play.Play;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -156,14 +158,15 @@ public class Administration extends Controller {
 		List<Person> personList = Person.getActivePersonsInDay(LocalDate.now(), personLogged.getOfficeAllowed(), false);
 		for(Person person : personList)
 		{
-			Contract currentContract = person.getCurrentContract();
+			String message = "";
+			
 			DateInterval troubleInterval = new DateInterval(ConfGeneral.getConfGeneral().initUseProgram, LocalDate.now());
-			DateInterval contractInterval = new DateInterval(contract.)
-			troubleInterval = DateUtility.intervalIntersection(troubleInterval, )
+			troubleInterval = DateUtility.intervalIntersection(troubleInterval, person.getCurrentContract().getContractDateInterval());
+			
 			//TODO quando sarà entrata in fuzione l'implementazione init use prendere tutti i person day da quando la persona ha dati in db
 			
 			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date",
-					person, initUse, LocalDate.now()).fetch();
+					person, troubleInterval.getBegin(), troubleInterval.getEnd()).fetch();
 			List<PersonDayInTrouble> troubles = new ArrayList<PersonDayInTrouble>();
 			for(PersonDay pd : pdList)
 			{
@@ -175,9 +178,37 @@ public class Administration extends Controller {
 			}
 			for(PersonDayInTrouble trouble : troubles)
 			{
+				if(trouble.cause.equals("timbratura disaccoppiata persona fixed"))
+					continue;
+				
+				message = message + person.name +" "+ person.surname +" "+ trouble.personDay.date +" "+ trouble.cause +"\n";
 				Logger.debug("%s %s %s %s", person.name, person.surname, trouble.personDay.date, trouble.cause);
 			}
 		}	
+		/*
+		
+		SimpleEmail email = new SimpleEmail();
+		if(person.contactData != null && (!person.contactData.email.trim().isEmpty())){
+			Logger.debug("L'indirizzo a cui inviare la mail è: %s", person.contactData.email);
+			email.addTo(person.contactData.email);
+		}
+			
+		else
+			email.addTo(person.name+"."+person.surname+"@"+"iit.cnr.it");
+		email.setHostName(Play.configuration.getProperty("mail.smtp.host"));
+		Integer port = new Integer(Play.configuration.getProperty("mail.smtp.port"));
+		email.setSmtpPort(port.intValue());
+		email.setAuthentication(Play.configuration.getProperty("mail.smtp.user"), Play.configuration.getProperty("mail.smtp.pass"));
+		
+		email.setFrom(Play.configuration.getProperty("mail.from.alias"));
+//		if(p != null)
+//			email.addCc(p.contactData.email);
+		email.setSubject("controllo giorni del mese");
+		email.setMsg("Salve, controllare i giorni: "+daysInTrouble+ " per "+person.name+' '+person.surname);
+		email.send();
+		
+		*/
+		
 	}
 	
 	
