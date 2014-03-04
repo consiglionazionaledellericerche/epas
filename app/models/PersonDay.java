@@ -189,6 +189,22 @@ public class PersonDay extends Model {
 	
 	/**
 	 * 
+	 * @return true se nel giorno c'è un'assenza oraria che giustifica una quantità oraria sufficiente a decretare la persona
+	 * "presente" a lavoro
+	 */
+	public boolean isEnoughHourlyAbsences(){
+		for(Absence abs : absences){
+			if(abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FourHours) ||
+					abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FiveHours) ||
+					abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SixHours) ||
+					abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SevenHours))
+				return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * 
 	 * @return true se il person day è in trouble
 	 */
 	public boolean isInTrouble()
@@ -704,7 +720,7 @@ public class PersonDay extends Model {
 		else
 		{
 			//caso no festa, no assenze, no timbrature
-			if(!this.isAllDayAbsences() && this.stampings.size()==0 && !this.isHoliday())
+			if(!this.isAllDayAbsences() && this.stampings.size()==0 && !this.isHoliday() && !this.isEnoughHourlyAbsences())
 			{
 				PersonDayInTrouble.insertPersonDayInTrouble(this, "no assenze giornaliere e no timbrature");
 				return;
