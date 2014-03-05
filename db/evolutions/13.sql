@@ -16,4 +16,4 @@ ALTER TABLE person_days
   DROP COLUMN stamp_modification_type_id;
  
 ALTER TABLE person_days_history
-  DROP COLUMN stamp_modification_type_id bigint;  
+  DROP COLUMN stamp_modification_type_id;  
