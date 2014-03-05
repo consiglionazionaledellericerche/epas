@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.LocalDate;
 import org.yaml.snakeyaml.Yaml;
@@ -31,6 +32,7 @@ import models.personalMonthSituation.Mese;
 import play.Logger;
 import play.Play;
 import play.db.jpa.JPAPlugin;
+import play.libs.Mail;
 import play.mvc.Controller;
 import play.mvc.With;
 import procedure.evolutions.Evolutions;
@@ -152,14 +154,16 @@ public class Administration extends Controller {
 	} 
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void troublesLog()
+	public static void troublesLog() throws EmailException
 	{
+		
 		Person personLogged = Person.find("byUsername", "admin").first();	
 		List<Person> personList = Person.getActivePersonsInDay(LocalDate.now(), personLogged.getOfficeAllowed(), false);
 		for(Person person : personList)
 		{
+			if(person.id!=146)
+				continue;
 			String message = "";
-			
 			DateInterval troubleInterval = new DateInterval(ConfGeneral.getConfGeneral().initUseProgram, LocalDate.now());
 			troubleInterval = DateUtility.intervalIntersection(troubleInterval, person.getCurrentContract().getContractDateInterval());
 			
@@ -182,32 +186,32 @@ public class Administration extends Controller {
 					continue;
 				
 				message = message + person.name +" "+ person.surname +" "+ trouble.personDay.date +" "+ trouble.cause +"\n";
-				Logger.debug("%s %s %s %s", person.name, person.surname, trouble.personDay.date, trouble.cause);
+			}
+			
+			if(!message.equals(""))
+			{
+				message = "Buongiorno %s %s,\n il software di rilevazione delle presenza ha riscontrato i seguenti giorni con problemi:\n " + message;
+				message = message + "Contattare l'amministrazione del personale per sistemare la situazione. Grazie!";
+				/*
+				mail.smtp.channel=starttls
+				mail.smtp.host=smtp.iit.cnr.it
+				mail.smtp.port=587
+				
+				SimpleEmail email = new SimpleEmail();
+				email.setFrom("situazione.presenze@cnr.it");
+				email.setHostName("smtp.iit.cnr.it");
+				email.addTo("alessandro.martelli@iit.cnr.it");
+				email.setSubject("subject");
+				email.setMsg(message);
+				Mail.send(email);
+				*/ 
 			}
 		}	
-		/*
 		
-		SimpleEmail email = new SimpleEmail();
-		if(person.contactData != null && (!person.contactData.email.trim().isEmpty())){
-			Logger.debug("L'indirizzo a cui inviare la mail è: %s", person.contactData.email);
-			email.addTo(person.contactData.email);
-		}
-			
-		else
-			email.addTo(person.name+"."+person.surname+"@"+"iit.cnr.it");
-		email.setHostName(Play.configuration.getProperty("mail.smtp.host"));
-		Integer port = new Integer(Play.configuration.getProperty("mail.smtp.port"));
-		email.setSmtpPort(port.intValue());
-		email.setAuthentication(Play.configuration.getProperty("mail.smtp.user"), Play.configuration.getProperty("mail.smtp.pass"));
 		
-		email.setFrom(Play.configuration.getProperty("mail.from.alias"));
-//		if(p != null)
-//			email.addCc(p.contactData.email);
-		email.setSubject("controllo giorni del mese");
-		email.setMsg("Salve, controllare i giorni: "+daysInTrouble+ " per "+person.name+' '+person.surname);
-		email.send();
+
 		
-		*/
+		
 		
 	}
 	
