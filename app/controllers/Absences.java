@@ -758,7 +758,7 @@ public class Absences extends Controller{
 		int taken = 0;
 		while(!actualDate.isAfter(dateTo))
 		{
-			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, true, file);
+			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, absenceType.consideredWeekEnd, file);
 			actualDate = actualDate.plusDays(1);
 		}
 		flash.success("Inseriti %s codici assenza per la persona", taken);
