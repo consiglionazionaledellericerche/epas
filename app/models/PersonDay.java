@@ -80,6 +80,7 @@ public class PersonDay extends Model {
 
 	@Column(name = "time_justified")
 	public Integer timeJustified;
+	//FIXME questo campo non è mai utilizzato
 	
 	public Integer difference;
 
