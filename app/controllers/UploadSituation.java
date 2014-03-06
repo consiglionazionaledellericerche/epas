@@ -266,30 +266,30 @@ public class UploadSituation extends Controller{
 			
 			
 			//vedere se l'ho gia' inviato con successo
-			CertificatedData cert = CertificatedData.find("Select cert from CertificatedData cert where cert.person = ? and cert.year = ? and cert.month = ?", person, year, month).first();
-			if(cert!=null && cert.isOk) 
-			{
-				//già spedito senza errori
-				continue;
-			}
-			
+//			CertificatedData cert = CertificatedData.find("Select cert from CertificatedData cert where cert.person = ? and cert.year = ? and cert.month = ?", person, year, month).first();
+//			if(cert!=null && cert.isOk) 
+//			{
+//				//già spedito senza errori
+//				continue;
+//			}
+//			
 			RispostaElaboraDati rispostaElaboraDati = AttestatiClient.elaboraDatiDipendente(
 					cookies, dipendente, year, month, 
 					pm.getAbsencesNotInternalUseInMonth(),
 					pm.getCompetenceInMonthForUploadSituation());
 			
 			
-			if(cert==null)
-			{
-				cert = new CertificatedData(person, dipendente.getCognomeNome(), dipendente.getMatricola(), year, month);				
-			}
-			cert.absencesSent = rispostaElaboraDati.getAbsencesSent();
-			cert.competencesSent = rispostaElaboraDati.getCompetencesSent();
-			cert.mealTicketSent = rispostaElaboraDati.getMealTicketSent();
-			cert.problems = rispostaElaboraDati.getProblems();
-			cert.isOk = rispostaElaboraDati.getOk();
-			cert.save();
-			
+//			if(cert==null)
+//			{
+//				cert = new CertificatedData(person, dipendente.getCognomeNome(), dipendente.getMatricola(), year, month);				
+//			}
+//			cert.absencesSent = rispostaElaboraDati.getAbsencesSent();
+//			cert.competencesSent = rispostaElaboraDati.getCompetencesSent();
+//			cert.mealTicketSent = rispostaElaboraDati.getMealTicketSent();
+//			cert.problems = rispostaElaboraDati.getProblems();
+//			cert.isOk = rispostaElaboraDati.getOk();
+//			cert.save();
+//			
 			checks.add(rispostaElaboraDati);
 		}
 		

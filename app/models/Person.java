@@ -533,7 +533,7 @@ public class Person extends Model {
 	 */
 	public boolean isActiveInDay(LocalDate date)
 	{
-		Contract c = this.getCurrentContract();
+		Contract c = this.getContract(date);
 		if(c==null)
 			return false;
 		else
