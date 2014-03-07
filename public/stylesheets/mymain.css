@@ -22,6 +22,14 @@ table#tabellonetimbrature tbody:before {
     display:block;
 }
 */
+#mynavbar-inner .container{
+padding-bottom: 5px;
+width: 85%;
+padding-left: 5%;
+}
+#mynavbar-inner .container a{
+margin-left: 10px;
+}
 
 /* header */
 table#tabellonetimbrature th{

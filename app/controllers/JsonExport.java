@@ -56,7 +56,7 @@ public class JsonExport extends Controller {
 					Joiner.on(" ").skipNulls().join(person.surname, person.othersSurnames), 
 					person.password);
 			}
-		}).toImmutableList();
+		}).toList();
 		
 		renderJSON(activePersonInfos);
 	}

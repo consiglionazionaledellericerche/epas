@@ -74,10 +74,14 @@ public class AbsenceType extends Model {
 	
 	@Column(name = "multiple_use")
 	public boolean multipleUse = false;
-
+	//FIXME questo campo non è mai utilizzato. la sua utilità mi sfugge
+	
+	
 	@Column(name = "meal_ticket_calculation")
 	public boolean mealTicketCalculation = false;
+	//FIXME questo campo non e' mai utilizzato, e' il caso della missione che prevede comunque il calcolo del buono mensa?
 
+	
 	@Column(name = "ignore_stamping")
 	public boolean ignoreStamping = false;
 	
@@ -93,7 +97,9 @@ public class AbsenceType extends Model {
 	 * rispetto agli altri tipi di assenza
 	 */
 	@Column(name = "compensatory_rest")
-	public boolean compensatoryRest = false;
+	public boolean compensatoryRest = false; 
+	//FIXME questo campo e' inutile, usato solo in FromMysql
+	
 	
 	/**
 	 * questo campo booleano serve nei casi in cui il codice sostitutivo da usare non debba essere considerato nel calcolo dell'orario di lavoro
@@ -104,7 +110,9 @@ public class AbsenceType extends Model {
 	 * giorno.
 	 */
 	@Column(name = "replacing_absence")
-	public boolean replacingAbsence = false; //FIXME inutile????
+	public boolean replacingAbsence = false; 
+	//FIXME questo campo non è mai utilizzato
+	
 	
 	@Transient
 	public String getShortDescription(){

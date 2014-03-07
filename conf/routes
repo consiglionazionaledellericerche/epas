@@ -189,6 +189,8 @@ GET		/printTags/absenceInPeriod/{personSelected}/{year}/{month}	Absences.absence
 #Gestione grafici
 GET		/charts/indexCharts						Charts.indexCharts		
 GET		/charts/overtimeOnPositiveResidual		Charts.overtimeOnPositiveResidual
+GET		/charts/checkLastYearAbsences			Charts.checkLastYearAbsences
+POST	/charts/processLastYearAbsences			Charts.processLastYearAbsences
 
 
 

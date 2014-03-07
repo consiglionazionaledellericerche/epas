@@ -1,5 +1,6 @@
 package models;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Entity;
@@ -26,7 +27,10 @@ public class StampModificationType extends Model{
 
 	
 	@OneToMany(mappedBy="stampModificationType")
-	public Set<Stamping> stampings; 
+	public Set<Stamping> stampings;
+	
+	@OneToMany(mappedBy="stampModificationType")
+	public List<PersonDay> personDays;
 	
 	
 	public static StampModificationType getStampModificationTypeByCode(String code)

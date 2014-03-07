@@ -159,12 +159,6 @@ public class Person extends Model {
 	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<StampProfile> stampProfiles = new ArrayList<StampProfile>();
 
-	/**
-	 * relazione con la tabella delle tipologie di orario di lavoro
-	 */
-//	@ManyToOne(fetch=FetchType.LAZY)
-//	@JoinColumn(name="working_time_type_id")
-//	public WorkingTimeType workingTimeType;
 	
 	@NotAudited
 	@OneToMany(mappedBy = "person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
@@ -357,14 +351,18 @@ public class Person extends Model {
 	 * @return il contratto attivo per quella persona alla date date
 	 */
 	public Contract getContract(LocalDate date){
-		for(Contract contract : this.contracts)
+
+		
+		for(Contract c : this.contracts)
 		{
-			DateInterval contractInterval = contract.getContractDateInterval();
-			if(DateUtility.isDateIntoInterval(date, contractInterval))
-				return contract;
+			if(DateUtility.isDateIntoInterval(date, c.getContractDateInterval()))
+				return c;
 		}
 		return null;
+
 	}
+	
+
 	
 	
 	/**
@@ -556,7 +554,7 @@ public class Person extends Model {
 	 */
 	public boolean isActiveInDay(LocalDate date)
 	{
-		Contract c = this.getCurrentContract();
+		Contract c = this.getContract(date);
 		if(c==null)
 			return false;
 		else
@@ -593,25 +591,12 @@ public class Person extends Model {
 	 * 
 	 * @param startPeriod
 	 * @param endPeriod
-	 * @param personLogged la persona loggata, cannot be null
+	 * @param officeAllowed
 	 * @param onlyTechnician true se voglio solo i tecnici con qualifica <= 3
 	 * @return
 	 */
-	public static List<Person> getActivePersonsSpeedyInPeriod(LocalDate startPeriod, LocalDate endPeriod, Person personLogged, boolean onlyTechnician)
+	public static List<Person> getActivePersonsSpeedyInPeriod(LocalDate startPeriod, LocalDate endPeriod, List<Office> officeAllowed, boolean onlyTechnician)
 	{
-		if(personLogged==null)
-		{
-			Logger.info("La lista delle persone attive visibili dall'amministratore e' vuota perchè personLogged e' null.");
-			return new ArrayList<Person>();
-		}
-		if(personLogged.name.equals("Admin"))
-		{
-			return Person.find("Select p from Person p order by p.surname, p.name").fetch();
-		}
-
-		//Filtro sulla sede
-		List<Office> officeAllowed = personLogged.getOfficeAllowed();
-				
 		//Filtro sulla qualifica
 		List<Qualification> qualificationRequested;
 		if(onlyTechnician)
@@ -665,65 +650,58 @@ public class Person extends Model {
 	
 	/**
 	 * La lista delle persone attive in uno specifico giorno
-	 *  sulle quali l'amministratore loggato detiene i diritti di amministrazione.
 	 * @param day
 	 * @param month
 	 * @param year
+	 * @param officeAllowed
 	 * @param onlyTechnician true se si desiderano solo tecnici, false altrimenti
 	 * @return
 	 */
-	public static List<Person> getActivePersonsInDay(int day, int month, int year, boolean onlyTechnician)
+	public static List<Person> getActivePersonsInDay(int day, int month, int year, List<Office> officeAllowed, boolean onlyTechnician)
 	{
 		LocalDate date = new LocalDate(year, month, day);
-		Person personLogged = Security.getPerson();
-		return Person.getActivePersonsSpeedyInPeriod(date, date, personLogged, onlyTechnician);
+		return Person.getActivePersonsSpeedyInPeriod(date, date, officeAllowed, onlyTechnician);
 	}
 	
 	/**
 	 * La lista delle persone attive in uno specifico giorno
-	 *  sulle quali l'amministratore loggato detiene i diritti di amministrazione.
-	 *   Se l'amministratore loggato è null (job automatico) ritorna l'elenco completo delle persone attive senza restrizioni sulla sede.
 	 * @param day
+	 * @param officeAllowed
 	 * @param onlyTechnician
 	 * @return
 	 */
-	public static List<Person> getActivePersonsInDay(LocalDate day, boolean onlyTechnician)
+	public static List<Person> getActivePersonsInDay(LocalDate day, List<Office> officeAllowed, boolean onlyTechnician)
 	{	
-		Person personLogged = Security.getPerson();
-		return Person.getActivePersonsSpeedyInPeriod(day, day, personLogged, onlyTechnician);
+		return Person.getActivePersonsSpeedyInPeriod(day, day, officeAllowed, onlyTechnician);
 	}
 
 	/**
 	 * La lista delle persone che abbiano almeno un giorno lavorativo coperto da contratto nel mese month
-	 *  sulle quali l'amministratore loggato detiene i diritti di amministrazione.
-	 *   Se l'amministratore loggato è null (job automatico) ritorna l'elenco completo delle persone attive senza restrizioni sulla sede.
 	 * @param month
 	 * @param year
+	 * @param officeAllowed
 	 * @param onlyTechnician true se si desiderano solo tecnici, false altrimenti
 	 * @return
 	 */
-	public static List<Person> getActivePersonsInMonth(int month, int year, boolean onlyTechnician)
+	public static List<Person> getActivePersonsInMonth(int month, int year, List<Office> officeAllowed, boolean onlyTechnician)
 	{
 
 		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
 		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
-		Person personLogged = Security.getPerson();
-		return Person.getActivePersonsSpeedyInPeriod(monthBegin, monthEnd, personLogged, onlyTechnician);
+		return Person.getActivePersonsSpeedyInPeriod(monthBegin, monthEnd, officeAllowed, onlyTechnician);
 	}
 
 	/**
 	 * La lista delle persone che abbiano almeno un giorno lavorativo coperto da contratto nell'anno year
-	 *  sulle quali l'amministratore loggato detiene i diritti di amministrazione.
-	 *   Se l'amministratore loggato è null (job automatico) ritorna l'elenco completo delle persone attive senza restrizioni sulla sede.
+	 * @param officeAllowed
 	 * @param year, onlyTechnician
 	 * @return le persone attive in un anno se il booleano è true ritorna solo la lista dei tecnici (per competenze)
 	 */
-	public static List<Person> getActivePersonsinYear(int year, boolean onlyTechnician){
+	public static List<Person> getActivePersonsinYear(int year, List<Office> officeAllowed, boolean onlyTechnician){
 
 		LocalDate yearBegin = new LocalDate().withYear(year).withMonthOfYear(1).withDayOfMonth(1);
 		LocalDate yearEnd = new LocalDate().withYear(year).withMonthOfYear(12).dayOfMonth().withMaximumValue();
-		Person personLogged = Security.getPerson();
-		return Person.getActivePersonsSpeedyInPeriod(yearBegin, yearEnd, personLogged, onlyTechnician);
+		return Person.getActivePersonsSpeedyInPeriod(yearBegin, yearEnd, officeAllowed, onlyTechnician);
 	
 	}
 	
@@ -756,12 +734,12 @@ public class Person extends Model {
 
 	/**
 	 * Ritorna la lista dei tecnici che beneficiano di competenze, attive alla data passata come argomento,
-	 *  sulle quali l'amministratore detiene i diritti di amministrazione.
 	 * @param date
+	 * @param officeAllowed
 	 * @return
 	 */
-	public static List<Person> getTechnicianForCompetences(LocalDate date){
-		return getActivePersonsInDay(date.getDayOfMonth(), date.getMonthOfYear(), date.getYear(), true);
+	public static List<Person> getTechnicianForCompetences(LocalDate date, List<Office> officeAllowed){
+		return getActivePersonsInDay(date, officeAllowed, true);
 	}
 
 	
