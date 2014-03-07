@@ -80,6 +80,7 @@ public class PersonDay extends Model {
 
 	@Column(name = "time_justified")
 	public Integer timeJustified;
+	//FIXME questo campo non è mai utilizzato
 	
 	public Integer difference;
 
@@ -107,8 +108,9 @@ public class PersonDay extends Model {
 	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY, cascade= {CascadeType.PERSIST, CascadeType.REMOVE})
 	public List<Absence> absences = new ArrayList<Absence>();
 
-	@Column(name = "modification_type")
-	public String modificationType;
+	@ManyToOne
+	@JoinColumn(name = "stamp_modification_type_id")
+	public StampModificationType stampModificationType;
 	
 	@NotAudited
 	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY, cascade= {CascadeType.PERSIST, CascadeType.REMOVE})
@@ -342,7 +344,7 @@ public class PersonDay extends Model {
 		}
 	
 		//Il pranzo e' servito??		
-		this.modificationType = null;
+		this.stampModificationType = null;
 		int breakTicketTime = getWorkingTimeTypeDay().breakTicketTime;	//30 minuti
 		int mealTicketTime = getWorkingTimeTypeDay().mealTicketTime;	//6 ore
 		if(mealTicketTime == 0){
@@ -379,8 +381,8 @@ public class PersonDay extends Model {
 				{
 					if(!isTicketForcedByAdmin || isTicketForcedByAdmin&&isTicketAvailable )		//TODO decidere la situazione intricata se l'amministratore forza a true
 						workTime = workTime - (breakTicketTime - minTimeForLunch);
-					StampModificationType smt = StampModificationType.getStampModificationTypeByCode(StampModificationTypeCode.FOR_MIN_LUNCH_TIME.getCode());
-					this.modificationType = smt.code;
+					this.stampModificationType = StampModificationType.getStampModificationTypeByCode(StampModificationTypeCode.FOR_MIN_LUNCH_TIME.getCode());
+					
 				}
 				setIsTickeAvailable(true);
 				return workTime + justifiedTimeAtWork;
@@ -399,8 +401,7 @@ public class PersonDay extends Model {
 			if(!isTicketForcedByAdmin || isTicketForcedByAdmin&&isTicketAvailable )			//TODO decidere la situazione intricata se l'amministratore forza a true
 				workTime = workTime - breakTicketTime;
 			setIsTickeAvailable(true);
-			StampModificationType smt = StampModificationType.getStampModificationTypeByCode(StampModificationTypeCode.FOR_DAILY_LUNCH_TIME.getCode());
-			this.modificationType = smt.code;
+			this.stampModificationType = StampModificationType.getStampModificationTypeByCode(StampModificationTypeCode.FOR_DAILY_LUNCH_TIME.getCode());
 			return workTime + justifiedTimeAtWork;
 		}
 		else
@@ -1005,7 +1006,7 @@ public class PersonDay extends Model {
 	@Override
 	public String toString() {
 		return String.format("PersonDay[%d] - person.id = %d, date = %s, difference = %s, isTicketAvailable = %s, modificationType = %s, progressive = %s, timeAtWork = %s",
-				id, person.id, date, difference, isTicketAvailable, modificationType, progressive, timeAtWork);
+				id, person.id, date, difference, isTicketAvailable, stampModificationType, progressive, timeAtWork);
 	}
 
 	private void checkExitStampNextDay(){
