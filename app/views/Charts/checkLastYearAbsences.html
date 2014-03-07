@@ -1,0 +1,16 @@
+#{extends 'main_admin_no_menu.html' /}
+#{set titolo: 'Controllo schedone anno passato'/}
+
+
+<ul class="nav nav-tabs">
+  <li><a href="@{Charts.indexCharts()}">Grafici</a></li>
+  <li class="active"><a href="@{Charts.checkLastYearAbsences()}">Controllo schedone anno passato</a></li>
+</ul>
+<p class="lead">Carica il file (formato .csv) su cui fare il controllo</p>
+#{form @Charts.processLastYearAbsences() ,  enctype:'multipart/form-data'}
+
+	    <input type="file" name="file">
+		
+		<input class="btn btn-primary" type="submit" value="Ok">
+
+#{/form}

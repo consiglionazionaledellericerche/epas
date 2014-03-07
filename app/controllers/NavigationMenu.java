@@ -75,7 +75,7 @@ public class NavigationMenu extends Controller {
 		session.put("dispatched", "false");
 		
 		
-		List<Person> persons = Person.getActivePersonsInMonth(month, year, false);
+		List<Person> persons = Person.getActivePersonsInMonth(month, year, Security.getPerson().getOfficeAllowed(), false);
 		
 		
 		ActionMenuItem action;

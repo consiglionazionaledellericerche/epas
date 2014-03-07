@@ -82,6 +82,7 @@ public class AbsenceFromJson extends Controller{
 					if(abs.absenceType.code.equals(previousAbsence.absenceType.code)){
 						if(!endCurrentPeriod.isEqual(abs.personDay.date.minusDays(1))){
 							personPeriodAbsenceCode = new PersonPeriodAbsenceCode();
+							personPeriodAbsenceCode.personId = person.id;
 							personPeriodAbsenceCode.name = person.name;
 							personPeriodAbsenceCode.surname = person.surname;
 							personPeriodAbsenceCode.code = previousAbsence.absenceType.code;
@@ -275,12 +276,15 @@ public class AbsenceFromJson extends Controller{
 
 			malattiaSize--;
 		}
-		if(listaMalattie.size() > 0){
+		
+		// L'assenza per amallatia è stata inglobata nell'assenza generica
+		// da richiesta delle Segreteria di Drezione
+		/*if(listaMalattie.size() > 0){
 			frequentAbsenceCodeMalattia.description = "Malattia";
 			if(frequentAbsenceCodeMalattia.code.endsWith("-"))
 				frequentAbsenceCodeMalattia.code = frequentAbsenceCodeMalattia.code.substring(0, frequentAbsenceCodeMalattia.code.length()-1);
 			frequentAbsenceCodeList.add(frequentAbsenceCodeMalattia);
-		}
+		}*/
 
 		FrequentAbsenceCode frequentAbsenceCodeCompensativi = new FrequentAbsenceCode("","");
 		int compensativiSize = listaRiposiCompensativi.size();

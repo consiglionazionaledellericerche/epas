@@ -80,6 +80,7 @@ public class PersonDay extends Model {
 
 	@Column(name = "time_justified")
 	public Integer timeJustified;
+	//FIXME questo campo non è mai utilizzato
 	
 	public Integer difference;
 
@@ -107,8 +108,9 @@ public class PersonDay extends Model {
 	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY, cascade= {CascadeType.PERSIST, CascadeType.REMOVE})
 	public List<Absence> absences = new ArrayList<Absence>();
 
-	@Column(name = "modification_type")
-	public String modificationType;
+	@ManyToOne
+	@JoinColumn(name = "stamp_modification_type_id")
+	public StampModificationType stampModificationType;
 	
 	@NotAudited
 	@OneToMany(mappedBy="personDay", fetch = FetchType.LAZY, cascade= {CascadeType.PERSIST, CascadeType.REMOVE})
@@ -182,6 +184,22 @@ public class PersonDay extends Model {
 		for(Absence ab : absences)
 		{
 			if(ab.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.AllDay) && !checkHourlyAbsenceCodeSameGroup(ab.absenceType))
+				return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * 
+	 * @return true se nel giorno c'è un'assenza oraria che giustifica una quantità oraria sufficiente a decretare la persona
+	 * "presente" a lavoro
+	 */
+	public boolean isEnoughHourlyAbsences(){
+		for(Absence abs : absences){
+			if(abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FourHours) ||
+					abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FiveHours) ||
+					abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SixHours) ||
+					abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SevenHours))
 				return true;
 		}
 		return false;
@@ -326,7 +344,7 @@ public class PersonDay extends Model {
 		}
 	
 		//Il pranzo e' servito??		
-		this.modificationType = null;
+		this.stampModificationType = null;
 		int breakTicketTime = getWorkingTimeTypeDay().breakTicketTime;	//30 minuti
 		int mealTicketTime = getWorkingTimeTypeDay().mealTicketTime;	//6 ore
 		if(mealTicketTime == 0){
@@ -363,8 +381,8 @@ public class PersonDay extends Model {
 				{
 					if(!isTicketForcedByAdmin || isTicketForcedByAdmin&&isTicketAvailable )		//TODO decidere la situazione intricata se l'amministratore forza a true
 						workTime = workTime - (breakTicketTime - minTimeForLunch);
-					StampModificationType smt = StampModificationType.getStampModificationTypeByCode(StampModificationTypeCode.FOR_MIN_LUNCH_TIME.getCode());
-					this.modificationType = smt.code;
+					this.stampModificationType = StampModificationType.getStampModificationTypeByCode(StampModificationTypeCode.FOR_MIN_LUNCH_TIME.getCode());
+					
 				}
 				setIsTickeAvailable(true);
 				return workTime + justifiedTimeAtWork;
@@ -383,8 +401,7 @@ public class PersonDay extends Model {
 			if(!isTicketForcedByAdmin || isTicketForcedByAdmin&&isTicketAvailable )			//TODO decidere la situazione intricata se l'amministratore forza a true
 				workTime = workTime - breakTicketTime;
 			setIsTickeAvailable(true);
-			StampModificationType smt = StampModificationType.getStampModificationTypeByCode(StampModificationTypeCode.FOR_DAILY_LUNCH_TIME.getCode());
-			this.modificationType = smt.code;
+			this.stampModificationType = StampModificationType.getStampModificationTypeByCode(StampModificationTypeCode.FOR_DAILY_LUNCH_TIME.getCode());
 			return workTime + justifiedTimeAtWork;
 		}
 		else
@@ -580,8 +597,11 @@ public class PersonDay extends Model {
 			
 		//if(this.person.id == 45) Logger.info("  *PopulatePersonDay date=%s", this.date);
 		//controllo problemi strutturali del person day
-		if(this.date.isBefore(new LocalDate()))
+		if(this.date.isBefore(new LocalDate())){
+			this.save();
 			this.checkForPersonDayInTrouble();
+		}
+			//this.checkForPersonDayInTrouble();
 
 		//if(this.person.id == 45 && this.troubles.size()==0) Logger.info("  *  Check Trouble                 NO");
 		//if(this.person.id == 45 && this.troubles.size()==1) Logger.info("  *  Check Trouble                 SI");
@@ -701,7 +721,7 @@ public class PersonDay extends Model {
 		else
 		{
 			//caso no festa, no assenze, no timbrature
-			if(!this.isAllDayAbsences() && this.stampings.size()==0 && !this.isHoliday())
+			if(!this.isAllDayAbsences() && this.stampings.size()==0 && !this.isHoliday() && !this.isEnoughHourlyAbsences())
 			{
 				PersonDayInTrouble.insertPersonDayInTrouble(this, "no assenze giornaliere e no timbrature");
 				return;
@@ -986,7 +1006,7 @@ public class PersonDay extends Model {
 	@Override
 	public String toString() {
 		return String.format("PersonDay[%d] - person.id = %d, date = %s, difference = %s, isTicketAvailable = %s, modificationType = %s, progressive = %s, timeAtWork = %s",
-				id, person.id, date, difference, isTicketAvailable, modificationType, progressive, timeAtWork);
+				id, person.id, date, difference, isTicketAvailable, stampModificationType, progressive, timeAtWork);
 	}
 
 	private void checkExitStampNextDay(){

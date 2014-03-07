@@ -323,15 +323,12 @@ public class Persons extends Controller {
 
 	@Check(Security.VIEW_PERSON_LIST)
 	public static void list(){
-		Person personLogged = Security.getPerson();
 
 		LocalDate startEra = new LocalDate(1900,1,1);
 		LocalDate endEra = new LocalDate(9999,1,1);
-		List<Person> personList = Person.getActivePersonsSpeedyInPeriod(startEra, endEra, personLogged, false);
-		
-		//Logger.debug("La lista delle persone: %s", personList.toString());
+		List<Person> personList = Person.getActivePersonsSpeedyInPeriod(startEra, endEra, Security.getPerson().getOfficeAllowed(), false);
 		LocalDate date = new LocalDate();
-		List<Person> activePerson = Person.getActivePersonsInDay(date.getDayOfMonth(), date.getMonthOfYear(), date.getYear(), false);
+		List<Person> activePerson = Person.getActivePersonsInDay(date.getDayOfMonth(), date.getMonthOfYear(), date.getYear(), Security.getPerson().getOfficeAllowed(), false);
 		
 		render(personList, activePerson);
 	}

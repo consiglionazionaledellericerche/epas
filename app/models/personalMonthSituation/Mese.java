@@ -210,6 +210,7 @@ public class Mese {
 		
 		if(validData!=null)
 		{
+
 			//riposi compensativi
 			List<Absence> riposiCompensativi = Absence.find("Select abs from Absence abs, AbsenceType abt, PersonDay pd where abs.personDay = pd and abs.absenceType = abt and abt.code = ? and pd.person = ? "
 					+ "and pd.date between ? and ?", "91", this.person, validData.getBegin(), validData.getEnd()).fetch();
@@ -219,7 +220,9 @@ public class Mese {
 				this.riposiCompensativiMinuti = this.riposiCompensativiMinuti + this.person.getWorkingTimeType(abs.personDay.date).getWorkingTimeTypeDayFromDayOfWeek(abs.personDay.date.getDayOfWeek()).workingTime;
 				this.numeroRiposiCompensativi++;
 			}
-		}
+
+			
+		}		
 
 	}
 	

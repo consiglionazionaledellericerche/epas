@@ -257,6 +257,7 @@ public class Contract extends Model {
 			contractInterval = new DateInterval(this.beginContract, this.expireContract);
 		return contractInterval;
 	}
+
 	
 	/**
 	 * Ritorna il riepilogo annule del contatto.
@@ -283,6 +284,7 @@ public class Contract extends Model {
 			yearRecap.delete();
 		}
 		this.recapPeriods = new ArrayList<ContractYearRecap>();
+
 
 		//Controllo se ho sufficienti dati
 		LocalDate initUse = ConfGeneral.getConfGeneral().initUseProgram;

@@ -1,0 +1,11 @@
+.accordion-heading{
+background-color: #d9edf7;
+border-radius: inherit;
+}
+.accordion-heading a{
+color: #31708f;
+}
+.accordion-heading a:hover{
+    text-decoration: none;
+    color: black;
+}

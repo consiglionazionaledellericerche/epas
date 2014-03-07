@@ -1,15 +1,17 @@
 #{extends 'main_admin_no_menu.html' /}
 #{set titolo: 'Grafici'/}
 
-	
+<ul class="nav nav-tabs">
+  <li class="active"><a href="@{Charts.indexCharts()}">Grafici</a></li>
+  <li><a href="@{Charts.checkLastYearAbsences()}">Controllo schedone anno passato</a></li>
+</ul>
 <p class="lead">Seleziona il grafico che ti interessa visualizzare</p>
 
 <ul>
 	<li><a href="@{Charts.overtimeOnPositiveResidual()}">Straordinari su residuo positivo MENSILE</a></li>
 	<li><a href="@{Charts.overtimeOnPositiveResidualInYear(null)}">Straordinari su residuo positivo ANNUALE</a></li>
 	<li><a href="@{Charts.whichAbsenceInYear(null)}">Suddivisione ANNUALE delle assenze</a></li>
-	<li><a href=""></a></li>
-	<li><a href=""></a></li>
+	
 </ul>
 
 
