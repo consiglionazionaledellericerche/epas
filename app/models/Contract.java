@@ -211,5 +211,19 @@ public class Contract extends Model {
 		first.save();
 		this.save();
 	}
+	
+	/**
+	 * Utilizza la libreria DateUtils per costruire l'intervallo attivo per il contratto.
+	 * @return
+	 */
+	public DateInterval getContractDateInterval()
+	{
+		DateInterval contractInterval;
+		if(this.endContract!=null)
+			contractInterval = new DateInterval(this.beginContract, this.endContract);
+		else
+			contractInterval = new DateInterval(this.beginContract, this.expireContract);
+		return contractInterval;
+	}
 
 }

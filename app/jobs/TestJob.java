@@ -3,10 +3,14 @@ package jobs;
 import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.PersonUtility;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import models.ConfGeneral;
+import models.Contract;
 import models.Person;
 import models.PersonDay;
+import models.PersonDayInTrouble;
 import models.StampModificationType;
 import models.Stamping;
 
@@ -30,9 +34,9 @@ public class TestJob extends Job{
 		
 
 		Logger.info("Start Job checkDay");
-		Person person = Person.find("byUsername", "admin").first();	
-		PersonUtility.fixPersonSituation(-1l, 2013, 1, person);
-
+		Person personLogged = Person.find("byUsername", "admin").first();	
+		PersonUtility.fixPersonSituation(-1l, 2013, 1, personLogged);
+		
 		/*
 		LocalDate yesterday = new LocalDate().minusDays(1);
 		

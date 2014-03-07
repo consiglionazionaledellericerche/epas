@@ -18,6 +18,7 @@ import play.db.jpa.Model;
 @Entity
 @Table(name = "auth_users")
 public class AuthUser extends Model{
+	//FIXME cancellare questa inutilissima tabella vuota mai utilizzata che dario non si ricordava neanche di aver creat
 	
 	private static final long serialVersionUID = -1726409927134109278L;
 	

@@ -19,6 +19,7 @@ import play.db.jpa.Model;
 @Table(name = "options")
 public class Option extends Model {
 
+	//FIXME questa classe non è mai utilizzata
 	private static final long serialVersionUID = -3732336156485565329L;
 
 	@Column
