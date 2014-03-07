@@ -276,12 +276,15 @@ public class AbsenceFromJson extends Controller{
 
 			malattiaSize--;
 		}
-		if(listaMalattie.size() > 0){
+		
+		// L'assenza per amallatia è stata inglobata nell'assenza generica
+		// da richiesta delle Segreteria di Drezione
+		/*if(listaMalattie.size() > 0){
 			frequentAbsenceCodeMalattia.description = "Malattia";
 			if(frequentAbsenceCodeMalattia.code.endsWith("-"))
 				frequentAbsenceCodeMalattia.code = frequentAbsenceCodeMalattia.code.substring(0, frequentAbsenceCodeMalattia.code.length()-1);
 			frequentAbsenceCodeList.add(frequentAbsenceCodeMalattia);
-		}
+		}*/
 
 		FrequentAbsenceCode frequentAbsenceCodeCompensativi = new FrequentAbsenceCode("","");
 		int compensativiSize = listaRiposiCompensativi.size();

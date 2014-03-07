@@ -11,6 +11,8 @@ import play.db.jpa.Model;
 @Table(name="valuable_competences")
 public class ValuableCompetence extends Model {
 
+	//FIXME tabella usata solo da FromMysql
+	
 	@ManyToOne
 	@JoinColumn(name="person_id")
 	public Person person;
