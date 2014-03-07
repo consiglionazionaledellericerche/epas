@@ -73,11 +73,12 @@
 	<input id="pastYear" type="button" onclick="window.open('http://orologio-history.iit.cnr.it/');" class="btn" value="Anni &lt; 2013">
 
      #{if session.username}
-			
+
            <a href="@{secure.logout()}" class="btn btn-warning pull-right">Logout</a>
 		   #{secure.permissionCheck}
     		  <a href="@{Faq.faq()}" class="btn btn-success pull-right">FAQ</a>
 		   #{/secure.permissionCheck}
+
       #{/if}
 
 #{/form}

@@ -1,5 +1,7 @@
 package controllers;
 
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.ExportToYaml;
 import it.cnr.iit.epas.FromMysqlToPostgres;
 import it.cnr.iit.epas.PersonUtility;
@@ -9,11 +11,15 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.LocalDate;
 import org.yaml.snakeyaml.Yaml;
 
 import controllers.shib.Shibboleth;
 import models.AbsenceType;
+import models.ConfGeneral;
+import models.Contract;
 import models.InitializationTime;
 import models.Person;
 import models.PersonDay;
@@ -24,7 +30,9 @@ import models.exports.PersonsList;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
 import play.Logger;
+import play.Play;
 import play.db.jpa.JPAPlugin;
+import play.libs.Mail;
 import play.mvc.Controller;
 import play.mvc.With;
 import procedure.evolutions.Evolutions;
@@ -144,6 +152,69 @@ public class Administration extends Controller {
 		}
 		render(listMese);
 	} 
+	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void troublesLog() throws EmailException
+	{
+		
+		Person personLogged = Person.find("byUsername", "admin").first();	
+		List<Person> personList = Person.getActivePersonsInDay(LocalDate.now(), personLogged.getOfficeAllowed(), false);
+		for(Person person : personList)
+		{
+			if(person.id!=146)
+				continue;
+			String message = "";
+			DateInterval troubleInterval = new DateInterval(ConfGeneral.getConfGeneral().initUseProgram, LocalDate.now());
+			troubleInterval = DateUtility.intervalIntersection(troubleInterval, person.getCurrentContract().getContractDateInterval());
+			
+			//TODO quando sarà entrata in fuzione l'implementazione init use prendere tutti i person day da quando la persona ha dati in db
+			
+			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date",
+					person, troubleInterval.getBegin(), troubleInterval.getEnd()).fetch();
+			List<PersonDayInTrouble> troubles = new ArrayList<PersonDayInTrouble>();
+			for(PersonDay pd : pdList)
+			{
+				for(PersonDayInTrouble trouble : pd.troubles)
+				{
+					if(!trouble.fixed)
+						troubles.add(trouble);
+				}
+			}
+			for(PersonDayInTrouble trouble : troubles)
+			{
+				if(trouble.cause.equals("timbratura disaccoppiata persona fixed"))
+					continue;
+				
+				message = message + person.name +" "+ person.surname +" "+ trouble.personDay.date +" "+ trouble.cause +"\n";
+			}
+			
+			if(!message.equals(""))
+			{
+				message = "Buongiorno %s %s,\n il software di rilevazione delle presenza ha riscontrato i seguenti giorni con problemi:\n " + message;
+				message = message + "Contattare l'amministrazione del personale per sistemare la situazione. Grazie!";
+				/*
+				mail.smtp.channel=starttls
+				mail.smtp.host=smtp.iit.cnr.it
+				mail.smtp.port=587
+				
+				SimpleEmail email = new SimpleEmail();
+				email.setFrom("situazione.presenze@cnr.it");
+				email.setHostName("smtp.iit.cnr.it");
+				email.addTo("alessandro.martelli@iit.cnr.it");
+				email.setSubject("subject");
+				email.setMsg(message);
+				Mail.send(email);
+				*/ 
+			}
+		}	
+		
+		
+
+		
+		
+		
+	}
+	
 	
 	
 	public static void buildYaml()

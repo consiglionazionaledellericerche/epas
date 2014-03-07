@@ -350,16 +350,18 @@ public class Person extends Model {
 	 * @return il contratto attivo per quella persona alla date date
 	 */
 	public Contract getContract(LocalDate date){
-
-		Contract contract = Contract.find("Select con from Contract con where con.person = ? and (con.beginContract IS NULL or con.beginContract <= ?) and (con.expireContract > ? or con.expireContract is null )",
-				this,
-				date,
-				date).first();
-		return contract;
+		
+		for(Contract c : this.contracts)
+		{
+			if(DateUtility.isDateIntoInterval(date, c.getContractDateInterval()))
+				return c;
+		}
+		return null;
 
 	}
 	
 	/**
+	 * //TODO eliminarlo è uguale a getContract
 	 * Il contratto attivo alla data, se esiste. Ciclando su tutti i contratti della persona (no query sql)
 	 * Da utilizzare se si intende ripetere la query per la persona su più giorni
 	 * @param date
@@ -369,10 +371,11 @@ public class Person extends Model {
 	{
 		for(Contract c : this.contracts)
 		{
-			if(DateUtility.isDateIntoInterval(date, new DateInterval(c.beginContract, c.expireContract)))
+			if(DateUtility.isDateIntoInterval(date, c.getContractDateInterval()))
 				return c;
 		}
 		return null;
+
 	}
 	/**
 	 * 
@@ -533,7 +536,7 @@ public class Person extends Model {
 	 */
 	public boolean isActiveInDay(LocalDate date)
 	{
-		Contract c = this.getCurrentContract();
+		Contract c = this.getContract(date);
 		if(c==null)
 			return false;
 		else
