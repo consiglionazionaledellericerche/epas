@@ -74,9 +74,10 @@
 
      #{if session.username}
 			
-           <a href="@{Secure.logout()}" class="btn btn-warning pull-right">Logout</a>
-           <a href="@{Faq.faq()}" class="btn btn-success pull-right">FAQ</a>
-
+           <a href="@{secure.logout()}" class="btn btn-warning pull-right">Logout</a>
+		   #{secure.permissionCheck}
+    		  <a href="@{Faq.faq()}" class="btn btn-success pull-right">FAQ</a>
+		   #{/secure.permissionCheck}
       #{/if}
 
 #{/form}

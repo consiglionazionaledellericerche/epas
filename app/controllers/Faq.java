@@ -7,6 +7,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
 import play.Logger;
+import play.data.validation.CheckWith;
 import play.mvc.*;
 
 @With( {Secure.class, NavigationMenu.class} )
