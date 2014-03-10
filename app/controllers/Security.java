@@ -79,7 +79,24 @@ public class Security extends Secure.Security {
 			}
 		}
 		return false;
-    }    
+    }   
+	
+	
+	static boolean permissionCheck() {
+		String username = connected();
+		if(username == null || username.isEmpty()){
+			Logger.debug("Nessun utente connesso");
+			return false;
+		}
+			
+		Logger.trace("checking Admin permission for user %s", username);
+		
+	//TODO Rendere più specifici i controlli per gli account di Amministrazione
+			if (getPersonAllPermissions(username).size() > 1) {
+				return true;
+			}
+		return false;
+    }   
 	
 	private static Person getPerson(String username){
 		if (username == null || username.isEmpty()) {
