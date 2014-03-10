@@ -228,10 +228,10 @@ public class Charts extends Controller{
 					Absence abs = Absence.find("Select abs from Absence abs where abs.personDay.person = ? and abs.personDay.date = ?", 
 							p, dataAssenza).first();
 					if(abs == null){
-						if(dataAssenza.isBefore(new LocalDate(2013,1,1)))
-							renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, false, "assenza prima della data inizio utilizzo del programma");
-						else
-							renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, false, "nessuna assenza trovata");
+						if(!dataAssenza.isBefore(new LocalDate(2013,1,1)))
+//							renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, false, "assenza prima della data inizio utilizzo del programma", null);
+//						else
+							renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, false, "nessuna assenza trovata", null);
 						
 					}
 					else{
@@ -240,17 +240,17 @@ public class Charts extends Controller{
 							//renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, true, null);
 						}
 						else{
-							if(abs.personDay.date.isBefore(new LocalDate(2013,1,1)))
-								renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, false, "assenza prima della data inizio utilizzo del programma");
-							else
-								renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, false, "assenza diversa da quella in anagrafica");
+							if(!abs.personDay.date.isBefore(new LocalDate(2013,1,1)))
+//								renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, false, "assenza prima della data inizio utilizzo del programma", null);
+//							else
+								renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, false, "assenza diversa da quella in anagrafica", abs.absenceType.code);
 						}
 					}
 					
 				}
 				catch(Exception e){
 					e.printStackTrace();
-					renderResult = new RenderResult(line, null, null, null, null, null, true, null);
+					renderResult = new RenderResult(line, null, null, null, null, null, true, null, null);
 					listNull.add(renderResult);
 					continue;
 				}
@@ -318,8 +318,9 @@ public class Charts extends Controller{
 		private LocalDate data;
 		private boolean check;
 		private String message;
+		private String codiceInAnagrafica;
 
-		private RenderResult(String line, Integer matricola, String nome, String cognome, String codice, LocalDate data, boolean check, String message){
+		private RenderResult(String line, Integer matricola, String nome, String cognome, String codice, LocalDate data, boolean check, String message, String codiceInAnagrafica){
 			this.line = line;
 			this.matricola = matricola;
 			this.nome = nome;
@@ -328,6 +329,8 @@ public class Charts extends Controller{
 			this.data = data;
 			this.check = check;
 			this.message = message;
+			this.codiceInAnagrafica = codiceInAnagrafica;
+			
 		}
 	}
 
