@@ -275,7 +275,7 @@ public class Contract extends Model {
 			
 	}
 	
-	public void populateContractYearRecap()
+	public void buildContractYearRecap()
 	{
 		Logger.info("PopulateContractYearRecap %s %s contract id = %s", this.person.name, this.person.surname, this.id);
 		//Distruggere quello che c'è prima (adesso in fase di sviluppo)
@@ -284,7 +284,6 @@ public class Contract extends Model {
 			yearRecap.delete();
 		}
 		this.recapPeriods = new ArrayList<ContractYearRecap>();
-
 
 		//Controllo se ho sufficienti dati
 		LocalDate initUse = ConfGeneral.getConfGeneral().initUseProgram;
@@ -305,7 +304,7 @@ public class Contract extends Model {
 			//contratto non interamente contenuto nel database (serve sourceContract)
 			if(this.sourceDate==null)
 				return;
-			yearToCompute = this.populateContractYearFromSourceWhenSourceIsEndOfYear();
+			yearToCompute = this.populateContractYearFromSource();
 		}
 		
 		int currentYear = new LocalDate().getYear();
@@ -350,31 +349,56 @@ public class Contract extends Model {
 	
 	/**
 	 * Costruisce il contractYearRecap se contract.SourceDate è l'ultimo giorno dell'anno.
-	 * N.B. se source non è l'ultimo giorno dell'anno il contractYearRecap non viene costruito perchè non utile agli algoritmi
-	 * di calcolo dei residui e delle ferie che utilizzano direttamente i dati di contract.source. Verificare se per motivi di report
-	 * ha senso persistere anche il riepilogo di tale anno.
 	 * @return l'anno di cui si deve costruire il prossimo contractYearRecap
 	 */
-	public int populateContractYearFromSourceWhenSourceIsEndOfYear()
+	public int populateContractYearFromSource()
 	{
 		LocalDate lastDayInYear = new LocalDate(this.sourceDate.getYear(), 12, 31);
-		if(! lastDayInYear.isEqual(this.sourceDate))
-			return this.sourceDate.getYear()+1;
-			
+		//Caso semplice source riepilogo dell'anno
+		if(lastDayInYear.isEqual(this.sourceDate))
+		{
+			int yearToCompute = this.sourceDate.getYear();
+			ContractYearRecap cyr = new ContractYearRecap();
+			cyr.year = yearToCompute;
+			cyr.contract = this;
+			cyr.remainingMinutesCurrentYear = this.sourceRemainingMinutesCurrentYear;
+			cyr.remainingMinutesLastYear = this.sourceRemainingMinutesLastYear;
+			cyr.vacationLastYearUsed = this.sourceVacationLastYearUsed;
+			cyr.vacationCurrentYearUsed = this.sourceVacationCurrentYearUsed;
+			cyr.recoveryDayUsed = this.sourceRecoveryDayUsed;
+			cyr.permissionUsed = this.sourcePermissionUsed;
+			cyr.save();
+			this.recapPeriods.add(cyr);
+			return yearToCompute+1;
+		}
+
+		//Caso complesso, TODO vedere (dopo che ci sono i test) se creando il VacationRecap si ottengono le stesse informazioni
+		AbsenceType ab31 = AbsenceType.getAbsenceTypeByCode("31");
+		AbsenceType ab32 = AbsenceType.getAbsenceTypeByCode("32");
+		AbsenceType ab37 = AbsenceType.getAbsenceTypeByCode("37");
+		AbsenceType ab94 = AbsenceType.getAbsenceTypeByCode("94");
+		DateInterval yearInterSource = new DateInterval(this.sourceDate.plusDays(1), lastDayInYear);
+		List<Absence> abs32 = VacationsRecap.getVacationDays(yearInterSource, this, ab32);
+		List<Absence> abs31 = VacationsRecap.getVacationDays(yearInterSource, this, ab31);
+		List<Absence> abs37 = VacationsRecap.getVacationDays(yearInterSource, this, ab37);
+		List<Absence> abs94 = VacationsRecap.getVacationDays(yearInterSource, this, ab94);
 		int yearToCompute = this.sourceDate.getYear();
 		ContractYearRecap cyr = new ContractYearRecap();
 		cyr.year = yearToCompute;
 		cyr.contract = this;
-		cyr.remainingMinutesCurrentYear = this.sourceRemainingMinutesCurrentYear;
-		cyr.remainingMinutesLastYear = this.sourceRemainingMinutesLastYear;
-		cyr.vacationLastYearUsed = this.sourceVacationLastYearUsed;
-		cyr.vacationCurrentYearUsed = this.sourceVacationCurrentYearUsed;
-		cyr.recoveryDayUsed = this.sourceRecoveryDayUsed;
-		cyr.permissionUsed = this.sourcePermissionUsed;
+		cyr.vacationLastYearUsed = this.sourceVacationLastYearUsed + abs31.size() + abs37.size();
+		cyr.vacationCurrentYearUsed = this.sourceVacationCurrentYearUsed + abs32.size();
+		cyr.permissionUsed = this.sourcePermissionUsed + abs94.size();
+		CalcoloSituazioneAnnualePersona csap = new CalcoloSituazioneAnnualePersona(this, yearToCompute, new LocalDate().minusDays(1));
+		Mese december = csap.getMese(yearToCompute, 12);
+		cyr.remainingMinutesCurrentYear = december.monteOreAnnoCorrente;
+		cyr.remainingMinutesLastYear = december.monteOreAnnoPassato;
 		cyr.save();
 		this.recapPeriods.add(cyr);
-		return yearToCompute+1;
+		return this.sourceDate.getYear()+1;
 	}
+	
+	
 	
 	/**
 	 * True se il contratto è l'ultimo contratto per mese e anno selezionati.

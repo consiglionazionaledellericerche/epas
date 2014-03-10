@@ -107,6 +107,11 @@ public class VacationsRecap {
 			abs37Last = getVacationDays(yearInterSource, activeContract, ab37);										
 			vacationDaysPastYearUsedNew = vacationDaysPastYearUsedNew + abs31Last.size() + abs37Last.size();
 		}
+		else if(activeContract.beginContract.getYear()==this.year)
+		{
+			//Non esiste anno passato nel presente contratto
+			vacationDaysPastYearUsedNew = 0;
+		}
 		else
 		{
 			//Popolare da contractYearRecap
