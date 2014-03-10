@@ -12,7 +12,6 @@ import com.google.common.collect.TreeBasedTable;
 
 
 
-
 import play.Logger;
 import play.data.binding.As;
 import play.db.jpa.JPA;
@@ -28,7 +27,6 @@ import java.util.List;
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
-import models.Contract;
 import models.InitializationTime;
 import models.Person;
 import models.PersonHourForOvertime;
@@ -82,8 +80,7 @@ public class Overtimes extends Controller {
 		
 		/*OvertimesData personOvertimesData = new OvertimesData(PersonTags.toHourTime(new Integer(personMonth.totaleResiduoAnnoCorrenteAFineMese())), PersonTags.toHourTime(new Integer(personMonth.residuoDelMese())), PersonTags.toHourTime(new Integer(personMonth.tempoDisponibilePerStraordinari())));*/		
 		/* temporaneamente tutti i dati vengono presi dalle nuove classi CalcoloSituazioneAnnualePersona e Mese */
-		Contract contract = person.getCurrentContract();
-		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, year, null);
+		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, year, null);
 		Mese mese = c.getMese(year, month);
 		
 		int totaleResiduoAnnoCorrenteAFineMese = mese.monteOreAnnoCorrente;

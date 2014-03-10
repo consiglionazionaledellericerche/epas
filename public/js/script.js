@@ -87,10 +87,6 @@ $('#modal-edit-contract').on('hidden', function(){
     $(this).data('modal', null);
 });
 
-$('#modal-edit-source-contract').on('hidden', function(){
-    $(this).data('modal', null);
-});
-
 $('#modal-terminate-person').on('hidden', function(){
     $(this).data('modal', null);
 });

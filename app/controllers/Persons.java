@@ -10,7 +10,6 @@ import java.util.List;
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
-import models.ConfGeneral;
 import models.ContactData;
 import models.Contract;
 import models.InitializationTime;
@@ -706,33 +705,6 @@ public class Persons extends Controller {
 		
 		flash.success("Aggiornato contratto per il dipendente %s %s", contract.person.name, contract.person.surname);
 		//render("@save");
-		Persons.edit(contract.person.id);
-		
-	}
-	
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void updateSourceContract(Long contractId)
-	{
-		
-		Contract contract = Contract.findById(contractId);
-		LocalDate initUse = ConfGeneral.getConfGeneral().initUseProgram;
-		render(contract, initUse);
-	}
-	
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void saveSourceContract(Contract contract)
-	{
-		if(contract.sourceVacationLastYearUsed==null) contract.sourceVacationLastYearUsed=0;
-		if(contract.sourceVacationCurrentYearUsed==null) contract.sourceVacationCurrentYearUsed=0;
-		if(contract.sourcePermissionUsed==null) contract.sourcePermissionUsed=0;
-		if(contract.sourceRemainingMinutesCurrentYear==null) contract.sourceRemainingMinutesCurrentYear=0;
-		if(contract.sourceRemainingMinutesLastYear==null) contract.sourceRemainingMinutesLastYear=0;
-		if(contract.sourceRecoveryDayUsed==null) contract.sourceRecoveryDayUsed=0;
-		
-		contract.save();
-		//Ricalcolo dei riepiloghi
-		contract.populateContractYearRecap();
-		
 		Persons.edit(contract.person.id);
 		
 	}

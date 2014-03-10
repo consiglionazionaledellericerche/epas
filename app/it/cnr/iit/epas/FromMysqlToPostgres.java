@@ -765,6 +765,9 @@ public class FromMysqlToPostgres {
 		int mysqlPresenceDefault = 0;
 		while(rs.next()){
 			//dati contratto mysql
+			if(person.id == 40L){
+				int i = 0;
+			}
 			LocalDate mysqlStartContract = null;
 			Date mysqlBegin = rs.getDate("DataInizio");
 			Date mysqlEnd = rs.getDate("DataFine");

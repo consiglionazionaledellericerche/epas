@@ -111,7 +111,7 @@ table.tablenoborder-bottompadding td{padding-bottom: 10px; }
 /* custom table class*/
 table.table-small{max-width: 400px;}
 
-table.table-display-contract{ border: 1px solid lightgrey; }
+table.table-display-contract{ max-width: 800px; border: 1px solid lightgrey; max-width: 800px;}
 table.table-display-contract th{ text-align: center;}
 table.table-display-contract td{ text-align: center;}
 

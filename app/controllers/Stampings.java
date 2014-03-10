@@ -84,15 +84,6 @@ public class Stampings extends Controller {
 					"Non esiste situazione mensile per il mese di %s", person.name, person.surname, DateUtility.fromIntToStringMonth(month));
 			render("@redirectToIndex");
 		}
-		
-		LocalDate today = new LocalDate();
-		if(today.getYear()==year && month>today.getMonthOfYear())
-		{
-			flash.error("Impossibile accedere a situazione futura, redirect automatico a mese attuale");
-			month = today.getMonthOfYear();
-		}
-		
-		
 	
 		
 		//Configuration conf = Configuration.getCurrentConfiguration();
@@ -126,25 +117,13 @@ public class Stampings extends Controller {
 		int basedWorkingDays = PersonUtility.basedWorkingDays(totalPersonDays);
 		Map<AbsenceType,Integer> absenceCodeMap = PersonUtility.getAllAbsenceCodeInMonth(totalPersonDays);
 
-		List<Contract> monthContracts = person.getMonthContracts(month, year);
-		List<Mese> contractMonths = new ArrayList<Mese>();
-		for(Contract contract : monthContracts)
-		{
-			CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, year, null);
-			if(c.getMese(year, month)!=null)
-				contractMonths.add(c.getMese(year, month));
-		}
-		if(contractMonths.size()==0)
-		{
-			flash.error("Impossibile visualizzare la situazione mensile per %s %s per il mese di %s", person.name, person.surname, DateUtility.fromIntToStringMonth(month));
-			render("@redirectToIndex");
-		}
-		
+		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, year, null);
+		Mese mese = c.getMese(year, month);
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);
 		
 		//Render
 		render(person, year, month, numberOfInOut, numberOfCompensatoryRestUntilToday,numberOfMealTicketToUse,numberOfMealTicketToRender,
-				daysRecap, stampModificationTypeList, stampTypeList, basedWorkingDays, absenceCodeMap, contractMonths, month_capitalized);
+				daysRecap, stampModificationTypeList, stampTypeList, basedWorkingDays, absenceCodeMap, mese, month_capitalized);
 
 	}
 
@@ -159,18 +138,12 @@ public class Stampings extends Controller {
 			personStamping(personId);
 		}
 		Person person = Person.findById(personId);
+		
 		if(!person.isActiveInMonth(month, year))
 		{
 			flash.error("Si è cercato di accedere a un mese al di fuori del contratto valido per %s %s. " +
 					"Non esiste situazione mensile per il mese di %s", person.name, person.surname, DateUtility.fromIntToStringMonth(month));
 			render("@redirectToIndex");
-		}
-		
-		LocalDate today = new LocalDate();
-		if(today.getYear()==year && month>today.getMonthOfYear())
-		{
-			flash.error("Impossibile accedere a situazione futura, redirect automatico a mese attuale");
-			month = today.getMonthOfYear();
 		}
 		
 		//Configuration conf = Configuration.getCurrentConfiguration();													//0 sql (se già in cache)
@@ -204,19 +177,14 @@ public class Stampings extends Controller {
 		int basedWorkingDays = PersonUtility.basedWorkingDays(totalPersonDays);											//0 sql
 		Map<AbsenceType,Integer> absenceCodeMap = PersonUtility.getAllAbsenceCodeInMonth(totalPersonDays);				//1 sql
 
-		List<Contract> monthContracts = person.getMonthContracts(month, year);
-		List<Mese> contractMonths = new ArrayList<Mese>();
-		for(Contract contract : monthContracts)
-		{
-			CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, year, null);
-			if(c.getMese(year, month)!=null)
-				contractMonths.add(c.getMese(year, month));
-		}
+		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, year, null);
+		Mese mese = c.getMese(year, month);
+		
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);
-
+		
 		//Render	//0 sql
 		render(person, year, month, numberOfInOut, numberOfCompensatoryRestUntilToday,numberOfMealTicketToUse,numberOfMealTicketToRender,
-				daysRecap, stampModificationTypeList, stampTypeList, basedWorkingDays, absenceCodeMap, contractMonths, month_capitalized);
+				daysRecap, stampModificationTypeList, stampTypeList, basedWorkingDays, absenceCodeMap, mese, month_capitalized);
 
 		 
 	}
