@@ -15,8 +15,10 @@
 	<th>Codice di assenza</th>
 	<th>Esito confronto con anagrafica</th>
 	<th>Motivazione</th>
+	<th>Codice di assenza rilevato in anagrafica</th>
 </tr>
 #{list items:listTrueFalse, as:'result'}
+#{if result != null}
 <tr>
 	<td>${result.matricola}</td>
 	<td>${result.nome} ${result.cognome}</td>
@@ -35,8 +37,13 @@
 		${result.message}
 		#{/if}
 	</td>
+	<td>
+	#{if result.codiceInAnagrafica != null}
+		${result.codiceInAnagrafica}
+	#{/if}
+	</td>
 </tr>
- 
+#{/if}
 #{/list}
 </table>
 
