@@ -3,7 +3,6 @@ package controllers;
 import java.util.List;
 
 import it.cnr.iit.epas.ActionMenuItem;
-import models.Contract;
 import models.Person;
 import models.PersonDay;
 import models.YearRecap;
@@ -35,8 +34,7 @@ public class Vacations extends Controller{
     	if(anno==null)
 			anno = new LocalDate().getYear(); 
 
-    	Contract contract = person.getCurrentContract();
-    	VacationsRecap vacationsRecap = new VacationsRecap(person, anno, contract, new LocalDate(), true);
+    	VacationsRecap vacationsRecap = new VacationsRecap(person, (short)anno.intValue(), new LocalDate(), true);
     	if(vacationsRecap.vacationPeriodList==null)
     	{
     		Logger.debug("Period e' null");
@@ -60,8 +58,7 @@ public class Vacations extends Controller{
     		person = Security.getPerson();
 
     	//Costruzione oggetto di riepilogo per la persona
-		Contract contract = person.getCurrentContract();
-    	VacationsRecap vacationsRecap = new VacationsRecap(person, anno, contract, new LocalDate(), true);
+    	VacationsRecap vacationsRecap = new VacationsRecap(person, (short)anno.intValue(), new LocalDate(), true);
     	if(vacationsRecap.vacationPeriodList==null)
     	{
     		Logger.debug("Period e' null");
@@ -83,8 +80,7 @@ public class Vacations extends Controller{
     		person = Security.getPerson();
     	
     	//Costruzione oggetto di riepilogo per la persona
-    	Contract contract = person.getCurrentContract();
-    	VacationsRecap vacationsRecap = new VacationsRecap(person, anno, contract, new LocalDate(), true);
+    	VacationsRecap vacationsRecap = new VacationsRecap(person, (short)anno.intValue(), new LocalDate(), true);
     	if(vacationsRecap.vacationPeriodList==null)
     	{
     		Logger.debug("Period e' null");

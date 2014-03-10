@@ -345,13 +345,11 @@ public class Person extends Model {
 		return setPermissions;
 	}
 
-	
 	/**
 	 * 
 	 * @return il contratto attivo per quella persona alla date date
 	 */
 	public Contract getContract(LocalDate date){
-
 		
 		for(Contract c : this.contracts)
 		{
@@ -362,9 +360,23 @@ public class Person extends Model {
 
 	}
 	
+	/**
+	 * //TODO eliminarlo è uguale a getContract
+	 * Il contratto attivo alla data, se esiste. Ciclando su tutti i contratti della persona (no query sql)
+	 * Da utilizzare se si intende ripetere la query per la persona su più giorni
+	 * @param date
+	 * @return
+	 */
+	public Contract getContractFromHeap(LocalDate date)
+	{
+		for(Contract c : this.contracts)
+		{
+			if(DateUtility.isDateIntoInterval(date, c.getContractDateInterval()))
+				return c;
+		}
+		return null;
 
-	
-	
+	}
 	/**
 	 * 
 	 * @return il contratto attualmente attivo per quella persona, null se la persona non ha contratto attivo
@@ -382,7 +394,6 @@ public class Person extends Model {
 	 */
 	public boolean hasMonthContracts(Integer month, Integer year)
 	{
-		//TODO usare getMonthContracts e ritornare size>0
 		List<Contract> monthContracts = new ArrayList<Contract>();
 		List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ?",this).fetch();
 		if(contractList == null){
@@ -405,35 +416,6 @@ public class Person extends Model {
 			return false;
 		
 		return true;
-	}
-	
-	/**
-	 * 
-	 * @param month
-	 * @param year
-	 * @return
-	 */
-	public List<Contract> getMonthContracts(Integer month, Integer year)
-	{
-		List<Contract> monthContracts = new ArrayList<Contract>();
-		List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract",this).fetch();
-		if(contractList == null){
-			return monthContracts;
-		}
-		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
-		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
-		DateInterval monthInterval = new DateInterval(monthBegin, monthEnd);
-		for(Contract contract : contractList)
-		{
-			if(!contract.onCertificate)
-				continue;
-			DateInterval contractInterval = contract.getContractDateInterval();
-			if(DateUtility.intervalIntersection(monthInterval, contractInterval)!=null)
-			{
-				monthContracts.add(contract);
-			}
-		}
-		return monthContracts;
 	}
 	
 	/**

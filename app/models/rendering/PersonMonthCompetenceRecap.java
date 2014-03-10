@@ -2,7 +2,6 @@ package models.rendering;
 
 import models.Competence;
 import models.CompetenceCode;
-import models.Contract;
 import models.Person;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
@@ -34,9 +33,7 @@ public class PersonMonthCompetenceRecap {
 		this.ordinaryShift = getOrdinaryShift(person, year, month);
 		this.nightShift = getNightShift(person, year, month);
 		
-		//RTODO
-		Contract contract = person.getCurrentContract();
-		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, year, null);
+		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, year, null);
 		Mese mese = c.getMese(year, month);
 		this.progressivoFinalePositivoMese = mese.progressivoFinalePositivoMese;
 	}

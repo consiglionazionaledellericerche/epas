@@ -6,12 +6,11 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-
+import org.apache.poi.hssf.record.formula.functions.Char;
 import org.joda.time.LocalDate;
 
 import models.Absence;
 import models.Competence;
-import models.Contract;
 import models.Person;
 import models.exports.PersonOvertime;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
@@ -63,8 +62,7 @@ public class Charts extends Controller{
 			Long val = Competence.find("Select sum(c.valueApproved) from Competence c where c.competenceCode.code in (?,?,?) and c.year = ? and c.month = ? and c.person = ?",
 					"S1","S2","S3", year, month, p).first();
 
-			Contract contract = p.getCurrentContract();
-			CalcoloSituazioneAnnualePersona sit = new CalcoloSituazioneAnnualePersona(contract, year, new LocalDate(year,month,1));
+			CalcoloSituazioneAnnualePersona sit = new CalcoloSituazioneAnnualePersona(p, year, new LocalDate(year,month,1));
 			Mese mese = sit.getMese(year,month);
 			po.month = 1;
 			po.year = 2013;
@@ -110,9 +108,7 @@ public class Charts extends Controller{
 		int totaleOreResidue = 0;
 		for(Person p : personeProva){
 			for(int month=1; month<13;month++){
-				//RTODO contratto attivo??
-				Contract contract = p.getCurrentContract();
-				CalcoloSituazioneAnnualePersona sit = new CalcoloSituazioneAnnualePersona(contract, year, new LocalDate(year,month,1).dayOfMonth().withMaximumValue());
+				CalcoloSituazioneAnnualePersona sit = new CalcoloSituazioneAnnualePersona(p, year, new LocalDate(year,month,1).dayOfMonth().withMaximumValue());
 				Mese mese = sit.getMese(year,month);
 				totaleOreResidue = totaleOreResidue+(mese.positiveResidualInMonth(p, year, month)/60);
 			}

@@ -292,8 +292,7 @@ public class PersonUtility {
 	 */
 	public static AbsenceType whichVacationCode(Person person, LocalDate actualDate){
 		
-		Contract contract = person.getCurrentContract();
-		VacationsRecap vr = new VacationsRecap(person, actualDate.getYear(), contract, actualDate, true);	
+		VacationsRecap vr = new VacationsRecap(person, (short) actualDate.getYear(), actualDate, true);	
 		
 		if(vr.vacationDaysLastYearNotYetUsed>0)
 			return AbsenceType.find("byCode", "31").first();
@@ -585,8 +584,7 @@ public class PersonUtility {
 	{
 		if(date.getDayOfMonth()>1)
 			date = date.minusDays(1);
-		Contract contract = person.getContract(date);
-		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, date.getYear(), date);
+		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, date.getYear(), date);
 		Mese mese = c.getMese(date.getYear(), date.getMonthOfYear());
 		Logger.info("monteOreAnnoCorrente=%s ,  monteOreAnnoPassato=%s, workingTime=%s", mese.monteOreAnnoCorrente, mese.monteOreAnnoPassato, mese.person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime);
 		if(mese.monteOreAnnoCorrente + mese.monteOreAnnoPassato > mese.person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime)
@@ -839,8 +837,7 @@ public class PersonUtility {
 	 * @return
 	 */
 	public static int numberOfCompensatoryRestUntilToday(Person person, int year, int month){
-		//TODO questo metodo è delicato. Prendere comunque il numero di riposi nell'anno solare. Ciclare a ritroso sui 
-		//Contratti per cercare se esiste un sourceContract
+		
 		Query query = JPA.em().createQuery("Select abs from Absence abs where abs.personDay.person = :person and abs.absenceType.code = :code " +
 				"and abs.personDay.date between :begin and :end");
 		query.setParameter("person", person)

@@ -20,11 +20,6 @@ import controllers.shib.Shibboleth;
 import models.AbsenceType;
 import models.ConfGeneral;
 import models.Contract;
-
-import models.ContractYearRecap;
-import models.InitializationAbsence;
-
-
 import models.InitializationTime;
 import models.Person;
 import models.PersonDay;
@@ -34,7 +29,6 @@ import models.WorkingTimeType;
 import models.exports.PersonsList;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
-import models.rendering.VacationsRecap;
 import play.Logger;
 import play.Play;
 import play.db.jpa.JPAPlugin;
@@ -45,8 +39,6 @@ import procedure.evolutions.Evolutions;
 
 
 //@With(Shibboleth.class)
-
-@With( {Secure.class, NavigationMenu.class} )
 public class Administration extends Controller {
 	
 	
@@ -149,21 +141,17 @@ public class Administration extends Controller {
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void personalResidualSituation()
 	{
-		
 		List<Person> listPerson = Person.getActivePersonsInDay(new LocalDate(), Security.getPerson().getOfficeAllowed(), false);
 		List<Mese> listMese = new ArrayList<Mese>();
 		for(Person person : listPerson)
 		{
 			LocalDate today = new LocalDate().minusMonths(1);
-			CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person.getCurrentContract(), today.getYear(), null);
+			CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, today.getYear(), null);
 			Mese mese = c.getMese(today.getYear(), today.getMonthOfYear());
 			listMese.add(mese);
 		}
 		render(listMese);
 	} 
-
-
-
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void troublesLog() throws EmailException
@@ -228,7 +216,6 @@ public class Administration extends Controller {
 	}
 	
 	
-
 	
 	public static void buildYaml()
 	{
@@ -260,99 +247,6 @@ public class Administration extends Controller {
 		FromMysqlToPostgres.importStamping();
 		renderText("E' fatta");
 	}
-	
-	
-	/**
-	 * Questo metodo e' da lanciare nel caso di procedura di importazione che preleva i dati dal 2013-01-01, 
-	 * (in cui anche initUse è 2013-01-01)
-	 * Computazioni integrative da compiere:
-	 * 1) Inserire nell'oggetto InitializationTime le ferie effettuate nell'anno precedente
-	 * 2) Costruire per ogni contratto attivo alla data 2013-01-01 l'oggetto sourceData
-	 * 3) Costruire per ogni contratto di cui si dispone di sufficiente informazione i riepiloghi annuali
-	 * 
-	 */
-	public static void mysqlIntegration()
-	{
-		
-		JPAPlugin.startTx(false);
-		//Distruggere quello che c'è prima (adesso in fase di sviluppo)
-		List<Contract> allContract = Contract.findAll();
-		for(Contract contract : allContract)
-		{
-			contract.sourceDate = null;
-			contract.save();
-			for(ContractYearRecap yearRecap : contract.recapPeriods)
-			{
-				yearRecap.delete();
-			}
-			contract.recapPeriods = new ArrayList<ContractYearRecap>();
-			contract.save();
-		}
-		JPAPlugin.closeTx(false);
-		
-		//1) Rimodellare il contenuto di InitializationTime (con ferie e residuo)
-		LocalDate mySqlImportation = new LocalDate(2013,1,1);
-		JPAPlugin.startTx(false);
-		List<Person> personList = Person.findAll();
-		for(Person person : personList)
-		{
-			Logger.debug("%s %s", person.name, person.surname);
-			if(person.name.equals("Admin"))
-				continue;
-			//TODO epasclocks
-			
-			if(person.initializationTimes==null || person.initializationTimes.size()==0)
-				continue;
 
-			InitializationTime mysqlInitPerson = person.initializationTimes.get(0);			
-			Contract contract = person.getContract(mySqlImportation);
-			if(contract==null)
-				continue;
-	
-			//AGGIORNAMENTO RISPETTO ALLA PROCEDURA DI IMPORTAZIONE
-			DateInterval year2012 = new DateInterval(new LocalDate(2012,1,1), new LocalDate(2012,12,31));
-			AbsenceType ab32 = AbsenceType.getAbsenceTypeByCode("32");
-			mysqlInitPerson.vacationCurrentYearUsed = VacationsRecap.getVacationDays(year2012, contract, ab32).size();
-			mysqlInitPerson.save();
-	
-			//2) Costruire per ogni contratto attivo alla data 2013-01-01 l'oggetto sourceData
-			contract.sourceDate = mySqlImportation.minusDays(1);
-			contract.sourceRemainingMinutesLastYear = 0;
-			contract.sourceRemainingMinutesCurrentYear = mysqlInitPerson.residualMinutesPastYear;
-			contract.sourcePermissionUsed = 0;
-			contract.sourceVacationCurrentYearUsed = mysqlInitPerson.vacationCurrentYearUsed;
-			contract.sourceVacationLastYearUsed = 0;
-			contract.sourceRecoveryDayUsed = 0;
-			contract.save();
-		}
-		JPAPlugin.closeTx(false);
-		
-		
-		JPAPlugin.startTx(false);
-		//3) Costruire per ogni contratto di cui si dispone di sufficiente informazione i riepiloghi annuali
-		for(Person person : personList)
-		{
-			if(person.name.equals("Admin"))
-				continue;
-			//TODO epasclocks
-			List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ?", person).fetch();
-			for(Contract contract : contractList)
-			{
-				try
-				{
-					contract.populateContractYearRecap();
-				}
-				catch(Exception e)
-				{
-					Logger.debug("Eccezione per il contratto %s", contract.id);
-				}
-			}
-		}
-		JPAPlugin.closeTx(false);
-
-		
-	}
-	
-	
     
 }
