@@ -24,9 +24,22 @@ public class DateUtility {
 	 * @return
 	 */
 	public static boolean isHoliday(Person person, LocalDate date){	
+		
+		//1) Festa generale
 		if(isGeneralHoliday(date))
 			return true;
-		return person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).holiday;
+		
+		//2) Festa secondo contratto
+		WorkingTimeType wtt = person.getWorkingTimeType(date);
+		if(wtt!=null)
+			return person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).holiday;
+	
+		//3) Satato o Domenica
+		if(date.getDayOfWeek()==6 || date.getDayOfWeek()==7)
+			return true;
+		else
+			return false;
+		
 
 	}
 
