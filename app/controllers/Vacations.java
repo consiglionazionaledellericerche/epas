@@ -92,4 +92,25 @@ public class Vacations extends Controller{
        	render(vacationsRecap);
 	}
 	
+	@Check(Security.VIEW_PERSONAL_SITUATION)
+	public static void permissionCurrentYear(Long personId, Integer anno){
+		Person person = null;
+		if(personId != null)
+    		person = Person.findById(personId);
+    	else
+    		person = Security.getPerson();
+
+    	//Costruzione oggetto di riepilogo per la persona
+    	VacationsRecap vacationsRecap = new VacationsRecap(person, (short)anno.intValue(), new LocalDate(), true);
+    	if(vacationsRecap.vacationPeriodList==null)
+    	{
+    		Logger.debug("Period e' null");
+    		flash.error("Piano ferie inesistente per %s %s", person.name, person.surname);
+    		render(vacationsRecap);
+    	}
+    	
+    	//rendering
+       	render(vacationsRecap);
+	}
+	
 }
