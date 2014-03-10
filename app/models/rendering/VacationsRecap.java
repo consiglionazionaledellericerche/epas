@@ -37,7 +37,7 @@ public class VacationsRecap {
 	
 	public List<Absence> vacationDaysLastYearUsed = new ArrayList<Absence>();
 	public List<Absence> vacationDaysCurrentYearUsed = new ArrayList<Absence>();
-	public Integer permissionUsed = 0;
+	public List<Absence> permissionUsed = new ArrayList<Absence>();
 	
 	public Integer vacationDaysLastYearAccrued = 0;
 	public Integer vacationDaysCurrentYearAccrued = 0;
@@ -101,7 +101,7 @@ public class VacationsRecap {
 		
 		this.vacationDaysCurrentYearUsed.addAll(getVacationDays(new DateInterval(startYear, endYear), currentContract, ab32));
 		
-		this.permissionUsed = getVacationDays(new DateInterval(startYear, endYear), currentContract, ab94).size();
+		this.permissionUsed = getVacationDays(new DateInterval(startYear, endYear), currentContract, ab94);
 		
 		
 		//***************************************************************
@@ -139,7 +139,7 @@ public class VacationsRecap {
 			this.vacationDaysLastYearNotYetUsed = 0;
 		}
 		this.vacationDaysCurrentYearNotYetUsed = this.vacationDaysCurrentYearTotal - this.vacationDaysCurrentYearUsed.size();									//per adesso quelli non utilizzati li considero tutti
-		this.persmissionNotYetUsed = this.permissionCurrentYearTotal - this.permissionUsed;
+		this.persmissionNotYetUsed = this.permissionCurrentYearTotal - this.permissionUsed.size();
 	}
 	
 	
