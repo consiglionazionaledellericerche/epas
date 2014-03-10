@@ -85,10 +85,19 @@ public class PersonStampingDayRecap {
 		
 		
 		this.wtt = pd.person.getWorkingTimeType(pd.date);
-		this.wttd = this.wtt.getWorkingTimeTypeDayFromDayOfWeek(pd.date.getDayOfWeek());
-		this.setWorkingTime(this.wttd.workingTime);
-		this.setMealTicketTime(this.wttd.mealTicketTime);
-		this.setBreakTicketTime(this.wttd.breakTicketTime);
+		if(wtt!=null)
+		{
+			this.wttd = this.wtt.getWorkingTimeTypeDayFromDayOfWeek(pd.date.getDayOfWeek());
+			this.setWorkingTime(this.wttd.workingTime);
+			this.setMealTicketTime(this.wttd.mealTicketTime);
+			this.setBreakTicketTime(this.wttd.breakTicketTime);
+		}
+		else
+		{
+			this.setWorkingTime(0);
+			this.setMealTicketTime(0);
+			this.setBreakTicketTime(0);
+		}
 		ConfGeneral conf = ConfGeneral.getConfGeneral();
 		this.setTimeMealFrom(conf.mealTimeStartHour, conf.mealTimeStartMinute);
 		this.setTimeMealTo(conf.mealTimeEndHour, conf.mealTimeEndMinute);
