@@ -731,7 +731,7 @@ public class Persons extends Controller {
 		
 		contract.save();
 		//Ricalcolo dei riepiloghi
-		contract.populateContractYearRecap();
+		contract.buildContractYearRecap();
 		
 		Persons.edit(contract.person.id);
 		

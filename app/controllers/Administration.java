@@ -340,7 +340,7 @@ public class Administration extends Controller {
 			{
 				try
 				{
-					contract.populateContractYearRecap();
+					contract.buildContractYearRecap();
 				}
 				catch(Exception e)
 				{
