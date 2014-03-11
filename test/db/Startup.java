@@ -64,8 +64,8 @@ public class Startup extends Job<Void> {
 		
 		Session session = (Session) JPA.em().getDelegate();
 		session.doWork(new DatasetImport(DatabaseOperation.INSERT, 
-				Resources.getResource(Startup.class, "fulldataset-2014-03-phase1.xml")));		
+				Resources.getResource(Startup.class, "absenceGroup.xml")));		
 		session.doWork(new DatasetImport(DatabaseOperation.INSERT, 
-				Resources.getResource(Startup.class, "fulldataset-2014-03.xml")));
+				Resources.getResource(Startup.class, "lucchesi-devel.xml")));
 	}
 }
