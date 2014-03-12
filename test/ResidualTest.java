@@ -182,12 +182,71 @@ public class ResidualTest extends UnitTest {
 		
 		//asserzioni sui residui
     	Mese february = contractMonths.get(0);
-    	assertEquals(february.monteOreAnnoPassato, 28764);
+    	assertEquals(february.monteOreAnnoPassato, 29196);
     	assertEquals(february.monteOreAnnoCorrente, 2166);
     	
     	VacationsRecap februaryVacation = contractVacationRecap.get(0);
     	//asserzioni sui vacation recap
     	assertEquals(februaryVacation.vacationDaysLastYearNotYetUsed, new Integer(25));	   //maturate(tutte) meno usate 	
+    	assertEquals(februaryVacation.vacationDaysCurrentYearNotYetUsed, new Integer(28)); //totali meno usate 
+    	assertEquals(februaryVacation.permissionUsed, new Integer(0));
+    	assertEquals(februaryVacation.persmissionNotYetUsed, new Integer(4));
+
+    }
+    
+    @Test
+    public void residualSuccurro() {
+    	LocalDate dateToTest = new LocalDate(2014,2,28);
+    	int month = 2;
+    	int year = 2014;
+    	
+    	JPAPlugin.startTx(false);
+    	Person person = Person.find("bySurname", "Succurro").first();
+    	assertEquals(Double.valueOf(224), Double.valueOf(person.id));
+    
+    	
+    	//Ricalcolo tutti i personday
+     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person);
+    	JPAPlugin.startTx(false);
+
+    	//Ricalcolo tutti i contract year recap
+    	List<Contract> monthContracts = person.getMonthContracts(month, year);
+    	for(Contract contract : monthContracts)
+		{
+			contract.buildContractYearRecap();
+		}
+    	assertEquals(monthContracts.size(),1);
+
+    	//Costruisco la situazione residuale al 28 febbraio (già concluso)
+		List<Mese> contractMonths = new ArrayList<Mese>();
+		for(Contract contract : monthContracts)
+		{
+			CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, year, dateToTest);
+			if(c.getMese(year, month)!=null)
+				contractMonths.add(c.getMese(year, month));
+		}
+		
+		//Costruisco la situazione ferie al 28 febbraio (già concluso)
+		List<VacationsRecap> contractVacationRecap = new ArrayList<VacationsRecap>();
+		for(Contract contract : monthContracts)
+		{
+			VacationsRecap vr = new VacationsRecap(person, 2014, contract, dateToTest, true);
+			contractVacationRecap.add(vr);
+		}
+		JPAPlugin.closeTx(false);
+    	
+	
+		assertEquals(contractMonths.size(),1);
+		assertEquals(contractVacationRecap.size(),1);
+		
+		//asserzioni sui residui
+    	Mese february = contractMonths.get(0);
+    	assertEquals(february.monteOreAnnoPassato, 32991);
+    	assertEquals(february.monteOreAnnoCorrente, 6487);
+    	
+    	VacationsRecap februaryVacation = contractVacationRecap.get(0);
+    	//asserzioni sui vacation recap
+    	assertEquals(februaryVacation.vacationDaysLastYearNotYetUsed, new Integer(24));	   //maturate(tutte) meno usate 	
     	assertEquals(februaryVacation.vacationDaysCurrentYearNotYetUsed, new Integer(28)); //totali meno usate 
     	assertEquals(februaryVacation.permissionUsed, new Integer(0));
     	assertEquals(februaryVacation.persmissionNotYetUsed, new Integer(4));
