@@ -1,5 +1,5 @@
 # subject; condition;  limit; restrictions
-persons; surname='Succurro'; ; .embedded
+persons; surname='Abba'; ; .embedded
 
 # from A (or association name); to B; restriction-condition
 inverse-fk16765acd966a951; ; ignore
@@ -232,13 +232,13 @@ persons; certificated_data; -775.3933392805193; -439.51661764343015; 1.0
 persons; person_children; -758.6934854327717; -214.3622578511471; 1.0
 persons; person_days_in_trouble; -814.4276123046875; 125.93998718261719; 1.0
 persons; locations; -303.21893310546875; -403.6798400878906; 0.0
-persons; initialization_times; -228.5079803466797; -287.8631286621094; 0.0
+persons; initialization_times; -227.990966796875; -289.66815185546875; 0.0
 persons; persons_permissions; -889.8816938564978; -438.9982705033917; 1.0
 persons; persons_working_time_types; -697.7647705078125; -81.43292236328125; 1.0
 persons; contracts; -847.2843627929688; -326.8580322265625; 1.0
 persons; badge_readers; -500.2149963378906; 362.0307312011719; 0.0
 persons; vacation_periods; -996.6913452148438; -139.7738037109375; 1.0
-persons; person_shift; -408.92694091796875; -102.07565307617188; 0.0
+persons; person_shift; -408.58148193359375; -102.16849517822266; 0.0
 persons; $ZOOMBOX; 0.0; 0.0; 1.0
 persons; person_reperibility_days; -1147.6792038503363; -153.34411781035953; 1.0
 persons; persons; -487.83865209867633; -247.04133835659502; 1.0
@@ -250,7 +250,7 @@ persons; person_reperibility; -977.8531292635806; -251.70157522638385; 1.0
 persons; valuable_competences; -738.4769096028873; -263.5980662154839; 1.0
 persons; stampings; -522.7144775390625; 209.32736206054688; 1.0
 persons; contact_data; -353.6865539550781; -242.6378631591797; 0.0
-persons; person_years; -271.32781982421875; -137.52406311035156; 0.0
+persons; person_years; -271.0689697265625; -138.25364685058594; 0.0
 persons; persons_competence_codes; -838.3565926882407; -556.8873146649146; 1.0
 persons; absences; -344.86676025390625; 56.96510314941406; 1.0
 
