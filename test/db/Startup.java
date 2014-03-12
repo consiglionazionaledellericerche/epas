@@ -61,11 +61,43 @@ public class Startup extends Job<Void> {
 			// come assicurazione del fatto che è nei test.
 			return;
 		}
-		
 		Session session = (Session) JPA.em().getDelegate();
-		session.doWork(new DatasetImport(DatabaseOperation.INSERT, 
-				Resources.getResource(Startup.class, "absenceGroup.xml")));		
-		session.doWork(new DatasetImport(DatabaseOperation.INSERT, 
-				Resources.getResource(Startup.class, "lucchesi-devel.xml")));
+		
+		//qualification absenceType absenceTypeQualification absenceTypeGroup
+		session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Startup.class, "absence-type-and-qualification-phase1.xml")));		
+		session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Startup.class, "absence-type-and-qualification-phase2.xml")));
+		
+		//competenceCode
+		session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Startup.class, "competence-codes.xml")));	
+
+		//office
+		session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Startup.class, "office.xml")));
+		
+		//permissions
+		session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Startup.class, "permissions.xml")));
+		
+		//stampModificationType
+		session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Startup.class, "stamp-modification-types.xml")));
+		
+		//stampType
+		session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Startup.class, "stamp-types.xml")));
+		
+		//vacationCode
+		session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Startup.class, "vacation-codes.xml")));
+		
+		//workingTimeType workingTimeTypeDay
+		session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Startup.class, "working-time-types.xml")));
+		
+		//confGeneral confYear
+		session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Startup.class, "conf-general.xml")));
+		session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Startup.class, "conf-year.xml")));
+
+		//lucchesi slim 2014-03 
+		session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Startup.class, "lucchesi-situation-slim-2014-03.xml")));
+		
+		//lami slim 2013-12
+		session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Startup.class, "lami-situation-slim-2013-12.xml")));
+		
+
 	}
 }
