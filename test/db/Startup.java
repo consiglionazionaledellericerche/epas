@@ -95,6 +95,12 @@ public class Startup extends Job<Void> {
 		//lucchesi slim 2014-03 
 		session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Startup.class, "lucchesi-situation-slim-2014-03.xml")));
 		
+		//santerini slim 2014-03 
+		session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Startup.class, "santerini-situation-slim-2014-03.xml")));
+		
+		//martinelli slim 2014-03 
+		session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Startup.class, "martinelli-situation-slim-2014-03.xml")));
+		
 		//lami slim 2013-12
 		session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Startup.class, "lami-situation-slim-2013-12.xml")));
 		
