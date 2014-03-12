@@ -216,7 +216,7 @@ public class Mese {
 		//In questo modo il riposo compensativo viene conteggiato sul residuo del mese attualmente in essere.
 		//es.: sono a febbraio e prendo un riposo compensativo per il 5 marzo. Nel "riepilogo ore di lavoro anno corrente" vedrò visualizzato
 		//il numero di riposi compensativi presi sia nel mese di febbraio che nel mese di marzo.
-		if(new LocalDate().getMonthOfYear()==this.mese)
+		if(new LocalDate().getMonthOfYear()==this.mese && new LocalDate().getYear()==this.anno )
 			monthEnd = new LocalDate(this.anno, this.mese+1,1).dayOfMonth().withMaximumValue();
 		
 		List<Absence> riposiCompensativi = Absence.find("Select abs from Absence abs, AbsenceType abt, PersonDay pd where abs.personDay = pd and abs.absenceType = abt and abt.code = ? and pd.person = ? "
