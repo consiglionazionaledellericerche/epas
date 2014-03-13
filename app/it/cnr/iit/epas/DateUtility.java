@@ -24,22 +24,9 @@ public class DateUtility {
 	 * @return
 	 */
 	public static boolean isHoliday(Person person, LocalDate date){	
-		
-		//1) Festa generale
 		if(isGeneralHoliday(date))
 			return true;
-		
-		//2) Festa secondo contratto
-		WorkingTimeType wtt = person.getWorkingTimeType(date);
-		if(wtt!=null)
-			return person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).holiday;
-	
-		//3) Satato o Domenica
-		if(date.getDayOfWeek()==6 || date.getDayOfWeek()==7)
-			return true;
-		else
-			return false;
-		
+		return person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).holiday;
 
 	}
 
@@ -181,6 +168,8 @@ public class DateUtility {
 	 */
 	public static DateInterval intervalIntersection(DateInterval inter1, DateInterval inter2)
 	{
+		if(inter1==null || inter2==null)
+			return null;
 		//ordino
 		if(!inter1.getBegin().isBefore(inter2.getBegin()))
 		{
@@ -269,6 +258,9 @@ public class DateUtility {
 	 */
 	public static String fromMinuteToHourMinute(int minute)
 	{
+		if(minute==0)
+			return "00:00";
+		
 		String s = "";
 		if(minute<0)
 		{

@@ -65,7 +65,7 @@ public class Competences extends Controller{
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void showCompetences(Integer year, Integer month){
 
-		
+		//Controllo parametri
 		List<Person> activePersons = null;
 		if((year == null || month == null) || (year == 0 || month == 0)){
 			int yearParams = params.get("year", Integer.class);
@@ -74,6 +74,14 @@ public class Competences extends Controller{
 		}
 		else{
 			activePersons = Person.getTechnicianForCompetences(new LocalDate(year, month, 1), Security.getPerson().getOfficeAllowed());
+		}
+		
+		//Redirect in caso di mese futuro
+		LocalDate today = new LocalDate();
+		if(today.getYear()==year && month>today.getMonthOfYear())
+		{
+			flash.error("Impossibile accedere a situazione futura, redirect automatico a mese attuale");
+			month = today.getMonthOfYear();
 		}
 
 		List<CompetenceCode> competenceCodes = PersonUtility.activeCompetence();

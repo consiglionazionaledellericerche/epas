@@ -2,12 +2,16 @@ package models;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
+import it.cnr.iit.epas.PersonUtility;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -18,6 +22,9 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import lombok.Data;
+import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
+import models.personalMonthSituation.Mese;
+import models.rendering.VacationsRecap;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
@@ -39,17 +46,40 @@ import play.db.jpa.Model;
 @Table(name="contracts")
 public class Contract extends Model {
 
+	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	@Column(name="source_date")
+	public LocalDate sourceDate = null;
+	
+	@Column(name="source_vacation_last_year_used")
+	public Integer sourceVacationLastYearUsed = null;
+	
+	@Column(name="source_vacation_current_year_used")
+	public Integer sourceVacationCurrentYearUsed = null;
+	
+	@Column(name="source_permission_used")
+	public Integer sourcePermissionUsed = null;
+	
+	@Column(name="source_recovery_day_used")
+	public Integer sourceRecoveryDayUsed = null;
+	
+	@Column(name="source_remaining_minutes_last_year")
+	public Integer sourceRemainingMinutesLastYear = null;
+	
+	@Column(name="source_remaining_minutes_current_year")
+	public Integer sourceRemainingMinutesCurrentYear = null;
+
+	
 	private static final long serialVersionUID = -4472102414284745470L;
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="person_id")
 	public Person person;
-
-	/**
-	 * relazione con la tabella di vacation_code
-	 */
+	
 	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY, cascade = CascadeType.REMOVE)
 	public List<VacationPeriod> vacationPeriods;
+	
+	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY, cascade = CascadeType.REMOVE)
+	public List<ContractYearRecap> recapPeriods;
 
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="begin_contract")
@@ -59,9 +89,7 @@ public class Contract extends Model {
 	@Column(name="expire_contract")
 	public LocalDate expireContract;
 
-	/**
-	 * data di termine contratto in casi di licenziamento, pensione, morte, ecc ecc...
-	 */
+	//data di termine contratto in casi di licenziamento, pensione, morte, ecc ecc...
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="end_contract")
 	public LocalDate endContract;
@@ -78,7 +106,11 @@ public class Contract extends Model {
 	public void setExpireContract(String date){
 		this.expireContract = new LocalDate(date);
 	}
-
+	
+	public void setSourceDate(String date){
+		this.sourceDate = new LocalDate(date);
+	}
+	
 	/**
 	 * I contratti con onCertificate = true sono quelli dei dipendenti CNR e 
 	 * corrispondono a quelli con l'obbligo dell'attestato di presenza 
@@ -226,4 +258,166 @@ public class Contract extends Model {
 		return contractInterval;
 	}
 
+	
+	/**
+	 * Ritorna il riepilogo annule del contatto.
+	 * @param year
+	 * @return
+	 */
+	public ContractYearRecap getContractYearRecap(int year)
+	{
+		for(ContractYearRecap cyr : this.recapPeriods)
+		{
+			if(cyr.year==year)
+				return cyr;
+		}
+		return null;
+			
+	}
+	
+	public void buildContractYearRecap()
+	{
+		Logger.info("PopulateContractYearRecap %s %s contract id = %s", this.person.name, this.person.surname, this.id);
+		//Distruggere quello che c'è prima (adesso in fase di sviluppo)
+		for(ContractYearRecap yearRecap : this.recapPeriods)
+		{
+			yearRecap.delete();
+		}
+		this.recapPeriods = new ArrayList<ContractYearRecap>();
+
+		//Controllo se ho sufficienti dati
+		LocalDate initUse = ConfGeneral.getConfGeneral().initUseProgram;
+		if(this.sourceDate!=null)
+			initUse = sourceDate.plusDays(1);
+		DateInterval personDatabaseInterval = new DateInterval(initUse, new LocalDate());
+		DateInterval contractInterval = this.getContractDateInterval();
+
+		//Se intersezione fra contratto e dati utili database vuota non costruisco alcun contractYearRecap
+		if(DateUtility.intervalIntersection(contractInterval, personDatabaseInterval)==null)
+			return;
+
+		int yearToCompute = this.beginContract.getYear();
+		
+		//verifico quanta informazione ho sul contratto
+		if(contractInterval.getBegin().isBefore(personDatabaseInterval.getBegin()))
+		{
+			//contratto non interamente contenuto nel database (serve sourceContract)
+			if(this.sourceDate==null)
+				return;
+			yearToCompute = this.populateContractYearFromSource();
+		}
+		
+		int currentYear = new LocalDate().getYear();
+		if(currentYear>contractInterval.getEnd().getYear())
+			currentYear = contractInterval.getEnd().getYear();
+		while(yearToCompute<currentYear)
+		{
+			Logger.debug("yearToCompute %s", yearToCompute);
+			ContractYearRecap cyr = new ContractYearRecap();
+			cyr.year = yearToCompute;
+			cyr.contract = this;
+			
+			//FERIE E PERMESSI
+			VacationsRecap vacationRecap = new VacationsRecap(this.person, yearToCompute, this, new LocalDate(), true);
+			cyr.vacationLastYearUsed = vacationRecap.vacationDaysLastYearUsed.size();
+			cyr.vacationCurrentYearUsed = vacationRecap.vacationDaysCurrentYearUsed.size();
+			cyr.permissionUsed = vacationRecap.permissionUsed;
+			
+			//RESIDUI
+			CalcoloSituazioneAnnualePersona csap = new CalcoloSituazioneAnnualePersona(this, yearToCompute, new LocalDate().minusDays(1));
+			Mese lastComputedMonthInYear;
+			if(yearToCompute!=currentYear)
+				lastComputedMonthInYear = csap.getMese(yearToCompute, 12);
+			else
+				lastComputedMonthInYear = csap.getMese(yearToCompute, new LocalDate().getMonthOfYear());
+			
+			cyr.remainingMinutesLastYear = lastComputedMonthInYear.monteOreAnnoPassato;
+			cyr.remainingMinutesCurrentYear = lastComputedMonthInYear.monteOreAnnoCorrente;
+			
+			//RIPOSI COMPENSATIVI
+			//TODO la logica che persiste il dato sui riposi compensativi utilizzati deve essere ancora implementata in quanto non banale.
+			//I riposi compensativi utilizzati sono in funzione del contratto?
+			//cyr.recoveryDayUsed = PersonUtility.numberOfCompensatoryRestUntilToday(this.person, yearToCompute, 12);
+			
+			cyr.save();
+			this.recapPeriods.add(cyr);
+			
+			yearToCompute++;
+		}
+	}
+	
+	
+	/**
+	 * Costruisce il contractYearRecap se contract.SourceDate è l'ultimo giorno dell'anno.
+	 * @return l'anno di cui si deve costruire il prossimo contractYearRecap
+	 */
+	public int populateContractYearFromSource()
+	{
+		LocalDate lastDayInYear = new LocalDate(this.sourceDate.getYear(), 12, 31);
+		//Caso semplice source riepilogo dell'anno
+		if(lastDayInYear.isEqual(this.sourceDate))
+		{
+			int yearToCompute = this.sourceDate.getYear();
+			ContractYearRecap cyr = new ContractYearRecap();
+			cyr.year = yearToCompute;
+			cyr.contract = this;
+			cyr.remainingMinutesCurrentYear = this.sourceRemainingMinutesCurrentYear;
+			cyr.remainingMinutesLastYear = this.sourceRemainingMinutesLastYear;
+			cyr.vacationLastYearUsed = this.sourceVacationLastYearUsed;
+			cyr.vacationCurrentYearUsed = this.sourceVacationCurrentYearUsed;
+			cyr.recoveryDayUsed = this.sourceRecoveryDayUsed;
+			cyr.permissionUsed = this.sourcePermissionUsed;
+			cyr.save();
+			this.recapPeriods.add(cyr);
+			return yearToCompute+1;
+		}
+
+		//Caso complesso, TODO vedere (dopo che ci sono i test) se creando il VacationRecap si ottengono le stesse informazioni
+		AbsenceType ab31 = AbsenceType.getAbsenceTypeByCode("31");
+		AbsenceType ab32 = AbsenceType.getAbsenceTypeByCode("32");
+		AbsenceType ab37 = AbsenceType.getAbsenceTypeByCode("37");
+		AbsenceType ab94 = AbsenceType.getAbsenceTypeByCode("94");
+		DateInterval yearInterSource = new DateInterval(this.sourceDate.plusDays(1), lastDayInYear);
+		List<Absence> abs32 = VacationsRecap.getVacationDays(yearInterSource, this, ab32);
+		List<Absence> abs31 = VacationsRecap.getVacationDays(yearInterSource, this, ab31);
+		List<Absence> abs37 = VacationsRecap.getVacationDays(yearInterSource, this, ab37);
+		List<Absence> abs94 = VacationsRecap.getVacationDays(yearInterSource, this, ab94);
+		int yearToCompute = this.sourceDate.getYear();
+		ContractYearRecap cyr = new ContractYearRecap();
+		cyr.year = yearToCompute;
+		cyr.contract = this;
+		cyr.vacationLastYearUsed = this.sourceVacationLastYearUsed + abs31.size() + abs37.size();
+		cyr.vacationCurrentYearUsed = this.sourceVacationCurrentYearUsed + abs32.size();
+		cyr.permissionUsed = this.sourcePermissionUsed + abs94.size();
+		CalcoloSituazioneAnnualePersona csap = new CalcoloSituazioneAnnualePersona(this, yearToCompute, new LocalDate().minusDays(1));
+		Mese december = csap.getMese(yearToCompute, 12);
+		cyr.remainingMinutesCurrentYear = december.monteOreAnnoCorrente;
+		cyr.remainingMinutesLastYear = december.monteOreAnnoPassato;
+		cyr.save();
+		this.recapPeriods.add(cyr);
+		return this.sourceDate.getYear()+1;
+	}
+	
+	
+	
+	/**
+	 * True se il contratto è l'ultimo contratto per mese e anno selezionati.
+	 * @param month
+	 * @param year
+	 * @return
+	 */
+	public boolean isLastInMonth(Integer month, Integer year)
+	{
+		List<Contract> contractInMonth = this.person.getMonthContracts(month, year);
+		if(contractInMonth.size()==0)
+			return false;
+		if(contractInMonth.get(contractInMonth.size()-1).id == this.id)
+			return true;
+		else
+			return false;
+	}
+	
 }
+	
+	
+

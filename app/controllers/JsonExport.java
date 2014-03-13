@@ -5,6 +5,7 @@ package controllers;
 
 import java.util.List;
 
+import models.Office;
 import models.Person;
 import models.exports.AuthInfo;
 
@@ -45,7 +46,8 @@ public class JsonExport extends Controller {
 	//TODO: serve un permesso più specifico?
 	@Check(Security.INSERT_AND_UPDATE_ADMINISTRATOR)
 	public static void activePersons() {
-		List<Person> activePersons = Person.getActivePersons(LocalDate.now());
+		List<Office> offices = Office.findAll();
+		List<Person> activePersons = Person.getActivePersonsInDay(LocalDate.now(), offices, false);
 		Logger.debug("activePersons.size() = %d", activePersons.size());
 		
 		List<PersonInfo> activePersonInfos = FluentIterable.from(activePersons).transform(new Function<Person, PersonInfo>() {
