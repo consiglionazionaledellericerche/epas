@@ -50,12 +50,8 @@
       <tr>
         <td>${vacationsRecap.year}</td>
         <td>${vacationsRecap.permissionCurrentYearTotal} (${vacationsRecap.permissionCurrentYearAccrued})</td>
-        <td>
-          <a data-toggle="modal" href="@{Vacations.permissionCurrentYear(vacationsRecap.person.id, vacationsRecap.year)}" data-target="#myModal3">
-			 ${vacationsRecap.permissionUsed.size()}
-		  </a>
-        </td>
-        <td>${vacationsRecap.permissionCurrentYearAccrued - vacationsRecap.permissionUsed.size()}</td>
+        <td>${vacationsRecap.permissionUsed}</td>
+        <td>${vacationsRecap.permissionCurrentYearAccrued - vacationsRecap.permissionUsed}</td>
       </tr>
   	</table>
   
@@ -64,7 +60,7 @@
   
 <div class="row">
  <div class="container">
-  <br> 
+  <br>
   <br>
   <p class="lead">Piani ferie associati al contratto corrente</p>
   <table class="table table-hover table-condensed vacation-recap">
@@ -91,7 +87,7 @@
 <div id="myModal3" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">Ferie e permessi</h3>
+    <h3 id="myModalLabel">Ferie</h3>
   </div>
   <div class="modal-body">
     <p></p>

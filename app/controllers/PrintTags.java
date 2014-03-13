@@ -11,6 +11,7 @@ import org.joda.time.LocalDate;
 
 import models.AbsenceType;
 import models.ConfGeneral;
+import models.Contract;
 import models.Person;
 import models.PersonDay;
 import models.PersonMonthRecap;
@@ -78,13 +79,18 @@ public class PrintTags extends Controller{
 		int basedWorkingDays = PersonUtility.basedWorkingDays(totalPersonDays);
 		Map<AbsenceType,Integer> absenceCodeMap = PersonUtility.getAllAbsenceCodeInMonth(totalPersonDays);
 
-		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, year, null);
+		/*
+		//RTODO il contratto attivo nel mese (quello più recente)
+		Contract contract = person.getCurrentContract();
+		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, year, null);
 		Mese mese = c.getMese(year, month);
+		*/
+		
 		String titolo = "Situazione presenze mensile " +  DateUtility.fromIntToStringMonth(month) + " " + year + " di " + person.surname + " " + person.name;
 		
 		//Render
 		renderPDF(person, year, month, numberOfInOut, numberOfCompensatoryRestUntilToday,numberOfMealTicketToUse,numberOfMealTicketToRender,
-				daysRecap, stampModificationTypeList, stampTypeList, basedWorkingDays, absenceCodeMap, mese, titolo);
+				daysRecap, stampModificationTypeList, stampTypeList, basedWorkingDays, absenceCodeMap, titolo);
 		
 	}
 	
@@ -142,13 +148,11 @@ public class PrintTags extends Controller{
 		int basedWorkingDays = PersonUtility.basedWorkingDays(totalPersonDays);
 		Map<AbsenceType,Integer> absenceCodeMap = PersonUtility.getAllAbsenceCodeInMonth(totalPersonDays);
 
-		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person, year, null);
-		Mese mese = c.getMese(year, month);
 		String titolo = "Situazione presenze mensile " +  DateUtility.fromIntToStringMonth(month) + " " + year + " di " + person.surname + " " + person.name;
 		
 		//Render
 		renderPDF(person, year, month, numberOfInOut, numberOfCompensatoryRestUntilToday,numberOfMealTicketToUse,numberOfMealTicketToRender,
-				daysRecap, stampModificationTypeList, stampTypeList, basedWorkingDays, absenceCodeMap, mese, titolo);
+				daysRecap, stampModificationTypeList, stampTypeList, basedWorkingDays, absenceCodeMap, titolo);
 		//renderPDF(person, year, month, numberOfInOut, daysRecap,stampModificationTypeList, stampTypeList);
 		
 		

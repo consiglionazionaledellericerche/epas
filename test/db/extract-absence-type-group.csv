@@ -1,31 +1,12 @@
 # subject; condition;  limit; restrictions
-persons; surname='Lucchesi' or username='admin'; ; .embedded
+absence_type_groups; ; ; .embedded
 
 # from A (or association name); to B; restriction-condition
-inverse-fk71b9ff7730325be3; ; ignore
-inverse-fk16765acd966a951; ; ignore
-inverse-fk6674c5d65b5f15b1; ; ignore
-inverse-fk53ee32958c3d68d6; ; ignore
-inverse-fkdda67575522ebd41; ; ignore
-inverse-fkc3373ebc2d0fa45e; ; ignore
-inverse-fkd78fcfbe2d0fa45e; ; ignore
-inverse-fkf0f758334428ea9; ; ignore
-inverse-fkbe7a61cae7a7b1be; ; ignore
-inverse-fk53ee3295e7a7b1be; ; ignore
-inverse-fk4094eae7e7a7b1be; ; ignore
-inverse-fk20975c68e7a7b1be; ; ignore
-inverse-fk7ab49e92e7a7b1be; ; ignore
-inverse-fkede9ea6ce7a7b1be; ; ignore
-inverse-fk218a9691dd4eb8b5; ; ignore
-inverse-fk9afc5dd6e7a7b1be; ; ignore
-inverse-fkd78fcfbe786a4ab6; ; ignore
-inverse-fk785e8f1435175bce; ; ignore
-inverse-fk785e8f14932966bd; ; ignore
-inverse-fk5170df704649fe84; ; ignore
-inverse-fkd78fcfbe35555570; ; ignore
-inverse-fkb943247635555570; ; ignore
+fk71b9ff7730325be3; ; ignore
+inverse-fkfe65dbf7ca0a1c8a; ; ignore
 
 #! block xml-mapping
+fkbf232f8afb1f039e;fkbf232f8afb1f039e;NONE
 fk74fdda1835555570;fk74fdda1835555570;NONE
 inverse-fk5170df704649fe84;vacation_periods;NONE
 fk10e41b2bd54d10ea;fk10e41b2bd54d10ea;NONE
@@ -49,6 +30,7 @@ fk4b732cdbfbe89596;fk4b732cdbfbe89596;NONE
 fk16765acd966a951;fk16765acd966a951;NONE
 fk16765acbce1b821;fk16765acbce1b821;NONE
 fk94fa58aad54d10ea;fk94fa58aad54d10ea;NONE
+inverse-fke69adb0135175bce;person_days;NONE
 inverse-fk785e8f1435175bce;stampings;NONE
 inverse-fk7abb85ef34428ea9;permissions_groups;NONE
 inverse-fkf0f758334428ea9;persons_permissions;NONE
@@ -57,9 +39,9 @@ fkb9432476e7a7b1be;fkb9432476e7a7b1be;NONE
 fkb943247635555570;fkb943247635555570;NONE
 inverse-fk785e8f148868391d;stampings;NONE
 fkcc549f52d54d10ea;fkcc549f52d54d10ea;NONE
+fk82ea23ccd54d10ea;fk82ea23ccd54d10ea;NONE
 inverse-fk7abb85ef522ebd41;permissions_groups;NONE
 inverse-fkdda67575522ebd41;persons_groups;NONE
-fk82ea23ccd54d10ea;fk82ea23ccd54d10ea;NONE
 fk3075811eda784c2b;fk3075811eda784c2b;NONE
 fk3075811e86585224;fk3075811e86585224;NONE
 fk3075811e3df511bb;fk3075811e3df511bb;NONE
@@ -75,7 +57,6 @@ fked96d718e7a7b1be;fked96d718e7a7b1be;NONE
 inverse-fk3075811eda784c2b;person_shift_days;NONE
 inverse-fk7757fc5e29b090bd;person_shift_shift_type;NONE
 fk8fa3d556d54d10ea;fk8fa3d556d54d10ea;NONE
-inverse-fkd78fcfbe35555570;persons;NONE
 inverse-fkb943247635555570;persons_working_time_types;NONE
 inverse-fk74fdda1835555570;working_time_type_days;NONE
 fka8bd39d54d10ea;fka8bd39d54d10ea;NONE
@@ -153,6 +134,7 @@ fkb8a4575ee7a7b1be;fkb8a4575ee7a7b1be;NONE
 fkf0f758334428ea9;fkf0f758334428ea9;NONE
 fkf0f7583a4f8de2b;fkf0f7583a4f8de2b;NONE
 fk68e007b9d54d10ea;fk68e007b9d54d10ea;NONE
+inverse-fkbf232f8afb1f039e;contract_year_recap;NONE
 fke86d11a1e7a7b1be;fke86d11a1e7a7b1be;NONE
 inverse-fk5170df70e7a7b1be;vacation_periods;NONE
 fkd52a4e11d54d10ea;fkd52a4e11d54d10ea;NONE
@@ -165,9 +147,9 @@ inverse-fkd78fcfbe2d0fa45e;persons;NONE
 fkd883fbcdd54d10ea;fkd883fbcdd54d10ea;NONE
 fk2631804cd54d10ea;fk2631804cd54d10ea;NONE
 fkee16b5fed54d10ea;fkee16b5fed54d10ea;NONE
-fkb7d05129d54d10ea;fkb7d05129d54d10ea;NONE
 fkb20b55e41df6de9;fkb20b55e41df6de9;NONE
 fkb20b55e47d5fd20c;fkb20b55e47d5fd20c;NONE
+fkb7d05129d54d10ea;fkb7d05129d54d10ea;NONE
 fk27e84399d54d10ea;fk27e84399d54d10ea;NONE
 inverse-fkca05bafce7a7b1be;certificated_data;NONE
 inverse-fkbe7a61cae7a7b1be;competences;NONE
@@ -185,7 +167,6 @@ inverse-fked96d718e7a7b1be;person_shift;NONE
 inverse-fkede9ea6ce7a7b1be;person_years;NONE
 fkd78fcfbe2d0fa45e;fkd78fcfbe2d0fa45e;NONE
 fkd78fcfbe786a4ab6;fkd78fcfbe786a4ab6;NONE
-fkd78fcfbe35555570;fkd78fcfbe35555570;NONE
 inverse-fk218a9691dd4eb8b5;persons_competence_codes;NONE
 inverse-fkdda67575dd4eb8b5;persons_groups;NONE
 inverse-fkf0f7583a4f8de2b;persons_permissions;NONE
@@ -196,6 +177,7 @@ inverse-fk9afc5dd6e7a7b1be;year_recaps;NONE
 fk9afc5dd6e7a7b1be;fk9afc5dd6e7a7b1be;NONE
 inverse-fk6674c5d6fbe89596;absences;NONE
 fke69adb01e7a7b1be;fke69adb01e7a7b1be;NONE
+fke69adb0135175bce;fke69adb0135175bce;NONE
 inverse-fk4b732cdbfbe89596;person_days_in_trouble;NONE
 inverse-fk785e8f14fbe89596;stampings;NONE
 fk5842d3d9e7a7b1be;fk5842d3d9e7a7b1be;NONE
@@ -212,7 +194,7 @@ fk6674c5d6fbe89596;fk6674c5d6fbe89596;NONE
 fk1fe1fac5d54d10ea;fk1fe1fac5d54d10ea;NONE
 
 #! block datamodelfolder
-epas
+epas-devel-other
 
 #! block export modus
 DBUNIT_FLAT_XML
@@ -223,70 +205,16 @@ yyyy-MM-dd;yyyy-MM-dd-HH.mm.ss;rowset
 #! block upserts
 
 #! block filters
-persons_working_time_types;person_id;146
 
 #! block layout
-stamp_modification_types; person_days; 128.9880828857422; -328.88641357421875; 0.0
-stamp_modification_types; stampings; 257.45713806152344; -275.0078582763672; 1.0
-stamp_modification_types; locations; -40.723297119140625; -501.6880187988281; 0.0
-stamp_modification_types; $ZOOMBOX; 0.0; 0.0; 1.0
-stamp_modification_types; stamp_modification_types; 0.0; 0.0; 1.0
-stamp_modification_types; contracts; -68.41078186035156; -225.76556396484375; 0.0
-stamp_modification_types; persons; -32.63447189331055; -358.92974853515625; 0.0
-stamp_modification_types; person_children; -177.1476593017578; -359.9035339355469; 0.0
-stamp_types; stampings; -461.15167236328125; -183.92605590820312; 1.0
-stamp_types; $ZOOMBOX; 0.0; 0.0; 1.0
-stamp_types; stamp_types; 0.0; 0.0; 1.0
-vacation_codes; persons_groups; -273.9497985839844; -283.0729064941406; 1.0
-vacation_codes; vacation_periods; 280.37457275390625; -305.9902820587158; 1.0
-vacation_codes; person_shift; -23.853370666503906; -459.3049621582031; 1.0
-vacation_codes; $ZOOMBOX; 0.0; 0.0; 1.0
-vacation_codes; competences; -362.1517333984375; -542.1399536132812; 0.0
-vacation_codes; vacation_codes; 0.0; 0.0; 1.0
-vacation_codes; stamp_profiles; -146.8201141357422; -511.7312927246094; 1.0
-vacation_codes; certificated_data; -356.0030517578125; -404.8037109375; 0.0
-vacation_codes; working_time_types; -465.06036376953125; -306.32415771484375; 0.0
-vacation_codes; persons; -217.02120971679688; -351.732177734375; 0.0
-vacation_codes; person_months_recap; -250.3079376220703; -508.41094970703125; 0.0
-vacation_codes; permissions_groups; -471.2522277832031; 24.65771484375; 0.0
-vacation_codes; valuable_competences; -166.220703125; -159.48104858398438; 1.0
-vacation_codes; persons_permissions; -275.9512023925781; -114.9256591796875; 0.0
-vacation_codes; permissions; -342.4435119628906; 34.699947357177734; 0.0
-vacation_codes; contact_data; 56.418235778808594; -294.1748046875; 1.0
-vacation_codes; persons_working_time_types; -599.031608581543; -209.62554931640625; 1.0
-vacation_codes; contracts; 93.9705581665039; -385.32861328125; 0.0
-vacation_codes; groups; -422.62945556640625; -123.38044738769531; 0.0
-persons; qualifications; 883.6395655607848; 159.23403393050114; 1.0
-persons; working_time_type_days; 258.812255859375; 427.1324157714844; 0.0
-persons; stamp_profiles; 519.4425048828125; 98.7781982421875; 0.0
-persons; fkfe65dbf7ca0a1c8a#; 991.990234375; 584.1143188476562; 0.0
-persons; absence_type_groups; 986.2748413085938; 721.2584838867188; 1.0
-persons; certificated_data; 221.01028442382812; 27.12565803527832; 0.0
-persons; absence_types; 843.0042665305264; 491.90174019765664; 1.0
-persons; person_children; 389.7359619140625; -99.68177032470703; 0.0
-persons; locations; 145.91925048828125; -85.0610580444336; 0.0
-persons; person_days_in_trouble; 562.4683712386425; 352.1685594312405; 1.0
-persons; absence_types_qualifications; 859.5186785743896; 284.13154523109836; 1.0
-persons; persons_permissions; 264.85241471069514; -79.1013867596701; 1.0
-persons; permissions; 212.76416015625; -246.01797485351562; 0.0
-persons; contracts; 85.18259357195984; 196.09761525116193; 1.0
-persons; persons_working_time_types; 232.00227627800092; 320.4176774018433; 1.0
-persons; groups; 431.592041015625; -346.6212463378906; 0.0
-persons; office; 59.16094300494723; 68.65979981910488; 1.0
-persons; persons_groups; 489.3673147486347; -214.8792387015656; 1.0
-persons; fk71b9ff7730325be3#; 868.5286865234375; 661.7833251953125; 0.0
-persons; person_shift; 485.8998718261719; -23.449539184570312; 0.0
-persons; $ZOOMBOX; 0.0; 0.0; 1.0
-persons; working_time_types; 312.85014615889764; 212.9843248176315; 1.0
-persons; persons; 364.8742050207067; 40.02839379973989; 1.0
-persons; fkc3373ebc2d0fa45e#; -73.46060943603516; 57.726097106933594; 0.0
-persons; person_months_recap; 416.11322021484375; 182.08895874023438; 0.0
-persons; permissions_groups; 334.40807173051667; -214.67171570673491; 1.0
-persons; person_days; 626.9008831206237; 271.0936243322607; 1.0
-persons; valuable_competences; 597.177734375; -52.375850677490234; 0.0
-persons; stampings; 728.5187377929688; 181.30067443847656; 0.0
-persons; contact_data; 228.08258056640625; 132.0071258544922; 0.0
-persons; absences; 724.2652587890625; 426.5752258300781; 0.0
+absence_type_groups; inverse-fkfe65dbf7ca0a1c8a#; -214.43917846679688; 5.5025715827941895; 1.0
+absence_type_groups; fk71b9ff7730325be3#; -121.78555297851562; -106.54698944091797; 0.0
+absence_type_groups; absence_types_qualifications; 55.47391128540039; 132.59873962402344; 0.0
+absence_type_groups; $ZOOMBOX; 0.0; 0.0; 1.0
+absence_type_groups; absences; 64.5515365600586; -45.92972946166992; 0.0
+absence_type_groups; absence_type_groups; -251.0; -134.0; 1.0
+absence_type_groups; absence_types; -68.8658676147461; 33.54094696044922; 1.0
+absence_type_groups; initialization_absences; -123.5119400024414; 179.6263427734375; 0.0
 
 #! block version
 4.1.1

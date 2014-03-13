@@ -12,13 +12,22 @@
 		while(i < vacationsRecap.vacationDaysCurrentYearUsed.size()){
 		
 	}%
-	<tr>
+	
+	#{if vacationsRecap.vacationDaysCurrentYearUsed.get(i)==null}
+	  <tr>
+	    <td>Assenza da inizializzazione</td>
+	  </tr>
+	#{/if}
+	#{else}
+	  <tr>
+		
 		<td>${vacationsRecap.vacationDaysCurrentYearUsed.get(i).personDay.date.getDayOfMonth()}</td>
 		<td>${vacationsRecap.vacationDaysCurrentYearUsed.get(i).personDay.date.getMonthOfYear()}</td>
 		<td>${vacationsRecap.vacationDaysCurrentYearUsed.get(i).personDay.date.getYear()}</td>
 		<td>${vacationsRecap.vacationDaysCurrentYearUsed.get(i).absenceType.description}</td>
 		<td>${vacationsRecap.vacationDaysCurrentYearUsed.get(i).absenceType.code}</td>
-	</tr>
+	  </tr>
+	#{/else}
 	%{
 		i++;}
 	}%

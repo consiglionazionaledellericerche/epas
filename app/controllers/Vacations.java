@@ -3,6 +3,7 @@ package controllers;
 import java.util.List;
 
 import it.cnr.iit.epas.ActionMenuItem;
+import models.Contract;
 import models.Person;
 import models.PersonDay;
 import models.YearRecap;
@@ -34,7 +35,8 @@ public class Vacations extends Controller{
     	if(anno==null)
 			anno = new LocalDate().getYear(); 
 
-    	VacationsRecap vacationsRecap = new VacationsRecap(person, (short)anno.intValue(), new LocalDate(), true);
+    	Contract contract = person.getCurrentContract();
+    	VacationsRecap vacationsRecap = new VacationsRecap(person, anno, contract, new LocalDate(), true);
     	if(vacationsRecap.vacationPeriodList==null)
     	{
     		Logger.debug("Period e' null");
@@ -58,7 +60,8 @@ public class Vacations extends Controller{
     		person = Security.getPerson();
 
     	//Costruzione oggetto di riepilogo per la persona
-    	VacationsRecap vacationsRecap = new VacationsRecap(person, (short)anno.intValue(), new LocalDate(), true);
+		Contract contract = person.getCurrentContract();
+    	VacationsRecap vacationsRecap = new VacationsRecap(person, anno, contract, new LocalDate(), true);
     	if(vacationsRecap.vacationPeriodList==null)
     	{
     		Logger.debug("Period e' null");
@@ -80,28 +83,8 @@ public class Vacations extends Controller{
     		person = Security.getPerson();
     	
     	//Costruzione oggetto di riepilogo per la persona
-    	VacationsRecap vacationsRecap = new VacationsRecap(person, (short)anno.intValue(), new LocalDate(), true);
-    	if(vacationsRecap.vacationPeriodList==null)
-    	{
-    		Logger.debug("Period e' null");
-    		flash.error("Piano ferie inesistente per %s %s", person.name, person.surname);
-    		render(vacationsRecap);
-    	}
-    	
-    	//rendering
-       	render(vacationsRecap);
-	}
-	
-	@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void permissionCurrentYear(Long personId, Integer anno){
-		Person person = null;
-		if(personId != null)
-    		person = Person.findById(personId);
-    	else
-    		person = Security.getPerson();
-
-    	//Costruzione oggetto di riepilogo per la persona
-    	VacationsRecap vacationsRecap = new VacationsRecap(person, (short)anno.intValue(), new LocalDate(), true);
+    	Contract contract = person.getCurrentContract();
+    	VacationsRecap vacationsRecap = new VacationsRecap(person, anno, contract, new LocalDate(), true);
     	if(vacationsRecap.vacationPeriodList==null)
     	{
     		Logger.debug("Period e' null");

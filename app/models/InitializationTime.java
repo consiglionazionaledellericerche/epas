@@ -1,5 +1,6 @@
 package models;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -22,23 +23,29 @@ public class InitializationTime extends Model{
 	@JoinColumn(name = "person_id", nullable = false)
 	public Person person;
 	
-	/**
-	 * data da cui far partire l'inizializzazione di minuti
-	 */
 	@Required
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate date;	
 	
-	/**
-	 * minuti di residuo da inizializzare maturati nell'anno relativo alla data dell'ogggetto 
-	 */
+	@Column
+	public Integer vacationLastYearUsed = 0;
+	
+	@Column
+	public Integer vacationCurrentYearUsed = 0;
+	
+	
+	@Column
+	public Integer permissionUsed = 0;
+	
+	@Column
+	public Integer recoveryDayUsed = 0;
+	
 	@Required
-	public Integer residualMinutesCurrentYear;
-
-	/**
-	 * minuti di residuo da inizializzare maturati nell'anno precedente alla data dell'ogggetto 
-	 */
+	@Column
+	public Integer residualMinutesPastYear = 0;
+	
 	@Required
-	public Integer residualMinutesPastYear;
-
-}
+	@Column
+	public Integer residualMinutesCurrentYear = 0;
+	
+	}
