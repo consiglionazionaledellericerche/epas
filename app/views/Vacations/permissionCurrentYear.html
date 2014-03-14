@@ -1,0 +1,35 @@
+<h3>Permessi ${vacationsRecap.person.surname + ' ' + vacationsRecap.person.name} nel ${vacationsRecap.year}</h3>
+<table class="table table-striped">
+	<tr>
+		<th>Giorno</th>
+		<th>Mese</th>
+		<th>Anno</th>
+		<th>Descrizione</th>
+		<th>Codice</th>
+	</tr>
+	%{ 
+		int i = 0;
+		while(i < vacationsRecap.permissionUsed.size()){
+		
+	}%
+	
+	#{if vacationsRecap.permissionUsed.get(i)==null}
+	  <tr>
+	    <td>Assenza da inizializzazione</td>
+	  </tr>
+	#{/if}
+	#{else}
+	  <tr>
+		
+		<td>${vacationsRecap.permissionUsed.get(i).personDay.date.getDayOfMonth()}</td>
+		<td>${vacationsRecap.permissionUsed.get(i).personDay.date.getMonthOfYear()}</td>
+		<td>${vacationsRecap.permissionUsed.get(i).personDay.date.getYear()}</td>
+		<td>${vacationsRecap.permissionUsed.get(i).absenceType.description}</td>
+		<td>${vacationsRecap.permissionUsed.get(i).absenceType.code}</td>
+	  </tr>
+	#{/else}
+	%{
+		i++;}
+	}%
+
+</table>

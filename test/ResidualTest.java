@@ -71,7 +71,7 @@ public class ResidualTest extends UnitTest {
     	//asserzioni sui vacation recap
     	assertEquals(februaryVacation.vacationDaysLastYearNotYetUsed, new Integer(26));	   //maturate(tutte) meno usate 27 - 1	
     	assertEquals(februaryVacation.vacationDaysCurrentYearNotYetUsed, new Integer(28)); //totali meno usate 28-0
-    	assertEquals(februaryVacation.permissionUsed, new Integer(2));
+    	assertEquals(februaryVacation.permissionUsed.size(), 2);
     	assertEquals(februaryVacation.persmissionNotYetUsed, new Integer(2));
 
     }
@@ -130,7 +130,7 @@ public class ResidualTest extends UnitTest {
     	//asserzioni sui vacation recap
     	assertEquals(februaryVacation.vacationDaysLastYearNotYetUsed, new Integer(28));	   //maturate(tutte) meno usate 	
     	assertEquals(februaryVacation.vacationDaysCurrentYearNotYetUsed, new Integer(28)); //totali meno usate 
-    	assertEquals(februaryVacation.permissionUsed, new Integer(0));
+    	assertEquals(februaryVacation.permissionUsed.size(), 0);
     	assertEquals(februaryVacation.persmissionNotYetUsed, new Integer(4));
 
     }
@@ -189,7 +189,7 @@ public class ResidualTest extends UnitTest {
     	//asserzioni sui vacation recap
     	assertEquals(februaryVacation.vacationDaysLastYearNotYetUsed, new Integer(25));	   //maturate(tutte) meno usate 	
     	assertEquals(februaryVacation.vacationDaysCurrentYearNotYetUsed, new Integer(28)); //totali meno usate 
-    	assertEquals(februaryVacation.permissionUsed, new Integer(0));
+    	assertEquals(februaryVacation.permissionUsed.size(), 0);
     	assertEquals(februaryVacation.persmissionNotYetUsed, new Integer(4));
 
     }
@@ -248,7 +248,7 @@ public class ResidualTest extends UnitTest {
     	//asserzioni sui vacation recap
     	assertEquals(februaryVacation.vacationDaysLastYearNotYetUsed, new Integer(24));	   //maturate(tutte) meno usate 	
     	assertEquals(februaryVacation.vacationDaysCurrentYearNotYetUsed, new Integer(28)); //totali meno usate 
-    	assertEquals(februaryVacation.permissionUsed, new Integer(0));
+    	assertEquals(februaryVacation.permissionUsed.size(), 0);
     	assertEquals(februaryVacation.persmissionNotYetUsed, new Integer(4));
 
     }
@@ -307,7 +307,7 @@ public class ResidualTest extends UnitTest {
     	//asserzioni sui vacation recap
     	assertEquals(februaryVacation.vacationDaysLastYearNotYetUsed, new Integer(19));	   //maturate(tutte) meno usate 	
     	assertEquals(februaryVacation.vacationDaysCurrentYearNotYetUsed, new Integer(28)); //totali meno usate 
-    	assertEquals(februaryVacation.permissionUsed, new Integer(0));
+    	assertEquals(februaryVacation.permissionUsed.size(), 0);
     	assertEquals(februaryVacation.persmissionNotYetUsed, new Integer(4));
 
     }

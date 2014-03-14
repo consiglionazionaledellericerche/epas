@@ -321,7 +321,7 @@ public class Contract extends Model {
 			VacationsRecap vacationRecap = new VacationsRecap(this.person, yearToCompute, this, new LocalDate(), true);
 			cyr.vacationLastYearUsed = vacationRecap.vacationDaysLastYearUsed.size();
 			cyr.vacationCurrentYearUsed = vacationRecap.vacationDaysCurrentYearUsed.size();
-			cyr.permissionUsed = vacationRecap.permissionUsed;
+			cyr.permissionUsed = vacationRecap.permissionUsed.size();
 			
 			//RESIDUI
 			CalcoloSituazioneAnnualePersona csap = new CalcoloSituazioneAnnualePersona(this, yearToCompute, new LocalDate().minusDays(1));
