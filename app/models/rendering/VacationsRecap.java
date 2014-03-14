@@ -38,7 +38,7 @@ public class VacationsRecap {
 	
 	public List<Absence> vacationDaysLastYearUsed = new ArrayList<Absence>();
 	public List<Absence> vacationDaysCurrentYearUsed = new ArrayList<Absence>();
-	public Integer permissionUsed = 0;
+	public List<Absence> permissionUsed = new ArrayList<Absence>();
 	
 	public Integer vacationDaysLastYearAccrued = 0;
 	public Integer vacationDaysCurrentYearAccrued = 0;
@@ -180,10 +180,15 @@ public class VacationsRecap {
 			abs94Current = getVacationDays(yearInter, activeContract, ab94);
 			permissionCurrentYearUsedNew = permissionCurrentYearUsedNew + abs94Current.size();
 		}
-		this.permissionUsed = permissionCurrentYearUsedNew;
+		this.permissionUsed.addAll(abs94Current);
+		while(this.permissionUsed.size()<permissionCurrentYearUsedNew)
+		{
+			Logger.debug("Inserita assenza nulla");
+			Absence nullAbsence = null;
+			this.permissionUsed.add(nullAbsence);
+		}
 		
-		
-		
+
 		//(4) Calcolo ferie e permessi maturati per l'anno passato e l'anno corrente (sono indipendenti dal database)
 		this.vacationDaysLastYearAccrued = getVacationAccruedYear(lastYearInter, this.activeContract, this.vacationPeriodList);
 		if(endYear.isAfter(actualDate))
@@ -209,7 +214,7 @@ public class VacationsRecap {
 		this.permissionCurrentYearTotal = getPermissionAccruedYear(yearInter, this.activeContract);
 		this.vacationDaysCurrentYearTotal = getVacationAccruedYear(yearInter, this.activeContract, this.vacationPeriodList);	
 		this.vacationDaysCurrentYearNotYetUsed = this.vacationDaysCurrentYearTotal - this.vacationDaysCurrentYearUsed.size();									//per adesso quelli non utilizzati li considero tutti
-		this.persmissionNotYetUsed = this.permissionCurrentYearTotal - this.permissionUsed;
+		this.persmissionNotYetUsed = this.permissionCurrentYearTotal - this.permissionUsed.size();
 	}
 	
 	
