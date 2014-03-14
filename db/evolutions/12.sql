@@ -1,7 +1,7 @@
 # ---!Ups
 
 
-drop table person_months_history;
+drop table if exists person_months_history;
 drop table person_months;
 drop sequence seq_person_months;
 
