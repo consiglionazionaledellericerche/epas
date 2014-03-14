@@ -1,21 +1,12 @@
-<!DOCTYPE html>
+#{extends 'main_admin_no_menu.html' /}
+#{set title: 'Unexpected error' /}
+#{set titolo: 'ePas 500' /}
 
-<html>
-    <head>
-        <title>Application error</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=${_response_encoding}"/>	
-    </head>
-    <body>
-        #{if play.mode.name() == 'DEV'}
-            #{500 exception /}
-        #{/if}
-        #{else}
-            <h1>Oops, an error occured</h1>
-            #{if exception instanceof play.exceptions.PlayException}
-                <p>
-                    This exception has been logged with id <strong>${exception.id}</strong>.
-                </p>
-            #{/if}
-        #{/else}
-    </body>
-</html>
+ <div class="row-fluid">
+  <div class="pagination-centered">
+    <img src="http://icons.iconarchive.com/icons/3dlb/3d-vol2/256/warning-icon.png">
+  </div>
+  <div class="pagination-centered">
+    <p class="lead">ePas ha generato un errore inaspettato. Riprovare o effettuare una segnalazione.<p>
+  </div>
+</div>
