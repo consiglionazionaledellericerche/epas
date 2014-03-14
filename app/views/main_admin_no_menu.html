@@ -24,7 +24,7 @@
 	<link rel="stylesheet" media="screen" href="@{'/public/font-awesome/css/font-awesome.min.css'}"/>
 	<link rel="stylesheet" media="screen" href="@{'/public/bootstrap-datepicker/css/datepicker.css'}"/>
 	<link rel="stylesheet" href="@{'/public/morris.js-0.4.3/morris.css'}">
-			
+	  <link rel="stylesheet" href="@{'/public/feedback-master/feedback.min.css'}" />
 	<link rel="stylesheet" media="screen" href="@{'/public/stylesheets/mymain.css'}">      
 	<link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap-editable/css/bootstrap-editable.css" rel="stylesheet"/>  
     #{get 'moreStyles' /}  		
@@ -124,6 +124,12 @@
         /* background: url(/public/images/dibaseNew3.jpg) right top no-repeat; */
         background: url(/public/images/logo.jpg) right top no-repeat;
       }
+   $(function(){
+	$.feedback({
+	    ajaxURL: 'http://test.url.com/feedback',
+	    html2canvasURL: '../feedback-master/html2canvas.js'
+	});
+});
    
       div#banner.chimica div div {
         background: url(/public/images/time_banner.jpg) left top no-repeat;
@@ -240,11 +246,13 @@
 	<!--  <script src="http://cdn.oesmith.co.uk/morris-0.4.3.min.js"></script>-->
 	<script src="@{'/public/morris.js-0.4.3/spec/vendor/raphael-2.1.0.min.js'}"></script>
 	<script src="@{'/public/morris.js-0.4.3/morris.min.js'}"></script>
+	<!--  <script src="http://code.jquery.com/jquery-latest.min.js"></script>-->
+    <script src="@{'/public/feedback-master/feedback.js'}"></script>
 	<!-- scripts concatenated and minified via ant build script-->
 	<!-- script defer src="@{'/public/js/plugins.js'}"></script> -->
 	<script src="@{'/public/js/script.js'}"></script>
 	  	
-	  
+	#{include './feedback.html' /}  
 	#{get 'moreScripts' /}
 	<!-- end scripts-->
 	

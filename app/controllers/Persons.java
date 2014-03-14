@@ -510,6 +510,9 @@ public class Persons extends Controller {
 		if(!params.get("surname").equals(person.surname))
 			person.surname = params.get("surname");
 		
+		if(!params.get("number").equals(person.number))
+			person.number = params.get("number", Integer.class);
+		
 		if(person.badgeNumber == null || !person.badgeNumber.equals(params.get("badgeNumber")))
 			person.badgeNumber = params.get("badgeNumber");
 		
