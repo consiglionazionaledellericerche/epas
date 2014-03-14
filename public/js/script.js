@@ -2,6 +2,8 @@
 
 */
 
+
+
 $(function($) {
 	// $.fn.editable.defaults.mode = 'inline';
 	$('a[data-x-editable]').editable();
@@ -133,5 +135,6 @@ $('#textComments1').editable({
 
 
 
+	
 
 
