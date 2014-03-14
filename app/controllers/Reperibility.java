@@ -3,6 +3,7 @@
  */
 package controllers;
 
+import helpers.BadRequest;
 import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
 import it.cnr.iit.epas.JsonReperibilityChangePeriodsBinder;
@@ -240,7 +241,7 @@ public class Reperibility extends Controller {
 	
 	/**
 	 * @author arianna
-	 * Restituisce la lista delle persone reperibili di una determinata tipologia in un dato intervallo di tempo
+	 * Restituisce la lista delle persone reperibili assenti di una determinata tipologia in un dato intervallo di tempo
 	 * (portale sistorg)
 	 */
 	public static void whoIsAbsent() {
@@ -342,14 +343,8 @@ public class Reperibility extends Controller {
 				
 				//Se la persona è in ferie questo giorno non può essere reperibile 
 				if (Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date = ? and pd.person = ?", day, reperibilityPeriod.person).fetch().size() > 0) {
-					throw new IllegalArgumentException(
-						String.format("ReperibilityPeriod person.id %d is not compatible with a Vacaction in the same day %s", reperibilityPeriod.person.id, day));
-				}
-
-				//Se la persona è in ferie questo giorno non può essere reperibile 
-				if (Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date = ? and pd.person = ?", day, reperibilityPeriod.person).fetch().size() > 0) {
-					throw new IllegalArgumentException(
-						String.format("ReperibilityPeriod person.id %d is not compatible with a Absence in the same day %s", reperibilityPeriod.person.id, day));
+							String msg = String.format("La reperibilità di %s %s è incompatibile con la sua assenza nel giorno %s", reperibilityPeriod.person.name, reperibilityPeriod.person.surname, day);
+							BadRequest.badRequest(msg);
 				}
 
 				//Salvataggio del giorno di reperibilità
@@ -464,7 +459,7 @@ public class Reperibility extends Controller {
 				// controlla che il numero dei giorni da scambiare coincida
 				if (((reqEndDay.toDate().getTime() - reqStartDay.toDate().getTime())/day) != ((subEndDay.toDate().getTime() - subStartDay.toDate().getTime())/day)) {
 					throw new IllegalArgumentException(
-							String.format("Different number of days betrween two intervals!"));
+							String.format("Different number of days between two intervals!"));
 				}
 				
 				Logger.debug("Aggiorno i giorni del richiedente");
@@ -683,9 +678,6 @@ public class Reperibility extends Controller {
 		}
 		
 		reperibilityMonth = builder.build();
-		
-		//Table<Person, String, Integer> reperibilitySumDays = HashBasedTable.<Person, String, Integer>create();
-		//Table<Person, String, List<PRP>> reperibilityDateDays = HashBasedTable.<Person, String, List<PRP>>create();
 		
 		Table<String, String, Integer> reperibilitySumDays = TreeBasedTable.<String, String, Integer>create();
 		Table<String, String, List<PRP>> reperibilityDateDays = TreeBasedTable.<String, String, List<PRP>>create();
