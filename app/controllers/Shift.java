@@ -10,14 +10,19 @@ import java.util.List;
 import java.util.Set;
 
 import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import org.jboss.netty.handler.codec.http.HttpResponse;
+import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.jsoup.HttpStatusException;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
+import com.ning.http.client.Response;
 
 import models.Absence;
 import models.CompetenceCode;
@@ -35,6 +40,8 @@ import models.exports.AbsenceShiftPeriod;
 import models.exports.ShiftCancelledPeriod;
 import models.exports.ShiftPeriod;
 import models.exports.ShiftPeriods;
+
+import helpers.BadRequest;
 
 import play.Logger;
 import play.Play;
@@ -153,7 +160,7 @@ public class Shift extends Controller{
 	 * @author arianna
 	 * Update shifts read from the sistorg portal calendar
 	 */
-	public static void update(String type, Integer year, Integer month, @As(binder=JsonShiftPeriodsBinder.class) ShiftPeriods body){
+	public static void update(String type, Integer year, Integer month, @As(binder=JsonShiftPeriodsBinder.class) ShiftPeriods body) throws HttpStatusException {
 		Logger.debug("update: Received shiftPeriods %s", body);
 		
 		if (body == null) {
@@ -200,11 +207,13 @@ public class Shift extends Controller{
 							String.format("Person %s is not a shift person", shiftPeriod.person));
 					}
 					
-					//Se la persona è in ferie questo giorno non può essere in turno (almeno che non sia cancellato)
-					//if ((Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date = ? and pd.person = ?", day, shiftPeriod.person).fetch().size() > 0) && (! "X".equals(type))){
+					//Se la persona è assente in questo giorno non può essere in turno (almeno che non sia cancellato)
 					if (Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date = ? and pd.person = ?", day, shiftPeriod.person).fetch().size() > 0) {
-						throw new IllegalArgumentException(
-							String.format("ShiftPeriod person.id %d is not compatible with a Absence in the same day %s", shiftPeriod.person.id, day));
+						String msg = String.format("Il turno di %s %s è incompatibile con la sua assenza nel giorno %s", shiftPeriod.person.name, shiftPeriod.person.surname, day);
+						
+						BadRequest.badRequest(msg);
+						//throw new HttpStatusException(msg, 400, "");	
+						//throw new IllegalArgumentException(msg);	
 					}
 				
 					//Salvataggio del giorno di turno
@@ -379,7 +388,7 @@ public class Shift extends Controller{
 	public static void exportMonthCalAsPDF() {
 		int year = params.get("year", Integer.class);
 		int month = params.get("month", Integer.class);
-//		Long groupType = params.get("type", Long.class);
+
 		Logger.debug("sono nella exportMonthCalAsPDF con year=%s e month=%s", year, month);
 		
 		ArrayList<String> shiftTypes = new ArrayList<String>();
