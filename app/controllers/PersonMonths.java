@@ -39,52 +39,10 @@ public class PersonMonths extends Controller{
 			person = Person.findById(personId);
 		else
 			person = Security.getPerson();
-		Map<Integer, List<String>> mapMonthSituation = new HashMap<Integer, List<String>>();
-		List<String> lista = null;
-				
-		//RTODO
+	
 		Contract contract = person.getCurrentContract();
-		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, year, null);
-		
-		int firstYear = 2013;	//TODO provvisorio fin quando non verranno persistiti i valori iniziali
-		
-		
-		for(int month = 1; month < 13; month++){
-			Mese mese = c.getMese(year, month);
-			LocalDate date = new LocalDate(year, month, 1);
-			lista = new ArrayList<String>();
-			if(mese.mese != 1){
-				lista.add(0, 0+"");
-				lista.add(1, DateUtility.fromMinuteToHourMinute(mese.mesePrecedente.monteOreAnnoCorrente));
-				lista.add(2, DateUtility.fromMinuteToHourMinute(mese.mesePrecedente.monteOreAnnoPassato));
-				lista.add(3, DateUtility.fromMinuteToHourMinute(mese.mesePrecedente.monteOreAnnoPassato + mese.mesePrecedente.monteOreAnnoCorrente));
-			}
-			else{
-				if(year==firstYear)
-				{
-					lista.add(0, DateUtility.fromMinuteToHourMinute(mese.initMonteOreAnnoPassato + mese.initMonteOreAnnoCorrente));
-					lista.add(1, 0+"");
-					lista.add(2, 0+"");
-					lista.add(3, DateUtility.fromMinuteToHourMinute(mese.initMonteOreAnnoPassato + mese.initMonteOreAnnoCorrente));
-				}
-				else
-				{
-					lista.add(0, 0+"");
-					lista.add(1, 0+"");
-					lista.add(2, DateUtility.fromMinuteToHourMinute(mese.initMonteOreAnnoPassato + mese.initMonteOreAnnoCorrente));
-					lista.add(3, DateUtility.fromMinuteToHourMinute(mese.initMonteOreAnnoPassato + mese.initMonteOreAnnoCorrente));
-				}
-			}			
-			lista.add(4, DateUtility.fromMinuteToHourMinute(mese.progressivoFinaleMese));
-			Integer minutiRiposiCompensativi = mese.riposiCompensativiMinutiImputatoAnnoCorrente + mese.riposiCompensativiMinutiImputatoAnnoPassato + mese.riposiCompensativiMinutiImputatoProgressivoFinalePositivoMese; 
-			//Integer riposiCompensativi = minutiRiposiCompensativi/mese.workingTime;
-			lista.add(5, mese.numeroRiposiCompensativi + " ("+ DateUtility.fromMinuteToHourMinute(minutiRiposiCompensativi)+")");
-			lista.add(6, mese.straordinariMinuti /60+"");
-			lista.add(7, DateUtility.fromMinuteToHourMinute(mese.monteOreAnnoCorrente + mese.monteOreAnnoPassato));
-			mapMonthSituation.put(date.getMonthOfYear(), lista);
-		}
-
-		render(mapMonthSituation, person, year);	
+		CalcoloSituazioneAnnualePersona csap = new CalcoloSituazioneAnnualePersona(contract, year, null);
+		render(csap, person, year);	
 	}
 	
 	@Check(Security.VIEW_PERSONAL_SITUATION)
