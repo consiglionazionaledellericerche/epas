@@ -30,18 +30,21 @@ public class Mese {
 	
 	public int initMonteOreAnnoPassato;
 	public int initMonteOreAnnoCorrente;
-
+	
 	public int progressivoFinaleMese		 = 0;	//person day
 	public int progressivoFinalePositivoMese = 0;	//person day
 	public int progressivoFinaleNegativoMese = 0;	//person day
 	
 	public int progressivoFinalePositivoMesePrint = 0;	//per il template
 
-	public int straordinariMinuti 			= 0;	//competences
-	public int straordinariMinutiS1Print	= 0;	//per il template
-	public int straordinariMinutiS2Print	= 0;	//per il template
-	public int straordinariMinutiS3Print	= 0;	//per il template
-	public int riposiCompensativiMinuti 	= 0;	//absences
+	public int straordinariMinuti 			 = 0;	//competences
+	public int straordinariMinutiS1Print	 = 0;	//per il template
+	public int straordinariMinutiS2Print	 = 0;	//per il template
+	public int straordinariMinutiS3Print	 = 0;	//per il template
+	
+	public int riposiCompensativiMinuti 	 = 0;	//absences 
+	public int riposiCompensativiMinutiPrint = 0;	//per il template
+	
 	
 	public int progressivoFinaleNegativoMeseImputatoAnnoPassato;
 	public int progressivoFinaleNegativoMeseImputatoAnnoCorrente;
@@ -54,6 +57,8 @@ public class Mese {
 	public int monteOreAnnoPassato;
 	public int monteOreAnnoCorrente;
 	public int numeroRiposiCompensativi;
+	
+	public int oreLavorate = 0;
 	
 	/**
 	 * Costruisce un oggetto mese con tutte le informazioni necessarie al calcolo della situazione residuo annuale della persona nell'ambito del contratto passato come argomento.
@@ -164,7 +169,8 @@ public class Mese {
 					this.progressivoFinalePositivoMese += pd.difference;
 				else
 					this.progressivoFinaleNegativoMese += pd.difference;
-
+				
+				this.oreLavorate += pd.timeAtWork;
 			}
 			this.progressivoFinaleNegativoMese = this.progressivoFinaleNegativoMese*-1;
 
@@ -220,7 +226,7 @@ public class Mese {
 				this.riposiCompensativiMinuti = this.riposiCompensativiMinuti + this.person.getWorkingTimeType(abs.personDay.date).getWorkingTimeTypeDayFromDayOfWeek(abs.personDay.date.getDayOfWeek()).workingTime;
 				this.numeroRiposiCompensativi++;
 			}
-
+			this.riposiCompensativiMinutiPrint = this.riposiCompensativiMinuti;
 			
 		}		
 
@@ -344,6 +350,36 @@ public class Mese {
 			}
 		}
 		return 0;
+	}
+	
+	public String getName()
+	{
+		if(mese==1)
+			return "Gennaio";
+		if(mese==2)
+			return "Febbraio";
+		if(mese==3)
+			return "Marzo";
+		if(mese==4)
+			return "Aprile";
+		if(mese==5)
+			return "Maggio";
+		if(mese==6)
+			return "Giugno";
+		if(mese==7)
+			return "Luglio";
+		if(mese==8)
+			return "Agosto";
+		if(mese==9)
+			return "Settembre";
+		if(mese==10)
+			return "Ottobre";
+		if(mese==11)
+			return "Novembre";
+		if(mese==12)
+			return "Dicembre";
+		else
+			return null;
 	}
 }
 
