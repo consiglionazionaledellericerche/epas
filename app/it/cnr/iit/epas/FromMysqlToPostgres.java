@@ -19,6 +19,7 @@ import models.Competence;
 import models.CompetenceCode;
 import models.ContactData;
 import models.Contract;
+import models.ContractWorkingTimeType;
 import models.InitializationAbsence;
 import models.InitializationTime;
 import models.Location;
@@ -729,14 +730,16 @@ public class FromMysqlToPostgres {
 			wtt = WorkingTimeType.em().getReference(WorkingTimeType.class, WorkingTimeTypeValues.NORMALE_MOD.getId());
 		}
 		//person.workingTimeType = wtt;
+		/*
 		Contract c = person.getCurrentContract();
-		PersonWorkingTimeType pwtt = new PersonWorkingTimeType();
-		pwtt.person = person;
-		pwtt.workingTimeType = wtt;
-		pwtt.beginDate = c.beginContract;
-		pwtt.endDate = c.expireContract;
-		pwtt.save();
-		person.personWorkingTimeType.add(pwtt);
+		ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
+		cwtt.contract = person;
+		cwtt.workingTimeType = wtt;
+		cwtt.beginDate = c.beginContract;
+		cwtt.endDate = c.expireContract;
+		cwtt.save();
+		person.personWorkingTimeType.add(cwtt);
+		*/
 		person.save();
 		Logger.info("Assegnato %s a %s. Il tipo di orario ha questi giorni impostati %s", wtt, person, wtt.workingTimeTypeDays);
 	}

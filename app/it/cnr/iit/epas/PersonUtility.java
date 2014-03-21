@@ -919,8 +919,6 @@ public class PersonUtility {
 		JPAPlugin.closeTx(false);
 		
 		// (2) Ricalcolo i valori dei person day aggregandoli per mese
-		JPAPlugin.startTx(true);
-		JPAPlugin.closeTx(false);
 		int i = 1;
 		for(Person p : personList){
 			Logger.info("Update person situation %s (%s di %s) dal %s-%s-01 a oggi", p.surname, i++, personList.size(), year, month);
@@ -943,45 +941,20 @@ public class PersonUtility {
 			JPAPlugin.closeTx(false);
 		}
 		
-		/*
-		//(3)persistere in Initialization Time il resudo
-		int currentYear = new LocalDate().getYear();
-		int actualYear = year;	//2014
-		while(actualYear<=currentYear)
-		{
-			LocalDate beginYear = new LocalDate(actualYear, 1, 1);
-			LocalDate endYear = new LocalDate(actualYear, 12, 31);
-			for(Person p: personList)
-			{
-				
-				List<InitializationTime> initializationTimeList = InitializationTime.find("Select i from InitializationTime i where i.person = ? and i.date between ? and ?" , p, beginYear, endYear).fetch();
-				InitializationTime initializationTime;
-				if(initializationTimeList.size()>1)
-				{
-					//siamo nella merda perche' per ogni anno deve essercene uno solo
-					continue;
-				}
-				if(initializationTimeList.size()==0)
-				{
-					initializationTime = new InitializationTime();
-					initializationTime.person = p;
-					initializationTime.date = beginYear;
-					initializationTime.residualMinutesCurrentYear = 3;
-					initializationTime.residualMinutesPastYear = 0;
-				}
-				else
-				{
-					initializationTime = initializationTimeList.get(0);
-					initializationTime.residualMinutesCurrentYear = 4;
-				}
-				CalcoloSituazioneAnnualePersona csap = new CalcoloSituazioneAnnualePersona(p, actualYear-1, null);	//2013
-				initializationTime.residualMinutesPastYear = csap.getMese(actualYear, 12).monteOreAnnoCorrente;
-				initializationTime.save();
-			}
-			actualYear++;
+		//(3) 
+		JPAPlugin.startTx(false);
+		i = 1;
+		for(Person p : personList){
+			Logger.info("Update residui %s (%s di %s) dal %s-%s-01 a oggi", p.surname, i++, personList.size(), year, month);
+			List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ?", p).fetch();
 			
+			for(Contract contract : contractList)
+			{
+				contract.buildContractYearRecap();
+			}
 		}
-		*/
+		JPAPlugin.closeTx(false);		
+
 	}
 	
 	 /**

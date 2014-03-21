@@ -18,6 +18,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -28,6 +29,7 @@ import models.rendering.VacationsRecap;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
 import play.Logger;
@@ -78,7 +80,7 @@ public class Contract extends Model {
 	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY, cascade = CascadeType.REMOVE)
 	public List<VacationPeriod> vacationPeriods;
 	
-	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY, cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY)
 	public List<ContractYearRecap> recapPeriods;
 
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
@@ -93,6 +95,11 @@ public class Contract extends Model {
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="end_contract")
 	public LocalDate endContract;
+	
+	@NotAudited
+	@OneToMany(mappedBy = "contract", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	@OrderBy("beginDate")
+	public List<ContractWorkingTimeType> contractWorkingTimeType = new ArrayList<ContractWorkingTimeType>();
 
 	//TODO eliminare e configurare yaml
 	public void setBeginContract(String date){
@@ -279,12 +286,20 @@ public class Contract extends Model {
 	{
 		Logger.info("PopulateContractYearRecap %s %s contract id = %s", this.person.name, this.person.surname, this.id);
 		//Distruggere quello che c'è prima (adesso in fase di sviluppo)
-		for(ContractYearRecap yearRecap : this.recapPeriods)
+		
+		while(this.recapPeriods.size()>0)
 		{
+			ContractYearRecap yearRecap = this.recapPeriods.get(0);
+			this.recapPeriods.remove(yearRecap);
 			yearRecap.delete();
+			this.save();
+			
 		}
+		
 		this.recapPeriods = new ArrayList<ContractYearRecap>();
-
+		this.save();
+		
+		
 		//Controllo se ho sufficienti dati
 		LocalDate initUse = ConfGeneral.getConfGeneral().initUseProgram;
 		if(this.sourceDate!=null)
@@ -341,9 +356,11 @@ public class Contract extends Model {
 			
 			cyr.save();
 			this.recapPeriods.add(cyr);
+			this.save();
 			
 			yearToCompute++;
 		}
+		
 	}
 	
 	
@@ -369,6 +386,7 @@ public class Contract extends Model {
 			cyr.permissionUsed = this.sourcePermissionUsed;
 			cyr.save();
 			this.recapPeriods.add(cyr);
+			this.save();
 			return yearToCompute+1;
 		}
 
@@ -395,6 +413,7 @@ public class Contract extends Model {
 		cyr.remainingMinutesLastYear = december.monteOreAnnoPassato;
 		cyr.save();
 		this.recapPeriods.add(cyr);
+		this.save();
 		return this.sourceDate.getYear()+1;
 	}
 	
@@ -416,6 +435,13 @@ public class Contract extends Model {
 		else
 			return false;
 	}
+	
+	/*
+	public List<ContractWorkingTimeType> getOrderedContractWorkingTimeType()
+	{
+		List<ContractWorkingTimeType> cwttList = ContractWorkingTimeType.find("", this).fetch();
+	}
+	*/
 	
 }
 	

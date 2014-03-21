@@ -91,6 +91,7 @@
 			<th>Data inizio contratto</th>
 			<th>Data fine contratto</th>
 			<th>Data terminazione esperienza lavorativa</th>
+			<th>Orario di lavoro</th>
 			<th>Attestato presenza</th>
 			<th>Modifica</th>
 			
@@ -154,6 +155,26 @@
 			  #{else}
 			    ${contract.endContract}
 			  #{/else}
+			</td>
+			
+			<td>
+			  <ul>
+			  #{list items:contract.contractWorkingTimeType, as:'wtt'}
+			    <li>
+			    <a href="#" data-popover
+	    		data-trigger="hover" data-toggle="popover" 
+	    		data-placement="bottom"
+	    		data-html="true"
+	    		data-content="
+	    		${(
+	    		'Inizio Periodo: <strong>'+wtt.beginDate+'</strong>'+
+	    		'<br>Fine Periodo: <strong>'+wtt.endDate+'</strong>'
+	    		).escape()}"
+	    		title="Periodo validità orario">${wtt.workingTimeType.description}</a>
+	    		</li>
+			  #{/list}
+			  </ul>
+			  <a data-toggle="modal" href="@{Persons.updateContractWorkingTimeType(contract.id)}" data-target="#myModal1"><input value="Modifica" class="btn-small" type="button"></a>
 			</td>
 			
 			<td>
@@ -336,6 +357,19 @@
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
     <h3 id="myModalLabel">Imposta dati iniziali Contratto</h3>
+  </div>
+  <div class="modal-body">
+    <p></p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+  </div>
+</div>
+
+<div id="myModal1" class="modal hide fade mymodal-medium" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Modifica i tipi orario associato al contratto</h3>
   </div>
   <div class="modal-body">
     <p></p>
