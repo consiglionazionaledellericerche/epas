@@ -1,6 +1,8 @@
 package controllers;
 
 import it.cnr.iit.epas.ActionMenuItem;
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
@@ -13,6 +15,7 @@ import models.CompetenceCode;
 import models.ConfGeneral;
 import models.ContactData;
 import models.Contract;
+import models.ContractWorkingTimeType;
 import models.InitializationTime;
 import models.Location;
 import models.Office;
@@ -319,6 +322,97 @@ public class Persons extends Controller {
 		person.save();
 		flash.success("Aggiornato l'orario di lavoro per %s %s", person.name, person.surname);
 		Application.indexAdmin();
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void updateContractWorkingTimeType(Long id)
+	{
+		List<WorkingTimeType> wttList = WorkingTimeType.findAll();
+		Contract contract = Contract.findById(id);
+		render(contract, wttList);
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void splitContractWorkingTimeType(ContractWorkingTimeType cwtt, String data)
+	{
+		LocalDate splitDate = null;
+		//Controllo integrità richiesta
+		if(cwtt==null || data==null)
+		{
+			flash.error("Impossibile completare la richiesta, controllare i log.");
+			Application.indexAdmin();
+		}
+		
+		try { 
+			splitDate = new LocalDate(data); 
+		}
+		catch(IllegalArgumentException e){	
+			flash.error("Errore nel fornire il parametro data. Inserire la data nel corretto formato aaaa-mm-gg");
+			Persons.edit(cwtt.contract.person.id);
+		}
+		if(!DateUtility.isDateIntoInterval(splitDate, new DateInterval(cwtt.beginDate, cwtt.endDate)))
+		{
+			flash.error("Errore nel fornire il parametro data. La data deve essere contenuta nel periodo da dividere.");
+			Persons.edit(cwtt.contract.person.id);
+		}
+		DateInterval first = new DateInterval(cwtt.beginDate, splitDate.minusDays(1));
+		if(! DateUtility.isIntervalIntoAnother(first, cwtt.contract.getContractDateInterval())){
+			flash.error("Errore nel fornire il parametro data. La data deve essere contenuta nel periodo da dividere.");
+			Persons.edit(cwtt.contract.person.id);
+		}
+		//agire
+					
+		ContractWorkingTimeType cwtt2 = new ContractWorkingTimeType();
+		cwtt2.contract = cwtt.contract;
+		cwtt2.beginDate = splitDate;
+		cwtt2.endDate = cwtt.endDate;
+		cwtt2.workingTimeType = cwtt.workingTimeType;
+		cwtt2.save();
+		
+		//cwtt.contract.contractWorkingTimeType.add(cwtt2);
+		
+		cwtt.endDate = splitDate.minusDays(1);
+		cwtt.save();
+		flash.success("Orario di lavoro correttamente suddiviso in due sottoperiodi con tipo orario %s.", cwtt.workingTimeType.description);
+		Persons.edit(cwtt.contract.person.id);	
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void deleteContractWorkingTimeType(ContractWorkingTimeType cwtt)
+	{
+		if(cwtt==null)
+		{
+			flash.error("Impossibile completare la richiesta, controllare i log.");
+			Application.indexAdmin();
+		}	
+		Contract contract = cwtt.contract;
+		int index = contract.contractWorkingTimeType.indexOf(cwtt);
+		if(contract.contractWorkingTimeType.size()<index)
+		{
+			flash.error("non esiste precedente che cazzo ");
+			Persons.edit(cwtt.contract.person.id);	
+		}
+		ContractWorkingTimeType previous = contract.contractWorkingTimeType.get(index-1);
+		previous.endDate = cwtt.endDate;
+		previous.save();
+		cwtt.delete();
+		flash.success("Orario di lavoro eliminato correttamente. Attribuito al periodo eliminato il tipo orario %s.", previous.workingTimeType.description);
+		Persons.edit(cwtt.contract.person.id);	
+	}
+	
+	public static void changeTypeOfContractWorkingTimeType(ContractWorkingTimeType cwtt, WorkingTimeType newWtt)
+	{
+		Logger.debug("cwtt"+cwtt);
+		Logger.debug("wtt"+newWtt);
+		if(cwtt==null || newWtt==null)
+		{
+			flash.error("Impossibile completare la richiesta, controllare i log.");
+			Application.indexAdmin();
+		}
+		cwtt.workingTimeType = newWtt;
+		cwtt.save();
+		flash.success("Cambiato correttamente tipo orario per il periodo a %s.", cwtt.workingTimeType.description);
+		Persons.edit(cwtt.contract.person.id);
 	}
 
 	@Check(Security.VIEW_PERSON_LIST)

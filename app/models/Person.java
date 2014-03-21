@@ -160,9 +160,9 @@ public class Person extends Model {
 	public List<StampProfile> stampProfiles = new ArrayList<StampProfile>();
 
 	
-	@NotAudited
-	@OneToMany(mappedBy = "person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<PersonWorkingTimeType> personWorkingTimeType = new ArrayList<PersonWorkingTimeType>();
+	//@NotAudited
+	//@OneToMany(mappedBy = "person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	//public List<PersonWorkingTimeType> personWorkingTimeType = new ArrayList<PersonWorkingTimeType>();
 	
 	/**
 	 * relazione con la tabella delle eventuali sedi distaccate
@@ -1309,11 +1309,14 @@ public class Person extends Model {
 	 * @return il tipo di orario di lavoro utilizzato in date
 	 */
 	public  WorkingTimeType getWorkingTimeType(LocalDate date) {
-		for(PersonWorkingTimeType personWtt : this.personWorkingTimeType)
+		Contract contract = this.getContract(date);
+		if(contract==null)
+			return null;
+		for(ContractWorkingTimeType cwtt : contract.contractWorkingTimeType)
 		{
-			if(DateUtility.isDateIntoInterval(date, new DateInterval(personWtt.beginDate, personWtt.endDate)))
+			if(DateUtility.isDateIntoInterval(date, new DateInterval(cwtt.beginDate, cwtt.endDate)))
 			{
-				return personWtt.workingTimeType;
+				return cwtt.workingTimeType;
 			}
 		}
 		return null;
