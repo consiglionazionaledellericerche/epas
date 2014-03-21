@@ -1,0 +1,75 @@
+<br>
+<br>
+<table class="table table-bordered table-hover">
+  <tr>
+    <th>Inizio Periodo</th>
+    <th>Fine Periodo</th>
+    <th><a href="#" data-placement="top" data-toggle="tooltip" title="Modifica il tipo orario per il periodo di riferimento">Cambia tipo orario</a></th>
+    <th><a href="#" data-placement="top" data-toggle="tooltip" title="Inserire la data inizio nuovo periodo">Dividi Periodo</a></th>
+    <th><a href="#" data-placement="left" data-toggle="tooltip" title="Elimina il periodo assegnando come tipo orario quello del periodo precedente">Elimina Periodo</a></th>
+    
+    
+  </tr>
+  #{list items:contract.contractWorkingTimeType, as:'cwtt'}
+    <tr>
+      <td>
+        #{if cwtt.beginDate.equals(contract.getContractDateInterval().begin)}
+          <span class="badge badge-success">${cwtt.beginDate}</span>
+        #{/if}
+        #{else}
+          <span class="badge badge-info">${cwtt.beginDate}</span>
+        #{/else}
+      </td>
+      <td>
+        #{if cwtt.endDate.equals(contract.getContractDateInterval().end)}
+          <span class="badge badge-important">${cwtt.endDate}</span>
+        #{/if}
+        #{else}
+          <span class="badge badge-info">${cwtt.endDate}</span>
+        #{/else}
+      </td>
+      
+      <!-- Cambia tipo orario -->
+      <td style="text-align: center;" >
+      #{form @Persons.changeTypeOfContractWorkingTimeType() }
+        <input type="hidden" name="cwtt.id" value="${cwtt.id}" />
+        #{select 'newWtt.id', value:cwtt.workingTimeType.id, class:'span2', id:'newWtt.id'}
+          
+          #{list items:wttList, as:'wttItem'}
+	        #{option wttItem.id}${wttItem.description}#{/option}
+		  #{/list}
+		  
+	    #{/select}
+	    <br>
+	    <input class="btn" type="submit" value="Cambia">
+      #{/form}
+      </td>
+      
+      <!-- Dividi periodo -->
+      
+      <td style="text-align: center;" >
+      #{form @Persons.splitContractWorkingTimeType() }
+        <input type="hidden" name="cwtt.id" value="${cwtt.id}" />
+        <input name="data" type="text" placeholder="Nuovo periodo (aaaa-mm-gg)"/>
+        <br>
+	    <input class="btn" type="submit" value="Dividi">
+      #{/form}
+      </td>
+      
+      <!-- Elimina periodo -->
+      
+      <td style="text-align: center;" >
+       #{if contract.contractWorkingTimeType.indexOf(cwtt) > 0}
+       #{form @Persons.deleteContractWorkingTimeType() }
+        <input type="hidden" name="cwtt.id" value="${cwtt.id}" />
+        <br>
+	    <input class="btn" type="submit" value="Elimina">
+       #{/form}
+       #{/if}
+      </td>
+      
+      
+      
+    </tr>
+  #{/list}
+</table>
