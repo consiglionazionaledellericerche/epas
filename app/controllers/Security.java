@@ -32,6 +32,7 @@ public class Security extends Secure.Security {
 	public final static String VIEW_PERSONAL_SITUATION ="viewPersonalSituation";
 	public final static String UPLOAD_SITUATION = "uploadSituation";
 	public final static String INSERT_AND_UPDATE_OFFICES = "insertAndUpdateOffices";
+	public final static String DEVELOPER = "developer";
 	
 	public final static String PERMISSION_CACHE_PREFIX = "permission.";
 		
