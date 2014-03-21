@@ -13,7 +13,11 @@
 
 <fieldset>
 	<legend>Dati personali</legend>
-	
+	#{secure.check "developer"}
+	<div class="pull-right">
+		<a class="btn btn-danger" href="@{Administrators.switchPersonTo(person.id)}">Assumi questa identità</a>
+	</div>
+	#{/secure.check}
 	<table class="tablenoborder">
 		<tr>
 			<td><b>Cognome</b></td>
