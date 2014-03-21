@@ -71,7 +71,11 @@
 
 	<input class="btn" type="submit" value="Invio">
 	<input id="pastYear" type="button" onclick="window.open('http://orologio-history.iit.cnr.it/');" class="btn" value="Anni &lt; 2013">
-
+	
+	#{if session.contains("sudo.username")}
+		<a href="@{Administrators.restorePerson()}" class="btn btn-warning pull-right">Torna chi eri</a>
+	#{/if}
+	#{else}
      #{if session.username}
 
            <a href="@{secure.logout()}" class="btn btn-warning pull-right">Logout</a>
@@ -80,7 +84,7 @@
 		   #{/secure.permissionCheck}
 
       #{/if}
-
+	#{/else}
 #{/form}
 
 

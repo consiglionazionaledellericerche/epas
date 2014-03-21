@@ -17,6 +17,7 @@ import models.Permission;
 import models.Person;
 import models.PersonTags;
 import play.Logger;
+import play.Play;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.db.jpa.JPA;
@@ -25,6 +26,9 @@ import play.mvc.With;
 
 @With( {Secure.class, NavigationMenu.class} )
 public class Administrators extends Controller {
+
+	private static final String SUDO_USERNAME = "sudo.username";
+	private static final String USERNAME = "username";
 
 	@Check(Security.INSERT_AND_UPDATE_ADMINISTRATOR)
 	public static void list(){
@@ -348,5 +352,34 @@ public class Administrators extends Controller {
 		flash.success(String.format("Eliminati i permessi per l'utente %s %s", person.name, person.surname));
 		Application.indexAdmin();
 	}
-
+	
+	/**
+	 * Switch in un'altra persona
+	 */
+	public static void switchPersonTo(long id) {
+		final Person person = Person.findById(id);
+		notFoundIfNull(person);
+		
+		
+		// salva il precedente
+		session.put(SUDO_USERNAME, session.get(USERNAME));
+		// recupera 
+		session.put(USERNAME, person.username);
+		// redirect alla radice
+		redirect(Play.ctxPath + "/");
+	}
+	
+	/**
+	 * ritorna alla precedente persona.
+	 */
+	public static void restorePerson() {
+		if (session.contains(SUDO_USERNAME)) {
+			session.put(USERNAME, session.get(SUDO_USERNAME));
+			session.remove(SUDO_USERNAME);
+		}
+		// redirect alla radice
+		redirect(Play.ctxPath + "/");
+	}
+	
+	
 }
