@@ -591,12 +591,12 @@ public class PersonUtility {
 		Logger.info("monteOreAnnoCorrente=%s ,  monteOreAnnoPassato=%s, workingTime=%s", mese.monteOreAnnoCorrente, mese.monteOreAnnoPassato, mese.person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime);
 		if(mese.monteOreAnnoCorrente + mese.monteOreAnnoPassato > mese.person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime)
 		{
-			Logger.info("decido si");
+			Logger.debug("decido si");
 			return true;
 		}
 		else
 		{
-			Logger.info("decido no");
+			Logger.debug("decido no");
 			return false;
 		}
 	}
