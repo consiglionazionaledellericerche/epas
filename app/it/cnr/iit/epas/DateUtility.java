@@ -237,7 +237,14 @@ public class DateUtility {
 		return new LocalDate(9999,12,31);
 	}
 	
-	
+	public static boolean isInfinity(LocalDate date)
+	{
+		LocalDate infinity = new LocalDate(9999,12,31);
+		if(date.equals(infinity))
+			return true;
+		else
+			return false;
+	}
 
 	/**
 	 * 

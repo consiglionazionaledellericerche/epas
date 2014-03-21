@@ -80,7 +80,7 @@ public class Contract extends Model {
 	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY, cascade = CascadeType.REMOVE)
 	public List<VacationPeriod> vacationPeriods;
 	
-	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY, cascade = CascadeType.REMOVE)
 	public List<ContractYearRecap> recapPeriods;
 
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
@@ -251,6 +251,45 @@ public class Contract extends Model {
 		this.save();
 	}
 	
+	/**
+	 * Quando vengono modificate le date di inizio o fine del contratto occorre rivedere la struttura dei periodi di tipo orario.
+	 * 1)Eliminare i periodi non più appartenenti al contratto
+	 * 2)Modificare la data di inizio del primo periodo se è cambiata la data di inizio del contratto
+	 * 3)Modificare la data di fine dell'ultimo periodo se è cambiata la data di fine del contratto
+	 * 
+	 */
+	public void updateContractWorkingTimeType()
+	{
+		//Aggiornare i periodi workingTimeType
+		//1) Cancello quelli che non appartengono più a contract
+		List<ContractWorkingTimeType> toDelete = new ArrayList<ContractWorkingTimeType>();
+		for(ContractWorkingTimeType cwtt : this.contractWorkingTimeType)
+		{
+			DateInterval cwttInterval = new DateInterval(cwtt.beginDate, cwtt.endDate);
+			if(DateUtility.intervalIntersection(this.getContractDateInterval(), cwttInterval) == null)
+			{
+				toDelete.add(cwtt);
+			}
+		}
+		for(ContractWorkingTimeType cwtt : toDelete)
+		{
+			cwtt.delete();
+			this.contractWorkingTimeType.remove(cwtt);
+			this.save();
+		}
+		//Sistemo il primo
+		ContractWorkingTimeType first = this.contractWorkingTimeType.get(0);
+		first.beginDate = this.getContractDateInterval().getBegin();
+		first.save();
+		//Sistemo l'ultimo
+		ContractWorkingTimeType last = this.contractWorkingTimeType.get(this.contractWorkingTimeType.size()-1);
+		last.endDate = this.getContractDateInterval().getEnd();
+		if(DateUtility.isInfinity(last.endDate))
+			last.endDate = null;
+		last.save();
+		this.save();
+	}
+
 	/**
 	 * Utilizza la libreria DateUtils per costruire l'intervallo attivo per il contratto.
 	 * @return
