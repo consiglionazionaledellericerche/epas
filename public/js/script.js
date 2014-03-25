@@ -39,7 +39,7 @@ $(function() {
   });
 
 $(function() {
-    $( "#datepicker2" ).datepicker();
+    $( ".datepicker" ).datepicker();
   });
 
 $(function() {

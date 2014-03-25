@@ -68,7 +68,7 @@ public class PersonMonthRecap extends Model {
 	public Boolean hoursApproved;
 
 	/**
-	 * aggiunta la date per test di getMaximumCoupleOfStampings ---da eliminare
+	 * aggiunta la date per test di getMaximumCoupleOfStampings ---da eliminarefromDate
 	 * @param person
 	 * @param year
 	 * @param month

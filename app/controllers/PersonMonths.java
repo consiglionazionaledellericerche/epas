@@ -88,6 +88,14 @@ public class PersonMonths extends Controller{
 		Person person = Person.findById(personId);
 		render(person);
 	}
+	
+	@Check(Security.VIEW_PERSONAL_SITUATION)
+	public static void modifyTrainingHours(Long personId, int month, int year){
+		Person person = Person.findById(personId);
+		List<PersonMonthRecap> pmList = PersonMonthRecap.find("select pm from PersonMonthRecap pm where pm.person = ? and pm.year = ? and pm.month = ?", 
+				person, year, month).fetch();
+		render(person, pmList);
+	}
 
 	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void saveTrainingHours(@Valid String begin, @Valid String end, @Valid Integer value, Long personId){

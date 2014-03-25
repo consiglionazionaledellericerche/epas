@@ -19,8 +19,13 @@
 		<td>
 			<ul>	
 			#{list items:entry.getValue(), as: 'pm'}
-				#{if pm.trainingHours != null}			
-				<li><b>${pm.trainingHours}</b> ore <b>Da:</b> <u>${pm.fromDate}</u> <b>A:</b> <u>${pm.toDate}</u></li>
+				#{if pm.trainingHours != null}
+					#{if pm.month == month}			
+						<li><a data-toggle="modal" href="@{PersonMonths.modifyTrainingHours(person.id, month, year)}" data-target="#myModal2"><b>${pm.trainingHours}</b> ore <b>Da:</b> <u>${pm.fromDate}</u> <b>A:</b> <u>${pm.toDate}</u></a></li>
+					#{/if}
+					#{else}
+						<li><b>${pm.trainingHours}</b> ore <b>Da:</b> <u>${pm.fromDate}</u> <b>A:</b> <u>${pm.toDate}</u></li>
+					#{/else}
 				#{/if}
 			#{/list}
 			</ul>
@@ -58,6 +63,19 @@
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
     <h3 id="myModalLabel">Inserisci ore di formazione per il mese</h3>
+  </div>
+  <div class="modal-body">
+    <p></p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+  </div>
+</div>
+
+<div id="myModal2" class="modal hide fade mymodal-small" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Modifica ore di formazione per il mese</h3>
   </div>
   <div class="modal-body">
     <p></p>
