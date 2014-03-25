@@ -23,6 +23,7 @@ import models.Stamping.WayType;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
 
+import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.DateTimeConstants;
@@ -53,6 +54,12 @@ public class PersonMonthRecap extends Model {
 	public Integer year;
 	
 	public Integer month;
+	
+	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	public LocalDate fromDate;
+	
+	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	public LocalDate toDate;
 
 	@Column(name="training_hours")
 	public Integer trainingHours;

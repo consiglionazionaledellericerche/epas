@@ -3,33 +3,68 @@
 
 <p class="lead">Le ore di formazione possono essere inserite solo per il mese selezionabile. Nel momento in cui l'amministratore le approva non potranno più essere modificate.</p>
 
-<table class="table table-hover span6">
+<table class="table table-hover span9">
 	<tr>
 		<th>Mese</th>
 		<th>Ore di formazione</th>
+		<th>Modifica</th>
 		<th>Approvate</th>
 	</tr>
 	
-	#{list items: pmList, as: 'personMonth'}
-
-		<tr>
-			<td>&{'views.tags.display.date.month.' +personMonth.month}</td>
-			#{if personMonth.month <= month}
-			<td><a data-x-editable href="#" data-type="number" data-pk="${personMonth.id}" data-name="value"
-	    	data-url="@{insertTrainingHours()}" 
-	    	data-title="Modifica ore di formazione per ${personMonth.person.name} ${personMonth.person.surname}">${personMonth.trainingHours}</a></td>
-			#{/if}
-			#{else}
+	#{list items:pmMap.entrySet(), as: 'entry'}
+	
+	<tr>
+		<td>&{'views.tags.display.date.month.' +entry.getKey()}</td>
+		
+		<td>
+			<ul>	
+			#{list items:entry.getValue(), as: 'pm'}
+				#{if pm.trainingHours != null}			
+				<li><b>${pm.trainingHours}</b> ore <b>Da:</b> <u>${pm.fromDate}</u> <b>A:</b> <u>${pm.toDate}</u></li>
+				#{/if}
+			#{/list}
+			</ul>
+		</td>		
+		#{if entry.getKey() == month}	
+		<td><a data-toggle="modal" href="@{PersonMonths.insertTrainingHours(person.id)}" data-target="#myModal1">Inserisci ore di formazione</a></td>
+		#{/if}
+		#{else}
+			#{if entry.getKey() > month}
 			<td>Mese non ancora raggiunto</td>
-			#{/else}
-			#{if personMonth.hoursApproved == true}
-				<td><input type="checkbox" disabled="disabled" checked="checked"/></td>
 			#{/if}
 			#{else}
-				<td><input type="checkbox" disabled="disabled"/></td>
+			<td>Mese già assegnato</td>
 			#{/else}
-		</tr>	
+		#{/else}
+		<td>
+		#{list items:entry.getValue(), as: 'check'}
+		#{if check.trainingHours != null}
+			#{if check.hoursApproved == true}
+				<input type="checkbox" disabled="disabled" checked="checked"/>
+			#{/if}
+			#{else}
+				<input type="checkbox" disabled="disabled"/>
+			#{/else}
+		#{/if}
+		#{/list}
+		</td>
+	</tr>
 
 	#{/list}
 	
 </table>
+
+<div id="myModal1" class="modal hide fade mymodal-small" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Inserisci ore di formazione per il mese</h3>
+  </div>
+  <div class="modal-body">
+    <p></p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+  </div>
+</div>
+
+
