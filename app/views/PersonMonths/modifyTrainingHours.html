@@ -1,0 +1,21 @@
+<h3>Ore di formazione per ${person.name} ${person.surname}</h3>
+<fieldset>
+<table class="tablenoborder">
+<input name="personId" type="hidden" value="${person.id}"/>
+	#{list items:pmList, as: 'pm'}
+	<tr>
+		<td>Da</td><td><input class="span2" name="begin" type="text" id="datepicker1" data-date-format="yyyy-mm-dd" value="${pm.fromDate}"/></td>
+	</tr>
+	<tr>
+		<td>A</td><td><input class="span2" name="end" type="text" id="datepicker1" data-date-format="yyyy-mm-dd" value="${pm.toDate}"/></td>
+	</tr>
+	<tr>
+		<td>Quantità</td><td><input class="span2" name="value" type="text" value="${pm.trainingHours}"/></td>
+	</tr>
+	#{/list}
+</table>
+</fieldset>
+
+<div class="buttoncenter">
+<input class="btn btn-primary" type="submit" value="Ok" />
+</div>
