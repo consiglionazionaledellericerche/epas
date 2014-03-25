@@ -264,6 +264,8 @@ public class UploadSituation extends Controller{
 			person = Person.findByNumber(Integer.parseInt(dipendente.getMatricola()));
 			pm = new PersonMonthRecap(person, year, month);
 			
+			List<PersonMonthRecap> pmList = PersonMonthRecap.find("Select pm from PersonMonthRecap pm where pm.person = ? and pm.month = ? and pm.year = ?",
+					 person, month, year).fetch();
 			
 			//vedere se l'ho gia' inviato con successo
 //			CertificatedData cert = CertificatedData.find("Select cert from CertificatedData cert where cert.person = ? and cert.year = ? and cert.month = ?", person, year, month).first();
@@ -276,8 +278,14 @@ public class UploadSituation extends Controller{
 			RispostaElaboraDati rispostaElaboraDati = AttestatiClient.elaboraDatiDipendente(
 					cookies, dipendente, year, month, 
 					pm.getAbsencesNotInternalUseInMonth(),
-					pm.getCompetenceInMonthForUploadSituation());
-			
+					pm.getCompetenceInMonthForUploadSituation(),
+					pmList);
+			if(rispostaElaboraDati.isOk()){
+				for(PersonMonthRecap personMonth : pmList){
+					personMonth.hoursApproved = true;
+					personMonth.save();
+				}
+			}
 			
 //			if(cert==null)
 //			{
