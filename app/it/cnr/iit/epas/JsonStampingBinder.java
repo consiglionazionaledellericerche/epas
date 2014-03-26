@@ -133,6 +133,13 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 					
 					long intMatricolaFirmaAsLong = Long.parseLong(intMatricolaFirma);
 					
+										
+					//Controlla sul campo person oldId
+					person = Person.find("Select p from Person p where p.oldId = ?", intMatricolaFirmaAsLong).first();
+					if(person != null){
+						stamping.personId = person.id;
+						break;
+					}	
 					
 					//Nell'inserimento delle persone ci deve essere un controllo che verifichi che non ci
 					//siano casi in cui il campo id possa essere utilizzato per associare il badge alla persona
@@ -145,13 +152,6 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 						stamping.personId = person.id;
 						break;
 					}
-					
-					//Controlla sul campo person oldId
-					person = Person.find("Select p from Person p where p.oldId = ?", intMatricolaFirmaAsLong).first();
-					if(person != null){
-						stamping.personId = person.id;
-						break;
-					}					
 					
 					continue;
 
