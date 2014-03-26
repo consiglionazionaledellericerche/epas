@@ -24,7 +24,7 @@ public class DateUtility {
 	 * @return
 	 */
 	public static boolean isHoliday(Person person, LocalDate date){	
-		if(date.isBefore(person.getCurrentContract().beginContract))
+		if(person.getCurrentContract() == null || date.isBefore(person.getCurrentContract().beginContract))
 			return false;
 		
 		if(isGeneralHoliday(date))
