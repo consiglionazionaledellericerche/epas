@@ -39,8 +39,8 @@ public class PersonStampingDayRecap {
 	
 	public Long personDayId;
 	public Person person;
-	public WorkingTimeTypeDay wttd;
-	public WorkingTimeType wtt;
+	public WorkingTimeTypeDay wttd = null;
+	public WorkingTimeType wtt = null;
 	public String workingTime = "";
 	public String mealTicketTime = "";
 	public String timeMealFrom = "";
@@ -84,17 +84,18 @@ public class PersonStampingDayRecap {
 		List<Stamping> stampingsForTemplate = pd.getStampingsForTemplate(numberOfInOut, today);
 
 		this.setStampingTemplate( stampingsForTemplate, pd );
-		if(pd.person.getWorkingTimeType(pd.date) != null)		
+		if(pd.person.getWorkingTimeType(pd.date) != null){		
 			this.wtt = pd.person.getWorkingTimeType(pd.date);
-		else{
-			WorkingTimeType wtt = WorkingTimeType.find("byDescription", "Normale").first();
-			this.wtt = wtt;
+			//this.wttd = this.wtt != null ? this.wtt.getWorkingTimeTypeDayFromDayOfWeek(pd.date.getDayOfWeek()) : this.wtt.getWorkingTimeTypeDayFromDayOfWeek(pd.date.plusMonths(1).getDayOfWeek());
+			this.wttd = this.wtt.getWorkingTimeTypeDayFromDayOfWeek(pd.date.getDayOfWeek());
+			this.setWorkingTime(this.wttd.workingTime);
+			this.setMealTicketTime(this.wttd.mealTicketTime);
+			this.setBreakTicketTime(this.wttd.breakTicketTime);
+		
 		}
 		
-		this.wttd = this.wtt != null ? this.wtt.getWorkingTimeTypeDayFromDayOfWeek(pd.date.getDayOfWeek()) : this.wtt.getWorkingTimeTypeDayFromDayOfWeek(pd.date.plusMonths(1).getDayOfWeek());
-		this.setWorkingTime(this.wttd.workingTime);
-		this.setMealTicketTime(this.wttd.mealTicketTime);
-		this.setBreakTicketTime(this.wttd.breakTicketTime);
+		
+		
 		ConfGeneral conf = ConfGeneral.getConfGeneral();
 		this.setTimeMealFrom(conf.mealTimeStartHour, conf.mealTimeStartMinute);
 		this.setTimeMealTo(conf.mealTimeEndHour, conf.mealTimeEndMinute);
