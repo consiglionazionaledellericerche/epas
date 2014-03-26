@@ -1,0 +1,22 @@
+#{form @PersonMonths.saveTrainingHours()}
+
+<h3>Ore di formazione per ${person.name} ${person.surname}</h3>
+<fieldset>
+<table class="tablenoborder">
+<input name="personId" type="hidden" value="${person.id}"/>
+	<tr>
+		<td>Da</td><td><input class="datepicker span2" name="begin" type="text"  data-date-format="yyyy-mm-dd"/></td>
+	</tr>
+	<tr>
+		<td>A</td><td><input class="datepicker span2" name="end" type="text"  data-date-format="yyyy-mm-dd"/></td>
+	</tr>
+	<tr>
+		<td>Quantità</td><td><input class="span2" name="value" type="text" /></td>
+	</tr>
+</table>
+</fieldset>
+
+<div class="buttoncenter">
+<input class="btn btn-primary" type="submit" value="Ok" />
+</div>
+#{/form}

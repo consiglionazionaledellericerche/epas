@@ -166,12 +166,12 @@ public class Stampings extends Controller {
 			render("@redirectToIndex");
 		}
 		
-		LocalDate today = new LocalDate();
-		if(today.getYear()==year && month>today.getMonthOfYear())
-		{
-			flash.error("Impossibile accedere a situazione futura, redirect automatico a mese attuale");
-			month = today.getMonthOfYear();
-		}
+//		LocalDate today = new LocalDate();
+//		if(today.getYear()==year && month>today.getMonthOfYear())
+//		{
+//			flash.error("Impossibile accedere a situazione futura, redirect automatico a mese attuale");
+//			month = today.getMonthOfYear();
+//		}
 		
 		//Configuration conf = Configuration.getCurrentConfiguration();													//0 sql (se già in cache)
 		ConfGeneral conf = ConfGeneral.getConfGeneral();

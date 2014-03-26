@@ -15,6 +15,7 @@ import models.Absence;
 import models.Competence;
 import models.ConfGeneral;
 import models.Person;
+import models.PersonMonthRecap;
 
 import org.joda.time.LocalDate;
 import org.jsoup.Connection;
@@ -209,7 +210,7 @@ public class AttestatiClient {
 	
 	public static RispostaElaboraDati elaboraDatiDipendente(
 			Map<String, String> cookies, Dipendente dipendente, Integer year, Integer month, 
-			List<Absence> absences, List<Competence> competences) 
+			List<Absence> absences, List<Competence> competences, List<PersonMonthRecap> pmList) 
 					throws URISyntaxException, MalformedURLException {
 		
 		//Configuration conf = Configuration.getCurrentConfiguration();
@@ -219,6 +220,8 @@ public class AttestatiClient {
 
 		StringBuffer absencesSent = new StringBuffer();
 		StringBuffer competencesSent = new StringBuffer();
+		//Nuovo stringBuffer per l'invio delle ore di formazione
+		StringBuffer trainingHoursSent = new StringBuffer();
 		StringBuffer problems = new StringBuffer();
 		
 		boolean isOk = true;
@@ -258,6 +261,22 @@ public class AttestatiClient {
 					dipendente.getCognomeNome(), competence.competenceCode.code, competence.valueApproved);
 			codComCounter++;
 		}
+		
+		int codFormCounter = 0;
+		if(pmList != null){
+			for(PersonMonthRecap pm : pmList){
+				connection.data("gg_inizio_corso" + codFormCounter, String.valueOf(pm.fromDate.getDayOfMonth()));
+				connection.data("gg_fine_corso" + codFormCounter, String.valueOf(pm.toDate.getDayOfMonth()));
+				connection.data("ore_corso" + codFormCounter, String.valueOf(pm.trainingHours));
+				trainingHoursSent.append(String.valueOf(pm.fromDate.getDayOfMonth())).append(",")
+									.append(String.valueOf(pm.toDate.getDayOfMonth())).append(",")
+									.append(String.valueOf(pm.trainingHours)).append("; ");
+				Logger.debug("%s, sto spedendo %d ore di formazione dal giorno %s al giorno %s", dipendente.getCognomeNome(), pm.trainingHours,
+						pm.fromDate, pm.toDate);
+				codFormCounter++;
+			}
+		}
+		
 		
 		Response elaboraDatiResponse;
 		try {

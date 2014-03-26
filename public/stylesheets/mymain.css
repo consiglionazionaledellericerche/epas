@@ -177,7 +177,10 @@ select#year{width: 90px;}
 li.distanziato{padding-bottom: 5px;}
 
 
-
+.datepicker{
+	z-index:10000000 !important;
+	color: red !important;
+}
 
 /**
  * Css per bordatura colonne tabella #tabellonetimbrature 

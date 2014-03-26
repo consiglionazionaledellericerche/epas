@@ -27,7 +27,7 @@ public final class RispostaElaboraDati {
 	
 	public String getCognomeNome() { return cognomeNome; }
 	public String getMatricola() { return matricola; }
-	public boolean getOk() {return ok; }
+	public boolean isOk() {return ok; }
 	public void setOk(boolean ok) { this.ok = ok; }
 	public String getAbsencesSent() { return absencesSent; }
 	public void setAbsencesSent(String absencesSent) { this.absencesSent = absencesSent; }
