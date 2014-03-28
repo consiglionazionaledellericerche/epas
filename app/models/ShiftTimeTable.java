@@ -3,6 +3,7 @@ package models;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
@@ -25,65 +26,54 @@ public class ShiftTimeTable extends Model{
 	public List<ShiftType> personShiftDaysshiftTypes = new ArrayList<ShiftType>();
 
 	// start time of morning shift
+	@Column(name="start_morning")
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalTimeAsString")
-	public LocalTime startMornig;
+	public LocalTime startMorning;
 	
 	// end time of morning shift
+	@Column(name="end_morning")
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalTimeAsString")
 	public LocalTime endMorning;
 	
 	// start time of afternoon shift
+	@Column(name="start_afternoon")
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalTimeAsString")
 	public LocalTime startAfternoon;
 	
 	// end time of afternoon shift
+	@Column(name="end_afternoon")
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalTimeAsString")
 	public LocalTime endAfternoon;
 	
 	// start time for morning lunch break
+	@Column(name="start_morning_lunch_time")
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalTimeAsString")
 	public LocalTime startMorningLunchTime;
 	
 	// end time for the morning lunch break
+	@Column(name="end_morning_lunch_time")
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalTimeAsString")
 	public LocalTime endMorningLunchTime;
 	
 	// start time for the lunch break
+	@Column(name="start_afternoon_lunch_time")
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalTimeAsString")
 	public LocalTime startAfternoonLunchTime;
 		
 	// end time for the lunch break
+	@Column(name="end_afternoon_lunch_time")
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalTimeAsString")
 	public LocalTime endAfternoonLunchTime;
 
 	// total amount of working minutes
-	public  Integer totalWorMinutes;
+	@Column(name="total_work_minutes")
+	public  Integer totalWorkMinutes;
 	
 	// Paid minuts per shift
+	@Column(name="paid_minutes")
 	public Integer paidMinutes;
 	
 	@OneToMany(mappedBy="shiftType", fetch=FetchType.LAZY)
 	public List<ShiftType> shiftTypes = new ArrayList<ShiftType>();
-	
-	
-	// return startMorning as a string in hh:mm format
-	public LocalTime getStartMornigShift(){
-		return this.startMornig;
-	}
-	
-	// return endMorning as a string in hh:mm format
-	public LocalTime getEndMornigShift(){
-		return this.endMorning;
-	}
-	
-	// return startAfternoon as a string in hh:mm format
-	public LocalTime getStartAfternoonShift(){
-		return this.startAfternoon;
-	}
-	
-	// return endAfternoon as a string in hh:mm format
-	public LocalTime getEndAfternoonShift(){
-		return this.endAfternoon;
-	}
-	
+		
 }

@@ -6,16 +6,16 @@ package models.enumerate;
  *
  */
 public enum ShiftSlot {
-	MATTINA("mattina"),
-	POMERIGGIO("pomeriggio");
+	MORNING("mattina"),
+	AFTERNOON("pomeriggio");
 	
-	private String id;
+	private String name;
 	
-	ShiftSlot(String id) {
-		this.id = id;
+	ShiftSlot(String name) {
+		this.name = name;
 	};
 	
-	public String getId() {
-		return id;
+	public String getName() {
+		return name;
 	}
 }

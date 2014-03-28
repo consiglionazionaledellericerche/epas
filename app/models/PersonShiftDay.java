@@ -2,7 +2,10 @@ package models;
 
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -23,7 +26,9 @@ import play.db.jpa.Model;
 public class PersonShiftDay extends Model{
 
 	// morning or afternoon slot
-	ShiftSlot shiftSlot;
+	@Column(name="shift_slot")
+	@Enumerated(EnumType.STRING)
+	public ShiftSlot shiftSlot;
 	
 	// shift date
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
