@@ -84,6 +84,7 @@ public class JsonShiftPeriodsBinder implements TypeBinder<ShiftPeriods> {
 					String[] hmsStart = jsonObject.get("time_table_start").getAsString().split(":");
 					String[] hmsEnd = jsonObject.get("time_table_end").getAsString().split(":");
 					
+					// controllo shiftType? ma allora type deve essere unico?
 					ShiftTimeTable shiftTimeTable = (ShiftTimeTable) JPA.em().createQuery("SELECT stt FROM ShiftTimeTable stt WHERE stt.startShift = :ldtStart")
 							.setParameter("ldtStart", new LocalDateTime(1970, 01, 01, Integer.parseInt(hmsStart[0]), Integer.parseInt(hmsStart[1])))
 							.getSingleResult();

@@ -3,8 +3,10 @@ package models.exports;
 import models.Person;
 import models.ShiftTimeTable;
 import models.ShiftType;
+import models.enumerate.ShiftSlot;
 
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 
 /**
  * Classe di supporto per l'esportazione delle informazioni relative
@@ -20,23 +22,30 @@ public class ShiftPeriod {
 	public LocalDate end;
 	public final ShiftType shiftType;
 	public final boolean cancelled;
-	public ShiftTimeTable shiftTimeTable;
+	//public ShiftTimeTable shiftTimeTable;
+	public ShiftSlot shiftSlot;
+	public LocalTime startShift;
+	public LocalTime endShift;
 	
-	public ShiftPeriod(Person person, LocalDate start, LocalDate end, ShiftType shiftType, boolean cancelled, ShiftTimeTable shiftTimeTable){
+	public ShiftPeriod(Person person, LocalDate start, LocalDate end, ShiftType shiftType, boolean cancelled, ShiftSlot shiftSlot, LocalTime startShift, LocalTime endShift) {
 		this.person = person;
 		this.start = start;
 		this.end = end;
 		this.cancelled = cancelled;
 		this.shiftType = shiftType;
-		this.shiftTimeTable = shiftTimeTable;
+		this.shiftSlot = shiftSlot;
+		this.startShift = startShift;
+		this.endShift = endShift;
 	}
 	
-	public ShiftPeriod(Person person, LocalDate start, ShiftType shiftType, boolean cancelled, ShiftTimeTable shiftTimeTable){
+	public ShiftPeriod(Person person, LocalDate start, ShiftType shiftType, boolean cancelled, ShiftSlot shiftSlot, LocalTime startShift, LocalTime endShift){
 		this.person = person;
 		this.start = start;
 		this.shiftType = shiftType;
 		this.cancelled = cancelled;
-		this.shiftTimeTable = shiftTimeTable;
+		this.shiftSlot = shiftSlot;
+		this.startShift = startShift;
+		this.endShift = endShift;
 	}
 	
 	// for cancelled shift

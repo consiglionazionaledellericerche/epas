@@ -29,4 +29,8 @@ public class ShiftType extends Model{
 	
 	@OneToMany(mappedBy="type", fetch=FetchType.LAZY)
 	public List<ShiftCancelled> shiftCancelled = new ArrayList<ShiftCancelled>();
+	
+	@ManyToOne
+	@JoinColumn(name="shift_time_table_id")
+	public ShiftTimeTable shiftTimeTable;
 }
