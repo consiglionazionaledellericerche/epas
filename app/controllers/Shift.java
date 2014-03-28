@@ -127,8 +127,8 @@ public class Shift extends Controller{
 		
 		for (PersonShiftDay psd : personShiftDay) {	
 			
-			LocalTime startShift = (personShiftDay.getShiftSlot().equals(ShiftSlot.MATTINA)) ? personShiftDay.shiftType.shiftTimeTable.getStartMornigShift() : personShiftDay.shiftType.shiftTimeTable.getStartAfternoonShift();
-			LocalTime endShift = (personShiftDay.getShiftSlot().equals(ShiftSlot.POMERIGGIO)) ? personShiftDay.shiftType.shiftTimeTable.getEndtMornigShift() : personShiftDay.shiftType.shiftTimeTable.getEndtAfternoonShift();
+			LocalTime startShift = (psd.getShiftSlot().equals(ShiftSlot.MORNING)) ? personShiftDay.shiftType.shiftTimeTable.getStartMornigShift() : personShiftDay.shiftType.shiftTimeTable.getStartAfternoonShift();
+			LocalTime endShift = (personShiftDay.getShiftSlot().equals(ShiftSlot.AFTERNOON)) ? personShiftDay.shiftType.shiftTimeTable.getEndtMornigShift() : personShiftDay.shiftType.shiftTimeTable.getEndtAfternoonShift();
 
 			//if (shiftPeriod == null || !shiftPeriod.person.equals(psd.personShift.person) || !shiftPeriod.end.plusDays(1).equals(psd.date) || !shiftPeriod.shiftTimeTable.getStartShift().equals(psd.shiftTimeTable.getStartShift() )){
 			if (shiftPeriod == null || !shiftPeriod.person.equals(psd.personShift.person) || !shiftPeriod.end.plusDays(1).equals(psd.date) || !shiftPeriod.startShift.equals(startShift)){
@@ -551,12 +551,12 @@ public class Shift extends Controller{
 					
 					
 					if (!shiftCalendar.contains(currShift, day)) {
-						shift = (shiftCalendarMonth.get(person, day).fasciaTurno.equals(ShiftSlot.MATTINA)) ? new SD (person, null) : new SD (null, person);
+						shift = (shiftCalendarMonth.get(person, day).fasciaTurno.equals(ShiftSlot.MORNING)) ? new SD (person, null) : new SD (null, person);
 						shiftCalendar.put(currShift, day, shift);
 						Logger.debug("creato shift (%s, %s) con shift.mattina=%s e shift.pomeriggio=%s", currShift, day, shift.mattina, shift.pomeriggio);
 					} else {
 						shift = shiftCalendar.get(currShift, day);
-						if (shiftCalendarMonth.get(person, day).fasciaTurno.equals(ShiftSlot.MATTINA)) {
+						if (shiftCalendarMonth.get(person, day).fasciaTurno.equals(ShiftSlot.MORNING)) {
 							Logger.debug("Completo turno di %s con la mattina di %s", day, person);
 							shift.mattina = person;
 						} else {
