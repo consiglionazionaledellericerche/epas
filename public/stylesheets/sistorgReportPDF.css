@@ -16,6 +16,12 @@ h2 {
 	text-align: center;
 }
 
+h3 {
+	color: #284A7E;
+	font-size: 10pt;
+	text-align: center;
+}
+
 div.table {
 	margin: 2em, 1em;
 }
@@ -144,3 +150,22 @@ div.resp {
 	margin-right: 7em;
 }
 
+/* Note nei report*/
+div.note {
+	width: 80%;
+	border: 0.2px solid black;
+	background-color: #FAFAFA;
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 9pt;
+	text-align: left;
+	margin-top: 3em;
+	margin-left: 10%;
+	/*margin: 3em, 0, 4em, 7em;*/
+	clear: left;	
+}
+
+div.note  h2, h3 {
+	text-align: left;
+	padding-left: 1em;
+	color: red;
+}

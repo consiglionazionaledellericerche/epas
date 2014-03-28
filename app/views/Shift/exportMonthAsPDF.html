@@ -11,19 +11,14 @@
     			mm = 0;
     			
     			mese = firstOfMonth.plusMonths(mm).monthOfYear().getAsText();
-    			if (mese.equals('July')) {
-    				mese = 'luglio';
-    			} else if (mese.equals('June')) {
-    				mese = 'giugno';
-    			} else if (mese.equals('August')) {
-    				mese = 'agosto';
-    			}
+    			anno = firstOfMonth.plusMonths(mm).year().getAsText();
+
     		}%
         	<h1>Istituto di Informatica e Telematica </h1>
         
         	<div class="table">
 			<table class="mensile">
-			<caption> Giorni di turno del personale per il mese di ${mese} ${firstOfMonth.plusMonths(mm).year().getAsText()}</caption>
+			<caption> Giorni di turno del personale per il mese di ${mese} ${anno}</caption>
 			<tr>
 			<th>Persona</th><th>Numero di giorni</th><th>Numero di ore</th>
 			</tr>	
@@ -58,9 +53,31 @@
 			%{
     			}
 			}%
-			
 			</table>
+			</div>
+			
+			<div class="note">
+			%{
+				if (inconsistentAbsence != null) {
+			}%
+					<h2>Attenzione! </h2>
+			    	<h3>E' stata rilevata una inconsistenza con le presenze del personale </h3>
+			    	<ul>
+			%{    	
+				for(person in inconsistentAbsence.rowKeySet()) {
+					for(day in inconsistentAbsence.columnKeySet()) {
+
+			}%
+
+					<li><em>${person}</em> risulta assente il giorno ${day} ${mese} ${anno} e in turno di tipo ${inconsistentAbsence.get(person, day)}</li>
+			%{
+					}
+				}
+				}
+			}%
       		</div>
+      		
+      		
       		<div class="date">
       			<strong>Data </strong>&nbsp;&nbsp;${today.getDayOfMonth()}/${today.getMonthOfYear()}/${today.getYear()}
       		</div>

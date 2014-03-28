@@ -11,19 +11,13 @@
     			mm = 0;
     			
        			mese = firstOfMonth.plusMonths(mm).monthOfYear().getAsText();
-    			if (mese.equals('July')) {
-    				mese = 'luglio';
-    			} else if (mese.equals('June')) {
-    				mese = 'giugno';
-    			} else if (mese.equals('August')) {
-    				mese = 'agosto';
-    			}
+				anno = firstOfMonth.plusMonths(mm).year().getAsText();
     		}%
         	<h1>Istituto di Informatica e Telematica </h1>
         
         	<div class="table">
 			<table class="mensile">
-			<caption> Reperibilità del personale per il mese di ${mese} ${firstOfMonth.plusMonths(mm).year().getAsText()}</caption>
+			<caption> Reperibilità del personale per il mese di ${mese} ${anno}</caption>
 			<tr>
 				<td class="no-border"></td><th colspan="2"> Feriali - Cod: ${codFr}</th> <th colspan="2" class="red"> Festivi - Cod: ${codFs}</th>
 			</tr>
@@ -62,6 +56,31 @@
 			}%
 			</table>
       		</div>
+      		
+			<div class="note">
+			%{
+				if (inconsistentAbsence != null) {
+			}%
+					<h2>Attenzione! </h2>
+			    	<h3>Sono state rilevate le seguenti inconsistenze con le presenze del personale: </h3>
+			    	<ul>
+			%{    	
+				for(person in inconsistentAbsence.rowKeySet()) {
+					for(day in inconsistentAbsence.columnKeySet()) {
+						if (inconsistentAbsence.contains(person, day)) {
+
+			}%
+
+					<li>${inconsistentAbsence.get(person, day)} per <em>${person}</em> nel giorno ${day} ${mese} ${anno}</li>
+			%{
+						}
+					}
+				}
+				}
+			}%
+      		</div>
+      		
+      		
       		<div class="date">
       			<strong>Data</strong> &nbsp;&nbsp;${today.getDayOfMonth()}/${today.getMonthOfYear()}/${today.getYear()}
       		</div>

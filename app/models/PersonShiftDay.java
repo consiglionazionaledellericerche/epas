@@ -10,8 +10,11 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import models.enumerate.ShiftSlot;
+
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 
 import play.db.jpa.Model;
 
@@ -19,6 +22,10 @@ import play.db.jpa.Model;
 @Table(name="person_shift_days")
 public class PersonShiftDay extends Model{
 
+	// morning or afternoon slot
+	ShiftSlot shiftSlot;
+	
+	// shift date
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate date;
 	
@@ -27,10 +34,14 @@ public class PersonShiftDay extends Model{
 	public ShiftType shiftType;
 	
 	@ManyToOne
-	@JoinColumn(name="shift_time_table_id")
-	public ShiftTimeTable shiftTimeTable;
-	
-	@ManyToOne
 	@JoinColumn(name="person_shift_id", nullable=false)
 	public PersonShift personShift;
+	
+	public ShiftSlot getShiftSlot(){
+		return this.shiftSlot;
+	}
+	
+	public void setShiftSlot(ShiftSlot shiftSlot){
+		this.shiftSlot = shiftSlot;
+	}
 }

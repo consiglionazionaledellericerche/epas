@@ -9,6 +9,7 @@ import models.Person;
 import models.PersonShift;
 import models.Qualification;
 import models.ShiftTimeTable;
+import models.ShiftTimeTable;
 import models.ShiftType;
 import models.StampModificationType;
 import models.StampType;
@@ -91,6 +92,11 @@ public class Bootstrap extends Job {
 				office.name = conf.instituteName;
 				office.save();
 				Logger.info("Creato ufficio di default con nome %s e codice %s", conf.instituteName, conf.seatCode);
+			}
+			
+			if (ShiftTimeTable.count() == 0) {
+				Fixtures.loadModels("ShiftTimeType.yml");
+				Logger.info("Creata la tabella di definizione della tipologia dei turni");
 			}
 			
 			Person admin = Person.find("byUsername", "admin").first();
