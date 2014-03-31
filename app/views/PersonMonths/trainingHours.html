@@ -9,6 +9,7 @@
 		<th>Ore di formazione</th>
 		<th>Modifica</th>
 		<th>Approvate</th>
+		
 	</tr>
 	
 	#{list items:pmMap.entrySet(), as: 'entry'}
@@ -21,7 +22,7 @@
 			#{list items:entry.getValue(), as: 'pm'}
 				#{if pm.trainingHours != null}
 					#{if pm.month == month}			
-						<li><a data-toggle="modal" href="@{PersonMonths.modifyTrainingHours(person.id, month, year)}" data-target="#myModal2"><b>${pm.trainingHours}</b> ore <b>Da:</b> <u>${pm.fromDate}</u> <b>A:</b> <u>${pm.toDate}</u></a></li>
+						<li><a data-toggle="modal" href="@{PersonMonths.modifyTrainingHours(pm.id)}" data-target="#myModal2"><b>${pm.trainingHours}</b> ore <b>Da:</b> <u>${pm.fromDate}</u> <b>A:</b> <u>${pm.toDate}</u></a></li>
 					#{/if}
 					#{else}
 						<li><b>${pm.trainingHours}</b> ore <b>Da:</b> <u>${pm.fromDate}</u> <b>A:</b> <u>${pm.toDate}</u></li>
@@ -31,7 +32,7 @@
 			</ul>
 		</td>		
 		#{if entry.getKey() == month}	
-		<td><a data-toggle="modal" href="@{PersonMonths.insertTrainingHours(person.id)}" data-target="#myModal1">Inserisci ore di formazione</a></td>
+		<td><a href="@{PersonMonths.insertTrainingHours(person.id, month, year)}" data-modal="#myModal1">Inserisci ore di formazione</a></td>
 		#{/if}
 		#{else}
 			#{if entry.getKey() > month}
@@ -53,6 +54,7 @@
 		#{/if}
 		#{/list}
 		</td>
+		
 	</tr>
 
 	#{/list}
