@@ -169,18 +169,18 @@ public class WorkingTimes extends Controller{
 			flash.error("Il campo nome tipo orario è obbligatorio. Operazione annullata");
 			WorkingTimes.manageWorkingTime();
 		}
-		List<WorkingTimeType> wttList = WorkingTimeType.findAll();
-		for(WorkingTimeType wtt0 : wttList)
-		{
-			Logger.info("%s: %s",wtt0.description, wtt0.contractWorkingTimeType.size());
-		}
-		
 		if(wtt.contractWorkingTimeType.size()!=0)
 		{
 			flash.error("Impossibile eliminare il tipo orario selezionato perchè assegnato ad almeno un contratto storicizzato. Operazione annullata");
 			WorkingTimes.manageWorkingTime();
 		}
-		flash.success("Aggiornato orario di lavoro denominato %s.", wtt.description);
+		for(WorkingTimeTypeDay wttd : wtt.workingTimeTypeDays)
+		{
+			wttd.delete();
+		}
+		wtt.delete();
+		
+		flash.success("Eliminato orario di lavoro denominato %s.", wtt.description);
 		WorkingTimes.manageWorkingTime();
 		
 	}
