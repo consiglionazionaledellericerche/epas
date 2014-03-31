@@ -2,18 +2,32 @@
 
 <h3>Ore di formazione per ${person.name} ${person.surname}</h3>
 <fieldset>
+
 <table class="tablenoborder">
 <input name="personId" type="hidden" value="${person.id}"/>
+<input name="month" type="hidden" value="${month}"/>
+<input name="year" type="hidden" value="${year}"/>
 	<tr>
-		<td>Da</td><td><input class="datepicker span2" name="begin" type="text"  data-date-format="yyyy-mm-dd"/></td>
+		<td>Giorno inizio</td><td>#{select 'begin',  class:'span1', id: 'begin'} 
+					#{list items:1..max, as:'i'}
+						#{option i}${i}#{/option}
+					#{/list}
+				#{/select}	
+		</td>
 	</tr>
 	<tr>
-		<td>A</td><td><input class="datepicker span2" name="end" type="text"  data-date-format="yyyy-mm-dd"/></td>
+		<td>Giorno fine</td><td>#{select 'end',  class:'span1', id: 'end' }
+					#{list items:1..max, as:'i'}
+						#{option i}${i}#{/option}
+					#{/list}
+				#{/select}	
+		</td>
 	</tr>
 	<tr>
-		<td>Quantità</td><td><input class="span2" name="value" type="text" /></td>
+		<td>Quantità</td><td><input class="span2" name="value" type="number" /></td>
 	</tr>
 </table>
+
 </fieldset>
 
 <div class="buttoncenter">
