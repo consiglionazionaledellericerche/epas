@@ -9,11 +9,11 @@
 		<td><strong>Data inizio contratto</strong></td>
 		<td>%{if(contract.beginContract != null){
 		}%
-			<td><input name="begin" type="date" value="${contract.beginContract}"/></td>
+			<td><input name="begin" type="text" data-datepicker data-date-format="yyyy-mm-dd" value="${contract.beginContract}"/></td>
 		%{
 		}else{
 		}%
-			<td><input name="begin" type="date" value="${}" /></td>
+			<td><input name="begin" type="text" data-datepicker data-date-format="yyyy-mm-dd" value="${}" /></td>
 		%{
 		}
 		}%
@@ -23,11 +23,11 @@
 		<td><strong>Data fine contratto</strong></td>
 		<td>%{if(contract.expireContract != null){
 		}%
-			<td><input name="expire" type="date" value="${contract.expireContract}" /></td>
+			<td><input name="expire" type="text" data-datepicker data-date-format="yyyy-mm-dd" value="${contract.expireContract}" /></td>
 		%{
 		}else{
 		}%
-			<td><input name="expire" type="date" value="${}" /></td>
+			<td><input name="expire" type="text" data-datepicker data-date-format="yyyy-mm-dd" value="${}" /></td>
 		%{
 		}
 		}%
@@ -37,11 +37,11 @@
 		<td><strong>Data terminazione contratto (causa morte, pensione...)</strong></td>
 		<td>%{if(contract.endContract != null){
 		}%
-			<td><input name="end" type="date" id="datepicker" value="${contract.endContract}" /></td>
+			<td><input name="end" type="text" data-datepicker data-date-format="yyyy-mm-dd" value="${contract.endContract}" /></td>
 		%{
 		}else{
 		}%	
-			<td><input name="end" type="date" id="datepicker" value="${}" /></td>
+			<td><input name="end" type="text" data-datepicker data-date-format="yyyy-mm-dd" value="${}" /></td>
 		%{
 		}
 		}%
