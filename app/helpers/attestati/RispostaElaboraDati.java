@@ -18,6 +18,7 @@ public final class RispostaElaboraDati {
 	private String absencesSent = null;
 	private String competencesSent = null;
 	private Integer mealTicketSent = null;
+	private String trainingHoursSent = null;
 	private String problems = null;
 	
 	public RispostaElaboraDati(String cognomeNome, String matricola) {
@@ -37,4 +38,12 @@ public final class RispostaElaboraDati {
 	public void setMealTicketSent(Integer mealTicketSent) { this.mealTicketSent = mealTicketSent; }
 	public String getProblems() {	return problems; }
 	public void setProblems(String errors) { this.problems = errors; }
+
+	public String getTrainingHoursSent() {
+		return trainingHoursSent;
+	}
+
+	public void setTrainingHoursSent(String trainingHoursSent) {
+		this.trainingHoursSent = trainingHoursSent;
+	}
 }

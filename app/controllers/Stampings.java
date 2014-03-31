@@ -85,12 +85,12 @@ public class Stampings extends Controller {
 			render("@redirectToIndex");
 		}
 		
-		LocalDate today = new LocalDate();
-		if(today.getYear()==year && month>today.getMonthOfYear())
-		{
-			flash.error("Impossibile accedere a situazione futura, redirect automatico a mese attuale");
-			month = today.getMonthOfYear();
-		}
+//		LocalDate today = new LocalDate();
+//		if(today.getYear()==year && month>today.getMonthOfYear())
+//		{
+//			flash.error("Impossibile accedere a situazione futura, redirect automatico a mese attuale");
+//			month = today.getMonthOfYear();
+//		}
 		
 		
 	
@@ -134,11 +134,11 @@ public class Stampings extends Controller {
 			if(c.getMese(year, month)!=null)
 				contractMonths.add(c.getMese(year, month));
 		}
-		if(contractMonths.size()==0)
-		{
-			flash.error("Impossibile visualizzare la situazione mensile per %s %s per il mese di %s", person.name, person.surname, DateUtility.fromIntToStringMonth(month));
-			render("@redirectToIndex");
-		}
+//		if(contractMonths.size()==0)
+//		{
+//			flash.error("Impossibile visualizzare la situazione mensile per %s %s per il mese di %s", person.name, person.surname, DateUtility.fromIntToStringMonth(month));
+//			render("@redirectToIndex");
+//		}
 		
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);
 		

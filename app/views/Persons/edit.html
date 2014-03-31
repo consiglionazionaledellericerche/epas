@@ -136,7 +136,7 @@
 			     <strong class="text-error">${contract.sourceRecoveryDayUsed}</strong><br>
 			   #{/if}
 			   
-			   <a data-toggle="modal" href="@{Persons.updateSourceContract(contract.id)}" data-target="#modal-edit-source-contract"><input value="Modifica" class="btn btn-small" type="button"></a>
+			   <a class="btn btn-small" href="@{Persons.updateSourceContract(contract.id)}" data-modal="#modal-edit-source-contract">Modifica</a>
 			
 			 #{/if}
 			 #{else}

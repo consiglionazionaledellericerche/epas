@@ -210,7 +210,7 @@ public class AttestatiClient {
 	
 	public static RispostaElaboraDati elaboraDatiDipendente(
 			Map<String, String> cookies, Dipendente dipendente, Integer year, Integer month, 
-			List<Absence> absences, List<Competence> competences, List<PersonMonthRecap> pmList) 
+			List<Absence> absences, List<Competence> competences, List<PersonMonthRecap> pmList, Integer mealTicket) 
 					throws URISyntaxException, MalformedURLException {
 		
 		//Configuration conf = Configuration.getCurrentConfiguration();
@@ -222,6 +222,7 @@ public class AttestatiClient {
 		StringBuffer competencesSent = new StringBuffer();
 		//Nuovo stringBuffer per l'invio delle ore di formazione
 		StringBuffer trainingHoursSent = new StringBuffer();
+		StringBuffer mealTicketSent = new StringBuffer();
 		StringBuffer problems = new StringBuffer();
 		
 		boolean isOk = true;
@@ -277,6 +278,17 @@ public class AttestatiClient {
 			}
 		}
 		
+		/**
+		 * TODO: questa parte deve essere soggetta a una configurazione che stabilisca se si devono inviare i buoni pasto oppure no
+		 * Per adesso è commentata in attesa di sviluppo
+		 */
+//		if(mealTicket != null){
+//			connection.data("gg_buoni_pasto", String.valueOf(mealTicket));
+//			mealTicketSent.append(String.valueOf(year)).append(",").append(String.valueOf(month)).append(",")
+//			.append(String.valueOf(mealTicket));
+//			Logger.debug("Inviati %d buoni pasto per %s", mealTicket, dipendente.getCognomeNome());
+//		}
+		
 		
 		Response elaboraDatiResponse;
 		try {
@@ -326,6 +338,7 @@ public class AttestatiClient {
 		resp.setAbsencesSent(absencesSent.length() > 0 ? absencesSent.toString() : null);
 		resp.setProblems(problems.length() > 0 ? problems.toString() : null);
 		resp.setCompetencesSent(competencesSent.length() > 0 ? competencesSent.toString() : null);
+		resp.setTrainingHoursSent(trainingHoursSent.length() > 0 ? trainingHoursSent.toString() : null );
 		resp.setOk(isOk);
 		return resp;
 	}
