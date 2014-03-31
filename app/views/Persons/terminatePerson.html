@@ -16,7 +16,7 @@
 			<td><input name="surname" type ="text" value="${person.surname}" disabled="disabled" /></td>
 			<td><input name="beginContract" type ="date" value="${person.getCurrentContract().beginContract}" disabled="disabled" /></td>
 			<td><input name="expireContract" type ="date" value="${person.getCurrentContract().expireContract}" disabled="disabled" /></td>
-			<td><input name="endContract" type ="date" value="${person.getCurrentContract().endContract}" /></td>
+			<td><input name="endContract" type ="text" data-datepicker data-date-format="yyyy-mm-dd" value="${person.getCurrentContract().endContract}" /></td>
 		</tr>	
 	</table>
 </fieldset>
