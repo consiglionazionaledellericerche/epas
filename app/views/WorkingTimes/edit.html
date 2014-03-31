@@ -125,10 +125,16 @@
 
 
 <div class="buttoncenter forminline">
-<input class="btn btn-primary" id="updateWorkingTime" type="submit" value="Aggiorna"/>
-#{/form}
-#{form @WorkingTimes.discard()}
-<input class="btn" id="backUpdate" type="submit" value="Indietro"/>
-#{/form}
+  <input class="btn btn-primary" id="updateWorkingTime" type="submit" value="Aggiorna"/>
+  #{/form}
+  
+  #{form @WorkingTimes.discard()}
+    <input class="btn" type="submit" value="Indietro"/>
+  #{/form}
+  
+  #{form @WorkingTimes.delete()}
+    <input type="hidden" name="wtt.id" value="${wtt.id}"/>
+    <input class="btn btn-danger" type="submit" value="Elimina"/>
+  #{/form}
 </div>
 </div>
