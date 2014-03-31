@@ -140,7 +140,7 @@
 			
 			 #{/if}
 			 #{else}
-			   <a data-toggle="modal" href="@{Persons.updateSourceContract(contract.id)}" data-target="#modal-edit-source-contract"><input value="Definisci Inizializzazione" class="btn btn-small" type="button"></a>
+			   <a class="btn btn-small" href="@{Persons.updateSourceContract(contract.id)}" data-modal="#modal-edit-source-contract">Definisci Inizializzazione</a>
 			 #{/else}
 			</td>
 		
@@ -156,7 +156,7 @@
 			<td>
 			  #{if contract.endContract==null } 
 			    <!-- <a href="@{Persons.terminatePerson(person.id)}">Termina contratto</a> -->
-			    <a data-toggle="modal" href="@{Persons.terminatePerson(person.id)}" data-target="#modal-terminate-person">Termina contratto</a>
+			    <a href="@{Persons.terminatePerson(person.id)}" data-modal="#modal-terminate-person">Termina contratto</a>
 			  #{/if}
 			  #{else}
 			    ${contract.endContract}
@@ -180,7 +180,7 @@
 	    		</li>
 			  #{/list}
 			  </ul>
-			  <a data-toggle="modal" href="@{Persons.updateContractWorkingTimeType(contract.id)}" data-target="#myModal1"><input value="Modifica" class="btn btn-small" type="button"></a>
+			  <a class="btn btn-small" href="@{Persons.updateContractWorkingTimeType(contract.id)}" data-modal="#modal-edit-working-time-type">Modifica</a>
 			</td>
 			
 			<td>
@@ -192,7 +192,7 @@
 			  #{/else}
 			</td>
 			<td>
-			  <a data-toggle="modal" href="@{Persons.modifyContract(contract.id)}" data-target="#modal-edit-contract"><input value="Modifica" class="btn" type="button"></a>
+			  <a class="btn btn-small" href="@{Persons.modifyContract(contract.id)}" data-modal="#modal-edit-contract">Modifica</a>
 			</td>
 			
 			<td>
@@ -299,11 +299,11 @@
 			%{
 			if(person.bornDate != null){
 			}%
-				<td><input class="span2" name="bornDate" type="text" value="${person.bornDate.convertToLocalDate()}" size="10" maxlength="50" /></td>
+				<td><input class="span2 datepicker" name="bornDate" type="text" value="${person.bornDate.convertToLocalDate()}" size="10" maxlength="50" /></td>
 			%{
 			}else{
 			}%
-				<td><input class="span2" name="bornDate" type="text" value="" size="10" maxlength="50" /></td>
+				<td><input class="span2 datepicker" name="bornDate" type="text" value="" size="10" maxlength="50" /></td>
 			%{	
 			}
 			}%
@@ -376,7 +376,7 @@
   </div>
 </div>
 
-<div id="myModal1" class="modal hide fade mymodal-medium" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div id="modal-edit-working-time-type" class="modal hide fade mymodal-medium" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
     <h3 id="myModalLabel">Modifica i tipi orario associato al contratto</h3>
