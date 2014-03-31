@@ -180,4 +180,28 @@ public class PersonMonths extends Controller{
 		flash.success("Aggiornate ore di formazione per %s %s", person.name, person.surname);
 		PersonMonths.trainingHours(personId, beginDate.getYear(), beginDate.getMonthOfYear());
 	}
+	
+	@Check(Security.VIEW_PERSONAL_SITUATION)
+	public static void deleteTrainingHours(Long personMonthRecapId, int year, int month){
+		PersonMonthRecap pm = PersonMonthRecap.findById(personMonthRecapId);
+		if(pm == null)
+		{
+			flash.error("Ore di formazioni inesistenti. Operazione annullata.");
+			Stampings.stampings(year, month);
+		}
+		render(pm, year, month);
+	}
+	
+	@Check(Security.VIEW_PERSONAL_SITUATION)
+	public static void deleteTrainingHoursConfirmed(Long personMonthRecapId, int year, int month){
+		PersonMonthRecap pm = PersonMonthRecap.findById(personMonthRecapId);
+		if(pm == null)
+		{
+			flash.error("Ore di formazioni inesistenti. Operazione annullata.");
+			Stampings.stampings(year, month);
+		}
+		pm.delete();
+		flash.error("Ore di formazione eliminate con successo.");
+		Stampings.stampings(year, month);
+	}
 }
