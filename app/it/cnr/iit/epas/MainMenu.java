@@ -86,6 +86,7 @@ public class MainMenu {
 		this.persons = persons;
 	}
 	
+	//NON USATO DA NESSUNA PARTE
 	public Person getPerson() {
 		
 		if (personId == null) {
@@ -108,7 +109,7 @@ public class MainMenu {
         
 		List<ActionMenuItem> actions = new ArrayList<ActionMenuItem>();
 		
-		Set<Permission> permissions = Security.getPerson().getAllPermissions();
+		Set<Permission> permissions = Security.getUser().getAllPermissions();
 		
 		Set<String> permissionDescriptions = new HashSet<String>();
 		for(Permission p : permissions){

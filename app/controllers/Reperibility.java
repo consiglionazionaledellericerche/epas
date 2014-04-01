@@ -574,7 +574,7 @@ public class Reperibility extends Controller {
 			for (PersonReperibilityDay personReperibilityDay : personReperibilityDays) {
 				Person person = personReperibilityDay.personReperibility.person;
 				
-				builder.put(person, personReperibilityDay.date.getDayOfMonth(), DateUtility.isHoliday(person, personReperibilityDay.date) ? "fs" : "fr");
+				builder.put(person, personReperibilityDay.date.getDayOfMonth(), person.isHoliday(personReperibilityDay.date) ? "fs" : "fr");
 			}
 			reperibilityMonth = builder.build();
 			reperibilityMonths.add(reperibilityMonth);
@@ -674,7 +674,7 @@ public class Reperibility extends Controller {
 		for (PersonReperibilityDay personReperibilityDay : personReperibilityDays) {
 			Person person = personReperibilityDay.personReperibility.person;
 				
-			builder.put(person, personReperibilityDay.date.getDayOfMonth(), DateUtility.isHoliday(person, personReperibilityDay.date) ? "fs" : "fr");
+			builder.put(person, personReperibilityDay.date.getDayOfMonth(), person.isHoliday(personReperibilityDay.date) ? "fs" : "fr");
 		}
 		
 		reperibilityMonth = builder.build();

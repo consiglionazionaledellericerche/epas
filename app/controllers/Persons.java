@@ -19,12 +19,14 @@ import models.ContractWorkingTimeType;
 import models.InitializationTime;
 import models.Location;
 import models.Office;
+import models.Permission;
 import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
 import models.PersonWorkingTimeType;
 import models.Qualification;
 import models.RemoteOffice;
+import models.User;
 //import models.RemoteOffice;
 import models.VacationCode;
 import models.VacationPeriod;
@@ -51,10 +53,7 @@ public class Persons extends Controller {
 	
 		LocalDate date = new LocalDate();
 		List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract", person).fetch();
-		List<Office> officeList = null;
-		Person personLogged = Security.getPerson();
-		officeList = personLogged.getOfficeAllowed();
-		
+		List<Office> officeList = Security.getOfficeAllowed();	
 		
 		InitializationTime initTime = InitializationTime.find("Select init from InitializationTime init where init.person = ?", person).first();
 		Integer month = date.getMonthOfYear();
@@ -304,9 +303,9 @@ public class Persons extends Controller {
 
 		LocalDate startEra = new LocalDate(1900,1,1);
 		LocalDate endEra = new LocalDate(9999,1,1);
-		List<Person> personList = Person.getActivePersonsSpeedyInPeriod(startEra, endEra, Security.getPerson().getOfficeAllowed(), false);
+		List<Person> personList = Person.getActivePersonsSpeedyInPeriod(startEra, endEra, Security.getOfficeAllowed(), false);
 		LocalDate date = new LocalDate();
-		List<Person> activePerson = Person.getActivePersonsInDay(date.getDayOfMonth(), date.getMonthOfYear(), date.getYear(), Security.getPerson().getOfficeAllowed(), false);
+		List<Person> activePerson = Person.getActivePersonsInDay(date.getDayOfMonth(), date.getMonthOfYear(), date.getYear(), Security.getOfficeAllowed(), false);
 		
 		render(personList, activePerson);
 	}
@@ -318,11 +317,11 @@ public class Persons extends Controller {
 		Location location = new Location();
 		ContactData contactData = new ContactData();
 		InitializationTime initializationTime = new InitializationTime();
-		Person personLogged = Security.getPerson();
-		List<Office> officeList = personLogged.getOfficeAllowed();
+		List<Office> officeList = Security.getOfficeAllowed();
 		List<Office> office = Office.find("Select office from Office office where office.office is null").fetch();
+		List<WorkingTimeType> wttList = WorkingTimeType.findAll();
 		Logger.debug("Lista office: %s", office.get(0).name);
-		render(person, contract, location, contactData, initializationTime, officeList/*, remoteOffice*/);
+		render(person, contract, location, contactData, initializationTime, officeList, wttList);
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
@@ -331,6 +330,8 @@ public class Persons extends Controller {
 			if(request.isAjax()) error("Invalid value");
 			render("@insertPerson");
 		}
+		
+		/* creazione persona */
 		Person person = null;
 		Location location = new Location();
 		ContactData contactData = new ContactData();
@@ -348,12 +349,10 @@ public class Persons extends Controller {
 		person.surname = params.get("surname");
 		
 		person.number = params.get("number", Integer.class);
-		person.username = params.get("name").toLowerCase()+'.'+params.get("surname").toLowerCase();
+				
 		Qualification qual = Qualification.findById(new Long(params.get("person.qualification", Integer.class)));
 		person.qualification = qual;
-		Codec codec = new Codec();
-		person.password = codec.hexMD5("epas");
-		
+				
 		Office office = Office.findById(new Long(params.get("person.office", Integer.class)));
 		if(office != null)
 			person.office = office;
@@ -364,29 +363,23 @@ public class Persons extends Controller {
 		}
 		person.save();
 		
-		/**
-		 * qui aggiungo il controllo sull'id generato dalla sequence di postgres rispetto ai vecchi id presenti nel vecchio db
-		 */
-//		if(PersonUtility.isIdPresentInOldSoftware(person.id)){
-//			/**
-//			 * TODO:l'id generato è già presente in anagrafica come oldId di qualcuno...questo potrebbe generare dei problemi in fase di acquisizione 
-//			 * delle timbrature...
-//			 */
-//			
-//			
-//		}
+		/* creazione utente */
+		User user = new User();
+		user.username = params.get("name").toLowerCase()+'.'+params.get("surname").toLowerCase(); 
+		Codec codec = new Codec();
+		user.password = codec.hexMD5("epas");
+		user.person = person;
 		
-		/**
-		 * controllo se la persona deve appartenere a una sede distaccata...
-		 */
-//		if(!params.get("remoteOfficeName").equals("") || !params.get("remoteOfficeAddress").equals("")){
-//			/**
-//			 * TODO: query sul db per vedere se esiste già una sede distaccata con quel nome, così da non fare assegnamenti multipli con lo stesso nome
-//			 */
-//		}
+		/*permesso viewPersonalSituation */
+		Permission per = Permission.find("Select per from Permission per where per.description = ?", "viewPersonalSituation").first();
+		user.permissions = new ArrayList<Permission>();
+		user.permissions.add(per);
+		user.save();
+				
+		person.user = user;
+		person.save();
 		
-		
-		Logger.debug("saving location, deparment = %s", location.department);
+		/*creazione location */
 		location.department = params.get("department");
 		location.headOffice = params.get("headOffice");
 		location.room = params.get("room");
@@ -394,10 +387,13 @@ public class Persons extends Controller {
 		location.save();
 		Logger.debug("Saving contact data...");
 		
+		/* creazione contactData */
 		contactData.email = params.get("email");
 		contactData.telephone = params.get("telephone");
 		contactData.person = person;
 		contactData.save();
+		
+		/* creazione contratto */
 		Logger.debug("Begin contract: %s", params.get("beginContract"));
 		if(params.get("beginContract") == null){
 			flash.error("Il contratto di %s %s deve avere una data di inizio. Utente cancellato. Reinserirlo con la data di inizio contratto valorizzata.", 
@@ -411,41 +407,27 @@ public class Persons extends Controller {
 			contract.expireContract = null;
 		else			
 			expireContract = new LocalDate(params.get("expireContract"));
-		
-				
 		contract.beginContract = beginContract;
 		contract.expireContract = expireContract;
+		
 		contract.person = person;
 		contract.onCertificate = params.get("onCertificate", Boolean.class);
 		contract.save();
-		Logger.debug("Salvato contratto...%s", contract.toString());
 		contract.setVacationPeriods();
-				
-		Logger.debug("saving contract, beginContract = %s, endContract = %s", contract.beginContract, contract.expireContract);
-		InitializationTime initTime = new InitializationTime();
-		if(params.get("minutesPastYear", Integer.class) != null || params.get("minutesCurrentYear", Integer.class) != null){
-			
-			initTime.person = person;
-			if(params.get("minutesCurrentYear", Integer.class) != null)
-				initTime.residualMinutesCurrentYear = params.get("minutesCurrentYear", Integer.class);
-			else
-				initTime.residualMinutesCurrentYear = 0;
-			if(params.get("minutesPastYear", Integer.class) != null)
-				initTime.residualMinutesPastYear = params.get("minutesPastYear", Integer.class);
-			else
-				initTime.residualMinutesPastYear = 0;
-			initTime.date = new LocalDate();
-			initTime.save();
-			Logger.debug("Saving initialization time for %s %s with value %s minutes for past year and %s minutes for current year", 
-					person.name, person.surname, initTime.residualMinutesPastYear, initTime.residualMinutesCurrentYear);
-		}		
 		
-		//flash.success(String.format("Inserita nuova persona in anagrafica: %s %s ",person.name, person.surname));
+		ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
+		cwtt.beginDate = contract.beginContract;
+		cwtt.endDate = contract.expireContract;
+		cwtt.workingTimeType = WorkingTimeType.findById(params.get("wtt", Long.class));
+		cwtt.contract = contract;
+		cwtt.save();
+		
+		
+		
 		Long personId = person.id;
-		Logger.debug("Person id: %d", personId);
 		List<String> usernameList = PersonUtility.composeUsername(person.name, person.surname);
 		render("@insertUsername", personId, usernameList, person);
-		//Application.indexAdmin();
+		
 		
 	}
 	
@@ -464,10 +446,11 @@ public class Persons extends Controller {
 		Person person = Person.findById(id);
 		Logger.debug("Il valore selezionato come username è: %s", params.get("username"));
 		Logger.debug("La persona che si vuole modificare è: %s %s", person.name, person.surname);
-		person.username = params.get("username");
+		person.user.username = params.get("username");
+		person.user.save();
 		person.save();
 		
-		flash.success("%s %s inserito in anagrafica con il valore %s come username", person.name, person.surname, person.username);
+		flash.success("%s %s inserito in anagrafica con il valore %s come username", person.name, person.surname, person.user.username);
 		render("@Stampings.redirectToIndex");
 		
 	}
@@ -795,7 +778,8 @@ public class Persons extends Controller {
 		
 		
 		Codec codec = new Codec();
-		person.password = codec.hexMD5(nuovaPassword);
+		person.user.password = codec.hexMD5(nuovaPassword);
+		person.user.save();
 		person.save();
 		Application.indexAdmin();
 

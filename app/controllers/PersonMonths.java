@@ -40,7 +40,7 @@ public class PersonMonths extends Controller{
 		if(personId != null)
 			person = Person.findById(personId);
 		else
-			person = Security.getPerson();
+			person = Security.getUser().person;
 
 		Contract contract = person.getCurrentContract();
 		CalcoloSituazioneAnnualePersona csap = new CalcoloSituazioneAnnualePersona(contract, year, null);

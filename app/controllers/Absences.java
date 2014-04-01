@@ -111,7 +111,7 @@ public class Absences extends Controller{
 
 	//@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void absences(Integer year, Integer month) {
-		Person person = Security.getPerson();
+		Person person = Security.getUser().person;
 		Map<AbsenceType,Integer> absenceTypeInMonth = getAbsenceTypeInMonth(person, year, month);
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);
 		render(absenceTypeInMonth, person, year, month, month_capitalized);
@@ -934,7 +934,7 @@ public class Absences extends Controller{
 	public static void insertPersonChildren(){
 		int month = new LocalDate().getMonthOfYear();
 		int year = new LocalDate().getYear();
-		List<Person> personList = Person.getActivePersonsInMonth(month, year, Security.getPerson().getOfficeAllowed(), false);
+		List<Person> personList = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
 		render(personList);
 	}
 	
@@ -1003,7 +1003,7 @@ public class Absences extends Controller{
 	
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void manageAttachmentsPerPerson(Long personSelected, Integer year, Integer month){
-		List<Person> personListForAttachments = Person.getActivePersonsInMonth(month, year, Security.getPerson().getOfficeAllowed(), false);
+		List<Person> personListForAttachments = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
 		if(personSelected == null || personSelected == 0){
 			
 			render(personListForAttachments, year, month);
@@ -1027,7 +1027,7 @@ public class Absences extends Controller{
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void absenceInPeriod(Long personSelected, int year, int month){
 		
-		List<Person> personList = Person.getActivePersonsInMonth(month, year, Security.getPerson().getOfficeAllowed(), false);
+		List<Person> personList = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
 		if(personSelected == null || personSelected == 0)
 			render(personList, year, month);
 		else{
@@ -1078,7 +1078,7 @@ public class Absences extends Controller{
 		while(!actualDate.isAfter(dateTo))
 		{
 			//se non devo considerare festa ed è festa vado oltre
-			if(notInHoliday && DateUtility.isHoliday(person, actualDate))
+			if(notInHoliday && person.isHoliday(actualDate))
 			{
 				actualDate = actualDate.plusDays(1);
 				continue;

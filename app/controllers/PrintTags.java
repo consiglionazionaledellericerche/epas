@@ -97,7 +97,7 @@ public class PrintTags extends Controller{
 	@Check(Security.INSERT_AND_UPDATE_STAMPING)
 	public static void listPersonForPrintTags(int year, int month){
 		LocalDate date = new LocalDate(year, month,1);
-		List<Person> personList = Person.getActivePersonsInMonth(month, year, Security.getPerson().getOfficeAllowed(), false);
+		List<Person> personList = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
 		render(personList, date, year, month);
 	}
 	
@@ -105,10 +105,11 @@ public class PrintTags extends Controller{
 	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void showPersonTag(Integer year, Integer month){
 		
-		if (Security.getPerson().username.equals("admin")) {
-			Application.indexAdmin();
-		}
-		Person person = Security.getPerson();
+		//TODOUSER
+		//if (Security.getPerson().username.equals("admin")) {
+		//	Application.indexAdmin();
+		//}
+		Person person = Security.getUser().person;
 		if(!person.isActiveInMonth(month, year))
 		{
 			flash.error("Si è cercato di accedere a un mese al di fuori del contratto valido per %s %s. " +
