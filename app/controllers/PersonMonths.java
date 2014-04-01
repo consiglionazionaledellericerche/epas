@@ -88,7 +88,7 @@ public class PersonMonths extends Controller{
 
 	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void insertTrainingHours(Long personId, int month, int year){
-		LocalDate date = new LocalDate();
+		LocalDate date = new LocalDate(year, month, 1);
 		int max = date.dayOfMonth().withMaximumValue().getDayOfMonth();
 
 		Person person = Person.findById(personId);
@@ -101,7 +101,7 @@ public class PersonMonths extends Controller{
 		int year = pm.year;
 		int month = pm.month;
 		Person person = pm.person;
-		LocalDate date = new LocalDate();
+		LocalDate date = new LocalDate(year, month, 1);
 		int max = date.dayOfMonth().withMaximumValue().getDayOfMonth();
 //		List<PersonMonthRecap> pmList = PersonMonthRecap.find("select pm from PersonMonthRecap pm where pm.person = ? and pm.year = ? and pm.month = ?", 
 //				person, year, month).fetch();
