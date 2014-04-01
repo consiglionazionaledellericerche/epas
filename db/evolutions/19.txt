@@ -56,17 +56,23 @@ CREATE TABLE users_permissions_history
 ALTER TABLE persons
   ADD COLUMN user_id bigint,
   ADD CONSTRAINT fkd78fcfbe47140efe FOREIGN KEY (user_id) REFERENCES users (id);
+  
 
 ALTER TABLE persons_history
   ADD COLUMN user_id bigint;
 
 INSERT INTO users(id, username, password) SELECT  id, username, password FROM persons;
 
+ALTER TABLE persons
+  DROP COLUMN username,
+  DROP COLUMN password;
+
 INSERT INTO users_permissions(users_id, permissions_id) SELECT users_id, permissions_id FROM persons_permissions;
+
+DROP TABLE persons_permissions;
 
 UPDATE persons set user_id = id;
 
 DELETE FROM persons_working_time_types where person_id = 1;
-DELETE FROM persons_permissions where users_id = 1;
 DELETE FROM persons where id = 1;
 

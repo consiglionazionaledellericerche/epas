@@ -111,10 +111,6 @@ public class Person extends Model {
 	@OneToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name = "user_id")
 	public User user;
-	
-	//public String username;
-
-	//public String password;
 
 	/**
 	 * Numero di matricola
@@ -200,8 +196,6 @@ public class Person extends Model {
 	@NotAudited
 	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<YearRecap> yearRecaps;
-
-
 
 	/**
 	 * relazione con la tabella Competence
