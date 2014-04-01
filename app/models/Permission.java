@@ -28,7 +28,7 @@ public class Permission extends Model{
 	public String description;
 	
 	@ManyToMany(mappedBy = "permissions", cascade = { CascadeType.ALL })
-    public List<Person> users;
+    public List<User> users;
     
     @ManyToMany
     public List <Group> groups;

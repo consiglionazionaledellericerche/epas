@@ -1,11 +1,6 @@
 #{extends 'main_admin_no_menu.html' /}
 #{set titolo: 'Gestione user per accesso amministrativo' /}
 
-<p class="lead">
-  <a data-toggle="modal" href="@{Administrators.insertAdmin}" data-target="#myModal1">
-    Inserisci un nuovo amministratore
-  </a>
-</p>
 <h3>User esistenti</h3>
 
 <table class="table table-condensed table-hover custom2 " id="listaAmministratori">
@@ -26,13 +21,11 @@
 		<th>Può caricare la situazione del personale</th>
 		
 	</tr>
-	%{
-		for(admin in administratorList){ 
-	}%
+	#{list items:userList, as:'admin'}
 	<tr>
 		<td class="caratteristica span3">
-		  <a data-toggle="modal" href="@{Administrators.edit(admin.id)}" data-target="#myModal2">
-		    ${admin.name} ${admin.surname}
+		  <a data-toggle="modal" href="@{Administrators.edit(admin.person.id)}" data-target="#myModal2">
+		    ${admin.person.name} ${admin.person.surname}
 		  </a>
 		</td>
 		<td>
@@ -157,10 +150,7 @@
 		
 		</td>
 	</tr>
-
-	%{
-		}
-	}%
+    #{/list}
 </table>
 
 <div id="myModal1" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

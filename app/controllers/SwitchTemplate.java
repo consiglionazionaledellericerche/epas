@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import it.cnr.iit.epas.ActionMenuItem;
 import it.cnr.iit.epas.PersonUtility;
 import models.Person;
+import models.User;
 
 import org.joda.time.LocalDate;
 
@@ -19,8 +20,14 @@ public class SwitchTemplate extends Controller{
 
 	public static void dispatch() throws InstantiationException, IllegalAccessException, IOException, ClassNotFoundException, SQLException {
 		
-		LocalDate now = new LocalDate();
+		User userLogged = Security.getUser();
+		if(userLogged==null)
+		{
+			flash.error("Nessun utente risulta loggato");
+			Application.index(); 	
+		}
 		
+		LocalDate now = new LocalDate();
 		session.put("dispatched", "true");
 		
 		String method = params.get("method");
@@ -29,8 +36,6 @@ public class SwitchTemplate extends Controller{
 			flash.error(String.format("La action da eseguire è: %s", method));
 			Application.indexAdmin();
 		}
-
-		
 		
 		session.put("methodSelected", method);
 		ActionMenuItem menuItem = ActionMenuItem.valueOf(method);
@@ -48,15 +53,25 @@ public class SwitchTemplate extends Controller{
 		session.put("daySelected", day);
 
 		//get person selected
-		Long personId = params.get("personId") != null ? Long.parseLong(params.get("personId")) : Security.getPerson().id; 
+		
+		//personId from routes (otherwise security)
+		Long personId;
+		if(params.get("personId")!=null)
+			personId = Long.parseLong(params.get("personId"));
+		else if(userLogged.person != null)
+			personId = userLogged.person.id;
+		else
+			personId = 1l; //admin id
 		session.put("personSelected", personId);
 		
-		//controllo se una certa funzionalità viene chiamata tramite curl 
-		Person personLogged = Security.getPerson();
-		Person p = PersonUtility.getPersonRightsBased(personLogged, personId);
-		if(p == null){
-			flash.error("Non si può accedere alla funzionalità per la persona con id %d", personId);
-			Application.indexAdmin();
+		//Se personId è una persona reale (1 admin, 0 tutti) eseguo il controllo
+		if(personId > 1)
+		{
+			if( !Security.canUserSeePerson(userLogged, personId) )
+			{
+				flash.error("Non si può accedere alla funzionalità per la persona con id %d", personId);
+				Application.indexAdmin();
+			}
 		}
 		
 		switch (menuItem) {
