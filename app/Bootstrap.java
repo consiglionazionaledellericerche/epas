@@ -93,12 +93,12 @@ public class Bootstrap extends Job {
 				Logger.info("Creato ufficio di default con nome %s e codice %s", conf.instituteName, conf.seatCode);
 			}
 			
-			Person admin = Person.find("byUsername", "admin").first();
-			if(admin!=null && admin.office==null){
-				admin.office = (Office)Office.findAll().get(0);
-				admin.save();
-				
-			}
+//			Person admin = Person.find("byUsername", "admin").first();
+//			if(admin!=null && admin.office==null){
+//				admin.office = (Office)Office.findAll().get(0);
+//				admin.save();
+//				
+//			}
 			
 			
 
