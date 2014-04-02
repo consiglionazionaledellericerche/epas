@@ -69,7 +69,7 @@ public class ResidualTest extends UnitTest {
     	
     	VacationsRecap februaryVacation = contractVacationRecap.get(0);
     	//asserzioni sui vacation recap
-    	assertEquals(februaryVacation.vacationDaysLastYearNotYetUsed, new Integer(26));	   //maturate(tutte) meno usate 27 - 1	
+    	assertEquals(februaryVacation.vacationDaysLastYearNotYetUsed, new Integer(25));	   //maturate(tutte) meno usate 27 - 1	
     	assertEquals(februaryVacation.vacationDaysCurrentYearNotYetUsed, new Integer(28)); //totali meno usate 28-0
     	assertEquals(februaryVacation.permissionUsed.size(), 2);
     	assertEquals(februaryVacation.persmissionNotYetUsed, new Integer(2));

@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-
 import org.joda.time.LocalDate;
 
 import models.Absence;
@@ -55,7 +54,7 @@ public class Charts extends Controller{
 
 		year = params.get("yearChart", Integer.class);
 		month = params.get("monthChart", Integer.class);
-		List<Person> personeProva = Person.getActivePersonsInMonth(month, year, Security.getPerson().getOfficeAllowed(), true);
+		List<Person> personeProva = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), true);
 		List<PersonOvertime> poList = new ArrayList<PersonOvertime>();
 		for(Person p : personeProva){
 			PersonOvertime po = new PersonOvertime();
@@ -79,7 +78,7 @@ public class Charts extends Controller{
 
 	public static void compensatoryRestInYear(){
 		int year = 2013;
-		List<Person> personeProva = Person.getActivePersonsinYear(year, Security.getPerson().getOfficeAllowed(), true);
+		List<Person> personeProva = Person.getActivePersonsinYear(year, Security.getOfficeAllowed(), true);
 		for(Person p : personeProva){
 
 		}
@@ -106,7 +105,7 @@ public class Charts extends Controller{
 		Logger.debug("Anno preso dai params: %d", year);
 		Long val = Competence.find("Select sum(c.valueApproved) from Competence c where c.competenceCode.code in (?,?,?) and c.year = ?", 
 				"S1","S2","S3", year).first();
-		List<Person> personeProva = Person.getActivePersonsinYear(year, Security.getPerson().getOfficeAllowed(), true);
+		List<Person> personeProva = Person.getActivePersonsinYear(year, Security.getOfficeAllowed(), true);
 		int totaleOreResidue = 0;
 		for(Person p : personeProva){
 			for(int month=1; month<13;month++){

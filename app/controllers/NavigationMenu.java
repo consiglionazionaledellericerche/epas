@@ -10,7 +10,9 @@ import it.cnr.iit.epas.ActionMenuItem;
 import it.cnr.iit.epas.MainMenu;
 import it.cnr.iit.epas.PersonUtility;
 import models.Contract;
+import models.Office;
 import models.Person;
+import models.User;
 
 import org.joda.time.LocalDate;
 
@@ -31,8 +33,12 @@ public class NavigationMenu extends Controller {
 	@Before 
 	public static void injectMenu() { 
 		LocalDate now = new LocalDate();
-		Person personLogged = Security.getPerson();
-		
+		User userLogged = Security.getUser();
+		if(userLogged==null)
+		{
+			flash.error("Nessun utente risulta loggato");
+			Application.index(); 	
+		}
 		Integer year;
 		Integer month;
 		Integer day;
@@ -63,7 +69,14 @@ public class NavigationMenu extends Controller {
 			session.put("daySelected", day);
 			
 			//personId from routes (otherwise security)
-			personId = params.get("personId") != null ? Long.parseLong(params.get("personId")) : Security.getPerson().id; 
+			if(params.get("personId")!=null)
+				personId = Long.parseLong(params.get("personId"));
+			else if(userLogged.person != null)
+				personId = userLogged.person.id;
+			else
+				personId = 1l; //admin id
+			
+			//personId = params.get("personId") != null ? Long.parseLong(params.get("personId")) : Security.getUser().person.id; 
 			session.put("personSelected", personId);
 			
 			//Method from Http.Request
@@ -74,9 +87,16 @@ public class NavigationMenu extends Controller {
 		
 		session.put("dispatched", "false");
 		
-		
-		List<Person> persons = Person.getActivePersonsInMonth(month, year, Security.getPerson().getOfficeAllowed(), false);
-		
+		List<Person> persons = null;
+		if(userLogged.person != null)
+		{
+			persons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
+		}
+		else
+		{
+			List<Office> allOffices = Office.findAll();
+			persons = Person.getActivePersonsInMonth(month, year, allOffices, false);
+		}
 		
 		ActionMenuItem action;
 		if(method != null && !method.equals("")) 
@@ -98,13 +118,15 @@ public class NavigationMenu extends Controller {
 			mainMenu = new MainMenu(personId, year, month, action, persons);
 		}		
 		
-		
-		
-		Person p = PersonUtility.getPersonRightsBased(personLogged, personId);
-		if(p == null){
-			flash.error("Non si può accedere alla funzionalità per la persona con id %d", personId);
-			renderArgs.put("mainMenu", mainMenu);
-			Application.indexAdmin();
+		//Se personId è una persona reale (1 admin, 0 tutti) eseguo il controllo
+		if( personId > 1 )
+		{
+			if( !Security.canUserSeePerson(userLogged, personId) )
+			{
+				flash.error("Non si può accedere alla funzionalità per la persona con id %d", personId);
+				renderArgs.put("mainMenu", mainMenu);
+				Application.indexAdmin();
+			}
 		}
 		renderArgs.put("mainMenu", mainMenu);
 

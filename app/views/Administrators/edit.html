@@ -9,7 +9,7 @@
 	
 		<tr>
 		<td>
-		#{if person.isViewPersonAvailable()}
+		#{if person.user.isViewPersonAvailable()}
 			Sì <input type="radio" name="viewPersonList" value="true" checked="checked"/> No <input type="radio" name="viewPersonList" value="false"/>
 		#{/if}
 		#{else}
@@ -32,7 +32,7 @@
 	
 		<tr>
 		<td>
-		#{if person.isInsertAndUpdatePersonAvailable()}
+		#{if person.user.isInsertAndUpdatePersonAvailable()}
 			Sì <input type="radio" name="insertAndUpdatePerson" value="true" checked="checked"/> No <input type="radio" name="insertAndUpdatePerson" value="false"/>
 		#{/if}
 		#{else}
@@ -57,7 +57,7 @@
 	
 	    <tr>
 		<td>
-		#{if person.isDeletePersonAvailable()}
+		#{if person.user.isDeletePersonAvailable()}
 			Sì <input type="radio" name="deletePerson" value="true" checked="checked"/> No <input type="radio" name="deletePerson" value="false"/>
 		#{/if}
 		#{else}
@@ -79,7 +79,7 @@
 		
 		<tr>
 		<td>
-		#{if person.isInsertAndUpdateStampingAvailable()}
+		#{if person.user.isInsertAndUpdateStampingAvailable()}
 			Sì <input type="radio" name="insertAndUpdateStamping" value="true" checked="checked"/> No <input type="radio" name="insertAndUpdateStamping" value="false"/>
 		#{/if}
 		#{else}
@@ -104,7 +104,7 @@
 		
 		<tr>
 		<td>
-		#{if person.isInsertAndUpdatePasswordAvailable()}
+		#{if person.user.isInsertAndUpdatePasswordAvailable()}
 			Sì <input type="radio" name="insertAndUpdatePassword" value="true" checked="checked"/> No <input type="radio" name="insertAndUpdatePassword" value="false"/>
 		#{/if}
 		#{else}
@@ -128,7 +128,7 @@
 
 		<tr>
 		<td>
-		#{if person.isInsertAndUpdateWorkinTimeAvailable()}
+		#{if person.user.isInsertAndUpdateWorkinTimeAvailable()}
 			Sì <input type="radio" name="insertAndUpdateWorkingTime" value="true" checked="checked"/> No <input type="radio" name="insertAndUpdateWorkingTime" value="false"/>
 		#{/if}
 		#{else}
@@ -153,7 +153,7 @@
 		
 		<tr>
 		<td>
-		#{if person.isInsertAndUpdateAbsenceAvailable()}
+		#{if person.user.isInsertAndUpdateAbsenceAvailable()}
 			Sì <input type="radio" name="insertAndUpdateAbsence" value="true" checked="checked"/> No <input type="radio" name="insertAndUpdateAbsence" value="false"/>
 		#{/if}
 		#{else}
@@ -178,7 +178,7 @@
 		
 		<tr>
 		<td>
-		#{if person.isInsertAndUpdateOfficesAvailable()}
+		#{if person.user.isInsertAndUpdateOfficesAvailable()}
 			Sì <input type="radio" name="insertAndUpdateOffices" value="true" checked="checked"/> No <input type="radio" name="insertAndUpdateOffices" value="false"/>
 		#{/if}
 		#{else}
@@ -206,7 +206,7 @@
 		
 		<tr>
 		<td>
-		#{if person.isInsertAndUpdateConfigurationAvailable()}
+		#{if person.user.isInsertAndUpdateConfigurationAvailable()}
 			Sì <input type="radio" name="insertAndUpdateConfiguration" value="true" checked="checked"/> No <input type="radio" name="insertAndUpdateConfiguration" value="false"/>
 		#{/if}
 		#{else}
@@ -231,7 +231,7 @@
 
 		<tr>
 		<td>
-		#{if person.isInsertAndUpdateAdministratorAvailable()}
+		#{if person.user.isInsertAndUpdateAdministratorAvailable()}
 			Sì <input type="radio" name="insertAndUpdateAdministrator" value="true" checked="checked"/> No <input type="radio" name="insertAndUpdateAdministrator" value="false"/>
 		#{/if}
 		#{else}
@@ -259,7 +259,7 @@
 
 		<tr>
 		<td>
-		#{if person.isInsertAndUpdateCompetenceAndOvertimeAvailable()}
+		#{if person.user.isInsertAndUpdateCompetenceAndOvertimeAvailable()}
 			Sì <input type="radio" name="insertAndUpdateCompetences" value="true" checked="checked"/> No <input type="radio" name="insertAndUpdateCompetences" value="false"/>
 		#{/if}
 		#{else}
@@ -285,7 +285,7 @@
 		
 		<tr>
 		<td>
-		#{if person.isInsertAndUpdateVacationsAvailable()}
+		#{if person.user.isInsertAndUpdateVacationsAvailable()}
 			Sì <input type="radio" name="insertAndUpdateVacations" value="true" checked="checked"/> No <input type="radio" name="insertAndUpdateVacations" value="false"/>
 		#{/if}
 		#{else}
@@ -312,7 +312,7 @@
 	
 		<tr>
 		<td>
-		#{if person.isUploadSituationAvailable()}
+		#{if person.user.isUploadSituationAvailable()}
 			Sì <input type="radio" name="uploadSituation" value="true" checked="checked"/> No <input type="radio" name="uploadSituation" value="false"/>
 		#{/if}
 		#{else}
