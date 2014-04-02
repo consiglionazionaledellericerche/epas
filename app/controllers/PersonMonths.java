@@ -144,7 +144,10 @@ public class PersonMonths extends Controller{
 		pm.toDate = endDate;
 		pm.save();
 		flash.success("Salvate %d ore di formazione ", value);
-		PersonMonths.trainingHours(personId, pm.year, pm.month);
+		if(month < new LocalDate().getMonthOfYear())
+			PersonMonths.trainingHours(personId, year, month+1);
+		else			
+			PersonMonths.trainingHours(personId, year, month);
 	}
 	
 	@Check(Security.VIEW_PERSONAL_SITUATION)
