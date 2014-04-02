@@ -91,7 +91,7 @@ public class YearlyAbsences extends Controller{
 		//controllo sui parametri
 		Person person = null;
 		if(personId == null)
-			person = Security.getPerson();
+			person = Security.getUser().person;
 		else
 			person = Person.findById(personId);
 		Integer anno = params.get("year", Integer.class);
@@ -156,7 +156,7 @@ public class YearlyAbsences extends Controller{
 			/**
 			 * caso in cui si vogliono le assenze di tutti i mesi dell'anno in corso fino alla data attuale
 			 */
-			List<Person> activePersons = Person.getActivePersonsinYear(year, Security.getPerson().getOfficeAllowed(), false);
+			List<Person> activePersons = Person.getActivePersonsinYear(year, Security.getOfficeAllowed(), false);
 			for(Person p : activePersons){
 				List<Absence> absenceInMonth = Absence.find("Select abs from Absence abs, PersonDay pd where abs.personDay = pd and " +
 						"pd.person = ? and pd.date >= ? and pd.date <= ?", 
@@ -179,7 +179,7 @@ public class YearlyAbsences extends Controller{
 			}
 		}
 		else{
-			List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getPerson().getOfficeAllowed(), false);
+			List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
 			//Table<Person, String, Integer> tableMonthlyAbsences = ArrayTable.create(activePersons, absenceInMonth);
 
 
@@ -227,7 +227,7 @@ public class YearlyAbsences extends Controller{
 		Logger.debug("Anno: %d Id: %d", year, personId);
 		Person person = null;
 		if(personId == null || personId == 0)
-			person = Security.getPerson();			//prende la persona collegata
+			person = Security.getUser().person;			//prende la persona collegata
 		else
 			person = Person.findById(personId);
 		Integer anno = params.get("year", Integer.class);

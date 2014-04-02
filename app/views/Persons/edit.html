@@ -15,7 +15,7 @@
 	<legend>Dati personali</legend>
 	#{secure.check "developer"}
 	<div class="pull-right">
-		<a class="btn btn-danger" href="@{Administrators.switchPersonTo(person.id)}">Assumi questa identità</a>
+		<a class="btn btn-danger" href="@{Administrators.switchUserTo(person.user.id)}">Assumi questa identità</a>
 	</div>
 	#{/secure.check}
 	<table class="tablenoborder">
