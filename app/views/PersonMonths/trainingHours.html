@@ -15,7 +15,7 @@
 	#{list items:pmMap.entrySet(), as: 'entry'}
 	
 	<tr>
-		<td>&{'views.tags.display.date.month.' +entry.getKey()}</td>
+		<td class="text-error">&{'views.tags.display.date.month.' +entry.getKey()}</td>
 		
 		<td>
 			<ul>	
@@ -39,11 +39,23 @@
 		<td><a href="@{PersonMonths.insertTrainingHours(person.id, month, year)}" data-modal="#myModal1">Inserisci ore di formazione</a></td>
 		#{/if}
 		#{else}
-			#{if entry.getKey() > month}
-			<td>Mese non ancora raggiunto</td>
+			#{if entry.getKey() > month }
+				<td>Mese non ancora raggiunto</td>
 			#{/if}
 			#{else}
-			<td>Mese già assegnato</td>
+				<td>
+				#{list items:entry.getValue(), as: 'item'}
+					#{if item.trainingHours != null}
+					#{if item.hoursApproved == false && item.month == month-1}
+					<a href="@{PersonMonths.insertTrainingHours(person.id, item.month, item.year)}" data-modal="#myModal1">Inserisci ore di formazione</a>	
+					#{/if}
+					#{else}
+						Mese già approvato
+					#{/else}
+					#{/if}
+				#{/list}
+				</td>
+				
 			#{/else}
 		#{/else}
 		<td>
