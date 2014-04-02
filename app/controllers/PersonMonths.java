@@ -65,7 +65,7 @@ public class PersonMonths extends Controller{
 			pm.trainingHours = 0;
 			pm.hoursApproved = false;
 
-			listina.add(new PersonMonthRecap(person,year,i));
+			listina.add(pm);
 			pmMap.put(pm.month, listina);
 		}
 		for(PersonMonthRecap pm : pmList){
