@@ -71,10 +71,10 @@
 		#{list items:entry.getValue(), as: 'check'}
 		#{if check.trainingHours != 0}
 			#{if check.hoursApproved == true}
-				<input type="checkbox" disabled="disabled" checked="checked"/>
+				<input type="checkbox" disabled="disabled" checked="checked"/><br>
 			#{/if}
 			#{else}
-				<input type="checkbox" disabled="disabled"/>
+				<input type="checkbox" disabled="disabled"/><br>
 			#{/else}
 		#{/if}
 		#{/list}
