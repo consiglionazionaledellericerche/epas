@@ -20,7 +20,7 @@
 		<td>
 			<ul>	
 			#{list items:entry.getValue(), as: 'pm'}
-				#{if pm.trainingHours != null}
+				#{if pm.trainingHours != 0}
 					#{if !pm.hoursApproved || pm.month == month}			
 						<li>
 							<a data-toggle="modal" data-placement="bottom" title="Modifica ore di formazione" href="@{PersonMonths.modifyTrainingHours(pm.id)}" data-target="#myModal2">
@@ -44,23 +44,32 @@
 			#{/if}
 			#{else}
 				<td>
-				#{list items:entry.getValue(), as: 'item'}
-					#{if item.trainingHours != null}
-					#{if item.hoursApproved == false && item.month == month-1}
-					<a href="@{PersonMonths.insertTrainingHours(person.id, item.month, item.year)}" data-modal="#myModal1">Inserisci ore di formazione</a>	
+				#{if entry.getValue().size() == 1}
+									
+					#{if entry.getValue().get(0).month == month-1 && entry.getValue().get(0).hoursApproved == false}
+					<a href="@{PersonMonths.insertTrainingHours(person.id, entry.getValue().get(0).month, entry.getValue().get(0).year)}" data-modal="#myModal1">Inserisci ore di formazione</a>	
 					#{/if}
 					#{else}
-						Mese già approvato
+						Ore già approvate<br>
 					#{/else}
+					
+				#{/if}
+				
+				#{else}
+					#{if entry.getValue().get(1).month == month-1 && entry.getValue().get(1).hoursApproved == false}
+					<a href="@{PersonMonths.insertTrainingHours(person.id, entry.getValue().get(1).month, entry.getValue().get(1).year)}" data-modal="#myModal1">Inserisci ore di formazione</a>	
 					#{/if}
-				#{/list}
+					#{else}
+						Ore già approvate<br>
+					#{/else}
+				#{/else}
 				</td>
 				
 			#{/else}
 		#{/else}
 		<td>
 		#{list items:entry.getValue(), as: 'check'}
-		#{if check.trainingHours != null}
+		#{if check.trainingHours != 0}
 			#{if check.hoursApproved == true}
 				<input type="checkbox" disabled="disabled" checked="checked"/>
 			#{/if}
