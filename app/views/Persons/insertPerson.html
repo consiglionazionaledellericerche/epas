@@ -74,14 +74,16 @@
 			</tr>	
 				
 			<tr>	
-				<td>Ore di inizializzazione maturate in altro istituto l'anno passato (in minuti)</td>
-				<td><input name="minutesPastYear" type="number" size="10" /></td>
+				<td>Tipo Orario</td>
+				<td>
+				#{select 'wtt'}
+                  #{list items:wttList, as:'wttItem'}
+	                #{option wttItem.id}${wttItem.description}#{/option}
+		          #{/list}
+		        #{/select}
+			    </td>
 			</tr>	
 				
-			<tr>	
-				<td>Ore di inizializzazione maturate in altro istituto nell'anno corrente (in minuti)</td>
-				<td><input name="minutesCurrentYear" type="number" size="10" /></td>
-			</tr>
 		</table>	
 	</fieldset>
 

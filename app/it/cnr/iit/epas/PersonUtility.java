@@ -335,7 +335,7 @@ public class PersonUtility {
 	 * @return il personDay se la data passata è di un giorno feriale, null altrimenti
 	 */
 	public static PersonDay createPersonDayFromDate(Person person, LocalDate date){
-		if(DateUtility.isHoliday(person,date))
+		if(person.isHoliday(date))
 			return null;
 		return new PersonDay(person, date);
 	}
@@ -1035,27 +1035,6 @@ public class PersonUtility {
 		return competenceCodeList;
 	}
 	
-	
-	/**
-	 * 
-	 * @param administrator
-	 * @param personId
-	 * @return la persona se l'amministratore che la vuole estrarre ha i diritti in termini di appartenenza alla stessa sede. 
-	 * Null altrimenti
-	 */
-	public static Person getPersonRightsBased(Person administrator, Long personId){
-		Person person = Person.findById(personId);
-		if(person == null)
-			return null;
-		if(person.office.id == administrator.office.id)
-			return person;
-		for(RemoteOffice remote : administrator.office.remoteOffices){
-			if(remote.id == person.office.id)
-				return person;
-		}
-		return null;
-	}
-
 }
 
 
