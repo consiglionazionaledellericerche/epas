@@ -52,7 +52,7 @@ public class Competences extends Controller{
 		if(personId != null)
 			person = Person.findById(personId); //Security.getPerson();
 		else
-			person = Security.getPerson();
+			person = Security.getUser().person;
 
 		PersonMonthCompetenceRecap personMonthCompetenceRecap = new PersonMonthCompetenceRecap(person, month, year);
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);
@@ -70,10 +70,10 @@ public class Competences extends Controller{
 		if((year == null || month == null) || (year == 0 || month == 0)){
 			int yearParams = params.get("year", Integer.class);
 			int monthParams = params.get("month", Integer.class);
-			activePersons = Person.getTechnicianForCompetences(new LocalDate(yearParams, monthParams,1), Security.getPerson().getOfficeAllowed());
+			activePersons = Person.getTechnicianForCompetences(new LocalDate(yearParams, monthParams,1), Security.getUser().person.getOfficeAllowed());
 		}
 		else{
-			activePersons = Person.getTechnicianForCompetences(new LocalDate(year, month, 1), Security.getPerson().getOfficeAllowed());
+			activePersons = Person.getTechnicianForCompetences(new LocalDate(year, month, 1), Security.getUser().person.getOfficeAllowed());
 		}
 		
 		//Redirect in caso di mese futuro
@@ -254,7 +254,7 @@ public class Competences extends Controller{
 			beginMonth = new LocalDate(year, month, 1);
 		}
 		
-		List<Person> activePersons = Person.getTechnicianForCompetences(new LocalDate(year, month, 1), Security.getPerson().getOfficeAllowed());
+		List<Person> activePersons = Person.getTechnicianForCompetences(new LocalDate(year, month, 1), Security.getUser().person.getOfficeAllowed());
 		for(Person p : activePersons){
 			Integer daysAtWork = 0;
 			Integer recoveryDays = 0;
@@ -308,7 +308,7 @@ public class Competences extends Controller{
 	 */
 	public static void recapCompetences(){
 		LocalDate date = new LocalDate();
-		List<Person> personList = Person.getTechnicianForCompetences(date, Security.getPerson().getOfficeAllowed());
+		List<Person> personList = Person.getTechnicianForCompetences(date, Security.getUser().person.getOfficeAllowed());
 		ImmutableTable.Builder<Person, String, Boolean> builder = ImmutableTable.builder();
 		Table<Person, String, Boolean> tableRecapCompetence = null;
 		List<CompetenceCode> codeList = CompetenceCode.findAll();
@@ -593,7 +593,7 @@ public class Competences extends Controller{
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void getOvertimeInYear(int year) throws IOException{
 		
-		List<Person> personList = Person.getActivePersonsinYear(year, Security.getPerson().getOfficeAllowed(), true);
+		List<Person> personList = Person.getActivePersonsinYear(year, Security.getOfficeAllowed(), true);
 		FileInputStream inputStream = null;
 		File tempFile = File.createTempFile("straordinari"+year,".csv" );
 		inputStream = new FileInputStream( tempFile );

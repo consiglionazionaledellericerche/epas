@@ -56,7 +56,7 @@ public class JsonExport extends Controller {
 				return new PersonInfo(
 					Joiner.on(" ").skipNulls().join(person.name, person.othersSurnames), 
 					Joiner.on(" ").skipNulls().join(person.surname, person.othersSurnames), 
-					person.password);
+					person.user.password);
 			}
 		}).toList();
 		
