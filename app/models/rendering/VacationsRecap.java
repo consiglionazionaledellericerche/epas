@@ -21,7 +21,6 @@ import models.Person;
 import models.PersonDay;
 import models.VacationCode;
 import models.VacationPeriod;
-import models.VacationsPermissionsDaysAccrued;
 
 import com.google.common.collect.Table;
 
@@ -334,5 +333,154 @@ public class VacationsRecap {
 		return vc.vacationDaysLastYearNotYetUsed;
 		
 	}
+	
+	/**
+	 * Progressione maturazione ferie e permessi nell'arco dell'anno
+	 */
+	private static class VacationsPermissionsDaysAccrued {
+
+		/**
+		 * 
+		 * @param days
+		 * @return il numero di giorni di ferie che corrispondono al numero di giorni lavorati dall'inizio dell'anno per chi lavora in 
+		 * istituto da meno di tre anni
+		 */
+		public static int convertWorkDaysToVacationDaysLessThreeYears(int days){
+			
+			if(days<=0)
+				return 0;
+			
+			if(days >= 1 && days <= 15)
+				return 1;
+			if(days >= 16 && days <= 30)
+				return 2;
+			if(days >= 31 && days <= 45)
+				return 3;
+			if(days >= 46 && days <= 60)
+				return 4;
+			if(days >= 61 && days <= 75)
+				return 5;
+			if(days >= 76 && days <= 90)
+				return 6;
+			if(days >= 91 && days <= 105)
+				return 7;
+			if(days >= 106 && days <= 120)
+				return 9;
+			if(days >= 121 && days <= 135)
+				return 10;
+			if(days >= 136 && days <= 150)
+				return 11;
+			if(days >= 151 && days <= 165)
+				return 12;
+			if(days >= 166 && days <= 180)
+				return 13;
+			if(days >= 181 && days <= 195)
+				return 14;
+			if(days >= 196 && days <= 210)
+				return 15;
+			if(days >= 211 && days <= 225)
+				return 16;
+			if(days >= 226 && days <= 240)
+				return 17;
+			if(days >= 241 && days <= 255)
+				return 18;
+			if(days >= 256 && days <= 270)
+				return 19;
+			if(days >= 271 && days <= 285)
+				return 20;
+			if(days >= 286 && days <= 300)
+				return 21;
+			if(days >= 301 && days <= 315)
+				return 22;
+			if(days >= 316 && days <= 330)
+				return 24;
+			if(days >= 331 && days <= 345)
+				return 25;
+			else
+				return 26;
+			
+		}
+
+		/**
+		 * 
+		 * @param days
+		 * @return il numero di giorni di ferie che corrispondono al numero di giorni lavorati dall'inizio dell'anno per chi lavora in
+		 * istituto da più di tre anni
+		 */
+		public static int convertWorkDaysToVacationDaysMoreThreeYears(int days){
+			if(days<=0)
+				return 0;
+			
+			if(days >= 1 && days <= 15)
+				return 1;
+			if(days >= 16 && days <= 30)
+				return 2;
+			if(days >= 31 && days <= 45)
+				return 3;
+			if(days >= 46 && days <= 60)
+				return 5;
+			if(days >= 61 && days <= 75)
+				return 6;
+			if(days >= 76 && days <= 90)
+				return 7;
+			if(days >= 91 && days <= 105)
+				return 8;
+			if(days >= 106 && days <= 120)
+				return 9;
+			if(days >= 121 && days <= 135)
+				return 10;
+			if(days >= 136 && days <= 150)
+				return 12;
+			if(days >= 151 && days <= 165)
+				return 13;
+			if(days >= 166 && days <= 180)
+				return 14;
+			if(days >= 181 && days <= 195)
+				return 15;
+			if(days >= 196 && days <= 210)
+				return 16;
+			if(days >= 211 && days <= 225)
+				return 17;
+			if(days >= 226 && days <= 240)
+				return 18;
+			if(days >= 241 && days <= 255)
+				return 20;
+			if(days >= 256 && days <= 270)
+				return 21;
+			if(days >= 271 && days <= 285)
+				return 22;
+			if(days >= 286 && days <= 300)
+				return 23;
+			if(days >= 301 && days <= 315)
+				return 24;
+			if(days >= 316 && days <= 330)
+				return 25;
+			if(days >= 331 && days <= 345)
+				return 26;
+			else
+				return 28;
+			
+		}
+
+		/**
+		 * 
+		 * @param days
+		 * @return il numero di giorni di permesso legge spettanti al dipendente a seconda dei giorni di presenza
+		 */
+		public static int convertWorkDaysToPermissionDays(int days){
+			int permissionDays = 0;
+			if(days >= 45 && days <= 135)
+				permissionDays = 1;
+			if(days >= 136 && days <= 225)
+				permissionDays = 2;
+			if(days >= 226 && days <= 315)
+				permissionDays = 3;
+			if(days >= 316 && days <= 365)
+				permissionDays = 4;
+			return permissionDays;
+		}
+		
+	}
+
 
 }
