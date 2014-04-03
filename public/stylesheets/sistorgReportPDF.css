@@ -151,20 +151,21 @@ div.resp {
 }
 
 /* Note nei report*/
-div.note {
-	width: 80%;
+div.note_presenze {
+	width: 90%;
 	border: 0.2px solid black;
 	background-color: #FAFAFA;
 	font-family: Verdana, Arial, sans-serif;
 	font-size: 9pt;
 	text-align: left;
-	margin-top: 3em;
-	margin-left: 10%;
+	padding: 2em 1em;
+	margin-left: 5%;
 	/*margin: 3em, 0, 4em, 7em;*/
 	clear: left;	
+	page-break-before:always;
 }
 
-div.note  h2, h3 {
+div.note_presenze  h2, h3 {
 	text-align: left;
 	padding-left: 1em;
 	color: red;

@@ -73,6 +73,8 @@ public class Shift extends Controller{
 
 		
 		String type = params.get("type");		
+		Logger.debug("Cerco persone del turno %s", type);
+		
 		ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();
 		if (shiftType == null) {
 			notFound(String.format("ShiftType type = %s doesn't exist", type));			
@@ -117,7 +119,7 @@ public class Shift extends Controller{
 		List<PersonShiftDay> personShiftDay = PersonShiftDay.find("" +
 				"SELECT psd FROM PersonShiftDay psd WHERE psd.date BETWEEN ? AND ? " +
 				"AND psd.shiftType = ? " +
-				"ORDER BY psd.getShiftSlot(), psd.date",
+				"ORDER BY psd.shiftSlot, psd.date",
 			//	"ORDER BY psd.shiftTimeTable.startShift, psd.date", 
 				from, to, shiftType).fetch();
 		Logger.debug("Shift find called from %s to %s, type %s - found %s shift days", from, to, shiftType.type, personShiftDay.size());
@@ -127,12 +129,12 @@ public class Shift extends Controller{
 		
 		for (PersonShiftDay psd : personShiftDay) {	
 			
-			LocalTime startShift = (psd.getShiftSlot().equals(ShiftSlot.MORNING)) ? personShiftDay.shiftType.shiftTimeTable.getStartMornigShift() : personShiftDay.shiftType.shiftTimeTable.getStartAfternoonShift();
-			LocalTime endShift = (personShiftDay.getShiftSlot().equals(ShiftSlot.AFTERNOON)) ? personShiftDay.shiftType.shiftTimeTable.getEndtMornigShift() : personShiftDay.shiftType.shiftTimeTable.getEndtAfternoonShift();
+			LocalTime startShift = (psd.shiftSlot.equals(ShiftSlot.MORNING)) ? psd.shiftType.shiftTimeTable.startMorning : psd.shiftType.shiftTimeTable.startAfternoon;
+			LocalTime endShift = (psd.getShiftSlot().equals(ShiftSlot.AFTERNOON)) ? psd.shiftType.shiftTimeTable.endMorning : psd.shiftType.shiftTimeTable.endAfternoon;
 
 			//if (shiftPeriod == null || !shiftPeriod.person.equals(psd.personShift.person) || !shiftPeriod.end.plusDays(1).equals(psd.date) || !shiftPeriod.shiftTimeTable.getStartShift().equals(psd.shiftTimeTable.getStartShift() )){
-			if (shiftPeriod == null || !shiftPeriod.person.equals(psd.personShift.person) || !shiftPeriod.end.plusDays(1).equals(psd.date) || !shiftPeriod.startShift.equals(startShift)){
-				shiftPeriod = new ShiftPeriod(psd.personShift.person, psd.date, psd.date, psd.shiftType, false, startShift, endShift);
+			if (shiftPeriod == null || !shiftPeriod.person.equals(psd.personShift.person) || !shiftPeriod.end.plusDays(1).equals(psd.date) || !shiftPeriod.startSlot.equals(startShift)){
+				shiftPeriod = new ShiftPeriod(psd.personShift.person, psd.date, psd.date, psd.shiftType, false, psd.shiftSlot, startShift, endShift);
 				shiftPeriods.add(shiftPeriod);
 				Logger.trace("\nCreato nuovo shiftPeriod, person=%s, start=%s, end=%s, type=%s, orario=%s - %s" , shiftPeriod.person, shiftPeriod.start, shiftPeriod.end, shiftPeriod.shiftType.type, startShift.toString("HH::mm"), endShift.toString("HH::mm"));
 			} else {
@@ -312,6 +314,30 @@ public class Shift extends Controller{
 			}
 		}
 	}
+	
+	
+	
+	/*public static void createShiftTimeTable() {
+		ShiftTimeTable shiftTimeTable = new ShiftTimeTable();
+		
+		shiftTimeTable.startMorning = new LocalTime(7, 50);
+		shiftTimeTable.endMorning = new LocalTime(14, 50);
+		
+		shiftTimeTable.startAfternoon = new LocalTime(13, 20);
+		shiftTimeTable.endAfternoon = new LocalTime(19, 50);
+		
+		shiftTimeTable.startMorningLunchTime = new LocalTime(13, 50);
+		shiftTimeTable.endMorningLunchTime = new LocalTime(14, 20);
+		
+		shiftTimeTable.startAfternoonLunchTime = new LocalTime(14, 20);
+		shiftTimeTable.endAfternoonLunchTime = new LocalTime(14, 50);
+		
+		shiftTimeTable.totalWorkMinutes = 720;
+		shiftTimeTable.paidMinutes = 390;
+		
+		Logger.debug("creato shift_time_table con startMorning=%s and endmorning=%s", shiftTimeTable.startMorning.toString(), shiftTimeTable.endMorning.toString());
+		shiftTimeTable.save();
+	}*/
 	
 	
 	/**

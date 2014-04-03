@@ -22,30 +22,39 @@ public class ShiftPeriod {
 	public LocalDate end;
 	public final ShiftType shiftType;
 	public final boolean cancelled;
-	//public ShiftTimeTable shiftTimeTable;
 	public ShiftSlot shiftSlot;
-	public LocalTime startShift;
-	public LocalTime endShift;
+	public LocalTime startSlot;
+	public LocalTime endSlot;
 	
-	public ShiftPeriod(Person person, LocalDate start, LocalDate end, ShiftType shiftType, boolean cancelled, ShiftSlot shiftSlot, LocalTime startShift, LocalTime endShift) {
+	public ShiftPeriod(Person person, LocalDate start, LocalDate end, ShiftType shiftType, boolean cancelled, ShiftSlot shiftSlot, LocalTime startSlot, LocalTime endSlot) {
 		this.person = person;
 		this.start = start;
 		this.end = end;
 		this.cancelled = cancelled;
 		this.shiftType = shiftType;
 		this.shiftSlot = shiftSlot;
-		this.startShift = startShift;
-		this.endShift = endShift;
+		this.startSlot = startSlot;
+		this.endSlot = endSlot;
 	}
 	
-	public ShiftPeriod(Person person, LocalDate start, ShiftType shiftType, boolean cancelled, ShiftSlot shiftSlot, LocalTime startShift, LocalTime endShift){
+	public ShiftPeriod(Person person, LocalDate start, LocalDate end, ShiftType shiftType, boolean cancelled, ShiftSlot shiftSlot) {
+		this.person = person;
+		this.start = start;
+		this.end = end;
+		this.cancelled = cancelled;
+		this.shiftType = shiftType;
+		this.shiftSlot = shiftSlot;
+	}
+	
+	// for periods of 1 day where end date is null
+	public ShiftPeriod(Person person, LocalDate start, ShiftType shiftType, boolean cancelled, ShiftSlot shiftSlot, LocalTime startSlot, LocalTime endSlot){
 		this.person = person;
 		this.start = start;
 		this.shiftType = shiftType;
 		this.cancelled = cancelled;
 		this.shiftSlot = shiftSlot;
-		this.startShift = startShift;
-		this.endShift = endShift;
+		this.startSlot = startSlot;
+		this.endSlot = endSlot;
 	}
 	
 	// for cancelled shift
