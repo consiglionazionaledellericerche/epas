@@ -92,7 +92,6 @@ public class Person extends Model {
 
 	@Version
 	public Integer version;
-	
 
 	@Required
 	public String name;
@@ -109,9 +108,9 @@ public class Person extends Model {
 	@Email
 	public String email;
 
-	public String username;
-
-	public String password;
+	@OneToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name = "user_id")
+	public User user;
 
 	/**
 	 * Numero di matricola
@@ -148,9 +147,6 @@ public class Person extends Model {
 	@OneToOne(mappedBy="person", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
 	public PersonHourForOvertime personHourForOvertime;
 
-	/**
-	 * relazione con la tabella dei contratti
-	 */
 	@NotAudited
 	@OneToMany(mappedBy="person", fetch=FetchType.EAGER, cascade = {CascadeType.REMOVE})
 	public List<Contract> contracts = new ArrayList<Contract>(); 
@@ -158,22 +154,6 @@ public class Person extends Model {
 	@NotAudited
 	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<StampProfile> stampProfiles = new ArrayList<StampProfile>();
-
-	
-	@NotAudited
-	@OneToMany(mappedBy = "person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<PersonWorkingTimeType> personWorkingTimeType = new ArrayList<PersonWorkingTimeType>();
-	
-	/**
-	 * relazione con la tabella delle eventuali sedi distaccate
-	 */
-//	@NotAudited
-//	@ManyToOne(fetch=FetchType.LAZY)
-//	@JoinColumn(name="remote_office_id", nullable=true)
-//	public RemoteOffice remoteOffice;
-
-	@ManyToMany(cascade = {CascadeType.REFRESH, CascadeType.REMOVE}, fetch = FetchType.LAZY)
-	public List<Permission> permissions;
 
 	/**
 	 * relazione con la tabella dei gruppi
@@ -216,8 +196,6 @@ public class Person extends Model {
 	@NotAudited
 	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<YearRecap> yearRecaps;
-
-
 
 	/**
 	 * relazione con la tabella Competence
@@ -338,12 +316,7 @@ public class Person extends Model {
 			return null;
 	}
 
-	public Set<Permission> getAllPermissions(){
-		Set<Permission> setPermissions = new HashSet<Permission>();
-		setPermissions.addAll(permissions);
-
-		return setPermissions;
-	}
+	
 
 	
 	/**
@@ -474,10 +447,14 @@ public class Person extends Model {
 	@Deprecated 
 	public static List<Person> getActivePersons(LocalDate date){
 		List<Person> activePersons = null;
-		Person person = Security.getPerson();
-		
+		User user = Security.getUser();
+					
+		if(user.person==null)
+		{
+			return Person.findAll();
+		}
 		//tutte le persone (l'amministratore è amministratore di sede principale)
-		if(person.office.remoteOffices.isEmpty())
+		if(user.person.office.remoteOffices.isEmpty())
 		{
 			//List<Person> personOffice = new ArrayList<Person>();
 			
@@ -504,7 +481,7 @@ public class Person extends Model {
 					+ "and (c.expireContract > ? or c.expireContract is null) "
 					+ "and (c.beginContract < ? or c.beginContract is null) "
 					+ "and p.username <> ? " + 
-					"order by p.surname, p.name", person.office, date, date, date, "epas.clocks").fetch();
+					"order by p.surname, p.name", user.person.office, date, date, date, "epas.clocks").fetch();
 		}
 		
 		return activePersons;
@@ -516,9 +493,6 @@ public class Person extends Model {
 	 * @return la lista delle sedi visibili alla persona che ha chiamato il metodo
 	 */
 	public List<Office> getOfficeAllowed(){
-		
-		if(this.username.equals("admin"))
-			return Office.findAll();
 		
 		List<Office> officeList = new ArrayList<Office>();
 		if(!this.office.remoteOffices.isEmpty()){
@@ -611,14 +585,16 @@ public class Person extends Model {
 				+ "left outer join fetch p.location "					//OneToOne
 				+ "left outer join fetch p.reperibility "				//OneToOne
 				+ "left outer join fetch p.personShift "				//OneToOne 
+				+ "left outer join fetch p.user "						//OneToOne 
 				+ "left outer join fetch p.contracts as c "
 				+ "where "
 				
 				//utenti di sistema
-				+"p.username != ? "
+				//+"p.username != ? "
 				
 				//contratto on certificate
-				+ "and c.onCertificate = true "
+				//+ "and c.onCertificate = true " tolto and perchè ho tolto username
+				+ "c.onCertificate = true "
 				
 				+ "and "
 				
@@ -643,7 +619,7 @@ public class Person extends Model {
 				+"and p.qualification in :qualificationList "
 				
 								
-				+ "order by p.surname, p.name", "epas.clocks", endPeriod, endPeriod, startPeriod, endPeriod, startPeriod).bind("officeList", officeAllowed).bind("qualificationList", qualificationRequested).fetch();
+				+ "order by p.surname, p.name", /*"epas.clocks",*/ endPeriod, endPeriod, startPeriod, endPeriod, startPeriod).bind("officeList", officeAllowed).bind("qualificationList", qualificationRequested).fetch();
 
 		return personList;
 	}
@@ -742,6 +718,34 @@ public class Person extends Model {
 		return getActivePersonsInDay(date, officeAllowed, true);
 	}
 
+	/**
+	 * True se il giorno passato come argomento è festivo per la persona. False altrimenti.
+	 * @param date
+	 * @return
+	 */
+	public boolean isHoliday(LocalDate date)
+	{
+		if(DateUtility.isGeneralHoliday(date))
+			return true;
+		
+		Contract contract = this.getContract(date);
+		if(contract == null)
+		{
+			//persona fuori contratto
+			return false;
+		}
+			
+		for(ContractWorkingTimeType cwtt : contract.contractWorkingTimeType)
+		{
+			if(DateUtility.isDateIntoInterval(date, new DateInterval(cwtt.beginDate, cwtt.endDate)))
+			{
+				return cwtt.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).holiday;
+			}
+		}
+		
+		return false;	//se il db è consistente non si verifica mai
+		
+	}
 	
 	@Override
 	public String toString() {
@@ -753,110 +757,7 @@ public class Person extends Model {
 	 * 
 	 */
 
-	public boolean isViewPersonAvailable(){
-		for(Permission p : this.permissions){
-			if(p.description.equals(Security.VIEW_PERSON_LIST))
-				return true;
-		}
-		return false;
-	}
-
-	public boolean isInsertAndUpdatePersonAvailable(){
-		for(Permission p : this.permissions){
-			if(p.description.equals(Security.INSERT_AND_UPDATE_PERSON))
-				return true;
-		}
-		return false;
-	}
-
-	public boolean isInsertAndUpdateAbsenceAvailable(){
-		for(Permission p : this.permissions){
-			if(p.description.equals(Security.INSERT_AND_UPDATE_ABSENCE))
-				return true;
-		}
-		return false;
-	}
-
-	public boolean isDeletePersonAvailable(){
-		for(Permission p : this.permissions){
-			if(p.description.equals(Security.DELETE_PERSON))
-				return true;
-		}
-		return false;
-	}
-
-	public boolean isInsertAndUpdateWorkinTimeAvailable(){
-		for(Permission p : this.permissions){
-			if(p.description.equals(Security.INSERT_AND_UPDATE_WORKINGTIME))
-				return true;
-		}
-		return false;
-	}
-
-	public boolean isInsertAndUpdateStampingAvailable(){
-		for(Permission p : this.permissions){
-			if(p.description.equals(Security.INSERT_AND_UPDATE_STAMPING))
-				return true;
-		}
-		return false;
-	}
-
-	public boolean isInsertAndUpdatePasswordAvailable(){
-		for(Permission p : this.permissions){
-			if(p.description.equals(Security.INSERT_AND_UPDATE_PASSWORD))
-				return true;
-		}
-		return false;
-	}
-
-	public boolean isInsertAndUpdateConfigurationAvailable(){
-		for(Permission p : this.permissions){
-			if(p.description.equals(Security.INSERT_AND_UPDATE_CONFIGURATION))
-				return true;
-		}
-		return false;
-	}
-
-	public boolean isInsertAndUpdateAdministratorAvailable(){
-		for(Permission p : this.permissions){
-			if(p.description.equals(Security.INSERT_AND_UPDATE_ADMINISTRATOR))
-				return true;
-		}
-		return false;
-	}
-
-	public boolean isInsertAndUpdateOfficesAvailable(){
-		for(Permission p : this.permissions){
-			if(p.description.equals(Security.INSERT_AND_UPDATE_OFFICES))
-				return true;
-		}
-		return false;
-	}
 	
-	public boolean isInsertAndUpdateCompetenceAndOvertimeAvailable(){
-		for(Permission p : this.permissions){
-			if(p.description.equals(Security.INSERT_AND_UPDATE_COMPETENCES))
-				return true;
-		}
-		return false;
-	}
-
-	public boolean isInsertAndUpdateVacationsAvailable(){
-		for(Permission p : this.permissions){
-			if(p.description.equals(Security.INSERT_AND_UPDATE_VACATIONS))
-				return true;
-		}
-		return false;
-	}
-	
-	public boolean isUploadSituationAvailable(){
-		for(Permission p : this.permissions){
-			if(p.description.equals(Security.UPLOAD_SITUATION))
-				return true;
-		}
-		return false;
-	}
-
 	/**
 	 * 
 	 * @return la lista delle persone che sono state selezionate per far parte della sperimentazione del nuovo sistema delle presenze
@@ -1309,11 +1210,14 @@ public class Person extends Model {
 	 * @return il tipo di orario di lavoro utilizzato in date
 	 */
 	public  WorkingTimeType getWorkingTimeType(LocalDate date) {
-		for(PersonWorkingTimeType personWtt : this.personWorkingTimeType)
+		Contract contract = this.getContract(date);
+		if(contract==null)
+			return null;
+		for(ContractWorkingTimeType cwtt : contract.contractWorkingTimeType)
 		{
-			if(DateUtility.isDateIntoInterval(date, new DateInterval(personWtt.beginDate, personWtt.endDate)))
+			if(DateUtility.isDateIntoInterval(date, new DateInterval(cwtt.beginDate, cwtt.endDate)))
 			{
-				return personWtt.workingTimeType;
+				return cwtt.workingTimeType;
 			}
 		}
 		return null;

@@ -29,7 +29,7 @@ public class Vacations extends Controller{
 			person = Person.findById(personId);
 		}
 		else
-			person = Security.getPerson();
+			person = Security.getUser().person;
 		
 		//default l'anno corrente
     	if(anno==null)
@@ -57,7 +57,7 @@ public class Vacations extends Controller{
 		if(personId != null)
     		person = Person.findById(personId);
     	else
-    		person = Security.getPerson();
+    		person = Security.getUser().person;
 
     	//Costruzione oggetto di riepilogo per la persona
 		Contract contract = person.getCurrentContract();
@@ -80,7 +80,7 @@ public class Vacations extends Controller{
     	if(personId != null)
     		person = Person.findById(personId);
     	else
-    		person = Security.getPerson();
+    		person = Security.getUser().person;
     	
     	//Costruzione oggetto di riepilogo per la persona
     	Contract contract = person.getCurrentContract();
@@ -102,7 +102,7 @@ public class Vacations extends Controller{
 		if(personId != null)
     		person = Person.findById(personId);
     	else
-    		person = Security.getPerson();
+    		person = Security.getUser().person;
 
     	//Costruzione oggetto di riepilogo per la persona
 		Contract contract = person.getCurrentContract();

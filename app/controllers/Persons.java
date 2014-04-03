@@ -1,6 +1,8 @@
 package controllers;
 
 import it.cnr.iit.epas.ActionMenuItem;
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
@@ -13,15 +15,18 @@ import models.CompetenceCode;
 import models.ConfGeneral;
 import models.ContactData;
 import models.Contract;
+import models.ContractWorkingTimeType;
 import models.InitializationTime;
 import models.Location;
 import models.Office;
+import models.Permission;
 import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
 import models.PersonWorkingTimeType;
 import models.Qualification;
 import models.RemoteOffice;
+import models.User;
 //import models.RemoteOffice;
 import models.VacationCode;
 import models.VacationPeriod;
@@ -48,10 +53,7 @@ public class Persons extends Controller {
 	
 		LocalDate date = new LocalDate();
 		List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract", person).fetch();
-		List<Office> officeList = null;
-		Person personLogged = Security.getPerson();
-		officeList = personLogged.getOfficeAllowed();
-		
+		List<Office> officeList = Security.getOfficeAllowed();	
 		
 		InitializationTime initTime = InitializationTime.find("Select init from InitializationTime init where init.person = ?", person).first();
 		Integer month = date.getMonthOfYear();
@@ -206,15 +208,6 @@ public class Persons extends Controller {
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void editWorkingTime(Long personId){
-		Person person = Person.findById(personId);
-		//WorkingTimeType wtt = person.gworkingTimeType;
-		WorkingTimeType wtt = person.getCurrentWorkingTimeType();
-		render(person, wtt);
-		
-	}
-	
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void changeVacation(Long personId){
 		Person person = Person.findById(personId);
 		List<VacationCode> codeList = VacationCode.findAll();
@@ -223,102 +216,86 @@ public class Persons extends Controller {
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void changeWorkingTime(Long personId){
-		Person person = Person.findById(personId);
+	public static void updateContractWorkingTimeType(Long id)
+	{
 		List<WorkingTimeType> wttList = WorkingTimeType.findAll();
-		render(person, wttList);
+		Contract contract = Contract.findById(id);
+		render(contract, wttList);
 	}
+	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void splitContractWorkingTimeType(ContractWorkingTimeType cwtt, LocalDate splitDate)
+	{
+		//Controllo integrità richiesta
+		if(cwtt==null)
+		{
+			flash.error("Impossibile completare la richiesta, controllare i log.");
+			Application.indexAdmin();
+		}
+		if(validation.hasError("splitDate"))
+		{
+			flash.error("Errore nel fornire il parametro data. Inserire la data nel corretto formato aaaa-mm-gg");
+			Persons.edit(cwtt.contract.person.id);
+		}
+		if(!DateUtility.isDateIntoInterval(splitDate, new DateInterval(cwtt.beginDate, cwtt.endDate)))
+		{
+			flash.error("Errore nel fornire il parametro data. La data deve essere contenuta nel periodo da dividere.");
+			Persons.edit(cwtt.contract.person.id);
+		}
+		DateInterval first = new DateInterval(cwtt.beginDate, splitDate.minusDays(1));
+		if(! DateUtility.isIntervalIntoAnother(first, cwtt.contract.getContractDateInterval())){
+			flash.error("Errore nel fornire il parametro data. La data deve essere contenuta nel periodo da dividere.");
+			Persons.edit(cwtt.contract.person.id);
+		}
+		//agire
+		ContractWorkingTimeType cwtt2 = new ContractWorkingTimeType();
+		cwtt2.contract = cwtt.contract;
+		cwtt2.beginDate = splitDate;
+		cwtt2.endDate = cwtt.endDate;
+		cwtt2.workingTimeType = cwtt.workingTimeType;
+		cwtt2.save();
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void setWorkingTime(Long personId){
-		Person person = Person.findById(personId);
-		List<WorkingTimeType> wttList = WorkingTimeType.findAll();
-		render(person,wttList);
+		cwtt.endDate = splitDate.minusDays(1);
+		cwtt.save();
+		flash.success("Orario di lavoro correttamente suddiviso in due sottoperiodi con tipo orario %s.", cwtt.workingTimeType.description);
+		Persons.edit(cwtt.contract.person.id);	
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void saveWorkingTime(){
-		Long personId = params.get("personId", Long.class);
-		if(params.get("description") == null || params.get("description").equals("")){
-			flash.error("Selezionare un orario di lavoro!!");
-			render("@save");
+	public static void deleteContractWorkingTimeType(ContractWorkingTimeType cwtt)
+	{
+		if(cwtt==null)
+		{
+			flash.error("Impossibile completare la richiesta, controllare i log.");
+			Application.indexAdmin();
+		}	
+		Contract contract = cwtt.contract;
+		int index = contract.contractWorkingTimeType.indexOf(cwtt);
+		if(contract.contractWorkingTimeType.size()<index)
+		{
+			flash.error("Impossibile completare la richiesta, controllare i log.");
+			Persons.edit(cwtt.contract.person.id);	
 		}
-		PersonWorkingTimeType nuovoPwtt = new PersonWorkingTimeType();
-		Person person = Person.findById(personId);
-		Date date = null;
-		LocalDate dataInizio = null;
-		if(!params.get("dataInizio").equals("")){
-			date = new LocalDate(params.get("dataInizio")).toDate();
-			dataInizio = new LocalDate(date);
-		}
-		else{
-			flash.error("La data di inizio dell'orario di lavoro deve essere valorizzata!!!");
-			Persons.list();
-		}
-		
-		Date dateEnd = null;
-		LocalDate dataFine = null;
-		if(!params.get("dataFine").equals("")){
-			dateEnd = new LocalDate(params.get("dataFine")).toDate();
-			dataFine = new LocalDate(dateEnd);
-		}
-		else{
-			dataFine = null;
-		}
-		
-		nuovoPwtt.person = person;
-		nuovoPwtt.workingTimeType = WorkingTimeType.find("byDescription", params.get("description")).first();
-		nuovoPwtt.beginDate = dataInizio;		
-		nuovoPwtt.endDate = dataFine;
-		nuovoPwtt.save();
-		person.save();
-		flash.success("Salvato nuovo orario di lavoro per %s %s", person.name, person.surname);
-		Application.indexAdmin();
+		ContractWorkingTimeType previous = contract.contractWorkingTimeType.get(index-1);
+		previous.endDate = cwtt.endDate;
+		previous.save();
+		cwtt.delete();
+		flash.success("Orario di lavoro eliminato correttamente. Attribuito al periodo eliminato il tipo orario %s.", previous.workingTimeType.description);
+		Persons.edit(cwtt.contract.person.id);	
 	}
 	
-	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void updateWorkingTime(){
-		if(params.get("description") == null || params.get("description").equals("")){
-			flash.error("Selezionare un orario di lavoro!!");
-			render("@save");
+	public static void changeTypeOfContractWorkingTimeType(ContractWorkingTimeType cwtt, WorkingTimeType newWtt)
+	{
+		if(cwtt==null || newWtt==null)
+		{
+			flash.error("Impossibile completare la richiesta, controllare i log.");
+			Application.indexAdmin();
 		}
-		if(WorkingTimeType.find("byDescription", params.get("description")).first() == null){
-			flash.error("L'orario di lavoro selezionato è inesistente in anagrafica");
-			render("@save");
-		}
-		Long personId = params.get("personId", Long.class);
-		Person person = Person.findById(personId);
-		if(params.get("dataInizio").equals("") || params.get("dataInizio") == null){
-			flash.error("Il campo data inizio deve essere valorizzato con la data da cui parte il nuovo orario di lavoro per %s %s", person.name, person.surname);
-			Persons.changeWorkingTime(personId);
-		}
-		Date date = new LocalDate(params.get("dataInizio")).toDate();
-		LocalDate dataInizio = new LocalDate(date);
-//		person.workingTimeType = null;
-		//person.save();
-		Logger.debug("l'orario selezionato è: %s", params.get("description"));
-		
-		PersonWorkingTimeType pwtt = PersonWorkingTimeType.find("Select pwtt from PersonWorkingTimeType pwtt where pwtt.person = ? and " +
-				"pwtt.beginDate < ? and pwtt.endDate is null", 
-				person, dataInizio).first();
-		if(pwtt == null){
-			flash.error("L'orario di lavoro alla data %s è immodificabile.", dataInizio);
-			render("@save");
-		}
-		pwtt.endDate = dataInizio.minusDays(1);
-		pwtt.save();
-		PersonWorkingTimeType nuovoPwtt = new PersonWorkingTimeType();
-		nuovoPwtt.person = person;
-		nuovoPwtt.workingTimeType = WorkingTimeType.find("byDescription", params.get("description")).first(); 
-				
-		nuovoPwtt.beginDate = dataInizio;
-		nuovoPwtt.endDate = null;
-		nuovoPwtt.save();
-		
-		person.save();
-		flash.success("Aggiornato l'orario di lavoro per %s %s", person.name, person.surname);
-		Application.indexAdmin();
+		cwtt.workingTimeType = newWtt;
+		cwtt.save();
+		flash.success("Cambiato correttamente tipo orario per il periodo a %s.", cwtt.workingTimeType.description);
+		Persons.edit(cwtt.contract.person.id);
 	}
 
 	@Check(Security.VIEW_PERSON_LIST)
@@ -326,9 +303,9 @@ public class Persons extends Controller {
 
 		LocalDate startEra = new LocalDate(1900,1,1);
 		LocalDate endEra = new LocalDate(9999,1,1);
-		List<Person> personList = Person.getActivePersonsSpeedyInPeriod(startEra, endEra, Security.getPerson().getOfficeAllowed(), false);
+		List<Person> personList = Person.getActivePersonsSpeedyInPeriod(startEra, endEra, Security.getOfficeAllowed(), false);
 		LocalDate date = new LocalDate();
-		List<Person> activePerson = Person.getActivePersonsInDay(date.getDayOfMonth(), date.getMonthOfYear(), date.getYear(), Security.getPerson().getOfficeAllowed(), false);
+		List<Person> activePerson = Person.getActivePersonsInDay(date.getDayOfMonth(), date.getMonthOfYear(), date.getYear(), Security.getOfficeAllowed(), false);
 		
 		render(personList, activePerson);
 	}
@@ -340,11 +317,11 @@ public class Persons extends Controller {
 		Location location = new Location();
 		ContactData contactData = new ContactData();
 		InitializationTime initializationTime = new InitializationTime();
-		Person personLogged = Security.getPerson();
-		List<Office> officeList = personLogged.getOfficeAllowed();
+		List<Office> officeList = Security.getOfficeAllowed();
 		List<Office> office = Office.find("Select office from Office office where office.office is null").fetch();
+		List<WorkingTimeType> wttList = WorkingTimeType.findAll();
 		Logger.debug("Lista office: %s", office.get(0).name);
-		render(person, contract, location, contactData, initializationTime, officeList/*, remoteOffice*/);
+		render(person, contract, location, contactData, initializationTime, officeList, wttList);
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
@@ -353,6 +330,8 @@ public class Persons extends Controller {
 			if(request.isAjax()) error("Invalid value");
 			render("@insertPerson");
 		}
+		
+		/* creazione persona */
 		Person person = null;
 		Location location = new Location();
 		ContactData contactData = new ContactData();
@@ -370,12 +349,10 @@ public class Persons extends Controller {
 		person.surname = params.get("surname");
 		
 		person.number = params.get("number", Integer.class);
-		person.username = params.get("name").toLowerCase()+'.'+params.get("surname").toLowerCase();
+				
 		Qualification qual = Qualification.findById(new Long(params.get("person.qualification", Integer.class)));
 		person.qualification = qual;
-		Codec codec = new Codec();
-		person.password = codec.hexMD5("epas");
-		
+				
 		Office office = Office.findById(new Long(params.get("person.office", Integer.class)));
 		if(office != null)
 			person.office = office;
@@ -386,29 +363,23 @@ public class Persons extends Controller {
 		}
 		person.save();
 		
-		/**
-		 * qui aggiungo il controllo sull'id generato dalla sequence di postgres rispetto ai vecchi id presenti nel vecchio db
-		 */
-//		if(PersonUtility.isIdPresentInOldSoftware(person.id)){
-//			/**
-//			 * TODO:l'id generato è già presente in anagrafica come oldId di qualcuno...questo potrebbe generare dei problemi in fase di acquisizione 
-//			 * delle timbrature...
-//			 */
-//			
-//			
-//		}
+		/* creazione utente */
+		User user = new User();
+		user.username = params.get("name").toLowerCase()+'.'+params.get("surname").toLowerCase(); 
+		Codec codec = new Codec();
+		user.password = codec.hexMD5("epas");
+		user.person = person;
 		
-		/**
-		 * controllo se la persona deve appartenere a una sede distaccata...
-		 */
-//		if(!params.get("remoteOfficeName").equals("") || !params.get("remoteOfficeAddress").equals("")){
-//			/**
-//			 * TODO: query sul db per vedere se esiste già una sede distaccata con quel nome, così da non fare assegnamenti multipli con lo stesso nome
-//			 */
-//		}
+		/*permesso viewPersonalSituation */
+		Permission per = Permission.find("Select per from Permission per where per.description = ?", "viewPersonalSituation").first();
+		user.permissions = new ArrayList<Permission>();
+		user.permissions.add(per);
+		user.save();
+				
+		person.user = user;
+		person.save();
 		
-		
-		Logger.debug("saving location, deparment = %s", location.department);
+		/*creazione location */
 		location.department = params.get("department");
 		location.headOffice = params.get("headOffice");
 		location.room = params.get("room");
@@ -416,10 +387,13 @@ public class Persons extends Controller {
 		location.save();
 		Logger.debug("Saving contact data...");
 		
+		/* creazione contactData */
 		contactData.email = params.get("email");
 		contactData.telephone = params.get("telephone");
 		contactData.person = person;
 		contactData.save();
+		
+		/* creazione contratto */
 		Logger.debug("Begin contract: %s", params.get("beginContract"));
 		if(params.get("beginContract") == null){
 			flash.error("Il contratto di %s %s deve avere una data di inizio. Utente cancellato. Reinserirlo con la data di inizio contratto valorizzata.", 
@@ -433,41 +407,27 @@ public class Persons extends Controller {
 			contract.expireContract = null;
 		else			
 			expireContract = new LocalDate(params.get("expireContract"));
-		
-				
 		contract.beginContract = beginContract;
 		contract.expireContract = expireContract;
+		
 		contract.person = person;
 		contract.onCertificate = params.get("onCertificate", Boolean.class);
 		contract.save();
-		Logger.debug("Salvato contratto...%s", contract.toString());
 		contract.setVacationPeriods();
-				
-		Logger.debug("saving contract, beginContract = %s, endContract = %s", contract.beginContract, contract.expireContract);
-		InitializationTime initTime = new InitializationTime();
-		if(params.get("minutesPastYear", Integer.class) != null || params.get("minutesCurrentYear", Integer.class) != null){
-			
-			initTime.person = person;
-			if(params.get("minutesCurrentYear", Integer.class) != null)
-				initTime.residualMinutesCurrentYear = params.get("minutesCurrentYear", Integer.class);
-			else
-				initTime.residualMinutesCurrentYear = 0;
-			if(params.get("minutesPastYear", Integer.class) != null)
-				initTime.residualMinutesPastYear = params.get("minutesPastYear", Integer.class);
-			else
-				initTime.residualMinutesPastYear = 0;
-			initTime.date = new LocalDate();
-			initTime.save();
-			Logger.debug("Saving initialization time for %s %s with value %s minutes for past year and %s minutes for current year", 
-					person.name, person.surname, initTime.residualMinutesPastYear, initTime.residualMinutesCurrentYear);
-		}		
 		
-		//flash.success(String.format("Inserita nuova persona in anagrafica: %s %s ",person.name, person.surname));
+		ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
+		cwtt.beginDate = contract.beginContract;
+		cwtt.endDate = contract.expireContract;
+		cwtt.workingTimeType = WorkingTimeType.findById(params.get("wtt", Long.class));
+		cwtt.contract = contract;
+		cwtt.save();
+		
+		
+		
 		Long personId = person.id;
-		Logger.debug("Person id: %d", personId);
 		List<String> usernameList = PersonUtility.composeUsername(person.name, person.surname);
 		render("@insertUsername", personId, usernameList, person);
-		//Application.indexAdmin();
+		
 		
 	}
 	
@@ -486,10 +446,11 @@ public class Persons extends Controller {
 		Person person = Person.findById(id);
 		Logger.debug("Il valore selezionato come username è: %s", params.get("username"));
 		Logger.debug("La persona che si vuole modificare è: %s %s", person.name, person.surname);
-		person.username = params.get("username");
+		person.user.username = params.get("username");
+		person.user.save();
 		person.save();
 		
-		flash.success("%s %s inserito in anagrafica con il valore %s come username", person.name, person.surname, person.username);
+		flash.success("%s %s inserito in anagrafica con il valore %s come username", person.name, person.surname, person.user.username);
 		render("@Stampings.redirectToIndex");
 		
 	}
@@ -509,6 +470,9 @@ public class Persons extends Controller {
 		
 		if(!params.get("surname").equals(person.surname))
 			person.surname = params.get("surname");
+		
+		if(!params.get("number").equals(person.number))
+			person.number = params.get("number", Integer.class);
 		
 		if(person.badgeNumber == null || !person.badgeNumber.equals(params.get("badgeNumber")))
 			person.badgeNumber = params.get("badgeNumber");
@@ -594,118 +558,144 @@ public class Persons extends Controller {
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void insertContract(Long personId){
-		if(personId == null)
-			personId = params.get("personId", Long.class);
-		Logger.debug("PersonId = %d", personId);
-		Person person = Person.findById(personId);
+	public static void insertContract(Person person){
+		if(person == null)
+		{
+			flash.error("Persona inesistente. Operazione annullata.");
+			Persons.list();
+		}
 		Contract con = new Contract();
-		render(con, person);
+		List<WorkingTimeType> wttList = WorkingTimeType.findAll();
+		render(con, person, wttList);
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void saveContract(){
-		Person person = Person.findById(params.get("personId", Long.class));
-		Contract contract = new Contract();
-		String dataInizio = params.get("beginContract");
-		String dataFine = params.get("expireContract");
-		Contract oldContract = person.getCurrentContract();
-		if(oldContract == null || 
-				(oldContract.expireContract != null && oldContract.expireContract.isBefore(new LocalDate(dataInizio)))
-				|| (oldContract.endContract != null && oldContract.endContract.isBefore(new LocalDate(dataInizio)))){
-			contract.beginContract = new LocalDate(dataInizio);
-			if(!dataFine.equals(""))
-				contract.expireContract = new LocalDate(dataFine);
-			else
-				contract.expireContract = null;
-			if(params.get("onCertificate", Boolean.class) != null && params.get("onCertificate", Boolean.class))
-				contract.onCertificate = true;
-			else
-				contract.onCertificate = false;
-			contract.person = person;
-			contract.save();
-			person.save();
-			contract.setVacationPeriods();
-			contract.save();
-			flash.success("Il contratto per %s %s è stato correttamente salvato", person.name, person.surname);
-			//render("@save");
-						
-		}
-		else{
-			flash.error("Le date di contratto che si vogliono inserire non sono coerenti con quelle del contratto precedente. Verificare");
-			//render("@save");
+	public static void saveContract(@Required LocalDate dataInizio, @Valid LocalDate dataFine, Person person, WorkingTimeType wtt, boolean onCertificate){
 			
-		}		
+		//Controllo parametri
+		if(person==null)
+		{
+			flash.error("Persona inesistente. Operazione annullata.");
+			Persons.list();
+		}
+		if(dataInizio==null){
+			flash.error("Errore nel fornire il parametro data inizio contratto. Inserire la data nel corretto formato aaaa-mm-gg");
+			Persons.edit(person.id);
+		}
+		if(validation.hasErrors())
+		{
+			flash.error("Errore nel fornire il parametro data fine contratto. Inserire la data nel corretto formato aaaa-mm-gg");
+			Persons.edit(person.id);
+		}
+		//Date non si sovrappongono con gli altri contratti della personas	
+		DateInterval contractInterval = new DateInterval(dataInizio, dataFine);
+		List<Contract> allContract = Contract.find("Select c from Contract c where c.person = ?", person).fetch();
+		for(Contract c : allContract)
+		{
+			if(DateUtility.intervalIntersection(contractInterval, c.getContractDateInterval()) != null)
+			{
+				flash.error("Il nuovo contratto si interseca con contratti precedenti. Controllare le date di inizio e fine. Operazione annulalta.");
+				Persons.edit(person.id);
+			}
+		}
+		//Tipo orario
+		if(wtt == null)
+		{
+			flash.error("Errore nel fornire il parametro tipo orario. Operazione annullata.");
+			Persons.edit(person.id);
+		}
+
+		//Creazione nuovo contratto
+		Contract contract = new Contract();
+		contract.beginContract = dataInizio;
+		contract.expireContract = dataFine;
+		contract.onCertificate = onCertificate;
+		contract.person = person;
+		contract.save();
+		contract.setVacationPeriods();
+		contract.save();
+		ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
+		cwtt.beginDate = dataInizio;
+		cwtt.endDate = dataFine;
+		cwtt.workingTimeType = wtt;
+		cwtt.contract = contract;
+		cwtt.save();
+		contract.save();
+		flash.success("Il contratto per %s %s è stato correttamente salvato", person.name, person.surname);
+		
 		Persons.edit(person.id);
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void modifyContract(Long contractId){
-		if(contractId != null){
-			Contract contract = Contract.findById(contractId);
-			if(contract == null){
-				flash.error("Non è stato trovato nessun contratto con id %s per il dipendente ", contractId);
-				Application.indexAdmin();
-			}
-			
-			//Person person = Person.find("Select person from Person person where person.contract = ?", contract).first();
-			render(contract);
+		Contract contract = Contract.findById(contractId);
+		if(contract == null)
+		{
+			flash.error("Non è stato trovato nessun contratto con id %s per il dipendente ", contractId);
+			Persons.list();
 		}
+		render(contract);
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void updateContract(){
-		Long contractId = params.get("contractId", Long.class);
+	public static void deleteContract(Long contractId){
 		Contract contract = Contract.findById(contractId);
-		LocalDate beginContract, expireContract, endContract = null;
-		String begin = params.get("inizio");
-		String end = params.get("end");
-		String expire = params.get("fine");
-		//Logger.debug("BeginContract: %s - ExpireContract: %s - EndContract: %s", begin, expire, end);
-		beginContract = new LocalDate(begin);
-		Logger.info("On certificate: %s", params.get("certificate", Boolean.class));
-		if(begin == null || begin.equals("")){
-			flash.error("Non può esistere un contratto senza data di inizio!");
-			render("@save");
+		if(contract == null)
+		{
+			flash.error("Contratto inesistente. Operazione annullata.");
+			Persons.list();
 		}
+		render(contract);
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void deleteContractConfirmed(Long contractId){
+		Contract contract = Contract.findById(contractId);
+		if(contract == null)
+		{
+			flash.error("Contratto inesistente. Operazione annullata.");
+			Persons.list();
+		}
+		contract.delete();
+		flash.error("Contratto eliminato con successo.");
+		Persons.edit(contract.person.id);
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void updateContract(Contract contract, @Required LocalDate begin, @Valid LocalDate expire, @Valid LocalDate end, boolean onCertificate){
 		
-		if(expire == null || expire.equals(""))
-			expireContract = null;
-		else
-			expireContract = new LocalDate(expire);
-		if(end == null || end.equals(""))
-			endContract = null;
-		else
-			endContract = new LocalDate(end);
-			
-		if(!contract.beginContract.isEqual(beginContract)){
-			contract.beginContract = beginContract;
-			
-			contract.save();
+		//Controllo dei parametri
+		if(contract == null)
+		{
+			flash.error("Contratto inesistente, operazione annullata");
+			Persons.list();
 		}
-		if((contract.expireContract != null && expireContract == null) || 
-				(contract.expireContract != null && expireContract != null && !contract.expireContract.isEqual(expireContract)) || 
-				(contract.expireContract == null && expireContract != null)){
-			contract.expireContract = expireContract;
-			contract.save();
+		if(begin==null){
+			flash.error("Errore nel fornire il parametro data inizio contratto. Inserire la data nel corretto formato aaaa-mm-gg");
+			Persons.edit(contract.person.id);
 		}
-			
-		if(contract.endContract == null && endContract != null){
-			contract.endContract = endContract;
-			contract.save();
+		if(validation.hasError("expire"))
+		{
+			flash.error("Errore nel fornire il parametro data fine contratto. Inserire la data nel corretto formato aaaa-mm-gg");
+			Persons.edit(contract.person.id);
 		}
-		
-		if(params.get("certificate", Boolean.class) == null  && contract.onCertificate == true)
-			contract.onCertificate = false;
-		else 
-			if(params.get("certificate", Boolean.class) == true && contract.onCertificate == false)
-				contract.onCertificate = true;
-		
+		if(validation.hasError("end"))
+		{
+			flash.error("Errore nel fornire il parametro data terminazione contratto. Inserire la data nel corretto formato aaaa-mm-gg");
+			Persons.edit(contract.person.id);
+		}
+
+		contract.beginContract = begin;
+		contract.expireContract = expire;
+		contract.endContract = end;
+		contract.onCertificate = onCertificate;
 		contract.setVacationPeriods();
+		contract.updateContractWorkingTimeType();
+		//contract.buildContractYearRecap();
 		contract.save();
 		
 		flash.success("Aggiornato contratto per il dipendente %s %s", contract.person.name, contract.person.surname);
-		//render("@save");
+		
 		Persons.edit(contract.person.id);
 		
 	}
@@ -713,7 +703,6 @@ public class Persons extends Controller {
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void updateSourceContract(Long contractId)
 	{
-		
 		Contract contract = Contract.findById(contractId);
 		LocalDate initUse = ConfGeneral.getConfGeneral().initUseProgram;
 		render(contract, initUse);
@@ -773,30 +762,27 @@ public class Persons extends Controller {
 	}
 	
 	@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void savePassword(){
+	public static void savePassword(Long personId, String nuovaPassword, String confermaPassword){
 		
-		Long personId = params.get("personId", Long.class);
+		Person person = Person.findById(personId);
+		if(nuovaPassword == null || confermaPassword == null)
+		{
+			flash.error("Operazione annullata, controllare i log.");
+			Persons.changePassword(personId);
+		}
+		if(nuovaPassword.equals("") || confermaPassword.equals(""))
+		{
+			flash.error("Valorizzare entrambi i campi. Operazione annullata");
+			Persons.changePassword(personId);
+		}
 		
-		Person p = Person.findById(personId);
-		String nuovaPassword = params.get("nuovaPassword");
-		String confermaPassword = params.get("confermaPassword");
-		if(nuovaPassword.equals(confermaPassword)){
-			Codec codec = new Codec();
-			
-			p.password = codec.hexMD5(nuovaPassword);
-			p.save();
-			Logger.debug("Salvata la nuova password per %s %s", p.surname, p.name);
-			flash.success("Aggiornata la password per %s %s", p.surname, p.name);
-			Application.indexAdmin();
-		}
-		else{
-			Logger.debug("Errore, password diverse per %s %s", p.surname, p.name);
-			flash.error("Le due password non sono coincidenti!!!");
-			
-			changePassword(personId);
-			render("@changePassword");
-		}
-			
+		
+		Codec codec = new Codec();
+		person.user.password = codec.hexMD5(nuovaPassword);
+		person.user.save();
+		person.save();
+		Application.indexAdmin();
+
 		
 	}
 	

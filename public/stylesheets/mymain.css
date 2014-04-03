@@ -98,6 +98,8 @@ div.mymodal-small{width: 500px; margin-left: -300px;}
 div.mymodal-medium{ width: 800px; margin-left: -400px;}
 div.mymodal-large{ width: 1200px; margin-left: -600px;}
 
+div#datepicker1{z-index:999999; }
+
 /* fieldset */
 fieldset { border: 1pt solid darkblue; 	padding: 1em;	margin: 5px; }
 fieldset legend { margin-bottom: 10px; font-weight: bold; border-bottom: none; }
@@ -175,8 +177,6 @@ input#pastYear{width: 100px; margin-left: 10px;}
 select#year{width: 90px;}
 
 li.distanziato{padding-bottom: 5px;}
-
-
 
 
 /**

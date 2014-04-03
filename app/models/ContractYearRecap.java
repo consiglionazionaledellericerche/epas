@@ -21,7 +21,7 @@ public class ContractYearRecap extends Model{
 
 	@Required
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="contract_id", nullable=false, updatable=false)
+	@JoinColumn(name="contract_id")
 	public Contract contract;
 		
 	@Column(name="year")

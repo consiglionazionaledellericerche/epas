@@ -2,17 +2,11 @@
 <h3>Utility per il Supremo</h3>
 
 #{form @Administration.fixPersonSituation()}
-
-
-
-	#{select 'personId', value:pdList.get(0), id:'person'}
-	
-		#{option -1}Tutti#{/option}
-		
+  #{select 'personId', value:pdList.get(0), id:'person'}
+    #{option -1}Tutti#{/option}
 		%{for(person in pdList){}%
 		#{option person.id}${person.surname + ' ' + person.name}#{/option}
 		%{}}%
-		
 	#{/select}
 	<br><br><input type="number" name="month" />Mese da ripristinare 
 

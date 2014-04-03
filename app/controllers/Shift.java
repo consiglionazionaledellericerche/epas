@@ -401,7 +401,7 @@ public class Shift extends Controller{
 				
 				// if there are no events and it is not an holiday -> error
 				if (personDay == null) {
-					if (!DateUtility.isHoliday(person, personShiftDay.date)) {
+					if (!person.isHoliday(personShiftDay.date)) {
 						Logger.info("Il turno di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personShiftDay.date);
 						inconsistentAbsence.put(person.name.concat(" ").concat(person.surname), personShiftDay.date.getDayOfMonth(), "mancata timbratura" );
 					}
@@ -409,7 +409,7 @@ public class Shift extends Controller{
 					List<PairStamping> pairStampings = PersonDay.PairStamping.getValidPairStamping(personDay.stampings);
 					
 					// check for the stampings in working days
-					if (!DateUtility.isHoliday(person, personShiftDay.date)) { 
+					if (!person.isHoliday(personShiftDay.date)) { 
 						// no stampings
 						if (personDay.stampings.isEmpty()) {
 							Logger.info("Il turno di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personDay.date);

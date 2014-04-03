@@ -3,20 +3,26 @@
   <legend>Inserimento dati nuovo contratto per ${person.name} ${person.surname}</legend>
 
 
-  <input type="hidden" name="personId" value="${person.id}"/>
+  <input type="hidden" name="person.id" value="${person.id}"/>
   <table class="table table-display-contract table-striped">
     <tr>
 			<th>Data inizio</th>
 			<th>Data fine</th>
-			
+			<th>Tipo orario</th>
 			<th>Attestato presenza</th>
 			
 	</tr>
 	
 	<tr>
-			<td><input name="beginContract" type="date" value="" id="datepicker1" data-date-format="yyyy-mm-dd" /></td>
-			<td><input name="expireContract" type="date" value="" id="datepicker2" data-date-format="yyyy-mm-dd" /></td>
-					
+			<td><input name="dataInizio" type="date" value="" id="datepicker1" data-date-format="yyyy-mm-dd"/></td>
+			<td><input name="dataFine" type="date" value="" id="datepicker2" data-date-format="yyyy-mm-dd"/></td>
+			<td>
+			#{select 'wtt.id', class:'span2', id:'wtt.id'}
+              #{list items:wttList, as:'wttItem'}
+	            #{option wttItem.id}${wttItem.description}#{/option}
+		      #{/list}
+		    #{/select}
+			</td>
 			<td>
 				<input name="onCertificate" type="checkbox" value="true"/>
 				

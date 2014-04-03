@@ -50,7 +50,7 @@ public class WorkingTimeTypeDay extends Model {
 	 */
 	public Integer mealTicketTime;
 	
-	public Integer breakTicketTime;
+	public Integer breakTicketTime;	
 	/**
 	 * booleano per controllo se il giorno in questione è festivo o meno
 	 */
@@ -73,6 +73,54 @@ public class WorkingTimeTypeDay extends Model {
 	 * tempo fine pausa pranzo
 	 */
 	public Integer timeMealTo;
+	
+	
+	public void setWorkingTime(Integer workingTime)
+	{
+		if(workingTime==null)
+			this.workingTime = 0;
+		else
+			this.workingTime = workingTime;
+	}
+	
+	public void setBreakTicketTime(Integer breakTicketTime)
+	{
+		if(breakTicketTime==null)
+			this.breakTicketTime = 0;
+		else
+			this.breakTicketTime = breakTicketTime;
+	}
+	
+	public void setMealTicketTime(Integer mealTicketTime)
+	{
+		if(mealTicketTime==null)
+			this.mealTicketTime = 0;
+		else
+			this.mealTicketTime = mealTicketTime;
+	}
+	
+	public void setHoliday(String holiday)
+	{
+		if(holiday != null && holiday.equals("true"))
+			this.holiday = true;
+		else
+			this.holiday = false;
+	}
+	
+	/**
+	 * Persiste nel db l'oggetto workingTimeTypeDay settando a 0 gli eventuali tempi nulli.
+	 */
+	public void properSave()
+	{
+		if(this.workingTime == null)
+			this.workingTime = 0;
+		if(this.mealTicketTime == null)
+			this.mealTicketTime = 0;
+		if(this.breakTicketTime == null)
+			this.breakTicketTime = 0;
+		this.save();
+	}
+	
 	
 	@Override
 	public String toString() {

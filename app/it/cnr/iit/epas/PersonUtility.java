@@ -335,7 +335,7 @@ public class PersonUtility {
 	 * @return il personDay se la data passata è di un giorno feriale, null altrimenti
 	 */
 	public static PersonDay createPersonDayFromDate(Person person, LocalDate date){
-		if(DateUtility.isHoliday(person,date))
+		if(person.isHoliday(date))
 			return null;
 		return new PersonDay(person, date);
 	}
@@ -591,12 +591,12 @@ public class PersonUtility {
 		Logger.info("monteOreAnnoCorrente=%s ,  monteOreAnnoPassato=%s, workingTime=%s", mese.monteOreAnnoCorrente, mese.monteOreAnnoPassato, mese.person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime);
 		if(mese.monteOreAnnoCorrente + mese.monteOreAnnoPassato > mese.person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime)
 		{
-			Logger.info("decido si");
+			Logger.debug("decido si");
 			return true;
 		}
 		else
 		{
-			Logger.info("decido no");
+			Logger.debug("decido no");
 			return false;
 		}
 	}
@@ -919,8 +919,6 @@ public class PersonUtility {
 		JPAPlugin.closeTx(false);
 		
 		// (2) Ricalcolo i valori dei person day aggregandoli per mese
-		JPAPlugin.startTx(true);
-		JPAPlugin.closeTx(false);
 		int i = 1;
 		for(Person p : personList){
 			Logger.info("Update person situation %s (%s di %s) dal %s-%s-01 a oggi", p.surname, i++, personList.size(), year, month);
@@ -943,45 +941,20 @@ public class PersonUtility {
 			JPAPlugin.closeTx(false);
 		}
 		
-		/*
-		//(3)persistere in Initialization Time il resudo
-		int currentYear = new LocalDate().getYear();
-		int actualYear = year;	//2014
-		while(actualYear<=currentYear)
-		{
-			LocalDate beginYear = new LocalDate(actualYear, 1, 1);
-			LocalDate endYear = new LocalDate(actualYear, 12, 31);
-			for(Person p: personList)
-			{
-				
-				List<InitializationTime> initializationTimeList = InitializationTime.find("Select i from InitializationTime i where i.person = ? and i.date between ? and ?" , p, beginYear, endYear).fetch();
-				InitializationTime initializationTime;
-				if(initializationTimeList.size()>1)
-				{
-					//siamo nella merda perche' per ogni anno deve essercene uno solo
-					continue;
-				}
-				if(initializationTimeList.size()==0)
-				{
-					initializationTime = new InitializationTime();
-					initializationTime.person = p;
-					initializationTime.date = beginYear;
-					initializationTime.residualMinutesCurrentYear = 3;
-					initializationTime.residualMinutesPastYear = 0;
-				}
-				else
-				{
-					initializationTime = initializationTimeList.get(0);
-					initializationTime.residualMinutesCurrentYear = 4;
-				}
-				CalcoloSituazioneAnnualePersona csap = new CalcoloSituazioneAnnualePersona(p, actualYear-1, null);	//2013
-				initializationTime.residualMinutesPastYear = csap.getMese(actualYear, 12).monteOreAnnoCorrente;
-				initializationTime.save();
-			}
-			actualYear++;
+		//(3) 
+		JPAPlugin.startTx(false);
+		i = 1;
+		for(Person p : personList){
+			Logger.info("Update residui %s (%s di %s) dal %s-%s-01 a oggi", p.surname, i++, personList.size(), year, month);
+			List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ?", p).fetch();
 			
+			for(Contract contract : contractList)
+			{
+				contract.buildContractYearRecap();
+			}
 		}
-		*/
+		JPAPlugin.closeTx(false);		
+
 	}
 	
 	 /**
@@ -1062,27 +1035,6 @@ public class PersonUtility {
 		return competenceCodeList;
 	}
 	
-	
-	/**
-	 * 
-	 * @param administrator
-	 * @param personId
-	 * @return la persona se l'amministratore che la vuole estrarre ha i diritti in termini di appartenenza alla stessa sede. 
-	 * Null altrimenti
-	 */
-	public static Person getPersonRightsBased(Person administrator, Long personId){
-		Person person = Person.findById(personId);
-		if(person == null)
-			return null;
-		if(person.office.id == administrator.office.id)
-			return person;
-		for(RemoteOffice remote : administrator.office.remoteOffices){
-			if(remote.id == person.office.id)
-				return person;
-		}
-		return null;
-	}
-
 }
 
 

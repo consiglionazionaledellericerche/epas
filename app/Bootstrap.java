@@ -94,21 +94,21 @@ public class Bootstrap extends Job {
 				Logger.info("Creato ufficio di default con nome %s e codice %s", conf.instituteName, conf.seatCode);
 			}
 			
-			if (ShiftTimeTable.count() == 0) {
-				Fixtures.loadModels("ShiftTimeType.yml");
-				Logger.info("Creata la tabella di definizione della tipologia dei turni");
-			}
 			
 			Person admin = Person.find("byUsername", "admin").first();
-			if(admin!=null && admin.office==null){
+			if (admin!=null && admin.office==null) {
 				admin.office = (Office)Office.findAll().get(0);
 				admin.save();
 				
 			}
-			
-			
 
-	
+//			Person admin = Person.find("byUsername", "admin").first();
+//			if(admin!=null && admin.office==null){
+//				admin.office = (Office)Office.findAll().get(0);
+//				admin.save();
+//				
+//			}
+
 		}
 		catch(RuntimeException e)
 		{

@@ -6,6 +6,7 @@ import helpers.attestati.AttestatiException;
 import helpers.attestati.Dipendente;
 import helpers.attestati.RispostaElaboraDati;
 import it.cnr.iit.epas.MainMenu;
+import it.cnr.iit.epas.PersonUtility;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -67,7 +68,7 @@ import com.google.common.collect.Sets;
 public class UploadSituation extends Controller{
 
 	@Check(Security.UPLOAD_SITUATION)
-	public static void show(final Integer month, final Integer year){
+	public static void show(final Integer year, final Integer month){
 		
 		render();
 		/*
@@ -141,7 +142,7 @@ public class UploadSituation extends Controller{
 				year, month, listaDipendenti.size()));
 
 		//Lista delle persone con un contratto attivo questo mese
-		final List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getPerson().getOfficeAllowed(), false);
+		final List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
 		
 		final Set<Dipendente> activeDipendenti = FluentIterable.from(activePersons).transform(new Function<Person, Dipendente>() {
 			@Override
@@ -264,32 +265,39 @@ public class UploadSituation extends Controller{
 			person = Person.findByNumber(Integer.parseInt(dipendente.getMatricola()));
 			pm = new PersonMonthRecap(person, year, month);
 			
+			List<PersonMonthRecap> pmList = PersonMonthRecap.find("Select pm from PersonMonthRecap pm where pm.person = ? and pm.month = ? and pm.year = ?",
+					 person, month, year).fetch();
+			//Numero di buoni mensa da passare alla procedura di invio attestati
+			Integer mealTicket = PersonUtility.numberOfMealTicketToUse(person, year, month);
 			
 			//vedere se l'ho gia' inviato con successo
-//			CertificatedData cert = CertificatedData.find("Select cert from CertificatedData cert where cert.person = ? and cert.year = ? and cert.month = ?", person, year, month).first();
-//			if(cert!=null && cert.isOk) 
-//			{
-//				//già spedito senza errori
-//				continue;
-//			}
-//			
+			CertificatedData cert = CertificatedData.find("Select cert from CertificatedData cert where cert.person = ? and cert.year = ? and cert.month = ?", person, year, month).first();
+			
+			
 			RispostaElaboraDati rispostaElaboraDati = AttestatiClient.elaboraDatiDipendente(
 					cookies, dipendente, year, month, 
 					pm.getAbsencesNotInternalUseInMonth(),
-					pm.getCompetenceInMonthForUploadSituation());
+					pm.getCompetenceInMonthForUploadSituation(),
+					pmList, mealTicket);
+			if(rispostaElaboraDati.isOk()){
+				for(PersonMonthRecap personMonth : pmList){
+					personMonth.hoursApproved = true;
+					personMonth.save();
+				}
+			}
 			
+			if(cert==null)
+			{
+				cert = new CertificatedData(person, dipendente.getCognomeNome(), dipendente.getMatricola(), year, month);				
+			}
+			cert.absencesSent = rispostaElaboraDati.getAbsencesSent();
+			cert.competencesSent = rispostaElaboraDati.getCompetencesSent();
+			cert.mealTicketSent = rispostaElaboraDati.getMealTicketSent();
+			cert.trainingHoursSent = rispostaElaboraDati.getTrainingHoursSent();
+			cert.problems = rispostaElaboraDati.getProblems();
+			cert.isOk = rispostaElaboraDati.isOk();
+			cert.save();
 			
-//			if(cert==null)
-//			{
-//				cert = new CertificatedData(person, dipendente.getCognomeNome(), dipendente.getMatricola(), year, month);				
-//			}
-//			cert.absencesSent = rispostaElaboraDati.getAbsencesSent();
-//			cert.competencesSent = rispostaElaboraDati.getCompetencesSent();
-//			cert.mealTicketSent = rispostaElaboraDati.getMealTicketSent();
-//			cert.problems = rispostaElaboraDati.getProblems();
-//			cert.isOk = rispostaElaboraDati.getOk();
-//			cert.save();
-//			
 			checks.add(rispostaElaboraDati);
 		}
 		

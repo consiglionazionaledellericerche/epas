@@ -19,6 +19,7 @@ import models.Competence;
 import models.CompetenceCode;
 import models.ContactData;
 import models.Contract;
+import models.ContractWorkingTimeType;
 import models.InitializationAbsence;
 import models.InitializationTime;
 import models.Location;
@@ -37,6 +38,7 @@ import models.StampType;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.TotalOvertime;
+import models.User;
 import models.VacationCode;
 import models.VacationPeriod;
 import models.ValuableCompetence;
@@ -294,7 +296,7 @@ public class FromMysqlToPostgres {
 			if(StampProfile.getCurrentStampProfile(p,date).fixedWorkingTime){
 
 				while(date.isBefore(new LocalDate())){
-					if(!DateUtility.isHoliday(p, date)){
+					if(!p.isHoliday(date)){
 
 						PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", p, date).first();
 						if(pd == null){
@@ -366,8 +368,9 @@ public class FromMysqlToPostgres {
 			person = new Person();
 			person.name = rs.getString("Nome");
 			person.surname = rs.getString("Cognome");
-			person.username = String.format("%s.%s", person.name.toLowerCase().replace(" ", ""), person.surname.toLowerCase().replace(" ", "") );
-			person.password = rs.getString("passwordmd5");
+			User user = new User();
+			 
+			
 			person.bornDate = rs.getDate("DataNascita");
 			person.number = rs.getInt("Matricola");
 			person.badgeNumber = rs.getString("Matricolabadge");
@@ -375,6 +378,14 @@ public class FromMysqlToPostgres {
 			Long qualifica = rs.getLong("Qualifica");
 			person.qualification = qualifica != null && qualifica != 0 ? JPA.em().getReference(Qualification.class, qualifica) : null;
 			person.save();
+			
+			user.username = String.format("%s.%s", person.name.toLowerCase().replace(" ", ""), person.surname.toLowerCase().replace(" ", "") );
+			user.password = rs.getString("passwordmd5");
+			user.person = person;
+			user.save();
+			person.user = user;
+			user.save();
+			
 			Logger.info("Creata %s", person);
 		} else {
 			Logger.info("La persona %s %s era già presente nel db, non ne è stata creata una nuova", rs.getString("Nome"), rs.getString("Cognome"));
@@ -729,14 +740,16 @@ public class FromMysqlToPostgres {
 			wtt = WorkingTimeType.em().getReference(WorkingTimeType.class, WorkingTimeTypeValues.NORMALE_MOD.getId());
 		}
 		//person.workingTimeType = wtt;
+		/*
 		Contract c = person.getCurrentContract();
-		PersonWorkingTimeType pwtt = new PersonWorkingTimeType();
-		pwtt.person = person;
-		pwtt.workingTimeType = wtt;
-		pwtt.beginDate = c.beginContract;
-		pwtt.endDate = c.expireContract;
-		pwtt.save();
-		person.personWorkingTimeType.add(pwtt);
+		ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
+		cwtt.contract = person;
+		cwtt.workingTimeType = wtt;
+		cwtt.beginDate = c.beginContract;
+		cwtt.endDate = c.expireContract;
+		cwtt.save();
+		person.personWorkingTimeType.add(cwtt);
+		*/
 		person.save();
 		Logger.info("Assegnato %s a %s. Il tipo di orario ha questi giorni impostati %s", wtt, person, wtt.workingTimeTypeDays);
 	}
@@ -1380,17 +1393,17 @@ public class FromMysqlToPostgres {
 		Logger.debug("Chiamata la funzione upgrade person");
 		Person person = Person.find("bySurnameAndName", "Lucchesi", "Cristian").first();
 		Logger.debug("Scelta persona: %s %s", person.name, person.surname);
-		if(person.permissions.size() > 0){
-			List<Permission> oldPermissions = person.permissions;
-			person.permissions.removeAll(oldPermissions);
+		if(person.user.permissions.size() > 0){
+			List<Permission> oldPermissions = person.user.permissions;
+			person.user.permissions.removeAll(oldPermissions);
 			List<Permission> permissionList = Permission.findAll();
-			person.permissions.addAll(permissionList);
+			person.user.permissions.addAll(permissionList);
 		}
 		else{
 			List<Permission> permissionList = Permission.findAll();
-			person.permissions.addAll(permissionList);
+			person.user.permissions.addAll(permissionList);
 		}		
-
+		person.user.save();
 		person.save();
 
 	}
@@ -1401,12 +1414,12 @@ public class FromMysqlToPostgres {
 	 */
 	public static void addPermissiontoAll(){
 		Logger.debug("Chiamata la funzione addPermissiontoAll");
-		List<Person> personList = Person.findAll();
+		List<User> userList = User.findAll();
 		Permission per = Permission.find("Select per from Permission per where per.description = ?", "viewPersonalSituation").first();
 		Logger.debug("Caricato il permesso: %s", per.description);
-		for(Person p : personList){
-			p.permissions.add(per);
-			p.save();
+		for(User u : userList){
+			u.permissions.add(per);
+			u.save();
 		}
 
 	}
