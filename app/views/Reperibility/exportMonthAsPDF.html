@@ -57,33 +57,10 @@
 			</table>
       		</div>
       		
-			<div class="note">
-			%{
-				if (inconsistentAbsence != null) {
-			}%
-					<h2>Attenzione! </h2>
-			    	<h3>Sono state rilevate le seguenti inconsistenze con le presenze del personale: </h3>
-			    	<ul>
-			%{    	
-				for(person in inconsistentAbsence.rowKeySet()) {
-					for(day in inconsistentAbsence.columnKeySet()) {
-						if (inconsistentAbsence.contains(person, day)) {
-
-			}%
-
-					<li>${inconsistentAbsence.get(person, day)} per <em>${person}</em> nel giorno ${day} ${mese} ${anno}</li>
-			%{
-						}
-					}
-				}
-				}
-			}%
-      		</div>
-      		
-      		
       		<div class="date">
       			<strong>Data</strong> &nbsp;&nbsp;${today.getDayOfMonth()}/${today.getMonthOfYear()}/${today.getYear()}
       		</div>
+      		
       		<div class="firma dir">
       			<strong>Il Direttore</strong> <br />
       			Dott. Domenico Laforenza
@@ -93,6 +70,78 @@
       			<strong>Il Responsabile</strong><br />
       			Dott. Maurizio Martinelli
       		</div>
+      		
+      		
+			
+			%{
+				if (inconsistentAbsence != null) {
+				
+				fistTr = true;
+			}%
+					<div class="note_presenze">
+					<h1>Inconsistenze con le presenze del personale </h1>
+			    	<p>Sono state rilevate delle inconsistenze tra i turni di reperibilit&agrave; e le presenze del personale: </p>
+			    	
+			    	<table class="mensile">
+			    		<tr>
+			    		<th>Nome dipendente </th> <th>${thNoStampings}</th> <th>${thAbsences}</th>
+			
+			%{
+					for(person in inconsistentAbsence.rowKeySet()) {
+			}%
+						<tr>
+							<td>${person}</td>
+			%{
+							if (inconsistentAbsence.contains(person, thNoStampings)) {
+			}%
+							<td> 
+			%{
+								for(day in inconsistentAbsence.get(person, thNoStampings)) {
+			}%
+								${day} ${mese}<br/>
+			%{
+    							}
+			}%
+							</td>
+			%{
+		    				} else {
+		    }%
+		  					<td>&nbsp;</td>
+		  	%{
+		  					}
+				
+							if (inconsistentAbsence.contains(person, thAbsences)) {
+			}%
+							<td> 
+			%{
+								for(day in inconsistentAbsence.get(person, thAbsences)) {
+			}%
+								${day} ${mese}<br/>
+			%{
+    							}
+			}%
+							</td>
+			%{
+		    				} else {
+		    }%
+		  					<td>&nbsp;</td>
+		  	%{
+		  					}
+		  	}%				
+		    			</tr>
+		    %{
+		    		}
+		  
+		    	}						
+			}%
+					</table>
+						
+      		</div>
+      		
+      		<div class="date">
+      			<strong>Data</strong> &nbsp;&nbsp;${today.getDayOfMonth()}/${today.getMonthOfYear()}/${today.getYear()}
+      		</div>
+
       		
     </body>
 </html>

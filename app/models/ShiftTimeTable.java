@@ -23,7 +23,7 @@ import play.db.jpa.Model;
 public class ShiftTimeTable extends Model{
 
 	@OneToMany(mappedBy="shiftTimeTable", fetch=FetchType.LAZY)
-	public List<ShiftType> personShiftDaysshiftTypes = new ArrayList<ShiftType>();
+	public List<ShiftType> shiftTypes = new ArrayList<ShiftType>();
 
 	// start time of morning shift
 	@Column(name="start_morning")
@@ -73,7 +73,4 @@ public class ShiftTimeTable extends Model{
 	@Column(name="paid_minutes")
 	public Integer paidMinutes;
 	
-	@OneToMany(mappedBy="shiftType", fetch=FetchType.LAZY)
-	public List<ShiftType> shiftTypes = new ArrayList<ShiftType>();
-		
 }

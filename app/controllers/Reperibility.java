@@ -645,8 +645,6 @@ public class Reperibility extends Controller {
 				art.add(1);
 				art.add(11);
 				art.add(8);
-				//String articolo = (art.contains(inizio)) ? "l'" : "il";
-				//return (inizio == fine) ? String.format("%s%d", articolo, inizio) : String.format("dal %d al %d", inizio, fine);
 				return (inizio == fine) ? String.format("%d / %s", inizio, mese) : String.format("%d-%d / %s", inizio, fine, mese);
 			}
 		}
@@ -670,8 +668,8 @@ public class Reperibility extends Controller {
 		// for each person contains the list of the rep periods divided by fr o fs
 		Table<String, String, List<PRP>> reperibilityDateDays = TreeBasedTable.<String, String, List<PRP>>create();
 		
-		// for each person contains the absences that match the reperibility days (fr/fs)
-		Table<String, Integer, String> inconsistentAbsence = TreeBasedTable.<String, Integer, String>create();		
+		// for each person contains days with absences and no-stamping  matching the reperibility days 
+		Table<String, String, List<Integer>> inconsistentAbsence = TreeBasedTable.<String, String, List<Integer>>create();		
 		
 				
 		PersonReperibilityType reperibilityType = PersonReperibilityType.findById(reperibilityId);	
@@ -689,29 +687,46 @@ public class Reperibility extends Controller {
 			.setParameter("reperibilityType", reperibilityType)
 			.getResultList();
 		
-			
+		String thNoStampings = "mancata timbratura";
+		String thAbsences = "assenza";
+		
+		// lista dei giorni di assenza e mancata timbratura
+		List<Integer> noStampingDays = new ArrayList<Integer>();
+		List<Integer> absenceDays = new ArrayList<Integer>();
+		Logger.debug("Inizializzato noStampingDays=%s e absenceDays=%s", noStampingDays.toString(), absenceDays.toString());
+		
 		for (PersonReperibilityDay personReperibilityDay : personReperibilityDays) {
 			Person person = personReperibilityDay.personReperibility.person;
+			
+			String personName = person.name.concat(" ").concat(person.surname);
 			
 			// record the reperibility days
 			builder.put(person, personReperibilityDay.date.getDayOfMonth(), DateUtility.isHoliday(person, personReperibilityDay.date) ? "fs" : "fr");
 			
 			//check for the absence inconsistencies
 			//------------------------------------------
+				
 			PersonDay personDay = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.date = ? and pd.person = ?", personReperibilityDay.date, person).first();
-			Logger.info("Prelevo il personDay %s per la persona %s - personDay=%s", personReperibilityDay.date, person, personDay);
+			//Logger.info("Prelevo il personDay %s per la persona %s - personDay=%s", personReperibilityDay.date, person, personDay);
 			
 			// if there are no events and it is not an holiday -> error
 			if (personDay == null) {
 				if (!DateUtility.isHoliday(person, personReperibilityDay.date)) {
 					Logger.info("La reperibilità di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personReperibilityDay.date);
-					inconsistentAbsence.put(person.name.concat(" ").concat(person.surname), personReperibilityDay.date.getDayOfMonth(), "mancata timbratura" );
+				
+					noStampingDays = (inconsistentAbsence.contains(personName, thNoStampings)) ? inconsistentAbsence.get(personName, thNoStampings) : new ArrayList<Integer>();
+					noStampingDays.add(personReperibilityDay.date.getDayOfMonth());
+					inconsistentAbsence.put(personName, thNoStampings, noStampingDays);	
 				}
 			} else {
 				// check for the stampings in working days
 				if (!DateUtility.isHoliday(person, personReperibilityDay.date) && personDay.stampings.isEmpty()) {
 					Logger.info("La reperibilità di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personDay.date);
-					inconsistentAbsence.put(person.name.concat(" ").concat(person.surname), personReperibilityDay.date.getDayOfMonth(), "mancata timbratura" );
+					
+					noStampingDays = (inconsistentAbsence.contains(personName, thNoStampings)) ? inconsistentAbsence.get(personName, thNoStampings) : new ArrayList<Integer>();	
+					noStampingDays.add(personReperibilityDay.date.getDayOfMonth());			
+					inconsistentAbsence.put(personName, thNoStampings, noStampingDays);
+					
 				}
 				
 				// check for absences
@@ -719,7 +734,10 @@ public class Reperibility extends Controller {
 					for (Absence absence : personDay.absences) {
 						if (absence.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay) {
 							Logger.info("La reperibilità di %s %s è incompatibile con la sua assenza nel giorno %s", person.name, person.surname, personReperibilityDay.date);
-							inconsistentAbsence.put(person.name.concat(" ").concat(person.surname), personReperibilityDay.date.getDayOfMonth(), "assenza" );
+							
+							absenceDays = (inconsistentAbsence.contains(personName, thAbsences)) ? inconsistentAbsence.get(personName, thAbsences) : new ArrayList<Integer>();							
+							absenceDays.add(personReperibilityDay.date.getDayOfMonth());							
+							inconsistentAbsence.put(personName, thAbsences, absenceDays);
 						}
 					}
 				}	
@@ -776,8 +794,8 @@ public class Reperibility extends Controller {
 		}
 		
 		// read the reperebility type codes (feriali o festivi)
-		CompetenceCode codeFR = CompetenceCode.findById(2L);
-		CompetenceCode codeFS = CompetenceCode.findById(3L);
+		CompetenceCode codeFR = CompetenceCode.findById(2L); // feriali
+		CompetenceCode codeFS = CompetenceCode.findById(3L); // festivi
 		String codFr = codeFR.code;
 		String codFs = codeFS.code;
 		
@@ -785,7 +803,7 @@ public class Reperibility extends Controller {
 		
 		Logger.info("Creazione del documento PDF con il resoconto delle reperibilità per il periodo %s/%s", firstOfMonth.plusMonths(0).monthOfYear().getAsText(), firstOfMonth.plusMonths(0).year().getAsText());
 		
-		renderPDF(today, firstOfMonth, reperibilitySumDays, reperibilityDateDays, inconsistentAbsence, codFs, codFr);
+		renderPDF(today, firstOfMonth, reperibilitySumDays, reperibilityDateDays, inconsistentAbsence, codFs, codFr, thNoStampings, thAbsences);
 	}
 
 	

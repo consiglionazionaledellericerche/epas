@@ -15,6 +15,7 @@ import models.PersonReperibility;
 import models.PersonReperibilityType;
 import models.ShiftTimeTable;
 import models.ShiftType;
+import models.enumerate.ShiftSlot;
 import models.exports.ShiftPeriod;
 import models.exports.ShiftPeriods;
 import net.fortuna.ical4j.model.DateTime;
@@ -39,12 +40,21 @@ import com.google.gson.JsonParser;
 /**
  * @author arianna
  *
- * Read data sent from the sist-org shift calendar
+ * Read json sent from the sist-org shift calendar. Json consist of periods of shift of a certain type and slot
+ * [{
+ * 	id: id of the person in the shift
+ * 	start : start date
+ * 	end: end date
+ * 	shiftSlot: slot of the shift (morning/afternoon) 
+ * }]
  */
 @Global
 public class JsonShiftPeriodsBinder implements TypeBinder<ShiftPeriods> {
 
 	/**
+	 * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[], java.lang.String, java.lang.Class, java.lang.reflect.Type)
+	 */
+	/* (non-Javadoc)
 	 * @see play.data.binding.TypeBinder#bind(java.lang.String, java.lang.annotation.Annotation[], java.lang.String, java.lang.Class, java.lang.reflect.Type)
 	 */
 	@Override
@@ -71,6 +81,8 @@ public class JsonShiftPeriodsBinder implements TypeBinder<ShiftPeriods> {
 				LocalDate start = new LocalDate(jsonObject.get("start").getAsString());
 				LocalDate end = new LocalDate(jsonObject.get("end").getAsString());
 				
+				
+						
 				if (!jsonObject.get("cancelled").getAsBoolean()) {
 					// validate person id
 					personId = jsonObject.get("id").getAsLong();
@@ -80,22 +92,30 @@ public class JsonShiftPeriodsBinder implements TypeBinder<ShiftPeriods> {
 					}
 					Logger.debug("letto id = %s corrispondente a person = %s", personId, person.name);
 					
+					
+					// read and validate the shift slot (MORNING/AFTERNOON)
+					String shiftSlotDesc = jsonObject.get("shiftSlot").getAsString();
+					ShiftSlot shiftSlot = ShiftSlot.valueOf(shiftSlotDesc);
+					if (shiftSlot == null) {
+						throw new IllegalArgumentException(String.format("ShiftSlot with name = %s not found", shiftSlotDesc));
+					}
+					
 					// validate the time table
-					String[] hmsStart = jsonObject.get("time_table_start").getAsString().split(":");
-					String[] hmsEnd = jsonObject.get("time_table_end").getAsString().split(":");
+					//String[] hmsStart = jsonObject.get("time_table_start").getAsString().split(":");
+					//String[] hmsEnd = jsonObject.get("time_table_end").getAsString().split(":");
 					
 					// controllo shiftType? ma allora type deve essere unico?
-					ShiftTimeTable shiftTimeTable = (ShiftTimeTable) JPA.em().createQuery("SELECT stt FROM ShiftTimeTable stt WHERE stt.startShift = :ldtStart")
+					/*ShiftTimeTable shiftTimeTable = (ShiftTimeTable) JPA.em().createQuery("SELECT stt FROM ShiftTimeTable stt WHERE stt.startShift = :ldtStart")
 							.setParameter("ldtStart", new LocalDateTime(1970, 01, 01, Integer.parseInt(hmsStart[0]), Integer.parseInt(hmsStart[1])))
 							.getSingleResult();
 	
 					Logger.debug("shiftTimeTable = %s", shiftTimeTable);
 					if (shiftTimeTable == null) {
 						throw new IllegalArgumentException(String.format("shiftTimeTable whith startShift = %s and endShift = %s not found", Arrays.toString(hmsStart), Arrays.toString(hmsEnd)));
-					}
+					}*/
 					
-					ShiftPeriod shiftPeriod =	new ShiftPeriod(person, start, end, shiftType, false, shiftTimeTable);
-					Logger.debug("Creato ShiftPeriod person = %s, start=%s, end=%s, shiftType=%s, shiftTimeTable=%s", person.name, start, end, shiftType, shiftTimeTable.description);
+					ShiftPeriod shiftPeriod =	new ShiftPeriod(person, start, end, shiftType, false, shiftSlot);
+					Logger.debug("Creato ShiftPeriod person = %s, start=%s, end=%s, shiftType=%s, shiftSlot=%s", person.name, start, end, shiftType, shiftSlot);
 					
 					shiftPeriods.add(shiftPeriod);
 					Logger.debug("letto id = %s corrispondente a person = %s", personId, person.name);
