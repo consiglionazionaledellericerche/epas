@@ -38,9 +38,6 @@ public class CertificatedData extends Model {
 	@Column(name="matricola")
 	public String matricola;
 	
-	@Column(name="ok")
-	public boolean ok = false;
-	
 	@Column(name="absences_sent")
 	public String absencesSent = null;
 	
@@ -49,6 +46,9 @@ public class CertificatedData extends Model {
 	
 	@Column(name="mealticket_sent")
 	public Integer mealTicketSent = null;
+	
+	@Column(name="traininghours_sent")
+	public String trainingHoursSent = null;
 	
 	@Column(name="problems")
 	public String problems = null;

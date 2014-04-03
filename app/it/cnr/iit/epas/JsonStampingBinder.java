@@ -120,7 +120,7 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 				}
 				
 				if(tipo.equals("idTabellaINT")){
-					
+					Logger.debug("Controllo l'idtabellaINT");
 					//Matricola firma derivante dal contatore interno
 					String intMatricolaFirma = matricolaFirma;
 					
@@ -129,22 +129,26 @@ public class JsonStampingBinder implements TypeBinder<StampingFromClient> {
 					} else {
 						continue;
 					}
-					
+					Logger.debug("La matricola firma è: %s", intMatricolaFirma);
 					
 					long intMatricolaFirmaAsLong = Long.parseLong(intMatricolaFirma);
+					
+										
 					//Controlla sul campo person oldId
 					person = Person.find("Select p from Person p where p.oldId = ?", intMatricolaFirmaAsLong).first();
 					if(person != null){
 						stamping.personId = person.id;
 						break;
-					}
+					}	
 					
 					//Nell'inserimento delle persone ci deve essere un controllo che verifichi che non ci
 					//siano casi in cui il campo id possa essere utilizzato per associare il badge alla persona
 					//e lo stesso valore dell'id esista già come oldId, altrimenti questa parte di codice non
 					//funzionerebbe
+					
 					person = Person.find("Select p from Person p where p.id = ?", intMatricolaFirmaAsLong).first();
 					if(person != null){
+						Logger.debug("La persona corrispondente è: %s %s", person.name, person.surname);
 						stamping.personId = person.id;
 						break;
 					}

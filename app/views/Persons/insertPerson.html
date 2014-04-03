@@ -65,7 +65,7 @@
 				
 			<tr>	
 				<td>Fine contratto</td>
-				<td><input name="expireContract" type="text" id="datepicker2" data-date-format="yyyy-mm-dd"/></td>
+				<td><input name="expireContract" type="text" id="datepicker3" data-date-format="yyyy-mm-dd"/></td>
 				
 				
 			<tr>	
@@ -74,14 +74,16 @@
 			</tr>	
 				
 			<tr>	
-				<td>Ore di inizializzazione maturate in altro istituto l'anno passato (in minuti)</td>
-				<td><input name="minutesPastYear" type="number" size="10" /></td>
+				<td>Tipo Orario</td>
+				<td>
+				#{select 'wtt'}
+                  #{list items:wttList, as:'wttItem'}
+	                #{option wttItem.id}${wttItem.description}#{/option}
+		          #{/list}
+		        #{/select}
+			    </td>
 			</tr>	
 				
-			<tr>	
-				<td>Ore di inizializzazione maturate in altro istituto nell'anno corrente (in minuti)</td>
-				<td><input name="minutesCurrentYear" type="number" size="10" /></td>
-			</tr>
 		</table>	
 	</fieldset>
 
@@ -119,7 +121,7 @@
 			</tr>		
 			<tr>	
 				<td>Data di nascita</td>
-				<td><input name="bornDate" type="date" value="${person.bornDate}" size="40" maxlength="200" /></td>
+				<td><input name="bornDate" type="text" class="datepicker" value="${person.bornDate}" size="40" maxlength="200" /></td>
 			</tr>	
 	
 		</table>

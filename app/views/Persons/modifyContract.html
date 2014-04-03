@@ -2,18 +2,18 @@
 #{form @Persons.updateContract()}
 <fieldset>
   <legend>Modifica dati contrattuali per ${contract.person.name} ${contract.person.surname}</legend>
-  <input type="hidden" name="contractId" value="${contract.id}" />
+  <input type="hidden" name="contract.id" value="${contract.id}" />
 
   <table class="tablenoborder">
 	<tr>
 		<td><strong>Data inizio contratto</strong></td>
 		<td>%{if(contract.beginContract != null){
 		}%
-			<td><input name="inizio" type="date" value="${contract.beginContract}"/></td>
+			<td><input name="begin" type="text" data-datepicker data-date-format="yyyy-mm-dd" value="${contract.beginContract}"/></td>
 		%{
 		}else{
 		}%
-			<td><input name="inizio" type="date" value="${}" /></td>
+			<td><input name="begin" type="text" data-datepicker data-date-format="yyyy-mm-dd" value="${}" /></td>
 		%{
 		}
 		}%
@@ -23,11 +23,11 @@
 		<td><strong>Data fine contratto</strong></td>
 		<td>%{if(contract.expireContract != null){
 		}%
-			<td><input name="fine" type="date" value="${contract.expireContract}" /></td>
+			<td><input name="expire" type="text" data-datepicker data-date-format="yyyy-mm-dd" value="${contract.expireContract}" /></td>
 		%{
 		}else{
 		}%
-			<td><input name="fine" type="date" value="${}" /></td>
+			<td><input name="expire" type="text" data-datepicker data-date-format="yyyy-mm-dd" value="${}" /></td>
 		%{
 		}
 		}%
@@ -37,11 +37,11 @@
 		<td><strong>Data terminazione contratto (causa morte, pensione...)</strong></td>
 		<td>%{if(contract.endContract != null){
 		}%
-			<td><input name="end" type="date" id="datepicker" value="${contract.endContract}" /></td>
+			<td><input name="end" type="text" data-datepicker data-date-format="yyyy-mm-dd" value="${contract.endContract}" /></td>
 		%{
 		}else{
 		}%	
-			<td><input name="end" type="date" id="datepicker" value="${}" /></td>
+			<td><input name="end" type="text" data-datepicker data-date-format="yyyy-mm-dd" value="${}" /></td>
 		%{
 		}
 		}%
@@ -51,11 +51,11 @@
 		<td><strong>In attestati presenza</strong></td>
 		<td>%{if(contract.onCertificate){
 		}%	
-			<td><input name="certificate" type="checkbox" checked="checked" /></td>
+			<td><input name="onCertificate" type="checkbox" checked="checked" /></td>
 		%{
 		}else{
 		}%
-			<td><input name="certificate" type="checkbox" /></td>
+			<td><input name="onCertificate" type="checkbox" /></td>
 		%{
 		}
 		}%	</td>

@@ -1,0 +1,60 @@
+<div class="accordion" id="accordion1">
+  <div class="accordion-group">
+    <div class="accordion-heading">
+      <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne">
+        <p class="text-error"><strong>Importante</strong></p>
+      </a>
+    </div>
+    <div id="collapseOne" class="accordion-body collapse out">
+      <div class="accordion-inner">
+        <p>
+          	Tramite questa form è possibile specificare quante e quali ore di formazione sono state effettuate nel corso del mese.
+          	Occorre specificare il periodo nel quale tali ore sono state svolte selezionando giorno di inizio e fine del periodo temporale 
+          	e la quantità di ore effettuate.          	
+  		</p> 
+  		<p>
+  			Es.: se si vuole specificare che dal 4 al 5 del mese sono state effettuate 8 ore di formazione, occorrerà selezionare come 
+  			giorno di inizio il 4, come giorno di fine il 5 e scrivere nel campo "quantità" il valore 8.   
+  		</p>
+      </div>
+    </div>
+  </div>
+  </div>
+
+
+#{form @PersonMonths.saveTrainingHours()}
+
+<h3>Ore di formazione di &{'views.tags.display.date.month.' +month}</h3>
+<fieldset>
+
+<table class="tablenoborder">
+<input name="personId" type="hidden" value="${person.id}"/>
+<input name="month" type="hidden" value="${month}"/>
+<input name="year" type="hidden" value="${year}"/>
+	<tr>
+		<td>Giorno inizio</td><td>#{select 'begin',  class:'span1', id: 'begin'} 
+					#{list items:1..max, as:'i'}
+						#{option i}${i}#{/option}
+					#{/list}
+				#{/select}	
+		</td>
+	</tr>
+	<tr>
+		<td>Giorno fine</td><td>#{select 'end',  class:'span1', id: 'end' }
+					#{list items:1..max, as:'i'}
+						#{option i}${i}#{/option}
+					#{/list}
+				#{/select}	
+		</td>
+	</tr>
+	<tr>
+		<td>Quantità</td><td><input class="span2" name="value" type="number" /></td>
+	</tr>
+</table>
+
+</fieldset>
+
+<div class="buttoncenter">
+<input class="btn btn-primary" type="submit" value="Ok" />
+</div>
+#{/form}

@@ -3,33 +3,126 @@
 
 <p class="lead">Le ore di formazione possono essere inserite solo per il mese selezionabile. Nel momento in cui l'amministratore le approva non potranno più essere modificate.</p>
 
-<table class="table table-hover span6">
+<table class="table table-hover span9">
 	<tr>
 		<th>Mese</th>
 		<th>Ore di formazione</th>
+		<th>Modifica</th>
 		<th>Approvate</th>
+		
 	</tr>
 	
-	#{list items: pmList, as: 'personMonth'}
-
-		<tr>
-			<td>&{'views.tags.display.date.month.' +personMonth.month}</td>
-			#{if personMonth.month <= month}
-			<td><a data-x-editable href="#" data-type="number" data-pk="${personMonth.id}" data-name="value"
-	    	data-url="@{insertTrainingHours()}" 
-	    	data-title="Modifica ore di formazione per ${personMonth.person.name} ${personMonth.person.surname}">${personMonth.trainingHours}</a></td>
+	#{list items:pmMap.entrySet(), as: 'entry'}
+	
+	<tr>
+		<td class="text-error">&{'views.tags.display.date.month.' +entry.getKey()}</td>
+		
+		<td>
+			<ul>	
+			#{list items:entry.getValue(), as: 'pm'}
+				#{if pm.trainingHours != 0}
+					#{if !pm.hoursApproved || pm.month == month}			
+						<li>
+							<a data-toggle="modal" data-placement="bottom" title="Modifica ore di formazione" href="@{PersonMonths.modifyTrainingHours(pm.id)}" data-target="#myModal2">
+							<b>${pm.trainingHours}</b> ore <b>Da:</b> <u>${pm.fromDate}</u> <b>A:</b> <u>${pm.toDate}</u></a>
+							<a data-toggle="modal" data-placement="bottom" title="Elimina ore di formazione" href="@{PersonMonths.deleteTrainingHours(pm.id, year, month)}" data-target="#myModal3" ><i class="icon-minus-sign icon-large"></i></a>
+						</li>
+					#{/if}
+					#{else}
+						<li><b>${pm.trainingHours}</b> ore <b>Da:</b> <u>${pm.fromDate}</u> <b>A:</b> <u>${pm.toDate}</u></li>
+					#{/else}
+				#{/if}
+			#{/list}
+			</ul>
+		</td>		
+		#{if entry.getKey() == month}	
+		<td><a href="@{PersonMonths.insertTrainingHours(person.id, month, year)}" data-modal="#myModal1">Inserisci ore di formazione</a></td>
+		#{/if}
+		#{else}
+			#{if entry.getKey() > month }
+				<td>Mese non ancora raggiunto</td>
 			#{/if}
 			#{else}
-			<td>Mese non ancora raggiunto</td>
+				<td>
+				#{if entry.getValue().size() == 1}
+									
+					#{if entry.getValue().get(0).month == month-1 && entry.getValue().get(0).hoursApproved == false}
+					<a href="@{PersonMonths.insertTrainingHours(person.id, entry.getValue().get(0).month, entry.getValue().get(0).year)}" data-modal="#myModal1">Inserisci ore di formazione</a>	
+					#{/if}
+					#{else}
+						Ore già approvate<br>
+					#{/else}
+					
+				#{/if}
+				
+				#{else}
+					#{if entry.getValue().get(1).month == month-1 && entry.getValue().get(1).hoursApproved == false}
+					<a href="@{PersonMonths.insertTrainingHours(person.id, entry.getValue().get(1).month, entry.getValue().get(1).year)}" data-modal="#myModal1">Inserisci ore di formazione</a>	
+					#{/if}
+					#{else}
+						Ore già approvate<br>
+					#{/else}
+				#{/else}
+				</td>
+				
 			#{/else}
-			#{if personMonth.hoursApproved == true}
-				<td><input type="checkbox" disabled="disabled" checked="checked"/></td>
+		#{/else}
+		<td>
+		#{list items:entry.getValue(), as: 'check'}
+		#{if check.trainingHours != 0}
+			#{if check.hoursApproved == true}
+				<input type="checkbox" disabled="disabled" checked="checked"/><br>
 			#{/if}
 			#{else}
-				<td><input type="checkbox" disabled="disabled"/></td>
+				<input type="checkbox" disabled="disabled"/><br>
 			#{/else}
-		</tr>	
+		#{/if}
+		#{/list}
+		</td>
+		
+	</tr>
 
 	#{/list}
 	
 </table>
+
+<div id="myModal1" class="modal hide fade mymodal-small" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Inserisci ore di formazione</h3>
+  </div>
+  <div class="modal-body">
+    <p></p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+  </div>
+</div>
+
+<div id="myModal2" class="modal hide fade mymodal-small" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Modifica ore di formazione</h3>
+  </div>
+  <div class="modal-body">
+    <p></p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+  </div>
+</div>
+
+<div id="myModal3" class="modal hide fade mymodal-small" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Cancella ore di formazione</h3>
+  </div>
+  <div class="modal-body">
+    <p></p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+  </div>
+</div>
+
+

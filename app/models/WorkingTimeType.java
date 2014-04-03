@@ -52,20 +52,13 @@ public class WorkingTimeType extends Model {
 	 */
 	public boolean shift = false;
 	
-	/**
-	 * true se e solo se è l'orario di lavoro di default da assegnare
-	 */
-//	public boolean defaultWorkingTimeType = false;
-	
-//	/**
-//	 * relazione con la tabella persone
-//	 */
-//	@OneToMany(mappedBy="workingTimeType")
-//	public List<Person> person = new ArrayList<Person>();
-		
 	@NotAudited
 	@OneToMany(mappedBy="workingTimeType", fetch=FetchType.LAZY)
 	public List<PersonWorkingTimeType> personWorkingTimeType = new ArrayList<PersonWorkingTimeType>();
+	
+	@NotAudited
+	@OneToMany(mappedBy="workingTimeType", fetch=FetchType.LAZY)
+	public List<ContractWorkingTimeType> contractWorkingTimeType = new ArrayList<ContractWorkingTimeType>();
 	
 	/**
 	 * relazione con la tabella di specifiche di orario di lavoro
@@ -94,12 +87,6 @@ public class WorkingTimeType extends Model {
 	public WorkingTimeTypeDay getWorkingTimeTypeDayFromDayOfWeek(int dayOfWeek){
 		
 		return this.workingTimeTypeDays.get(dayOfWeek-1);
-		/*
-		WorkingTimeTypeDay wttd = WorkingTimeTypeDay.find("Select wttd from WorkingTimeTypeDay wttd where wttd.workingTimeType = ?" +
-				" and wttd.dayOfWeek = ?", this, dayOfWeek).first();
-		
-		return wttd;
-		*/
 	}
 	
 	/**

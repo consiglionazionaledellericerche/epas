@@ -576,7 +576,7 @@ public class Reperibility extends Controller {
 			for (PersonReperibilityDay personReperibilityDay : personReperibilityDays) {
 				Person person = personReperibilityDay.personReperibility.person;
 				
-				builder.put(person, personReperibilityDay.date.getDayOfMonth(), DateUtility.isHoliday(person, personReperibilityDay.date) ? "fs" : "fr");
+				builder.put(person, personReperibilityDay.date.getDayOfMonth(), person.isHoliday(personReperibilityDay.date) ? "fs" : "fr");
 			}
 			reperibilityMonth = builder.build();
 			reperibilityMonths.add(reperibilityMonth);
@@ -701,7 +701,7 @@ public class Reperibility extends Controller {
 			String personName = person.name.concat(" ").concat(person.surname);
 			
 			// record the reperibility days
-			builder.put(person, personReperibilityDay.date.getDayOfMonth(), DateUtility.isHoliday(person, personReperibilityDay.date) ? "fs" : "fr");
+			builder.put(person, personReperibilityDay.date.getDayOfMonth(), person.isHoliday(personReperibilityDay.date) ? "fs" : "fr");
 			
 			//check for the absence inconsistencies
 			//------------------------------------------
@@ -711,7 +711,7 @@ public class Reperibility extends Controller {
 			
 			// if there are no events and it is not an holiday -> error
 			if (personDay == null) {
-				if (!DateUtility.isHoliday(person, personReperibilityDay.date)) {
+				if (!person.isHoliday(personReperibilityDay.date)) {
 					Logger.info("La reperibilità di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personReperibilityDay.date);
 				
 					noStampingDays = (inconsistentAbsence.contains(personName, thNoStampings)) ? inconsistentAbsence.get(personName, thNoStampings) : new ArrayList<Integer>();
@@ -720,7 +720,7 @@ public class Reperibility extends Controller {
 				}
 			} else {
 				// check for the stampings in working days
-				if (!DateUtility.isHoliday(person, personReperibilityDay.date) && personDay.stampings.isEmpty()) {
+				if (!person.isHoliday(personReperibilityDay.date) && personDay.stampings.isEmpty()) {
 					Logger.info("La reperibilità di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personDay.date);
 					
 					noStampingDays = (inconsistentAbsence.contains(personName, thNoStampings)) ? inconsistentAbsence.get(personName, thNoStampings) : new ArrayList<Integer>();	
@@ -742,7 +742,7 @@ public class Reperibility extends Controller {
 					}
 				}	
 			}
-		}		
+		}
 		reperibilityMonth = builder.build();
 		
 	

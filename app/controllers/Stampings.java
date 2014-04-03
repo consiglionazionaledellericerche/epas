@@ -74,10 +74,7 @@ public class Stampings extends Controller {
 	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void stampings(Integer year, Integer month){
 
-		if (Security.getPerson().username.equals("admin")) {
-			Application.indexAdmin();
-		}
-		Person person = Security.getPerson();
+		Person person = Security.getUser().person;
 		if(!person.isActiveInMonth(month, year))
 		{
 			flash.error("Si è cercato di accedere a un mese al di fuori del contratto valido per %s %s. " +
@@ -85,16 +82,14 @@ public class Stampings extends Controller {
 			render("@redirectToIndex");
 		}
 		
-		LocalDate today = new LocalDate();
-		if(today.getYear()==year && month>today.getMonthOfYear())
-		{
-			flash.error("Impossibile accedere a situazione futura, redirect automatico a mese attuale");
-			month = today.getMonthOfYear();
-		}
+//		LocalDate today = new LocalDate();
+//		if(today.getYear()==year && month>today.getMonthOfYear())
+//		{
+//			flash.error("Impossibile accedere a situazione futura, redirect automatico a mese attuale");
+//			month = today.getMonthOfYear();
+//		}
 		
-		
-	
-		
+
 		//Configuration conf = Configuration.getCurrentConfiguration();
 		ConfGeneral conf = ConfGeneral.getConfGeneral();
 		int minInOutColumn = conf.numberOfViewingCoupleColumn;
@@ -134,11 +129,11 @@ public class Stampings extends Controller {
 			if(c.getMese(year, month)!=null)
 				contractMonths.add(c.getMese(year, month));
 		}
-		if(contractMonths.size()==0)
-		{
-			flash.error("Impossibile visualizzare la situazione mensile per %s %s per il mese di %s", person.name, person.surname, DateUtility.fromIntToStringMonth(month));
-			render("@redirectToIndex");
-		}
+//		if(contractMonths.size()==0)
+//		{
+//			flash.error("Impossibile visualizzare la situazione mensile per %s %s per il mese di %s", person.name, person.surname, DateUtility.fromIntToStringMonth(month));
+//			render("@redirectToIndex");
+//		}
 		
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);
 		
@@ -166,12 +161,12 @@ public class Stampings extends Controller {
 			render("@redirectToIndex");
 		}
 		
-		LocalDate today = new LocalDate();
-		if(today.getYear()==year && month>today.getMonthOfYear())
-		{
-			flash.error("Impossibile accedere a situazione futura, redirect automatico a mese attuale");
-			month = today.getMonthOfYear();
-		}
+//		LocalDate today = new LocalDate();
+//		if(today.getYear()==year && month>today.getMonthOfYear())
+//		{
+//			flash.error("Impossibile accedere a situazione futura, redirect automatico a mese attuale");
+//			month = today.getMonthOfYear();
+//		}
 		
 		//Configuration conf = Configuration.getCurrentConfiguration();													//0 sql (se già in cache)
 		ConfGeneral conf = ConfGeneral.getConfGeneral();
@@ -223,7 +218,7 @@ public class Stampings extends Controller {
 
 	private static void personStamping() {
 		LocalDate now = new LocalDate();
-		personStamping(Security.getPerson().getId(), now.getYear(),now.getMonthOfYear());
+		personStamping(Security.getUser().person.getId(), now.getYear(),now.getMonthOfYear());
 	}
 
 	private static void personStamping(Long personId) {
@@ -463,7 +458,7 @@ public class Stampings extends Controller {
 		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
 
 		//lista delle persone che sono state attive nel mese
-		List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getPerson().getOfficeAllowed(), false);
+		List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
 
 		List<PersonTroublesInMonthRecap> missingStampings = new ArrayList<PersonTroublesInMonthRecap>();
 		
@@ -512,7 +507,7 @@ public class Stampings extends Controller {
 	public static void dailyPresence(Integer year, Integer month, Integer day) {
 
 		LocalDate dayPresence = new LocalDate(year, month, day);
-		List<Person> activePersonsInDay = Person.getActivePersonsInDay(day, month, year, Security.getPerson().getOfficeAllowed(), false);
+		List<Person> activePersonsInDay = Person.getActivePersonsInDay(day, month, year, Security.getOfficeAllowed(), false);
 		int numberOfInOut = maxNumberOfStampingsInMonth(year, month, day, activePersonsInDay);
 		
 		
@@ -520,7 +515,9 @@ public class Stampings extends Controller {
 		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();						
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 		for(Person person : activePersonsInDay){
-			if(!person.username.equals("epas.clocks")){
+			Logger.info("persona: %s", person.surname);
+			//TODOUSER
+			//if(!person.username.equals("epas.clocks")){
 				PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.date = ? and pd.person = ?", dayPresence, person).first();
 				if(pd==null)
 					pd = new PersonDay(person, dayPresence);
@@ -528,7 +525,7 @@ public class Stampings extends Controller {
 				pd.computeValidStampings();
 				daysRecap.add(new PersonStampingDayRecap(pd, numberOfInOut));
 
-			}
+			//}
 						
 		}
 
@@ -543,7 +540,7 @@ public class Stampings extends Controller {
 
 		LocalDate beginMonth = new LocalDate(year, month, 1);
 
-		List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getPerson().getOfficeAllowed(), false);
+		List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
 		Builder<Person, LocalDate, String> builder = ImmutableTable.<Person, LocalDate, String>builder().orderColumnsBy(new Comparator<LocalDate>() {
 
 			public int compare(LocalDate date1, LocalDate date2) {

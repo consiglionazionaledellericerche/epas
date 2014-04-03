@@ -77,10 +77,6 @@ public class PersonDay extends Model {
 
 	@Column(name = "time_at_work")
 	public Integer timeAtWork;
-
-	@Column(name = "time_justified")
-	public Integer timeJustified;
-	//FIXME questo campo non è mai utilizzato
 	
 	public Integer difference;
 
@@ -164,7 +160,7 @@ public class PersonDay extends Model {
 	public boolean isHoliday(){
 		if(isHolidayy!=null)	//già calcolato
 			return isHolidayy;
-		isHolidayy = DateUtility.isHoliday(this.person, this.date);
+		isHolidayy = this.person.isHoliday(this.date);
 		return isHolidayy;
 	}
 	
@@ -431,8 +427,6 @@ public class PersonDay extends Model {
 			return this.isFixedTimeAtWorkk;
 		
 		this.isFixedTimeAtWorkk = false;
-		//FIXME: invece che ciclare su tutti non si poteva con una select prendere lo
-		//stampProfile alla data attuale?
 		for(StampProfile sp : this.person.stampProfiles)
 		{
 			if(DateUtility.isDateIntoInterval(this.date, new DateInterval(sp.startFrom,sp.endTo)))

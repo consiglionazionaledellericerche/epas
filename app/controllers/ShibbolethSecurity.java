@@ -69,15 +69,15 @@ public class ShibbolethSecurity extends controllers.shib.Security {
 				eppn, eppn).first();
 		
 		if(person != null){
-			Cache.set(person.username, person, Security.CACHE_DURATION);
-			Cache.set(Security.PERMISSION_CACHE_PREFIX + person.username, person.getAllPermissions(), Security.CACHE_DURATION);
+			Cache.set(person.user.username, person, Security.CACHE_DURATION);
+			Cache.set(Security.PERMISSION_CACHE_PREFIX + person.user.username, person.user.getAllPermissions(), Security.CACHE_DURATION);
 			Cache.set("personId", person.id, Security.CACHE_DURATION);
 
-			session.put("username", person.username);
+			session.put("username", person.user.username);
 
             flash.success("Welcome, " + person.name + ' ' + person.surname);
-            Logger.info("Person %s successfully logged in", person.username);
-            Logger.trace("Permission list for %s %s: %s", person.name, person.surname, person.permissions);
+            Logger.info("Person %s successfully logged in", person.user.username);
+            Logger.trace("Permission list for %s %s: %s", person.name, person.surname, person.user.permissions);
 		} else {
 			Logger.warn("Person with email %s successfully logged in Shibboleth but unknonw to ePAS", eppn);
 		}

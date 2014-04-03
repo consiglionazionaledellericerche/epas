@@ -29,6 +29,8 @@ import models.ConfYear;
 import models.Person;
 import models.PersonDay;
 import models.PersonMonthRecap;
+import models.PersonReperibilityDay;
+import models.PersonShiftDay;
 import models.PersonTags;
 import models.Qualification;
 import models.Stamping;
@@ -40,6 +42,8 @@ import models.exports.PersonEmailFromJson;
 import models.exports.PersonPeriodAbsenceCode;
 import models.rendering.VacationsRecap;
 
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.MultiPartEmail;
 import org.hibernate.envers.entities.mapper.relation.lazy.proxy.SetProxy;
 import org.joda.time.LocalDate;
 
@@ -56,51 +60,17 @@ import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.db.jpa.Blob;
 import play.db.jpa.JPA;
+import play.libs.Mail;
 import play.mvc.Controller;
 import play.mvc.With;
 
 @With( {Secure.class, NavigationMenu.class} )
 public class Absences extends Controller{
 
+	
 	private static List<AbsenceType> getFrequentAbsenceTypes(){
-
-		List<AbsenceType> absenceTypeList = new ArrayList<AbsenceType>();
-		try
-		{
-			//prepared statement
-			Connection connection = null;
-			if(connection == null)
-			{
-				Class.forName("org.postgresql.Driver");
-				connection = DriverManager.getConnection(
-						Play.configuration.getProperty("db.new.url"),
-						Play.configuration.getProperty("db.new.user"),
-						Play.configuration.getProperty("db.new.password"));
-			}
-
-			String query = "select abt.id "
-					+ "from absences ab left outer join absence_types abt on ab.absence_type_id = abt.id "
-					+ "group by abt.id "
-					+ "order by count(*) desc "
-					+ "limit 20;";
-
-			PreparedStatement ps = connection.prepareStatement(query);
-			ResultSet rs = ps.executeQuery();
-
-			while(rs.next())
-			{
-				long absenceTypeId = rs.getLong("id");
-				AbsenceType abt = AbsenceType.findById(absenceTypeId);
-				absenceTypeList.add(abt);
-			}
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-			return null;
-		}
-
-		return absenceTypeList;
+		return AbsenceType.find("Select abt from AbsenceType abt, Absence abs " +
+				"where abs.absenceType = abt group by abt order by sum(abt.id) desc limit 20").fetch();
 
 	}
 
@@ -111,7 +81,7 @@ public class Absences extends Controller{
 
 	//@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void absences(Integer year, Integer month) {
-		Person person = Security.getPerson();
+		Person person = Security.getUser().person;
 		Map<AbsenceType,Integer> absenceTypeInMonth = getAbsenceTypeInMonth(person, year, month);
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);
 		render(absenceTypeInMonth, person, year, month, month_capitalized);
@@ -325,7 +295,7 @@ public class Absences extends Controller{
 	}
 
 	private static void insertAbsence(Long personId, Integer yearFrom, 
-			Integer monthFrom, Integer dayFrom, String absenceCode, Integer annoFine, Integer meseFine, Integer giornoFine, Blob file, String mealTicket)
+			Integer monthFrom, Integer dayFrom, String absenceCode, Integer annoFine, Integer meseFine, Integer giornoFine, Blob file, String mealTicket) throws EmailException
 	{
 		Person person = Person.em().getReference(Person.class, personId);
 		LocalDate dateFrom = new LocalDate(yearFrom, monthFrom, dayFrom);
@@ -358,6 +328,12 @@ public class Absences extends Controller{
 		}
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
+//		if(absenceType.code.startsWith("25")){
+//			handler25(person, dateFrom, dateTo, absenceType, file);
+//			return;
+//		}
+		
+		
 		if(absenceType.code.equals("91"))
 		{
 			handlerCompensatoryRest(person, dateFrom, dateTo, absenceType, file);
@@ -396,9 +372,11 @@ public class Absences extends Controller{
 	}
 
 	
+	
+
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void insert(@Required Long personId, @Required Integer yearFrom, 
-			@Required Integer monthFrom, @Required Integer dayFrom, @Required String absenceCode, Integer annoFine, Integer meseFine, Integer giornoFine, Blob file, String mealTicket){
+			@Required Integer monthFrom, @Required Integer dayFrom, @Required String absenceCode, Integer annoFine, Integer meseFine, Integer giornoFine, Blob file, String mealTicket) throws EmailException{
 
 		//Ho dovuto implementare un involucro perchè quando richiamavo questo medoto da update il campo blob era null.
 		insertAbsence(personId, yearFrom, monthFrom, dayFrom, absenceCode, annoFine, meseFine, giornoFine, file, mealTicket);
@@ -505,7 +483,7 @@ public class Absences extends Controller{
 	}
     
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
-	public static void update(Blob file) {
+	public static void update(Blob file) throws EmailException {
 		Absence absence = Absence.findById(params.get("absenceId", Long.class));
 		if (absence == null) {
 			notFound();
@@ -581,14 +559,17 @@ public class Absences extends Controller{
 	 * @param dateFrom
 	 * @param dateTo
 	 * @param absenceType
+	 * @throws EmailException 
 	 */
-	private static void handlerCompensatoryRest(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType,Blob file)
+	private static void handlerCompensatoryRest(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType,Blob file) throws EmailException
 	{
 		LocalDate actualDate = dateFrom;
 		int taken = 0;
-		
+		boolean esito = false;
+		int countHowManyCheck = 0;
 		while(!actualDate.isAfter(dateTo))
 		{
+			
 			ConfYear config = ConfYear.getConfYear(actualDate.getYear());
 	
 			//verifica se ha esaurito il bonus per l'anno
@@ -610,8 +591,25 @@ public class Absences extends Controller{
 			//Controllo del residuo
 			if(!PersonUtility.canTakeCompensatoryRest(person, actualDate))
 			{
+				
 				actualDate = actualDate.plusDays(1);
 				continue;
+			}
+			esito = checkIfAbsenceInReperibilityOrInShift(person, actualDate);
+			if(esito==true){
+				countHowManyCheck++;
+				MultiPartEmail email = new MultiPartEmail();
+
+				email.addTo(person.contactData.email);
+				email.setFrom("epas@iit.cnr.it");
+				
+				email.setSubject("Segnalazione inserimento assenza in giorno con reperibilità/turno");
+				email.setMsg("E' stato richiesto l'inserimento di una assenza per il giorno "+actualDate+ 
+						" per il quale risulta una reperibilità o turno. "+'\n'+
+						"Controllare tramite la segreteria del personale."+'\n'+
+						'\n'+
+						"Servizio ePas");
+				Mail.send(email); 
 			}
 			
 			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, true, file);
@@ -619,6 +617,11 @@ public class Absences extends Controller{
 			actualDate = actualDate.plusDays(1);
 		}
 		actualDate.minusDays(1);
+		if(countHowManyCheck > 0){
+			flash.success("Aggiunti codici assenza FER anche in giorni in cui il dipendente %s %s presenta turno o reperibilità. Il dipendente è stato informato via mail.", person.name, person.surname);
+			PersonUtility.updatePersonDaysIntoInterval(person,dateFrom,dateTo);
+			Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
+		}
 
 		if(taken==0)
 			flash.error("Non e' stato possibile inserire alcun riposo compensativo (bonus esaurito o residuo insufficiente)");
@@ -636,22 +639,24 @@ public class Absences extends Controller{
 	 * @param dateFrom
 	 * @param dateTo
 	 * @param absenceType
+	 * @throws EmailException 
 	 */
-	private static void handlerFER(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, Blob file)
+	private static void handlerFER(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, Blob file) throws EmailException
 	{
 		//controllo reperibilita'
 		LocalDate actualDate = dateFrom;
-		while(!actualDate.isAfter(dateTo))
-		{
-			if(!PersonUtility.canPersonTakeAbsenceInShiftOrReperibility(person, actualDate))	
-			{
-				flash.error("Operazione annullata in quanto %s %s al giorno %s si trova in turno/reperibilità. \n Contattarlo e chiedere spiegazioni", person.name, person.surname, actualDate);
-				Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
-			}
-			
-			actualDate = actualDate.plusDays(1);
-		}
-		
+//		while(!actualDate.isAfter(dateTo))
+//		{
+//			if(!PersonUtility.canPersonTakeAbsenceInShiftOrReperibility(person, actualDate))	
+//			{
+//				flash.error("Operazione annullata in quanto %s %s al giorno %s si trova in turno/reperibilità. \n Contattarlo e chiedere spiegazioni", person.name, person.surname, actualDate);
+//				Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
+//			}
+//			
+//			actualDate = actualDate.plusDays(1);
+//		}
+		boolean esito = false;
+		int countHowManyCheck = 0;
 		//inserimento
 		int taken = 0;
 		actualDate = dateFrom;
@@ -672,15 +677,35 @@ public class Absences extends Controller{
 				PersonUtility.updatePersonDaysIntoInterval(person,dateFrom,dateTo);
 				Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
 			}
-			
+			esito = checkIfAbsenceInReperibilityOrInShift(person, actualDate);
+			if(esito==true){
+				countHowManyCheck++;
+				MultiPartEmail email = new MultiPartEmail();
+
+				email.addTo(person.contactData.email);
+				email.setFrom("epas@iit.cnr.it");
+				
+				email.setSubject("Segnalazione inserimento assenza in giorno con reperibilità/turno");
+				email.setMsg("E' stato richiesto l'inserimento di una assenza per il giorno "+actualDate+ 
+						" per il quale risulta una reperibilità o turno. "+'\n'+
+						"Controllare tramite la segreteria del personale."+'\n'+
+						'\n'+
+						"Servizio ePas");
+				Mail.send(email); 
+			}
 			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, wichFer, true, file);
 			actualDate = actualDate.plusDays(1);
 			
 		}
 		actualDate = actualDate.minusDays(1);
-		if(taken==1)
+		if(countHowManyCheck > 0){
+			flash.success("Aggiunti codici assenza FER anche in giorni in cui il dipendente %s %s presenta turno o reperibilità. Il dipendente è stato informato via mail.", person.name, person.surname);
+			PersonUtility.updatePersonDaysIntoInterval(person,dateFrom,dateTo);
+			Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
+		}
+		if(taken==1 && countHowManyCheck == 0)
 			flash.success("Aggiunto codice assenza FER per il giorno %s", actualDate);
-		if(taken>1)
+		if(taken>1 && countHowManyCheck == 0)
 			flash.success("Aggiunti %s codici assenza FER da %s a %s.", taken, dateFrom, dateTo);
 		
 		PersonUtility.updatePersonDaysIntoInterval(person,dateFrom,dateTo);
@@ -689,16 +714,38 @@ public class Absences extends Controller{
 	}
 	
 	/**
-	 * Gestisce una richiesta di inserimento codice 37 (utilizzo ferie anno precedente scadute)
+	 * metodo che in caso di inserimento di codice di assenza 25 o similari riduce il numero di giorni di ferie nel numero di giorni
+	 * in cui questo codice viene assegnato
 	 * @param person
 	 * @param dateFrom
 	 * @param dateTo
 	 * @param absenceType
 	 * @param file
 	 */
-	private static void handler37(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, Blob file)
+//	private static void handler25(Person person, LocalDate dateFrom,LocalDate dateTo, AbsenceType absenceType, Blob file) {
+//		
+//		LocalDate datebegin = dateFrom;
+//		while(!datebegin.isAfter(dateTo)){
+//			
+//			
+//			
+//			datebegin = datebegin.plusDays(1);
+//		}
+//	}
+	
+	/**
+	 * Gestisce una richiesta di inserimento codice 37 (utilizzo ferie anno precedente scadute)
+	 * @param person
+	 * @param dateFrom
+	 * @param dateTo
+	 * @param absenceType
+	 * @param file
+	 * @throws EmailException 
+	 */
+	private static void handler37(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, Blob file) throws EmailException
 	{
-		
+		boolean esito = false;
+		int countHowManyCheck = 0;
 		if(dateFrom.getYear() != dateTo.getYear())
 		{
 			flash.error("I recuperi ferie anno precedente possono essere assegnati solo per l'anno corrente");
@@ -715,8 +762,27 @@ public class Absences extends Controller{
 		int taken = 0;
 		while(!actualDate.isAfter(dateTo) && taken<=remaining37)
 		{
+			esito = checkIfAbsenceInReperibilityOrInShift(person, actualDate);
+			if(esito==true){
+				countHowManyCheck++;
+				MultiPartEmail email = new MultiPartEmail();
+
+				email.addTo(person.contactData.email);
+				email.setFrom("epas@iit.cnr.it");
+				
+				email.setSubject("Segnalazione inserimento assenza in giorno con reperibilità/turno");
+				email.setMsg("E' stato richiesto l'inserimento di una assenza per il giorno " +actualDate+ 
+						"per il quale risulta una reperibilità o turno. "+'\n'+
+						"Controllare tramite la segreteria del personale.");
+				Mail.send(email); 
+			}
 			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, true, file);
 			actualDate = actualDate.plusDays(1);
+		}
+		if(countHowManyCheck > 0){
+			flash.success("Aggiunti codici assenza FER anche in giorni in cui il dipendente %s %s presenta turno o reperibilità. Il dipendente è stato informato via mail.", person.name, person.surname);
+			PersonUtility.updatePersonDaysIntoInterval(person,dateFrom,dateTo);
+			Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
 		}
 
 		flash.success("Inseriti %s codice 37 per la persona", taken);
@@ -730,8 +796,9 @@ public class Absences extends Controller{
 	 * @param person
 	 * @param dateFrom
 	 * @param absenceType
+	 * @throws EmailException 
 	 */
-	private static void handlerChildIllness(Person person, LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, Blob file)
+	private static void handlerChildIllness(Person person, LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, Blob file) throws EmailException
 	{
 		/**
 		 * controllo sulla possibilità di poter prendere i congedi per malattia dei figli, guardo se il codice di assenza appartiene alla
@@ -753,13 +820,35 @@ public class Absences extends Controller{
 			Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
 			return;
 		}
-		
+		Boolean check = false;
+		int countHowManyCheck = 0;
 		LocalDate actualDate = dateFrom;
 		int taken = 0;
 		while(!actualDate.isAfter(dateTo))
 		{
+			check = checkIfAbsenceInReperibilityOrInShift(person, actualDate);
+			if(check==true){
+				countHowManyCheck++;
+				MultiPartEmail email = new MultiPartEmail();
+
+				email.addTo(person.contactData.email);
+				email.setFrom("epas@iit.cnr.it");
+				
+				email.setSubject("Segnalazione inserimento assenza in giorno con reperibilità/turno");
+				email.setMsg("E' stato richiesto l'inserimento di una assenza per il giorno "+actualDate+ 
+						" per il quale risulta una reperibilità o turno. "+'\n'+
+						"Controllare tramite la segreteria del personale."+'\n'+
+						'\n'+
+						"Servizio ePas");
+				Mail.send(email); 
+			}
 			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, !absenceType.consideredWeekEnd, file);
 			actualDate = actualDate.plusDays(1);
+		}
+		if(countHowManyCheck > 0){
+			flash.success("Aggiunti codici assenza FER anche in giorni in cui il dipendente %s %s presenta turno o reperibilità. Il dipendente è stato informato via mail.", person.name, person.surname);
+			PersonUtility.updatePersonDaysIntoInterval(person,dateFrom,dateTo);
+			Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
 		}
 		flash.success("Inseriti %s codici assenza per la persona", taken);
 		PersonUtility.updatePersonDaysIntoInterval(person, dateFrom, dateTo);
@@ -774,8 +863,9 @@ public class Absences extends Controller{
 	 * @param dateTo
 	 * @param absenceType
 	 * @param file
+	 * @throws EmailException 
 	 */
-	private static void handlerIllnessOrDischarge(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType,Blob file)
+	private static void handlerIllnessOrDischarge(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType,Blob file) throws EmailException
 	{
 		int taken = insertAbsencesInPeriod(person, dateFrom, dateTo, absenceType, false, file);
 		flash.success("Inseriti %s codici assenza per la persona", taken);
@@ -790,11 +880,30 @@ public class Absences extends Controller{
 	 * @param dateTo
 	 * @param absenceType
 	 * @param file
+	 * @throws EmailException 
 	 */
-	private static void handlerAbsenceTypeGroup(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, Blob file)
+	private static void handlerAbsenceTypeGroup(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, Blob file) throws EmailException
 	{
+		boolean esito = false;
+		int countHowManyCheck = 0;
 		LocalDate actualDate = dateFrom;
 		while(actualDate.isBefore(dateTo) || actualDate.isEqual(dateTo)){
+			esito = checkIfAbsenceInReperibilityOrInShift(person, actualDate);
+			if(esito==true){
+				countHowManyCheck++;
+				MultiPartEmail email = new MultiPartEmail();
+
+				email.addTo(person.contactData.email);
+				email.setFrom("epas@iit.cnr.it");
+				
+				email.setSubject("Segnalazione inserimento assenza in giorno con reperibilità/turno");
+				email.setMsg("E' stato richiesto l'inserimento di una assenza per il giorno " +actualDate+ 
+						" per il quale risulta una reperibilità o turno. "+'\n'+
+						"Controllare tramite la segreteria del personale."+'\n'+
+						'\n'+
+						"Servizio ePas");
+				Mail.send(email); 
+			}
 			CheckMessage checkMessage = PersonUtility.checkAbsenceGroup(absenceType, person, actualDate);
 			if(checkMessage.check == false){
 				flash.error("Impossibile inserire il codice %s per %s %s. "+checkMessage.message, absenceType.code, person.name, person.surname);
@@ -850,20 +959,48 @@ public class Absences extends Controller{
 			}
 			actualDate = actualDate.plusDays(1);
 		}
+		if(countHowManyCheck > 0){
+			flash.success("Aggiunti codici assenza FER anche in giorni in cui il dipendente %s %s presenta turno o reperibilità. Il dipendente è stato informato via mail.", person.name, person.surname);
+			PersonUtility.updatePersonDaysIntoInterval(person,dateFrom,dateTo);
+			Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
+		}
 		flash.success("Aggiunto codice di assenza %s ", absenceType.code);
 		Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
 		
 	}
 	
-	private static void handlerGenericAbsenceType(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, Blob file, String mealTicket)
+	private static void handlerGenericAbsenceType(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, Blob file, String mealTicket) throws EmailException
 	{
 		LocalDate actualDate = dateFrom;
 		int taken = 0;
+		boolean esito = false;
+		int countHowManyCheck = 0; 
 		while(!actualDate.isAfter(dateTo))
 		{
 			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, false, file);
 			checkMealTicket(actualDate, person, mealTicket, absenceType);
+			esito = checkIfAbsenceInReperibilityOrInShift(person, actualDate);
+			if(esito==true){
+				countHowManyCheck++;
+				MultiPartEmail email = new MultiPartEmail();
+
+				email.addTo(person.contactData.email);
+				email.setFrom("epas@iit.cnr.it");
+				
+				email.setSubject("Segnalazione inserimento assenza in giorno con reperibilità/turno");
+				email.setMsg("E' stato richiesto l'inserimento di una assenza per il giorno "+actualDate+ 
+						" per il quale risulta una reperibilità o turno. "+'\n'+
+						"Controllare tramite la segreteria del personale."+'\n'+
+						'\n'+
+						"Servizio ePas");
+				Mail.send(email); 
+			}
 			actualDate = actualDate.plusDays(1);
+		}
+		if(countHowManyCheck > 0){
+			flash.success("Aggiunti codici assenza FER anche in giorni in cui il dipendente %s %s presenta turno o reperibilità. Il dipendente è stato informato via mail.", person.name, person.surname);
+			PersonUtility.updatePersonDaysIntoInterval(person,dateFrom,dateTo);
+			Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
 		}
 		flash.success("Inseriti %s codici assenza per la persona", taken);
 		PersonUtility.updatePersonDaysIntoInterval(person, dateFrom, dateTo);
@@ -925,16 +1062,29 @@ public class Absences extends Controller{
 
 	}
 	
-
-	public static void setPersonEmailForAbsence(){
-		
+	/**
+	 * controlla se si sta prendendo un codice di assenza in un giorno in cui si è reperibili
+	 * @return true se si sta prendendo assenza per un giorno in cui si è reperibili, false altrimenti
+	 */
+	private static boolean checkIfAbsenceInReperibilityOrInShift(Person person, LocalDate date){
+		//controllo se la persona è in reperibilità
+		PersonReperibilityDay prd = PersonReperibilityDay.find("Select prd from PersonReperibilityDay prd where prd.date = ? and prd.personReperibility.person = ?", 
+				date, person).first();
+				
+		//controllo se la persona è in turno
+		PersonShiftDay psd = PersonShiftDay.find("Select psd from PersonShiftDay psd where psd.date = ? and psd.personShift.person = ?",
+				date, person).first();
+		if(psd == null && prd == null)		
+			return false;
+		else
+			return true;
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void insertPersonChildren(){
 		int month = new LocalDate().getMonthOfYear();
 		int year = new LocalDate().getYear();
-		List<Person> personList = Person.getActivePersonsInMonth(month, year, Security.getPerson().getOfficeAllowed(), false);
+		List<Person> personList = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
 		render(personList);
 	}
 	
@@ -1003,7 +1153,7 @@ public class Absences extends Controller{
 	
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void manageAttachmentsPerPerson(Long personSelected, Integer year, Integer month){
-		List<Person> personListForAttachments = Person.getActivePersonsInMonth(month, year, Security.getPerson().getOfficeAllowed(), false);
+		List<Person> personListForAttachments = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
 		if(personSelected == null || personSelected == 0){
 			
 			render(personListForAttachments, year, month);
@@ -1027,7 +1177,7 @@ public class Absences extends Controller{
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void absenceInPeriod(Long personSelected, int year, int month){
 		
-		List<Person> personList = Person.getActivePersonsInMonth(month, year, Security.getPerson().getOfficeAllowed(), false);
+		List<Person> personList = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
 		if(personSelected == null || personSelected == 0)
 			render(personList, year, month);
 		else{
@@ -1070,15 +1220,18 @@ public class Absences extends Controller{
 	 * @param absenceType
 	 * @param considerHoliday
 	 * @param file
+	 * @throws EmailException 
 	 */
-	private static int insertAbsencesInPeriod(Person person, LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, boolean notInHoliday, Blob file)
+	private static int insertAbsencesInPeriod(Person person, LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, boolean notInHoliday, Blob file) throws EmailException
 	{
 		LocalDate actualDate = dateFrom;
 		int taken = 0;
+		boolean esito = false;
+		int countHowManyCheck = 0;
 		while(!actualDate.isAfter(dateTo))
 		{
 			//se non devo considerare festa ed è festa vado oltre
-			if(notInHoliday && DateUtility.isHoliday(person, actualDate))
+			if(notInHoliday && person.isHoliday(actualDate))
 			{
 				actualDate = actualDate.plusDays(1);
 				continue;
@@ -1090,7 +1243,22 @@ public class Absences extends Controller{
 				pd = new PersonDay(person, actualDate);
 				pd.create();
 			}
+			esito = checkIfAbsenceInReperibilityOrInShift(person, actualDate);
+			if(esito==true){
+				countHowManyCheck++;
+				MultiPartEmail email = new MultiPartEmail();
 
+				email.addTo(person.contactData.email);
+				email.setFrom("epas@iit.cnr.it");
+				
+				email.setSubject("Segnalazione inserimento assenza in giorno con reperibilità/turno");
+				email.setMsg("E' stato richiesto l'inserimento di una assenza per il giorno "+actualDate+ 
+						" per il quale risulta una reperibilità o turno. "+'\n'+
+						"Controllare tramite la segreteria del personale."+'\n'+
+						'\n'+
+						"Servizio ePas");
+				Mail.send(email); 
+			}
 			//creo l'assenza e l'aggiungo
 			Absence absence = new Absence();
 			absence.absenceType = absenceType;
@@ -1103,7 +1271,13 @@ public class Absences extends Controller{
 			pd.populatePersonDay();
 			//pd.save();
 			taken++;
+			
 			actualDate = actualDate.plusDays(1);
+		}
+		if(countHowManyCheck > 0){
+			flash.success("Aggiunti codici assenza FER anche in giorni in cui il dipendente %s %s presenta turno o reperibilità. Il dipendente è stato informato via mail.", person.name, person.surname);
+			PersonUtility.updatePersonDaysIntoInterval(person,dateFrom,dateTo);
+			Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
 		}
 		return taken;
 	}
