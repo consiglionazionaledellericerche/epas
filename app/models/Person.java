@@ -1227,6 +1227,18 @@ public class Person extends Model {
 	 * 
 	 * @param year
 	 * @param month
+	 * @return l'esito dell'invio attestati per la persona (null se non è ancora stato effettuato)
+	 */
+	public CertificatedData getCertificatedData(int year, int month)
+	{
+		CertificatedData cd = CertificatedData.find("Select cd from CertificatedData cd where cd.person = ? and cd.year = ? and cd.month = ?",
+				this, year, month).first();
+		return cd;
+	}
+	/**
+	 * 
+	 * @param year
+	 * @param month
 	 * @return le ore di residuo positivo fatte nel mese/anno da this. Metodo usato nel template showCompetences
 	 */
 	public Integer getPositiveResidualInMonth(int year, int month){

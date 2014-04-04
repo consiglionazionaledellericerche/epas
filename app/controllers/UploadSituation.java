@@ -17,6 +17,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,6 +46,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import play.Logger;
+import play.cache.Cache;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -56,6 +59,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.sun.istack.internal.NotNull;
 
 /**
  * Contiene in metodi necessari per l'interazione tra utente, ePAS e 
@@ -66,20 +70,13 @@ import com.google.common.collect.Sets;
  */
 @With( {Secure.class, NavigationMenu.class} )
 public class UploadSituation extends Controller{
-
+	
+	public static final String LOGIN_RESPONSE_CACHED = "loginResponse";
+	public static final String LISTA_DIPENTENTI_CNR_CACHED = "listaDipendentiCnr";
+	
 	@Check(Security.UPLOAD_SITUATION)
 	public static void show(final Integer year, final Integer month){
-		
 		render();
-		/*
-		MainMenu mainMenu = null;
-		if (month == null || year == null) {
-			LocalDate prevMonth = LocalDate.now().minusMonths(1);
-			mainMenu = new MainMenu(prevMonth.getYear(), prevMonth.getMonthOfYear());
-		} else 
-			mainMenu = new MainMenu(year, month, 1);
-		render(mainMenu);
-		*/
 	}
 
 	@Check(Security.UPLOAD_SITUATION)
@@ -90,96 +87,6 @@ public class UploadSituation extends Controller{
 		String attestatiLogin = params.get("attestatiLogin") == null ? conf.userToPresence : params.get("attestatiLogin"); 
 
 		render(year, month, urlToPresence, attestatiLogin);
-	}
-
-	@Check(Security.UPLOAD_SITUATION)
-	public static void checkAttestati(final String attestatiLogin, final String attestatiPassword, final Integer year, final Integer month) 
-			throws AttestatiException, MalformedURLException, URISyntaxException {
-
-		if (params.get("back") != null) {
-			loginAttestati(year, month);
-		}
-
-		if (params.get("home") != null) {
-			redirect("Application.indexAdmin");
-		}
-
-		
-		//String urlToPresence = Configuration.getCurrentConfiguration().urlToPresence;
-		String urlToPresence = ConfGeneral.getConfGeneral().urlToPresence;
-
-		List<String> actions = Lists.newLinkedList();
-
-		List<Dipendente> listaDipendenti = null;
-		LoginResponse loginResponse = null;
-		try {
-			loginResponse = AttestatiClient.login(attestatiLogin, attestatiPassword); 
-			if (!loginResponse.isLoggedIn()) {
-				flash.error("Errore durante il login sul sistema degli attestati");
-				actions.add("Login sul sistema degli attestati fallito");
-				render(attestatiLogin, attestatiPassword, year, month);
-				return;
-			} 
-			actions.add(String.format("Login effettuato con successo su %s", urlToPresence));
-
-			Logger.debug("Prendo lista dipendenti da %s. Anno = %d, mese = %d", urlToPresence, year, month);
-
-			listaDipendenti = AttestatiClient.listaDipendenti(loginResponse.getCookies(), year, month);
-
-		} catch (AttestatiException e) {
-			flash.error(
-					String.format("Errore durante il login e/o prelevamento della lista dei dipendenti dal sistema degli attestati. Eccezione: %s", e));
-			render(attestatiLogin, attestatiPassword, year, month, actions);
-		}
-
-		if (listaDipendenti == null || listaDipendenti.isEmpty()) {
-			flash.error("Errore durante il prelevamento della lista dei dipendenti dal sistema degli attestati.");
-			actions.add("Prelevamento della lista dei dipendenti fallito");
-			render(attestatiLogin, attestatiPassword, year, month, actions);			
-		}
-
-		actions.add(String.format("Prelevata la lista dei dipendenti per l'anno %d e mese %d, trovati %d dipendenti", 
-				year, month, listaDipendenti.size()));
-
-		//Lista delle persone con un contratto attivo questo mese
-		final List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
-		
-		final Set<Dipendente> activeDipendenti = FluentIterable.from(activePersons).transform(new Function<Person, Dipendente>() {
-			@Override
-			public Dipendente apply(Person person) {
-				Dipendente dipendente = 
-						new Dipendente(person.number == null ? "" : person.number.toString(), Joiner.on(" ").skipNulls().join(person.surname, person.othersSurnames, person.name));
-				return dipendente;
-			}
-		}).toSet();
-
-		Logger.trace("Lista dipendenti attivi nell'anno %d, mese %d e': %s", year, month, activeDipendenti);
-
-		Set<Dipendente> dipendentiNonInEpas = Sets.difference(ImmutableSet.copyOf(listaDipendenti), activeDipendenti);
-		if (dipendentiNonInEpas.size() > 0)
-			Logger.info("I seguenti dipendenti sono nell'anagrafica CNR ma non in ePAS. %s", dipendentiNonInEpas);
-
-		Set<Dipendente> dipendentiNonInCNR = Sets.difference(activeDipendenti, ImmutableSet.copyOf(listaDipendenti));
-		if (dipendentiNonInCNR.size() > 0)
-			Logger.info("I seguenti dipendenti sono nell'anagrafica di ePAS ma non in quella del CNR. %s", dipendentiNonInCNR);
-
-		List<RispostaElaboraDati> checks = 
-				elaboraDatiDipendenti(
-						loginResponse.getCookies(), 
-						Sets.intersection(ImmutableSet.copyOf(listaDipendenti), activeDipendenti), 
-						year, month);
-
-		Predicate<RispostaElaboraDati> rispostaOk = new Predicate<RispostaElaboraDati>() {
-			@Override
-			public boolean apply(RispostaElaboraDati risposta) {
-				return risposta.getProblems() == null || risposta.getProblems().isEmpty();
-			}
-		};
-		List<RispostaElaboraDati> risposteOk = FluentIterable.from(checks).filter(rispostaOk).toList();
-		List<RispostaElaboraDati> risposteNotOk = FluentIterable.from(checks).filter(Predicates.not(rispostaOk)).toList();
-
-		render(attestatiLogin, attestatiPassword, year, month, actions, dipendentiNonInEpas, dipendentiNonInCNR, risposteOk, risposteNotOk);
-
 	}
 
 	@Check(Security.UPLOAD_SITUATION)
@@ -197,7 +104,7 @@ public class UploadSituation extends Controller{
 			flash.error("Il valore dei parametri su cui fare il caricamento dei dati non può essere nullo");
 			Application.indexAdmin();
 		}
-		//Configuration conf = Configuration.getCurrentConfiguration();
+
 		ConfGeneral conf = ConfGeneral.getConfGeneral();
 		List<Person> personList = Person.find("Select p from Person p where p.number <> ? and p.number is not null order by p.number", 0).fetch();
 		Logger.debug("La lista di nomi è composta da %s persone ", personList.size());
@@ -257,6 +164,215 @@ public class UploadSituation extends Controller{
 	}
 
 
+	
+	
+	@Check(Security.UPLOAD_SITUATION)
+	public static void processAttestati(final String attestatiLogin, final String attestatiPassword, Integer year, Integer month) throws MalformedURLException, URISyntaxException
+	{
+		
+		LoginResponse loginResponse = null;
+		List<Dipendente> listaDipendenti = null;
+
+		if(attestatiLogin==null && attestatiPassword==null)
+		{
+			loginResponse = loadAttestatiLoginCached();
+			listaDipendenti = loadAttestatiListaCached();
+			if(loginResponse==null || !loginResponse.isLoggedIn() || listaDipendenti == null || listaDipendenti.size()==0)
+			{
+				flash.error("La sessione attestati non è attiva o è scaduta, effettuare nuovamente login.");
+				UploadSituation.loginAttestati(year, month);
+			}
+		}
+		else
+		{
+			Cache.set(LOGIN_RESPONSE_CACHED+Security.getUser().username, null);
+			Cache.set(LISTA_DIPENTENTI_CNR_CACHED+Security.getUser().username, null);
+			
+			if (params.get("back") != null) {
+				loginAttestati(year, month);
+			}
+
+			if (params.get("home") != null) {
+				redirect("Application.indexAdmin");
+			}
+
+			String urlToPresence = ConfGeneral.getConfGeneral().urlToPresence;
+			
+			try {
+				//1) LOGIN
+				
+				loginResponse = AttestatiClient.login(attestatiLogin, attestatiPassword, year, month); 
+				if (!loginResponse.isLoggedIn()) {
+					flash.error("Errore durante il login sul sistema degli attestati. (%s)", loginResponse.getException());
+					UploadSituation.loginAttestati(year, month);
+					return;
+				} 
+				
+				//2) CARICO LISTA DIPENDENTI CNR CENTRALE (ANNO-MESE)
+				Logger.debug("Prendo lista dipendenti da %s. Anno = %d, mese = %d", urlToPresence, year, month);
+
+				
+				listaDipendenti = AttestatiClient.listaDipendenti(loginResponse.getCookies(), year, month);
+				
+
+			} catch (AttestatiException e) {
+				flash.error(
+						String.format("Errore durante il login e/o prelevamento della lista dei dipendenti dal sistema degli attestati. Eccezione: %s", e));
+				UploadSituation.loginAttestati(year, month);
+			}
+
+			if (listaDipendenti == null || listaDipendenti.isEmpty()) {
+				flash.error("Errore durante il prelevamento della lista dei dipendenti dal sistema degli attestati.");
+				UploadSituation.loginAttestati(year, month);
+			}
+		}
+		
+		final List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
+		
+		final Set<Dipendente> activeDipendenti = FluentIterable.from(activePersons).transform(new Function<Person, Dipendente>() {
+			@Override
+			public Dipendente apply(Person person) {
+				Dipendente dipendente = 
+						new Dipendente(person.number == null ? "" : person.number.toString(), Joiner.on(" ").skipNulls().join(person.surname, person.othersSurnames, person.name));
+				return dipendente;
+			}
+		}).toSet();
+		Logger.trace("Lista dipendenti attivi nell'anno %d, mese %d e': %s", year, month, activeDipendenti);
+
+
+		Set<Dipendente> dipendentiNonInEpas = getDipendenteNonInEpas(year, month, listaDipendenti, activeDipendenti);
+		Set<Dipendente> dipendentiNonInCNR = getDipendenteNonInCnr(year, month, listaDipendenti, activeDipendenti);
+
+		memAttestatiIntoCache(loginResponse, listaDipendenti);
+		
+		render(year, month, activeDipendenti, dipendentiNonInEpas, dipendentiNonInCNR, loginResponse);
+		
+	}
+
+	@Check(Security.UPLOAD_SITUATION)
+	public static void processAllPersons(int year, int month) throws MalformedURLException, URISyntaxException
+	{
+		if (params.get("back") != null) {
+			redirect("UploadSituation.loginAttestati");
+		}
+		
+		LoginResponse loginResponse = loadAttestatiLoginCached();
+		List<Dipendente> listaDipendenti = loadAttestatiListaCached();
+		
+		if(loginResponse==null || !loginResponse.isLoggedIn() || listaDipendenti == null || listaDipendenti.size()==0)
+		{
+			flash.error("La sessione attestati non è attiva o è scaduta, effettuare nuovamente login.");
+			UploadSituation.loginAttestati(year, month);
+		}
+
+		Set<Dipendente> activeDipendenti = getActiveDipendenti(year, month);
+		Set<Dipendente> dipendentiNonInEpas = getDipendenteNonInEpas(year, month, listaDipendenti, activeDipendenti);
+		Set<Dipendente> dipendentiNonInCNR = getDipendenteNonInCnr(year, month, listaDipendenti, activeDipendenti);
+
+		List<RispostaElaboraDati> checks = 
+				elaboraDatiDipendenti(
+						loginResponse.getCookies(), 
+						Sets.intersection(ImmutableSet.copyOf(listaDipendenti), activeDipendenti), 
+						year, month);
+
+		Predicate<RispostaElaboraDati> rispostaOk = new Predicate<RispostaElaboraDati>() {
+			@Override
+			public boolean apply(RispostaElaboraDati risposta) {
+				return risposta.getProblems() == null || risposta.getProblems().isEmpty();
+			}
+		};
+		List<RispostaElaboraDati> risposteOk = FluentIterable.from(checks).filter(rispostaOk).toList();
+		List<RispostaElaboraDati> risposteNotOk = FluentIterable.from(checks).filter(Predicates.not(rispostaOk)).toList();
+
+		render(year, month, dipendentiNonInEpas, dipendentiNonInCNR, risposteOk, risposteNotOk, loginResponse);
+
+	}
+	
+	@Check(Security.UPLOAD_SITUATION)
+	public static void processSinglePerson(String matricola, int year, int month) throws MalformedURLException, URISyntaxException
+	{
+		if(matricola==null)
+		{
+			flash.error("Errore caricamento dipendente da elaborare. Riprovare o effettuare una segnalazione.");
+			UploadSituation.processAttestati(null, null, year, month);
+		}
+		
+		LoginResponse loginResponse = loadAttestatiLoginCached();
+		List<Dipendente> listaDipendenti = loadAttestatiListaCached();
+		
+		if(loginResponse==null || !loginResponse.isLoggedIn() || listaDipendenti == null || listaDipendenti.size()==0)
+		{
+			flash.error("La sessione attestati non è attiva o è scaduta, effettuare nuovamente login.");
+			UploadSituation.loginAttestati(year, month);
+		}
+
+		Set<Dipendente> activeDipendentiCached = getActiveDipendenti(year, month);
+		Set<Dipendente> dipendentiNonInEpas = getDipendenteNonInEpas(year, month, listaDipendenti, activeDipendentiCached);
+		Set<Dipendente> dipendentiNonInCNR = getDipendenteNonInCnr(year, month, listaDipendenti, activeDipendentiCached);
+		
+		
+		Dipendente dipendente = null;
+		for(Dipendente dip : activeDipendentiCached)
+		{
+			if(dip.getMatricola().equals(matricola))
+			{
+				dipendente = dip;
+				break;
+			}
+		}
+		
+		if(dipendente==null)
+		{
+			flash.error("Errore caricamento dipendente da elaborare. Riprovare o effettuare una segnalazione.");
+			UploadSituation.processAttestati(null, null, year, month);
+		}
+		
+		Set<Dipendente> activeDipendenti = new HashSet<Dipendente>();
+		activeDipendenti.add(dipendente);
+		
+		
+
+		List<RispostaElaboraDati> checks = 
+				elaboraDatiDipendenti(
+						loginResponse.getCookies(), 
+						Sets.intersection(ImmutableSet.copyOf(listaDipendenti), activeDipendenti), 
+						year, month);
+
+		Predicate<RispostaElaboraDati> rispostaOk = new Predicate<RispostaElaboraDati>() {
+			@Override
+			public boolean apply(RispostaElaboraDati risposta) {
+				return risposta.getProblems() == null || risposta.getProblems().isEmpty();
+			}
+		};
+		List<RispostaElaboraDati> risposteOk = FluentIterable.from(checks).filter(rispostaOk).toList();
+		List<RispostaElaboraDati> risposteNotOk = FluentIterable.from(checks).filter(Predicates.not(rispostaOk)).toList();
+
+		render(year, month, dipendentiNonInEpas, dipendentiNonInCNR, risposteOk, risposteNotOk, loginResponse);
+
+	}
+	
+	@Check(Security.UPLOAD_SITUATION)
+	public static void showProblems(Long certificatedDataId)
+	{
+		CertificatedData cd = CertificatedData.findById(certificatedDataId);
+		if(cd==null)
+		{
+			renderText("L'elaborazione attestati richiesta è inesistente.");
+		}
+		render(cd);
+	}
+	
+	@Check(Security.UPLOAD_SITUATION)
+	public static void showCertificatedData(Long certificatedDataId)
+	{
+		CertificatedData cd = CertificatedData.findById(certificatedDataId);
+		if(cd==null)
+		{
+			renderText("L'elaborazione attestati richiesta è inesistente.");
+		}
+		render(cd);
+	}
+	
 	private static List<RispostaElaboraDati> elaboraDatiDipendenti(Map<String, String> cookies, Set<Dipendente> dipendenti, int year, int month) throws MalformedURLException, URISyntaxException {
 		List<RispostaElaboraDati> checks = Lists.newLinkedList();
 		Person person = null;
@@ -288,7 +404,14 @@ public class UploadSituation extends Controller{
 			
 			if(cert==null)
 			{
-				cert = new CertificatedData(person, dipendente.getCognomeNome(), dipendente.getMatricola(), year, month);				
+				//FIXME
+				//queste variabili di appoggio sono state inserite perchè richiamandole direttamente nel costruttore veniva lanciata l'eccezione
+				//play.exceptions.JavaExecutionException: models.CertificatedData.<init>(Lmodels/Person;Ljava/lang/String;Ljava/lang/String;II)V
+				int anno = year;
+				int mese = month;
+				String cognomeNome = dipendente.getCognomeNome();
+				String matricola = dipendente.getMatricola();
+				cert = new CertificatedData(person, cognomeNome, matricola, anno, mese);				
 			}
 			cert.absencesSent = rispostaElaboraDati.getAbsencesSent();
 			cert.competencesSent = rispostaElaboraDati.getCompetencesSent();
@@ -303,5 +426,65 @@ public class UploadSituation extends Controller{
 		
 		return checks;
 	}
+	
+	private static void memAttestatiIntoCache(LoginResponse loginResponse, List<Dipendente> listaDipendenti)
+	{
+		Cache.set(LOGIN_RESPONSE_CACHED+Security.getUser().username, loginResponse);
+		Cache.set(LISTA_DIPENTENTI_CNR_CACHED+Security.getUser().username, listaDipendenti);
+	}
+	
+	/**
+	 * Carica in cache lo stato della connessione con attestati.cnr
+	 * @return
+	 */
+	private static LoginResponse loadAttestatiLoginCached()
+	{
+		return (LoginResponse)Cache.get(LOGIN_RESPONSE_CACHED+Security.getUser().username);
+	}
+	
+	/**
+	 * Carica in cache la lista dipendenti abilitati in attestati.cnr
+	 * @return
+	 */
+	private static List<Dipendente> loadAttestatiListaCached()
+	{
+		return (List<Dipendente>)Cache.get(LISTA_DIPENTENTI_CNR_CACHED+Security.getUser().username);
+	}
+	
+	private static Set<Dipendente> getDipendenteNonInEpas(int year, int month, List<Dipendente> listaDipendenti,  Set<Dipendente> activeDipendenti)
+	{
+		Set<Dipendente> dipendentiNonInEpas = Sets.difference(ImmutableSet.copyOf(listaDipendenti), activeDipendenti);
+		if (dipendentiNonInEpas.size() > 0)
+			Logger.info("I seguenti dipendenti sono nell'anagrafica CNR ma non in ePAS. %s", dipendentiNonInEpas);
 
+		return dipendentiNonInEpas;
+	}
+
+	private static Set<Dipendente> getDipendenteNonInCnr(int year, int month, List<Dipendente> listaDipendenti, Set<Dipendente> activeDipendenti)
+	{		
+		Set<Dipendente> dipendentiNonInCNR = Sets.difference(activeDipendenti, ImmutableSet.copyOf(listaDipendenti));
+		if (dipendentiNonInCNR.size() > 0)
+			Logger.info("I seguenti dipendenti sono nell'anagrafica di ePAS ma non in quella del CNR. %s", dipendentiNonInCNR);
+
+		return dipendentiNonInCNR;
+	}
+	
+	private static Set<Dipendente> getActiveDipendenti(int year, int month)
+	{
+		final List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
+		
+		final Set<Dipendente> activeDipendenti = FluentIterable.from(activePersons).transform(new Function<Person, Dipendente>() {
+			@Override
+			public Dipendente apply(Person person) {
+				Dipendente dipendente = 
+						new Dipendente(person.number == null ? "" : person.number.toString(), Joiner.on(" ").skipNulls().join(person.surname, person.othersSurnames, person.name));
+				return dipendente;
+			}
+		}).toSet();
+		Logger.trace("Lista dipendenti attivi nell'anno %d, mese %d e': %s", year, month, activeDipendenti);
+		
+		return activeDipendenti;
+	}
+
+	
 }

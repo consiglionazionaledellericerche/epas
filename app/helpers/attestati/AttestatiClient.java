@@ -3,7 +3,10 @@
  */
 package helpers.attestati;
 
+import it.cnr.iit.epas.DateUtility;
+
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -68,15 +71,31 @@ public class AttestatiClient {
 
 	}
 	
-	public final static class LoginResponse {
+	public final static class LoginResponse implements Serializable{
+		private Integer year;
+		private Integer month;
+		private Exception e;
 		private final boolean loggedIn;
 		private final Map<String, String> cookies;
-		public LoginResponse(boolean loggedIn, Map<String, String> cookies) {
+		public LoginResponse(boolean loggedIn, Map<String, String> cookies, Integer year, Integer month) {
 			this.loggedIn = loggedIn;
 			this.cookies = cookies;
+			this.year = year;
+			this.month = month;
+		}
+		public LoginResponse(boolean loggedIn, Map<String, String> cookies, Integer year, Integer month, Exception e) {
+			this.loggedIn = loggedIn;
+			this.cookies = cookies;
+			this.year = year;
+			this.month = month;
+			this.e = e;
 		}
 		public boolean isLoggedIn() { return loggedIn; }
 		public Map<String, String> getCookies() { return cookies; }
+		public String getException() {return e.toString();}
+		public Integer getYear() {return this.year;}
+		public Integer getMonth() {return this.month;}
+		public String getNamedMonth() {return DateUtility.getName(this.month);}
 	}
 	
 	
@@ -93,10 +112,12 @@ public class AttestatiClient {
 	 * @throws MalformedURLException
 	 * @throws URISyntaxException
 	 */
-	public static LoginResponse login(String attestatiLogin, String attestatiPassword) throws AttestatiException, MalformedURLException, URISyntaxException {
+	public static LoginResponse login(String attestatiLogin, String attestatiPassword, Integer year, Integer month) throws AttestatiException, MalformedURLException, URISyntaxException {
 		
 		//URI baseUri = new URI(Configuration.getCurrentConfiguration().urlToPresence);
-		URI baseUri = new URI(ConfGeneral.getConfGeneral().urlToPresence);
+		ConfGeneral confGeneral =  ConfGeneral.getConfGeneral();
+		String urlToPresence = confGeneral.urlToPresence;
+		URI baseUri = new URI(urlToPresence);
 		URL loginUrl = baseUri.resolve(BASE_LOGIN_URL).toURL();
 		
 		Connection connection = Jsoup.connect(loginUrl.toString());
@@ -121,14 +142,14 @@ public class AttestatiClient {
 			if (loginResponse.statusCode() != 200 || 
 					loginMessages.isEmpty() || 
 					! loginMessages.first().ownText().contains("Login completata con successo.")) {
-				return new LoginResponse(false, loginResponse.cookies());
+				return new LoginResponse(false, loginResponse.cookies(), year, month);
 			} else {
-				return new LoginResponse(true, loginResponse.cookies());
+				return new LoginResponse(true, loginResponse.cookies(), year, month);
 			}
 			
 		} catch (IOException e) {
 			Logger.error("Errore durante la login sul sistema di invio degli attestati. Eccezione = %s", e);
-			return new LoginResponse(false, null);
+			return new LoginResponse(false, null, year, month, e);
 		}
 	}
 	
@@ -143,7 +164,6 @@ public class AttestatiClient {
 	 */
 	public static List<Dipendente> listaDipendenti(Map<String, String> cookies, Integer year, Integer month) throws URISyntaxException, MalformedURLException {
 		Response listaDipendentiResponse;
-		//Configuration conf = Configuration.getCurrentConfiguration();
 		ConfGeneral conf = ConfGeneral.getConfGeneral();
 		URI baseUri = new URI(conf.urlToPresence);
 		final URL listaDipendentiUrl = baseUri.resolve(BASE_LISTA_DIPENDENTI_URL).toURL();
