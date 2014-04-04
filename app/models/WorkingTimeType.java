@@ -52,6 +52,9 @@ public class WorkingTimeType extends Model {
 	 */
 	public boolean shift = false;
 	
+	@Column(name="meal_ticket_enabled")
+	public boolean mealTicketEnabled = true;
+	
 	@NotAudited
 	@OneToMany(mappedBy="workingTimeType", fetch=FetchType.LAZY)
 	public List<PersonWorkingTimeType> personWorkingTimeType = new ArrayList<PersonWorkingTimeType>();

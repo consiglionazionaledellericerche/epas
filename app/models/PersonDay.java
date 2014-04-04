@@ -802,7 +802,7 @@ public class PersonDay extends Model {
 	 */
 	private boolean isTicketAvailableForWorkingTime(){
 		WorkingTimeType wtt = person.getWorkingTimeType(date);
-		if(wtt.description.equals("Normale-asd") || wtt.description.equals("Normale") || wtt.description.equals("80%") || wtt.description.equals("85%"))
+		if(wtt.mealTicketEnabled)
 		{
 			return true;
 		}
