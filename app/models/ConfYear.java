@@ -54,21 +54,6 @@ public class ConfYear extends Model{
 	@Column(name="hour_max_to_calculate_worktime")
 	public Integer hourMaxToCalculateWorkTime;
 	
-	public static ConfYear getConfYear()
-	{
-		ConfYear confYear = (ConfYear)Cache.get("confYear");
-		if(confYear==null)
-		{
-			confYear = ConfYear.find("Select cy from ConfYear cy where cy.year = ?", new LocalDate().getYear()).first();
-			if(confYear==null)
-			{
-				//TODO va creato per l'anno nuovo
-			}
-			Cache.set("confYear", confYear);
-		}
-		return confYear;
-	}
-	
 	public static ConfYear getConfYear(Integer year)
 	{
 		ConfYear confYear = (ConfYear)Cache.get("confYear"+year);

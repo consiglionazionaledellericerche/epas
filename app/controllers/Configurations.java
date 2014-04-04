@@ -146,12 +146,13 @@ public class Configurations extends Controller{
 				confGeneral.numberOfViewingCoupleColumn = numberOfViewingCoupleColumn;
 				confGeneral.save();
 			}
-		}
+		}		
 		catch(Exception e)
 		{
 			response.status = 500;
 			renderText("Bad request");
-		}	
+		}
+		Cache.set("confGeneral", confGeneral);
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_CONFIGURATION)
