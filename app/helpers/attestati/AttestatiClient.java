@@ -74,7 +74,6 @@ public class AttestatiClient {
 	public final static class LoginResponse implements Serializable{
 		private Integer year;
 		private Integer month;
-		private Exception e;
 		private final boolean loggedIn;
 		private final Map<String, String> cookies;
 		public LoginResponse(boolean loggedIn, Map<String, String> cookies, Integer year, Integer month) {
@@ -88,11 +87,9 @@ public class AttestatiClient {
 			this.cookies = cookies;
 			this.year = year;
 			this.month = month;
-			this.e = e;
 		}
 		public boolean isLoggedIn() { return loggedIn; }
 		public Map<String, String> getCookies() { return cookies; }
-		public String getException() {return e.toString();}
 		public Integer getYear() {return this.year;}
 		public Integer getMonth() {return this.month;}
 		public String getNamedMonth() {return DateUtility.getName(this.month);}
