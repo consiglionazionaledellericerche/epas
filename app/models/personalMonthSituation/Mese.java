@@ -352,35 +352,6 @@ public class Mese {
 		return 0;
 	}
 	
-	public String getName()
-	{
-		if(mese==1)
-			return "Gennaio";
-		if(mese==2)
-			return "Febbraio";
-		if(mese==3)
-			return "Marzo";
-		if(mese==4)
-			return "Aprile";
-		if(mese==5)
-			return "Maggio";
-		if(mese==6)
-			return "Giugno";
-		if(mese==7)
-			return "Luglio";
-		if(mese==8)
-			return "Agosto";
-		if(mese==9)
-			return "Settembre";
-		if(mese==10)
-			return "Ottobre";
-		if(mese==11)
-			return "Novembre";
-		if(mese==12)
-			return "Dicembre";
-		else
-			return null;
-	}
 }
 
 

@@ -1,0 +1,147 @@
+#{extends 'main_admin_no_menu.html' /}
+#{set titolo: 'Invio attestati ' + loginResponse.getNamedMonth() + ' ' + year /} 
+
+<div class="container">
+
+<div class="row">
+
+#{form @processAllPersons(year, month), class:'form-horizontal'}
+  <input type="hidden" name="year" value="${year}" />
+  <input type="hidden" name="month" value="${month}" />
+  <input type="submit" name="back" value="Torna a Login e Selezione mese" class="btn btn-default"/>
+  <input type="submit" value="Elabora Tutti" class="btn btn-primary"/>
+#{/form}
+
+
+<p class="lead">Tutti i dipendenti EPAS</p> 
+<table class="table table-condensed table-bordered table-striped span8">
+  <tr>
+    <th>Matricola</th>
+    <th>Nome Cognome</th>
+    <th>Esito</th>
+    <th style="text-align: center;" >Dati<br>elaborati</th>
+    <th style="text-align: center;" >Problemi<br>Elaborazione</th>
+    <th style="text-align: center;" >Elabora singolo<br>dipendente</th>
+    
+    
+  </tr>
+  #{list items:activeDipendenti, as:'dipendente'}
+    <tr>
+      <td>${dipendente.matricola}</td>
+      <td>${dipendente.cognomeNome}</td>
+      
+      <!-- Non ancora elaborato -->
+      #{if dipendente.getPerson().getCertificatedData(year, month) == null}
+           #{if dipendentiNonInCNR.contains(dipendente)}
+             <td style="text-align: center;"><span class="label label-inverse">Non in CNR</span></td>
+             <td></td>
+             <td></td>
+             <td></td>
+           #{/if}
+           #{else}
+             <td style="text-align: center;" ><span class="label label-important">Non ancora elaborato</span></td>
+             <td></td>
+             <td></td>
+             <td></td>
+           #{/else}
+      #{/if}
+      
+      <!-- Già elaborato -->
+      #{else}
+        <!-- esito -->
+        <td style="text-align: center;" >
+        #{if dipendente.getPerson().getCertificatedData(year, month).isOk }
+           <i style="color: green" class="icon-ok"></i>   
+        #{/if}
+        #{else}
+           <i style="color: red" class="icon-remove"></i>
+        #{/else}
+        </td>
+        <!-- dati elaborati -->
+        <td style="text-align: center;" >
+          #{if dipendente.getPerson().getCertificatedData(year, month) != null}
+            <a href="@{UploadSituation.showCertificatedData(dipendente.getPerson().getCertificatedData(year, month).id)}" data-modal="#mymodal1">dati</a>
+          #{/if}
+        </td>
+        <!-- problemi -->
+        <td style="text-align: center;" >
+        #{if dipendente.getPerson().getCertificatedData(year, month).problems != null}
+          <a href="@{UploadSituation.showProblems(dipendente.getPerson().getCertificatedData(year, month).id)}" data-modal="#mymodal2">problemi</a>
+        #{/if}
+        </td>
+        <!-- elabora singolo -->
+        <td style="text-align: center;" >
+          #{form @processSinglePerson(dipendente.getMatricola(), year, month), style:'margin-bottom: 0px;'}
+  	        <input type="hidden" name="year" value="${year}" />
+            <input type="hidden" name="month" value="${month}" />
+            <input type="submit" value="Elabora" class="btn btn-small btn-default"/>
+          #{/form}
+        </td>
+      #{/else} 
+ 
+    </tr>  
+  #{/list}
+</table>
+</div>
+
+<div class="row">
+<!-- Dipendenti CNR non in EPAS -->
+<p class="lead">Dipendenti CNR non in EPAS</p>
+<table class="table table-condensed table-bordered span8">
+  <tr>
+    <th>Matricola</th>
+    <th>Nome Cognome</th>
+  </tr>
+  #{list items:dipendentiNonInEpas, as:'dipendente'}
+    <tr>
+      <td>${dipendente.matricola}</td>
+      <td>${dipendente.cognomeNome}</td>
+    </tr> 
+  #{/list}
+</table>
+</div>
+
+<div class="row">
+<!-- Dipendenti EPAS non in CNR -->
+<p class="lead">Dipendenti EPAS non in CNR</p>
+<table class="table table-condensed table-bordered span8">
+  <tr>
+    <th>Matricola</th>
+    <th>Nome Cognome</th>
+  </tr>
+  #{list items:dipendentiNonInCNR, as:'dipendente'}
+    <tr>
+      <td>${dipendente.matricola}</td>
+      <td>${dipendente.cognomeNome}</td>
+    </tr> 
+  #{/list}
+</table>
+</div>
+
+</div>
+
+<div id="mymodal1" class="modal hide fade mymodal-medium" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Dati elaborati</h3>
+  </div>
+  <div class="modal-body">
+    <p></p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+  </div>
+</div>
+
+<div id="mymodal2" class="modal hide fade mymodal-medium" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Problemi elaborazione</h3>
+  </div>
+  <div class="modal-body">
+    <p></p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+  </div>
+</div>

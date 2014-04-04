@@ -1,0 +1,32 @@
+
+  <fieldset>
+    <legend>Attestati ${cd.person.name} ${cd.person.surname}</legend>
+    <p>Riepilogo attestati elaborati per il mese ${cd.year}/${cd.month}</p>
+    <table class="table table-condensed table-bordered">
+      <tr>
+        <th>Voce</th>
+        <th>Valore</th>
+      <tr>
+      
+      <!-- Assenze -->
+      <tr>
+        <td>Assenze</td>
+        <td>${cd.absencesSent}</td>
+      </tr>
+      <!-- Competenze -->
+      <tr>
+        <td>Competenze</td>
+        <td>${cd.competencesSent}</td>
+      </tr>
+      <!-- Ore Formazione -->
+      <tr>
+        <td>Ore Formazione</td>
+        <td>${cd.trainingHoursSent}</td>
+      </tr>
+      <!-- Buoni Pasto -->
+      <tr>
+        <td>Buoni Pasto</td>
+        <td>${cd.mealTicketSent}</td>
+      </tr>
+    </table>
+  </fieldset>

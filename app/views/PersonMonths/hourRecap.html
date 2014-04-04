@@ -30,7 +30,7 @@
 	
 	#{list items:csap.mesi, as:'mese'}
 	  <tr>
-	    <td>${mese.getName()}</td>
+	    <td> &{'views.tags.display.date.month.' +mese.mese}</td>
 	    
 	    <td>${mese.oreLavorate.toHourTime()}</td>
 	    

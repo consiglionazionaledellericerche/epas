@@ -1,22 +1,20 @@
-#{extends 'main_admin.html' /}
 
 <h3>Caricamento situazione mensile del personale - Controllo attestati</h3>
 
 <h4>Risultati del invio dei dati del mese ${month}/${year}</h4>
 
-#{form @checkAttestati(), class:'form-horizontal'}
+#{form @processAttestati()}
 	<div style="margin-top: 1em">
 		<input type="hidden" name="year" value="${year}" />
 		<input type="hidden" name="month" value="${month}" />
-	 	<input type="submit" name="home" value="Torna alla home" class="btn btn-primary"/>
-		<input type="submit" name="back" value="Indietro" class="btn"/>
+	 	<input type="submit" name="home" value="Torna a riepilogo invio attestati" class="btn btn-primary"/>
 	</div>
 	
 	</fieldset>
 #{/form}
 
 <fieldset>
-<legend>Operazioi effettuate e risultati</legend>
+<legend>Operazioni effettuate e risultati</legend>
 
 #{if actions != null && ! actions.isEmpty()}
 	<p>Operazioni effettuate:</p>
