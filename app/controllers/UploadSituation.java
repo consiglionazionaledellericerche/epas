@@ -203,7 +203,7 @@ public class UploadSituation extends Controller{
 				
 				loginResponse = AttestatiClient.login(attestatiLogin, attestatiPassword, year, month); 
 				if (!loginResponse.isLoggedIn()) {
-					flash.error("Errore durante il login sul sistema degli attestati. (%s)", loginResponse.getException());
+					flash.error("Errore durante il login sul sistema degli attestati.");
 					UploadSituation.loginAttestati(year, month);
 					return;
 				} 
