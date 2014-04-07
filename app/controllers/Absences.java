@@ -67,7 +67,12 @@ import play.mvc.With;
 @With( {Secure.class, NavigationMenu.class} )
 public class Absences extends Controller{
 
-	
+	/**
+	 * @deprecated use AbsenceTypeDao.getFrequentTypes()
+	 * 
+	 * @return la lista dei tipi di competenza più utilizzati
+	 */
+	@Deprecated
 	private static List<AbsenceType> getFrequentAbsenceTypes(){
 		return AbsenceType.find("Select abt from AbsenceType abt, Absence abs " +
 				"where abs.absenceType = abt group by abt order by sum(abt.id) desc limit 20").fetch();
