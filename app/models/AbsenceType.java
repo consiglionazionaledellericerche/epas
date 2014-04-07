@@ -3,6 +3,7 @@ package models;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -25,9 +26,13 @@ import models.enumerate.AccumulationType;
 import models.enumerate.JustifiedTimeAtWork;
 import net.sf.oval.constraint.NotNull;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
+
+import com.google.common.collect.Sets;
 
 import play.data.validation.Required;
 import play.db.jpa.Model;
@@ -112,6 +117,13 @@ public class AbsenceType extends Model {
 	@Column(name = "replacing_absence")
 	public boolean replacingAbsence = false; 
 	//FIXME questo campo non è mai utilizzato
+	
+	/**
+	 * Relazione inversa con le assenze.
+	 */
+	@OneToMany(mappedBy="absenceType")
+	@LazyCollection(LazyCollectionOption.EXTRA)
+	public Set<Absence> absences = Sets.newHashSet();
 	
 	
 	@Transient
