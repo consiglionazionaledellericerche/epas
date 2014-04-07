@@ -19,6 +19,23 @@ require:
     - org.hamcrest -> hamcrest-library 1.2.1
     - org.hamcrest -> hamcrest-integration 1.2.1
     - org.mockito -> mockito-core 1.9.0
+    - com.mysema.querydsl -> querydsl-jpa 3.3.2:
+       exclude:
+        - asm -> asm *
+        - cglib -> cglib *
+        - org.apache.geronimo.specs -> geronimo-jpa_3.0_spec *
+        - org.mongodb.morphia -> morphia *
+        - org.springframework.roo -> org.springframework.roo.annotations *
+        - org.eclipse.persistence -> eclipselink *
+        
+    - com.mysema.querydsl -> querydsl-apt 3.3.2:
+       exclude:
+        - asm -> asm *
+        - cglib -> cglib *
+        - org.apache.geronimo.specs -> geronimo-jpa_3.0_spec *
+        - org.mongodb.morphia -> morphia *
+        - org.springframework.roo -> org.springframework.roo.annotations *
+        - org.eclipse.persistence -> eclipselink *
 
 # My custom repository
 
