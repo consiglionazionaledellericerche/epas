@@ -114,7 +114,7 @@ public class SwitchTemplate extends Controller{
 			break;
 
 		case totalMonthlyAbsences:
-			YearlyAbsences.showGeneralMonthlyAbsences(year, month);
+			YearlyAbsences.showGeneralMonthlyAbsences(year, month, null);
 			break;
 
 		case manageAbsenceCode:
