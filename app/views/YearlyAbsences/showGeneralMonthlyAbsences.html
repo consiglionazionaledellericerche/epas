@@ -9,6 +9,16 @@
 
 <br>
 <div class="container">
+#{form action:@YearlyAbsences.showGeneralMonthlyAbsences(), class:'form', 
+    method:'GET', autocomplete:'off',
+    'data-reload':'#results'}
+    
+    <input type="text" name="name" placeholder="Nome o cognome" value="${name}"/>
+	<input type="hidden" name="year" value="${year}"/>
+	<input type="hidden" name="month" value="${month}"/>
+#{/form}
+
+<section id="results">
 <table class="table table-hover custom2 span9">
 	<tr>
 		<th rowspan="2">Nome</th>
@@ -45,6 +55,7 @@
 	}
 	}%
 </table>
+</section>
 </div>
 
 <div id="myModal3" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

@@ -19,6 +19,7 @@ import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ArrayTable;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
@@ -147,7 +148,7 @@ public class YearlyAbsences extends Controller{
 	};
 
 	@Check(Security.VIEW_PERSON_LIST)
-	public static void showGeneralMonthlyAbsences(int year, int month) throws InstantiationException, IllegalAccessException{
+	public static void showGeneralMonthlyAbsences(int year, int month, String name) throws InstantiationException, IllegalAccessException{
 
 		Table<Person, AbsenceType, Integer> tableMonthlyAbsences = TreeBasedTable.create(PersonNameComparator, AbsenceCodeComparator);
 		AbsenceType abt = new AbsenceType();
@@ -208,6 +209,11 @@ public class YearlyAbsences extends Controller{
 		String month_capitalized = null;
 		if(month>0)
 			month_capitalized = DateUtility.fromIntToStringMonth(month);
+		
+		if (!Strings.isNullOrEmpty(name)) {
+			Logger.info("filtrare per nome qui... %s", name);
+			// TODO: filtrare per nome tableMonthly...
+		}
 		
 		render(tableMonthlyAbsences, year, month,numberOfDifferentAbsenceType, month_capitalized);
 

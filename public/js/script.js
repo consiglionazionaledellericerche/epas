@@ -1,123 +1,148 @@
 /* Author: 
-
-*/
-
-
-
-var initEpas = function($) {
-	// $.fn.editable.defaults.mode = 'inline';
-	$('a[data-x-editable]').editable();
-	
-	$('a.popup_window').popupWindow({ 
-		height:600, 
-		width:1000,
-		scrollbars:1,
-		resizable:0,
-		top:50, 
-		left:50 
-		});
-	$('a.popup_window_mini').popupWindow({ 
-		height:600, 
-		width:800,
-		scrollbars:1,
-		resizable:0,
-		top:50, 
-		left:50 
-		}); 
-	
-	$("a[data-popover]").popover();
-	$("input[data-datepicker]").datepicker();
-	$("#datepicker1" ).datepicker();
-	$(".datepicker" ).datepicker();
-	$("#datepicker3" ).datepicker();
-	
-	$('#myModal1').on('show', function () {
-		$('#myModal2').modal('hide');
-	})
-
-	$('#myModal2').on('show', function () {
-		$('#myModal1').modal('hide');
-	})
-
-	$('#myModal1').on('hide', function(){
-	    $(this).data('modal', null);
-	});
-
-	$('#myModal2').on('hide', function(){
-	    $(this).data('modal', null);
-	});
-
-	$('#myModal1').on('hidden', function(){
-	    $(this).data('modal', null);
-	});
-
-	$('#myModal2').on('hidden', function(){
-	    $(this).data('modal', null);
-	});
-
-	$('#myModal3').on('hidden', function(){
-	    $(this).data('modal', null);
-	});
-
-	$('#myModal4').on('hidden', function(){
-	    $(this).data('modal', null);
-	});
-
-	$('#modal-insert-contract').on('hidden', function(){
-	    $(this).data('modal', null);
-	});
-
-	$('#modal-edit-contract').on('hidden', function(){
-	    $(this).data('modal', null);
-	});
-
-	$('#modal-edit-source-contract').on('hidden', function(){
-	    $(this).data('modal', null);
-	});
-
-	$('#modal-terminate-person').on('hidden', function(){
-	    $(this).data('modal', null);
-	});
-
-	$('#modal-edit-vacationperiod').on('hidden', function(){
-	    $(this).data('modal', null);
-	});
-
-	$('#modal-insert-vacationperiod').on('hidden', function(){
-	    $(this).data('modal', null);
-	});
-
-	$('#modal-absencetype-month').on('hidden', function(){
-	    $(this).data('modal', null);
-	});
-
-
-	$('#select1').editable(); 
-	$('#select2').editable(); 
-	$('#select3').editable(); 
-	$('#select4').editable(); 
-	$('#select5').editable(); 
-	$('#select6').editable(); 
-	$('#simpleText1').editable(); 
-	$('#simpleText2').editable();
-	$('#simpleText3').editable(); 
-
-	$('#textComments1').editable({
-	    showbuttons: 'bottom'
-	}); 
-	
-};
-
-
+ */
 $(function($){
-	initEpas($);
+	
+	$.fn.initepas = function() {
+		
+		// $.fn.editable.defaults.mode = 'inline';
+		this.find('a[data-x-editable]').editable();
+		
+		this.find('a.popup_window').popupWindow({ 
+			height:600, 
+			width:1000,
+			scrollbars:1,
+			resizable:0,
+			top:50, 
+			left:50 
+			});
+		this.find('a.popup_window_mini').popupWindow({ 
+			height:600, 
+			width:800,
+			scrollbars:1,
+			resizable:0,
+			top:50, 
+			left:50 
+			}); 
+		
+		this.find("a[data-popover]").popover();
+		this.find("input[data-datepicker]").datepicker();
+		this.find("#datepicker1" ).datepicker();
+		this.find(".datepicker" ).datepicker();
+		this.find("#datepicker3" ).datepicker();
+		
+		this.find('#myModal1').on('show', function () {
+			this.find('#myModal2').modal('hide');
+		})
+
+		this.find('#myModal2').on('show', function () {
+			this.find('#myModal1').modal('hide');
+		})
+
+		this.find('#myModal1').on('hide', function(){
+		    $(this).data('modal', null);
+		});
+
+		this.find('#myModal2').on('hide', function(){
+		    $(this).data('modal', null);
+		});
+
+		this.find('#myModal1').on('hidden', function(){
+		    $(this).data('modal', null);
+		});
+
+		this.find('#myModal2').on('hidden', function(){
+		    $(this).data('modal', null);
+		});
+
+		this.find('#myModal3').on('hidden', function(){
+		    $(this).data('modal', null);
+		});
+
+		this.find('#myModal4').on('hidden', function(){
+		    $(this).data('modal', null);
+		});
+
+		this.find('#modal-insert-contract').on('hidden', function(){
+		    $(this).data('modal', null);
+		});
+
+		this.find('#modal-edit-contract').on('hidden', function(){
+		    $(this).data('modal', null);
+		});
+
+		this.find('#modal-edit-source-contract').on('hidden', function(){
+		    $(this).data('modal', null);
+		});
+
+		this.find('#modal-terminate-person').on('hidden', function(){
+		    $(this).data('modal', null);
+		});
+
+		this.find('#modal-edit-vacationperiod').on('hidden', function(){
+		    $(this).data('modal', null);
+		});
+
+		this.find('#modal-insert-vacationperiod').on('hidden', function(){
+		    $(this).data('modal', null);
+		});
+
+		this.find('#modal-absencetype-month').on('hidden', function(){
+		    $(this).data('modal', null);
+		});
+
+
+		this.find('#select1').editable(); 
+		this.find('#select2').editable(); 
+		this.find('#select3').editable(); 
+		this.find('#select4').editable(); 
+		this.find('#select5').editable(); 
+		this.find('#select6').editable(); 
+		this.find('#simpleText1').editable(); 
+		this.find('#simpleText2').editable();
+		this.find('#simpleText3').editable(); 
+
+		this.find('#textComments1').editable({
+		    showbuttons: 'bottom'
+		}); 
+		
+		this.find('form[data-reload] :input').on('change', function(e) {
+	    	var $form = $(this).closest("form");
+	    	var selector = $form.data('reload');
+	    	var $target = $(selector);
+	    	$target.addClass('reloading');
+	    	var $spinner = $('<span class="text-primary" style="position:absolute; z-index: 10"><i class="fa fa-spin fa-spinner fa-2x"></i</span>').prependTo($target);
+	    	var offset = $spinner.offset();
+	    	$spinner.offset({top:offset.top + 10, left:offset.left + 10});
+	    	var url = $form.prop('action') + '?'+ $form.find(":input").serialize();
+	    	$target.load(url + ' '+ selector, function(response, status, request) {
+	    		// History.replaceState(null, $('title').text, url);
+	    		$target.removeClass('reloading');
+	    		$target.initepas();
+	    	});
+	    });
+	    
+	    this.find('form[data-reload] input[type=text]').on('input', function(e) {
+	    	var $this = $(this);
+	    	var autochange_timeout = $this.data('autochange_timeout')
+	    	if (autochange_timeout) {
+	    		clearTimeout(autochange_timeout);
+	    		$this.removeData('autochange_timeout', autochange_timeout);
+	    	}
+	    	$this.data('autochange_timeout', setTimeout(function() {
+	    		$this.trigger('change');
+	    	}, 500));
+	    });
+		
+	}
+	$('body').initepas();
 	
 	$('a[data-modal]').click(function(e) {
 		var $this = $(this);
 		var url = $this.attr('href');
 		var $modal = $($this.data('modal'));
-		$modal.modal('show').find('.modal-body').load(url, function() {
-			initEpas($);
+		var $modalbody = $modal.modal('show').find('.modal-body');
+		$modalbody.load(url, function() {
+			$modalbody.initepas();
 		});
 		e.preventDefault();
 	});
