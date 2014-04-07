@@ -15,3 +15,15 @@ Strumenti utilizzati:
  - junit
    - alcuni test di base sono fatti tramite l'integrazione in play della junit
  
+QueryDSL:
+Per ricompilare i Q<model>:
+(meglio se si utilizza java6 per la seguente)
+
+$ ant build -Dplay.path=<il-path-del-play>
+
+Esempio di query sulle person:
+
+        SearchResults<?> results = PersonDao.list(Optional.of(""), 
+                ImmutableSet.of(Office.<Office>findById(1L)), true)
+                .paginated(page);
+        ...
