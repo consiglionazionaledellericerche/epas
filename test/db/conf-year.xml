@@ -11,6 +11,7 @@
   
 -->
 <dataset>
+  <conf_year id="1" day_expiry_vacation_past_year="31" hour_max_to_calculate_worktime="5" max_recovery_days_49="0" max_recovery_days_13="22" month_expire_recovery_days_49="4" month_expire_recovery_days_13="0" month_expiry_vacation_past_year="8" year="2012"/>
   <conf_year id="1" day_expiry_vacation_past_year="31" hour_max_to_calculate_worktime="5" max_recovery_days_49="0" max_recovery_days_13="22" month_expire_recovery_days_49="4" month_expire_recovery_days_13="0" month_expiry_vacation_past_year="8" year="2013"/>
   <conf_year id="2" day_expiry_vacation_past_year="31" hour_max_to_calculate_worktime="5" max_recovery_days_49="0" max_recovery_days_13="22" month_expire_recovery_days_49="4" month_expire_recovery_days_13="0" month_expiry_vacation_past_year="8" year="2014"/>
 
