@@ -31,11 +31,11 @@ $(function($){
 		this.find("#datepicker3" ).datepicker();
 		
 		this.find('#myModal1').on('show', function () {
-			this.find('#myModal2').modal('hide');
+			$('#myModal2').modal('hide');
 		})
 
 		this.find('#myModal2').on('show', function () {
-			this.find('#myModal1').modal('hide');
+			$('#myModal1').modal('hide');
 		})
 
 		this.find('#myModal1').on('hide', function(){
