@@ -110,7 +110,7 @@ $(function($){
 	    	var selector = $form.data('reload');
 	    	var $target = $(selector);
 	    	$target.addClass('reloading');
-	    	var $spinner = $('<span class="text-primary" style="position:absolute; z-index: 10"><i class="fa fa-spin fa-spinner fa-2x"></i</span>').prependTo($target);
+	    	var $spinner = $('<span class="text-primary" style="position:absolute; z-index: 10"><i class="icon-spinner icon-spin icon-2x"></i</span>').prependTo($target);
 	    	var offset = $spinner.offset();
 	    	$spinner.offset({top:offset.top + 10, left:offset.left + 10});
 	    	var url = $form.prop('action') + '?'+ $form.find(":input").serialize();

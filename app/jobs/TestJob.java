@@ -13,6 +13,7 @@ import models.PersonDay;
 import models.PersonDayInTrouble;
 import models.StampModificationType;
 import models.Stamping;
+import models.User;
 
 import org.joda.time.LocalDate;
 
@@ -34,8 +35,8 @@ public class TestJob extends Job{
 		
 
 		Logger.info("Start Job checkDay");
-		Person personLogged = Person.find("byUsername", "admin").first();	
-		PersonUtility.fixPersonSituation(-1l, 2013, 1, personLogged);
+		User userLogged = User.find("byUsername", "admin").first();	
+		PersonUtility.fixPersonSituation(-1l, 2013, 1, userLogged);
 		
 		/*
 		LocalDate yesterday = new LocalDate().minusDays(1);
