@@ -69,43 +69,43 @@ public class PersonUtility {
 	}
 
 
-//	/** TODO usato in Competences.java ma utilizza dati del person month, sostituirlo */
-//	public static boolean canTakeOvertime(Person person, int year, int month){
-//		boolean canOrNot = false;
-//		int positiveDifference = 0;
-//		int negativeDifference = 0;
-//		LocalDate date = new LocalDate(year, month, 1);
-//		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-//				person, date, date.dayOfMonth().withMaximumValue()).fetch();
-//		for(PersonDay pd : pdList){
-//			if(pd.difference > 0)
-//				positiveDifference = positiveDifference + pd.difference;
-//			else
-//				negativeDifference = negativeDifference + pd.difference;
-//		}
-//		if(positiveDifference > -negativeDifference)
-//			canOrNot = true;
-//		else{
-//			/**
-//			 * per "bilanciare" i residui negativi del mese, si va a vedere se esistono residui positivi dal mese precedente o dall'anno precedente
-//			 */
-//			PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
-//					person, year, month-1).first();
-//
-//			if(pm != null){
-//				if(pm.totalRemainingMinutes > -negativeDifference)
-//					canOrNot = true;
-//				else 
-//					canOrNot = false;
-//			}
-//			else
-//				canOrNot = false;
-//
-//
-//		}
-//		return canOrNot;
-//
-//	}
+	//	/** TODO usato in Competences.java ma utilizza dati del person month, sostituirlo */
+	//	public static boolean canTakeOvertime(Person person, int year, int month){
+	//		boolean canOrNot = false;
+	//		int positiveDifference = 0;
+	//		int negativeDifference = 0;
+	//		LocalDate date = new LocalDate(year, month, 1);
+	//		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+	//				person, date, date.dayOfMonth().withMaximumValue()).fetch();
+	//		for(PersonDay pd : pdList){
+	//			if(pd.difference > 0)
+	//				positiveDifference = positiveDifference + pd.difference;
+	//			else
+	//				negativeDifference = negativeDifference + pd.difference;
+	//		}
+	//		if(positiveDifference > -negativeDifference)
+	//			canOrNot = true;
+	//		else{
+	//			/**
+	//			 * per "bilanciare" i residui negativi del mese, si va a vedere se esistono residui positivi dal mese precedente o dall'anno precedente
+	//			 */
+	//			PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
+	//					person, year, month-1).first();
+	//
+	//			if(pm != null){
+	//				if(pm.totalRemainingMinutes > -negativeDifference)
+	//					canOrNot = true;
+	//				else 
+	//					canOrNot = false;
+	//			}
+	//			else
+	//				canOrNot = false;
+	//
+	//
+	//		}
+	//		return canOrNot;
+	//
+	//	}
 
 	/**
 	 * metodo per stabilire se una persona può ancora prendere o meno giorni di permesso causa malattia del figlio
@@ -137,7 +137,7 @@ public class PersonUtility {
 			else{
 				return false;
 			}
-			
+
 			break;
 
 
@@ -158,7 +158,7 @@ public class PersonUtility {
 						return false;
 				}
 			}
-			
+
 			break;
 
 		case 123:
@@ -178,7 +178,7 @@ public class PersonUtility {
 			else{
 				return false;
 			}
-			
+
 			break;
 
 		case 13:
@@ -195,7 +195,7 @@ public class PersonUtility {
 						return false;
 				}	
 			}
-			
+
 			else{
 				return false;
 			}
@@ -218,7 +218,7 @@ public class PersonUtility {
 			else{
 				return false;
 			}
-			
+
 			break;
 
 		case 133:
@@ -257,7 +257,7 @@ public class PersonUtility {
 			else{
 				return false;
 			}
-					
+
 			break;
 
 		default:
@@ -283,7 +283,7 @@ public class PersonUtility {
 			return true;
 
 	}
-	
+
 	/**
 	 * Il primo codice utilizzabile per l'anno selezionato come assenza nel seguente ordine 31,32,94
 	 * @param person
@@ -291,22 +291,22 @@ public class PersonUtility {
 	 * @return
 	 */
 	public static AbsenceType whichVacationCode(Person person, LocalDate actualDate){
-		
+
 		Contract contract = person.getCurrentContract();
 		VacationsRecap vr = new VacationsRecap(person, actualDate.getYear(), contract, actualDate, true);	
-		
+
 		if(vr.vacationDaysLastYearNotYetUsed>0)
 			return AbsenceType.find("byCode", "31").first();
 
 		if(vr.vacationDaysCurrentYearNotYetUsed>0)
 			return AbsenceType.find("byCode", "32").first();
-		
+
 		if(vr.persmissionNotYetUsed>0)
 			return AbsenceType.find("byCode", "94").first();	
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * 
 	 * @param person
@@ -317,7 +317,7 @@ public class PersonUtility {
 		Query queryReperibility = JPA.em().createQuery("Select count(*) from PersonReperibilityDay prd where prd.date = :date and prd.personReperibility.person = :person");
 		queryReperibility.setParameter("date", date).setParameter("person", person);
 		int prdCount = queryReperibility.getFirstResult();
-	//	List<PersonReperibilityDay> prd =  queryReperibility.getResultList();
+		//	List<PersonReperibilityDay> prd =  queryReperibility.getResultList();
 		if(prdCount != 0)
 			return false;
 		Query queryShift = JPA.em().createQuery("Select count(*) from PersonShiftDay psd where psd.date = :date and psd.personShift.person = :person");
@@ -325,10 +325,10 @@ public class PersonUtility {
 		int psdCount = queryShift.getFirstResult();
 		if(psdCount != 0)
 			return false;
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * 
 	 * @param date
@@ -339,7 +339,7 @@ public class PersonUtility {
 			return null;
 		return new PersonDay(person, date);
 	}
-	
+
 	/**
 	 * 
 	 * @param name
@@ -351,8 +351,8 @@ public class PersonUtility {
 		List<String> usernameList = new ArrayList<String>();
 		usernameList.add(name.replace(' ', '_').toLowerCase()+'.'+surname.replace(' ','_').toLowerCase());
 		usernameList.add(name.trim().toLowerCase().substring(0,1)+'.'+surname.replace(' ','_').toLowerCase());
-		
-	
+
+
 		int blankNamePosition = whichBlankPosition(name);
 		int blankSurnamePosition = whichBlankPosition(surname);
 		if(blankSurnamePosition > 4 && blankNamePosition == 0){
@@ -380,7 +380,7 @@ public class PersonUtility {
 		}
 		return usernameList;
 	}
-	
+
 	/**
 	 * 
 	 * @param s
@@ -412,7 +412,7 @@ public class PersonUtility {
 			check = canTakeAbsenceWithReplacingCodeAndDecreasing(absenceType, person, date);
 		}
 		return check;
-		
+
 	}
 
 	/**
@@ -426,78 +426,81 @@ public class PersonUtility {
 	 */
 	private static CheckMessage canTakeAbsenceWithReplacingCodeAndDecreasing(
 			AbsenceType absenceType, Person person, LocalDate date) {
-		
-		
+
+
 		int totalMinutesJustified = 0;
 		List<Absence> absList = null;
 		//trovo nella storia dei personDay l'ultima occorrenza in ordine temporale del codice di rimpiazzamento relativo al codice di assenza
 		//che intendo inserire, di modo da fare i calcoli sulla possibilità di inserire quel codice di assenza da quel giorno in poi.
 		Absence absence = Absence.find(
 				"Select abs "
-				+ "from Absence abs "
-				+ "where abs.absenceType = ? and abs.personDay.person = ? " 
-				+ "order by abs.personDay.date desc",
-				absenceType.absenceTypeGroup.replacingAbsenceType, 
-				person).first();
-		
-		if(absenceType.absenceTypeGroup.accumulationType.equals(AccumulationType.yearly)){
-			absList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup.label = ? and abs.personDay.person = ? and" +
-					" abs.personDay.date between ? and ?", 
-					absenceType.absenceTypeGroup.label, person, absence.personDay.date, date).fetch();
-			for(Absence abs : absList){
-				totalMinutesJustified = totalMinutesJustified + abs.absenceType.justifiedTimeAtWork.minutesJustified;
-			}
-			if(absenceType.absenceTypeGroup.limitInMinute > totalMinutesJustified + absenceType.justifiedTimeAtWork.minutesJustified)
-				/**
-				 * in questo caso non si è arrivati a raggiungere il limite previsto per quella assenza oraria 
-				 */
-				return new CheckMessage(true, "Si può utilizzare il codice di assenza e non c'è necessità di rimpiazzare il codice con il codice " +
-						"di rimpiazzamento", null);
-			else{
-				/**
-				 * si è arrivati a raggiungere il limite, a questo punto esistono due possibilità:
-				 * raggiunto il limite, si guarda se il codice di sostituzione, nella somma delle proprie occorrenze in ambito annuale, ha 
-				 * raggiunto o meno il limite per esso previsto, se sì non si fa prendere il codice di assenza altrimenti si concede
-				 */
-				int totalReplacingAbsence = 0;
-				List<Absence> replacingAbsenceList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? and " +
-						"abs.personDay.date between ? and ? and abs.absenceType.code = ?", 
-						person, date.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), date, absenceType.absenceTypeGroup.replacingAbsenceType.code).fetch();
-				totalReplacingAbsence = replacingAbsenceList.size();
-				if(absenceType.absenceTypeGroup.replacingAbsenceType.absenceTypeGroup.limitInMinute < totalReplacingAbsence*absenceType.absenceTypeGroup.limitInMinute){
-					return new CheckMessage(false,"Non è possibile prendere ulteriori assenze con questo codice poichè si è superato il limite massimo a livello annuale per il suo codice di rimpiazzamento", null);
+						+ "from Absence abs "
+						+ "where abs.absenceType = ? and abs.personDay.person = ? " 
+						+ "order by abs.personDay.date desc",
+						absenceType.absenceTypeGroup.replacingAbsenceType, 
+						person).first();
+		if(absence != null){
+			
+			if(absenceType.absenceTypeGroup.accumulationType.equals(AccumulationType.yearly)){
+				absList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup.label = ? and abs.personDay.person = ? and" +
+						" abs.personDay.date between ? and ?", 
+						absenceType.absenceTypeGroup.label, person, absence.personDay.date, date).fetch();
+				for(Absence abs : absList){
+					totalMinutesJustified = totalMinutesJustified + abs.absenceType.justifiedTimeAtWork.minutesJustified;
 				}
+				if(absenceType.absenceTypeGroup.limitInMinute > totalMinutesJustified + absenceType.justifiedTimeAtWork.minutesJustified)
+					/**
+					 * in questo caso non si è arrivati a raggiungere il limite previsto per quella assenza oraria 
+					 */
+					return new CheckMessage(true, "Si può utilizzare il codice di assenza e non c'è necessità di rimpiazzare il codice con il codice " +
+							"di rimpiazzamento", null);
 				else{
+					/**
+					 * si è arrivati a raggiungere il limite, a questo punto esistono due possibilità:
+					 * raggiunto il limite, si guarda se il codice di sostituzione, nella somma delle proprie occorrenze in ambito annuale, ha 
+					 * raggiunto o meno il limite per esso previsto, se sì non si fa prendere il codice di assenza altrimenti si concede
+					 */
+					int totalReplacingAbsence = 0;
+					List<Absence> replacingAbsenceList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? and " +
+							"abs.personDay.date between ? and ? and abs.absenceType.code = ?", 
+							person, date.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), date, absenceType.absenceTypeGroup.replacingAbsenceType.code).fetch();
+					totalReplacingAbsence = replacingAbsenceList.size();
+					if(absenceType.absenceTypeGroup.replacingAbsenceType.absenceTypeGroup.limitInMinute < totalReplacingAbsence*absenceType.absenceTypeGroup.limitInMinute){
+						return new CheckMessage(false,"Non è possibile prendere ulteriori assenze con questo codice poichè si è superato il limite massimo a livello annuale per il suo codice di rimpiazzamento", null);
+					}
+					else{
+						return new CheckMessage(true, "Si può prendere il codice di assenza richiesto e viene inserito anche il codice di rimpiazzamento", absenceType.absenceTypeGroup.replacingAbsenceType);
+					}
+				}
+
+			}
+			else if(absenceType.absenceTypeGroup.accumulationType.equals(AccumulationType.always)){
+
+				absList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup.label = ? and abs.personDay.person = ? and" +
+						" abs.personDay.date between ? and ?", 
+						absenceType.absenceTypeGroup.label, person, absence.personDay.date, date).fetch();
+				for(Absence abs : absList){
+					if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay)
+						totalMinutesJustified = person.getCurrentWorkingTimeType().getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime;
+					else{
+
+						totalMinutesJustified = totalMinutesJustified+abs.absenceType.justifiedTimeAtWork.minutesJustified;
+					}
+
+				}
+				if(absenceType.absenceTypeGroup.limitInMinute > totalMinutesJustified + absenceType.justifiedTimeAtWork.minutesJustified)
+					/**
+					 * in questo caso non si è arrivati a raggiungere il limite previsto per quella assenza oraria 
+					 */
+					return new CheckMessage(true, "Si può utilizzare il codice di assenza e non c'è necessità di rimpiazzare il codice con il codice " +
+							"di rimpiazzamento", null);
+				else{		
 					return new CheckMessage(true, "Si può prendere il codice di assenza richiesto e viene inserito anche il codice di rimpiazzamento", absenceType.absenceTypeGroup.replacingAbsenceType);
 				}
+
 			}
-				
 		}
-		else if(absenceType.absenceTypeGroup.accumulationType.equals(AccumulationType.always)){
-			
-			absList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup.label = ? and abs.personDay.person = ? and" +
-					" abs.personDay.date between ? and ?", 
-					absenceType.absenceTypeGroup.label, person, absence.personDay.date, date).fetch();
-			for(Absence abs : absList){
-				if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay)
-					totalMinutesJustified = person.getCurrentWorkingTimeType().getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime;
-				else{
-					
-					totalMinutesJustified = totalMinutesJustified+abs.absenceType.justifiedTimeAtWork.minutesJustified;
-				}
-				
-			}
-			if(absenceType.absenceTypeGroup.limitInMinute > totalMinutesJustified + absenceType.justifiedTimeAtWork.minutesJustified)
-				/**
-				 * in questo caso non si è arrivati a raggiungere il limite previsto per quella assenza oraria 
-				 */
-				return new CheckMessage(true, "Si può utilizzare il codice di assenza e non c'è necessità di rimpiazzare il codice con il codice " +
-						"di rimpiazzamento", null);
-			else{		
-				return new CheckMessage(true, "Si può prendere il codice di assenza richiesto e viene inserito anche il codice di rimpiazzamento", absenceType.absenceTypeGroup.replacingAbsenceType);
-			}
-			
-		}
+		
 		return new CheckMessage(true, "Si può prendere il codice di assenza richiesto.", null);	
 	}
 
@@ -511,7 +514,7 @@ public class PersonUtility {
 	 */
 	private static CheckMessage canTakeAbsenceWithNoMoreAbsencesAccepted(
 			AbsenceType absenceType, Person person, LocalDate date) {
-		
+
 		int totalMinutesJustified = 0;
 		List<Absence> absList = null;
 		//controllo che il tipo di accumulo sia su base mensile cercando nel mese tutte le occorrenze di codici di assenza che hanno
@@ -540,11 +543,11 @@ public class PersonUtility {
 				if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay)
 					totalMinutesJustified = person.getCurrentWorkingTimeType().getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime;
 				else{
-					
+
 					totalMinutesJustified = totalMinutesJustified+abs.absenceType.justifiedTimeAtWork.minutesJustified;
 				}
-					
-				
+
+
 			}
 			Logger.debug("TotalMinutesJustified= %d. Minuti giustificati: %d", totalMinutesJustified, absenceType.justifiedTimeAtWork.minutesJustified);
 			int quantitaGiustificata;
@@ -557,7 +560,7 @@ public class PersonUtility {
 			else
 				return new CheckMessage(false, "La quantità usata nell'arco dell'anno per questo codice ha raggiunto il limite. Non si può usarne un altro.", null);
 		}
-		
+
 	}
 
 	/**
@@ -570,11 +573,11 @@ public class PersonUtility {
 	 * la situazione opposta
 	 */
 	private static CheckMessage canTakeAbsenceWithNoAccumulation(AbsenceType absenceType, Person person, LocalDate date) {
-		
-		 
+
+
 		return new CheckMessage(true, "E' possibile prendere il codice d'assenza", null);
 	}
-	
+
 	/**
 	 * 
 	 * @param person
@@ -600,7 +603,7 @@ public class PersonUtility {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Il numero di coppie ingresso/uscita da stampare per il personday
 	 * @param pd
@@ -613,7 +616,7 @@ public class PersonUtility {
 		pd.orderStampings();
 
 		int coupleOfStampings = 0;
-		
+
 		String lastWay = null;
 		for(Stamping s : pd.stampings)
 		{
@@ -632,7 +635,7 @@ public class PersonUtility {
 					lastWay = s.way.description;
 					continue;
 				}
-				
+
 			}
 			//lastWay in
 			if(lastWay.equals("in"))
@@ -655,10 +658,10 @@ public class PersonUtility {
 		//l'ultima stampings e' in chiudo una coppia
 		if(lastWay!=null)
 			coupleOfStampings++;
-		
+
 		return coupleOfStampings;
 	}
-	
+
 	/**
 	 * Calcola il numero massimo di coppie di colonne ingresso/uscita da stampare nell'intero mese
 	 * @param person
@@ -667,7 +670,7 @@ public class PersonUtility {
 	 * @return
 	 */
 	public static int getMaximumCoupleOfStampings(Person person, int year, int month){
-		
+
 		LocalDate begin = new LocalDate(year, month, 1);
 		if(begin.isAfter(new LocalDate()))
 			return 0;
@@ -677,14 +680,14 @@ public class PersonUtility {
 		for(PersonDay pd : pdList)
 		{
 			int coupleOfStampings = PersonUtility.numberOfInOutInPersonDay(pd);
-			
+
 			if(max<coupleOfStampings)
 				max = coupleOfStampings;
 		}
-		
+
 		return max;
 	}
-	
+
 	/**
 	 * Genera una lista di PersonDay aggiungendo elementi fittizzi per coprire ogni giorno del mese
 	 * @param person
@@ -696,11 +699,11 @@ public class PersonUtility {
 	{
 		LocalDate beginMonth = new LocalDate(year, month, 1);
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
-		
+
 		List<PersonDay> totalDays = new ArrayList<PersonDay>();
 		List<PersonDay> workingDays = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date",
 				person, beginMonth, endMonth).fetch();
-		
+
 		int currentWorkingDays = 0;
 		LocalDate currentDate = beginMonth;
 		while(!currentDate.isAfter(endMonth))
@@ -715,7 +718,7 @@ public class PersonUtility {
 				PersonDay previusPersonDay = null;
 				if(totalDays.size()>0)
 					previusPersonDay = totalDays.get(totalDays.size()-1);
-				
+
 				PersonDay newPersonDay; 
 				//primo giorno del mese festivo 
 				if(previusPersonDay==null)
@@ -725,15 +728,15 @@ public class PersonUtility {
 				{
 					newPersonDay = new PersonDay(person, new LocalDate(year, month, currentDate.getDayOfMonth()), 0, 0, previusPersonDay.progressive);
 				}
-					
+
 				totalDays.add(newPersonDay);
-				
+
 			}
 			currentDate = currentDate.plusDays(1);
 		}
 		return totalDays;
 	}
-	
+
 	/**
 	 * //TODO utilizzare jpa per prendere direttamente i codici (e migrare ad una lista)
 	 * @param days lista di PersonDay
@@ -745,7 +748,7 @@ public class PersonUtility {
 		LocalDate beginMonth = new LocalDate(year, month, 1);
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
 		Person person = personDays.get(0).person;
-		
+
 		List<AbsenceType> abtList = AbsenceType.find("Select abt from AbsenceType abt, Absence ab, PersonDay pd where ab.personDay = pd and ab.absenceType = abt and pd.person = ? and pd.date between ? and ?", person, beginMonth, endMonth ).fetch();
 		Map<AbsenceType, Integer> absenceCodeMap = new HashMap<AbsenceType, Integer>();
 		int i = 0;
@@ -763,16 +766,16 @@ public class PersonUtility {
 		}
 		return absenceCodeMap;
 	}
-	
+
 	/**
 	 * Il numero di buoni pasto usabili all'interno della lista di person day passata come parametro
 	 * @return
 	 */
 	public static int numberOfMealTicketToUse(Person person, int year, int month){
-		
+
 		LocalDate beginMonth = new LocalDate(year, month, 1);
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
-		
+
 		List<PersonDay> workingDays = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? and pd.isTicketAvailable = ? order by pd.date",
 				person, beginMonth, endMonth, true).fetch();
 		int number = 0;
@@ -783,8 +786,8 @@ public class PersonUtility {
 		}
 		return number;
 	}
-	
-	
+
+
 
 	/**
 	 * Il numero di buoni pasto da restituire all'interno della lista di person day passata come parametro
@@ -793,19 +796,19 @@ public class PersonUtility {
 	public static int numberOfMealTicketToRender(Person person, int year, int month){
 		LocalDate beginMonth = new LocalDate(year, month, 1);
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
-		
+
 		List<PersonDay> pdListNoTicket = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? and pd.isTicketAvailable = ? order by pd.date",
 				person, beginMonth, endMonth, false).fetch();
 		int ticketTorender = pdListNoTicket.size();
-		
+
 		//tolgo da ticket da restituire i giorni festivi e oggi
 		for(PersonDay pd : pdListNoTicket)
 			if(pd.isHoliday() || pd.isToday())
 				ticketTorender--;
-		
+
 		return ticketTorender;
 	}
-	
+
 	/**
 	 * 
 	 * @return il numero di giorni lavorati in sede. Per stabilirlo si controlla che per ogni giorno lavorativo, esista almeno una 
@@ -818,7 +821,7 @@ public class PersonUtility {
 			boolean fixed = pd.isFixedTimeAtWork();
 			if(pd.isHoliday())
 				continue;
-			
+
 			if(fixed && !pd.isAllDayAbsences() )
 			{
 				basedDays++;
@@ -830,7 +833,7 @@ public class PersonUtility {
 		}
 		return basedDays;
 	}
-	
+
 	/**
 	 * Il numero di riposi compensativi utilizzati nell'anno dalla persona
 	 * @param person
@@ -847,10 +850,10 @@ public class PersonUtility {
 		.setParameter("code", "91")
 		.setParameter("begin", new LocalDate(year,1,1))
 		.setParameter("end", new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
-		
+
 		return query.getResultList().size();
 	}
-	
+
 	/**
 	 * Aggiorna i person day della persona dei mesi che cadono entro l'intervallo temporale [dateFrom,dateTo]
 	 * @param person
@@ -880,7 +883,7 @@ public class PersonUtility {
 
 	}
 
-	
+
 	/**
 	 * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
 	 * @param personId l'id univoco della persona da fixare, -1 per fixare tutte le persone attive alla data di ieri
@@ -889,10 +892,10 @@ public class PersonUtility {
 	 * @param personLogged
 	 */
 	public static void fixPersonSituation(Long personId, int year, int month, Person personLogged){
-		
+
 		if(personLogged==null)
 			return;
-		
+
 		//Costruisco la lista di persone su cui voglio operare
 		List<Person> personList = new ArrayList<Person>();
 		if(personId==-1)
@@ -909,7 +912,7 @@ public class PersonUtility {
 			//TODO controllare che personLogged abbia i diritti sulla persona
 			personList.add((Person)Person.findById(personId));
 		}
-		
+
 		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
 		JPAPlugin.startTx(false);
 		for(Person person : personList)
@@ -917,12 +920,12 @@ public class PersonUtility {
 			PersonUtility.checkHistoryError(person, year, month);
 		}
 		JPAPlugin.closeTx(false);
-		
+
 		// (2) Ricalcolo i valori dei person day aggregandoli per mese
 		int i = 1;
 		for(Person p : personList){
 			Logger.info("Update person situation %s (%s di %s) dal %s-%s-01 a oggi", p.surname, i++, personList.size(), year, month);
-			
+
 			LocalDate actualMonth = new LocalDate(year, month, 1);
 			LocalDate endMonth = new LocalDate().withDayOfMonth(1);
 			JPAPlugin.startTx(false);
@@ -940,14 +943,14 @@ public class PersonUtility {
 			}
 			JPAPlugin.closeTx(false);
 		}
-		
+
 		//(3) 
 		JPAPlugin.startTx(false);
 		i = 1;
 		for(Person p : personList){
 			Logger.info("Update residui %s (%s di %s) dal %s-%s-01 a oggi", p.surname, i++, personList.size(), year, month);
 			List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ?", p).fetch();
-			
+
 			for(Contract contract : contractList)
 			{
 				contract.buildContractYearRecap();
@@ -956,8 +959,8 @@ public class PersonUtility {
 		JPAPlugin.closeTx(false);		
 
 	}
-	
-	 /**
+
+	/**
 	 * Verifica per la persona (se attiva) che alla data 
 	 * 	(1) in caso di giorno lavorativo il person day esista. 
 	 * 		Altrimenti viene creato e persistito un personday vuoto e inserito un record nella tabella PersonDayInTrouble.
@@ -997,7 +1000,7 @@ public class PersonUtility {
 			return;
 		}
 	}
-	
+
 	/**
 	 * A partire dal mese e anno passati al metodo fino al giorno di ieri (yesterday)
 	 * controlla la presenza di errori nelle timbrature, inserisce i giorni problematici nella tabella PersonDayInTrouble
@@ -1020,7 +1023,7 @@ public class PersonUtility {
 				break;
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @return la lista dei codici competenza attivi per le persone nell'anno in corso
@@ -1034,7 +1037,7 @@ public class PersonUtility {
 		}
 		return competenceCodeList;
 	}
-	
+
 }
 
 
