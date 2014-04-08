@@ -136,7 +136,7 @@ public class Administration extends Controller {
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void fixPersonSituation(Long personId, int year, int month){
 		
-		PersonUtility.fixPersonSituation(personId, year, month, Security.getUser().person);
+		PersonUtility.fixPersonSituation(personId, year, month, Security.getUser());
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)

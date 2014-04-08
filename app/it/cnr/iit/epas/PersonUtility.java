@@ -37,6 +37,7 @@ import models.PersonShiftDay;
 import models.RemoteOffice;
 import models.StampProfile;
 import models.Stamping;
+import models.User;
 import models.VacationPeriod;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
@@ -888,10 +889,16 @@ public class PersonUtility {
 	 * @param month il mese dal quale far partire il fix
 	 * @param personLogged
 	 */
-	public static void fixPersonSituation(Long personId, int year, int month, Person personLogged){
+	public static void fixPersonSituation(Long personId, int year, int month, User userLogged){
 		
-		if(personLogged==null)
+		if(userLogged==null)
 			return;
+		
+		List<Office> officeAllowed = new ArrayList<Office>();
+		if(userLogged.person == null)
+			officeAllowed = Office.findAll();
+		else
+			officeAllowed = userLogged.person.getOfficeAllowed();
 		
 		//Costruisco la lista di persone su cui voglio operare
 		List<Person> personList = new ArrayList<Person>();
@@ -901,7 +908,6 @@ public class PersonUtility {
 		{
 			LocalDate begin = new LocalDate(year, month, 1);
 			LocalDate end = new LocalDate().minusDays(1);
-			List<Office> officeAllowed = personLogged.getOfficeAllowed();
 			personList = Person.getActivePersonsSpeedyInPeriod(begin, end, officeAllowed, false);	
 		}
 		else

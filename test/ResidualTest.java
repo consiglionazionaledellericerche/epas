@@ -29,7 +29,7 @@ public class ResidualTest extends UnitTest {
     
     	
     	//Ricalcolo tutti i personday
-     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person);
+     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
@@ -88,7 +88,7 @@ public class ResidualTest extends UnitTest {
     
     	
     	//Ricalcolo tutti i personday
-     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person);
+     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
@@ -147,7 +147,7 @@ public class ResidualTest extends UnitTest {
     
     	
     	//Ricalcolo tutti i personday
-     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person);
+     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
@@ -206,7 +206,7 @@ public class ResidualTest extends UnitTest {
     
     	
     	//Ricalcolo tutti i personday
-     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person);
+     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
@@ -265,7 +265,7 @@ public class ResidualTest extends UnitTest {
     
     	
     	//Ricalcolo tutti i personday
-     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person);
+     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
