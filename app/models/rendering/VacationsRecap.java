@@ -142,20 +142,30 @@ public class VacationsRecap {
 		
 		//(2) Calcolo ferie usate dell'anno corrente ---------------------------------------------------------------------------------------------------------------------------------
 		List<Absence> abs32Current = null;
+		/**
+		 * controllo che nell'anno ci siano dei codici di assenza di tipo 24/24S/25 (per ora abbastanza limitato eventualmente da rivedere)
+		 * di modo da conteggiarli come giorni di ferie utilizzati nell'anno
+		 */
+		List<Absence> abs2425Current = Absence.find("Select abs from Absence abs where abs.absenceType.code in (?,?,?) " +
+				"and abs.personDay.person = ? and abs.personDay.date between ? and ?", "24", "24S", "25", this.person, startYear, endYear).fetch();
+		Logger.debug("Giorni di codice 24, 25 o simili per %s %s: %d", person.name, person.surname, abs2425Current.size());
+		
 		int vacationDaysCurrentYearUsedNew = 0;
 		if(activeContract.sourceDate!=null && activeContract.sourceDate.getYear()==year)
 		{
 			vacationDaysCurrentYearUsedNew = vacationDaysCurrentYearUsedNew + activeContract.sourceVacationCurrentYearUsed;
 			DateInterval yearInterSource = new DateInterval(activeContract.sourceDate.plusDays(1), endYear);
 			abs32Current = getVacationDays(yearInterSource, activeContract, ab32);										
-			vacationDaysCurrentYearUsedNew = vacationDaysCurrentYearUsedNew + abs32Current.size();
+			vacationDaysCurrentYearUsedNew = vacationDaysCurrentYearUsedNew + abs32Current.size() + abs2425Current.size();
 		}
 		else
 		{
 			abs32Current = getVacationDays(yearInter, activeContract, ab32);
-			vacationDaysCurrentYearUsedNew = vacationDaysCurrentYearUsedNew + abs32Current.size();
+			vacationDaysCurrentYearUsedNew = vacationDaysCurrentYearUsedNew + abs32Current.size() + abs2425Current.size();
 		}
 		this.vacationDaysCurrentYearUsed.addAll(abs32Current);
+		if(abs2425Current.size() > 0)
+			this.vacationDaysCurrentYearUsed.addAll(abs2425Current);
 		while(this.vacationDaysCurrentYearUsed.size()<vacationDaysCurrentYearUsedNew)
 		{
 			Logger.debug("Inserita assenza nulla");
