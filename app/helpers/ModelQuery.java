@@ -38,7 +38,7 @@ public final class ModelQuery {
 			this.query = query;
 			this.count = (int)query.count();
 			this.totalPage = this.count / this.page_size;
-			if(this.count%this.page_size != 0 && this.totalPage!=0)
+			if(this.count%this.page_size != 0)
 				this.totalPage++;
 			this.e = e;
 		}
