@@ -1036,7 +1036,7 @@ public class PersonUtility {
 	 */
 	public static List<CompetenceCode> activeCompetence(){
 		List<CompetenceCode> competenceCodeList = new ArrayList<CompetenceCode>();
-		List<Competence> competenceList = Competence.find("Select comp from Competence comp where comp.year = ?", new LocalDate().getYear()).fetch();
+		List<Competence> competenceList = Competence.find("Select comp from Competence comp where comp.year = ? order by comp.competenceCode.code", new LocalDate().getYear()).fetch();
 		for(Competence comp : competenceList){
 			if(!competenceCodeList.contains(comp.competenceCode))
 				competenceCodeList.add(comp.competenceCode);
