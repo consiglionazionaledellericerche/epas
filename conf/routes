@@ -135,7 +135,7 @@ GET		/absences/create						Absences.create
 
 GET		/absences/edit/{absenceId}				Absences.edit
 POST	/absences/update						Absences.update
-GET		/absences/manageAbsenceCode				Absences.manageAbsenceCode
+#GET		/absences/manageAbsenceCode				Absences.manageAbsenceCode
 GET		/absences/absenceCodeList				Absences.absenceCodeList
 GET		/absences/insertAbsenceCode				Absences.insertAbsenceCode
 POST	/absences/insertAbsenceCode				Absences.saveAbsenceCode

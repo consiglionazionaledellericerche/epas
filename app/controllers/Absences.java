@@ -1,5 +1,6 @@
 package controllers;
 
+import helpers.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.CheckMessage;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
@@ -47,9 +48,14 @@ import org.apache.commons.mail.MultiPartEmail;
 import org.hibernate.envers.entities.mapper.relation.lazy.proxy.SetProxy;
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableTable;
+import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
+
+import dao.AbsenceTypeDao;
+import dao.PersonDao;
 
 import play.Logger;
 import play.Play;
@@ -152,10 +158,15 @@ public class Absences extends Controller{
 	 * questa è una funzione solo per admin, quindi va messa con il check administrator
 	 */
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
-	public static void manageAbsenceCode(){
-		List<AbsenceType> absenceList = AbsenceType.find("Select abt from AbsenceType abt order by abt.code").fetch();
-
-		render(absenceList);
+	public static void manageAbsenceCode(String name, Integer page){
+		if(page==null)
+			page = 0;
+		SimpleResults<AbsenceType> simpleResults = AbsenceTypeDao.getAbsences(Optional.fromNullable(name));
+		simpleResults.page = page;
+		List<AbsenceType> absenceList = simpleResults.paginated(page).getResults();
+		//List<AbsenceType> absenceList = AbsenceType.find("Select abt from AbsenceType abt order by abt.code").fetch();
+		
+		render(absenceList, name, simpleResults);
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
@@ -284,7 +295,7 @@ public class Absences extends Controller{
 
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void discard(){
-		manageAbsenceCode();
+		manageAbsenceCode(null, null);
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
@@ -467,7 +478,7 @@ public class Absences extends Controller{
 		absence.save();
 
 		flash.success("Modificato codice di assenza %s", absence.code);
-		Absences.manageAbsenceCode();
+		Absences.manageAbsenceCode(null, null);
 
 	}
 
