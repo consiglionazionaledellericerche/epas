@@ -5,8 +5,16 @@
 <!-- <h2 id="titoloGestionePersonale">Gestione dati del personale per rilevazione presenze</h2>  -->  
 <p class="lead" id="nuovaPersona"><a href="@{Persons.insertPerson}">Inserisci una nuova persona</a></p>
 
-<p>Personale esistente</p>
 
+#{form action:@Persons.list(), class:'form', 
+    method:'GET', autocomplete:'off',
+    'data-reload':'#results'}
+    
+    <input type="text" name="name" placeholder="Nome o cognome" value="${name}"/>
+
+#{/form}
+
+<section id="results">
 <table class="table table-striped table-hover table-condensed" id="listaPersone"><!-- Da aggiungere come entry nel file main.css dove dovrò sistemare le caratteristiche della tabella  -->
 	<tr>
 		<th>Cognome</th>
@@ -90,6 +98,7 @@
 }%
 
 </table>
+</section>
 
 <div id="myModal1" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-header">

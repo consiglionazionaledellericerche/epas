@@ -1,5 +1,6 @@
 package controllers;
 
+import helpers.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.PersonUtility;
 
@@ -39,9 +40,13 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
+import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
+
+import dao.PersonDao;
 
 @With( {Secure.class, NavigationMenu.class} )
 public class Competences extends Controller{
@@ -63,18 +68,25 @@ public class Competences extends Controller{
 
 
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
-	public static void showCompetences(Integer year, Integer month){
+	public static void showCompetences(Integer year, Integer month, String name, Integer page){
 
+		if(page==null)
+			page = 0;
+		
+		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
+				Sets.newHashSet(Security.getOfficeAllowed()), 
+				false, 
+				new LocalDate(year, month, 1), 
+				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
+		
+		simpleResults.page = page;
+		List<Person> activePersons = simpleResults.paginated(page).getResults();
+		
+		int count = activePersons.size();
 		//Controllo parametri
-		List<Person> activePersons = null;
-		if((year == null || month == null) || (year == 0 || month == 0)){
-			int yearParams = params.get("year", Integer.class);
-			int monthParams = params.get("month", Integer.class);
-			activePersons = Person.getTechnicianForCompetences(new LocalDate(yearParams, monthParams,1), Security.getUser().person.getOfficeAllowed());
-		}
-		else{
-			activePersons = Person.getTechnicianForCompetences(new LocalDate(year, month, 1), Security.getUser().person.getOfficeAllowed());
-		}
+		//List<Person> activePersons = null;
+		if(activePersons == null)
+			activePersons = new ArrayList<Person>();
 		
 		//Redirect in caso di mese futuro
 		LocalDate today = new LocalDate();
@@ -119,7 +131,7 @@ public class Competences extends Controller{
 			totaleMonteOre = totaleMonteOre+tot.numberOfHours;
 		}
 		
-		render(year, month, activePersons, competenceCodes, totaleOreStraordinarioMensile, totaleOreStraordinarioAnnuale, totaleMonteOre);
+		render(year, month, activePersons, competenceCodes, totaleOreStraordinarioMensile, totaleOreStraordinarioAnnuale, totaleMonteOre, simpleResults, name);
 
 	}
 	

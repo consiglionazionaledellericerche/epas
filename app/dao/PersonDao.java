@@ -8,7 +8,12 @@ import helpers.ModelQuery.SimpleResults;
 import models.Office;
 import models.Person;
 import models.query.QContract;
+import models.query.QLocation;
 import models.query.QPerson;
+import models.query.QPersonHourForOvertime;
+import models.query.QPersonReperibility;
+import models.query.QPersonShift;
+import models.query.QUser;
 
 import org.joda.time.LocalDate;
 
@@ -36,19 +41,27 @@ public final class PersonDao {
 	 * @return la lista delle person corrispondenti
 	 */
 	public static SimpleResults<Person> list(Optional<String> name, Set<Office> offices, 
-			boolean onlyTechnician) {
+			boolean onlyTechnician, LocalDate start, LocalDate end) {
 		
 		Preconditions.checkState(!offices.isEmpty());
 		
 		final QPerson qp = QPerson.person;
 		final QContract qc = QContract.contract;
 		// TODO: completare con l'intervallo
-		final LocalDate start = new LocalDate();
-		final LocalDate end = start;
-		
+		//final LocalDate start = new LocalDate();
+		//final LocalDate end = start;
+				
 		final JPQLQuery query = ModelQuery.queryFactory().from(qp)
-				.join(qp.contracts, qc)
-				.orderBy(qp.surname.asc(), qp.name.asc());
+				.leftJoin(qp.contracts, qc)
+				.leftJoin(qp.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime)
+				.leftJoin(qp.location, QLocation.location)
+				.leftJoin(qp.reperibility, QPersonReperibility.personReperibility)
+				.leftJoin(qp.personShift, QPersonShift.personShift)
+				.leftJoin(qp.user, QUser.user)
+				.orderBy(qp.surname.asc(), qp.name.asc())
+				.distinct();
+		
+		
 		
 		final BooleanBuilder condition = new BooleanBuilder();
 		condition.and(qp.office.in(offices));
@@ -67,6 +80,7 @@ public final class PersonDao {
 		condition.andAnyOf(qc.endContract.isNull().and(qc.expireContract.isNull()),
 				qc.expireContract.isNotNull().and(qc.expireContract.goe(start)),
 				qc.endContract.isNotNull().and(qc.endContract.goe(start)));
+		
 		query.where(condition);
 		
 		return ModelQuery.simpleResults(query, qp);

@@ -34,6 +34,11 @@ import models.WorkingTimeType;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
+
+import dao.PersonDao;
+
 import play.Logger;
 import play.data.validation.Required;
 import play.data.validation.Valid;
@@ -299,13 +304,25 @@ public class Persons extends Controller {
 	}
 
 	@Check(Security.VIEW_PERSON_LIST)
-	public static void list(){
-
+	public static void list(String name){
 		LocalDate startEra = new LocalDate(1900,1,1);
 		LocalDate endEra = new LocalDate(9999,1,1);
-		List<Person> personList = Person.getActivePersonsSpeedyInPeriod(startEra, endEra, Security.getOfficeAllowed(), false);
+		List<Person> personList = PersonDao.list(Optional.fromNullable(name), 
+				Sets.newHashSet(Security.getOfficeAllowed()), 
+				false, 
+				startEra, 
+				endEra)
+				.list();
 		LocalDate date = new LocalDate();
-		List<Person> activePerson = Person.getActivePersonsInDay(date.getDayOfMonth(), date.getMonthOfYear(), date.getYear(), Security.getOfficeAllowed(), false);
+		List<Person> activePerson = PersonDao.list(Optional.fromNullable(name), 
+				Sets.newHashSet(Security.getOfficeAllowed()), 
+				false, 
+				date, 
+				date)
+				.list();
+		//List<Person> personList = Person.getActivePersonsSpeedyInPeriod(startEra, endEra, Security.getOfficeAllowed(), false);
+		
+		//List<Person> activePerson = Person.getActivePersonsInDay(date.getDayOfMonth(), date.getMonthOfYear(), date.getYear(), Security.getOfficeAllowed(), false);
 		
 		render(personList, activePerson);
 	}
@@ -554,7 +571,7 @@ public class Persons extends Controller {
 		person.save();
 		flash.success("Modificate informazioni per l'utente %s %s", person.name, person.surname);
 		//Application.indexAdmin();
-		Persons.list();	
+		Persons.list(null);	
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
@@ -562,7 +579,7 @@ public class Persons extends Controller {
 		if(person == null)
 		{
 			flash.error("Persona inesistente. Operazione annullata.");
-			Persons.list();
+			Persons.list(null);
 		}
 		Contract con = new Contract();
 		List<WorkingTimeType> wttList = WorkingTimeType.findAll();
@@ -576,7 +593,7 @@ public class Persons extends Controller {
 		if(person==null)
 		{
 			flash.error("Persona inesistente. Operazione annullata.");
-			Persons.list();
+			Persons.list(null);
 		}
 		if(dataInizio==null){
 			flash.error("Errore nel fornire il parametro data inizio contratto. Inserire la data nel corretto formato aaaa-mm-gg");
@@ -632,7 +649,7 @@ public class Persons extends Controller {
 		if(contract == null)
 		{
 			flash.error("Non è stato trovato nessun contratto con id %s per il dipendente ", contractId);
-			Persons.list();
+			Persons.list(null);
 		}
 		render(contract);
 	}
@@ -643,7 +660,7 @@ public class Persons extends Controller {
 		if(contract == null)
 		{
 			flash.error("Contratto inesistente. Operazione annullata.");
-			Persons.list();
+			Persons.list(null);
 		}
 		render(contract);
 	}
@@ -654,7 +671,7 @@ public class Persons extends Controller {
 		if(contract == null)
 		{
 			flash.error("Contratto inesistente. Operazione annullata.");
-			Persons.list();
+			Persons.list(null);
 		}
 		contract.delete();
 		flash.error("Contratto eliminato con successo.");
@@ -668,7 +685,7 @@ public class Persons extends Controller {
 		if(contract == null)
 		{
 			flash.error("Contratto inesistente, operazione annullata");
-			Persons.list();
+			Persons.list(null);
 		}
 		if(begin==null){
 			flash.error("Errore nel fornire il parametro data inizio contratto. Inserire la data nel corretto formato aaaa-mm-gg");
@@ -728,7 +745,7 @@ public class Persons extends Controller {
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void discard(){
-		Persons.list();
+		Persons.list(null);
 	}
 
 	/**

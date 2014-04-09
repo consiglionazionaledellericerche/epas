@@ -9,13 +9,69 @@
   <li><a href="@{Competences.exportCompetences()}#">Esporta competenze</a></li>
 </ul>
 
-<h3 id="titoloGestioneCompetenze">Competenze del mese di <span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year}</h3>
+<div class="row">
+
+<div class="accordion span8" id="accordion1">
+  <div class="accordion-group">
+    <div class="accordion-heading">
+      <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne">
+        <p class="text-error"><strong>Competenze del mese di <span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year}</strong></p>
+      </a>
+    </div>
+    <div id="collapseOne" class="accordion-body collapse out">
+      <div class="accordion-inner">
+        <p>Totale ore di straordinario(S1+S2+S3) pagate a <span class="capitalized">&{'views.tags.display.date.month.' + month}</span>: <strong>${totaleOreStraordinarioMensile}</strong></p>
+		<p>Totale ore di straordinario pagate nell'anno: <strong>${totaleOreStraordinarioAnnuale}</strong></p>
+		<p>Totale monte ore nell'anno ${year}: <strong>${totaleMonteOre}</strong></p>
+		<p class="lead">I valori per le reperibilità sono espressi in GIORNI, quelli per straordinari e turni in ORE</p>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+ 
 <input type="hidden" name="year" value="${year}"/>
 <input type="hidden" name="month" value="${month}"/>
-<p>Totale ore di straordinario(S1+S2+S3) pagate a <span class="capitalized">&{'views.tags.display.date.month.' + month}</span>: <strong>${totaleOreStraordinarioMensile}</strong></p>
-<p>Totale ore di straordinario pagate nell'anno: <strong>${totaleOreStraordinarioAnnuale}</strong></p>
-<p>Totale monte ore nell'anno ${year}: <strong>${totaleMonteOre}</strong></p>
-<p class="lead">I valori per le reperibilità sono espressi in GIORNI, quelli per straordinari e turni in ORE</p>
+
+
+
+
+
+
+
+<section id="results">
+<div class="row">
+<div class="container span3">
+#{form action:@Competences.showCompetences(), class:'form-search',  
+    method:'GET', autocomplete:'off',
+    'data-reload':'#results'}
+    
+    <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="input-medium search-query"/>
+    <i class="icon-search icon-large"></i>
+    <input type="hidden" name="year" value="${year}"/>
+	<input type="hidden" name="month" value="${month}"/>
+
+#{/form}
+</div>
+
+<div class="container">
+<div class="pagination pagination-centered" style="margin-top: 0px;">
+  <ul>
+  	#{list items:0..simpleResults.totalPage, as:'indexPage', class:'inline'}
+  	  #{if simpleResults.page==indexPage}
+  	    <li class="active"><a href="#">${indexPage+1}</a></li>
+  	  #{/if}
+  	  #{else}
+  	    <li><a href="@{Competences.showCompetences(year, month, name, indexPage)}">${indexPage+1}</a></li>
+  	  #{/else}
+  	  
+       
+	#{/list}
+  </ul>
+</div>
+</div>
+
+</div>
 <table class="table table-hover competence-big" >
 	<tr>
 	  <th class="span2">Nome e cognome</th>
@@ -52,11 +108,10 @@
 	<tr>
 		<td class="nomeCognome">TOTALE</td>
 		#{list items:competenceCodes, as:'code'}
-		<td>${person.totalFromCompetenceCode(code, month, year)}</td>
+		<td>${code.totalFromCompetenceCode(month, year)}</td>
 		#{/list}
 	</tr>
-
 </table>
-
+</section>
 
 

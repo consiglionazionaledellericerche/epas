@@ -30,7 +30,7 @@ public class Application extends Controller {
     		return;
     	}
     	if(Security.getUser().username.equals("admin")){
-    		Persons.list();
+    		Persons.list(null);
     		return;
     	}
 		

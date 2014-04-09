@@ -19,12 +19,16 @@ import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.ArrayTable;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
+import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
+
+import dao.PersonDao;
 
 @With( {Secure.class, NavigationMenu.class} )
 public class YearlyAbsences extends Controller{
@@ -180,13 +184,21 @@ public class YearlyAbsences extends Controller{
 			}
 		}
 		else{
-			List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
+			List<Person> persons = PersonDao.list(Optional.fromNullable(name), 
+					Sets.newHashSet(Security.getOfficeAllowed()), 
+					false, 
+					new LocalDate(year, month,1), 
+					new LocalDate(year, month, 1).dayOfMonth().withMaximumValue())
+					.list();
+			
+			
+			//List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
 			//Table<Person, String, Integer> tableMonthlyAbsences = ArrayTable.create(activePersons, absenceInMonth);
 
 
-			for(Person p : activePersons){
-				List<Absence> absenceInMonth = Absence.find("Select abs from Absence abs, PersonDay pd where abs.personDay = pd and " +
-						"pd.person = ? and pd.date >= ? and pd.date <= ?", 
+			for(Person p : persons){
+				List<Absence> absenceInMonth = Absence.find("Select abs from Absence abs where " +
+						"abs.personDay.person = ? and abs.personDay.date >= ? and abs.personDay.date <= ?", 
 						p, new LocalDate(year, month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
 
 				tableMonthlyAbsences.put(p, abt, absenceInMonth.size());
