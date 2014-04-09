@@ -354,14 +354,7 @@ public class PersonDay extends Model {
 		//ha timbrato per il pranzo ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		if(gapLunchPairs.size()>0)
 		{
-			int minTimeForLunch = 0;
-			for(PairStamping gapLunchPair : gapLunchPairs)
-			{
-				//per adesso considero il primo gap in orario pranzo)
-				minTimeForLunch = minTimeForLunch - toMinute(gapLunchPair.in.date);
-				minTimeForLunch = minTimeForLunch + toMinute(gapLunchPair.out.date);
-				break;
-			}
+			int minTimeForLunch = gapLunchPairs.get(0).timeInPair;
 			
 			//gap e worktime sufficienti
 			if(minTimeForLunch >= breakTicketTime && workTime >= mealTicketTime)
@@ -944,11 +937,13 @@ public class PersonDay extends Model {
 	}
 	
 	/**
-	 * 
-	 * @param stamping
-	 * @return il numero di minuti che sono intercorsi tra la timbratura d'uscita per la pausa pranzo e la timbratura d'entrata
-	 * dopo la pausa pranzo. Questo valore verrà poi controllato per stabilire se c'è la necessità di aumentare la durata della pausa
-	 * pranzo intervenendo sulle timbrature
+	 * Questo metodo ritorna una lista di coppie di timbrature (uscita/entrata) che rappresentano le potenziali uscite per pranzo.
+	 * L'algoritmo filtra le coppie che appartengono alla fascia pranzo in configurazione.
+	 * Nel caso in cui una sola timbratura appartenga alla fascia pranzo, l'algoritmo provvede a ricomputare il timeInPair della coppia 
+	 * assumendo la timbratura al di fuori della fascia uguale al limite di tale fascia. (Le timbrature vengono tuttavia mantenute originali
+	 * per garantire l'usabilità anche ai controller che gestiscono reperibilità e turni)
+	 * @param validPairs le coppie di timbrature ritenute valide all'interno del giorno
+	 * @return
 	 */
 	private List<PairStamping> getGapLunchPairs(List<PairStamping> validPairs)
 	{
@@ -970,28 +965,47 @@ public class PersonDay extends Model {
 		.withMinuteOfHour(conf.mealTimeEndMinute);
 		
 		//List<PairStamping> lunchPairs = new ArrayList<PersonDay.PairStamping>();
-		List<PairStamping> gapPairs = new ArrayList<PersonDay.PairStamping>();
-		Stamping outForLunch = null;
+		List<PairStamping> allGapPairs = new ArrayList<PersonDay.PairStamping>();
 		
+		//1) Calcolare tutte le gapPair
+		Stamping outForLunch = null;
 		for(PairStamping validPair : validPairs)
 		{
-			 LocalDateTime out = validPair.out.date;
-			 if(outForLunch==null)
-			 {
-				 if( (out.isAfter(startLunch.minusMinutes(1))) && (out.isBefore(endLunch.plusMinutes(1))) )
-				 {
-					 outForLunch = validPair.out;
-				 }
-			 }
-			 else
-			 {
-				 gapPairs.add( new PairStamping(outForLunch, validPair.in) );
-				 outForLunch = null;
-				 if( (out.isAfter(startLunch.minusMinutes(1))) && (out.isBefore(endLunch.plusMinutes(1))) )
-				 {
-					 outForLunch = validPair.out;
-				 }
-			 }
+			if(outForLunch==null)
+			{
+				outForLunch = validPair.out;
+			}
+			else
+			{
+				allGapPairs.add( new PairStamping(outForLunch, validPair.in) );
+				outForLunch = validPair.out;
+			}
+		}
+		
+		//2) selezionare quelle che appartengono alla fascia pranzo, nel calcolo del tempo limare gli estremi a tale fascia se necessario
+		List<PairStamping> gapPairs = new ArrayList<PersonDay.PairStamping>();
+		for(PairStamping gapPair : allGapPairs)
+		{
+			LocalDateTime out = gapPair.out.date;
+			LocalDateTime in = gapPair.in.date;
+			boolean isInIntoMealTime = in.isAfter(startLunch.minusMinutes(1)) && in.isBefore(endLunch.plusMinutes(1));
+			boolean isOutIntoMealTime = out.isAfter(startLunch.minusMinutes(1)) && out.isBefore(endLunch.plusMinutes(1));
+			
+			if( isInIntoMealTime || isOutIntoMealTime  ) 
+			{
+				LocalDateTime inForCompute = gapPair.in.date;
+				LocalDateTime outForCompute = gapPair.out.date;
+				if(!isInIntoMealTime)
+					inForCompute = startLunch;
+				if(!isOutIntoMealTime)
+					outForCompute = endLunch;
+				int timeInPair = 0;
+				timeInPair = timeInPair - toMinute(inForCompute);
+				timeInPair = timeInPair + toMinute(outForCompute);
+				gapPair.timeInPair = timeInPair;
+				gapPairs.add(gapPair);
+			}
+				
 		}
 		
 		return gapPairs;
@@ -1062,16 +1076,22 @@ public class PersonDay extends Model {
 	 */
 	public final static class PairStamping
 	{
+
 		private static int sequence_id = 1;
 		
 		int pairId;	//for hover template
 		Stamping in;
 		Stamping out;
+		int timeInPair = 0;
 
 		PairStamping(Stamping in, Stamping out)
 		{
 			this.in = in;
 			this.out = out;
+			timeInPair = 0;
+			timeInPair = timeInPair - toMinute(in.date);
+			timeInPair = timeInPair + toMinute(out.date);
+			
 			this.pairId = sequence_id++;
 			in.pairId = this.pairId;
 			out.pairId = this.pairId;
