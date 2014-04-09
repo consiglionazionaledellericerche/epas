@@ -68,23 +68,36 @@ public class Competences extends Controller{
 
 
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
-	public static void showCompetences(Integer year, Integer month, String name, Integer page){
+	public static void showCompetences(Integer year, Integer month, String name, String codice, Integer page){
 
 		if(page==null)
 			page = 0;
+				
+		List<CompetenceCode> activeCompetenceCodes = PersonUtility.activeCompetence();
 		
-		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
+		CompetenceCode competenceCode = null;
+		if(codice==null || codice=="")
+		{
+			competenceCode = activeCompetenceCodes.get(0);	//per adesso assumiamo che almeno una attiva ci sia (esempio S1)
+		}
+		else
+		{
+			for(CompetenceCode compCode : activeCompetenceCodes)
+			{
+				if(compCode.code.equals(codice))
+					competenceCode = compCode;
+			}
+		}
+
+		
+		SimpleResults<Person> simpleResults = PersonDao.listForCompetence(competenceCode, Optional.fromNullable(name), 
 				Sets.newHashSet(Security.getOfficeAllowed()), 
 				false, 
 				new LocalDate(year, month, 1), 
 				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
-		
-		simpleResults.page = page;
+
 		List<Person> activePersons = simpleResults.paginated(page).getResults();
 		
-		int count = activePersons.size();
-		//Controllo parametri
-		//List<Person> activePersons = null;
 		if(activePersons == null)
 			activePersons = new ArrayList<Person>();
 		
@@ -96,7 +109,7 @@ public class Competences extends Controller{
 			month = today.getMonthOfYear();
 		}
 
-		List<CompetenceCode> competenceCodes = PersonUtility.activeCompetence();
+		
 		for(Person p : activePersons){
 			for(CompetenceCode c : p.competenceCode){
 				Competence comp = Competence.find("Select comp from Competence comp where comp.person = ? and comp.month = ? and comp.year = ?" +
@@ -108,7 +121,6 @@ public class Competences extends Controller{
 				}
 					
 			}
-			
 		}
 		
 		List<Competence> competenceList = Competence.find("Select comp from Competence comp, CompetenceCode code where comp.year = ? and comp.month = ? " +
@@ -131,7 +143,8 @@ public class Competences extends Controller{
 			totaleMonteOre = totaleMonteOre+tot.numberOfHours;
 		}
 		
-		render(year, month, activePersons, competenceCodes, totaleOreStraordinarioMensile, totaleOreStraordinarioAnnuale, totaleMonteOre, simpleResults, name);
+		render(year, month, activePersons, totaleOreStraordinarioMensile, totaleOreStraordinarioAnnuale, 
+				totaleMonteOre, simpleResults, name, codice, activeCompetenceCodes, competenceCode);
 
 	}
 	

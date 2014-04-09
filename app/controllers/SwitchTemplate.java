@@ -126,7 +126,7 @@ public class SwitchTemplate extends Controller{
 			break;
 
 		case competencesAdmin:
-			Competences.showCompetences(year, month, null, null);
+			Competences.showCompetences(year, month, null, null, null);
 			break;
 
 		case changePassword:
