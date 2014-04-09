@@ -6,6 +6,8 @@ import helpers.ModelQuery.SimpleResults;
 import java.util.List;
 import java.util.Map;
 
+import org.bouncycastle.util.Strings;
+
 import com.google.common.base.Optional;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
@@ -79,7 +81,7 @@ public class AbsenceTypeDao {
 				.orderBy(absenceType.code.asc());
 		if (name.isPresent() && !name.get().trim().isEmpty()) {
 			condition.andAnyOf(absenceType.code.startsWithIgnoreCase(name.get()),
-					absenceType.description.startsWithIgnoreCase(name.get()));
+					absenceType.description.toLowerCase().like("%"+Strings.toLowerCase(name.get())+"%"));
 			query.where(condition);
 		}
 		

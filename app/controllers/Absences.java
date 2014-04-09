@@ -162,7 +162,6 @@ public class Absences extends Controller{
 		if(page==null)
 			page = 0;
 		SimpleResults<AbsenceType> simpleResults = AbsenceTypeDao.getAbsences(Optional.fromNullable(name));
-		simpleResults.page = page;
 		List<AbsenceType> absenceList = simpleResults.paginated(page).getResults();
 		//List<AbsenceType> absenceList = AbsenceType.find("Select abt from AbsenceType abt order by abt.code").fetch();
 		

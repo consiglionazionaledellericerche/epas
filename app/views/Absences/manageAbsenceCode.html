@@ -13,7 +13,7 @@
     method:'GET', autocomplete:'off',
     'data-reload':'#results'}
     
-    <input type="text" name="name" placeholder="Codice" value="${name}" class="input-medium search-query"/>
+    <input type="text" name="name" placeholder="Codice o descrizione" value="${name}" class="input-medium search-query"/>
     <i class="icon-search icon-large"></i>
     
 
@@ -22,7 +22,7 @@
 
 <div class="pagination pagination-centered" style="margin-left: 10px;">
   <ul>
-  	#{list items:0..simpleResults.totalPage, as:'indexPage', class:'inline'}
+  	#{list items:0..simpleResults.totalPage-1, as:'indexPage', class:'inline'}
   	  #{if simpleResults.page==indexPage}
   	    <li class="active"><a href="#">${indexPage+1}</a></li>
   	  #{/if}
