@@ -36,7 +36,7 @@ public class DarkNightJob extends Job{
 
 		Logger.info("Start Job checkDay");
 		User userLogged = User.find("byUsername", "admin").first();	
-		PersonUtility.fixPersonSituation(-1l, 2013, 1, userLogged);
+		PersonUtility.fixPersonSituation(-1l, 2014, 1, userLogged);
 		
 		/*
 		LocalDate yesterday = new LocalDate().minusDays(1);
