@@ -57,7 +57,7 @@
 <div class="container">
 <div class="pagination pagination-centered" style="margin-top: 0px;">
   <ul>
-  	#{list items:0..simpleResults.totalPage, as:'indexPage', class:'inline'}
+  	#{list items:0..simpleResults.totalPage-1, as:'indexPage', class:'inline'}
   	  #{if simpleResults.page==indexPage}
   	    <li class="active"><a href="#">${indexPage+1}</a></li>
   	  #{/if}
