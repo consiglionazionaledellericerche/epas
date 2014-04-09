@@ -29,7 +29,7 @@ import play.jobs.OnApplicationStart;
 @On("0 1 5 * * ?")
 //@On("1 /1 * * * ?")
 //@OnApplicationStart
-public class TestJob extends Job{
+public class DarkNightJob extends Job{
 	
 	public void doJob(){
 		
