@@ -1,11 +1,13 @@
 package dao;
 
 import helpers.ModelQuery;
+import helpers.ModelQuery.SimpleResults;
 
 import java.util.List;
 import java.util.Map;
 
 import com.google.common.base.Optional;
+import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.types.Projections;
 
@@ -67,4 +69,20 @@ public class AbsenceTypeDao {
 		
 		return query.list(absenceType);
 	} 
+	
+	
+	public static SimpleResults<AbsenceType> getAbsences(Optional<String> name){
+		
+		final BooleanBuilder condition = new BooleanBuilder();
+		QAbsenceType absenceType = QAbsenceType.absenceType;
+		final JPQLQuery query = ModelQuery.queryFactory().from(absenceType)
+				.orderBy(absenceType.code.asc());
+		if (name.isPresent() && !name.get().trim().isEmpty()) {
+			condition.andAnyOf(absenceType.code.startsWithIgnoreCase(name.get()),
+					absenceType.description.startsWithIgnoreCase(name.get()));
+			query.where(condition);
+		}
+		
+		return ModelQuery.simpleResults(query, absenceType);
+	}
 }

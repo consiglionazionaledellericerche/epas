@@ -118,7 +118,7 @@ public class SwitchTemplate extends Controller{
 			break;
 
 		case manageAbsenceCode:
-			Absences.manageAbsenceCode();
+			Absences.manageAbsenceCode(null, null);
 			break;
 
 		case vacationsAdmin:
