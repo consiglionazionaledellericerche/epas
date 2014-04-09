@@ -5,7 +5,35 @@
 
 <p class="lead"><a href="@{Absences.insertAbsenceCode}">Definisci nuovo codice di assenza</a></p>
 
-<h4>Codici di assenza esistenti:</h4>
+
+
+<section id="results">
+<div class="container span3"style="margin-left: 0px;">
+#{form action:@Absences.manageAbsenceCode(), class:'form-search',  
+    method:'GET', autocomplete:'off',
+    'data-reload':'#results'}
+    
+    <input type="text" name="name" placeholder="Codice" value="${name}" class="input-medium search-query"/>
+    <i class="icon-search icon-large"></i>
+    
+
+#{/form}
+</div>
+
+<div class="pagination pagination-centered" style="margin-left: 10px;">
+  <ul>
+  	#{list items:0..simpleResults.totalPage, as:'indexPage', class:'inline'}
+  	  #{if simpleResults.page==indexPage}
+  	    <li class="active"><a href="#">${indexPage+1}</a></li>
+  	  #{/if}
+  	  #{else}
+  	    <li><a href="@{Absences.manageAbsenceCode(name, indexPage)}">${indexPage+1}</a></li>
+  	  #{/else}
+  	  
+       
+	#{/list}
+  </ul>
+</div>
 
 <table class="table table-condensed table-hover custom2">
 	<tr>
@@ -62,3 +90,4 @@
 	}%
 
 </table>
+</section>
