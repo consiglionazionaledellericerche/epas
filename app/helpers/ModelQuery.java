@@ -29,9 +29,17 @@ public final class ModelQuery {
 	public static class SimpleResults<T> {
 		private final Expression<T> e;
 		private final JPQLQuery query;
+		public int count = 0;
+		public int page = 0;
+		public int page_size = PAGE_SIZE;
+		public int totalPage = 0;
 		
 		SimpleResults(JPQLQuery query, Expression<T> e) {
 			this.query = query;
+			this.count = (int)query.count();
+			this.totalPage = this.count / this.page_size;
+			if(this.count%this.page_size != 0 && this.totalPage!=0)
+				this.totalPage++;
 			this.e = e;
 		}
 		
@@ -40,6 +48,7 @@ public final class ModelQuery {
 		}
 		
 		public SearchResults<T> paginated(int page) {
+			this.page = page;
 			return query.offset(page * PAGE_SIZE) 
 					.limit(PAGE_SIZE) 
 					.listResults(e);

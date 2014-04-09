@@ -67,7 +67,7 @@ POST	/insertRemoteOffice						Offices.save
 
 
 # Gestione persone
-GET		/personList								Persons.list
+#GET		/personList								Persons.list
 POST	/persons								Persons.save
 GET		/persons								Persons.insertPerson
 GET		/insertUsername							Persons.insertUsername
@@ -163,7 +163,7 @@ GET 	/administrators/edit/{adminId}			Administrators.edit
 POST	/administrators/update					Administrators.update
 
 #Gestione straordinari e competenze
-GET		/showCompetences/{year}/{month}			Competences.showCompetences
+#GET		/showCompetences/{year}/{month}			Competences.showCompetences
 GET		/manageCompetenceCode					Competences.manageCompetenceCode
 GET		/competences/edit/{competenceCodeId}	Competences.edit
 GET		/insertCompetenceCode					Competences.insertCompetenceCode

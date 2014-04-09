@@ -893,22 +893,6 @@ public class Person extends Model {
 		}
 	}
 	
-	/**
-	 * 
-	 * @param code
-	 * @param month
-	 * @param year
-	 * @return il totale per quel mese e quell'anno di ore/giorni relativi a quel codice competenza
-	 */
-	public int totalFromCompetenceCode(CompetenceCode code, int month, int year){
-		int totale = 0;
-		List<Competence> compList = Competence.find("Select comp from Competence comp where comp.competenceCode = ? " +
-				"and comp.month = ? and comp.year = ?", code, month, year).fetch();
-		for(Competence comp : compList){
-			totale = totale+comp.valueApproved;
-		}
-		return totale;
-	}
 	
 	/**
 	 * 

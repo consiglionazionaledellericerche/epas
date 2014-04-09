@@ -8,6 +8,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import controllers.Security;
+
 import play.data.validation.Required;
 import play.db.jpa.Model;
 
@@ -44,5 +46,24 @@ public class CompetenceCode extends Model {
 	@Override
 	public String toString() {
 		return String.format("CompetenceCode[%d] - description = %s", id, description);
+	}
+	
+
+	/**
+	 * 
+	 * @param code
+	 * @param month
+	 * @param year
+	 * @return il totale per quel mese e quell'anno di ore/giorni relativi a quel codice competenza
+	 */
+	public int totalFromCompetenceCode(int month, int year){
+		int totale = 0;
+		
+		List<Competence> compList = Competence.find("Select comp from Competence comp where comp.competenceCode = ? " +
+				"and comp.month = ? and comp.year = ?", this, month, year).fetch();
+		for(Competence comp : compList){
+			totale = totale+comp.valueApproved;
+		}
+		return totale;
 	}
 }

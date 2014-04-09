@@ -112,7 +112,7 @@ $(function($){
 	    	$target.addClass('reloading');
 	    	var $spinner = $('<span class="text-primary" style="position:absolute; z-index: 10"><i class="icon-spinner icon-spin icon-2x"></i</span>').prependTo($target);
 	    	var offset = $spinner.offset();
-	    	$spinner.offset({top:offset.top + 10, left:offset.left + 10});
+	    	$spinner.offset({top:offset.top + 1, left:offset.left + 250});
 	    	var url = $form.prop('action') + '?'+ $form.find(":input").serialize();
 	    	$target.load(url + ' '+ selector, function(response, status, request) {
 	    		// History.replaceState(null, $('title').text, url);
