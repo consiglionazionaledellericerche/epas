@@ -1,15 +1,9 @@
-import it.cnr.iit.epas.FromMysqlToPostgres;
-import models.AbsenceType;
 import models.CompetenceCode;
 import models.ConfGeneral;
 import models.Configuration;
 import models.Office;
 import models.Permission;
-import models.Person;
-import models.PersonShift;
 import models.Qualification;
-import models.ShiftTimeTable;
-import models.ShiftType;
 import models.StampModificationType;
 import models.StampType;
 import models.VacationCode;

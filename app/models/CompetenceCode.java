@@ -8,8 +8,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import controllers.Security;
-
 import play.data.validation.Required;
 import play.db.jpa.Model;
 

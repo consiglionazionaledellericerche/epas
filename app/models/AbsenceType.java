@@ -1,30 +1,22 @@
 package models;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import models.enumerate.AccumulationBehaviour;
-import models.enumerate.AccumulationType;
 import models.enumerate.JustifiedTimeAtWork;
-import net.sf.oval.constraint.NotNull;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -32,10 +24,10 @@ import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
-import com.google.common.collect.Sets;
-
 import play.data.validation.Required;
 import play.db.jpa.Model;
+
+import com.google.common.collect.Sets;
 /**
  * 
  * @author dario

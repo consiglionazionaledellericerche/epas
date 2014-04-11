@@ -1,21 +1,10 @@
 package controllers;
 
-import it.cnr.iit.epas.ActionMenuItem;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
-import org.hibernate.mapping.Array;
-import org.joda.time.LocalDate;
-
-import models.Stamping;
-import models.VacationCode;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
-import play.Logger;
 import play.data.validation.Required;
 import play.mvc.Controller;
 import play.mvc.With;

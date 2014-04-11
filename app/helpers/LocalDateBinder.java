@@ -3,7 +3,6 @@ package helpers;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
-import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.joda.time.LocalDate;
 
 import play.data.binding.Global;

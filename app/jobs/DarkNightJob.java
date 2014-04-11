@@ -1,28 +1,10 @@
 package jobs;
 
-import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.PersonUtility;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import models.ConfGeneral;
-import models.Contract;
-import models.Person;
-import models.PersonDay;
-import models.PersonDayInTrouble;
-import models.StampModificationType;
-import models.Stamping;
 import models.User;
-
-import org.joda.time.LocalDate;
-
-import controllers.Administration;
-import controllers.Secure.Security;
 import play.Logger;
 import play.jobs.Job;
 import play.jobs.On;
-import play.jobs.OnApplicationStart;
 
 
 

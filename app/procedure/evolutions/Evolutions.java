@@ -21,7 +21,7 @@ import play.Play;
 
 public class Evolutions {
 
-	public static void updateVacationPeriodRelation() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+	public static void updateVacationPeriodRelation() {
 
 		List<Person> personList = Person.getActivePersons(new LocalDate());
 		for(Person p : personList){

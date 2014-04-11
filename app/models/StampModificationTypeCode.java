@@ -1,6 +1,5 @@
 package models;
 
-import play.db.jpa.JPA;
 
 public enum StampModificationTypeCode {
 

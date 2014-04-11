@@ -1,32 +1,19 @@
 package it.cnr.iit.epas;
 
-import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import javax.xml.crypto.Data;
+import models.Person;
+import models.exports.PersonEmailFromJson;
+import play.Logger;
+import play.data.binding.TypeBinder;
 
-import org.joda.time.LocalDate;
-
-
-
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
-
-import models.Person;
-
-import models.exports.PersonEmailFromJson;
-import models.exports.StampingFromClient;
-import play.Logger;
-import play.data.binding.TypeBinder;
-import play.mvc.Http.Request;
 
 
 public class JsonPersonEmailBinder implements TypeBinder<PersonEmailFromJson>{
