@@ -12,9 +12,36 @@
   <li><a href="@{Competences.exportCompetences()}#">Esporta competenze</a></li>
 </ul>
  
+<section id="results">
+<div class="container span3"style="margin-left: 0px;">
+#{form action:@Competences.recapCompetences(), class:'form-search',  
+    method:'GET', autocomplete:'off',
+    'data-reload':'#results'}
+    
+    <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="input-medium search-query"/>
+    <i class="icon-search icon-large"></i>
+    <input type="hidden" name="year" value="${year}"/>
+	<input type="hidden" name="month" value="${month}"/>
+
+#{/form}
+</div>
+<div class="pagination pagination-centered" style="margin-left: 10px;">
+  <ul>
+  	#{list items:0..simpleResults.totalPage-1, as:'indexPage', class:'inline'}
+  	  #{if simpleResults.page==indexPage}
+  	    <li class="active"><a href="#">${indexPage+1}</a></li>
+  	  #{/if}
+  	  #{else}
+  	    <li><a href="@{Competences.recapCompetences(name, indexPage)}">${indexPage+1}</a></li>
+  	  #{/else}
+  	  
+       
+	#{/list}
+  </ul>
+</div>
  <div class="row">
   <div class="span0"></div>
-  <div class="span11">
+  <div class="span11" style="margin-left: 5px;">
  
 <h3 id="titoloGestioneCompetenze">Da questa pagina puoi definire quali competenze spettano ad ogni persona</h3>
 
@@ -60,6 +87,7 @@
 		}
 	}%
 </table>
+</div>
+</div>
+</section>
 
-</div>
-</div>

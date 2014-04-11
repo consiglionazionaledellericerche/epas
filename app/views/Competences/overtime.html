@@ -8,6 +8,35 @@
   <li><a href="@{Competences.recapCompetences()}#">Recap competenze</a></li>
   <li><a href="@{Competences.exportCompetences()}#">Esporta competenze</a></li>
 </ul>
+
+
+<section id="results">
+<div class="container span3"style="margin-left: 0px;">
+#{form action:@Competences.overtime(), class:'form-search',  
+    method:'GET', autocomplete:'off',
+    'data-reload':'#results'}
+    
+    <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="input-medium search-query"/>
+    <i class="icon-search icon-large"></i>
+    <input type="hidden" name="year" value="${year}"/>
+	<input type="hidden" name="month" value="${month}"/>
+
+#{/form}
+</div>
+<div class="pagination pagination-centered" style="margin-left: 10px;">
+  <ul>
+  	#{list items:0..simpleResults.totalPage-1, as:'indexPage', class:'inline'}
+  	  #{if simpleResults.page==indexPage}
+  	    <li class="active"><a href="#">${indexPage+1}</a></li>
+  	  #{/if}
+  	  #{else}
+  	    <li><a href="@{Competences.overtime(year, month,name, indexPage)}">${indexPage+1}</a></li>
+  	  #{/else}
+  	  
+       
+	#{/list}
+  </ul>
+</div>
     %{if(year != 0 && month != 0){
     }%
 	    <input type="hidden" name="year" value="${year}"/>
@@ -60,6 +89,8 @@
     	}
     	}%   
     </table>
+
+</section>
     
     
     

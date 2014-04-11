@@ -265,7 +265,10 @@ public class Competences extends Controller{
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
-	public static void overtime(int year, int month){
+	public static void overtime(int year, int month, String name, Integer page){
+		
+		if(page == null)
+			page = 0;
 		
 		ImmutableTable.Builder<Person, String, Integer> builder = ImmutableTable.builder();
 		Table<Person, String, Integer> tableFeature = null;
@@ -279,7 +282,16 @@ public class Competences extends Controller{
 			beginMonth = new LocalDate(year, month, 1);
 		}
 		
-		List<Person> activePersons = Person.getTechnicianForCompetences(new LocalDate(year, month, 1), Security.getUser().person.getOfficeAllowed());
+		CompetenceCode code = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", "S1").first();
+		SimpleResults<Person> simpleResults = PersonDao.listForCompetence(code, Optional.fromNullable(name), 
+				Sets.newHashSet(Security.getOfficeAllowed()), 
+				false, 
+				new LocalDate(year, month, 1), 
+				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
+
+		List<Person> activePersons = simpleResults.paginated(page).getResults();
+		
+	//	List<Person> activePersons = Person.getTechnicianForCompetences(new LocalDate(year, month, 1), Security.getUser().person.getOfficeAllowed());
 		for(Person p : activePersons){
 			Integer daysAtWork = 0;
 			Integer recoveryDays = 0;
@@ -299,7 +311,7 @@ public class Competences extends Controller{
 				}
 
 			}
-			CompetenceCode code = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", "S1").first();
+	//		CompetenceCode code = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", "S1").first();
 			
 			Competence comp = Competence.find("Select comp from Competence comp where comp.person = ? " +
 					"and comp.year = ? and comp.month = ? and comp.competenceCode.code = ?", 
@@ -319,11 +331,11 @@ public class Competences extends Controller{
 		}
 		tableFeature = builder.build();
 		if(year != 0 && month != 0)
-			render(tableFeature, year, month);
+			render(tableFeature, year, month, simpleResults, name);
 		else{
 			int yearParams = params.get("year", Integer.class);
 			int monthParams = params.get("month", Integer.class);
-			render(tableFeature,yearParams,monthParams );
+			render(tableFeature,yearParams,monthParams,simpleResults, name );
 		}
 
 	}
@@ -331,9 +343,20 @@ public class Competences extends Controller{
 	/**
 	 * funzione che ritorna la tabella contenente le competenze associate a ciascuna persona
 	 */
-	public static void recapCompetences(){
+	public static void recapCompetences(String name, Integer page){
+		
+		if(page == null)
+			page = 0;
 		LocalDate date = new LocalDate();
-		List<Person> personList = Person.getTechnicianForCompetences(date, Security.getUser().person.getOfficeAllowed());
+		
+		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
+				Sets.newHashSet(Security.getOfficeAllowed()), 
+				false, 
+				date, 
+				date.dayOfMonth().withMaximumValue());
+
+		List<Person> personList = simpleResults.paginated(page).getResults();
+//		List<Person> personList = Person.getTechnicianForCompetences(date, Security.getUser().person.getOfficeAllowed());
 		ImmutableTable.Builder<Person, String, Boolean> builder = ImmutableTable.builder();
 		Table<Person, String, Boolean> tableRecapCompetence = null;
 		List<CompetenceCode> codeList = CompetenceCode.findAll();
@@ -353,7 +376,7 @@ public class Competences extends Controller{
 		tableRecapCompetence = builder.build();
 		int month = date.getMonthOfYear();
 		int year = date.getYear();
-		render(tableRecapCompetence, month, year);
+		render(tableRecapCompetence, month, year, simpleResults, name);
 	}
 
 	/**
@@ -606,7 +629,7 @@ public class Competences extends Controller{
 		}
 		person.save();
 		flash.success(String.format("Aggiornate con successo le competenze per %s %s", person.name, person.surname));
-		Competences.recapCompetences();
+		Competences.recapCompetences(null, null);
 
 	}
 	
