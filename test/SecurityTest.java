@@ -1,6 +1,5 @@
 import org.junit.Test;
 
-import play.Logger;
 import play.mvc.Http;
 import play.mvc.Http.Response;
 import play.test.FunctionalTest;

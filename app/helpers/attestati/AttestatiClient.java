@@ -17,7 +17,6 @@ import java.util.Map;
 import models.Absence;
 import models.Competence;
 import models.ConfGeneral;
-import models.Person;
 import models.PersonMonthRecap;
 
 import org.joda.time.LocalDate;
@@ -29,9 +28,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import com.google.common.collect.Lists;
-
 import play.Logger;
+
+import com.google.common.collect.Lists;
 
 /**
  * Incapsula le funzionalità necessarie per l'interazione via HTTP GET/POST
@@ -316,7 +315,7 @@ public class AttestatiClient {
 
 			if (elaboraDatiResponse.statusCode() != 200)  {
 				throw new AttestatiException(String.format("Errore durante l'elaborazione dati del dipendente %s", dipendente.getCognomeNome()));
-			};			
+			}
 
 			Document elaboraDatiDoc = elaboraDatiResponse.parse();
 			Logger.debug("Risposta all'elaborazione dati = \n%s", elaboraDatiDoc);

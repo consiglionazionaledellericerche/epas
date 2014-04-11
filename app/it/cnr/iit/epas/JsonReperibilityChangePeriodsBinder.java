@@ -7,10 +7,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import models.Person;
-import models.PersonReperibilityType;
 import models.exports.ReperibilityPeriod;
 import models.exports.ReperibilityPeriods;
 

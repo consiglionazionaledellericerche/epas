@@ -2,18 +2,10 @@ package controllers;
 
 import helpers.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.CheckMessage;
-import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-import it.cnr.iit.epas.JsonPersonEmailBinder;
 import it.cnr.iit.epas.MainMenu;
 import it.cnr.iit.epas.PersonUtility;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -29,46 +21,31 @@ import models.AbsenceTypeGroup;
 import models.ConfYear;
 import models.Person;
 import models.PersonDay;
-import models.PersonMonthRecap;
 import models.PersonReperibilityDay;
 import models.PersonShiftDay;
-import models.PersonTags;
 import models.Qualification;
-import models.Stamping;
-import models.WorkingTimeTypeDay;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
 import models.enumerate.JustifiedTimeAtWork;
-import models.exports.PersonEmailFromJson;
-import models.exports.PersonPeriodAbsenceCode;
 import models.rendering.VacationsRecap;
 
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.MultiPartEmail;
-import org.hibernate.envers.entities.mapper.relation.lazy.proxy.SetProxy;
 import org.joda.time.LocalDate;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Table;
-import com.google.common.collect.TreeBasedTable;
-
-import dao.AbsenceTypeDao;
-import dao.PersonDao;
-
 import play.Logger;
-import play.Play;
-import play.data.Upload;
-import play.data.binding.As;
-import play.data.validation.CheckWith;
 import play.data.validation.Required;
-import play.data.validation.Valid;
 import play.db.jpa.Blob;
 import play.db.jpa.JPA;
 import play.libs.Mail;
 import play.mvc.Controller;
 import play.mvc.With;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.Table;
+import com.google.common.collect.TreeBasedTable;
+
+import dao.AbsenceTypeDao;
 
 @With( {Secure.class, NavigationMenu.class} )
 public class Absences extends Controller{
@@ -531,7 +508,7 @@ public class Absences extends Controller{
 			PersonUtility.updatePersonDaysIntoInterval(person, dateFrom, dateTo);
 			Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
 		}
-		insertAbsence(person.id, yearFrom, monthFrom, dayFrom, newAbsenceType.code, yearTo, monthTo, dayTo, (Blob)file, mealTicket);
+		insertAbsence(person.id, yearFrom, monthFrom, dayFrom, newAbsenceType.code, yearTo, monthTo, dayTo, file, mealTicket);
 
 	}
 	

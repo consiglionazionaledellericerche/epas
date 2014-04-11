@@ -1,18 +1,12 @@
 package controllers;
 
-import java.util.List;
-
-import it.cnr.iit.epas.ActionMenuItem;
 import models.Contract;
 import models.Person;
-import models.PersonDay;
-import models.YearRecap;
 import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
 
 import play.Logger;
-import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 

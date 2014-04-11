@@ -3,37 +3,12 @@ package it.cnr.iit.epas;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.EntityManager;
-
 import models.ConfGeneral;
-import models.Person;
-import models.WorkingTimeType;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
-import play.Logger;
-import play.db.jpa.JPA;
-
 public class DateUtility {
-
-//	/**
-//	 * Controlla che il giorno sia festivo o lavorativo per la persona sulla base delle Feste Generali e del piano di lavoro
-//	 * @param person
-//	 * @param date
-//	 * @return
-//	 */
-//	public static boolean isHoliday(Person person, LocalDate date){	
-//		
-//		if(person.getCurrentContract() == null || date.isBefore(person.getCurrentContract().beginContract))
-//			return false;
-//		
-//		if(isGeneralHoliday(date))
-//			return true;
-//		
-//		return person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).holiday;
-//
-//	}
 
 	/**
 	 * 
