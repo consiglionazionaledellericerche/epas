@@ -79,25 +79,13 @@ public class Administration extends Controller {
 		renderText("Modificati i permessi per l'utente");
 	}
 	
-	public static void updateCompetence() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-		//Person person = Person.find("bySurnameAndName", "Lucchesi", "Cristian").first();
-	//	FromMysqlToPostgres.updateCompetence();
-		renderText("Aggiunti gli straordinari diurni feriali alle persone nella tabella competenze");
-	}
 	
 	public static void updatePersonDay(){
 		FromMysqlToPostgres.checkFixedWorkingTime();
 		renderText("Aggiornati i person day delle persone con timbratura fissa");
 	}
 	
-	/**
-	 * @deprecated Use {@link Evolutions#updateVacationPeriodRelation()} instead
-	 */
-	public static void updateVacationPeriodRelation() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-		Evolutions.updateVacationPeriodRelation();
-	}
 
-	
 	public static void checkNewRelation() throws ClassNotFoundException, SQLException{
 		Evolutions.updateWorkingTimeTypeRelation();
 	}

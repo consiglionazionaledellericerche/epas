@@ -354,7 +354,7 @@ public class FromMysqlToPostgres {
 	}
 
 
-	public static Person createPerson(ResultSet rs) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException {
+	public static Person createPerson(ResultSet rs) throws SQLException {
 		Logger.trace("Inizio a creare la persona %s %s", rs.getString("Nome"), rs.getString("Cognome"));
 
 		Person person = Person.find("Select p from Person p where p.name = ? and p.surname = ?", rs.getString("Nome"), rs.getString("Cognome")).first();
@@ -1012,7 +1012,7 @@ public class FromMysqlToPostgres {
 
 	}
 
-	public static void createVacationType(Contract con) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+	public static void createVacationType(Contract con) {
 		JPAPlugin.startTx(false);
 		Logger.debug("Inizio a creare i periodi di ferie per %s", con.person);
 		if(con.expireContract == null){
