@@ -59,31 +59,22 @@ package controllers;
  *  
  */
 
-import java.awt.image.renderable.RenderContext;
-import java.util.Date;
+import it.cnr.iit.epas.DateUtility;
+
 import java.util.List;
 
-import javax.persistence.Column;
-
-import org.hibernate.annotations.Type;
-import org.joda.time.LocalDate;
-
-import it.cnr.iit.epas.ActionMenuItem;
-import it.cnr.iit.epas.DateUtility;
 import models.ConfGeneral;
 import models.ConfYear;
-import models.WebStampingAddress;
-import models.WorkingTimeType;
-import play.Logger;
-import play.cache.Cache;
-import play.data.validation.Email;
-import play.mvc.Controller;
-import play.mvc.With;
-import play.mvc.results.Error;
 import models.Configuration;
 import models.enumerate.CapacityCompensatoryRestFourEight;
 import models.enumerate.CapacityCompensatoryRestOneThree;
 import models.enumerate.ResidualWithPastYear;
+
+import org.joda.time.LocalDate;
+
+import play.cache.Cache;
+import play.mvc.Controller;
+import play.mvc.With;
 
 @With( {Secure.class, NavigationMenu.class} )
 public class Configurations extends Controller{

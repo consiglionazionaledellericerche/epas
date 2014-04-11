@@ -1,50 +1,36 @@
 package it.cnr.iit.epas;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.FetchType;
 import javax.persistence.Query;
 
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.SimpleEmail;
-import org.joda.time.DateTimeConstants;
-import org.joda.time.LocalDate;
-
-import play.Logger;
-import play.db.jpa.JPA;
-import play.db.jpa.JPAPlugin;
-import play.db.jpa.Transactional;
-import play.mvc.Scope.Flash;
 import models.Absence;
 import models.AbsenceType;
 import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
-import models.InitializationTime;
 import models.Office;
 import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
-import models.PersonDayInTrouble;
 import models.PersonMonthRecap;
-import models.PersonReperibilityDay;
-import models.PersonShiftDay;
-import models.RemoteOffice;
-import models.StampProfile;
 import models.Stamping;
 import models.User;
-import models.VacationPeriod;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
 import models.enumerate.JustifiedTimeAtWork;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
 import models.rendering.VacationsRecap;
+
+import org.joda.time.LocalDate;
+
+import play.Logger;
+import play.db.jpa.JPA;
+import play.db.jpa.JPAPlugin;
 
 public class PersonUtility {
 

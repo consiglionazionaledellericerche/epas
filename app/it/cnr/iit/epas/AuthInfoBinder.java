@@ -5,24 +5,12 @@ package it.cnr.iit.epas;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
-import models.Person;
-import models.PersonReperibilityType;
 import models.exports.AuthInfo;
-import models.exports.ReperibilityPeriod;
-import models.exports.ReperibilityPeriods;
-
-import org.joda.time.LocalDate;
-
 import play.Logger;
 import play.data.binding.Global;
 import play.data.binding.TypeBinder;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 

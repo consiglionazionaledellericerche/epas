@@ -1,30 +1,19 @@
 package models;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import lombok.ToString;
-
 import org.hibernate.annotations.Type;
-import org.hibernate.envers.AuditReader;
-import org.hibernate.envers.AuditReaderFactory;
-import org.hibernate.envers.Audited;
-import org.hibernate.envers.query.AuditQuery;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
-import play.data.validation.Unique;
-import play.db.jpa.JPA;
 import play.db.jpa.Model;
 
 @Entity

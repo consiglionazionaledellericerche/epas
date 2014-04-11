@@ -10,8 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.Query;
-
 import models.Absence;
 import models.AbsenceType;
 import models.AbsenceTypeGroup;
@@ -19,7 +17,6 @@ import models.Competence;
 import models.CompetenceCode;
 import models.ContactData;
 import models.Contract;
-import models.ContractWorkingTimeType;
 import models.InitializationAbsence;
 import models.InitializationTime;
 import models.Location;
@@ -28,10 +25,8 @@ import models.Person;
 import models.PersonDay;
 import models.PersonMonthRecap;
 import models.PersonReperibility;
-import models.PersonWorkingTimeType;
 import models.PersonYear;
 import models.Qualification;
-import models.StampModificationType;
 import models.StampModificationTypeValue;
 import models.StampProfile;
 import models.StampType;
@@ -47,7 +42,6 @@ import models.WorkingTimeTypeDay;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
 import models.enumerate.JustifiedTimeAtWork;
-import models.enumerate.StampTypeValues;
 import models.enumerate.WorkingTimeTypeValues;
 
 import org.joda.time.LocalDate;

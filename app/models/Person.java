@@ -7,73 +7,44 @@ package models;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
-import it.cnr.iit.epas.JsonStampingBinder;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
-import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinColumns;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import lombok.ToString;
 import models.Stamping.WayType;
-import models.exports.ReperibilityPeriods;
 import models.exports.StampingFromClient;
 import models.personalMonthSituation.Mese;
-import models.rendering.VacationsRecap;
-import net.spy.memcached.FailureMode;
 
-import org.apache.commons.lang.time.DateUtils;
-import org.eclipse.jdt.internal.core.BecomeWorkingCopyOperation;
-import org.hibernate.envers.AuditReader;
-import org.hibernate.envers.AuditReaderFactory;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
-import org.hibernate.envers.query.AuditEntity;
-import org.hibernate.envers.query.AuditQuery;
-import org.hibernate.envers.query.AuditQueryCreator;
-import org.hibernate.envers.query.criteria.AuditConjunction;
-import org.hibernate.envers.query.criteria.AuditCriterion;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+
+import play.Logger;
+import play.data.validation.Email;
+import play.data.validation.Required;
+import play.db.jpa.Model;
+import play.mvc.With;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 
-import controllers.Check;
 import controllers.Secure;
 import controllers.Security;
-import play.Logger;
-import play.cache.Cache;
-import play.data.binding.As;
-import play.data.validation.Email;
-import play.data.validation.Required;
-import play.db.jpa.JPA;
-import play.db.jpa.Model;
-import play.mvc.Controller;
-import play.mvc.Http.Request;
-import play.mvc.Scope.Params;
-import play.mvc.Scope.Session;
-import play.mvc.With;
 
 /**
  * @author cristian

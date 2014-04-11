@@ -6,13 +6,10 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.joda.time.LocalDate;
-
-import play.Logger;
 import models.Contract;
 import models.ContractYearRecap;
-import models.InitializationTime;
-import models.Person;
+
+import org.joda.time.LocalDate;
 
 public class CalcoloSituazioneAnnualePersona {
 

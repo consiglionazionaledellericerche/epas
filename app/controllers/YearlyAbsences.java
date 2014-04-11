@@ -1,6 +1,5 @@
 package controllers;
 
-import it.cnr.iit.epas.ActionMenuItem;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.ArrayList;
@@ -10,7 +9,6 @@ import java.util.List;
 import models.Absence;
 import models.AbsenceType;
 import models.Person;
-import models.PersonDay;
 import models.rendering.YearlyAbsencesRecap;
 
 import org.joda.time.LocalDate;
@@ -21,9 +19,6 @@ import play.mvc.With;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import com.google.common.collect.ArrayTable;
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
