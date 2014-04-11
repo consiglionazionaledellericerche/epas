@@ -1,22 +1,18 @@
 package controllers;
 
+import it.cnr.iit.epas.JsonPersonEmailBinder;
+
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
+import models.Absence;
+import models.Person;
+import models.exports.FrequentAbsenceCode;
+import models.exports.PersonEmailFromJson;
+import models.exports.PersonPeriodAbsenceCode;
 
 import org.joda.time.LocalDate;
 
-import it.cnr.iit.epas.JsonPersonEmailBinder;
-import it.cnr.iit.epas.JsonRequestedFrequentAbsenceBinder;
-import models.Absence;
-import models.AbsenceType;
-import models.Person;
-import models.exports.FrequentAbsenceCode;
-import models.exports.PeriodAbsenceCode;
-import models.exports.PersonEmailFromJson;
-import models.exports.PersonPeriodAbsenceCode;
 import play.Logger;
 import play.data.binding.As;
 import play.mvc.Controller;

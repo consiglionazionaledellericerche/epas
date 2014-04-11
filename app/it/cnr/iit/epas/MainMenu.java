@@ -8,21 +8,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.mail.Session;
-
-import org.joda.time.LocalDate;
-
-import controllers.Security;
-
-import play.Logger;
-import play.cache.Cache;
-
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Setter;
 import models.Permission;
 import models.Person;
+
+import org.joda.time.LocalDate;
+
+import play.Logger;
+import play.cache.Cache;
+import controllers.Security;
 
 /**
  * @author cristian

@@ -10,8 +10,6 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.hibernate.envers.Audited;
-
 import play.data.validation.Required;
 import play.db.jpa.Model;
 
@@ -19,7 +17,6 @@ import play.db.jpa.Model;
  * @author cristian
  *
  */
-//@Audited
 @Entity
 @Table(name = "vacation_codes")
 public class VacationCode extends Model {

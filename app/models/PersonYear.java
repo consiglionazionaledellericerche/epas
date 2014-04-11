@@ -1,8 +1,5 @@
 package models;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -10,11 +7,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.hibernate.envers.Audited;
-import org.joda.time.DateTimeConstants;
-import org.joda.time.LocalDate;
 
-import play.Logger;
-import play.db.jpa.JPA;
 import play.db.jpa.Model;
 
 /**
