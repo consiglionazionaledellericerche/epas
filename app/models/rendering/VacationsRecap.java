@@ -4,25 +4,19 @@ import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.joda.time.LocalDate;
-
-import play.Logger;
 import models.Absence;
 import models.AbsenceType;
 import models.ConfYear;
 import models.Contract;
 import models.ContractYearRecap;
 import models.Person;
-import models.PersonDay;
-import models.VacationCode;
 import models.VacationPeriod;
 
-import com.google.common.collect.Table;
+import org.joda.time.LocalDate;
+
+import play.Logger;
 
 /**
  * @author alessandro
@@ -88,7 +82,7 @@ public class VacationsRecap {
 		AbsenceType ab37 = AbsenceType.getAbsenceTypeByCode("37");
 		AbsenceType ab94 = AbsenceType.getAbsenceTypeByCode("94");
 		
-		ConfYear conf = ConfYear.getConfYear((int)year);
+		ConfYear conf = ConfYear.getConfYear(year);
 		LocalDate expireVacation = actualDate.withMonthOfYear(conf.monthExpiryVacationPastYear).withDayOfMonth(conf.dayExpiryVacationPastYear);
 		
 		//(1) Calcolo ferie usate dell'anno passato ---------------------------------------------------------------------------------------------------------------------------------

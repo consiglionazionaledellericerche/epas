@@ -1,22 +1,16 @@
 
-import java.util.ArrayList;
-import java.util.List;
-
 import models.Person;
 
-import org.hamcrest.core.Is;
-import org.hamcrest.core.IsNot;
 import org.hamcrest.core.IsNull;
-import org.junit.*;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.Test;
 
-import controllers.shib.MockShibboleth;
-import controllers.shib.Shibboleth;
 import play.Logger;
-import play.test.*;
-import play.db.jpa.JPA;
-import play.mvc.*;
-import play.mvc.Http.*;
+import play.mvc.Http;
+import play.mvc.Http.Response;
+import play.mvc.Router;
+import play.test.FunctionalTest;
+import controllers.shib.MockShibboleth;
 
 public class ShibbolethTest extends FunctionalTest {
 

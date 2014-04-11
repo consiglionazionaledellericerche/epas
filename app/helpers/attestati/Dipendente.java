@@ -3,8 +3,6 @@
  */
 package helpers.attestati;
 
-import java.io.Serializable;
-
 import models.Person;
 
 /**

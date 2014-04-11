@@ -1,17 +1,14 @@
 package controllers;
 
+import it.cnr.iit.epas.ActionMenuItem;
+
 import java.io.IOException;
 import java.sql.SQLException;
 
-import it.cnr.iit.epas.ActionMenuItem;
-import it.cnr.iit.epas.PersonUtility;
-import models.Person;
 import models.User;
 
 import org.joda.time.LocalDate;
 
-import play.Logger;
-import play.cache.Cache;
 import play.mvc.Controller;
 
 public class SwitchTemplate extends Controller{

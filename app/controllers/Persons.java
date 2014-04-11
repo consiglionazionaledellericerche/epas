@@ -1,15 +1,12 @@
 package controllers;
 
-import it.cnr.iit.epas.ActionMenuItem;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
 import models.ConfGeneral;
@@ -23,32 +20,27 @@ import models.Permission;
 import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
-import models.PersonWorkingTimeType;
 import models.Qualification;
-import models.RemoteOffice;
 import models.User;
 //import models.RemoteOffice;
 import models.VacationCode;
-import models.VacationPeriod;
 import models.WorkingTimeType;
 import net.sf.oval.constraint.MinLength;
-import net.sf.oval.constraint.MinSize;
 
 import org.joda.time.LocalDate;
+
+import play.Logger;
+import play.data.validation.Required;
+import play.data.validation.Valid;
+import play.i18n.Messages;
+import play.libs.Codec;
+import play.mvc.Controller;
+import play.mvc.With;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 
 import dao.PersonDao;
-import play.Logger;
-import play.data.validation.Min;
-import play.data.validation.Required;
-import play.data.validation.Valid;
-import play.mvc.Controller;
-import play.mvc.With;
-import play.i18n.Messages;
-import play.libs.Crypto;
-import play.libs.Codec;
 
 @With( {Secure.class, NavigationMenu.class} )
 public class Persons extends Controller {

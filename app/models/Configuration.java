@@ -4,27 +4,19 @@ package models;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import java.sql.Blob;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import models.enumerate.AuthWebStamping;
-import models.enumerate.AutoDeclareAbsences;
-import models.enumerate.AutoDeclareWorkingTime;
 import models.enumerate.CapacityCompensatoryRestFourEight;
 import models.enumerate.CapacityCompensatoryRestOneThree;
 import models.enumerate.ResidualWithPastYear;
 
-import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 

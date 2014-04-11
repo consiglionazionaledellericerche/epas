@@ -3,17 +3,15 @@ package models.personalMonthSituation;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.joda.time.LocalDate;
-
-import play.Logger;
 import models.Absence;
 import models.Competence;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
+
+import org.joda.time.LocalDate;
 
 public class Mese {
 

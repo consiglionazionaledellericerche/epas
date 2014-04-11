@@ -1,39 +1,18 @@
 package models;
 
-import it.cnr.iit.epas.PersonUtility;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.Query;
 import javax.persistence.Table;
-import javax.persistence.Transient;
-
-import models.Stamping.WayType;
-import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
-import models.personalMonthSituation.Mese;
 
 import org.hibernate.annotations.Type;
-import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
-import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 
 import play.Logger;
 import play.data.validation.Required;
-import play.data.validation.Valid;
-import play.db.jpa.JPA;
-import play.db.jpa.JPAPlugin;
 import play.db.jpa.Model;
 
 /**

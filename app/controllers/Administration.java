@@ -1,7 +1,6 @@
 package controllers;
 
 import it.cnr.iit.epas.DateInterval;
-import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.ExportToYaml;
 import it.cnr.iit.epas.FromMysqlToPostgres;
 import it.cnr.iit.epas.PersonUtility;
@@ -11,34 +10,19 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.SimpleEmail;
-import org.joda.time.LocalDate;
-import org.yaml.snakeyaml.Yaml;
-
-import controllers.shib.Shibboleth;
 import models.AbsenceType;
-import models.ConfGeneral;
 import models.Contract;
-
 import models.ContractYearRecap;
-import models.InitializationAbsence;
-
-
 import models.InitializationTime;
 import models.Person;
-import models.PersonDay;
-import models.PersonDayInTrouble;
-import models.PersonMonthRecap;
-import models.WorkingTimeType;
-import models.exports.PersonsList;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
 import models.rendering.VacationsRecap;
+
+import org.joda.time.LocalDate;
+
 import play.Logger;
-import play.Play;
 import play.db.jpa.JPAPlugin;
-import play.libs.Mail;
 import play.mvc.Controller;
 import play.mvc.With;
 import procedure.evolutions.Evolutions;
@@ -95,25 +79,13 @@ public class Administration extends Controller {
 		renderText("Modificati i permessi per l'utente");
 	}
 	
-	public static void updateCompetence() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-		//Person person = Person.find("bySurnameAndName", "Lucchesi", "Cristian").first();
-	//	FromMysqlToPostgres.updateCompetence();
-		renderText("Aggiunti gli straordinari diurni feriali alle persone nella tabella competenze");
-	}
 	
 	public static void updatePersonDay(){
 		FromMysqlToPostgres.checkFixedWorkingTime();
 		renderText("Aggiornati i person day delle persone con timbratura fissa");
 	}
 	
-	/**
-	 * @deprecated Use {@link Evolutions#updateVacationPeriodRelation()} instead
-	 */
-	public static void updateVacationPeriodRelation() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-		Evolutions.updateVacationPeriodRelation();
-	}
 
-	
 	public static void checkNewRelation() throws ClassNotFoundException, SQLException{
 		Evolutions.updateWorkingTimeTypeRelation();
 	}

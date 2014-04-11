@@ -3,21 +3,17 @@ package controllers;
 import java.util.List;
 import java.util.Set;
 
-import com.google.common.base.Charsets;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.hash.Hashing;
-
-import play.Logger;
-import play.cache.Cache;
-import play.db.jpa.JPA;
-import play.db.jpa.GenericModel.JPAQuery;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import models.Office;
 import models.Permission;
 import models.Person;
 import models.RemoteOffice;
 import models.User;
+import play.Logger;
+import play.cache.Cache;
+
+import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.hash.Hashing;
 
 public class Security extends Secure.Security {
 	

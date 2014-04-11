@@ -1,7 +1,5 @@
 package controllers;
 
-import it.cnr.iit.epas.DateUtility;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,25 +7,16 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
-import org.hibernate.envers.reader.FirstLevelCache;
-import org.joda.time.DateTimeConstants;
-import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
-
-import models.Absence;
-import models.Competence;
-import models.CompetenceCode;
 import models.Contract;
-import models.InitializationTime;
 import models.Person;
-import models.PersonDay;
 import models.PersonMonthRecap;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
-import models.personalMonthSituation.Mese;
+
+import org.joda.time.LocalDate;
+
+import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
-import play.Logger;
-import play.Play;
 
 @With( {Secure.class, NavigationMenu.class} )
 public class PersonMonths extends Controller{

@@ -1,5 +1,6 @@
 package controllers;
 
+import static play.modules.pdf.PDF.renderPDF;
 import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.PersonUtility;
 
@@ -7,24 +8,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.joda.time.LocalDate;
-
 import models.AbsenceType;
 import models.ConfGeneral;
-import models.Contract;
 import models.Person;
 import models.PersonDay;
-import models.PersonMonthRecap;
 import models.StampModificationType;
 import models.StampType;
-import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
-import models.personalMonthSituation.Mese;
 import models.rendering.PersonStampingDayRecap;
-import play.Logger;
-import play.i18n.Lang;
+
+import org.joda.time.LocalDate;
+
 import play.mvc.Controller;
 import play.mvc.With;
-import static play.modules.pdf.PDF.*;
 
 @With( {Secure.class, NavigationMenu.class} )
 public class PrintTags extends Controller{
