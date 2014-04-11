@@ -128,7 +128,7 @@ public class PersonMonths extends Controller{
 			flash.error("La data di inizio del periodo di formazione non può essere successiva a quella di fine");
 			PersonMonths.trainingHours(personId, beginDate.getYear(), beginDate.getMonthOfYear());
 		}
-		if(value == null || value < 0 || value > 24*(endDate.getDayOfMonth()-beginDate.getDayOfMonth())){
+		if(value == null || value < 0 || value > 24*(endDate.getDayOfMonth()-beginDate.getDayOfMonth()+1)){
 			flash.error("Non sono valide le ore di formazione negative, testuali o che superino la quantità massima di ore nell'intervallo temporale inserito.");
 			PersonMonths.trainingHours(personId, beginDate.getYear(), beginDate.getMonthOfYear());
 		}
