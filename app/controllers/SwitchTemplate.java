@@ -130,7 +130,7 @@ public class SwitchTemplate extends Controller{
 			break;
 
 		case changePassword:
-			Persons.changePassword(personId);
+			Persons.changePassword();
 			break;
 
 		case manageWorkingTime:
