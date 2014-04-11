@@ -2,7 +2,6 @@ package jobs;
 
 import java.util.List;
 
-import it.cnr.iit.epas.DateUtility;
 import models.Person;
 import models.PersonDay;
 
@@ -10,7 +9,6 @@ import org.joda.time.LocalDate;
 
 import play.Logger;
 import play.jobs.Job;
-import play.jobs.On;
 
 //@On("0 /5 * * * ?")
 //@On("0 0 2 * * ?")

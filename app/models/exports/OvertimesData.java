@@ -3,13 +3,6 @@
  */
 package models.exports;
 
-import org.joda.time.LocalDate;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import models.Person;
 
 
 /**

@@ -9,11 +9,9 @@ import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
 import models.rendering.VacationsRecap;
 
-import org.hibernate.mapping.Array;
 import org.joda.time.LocalDate;
 import org.junit.Test;
 
-import play.Logger;
 import play.db.jpa.JPAPlugin;
 import play.test.UnitTest;
 

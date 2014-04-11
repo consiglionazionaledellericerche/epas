@@ -1,7 +1,5 @@
 package models.exports;
 
-import models.Person;
-import models.ShiftTimeTable;
 import models.ShiftType;
 
 import org.joda.time.LocalDate;

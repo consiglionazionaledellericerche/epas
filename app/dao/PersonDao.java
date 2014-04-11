@@ -1,10 +1,10 @@
 package dao;
 
-import java.util.List;
-import java.util.Set;
-
 import helpers.ModelQuery;
 import helpers.ModelQuery.SimpleResults;
+
+import java.util.Set;
+
 import models.CompetenceCode;
 import models.Office;
 import models.Person;
@@ -21,9 +21,7 @@ import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import com.mysema.query.BooleanBuilder;
-import com.mysema.query.SearchResults;
 import com.mysema.query.jpa.JPQLQuery;
 
 /**

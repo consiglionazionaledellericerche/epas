@@ -9,39 +9,26 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import javax.management.Query;
 
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
-import models.Permission;
 import models.Person;
 import models.PersonDay;
-import models.PersonMonthRecap;
 import models.TotalOvertime;
 import models.rendering.PersonMonthCompetenceRecap;
 
 import org.joda.time.LocalDate;
 
 import play.Logger;
-import play.data.validation.IsTrue;
-import play.data.validation.Min;
-import play.data.validation.Required;
-import play.data.validation.Valid;
-import play.db.jpa.JPA;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;

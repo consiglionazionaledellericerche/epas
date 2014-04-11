@@ -1,42 +1,24 @@
 package controllers;
 
-import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-import it.cnr.iit.epas.PersonUtility;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
-import models.Absence;
 import models.Competence;
-import models.CompetenceCode;
 import models.Person;
 import models.PersonDay;
-import models.StampProfile;
-import models.Stamping;
-import models.WorkingTimeTypeDay;
-import models.enumerate.JustifiedTimeAtWork;
 
-import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
-import com.google.common.collect.TreeBasedTable;
-
 import play.Logger;
-import play.Play;
-import play.data.binding.As;
 import play.mvc.Controller;
 import play.mvc.With;
+
+import com.google.common.collect.Table;
+import com.google.common.collect.TreeBasedTable;
 
 @With( {Secure.class, NavigationMenu.class} )
 public class MonthRecaps extends Controller{

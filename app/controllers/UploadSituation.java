@@ -5,7 +5,6 @@ import helpers.attestati.AttestatiClient.LoginResponse;
 import helpers.attestati.AttestatiException;
 import helpers.attestati.Dipendente;
 import helpers.attestati.RispostaElaboraDati;
-import it.cnr.iit.epas.MainMenu;
 import it.cnr.iit.epas.PersonUtility;
 
 import java.io.BufferedWriter;
@@ -14,37 +13,18 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.criteria.Join;
-
-import lombok.Data;
 import models.Absence;
 import models.CertificatedData;
 import models.Competence;
-import models.CompetenceCode;
 import models.ConfGeneral;
 import models.Person;
 import models.PersonMonthRecap;
-
-import org.hibernate.ejb.criteria.path.AbstractFromImpl.JoinScope;
-import org.hibernate.type.OrderedSetType;
-import org.joda.time.LocalDate;
-import org.jsoup.Connection;
-import org.jsoup.Connection.Method;
-import org.jsoup.Connection.Response;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
 import play.Logger;
 import play.cache.Cache;
 import play.mvc.Controller;
@@ -52,14 +32,12 @@ import play.mvc.With;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.sun.istack.internal.NotNull;
 
 /**
  * Contiene in metodi necessari per l'interazione tra utente, ePAS e 
