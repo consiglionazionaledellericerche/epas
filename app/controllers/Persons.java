@@ -31,6 +31,8 @@ import models.User;
 import models.VacationCode;
 import models.VacationPeriod;
 import models.WorkingTimeType;
+import net.sf.oval.constraint.MinLength;
+import net.sf.oval.constraint.MinSize;
 
 import org.joda.time.LocalDate;
 
@@ -38,12 +40,13 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 
 import dao.PersonDao;
-
 import play.Logger;
+import play.data.validation.Min;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.i18n.Messages;
 import play.libs.Crypto;
 import play.libs.Codec;
 
@@ -773,34 +776,28 @@ public class Persons extends Controller {
 	 * @param personId permette all'utente amministratore di cambiare la propria password.
 	 */
 	@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void changePassword(Long personId){
-		Person person = Person.findById(personId);
-		render(person);
+	public static void changePassword(){
+		User user = Security.getUser();
+		notFoundIfNull(user);
+		render(user);
 	}
 	
 	@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void savePassword(Long personId, String nuovaPassword, String confermaPassword){
+	public static void savePassword(@MinLength(5) @Required String nuovaPassword, @MinLength(5) @Required String confermaPassword){
 		
-		Person person = Person.findById(personId);
-		if(nuovaPassword == null || confermaPassword == null)
-		{
-			flash.error("Operazione annullata, controllare i log.");
-			Persons.changePassword(personId);
+		User user = Security.getUser();
+		notFoundIfNull(user);
+		if(validation.hasErrors() || !nuovaPassword.equals(confermaPassword)) {
+			flash.error("Entrambi i campi devono essere valorizzati e con valore uguale. "
+					+ "La passord deve essere almeno lunga 5 caratteri. Operazione annullata.");
+			Persons.changePassword();
 		}
-		if(nuovaPassword.equals("") || confermaPassword.equals(""))
-		{
-			flash.error("Valorizzare entrambi i campi. Operazione annullata");
-			Persons.changePassword(personId);
-		}
-		
-		
-		Codec codec = new Codec();
-		person.user.password = codec.hexMD5(nuovaPassword);
-		person.user.save();
-		person.save();
-		Application.indexAdmin();
 
-		
+		Codec codec = new Codec();
+		user.password = codec.hexMD5(nuovaPassword);
+		user.save();
+		flash.success(Messages.get("passwordSuccessfullyChanged"));
+		Application.indexAdmin();
 	}
 	
 	@Check(Security.DELETE_PERSON)
@@ -860,7 +857,6 @@ public class Persons extends Controller {
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void personChildrenList(Long personId){
 		Person person = Person.findById(personId);
-		List<PersonChildren> personChildren = person.personChildren;
 		render(person);
 	}
 	
