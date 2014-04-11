@@ -213,6 +213,7 @@ public class Administrators extends Controller {
 	/**
 	 * Switch in un'altra persona
 	 */
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void switchUserTo(long id) {
 		final User user = User.findById(id);
 		notFoundIfNull(user);
