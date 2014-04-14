@@ -1,4 +1,5 @@
-#{extends 'main_admin.html' /}
+#{extends 'main_with_navbar.html' /}
+#{set titolo: 'Gestione dei codici di assenza' /}
 
 <h2 id="inserimentoNuovoCodiceAssenza">Inserimento dati per nuovo codice di assenza</h2>
 
@@ -205,11 +206,13 @@
 
 </fieldset>
 
-
-	<input class="btn btn-primary" id="submitNuovoCodiceAssenza" type="submit" value="Ok"/>
-
-	#{/form}
-	#{form @Absences.discard()}
+<div class="forminline buttoncenter">
+<input class="btn btn-primary" id="submitNuovoCodiceAssenza" type="submit" value="Ok"/>
+#{/form} 
+#{form @Absences.discard()}
 	<input class="btn btn-primary" id="discardNuovoCodiceAssenza" type="submit" value="Annulla"/>
-	#{/form}
+#{/form}
+</div>
 
+
+	

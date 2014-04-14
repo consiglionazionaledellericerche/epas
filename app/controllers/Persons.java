@@ -208,14 +208,6 @@ public class Persons extends Controller {
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void changeVacation(Long personId){
-		Person person = Person.findById(personId);
-		List<VacationCode> codeList = VacationCode.findAll();
-		Logger.debug("Lista dei vacationCode: %s", codeList.toString());
-		render(person, codeList);
-	}
-	
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void updateContractWorkingTimeType(Long id)
 	{
 		List<WorkingTimeType> wttList = WorkingTimeType.findAll();

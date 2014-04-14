@@ -174,5 +174,24 @@ public class Security extends Secure.Security {
 		}
 		return false;
 	}
+	
+	/**
+	 * Ritorna la persona identificata da personId se l'user loggato è effettivamente tale persona.
+	 * @param personId
+	 * @return
+	 */
+	public static Person getSelfPerson(Long personId) {
+		if(personId == null)
+			return null;
+		User user = getUser();
+		if(user == null)
+			return null;
+		if(user.person == null)
+			return null;
+		if(user.person.id.longValue() != personId.longValue())
+			return null;
+		return user.person;
+				
+	}
 
 }
