@@ -237,12 +237,12 @@ public class YearlyAbsences extends Controller{
 	public static void absencesPerPerson(Long personId, Integer year){
 		
 		//controllo sui parametri
-		Logger.debug("Anno: %d Id: %d", year, personId);
-		Person person = null;
-		if(personId == null || personId == 0)
-			person = Security.getUser().person;			//prende la persona collegata
-		else
-			person = Person.findById(personId);
+		Person person = Security.getSelfPerson(personId);
+		if( person == null ) {
+			flash.error("Accesso negato.");
+			renderTemplate("Application/indexAdmin.html");
+		}
+		
 		Integer anno = params.get("year", Integer.class);
 		Logger.debug("La persona correntemente loggata è: %s", person);
 		Logger.trace("Anno: "+anno);
@@ -259,7 +259,7 @@ public class YearlyAbsences extends Controller{
 		}
 	}
 	
-	@Check(Security.VIEW_PERSONAL_SITUATION)
+	@Check(Security.VIEW_PERSON_LIST)
 	public static void showPersonMonthlyAbsences(Long personId, Integer year, Integer month, String absenceTypeCode) throws InstantiationException, IllegalAccessException
 	{
 		LocalDate monthBegin = new LocalDate(year, month, 1);

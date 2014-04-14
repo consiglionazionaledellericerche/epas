@@ -146,12 +146,6 @@ public class Absences extends Controller{
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
-	public static void absenceCodeList(){
-		List<AbsenceType> absenceList = AbsenceType.findAll();
-		render(absenceList);
-	}
-
-	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void insertAbsenceCode(){
 		AbsenceType abt = new AbsenceType();
 		AbsenceTypeGroup  abtg = new AbsenceTypeGroup();
