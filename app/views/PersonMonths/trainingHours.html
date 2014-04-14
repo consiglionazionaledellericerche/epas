@@ -1,4 +1,4 @@
-#{extends 'main_admin_no_menu.html' /}
+#{extends 'main_with_navbar.html' /}
 #{set titolo: 'Ore di formazione per ' + person.surname + ' ' + person.name + ' anno: ' + year /}
 
 <p class="lead">Le ore di formazione possono essere inserite solo per il mese selezionabile. Nel momento in cui l'amministratore le approva non potranno più essere modificate.</p>
@@ -19,18 +19,18 @@
 			<ul>			
 			#{list items:pmList, as: 'pm'}
 				#{if pm != null}
-				#{if pm.month == mese}	
+				  #{if pm.month == mese}	
 					#{if mese == date.getMonthOfYear() || (mese == date.getMonthOfYear()-1 && pm.hoursApproved == false)}		
-					<li>
+					  <li>
 						<a data-toggle="modal" data-placement="bottom" title="Modifica ore di formazione" href="@{PersonMonths.modifyTrainingHours(pm.id)}" data-target="#myModal2">
 						<b>${pm.trainingHours}</b> ore <b>Da:</b> <u>${pm.fromDate}</u> <b>A:</b> <u>${pm.toDate}</u></a>
 						<a data-toggle="modal" data-placement="bottom" title="Elimina ore di formazione" href="@{PersonMonths.deleteTrainingHours(pm.id, year, month)}" data-target="#myModal3" ><i class="icon-minus-sign icon-large"></i></a>
-					</li>
+					  </li>
 					#{/if}
 					#{else}
-					<li><b>${pm.trainingHours}</b> ore <b>Da:</b> <u>${pm.fromDate}</u> <b>A:</b> <u>${pm.toDate}</u></li>	
+					  <li><b>${pm.trainingHours}</b> ore <b>Da:</b> <u>${pm.fromDate}</u> <b>A:</b> <u>${pm.toDate}</u></li>	
 					#{/else}
-				#{/if}
+				  #{/if}
 				
 				#{/if}
 			#{/list}

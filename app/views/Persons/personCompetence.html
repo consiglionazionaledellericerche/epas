@@ -1,4 +1,4 @@
-#{extends 'main_admin_no_menu.html' /}
+#{extends 'main_with_navbar.html' /}
 #{set titolo: 'Modifica dati per la persona ' + person.name + ' ' + person.surname /}
 <ul class="nav nav-tabs">
   <li><a href="@{Persons.edit(person.id)}#">Dati Anagrafici ${person.name} ${person.surname}</a></li>

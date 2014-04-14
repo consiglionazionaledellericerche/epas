@@ -24,16 +24,17 @@ public class PersonMonths extends Controller{
 	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void hourRecap(Long personId,int year){
 
+		Person person = Security.getSelfPerson(personId);
+		if( person == null ) {
+			flash.error("Accesso negato.");
+			renderTemplate("Application/indexAdmin.html");
+		}
+		
 		if(year > new LocalDate().getYear()){
 			flash.error("Richiesto riepilogo orario di un anno futuro. Impossibile soddisfare la richiesta");
 			renderTemplate("Application/indexAdmin.html");
 		}
-		Person person = null;
-		if(personId != null)
-			person = Person.findById(personId);
-		else
-			person = Security.getUser().person;
-
+		
 		Contract contract = person.getCurrentContract();
 		CalcoloSituazioneAnnualePersona csap = new CalcoloSituazioneAnnualePersona(contract, year, null);
 		render(csap, person, year);	
@@ -41,8 +42,12 @@ public class PersonMonths extends Controller{
 
 	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void trainingHours(Long personId, int year, int month){
-		Person person = Person.findById(personId);
-		Logger.debug("Ore di formazione per %s %s dell'anno %d", person.name, person.surname, year);
+		
+		Person person = Security.getSelfPerson(personId);
+		if( person == null ) {
+			flash.error("Accesso negato.");
+			renderTemplate("Application/indexAdmin.html");
+		}
 		
 		List<Integer> mesi = new ArrayList<Integer>();
 		for(int i = 1; i < 13; i++){
