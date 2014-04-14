@@ -40,11 +40,12 @@ public class Competences extends Controller{
 
 	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void competences(Long personId, int year, int month) {
-		Person person = null;
-		if(personId != null)
-			person = Person.findById(personId); //Security.getPerson();
-		else
-			person = Security.getUser().person;
+		
+		Person person = Security.getSelfPerson(personId);
+		if( person == null ) {
+			flash.error("Accesso negato.");
+			renderTemplate("Application/indexAdmin.html");
+		}
 
 		PersonMonthCompetenceRecap personMonthCompetenceRecap = new PersonMonthCompetenceRecap(person, month, year);
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);

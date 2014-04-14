@@ -34,11 +34,6 @@ import procedure.evolutions.Evolutions;
 public class Administration extends Controller {
 	
 	
-    public static void index() {
-        render();
-    }
-        
-    
     public static void importOreStraordinario() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
     	
     	FromMysqlToPostgres.importOreStraordinario();
