@@ -25,19 +25,32 @@
 
 <fieldset>
   <legend>Sedi Distaccate associate alla sede suprema</legend>
+  * Le sedi colorate di grigio sono esistenti ma non più associate ad alcuna sede principale
   #{if remoteOffices.size()>0 }
     <table>
 	  <tr>
 		<th>Nome</th>
 		<th>Codice</th>
 		<th>Indirizzo</th>
+		<th>Disattiva</th>
 	  </tr>
       #{list items: remoteOffices, as: 'remoteOffice'}
+      #{if remoteOffice.office != null}
       <tr>
-        <td>${remoteOffice.name}</td>
+        <td><a data-toggle="modal" href="@{Offices.editOffice(remoteOffice.id)}" data-target="#myModal2">${remoteOffice.name}</a></td>
         <td>${remoteOffice.code}</td>
         <td>${remoteOffice.address}</td>
+        <td><a class="btn btn-small" href="@{Offices.disableRemoteOffice(remoteOffice.id)}" data-modal="#myModal3">Disabilita</a></td>
       </tr>	
+      #{/if}
+      #{else}
+      <tr>
+        <td bgcolor="#D2D2D2">${remoteOffice.name}</td>
+        <td bgcolor="#D2D2D2">${remoteOffice.code}</td>
+        <td bgcolor="#D2D2D2">${remoteOffice.address}</td>
+        <td bgcolor="#D2D2D2"><a class="btn btn-small" href="@{Offices.disableRemoteOffice(remoteOffice.id)}" data-modal="#myModal3" disabled="disabled">Disabilita</a></td>
+      </tr>	
+      #{/else}
       #{/list}
     </table>  
   #{/if}
@@ -60,7 +73,7 @@
 <div id="myModal2" class="modal hide fade mymodal-small" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3>Inserimento nuova sede distaccata</h3>
+    <h3>Modifica sede distaccata</h3>
   </div>
   <div class="modal-body">
     <p></p>
@@ -72,7 +85,19 @@
 </div>
 
 
-
+<div id="myModal3" class="modal hide fade mymodal-small" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3>Disabilita sede distaccata</h3>
+  </div>
+  <div class="modal-body">
+    <p></p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+   <!--   <button class="btn btn-primary">Save changes</button>-->
+  </div>
+</div>
 
 
 <div id="myModal1" class="modal hide fade mymodal-small" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
