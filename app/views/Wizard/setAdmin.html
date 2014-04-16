@@ -1,0 +1,37 @@
+#{extends 'Wizard/wizard.html' /}
+
+%{
+if (properties != null){
+	user_saved = properties.getProperty("user");
+	psw_saved = properties.getProperty("password");
+	pswr_saved = properties.getProperty("password_retype");
+}
+}%
+
+
+#{form @Wizard.setAdmin()}
+<div>
+<p>Inserire un nome utente</p>
+	<input placeholder="Username" type="text" name="user" id="user" value="${user_saved}" />
+	<p class="fError">#{error 'user' /}</p>
+</div>
+
+<div>
+	<p>Inserire la password</p>
+	<input placeholder="Password" type="password" name="password" id="password" value="${psw_saved}" />
+	<p class="fError">#{error 'password' /}</p>
+</div>
+
+<div>
+	<p>Reinserire la password</p>
+	<input placeholder="Retype Password" type="password" name="passwordRetype" id="password_retype" value="${pswr_saved}" />
+	<p class="fError">#{error 'passwordRetype' /}</p>
+</div>
+
+<div>
+	<input class="btn btn-default" type="submit"/>
+</div>
+
+#{/form}
+
+

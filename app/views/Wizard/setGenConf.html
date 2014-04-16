@@ -1,0 +1,60 @@
+#{extends 'Wizard/wizard.html' /}
+
+#{set 'moreStyles'}
+	<link rel="stylesheet" media="screen" href="@{'/public/bootstrap-datepicker/css/datepicker.css'}"/>
+#{/set}
+%{
+startDate = properties.getProperty("Data di inizio utilizzo");
+startTime = properties.getProperty("Inzio pausa pranzo");
+finishTime = properties.getProperty("Fine pausa pranzo");
+webStamp = properties.getProperty("Permetti timbrature web");
+}%
+
+#{form @Wizard.setGenConf()}
+<p>Data di inizio del programma</p>
+<div class="input-append">
+  <input type="text" datepicker value=#{if startDate} ${startDate} #{/if}#{else} "" #{/else} name="initUseStart"><span class="add-on"><p class="icon-calendar"></p></span>
+</div>
+<p class="fError">#{error 'initUseStart' /}</p>
+
+<div>
+	<p>Inizio pausa pranzo</p>
+	<input type="time" name="lunchPauseStart" value=#{if startTime} ${startTime} #{/if}#{else} "12:00" #{/else} />
+	<p class="fError">#{error 'lunchPauseStart' /}</p>
+</div>
+
+<div>
+	<p>Fine pausa pranzo</p>
+	<input type="time" name="lunchPauseStop" value=#{if finishTime} ${finishTime} #{/if}#{else} "15:00" #{/else} />
+	<p class="fError">#{error 'lunchPauseStop' /}</p>
+</div>
+
+<div>
+	<p>Permetti Timbrature Web</p>
+	<input type="checkbox" name="webStampingAllowed" #{if webStamp == "SI"} checked #{/if} />
+	<p class="fError">#{error 'lunchPauseStop' /}</p>
+</div>
+
+<div>
+	<input class="btn btn-default" type="submit"/>
+</div>
+
+#{/form}
+
+#{set 'moreScripts'}
+
+<script type="text/javascript">
+	
+$('input[datepicker]').datepicker({
+    format: "dd/mm/yyyy",
+    startView: 2,
+    todayBtn: "linked",
+    language: "it",
+    autoclose: true,
+    todayHighlight: true
+});
+</script>
+
+<script src="@{'/public/bootstrap-datepicker/js/bootstrap-datepicker.js'}" type="text/javascript"></script>
+
+#{/set}

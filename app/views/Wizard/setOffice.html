@@ -1,0 +1,28 @@
+#{extends 'Wizard/wizard.html' /}
+
+%{
+if (properties != null){
+	institute = properties.getProperty("Istituto");
+	site = properties.getProperty("Sede");
+}
+}%
+
+
+#{form @Wizard.setOffice()}
+<div>
+	<p>Inserire il nome Dell'istituto</p>
+	<input placeholder="Nome istituto" type="text" name="istituto" value="${institute}" />
+	<p class="fError">#{error 'istituto' /}</p>
+</div>
+
+<div>
+	<p>Inserire il codice Sede</p>
+	<input placeholder="Codice Sede" type="text" name="sede" value="${site}" />
+	<p class="fError">#{error 'sede' /}</p>
+</div>
+
+<div>
+	<input class="btn btn-default" type="submit"/>
+</div>
+
+#{/form}

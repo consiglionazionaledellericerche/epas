@@ -1,0 +1,69 @@
+#{extends 'Wizard/wizard.html' /}
+
+%{
+if (properties != null){
+	mese = properties.getProperty("Mese Patrono");
+	giorno = properties.getProperty("Giorno Patrono");
+}
+}%
+
+#{form @Wizard.setPatron()}
+<div>
+
+<p>Data del giorno del Patrono</p>
+  #{select 'giorno_patrono', value:giorno,class:'span1'}
+	#{option 1}1#{/option}
+	#{option 2}2#{/option}
+	#{option 3}3#{/option}
+	#{option 4}4#{/option}
+	#{option 5}5#{/option}
+	#{option 6}6#{/option}
+	#{option 7}7#{/option}
+	#{option 8}8#{/option}
+	#{option 9}9#{/option}
+	#{option 10}10#{/option}
+	#{option 11}11#{/option}
+	#{option 12}12#{/option}
+	#{option 13}13#{/option}
+	#{option 14}14#{/option}
+	#{option 15}15#{/option}
+	#{option 16}16#{/option}
+	#{option 17}17#{/option}
+	#{option 18}18#{/option}
+	#{option 19}19#{/option}
+	#{option 20}20#{/option}
+	#{option 21}21#{/option}
+	#{option 22}22#{/option}
+	#{option 23}23#{/option}
+	#{option 24}24#{/option}
+	#{option 25}25#{/option}
+	#{option 26}26#{/option}
+	#{option 27}27#{/option}
+	#{option 28}28#{/option}
+	#{option 29}29#{/option}
+	#{option 30}30#{/option}
+	#{option 31}31#{/option}
+  #{/select}
+
+  #{select 'mese_patrono', value:mese}
+	#{option 1}Gennaio#{/option}
+	#{option 2}Febbraio#{/option}
+	#{option 3}Marzo#{/option}
+	#{option 4}Aprile#{/option}
+	#{option 5}Maggio#{/option}
+	#{option 6}Giugno#{/option}
+	#{option 7}Luglio#{/option}
+	#{option 8}Agosto#{/option}
+	#{option 9}Settembre#{/option}
+	#{option 10}Ottobre#{/option}
+	#{option 11}Novembre#{/option}
+	#{option 12}Dicembre#{/option}
+  #{/select}
+</div>
+
+<div>
+	<input class="btn btn-default" type="submit"/>
+</div>
+
+#{/form}
+
