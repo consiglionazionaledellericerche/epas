@@ -1,0 +1,52 @@
+#{extends 'main_no_menu.html' /}
+#{set title:'Wizard di installazione ePas' /}
+
+#{set 'moreStyles'}
+<style type="text/css">
+#bottom{
+position:absolute;
+bottom: 90px;
+}
+
+.btn-group{
+	margin-bottom: 70px;
+}
+
+</style>
+ #{get 'moreStyles' /}
+#{/set}
+
+<div class="container" style="text-align:center;">
+
+<h1>${currentStep.name}</h1>
+
+<div class="btn-group">
+ #{list items:steps, as:'step'}
+	<a class="btn #{if currentStep.name == step.name} btn-info #{/if}
+			#{else}
+				#{if step.completed} btn-success #{/if}
+	     		#{else} btn-danger#{/else}
+			#{/else}" href="@{wizard.wizard(step.index)}">${step.name}</a>
+ #{/list}
+</div>
+
+#{doLayout/}
+
+
+<div id="bottom" class="container">
+<ul class="pager">
+  <li><a href="@{Wizard.wizard(currentStep.index-1)}">Previous</a></li>
+  <li><a href="@{Wizard.wizard(currentStep.index+1)}">Next</a></li>
+</ul>
+
+<div class="progress progress-success">
+  <div class="bar" style="width: ${percent}%">${percent}%</div>
+</div>
+
+</div>
+</div>
+
+
+
+
+
