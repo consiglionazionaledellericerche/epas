@@ -140,7 +140,7 @@ public class NavigationMenu extends Controller {
 		if(controller.equals("YearlyAbsences.yearlyAbsences"))
 			return "yearlyAbsences";
 		
-		if(controller.equals("VacationsAdmin.manageVacationCode"))
+		if(controller.equals("VacationsAdmin.manageVacationCode") || controller.equals("VacationsAdmin.list"))
 			return  "vacationsAdmin";
 		
 		if(controller.equals("Competences.showCompetences") || controller.equals("Competences.overtime") || controller.equals("Competences.totalOvertimeHours") || controller.equals("Competences.recapCompetences"))

@@ -21,14 +21,24 @@ public class Vacations extends Controller{
 		if( person == null ) {
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
+			return;
 		}
 		
 		//default l'anno corrente
     	if(anno==null)
 			anno = new LocalDate().getYear(); 
 
-    	Contract contract = person.getCurrentContract();
-    	VacationsRecap vacationsRecap = new VacationsRecap(person, anno, contract, new LocalDate(), true);
+		Contract contract = person.getCurrentContract();
+    	
+    	VacationsRecap vacationsRecap = null;
+    	try { 
+    		vacationsRecap = new VacationsRecap(person, anno, contract, new LocalDate(), true);
+    	} catch(IllegalStateException e) {
+    		flash.error("Impossibile calcolare la situazione ferie. Definire i dati di inizializzazione per %s %s.", person.name, person.surname);
+    		renderTemplate("Application/indexAdmin.html");
+    		return;
+    	}
+    	
     	if(vacationsRecap.vacationPeriodList==null)
     	{
     		Logger.debug("Period e' null");
@@ -50,11 +60,21 @@ public class Vacations extends Controller{
 		if( person == null ) {
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
+			return;
 		}
 
     	//Costruzione oggetto di riepilogo per la persona
 		Contract contract = person.getCurrentContract();
-    	VacationsRecap vacationsRecap = new VacationsRecap(person, anno, contract, new LocalDate(), true);
+		
+		VacationsRecap vacationsRecap = null;
+    	try { 
+    		vacationsRecap = new VacationsRecap(person, anno, contract, new LocalDate(), true);
+    	} catch(IllegalStateException e) {
+    		flash.error("Impossibile calcolare la situazione ferie. Definire i dati di inizializzazione per %s %s.", person.name, person.surname);
+    		renderTemplate("Application/indexAdmin.html");
+    		return;
+    	}
+		    	
     	if(vacationsRecap.vacationPeriodList==null)
     	{
     		Logger.debug("Period e' null");
@@ -74,11 +94,21 @@ public class Vacations extends Controller{
 		if( person == null ) {
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
+			return;
 		}
     	
     	//Costruzione oggetto di riepilogo per la persona
     	Contract contract = person.getCurrentContract();
-    	VacationsRecap vacationsRecap = new VacationsRecap(person, anno, contract, new LocalDate(), true);
+    	
+    	VacationsRecap vacationsRecap = null;
+    	try { 
+    		vacationsRecap = new VacationsRecap(person, anno, contract, new LocalDate(), true);
+    	} catch(IllegalStateException e) {
+    		flash.error("Impossibile calcolare la situazione ferie. Definire i dati di inizializzazione per %s %s.", person.name, person.surname);
+    		renderTemplate("Application/indexAdmin.html");
+    		return;
+    	}
+    	
     	if(vacationsRecap.vacationPeriodList==null)
     	{
     		Logger.debug("Period e' null");
@@ -97,11 +127,21 @@ public class Vacations extends Controller{
 		if( person == null ) {
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
+			return;
 		}
 		
     	//Costruzione oggetto di riepilogo per la persona
 		Contract contract = person.getCurrentContract();
-    	VacationsRecap vacationsRecap = new VacationsRecap(person, anno, contract, new LocalDate(), true);
+		
+    	VacationsRecap vacationsRecap = null;
+    	try { 
+    		vacationsRecap = new VacationsRecap(person, anno, contract, new LocalDate(), true);
+    	} catch(IllegalStateException e) {
+    		flash.error("Impossibile calcolare la situazione ferie. Definire i dati di inizializzazione per %s %s.", person.name, person.surname);
+    		renderTemplate("Application/indexAdmin.html");
+    		return;
+    	}
+    	
     	if(vacationsRecap.vacationPeriodList==null)
     	{
     		Logger.debug("Period e' null");

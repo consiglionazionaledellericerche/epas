@@ -27,6 +27,8 @@ public class VacationsRecap {
 	public Person person;
 	public int year;
 	public Contract activeContract = null;
+	public DateInterval activeContractInterval = null;
+	
 	public List<VacationPeriod>vacationPeriodList = null;	//lista vacation period del current contract
 	
 	public List<Absence> vacationDaysLastYearUsed = new ArrayList<Absence>();
@@ -43,17 +45,24 @@ public class VacationsRecap {
 		
 	public Integer vacationDaysCurrentYearTotal = 0;
 	public Integer permissionCurrentYearTotal = 0;
-
+	
+	public boolean isExpireLastYear = false;		/* true se le ferie dell'anno passato sono scadute */
+  
+	public boolean isExpireBeforeEndYear = false;	/* true se il contratto termina prima della fine dell'anno richiesto */
+	public boolean isActiveAfterBeginYear = false;	/* true se il contratto inizia dopo l'inizio dell'anno richiesto */
+	 
 	
 	/**
-	 * La situazione sui residui e maturazioni di ferie e permessi nell'anno.
+	 * La situazione sui residui e maturazioni di ferie e permessi nell'anno. 
 	 * @param person
 	 * @param year l'anno in considerazione
-	 * @param actualDate la data specifica nell'anno in cui si desidera fotografare la situazione, tipicamente oggi
-	 * @param considerExpireLastYear impostare true se non si vuole considerare il limite di scadenza per l'utilizzo
+	 * @param actualDate la data specifica dell'anno attuale in cui si desidera fotografare la situazione in termini di ferie e permessi maturati (tipicamente oggi)
+	 * @param considerExpireLastYear impostare false se non si vuole considerare il limite di scadenza per l'utilizzo
 	 * delle ferie dell'anno precedente (utile per assegnare il codice 37)
+	 * @throws IllegalStateException nel caso in cui la persona non abbia sufficienti riepiloghi annuali dovuti dalla mancanza di dati di inizializzazione
+	 * 
 	 */
-	public VacationsRecap(Person person, int year, Contract contract, LocalDate actualDate, boolean considerExpireLastYear)
+	public VacationsRecap(Person person, int year, Contract contract, LocalDate actualDate, boolean considerExpireLastYear) throws IllegalStateException
 	{
 		
 		this.person = person;
@@ -63,12 +72,15 @@ public class VacationsRecap {
 		this.activeContract = contract;
 		if(activeContract == null)
 			return;
-	
+		
+		this.activeContractInterval = this.activeContract.getContractDateInterval();
+		
 		//vacation periods list
 		this.vacationPeriodList = this.activeContract.getContractVacationPeriods();
 		if(vacationPeriodList == null)
 			return;
 		
+		LocalDate today = LocalDate.now();
 		LocalDate startLastYear = new LocalDate(this.year-1,1,1);	
 		LocalDate endLastYear = new LocalDate(this.year-1,12,31);	
 		LocalDate startYear = new LocalDate(this.year,1,1);
@@ -77,18 +89,44 @@ public class VacationsRecap {
 		DateInterval yearInter = new DateInterval(startYear, endYear);
 		DateInterval yearActualDateInter = new DateInterval(startYear, actualDate);
 
-		AbsenceType ab32 = AbsenceType.getAbsenceTypeByCode("32");
-		AbsenceType ab31 = AbsenceType.getAbsenceTypeByCode("31");
-		AbsenceType ab37 = AbsenceType.getAbsenceTypeByCode("37");
-		AbsenceType ab94 = AbsenceType.getAbsenceTypeByCode("94");
+		AbsenceType ab32  = AbsenceType.getAbsenceTypeByCode("32");
+		AbsenceType ab31  = AbsenceType.getAbsenceTypeByCode("31");
+		AbsenceType ab37  = AbsenceType.getAbsenceTypeByCode("37");
+		AbsenceType ab94  = AbsenceType.getAbsenceTypeByCode("94");
+		AbsenceType ab24  = AbsenceType.getAbsenceTypeByCode("24");
+		AbsenceType ab24S = AbsenceType.getAbsenceTypeByCode("24S");
+		AbsenceType ab25  = AbsenceType.getAbsenceTypeByCode("25");
+		
+		//Expire Last Year
 		
 		ConfYear conf = ConfYear.getConfYear(year);
 		LocalDate expireVacation = actualDate.withMonthOfYear(conf.monthExpiryVacationPastYear).withDayOfMonth(conf.dayExpiryVacationPastYear);
 		
+		this.isExpireLastYear = false;
+		
+		if( this.year < today.getYear() ) {		//query anni passati 
+			this.isExpireLastYear = true;
+		}
+		else if( this.year == today.getYear() && actualDate.isAfter(expireVacation)) {	//query anno attuale
+			this.isExpireLastYear = true;
+		}
+		
+		//Expire Before End Of Year / Active After Begin Of Year
+		
+		if(this.activeContractInterval.getEnd().isBefore(endYear))
+			this.isExpireBeforeEndYear = true;
+		if(this.activeContractInterval.getBegin().isAfter(startYear))
+			this.isActiveAfterBeginYear = true;
+		
 		//(1) Calcolo ferie usate dell'anno passato ---------------------------------------------------------------------------------------------------------------------------------
 		List<Absence> abs32Last = null;
+		List<Absence> abs24Last = null;
+		List<Absence> abs24SLast = null;
+		List<Absence> abs25Last = null;
+		
 		List<Absence> abs31Last = null;
 		List<Absence> abs37Last = null;
+		
 		
 		int vacationDaysPastYearUsedNew = 0;
 		if(activeContract.sourceDate!=null && activeContract.sourceDate.getYear()==year)
@@ -97,28 +135,37 @@ public class VacationsRecap {
 			vacationDaysPastYearUsedNew = vacationDaysPastYearUsedNew + activeContract.sourceVacationLastYearUsed;
 			DateInterval yearInterSource = new DateInterval(activeContract.sourceDate.plusDays(1), endYear);
 			abs31Last = getVacationDays(yearInterSource, activeContract, ab31);										
-			abs37Last = getVacationDays(yearInterSource, activeContract, ab37);										
+			abs37Last = getVacationDays(yearInterSource, activeContract, ab37);		
 			vacationDaysPastYearUsedNew = vacationDaysPastYearUsedNew + abs31Last.size() + abs37Last.size();
 		}
 		else if(activeContract.beginContract.getYear()==this.year)
 		{
 			//Non esiste anno passato nel presente contratto
 			vacationDaysPastYearUsedNew = 0;
+			abs31Last  = new ArrayList<Absence>();
+			abs37Last  = new ArrayList<Absence>();
 		}
 		else
 		{
 			//Popolare da contractYearRecap
 			ContractYearRecap recapPastYear = contract.getContractYearRecap(year-1);
+			if(recapPastYear==null)
+				throw new IllegalStateException("Mancano i riepiloghi annuali.");
 			vacationDaysPastYearUsedNew = recapPastYear.vacationCurrentYearUsed;
 			abs31Last = getVacationDays(yearInter, activeContract, ab31);						
 			abs37Last = getVacationDays(yearInter, activeContract, ab37);						
 			vacationDaysPastYearUsedNew = vacationDaysPastYearUsedNew + abs31Last.size() + abs37Last.size();
 		}
 		//costruisco la lista delle ferie per stampare le date (prendo tutto ciò che trovo nel db e poi riempo con null fino alla dimensione calcolata)
-		abs32Last = getVacationDays(lastYearInter, activeContract, ab32);
-		abs31Last = getVacationDays(yearInter, activeContract, ab31);
-		abs37Last = getVacationDays(yearInter, activeContract, ab37);
+		abs32Last  = getVacationDays(lastYearInter, activeContract, ab32);
+		abs24Last  = getVacationDays(lastYearInter, activeContract, ab24);
+		abs24SLast = getVacationDays(lastYearInter, activeContract, ab24S);
+		abs25Last  = getVacationDays(lastYearInter, activeContract, ab25);
+
 		this.vacationDaysLastYearUsed.addAll(abs32Last);
+		this.vacationDaysLastYearUsed.addAll(abs24Last);
+		this.vacationDaysLastYearUsed.addAll(abs24SLast);
+		this.vacationDaysLastYearUsed.addAll(abs25Last);
 		this.vacationDaysLastYearUsed.addAll(abs31Last);
 		this.vacationDaysLastYearUsed.addAll(abs37Last);
 		while(this.vacationDaysLastYearUsed.size()<vacationDaysPastYearUsedNew)
@@ -128,38 +175,36 @@ public class VacationsRecap {
 			this.vacationDaysLastYearUsed.add(nullAbsence);
 		}
 		
-		if(this.vacationDaysLastYearUsed.size()==vacationDaysPastYearUsedNew)
-			Logger.debug("Ok per %s %s ",person.name, person.surname);
-		else
-			Logger.debug("Nok %s %s", person.name, person.surname);
-		
 		
 		//(2) Calcolo ferie usate dell'anno corrente ---------------------------------------------------------------------------------------------------------------------------------
-		List<Absence> abs32Current = null;
-		/**
-		 * controllo che nell'anno ci siano dei codici di assenza di tipo 24/24S/25 (per ora abbastanza limitato eventualmente da rivedere)
-		 * di modo da conteggiarli come giorni di ferie utilizzati nell'anno
-		 */
-		List<Absence> abs2425Current = Absence.find("Select abs from Absence abs where abs.absenceType.code in (?,?,?) " +
-				"and abs.personDay.person = ? and abs.personDay.date between ? and ?", "24", "24S", "25", this.person, startYear, endYear).fetch();
-		Logger.debug("Giorni di codice 24, 25 o simili per %s %s: %d", person.name, person.surname, abs2425Current.size());
+		List<Absence> abs32Current  = null;
+		List<Absence> abs24Current  = null;
+		List<Absence> abs24SCurrent = null;
+		List<Absence> abs25Current  = null;
 		
 		int vacationDaysCurrentYearUsedNew = 0;
 		if(activeContract.sourceDate!=null && activeContract.sourceDate.getYear()==year)
 		{
 			vacationDaysCurrentYearUsedNew = vacationDaysCurrentYearUsedNew + activeContract.sourceVacationCurrentYearUsed;
 			DateInterval yearInterSource = new DateInterval(activeContract.sourceDate.plusDays(1), endYear);
-			abs32Current = getVacationDays(yearInterSource, activeContract, ab32);										
-			vacationDaysCurrentYearUsedNew = vacationDaysCurrentYearUsedNew + abs32Current.size() + abs2425Current.size();
+			abs32Current = getVacationDays(yearInterSource, activeContract, ab32);
+			abs24Current = getVacationDays(yearInterSource, activeContract, ab24);
+			abs24SCurrent = getVacationDays(yearInterSource, activeContract, ab24S);
+			abs25Current = getVacationDays(yearInterSource, activeContract, ab25);
+			vacationDaysCurrentYearUsedNew = vacationDaysCurrentYearUsedNew + abs32Current.size() + abs24Current.size() + abs24SCurrent.size() + abs25Current.size();
 		}
 		else
 		{
 			abs32Current = getVacationDays(yearInter, activeContract, ab32);
-			vacationDaysCurrentYearUsedNew = vacationDaysCurrentYearUsedNew + abs32Current.size() + abs2425Current.size();
+			abs24Current = getVacationDays(yearInter, activeContract, ab24);
+			abs24SCurrent = getVacationDays(yearInter, activeContract, ab24S);
+			abs25Current = getVacationDays(yearInter, activeContract, ab25);
+			vacationDaysCurrentYearUsedNew = vacationDaysCurrentYearUsedNew + abs32Current.size() + abs24Current.size() + abs24SCurrent.size() + abs25Current.size();
 		}
 		this.vacationDaysCurrentYearUsed.addAll(abs32Current);
-		if(abs2425Current.size() > 0)
-			this.vacationDaysCurrentYearUsed.addAll(abs2425Current);
+		this.vacationDaysCurrentYearUsed.addAll(abs24Current);
+		this.vacationDaysCurrentYearUsed.addAll(abs24SCurrent);
+		this.vacationDaysCurrentYearUsed.addAll(abs25Current);
 		while(this.vacationDaysCurrentYearUsed.size()<vacationDaysCurrentYearUsedNew)
 		{
 			Logger.debug("Inserita assenza nulla");
@@ -299,7 +344,11 @@ public class VacationsRecap {
 	public static List<Absence> getVacationDays(DateInterval inter, Contract contract, AbsenceType ab)
 	{
 		
-			
+		DateInterval contractInterInterval = DateUtility.intervalIntersection(inter, contract.getContractDateInterval());
+		if(contractInterInterval==null)
+			return new ArrayList<Absence>();
+		
+		/*
 		//calcolo inizio fine a seconda del contratto
 		if(inter.getBegin().isBefore(contract.beginContract))
 		{
@@ -310,14 +359,42 @@ public class VacationsRecap {
 			inter = new DateInterval(inter.getBegin(), contract.expireContract);
 		}
 		
+		
 		List<Absence> absences = Absence.find(
 				"SELECT ab "
 						+ "FROM Absence ab "
 						+ "WHERE ab.personDay.person = ? AND ( ab.personDay.date between ? AND ? ) AND ab.absenceType.code = ? order by ab.personDay.date",
 						contract.person, inter.getBegin(), inter.getEnd(), ab.code).fetch();
+		*/
+		
+		List<Absence> absences = Absence.find(
+				"SELECT ab "
+						+ "FROM Absence ab "
+						+ "WHERE ab.personDay.person = ? AND ( ab.personDay.date between ? AND ? ) AND ab.absenceType.code = ? order by ab.personDay.date",
+						contract.person, contractInterInterval.getBegin(), contractInterInterval.getEnd(), ab.code).fetch();
+		
 		
 		return absences;	
 
+	}
+	
+	/**
+	 * 
+	 * @param year l'anno per il quale vogliamo capire se le ferie dell'anno precedente sono scadute
+	 * @param expireDate l'ultimo giorno utile per usufruire delle ferie dell'anno precedente
+	 * @return
+	 */
+	public static boolean isVacationsLastYearExpired(int year, LocalDate expireDate)
+	{
+		LocalDate today = LocalDate.now();
+		
+		if( year < today.getYear() ) {		//query anni passati 
+			return true;
+		}
+		else if( year == today.getYear() && today.isAfter(expireDate)) {	//query anno attuale
+			return true;
+		}
+		return false;
 	}
 	
 	/**
@@ -332,9 +409,18 @@ public class VacationsRecap {
 	 * @return
 	 */
 	public static int remainingPastVacationsAs37(int year, Person person){
+		
 		Contract contract = person.getCurrentContract();
-		VacationsRecap vc = new VacationsRecap(person, year, contract, new LocalDate(), false);
-		return vc.vacationDaysLastYearNotYetUsed;
+		
+		VacationsRecap vr = null;
+		try {
+			vr = new VacationsRecap(person, year, contract, new LocalDate(), false);
+		}
+		catch(IllegalStateException e){
+			return 0;
+		}
+		
+		return vr.vacationDaysLastYearNotYetUsed;
 		
 	}
 	
