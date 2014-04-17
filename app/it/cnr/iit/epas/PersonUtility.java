@@ -280,8 +280,14 @@ public class PersonUtility {
 	public static AbsenceType whichVacationCode(Person person, LocalDate actualDate){
 
 		Contract contract = person.getCurrentContract();
-		VacationsRecap vr = new VacationsRecap(person, actualDate.getYear(), contract, actualDate, true);	
-
+		
+		VacationsRecap vr = null;
+    	try { 
+    		vr = new VacationsRecap(person, actualDate.getYear(), contract, actualDate, true);
+    	} catch(IllegalStateException e) {
+    		return null;
+    	}
+			
 		if(vr.vacationDaysLastYearNotYetUsed>0)
 			return AbsenceType.find("byCode", "31").first();
 

@@ -60,7 +60,7 @@ public final class PersonDao {
 				.leftJoin(qp.user, QUser.user)
 				.orderBy(qp.surname.asc(), qp.name.asc())
 				.distinct();
-		
+				
 		
 		
 		final BooleanBuilder condition = new BooleanBuilder();
@@ -76,11 +76,41 @@ public final class PersonDao {
 					qp.surname.startsWithIgnoreCase(name.get()));
 		}
 		condition.and(qc.onCertificate.isTrue());
-		condition.and(qc.beginContract.before(end));
-		condition.andAnyOf(qc.endContract.isNull().and(qc.expireContract.isNull()),
-				qc.expireContract.isNotNull().and(qc.expireContract.goe(start)),
-				qc.endContract.isNotNull().and(qc.endContract.goe(start)));
 		
+		condition.andAnyOf(
+				
+				//contratto terminato
+				qc.endContract.isNotNull().and(qc.beginContract.loe(end)).and(qc.endContract.goe(start)),
+
+				//contratto non terminato
+				qc.endContract.isNull().and(
+
+						//contratto tempo indeterminato
+						qc.expireContract.isNull().and(qc.beginContract.loe(end))
+						
+						.or(
+						
+						//contratto tempo determinato
+						qc.expireContract.isNotNull().and(qc.beginContract.loe(end)).and(qc.expireContract.goe(start))
+						
+						)
+					)
+				
+				);
+		
+		/*
+		condition.and(qc.beginContract.before(end));
+		
+		condition.andAnyOf(
+				qc.endContract.isNull().and(qc.expireContract.isNull()),											//contratto indeterminato non terminato
+				
+				qc.endContract.isNull().and( qc.expireContract.isNotNull().and(qc.expireContract.goe(start)) ), 	//contratto determinato non terminato
+				
+				qc.endContract.isNotNull().and(qc.endContract.goe(start)) );										//contratto terminato 
+				
+				*/
+				
+
 		query.where(condition);
 		
 		return ModelQuery.simpleResults(query, qp);

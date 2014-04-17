@@ -119,7 +119,7 @@ public class SwitchTemplate extends Controller{
 			break;
 
 		case vacationsAdmin:
-			VacationsAdmin.manageVacationCode();		
+			VacationsAdmin.list(year, null, null);		
 			break;
 
 		case competencesAdmin:
