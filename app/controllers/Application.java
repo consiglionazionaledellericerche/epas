@@ -34,11 +34,9 @@ public class Application extends Controller {
 		
 		//method
     	if (Security.check(Security.INSERT_AND_UPDATE_STAMPING)) {
-    		Logger.debug("put3:%s ", "stampingsAdmin");
     		session.put("methodSelected", "stampingsAdmin");
     		Application.indexAdmin();
     	} else {
-    		Logger.debug("put4:%s ", "stampings");
     		session.put("methodSelected", "stampings");
     		Stampings.stampings(new LocalDate().getYear(), new LocalDate().getMonthOfYear());
     		
