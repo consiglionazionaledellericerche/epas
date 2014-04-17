@@ -333,7 +333,10 @@ public class Contract extends Model {
 		
 		
 		//Controllo se ho sufficienti dati
-		LocalDate initUse = ConfGeneral.getConfGeneral().initUseProgram;
+		
+	//	LocalDate initUse = ConfGeneral.getConfGeneral().initUseProgram;
+		String dateInitUse = ConfGeneral.getFieldValue("init_use_program", person.office);
+		LocalDate initUse = new LocalDate(dateInitUse);
 		if(this.sourceDate!=null)
 			initUse = sourceDate.plusDays(1);
 		DateInterval personDatabaseInterval = new DateInterval(initUse, new LocalDate());
