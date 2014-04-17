@@ -45,4 +45,10 @@ public class Office extends Model{
      
     @OneToMany(mappedBy="office", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
     public List<Person> persons = new ArrayList<Person>();
+    
+    @OneToMany(mappedBy="office", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+    public List<ConfGeneral> confGeneral = new ArrayList<ConfGeneral>();
+    
+    @OneToMany(mappedBy="office", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+    public List<ConfYear> confYear = new ArrayList<ConfYear>();
 }
