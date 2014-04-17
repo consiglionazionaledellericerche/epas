@@ -66,6 +66,7 @@ GET		/offices/insertRemoteOffice				Offices.insertRemoteOffice
 POST	/insertRemoteOffice						Offices.save
 
 
+
 # Gestione persone
 #GET		/personList								Persons.list
 POST	/persons								Persons.save
