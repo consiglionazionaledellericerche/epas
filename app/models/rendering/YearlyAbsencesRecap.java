@@ -100,7 +100,7 @@ public class YearlyAbsencesRecap {
 			int absDay =  abs.personDay.date.getDayOfMonth();
 		
 			String value = table.get(absMonth, absDay);
-			if(value=="")
+			if(value.equals(""))
 			{
 				table.put(absMonth, absDay, abs.absenceType.code);
 			}
