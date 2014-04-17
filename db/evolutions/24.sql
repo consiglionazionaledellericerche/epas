@@ -149,7 +149,7 @@ meal_time_start_hour integer,
 meal_time_start_minute integer,
 meal_time_end_hour integer,
 meal_time_end_minute integer,
-CONSTRAINT conf_general_tmp_pkey PRIMARY KEY (id),
+CONSTRAINT conf_general_tmp_pkey PRIMARY KEY (id)
 );
 
 CREATE TABLE conf_general_tmp_history(
@@ -217,7 +217,7 @@ max_recovery_days_13 integer,
 max_recovery_days_49 integer,
 hour_max_to_calculate_worktime integer,
 year integer,
-CONSTRAINT conf_year_tmp_pkey PRIMARY KEY (id),
+CONSTRAINT conf_year_tmp_pkey PRIMARY KEY (id)
 );
 
 CREATE TABLE conf_year_tmp_history(
