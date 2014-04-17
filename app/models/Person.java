@@ -119,7 +119,7 @@ public class Person extends Model {
 	public PersonHourForOvertime personHourForOvertime;
 
 	@NotAudited
-	@OneToMany(mappedBy="person", fetch=FetchType.EAGER, cascade = {CascadeType.REMOVE})
+	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<Contract> contracts = new ArrayList<Contract>(); 
 
 	@NotAudited
@@ -302,6 +302,7 @@ public class Person extends Model {
 			if(DateUtility.isDateIntoInterval(date, c.getContractDateInterval()))
 				return c;
 		}
+		
 		return null;
 
 	}
@@ -315,6 +316,17 @@ public class Person extends Model {
 	 */
 	public Contract getCurrentContract(){
 		return getContract(LocalDate.now());
+	}
+	
+	public Contract getCurrentContractEager()
+	{
+		List<Contract> contracts = Contract.find("select c from Contract c where c.person = ?", this).fetch();
+		for(Contract c : contracts)
+		{
+			if(DateUtility.isDateIntoInterval(LocalDate.now(), c.getContractDateInterval()))
+				return c;
+		}
+		return null;
 	}
 	
 	
@@ -583,6 +595,10 @@ public class Person extends Model {
 				+ "c.endContract is not null and c.beginContract <= ? and c.endContract >= ? "
 				+ ") "
 				
+				
+				
+				
+							
 				//persona allowed
 				+"and p.office in :officeList "
 				

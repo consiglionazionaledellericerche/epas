@@ -2,6 +2,15 @@
 #{set titolo: 'Gestione dei tipi di ferie e dei permessi legge' /}
 
 <div class="container">
+
+<ul class="nav nav-tabs">
+  <li><a href="@{VacationsAdmin.list(year)}">Situazione ferie e permessi</a></li>
+  <li class="active"><a href="@{VacationsAdmin.manageVacationCode()}">Gestione Piani Ferie</a></li>
+</ul>
+
+</div>
+
+<div class="container">
   <p class="lead"><a data-toggle="modal" href="@{VacationsAdmin.insertVacationCode}" data-target="#modal-insert-vacationperiod">Inserisci nuovo piano ferie</a></p>
 </div>
 <div class="container centered">
