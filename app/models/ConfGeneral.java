@@ -86,25 +86,25 @@ public class ConfGeneral extends Model{
 	
 
 
-	public void setInitUseProgram(String initUseProgram, Office office) {
-		ConfGeneral conf = null;
-		try {
+//	public void setInitUseProgram(String initUseProgram, Office office) {
+//		ConfGeneral conf = null;
+//		try {
 //			String[] tokens = initUseProgram.split("-");
 //			Integer day = Integer.parseInt(tokens[0]);
 //			Integer month = Integer.parseInt(tokens[1]);
 //			Integer year = Integer.parseInt(tokens[2]);
-			conf = ConfGeneral.find("Select conf from ConfGeneral conf where conf.field = ? and conf.office = ?", 
-					"initUseProgram", office).first();
-			conf.fieldValue = initUseProgram;
-			conf.save();
-			//this.initUseProgram = new LocalDate(year, month, day);
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-			conf = null;
-		}
-	}
+//			conf = ConfGeneral.find("Select conf from ConfGeneral conf where conf.field = ? and conf.office = ?", 
+//					"initUseProgram", office).first();
+//			conf.fieldValue = initUseProgram;
+//			conf.save();
+//			//this.initUseProgram = new LocalDate(year, month, day);
+//		}
+//		catch(Exception e)
+//		{
+//			e.printStackTrace();
+//			conf = null;
+//		}
+//	}
 	
 	public static ConfGeneral getConfGeneral()
 	{
