@@ -1,24 +1,22 @@
 #{extends 'Wizard/wizard.html' /}
 
 %{
-if (properties != null){
 	institute = properties.getProperty("Istituto");
-	site = properties.getProperty("Sede");
-}
+	siteCode = properties.getProperty("Codice Sede");
 }%
 
 
 #{form @Wizard.setOffice()}
 <div>
 	<p>Inserire il nome Dell'istituto</p>
-	<input placeholder="Nome istituto" type="text" name="istituto" value="${institute}" />
-	<p class="fError">#{error 'istituto' /}</p>
+	<input placeholder="Nome istituto" type="text" name="institute" value="${institute}" />
+	<p class="fError">#{error 'institute' /}</p>
 </div>
 
 <div>
 	<p>Inserire il codice Sede</p>
-	<input placeholder="Codice Sede" type="text" name="sede" value="${site}" />
-	<p class="fError">#{error 'sede' /}</p>
+	<input placeholder="Codice Sede" type="text" name="siteCode" value="${siteCode}" />
+	<p class="fError">#{error 'siteCode' /}</p>
 </div>
 
 <div>

@@ -1,0 +1,44 @@
+#{extends 'Wizard/wizard.html' /}
+
+#{set 'moreStyles'}
+<style>
+fieldset{
+-webkit-border-radius: 8px;
+-moz-border-radius: 8px;
+border-radius: 8px;
+margin: 2% 20%;
+}
+.pager{
+display: none;
+}
+#progressBar{
+margin-top: 30px;
+position: static;
+width: 100%;
+}
+p > strong:nth-of-type(2){
+color: blue;
+text-align: right;
+}
+
+
+</style>
+#{/set}
+
+	<fieldset>
+		<legend>Riepilogo dati</legend>
+
+
+		#{list items:properties.stringPropertyNames(), as:'property'}
+			<p><strong>${property.toString()}</strong> - <strong>${properties.getProperty(property.toString())}</strong></p>		
+		#{/list}
+		
+
+	</fieldset>
+	
+	<a href="@{Wizard.wizard(1)}"><button class="btn">Modifica</button></a>
+	<a href="@{Wizard.wizard(1)}"><button class="btn">Conferma</button></a>
+
+
+
+

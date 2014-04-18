@@ -88,7 +88,7 @@ public class ConfGeneral extends Model{
 			Integer day = Integer.parseInt(tokens[0]);
 			Integer month = Integer.parseInt(tokens[1]);
 			Integer year = Integer.parseInt(tokens[2]);
-			this.initUseProgram = new LocalDate(year, month, day);
+			this.initUseProgram = new LocalDate(year, month, day);			
 		}
 		catch(Exception e)
 		{

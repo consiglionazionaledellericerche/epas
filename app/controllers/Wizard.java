@@ -13,8 +13,11 @@ import org.joda.time.format.DateTimeFormatterBuilder;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 
+import play.Logger;
 import play.cache.Cache;
 import play.data.validation.*;
 import play.mvc.Controller;
@@ -59,18 +62,15 @@ public class Wizard extends Controller {
 					WizardStep.of("Nuovo ufficio", "setOffice",2),
 					WizardStep.of("Configurazione Giorno Patrono", "setPatron",3),
 					WizardStep.of("Parametri di configurazione generale", "setGenConf",4),
-					WizardStep.of("Configurazione annuale", "setConfYear", 5));
+					WizardStep.of("Configurazione annuale", "setConfYear", 5),
+					WizardStep.of("Riepilogo", "summary",6));
 	}
 	
-    public static void wizard(@Range(min = 0, max = 5)int step) {
+    public static void wizard(int step) {
     	
-    	if(validation.hasError("step")){
-    		step = 0;
-    	}  
-    
     	List<WizardStep> steps = Cache.get(STEPS_KEY, List.class);
     	Properties properties = Cache.get(PROPERTIES_KEY, Properties.class);
-    	
+    	double percent = 0;
     	
     	if (steps == null) {
     		steps = createSteps();
@@ -79,32 +79,37 @@ public class Wizard extends Controller {
     			properties.load(new FileInputStream("conf/properties.conf"));	
     		}
     		catch(IOException f){
-    			flash.error(f.getMessage());  		
+    			Logger.info("Creato il file properties.conf per la procedura di Wizard");	
     		}
     	
     		Cache.safeAdd(STEPS_KEY, steps,"10mn");
     		Cache.safeAdd(PROPERTIES_KEY, properties,"10mn");
        	}
-		
-    	int stepsCompleted = Collections2.filter(steps, 
-    		new Predicate<WizardStep>() {
-    	    @Override
-    	    public boolean apply(WizardStep p) {
-    	        return p.completed;
-    	    }
-    	}).size();
-
-    	double percent = stepsCompleted*(100/steps.size());
     	
-    	if(step != 0){
+    	if(step>0 && step<=steps.size()){
+    		
+    		int stepsCompleted = Collections2.filter(steps, 
+    	    		new Predicate<WizardStep>() {
+    	    	    @Override
+    	    	    public boolean apply(WizardStep p) {
+    	    	        return p.completed;
+    	    	    }
+    	    	}).size();
+    		
+    		percent = stepsCompleted*(100/steps.size());
+    		
     		if(!steps.get(step-1).completed){
     			step = stepsCompleted;
         	}
     	}
     	
+    	else{
+    		step=0;
+    	}
+    	
     	WizardStep currentStep = steps.get(step);
     	
-    	if(properties != null){
+    	if(properties != null && step == 6){
     	try{
     		properties.store(new FileOutputStream("conf/properties.conf"), "File impostazioni wizard");
     	}
@@ -112,7 +117,6 @@ public class Wizard extends Controller {
     		flash.error(e.getMessage());    		
     	}
     	}
-
     	render("@" + currentStep.template, steps,currentStep, percent, properties);
     }
 
@@ -150,9 +154,8 @@ public class Wizard extends Controller {
     	
     	if(steps != null){
     		
-    		properties.setProperty("user",user);
-    		properties.setProperty("password",password);
-    		properties.setProperty("password_retype",passwordRetype);
+    		properties.setProperty("Nome Amministratore",user);
+    		properties.setProperty("Password Amministratore",password);
 
     		steps.get(1).complete();
     		Cache.safeSet(STEPS_KEY, steps, "10mn");
@@ -166,8 +169,8 @@ public class Wizard extends Controller {
      * STEP 3 "Inserimento nome istituto e codice sede"
      */
     public static void setOffice(
-    		@Required String istituto,
-    		@Required String sede ){
+    		@Required String institute,
+    		@Required String siteCode ){
 
     	if (validation.hasErrors()){
     	    params.flash(); 
@@ -180,8 +183,8 @@ public class Wizard extends Controller {
     	
     	if(steps != null){
     		
-    		properties.setProperty("Istituto",istituto);
-    		properties.setProperty("Sede",sede);
+    		properties.setProperty("Istituto",institute);
+    		properties.setProperty("Codice Sede",siteCode);
 
     		steps.get(2).complete();
     		Cache.safeSet(STEPS_KEY, steps, "10mn");
@@ -194,7 +197,7 @@ public class Wizard extends Controller {
     /**
      * STEP 4 Inserimento Giorno Patrono"
      */
-    public static void setPatron(@Required String mese_patrono,@Required String giorno_patrono){
+    public static void setPatron(@Required String patronMonth,@Required String patronDay){
 
     	if (validation.hasErrors()){
     	    params.flash(); 
@@ -207,8 +210,8 @@ public class Wizard extends Controller {
     	
     	if(steps != null){
     		
-    		properties.setProperty("Mese Patrono",mese_patrono);
-    		properties.setProperty("Giorno Patrono",giorno_patrono);
+    		properties.setProperty("Mese Patrono",patronMonth);
+    		properties.setProperty("Giorno Patrono",patronDay);
 
     		steps.get(3).complete();
     		Cache.safeSet(STEPS_KEY, steps, "10mn");
@@ -279,18 +282,18 @@ public class Wizard extends Controller {
     		
     		properties.setProperty("Giorno scadenza Vacanze anno passato",dayVacantionExp);
     		properties.setProperty("Mese scadenza Vacanze anno passato",monthVacantionExp);
-    		properties.setProperty("Mese scadenza giorni di recupero 13",monthExpireRecoveryDaysOneThree);
-    		properties.setProperty("Numero massimo giorni di recupero 13",maxRecoveryDaysOneThree);
-    		properties.setProperty("Mese scadenza giorni di recupero 49",monthExpireRecoveryDaysFourNine);
-    		properties.setProperty("Numero massimo giorni di recupero 49",maxRecoveryDaysFourNine);
-    		properties.setProperty("Soglia oraria massima per il calcolo delle timbrature giornaliere",hourMaxToCalculateWorkTime);    		
- 
+    		properties.setProperty("Mese scadenza giorni di recupero 1-3",monthExpireRecoveryDaysOneThree);
+    		properties.setProperty("Numero massimo giorni di recupero 1-3",maxRecoveryDaysOneThree);
+    		properties.setProperty("Mese scadenza giorni di recupero 4-9",monthExpireRecoveryDaysFourNine);
+    		properties.setProperty("Numero massimo giorni di recupero 4-9",maxRecoveryDaysFourNine);
+    		properties.setProperty("Soglia oraria calcolo timbrature giornaliere",hourMaxToCalculateWorkTime);    
+    		    		
     		steps.get(5).complete();
     		Cache.safeSet(STEPS_KEY, steps, "10mn");
     		Cache.safeSet(PROPERTIES_KEY, properties, "10mn");
+    		
     	}
-    	renderText("wizard ok");
-//       	wizard(6);
+       	wizard(6);
     }
     
 }
