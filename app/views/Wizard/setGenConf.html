@@ -4,35 +4,35 @@
 	<link rel="stylesheet" media="screen" href="@{'/public/bootstrap-datepicker/css/datepicker.css'}"/>
 #{/set}
 %{
-startDate = properties.getProperty("Data di inizio utilizzo");
-startTime = properties.getProperty("Inzio pausa pranzo");
-finishTime = properties.getProperty("Fine pausa pranzo");
-webStamp = properties.getProperty("Permetti timbrature web");
+initUseStart = properties.getProperty("Data di inizio utilizzo");
+lunchPauseStart = properties.getProperty("Inzio pausa pranzo");
+lunchPauseStop = properties.getProperty("Fine pausa pranzo");
+webStampingAllowed = properties.getProperty("Permetti timbrature web");
 }%
 
 #{form @Wizard.setGenConf()}
 <p>Data di inizio del programma</p>
 <div class="input-append">
-  <input type="text" datepicker value=#{if startDate} ${startDate} #{/if}#{else} "" #{/else} name="initUseStart"><span class="add-on"><p class="icon-calendar"></p></span>
+  <input type="text" datepicker value="${initUseStart}" name="initUseStart"><span class="add-on"><p class="icon-calendar"></p></span>
 </div>
 <p class="fError">#{error 'initUseStart' /}</p>
 
 <div>
 	<p>Inizio pausa pranzo</p>
-	<input type="time" name="lunchPauseStart" value=#{if startTime} ${startTime} #{/if}#{else} "12:00" #{/else} />
+	<input type="time" name="lunchPauseStart" value="${lunchPauseStart}" />
 	<p class="fError">#{error 'lunchPauseStart' /}</p>
 </div>
 
 <div>
 	<p>Fine pausa pranzo</p>
-	<input type="time" name="lunchPauseStop" value=#{if finishTime} ${finishTime} #{/if}#{else} "15:00" #{/else} />
+	<input type="time" name="lunchPauseStop" value="${lunchPauseStop}" />
 	<p class="fError">#{error 'lunchPauseStop' /}</p>
 </div>
 
 <div>
 	<p>Permetti Timbrature Web</p>
-	<input type="checkbox" name="webStampingAllowed" #{if webStamp == "SI"} checked #{/if} />
-	<p class="fError">#{error 'lunchPauseStop' /}</p>
+	<input type="checkbox" name="webStampingAllowed" #{if webStampingAllowed == "SI"} checked #{/if} />
+	<p class="fError">#{error 'webStampingAllowed' /}</p>
 </div>
 
 <div>
