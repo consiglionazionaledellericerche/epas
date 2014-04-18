@@ -23,8 +23,10 @@ import models.Absence;
 import models.CertificatedData;
 import models.Competence;
 import models.ConfGeneral;
+import models.Office;
 import models.Person;
 import models.PersonMonthRecap;
+import models.enumerate.ConfigurationFields;
 import play.Logger;
 import play.cache.Cache;
 import play.mvc.Controller;
@@ -60,9 +62,12 @@ public class UploadSituation extends Controller{
 	@Check(Security.UPLOAD_SITUATION)
 	public static void loginAttestati(Integer year, Integer month) {
 		//Configuration conf = Configuration.getCurrentConfiguration();
-		ConfGeneral conf = ConfGeneral.getConfGeneral();
-		String urlToPresence = conf.urlToPresence;
-		String attestatiLogin = params.get("attestatiLogin") == null ? conf.userToPresence : params.get("attestatiLogin"); 
+//		ConfGeneral conf = ConfGeneral.getConfGeneral();
+		Office office = Security.getUser().person.office;
+		String urlToPresence = ConfGeneral.getFieldValue(ConfigurationFields.UrlToPresence.description, office);
+		String userToPresence = ConfGeneral.getFieldValue(ConfigurationFields.UserToPresence.description, office);
+//		String urlToPresence = conf.urlToPresence;
+		String attestatiLogin = params.get("attestatiLogin") == null ? userToPresence : params.get("attestatiLogin"); 
 
 		render(year, month, urlToPresence, attestatiLogin);
 	}
@@ -83,7 +88,8 @@ public class UploadSituation extends Controller{
 			Application.indexAdmin();
 		}
 
-		ConfGeneral conf = ConfGeneral.getConfGeneral();
+//		ConfGeneral conf = ConfGeneral.getConfGeneral();
+		Integer seatCode = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.SeatCode.description, Security.getUser().person.office));
 		List<Person> personList = Person.find("Select p from Person p where p.number <> ? and p.number is not null order by p.number", 0).fetch();
 		Logger.debug("La lista di nomi è composta da %s persone ", personList.size());
 		List<Absence> absenceList = null;
@@ -96,7 +102,7 @@ public class UploadSituation extends Controller{
 		FileWriter writer = new FileWriter(tempFile, true);
 		try {
 			BufferedWriter out = new BufferedWriter(writer);
-			out.write(conf.seatCode.toString());
+			out.write(seatCode.toString());
 			out.write(' ');
 			out.write(new String(month.toString()+year.toString()));
 			out.newLine();
@@ -174,7 +180,7 @@ public class UploadSituation extends Controller{
 				redirect("Application.indexAdmin");
 			}
 
-			String urlToPresence = ConfGeneral.getConfGeneral().urlToPresence;
+			String urlToPresence = ConfGeneral.getFieldValue(ConfigurationFields.UrlToPresence.description, Security.getUser().person.office);
 			
 			try {
 				//1) LOGIN

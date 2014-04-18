@@ -26,6 +26,7 @@ import models.PersonShiftDay;
 import models.Qualification;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
+import models.enumerate.ConfigurationFields;
 import models.enumerate.JustifiedTimeAtWork;
 import models.rendering.VacationsRecap;
 
@@ -555,7 +556,7 @@ public class Absences extends Controller{
 		int countHowManyCheck = 0;
 		while(!actualDate.isAfter(dateTo))
 		{
-			
+			Integer maxRecoveryDaysOneThree = ConfYear.getFieldValue(ConfigurationFields.MaxRecoveryDays13.description, actualDate.getYear(), person.office);
 			ConfYear config = ConfYear.getConfYear(actualDate.getYear());
 	
 			//verifica se ha esaurito il bonus per l'anno
@@ -568,7 +569,7 @@ public class Absences extends Controller{
 				setParameter("code", "91");
 				List<Object> resultList = query.getResultList();
 				Logger.debug("Il numero di assenze con codice %s fino a oggi è %d", absenceType.code, resultList.size());
-				if(resultList.size() >= config.maxRecoveryDaysOneThree){
+				if(resultList.size() >= maxRecoveryDaysOneThree){
 					actualDate = actualDate.plusDays(1);
 					continue;
 				}

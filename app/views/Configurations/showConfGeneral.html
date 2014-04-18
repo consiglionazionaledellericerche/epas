@@ -12,19 +12,19 @@
   <table class="table tablenoborder">
     <tr>
 	  <td class="span7">Data di inizio uso di questo programma</td>
-	  <td><strong>${confGeneral.initUseProgram}</strong></td>
+	  <td><strong>${initUseProgram}</strong></td>
     </tr>
     <tr>	
 	  <td class="span7">Nome dell'istituto</td>
-	  <td><strong>${confGeneral.instituteName}</strong></td>
+	  <td><strong>${instituteName}</strong></td>
     </tr>	
     <tr>	
       <td class="span7">Codice sede</td>
-      <td><strong>${confGeneral.seatCode}</strong></td>
+      <td><strong>${seatCode}</strong></td>
     </tr>
     <tr>
       <td>Festa del patrono</td>
-      <td><strong>${confGeneral.dayOfPatron} / ${confGeneral.monthOfPatron}</strong></td>
+      <td><strong>${dayOfPatron} / ${monthOfPatron}</strong></td>
     </tr>
   </table>  
 </fieldset>
@@ -42,7 +42,7 @@
           id="select1" 
           data-type="select" 
           data-pk="webStampingAllowed" 
-          data-value="['${confGeneral.webStampingAllowed}']"
+          data-value="['${webStampingAllowed}']"
           data-source="[{'true': 'SI'},{'false': 'NO'}]" 
           data-url="@{saveConfGeneral()}" 
           class="editable editable-click"></a>
@@ -75,15 +75,15 @@
   <table class="table tablenoborder">
     <tr>	
       <td class="span7">URL per gestione attestato presenza dell'amministrazione centrale </td>
-      <td><strong><a href="#" id="simpleText1" data-type="text" data-pk="urlToPresence" data-url="@{saveConfGeneral()}" class="editable editable-click">${confGeneral.urlToPresence}</a></strong></td>
+      <td><strong><a href="#" id="simpleText1" data-type="text" data-pk="urlToPresence" data-url="@{saveConfGeneral()}" class="editable editable-click">${urlToPresence}</a></strong></td>
     </tr>
     <tr>	
       <td class="span7">User per gestione attestato presenza dell'amministrazione centrale</td>
-      <td><strong><a href="#" id="simpleText2" data-type="text" data-pk="userToPresence" data-url="@{saveConfGeneral()}" class="editable editable-click">${confGeneral.userToPresence}</a></strong></td>
+      <td><strong><a href="#" id="simpleText2" data-type="text" data-pk="userToPresence" data-url="@{saveConfGeneral()}" class="editable editable-click">${userToPresence}</a></strong></td>
     </tr>
     <tr>	
       <td class="span7">Password per gestione attestato presenza dell'amministrazione centrale</td>
-      <td><strong><a href="#" id="simpleText3" data-type="text" data-pk="passwordToPresence" data-url="@{saveConfGeneral()}" class="editable editable-click">${confGeneral.passwordToPresence}</a></strong></td>
+      <td><strong><a href="#" id="simpleText3" data-type="text" data-pk="passwordToPresence" data-url="@{saveConfGeneral()}" class="editable editable-click">${passwordToPresence}</a></strong></td>
     </tr>
     <tr>	
       <td class="span7">Numero di colonne di entrata/uscita da visualizzare</td>
@@ -93,7 +93,7 @@
 	          id="select2" 
               data-type="select" 
               data-pk="numberOfViewingCoupleColumn" 
-              data-value="[${confGeneral.numberOfViewingCoupleColumn}]"
+              data-value="[${numberOfViewingCoupleColumn}]"
               data-source="[{1: '1'},{2: '2'},{3: '3'},{4: '4'},{5: '5'}]" 
               data-url="@{saveConfGeneral()}" 
               class="editable editable-click"></a>

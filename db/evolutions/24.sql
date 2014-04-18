@@ -107,13 +107,30 @@ insert into conf_year_tmp (field, year, office_id) values('max_recovery_days_13'
 insert into conf_year_tmp (field, year, office_id) values('max_recovery_days_49', 2014, 1);
 insert into conf_year_tmp (field, year, office_id) values('hour_max_to_calculate_worktime', 2014, 1);
 
-UPDATE conf_year_tmp SET field_value = conf_year.month_expiry_vacation_past_year from conf_year where conf_year.year = 2014 and conf_year_tmp.field = 'month_expiry_vacation_past_year';
-UPDATE conf_year_tmp SET field_value = conf_year.day_expiry_vacation_past_year from conf_year where conf_year.year = 2014 and conf_year_tmp.field = 'day_expiry_vacation_past_year';
-UPDATE conf_year_tmp SET field_value = conf_year.month_expire_recovery_days_13 from conf_year where conf_year.year = 2014 and conf_year_tmp.field = 'month_expire_recovery_days_13';
-UPDATE conf_year_tmp SET field_value = conf_year.month_expire_recovery_days_49 from conf_year where conf_year.year = 2014 and conf_year_tmp.field = 'month_expire_recovery_days_49';
-UPDATE conf_year_tmp SET field_value = conf_year.max_recovery_days_13 from conf_year where conf_year.year = 2014 and conf_year_tmp.field = 'max_recovery_days_13';
-UPDATE conf_year_tmp SET field_value = conf_year.max_recovery_days_49 from conf_year where conf_year.year = 2014 and conf_year_tmp.field = 'max_recovery_days_49';
-UPDATE conf_year_tmp SET field_value = conf_year.hour_max_to_calculate_worktime from conf_year where conf_year.year = 2014 and conf_year_tmp.field = 'hour_max_to_calculate_worktime';
+insert into conf_year_tmp (field, year, office_id) values('month_expiry_vacation_past_year', 2013, 1);
+insert into conf_year_tmp (field, year, office_id) values('day_expiry_vacation_past_year', 2013, 1);
+insert into conf_year_tmp (field, year, office_id) values('month_expire_recovery_days_13', 2013, 1);
+insert into conf_year_tmp (field, year, office_id) values('month_expire_recovery_days_49', 2013, 1);
+insert into conf_year_tmp (field, year, office_id) values('max_recovery_days_13', 2013, 1);
+insert into conf_year_tmp (field, year, office_id) values('max_recovery_days_49', 2013, 1);
+insert into conf_year_tmp (field, year, office_id) values('hour_max_to_calculate_worktime', 2013, 1);
+
+UPDATE conf_year_tmp SET field_value = conf_year.month_expiry_vacation_past_year from conf_year where conf_year.year = 2014 and conf_year_tmp.year = 2014 and conf_year_tmp.field = 'month_expiry_vacation_past_year';
+UPDATE conf_year_tmp SET field_value = conf_year.day_expiry_vacation_past_year from conf_year where conf_year.year = 2014 and conf_year_tmp.year = 2014 and conf_year_tmp.field = 'day_expiry_vacation_past_year';
+UPDATE conf_year_tmp SET field_value = conf_year.month_expire_recovery_days_13 from conf_year where conf_year.year = 2014 and conf_year_tmp.year = 2014 and conf_year_tmp.field = 'month_expire_recovery_days_13';
+UPDATE conf_year_tmp SET field_value = conf_year.month_expire_recovery_days_49 from conf_year where conf_year.year = 2014 and conf_year_tmp.year = 2014 and conf_year_tmp.field = 'month_expire_recovery_days_49';
+UPDATE conf_year_tmp SET field_value = conf_year.max_recovery_days_13 from conf_year where conf_year.year = 2014 and conf_year_tmp.year = 2014 and conf_year_tmp.field = 'max_recovery_days_13';
+UPDATE conf_year_tmp SET field_value = conf_year.max_recovery_days_49 from conf_year where conf_year.year = 2014 and conf_year_tmp.year = 2014 and conf_year_tmp.field = 'max_recovery_days_49';
+UPDATE conf_year_tmp SET field_value = conf_year.hour_max_to_calculate_worktime from conf_year where conf_year.year = 2014 and conf_year_tmp.year = 2014 and conf_year_tmp.field = 'hour_max_to_calculate_worktime';
+
+UPDATE conf_year_tmp SET field_value = conf_year.month_expiry_vacation_past_year from conf_year where conf_year.year = 2013 and conf_year_tmp.year = 2013 and conf_year_tmp.field = 'month_expiry_vacation_past_year';
+UPDATE conf_year_tmp SET field_value = conf_year.day_expiry_vacation_past_year from conf_year where conf_year.year = 2013 and conf_year_tmp.year = 2013 and conf_year_tmp.field = 'day_expiry_vacation_past_year';
+UPDATE conf_year_tmp SET field_value = conf_year.month_expire_recovery_days_13 from conf_year where conf_year.year = 2013 and conf_year_tmp.year = 2013 and conf_year_tmp.field = 'month_expire_recovery_days_13';
+UPDATE conf_year_tmp SET field_value = conf_year.month_expire_recovery_days_49 from conf_year where conf_year.year = 2013 and conf_year_tmp.year = 2013 and conf_year_tmp.field = 'month_expire_recovery_days_49';
+UPDATE conf_year_tmp SET field_value = conf_year.max_recovery_days_13 from conf_year where conf_year.year = 2013 and conf_year_tmp.year = 2013 and conf_year_tmp.field = 'max_recovery_days_13';
+UPDATE conf_year_tmp SET field_value = conf_year.max_recovery_days_49 from conf_year where conf_year.year = 2013 and conf_year_tmp.year = 2013 and conf_year_tmp.field = 'max_recovery_days_49';
+UPDATE conf_year_tmp SET field_value = conf_year.hour_max_to_calculate_worktime from conf_year where conf_year.year = 2013 and conf_year_tmp.year = 2013 and conf_year_tmp.field = 'hour_max_to_calculate_worktime';
+
 
 DROP TABLE conf_year_history;
 DROP TABLE conf_year;
@@ -238,14 +255,24 @@ CONSTRAINT revinfo_conf_year_tmp_history_fkey FOREIGN KEY (_revision)
 );
 
 insert into conf_year_tmp (id, year) values (1, 2014);
+insert into conf_year_tmp (id, year) values (2, 2013);
 
-UPDATE conf_year_tmp SET month_expiry_vacation_past_year = conf_year.field_value from conf_year where conf_year.field = 'month_expiry_vacation_past_year' and conf_year_tmp.year = 2014;
-UPDATE conf_year_tmp SET day_expiry_vacation_past_year = conf_year.field_value from conf_year where conf_year.field = 'day_expiry_vacation_past_year' and conf_year_tmp.year = 2014;
-UPDATE conf_year_tmp SET month_expire_recovery_days_13 = conf_year.field_value from conf_year where conf_year.field = 'month_expire_recovery_days_13' and conf_year_tmp.year = 2014;
-UPDATE conf_year_tmp SET month_expire_recovery_days_49 = conf_year.field_value from conf_year where conf_year.field = 'month_expire_recovery_days_49' and conf_year_tmp.year = 2014;
-UPDATE conf_year_tmp SET max_recovery_days_13 = conf_year.field_value from conf_year where conf_year.year = 'max_recovery_days_13' and conf_year_tmp.year = 2014;
-UPDATE conf_year_tmp SET max_recovery_days_49 = conf_year.field_value from conf_year where conf_year.year = 'max_recovery_days_49' and conf_year_tmp.year = 2014;
-UPDATE conf_year_tmp SET hour_max_to_calculate_worktime = conf_year.field_value from conf_year where conf_year.field = 'hour_max_to_calculate_worktime' and conf_year_tmp.year = 2014;
+UPDATE conf_year_tmp SET month_expiry_vacation_past_year = conf_year.field_value from conf_year where conf_year.field = 'month_expiry_vacation_past_year' and conf_year.year = 2014 and conf_year_tmp.year = 2014;
+UPDATE conf_year_tmp SET day_expiry_vacation_past_year = conf_year.field_value from conf_year where conf_year.field = 'day_expiry_vacation_past_year' and conf_year.year = 2014 and conf_year_tmp.year = 2014;
+UPDATE conf_year_tmp SET month_expire_recovery_days_13 = conf_year.field_value from conf_year where conf_year.field = 'month_expire_recovery_days_13' and conf_year.year = 2014 and conf_year_tmp.year = 2014;
+UPDATE conf_year_tmp SET month_expire_recovery_days_49 = conf_year.field_value from conf_year where conf_year.field = 'month_expire_recovery_days_49' and conf_year.year = 2014 and conf_year_tmp.year = 2014;
+UPDATE conf_year_tmp SET max_recovery_days_13 = conf_year.field_value from conf_year where conf_year.year = 'max_recovery_days_13' and conf_year.year = 2014 and conf_year_tmp.year = 2014;
+UPDATE conf_year_tmp SET max_recovery_days_49 = conf_year.field_value from conf_year where conf_year.year = 'max_recovery_days_49' and conf_year.year = 2014 and conf_year_tmp.year = 2014;
+UPDATE conf_year_tmp SET hour_max_to_calculate_worktime = conf_year.field_value from conf_year where conf_year.field = 'hour_max_to_calculate_worktime' and conf_year.year = 2014 and conf_year_tmp.year = 2014;
+
+UPDATE conf_year_tmp SET month_expiry_vacation_past_year = conf_year.field_value from conf_year where conf_year.field = 'month_expiry_vacation_past_year' and conf_year.year = 2013 and conf_year_tmp.year = 2013;
+UPDATE conf_year_tmp SET day_expiry_vacation_past_year = conf_year.field_value from conf_year where conf_year.field = 'day_expiry_vacation_past_year' and conf_year.year = 2013 and conf_year_tmp.year = 2013;
+UPDATE conf_year_tmp SET month_expire_recovery_days_13 = conf_year.field_value from conf_year where conf_year.field = 'month_expire_recovery_days_13' and conf_year.year = 2013 and conf_year_tmp.year = 2013;
+UPDATE conf_year_tmp SET month_expire_recovery_days_49 = conf_year.field_value from conf_year where conf_year.field = 'month_expire_recovery_days_49' and conf_year.year = 2013 and conf_year_tmp.year = 2013;
+UPDATE conf_year_tmp SET max_recovery_days_13 = conf_year.field_value from conf_year where conf_year.year = 'max_recovery_days_13' and conf_year.year = 2013 and conf_year_tmp.year = 2013;
+UPDATE conf_year_tmp SET max_recovery_days_49 = conf_year.field_value from conf_year where conf_year.year = 'max_recovery_days_49' and conf_year.year = 2013 and conf_year_tmp.year = 2013;
+UPDATE conf_year_tmp SET hour_max_to_calculate_worktime = conf_year.field_value from conf_year where conf_year.field = 'hour_max_to_calculate_worktime' and conf_year.year = 2013 and conf_year_tmp.year = 2013;
+
 
 DROP TABLE conf_year_history;
 DROP TABLE conf_year;

@@ -66,8 +66,10 @@ import java.util.List;
 import models.ConfGeneral;
 import models.ConfYear;
 import models.Configuration;
+import models.Office;
 import models.enumerate.CapacityCompensatoryRestFourEight;
 import models.enumerate.CapacityCompensatoryRestOneThree;
+import models.enumerate.ConfigurationFields;
 import models.enumerate.ResidualWithPastYear;
 
 import org.joda.time.LocalDate;
@@ -83,59 +85,115 @@ public class Configurations extends Controller{
 
 	@Check(Security.INSERT_AND_UPDATE_CONFIGURATION)
 	public static void showConfGeneral(){
-		
-		ConfGeneral confGeneral = ConfGeneral.find("select cg from ConfGeneral cg").first();
-		render(confGeneral);
+		Office office = Security.getUser().person.office;
+//		ConfGeneral confGeneral = ConfGeneral.find("select cg from ConfGeneral cg").first();
+		LocalDate initUseProgram = new LocalDate(ConfGeneral.getFieldValue(ConfigurationFields.InitUseProgram.description, office));
+		String instituteName = ConfGeneral.getFieldValue(ConfigurationFields.InstituteName.description, office);
+		Integer seatCode = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.SeatCode.description, office));
+		Integer dayOfPatron = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.DayOfPatron.description, office));
+		Integer monthOfPatron = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.MonthOfPatron.description, office));
+		Boolean webStampingAllowed = new Boolean(ConfGeneral.getFieldValue(ConfigurationFields.WebStampingAllowed.description, office));
+		String urlToPresence = ConfGeneral.getFieldValue(ConfigurationFields.UrlToPresence.description, office);
+		String userToPresence = ConfGeneral.getFieldValue(ConfigurationFields.UserToPresence.description, office);
+		String passwordToPresence = ConfGeneral.getFieldValue(ConfigurationFields.PasswordToPresence.description, office);
+		Integer numberOfViewingCouple = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, office));
+//		LocalDate initUseProgram = new LocalDate(ConfGeneral.getFieldValue(ConfigurationFields.InitUseProgram.description, office));
+//		LocalDate initUseProgram = new LocalDate(ConfGeneral.getFieldValue(ConfigurationFields.InitUseProgram.description, office));
+//		LocalDate initUseProgram = new LocalDate(ConfGeneral.getFieldValue(ConfigurationFields.InitUseProgram.description, office));
+//		LocalDate initUseProgram = new LocalDate(ConfGeneral.getFieldValue(ConfigurationFields.InitUseProgram.description, office));
+//		LocalDate initUseProgram = new LocalDate(ConfGeneral.getFieldValue(ConfigurationFields.InitUseProgram.description, office));
+//		render(confGeneral);
+		render(initUseProgram, instituteName, seatCode, dayOfPatron, monthOfPatron, webStampingAllowed, urlToPresence, userToPresence,
+				passwordToPresence, numberOfViewingCouple);
 		
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_CONFIGURATION)
 	public static void showConfYear(){
+		LocalDate date = new LocalDate();
+		Office office = Security.getUser().person.office;
 		
 		//last year (non modificabile)
 		ConfYear lastConfYear = ConfYear.getConfYear(new LocalDate().getYear()-1);
+		Integer lastYearDayExpiryVacationPastYear = ConfYear.getFieldValue(ConfigurationFields.DayExpiryVacationPastYear.description, date.getYear()-1, office);
+		Integer lastYearMonthExpiryVacationPastYear = ConfYear.getFieldValue(ConfigurationFields.MonthExpiryVacationPastYear.description, date.getYear()-1, office);
+		Integer lastYearMonthExpireRecoveryDaysOneThree = ConfYear.getFieldValue(ConfigurationFields.MonthExpireRecoveryDays13.description, date.getYear()-1, office);
+		Integer lastYearMonthExpireRecoveryDaysFourNine = ConfYear.getFieldValue(ConfigurationFields.MonthExpireRecoveryDays49.description, date.getYear()-1, office);
+		Integer lastYearMaxRecoveryDaysOneThree = ConfYear.getFieldValue(ConfigurationFields.MaxRecoveryDays13.description, date.getYear()-1, office);
+		Integer lastYearMaxRecoveryDaysFourNine = ConfYear.getFieldValue(ConfigurationFields.MaxRecoveryDays49.description, date.getYear()-1, office);
+		Integer lastYearHourMaxToCalculateWorkTime = ConfYear.getFieldValue(ConfigurationFields.HourMaxToCalculateWorkTime.description, date.getYear()-1, office);
 		
 		//current year (modificabile)
 		ConfYear confYear = ConfYear.getConfYear(new LocalDate().getYear());
+		Integer dayExpiryVacationPastYear = ConfYear.getFieldValue(ConfigurationFields.DayExpiryVacationPastYear.description, date.getYear(), office);
+		Integer monthExpiryVacationPastYear = ConfYear.getFieldValue(ConfigurationFields.MonthExpiryVacationPastYear.description, date.getYear(), office);
+		Integer monthExpireRecoveryDaysOneThree = ConfYear.getFieldValue(ConfigurationFields.MonthExpireRecoveryDays13.description, date.getYear(), office);
+		Integer monthExpireRecoveryDaysFourNine = ConfYear.getFieldValue(ConfigurationFields.MonthExpireRecoveryDays49.description, date.getYear(), office);
+		Integer maxRecoveryDaysOneThree = ConfYear.getFieldValue(ConfigurationFields.MaxRecoveryDays13.description, date.getYear(), office);
+		Integer maxRecoveryDaysFourNine = ConfYear.getFieldValue(ConfigurationFields.MaxRecoveryDays49.description, date.getYear(), office);
+		Integer hourMaxToCalculateWorkTime = ConfYear.getFieldValue(ConfigurationFields.HourMaxToCalculateWorkTime.description, date.getYear(), office);
 		
 		Integer nextYear = new LocalDate().getYear()+1;
-		render(lastConfYear, confYear, nextYear);
+		
+		render(lastYearDayExpiryVacationPastYear, lastYearMonthExpiryVacationPastYear, lastYearMonthExpireRecoveryDaysOneThree,
+				lastYearMonthExpireRecoveryDaysFourNine, lastYearMaxRecoveryDaysOneThree, lastYearMaxRecoveryDaysFourNine,
+				lastYearHourMaxToCalculateWorkTime, lastConfYear, dayExpiryVacationPastYear, monthExpiryVacationPastYear,
+				monthExpireRecoveryDaysOneThree, monthExpireRecoveryDaysFourNine, monthExpireRecoveryDaysFourNine, maxRecoveryDaysOneThree,
+				maxRecoveryDaysFourNine, hourMaxToCalculateWorkTime, confYear, nextYear);
 
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_CONFIGURATION)
 	public static void saveConfGeneral(String pk, String value){
-		ConfGeneral confGeneral = ConfGeneral.find("select cg from ConfGeneral cg").first();
+	//	ConfGeneral confGeneral = ConfGeneral.find("select cg from ConfGeneral cg").first();
 
 		try
 		{
 			if(pk.equals("webStampingAllowed"))
 			{
 				Boolean webStampingAllowed = Boolean.parseBoolean(value);
-				if(webStampingAllowed!=null)
-					confGeneral.webStampingAllowed = webStampingAllowed;
-				confGeneral.save();
+				if(webStampingAllowed!=null){
+					ConfGeneral conf = ConfGeneral.find("Select conf from ConfGeneral conf where conf.office = ? and conf.field = ?", 
+							Security.getUser().person.office, ConfigurationFields.WebStampingAllowed.description).first();
+					conf.fieldValue = webStampingAllowed.toString();
+					conf.save();
+					Cache.set(ConfigurationFields.WebStampingAllowed.description, conf.fieldValue);
+				}
+				//confGeneral.webStampingAllowed = webStampingAllowed;
+				//confGeneral.save();
 			}
 			if(pk.equals("urlToPresence"))
 			{
-				confGeneral.urlToPresence = value;
-				confGeneral.save();
+				ConfGeneral conf = ConfGeneral.find("Select conf from ConfGeneral conf where conf.office = ? and conf.field = ?", 
+					Security.getUser().person.office, ConfigurationFields.UrlToPresence.description).first();
+				conf.fieldValue = value;
+				conf.save();
+				Cache.set(ConfigurationFields.UrlToPresence.description, conf.fieldValue);
 			}
 			if(pk.equals("userToPresence"))
 			{
-				confGeneral.userToPresence = value;
-				confGeneral.save();
+				ConfGeneral conf = ConfGeneral.find("Select conf from ConfGeneral conf where conf.office = ? and conf.field = ?", 
+						Security.getUser().person.office, ConfigurationFields.UserToPresence.description).first();
+				conf.fieldValue = value;
+				conf.save();
+				Cache.set(ConfigurationFields.UserToPresence.description, conf.fieldValue);
 			}
 			if(pk.equals("passwordToPresence"))
 			{
-				confGeneral.passwordToPresence = value;
-				confGeneral.save();
+				ConfGeneral conf = ConfGeneral.find("Select conf from ConfGeneral conf where conf.office = ? and conf.field = ?", 
+						Security.getUser().person.office, ConfigurationFields.PasswordToPresence.description).first();
+				conf.fieldValue = value;
+				conf.save();
+				Cache.set(ConfigurationFields.PasswordToPresence.description, conf.fieldValue);
 			}
 			if(pk.equals("numberOfViewingCoupleColumn"))
 			{
+				ConfGeneral conf = ConfGeneral.find("Select conf from ConfGeneral conf where conf.office = ? and conf.field = ?", 
+						Security.getUser().person.office, ConfigurationFields.NumberOfViewingCouple.description).first();
 				Integer numberOfViewingCoupleColumn = Integer.parseInt(value);
-				confGeneral.numberOfViewingCoupleColumn = numberOfViewingCoupleColumn;
-				confGeneral.save();
+				conf.fieldValue = numberOfViewingCoupleColumn.toString();
+				conf.save();
+				Cache.set(ConfigurationFields.NumberOfViewingCouple.description, conf.fieldValue);
 			}
 		}		
 		catch(Exception e)
@@ -143,18 +201,18 @@ public class Configurations extends Controller{
 			response.status = 500;
 			renderText("Bad request");
 		}
-		Cache.set("confGeneral", confGeneral);
+		//Cache.set("confGeneral", confGeneral);
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_CONFIGURATION)
 	public static void saveConfYear(String pk, String value){
 		Integer year = new LocalDate().getYear();
-		ConfYear confYear = ConfGeneral.find("select cy from ConfYear cy where cy.year = ?", year).first();
-		if(confYear==null)
-		{
-			//TODO va creato
-			return;
-		}
+//		ConfYear confYear = ConfGeneral.find("select cy from ConfYear cy where cy.year = ?", year).first();
+//		if(confYear==null)
+//		{
+//			//TODO va creato
+//			return;
+//		}
 		
 		try
 		{
@@ -163,15 +221,17 @@ public class Configurations extends Controller{
 				Integer day = Integer.parseInt(value);
 				try
 				{
-					new LocalDate(year, confYear.monthExpiryVacationPastYear, day);
-					confYear.dayExpiryVacationPastYear = day;
-					confYear.save();
-					Cache.set("confYear"+year, confYear);
+					ConfYear conf = ConfYear.find("Select conf from ConfYear conf where conf.field = ? and conf.year = ? and conf.office = ?",
+							ConfigurationFields.DayExpiryVacationPastYear.description, year, Security.getUser().person.office).first();
+				//	new LocalDate(year, confYear.monthExpiryVacationPastYear, day);
+					conf.fieldValue = day;
+					conf.save();
+					Cache.set(ConfigurationFields.DayExpiryVacationPastYear.description+year, conf.fieldValue);
 				}
 				catch(Exception e)
 				{
 					response.status = 500;
-					renderText(day+"/"+confYear.monthExpiryVacationPastYear+"/"+year+" data non valida. Settare correttamente i parametri.");
+					renderText(day+"/"+ConfYear.getFieldValue(ConfigurationFields.MonthExpiryVacationPastYear.description, year, Security.getUser().person.office)+"/"+year+" data non valida. Settare correttamente i parametri.");
 				}
 				
 			}
@@ -180,15 +240,17 @@ public class Configurations extends Controller{
 				Integer month = Integer.parseInt(value);
 				try
 				{
-					new LocalDate(year, month, confYear.dayExpiryVacationPastYear);
-					confYear.monthExpiryVacationPastYear = month;
-					confYear.save();
-					Cache.set("confYear"+year, confYear);
+					ConfYear conf = ConfYear.find("Select conf from ConfYear conf where conf.field = ? and conf.year = ? and conf.office = ?",
+							ConfigurationFields.MonthExpiryVacationPastYear.description, year, Security.getUser().person.office).first();
+					//new LocalDate(year, month, confYear.dayExpiryVacationPastYear);
+					conf.fieldValue = month;
+					conf.save();
+					Cache.set(ConfigurationFields.MonthExpiryVacationPastYear.description+year, conf.fieldValue);
 				}
 				catch(Exception e)
 				{
 					response.status = 500;
-					renderText(confYear.dayExpiryVacationPastYear+"/"+month+"/"+year+" data non valida. Settare correttamente i parametri.");
+					renderText(ConfYear.getFieldValue(ConfigurationFields.DayExpiryVacationPastYear.description, year, Security.getUser().person.office)+"/"+month+"/"+year+" data non valida. Settare correttamente i parametri.");
 				}
 			}
 			if(pk.equals("monthExpireRecoveryDaysOneThree"))
@@ -199,9 +261,11 @@ public class Configurations extends Controller{
 					response.status = 500;
 					renderText("Bad request");
 				}
-				confYear.monthExpireRecoveryDaysOneThree = val;
-				confYear.save();
-				Cache.set("confYear"+year, confYear);
+				ConfYear conf = ConfYear.find("Select conf from ConfYear conf where conf.field = ? and conf.year = ? and conf.office = ?",
+						ConfigurationFields.MonthExpireRecoveryDays13.description, year, Security.getUser().person.office).first();
+				conf.fieldValue = val;
+				conf.save();
+				Cache.set(ConfigurationFields.MonthExpireRecoveryDays13.description+year, conf.fieldValue);
 			}
 			if(pk.equals("monthExpireRecoveryDaysFourNine"))
 			{
@@ -211,9 +275,11 @@ public class Configurations extends Controller{
 					response.status = 500;
 					renderText("Bad request");
 				}
-				confYear.monthExpireRecoveryDaysFourNine = val;
-				confYear.save();
-				Cache.set("confYear"+year, confYear);
+				ConfYear conf = ConfYear.find("Select conf from ConfYear conf where conf.field = ? and conf.year = ? and conf.office = ?",
+						ConfigurationFields.MonthExpireRecoveryDays49.description, year, Security.getUser().person.office).first();
+				conf.fieldValue = val;
+				conf.save();
+				Cache.set(ConfigurationFields.MonthExpireRecoveryDays49.description+year, conf.fieldValue);
 			}
 			if(pk.equals("maxRecoveryDaysOneThree"))
 			{
@@ -223,9 +289,11 @@ public class Configurations extends Controller{
 					response.status = 500;
 					renderText("Bad request");
 				}
-				confYear.maxRecoveryDaysOneThree = val;
-				confYear.save();
-				Cache.set("confYear"+year, confYear);
+				ConfYear conf = ConfYear.find("Select conf from ConfYear conf where conf.field = ? and conf.year = ? and conf.office = ?",
+						ConfigurationFields.MaxRecoveryDays13.description, year, Security.getUser().person.office).first();
+				conf.fieldValue = val;
+				conf.save();
+				Cache.set(ConfigurationFields.MaxRecoveryDays13.description+year, conf.fieldValue);
 			}
 			if(pk.equals("maxRecoveryDaysFourNine"))
 			{
@@ -235,9 +303,11 @@ public class Configurations extends Controller{
 					response.status = 500;
 					renderText("Bad request");
 				}
-				confYear.maxRecoveryDaysFourNine = val;
-				confYear.save();
-				Cache.set("confYear"+year, confYear);
+				ConfYear conf = ConfYear.find("Select conf from ConfYear conf where conf.field = ? and conf.year = ? and conf.office = ?",
+						ConfigurationFields.MaxRecoveryDays49.description, year, Security.getUser().person.office).first();
+				conf.fieldValue = val;
+				conf.save();
+				Cache.set(ConfigurationFields.MaxRecoveryDays49.description+year, conf.fieldValue);
 			}
 		}
 		catch(Exception e)

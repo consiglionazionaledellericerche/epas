@@ -25,6 +25,7 @@ import models.User;
 //import models.RemoteOffice;
 import models.VacationCode;
 import models.WorkingTimeType;
+import models.enumerate.ConfigurationFields;
 import net.sf.oval.constraint.MinLength;
 
 import org.joda.time.LocalDate;
@@ -708,7 +709,8 @@ public class Persons extends Controller {
 	public static void updateSourceContract(Long contractId)
 	{
 		Contract contract = Contract.findById(contractId);
-		LocalDate initUse = ConfGeneral.getConfGeneral().initUseProgram;
+		LocalDate initUse = new LocalDate(ConfGeneral.getFieldValue(ConfigurationFields.InitUseProgram.description, Security.getUser().person.office));
+//		LocalDate initUse = ConfGeneral.getConfGeneral().initUseProgram;
 		render(contract, initUse);
 	}
 	
