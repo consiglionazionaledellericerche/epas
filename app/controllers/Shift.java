@@ -144,7 +144,7 @@ public class Shift extends Controller{
 	 * @author arianna
 	 * Update shifts read from the sistorg portal calendar
 	 */
-	public static void update(String type, Integer year, Integer month, @As(binder=JsonShiftPeriodsBinder.class) ShiftPeriods body) throws HttpStatusException {
+	public static void update(String type, Integer year, Integer month, @As(binder=JsonShiftPeriodsBinder.class) ShiftPeriods body) {
 		Logger.debug("update: Received shiftPeriods %s", body);
 		
 		if (body == null) {
