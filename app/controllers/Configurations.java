@@ -113,7 +113,7 @@ public class Configurations extends Controller{
 	@Check(Security.INSERT_AND_UPDATE_CONFIGURATION)
 	public static void saveConfYear(String pk, String value){
 		Integer year = new LocalDate().getYear();
-//		LocalDate date = null;
+
 		try
 		{
 			ConfYear conf = ConfYear.findById(Long.parseLong(pk));
@@ -172,99 +172,7 @@ public class Configurations extends Controller{
 			conf.fieldValue = Integer.parseInt(value);
 			conf.save();
 			Cache.set(conf.field+conf.office.name+conf.year, conf.fieldValue);
-			//			if(pk.equals("dayExpiryVacationPastYear"))
-			//			{
-			//				Integer day = Integer.parseInt(value);
-			//				try
-			//				{
-			//					ConfYear conf = ConfYear.find("Select conf from ConfYear conf where conf.field = ? and conf.year = ? and conf.office = ?",
-			//							ConfigurationFields.DayExpiryVacationPastYear.description, year, Security.getUser().person.office).first();
-			//				//	new LocalDate(year, confYear.monthExpiryVacationPastYear, day);
-			//					conf.fieldValue = day;
-			//					conf.save();
-			//					Cache.set(ConfigurationFields.DayExpiryVacationPastYear.description+year, conf.fieldValue);
-			//				}
-			//				catch(Exception e)
-			//				{
-			//					response.status = 500;
-			//					renderText(day+"/"+ConfYear.getFieldValue(ConfigurationFields.MonthExpiryVacationPastYear.description, year, Security.getUser().person.office)+"/"+year+" data non valida. Settare correttamente i parametri.");
-			//				}
-			//				
-			//			}
-			//			if(pk.equals("monthExpiryVacationPastYear"))
-			//			{
-			//				Integer month = Integer.parseInt(value);
-			//				try
-			//				{
-			//					ConfYear conf = ConfYear.find("Select conf from ConfYear conf where conf.field = ? and conf.year = ? and conf.office = ?",
-			//							ConfigurationFields.MonthExpiryVacationPastYear.description, year, Security.getUser().person.office).first();
-			//					//new LocalDate(year, month, confYear.dayExpiryVacationPastYear);
-			//					conf.fieldValue = month;
-			//					conf.save();
-			//					Cache.set(ConfigurationFields.MonthExpiryVacationPastYear.description+year, conf.fieldValue);
-			//				}
-			//				catch(Exception e)
-			//				{
-			//					response.status = 500;
-			//					renderText(ConfYear.getFieldValue(ConfigurationFields.DayExpiryVacationPastYear.description, year, Security.getUser().person.office)+"/"+month+"/"+year+" data non valida. Settare correttamente i parametri.");
-			//				}
-			//			}
-			//			if(pk.equals("monthExpireRecoveryDaysOneThree"))
-			//			{
-			//				Integer val = Integer.parseInt(value);
-			//				if(val<0||val>12)
-			//				{
-			//					response.status = 500;
-			//					renderText("Bad request");
-			//				}
-			//				ConfYear conf = ConfYear.find("Select conf from ConfYear conf where conf.field = ? and conf.year = ? and conf.office = ?",
-			//						ConfigurationFields.MonthExpireRecoveryDays13.description, year, Security.getUser().person.office).first();
-			//				conf.fieldValue = val;
-			//				conf.save();
-			//				Cache.set(ConfigurationFields.MonthExpireRecoveryDays13.description+year, conf.fieldValue);
-			//			}
-			//			if(pk.equals("monthExpireRecoveryDaysFourNine"))
-			//			{
-			//				Integer val = Integer.parseInt(value);
-			//				if(val<0||val>12)
-			//				{
-			//					response.status = 500;
-			//					renderText("Bad request");
-			//				}
-			//				ConfYear conf = ConfYear.find("Select conf from ConfYear conf where conf.field = ? and conf.year = ? and conf.office = ?",
-			//						ConfigurationFields.MonthExpireRecoveryDays49.description, year, Security.getUser().person.office).first();
-			//				conf.fieldValue = val;
-			//				conf.save();
-			//				Cache.set(ConfigurationFields.MonthExpireRecoveryDays49.description+year, conf.fieldValue);
-			//			}
-			//			if(pk.equals("maxRecoveryDaysOneThree"))
-			//			{
-			//				Integer val = Integer.parseInt(value);
-			//				if(val<0||val>31)
-			//				{
-			//					response.status = 500;
-			//					renderText("Bad request");
-			//				}
-			//				ConfYear conf = ConfYear.find("Select conf from ConfYear conf where conf.field = ? and conf.year = ? and conf.office = ?",
-			//						ConfigurationFields.MaxRecoveryDays13.description, year, Security.getUser().person.office).first();
-			//				conf.fieldValue = val;
-			//				conf.save();
-			//				Cache.set(ConfigurationFields.MaxRecoveryDays13.description+year, conf.fieldValue);
-			//			}
-			//			if(pk.equals("maxRecoveryDaysFourNine"))
-			//			{
-			//				Integer val = Integer.parseInt(value);
-			//				if(val<0||val>31)
-			//				{
-			//					response.status = 500;
-			//					renderText("Bad request");
-			//				}
-			//				ConfYear conf = ConfYear.find("Select conf from ConfYear conf where conf.field = ? and conf.year = ? and conf.office = ?",
-			//						ConfigurationFields.MaxRecoveryDays49.description, year, Security.getUser().person.office).first();
-			//				conf.fieldValue = val;
-			//				conf.save();
-			//				Cache.set(ConfigurationFields.MaxRecoveryDays49.description+year, conf.fieldValue);
-			//			}
+		
 		}
 		catch(Exception e)
 		{
