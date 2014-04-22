@@ -139,6 +139,8 @@ ALTER TABLE conf_year_tmp RENAME TO conf_year;
 ALTER TABLE conf_year_tmp_history RENAME TO conf_year_history;
 ALTER SEQUENCE seq_conf_year_tmp RENAME TO seq_conf_year;
 
+ALTER TABLE conf_general ADD CONSTRAINT unique_conf_general_integrity_key UNIQUE (field, office_id);
+ALTER TABLE conf_year ADD CONSTRAINT unique_conf_year_integrity_key UNIQUE (field, year, office_id);
 
 # ---!Downs
 

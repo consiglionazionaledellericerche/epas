@@ -56,44 +56,6 @@ public class PersonUtility {
 	}
 
 
-	//	/** TODO usato in Competences.java ma utilizza dati del person month, sostituirlo */
-	//	public static boolean canTakeOvertime(Person person, int year, int month){
-	//		boolean canOrNot = false;
-	//		int positiveDifference = 0;
-	//		int negativeDifference = 0;
-	//		LocalDate date = new LocalDate(year, month, 1);
-	//		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-	//				person, date, date.dayOfMonth().withMaximumValue()).fetch();
-	//		for(PersonDay pd : pdList){
-	//			if(pd.difference > 0)
-	//				positiveDifference = positiveDifference + pd.difference;
-	//			else
-	//				negativeDifference = negativeDifference + pd.difference;
-	//		}
-	//		if(positiveDifference > -negativeDifference)
-	//			canOrNot = true;
-	//		else{
-	//			/**
-	//			 * per "bilanciare" i residui negativi del mese, si va a vedere se esistono residui positivi dal mese precedente o dall'anno precedente
-	//			 */
-	//			PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
-	//					person, year, month-1).first();
-	//
-	//			if(pm != null){
-	//				if(pm.totalRemainingMinutes > -negativeDifference)
-	//					canOrNot = true;
-	//				else 
-	//					canOrNot = false;
-	//			}
-	//			else
-	//				canOrNot = false;
-	//
-	//
-	//		}
-	//		return canOrNot;
-	//
-	//	}
-
 	/**
 	 * metodo per stabilire se una persona può ancora prendere o meno giorni di permesso causa malattia del figlio
 	 */
@@ -583,6 +545,10 @@ public class PersonUtility {
 			date = date.minusDays(1);
 		Contract contract = person.getContract(date);
 		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, date.getYear(), date);
+		/**
+		 * TODO: aggiungere la condizione per poter inserire un riposo compensativo in un mese futuro (verosimilmente il mese successivo a
+		 * quello in cui ci troviamo al momento in cui viene chiamato l'handler
+		 */
 		Mese mese = c.getMese(date.getYear(), date.getMonthOfYear());
 		Logger.info("monteOreAnnoCorrente=%s ,  monteOreAnnoPassato=%s, workingTime=%s", mese.monteOreAnnoCorrente, mese.monteOreAnnoPassato, mese.person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime);
 		if(mese.monteOreAnnoCorrente + mese.monteOreAnnoPassato > mese.person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime)
