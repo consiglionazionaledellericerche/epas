@@ -84,6 +84,16 @@ public class ConfYear extends Model{
 		}
 		return value;
 	}
+	
+	
+	public static ConfYear getConfGeneralByFieldAndYear(String field, Integer year, Office office){
+		
+		ConfYear conf = ConfYear.find("Select conf from ConfYear conf where conf.field = ? and conf.office = ? and conf.year = ?", 
+				field, office, year).first();
+				
+		
+		return conf;
+	}
 
 	
 

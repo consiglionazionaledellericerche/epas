@@ -476,13 +476,14 @@ public class Person extends Model {
 	public List<Office> getOfficeAllowed(){
 		
 		List<Office> officeList = new ArrayList<Office>();
+		officeList.add(this.office);
 		if(!this.office.remoteOffices.isEmpty()){
 			
 			for(Office office : this.office.remoteOffices){
 				officeList.add(office);
 			}
 		}
-		officeList.add(this.office);
+		
 		return officeList;
 	}
 	
