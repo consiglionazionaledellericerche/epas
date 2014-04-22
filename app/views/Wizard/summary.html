@@ -2,11 +2,8 @@
 
 #{set 'moreStyles'}
 <style>
-fieldset{
--webkit-border-radius: 8px;
--moz-border-radius: 8px;
-border-radius: 8px;
-margin: 2% 20%;
+legend{
+	color: green;
 }
 .pager{
 display: none;
@@ -16,28 +13,59 @@ margin-top: 30px;
 position: static;
 width: 100%;
 }
-p > strong:nth-of-type(2){
-color: blue;
-text-align: right;
+table,tr,td{
+margin: auto auto;
+margin-bottom: 40px;
+border: none;
 }
 
-
+tr > td:nth-of-type(1){
+	font-weight: 900;
+}
+tr > td:nth-of-type(2){
+color: blue;
+}
 </style>
 #{/set}
-
-	<fieldset>
-		<legend>Riepilogo dati</legend>
-
-
-		#{list items:properties.stringPropertyNames(), as:'property'}
-			<p><strong>${property.toString()}</strong> - <strong>${properties.getProperty(property.toString())}</strong></p>		
-		#{/list}
+		<legend>Account Amministratore</legend>
+		<table>
+			<tr><td>Nome Amministratore</td><td>${properties.getProperty('Nome Amministratore')}</td></tr>		
+			<tr><td>Password Amministratore</td><td>${properties.getProperty('Password Amministratore')}</td></tr>
+		</table>
 		
+		<legend>Istituto</legend>
+		<table>		
+			<tr><td>Istituto</td><td>${properties.getProperty('Istituto')}</td></tr>	
+			<tr><td>Codice Sede</td><td>${properties.getProperty('Codice Sede')}</td></tr>	
+		</table>
 
-	</fieldset>
+		<legend>Giorno Patronale</legend>
+		<table>	
+			<tr><td>Data Patrono</td><td>${properties.getProperty('Giorno Patrono')}/${properties.getProperty('Mese Patrono')}</td></tr>
+		</table>
+
+
+		<legend>Configurazione generale</legend>
+		<table>		
+			<tr><td>Data di inizio utilizzo Programma</td><td>${properties.getProperty('Data di inizio utilizzo')}</td></tr>	
+			<tr><td>Inzio pausa pranzo</td><td>${properties.getProperty('Inzio pausa pranzo')}</td></tr>	
+			<tr><td>Fine pausa pranzo</td><td>${properties.getProperty('Fine pausa pranzo')}</td></tr>	
+			<tr><td>Permetti timbrature web</td><td>${properties.getProperty('Permetti timbrature web')}</td></tr>	
+		</table>
+		
+		<legend>Configurazione Annuale</legend>
+		<table>	
+			<tr><td>Data scadenza vacanze anno passato</td><td>${properties.getProperty('Giorno scadenza Vacanze anno passato')}/${properties.getProperty('Mese scadenza Vacanze anno passato')}</td></tr>	
+			<tr><td>Mese scadenza giorni di recupero 1-3</td><td>${properties.getProperty('Mese scadenza giorni di recupero 1-3')}</td></tr>	
+			<tr><td>Numero massimo giorni di recupero 1-3</td><td>${properties.getProperty('Numero massimo giorni di recupero 1-3')}</td></tr>	
+			<tr><td>Mese scadenza giorni di recupero 4-9</td><td>${properties.getProperty('Mese scadenza giorni di recupero 4-9')}</td></tr>
+			<tr><td>Numero massimo giorni di recupero 4-9</td><td>${properties.getProperty('Numero massimo giorni di recupero 4-9')}</td></tr>
+			<tr><td>Mese scadenza giorni di recupero 4-9</td><td>${properties.getProperty('Mese scadenza giorni di recupero 4-9')}</td></tr>
+			<tr><td>Soglia oraria calcolo timbrature giornaliere</td><td>${properties.getProperty('Soglia oraria calcolo timbrature giornaliere')}</td></tr>			
+		</table>
 	
 	<a href="@{Wizard.wizard(1)}"><button class="btn">Modifica</button></a>
-	<a href="@{Wizard.wizard(1)}"><button class="btn">Conferma</button></a>
+	<a href="@{Wizard.submit()}"><button class="btn">Conferma</button></a>
 
 
 

@@ -6,20 +6,31 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
+import models.ConfGeneral;
+import models.ConfYear;
+import models.Office;
+import models.Permission;
+import models.User;
+
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.DateTimeFormatterBuilder;
 
 import com.google.common.base.Predicate;
+import com.google.common.base.Splitter;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.thoughtworks.xstream.XStream;
 
 import play.Logger;
 import play.cache.Cache;
 import play.data.validation.*;
+import play.libs.Codec;
 import play.mvc.Controller;
 
 
@@ -61,7 +72,7 @@ public class Wizard extends Controller {
 					WizardStep.of("Nuovo admin", "setAdmin",1),
 					WizardStep.of("Nuovo ufficio", "setOffice",2),
 					WizardStep.of("Configurazione Giorno Patrono", "setPatron",3),
-					WizardStep.of("Parametri di configurazione generale", "setGenConf",4),
+					WizardStep.of("Configurazione generale", "setGenConf",4),
 					WizardStep.of("Configurazione annuale", "setConfYear", 5),
 					WizardStep.of("Riepilogo", "summary",6));
 	}
@@ -79,7 +90,6 @@ public class Wizard extends Controller {
     			properties.load(new FileInputStream("conf/properties.conf"));	
     		}
     		catch(IOException f){
-    			Logger.info("Creato il file properties.conf per la procedura di Wizard");	
     		}
     	
     		Cache.safeAdd(STEPS_KEY, steps,"10mn");
@@ -112,6 +122,7 @@ public class Wizard extends Controller {
     	if(properties != null && step == 6){
     	try{
     		properties.store(new FileOutputStream("conf/properties.conf"), "File impostazioni wizard");
+    		Logger.info("Creato file properties.conf");
     	}
     	catch(IOException e){
     		flash.error(e.getMessage());    		
@@ -296,4 +307,101 @@ public class Wizard extends Controller {
        	wizard(6);
     }
     
+    
+    public static void submit(){
+		Properties properties = new Properties();
+		try{
+			properties.load(new FileInputStream("conf/properties.conf"));	
+		}
+		catch(IOException f){
+			Logger.info("Creato il file properties.conf per la procedura di Wizard");	
+		}
+		// setAdmin
+		User admin = new User();
+		admin.username = properties.getProperty("Nome Amministratore");
+		admin.password = Codec.hexMD5(properties.getProperty("Password Amministratore"));
+		admin.permissions = Permission.findAll();
+		admin.save();
+	
+		// setOffice
+		Office office = new Office();
+		office.name = properties.getProperty("Istituto");
+		office.code = Integer.parseInt(properties.getProperty("Codice Sede"));
+		// setPatron
+		ConfGeneral confGeneral = new ConfGeneral();
+		confGeneral.instituteName = office.name;
+		confGeneral.seatCode = office.code;
+		confGeneral.urlToPresence = "https://attestati.rm.cnr.it/attestati/";
+		confGeneral.monthOfPatron = Integer.parseInt(properties.getProperty("Mese Patrono"));
+		confGeneral.dayOfPatron = Integer.parseInt(properties.getProperty("Giorno Patrono"));
+		//setGenConf
+		DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/yyyy");
+		confGeneral.initUseProgram = LocalDate.parse
+				(properties.getProperty("Data di inizio utilizzo"),dtf);
+		
+		List<String> launchStartTime = 
+				Splitter.on(":").trimResults().splitToList
+				(properties.getProperty("Inzio pausa pranzo"));
+		List<String> launchEndTime = 
+				Splitter.on(":").trimResults().splitToList
+				(properties.getProperty("Fine pausa pranzo"));
+		
+		confGeneral.mealTimeStartHour = Integer.parseInt(launchStartTime.get(0));
+		confGeneral.mealTimeStartMinute = Integer.parseInt(launchStartTime.get(1));
+		
+		confGeneral.mealTimeEndHour = Integer.parseInt(launchEndTime.get(0)); 
+		confGeneral.mealTimeEndMinute = Integer.parseInt(launchEndTime.get(1));
+		
+		if (properties.getProperty("Permetti timbrature web").equalsIgnoreCase("SI")){
+			confGeneral.webStampingAllowed = true;
+		}
+		else{
+			confGeneral.webStampingAllowed = false;
+		}
+		
+		confGeneral.save();
+		
+		// setConfYear
+		LocalDate date = new LocalDate();
+		 
+		ConfYear confYear = new ConfYear();
+		confYear.year = date.getYear();
+		
+		confYear.dayExpiryVacationPastYear = Integer.parseInt(
+				properties.getProperty("Giorno scadenza Vacanze anno passato"));
+		confYear.monthExpiryVacationPastYear = Integer.parseInt(properties.getProperty(
+				"Mese scadenza Vacanze anno passato"));
+		confYear.monthExpireRecoveryDaysOneThree = Integer.parseInt(properties.getProperty(
+				"Mese scadenza giorni di recupero 1-3"));
+		confYear.maxRecoveryDaysOneThree = Integer.parseInt(properties.getProperty(
+				"Numero massimo giorni di recupero 1-3"));
+		confYear.monthExpireRecoveryDaysFourNine = Integer.parseInt(properties.getProperty(
+				"Mese scadenza giorni di recupero 4-9"));
+		confYear.maxRecoveryDaysFourNine = Integer.parseInt(properties.getProperty(
+				"Numero massimo giorni di recupero 4-9"));
+		confYear.hourMaxToCalculateWorkTime = Integer.parseInt(Splitter.on(":").trimResults().splitToList
+				(properties.getProperty("Soglia oraria calcolo timbrature giornaliere")).get(0));
+		
+		confYear.save();
+				
+		
+		ConfYear confPreviousYear = new ConfYear();
+		
+//		Gson gs = new Gson();
+//		confPreviousYear = gs.fromJson(gs.toJson(confYear),ConfYear.class);
+		
+		confPreviousYear.year = confYear.year - 1;
+		confPreviousYear.dayExpiryVacationPastYear = confYear.dayExpiryVacationPastYear;
+		confPreviousYear.monthExpiryVacationPastYear = confYear.monthExpiryVacationPastYear;
+		confPreviousYear.monthExpireRecoveryDaysOneThree = confYear.monthExpireRecoveryDaysOneThree;
+		confPreviousYear.maxRecoveryDaysOneThree = confYear.maxRecoveryDaysOneThree;
+		confPreviousYear.monthExpireRecoveryDaysFourNine = confYear.monthExpireRecoveryDaysFourNine;
+		confPreviousYear.maxRecoveryDaysFourNine = confYear.maxRecoveryDaysFourNine;
+		confPreviousYear.hourMaxToCalculateWorkTime = confYear.hourMaxToCalculateWorkTime;
+		
+		confPreviousYear.save();
+		
+		Application.index();
+    }
+            
 }
