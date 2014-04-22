@@ -86,25 +86,7 @@ public class ConfGeneral extends Model{
 	
 
 
-//	public void setInitUseProgram(String initUseProgram, Office office) {
-//		ConfGeneral conf = null;
-//		try {
-//			String[] tokens = initUseProgram.split("-");
-//			Integer day = Integer.parseInt(tokens[0]);
-//			Integer month = Integer.parseInt(tokens[1]);
-//			Integer year = Integer.parseInt(tokens[2]);
-//			conf = ConfGeneral.find("Select conf from ConfGeneral conf where conf.field = ? and conf.office = ?", 
-//					"initUseProgram", office).first();
-//			conf.fieldValue = initUseProgram;
-//			conf.save();
-//			//this.initUseProgram = new LocalDate(year, month, day);
-//		}
-//		catch(Exception e)
-//		{
-//			e.printStackTrace();
-//			conf = null;
-//		}
-//	}
+
 	
 	public static ConfGeneral getConfGeneral()
 	{
@@ -128,33 +110,5 @@ public class ConfGeneral extends Model{
 		return value;
 	}
 	
-	/*
-	public static Configuration getCurrentConfiguration(){
-
-		Configuration currentConfiguration = (Configuration)Cache.get("currentConfiguration"); 
-		
-		//non trovata la metto in cache
-		if(currentConfiguration == null)
-		{
-			currentConfiguration = getConfiguration(new LocalDate());
-			Cache.set("currentConfiguration", currentConfiguration);
-			return currentConfiguration;
-		}
-		
-		LocalDate beginConf = new LocalDate(currentConfiguration.beginDate);
-		LocalDate endConf = new LocalDate(currentConfiguration.endDate);
-		//trovata scaduta la ricarico
-		if(! DateUtility.isDateIntoInterval(new LocalDate(), new DateInterval(beginConf, endConf)))
-		{
-			currentConfiguration = getConfiguration(new LocalDate());
-			Cache.set("currentConfiguration", currentConfiguration);
-		}
-		return currentConfiguration;
-	}
 	
-	public static List<Configuration> getAllConfiguration()
-	{
-		return Configuration.find("Select conf from Configuration conf").fetch();
-	}
-	*/
 }
