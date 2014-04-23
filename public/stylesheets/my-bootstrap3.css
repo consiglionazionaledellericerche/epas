@@ -1,11 +1,12 @@
 /* CSS for login page and lost password*/
 
 html, body {
-	background-color: lightblue;
+	height: 100%;
 }
 
-#wrapper {
+#wrapper-login {
 	padding-top: 90px;
+	background-color: lightblue;
 }
 
 #banner {
@@ -82,8 +83,36 @@ html, body {
     }
 }
 
-#nav-year {
+@media (min-width: 768px) {
+	
+  #nav-year {
 	margin-left: 50px;
+  }
+
+}
+
+#nav-year .badge {
+	background-color: #2d6ca2;
+	font-size: 1.1em;
+}
+
+#nav-month .badge {
+	background-color: #2d6ca2;
+	font-size: 1.1em;
+}
+
+/* CSS page content */
+#wrapper {
+	padding-top: 50px;
+	background-color: lightblue;
+	position: relative;
+	height: 100%;
+	
+}
+
+#main-container {
+	background-color: white;
+	height: 100%;
 }
 
 

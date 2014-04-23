@@ -4,6 +4,7 @@
 package controllers;
 
 import it.cnr.iit.epas.ActionMenuItem;
+import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.MainMenu;
 
 import java.util.List;
@@ -57,6 +58,7 @@ public class NavigationMenu extends Controller {
 			//Month from routes (otherwise now)
 			month = params.get("month") != null  ? Integer.valueOf(params.get("month")) : now.getMonthOfYear();
 			session.put("monthSelected", month);
+			session.put("monthSelectedName", DateUtility.getName(month));
 			
 			//Day from routes (otherwise now)
 			day = params.get("day") != null ? Integer.valueOf(params.get("day")) : now.getDayOfMonth();
