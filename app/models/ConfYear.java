@@ -30,7 +30,7 @@ public class ConfYear extends Model{
 	public String field;
 	
 	@Column(name="field_value")
-	public Integer fieldValue;
+	public String fieldValue;
 	
 	/*fine configurazione della tabella*/
 	
@@ -74,8 +74,8 @@ public class ConfYear extends Model{
 		return confYear;
 	}
 
-	public static Integer getFieldValue(String field, Integer year, Office office) {
-		Integer value = (Integer)Cache.get(field+year);
+	public static String getFieldValue(String field, Integer year, Office office) {
+		String value = (String)Cache.get(field+year);
 		if(value == null){
 			ConfYear conf = ConfYear.find("Select cy from ConfYear cy where cy.year = ? and cy.field = ? and cy.office = ?", 
 					year, field, office).first();
