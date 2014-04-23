@@ -1,41 +1,35 @@
-#{extends 'main.html' /}
+#{extends 'main3.html' /}
 
 #{set title:'ePAS - electronic Personnel Attendance System' /}
 
-<div class="container" style="text-align:center;">
+<div id="login-container" class="container">
   <h2>Benvenuto in ePAS</h2>
 
   <div>
+	#{if flash.error}
+	  <p class="error">&{flash.error}</p>
+	#{/if}
+	#{if flash.success}
+	  <p class="success">&{flash.success}</p>
+	#{/if}
 
-	#{form @authenticate(), id:'formLogin'}
+	#{form @authenticate(), role:'form'}
+
+		<!-- User e Password -->
+		<p><input class="form-control" placeholder="Username" type="text" name="username" value="${flash.username}" /></p>
+		<p><input class="form-control" placeholder="Password" type="password" name="password" value="" /></p>
+	 
+		<!-- Remember me -->
+		<p>
+		  <input type="checkbox" name="remember" id="remember" value="true" ${flash.remember ? 'checked="true"' : ''} />
+		  <label for="remember">&{'secure.remember'}</label>
+		</p>
 		
-		#{if flash.error}
-			<p class="error">
-				&{flash.error}
-			</p>
-		#{/if}
-		#{if flash.success}
-			<p class="success">
-				&{flash.success}
-			</p>
-		#{/if}
-	
-		<p>
-			<input placeholder="Username" type="text" name="username" id="username" value="${flash.username}" />
-		</p>
-		<p>
-			<input placeholder="Password" type="password" name="password" id="password" value="" />
-		</p>
-		<p>
-			<input type="checkbox" name="remember" id="remember" value="true" ${flash.remember ? 'checked="true"' : ''} />
-			<label for="remember">&{'secure.remember'}</label>
-		</p>
-		<p>
-			<input class="btn" type="submit" id="signin" value="&{'secure.signin'}" />
-		</p>
+		<!-- Submit -->
+		<p><input class="btn btn-info" type="submit" id="signin" value="&{'secure.signin'}" /></p>
+
 	#{/form}
-	    <p>
-			<a href="@{LostPassword.lostPassword()}">Password dimenticata?</a>
-		</p>
+	
+	<p><a href="@{LostPassword.lostPassword()}">Password dimenticata?</a></p>
   </div>
 </div>
