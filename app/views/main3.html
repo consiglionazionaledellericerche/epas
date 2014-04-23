@@ -56,14 +56,25 @@
 	
     <!-- Begin page content -->
     <div class="container">
-            
+    
       #{if flash.error}
+      <div class="panel panel-danger">
+      <div class="panel-heading flash-panel">  
         <p class="fError"><strong>${flash.error}</strong></p>
+      </div>
+      </div>
       #{/if}
       #{if flash.success}
+      <div class="panel panel-success">
+      <div class="panel-heading flash-panel">  
         <p class="fSuccess"><strong>${flash.success}</strong></p>
+      </div>
+      </div>
       #{/if}
-        #{doLayout /}
+
+
+      #{doLayout /}
+
     </div> 
     
   </div>

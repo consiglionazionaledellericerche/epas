@@ -31,33 +31,44 @@ html, body {
 	height: 70%;
 }
 
-#login-container {
+.my-centered-container {
 	text-align: center;
 	font-size: 1em;
 }
 
-#login-container h2 {
+.my-centered-container h2 {
     margin-bottom: 25px;
   }
 
-#login-container form {
+.my-centered-container form {
 	margin: auto 35%;
 }
 
-#login-container .btn {
+.my-centered-container .btn {
 	margin-bottom: 15px;
 }
 
 @media (max-width: 767px) {
 	
-  #login-container > h2 {
+  .my-centered-container > h2 {
     font-size: 1.8em;
   }
   
-  #login-container form {
+  .my-centered-container form {
 	margin: auto 20%;
   }
 
+}
+
+/* CSS flash message */
+.flash-panel {
+	text-align: center;
+	padding: 0;
+}
+
+.flash-panel p{
+	padding: 0;
+	padding-top: 7px;
 }
 
 
