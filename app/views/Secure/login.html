@@ -6,13 +6,7 @@
   <h2>Benvenuto in ePAS</h2>
 
   <div>
-	#{if flash.error}
-	  <p class="error">&{flash.error}</p>
-	#{/if}
-	#{if flash.success}
-	  <p class="success">&{flash.success}</p>
-	#{/if}
-
+	
 	#{form @authenticate(), role:'form'}
 
 		<!-- User e Password -->
