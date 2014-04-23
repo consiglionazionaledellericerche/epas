@@ -12,6 +12,7 @@ import java.util.Map;
 import models.AbsenceType;
 import models.ConfGeneral;
 import models.Contract;
+import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.PersonTags;
@@ -485,7 +486,10 @@ public class Stampings extends Controller {
 	public static void dailyPresence(Integer year, Integer month, Integer day) {
 
 		LocalDate dayPresence = new LocalDate(year, month, day);
-		List<Person> activePersonsInDay = Person.getActivePersonsInDay(day, month, year, Security.getOfficeAllowed(), false);
+		//TODO:
+		List<Office> office = new ArrayList<Office>();
+		office.add(Security.getUser().person.office);
+		List<Person> activePersonsInDay = Person.getActivePersonsInDay(day, month, year, office, false);
 		int numberOfInOut = maxNumberOfStampingsInMonth(year, month, day, activePersonsInDay);
 		
 		

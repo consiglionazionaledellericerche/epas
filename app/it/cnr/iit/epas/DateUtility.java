@@ -49,13 +49,14 @@ public class DateUtility {
 	    }
 	}
 	
-	public static boolean isGeneralHoliday(LocalDate date){
+	public static boolean isGeneralHoliday(Office office, LocalDate date){
 		
 		//Configuration config = Configuration.getConfiguration(date);
 		//ConfGeneral confGeneral = ConfGeneral.getConfGeneral();
 		
 		/*TODO: da riverificare*/
-		Office office = Security.getUser().person.office;
+		if(office == null)
+			office = Security.getUser().person.office;
 		Integer monthOfPatron = Integer.parseInt(ConfGeneral.getFieldValue("month_of_patron", office));
 		Integer dayOfPatron = Integer.parseInt(ConfGeneral.getFieldValue("day_of_patron", office));
 		/*fine pezzo da verificare*/
@@ -123,7 +124,7 @@ public class DateUtility {
 		List<LocalDate> generalWorkingDays = new ArrayList<LocalDate>();
 		while(!day.isAfter(end))
 		{
-			if( ! DateUtility.isGeneralHoliday(day) )
+			if( ! DateUtility.isGeneralHoliday(null, day) )
 				generalWorkingDays.add(day);
 			day = day.plusDays(1);
 		}
