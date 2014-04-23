@@ -135,7 +135,7 @@ public class SwitchTemplate extends Controller{
 			break;
 
 		case confParameters:
-			Configurations.showConfGeneral();
+			Configurations.showConfGeneral(Security.getUser().person.office.id);
 			break;
 
 		case personList:

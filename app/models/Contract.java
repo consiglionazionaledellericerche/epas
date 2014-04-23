@@ -333,7 +333,10 @@ public class Contract extends Model {
 		
 		
 		//Controllo se ho sufficienti dati
-		LocalDate initUse = ConfGeneral.getConfGeneral().initUseProgram;
+		
+	//	LocalDate initUse = ConfGeneral.getConfGeneral().initUseProgram;
+		String dateInitUse = ConfGeneral.getFieldValue("init_use_program", person.office);
+		LocalDate initUse = new LocalDate(dateInitUse);
 		if(this.sourceDate!=null)
 			initUse = sourceDate.plusDays(1);
 		DateInterval personDatabaseInterval = new DateInterval(initUse, new LocalDate());
@@ -462,19 +465,12 @@ public class Contract extends Model {
 		List<Contract> contractInMonth = this.person.getMonthContracts(month, year);
 		if(contractInMonth.size()==0)
 			return false;
-		if(contractInMonth.get(contractInMonth.size()-1).id == this.id)
+		if(contractInMonth.get(contractInMonth.size()-1).id.equals(this.id))
 			return true;
 		else
 			return false;
 	}
-	
-	/*
-	public List<ContractWorkingTimeType> getOrderedContractWorkingTimeType()
-	{
-		List<ContractWorkingTimeType> cwttList = ContractWorkingTimeType.find("", this).fetch();
-	}
-	*/
-	
+		
 }
 	
 	

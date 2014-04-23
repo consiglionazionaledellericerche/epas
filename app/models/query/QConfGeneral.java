@@ -9,6 +9,7 @@ import com.mysema.query.types.path.*;
 import com.mysema.query.types.PathMetadata;
 import javax.annotation.Generated;
 import com.mysema.query.types.Path;
+import com.mysema.query.types.path.PathInits;
 
 
 /**
@@ -19,59 +20,46 @@ public class QConfGeneral extends EntityPathBase<ConfGeneral> {
 
     private static final long serialVersionUID = 1743575936L;
 
+    private static final PathInits INITS = PathInits.DIRECT2;
+
     public static final QConfGeneral confGeneral = new QConfGeneral("confGeneral");
 
     public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
 
-    public final NumberPath<Integer> dayOfPatron = createNumber("dayOfPatron", Integer.class);
-
-    public final StringPath emailToContact = createString("emailToContact");
-
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
+
+    public final StringPath field = createString("field");
+
+    public final StringPath fieldValue = createString("fieldValue");
 
     //inherited
     public final NumberPath<Long> id = _super.id;
 
-    public final DatePath<org.joda.time.LocalDate> initUseProgram = createDate("initUseProgram", org.joda.time.LocalDate.class);
-
-    public final StringPath instituteName = createString("instituteName");
-
-    public final NumberPath<Integer> mealTimeEndHour = createNumber("mealTimeEndHour", Integer.class);
-
-    public final NumberPath<Integer> mealTimeEndMinute = createNumber("mealTimeEndMinute", Integer.class);
-
-    public final NumberPath<Integer> mealTimeStartHour = createNumber("mealTimeStartHour", Integer.class);
-
-    public final NumberPath<Integer> mealTimeStartMinute = createNumber("mealTimeStartMinute", Integer.class);
-
-    public final NumberPath<Integer> monthOfPatron = createNumber("monthOfPatron", Integer.class);
-
-    public final NumberPath<Integer> numberOfViewingCoupleColumn = createNumber("numberOfViewingCoupleColumn", Integer.class);
-
-    public final StringPath passwordToPresence = createString("passwordToPresence");
+    public final QOffice office;
 
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
-    public final NumberPath<Integer> seatCode = createNumber("seatCode", Integer.class);
-
-    public final StringPath urlToPresence = createString("urlToPresence");
-
-    public final StringPath userToPresence = createString("userToPresence");
-
-    public final BooleanPath webStampingAllowed = createBoolean("webStampingAllowed");
-
     public QConfGeneral(String variable) {
-        super(ConfGeneral.class, forVariable(variable));
+        this(ConfGeneral.class, forVariable(variable), INITS);
     }
 
     public QConfGeneral(Path<? extends ConfGeneral> path) {
-        super(path.getType(), path.getMetadata());
+        this(path.getType(), path.getMetadata(), path.getMetadata().isRoot() ? INITS : PathInits.DEFAULT);
     }
 
     public QConfGeneral(PathMetadata<?> metadata) {
-        super(ConfGeneral.class, metadata);
+        this(metadata, metadata.isRoot() ? INITS : PathInits.DEFAULT);
+    }
+
+    public QConfGeneral(PathMetadata<?> metadata, PathInits inits) {
+        this(ConfGeneral.class, metadata, inits);
+    }
+
+    public QConfGeneral(Class<? extends ConfGeneral> type, PathMetadata<?> metadata, PathInits inits) {
+        super(type, metadata, inits);
+        this.office = inits.isInitialized("office") ? new QOffice(forProperty("office")) : null;
     }
 
 }

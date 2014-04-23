@@ -462,7 +462,7 @@ public class Reperibility extends Controller {
 					
 					Logger.debug("trovato personReperibilityDay.personReperibility.person=%s e reqStartDay=%s", personReperibilityDay.personReperibility.person, reqStartDay);
 					
-					if ((personReperibilityDay.personReperibility.person != requestor) || (personReperibilityDay == null)) {
+					if (personReperibilityDay == null || (personReperibilityDay.personReperibility.person != requestor)) {
 						throw new IllegalArgumentException(
 								String.format("Impossible to offer the day %s because is not associated to the right requestor %s", reqStartDay, requestor));
 					} else {
