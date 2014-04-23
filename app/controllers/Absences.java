@@ -556,7 +556,7 @@ public class Absences extends Controller{
 		int countHowManyCheck = 0;
 		while(!actualDate.isAfter(dateTo))
 		{
-			Integer maxRecoveryDaysOneThree = ConfYear.getFieldValue(ConfigurationFields.MaxRecoveryDays13.description, actualDate.getYear(), person.office);
+			Integer maxRecoveryDaysOneThree = Integer.parseInt(ConfYear.getFieldValue(ConfigurationFields.MaxRecoveryDays13.description, actualDate.getYear(), person.office));
 			ConfYear config = ConfYear.getConfYear(actualDate.getYear());
 	
 			//verifica se ha esaurito il bonus per l'anno
