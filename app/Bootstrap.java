@@ -1,20 +1,15 @@
-import it.cnr.iit.epas.FromMysqlToPostgres;
-import models.AbsenceType;
 import models.CompetenceCode;
 import models.ConfGeneral;
 import models.Configuration;
 import models.Office;
 import models.Permission;
-import models.Person;
-import models.PersonShift;
 import models.Qualification;
-import models.ShiftTimeTable;
-import models.ShiftType;
 import models.StampModificationType;
 import models.StampType;
 import models.VacationCode;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
+import models.enumerate.ConfigurationFields;
 import play.Logger;
 import play.Play;
 import play.jobs.Job;
@@ -85,12 +80,14 @@ public class Bootstrap extends Job {
 			
 			if(Office.count() == 0){
 				//Configuration conf = (Configuration)Configuration.findAll().get(0);
-				ConfGeneral conf = ConfGeneral.getConfGeneral();
+				//ConfGeneral conf = ConfGeneral.getConfGeneral();
 				Office office = new Office();
-				office.code = conf.seatCode;
-				office.name = conf.instituteName;
+				Integer seatCode = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.SeatCode.description, office));
+				String instituteName = ConfGeneral.getFieldValue(ConfigurationFields.InstituteName.description, office);
+				office.code = seatCode;
+				office.name = instituteName;
 				office.save();
-				Logger.info("Creato ufficio di default con nome %s e codice %s", conf.instituteName, conf.seatCode);
+				Logger.info("Creato ufficio di default con nome %s e codice %s", instituteName, seatCode);
 			}
 			
 //			Person admin = Person.find("byUsername", "admin").first();

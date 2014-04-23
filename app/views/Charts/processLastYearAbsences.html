@@ -1,4 +1,4 @@
-#{extends 'main_admin_no_menu.html' /}
+#{extends 'main_with_navbar.html' /}
 #{set titolo: 'Controllo schedone anno passato'/}
 
 <ul class="nav nav-tabs">
@@ -50,7 +50,6 @@
 #{list items:listNull, as:'result'}
   ${result.line}
 #{/list}
-</div>
 
 <div class="row">
 <ul class="pager">

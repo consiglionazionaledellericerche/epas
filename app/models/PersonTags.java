@@ -1,22 +1,10 @@
 package models;
 
-import groovy.lang.Closure;
-
-import java.io.PrintWriter;
-import java.sql.Time;
-import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
-import java.util.Map;
 
-import org.joda.time.DateTimeFieldType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
-import play.templates.GroovyTemplate.ExecutableTemplate;
 import play.templates.JavaExtensions;
 
 public class PersonTags extends JavaExtensions {
@@ -34,7 +22,7 @@ public class PersonTags extends JavaExtensions {
         
 	public static String toHourTime(Integer minutes) {
 		int min =  Math.abs(minutes%60);
-		int hour= Math.abs((int)minutes/60);
+		int hour= Math.abs(minutes/60);
 		if((minutes.intValue()<0))
 			
 			return String.format("-%02d:%02d", hour, min);
@@ -61,7 +49,7 @@ public class PersonTags extends JavaExtensions {
 //	}
 	
 	public static String toHour(Integer minutes){
-		int hour = Math.abs((int)minutes/60);
+		int hour = Math.abs(minutes/60);
 		return String.format("%d", hour);
 	}
 	

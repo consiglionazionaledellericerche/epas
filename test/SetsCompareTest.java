@@ -4,15 +4,9 @@ import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.google.common.collect.Sets;
- 
-
-
-import controllers.UploadSituation;
-import play.test.UnitTest;
 
 public class SetsCompareTest {
 

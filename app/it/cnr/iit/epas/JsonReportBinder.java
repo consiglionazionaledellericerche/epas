@@ -1,25 +1,19 @@
 package it.cnr.iit.epas;
 
 
-import java.io.FileOutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
-import javax.xml.bind.DatatypeConverter;
-import org.apache.commons.codec.binary.Base64;
-import com.google.common.base.Preconditions;
-import com.google.gson.Gson;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
-
 import models.exports.ReportFromJson;
+
+import org.apache.commons.codec.binary.Base64;
 
 import play.Logger;
 import play.data.binding.TypeBinder;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class JsonReportBinder implements TypeBinder<ReportFromJson>{
 	

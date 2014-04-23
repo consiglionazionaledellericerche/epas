@@ -1,8 +1,8 @@
-#{extends 'main_admin_no_menu.html' /}
+#{extends 'main_with_navbar.html' /}
 #{set titolo: 'Ore di formazione per ' + person.surname + ' ' + person.name + ' anno: ' + year /}
 
 <p class="lead">Le ore di formazione possono essere inserite solo per il mese selezionabile. Nel momento in cui l'amministratore le approva non potranno più essere modificate.</p>
-
+<div class="row">
 <table class="table table-hover span9">
 	<tr>
 		<th>Mese</th>
@@ -12,79 +12,61 @@
 		
 	</tr>
 	
-	#{list items:pmMap.entrySet(), as: 'entry'}
-	
+	#{list items:mesi, as: 'mese'}
 	<tr>
-		<td class="text-error">&{'views.tags.display.date.month.' +entry.getKey()}</td>
-		
+		<td class="text-error">&{'views.tags.display.date.month.' +mese}</td>
 		<td>
-			<ul>	
-			#{list items:entry.getValue(), as: 'pm'}
-				#{if pm.trainingHours != 0}
-					#{if !pm.hoursApproved || pm.month == month}			
-						<li>
-							<a data-toggle="modal" data-placement="bottom" title="Modifica ore di formazione" href="@{PersonMonths.modifyTrainingHours(pm.id)}" data-target="#myModal2">
-							<b>${pm.trainingHours}</b> ore <b>Da:</b> <u>${pm.fromDate}</u> <b>A:</b> <u>${pm.toDate}</u></a>
-							<a data-toggle="modal" data-placement="bottom" title="Elimina ore di formazione" href="@{PersonMonths.deleteTrainingHours(pm.id, year, month)}" data-target="#myModal3" ><i class="icon-minus-sign icon-large"></i></a>
-						</li>
+			<ul>			
+			#{list items:pmList, as: 'pm'}
+				#{if pm != null}
+				  #{if pm.month == mese}	
+					#{if mese == date.getMonthOfYear() || (mese == date.getMonthOfYear()-1 && pm.hoursApproved == false)}		
+					  <li>
+						<a data-toggle="modal" data-placement="bottom" title="Modifica ore di formazione" href="@{PersonMonths.modifyTrainingHours(pm.id)}" data-target="#myModal2">
+						<b>${pm.trainingHours}</b> ore <b>Da:</b> <u>${pm.fromDate}</u> <b>A:</b> <u>${pm.toDate}</u></a>
+						<a data-toggle="modal" data-placement="bottom" title="Elimina ore di formazione" href="@{PersonMonths.deleteTrainingHours(pm.id, year, month)}" data-target="#myModal3" ><i class="icon-minus-sign icon-large"></i></a>
+					  </li>
 					#{/if}
 					#{else}
-						<li><b>${pm.trainingHours}</b> ore <b>Da:</b> <u>${pm.fromDate}</u> <b>A:</b> <u>${pm.toDate}</u></li>
+					  <li><b>${pm.trainingHours}</b> ore <b>Da:</b> <u>${pm.fromDate}</u> <b>A:</b> <u>${pm.toDate}</u></li>	
 					#{/else}
+				  #{/if}
+				
 				#{/if}
 			#{/list}
 			</ul>
-		</td>		
-		#{if entry.getKey() == month}	
-		<td><a href="@{PersonMonths.insertTrainingHours(person.id, month, year)}" data-modal="#myModal1">Inserisci ore di formazione</a></td>
-		#{/if}
-		#{else}
-			#{if entry.getKey() > month }
-				<td>Mese non ancora raggiunto</td>
-			#{/if}
-			#{else}
-				<td>
-				#{if entry.getValue().size() == 1}
-									
-					#{if entry.getValue().get(0).month == month-1 && entry.getValue().get(0).hoursApproved == false}
-					<a href="@{PersonMonths.insertTrainingHours(person.id, entry.getValue().get(0).month, entry.getValue().get(0).year)}" data-modal="#myModal1">Inserisci ore di formazione</a>	
-					#{/if}
-					#{else}
-						Ore già approvate<br>
-					#{/else}
-					
-				#{/if}
-				
-				#{else}
-					#{if entry.getValue().get(1).month == month-1 && entry.getValue().get(1).hoursApproved == false}
-					<a href="@{PersonMonths.insertTrainingHours(person.id, entry.getValue().get(1).month, entry.getValue().get(1).year)}" data-modal="#myModal1">Inserisci ore di formazione</a>	
-					#{/if}
-					#{else}
-						Ore già approvate<br>
-					#{/else}
-				#{/else}
-				</td>
-				
-			#{/else}
-		#{/else}
-		<td>
-		#{list items:entry.getValue(), as: 'check'}
-		#{if check.trainingHours != 0}
-			#{if check.hoursApproved == true}
-				<input type="checkbox" disabled="disabled" checked="checked"/><br>
-			#{/if}
-			#{else}
-				<input type="checkbox" disabled="disabled"/><br>
-			#{/else}
-		#{/if}
-		#{/list}
 		</td>
-		
+		<td>
+			#{if mese == date.getMonthOfYear()}
+				<a href="@{PersonMonths.insertTrainingHours(person.id, mese, year)}" data-modal="#myModal1">Inserisci ore di formazione</a>
+			#{/if}
+			
+		</td>
+		<td>
+			#{if pm != null && pm.month == mese }
+				#{if mese == date.getMonthOfYear() || mese == date.getMonthOfYear()-1}
+					#{if pm.hoursApproved == true}
+						SI<br>
+					#{/if}
+					#{else}
+						NO<br>
+					#{/else}			
+				#{/if}
+			#{/if}
+			
+		</td>
 	</tr>
-
 	#{/list}
-	
 </table>
+</div>
+
+
+<p class="lead"><a href="@{PersonMonths.insertTrainingHours(person.id, date.getMonthOfYear()-1, year)}" data-modal="#myModal1">Inserisci ore di formazione del mese precedente se non ancora approvato</a></p>
+
+
+
+
+
 
 <div id="myModal1" class="modal hide fade mymodal-small" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-header">

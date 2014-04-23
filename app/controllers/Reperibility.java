@@ -3,29 +3,24 @@
  */
 package controllers;
 
+import static play.modules.pdf.PDF.renderPDF;
 import helpers.BadRequest;
-import it.cnr.iit.epas.DateUtility;
-import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
 import it.cnr.iit.epas.JsonReperibilityChangePeriodsBinder;
+import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
-import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.UUID;
 
 import models.Absence;
 import models.CompetenceCode;
 import models.Person;
-import models.PersonDay;
 import models.PersonReperibility;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
@@ -35,38 +30,26 @@ import models.exports.ReperibilityPeriods;
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Date;
-import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Dur;
-import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.TimeZoneRegistry;
-import net.fortuna.ical4j.model.TimeZoneRegistryFactory;
 import net.fortuna.ical4j.model.ValidationException;
 import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.component.VTimeZone;
-import net.fortuna.ical4j.model.parameter.Value;
 import net.fortuna.ical4j.model.property.CalScale;
 import net.fortuna.ical4j.model.property.ProdId;
 import net.fortuna.ical4j.model.property.Uid;
 import net.fortuna.ical4j.model.property.Version;
-import net.fortuna.ical4j.util.UidGenerator;
 
-import org.h2.command.ddl.CreateAggregate;
 import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-import org.joda.time.ReadablePeriod;
-
-import com.google.common.collect.Collections2;
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
-import com.google.common.collect.TreeBasedTable;
 
 import play.Logger;
 import play.data.binding.As;
 import play.db.jpa.JPA;
 import play.mvc.Controller;
-import static play.modules.pdf.PDF.*;
+
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.ImmutableTable;
+import com.google.common.collect.Table;
+import com.google.common.collect.TreeBasedTable;
 
 
 /**
@@ -75,7 +58,7 @@ import static play.modules.pdf.PDF.*;
  */
 public class Reperibility extends Controller {
 
-	public enum SemRep {FS1S, FR1S, FS2S, FR2S}; 
+	public enum SemRep {FS1S, FR1S, FS2S, FR2S}
 	
 	/*
 	 * @author arianna
@@ -479,7 +462,7 @@ public class Reperibility extends Controller {
 					
 					Logger.debug("trovato personReperibilityDay.personReperibility.person=%s e reqStartDay=%s", personReperibilityDay.personReperibility.person, reqStartDay);
 					
-					if ((personReperibilityDay.personReperibility.person != requestor) || (personReperibilityDay == null)) {
+					if (personReperibilityDay == null || (personReperibilityDay.personReperibility.person != requestor)) {
 						throw new IllegalArgumentException(
 								String.format("Impossible to offer the day %s because is not associated to the right requestor %s", reqStartDay, requestor));
 					} else {

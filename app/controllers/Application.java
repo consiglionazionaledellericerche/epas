@@ -1,16 +1,8 @@
 package controllers;
 
-import it.cnr.iit.epas.ActionMenuItem;
-import it.cnr.iit.epas.MainMenu;
-
-import java.util.List;
-
 import org.joda.time.LocalDate;
 
-import models.Permission;
-import models.Person;
 import play.Logger;
-import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -30,7 +22,7 @@ public class Application extends Controller {
     		return;
     	}
     	if(Security.getUser().username.equals("admin")){
-    		Persons.list();
+    		Persons.list(null);
     		return;
     	}
 		
@@ -42,11 +34,9 @@ public class Application extends Controller {
 		
 		//method
     	if (Security.check(Security.INSERT_AND_UPDATE_STAMPING)) {
-    		Logger.debug("put3:%s ", "stampingsAdmin");
     		session.put("methodSelected", "stampingsAdmin");
     		Application.indexAdmin();
     	} else {
-    		Logger.debug("put4:%s ", "stampings");
     		session.put("methodSelected", "stampings");
     		Stampings.stampings(new LocalDate().getYear(), new LocalDate().getMonthOfYear());
     		

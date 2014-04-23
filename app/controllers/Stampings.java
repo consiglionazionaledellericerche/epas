@@ -1,64 +1,41 @@
 package controllers;
 
-import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-import it.cnr.iit.epas.MainMenu;
 import it.cnr.iit.epas.PersonUtility;
 
-import java.sql.Connection;
-import java.sql.Date;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import models.Absence;
 import models.AbsenceType;
 import models.ConfGeneral;
 import models.Contract;
-import models.InitializationAbsence;
-import models.InitializationTime;
 import models.Person;
 import models.PersonDay;
-import models.PersonDayInTrouble;
-import models.PersonMonthRecap;
 import models.PersonTags;
 import models.StampModificationType;
-import models.StampProfile;
 import models.StampType;
 import models.Stamping;
-import models.Stamping.WayType;
-import models.WorkingTimeType;
-import models.WorkingTimeTypeDay;
-import models.exports.AbsenceReperibilityPeriod;
+import models.enumerate.ConfigurationFields;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
-import models.rendering.PersonTroublesInMonthRecap;
 import models.rendering.PersonStampingDayRecap;
+import models.rendering.PersonTroublesInMonthRecap;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
 import play.Logger;
-import play.Play;
-import play.cache.Cache;
 import play.data.validation.Required;
 import play.data.validation.Valid;
-import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.ImmutableTable.Builder;
 import com.google.common.collect.Table;
-import com.ning.http.util.DateUtil.DateParseException;
 
 
 
@@ -91,8 +68,8 @@ public class Stampings extends Controller {
 		
 
 		//Configuration conf = Configuration.getCurrentConfiguration();
-		ConfGeneral conf = ConfGeneral.getConfGeneral();
-		int minInOutColumn = conf.numberOfViewingCoupleColumn;
+		//ConfGeneral conf = ConfGeneral.getConfGeneral();
+		int minInOutColumn = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));
 		int numberOfInOut = Math.max(minInOutColumn, PersonUtility.getMaximumCoupleOfStampings(person, year, month));
 
 		//Lista person day contente tutti i giorni fisici del mese
@@ -169,8 +146,9 @@ public class Stampings extends Controller {
 //		}
 		
 		//Configuration conf = Configuration.getCurrentConfiguration();													//0 sql (se già in cache)
-		ConfGeneral conf = ConfGeneral.getConfGeneral();
-		int minInOutColumn = conf.numberOfViewingCoupleColumn;
+//		ConfGeneral conf = ConfGeneral.getConfGeneral();
+		int minInOutColumn = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));
+//		int minInOutColumn = conf.numberOfViewingCoupleColumn;
 		int numberOfInOut = Math.max(minInOutColumn, PersonUtility.getMaximumCoupleOfStampings(person, year, month));	//30 sql
 
 		//Lista person day contente tutti i giorni fisici del mese

@@ -3,21 +3,17 @@ package controllers;
 import java.util.List;
 import java.util.Set;
 
-import com.google.common.base.Charsets;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.hash.Hashing;
-
-import play.Logger;
-import play.cache.Cache;
-import play.db.jpa.JPA;
-import play.db.jpa.GenericModel.JPAQuery;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import models.Office;
 import models.Permission;
 import models.Person;
 import models.RemoteOffice;
 import models.User;
+import play.Logger;
+import play.cache.Cache;
+
+import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.hash.Hashing;
 
 public class Security extends Secure.Security {
 	
@@ -177,6 +173,25 @@ public class Security extends Secure.Security {
 				return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * Ritorna la persona identificata da personId se l'user loggato è effettivamente tale persona.
+	 * @param personId
+	 * @return
+	 */
+	public static Person getSelfPerson(Long personId) {
+		if(personId == null)
+			return null;
+		User user = getUser();
+		if(user == null)
+			return null;
+		if(user.person == null)
+			return null;
+		if(user.person.id.longValue() != personId.longValue())
+			return null;
+		return user.person;
+				
 	}
 
 }

@@ -7,17 +7,16 @@ import java.util.List;
 
 import models.Office;
 import models.Person;
-import models.exports.AuthInfo;
 
 import org.joda.time.LocalDate;
-
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.collect.FluentIterable;
 
 import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
+
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.collect.FluentIterable;
 
 /**
  * @author cristian

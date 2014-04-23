@@ -1,30 +1,45 @@
-#{extends 'main_admin_no_menu.html' /}
+#{extends 'main_with_navbar.html' /}
 #{set titolo: 'Gestione parametri di configurazione' /}
 
 <ul class="nav nav-tabs">
   <li class="active"><a href="@{Configurations.showConfGeneral()}#">Parametri Istituto</a></li>
   <li><a href="@{Configurations.showConfYear()}#">Parametri Annuali</a></li>
 </ul>
+<div class="container" style="padding-left:200px;">
+#{form action:@Configurations.showConfGeneral(), class:'form', 
+    method:'GET', autocomplete:'off',
+    'data-reload':'#results'}
+    
+    <select style='display:inline;' name="officeid" class="input-medium span2">
+      #{list items:offices, as:'office'}
+        <option value="${office.id}" >${office.name}</option>
+      #{/list}
+	</select>
+    
 
+#{/form}
+</div>
+<div class="container">
+<section id="results">
 
 <fieldset style="margin-left:100px; margin-right:100px;">
   <legend>Configurazione Generale Istituto (Parametri non modificabili)</legend>
   <table class="table tablenoborder">
     <tr>
 	  <td class="span7">Data di inizio uso di questo programma</td>
-	  <td><strong>${confGeneral.initUseProgram}</strong></td>
+	  <td><strong>${initUseProgram.fieldValue}</strong></td>
     </tr>
     <tr>	
 	  <td class="span7">Nome dell'istituto</td>
-	  <td><strong>${confGeneral.instituteName}</strong></td>
+	  <td><strong>${instituteName.fieldValue}</strong></td>
     </tr>	
     <tr>	
       <td class="span7">Codice sede</td>
-      <td><strong>${confGeneral.seatCode}</strong></td>
+      <td><strong>${seatCode.fieldValue}</strong></td>
     </tr>
     <tr>
       <td>Festa del patrono</td>
-      <td><strong>${confGeneral.dayOfPatron} / ${confGeneral.monthOfPatron}</strong></td>
+      <td><strong>${dayOfPatron.fieldValue} / ${monthOfPatron.fieldValue}</strong></td>
     </tr>
   </table>  
 </fieldset>
@@ -41,8 +56,8 @@
           <a href="#" 
           id="select1" 
           data-type="select" 
-          data-pk="webStampingAllowed" 
-          data-value="['${confGeneral.webStampingAllowed}']"
+          data-pk="${webStampingAllowed.id}" 
+          data-value="['${webStampingAllowed.fieldValue}']"
           data-source="[{'true': 'SI'},{'false': 'NO'}]" 
           data-url="@{saveConfGeneral()}" 
           class="editable editable-click"></a>
@@ -75,15 +90,15 @@
   <table class="table tablenoborder">
     <tr>	
       <td class="span7">URL per gestione attestato presenza dell'amministrazione centrale </td>
-      <td><strong><a href="#" id="simpleText1" data-type="text" data-pk="urlToPresence" data-url="@{saveConfGeneral()}" class="editable editable-click">${confGeneral.urlToPresence}</a></strong></td>
+      <td><strong><a href="#" id="simpleText1" data-type="text" data-pk="${urlToPresence.id}" data-url="@{saveConfGeneral()}" class="editable editable-click">${urlToPresence.fieldValue}</a></strong></td>
     </tr>
     <tr>	
       <td class="span7">User per gestione attestato presenza dell'amministrazione centrale</td>
-      <td><strong><a href="#" id="simpleText2" data-type="text" data-pk="userToPresence" data-url="@{saveConfGeneral()}" class="editable editable-click">${confGeneral.userToPresence}</a></strong></td>
+      <td><strong><a href="#" id="simpleText2" data-type="text" data-pk="${userToPresence.id}" data-url="@{saveConfGeneral()}" class="editable editable-click">${userToPresence.fieldValue}</a></strong></td>
     </tr>
     <tr>	
       <td class="span7">Password per gestione attestato presenza dell'amministrazione centrale</td>
-      <td><strong><a href="#" id="simpleText3" data-type="text" data-pk="passwordToPresence" data-url="@{saveConfGeneral()}" class="editable editable-click">${confGeneral.passwordToPresence}</a></strong></td>
+      <td><strong><a href="#" id="simpleText3" data-type="text" data-pk="${passwordToPresence.id}" data-url="@{saveConfGeneral()}" class="editable editable-click">${passwordToPresence.fieldValue}</a></strong></td>
     </tr>
     <tr>	
       <td class="span7">Numero di colonne di entrata/uscita da visualizzare</td>
@@ -92,8 +107,8 @@
       	   <a href="#" 
 	          id="select2" 
               data-type="select" 
-              data-pk="numberOfViewingCoupleColumn" 
-              data-value="[${confGeneral.numberOfViewingCoupleColumn}]"
+              data-pk="${numberOfViewingCouple.id}" 
+              data-value="[${numberOfViewingCouple.fieldValue}]"
               data-source="[{1: '1'},{2: '2'},{3: '3'},{4: '4'},{5: '5'}]" 
               data-url="@{saveConfGeneral()}" 
               class="editable editable-click"></a>
@@ -152,3 +167,5 @@
 </fieldset>
 
  -->
+ </section>
+</div>

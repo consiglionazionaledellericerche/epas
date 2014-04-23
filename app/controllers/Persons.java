@@ -1,15 +1,12 @@
 package controllers;
 
-import it.cnr.iit.epas.ActionMenuItem;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
 import models.ConfGeneral;
@@ -23,24 +20,28 @@ import models.Permission;
 import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
-import models.PersonWorkingTimeType;
 import models.Qualification;
-import models.RemoteOffice;
 import models.User;
 //import models.RemoteOffice;
 import models.VacationCode;
-import models.VacationPeriod;
 import models.WorkingTimeType;
+import models.enumerate.ConfigurationFields;
+import net.sf.oval.constraint.MinLength;
 
 import org.joda.time.LocalDate;
 
 import play.Logger;
 import play.data.validation.Required;
 import play.data.validation.Valid;
+import play.i18n.Messages;
+import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
-import play.libs.Crypto;
-import play.libs.Codec;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
+
+import dao.PersonDao;
 
 @With( {Secure.class, NavigationMenu.class} )
 public class Persons extends Controller {
@@ -208,14 +209,6 @@ public class Persons extends Controller {
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void changeVacation(Long personId){
-		Person person = Person.findById(personId);
-		List<VacationCode> codeList = VacationCode.findAll();
-		Logger.debug("Lista dei vacationCode: %s", codeList.toString());
-		render(person, codeList);
-	}
-	
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void updateContractWorkingTimeType(Long id)
 	{
 		List<WorkingTimeType> wttList = WorkingTimeType.findAll();
@@ -299,13 +292,25 @@ public class Persons extends Controller {
 	}
 
 	@Check(Security.VIEW_PERSON_LIST)
-	public static void list(){
-
+	public static void list(String name){
 		LocalDate startEra = new LocalDate(1900,1,1);
 		LocalDate endEra = new LocalDate(9999,1,1);
-		List<Person> personList = Person.getActivePersonsSpeedyInPeriod(startEra, endEra, Security.getOfficeAllowed(), false);
+		List<Person> personList = PersonDao.list(Optional.fromNullable(name), 
+				Sets.newHashSet(Security.getOfficeAllowed()), 
+				false, 
+				startEra, 
+				endEra)
+				.list();
 		LocalDate date = new LocalDate();
-		List<Person> activePerson = Person.getActivePersonsInDay(date.getDayOfMonth(), date.getMonthOfYear(), date.getYear(), Security.getOfficeAllowed(), false);
+		List<Person> activePerson = PersonDao.list(Optional.fromNullable(name), 
+				Sets.newHashSet(Security.getOfficeAllowed()), 
+				false, 
+				date, 
+				date)
+				.list();
+		//List<Person> personList = Person.getActivePersonsSpeedyInPeriod(startEra, endEra, Security.getOfficeAllowed(), false);
+		
+		//List<Person> activePerson = Person.getActivePersonsInDay(date.getDayOfMonth(), date.getMonthOfYear(), date.getYear(), Security.getOfficeAllowed(), false);
 		
 		render(personList, activePerson);
 	}
@@ -554,7 +559,7 @@ public class Persons extends Controller {
 		person.save();
 		flash.success("Modificate informazioni per l'utente %s %s", person.name, person.surname);
 		//Application.indexAdmin();
-		Persons.list();	
+		Persons.list(null);	
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
@@ -562,7 +567,7 @@ public class Persons extends Controller {
 		if(person == null)
 		{
 			flash.error("Persona inesistente. Operazione annullata.");
-			Persons.list();
+			Persons.list(null);
 		}
 		Contract con = new Contract();
 		List<WorkingTimeType> wttList = WorkingTimeType.findAll();
@@ -576,7 +581,7 @@ public class Persons extends Controller {
 		if(person==null)
 		{
 			flash.error("Persona inesistente. Operazione annullata.");
-			Persons.list();
+			Persons.list(null);
 		}
 		if(dataInizio==null){
 			flash.error("Errore nel fornire il parametro data inizio contratto. Inserire la data nel corretto formato aaaa-mm-gg");
@@ -632,7 +637,7 @@ public class Persons extends Controller {
 		if(contract == null)
 		{
 			flash.error("Non è stato trovato nessun contratto con id %s per il dipendente ", contractId);
-			Persons.list();
+			Persons.list(null);
 		}
 		render(contract);
 	}
@@ -643,7 +648,7 @@ public class Persons extends Controller {
 		if(contract == null)
 		{
 			flash.error("Contratto inesistente. Operazione annullata.");
-			Persons.list();
+			Persons.list(null);
 		}
 		render(contract);
 	}
@@ -654,7 +659,7 @@ public class Persons extends Controller {
 		if(contract == null)
 		{
 			flash.error("Contratto inesistente. Operazione annullata.");
-			Persons.list();
+			Persons.list(null);
 		}
 		contract.delete();
 		flash.error("Contratto eliminato con successo.");
@@ -668,7 +673,7 @@ public class Persons extends Controller {
 		if(contract == null)
 		{
 			flash.error("Contratto inesistente, operazione annullata");
-			Persons.list();
+			Persons.list(null);
 		}
 		if(begin==null){
 			flash.error("Errore nel fornire il parametro data inizio contratto. Inserire la data nel corretto formato aaaa-mm-gg");
@@ -704,7 +709,8 @@ public class Persons extends Controller {
 	public static void updateSourceContract(Long contractId)
 	{
 		Contract contract = Contract.findById(contractId);
-		LocalDate initUse = ConfGeneral.getConfGeneral().initUseProgram;
+		LocalDate initUse = new LocalDate(ConfGeneral.getFieldValue(ConfigurationFields.InitUseProgram.description, Security.getUser().person.office));
+//		LocalDate initUse = ConfGeneral.getConfGeneral().initUseProgram;
 		render(contract, initUse);
 	}
 	
@@ -728,7 +734,7 @@ public class Persons extends Controller {
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void discard(){
-		Persons.list();
+		Persons.list(null);
 	}
 
 	/**
@@ -756,34 +762,28 @@ public class Persons extends Controller {
 	 * @param personId permette all'utente amministratore di cambiare la propria password.
 	 */
 	@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void changePassword(Long personId){
-		Person person = Person.findById(personId);
-		render(person);
+	public static void changePassword(){
+		User user = Security.getUser();
+		notFoundIfNull(user);
+		render(user);
 	}
 	
 	@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void savePassword(Long personId, String nuovaPassword, String confermaPassword){
+	public static void savePassword(@MinLength(5) @Required String nuovaPassword, @MinLength(5) @Required String confermaPassword){
 		
-		Person person = Person.findById(personId);
-		if(nuovaPassword == null || confermaPassword == null)
-		{
-			flash.error("Operazione annullata, controllare i log.");
-			Persons.changePassword(personId);
+		User user = Security.getUser();
+		notFoundIfNull(user);
+		if(validation.hasErrors() || !nuovaPassword.equals(confermaPassword)) {
+			flash.error("Entrambi i campi devono essere valorizzati e con valore uguale. "
+					+ "La passord deve essere almeno lunga 5 caratteri. Operazione annullata.");
+			Persons.changePassword();
 		}
-		if(nuovaPassword.equals("") || confermaPassword.equals(""))
-		{
-			flash.error("Valorizzare entrambi i campi. Operazione annullata");
-			Persons.changePassword(personId);
-		}
-		
-		
-		Codec codec = new Codec();
-		person.user.password = codec.hexMD5(nuovaPassword);
-		person.user.save();
-		person.save();
-		Application.indexAdmin();
 
-		
+		Codec codec = new Codec();
+		user.password = codec.hexMD5(nuovaPassword);
+		user.save();
+		flash.success(Messages.get("passwordSuccessfullyChanged"));
+		Application.indexAdmin();
 	}
 	
 	@Check(Security.DELETE_PERSON)
@@ -843,7 +843,6 @@ public class Persons extends Controller {
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void personChildrenList(Long personId){
 		Person person = Person.findById(personId);
-		List<PersonChildren> personChildren = person.personChildren;
 		render(person);
 	}
 	

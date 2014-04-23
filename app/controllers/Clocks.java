@@ -6,28 +6,22 @@ import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-
-import models.AbsenceType;
 import models.ConfGeneral;
-import models.Contract;
 import models.Office;
 import models.Person;
 import models.PersonDay;
-import models.PersonMonthRecap;
 import models.StampModificationType;
 import models.StampType;
 import models.Stamping;
 import models.Stamping.WayType;
-import models.exports.StampingFromClient;
-import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
-import models.personalMonthSituation.Mese;
+import models.enumerate.ConfigurationFields;
 import models.rendering.PersonStampingDayRecap;
+
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+
 import play.Logger;
-import play.cache.Cache;
 import play.mvc.Controller;
 
 public class Clocks extends Controller{
@@ -67,8 +61,9 @@ public class Clocks extends Controller{
 		
 		//numero di colonne da visualizzare
 		//Configuration conf = Configuration.getCurrentConfiguration();
-		ConfGeneral conf = ConfGeneral.getConfGeneral();
-		int minInOutColumn = conf.numberOfViewingCoupleColumn;
+		//ConfGeneral conf = ConfGeneral.getConfGeneral();
+		int minInOutColumn = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));
+		//int minInOutColumn = conf.numberOfViewingCoupleColumn;
 		int numberOfInOut = Math.max(minInOutColumn,  PersonUtility.numberOfInOutInPersonDay(pd));
 		
 		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
@@ -155,8 +150,9 @@ public class Clocks extends Controller{
 		
 		//numero di colonne da visualizzare
 		//Configuration conf = Configuration.getCurrentConfiguration();
-		ConfGeneral conf = ConfGeneral.getConfGeneral();
-		int minInOutColumn = conf.numberOfViewingCoupleColumn;
+		//ConfGeneral conf = ConfGeneral.getConfGeneral();
+		//int minInOutColumn = conf.numberOfViewingCoupleColumn;
+		int minInOutColumn = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));
 		int numberOfInOut = Math.max(minInOutColumn,  PersonUtility.numberOfInOutInPersonDay(pd));
 		
 		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	

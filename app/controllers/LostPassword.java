@@ -7,7 +7,6 @@ import models.ContactData;
 import models.Person;
 import models.User;
 
-import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.LocalDate;
 
@@ -86,7 +85,7 @@ public class LostPassword extends Controller{
 		
 		session.put(USERNAME, user.username);
 		flash.success("Il sistema ha assegnato al tuo account la password default %s. Si suggerisce di modificarla per motivi di sicurezza.", newPassword);
-		Persons.changePassword(user.person.id);
+		Persons.changePassword();
 	}
 	
 	

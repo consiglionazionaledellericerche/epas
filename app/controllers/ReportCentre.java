@@ -1,22 +1,20 @@
 package controllers;
 
+import it.cnr.iit.epas.JsonReportBinder;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import models.Person;
+import models.exports.ReportFromJson;
+
 import org.apache.commons.mail.EmailAttachment;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.MultiPartEmail;
-import org.apache.commons.mail.SimpleEmail;
 
-import it.cnr.iit.epas.JsonReportBinder;
-import it.cnr.iit.epas.JsonStampingBinder;
-import models.Person;
-import models.exports.ReportFromJson;
-import models.exports.StampingFromClient;
 import play.Logger;
-import play.Play;
 import play.data.binding.As;
 import play.libs.Mail;
 import play.mvc.Controller;

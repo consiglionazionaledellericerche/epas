@@ -8,23 +8,15 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 import models.Person;
-import models.PersonReperibility;
-import models.PersonReperibilityType;
 import models.ShiftTimeTable;
 import models.ShiftType;
 import models.exports.ShiftPeriod;
 import models.exports.ShiftPeriods;
-import net.fortuna.ical4j.model.DateTime;
 
-import org.apache.log4j.jmx.LoggerDynamicMBean;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-import org.joda.time.LocalTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 import play.Logger;
 import play.data.binding.Global;

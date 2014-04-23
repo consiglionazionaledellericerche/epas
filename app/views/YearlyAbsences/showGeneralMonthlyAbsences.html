@@ -1,4 +1,4 @@
-#{extends 'main_admin_no_menu.html' /}
+#{extends 'main_with_navbar.html' /}
 
 #{if month != 0}
   #{set titolo: 'Situazione generale delle assenze per ciascun dipendente nel mese di ' + month_capitalized + ' ' + year /}
@@ -8,18 +8,24 @@
 #{/else}
 
 <br>
+<div class="row">
 <div class="container">
 #{form action:@YearlyAbsences.showGeneralMonthlyAbsences(), class:'form', 
     method:'GET', autocomplete:'off',
     'data-reload':'#results'}
     
-    <input type="text" name="name" placeholder="Nome o cognome" value="${name}"/>
+    <input type="text" name="name" placeholder="Nome o cognome" value="${name}"class="input-medium search-query"/>
+    <i class="icon-search icon-large"></i>
 	<input type="hidden" name="year" value="${year}"/>
 	<input type="hidden" name="month" value="${month}"/>
 #{/form}
+</div>
+</div>
 
+<div class="row">
+<div class="container">
 <section id="results">
-<table class="table table-hover custom2 span9">
+<table class="table table-hover custom2 span11" style="margin-left: 0px;">
 	<tr>
 		<th rowspan="2">Nome</th>
 		<th colspan="${numberOfDifferentAbsenceType}">Codici di assenza</th>
@@ -56,6 +62,7 @@
 	}%
 </table>
 </section>
+</div>
 </div>
 
 <div id="myModal3" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
