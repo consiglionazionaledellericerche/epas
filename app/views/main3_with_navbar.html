@@ -23,7 +23,7 @@
 	<!-- Bootstrap -->
 	<link rel="stylesheet" media="screen" href="@{'/public/bootstrap-3.1.1-dist/css/bootstrap.min.css'}" />
 	<link rel="stylesheet" media="screen" href="@{'/public/bootstrap-3.1.1-dist/css/bootstrap-theme.min.css'}" />  		
-	<link rel="stylesheet" media="screen" href="@{'/public/stylesheets/sticky-footer.css'}" /> 
+	<link rel="stylesheet" media="screen" href="@{'/public/stylesheets/sticky-footer.css'}" />
 	
 	<!-- <link rel="stylesheet" media="screen" href="@{'/public/stylesheets/mymain.css'}">   -->
 	<link rel="stylesheet" media="screen" href="@{'/public/stylesheets/my-bootstrap3.css'}">      
@@ -42,20 +42,80 @@
 
 <body>
 
-  <div id="wrapper-login">
+  <div id="wrapper">
   
-  
-	<!-- Banner -->
-	<div id="banner">
-     <img class="img-responsive" src="/public/images/time_banner.jpg" alt="alt">
-     <img class="img-responsive pull-right hidden-xs" src="/public/images/logo.jpg" alt="alt">
+  <nav class="navbar navbar-fixed-top navbar-inverse" role="navigation">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">ePAS</a>
     </div>
 
-	
-	
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="dropdown active">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span>
+          ${session.username} <b class="caret"></b></a>
+          <ul class="dropdown-menu">
+            <li><a href="#">Situazione mensile</a></li>
+            
+            <li><a href="#">Assenze mensili</a></li>
+            <li><a href="#">Assenze annuali</a></li>
+            <li><a href="#">Ferie</a></li>
+            <li><a href="#">Competenze</a></li>
+            <li><a href="#">Riepilogo orario</a></li>
+            <li><a href="#">Ore di formazione</a></li>
+            <li class="divider"></li>
+            <li><a href="#">Stampa cartellino presenze</a></li>
+            <li class="divider"></li>
+            <li><a href="#">Gestione password</a></li>
+            
+            
+          </ul>
+        </li>
+      </ul>
+      
+      <ul id="nav-year" class="nav navbar-nav">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="badge">${session.get("yearSelected")}</span><b class="caret"></b></a>
+          <ul class="dropdown-menu">
+            <li><a href="#">2012</a></li>
+            <li><a href="#">2013</a></li>
+            <li><a href="#">2014</a></li>
+            <li><a href="#">2015</a></li>            
+          </ul>
+        </li>
+      </ul>
+      
+      <ul id="nav-month" class="nav navbar-nav">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="badge">${session.get("monthSelectedName")}</span><b class="caret"></b></a>
+          <ul class="dropdown-menu">
+            <li><a href="#">Gennaio</a></li>
+            <li><a href="#">Febbraio</a></li>
+            <li><a href="#">Marzo</a></li>
+            <li><a href="#">Aprile</a></li>            
+          </ul>
+        </li>
+      </ul>
+      
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+  
 	
     <!-- Begin page content -->
-    <div class="container">
+    <div id="main-container" class="container">
     
       #{if flash.error}
       <div class="panel panel-danger">
@@ -75,9 +135,9 @@
 
       #{doLayout /}
 
-    </div> 
+ </div> 
     
-  </div>
+ </div>	<!-- end wrapper -->
   	
   <div id="footer" >
     <div class="container">
