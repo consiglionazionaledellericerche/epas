@@ -605,7 +605,7 @@ public class Absences extends Controller{
 		}
 		actualDate.minusDays(1);
 		if(countHowManyCheck > 0){
-			flash.success("Aggiunti codici assenza FER anche in giorni in cui il dipendente %s %s presenta turno o reperibilità. Il dipendente è stato informato via mail.", person.name, person.surname);
+			flash.success("Aggiunti riposi compensativi anche in giorni in cui il dipendente %s %s presenta turno o reperibilità. Il dipendente è stato informato via mail.", person.name, person.surname);
 			PersonUtility.updatePersonDaysIntoInterval(person,dateFrom,dateTo);
 			Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
 		}
@@ -767,7 +767,7 @@ public class Absences extends Controller{
 			actualDate = actualDate.plusDays(1);
 		}
 		if(countHowManyCheck > 0){
-			flash.success("Aggiunti codici assenza FER anche in giorni in cui il dipendente %s %s presenta turno o reperibilità. Il dipendente è stato informato via mail.", person.name, person.surname);
+			flash.success("Aggiunti codici assenza anche in giorni in cui il dipendente %s %s presenta turno o reperibilità. Il dipendente è stato informato via mail.", person.name, person.surname);
 			PersonUtility.updatePersonDaysIntoInterval(person,dateFrom,dateTo);
 			Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
 		}
@@ -833,7 +833,7 @@ public class Absences extends Controller{
 			actualDate = actualDate.plusDays(1);
 		}
 		if(countHowManyCheck > 0){
-			flash.success("Aggiunti codici assenza FER anche in giorni in cui il dipendente %s %s presenta turno o reperibilità. Il dipendente è stato informato via mail.", person.name, person.surname);
+			flash.success("Aggiunti codici assenza anche in giorni in cui il dipendente %s %s presenta turno o reperibilità. Il dipendente è stato informato via mail.", person.name, person.surname);
 			PersonUtility.updatePersonDaysIntoInterval(person,dateFrom,dateTo);
 			Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
 		}
@@ -947,7 +947,7 @@ public class Absences extends Controller{
 			actualDate = actualDate.plusDays(1);
 		}
 		if(countHowManyCheck > 0){
-			flash.success("Aggiunti codici assenza FER anche in giorni in cui il dipendente %s %s presenta turno o reperibilità. Il dipendente è stato informato via mail.", person.name, person.surname);
+			flash.success("Aggiunti codici assenza anche in giorni in cui il dipendente %s %s presenta turno o reperibilità. Il dipendente è stato informato via mail.", person.name, person.surname);
 			PersonUtility.updatePersonDaysIntoInterval(person,dateFrom,dateTo);
 			Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
 		}

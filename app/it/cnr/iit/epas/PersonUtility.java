@@ -549,7 +549,12 @@ public class PersonUtility {
 		 * TODO: aggiungere la condizione per poter inserire un riposo compensativo in un mese futuro (verosimilmente il mese successivo a
 		 * quello in cui ci troviamo al momento in cui viene chiamato l'handler
 		 */
-		Mese mese = c.getMese(date.getYear(), date.getMonthOfYear());
+		LocalDate now = new LocalDate();
+		Mese mese = null;
+		if(now.isBefore(date))
+			mese = c.getMese(date.getYear(), now.getMonthOfYear());
+		else
+			mese = c.getMese(date.getYear(), date.getMonthOfYear());
 		Logger.info("monteOreAnnoCorrente=%s ,  monteOreAnnoPassato=%s, workingTime=%s", mese.monteOreAnnoCorrente, mese.monteOreAnnoPassato, mese.person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime);
 		if(mese.monteOreAnnoCorrente + mese.monteOreAnnoPassato > mese.person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime)
 		{
