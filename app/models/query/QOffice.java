@@ -28,6 +28,10 @@ public class QOffice extends EntityPathBase<Office> {
 
     public final NumberPath<Integer> code = createNumber("code", Integer.class);
 
+    public final ListPath<models.ConfGeneral, QConfGeneral> confGeneral = this.<models.ConfGeneral, QConfGeneral>createList("confGeneral", models.ConfGeneral.class, QConfGeneral.class, PathInits.DIRECT2);
+
+    public final ListPath<models.ConfYear, QConfYear> confYear = this.<models.ConfYear, QConfYear>createList("confYear", models.ConfYear.class, QConfYear.class, PathInits.DIRECT2);
+
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 

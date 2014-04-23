@@ -216,6 +216,9 @@ public class Mese {
 		{
 
 			//riposi compensativi
+			if(this.mese == new LocalDate().getMonthOfYear() && this.anno == new LocalDate().getYear()){
+				validData = new DateInterval(validData.getBegin(), validData.getEnd().plusMonths(1).dayOfMonth().withMaximumValue());
+			}
 			List<Absence> riposiCompensativi = Absence.find("Select abs from Absence abs, AbsenceType abt, PersonDay pd where abs.personDay = pd and abs.absenceType = abt and abt.code = ? and pd.person = ? "
 					+ "and pd.date between ? and ?", "91", this.person, validData.getBegin(), validData.getEnd()).fetch();
 			this.riposiCompensativiMinuti = 0;

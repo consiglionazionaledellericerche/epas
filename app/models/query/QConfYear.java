@@ -9,6 +9,7 @@ import com.mysema.query.types.path.*;
 import com.mysema.query.types.PathMetadata;
 import javax.annotation.Generated;
 import com.mysema.query.types.Path;
+import com.mysema.query.types.path.PathInits;
 
 
 /**
@@ -19,29 +20,23 @@ public class QConfYear extends EntityPathBase<ConfYear> {
 
     private static final long serialVersionUID = 2027912357L;
 
+    private static final PathInits INITS = PathInits.DIRECT2;
+
     public static final QConfYear confYear = new QConfYear("confYear");
 
     public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
 
-    public final NumberPath<Integer> dayExpiryVacationPastYear = createNumber("dayExpiryVacationPastYear", Integer.class);
-
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
-    public final NumberPath<Integer> hourMaxToCalculateWorkTime = createNumber("hourMaxToCalculateWorkTime", Integer.class);
+    public final StringPath field = createString("field");
+
+    public final NumberPath<Integer> fieldValue = createNumber("fieldValue", Integer.class);
 
     //inherited
     public final NumberPath<Long> id = _super.id;
 
-    public final NumberPath<Integer> maxRecoveryDaysFourNine = createNumber("maxRecoveryDaysFourNine", Integer.class);
-
-    public final NumberPath<Integer> maxRecoveryDaysOneThree = createNumber("maxRecoveryDaysOneThree", Integer.class);
-
-    public final NumberPath<Integer> monthExpireRecoveryDaysFourNine = createNumber("monthExpireRecoveryDaysFourNine", Integer.class);
-
-    public final NumberPath<Integer> monthExpireRecoveryDaysOneThree = createNumber("monthExpireRecoveryDaysOneThree", Integer.class);
-
-    public final NumberPath<Integer> monthExpiryVacationPastYear = createNumber("monthExpiryVacationPastYear", Integer.class);
+    public final QOffice office;
 
     //inherited
     public final BooleanPath persistent = _super.persistent;
@@ -49,15 +44,24 @@ public class QConfYear extends EntityPathBase<ConfYear> {
     public final NumberPath<Integer> year = createNumber("year", Integer.class);
 
     public QConfYear(String variable) {
-        super(ConfYear.class, forVariable(variable));
+        this(ConfYear.class, forVariable(variable), INITS);
     }
 
     public QConfYear(Path<? extends ConfYear> path) {
-        super(path.getType(), path.getMetadata());
+        this(path.getType(), path.getMetadata(), path.getMetadata().isRoot() ? INITS : PathInits.DEFAULT);
     }
 
     public QConfYear(PathMetadata<?> metadata) {
-        super(ConfYear.class, metadata);
+        this(metadata, metadata.isRoot() ? INITS : PathInits.DEFAULT);
+    }
+
+    public QConfYear(PathMetadata<?> metadata, PathInits inits) {
+        this(ConfYear.class, metadata, inits);
+    }
+
+    public QConfYear(Class<? extends ConfYear> type, PathMetadata<?> metadata, PathInits inits) {
+        super(type, metadata, inits);
+        this.office = inits.isInitialized("office") ? new QOffice(forProperty("office")) : null;
     }
 
 }

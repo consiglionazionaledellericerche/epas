@@ -934,20 +934,24 @@ public class PersonDay extends Model {
 	{
 		//Assumo che la timbratura di uscita e di ingresso debbano appartenere alla finestra 12:00 - 15:00
 		//Configuration conf = Configuration.getConfiguration(this.date);
+		Integer mealTimeStartHour = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_start_hour", person.office));
+		Integer mealTimeStartMinute = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_start_minute", person.office));
+		Integer mealTimeEndHour = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_end_hour", person.office));
+		Integer mealTimeEndMinute = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_end_minute", person.office));
 		ConfGeneral conf = ConfGeneral.getConfGeneral();
 		LocalDateTime startLunch = new LocalDateTime()
 		.withYear(this.date.getYear())
 		.withMonthOfYear(this.date.getMonthOfYear())
 		.withDayOfMonth(this.date.getDayOfMonth())
-		.withHourOfDay(conf.mealTimeStartHour)
-		.withMinuteOfHour(conf.mealTimeStartMinute);
+		.withHourOfDay(mealTimeStartHour)
+		.withMinuteOfHour(mealTimeStartMinute);
 		
 		LocalDateTime endLunch = new LocalDateTime()
 		.withYear(this.date.getYear())
 		.withMonthOfYear(this.date.getMonthOfYear())
 		.withDayOfMonth(this.date.getDayOfMonth())
-		.withHourOfDay(conf.mealTimeEndHour)
-		.withMinuteOfHour(conf.mealTimeEndMinute);
+		.withHourOfDay(mealTimeEndHour)
+		.withMinuteOfHour(mealTimeEndMinute);
 		
 		//List<PairStamping> lunchPairs = new ArrayList<PersonDay.PairStamping>();
 		List<PairStamping> allGapPairs = new ArrayList<PersonDay.PairStamping>();
@@ -1020,8 +1024,10 @@ public class PersonDay extends Model {
 		if(lastStampingPreviousDay != null && lastStampingPreviousDay.isIn())
 		{
 			this.orderStampings();
-			ConfYear config = ConfYear.getConfYear(this.date.getYear());
-			if(this.stampings.size() > 0 && this.stampings.get(0).way == WayType.out && config.hourMaxToCalculateWorkTime > this.stampings.get(0).date.getHourOfDay())
+			String hourMaxToCalculateWorkTime = ConfYear.getFieldValue("hour_max_to_calculate_worktime", this.date.getYear(), this.person.office);
+			//ConfYear config = ConfYear.getConfYear(this.date.getYear());
+			Integer maxHour = Integer.parseInt(hourMaxToCalculateWorkTime);
+			if(this.stampings.size() > 0 && this.stampings.get(0).way == WayType.out && maxHour > this.stampings.get(0).date.getHourOfDay())
 			{
 				Stamping correctStamp = new Stamping();
 				correctStamp.date = new LocalDateTime(this.previousPersonDayInMonth.date.getYear(), this.previousPersonDayInMonth.date.getMonthOfYear(), this.previousPersonDayInMonth.date.getDayOfMonth(), 23, 59);

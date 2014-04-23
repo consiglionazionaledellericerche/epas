@@ -114,7 +114,6 @@ public class Person extends Model {
 	@OneToOne(mappedBy="person", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE}, orphanRemoval=true, optional=true)
 	public ContactData contactData;
 	
-	
 	@OneToOne(mappedBy="person", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
 	public PersonHourForOvertime personHourForOvertime;
 
@@ -196,7 +195,6 @@ public class Person extends Model {
 	@NotAudited
 	@OneToOne(mappedBy="person", fetch=FetchType.EAGER, cascade = {CascadeType.REMOVE}, orphanRemoval=true)
 	public Location location;
-
 
 	@OneToOne(mappedBy="person", fetch=FetchType.EAGER,  cascade = {CascadeType.REMOVE} )
 	public PersonReperibility reperibility;
@@ -478,13 +476,14 @@ public class Person extends Model {
 	public List<Office> getOfficeAllowed(){
 		
 		List<Office> officeList = new ArrayList<Office>();
+		officeList.add(this.office);
 		if(!this.office.remoteOffices.isEmpty()){
 			
 			for(Office office : this.office.remoteOffices){
 				officeList.add(office);
 			}
 		}
-		officeList.add(this.office);
+		
 		return officeList;
 	}
 	
@@ -498,7 +497,7 @@ public class Person extends Model {
 		List<Office> officeAllowed = administrator.getOfficeAllowed();
 		for(Office office : officeAllowed)
 		{
-			if(office.id == this.office.id)
+			if(office.id.equals(this.office.id))
 				return true;
 		}
 		return false;
@@ -712,7 +711,7 @@ public class Person extends Model {
 	 */
 	public boolean isHoliday(LocalDate date)
 	{
-		if(DateUtility.isGeneralHoliday(date))
+		if(DateUtility.isGeneralHoliday(this.office, date))
 			return true;
 		
 		Contract contract = this.getContract(date);

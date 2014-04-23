@@ -12,12 +12,14 @@ import java.util.Map;
 import models.AbsenceType;
 import models.ConfGeneral;
 import models.Contract;
+import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.PersonTags;
 import models.StampModificationType;
 import models.StampType;
 import models.Stamping;
+import models.enumerate.ConfigurationFields;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
 import models.rendering.PersonStampingDayRecap;
@@ -67,8 +69,8 @@ public class Stampings extends Controller {
 		
 
 		//Configuration conf = Configuration.getCurrentConfiguration();
-		ConfGeneral conf = ConfGeneral.getConfGeneral();
-		int minInOutColumn = conf.numberOfViewingCoupleColumn;
+		//ConfGeneral conf = ConfGeneral.getConfGeneral();
+		int minInOutColumn = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));
 		int numberOfInOut = Math.max(minInOutColumn, PersonUtility.getMaximumCoupleOfStampings(person, year, month));
 
 		//Lista person day contente tutti i giorni fisici del mese
@@ -145,8 +147,9 @@ public class Stampings extends Controller {
 //		}
 		
 		//Configuration conf = Configuration.getCurrentConfiguration();													//0 sql (se già in cache)
-		ConfGeneral conf = ConfGeneral.getConfGeneral();
-		int minInOutColumn = conf.numberOfViewingCoupleColumn;
+//		ConfGeneral conf = ConfGeneral.getConfGeneral();
+		int minInOutColumn = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));
+//		int minInOutColumn = conf.numberOfViewingCoupleColumn;
 		int numberOfInOut = Math.max(minInOutColumn, PersonUtility.getMaximumCoupleOfStampings(person, year, month));	//30 sql
 
 		//Lista person day contente tutti i giorni fisici del mese
@@ -483,7 +486,10 @@ public class Stampings extends Controller {
 	public static void dailyPresence(Integer year, Integer month, Integer day) {
 
 		LocalDate dayPresence = new LocalDate(year, month, day);
-		List<Person> activePersonsInDay = Person.getActivePersonsInDay(day, month, year, Security.getOfficeAllowed(), false);
+		//TODO:
+		List<Office> office = new ArrayList<Office>();
+		office.add(Security.getUser().person.office);
+		List<Person> activePersonsInDay = Person.getActivePersonsInDay(day, month, year, office, false);
 		int numberOfInOut = maxNumberOfStampingsInMonth(year, month, day, activePersonsInDay);
 		
 		
