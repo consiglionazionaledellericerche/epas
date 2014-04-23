@@ -711,7 +711,7 @@ public class Person extends Model {
 	 */
 	public boolean isHoliday(LocalDate date)
 	{
-		if(DateUtility.isGeneralHoliday(date))
+		if(DateUtility.isGeneralHoliday(this.office, date))
 			return true;
 		
 		Contract contract = this.getContract(date);

@@ -172,7 +172,7 @@ public class MonthRecaps extends Controller{
 				lastDayOfMonth = lastDayOfMonth.plusDays(1);
 				continue;
 			}
-			if( ! DateUtility.isGeneralHoliday(lastDayOfMonth) )
+			if( ! DateUtility.isGeneralHoliday(null, lastDayOfMonth) )
 			{
 				generalWorkingDaysOfMonth++;
 			}
