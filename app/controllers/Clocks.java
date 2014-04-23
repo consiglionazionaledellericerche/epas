@@ -16,6 +16,7 @@ import models.StampType;
 import models.Stamping;
 import models.Stamping.WayType;
 import models.User;
+import models.enumerate.ConfigurationFields;
 import models.rendering.PersonStampingDayRecap;
 
 import org.joda.time.LocalDate;
@@ -63,8 +64,9 @@ public class Clocks extends Controller{
 		
 		//numero di colonne da visualizzare
 		//Configuration conf = Configuration.getCurrentConfiguration();
-		ConfGeneral conf = ConfGeneral.getConfGeneral();
-		int minInOutColumn = conf.numberOfViewingCoupleColumn;
+		//ConfGeneral conf = ConfGeneral.getConfGeneral();
+		int minInOutColumn = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, user.person.office));
+		//int minInOutColumn = conf.numberOfViewingCoupleColumn;
 		int numberOfInOut = Math.max(minInOutColumn,  PersonUtility.numberOfInOutInPersonDay(pd));
 		
 		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
@@ -151,8 +153,9 @@ public class Clocks extends Controller{
 		
 		//numero di colonne da visualizzare
 		//Configuration conf = Configuration.getCurrentConfiguration();
-		ConfGeneral conf = ConfGeneral.getConfGeneral();
-		int minInOutColumn = conf.numberOfViewingCoupleColumn;
+		//ConfGeneral conf = ConfGeneral.getConfGeneral();
+		//int minInOutColumn = conf.numberOfViewingCoupleColumn;
+		int minInOutColumn = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));
 		int numberOfInOut = Math.max(minInOutColumn,  PersonUtility.numberOfInOutInPersonDay(pd));
 		
 		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	

@@ -14,6 +14,7 @@ import models.Person;
 import models.PersonDay;
 import models.StampModificationType;
 import models.StampType;
+import models.enumerate.ConfigurationFields;
 import models.rendering.PersonStampingDayRecap;
 
 import org.joda.time.LocalDate;
@@ -44,8 +45,9 @@ public class PrintTags extends Controller{
 		
 	
 		//Configuration conf = Configuration.getCurrentConfiguration();
-		ConfGeneral conf = ConfGeneral.getConfGeneral();
-		int minInOutColumn = conf.numberOfViewingCoupleColumn;
+		//ConfGeneral conf = ConfGeneral.getConfGeneral();
+		int minInOutColumn = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));
+		//int minInOutColumn = conf.numberOfViewingCoupleColumn;
 		int numberOfInOut = Math.max(minInOutColumn, PersonUtility.getMaximumCoupleOfStampings(person, year, month));
 
 		//Lista person day contente tutti i giorni fisici del mese
@@ -114,8 +116,9 @@ public class PrintTags extends Controller{
 	
 		
 		//Configuration conf = Configuration.getCurrentConfiguration();
-		ConfGeneral conf = ConfGeneral.getConfGeneral();
-		int minInOutColumn = conf.numberOfViewingCoupleColumn;
+		//ConfGeneral conf = ConfGeneral.getConfGeneral();
+		int minInOutColumn = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));
+		//int minInOutColumn = conf.numberOfViewingCoupleColumn;
 		int numberOfInOut = Math.max(minInOutColumn, PersonUtility.getMaximumCoupleOfStampings(person, year, month));
 
 		//Lista person day contente tutti i giorni fisici del mese

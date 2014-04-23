@@ -13,6 +13,7 @@ import com.google.common.collect.Sets;
 import dao.PersonDao;
 import models.ConfYear;
 import models.Contract;
+import models.Office;
 import models.Person;
 import models.VacationCode;
 import models.rendering.VacationsRecap;
@@ -54,8 +55,11 @@ public class VacationsAdmin extends Controller{
 			}
 		}
 		
-		ConfYear conf = ConfYear.getConfYear(year);
-		LocalDate expireDate = LocalDate.now().withMonthOfYear(conf.monthExpiryVacationPastYear).withDayOfMonth(conf.dayExpiryVacationPastYear);
+		//ConfYear conf = ConfYear.getConfYear(year);
+		Office office = Security.getUser().person.office;
+		Integer monthExpiryVacationPastYear = Integer.parseInt(ConfYear.getFieldValue("month_expiry_vacation_past_year", year, office));
+		Integer dayExpiryVacationPastYear = Integer.parseInt(ConfYear.getFieldValue("day_expiry_vacation_past_year", year, office));
+		LocalDate expireDate = LocalDate.now().withMonthOfYear(monthExpiryVacationPastYear).withDayOfMonth(dayExpiryVacationPastYear);
 		
 		boolean isVacationLastYearExpired = VacationsRecap.isVacationsLastYearExpired(year, expireDate);
 		render(vacationsList, isVacationLastYearExpired, personsWithVacationsProblems, year, simpleResults);

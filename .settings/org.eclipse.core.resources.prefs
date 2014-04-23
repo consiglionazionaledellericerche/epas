@@ -1,3 +1,5 @@
-#Tue Feb 17 18:35:42 CET 2009
 eclipse.preferences.version=1
+encoding//app/views/main.html=UTF-8
+encoding//app/views/main_clock1.html=UTF-8
+encoding//app/views/main_with_navbar.html=UTF-8
 encoding/<project>=UTF-8

@@ -54,11 +54,7 @@ public class AbsenceTypeDao {
 				.map(absenceType, absence.count());
 	}
 
-	/*
-	 * 		return AbsenceType.find("Select abt from AbsenceType abt, Absence abs " +
-				"where abs.absenceType = abt group by abt order by sum(abt.id) desc limit 20").fetch();
-	 */
-	public static List<AbsenceType> getFrequentTypes(Optional<Boolean> notInternal) {
+	public static List<AbsenceType> getFrequentTypes() {
 		QAbsenceType absenceType = QAbsenceType.absenceType;
 		QAbsence absence = QAbsence.absence;
 		final JPQLQuery query = ModelQuery.queryFactory().from(absence)

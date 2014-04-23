@@ -90,9 +90,14 @@ public class PersonStampingDayRecap {
 		
 		
 		
-		ConfGeneral conf = ConfGeneral.getConfGeneral();
-		this.setTimeMealFrom(conf.mealTimeStartHour, conf.mealTimeStartMinute);
-		this.setTimeMealTo(conf.mealTimeEndHour, conf.mealTimeEndMinute);
+		//ConfGeneral conf = ConfGeneral.getConfGeneral();
+		Integer mealTimeStartHour = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_start_hour", person.office));
+		Integer mealTimeStartMinute = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_start_minute", person.office));
+		Integer mealTimeEndHour = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_end_hour", person.office));
+		Integer mealTimeEndMinute = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_end_minute", person.office));
+		
+		this.setTimeMealFrom(mealTimeStartHour, mealTimeStartMinute);
+		this.setTimeMealTo(mealTimeEndHour, mealTimeEndMinute);
 		
 		
 		//----------------------------------------------- fixed:  worktime, difference, progressive, p---------------------------------
