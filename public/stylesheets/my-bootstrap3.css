@@ -1,12 +1,19 @@
-/* CSS for login page and lost password*/
 
 html, body {
 	height: 100%;
 }
 
+/* CSS for login page and lost password*/
+
+html, body {
+	height: 100%;
+	background-color: lightblue;
+}
+
+
 #wrapper-login {
 	padding-top: 90px;
-	background-color: lightblue;
+	
 }
 
 #banner {
@@ -113,6 +120,7 @@ html, body {
 #main-container {
 	background-color: white;
 	height: 100%;
+	padding-top: 10px;	
 }
 
 
