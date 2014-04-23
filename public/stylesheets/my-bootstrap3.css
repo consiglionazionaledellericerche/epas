@@ -1,4 +1,4 @@
-/* CSS for login page */
+/* CSS for login page and lost password*/
 
 html, body {
 	background-color: lightblue;
@@ -61,6 +61,7 @@ html, body {
 }
 
 /* CSS flash message */
+
 .flash-panel {
 	text-align: center;
 	padding: 0;
@@ -71,6 +72,19 @@ html, body {
 	padding-top: 7px;
 }
 
+/* Custom Fixed navbar dropdown */
+
+@media (max-width: 767px) {
+
+	.container>.navbar-header, .container-fluid>.navbar-header, .container>.navbar-collapse, .container-fluid>.navbar-collapse {
+	  margin-right: 0;
+	  margin-left: 0;
+    }
+}
+
+#nav-year {
+	margin-left: 50px;
+}
 
 
 
