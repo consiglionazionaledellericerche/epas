@@ -27,7 +27,6 @@ import play.Logger;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
-import procedure.evolutions.Evolutions;
 
 
 //@With(Shibboleth.class)
@@ -83,10 +82,6 @@ public class Administration extends Controller {
 	}
 	
 
-	public static void checkNewRelation() throws ClassNotFoundException, SQLException{
-		Evolutions.updateWorkingTimeTypeRelation();
-	}
-	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void utilities(){
 		List<Person> pdList = Person.getActivePersonsInDay(new LocalDate(), Security.getOfficeAllowed(), false);
