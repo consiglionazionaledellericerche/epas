@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import models.ConfGeneral;
+import models.Office;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+
+import controllers.Security;
 
 public class DateUtility {
 
@@ -49,7 +52,13 @@ public class DateUtility {
 	public static boolean isGeneralHoliday(LocalDate date){
 		
 		//Configuration config = Configuration.getConfiguration(date);
-		ConfGeneral confGeneral = ConfGeneral.getConfGeneral();
+		//ConfGeneral confGeneral = ConfGeneral.getConfGeneral();
+		
+		/*TODO: da riverificare*/
+		Office office = Security.getUser().person.office;
+		Integer monthOfPatron = Integer.parseInt(ConfGeneral.getFieldValue("month_of_patron", office));
+		Integer dayOfPatron = Integer.parseInt(ConfGeneral.getFieldValue("day_of_patron", office));
+		/*fine pezzo da verificare*/
 		
 		LocalDate easter = findEaster(date.getYear());
 		LocalDate easterMonday = easter.plusDays(1);
@@ -79,7 +88,7 @@ public class DateUtility {
 			return true;
 		if((date.getMonthOfYear() == 11) && (date.getDayOfMonth() == 1))
 			return true;
-		if((date.getMonthOfYear() == confGeneral.monthOfPatron && date.getDayOfMonth() == confGeneral.dayOfPatron))
+		if((date.getMonthOfYear() == monthOfPatron && date.getDayOfMonth() == dayOfPatron))
 			return true;
 		/**
 		 * ricorrenza centocinquantenario dell'unità d'Italia

@@ -2,6 +2,9 @@ package models;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.hibernate.envers.Audited;
@@ -15,29 +18,46 @@ import play.db.jpa.Model;
 @Table(name="conf_year")
 public class ConfYear extends Model{
 	
+	/* nuova configurazione della tabella*/
+	@ManyToOne( fetch=FetchType.LAZY)
+	@JoinColumn(name="office_id")
+	public Office office;
+	
 	@Column(name="year")
 	public Integer year;
 	
-	@Column(name="month_expiry_vacation_past_year")
-	public Integer monthExpiryVacationPastYear;
-
-	@Column(name="day_expiry_vacation_past_year")
-	public Integer dayExpiryVacationPastYear;
+	@Column(name="field")
+	public String field;
 	
-	@Column(name="month_expire_recovery_days_13")
-	public Integer monthExpireRecoveryDaysOneThree;
+	@Column(name="field_value")
+	public Integer fieldValue;
 	
-	@Column(name="month_expire_recovery_days_49")
-	public Integer monthExpireRecoveryDaysFourNine;
-
-	@Column(name="max_recovery_days_13")
-	public Integer maxRecoveryDaysOneThree;
-
-	@Column(name="max_recovery_days_49")
-	public Integer maxRecoveryDaysFourNine;	
+	/*fine configurazione della tabella*/
 	
-	@Column(name="hour_max_to_calculate_worktime")
-	public Integer hourMaxToCalculateWorkTime;
+	
+	
+//	@Column(name="month_expiry_vacation_past_year")
+//	public Integer monthExpiryVacationPastYear;
+//
+//	@Column(name="day_expiry_vacation_past_year")
+//	public Integer dayExpiryVacationPastYear;
+//	
+//	@Column(name="month_expire_recovery_days_13")
+//	public Integer monthExpireRecoveryDaysOneThree;
+//	
+//	@Column(name="month_expire_recovery_days_49")
+//	public Integer monthExpireRecoveryDaysFourNine;
+//
+//	@Column(name="max_recovery_days_13")
+//	public Integer maxRecoveryDaysOneThree;
+//
+//	@Column(name="max_recovery_days_49")
+//	public Integer maxRecoveryDaysFourNine;	
+//	
+//	@Column(name="hour_max_to_calculate_worktime")
+//	public Integer hourMaxToCalculateWorkTime;
+	
+	
 	
 	public static ConfYear getConfYear(Integer year)
 	{
@@ -53,7 +73,30 @@ public class ConfYear extends Model{
 		}
 		return confYear;
 	}
+
+	public static Integer getFieldValue(String field, Integer year, Office office) {
+		Integer value = (Integer)Cache.get(field+year);
+		if(value == null){
+			ConfYear conf = ConfYear.find("Select cy from ConfYear cy where cy.year = ? and cy.field = ? and cy.office = ?", 
+					year, field, office).first();
+			value = conf.fieldValue;
+			Cache.set(field+year, value);
+		}
+		return value;
+	}
 	
+	
+	public static ConfYear getConfGeneralByFieldAndYear(String field, Integer year, Office office){
+		
+		ConfYear conf = ConfYear.find("Select conf from ConfYear conf where conf.field = ? and conf.office = ? and conf.year = ?", 
+				field, office, year).first();
+				
+		
+		return conf;
+	}
+
+	
+
 	public String getIntelligibleMonthValue(Integer i)
 	{
 		if(i==0)
