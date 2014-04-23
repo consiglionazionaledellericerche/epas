@@ -100,8 +100,8 @@ public class VacationsRecap {
 		//Expire Last Year
 		
 		//ConfYear conf = ConfYear.getConfYear(year);
-		Integer monthExpiryVacationPastYear = ConfYear.getFieldValue("month_expiry_vacation_past_year", year, person.office);
-		Integer dayExpiryVacationPastYear = ConfYear.getFieldValue("day_expiry_vacation_past_year", year, person.office);
+		Integer monthExpiryVacationPastYear = Integer.parseInt(ConfYear.getFieldValue("month_expiry_vacation_past_year", year, person.office));
+		Integer dayExpiryVacationPastYear = Integer.parseInt(ConfYear.getFieldValue("day_expiry_vacation_past_year", year, person.office));
 		LocalDate expireVacation = actualDate.withMonthOfYear(monthExpiryVacationPastYear).withDayOfMonth(dayExpiryVacationPastYear);
 		
 		this.isExpireLastYear = false;
