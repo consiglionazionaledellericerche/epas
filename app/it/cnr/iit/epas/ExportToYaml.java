@@ -1,17 +1,8 @@
 package it.cnr.iit.epas;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.joda.time.LocalDate;
-import org.yaml.snakeyaml.Yaml;
-
-import play.Logger;
 import models.Absence;
 import models.AbsenceType;
 import models.AbsenceTypeGroup;
@@ -25,8 +16,10 @@ import models.Qualification;
 import models.StampProfile;
 import models.Stamping;
 import models.VacationCode;
-import models.WorkingTimeType;
-import models.WorkingTimeTypeDay;
+
+import org.joda.time.LocalDate;
+
+import play.Logger;
 
 public class ExportToYaml {
 

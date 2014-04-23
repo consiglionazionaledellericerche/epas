@@ -5,7 +5,6 @@ import helpers.attestati.AttestatiClient.LoginResponse;
 import helpers.attestati.AttestatiException;
 import helpers.attestati.Dipendente;
 import helpers.attestati.RispostaElaboraDati;
-import it.cnr.iit.epas.MainMenu;
 import it.cnr.iit.epas.PersonUtility;
 
 import java.io.BufferedWriter;
@@ -14,37 +13,20 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.criteria.Join;
-
-import lombok.Data;
 import models.Absence;
 import models.CertificatedData;
 import models.Competence;
-import models.CompetenceCode;
 import models.ConfGeneral;
+import models.Office;
 import models.Person;
 import models.PersonMonthRecap;
-
-import org.hibernate.ejb.criteria.path.AbstractFromImpl.JoinScope;
-import org.hibernate.type.OrderedSetType;
-import org.joda.time.LocalDate;
-import org.jsoup.Connection;
-import org.jsoup.Connection.Method;
-import org.jsoup.Connection.Response;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
+import models.enumerate.ConfigurationFields;
 import play.Logger;
 import play.cache.Cache;
 import play.mvc.Controller;
@@ -52,14 +34,12 @@ import play.mvc.With;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.sun.istack.internal.NotNull;
 
 /**
  * Contiene in metodi necessari per l'interazione tra utente, ePAS e 
@@ -82,9 +62,12 @@ public class UploadSituation extends Controller{
 	@Check(Security.UPLOAD_SITUATION)
 	public static void loginAttestati(Integer year, Integer month) {
 		//Configuration conf = Configuration.getCurrentConfiguration();
-		ConfGeneral conf = ConfGeneral.getConfGeneral();
-		String urlToPresence = conf.urlToPresence;
-		String attestatiLogin = params.get("attestatiLogin") == null ? conf.userToPresence : params.get("attestatiLogin"); 
+//		ConfGeneral conf = ConfGeneral.getConfGeneral();
+		Office office = Security.getUser().person.office;
+		String urlToPresence = ConfGeneral.getFieldValue(ConfigurationFields.UrlToPresence.description, office);
+		String userToPresence = ConfGeneral.getFieldValue(ConfigurationFields.UserToPresence.description, office);
+//		String urlToPresence = conf.urlToPresence;
+		String attestatiLogin = params.get("attestatiLogin") == null ? userToPresence : params.get("attestatiLogin"); 
 
 		render(year, month, urlToPresence, attestatiLogin);
 	}
@@ -105,7 +88,8 @@ public class UploadSituation extends Controller{
 			Application.indexAdmin();
 		}
 
-		ConfGeneral conf = ConfGeneral.getConfGeneral();
+//		ConfGeneral conf = ConfGeneral.getConfGeneral();
+		Integer seatCode = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.SeatCode.description, Security.getUser().person.office));
 		List<Person> personList = Person.find("Select p from Person p where p.number <> ? and p.number is not null order by p.number", 0).fetch();
 		Logger.debug("La lista di nomi è composta da %s persone ", personList.size());
 		List<Absence> absenceList = null;
@@ -118,7 +102,7 @@ public class UploadSituation extends Controller{
 		FileWriter writer = new FileWriter(tempFile, true);
 		try {
 			BufferedWriter out = new BufferedWriter(writer);
-			out.write(conf.seatCode.toString());
+			out.write(seatCode.toString());
 			out.write(' ');
 			out.write(new String(month.toString()+year.toString()));
 			out.newLine();
@@ -196,7 +180,7 @@ public class UploadSituation extends Controller{
 				redirect("Application.indexAdmin");
 			}
 
-			String urlToPresence = ConfGeneral.getConfGeneral().urlToPresence;
+			String urlToPresence = ConfGeneral.getFieldValue(ConfigurationFields.UrlToPresence.description, Security.getUser().person.office);
 			
 			try {
 				//1) LOGIN

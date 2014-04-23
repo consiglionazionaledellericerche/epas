@@ -33,6 +33,12 @@ public class QRemoteOffice extends EntityPathBase<RemoteOffice> {
     public final NumberPath<Integer> code = _super.code;
 
     //inherited
+    public final ListPath<models.ConfGeneral, QConfGeneral> confGeneral = _super.confGeneral;
+
+    //inherited
+    public final ListPath<models.ConfYear, QConfYear> confYear = _super.confYear;
+
+    //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
     //inherited

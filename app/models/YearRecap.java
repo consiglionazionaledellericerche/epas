@@ -2,39 +2,20 @@ package models;
 
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityManager;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.persistence.criteria.Fetch;
 
-import org.hibernate.envers.AuditReader;
-import org.hibernate.envers.AuditReaderFactory;
-import org.hibernate.envers.query.AuditQuery;
-import org.joda.time.DateTimeConstants;
-import org.joda.time.Days;
 import org.joda.time.LocalDate;
 
-import com.google.common.collect.Multiset.Entry;
-
-import net.sf.oval.constraint.Min;
-import net.sf.oval.constraint.NotNull;
-import net.sf.oval.constraint.Range;
-import play.Logger;
 import play.data.validation.Required;
-import play.data.validation.Valid;
-import play.db.jpa.JPA;
 import play.db.jpa.Model;
 
 

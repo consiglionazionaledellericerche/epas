@@ -1,19 +1,21 @@
 package dao;
 
 import helpers.ModelQuery;
+import helpers.ModelQuery.SimpleResults;
 
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.base.Optional;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.types.Projections;
-
 import models.AbsenceType;
-import models.Competence;
 import models.query.QAbsence;
 import models.query.QAbsenceType;
-import models.query.QCompetence;
+
+import org.bouncycastle.util.Strings;
+
+import com.google.common.base.Optional;
+import com.mysema.query.BooleanBuilder;
+import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.types.Projections;
 
 public class AbsenceTypeDao {
 
@@ -52,11 +54,7 @@ public class AbsenceTypeDao {
 				.map(absenceType, absence.count());
 	}
 
-	/*
-	 * 		return AbsenceType.find("Select abt from AbsenceType abt, Absence abs " +
-				"where abs.absenceType = abt group by abt order by sum(abt.id) desc limit 20").fetch();
-	 */
-	public static List<AbsenceType> getFrequentTypes(Optional<Boolean> notInternal) {
+	public static List<AbsenceType> getFrequentTypes() {
 		QAbsenceType absenceType = QAbsenceType.absenceType;
 		QAbsence absence = QAbsence.absence;
 		final JPQLQuery query = ModelQuery.queryFactory().from(absence)
@@ -67,4 +65,20 @@ public class AbsenceTypeDao {
 		
 		return query.list(absenceType);
 	} 
+	
+	
+	public static SimpleResults<AbsenceType> getAbsences(Optional<String> name){
+		
+		final BooleanBuilder condition = new BooleanBuilder();
+		QAbsenceType absenceType = QAbsenceType.absenceType;
+		final JPQLQuery query = ModelQuery.queryFactory().from(absenceType)
+				.orderBy(absenceType.code.asc());
+		if (name.isPresent() && !name.get().trim().isEmpty()) {
+			condition.andAnyOf(absenceType.code.startsWithIgnoreCase(name.get()),
+					absenceType.description.toLowerCase().like("%"+Strings.toLowerCase(name.get())+"%"));
+			query.where(condition);
+		}
+		
+		return ModelQuery.simpleResults(query, absenceType);
+	}
 }

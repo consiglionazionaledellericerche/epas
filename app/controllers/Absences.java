@@ -1,18 +1,11 @@
 package controllers;
 
+import helpers.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.CheckMessage;
-import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-import it.cnr.iit.epas.JsonPersonEmailBinder;
 import it.cnr.iit.epas.MainMenu;
 import it.cnr.iit.epas.PersonUtility;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -28,41 +21,32 @@ import models.AbsenceTypeGroup;
 import models.ConfYear;
 import models.Person;
 import models.PersonDay;
-import models.PersonMonthRecap;
 import models.PersonReperibilityDay;
 import models.PersonShiftDay;
-import models.PersonTags;
 import models.Qualification;
-import models.Stamping;
-import models.WorkingTimeTypeDay;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
+import models.enumerate.ConfigurationFields;
 import models.enumerate.JustifiedTimeAtWork;
-import models.exports.PersonEmailFromJson;
-import models.exports.PersonPeriodAbsenceCode;
 import models.rendering.VacationsRecap;
 
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.MultiPartEmail;
-import org.hibernate.envers.entities.mapper.relation.lazy.proxy.SetProxy;
 import org.joda.time.LocalDate;
 
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
-import com.google.common.collect.TreeBasedTable;
-
 import play.Logger;
-import play.Play;
-import play.data.Upload;
-import play.data.binding.As;
-import play.data.validation.CheckWith;
 import play.data.validation.Required;
-import play.data.validation.Valid;
 import play.db.jpa.Blob;
 import play.db.jpa.JPA;
 import play.libs.Mail;
 import play.mvc.Controller;
 import play.mvc.With;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.Table;
+import com.google.common.collect.TreeBasedTable;
+
+import dao.AbsenceTypeDao;
 
 @With( {Secure.class, NavigationMenu.class} )
 public class Absences extends Controller{
@@ -152,16 +136,14 @@ public class Absences extends Controller{
 	 * questa è una funzione solo per admin, quindi va messa con il check administrator
 	 */
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
-	public static void manageAbsenceCode(){
-		List<AbsenceType> absenceList = AbsenceType.find("Select abt from AbsenceType abt order by abt.code").fetch();
-
-		render(absenceList);
-	}
-
-	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
-	public static void absenceCodeList(){
-		List<AbsenceType> absenceList = AbsenceType.findAll();
-		render(absenceList);
+	public static void manageAbsenceCode(String name, Integer page){
+		if(page==null)
+			page = 0;
+		SimpleResults<AbsenceType> simpleResults = AbsenceTypeDao.getAbsences(Optional.fromNullable(name));
+		List<AbsenceType> absenceList = simpleResults.paginated(page).getResults();
+		//List<AbsenceType> absenceList = AbsenceType.find("Select abt from AbsenceType abt order by abt.code").fetch();
+		
+		render(absenceList, name, simpleResults);
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
@@ -284,7 +266,7 @@ public class Absences extends Controller{
 
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void discard(){
-		manageAbsenceCode();
+		manageAbsenceCode(null, null);
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
@@ -467,7 +449,7 @@ public class Absences extends Controller{
 		absence.save();
 
 		flash.success("Modificato codice di assenza %s", absence.code);
-		Absences.manageAbsenceCode();
+		Absences.manageAbsenceCode(null, null);
 
 	}
 
@@ -521,7 +503,7 @@ public class Absences extends Controller{
 			PersonUtility.updatePersonDaysIntoInterval(person, dateFrom, dateTo);
 			Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
 		}
-		insertAbsence(person.id, yearFrom, monthFrom, dayFrom, newAbsenceType.code, yearTo, monthTo, dayTo, (Blob)file, mealTicket);
+		insertAbsence(person.id, yearFrom, monthFrom, dayFrom, newAbsenceType.code, yearTo, monthTo, dayTo, file, mealTicket);
 
 	}
 	
@@ -574,7 +556,7 @@ public class Absences extends Controller{
 		int countHowManyCheck = 0;
 		while(!actualDate.isAfter(dateTo))
 		{
-			
+			Integer maxRecoveryDaysOneThree = ConfYear.getFieldValue(ConfigurationFields.MaxRecoveryDays13.description, actualDate.getYear(), person.office);
 			ConfYear config = ConfYear.getConfYear(actualDate.getYear());
 	
 			//verifica se ha esaurito il bonus per l'anno
@@ -587,7 +569,7 @@ public class Absences extends Controller{
 				setParameter("code", "91");
 				List<Object> resultList = query.getResultList();
 				Logger.debug("Il numero di assenze con codice %s fino a oggi è %d", absenceType.code, resultList.size());
-				if(resultList.size() >= config.maxRecoveryDaysOneThree){
+				if(resultList.size() >= maxRecoveryDaysOneThree){
 					actualDate = actualDate.plusDays(1);
 					continue;
 				}

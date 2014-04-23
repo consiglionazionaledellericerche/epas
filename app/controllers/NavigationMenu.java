@@ -3,26 +3,20 @@
  */
 package controllers;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import it.cnr.iit.epas.ActionMenuItem;
 import it.cnr.iit.epas.MainMenu;
-import it.cnr.iit.epas.PersonUtility;
-import models.Contract;
+
+import java.util.List;
+
 import models.Office;
 import models.Person;
 import models.User;
 
 import org.joda.time.LocalDate;
 
-import play.Logger;
-import play.cache.Cache;
-import play.mvc.After;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Http;
-import play.mvc.Scope;
 
 /**
  * @author cristian
@@ -146,7 +140,7 @@ public class NavigationMenu extends Controller {
 		if(controller.equals("YearlyAbsences.yearlyAbsences"))
 			return "yearlyAbsences";
 		
-		if(controller.equals("VacationsAdmin.manageVacationCode"))
+		if(controller.equals("VacationsAdmin.manageVacationCode") || controller.equals("VacationsAdmin.list"))
 			return  "vacationsAdmin";
 		
 		if(controller.equals("Competences.showCompetences") || controller.equals("Competences.overtime") || controller.equals("Competences.totalOvertimeHours") || controller.equals("Competences.recapCompetences"))

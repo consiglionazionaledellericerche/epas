@@ -1,17 +1,14 @@
 package controllers;
 
+import it.cnr.iit.epas.ActionMenuItem;
+
 import java.io.IOException;
 import java.sql.SQLException;
 
-import it.cnr.iit.epas.ActionMenuItem;
-import it.cnr.iit.epas.PersonUtility;
-import models.Person;
 import models.User;
 
 import org.joda.time.LocalDate;
 
-import play.Logger;
-import play.cache.Cache;
 import play.mvc.Controller;
 
 public class SwitchTemplate extends Controller{
@@ -118,19 +115,19 @@ public class SwitchTemplate extends Controller{
 			break;
 
 		case manageAbsenceCode:
-			Absences.manageAbsenceCode();
+			Absences.manageAbsenceCode(null, null);
 			break;
 
 		case vacationsAdmin:
-			VacationsAdmin.manageVacationCode();		
+			VacationsAdmin.list(year, null, null);		
 			break;
 
 		case competencesAdmin:
-			Competences.showCompetences(year, month);
+			Competences.showCompetences(year, month, null, null, null);
 			break;
 
 		case changePassword:
-			Persons.changePassword(personId);
+			Persons.changePassword();
 			break;
 
 		case manageWorkingTime:
@@ -138,11 +135,11 @@ public class SwitchTemplate extends Controller{
 			break;
 
 		case confParameters:
-			Configurations.showConfGeneral();
+			Configurations.showConfGeneral(Security.getUser().person.office.id);
 			break;
 
 		case personList:
-			Persons.list();
+			Persons.list(null);
 			break;
 
 		case administrator:

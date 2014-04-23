@@ -17,7 +17,7 @@ import java.util.Map;
 import models.Absence;
 import models.Competence;
 import models.ConfGeneral;
-import models.Person;
+import models.Office;
 import models.PersonMonthRecap;
 
 import org.joda.time.LocalDate;
@@ -29,9 +29,11 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import play.Logger;
+
 import com.google.common.collect.Lists;
 
-import play.Logger;
+import controllers.Security;
 
 /**
  * Incapsula le funzionalità necessarie per l'interazione via HTTP GET/POST
@@ -112,8 +114,9 @@ public class AttestatiClient {
 	public static LoginResponse login(String attestatiLogin, String attestatiPassword, Integer year, Integer month) throws AttestatiException, MalformedURLException, URISyntaxException {
 		
 		//URI baseUri = new URI(Configuration.getCurrentConfiguration().urlToPresence);
-		ConfGeneral confGeneral =  ConfGeneral.getConfGeneral();
-		String urlToPresence = confGeneral.urlToPresence;
+		//ConfGeneral confGeneral =  ConfGeneral.getConfGeneral();
+		Office office = Security.getUser().person.office;
+		String urlToPresence = ConfGeneral.getFieldValue("url_to_presence", office);
 		URI baseUri = new URI(urlToPresence);
 		URL loginUrl = baseUri.resolve(BASE_LOGIN_URL).toURL();
 		
@@ -161,15 +164,18 @@ public class AttestatiClient {
 	 */
 	public static List<Dipendente> listaDipendenti(Map<String, String> cookies, Integer year, Integer month) throws URISyntaxException, MalformedURLException {
 		Response listaDipendentiResponse;
-		ConfGeneral conf = ConfGeneral.getConfGeneral();
-		URI baseUri = new URI(conf.urlToPresence);
+//		ConfGeneral conf = ConfGeneral.getConfGeneral();
+		Office office = Security.getUser().person.office;
+		String urlToPresence = ConfGeneral.getFieldValue("url_to_presence", office);
+		Integer seatCode = Integer.parseInt(ConfGeneral.getFieldValue("seat_code", office));
+		URI baseUri = new URI(urlToPresence);
 		final URL listaDipendentiUrl = baseUri.resolve(BASE_LISTA_DIPENDENTI_URL).toURL();
 		Connection connection = Jsoup.connect(listaDipendentiUrl.toString());
 		connection.cookies(cookies);
 		
 		try {
 			listaDipendentiResponse = connection
-					.data("sede_id", conf.seatCode.toString())
+					.data("sede_id", seatCode.toString())
 					.data("anno", year.toString())
 					.data("mese", month.toString())
 					.userAgent(CLIENT_USER_AGENT)
@@ -231,8 +237,11 @@ public class AttestatiClient {
 					throws URISyntaxException, MalformedURLException {
 		
 		//Configuration conf = Configuration.getCurrentConfiguration();
-		ConfGeneral conf = ConfGeneral.getConfGeneral();
-		URI baseUri = new URI(conf.urlToPresence);
+		//ConfGeneral conf = ConfGeneral.getConfGeneral();
+		Office office = Security.getUser().person.office;
+		String urlToPresence = ConfGeneral.getFieldValue("url_to_presence", office);
+		Integer seatCode = Integer.parseInt(ConfGeneral.getFieldValue("seat_code", office));
+		URI baseUri = new URI(urlToPresence);
 		final URL elaboraDatiUrl = baseUri.resolve(BASE_ELABORA_DATI_URL).toURL();
 
 		StringBuffer absencesSent = new StringBuffer();
@@ -251,7 +260,7 @@ public class AttestatiClient {
 			.data("matr", dipendente.getMatricola())
 			.data("anno", year.toString())
 			.data("mese", month.toString())
-			.data("sede_id", conf.seatCode.toString())
+			.data("sede_id", seatCode.toString())
 			.method(Method.POST);
 
 		int codAssAssoCounter = 0;
@@ -316,7 +325,7 @@ public class AttestatiClient {
 
 			if (elaboraDatiResponse.statusCode() != 200)  {
 				throw new AttestatiException(String.format("Errore durante l'elaborazione dati del dipendente %s", dipendente.getCognomeNome()));
-			};			
+			}
 
 			Document elaboraDatiDoc = elaboraDatiResponse.parse();
 			Logger.debug("Risposta all'elaborazione dati = \n%s", elaboraDatiDoc);

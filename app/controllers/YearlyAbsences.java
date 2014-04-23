@@ -1,6 +1,5 @@
 package controllers;
 
-import it.cnr.iit.epas.ActionMenuItem;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.ArrayList;
@@ -10,7 +9,6 @@ import java.util.List;
 import models.Absence;
 import models.AbsenceType;
 import models.Person;
-import models.PersonDay;
 import models.rendering.YearlyAbsencesRecap;
 
 import org.joda.time.LocalDate;
@@ -19,12 +17,13 @@ import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import com.google.common.collect.ArrayTable;
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableTable;
+import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
+
+import dao.PersonDao;
 
 @With( {Secure.class, NavigationMenu.class} )
 public class YearlyAbsences extends Controller{
@@ -180,13 +179,21 @@ public class YearlyAbsences extends Controller{
 			}
 		}
 		else{
-			List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
+			List<Person> persons = PersonDao.list(Optional.fromNullable(name), 
+					Sets.newHashSet(Security.getOfficeAllowed()), 
+					false, 
+					new LocalDate(year, month,1), 
+					new LocalDate(year, month, 1).dayOfMonth().withMaximumValue())
+					.list();
+			
+			
+			//List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
 			//Table<Person, String, Integer> tableMonthlyAbsences = ArrayTable.create(activePersons, absenceInMonth);
 
 
-			for(Person p : activePersons){
-				List<Absence> absenceInMonth = Absence.find("Select abs from Absence abs, PersonDay pd where abs.personDay = pd and " +
-						"pd.person = ? and pd.date >= ? and pd.date <= ?", 
+			for(Person p : persons){
+				List<Absence> absenceInMonth = Absence.find("Select abs from Absence abs where " +
+						"abs.personDay.person = ? and abs.personDay.date >= ? and abs.personDay.date <= ?", 
 						p, new LocalDate(year, month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
 
 				tableMonthlyAbsences.put(p, abt, absenceInMonth.size());
@@ -230,12 +237,12 @@ public class YearlyAbsences extends Controller{
 	public static void absencesPerPerson(Long personId, Integer year){
 		
 		//controllo sui parametri
-		Logger.debug("Anno: %d Id: %d", year, personId);
-		Person person = null;
-		if(personId == null || personId == 0)
-			person = Security.getUser().person;			//prende la persona collegata
-		else
-			person = Person.findById(personId);
+		Person person = Security.getSelfPerson(personId);
+		if( person == null ) {
+			flash.error("Accesso negato.");
+			renderTemplate("Application/indexAdmin.html");
+		}
+		
 		Integer anno = params.get("year", Integer.class);
 		Logger.debug("La persona correntemente loggata è: %s", person);
 		Logger.trace("Anno: "+anno);
@@ -252,7 +259,7 @@ public class YearlyAbsences extends Controller{
 		}
 	}
 	
-	@Check(Security.VIEW_PERSONAL_SITUATION)
+	@Check(Security.VIEW_PERSON_LIST)
 	public static void showPersonMonthlyAbsences(Long personId, Integer year, Integer month, String absenceTypeCode) throws InstantiationException, IllegalAccessException
 	{
 		LocalDate monthBegin = new LocalDate(year, month, 1);

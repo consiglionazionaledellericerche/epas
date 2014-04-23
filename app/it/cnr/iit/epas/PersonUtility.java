@@ -1,50 +1,36 @@
 package it.cnr.iit.epas;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.FetchType;
 import javax.persistence.Query;
 
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.SimpleEmail;
-import org.joda.time.DateTimeConstants;
-import org.joda.time.LocalDate;
-
-import play.Logger;
-import play.db.jpa.JPA;
-import play.db.jpa.JPAPlugin;
-import play.db.jpa.Transactional;
-import play.mvc.Scope.Flash;
 import models.Absence;
 import models.AbsenceType;
 import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
-import models.InitializationTime;
 import models.Office;
 import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
-import models.PersonDayInTrouble;
 import models.PersonMonthRecap;
-import models.PersonReperibilityDay;
-import models.PersonShiftDay;
-import models.RemoteOffice;
-import models.StampProfile;
 import models.Stamping;
 import models.User;
-import models.VacationPeriod;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
 import models.enumerate.JustifiedTimeAtWork;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
 import models.rendering.VacationsRecap;
+
+import org.joda.time.LocalDate;
+
+import play.Logger;
+import play.db.jpa.JPA;
+import play.db.jpa.JPAPlugin;
 
 public class PersonUtility {
 
@@ -69,44 +55,6 @@ public class PersonUtility {
 		return positiveDifference;
 	}
 
-
-	//	/** TODO usato in Competences.java ma utilizza dati del person month, sostituirlo */
-	//	public static boolean canTakeOvertime(Person person, int year, int month){
-	//		boolean canOrNot = false;
-	//		int positiveDifference = 0;
-	//		int negativeDifference = 0;
-	//		LocalDate date = new LocalDate(year, month, 1);
-	//		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-	//				person, date, date.dayOfMonth().withMaximumValue()).fetch();
-	//		for(PersonDay pd : pdList){
-	//			if(pd.difference > 0)
-	//				positiveDifference = positiveDifference + pd.difference;
-	//			else
-	//				negativeDifference = negativeDifference + pd.difference;
-	//		}
-	//		if(positiveDifference > -negativeDifference)
-	//			canOrNot = true;
-	//		else{
-	//			/**
-	//			 * per "bilanciare" i residui negativi del mese, si va a vedere se esistono residui positivi dal mese precedente o dall'anno precedente
-	//			 */
-	//			PersonMonth pm = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
-	//					person, year, month-1).first();
-	//
-	//			if(pm != null){
-	//				if(pm.totalRemainingMinutes > -negativeDifference)
-	//					canOrNot = true;
-	//				else 
-	//					canOrNot = false;
-	//			}
-	//			else
-	//				canOrNot = false;
-	//
-	//
-	//		}
-	//		return canOrNot;
-	//
-	//	}
 
 	/**
 	 * metodo per stabilire se una persona può ancora prendere o meno giorni di permesso causa malattia del figlio
@@ -294,8 +242,14 @@ public class PersonUtility {
 	public static AbsenceType whichVacationCode(Person person, LocalDate actualDate){
 
 		Contract contract = person.getCurrentContract();
-		VacationsRecap vr = new VacationsRecap(person, actualDate.getYear(), contract, actualDate, true);	
-
+		
+		VacationsRecap vr = null;
+    	try { 
+    		vr = new VacationsRecap(person, actualDate.getYear(), contract, actualDate, true);
+    	} catch(IllegalStateException e) {
+    		return null;
+    	}
+			
 		if(vr.vacationDaysLastYearNotYetUsed>0)
 			return AbsenceType.find("byCode", "31").first();
 
@@ -591,6 +545,10 @@ public class PersonUtility {
 			date = date.minusDays(1);
 		Contract contract = person.getContract(date);
 		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, date.getYear(), date);
+		/**
+		 * TODO: aggiungere la condizione per poter inserire un riposo compensativo in un mese futuro (verosimilmente il mese successivo a
+		 * quello in cui ci troviamo al momento in cui viene chiamato l'handler
+		 */
 		Mese mese = c.getMese(date.getYear(), date.getMonthOfYear());
 		Logger.info("monteOreAnnoCorrente=%s ,  monteOreAnnoPassato=%s, workingTime=%s", mese.monteOreAnnoCorrente, mese.monteOreAnnoPassato, mese.person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime);
 		if(mese.monteOreAnnoCorrente + mese.monteOreAnnoPassato > mese.person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime)
@@ -1036,7 +994,7 @@ public class PersonUtility {
 	 */
 	public static List<CompetenceCode> activeCompetence(){
 		List<CompetenceCode> competenceCodeList = new ArrayList<CompetenceCode>();
-		List<Competence> competenceList = Competence.find("Select comp from Competence comp where comp.year = ?", new LocalDate().getYear()).fetch();
+		List<Competence> competenceList = Competence.find("Select comp from Competence comp where comp.year = ? order by comp.competenceCode.code", new LocalDate().getYear()).fetch();
 		for(Competence comp : competenceList){
 			if(!competenceCodeList.contains(comp.competenceCode))
 				competenceCodeList.add(comp.competenceCode);

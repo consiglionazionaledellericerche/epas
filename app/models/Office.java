@@ -10,8 +10,6 @@ import javax.persistence.DiscriminatorType;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
@@ -47,4 +45,10 @@ public class Office extends Model{
      
     @OneToMany(mappedBy="office", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
     public List<Person> persons = new ArrayList<Person>();
+    
+    @OneToMany(mappedBy="office", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+    public List<ConfGeneral> confGeneral = new ArrayList<ConfGeneral>();
+    
+    @OneToMany(mappedBy="office", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+    public List<ConfYear> confYear = new ArrayList<ConfYear>();
 }
