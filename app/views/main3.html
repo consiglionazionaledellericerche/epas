@@ -14,9 +14,13 @@
     <link rel="stylesheet" media="screen" href="@{'/public/bootstrap-3.1.1-dist/css/bootstrap.min.css'}" />
 	<link rel="stylesheet" media="screen" href="@{'/public/stylesheets/my-bootstrap3.css'}" />
 	<link rel="stylesheet" media="screen" href="@{'/public/font-awesome-4.0.3/css/font-awesome.min.css'}"/>
+	<link rel="stylesheet" media="screen" href="@{'/public/bootstrap-datepicker/css/datepicker.css'}"/>
+	<link rel="stylesheet" href="@{'/public/morris.js-0.4.3/morris.css'}">
+	<link rel="stylesheet" href="@{'/public/feedback-master/feedback.min.css'}" />
     
     <!-- Custom styles for this template -->
-    <link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap-editable/css/bootstrap-editable.css" rel="stylesheet"/>   
+    <link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap-editable/css/bootstrap-editable.css" rel="stylesheet"/>
+       
 	#{get 'moreStyles' /}
 	
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -49,7 +53,15 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">ePAS</a>
+          <a class="navbar-brand" href="#">ePAS
+ 
+          <small class="visible-xs">XS</small>
+          <small class="visible-sm">SM</small>
+          <small class="visible-md">MD</small>
+          <small class="visible-lg">LG</small>
+
+          
+          </a>
         </div>
         <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
@@ -57,18 +69,18 @@
               <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span>
           		${session.username} <b class="caret"></b></a>
               <ul class="dropdown-menu">
-                <li><a href="#">Situazione mensile</a></li>
+                <li><a href="@{Stampings.stampings(session.get("yearSelected"), session.get("monthSelected"))}">Situazione mensile</a></li>
             
             	<li><a href="#">Assenze mensili</a></li>
-            	<li><a href="#">Assenze annuali</a></li>
-            	<li><a href="#">Ferie</a></li>
+            	<li><a href="@{YearlyAbsences.absencesPerPerson(session.get("personSelected"), session.get("yearSelected"))}">Assenze annuali</a></li>
+            	<li><a href="@{Vacations.show(session.get("personSelected"), session.get("yearSelected"))}">Ferie</a></li>
             	<li><a href="#">Competenze</a></li>
             	<li><a href="#">Riepilogo orario</a></li>
-            	<li><a href="#">Ore di formazione</a></li>
+            	<li><a href="@{PersonMonths.trainingHours(session.get("personSelected"), session.get("yearSelected"), session.get("monthSelected"))}">Ore di formazione</a></li>
             	<li class="divider"></li>
             	<li><a href="#">Stampa cartellino presenze</a></li>
             	<li class="divider"></li>
-            	<li><a href="#">Gestione password</a></li>
+            	<li><a href="@{Persons.changePassword()}">Gestione password</a></li>
               </ul>
             </li>
           </ul>
@@ -96,7 +108,6 @@
           	  </ul>
         	</li>
       	  </ul>
-      	  
       	  
       	  #{if session.contains("sudo.username")}
       	  <ul class="nav navbar-nav navbar-right">
@@ -163,6 +174,17 @@
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    
     <script src="@{'/public/bootstrap-3.1.1-dist/js/bootstrap.min.js'}" type="text/javascript"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap-editable/js/bootstrap-editable.min.js"></script>
+    <script src="@{'/public/bootstrap-datepicker/js/bootstrap-datepicker.js'}" type="text/javascript"></script>
+	<script src="@{'/public/morris.js-0.4.3/spec/vendor/raphael-2.1.0.min.js'}"></script>
+	<script src="@{'/public/morris.js-0.4.3/morris.min.js'}"></script>
+    <script src="@{'/public/feedback-master/feedback.js'}"></script>
+    
+    <script src="@{'/public/js/script.js'}"></script>
+     
+    #{include './feedback.html' /}  
+	#{get 'moreScripts' /}
   </body>
 </html>

@@ -1,5 +1,15 @@
+/* Browser reset
+------------------------------------------------------------------------- */
+
+h1,h2,h3,h4,h5 {
+	padding: 2px;
+	margin: 2px;
+	margin-bottom:4px;
+}
+
 /* Sticky footer styles
 ------------------------------------------------------------------------- */
+
 html,
 body {
   background-color: lightgrey;
@@ -35,11 +45,13 @@ footer p {
 }
 
 
+
 /* Custom page CSS
 ------------------------------------------------------------------------ */
 /* Not required for template or sticky footer method. */
 
 .flash-panel {
+	border: 1px solid;
 	text-align: center;
 	padding: 0;
 }
@@ -76,10 +88,40 @@ footer p {
 	font-size: 1.1em;
 }
 
+.panel {
+	padding-left: 0;
+	padding-right: 0;
+	border-color: darkgrey;
+}
+
 /* CSS utilità */
 
 .center {
 	text-align: center;
+}
+
+.center th {
+	text-align: center;
+}
+
+.container-main {
+	background-color: white;
+	border-radius: 5px;
+	border: 1px solid darkgrey;
+	padding: 10px;
+	font-size: .9em;
+}
+
+.container-margintop {
+	margin-top: 20px;
+}
+
+.container-marginbottom {
+	margin-bottom: 20px;
+}
+
+.modal-dialog-center {
+    margin-top: 15%;
 }
 
 /* CSS template */
