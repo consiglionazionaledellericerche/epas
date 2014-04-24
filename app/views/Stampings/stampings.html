@@ -1,9 +1,14 @@
-#{extends 'main_with_navbar.html' /}
-#{set title:person.surname + ' ' + person.name + ', matricola=' + person.number /}
-#{set titolo: 'Situazione presenze mensile ' +  month_capitalized + ' ' + year + ' di ' + person.surname + ' ' + person.name /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title:person.surname + ' ' + person.name + ', matricola=' + person.number  /}
 
-<div class="row-fluid">
-  <div class="span8" style="min-width: 900px;">
+
+
+
+<div class="panel panel-info">
+  <div class="panel-heading">Situazione mensile ${person.name} ${person.surname} </div>
+  <div class="panel-body">
+   <div class="span8" style="min-width: 900px;">
     <table id="tabellonetimbrature" class="table table-bordered table-condensed">
 
 	<tr>
@@ -152,10 +157,15 @@
     </table>
 
   </div>
+  
   <div class="span4">
      #{include './_riepilogoRiassuntivoMese.html' /}
   </div>
+  </div>
 </div>
+
+
+
 
 
 
