@@ -100,6 +100,10 @@ body {
 	text-align: center;
 }
 
+.center th {
+	text-align: center;
+}
+
 .container-main {
 	background-color: white;
 	border-radius: 5px;
@@ -116,6 +120,9 @@ body {
 	margin-bottom: 20px;
 }
 
+.modal-dialog-center {
+    margin-top: 15%;
+}
 
 /* CSS template */
 
