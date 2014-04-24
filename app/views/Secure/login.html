@@ -1,29 +1,36 @@
 #{extends 'main3.html' /}
-
+#{set header:'banner' /}
 #{set title:'ePAS - electronic Personnel Attendance System' /}
 
-<div class="container my-centered-container">
-  <h2>Benvenuto in ePAS</h2>
+<div class="row center">
 
-  <div>
+  <div class="container col-md-4 col-md-offset-4">
+    <h3>Benvenuto in ePAS</h3>
+  </div>
+
+  <div class="container col-xs-8 col-xs-offset-2
+  						col-sm-4 col-sm-offset-4 
+  						col-md-2 col-md-offset-5">
+    
 	
-	#{form @authenticate(), role:'form'}
+	#{form @authenticate(), id:'formLogin', role:'form'}
 
 		<!-- User e Password -->
-		<p><input class="form-control" placeholder="Username" type="text" name="username" value="${flash.username}" /></p>
-		<p><input class="form-control" placeholder="Password" type="password" name="password" value="" /></p>
+		<input class="form-control" placeholder="Username" type="text" name="username" value="${flash.username}" />
+		<input class="form-control" placeholder="Password" type="password" name="password" value="" />
 	 
 		<!-- Remember me -->
-		<p>
-		  <input type="checkbox" name="remember" id="remember" value="true" ${flash.remember ? 'checked="true"' : ''} />
-		  <label for="remember">&{'secure.remember'}</label>
-		</p>
+		
+		<input type="checkbox" name="remember" id="remember" value="true" ${flash.remember ? 'checked="true"' : ''} />
+		<label for="remember">&{'secure.remember'}</label>
+		
 		
 		<!-- Submit -->
-		<p><input class="btn btn-info" type="submit" id="signin" value="&{'secure.signin'}" /></p>
+		<input class="btn btn-primary btn-block" type="submit" id="signin" value="&{'secure.signin'}" />
 
 	#{/form}
 	
-	<p><a href="@{LostPassword.lostPassword()}">Password dimenticata?</a></p>
+	<a href="@{LostPassword.lostPassword()}">Password dimenticata?</a>
+	 
   </div>
 </div>

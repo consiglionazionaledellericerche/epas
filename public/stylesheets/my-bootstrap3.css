@@ -1,19 +1,52 @@
+/* Sticky footer styles
+------------------------------------------------------------------------- */
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  /* Margin bottom by footer height */
+  margin-bottom: 70px;
+  background-color: lightgrey;
+  height: 100%;
+}
 
-html, body {
+#footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 70px;				
+  background-color: black;
+  text-align: center;
+}
+
+#footer p {
+  padding-top: 5px;
+  color: grey;
+  font-size: .9em;
+}
+
+
+/* Custom page CSS
+------------------------------------------------------------------------ */
+/* Not required for template or sticky footer method. */
+
+
+#wrapper {
+	padding: 90px 15px 0;
+	background-color: lightgrey;
 	height: 100%;
 }
 
-/* CSS for login page and lost password*/
-
-html, body {
-	height: 100%;
-	background-color: lightblue;
+.flash-panel {
+	text-align: center;
+	padding: 0;
 }
 
-
-#wrapper-login {
-	padding-top: 90px;
-	
+.flash-panel p{
+	padding: 0;
+	padding-top: 7px;
 }
 
 #banner {
@@ -33,71 +66,6 @@ html, body {
 	display: inline-block;
 }
 
-#banner img:nth-of-type(2) {
-	margin-top: 15px;
-	margin-right: 10px;
-	height: 70%;
-}
-
-.my-centered-container {
-	text-align: center;
-	font-size: 1em;
-}
-
-.my-centered-container h2 {
-    margin-bottom: 25px;
-  }
-
-.my-centered-container form {
-	margin: auto 35%;
-}
-
-.my-centered-container .btn {
-	margin-bottom: 15px;
-}
-
-@media (max-width: 767px) {
-	
-  .my-centered-container > h2 {
-    font-size: 1.8em;
-  }
-  
-  .my-centered-container form {
-	margin: auto 20%;
-  }
-
-}
-
-/* CSS flash message */
-
-.flash-panel {
-	text-align: center;
-	padding: 0;
-}
-
-.flash-panel p{
-	padding: 0;
-	padding-top: 7px;
-}
-
-/* Custom Fixed navbar dropdown */
-
-@media (max-width: 767px) {
-
-	.container>.navbar-header, .container-fluid>.navbar-header, .container>.navbar-collapse, .container-fluid>.navbar-collapse {
-	  margin-right: 0;
-	  margin-left: 0;
-    }
-}
-
-@media (min-width: 768px) {
-	
-  #nav-year {
-	margin-left: 50px;
-  }
-
-}
-
 #nav-year .badge {
 	background-color: #2d6ca2;
 	font-size: 1.1em;
@@ -108,23 +76,16 @@ html, body {
 	font-size: 1.1em;
 }
 
-/* CSS page content */
-#wrapper {
-	padding-top: 50px;
-	background-color: lightblue;
-	position: relative;
-	height: 100%;
-	
+/* CSS utilità */
+
+.center {
+	text-align: center;
 }
 
-#main-container {
-	background-color: white;
-	height: 100%;
-	padding-top: 10px;	
+/* CSS template */
+
+#formLogin input {
+	margin-top: 10px;
+	margin-bottom: 10px;
 }
-
-
-
-
-
 
