@@ -68,7 +68,7 @@
                 <li><a href="@{Stampings.stampings(session.get("yearSelected"), session.get("monthSelected"))}">Situazione mensile</a></li>
             
             	<li><a href="#">Assenze mensili</a></li>
-            	<li><a href="#">Assenze annuali</a></li>
+            	<li><a href="@{YearlyAbsences.absencesPerPerson(session.get("personSelected"), session.get("yearSelected"))}">Assenze annuali</a></li>
             	<li><a href="@{Vacations.show(session.get("personSelected"), session.get("yearSelected"))}">Ferie</a></li>
             	<li><a href="#">Competenze</a></li>
             	<li><a href="#">Riepilogo orario</a></li>
