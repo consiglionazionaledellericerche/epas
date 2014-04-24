@@ -2,13 +2,44 @@
 #{set header:'navbar' /}
 #{set title:person.surname + ' ' + person.name + ', matricola=' + person.number  /}
 
+#{set 'moreStyles'}
 
+<style>
+    
+@media (max-width: 767px) {
 
+	#tabellonetimbrature {
+	   font-size: .7em;
+	   min-width: 600px;
+	}
+	
+	#padre {
+	   min-width: 640px;
+	}
+	
+	.container {
+		margin-left: 0px;
+		padding-left: 5px;
+		margin-right: 0px;
+		padding-right: 5px;
+	}
+	
+	#wrapper {
+		margin-left: 0px;
+		padding-left: 0px;
+		margin-right: 0px;
+		padding-right: 0px;
+		
+		padding-top: 60px;
+	
+	}
+	
+}
+</style>
 
-<div class="panel panel-info">
-  <div class="panel-heading">Situazione mensile ${person.name} ${person.surname} </div>
-  <div class="panel-body">
-   <div class="span8" style="min-width: 900px;">
+#{/set}
+
+<div id="padre" class="container container-main">
     <table id="tabellonetimbrature" class="table table-bordered table-condensed">
 
 	<tr>
@@ -31,8 +62,8 @@
 		<th class="group-single">Tempo<br>lavoro</th>
 		<th class="group-single">Diffe-</div><br/>renza</th>
 		<th class="group-single">Progres-<br/>sivo</th>		
-		<th class="group-single">Tipo<br>Orario</th>
-		<th class="group-single">Note</th>
+		<th class="group-single hidden-xs hidden-sm">Tipo<br>Orario</th>
+		<th class="group-single hidden-xs hidden-sm">Note</th>
 	</tr>
 	
 	#{list items:daysRecap, as:'dayRecap'}
@@ -129,7 +160,7 @@
 												
 		
 	        
-	        <td class="default-single">
+	        <td class="default-single hidden-xs hidden-sm">
 	        #{if dayRecap.wtt!=null && dayRecap.wttd!=null}
 	        <a href="#" data-popover
 	    		data-trigger="hover" data-toggle="popover" 
@@ -146,7 +177,7 @@
 	      
 	      
 	    </td>
-	        <td class="default-single">
+	        <td class="default-single hidden-xs hidden-sm">
 	        #{list items:dayRecap.note, as:'n'}
 	        	<!--  ${n}<br> -->
 	        #{/list}
@@ -155,15 +186,15 @@
 	#{/list}
 
     </table>
-
-  </div>
-  
-  <div class="span4">
-     #{include './_riepilogoRiassuntivoMese.html' /}
-  </div>
-  </div>
 </div>
 
+
+<div class="panel panel-info">
+  <div class="panel-heading">Situazione mensile ${person.name} ${person.surname} </div>
+  <div class="panel-body">
+    #{include './_riepilogoRiassuntivoMese.html' /}
+  </div>
+</div>
 
 
 
