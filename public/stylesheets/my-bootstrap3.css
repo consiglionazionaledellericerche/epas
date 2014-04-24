@@ -1,5 +1,15 @@
+/* Browser reset
+------------------------------------------------------------------------- */
+
+h1,h2,h3,h4,h5 {
+	padding: 2px;
+	margin: 2px;
+	margin-bottom:4px;
+}
+
 /* Sticky footer styles
 ------------------------------------------------------------------------- */
+
 html {
   position: relative;
   min-height: 100%;
@@ -26,6 +36,7 @@ body {
   color: grey;
   font-size: .9em;
 }
+
 
 
 /* Custom page CSS
@@ -88,6 +99,23 @@ body {
 .center {
 	text-align: center;
 }
+
+.container-main {
+	background-color: white;
+	border-radius: 5px;
+	border: 1px solid darkgrey;
+	padding: 10px;
+	font-size: .9em;
+}
+
+.container-margintop {
+	margin-top: 20px;
+}
+
+.container-marginbottom {
+	margin-bottom: 20px;
+}
+
 
 /* CSS template */
 
