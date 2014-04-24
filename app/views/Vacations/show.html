@@ -1,13 +1,15 @@
-#{extends 'main_with_navbar.html' /}
-#{set title:vacationsRecap.person.surname + ' ' + vacationsRecap.person.name + ', matricola=' + vacationsRecap.person.number /}
-#{set titolo: 'Situazione ferie e permessi anno ' + vacationsRecap.year + ' di ' + vacationsRecap.person.surname + ' ' + vacationsRecap.person.name /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title:'ePAS - Ferie e permessi' /}
+
+
 
 <div class="row">
-  <div class="container">
-	<p class="lead"><strong>Ferie</strong></p>
+  <div class="container col-sm-8 col-sm-offset-2 container-main center">
+	<h4>Ferie</h4>
   
-  	<table class="table vacation-recap">
-      <tr>
+  	<table class="table table-bordered table-hover">
+      <tr class="info">
         <th>Anno</th>
         <th>Totali (maturate)</th>
         <th>Utilizzate</th>
@@ -37,11 +39,11 @@
   
   </div>
   
-  <div class="container">
-	<p class="lead"><strong>Permessi legge 937/77</strong></p>
+  <div class="container col-sm-8 col-sm-offset-2 container-main container-margintop center">
+	<h4>Permessi legge 937/77</h4>
   
-  	<table class="table vacation-recap">
-      <tr>
+  	<table class="table table-bordered table-hover">
+      <tr class="info">
         <th>Anno</th>
         <th>Totali (maturati)</th>
         <th>Utilizzati</th>
@@ -63,12 +65,10 @@
 </div>  
   
 <div class="row">
- <div class="container">
-  <br>
-  <br>
-  <p class="lead">Piani ferie associati al contratto corrente</p>
-  <table class="table table-hover table-condensed vacation-recap">
-    <tr>
+ <div class="container col-sm-8 col-sm-offset-2 container-main container-margintop container-marginbottom center">
+  <h4>Piani ferie associati al contratto corrente</h4>
+  <table class="table table-bordered table-hover center">
+    <tr class="info">
       <th>Descrizione</th>
       <th>Data inizio</th>
       <th>Data fine</th>
@@ -85,6 +85,7 @@
   </table>
  </div>
 </div>
+
 
 
 
