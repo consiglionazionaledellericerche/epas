@@ -22,7 +22,8 @@
 	
 	<!-- Bootstrap -->
 	<link rel="stylesheet" media="screen" href="@{'/public/bootstrap-3.1.1-dist/css/bootstrap.min.css'}" />
-	<link rel="stylesheet" media="screen" href="@{'/public/bootstrap-3.1.1-dist/css/bootstrap-theme.min.css'}" />  		
+	<!--  <link rel="stylesheet" media="screen" href="@{'/public/bootstrap-3.1.1-dist/css/bootstrap-theme.min.css'}" />-->  
+	<link rel="stylesheet" media="screen" href="@{'/public/font-awesome-4.0.3/css/font-awesome.css'}"/>		
 	<link rel="stylesheet" media="screen" href="@{'/public/stylesheets/sticky-footer.css'}" />
 	
 	<!-- <link rel="stylesheet" media="screen" href="@{'/public/stylesheets/mymain.css'}">   -->
@@ -61,7 +62,7 @@
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
         <li class="dropdown active">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span>
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user fa-lg"></i>
           ${session.username} <b class="caret"></b></a>
           <ul class="dropdown-menu">
             <li><a href="#">Situazione mensile</a></li>
@@ -107,7 +108,7 @@
       </ul>
       
       <ul class="nav navbar-nav navbar-right">
-        <li><a href="#"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+        <li><a href="#"><i class="fa fa-sign-out fa-lg"></i> Logout</a></li>
       </ul>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
