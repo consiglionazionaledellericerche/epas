@@ -11,21 +11,16 @@ import models.ConfYear;
 import models.Office;
 import models.Permission;
 import models.User;
+import models.enumerate.ConfigurationFields;
 
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.DateTimeFormatterBuilder;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.thoughtworks.xstream.XStream;
 
 import play.Logger;
 import play.cache.Cache;
@@ -78,6 +73,9 @@ public class Wizard extends Controller {
 	}
 	
     public static void wizard(int step) {
+    	
+		Logger.info(ConfigurationFields.getConfGeneralFields().toString());
+		Logger.info(ConfigurationFields.getConfYearFields().toString());
     	
     	List<WizardStep> steps = Cache.get(STEPS_KEY, List.class);
     	Properties properties = Cache.get(PROPERTIES_KEY, Properties.class);
@@ -181,7 +179,7 @@ public class Wizard extends Controller {
      */
     public static void setOffice(
     		@Required String institute,
-    		@Required String siteCode ){
+    		@Required String code ){
 
     	if (validation.hasErrors()){
     	    params.flash(); 
@@ -194,8 +192,8 @@ public class Wizard extends Controller {
     	
     	if(steps != null){
     		
-    		properties.setProperty("Istituto",institute);
-    		properties.setProperty("Codice Sede",siteCode);
+    		properties.setProperty("institute_name",institute);
+    		properties.setProperty("seat_code",code);
 
     		steps.get(2).complete();
     		Cache.safeSet(STEPS_KEY, steps, "10mn");
@@ -221,8 +219,8 @@ public class Wizard extends Controller {
     	
     	if(steps != null){
     		
-    		properties.setProperty("Mese Patrono",patronMonth);
-    		properties.setProperty("Giorno Patrono",patronDay);
+    		properties.setProperty("month_of_patron",patronMonth);
+    		properties.setProperty("day_of_patron",patronDay);
 
     		steps.get(3).complete();
     		Cache.safeSet(STEPS_KEY, steps, "10mn");
@@ -242,13 +240,9 @@ public class Wizard extends Controller {
     		){
     	
     	if (validation.hasErrors()){
-//    		DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/yyyy");
-//    		LocalDate data = new LocalDate(LocalDate.parse(initUseStart,dtf));
-//        	flash.error("data inserita %s", data);
     	    params.flash(); 
     	    validation.keep();
     		wizard(4);
-        	
     	}
     	    	
     	List<WizardStep> steps = Cache.get(STEPS_KEY, List.class);
@@ -256,12 +250,18 @@ public class Wizard extends Controller {
     	
     	if(steps != null){
     		
-    		properties.setProperty("Data di inizio utilizzo",initUseStart);
-    		properties.setProperty("Inzio pausa pranzo",lunchPauseStart);
-    		properties.setProperty("Fine pausa pranzo",lunchPauseStop);
+    		properties.setProperty("init_use_program",initUseStart);
+    		
+			List<String> pauseStart = Splitter.on(":").trimResults().splitToList(lunchPauseStart);
+			List<String> pauseStop = Splitter.on(":").trimResults().splitToList(lunchPauseStop);
+			
+    		properties.setProperty("meal_time_start_hour",pauseStart.get(0));
+    		properties.setProperty("meal_time_start_minute",pauseStart.get(1));
+    		properties.setProperty("meal_time_end_hour",pauseStop.get(0));
+    		properties.setProperty("meal_time_end_minute",pauseStop.get(1));
     		String ok = "NO";
     		if(webStampingAllowed){ok ="SI";}
-    		properties.setProperty("Permetti timbrature web",ok);
+    		properties.setProperty("web_stamping_allowed",ok);
 
     		steps.get(4).complete();
     		Cache.safeSet(STEPS_KEY, steps, "10mn");
@@ -291,13 +291,15 @@ public class Wizard extends Controller {
     	
     	if(steps != null){
     		
-    		properties.setProperty("Giorno scadenza Vacanze anno passato",dayVacantionExp);
-    		properties.setProperty("Mese scadenza Vacanze anno passato",monthVacantionExp);
-    		properties.setProperty("Mese scadenza giorni di recupero 1-3",monthExpireRecoveryDaysOneThree);
-    		properties.setProperty("Numero massimo giorni di recupero 1-3",maxRecoveryDaysOneThree);
-    		properties.setProperty("Mese scadenza giorni di recupero 4-9",monthExpireRecoveryDaysFourNine);
-    		properties.setProperty("Numero massimo giorni di recupero 4-9",maxRecoveryDaysFourNine);
-    		properties.setProperty("Soglia oraria calcolo timbrature giornaliere",hourMaxToCalculateWorkTime);    
+    		properties.setProperty("day_expiry_vacation_past_year",dayVacantionExp);
+    		properties.setProperty("month_expiry_vacation_past_year",monthVacantionExp);
+    		properties.setProperty("month_expire_recovery_days_13",monthExpireRecoveryDaysOneThree);
+    		properties.setProperty("max_recovery_days_13",maxRecoveryDaysOneThree);
+    		properties.setProperty("month_expire_recovery_days_49",monthExpireRecoveryDaysFourNine);
+    		properties.setProperty("max_recovery_days_49",maxRecoveryDaysFourNine);
+    		
+    		List<String> hmtcwk = Splitter.on(":").trimResults().splitToList(hourMaxToCalculateWorkTime);
+    		properties.setProperty("hour_max_to_calculate_worktime",hmtcwk.get(0)); 
     		    		
     		steps.get(5).complete();
     		Cache.safeSet(STEPS_KEY, steps, "10mn");
@@ -324,83 +326,108 @@ public class Wizard extends Controller {
 		admin.save();
 	
 		// setOffice
-		Office office = new Office();
-		office.name = properties.getProperty("Istituto");
-		office.code = Integer.parseInt(properties.getProperty("Codice Sede"));
-		// setPatron
-		ConfGeneral confGeneral = new ConfGeneral();
-		confGeneral.instituteName = office.name;
-		confGeneral.seatCode = office.code;
-		confGeneral.urlToPresence = "https://attestati.rm.cnr.it/attestati/";
-		confGeneral.monthOfPatron = Integer.parseInt(properties.getProperty("Mese Patrono"));
-		confGeneral.dayOfPatron = Integer.parseInt(properties.getProperty("Giorno Patrono"));
-		//setGenConf
+		Office office = Office.findById(new Long(1));
+		if(office == null){
+			office = new Office();
+		}
+		office.name = properties.getProperty("institute_name");
+		office.code = Integer.parseInt(properties.getProperty("seat_code"));
+		office.save();
+		
+		List<ConfGeneral> confGeneral = ConfGeneral.find(
+				"Select cg from ConfGeneral cg where cg.office = ?", office).fetch();
+		
+		
+		for (ConfGeneral cf : confGeneral){
+			cf.fieldValue = properties.getProperty(cf.field);
+			cf.save();
+		}
+		
 		DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/yyyy");
-		confGeneral.initUseProgram = LocalDate.parse
-				(properties.getProperty("Data di inizio utilizzo"),dtf);
 		
-		List<String> launchStartTime = 
-				Splitter.on(":").trimResults().splitToList
-				(properties.getProperty("Inzio pausa pranzo"));
-		List<String> launchEndTime = 
-				Splitter.on(":").trimResults().splitToList
-				(properties.getProperty("Fine pausa pranzo"));
-		
-		confGeneral.mealTimeStartHour = Integer.parseInt(launchStartTime.get(0));
-		confGeneral.mealTimeStartMinute = Integer.parseInt(launchStartTime.get(1));
-		
-		confGeneral.mealTimeEndHour = Integer.parseInt(launchEndTime.get(0)); 
-		confGeneral.mealTimeEndMinute = Integer.parseInt(launchEndTime.get(1));
-		
-		if (properties.getProperty("Permetti timbrature web").equalsIgnoreCase("SI")){
-			confGeneral.webStampingAllowed = true;
-		}
-		else{
-			confGeneral.webStampingAllowed = false;
-		}
-		
-		confGeneral.save();
-		
-		// setConfYear
-		LocalDate date = new LocalDate();
-		 
-		ConfYear confYear = new ConfYear();
-		confYear.year = date.getYear();
-		
-		confYear.dayExpiryVacationPastYear = Integer.parseInt(
-				properties.getProperty("Giorno scadenza Vacanze anno passato"));
-		confYear.monthExpiryVacationPastYear = Integer.parseInt(properties.getProperty(
-				"Mese scadenza Vacanze anno passato"));
-		confYear.monthExpireRecoveryDaysOneThree = Integer.parseInt(properties.getProperty(
-				"Mese scadenza giorni di recupero 1-3"));
-		confYear.maxRecoveryDaysOneThree = Integer.parseInt(properties.getProperty(
-				"Numero massimo giorni di recupero 1-3"));
-		confYear.monthExpireRecoveryDaysFourNine = Integer.parseInt(properties.getProperty(
-				"Mese scadenza giorni di recupero 4-9"));
-		confYear.maxRecoveryDaysFourNine = Integer.parseInt(properties.getProperty(
-				"Numero massimo giorni di recupero 4-9"));
-		confYear.hourMaxToCalculateWorkTime = Integer.parseInt(Splitter.on(":").trimResults().splitToList
-				(properties.getProperty("Soglia oraria calcolo timbrature giornaliere")).get(0));
-		
-		confYear.save();
+		List<ConfYear> confYear = ConfYear.find(
+				"Select cy from ConfYear cy where cy.office = ? and cy.year = ?", 
+				office,LocalDate.parse
+				(properties.getProperty("init_use_program"),dtf).getYear()).fetch();
 				
+		for (ConfYear cy : confYear){
+			cy.fieldValue = Integer.parseInt(properties.getProperty(cy.field));
+			cy.save();
+		}
+				
+		// setPatron
+//		ConfGeneral confGeneral = new ConfGeneral();
+//		confGeneral.instituteName = office.name;
+//		confGeneral.seatCode = office.code;
+//		confGeneral.urlToPresence = "https://attestati.rm.cnr.it/attestati/";
+//		confGeneral.monthOfPatron = Integer.parseInt(properties.getProperty("Mese Patrono"));
+//		confGeneral.dayOfPatron = Integer.parseInt(properties.getProperty("Giorno Patrono"));
+		//setGenConf
 		
-		ConfYear confPreviousYear = new ConfYear();
 		
-//		Gson gs = new Gson();
-//		confPreviousYear = gs.fromJson(gs.toJson(confYear),ConfYear.class);
-		
-		confPreviousYear.year = confYear.year - 1;
-		confPreviousYear.dayExpiryVacationPastYear = confYear.dayExpiryVacationPastYear;
-		confPreviousYear.monthExpiryVacationPastYear = confYear.monthExpiryVacationPastYear;
-		confPreviousYear.monthExpireRecoveryDaysOneThree = confYear.monthExpireRecoveryDaysOneThree;
-		confPreviousYear.maxRecoveryDaysOneThree = confYear.maxRecoveryDaysOneThree;
-		confPreviousYear.monthExpireRecoveryDaysFourNine = confYear.monthExpireRecoveryDaysFourNine;
-		confPreviousYear.maxRecoveryDaysFourNine = confYear.maxRecoveryDaysFourNine;
-		confPreviousYear.hourMaxToCalculateWorkTime = confYear.hourMaxToCalculateWorkTime;
-		
-		confPreviousYear.save();
-		
+//		DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/yyyy");
+//		confGeneral.initUseProgram = LocalDate.parse
+//				(properties.getProperty("Data di inizio utilizzo"),dtf);
+//		
+//		List<String> launchStartTime = 
+//				Splitter.on(":").trimResults().splitToList
+//				(properties.getProperty("Inzio pausa pranzo"));
+//		List<String> launchEndTime = 
+//				Splitter.on(":").trimResults().splitToList
+//				(properties.getProperty("Fine pausa pranzo"));
+//		
+//		confGeneral.mealTimeStartHour = Integer.parseInt(launchStartTime.get(0));
+//		confGeneral.mealTimeStartMinute = Integer.parseInt(launchStartTime.get(1));
+//		
+//		confGeneral.mealTimeEndHour = Integer.parseInt(launchEndTime.get(0)); 
+//		confGeneral.mealTimeEndMinute = Integer.parseInt(launchEndTime.get(1));
+//		
+//		if (properties.getProperty("Permetti timbrature web").equalsIgnoreCase("SI")){
+//			confGeneral.webStampingAllowed = true;
+//		}
+//		else{
+//			confGeneral.webStampingAllowed = false;
+//		}
+//		
+//		confGeneral.save();
+//		
+//		// setConfYear
+//		LocalDate date = new LocalDate();
+//		 
+//		ConfYear confYear = new ConfYear();
+//		confYear.year = date.getYear();
+//		
+//		confYear.dayExpiryVacationPastYear = Integer.parseInt(
+//				properties.getProperty("Giorno scadenza Vacanze anno passato"));
+//		confYear.monthExpiryVacationPastYear = Integer.parseInt(properties.getProperty(
+//				"Mese scadenza Vacanze anno passato"));
+//		confYear.monthExpireRecoveryDaysOneThree = Integer.parseInt(properties.getProperty(
+//				"Mese scadenza giorni di recupero 1-3"));
+//		confYear.maxRecoveryDaysOneThree = Integer.parseInt(properties.getProperty(
+//				"Numero massimo giorni di recupero 1-3"));
+//		confYear.monthExpireRecoveryDaysFourNine = Integer.parseInt(properties.getProperty(
+//				"Mese scadenza giorni di recupero 4-9"));
+//		confYear.maxRecoveryDaysFourNine = Integer.parseInt(properties.getProperty(
+//				"Numero massimo giorni di recupero 4-9"));
+//		confYear.hourMaxToCalculateWorkTime = Integer.parseInt(Splitter.on(":").trimResults().splitToList
+//				(properties.getProperty("Soglia oraria calcolo timbrature giornaliere")).get(0));
+//		
+//		confYear.save();
+//				
+//		
+//		ConfYear confPreviousYear = new ConfYear();
+//				
+//		confPreviousYear.year = confYear.year - 1;
+//		confPreviousYear.dayExpiryVacationPastYear = confYear.dayExpiryVacationPastYear;
+//		confPreviousYear.monthExpiryVacationPastYear = confYear.monthExpiryVacationPastYear;
+//		confPreviousYear.monthExpireRecoveryDaysOneThree = confYear.monthExpireRecoveryDaysOneThree;
+//		confPreviousYear.maxRecoveryDaysOneThree = confYear.maxRecoveryDaysOneThree;
+//		confPreviousYear.monthExpireRecoveryDaysFourNine = confYear.monthExpireRecoveryDaysFourNine;
+//		confPreviousYear.maxRecoveryDaysFourNine = confYear.maxRecoveryDaysFourNine;
+//		confPreviousYear.hourMaxToCalculateWorkTime = confYear.hourMaxToCalculateWorkTime;
+//		
+//		confPreviousYear.save();
+
 		Application.index();
     }
             

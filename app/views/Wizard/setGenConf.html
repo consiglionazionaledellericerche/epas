@@ -4,10 +4,12 @@
 	<link rel="stylesheet" media="screen" href="@{'/public/bootstrap-datepicker/css/datepicker.css'}"/>
 #{/set}
 %{
-initUseStart = properties.getProperty("Data di inizio utilizzo");
-lunchPauseStart = properties.getProperty("Inzio pausa pranzo");
-lunchPauseStop = properties.getProperty("Fine pausa pranzo");
-webStampingAllowed = properties.getProperty("Permetti timbrature web");
+initUseStart = properties.getProperty("init_use_program");
+lunchPauseStartHour = properties.getProperty("meal_time_start_hour");
+lunchPauseStartMinute = properties.getProperty("meal_time_start_minute");
+lunchPauseEndHour = properties.getProperty("meal_time_end_hour");
+lunchPauseEndMinute = properties.getProperty("meal_time_end_minute");
+webStampingAllowed = properties.getProperty("web_stamping_allowed");
 }%
 
 #{form @Wizard.setGenConf()}
@@ -19,13 +21,13 @@ webStampingAllowed = properties.getProperty("Permetti timbrature web");
 
 <div>
 	<p>Inizio pausa pranzo</p>
-	<input type="time" name="lunchPauseStart" value="${lunchPauseStart}" />
+	<input type="text" name="lunchPauseStart" value="${lunchPauseStartHour}:${lunchPauseStartMinute}"  />
 	<p class="fError">#{error 'lunchPauseStart' /}</p>
 </div>
 
 <div>
 	<p>Fine pausa pranzo</p>
-	<input type="time" name="lunchPauseStop" value="${lunchPauseStop}" />
+	<input type="text" name="lunchPauseStop" value="${lunchPauseEndHour}:${lunchPauseEndMinute}" />
 	<p class="fError">#{error 'lunchPauseStop' /}</p>
 </div>
 

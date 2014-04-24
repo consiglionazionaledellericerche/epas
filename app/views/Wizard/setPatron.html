@@ -1,8 +1,8 @@
 #{extends 'Wizard/wizard.html' /}
 
 %{
-	patronMonth = properties.getProperty("Mese Patrono");
-	patronDay = properties.getProperty("Giorno Patrono");
+	patronMonth = properties.getProperty("month_of_patron");
+	patronDay = properties.getProperty("day_of_patron");
 }%
 
 #{form @Wizard.setPatron()}
