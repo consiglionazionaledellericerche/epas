@@ -10,28 +10,35 @@ h1,h2,h3,h4,h5 {
 /* Sticky footer styles
 ------------------------------------------------------------------------- */
 
-html {
-  position: relative;
-  min-height: 100%;
-}
+html,
 body {
-  /* Margin bottom by footer height */
-  margin-bottom: 70px;
   background-color: lightgrey;
   height: 100%;
 }
 
-#footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  /* Set the fixed height of the footer here */
+#wrapper {
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    margin-bottom:  -70px;
+    background: #FFF;
+    -webkit-box-shadow: 0px 0px 6px 8px #FFF;
+	-moz-box-shadow: 0px 0px 6px 8px #FFF;
+	box-shadow: 0px 0px 6px 8px #FFF;
+}
+
+#page_content{
+	padding-top:130px;
+	padding-bottom: 90px;
+}
+
+footer {
   height: 70px;				
   background-color: black;
   text-align: center;
 }
 
-#footer p {
+footer p {
   padding-top: 5px;
   color: grey;
   font-size: .9em;
@@ -42,13 +49,6 @@ body {
 /* Custom page CSS
 ------------------------------------------------------------------------ */
 /* Not required for template or sticky footer method. */
-
-
-#wrapper {
-	padding: 90px 15px 0;
-	background-color: lightgrey;
-	height: 100%;
-}
 
 .flash-panel {
 	border: 1px solid;
