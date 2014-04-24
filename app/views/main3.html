@@ -13,6 +13,7 @@
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" media="screen" href="@{'/public/bootstrap-3.1.1-dist/css/bootstrap.min.css'}" />
 	<link rel="stylesheet" media="screen" href="@{'/public/stylesheets/my-bootstrap3.css'}" />
+	<link rel="stylesheet" media="screen" href="@{'/public/font-awesome-4.0.3/css/font-awesome.min.css'}"/>
     
     <!-- Custom styles for this template -->
     <link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap-editable/css/bootstrap-editable.css" rel="stylesheet"/>   
@@ -95,11 +96,26 @@
           	  </ul>
         	</li>
       	  </ul>
+      	  
+      	  
+      	  #{if session.contains("sudo.username")}
+      	  <ul class="nav navbar-nav navbar-right">
+      	    <li><a href="@{Administrators.restoreUser()}"><span class="glyphicon glyphicon-log-out"></span> Torna chi eri</a></li>
+          </ul>
+  		  #{/if}
+  		  
+  		  #{else}
+    	    #{if session.username}
+      		  <ul class="nav navbar-nav navbar-right">
+      		    #{secure.permissionCheck}
+	   	          <li><a href="@{Faq.faq()}"><i class="fa fa-comment-o"></i> FAQ</a></li>
+      	        #{/secure.permissionCheck}
+    	        <li><a href="#"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+    	      </ul>
+    	    #{/if}
+  		  
+  		  #{/else}
       
-	      <ul class="nav navbar-nav navbar-right">
-    	    <li><a href="#"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
-      	  </ul>
-
         </div>
         
       </div>
