@@ -1,11 +1,15 @@
 package models.enumerate;
 
+import java.util.List;
+import com.google.common.collect.ImmutableList;
+
 /**
  * 
  * @author dario
  * enumerato per la definizione dei campi delle tabelle di configurazione
  */
 public enum ConfigurationFields {
+	// ConfGeneral
 	InitUseProgram("init_use_program"),
 	InstituteName("institute_name"),
 	EmailToContact("email_to_contact"),
@@ -21,6 +25,7 @@ public enum ConfigurationFields {
 	MealTimeStartMinute("meal_time_start_minute"),
 	MealTimeEndHour("meal_time_end_hour"),
 	MealTimeEndMinute("meal_time_end_minute"),
+	// ConfYear
 	MonthExpiryVacationPastYear("month_expiry_vacation_past_year"),
 	DayExpiryVacationPastYear("day_expiry_vacation_past_year"),
 	MonthExpireRecoveryDays13("month_expire_recovery_days_13"),
@@ -82,4 +87,38 @@ public enum ConfigurationFields {
 			return ConfigurationFields.HourMaxToCalculateWorkTime;
 		return null;
 	}
+	
+	public static List<String> getConfGeneralFields(){
+		 		 
+		return ImmutableList.of(
+		   InitUseProgram.name(),
+		   InstituteName.name(),
+		   EmailToContact.name(),
+		   SeatCode.name(),
+		   UrlToPresence.name(),
+		   UserToPresence.name(),
+		   PasswordToPresence.name(),
+		   NumberOfViewingCouple.name(),
+		   MonthOfPatron.name(),
+		   DayOfPatron.name(),
+		   MealTimeStartHour.name(),
+		   MealTimeStartMinute.name(),
+		   MealTimeEndHour.name(),
+		   MealTimeEndMinute.name(),
+		   WebStampingAllowed.name());
+	}
+	
+	
+	public static List<String> getConfYearFields(){
+		
+		return ImmutableList.of(
+				MonthExpiryVacationPastYear.name(),
+				DayExpiryVacationPastYear.name(),
+				MonthExpireRecoveryDays13.name(),
+				MonthExpireRecoveryDays49.name(),
+				MaxRecoveryDays13.name(),
+				MaxRecoveryDays49.name(),
+				HourMaxToCalculateWorkTime.name());
+	}
+		
 }

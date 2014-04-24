@@ -35,33 +35,33 @@ color: blue;
 		
 		<legend>Istituto</legend>
 		<table>		
-			<tr><td>Istituto</td><td>${properties.getProperty('Istituto')}</td></tr>	
-			<tr><td>Codice Sede</td><td>${properties.getProperty('Codice Sede')}</td></tr>	
+			<tr><td>Istituto</td><td>${properties.getProperty('institute_name')}</td></tr>	
+			<tr><td>Codice Sede</td><td>${properties.getProperty('seat_code')}</td></tr>	
 		</table>
 
 		<legend>Giorno Patronale</legend>
 		<table>	
-			<tr><td>Data Patrono</td><td>${properties.getProperty('Giorno Patrono')}/${properties.getProperty('Mese Patrono')}</td></tr>
+			<tr><td>Data Patrono</td><td>${properties.getProperty('day_of_patron')}/${properties.getProperty('month_of_patron')}</td></tr>
 		</table>
 
 
 		<legend>Configurazione generale</legend>
 		<table>		
-			<tr><td>Data di inizio utilizzo Programma</td><td>${properties.getProperty('Data di inizio utilizzo')}</td></tr>	
-			<tr><td>Inzio pausa pranzo</td><td>${properties.getProperty('Inzio pausa pranzo')}</td></tr>	
-			<tr><td>Fine pausa pranzo</td><td>${properties.getProperty('Fine pausa pranzo')}</td></tr>	
-			<tr><td>Permetti timbrature web</td><td>${properties.getProperty('Permetti timbrature web')}</td></tr>	
+			<tr><td>Data di inizio utilizzo Programma</td><td>${properties.getProperty('init_use_program')}</td></tr>	
+			<tr><td>Inzio pausa pranzo</td><td>${properties.getProperty('meal_time_start_hour')}:${properties.getProperty('meal_time_start_minute')}</td></tr>	
+			<tr><td>Fine pausa pranzo</td><td>${properties.getProperty('meal_time_end_hour')}:${properties.getProperty('meal_time_end_minute')}</td></tr>	
+			<tr><td>Permetti timbrature web</td><td>${properties.getProperty('web_stamping_allowed')}</td></tr>	
 		</table>
 		
 		<legend>Configurazione Annuale</legend>
 		<table>	
-			<tr><td>Data scadenza vacanze anno passato</td><td>${properties.getProperty('Giorno scadenza Vacanze anno passato')}/${properties.getProperty('Mese scadenza Vacanze anno passato')}</td></tr>	
-			<tr><td>Mese scadenza giorni di recupero 1-3</td><td>${properties.getProperty('Mese scadenza giorni di recupero 1-3')}</td></tr>	
-			<tr><td>Numero massimo giorni di recupero 1-3</td><td>${properties.getProperty('Numero massimo giorni di recupero 1-3')}</td></tr>	
-			<tr><td>Mese scadenza giorni di recupero 4-9</td><td>${properties.getProperty('Mese scadenza giorni di recupero 4-9')}</td></tr>
+			<tr><td>Data scadenza vacanze anno passato</td><td>${properties.getProperty('day_expiry_vacation_past_year')}/${properties.getProperty('month_expiry_vacation_past_year')}</td></tr>	
+			<tr><td>Mese scadenza giorni di recupero 1-3</td><td>${properties.getProperty('month_expire_recovery_days_13')}</td></tr>	
+			<tr><td>Numero massimo giorni di recupero 1-3</td><td>${properties.getProperty('max_recovery_days_13')}</td></tr>	
+			<tr><td>Mese scadenza giorni di recupero 4-9</td><td>${properties.getProperty('month_expire_recovery_days_49')}</td></tr>
 			<tr><td>Numero massimo giorni di recupero 4-9</td><td>${properties.getProperty('Numero massimo giorni di recupero 4-9')}</td></tr>
-			<tr><td>Mese scadenza giorni di recupero 4-9</td><td>${properties.getProperty('Mese scadenza giorni di recupero 4-9')}</td></tr>
-			<tr><td>Soglia oraria calcolo timbrature giornaliere</td><td>${properties.getProperty('Soglia oraria calcolo timbrature giornaliere')}</td></tr>			
+			<tr><td>Mese scadenza giorni di recupero 4-9</td><td>${properties.getProperty('max_recovery_days_49')}</td></tr>
+			<tr><td>Soglia oraria calcolo timbrature giornaliere</td><td>${properties.getProperty('hour_max_to_calculate_worktime')}</td></tr>			
 		</table>
 	
 	<a href="@{Wizard.wizard(1)}"><button class="btn">Modifica</button></a>

@@ -1,8 +1,8 @@
 #{extends 'Wizard/wizard.html' /}
 
 %{
-	institute = properties.getProperty("Istituto");
-	siteCode = properties.getProperty("Codice Sede");
+	institute = properties.getProperty("institute_name");
+	siteCode = properties.getProperty("seat_code");
 }%
 
 
@@ -15,8 +15,8 @@
 
 <div>
 	<p>Inserire il codice Sede</p>
-	<input placeholder="Codice Sede" type="text" name="siteCode" value="${siteCode}" />
-	<p class="fError">#{error 'siteCode' /}</p>
+	<input placeholder="Codice Sede" type="text" name="code" value="${siteCode}" />
+	<p class="fError">#{error 'code' /}</p>
 </div>
 
 <div>
