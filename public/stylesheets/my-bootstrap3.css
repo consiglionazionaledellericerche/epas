@@ -40,6 +40,7 @@ body {
 }
 
 .flash-panel {
+	border: 1px solid;
 	text-align: center;
 	padding: 0;
 }
@@ -74,6 +75,12 @@ body {
 #nav-month .badge {
 	background-color: #2d6ca2;
 	font-size: 1.1em;
+}
+
+.panel {
+	padding-left: 0;
+	padding-right: 0;
+	border-color: darkgrey;
 }
 
 /* CSS utilità */
