@@ -1,0 +1,113 @@
+<div class="panel-group" id="accordion_meal">
+  <div class="panel panel-info">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion_meal" href="#meal">
+          Situazione buoni mensa
+        </a>
+      </h4>
+    </div>
+    <div id="meal" class="panel-collapse collapse in">
+      <div class="panel-body">
+   
+       Il numero di buoni mensa usabili per questo mese è <strong>${numberOfMealTicketToUse}</strong> <br>
+       Il numero di buoni mensa da restituire per questo mese è <strong>${numberOfMealTicketToRender}</strong> <br>   
+	
+	  #{if !stampModificationTypeList.isEmpty() }
+      <table class="table table-condensed table-bordered">
+		<tr>
+			<th width="80">Codice</th>
+			<th width="400">Descrizione</th>
+				
+		</tr>
+	    <tr>
+		  <td><span class="glyphicon glyphicon-ban-circle"></span></td>
+		  <td>Buono mensa da restituire</td>
+		</tr>
+		<tr>
+		  <td><span class="glyphicon glyphicon-remove"></span></td>
+		  <td>Buono mensa non ottenuto se si uscisse in questo momento</td>
+		</tr>
+		<tr>
+		  <td><span class="glyphicon glyphicon-ok"></span></td>
+		  <td>Buono mensa ottenuto se si uscisse in questo momento</td>
+		</tr>
+	  </table>
+      #{/if}
+
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="panel-group" id="accordion_notes">
+  <div class="panel panel-info">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion_notes" href="#notes">
+          Legenda
+        </a>
+      </h4>
+    </div>
+    <div id="notes" class="panel-collapse collapse out">
+      <div class="panel-body">
+ 
+ 	  #{if !stampModificationTypeList.isEmpty() }
+      <table class="table table-condensed table-bordered">
+		<tr>
+			<th width="80">Codice</th>
+			<th width="400">Descrizione</th>
+				
+		</tr>
+		#{list items:stampModificationTypeList, as:'smt'}
+		  <tr>
+			<td>${smt.code}</td>     
+			<td>${smt.description}</td>		
+		  </tr>
+		#{/list}
+		
+		#{list stampTypeList, as:'type'}
+		  <tr>
+			<td>${type.identifier}</td>
+			<td>${type.description}</td>
+		  </tr>
+		#{/list}
+	    </table>
+       #{/if}
+
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="panel-group" id="accordion_assenze">
+  <div class="panel panel-info">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion_assenze" href="#assenze">
+          Riepilogo assenze
+        </a>
+      </h4>
+    </div>
+    <div id="assenze" class="panel-collapse collapse out">
+      <div class="panel-body">
+        <table class="table table-condensed table-bordered">
+	      <tr>
+		    <th width="80">Codice assenza</th>
+		    <th width="200">Descrizione</th>
+		    <th width="80">Numero giorni</th>
+		  </tr>
+		  #{list items:absenceCodeMap.entrySet(), as:'entry'}
+		  <tr>
+		    <td>${entry.getKey().code}</td>     
+		    <td>${entry.getKey().description}</td>	
+		    <td>${entry.getValue()}</td>	
+	      </tr>
+		  #{/list}
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
