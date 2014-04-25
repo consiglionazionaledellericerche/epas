@@ -35,17 +35,24 @@
 		text-align: center;
 	}
 	
+	.container {
+		margin-left: 0;
+		margin-right: 0;
+	}
 	
+	#page_content {
+		widht: 100%;
+	}
     
 @media (max-width: 767px) {
 
 	#tabellonetimbrature {
-	   font-size: .7em;
-	   min-width: 600px;
+	   font-size: 10px !important; 
+	   /* min-width: 600px; */
 	}
 	
 	#padre {
-	   min-width: 640px;
+	   /* min-width: 640px; */
 	}
 	
 	.container {
@@ -60,12 +67,17 @@
 		display: none;
 	}
 	
+	#riepiloghi {
+	    font-size: 12px !important; 
+	}
+	
 }
+
 </style>
 
 #{/set}
 
-
+    <div class="col-xs-12 col-lg-8">
     <table id="tabellonetimbrature" class="table table-bordered table-condensed">
 
 	<tr>
@@ -212,18 +224,18 @@
 	#{/list}
 
     </table>
+  </div>
 
-
-<div class="row-fluid">
+  <div id="riepiloghi">
   
-  <div class="col-xs-12 col-sm-12 col-md-6 left">
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 left">
       #{include './_contractsRecap.html' /}
   </div>
   
-  <div class="col-xs-12 col-sm-12 col-md-6 right">
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 right">
     #{include './_notes.html' /}
   </div>
   
-</div>
+  </div>
 
 

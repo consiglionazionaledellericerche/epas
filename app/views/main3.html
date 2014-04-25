@@ -39,7 +39,7 @@
 
   <body>
   
-   <div id="wrapper" class="container">
+   <div id="wrapper">
 
     #{if header.equals('navbar') }
     
@@ -143,7 +143,7 @@
 	#{/if}
 	
     <!-- Begin page content -->
-    <div class="container" id="page_content">
+    <div class="container-fluid" id="page_content">
        #{if flash.error}
       <div class="panel panel-danger">
       <div class="panel-heading flash-panel">  
@@ -164,7 +164,7 @@
    </div>
 
    <footer>
-     <div class="container">
+     <div class="container-fluid">
        <p>Created with <a href="http://www.playframework.org">play framework</a> and really inspired from the "orologio" application developed by Pasquale Lazzareschi</p>
      </div>
    </footer>
