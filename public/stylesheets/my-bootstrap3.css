@@ -22,9 +22,7 @@ body {
     height: 100%;
     margin-bottom:  -70px;
     background: #FFF;
-    -webkit-box-shadow: 0px 0px 6px 8px #FFF;
-	-moz-box-shadow: 0px 0px 6px 8px #FFF;
-	box-shadow: 0px 0px 6px 8px #FFF;
+   
 }
 
 #page_content{
