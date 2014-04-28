@@ -1024,9 +1024,10 @@ public class PersonDay extends Model {
 		if(lastStampingPreviousDay != null && lastStampingPreviousDay.isIn())
 		{
 			this.orderStampings();
-			Integer hourMaxToCalculateWorkTime = ConfYear.getFieldValue("hour_max_to_calculate_worktime", this.date.getYear(), this.person.office);
+			String hourMaxToCalculateWorkTime = ConfYear.getFieldValue("hour_max_to_calculate_worktime", this.date.getYear(), this.person.office);
 			//ConfYear config = ConfYear.getConfYear(this.date.getYear());
-			if(this.stampings.size() > 0 && this.stampings.get(0).way == WayType.out && hourMaxToCalculateWorkTime > this.stampings.get(0).date.getHourOfDay())
+			Integer maxHour = Integer.parseInt(hourMaxToCalculateWorkTime);
+			if(this.stampings.size() > 0 && this.stampings.get(0).way == WayType.out && maxHour > this.stampings.get(0).date.getHourOfDay())
 			{
 				Stamping correctStamp = new Stamping();
 				correctStamp.date = new LocalDateTime(this.previousPersonDayInMonth.date.getYear(), this.previousPersonDayInMonth.date.getMonthOfYear(), this.previousPersonDayInMonth.date.getDayOfMonth(), 23, 59);
