@@ -10,7 +10,7 @@ import play.Play;
 import play.mvc.Controller;
 import play.mvc.With;
 
-@With( {Secure.class, NavigationMenu.class} )
+@With( {Secure.class, RequestInit.class} )
 public class Administrators extends Controller {
 
 	private static final String SUDO_USERNAME = "sudo.username";

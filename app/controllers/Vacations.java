@@ -10,7 +10,7 @@ import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
 
-@With( {Secure.class, NavigationMenu.class} )
+@With( {Secure.class, RequestInit.class} )
 public class Vacations extends Controller{
 		
 	@Check(Security.VIEW_PERSONAL_SITUATION)

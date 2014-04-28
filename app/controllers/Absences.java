@@ -48,7 +48,7 @@ import com.google.common.collect.TreeBasedTable;
 
 import dao.AbsenceTypeDao;
 
-@With( {Secure.class, NavigationMenu.class} )
+@With( {Secure.class, RequestInit.class} )
 public class Absences extends Controller{
 
 	/**

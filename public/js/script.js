@@ -4,6 +4,11 @@ $(function($){
 	
 	$.fn.initepas = function() {
 		
+		
+		this.find('.my-modal').on('hidden.bs.modal', function(){
+		    $(this).data('bs.modal', null);
+		});
+		
 		// $.fn.editable.defaults.mode = 'inline';
 		this.find('a[data-x-editable]').editable();
 		

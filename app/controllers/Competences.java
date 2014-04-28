@@ -35,7 +35,7 @@ import com.google.common.collect.Table;
 
 import dao.PersonDao;
 
-@With( {Secure.class, NavigationMenu.class} )
+@With( {Secure.class, RequestInit.class} )
 public class Competences extends Controller{
 
 	@Check(Security.VIEW_PERSONAL_SITUATION)

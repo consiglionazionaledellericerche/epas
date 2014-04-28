@@ -16,7 +16,7 @@ public class SwitchTemplate extends Controller{
 
 	public static final String USERNAME_SESSION_KEY = "username";
 
-	public static void dispatch() throws InstantiationException, IllegalAccessException, IOException, ClassNotFoundException, SQLException {
+	public static void dispatch() throws ClassNotFoundException, SQLException, InstantiationException, IllegalAccessException {
 		
 		User userLogged = Security.getUser();
 		if(userLogged==null)
@@ -200,8 +200,11 @@ public class SwitchTemplate extends Controller{
 			break;
 
 		}
+		
+		renderText("ok");
 
 	}
+	
 }
 
 

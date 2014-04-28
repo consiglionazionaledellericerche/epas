@@ -40,7 +40,7 @@ import com.google.common.collect.Table;
 
 
 
-@With( {Secure.class, NavigationMenu.class} )
+@With( {Secure.class, RequestInit.class} )
 public class Stampings extends Controller {
 
 	/**

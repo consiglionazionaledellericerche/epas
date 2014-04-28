@@ -23,10 +23,28 @@ import play.mvc.Http;
  * @author cristian
  *
  */
-public class NavigationMenu extends Controller {
+public class RequestInit extends Controller {
 
+	public static class TemplateUtility {
+		
+		public String monthName(String month) {
+			
+			return DateUtility.getName(Integer.parseInt(month));
+		}
+	}
+	
+	@Before
+	public static void injectUtility() {
+		
+		TemplateUtility templateUtility = new TemplateUtility();
+		renderArgs.put("templateUtility", templateUtility);
+		
+	}
+	
+	
 	@Before 
 	public static void injectMenu() { 
+		
 		LocalDate now = new LocalDate();
 		User userLogged = Security.getUser();
 		if(userLogged==null)
@@ -47,7 +65,6 @@ public class NavigationMenu extends Controller {
 			day = Integer.parseInt(session.get("daySelected"));
 			personId = Long.parseLong(session.get("personSelected"));
 			method = session.get("methodSelected");
-			
 		}
 		else
 		{
@@ -195,7 +212,6 @@ public class NavigationMenu extends Controller {
 		
 		return null;
 		
-	
 	}
 		
 }
