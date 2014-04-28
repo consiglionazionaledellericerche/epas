@@ -1,6 +1,7 @@
 package controllers;
 
 import it.cnr.iit.epas.ActionMenuItem;
+import it.cnr.iit.epas.DateUtility;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -44,6 +45,7 @@ public class SwitchTemplate extends Controller{
 		//Month from routes/form (otherwise now)
 		Integer month = params.get("month") != null  ? Integer.valueOf(params.get("month")) : now.getMonthOfYear();
 		session.put("monthSelected", month);
+		session.put("monthSelectedName", DateUtility.getName(month));
 				
 		//Day from routes/form (otherwise now)
 		Integer day = params.get("day") != null ? Integer.valueOf(params.get("day")) : now.getDayOfMonth();

@@ -193,3 +193,20 @@ div.accordion-inner {border-top: 1px solid #bbb;}
 
 .popover{width:300px;}
 
+/**
+ * Css per clock
+ */
+/* clock */
+
+#clockBase{
+	text-align: center;
+	font-size:180px;
+	font-weight:bold;
+	text-shadow: 5px 5px 5px black;
+	
+}
+
+form#formClockLogin{ font-size: 30px; }
+input#formClockPassword{ font-size: 25px; height: 35px;}
+input#formClockPerson{ size: 100; }
+

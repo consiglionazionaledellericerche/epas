@@ -28,9 +28,6 @@ import play.data.validation.*;
 import play.libs.Codec;
 import play.mvc.Controller;
 
-
-
-
 /**
  * @author daniele
  *
@@ -73,10 +70,7 @@ public class Wizard extends Controller {
 	}
 	
     public static void wizard(int step) {
-    	
-		Logger.info(ConfigurationFields.getConfGeneralFields().toString());
-		Logger.info(ConfigurationFields.getConfYearFields().toString());
-    	
+    	    	
     	List<WizardStep> steps = Cache.get(STEPS_KEY, List.class);
     	Properties properties = Cache.get(PROPERTIES_KEY, Properties.class);
     	double percent = 0;
@@ -206,7 +200,9 @@ public class Wizard extends Controller {
     /**
      * STEP 4 Inserimento Giorno Patrono"
      */
-    public static void setPatron(@Required String patronMonth,@Required String patronDay){
+    public static void setPatron(
+    		@Required String patronMonth,
+    		@Required String patronDay){
 
     	if (validation.hasErrors()){
     	    params.flash(); 
@@ -233,7 +229,8 @@ public class Wizard extends Controller {
     /**
      * STEP 5
      */
-    public static void setGenConf(@Required String initUseStart,
+    public static void setGenConf(
+    		@Required String initUseStart,
     		@Required String lunchPauseStart, 
     		@Required String lunchPauseStop,
     		@Required boolean webStampingAllowed
@@ -271,7 +268,8 @@ public class Wizard extends Controller {
        	wizard(5);
     }
     
-    public static void setConfYear(@Required String dayVacantionExp,
+    public static void setConfYear(
+    		@Required String dayVacantionExp,
     		@Required String monthVacantionExp,
     		@Required String monthExpireRecoveryDaysOneThree,
     		@Required String maxRecoveryDaysOneThree,
@@ -334,99 +332,78 @@ public class Wizard extends Controller {
 		office.code = Integer.parseInt(properties.getProperty("seat_code"));
 		office.save();
 		
+		
+		List<String> cgf = ConfigurationFields.getConfGeneralFields();
+		
 		List<ConfGeneral> confGeneral = ConfGeneral.find(
 				"Select cg from ConfGeneral cg where cg.office = ?", office).fetch();
 		
+		for(String field : cgf){
+			boolean fieldIsPresent = false;
+			for(ConfGeneral cg : confGeneral){
+				if(cg.field.equals(field)){
+					fieldIsPresent = true;
+					cg.fieldValue = properties.getProperty(field);
+					cg.save();
+				}
+			}
+			if(!fieldIsPresent){
+				ConfGeneral ncg = new ConfGeneral();
+				ncg.office = office;
+				ncg.field = field;
+				ncg.fieldValue = properties.getProperty(field);
+				ncg.save();
+				
+			}
+		}	
 		
-		for (ConfGeneral cf : confGeneral){
-			cf.fieldValue = properties.getProperty(cf.field);
-			cf.save();
-		}
+		
+		List<String> cyf = ConfigurationFields.getConfYearFields();
 		
 		DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/yyyy");
+		Integer startYear = LocalDate.parse
+				(properties.getProperty("init_use_program"),dtf).getYear();
 		
 		List<ConfYear> confYear = ConfYear.find(
 				"Select cy from ConfYear cy where cy.office = ? and cy.year = ?", 
-				office,LocalDate.parse
-				(properties.getProperty("init_use_program"),dtf).getYear()).fetch();
+				office,startYear).fetch();
+		
+		for(String field : cyf){
+			boolean fieldIsPresent = false;
+			for(ConfYear cy : confYear){
+				if((cy.field.equals(field)) && (cy.year == startYear)){
+					fieldIsPresent = true;
+					cy.fieldValue = properties.getProperty(field);
+					
+					ConfYear ncpy = new ConfYear();
+					ncpy.year = cy.year -1;
+					ncpy.office = cy.office;
+					ncpy.field = cy.field;
+					ncpy.fieldValue = cy.fieldValue;
+					
+					cy.save();
+					ncpy.save();
+				}
+			
+			}
+			
+			if(!fieldIsPresent){
+				ConfYear ncy = new ConfYear();
+				ncy.year = startYear;
+				ncy.office = office;
+				ncy.field = field;
+				ncy.fieldValue = properties.getProperty(field);
 				
-		for (ConfYear cy : confYear){
-			cy.fieldValue = Integer.parseInt(properties.getProperty(cy.field));
-			cy.save();
+				ConfYear ncpy = new ConfYear();
+				ncpy.year = ncy.year -1;
+				ncpy.office = ncy.office;
+				ncpy.field = ncy.field;
+				ncpy.fieldValue = ncy.fieldValue;
+				
+				ncy.save();
+				ncpy.save();
+			}
 		}
-				
-		// setPatron
-//		ConfGeneral confGeneral = new ConfGeneral();
-//		confGeneral.instituteName = office.name;
-//		confGeneral.seatCode = office.code;
-//		confGeneral.urlToPresence = "https://attestati.rm.cnr.it/attestati/";
-//		confGeneral.monthOfPatron = Integer.parseInt(properties.getProperty("Mese Patrono"));
-//		confGeneral.dayOfPatron = Integer.parseInt(properties.getProperty("Giorno Patrono"));
-		//setGenConf
-		
-		
-//		DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/yyyy");
-//		confGeneral.initUseProgram = LocalDate.parse
-//				(properties.getProperty("Data di inizio utilizzo"),dtf);
-//		
-//		List<String> launchStartTime = 
-//				Splitter.on(":").trimResults().splitToList
-//				(properties.getProperty("Inzio pausa pranzo"));
-//		List<String> launchEndTime = 
-//				Splitter.on(":").trimResults().splitToList
-//				(properties.getProperty("Fine pausa pranzo"));
-//		
-//		confGeneral.mealTimeStartHour = Integer.parseInt(launchStartTime.get(0));
-//		confGeneral.mealTimeStartMinute = Integer.parseInt(launchStartTime.get(1));
-//		
-//		confGeneral.mealTimeEndHour = Integer.parseInt(launchEndTime.get(0)); 
-//		confGeneral.mealTimeEndMinute = Integer.parseInt(launchEndTime.get(1));
-//		
-//		if (properties.getProperty("Permetti timbrature web").equalsIgnoreCase("SI")){
-//			confGeneral.webStampingAllowed = true;
-//		}
-//		else{
-//			confGeneral.webStampingAllowed = false;
-//		}
-//		
-//		confGeneral.save();
-//		
-//		// setConfYear
-//		LocalDate date = new LocalDate();
-//		 
-//		ConfYear confYear = new ConfYear();
-//		confYear.year = date.getYear();
-//		
-//		confYear.dayExpiryVacationPastYear = Integer.parseInt(
-//				properties.getProperty("Giorno scadenza Vacanze anno passato"));
-//		confYear.monthExpiryVacationPastYear = Integer.parseInt(properties.getProperty(
-//				"Mese scadenza Vacanze anno passato"));
-//		confYear.monthExpireRecoveryDaysOneThree = Integer.parseInt(properties.getProperty(
-//				"Mese scadenza giorni di recupero 1-3"));
-//		confYear.maxRecoveryDaysOneThree = Integer.parseInt(properties.getProperty(
-//				"Numero massimo giorni di recupero 1-3"));
-//		confYear.monthExpireRecoveryDaysFourNine = Integer.parseInt(properties.getProperty(
-//				"Mese scadenza giorni di recupero 4-9"));
-//		confYear.maxRecoveryDaysFourNine = Integer.parseInt(properties.getProperty(
-//				"Numero massimo giorni di recupero 4-9"));
-//		confYear.hourMaxToCalculateWorkTime = Integer.parseInt(Splitter.on(":").trimResults().splitToList
-//				(properties.getProperty("Soglia oraria calcolo timbrature giornaliere")).get(0));
-//		
-//		confYear.save();
-//				
-//		
-//		ConfYear confPreviousYear = new ConfYear();
-//				
-//		confPreviousYear.year = confYear.year - 1;
-//		confPreviousYear.dayExpiryVacationPastYear = confYear.dayExpiryVacationPastYear;
-//		confPreviousYear.monthExpiryVacationPastYear = confYear.monthExpiryVacationPastYear;
-//		confPreviousYear.monthExpireRecoveryDaysOneThree = confYear.monthExpireRecoveryDaysOneThree;
-//		confPreviousYear.maxRecoveryDaysOneThree = confYear.maxRecoveryDaysOneThree;
-//		confPreviousYear.monthExpireRecoveryDaysFourNine = confYear.monthExpireRecoveryDaysFourNine;
-//		confPreviousYear.maxRecoveryDaysFourNine = confYear.maxRecoveryDaysFourNine;
-//		confPreviousYear.hourMaxToCalculateWorkTime = confYear.hourMaxToCalculateWorkTime;
-//		
-//		confPreviousYear.save();
 
 		Application.index();
     }

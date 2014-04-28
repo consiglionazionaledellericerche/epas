@@ -783,7 +783,7 @@ public class Persons extends Controller {
 		user.password = codec.hexMD5(nuovaPassword);
 		user.save();
 		flash.success(Messages.get("passwordSuccessfullyChanged"));
-		Application.indexAdmin();
+		Persons.changePassword();
 	}
 	
 	@Check(Security.DELETE_PERSON)

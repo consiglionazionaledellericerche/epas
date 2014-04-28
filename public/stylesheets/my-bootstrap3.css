@@ -1,0 +1,219 @@
+/* Browser reset
+------------------------------------------------------------------------- */
+
+h1,h2,h3,h4,h5 {
+	padding: 2px;
+	margin: 2px;
+	margin-bottom:4px;
+}
+
+/* Sticky footer styles
+------------------------------------------------------------------------- */
+
+html,
+body {
+  background-color: lightgrey;
+  height: 100%;
+}
+
+#wrapper {
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    margin-bottom:  -70px;
+    background: #FFF;
+    -webkit-box-shadow: 0px 0px 6px 8px #FFF;
+	-moz-box-shadow: 0px 0px 6px 8px #FFF;
+	box-shadow: 0px 0px 6px 8px #FFF;
+}
+
+#page_content{
+	padding-top:130px;
+	padding-bottom: 90px;
+}
+
+footer {
+  height: 70px;				
+  background-color: black;
+  text-align: center;
+}
+
+footer p {
+  padding-top: 5px;
+  color: grey;
+  font-size: .9em;
+}
+
+
+
+/* Custom page CSS
+------------------------------------------------------------------------ */
+/* Not required for template or sticky footer method. */
+
+.flash-panel {
+	border: 1px solid;
+	text-align: center;
+	padding: 0;
+}
+
+.flash-panel p{
+	padding: 0;
+	padding-top: 7px;
+}
+
+#banner {
+	position: absolute;
+	width: 100%;
+	height: 80px;
+	background-color: white;
+	top: 0;
+	left: 0;
+	border-bottom: 1px solid black;
+	box-shadow: 0px 0px 5px black;
+}
+
+#banner img {
+	height: 79px;
+	width: auto;
+	display: inline-block;
+}
+
+#nav-year .badge {
+	background-color: #2d6ca2;
+	font-size: 1.1em;
+}
+
+#nav-month .badge {
+	background-color: #2d6ca2;
+	font-size: 1.1em;
+}
+
+.panel {
+	padding-left: 0;
+	padding-right: 0;
+	border-color: darkgrey;
+}
+
+/* CSS utilità */
+
+.center {
+	text-align: center;
+}
+
+.center th {
+	text-align: center;
+}
+
+.container-main {
+	background-color: white;
+	border-radius: 5px;
+	border: 1px solid darkgrey;
+	padding: 10px;
+	font-size: .9em;
+}
+
+.container-margintop {
+	margin-top: 20px;
+}
+
+.container-marginbottom {
+	margin-bottom: 20px;
+}
+
+.modal-dialog-center {
+    margin-top: 15%;
+}
+
+/* CSS template */
+
+#formLogin input {
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+/* CSS Tabellone Timbrature */
+
+/* tabella default */
+table { border: 1px solid #aaa; }
+th { background: #eee}
+td, th { padding: 5px; text-align: left; border-right: 1px solid #aaa; border-bottom: 1px solid #aaa; }
+
+/* tabellone timbrature */
+table#tabellonetimbrature{
+	font-size: small;
+	border-right: 0;
+    border-top: 0;
+    border-bottom: 0;
+    border-spacing: 0px 1px; 
+    
+    border-collapse: separate; /* per i bordi tondiiiiiiiii */
+}
+
+/* header */
+
+table#tabellonetimbrature th{
+	border: 1px solid #bbb;
+	background-color: lightgrey;
+	text-align: center;
+}
+table#tabellonetimbrature th.group-left  { border-radius: 5px 0 0 5px; border-right: none;}
+table#tabellonetimbrature th.group-right { border-radius: 0 5px 5px 0; border-left: none;}
+table#tabellonetimbrature th.group-center{ border-radius: none; border-left: none; border-right: none;}
+table#tabellonetimbrature th.group-single{ border-radius: 5px;}
+
+table#tabellonetimbrature th.invisible {border: none; padding-left: 2px; padding-right: 1px;}
+table#tabellonetimbrature td.invisible {border: none; padding-left: 2px; padding-right: 1px;}
+
+/* celle */
+
+table#tabellonetimbrature td.default-single{border-radius: 5px; border-color: #bbb;}
+table#tabellonetimbrature td.default-left{border-radius: 5px 0 0 5px; border-color: #bbb; border-right: none;}
+table#tabellonetimbrature td.default-right{border-radius: 0 5px 5px 0; border-color: #bbb;border-left: none;}
+
+table#tabellonetimbrature td{
+	text-align: center;
+	padding-left: 0px;
+    padding-right: 0px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+table#tabellonetimbrature td.positionleft{
+	border-radius: 10px 0px 0px 10px;
+	border-color: #808080;
+	border-right-style: none;
+	background-color: rgba(205, 245, 255, 0.48);;
+}
+table#tabellonetimbrature td.positionright{
+	border-radius: 0px 10px 10px 0px;
+	border-color: #808080;
+	border-left-style: none;
+	background-color: rgba(205, 245, 255, 0.48);;
+}
+table#tabellonetimbrature td.positioncenter.default-left, table#tabellonetimbrature td.positioncenter.default-right{
+	border-radius: 0px 0px 0px 0px;
+	border-left-style: none;
+	border-right-style: none;	
+	border-color: #808080;
+	background-color: rgba(205, 245, 255, 0.48);;
+}
+table#tabellonetimbrature td.positioncenter.warn{
+	border-left-style: none;
+	border-right-style: none;	
+	border-color: #808080;
+	background-color: rgba(205, 245, 255, 0.48);;
+}
+table#tabellonetimbrature td.positionnone.warn{
+	border-radius: 10px 10px 10px 10px;
+	border-color: #808080;
+	background-color: yellow;
+}
+table#tabellonetimbrature td.festivi {background-color: #fac08d;}
+table#tabellonetimbrature td.assenza {background-color: #ffffcf;}
+table#tabellonetimbrature td.progressivo {background-color: #ffffcf;}
+table#tabellonetimbrature td.capitalized {text-transform: capitalize;}
+
+
+/* bordatura */
+
+table#tabellonetimbrature th,
+table#tabellonetimbrature td {border: 1px solid #bbb;}

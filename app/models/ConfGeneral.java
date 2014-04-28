@@ -83,6 +83,8 @@ public class ConfGeneral extends Model{
 	//	
 	//	@Column(name="meal_time_end_minute")
 	//	public Integer mealTimeEndMinute;
+	
+	
 
 	public static ConfGeneral getConfGeneral()
 	{

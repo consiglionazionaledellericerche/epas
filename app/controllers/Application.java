@@ -1,5 +1,7 @@
 package controllers;
 
+import it.cnr.iit.epas.DateUtility;
+
 import org.joda.time.LocalDate;
 
 import play.Logger;
@@ -29,6 +31,7 @@ public class Application extends Controller {
     	//inizializzazione functional menu dopo login
     	
 		session.put("monthSelected", new LocalDate().getMonthOfYear());
+		session.put("monthSelectedName", DateUtility.getName(new LocalDate().getMonthOfYear()));
 		session.put("yearSelected", new LocalDate().getYear());
 		session.put("personSelected", Security.getUser().person.id);
 		

@@ -55,32 +55,7 @@ public class PersonMonths extends Controller{
 		}
 		List<PersonMonthRecap> pmList = PersonMonthRecap.find("Select pm from PersonMonthRecap pm where pm.year = ? and pm.person = ?", year, person).fetch();
 		LocalDate date = new LocalDate();
-//		Map<Integer, List<PersonMonthRecap>> pmMap = new HashMap<Integer, List<PersonMonthRecap>>();
-//		List<PersonMonthRecap> pmList = PersonMonthRecap.find("Select pm from PersonMonthRecap pm where pm.year = ? and pm.person = ?", year, person).fetch();
-//		Logger.debug("Lista di ore di formazione: %s", pmList);
-//
-//		List<PersonMonthRecap> list = null;
-//		for(int i=1; i< 13; i++){
-//			PersonMonthRecap pm = new PersonMonthRecap(person, year, i);
-//			List<PersonMonthRecap> listina = new ArrayList<PersonMonthRecap>();
-//			pm.trainingHours = 0;
-//			pm.hoursApproved = false;
-//
-//			listina.add(pm);
-//			pmMap.put(pm.month, listina);
-//		}
-//		for(PersonMonthRecap pm : pmList){
-//			if(!pmMap.containsKey(pm.month)){
-//				list = new ArrayList<PersonMonthRecap>();
-//				list.add(pm);
-//				pmMap.put(pm.month, list);
-//			}
-//			else{
-//				list = pmMap.get(pm.month);
-//				list.add(pm);
-//				pmMap.put(pm.month, list);
-//			}
-//		}
+
 
 		render(person, year, mesi, month, pmList, date);
 
