@@ -31,7 +31,7 @@ import play.mvc.With;
 
 //@With(Shibboleth.class)
 
-@With( {Secure.class, NavigationMenu.class} )
+@With( {Secure.class, RequestInit.class} )
 public class Administration extends Controller {
 	
 	

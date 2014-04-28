@@ -1,37 +1,57 @@
-#{form @PersonMonths.updateTrainingHours()}
 
-<h3>Ore di formazione di &{'views.tags.display.date.month.' +month}</h3>
-<fieldset>
-<table class="tablenoborder">
-<input name="personId" type="hidden" value="${person.id}"/>
-<input name="month" type="hidden" value="${month}"/>
-<input name="year" type="hidden" value="${year}"/>
-<input name="personMonthId" type="hidden" value="${pm.id}"/>
-	
-	<tr>
-		<td>Giorno inizio</td><td>#{select 'begin', value: pm.fromDate.getDayOfMonth(), class:'span1', id: 'begin'} 
-					#{list items:1..max, as:'i'}
-						#{option i}${i}#{/option}
-					#{/list}
-				#{/select}	
-		</td>
-	</tr>
-	<tr>
-		<td>Giorno fine</td><td>#{select 'end', value: pm.toDate.getDayOfMonth(), class:'span1', id: 'end' }
-					#{list items:1..max, as:'i'}
-						#{option i}${i}#{/option}
-					#{/list}
-				#{/select}	
-		</td>
-	</tr>
-	<tr>
-		<td>Quantità</td><td><input class="span2" name="value" type="text" value="${pm.trainingHours}"/></td>
-	</tr>
-	
-</table>
-</fieldset>
-
-<div class="buttoncenter">
-<input class="btn btn-primary" type="submit" value="Ok" />
+<div class="modal-header">
+  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+  <h4 class="modal-title">Ore di formazione di &{'views.tags.display.date.month.' +month}</h4>
 </div>
+
+<!-- Start Body -->
+<div class="modal-body">
+
+
+<div class="container-fluid center">
+#{form @PersonMonths.updateTrainingHours(), role:'form', class:'form-horizontal'}
+  
+  <input name="personId" type="hidden" value="${person.id}"/>
+  <input name="month" type="hidden" value="${month}"/>
+  <input name="year" type="hidden" value="${year}"/>
+  <input name="personMonthId" type="hidden" value="${pm.id}"/>
+	
+		<div class="form-group">
+         <label for="begin" class="col-xs-4 control-label">Giorno Inizio</label>
+         <div class="col-xs-8">
+           #{select 'begin',  value: pm.fromDate.getDayOfMonth(), class:'form-control', id: 'begin'} 
+		     #{list items:1..max, as:'i'}
+		       #{option i}${i}#{/option}
+			 #{/list}
+		  #{/select}	
+         </div>
+        </div>
+        
+        <div class="form-group">
+         <label for="end" class="col-xs-4 control-label">Giorno fine</label>
+         <div class="col-xs-8">
+           #{select 'end',  value: pm.toDate.getDayOfMonth(), class:'form-control', id: 'end'} 
+		     #{list items:1..max, as:'i'}
+		       #{option i}${i}#{/option}
+			 #{/list}
+		  #{/select}	
+         </div>
+        </div>
+        
+        <div class="form-group">
+         <label for="value" class="col-xs-4 control-label">Quantità</label>
+         <div class="col-xs-8">
+           <input type="number" class="form-control" name="value" id="value" placeholder="Quantità" value="${pm.trainingHours}">
+         </div>  
+        </div>
+        
+	  
+		<button type="submit" class="btn btn-primary" value="Ok">Ok</button>
 #{/form}
+
+</div>
+
+
+
+
+</div> <!-- End Body -->

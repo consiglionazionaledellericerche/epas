@@ -48,7 +48,7 @@ import com.google.common.collect.Sets;
  * @author cristian
  *
  */
-@With( {Secure.class, NavigationMenu.class} )
+@With( {Secure.class, RequestInit.class} )
 public class UploadSituation extends Controller{
 	
 	public static final String LOGIN_RESPONSE_CACHED = "loginResponse";

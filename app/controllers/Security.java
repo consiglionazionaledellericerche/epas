@@ -168,6 +168,7 @@ public class Security extends Secure.Security {
 		
 		if(person.office.id == user.person.office.id)
 			return true;
+		
 		for(RemoteOffice remote : user.person.office.remoteOffices){
 			if(remote.id == person.office.id)
 				return true;

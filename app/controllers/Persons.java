@@ -43,7 +43,7 @@ import com.google.common.collect.Sets;
 
 import dao.PersonDao;
 
-@With( {Secure.class, NavigationMenu.class} )
+@With( {Secure.class, RequestInit.class} )
 public class Persons extends Controller {
 
 	public static final String USERNAME_SESSION_KEY = "username";
