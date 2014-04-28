@@ -64,13 +64,13 @@ public class Configurations extends Controller{
 
 		//last year (non modificabile)
 		ConfYear lastConfYear = ConfYear.getConfYear(new LocalDate().getYear()-1);
-		Integer lastYearDayExpiryVacationPastYear = ConfYear.getFieldValue(ConfigurationFields.DayExpiryVacationPastYear.description, date.getYear()-1, office);
-		Integer lastYearMonthExpiryVacationPastYear = ConfYear.getFieldValue(ConfigurationFields.MonthExpiryVacationPastYear.description, date.getYear()-1, office);
-		Integer lastYearMonthExpireRecoveryDaysOneThree = ConfYear.getFieldValue(ConfigurationFields.MonthExpireRecoveryDays13.description, date.getYear()-1, office);
-		Integer lastYearMonthExpireRecoveryDaysFourNine = ConfYear.getFieldValue(ConfigurationFields.MonthExpireRecoveryDays49.description, date.getYear()-1, office);
-		Integer lastYearMaxRecoveryDaysOneThree = ConfYear.getFieldValue(ConfigurationFields.MaxRecoveryDays13.description, date.getYear()-1, office);
-		Integer lastYearMaxRecoveryDaysFourNine = ConfYear.getFieldValue(ConfigurationFields.MaxRecoveryDays49.description, date.getYear()-1, office);
-		Integer lastYearHourMaxToCalculateWorkTime = ConfYear.getFieldValue(ConfigurationFields.HourMaxToCalculateWorkTime.description, date.getYear()-1, office);
+		Integer lastYearDayExpiryVacationPastYear = Integer.parseInt(ConfYear.getFieldValue(ConfigurationFields.DayExpiryVacationPastYear.description, date.getYear()-1, office));
+		Integer lastYearMonthExpiryVacationPastYear = Integer.parseInt(ConfYear.getFieldValue(ConfigurationFields.MonthExpiryVacationPastYear.description, date.getYear()-1, office));
+		Integer lastYearMonthExpireRecoveryDaysOneThree = Integer.parseInt(ConfYear.getFieldValue(ConfigurationFields.MonthExpireRecoveryDays13.description, date.getYear()-1, office));
+		Integer lastYearMonthExpireRecoveryDaysFourNine = Integer.parseInt(ConfYear.getFieldValue(ConfigurationFields.MonthExpireRecoveryDays49.description, date.getYear()-1, office));
+		Integer lastYearMaxRecoveryDaysOneThree = Integer.parseInt(ConfYear.getFieldValue(ConfigurationFields.MaxRecoveryDays13.description, date.getYear()-1, office));
+		Integer lastYearMaxRecoveryDaysFourNine = Integer.parseInt(ConfYear.getFieldValue(ConfigurationFields.MaxRecoveryDays49.description, date.getYear()-1, office));
+		Integer lastYearHourMaxToCalculateWorkTime = Integer.parseInt(ConfYear.getFieldValue(ConfigurationFields.HourMaxToCalculateWorkTime.description, date.getYear()-1, office));
 
 		//current year (modificabile)
 		ConfYear confYear = ConfYear.getConfYear(new LocalDate().getYear());
@@ -119,7 +119,7 @@ public class Configurations extends Controller{
 			ConfYear conf = ConfYear.findById(Long.parseLong(pk));
 
 			if(conf.field.equals(ConfigurationFields.DayExpiryVacationPastYear.description)){
-				Integer month = ConfYear.getFieldValue(ConfigurationFields.MonthExpiryVacationPastYear.description, year, conf.office);
+				Integer month = Integer.parseInt(ConfYear.getFieldValue(ConfigurationFields.MonthExpiryVacationPastYear.description, year, conf.office));
 				try{
 					new LocalDate(year, month, Integer.parseInt(value));
 				}
@@ -130,7 +130,7 @@ public class Configurations extends Controller{
 			}
 
 			if(conf.field.equals(ConfigurationFields.MonthExpiryVacationPastYear.description)){
-				Integer day  = ConfYear.getFieldValue(ConfigurationFields.DayExpiryVacationPastYear.description, year, conf.office);
+				Integer day  = Integer.parseInt(ConfYear.getFieldValue(ConfigurationFields.DayExpiryVacationPastYear.description, year, conf.office));
 				try{
 					LocalDate date = new LocalDate(year, Integer.parseInt(value), day);
 				}
@@ -169,7 +169,7 @@ public class Configurations extends Controller{
 				}
 			}
 			
-			conf.fieldValue = Integer.parseInt(value);
+			conf.fieldValue = value;
 			conf.save();
 			Cache.set(conf.field+conf.office.name+conf.year, conf.fieldValue);
 		
