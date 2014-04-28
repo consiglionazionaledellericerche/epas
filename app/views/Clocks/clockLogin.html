@@ -3,7 +3,7 @@
 
 <div id="clockBase" style></div>
 <fieldset>
-	<legend>Situazione ${person.name} ${person.surname} giorno ${dayRecap.date}</legend>
+	<legend>Situazione ${user.person.name} ${user.person.surname} giorno ${dayRecap.date}</legend>
 	
 	<table class="table table-bordered" id="presenze_mensili">
 	<tr>
@@ -128,7 +128,7 @@
 	<tr>
 	<td>
 		#{form @Clocks.insertStamping()}
-			<input type="hidden" name="personId" value="${person.id}">
+			<input type="hidden" name="personId" value="${user.person.id}">
 			<input type="hidden" name="type" value="true"/> 
 			<input type="submit" class="btn btn-large btn-primary" name ="submit" value="Entrata" />
 
@@ -147,7 +147,7 @@
 	
 	<td>
 		#{form @Clocks.insertStamping()}
-			<input type="hidden" name="personId" value="${person.id}">
+			<input type="hidden" name="personId" value="${user.person.id}">
 			<input type="hidden" name="type" value="false"/> 
 			<input type="submit" class="btn btn-large btn-primary" name ="submit" value="Uscita" />
 

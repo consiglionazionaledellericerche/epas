@@ -91,34 +91,34 @@ public enum ConfigurationFields {
 	public static List<String> getConfGeneralFields(){
 		 		 
 		return ImmutableList.of(
-		   InitUseProgram.name(),
-		   InstituteName.name(),
-		   EmailToContact.name(),
-		   SeatCode.name(),
-		   UrlToPresence.name(),
-		   UserToPresence.name(),
-		   PasswordToPresence.name(),
-		   NumberOfViewingCouple.name(),
-		   MonthOfPatron.name(),
-		   DayOfPatron.name(),
-		   MealTimeStartHour.name(),
-		   MealTimeStartMinute.name(),
-		   MealTimeEndHour.name(),
-		   MealTimeEndMinute.name(),
-		   WebStampingAllowed.name());
+		   InitUseProgram.description,
+		   InstituteName.description,
+		   EmailToContact.description,
+		   SeatCode.description,
+		   UrlToPresence.description,
+		   UserToPresence.description,
+		   PasswordToPresence.description,
+		   NumberOfViewingCouple.description,
+		   MonthOfPatron.description,
+		   DayOfPatron.description,
+		   MealTimeStartHour.description,
+		   MealTimeStartMinute.description,
+		   MealTimeEndHour.description,
+		   MealTimeEndMinute.description,
+		   WebStampingAllowed.description);
 	}
 	
 	
 	public static List<String> getConfYearFields(){
 		
 		return ImmutableList.of(
-				MonthExpiryVacationPastYear.name(),
-				DayExpiryVacationPastYear.name(),
-				MonthExpireRecoveryDays13.name(),
-				MonthExpireRecoveryDays49.name(),
-				MaxRecoveryDays13.name(),
-				MaxRecoveryDays49.name(),
-				HourMaxToCalculateWorkTime.name());
+				MonthExpiryVacationPastYear.description,
+				DayExpiryVacationPastYear.description,
+				MonthExpireRecoveryDays13.description,
+				MonthExpireRecoveryDays49.description,
+				MaxRecoveryDays13.description,
+				MaxRecoveryDays49.description,
+				HourMaxToCalculateWorkTime.description);
 	}
 		
 }
