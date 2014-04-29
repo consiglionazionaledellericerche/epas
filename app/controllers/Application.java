@@ -1,7 +1,6 @@
 package controllers;
 
 import it.cnr.iit.epas.DateUtility;
-import it.cnr.iit.epas.SessionEpas;
 import models.User;
 
 import org.joda.time.LocalDate;
