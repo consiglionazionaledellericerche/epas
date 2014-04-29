@@ -19,6 +19,8 @@ import models.WorkingTimeTypeDay;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
+import play.Logger;
+
 /**
  * Oggetto che modella il giorno di una persona nelle viste personStamping e stampings.
  * @author alessandro
@@ -74,9 +76,10 @@ public class PersonStampingDayRecap {
 		this.person = pd.person;
 		setDate(pd.date); 
 		this.absences = pd.absences;
-		
+
 		List<Stamping> stampingsForTemplate = pd.getStampingsForTemplate(numberOfInOut, today);
 
+		
 		this.setStampingTemplate( stampingsForTemplate, pd );
 		if(pd.person.getWorkingTimeType(pd.date) != null){		
 			this.wtt = pd.person.getWorkingTimeType(pd.date);
