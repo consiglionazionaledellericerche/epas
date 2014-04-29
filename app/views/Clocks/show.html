@@ -4,13 +4,13 @@
 
 <form id="formClockLogin" action="/clocks/clocklogin" method="post" align="center">
 
-<select id="formClockPerson" name="personId" size="1" id="login" width="500" style="width: 500px">
+<select id="formClockPerson" name="userId" size="1" id="login" width="500" style="width: 500px">
 	
 	<option value="0"></option>
 	%{
 	for(person in personList){
 	}%
-		<option value="${person.id}">${person.surname + ' ' + person.name}</option>
+		<option value="${person.user.id}">${person.surname + ' ' + person.name}</option>
 	%{
 	}
 	}%	

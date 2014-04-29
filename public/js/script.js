@@ -4,25 +4,13 @@ $(function($){
 	
 	$.fn.initepas = function() {
 		
+		
+		this.find('.my-modal').on('hidden.bs.modal', function(){
+		    $(this).data('bs.modal', null);
+		});
+		
 		// $.fn.editable.defaults.mode = 'inline';
 		this.find('a[data-x-editable]').editable();
-		
-		this.find('a.popup_window').popupWindow({ 
-			height:600, 
-			width:1000,
-			scrollbars:1,
-			resizable:0,
-			top:50, 
-			left:50 
-			});
-		this.find('a.popup_window_mini').popupWindow({ 
-			height:600, 
-			width:800,
-			scrollbars:1,
-			resizable:0,
-			top:50, 
-			left:50 
-			}); 
 		
 		this.find("a[data-popover]").popover();
 		this.find("input[data-datepicker]").datepicker();
@@ -54,9 +42,10 @@ $(function($){
 		    $(this).data('modal', null);
 		});
 
-		this.find('#myModal3').on('hidden', function(){
-		    $(this).data('modal', null);
+		this.find('#myModal3').on('hidden.bs.modal', function(){
+		    $(this).data('bs.modal', null);
 		});
+		
 
 		this.find('#myModal4').on('hidden', function(){
 		    $(this).data('modal', null);

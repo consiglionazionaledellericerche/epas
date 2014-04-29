@@ -20,7 +20,7 @@ import play.mvc.With;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
-@With( {Secure.class, NavigationMenu.class} )
+@With( {Secure.class, RequestInit.class} )
 public class MonthRecaps extends Controller{
 
 	private static Comparator<Person> PersonNameComparator = new Comparator<Person>() {

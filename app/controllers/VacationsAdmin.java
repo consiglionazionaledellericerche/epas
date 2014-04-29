@@ -22,7 +22,7 @@ import play.mvc.Controller;
 import play.mvc.Scope.RenderArgs;
 import play.mvc.With;
 
-@With( {Secure.class, NavigationMenu.class} )
+@With( {Secure.class, RequestInit.class} )
 public class VacationsAdmin extends Controller{
 
 	@Check(Security.INSERT_AND_UPDATE_VACATIONS)
