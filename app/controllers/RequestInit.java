@@ -39,12 +39,81 @@ public class RequestInit extends Controller {
 		TemplateUtility templateUtility = new TemplateUtility();
 		renderArgs.put("templateUtility", templateUtility);
 		
+		
+		
 	}
 	
 	
 	@Before 
 	public static void injectMenu() { 
 		
+		session.put("actionSelected", 
+				computeActionSelected(Http.Request.current().action));
+		
+		Integer year;
+		if ( params.get("year") != null ) {
+			
+			year = Integer.valueOf(params.get("year"));
+			session.put("yearSelected", year);
+		} 
+		else if (session.get("yearSelected") != null ){
+			
+			year = Integer.valueOf(session.get("yearSelected"));
+		}
+		else {
+			
+			year = LocalDate.now().getYear();
+		}
+		
+		Integer month;
+		if ( params.get("month") != null ) {
+			
+			month = Integer.valueOf(params.get("month"));
+			session.put("monthSelected", month);
+		} 
+		else if ( session.get("monthSelected") != null ){
+			
+			month = Integer.valueOf(session.get("monthSelected"));
+		}
+		else {
+			
+			month = LocalDate.now().getMonthOfYear();
+		}
+		
+		Integer personId;
+		if ( params.get("personId") != null ) {
+			
+			personId = Integer.valueOf(params.get("personId"));
+			session.put("personSelected", personId);
+		} 
+		else if ( session.get("personSelected") != null ){
+			
+			personId = Integer.valueOf(session.get("personSelected"));
+		}
+		else if( Security.getUser().person != null ){
+			
+			session.put("personSelected", Security.getUser().person.id);
+		}
+		else {
+			
+			session.put("personSelected", 1);
+		}
+		
+		
+		if(Security.getUser().person != null) {
+			
+			List<Person> persons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
+			renderArgs.put("navPersons", persons);
+		} 
+		else {
+			
+			List<Office> allOffices = Office.findAll();
+			List<Person> persons = Person.getActivePersonsInMonth(month, year, allOffices, false);
+			renderArgs.put("navPersons", persons);
+		}
+		
+		
+		/*
 		LocalDate now = new LocalDate();
 		User userLogged = Security.getUser();
 		if(userLogged==null)
@@ -65,6 +134,7 @@ public class RequestInit extends Controller {
 			day = Integer.parseInt(session.get("daySelected"));
 			personId = Long.parseLong(session.get("personSelected"));
 			method = session.get("methodSelected");
+
 		}
 		else
 		{
@@ -95,7 +165,7 @@ public class RequestInit extends Controller {
 			//Method from Http.Request
 			method = getFormAction(Http.Request.current().action);
 			session.put("methodSelected", method);
-			
+						
 		}
 		
 		session.put("dispatched", "false");
@@ -142,9 +212,10 @@ public class RequestInit extends Controller {
 			}
 		}
 		renderArgs.put("mainMenu", mainMenu);
-
+		*/
 	}
 	
+	/*
 	private static String getFormAction(String controller)
 	{
 		if(controller.equals("Stampings.personStamping"))
@@ -212,6 +283,82 @@ public class RequestInit extends Controller {
 		
 		return null;
 		
+	}
+	*/
+	
+	private static String computeActionSelected(String action) {
+		
+		
+		if( action.startsWith("Stampings.")) {
+			
+			if(action.equals("Stampings.stampings")) {
+				
+				renderArgs.put("dropDown", "dropDown1");
+				return "Stampings.stampings";
+			}
+			
+			if(action.equals("Stampings.personStamping")) {
+				
+				renderArgs.put("dropDown", "dropDown2");
+				return "Stampings.personStamping";
+			}
+			
+		}
+		
+		if( action.startsWith("PersonMonths.")) {
+			
+			if(action.equals("PersonMonths.trainingHours")) {
+				
+				renderArgs.put("dropDown", "dropDown1");
+				return "PersonMonths.trainingHours";
+			}
+			
+			if(action.equals("PersonMonths.hourRecap")) {
+				
+				renderArgs.put("dropDown", "dropDown1");
+				return "PersonMonths.hourRecap";
+			}
+		}
+		
+		if( action.startsWith("Vacations.")) {
+			
+			if(action.equals("Vacations.show")) {
+				
+				renderArgs.put("dropDown", "dropDown1");
+				return "Vacations.show";
+			}
+		}
+		
+		if( action.startsWith("Persons.")) {
+			
+			if(action.equals("Persons.changePassword")) {
+				
+				renderArgs.put("dropDown", "dropDown1");
+				return "Persons.changePassword";
+			}
+		}
+		
+		if(action.startsWith("Absences.")) {
+			
+			if(action.equals("Absences.absences")) {
+				
+				renderArgs.put("dropDown", "dropDown1");
+				return "Absences.absences";
+			}
+		}
+		
+		if(action.startsWith("YearlyAbsences.")) {
+			
+			if(action.equals("YearlyAbsences.absencesPerPerson")) {
+				
+				renderArgs.put("dropDown", "dropDown1");
+				return "YearlyAbsences.absencesPerPerson";
+			}
+		}
+		
+		
+		
+		return session.get("actionSelected");
 	}
 		
 }

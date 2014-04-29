@@ -30,6 +30,13 @@ body {
 	padding-bottom: 90px;
 }
 
+.my-navbar-form select{
+	border-radius: 20px;
+	padding: 5px;
+	margin-top: 4px;
+	
+}
+
 footer {
   height: 70px;				
   background-color: black;
@@ -105,7 +112,6 @@ footer p {
 	border-color: darkgrey;
 }
 
-
 /* CSS utilità */
 
 .center {
@@ -118,6 +124,31 @@ footer p {
 
 .modal-dialog-center {
     margin-top: 15%;
+}
+
+.table-form, .table-form td {
+	border: none !important;
+}
+
+.table-form td.lab {
+	text-align: right;
+	padding-right: 30px;
+}
+
+.table-form input[type=radio] {
+	margin-right: 10px;
+}
+
+.table-form label {
+	padding-right: 3px;
+}
+
+.table-form input.input-sm {
+	max-width: 60px;
+}
+
+.table-form input.input-md {
+	max-width: 80px;
 }
 
 /* CSS template */
@@ -207,6 +238,9 @@ table#tabellonetimbrature td.festivi {background-color: #fac08d;}
 table#tabellonetimbrature td.assenza {background-color: #ffffcf;}
 table#tabellonetimbrature td.progressivo {background-color: #ffffcf;}
 table#tabellonetimbrature td.capitalized {text-transform: capitalize;}
+
+table#tabellonetimbrature td.note {padding: 0;}
+table#tabellonetimbrature a.btn.note {padding: 0;}
 
 
 /* bordatura */

@@ -65,11 +65,17 @@
         </div>
         <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
+            #{if dropDown.equals("dropDown1") }
             <li class="dropdown active">
+            #{/if}
+            #{else}
+            <li class="dropdown">  
+            #{/else}
+            
               <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span>
           		${session.username} <b class="caret"></b></a>
               <ul class="dropdown-menu">
-                <li><a href="@{SwitchTemplate.dispatch()}">Situazione mensile</a></li>
+                <li><a href="@{Stampings.stampings(session.get("yearSelected"), session.get("monthSelected"))}">Situazione mensile</a></li>
             
             	<li><a href="@{Absences.absences(session.get("yearSelected"), session.get("monthSelected"))}">Assenze mensili</a></li>
             	<li><a href="@{YearlyAbsences.absencesPerPerson(session.get("personSelected"), session.get("yearSelected"))}">Assenze annuali</a></li>
@@ -85,14 +91,31 @@
             </li>
           </ul>
           
+          #{secure.check "viewPersonList"}
+          <ul class="nav navbar-nav">
+            #{if dropDown.equals("dropDown2") }
+            <li class="dropdown active">
+            #{/if}
+            #{else}
+            <li class="dropdown">  
+            #{/else}
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bar-chart-o"></i>
+          		Amministrazione <b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li><a href="@{Stampings.personStamping(session.get("personSelected"), session.get("yearSelected"), session.get("monthSelected"))}">Timbrature</a></li>
+              </ul>
+            </li>
+          </ul>
+          #{/secure.check}
+          
           <ul id="nav-year" class="nav navbar-nav">
        		<li class="dropdown">
           	  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="badge">${session.get("yearSelected")}</span><b class="caret"></b></a>
           	  <ul class="dropdown-menu">
-            	<li><a href="#">2012</a></li>
-            	<li><a href="#">2013</a></li>
-            	<li><a href="#">2014</a></li>
-            	<li><a href="#">2015</a></li>            
+            	<li><a href="@{SwitchTemplate.updateYear(2012)}">2012</a></li>
+            	<li><a href="@{SwitchTemplate.updateYear(2013)}">2013</a></li>
+            	<li><a href="@{SwitchTemplate.updateYear(2014)}">2014</a></li>
+            	<li><a href="@{SwitchTemplate.updateYear(2015)}">2015</a></li>            
           	  </ul>
         	</li>
       	  </ul>
@@ -101,19 +124,53 @@
         	<li class="dropdown">
           	  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="badge">${templateUtility.monthName(session.get("monthSelected"))}</span><b class="caret"></b></a>
           	  <ul class="dropdown-menu">
-            	<li><a href="#">Gennaio</a></li>
-            	<li><a href="#">Febbraio</a></li>
-            	<li><a href="#">Marzo</a></li>
-            	<li><a href="#">Aprile</a></li>            
+            	<li><a href="@{SwitchTemplate.updateMonth(1)}">Gennaio</a></li>
+            	<li><a href="@{SwitchTemplate.updateMonth(2)}">Febbraio</a></li>
+            	<li><a href="@{SwitchTemplate.updateMonth(3)}">Marzo</a></li>
+            	<li><a href="@{SwitchTemplate.updateMonth(4)}">Aprile</a></li>            
           	  </ul>
         	</li>
       	  </ul>
+      	  
+      	  #{secure.check "viewPersonList"}
+      	  	#{form @SwitchTemplate.updatePerson(), class: 'navbar-form navbar-left my-navbar-form', onChange:'javascript:this.form.submit()' }
+      	  	<div class="form-group">
+      	  	<!-- Lista persone -->
+          	  #{select 'personId', value:session.get("personSelected"), class:'form-control', id:'person', onChange:'javascript:this.form.submit()'}
+		  		#{list items:navPersons, as:'person'}
+		    		#{option person.id}${person.surname + ' ' + person.name}#{/option}
+	  			#{/list}
+		  	  #{/select}
+		  	</div>
+  			
+      		#{/form}
+      	  #{/secure.check}
+      	  
+      	  
+      	  
+      	  
+      	  
+      	  
+      	  
+      	  
+      	  
+      	  
+      	  
+      	  
+      	  
+      	  
+      	  
+      	  
+      	  
+      	  
       	  
       	  #{if session.contains("sudo.username")}
       	  <ul class="nav navbar-nav navbar-right">
       	    <li><a href="@{Administrators.restoreUser()}"><span class="glyphicon glyphicon-log-out"></span> Torna chi eri</a></li>
           </ul>
   		  #{/if}
+  		  
+  		  
   		  
   		  #{else}
     	    #{if session.username}
