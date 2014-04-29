@@ -30,6 +30,8 @@ import play.data.validation.*;
 import play.libs.Codec;
 import play.mvc.Controller;
 
+import validators.StringIsTime;
+
 /**
  * @author daniele
  *
@@ -234,8 +236,8 @@ public class Wizard extends Controller {
      */
     public static void setGenConf(
     		@Required String initUseStart,
-    		@Required String lunchPauseStart, 
-    		@Required String lunchPauseStop,
+    		@Required @CheckWith (StringIsTime.class) String lunchPauseStart, 
+    		@Required @CheckWith (StringIsTime.class) String lunchPauseStop,
     		@Required boolean webStampingAllowed
     		){
     	
@@ -278,7 +280,7 @@ public class Wizard extends Controller {
     		@Required String maxRecoveryDaysOneThree,
     		@Required String monthExpireRecoveryDaysFourNine,
     		@Required String maxRecoveryDaysFourNine,
-    		@Required String hourMaxToCalculateWorkTime
+    		@Required @Range(min = 0,max = 23)String hourMaxToCalculateWorkTime
     		){
     	
     	if (validation.hasErrors()){
@@ -298,9 +300,7 @@ public class Wizard extends Controller {
     		properties.setProperty("max_recovery_days_13",maxRecoveryDaysOneThree);
     		properties.setProperty("month_expire_recovery_days_49",monthExpireRecoveryDaysFourNine);
     		properties.setProperty("max_recovery_days_49",maxRecoveryDaysFourNine);
-    		
-    		List<String> hmtcwk = Splitter.on(":").trimResults().splitToList(hourMaxToCalculateWorkTime);
-    		properties.setProperty("hour_max_to_calculate_worktime",hmtcwk.get(0)); 
+    		properties.setProperty("hour_max_to_calculate_worktime",hourMaxToCalculateWorkTime); 
     		    		
     		steps.get(5).complete();
     		Cache.safeSet(STEPS_KEY, steps, "10mn");
