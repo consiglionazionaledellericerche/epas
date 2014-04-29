@@ -7,20 +7,29 @@
 
 
 #{form @Wizard.setOffice()}
-<div>
-	<p>Inserire il nome Dell'istituto</p>
-	<input placeholder="Nome istituto" type="text" name="institute" value="${institute}" />
-	<p class="fError">#{error 'institute' /}</p>
-</div>
+
+#{field 'institute'}
+    <div class="control-group #{if field.error}error#{/if}">         
+            <label  class="control-label" for="${field.id}">Inserire il nome Dell'istituto</label>
+     <div class="controls">
+            <input placeholder="Nome istituto" id="${field.id}" type="text" name="${field.name}" value="${institute}">
+            <span class="help-block">${field.error}</span>
+      </div>
+   </div>
+#{/field}
+
+#{field 'code'}
+    <div class="control-group #{if field.error}error#{/if}">         
+            <label  class="control-label" for="${field.id}">Inserire il codice Sede</label>
+     <div class="controls">
+            <input placeholder="Codice Sede" id="${field.id}" type="text" name="${field.name}" value="${siteCode}">
+            <span class="help-block">${field.error}</span>
+      </div>
+   </div>
+#{/field}
 
 <div>
-	<p>Inserire il codice Sede</p>
-	<input placeholder="Codice Sede" type="text" name="code" value="${siteCode}" />
-	<p class="fError">#{error 'code' /}</p>
-</div>
-
-<div>
-	<input class="btn btn-default" type="submit"/>
+	<input class="btn btn-default" type="submit">
 </div>
 
 #{/form}

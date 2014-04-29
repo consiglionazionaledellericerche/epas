@@ -6,24 +6,37 @@
 }%
 
 
-#{form @Wizard.setAdmin()}
-<div>
-<p>Inserire un nome utente</p>
-	<input placeholder="Username" type="text" name="user" id="user" value="${user}" />
-	<p class="fError">#{error 'user' /}</p>
-</div>
+#{form @Wizard.setAdmin(), class:'form-horizontal'}
 
-<div>
-	<p>Inserire la password</p>
-	<input placeholder="Password" type="password" name="password" id="password" value="${password}" />
-	<p class="fError">#{error 'password' /}</p>
-</div>
+#{field 'user'}
+    <div class="control-group #{if field.error}error#{/if}">         
+            <label  class="control-label" for="${field.id}">Inserire un nome utente</label>
+     <div class="controls">
+            <input placeholder="Username" id="${field.id}" type="text" name="${field.name}" value="${user}">
+            <span class="help-block">${field.error}</span>
+      </div>
+   </div>
+#{/field}
 
-<div>
-	<p>Reinserire la password</p>
-	<input placeholder="Retype Password" type="password" name="passwordRetype" id="password_retype" value="${password}" />
-	<p class="fError">#{error 'passwordRetype' /}</p>
-</div>
+#{field 'password'}
+    <div class="control-group #{if field.error}error#{/if}">         
+            <label  class="control-label" for="${field.id}">Inserire la password</label>
+     <div class="controls">
+            <input placeholder="Password" id="${field.id}" type="password" name="${field.name}" value="${password}">
+            <span class="help-block">${field.error}</span>
+      </div>
+   </div>
+#{/field}
+
+#{field 'passwordRetype'}
+    <div class="control-group #{if field.error}error#{/if}">         
+            <label  class="control-label" for="${field.id}">Reinserire la password</label>
+     <div class="controls">
+            <input placeholder="Retype Password" id="${field.id}" type="password" name="${field.name}" value="${password}" />
+            <span class="help-block">${field.error}</span>
+      </div>
+   </div>
+#{/field}
 
 <div>
 	<input class="btn btn-default" type="submit"/>

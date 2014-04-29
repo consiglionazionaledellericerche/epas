@@ -81,6 +81,10 @@ public class Wizard extends Controller {
     	
     	if (steps == null) {
     		steps = createSteps();
+    		Cache.safeAdd(STEPS_KEY, steps,"10mn");
+       	}
+    	
+    	if(properties == null){
     		try{
     			properties = new Properties();
     			properties.load(new FileInputStream("conf/properties.conf"));	
@@ -88,10 +92,8 @@ public class Wizard extends Controller {
     		catch(IOException f){
     			Logger.error("Impossibile caricare il file properties.conf per la procedura di Wizard");
     		}
-    	
-    		Cache.safeAdd(STEPS_KEY, steps,"10mn");
     		Cache.safeAdd(PROPERTIES_KEY, properties,"10mn");
-       	}
+    	}
     	
     	if(step>0 && step<=steps.size()){
     		
@@ -110,8 +112,8 @@ public class Wizard extends Controller {
         	}
     	}
     	
-    	else{
-    		step=0;
+    	else {
+    		step = 0;
     	}
     	
     	WizardStep currentStep = steps.get(step);
@@ -125,6 +127,7 @@ public class Wizard extends Controller {
     		flash.error(e.getMessage());    		
     	}
     	}
+
     	render("@" + currentStep.template, steps,currentStep, percent, properties);
     }
 
