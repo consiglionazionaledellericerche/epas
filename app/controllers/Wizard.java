@@ -3,6 +3,8 @@ package controllers;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 
@@ -82,6 +84,7 @@ public class Wizard extends Controller {
     			properties.load(new FileInputStream("conf/properties.conf"));	
     		}
     		catch(IOException f){
+    			Logger.error("Impossibile caricare il file properties.conf per la procedura di Wizard");
     		}
     	
     		Cache.safeAdd(STEPS_KEY, steps,"10mn");
@@ -256,9 +259,9 @@ public class Wizard extends Controller {
     		properties.setProperty("meal_time_start_minute",pauseStart.get(1));
     		properties.setProperty("meal_time_end_hour",pauseStop.get(0));
     		properties.setProperty("meal_time_end_minute",pauseStop.get(1));
-    		String ok = "NO";
-    		if(webStampingAllowed){ok ="SI";}
-    		properties.setProperty("web_stamping_allowed",ok);
+    		String allowed = "NO";
+    		if(webStampingAllowed){allowed ="SI";}
+    		properties.setProperty("web_stamping_allowed",allowed);
 
     		steps.get(4).complete();
     		Cache.safeSet(STEPS_KEY, steps, "10mn");
@@ -314,7 +317,7 @@ public class Wizard extends Controller {
 			properties.load(new FileInputStream("conf/properties.conf"));	
 		}
 		catch(IOException f){
-			Logger.info("Creato il file properties.conf per la procedura di Wizard");	
+			Logger.error("Impossibile caricare il file properties.conf per la procedura di Wizard");	
 		}
 		// setAdmin
 		User admin = new User();
@@ -345,6 +348,7 @@ public class Wizard extends Controller {
 					fieldIsPresent = true;
 					cg.fieldValue = properties.getProperty(field);
 					cg.save();
+					break;
 				}
 			}
 			if(!fieldIsPresent){
@@ -356,8 +360,7 @@ public class Wizard extends Controller {
 				
 			}
 		}	
-		
-		
+				
 		List<String> cyf = ConfigurationFields.getConfYearFields();
 		
 		DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/yyyy");
@@ -365,44 +368,48 @@ public class Wizard extends Controller {
 				(properties.getProperty("init_use_program"),dtf).getYear();
 		
 		List<ConfYear> confYear = ConfYear.find(
-				"Select cy from ConfYear cy where cy.office = ? and cy.year = ?", 
-				office,startYear).fetch();
+				"Select cy from ConfYear cy where cy.office = ? and cy.year = ? or cy.year = ? order by cy.field asc", 
+				office,startYear,startYear - 1).fetch();
 		
 		for(String field : cyf){
-			boolean fieldIsPresent = false;
+			boolean thisYearPresent = false;
+			boolean prevYearPresent = false;
 			for(ConfYear cy : confYear){
-				if((cy.field.equals(field)) && (cy.year == startYear)){
-					fieldIsPresent = true;
-					cy.fieldValue = properties.getProperty(field);
+				if(cy.field.equals(field)){
 					
-					ConfYear ncpy = new ConfYear();
-					ncpy.year = cy.year -1;
-					ncpy.office = cy.office;
-					ncpy.field = cy.field;
-					ncpy.fieldValue = cy.fieldValue;
+					if(cy.year.compareTo(startYear) == 0 ){	
+						thisYearPresent = true;
+					}
+					else{ 
+						prevYearPresent = true;
+						}
 					
+					cy.fieldValue = properties.getProperty(field);					
 					cy.save();
-					ncpy.save();
+					
+				if (thisYearPresent && prevYearPresent){
+					break;	
+					} 
 				}
-			
 			}
 			
-			if(!fieldIsPresent){
+			if(!thisYearPresent){
 				ConfYear ncy = new ConfYear();
 				ncy.year = startYear;
 				ncy.office = office;
 				ncy.field = field;
 				ncy.fieldValue = properties.getProperty(field);
-				
-				ConfYear ncpy = new ConfYear();
-				ncpy.year = ncy.year -1;
-				ncpy.office = ncy.office;
-				ncpy.field = ncy.field;
-				ncpy.fieldValue = ncy.fieldValue;
-				
 				ncy.save();
-				ncpy.save();
 			}
+			if(!prevYearPresent){
+				ConfYear ncy = new ConfYear();
+				ncy.year = startYear - 1;
+				ncy.office = office;
+				ncy.field = field;
+				ncy.fieldValue = properties.getProperty(field);
+				ncy.save();
+			}
+			
 		}
 
 		Application.index();
