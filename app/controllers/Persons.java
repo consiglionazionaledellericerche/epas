@@ -38,8 +38,10 @@ import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
+import com.google.common.hash.Hashing;
 
 import dao.PersonDao;
 
@@ -769,17 +771,33 @@ public class Persons extends Controller {
 	}
 	
 	@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void savePassword(@MinLength(5) @Required String nuovaPassword, @MinLength(5) @Required String confermaPassword){
+	public static void savePassword(@MinLength(5) @Required String vecchiaPassword, 
+			@MinLength(5) @Required String nuovaPassword, @MinLength(5) @Required String confermaPassword){
 		
-		User user = Security.getUser();
-		notFoundIfNull(user);
+		User user = User.find("SELECT u FROM User u where username = ? and password = ?", 
+				Security.getUser().username, Hashing.md5().hashString(vecchiaPassword,  Charsets.UTF_8).toString()).first();
+		if(user == null) {
+			flash.error("Nessuna corrispondenza trovata fra utente e vecchia password inserita.");
+			Persons.changePassword();
+		}
+		
 		if(validation.hasErrors() || !nuovaPassword.equals(confermaPassword)) {
-			flash.error("Entrambi i campi devono essere valorizzati e con valore uguale. "
+			flash.error("Tutti i campi devono essere valorizzati. "
 					+ "La passord deve essere almeno lunga 5 caratteri. Operazione annullata.");
 			Persons.changePassword();
 		}
+		
+		notFoundIfNull(user);
+		
+		
+				
+		
+		
+		
+		
 
 		Codec codec = new Codec();
+		
 		user.password = codec.hexMD5(nuovaPassword);
 		user.save();
 		flash.success(Messages.get("passwordSuccessfullyChanged"));

@@ -82,7 +82,7 @@
             	<li><a href="@{Vacations.show(session.get("personSelected"), session.get("yearSelected"))}">Ferie</a></li>
             	<li><a href="@{Competences.competences(session.get("personSelected"), session.get("yearSelected"), session.get("monthSelected"))}">Competenze</a></li>
             	<li><a href="@{PersonMonths.hourRecap(session.get("personSelected"), session.get("yearSelected"))}">Riepilogo orario</a></li>
-            	<li><a href="@{PersonMonths.trainingHours(session.get("personSelected"), session.get("yearSelected"), session.get("monthSelected"))}">Ore di formazione</a></li>
+            	<li><a href="@{PersonMonths.trainingHours(session.get("yearSelected"))}">Ore di formazione</a></li>
             	<li class="divider"></li>
             	<li><a href="#">Stampa cartellino presenze</a></li>
             	<li class="divider"></li>
@@ -112,7 +112,6 @@
        		<li class="dropdown">
           	  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="badge">${session.get("yearSelected")}</span><b class="caret"></b></a>
           	  <ul class="dropdown-menu">
-            	<li><a href="@{SwitchTemplate.updateYear(2012)}">2012</a></li>
             	<li><a href="@{SwitchTemplate.updateYear(2013)}">2013</a></li>
             	<li><a href="@{SwitchTemplate.updateYear(2014)}">2014</a></li>
             	<li><a href="@{SwitchTemplate.updateYear(2015)}">2015</a></li>            
@@ -127,7 +126,15 @@
             	<li><a href="@{SwitchTemplate.updateMonth(1)}">Gennaio</a></li>
             	<li><a href="@{SwitchTemplate.updateMonth(2)}">Febbraio</a></li>
             	<li><a href="@{SwitchTemplate.updateMonth(3)}">Marzo</a></li>
-            	<li><a href="@{SwitchTemplate.updateMonth(4)}">Aprile</a></li>            
+            	<li><a href="@{SwitchTemplate.updateMonth(4)}">Aprile</a></li>  
+            	<li><a href="@{SwitchTemplate.updateMonth(5)}">Maggio</a></li>  
+            	<li><a href="@{SwitchTemplate.updateMonth(6)}">Giugno</a></li>  
+            	<li><a href="@{SwitchTemplate.updateMonth(7)}">Luglio</a></li>  
+            	<li><a href="@{SwitchTemplate.updateMonth(8)}">Agosto</a></li>  
+            	<li><a href="@{SwitchTemplate.updateMonth(9)}">Settembre</a></li>  
+            	<li><a href="@{SwitchTemplate.updateMonth(10)}">Ottobre</a></li> 
+            	<li><a href="@{SwitchTemplate.updateMonth(11)}">Novembre</a></li>  
+            	<li><a href="@{SwitchTemplate.updateMonth(12)}">Dicembre</a></li>               
           	  </ul>
         	</li>
       	  </ul>
