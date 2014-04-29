@@ -3,16 +3,18 @@
 
 #{set 'moreStyles'}
 <style type="text/css">
-
-.btn-group{
-	margin-top: 20px;
-	margin-bottom: 70px;
+h2{
+padding: 2px;
+border-radius:40px;
+margin: 5% 20% 8% 20%; 
 }
 #page-content{
 text-align: center;
 margin:	auto 20%;
 }
-
+form{
+margin: auto 30%;
+}
 #progressBar{
 position: absolute;
 bottom: 60px;
@@ -22,7 +24,6 @@ width: 60%;
  #{get 'moreStyles' /}
 #{/set}
 
-<h1>${currentStep.name}</h1>
 
 <div class="btn-group">
  #{list items:steps, as:'step'}
@@ -33,6 +34,8 @@ width: 60%;
 			#{/else}" href="@{wizard.wizard(step.index)}">${step.name}</a>
  #{/list}
 </div>
+
+<h2 class="btn-info">${currentStep.name}</h2>
 
 #{doLayout/}
 

@@ -3,7 +3,9 @@
 #{set 'moreStyles'}
 <style>
 legend{
-	color: green;
+	width: 30%;
+	margin: 2% auto;
+	border-radius: 10px;
 }
 .pager{
 display: none;
@@ -14,8 +16,7 @@ position: static;
 width: 100%;
 }
 table,tr,td{
-margin: auto auto;
-margin-bottom: 40px;
+margin: auto auto 40px auto;
 border: none;
 }
 
@@ -27,25 +28,25 @@ color: blue;
 }
 </style>
 #{/set}
-		<legend>Account Amministratore</legend>
+		<legend class="btn-success">Account Amministratore</legend>
 		<table>
 			<tr><td>Nome Amministratore</td><td>${properties.getProperty('Nome Amministratore')}</td></tr>		
 			<tr><td>Password Amministratore</td><td>${properties.getProperty('Password Amministratore')}</td></tr>
 		</table>
 		
-		<legend>Istituto</legend>
+		<legend class="btn-success">Istituto</legend>
 		<table>		
 			<tr><td>Istituto</td><td>${properties.getProperty('institute_name')}</td></tr>	
 			<tr><td>Codice Sede</td><td>${properties.getProperty('seat_code')}</td></tr>	
 		</table>
 
-		<legend>Giorno Patronale</legend>
+		<legend class="btn-success">Giorno Patronale</legend>
 		<table>	
 			<tr><td>Data Patrono</td><td>${properties.getProperty('day_of_patron')}/${properties.getProperty('month_of_patron')}</td></tr>
 		</table>
 
 
-		<legend>Configurazione generale</legend>
+		<legend class="btn-success">Configurazione generale</legend>
 		<table>		
 			<tr><td>Data di inizio utilizzo Programma</td><td>${properties.getProperty('init_use_program')}</td></tr>	
 			<tr><td>Inzio pausa pranzo</td><td>${properties.getProperty('meal_time_start_hour')}:${properties.getProperty('meal_time_start_minute')}</td></tr>	
@@ -53,7 +54,7 @@ color: blue;
 			<tr><td>Permetti timbrature web</td><td>${properties.getProperty('web_stamping_allowed')}</td></tr>	
 		</table>
 		
-		<legend>Configurazione Annuale</legend>
+		<legend class="btn-success">Configurazione Annuale</legend>
 		<table>	
 			<tr><td>Data scadenza vacanze anno passato</td><td>${properties.getProperty('day_expiry_vacation_past_year')}/${properties.getProperty('month_expiry_vacation_past_year')}</td></tr>	
 			<tr><td>Mese scadenza giorni di recupero 1-3</td><td>${properties.getProperty('month_expire_recovery_days_13')}</td></tr>	

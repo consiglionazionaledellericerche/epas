@@ -13,32 +13,51 @@ webStampingAllowed = properties.getProperty("web_stamping_allowed");
 }%
 
 #{form @Wizard.setGenConf()}
-<p>Data di inizio del programma</p>
-<div class="input-append">
-  <input type="text" datepicker value="${initUseStart}" name="initUseStart"><span class="add-on"><p class="icon-calendar"></p></span>
-</div>
-<p class="fError">#{error 'initUseStart' /}</p>
+
+#{field 'initUseStart'}
+    <div class="control-group #{if field.error}error#{/if}">         
+            <label  class="control-label" for="${field.id}">Data di inizio del programma</label>
+     <div class="controls">
+     <div class="input-append">
+            <input id="${field.id}" type="text" name="${field.name}" datepicker value="${initUseStart}"><span class="add-on"><p class="icon-calendar"></p></span>
+     </div>
+            <span class="help-block">${field.error}</span>
+      </div>
+   </div>
+#{/field}
+
+#{field 'lunchPauseStart'}
+    <div class="control-group #{if field.error}error#{/if}">         
+            <label  class="control-label" for="${field.id}">Inizio pausa pranzo</label>
+     <div class="controls">
+            <input id="${field.id}" type="text" name="${field.name}" value="${lunchPauseStartHour}:${lunchPauseStartMinute}">
+            <span class="help-block">${field.error}</span>
+      </div>
+   </div>
+#{/field}
+
+#{field 'lunchPauseStop'}
+    <div class="control-group #{if field.error}error#{/if}">         
+            <label  class="control-label" for="${field.id}">Fine pausa pranzo</label>
+     <div class="controls">
+            <input id="${field.id}" type="text" name="${field.name}" value="${lunchPauseEndHour}:${lunchPauseEndMinute}">
+            <span class="help-block">${field.error}</span>
+      </div>
+   </div>
+#{/field}
+
+#{field 'webStampingAllowed'}
+    <div class="control-group #{if field.error}error#{/if}">         
+            <label  class="control-label" for="${field.id}">Permetti Timbrature Web</label>
+     <div class="controls">
+            <input id="${field.id}" type="checkbox" name="${field.name}" #{if webStampingAllowed == "SI"} checked #{/if}>
+            <span class="help-block">${field.error}</span>
+      </div>
+   </div>
+#{/field}
 
 <div>
-	<p>Inizio pausa pranzo</p>
-	<input type="text" name="lunchPauseStart" value="${lunchPauseStartHour}:${lunchPauseStartMinute}"  />
-	<p class="fError">#{error 'lunchPauseStart' /}</p>
-</div>
-
-<div>
-	<p>Fine pausa pranzo</p>
-	<input type="text" name="lunchPauseStop" value="${lunchPauseEndHour}:${lunchPauseEndMinute}" />
-	<p class="fError">#{error 'lunchPauseStop' /}</p>
-</div>
-
-<div>
-	<p>Permetti Timbrature Web</p>
-	<input type="checkbox" name="webStampingAllowed" #{if webStampingAllowed == "SI"} checked #{/if} />
-	<p class="fError">#{error 'webStampingAllowed' /}</p>
-</div>
-
-<div>
-	<input class="btn btn-default" type="submit"/>
+	<input class="btn btn-default" type="submit">
 </div>
 
 #{/form}
