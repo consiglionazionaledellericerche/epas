@@ -30,13 +30,6 @@ body {
 	padding-bottom: 90px;
 }
 
-.my-navbar-form select{
-	border-radius: 20px;
-	padding: 5px;
-	margin-top: 4px;
-	
-}
-
 footer {
   height: 70px;				
   background-color: black;
@@ -96,14 +89,27 @@ footer p {
 	display: inline-block;
 }
 
-#nav-year .badge {
-	background-color: #2d6ca2;
+#nav-year a.dropdown-toggle, #nav-month a.dropdown-toggle {
+	padding-right: 2px;
+	padding-left: 4px;
+}
+
+#nav-year .badge, #nav-month .badge {
+	background-color: white;
 	font-size: 1.1em;
 }
 
-#nav-month .badge {
-	background-color: #2d6ca2;
-	font-size: 1.1em;
+.my-navbar-form {
+	padding-left: 4px;
+	padding-right: 2px;
+}
+
+.my-navbar-form select{
+	border-radius: 20px;
+	padding: 5px;
+	padding-top: 1px;
+	padding-bottom: 1px;
+	margin-top: 9px;
 }
 
 .panel {

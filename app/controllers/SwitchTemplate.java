@@ -229,7 +229,7 @@ public class SwitchTemplate extends Controller{
 		
 		if(action.equals("PersonMonths.trainingHours")) {
 			
-			PersonMonths.trainingHours(personId, year, month);
+			PersonMonths.trainingHours(year);
 		}
 		
 		if(action.equals("PersonMonths.hourRecap")) {
