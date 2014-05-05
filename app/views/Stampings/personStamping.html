@@ -157,7 +157,7 @@
 	      #{/elseif}
 					
 		  #{if stampingTemplate.date!=null}
-		    <a data-toggle="modal" href="@{Stampings.edit(stampingTemplate.stampingId)}" data-target=".my-modal">
+		    <a data-toggle="modal" href="@{Stampings.edit(stampingTemplate.stampingId)}" data-modal=".my-modal">
 			  ${stampingTemplate.hour}
 			</a>
 		  #{/if}
@@ -178,7 +178,7 @@
 		  </td>
 	    #{/list}
 	    <td class="inserisciTimbratura default-single">
-		    <a data-toggle="modal" data-backdrop="true" href="@{Stampings.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" data-target=".my-modal">
+		    <a data-toggle="modal" data-backdrop="true" href="@{Stampings.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" data-modal=".my-modal">
 		      +++
 		    </a>
 		</td>
@@ -259,17 +259,7 @@
   </div>
   
   </div>
+#{include '_myModal.html' /}
 
 
 
-
-<div class="modal fade my-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-center">
-    
-    <div class="modal-content">
-             
-    </div><!-- /.modal-content -->
-           
-    
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->

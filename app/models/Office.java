@@ -54,6 +54,6 @@ public class Office extends Model{
     public List<ConfYear> confYear = new ArrayList<ConfYear>();
     
     @NotAudited
-    @OneToMany(mappedBy="office", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+    @OneToMany(mappedBy="office", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
     public List<UsersPermissionsOffices> userPermissionOffices = new ArrayList<UsersPermissionsOffices>();
 }

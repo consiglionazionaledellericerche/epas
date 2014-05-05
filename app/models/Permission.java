@@ -26,7 +26,7 @@ import play.db.jpa.Model;
 @Table(name="permissions")
 public class Permission extends Model{
 
-	@Unique
+//	@Unique
 	public String description;
 	
 //	@ManyToMany(mappedBy = "permissions", cascade = { CascadeType.ALL })
@@ -36,6 +36,6 @@ public class Permission extends Model{
     public List <Group> groups;
     
     @NotAudited
-    @OneToMany(mappedBy="permission", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+    @OneToMany(mappedBy="permission", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
     public List<UsersPermissionsOffices> userPermissionOffices = new ArrayList<UsersPermissionsOffices>();
 }
