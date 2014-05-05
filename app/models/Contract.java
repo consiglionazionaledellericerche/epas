@@ -2,33 +2,26 @@ package models;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import lombok.Data;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
 import models.rendering.VacationsRecap;
 
 import org.hibernate.annotations.Type;
-import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
@@ -340,7 +333,10 @@ public class Contract extends Model {
 		
 		
 		//Controllo se ho sufficienti dati
-		LocalDate initUse = ConfGeneral.getConfGeneral().initUseProgram;
+		
+	//	LocalDate initUse = ConfGeneral.getConfGeneral().initUseProgram;
+		String dateInitUse = ConfGeneral.getFieldValue("init_use_program", person.office);
+		LocalDate initUse = new LocalDate(dateInitUse);
 		if(this.sourceDate!=null)
 			initUse = sourceDate.plusDays(1);
 		DateInterval personDatabaseInterval = new DateInterval(initUse, new LocalDate());
@@ -469,19 +465,12 @@ public class Contract extends Model {
 		List<Contract> contractInMonth = this.person.getMonthContracts(month, year);
 		if(contractInMonth.size()==0)
 			return false;
-		if(contractInMonth.get(contractInMonth.size()-1).id == this.id)
+		if(contractInMonth.get(contractInMonth.size()-1).id.equals(this.id))
 			return true;
 		else
 			return false;
 	}
-	
-	/*
-	public List<ContractWorkingTimeType> getOrderedContractWorkingTimeType()
-	{
-		List<ContractWorkingTimeType> cwttList = ContractWorkingTimeType.find("", this).fetch();
-	}
-	*/
-	
+		
 }
 	
 	

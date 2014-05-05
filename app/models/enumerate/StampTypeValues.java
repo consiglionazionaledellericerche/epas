@@ -38,7 +38,7 @@ public enum StampTypeValues {
 	
 	StampTypeValues(Long id) {
 		this.id = id;
-	};
+	}
 	
 	public Long getId() {
 		return id;

@@ -2,27 +2,18 @@ package models.rendering;
 
 import it.cnr.iit.epas.DateUtility;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.Vector;
 
-import org.joda.time.LocalDate;
-
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
-import com.google.common.collect.ImmutableTable.Builder;
-import com.google.common.collect.TreeBasedTable;
-
-import play.Logger;
-import play.data.validation.Valid;
 import models.Absence;
 import models.AbsenceType;
 import models.Person;
-import models.PersonDay;
+
+import org.joda.time.LocalDate;
+
+import com.google.common.collect.Table;
+import com.google.common.collect.TreeBasedTable;
 
 /**
  * 
@@ -109,7 +100,7 @@ public class YearlyAbsencesRecap {
 			int absDay =  abs.personDay.date.getDayOfMonth();
 		
 			String value = table.get(absMonth, absDay);
-			if(value=="")
+			if(value.equals(""))
 			{
 				table.put(absMonth, absDay, abs.absenceType.code);
 			}

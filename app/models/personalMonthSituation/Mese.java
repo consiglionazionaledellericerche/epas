@@ -3,17 +3,15 @@ package models.personalMonthSituation;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.joda.time.LocalDate;
-
-import play.Logger;
 import models.Absence;
 import models.Competence;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
+
+import org.joda.time.LocalDate;
 
 public class Mese {
 
@@ -218,6 +216,9 @@ public class Mese {
 		{
 
 			//riposi compensativi
+			if(this.mese == new LocalDate().getMonthOfYear() && this.anno == new LocalDate().getYear()){
+				validData = new DateInterval(validData.getBegin(), validData.getEnd().plusMonths(1).dayOfMonth().withMaximumValue());
+			}
 			List<Absence> riposiCompensativi = Absence.find("Select abs from Absence abs, AbsenceType abt, PersonDay pd where abs.personDay = pd and abs.absenceType = abt and abt.code = ? and pd.person = ? "
 					+ "and pd.date between ? and ?", "91", this.person, validData.getBegin(), validData.getEnd()).fetch();
 			this.riposiCompensativiMinuti = 0;
@@ -352,35 +353,6 @@ public class Mese {
 		return 0;
 	}
 	
-	public String getName()
-	{
-		if(mese==1)
-			return "Gennaio";
-		if(mese==2)
-			return "Febbraio";
-		if(mese==3)
-			return "Marzo";
-		if(mese==4)
-			return "Aprile";
-		if(mese==5)
-			return "Maggio";
-		if(mese==6)
-			return "Giugno";
-		if(mese==7)
-			return "Luglio";
-		if(mese==8)
-			return "Agosto";
-		if(mese==9)
-			return "Settembre";
-		if(mese==10)
-			return "Ottobre";
-		if(mese==11)
-			return "Novembre";
-		if(mese==12)
-			return "Dicembre";
-		else
-			return null;
-	}
 }
 
 

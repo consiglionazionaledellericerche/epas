@@ -3,21 +3,17 @@ package controllers;
 import java.util.List;
 import java.util.Set;
 
-import com.google.common.base.Charsets;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.hash.Hashing;
-
-import play.Logger;
-import play.cache.Cache;
-import play.db.jpa.JPA;
-import play.db.jpa.GenericModel.JPAQuery;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import models.Office;
 import models.Permission;
 import models.Person;
 import models.RemoteOffice;
 import models.User;
+import play.Logger;
+import play.cache.Cache;
+
+import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.hash.Hashing;
 
 public class Security extends Secure.Security {
 	
@@ -73,6 +69,19 @@ public class Security extends Secure.Security {
 		if(username == null || username.isEmpty()){
 			Logger.debug("Lo username per la check del profilo %s è null o vuoto", profile);
 			return false;
+		}
+		
+		//Se personId è una persona reale (1 admin, 0 tutti) eseguo il controllo
+		Long personId = Long.valueOf(session.get("personSelected"));
+		if(params.get("personId") != null)
+			personId = Long.valueOf(params.get("personId"));
+		if( personId > 1 ) {
+			
+			if( !Security.canUserSeePerson(Security.getUser(), personId) ) {
+				
+				flash.error("Non si può accedere alla funzionalità per la persona con id %d", personId);
+				Application.indexAdmin();
+			}
 		}
 			
 		Logger.trace("checking permission %s for user %s", profile, username);
@@ -172,11 +181,33 @@ public class Security extends Secure.Security {
 		
 		if(person.office.id == user.person.office.id)
 			return true;
+		
 		for(RemoteOffice remote : user.person.office.remoteOffices){
 			if(remote.id == person.office.id)
 				return true;
 		}
 		return false;
 	}
+	
+	/**
+	 * Ritorna la persona identificata da personId se l'user loggato è effettivamente tale persona.
+	 * @param personId
+	 * @return
+	 */
+	public static Person getSelfPerson(Long personId) {
+		if(personId == null)
+			return null;
+		User user = getUser();
+		if(user == null)
+			return null;
+		if(user.person == null)
+			return null;
+		if(user.person.id.longValue() != personId.longValue())
+			return null;
+		return user.person;
+				
+	}
+	
+	
 
 }

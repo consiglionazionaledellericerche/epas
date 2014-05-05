@@ -1,25 +1,26 @@
 package controllers;
 
+import it.cnr.iit.epas.ActionMenuItem;
+import it.cnr.iit.epas.DateUtility;
+
 import java.io.IOException;
 import java.sql.SQLException;
 
-import it.cnr.iit.epas.ActionMenuItem;
-import it.cnr.iit.epas.PersonUtility;
-import models.Person;
 import models.User;
 
 import org.joda.time.LocalDate;
 
-import play.Logger;
-import play.cache.Cache;
 import play.mvc.Controller;
+import play.mvc.With;
 
+@With(RequestInit.class)
 public class SwitchTemplate extends Controller{
 
 	public static final String USERNAME_SESSION_KEY = "username";
 
-	public static void dispatch() throws InstantiationException, IllegalAccessException, IOException, ClassNotFoundException, SQLException {
+	public static void dispatch() throws ClassNotFoundException, SQLException, InstantiationException, IllegalAccessException {
 		
+		/*
 		User userLogged = Security.getUser();
 		if(userLogged==null)
 		{
@@ -47,6 +48,7 @@ public class SwitchTemplate extends Controller{
 		//Month from routes/form (otherwise now)
 		Integer month = params.get("month") != null  ? Integer.valueOf(params.get("month")) : now.getMonthOfYear();
 		session.put("monthSelected", month);
+		session.put("monthSelectedName", DateUtility.getName(month));
 				
 		//Day from routes/form (otherwise now)
 		Integer day = params.get("day") != null ? Integer.valueOf(params.get("day")) : now.getDayOfMonth();
@@ -114,23 +116,23 @@ public class SwitchTemplate extends Controller{
 			break;
 
 		case totalMonthlyAbsences:
-			YearlyAbsences.showGeneralMonthlyAbsences(year, month);
+			YearlyAbsences.showGeneralMonthlyAbsences(year, month, null);
 			break;
 
 		case manageAbsenceCode:
-			Absences.manageAbsenceCode();
+			Absences.manageAbsenceCode(null, null);
 			break;
 
 		case vacationsAdmin:
-			VacationsAdmin.manageVacationCode();		
+			VacationsAdmin.list(year, null, null);		
 			break;
 
 		case competencesAdmin:
-			Competences.showCompetences(year, month);
+			Competences.showCompetences(year, month, null, null, null);
 			break;
 
 		case changePassword:
-			Persons.changePassword(personId);
+			Persons.changePassword();
 			break;
 
 		case manageWorkingTime:
@@ -138,11 +140,11 @@ public class SwitchTemplate extends Controller{
 			break;
 
 		case confParameters:
-			Configurations.showConfGeneral();
+			Configurations.showConfGeneral(Security.getUser().person.office.id);
 			break;
 
 		case personList:
-			Persons.list();
+			Persons.list(null);
 			break;
 
 		case administrator:
@@ -201,8 +203,122 @@ public class SwitchTemplate extends Controller{
 			break;
 
 		}
+		
+		renderText("ok");
+		*/
 
 	}
+	
+	private static void executeAction(String action) {
+		
+		Integer year = Integer.parseInt(session.get("yearSelected"));
+		Integer month = Integer.parseInt(session.get("monthSelected"));
+		Long personId = Long.parseLong(session.get("personSelected"));
+		
+		session.put("actionSelected", action);
+		
+		if(action.equals("Stampings.stampings")) {
+			
+			Stampings.stampings(year, month);
+		}
+		
+		if(action.equals("Stampings.personStamping")) {
+			
+			Stampings.personStamping(personId, year, month);
+		}
+		
+		if(action.equals("PersonMonths.trainingHours")) {
+			
+			PersonMonths.trainingHours(year);
+		}
+		
+		if(action.equals("PersonMonths.hourRecap")) {
+			
+			PersonMonths.hourRecap(personId, year);
+		}
+		
+		if(action.equals("Vacations.show")) {
+			
+			Vacations.show(personId, year);
+		}
+		
+		if(action.equals("Persons.changePassword")) {
+			
+			Persons.changePassword();
+		}
+		
+		if(action.equals("Absences.absences")) {
+			
+			Absences.absences(year, month);
+		}
+		
+		if(action.equals("YearlyAbsences.absencesPerPerson")) {
+			YearlyAbsences.absencesPerPerson(personId, year);
+		}
+	}
+	
+	
+	public static void updateMonth(Integer month) throws Throwable {
+		
+		String action = session.get("actionSelected");
+		if( action==null ) {
+			
+			flash.error("La sessione è scaduta. Effettuare nuovamente login.");
+			Secure.login();
+		}
+		
+		if(month == null || month < 1 || month > 12) {
+			
+			Application.index();	
+		}
+		
+		session.put("monthSelected", month);
+		
+		executeAction(action);
+		
+	}
+	
+	public static void updateYear(Integer year) throws Throwable {
+		
+		String action = session.get("actionSelected");
+		if( action==null ) {
+			
+			flash.error("La sessione è scaduta. Effettuare nuovamente login.");
+			Secure.login();
+		}
+		
+		if(year == null ) {	/* TODO check bound year */
+			
+			Application.index();	
+		}
+		
+		session.put("yearSelected", year);
+		
+		executeAction(action);
+		
+	}
+	
+	public static void updatePerson(Long personId) throws Throwable {
+	
+		String action = session.get("actionSelected");
+		if( action==null ) {
+			
+			flash.error("La sessione è scaduta. Effettuare nuovamente login.");
+			Secure.login();
+		}
+		
+		if(personId == null ) {	/* TODO check bound year */
+			
+			Application.index();	
+		}
+		
+		session.put("personSelected", personId);
+		
+		executeAction(action);
+		
+	}
+	
+	
 }
 
 

@@ -5,11 +5,12 @@ import java.util.List;
 import org.joda.time.LocalDate;
 
 import models.Office;
+import models.Person;
 import models.RemoteOffice;
 import play.mvc.Controller;
 import play.mvc.With;
 
-@With( {Secure.class, NavigationMenu.class})
+@With( {Secure.class, RequestInit.class})
 public class Offices extends Controller {
 
 	@Check(Security.INSERT_AND_UPDATE_OFFICES)
@@ -107,6 +108,34 @@ public class Offices extends Controller {
 		Offices.showOffices();
 	}
 	
+	@Check(Security.INSERT_AND_UPDATE_OFFICES)
+	public static void disableRemoteOffice(Long remoteOfficeId){
+	
+		RemoteOffice remote = RemoteOffice.findById(remoteOfficeId);
+		List<Office> offices = Office.find("Select o from Office o where o.joiningDate is null").fetch();
+		render(remote, offices);
+	}
+	
+	@Check(Security.INSERT_AND_UPDATE_OFFICES)
+	public static void disable(){
+		
+		String remoteOfficeId = params.get("remoteOfficeId");
+		String office = params.get("office");
+		Long id = new Long(remoteOfficeId);
+		RemoteOffice remote = RemoteOffice.findById(id);
+
+		List<Person> personRemoteOfficeAddicted = Person.find("Select p from Person p where p.office = ?", remote).fetch();
+		Office o = Office.find("Select o from Office o where o.name = ?", office).first();
+		for(Person p : personRemoteOfficeAddicted){
+			p.office = o;
+			p.save();
+		}
+		remote.office = null;
+		//remote.joiningDate = null;
+		remote.save();
+		flash.success("Sede distaccata disabilitata con successo. E persone associate alla sede %s", o.name);
+		Offices.showOffices();
+	}
 	
 	
 	private static boolean isNullOrEmpty(String parameter)

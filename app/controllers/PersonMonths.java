@@ -1,7 +1,5 @@
 package controllers;
 
-import it.cnr.iit.epas.DateUtility;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,89 +7,78 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
-import org.hibernate.envers.reader.FirstLevelCache;
-import org.joda.time.DateTimeConstants;
-import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
-
-import models.Absence;
-import models.Competence;
-import models.CompetenceCode;
 import models.Contract;
-import models.InitializationTime;
 import models.Person;
-import models.PersonDay;
 import models.PersonMonthRecap;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
-import models.personalMonthSituation.Mese;
+
+import org.joda.time.LocalDate;
+
+import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
-import play.Logger;
-import play.Play;
 
-@With( {Secure.class, NavigationMenu.class} )
+@With( {Secure.class, RequestInit.class} )
 public class PersonMonths extends Controller{
-
+	
 	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void hourRecap(Long personId,int year){
 
+		Person person = Security.getSelfPerson(personId);
+		if( person == null ) {
+			flash.error("Accesso negato.");
+			renderTemplate("Application/indexAdmin.html");
+		}
+		
 		if(year > new LocalDate().getYear()){
 			flash.error("Richiesto riepilogo orario di un anno futuro. Impossibile soddisfare la richiesta");
 			renderTemplate("Application/indexAdmin.html");
 		}
-		Person person = null;
-		if(personId != null)
-			person = Person.findById(personId);
-		else
-			person = Security.getUser().person;
-
+		
 		Contract contract = person.getCurrentContract();
 		CalcoloSituazioneAnnualePersona csap = new CalcoloSituazioneAnnualePersona(contract, year, null);
 		render(csap, person, year);	
 	}
 
 	@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void trainingHours(Long personId, int year, int month){
-		Person person = Person.findById(personId);
-		Logger.debug("Ore di formazione per %s %s dell'anno %d", person.name, person.surname, year);
-		Map<Integer, List<PersonMonthRecap>> pmMap = new HashMap<Integer, List<PersonMonthRecap>>();
-		List<PersonMonthRecap> pmList = PersonMonthRecap.find("Select pm from PersonMonthRecap pm where pm.year = ? and pm.person = ?", year, person).fetch();
-		Logger.debug("Lista di ore di formazione: %s", pmList);
-
-		List<PersonMonthRecap> list = null;
-		for(int i=1; i< 13; i++){
-			PersonMonthRecap pm = new PersonMonthRecap(person, year, i);
-			List<PersonMonthRecap> listina = new ArrayList<PersonMonthRecap>();
-			pm.trainingHours = 0;
-			pm.hoursApproved = false;
-
-			listina.add(pm);
-			pmMap.put(pm.month, listina);
+	public static void trainingHours(int year){
+		
+		if( Security.getUser().person == null ) {
+			flash.error("Accesso negato.");
+			renderTemplate("Application/indexAdmin.html");
 		}
-		for(PersonMonthRecap pm : pmList){
-			if(!pmMap.containsKey(pm.month)){
-				list = new ArrayList<PersonMonthRecap>();
-				list.add(pm);
-				pmMap.put(pm.month, list);
-			}
-			else{
-				list = pmMap.get(pm.month);
-				list.add(pm);
-				pmMap.put(pm.month, list);
-			}
+		
+		Person person = Security.getUser().person;
+		
+		List<Integer> mesi = new ArrayList<Integer>();
+		for(int i = 1; i < 13; i++){
+			mesi.add(i);
 		}
+		List<PersonMonthRecap> pmList = PersonMonthRecap.find("Select pm from PersonMonthRecap pm where pm.year = ? and pm.person = ?",
+				year, person).fetch();
+		
+		LocalDate today = new LocalDate();
+		
 
-		render(person, year, pmMap, month);
+		render(person, year, mesi, pmList, today);
 
 	}
 
 
 	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void insertTrainingHours(Long personId, int month, int year){
+		
+		/*
+		 		Person person = Security.getUser().person;
+				int max = LocalDate.now().dayOfMonth().withMaximumValue().getDayOfMonth();
+				int actualMonth = LocalDate.now().getMonthOfYear();
+				render(person, actualMonth, year, max);
+		 */
+		Person person = Person.findById(personId);
 		LocalDate date = new LocalDate(year, month, 1);
 		int max = date.dayOfMonth().withMaximumValue().getDayOfMonth();
 
-		Person person = Person.findById(personId);
+		
 		render(person, month, year, max);
 	}
 
@@ -122,11 +109,11 @@ public class PersonMonths extends Controller{
 		LocalDate endDate = new LocalDate(year, month, end);
 		if(begin > end){
 			flash.error("La data di inizio del periodo di formazione non può essere successiva a quella di fine");
-			PersonMonths.trainingHours(personId, beginDate.getYear(), beginDate.getMonthOfYear());
+			PersonMonths.trainingHours(beginDate.getYear());
 		}
-		if(value == null || value < 0 || value > 24*beginDate.dayOfMonth().withMaximumValue().getDayOfMonth()){
-			flash.error("Non sono valide le ore di formazione negative o testuali.");
-			PersonMonths.trainingHours(personId, beginDate.getYear(), beginDate.getMonthOfYear());
+		if(value == null || value < 0 || value > 24*(endDate.getDayOfMonth()-beginDate.getDayOfMonth()+1)){
+			flash.error("Non sono valide le ore di formazione negative, testuali o che superino la quantità massima di ore nell'intervallo temporale inserito.");
+			PersonMonths.trainingHours(beginDate.getYear());
 		}
 
 		List<PersonMonthRecap> pmList = PersonMonthRecap.find("Select pm from PersonMonthRecap pm where pm.person = ? and pm.year = ? " +
@@ -134,9 +121,20 @@ public class PersonMonths extends Controller{
 				person, year, month, beginDate, endDate).fetch();
 		if(pmList != null && pmList.size() > 0){
 			flash.error("Esiste un periodo di ore di formazione che contiene uno o entrambi i giorni specificati.");
-			PersonMonths.trainingHours(personId, beginDate.getYear(), beginDate.getMonthOfYear());
+			PersonMonths.trainingHours(beginDate.getYear());
 		}
 		
+		/* Si cerca di inserire delle ore di formazione per il mese precedente: se le ore di formazione sono già state inviate insieme
+		 * agli attestati, il sistema non permette l'inserimento.
+		 * In caso contrario sì
+		 */
+		List<PersonMonthRecap> list = PersonMonthRecap.find("Select pm from PersonMonthRecap pm where pm.month = ? and pm.year = ? and pm.hoursApproved = ?",
+				month, year, true).fetch();
+		if(list.size() > 0){
+			flash.error("Impossibile inserire ore di formazione per il mese precedente poichè gli attestati per quel mese sono già stati inviati");
+			trainingHours(year);
+		}
+			
 		PersonMonthRecap pm = new PersonMonthRecap(person, year, month);
 		pm.hoursApproved = false;
 		pm.trainingHours = value;
@@ -144,10 +142,8 @@ public class PersonMonths extends Controller{
 		pm.toDate = endDate;
 		pm.save();
 		flash.success("Salvate %d ore di formazione ", value);
-		if(month < new LocalDate().getMonthOfYear())
-			PersonMonths.trainingHours(personId, year, month+1);
-		else			
-			PersonMonths.trainingHours(personId, year, month);
+		
+		PersonMonths.trainingHours(year);
 	}
 	
 	@Check(Security.VIEW_PERSONAL_SITUATION)
@@ -162,11 +158,11 @@ public class PersonMonths extends Controller{
 		LocalDate endDate = new LocalDate(year, month, end);
 		if(begin > end){
 			flash.error("La data di inizio del periodo di formazione non può essere successiva a quella di fine");
-			PersonMonths.trainingHours(personId, beginDate.getYear(), beginDate.getMonthOfYear());
+			PersonMonths.trainingHours(beginDate.getYear());
 		}
 		if(value == null || value < 0 || value > 24*beginDate.dayOfMonth().withMaximumValue().getDayOfMonth()){
 			flash.error("Non sono valide le ore di formazione negative o testuali.");
-			PersonMonths.trainingHours(personId, beginDate.getYear(), beginDate.getMonthOfYear());
+			PersonMonths.trainingHours(beginDate.getYear());
 		}
 		PersonMonthRecap pm = PersonMonthRecap.findById(personMonthId);
 		if(pm != null){
@@ -178,33 +174,34 @@ public class PersonMonths extends Controller{
 		}
 		else{
 			flash.error("Non ci sono ore di formazione per %s %s in questo mese da modificare!!!", person.name, person.surname);
-			PersonMonths.trainingHours(personId, beginDate.getYear(), beginDate.getMonthOfYear());
+			PersonMonths.trainingHours(beginDate.getYear());
 		}
 		flash.success("Aggiornate ore di formazione per %s %s", person.name, person.surname);
-		PersonMonths.trainingHours(personId, beginDate.getYear(), beginDate.getMonthOfYear());
+		PersonMonths.trainingHours(beginDate.getYear());
 	}
 	
 	@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void deleteTrainingHours(Long personMonthRecapId, int year, int month){
+	public static void deleteTrainingHours(Long personId, Long personMonthRecapId){
 		PersonMonthRecap pm = PersonMonthRecap.findById(personMonthRecapId);
 		if(pm == null)
 		{
 			flash.error("Ore di formazioni inesistenti. Operazione annullata.");
-			Stampings.stampings(year, month);
+			PersonMonths.trainingHours(LocalDate.now().getYear());
+			
 		}
-		render(pm, year, month);
+		render(pm);
 	}
 	
 	@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void deleteTrainingHoursConfirmed(Long personMonthRecapId, int year, int month){
+	public static void deleteTrainingHoursConfirmed(Long personId, Long personMonthRecapId){
 		PersonMonthRecap pm = PersonMonthRecap.findById(personMonthRecapId);
 		if(pm == null)
 		{
 			flash.error("Ore di formazioni inesistenti. Operazione annullata.");
-			Stampings.stampings(year, month);
+			Stampings.stampings(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
 		}
 		pm.delete();
 		flash.error("Ore di formazione eliminate con successo.");
-		Stampings.stampings(year, month);
+		PersonMonths.trainingHours(pm.year);
 	}
 }

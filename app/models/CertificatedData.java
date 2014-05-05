@@ -56,7 +56,7 @@ public class CertificatedData extends Model {
 	@Column(name="is_ok")
 	public boolean isOk = false;
 	
-	public CertificatedData(Person person, String cognomeNome, String matricola, int year, int month) {
+	public CertificatedData(Person person, String cognomeNome, String matricola, Integer year, Integer month) {
 		this.year = year;
 		this.month = month;
 		this.person = person;

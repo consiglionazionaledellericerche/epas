@@ -7,73 +7,44 @@ package models;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
-import it.cnr.iit.epas.JsonStampingBinder;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
-import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinColumns;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import lombok.ToString;
 import models.Stamping.WayType;
-import models.exports.ReperibilityPeriods;
 import models.exports.StampingFromClient;
 import models.personalMonthSituation.Mese;
-import models.rendering.VacationsRecap;
-import net.spy.memcached.FailureMode;
 
-import org.apache.commons.lang.time.DateUtils;
-import org.eclipse.jdt.internal.core.BecomeWorkingCopyOperation;
-import org.hibernate.envers.AuditReader;
-import org.hibernate.envers.AuditReaderFactory;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
-import org.hibernate.envers.query.AuditEntity;
-import org.hibernate.envers.query.AuditQuery;
-import org.hibernate.envers.query.AuditQueryCreator;
-import org.hibernate.envers.query.criteria.AuditConjunction;
-import org.hibernate.envers.query.criteria.AuditCriterion;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+
+import play.Logger;
+import play.data.validation.Email;
+import play.data.validation.Required;
+import play.db.jpa.Model;
+import play.mvc.With;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 
-import controllers.Check;
 import controllers.Secure;
 import controllers.Security;
-import play.Logger;
-import play.cache.Cache;
-import play.data.binding.As;
-import play.data.validation.Email;
-import play.data.validation.Required;
-import play.db.jpa.JPA;
-import play.db.jpa.Model;
-import play.mvc.Controller;
-import play.mvc.Http.Request;
-import play.mvc.Scope.Params;
-import play.mvc.Scope.Session;
-import play.mvc.With;
 
 /**
  * @author cristian
@@ -143,12 +114,11 @@ public class Person extends Model {
 	@OneToOne(mappedBy="person", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE}, orphanRemoval=true, optional=true)
 	public ContactData contactData;
 	
-	
 	@OneToOne(mappedBy="person", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
 	public PersonHourForOvertime personHourForOvertime;
 
 	@NotAudited
-	@OneToMany(mappedBy="person", fetch=FetchType.EAGER, cascade = {CascadeType.REMOVE})
+	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<Contract> contracts = new ArrayList<Contract>(); 
 
 	@NotAudited
@@ -225,7 +195,6 @@ public class Person extends Model {
 	@NotAudited
 	@OneToOne(mappedBy="person", fetch=FetchType.EAGER, cascade = {CascadeType.REMOVE}, orphanRemoval=true)
 	public Location location;
-
 
 	@OneToOne(mappedBy="person", fetch=FetchType.EAGER,  cascade = {CascadeType.REMOVE} )
 	public PersonReperibility reperibility;
@@ -331,6 +300,7 @@ public class Person extends Model {
 			if(DateUtility.isDateIntoInterval(date, c.getContractDateInterval()))
 				return c;
 		}
+		
 		return null;
 
 	}
@@ -344,6 +314,17 @@ public class Person extends Model {
 	 */
 	public Contract getCurrentContract(){
 		return getContract(LocalDate.now());
+	}
+	
+	public Contract getCurrentContractEager()
+	{
+		List<Contract> contracts = Contract.find("select c from Contract c where c.person = ?", this).fetch();
+		for(Contract c : contracts)
+		{
+			if(DateUtility.isDateIntoInterval(LocalDate.now(), c.getContractDateInterval()))
+				return c;
+		}
+		return null;
 	}
 	
 	
@@ -495,13 +476,14 @@ public class Person extends Model {
 	public List<Office> getOfficeAllowed(){
 		
 		List<Office> officeList = new ArrayList<Office>();
+		officeList.add(this.office);
 		if(!this.office.remoteOffices.isEmpty()){
 			
 			for(Office office : this.office.remoteOffices){
 				officeList.add(office);
 			}
 		}
-		officeList.add(this.office);
+		
 		return officeList;
 	}
 	
@@ -515,7 +497,7 @@ public class Person extends Model {
 		List<Office> officeAllowed = administrator.getOfficeAllowed();
 		for(Office office : officeAllowed)
 		{
-			if(office.id == this.office.id)
+			if(office.id.equals(this.office.id))
 				return true;
 		}
 		return false;
@@ -612,6 +594,10 @@ public class Person extends Model {
 				+ "c.endContract is not null and c.beginContract <= ? and c.endContract >= ? "
 				+ ") "
 				
+				
+				
+				
+							
 				//persona allowed
 				+"and p.office in :officeList "
 				
@@ -725,7 +711,7 @@ public class Person extends Model {
 	 */
 	public boolean isHoliday(LocalDate date)
 	{
-		if(DateUtility.isGeneralHoliday(date))
+		if(DateUtility.isGeneralHoliday(this.office, date))
 			return true;
 		
 		Contract contract = this.getContract(date);
@@ -893,22 +879,6 @@ public class Person extends Model {
 		}
 	}
 	
-	/**
-	 * 
-	 * @param code
-	 * @param month
-	 * @param year
-	 * @return il totale per quel mese e quell'anno di ore/giorni relativi a quel codice competenza
-	 */
-	public int totalFromCompetenceCode(CompetenceCode code, int month, int year){
-		int totale = 0;
-		List<Competence> compList = Competence.find("Select comp from Competence comp where comp.competenceCode = ? " +
-				"and comp.month = ? and comp.year = ?", code, month, year).fetch();
-		for(Competence comp : compList){
-			totale = totale+comp.valueApproved;
-		}
-		return totale;
-	}
 	
 	/**
 	 * 
@@ -1223,6 +1193,18 @@ public class Person extends Model {
 		return null;
 	}
 	
+	/**
+	 * 
+	 * @param year
+	 * @param month
+	 * @return l'esito dell'invio attestati per la persona (null se non è ancora stato effettuato)
+	 */
+	public CertificatedData getCertificatedData(int year, int month)
+	{
+		CertificatedData cd = CertificatedData.find("Select cd from CertificatedData cd where cd.person = ? and cd.year = ? and cd.month = ?",
+				this, year, month).first();
+		return cd;
+	}
 	/**
 	 * 
 	 * @param year

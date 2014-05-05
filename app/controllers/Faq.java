@@ -1,16 +1,9 @@
 package controllers;
 
-import java.io.File;
-import java.io.IOException;
+import play.mvc.Controller;
+import play.mvc.With;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
-
-import play.Logger;
-import play.data.validation.CheckWith;
-import play.mvc.*;
-
-@With( {Secure.class, NavigationMenu.class} )
+@With( {Secure.class, RequestInit.class} )
 public class Faq extends Controller {
 
     public static void faq() {

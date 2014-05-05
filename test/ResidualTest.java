@@ -9,11 +9,9 @@ import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
 import models.rendering.VacationsRecap;
 
-import org.hibernate.mapping.Array;
 import org.joda.time.LocalDate;
 import org.junit.Test;
 
-import play.Logger;
 import play.db.jpa.JPAPlugin;
 import play.test.UnitTest;
 
@@ -29,7 +27,7 @@ public class ResidualTest extends UnitTest {
     
     	
     	//Ricalcolo tutti i personday
-     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person);
+     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
@@ -88,7 +86,7 @@ public class ResidualTest extends UnitTest {
     
     	
     	//Ricalcolo tutti i personday
-     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person);
+     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
@@ -147,7 +145,7 @@ public class ResidualTest extends UnitTest {
     
     	
     	//Ricalcolo tutti i personday
-     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person);
+     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
@@ -206,7 +204,7 @@ public class ResidualTest extends UnitTest {
     
     	
     	//Ricalcolo tutti i personday
-     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person);
+     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
@@ -265,7 +263,7 @@ public class ResidualTest extends UnitTest {
     
     	
     	//Ricalcolo tutti i personday
-     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person);
+     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
