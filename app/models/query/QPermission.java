@@ -37,7 +37,7 @@ public class QPermission extends EntityPathBase<Permission> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
-    public final ListPath<models.User, QUser> users = this.<models.User, QUser>createList("users", models.User.class, QUser.class, PathInits.DIRECT2);
+    public final ListPath<models.UsersPermissionsOffices, QUsersPermissionsOffices> userPermissionOffices = this.<models.UsersPermissionsOffices, QUsersPermissionsOffices>createList("userPermissionOffices", models.UsersPermissionsOffices.class, QUsersPermissionsOffices.class, PathInits.DIRECT2);
 
     public QPermission(String variable) {
         super(Permission.class, forVariable(variable));

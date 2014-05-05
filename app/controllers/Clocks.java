@@ -15,6 +15,7 @@ import models.StampModificationType;
 import models.StampType;
 import models.Stamping;
 import models.Stamping.WayType;
+import models.User;
 import models.enumerate.ConfigurationFields;
 import models.rendering.PersonStampingDayRecap;
 
@@ -36,33 +37,35 @@ public class Clocks extends Controller{
 	}
 	
 	
-	public static void clockLogin(Long personId, String password)
+	public static void clockLogin(Long userId, String password)
 	{
 		LocalDate today = new LocalDate();
-		if(personId==0)
+		if(userId==0)
 		{
 			flash.error("Utente non selezionato");
 			Clocks.show();
 		}
-		Person person = Person.find("SELECT p FROM Person p where id = ? and password = md5(?)",personId, password).first();
-		if(person == null)
+		
+		User user = User.find("select u from User u where id = ? and password = md5(?)", userId, password).first();
+		
+		if(user == null)
 		{
 			flash.error("Password non corretta");
 			Clocks.show();
 		}
 	
 					
-		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, today).first();
+		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", user.person, today).first();
 		if(pd == null){
-			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", person.name, person.surname);
-			pd = new PersonDay(person, today);
+			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", user.person.name, user.person.surname);
+			pd = new PersonDay(user.person, today);
 			pd.save();
 		}
 		
 		//numero di colonne da visualizzare
 		//Configuration conf = Configuration.getCurrentConfiguration();
 		//ConfGeneral conf = ConfGeneral.getConfGeneral();
-		int minInOutColumn = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));
+		int minInOutColumn = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, user.person.office));
 		//int minInOutColumn = conf.numberOfViewingCoupleColumn;
 		int numberOfInOut = Math.max(minInOutColumn,  PersonUtility.numberOfInOutInPersonDay(pd));
 		
@@ -70,7 +73,7 @@ public class Clocks extends Controller{
 		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();				
 		PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(pd,numberOfInOut);
 		
-		render(person, dayRecap, numberOfInOut);
+		render(user, dayRecap, numberOfInOut);
 	}
 	
 	

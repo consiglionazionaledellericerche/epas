@@ -900,12 +900,19 @@ public class PersonUtility {
 			JPAPlugin.startTx(false);
 			while(!actualMonth.isAfter(endMonth))
 			{
+				
 				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
 						p, actualMonth, actualMonth.dayOfMonth().withMaximumValue()).fetch();
 
 
 				for(PersonDay pd : pdList){
-					pd.populatePersonDay();
+					JPAPlugin.closeTx(false);
+					JPAPlugin.startTx(false);
+					//Logger.debug("DATA: %s", pd.date);
+					PersonDay pd1 = PersonDay.findById(pd.id);
+					pd1.populatePersonDay();
+					JPAPlugin.closeTx(false);
+					JPAPlugin.startTx(false);
 				}
 
 				actualMonth = actualMonth.plusMonths(1);

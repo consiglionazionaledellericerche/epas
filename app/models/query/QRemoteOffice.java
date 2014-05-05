@@ -60,6 +60,9 @@ public class QRemoteOffice extends EntityPathBase<RemoteOffice> {
     //inherited
     public final ListPath<RemoteOffice, QRemoteOffice> remoteOffices = _super.remoteOffices;
 
+    //inherited
+    public final ListPath<models.UsersPermissionsOffices, QUsersPermissionsOffices> userPermissionOffices = _super.userPermissionOffices;
+
     public QRemoteOffice(String variable) {
         this(RemoteOffice.class, forVariable(variable), INITS);
     }
