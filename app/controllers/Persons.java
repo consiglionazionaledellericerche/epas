@@ -243,107 +243,106 @@ public class Persons extends Controller {
 
 
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
-		public static void update(){
-			Long personId = params.get("personId", Long.class);		
-			
-			Person person = Person.findById(personId);
-			ContactData contactData = person.contactData;
-			Location location = person.location;
-			
-			InitializationTime initTime = InitializationTime.find("Select init from InitializationTime init where init.person = ?", person).first();
-			
-			if(!params.get("name").equals(person.name))
-				person.name = params.get("name");
-			
-			if(!params.get("surname").equals(person.surname))
-				person.surname = params.get("surname");
-			
-			if(!params.get("number").equals(person.number))
-				person.number = params.get("number", Integer.class);
-			
-			if(person.badgeNumber == null || !person.badgeNumber.equals(params.get("badgeNumber")))
-				person.badgeNumber = params.get("badgeNumber");
-			
-			Logger.debug("Sede: %s", params.get("person.office"));
-			if(person.office == null || !person.office.id.equals(new Long(params.get("person.office")))){
-				person.office = Office.findById(Long.parseLong((params.get("person.office"))));
-			}
-			
-			
-			if(contactData != null){
-				if(contactData.email == null || !contactData.email.equals(params.get("email"))){
-					contactData.email = params.get("email");
-				}
-				if(contactData.telephone == null || !contactData.telephone.equals(params.get("telephone"))){
-					contactData.telephone = params.get("telephone");
-				}
-				contactData.save();
-			}
-			else{
-				contactData = new ContactData();
-				if(params.get("email") != null)
-					contactData.email = params.get("email");
-				if(params.get("telephone") != null)
-					contactData.telephone = params.get("telephone");
-				contactData.save();
-			}
-			
-			if(location != null){
-				if(location.department == null || !location.department.equals(params.get("department"))){
-					location.department = params.get("department");
-				}
-				if(location.headOffice == null || !location.headOffice.equals(params.get("headOffice"))){
-					location.headOffice = params.get("headOffice");
-				}
-				if(location.room == null || !location.room.equals(params.get("room"))){
-					location.room = params.get("room");
-				}
-				location.save();
-			}
-			else{
-				location = new Location();
-				if(params.get("department") != null)
-					location.department = params.get("department");
-				if(params.get("headOffice") != null)
-					location.headOffice = params.get("headOffice");
-				if(params.get("room") != null)
-					location.room = params.get("room");
-				location.save();
-			}
-			
-			if(initTime != null){
-				if(initTime.residualMinutesCurrentYear == null || ! initTime.residualMinutesCurrentYear.equals(params.get("minutesCurrentYear", Integer.class)))
-					initTime.residualMinutesCurrentYear = params.get("minutesCurrentYear", Integer.class);
-				if(initTime.residualMinutesPastYear == null || ! initTime.residualMinutesPastYear.equals(params.get("minutesPastYear", Integer.class)))
-					initTime.residualMinutesPastYear = params.get("minutesPastYear", Integer.class);
-				initTime.save();
-			}
-	//		else{
-	//			initTime = new InitializationTime();
-	//			if(params.get("minutesPastYear") != null)
-	//				initTime.residualMinutesPastYear = params.get("minutesPastYear", Integer.class);
-	//			if(params.get("minutesCurrentYear") != null)
-	//				initTime.residualMinutesCurrentYear = params.get("minutesCurrentYear", Integer.class);
-	//			initTime.save();
-	//		}
-			if(person.number != null && ! person.number.equals(params.get("number", Integer.class)))
-				person.number = params.get("number", Integer.class);
-			//Logger.debug("Qualifica: %d", params.get("person.qualification", Integer.class));
-			if(person.qualification != null && person.qualification.qualification != params.get("person.qualification", Integer.class)){
-				Qualification q = Qualification.find("Select q from Qualification q where q.qualification = ?", params.get("person.qualification", Integer.class)).first();
-				person.qualification = q;
-			}
-			if(person.qualification == null){
-				Qualification q = Qualification.find("Select q from Qualification q where q.qualification = ?", params.get("person.qualification", Integer.class)).first();
-				person.qualification = q;
-			}
-			
-			person.save();
-			flash.success("Modificate informazioni per l'utente %s %s", person.name, person.surname);
-			//Application.indexAdmin();
-			Persons.list(null);	
+	public static void update(){
+		Long personId = params.get("personId", Long.class);		
+
+		Person person = Person.findById(personId);
+		ContactData contactData = person.contactData;
+		Location location = person.location;
+
+		InitializationTime initTime = InitializationTime.find("Select init from InitializationTime init where init.person = ?", person).first();
+
+		if(!params.get("name").equals(person.name))
+			person.name = params.get("name");
+
+		if(!params.get("surname").equals(person.surname))
+			person.surname = params.get("surname");
+
+		if(!params.get("number").equals(person.number))
+			person.number = params.get("number", Integer.class);
+
+		if(person.badgeNumber == null || !person.badgeNumber.equals(params.get("badgeNumber")))
+			person.badgeNumber = params.get("badgeNumber");
+
+		Logger.debug("Sede: %s", params.get("person.office"));
+		if(person.office == null || !person.office.id.equals(new Long(params.get("person.office")))){
+			person.office = Office.findById(Long.parseLong((params.get("person.office"))));
 		}
 
+
+		if(contactData != null){
+			if(contactData.email == null || !contactData.email.equals(params.get("email"))){
+				contactData.email = params.get("email");
+			}
+			if(contactData.telephone == null || !contactData.telephone.equals(params.get("telephone"))){
+				contactData.telephone = params.get("telephone");
+			}
+			contactData.save();
+		}
+		else{
+			contactData = new ContactData();
+			if(params.get("email") != null)
+				contactData.email = params.get("email");
+			if(params.get("telephone") != null)
+				contactData.telephone = params.get("telephone");
+			contactData.save();
+		}
+
+		if(location != null){
+			if(location.department == null || !location.department.equals(params.get("department"))){
+				location.department = params.get("department");
+			}
+			if(location.headOffice == null || !location.headOffice.equals(params.get("headOffice"))){
+				location.headOffice = params.get("headOffice");
+			}
+			if(location.room == null || !location.room.equals(params.get("room"))){
+				location.room = params.get("room");
+			}
+			location.save();
+		}
+		else{
+			location = new Location();
+			if(params.get("department") != null)
+				location.department = params.get("department");
+			if(params.get("headOffice") != null)
+				location.headOffice = params.get("headOffice");
+			if(params.get("room") != null)
+				location.room = params.get("room");
+			location.save();
+		}
+
+		if(initTime != null){
+			if(initTime.residualMinutesCurrentYear == null || ! initTime.residualMinutesCurrentYear.equals(params.get("minutesCurrentYear", Integer.class)))
+				initTime.residualMinutesCurrentYear = params.get("minutesCurrentYear", Integer.class);
+			if(initTime.residualMinutesPastYear == null || ! initTime.residualMinutesPastYear.equals(params.get("minutesPastYear", Integer.class)))
+				initTime.residualMinutesPastYear = params.get("minutesPastYear", Integer.class);
+			initTime.save();
+		}
+		//		else{
+		//			initTime = new InitializationTime();
+		//			if(params.get("minutesPastYear") != null)
+		//				initTime.residualMinutesPastYear = params.get("minutesPastYear", Integer.class);
+		//			if(params.get("minutesCurrentYear") != null)
+		//				initTime.residualMinutesCurrentYear = params.get("minutesCurrentYear", Integer.class);
+		//			initTime.save();
+		//		}
+		if(person.number != null && ! person.number.equals(params.get("number", Integer.class)))
+			person.number = params.get("number", Integer.class);
+		//Logger.debug("Qualifica: %d", params.get("person.qualification", Integer.class));
+		if(person.qualification != null && person.qualification.qualification != params.get("person.qualification", Integer.class)){
+			Qualification q = Qualification.find("Select q from Qualification q where q.qualification = ?", params.get("person.qualification", Integer.class)).first();
+			person.qualification = q;
+		}
+		if(person.qualification == null){
+			Qualification q = Qualification.find("Select q from Qualification q where q.qualification = ?", params.get("person.qualification", Integer.class)).first();
+			person.qualification = q;
+		}
+
+		person.save();
+		flash.success("Modificate informazioni per l'utente %s %s", person.name, person.surname);
+		//Application.indexAdmin();
+		Persons.edit(person.id);	
+	}
 
 	/**
 	 * cancella una persona dal database
@@ -352,16 +351,25 @@ public class Persons extends Controller {
 	@Check(Security.DELETE_PERSON)
 	public static void deletePerson(Long personId){
 		Person person = Person.findById(personId);
-		//person.contactData.delete();
-		//person.location.delete();
-		//person.personShift.delete();
-		//person.reperibility.delete();
-		//person.save();
-		person.delete();
-		flash.success("La persona %s %s e' stata terminata.", person.surname, person.name);
-		
-		render("@Stampings.redirectToIndex");
+		if(person == null) {
+			
+			flash.error("La persona selezionata non esiste. Operazione annullata");
+			Persons.list(null);
+		}
+		render(person);
+	}
 	
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	public static void deletePersonConfirmed(Long personId){
+		Person person = Person.findById(personId);
+		if(person == null) {
+			
+			flash.error("La persona selezionata non esiste. Operazione annullata");
+			Persons.list(null);
+		}
+		person.delete();
+		flash.error("La persona è stata eliminata.");
+		Persons.list(null);
 	}
 
 

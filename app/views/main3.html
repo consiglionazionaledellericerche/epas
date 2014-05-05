@@ -104,6 +104,7 @@
               <ul class="dropdown-menu">
                 <li><a href="@{Stampings.personStamping(session.get("personSelected"), session.get("yearSelected"), session.get("monthSelected"))}">Timbrature</a></li>
                 <li><a href="@{Persons.list()}">Lista Persone</a></li>
+                <li><a href="@{Competences.showCompetences(session.get("yearSelected"), session.get("monthSelected"))}">Competenze</a></li>
               </ul>
             </li>
           </ul>
@@ -171,7 +172,7 @@
       	  
       	  
       	  
-      	  
+      	 
       	  
       	  
       	  
@@ -194,6 +195,30 @@
     	    #{/if}
   		  
   		  #{/else}
+  		  
+  		  
+  		  
+  		  
+  		  
+  		  
+  		  
+  		  
+  		  
+  		  <!-- flash error icon 
+          <div class=container>
+            #{if flash.error}
+              <ul class="nav navbar-nav navbar-right">
+      	        <li><a href="@{Administrators.restoreUser()}"><i class="fa fa-info-circle fa-lg" style="color: red;"></i></a></li>
+              </ul>
+            #{/if}
+            #{if flash.success}
+              <ul class="nav navbar-nav navbar-right">
+      	        <li><a href="@{Administrators.restoreUser()}"><i class="fa fa-info-circle fa-lg" style="color: green;"></i></a></li>
+              </ul>
+            #{/if}
+          </div>
+          -->
+      
       
         </div>
         
@@ -213,29 +238,30 @@
     <!-- Begin page content -->
     <div class="container-fluid" id="page_content">
        
-       <!-- flash error -->
-       <div class=container>
-       #{if flash.error}
-         <div class="panel panel-danger">
-           <div class="panel-heading flash-panel">  
-             <p class="fError"><strong>${flash.error}</strong></p>
-           </div>
-         </div>
-         #{/if}
-         #{if flash.success}
-           <div class="panel panel-success">
-             <div class="panel-heading flash-panel">  
-               <p class="fSuccess"><strong>${flash.success}</strong></p>
-             </div>
-           </div>
-        #{/if}
-      </div>
-      
       <!-- do layout -->
       #{doLayout /}
-      
-      
+
     </div>
+    
+    <!-- Altri componenti html -->
+    #{if flash.error}
+      <div id="flash-error" class="popover bottom">
+        <div class="arrow"></div>
+        <h3 class="popover-title"><strong>Notifica</strong></h3>
+        <div class="popover-content">
+          <strong>${flash.error}</strong>
+        </div>
+      </div>
+    #{/if}
+    #{if flash.success}
+      <div id="flash-success" class="popover bottom">
+        <div class="arrow"></div>
+        <h3 class="popover-title"><strong>Notifica</strong></h3>
+        <div class="popover-content">
+          <strong>${flash.success}</strong>
+        </div>
+      </div>
+    #{/if}  
       
    </div>
 

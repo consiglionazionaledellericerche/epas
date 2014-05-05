@@ -253,7 +253,13 @@ public class SwitchTemplate extends Controller{
 		}
 		
 		if(action.equals("YearlyAbsences.absencesPerPerson")) {
+			
 			YearlyAbsences.absencesPerPerson(personId, year);
+		}
+		
+		if(action.equals("Competences.showCompetences")) {
+			
+			Competences.showCompetences(year, month, null,  null,  null);
 		}
 		
 	}

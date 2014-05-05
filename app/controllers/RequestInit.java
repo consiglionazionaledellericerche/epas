@@ -371,6 +371,16 @@ public class RequestInit extends Controller {
 			}
 		}
 		
+		if(action.startsWith("Competences.")) {
+			
+			if(action.equals("Competences.showCompetences")) {
+				
+				renderArgs.put("noPerson", true);
+				renderArgs.put("dropDown", "dropDown2");
+				return "Competences.showCompetences";
+			}
+		}
+		
 		
 		
 		return session.get("actionSelected");
