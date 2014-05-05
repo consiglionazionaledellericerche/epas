@@ -72,6 +72,42 @@ footer p {
 	padding-top: 7px;
 }
 
+#flash-error, #flash-success {
+ 	position: fixed;
+  	top: 50px;
+  	right: 100px;
+  	display: block;
+  	left: auto;	
+}
+
+#flash-error {
+	background-color: lightpink;
+}
+
+#flash-error h3 {
+	background-color: red;
+	color: white;
+	text-align: center;
+}
+
+#flash-success div.arrow {
+	border-bottom-color: red;
+}
+
+#flash-success {
+	background-color: lightgreen;
+}
+
+#flash-success h3 {
+	background-color: green;
+	color: white;
+	text-align: center;
+}
+
+#flash-success div.arrow {
+	border-bottom-color: green;
+}
+
 #banner {
 	position: absolute;
 	width: 100%;
@@ -128,9 +164,11 @@ footer p {
 	text-align: center;
 }
 
+/*
 .modal-dialog-center {
     margin-top: 15%;
 }
+*/
 
 .table-form, .table-form td {
 	border: none !important;
