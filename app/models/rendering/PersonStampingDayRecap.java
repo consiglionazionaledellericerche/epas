@@ -6,22 +6,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import models.Absence;
+import models.ConfGeneral;
 import models.Person;
 import models.PersonDay;
-import models.PersonDay.PairStamping;
-import models.ConfGeneral;
 import models.StampModificationType;
 import models.StampModificationTypeValue;
-import models.StampProfile;
 import models.StampType;
 import models.Stamping;
 import models.WorkingTimeType;
-import models.Stamping.WayType;
 import models.WorkingTimeTypeDay;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-import org.xhtmlrenderer.css.style.CalculatedStyle;
 
 import play.Logger;
 
@@ -80,9 +76,10 @@ public class PersonStampingDayRecap {
 		this.person = pd.person;
 		setDate(pd.date); 
 		this.absences = pd.absences;
-		
+
 		List<Stamping> stampingsForTemplate = pd.getStampingsForTemplate(numberOfInOut, today);
 
+		
 		this.setStampingTemplate( stampingsForTemplate, pd );
 		if(pd.person.getWorkingTimeType(pd.date) != null){		
 			this.wtt = pd.person.getWorkingTimeType(pd.date);
@@ -96,9 +93,14 @@ public class PersonStampingDayRecap {
 		
 		
 		
-		ConfGeneral conf = ConfGeneral.getConfGeneral();
-		this.setTimeMealFrom(conf.mealTimeStartHour, conf.mealTimeStartMinute);
-		this.setTimeMealTo(conf.mealTimeEndHour, conf.mealTimeEndMinute);
+		//ConfGeneral conf = ConfGeneral.getConfGeneral();
+		Integer mealTimeStartHour = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_start_hour", person.office));
+		Integer mealTimeStartMinute = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_start_minute", person.office));
+		Integer mealTimeEndHour = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_end_hour", person.office));
+		Integer mealTimeEndMinute = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_end_minute", person.office));
+		
+		this.setTimeMealFrom(mealTimeStartHour, mealTimeStartMinute);
+		this.setTimeMealTo(mealTimeEndHour, mealTimeEndMinute);
 		
 		
 		//----------------------------------------------- fixed:  worktime, difference, progressive, p---------------------------------

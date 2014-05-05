@@ -3,14 +3,10 @@
  */
 package models.exports;
 
-import org.joda.time.LocalDate;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import models.Person;
 import models.ShiftType;
+
+import org.joda.time.LocalDate;
 
 /**
  * Classe di supporto per l'importazione delle informazioni relative

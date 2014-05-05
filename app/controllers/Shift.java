@@ -1,7 +1,7 @@
 package controllers;
 
 import static play.modules.pdf.PDF.renderPDF;
-import it.cnr.iit.epas.DateUtility;
+import helpers.BadRequest;
 import it.cnr.iit.epas.JsonShiftPeriodsBinder;
 
 import java.util.ArrayList;
@@ -10,15 +10,25 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import models.Absence;
+import models.Person;
+import models.PersonShift;
+import models.PersonShiftDay;
+import models.ShiftCancelled;
+import models.ShiftType;
+import models.exports.AbsenceShiftPeriod;
+import models.exports.ShiftPeriod;
+import models.exports.ShiftPeriods;
 
-import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 import org.jsoup.HttpStatusException;
+
+import play.Logger;
+import play.data.binding.As;
+import play.db.jpa.JPA;
+import play.mvc.Controller;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
@@ -195,7 +205,7 @@ public class Shift extends Controller{
 	 * @author arianna
 	 * Update shifts read from the sistorg portal calendar
 	 */
-	public static void update(String type, Integer year, Integer month, @As(binder=JsonShiftPeriodsBinder.class) ShiftPeriods body) throws HttpStatusException {
+	public static void update(String type, Integer year, Integer month, @As(binder=JsonShiftPeriodsBinder.class) ShiftPeriods body) {
 		Logger.debug("update: Received shiftPeriods %s", body);
 		
 		if (body == null) {
@@ -299,7 +309,7 @@ public class Shift extends Controller{
 					daysOfMonthForCancelled.remove(day.getDayOfMonth());
 				}
 			
-				day = (LocalDate)day.plusDays(1);
+				day = day.plusDays(1);
 			}
 		}
 		

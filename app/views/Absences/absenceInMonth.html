@@ -1,9 +1,14 @@
-<h4>Date in cui è stata effettuata l'assenza ${absenceCode}</h4>
+<div class="modal-header">
+  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+  <h4>Date in cui è stata effettuata l'assenza ${absenceCode}</h4>
+</div>
+
+<div class="modal-body">
 
 <ul>
-%{for(date in dateAbsences){
-}%<li>${date}</li>
-%{
-}
-}%
+  #{list items:dateAbsences, as:'date'}
+    <li>${date}</li>
+  #{/list}
 </ul>
+
+</div>

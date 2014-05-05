@@ -1,4 +1,4 @@
-#{extends 'main_admin_no_menu.html' /}
+#{extends 'main_with_navbar.html' /}
 #{set titolo: 'Gestione parametri di configurazione' /}
 
 <ul class="nav nav-tabs">
@@ -6,33 +6,49 @@
   <li class="active"><a href="@{Configurations.showConfYear()}#">Parametri Annuali</a></li>
 </ul>
 
+<div class="container" style="padding-left:200px;">
+#{form action:@Configurations.showConfYear(), class:'form', 
+    method:'GET', autocomplete:'off',
+    'data-reload':'#results'}
+    
+    <select style='display:inline;' name="officeid" class="input-medium span2">
+      #{list items:offices, as:'office'}
+        <option value="${office.id}" >${office.name}</option>
+      #{/list}
+	</select>
+    
+
+#{/form}
+</div>
+
+<section id="results">
 <div class="container">
 
 <h3>${lastConfYear.year}</h3>
 <table class="table table-bordered table-striped span7">
   <tr>
     <td class="span5">Giorno massimo utilizzo ferie dell'anno precedente</td>
-    <td class="span2">${lastConfYear.dayExpiryVacationPastYear} / ${lastConfYear.monthExpiryVacationPastYear}</td>
+    <td class="span2">${lastYearDayExpiryVacationPastYear} / ${lastYearMonthExpiryVacationPastYear}</td>
   </tr>						
   <tr>
     <td class="span5">Limite utilizzo residui dell'anno precedente per i livelli da 1 a 3</td>
-    <td class="span2">${lastConfYear.getIntelligibleMonthValue(lastConfYear.monthExpireRecoveryDaysOneThree)}</td>
+    <td class="span2">${lastConfYear.getIntelligibleMonthValue(lastYearMonthExpireRecoveryDaysOneThree)}</td>
   </tr>						
   <tr>
     <td class="span5">Limite utilizzo residui dell'anno precedente per i livelli da 4 a 9</td>
-    <td class="span2">${lastConfYear.getIntelligibleMonthValue(lastConfYear.monthExpireRecoveryDaysFourNine)}</td>
+    <td class="span2">${lastConfYear.getIntelligibleMonthValue(lastYearMonthExpireRecoveryDaysFourNine)}</td>
   </tr>						
   <tr>	
     <td class="span5">Numero massimo di giorni di recupero in un anno per i livelli da 1 a 3</td>
-    <td class="span2">${lastConfYear.getIntelligibleNumberValue(lastConfYear.maxRecoveryDaysOneThree)}</td>
+    <td class="span2">${lastConfYear.getIntelligibleNumberValue(lastYearMaxRecoveryDaysOneThree)}</td>
   </tr>						
   <tr>
     <td class="span5">Numero massimo di giorni di recupero in un anno per i livelli da 4 a 9</td>
-    <td class="span2">${lastConfYear.getIntelligibleNumberValue(lastConfYear.maxRecoveryDaysFourNine)}</td>
+    <td class="span2">${lastConfYear.getIntelligibleNumberValue(lastYearMaxRecoveryDaysFourNine)}</td>
   </tr>	
   <tr>
     <td class="span5">Limite orario massimo per timbratura notturna</td>
-    <td class="span2">${lastConfYear.hourMaxToCalculateWorkTime}:00</td>
+    <td class="span2">${lastYearHourMaxToCalculateWorkTime}:00</td>
   </tr>					
 
 </table>
@@ -48,16 +64,16 @@
        <a href="#" 
           id="select1" 
           data-type="select" 
-          data-pk="dayExpiryVacationPastYear" 
-          data-value="[${confYear.dayExpiryVacationPastYear}]"
+          data-pk="${dayExpiryVacationPastYear.id}" 
+          data-value="[${dayExpiryVacationPastYear.fieldValue}]"
           data-source="[{ 1 : '1'}, { 2 : '2'}, { 3 : '3'}, { 4 : '4'}, { 5 : '5'}, { 6 : '6'}, { 7 : '7'}, { 8 : '8'}, { 9 : '9'}, { 10 : '10'}, { 11 : '11'}, { 12 : '12'}, { 13 : '13'}, { 14 : '14'}, { 15 : '15'}, { 16 : '16'}, { 17 : '17'}, { 18 : '18'}, { 19 : '19'}, { 20 : '20'}, { 21 : '21'}, { 22 : '22'}, { 23 : '23'}, { 24 : '24'}, { 25 : '25'}, { 26 : '26'}, { 27 : '27'}, { 28 : '28'}, { 29 : '29'}, { 30 : '30'}, { 31 : '31'}]" 
           data-url="@{saveConfYear()}" 
           class="editable editable-click"></a>
         <a href="#" 
           id="select2" 
           data-type="select" 
-          data-pk="monthExpiryVacationPastYear" 
-          data-value="[${confYear.monthExpiryVacationPastYear}]"
+          data-pk="${monthExpiryVacationPastYear.id}" 
+          data-value="[${monthExpiryVacationPastYear.fieldValue}]"
           data-source="[{ 1 : 'gennaio'}, { 2 : 'febbraio'}, { 3 : 'marzo'}, { 4 : 'aprile'}, { 5 : 'maggio'}, { 6 : 'giugno'}, { 7 : 'luglio'}, { 8 : 'agosto'}, { 9 : 'settembre'}, { 10 : 'ottobre'}, { 11 : 'novembre'}, { 12 : 'dicembre'}]" 
           data-url="@{saveConfYear()}" 
           class="editable editable-click"></a>
@@ -69,8 +85,8 @@
       <a href="#" 
           id="select3" 
           data-type="select" 
-          data-pk="monthExpireRecoveryDaysOneThree" 
-          data-value="[${confYear.monthExpireRecoveryDaysOneThree}]"
+          data-pk="${monthExpireRecoveryDaysOneThree.id}" 
+          data-value="[${monthExpireRecoveryDaysOneThree.fieldValue}]"
           data-source="[{ 1 : 'entro gennaio'}, { 2 : 'entro febbraio'}, { 3 : 'entro marzo'}, { 4 : 'entro aprile'}, { 5 : 'entro maggio'}, { 6 : 'entro giugno'}, { 7 : 'entro luglio'}, { 8 : 'entro agosto'}, { 9 : 'entro settembre'}, { 10 : 'entro ottobre'}, { 11 : 'entro novembre'}, { 12 : 'entro dicembre'}, { 0 : 'nessun limite'}]" 
           data-url="@{saveConfYear()}" 
           class="editable editable-click"></a>
@@ -82,8 +98,8 @@
       <a href="#" 
           id="select4" 
           data-type="select" 
-          data-pk="monthExpireRecoveryDaysFourNine" 
-          data-value="[${confYear.monthExpireRecoveryDaysFourNine}]"
+          data-pk="${monthExpireRecoveryDaysFourNine.id}" 
+          data-value="[${monthExpireRecoveryDaysFourNine.fieldValue}]"
           data-source="[{ 1 : 'entro gennaio'}, { 2 : 'entro febbraio'}, { 3 : 'entro marzo'}, { 4 : 'entro aprile'}, { 5 : 'entro maggio'}, { 6 : 'entro giugno'}, { 7 : 'entro luglio'}, { 8 : 'entro agosto'}, { 9 : 'entro settembre'}, { 10 : 'entro ottobre'}, { 11 : 'entro novembre'}, { 12 : 'entro dicembre'}, { 0 : 'nessun limite'}]" 
           data-url="@{saveConfYear()}" 
           class="editable editable-click"></a>
@@ -95,8 +111,8 @@
       <a href="#" 
           id="select5" 
           data-type="select" 
-          data-pk="maxRecoveryDaysOneThree" 
-          data-value="[${confYear.maxRecoveryDaysOneThree}]"
+          data-pk="${maxRecoveryDaysOneThree.id}" 
+          data-value="[${maxRecoveryDaysOneThree.fieldValue}]"
           data-source="[{ 1 : '1'}, { 2 : '2'}, { 3 : '3'}, { 4 : '4'}, { 5 : '5'}, { 6 : '6'}, { 7 : '7'}, { 8 : '8'}, { 9 : '9'}, { 10 : '10'}, { 11 : '11'}, { 12 : '12'}, { 13 : '13'}, { 14 : '14'}, { 15 : '15'}, { 16 : '16'}, { 17 : '17'}, { 18 : '18'}, { 19 : '19'}, { 20 : '20'}, { 21 : '21'}, { 22 : '22'}, { 23 : '23'}, { 24 : '24'}, { 25 : '25'}, { 26 : '26'}, { 27 : '27'}, { 28 : '28'}, { 29 : '29'}, { 30 : '30'}, { 0: 'nessun limite'}]" 
           data-url="@{saveConfYear()}" 
           class="editable editable-click"></a>
@@ -110,8 +126,8 @@
       <a href="#" 
           id="select6" 
           data-type="select" 
-          data-pk="maxRecoveryDaysFourNine" 
-          data-value="[${confYear.maxRecoveryDaysFourNine}]"
+          data-pk="${maxRecoveryDaysFourNine.id}" 
+          data-value="[${maxRecoveryDaysFourNine.fieldValue}]"
           data-source="[{ 1 : '1'}, { 2 : '2'}, { 3 : '3'}, { 4 : '4'}, { 5 : '5'}, { 6 : '6'}, { 7 : '7'}, { 8 : '8'}, { 9 : '9'}, { 10 : '10'}, { 11 : '11'}, { 12 : '12'}, { 13 : '13'}, { 14 : '14'}, { 15 : '15'}, { 16 : '16'}, { 17 : '17'}, { 18 : '18'}, { 19 : '19'}, { 20 : '20'}, { 21 : '21'}, { 22 : '22'}, { 23 : '23'}, { 24 : '24'}, { 25 : '25'}, { 26 : '26'}, { 27 : '27'}, { 28 : '28'}, { 29 : '29'}, { 30 : '30'}, { 0: 'nessun limite'}]" 
           data-url="@{saveConfYear()}" 
           class="editable editable-click"></a>
@@ -121,13 +137,13 @@
   
   <tr>
     <td class="span5">Limite orario massimo per timbratura notturna</td>
-    <td class="span2">${confYear.hourMaxToCalculateWorkTime}:00</td>
+    <td class="span2">${hourMaxToCalculateWorkTime.fieldValue}:00</td>
   </tr>							
 
 </table>
 
 </div>
-
+</section>
 
 <a href="#">Inserisci configurazione ${nextYear}</a>
 

@@ -1,12 +1,9 @@
 package controllers;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.joda.time.LocalDate;
 
 import models.Absence;
 import models.Competence;
@@ -15,12 +12,15 @@ import models.Person;
 import models.exports.PersonOvertime;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
+
+import org.joda.time.LocalDate;
+
 import play.Logger;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
 
-@With( {Secure.class, NavigationMenu.class} )
+@With( {Secure.class, RequestInit.class} )
 public class Charts extends Controller{
 
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
@@ -76,14 +76,6 @@ public class Charts extends Controller{
 		render(poList, year, month, annoList, meseList);
 	}
 
-	public static void compensatoryRestInYear(){
-		int year = 2013;
-		List<Person> personeProva = Person.getActivePersonsinYear(year, Security.getOfficeAllowed(), true);
-		for(Person p : personeProva){
-
-		}
-	}
-
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void indexCharts(){
 		render();
@@ -134,10 +126,7 @@ public class Charts extends Controller{
 			Logger.debug("Chiamato metodo con anno e mese nulli");
 			render(annoList);
 		}
-		List<Absence> missioni = new ArrayList<Absence>();
-		List<Absence> riposiCompensativi = new ArrayList<Absence>();
-		List<Absence> malattia = new ArrayList<Absence>();
-		List<Absence> altre = new ArrayList<Absence>();
+
 		year = params.get("yearChart", Integer.class);
 		Logger.debug("Anno preso dai params: %d", year);
 
@@ -150,10 +139,6 @@ public class Charts extends Controller{
 		Long altreSize = Absence.find("Select count(abs) from Absence abs where abs.personDay.date between ? and ? and abs.absenceType.code not in(?,?,?)", 
 				new LocalDate(year,1,1), new LocalDate(year,1,1).monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue(), "92","91","111").first();
 
-		//int missioniSize = missioni.size();
-		//int riposiCompensativiSize = riposiCompensativi.size();
-		//int malattiaSize = malattia.size();
-		//int altreSize = altre.size();
 		Logger.debug("Missioni size: %d", missioniSize);
 		Logger.debug("RiposiCompensativi size: %d", riposiCompensativiSize);
 		Logger.debug("Malattia size: %d", malattiaSize);

@@ -3,7 +3,10 @@
  */
 package helpers.attestati;
 
+import it.cnr.iit.epas.DateUtility;
+
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -14,7 +17,7 @@ import java.util.Map;
 import models.Absence;
 import models.Competence;
 import models.ConfGeneral;
-import models.Person;
+import models.Office;
 import models.PersonMonthRecap;
 
 import org.joda.time.LocalDate;
@@ -26,9 +29,11 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import play.Logger;
+
 import com.google.common.collect.Lists;
 
-import play.Logger;
+import controllers.Security;
 
 /**
  * Incapsula le funzionalità necessarie per l'interazione via HTTP GET/POST
@@ -68,15 +73,28 @@ public class AttestatiClient {
 
 	}
 	
-	public final static class LoginResponse {
+	public final static class LoginResponse implements Serializable{
+		private Integer year;
+		private Integer month;
 		private final boolean loggedIn;
 		private final Map<String, String> cookies;
-		public LoginResponse(boolean loggedIn, Map<String, String> cookies) {
+		public LoginResponse(boolean loggedIn, Map<String, String> cookies, Integer year, Integer month) {
 			this.loggedIn = loggedIn;
 			this.cookies = cookies;
+			this.year = year;
+			this.month = month;
+		}
+		public LoginResponse(boolean loggedIn, Map<String, String> cookies, Integer year, Integer month, Exception e) {
+			this.loggedIn = loggedIn;
+			this.cookies = cookies;
+			this.year = year;
+			this.month = month;
 		}
 		public boolean isLoggedIn() { return loggedIn; }
 		public Map<String, String> getCookies() { return cookies; }
+		public Integer getYear() {return this.year;}
+		public Integer getMonth() {return this.month;}
+		public String getNamedMonth() {return DateUtility.getName(this.month);}
 	}
 	
 	
@@ -93,10 +111,13 @@ public class AttestatiClient {
 	 * @throws MalformedURLException
 	 * @throws URISyntaxException
 	 */
-	public static LoginResponse login(String attestatiLogin, String attestatiPassword) throws AttestatiException, MalformedURLException, URISyntaxException {
+	public static LoginResponse login(String attestatiLogin, String attestatiPassword, Integer year, Integer month) throws AttestatiException, MalformedURLException, URISyntaxException {
 		
 		//URI baseUri = new URI(Configuration.getCurrentConfiguration().urlToPresence);
-		URI baseUri = new URI(ConfGeneral.getConfGeneral().urlToPresence);
+		//ConfGeneral confGeneral =  ConfGeneral.getConfGeneral();
+		Office office = Security.getUser().person.office;
+		String urlToPresence = ConfGeneral.getFieldValue("url_to_presence", office);
+		URI baseUri = new URI(urlToPresence);
 		URL loginUrl = baseUri.resolve(BASE_LOGIN_URL).toURL();
 		
 		Connection connection = Jsoup.connect(loginUrl.toString());
@@ -121,14 +142,14 @@ public class AttestatiClient {
 			if (loginResponse.statusCode() != 200 || 
 					loginMessages.isEmpty() || 
 					! loginMessages.first().ownText().contains("Login completata con successo.")) {
-				return new LoginResponse(false, loginResponse.cookies());
+				return new LoginResponse(false, loginResponse.cookies(), year, month);
 			} else {
-				return new LoginResponse(true, loginResponse.cookies());
+				return new LoginResponse(true, loginResponse.cookies(), year, month);
 			}
 			
 		} catch (IOException e) {
 			Logger.error("Errore durante la login sul sistema di invio degli attestati. Eccezione = %s", e);
-			return new LoginResponse(false, null);
+			return new LoginResponse(false, null, year, month, e);
 		}
 	}
 	
@@ -143,16 +164,18 @@ public class AttestatiClient {
 	 */
 	public static List<Dipendente> listaDipendenti(Map<String, String> cookies, Integer year, Integer month) throws URISyntaxException, MalformedURLException {
 		Response listaDipendentiResponse;
-		//Configuration conf = Configuration.getCurrentConfiguration();
-		ConfGeneral conf = ConfGeneral.getConfGeneral();
-		URI baseUri = new URI(conf.urlToPresence);
+//		ConfGeneral conf = ConfGeneral.getConfGeneral();
+		Office office = Security.getUser().person.office;
+		String urlToPresence = ConfGeneral.getFieldValue("url_to_presence", office);
+		Integer seatCode = Integer.parseInt(ConfGeneral.getFieldValue("seat_code", office));
+		URI baseUri = new URI(urlToPresence);
 		final URL listaDipendentiUrl = baseUri.resolve(BASE_LISTA_DIPENDENTI_URL).toURL();
 		Connection connection = Jsoup.connect(listaDipendentiUrl.toString());
 		connection.cookies(cookies);
 		
 		try {
 			listaDipendentiResponse = connection
-					.data("sede_id", conf.seatCode.toString())
+					.data("sede_id", seatCode.toString())
 					.data("anno", year.toString())
 					.data("mese", month.toString())
 					.userAgent(CLIENT_USER_AGENT)
@@ -214,8 +237,11 @@ public class AttestatiClient {
 					throws URISyntaxException, MalformedURLException {
 		
 		//Configuration conf = Configuration.getCurrentConfiguration();
-		ConfGeneral conf = ConfGeneral.getConfGeneral();
-		URI baseUri = new URI(conf.urlToPresence);
+		//ConfGeneral conf = ConfGeneral.getConfGeneral();
+		Office office = Security.getUser().person.office;
+		String urlToPresence = ConfGeneral.getFieldValue("url_to_presence", office);
+		Integer seatCode = Integer.parseInt(ConfGeneral.getFieldValue("seat_code", office));
+		URI baseUri = new URI(urlToPresence);
 		final URL elaboraDatiUrl = baseUri.resolve(BASE_ELABORA_DATI_URL).toURL();
 
 		StringBuffer absencesSent = new StringBuffer();
@@ -234,7 +260,7 @@ public class AttestatiClient {
 			.data("matr", dipendente.getMatricola())
 			.data("anno", year.toString())
 			.data("mese", month.toString())
-			.data("sede_id", conf.seatCode.toString())
+			.data("sede_id", seatCode.toString())
 			.method(Method.POST);
 
 		int codAssAssoCounter = 0;
@@ -299,7 +325,7 @@ public class AttestatiClient {
 
 			if (elaboraDatiResponse.statusCode() != 200)  {
 				throw new AttestatiException(String.format("Errore durante l'elaborazione dati del dipendente %s", dipendente.getCognomeNome()));
-			};			
+			}
 
 			Document elaboraDatiDoc = elaboraDatiResponse.parse();
 			Logger.debug("Risposta all'elaborazione dati = \n%s", elaboraDatiDoc);

@@ -3,37 +3,15 @@ package it.cnr.iit.epas;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.EntityManager;
-
 import models.ConfGeneral;
-import models.Person;
-import models.WorkingTimeType;
+import models.Office;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
-import play.Logger;
-import play.db.jpa.JPA;
+import controllers.Security;
 
 public class DateUtility {
-
-//	/**
-//	 * Controlla che il giorno sia festivo o lavorativo per la persona sulla base delle Feste Generali e del piano di lavoro
-//	 * @param person
-//	 * @param date
-//	 * @return
-//	 */
-//	public static boolean isHoliday(Person person, LocalDate date){	
-//		
-//		if(person.getCurrentContract() == null || date.isBefore(person.getCurrentContract().beginContract))
-//			return false;
-//		
-//		if(isGeneralHoliday(date))
-//			return true;
-//		
-//		return person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).holiday;
-//
-//	}
 
 	/**
 	 * 
@@ -71,10 +49,17 @@ public class DateUtility {
 	    }
 	}
 	
-	public static boolean isGeneralHoliday(LocalDate date){
+	public static boolean isGeneralHoliday(Office office, LocalDate date){
 		
 		//Configuration config = Configuration.getConfiguration(date);
-		ConfGeneral confGeneral = ConfGeneral.getConfGeneral();
+		//ConfGeneral confGeneral = ConfGeneral.getConfGeneral();
+		
+		/*TODO: da riverificare*/
+		if(office == null)
+			office = Security.getUser().person.office;
+		Integer monthOfPatron = Integer.parseInt(ConfGeneral.getFieldValue("month_of_patron", office));
+		Integer dayOfPatron = Integer.parseInt(ConfGeneral.getFieldValue("day_of_patron", office));
+		/*fine pezzo da verificare*/
 		
 		LocalDate easter = findEaster(date.getYear());
 		LocalDate easterMonday = easter.plusDays(1);
@@ -104,7 +89,7 @@ public class DateUtility {
 			return true;
 		if((date.getMonthOfYear() == 11) && (date.getDayOfMonth() == 1))
 			return true;
-		if((date.getMonthOfYear() == confGeneral.monthOfPatron && date.getDayOfMonth() == confGeneral.dayOfPatron))
+		if((date.getMonthOfYear() == monthOfPatron && date.getDayOfMonth() == dayOfPatron))
 			return true;
 		/**
 		 * ricorrenza centocinquantenario dell'unità d'Italia
@@ -139,7 +124,7 @@ public class DateUtility {
 		List<LocalDate> generalWorkingDays = new ArrayList<LocalDate>();
 		while(!day.isAfter(end))
 		{
-			if( ! DateUtility.isGeneralHoliday(day) )
+			if( ! DateUtility.isGeneralHoliday(null, day) )
 				generalWorkingDays.add(day);
 			day = day.plusDays(1);
 		}
@@ -261,6 +246,36 @@ public class DateUtility {
 	{
 		LocalDate date = new LocalDate().withMonthOfYear(monthNumber);
 		return date.monthOfYear().getAsText();
+	}
+	
+	public static String getName(int mese)
+	{
+		if(mese==1)
+			return "Gennaio";
+		if(mese==2)
+			return "Febbraio";
+		if(mese==3)
+			return "Marzo";
+		if(mese==4)
+			return "Aprile";
+		if(mese==5)
+			return "Maggio";
+		if(mese==6)
+			return "Giugno";
+		if(mese==7)
+			return "Luglio";
+		if(mese==8)
+			return "Agosto";
+		if(mese==9)
+			return "Settembre";
+		if(mese==10)
+			return "Ottobre";
+		if(mese==11)
+			return "Novembre";
+		if(mese==12)
+			return "Dicembre";
+		else
+			return null;
 	}
 
 	/**

@@ -1,47 +1,27 @@
 package controllers;
 
 import static play.modules.pdf.PDF.renderPDF;
-
-import org.joda.time.LocalDate;
-
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
-import com.google.common.collect.TreeBasedTable;
-
-
-
-
-
-import play.Logger;
-import play.data.binding.As;
-import play.db.jpa.JPA;
-import play.mvc.Controller;
-import it.cnr.iit.epas.DateUtility;
-import it.cnr.iit.epas.JsonReperibilityPeriodsBinder;
 import it.cnr.iit.epas.JsonRequestedOvertimeBinder;
 import it.cnr.iit.epas.JsonRequestedPersonsBinder;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
-import models.InitializationTime;
 import models.Person;
 import models.PersonHourForOvertime;
-import models.PersonReperibilityDay;
-import models.PersonReperibilityType;
 import models.exports.OvertimesData;
 import models.exports.PersonsCompetences;
 import models.exports.PersonsList;
-import models.exports.ReperibilityPeriod;
-import models.exports.ReperibilityPeriods;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
-import models.PersonTags;
+
+import org.joda.time.LocalDate;
+
+import play.Logger;
+import play.data.binding.As;
+import play.mvc.Controller;
+
+import com.google.common.collect.Table;
+import com.google.common.collect.TreeBasedTable;
 
 
 /*

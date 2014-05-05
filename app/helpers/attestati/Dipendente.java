@@ -3,6 +3,8 @@
  */
 package helpers.attestati;
 
+import models.Person;
+
 /**
  * Contiene le informazioni essenziali prelevate dal sistema centrale del CNR
  * E' utilizzata anche per effettuare i controlli di esistenza delle persone 
@@ -14,14 +16,17 @@ package helpers.attestati;
 public final class Dipendente implements Comparable<Dipendente> {
 
 	private final String matricola, cognomeNome;
+	private final Person person;
 	
 	public Dipendente(final String matricola, final String nomeCognome) {
 		this.matricola = matricola;
 		this.cognomeNome = nomeCognome;
+		this.person = Person.findByNumber(Integer.parseInt(this.matricola));
 	}
 
 	public String getMatricola() { return matricola; }
 	public String getCognomeNome() { return cognomeNome; }
+	public Person getPerson() {return person;}
 	
 	/** 
 	 * Metodo necessario per i controlli di "contains" dei Set 

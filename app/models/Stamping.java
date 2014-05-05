@@ -3,16 +3,12 @@
  */
 package models;
 
-import java.util.List;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -158,6 +154,15 @@ public class Stamping extends Model implements Comparable<Stamping> {
 		else
 			return 0; 
 	}
+	
+	public boolean isServiceStamping() {
+		if(this.stampType!=null && this.stampType.identifier!=null && this.stampType.identifier.equals("s"))
+		{
+			return true;
+		}
+		return false;
+	}
+	
 
 
 

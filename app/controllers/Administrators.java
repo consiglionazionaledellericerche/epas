@@ -3,29 +3,14 @@ package controllers;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeConstants;
-import org.joda.time.LocalDate;
-
-import models.ContactData;
-import models.Contract;
-import models.Location;
 import models.Permission;
 import models.Person;
-import models.PersonTags;
 import models.User;
-import play.Logger;
 import play.Play;
-import play.data.validation.Required;
-import play.data.validation.Valid;
-import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
 
-@With( {Secure.class, NavigationMenu.class} )
+@With( {Secure.class, RequestInit.class} )
 public class Administrators extends Controller {
 
 	private static final String SUDO_USERNAME = "sudo.username";
@@ -213,6 +198,7 @@ public class Administrators extends Controller {
 	/**
 	 * Switch in un'altra persona
 	 */
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void switchUserTo(long id) {
 		final User user = User.findById(id);
 		notFoundIfNull(user);
