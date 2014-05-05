@@ -86,7 +86,8 @@ public class Security extends Secure.Security {
 			}
 		}
 			
-		Logger.debug("checking permission %s for user %s", profile, username);
+		Logger.trace("checking permission %s for user %s", profile, username);
+
 		//Set<UsersPermissionsOffices> userPermissionsOffices = getUserAllPermissions(username);
 		List<UsersPermissionsOffices> userPermissionsOffices = getUserAllPermissions(username);
 		Logger.debug("I permessi per %s sono %d", username, userPermissionsOffices.size());
