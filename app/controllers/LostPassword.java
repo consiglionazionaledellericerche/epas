@@ -10,6 +10,7 @@ import models.User;
 import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.LocalDate;
 
+import play.Logger;
 import play.Play;
 import play.libs.Codec;
 import play.libs.Mail;
@@ -50,6 +51,8 @@ public class LostPassword extends Controller{
 		simpleEmail.addTo(email);
 		simpleEmail.setSubject("ePas Recupero Password");
 		String message = "Utente: " + person.user.username + "\r\n" + "Per ottenere una nuova password apri il seguente collegamento: " + GET_RECOVERY_PREFIX + token;
+		
+		Logger.info("Messaggio recovery password spedito è: %s", message);
 		
 		simpleEmail.setMsg(message);
 		Mail.send(simpleEmail); 

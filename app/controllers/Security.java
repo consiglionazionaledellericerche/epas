@@ -72,6 +72,19 @@ public class Security extends Secure.Security {
 			Logger.debug("Lo username per la check del profilo %s è null o vuoto", profile);
 			return false;
 		}
+		
+		//Se personId è una persona reale (1 admin, 0 tutti) eseguo il controllo
+		Long personId = Long.valueOf(session.get("personSelected"));
+		if(params.get("personId") != null)
+			personId = Long.valueOf(params.get("personId"));
+		if( personId > 1 ) {
+			
+			if( !Security.canUserSeePerson(Security.getUser(), personId) ) {
+				
+				flash.error("Non si può accedere alla funzionalità per la persona con id %d", personId);
+				Application.indexAdmin();
+			}
+		}
 			
 		Logger.debug("checking permission %s for user %s", profile, username);
 		//Set<UsersPermissionsOffices> userPermissionsOffices = getUserAllPermissions(username);
@@ -177,6 +190,7 @@ public class Security extends Secure.Security {
 		
 		if(person.office.id == user.person.office.id)
 			return true;
+		
 		for(RemoteOffice remote : user.person.office.remoteOffices){
 			if(remote.id == person.office.id)
 				return true;
@@ -202,5 +216,7 @@ public class Security extends Secure.Security {
 		return user.person;
 				
 	}
+	
+	
 
 }

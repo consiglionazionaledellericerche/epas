@@ -25,7 +25,7 @@ import com.google.common.collect.TreeBasedTable;
 
 import dao.PersonDao;
 
-@With( {Secure.class, NavigationMenu.class} )
+@With( {Secure.class, RequestInit.class} )
 public class YearlyAbsences extends Controller{
 
 	public final static class AbsenceTypeDays{

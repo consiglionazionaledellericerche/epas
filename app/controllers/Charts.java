@@ -20,7 +20,7 @@ import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
 
-@With( {Secure.class, NavigationMenu.class} )
+@With( {Secure.class, RequestInit.class} )
 public class Charts extends Controller{
 
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
