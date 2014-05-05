@@ -255,6 +255,7 @@ public class SwitchTemplate extends Controller{
 		if(action.equals("YearlyAbsences.absencesPerPerson")) {
 			YearlyAbsences.absencesPerPerson(personId, year);
 		}
+		
 	}
 	
 	

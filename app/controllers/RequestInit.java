@@ -336,6 +336,21 @@ public class RequestInit extends Controller {
 				renderArgs.put("dropDown", "dropDown1");
 				return "Persons.changePassword";
 			}
+			if(action.equals("Persons.list")) {
+				
+				renderArgs.put("noData", true);
+				renderArgs.put("noPerson", true);
+				renderArgs.put("dropDown", "dropDown2");
+				return "Persons.list";
+			}
+			
+			if(action.equals("Persons.edit")) {
+				
+				renderArgs.put("noData", true);
+				renderArgs.put("noPerson", true);
+				renderArgs.put("dropDown", "dropDown2");
+				return "Persons.edit";
+			}
 		}
 		
 		if(action.startsWith("Absences.")) {

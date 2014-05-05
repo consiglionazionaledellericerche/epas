@@ -128,9 +128,11 @@ footer p {
 	text-align: center;
 }
 
+/*
 .modal-dialog-center {
     margin-top: 15%;
 }
+*/
 
 .table-form, .table-form td {
 	border: none !important;

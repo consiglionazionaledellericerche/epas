@@ -60,17 +60,8 @@ public class Stampings extends Controller {
 			render("@redirectToIndex");
 		}
 		
-//		LocalDate today = new LocalDate();
-//		if(today.getYear()==year && month>today.getMonthOfYear())
-//		{
-//			flash.error("Impossibile accedere a situazione futura, redirect automatico a mese attuale");
-//			month = today.getMonthOfYear();
-//		}
-		
-
-		//Configuration conf = Configuration.getCurrentConfiguration();
-		//ConfGeneral conf = ConfGeneral.getConfGeneral();
-		int minInOutColumn = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));
+		//int minInOutColumn = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));
+		int minInOutColumn = 2;
 		int numberOfInOut = Math.max(minInOutColumn, PersonUtility.getMaximumCoupleOfStampings(person, year, month));
 
 		//Lista person day contente tutti i giorni fisici del mese
@@ -107,11 +98,6 @@ public class Stampings extends Controller {
 			if(c.getMese(year, month)!=null)
 				contractMonths.add(c.getMese(year, month));
 		}
-//		if(contractMonths.size()==0)
-//		{
-//			flash.error("Impossibile visualizzare la situazione mensile per %s %s per il mese di %s", person.name, person.surname, DateUtility.fromIntToStringMonth(month));
-//			render("@redirectToIndex");
-//		}
 		
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);
 		
@@ -148,8 +134,9 @@ public class Stampings extends Controller {
 		
 		//Configuration conf = Configuration.getCurrentConfiguration();													//0 sql (se già in cache)
 //		ConfGeneral conf = ConfGeneral.getConfGeneral();
-		int minInOutColumn = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));
+//		int minInOutColumn = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));
 //		int minInOutColumn = conf.numberOfViewingCoupleColumn;
+		int minInOutColumn = 2;
 		int numberOfInOut = Math.max(minInOutColumn, PersonUtility.getMaximumCoupleOfStampings(person, year, month));	//30 sql
 
 		//Lista person day contente tutti i giorni fisici del mese
