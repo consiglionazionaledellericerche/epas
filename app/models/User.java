@@ -1,5 +1,6 @@
 package models;
 
+import java.security.Permissions;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -39,7 +40,7 @@ public class User extends Model{
 //	@ManyToMany(cascade = {CascadeType.REFRESH, CascadeType.REMOVE}, fetch = FetchType.LAZY)
 //	public List<Permission> permissions;
 	@NotAudited
-	@OneToMany(mappedBy="user", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	@OneToMany(mappedBy="user", fetch=FetchType.EAGER, cascade = {CascadeType.REMOVE})
 	public List<UsersPermissionsOffices> userPermissionOffices = new ArrayList<UsersPermissionsOffices>();
 	
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
@@ -57,18 +58,25 @@ public class User extends Model{
 			return false;
 	}
 	
-	public List<UsersPermissionsOffices> getAllPermissions(){
-		List<UsersPermissionsOffices> permissions = null;
+	public List<Permission> getAllPermissions(){
+		List<Permission> permissions = new ArrayList<Permission>();
 		if(this.person != null){
-			permissions = UsersPermissionsOffices.find("Select upo from UsersPermissionsOffices upo where " +
+			List<UsersPermissionsOffices> upoList = UsersPermissionsOffices.find("Select upo from UsersPermissionsOffices upo where " +
 					"upo.user = ? and upo.office = ?", this, this.person.office).fetch();
+			for(UsersPermissionsOffices upo : upoList){
+				permissions.add(upo.permission);
+			}
+			
 		}
 		else{
-			Office office = Office.find("Select o from Office o where o.joiningDate is null").first();
-			permissions = UsersPermissionsOffices.find("Select upo from UsersPermissionsOffices upo where " +
+			Office office = Office.find("Select off from Office off where off.joiningDate is null").first();
+			List<UsersPermissionsOffices> upoList = UsersPermissionsOffices.find("Select upo from UsersPermissionsOffices upo where " +
 					"upo.user = ? and upo.office = ?", this, office).fetch();
+			for(UsersPermissionsOffices upo : upoList){
+				permissions.add(upo.permission);
+			}
 		}
-		
+
 		return permissions;
 	}
 	

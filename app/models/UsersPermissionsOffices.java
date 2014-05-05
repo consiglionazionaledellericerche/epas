@@ -15,17 +15,17 @@ import play.db.jpa.Model;
 public class UsersPermissionsOffices extends Model{
 
 	@NotAudited
-	@ManyToOne(fetch=FetchType.LAZY)
+	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="user_id")
 	public User user;
 	
 	@NotAudited
-	@ManyToOne(fetch=FetchType.LAZY)
+	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="office_id")
 	public Office office;
 	
 	@NotAudited
-	@ManyToOne(fetch=FetchType.LAZY)
+	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="permission_id")
 	public Permission permission;
 }

@@ -6,6 +6,7 @@ import java.util.Set;
 
 import models.Office;
 
+import models.Permission;
 import models.Person;
 import models.RemoteOffice;
 import models.User;
@@ -49,7 +50,6 @@ public class Security extends Secure.Security {
 
 		if(user != null){
 			Cache.set(username, user, CACHE_DURATION);
-//			Cache.set(PERMISSION_CACHE_PREFIX + username, user.getAllPermissions(), CACHE_DURATION);
 			Cache.set("userId", user.id, CACHE_DURATION);
 			            
             //flash.success("Welcome, " + .name + ' ' + person.surname);
@@ -89,11 +89,11 @@ public class Security extends Secure.Security {
 		Logger.trace("checking permission %s for user %s", profile, username);
 
 		//Set<UsersPermissionsOffices> userPermissionsOffices = getUserAllPermissions(username);
-		List<UsersPermissionsOffices> userPermissionsOffices = getUserAllPermissions(username);
-		Logger.debug("I permessi per %s sono %d", username, userPermissionsOffices.size());
-		for (UsersPermissionsOffices p : userPermissionsOffices) {
+		List<Permission> userPermissionsOffices = getUserAllPermissions(username);
+//		Logger.debug("I permessi per %s sono %d", username, userPermissionsOffices.size());
+		for (Permission p : userPermissionsOffices) {
 			//Logger.debug("Permesso: %s", p.permission.description);
-			if (p.permission.description.equals(profile)) {
+			if (p.description.equals(profile)) {
 				return true;
 			}
 		}
@@ -134,15 +134,16 @@ public class Security extends Secure.Security {
 		return user;
 	}
 
-	private static List<UsersPermissionsOffices> getUserAllPermissions(String username) {
+	private static List<Permission> getUserAllPermissions(String username) {
 		User user = getUser(username);
 		if (user == null) {
 			//return ImmutableSet.of();
 			return null;
 		}
 		//Set<UsersPermissionsOffices> permissions = Cache.get(PERMISSION_CACHE_PREFIX + username, Set.class);
-		List<UsersPermissionsOffices> permissions = Cache.get(PERMISSION_CACHE_PREFIX + username, List.class);
-//		List<UsersPermissionsOffices> permissions = null;
+		
+		List<Permission> permissions = Cache.get(PERMISSION_CACHE_PREFIX + username, List.class);
+		
 		if (permissions == null) {
 			user.refresh();
 			permissions = user.getAllPermissions();
@@ -156,7 +157,7 @@ public class Security extends Secure.Security {
 		return getUser(connected());
 	}
 	
-	public static List<UsersPermissionsOffices> getPersonAllPermissions() {
+	public static List<Permission> getPersonAllPermissions() {
 		return getUserAllPermissions(connected());
 	}
 	
