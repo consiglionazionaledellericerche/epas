@@ -32,23 +32,23 @@
 				<td> ${person}</th>
 				<td> 
 					%{
-						for(day in reperibilityDateDays.get(person, "FR")) {
+						for(day in reperibilityDateDays.get(person, codFr)) {
 					}%
 						${day} <br/>
 					%{
     					}
 					}%
 				</td>
-				<td> ${reperibilitySumDays.contains(person, "FR") ? reperibilitySumDays.get(person, "FR") : ''}</td>
+				<td> ${reperibilitySumDays.contains(person, codFr) ? reperibilitySumDays.get(person, codFr) : '0'}</td>
 				<td> %{
-						for(day in reperibilityDateDays.get(person, "FS")) {
+						for(day in reperibilityDateDays.get(person, codFs)) {
 					}%
 						${day} <br/>
 					%{
     					}
 					}%
 				</td>
-				<td class="red"> ${reperibilitySumDays.contains(person, "FS") ? reperibilitySumDays.get(person, "FS") : '0'}</td>
+				<td class="red"> ${reperibilitySumDays.contains(person, codFs) ? reperibilitySumDays.get(person, codFs) : '0'}</td>
 			</tr>
 
 			%{
@@ -71,10 +71,10 @@
       			Dott. Maurizio Martinelli
       		</div>
       		
-      		
+     
 			
 			%{
-				if (inconsistentAbsence != null) {
+				if (!inconsistentAbsence.isEmpty()) {
 				
 				fistTr = true;
 			}%
@@ -131,16 +131,20 @@
 		    			</tr>
 		    %{
 		    		}
-		  
-		    	}						
-			}%
-					</table>
+		  	}%
+		  	
+		  	</table>
 						
       		</div>
       		
       		<div class="date">
       			<strong>Data</strong> &nbsp;&nbsp;${today.getDayOfMonth()}/${today.getMonthOfYear()}/${today.getYear()}
       		</div>
+      		
+		  	%{
+		    	}						
+			}%
+					
 
       		
     </body>

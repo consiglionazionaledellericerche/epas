@@ -66,7 +66,7 @@ public class ShiftTimeTable extends Model{
 	public LocalTime endAfternoonLunchTime;
 
 	// total amount of working minutes
-	@Column(name="total_work_minutes")
+	@Column(name="total_working_minutes")
 	public  Integer totalWorkMinutes;
 	
 	// Paid minuts per shift

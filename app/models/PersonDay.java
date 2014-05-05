@@ -1065,8 +1065,8 @@ public class PersonDay extends Model {
 		private static int sequence_id = 1;
 		
 		int pairId;	//for hover template
-		Stamping in;
-		Stamping out;
+		public Stamping in;
+		public Stamping out;
 
 		PairStamping(Stamping in, Stamping out)
 		{
