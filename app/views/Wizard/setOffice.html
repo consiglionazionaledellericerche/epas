@@ -1,19 +1,25 @@
 #{extends 'Wizard/wizard.html' /}
-
+#{set 'moreStyles'}
+<style>
+form{
+	margin-bottom: 12em;
+}
+</style>
+#{/set}
 %{
 	institute = properties.getProperty("institute_name");
 	siteCode = properties.getProperty("seat_code");
 }%
 
+#{form @Wizard.setOffice(),class:'form-horizontal'}
 
-#{form @Wizard.setOffice()}
-
+<fieldset>
 #{field 'institute'}
     <div class="control-group #{if field.error}error#{/if}">         
-            <label  class="control-label" for="${field.id}">Inserire il nome Dell'istituto</label>
+            <label  class="control-label" for="${field.id}">Inserire il nome dell'istituto</label>
      <div class="controls">
-            <input placeholder="Nome istituto" id="${field.id}" type="text" name="${field.name}" value="${institute}">
-            <span class="help-block">${field.error}</span>
+            <input class="input-large" placeholder="Nome istituto" required="" id="${field.id}" type="text" name="${field.name}" value="${institute}">
+            <p class="help-block">${field.error}</p>
       </div>
    </div>
 #{/field}
@@ -22,14 +28,13 @@
     <div class="control-group #{if field.error}error#{/if}">         
             <label  class="control-label" for="${field.id}">Inserire il codice Sede</label>
      <div class="controls">
-            <input placeholder="Codice Sede" id="${field.id}" type="text" name="${field.name}" value="${siteCode}">
-            <span class="help-block">${field.error}</span>
+            <input class="input-large" placeholder="Codice Sede" required="" id="${field.id}" type="text" name="${field.name}" value="${siteCode}">
+            <p class="help-block">${field.error}</p>
       </div>
    </div>
 #{/field}
 
-<div>
-	<input class="btn btn-default" type="submit">
-</div>
+<input type="submit" class="btn btn-info btn-large"/>
 
+</fieldset>
 #{/form}

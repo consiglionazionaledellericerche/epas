@@ -2,19 +2,16 @@
 
 #{set 'moreStyles'}
 <style>
+
 legend{
-	width: 30%;
+	width: 50%;
 	margin: 2% auto;
 	border-radius: 10px;
 }
 .pager{
 display: none;
 }
-#progressBar{
-margin-top: 30px;
-position: static;
-width: 100%;
-}
+
 table,tr,td{
 margin: auto auto 40px auto;
 border: none;
@@ -25,6 +22,10 @@ tr > td:nth-of-type(1){
 }
 tr > td:nth-of-type(2){
 color: blue;
+}
+
+.progress-success{
+	margin-top: 2em;
 }
 </style>
 #{/set}
@@ -64,8 +65,8 @@ color: blue;
 			<tr><td>Soglia oraria calcolo timbrature giornaliere</td><td>${properties.getProperty('hour_max_to_calculate_worktime')}</td></tr>			
 		</table>
 	
-	<a href="@{Wizard.wizard(1)}"><button class="btn">Modifica</button></a>
-	<a href="@{Wizard.submit()}"><button class="btn">Conferma</button></a>
+	<a href="@{Wizard.wizard(1)}"><button class="btn-large btn-warning">Modifica</button></a>
+	<a href="@{Wizard.submit()}"><button class="btn-large btn-success">Conferma</button></a>
 
 
 
