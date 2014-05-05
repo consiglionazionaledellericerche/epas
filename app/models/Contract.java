@@ -536,9 +536,15 @@ public class Contract extends Model {
 	 */
 	public void recomputeContract() {
 		
+		String dateInitUse = ConfGeneral.getFieldValue("init_use_program", person.office);
+		LocalDate initUse = new LocalDate(dateInitUse);
+		
 		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
 		LocalDate date = this.beginContract;
+		if(date.isBefore(initUse))
+			date = initUse;
 		DateInterval contractInterval = this.getContractDatabaseDateInterval();
+		
 		LocalDate today = new LocalDate();
 		while(true) {
 			

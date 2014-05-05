@@ -17,17 +17,7 @@
   	margin-bottom: 10px;
   
   }
-  
-  #boh {
-  	position: fixed;
-  	top: 50px;
-  	right: 100px;
-  	display: block;
-  	left: auto;	
-  }
-  
-  
-  
+ 
 </style>
 #{/set}
 
@@ -109,7 +99,7 @@
 
 
 
-<!-- Pannello 1 Dati personali -->
+<!-- Pannello 2 Contatti -->
 <div class="panel panel-default">
   <div class="panel-heading">
     <h3 class="panel-title"><span class="badge">2</span> Informazioni di ubicazione e contatti</h3>
@@ -238,7 +228,7 @@
 			</td>
 			
 			<td>
-			  <a data-toggle="modal" href="@{Persons.deleteContract(contract.id)}" data-target="#myModal2"><input value="Elimina" class="btn btn-sm btn-danger" type="button"></a>
+			  <a data-toggle="modal" href="@{Persons.deleteContract(contract.id)}" data-target=".my-modal"><input value="Elimina" class="btn btn-sm btn-danger" type="button"></a>
 			</td>
 			
 			 <td class="span4" style="text-align: center;">
@@ -308,10 +298,38 @@
 	  
 	   -->
     </div>
-  </div>
+  </div>  <!-- Fine pannello dati contrattuli -->
+  
+  
+  
+  
+   <!-- Pannello 4 Elimina -->
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title"><span class="badge">4</span> Eliminazione persona ePAS</h3>
+    </div>
+    <div class="panel-body center">
+      <a data-modal data-toggle="modal" href="@{Persons.deletePerson(person.id)}" data-target=".my-modal">
+  	    <button type="button" class="btn btn-danger">Elimina</button>
+  	  </a>
+   </div>
+  </div>	<!-- Fine pannello 2 -->
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
 </div>
   
+  
+ 
   
   
 
@@ -323,21 +341,11 @@
 </div>
 #{/secure.check}
 
-#{form @Persons.deletePerson(person.id), class:'form-inline', role:'form'}
-<input class="btn btn-danger" type="submit" value="Elimina" />
-#{/form}
+
 
 
 
  #{include '_myModal.html' /}
 
-<div id="boh" class="popover bottom">
-      <div class="arrow"></div>
-      <h3 class="popover-title">Popover bottom</h3>
 
-      <div class="popover-content">
-        <p>Sed posuere consectetur est at lobortis. Aenean eu leo quam. 
-        Pellentesque ornare sem lacinia quam venenatis vestibulum.</p>
-      </div>
-    </div>
 
