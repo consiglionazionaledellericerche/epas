@@ -1,19 +1,25 @@
-#{extends 'main_with_navbar.html' /}
-#{set titolo: 'Gestione dati del personale per rilevazione presenze' /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Dati del personale'  /}
 
+#{set 'moreStyles'}
+  <style>
+  
+  </style>
+#{/set}
 
-<!-- <h2 id="titoloGestionePersonale">Gestione dati del personale per rilevazione presenze</h2>  -->  
-<p class="lead" id="nuovaPersona"><a href="@{Persons.insertPerson}">Inserisci una nuova persona</a></p>
+<p><a href="@{Persons.insertPerson}"><span class="glyphicon glyphicon-plus"></span> Inserisci una nuova persona</a></p>
 
-
+<p>
 #{form action:@Persons.list(), class:'form', 
     method:'GET', autocomplete:'off',
     'data-reload':'#results'}
     
-    <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="input-medium search-query"/>
-    <i class="icon-search icon-large"></i>
+    <span class="glyphicon glyphicon-search"></span>
+    <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="search-query"/>
 
 #{/form}
+</p>
 
 <section id="results">
 <table class="table table-striped table-hover table-condensed" id="listaPersone"><!-- Da aggiungere come entry nel file main.css dove dovrò sistemare le caratteristiche della tabella  -->
@@ -36,26 +42,36 @@
 		<th>Note</th>
 	</tr>
 	
-%{
-     for(person in personList) {
-}%
+	#{list items:personList, as:'person'}
+	
+
 
 	<tr>
-	%{if(activePerson.contains(person)){
-	}%
+	#{if activePerson.contains(person)}
+	
 		<td><a href="@{edit(person.id)}"><font color="#0000FF">${person.surname}</font></a></td>
 		<td><font color="#000000">${person.name}</font></td>
 		<td><font color="#000000">${person.number}</font></td>
 		<td><font color="#000000">${person.badgeNumber}</font></td>
 		<td><font color="#000000">${person.getCurrentContract() != null ? person.getCurrentContract().beginContract : ''}</font></td>
 		<td><font color="#000000">${person.getCurrentContract() != null ? person.getCurrentContract().expireContract : ''}</font></td>
-		#{if person.getCurrentWorkingTimeType() != null && person.getCurrentWorkingTimeType().description != null}
-			<td><font color="#0000FF">${person.getCurrentWorkingTimeType().description}</font></td>
-		#{/if}
-		#{else}
-			<td></td>
-		#{/else}
-		<td><a  data-toggle="modal" href="@{Persons.editVacation(person.id)}" data-target="#myModal1"><font color="#0000FF">${person.getVacation() != null ? person.getVacation().description : ''}</font></a></td>
+		
+		<td>
+		  #{if person.getCurrentWorkingTimeType() != null}
+		    <a data-toggle="modal" href="@{Persons.showCurrentContractWorkingTimeType(person.id)}" data-target=".my-modal">
+		      ${person.getCurrentWorkingTimeType().description}
+		    </a>
+		  #{/if}
+		</td>
+		
+		<td>
+		  #{if person.getVacation() != null }
+		     <a data-toggle="modal" href="@{Persons.showCurrentVacation(person.id)}" data-target=".my-modal">
+		     ${person.getVacation().description}
+		     </a>
+		  #{/if}
+		</td>
+		
 		<td><font color="#000000">${person.getQualification() != null ? person.getQualification().qualification : ''}</font></td>
 		<td>${''}</td>
 		<td><font color="#000000">${person.getLocation() != null ? person.location.department : ''}</font></td>
@@ -64,22 +80,21 @@
 		<td><font color="#000000">${person.location != null ? person.location.room : ''}</font></td>
 		<td><font color="#000000">${person.contactData != null ? person.contactData.email : ''}</font></td>
 		<td>${}</td>
-	%{
-	}else{
-	}%	
+	#{/if}
+	#{else}
 		<td><a href="@{edit(person.id)}"><font color="#808080">${person.surname}</font></a></td>
 		<td><font color="#808080">${person.name}</font></td>
 		<td><font color="#808080">${person.number}</font></td>
 		<td><font color="#000000">${person.badgeNumber}</font></td>
 		<td><font color="#808080">${person.getCurrentContract() != null ? person.getCurrentContract().beginContract : ''}</font></td>
 		<td><font color="#808080">${person.getCurrentContract() != null ? person.getCurrentContract().expireContract : ''}</font></td>
-		#{if person.getCurrentWorkingTimeType() != null && person.getCurrentWorkingTimeType().description != null}
+		#{if person.getCurrentWorkingTimeType() != null}
 			<td><font color="#808080">${person.getCurrentWorkingTimeType().description}</font></td>
 		#{/if}
 		#{else}
 			<td></td>
 		#{/else}
-		<td><a data-toggle="modal" href="@{Persons.editVacation(person.id)}" data-target="#myModal1"><font color="#808080">${person.getVacation() != null ? person.getVacation().description : ''}</font></a></td>
+		<td><font color="#808080">${person.getVacation() != null ? person.getVacation().description : ''}</font></td>
 		<td><font color="#808080">${person.getQualification() != null ? person.getQualification().qualification : ''}</font></td>
 		<td>${''}</td>
 		<td><font color="#808080">${person.getLocation() != null ? person.location.department : ''}</font></td>
@@ -88,29 +103,13 @@
 		<td><font color="#808080">${person.location != null ? person.location.room : ''}</font></td>
 		<td><font color="#808080">${person.contactData != null ? person.contactData.email : ''}</font></td>
 		<td>${}</td>
-	%{
-	}
-	}%
+	#{/else}
 	</tr>
 
-%{  		   
-     }
-     
-}%
+	#{/list}
 
 </table>
 </section>
 
-<div id="myModal1" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">Piano ferie previsto</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-   <!--   <button class="btn btn-primary">Save changes</button>-->
-  </div>
-</div>
+ #{include '_myModal.html' /}
+

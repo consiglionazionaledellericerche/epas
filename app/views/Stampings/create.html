@@ -1,11 +1,5 @@
-
-<div class="modal-header center">
-  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-  <h4 class="modal-title">Nuova timbratura ${personDay.date} per ${person.surname}</h4>
-</div>
-
-<!-- Start Body -->
-<div class="modal-body">
+#{extends 'modal.html' /}
+#{set modalHeader:'Nuova timbratura ' + personDay.date + ' per ' + person.surname /}
 
 <div class="container-fluid text-center">
 #{form @Stampings.insert(), role:'form'}
@@ -50,7 +44,5 @@
 	<input class="btn btn-primary" type="submit" value="Inserisci"/>
 
 #{/form}
-
-</div>
 
 </div>
