@@ -45,6 +45,7 @@ import com.google.gson.JsonParser;
  * 	id: id of the person in the shift
  * 	start : start date
  * 	end: end date
+ *  cancelled: true/false
  * 	shiftSlot: slot of the shift (morning/afternoon) 
  * }]
  */
@@ -80,9 +81,8 @@ public class JsonShiftPeriodsBinder implements TypeBinder<ShiftPeriods> {
 				// read the start and end data of the period
 				LocalDate start = new LocalDate(jsonObject.get("start").getAsString());
 				LocalDate end = new LocalDate(jsonObject.get("end").getAsString());
-				
-				
-						
+
+				// get a real shift period
 				if (!jsonObject.get("cancelled").getAsBoolean()) {
 					// validate person id
 					personId = jsonObject.get("id").getAsLong();
@@ -95,24 +95,13 @@ public class JsonShiftPeriodsBinder implements TypeBinder<ShiftPeriods> {
 					
 					// read and validate the shift slot (MORNING/AFTERNOON)
 					String shiftSlotDesc = jsonObject.get("shiftSlot").getAsString();
-					ShiftSlot shiftSlot = ShiftSlot.valueOf(shiftSlotDesc);
+					Logger.debug("Leggo dal json shiftSlotDesc=%s", shiftSlotDesc);
+					
+					ShiftSlot shiftSlot = ShiftSlot.getEnum(shiftSlotDesc);
+					Logger.debug("Cerca e controlla shiftSlot=%s", shiftSlot);
 					if (shiftSlot == null) {
-						throw new IllegalArgumentException(String.format("ShiftSlot with name = %s not found", shiftSlotDesc));
+						throw new IllegalArgumentException(String.format("ShiftSlot with name = %s not found2", shiftSlotDesc));
 					}
-					
-					// validate the time table
-					//String[] hmsStart = jsonObject.get("time_table_start").getAsString().split(":");
-					//String[] hmsEnd = jsonObject.get("time_table_end").getAsString().split(":");
-					
-					// controllo shiftType? ma allora type deve essere unico?
-					/*ShiftTimeTable shiftTimeTable = (ShiftTimeTable) JPA.em().createQuery("SELECT stt FROM ShiftTimeTable stt WHERE stt.startShift = :ldtStart")
-							.setParameter("ldtStart", new LocalDateTime(1970, 01, 01, Integer.parseInt(hmsStart[0]), Integer.parseInt(hmsStart[1])))
-							.getSingleResult();
-	
-					Logger.debug("shiftTimeTable = %s", shiftTimeTable);
-					if (shiftTimeTable == null) {
-						throw new IllegalArgumentException(String.format("shiftTimeTable whith startShift = %s and endShift = %s not found", Arrays.toString(hmsStart), Arrays.toString(hmsEnd)));
-					}*/
 					
 					ShiftPeriod shiftPeriod =	new ShiftPeriod(person, start, end, shiftType, false, shiftSlot);
 					Logger.debug("Creato ShiftPeriod person = %s, start=%s, end=%s, shiftType=%s, shiftSlot=%s", person.name, start, end, shiftType, shiftSlot);

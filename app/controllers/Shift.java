@@ -5,6 +5,7 @@ import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.JsonShiftPeriodsBinder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -53,6 +54,7 @@ import play.Play;
 import play.data.binding.As;
 import play.db.jpa.JPA;
 import play.mvc.Controller;
+import sun.tools.java.Package;
 
 /**
  * 
@@ -69,9 +71,7 @@ public class Shift extends Controller{
 	 */
 	public static void personList(){
 		response.accessControl("*");
-		//response.setHeader("Access-Control-Allow-Origin", Play.configuration.getProperty("address.sistorg"));
 
-		
 		String type = params.get("type");		
 		Logger.debug("Cerco persone del turno %s", type);
 		
@@ -92,6 +92,29 @@ public class Shift extends Controller{
 			Logger.debug("name=%s surname=%s id=%di jolly=%s", p.name, p.surname, p.id, p.personShift.jolly);
 		}
 		render(personList);
+	}
+	
+	/*
+	 * @author arianna
+	 * Get shifts from the DB and render to the sistorg portal calendar
+	 */
+	public static void timeTable(){
+		response.accessControl("*");
+		
+		Logger.debug("Cercata la time table di un turno");
+		
+		// type validation
+		String type = params.get("type");
+		ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();
+		if (shiftType == null) {
+			notFound(String.format("ShiftType type = %s doesn't exist", type));			
+		}
+		Logger.debug("Cerco la time table del turno di tipo %s", shiftType.type);
+		
+		ShiftTimeTable shiftTimeTable = shiftType.shiftTimeTable;
+		
+		render(shiftTimeTable);
+		
 	}
 	
 	/*
@@ -130,16 +153,15 @@ public class Shift extends Controller{
 		for (PersonShiftDay psd : personShiftDay) {	
 			
 			LocalTime startShift = (psd.shiftSlot.equals(ShiftSlot.MORNING)) ? psd.shiftType.shiftTimeTable.startMorning : psd.shiftType.shiftTimeTable.startAfternoon;
-			LocalTime endShift = (psd.getShiftSlot().equals(ShiftSlot.AFTERNOON)) ? psd.shiftType.shiftTimeTable.endMorning : psd.shiftType.shiftTimeTable.endAfternoon;
+			LocalTime endShift = (psd.getShiftSlot().equals(ShiftSlot.MORNING)) ? psd.shiftType.shiftTimeTable.endMorning : psd.shiftType.shiftTimeTable.endAfternoon;
 
-			//if (shiftPeriod == null || !shiftPeriod.person.equals(psd.personShift.person) || !shiftPeriod.end.plusDays(1).equals(psd.date) || !shiftPeriod.shiftTimeTable.getStartShift().equals(psd.shiftTimeTable.getStartShift() )){
 			if (shiftPeriod == null || !shiftPeriod.person.equals(psd.personShift.person) || !shiftPeriod.end.plusDays(1).equals(psd.date) || !shiftPeriod.startSlot.equals(startShift)){
 				shiftPeriod = new ShiftPeriod(psd.personShift.person, psd.date, psd.date, psd.shiftType, false, psd.shiftSlot, startShift, endShift);
 				shiftPeriods.add(shiftPeriod);
-				Logger.trace("\nCreato nuovo shiftPeriod, person=%s, start=%s, end=%s, type=%s, orario=%s - %s" , shiftPeriod.person, shiftPeriod.start, shiftPeriod.end, shiftPeriod.shiftType.type, startShift.toString("HH::mm"), endShift.toString("HH::mm"));
+				Logger.debug("\nCreato nuovo shiftPeriod, person=%s, start=%s, end=%s, type=%s, fascia=%s, orario=%s - %s" , shiftPeriod.person, shiftPeriod.start, shiftPeriod.end, shiftPeriod.shiftType.type, shiftPeriod.shiftSlot, startShift.toString("HH:mm"), endShift.toString("HH:mm"));
 			} else {
 				shiftPeriod.end = psd.date;
-				Logger.trace("Aggiornato ShiftPeriod, person=%s, start=%s, end=%s, type=%s, orario=%s - %s", shiftPeriod.person, shiftPeriod.start, shiftPeriod.end, shiftPeriod.shiftType.type, startShift.toString("HH::mm"), endShift.toString("HH::mm"));
+				Logger.debug("Aggiornato ShiftPeriod, person=%s, start=%s, end=%s, type=%s, fascia=%s, orario=%s - %s", shiftPeriod.person, shiftPeriod.start, shiftPeriod.end, shiftPeriod.shiftType.type, shiftPeriod.shiftSlot, startShift.toString("HH:mm"), endShift.toString("HH:mm"));
 			}
 		}
 		
@@ -163,7 +185,7 @@ public class Shift extends Controller{
 			}
 		}
 		
-		Logger.debug("Find %s shiftPeriods. ShiftPeriods = %s", shiftPeriods.size(), shiftPeriods);
+		Logger.debug("Find %s shiftPeriods.", shiftPeriods.size());
 		render(shiftPeriods);
 		
 	}
@@ -231,13 +253,11 @@ public class Shift extends Controller{
 				
 					//Salvataggio del giorno di turno
 					//Se c'è un turno già presente viene sostituito, altrimenti viene creato un PersonShiftDay nuovo
-					//Logger.debug("Cerco turno shiftType = %s AND date = %s AND shiftTimeTable.startShift = %s", shiftType.description, day, shiftPeriod.shiftTimeTable.getStartShift());
 					Logger.debug("Cerco turno shiftType = %s AND date = %s AND shiftSlot = %s", shiftType.description, day, shiftPeriod.shiftSlot);
 					
 					//String[] hmsStart = shiftPeriod.startShift.getStartShift().split(":");
 					
 					PersonShiftDay personShiftDay = 
-						//PersonShiftDay.find("shiftType = ? AND date = ? AND shiftTimeTable.startShift = ?", shiftType, day, new LocalDateTime(1970, 01, 01, Integer.parseInt(hmsStart[0]), Integer.parseInt(hmsStart[1]))).first();
 						PersonShiftDay.find("shiftType = ? AND date = ? AND shiftSlot = ?", shiftType, day, shiftPeriod.shiftSlot).first();
 					if (personShiftDay == null) {
 						personShiftDay = new PersonShiftDay();
@@ -247,7 +267,6 @@ public class Shift extends Controller{
 					}
 					personShiftDay.date = day;
 					personShiftDay.shiftType = shiftType;
-					//personShiftDay.shiftTimeTable = shiftPeriod.shiftTimeTable;
 					personShiftDay.setShiftSlot(shiftPeriod.shiftSlot);
 					personShiftDay.personShift = personShift;
 					
@@ -316,30 +335,6 @@ public class Shift extends Controller{
 	}
 	
 	
-	
-	/*public static void createShiftTimeTable() {
-		ShiftTimeTable shiftTimeTable = new ShiftTimeTable();
-		
-		shiftTimeTable.startMorning = new LocalTime(7, 50);
-		shiftTimeTable.endMorning = new LocalTime(14, 50);
-		
-		shiftTimeTable.startAfternoon = new LocalTime(13, 20);
-		shiftTimeTable.endAfternoon = new LocalTime(19, 50);
-		
-		shiftTimeTable.startMorningLunchTime = new LocalTime(13, 50);
-		shiftTimeTable.endMorningLunchTime = new LocalTime(14, 20);
-		
-		shiftTimeTable.startAfternoonLunchTime = new LocalTime(14, 20);
-		shiftTimeTable.endAfternoonLunchTime = new LocalTime(14, 50);
-		
-		shiftTimeTable.totalWorkMinutes = 720;
-		shiftTimeTable.paidMinutes = 390;
-		
-		Logger.debug("creato shift_time_table con startMorning=%s and endmorning=%s", shiftTimeTable.startMorning.toString(), shiftTimeTable.endMorning.toString());
-		shiftTimeTable.save();
-	}*/
-	
-	
 	/**
 	 * @author arianna
 	 * crea il file PDF con il resoconto mensile dei turni di tipo 'A e B' per
@@ -349,12 +344,15 @@ public class Shift extends Controller{
 	 * T.B.N. che il tipo dei turni in questo caso è fisso. Sarà variabile quando si introdurranno
 	 * i gruppi e i tipi di reperibilità associati ad ogni gruppo
 	 */
+	/**
+	 * 
+	 */
 	public static void exportMonthAsPDF() {
 		int year = params.get("year", Integer.class);
 		int month = params.get("month", Integer.class);
 //		Long groupType = params.get("type", Long.class);
 		
-		Logger.debug("sono nella exportMonthAsPDF con year=%s e month=%s", year, month);
+		//Logger.debug("sono nella exportMonthAsPDF con year=%s e month=%s", year, month);
 		
 		 ArrayList<String> shiftTypes = new ArrayList<String>();
 		 shiftTypes.add("A"); 
@@ -362,14 +360,31 @@ public class Shift extends Controller{
 		 Logger.debug("shiftTypes=%s", shiftTypes);
 		
 		
-		// crea la tabella per registrare i turni delle persone nei giorni del mese
+		// crea la tabella per registrare i turni delle persone nei giorni del mese (nome cognome, giorno mese, A/B)
 		ImmutableTable.Builder<Person, Integer, String> builder = ImmutableTable.builder(); 
 		Table<Person, Integer, String> shiftMonth = null;
 		
-		// crea la tabella per registrare le assenze inconsistenti con i turni trovati
-		Table<String, Integer, String> inconsistentAbsence = TreeBasedTable.<String, Integer, String>create();
+		//  Used TreeBasedTable becouse of the alphabetical name order (persona, A/B, num. giorni)
+		Table<String, String, Integer> shiftSumDays = TreeBasedTable.<String, String, Integer>create();
+				
+		// crea la tabella per registrare le assenze e le timbrature inconsistenti con i turni trovati
+		Table<String, String, List<Integer>> inconsistentAbsence = TreeBasedTable.<String, String, List<Integer>>create();
+		Table<String, String, List<String>> inconsistentAbsence2 = TreeBasedTable.<String, String, List<String>>create();
 
+		String thNoStampings = "Mancata timbratura";
+		String thBadStampings = "Timbratura errata";
+		String thAbsences = "Assenza";
 		
+		
+		
+		// lista dei giorni di assenza, mancata timbratura e timbratura inconsistente
+		List<Integer> noStampingDays = new ArrayList<Integer>();
+		List<String> noStampingDays2 = new ArrayList<String>();
+		List<Integer> badStampingDays = new ArrayList<Integer>();
+		List<String> badStampingDays2 = new ArrayList<String>();
+		List<Integer> absenceDays = new ArrayList<Integer>();
+		List<String> absenceDays2 = new ArrayList<String>();
+				
 		LocalDate firstOfMonth = new LocalDate(year, month, 1);
 		for (String type: shiftTypes)
 		{	
@@ -379,76 +394,156 @@ public class Shift extends Controller{
 				notFound(String.format("ShiftType = %s doesn't exist", shiftType));			
 			}
 			
-			// legge l'orario del turno 
-			
-			
 			// seleziona le persone nel turno 'shiftType' da inizio a fine mese
 			List<PersonShiftDay> personShiftDays = 
 				PersonShiftDay.find("SELECT psd FROM PersonShiftDay psd WHERE date BETWEEN ? AND ? AND psd.shiftType = ? ORDER by date", firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue(), shiftType).fetch();
 		
 			for (PersonShiftDay personShiftDay : personShiftDays) {
 				Person person = personShiftDay.personShift.person;
+				String personName = person.name.concat(" ").concat(person.surname);
 					
-				// registro il turno della persona per quel giorno
-				builder.put(person, personShiftDay.date.getDayOfMonth(), personShiftDay.shiftType.type);
+				// legge l'rario di inizio e fine turno da rispettare (mattina o pomeriggio)
+				LocalTime startShift = (personShiftDay.shiftSlot.equals(ShiftSlot.MORNING)) ? personShiftDay.shiftType.shiftTimeTable.startMorning : personShiftDay.shiftType.shiftTimeTable.startAfternoon;
+				LocalTime endShift = (personShiftDay.shiftSlot.equals(ShiftSlot.MORNING)) ? personShiftDay.shiftType.shiftTimeTable.endMorning : personShiftDay.shiftType.shiftTimeTable.endAfternoon;
 				
-				Logger.debug("Registro il turno %s di %s per il giorno %d", personShiftDay.shiftType.type, person, personShiftDay.date.getDayOfMonth());
+				// legge l'orario di inizio e fine pausa pranzo
+				LocalTime startLunchTime = (personShiftDay.shiftSlot.equals(ShiftSlot.MORNING)) ? personShiftDay.shiftType.shiftTimeTable.startMorningLunchTime : personShiftDay.shiftType.shiftTimeTable.startAfternoonLunchTime;
+				LocalTime endLunchTime = (personShiftDay.shiftSlot.equals(ShiftSlot.MORNING)) ? personShiftDay.shiftType.shiftTimeTable.endMorningLunchTime : personShiftDay.shiftType.shiftTimeTable.endAfternoonLunchTime;
+				
+				// registro il turno della persona per quel giorno
+				//------------------------------------------------------
+				builder.put(person, personShiftDay.date.getDayOfMonth(), personShiftDay.shiftType.type);				
+				//Logger.debug("Registro il turno %s di %s per il giorno %d", personShiftDay.shiftType.type, person, personShiftDay.date.getDayOfMonth());
 		
 				//check for the absence inconsistencies
 				//------------------------------------------
 				PersonDay personDay = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.date = ? and pd.person = ?", personShiftDay.date, person).first();
-				Logger.info("Prelevo il personDay %s per la persona %s - personDay=%s", personShiftDay.date, person, personDay);
+				Logger.debug("Prelevo il personDay %s per la persona %s - personDay=%s", personShiftDay.date, person, personDay);
 				
 				// if there are no events and it is not an holiday -> error
-				if (personDay == null) {
-					if (!person.isHoliday(personShiftDay.date)) {
-						Logger.info("Il turno di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personShiftDay.date);
-						inconsistentAbsence.put(person.name.concat(" ").concat(person.surname), personShiftDay.date.getDayOfMonth(), "mancata timbratura" );
+				if (personDay == null) {	
+					
+					if ( !person.isHoliday(personShiftDay.date) && personShiftDay.date.isBefore(LocalDate.now())) {
+						Logger.info("Il turno di %s è incompatibile con la sua mancata timbratura nel giorno %s (personDay == null)", personName, personShiftDay.date);
+						
+						/*noStampingDays = (inconsistentAbsence.contains(personName, thNoStampings)) ? inconsistentAbsence.get(personName, thNoStampings) : new ArrayList<Integer>();
+						noStampingDays.add(personShiftDay.date.getDayOfMonth());
+						inconsistentAbsence.put(personName, thNoStampings, noStampingDays);*/
+						
+						noStampingDays2 = (inconsistentAbsence2.contains(personName, thNoStampings)) ? inconsistentAbsence2.get(personName, thNoStampings) : new ArrayList<String>();
+						noStampingDays2.add(personShiftDay.date.toString("dd MMM"));
+						inconsistentAbsence2.put(personName, thNoStampings, noStampingDays2);
 					}
 				} else {
-					List<PairStamping> pairStampings = PersonDay.PairStamping.getValidPairStamping(personDay.stampings);
-					
+	
 					// check for the stampings in working days
-					if (!person.isHoliday(personShiftDay.date)) { 
-						// no stampings
+					if (!person.isHoliday(personShiftDay.date)) {
+						
+						// check no stampings
+						//-----------------------------
 						if (personDay.stampings.isEmpty()) {
-							Logger.info("Il turno di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personDay.date);
-							inconsistentAbsence.put(person.name.concat(" ").concat(person.surname), personShiftDay.date.getDayOfMonth(), "mancata timbratura" );
+							Logger.info("Il turno di %s è incompatibile con la sue mancate timbrature nel giorno %s", personName, personDay.date);
+							
+							/*noStampingDays = (inconsistentAbsence.contains(personName, thNoStampings)) ? inconsistentAbsence.get(personName, thNoStampings) : new ArrayList<Integer>();
+							noStampingDays.add(personShiftDay.date.getDayOfMonth());
+							inconsistentAbsence.put(personName, thNoStampings, noStampingDays);*/
+							
+							noStampingDays2 = (inconsistentAbsence2.contains(personName, thNoStampings)) ? inconsistentAbsence2.get(personName, thNoStampings) : new ArrayList<String>();
+							noStampingDays2.add(personShiftDay.date.toString("dd MMM"));
+							inconsistentAbsence2.put(personName, thNoStampings, noStampingDays2);
 						} else {
-							// consistent stampings
+							// check consistent stampings
+							//-----------------------------
 							
+							// legge le coppie di timbrature valide 
+							List<PairStamping> pairStampings = PersonDay.PairStamping.getValidPairStamping(personDay.stampings);
 							
-						}
-					}
+							// se c'è una timbratura guardo se è entro il turno
+							if ((personDay.stampings.size() == 1) &&
+								((personDay.stampings.get(0).isIn() && personDay.stampings.get(0).date.toLocalTime().isAfter(startShift)) || 
+								(personDay.stampings.get(0).isOut() && personDay.stampings.get(0).date.toLocalTime().isBefore(startShift)) )) {
+								
+								String stamp = (personDay.stampings.get(0).isIn()) ? personDay.stampings.get(0).date.toLocalTime().toString("HH:mm").concat("- **:**") : "- **:**".concat(personDay.stampings.get(0).date.toLocalTime().toString("HH:mm"));
+									
+								badStampingDays2 = (inconsistentAbsence2.contains(personName, thBadStampings)) ? inconsistentAbsence2.get(personName, thBadStampings) : new ArrayList<String>();
+								badStampingDays2.add(personShiftDay.date.toString("dd MMM").concat(" -> ").concat(stamp));
+								inconsistentAbsence2.put(personName, thBadStampings, badStampingDays2);
+									
+							// se è vuota -> manca qualche timbratura		
+							} else if (pairStampings.isEmpty()) {							
+									
+								Logger.info("Il turno di %s è incompatibile con la sue  timbrature disallineate nel giorno %s", personName, personDay.date);
+								
+								/*badStampingDays = (inconsistentAbsence.contains(personName, thBadStampings)) ? inconsistentAbsence.get(personName, thBadStampings) : new ArrayList<Integer>();
+								badStampingDays.add(personShiftDay.date.getDayOfMonth());
+								inconsistentAbsence.put(personName, thBadStampings, badStampingDays);*/
+								
+								badStampingDays2 = (inconsistentAbsence2.contains(personName, thBadStampings)) ? inconsistentAbsence2.get(personName, thBadStampings) : new ArrayList<String>();
+								badStampingDays2.add(personShiftDay.date.toString("dd MMM"));
+								inconsistentAbsence2.put(personName, thBadStampings, badStampingDays2);
+							
+							// controlla che le coppie di timbrature coprano
+							// gli intervalli di prima e dopo pranzo
+							} else {
+								
+								boolean okBeforeLunch = false;  // intervallo prima di pranzo coperto
+								boolean okAfterLunch = false;	// intervallo dopo pranzo coperto
+											
+								// per ogni coppia di timbrature
+								for (PairStamping pairStamping : pairStampings) {
+									
+									// controlla se interseca l'intervallo prima e dopo pranzo del turno
+									// controlla se interseca la coppia di timbrature
+									 if (pairStamping.out.date.toLocalTime().isAfter(startShift) && pairStamping.in.date.toLocalTime().isBefore(startLunchTime)) {
+										 okBeforeLunch = true;
+									 }
+									 if (pairStamping.out.date.toLocalTime().isAfter(endLunchTime) && pairStamping.in.date.toLocalTime().isBefore(endShift)) {
+										 okAfterLunch = true;
+									 }
+								}
+								
+								// se non ha coperto i due intervalli da errore
+								if (!okBeforeLunch || !okAfterLunch) {
+									
+									Logger.info("Il turno di %s nel giorno %s non è stato completato o c'è stata una uscita fuori pausa pranzo - entrata alle %s, uscita alle %s - " +
+											"pausa pranzo da %s a %s", personName, personDay.date, pairStampings.get(0).in.date.toString("HH:mm"), pairStampings.get(1).out.date.toString("HH:mm"), pairStampings.get(0).out.date.toString("HH:mm"), pairStampings.get(1).in.date.toString("HH:mm"));
+								
+									/*badStampingDays = (inconsistentAbsence.contains(personName, thBadStampings)) ? inconsistentAbsence.get(personName, thBadStampings) : new ArrayList<Integer>();
+									badStampingDays.add(personShiftDay.date.getDayOfMonth());
+									inconsistentAbsence.put(personName, thBadStampings, badStampingDays);*/
+									
+									badStampingDays2 = (inconsistentAbsence2.contains(personName, thBadStampings)) ? inconsistentAbsence2.get(personName, thBadStampings) : new ArrayList<String>();
+									badStampingDays2.add(personShiftDay.date.toString("dd MMM").concat(" -> ").concat(pairStampings.get(0).in.date.toString("HH:mm").concat("-").concat(pairStampings.get(0).out.date.toString("HH:mm")).concat("  ")).concat(pairStampings.get(1).in.date.toString("HH:mm").concat("-").concat(pairStampings.get(1).out.date.toString("HH:mm"))));
+									inconsistentAbsence2.put(personName, thBadStampings, badStampingDays2);
+								}
+							} // fine controllo coppie timbrature
+						} // fine if esistenza timbrature
+					} // fine se non è giorno festivo
 					
 					// check for absences
 					if (!personDay.absences.isEmpty()) {
 						for (Absence absence : personDay.absences) {
 							if (absence.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay) {
-								Logger.info("Il turno di %s %s è incompatibile con la sua assenza nel giorno %s", person.name, person.surname, personShiftDay.date);
-								inconsistentAbsence.put(person.name.concat(" ").concat(person.surname), personShiftDay.date.getDayOfMonth(), "assenza" );
+								Logger.info("Il turno di %s è incompatibile con la sua assenza nel giorno %s", personName, personShiftDay.date);
+								
+								/*absenceDays = (inconsistentAbsence.contains(personName, thAbsences)) ? inconsistentAbsence.get(personName, thAbsences) : new ArrayList<Integer>();							
+								absenceDays.add(personShiftDay.date.getDayOfMonth());							
+								inconsistentAbsence.put(personName, thAbsences, absenceDays);*/
+								
+								absenceDays2 = (inconsistentAbsence2.contains(personName, thAbsences)) ? inconsistentAbsence2.get(personName, thAbsences) : new ArrayList<String>();							
+								absenceDays2.add(personShiftDay.date.toString("dd MMM"));							
+								inconsistentAbsence2.put(personName, thAbsences, absenceDays2);
 							}
 						}
 					}	
-				}
+				} // fine personDay != null
 				
-				//Se la persona è assente in questo giorno non può essere in turno (almeno che non sia cancellato)
-				if (Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date = ? and pd.person = ?", personShiftDay.date, person).fetch().size() > 0) {
-					
-					inconsistentAbsence.put(person.name.concat(" ").concat(person.surname), personShiftDay.date.getDayOfMonth(), personShiftDay.shiftType.type );
-					Logger.debug("Il turno di %s %s è incompatibile con la sua assenza nel giorno %s", person.name, person.surname, personShiftDay.date);
-					
-				}
 			}
 		}
 	
 		shiftMonth = builder.build();
 		
-		//Table<Person, String, Integer> shiftSumDays = HashBasedTable.<Person, String, Integer>create();
-		//  Used TreeBasedTable becouse of the alphabetical name order
-		Table<String, String, Integer> shiftSumDays = TreeBasedTable.<String, String, Integer>create();
-		
-		
+
 		// for each person
 		for (Person person: shiftMonth.rowKeySet()) {
 			String personName = person.surname + " " + person.name;
@@ -464,14 +559,14 @@ public class Shift extends Controller{
 						
 					int n = shiftSumDays.contains(personName, shiftType) ? shiftSumDays.get(personName, shiftType) + 1 : 1;
 					shiftSumDays.put(personName, shiftType, Integer.valueOf(n));
-					Logger.debug("inserito turno per %s, %s %s", person, shiftType, n);
 				} 
 			}
-			
 		}
 	
+		ArrayList<String> ths = new ArrayList<String>(Arrays.asList(thAbsences, thNoStampings, thBadStampings));
+		
 		LocalDate today = new LocalDate();
-		renderPDF(today, firstOfMonth, shiftSumDays, inconsistentAbsence);
+		renderPDF(today, firstOfMonth, shiftSumDays, inconsistentAbsence2, ths);
 	}
 
 	/**
@@ -538,14 +633,14 @@ public class Shift extends Controller{
 			// legge i giorni di turno del tipo 'type' da inizio a fine mese 
 			List<PersonShiftDay> personShiftDays = 
 				PersonShiftDay.find("SELECT prd FROM PersonShiftDay prd WHERE date BETWEEN ? AND ? AND prd.shiftType = ? ORDER by date, prd.shiftTimeTable.startShift", firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue(), shiftType).fetch();
-			Logger.debug("Trovati %d turni di tipo %s",personShiftDays.size(), type);
+				//Logger.debug("Trovati %d turni di tipo %s",personShiftDays.size(), type);
 			
 			for (PersonShiftDay personShiftDay : personShiftDays) {
 				Person person = personShiftDay.personShift.person;
 				PSD psd = new PSD(personShiftDay.shiftType.type, personShiftDay.getShiftSlot());
 					
 				builder.put(person, personShiftDay.date.getDayOfMonth(), psd);
-				Logger.debug("Inserito in shiftCalendarMonth %s %s turno %s di %s", person, personShiftDay.date.getDayOfMonth(), psd.tipoTurno, psd.fasciaTurno);
+				//Logger.debug("Inserito in shiftCalendarMonth %s %s turno %s di %s", person, personShiftDay.date.getDayOfMonth(), psd.tipoTurno, psd.fasciaTurno);
 			}
 			
 			//legge i turni cancellati e li registra nella tabella mensile
@@ -555,7 +650,7 @@ public class Shift extends Controller{
 			SD shift = new SD (null, null);
 			for (ShiftCancelled sc: shiftsCancelled) {
 				shiftCalendar.put(type, sc.date.getDayOfMonth(), shift);
-				Logger.debug("trovato turno cancellato di tipo %s del %s", type, sc.date);
+				//Logger.debug("trovato turno cancellato di tipo %s del %s", type, sc.date);
 			}
 		}
 		
@@ -573,13 +668,13 @@ public class Shift extends Controller{
 				if (shiftCalendarMonth.contains(person, day)) {
 					currShift = shiftCalendarMonth.get(person, day).tipoTurno;
 					ShiftSlot f = shiftCalendarMonth.get(person, day).fasciaTurno;
-					Logger.debug("trovato turno (%s,%s) per (%s, %s)", currShift, f, person, day);
+					//Logger.debug("trovato turno (%s,%s) per (%s, %s)", currShift, f, person, day);
 					
 					
 					if (!shiftCalendar.contains(currShift, day)) {
 						shift = (shiftCalendarMonth.get(person, day).fasciaTurno.equals(ShiftSlot.MORNING)) ? new SD (person, null) : new SD (null, person);
 						shiftCalendar.put(currShift, day, shift);
-						Logger.debug("creato shift (%s, %s) con shift.mattina=%s e shift.pomeriggio=%s", currShift, day, shift.mattina, shift.pomeriggio);
+						//Logger.debug("creato shift (%s, %s) con shift.mattina=%s e shift.pomeriggio=%s", currShift, day, shift.mattina, shift.pomeriggio);
 					} else {
 						shift = shiftCalendar.get(currShift, day);
 						if (shiftCalendarMonth.get(person, day).fasciaTurno.equals(ShiftSlot.MORNING)) {

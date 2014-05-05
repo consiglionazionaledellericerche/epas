@@ -576,7 +576,7 @@ public class Reperibility extends Controller {
 			for (PersonReperibilityDay personReperibilityDay : personReperibilityDays) {
 				Person person = personReperibilityDay.personReperibility.person;
 				
-				builder.put(person, personReperibilityDay.date.getDayOfMonth(), person.isHoliday(personReperibilityDay.date) ? "fs" : "fr");
+				builder.put(person, personReperibilityDay.date.getDayOfMonth(), person.isHoliday(personReperibilityDay.date) ? "FS" : "FR");
 			}
 			reperibilityMonth = builder.build();
 			reperibilityMonths.add(reperibilityMonth);
@@ -671,6 +671,15 @@ public class Reperibility extends Controller {
 		// for each person contains days with absences and no-stamping  matching the reperibility days 
 		Table<String, String, List<Integer>> inconsistentAbsence = TreeBasedTable.<String, String, List<Integer>>create();		
 		
+		String thNoStampings = "Mancata timbratura";
+		String thAbsences = "Assenza";
+		
+		// read the reperebility type codes (feriali o festivi)
+		CompetenceCode codeFR = CompetenceCode.findById(2L); // feriali
+		CompetenceCode codeFS = CompetenceCode.findById(3L); // festivi
+		String codFr = codeFR.code;
+		String codFs = codeFS.code;
+				
 				
 		PersonReperibilityType reperibilityType = PersonReperibilityType.findById(reperibilityId);	
 		if (reperibilityType == null) {
@@ -687,13 +696,9 @@ public class Reperibility extends Controller {
 			.setParameter("reperibilityType", reperibilityType)
 			.getResultList();
 		
-		String thNoStampings = "mancata timbratura";
-		String thAbsences = "assenza";
-		
 		// lista dei giorni di assenza e mancata timbratura
 		List<Integer> noStampingDays = new ArrayList<Integer>();
 		List<Integer> absenceDays = new ArrayList<Integer>();
-		Logger.debug("Inizializzato noStampingDays=%s e absenceDays=%s", noStampingDays.toString(), absenceDays.toString());
 		
 		for (PersonReperibilityDay personReperibilityDay : personReperibilityDays) {
 			Person person = personReperibilityDay.personReperibility.person;
@@ -701,7 +706,8 @@ public class Reperibility extends Controller {
 			String personName = person.name.concat(" ").concat(person.surname);
 			
 			// record the reperibility days
-			builder.put(person, personReperibilityDay.date.getDayOfMonth(), person.isHoliday(personReperibilityDay.date) ? "fs" : "fr");
+			builder.put(person, personReperibilityDay.date.getDayOfMonth(), person.isHoliday(personReperibilityDay.date) ? codFs : codFr);
+			
 			
 			//check for the absence inconsistencies
 			//------------------------------------------
@@ -776,7 +782,7 @@ public class Reperibility extends Controller {
 						((dayOfMonth - 1) != previousPersonReperibilityDay.giorno)) { 		
 							currentPersonReperibilityPeriod = new PRP (dayOfMonth, dayOfMonth, shortMonth, reperibilityMonth.get(person, dayOfMonth));
 					
-							if (currentPersonReperibilityPeriod.tipo == "fs") {
+							if (currentPersonReperibilityPeriod.tipo == codFs) {
 								fsPeriods.add(currentPersonReperibilityPeriod);
 							} else {
 								frPeriods.add(currentPersonReperibilityPeriod);
@@ -789,15 +795,9 @@ public class Reperibility extends Controller {
 				}
 			}
 			
-			reperibilityDateDays.put(personName, "FS", fsPeriods);
-			reperibilityDateDays.put(personName, "FR", frPeriods);
+			reperibilityDateDays.put(personName, codFs, fsPeriods);
+			reperibilityDateDays.put(personName, codFr, frPeriods);
 		}
-		
-		// read the reperebility type codes (feriali o festivi)
-		CompetenceCode codeFR = CompetenceCode.findById(2L); // feriali
-		CompetenceCode codeFS = CompetenceCode.findById(3L); // festivi
-		String codFr = codeFR.code;
-		String codFs = codeFS.code;
 		
 		
 		

@@ -18,4 +18,14 @@ public enum ShiftSlot {
 	public String getName() {
 		return name;
 	}
+	
+	public static ShiftSlot getEnum(String name) {
+		for (ShiftSlot shiftSlot : values()) {
+			if (shiftSlot.getName().equals(name)) {
+				return shiftSlot;
+			}
+		}
+		throw new IllegalArgumentException(String.format("ShiftSlot with name = %s not found", name));
+	}
+
 }

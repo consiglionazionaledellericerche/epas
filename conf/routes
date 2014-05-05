@@ -221,6 +221,7 @@ GET		/reperibility/{type}/whoIsAbsent/{<(19|20)\d\d>yearFrom}/{<(0[1-9]|1[012])>
 
 #Gestione turni (sist-org)
 GET		/shift/{type}/personList																		Shift.personList
+GET		/shift/{type}/timeTable																			Shift.timeTable
 GET		/shift/{type}/find/{<(19|20)\d\d>yearFrom}/{<(0[1-9]|1[012])>monthFrom}/{<(0[1-9]|[12][0-9]|3[01])>dayFrom}/{<(19|20)\d\d>yearTo}/{<(0[1-9]|1[012])>monthTo}/{<(0[1-9]|[12][0-9]|3[01])>dayTo}	Shift.find
 GET 	/shift/{type}/exportMonthAsPDF/{<(19|20)\d\d>year}/{<(0[1-9]|1[012])>month}						Shift.exportMonthAsPDF
 GET 	/shift/{type}/exportMonthCalAsPDF/{<(19|20)\d\d>year}/{<(0[1-9]|1[012])>month}					Shift.exportMonthCalAsPDF

@@ -55,27 +55,6 @@
 			}%
 			</table>
 			</div>
-			
-			<div class="note">
-			%{
-				if (inconsistentAbsence != null) {
-			}%
-					<h2>Attenzione! </h2>
-			    	<h3>E' stata rilevata una inconsistenza con le presenze del personale </h3>
-			    	<ul>
-			%{    	
-				for(person in inconsistentAbsence.rowKeySet()) {
-					for(day in inconsistentAbsence.columnKeySet()) {
-
-			}%
-
-					<li><em>${person}</em> risulta assente il giorno ${day} ${mese} ${anno} e in turno di tipo ${inconsistentAbsence.get(person, day)}</li>
-			%{
-					}
-				}
-				}
-			}%
-      		</div>
       		
       		
       		<div class="date">
@@ -90,6 +69,71 @@
       			<strong>Il Responsabile</strong><br />
       			Dott. Maurizio Martinelli
       		</div>
+      		
+      		
+      		%{
+				if (!inconsistentAbsence2.isEmpty()) {
+				
+				fistTr = true;
+			}%
+					<div class="note_presenze">
+					<h1>Inconsistenze con le presenze del personale </h1>
+			    	<p>Sono state rilevate delle inconsistenze tra i turni e le presenze del personale: </p>
+			    	
+			    	<table class="mensile">
+			    		<tr>
+			    		<th>Nome dipendente</th>
+			 %{
+					for(th in ths) {
+			 }%  
+			    		<th>${th} </th> 
+			%{
+					}
+			 }%  
+			
+			%{
+					for(person in inconsistentAbsence2.rowKeySet()) {
+			}%
+						<tr>
+							<td>${person}</td>
+			%{
+							for(th in ths) {
+								if (inconsistentAbsence2.contains(person, th)) {
+			}%
+							<td> 
+			%{
+								for(day in inconsistentAbsence2.get(person, th)) {
+			}%
+								${day}<br/>
+			%{
+    							}
+			}%
+							</td>
+			%{
+		    					} else {
+		    }%
+		  					<td>&nbsp;</td>
+		  	%{
+		  						}
+				
+							}
+			}%
+		    			</tr>
+		    %{
+		    		}
+		  	}%
+		  	
+		  	</table>
+						
+      		</div>
+      		
+      		<div class="date">
+      			<strong>Data</strong> &nbsp;&nbsp;${today.getDayOfMonth()}/${today.getMonthOfYear()}/${today.getYear()}
+      		</div>
+      		
+		  	%{
+		    	}						
+			}%
       		
     </body>
 </html>
