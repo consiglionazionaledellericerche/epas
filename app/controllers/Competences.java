@@ -18,6 +18,7 @@ import models.CompetenceCode;
 import models.Person;
 import models.PersonDay;
 import models.TotalOvertime;
+import models.User;
 import models.rendering.PersonMonthCompetenceRecap;
 
 import org.joda.time.LocalDate;
@@ -39,18 +40,19 @@ import dao.PersonDao;
 public class Competences extends Controller{
 
 	@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void competences(Long personId, int year, int month) {
-		
-		Person person = Security.getSelfPerson(personId);
-		if( person == null ) {
+	public static void competences(int year, int month) {
+
+		//controllo dei parametri
+		User user = Security.getUser();
+		if( user == null || user.person == null ) {
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
 		}
 
-		PersonMonthCompetenceRecap personMonthCompetenceRecap = new PersonMonthCompetenceRecap(person, month, year);
-		String month_capitalized = DateUtility.fromIntToStringMonth(month);
-		
-		render(personMonthCompetenceRecap, person, month_capitalized);
+		PersonMonthCompetenceRecap personMonthCompetenceRecap = new PersonMonthCompetenceRecap(user.person, month, year);
+
+		Person person = user.person;
+		render(personMonthCompetenceRecap, person, year, month);
 
 	}
 
@@ -214,42 +216,50 @@ public class Competences extends Controller{
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
-	public static void totalOvertimeHours(int year, int month){
+	public static void totalOvertimeHours(int year){
 		List<TotalOvertime> totalList = TotalOvertime.find("Select tot from TotalOvertime tot where tot.year = ?", year).fetch();
 
 		int totale = 0;
 		for(TotalOvertime tot : totalList) {
-			totale = totale+tot.numberOfHours;
+			
+			totale = totale + tot.numberOfHours;
 		}
 
-		Logger.debug("la lista di monte ore per l'anno %s è %s", year, totalList);
-		render(totalList, totale, year, month);
+		render(totalList, totale, year);
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
-	public static void saveOvertime(int year, int month){
+	public static void saveOvertime(int year){
 		TotalOvertime total = new TotalOvertime();
 		LocalDate data = new LocalDate();
 		total.date = data;
 		total.year = data.getYear();
 
 		String numeroOre = params.get("numeroOre");
-		if(numeroOre.startsWith("-")){
+		try {
+			if(numeroOre.startsWith("-")) {
 
-			total.numberOfHours = - new Integer(numeroOre.substring(1, numeroOre.length()));
+				total.numberOfHours = - new Integer(numeroOre.substring(1, numeroOre.length()));
+			}
+			else if(numeroOre.startsWith("+")) {
 
+				total.numberOfHours = new Integer(numeroOre.substring(1, numeroOre.length()));
+			}
+			else {
+				
+				flash.error("Inserire il segno (+) o (-) davanti al numero di ore da aggiungere (sottrarre)");
+				Competences.totalOvertimeHours(year);
+			}
 		}
-		else if(numeroOre.startsWith("+")){
+		catch (Exception e) {
 
-			total.numberOfHours = new Integer(numeroOre.substring(1, numeroOre.length()));
+			flash.error("Inserire il segno (+) o (-) davanti al numero di ore da aggiungere (sottrarre)");
+			Competences.totalOvertimeHours(year);
 		}
-		else {
-			flash.error(String.format("Format unexpected"));
-			Competences.totalOvertimeHours(year, month);
-		}
+		
 		total.save();
 		flash.success(String.format("Aggiornato monte ore per l'anno %s", data.getYear()));
-		Competences.totalOvertimeHours(year, month);
+		Competences.totalOvertimeHours(year);
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
@@ -331,24 +341,32 @@ public class Competences extends Controller{
 	/**
 	 * funzione che ritorna la tabella contenente le competenze associate a ciascuna persona
 	 */
-	public static void recapCompetences(String name, Integer page){
-		
-		if(page == null)
-			page = 0;
+	public static void enabledCompetences(String name){
+
 		LocalDate date = new LocalDate();
+		
 		
 		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
 				Sets.newHashSet(Security.getOfficeAllowed()), 
 				false, 
 				date, 
 				date.dayOfMonth().withMaximumValue());
-
-		List<Person> personList = simpleResults.paginated(page).getResults();
-//		List<Person> personList = Person.getTechnicianForCompetences(date, Security.getUser().person.getOfficeAllowed());
+		
+		//List<Person> personList = simpleResults.paginated(page).getResults();
+		List<Person> personList = simpleResults.list();
+		
 		ImmutableTable.Builder<Person, String, Boolean> builder = ImmutableTable.builder();
 		Table<Person, String, Boolean> tableRecapCompetence = null;
-		List<CompetenceCode> codeList = CompetenceCode.findAll();
-		for(Person p : personList){
+		List<CompetenceCode> allCodeList = CompetenceCode.findAll();
+		List<CompetenceCode> codeList = new ArrayList<CompetenceCode>();
+		for(CompetenceCode compCode : allCodeList) {
+			
+			if( compCode.persons.size() > 0 )
+				codeList.add(compCode);
+			
+		}
+			
+		for(Person p : personList) {
 
 			for(CompetenceCode comp : codeList){
 				if(p.competenceCode.contains(comp)){
@@ -357,10 +375,9 @@ public class Competences extends Controller{
 				else{
 					builder.put(p, comp.description+'\n'+comp.code, false);
 				}
-
 			}
-
 		}
+		
 		tableRecapCompetence = builder.build();
 		int month = date.getMonthOfYear();
 		int year = date.getYear();
@@ -372,7 +389,9 @@ public class Competences extends Controller{
 	 * @param personId render della situazione delle competenze per la persona nella form updatePersonCompetence
 	 */
 	public static void updatePersonCompetence(Long personId){
+		
 		if(personId != null){
+			
 			Person person = Person.findById(personId);
 			render(person);
 		}
@@ -617,7 +636,7 @@ public class Competences extends Controller{
 		}
 		person.save();
 		flash.success(String.format("Aggiornate con successo le competenze per %s %s", person.name, person.surname));
-		Competences.recapCompetences(null, null);
+		Competences.enabledCompetences(null);
 
 	}
 	

@@ -10,6 +10,7 @@ import javax.validation.Valid;
 import models.Contract;
 import models.Person;
 import models.PersonMonthRecap;
+import models.User;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 
 import org.joda.time.LocalDate;
@@ -22,22 +23,23 @@ import play.mvc.With;
 public class PersonMonths extends Controller{
 	
 	@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void hourRecap(Long personId,int year){
+	public static void hourRecap(int year){
 
-		Person person = Security.getSelfPerson(personId);
-		if( person == null ) {
+		//controllo dei parametri
+		User user = Security.getUser();
+		if( user == null || user.person == null ) {
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
 		}
-		
+
 		if(year > new LocalDate().getYear()){
 			flash.error("Richiesto riepilogo orario di un anno futuro. Impossibile soddisfare la richiesta");
 			renderTemplate("Application/indexAdmin.html");
 		}
 		
-		Contract contract = person.getCurrentContract();
+		Contract contract = user.person.getCurrentContract();
 		CalcoloSituazioneAnnualePersona csap = new CalcoloSituazioneAnnualePersona(contract, year, null);
-		render(csap, person, year);	
+		render(csap, user.person, year);	
 	}
 
 	@Check(Security.VIEW_PERSONAL_SITUATION)

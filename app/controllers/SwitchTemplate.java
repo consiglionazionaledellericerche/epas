@@ -234,12 +234,12 @@ public class SwitchTemplate extends Controller{
 		
 		if(action.equals("PersonMonths.hourRecap")) {
 			
-			PersonMonths.hourRecap(personId, year);
+			PersonMonths.hourRecap(year);
 		}
 		
 		if(action.equals("Vacations.show")) {
 			
-			Vacations.show(personId, year);
+			Vacations.show(year);
 		}
 		
 		if(action.equals("Persons.changePassword")) {
@@ -254,13 +254,41 @@ public class SwitchTemplate extends Controller{
 		
 		if(action.equals("YearlyAbsences.absencesPerPerson")) {
 			
-			YearlyAbsences.absencesPerPerson(personId, year);
+			YearlyAbsences.absencesPerPerson(year);
+		}
+		
+		if(action.equals("Competences.competences")) {
+			
+			Competences.competences(year, month);
 		}
 		
 		if(action.equals("Competences.showCompetences")) {
 			
 			Competences.showCompetences(year, month, null,  null,  null);
 		}
+		
+		if(action.equals("Competences.overtime")) {
+			
+			Competences.overtime(year, month, null,  null);
+		}
+		
+		if(action.equals("Competences.totalOvertimeHours")) {
+			
+			Competences.totalOvertimeHours(year);
+		}
+		
+		if(action.equals("Competences.enabledCompetences")) {
+			
+			Competences.enabledCompetences(null);
+		}
+		
+		if(action.equals("Competences.exportCompetences")) {
+			
+			Competences.exportCompetences();
+		}
+		
+		
+		
 		
 	}
 	

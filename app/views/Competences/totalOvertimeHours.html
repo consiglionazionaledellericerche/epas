@@ -1,49 +1,66 @@
-#{extends 'main_with_navbar.html' /}
-#{set titolo: 'Gestione straordinari e altre competenze' /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Monte ore straordinario'  /}
   
- <ul class="nav nav-tabs">
-  <li><a href="@{Competences.showCompetences(year,month)}#">Competenze</a></li>
-  <li><a href="@{Competences.overtime(year, month)}#">Straordinari</a></li>
-  <li class="active"><a href="@{Competences.totalOvertimeHours(year, month)}#">Monte ore</a></li>
-  <li><a href="@{Competences.recapCompetences()}#">Recap competenze</a></li>
-  <li><a href="@{Competences.exportCompetences()}#">Esporta competenze</a></li>
-</ul>
+<div id="container-fluid-nav-tabs" class="container-fluid">
+  <ul class="nav nav-tabs">
+    <li><a href="@{Competences.showCompetences(year, session.get("monthSelected") )}">Assegna Competenze</a></li>
+    <li><a href="@{Competences.overtime(year, session.get("monthSelected") )}">Straordinari</a></li>
+    <li class="active"><a href="@{Competences.totalOvertimeHours(year)}">Monte ore</a></li>
+    <li><a href="@{Competences.enabledCompetences()}">Abilita Competenze</a></li>
+    <li><a href="@{Competences.exportCompetences()}">Esporta competenze</a></li>
+  </ul>
+</div>
 
-#{form @Competences.saveOvertime()}
+<div class="container-fluid">
+  <div class="panel panel-info col-xs-12 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3">
+      <div class="panel-heading">
+        <h3 class="panel-title">Modifica del monte ore di straordinario del ${year}</h3>
+      </div>
+      <div class="panel-body">
+ 
+ 
+        #{form @Competences.saveOvertime()}
 
-<fieldset>
-  <legend>Modifica del monte ore di straordinario del ${year}</legend>
- <input type="hidden" name="year" value="${year}"/>
-	<input type="hidden" name="month" value="${month}"/>
-    #{if totalList.size()!=0}
-      <table class="table table-condensed table-striped table-small">
-	    <tr>
-	      <th>Quando</th>
-	      <th>Ore definite</th>
-	    </tr>
-		#{list items:totalList, as:'tot'}
-	    <tr>
-	      <td>${tot.date}</td>
-	      <td>${tot.numberOfHours}</td>
-	    </tr>
-	    #{/list}
-      </table>
-	#{/if}
-	    
+          <input type="hidden" name="year" value="${year}"/>
+	
+          #{if totalList.size()!=0}
+            <table class="table table-condensed table-hover">
+	          <tr>
+	            <th>Quando</th>
+	            <th>Ore definite</th>
+	          </tr>
+		      #{list items:totalList, as:'tot'}
+	          <tr>
+	            <td>${tot.date}</td>
+	            <td>${tot.numberOfHours}</td>
+	          </tr>
+	          #{/list}
+	          
+	          <tr class="success">
+	            <td><strong>Totale monte ore definite</strong></td>
+	            <td><strong>${totale}</strong></td>
+	          
+	          </tr>
+            </table>
+	      #{/if}
+		  <div class="center">
+		    <input type="text" name="numeroOre" />
+            <input type="submit" value="Salva" />
+		  </div>	    	    
+    
+          <br>
+          <p class="text-info"><i class="fa fa-exclamation-circle fa-lg"></i> <em>Inserire un incremento (segno +) o una diminuizione (segno -) 
+          rispetto al totale già disponibile <strong>prima</strong> del numero di ore da inserire</em>
+          </p>
+  
+        #{/form}
+ 
+      
+      </div>
+  </div>
+</div>
 
-		
-	    
-	    	
-    <p>Totale monte ore definite:<b>${totale}</b>
-    </p>
-    
-    <p id="inserimentoMonteOre">Inserire un incremento (segno +) o una diminuizione (segno -) rispetto al totale già disponibile prima del numero di ore da inserire</p>
-    
-    <input type="text" name="numeroOre" value="${}"/>
-    
-    <input id="" type="submit" value="Salva" />
-    
-</fieldset>
-   #{/form}
+
     
     
