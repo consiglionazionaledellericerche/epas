@@ -209,7 +209,7 @@ public class SwitchTemplate extends Controller{
 
 	}
 	
-	private static void executeAction(String action) {
+private static void executeAction(String action) {
 		
 		Integer year = Integer.parseInt(session.get("yearSelected"));
 		Integer month = Integer.parseInt(session.get("monthSelected"));

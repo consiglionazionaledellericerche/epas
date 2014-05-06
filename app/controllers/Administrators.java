@@ -6,6 +6,7 @@ import java.util.List;
 import models.Permission;
 import models.Person;
 import models.User;
+import models.UsersPermissionsOffices;
 import play.Play;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -67,118 +68,235 @@ public class Administrators extends Controller {
 		String uploadSituation = params.get("uploadSituation");
 		if(viewPersonList.equals("true") && !user.isViewPersonAvailable()){
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "viewPersonList").first();
-			user.permissions.add(p);
+			UsersPermissionsOffices upo = new UsersPermissionsOffices();
+			upo.permission = p;
+			upo.user = user;
+			upo.office = user.person.office;
+			upo.save();			
+			user.userPermissionOffices.add(upo);
 		}
 		else if(viewPersonList.equals("false") && user.isViewPersonAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "viewPersonList").first();
-			user.permissions.remove(p);
+			UsersPermissionsOffices upo = UsersPermissionsOffices.find("Select upo from UsersPermissionsOffices upo where" +
+					" upo.user = ? and upo.office = ? and upo.permission.description = ?", user, user.person.office, "viewPersonList").first();
+			//Permission p = Permission.find("Select p from Permission p where p.description = ? ", "viewPersonList").first();
+			//user.permissions.remove(p);
+			user.userPermissionOffices.remove(upo);
 		}
 		
 		if(insertAndUpdatePerson.equals("true") && !user.isInsertAndUpdatePersonAvailable()){
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdatePerson").first();
-			user.permissions.add(p);
+			UsersPermissionsOffices upo = new UsersPermissionsOffices();
+			upo.permission = p;
+			upo.user = user;
+			upo.office = user.person.office;
+			upo.save();			
+			user.userPermissionOffices.add(upo);
+	//		user.permissions.add(p);
 		}
 		else if(insertAndUpdatePerson.equals("false") && user.isInsertAndUpdatePersonAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdatePerson").first();
-			user.permissions.remove(p);
+	//		Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdatePerson").first();
+	//		user.permissions.remove(p);
+			UsersPermissionsOffices upo = UsersPermissionsOffices.find("Select upo from UsersPermissionsOffices upo where" +
+					" upo.user = ? and upo.office = ? and upo.permission.description = ?", user, user.person.office, "insertAndUpdatePerson").first();
+			user.userPermissionOffices.remove(upo);
 		}
 		
 		if(deletePerson.equals("true") && !user.isDeletePersonAvailable()){
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "deletePerson").first();
-			user.permissions.add(p);
+			UsersPermissionsOffices upo = new UsersPermissionsOffices();
+			upo.permission = p;
+			upo.user = user;
+			upo.office = user.person.office;
+			upo.save();			
+			user.userPermissionOffices.add(upo);
+	//		user.permissions.add(p);
 		}
 		else if(deletePerson.equals("false") && user.isDeletePersonAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "deletePerson").first();
-			user.permissions.remove(p);
+//			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "deletePerson").first();
+//			user.permissions.remove(p);
+			UsersPermissionsOffices upo = UsersPermissionsOffices.find("Select upo from UsersPermissionsOffices upo where" +
+					" upo.user = ? and upo.office = ? and upo.permission.description = ?", user, user.person.office, "deletePerson").first();
+			user.userPermissionOffices.remove(upo);
 		}
 		
 		if(insertAndUpdateStamping.equals("true") && !user.isInsertAndUpdateStampingAvailable()){
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateStamping").first();
-			user.permissions.add(p);
+			UsersPermissionsOffices upo = new UsersPermissionsOffices();
+			upo.permission = p;
+			upo.user = user;
+			upo.office = user.person.office;
+			upo.save();			
+			user.userPermissionOffices.add(upo);
+	//		user.permissions.add(p);
 		}
 		else if(insertAndUpdateStamping.equals("false") && user.isInsertAndUpdateStampingAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateStamping").first();
-			user.permissions.remove(p);
+//			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateStamping").first();
+//			user.permissions.remove(p);
+			UsersPermissionsOffices upo = UsersPermissionsOffices.find("Select upo from UsersPermissionsOffices upo where" +
+					" upo.user = ? and upo.office = ? and upo.permission.description = ?", user, user.person.office, "insertAndUpdateStamping").first();
+			user.userPermissionOffices.remove(upo);
 		}
 		
 		if(insertAndUpdatePassword.equals("true") && !user.isInsertAndUpdatePasswordAvailable()){
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdatePassword").first();
-			user.permissions.add(p);
+			UsersPermissionsOffices upo = new UsersPermissionsOffices();
+			upo.permission = p;
+			upo.user = user;
+			upo.office = user.person.office;
+			upo.save();			
+			user.userPermissionOffices.add(upo);
+	//		user.permissions.add(p);
 		}	
 		else if(insertAndUpdatePassword.equals("false") && user.isInsertAndUpdatePasswordAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdatePassword").first();
-			user.permissions.remove(p);
+//			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdatePassword").first();
+//			user.permissions.remove(p);
+			UsersPermissionsOffices upo = UsersPermissionsOffices.find("Select upo from UsersPermissionsOffices upo where" +
+					" upo.user = ? and upo.office = ? and upo.permission.description = ?", user, user.person.office, "insertAndUpdatePassword").first();
+			user.userPermissionOffices.remove(upo);
 		}
 		
 		if(insertAndUpdateWorkingTime.equals("true") && !user.isInsertAndUpdateWorkinTimeAvailable()){
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateWorkingTime").first();
-			user.permissions.add(p);
+			UsersPermissionsOffices upo = new UsersPermissionsOffices();
+			upo.permission = p;
+			upo.user = user;
+			upo.office = user.person.office;
+			upo.save();			
+			user.userPermissionOffices.add(upo);
+	//		user.permissions.add(p);
 		}	
 		else if(insertAndUpdateWorkingTime.equals("false") && user.isInsertAndUpdateWorkinTimeAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateWorkingTime").first();
-			user.permissions.remove(p);
+//			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateWorkingTime").first();
+//			user.permissions.remove(p);
+			UsersPermissionsOffices upo = UsersPermissionsOffices.find("Select upo from UsersPermissionsOffices upo where" +
+					" upo.user = ? and upo.office = ? and upo.permission.description = ?", user, user.person.office, "insertAndUpdateWorkingTime").first();
+			user.userPermissionOffices.remove(upo);
 		}
 		
 		if(insertAndUpdateAbsence.equals("true") && !user.isInsertAndUpdateAbsenceAvailable()){
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateAbsence").first();
-			user.permissions.add(p);
+			UsersPermissionsOffices upo = new UsersPermissionsOffices();
+			upo.permission = p;
+			upo.user = user;
+			upo.office = user.person.office;
+			upo.save();			
+			user.userPermissionOffices.add(upo);
+	//		user.permissions.add(p);
 		}
 		else if(insertAndUpdateAbsence.equals("false") && user.isInsertAndUpdateAbsenceAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateAbsence").first();
-			user.permissions.remove(p);
+//			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateAbsence").first();
+//			user.permissions.remove(p);
+			UsersPermissionsOffices upo = UsersPermissionsOffices.find("Select upo from UsersPermissionsOffices upo where" +
+					" upo.user = ? and upo.office = ? and upo.permission.description = ?", user, user.person.office, "insertAndUpdateAbsence").first();
+			user.userPermissionOffices.remove(upo);
 		}
 		
 		if(insertAndUpdateConfiguration.equals("true") && !user.isInsertAndUpdateConfigurationAvailable()){
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateConfiguration").first();
-			user.permissions.add(p);
+			UsersPermissionsOffices upo = new UsersPermissionsOffices();
+			upo.permission = p;
+			upo.user = user;
+			upo.office = user.person.office;
+			upo.save();			
+			user.userPermissionOffices.add(upo);
+	//		user.permissions.add(p);
 		}
 		else if(insertAndUpdateConfiguration.equals("false") && user.isInsertAndUpdateConfigurationAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateConfiguration").first();
-			user.permissions.remove(p);
+//			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateConfiguration").first();
+//			user.permissions.remove(p);
+			UsersPermissionsOffices upo = UsersPermissionsOffices.find("Select upo from UsersPermissionsOffices upo where" +
+					" upo.user = ? and upo.office = ? and upo.permission.description = ?", user, user.person.office, "insertAndUpdateConfiguration").first();
+			user.userPermissionOffices.remove(upo);
 		}
 		
 		if(insertAndUpdateAdministrator.equals("true") && !user.isInsertAndUpdateAdministratorAvailable()){
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateAdministrator").first();
-			user.permissions.add(p);
+			UsersPermissionsOffices upo = new UsersPermissionsOffices();
+			upo.permission = p;
+			upo.user = user;
+			upo.office = user.person.office;
+			upo.save();			
+			user.userPermissionOffices.add(upo);
+	//		user.permissions.add(p);
 		}
 		else if(insertAndUpdateAdministrator.equals("false") && user.isInsertAndUpdateAdministratorAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateAdministrator").first();
-			user.permissions.remove(p);
+//			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateAdministrator").first();
+//			user.permissions.remove(p);
+			UsersPermissionsOffices upo = UsersPermissionsOffices.find("Select upo from UsersPermissionsOffices upo where" +
+					" upo.user = ? and upo.office = ? and upo.permission.description = ?", user, user.person.office, "insertAndUpdateAdministrator").first();
+			user.userPermissionOffices.remove(upo);
 		}
 		
 		if(insertAndUpdateOffices.equals("true") && !user.isInsertAndUpdateOfficesAvailable()){
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateOffices").first();
-			user.permissions.add(p);
+			UsersPermissionsOffices upo = new UsersPermissionsOffices();
+			upo.permission = p;
+			upo.user = user;
+			upo.office = user.person.office;
+			upo.save();			
+			user.userPermissionOffices.add(upo);
+	//		user.permissions.add(p);
 		}
 		else if(insertAndUpdateOffices.equals("false") && user.isInsertAndUpdateOfficesAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateOffices").first();
-			user.permissions.remove(p);
+//			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateOffices").first();
+//			user.permissions.remove(p);
+			UsersPermissionsOffices upo = UsersPermissionsOffices.find("Select upo from UsersPermissionsOffices upo where" +
+					" upo.user = ? and upo.office = ? and upo.permission.description = ?", user, user.person.office, "insertAndUpdateOffices").first();
+			user.userPermissionOffices.remove(upo);
+			
 		}
 		
 		if(insertAndUpdateCompetences.equals("true") && !user.isInsertAndUpdateCompetenceAndOvertimeAvailable()){
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateCompetences").first();
-			user.permissions.add(p);
+			UsersPermissionsOffices upo = new UsersPermissionsOffices();
+			upo.permission = p;
+			upo.user = user;
+			upo.office = user.person.office;
+			upo.save();			
+			user.userPermissionOffices.add(upo);
+	//		user.permissions.add(p);
 		}
 		else if(insertAndUpdateCompetences.equals("false") && user.isInsertAndUpdateCompetenceAndOvertimeAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateCompetences").first();
-			user.permissions.remove(p);
+//			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateCompetences").first();
+//			user.permissions.remove(p);
+			UsersPermissionsOffices upo = UsersPermissionsOffices.find("Select upo from UsersPermissionsOffices upo where" +
+					" upo.user = ? and upo.office = ? and upo.permission.description = ?", user, user.person.office, "insertAndUpdateCompetences").first();
+			user.userPermissionOffices.remove(upo);
 		}
 		
 		if(insertAndUpdateVacations.equals("true") && !user.isInsertAndUpdateVacationsAvailable()){
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateVacations").first();
-			user.permissions.add(p);
+			UsersPermissionsOffices upo = new UsersPermissionsOffices();
+			upo.permission = p;
+			upo.user = user;
+			upo.office = user.person.office;
+			upo.save();			
+			user.userPermissionOffices.add(upo);
+	//		user.permissions.add(p);
 		}
 		else if(insertAndUpdateVacations.equals("false") && user.isInsertAndUpdateVacationsAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateVacations").first();
-			user.permissions.remove(p);
+//			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateVacations").first();
+//			user.permissions.remove(p);
+			UsersPermissionsOffices upo = UsersPermissionsOffices.find("Select upo from UsersPermissionsOffices upo where" +
+					" upo.user = ? and upo.office = ? and upo.permission.description = ?", user, user.person.office, "insertAndUpdateVacations").first();
+			user.userPermissionOffices.remove(upo);
 		}
 		if(uploadSituation.equals("true") && !user.isUploadSituationAvailable()){
 			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "uploadSituation").first();
-			user.permissions.add(p);
+			UsersPermissionsOffices upo = new UsersPermissionsOffices();
+			upo.permission = p;
+			upo.user = user;
+			upo.office = user.person.office;
+			upo.save();			
+			user.userPermissionOffices.add(upo);
+	//		user.permissions.add(p);
 		}
 		else if(uploadSituation.equals("false") && user.isUploadSituationAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "uploadSituation").first();
-			user.permissions.remove(p);
+//			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "uploadSituation").first();
+//			user.permissions.remove(p);
+			UsersPermissionsOffices upo = UsersPermissionsOffices.find("Select upo from UsersPermissionsOffices upo where" +
+					" upo.user = ? and upo.office = ? and upo.permission.description = ?", user, user.person.office, "uploadSituation").first();
+			user.userPermissionOffices.remove(upo);
 		}
 		user.save();
 		flash.success(String.format("Aggiornati con successo i permessi per %s %s", user.person.name, user.person.surname));
@@ -189,7 +307,7 @@ public class Administrators extends Controller {
 	@Check(Security.INSERT_AND_UPDATE_ADMINISTRATOR)
 	public static void delete(Long adminId){
 		Person person = Person.findById(adminId);
-		person.user.permissions.clear();
+		person.user.userPermissionOffices.clear();
 		person.save();
 		flash.success(String.format("Eliminati i permessi per l'utente %s %s", person.name, person.surname));
 		Application.indexAdmin();

@@ -31,7 +31,7 @@ public class QConfYear extends EntityPathBase<ConfYear> {
 
     public final StringPath field = createString("field");
 
-    public final NumberPath<Integer> fieldValue = createNumber("fieldValue", Integer.class);
+    public final StringPath fieldValue = createString("fieldValue");
 
     //inherited
     public final NumberPath<Long> id = _super.id;

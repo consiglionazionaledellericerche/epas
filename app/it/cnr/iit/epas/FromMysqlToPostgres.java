@@ -34,6 +34,7 @@ import models.Stamping;
 import models.Stamping.WayType;
 import models.TotalOvertime;
 import models.User;
+import models.UsersPermissionsOffices;
 import models.VacationCode;
 import models.VacationPeriod;
 import models.ValuableCompetence;
@@ -1387,15 +1388,17 @@ public class FromMysqlToPostgres {
 		Logger.debug("Chiamata la funzione upgrade person");
 		Person person = Person.find("bySurnameAndName", "Lucchesi", "Cristian").first();
 		Logger.debug("Scelta persona: %s %s", person.name, person.surname);
-		if(person.user.permissions.size() > 0){
-			List<Permission> oldPermissions = person.user.permissions;
-			person.user.permissions.removeAll(oldPermissions);
-			List<Permission> permissionList = Permission.findAll();
-			person.user.permissions.addAll(permissionList);
+		if(person.user.userPermissionOffices.size() > 0){
+			List<UsersPermissionsOffices> oldPermissions = person.user.userPermissionOffices;
+			person.user.userPermissionOffices.removeAll(oldPermissions);
+			List<UsersPermissionsOffices> permissionList = UsersPermissionsOffices.find("Select upo from UsersPermissionsOffices upo where" +
+					" upo.user = ? and upo.office = ?", person.user, person.office).fetch();
+			person.user.userPermissionOffices.addAll(permissionList);
 		}
 		else{
-			List<Permission> permissionList = Permission.findAll();
-			person.user.permissions.addAll(permissionList);
+			List<UsersPermissionsOffices> permissionList = UsersPermissionsOffices.find("Select upo from UsersPermissionsOffices upo where" +
+					" upo.user = ? and upo.office = ?", person.user, person.office).fetch();
+			person.user.userPermissionOffices.addAll(permissionList);
 		}		
 		person.user.save();
 		person.save();
@@ -1412,8 +1415,12 @@ public class FromMysqlToPostgres {
 		Permission per = Permission.find("Select per from Permission per where per.description = ?", "viewPersonalSituation").first();
 		Logger.debug("Caricato il permesso: %s", per.description);
 		for(User u : userList){
-			u.permissions.add(per);
-			u.save();
+			UsersPermissionsOffices upo = new UsersPermissionsOffices();
+			upo.office = u.person.office;
+			upo.permission = per;
+			upo.user = u;
+			upo.save();
+			//u.save();
 		}
 
 	}
