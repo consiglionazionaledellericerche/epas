@@ -1,11 +1,11 @@
-#{extends 'main_with_navbar.html' /}
-#{set titolo: 'Gestione straordinari e altre competenze' /}
+#{extends 'modal.html' /}
+#{set modalHeader: 'Abilita competenze per ' + person.name + ' ' + person.surname /}
 
-#{form @Competences.saveNewCompetenceConfiguration()}
-<input type="hidden" name="personId" value="${person.id}"/>
-<fieldset>
-	<legend>Modifica competenze per ${person.name} ${person.surname}</legend>
-	<table class="table table-condensed table-striped table-hover tablenoborder">
+<div class="container-fluid center">
+
+  #{form @Competences.saveNewCompetenceConfiguration()}
+    <input type="hidden" name="personId" value="${person.id}"/>
+	<table class="table table-condensed table-hover table-form">
 	<tr>
 		<td>#{if person.isOvertimeInWorkDayAvailable()}
 			Sì <input type="radio" value="true" name="overtimeWorkDay" checked="checked"/> No <input type="radio" value="false" name="overtimeWorkDay"/>
@@ -14,7 +14,7 @@
 			Sì <input type="radio" value="true" name="overtimeWorkDay"/> No <input type="radio" value="false" checked="checked" name="overtimeWorkDay"/>
 			#{/else}
 		</td>
-		<td><p>Straordinario diurno nei giorni lavorativi</p>
+		<td>Straordinario diurno nei giorni lavorativi
 		</td>
 	</tr>
 	<tr>
@@ -24,7 +24,7 @@
 			#{else} 
 			Sì <input type="radio" name="nightlyOvertime" value="true"/> No <input type="radio" name="nightlyOvertime" value="false" checked="checked"/>
 			#{/else}</td>
-		<td><p>Straordinario diurno nei giorni festivi o notturno nei giorni lavorativi</p>
+		<td>Straordinario diurno nei giorni festivi o notturno nei giorni lavorativi
 		</td>
 	</tr>
 	<tr>
@@ -33,9 +33,9 @@
 			%{ } else {	}% 
 			Sì <input type="radio" name="nightlyHolidayOvertime" value="true"/> No <input type="radio" value="false" name="nightlyHolidayOvertime" checked="checked"/>
 			%{ } }%</td>
-		<td><p>Straordinario notturno nei giorni festivi
+		<td>Straordinario notturno nei giorni festivi
 	
-	</p></td>
+	</td>
 	</tr>
 	<tr>
 		<td>
@@ -45,7 +45,7 @@
 			Sì <input type="radio" value="true" name="workdayReperibility"/> No <input type="radio" value="false" name="workdayReperibility" checked="checked"/>
 			%{ } }%
 	</td>
-		<td><p>Ind.tà rep.tà feriale</p></td>
+		<td>Ind.tà rep.tà feriale</td>
 	</tr>
 	<tr>
 		<td>
@@ -55,7 +55,7 @@
 			Sì <input type="radio" name="holidayReperebility" value="true"/> No <input type="radio" name="holidayReperebility" value="false" checked="checked"/>
 			%{ } }%
 	</td>
-		<td><p>Ind.tà rep.tà festiva</p></td>
+		<td>Ind.tà rep.tà festiva</td>
 	</tr>
 	<tr>
 		<td>
@@ -65,7 +65,7 @@
 			Sì <input type="radio" name="ordinaryShift" value="true"/> No <input type="radio" name="ordinaryShift" value="false" checked="checked"/>
 			%{ } }%
 	</td>
-		<td><p>Turno ordinario</p></td>
+		<td>Turno ordinario</td>
 	</tr>
 	<tr>
 		<td>
@@ -75,7 +75,7 @@
 			Sì <input type="radio" name="holidayShift" value="true"/> No <input type="radio" value="false" name="holidayShift" checked="checked"/>
 			%{ } }%
 	</td>
-		<td><p>Turno festivo</p></td>
+		<td>Turno festivo</td>
 	</tr>
 	<tr>
 		<td>
@@ -85,7 +85,7 @@
 			Sì <input type="radio" name="nightlyShift" value="true"/> No <input type="radio" name="nightlyShift" value="false" checked="checked"/>
 			%{ } }%
 	</td>
-		<td><p>Turno notturno</p></td>
+		<td>Turno notturno</td>
 	</tr>
 	<tr>
 		<td>
@@ -95,7 +95,7 @@
 			Sì <input type="radio" name="hardship" value="true"/> No <input type="radio" value="false"  name="hardship" checked="checked"/>
 			%{ } }%
 	</td>
-		<td><p>Ind.tà sede disagiata</p></td>
+		<td>Ind.tà sede disagiata</td>
 	</tr>
 	<tr>
 		<td>
@@ -105,7 +105,7 @@
 			Sì <input type="radio" name="handleValues" value="true"/> No <input type="radio" name="handleValues" value="false" checked="checked"/>
 			%{ } }%
 	</td>
-		<td><p>Ind.tà maneggio valori</p></td>
+		<td>Ind.tà maneggio valori</td>
 	</tr>
 	<tr>
 		<td>
@@ -115,7 +115,7 @@
 			Sì <input type="radio" name="task" value="true"/> No <input type="radio" name="task" value="false" checked="checked"/>
 			%{ } }%
 	</td>
-		<td><p>Ind.ta'mansione L.397/71</p></td>
+		<td>Ind.ta'mansione L.397/71</td>
 	</tr>
 	<tr>
 		<td>
@@ -125,7 +125,7 @@
 			Sì <input type="radio" name="taskIncreased" value="true"/> No <input type="radio" name="taskIncreased" value="false" checked="checked"/>
 			%{ } }%
 	</td>
-		<td><p>Ind.ta' mansione L.397/71 Magg.</p></td>
+		<td>Ind.ta' mansione L.397/71 Magg.</td>
 	</tr>
 	<tr>
 		<td>
@@ -135,7 +135,7 @@
 			Sì <input type="radio" name="boats" value="true"/> No <input type="radio" name="boats" value="false" checked="checked"/>
 			%{ } }%
 	</td>
-		<td><p>Ind.ta' Natanti</p></td>
+		<td>Ind.ta' Natanti</td>
 	</tr>
 	<tr>
 		<td>
@@ -145,7 +145,7 @@
 			Sì <input type="radio" name="ionicRadiance1" value="true"/> No <input type="radio" name="ionicRadiance1" value="false" checked="checked"/>
 			%{ } }%
 	</td>
-		<td><p>Ind.ta' Risc.Rad.Ion. Com.1</p></td>
+		<td>Ind.ta' Risc.Rad.Ion. Com.1</td>
 	</tr>
 	<tr>
 		<td>
@@ -155,7 +155,7 @@
 			Sì <input type="radio" name="ionicRadiance3" value="true"/> No <input type="radio" name="ionicRadiance3" value="false" checked="checked"/>
 			%{ } }%
 	</td>
-		<td><p>Ind.ta' Risc.Rad.Ion. Com.3</p></td>
+		<td>Ind.ta' Risc.Rad.Ion. Com.3</td>
 	</tr>
 	<tr>
 		<td>
@@ -165,7 +165,7 @@
 			Sì <input type="radio" name="ionicRadiance1bis" value="true"/> No <input type="radio" name="ionicRadiance1bis" value="false" checked="checked"/>
 			%{ } }%
 	</td>
-		<td><p>Ind.ta'Risc. Rad. Ion. Com.1</p></td>
+		<td>Ind.ta'Risc. Rad. Ion. Com.1</td>
 	</tr>
 	<tr>
 		<td>
@@ -175,7 +175,7 @@
 			Sì <input type="radio" name="ionicRadiance3bis" value="true"/> No <input type="radio" name="ionicRadiance3bis" value="false" checked="checked"/>
 			%{ } }%
 	</td>
-		<td><p>Ind.ta'Risc. Rad. Ion. Com.3</p></td>
+		<td>Ind.ta'Risc. Rad. Ion. Com.3</td>
 	</tr>
 	<tr>
 		<td>
@@ -185,7 +185,7 @@
 			Sì <input type="radio" name="riskOne" value="true"/> No <input type="radio" name="riskOne" value="false" checked="checked"/>
 			%{ } }%
 	</td>
-		<td><p>Ind.ta' Rischio GR.1 DPR.146</p></td>
+		<td>Ind.ta' Rischio GR.1 DPR.146</td>
 	</tr>
 	<tr>
 		<td>
@@ -195,7 +195,7 @@
 			Sì <input type="radio" name="riskTwo" value="true"/> No <input type="radio" name="riskTwo" value="false" checked="checked"/>
 			%{ } }%
 	</td>
-		<td><p>Ind.ta' Rischio GR.2 DPR.146</p></td>
+		<td>Ind.ta' Rischio GR.2 DPR.146</td>
 	</tr>
 	<tr>
 		<td>
@@ -205,7 +205,7 @@
 			Sì <input type="radio" name="riskThree" value="true"/> No <input type="radio" name="riskThree" value="false" checked="checked"/>
 			%{ } }%
 	</td>
-		<td><p>Ind.ta' Rischio GR.3 DPR.146</p></td>
+		<td>Ind.ta' Rischio GR.3 DPR.146</td>
 	</tr>
 	<tr>
 		<td>
@@ -215,7 +215,7 @@
 			Sì <input type="radio" name="riskFour" value="true"/> No <input type="radio" name="riskFour" value="false" checked="checked"/>
 			%{ } }%
 	</td>
-		<td><p>Ind.ta' Rischio GR.4 DPR.146</p></td>
+		<td>Ind.ta' Rischio GR.4 DPR.146</td>
 	</tr>
 	<tr>
 		<td>
@@ -225,7 +225,7 @@
 			Sì <input type="radio" name="riskFive" value="true"/> No <input type="radio" name="riskFive" value="false" checked="checked"/>
 			%{ } }%
 	</td>
-		<td><p>Ind.ta' Rischio GR.5 DPR.146</p></td>
+		<td>Ind.ta' Rischio GR.5 DPR.146</td>
 	</tr>
 	<tr>
 		<td>
@@ -235,11 +235,13 @@
 			Sì <input type="radio" name="riskDiving" value="true"/> No <input type="radio" name="riskDiving" value="false" checked="checked"/>
 			%{ } }%
 	</td>
-		<td><p>Ind.ta' Rischio Subacquei</p></td>
+		<td>Ind.ta' Rischio Subacquei</td>
 	</tr>	
-</table>
-</fieldset>
+  </table>
+
   <div class="buttoncenter">
     <input type="submit" class="btn btn-primary"id="saveCompetence" value="Ok"/>
   </div>
 #{/form}
+
+</div>

@@ -40,7 +40,7 @@ import com.google.common.collect.Table;
 
 
 
-@With( {Secure.class, NavigationMenu.class} )
+@With( {Secure.class, RequestInit.class} )
 public class Stampings extends Controller {
 
 	/**
@@ -60,17 +60,8 @@ public class Stampings extends Controller {
 			render("@redirectToIndex");
 		}
 		
-//		LocalDate today = new LocalDate();
-//		if(today.getYear()==year && month>today.getMonthOfYear())
-//		{
-//			flash.error("Impossibile accedere a situazione futura, redirect automatico a mese attuale");
-//			month = today.getMonthOfYear();
-//		}
-		
-
-		//Configuration conf = Configuration.getCurrentConfiguration();
-		//ConfGeneral conf = ConfGeneral.getConfGeneral();
-		int minInOutColumn = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));
+		//int minInOutColumn = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));
+		int minInOutColumn = 2;
 		int numberOfInOut = Math.max(minInOutColumn, PersonUtility.getMaximumCoupleOfStampings(person, year, month));
 
 		//Lista person day contente tutti i giorni fisici del mese
@@ -107,11 +98,6 @@ public class Stampings extends Controller {
 			if(c.getMese(year, month)!=null)
 				contractMonths.add(c.getMese(year, month));
 		}
-//		if(contractMonths.size()==0)
-//		{
-//			flash.error("Impossibile visualizzare la situazione mensile per %s %s per il mese di %s", person.name, person.surname, DateUtility.fromIntToStringMonth(month));
-//			render("@redirectToIndex");
-//		}
 		
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);
 		
@@ -148,8 +134,9 @@ public class Stampings extends Controller {
 		
 		//Configuration conf = Configuration.getCurrentConfiguration();													//0 sql (se già in cache)
 //		ConfGeneral conf = ConfGeneral.getConfGeneral();
-		int minInOutColumn = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));
+//		int minInOutColumn = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));
 //		int minInOutColumn = conf.numberOfViewingCoupleColumn;
+		int minInOutColumn = 2;
 		int numberOfInOut = Math.max(minInOutColumn, PersonUtility.getMaximumCoupleOfStampings(person, year, month));	//30 sql
 
 		//Lista person day contente tutti i giorni fisici del mese
@@ -166,7 +153,12 @@ public class Stampings extends Controller {
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 		for(PersonDay pd : totalPersonDays )
 		{
-			PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(pd,numberOfInOut);								//1 quando non e' festa (absence)						
+			if(pd.date.getDayOfMonth() == 27) 
+			{
+				Logger.debug("");
+			}
+			PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(pd,numberOfInOut);								//1 quando non e' festa (absence)				
+		
 			daysRecap.add(dayRecap);
 		}
 		List<StampModificationType> stampModificationTypeList = PersonStampingDayRecap.stampModificationTypeList;		//0 sql
@@ -247,16 +239,14 @@ public class Stampings extends Controller {
 			pd.create();
 		}
 
-//		if(pd.stampings.size() == 0 && pd.isHoliday()){
-//			flash.error("Si sta inserendo una timbratura in un giorno di festa. Errore");
-//			Stampings.personStamping(personId, year, month);
-//		}
 
 		if(date.isAfter(new LocalDate())){
 			flash.error("Non si può inserire una timbratura futura!!!");
 			Stampings.personStamping(personId, year, month);
 		}
 
+		
+		/* TODO rifarla perchè non funziona, va inserito un boolean in PersonDay
 		if(params.get("timeAtWork", Boolean.class) == true){
 			//pd.timeAtWork = person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(new LocalDate(year, month, day).getDayOfWeek()).workingTime;
 			pd.timeAtWork = person.getWorkingTimeType(new LocalDate(year,month,day)).getWorkingTimeTypeDayFromDayOfWeek(new LocalDate(year, month, day).getDayOfWeek()).workingTime;
@@ -266,16 +256,30 @@ public class Stampings extends Controller {
 			flash.success("Inserita timbratura forzata all'orario di lavoro per %s %s", person.name, person.surname);
 			Stampings.personStamping(personId, year, month);
 		}
-		Integer hour = params.get("hourStamping", Integer.class);
-		Integer minute = params.get("minuteStamping", Integer.class);
-		//Logger.debug("I parametri per costruire la data sono: anno: %s, mese: %s, giorno: %s, ora: %s, minuti: %s", year, month, day, hour, minute);
-
+		*/
+		
+		Stamping stamp = new Stamping();
+		
+		
+		try {
+			String hour = params.get("hourStamping");
+			Integer hourNumber = Integer.parseInt(hour.substring(0,2));
+			Integer minNumber = Integer.parseInt(hour.substring(2,4));
+			if(hourNumber < 0 || hourNumber > 23 || minNumber < 0 || minNumber > 59)  {
+				flash.error("Inserire un valore valido per l'ora timbratura. Operazione annullata");
+				Stampings.personStamping(personId, year, month);
+			}
+			stamp.date = new LocalDateTime(year, month, day, hourNumber, minNumber, 0);
+			stamp.markedByAdmin = true;
+			
+		} catch(Exception e) {
+			flash.error("Inserire un valore valido per l'ora timbratura. Operazione annullata");
+			Stampings.personStamping(personId, year, month);
+		}
+		
 		String type = params.get("type");
 		String service = params.get("service");
-		Stamping stamp = new Stamping();
-		stamp.date = new LocalDateTime(year, month, day, hour, minute, 0);
-		stamp.markedByAdmin = true;		
-
+		
 		if(service.equals("true")){
 			stamp.note = "timbratura di servizio";
 			stamp.stampType = StampType.find("Select st from StampType st where st.code = ?", "motiviDiServizio").first();
@@ -328,19 +332,11 @@ public class Stampings extends Controller {
 		if (stamping == null) {
 			notFound();
 		}
-		PersonDay pd = stamping.personDay;
-		Integer hour = params.get("stampingHour", Integer.class);
-		Integer minute = params.get("stampingMinute", Integer.class);
 		
-		if(hour != null && minute == null || hour == null && minute != null)
-		{
-			flash.error("Attribuire valore a ciascun campo se si intende modificare la timbratura o togliere valore a entrambi i campi" +
-					" se si intende cancellarla");
-			Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
-		}
-		if (hour == null && minute == null) 
-		{
-
+		PersonDay pd = stamping.personDay;
+		
+		//elimina
+		if( params.get("elimina") != null) {
 			stamping.delete();
 			pd.stampings.remove(stamping);
 
@@ -350,12 +346,21 @@ public class Stampings extends Controller {
 			flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(stamping.date.toLocalDate()));	
 
 			Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
-
-		} 
+		}
+		
+		
+		Integer hour = params.get("stampingHour", Integer.class);
+		Integer minute = params.get("stampingMinute", Integer.class);
+		
+		if(hour != null && minute == null || hour == null && minute != null)
+		{
+			flash.error("Attribuire valore a ciascun campo se si intende modificare la timbratura");
+			Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
+		}
 		else 
 		{
 			if (hour == null || minute == null) {
-				flash.error("E' necessario specificare sia il campo ore che minuti, oppure nessuno dei due per rimuovere la timbratura.");
+				flash.error("E' necessario specificare sia il campo ore che minuti.");
 				Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
 				
 			}

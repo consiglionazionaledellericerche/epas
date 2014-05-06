@@ -9,7 +9,7 @@ import com.google.common.io.Files;
 import play.Logger;
 import play.mvc.*;
 
-@With( {Secure.class, NavigationMenu.class} )
+@With( {Secure.class, RequestInit.class} )
 public class Version extends Controller {
 
     public static void showVersion() {

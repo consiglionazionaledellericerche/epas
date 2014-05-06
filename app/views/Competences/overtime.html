@@ -1,55 +1,57 @@
-#{extends 'main_with_navbar.html' /}
-#{set titolo: 'Gestione straordinari e altre competenze' /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Riepilogo Straordinari'  /}
 
-<ul class="nav nav-tabs">
-  <li ><a href="@{Competences.showCompetences(year, month)}#">Competenze</a></li>
-  <li class="active"><a href="@{Competences.overtime(year, month)}#">Straordinari</a></li>
-  <li><a href="@{Competences.totalOvertimeHours(year, month)}#">Monte ore</a></li>
-  <li><a href="@{Competences.recapCompetences()}#">Recap competenze</a></li>
-  <li><a href="@{Competences.exportCompetences()}#">Esporta competenze</a></li>
-</ul>
-
-
-<section id="results">
-<div class="container span3"style="margin-left: 0px;">
-#{form action:@Competences.overtime(), class:'form-search',  
-    method:'GET', autocomplete:'off',
-    'data-reload':'#results'}
-    
-    <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="input-medium search-query"/>
-    <i class="icon-search icon-large"></i>
-    <input type="hidden" name="year" value="${year}"/>
-	<input type="hidden" name="month" value="${month}"/>
-
-#{/form}
-</div>
-<div class="pagination pagination-centered" style="margin-left: 10px;">
-  <ul>
-  	#{list items:0..simpleResults.totalPage-1, as:'indexPage', class:'inline'}
-  	  #{if simpleResults.page==indexPage}
-  	    <li class="active"><a href="#">${indexPage+1}</a></li>
-  	  #{/if}
-  	  #{else}
-  	    <li><a href="@{Competences.overtime(year, month,name, indexPage)}">${indexPage+1}</a></li>
-  	  #{/else}
-  	  
-       
-	#{/list}
+<div id="container-fluid-nav-tabs" class="container-fluid">
+  <ul class="nav nav-tabs">
+    <li><a href="@{Competences.showCompetences(year, month)}">Assegna Competenze</a></li>
+    <li class="active"><a href="@{Competences.overtime(year, month)}">Straordinari</a></li>
+    <li><a href="@{Competences.totalOvertimeHours(year)}">Monte ore</a></li>
+    <li><a href="@{Competences.enabledCompetences()}">Abilita Competenze</a></li>
+    <li><a href="@{Competences.exportCompetences()}">Esporta competenze</a></li>
   </ul>
 </div>
-    %{if(year != 0 && month != 0){
-    }%
-	    <input type="hidden" name="year" value="${year}"/>
-		<input type="hidden" name="month" value="${month}"/>
-	%{
-	}else{
-	}%
-		<input type="hidden" name="year" value="${yearParams}"/>
-		<input type="hidden" name="month" value="${monthParams}"/>
-	%{
-	}
-	}%
-    <h3 id="titoloStraordinari">Tabella riassuntiva del mese di <span class="capitalized">&{'views.tags.display.date.month.' + month}</span></h3>
+
+<div class="container-fluid">
+
+  <div class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title">Tabella riassuntiva del mese di <span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year} </h3>
+      </div>
+      <div class="panel-body">
+      
+        <div class="col-xs-5">
+          #{form action:@Competences.overtime(), class:'form-search',  
+          method:'GET', autocomplete:'off',
+          'data-reload':'#results'}
+    
+            <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="input-medium search-query"/>
+            <i class="icon-search icon-large"></i>
+            <input type="hidden" name="year" value="${year}"/>
+	        <input type="hidden" name="month" value="${month}"/>
+          #{/form}
+         </div>
+
+        <section id="results">
+
+          <div class="col-xs-7">
+            <ul class="pagination">
+  	          #{list items:0..simpleResults.totalPage-1, as:'indexPage', class:'inline'}
+  	            #{if simpleResults.page==indexPage}
+  	              <li class="active"><a href="#">${indexPage+1}</a></li>
+  	            #{/if}
+  	            #{else}
+  	              <li><a href="@{Competences.overtime(year, month,name, indexPage)}">${indexPage+1}</a></li>
+  	            #{/else}
+  	          #{/list}
+            </ul>
+		  </div>
+
+		  
+		  
+		  
+		  
+		 
     <table class="table overtime-big table-hover">
     	<tr>
 	    	<th>Nome e cognome</th>
@@ -89,8 +91,68 @@
     	}
     	}%   
     </table>
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		        
 
-</section>
+        </section>
+        
+        
+        
+        <!-- end Assegna Competenze panel body -->
+      </div>
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     
     

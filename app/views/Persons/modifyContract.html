@@ -1,68 +1,63 @@
+#{extends 'modal.html' /}
+#{set modalHeader: 'Modifica dati contrattuali per ' + contract.person.name + ' ' + contract.person.surname /}
+
+<div class="container-fluid center">
 
 #{form @Persons.updateContract()}
-<fieldset>
-  <legend>Modifica dati contrattuali per ${contract.person.name} ${contract.person.surname}</legend>
+
   <input type="hidden" name="contract.id" value="${contract.id}" />
 
-  <table class="tablenoborder">
+  <table class="table table-hover table-form">
+	<!-- Begin contract -->
 	<tr>
-		<td><strong>Data inizio contratto</strong></td>
-		<td>%{if(contract.beginContract != null){
-		}%
-			<td><input name="begin" type="text" data-datepicker data-date-format="yyyy-mm-dd" value="${contract.beginContract}"/></td>
-		%{
-		}else{
-		}%
-			<td><input name="begin" type="text" data-datepicker data-date-format="yyyy-mm-dd" value="${}" /></td>
-		%{
-		}
-		}%
-		</td>
+		<td class="lab"><strong>Data inizio contratto</strong></td>
+		<td><input name="begin" type="text" data-datepicker data-date-format="yyyy-mm-dd" value="${contract.beginContract}"/></td>
+
 	</tr>
+	
+	<!-- Expire contract -->
 	<tr>
-		<td><strong>Data fine contratto</strong></td>
-		<td>%{if(contract.expireContract != null){
-		}%
-			<td><input name="expire" type="text" data-datepicker data-date-format="yyyy-mm-dd" value="${contract.expireContract}" /></td>
-		%{
-		}else{
-		}%
-			<td><input name="expire" type="text" data-datepicker data-date-format="yyyy-mm-dd" value="${}" /></td>
-		%{
-		}
-		}%
-		</td>
+		<td class="lab"><strong>Data fine contratto</strong></td>
+		<td><input name="expire" type="text" data-datepicker data-date-format="yyyy-mm-dd" value="${contract.expireContract}" /></td>
 	</tr>
+	
+	<!-- End contract -->
 	<tr>
-		<td><strong>Data terminazione contratto (causa morte, pensione...)</strong></td>
-		<td>%{if(contract.endContract != null){
-		}%
-			<td><input name="end" type="text" data-datepicker data-date-format="yyyy-mm-dd" value="${contract.endContract}" /></td>
-		%{
-		}else{
-		}%	
-			<td><input name="end" type="text" data-datepicker data-date-format="yyyy-mm-dd" value="${}" /></td>
-		%{
-		}
-		}%
-		</td>
+		<td class="lab"><strong>Data terminazione contratto<br>(causa morte, pensione...)</strong></td>
+		<td><input name="end" type="text" data-datepicker data-date-format="yyyy-mm-dd" value="${contract.endContract}" /></td>
 	</tr>
+	
+	<!-- On certificate -->
 	<tr>
-		<td><strong>In attestati presenza</strong></td>
-		<td>%{if(contract.onCertificate){
-		}%	
-			<td><input name="onCertificate" type="checkbox" checked="checked" /></td>
-		%{
-		}else{
-		}%
-			<td><input name="onCertificate" type="checkbox" /></td>
-		%{
-		}
-		}%	</td>
+		<td class="lab"><strong>In attestati presenza</strong></td>
+		#{if contract.onCertificate }
+		  <td><input name="onCertificate" type="checkbox" checked="checked" /></td>
+		#{/if}
+		#{else}
+		  <td><input name="onCertificate" type="checkbox" /></td>
+		#{/else}
+		
 	</tr>
   </table>
-</fieldset>
-<div class="buttoncenter">
-  <input id="modificaContratto" class="btn btn-primary" type="submit" value="Modifica"/>
-</div>
+
+  <input class="btn btn-primary" type="submit" value="Modifica"/>
+  
 #{/form}
+
+</div>
+
+<br>
+
+<div class="container-fluid well well-sm"">
+  <strong>Attenzione</strong>
+  <ol>
+    <li>
+      <em>La modifica delle date del contratto causerà il ricalcolo dei riepiloghi annuali inerenti il contratto 
+      fra cui il monte ore residuo.</em>
+    </li>
+    <li>
+      <em>Il tipo orario attribuito di default all'eventuale prolungamento del contratto 
+      sarà quello già attribuito alla parte conclusiva del contratto.</em>
+    </li>
+  </ol>
+</div>

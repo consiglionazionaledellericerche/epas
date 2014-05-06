@@ -1,19 +1,47 @@
-#{extends 'main_with_navbar.html' /}
-#{set titolo: 'Riepilogo ore di lavoro, straordinario e recuperi ' + person.surname + ' ' + person.name + ' anno: ' + year /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Riepilogo ore ' + year  /}
+
+#{set 'moreStyles'}
+
+<style>
+       
+@media (max-width: 991px) {
+
+	.container {
+	    font-size: 12px !important; 
+	}
+	
+}
+
+@media (max-width: 767px) {
+
+	footer {
+		display: none;
+	}
+	
+}
+
+</style>
+
+#{/set}
 
 <div class="container">
 
+  <div class="panel panel-info">
+    <div class="panel-heading">
+      <h3 class="panel-title text-center">Riepilogo ore ${year}</h3>
+    </div>
+    <div class="panel-body">
 
-
-	<br>
-    <table class="table hour-recap table-condensed">
+    <table class="table hour-recap table-condensed center">
     <tr>
 	  <th rowspan=2>Mese</th>
 	  <th rowspan=2>Ore<br>Lavorate</th>
 	  <th colspan=3>Monte ore inizio mese</th>
 	  <th rowspan=2>Progressivo<br>a fine mese</th>
-	  <th rowspan=2>Ore<br>Straordinario </th>
-	  <th rowspan=2>Riposi<br>Compensativi </th>
+	  <th rowspan=2>Ore<br>Straord.</th>
+	  <th rowspan=2>Riposi<br>Comp. </th>
 	  <th colspan=3>Monte ore fine mese</th>
 	</tr>
 	<tr>
@@ -30,7 +58,7 @@
 	
 	#{list items:csap.mesi, as:'mese'}
 	  <tr>
-	    <td> &{'views.tags.display.date.month.' +mese.mese}</td>
+	    <td class="warning"> &{'views.tags.display.date.month.' +mese.mese}</td>
 	    
 	    <td>${mese.oreLavorate.toHourTime()}</td>
 	    
@@ -68,6 +96,8 @@
 	  </tr>
 	#{/list}
 	
-  </table>
-  
+    </table>
+    </div>
+  </div>  
 </div>
+

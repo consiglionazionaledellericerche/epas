@@ -1,41 +1,44 @@
+#{extends 'modal.html' /}
+#{set modalHeader: 'Nuovo contratto ' + person.name + ' ' + person.surname /}
+
+<div class="container-fluid center">
+
 #{form @Persons.saveContract()}
-  <fieldset>
-  <legend>Inserimento dati nuovo contratto per ${person.name} ${person.surname}</legend>
-
-
+  
   <input type="hidden" name="person.id" value="${person.id}"/>
-  <table class="table table-display-contract table-striped">
+  <table class="table table-form table-hover">
+  
     <tr>
-			<th>Data inizio</th>
-			<th>Data fine</th>
-			<th>Tipo orario</th>
-			<th>Attestato presenza</th>
-			
-	</tr>
-	
-	<tr>
-			<td><input name="dataInizio" type="date" value="" id="datepicker1" data-date-format="yyyy-mm-dd"/></td>
-			<td><input name="dataFine" type="date" value="" id="datepicker2" data-date-format="yyyy-mm-dd"/></td>
-			<td>
-			#{select 'wtt.id', class:'span2', id:'wtt.id'}
+      <td class="lab"><strong>Data inizio</strong></td>
+      <td><input name="dataInizio" type="text" data-datepicker data-date-format="yyyy-mm-dd" /></td>
+    </tr>
+    
+    <tr>
+      <td class="lab"><strong>Data fine</strong></td>
+      <td><input name="dataFine" type="text" data-datepicker data-date-format="yyyy-mm-dd" /></td>
+    </tr>
+    
+    <tr>
+      <td class="lab"><strong>Tipo orario</strong></td>
+      <td>
+            #{select 'wtt.id', class:'span2', id:'wtt.id'}
               #{list items:wttList, as:'wttItem'}
 	            #{option wttItem.id}${wttItem.description}#{/option}
 		      #{/list}
 		    #{/select}
-			</td>
-			<td>
-				<input name="onCertificate" type="checkbox" value="true"/>
-				
-			</td>
-			
-	</tr>
+      </td>
+    </tr>
+    
+    <tr>
+      <td class="lab"><strong>Attestato presenza</strong></td>
+      <td><input name="onCertificate" type="checkbox" value="true"/></td>
+    </tr>
 		
   </table>
-</fieldset>
 
-<div class="buttoncenter">
-  <input class="btn btn-primary" id="submitContractPerson"type="submit" value="Inserisci" />
-</div>
+  <input class="btn btn-primary" type="submit" value="Inserisci" />
+
 	
 #{/form}
 
+</div>

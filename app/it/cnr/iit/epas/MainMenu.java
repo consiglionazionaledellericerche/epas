@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.Setter;
 import models.Permission;
 import models.Person;
+import models.UsersPermissionsOffices;
 
 import org.joda.time.LocalDate;
 
@@ -104,7 +105,8 @@ public class MainMenu {
         
 		List<ActionMenuItem> actions = new ArrayList<ActionMenuItem>();
 		
-		Set<Permission> permissions = Security.getUser().getAllPermissions();
+		//Set<UsersPermissionsOffices> permissions = Security.getUser().getAllPermissions();
+		List<Permission> permissions = Security.getUser().getAllPermissions();
 		
 		Set<String> permissionDescriptions = new HashSet<String>();
 		for(Permission p : permissions){

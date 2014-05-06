@@ -1,39 +1,75 @@
 #{extends 'main3.html' /}
 #{set header:'navbar' /}
-#{set title:'Ore di formazione per ' + person.surname + ' ' + person.name + ' anno: ' + year /}
+#{set title: 'ePAS - Ore Formazione'  /}
 
+#{set 'moreStyles'}
 
+<style>
+    
+  p {
+	display: inline-block;
+	color: black;
+	font-size: 1.2em;
+  }
+  
+  p span {
+    display: inline-block; 
+    color: black; 
+    font-size: .8em;
+  }
+  
+  #before-table {
+  	margin-bottom: 10px;
+  }
 
-<div class="row">
+</style>
+
+#{/set}
+
+<div class="container">
 
 <div class="panel panel-info">
 	<div class="panel-heading">
-	<p class="lead">Le ore di formazione possono essere inserite solo per il mese selezionabile. Nel momento in cui l'amministratore le approva non potranno più essere modificate.</p>
+	  <h3 class="panel-title text-center">Ore di formazione ${person.surname} ${person.name} per l'anno ${year}</h3>
 	</div>
   	<div class="panel-body">
-    <table class="table table-hover span9">
-	<tr>
+  	
+  	<div class="col-xs-1">
+      <h3 class="text-right text-danger"><i class="fa fa-info-circle"></i></h3>
+    </div>
+  	<div class="col-xs-11" id="before-table">
+  	  Le ore di formazione possono essere inserite solo per il mese selezionabile.<br> 
+  	            Nel momento in cui l'amministratore le approva non potranno più essere modificate.
+  	</div>
+  	
+    <table class="table table-condensed center">
+	  <tr class="info">
 		<th>Mese</th>
 		<th>Ore di formazione</th>
 		<th>Modifica</th>
 		<th>Approvate</th>
 		
-	</tr>
+	  </tr>
 	
 	
-	#{list items:mesi, as: 'mese'}
-	<tr>
-		<td class="text-error">&{'views.tags.display.date.month.' +mese}</td>
+	  #{list items:mesi, as: 'mese'}
+	  <tr>
+		<td class="warning">&{'views.tags.display.date.month.' +mese}</td>
 		<td>
-			<ul>			
+			<ul class="list-group">			
 			#{list items:pmList, as: 'pm'}
 				#{if pm != null}
 				  #{if pm.month == mese}	
-					#{if mese == date.getMonthOfYear() || (mese == date.getMonthOfYear()-1 && pm.hoursApproved == false)}		
-					  <li>
-						<a data-toggle="modal" data-placement="bottom" title="Modifica ore di formazione" href="@{PersonMonths.modifyTrainingHours(pm.id)}" data-target="#myModal2">
-						<b>${pm.trainingHours}</b> ore <b>Da:</b> <u>${pm.fromDate}</u> <b>A:</b> <u>${pm.toDate}</u></a>
-						<a data-toggle="modal" data-placement="bottom" title="Elimina ore di formazione" href="@{PersonMonths.deleteTrainingHours(pm.id, year, month)}" data-target="#myModal3" ><i class="icon-minus-sign icon-large"></i></a>
+					#{if mese == today.getMonthOfYear() || (mese == today.getMonthOfYear()-1 && pm.hoursApproved == false)}		
+					  <li class="list-group-item list-group-item-info" >
+					    <p>
+					      <span class="label label-success">${pm.trainingHours} ore</span>
+					      <span><b>Da:</b> ${pm.fromDate}</span>
+					      <span><b>A:</b> ${pm.toDate}</span>
+					    </p>
+						<a data-toggle="modal" data-placement="bottom" title="Modifica ore di formazione" href="@{PersonMonths.modifyTrainingHours(pm.id)}" data-target=".my-modal"><i class="fa fa-pencil"></i></a>
+						
+						<a data-toggle="modal" data-placement="bottom" title="Elimina ore di formazione" href="@{PersonMonths.deleteTrainingHours(pm.person.id, pm.id)}" data-target=".my-modal" ><span class="glyphicon glyphicon-trash"></span></i></a>
 					  </li>
 					#{/if}
 					#{else}
@@ -46,14 +82,14 @@
 			</ul>
 		</td>
 		<td>
-			#{if mese == date.getMonthOfYear()}
-				<a href="@{PersonMonths.insertTrainingHours(person.id, mese, year)}" data-modal="#myModal1">Inserisci ore di formazione</a>
+			#{if mese == today.getMonthOfYear() && year == today.getYear()}
+				<a data-toggle="modal" data-placement="bottom" title="Inserisci ore di formazione" href="@{PersonMonths.insertTrainingHours(person.id, mese, year)}" data-target=".my-modal">Inserisci ore di formazione</a>
 			#{/if}
 			
 		</td>
 		<td>
 			#{if pm != null && pm.month == mese }
-				#{if mese == date.getMonthOfYear() || mese == date.getMonthOfYear()-1}
+				#{if mese == today.getMonthOfYear() || mese == today.getMonthOfYear()-1}
 					#{if pm.hoursApproved == true}
 						SI<br>
 					#{/if}
@@ -64,9 +100,18 @@
 			#{/if}
 			
 		</td>
-	</tr>
-	#{/list}
-</table>
+	  </tr>
+	  #{/list}
+    </table>
+    
+    <div class="col-xs-1">
+      <h3 class="text-right"><i class="fa fa-pencil"></i></h3>
+    </div>
+  	<div class="col-xs-11">
+  	  <a data-toggle="modal" data-placement="bottom" href="@{PersonMonths.insertTrainingHours(person.id, today.getMonthOfYear()-1, year)}" data-target=".my-modal">
+  	  Modifica ore di formazione del mese precedente se non ancora approvate</a>
+  	</div>
+    
   </div>
 </div>
 
@@ -74,55 +119,19 @@
 </div>
 
 
-<p class="lead"><a href="@{PersonMonths.insertTrainingHours(person.id, date.getMonthOfYear()-1, year)}" data-modal="#myModal1">Inserisci ore di formazione del mese precedente se non ancora approvato</a></p>
-
-
-
-<div class="modal fade" id="myModal1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
+<div class="modal fade my-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-center">
+    
     <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">Inserisci ore di formazione</h4>
-      </div>
-      <div class="modal-body">
-        <p>One fine body&hellip;</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
-      </div>
+             
     </div><!-- /.modal-content -->
+           
+    
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
 
 
 
-<div id="myModal2" class="modal hide fade mymodal-small" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">Modifica ore di formazione</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-  </div>
-</div>
-
-<div id="myModal3" class="modal hide fade mymodal-small" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">Cancella ore di formazione</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-  </div>
-</div>
 
 
