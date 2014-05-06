@@ -1,0 +1,87 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Abilita competenze'  /}
+
+
+<div id="container-fluid-nav-tabs" class="container-fluid">
+
+<ul class="nav nav-tabs">
+  <li><a href="@{Competences.showCompetences(year, month)}">Assegna Competenze</a></li>
+  <li><a href="@{Competences.overtime(year, month)}">Straordinari</a></li>
+  <li><a href="@{Competences.totalOvertimeHours(year)}">Monte ore</a></li>
+  <li class="active"><a href="@{Competences.enabledCompetences()}">Abilita Competenze</a></li>
+  <li><a href="@{Competences.exportCompetences()}">Esporta competenze</a></li>
+</ul>
+
+</div>
+ 
+<div class="container-fluid">
+
+<h3>Da questa pagina puoi definire quali competenze spettano ad ogni persona</h3> 
+
+<br>
+
+#{form action:@Competences.enabledCompetences(), class:'form-search',  
+    method:'GET', autocomplete:'off',
+    'data-reload':'#results'}
+    
+    <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="input-medium search-query"/>
+    <i class="icon-search icon-large"></i>
+    <input type="hidden" name="year" value="${year}"/>
+	<input type="hidden" name="month" value="${month}"/>
+
+#{/form}
+
+<br>
+
+ <section id="results"> 
+
+  <table class="table table-condensed table-hover center">
+	<tr>
+		<th>Nome</th>
+		%{for(col in tableRecapCompetence.columnKeySet()){
+		}%
+		<th>${col}</th>
+	%{
+		}
+	}%
+	</tr>
+
+	%{  for(entry in tableRecapCompetence.rowMap().entrySet()){
+		}%
+	<tr>
+		<td>
+		  <a data-toggle="modal" href="@{Competences.updatePersonCompetence(entry.getKey().id)}" data-modal=".my-modal"> 
+		    ${entry.getKey().name} ${entry.getKey().surname}
+		  </a>
+		</td>
+		
+		%{ for(col in tableRecapCompetence.columnKeySet()){
+		}%
+		%{ if(entry.getValue().get(col) == true){
+		}%	<td>	
+				<span class="glyphicon glyphicon-ok"></span>
+			</td>
+		%{ 
+		}else{
+		}%
+			<td>	
+				
+			</td>
+		%{
+			}
+		}%
+		%{
+		   }
+		}%
+	</tr>	
+	%{
+		}
+	}%
+  </table>
+ </section> 
+</div>
+
+#{include '_myModal.html' /}
+
+

@@ -154,6 +154,14 @@ footer p {
 	border-color: darkgrey;
 }
 
+#container-fluid-nav-tabs {
+    padding-bottom: 20px;
+}
+    
+ul.pagination {
+    margin-top: 0px;
+}
+
 /* CSS utilità */
 
 .center {

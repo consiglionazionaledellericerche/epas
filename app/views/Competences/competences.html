@@ -1,32 +1,59 @@
-#{extends 'main_with_navbar.html' /}
-#{set titolo: 'Riepilogo straordinari e altre competenze ' + person.surname + ' ' + person.name + ' ' + month_capitalized + ' ' + personMonthCompetenceRecap.year /}
 
-<div class="container">
+<!-- 'Riepilogo straordinari e altre competenze ' + person.surname + ' ' + person.name + ' ' + month_capitalized + ' ' + personMonthCompetenceRecap.year -->
 
-<div class="span11">
-<br>
-<table class="table table-hover table-bordered competence-recap">
-	<tr>
-		<th class="competenze">Cognome nome</th>
-		<th class="competenze">Ind.tà rep.tà feriale (207)</th>
-		<th class="competenze">Ind.tà rep.tà festiva (208)</th>
-		<th class="competenze">Straordinario diurno nei giorni lavorativi</th>
-		<th class="competenze">Straordinario diurno nei giorni festivi o notturno nei giorni lavorativi</th>
-		<th class="competenze">Turno ordinario (T1)</th>
-		<th class="competenze">Turno notturno (T2)</th>
-	</tr>
-	<tr>
-		<td class="comp-nome">${person.surname + ' ' + person.name + ' (' + person.number + ')'}</td>
-		<td class="comp">${personMonthCompetenceRecap.weekDayAvailability}</td>
-		<td class="comp">${personMonthCompetenceRecap.holidaysAvailability}</td>
-		<td class="comp">(${personMonthCompetenceRecap.progressivoFinalePositivoMese.toHour()}) ${personMonthCompetenceRecap.daylightWorkingDaysOvertime}</td>
-		<td class="comp">${personMonthCompetenceRecap.daylightholidaysOvertime}</td>
-		<td class="comp">${personMonthCompetenceRecap.ordinaryShift}</td>
-		<td class="comp">${personMonthCompetenceRecap.nightShift}</td>	
-	</tr>
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Situazione Mensile'  /}
 
-</table>
+<div class="panel panel-info col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3">
+    <div class="panel-heading text-center">
+      <h3 class="panel-title">Riepilogo straordinari e altre competenze ${templateUtility.monthName(session.get("monthSelected"))} ${year}  </h3>
+    </div>
+    <div class="panel-body">
+      
+      <table class="table table-bordered table-hover">
+        
+        <tr>
+          <th>Competenza</th>
+          <th>Quantità</th>
+        </tr>
+        
+        <tr>
+          <td>Ind.tà rep.tà feriale (207)</td>
+          <td>${personMonthCompetenceRecap.weekDayAvailability}</td>
+        </tr>
+        
+        <tr>
+          <td>Ind.tà rep.tà festiva (208)</td>
+          <td>${personMonthCompetenceRecap.holidaysAvailability}</td>
+        </tr>
+        
+        <tr>
+          <td>Straordinario diurno nei giorni lavorativi</td>
+          <td>(${personMonthCompetenceRecap.progressivoFinalePositivoMese.toHour()}) ${personMonthCompetenceRecap.daylightWorkingDaysOvertime}</td>
+        </tr>
+        
+        <tr>
+          <td>Straordinario diurno nei giorni festivi o notturno nei giorni lavorativi</td>
+          <td>${personMonthCompetenceRecap.daylightholidaysOvertime}</td>
+        </tr>
+        
+        <tr>
+          <td>Turno ordinario (T1)</td>
+          <td>${personMonthCompetenceRecap.ordinaryShift}</td>
+        </tr>
+        
+        <tr>
+          <td>Turno notturno (T2)</td>
+          <td>${personMonthCompetenceRecap.nightShift}</td>
+        </tr>
 
-<p> - Il numero tra parentesi, nella colonna degli straordinari, rappresenta le ore di lavoro fatte in più nel mese sulle quali possono essere pagati gli straordinari  </p>
-</div>
-</div>
+      </table>
+      
+      <p class="text-info"><em>Il numero tra parentesi, nella colonna degli straordinari, rappresenta le ore di lavoro 
+      fatte in più nel mese sulle quali possono essere pagati gli straordinari.</em></p>
+
+    
+   </div>
+</div> 
+

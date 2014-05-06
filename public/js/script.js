@@ -4,6 +4,8 @@ $(function($){
 	
 	$.fn.initepas = function() {
 		
+		 
+		this.find('data-tooltip').tooltip();
 		
 		this.find('.my-modal').on('hidden.bs.modal', function(){
 		    $(this).data('bs.modal', null);

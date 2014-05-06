@@ -315,6 +315,7 @@ public class RequestInit extends Controller {
 			
 			if(action.equals("PersonMonths.hourRecap")) {
 				
+				renderArgs.put("noPerson", true);
 				renderArgs.put("dropDown", "dropDown1");
 				return "PersonMonths.hourRecap";
 			}
@@ -324,6 +325,7 @@ public class RequestInit extends Controller {
 			
 			if(action.equals("Vacations.show")) {
 				
+				renderArgs.put("noPerson", true);
 				renderArgs.put("dropDown", "dropDown1");
 				return "Vacations.show";
 			}
@@ -366,6 +368,7 @@ public class RequestInit extends Controller {
 			
 			if(action.equals("YearlyAbsences.absencesPerPerson")) {
 				
+				renderArgs.put("noPerson", true);
 				renderArgs.put("dropDown", "dropDown1");
 				return "YearlyAbsences.absencesPerPerson";
 			}
@@ -373,12 +376,50 @@ public class RequestInit extends Controller {
 		
 		if(action.startsWith("Competences.")) {
 			
+			if(action.equals("Competences.competences")) {
+				
+				renderArgs.put("noPerson", true);
+				renderArgs.put("dropDown", "dropDown1");
+				return "Competences.competences";
+			}
+			
 			if(action.equals("Competences.showCompetences")) {
 				
 				renderArgs.put("noPerson", true);
 				renderArgs.put("dropDown", "dropDown2");
 				return "Competences.showCompetences";
 			}
+			
+			if(action.equals("Competences.overtime")) {
+				
+				renderArgs.put("noPerson", true);
+				renderArgs.put("dropDown", "dropDown2");
+				return "Competences.overtime";
+			}
+			
+			if(action.equals("Competences.totalOvertimeHours")) {
+				
+				renderArgs.put("noPerson", true);
+				renderArgs.put("dropDown", "dropDown2");
+				return "Competences.totalOvertimeHours";
+			}
+			
+			if(action.equals("Competences.enabledCompetences")) {
+				
+				renderArgs.put("noData", true);
+				renderArgs.put("noPerson", true);
+				renderArgs.put("dropDown", "dropDown2");
+				return "Competences.enabledCompetences";
+			}
+			
+			if(action.equals("Competences.exportCompetences")) {
+				
+				renderArgs.put("noData", true);
+				renderArgs.put("noPerson", true);
+				renderArgs.put("dropDown", "dropDown2");
+				return "Competences.exportCompetences";
+			}
+
 		}
 		
 		

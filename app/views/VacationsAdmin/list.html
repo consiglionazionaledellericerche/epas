@@ -1,43 +1,49 @@
-#{extends 'main_with_navbar.html' /}
-#{set titolo: 'Gestione Ferie e Permessi' /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Ferie e Permessi' /}
 
-<div class="container">
+
+<div id="container-fluid-nav-tabs" class="container-fluid">
 
 <ul class="nav nav-tabs">
   <li class="active"><a href="@{VacationsAdmin.list(year)}">Situazione ferie e permessi</a></li>
   <li><a href="@{VacationsAdmin.manageVacationCode()}">Gestione Piani Ferie</a></li>
 </ul>
 
-
-<div class="span3">
-#{form action:@VacationsAdmin.list()	,  
-    method:'GET', autocomplete:'off',
-    'data-reload':'#results'}
-    <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="input-medium"/>
-    <i class="icon-search icon-large"></i>
-    <input type="hidden" name="year" value="${year}"/>
-#{/form}
 </div>
 
-<section id="results">
 
- <div class="pull-right">
- <div class="pagination pagination-centered" style="margin-top: 0px; margin-right: 0px;">
-  <ul>
-  	#{list items:0..simpleResults.totalPage-1, as:'indexPage', class:'inline'}
-  	  #{if simpleResults.page==indexPage}
-  	    <li class="active"><a href="#">${indexPage+1}</a></li>
-  	  #{/if}
-  	  #{else}
-  	    <li><a href="@{VacationsAdmin.list(year, name, indexPage)}">${indexPage+1}</a></li>
-  	  #{/else}
-	#{/list}
-  </ul>
- </div>
- </div>
+<div class="container-fluid">
+
+        <div class="col-xs-5">
+          #{form action:@VacationsAdmin.list()	,  
+          method:'GET', autocomplete:'off',
+          'data-reload':'#results'}
+            <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="input-medium"/>
+            <i class="icon-search icon-large"></i>
+            <input type="hidden" name="year" value="${year}"/>
+         #{/form}
+        </div>
  
- <div class=span12>
-  <table class="table table-bordered table-condensed custom1">
+        <section id="results">
+
+          <div class="col-xs-7">
+            <ul class="pagination">
+  	          #{list items:0..simpleResults.totalPage-1, as:'indexPage', class:'inline'}
+  	            #{if simpleResults.page==indexPage}
+  	             <li class="active"><a href="#">${indexPage+1}</a></li>
+  	            #{/if}
+  	            #{else}
+  	              <li><a href="@{VacationsAdmin.list(year, name, indexPage)}">${indexPage+1}</a></li>
+  	            #{/else}
+	          #{/list}
+            </ul>
+		  </div>
+
+
+ 
+
+  <table class="table table-bordered table-condensed">
     <thead>
       <tr>
         <td rowspan="2">Nome</td>
@@ -72,19 +78,22 @@
         <td>${vacationsRecap.person.surname} ${vacationsRecap.person.name}</td>
         
         <td>
-          <a data-toggle="modal" href="@{VacationsAdmin.vacationsLastYear(vacationsRecap.person.id, vacationsRecap.year)}" data-target="#myModal3">
+          <a data-toggle="modal" 
+             href="@{VacationsAdmin.vacationsLastYear(vacationsRecap.person.id, vacationsRecap.year)}" data-modal=".my-modal">
 			${vacationsRecap.vacationDaysLastYearUsed.size()}
 	      </a> 
         </td>
         
         <td>
-          <a data-toggle="modal" href="@{VacationsAdmin.vacationsCurrentYear(vacationsRecap.person.id, vacationsRecap.year)}" data-target="#myModal3">
+          <a data-toggle="modal" 
+             href="@{VacationsAdmin.vacationsCurrentYear(vacationsRecap.person.id, vacationsRecap.year)}" data-modal=".my-modal">
 			${vacationsRecap.vacationDaysCurrentYearUsed.size()}
 		  </a>
 		</td>
 		
 		<td>
-          <a data-toggle="modal" href="@{VacationsAdmin.permissionCurrentYear(vacationsRecap.person.id, vacationsRecap.year)}" data-target="#myModal3">
+          <a data-toggle="modal" 
+             href="@{VacationsAdmin.permissionCurrentYear(vacationsRecap.person.id, vacationsRecap.year)}" data-modal=".my-modal">
 			${vacationsRecap.permissionUsed.size()}
 		  </a>
         </td>
@@ -118,7 +127,8 @@
   
   </table>
   
-  <p><br> 
+  <p>
+     <br> 
      #{if isVacationLastYearExpired}
        <i class="icon-remove" style="color: red;"></i> Ferie anno precedente scadute.
      #{/if}
@@ -128,29 +138,19 @@
   </p>
 
   #{if personsWithVacationsProblems.size() > 0}
-  <p>Sono stati riscontrati errori durante il calcolo dei piani ferie per le seguenti persone. 
-  Tali errori potrebbero derivare dalla mancanza di dati di inizializzazione inerenti il contratto attuale.</p>
-  <ul>
-    #{list items:personsWithVacationsProblems, as:'person'}
-      <li><a href="@{Persons.edit(person.id)}">${person.surname} ${person.name}</a></li>
-    #{/list}
-  </ul>
+    <p>
+      Sono stati riscontrati errori durante il calcolo dei piani ferie per le seguenti persone. 
+      Tali errori potrebbero derivare dalla mancanza di dati di inizializzazione inerenti il contratto attuale.
+    </p>
+    <ul>
+      #{list items:personsWithVacationsProblems, as:'person'}
+        <li><a href="@{Persons.edit(person.id)}">${person.surname} ${person.name}</a></li>
+      #{/list}
+    </ul>
   #{/if}
- </div>  
-</section> 
-  
-</div>
 
-<div id="myModal3" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">Ferie e permessi</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-   <!--   <button class="btn btn-primary">Save changes</button>-->
-  </div>
-</div>
+  </section> 
+</div>    
+
+
+#{include '_myModal.html' /}
