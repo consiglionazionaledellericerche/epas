@@ -36,8 +36,6 @@ public class QUser extends EntityPathBase<User> {
 
     public final StringPath password = createString("password");
 
-    public final ListPath<models.Permission, QPermission> permissions = this.<models.Permission, QPermission>createList("permissions", models.Permission.class, QPermission.class, PathInits.DIRECT2);
-
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
@@ -46,6 +44,8 @@ public class QUser extends EntityPathBase<User> {
     public final StringPath recoveryToken = createString("recoveryToken");
 
     public final StringPath username = createString("username");
+
+    public final ListPath<models.UsersPermissionsOffices, QUsersPermissionsOffices> userPermissionOffices = this.<models.UsersPermissionsOffices, QUsersPermissionsOffices>createList("userPermissionOffices", models.UsersPermissionsOffices.class, QUsersPermissionsOffices.class, PathInits.DIRECT2);
 
     public QUser(String variable) {
         this(User.class, forVariable(variable), INITS);

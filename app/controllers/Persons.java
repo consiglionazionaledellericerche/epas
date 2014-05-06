@@ -22,6 +22,7 @@ import models.PersonChildren;
 import models.PersonDay;
 import models.Qualification;
 import models.User;
+import models.UsersPermissionsOffices;
 //import models.RemoteOffice;
 import models.VacationCode;
 import models.VacationPeriod;
@@ -139,10 +140,20 @@ public class Persons extends Controller {
 		
 		/*permesso viewPersonalSituation */
 		Permission per = Permission.find("Select per from Permission per where per.description = ?", "viewPersonalSituation").first();
-		user.permissions = new ArrayList<Permission>();
-		user.permissions.add(per);
+		
+		/*Aggiungere lo user_permission_office per la persona con permesso quello appena recuperato dal db e come ufficio quello della 
+		 * persona che si va a creare*/
+		user.userPermissionOffices = new ArrayList<UsersPermissionsOffices>();
+		 
+		//user.permissions.add(per);
 		user.save();
-				
+		UsersPermissionsOffices upo = new UsersPermissionsOffices();
+		upo.user =	user;
+		upo.permission = per;
+		upo.office = user.person.office;
+		upo.save();
+		user.userPermissionOffices.add(upo);
+		user.save();
 		person.user = user;
 		person.save();
 		

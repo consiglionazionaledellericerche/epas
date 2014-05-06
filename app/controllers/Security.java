@@ -1,13 +1,16 @@
 package controllers;
 
+
 import java.util.List;
 import java.util.Set;
 
 import models.Office;
+
 import models.Permission;
 import models.Person;
 import models.RemoteOffice;
 import models.User;
+import models.UsersPermissionsOffices;
 import play.Logger;
 import play.cache.Cache;
 
@@ -33,7 +36,7 @@ public class Security extends Secure.Security {
 	public final static String INSERT_AND_UPDATE_OFFICES = "insertAndUpdateOffices";
 	public final static String DEVELOPER = "developer";
 	
-	public final static String PERMISSION_CACHE_PREFIX = "permission.";
+	public final static String PERMISSION_CACHE_PREFIX = "user-permission-office-";
 		
 	public final static String CACHE_DURATION = "30mn";
 	
@@ -47,7 +50,6 @@ public class Security extends Secure.Security {
 
 		if(user != null){
 			Cache.set(username, user, CACHE_DURATION);
-			Cache.set(PERMISSION_CACHE_PREFIX + username, user.getAllPermissions(), CACHE_DURATION);
 			Cache.set("userId", user.id, CACHE_DURATION);
 			            
             //flash.success("Welcome, " + .name + ' ' + person.surname);
@@ -85,9 +87,13 @@ public class Security extends Secure.Security {
 		}
 			
 		Logger.trace("checking permission %s for user %s", profile, username);
-		
-		for (Permission permission : getUserAllPermissions(username)) {
-			if (permission.description.equals(profile)) {
+
+		//Set<UsersPermissionsOffices> userPermissionsOffices = getUserAllPermissions(username);
+		List<Permission> userPermissionsOffices = getUserAllPermissions(username);
+//		Logger.debug("I permessi per %s sono %d", username, userPermissionsOffices.size());
+		for (Permission p : userPermissionsOffices) {
+			//Logger.debug("Permesso: %s", p.permission.description);
+			if (p.description.equals(profile)) {
 				return true;
 			}
 		}
@@ -128,17 +134,22 @@ public class Security extends Secure.Security {
 		return user;
 	}
 
-	private static Set<Permission> getUserAllPermissions(String username) {
+	private static List<Permission> getUserAllPermissions(String username) {
 		User user = getUser(username);
 		if (user == null) {
-			return ImmutableSet.of();
+			//return ImmutableSet.of();
+			return null;
 		}
-		Set<Permission> permissions = Cache.get(PERMISSION_CACHE_PREFIX + username, Set.class);
+		//Set<UsersPermissionsOffices> permissions = Cache.get(PERMISSION_CACHE_PREFIX + username, Set.class);
+		
+		List<Permission> permissions = Cache.get(PERMISSION_CACHE_PREFIX + username, List.class);
+		
 		if (permissions == null) {
 			user.refresh();
 			permissions = user.getAllPermissions();
 			Cache.set(PERMISSION_CACHE_PREFIX + username, permissions, CACHE_DURATION);
 		}
+		
 		return permissions;
 	}
 	
@@ -146,7 +157,7 @@ public class Security extends Secure.Security {
 		return getUser(connected());
 	}
 	
-	public static Set<Permission> getPersonAllPermissions() {
+	public static List<Permission> getPersonAllPermissions() {
 		return getUserAllPermissions(connected());
 	}
 	
