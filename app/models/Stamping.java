@@ -154,6 +154,15 @@ public class Stamping extends Model implements Comparable<Stamping> {
 		else
 			return 0; 
 	}
+	
+	public boolean isServiceStamping() {
+		if(this.stampType!=null && this.stampType.identifier!=null && this.stampType.identifier.equals("s"))
+		{
+			return true;
+		}
+		return false;
+	}
+	
 
 
 

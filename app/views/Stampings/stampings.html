@@ -1,45 +1,83 @@
 #{extends 'main3.html' /}
 #{set header:'navbar' /}
-#{set title:person.surname + ' ' + person.name + ', matricola=' + person.number  /}
+#{set title: 'ePAS - Situazione Mensile'  /}
 
 #{set 'moreStyles'}
 
 <style>
     
-@media (max-width: 767px) {
-
-	#tabellonetimbrature {
-	   font-size: .7em;
-	   min-width: 600px;
+    html, body {
+		background-color: white;
 	}
 	
-	#padre {
-	   min-width: 640px;
+	#page_content {
+		padding-top: 70px;
+	}
+	
+	.col-xs-12, col-sm-12, col-md-6  {
+		padding-left: 4px;
+		padding-right: 4px;
+	} 
+	
+	.panel-success>.panel-heading {
+		color: black;
+		background-color: grey;
+		border-color: #dddddd;
+	}
+	
+	.col-xs-10, .col-xs-2 {	/* tabelle riepilogo responsive */
+		border: 1px solid lightgrey;
+		padding-top: 3px;
+		padding-bottom: 3px;
+	}
+	
+	.col-xs-2 {
+		text-align: center;
 	}
 	
 	.container {
-		margin-left: 0px;
-		padding-left: 5px;
-		margin-right: 0px;
-		padding-right: 5px;
+		margin-left: 0;
+		margin-right: 0;
 	}
 	
-	#wrapper {
+	#page_content {
+		widht: 100%;
+	}
+    
+@media (max-width: 767px) {
+
+	#tabellonetimbrature {
+	   font-size: 10px !important; 
+	   /* min-width: 600px; */
+	}
+	
+	#padre {
+	   /* min-width: 640px; */
+	}
+	
+	.container {
 		margin-left: 0px;
 		padding-left: 0px;
 		margin-right: 0px;
 		padding-right: 0px;
 		
-		padding-top: 60px;
+	}
 	
+	footer {
+		display: none;
+	}
+	
+	#riepiloghi {
+	    font-size: 12px !important; 
 	}
 	
 }
+
 </style>
 
 #{/set}
 
-<div id="padre" class="container container-main">
+    <div class="col-xs-12 col-lg-8">
     <table id="tabellonetimbrature" class="table table-bordered table-condensed">
 
 	<tr>
@@ -52,10 +90,16 @@
 		
 		
 		
+		
+		
 		#{list items:1..numberOfInOut, as:'i'}
-			<th class="group-left">${i}<sup>a</sup> <br/>entrata</th>
-			<th class="group-right">${i}<sup>a</sup> <br/>uscita</th>
+			<th class="group-left hidden-xs">${i}<sup>a</sup> <br/>entrata</th>
+			<th class="group-right hidden-xs">${i}<sup>a</sup> <br/>uscita</th>
 		#{/list}
+		
+		<th class="group-single hidden-sm hidden-md hidden-lg">entrate/uscite</th>
+		
+		
 		
 		<th class="invisible"></th>
 		
@@ -96,16 +140,16 @@
 			</td>
 			
 			
-	       
+	        
 			#{list items:dayRecap.stampingsTemplate, as:'stampingTemplate'}
 				#{if stampingTemplate.colour.equals("in")}
-				  <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-left">
+				  <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-left hidden-xs">
 				#{/if}
 				#{elseif stampingTemplate.colour.equals("out")}
-				  <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-right">
+				  <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-right hidden-xs">
 				#{/elseif}
 				#{elseif stampingTemplate.colour.equals("warn")}
-				  <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} warn">
+				  <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} warn hidden-xs">
 				#{/elseif}
 					
 				#{if stampingTemplate.date!=null}
@@ -126,8 +170,23 @@
 				#{/ifnot}	
 				<!--  ${stampingTemplate.pairId}${stampingTemplate.pairPosition}  -->		
 				</td>
-			
 			#{/list}
+			
+			<td class="default-single hidden-sm hidden-md hidden-lg">
+			  #{list items:dayRecap.stampingsTemplate, as:'stampingTemplate'}
+			  #{/list}
+			  <div class="container-fluid">
+			    <div class="col-xs-3">aaa</div>
+			    <div class="col-xs-3">bbb</div>
+			    <div class="col-xs-3">ccc</div>
+			    <div class="col-xs-3">ddd</div>
+			    <div class="col-xs-3">aaa</div>
+			    <div class="col-xs-3">bbb</div>
+			    <div class="col-xs-3">ccc</div>
+			    <div class="col-xs-3">ddd</div>
+			  </div>
+			
+			</td>
 			
 			<td class="invisible"></td>
 	       			
@@ -186,17 +245,18 @@
 	#{/list}
 
     </table>
-</div>
-
-
-<div class="panel panel-info">
-  <div class="panel-heading">Situazione mensile ${person.name} ${person.surname} </div>
-  <div class="panel-body">
-    #{include './_riepilogoRiassuntivoMese.html' /}
   </div>
-</div>
 
-
-
+  <div id="riepiloghi">
+  
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 left">
+      #{include './_contractsRecap.html' /}
+  </div>
+  
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 right">
+    #{include './_notes.html' /}
+  </div>
+  
+  </div>
 
 

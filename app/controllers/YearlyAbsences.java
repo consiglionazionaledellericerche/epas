@@ -9,6 +9,7 @@ import java.util.List;
 import models.Absence;
 import models.AbsenceType;
 import models.Person;
+import models.User;
 import models.rendering.YearlyAbsencesRecap;
 
 import org.joda.time.LocalDate;
@@ -25,7 +26,7 @@ import com.google.common.collect.TreeBasedTable;
 
 import dao.PersonDao;
 
-@With( {Secure.class, NavigationMenu.class} )
+@With( {Secure.class, RequestInit.class} )
 public class YearlyAbsences extends Controller{
 
 	public final static class AbsenceTypeDays{
@@ -234,27 +235,23 @@ public class YearlyAbsences extends Controller{
 	 * Render della pagina absencePerPerson.html che riassume le assenze annuali di una persona
 	 */
 	@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void absencesPerPerson(Long personId, Integer year){
+	public static void absencesPerPerson(Integer year){
 		
 		//controllo sui parametri
-		Person person = Security.getSelfPerson(personId);
-		if( person == null ) {
+		User user = Security.getUser();
+		if( user == null || user.person == null ) {
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
 		}
 		
-		Integer anno = params.get("year", Integer.class);
-		Logger.debug("La persona correntemente loggata è: %s", person);
-		Logger.trace("Anno: "+anno);
-
 		//rendering 
-		if(anno==null){
+		if(year==null){
 			LocalDate now = new LocalDate();
-			YearlyAbsencesRecap yearlyAbsencesRecap = new YearlyAbsencesRecap(person, (short)now.getYear());
+			YearlyAbsencesRecap yearlyAbsencesRecap = new YearlyAbsencesRecap(user.person, (short)now.getYear());
 			render(yearlyAbsencesRecap);
 		}
 		else{
-			YearlyAbsencesRecap yearlyAbsencesRecap = new YearlyAbsencesRecap(person, (short)anno.intValue());
+			YearlyAbsencesRecap yearlyAbsencesRecap = new YearlyAbsencesRecap(user.person, (short)year.intValue());
 			render(yearlyAbsencesRecap);
 		}
 	}

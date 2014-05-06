@@ -1,111 +1,166 @@
-#{extends 'main_with_navbar.html' /}
-#{set titolo: 'Gestione straordinari e altre competenze' /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Assegna competenze'  /}
+
+<div id="container-fluid-nav-tabs" class="container-fluid">
 
 <ul class="nav nav-tabs">
-  <li class="active"><a href="@{Competences.showCompetences(year, month)}#">Competenze</a></li>
-  <li><a href="@{Competences.overtime(year, month)}#">Straordinari</a></li>
-  <li><a href="@{Competences.totalOvertimeHours(year, month)}#">Monte ore</a></li>
-  <li><a href="@{Competences.recapCompetences()}#">Recap competenze</a></li>
-  <li><a href="@{Competences.exportCompetences()}#">Esporta competenze</a></li>
+  <li class="active"><a href="@{Competences.showCompetences(year, month)}">Assegna Competenze</a></li>
+  <li><a href="@{Competences.overtime(year, month)}">Straordinari</a></li>
+  <li><a href="@{Competences.totalOvertimeHours(year)}">Monte ore</a></li>
+  <li><a href="@{Competences.enabledCompetences()}">Abilita Competenze</a></li>
+  <li><a href="@{Competences.exportCompetences()}">Esporta competenze</a></li>
 </ul>
 
-<div class="row">
+</div>
 
-<div class="accordion span10" id="accordion1" style="text-align:center; margin-left: 400px;">
-  <div class="accordion-group">
-    <div class="accordion-heading">
-      <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne">
-        <p class="text-error"><strong>Competenze del mese di <span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year}</strong></p>
-      </a>
-    </div>
-    <div id="collapseOne" class="accordion-body collapse out">
-      <div class="accordion-inner">
-        <p>Totale ore di straordinario(S1+S2+S3) pagate a <span class="capitalized">&{'views.tags.display.date.month.' + month}</span>: <strong>${totaleOreStraordinarioMensile}</strong></p>
-		<p>Totale ore di straordinario pagate nell'anno: <strong>${totaleOreStraordinarioAnnuale}</strong></p>
-		<p>Totale monte ore nell'anno ${year}: <strong>${totaleMonteOre}</strong></p>
-		<p class="lead">I valori per le reperibilità sono espressi in GIORNI, quelli per straordinari e turni in ORE</p>
+<div class="container-fluid">
+  
+  <div class="col-md-8">
+  
+    <div class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title">Assegna competenze &{'views.tags.display.date.month.' + month} ${year} </h3>
+      </div>
+      <div class="panel-body">
+        <!-- begin Assegna competenze panel body -->
+        
+        <input type="hidden" name="year" value="${year}"/>
+        <input type="hidden" name="month" value="${month}"/>
+
+        <div class="col-xs-5">
+        #{form action:@Competences.showCompetences()	,  
+          method:'GET', autocomplete:'off',
+          'data-reload':'#results'}
+          <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="input-medium"/>
+    
+          <select name="codice" class="input-medium">
+            #{list items:activeCompetenceCodes, as:'activeCode'}
+              <option value="${activeCode.code}" >${activeCode.code}</option>
+            #{/list}
+	      </select>
+          <i class="icon-search icon-large"></i>
+      
+          <input type="hidden" name="year" value="${year}"/>
+	      <input type="hidden" name="month" value="${month}"/>
+        #{/form}
+        </div>
+
+        <section id="results">
+
+          <div class="col-xs-7">
+            <ul class="pagination">
+  	        #{list items:0..simpleResults.totalPage-1, as:'indexPage', class:'inline'}
+  	          #{if simpleResults.page==indexPage}
+  	            <li class="active"><a href="#">${indexPage+1}</a></li>
+  	          #{/if}
+  	          #{else}
+  	            <li><a href="@{Competences.showCompetences(year, month, name, codice, indexPage)}">${indexPage+1}</a></li>
+  	          #{/else}
+	        #{/list}
+            </ul>
+		  </div>
+
+          <table class="table table-hover">
+	        <tr class="warning">
+	          <th>Nome e cognome</th>
+	          <th>${competenceCode.description} ${competenceCode.code}</th>
+	        </tr>
+	
+	        #{list items:activePersons, as:'person'}
+	          #{if person.competenceCode.contains(competenceCode) }
+	          <tr>
+	            <td class="person">${person.name} ${person.surname}</td>
+	            <td>
+	            #{if person.competenceCode.contains(competenceCode)}
+	     	      #{if competenceCode.code.equals('S1')}
+	     	        (${person.getPositiveResidualInMonth(year,month)+person.competence(competenceCode,year,month).valueApproved})
+	              #{/if}
+	            #{/if}
+	            <a data-x-editable href="#" data-type="number" data-pk="${person.competence(competenceCode,year,month).id}" data-name="value"
+	     	    data-url="@{updateCompetence()}" 
+	     	    data-title="Modifica ${competenceCode.description} per ${person.name} ${person.surname}">${person.competence(competenceCode,year,month).valueApproved}</a>
+	            </td>
+	          </tr>
+	          #{/if}
+	        #{/list}
+	      </table>
+	      
+	      
+	      <strong>Totale ${competenceCode.code} mese istituto</strong>
+		  <a data-tooltip data-toggle="tooltip" data-placement="right" title="Per aggiornare questo valore ricaricare la pagina">
+		    <strong>${competenceCode.totalFromCompetenceCode(month, year)}</strong>
+		  </a>	      
+
+        </section>
+        
+        
+        
+        <!-- end Assegna Competenze panel body -->
       </div>
     </div>
-  </div>
-</div>
-</div>
- 
-<input type="hidden" name="year" value="${year}"/>
-<input type="hidden" name="month" value="${month}"/>
+  
+  </div> <!-- end col-md-8 -->
 
-<div class="row-fluid" style="margin-left: 60px;">
 
-<div class="offset2 span4">
-#{form action:@Competences.showCompetences()	,  
-    method:'GET', autocomplete:'off',
-    'data-reload':'#results'}
-    <input style='display:inline;' type="text" name="name" placeholder="Nome o cognome" value="${name}" class="input-medium"/>
-    
-    <select style='display:inline;' name="codice" class="input-medium">
-      #{list items:activeCompetenceCodes, as:'activeCode'}
-        <option value="${activeCode.code}" >${activeCode.code}</option>
-      #{/list}
-	</select>
-    <i class="icon-search icon-large"></i>
-      
-    <input type="hidden" name="year" value="${year}"/>
-	<input type="hidden" name="month" value="${month}"/>
+  <div class="col-md-4">
+   <div class="panel-group" id="collapseInfo">
+    <div class="panel panel-info	">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          <a data-toggle="collapse" data-parent="#collapseInfo" href="#collapseInfoContent">
+            <strong>Riepilogo Istituto</strong>
+          </a>
+        </h4>
+      </div>
+      <div id="collapseInfoContent" class="panel-collapse collapse in">
+        <div class="panel-body">
+          <table class="table table-condensed table-hover">
+            <tr>
+              <td>
+                Totale ore di straordinario pagate a 
+                <span class="capitalized">&{'views.tags.display.date.month.' + month}</span>
+                <br>
+                (S1+S2+S3) 
+              </td>
+              <td class="success"><strong>${totaleOreStraordinarioMensile}</strong></td>
+            </tr>
+            <tr>
+              <td>Totale ore di straordinario pagate nell'anno</td>
+              <td class="success"><strong>${totaleOreStraordinarioAnnuale}</strong></td>
+            </tr>
+            <tr>
+              <td>Totale monte ore nell'anno ${year}</td>
+              <td class="success"><strong>${totaleMonteOre}</strong></td>
+            </tr>
+          </table>
+        </div>
+        
+      </div>   
+    </div> 
+   </div> <!-- end accordion Info -->
+  
+  </div> <!-- end col-md-4 --> 
+  
+  <div class="col-md-4">
+   <div class="panel-group" id="collapseInfo2">
+    <div class="panel panel-info	">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          <a data-toggle="collapse" data-parent="#collapseInfo2" href="#collapseInfoContent2">
+            <i class="fa fa-info fa-lg"></i> <strong>Note</strong>
+          </a>
+        </h4>
+      </div>
+      <div id="collapseInfoContent2" class="panel-collapse collapse in">
+        <div class="panel-body">
+           <p>I valori per le reperibilità sono espressi in GIORNI, quelli per straordinari e turni in ORE</p>
+        </div>
+        
+      </div>   
+    </div> 
+   </div> <!-- end accordion Info -->
+  
+  </div> <!-- end col-md-4 --> 
 
-#{/form}
-</div>
-
-<section id="results">
-
-<div class="span3">
-<div class="pagination pagination-centered" style="margin-top: 0px;">
-  <ul>
-  	#{list items:0..simpleResults.totalPage-1, as:'indexPage', class:'inline'}
-  	  #{if simpleResults.page==indexPage}
-  	    <li class="active"><a href="#">${indexPage+1}</a></li>
-  	  #{/if}
-  	  #{else}
-  	    <li><a href="@{Competences.showCompetences(year, month, name, codice, indexPage)}">${indexPage+1}</a></li>
-  	  #{/else}
-	#{/list}
-  </ul>
-</div>
-</div>
-<br>
-<div class="offset2 span6">
-<table class="table table-hover competence-big" style="margin-left: 0px;">
-	<tr>
-	  <th class="span2">Nome e cognome</th>
-	  <th class="span2">
-	     ${competenceCode.description} ${competenceCode.code}
-	  </th>
-	
-	</tr>
-	
-	#{list items:activePersons, as:'person'}
-	  #{if person.competenceCode.contains(competenceCode) }
-	    <tr>
-	      <td class="person">${person.name} ${person.surname}</td>
-	      <td>
-	      #{if person.competenceCode.contains(competenceCode)}
-	     	#{if competenceCode.code.equals('S1')}
-	     	  (${person.getPositiveResidualInMonth(year,month)+person.competence(competenceCode,year,month).valueApproved})
-	        #{/if}
-	      #{/if}
-	      <a data-x-editable href="#" data-type="number" data-pk="${person.competence(competenceCode,year,month).id}" data-name="value"
-	     	data-url="@{updateCompetence()}" 
-	     	data-title="Modifica ${competenceCode.description} per ${person.name} ${person.surname}">${person.competence(competenceCode,year,month).valueApproved}</a>
-	      </td>
-	    </tr>
-	  #{/if}
-	  <tr>  
-	#{/list}
-	<tr>
-	  <td class="nomeCognome"><strong>Totale mese istituto</strong></td>
-		<td><strong>${competenceCode.totalFromCompetenceCode(month, year)}</strong></td>
-	  </tr>
-</table>
-</div>
-
-</section>
-</div>
-
+</div> <!-- end container-fluid -->

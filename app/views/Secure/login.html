@@ -2,15 +2,25 @@
 #{set header:'banner' /}
 #{set title:'ePAS - electronic Personnel Attendance System' /}
 
-<div class="row center">
+#{set 'moreStyles'}
 
-  <div class="container col-md-4 col-md-offset-4">
+<style>
+	#benvenuto{
+		padding-top: 25px;
+	}
+
+</style>
+
+#{/set}
+
+  <div id="benvenuto" class="container col-md-4 col-md-offset-4 center">
     <h3>Benvenuto in ePAS</h3>
   </div>
 
   <div class="container col-xs-8 col-xs-offset-2
-  						col-sm-4 col-sm-offset-4 
-  						col-md-2 col-md-offset-5">
+  						col-sm-6 col-sm-offset-3 
+  						col-md-4 col-md-offset-4
+  						col-lg-2 col-lg-offset-5">
     
 	
 	#{form @authenticate(), id:'formLogin', role:'form'}
@@ -33,4 +43,3 @@
 	<a href="@{LostPassword.lostPassword()}">Password dimenticata?</a>
 	 
   </div>
-</div>

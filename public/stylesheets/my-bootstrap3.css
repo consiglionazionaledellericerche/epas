@@ -12,7 +12,7 @@ h1,h2,h3,h4,h5 {
 
 html,
 body {
-  background-color: lightgrey;
+  background-color: white;
   height: 100%;
 }
 
@@ -21,14 +21,12 @@ body {
     height: auto !important;
     height: 100%;
     margin-bottom:  -70px;
-    background: #FFF;
-    -webkit-box-shadow: 0px 0px 6px 8px #FFF;
-	-moz-box-shadow: 0px 0px 6px 8px #FFF;
-	box-shadow: 0px 0px 6px 8px #FFF;
+    background: white;
+   
 }
 
 #page_content{
-	padding-top:130px;
+	padding-top:70px;
 	padding-bottom: 90px;
 }
 
@@ -45,6 +43,19 @@ footer p {
 }
 
 
+/* Regole per smartphone s2
+------------------------------------------------------------------------- */
+@media (max-width: 400px) {
+
+	html, body {
+		font-size: 10px;
+	}	
+	
+	.container {
+		padding-left: 0px;
+		padding-right: 0px;
+	}
+}
 
 /* Custom page CSS
 ------------------------------------------------------------------------ */
@@ -59,6 +70,42 @@ footer p {
 .flash-panel p{
 	padding: 0;
 	padding-top: 7px;
+}
+
+#flash-error, #flash-success {
+ 	position: fixed;
+  	top: 50px;
+  	right: 100px;
+  	display: block;
+  	left: auto;	
+}
+
+#flash-error {
+	background-color: lightpink;
+}
+
+#flash-error h3 {
+	background-color: red;
+	color: white;
+	text-align: center;
+}
+
+#flash-success div.arrow {
+	border-bottom-color: red;
+}
+
+#flash-success {
+	background-color: lightgreen;
+}
+
+#flash-success h3 {
+	background-color: green;
+	color: white;
+	text-align: center;
+}
+
+#flash-success div.arrow {
+	border-bottom-color: green;
 }
 
 #banner {
@@ -78,20 +125,41 @@ footer p {
 	display: inline-block;
 }
 
-#nav-year .badge {
-	background-color: #2d6ca2;
+#nav-year a.dropdown-toggle, #nav-month a.dropdown-toggle {
+	padding-right: 2px;
+	padding-left: 4px;
+}
+
+#nav-year .badge, #nav-month .badge {
+	background-color: white;
 	font-size: 1.1em;
 }
 
-#nav-month .badge {
-	background-color: #2d6ca2;
-	font-size: 1.1em;
+.my-navbar-form {
+	padding-left: 4px;
+	padding-right: 2px;
+}
+
+.my-navbar-form select{
+	border-radius: 20px;
+	padding: 5px;
+	padding-top: 1px;
+	padding-bottom: 1px;
+	margin-top: 9px;
 }
 
 .panel {
-	padding-left: 0;
-	padding-right: 0;
+	padding-left: 0px;
+	padding-right: 0px;
 	border-color: darkgrey;
+}
+
+#container-fluid-nav-tabs {
+    padding-bottom: 20px;
+}
+    
+ul.pagination {
+    margin-top: 0px;
 }
 
 /* CSS utilità */
@@ -100,28 +168,39 @@ footer p {
 	text-align: center;
 }
 
-.center th {
+.center th, .center td {
 	text-align: center;
 }
 
-.container-main {
-	background-color: white;
-	border-radius: 5px;
-	border: 1px solid darkgrey;
-	padding: 10px;
-	font-size: .9em;
-}
-
-.container-margintop {
-	margin-top: 20px;
-}
-
-.container-marginbottom {
-	margin-bottom: 20px;
-}
-
+/*
 .modal-dialog-center {
     margin-top: 15%;
+}
+*/
+
+.table-form, .table-form td {
+	border: none !important;
+}
+
+.table-form td.lab {
+	text-align: right;
+	padding-right: 30px;
+}
+
+.table-form input[type=radio] {
+	margin-right: 10px;
+}
+
+.table-form label {
+	padding-right: 3px;
+}
+
+.table-form input.input-sm {
+	max-width: 60px;
+}
+
+.table-form input.input-md {
+	max-width: 80px;
 }
 
 /* CSS template */
@@ -211,6 +290,9 @@ table#tabellonetimbrature td.festivi {background-color: #fac08d;}
 table#tabellonetimbrature td.assenza {background-color: #ffffcf;}
 table#tabellonetimbrature td.progressivo {background-color: #ffffcf;}
 table#tabellonetimbrature td.capitalized {text-transform: capitalize;}
+
+table#tabellonetimbrature td.note {padding: 0;}
+table#tabellonetimbrature a.btn.note {padding: 0;}
 
 
 /* bordatura */

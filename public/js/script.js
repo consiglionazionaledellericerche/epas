@@ -4,6 +4,13 @@ $(function($){
 	
 	$.fn.initepas = function() {
 		
+		 
+		this.find('data-tooltip').tooltip();
+		
+		this.find('.my-modal').on('hidden.bs.modal', function(){
+		    $(this).data('bs.modal', null);
+		});
+		
 		// $.fn.editable.defaults.mode = 'inline';
 		this.find('a[data-x-editable]').editable();
 		
@@ -123,8 +130,8 @@ $(function($){
 	$('a[data-modal]').click(function(e) {
 		var $this = $(this);
 		var url = $this.attr('href');
-		var $modal = $($this.data('modal'));
-		var $modalbody = $modal.modal('show').find('.modal-body');
+		var $modal = $('.my-modal');
+		var $modalbody = $modal.modal('show').find('.modal-content');
 		$modalbody.load(url, function() {
 			$modalbody.initepas();
 		});

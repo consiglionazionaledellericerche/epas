@@ -19,8 +19,8 @@
 	<link rel="stylesheet" href="@{'/public/feedback-master/feedback.min.css'}" />
     
     <!-- Custom styles for this template -->
-    <link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap-editable/css/bootstrap-editable.css" rel="stylesheet"/>
-       
+    <!-- <link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap-editable/css/bootstrap-editable.css" rel="stylesheet"/>  -->
+    <link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet"/>
 	#{get 'moreStyles' /}
 	
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -39,7 +39,7 @@
 
   <body>
   
-   <div id="wrapper" class="container">
+   <div id="wrapper">
 
     #{if header.equals('navbar') }
     
@@ -65,18 +65,24 @@
         </div>
         <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
+            #{if dropDown.equals("dropDown1") }
             <li class="dropdown active">
+            #{/if}
+            #{else}
+            <li class="dropdown">  
+            #{/else}
+            
               <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span>
           		${session.username} <b class="caret"></b></a>
               <ul class="dropdown-menu">
                 <li><a href="@{Stampings.stampings(session.get("yearSelected"), session.get("monthSelected"))}">Situazione mensile</a></li>
             
-            	<li><a href="#">Assenze mensili</a></li>
-            	<li><a href="@{YearlyAbsences.absencesPerPerson(session.get("personSelected"), session.get("yearSelected"))}">Assenze annuali</a></li>
-            	<li><a href="@{Vacations.show(session.get("personSelected"), session.get("yearSelected"))}">Ferie</a></li>
-            	<li><a href="#">Competenze</a></li>
-            	<li><a href="#">Riepilogo orario</a></li>
-            	<li><a href="@{PersonMonths.trainingHours(session.get("personSelected"), session.get("yearSelected"), session.get("monthSelected"))}">Ore di formazione</a></li>
+            	<li><a href="@{Absences.absences(session.get("yearSelected"), session.get("monthSelected"))}">Assenze mensili</a></li>
+            	<li><a href="@{YearlyAbsences.absencesPerPerson(session.get("yearSelected"))}">Assenze annuali</a></li>
+            	<li><a href="@{Vacations.show(session.get("yearSelected"))}">Ferie</a></li>
+            	<li><a href="@{Competences.competences(session.get("yearSelected"), session.get("monthSelected"))}">Competenze</a></li>
+            	<li><a href="@{PersonMonths.hourRecap(session.get("yearSelected"))}">Riepilogo orario</a></li>
+            	<li><a href="@{PersonMonths.trainingHours(session.get("yearSelected"))}">Ore di formazione</a></li>
             	<li class="divider"></li>
             	<li><a href="#">Stampa cartellino presenze</a></li>
             	<li class="divider"></li>
@@ -85,29 +91,92 @@
             </li>
           </ul>
           
+          #{secure.check "viewPersonList"}
+          <ul class="nav navbar-nav">
+            #{if dropDown.equals("dropDown2") }
+            <li class="dropdown active">
+            #{/if}
+            #{else}
+            <li class="dropdown">  
+            #{/else}
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bar-chart-o"></i>
+          		Amministrazione <b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li><a href="@{Persons.list()}">Lista Persone</a></li>
+                <li class="divider"></li>
+                <li><a href="@{Stampings.personStamping(session.get("personSelected"), session.get("yearSelected"), session.get("monthSelected"))}">Timbrature</a></li>
+                <li><a href="@{Competences.showCompetences(session.get("yearSelected"), session.get("monthSelected"))}">Competenze</a></li>
+                <li><a href="@{VacationsAdmin.list(session.get("yearSelected"))}">Ferie e Permessi</a></li>
+              </ul>
+            </li>
+          </ul>
+          #{/secure.check}
+          
+          #{if noData==null }
           <ul id="nav-year" class="nav navbar-nav">
        		<li class="dropdown">
           	  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="badge">${session.get("yearSelected")}</span><b class="caret"></b></a>
           	  <ul class="dropdown-menu">
-            	<li><a href="#">2012</a></li>
-            	<li><a href="#">2013</a></li>
-            	<li><a href="#">2014</a></li>
-            	<li><a href="#">2015</a></li>            
+            	<li><a href="@{SwitchTemplate.updateYear(2013)}">2013</a></li>
+            	<li><a href="@{SwitchTemplate.updateYear(2014)}">2014</a></li>
+            	<li><a href="@{SwitchTemplate.updateYear(2015)}">2015</a></li>            
           	  </ul>
         	</li>
       	  </ul>
       
       	  <ul id="nav-month" class="nav navbar-nav">
         	<li class="dropdown">
-          	  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="badge">${session.get("monthSelectedName")}</span><b class="caret"></b></a>
+          	  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="badge">${templateUtility.monthName(session.get("monthSelected"))}</span><b class="caret"></b></a>
           	  <ul class="dropdown-menu">
-            	<li><a href="#">Gennaio</a></li>
-            	<li><a href="#">Febbraio</a></li>
-            	<li><a href="#">Marzo</a></li>
-            	<li><a href="#">Aprile</a></li>            
+            	<li><a href="@{SwitchTemplate.updateMonth(1)}">Gennaio</a></li>
+            	<li><a href="@{SwitchTemplate.updateMonth(2)}">Febbraio</a></li>
+            	<li><a href="@{SwitchTemplate.updateMonth(3)}">Marzo</a></li>
+            	<li><a href="@{SwitchTemplate.updateMonth(4)}">Aprile</a></li>  
+            	<li><a href="@{SwitchTemplate.updateMonth(5)}">Maggio</a></li>  
+            	<li><a href="@{SwitchTemplate.updateMonth(6)}">Giugno</a></li>  
+            	<li><a href="@{SwitchTemplate.updateMonth(7)}">Luglio</a></li>  
+            	<li><a href="@{SwitchTemplate.updateMonth(8)}">Agosto</a></li>  
+            	<li><a href="@{SwitchTemplate.updateMonth(9)}">Settembre</a></li>  
+            	<li><a href="@{SwitchTemplate.updateMonth(10)}">Ottobre</a></li> 
+            	<li><a href="@{SwitchTemplate.updateMonth(11)}">Novembre</a></li>  
+            	<li><a href="@{SwitchTemplate.updateMonth(12)}">Dicembre</a></li>               
           	  </ul>
         	</li>
       	  </ul>
+      	  #{/if}
+      	  
+      	  #{if noPerson==null }
+      	  #{secure.check "viewPersonList"}
+      	  	#{form @SwitchTemplate.updatePerson(), class: 'navbar-form navbar-left my-navbar-form', onChange:'javascript:this.form.submit()' }
+      	  	<div class="form-group">
+      	  	<!-- Lista persone -->
+          	  #{select 'personId', value:session.get("personSelected"), class:'form-control', id:'person', onChange:'javascript:this.form.submit()'}
+		  		#{list items:navPersons, as:'person'}
+		    		#{option person.id}${person.surname + ' ' + person.name}#{/option}
+	  			#{/list}
+		  	  #{/select}
+		  	</div>
+  			
+      		#{/form}
+      	  #{/secure.check}
+      	  #{/if}
+      	  
+      	  
+      	  
+      	  
+      	  
+      	  
+      	  
+      	  
+      	  
+      	  
+      	  
+      	  
+      	  
+      	  
+      	 
+      	  
+      	  
       	  
       	  #{if session.contains("sudo.username")}
       	  <ul class="nav navbar-nav navbar-right">
@@ -115,17 +184,43 @@
           </ul>
   		  #{/if}
   		  
+  		  
+  		  
   		  #{else}
     	    #{if session.username}
       		  <ul class="nav navbar-nav navbar-right">
       		    #{secure.permissionCheck}
 	   	          <li><a href="@{Faq.faq()}"><i class="fa fa-comment-o"></i> FAQ</a></li>
       	        #{/secure.permissionCheck}
-    	        <li><a href="#"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+    	        <li><a href="@{secure.logout()}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
     	      </ul>
     	    #{/if}
   		  
   		  #{/else}
+  		  
+  		  
+  		  
+  		  
+  		  
+  		  
+  		  
+  		  
+  		  
+  		  <!-- flash error icon 
+          <div class=container>
+            #{if flash.error}
+              <ul class="nav navbar-nav navbar-right">
+      	        <li><a href="@{Administrators.restoreUser()}"><i class="fa fa-info-circle fa-lg" style="color: red;"></i></a></li>
+              </ul>
+            #{/if}
+            #{if flash.success}
+              <ul class="nav navbar-nav navbar-right">
+      	        <li><a href="@{Administrators.restoreUser()}"><i class="fa fa-info-circle fa-lg" style="color: green;"></i></a></li>
+              </ul>
+            #{/if}
+          </div>
+          -->
+      
       
         </div>
         
@@ -143,28 +238,37 @@
 	#{/if}
 	
     <!-- Begin page content -->
-    <div class="container" id="page_content">
-       #{if flash.error}
-      <div class="panel panel-danger">
-      <div class="panel-heading flash-panel">  
-        <p class="fError"><strong>${flash.error}</strong></p>
-      </div>
-      </div>
-      #{/if}
-      #{if flash.success}
-      <div class="panel panel-success">
-      <div class="panel-heading flash-panel">  
-        <p class="fSuccess"><strong>${flash.success}</strong></p>
-      </div>
-      </div>
-      #{/if}
-        #{doLayout /}
+    <div class="container-fluid" id="page_content">
+       
+      <!-- do layout -->
+      #{doLayout /}
+
     </div>
+    
+    <!-- Altri componenti html -->
+    #{if flash.error}
+      <div id="flash-error" class="popover bottom">
+        <div class="arrow"></div>
+        <h3 class="popover-title"><strong>Notifica</strong></h3>
+        <div class="popover-content">
+          <strong>${flash.error}</strong>
+        </div>
+      </div>
+    #{/if}
+    #{if flash.success}
+      <div id="flash-success" class="popover bottom">
+        <div class="arrow"></div>
+        <h3 class="popover-title"><strong>Notifica</strong></h3>
+        <div class="popover-content">
+          <strong>${flash.success}</strong>
+        </div>
+      </div>
+    #{/if}  
       
    </div>
 
    <footer>
-     <div class="container">
+     <div class="container-fluid">
        <p>Created with <a href="http://www.playframework.org">play framework</a> and really inspired from the "orologio" application developed by Pasquale Lazzareschi</p>
      </div>
    </footer>
@@ -176,7 +280,8 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     
     <script src="@{'/public/bootstrap-3.1.1-dist/js/bootstrap.min.js'}" type="text/javascript"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap-editable/js/bootstrap-editable.min.js"></script>
+    <!-- <script src="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap-editable/js/bootstrap-editable.min.js"></script>  -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
     <script src="@{'/public/bootstrap-datepicker/js/bootstrap-datepicker.js'}" type="text/javascript"></script>
 	<script src="@{'/public/morris.js-0.4.3/spec/vendor/raphael-2.1.0.min.js'}"></script>
 	<script src="@{'/public/morris.js-0.4.3/morris.min.js'}"></script>
