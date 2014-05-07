@@ -13,6 +13,7 @@ import models.ConfYear;
 import models.Office;
 import models.Permission;
 import models.User;
+import models.UsersPermissionsOffices;
 import models.enumerate.ConfigurationFields;
 
 import org.joda.time.LocalDate;
@@ -29,7 +30,6 @@ import play.cache.Cache;
 import play.data.validation.*;
 import play.libs.Codec;
 import play.mvc.Controller;
-
 import validators.StringIsTime;
 
 /**
@@ -153,7 +153,11 @@ public class Wizard extends Controller {
     		@Required String user,
     		@Required String password,
     		@Required @Equals("password") String passwordRetype){
-
+    	
+    	User admin = User.find("byUsername", user).first();
+    	if(admin != null){
+    		validation.addError("user", "Nome utente già utilizzato");
+    	}
     	if (validation.hasErrors()){
     	    params.flash(); 
     	    validation.keep();
@@ -322,15 +326,8 @@ public class Wizard extends Controller {
 		catch(IOException f){
 			Logger.error("Impossibile caricare il file properties.conf per la procedura di Wizard");	
 		}
-		// setAdmin
-		User admin = new User();
-		admin.username = properties.getProperty("Nome Amministratore");
-		admin.password = Codec.hexMD5(properties.getProperty("Password Amministratore"));
-		admin.permissions = Permission.findAll();
-		admin.save();
-	
 		// setOffice
-		Office office = Office.findById(new Long(1));
+		Office office = Office.findById(1L);
 		if(office == null){
 			office = new Office();
 		}
@@ -338,7 +335,51 @@ public class Wizard extends Controller {
 		office.code = Integer.parseInt(properties.getProperty("seat_code"));
 		office.save();
 		
+		// setAdmin
+		String username = properties.getProperty("Nome Amministratore");
+		User admin = User.find("byUsername", username).first();
 		
+		if(admin == null){
+			admin = new User();
+			admin.username = username;
+		}
+		
+		admin.password = Codec.hexMD5(properties.getProperty("Password Amministratore"));
+		admin.save();
+		
+		List<String> permessi = new ArrayList<String>();
+		permessi.add("insertAndUpdateOffices");
+		permessi.add("viewPersonList");
+		permessi.add("deletePerson");
+		permessi.add("insertAndUpdateStamping");
+		permessi.add("insertAndUpdatePerson");
+		permessi.add("insertAndUpdateWorkingTime");
+		permessi.add("insertAndUpdateAbsence");
+		permessi.add("insertAndUpdateConfiguration");
+		permessi.add("insertAndUpdatePassword");
+		permessi.add("insertAndUpdateAdministrator");
+		permessi.add("insertAndUpdateCompetences");
+		permessi.add("insertAndUpdateVacations");
+		permessi.add("viewPersonalSituation");
+		permessi.add("uploadSituation");
+		
+		List<Permission> permissions = Permission.find("description in (?1)", permessi).fetch();
+		
+		List<UsersPermissionsOffices> userPermissionOffices = new ArrayList<UsersPermissionsOffices>(); 
+		
+		for (Permission p: permissions){
+			UsersPermissionsOffices upo = new UsersPermissionsOffices();
+			upo.office = office;
+			upo.user = admin;
+			upo.permission = p;
+			upo.save();
+			userPermissionOffices.add(upo);
+		}
+		
+		admin.userPermissionOffices = userPermissionOffices;
+		admin.save();
+		
+		// setGenConf
 		List<String> cgf = ConfigurationFields.getConfGeneralFields();
 		
 		List<ConfGeneral> confGeneral = ConfGeneral.find(
@@ -364,6 +405,8 @@ public class Wizard extends Controller {
 			}
 		}	
 				
+		
+		// setConfYear
 		List<String> cyf = ConfigurationFields.getConfYearFields();
 		
 		DateTimeFormatter dtf = DateTimeFormat.forPattern("dd/MM/yyyy");
