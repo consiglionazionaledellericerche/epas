@@ -16,7 +16,9 @@ import models.Office;
 import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
+import models.PersonDayInTrouble;
 import models.PersonMonthRecap;
+import models.StampProfile;
 import models.Stamping;
 import models.User;
 import models.enumerate.AccumulationBehaviour;
@@ -26,11 +28,18 @@ import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
 import models.rendering.VacationsRecap;
 
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.SimpleEmail;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.DateTimeFormatterBuilder;
 
 import play.Logger;
 import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
+import play.libs.Mail;
 
 public class PersonUtility {
 
@@ -242,14 +251,14 @@ public class PersonUtility {
 	public static AbsenceType whichVacationCode(Person person, LocalDate actualDate){
 
 		Contract contract = person.getCurrentContract();
-		
+
 		VacationsRecap vr = null;
-    	try { 
-    		vr = new VacationsRecap(person, actualDate.getYear(), contract, actualDate, true);
-    	} catch(IllegalStateException e) {
-    		return null;
-    	}
-			
+		try { 
+			vr = new VacationsRecap(person, actualDate.getYear(), contract, actualDate, true);
+		} catch(IllegalStateException e) {
+			return null;
+		}
+
 		if(vr.vacationDaysLastYearNotYetUsed>0)
 			return AbsenceType.find("byCode", "31").first();
 
@@ -395,7 +404,7 @@ public class PersonUtility {
 						absenceType.absenceTypeGroup.replacingAbsenceType, 
 						person).first();
 		if(absence != null){
-			
+
 			if(absenceType.absenceTypeGroup.accumulationType.equals(AccumulationType.yearly)){
 				absList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup.label = ? and abs.personDay.person = ? and" +
 						" abs.personDay.date between ? and ?", 
@@ -455,7 +464,7 @@ public class PersonUtility {
 
 			}
 		}
-		
+
 		return new CheckMessage(true, "Si può prendere il codice di assenza richiesto.", null);	
 	}
 
@@ -823,6 +832,7 @@ public class PersonUtility {
 	 * @param person
 	 * @param dateFrom
 	 * @param dateTo
+	 * @throws EmailException 
 	 */
 	public static void updatePersonDaysIntoInterval(Person person, LocalDate dateFrom, LocalDate dateTo)
 	{
@@ -854,19 +864,20 @@ public class PersonUtility {
 	 * @param year l'anno dal quale far partire il fix
 	 * @param month il mese dal quale far partire il fix
 	 * @param personLogged
+	 * @throws EmailException 
 	 */
-	public static void fixPersonSituation(Long personId, int year, int month, User userLogged){
-		
+	public static void fixPersonSituation(Long personId, int year, int month, User userLogged) throws EmailException{
+
 		if(userLogged==null)
 			return;
-	
+
 		List<Office> officeAllowed = new ArrayList<Office>();
 		if(userLogged.person == null)
 			officeAllowed = Office.findAll();
 		else
 			officeAllowed = userLogged.person.getOfficeAllowed();
-		
-		//Costruisco la lista di persone su cui voglio operare
+		//
+		//		//Costruisco la lista di persone su cui voglio operare
 		List<Person> personList = new ArrayList<Person>();
 		if(personId==-1)
 			personId=null;
@@ -900,7 +911,7 @@ public class PersonUtility {
 			JPAPlugin.startTx(false);
 			while(!actualMonth.isAfter(endMonth))
 			{
-				
+
 				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
 						p, actualMonth, actualMonth.dayOfMonth().withMaximumValue()).fetch();
 
@@ -932,10 +943,66 @@ public class PersonUtility {
 				contract.buildContractYearRecap();
 			}
 		}
-		JPAPlugin.closeTx(false);		
+		JPAPlugin.closeTx(false);	
+		
+		//(4) Invio mail per controllo timbrature da farsi solo nei giorni feriali
+		if(new LocalDate().isAfter(new LocalDate(2014,5,8))){
+			if(new LocalDate().getDayOfWeek() != DateTimeConstants.SATURDAY && new LocalDate().getDayOfWeek() != DateTimeConstants.SUNDAY){
+				JPAPlugin.startTx(false);		
+				LocalDate begin = new LocalDate().minusMonths(1);
+				LocalDate end = new LocalDate().minusDays(1);
 
+				for(Person p : personList){
+					Logger.debug("Chiamato controllo sul giorni %s %s", begin, end);
+					checkPersonDayForSendingEmail(p, begin, end);
+
+				}
+				JPAPlugin.closeTx(false);
+			}
+		}
+		
+		
+		
 	}
 
+
+	/**
+	 * metodo che controlla i personday in trouble dei dipendenti che non hanno timbratura fixed e invia mail nel caso in cui esistano
+	 * timbrature disaccoppiate
+	 * @param p
+	 * @param begin
+	 * @param end
+	 * @throws EmailException
+	 */
+	private static void checkPersonDayForSendingEmail(Person p, LocalDate begin, LocalDate end) throws EmailException{
+		List<PersonDayInTrouble> pdList = PersonDayInTrouble.find("Select pd from PersonDayInTrouble pd where pd.personDay.person = ? " +
+				"and pd.personDay.date between ? and ? and pd.fixed = ?", p, begin, end, false).fetch();
+
+		List<LocalDate> dateList = new ArrayList<LocalDate>();
+
+		for(PersonDayInTrouble pd : pdList){
+			if(pd.cause.contains("timbratura"))
+				dateList.add(pd.personDay.date);
+		}
+		if(p.surname.equals("Conti") && p.name.equals("Marco"))
+			Logger.debug("Trovato Marco Conti, capire cosa fare con la sua situazione...");
+		else{
+			for(StampProfile sp : p.stampProfiles){
+				if(DateUtility.isDateIntoInterval(begin, new DateInterval(sp.startFrom,sp.endTo))){
+					if(sp.fixedWorkingTime == false){
+						boolean flag = sendEmailToPerson(dateList, p);
+						//se ho inviato mail devo andare a settare 'true' i campi emailSent dei personDayInTrouble relativi 
+						if(flag){
+							for(PersonDayInTrouble pd : pdList){
+								pd.emailSent = true;
+								pd.save();
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 	/**
 	 * Verifica per la persona (se attiva) che alla data 
 	 * 	(1) in caso di giorno lavorativo il person day esista. 
@@ -946,8 +1013,9 @@ public class PersonUtility {
 	 * 		(b) che le persone not fixed non presentino ne' assenze AllDay ne' timbrature. 
 	 * @param personid la persona da controllare
 	 * @param dayToCheck il giorno da controllare
+	 * @throws EmailException 
 	 */
-	private static void checkPersonDay(Long personid, LocalDate dayToCheck)
+	private static void checkPersonDay(Long personid, LocalDate dayToCheck) throws EmailException
 	{
 		JPAPlugin.closeTx(false);
 		JPAPlugin.startTx(false);
@@ -984,8 +1052,9 @@ public class PersonUtility {
 	 * @param personid la persona da controllare
 	 * @param year l'anno di partenza
 	 * @param month il mese di partenza
+	 * @throws EmailException 
 	 */
-	private static void checkHistoryError(Person person, int year, int month)
+	private static void checkHistoryError(Person person, int year, int month) throws EmailException
 	{
 		//Person person = Person.findById(personid);
 		Logger.info("Check history error %s dal %s-%s-1 a oggi", person.surname, year, month);
@@ -998,6 +1067,62 @@ public class PersonUtility {
 			if(date.isEqual(today))
 				break;
 		}
+	}
+
+
+	/**
+	 * invia la mail alla persona specificata in firma con la lista dei giorni in cui ha timbrature disaccoppiate
+	 * @param date, person
+	 * @throws EmailException 
+	 */
+	private static boolean sendEmailToPerson(List<LocalDate> dateList, Person person) throws EmailException{
+		if(dateList.size() == 0){
+			return false;
+		}
+		SimpleEmail simpleEmail = new SimpleEmail();
+		try {
+			simpleEmail.setFrom("epas@iit.cnr.it");
+		} catch (EmailException e1) {
+			
+			e1.printStackTrace();
+		}
+		try {
+			simpleEmail.addTo(person.contactData.email);
+			//simpleEmail.addTo("dario.tagliaferri@iit.cnr.it");
+		} catch (EmailException e) {
+
+			e.printStackTrace();
+		}
+		List<LocalDate> dateFormat = new ArrayList<LocalDate>();
+		DateTimeFormatter fmt = DateTimeFormat.forPattern("dd-MM-YYYY");		
+		String date = "";
+		for(LocalDate d : dateList){
+			if(!DateUtility.isGeneralHoliday(person.office, d)){
+				dateFormat.add(d);
+				String str = fmt.print(d);
+				date = date+str+", ";
+			}
+		}
+		String incipit = "";
+		if(dateFormat.size() == 0)
+			return false;
+		if(dateFormat.size() > 1)
+			incipit = "Nei giorni: ";
+		if(dateFormat.size() == 1)
+			incipit = "Nel giorno: ";	
+
+		simpleEmail.setSubject("ePas Controllo timbrature");
+		String message = "Gentile " +person.name+" "+person.surname+ 
+				"\r\n" + incipit+date+ " il sistema ePAS ha rilevato un caso di timbratura disaccoppiata. \r\n " +
+				"La preghiamo di contattare l'ufficio del personale per regolarizzare la sua posizione. \r\n" +
+				"Saluti \r\n"+
+				"Il team di ePAS";
+
+		Logger.info("Messaggio recovery password spedito è: %s", message);
+
+		simpleEmail.setMsg(message);
+		Mail.send(simpleEmail);
+		return true;
 	}
 
 	/**

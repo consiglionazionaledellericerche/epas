@@ -21,6 +21,7 @@ import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
 import models.rendering.VacationsRecap;
 
+import org.apache.commons.mail.EmailException;
 import org.joda.time.LocalDate;
 
 import play.Logger;
@@ -58,7 +59,12 @@ public class Administration extends Controller {
     	//FromMysqlToPostgres.createAbsenceTypeToQualificationRelations();
     	int workingTimeTypes = FromMysqlToPostgres.importWorkingTimeTypes();
     	
-    	FromMysqlToPostgres.importAll(NUMERO_PERSONE_DA_IMPORTARE, ANNO_DA_CUI_INIZIARE_IMPORTAZIONE);
+    	try {
+			FromMysqlToPostgres.importAll(NUMERO_PERSONE_DA_IMPORTARE, ANNO_DA_CUI_INIZIARE_IMPORTAZIONE);
+		} catch (EmailException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
       	renderText(
         		String.format("Importate dalla vecchia applicazione %d tipi di assenza con i relativi gruppi e %d tipi di orari di lavoro.\n" +
         			"Importate %d persone con i relativi dati (contratti, dati personali, assenze, timbrature, ...", 
@@ -78,7 +84,12 @@ public class Administration extends Controller {
 	
 	
 	public static void updatePersonDay(){
-		FromMysqlToPostgres.checkFixedWorkingTime();
+		try {
+			FromMysqlToPostgres.checkFixedWorkingTime();
+		} catch (EmailException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		renderText("Aggiornati i person day delle persone con timbratura fissa");
 	}
 	
@@ -99,11 +110,12 @@ public class Administration extends Controller {
 	 * @param personId l'id univoco della persona da fixare, -1 per fixare tutte le persone
 	 * @param year l'anno dal quale far partire il fix
 	 * @param month il mese dal quale far partire il fix
+	 * @throws EmailException 
 	 * 
 	 * 
 	 */	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void fixPersonSituation(Long personId, int year, int month){
+	public static void fixPersonSituation(Long personId, int year, int month) throws EmailException{
 		
 		PersonUtility.fixPersonSituation(personId, year, month, Security.getUser());
 	}

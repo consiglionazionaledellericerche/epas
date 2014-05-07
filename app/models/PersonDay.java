@@ -27,6 +27,7 @@ import javax.persistence.UniqueConstraint;
 import models.Stamping.WayType;
 import models.enumerate.JustifiedTimeAtWork;
 
+import org.apache.commons.mail.EmailException;
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -34,6 +35,7 @@ import org.joda.time.DateTimeFieldType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
+import play.Logger;
 import play.data.validation.Required;
 import play.db.jpa.JPA;
 import play.db.jpa.Model;
@@ -563,6 +565,7 @@ public class PersonDay extends Model {
 	/**
 	 * (1) Controlla che il personDay sia ben formato (altrimenti lo inserisce nella tabella PersonDayInTrouble.
 	 * (2) Popola i valori aggiornati del person day e li persiste nel db
+	 * @throws EmailException 
 	 */
 	public void populatePersonDay()
 	{
@@ -670,6 +673,7 @@ public class PersonDay extends Model {
 	 * fixed.
 	 * @param pd
 	 * @param person
+	 * @throws EmailException 
 	 */
 	public void checkForPersonDayInTrouble()
 	{
@@ -741,6 +745,7 @@ public class PersonDay extends Model {
 	
 	/**
 	 * Metodo da utilizzare per la modifica del personDay che impatta su tutto il mese
+	 * @throws EmailException 
 	 */
 	public void updatePersonDaysInMonth()
 	{

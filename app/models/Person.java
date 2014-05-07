@@ -28,6 +28,7 @@ import models.Stamping.WayType;
 import models.exports.StampingFromClient;
 import models.personalMonthSituation.Mese;
 
+import org.apache.commons.mail.EmailException;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
@@ -835,7 +836,9 @@ public class Person extends Model {
 			
 		}
 		Logger.debug("Chiamo la populatePersonDay per fare i calcoli sulla nuova timbratura inserita per il personDay %s", pd);
+		
 		pd.populatePersonDay();
+		
 
 		pd.save();
 		return true;
