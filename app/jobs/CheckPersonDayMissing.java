@@ -5,6 +5,7 @@ import java.util.List;
 import models.Person;
 import models.PersonDay;
 
+import org.apache.commons.mail.EmailException;
 import org.joda.time.LocalDate;
 
 import play.Logger;
@@ -36,7 +37,9 @@ public class CheckPersonDayMissing extends Job{
 					Logger.debug("Non c'è personDay e non è festa per %s %s nel giorno %s", p.name, p.surname, dateBegin);
 					pd = new PersonDay(p, dateBegin);
 					pd.create();
+					
 					pd.populatePersonDay();
+					
 					pd.save();
 					Logger.debug("Creato person day per %s %s per il giorno %s in cui non risultavano nè timbrature nè codici di assenza", 
 							p.name, p.surname, dateBegin);

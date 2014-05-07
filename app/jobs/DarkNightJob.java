@@ -1,5 +1,7 @@
 package jobs;
 
+import org.apache.commons.mail.EmailException;
+
 import it.cnr.iit.epas.PersonUtility;
 import models.User;
 import play.Logger;
@@ -9,8 +11,7 @@ import play.jobs.On;
 
 
 @On("0 1 5 * * ?")
-//@On("1 /1 * * * ?")
-//@OnApplicationStart
+//@On("0 5 13 * * ?")
 public class DarkNightJob extends Job{
 	
 	public void doJob(){
@@ -18,7 +19,12 @@ public class DarkNightJob extends Job{
 
 		Logger.info("Start Job checkDay");
 		User userLogged = User.find("byUsername", "admin").first();	
-		PersonUtility.fixPersonSituation(-1l, 2014, 1, userLogged);
+		try {
+			PersonUtility.fixPersonSituation(-1l, 2014, 1, userLogged);
+		} catch (EmailException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		/*
 		LocalDate yesterday = new LocalDate().minusDays(1);

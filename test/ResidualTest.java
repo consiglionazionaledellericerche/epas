@@ -9,6 +9,7 @@ import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
 import models.rendering.VacationsRecap;
 
+import org.apache.commons.mail.EmailException;
 import org.joda.time.LocalDate;
 import org.junit.Test;
 
@@ -27,7 +28,12 @@ public class ResidualTest extends UnitTest {
     
     	
     	//Ricalcolo tutti i personday
-     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
+     	try {
+			PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
+		} catch (EmailException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
@@ -86,7 +92,12 @@ public class ResidualTest extends UnitTest {
     
     	
     	//Ricalcolo tutti i personday
-     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
+     	try {
+			PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
+		} catch (EmailException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
@@ -145,7 +156,12 @@ public class ResidualTest extends UnitTest {
     
     	
     	//Ricalcolo tutti i personday
-     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
+     	try {
+			PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
+		} catch (EmailException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
@@ -204,7 +220,12 @@ public class ResidualTest extends UnitTest {
     
     	
     	//Ricalcolo tutti i personday
-     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
+     	try {
+			PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
+		} catch (EmailException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
@@ -263,7 +284,12 @@ public class ResidualTest extends UnitTest {
     
     	
     	//Ricalcolo tutti i personday
-     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
+     	try {
+			PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
+		} catch (EmailException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap

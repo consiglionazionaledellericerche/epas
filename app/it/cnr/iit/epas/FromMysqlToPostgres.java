@@ -44,6 +44,7 @@ import models.enumerate.AccumulationType;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.WorkingTimeTypeValues;
 
+import org.apache.commons.mail.EmailException;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
@@ -170,7 +171,7 @@ public class FromMysqlToPostgres {
 
 	}
 
-	public static void importAll(int limit, int anno) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
+	public static void importAll(int limit, int anno) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException, EmailException {
 		Connection mysqlCon = FromMysqlToPostgres.getMysqlConnection();
 
 		String sqlVacationCode = "Select * from ferie";
@@ -271,7 +272,12 @@ public class FromMysqlToPostgres {
 		Logger.info("Importazione terminata");
 
 		//il fix conclusivo
-		Administration.fixPersonSituation(null, 2013, 1);
+		try {
+			Administration.fixPersonSituation(null, 2013, 1);
+		} catch (EmailException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		mysqlCon.close();
 
 
@@ -279,8 +285,9 @@ public class FromMysqlToPostgres {
 
 	/**
 	 * controlla tutte le persone che hanno timbrature fisse 
+	 * @throws EmailException 
 	 */
-	public static void checkFixedWorkingTime() {
+	public static void checkFixedWorkingTime() throws EmailException {
 		Logger.debug("Controllo delle persone con timbratura fissa");
 		List<Person> activePerson = Person.getActivePersons(new LocalDate(2013,1,1));
 
@@ -350,7 +357,12 @@ public class FromMysqlToPostgres {
 	 * @throws SQLException
 	 */
 	public static void importAll(int anno) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
-		importAll(0, anno);
+		try {
+			importAll(0, anno);
+		} catch (EmailException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 
@@ -916,7 +928,8 @@ public class FromMysqlToPostgres {
 					Logger.debug("Il progressivo del personday del giorno appena trascorso da cui partire per fare i calcoli è: %s", pd.progressive);
 					PersonDay pdOld = PersonDay.findById(pd.id);
 
-					pdOld.populatePersonDay();	
+					pdOld.populatePersonDay();
+					
 					pdOld.merge();
 
 					Logger.debug("Il progressivo del personday del giorno appena trascorso assegnato a un nuovo personDay è: %s", pdOld.progressive);
@@ -986,6 +999,7 @@ public class FromMysqlToPostgres {
 				 */
 				pd.merge();
 				pd.populatePersonDay();
+				
 
 				Logger.debug("Il progressivo al termine del resultset è: %s e il differenziale è: %s", pd.progressive, pd.difference);
 				Logger.info("Creato %s", pd);
@@ -1621,7 +1635,8 @@ public class FromMysqlToPostgres {
 						Logger.debug("Il progressivo del personday del giorno appena trascorso da cui partire per fare i calcoli è: %s", pd.progressive);
 						PersonDay pdOld = PersonDay.findById(pd.id);
 
-						pdOld.populatePersonDay();	
+						pdOld.populatePersonDay();
+							
 						pdOld.merge();
 
 						Logger.debug("Il progressivo del personday del giorno appena trascorso assegnato a un nuovo personDay è: %s", pdOld.progressive);
@@ -1695,7 +1710,7 @@ public class FromMysqlToPostgres {
 					 */
 					pd.merge();
 					pd.populatePersonDay();
-
+					
 					Logger.debug("Il progressivo al termine del resultset è: %s e il differenziale è: %s", pd.progressive, pd.difference);
 					Logger.info("Creato %s", pd);
 				}

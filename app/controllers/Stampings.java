@@ -25,6 +25,7 @@ import models.personalMonthSituation.Mese;
 import models.rendering.PersonStampingDayRecap;
 import models.rendering.PersonTroublesInMonthRecap;
 
+import org.apache.commons.mail.EmailException;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
@@ -236,7 +237,7 @@ public class Stampings extends Controller {
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_STAMPING)
-	public static void insert(@Valid @Required Long personId, @Required Integer year, @Required Integer month, @Required Integer day) {
+	public static void insert(@Valid @Required Long personId, @Required Integer year, @Required Integer month, @Required Integer day) throws EmailException {
 
 		Person person = Person.em().getReference(Person.class, personId);
 
@@ -323,7 +324,7 @@ public class Stampings extends Controller {
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_STAMPING)
-	public static void update() {
+	public static void update() throws EmailException {
 		Stamping stamping = Stamping.findById(params.get("stampingId", Long.class));
 		if (stamping == null) {
 			notFound();

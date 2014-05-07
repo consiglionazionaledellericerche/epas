@@ -513,8 +513,9 @@ public class Absences extends Controller{
 	 * @param person
 	 * @param mealTicket
 	 * @param abt
+	 * @throws EmailException 
 	 */
-	private static void checkMealTicket(LocalDate date, Person person, String mealTicket, AbsenceType abt){
+	private static void checkMealTicket(LocalDate date, Person person, String mealTicket, AbsenceType abt) throws EmailException{
 		
 		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
 		if(abt==null || !abt.code.equals("92"))
@@ -1274,8 +1275,9 @@ public class Absences extends Controller{
 	 * @param person
 	 * @param dateFrom
 	 * @param dateTo
+	 * @throws EmailException 
 	 */
-	private static int removeAbsencesInPeriod(Person person, LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType)
+	private static int removeAbsencesInPeriod(Person person, LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType) throws EmailException
 	{
 		LocalDate today = new LocalDate();
 		LocalDate actualDate = dateFrom;
