@@ -7,6 +7,7 @@ import it.cnr.iit.epas.ActionMenuItem;
 import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.MainMenu;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import models.Office;
@@ -31,6 +32,11 @@ public class RequestInit extends Controller {
 
 			return DateUtility.getName(Integer.parseInt(month));
 		}
+		
+		public String monthName(Integer month) {
+
+			return DateUtility.getName(month);
+		}
 	}
 
 	@Before
@@ -38,8 +44,6 @@ public class RequestInit extends Controller {
 
 		TemplateUtility templateUtility = new TemplateUtility();
 		renderArgs.put("templateUtility", templateUtility);
-
-
 
 	}
 
@@ -50,11 +54,11 @@ public class RequestInit extends Controller {
 		session.put("actionSelected", 
 				computeActionSelected(Http.Request.current().action));
 
+		// year init /////////////////////////////////////////////////////////////////
 		Integer year;
 		if ( params.get("year") != null ) {
 
 			year = Integer.valueOf(params.get("year"));
-			session.put("yearSelected", year);
 		} 
 		else if (session.get("yearSelected") != null ){
 
@@ -65,11 +69,13 @@ public class RequestInit extends Controller {
 			year = LocalDate.now().getYear();
 		}
 
+		session.put("yearSelected", year);
+		
+		// month init ////////////////////////////////////////////////////////////////
 		Integer month;
 		if ( params.get("month") != null ) {
 
 			month = Integer.valueOf(params.get("month"));
-			session.put("monthSelected", month);
 		} 
 		else if ( session.get("monthSelected") != null ){
 
@@ -79,7 +85,27 @@ public class RequestInit extends Controller {
 
 			month = LocalDate.now().getMonthOfYear();
 		}
+		
+		session.put("monthSelected", month);
+		
+		// day init //////////////////////////////////////////////////////////////////
+		Integer day;
+		if ( params.get("day") != null ) {
 
+			day = Integer.valueOf(params.get("day"));
+		} 
+		else if ( session.get("daySelected") != null ){
+
+			day = Integer.valueOf(session.get("daySelected"));
+		}
+		else {
+
+			day = LocalDate.now().getDayOfMonth();
+		}
+
+		session.put("daySelected", day);
+		
+		// person init //////////////////////////////////////////////////////////////
 		Integer personId;
 		if ( params.get("personId") != null ) {
 
@@ -112,6 +138,19 @@ public class RequestInit extends Controller {
 			renderArgs.put("navPersons", persons);
 		}
 
+		// day lenght (provvisorio)
+		try {
+			
+			Integer dayLenght = new LocalDate(year, month, day).dayOfMonth().withMaximumValue().getDayOfMonth();
+			renderArgs.put("dayLenght", dayLenght);
+		}
+		catch (Exception e) {
+			
+		}
+		 
+		
+		
+		
 
 		/*
 		LocalDate now = new LocalDate();
@@ -232,6 +271,28 @@ public class RequestInit extends Controller {
 				return "Stampings.personStamping";
 			}
 			
+			if(action.equals("Stampings.missingStamping")) {
+				
+				renderArgs.put("noPerson", true);
+				renderArgs.put("dropDown", "dropDown2");
+				return "Stampings.missingStamping";
+			}
+			
+			if(action.equals("Stampings.dailyPresence")) {
+				
+				renderArgs.put("switchDay", true);
+				renderArgs.put("noPerson", true);
+				renderArgs.put("dropDown", "dropDown2");
+				return "Stampings.dailyPresence";
+			}
+			
+			if(action.equals("Stampings.mealTicketSituation")) {
+				
+				renderArgs.put("noPerson", true);
+				renderArgs.put("dropDown", "dropDown2");
+				return "Stampings.mealTicketSituation";
+			}
+
 		}
 		
 		if( action.startsWith("PersonMonths.")) {
@@ -351,7 +412,42 @@ public class RequestInit extends Controller {
 
 		}
 		
+		if(action.startsWith("MonthRecaps.")) {
+			
+			if(action.equals("MonthRecaps.show")) {
+				
+				renderArgs.put("noPerson", true);
+				renderArgs.put("dropDown", "dropDown2");
+				return "MonthRecaps.show";
+			}
+		}
 		
+		if(action.startsWith("UploadSituation.")) {
+			
+			if(action.equals("UploadSituation.show")) {
+				
+				renderArgs.put("noData", true);
+				renderArgs.put("noPerson", true);
+				renderArgs.put("dropDown", "dropDown2");
+				return "UploadSituation.show";
+			}
+			
+			if(action.equals("UploadSituation.loginAttestati")) {
+				
+				renderArgs.put("noData", true);
+				renderArgs.put("noPerson", true);
+				renderArgs.put("dropDown", "dropDown2");
+				return "UploadSituation.loginAttestati";
+			}
+			
+			if(action.equals("UploadSituation.processAttestati")) {
+				
+				renderArgs.put("noData", true);
+				renderArgs.put("noPerson", true);
+				renderArgs.put("dropDown", "dropDown2");
+				return "UploadSituation.processAttestati";
+			}
+		}
 		
 		return session.get("actionSelected");
 	}

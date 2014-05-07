@@ -1,5 +1,6 @@
 package controllers;
 
+import helpers.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.DateUtility;
 
 import java.sql.SQLException;
@@ -17,8 +18,12 @@ import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
+
+import dao.PersonDao;
 
 @With( {Secure.class, RequestInit.class} )
 public class MonthRecaps extends Controller{
@@ -154,8 +159,11 @@ public class MonthRecaps extends Controller{
 	 * @throws SQLException
 	 */
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void show(int year, int month) throws ClassNotFoundException, SQLException {
+	public static void show(int year, int month, String name, Integer page) {
 
+		if(page == null)
+			page = 0;
+		
 		LocalDate today = new LocalDate();
 		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
 		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
@@ -182,8 +190,11 @@ public class MonthRecaps extends Controller{
 		
 		Table<Person, String, Integer> tableMonthRecap = TreeBasedTable.create(PersonNameComparator, AbsenceCodeComparator);
 
-		List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
+		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), Sets.newHashSet(Security.getOfficeAllowed()), 
+				false, monthBegin, monthEnd);
 
+		List<Person> activePersons = simpleResults.paginated(page).getResults();
+		
 		//logica mese attuale
 		if(today.getYear()==year && today.getMonthOfYear()==month)
 		{
@@ -234,11 +245,8 @@ public class MonthRecaps extends Controller{
 			tableMonthRecap.put(person, "Ore straord. pagate".intern(), new Integer(mr.valueApproved));
 			tableMonthRecap.put(person, "Buoni mensa da restituire".intern(), mr.mealTicketToRender);
 		}
-		
-		String month_capitalized  = null;
-		if(month>0)
-			month_capitalized = DateUtility.fromIntToStringMonth(month);
-		render(tableMonthRecap, generalWorkingDaysOfMonth, today, lastDayOfMonth, month_capitalized, year);
+
+		render(tableMonthRecap, generalWorkingDaysOfMonth, today, lastDayOfMonth, year, month, simpleResults, name);
 
 	}
 	
@@ -249,11 +257,12 @@ public class MonthRecaps extends Controller{
 	 * @param month
 	 */
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void notJustifiedAbsences(Long id, int year, int month){
+	public static void notJustifiedAbsences(Long personId, int year, int month){
 		
-		List<PersonDay> notJustifiedAbsences = getPersonDayListRecap(id, year, month, "notJustifiedAbsences");
+		Person person = Person.findById(personId);
+		List<PersonDay> notJustifiedAbsences = getPersonDayListRecap(personId, year, month, "notJustifiedAbsences");
 
-		render(notJustifiedAbsences);
+		render(notJustifiedAbsences, person);
 	}
 	
 	/**
@@ -263,10 +272,12 @@ public class MonthRecaps extends Controller{
 	 * @param month
 	 */
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void justifiedAbsences(Long id, int year, int month){
-		List<PersonDay> justifiedAbsences = getPersonDayListRecap(id, year, month, "justifiedAbsences");
+	public static void justifiedAbsences(Long personId, int year, int month){
+		
+		Person person = Person.findById(personId);
+		List<PersonDay> justifiedAbsences = getPersonDayListRecap(personId, year, month, "justifiedAbsences");
 
-		render(justifiedAbsences);
+		render(justifiedAbsences, person);
 	}
 
 	/**
@@ -276,10 +287,12 @@ public class MonthRecaps extends Controller{
 	 * @param month
 	 */
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void workingDayHoliday(Long id, int year, int month){
-		List<PersonDay> workingDayHoliday = getPersonDayListRecap(id, year, month, "workingDayHoliday");
+	public static void workingDayHoliday(Long personId, int year, int month){
+		
+		Person person = Person.findById(personId);
+		List<PersonDay> workingDayHoliday = getPersonDayListRecap(personId, year, month, "workingDayHoliday");
 
-		render(workingDayHoliday);
+		render(workingDayHoliday, person);
 	}
 	
 	/**
@@ -289,10 +302,12 @@ public class MonthRecaps extends Controller{
 	 * @param month
 	 */
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void workingDayNotHoliday(Long id, int year, int month){
-		List<PersonDay> workingDayNotHoliday = getPersonDayListRecap(id, year, month, "workingDayNotHoliday");
+	
+	public static void workingDayNotHoliday(Long personId, int year, int month){
+		Person person = Person.findById(personId);
+		List<PersonDay> workingDayNotHoliday = getPersonDayListRecap(personId, year, month, "workingDayNotHoliday");
 
-		render(workingDayNotHoliday);
+		render(workingDayNotHoliday, person);
 	}
 
 	/**

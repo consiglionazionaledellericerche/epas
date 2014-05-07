@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.joda.time.LocalDate;
+
 import models.Absence;
 import models.CertificatedData;
 import models.Competence;
@@ -55,18 +57,23 @@ public class UploadSituation extends Controller{
 	public static final String LISTA_DIPENTENTI_CNR_CACHED = "listaDipendentiCnr";
 	
 	@Check(Security.UPLOAD_SITUATION)
-	public static void show(final Integer year, final Integer month){
-		render();
+	public static void show(){
+		LocalDate lastMonth = LocalDate.now().minusMonths(1);
+		
+		int month = lastMonth.getMonthOfYear();
+		int year = lastMonth.getYear();
+			
+		render(year, month);
 	}
 
 	@Check(Security.UPLOAD_SITUATION)
 	public static void loginAttestati(Integer year, Integer month) {
-		//Configuration conf = Configuration.getCurrentConfiguration();
-//		ConfGeneral conf = ConfGeneral.getConfGeneral();
+
 		Office office = Security.getUser().person.office;
+		
 		String urlToPresence = ConfGeneral.getFieldValue(ConfigurationFields.UrlToPresence.description, office);
 		String userToPresence = ConfGeneral.getFieldValue(ConfigurationFields.UserToPresence.description, office);
-//		String urlToPresence = conf.urlToPresence;
+		
 		String attestatiLogin = params.get("attestatiLogin") == null ? userToPresence : params.get("attestatiLogin"); 
 
 		render(year, month, urlToPresence, attestatiLogin);
@@ -173,7 +180,7 @@ public class UploadSituation extends Controller{
 			Cache.set(LISTA_DIPENTENTI_CNR_CACHED+Security.getUser().username, null);
 			
 			if (params.get("back") != null) {
-				loginAttestati(year, month);
+				show();
 			}
 
 			if (params.get("home") != null) {
@@ -229,6 +236,7 @@ public class UploadSituation extends Controller{
 
 		memAttestatiIntoCache(loginResponse, listaDipendenti);
 		
+
 		render(year, month, activeDipendenti, dipendentiNonInEpas, dipendentiNonInCNR, loginResponse);
 		
 	}
@@ -237,7 +245,7 @@ public class UploadSituation extends Controller{
 	public static void processAllPersons(int year, int month) throws MalformedURLException, URISyntaxException
 	{
 		if (params.get("back") != null) {
-			redirect("UploadSituation.loginAttestati");
+			UploadSituation.loginAttestati(year, month);
 		}
 		
 		LoginResponse loginResponse = loadAttestatiLoginCached();
@@ -250,25 +258,14 @@ public class UploadSituation extends Controller{
 		}
 
 		Set<Dipendente> activeDipendenti = getActiveDipendenti(year, month);
-		Set<Dipendente> dipendentiNonInEpas = getDipendenteNonInEpas(year, month, listaDipendenti, activeDipendenti);
-		Set<Dipendente> dipendentiNonInCNR = getDipendenteNonInCnr(year, month, listaDipendenti, activeDipendenti);
 
-		List<RispostaElaboraDati> checks = 
-				elaboraDatiDipendenti(
+		elaboraDatiDipendenti(
 						loginResponse.getCookies(), 
 						Sets.intersection(ImmutableSet.copyOf(listaDipendenti), activeDipendenti), 
 						year, month);
 
-		Predicate<RispostaElaboraDati> rispostaOk = new Predicate<RispostaElaboraDati>() {
-			@Override
-			public boolean apply(RispostaElaboraDati risposta) {
-				return risposta.getProblems() == null || risposta.getProblems().isEmpty();
-			}
-		};
-		List<RispostaElaboraDati> risposteOk = FluentIterable.from(checks).filter(rispostaOk).toList();
-		List<RispostaElaboraDati> risposteNotOk = FluentIterable.from(checks).filter(Predicates.not(rispostaOk)).toList();
+		UploadSituation.processAttestati(null, null, year, month);
 
-		render(year, month, dipendentiNonInEpas, dipendentiNonInCNR, risposteOk, risposteNotOk, loginResponse);
 
 	}
 	
@@ -291,9 +288,6 @@ public class UploadSituation extends Controller{
 		}
 
 		Set<Dipendente> activeDipendentiCached = getActiveDipendenti(year, month);
-		Set<Dipendente> dipendentiNonInEpas = getDipendenteNonInEpas(year, month, listaDipendenti, activeDipendentiCached);
-		Set<Dipendente> dipendentiNonInCNR = getDipendenteNonInCnr(year, month, listaDipendenti, activeDipendentiCached);
-		
 		
 		Dipendente dipendente = null;
 		for(Dipendente dip : activeDipendentiCached)
@@ -316,23 +310,15 @@ public class UploadSituation extends Controller{
 		
 		
 
-		List<RispostaElaboraDati> checks = 
-				elaboraDatiDipendenti(
+		elaboraDatiDipendenti(
 						loginResponse.getCookies(), 
 						Sets.intersection(ImmutableSet.copyOf(listaDipendenti), activeDipendenti), 
 						year, month);
 
-		Predicate<RispostaElaboraDati> rispostaOk = new Predicate<RispostaElaboraDati>() {
-			@Override
-			public boolean apply(RispostaElaboraDati risposta) {
-				return risposta.getProblems() == null || risposta.getProblems().isEmpty();
-			}
-		};
-		List<RispostaElaboraDati> risposteOk = FluentIterable.from(checks).filter(rispostaOk).toList();
-		List<RispostaElaboraDati> risposteNotOk = FluentIterable.from(checks).filter(Predicates.not(rispostaOk)).toList();
-
-		render(year, month, dipendentiNonInEpas, dipendentiNonInCNR, risposteOk, risposteNotOk, loginResponse);
-
+		
+		
+		UploadSituation.processAttestati(null, null, year, month);
+		
 	}
 	
 	@Check(Security.UPLOAD_SITUATION)

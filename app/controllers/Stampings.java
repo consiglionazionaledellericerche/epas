@@ -1,5 +1,6 @@
 package controllers;
 
+import helpers.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.PersonUtility;
 
@@ -34,9 +35,13 @@ import play.data.validation.Valid;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableTable;
+import com.google.common.collect.Sets;
 import com.google.common.collect.ImmutableTable.Builder;
 import com.google.common.collect.Table;
+
+import dao.PersonDao;
 
 
 
@@ -432,16 +437,15 @@ public class Stampings extends Controller {
 	 * che avevano almeno un contratto attivo in tale mese
 	 * @param year
 	 * @param month
-	 * @throws ClassNotFoundException 
-	 * @throws SQLException 
 	 */
 	@Check(Security.INSERT_AND_UPDATE_STAMPING)
-	public static void missingStamping(int year, int month) throws ClassNotFoundException, SQLException{
+	public static void missingStamping(int year, int month) {
 
 		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
 		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
 
 		//lista delle persone che sono state attive nel mese
+		//TODO usare PersonDao
 		List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
 
 		List<PersonTroublesInMonthRecap> missingStampings = new ArrayList<PersonTroublesInMonthRecap>();
@@ -451,8 +455,8 @@ public class Stampings extends Controller {
 			PersonTroublesInMonthRecap pt = new PersonTroublesInMonthRecap(person, monthBegin, monthEnd);
 			missingStampings.add(pt);
 		}
-		String month_capitalized = DateUtility.fromIntToStringMonth(month);
-		render(month, year, missingStampings, month_capitalized);
+		
+		render(month, year, missingStampings);
 
 
 
@@ -494,26 +498,21 @@ public class Stampings extends Controller {
 		//TODO:
 		List<Office> office = new ArrayList<Office>();
 		office.add(Security.getUser().person.office);
-		List<Person> activePersonsInDay = Person.getActivePersonsInDay(day, month, year, office, false);
+		List<Person> activePersonsInDay = Person.getActivePersonsInDay(day, month, year, Security.getOfficeAllowed(), false);
+		
 		int numberOfInOut = maxNumberOfStampingsInMonth(year, month, day, activePersonsInDay);
-		
-		
+				
 		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
 		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();						
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 		for(Person person : activePersonsInDay){
-			Logger.info("persona: %s", person.surname);
-			//TODOUSER
-			//if(!person.username.equals("epas.clocks")){
-				PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.date = ? and pd.person = ?", dayPresence, person).first();
-				if(pd==null)
-					pd = new PersonDay(person, dayPresence);
 
-				pd.computeValidStampings();
-				daysRecap.add(new PersonStampingDayRecap(pd, numberOfInOut));
+			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.date = ? and pd.person = ?", dayPresence, person).first();
+			if(pd==null)
+				pd = new PersonDay(person, dayPresence);
 
-			//}
-						
+			pd.computeValidStampings();
+			daysRecap.add(new PersonStampingDayRecap(pd, numberOfInOut));
 		}
 
 		
@@ -523,11 +522,23 @@ public class Stampings extends Controller {
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void mealTicketSituation(Integer year, Integer month){
+	public static void mealTicketSituation(Integer year, Integer month, String name, Integer page){
 
+		if(page == null)
+			page = 0;
+		
 		LocalDate beginMonth = new LocalDate(year, month, 1);
+		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
 
-		List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
+		
+		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), Sets.newHashSet(Security.getOfficeAllowed()), 
+				false, beginMonth, endMonth);
+
+		List<Person> activePersons = simpleResults.paginated(page).getResults();
+		
+		//List<Person> activePersons = PersonDao.list(Optional.fromNullable(name), Sets.newHashSet(Security.getOfficeAllowed()), 
+		//		false, beginMonth, endMonth).list();
+		
 		Builder<Person, LocalDate, String> builder = ImmutableTable.<Person, LocalDate, String>builder().orderColumnsBy(new Comparator<LocalDate>() {
 
 			public int compare(LocalDate date1, LocalDate date2) {
@@ -546,25 +557,21 @@ public class Stampings extends Controller {
 					p, beginMonth, beginMonth.dayOfMonth().withMaximumValue()).fetch();
 			Logger.debug("La lista dei personDay: ", pdList);
 			for(PersonDay pd : pdList){
-				if(pd.isTicketForcedByAdmin)
-				{
-					if(pd.isTicketAvailable)
-					{
+				if(pd.isTicketForcedByAdmin) {
+					
+					if(pd.isTicketAvailable) {
 						builder.put(p, pd.date, "siAd");
 					}
-					else
-					{
+					else {
 						builder.put(p, pd.date, "noAd");
 					}
 				}
-				else
-				{
-					if(pd.isTicketAvailable)
-					{
+				else {
+					
+					if(pd.isTicketAvailable) {
 						builder.put(p, pd.date, "si");
 					}
-					else
-					{
+					else {
 						builder.put(p, pd.date, "");
 					}
 				}    			
@@ -572,11 +579,10 @@ public class Stampings extends Controller {
 			}
 
 		}
-		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
+
 		int numberOfDays = endMonth.getDayOfMonth();
 		Table<Person, LocalDate, String> tablePersonTicket = builder.build();
-		String month_capitalized = DateUtility.fromIntToStringMonth(month);
-		render(year, month, tablePersonTicket, numberOfDays, month_capitalized);
+		render(year, month, tablePersonTicket, numberOfDays, simpleResults, name);
 	}
 
 
