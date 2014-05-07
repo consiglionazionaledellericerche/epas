@@ -1,5 +1,6 @@
 /* Author: 
  */
+
 $(function($){
 	
 	$.fn.initepas = function() {
@@ -94,7 +95,21 @@ $(function($){
 
 		this.find('#textComments1').editable({
 		    showbuttons: 'bottom'
-		}); 
+		});
+		
+		this.find('form[data-reload-no-ajax] input[type=text]').on('input', function(e) {
+			var $form = $(this).closest("form");
+	    	var $this = $(this);
+	    	var autochange_timeout = $this.data('autochange_timeout')
+	    	if (autochange_timeout) {
+	    		clearTimeout(autochange_timeout);
+	    		$this.removeData('autochange_timeout', autochange_timeout);
+	    	}
+	    	$this.data('autochange_timeout', setTimeout(function() {
+	    		$form.submit();
+	    	}, 500));
+	    });
+
 		
 		this.find('form[data-reload] :input').on('change', function(e) {
 	    	var $form = $(this).closest("form");
@@ -124,8 +139,10 @@ $(function($){
 	    	}, 500));
 	    });
 		
-	}
+	}	/* fine initepas() */
+	
 	$('body').initepas();
+	
 	
 	$('a[data-modal]').click(function(e) {
 		var $this = $(this);
@@ -137,7 +154,9 @@ $(function($){
 		});
 		e.preventDefault();
 	});
-});
+
+	
+});	/* fine on document load */
 
 
 

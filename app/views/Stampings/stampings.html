@@ -88,19 +88,14 @@
 		
 		<th class="group-single">Codice <br>assenza</th>
 		
-		
-		
-		
-		
+
 		#{list items:1..numberOfInOut, as:'i'}
 			<th class="group-left hidden-xs">${i}<sup>a</sup> <br/>entrata</th>
 			<th class="group-right hidden-xs">${i}<sup>a</sup> <br/>uscita</th>
 		#{/list}
 		
 		<th class="group-single hidden-sm hidden-md hidden-lg">entrate/uscite</th>
-		
-		
-		
+
 		<th class="invisible"></th>
 		
 		<th class="group-single">Tempo<br>lavoro</th>
@@ -121,13 +116,13 @@
 
             <td class="default-single">
 			#{if dayRecap.mealTicket.equals("NO")}
-			  <i class="icon-ban-circle"></i>
+			  <span class="glyphicon glyphicon-ban-circle"></span>
 			#{/if} 
 			#{if dayRecap.mealTicket.equals("NOT_YET")}
-			  <i class="icon-remove"></i>
+			  <span class="glyphicon glyphicon-remove"></span>
 			#{/if} 
 			#{if dayRecap.mealTicket.equals("YES")}
-			  <i class="icon-ok"></i>
+			  <span class="glyphicon glyphicon-ok"></span>
 			#{/if} 
 			</td>
 

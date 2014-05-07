@@ -1,39 +1,70 @@
-#{extends 'main_with_navbar.html' /}
-#{set titolo: 'Controllo delle timbrature mancanti di ' + month_capitalized + ' ' + year/}
-<br>
-<div class="container">
-<div class="span8">
-<table class="table table-hover custom2">
-	<tr>
-		<th>Nome</th>
-		<th>No assenze e timbrature</th>
-		<th>Timbrature disaccoppiate giorno feriale</th>
-		<th>Timbrature disaccoppiate giorno festivo</th>
-		
-	</tr>
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Timbrature mancanti'  /}
+
+#{set 'moreStyles'}
+<style>
+  span.badge.badge-danger {
+    background-color: rgb(192, 66, 66); /* rosso scuro */
+  }
+  
+  span.badge.badge-warning {
+    background-color: yellow;
+    color: black;
+  }
+</style>
+#{/set}
+
+<div class="container-fluid center">
+
+   <div class="panel panel-info col-xs-12 col-sm-12 col-md-8 col-md-offset-2">
+      <div class="panel-heading">
+        <h3 class="panel-title">Timbrature mancanti di &{'views.tags.display.date.month.' + month} ${year} </h3>
+      </div>
+      <div class="panel-body">
+      
+      <table class="table table-hover table-striped">
+	    <tr>
+		  <th style="min-width: 300px;">Nome</th>
+		  <th>No assenze e timbrature</th>
+		  <th>Timbrature disaccoppiate giorno feriale</th>
+		  <th>Timbrature disaccoppiate giorno festivo</th>
+		</tr>
 	
-	#{list items:missingStampings, as:'personMissingStampings'}
-	<tr>
-		<td class="caratteristica span3"><a href="@{Stampings.personStamping(personMissingStampings.person.id,year,month)}">${personMissingStampings.person.surname} ${personMissingStampings.person.name}</a></td>
-		
-		<td>
-		    
-			#{list items:personMissingStampings.troublesNoAbsenceNoStampingsL, as:'day'}
-			  <span class="badge badge-important">${day}</span>
-			#{/list}
-	    </td>
-	    <td>
+	   #{list items:missingStampings, as:'personMissingStampings'}
+	   <tr>
+		 <td>
+		   <a href="@{Stampings.personStamping(personMissingStampings.person.id,year,month)}">
+		     ${personMissingStampings.person.surname} ${personMissingStampings.person.name}
+		   </a>
+		 </td>
+		 
+		 <td>
+		   #{list items:personMissingStampings.troublesNoAbsenceNoStampingsL, as:'day'}
+		     <span class="badge badge-danger">${day}</span>
+		   #{/list}
+	     </td>
+	     
+	     <td>
 	        #{list items:personMissingStampings.troublesNoAbsenceUncoupledStampingsNotHolidayL, as:'day'}
-			  <span class="badge badge-inverse">${day}</span>
+			  <span class="badge badge-warning">${day}</span>
 			#{/list}
-	    </td>
-	    <td>
+	     </td>
+	     
+	     <td>
 	        #{list items:personMissingStampings.troublesNoAbsenceUncoupledStampingsHolidayL, as:'day'}
 			  <span class="badge badge-inverse">${day}</span>
 			#{/list}
-	    </td>
-	#{/list}
-	</tr>
-</table>
-</div>
+	     </td>
+	   </tr>     
+	   #{/list}
+	
+     </table>
+      
+      
+  </div>
+ </div>  
+ 
+ 
+ 
 </div>

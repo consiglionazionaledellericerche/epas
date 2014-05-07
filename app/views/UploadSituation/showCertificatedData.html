@@ -1,7 +1,8 @@
+#{extends 'modal.html' /}
+#{set modalHeader: 'Riepilogo Attestati elaborati ' + templateUtility.monthName(cd.month) + ' ' + cd.year + ' per ' + cd.person.surname + ' ' + cd.person.name/}
 
-  <fieldset>
-    <legend>Attestati ${cd.person.name} ${cd.person.surname}</legend>
-    <p>Riepilogo attestati elaborati per il mese ${cd.year}/${cd.month}</p>
+<div class="container-fluid center">
+  
     <table class="table table-condensed table-bordered">
       <tr>
         <th>Voce</th>
@@ -29,4 +30,5 @@
         <td>${cd.mealTicketSent}</td>
       </tr>
     </table>
-  </fieldset>
+
+</div>

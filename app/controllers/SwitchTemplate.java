@@ -213,6 +213,7 @@ private static void executeAction(String action) {
 		
 		Integer year = Integer.parseInt(session.get("yearSelected"));
 		Integer month = Integer.parseInt(session.get("monthSelected"));
+		Integer day = Integer.parseInt(session.get("daySelected"));
 		Long personId = Long.parseLong(session.get("personSelected"));
 		
 		session.put("actionSelected", action);
@@ -287,11 +288,56 @@ private static void executeAction(String action) {
 			Competences.exportCompetences();
 		}
 		
+		if(action.equals("Stampings.missingStamping")) {
+			
+			Stampings.missingStamping(year, month);
+		}
 		
+		if(action.equals("Stampings.dailyPresence")) {
+			
+			Stampings.dailyPresence(year, month, day);
+		}
+		
+		if(action.equals("MonthRecaps.show")) {
+			
+			MonthRecaps.show(year, month, null, null);
+		}
+		
+		if(action.equals("Stampings.mealTicketSituation")) {
+			
+			Stampings.mealTicketSituation(year, month, null, null);
+		}
+		
+		if(action.equals("UploadSituation.show")) {
+			
+			UploadSituation.show();
+		}
+		
+				
 		
 		
 	}
-	
+
+	public static void updateDay(Integer day) throws Throwable {
+
+		String action = session.get("actionSelected");
+		if( action==null ) {
+
+			flash.error("La sessione è scaduta. Effettuare nuovamente login.");
+			Secure.login();
+		}
+
+		if(day == null || day < 1 || day > 31) {
+
+			Application.index();	
+		}
+
+		session.put("daySelected", day);
+
+		executeAction(action);
+
+	}
+
 	
 	public static void updateMonth(Integer month) throws Throwable {
 		
