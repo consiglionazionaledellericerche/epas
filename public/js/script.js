@@ -5,8 +5,7 @@ $(function($){
 	
 	$.fn.initepas = function() {
 		
-		 
-		this.find('data-tooltip').tooltip();
+			this.find('data-tooltip').tooltip();
 		
 		this.find('.my-modal').on('hidden.bs.modal', function(){
 		    $(this).data('bs.modal', null);
@@ -154,6 +153,14 @@ $(function($){
 		});
 		e.preventDefault();
 	});
+	
+	$('#buttonError').click(function() {
+        $('#flash-error').hide();
+	});	
+	
+	$('#buttonSuccess').click(function() {
+        $('#flash-success').hide();
+	});	
 
 	
 });	/* fine on document load */
