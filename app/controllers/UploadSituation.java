@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.poi.hssf.util.HSSFColor.ROSE;
 import org.joda.time.LocalDate;
 
 import models.Absence;
@@ -259,11 +260,28 @@ public class UploadSituation extends Controller{
 
 		Set<Dipendente> activeDipendenti = getActiveDipendenti(year, month);
 
-		elaboraDatiDipendenti(
+		List<RispostaElaboraDati> checks = elaboraDatiDipendenti( 
 						loginResponse.getCookies(), 
 						Sets.intersection(ImmutableSet.copyOf(listaDipendenti), activeDipendenti), 
 						year, month);
+		
+		Predicate<RispostaElaboraDati> rispostaOk = new Predicate<RispostaElaboraDati>() {
+			@Override
+			public boolean apply(RispostaElaboraDati risposta) {
+				return risposta.getProblems() == null || risposta.getProblems().isEmpty();
+			}
+		};
 
+		List<RispostaElaboraDati> risposteNotOk = FluentIterable.from(checks).filter(Predicates.not(rispostaOk)).toList();
+		
+		if(risposteNotOk.isEmpty())
+			flash.success("Elaborazione dipendenti effettuata senza errori.");
+		else if(risposteNotOk.size()==1)
+			flash.error("Elaborazione dipendenti effettuata. Sono stati riscontrati problemi per 1 dipendente. Controllare l'esito.");
+		else
+			flash.error("Elaborazione dipendenti effettuata. Sono stati riscontrati problemi per %s dipendenti. Controllare l'esito.",
+					risposteNotOk.size());
+			
 		UploadSituation.processAttestati(null, null, year, month);
 
 
@@ -304,23 +322,37 @@ public class UploadSituation extends Controller{
 			flash.error("Errore caricamento dipendente da elaborare. Riprovare o effettuare una segnalazione.");
 			UploadSituation.processAttestati(null, null, year, month);
 		}
-		
+
 		Set<Dipendente> activeDipendenti = new HashSet<Dipendente>();
 		activeDipendenti.add(dipendente);
-		
-		
 
-		elaboraDatiDipendenti(
-						loginResponse.getCookies(), 
-						Sets.intersection(ImmutableSet.copyOf(listaDipendenti), activeDipendenti), 
-						year, month);
 
-		
-		
+
+		List<RispostaElaboraDati> checks = elaboraDatiDipendenti( 
+				loginResponse.getCookies(), 
+				Sets.intersection(ImmutableSet.copyOf(listaDipendenti), activeDipendenti), 
+				year, month);
+
+		Predicate<RispostaElaboraDati> rispostaOk = new Predicate<RispostaElaboraDati>() {
+			@Override
+			public boolean apply(RispostaElaboraDati risposta) {
+				return risposta.getProblems() == null || risposta.getProblems().isEmpty();
+			}
+		};
+
+		List<RispostaElaboraDati> risposteNotOk = FluentIterable.from(checks).filter(Predicates.not(rispostaOk)).toList();
+
+		if(risposteNotOk.isEmpty())
+			flash.success("Elaborazione dipendente effettuata senza errori.");
+		else 
+			flash.error("Elaborazione dipendente effettuata. Sono stati riscontrati problemi per 1 dipendente. Controllare l'esito.");
+
+
+
 		UploadSituation.processAttestati(null, null, year, month);
-		
+
 	}
-	
+
 	@Check(Security.UPLOAD_SITUATION)
 	public static void showProblems(Long certificatedDataId)
 	{

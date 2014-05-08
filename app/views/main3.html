@@ -294,7 +294,9 @@
     #{if flash.error}
       <div id="flash-error" class="popover bottom">
         <div class="arrow"></div>
-        <h3 class="popover-title"><strong>Notifica</strong></h3>
+        <h3 class="popover-title"><strong>Notifica</strong>
+          <button id="buttonError" type="button" class="close" aria-hidden="true">&times;</button>
+        </h3>
         <div class="popover-content">
           <strong>${flash.error}</strong>
         </div>
@@ -303,7 +305,9 @@
     #{if flash.success}
       <div id="flash-success" class="popover bottom">
         <div class="arrow"></div>
-        <h3 class="popover-title"><strong>Notifica</strong></h3>
+        <h3 class="popover-title"><strong>Notifica</strong>
+          <button id="buttonSuccess" type="button" class="close" aria-hidden="true">&times;</button>
+        </h3>
         <div class="popover-content">
           <strong>${flash.success}</strong>
         </div>
