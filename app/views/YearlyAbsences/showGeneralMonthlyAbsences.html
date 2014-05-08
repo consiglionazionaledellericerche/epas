@@ -1,78 +1,101 @@
-#{extends 'main_with_navbar.html' /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Assenze'  /}
 
-#{if month != 0}
-  #{set titolo: 'Situazione generale delle assenze per ciascun dipendente nel mese di ' + month_capitalized + ' ' + year /}
-#{/if}
-#{else}
-  #{set titolo: 'Situazione assenze per ciascun dipendente da inizio anno' /}
-#{/else}
+<div id="container-fluid-nav-tabs" class="container-fluid">
 
-<br>
-<div class="row">
-<div class="container">
-#{form action:@YearlyAbsences.showGeneralMonthlyAbsences(), class:'form', 
-    method:'GET', autocomplete:'off',
-    'data-reload':'#results'}
-    
-    <input type="text" name="name" placeholder="Nome o cognome" value="${name}"class="input-medium search-query"/>
-    <i class="icon-search icon-large"></i>
-	<input type="hidden" name="year" value="${year}"/>
-	<input type="hidden" name="month" value="${month}"/>
-#{/form}
-</div>
+<ul class="nav nav-tabs">
+  <li class="active"><a href="@{YearlyAbsences.showGeneralMonthlyAbsences(year, month)}">Assenze Mensili</a></li>
+  <li><a href="@{YearlyAbsences.yearlyAbsences(session.get("personSelected"), year)}">Assenze Annuali</a></li>
+  <li><a href="@{Absences.manageAttachmentsPerCode(year, month)}">Gestione Allegati Per Codice</a></li>
+  <li><a href="@{Absences.manageAttachmentsPerPerson(session.get("personSelected"), year, month)}">Allegati Per Persona</a></li>
+</ul>
+
 </div>
 
-<div class="row">
-<div class="container">
-<section id="results">
-<table class="table table-hover custom2 span11" style="margin-left: 0px;">
-	<tr>
-		<th rowspan="2">Nome</th>
-		<th colspan="${numberOfDifferentAbsenceType}">Codici di assenza</th>
-		
-	</tr>
-	%{  
-	for(col in tableMonthlyAbsences.columnKeySet()){
-	}%
-		<th>${col.code}</th>
-	%{
-	}
-	}%
-	
-	
-	%{  
-	for(entry in tableMonthlyAbsences.rowMap().entrySet()){
-	}%
-	<tr>
-		<td class="caratteristica">${entry.getKey().name} ${entry.getKey().surname}</td>
-		%{ 
-		for(col in tableMonthlyAbsences.columnKeySet()){
-		}%
-			<td>
-			 	<a data-toggle="modal" href="@{YearlyAbsences.showPersonMonthlyAbsences(entry.getKey().id, year, month, col.code)}" data-target="#myModal3">
-				<abbr title="${col.code} ${col.description}" class="initialism">${entry.getValue().get(col)}</abbr>
-				</a>
-			</td>
-		%{
-		 }
-		 }%
-	</tr>	
-	%{
-	}
-	}%
-</table>
-</section>
-</div>
-</div>
+<div class="container-fluid">
+  
+    <div class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title text-center">Situazione assenze &{'views.tags.display.date.month.' + month} ${year} </h3>
+      </div>
+      <div class="panel-body">
+      
+          <div class="col-xs-5">
+			#{form action:@YearlyAbsences.showGeneralMonthlyAbsences(), class:'form', 
+			    method:'GET', autocomplete:'off',
+			    'data-reload':'#results'}
+			    
+			    <input type="text" name="name" placeholder="Nome o cognome" value="${name}"class="input-medium search-query"/>
+			    <input type="hidden" name="year" value="${year}"/>
+				<input type="hidden" name="month" value="${month}"/>
+			#{/form}
+         </div>
 
-<div id="myModal3" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-   <!--   <button class="btn btn-primary">Save changes</button>-->
-  </div>
-</div>
+
+		 <section id="results">
+
+          <div class="col-xs-7">
+            <ul class="pagination">
+  	        #{list items:0..simpleResults.totalPage-1, as:'indexPage', class:'inline'}
+  	          #{if simpleResults.page==indexPage}
+  	            <li class="active"><a href="#">${indexPage+1}</a></li>
+  	          #{/if}
+  	          #{else}
+  	            <li><a href="@{YearlyAbsences.showGeneralMonthlyAbsences(year, month, name, indexPage)}">${indexPage+1}</a></li>
+  	          #{/else}
+	        #{/list}
+            </ul>
+		  </div>
+
+  		  <div class="col-xs-12 center">
+  		  <table class="table table-condensed table-hover">
+				<tr>
+					<th rowspan="2" class="col-xs-2">Nome</th>
+					<th colspan="${numberOfDifferentAbsenceType-1}">Codici di assenza</th>
+					<th rowspan="2">Totale<br>giorni</th>
+				</tr>
+				<tr>
+				%{  
+				for(col in tableMonthlyAbsences.columnKeySet()){
+				}%
+				    #{if !col.code.equals("Totale") }
+					<th><abbr title="${col.code} ${col.description}" class="initialism">${col.code}</abbr></th>
+					#{/if}
+					
+				%{
+				}
+				}%
+				</tr>
+				
+				%{  
+				for(entry in tableMonthlyAbsences.rowMap().entrySet()){
+				}%
+				<tr>
+					<td class="warning">${entry.getKey().name} ${entry.getKey().surname}</td>
+					%{ 
+					for(col in tableMonthlyAbsences.columnKeySet()){
+					}%
+						<td>
+						 	<a href="@{YearlyAbsences.showPersonMonthlyAbsences(entry.getKey().id, year, month, col.code)}" data-modal=".my-modal">
+						 	${entry.getValue().get(col)}							
+							</a>
+						</td>
+					%{
+					 }
+					 }%
+				</tr>	
+				%{
+				}
+				}%
+			</table>
+		  </div>
+		  </section>
+	 </div>
+   </div>
+   
+</div>   
+
+#{include '_myModal.html' /}
 
 

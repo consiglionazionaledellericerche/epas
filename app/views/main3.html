@@ -105,6 +105,7 @@
                 <li><a href="@{Persons.list()}">Lista Persone</a></li>
                 <li class="divider"></li>
                 <li><a href="@{Stampings.personStamping(session.get("personSelected"), session.get("yearSelected"), session.get("monthSelected"))}">Timbrature</a></li>
+                <li><a href="@{YearlyAbsences.showGeneralMonthlyAbsences(session.get("yearSelected"), session.get("monthSelected"))}">Assenze</a></li>
                 <li><a href="@{Competences.showCompetences(session.get("yearSelected"), session.get("monthSelected"))}">Competenze</a></li>
                 <li><a href="@{VacationsAdmin.list(session.get("yearSelected"))}">Ferie e Permessi</a></li>
                 <li class="divider"></li>

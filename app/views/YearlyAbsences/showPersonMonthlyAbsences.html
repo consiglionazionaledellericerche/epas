@@ -1,4 +1,7 @@
-<h3 align="center">Assenze mensili per ${person.name} ${person.surname}</h3> 
+#{extends 'modal.html' /}
+#{set modalHeader: 'Assenze mensili per ' + person.surname + ' ' + person.name /}
+
+<div class="container-fluid">
 
 <table align="center">
 	<tr>
@@ -15,4 +18,4 @@
 
 </table>
 
-
+</div>

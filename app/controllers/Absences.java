@@ -946,36 +946,57 @@ public class Absences extends Controller{
 
 	};
 	
+	public static class AttachmentsPerCodeRecap {
+		
+		List<Absence> absenceSameType = new ArrayList<Absence>();
+		
+		public String getCode() {
+			return absenceSameType.get(0).absenceType.code;
+		}
+		
+	}
+	
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void manageAttachmentsPerCode(Integer year, Integer month){
 		LocalDate beginMonth = new LocalDate(year, month, 1);
-		Table<Integer, String, List<Absence>> tableAbsences = TreeBasedTable.create(IntegerComparator, AbsenceCodeComparator);
+		//Table<Integer, String, List<Absence>> tableAbsences = TreeBasedTable.create(IntegerComparator, AbsenceCodeComparator);
 		
+		
+		//Prendere le assenze ordinate per tipo
 		List<Absence> absenceList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup is null and " +
-				"abs.personDay.date between ? and ?", 
+				"abs.personDay.date between ? and ? and abs.absenceFile is not null order by abs.absenceType.code", 
 				beginMonth, beginMonth.dayOfMonth().withMaximumValue()).fetch();
-		List<Absence> listaAssenze = null;
-		for(Absence abs : absenceList){
+	
+		List<AttachmentsPerCodeRecap> attachmentRecapList = new ArrayList<AttachmentsPerCodeRecap>();
+		AttachmentsPerCodeRecap currentRecap = new AttachmentsPerCodeRecap();
+		AbsenceType currentAbt = null;
+		
+		for(Absence abs : absenceList) {
 			
-			if(abs.absenceFile.get() != null){
-				if(!tableAbsences.containsColumn(abs.absenceType.code)){
-					Logger.debug("Absence type per assenza %s : %s", abs, abs.absenceType.code);
-					listaAssenze = new ArrayList<Absence>();
-					listaAssenze.add(abs);
-					tableAbsences.put(abs.personDay.date.getDayOfMonth(), abs.absenceType.code, listaAssenze);
-				}
-				else{
-					listaAssenze = tableAbsences.remove(abs.personDay.date.getDayOfMonth(), abs.absenceType.code);
-					if(listaAssenze == null)
-						listaAssenze = new ArrayList<Absence>();
-					listaAssenze.add(abs);
-					tableAbsences.put(abs.personDay.date.getDayOfMonth(), abs.absenceType.code, listaAssenze);
-				}					
-					
+			if(currentAbt == null) {
+				
+				currentAbt = abs.absenceType;
+			}
+			else if( !currentAbt.code.equals(abs.absenceType.code) ) {
+				
+				//finalizza tipo
+				if( currentRecap.absenceSameType.size() > 0 )		/* evitato con la query abs.absenceFile is not null */
+					attachmentRecapList.add(currentRecap);
+				currentRecap = new AttachmentsPerCodeRecap();
+				//nuovo tipo
+				currentAbt = abs.absenceType;
+			}
+			if(abs.absenceFile.get() != null) {
+				
+				currentRecap.absenceSameType.add(abs);
 			}
 		}
 		
-		render(tableAbsences, year, month);
+		//finalizza ultimo tipo
+		if( currentRecap.absenceSameType.size() > 0 )
+			attachmentRecapList.add(currentRecap);
+		
+		render(attachmentRecapList, year, month);
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
@@ -990,33 +1011,27 @@ public class Absences extends Controller{
 
 	
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
-	public static void manageAttachmentsPerPerson(Long personSelected, Integer year, Integer month){
-		List<Person> personListForAttachments = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
-		if(personSelected == null || personSelected == 0){
-			
-			render(personListForAttachments, year, month);
-		}
-		else{
-			Person person = Person.findById(personSelected);
-			List<Absence> personAbsenceListWithFile = new ArrayList<Absence>();
-			List<Absence> personAbsenceList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
-					"and abs.personDay.date between ? and ?", 
-					person, new LocalDate(year, month,1), new LocalDate(year, month,1).dayOfMonth().withMaximumValue()).fetch();
-			for(Absence abs : personAbsenceList){
-				if (abs.absenceFile.get() != null){
-					personAbsenceListWithFile.add(abs);
-				}
+	public static void manageAttachmentsPerPerson(Long personId, Integer year, Integer month){
+		Person person = Person.findById(personId);
+		List<Absence> personAbsenceListWithFile = new ArrayList<Absence>();
+		List<Absence> personAbsenceList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
+				"and abs.personDay.date between ? and ?", 
+				person, new LocalDate(year, month,1), new LocalDate(year, month,1).dayOfMonth().withMaximumValue()).fetch();
+		for(Absence abs : personAbsenceList){
+			if (abs.absenceFile.get() != null){
+				personAbsenceListWithFile.add(abs);
 			}
-			render(personAbsenceListWithFile, year, month, personSelected, personListForAttachments);
 		}
+		render(personAbsenceListWithFile, year, month, person);
+
 		
 	}	
 	
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
-	public static void absenceInPeriod(Long personSelected, int year, int month){
+	public static void absenceInPeriod(Long personId, int year, int month){
 		
 		List<Person> personList = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
-		if(personSelected == null || personSelected == 0)
+		if(personId == null || personId == 0)
 			render(personList, year, month);
 		else{
 			String dataInizio = params.get("dataInizio");
@@ -1027,7 +1042,7 @@ public class Absences extends Controller{
 			List<Absence> ferie = new ArrayList<Absence>();
 			List<Absence> riposiCompensativi = new ArrayList<Absence>();
 			List<Absence> altreAssenze = new ArrayList<Absence>();
-			Person person = Person.findById(personSelected);
+			Person person = Person.findById(personId);
 			List<Absence> absenceList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
 					"and abs.personDay.date between ? and ? and abs.absenceType.justifiedTimeAtWork = ?", person, dateFrom, dateTo, JustifiedTimeAtWork.AllDay).fetch();
 //			Logger.debug("La lista di assenze di %s %s per il periodo richiesto contiene %d elementi", person.name, person.surname, 
@@ -1045,7 +1060,7 @@ public class Absences extends Controller{
 				else
 					altreAssenze.add(abs);
 			}
-			render(person, absenceList, personList, year, month, personSelected, dateFrom, dateTo, missioni, ferie, riposiCompensativi, altreAssenze);
+			render(person, absenceList, personList, year, month, personId, dateFrom, dateTo, missioni, ferie, riposiCompensativi, altreAssenze);
 		}
 	}
 	
