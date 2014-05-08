@@ -313,6 +313,26 @@ private static void executeAction(String action) {
 			UploadSituation.show();
 		}
 		
+		if(action.equals("YearlyAbsences.showGeneralMonthlyAbsences")) {
+			
+			YearlyAbsences.showGeneralMonthlyAbsences(year, month, null, null);
+		}
+		
+		if(action.equals("YearlyAbsences.yearlyAbsences")) {
+			
+			YearlyAbsences.yearlyAbsences(personId, year);
+		}
+		
+		if(action.equals("Absences.manageAttachmentsPerCode")) {
+			
+			Absences.manageAttachmentsPerCode(year, month);
+		}
+		
+		if(action.equals("Absences.manageAttachmentsPerPerson")) {
+			
+			Absences.manageAttachmentsPerPerson(personId, year, month);
+		}
+		
 				
 		
 		

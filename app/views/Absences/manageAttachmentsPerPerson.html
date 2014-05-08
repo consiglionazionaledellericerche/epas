@@ -1,39 +1,34 @@
-#{extends 'main_with_navbar.html' /}
-#{set titolo: 'Gestione allegati ai codici di assenza' /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Assenze'  /}
+
+<div id="container-fluid-nav-tabs" class="container-fluid">
 
 <ul class="nav nav-tabs">
-  	<li><a href="@{Absences.manageAttachmentsPerCode(year, month)}#">Gestione attachment per codice di assenza</a></li>
-  	<li class="active"><a href="@{Absences.manageAttachmentsPerPerson(0,year, month)}#">Gestione attachment per persona</a></li>
+  <li><a href="@{YearlyAbsences.showGeneralMonthlyAbsences(year, month)}">Assenze Mensili</a></li>
+  <li><a href="@{YearlyAbsences.yearlyAbsences(session.get("personSelected"), year)}">Assenze Annuali</a></li>
+  <li><a href="@{Absences.manageAttachmentsPerCode(year, month)}">Gestione Allegati Per Codice</a></li>
+  <li class="active"><a href="@{Absences.manageAttachmentsPerPerson(session.get("personSelected"), year, month)}">Allegati Per Persona</a></li>
 </ul>
-#{form @Absences.manageAttachmentsPerPerson()}
 
-<input type="hidden" name="year" value="${year}"/>
-<input type="hidden" name="month" value="${month}"/>
-#{select 'personSelected', value:personListForAttachments.get(0), id:'person'}
-			#{option}Scegli una persona#{/option}
-			
-		%{
-			for(person in personListForAttachments){
-		}%
-			#{option person.id}${person.surname + ' ' + person.name}#{/option}
-			%{
-				}
-			}%
-		
-#{/select}
+</div>
 
+<div class="container">
 
-<input class="btn btn-primary" type="submit" value="Ok"/>
-#{/form}
-#{if personSelected != null && personSelected > 0 }
-<fieldset>
-	<legend>Allegati di &{'views.tags.display.date.month.' +month} ${year}</legend>
+   <div class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title text-center">Allegati Assenze di ${person.name} ${person.surname} &{'views.tags.display.date.month.' + month} ${year} </h3>
+      </div>
+      <div class="panel-body">
 		<ul class="icons-ul">
 			#{list items:personAbsenceListWithFile, as:'personAbsence'}
-				<li class="distanziato"> <i class="icon-li icon-ok"></i>Allegato del ${personAbsence.personDay.date} <a href="@{Absences.downloadAttachment(personAbsence.id)}"><i class="icon-paper-clip icon-large"></i></a></li>
+				<li class="distanziato"> 
+				  <i class="icon-li icon-ok"></i>Allegato del ${personAbsence.personDay.date} 
+				  <a href="@{Absences.downloadAttachment(personAbsence.id)}"><span class="glyphicon glyphicon-paperclip"></span></a>
+				</li>
 			#{/list}
 		</ul>
-
-</fieldset>
-#{/if}
-
+     </div>
+   </div>
+   
+</div>

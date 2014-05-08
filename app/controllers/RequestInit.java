@@ -360,6 +360,23 @@ public class RequestInit extends Controller {
 				renderArgs.put("dropDown", "dropDown1");
 				return "Absences.absences";
 			}
+			
+			if(action.equals("Absences.manageAttachmentsPerCode")) {
+				
+				renderArgs.put("switchMonth",  true);
+				renderArgs.put("switchYear",  true);
+				renderArgs.put("dropDown", "dropDown2");
+				return "Absences.manageAttachmentsPerCode";
+			}
+			
+			if(action.equals("Absences.manageAttachmentsPerPerson")) {
+				
+				renderArgs.put("switchMonth",  true);
+				renderArgs.put("switchYear",  true);
+				renderArgs.put("switchPerson", true);
+				renderArgs.put("dropDown", "dropDown2");
+				return "Absences.manageAttachmentsPerPerson";
+			}
 		}
 		
 		if(action.startsWith("YearlyAbsences.")) {
@@ -369,6 +386,22 @@ public class RequestInit extends Controller {
 				renderArgs.put("switchYear",  true);
 				renderArgs.put("dropDown", "dropDown1");
 				return "YearlyAbsences.absencesPerPerson";
+			}
+			
+			if(action.equals("YearlyAbsences.showGeneralMonthlyAbsences")) {
+				
+				renderArgs.put("switchMonth",  true);
+				renderArgs.put("switchYear",  true);
+				renderArgs.put("dropDown", "dropDown2");
+				return "YearlyAbsences.showGeneralMonthlyAbsences";
+			}
+			
+			if(action.equals("YearlyAbsences.yearlyAbsences")) {
+				
+				renderArgs.put("switchYear",  true);
+				renderArgs.put("switchPerson", true);
+				renderArgs.put("dropDown", "dropDown2");
+				return "YearlyAbsences.yearlyAbsences";
 			}
 		}
 		
