@@ -261,19 +261,25 @@ public class RequestInit extends Controller {
 			
 			if(action.equals("Stampings.stampings")) {
 				
+				renderArgs.put("switchMonth",  true);
+				renderArgs.put("switchYear",  true);
 				renderArgs.put("dropDown", "dropDown1");
 				return "Stampings.stampings";
 			}
 			
 			if(action.equals("Stampings.personStamping")) {
 				
+				renderArgs.put("switchMonth",  true);
+				renderArgs.put("switchYear",  true);
+				renderArgs.put("switchPerson", true);
 				renderArgs.put("dropDown", "dropDown2");
 				return "Stampings.personStamping";
 			}
 			
 			if(action.equals("Stampings.missingStamping")) {
 				
-				renderArgs.put("noPerson", true);
+				renderArgs.put("switchMonth",  true);
+				renderArgs.put("switchYear",  true);
 				renderArgs.put("dropDown", "dropDown2");
 				return "Stampings.missingStamping";
 			}
@@ -281,14 +287,16 @@ public class RequestInit extends Controller {
 			if(action.equals("Stampings.dailyPresence")) {
 				
 				renderArgs.put("switchDay", true);
-				renderArgs.put("noPerson", true);
+				renderArgs.put("switchMonth",  true);
+				renderArgs.put("switchYear",  true);
 				renderArgs.put("dropDown", "dropDown2");
 				return "Stampings.dailyPresence";
 			}
 			
 			if(action.equals("Stampings.mealTicketSituation")) {
 				
-				renderArgs.put("noPerson", true);
+				renderArgs.put("switchMonth",  true);
+				renderArgs.put("switchYear",  true);
 				renderArgs.put("dropDown", "dropDown2");
 				return "Stampings.mealTicketSituation";
 			}
@@ -299,13 +307,15 @@ public class RequestInit extends Controller {
 			
 			if(action.equals("PersonMonths.trainingHours")) {
 				
+				
+				renderArgs.put("switchYear",  true);
 				renderArgs.put("dropDown", "dropDown1");
 				return "PersonMonths.trainingHours";
 			}
 			
 			if(action.equals("PersonMonths.hourRecap")) {
 				
-				renderArgs.put("noPerson", true);
+				renderArgs.put("switchYear",  true);
 				renderArgs.put("dropDown", "dropDown1");
 				return "PersonMonths.hourRecap";
 			}
@@ -315,7 +325,7 @@ public class RequestInit extends Controller {
 			
 			if(action.equals("Vacations.show")) {
 				
-				renderArgs.put("noPerson", true);
+				renderArgs.put("switchYear",  true);
 				renderArgs.put("dropDown", "dropDown1");
 				return "Vacations.show";
 			}
@@ -330,16 +340,12 @@ public class RequestInit extends Controller {
 			}
 			if(action.equals("Persons.list")) {
 				
-				renderArgs.put("noData", true);
-				renderArgs.put("noPerson", true);
 				renderArgs.put("dropDown", "dropDown2");
 				return "Persons.list";
 			}
 			
 			if(action.equals("Persons.edit")) {
 				
-				renderArgs.put("noData", true);
-				renderArgs.put("noPerson", true);
 				renderArgs.put("dropDown", "dropDown2");
 				return "Persons.edit";
 			}
@@ -349,6 +355,8 @@ public class RequestInit extends Controller {
 			
 			if(action.equals("Absences.absences")) {
 				
+				renderArgs.put("switchMonth",  true);
+				renderArgs.put("switchYear",  true);
 				renderArgs.put("dropDown", "dropDown1");
 				return "Absences.absences";
 			}
@@ -358,7 +366,7 @@ public class RequestInit extends Controller {
 			
 			if(action.equals("YearlyAbsences.absencesPerPerson")) {
 				
-				renderArgs.put("noPerson", true);
+				renderArgs.put("switchYear",  true);
 				renderArgs.put("dropDown", "dropDown1");
 				return "YearlyAbsences.absencesPerPerson";
 			}
@@ -368,44 +376,43 @@ public class RequestInit extends Controller {
 			
 			if(action.equals("Competences.competences")) {
 				
-				renderArgs.put("noPerson", true);
+				renderArgs.put("switchMonth",  true);
+				renderArgs.put("switchYear",  true);
 				renderArgs.put("dropDown", "dropDown1");
 				return "Competences.competences";
 			}
 			
 			if(action.equals("Competences.showCompetences")) {
 				
-				renderArgs.put("noPerson", true);
+				renderArgs.put("switchMonth",  true);
+				renderArgs.put("switchYear",  true);
 				renderArgs.put("dropDown", "dropDown2");
 				return "Competences.showCompetences";
 			}
 			
 			if(action.equals("Competences.overtime")) {
 				
-				renderArgs.put("noPerson", true);
+				renderArgs.put("switchMonth",  true);
+				renderArgs.put("switchYear",  true);
 				renderArgs.put("dropDown", "dropDown2");
 				return "Competences.overtime";
 			}
 			
 			if(action.equals("Competences.totalOvertimeHours")) {
 				
-				renderArgs.put("noPerson", true);
+				renderArgs.put("switchYear",  true);
 				renderArgs.put("dropDown", "dropDown2");
 				return "Competences.totalOvertimeHours";
 			}
 			
 			if(action.equals("Competences.enabledCompetences")) {
 				
-				renderArgs.put("noData", true);
-				renderArgs.put("noPerson", true);
 				renderArgs.put("dropDown", "dropDown2");
 				return "Competences.enabledCompetences";
 			}
 			
 			if(action.equals("Competences.exportCompetences")) {
 				
-				renderArgs.put("noData", true);
-				renderArgs.put("noPerson", true);
 				renderArgs.put("dropDown", "dropDown2");
 				return "Competences.exportCompetences";
 			}
@@ -416,7 +423,8 @@ public class RequestInit extends Controller {
 			
 			if(action.equals("MonthRecaps.show")) {
 				
-				renderArgs.put("noPerson", true);
+				renderArgs.put("switchMonth",  true);
+				renderArgs.put("switchYear",  true);
 				renderArgs.put("dropDown", "dropDown2");
 				return "MonthRecaps.show";
 			}
@@ -426,24 +434,18 @@ public class RequestInit extends Controller {
 			
 			if(action.equals("UploadSituation.show")) {
 				
-				renderArgs.put("noData", true);
-				renderArgs.put("noPerson", true);
 				renderArgs.put("dropDown", "dropDown2");
 				return "UploadSituation.show";
 			}
 			
 			if(action.equals("UploadSituation.loginAttestati")) {
 				
-				renderArgs.put("noData", true);
-				renderArgs.put("noPerson", true);
 				renderArgs.put("dropDown", "dropDown2");
 				return "UploadSituation.loginAttestati";
 			}
 			
 			if(action.equals("UploadSituation.processAttestati")) {
 				
-				renderArgs.put("noData", true);
-				renderArgs.put("noPerson", true);
 				renderArgs.put("dropDown", "dropDown2");
 				return "UploadSituation.processAttestati";
 			}
