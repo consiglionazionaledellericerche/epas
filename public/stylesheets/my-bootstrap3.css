@@ -210,6 +210,11 @@ ul.pagination {
 	margin-bottom: 10px;
 }
 
+.reloading, .reloading * {
+	background-color: lightgrey !important;
+	cursor: wait;	
+}
+
 /* CSS Tabellone Timbrature */
 
 /* tabella default */

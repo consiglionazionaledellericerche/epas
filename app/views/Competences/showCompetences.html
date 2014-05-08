@@ -25,9 +25,6 @@
       <div class="panel-body">
         <!-- begin Assegna competenze panel body -->
         
-        <input type="hidden" name="year" value="${year}"/>
-        <input type="hidden" name="month" value="${month}"/>
-
         <div class="col-xs-5">
         #{form action:@Competences.showCompetences()	,  
           method:'GET', autocomplete:'off',
@@ -36,7 +33,7 @@
     
           <select name="codice" class="input-medium">
             #{list items:activeCompetenceCodes, as:'activeCode'}
-              <option value="${activeCode.code}" >${activeCode.code}</option>
+              <option value="${activeCode.code}" #{if activeCode.code.equals(codice) } selected="selected" #{/if} >${activeCode.code}</option>
             #{/list}
 	      </select>
           <i class="icon-search icon-large"></i>
@@ -61,6 +58,7 @@
             </ul>
 		  </div>
 
+  		  <div class="col-xs-12">
           <table class="table table-hover">
 	        <tr class="warning">
 	          <th>Nome e cognome</th>
@@ -92,6 +90,8 @@
 		    <strong>${competenceCode.totalFromCompetenceCode(month, year)}</strong>
 		  </a>	      
 
+		  </div>
+		  
         </section>
         
         

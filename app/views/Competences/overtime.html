@@ -51,47 +51,47 @@
 		  
 		  
 		  
-		 
-    <table class="table overtime-big table-hover">
-    	<tr>
-	    	<th>Nome e cognome</th>
-	    	%{for(col in tableFeature.columnKeySet()){
-			}%
-			<th>${col}</th>
-			%{
-			}
-			}%
-
-    	</tr>
-    	%{  for(entry in tableFeature.rowMap().entrySet()){
-		}%
-    	<tr>
-    		<td class="person">${entry.getKey().surname} ${entry.getKey().name} (${entry.getKey().number})</td>
-    		%{ for(col in tableFeature.columnKeySet()){
-			}%
-			%{if(col.equals('Giorni di Presenza') || col.equals('Ore straordinario pagate') || col.equals('Riposi compens.')){
-			}%
-				<td>
-					${entry.getValue().get(col)}			
-				</td>
-				%{
-				}else{
+		 <div class="col-xs-12">
+		    <table class="table overtime-big table-hover">
+		    	<tr>
+			    	<th>Nome e cognome</th>
+			    	%{for(col in tableFeature.columnKeySet()){
+					}%
+					<th>${col}</th>
+					%{
+					}
+					}%
+		
+		    	</tr>
+		    	%{  for(entry in tableFeature.rowMap().entrySet()){
 				}%
-				<td>
-					${entry.getValue().get(col).toHourTime()}			
-				</td>
-				%{
-				}
-				}%
-			%{
-			}
-			}%
-    	</tr> 
-    	%{
-    	}
-    	}%   
-    </table>
-		  
+		    	<tr>
+		    		<td class="person">${entry.getKey().surname} ${entry.getKey().name} (${entry.getKey().number})</td>
+		    		%{ for(col in tableFeature.columnKeySet()){
+					}%
+					%{if(col.equals('Giorni di Presenza') || col.equals('Ore straordinario pagate') || col.equals('Riposi compens.')){
+					}%
+						<td>
+							${entry.getValue().get(col)}			
+						</td>
+						%{
+						}else{
+						}%
+						<td>
+							${entry.getValue().get(col).toHourTime()}			
+						</td>
+						%{
+						}
+						}%
+					%{
+					}
+					}%
+		    	</tr> 
+		    	%{
+		    	}
+		    	}%   
+		    </table>
+		  </div>
 		  
 		  
 		  

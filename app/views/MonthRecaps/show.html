@@ -14,11 +14,11 @@
 	  <p class="lead">Numero di giorni lavorativi: ${generalWorkingDaysOfMonth}</p>
 	  
 	 
-	  
+
 	     <div class="col-xs-5">
 	     
           #{form action:@MonthRecaps.show(), class:'form', method:'GET', autocomplete:'off',
-          'data-reload-no-ajax':'#results'}
+          'data-reload':'#results'}
     
             <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="input-medium search-query"/>
             <i class="icon-search icon-large"></i>
@@ -27,7 +27,7 @@
           #{/form}
          </div>
 
-         
+	     <section id="results">         
 
           <div class="col-xs-7">
             <ul class="pagination">
@@ -43,7 +43,7 @@
 		  </div>
 	  
 	  
-	  
+	      <div class="col-xs-12">
 	  
 		  <table class="table table-hover center">
 			<tr>
@@ -79,7 +79,8 @@
 							
 					}%						
 							<td>
-		 					  <a data-toggle="modal"  href="@{MonthRecaps.justifiedAbsences(entry.getKey().id, lastDayOfMonth.getYear(), lastDayOfMonth.getMonthOfYear())}" data-modal=".my-modal">${entry.getValue().get(col)}</a>
+		 					  <a href="@{MonthRecaps.justifiedAbsences(entry.getKey().id, lastDayOfMonth.getYear(), lastDayOfMonth.getMonthOfYear())}"
+		 					   data-modal=".my-modal">${entry.getValue().get(col)}</a>
 							</td>
 					%{
 							
@@ -120,10 +121,10 @@
 					}
 				}%	
 		  </table>
-		  
+		  </div>
 		 
 	  
-	   
+	   </section>
 	  
 	</div>
   </div> <!-- end panel -->  

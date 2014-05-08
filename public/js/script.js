@@ -5,7 +5,7 @@ $(function($){
 	
 	$.fn.initepas = function() {
 		
-			this.find('data-tooltip').tooltip();
+		this.find('data-tooltip').tooltip();
 		
 		this.find('.my-modal').on('hidden.bs.modal', function(){
 		    $(this).data('bs.modal', null);
@@ -115,7 +115,7 @@ $(function($){
 	    	var selector = $form.data('reload');
 	    	var $target = $(selector);
 	    	$target.addClass('reloading');
-	    	var $spinner = $('<span class="text-primary" style="position:absolute; z-index: 10"><i class="icon-spinner icon-spin icon-2x"></i</span>').prependTo($target);
+	    	var $spinner = $('<span class="text-primary" style="position:absolute; z-index: 10"><i class="fa fa-spin fa-spinner fa-2x"></i></span>').prependTo($target);
 	    	var offset = $spinner.offset();
 	    	$spinner.offset({top:offset.top + 1, left:offset.left + 250});
 	    	var url = $form.prop('action') + '?'+ $form.find(":input").serialize();
@@ -137,22 +137,21 @@ $(function($){
 	    		$this.trigger('change');
 	    	}, 500));
 	    });
+	    
+	    this.find('a[data-modal]').click(function(e) {
+			var $this = $(this);
+			var url = $this.attr('href');
+			var $modal = $($this.data('modal'));
+			var $modalbody = $modal.modal('show').find('.modal-content');
+			$modalbody.load(url, function() {
+				$modalbody.initepas();
+			});
+			e.preventDefault();
+		});
 		
 	}	/* fine initepas() */
 	
 	$('body').initepas();
-	
-	
-	$('a[data-modal]').click(function(e) {
-		var $this = $(this);
-		var url = $this.attr('href');
-		var $modal = $('.my-modal');
-		var $modalbody = $modal.modal('show').find('.modal-content');
-		$modalbody.load(url, function() {
-			$modalbody.initepas();
-		});
-		e.preventDefault();
-	});
 	
 	$('#buttonError').click(function() {
         $('#flash-error').hide();

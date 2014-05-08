@@ -211,7 +211,7 @@
 	    		
 			  #{/list}
 			  
-			  <a data-toggle="modal" href="@{Persons.updateContractWorkingTimeType(contract.id)}" data-modal=".my-modal"><i class="fa fa-pencil-square-o"></i> Modifica</a>
+			  <a href="@{Persons.updateContractWorkingTimeType(contract.id)}" data-modal=".my-modal"><i class="fa fa-pencil-square-o"></i> Modifica</a>
 			</td>
 			
 			<td>
@@ -224,11 +224,11 @@
 			</td>
 			
 			<td>
-			  <a data-modal data-toggle="modal" href="@{Persons.modifyContract(contract.id)}" data-target=".my-modal"><i class="fa fa-pencil-square-o"></i> Modifica</a>
+			  <a href="@{Persons.modifyContract(contract.id)}" data-modal=".my-modal"><i class="fa fa-pencil-square-o"></i> Modifica</a>
 			</td>
 			
 			<td>
-			  <a data-toggle="modal" href="@{Persons.deleteContract(contract.id)}" data-target=".my-modal"><input value="Elimina" class="btn btn-sm btn-danger" type="button"></a>
+			  <a href="@{Persons.deleteContract(contract.id)}" data-modal=".my-modal"><input value="Elimina" class="btn btn-sm btn-danger" type="button"></a>
 			</td>
 			
 			 <td class="span4" style="text-align: center;">
@@ -260,11 +260,11 @@
 			     <strong class="text-error">${contract.sourceRecoveryDayUsed}</strong><br>
 			   #{/if}
 			   
-			   <a class="btn btn-small" href="@{Persons.updateSourceContract(contract.id)}" data-modal="#modal-edit-source-contract">Modifica</a>
+			   <a class="btn btn-small" href="@{Persons.updateSourceContract(contract.id)}" data-modal=".my-modal">Modifica</a>
 			
 			 #{/if}
 			 #{else}
-			   <a class="btn btn-small" href="@{Persons.updateSourceContract(contract.id)}" data-modal="#modal-edit-source-contract">Definisci Inizializzazione</a>
+			   <a class="btn btn-small" href="@{Persons.updateSourceContract(contract.id)}" data-modal=".my-modal">Definisci Inizializzazione</a>
 			 #{/else}
 			</td>
 			
@@ -274,7 +274,7 @@
 	  </table>
 	  
 	  <p>
-  	    <a data-modal data-toggle="modal" href="@{Persons.insertContract('person.id':person.id)}" data-target=".my-modal">
+  	    <a href="@{Persons.insertContract('person.id':person.id)}" data-modal=".my-modal">
   	      <span class="glyphicon glyphicon-plus"></span> Inserisci un nuovo contratto per ${person.surname} ${person.name}
   	    </a>
   	  </p>
@@ -309,7 +309,7 @@
       <h3 class="panel-title"><span class="badge">4</span> Eliminazione persona ePAS</h3>
     </div>
     <div class="panel-body center">
-      <a data-modal data-toggle="modal" href="@{Persons.deletePerson(person.id)}" data-target=".my-modal">
+      <a href="@{Persons.deletePerson(person.id)}" data-target=".my-modal">
   	    <button type="button" class="btn btn-danger">Elimina</button>
   	  </a>
    </div>
