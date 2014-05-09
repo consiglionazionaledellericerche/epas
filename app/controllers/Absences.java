@@ -958,10 +958,9 @@ public class Absences extends Controller{
 	
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void manageAttachmentsPerCode(Integer year, Integer month){
+		
 		LocalDate beginMonth = new LocalDate(year, month, 1);
-		//Table<Integer, String, List<Absence>> tableAbsences = TreeBasedTable.create(IntegerComparator, AbsenceCodeComparator);
-		
-		
+				
 		//Prendere le assenze ordinate per tipo
 		List<Absence> absenceList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup is null and " +
 				"abs.personDay.date between ? and ? and abs.absenceFile is not null order by abs.absenceType.code", 
@@ -1028,42 +1027,54 @@ public class Absences extends Controller{
 	}	
 	
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
-	public static void absenceInPeriod(Long personId, int year, int month){
+	public static void absenceInPeriod(Long personId){
+
+		List<Person> personList = Person.getActivePersonsInDay(LocalDate.now(),
+				Security.getOfficeAllowed(), false);
 		
-		List<Person> personList = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
-		if(personId == null || personId == 0)
-			render(personList, year, month);
-		else{
+		if(personId==null)
+			render(personList);
+		
+		LocalDate dateFrom = null;
+		LocalDate dateTo = null;
+		
+		try {
+			
 			String dataInizio = params.get("dataInizio");
 			String dataFine = params.get("dataFine");
-			LocalDate dateFrom = new LocalDate(dataInizio);
-			LocalDate dateTo = new LocalDate(dataFine);
-			List<Absence> missioni = new ArrayList<Absence>();
-			List<Absence> ferie = new ArrayList<Absence>();
-			List<Absence> riposiCompensativi = new ArrayList<Absence>();
-			List<Absence> altreAssenze = new ArrayList<Absence>();
-			Person person = Person.findById(personId);
-			List<Absence> absenceList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
-					"and abs.personDay.date between ? and ? and abs.absenceType.justifiedTimeAtWork = ?", person, dateFrom, dateTo, JustifiedTimeAtWork.AllDay).fetch();
-//			Logger.debug("La lista di assenze di %s %s per il periodo richiesto contiene %d elementi", person.name, person.surname, 
-//					absenceList.size());
-			for(Absence abs : absenceList){
-				if(abs.absenceType.code.equals("92")){
-					missioni.add(abs);
-				}
-				else if(abs.absenceType.code.equals("31") || abs.absenceType.code.equals("32") || abs.absenceType.code.equals("94")){
-					ferie.add(abs);
-				}
-				else if(abs.absenceType.code.equals("91")){
-					riposiCompensativi.add(abs);
-				}
-				else
-					altreAssenze.add(abs);
-			}
-			render(person, absenceList, personList, year, month, personId, dateFrom, dateTo, missioni, ferie, riposiCompensativi, altreAssenze);
+			dateFrom = new LocalDate(dataInizio);
+			dateTo = new LocalDate(dataFine);
+		} catch (Exception e) {
+			
+			flash.error("Errore nell'inserimento dei parametri. Valorizzare correttamente data inizio e data fine secondo il formato aaaa-mm-dd");
+			render(personId, personList);
 		}
+		
+		List<Absence> missioni = new ArrayList<Absence>();
+		List<Absence> ferie = new ArrayList<Absence>();
+		List<Absence> riposiCompensativi = new ArrayList<Absence>();
+		List<Absence> altreAssenze = new ArrayList<Absence>();
+		Person person = Person.findById(personId);
+		List<Absence> absenceList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
+				"and abs.personDay.date between ? and ? and abs.absenceType.justifiedTimeAtWork = ?", person, dateFrom, dateTo, JustifiedTimeAtWork.AllDay).fetch();
+
+		for(Absence abs : absenceList){
+			if(abs.absenceType.code.equals("92")){
+				missioni.add(abs);
+			}
+			else if(abs.absenceType.code.equals("31") || abs.absenceType.code.equals("32") || abs.absenceType.code.equals("94")){
+				ferie.add(abs);
+			}
+			else if(abs.absenceType.code.equals("91")){
+				riposiCompensativi.add(abs);
+			}
+			else
+				altreAssenze.add(abs);
+		}
+		render(personList, person, absenceList, dateFrom, dateTo, missioni, ferie, riposiCompensativi, altreAssenze, personId);
+
 	}
-	
+
 	
 	/**
 	 * Inserisce l'assenza absenceType nel person day della persona nel periodo indicato. Se dateFrom = dateTo inserisce nel giorno singolo.

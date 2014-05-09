@@ -377,6 +377,12 @@ public class RequestInit extends Controller {
 				renderArgs.put("dropDown", "dropDown2");
 				return "Absences.manageAttachmentsPerPerson";
 			}
+			
+			if(action.equals("Absences.absenceInPeriod")) {
+				
+				renderArgs.put("dropDown", "dropDown2");
+				return "Absences.absenceInPeriod";
+			}
 		}
 		
 		if(action.startsWith("YearlyAbsences.")) {

@@ -9,6 +9,7 @@
   <li><a href="@{YearlyAbsences.yearlyAbsences(session.get("personSelected"), year)}">Assenze Annuali</a></li>
   <li><a href="@{Absences.manageAttachmentsPerCode(year, month)}">Gestione Allegati Per Codice</a></li>
   <li class="active"><a href="@{Absences.manageAttachmentsPerPerson(session.get("personSelected"), year, month)}">Allegati Per Persona</a></li>
+  <li><a href="@{Absences.absenceInPeriod()}">Assenze in periodo</a></li>
 </ul>
 
 </div>
