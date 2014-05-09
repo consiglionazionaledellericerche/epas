@@ -333,6 +333,11 @@ private static void executeAction(String action) {
 			Absences.manageAttachmentsPerPerson(personId, year, month);
 		}
 		
+		if(action.equals("Absences.absenceInPeriod")) {
+			
+			Absences.absenceInPeriod(personId);
+		}
+		
 				
 		
 		
