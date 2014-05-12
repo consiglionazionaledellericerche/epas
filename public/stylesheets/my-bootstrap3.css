@@ -215,6 +215,11 @@ ul.pagination {
 	cursor: wait;	
 }
 
+div.datepicker {
+    z-index: 9999 !important;
+}
+
+
 /* CSS Tabellone Timbrature */
 
 /* tabella default */

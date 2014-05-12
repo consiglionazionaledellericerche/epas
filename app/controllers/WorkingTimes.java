@@ -3,6 +3,7 @@ package controllers;
 import java.util.LinkedList;
 import java.util.List;
 
+import models.Contract;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import play.data.validation.Required;
@@ -168,4 +169,5 @@ public class WorkingTimes extends Controller{
 		WorkingTimes.manageWorkingTime();
 		
 	}
+	
 }

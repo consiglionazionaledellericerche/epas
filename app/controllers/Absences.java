@@ -283,11 +283,11 @@ public class Absences extends Controller{
 	}
 
 	private static void insertAbsence(Long personId, Integer yearFrom, 
-			Integer monthFrom, Integer dayFrom, String absenceCode, Integer annoFine, Integer meseFine, Integer giornoFine, Blob file, String mealTicket) throws EmailException
+			Integer monthFrom, Integer dayFrom, String absenceCode, String finoa, Blob file, String mealTicket) throws EmailException
 	{
 		Person person = Person.em().getReference(Person.class, personId);
 		LocalDate dateFrom = new LocalDate(yearFrom, monthFrom, dayFrom);
-		LocalDate dateTo = new LocalDate(annoFine, meseFine, giornoFine);
+		
 		AbsenceType absenceType = AbsenceType.find("byCode", absenceCode).first();
 		
 		if (absenceType == null) {
@@ -297,8 +297,22 @@ public class Absences extends Controller{
 			Logger.info("E' stato richiesto l'inserimento del codice di assenza %s per l'assenza del giorno %s per personId = %d. Il codice NON esiste. Se si tratta di un codice di assenza per malattia figlio NUOVO, inserire il nuovo codice nella lista e riprovare ad assegnarlo.", absenceType, dateFrom, personId);
 			Stampings.personStamping(personId, yearFrom, monthFrom);
 		}
-
+		
 		//Controlli di correttezza richiesta
+		LocalDate dateTo = null;
+		if(finoa==null || finoa.equals("")) {
+			dateTo = dateFrom;
+		}
+		else {
+			try {
+				dateTo = new LocalDate(finoa);	
+			}
+			catch (Exception e) {
+				flash.error("Errore inserimento campo data fine codice assenza. Operazione annullata.");
+				Stampings.personStamping(personId, yearFrom, monthFrom);
+			}
+		}
+	
 		if(dateTo.isBefore(dateFrom))
 		{
 			flash.error("Data fine precedente alla data inizio. Operazione annullata.");
@@ -360,10 +374,10 @@ public class Absences extends Controller{
 
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void insert(@Required Long personId, @Required Integer yearFrom, 
-			@Required Integer monthFrom, @Required Integer dayFrom, @Required String absenceCode, Integer annoFine, Integer meseFine, Integer giornoFine, Blob file, String mealTicket) throws EmailException{
+			@Required Integer monthFrom, @Required Integer dayFrom, @Required String absenceCode, String finoa, Blob file, String mealTicket) throws EmailException{
 
 		//Ho dovuto implementare un involucro perchè quando richiamavo questo medoto da update il campo blob era null.
-		insertAbsence(personId, yearFrom, monthFrom, dayFrom, absenceCode, annoFine, meseFine, giornoFine, file, mealTicket);
+		insertAbsence(personId, yearFrom, monthFrom, dayFrom, absenceCode, finoa, file, mealTicket);
 		
 	}
 
@@ -479,12 +493,21 @@ public class Absences extends Controller{
 		
 
 		Person person = absence.personDay.person;
-		int yearTo = params.get("annoFine", Integer.class);
-		int monthTo = params.get("meseFine", Integer.class);
-		int dayTo = params.get("giornoFine", Integer.class);
+		LocalDate dateFrom =  absence.personDay.date;		
+		LocalDate dateTo = null;
 		
-		LocalDate dateFrom =  absence.personDay.date;
-		LocalDate dateTo = new LocalDate(yearTo, monthTo, dayTo);
+		String finoa = params.get("finoa");
+		if(finoa==null || finoa.equals(""))
+			dateTo = dateFrom;
+		else {
+			try {
+				dateTo = new LocalDate(finoa);
+			} catch(Exception e) {
+				flash.error("Errore nell'inserimento del campo Fino A, inserire una data valida. Operazione annullata");
+				Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
+			}
+		}
+		
 		
 		int yearFrom = dateFrom.getYear();
 		int monthFrom = dateFrom.getMonthOfYear();
@@ -500,7 +523,7 @@ public class Absences extends Controller{
 			PersonUtility.updatePersonDaysIntoInterval(person, dateFrom, dateTo);
 			Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
 		}
-		insertAbsence(person.id, yearFrom, monthFrom, dayFrom, newAbsenceType.code, yearTo, monthTo, dayTo, file, mealTicket);
+		insertAbsence(person.id, yearFrom, monthFrom, dayFrom, newAbsenceType.code, dateTo.toString(), file, mealTicket);
 
 	}
 	

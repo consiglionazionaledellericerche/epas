@@ -135,11 +135,11 @@
 		<td class="invisible"></td>
 		
 		<td class="assenza default-single">
-		  <a data-toggle="modal" data-backdrop="true" href="@{Absences.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" data-target=".my-modal">
+		  <a data-backdrop="true" href="@{Absences.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" data-modal=".my-modal">
 		  ___
 		  </a>
 		  #{list items:dayRecap.absences, as:'absence'}
-		    <a data-toggle="modal" href="@{Absences.edit(absence.id)}" data-target=".my-modal">
+		    <a href="@{Absences.edit(absence.id)}" data-modal=".my-modal">
 			  ${absence.absenceType.code}
 			</a>
 		  #{/list}	
@@ -259,6 +259,7 @@
   </div>
   
   </div>
+  
 #{include '_myModal.html' /}
 
 
