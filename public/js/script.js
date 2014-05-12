@@ -164,6 +164,16 @@ $(function($){
 	
 });	/* fine on document load */
 
+function Change(){
+	var assenzaFrequente = document.getElementById("assenzaFrequente");
+	var absenceCode = document.getElementById("absenceCode");
+	absenceCode.value = assenzaFrequente.value;
+}
+function Change2(){
+	var tuttiCodici = document.getElementById("tuttiCodici");
+	var absenceCode = document.getElementById("absenceCode");
+	absenceCode.value = tuttiCodici.value;
+}
 
 
 

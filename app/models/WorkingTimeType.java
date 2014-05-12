@@ -15,6 +15,7 @@ import javax.persistence.Table;
 
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
+import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
 import play.db.jpa.Model;
@@ -112,7 +113,44 @@ public class WorkingTimeType extends Model {
 		
 		return breakTime;
 	}
-	
+
+	public List<Contract> getAssociatedContract() {
+
+		List<Contract> contractList = Contract.find(
+				"Select distinct c from Contract c "
+						+ "left outer join fetch c.contractWorkingTimeType as cwtt "
+						+ "where cwtt.workingTimeType = ?", this).fetch();
+
+		return contractList;
+	}
+
+	public List<Contract> getAssociatedActiveContract() {
+		
+		LocalDate today = new LocalDate();
+
+		List<Contract> contractList = Contract.find(
+				"Select distinct c from Contract c "
+						+ "left outer join fetch c.contractWorkingTimeType as cwtt "
+						+ "where cwtt.workingTimeType = ? "
+						
+						//contratto attivo nel periodo
+						+ " and ( "
+						//caso contratto non terminato
+						+ "c.endContract is null and "
+							//contratto a tempo indeterminato che si interseca col periodo 
+							+ "( (c.expireContract is null and c.beginContract <= ? )"
+							+ "or "
+							//contratto a tempo determinato che si interseca col periodo (comanda il campo endContract)
+							+ "(c.expireContract is not null and c.beginContract <= ? and c.expireContract >= ? ) ) "
+						+ "or "
+						//caso contratto terminato che si interseca col periodo		
+						+ "c.endContract is not null and c.beginContract <= ? and c.endContract >= ? "
+						+ ") "
+						, this, today, today, today, today, today).fetch();
+
+		return contractList;
+	}
+
 	
 	@Override
 	public String toString() {
