@@ -50,11 +50,12 @@ import controllers.Security;
  * @author cristian
  *
  */
+
 @Entity
 @Audited
 @Table(name = "persons")
 @With(Secure.class)
-public class Person extends Model {
+public class Person extends Model implements Comparable<Person>{
 
 	/**
 	 * relazione con la tabella dei permessi
@@ -107,6 +108,12 @@ public class Person extends Model {
 
 	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<InitializationTime> initializationTimes = new ArrayList<InitializationTime>();
+	
+	/**
+	 *  relazione con i turni
+	 */
+	@OneToMany(mappedBy="supervisor", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	public List<ShiftType> shiftTypes = new ArrayList<ShiftType>();
 
 	/**
 	 * relazione con la tabella delle info di contatto
@@ -1214,6 +1221,13 @@ public class Person extends Model {
 	public Integer getPositiveResidualInMonth(int year, int month){
 		
 		return Mese.positiveResidualInMonth(this, year, month)/60; 
+	}
+
+	@Override
+	public int compareTo(Person person) {
+				
+		int res = (this.surname.compareTo(person.surname) == 0) ?  this.name.compareTo(person.name) :  this.surname.compareTo(person.surname);
+		return res;
 	}
 
 }
