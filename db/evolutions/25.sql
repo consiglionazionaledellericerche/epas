@@ -20,7 +20,7 @@ ALTER TABLE shift_time_table ADD COLUMN paid_minutes INT;
 ALTER TABLE person_shift_days ADD COLUMN shift_slot VARCHAR(64);
 
 ALTER TABLE shift_type ADD COLUMN shift_time_table_id INT REFERENCES shift_time_table(id);
-ALTER TABLE shift_type ADD COLUMN person_id INT REFERENCES persons(id);
+ALTER TABLE shift_type ADD COLUMN supervisor INT REFERENCES persons(id);
 
 UPDATE person_shift_days SET shift_slot = 'MORNING' WHERE shift_time_table_id = 82;
 UPDATE person_shift_days SET shift_slot = 'AFTERNOON' WHERE shift_time_table_id = 83;
@@ -74,8 +74,17 @@ INSERT INTO shift_time_table (start_morning, end_morning, start_afternoon, end_a
 	VALUES ('08:20:00', '14:05:00', '13:35:00', '19:20:00', 
 			'14:05:00','', '', '13:35:00', 660, 345);
 			
-UPDATE shift_type SET shift_time_table_id = 2;
-UPDATE shift_type SET person_id = 24;
+CREATE TABLE shift_type_history (
+    id bigint NOT NULL,
+    _revision integer NOT NULL,
+  	_revision_type smallint,
+    description character varying(255),
+    type character varying(255),
+    supervisor bigint,
+    
+    CONSTRAINT revinfo_shift_type_history_fkey FOREIGN KEY (_revision)
+    REFERENCES revinfo (rev)
+);
 
 # ---!Downs
   
@@ -84,6 +93,9 @@ ALTER TABLE shift_time_table ADD COLUMN endshift TIMESTAMP without time zone;
 ALTER TABLE shift_time_table ADD COLUMN description VARCHAR(64);
 
 ALTER TABLE shift_type DROP COLUMN shift_time_table_id;
+ALTER TABLE shift_type DROP COLUMN supervisor;
+
+drop table if exists shift_type_history; 
 
 ALTER TABLE shift_time_table DROP COLUMN start_morning;
 ALTER TABLE shift_time_table DROP COLUMN end_morning;
@@ -103,7 +115,7 @@ ALTER TABLE person_shift_days ADD COLUMN shift_time_table_id INT REFERENCES shif
 INSERT INTO shift_time_table (id, startshift, endshift, description) VALUES (82, '01-01-12 07:00:00 AM', '01-01-12 01:30:00 PM', 'turno mattina');
 INSERT INTO shift_time_table (id, startshift, endshift, description) VALUES (83, '01-01-12 01:30:00 PM', '01-01-12 07:00:00 PM', 'turno pomeriggio');
 
-UPDATE person_shift_days SET shift_time_table_id = 82 WHERE shift_slot = 'MORNING';
+UPDATE person_shift_days SET shift_time_table_id = 82 WHERE shift_slot = 'MORNING' ;
 UPDATE person_shift_days SET shift_time_table_id = 83 WHERE shift_slot = 'AFTERNOON';
 
 ALTER TABLE person_shift_days DROP COLUMN shift_slot;

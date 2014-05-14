@@ -20,10 +20,14 @@ import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 
+import org.hibernate.envers.NotAudited;
+
 import play.db.jpa.Model;
+
 
 @Entity
 @Table(name="person_shift_days")
+
 public class PersonShiftDay extends Model{
 
 	// morning or afternoon slot

@@ -29,7 +29,7 @@
 			}%
 				<td> 
 					<p>
-						${person}
+						${person.surname} ${person.name}
 					</p>
 				</td>
 
@@ -95,7 +95,7 @@
 					for(person in inconsistentAbsence2.rowKeySet()) {
 			}%
 						<tr>
-							<td>${person}</td>
+							<td>${person.surname} ${person.name}</td>
 			%{
 							for(th in ths) {
 								if (inconsistentAbsence2.contains(person, th)) {
