@@ -8,6 +8,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.envers.Audited;
 
@@ -73,8 +74,7 @@ public class WorkingTimeTypeDay extends Model {
 	 * tempo fine pausa pranzo
 	 */
 	public Integer timeMealTo;
-	
-	
+		
 	public void setWorkingTime(Integer workingTime)
 	{
 		if(workingTime==null)
@@ -89,6 +89,9 @@ public class WorkingTimeTypeDay extends Model {
 			this.breakTicketTime = 0;
 		else
 			this.breakTicketTime = breakTicketTime;
+		
+		if(this.breakTicketTime < 30)
+			this.breakTicketTime = 30;
 	}
 	
 	public void setMealTicketTime(Integer mealTicketTime)
@@ -107,18 +110,21 @@ public class WorkingTimeTypeDay extends Model {
 			this.holiday = false;
 	}
 	
+	
 	/**
-	 * Persiste nel db l'oggetto workingTimeTypeDay settando a 0 gli eventuali tempi nulli.
+	 * True se è ammesso il calcolo del buono pasto per la persona, false altrimenti (il campo mealTicketTime
+	 *  che rappresenta il tempo minimo di lavoro per avere diritto al buono pasto è pari a zero)
+	 * @return
 	 */
-	public void properSave()
-	{
-		if(this.workingTime == null)
-			this.workingTime = 0;
-		if(this.mealTicketTime == null)
-			this.mealTicketTime = 0;
-		if(this.breakTicketTime == null)
-			this.breakTicketTime = 0;
-		this.save();
+	public boolean mealTicketEnabled() {
+		if( holiday )
+			return false;
+		
+		if( mealTicketTime > 0)
+			return true;
+		else 
+			return false;
+		
 	}
 	
 	

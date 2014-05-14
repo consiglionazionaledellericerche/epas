@@ -1,0 +1,17 @@
+#{extends 'modal.html' /}
+#{set modalHeader:'Cotratti attivi associati a ' + wtt.description /}
+
+<div class="container-fluid">
+
+
+	<ol>
+	  #{list items:contractList, as:'contract'}
+		<li>${contract.person.surname} ${contract.person.name}</li>
+	  #{/list}
+	</ol>
+
+
+
+
+
+</div>

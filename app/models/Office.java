@@ -56,4 +56,8 @@ public class Office extends Model{
     @NotAudited
     @OneToMany(mappedBy="office", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
     public List<UsersPermissionsOffices> userPermissionOffices = new ArrayList<UsersPermissionsOffices>();
+    
+    @NotAudited
+	@OneToMany(mappedBy="office", fetch=FetchType.LAZY)
+	public List<WorkingTimeType> workingTimeType = new ArrayList<WorkingTimeType>();
 }
