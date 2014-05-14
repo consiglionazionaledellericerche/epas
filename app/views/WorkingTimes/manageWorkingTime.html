@@ -2,95 +2,181 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Gestione tipi orario'  /}
 
+#{set 'moreStyles'}
+  <style>
+  	#table-wtt th, #table-wtt td {
+  		max-width: 40px;
+  	}
+  	
+  	#table-wtt input[type=number] {
+  		max-width: 60px;
+  	}
+  	
+  	#table-wtt td.item {
+  		font-size: .9em;
+  	}
+
+  </style>
+#{/set}
+
 <div class="container-fluid">
 
-<p class="text-info lead">
-  <a href="@{WorkingTimes.insertWorkingTime()}" data-modal=".my-modal">
-    Inserisci nuovo orario di lavoro
-  </a>
-</p>
-<div class="span11">
-<table  class="table table-hover table-working-type">
-	<tr>
-		<th>Nome tipo orario</th>
-		<th></th>
-		<th>Lunedì</th>
-		<th>Martedì</th>
-		<th>Mercoledì</th>
-		<th>Giovedì</th>
-		<th>Venerdì</th>
-		<th>Sabato</th>
-		<th>Domenica</th>
-		<th>Default</th>
-		<th>Può fare turni</th>
-	</tr>
+	<div class="col-md-6">
+	<div class="panel panel-info">
+	  <div class="panel-heading">
+	    <h3 class="panel-title">Tipi orario CNR</h3>
+	  </div>
+	  <div class="panel-body">
+	    <table class="table table-hover">
+	        <tr>
+	          <th class="center">Descrizione</th>
+	          <th class="center">Contratti attivi<br>associati</th>
+	          <th class="center">Cambia orario<br>a tutti</th>
+	        </tr>
+		    #{list items:wttDefault, as:'wtt'}
+		      <tr>
+		        <td>
+		          <a href="@{WorkingTimes.showWorkingTimeType(wtt.id)}" data-modal=".my-modal-large">
+				    ${wtt.description}			    
+				  </a>
+		        </td>
+		        <td class="center">
+		          <a href="@{WorkingTimes.showContractWorkingTimeType(wtt.id)}" data-modal=".my-modal">
+		            ${wtt.getAssociatedActiveContract().size()}
+		    	  </a>    
+		        </td>
+		        <td class="center">
+		          <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.id)}" data-modal=".my-modal">
+		            Cambia
+		    	  </a>
+		        </td>
+		      </tr>	
+		    #{/list}
+		</table>
+	  </div>
+	</div>
+	</div>
 	
-	#{list items:wttList, as:'wtt'}
-	<tr>
-		<td class="tipo-orario first-line" rowspan=5>
-		  <a href="@{WorkingTimes.edit(wtt.id)}" data-modal=".my-modal">
-		    ${wtt.description}<br>
-		    ${wtt.getAssociatedContract().size()}<br>
-		    ${wtt.getAssociatedActiveContract().size()}
-		    
-		  </a>
-		</td>
-		<tr>
-			<td class="caratteristica first-line">Tempo lavoro</td>
-			<td class="first-line">${wtt.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime.toHourTime()}</td>
-			<td class="first-line">${wtt.getWorkingTimeTypeDayFromDayOfWeek(2).workingTime.toHourTime()}</td>
-			<td class="first-line">${wtt.getWorkingTimeTypeDayFromDayOfWeek(3).workingTime.toHourTime()}</td>
-			<td class="first-line">${wtt.getWorkingTimeTypeDayFromDayOfWeek(4).workingTime.toHourTime()}</td>
-			<td class="first-line">${wtt.getWorkingTimeTypeDayFromDayOfWeek(5).workingTime.toHourTime()}</td>
-			<td class="first-line">${wtt.getWorkingTimeTypeDayFromDayOfWeek(6).workingTime.toHourTime()}</td>
-			<td class="first-line">${wtt.getWorkingTimeTypeDayFromDayOfWeek(7).workingTime.toHourTime()}</td>
-			<td class="first-line"></td>
-			<td class="first-line"></td>
+	<div class="col-md-6">
+		<div class="panel panel-info">
+		  <div class="panel-heading">
+		    <h3 class="panel-title">Tipi Orario particolari attivi</h3>
+		  </div>
+		  <div class="panel-body">
+		    <!-- lista -->
+		    <table class="table table-condensed table-hover">
+		        <tr>
+		          <th>Descrizione</th>
+		          <th class="center">Sede</th>
+		          <th class="center">Contratti attivi<br>associati</th>
+		          <th class="center">Contratti<br>associati<br>(storico)</th>
+		          <th class="center">Cambia orario<br>a tutti</th>
+		        </tr>
+			    #{list items:wttAllowed, as:'wtt'}
+			    #{if wtt.disabled == false }
+			      <tr>
+			        <td>
+			          <a href="@{WorkingTimes.showWorkingTimeType(wtt.id)}" data-modal=".my-modal-large">
+					    ${wtt.description}			    
+					  </a>
+			        </td>
+			        <td  class="center">${wtt.office.name}</td>
+			        <td  class="center">
+			          <a href="@{WorkingTimes.showContractWorkingTimeType(wtt.id)}" data-modal=".my-modal">
+			            ${wtt.getAssociatedActiveContract().size()}
+			    	  </a>    
+			    	  #{if wtt.getAssociatedActiveContract().size() == 0 }
+			    	    <a href="@{WorkingTimes.toggleWorkingTimeTypeEnabled(wtt.id)}">
+			    	      <i data-toggle="tooltip" data-placement="bottom" title="Disattiva tipo orario non associato ad alcun contratto attivo" class="fa fa-power-off"></i>
+			    	    </a>
+			    	  #{/if }
+			    	  
+			        </td>
+			        <td  class="center">
+			          ${wtt.getAssociatedContract().size()}
+			          #{if wtt.getAssociatedContract().size() == 0 }
+			    	    <a href="@{WorkingTimes.delete(wtt.id)}">
+			    	      <i data-toggle="tooltip" data-placement="bottom" title="Elimina tipo orario non associato ad alcun contratto" class="fa fa-trash-o"></i>
+			    	    </a>
+			    	  #{/if}
+			    	</td>
+			        <td class="center">
+			          <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.id)}" data-modal=".my-modal">
+		                Cambia
+		    	      </a>
+					</td>
+			      </tr>	
+			    #{/if }  
+			    #{/list}
+			</table>
 			
-		</tr>
-		<tr>
-			<td class="caratteristica">Tempo minimo di lavoro per diritto a intervallo pranzo</td>
-			<td>${wtt.getMinimalTimeForLunch(1, wtt).toHourTime()}</td>
-			<td>${wtt.getMinimalTimeForLunch(2, wtt).toHourTime()}</td>
-			<td>${wtt.getMinimalTimeForLunch(3, wtt).toHourTime()}</td>
-			<td>${wtt.getMinimalTimeForLunch(4, wtt).toHourTime()}</td>
-			<td>${wtt.getMinimalTimeForLunch(5, wtt).toHourTime()}</td>
-			<td>${wtt.getMinimalTimeForLunch(6, wtt).toHourTime()}</td>
-			<td>${wtt.getMinimalTimeForLunch(7, wtt).toHourTime()}</td>
-			<td></td>
-			<td></td>
-			
-		</tr>
-		<tr>
-			<td class="caratteristica">Intervallo pranzo</td>
-			<td>${wtt.getBreakTime(1, wtt).toHourTime()}</td>
-			<td>${wtt.getBreakTime(2, wtt).toHourTime()}</td>
-			<td>${wtt.getBreakTime(3, wtt).toHourTime()}</td>
-			<td>${wtt.getBreakTime(4, wtt).toHourTime()}</td>
-			<td>${wtt.getBreakTime(5, wtt).toHourTime()}</td>
-			<td>${wtt.getBreakTime(6, wtt).toHourTime()}</td>
-			<td>${wtt.getBreakTime(7, wtt).toHourTime()}</td>
-			<td></td>
-			<td></td>
-		</tr>
-		<tr>
-			<td class="caratteristica">Giorno festivo</td>
-			<td>${wtt.getHolidayFromWorkinTimeType(1, wtt)}</td>
-			<td>${wtt.getHolidayFromWorkinTimeType(2, wtt)}</td>
-			<td>${wtt.getHolidayFromWorkinTimeType(3, wtt)}</td>
-			<td>${wtt.getHolidayFromWorkinTimeType(4, wtt)}</td>
-			<td>${wtt.getHolidayFromWorkinTimeType(5, wtt)}</td>
-			<td>${wtt.getHolidayFromWorkinTimeType(6, wtt)}</td>
-			<td>${wtt.getHolidayFromWorkinTimeType(7, wtt)}</td>
-			<td></td>
-			<td></td>
-		</tr>
+			<!-- Nuovo -->
+			<a href="@{WorkingTimes.insertWorkingTime()}" data-modal=".my-modal-large">
+		      <span class="glyphicon glyphicon-plus"></span> Crea nuovo orario di lavoro
+		    </a>
+		  </div>
+		</div>
+	</div>
+	
+	<div class="col-md-6">
+	<div class="panel-group" id="accordion-wtt">
+	  <div class="panel panel-default">
+	    <div class="panel-heading">
+	      <h4 class="panel-title">
+	        <a data-toggle="collapse" data-parent="#accordion-wtt" href="#collapseOne-wtt">
+	          Tipi Orario particolari disattivati
+	        </a>
+	      </h4>
+	    </div>
+	    <div id="collapseOne-wtt" class="panel-collapse collapse out">
+	      <div class="panel-body">
+		    <!-- lista -->
+		    <table class="table table-condensed table-hover">
+		        <tr>
+		          <th>Descrizione</th>
+		          <th class="center">Sede</th>
+		          <th class="center">Riattiva</th>
+		          <th class="center">Contratti<br>associati<br>(storico)</th>
+		        </tr>
+			    #{list items:wttAllowed, as:'wtt'}
+			    #{if wtt.disabled == true }
+			      <tr>
 
+			        <td>
+			          <a href="@{WorkingTimes.showWorkingTimeType(wtt.id)}" data-modal=".my-modal-large">
+					    ${wtt.description}			    
+					  </a>
+			        </td>
+
+			        <td class="center">${wtt.office.name}</td>
+
+			        <td class="center">
+			          <a href="@{WorkingTimes.toggleWorkingTimeTypeEnabled(wtt.id)}">
+			    	    <i data-toggle="tooltip" data-placement="bottom" title="Riattiva tipo orario" class="fa fa-power-off"></i>
+			    	  </a>
+			        </td>
+
+			        <td  class="center">
+			          ${wtt.getAssociatedContract().size()}
+			          #{if wtt.getAssociatedContract().size() == 0 }
+			    	    <a href="@{WorkingTimes.delete(wtt.id)}">
+			    	      <i data-toggle="tooltip" data-placement="bottom" title="Elimina tipo orario non associato ad alcun contratto" class="fa fa-trash-o"></i>
+			    	    </a>
+			    	  #{/if}
+			    	</td>
+			      </tr>	
+			    #{/if }  
+			    #{/list}
+			</table>
+			
+		  </div>
+		</div>
+      </div>
+	</div>
+	</div>
 	
-	</tr>
-	#{/list}
-</table>
-</div>
+
 </div>
 
 #{include '_myModal_large.html' /}
+#{include '_myModal.html' /}

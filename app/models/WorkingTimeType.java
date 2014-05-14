@@ -9,6 +9,8 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
@@ -16,6 +18,8 @@ import javax.persistence.Table;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
+
+import com.sun.corba.se.spi.orbutil.threadpool.Work;
 
 import play.data.validation.Required;
 import play.db.jpa.Model;
@@ -46,7 +50,7 @@ public class WorkingTimeType extends Model {
 	public boolean shift = false;
 	
 	@Column(name="meal_ticket_enabled")
-	public boolean mealTicketEnabled = true;
+	public boolean mealTicketEnabled = true;	//inutile
 	
 	@NotAudited
 	@OneToMany(mappedBy="workingTimeType", fetch=FetchType.LAZY)
@@ -55,6 +59,15 @@ public class WorkingTimeType extends Model {
 	@NotAudited
 	@OneToMany(mappedBy="workingTimeType", fetch=FetchType.LAZY)
 	public List<ContractWorkingTimeType> contractWorkingTimeType = new ArrayList<ContractWorkingTimeType>();
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name = "office_id")
+	public Office office;
+	
+	@Column(name="disabled")
+	public boolean disabled = false;
+	
+	
 	
 	/**
 	 * relazione con la tabella di specifiche di orario di lavoro
@@ -128,6 +141,9 @@ public class WorkingTimeType extends Model {
 		
 		LocalDate today = new LocalDate();
 
+		List<Contract> contractList = new ArrayList<Contract>();
+		
+		/*
 		List<Contract> contractList = Contract.find(
 				"Select distinct c from Contract c "
 						+ "left outer join fetch c.contractWorkingTimeType as cwtt "
@@ -147,10 +163,60 @@ public class WorkingTimeType extends Model {
 						+ "c.endContract is not null and c.beginContract <= ? and c.endContract >= ? "
 						+ ") "
 						, this, today, today, today, today, today).fetch();
-
+		*/
+		
+		List<Contract> activeContract = Contract.find(
+				"Select c from Contract c "
+										
+						//contratto attivo nel periodo
+						+ " where ( "
+						//caso contratto non terminato
+						+ "c.endContract is null and "
+							//contratto a tempo indeterminato che si interseca col periodo 
+							+ "( (c.expireContract is null and c.beginContract <= ? )"
+							+ "or "
+							//contratto a tempo determinato che si interseca col periodo (comanda il campo endContract)
+							+ "(c.expireContract is not null and c.beginContract <= ? and c.expireContract >= ? ) ) "
+						+ "or "
+						//caso contratto terminato che si interseca col periodo		
+						+ "c.endContract is not null and c.beginContract <= ? and c.endContract >= ? "
+						+ ") "
+						, today, today, today, today, today).fetch();
+		
+		for(Contract contract : activeContract) {
+			ContractWorkingTimeType current = contract.getContractWorkingTimeType(today);
+			if(current.workingTimeType.id.equals(this.id))
+				contractList.add(contract);
+		}
+		
 		return contractList;
 	}
-
+	
+	
+	
+	public static List<WorkingTimeType> getDefaultWorkingTimeTypes() {
+		
+		List<WorkingTimeType> defaultList = WorkingTimeType.find(
+				"select wtt from WorkingTimeType wtt where wtt.office is null order by description").fetch();
+		return defaultList;
+		
+	}
+	
+	
+	
+	public static List<WorkingTimeType> getOfficesWorkingTimeTypes(List<Office> officeList) {
+		
+		List<WorkingTimeType> wttList = new ArrayList<WorkingTimeType>();
+		for(Office office : officeList) {
+			
+			for(WorkingTimeType wtt : office.workingTimeType) {
+				
+				wttList.add(wtt);
+			}
+		}
+		
+		return wttList;
+	}
 	
 	@Override
 	public String toString() {

@@ -11,6 +11,10 @@ $(function($){
 		    $(this).data('bs.modal', null);
 		});
 		
+		this.find('.my-modal-large').on('hidden.bs.modal', function(){
+		    $(this).data('bs.modal', null);
+		});
+		
 		// $.fn.editable.defaults.mode = 'inline';
 		this.find('a[data-x-editable]').editable();
 		

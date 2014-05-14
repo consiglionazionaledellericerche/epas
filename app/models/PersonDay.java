@@ -325,15 +325,20 @@ public class PersonDay extends Model {
 		}
 	
 		//Il pranzo e' servito??		
-		this.stampModificationType = null;
-		int breakTicketTime = getWorkingTimeTypeDay().breakTicketTime;	//30 minuti
-		int mealTicketTime = getWorkingTimeTypeDay().mealTicketTime;	//6 ore
-		if(mealTicketTime == 0){
+		WorkingTimeTypeDay wttd = getWorkingTimeTypeDay();
+		
+		
+		//se mealTicketTime è zero significa che il dipendente nel giorno non ha diritto al calcolo del buono pasto
+		if( ! wttd.mealTicketEnabled() ) {
+			
 			setIsTickeAvailable(false);
 			return workTime + justifiedTimeAtWork;
 		}
-			
 		
+		int mealTicketTime = wttd.mealTicketTime;					//6 ore
+		int breakTicketTime = wttd.breakTicketTime;					//30 minuti
+		
+		this.stampModificationType = null;
 		List<PairStamping> gapLunchPairs = getGapLunchPairs(validPairs);
 		
 		//ha timbrato per il pranzo ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -779,8 +784,8 @@ public class PersonDay extends Model {
 	 * @return 
 	 */
 	private boolean isTicketAvailableForWorkingTime(){
-		WorkingTimeType wtt = person.getWorkingTimeType(date);
-		if(wtt.mealTicketEnabled)
+		
+		if( this.getWorkingTimeTypeDay().mealTicketEnabled() )
 		{
 			return true;
 		}
