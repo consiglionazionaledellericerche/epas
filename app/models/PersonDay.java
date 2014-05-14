@@ -1073,6 +1073,7 @@ public class PersonDay extends Model {
 		int pairId;	//for hover template
 		public Stamping in;
 		public Stamping out;
+
 		int timeInPair = 0;
 
 		PairStamping(Stamping in, Stamping out)
