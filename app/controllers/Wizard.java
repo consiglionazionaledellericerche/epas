@@ -64,7 +64,7 @@ public class Wizard extends Controller {
 	
 	public static List<WizardStep> createSteps() {
 		return ImmutableList
-				.of(WizardStep.of("Nuova installazione", "firstChoice",0),
+				.of(WizardStep.of("Cambio Password admin", "changeAdminPsw",0),
 					WizardStep.of("Nuovo admin", "setAdmin",1),
 					WizardStep.of("Nuovo ufficio", "setOffice",2),
 					WizardStep.of("Configurazione Giorno Patrono", "setPatron",3),
@@ -132,18 +132,31 @@ public class Wizard extends Controller {
     }
 
     /**
-     * STEP 1 "Scelta import o manuale"
+     * STEP 1 "Cambio password admin"
      */
-    public static void firstChoice() {
+
+    public static void changeAdminPsw(
+    		@Required String adminPassword,
+    		@Required @Equals("adminPassword") String adminPasswordRetype){
+    	
+    	if (validation.hasErrors()){
+    	    params.flash(); 
+    	    validation.keep();
+    		wizard(0);
+    	}
+    	
     	List<WizardStep> steps = Cache.get(STEPS_KEY, List.class);
+    	Properties properties = Cache.get(PROPERTIES_KEY, Properties.class);
     	
     	if(steps != null){
-        	steps.get(0).complete();
-        	Cache.replace(STEPS_KEY, steps);
+    		properties.setProperty("Nuova Password Admin",adminPassword);
 
+    		steps.get(0).complete();
+    		Cache.safeSet(STEPS_KEY, steps, "10mn");
+    		Cache.safeSet(PROPERTIES_KEY, properties, "10mn");
     	}
-    	wizard(1);
-    
+    	
+       	wizard(1);
     }
     
     /**
@@ -245,8 +258,7 @@ public class Wizard extends Controller {
     		@Required String initUseStart,
     		@Required @CheckWith (StringIsTime.class) String lunchPauseStart, 
     		@Required @CheckWith (StringIsTime.class) String lunchPauseStop,
-    		@Required boolean webStampingAllowed
-    		){
+    		@Required boolean webStampingAllowed){
     	
     	if (validation.hasErrors()){
     	    params.flash(); 
@@ -326,64 +338,63 @@ public class Wizard extends Controller {
 		catch(IOException f){
 			Logger.error("Impossibile caricare il file properties.conf per la procedura di Wizard");	
 		}
+		//Admin password set
+		User admin = User.find("byUsername", "admin").first();
+		admin.password = Codec.hexMD5(properties.getProperty("Nuova Password Admin"));
+		admin.save();
+		
 		// setOffice
-		Office office = Office.findById(1L);
+		Office office = Office.findById(1L); 
 		if(office == null){
 			office = new Office();
 		}
-		office.name = properties.getProperty("institute_name");
+		
+		office.name= properties.getProperty("institute_name");
 		office.code = Integer.parseInt(properties.getProperty("seat_code"));
 		office.save();
 		
 		// setAdmin
-		String username = properties.getProperty("Nome Amministratore");
-		User admin = User.find("byUsername", username).first();
+		User newAdmin = new User();
+		newAdmin.username = properties.getProperty("Nome Amministratore");
+		newAdmin.password = Codec.hexMD5(properties.getProperty("Password Amministratore"));
+		newAdmin.save();
 		
-		if(admin == null){
-			admin = new User();
-			admin.username = username;
-		}
+		List<String> descPermissions = new ArrayList<String>();
+		descPermissions.add("insertAndUpdateOffices");
+		descPermissions.add("viewPersonList");
+		descPermissions.add("deletePerson");
+//		descPermissions.add("insertAndUpdateStamping");
+		descPermissions.add("insertAndUpdatePerson");
+//		descPermissions.add("insertAndUpdateWorkingTime");
+//		descPermissions.add("insertAndUpdateAbsence");
+		descPermissions.add("insertAndUpdateConfiguration");
+		descPermissions.add("insertAndUpdatePassword");
+		descPermissions.add("insertAndUpdateAdministrator");
+//		descPermissions.add("insertAndUpdateCompetences");
+//		descPermissions.add("insertAndUpdateVacations");
+//		descPermissions.add("viewPersonalSituation");
+//		descPermissions.add("uploadSituation");
 		
-		admin.password = Codec.hexMD5(properties.getProperty("Password Amministratore"));
-		admin.save();
+		List<Permission> permissions = Permission.find("description in (?1)", descPermissions).fetch();
 		
-		List<String> permessi = new ArrayList<String>();
-		permessi.add("insertAndUpdateOffices");
-		permessi.add("viewPersonList");
-		permessi.add("deletePerson");
-		permessi.add("insertAndUpdateStamping");
-		permessi.add("insertAndUpdatePerson");
-		permessi.add("insertAndUpdateWorkingTime");
-		permessi.add("insertAndUpdateAbsence");
-		permessi.add("insertAndUpdateConfiguration");
-		permessi.add("insertAndUpdatePassword");
-		permessi.add("insertAndUpdateAdministrator");
-		permessi.add("insertAndUpdateCompetences");
-		permessi.add("insertAndUpdateVacations");
-		permessi.add("viewPersonalSituation");
-		permessi.add("uploadSituation");
-		
-		List<Permission> permissions = Permission.find("description in (?1)", permessi).fetch();
-		
-		List<UsersPermissionsOffices> userPermissionOffices = new ArrayList<UsersPermissionsOffices>(); 
+		List<UsersPermissionsOffices> usersPermissionOffices = new ArrayList<UsersPermissionsOffices>(); 
 		
 		for (Permission p: permissions){
 			UsersPermissionsOffices upo = new UsersPermissionsOffices();
 			upo.office = office;
-			upo.user = admin;
+			upo.user = newAdmin;
 			upo.permission = p;
 			upo.save();
-			userPermissionOffices.add(upo);
+			usersPermissionOffices.add(upo);
 		}
 		
-		admin.userPermissionOffices = userPermissionOffices;
-		admin.save();
+		newAdmin.userPermissionOffices = usersPermissionOffices;
+		newAdmin.save();
 		
 		// setGenConf
 		List<String> cgf = ConfigurationFields.getConfGeneralFields();
 		
-		List<ConfGeneral> confGeneral = ConfGeneral.find(
-				"Select cg from ConfGeneral cg where cg.office = ?", office).fetch();
+		List<ConfGeneral> confGeneral = ConfGeneral.find("office_id", office).fetch();
 		
 		for(String field : cgf){
 			boolean fieldIsPresent = false;
@@ -405,7 +416,6 @@ public class Wizard extends Controller {
 			}
 		}	
 				
-		
 		// setConfYear
 		List<String> cyf = ConfigurationFields.getConfYearFields();
 		

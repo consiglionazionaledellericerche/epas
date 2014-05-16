@@ -20,7 +20,7 @@ form{
     <div class="control-group #{if field.error}error#{/if}">         
             <label  class="control-label" for="${field.id}">Inserire un nome utente</label>
      <div class="controls">
-            <input class="input-large" required="" placeholder="Username" id="${field.id}" type="text" name="${field.name}" value="${user}">
+            <input class="input-large" placeholder="Username" id="${field.id}" type="text" name="${field.name}" value="${user}">
             <p class="help-block">${field.error}</p>
       </div>
    </div>
@@ -30,7 +30,7 @@ form{
     <div class="control-group #{if field.error}error#{/if}">         
             <label  class="control-label" for="${field.id}">Inserire la password</label>
      <div class="controls">
-            <input  class="input-large" required="" placeholder="Password" id="${field.id}" type="password" name="${field.name}" value="${password}">
+            <input  class="input-large" placeholder="Password" id="${field.id}" type="password" name="${field.name}" value="${password}">
             <p class="help-block">${field.error}</p>
       </div>
    </div>
@@ -40,7 +40,7 @@ form{
     <div class="control-group #{if field.error}error#{/if}">         
             <label  class="control-label" for="${field.id}">Reinserire la password</label>
      <div class="controls">
-            <input  class="input-large" required="" placeholder="Retype Password" id="${field.id}" type="password" name="${field.name}" value="${password}" />
+            <input  class="input-large" placeholder="Retype Password" id="${field.id}" type="password" name="${field.name}" value="${password}" />
             <p class="help-block">${field.error}</p>
       </div>
    </div>
