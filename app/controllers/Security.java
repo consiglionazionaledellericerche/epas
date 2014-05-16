@@ -162,14 +162,16 @@ public class Security extends Secure.Security {
 	}
 	
 	public static List<Office> getOfficeAllowed()
-	{
-		User userLogged = getUser();
-		if(userLogged.username.equals("admin"))
-			return Office.findAll();
-		if(userLogged.person!=null)
-			return userLogged.person.getOfficeAllowed();
-		else
-			return null;
+	{	
+		
+//		User userLogged = getUser();
+//		if(userLogged.person == null)
+//			return Office.findAll();
+//		if(userLogged.person != null)
+//			return userLogged.person.getOfficeAllowed();
+//		else
+//			return null;
+		return getUser().getOfficeAllowed();
 	}
 	
 	/**

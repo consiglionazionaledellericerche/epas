@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.List;
+
 import models.CompetenceCode;
 import models.ConfGeneral;
 import models.Configuration;
@@ -6,6 +9,8 @@ import models.Permission;
 import models.Qualification;
 import models.StampModificationType;
 import models.StampType;
+import models.User;
+import models.UsersPermissionsOffices;
 import models.VacationCode;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
@@ -14,6 +19,7 @@ import play.Logger;
 import play.Play;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
+import play.libs.Codec;
 import play.test.Fixtures;
 
 
@@ -88,6 +94,52 @@ public class Bootstrap extends Job {
 				office.name = instituteName;
 				office.save();
 				Logger.info("Creato ufficio di default con nome %s e codice %s", instituteName, seatCode);
+			}
+			
+			if(User.count() == 0){
+				User admin = new User();
+				admin.username = "admin";
+				admin.password = Codec.hexMD5("personnelEpasNewVersion");
+				admin.save();
+				
+				List<String> descPermissions = new ArrayList<String>();
+				descPermissions.add("insertAndUpdateOffices");
+				descPermissions.add("viewPersonList");
+				descPermissions.add("deletePerson");
+//				descPermissions.add("insertAndUpdateStamping");
+				descPermissions.add("insertAndUpdatePerson");
+//				descPermissions.add("insertAndUpdateWorkingTime");
+//				descPermissions.add("insertAndUpdateAbsence");
+				descPermissions.add("insertAndUpdateConfiguration");
+				descPermissions.add("insertAndUpdatePassword");
+				descPermissions.add("insertAndUpdateAdministrator");
+//				descPermissions.add("insertAndUpdateCompetences");
+//				descPermissions.add("insertAndUpdateVacations");
+//				descPermissions.add("viewPersonalSituation");
+//				descPermissions.add("uploadSituation");
+				
+				List<Permission> permissions = Permission.find("description in (?1)", descPermissions).fetch();
+				
+				List<UsersPermissionsOffices> usersPermissionOffices = new ArrayList<UsersPermissionsOffices>(); 
+				
+				Office office = Office.findById(1L);
+				if(office == null){
+					office = new Office();
+					office.save();
+				}
+				
+				for (Permission p: permissions){
+					UsersPermissionsOffices upo = new UsersPermissionsOffices();
+					upo.office = office;
+					upo.user = admin;
+					upo.permission = p;
+					upo.save();
+					usersPermissionOffices.add(upo);
+				}
+				
+				admin.userPermissionOffices = usersPermissionOffices;
+				admin.save();
+		
 			}
 			
 //			Person admin = Person.find("byUsername", "admin").first();

@@ -39,7 +39,7 @@ webStampingAllowed = properties.getProperty("web_stamping_allowed");
     <div class="control-group #{if field.error}error#{/if}">         
             <label  class="control-label" for="${field.id}">Inizio pausa pranzo</label>
      <div class="controls">
-            <input placeholder="hh:mm" class="input-large" required="" id="${field.id}" type="text" name="${field.name}" value="${lunchPauseStartHour}#{if lunchPauseStartHour}:#{/if}${lunchPauseStartMinute}">
+            <input placeholder="hh:mm" class="input-large" id="${field.id}" type="text" name="${field.name}" value="${lunchPauseStartHour}#{if lunchPauseStartHour}:#{/if}${lunchPauseStartMinute}">
             <span class="help-block">${field.error}</span>
       </div>
    </div>
@@ -49,7 +49,7 @@ webStampingAllowed = properties.getProperty("web_stamping_allowed");
     <div class="control-group #{if field.error}error#{/if}">         
             <label  class="control-label" for="${field.id}">Fine pausa pranzo</label>
      <div class="controls">
-            <input placeholder="hh:mm" class="input-large" required="" id="${field.id}" type="text" name="${field.name}" value="${lunchPauseEndHour}#{if lunchPauseEndHour}:#{/if}${lunchPauseEndMinute}">
+            <input placeholder="hh:mm" class="input-large" id="${field.id}" type="text" name="${field.name}" value="${lunchPauseEndHour}#{if lunchPauseEndHour}:#{/if}${lunchPauseEndMinute}">
             <span class="help-block">${field.error}</span>
       </div>
    </div>

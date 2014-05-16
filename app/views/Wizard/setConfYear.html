@@ -69,7 +69,7 @@ hourMaxToCalculateWorkTime = properties.getProperty("hour_max_to_calculate_workt
     <div class="control-group #{if field.error}error#{/if}">         
             <label  class="control-label" for="${field.id}">Numero massimo giorni di recupero lv 1-3</label>
      <div class="controls">
-            <input placeholder="Giorni di recupero massimi" class="input-large" required="" id="${field.id}" type="text" name="${field.name}" value="${maxRecoveryDaysOneThree}">
+            <input placeholder="Giorni di recupero massimi" class="input-large" id="${field.id}" type="text" name="${field.name}" value="${maxRecoveryDaysOneThree}">
             <span class="help-block">${field.error}</span>
       </div>
    </div>
@@ -101,7 +101,7 @@ hourMaxToCalculateWorkTime = properties.getProperty("hour_max_to_calculate_workt
     <div class="control-group #{if field.error}error#{/if}">         
             <label  class="control-label" for="${field.id}">Numero massimo giorni di recupero lv 4-9</label>
      <div class="controls">
-            <input placeholder="Giorni di recupero massimi" class="input-large" required="" id="${field.id}" type="text" name="${field.name}" value="${maxRecoveryDaysFourNine}">
+            <input placeholder="Giorni di recupero massimi" class="input-large" id="${field.id}" type="text" name="${field.name}" value="${maxRecoveryDaysFourNine}">
             <span class="help-block">${field.error}</span>
       </div>
    </div>
@@ -111,7 +111,7 @@ hourMaxToCalculateWorkTime = properties.getProperty("hour_max_to_calculate_workt
     <div class="control-group #{if field.error}error#{/if}">         
             <label  class="control-label" for="${field.id}">Soglia oraria per il calcolo delle timbrature del giorno</label>
      <div class="controls">
-            <input placeholder="hh" class="input-mini" required="" id="${field.id}" type="text" name="${field.name}" value="${hourMaxToCalculateWorkTime}">
+            <input placeholder="hh" class="input-mini" id="${field.id}" type="text" name="${field.name}" value="${hourMaxToCalculateWorkTime}">
             <span class="help-block">${field.error}</span>
       </div>
    </div>
