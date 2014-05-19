@@ -1,5 +1,8 @@
+import java.util.List;
+
 import models.CompetenceCode;
 import models.ConfGeneral;
+import models.ConfYear;
 import models.Configuration;
 import models.Office;
 import models.Permission;
@@ -97,6 +100,21 @@ public class Bootstrap extends Job {
 //				
 //			}
 			
+			//Fix Creazione configurazione 2012 se non esiste
+			List<ConfYear> confYearList = ConfYear.find("byYear", 2012).fetch();
+			if(confYearList.size() == 0) {
+				
+				List<ConfYear> confYear2013 = ConfYear.find("byYear", 2013).fetch();
+				for(ConfYear confYear : confYear2013) {
+					ConfYear newConf2012 = new ConfYear();
+					newConf2012.field = confYear.field;
+					newConf2012.fieldValue = confYear.fieldValue;
+					newConf2012.office = confYear.office;
+					newConf2012.year = 2012;
+					newConf2012.save();
+				}
+				
+			}
 			
 
 	

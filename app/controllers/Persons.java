@@ -529,7 +529,7 @@ public class Persons extends Controller {
 		contract.updateContractWorkingTimeType();
 		
 		//Ricalcolo valori
-		contract.recomputeContract();
+		contract.recomputeContract(null);
 		
 		contract.save();
 		
@@ -678,7 +678,7 @@ public class Persons extends Controller {
 		cwtt.save();
 		
 		//Ricalcolo valori
-		cwtt.contract.recomputeContract();
+		cwtt.contract.recomputeContract(cwtt.beginDate);
 		
 		flash.success("Cambiato correttamente tipo orario per il periodo a %s.", cwtt.workingTimeType.description);
 		Persons.edit(cwtt.contract.person.id);

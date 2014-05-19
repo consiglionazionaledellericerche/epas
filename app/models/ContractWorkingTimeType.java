@@ -1,5 +1,7 @@
 package models;
 
+import it.cnr.iit.epas.DateInterval;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -19,7 +21,7 @@ import play.db.jpa.Model;
  */
 @Entity
 @Table(name = "contracts_working_time_types")
-public class ContractWorkingTimeType extends Model {
+public class ContractWorkingTimeType extends Model implements Comparable<ContractWorkingTimeType> {
 
 	@Required
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -38,5 +40,23 @@ public class ContractWorkingTimeType extends Model {
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="end_date")
 	public LocalDate endDate;
+	
+	/**
+	 * Comparator ContractWorkingTimeType
+	 */
+	public int compareTo(ContractWorkingTimeType compareCwtt)
+	{
+		if (beginDate.isBefore(compareCwtt.beginDate))
+			return -1;
+		else if (beginDate.isAfter(compareCwtt.beginDate))
+			return 1;
+		else
+			return 0; 
+	}
+	
+	public DateInterval getCwttDateInterval() {
+		
+		return new DateInterval(beginDate, endDate);
+	}
 	
 }
