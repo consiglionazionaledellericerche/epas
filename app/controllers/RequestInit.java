@@ -37,6 +37,11 @@ public class RequestInit extends Controller {
 
 			return DateUtility.getName(month);
 		}
+		
+		public boolean checkTemplate(String profile) {
+			
+			return false;
+		}
 	}
 
 	@Before
@@ -51,8 +56,7 @@ public class RequestInit extends Controller {
 	@Before 
 	public static void injectMenu() { 
 
-		session.put("actionSelected", 
-				computeActionSelected(Http.Request.current().action));
+		session.put("actionSelected", computeActionSelected(Http.Request.current().action));
 
 		// year init /////////////////////////////////////////////////////////////////
 		Integer year;
@@ -489,6 +493,17 @@ public class RequestInit extends Controller {
 				return "UploadSituation.processAttestati";
 			}
 		}
+		
+		if(action.startsWith("WorkingTimes.")) {
+			
+			if(action.equals("WorkingTimes.manageWorkingTime")) {
+				
+				renderArgs.put("dropDown", "dropDown3");
+				return "WorkingTimes.manageWorkingTime";
+			}
+		}
+		
+		
 		
 		return session.get("actionSelected");
 	}

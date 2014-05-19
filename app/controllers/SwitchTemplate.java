@@ -338,6 +338,13 @@ private static void executeAction(String action) {
 			Absences.absenceInPeriod(personId);
 		}
 		
+		if(action.equals("WorkingTimes.manageWorkingTime")) {
+			
+			WorkingTimes.manageWorkingTime();
+		}
+		
+		
+		
 				
 		
 		

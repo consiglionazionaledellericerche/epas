@@ -73,6 +73,8 @@ public class Security extends Secure.Security {
 			return false;
 		}
 		
+		
+		
 		//Se personId è una persona reale (1 admin, 0 tutti) eseguo il controllo
 		Long personId = Long.valueOf(session.get("personSelected"));
 		if(params.get("personId") != null)
@@ -88,12 +90,13 @@ public class Security extends Secure.Security {
 			
 		Logger.trace("checking permission %s for user %s", profile, username);
 
-		//Set<UsersPermissionsOffices> userPermissionsOffices = getUserAllPermissions(username);
+		
 		List<Permission> userPermissionsOffices = getUserAllPermissions(username);
-//		Logger.debug("I permessi per %s sono %d", username, userPermissionsOffices.size());
+
 		for (Permission p : userPermissionsOffices) {
-			//Logger.debug("Permesso: %s", p.permission.description);
+
 			if (p.description.equals(profile)) {
+				
 				return true;
 			}
 		}
@@ -137,7 +140,7 @@ public class Security extends Secure.Security {
 	private static List<Permission> getUserAllPermissions(String username) {
 		User user = getUser(username);
 		if (user == null) {
-			//return ImmutableSet.of();
+
 			return null;
 		}
 		//Set<UsersPermissionsOffices> permissions = Cache.get(PERMISSION_CACHE_PREFIX + username, Set.class);
