@@ -96,6 +96,23 @@ public class User extends Model{
 //		return setPermissions;
 //	}
 	
+	/**
+	 * true se l'user ha almeno un permesso di amministratore per office
+	 * @return
+	 */
+	public boolean isOfficeGeneralAdministrator(Office office) {
+
+		for(UsersPermissionsOffices upo: this.userPermissionOffices) {
+			
+			if(upo.office.equals(office) && ! upo.permission.description.equals(Security.VIEW_PERSONAL_SITUATION) ) {
+				
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
 	public boolean isViewPersonAvailable(){
 		for(UsersPermissionsOffices p : this.userPermissionOffices){
 			if(p.permission.description.equals(Security.VIEW_PERSON_LIST))

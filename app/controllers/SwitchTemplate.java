@@ -342,11 +342,7 @@ private static void executeAction(String action) {
 			
 			WorkingTimes.manageWorkingTime();
 		}
-		
-		
-		
-				
-		
+
 		
 	}
 
