@@ -3,4 +3,23 @@
 
 <div class="container-fluid">
 	<p class="text-danger">Controllo in fase di implementazione</p>
+	
+	#{form @WorkingTimes.executeChangeWorkingTimeTypeToAll() }
+        <input type="hidden" name="wttId" value="${wtt.id}" />
+        #{select 'wttId1'}
+          
+          #{list items:wttList, as:'wttItem'}
+	        #{option wttItem.id}${wttItem.description}#{/option}
+		  #{/list}
+		  
+	    #{/select}
+	    <br>
+	    Inizio<input name="dateFrom" type="text" data-datepicker data-date-format="yyyy-mm-dd" />
+	    <br>
+	    Fine<input name="dateTo" type="text" data-datepicker data-date-format="yyyy-mm-dd" />
+	    <br>
+	    <button type="submit" class="btn btn-default btn-xs">Cambia</button>
+	
+	#{/form}
+	
 </div>

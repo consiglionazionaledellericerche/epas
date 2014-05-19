@@ -137,51 +137,17 @@ public class WorkingTimeType extends Model {
 		return contractList;
 	}
 
+	/**
+	 * I contratti attivi che attualmente hanno impostato il WorkingTimeType
+	 * @return
+	 */
 	public List<Contract> getAssociatedActiveContract() {
 		
 		LocalDate today = new LocalDate();
 
 		List<Contract> contractList = new ArrayList<Contract>();
 		
-		/*
-		List<Contract> contractList = Contract.find(
-				"Select distinct c from Contract c "
-						+ "left outer join fetch c.contractWorkingTimeType as cwtt "
-						+ "where cwtt.workingTimeType = ? "
-						
-						//contratto attivo nel periodo
-						+ " and ( "
-						//caso contratto non terminato
-						+ "c.endContract is null and "
-							//contratto a tempo indeterminato che si interseca col periodo 
-							+ "( (c.expireContract is null and c.beginContract <= ? )"
-							+ "or "
-							//contratto a tempo determinato che si interseca col periodo (comanda il campo endContract)
-							+ "(c.expireContract is not null and c.beginContract <= ? and c.expireContract >= ? ) ) "
-						+ "or "
-						//caso contratto terminato che si interseca col periodo		
-						+ "c.endContract is not null and c.beginContract <= ? and c.endContract >= ? "
-						+ ") "
-						, this, today, today, today, today, today).fetch();
-		*/
-		
-		List<Contract> activeContract = Contract.find(
-				"Select c from Contract c "
-										
-						//contratto attivo nel periodo
-						+ " where ( "
-						//caso contratto non terminato
-						+ "c.endContract is null and "
-							//contratto a tempo indeterminato che si interseca col periodo 
-							+ "( (c.expireContract is null and c.beginContract <= ? )"
-							+ "or "
-							//contratto a tempo determinato che si interseca col periodo (comanda il campo endContract)
-							+ "(c.expireContract is not null and c.beginContract <= ? and c.expireContract >= ? ) ) "
-						+ "or "
-						//caso contratto terminato che si interseca col periodo		
-						+ "c.endContract is not null and c.beginContract <= ? and c.endContract >= ? "
-						+ ") "
-						, today, today, today, today, today).fetch();
+		List<Contract> activeContract = Contract.getActiveContractInPeriod(today, today);
 		
 		for(Contract contract : activeContract) {
 			ContractWorkingTimeType current = contract.getContractWorkingTimeType(today);

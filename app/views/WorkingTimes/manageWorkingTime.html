@@ -174,9 +174,41 @@
       </div>
 	</div>
 	</div>
-	
 
 </div>
+
+<div class="container">	
+
+	<div class="well">
+		<p class="text-danger"><strong><em>Importante</em></strong></p>
+		Per motivi di sicurezza e integrità dei dati calcolati in ePAS non viene permessa la modifica diretta dei tipi orario.
+		La procedura corretta per modificare il tipo orario è la seguente:
+		<ul>
+		 <li>Individuare il tipo orario da modificare (es <em>Normale</em>)</li>
+		 <li>Creare un nuovo tipo orario con le modifiche opportune rispetto al tipo orario da modificare (es <em>Normale-mod</em>)</li>
+		 <li>Attraverso la Form <strong>Cambia orario a tutti</strong> impostare la data (anche passata) a partire dalla quale tutti coloro che hanno impostato
+		  il vecchio orario (<em>Normale</em>) vengano migrati al nuovo orario (<em>Normale-mod</em>)</li>
+		 <li>Poichè il software provvederà ad effettuare nuovamente tutti i calcoli inerenti tempo lavorato e situazioni residuali 
+		per ogni contratto attivo interessato dall'operazione a partire dalla data specificata, questa procedura potrebbe richiedere alcuni minuti.</li>
+		</ul>
+		
+		
+		<p><strong class="text-danger"><em>Modifiche per singoli dipendenti</em></strong><br>
+		Nel caso di modifiche del tipo orario riguardanti un numero ristretto di dipendenti si consiglia di utilizzare le procedure messe a disposizione
+		nella sezione amministrativa Lista Persone.
+		</p>
+		<p><strong class="text-danger"><em>Eliminare o disabilitare tipi orario</em></strong><br>
+		Per eliminare un tipo orario è necessario che non sia associato ad alcun contratto presente in ePAS (anche terminato).<br>
+		Per disabilitare un tipo orario è necessario che non sia attualmente associato ad alcun contratto attivo.
+		</p>  
+	</div>
+	
+	
+	
+</div>
+	
+
+
 
 #{include '_myModal_large.html' /}
 #{include '_myModal.html' /}

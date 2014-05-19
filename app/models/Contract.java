@@ -351,6 +351,9 @@ public class Contract extends Model {
 			
 	}
 	
+	/**
+	 * Computa da zero i riepiloghi annuali del contratto. Cancella i riepiloghi precedenti sovrascrivendoli con i nuovi calcoli.
+	 */
 	public void buildContractYearRecap()
 	{
 		Logger.info("PopulateContractYearRecap %s %s contract id = %s", this.person.name, this.person.surname, this.id);
@@ -529,22 +532,32 @@ public class Contract extends Model {
 	}
 	
 	/**
-	 * Fix definitivo per l'intero contratto. (ricalca il flusso di fixPersonSituation)
+	
+	 */
+	
+	/**
+	 * Fix definitivo da dateFrom a oggi per l'intero contratto. (ricalca il flusso di fixPersonSituation).
+	 *  
 	 * 1) CheckHistoryError 
 	 * 2) Ricalcolo tempi lavoro
-	 * 3) Ricalcolo riepiloghi annuali
+	 * 3) Ricalcolo riepiloghi annuali 
+	 * @param dateFrom giorno a partire dal quale effettuare il ricalcolo. Se null ricalcola dall'inizio del contratto.
 	 */
-	public void recomputeContract() {
+	public void recomputeContract(LocalDate dateFrom) {
 		
+		// (0) Definisco l'intervallo su cui operare
 		String dateInitUse = ConfGeneral.getFieldValue("init_use_program", person.office);
 		LocalDate initUse = new LocalDate(dateInitUse);
-		
-		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
 		LocalDate date = this.beginContract;
 		if(date.isBefore(initUse))
 			date = initUse;
 		DateInterval contractInterval = this.getContractDatabaseDateInterval();
-		
+		if( dateFrom != null && contractInterval.getBegin().isBefore(dateFrom)) {
+			contractInterval = new DateInterval(dateFrom, contractInterval.getEnd());
+		}
+
+		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
+		Logger.info("CheckPersonDay");
 		LocalDate today = new LocalDate();
 		while(true) {
 			
@@ -555,6 +568,8 @@ public class Contract extends Model {
 			if(!DateUtility.isDateIntoInterval(date, contractInterval))
 				break;
 		}
+		
+		Logger.info("PopulatePersonDay");
 		
 		// (2) Ricalcolo i valori dei person day aggregandoli per mese
 		LocalDate actualMonth = contractInterval.getBegin().withDayOfMonth(1);
@@ -576,12 +591,41 @@ public class Contract extends Model {
 			actualMonth = actualMonth.plusMonths(1);
 		}
 
+		Logger.info("BuildContractYearRecap");
 		//(3) Ricalcolo dei riepiloghi annuali
-		List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ?", this.person).fetch();
-		for(Contract contract : contractList) {
-			
-			contract.buildContractYearRecap();
-		}
+		this.buildContractYearRecap();
+		
+		
+	}
+	
+	/**
+	 * La lista con tutti i contratti attivi nel periodo selezionato.
+	 * @return
+	 */
+	public static List<Contract> getActiveContractInPeriod(LocalDate begin, LocalDate end) {
+		
+		//TODO queryDSL
+		
+		List<Contract> activeContract = Contract.find(
+				"Select c from Contract c "
+										
+						//contratto attivo nel periodo
+						+ " where ( "
+						//caso contratto non terminato
+						+ "c.endContract is null and "
+							//contratto a tempo indeterminato che si interseca col periodo 
+							+ "( (c.expireContract is null and c.beginContract <= ? )"
+							+ "or "
+							//contratto a tempo determinato che si interseca col periodo (comanda il campo endContract)
+							+ "(c.expireContract is not null and c.beginContract <= ? and c.expireContract >= ? ) ) "
+						+ "or "
+						//caso contratto terminato che si interseca col periodo		
+						+ "c.endContract is not null and c.beginContract <= ? and c.endContract >= ? "
+						+ ") "
+						, end, end, begin, end, begin).fetch();
+		
+		return activeContract;
+		
 		
 	}
 		
