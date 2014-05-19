@@ -80,6 +80,13 @@ public class User extends Model{
 		return permissions;
 	}
 	
+	public List<Office> getOfficeAllowed(){
+		
+		return Office.find("select distinct o from Office o join "
+				+ "o.userPermissionOffices as upo where upo.user = ?",this).fetch();
+		
+	}
+	
 //	public Set<UsersPermissionsOffices> getAllPermissions(){
 //		Set<UsersPermissionsOffices> setPermissions = new HashSet<UsersPermissionsOffices>();
 //		List<UsersPermissionsOffices> permissions = UsersPermissionsOffices.find("Select upo from UsersPermissionsOffices upo where " +
