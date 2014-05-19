@@ -3,6 +3,13 @@ package controllers;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.joda.time.LocalDate;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
+
+import dao.PersonDao;
+import models.Office;
 import models.Permission;
 import models.Person;
 import models.User;
@@ -18,25 +25,22 @@ public class Administrators extends Controller {
 	private static final String USERNAME = "username";
 
 	@Check(Security.INSERT_AND_UPDATE_ADMINISTRATOR)
-	public static void list(){
-		/**
-		 * TODO: cambiare i permessi in relazione al fatto che l'utente loggato sia effettivamente attivo nella data in cui visita
-		 * la pagina di lista amministratori
-		 */
-		List<Person> administratorList = Person.find("Select p from Person p where p.name <> ? order by p.surname", "Admin").fetch();
-		List<User> userList = new ArrayList<User>();
-		for(Person person : administratorList)
-		{
-			userList.add(person.user);
-		}
+	public static void list(String name) {
+		
 
-		render(userList);
+		List<Person> personList = PersonDao.list(Optional.fromNullable(name), 
+				Sets.newHashSet(Security.getOfficeAllowed()), false, LocalDate.now(), 
+				LocalDate.now()).list();
+		
+		List<Office> officeList = Office.findAll();
+		
+		render(personList, officeList);
 	}
 
 	
 	@Check(Security.INSERT_AND_UPDATE_ADMINISTRATOR)
 	public static void discard(){
-		Administrators.list();
+		Administrators.list(null);
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_ADMINISTRATOR)
@@ -300,7 +304,7 @@ public class Administrators extends Controller {
 		}
 		user.save();
 		flash.success(String.format("Aggiornati con successo i permessi per %s %s", user.person.name, user.person.surname));
-		Administrators.list();
+		Administrators.list(null);
 		
 	}
 	
