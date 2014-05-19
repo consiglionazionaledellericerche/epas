@@ -1,6 +1,7 @@
 package controllers;
 
 import it.cnr.iit.epas.DateUtility;
+import models.Office;
 import models.User;
 
 import org.joda.time.LocalDate;
@@ -21,11 +22,16 @@ public class Application extends Controller {
 	
     public static void index() {
     	
+		Office office = Office.findById(1L);
+		if(office.code.intValue() == 0){
+			Wizard.wizard(0);
+		}
+    	
     	if(Security.getUser().username.equals("epas.clocks")){
     		Clocks.show();
     		return;
     	}
-    	if(Security.getUser().username.equals("admin")){
+    	if(Security.getUser().person == null){
     		Persons.list(null);
     		return;
     	}
