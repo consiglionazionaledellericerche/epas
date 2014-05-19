@@ -50,7 +50,14 @@
         /* Negative indent footer by it's height */
         margin: 0 auto -60px;
       }
-
+      .navbar-fixed-top{
+      	position:static;
+      }
+      
+      #page-content{
+      padding-top: 20px;
+      }
+		
       /* Set the fixed height of the footer here */
       #push,
       #footer {
@@ -75,12 +82,7 @@
           padding-left: 5px;
           padding-right: 5px;
         }
-      }
-      
-      @media screen{
-        #page-content{ padding-top: 125px; }
-      }
-      
+      }      
 
       /* Custom page CSS
       -------------------------------------------------- */
@@ -207,7 +209,7 @@
 
     <!-- Part 2: Sticked Footer -->
     <div id="footer">
-      <div class="container" style="text-align: center;"">
+      <div class="container" style="text-align: center;">
         <p class="muted credit">Created with <a href="http://www.playframework.org">play framework</a> and really inspired from the "orologio" application developed by Pasquale Lazzareschi</p>
       </div>
     </div>
