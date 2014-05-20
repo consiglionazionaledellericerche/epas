@@ -178,14 +178,23 @@ public class PersonDay extends Model {
 	 * "presente" a lavoro
 	 */
 	public boolean isEnoughHourlyAbsences(){
-		for(Absence abs : absences){
-			if(abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FourHours) ||
-					abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FiveHours) ||
-					abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SixHours) ||
-					abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SevenHours))
-				return true;
+		if(this.person.qualification.qualification > 3){
+			for(Absence abs : absences){
+				if(abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FourHours) ||
+						abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FiveHours) ||
+						abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SixHours) ||
+						abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SevenHours))
+					return true;
+			}
+			return false;
 		}
-		return false;
+		else{
+			if(absences.size() >= 1)
+				return true;
+			else
+				return false;
+		}
+		
 	}
 	
 	/**
@@ -702,6 +711,7 @@ public class PersonDay extends Model {
 				PersonDayInTrouble.insertPersonDayInTrouble(this, "no assenze giornaliere e no timbrature");
 				return;
 			}
+			
 			//caso no festa, no assenze, timbrature disaccoppiate
 			if(!this.isAllDayAbsences() && !this.isHoliday())
 			{

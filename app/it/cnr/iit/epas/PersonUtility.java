@@ -981,7 +981,7 @@ public class PersonUtility {
 		List<LocalDate> dateTroubleStampingList = new ArrayList<LocalDate>();
 
 		for(PersonDayInTrouble pd : pdList){
-			if(pd.cause.contains(cause))
+			if(pd.cause.contains(cause) && !pd.personDay.isHoliday())
 				dateTroubleStampingList.add(pd.personDay.date);
 		}
 		if(p.surname.equals("Conti") && p.name.equals("Marco"))
@@ -1171,7 +1171,7 @@ public class PersonUtility {
 					"Il team di ePAS";
 		}
 		
-		Logger.info("Messaggio recovery password spedito è: %s", message);
+		//Logger.info("Messaggio recovery password spedito è: %s", message);
 
 		simpleEmail.setMsg(message);
 		Mail.send(simpleEmail);
