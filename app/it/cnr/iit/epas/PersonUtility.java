@@ -954,7 +954,7 @@ public class PersonUtility {
 
 				for(Person p : personList){
 					Logger.debug("Chiamato controllo sul giorni %s %s", begin, end);
-					checkPersonDayForSendingEmail(p, begin, end);
+					checkPersonDayForSendingEmail(p, begin, end, "timbratura");
 
 				}
 				JPAPlugin.closeTx(false);
@@ -974,15 +974,15 @@ public class PersonUtility {
 	 * @param end
 	 * @throws EmailException
 	 */
-	private static void checkPersonDayForSendingEmail(Person p, LocalDate begin, LocalDate end) throws EmailException{
+	private static void checkPersonDayForSendingEmail(Person p, LocalDate begin, LocalDate end, String cause) throws EmailException{
 		List<PersonDayInTrouble> pdList = PersonDayInTrouble.find("Select pd from PersonDayInTrouble pd where pd.personDay.person = ? " +
 				"and pd.personDay.date between ? and ? and pd.fixed = ?", p, begin, end, false).fetch();
 
-		List<LocalDate> dateList = new ArrayList<LocalDate>();
+		List<LocalDate> dateTroubleStampingList = new ArrayList<LocalDate>();
 
 		for(PersonDayInTrouble pd : pdList){
-			if(pd.cause.contains("timbratura"))
-				dateList.add(pd.personDay.date);
+			if(pd.cause.contains(cause))
+				dateTroubleStampingList.add(pd.personDay.date);
 		}
 		if(p.surname.equals("Conti") && p.name.equals("Marco"))
 			Logger.debug("Trovato Marco Conti, capire cosa fare con la sua situazione...");
@@ -990,7 +990,7 @@ public class PersonUtility {
 			for(StampProfile sp : p.stampProfiles){
 				if(DateUtility.isDateIntoInterval(begin, new DateInterval(sp.startFrom,sp.endTo))){
 					if(sp.fixedWorkingTime == false){
-						boolean flag = sendEmailToPerson(dateList, p);
+						boolean flag = sendEmailToPerson(dateTroubleStampingList, p, cause);
 						//se ho inviato mail devo andare a settare 'true' i campi emailSent dei personDayInTrouble relativi 
 						if(flag){
 							for(PersonDayInTrouble pd : pdList){
@@ -998,11 +998,53 @@ public class PersonUtility {
 								pd.save();
 							}
 						}
+
 					}
 				}
 			}
 		}
 	}
+	
+	/**
+	 * questo metodo viene invocato nell'expandableJob per controllare ogni due giorni la presenza di giorni in cui, per ogni dipendente,
+	 * non ci siano nè assenze nè timbrature
+	 * @param personId
+	 * @param year
+	 * @param month
+	 * @param userLogged
+	 * @throws EmailException 
+	 */
+	public static void checkNoAbsenceNoStamping(Long personId, int year, int month, User userLogged) throws EmailException{
+		List<Person> personList = new ArrayList<Person>();
+		List<Office> officeAllowed = new ArrayList<Office>();
+		LocalDate begin = null;
+		LocalDate end = null;
+		if(userLogged.person == null)
+			officeAllowed = Office.findAll();
+		else
+			officeAllowed = userLogged.person.getOfficeAllowed();
+		
+		if(personId==-1)
+			personId=null;
+		if(personId==null)
+		{
+			begin = new LocalDate(year, month, 1);
+			end = new LocalDate().minusDays(1);
+			personList = Person.getActivePersonsSpeedyInPeriod(begin, end, officeAllowed, false);	
+		}
+		else
+		{
+			//TODO controllare che personLogged abbia i diritti sulla persona
+			personList.add((Person)Person.findById(personId));
+		}
+		for(Person p : personList){
+			Logger.debug("Chiamato controllo sul giorni %s %s", begin, end);
+			checkPersonDayForSendingEmail(p, begin, end, "no assenze");
+
+		}
+	}
+	
+	
 	/**
 	 * Verifica per la persona (se attiva) che alla data 
 	 * 	(1) in caso di giorno lavorativo il person day esista. 
@@ -1075,7 +1117,7 @@ public class PersonUtility {
 	 * @param date, person
 	 * @throws EmailException 
 	 */
-	private static boolean sendEmailToPerson(List<LocalDate> dateList, Person person) throws EmailException{
+	private static boolean sendEmailToPerson(List<LocalDate> dateList, Person person, String cause) throws EmailException{
 		if(dateList.size() == 0){
 			return false;
 		}
@@ -1112,12 +1154,23 @@ public class PersonUtility {
 			incipit = "Nel giorno: ";	
 
 		simpleEmail.setSubject("ePas Controllo timbrature");
-		String message = "Gentile " +person.name+" "+person.surname+ 
-				"\r\n" + incipit+date+ " il sistema ePAS ha rilevato un caso di timbratura disaccoppiata. \r\n " +
-				"La preghiamo di contattare l'ufficio del personale per regolarizzare la sua posizione. \r\n" +
-				"Saluti \r\n"+
-				"Il team di ePAS";
+		String message = "";
+		if(cause.equals("timbratura")){
+			message = "Gentile " +person.name+" "+person.surname+ 
+					"\r\n" + incipit+date+ " il sistema ePAS ha rilevato un caso di timbratura disaccoppiata. \r\n " +
+					"La preghiamo di contattare l'ufficio del personale per regolarizzare la sua posizione. \r\n" +
+					"Saluti \r\n"+
+					"Il team di ePAS";
 
+		}
+		if(cause.equals("no assenze")){
+			message = "Gentile " +person.name+" "+person.surname+ 
+					"\r\n" + incipit+date+ " il sistema ePAS ha rilevato un caso di mancanza di timbrature e di codici di assenza. \r\n " +
+					"La preghiamo di contattare l'ufficio del personale per regolarizzare la sua posizione. \r\n" +
+					"Saluti \r\n"+
+					"Il team di ePAS";
+		}
+		
 		Logger.info("Messaggio recovery password spedito è: %s", message);
 
 		simpleEmail.setMsg(message);

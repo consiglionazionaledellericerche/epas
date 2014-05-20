@@ -11,7 +11,7 @@ import play.jobs.On;
 
 
 @On("0 1 5 * * ?")
-//@On("0 5 13 * * ?")
+//@On("0 30 14 * * ?")
 public class DarkNightJob extends Job{
 	
 	public void doJob(){
