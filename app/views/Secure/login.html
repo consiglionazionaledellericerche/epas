@@ -42,4 +42,15 @@
 	
 	<a href="@{LostPassword.lostPassword()}">Password dimenticata?</a>
 	 
+	#{if play.Play.configuration.getProperty("shib.login").equals("true")}
+		<div class="center" style="margin-top: 1em">
+			<a href="@{ShibbolethSecurity.login()}">
+				<div>
+					<img src="@{'/public/images/shibboleth-logo.jpg'}" />
+				</div>
+				Login via Shibboleth
+			</a>
+		</div>
+	#{/if}
+			 
   </div>
