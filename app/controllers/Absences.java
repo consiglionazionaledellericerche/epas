@@ -1255,6 +1255,8 @@ public class Absences extends Controller{
 				absence.absenceFile = file;
 			}
 			absence.save();
+			Logger.info("Inserita nuova assenza %s per %s %s in data: %s", 
+					absence.absenceType.code, absence.personDay.person.name, absence.personDay.person.surname, absence.personDay.date);
 			pd.absences.add(absence);
 			pd.populatePersonDay();
 			//pd.save();
@@ -1301,6 +1303,7 @@ public class Absences extends Controller{
 					pd.isTicketForcedByAdmin = false;
 					pd.populatePersonDay();
 					deleted++;
+					Logger.info("Rimossa assenza del %s per %s %s", actualDate, person.name, person.surname);
 				}
 			}
 			if(pd.date.isAfter(today) && pd.absences.isEmpty() && pd.absences.isEmpty()){
