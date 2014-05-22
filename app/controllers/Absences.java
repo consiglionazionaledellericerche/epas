@@ -1171,7 +1171,8 @@ public class Absences extends Controller{
 	private static void sendEmail(Person person, CheckAbsenceInsert cai) throws EmailException{
 		MultiPartEmail email = new MultiPartEmail();
 
-		email.addTo(person.contactData.email);
+//		email.addTo(person.contactData.email);
+		email.addTo(person.email);
 		//Da attivare, commentando la riga precedente, per fare i test così da evitare di inviare mail a caso ai dipendenti...
 		//email.addTo("dario.tagliaferri@iit.cnr.it");
 		email.setFrom("epas@iit.cnr.it");

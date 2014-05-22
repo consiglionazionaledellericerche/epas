@@ -15,11 +15,9 @@ import models.AbsenceType;
 import models.AbsenceTypeGroup;
 import models.Competence;
 import models.CompetenceCode;
-import models.ContactData;
 import models.Contract;
 import models.InitializationAbsence;
 import models.InitializationTime;
-import models.Location;
 import models.Permission;
 import models.Person;
 import models.PersonDay;
@@ -391,54 +389,51 @@ public class FromMysqlToPostgres {
 
 	public static void createContactData(ResultSet rs, Person person) throws SQLException {
 		Logger.trace("Inizio a creare il contact data per %s", person);
-		ContactData contactData = new ContactData();
-		contactData.person = person;
+		
+		
 
-		contactData.email = rs.getString("Email");
-		contactData.fax = rs.getString("Fax");
-		contactData.telephone = rs.getString("Telefono");
+		person.email = rs.getString("Email");
+		person.fax = rs.getString("Fax");
+		person.telephone = rs.getString("Telefono");
 
 		/**
 		 * controllo sui valori del campo Telefono e conseguente modifica sul nuovo db
 		 */
-		if(contactData.telephone != null){
-			if(contactData.telephone.length() == 4){
-				contactData.telephone = "+39050315" + contactData.telephone;
+		if(person.telephone != null){
+			if(person.telephone.length() == 4){
+				person.telephone = "+39050315" + person.telephone;
 			}
-			if(contactData.telephone.startsWith("315")){
-				contactData.telephone = "+39050" + contactData.telephone;
+			if(person.telephone.startsWith("315")){
+				person.telephone = "+39050" + person.telephone;
 			}	
-			if(contactData.telephone.startsWith("335")){
-				contactData.mobile = contactData.telephone;
-				contactData.telephone = "No internal number";
+			if(person.telephone.startsWith("335")){
+				person.mobile = person.telephone;
+				person.telephone = "No internal number";
 			}
-			if(contactData.telephone.length() == 2){
-				contactData.telephone = "No internal number";
+			if(person.telephone.length() == 2){
+				person.telephone = "No internal number";
 			}
-			if(contactData.telephone.startsWith("503")){
-				contactData.telephone = "+390" + contactData.telephone;
+			if(person.telephone.startsWith("503")){
+				person.telephone = "+390" + person.telephone;
 			}			
 
 		}
 		else{ 
 			Logger.info("Validazione numero di telefono non avvenuta. No phone number");
-			contactData.telephone = null;		
+			person.telephone = null;		
 		}
-		contactData.save();
+		person.save();
 		Logger.info("Creato %s", person);
 	}
 
 
 	public static void createLocation(ResultSet rs, Person person) throws SQLException{
 		Logger.debug("Inizio a creare la location per %s", person);
-		Location location = new Location();
-		location.person = person;
-
-		location.department = rs.getString("Dipartimento");
-		location.headOffice = rs.getString("Sede");
-		location.room = rs.getString("Stanza");		
-		location.save();
-		Logger.info("Creata %s", location);
+		person.department = rs.getString("Dipartimento");
+		person.headOffice = rs.getString("Sede");
+		person.room = rs.getString("Stanza");		
+		person.save();
+		Logger.info("Creata %s", person);
 	}
 
 

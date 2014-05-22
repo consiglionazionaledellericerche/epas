@@ -32,20 +32,26 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final ListPath<models.CertificatedData, QCertificatedData> certificatedData = this.<models.CertificatedData, QCertificatedData>createList("certificatedData", models.CertificatedData.class, QCertificatedData.class, PathInits.DIRECT2);
 
+    public final StringPath cnr_email = createString("cnr_email");
+
     public final ListPath<models.CompetenceCode, QCompetenceCode> competenceCode = this.<models.CompetenceCode, QCompetenceCode>createList("competenceCode", models.CompetenceCode.class, QCompetenceCode.class, PathInits.DIRECT2);
 
     public final ListPath<models.Competence, QCompetence> competences = this.<models.Competence, QCompetence>createList("competences", models.Competence.class, QCompetence.class, PathInits.DIRECT2);
 
-    public final QContactData contactData;
-
     public final ListPath<models.Contract, QContract> contracts = this.<models.Contract, QContract>createList("contracts", models.Contract.class, QContract.class, PathInits.DIRECT2);
+
+    public final StringPath department = createString("department");
 
     public final StringPath email = createString("email");
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final StringPath fax = createString("fax");
+
     public final ListPath<models.Group, QGroup> groups = this.<models.Group, QGroup>createList("groups", models.Group.class, QGroup.class, PathInits.DIRECT2);
+
+    public final StringPath headOffice = createString("headOffice");
 
     //inherited
     public final NumberPath<Long> id = _super.id;
@@ -54,7 +60,7 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final ListPath<models.InitializationTime, QInitializationTime> initializationTimes = this.<models.InitializationTime, QInitializationTime>createList("initializationTimes", models.InitializationTime.class, QInitializationTime.class, PathInits.DIRECT2);
 
-    public final QLocation location;
+    public final StringPath mobile = createString("mobile");
 
     public final StringPath name = createString("name");
 
@@ -85,9 +91,13 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final QPersonReperibility reperibility;
 
+    public final StringPath room = createString("room");
+
     public final ListPath<models.StampProfile, QStampProfile> stampProfiles = this.<models.StampProfile, QStampProfile>createList("stampProfiles", models.StampProfile.class, QStampProfile.class, PathInits.DIRECT2);
 
     public final StringPath surname = createString("surname");
+
+    public final StringPath telephone = createString("telephone");
 
     public final QUser user;
 
@@ -115,8 +125,6 @@ public class QPerson extends EntityPathBase<Person> {
 
     public QPerson(Class<? extends Person> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.contactData = inits.isInitialized("contactData") ? new QContactData(forProperty("contactData"), inits.get("contactData")) : null;
-        this.location = inits.isInitialized("location") ? new QLocation(forProperty("location"), inits.get("location")) : null;
         this.office = inits.isInitialized("office") ? new QOffice(forProperty("office")) : null;
         this.personHourForOvertime = inits.isInitialized("personHourForOvertime") ? new QPersonHourForOvertime(forProperty("personHourForOvertime"), inits.get("personHourForOvertime")) : null;
         this.personShift = inits.isInitialized("personShift") ? new QPersonShift(forProperty("personShift"), inits.get("personShift")) : null;

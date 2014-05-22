@@ -3,7 +3,7 @@ package controllers;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
-import models.ContactData;
+
 import models.Person;
 import models.User;
 
@@ -30,8 +30,8 @@ public class LostPassword extends Controller{
 			LostPassword.lostPassword();
 		}
 
-		ContactData contactData = ContactData.find("byEmail", email).first();
-		if(contactData==null)
+		Person person = Person.find("byEmail", email).first();
+		if(person==null)
 		{
 			flash.error("L'indirizzo email fornito è sconosciuto. Operazione annullata.");
 			LostPassword.lostPassword();
@@ -41,7 +41,7 @@ public class LostPassword extends Controller{
 		SecureRandom random = new SecureRandom();
 		String token = new BigInteger(130, random).toString(32);
 		
-		Person person = contactData.person;
+		//Person person = contactData.person;
 		person.user.recoveryToken = token;
 		person.user.expireRecoveryToken = new LocalDate();
 		person.user.save();
@@ -57,7 +57,7 @@ public class LostPassword extends Controller{
 		simpleEmail.setMsg(message);
 		Mail.send(simpleEmail); 
 		
-		flash.success("E' stata inviata una mail all'indirizzo %s. Completare la procedura di recovery password entro la data di oggi.",contactData.email);
+		flash.success("E' stata inviata una mail all'indirizzo %s. Completare la procedura di recovery password entro la data di oggi.",person.email);
 		LostPassword.lostPassword();
 	}
 	
