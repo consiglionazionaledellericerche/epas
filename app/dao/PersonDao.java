@@ -10,7 +10,7 @@ import models.Office;
 import models.Person;
 import models.query.QCompetenceCode;
 import models.query.QContract;
-import models.query.QLocation;
+
 import models.query.QPerson;
 import models.query.QPersonHourForOvertime;
 import models.query.QPersonReperibility;
@@ -54,7 +54,7 @@ public final class PersonDao {
 		final JPQLQuery query = ModelQuery.queryFactory().from(qp)
 				.leftJoin(qp.contracts, qc)
 				.leftJoin(qp.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime)
-				.leftJoin(qp.location, QLocation.location)
+				//.leftJoin(qp.location, QLocation.location)
 				.leftJoin(qp.reperibility, QPersonReperibility.personReperibility)
 				.leftJoin(qp.personShift, QPersonShift.personShift)
 				.leftJoin(qp.user, QUser.user)
@@ -137,7 +137,7 @@ public final class PersonDao {
 		final JPQLQuery query = ModelQuery.queryFactory().from(qp)
 				.leftJoin(qp.contracts, qc)
 				.leftJoin(qp.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime)
-				.leftJoin(qp.location, QLocation.location)
+				//.leftJoin(qp.location, QLocation.location)
 				.leftJoin(qp.reperibility, QPersonReperibility.personReperibility)
 				.leftJoin(qp.personShift, QPersonShift.personShift)
 				.leftJoin(qp.user, QUser.user)

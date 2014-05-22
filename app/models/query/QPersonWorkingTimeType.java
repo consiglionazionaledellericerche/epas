@@ -62,7 +62,7 @@ public class QPersonWorkingTimeType extends EntityPathBase<PersonWorkingTimeType
     public QPersonWorkingTimeType(Class<? extends PersonWorkingTimeType> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
         this.person = inits.isInitialized("person") ? new QPerson(forProperty("person"), inits.get("person")) : null;
-        this.workingTimeType = inits.isInitialized("workingTimeType") ? new QWorkingTimeType(forProperty("workingTimeType")) : null;
+        this.workingTimeType = inits.isInitialized("workingTimeType") ? new QWorkingTimeType(forProperty("workingTimeType"), inits.get("workingTimeType")) : null;
     }
 
 }

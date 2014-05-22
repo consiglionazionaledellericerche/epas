@@ -63,6 +63,9 @@ public class QRemoteOffice extends EntityPathBase<RemoteOffice> {
     //inherited
     public final ListPath<models.UsersPermissionsOffices, QUsersPermissionsOffices> userPermissionOffices = _super.userPermissionOffices;
 
+    //inherited
+    public final ListPath<models.WorkingTimeType, QWorkingTimeType> workingTimeType = _super.workingTimeType;
+
     public QRemoteOffice(String variable) {
         this(RemoteOffice.class, forVariable(variable), INITS);
     }

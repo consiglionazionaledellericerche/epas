@@ -49,6 +49,8 @@ public class QOffice extends EntityPathBase<Office> {
 
     public final ListPath<models.UsersPermissionsOffices, QUsersPermissionsOffices> userPermissionOffices = this.<models.UsersPermissionsOffices, QUsersPermissionsOffices>createList("userPermissionOffices", models.UsersPermissionsOffices.class, QUsersPermissionsOffices.class, PathInits.DIRECT2);
 
+    public final ListPath<models.WorkingTimeType, QWorkingTimeType> workingTimeType = this.<models.WorkingTimeType, QWorkingTimeType>createList("workingTimeType", models.WorkingTimeType.class, QWorkingTimeType.class, PathInits.DIRECT2);
+
     public QOffice(String variable) {
         super(Office.class, forVariable(variable));
     }
