@@ -99,7 +99,7 @@ public class PrintTags extends Controller{
 	}
 	
 	
-	@Check(Security.VIEW_PERSONAL_SITUATION)
+	//@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void showPersonTag(Integer year, Integer month){
 		
 		//TODOUSER

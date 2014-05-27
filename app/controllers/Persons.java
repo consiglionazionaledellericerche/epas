@@ -22,7 +22,6 @@ import models.PersonChildren;
 import models.PersonDay;
 import models.Qualification;
 import models.User;
-import models.UsersPermissionsOffices;
 //import models.RemoteOffice;
 import models.VacationCode;
 import models.VacationPeriod;
@@ -52,48 +51,45 @@ public class Persons extends Controller {
 
 	public static final String USERNAME_SESSION_KEY = "username";
 
-	@Check(Security.VIEW_PERSON_LIST)
+	@Check(Security.VIEW_PERSON)
 	public static void list(String name){
+
+		List<Office> officeList = Security.getOfficeAllowed(Security.VIEW_PERSON);
+		
 		LocalDate startEra = new LocalDate(1900,1,1);
 		LocalDate endEra = new LocalDate(9999,1,1);
+		
 		List<Person> personList = PersonDao.list(Optional.fromNullable(name), 
-				Sets.newHashSet(Security.getOfficeAllowed()), 
-				false, 
-				startEra, 
-				endEra)
-				.list();
+				Sets.newHashSet(officeList), false,	startEra, endEra).list();
+		
 		LocalDate date = new LocalDate();
 		List<Person> activePerson = PersonDao.list(Optional.fromNullable(name), 
-				Sets.newHashSet(Security.getOfficeAllowed()), 
-				false, 
-				date, 
-				date)
-				.list();
-		//List<Person> personList = Person.getActivePersonsSpeedyInPeriod(startEra, endEra, Security.getOfficeAllowed(), false);
-		
-		//List<Person> activePerson = Person.getActivePersonsInDay(date.getDayOfMonth(), date.getMonthOfYear(), date.getYear(), Security.getOfficeAllowed(), false);
+				Sets.newHashSet(officeList), false, date, date).list();
 		
 		render(personList, activePerson);
 	}
 
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	@Check(Security.EDIT_PERSON)
 	public static void insertPerson() throws InstantiationException, IllegalAccessException {
+		
 		Person person = new Person();
 		Contract contract = new Contract();
 		Location location = new Location();
 		ContactData contactData = new ContactData();
 		InitializationTime initializationTime = new InitializationTime();
-		List<Office> officeList = Security.getOfficeAllowed();
-		List<Office> office = Office.find("Select office from Office office where office.office is null").fetch();
+		
+		List<Office> officeList = Security.getOfficeAllowed(Security.EDIT_PERSON);
+
 		List<WorkingTimeType> wttList = WorkingTimeType.findAll();
-		Logger.debug("Lista office: %s", office.get(0).name);
+
 		render(person, contract, location, contactData, initializationTime, officeList, wttList);
 	}
 
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void save() {
+	@Check(Security.EDIT_PERSON)
+	public static void save(Long officeId) {
+		
 		if(validation.hasErrors()) {
 			if(request.isAjax()) error("Invalid value");
 			render("@insertPerson");
@@ -121,11 +117,13 @@ public class Persons extends Controller {
 		Qualification qual = Qualification.findById(new Long(params.get("person.qualification", Integer.class)));
 		person.qualification = qual;
 				
-		Office office = Office.findById(new Long(params.get("person.office", Integer.class)));
-		if(office != null)
+		Office office = Office.findById(officeId);
+		if(office != null) {
+
 			person.office = office;
-		else{
-			Logger.debug("L'ufficio che si tenta di inserire per %s %s è nullo. Non inserisco niente", person.name, person.surname);
+		} 
+		else {
+				
 			flash.error("L'ufficio di appartenenza non può essere nullo.");
 			render("@list");
 		}
@@ -137,25 +135,6 @@ public class Persons extends Controller {
 		Codec codec = new Codec();
 		user.password = codec.hexMD5("epas");
 		user.person = person;
-		
-		/*permesso viewPersonalSituation */
-		Permission per = Permission.find("Select per from Permission per where per.description = ?", "viewPersonalSituation").first();
-		
-		/*Aggiungere lo user_permission_office per la persona con permesso quello appena recuperato dal db e come ufficio quello della 
-		 * persona che si va a creare*/
-		user.userPermissionOffices = new ArrayList<UsersPermissionsOffices>();
-		 
-		//user.permissions.add(per);
-		user.save();
-		UsersPermissionsOffices upo = new UsersPermissionsOffices();
-		upo.user =	user;
-		upo.permission = per;
-		upo.office = user.person.office;
-		upo.save();
-		user.userPermissionOffices.add(upo);
-		user.save();
-		person.user = user;
-		person.save();
 		
 		/*creazione location */
 		location.department = params.get("department");
@@ -210,7 +189,7 @@ public class Persons extends Controller {
 	}
 
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	@Check(Security.EDIT_PERSON)
 	public static void insertUsername(Person person){
 	
 	
@@ -220,7 +199,7 @@ public class Persons extends Controller {
 	}
 
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	@Check(Security.EDIT_PERSON)
 	public static void updateUsername(){
 		
 		Long id = params.get("person", Long.class);
@@ -237,15 +216,18 @@ public class Persons extends Controller {
 	}
 
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	@Check(Security.VIEW_PERSON)
 	public static void edit(Long personId){
+		
 		Person person = Person.findById(personId);
 	
 		LocalDate date = new LocalDate();
 		List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract", person).fetch();
-		List<Office> officeList = Security.getOfficeAllowed();	
+		
+		List<Office> officeList = Security.getOfficeAllowed(Security.EDIT_PERSON);
 		
 		InitializationTime initTime = InitializationTime.find("Select init from InitializationTime init where init.person = ?", person).first();
+		
 		Integer month = date.getMonthOfYear();
 		Integer year = date.getYear();
 		Long id = person.id;		
@@ -253,9 +235,8 @@ public class Persons extends Controller {
 	}
 
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void update(){
-		Long personId = params.get("personId", Long.class);		
+	@Check(Security.EDIT_PERSON)
+	public static void update(Long personId, Long officeId){
 
 		Person person = Person.findById(personId);
 		ContactData contactData = person.contactData;
@@ -275,9 +256,10 @@ public class Persons extends Controller {
 		if(person.badgeNumber == null || !person.badgeNumber.equals(params.get("badgeNumber")))
 			person.badgeNumber = params.get("badgeNumber");
 
-		Logger.debug("Sede: %s", params.get("person.office"));
-		if(person.office == null || !person.office.id.equals(new Long(params.get("person.office")))){
-			person.office = Office.findById(Long.parseLong((params.get("person.office"))));
+		if(officeId != null ) {
+			
+			Office office = Office.findById(officeId);
+			person.office = office;
 		}
 
 
@@ -329,17 +311,10 @@ public class Persons extends Controller {
 				initTime.residualMinutesPastYear = params.get("minutesPastYear", Integer.class);
 			initTime.save();
 		}
-		//		else{
-		//			initTime = new InitializationTime();
-		//			if(params.get("minutesPastYear") != null)
-		//				initTime.residualMinutesPastYear = params.get("minutesPastYear", Integer.class);
-		//			if(params.get("minutesCurrentYear") != null)
-		//				initTime.residualMinutesCurrentYear = params.get("minutesCurrentYear", Integer.class);
-		//			initTime.save();
-		//		}
+
 		if(person.number != null && ! person.number.equals(params.get("number", Integer.class)))
 			person.number = params.get("number", Integer.class);
-		//Logger.debug("Qualifica: %d", params.get("person.qualification", Integer.class));
+		
 		if(person.qualification != null && person.qualification.qualification != params.get("person.qualification", Integer.class)){
 			Qualification q = Qualification.find("Select q from Qualification q where q.qualification = ?", params.get("person.qualification", Integer.class)).first();
 			person.qualification = q;
@@ -355,10 +330,7 @@ public class Persons extends Controller {
 		Persons.edit(person.id);	
 	}
 
-	/**
-	 * cancella una persona dal database
-	 * @param person
-	 */
+
 	@Check(Security.DELETE_PERSON)
 	public static void deletePerson(Long personId){
 		Person person = Person.findById(personId);
@@ -410,8 +382,8 @@ public class Persons extends Controller {
 	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void insertContract(Person person){
-		if(person == null)
-		{
+		if(person == null) {
+			
 			flash.error("Persona inesistente. Operazione annullata.");
 			Persons.list(null);
 		}
@@ -444,7 +416,7 @@ public class Persons extends Controller {
 		if(wtt == null) {
 			flash.error("Errore nel fornire il parametro tipo orario. Operazione annullata.");
 			Persons.edit(person.id);
-		}
+		} 
 	
 		//Creazione nuovo contratto
 		Contract contract = new Contract();
@@ -689,14 +661,14 @@ public class Persons extends Controller {
 	 * 
 	 * @param personId permette all'utente amministratore di cambiare la propria password.
 	 */
-	@Check(Security.VIEW_PERSONAL_SITUATION)
+	//@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void changePassword(){
 		User user = Security.getUser();
 		notFoundIfNull(user);
 		render(user);
 	}
 	
-	@Check(Security.VIEW_PERSONAL_SITUATION)
+	//@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void savePassword(@MinLength(5) @Required String vecchiaPassword, 
 			@MinLength(5) @Required String nuovaPassword, @MinLength(5) @Required String confermaPassword){
 		

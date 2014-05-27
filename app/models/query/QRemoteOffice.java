@@ -39,6 +39,9 @@ public class QRemoteOffice extends EntityPathBase<RemoteOffice> {
     public final ListPath<models.ConfYear, QConfYear> confYear = _super.confYear;
 
     //inherited
+    public final StringPath contraction = _super.contraction;
+
+    //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
     //inherited
@@ -61,7 +64,10 @@ public class QRemoteOffice extends EntityPathBase<RemoteOffice> {
     public final ListPath<RemoteOffice, QRemoteOffice> remoteOffices = _super.remoteOffices;
 
     //inherited
-    public final ListPath<models.UsersPermissionsOffices, QUsersPermissionsOffices> userPermissionOffices = _super.userPermissionOffices;
+    public final ListPath<models.UsersRolesOffices, QUsersRolesOffices> usersRolesOffices = _super.usersRolesOffices;
+
+    //inherited
+    public final ListPath<models.WorkingTimeType, QWorkingTimeType> workingTimeType = _super.workingTimeType;
 
     public QRemoteOffice(String variable) {
         this(RemoteOffice.class, forVariable(variable), INITS);

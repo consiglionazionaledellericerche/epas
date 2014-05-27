@@ -116,7 +116,7 @@ public class Absences extends Controller{
 
 	}
 	
-	@Check(Security.VIEW_PERSONAL_SITUATION)
+	//@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void absenceInMonth(Long personId, String absenceCode, int year, int month){
 		List<LocalDate> dateAbsences = new ArrayList<LocalDate>();
 		Person person = Person.findById(personId);

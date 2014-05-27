@@ -34,7 +34,6 @@ import models.Stamping;
 import models.Stamping.WayType;
 import models.TotalOvertime;
 import models.User;
-import models.UsersPermissionsOffices;
 import models.VacationCode;
 import models.VacationPeriod;
 import models.ValuableCompetence;
@@ -1385,9 +1384,13 @@ public class FromMysqlToPostgres {
 	 * metodo che consente permessi di "amministrazione" a un utente specificato
 	 */
 	public static void upgradePerson(){
+		
+		/* TODO i permessi non possono più essere importati perchè adesso occorre passare dai ruoli
 		Logger.debug("Chiamata la funzione upgrade person");
 		Person person = Person.find("bySurnameAndName", "Lucchesi", "Cristian").first();
 		Logger.debug("Scelta persona: %s %s", person.name, person.surname);
+		
+		 
 		if(person.user.userPermissionOffices.size() > 0){
 			List<UsersPermissionsOffices> oldPermissions = person.user.userPermissionOffices;
 			person.user.userPermissionOffices.removeAll(oldPermissions);
@@ -1402,6 +1405,8 @@ public class FromMysqlToPostgres {
 		}		
 		person.user.save();
 		person.save();
+		
+		*/
 
 	}
 
@@ -1410,6 +1415,8 @@ public class FromMysqlToPostgres {
 	 * situazione mensile
 	 */
 	public static void addPermissiontoAll(){
+		
+		/* TODO questo diritto è automatico con contratto attivo 
 		Logger.debug("Chiamata la funzione addPermissiontoAll");
 		List<User> userList = User.findAll();
 		Permission per = Permission.find("Select per from Permission per where per.description = ?", "viewPersonalSituation").first();
@@ -1422,6 +1429,7 @@ public class FromMysqlToPostgres {
 			upo.save();
 			//u.save();
 		}
+		*/
 
 	}
 	/**

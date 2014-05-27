@@ -1,16 +1,16 @@
 package controllers;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import models.Office;
-
 import models.Permission;
 import models.Person;
 import models.RemoteOffice;
 import models.User;
-import models.UsersPermissionsOffices;
+import models.UsersRolesOffices;
 import play.Logger;
 import play.cache.Cache;
 
@@ -20,21 +20,82 @@ import com.google.common.hash.Hashing;
 
 public class Security extends Secure.Security {
 	
+	/* Sviluppatore */
+	
+	public final static String DEVELOPER = "develop";
+	
+	/* Dipendente */
+	
+	public final static String EMPLOYEE = "employee";
+
+	/* Amministratore Personale */
+	
+	public final static String VIEW_PERSON = "viewPerson";
+	public final static String EDIT_PERSON = "editPerson";
+	
+	public final static String VIEW_PERSON_DAY = "viewPersonDay";
+	public final static String EDIT_PERSON_DAY = "editPersonDay";
+
+	public final static String VIEW_COMPETENCE = "viewCompetence";
+	public final static String EDIT_COMPETENCE = "editCompetence";
+	
+	public final static String UPLOAD_SITUATION = "uploadSituation";
+	
+
+	
+	/* Amministratore ePAS */
+	
+	public final static String VIEW_ABSENCE_TYPE = "viewAbsenceType";
+	public final static String EDIT_ABSENCE_TYPE = "editAbsenceType";
+
+	public final static String VIEW_CONFIGURATION = "viewConfiguration";
+	public final static String EDIT_CONFIGURATION = "editConfiguration";
+
+	public final static String VIEW_OFFICE = "viewOffice";
+	public final static String EDIT_OFFICE = "editOffice";
+
+	public final static String VIEW_WORKING_TIME_TYPE = "viewWorkingTimeType";
+	public final static String EDIT_WORKING_TIME_TYPE = "editWorkingTimeType";
+	
+	public final static String VIEW_COMPETENCE_CODE = "viewCompetenceCode";
+	public final static String EDIT_COMPETENCE_CODE = "editCompetenceCode";
+	
+	public final static String VIEW_ADMINISTRATOR = "viewAdministrator";
+	public final static String EDIT_ADMINISTRATOR = "editAdministrator";
+	
+	
+	
+	
+
+	
+	
+	
+	
+	
 	public final static String VIEW_PERSON_LIST = "viewPersonList";
+
 	public final static String INSERT_AND_UPDATE_PERSON = "insertAndUpdatePerson";
-	public final static String DELETE_PERSON = "deletePerson";
 	public final static String INSERT_AND_UPDATE_STAMPING = "insertAndUpdateStamping";
-	public final static String INSERT_AND_UPDATE_PASSWORD = "insertAndUpdatePassword";
-	public final static String INSERT_AND_UPDATE_WORKINGTIME = "insertAndUpdateWorkingTime";
 	public final static String INSERT_AND_UPDATE_ABSENCE = "insertAndUpdateAbsence";
-	public final static String INSERT_AND_UPDATE_CONFIGURATION = "insertAndUpdateConfiguration";
-	public final static String INSERT_AND_UPDATE_ADMINISTRATOR = "insertAndUpdateAdministrator";
+
+
+	public final static String INSERT_AND_UPDATE_WORKINGTIME = "insertAndUpdateWorkingTime";
 	public final static String INSERT_AND_UPDATE_COMPETENCES = "insertAndUpdateCompetences";
 	public final static String INSERT_AND_UPDATE_VACATIONS = "insertAndUpdateVacations";
-	public final static String VIEW_PERSONAL_SITUATION ="viewPersonalSituation";
-	public final static String UPLOAD_SITUATION = "uploadSituation";
 	public final static String INSERT_AND_UPDATE_OFFICES = "insertAndUpdateOffices";
-	public final static String DEVELOPER = "developer";
+	public final static String INSERT_AND_UPDATE_CONFIGURATION = "insertAndUpdateConfiguration";
+	public final static String INSERT_AND_UPDATE_ADMINISTRATOR = "insertAndUpdateAdministrator";
+	
+
+	
+
+	public final static String INSERT_AND_UPDATE_PASSWORD = "insertAndUpdatePassword";	
+	
+	public final static String DELETE_PERSON = "deletePerson";
+	
+	
+	
+	
 	
 	public final static String PERMISSION_CACHE_PREFIX = "user-permission-office-";
 		
@@ -67,42 +128,88 @@ public class Security extends Secure.Security {
 	
 	
 	static boolean check(String profile) {
-		String username = connected();
-		if(username == null || username.isEmpty()){
+
+		User user = Security.getUser();
+		if( user == null ) {
+			
 			Logger.debug("Lo username per la check del profilo %s è null o vuoto", profile);
 			return false;
 		}
 		
-		
-		
-		//Se personId è una persona reale (1 admin, 0 tutti) eseguo il controllo
-		Long personId = Long.valueOf(session.get("personSelected"));
-		if(params.get("personId") != null)
-			personId = Long.valueOf(params.get("personId"));
-		if( personId > 1 ) {
+		Permission permission = Permission.find("byDescription", profile).first();
+		if(permission == null) {
 			
-			if( !Security.canUserSeePerson(Security.getUser(), personId) ) {
-				
-				flash.error("Non si può accedere alla funzionalità per la persona con id %d", personId);
-				Application.indexAdmin();
-			}
+			Logger.debug("Il Permission per la check del profilo %s è null o vuoto", profile);
+			return false;
 		}
-			
-		Logger.trace("checking permission %s for user %s", profile, username);
-
 		
-		List<Permission> userPermissionsOffices = getUserAllPermissions(username);
+		Long officeId = params.get("officeId") != null ? Long.valueOf(params.get("officeId")) : null;
+		Long personId = params.get("personId") != null ? Long.valueOf(params.get("personId")) : null;
 
-		for (Permission p : userPermissionsOffices) {
-
-			if (p.description.equals(profile)) {
+		/* caso richiesta solo su personId */
+		if( personId != null && officeId == null) {
+			
+			Person person = Person.findById(personId);
+			if( checkUro(user.userRoleOffices, permission, person.office) ) {
 				
 				return true;
 			}
+			return false;
 		}
-		return false;
+		
+		/* caso richiesta solo su officeId */
+		
+		if( personId == null && officeId != null ) {
+			
+			Office office = Office.findById(officeId);
+			if( checkUro(user.userRoleOffices, permission, office) ) {
+				
+				return true;
+			}
+			return false;
+		}
+		
+		/* caso richiesta sia su personId che su officeId (rara, solo cambio sede persona) */
+
+		if( personId != null && officeId != null ) { 
+			
+			Person person = Person.findById(personId);
+			Office office = Office.findById(officeId);
+			if( checkUro(user.userRoleOffices, permission, person.office) && checkUro(user.userRoleOffices, permission, office) ) {
+				
+				return true;
+			}
+			return false;
+		}
+		
+		
+		/* caso richiesta generica senza personId o officeId specificati */
+		
+		return checkUro(user.userRoleOffices, permission, null);
+		
+		
+		
+	
     }   
 	
+	private static boolean checkUro(List<UsersRolesOffices> uroList, Permission permission, Office office) {
+		
+		for(UsersRolesOffices uro : uroList) {
+
+			if(office != null && !office.id.equals(uro.office.id)) {
+				
+				continue;
+			}
+			for(Permission p : uro.role.permissions) {
+
+				if(p.description.equals(permission.description)) {
+
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 	
 	static boolean permissionCheck() {
 		String username = connected();
@@ -114,10 +221,13 @@ public class Security extends Secure.Security {
 		Logger.trace("checking Admin permission for user %s", username);
 		
 		//TODO Rendere più specifici i controlli per gli account di Amministrazione
+		/*
 		if (getUserAllPermissions(username).size() > 1) {
 			return true;
 		}
 		return false;
+		*/
+		return true;
     }   
 	
 	private static User getUser(String username){
@@ -177,51 +287,23 @@ public class Security extends Secure.Security {
 		return getUser().getOfficeAllowed();
 	}
 	
-	/**
-	 * 
-	 * @param user
-	 * @param personId
-	 * @return true se l'user possiede i diritti per visualizzarla in termini di office false altrimenti 
-	 */
-	public static boolean canUserSeePerson(User user, Long personId){
-		Person person = Person.findById(personId);
-		if(person == null)
-			return false;
+	public static List<Office> getOfficeAllowed(String profile) {
 		
-		//amministratore
-		if(user.isAdmin())
-			return true;
+		User user = Security.getUser();
+		List<Office> officeList = new ArrayList<Office>();
 		
-		if(user.person==null)	//questo evento non dovrebbe verificarsi
-			return false;
-		
-		if(person.office.id == user.person.office.id)
-			return true;
-		
-		for(RemoteOffice remote : user.person.office.remoteOffices){
-			if(remote.id == person.office.id)
-				return true;
-		}
-		return false;
-	}
-	
-	/**
-	 * Ritorna la persona identificata da personId se l'user loggato è effettivamente tale persona.
-	 * @param personId
-	 * @return
-	 */
-	public static Person getSelfPerson(Long personId) {
-		if(personId == null)
-			return null;
-		User user = getUser();
-		if(user == null)
-			return null;
-		if(user.person == null)
-			return null;
-		if(user.person.id.longValue() != personId.longValue())
-			return null;
-		return user.person;
+		for(UsersRolesOffices uro : user.userRoleOffices)  {
+			
+			for(Permission p : uro.role.permissions) {
 				
+				if(p.description.equals(profile)) {
+					
+					officeList.add(uro.office);
+				}
+			}
+		}
+		
+		return officeList;
 	}
 	
 	

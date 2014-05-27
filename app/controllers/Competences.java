@@ -39,7 +39,7 @@ import dao.PersonDao;
 @With( {Secure.class, RequestInit.class} )
 public class Competences extends Controller{
 
-	@Check(Security.VIEW_PERSONAL_SITUATION)
+	//@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void competences(int year, int month) {
 
 		//controllo dei parametri

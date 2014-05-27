@@ -32,6 +32,8 @@ public class QOffice extends EntityPathBase<Office> {
 
     public final ListPath<models.ConfYear, QConfYear> confYear = this.<models.ConfYear, QConfYear>createList("confYear", models.ConfYear.class, QConfYear.class, PathInits.DIRECT2);
 
+    public final StringPath contraction = createString("contraction");
+
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
@@ -47,7 +49,9 @@ public class QOffice extends EntityPathBase<Office> {
 
     public final ListPath<models.RemoteOffice, QRemoteOffice> remoteOffices = this.<models.RemoteOffice, QRemoteOffice>createList("remoteOffices", models.RemoteOffice.class, QRemoteOffice.class, PathInits.DIRECT2);
 
-    public final ListPath<models.UsersPermissionsOffices, QUsersPermissionsOffices> userPermissionOffices = this.<models.UsersPermissionsOffices, QUsersPermissionsOffices>createList("userPermissionOffices", models.UsersPermissionsOffices.class, QUsersPermissionsOffices.class, PathInits.DIRECT2);
+    public final ListPath<models.UsersRolesOffices, QUsersRolesOffices> usersRolesOffices = this.<models.UsersRolesOffices, QUsersRolesOffices>createList("usersRolesOffices", models.UsersRolesOffices.class, QUsersRolesOffices.class, PathInits.DIRECT2);
+
+    public final ListPath<models.WorkingTimeType, QWorkingTimeType> workingTimeType = this.<models.WorkingTimeType, QWorkingTimeType>createList("workingTimeType", models.WorkingTimeType.class, QWorkingTimeType.class, PathInits.DIRECT2);
 
     public QOffice(String variable) {
         super(Office.class, forVariable(variable));

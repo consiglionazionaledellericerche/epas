@@ -22,7 +22,7 @@ import play.mvc.With;
 @With( {Secure.class, RequestInit.class} )
 public class PersonMonths extends Controller{
 	
-	@Check(Security.VIEW_PERSONAL_SITUATION)
+	//@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void hourRecap(int year){
 
 		//controllo dei parametri
@@ -42,7 +42,7 @@ public class PersonMonths extends Controller{
 		render(csap, user.person, year);	
 	}
 
-	@Check(Security.VIEW_PERSONAL_SITUATION)
+	//@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void trainingHours(int year){
 		
 		if( Security.getUser().person == null ) {
@@ -67,8 +67,8 @@ public class PersonMonths extends Controller{
 	}
 
 
-	@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void insertTrainingHours(Long personId, int month, int year){
+	//@Check(Security.VIEW_PERSONAL_SITUATION)
+	public static void insertTrainingHours(int month, int year){
 		
 		/*
 		 		Person person = Security.getUser().person;
@@ -76,7 +76,7 @@ public class PersonMonths extends Controller{
 				int actualMonth = LocalDate.now().getMonthOfYear();
 				render(person, actualMonth, year, max);
 		 */
-		Person person = Person.findById(personId);
+		Person person = Security.getUser().person;
 		LocalDate date = new LocalDate(year, month, 1);
 		int max = date.dayOfMonth().withMaximumValue().getDayOfMonth();
 
@@ -84,28 +84,32 @@ public class PersonMonths extends Controller{
 		render(person, month, year, max);
 	}
 
-	@Check(Security.VIEW_PERSONAL_SITUATION)
+	//@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void modifyTrainingHours(Long personMonthSituationId){
+		
 		PersonMonthRecap pm = PersonMonthRecap.findById(personMonthSituationId);
 		int year = pm.year;
 		int month = pm.month;
 		Person person = pm.person;
 		LocalDate date = new LocalDate(year, month, 1);
 		int max = date.dayOfMonth().withMaximumValue().getDayOfMonth();
-//		List<PersonMonthRecap> pmList = PersonMonthRecap.find("select pm from PersonMonthRecap pm where pm.person = ? and pm.year = ? and pm.month = ?", 
-//				person, year, month).fetch();
 		render(person, pm, max, year, month);
 	}
 
-	@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void saveTrainingHours(@Valid int begin, @Valid int end, @Valid Integer value, Long personId, int month, int year){
+	//@Check(Security.VIEW_PERSONAL_SITUATION)
+	public static void saveTrainingHours(@Valid int begin, @Valid int end, @Valid Integer value, int month, int year){
 		if (validation.hasErrors()) {
 			flash.error("Ci sono errori");
 			Application.indexAdmin();
 			return;
 		}
 
-		Person person = Person.findById(personId);
+		Person person = Security.getUser().person;
+		if( person == null ) {
+			flash.error("Accesso negato.");
+			renderTemplate("Application/indexAdmin.html");
+		}
+		
 		Logger.debug("nome e cognome: %s %s", person.name, person.surname);
 		LocalDate beginDate = new LocalDate(year, month, begin);
 		LocalDate endDate = new LocalDate(year, month, end);
@@ -130,8 +134,8 @@ public class PersonMonths extends Controller{
 		 * agli attestati, il sistema non permette l'inserimento.
 		 * In caso contrario sì
 		 */
-		List<PersonMonthRecap> list = PersonMonthRecap.find("Select pm from PersonMonthRecap pm where pm.month = ? and pm.year = ? and pm.hoursApproved = ?",
-				month, year, true).fetch();
+		List<PersonMonthRecap> list = PersonMonthRecap.find("Select pm from PersonMonthRecap pm where pm.person = ? and pm.month = ? and pm.year = ? and pm.hoursApproved = ?",
+				person, month, year, true).fetch();
 		if(list.size() > 0){
 			flash.error("Impossibile inserire ore di formazione per il mese precedente poichè gli attestati per quel mese sono già stati inviati");
 			trainingHours(year);
@@ -148,14 +152,15 @@ public class PersonMonths extends Controller{
 		PersonMonths.trainingHours(year);
 	}
 	
-	@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void updateTrainingHours(@Valid int begin, @Valid int end, @Valid Integer value, Long personId, int month, int year, Long personMonthId){
+	//@Check(Security.VIEW_PERSONAL_SITUATION)
+	public static void updateTrainingHours(@Valid int begin, @Valid int end, @Valid Integer value, int month, int year, Long personMonthId){
+		
 		if (validation.hasErrors()) {
 			flash.error("Ci sono errori");
 			Application.indexAdmin();
 			return;
 		}
-		Person person = Person.findById(personId);
+		
 		LocalDate beginDate = new LocalDate(year, month, begin);
 		LocalDate endDate = new LocalDate(year, month, end);
 		if(begin > end){
@@ -166,23 +171,34 @@ public class PersonMonths extends Controller{
 			flash.error("Non sono valide le ore di formazione negative o testuali.");
 			PersonMonths.trainingHours(beginDate.getYear());
 		}
+		
 		PersonMonthRecap pm = PersonMonthRecap.findById(personMonthId);
-		if(pm != null){
-			pm.hoursApproved = false;
-			pm.trainingHours = value;
-			pm.fromDate = beginDate;
-			pm.toDate = endDate;
-			pm.save();
-		}
-		else{
-			flash.error("Non ci sono ore di formazione per %s %s in questo mese da modificare!!!", person.name, person.surname);
+		if(pm == null) {
+			
+			flash.error("Ore di formazione non trovate. Operazione annullata.");
 			PersonMonths.trainingHours(beginDate.getYear());
 		}
+		
+		Person person = Security.getUser().person;
+		if( person == null || !person.id.equals(pm.person.id)) {
+			flash.error("Accesso negato.");
+			renderTemplate("Application/indexAdmin.html");
+		}
+		
+		
+		
+
+		pm.hoursApproved = false;
+		pm.trainingHours = value;
+		pm.fromDate = beginDate;
+		pm.toDate = endDate;
+		pm.save();
+		
 		flash.success("Aggiornate ore di formazione per %s %s", person.name, person.surname);
 		PersonMonths.trainingHours(beginDate.getYear());
 	}
 	
-	@Check(Security.VIEW_PERSONAL_SITUATION)
+	//@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void deleteTrainingHours(Long personId, Long personMonthRecapId){
 		PersonMonthRecap pm = PersonMonthRecap.findById(personMonthRecapId);
 		if(pm == null)
@@ -194,14 +210,23 @@ public class PersonMonths extends Controller{
 		render(pm);
 	}
 	
-	@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void deleteTrainingHoursConfirmed(Long personId, Long personMonthRecapId){
+	//@Check(Security.VIEW_PERSONAL_SITUATION)
+	public static void deleteTrainingHoursConfirmed( Long personMonthRecapId ){
+		
 		PersonMonthRecap pm = PersonMonthRecap.findById(personMonthRecapId);
 		if(pm == null)
 		{
 			flash.error("Ore di formazioni inesistenti. Operazione annullata.");
 			Stampings.stampings(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
 		}
+		
+		Person person = Security.getUser().person;
+		if( person == null || !person.id.equals(pm.person.id)) {
+			flash.error("Accesso negato.");
+			renderTemplate("Application/indexAdmin.html");
+		}
+		
+		
 		pm.delete();
 		flash.error("Ore di formazione eliminate con successo.");
 		PersonMonths.trainingHours(pm.year);

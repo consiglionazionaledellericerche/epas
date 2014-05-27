@@ -205,7 +205,7 @@ public class YearlyAbsences extends Controller{
 	 * @param year
 	 * Render della pagina absencePerPerson.html che riassume le assenze annuali di una persona
 	 */
-	@Check(Security.VIEW_PERSONAL_SITUATION)
+	//@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void absencesPerPerson(Integer year){
 		
 		//controllo sui parametri

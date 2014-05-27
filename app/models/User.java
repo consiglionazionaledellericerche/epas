@@ -37,11 +37,9 @@ public class User extends Model{
 	@OneToOne(mappedBy="user", fetch=FetchType.EAGER, cascade = {CascadeType.REMOVE}, orphanRemoval=true)
 	public Person person;
 	
-//	@ManyToMany(cascade = {CascadeType.REFRESH, CascadeType.REMOVE}, fetch = FetchType.LAZY)
-//	public List<Permission> permissions;
 	@NotAudited
 	@OneToMany(mappedBy="user", fetch=FetchType.EAGER, cascade = {CascadeType.REMOVE})
-	public List<UsersPermissionsOffices> userPermissionOffices = new ArrayList<UsersPermissionsOffices>();
+	public List<UsersRolesOffices> userRoleOffices = new ArrayList<UsersRolesOffices>();
 	
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="expire_recovery_token")
@@ -58,16 +56,20 @@ public class User extends Model{
 			return false;
 	}
 	
-	public List<Permission> getAllPermissions(){
+	public List<Permission> getAllPermissions() {
 		List<Permission> permissions = new ArrayList<Permission>();
+		
 		if(this.person != null){
-			List<UsersPermissionsOffices> upoList = UsersPermissionsOffices.find("Select upo from UsersPermissionsOffices upo where " +
-					"upo.user = ? and upo.office = ?", this, this.person.office).fetch();
-			for(UsersPermissionsOffices upo : upoList){
-				permissions.add(upo.permission);
+			UsersRolesOffices uro = UsersRolesOffices.find("Select upo from UsersRolesOffices uro where " +
+					"uro.user = ? and uro.office = ?", this, this.person.office).first();
+			for(Permission p : uro.role.permissions){
+				permissions.add(p);
 			}
 			
 		}
+		
+		//TODO admin 
+		/*
 		else{
 			Office office = Office.find("Select off from Office off where off.joiningDate is null").first();
 			List<UsersPermissionsOffices> upoList = UsersPermissionsOffices.find("Select upo from UsersPermissionsOffices upo where " +
@@ -76,147 +78,27 @@ public class User extends Model{
 				permissions.add(upo.permission);
 			}
 		}
-
+		*/
 		return permissions;
 	}
 	
-	public List<Office> getOfficeAllowed(){
+	public List<Office> getOfficeAllowed() {
 		
-		return Office.find("select distinct o from Office o join "
-				+ "o.userPermissionOffices as upo where upo.user = ?",this).fetch();
-		
-	}
-	
-//	public Set<UsersPermissionsOffices> getAllPermissions(){
-//		Set<UsersPermissionsOffices> setPermissions = new HashSet<UsersPermissionsOffices>();
-//		List<UsersPermissionsOffices> permissions = UsersPermissionsOffices.find("Select upo from UsersPermissionsOffices upo where " +
-//				"upo.user = ? and upo.office = ?", this, this.person.office).fetch();
-//		setPermissions.addAll(permissions);
-//
-//		return setPermissions;
-//	}
-	
-	/**
-	 * true se l'user ha almeno un permesso di amministratore per office
-	 * @return
-	 */
-	public boolean isOfficeGeneralAdministrator(Office office) {
-
-		for(UsersPermissionsOffices upo: this.userPermissionOffices) {
+		List<Office> officeList = new ArrayList<Office>();
+		//TODO riscrivere col nuovo concetto di ruoli e permessi e funzionale al tipo di ruolo che si cerca
+		if (this.person != null) {
+			officeList.add(this.person.office);
+		}
+		else {
 			
-			if(upo.office.equals(office) && ! upo.permission.description.equals(Security.VIEW_PERSONAL_SITUATION) ) {
-				
-				return true;
-			}
+			officeList = Office.findAll(); 
 		}
+		return officeList;
+			
+		//return Office.find("select distinct o from Office o join "
+		//		+ "o.userPermissionOffices as upo where upo.user = ?",this).fetch();
 		
-		return false;
 	}
-	
-	public boolean isViewPersonAvailable(){
-		for(UsersPermissionsOffices p : this.userPermissionOffices){
-			if(p.permission.description.equals(Security.VIEW_PERSON_LIST))
-				return true;
-		}
-		return false;
-	}
-
-	public boolean isInsertAndUpdatePersonAvailable(){
-		for(UsersPermissionsOffices p : this.userPermissionOffices){
-			if(p.permission.description.equals(Security.INSERT_AND_UPDATE_PERSON))
-				return true;
-		}
-		return false;
-	}
-
-	public boolean isInsertAndUpdateAbsenceAvailable(){
-		for(UsersPermissionsOffices p : this.userPermissionOffices){
-			if(p.permission.description.equals(Security.INSERT_AND_UPDATE_ABSENCE))
-				return true;
-		}
-		return false;
-	}
-
-	public boolean isDeletePersonAvailable(){
-		for(UsersPermissionsOffices p : this.userPermissionOffices){
-			if(p.permission.description.equals(Security.DELETE_PERSON))
-				return true;
-		}
-		return false;
-	}
-
-	public boolean isInsertAndUpdateWorkinTimeAvailable(){
-		for(UsersPermissionsOffices p : this.userPermissionOffices){
-			if(p.permission.description.equals(Security.INSERT_AND_UPDATE_WORKINGTIME))
-				return true;
-		}
-		return false;
-	}
-
-	public boolean isInsertAndUpdateStampingAvailable(){
-		for(UsersPermissionsOffices p : this.userPermissionOffices){
-			if(p.permission.description.equals(Security.INSERT_AND_UPDATE_STAMPING))
-				return true;
-		}
-		return false;
-	}
-
-	public boolean isInsertAndUpdatePasswordAvailable(){
-		for(UsersPermissionsOffices p : this.userPermissionOffices){
-			if(p.permission.description.equals(Security.INSERT_AND_UPDATE_PASSWORD))
-				return true;
-		}
-		return false;
-	}
-
-	public boolean isInsertAndUpdateConfigurationAvailable(){
-		for(UsersPermissionsOffices p : this.userPermissionOffices){
-			if(p.permission.description.equals(Security.INSERT_AND_UPDATE_CONFIGURATION))
-				return true;
-		}
-		return false;
-	}
-
-	public boolean isInsertAndUpdateAdministratorAvailable(){
-		for(UsersPermissionsOffices p : this.userPermissionOffices){
-			if(p.permission.description.equals(Security.INSERT_AND_UPDATE_ADMINISTRATOR))
-				return true;
-		}
-		return false;
-	}
-
-	public boolean isInsertAndUpdateOfficesAvailable(){
-		for(UsersPermissionsOffices p : this.userPermissionOffices){
-			if(p.permission.description.equals(Security.INSERT_AND_UPDATE_OFFICES))
-				return true;
-		}
-		return false;
-	}
-	
-	public boolean isInsertAndUpdateCompetenceAndOvertimeAvailable(){
-		for(UsersPermissionsOffices p : this.userPermissionOffices){
-			if(p.permission.description.equals(Security.INSERT_AND_UPDATE_COMPETENCES))
-				return true;
-		}
-		return false;
-	}
-
-	public boolean isInsertAndUpdateVacationsAvailable(){
-		for(UsersPermissionsOffices p : this.userPermissionOffices){
-			if(p.permission.description.equals(Security.INSERT_AND_UPDATE_VACATIONS))
-				return true;
-		}
-		return false;
-	}
-	
-	public boolean isUploadSituationAvailable(){
-		for(UsersPermissionsOffices p : this.userPermissionOffices){
-			if(p.permission.description.equals(Security.UPLOAD_SITUATION))
-				return true;
-		}
-		return false;
-	}
-
 	
 	
 }

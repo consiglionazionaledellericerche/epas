@@ -12,7 +12,6 @@ import lombok.Getter;
 import lombok.Setter;
 import models.Permission;
 import models.Person;
-import models.UsersPermissionsOffices;
 
 import org.joda.time.LocalDate;
 

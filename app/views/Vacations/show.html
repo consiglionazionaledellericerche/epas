@@ -26,7 +26,7 @@
         <td>${vacationsRecap.vacationDaysLastYearAccrued} (${vacationsRecap.vacationDaysLastYearAccrued})</td>
         <td>
           #{if vacationsRecap.vacationDaysLastYearUsed.size() != 0 } 
-           <a data-toggle="modal" href="@{Vacations.vacationsLastYear(vacationsRecap.person.id, vacationsRecap.year)}" data-target="#myModal3">
+           <a data-toggle="modal" href="@{Vacations.vacationsLastYear(vacationsRecap.year)}" data-target="#myModal3">
 			${vacationsRecap.vacationDaysLastYearUsed.size()}
 		  </a>
 		  #{/if}
@@ -42,7 +42,7 @@
         <td>${vacationsRecap.vacationDaysCurrentYearTotal} (${vacationsRecap.vacationDaysCurrentYearAccrued})</td>
         <td>
           #{if vacationsRecap.vacationDaysCurrentYearUsed.size() != 0 } 
-          <a data-toggle="modal" href="@{Vacations.vacationsCurrentYear(vacationsRecap.person.id, vacationsRecap.year)}" data-target="#myModal3">
+          <a data-toggle="modal" href="@{Vacations.vacationsCurrentYear(vacationsRecap.year)}" data-target="#myModal3">
 			${vacationsRecap.vacationDaysCurrentYearUsed.size()}
 		  </a>
 		  #{/if}
@@ -79,7 +79,7 @@
         <td>
         
           #{if vacationsRecap.permissionUsed.size() != 0 } 
-            <a data-toggle="modal" href="@{Vacations.permissionCurrentYear(vacationsRecap.person.id, vacationsRecap.year)}" data-target="#myModal3">
+            <a data-toggle="modal" href="@{Vacations.permissionCurrentYear(vacationsRecap.year)}" data-target="#myModal3">
 			${vacationsRecap.permissionUsed.size()}
 		    </a>
 		  #{/if}

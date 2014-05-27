@@ -1,115 +1,64 @@
-#{extends 'main_with_navbar.html' /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione sedi'  /}
 
-#{set titolo: 'Inserimento/modifica nuova sede' /}
 
-<fieldset>
-	<legend>Sede Suprema</legend>
-	<table>
-		<tr>
-			<th>Nome</th>
-			<th>Codice</th>
-			<th>Indirizzo</th>
-		</tr>
+<div class="container">
 
-		<tr>
-			<td><a data-toggle="modal" href="@{Offices.editOffice(office.id)}" data-target="#myModal2">${office.name}</a></td>
-			<td>${office.code}</td>
-			<td>${office.address}</td>
-		</tr>	
+	#{list items:instituteList, as:'institute'}
+	 
+	<div class="panel panel-info">
+	  <div class="panel-heading">
+	    <h3 class="panel-title">${institute.name}</h3>
+	  </div>
+	  <div class="panel-body">
+	  
+	    <p>Il numero totale dei dipendenti presenti in ePAS con contratto attivo in questo instituto è <strong>${institute.getActivePersons().size()}</strong></p>
+	  
+	    <table class="table table-hover">
+	      <tr>
+	        <th>Sede</th>
+	        <th>Indirizzo</th>
+	        <th>Codice</th>
+	        <th>Data Affiliazione</th>
+	        <th>Numero Dipendenti</th>
+	        <th>Modifica</th>
+	      </tr>
+	      
+	      #{list items:institute.remoteOffices, as:'seat'}
+	        <tr>
+	          <td>${seat.name}</td>
+	          <td>${seat.address}</td>
+	          <td>${seat.code}</td>
+	          <td>${seat.joiningDate}</td>
+	          <td>${seat.getActivePersons().size()}</td>
+	          <td>
+	            <a data-modal=".my-modal" href="@{Offices.editSeat(seat.id)}">Modifica</a>
+	          </td>
+	        </tr>
+	  	  #{/list} 
+	      
+	    </table>
+	    
+	    <p>
+	      <a  data-modal=".my-modal" href="@{Offices.insertSeat(institute.id)}">
+	        <span class="glyphicon glyphicon-plus"></span> Crea una nuova sede per ${institute.contraction}
+	      </a>
+	    </p>
+	  	 
+	  </div>
+	</div>   
+	  
+	#{/list}
 	
-	</table>
+	<p>
+	  <a  data-modal=".my-modal" href="@{Offices.insertInstitute()}">
+	    <span class="glyphicon glyphicon-plus"></span> Crea un nuovo istituto
+	  </a>
+	</p>
 
-</fieldset>
-
-<br>
-
-<fieldset>
-  <legend>Sedi Distaccate associate alla sede suprema</legend>
-  * Le sedi colorate di grigio sono esistenti ma non più associate ad alcuna sede principale
-  #{if remoteOffices.size()>0 }
-    <table>
-	  <tr>
-		<th>Nome</th>
-		<th>Codice</th>
-		<th>Indirizzo</th>
-		<th>Disattiva</th>
-	  </tr>
-      #{list items: remoteOffices, as: 'remoteOffice'}
-      #{if remoteOffice.office != null}
-      <tr>
-        <td><a data-toggle="modal" href="@{Offices.editOffice(remoteOffice.id)}" data-target="#myModal2">${remoteOffice.name}</a></td>
-        <td>${remoteOffice.code}</td>
-        <td>${remoteOffice.address}</td>
-        <td><a class="btn btn-small" href="@{Offices.disableRemoteOffice(remoteOffice.id)}" data-modal="#myModal3">Disabilita</a></td>
-      </tr>	
-      #{/if}
-      #{else}
-      <tr>
-        <td bgcolor="#D2D2D2">${remoteOffice.name}</td>
-        <td bgcolor="#D2D2D2">${remoteOffice.code}</td>
-        <td bgcolor="#D2D2D2">${remoteOffice.address}</td>
-        <td bgcolor="#D2D2D2"><a class="btn btn-small" href="@{Offices.disableRemoteOffice(remoteOffice.id)}" data-modal="#myModal3" disabled="disabled">Disabilita</a></td>
-      </tr>	
-      #{/else}
-      #{/list}
-    </table>  
-  #{/if}
-
-  #{else}
-    <!-- Non è stata ancora definita alcuna sede distaccata -->
-  #{/else}
-  
-  <br>
-  <br>
-  <p class="text-info lead">
-    <a href="@{Offices.insertRemoteOffice()}" data-modal="#myModal1">
-      Inserisci nuova sede distaccata
-    </a>
-  </p>
-  
-  
-</fieldset>
-
-<div id="myModal2" class="modal hide fade mymodal-small" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3>Modifica sede distaccata</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-   <!--   <button class="btn btn-primary">Save changes</button>-->
-  </div>
 </div>
 
-
-<div id="myModal3" class="modal hide fade mymodal-small" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3>Disabilita sede distaccata</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-   <!--   <button class="btn btn-primary">Save changes</button>-->
-  </div>
-</div>
+#{include '_myModal.html' /}
 
 
-<div id="myModal1" class="modal hide fade mymodal-small" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3>Inserimento nuova sede distaccata</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-   <!--   <button class="btn btn-primary">Save changes</button>-->
-  </div>
-</div>
