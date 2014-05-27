@@ -27,11 +27,11 @@ public class Application extends Controller {
 			Wizard.wizard(0);
 		}
     	
-    	if(Security.getUser().username.equals("epas.clocks")){
+    	if(Security.getUser().get().username.equals("epas.clocks")){
     		Clocks.show();
     		return;
     	}
-    	if(Security.getUser().person == null){
+    	if(Security.getUser().get().person == null){
     		Persons.list(null);
     		return;
     	}
@@ -41,7 +41,7 @@ public class Application extends Controller {
     	
 		session.put("monthSelected", new LocalDate().getMonthOfYear());
 		session.put("yearSelected", new LocalDate().getYear());
-		session.put("personSelected", Security.getUser().person.id);
+		session.put("personSelected", Security.getUser().get().person.id);
 		
 		//method
     	if (Security.check(Security.INSERT_AND_UPDATE_STAMPING)) {

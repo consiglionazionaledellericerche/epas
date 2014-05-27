@@ -119,7 +119,7 @@ public class AttestatiClient {
 		
 		//URI baseUri = new URI(Configuration.getCurrentConfiguration().urlToPresence);
 		//ConfGeneral confGeneral =  ConfGeneral.getConfGeneral();
-		Office office = Security.getUser().person.office;
+		Office office = Security.getUser().get().person.office;
 		String urlToPresence = ConfGeneral.getFieldValue("url_to_presence", office);
 		URI baseUri = new URI(urlToPresence);
 		URL loginUrl = baseUri.resolve(BASE_LOGIN_URL).toURL();
@@ -169,7 +169,7 @@ public class AttestatiClient {
 	public static List<Dipendente> listaDipendenti(Map<String, String> cookies, Integer year, Integer month) throws URISyntaxException, MalformedURLException {
 		Response listaDipendentiResponse;
 //		ConfGeneral conf = ConfGeneral.getConfGeneral();
-		Office office = Security.getUser().person.office;
+		Office office = Security.getUser().get().person.office;
 		String urlToPresence = ConfGeneral.getFieldValue("url_to_presence", office);
 		Integer seatCode = Integer.parseInt(ConfGeneral.getFieldValue("seat_code", office));
 		URI baseUri = new URI(urlToPresence);
@@ -242,7 +242,7 @@ public class AttestatiClient {
 		
 		//Configuration conf = Configuration.getCurrentConfiguration();
 		//ConfGeneral conf = ConfGeneral.getConfGeneral();
-		Office office = Security.getUser().person.office;
+		Office office = Security.getUser().get().person.office;
 		String urlToPresence = ConfGeneral.getFieldValue("url_to_presence", office);
 		Integer seatCode = Integer.parseInt(ConfGeneral.getFieldValue("seat_code", office));
 		URI baseUri = new URI(urlToPresence);
@@ -252,7 +252,6 @@ public class AttestatiClient {
 		StringBuffer competencesSent = new StringBuffer();
 		//Nuovo stringBuffer per l'invio delle ore di formazione
 		StringBuffer trainingHoursSent = new StringBuffer();
-		StringBuffer mealTicketSent = new StringBuffer();
 		StringBuffer problems = new StringBuffer();
 		
 		boolean isOk = true;

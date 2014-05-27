@@ -7,6 +7,8 @@ import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
+
 import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -18,12 +20,12 @@ public class Vacations extends Controller{
 	public static void show(Integer anno) {
 
 		//controllo dei parametri
-		User user = Security.getUser();
-		if( user == null || user.person == null ) {
+		Optional<User> currentUser = Security.getUser();
+		if( ! currentUser.isPresent() || currentUser.get().person == null ) {
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
 		}
-
+		User user = currentUser.get();
 		
 		//default l'anno corrente
     	if(anno==null)

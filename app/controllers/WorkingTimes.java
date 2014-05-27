@@ -86,7 +86,7 @@ public class WorkingTimes extends Controller{
 				WorkingTimes.manageWorkingTime();
 			}
 			
-			wtt.office = Security.getUser().person.office;
+			wtt.office = Security.getUser().get().person.office;
 			
 			wtt.save();
 			

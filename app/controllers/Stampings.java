@@ -57,7 +57,7 @@ public class Stampings extends Controller {
 	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void stampings(Integer year, Integer month){
 
-		Person person = Security.getUser().person;
+		Person person = Security.getUser().get().person;
 		if(!person.isActiveInMonth(month, year))
 		{
 			flash.error("Si è cercato di accedere a un mese al di fuori del contratto valido per %s %s. " +
@@ -194,7 +194,7 @@ public class Stampings extends Controller {
 
 	private static void personStamping() {
 		LocalDate now = new LocalDate();
-		personStamping(Security.getUser().person.getId(), now.getYear(),now.getMonthOfYear());
+		personStamping(Security.getUser().get().person.getId(), now.getYear(),now.getMonthOfYear());
 	}
 
 	private static void personStamping(Long personId) {
@@ -497,7 +497,7 @@ public class Stampings extends Controller {
 		LocalDate dayPresence = new LocalDate(year, month, day);
 		//TODO:
 		List<Office> office = new ArrayList<Office>();
-		office.add(Security.getUser().person.office);
+		office.add(Security.getUser().get().person.office);
 		List<Person> activePersonsInDay = Person.getActivePersonsInDay(day, month, year, Security.getOfficeAllowed(), false);
 		
 		int numberOfInOut = maxNumberOfStampingsInMonth(year, month, day, activePersonsInDay);

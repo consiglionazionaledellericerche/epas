@@ -29,8 +29,6 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 
-//@With(Shibboleth.class)
-
 @With( {Secure.class, RequestInit.class} )
 public class Administration extends Controller {
 	
@@ -100,7 +98,7 @@ public class Administration extends Controller {
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void fixPersonSituation(Long personId, int year, int month){
 		
-		PersonUtility.fixPersonSituation(personId, year, month, Security.getUser());
+		PersonUtility.fixPersonSituation(personId, year, month, Security.getUser().get());
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
