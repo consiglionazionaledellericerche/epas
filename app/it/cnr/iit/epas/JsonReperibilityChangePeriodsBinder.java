@@ -71,7 +71,7 @@ public class JsonReperibilityChangePeriodsBinder implements TypeBinder<Reperibil
 				Logger.debug("reqPerson = %s", reqPerson);
 				if (reqPerson == null) {
 					throw new IllegalArgumentException(
-							String.format("Person with email %d not exist in the ePAS database", reqPersonEmail));
+							String.format("Person with email %s not exist in the ePAS database", reqPersonEmail));
 				}
 
 				
@@ -87,7 +87,7 @@ public class JsonReperibilityChangePeriodsBinder implements TypeBinder<Reperibil
 				subPerson = Person.find("SELECT p FROM Person p WHERE p.contactData.email = ?", subPersonEmail).first();
 				if (subPerson == null) {
 					throw new IllegalArgumentException(
-							String.format("Person with email %d not exist in the ePAS database", subPerson));
+							String.format("Person with email %s not exist in the ePAS database", subPersonEmail));
 				}
 				LocalDate subStartDate = new LocalDate(jsonObject.get("sub_start_date").getAsString());
 				LocalDate subEndDate = new LocalDate(jsonObject.get("sub_end_date").getAsString());

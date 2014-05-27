@@ -120,9 +120,9 @@ public class RequestInit extends Controller {
 
 			personId = Integer.valueOf(session.get("personSelected"));
 		}
-		else if( Security.getUser().person != null ){
+		else if( Security.getUser().get().person != null ){
 
-			session.put("personSelected", Security.getUser().person.id);
+			session.put("personSelected", Security.getUser().get().person.id);
 		}
 		else {
 
@@ -130,7 +130,7 @@ public class RequestInit extends Controller {
 		}
 
 
-		if(Security.getUser().person != null) {
+		if(Security.getUser().get().person != null) {
 
 			List<Person> persons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
 			renderArgs.put("navPersons", persons);

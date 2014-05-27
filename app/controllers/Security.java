@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 
 import models.Office;
-
 import models.Permission;
 import models.Person;
 import models.RemoteOffice;
@@ -15,7 +14,9 @@ import play.Logger;
 import play.cache.Cache;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.hash.Hashing;
 
 public class Security extends Secure.Security {
@@ -81,7 +82,7 @@ public class Security extends Secure.Security {
 			personId = Long.valueOf(params.get("personId"));
 		if( personId > 1 ) {
 			
-			if( !Security.canUserSeePerson(Security.getUser(), personId) ) {
+			if( !Security.canUserSeePerson(Security.getUser().get(), personId) ) {
 				
 				flash.error("Non si può accedere alla funzionalità per la persona con id %d", personId);
 				Application.indexAdmin();
@@ -120,10 +121,10 @@ public class Security extends Secure.Security {
 		return false;
     }   
 	
-	private static User getUser(String username){
+	private static Optional<User> getUser(String username){
 		if (username == null || username.isEmpty()) {
 			Logger.trace("getUSer failed for username %s", username);
-			return null;
+			return Optional.<User>absent();
 		}
 		Logger.trace("Richiesta getUser(), username=%s", username);
 		
@@ -132,31 +133,30 @@ public class Security extends Secure.Security {
 		Logger.trace("USer.find('byUsername'), username=%s, e' %s", username, user);
 		if (user == null){
 			Logger.info("Security.getUser(): USer con username = %s non trovata nel database", username);
-			return null;
+			return Optional.<User>absent();
 		}
-		return user;
+		return Optional.of(user);
 	}
 
 	private static List<Permission> getUserAllPermissions(String username) {
-		User user = getUser(username);
-		if (user == null) {
-
-			return null;
+		Optional<User> user = getUser(username);
+		if (!user.isPresent()) {
+			return Lists.newArrayList();
 		}
 		//Set<UsersPermissionsOffices> permissions = Cache.get(PERMISSION_CACHE_PREFIX + username, Set.class);
 		
 		List<Permission> permissions = Cache.get(PERMISSION_CACHE_PREFIX + username, List.class);
 		
 		if (permissions == null) {
-			user.refresh();
-			permissions = user.getAllPermissions();
+			user.get().refresh();
+			permissions = user.get().getAllPermissions();
 			Cache.set(PERMISSION_CACHE_PREFIX + username, permissions, CACHE_DURATION);
 		}
 		
 		return permissions;
 	}
 	
-	public static User getUser() {
+	public static Optional<User> getUser() {
 		return getUser(connected());
 	}
 	
@@ -174,7 +174,10 @@ public class Security extends Secure.Security {
 //			return userLogged.person.getOfficeAllowed();
 //		else
 //			return null;
-		return getUser().getOfficeAllowed();
+		if (!getUser().isPresent()) {
+			return Lists.newArrayList();
+		}
+		return getUser().get().getOfficeAllowed();
 	}
 	
 	/**
@@ -195,11 +198,12 @@ public class Security extends Secure.Security {
 		if(user.person==null)	//questo evento non dovrebbe verificarsi
 			return false;
 		
-		if(person.office.id == user.person.office.id)
+		if(person.office.id.equals(user.person.office.id)) {
 			return true;
-		
+		}
+			
 		for(RemoteOffice remote : user.person.office.remoteOffices){
-			if(remote.id == person.office.id)
+			if(remote.id.equals(person.office.id))
 				return true;
 		}
 		return false;
@@ -210,17 +214,19 @@ public class Security extends Secure.Security {
 	 * @param personId
 	 * @return
 	 */
+	//FIXME: ritornare un Optional<Person> 
 	public static Person getSelfPerson(Long personId) {
 		if(personId == null)
 			return null;
-		User user = getUser();
-		if(user == null)
+		Optional<User> user = getUser();
+		if (!user.isPresent()) {
 			return null;
-		if(user.person == null)
+		}
+		if(user.get().person == null)
 			return null;
-		if(user.person.id.longValue() != personId.longValue())
+		if(user.get().person.id.longValue() != personId.longValue())
 			return null;
-		return user.person;
+		return user.get().person;
 				
 	}
 	
