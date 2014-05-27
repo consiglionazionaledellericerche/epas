@@ -1,6 +1,6 @@
-#{extends 'main_with_navbar.html' /}
-
-#{set titolo: 'Inserimento nuova persona' /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Inserimento nuova persona' /}
 
 <!-- secondo me questo controllo è inutile perchè c'è il template apposito di modifica
 <h2 id="titoloModificaPersonale">
@@ -92,8 +92,8 @@
 		<input type="hidden" name="location.person_id"  value="${person.id}" />
 		<table class="tablenoborder">
 			<tr>
-				<td>Sede centrale/distaccata</td>
-				<td>#{select 'person.office', value:'', id:'office'} 
+				<td>Sede</td>
+				<td>#{select 'officeId', value:'', id:'office'} 
 						#{list items: officeList, as: 'office'}
 							#{option office.id}${office.name}#{/option}
 						#{/list} 
@@ -128,7 +128,7 @@
 	</fieldset>
 	
     <p>I valori in <b>grassetto</b> sono obbligatori</p>
-    <p>Il fieldset "sede distaccata" va riempito SOLO SE la nuova persona appartiene a una sede distaccata</p>	
+ 
 	
   <div class="forminline buttoncenter">	
     <input class="btn btn-primary" id="submitInsertPerson" type="submit" value="Avanti"/>

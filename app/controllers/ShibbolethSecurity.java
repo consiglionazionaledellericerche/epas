@@ -69,7 +69,7 @@ public class ShibbolethSecurity extends controllers.shib.Security {
 
             flash.success("Welcome, " + person.name + ' ' + person.surname);
             Logger.info("Person %s successfully logged in", person.user.username);
-            Logger.trace("Permission list for %s %s: %s", person.name, person.surname, person.user.userPermissionOffices);
+            Logger.trace("Permission list for %s %s: %s", person.name, person.surname, person.user.userRoleOffices);
 		} else {
 			Logger.warn("Person with email %s successfully logged in Shibboleth but unknonw to ePAS", eppn);
 		}

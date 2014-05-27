@@ -2,17 +2,23 @@
 import java.util.ArrayList;
 import java.util.List;
 
+import org.joda.time.LocalDate;
+
+import controllers.Security;
 import models.CompetenceCode;
 import models.ConfGeneral;
 import models.ConfYear;
 import models.Configuration;
 import models.Office;
 import models.Permission;
+import models.Person;
 import models.Qualification;
+import models.RemoteOffice;
+import models.Role;
 import models.StampModificationType;
 import models.StampType;
 import models.User;
-import models.UsersPermissionsOffices;
+import models.UsersRolesOffices;
 import models.VacationCode;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
@@ -44,6 +50,7 @@ public class Bootstrap extends Job {
 		
 		try
 		{
+			/*
 			if(Qualification.count() == 0){
 				Fixtures.loadModels("absenceTypesAndQualifications.yml");
 				Logger.info("Create qualifiche e codici di assenza");
@@ -98,7 +105,12 @@ public class Bootstrap extends Job {
 				Logger.info("Creato ufficio di default con nome %s e codice %s", instituteName, seatCode);
 			}
 			
+			*/
+			
 			if(User.count() == 0){
+				
+				/*
+				
 				User admin = new User();
 				admin.username = "admin";
 				admin.password = Codec.hexMD5("personnelEpasNewVersion");
@@ -141,6 +153,8 @@ public class Bootstrap extends Job {
 				
 				admin.userPermissionOffices = usersPermissionOffices;
 				admin.save();
+				
+				*/
 		
 			}
 			
@@ -150,6 +164,8 @@ public class Bootstrap extends Job {
 //				admin.save();
 //				
 //			}
+			
+			/*
 			
 			//Fix Creazione configurazione 2012 se non esiste
 			List<ConfYear> confYearList = ConfYear.find("byYear", 2012).fetch();
@@ -167,6 +183,56 @@ public class Bootstrap extends Job {
 				
 			}
 			
+			*/
+
+			/*
+			//FIX seat IIT, creo la sede pisa e IIT diventa l'istituto 
+			Office iit = Office.find("byName", "IIT").first();
+			if(iit!=null) {
+				iit.code = 1;
+				iit.name = "Istituto Informatica e Telematica";
+				iit.contraction = "IIT";
+				iit.save();
+				if(iit.persons.size()!=0) {
+
+					RemoteOffice iitpisa = new RemoteOffice();
+					iitpisa.name = "IIT - Pisa";
+					iitpisa.code = iit.code;
+					iitpisa.address = iit.address;
+					iitpisa.joiningDate = new LocalDate(2013,1,1);
+					iitpisa.office = iit;
+					iitpisa.save();
+
+					for(Person person : iit.persons) {
+
+						person.office = iitpisa;
+						person.save();
+					}
+
+					for(ConfYear confYear : iit.confYear) {
+
+						confYear.office = iitpisa;
+						confYear.save();
+					}
+
+					for(ConfGeneral confGeneral : iit.confGeneral) {
+
+						confGeneral.office = iitpisa;
+						confGeneral.save();
+					}
+
+					for(UsersPermissionsOffices upo : iit.userPermissionOffices) {
+
+						upo.office = iitpisa;
+						upo.save();
+					}
+
+				}
+			}
+			
+			*/
+			
+			bootstrapPermissionsHandler();
 
 	
 		}
@@ -236,5 +302,160 @@ public class Bootstrap extends Job {
 			wttd.save();
 			Logger.debug("Creato il WorkingTimeTypeDay per il giorno %d del WorkingTimeType %s", dayOfWeek, wttNew.description);
 		}
+	}
+	
+	
+	private static void bootstrapPermissionsHandler() {
+		
+		/* Metodo provvisiorio per popolare la tabella Permissions con i nuovi permessi */
+		
+		Permission permission;
+
+		if(Permission.find("byDescription", Security.DEVELOPER).first() == null) {
+			
+			Role role = new Role();
+			role.name = Role.PERSONNEL_ADMIN;
+			role.permissions = new ArrayList<Permission>();
+			
+			Role roleMini = new Role();
+			roleMini.name = Role.PERSONNEL_ADMIN_MINI;
+			roleMini.permissions = new ArrayList<Permission>();
+			
+			permission = new Permission();
+			permission.description = Security.DEVELOPER;
+			permission.save();
+			
+			permission = new Permission();
+			permission.description = Security.EMPLOYEE;
+			permission.save();
+			
+			permission = new Permission();
+			permission.description = Security.VIEW_PERSON;
+			permission.save();
+			role.permissions.add(permission);
+			roleMini.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.EDIT_PERSON;
+			permission.save();
+			role.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.VIEW_PERSON_DAY;
+			permission.save();
+			role.permissions.add(permission);
+			roleMini.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.EDIT_PERSON_DAY;
+			permission.save();
+			role.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.VIEW_COMPETENCE;
+			permission.save();
+			role.permissions.add(permission);
+			roleMini.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.EDIT_COMPETENCE;
+			permission.save();
+			role.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.UPLOAD_SITUATION;
+			permission.save();
+			role.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.VIEW_ABSENCE_TYPE;
+			permission.save();
+			role.permissions.add(permission);
+			roleMini.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.EDIT_ABSENCE_TYPE;
+			permission.save();
+			role.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.VIEW_CONFIGURATION;
+			permission.save();
+			role.permissions.add(permission);
+			roleMini.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.EDIT_CONFIGURATION;
+			permission.save();
+			role.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.VIEW_OFFICE;
+			permission.save();
+			role.permissions.add(permission);
+			roleMini.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.EDIT_OFFICE;
+			permission.save();
+			role.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.VIEW_WORKING_TIME_TYPE;
+			permission.save();
+			role.permissions.add(permission);
+			roleMini.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.EDIT_WORKING_TIME_TYPE;
+			permission.save();
+			role.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.VIEW_COMPETENCE_CODE;
+			permission.save();
+			role.permissions.add(permission);
+			roleMini.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.EDIT_COMPETENCE_CODE;
+			permission.save();
+			role.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.VIEW_ADMINISTRATOR;
+			permission.save();
+			role.permissions.add(permission);
+			roleMini.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.EDIT_ADMINISTRATOR;
+			permission.save();
+			role.permissions.add(permission);
+			
+			role.save();
+			roleMini.save();
+			
+	
+		}
+		
+		/* ADMIN per IIT 
+		Person person = Person.find("bySurname", "Lucchesi").first();
+		UsersRolesOffices uro = new UsersRolesOffices();
+		uro.user = person.user;
+		uro.role = Role.find("byName", Role.PERSONNEL_ADMIN).first();
+		uro.office = person.office;
+		uro.save();
+		*/
+		
+		/* ADMIN_MINI per COSENZA 
+		Person person = Person.find("bySurname", "Lucchesi").first();
+		UsersRolesOffices uro = new UsersRolesOffices();
+		uro.user = person.user;
+		uro.role = Role.find("byName", Role.PERSONNEL_ADMIN_MINI).first();
+		uro.office = Office.find("byCode", new Integer("223410")).first();
+		uro.save();
+		*/
+		
 	}
 }

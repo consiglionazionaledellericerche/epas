@@ -13,7 +13,6 @@ import models.ConfYear;
 import models.Office;
 import models.Permission;
 import models.User;
-import models.UsersPermissionsOffices;
 import models.enumerate.ConfigurationFields;
 
 import org.joda.time.LocalDate;
@@ -375,6 +374,8 @@ public class Wizard extends Controller {
 //		descPermissions.add("viewPersonalSituation");
 //		descPermissions.add("uploadSituation");
 		
+		
+		/* TODO rifattorizzare con i nuovi permessi 
 		List<Permission> permissions = Permission.find("description in (?1)", descPermissions).fetch();
 		
 		List<UsersPermissionsOffices> usersPermissionOffices = new ArrayList<UsersPermissionsOffices>(); 
@@ -389,6 +390,8 @@ public class Wizard extends Controller {
 		}
 		
 		newAdmin.userPermissionOffices = usersPermissionOffices;
+		
+		*/
 		newAdmin.save();
 		
 		// setGenConf

@@ -17,7 +17,13 @@ import javax.persistence.Table;
 
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
+import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
+
+import controllers.Security;
+import dao.PersonDao;
 import play.db.jpa.Model;
  
  
@@ -34,7 +40,10 @@ public class Office extends Model{
  
     @Column(name = "name")
     public String name;
-     
+    
+    @Column(name = "contraction")
+    public String contraction;
+    
     @Column(name = "address")
     public String address = "";
     
@@ -55,9 +64,65 @@ public class Office extends Model{
     
     @NotAudited
     @OneToMany(mappedBy="office", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
-    public List<UsersPermissionsOffices> userPermissionOffices = new ArrayList<UsersPermissionsOffices>();
+    public List<UsersRolesOffices> usersRolesOffices = new ArrayList<UsersRolesOffices>();
     
     @NotAudited
 	@OneToMany(mappedBy="office", fetch=FetchType.LAZY)
 	public List<WorkingTimeType> workingTimeType = new ArrayList<WorkingTimeType>();
+    
+    
+    /**
+     * Ritorna il numero di dipendenti attivi registrati nella sede e nelle sottosedi
+     * @return
+     */
+    public List<Person> getActivePersons() {
+    
+    	List<Office> officeList = this.getSubOfficeTree();
+    	LocalDate date = new LocalDate();
+    	
+    	List<Person> activePerson = Person.getActivePersonsSpeedyInPeriod(date, date,
+    			officeList, false);
+    	
+    	//TODOOFF capire perchè con person dao non funziona!!!
+    	/*
+		List<Person> activePerson = PersonDao.list(Optional.fromNullable(name), 
+				Sets.newHashSet(this.getSubOfficeTree()), 
+				false, 
+				date, 
+				date)
+				.list();
+				*/
+    	return activePerson;
+    	
+    }
+    
+    /**
+     * Ritorna la lista di tutte le sedi gerarchicamente sotto a Office
+     * @return
+     */
+    private List<Office> getSubOfficeTree() {
+    	
+    	List<Office> officeToCompute = new ArrayList<Office>();
+    	List<Office> officeComputed = new ArrayList<Office>();
+    	
+    	officeToCompute.add(this);
+    	while(officeToCompute.size() != 0) {
+    		
+    		Office office = officeToCompute.get(0);
+    		officeToCompute.remove(office);
+    		
+    		for(Office remoteOffice : office.remoteOffices) {
+    			
+    			//Office temp = Office.find("byId", remoteOffice.id).first();
+    			//officeToCompute.add(temp);
+    			officeToCompute.add((Office)remoteOffice);
+    		}
+    		
+    		officeComputed.add(office);
+    	}
+    	return officeComputed;
+    }
+    
+    
+
 }

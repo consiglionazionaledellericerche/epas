@@ -11,8 +11,8 @@ import org.hibernate.envers.NotAudited;
 import play.db.jpa.Model;
 
 @Entity
-@Table(name="users_permissions_offices")
-public class UsersPermissionsOffices extends Model{
+@Table(name="users_roles_offices")
+public class UsersRolesOffices extends Model{
 
 	@NotAudited
 	@ManyToOne(fetch=FetchType.EAGER)
@@ -26,6 +26,6 @@ public class UsersPermissionsOffices extends Model{
 	
 	@NotAudited
 	@ManyToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name="permission_id")
-	public Permission permission;
+	@JoinColumn(name="role_id")
+	public Role role;
 }

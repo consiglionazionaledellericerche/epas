@@ -3,9 +3,9 @@
 #{set title: 'ePAS - Gestione amministratori'  /}
 
 
-<div class="container-fluid">
+<div class="container">
 
-  <table>
+  <table class="table center table-hover table-condensed">
     <tr>
       <th>Nome</th>
       #{list items:officeList, as:'office'}
@@ -16,17 +16,23 @@
     #{list items:personList, as:'person'}
   
       <tr>
-          <td>${person.name} ${person.surname}</td>
+          <td class="warning">
+            ${person.name} ${person.surname}
+          </td>
           #{list items:officeList, as:'office'}
           
-            <td>
+            
               #{if person.user.isOfficeGeneralAdministrator(office)}
-                <span class="glyphicon glyphicon-ok"></span>
+              <td class="success">
+                <a href="@{Administrators.edit(person.id, office.id)}"><span class="glyphicon glyphicon-pencil"></span></a>
+              </td>
               #{/if}
               #{else}
-                
+              <td>
+                <a href="@{Administrators.edit(person.id, office.id)}"><span class="glyphicon glyphicon-pencil"></span></a>
+              </td>  
               #{/else}
-            </td>
+            
             
           #{/list}
       </tr>

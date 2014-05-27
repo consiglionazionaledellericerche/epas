@@ -13,7 +13,6 @@ import models.Office;
 import models.Permission;
 import models.Person;
 import models.User;
-import models.UsersPermissionsOffices;
 import play.Play;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -44,15 +43,17 @@ public class Administrators extends Controller {
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_ADMINISTRATOR)
-	public static void edit(Long adminId){
-		if(adminId != null){
-			Person person = Person.findById(adminId);
+	public static void edit(Long personId, Long officeId){
+		if(personId != null){
+			Person person = Person.findById(personId);
 			render(person);
 		}
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_ADMINISTRATOR)
 	public static void update(){
+		
+		/*
 		long personId = params.get("personId", Long.class);
 		
 		Person person = Person.findById(personId);
@@ -303,7 +304,10 @@ public class Administrators extends Controller {
 			user.userPermissionOffices.remove(upo);
 		}
 		user.save();
+		
 		flash.success(String.format("Aggiornati con successo i permessi per %s %s", user.person.name, user.person.surname));
+		
+		*/
 		Administrators.list(null);
 		
 	}
@@ -311,7 +315,7 @@ public class Administrators extends Controller {
 	@Check(Security.INSERT_AND_UPDATE_ADMINISTRATOR)
 	public static void delete(Long adminId){
 		Person person = Person.findById(adminId);
-		person.user.userPermissionOffices.clear();
+		person.user.userRoleOffices.clear();
 		person.save();
 		flash.success(String.format("Eliminati i permessi per l'utente %s %s", person.name, person.surname));
 		Application.indexAdmin();

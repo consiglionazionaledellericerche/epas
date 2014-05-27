@@ -77,7 +77,7 @@ public class QWorkingTimeTypeDay extends EntityPathBase<WorkingTimeTypeDay> {
 
     public QWorkingTimeTypeDay(Class<? extends WorkingTimeTypeDay> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.workingTimeType = inits.isInitialized("workingTimeType") ? new QWorkingTimeType(forProperty("workingTimeType")) : null;
+        this.workingTimeType = inits.isInitialized("workingTimeType") ? new QWorkingTimeType(forProperty("workingTimeType"), inits.get("workingTimeType")) : null;
     }
 
 }
