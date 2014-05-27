@@ -287,13 +287,13 @@ public class Administration extends Controller {
 		}
 		
 		//destroy contact_data
-		if(person.contactData!=null)
-			person.contactData.delete();
+//		if(person.contactData!=null)
+//			person.contactData.delete();
 		
 		//destroy locations
-		if(person.location!=null)
-			person.location.delete();
-		
+//		if(person.location!=null)
+//			person.location.delete();
+//		
 		person.save();
 		
 		renderText(person.name);

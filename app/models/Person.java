@@ -98,6 +98,31 @@ public class Person extends Model {
 	 * id che questa persona aveva nel vecchio database
 	 */
 	public Long oldId;
+	
+	/**
+	 * nuovo campo email del cnr da usarsi in caso di autenticazione via shibboleth inserito con l'evoluzione 28
+	 */
+	@Email
+	public String cnr_email;
+	
+	/**
+	 * i prossimi tre campi sono stati inseriti con l'evoluzione 28 prendendoli da contact_data così da eliminare quella tabella
+	 */
+	public String telephone;
+	
+	public String fax;
+	
+	public String mobile;
+	
+	/**
+	 * i prossimi tre campi sono stati inseriti con l'evoluzione 28 prendendoli da locations così da eliminare quella tabella
+	 */
+	public String department;
+
+	public String headOffice;
+ 
+	public String room;
+	
 
 	/**
 	 * relazione con la tabella delle assenze iniziali
@@ -111,8 +136,8 @@ public class Person extends Model {
 	/**
 	 * relazione con la tabella delle info di contatto
 	 */
-	@OneToOne(mappedBy="person", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE}, orphanRemoval=true, optional=true)
-	public ContactData contactData;
+//	@OneToOne(mappedBy="person", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE}, orphanRemoval=true, optional=true)
+//	public ContactData contactData;
 	
 	@OneToOne(mappedBy="person", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
 	public PersonHourForOvertime personHourForOvertime;
@@ -192,9 +217,9 @@ public class Person extends Model {
 	/**
 	 * relazione con la tabella delle locazioni degli utenti
 	 */
-	@NotAudited
-	@OneToOne(mappedBy="person", fetch=FetchType.EAGER, cascade = {CascadeType.REMOVE}, orphanRemoval=true)
-	public Location location;
+//	@NotAudited
+//	@OneToOne(mappedBy="person", fetch=FetchType.EAGER, cascade = {CascadeType.REMOVE}, orphanRemoval=true)
+//	public Location location;
 
 	@OneToOne(mappedBy="person", fetch=FetchType.EAGER,  cascade = {CascadeType.REMOVE} )
 	public PersonReperibility reperibility;
@@ -278,12 +303,12 @@ public class Person extends Model {
 	 * 
 	 * @return la locazione della persona
 	 */
-	public Location getLocation(){
-		if(this.location != null)
-			return this.location;
-		else
-			return null;
-	}
+//	public Location getLocation(){
+//		if(this.location != null)
+//			return this.location;
+//		else
+//			return null;
+//	}
 
 	
 
@@ -562,9 +587,9 @@ public class Person extends Model {
 				
 		//Query //TODO QueryDsl
 		List<Person> personList = Person.find("Select distinct p from Person p "
-				+ "left outer join fetch p.contactData "				//OneToOne			//TODO ISSUE discutere dell'opzionalità di queste relazioni OneToOne
+//				+ "left outer join fetch p.contactData "				//OneToOne			//TODO ISSUE discutere dell'opzionalità di queste relazioni OneToOne
 				+ "left outer join fetch p.personHourForOvertime "		//OneToOne
-				+ "left outer join fetch p.location "					//OneToOne
+//				+ "left outer join fetch p.location "					//OneToOne
 				+ "left outer join fetch p.reperibility "				//OneToOne
 				+ "left outer join fetch p.personShift "				//OneToOne 
 				+ "left outer join fetch p.user "						//OneToOne 
