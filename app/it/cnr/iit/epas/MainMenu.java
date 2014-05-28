@@ -105,7 +105,7 @@ public class MainMenu {
 		List<ActionMenuItem> actions = new ArrayList<ActionMenuItem>();
 		
 		//Set<UsersPermissionsOffices> permissions = Security.getUser().getAllPermissions();
-		List<Permission> permissions = Security.getUser().getAllPermissions();
+		List<Permission> permissions = Security.getUser().get().getAllPermissions();
 		
 		Set<String> permissionDescriptions = new HashSet<String>();
 		for(Permission p : permissions){

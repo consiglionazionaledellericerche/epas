@@ -71,7 +71,7 @@ public class Absences extends Controller{
 
 	//@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void absences(Integer year, Integer month) {
-		Person person = Security.getUser().person;
+		Person person = Security.getUser().get().person;
 		Map<AbsenceType,Integer> absenceTypeInMonth = getAbsenceTypeInMonth(person, year, month);
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);
 		render(absenceTypeInMonth, person, year, month, month_capitalized);
@@ -948,26 +948,6 @@ public class Absences extends Controller{
 		List<Person> personList = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
 		render(personList);
 	}
-	
-	private static Comparator<Integer> IntegerComparator = new Comparator<Integer>() {
-
-		public int compare(Integer int1, Integer int2) {
-
-
-			return int1.compareTo(int2);
-
-		}
-
-	};	
-
-	private static Comparator<String> AbsenceCodeComparator = new Comparator<String>(){
-
-		public int compare(String absenceCode1, String absenceCode2){
-			return absenceCode1.compareTo(absenceCode2);
-
-		}		
-
-	};
 	
 	public static class AttachmentsPerCodeRecap {
 		

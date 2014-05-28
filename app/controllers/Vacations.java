@@ -7,6 +7,8 @@ import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
+
 import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -18,12 +20,12 @@ public class Vacations extends Controller{
 	public static void show(Integer anno) {
 
 		//controllo dei parametri
-		User user = Security.getUser();
-		if( user == null || user.person == null ) {
+		Optional<User> currentUser = Security.getUser();
+		if( ! currentUser.isPresent() || currentUser.get().person == null ) {
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
 		}
-
+		User user = currentUser.get();
 		
 		//default l'anno corrente
     	if(anno==null)
@@ -57,7 +59,7 @@ public class Vacations extends Controller{
 	//@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void vacationsCurrentYear(Integer anno){
 		
-		Person person = Security.getUser().person;
+		Person person = Security.getUser().get().person;
 		if( person == null ) {
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
@@ -91,7 +93,7 @@ public class Vacations extends Controller{
 	//@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void vacationsLastYear(Integer anno){
 		
-		Person person = Security.getUser().person;
+		Person person = Security.getUser().get().person;
 		if( person == null ) {
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
@@ -124,7 +126,7 @@ public class Vacations extends Controller{
 	//@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void permissionCurrentYear(Integer anno){
 		
-		Person person = Security.getUser().person;
+		Person person = Security.getUser().get().person;
 		if( person == null ) {
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");

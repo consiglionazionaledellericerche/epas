@@ -11,7 +11,8 @@ require:
     - org.yaml -> snakeyaml 1.9:
           force: true
     - play -> db 1.1.1
-    - com.google.guava -> guava 16.+
+    - com.google.guava -> guava 17.+
+    - com.google.inject -> guice 3.0
     - play -> pdf 0.9
     - org.mnode.ical4j -> ical4j 1.0.+    
     - org.jsoup -> jsoup 1.7+
@@ -19,7 +20,7 @@ require:
     - org.hamcrest -> hamcrest-library 1.2.1
     - org.hamcrest -> hamcrest-integration 1.2.1
     - org.mockito -> mockito-core 1.9.0
-    - com.mysema.querydsl -> querydsl-jpa 3.3.2:
+    - com.mysema.querydsl -> querydsl-jpa 3.3.4:
        exclude:
         - asm -> asm *
         - cglib -> cglib *
@@ -28,7 +29,7 @@ require:
         - org.springframework.roo -> org.springframework.roo.annotations *
         - org.eclipse.persistence -> eclipselink *
         
-    - com.mysema.querydsl -> querydsl-apt 3.3.2:
+    - com.mysema.querydsl -> querydsl-apt 3.3.4:
        exclude:
         - asm -> asm *
         - cglib -> cglib *
@@ -36,6 +37,9 @@ require:
         - org.mongodb.morphia -> morphia *
         - org.springframework.roo -> org.springframework.roo.annotations *
         - org.eclipse.persistence -> eclipselink *
+    - org.drools -> drools-core 5.5.0.Final
+    - org.drools -> drools-compiler 5.5.0.Final        
+    - org.codehaus.janino -> janino 2.5.10
 
 # My custom repository
 

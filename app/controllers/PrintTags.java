@@ -106,7 +106,7 @@ public class PrintTags extends Controller{
 		//if (Security.getPerson().username.equals("admin")) {
 		//	Application.indexAdmin();
 		//}
-		Person person = Security.getUser().person;
+		Person person = Security.getUser().get().person;
 		if(!person.isActiveInMonth(month, year))
 		{
 			flash.error("Si è cercato di accedere a un mese al di fuori del contratto valido per %s %s. " +

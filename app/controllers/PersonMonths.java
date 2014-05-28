@@ -26,7 +26,7 @@ public class PersonMonths extends Controller{
 	public static void hourRecap(int year){
 
 		//controllo dei parametri
-		User user = Security.getUser();
+		User user = Security.getUser().get();
 		if( user == null || user.person == null ) {
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
@@ -45,12 +45,12 @@ public class PersonMonths extends Controller{
 	//@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void trainingHours(int year){
 		
-		if( Security.getUser().person == null ) {
+		if( Security.getUser().get().person == null ) {
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
 		}
 		
-		Person person = Security.getUser().person;
+		Person person = Security.getUser().get().person;
 		
 		List<Integer> mesi = new ArrayList<Integer>();
 		for(int i = 1; i < 13; i++){
@@ -76,7 +76,7 @@ public class PersonMonths extends Controller{
 				int actualMonth = LocalDate.now().getMonthOfYear();
 				render(person, actualMonth, year, max);
 		 */
-		Person person = Security.getUser().person;
+		Person person = Security.getUser().get().person;
 		LocalDate date = new LocalDate(year, month, 1);
 		int max = date.dayOfMonth().withMaximumValue().getDayOfMonth();
 
@@ -104,7 +104,7 @@ public class PersonMonths extends Controller{
 			return;
 		}
 
-		Person person = Security.getUser().person;
+		Person person = Security.getUser().get().person;
 		if( person == null ) {
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
@@ -179,7 +179,7 @@ public class PersonMonths extends Controller{
 			PersonMonths.trainingHours(beginDate.getYear());
 		}
 		
-		Person person = Security.getUser().person;
+		Person person = Security.getUser().get().person;
 		if( person == null || !person.id.equals(pm.person.id)) {
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
@@ -220,7 +220,7 @@ public class PersonMonths extends Controller{
 			Stampings.stampings(LocalDate.now().getYear(), LocalDate.now().getMonthOfYear());
 		}
 		
-		Person person = Security.getUser().person;
+		Person person = Security.getUser().get().person;
 		if( person == null || !person.id.equals(pm.person.id)) {
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");

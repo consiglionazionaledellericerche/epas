@@ -29,6 +29,7 @@ import models.ConfGeneral;
 import models.Office;
 import models.Person;
 import models.PersonMonthRecap;
+import models.User;
 import models.enumerate.ConfigurationFields;
 import play.Logger;
 import play.cache.Cache;
@@ -70,7 +71,7 @@ public class UploadSituation extends Controller{
 	@Check(Security.UPLOAD_SITUATION)
 	public static void loginAttestati(Integer year, Integer month) {
 
-		Office office = Security.getUser().person.office;
+		Office office = Security.getUser().get().person.office;
 		
 		String urlToPresence = ConfGeneral.getFieldValue(ConfigurationFields.UrlToPresence.description, office);
 		String userToPresence = ConfGeneral.getFieldValue(ConfigurationFields.UserToPresence.description, office);
@@ -97,7 +98,7 @@ public class UploadSituation extends Controller{
 		}
 
 //		ConfGeneral conf = ConfGeneral.getConfGeneral();
-		Integer seatCode = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.SeatCode.description, Security.getUser().person.office));
+		Integer seatCode = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.SeatCode.description, Security.getUser().get().person.office));
 		List<Person> personList = Person.find("Select p from Person p where p.number <> ? and p.number is not null order by p.number", 0).fetch();
 		Logger.debug("La lista di nomi è composta da %s persone ", personList.size());
 		List<Absence> absenceList = null;
@@ -177,8 +178,9 @@ public class UploadSituation extends Controller{
 		}
 		else
 		{
-			Cache.set(LOGIN_RESPONSE_CACHED+Security.getUser().username, null);
-			Cache.set(LISTA_DIPENTENTI_CNR_CACHED+Security.getUser().username, null);
+			User user = Security.getUser().get();
+			Cache.set(LOGIN_RESPONSE_CACHED + user.username, null);
+			Cache.set(LISTA_DIPENTENTI_CNR_CACHED + user.username, null);
 			
 			if (params.get("back") != null) {
 				show();
@@ -188,7 +190,7 @@ public class UploadSituation extends Controller{
 				redirect("Application.indexAdmin");
 			}
 
-			String urlToPresence = ConfGeneral.getFieldValue(ConfigurationFields.UrlToPresence.description, Security.getUser().person.office);
+			String urlToPresence = ConfGeneral.getFieldValue(ConfigurationFields.UrlToPresence.description, user.person.office);
 			
 			try {
 				//1) LOGIN
@@ -431,8 +433,8 @@ public class UploadSituation extends Controller{
 	
 	private static void memAttestatiIntoCache(LoginResponse loginResponse, List<Dipendente> listaDipendenti)
 	{
-		Cache.set(LOGIN_RESPONSE_CACHED+Security.getUser().username, loginResponse);
-		Cache.set(LISTA_DIPENTENTI_CNR_CACHED+Security.getUser().username, listaDipendenti);
+		Cache.set(LOGIN_RESPONSE_CACHED+Security.getUser().get().username, loginResponse);
+		Cache.set(LISTA_DIPENTENTI_CNR_CACHED+Security.getUser().get().username, listaDipendenti);
 	}
 	
 	/**
@@ -441,7 +443,7 @@ public class UploadSituation extends Controller{
 	 */
 	private static LoginResponse loadAttestatiLoginCached()
 	{
-		return (LoginResponse)Cache.get(LOGIN_RESPONSE_CACHED+Security.getUser().username);
+		return (LoginResponse)Cache.get(LOGIN_RESPONSE_CACHED+Security.getUser().get().username);
 	}
 	
 	/**
@@ -450,7 +452,7 @@ public class UploadSituation extends Controller{
 	 */
 	private static List<Dipendente> loadAttestatiListaCached()
 	{
-		return (List<Dipendente>)Cache.get(LISTA_DIPENTENTI_CNR_CACHED+Security.getUser().username);
+		return (List<Dipendente>)Cache.get(LISTA_DIPENTENTI_CNR_CACHED+Security.getUser().get().username);
 	}
 	
 	private static Set<Dipendente> getDipendenteNonInEpas(int year, int month, List<Dipendente> listaDipendenti,  Set<Dipendente> activeDipendenti)
