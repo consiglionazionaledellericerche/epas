@@ -119,6 +119,7 @@ public class Person extends Model {
 	 */
 	public String department;
 
+	@Column(name="head_office")
 	public String headOffice;
  
 	public String room;

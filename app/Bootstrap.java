@@ -436,26 +436,24 @@ public class Bootstrap extends Job {
 			role.save();
 			roleMini.save();
 			
-	
+			/* ADMIN per IIT */ 
+			Person person = Person.find("bySurname", "Lucchesi").first();
+			UsersRolesOffices uro = new UsersRolesOffices();
+			uro.user = person.user;
+			uro.role = Role.find("byName", Role.PERSONNEL_ADMIN).first();
+			uro.office = person.office;
+			uro.save();
+			
+
 		}
 		
-		/* ADMIN per IIT 
+		/* ADMIN_MINI per COSENZA */
 		Person person = Person.find("bySurname", "Lucchesi").first();
-		UsersRolesOffices uro = new UsersRolesOffices();
-		uro.user = person.user;
-		uro.role = Role.find("byName", Role.PERSONNEL_ADMIN).first();
-		uro.office = person.office;
-		uro.save();
-		*/
-		
-		/* ADMIN_MINI per COSENZA 
-		Person person = Person.find("bySurname", "Lucchesi").first();
-		UsersRolesOffices uro = new UsersRolesOffices();
-		uro.user = person.user;
-		uro.role = Role.find("byName", Role.PERSONNEL_ADMIN_MINI).first();
-		uro.office = Office.find("byCode", new Integer("223410")).first();
-		uro.save();
-		*/
+		UsersRolesOffices uro2 = new UsersRolesOffices();
+		uro2.user = person.user;
+		uro2.role = Role.find("byName", Role.PERSONNEL_ADMIN_MINI).first();
+		uro2.office = Office.find("byCode", new Integer("223410")).first();
+		uro2.save();
 		
 	}
 }
