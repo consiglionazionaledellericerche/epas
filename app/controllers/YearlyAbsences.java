@@ -93,7 +93,7 @@ public class YearlyAbsences extends Controller{
 		//controllo sui parametri
 		Person person = null;
 		if(personId == null)
-			person = Security.getUser().person;
+			person = Security.getUser().get().person;
 		else
 			person = Person.findById(personId);
 		Integer anno = params.get("year", Integer.class);
@@ -209,12 +209,12 @@ public class YearlyAbsences extends Controller{
 	public static void absencesPerPerson(Integer year){
 		
 		//controllo sui parametri
-		User user = Security.getUser();
-		if( user == null || user.person == null ) {
+		Optional<User> currentUser = Security.getUser();
+		if( !currentUser.isPresent() || currentUser.get().person == null ) {
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
 		}
-		
+		User user = currentUser.get();
 		//rendering 
 		if(year==null){
 			LocalDate now = new LocalDate();

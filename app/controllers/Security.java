@@ -15,8 +15,11 @@ import play.Logger;
 import play.cache.Cache;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.hash.Hashing;
+import com.google.common.collect.Lists;
+
 
 public class Security extends Secure.Security {
 	
@@ -126,16 +129,34 @@ public class Security extends Secure.Security {
         return false;
     }
 	
+	private static Optional<User> getUser(String username){
+		if (username == null || username.isEmpty()) {
+			Logger.trace("getUSer failed for username %s", username);
+			return Optional.<User>absent();
+		}
+		Logger.trace("Richiesta getUser(), username=%s", username);
+		
+
+		User user = User.find("byUsername", username).first();
+		Logger.trace("USer.find('byUsername'), username=%s, e' %s", username, user);
+		if (user == null){
+			Logger.info("Security.getUser(): USer con username = %s non trovata nel database", username);
+			return Optional.<User>absent();
+		}
+		return Optional.of(user);
+	}
+	
+	public static Optional<User> getUser() {
+		return getUser(connected());
+	}
 	
 	static boolean check(String profile) {
-
-		User user = Security.getUser();
-		if( user == null ) {
-			
-			Logger.debug("Lo username per la check del profilo %s è null o vuoto", profile);
+		if (!getUser().isPresent()) {
 			return false;
 		}
+//		User user = Security.getUser();
 		
+		User user = getUser().get();
 		Permission permission = Permission.find("byDescription", profile).first();
 		if(permission == null) {
 			
@@ -230,45 +251,59 @@ public class Security extends Secure.Security {
 		return true;
     }   
 	
-	private static User getUser(String username){
-		if (username == null || username.isEmpty()) {
-			Logger.trace("getUSer failed for username %s", username);
-			return null;
-		}
-		Logger.trace("Richiesta getUser(), username=%s", username);
-		
-
-		User user = User.find("byUsername", username).first();
-		Logger.trace("USer.find('byUsername'), username=%s, e' %s", username, user);
-		if (user == null){
-			Logger.info("Security.getUser(): USer con username = %s non trovata nel database", username);
-			return null;
-		}
-		return user;
-	}
+//	private static User getUser(String username){
+//		if (username == null || username.isEmpty()) {
+//			Logger.trace("getUSer failed for username %s", username);
+//			return null;
+//		}
+//		Logger.trace("Richiesta getUser(), username=%s", username);
+//		
+//
+//		User user = User.find("byUsername", username).first();
+//		Logger.trace("USer.find('byUsername'), username=%s, e' %s", username, user);
+//		if (user == null){
+//			Logger.info("Security.getUser(): USer con username = %s non trovata nel database", username);
+//			return null;
+//		}
+//		return user;
+//	}
 
 	private static List<Permission> getUserAllPermissions(String username) {
-		User user = getUser(username);
-		if (user == null) {
-
-			return null;
-		}
-		//Set<UsersPermissionsOffices> permissions = Cache.get(PERMISSION_CACHE_PREFIX + username, Set.class);
 		
+		Optional<User> user = getUser(username);
+		if (!user.isPresent()) {
+			return Lists.newArrayList();
+		}
 		List<Permission> permissions = Cache.get(PERMISSION_CACHE_PREFIX + username, List.class);
 		
 		if (permissions == null) {
-			user.refresh();
-			permissions = user.getAllPermissions();
+			user.get().refresh();
+			permissions = user.get().getAllPermissions();
 			Cache.set(PERMISSION_CACHE_PREFIX + username, permissions, CACHE_DURATION);
 		}
 		
 		return permissions;
+//		User user = getUser(username);
+//		if (user == null) {
+//
+//			return null;
+//		}
+		//Set<UsersPermissionsOffices> permissions = Cache.get(PERMISSION_CACHE_PREFIX + username, Set.class);
+		
+//		List<Permission> permissions = Cache.get(PERMISSION_CACHE_PREFIX + username, List.class);
+//		
+//		if (permissions == null) {
+//			user.refresh();
+//			permissions = user.getAllPermissions();
+//			Cache.set(PERMISSION_CACHE_PREFIX + username, permissions, CACHE_DURATION);
+//		}
+//		
+//		return permissions;
 	}
 	
-	public static User getUser() {
-		return getUser(connected());
-	}
+//	public static User getUser() {
+//		return getUser(connected());
+//	}
 	
 	public static List<Permission> getPersonAllPermissions() {
 		return getUserAllPermissions(connected());
@@ -276,7 +311,10 @@ public class Security extends Secure.Security {
 	
 	public static List<Office> getOfficeAllowed()
 	{	
-		
+		if (!getUser().isPresent()) {
+			return Lists.newArrayList();
+		}
+		return getUser().get().getOfficeAllowed();
 //		User userLogged = getUser();
 //		if(userLogged.person == null)
 //			return Office.findAll();
@@ -284,15 +322,17 @@ public class Security extends Secure.Security {
 //			return userLogged.person.getOfficeAllowed();
 //		else
 //			return null;
-		return getUser().getOfficeAllowed();
+//		return getUser().getOfficeAllowed();
 	}
 	
 	public static List<Office> getOfficeAllowed(String profile) {
-		
-		User user = Security.getUser();
+		if (!getUser().isPresent()) {
+			return Lists.newArrayList();
+		}
+		//User user = Security.getUser();
 		List<Office> officeList = new ArrayList<Office>();
 		
-		for(UsersRolesOffices uro : user.userRoleOffices)  {
+		for(UsersRolesOffices uro : getUser().get().userRoleOffices)  {
 			
 			for(Permission p : uro.role.permissions) {
 				

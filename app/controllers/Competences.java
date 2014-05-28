@@ -43,15 +43,15 @@ public class Competences extends Controller{
 	public static void competences(int year, int month) {
 
 		//controllo dei parametri
-		User user = Security.getUser();
-		if( user == null || user.person == null ) {
+		Optional<User> user = Security.getUser();
+		if( ! user.isPresent() || user.get().person == null ) {
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
 		}
 
-		PersonMonthCompetenceRecap personMonthCompetenceRecap = new PersonMonthCompetenceRecap(user.person, month, year);
+		PersonMonthCompetenceRecap personMonthCompetenceRecap = new PersonMonthCompetenceRecap(user.get().person, month, year);
 
-		Person person = user.person;
+		Person person = user.get().person;
 		render(personMonthCompetenceRecap, person, year, month);
 
 	}

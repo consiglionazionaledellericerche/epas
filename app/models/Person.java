@@ -454,7 +454,7 @@ public class Person extends Model {
 	@Deprecated 
 	public static List<Person> getActivePersons(LocalDate date){
 		List<Person> activePersons = null;
-		User user = Security.getUser();
+		User user = Security.getUser().get();
 					
 		if(user.person==null)
 		{

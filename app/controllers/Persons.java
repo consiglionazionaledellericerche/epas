@@ -571,7 +571,7 @@ public class Persons extends Controller {
 	public static void updateSourceContract(Long contractId)
 	{
 		Contract contract = Contract.findById(contractId);
-		LocalDate initUse = new LocalDate(ConfGeneral.getFieldValue(ConfigurationFields.InitUseProgram.description, Security.getUser().person.office));
+		LocalDate initUse = new LocalDate(ConfGeneral.getFieldValue(ConfigurationFields.InitUseProgram.description, Security.getUser().get().person.office));
 		render(contract, initUse);
 	}
 
@@ -693,7 +693,7 @@ public class Persons extends Controller {
 	 * @param personId permette all'utente amministratore di cambiare la propria password.
 	 */
 	public static void changePassword(){
-		User user = Security.getUser();
+		User user = Security.getUser().get();
 		notFoundIfNull(user);
 		render(user);
 	}
@@ -702,7 +702,7 @@ public class Persons extends Controller {
 			@MinLength(5) @Required String nuovaPassword, @MinLength(5) @Required String confermaPassword){
 
 		User user = User.find("SELECT u FROM User u where username = ? and password = ?", 
-				Security.getUser().username, Hashing.md5().hashString(vecchiaPassword,  Charsets.UTF_8).toString()).first();
+				Security.getUser().get().username, Hashing.md5().hashString(vecchiaPassword,  Charsets.UTF_8).toString()).first();
 		if(user == null) {
 			flash.error("Nessuna corrispondenza trovata fra utente e vecchia password inserita.");
 			Persons.changePassword();

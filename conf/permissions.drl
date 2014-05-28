@@ -1,0 +1,28 @@
+package security;
+ 
+import security.PermissionCheck;
+import models.Person;
+
+global models.User currentUser;
+
+/* i dipendenti possono: */
+rule IsPerson
+when
+ $c: PermissionCheck(action in (
+     	"TestDrools.youMustBeLoggedIn",
+     	/* abilitate per il metodo, ristrette poi */
+     	"TestDrools.youMustBe"
+     	), target == null, granted == false)
+ $u: User(person != null)
+then
+ $c.grant();
+end
+
+/* Ognugno puoi vedere solo i propri dati */
+rule ViewPersonalData
+when
+ $p: Person(number == 9802)
+ $c: PermissionCheck(action in ("TestDrools.youMustBe"), target == $p, granted == false)
+then
+ $c.grant();
+end

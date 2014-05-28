@@ -30,7 +30,7 @@ public class ReportCentre extends Controller{
 		}
 
 		try {
-			Person person = Security.getUser().person;
+			Person person = Security.getUser().get().person;
 			File theDir = new File("/tmp/immagini-mail/");
 			if(!theDir.exists())
 			{	

@@ -29,7 +29,7 @@ public class Configurations extends Controller{
 			office = Office.findById(officeId);
 		}
 		else{
-			office = Security.getUser().person.office;
+			office = Security.getUser().get().person.office;
 		}
 		ConfGeneral initUseProgram = ConfGeneral.getConfGeneralByField(ConfigurationFields.InitUseProgram.description, office);
 		ConfGeneral instituteName = ConfGeneral.getConfGeneralByField(ConfigurationFields.InstituteName.description, office);
@@ -57,7 +57,7 @@ public class Configurations extends Controller{
 			office = Office.findById(officeId);
 		}
 		else{
-			office = Security.getUser().person.office;
+			office = Security.getUser().get().person.office;
 		}
 		LocalDate date = new LocalDate();
 		//		Office office = Security.getUser().person.office;
@@ -125,7 +125,7 @@ public class Configurations extends Controller{
 				}
 				catch(Exception e){
 					response.status = 500;
-					renderText(Integer.parseInt(value)+"/"+ConfYear.getFieldValue(ConfigurationFields.MonthExpiryVacationPastYear.description, year, Security.getUser().person.office)+"/"+year+" data non valida. Settare correttamente i parametri.");
+					renderText(Integer.parseInt(value)+"/"+ConfYear.getFieldValue(ConfigurationFields.MonthExpiryVacationPastYear.description, year, Security.getUser().get().person.office)+"/"+year+" data non valida. Settare correttamente i parametri.");
 				}
 			}
 
@@ -136,7 +136,7 @@ public class Configurations extends Controller{
 				}
 				catch(Exception e){
 					response.status = 500;
-					renderText(ConfYear.getFieldValue(ConfigurationFields.DayExpiryVacationPastYear.description, year, Security.getUser().person.office)+"/"+Integer.parseInt(value)+"/"+year+" data non valida. Settare correttamente i parametri.");
+					renderText(ConfYear.getFieldValue(ConfigurationFields.DayExpiryVacationPastYear.description, year, Security.getUser().get().person.office)+"/"+Integer.parseInt(value)+"/"+year+" data non valida. Settare correttamente i parametri.");
 				}
 				
 			}
