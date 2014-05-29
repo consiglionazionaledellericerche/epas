@@ -7,19 +7,17 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.Type;
-import org.hibernate.envers.Audited;
-import org.joda.time.LocalDate;
+import models.base.BaseModel;
 
+import org.hibernate.envers.Audited;
 import play.cache.Cache;
-import play.data.validation.Email;
-import play.db.jpa.Model;
+
 
 
 @Audited
 @Entity
 @Table(name="conf_general")
-public class ConfGeneral extends Model{
+public class ConfGeneral extends BaseModel{
 
 	/*inizio nuova configurazione della tabella*/
 	@ManyToOne( fetch=FetchType.LAZY)

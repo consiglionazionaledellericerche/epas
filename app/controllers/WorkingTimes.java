@@ -15,7 +15,6 @@ import models.ContractWorkingTimeType;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import play.Logger;
-import play.data.validation.Required;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;

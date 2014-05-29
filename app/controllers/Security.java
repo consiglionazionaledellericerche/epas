@@ -3,12 +3,9 @@ package controllers;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-
 import models.Office;
 import models.Permission;
 import models.Person;
-import models.RemoteOffice;
 import models.User;
 import models.UsersRolesOffices;
 import play.Logger;
@@ -16,7 +13,6 @@ import play.cache.Cache;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.hash.Hashing;
 import com.google.common.collect.Lists;
 

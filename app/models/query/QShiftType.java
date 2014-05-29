@@ -18,11 +18,11 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QShiftType extends EntityPathBase<ShiftType> {
 
-    private static final long serialVersionUID = 153403448L;
+    private static final long serialVersionUID = 153403448;
 
     public static final QShiftType shiftType = new QShiftType("shiftType");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final StringPath description = createString("description");
 

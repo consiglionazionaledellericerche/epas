@@ -18,13 +18,13 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QContractYearRecap extends EntityPathBase<ContractYearRecap> {
 
-    private static final long serialVersionUID = 180186860L;
+    private static final long serialVersionUID = 180186860;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
     public static final QContractYearRecap contractYearRecap = new QContractYearRecap("contractYearRecap");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final QContract contract;
 

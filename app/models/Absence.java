@@ -6,10 +6,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
+
 import org.hibernate.envers.Audited;
 
 import play.db.jpa.Blob;
-import play.db.jpa.Model;
+
 
 /**
  * 
@@ -19,7 +21,7 @@ import play.db.jpa.Model;
 @Audited
 @Entity
 @Table(name = "absences")
-public class Absence extends Model {
+public class Absence extends BaseModel {
 	
 	private static final long serialVersionUID = -1963061850354314327L;
 	

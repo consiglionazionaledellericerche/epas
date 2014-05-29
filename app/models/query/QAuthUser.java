@@ -17,11 +17,11 @@ import com.mysema.query.types.Path;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QAuthUser extends EntityPathBase<AuthUser> {
 
-    private static final long serialVersionUID = -254137161L;
+    private static final long serialVersionUID = -254137161;
 
     public static final QAuthUser authUser = new QAuthUser("authUser");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final StringPath authIp = createString("authIp");
 

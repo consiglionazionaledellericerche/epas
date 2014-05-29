@@ -6,14 +6,16 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
+
 import org.hibernate.envers.NotAudited;
 
 import play.Logger;
-import play.db.jpa.Model;
+
 
 @Entity
 @Table(name="person_days_in_trouble")
-public class PersonDayInTrouble extends Model
+public class PersonDayInTrouble extends BaseModel
 {
 	
 	public String cause;

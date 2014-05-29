@@ -6,9 +6,10 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
+
 import org.hibernate.envers.Audited;
 
-import play.db.jpa.Model;
 import play.mvc.With;
 import controllers.Secure;
 
@@ -21,7 +22,7 @@ import controllers.Secure;
 @Entity
 @Table(name = "groups")
 @With(Secure.class)
-public class Group extends Model{
+public class Group extends BaseModel{
 
 	@ManyToMany(mappedBy = "groups")
 	public List<Person> persons;

@@ -5,14 +5,16 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
+
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
-import play.db.jpa.Model;
+
 
 @Entity
 @Table(name="shift_cancelled")
-public class ShiftCancelled extends Model{
+public class ShiftCancelled extends BaseModel{
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate date;
 	

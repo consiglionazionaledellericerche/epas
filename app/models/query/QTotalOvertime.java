@@ -17,11 +17,11 @@ import com.mysema.query.types.Path;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QTotalOvertime extends EntityPathBase<TotalOvertime> {
 
-    private static final long serialVersionUID = -695659423L;
+    private static final long serialVersionUID = -695659423;
 
     public static final QTotalOvertime totalOvertime = new QTotalOvertime("totalOvertime");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final DatePath<org.joda.time.LocalDate> date = createDate("date", org.joda.time.LocalDate.class);
 

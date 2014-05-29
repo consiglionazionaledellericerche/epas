@@ -18,13 +18,13 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QAbsence extends EntityPathBase<Absence> {
 
-    private static final long serialVersionUID = -968783207L;
+    private static final long serialVersionUID = -968783207;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
     public static final QAbsence absence = new QAbsence("absence");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final SimplePath<play.db.jpa.Blob> absenceFile = createSimple("absenceFile", play.db.jpa.Blob.class);
 

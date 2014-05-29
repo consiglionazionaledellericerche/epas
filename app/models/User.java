@@ -1,32 +1,26 @@
 package models;
 
-import java.security.Permissions;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+
+import models.base.BaseModel;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
-import play.db.jpa.Model;
-import controllers.Security;
-
 @Entity
 @Audited
 @Table(name="users")
-public class User extends Model{
+public class User extends BaseModel{
 
 	
 	public String username;

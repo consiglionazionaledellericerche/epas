@@ -18,13 +18,13 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QContract extends EntityPathBase<Contract> {
 
-    private static final long serialVersionUID = 2041582646L;
+    private static final long serialVersionUID = 2041582646;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
     public static final QContract contract = new QContract("contract");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final DatePath<org.joda.time.LocalDate> beginContract = createDate("beginContract", org.joda.time.LocalDate.class);
 

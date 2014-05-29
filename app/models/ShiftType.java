@@ -8,11 +8,13 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import play.db.jpa.Model;
+import models.base.BaseModel;
+
+
 
 @Entity
 @Table(name="shift_type")
-public class ShiftType extends Model{
+public class ShiftType extends BaseModel{
 
 	public String type;
 	public String description;

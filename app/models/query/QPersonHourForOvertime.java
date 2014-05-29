@@ -18,13 +18,13 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QPersonHourForOvertime extends EntityPathBase<PersonHourForOvertime> {
 
-    private static final long serialVersionUID = -1600219059L;
+    private static final long serialVersionUID = -1600219059;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
     public static final QPersonHourForOvertime personHourForOvertime = new QPersonHourForOvertime("personHourForOvertime");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;

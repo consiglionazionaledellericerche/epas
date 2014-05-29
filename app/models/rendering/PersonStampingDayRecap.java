@@ -19,8 +19,6 @@ import models.WorkingTimeTypeDay;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
-import play.Logger;
-
 /**
  * Oggetto che modella il giorno di una persona nelle viste personStamping e stampings.
  * @author alessandro

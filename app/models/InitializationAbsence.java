@@ -6,17 +6,19 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
+
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
-import play.db.jpa.Model;
+
 
 @Audited
 @Entity
 @Table(name= "initialization_absences")
-public class InitializationAbsence extends Model{
+public class InitializationAbsence extends BaseModel{
 	
 	@Required
 	@ManyToOne(optional = false)

@@ -5,11 +5,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import play.db.jpa.Model;
+import models.base.BaseModel;
+
+
 
 @Entity
 @Table(name="valuable_competences")
-public class ValuableCompetence extends Model {
+public class ValuableCompetence extends BaseModel {
 
 	//FIXME tabella usata solo da FromMysql
 	
