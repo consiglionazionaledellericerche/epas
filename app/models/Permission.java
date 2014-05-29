@@ -13,6 +13,8 @@ import javax.persistence.Table;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
+import com.google.common.collect.Lists;
+
 import play.data.validation.Unique;
 import play.db.jpa.Model;
 
@@ -29,8 +31,8 @@ public class Permission extends Model{
 	public String description;
     
     @ManyToMany
-    public List <Group> groups;
+    public List <Group> groups = Lists.newArrayList();
     
-	@ManyToMany(cascade = {CascadeType.REFRESH, CascadeType.REMOVE}, fetch = FetchType.LAZY)
-	public List<Role> roles;
+	@ManyToMany(mappedBy="permissions")
+	public List<Role> roles = Lists.newArrayList();
 }

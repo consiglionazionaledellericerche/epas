@@ -36,7 +36,7 @@ public class Resecure extends Controller {
 			return;
 		} else {
 			if (Security.getUser().isPresent()) {
-				renderArgs.put("currentOperator", Security.getUser().get());
+				renderArgs.put("currentUser", Security.getUser().get());
 			}
 			Secure.checkAccess();
 			rules.checkIfPermitted();

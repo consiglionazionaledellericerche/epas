@@ -8,8 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import lombok.Getter;
-import lombok.Setter;
 import models.Permission;
 import models.Person;
 
@@ -23,19 +21,16 @@ import controllers.Security;
  * @author cristian
  *
  */
-@Getter
 public class MainMenu {
 
 	public static final String PERSON_ID_CACHE_PREFIX = "personId.";
 	
-	@Setter
 	private Long personId = null;
 
 	private int year;
 	private int month;
 	private Integer day;
 
-	@Setter
 	private ActionMenuItem method = null;
 
 	private List<Person> persons;
