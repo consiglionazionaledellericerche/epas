@@ -1,65 +1,47 @@
 # --- !Ups
 
 ALTER TABLE office
-  ADD COLUMN contraction character varying(255);
+  ADD COLUMN contraction TEXT;
   
 ALTER TABLE office_history
-  ADD COLUMN contraction character varying(255);
+  ADD COLUMN contraction TEXT;
 
-  
-CREATE SEQUENCE seq_roles
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE;
-    
-CREATE SEQUENCE seq_users_roles_offices
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE;
-  
 CREATE TABLE roles
 (
-  id bigint DEFAULT nextval('seq_roles'::regclass) NOT NULL,
-  name character varying(255),
-  CONSTRAINT roles_pkey PRIMARY KEY (id )
+  id SERIAL PRIMARY KEY,
+  name TEXT
 );
 
 CREATE TABLE roles_history
 (
   id bigint NOT NULL,
-  _revision integer NOT NULL,
+  _revision integer NOT NULL REFERENCES revinfo (rev), 
   _revision_type smallint,
-  name character varying(255),
-  CONSTRAINT roles_history_pkey PRIMARY KEY (id , _revision ),
-  CONSTRAINT fk1c620d12d54d10ea FOREIGN KEY (_revision)
-      REFERENCES revinfo (rev)
+  name TEXT,
+  CONSTRAINT roles_history_pkey PRIMARY KEY (id , _revision )
 );
 
 CREATE TABLE roles_permissions
 (
-  roles_id bigint NOT NULL,
-  permissions_id bigint NOT NULL,
-  CONSTRAINT fk250ae0234428ea9 FOREIGN KEY (permissions_id)
-      REFERENCES permissions (id),
-  CONSTRAINT fk250ae024001c377 FOREIGN KEY (roles_id)
-      REFERENCES roles (id)
+  roles_id bigint NOT NULL REFERENCES roles (id),
+  permissions_id bigint NOT NULL REFERENCES permissions (id)
+);
+
+CREATE TABLE roles_permissions_history
+(
+  roles_id bigint,
+  permissions_id bigint,
+  _revision integer NOT NULL REFERENCES revinfo (rev), 
+  _revision_type smallint
 );
 
 CREATE TABLE users_roles_offices
 (
-  id bigint DEFAULT nextval('seq_users_roles_offices'::regclass) NOT NULL,
-  office_id bigint,
-  role_id bigint,
-  user_id bigint,
-  CONSTRAINT users_roles_offices_pkey PRIMARY KEY (id ),
-  CONSTRAINT fk4a11f3be2d0fa45e FOREIGN KEY (office_id)
-      REFERENCES office (id),
-  CONSTRAINT fk4a11f3be47140efe FOREIGN KEY (user_id)
-      REFERENCES users (id),
-  CONSTRAINT fk4a11f3bea1e94b1e FOREIGN KEY (role_id)
-      REFERENCES roles (id)
+  id SERIAL PRIMARY KEY,
+  office_id BIGINT REFERENCES office (id),
+  role_id BIGINT REFERENCES roles (id),
+  user_id BIGINT REFERENCES users (id),
+  CONSTRAINT uro_unique_index UNIQUE (office_id, role_id, user_id)
 );
 
 DROP TABLE users_permissions_history;
@@ -74,4 +56,51 @@ ALTER TABLE office
   
 ALTER TABLE office_history
   DROP COLUMN contraction;
+  
+DROP TABLE roles_permissions_history;  
+
+DROP TABLE roles_permissions;
+
+
+DROP TABLE users_roles_offices;
+
+DROP TABLE roles_history;
+
+DROP TABLE roles;
+
+
+
+
+
+
+
+
+
+CREATE TABLE users_permissions
+(
+  users_id bigint NOT NULL REFERENCES users (id),
+  permissions_id bigint NOT NULL REFERENCES permissions (id)
+);
+
+CREATE TABLE users_permissions_history
+(
+  users_id bigint,
+  permissions_id bigint,
+  _revision integer NOT NULL REFERENCES revinfo (rev), 
+  _revision_type smallint
+);
+
+CREATE TABLE users_permissions_offices
+(
+  id SERIAL PRIMARY KEY,
+  user_id bigint NOT NULL REFERENCES users (id),
+  permission_id bigint NOT NULL REFERENCES permissions (id),
+  office_id bigint NOT NULL REFERENCES office (id)
+);
+
+
+
+
+  
+  
  

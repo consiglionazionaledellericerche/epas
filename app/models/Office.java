@@ -70,6 +70,10 @@ public class Office extends Model{
 	@OneToMany(mappedBy="office", fetch=FetchType.LAZY)
 	public List<WorkingTimeType> workingTimeType = new ArrayList<WorkingTimeType>();
     
+    public String getName() {
+    	return this.name;
+    }
+    
     
     /**
      * Ritorna il numero di dipendenti attivi registrati nella sede e nelle sottosedi
