@@ -28,7 +28,8 @@ public class TestDrools extends Controller {
 	public static void youMustBe(int number) {
 		Person person = Person.findByNumber(number);
 		notFoundIfNull(person);
-		rules.checkIfPermitted(person);
+		
+		rules.checkIfPermitted(person.office);
 		
 		renderText("La matricola passata deve essere = 9802 per vedere questo messaggio");
 	}
