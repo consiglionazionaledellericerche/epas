@@ -19,7 +19,6 @@ import models.VacationCode;
 import models.rendering.VacationsRecap;
 import play.Logger;
 import play.mvc.Controller;
-import play.mvc.Scope.RenderArgs;
 import play.mvc.With;
 
 @With( {Secure.class, RequestInit.class} )

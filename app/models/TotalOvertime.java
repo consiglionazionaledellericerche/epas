@@ -3,11 +3,13 @@ package models;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
+
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
-import play.db.jpa.Model;
+
 
 /**
  * 
@@ -17,7 +19,7 @@ import play.db.jpa.Model;
 
 @Entity
 @Table(name = "total_overtime")
-public class TotalOvertime extends Model{
+public class TotalOvertime extends BaseModel{
 
 	@Required
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")

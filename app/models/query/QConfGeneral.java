@@ -18,13 +18,13 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QConfGeneral extends EntityPathBase<ConfGeneral> {
 
-    private static final long serialVersionUID = 1743575936L;
+    private static final long serialVersionUID = 1743575936;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
     public static final QConfGeneral confGeneral = new QConfGeneral("confGeneral");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;

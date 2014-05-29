@@ -7,16 +7,18 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
+
 import org.hibernate.envers.Audited;
 
 import play.cache.Cache;
-import play.db.jpa.Model;
+
 
 
 @Audited
 @Entity
 @Table(name="conf_year")
-public class ConfYear extends Model{
+public class ConfYear extends BaseModel{
 	
 	/* nuova configurazione della tabella*/
 	@ManyToOne( fetch=FetchType.LAZY)

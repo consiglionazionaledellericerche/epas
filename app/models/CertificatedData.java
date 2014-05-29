@@ -6,10 +6,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
+
 import org.hibernate.envers.Audited;
 
 import play.data.validation.Required;
-import play.db.jpa.Model;
+
 
 /**
  * Contiene le informazioni relative alla richiesta/risposta di elaborazione
@@ -22,7 +24,7 @@ import play.db.jpa.Model;
 @Audited
 @Entity()
 @Table(name="certificated_data")
-public class CertificatedData extends Model {
+public class CertificatedData extends BaseModel {
 	
 	public int year;
 	public int month;

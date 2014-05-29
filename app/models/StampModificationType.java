@@ -9,14 +9,15 @@ import javax.persistence.Table;
 
 import org.hibernate.envers.Audited;
 
+import models.base.BaseModel;
 import net.sf.oval.constraint.MinLength;
 import play.data.validation.Required;
-import play.db.jpa.Model;
+
 
 @Audited
 @Entity
 @Table(name="stamp_modification_types")
-public class StampModificationType extends Model{
+public class StampModificationType extends BaseModel{
 	
 	@Required
 	public String code;

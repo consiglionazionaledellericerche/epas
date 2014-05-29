@@ -1,34 +1,17 @@
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.joda.time.LocalDate;
-
-import controllers.Security;
-import models.CompetenceCode;
-import models.ConfGeneral;
-import models.ConfYear;
-import models.Configuration;
 import models.Office;
 import models.Permission;
 import models.Person;
-import models.Qualification;
-import models.RemoteOffice;
 import models.Role;
-import models.StampModificationType;
-import models.StampType;
 import models.User;
 import models.UsersRolesOffices;
-import models.VacationCode;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
-import models.enumerate.ConfigurationFields;
 import play.Logger;
 import play.Play;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
-import play.libs.Codec;
-import play.test.Fixtures;
+import controllers.Security;
 
 
 /**
@@ -232,7 +215,7 @@ public class Bootstrap extends Job {
 			
 			*/
 			
-			//bootstrapPermissionsHandler();
+			bootstrapPermissionsHandler();
 
 	
 		}
@@ -311,15 +294,14 @@ public class Bootstrap extends Job {
 		
 		Permission permission;
 
-		if(Permission.find("byDescription", Security.DEVELOPER).first() == null) {
+		if (Permission.find("byDescription", Security.DEVELOPER).first() == null) {
 			
 			Role role = new Role();
 			role.name = Role.PERSONNEL_ADMIN;
-			role.permissions = new ArrayList<Permission>();
+			role.save();
 			
 			Role roleMini = new Role();
 			roleMini.name = Role.PERSONNEL_ADMIN_MINI;
-			roleMini.permissions = new ArrayList<Permission>();
 			
 			permission = new Permission();
 			permission.description = Security.DEVELOPER;
@@ -444,16 +426,12 @@ public class Bootstrap extends Job {
 			uro.office = person.office;
 			uro.save();
 			
-
+			/* ADMIN_MINI per COSENZA */
+			UsersRolesOffices uro2 = new UsersRolesOffices();
+			uro2.user = person.user;
+			uro2.role = Role.find("byName", Role.PERSONNEL_ADMIN_MINI).first();
+			uro2.office = Office.find("byCode", new Integer("223410")).first();
+			uro2.save();
 		}
-		
-		/* ADMIN_MINI per COSENZA */
-		Person person = Person.find("bySurname", "Lucchesi").first();
-		UsersRolesOffices uro2 = new UsersRolesOffices();
-		uro2.user = person.user;
-		uro2.role = Role.find("byName", Role.PERSONNEL_ADMIN_MINI).first();
-		uro2.office = Office.find("byCode", new Integer("223410")).first();
-		uro2.save();
-		
 	}
 }

@@ -6,13 +6,15 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
+
 import org.hibernate.envers.NotAudited;
 
-import play.db.jpa.Model;
+
 
 @Entity
 @Table(name="users_roles_offices")
-public class UsersRolesOffices extends Model{
+public class UsersRolesOffices extends BaseModel{
 
 	@NotAudited
 	@ManyToOne(fetch=FetchType.EAGER)

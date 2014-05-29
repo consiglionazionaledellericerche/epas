@@ -1,6 +1,5 @@
 package controllers;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.LocalDate;
@@ -10,7 +9,6 @@ import com.google.common.collect.Sets;
 
 import dao.PersonDao;
 import models.Office;
-import models.Permission;
 import models.Person;
 import models.User;
 import play.Play;

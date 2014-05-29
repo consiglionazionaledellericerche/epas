@@ -18,13 +18,13 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QShiftCancelled extends EntityPathBase<ShiftCancelled> {
 
-    private static final long serialVersionUID = 306636563L;
+    private static final long serialVersionUID = 306636563;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
     public static final QShiftCancelled shiftCancelled = new QShiftCancelled("shiftCancelled");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final DatePath<org.joda.time.LocalDate> date = createDate("date", org.joda.time.LocalDate.class);
 

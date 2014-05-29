@@ -8,12 +8,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
+
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
 import play.Logger;
 import play.data.validation.Required;
-import play.db.jpa.Model;
+
 
 /**
  * @author cristian
@@ -22,7 +24,7 @@ import play.db.jpa.Model;
 //@Audited
 @Table(name="person_months_recap")
 @Entity
-public class PersonMonthRecap extends Model {
+public class PersonMonthRecap extends BaseModel {
 
 	@Required
 	@ManyToOne(optional = false)

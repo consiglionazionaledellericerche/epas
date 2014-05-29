@@ -16,6 +16,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import models.base.BaseModel;
 import models.enumerate.JustifiedTimeAtWork;
 
 import org.hibernate.annotations.LazyCollection;
@@ -25,7 +26,6 @@ import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
-import play.db.jpa.Model;
 
 import com.google.common.collect.Sets;
 /**
@@ -36,7 +36,7 @@ import com.google.common.collect.Sets;
 @Entity
 @Table(name="absence_types")
 @Audited
-public class AbsenceType extends Model {
+public class AbsenceType extends BaseModel {
 	
 	private static final long serialVersionUID = 7157167508454574329L;
 	

@@ -18,6 +18,7 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import models.base.BaseModel;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
 import models.rendering.VacationsRecap;
@@ -26,11 +27,9 @@ import org.hibernate.annotations.Type;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
-import controllers.Persons;
 import play.Logger;
 import play.data.validation.Required;
-import play.db.jpa.JPAPlugin;
-import play.db.jpa.Model;
+
 
 /**
  * 
@@ -42,7 +41,7 @@ import play.db.jpa.Model;
 
 @Entity
 @Table(name="contracts")
-public class Contract extends Model {
+public class Contract extends BaseModel {
 
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="source_date")

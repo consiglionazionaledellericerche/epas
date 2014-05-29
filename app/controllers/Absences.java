@@ -8,7 +8,6 @@ import it.cnr.iit.epas.MainMenu;
 import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -44,9 +43,6 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Table;
-import com.google.common.collect.TreeBasedTable;
-
 import dao.AbsenceTypeDao;
 
 @With( {Secure.class, RequestInit.class} )

@@ -12,9 +12,10 @@ import javax.persistence.Table;
 
 import org.hibernate.envers.Audited;
 
+import models.base.BaseModel;
 import net.sf.oval.constraint.NotNull;
 
-import play.db.jpa.Model;
+
 
 /**
  * @author cristian
@@ -24,7 +25,7 @@ import play.db.jpa.Model;
 @Entity
 @Table(name="badge_readers")
 @Audited
-public class BadgeReader extends Model {
+public class BadgeReader extends BaseModel {
 
 	@NotNull
 	public String code;

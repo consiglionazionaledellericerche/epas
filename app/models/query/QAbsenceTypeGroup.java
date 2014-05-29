@@ -18,13 +18,13 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QAbsenceTypeGroup extends EntityPathBase<AbsenceTypeGroup> {
 
-    private static final long serialVersionUID = -556639028L;
+    private static final long serialVersionUID = -556639028;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
     public static final QAbsenceTypeGroup absenceTypeGroup = new QAbsenceTypeGroup("absenceTypeGroup");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final ListPath<models.AbsenceType, QAbsenceType> absenceTypes = this.<models.AbsenceType, QAbsenceType>createList("absenceTypes", models.AbsenceType.class, QAbsenceType.class, PathInits.DIRECT2);
 

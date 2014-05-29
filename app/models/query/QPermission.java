@@ -18,11 +18,11 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QPermission extends EntityPathBase<Permission> {
 
-    private static final long serialVersionUID = -1980985357L;
+    private static final long serialVersionUID = -1980985357;
 
     public static final QPermission permission = new QPermission("permission");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final StringPath description = createString("description");
 

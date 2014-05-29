@@ -25,6 +25,7 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 import models.Stamping.WayType;
+import models.base.BaseModel;
 import models.exports.StampingFromClient;
 import models.personalMonthSituation.Mese;
 
@@ -36,7 +37,6 @@ import org.joda.time.LocalDateTime;
 import play.Logger;
 import play.data.validation.Email;
 import play.data.validation.Required;
-import play.db.jpa.Model;
 import play.mvc.With;
 
 import com.google.common.base.Optional;
@@ -54,7 +54,7 @@ import controllers.Security;
 @Audited
 @Table(name = "persons")
 @With(Secure.class)
-public class Person extends Model {
+public class Person extends BaseModel {
 
 	/**
 	 * relazione con la tabella dei permessi
@@ -225,7 +225,7 @@ public class Person extends Model {
 	@OneToOne(mappedBy="person", fetch=FetchType.EAGER,  cascade = {CascadeType.REMOVE} )
 	public PersonReperibility reperibility;
 
-	@ManyToOne(fetch=FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(name="qualification_id")
 	public Qualification qualification;
 
