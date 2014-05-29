@@ -6,11 +6,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
+
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
-import play.db.jpa.Model;
+
 
 /**
  * 
@@ -21,7 +23,7 @@ import play.db.jpa.Model;
 @Entity
 @Audited
 @Table(name="person_children")
-public class PersonChildren extends Model{
+public class PersonChildren extends BaseModel{
 
 	public String name;
 	

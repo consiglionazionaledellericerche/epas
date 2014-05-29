@@ -11,9 +11,10 @@ import javax.persistence.Table;
 
 import org.hibernate.envers.Audited;
 
+import models.base.BaseModel;
 import net.sf.oval.constraint.MinLength;
 import play.data.validation.Required;
-import play.db.jpa.Model;
+
 
 /**
  * @author cristian
@@ -22,7 +23,7 @@ import play.db.jpa.Model;
 @Audited
 @Entity
 @Table(name = "stamp_types")
-public class StampType extends Model {
+public class StampType extends BaseModel {
 
 	private static final long serialVersionUID = 1953695910638450365L;
 

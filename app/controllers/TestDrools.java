@@ -6,7 +6,6 @@ package controllers;
 import javax.inject.Inject;
 
 import models.Person;
-import dao.PersonDao;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;

@@ -11,13 +11,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
+
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
 import play.data.validation.Unique;
-import play.db.jpa.Model;
+
 
 /**
  * Contiene le informazioni per l'eventuale "reperibilità" svolta dalla persona
@@ -28,7 +30,7 @@ import play.db.jpa.Model;
 @Audited
 @Entity
 @Table(name="person_reperibility")
-public class PersonReperibility extends Model {
+public class PersonReperibility extends BaseModel {
 
 	@Unique
 	@Required

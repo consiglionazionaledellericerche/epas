@@ -13,10 +13,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import models.base.BaseModel;
+
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
-import play.db.jpa.Model;
+
 
 
 /**
@@ -28,7 +30,7 @@ import play.db.jpa.Model;
  */
 @Entity
 @Table(name = "year_recaps")
-public class YearRecap extends Model{
+public class YearRecap extends BaseModel{
 
 	private static final long serialVersionUID = -5721503493068567394L;
 

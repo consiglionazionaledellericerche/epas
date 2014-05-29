@@ -8,9 +8,11 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
+
 import org.hibernate.envers.Audited;
 
-import play.db.jpa.Model;
+
 /**
  * 
  * @author dario
@@ -19,7 +21,7 @@ import play.db.jpa.Model;
 @Entity
 @Audited
 @Table(name="qualifications")
-public class Qualification extends Model{
+public class Qualification extends BaseModel{
 	
 	@OneToMany(mappedBy="qualification")
 	public List<Person> person;

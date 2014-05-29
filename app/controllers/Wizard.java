@@ -4,14 +4,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 
 import models.ConfGeneral;
 import models.ConfYear;
 import models.Office;
-import models.Permission;
 import models.User;
 import models.enumerate.ConfigurationFields;
 

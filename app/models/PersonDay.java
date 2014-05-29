@@ -25,6 +25,7 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import models.Stamping.WayType;
+import models.base.BaseModel;
 import models.enumerate.JustifiedTimeAtWork;
 
 import org.hibernate.annotations.Type;
@@ -34,10 +35,9 @@ import org.joda.time.DateTimeFieldType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
-import play.Logger;
 import play.data.validation.Required;
 import play.db.jpa.JPA;
-import play.db.jpa.Model;
+
 
 /**
  * Classe che rappresenta un giorno, sia esso lavorativo o festivo di una persona.
@@ -49,7 +49,7 @@ import play.db.jpa.Model;
 @Entity
 @Audited
 @Table(name="person_days", uniqueConstraints = { @UniqueConstraint(columnNames={ "person_id", "date"}) })
-public class PersonDay extends Model {
+public class PersonDay extends BaseModel {
 
 
 	@Required

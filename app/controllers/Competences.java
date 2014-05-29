@@ -1,7 +1,6 @@
 package controllers;
 
 import helpers.ModelQuery.SimpleResults;
-import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.PersonUtility;
 
 import java.io.BufferedWriter;

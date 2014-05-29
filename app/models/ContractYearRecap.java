@@ -7,12 +7,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
 import play.data.validation.Required;
-import play.db.jpa.Model;
+
 
 @Entity
 @Table(name="contract_year_recap")
-public class ContractYearRecap extends Model{
+public class ContractYearRecap extends BaseModel{
 
 	@Required
 	@ManyToOne(fetch=FetchType.LAZY)

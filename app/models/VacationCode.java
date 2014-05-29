@@ -10,8 +10,9 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
 import play.data.validation.Required;
-import play.db.jpa.Model;
+
 
 /**
  * @author cristian
@@ -19,7 +20,7 @@ import play.db.jpa.Model;
  */
 @Entity
 @Table(name = "vacation_codes")
-public class VacationCode extends Model {
+public class VacationCode extends BaseModel {
 	
 	private static final long serialVersionUID = 6182486562743326271L;
 	

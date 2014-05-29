@@ -18,11 +18,11 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QConfiguration extends EntityPathBase<Configuration> {
 
-    private static final long serialVersionUID = 680577106L;
+    private static final long serialVersionUID = 680577106;
 
     public static final QConfiguration configuration = new QConfiguration("configuration");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final BooleanPath addWorkingTimeInExcess = createBoolean("addWorkingTimeInExcess");
 

@@ -5,8 +5,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
 import play.data.validation.Required;
-import play.db.jpa.Model;
+
 
 /**
  * tabella delle competenze relative alla persona in cui sono memorizzate le competenze in determinate date (espresse
@@ -17,7 +18,7 @@ import play.db.jpa.Model;
  */
 @Entity
 @Table(name = "competences")
-public class Competence extends Model {
+public class Competence extends BaseModel {
 	
 	private static final long serialVersionUID = -36737525666037452L;
 

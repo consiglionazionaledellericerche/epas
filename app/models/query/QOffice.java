@@ -18,11 +18,11 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QOffice extends EntityPathBase<Office> {
 
-    private static final long serialVersionUID = -1289700640L;
+    private static final long serialVersionUID = -1289700640;
 
     public static final QOffice office = new QOffice("office");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final StringPath address = createString("address");
 
@@ -49,7 +49,7 @@ public class QOffice extends EntityPathBase<Office> {
 
     public final ListPath<models.RemoteOffice, QRemoteOffice> remoteOffices = this.<models.RemoteOffice, QRemoteOffice>createList("remoteOffices", models.RemoteOffice.class, QRemoteOffice.class, PathInits.DIRECT2);
 
-    public final ListPath<models.UsersRolesOffices, QUsersRolesOffices> usersRolesOffices = this.<models.UsersRolesOffices, QUsersRolesOffices>createList("usersRolesOffices", models.UsersRolesOffices.class, QUsersRolesOffices.class, PathInits.DIRECT2);
+    public final SetPath<models.UsersRolesOffices, QUsersRolesOffices> usersRolesOffices = this.<models.UsersRolesOffices, QUsersRolesOffices>createSet("usersRolesOffices", models.UsersRolesOffices.class, QUsersRolesOffices.class, PathInits.DIRECT2);
 
     public final ListPath<models.WorkingTimeType, QWorkingTimeType> workingTimeType = this.<models.WorkingTimeType, QWorkingTimeType>createList("workingTimeType", models.WorkingTimeType.class, QWorkingTimeType.class, PathInits.DIRECT2);
 

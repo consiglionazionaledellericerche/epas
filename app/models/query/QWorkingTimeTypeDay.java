@@ -18,13 +18,13 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QWorkingTimeTypeDay extends EntityPathBase<WorkingTimeTypeDay> {
 
-    private static final long serialVersionUID = 1247746216L;
+    private static final long serialVersionUID = 1247746216;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
     public static final QWorkingTimeTypeDay workingTimeTypeDay = new QWorkingTimeTypeDay("workingTimeTypeDay");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final NumberPath<Integer> breakTicketTime = createNumber("breakTicketTime", Integer.class);
 

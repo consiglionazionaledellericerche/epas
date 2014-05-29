@@ -2,6 +2,7 @@ package models;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -15,16 +16,14 @@ import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
+
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 
-import controllers.Security;
-import dao.PersonDao;
-import play.db.jpa.Model;
  
  
 @Entity
@@ -36,7 +35,7 @@ import play.db.jpa.Model;
     discriminatorType=DiscriminatorType.STRING
 )
 @DiscriminatorValue(value="O")
-public class Office extends Model{
+public class Office extends BaseModel{
  
     @Column(name = "name")
     public String name;
@@ -63,8 +62,8 @@ public class Office extends Model{
     public List<ConfYear> confYear = new ArrayList<ConfYear>();
     
     @NotAudited
-    @OneToMany(mappedBy="office", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
-    public List<UsersRolesOffices> usersRolesOffices = new ArrayList<UsersRolesOffices>();
+    @OneToMany(mappedBy="office", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
+    public Set<UsersRolesOffices> usersRolesOffices = Sets.newHashSet();
     
     @NotAudited
 	@OneToMany(mappedBy="office", fetch=FetchType.LAZY)
