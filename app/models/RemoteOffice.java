@@ -11,6 +11,8 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
+
+import play.db.jpa.Model;
  
 @Entity
 @Audited
@@ -22,9 +24,7 @@ public class RemoteOffice extends Office {
     @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
     public LocalDate joiningDate;
      
-    // Constructors and Getter/Setter methods, 
-    @ManyToOne( fetch=FetchType.LAZY )
+    @ManyToOne
     @JoinColumn(name="office_id")
     public Office office;
-
 }
