@@ -4,12 +4,15 @@
 package controllers;
 
 import it.cnr.iit.epas.DateUtility;
+
 import java.util.List;
 
 import models.Office;
 import models.Person;
+
 import org.joda.time.LocalDate;
 
+import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -19,6 +22,24 @@ import play.mvc.Http;
  *
  */
 public class RequestInit extends Controller {
+	
+	public static class CurrentData {
+		public final Integer year;
+		public final Integer month;
+		public final Integer day;
+		public final Long personId;
+		
+		CurrentData(Integer year, Integer month, Integer day, Long personId) {
+			this.year = year;
+			this.month = month;
+			this.day = day;
+			this.personId = personId;
+		}
+		
+		public String getMonthLabel() {
+			return Messages.get("Month." + month);
+		}
+	}
 
 	public static class TemplateUtility {
 
@@ -123,6 +144,8 @@ public class RequestInit extends Controller {
 			session.put("personSelected", 1);
 		}
 
+		renderArgs.put("currentData", new CurrentData(year, month, day, 
+				Long.valueOf(session.get("personSelected"))));
 
 		if(Security.getUser().get().person != null) {
 
