@@ -110,6 +110,10 @@ public class SecurityRules {
         final StatelessKnowledgeSession session = knowledge.get().newStatelessKnowledgeSession();
         session.addEventListener(new AgendaLogger());
         
+        LOG.debug("SecurityRules: currentUser = " + user);
+        
+        
+        
         session.setGlobal(CURRENT_OPERATOR_IDENTIFIER, user);
         
         final List<Command<?>> commands = Lists.newArrayList();

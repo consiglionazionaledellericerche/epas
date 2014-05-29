@@ -232,7 +232,7 @@ public class Bootstrap extends Job {
 			
 			*/
 			
-			bootstrapPermissionsHandler();
+			//bootstrapPermissionsHandler();
 
 	
 		}
