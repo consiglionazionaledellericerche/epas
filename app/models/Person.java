@@ -225,7 +225,7 @@ public class Person extends Model {
 	@OneToOne(mappedBy="person", fetch=FetchType.EAGER,  cascade = {CascadeType.REMOVE} )
 	public PersonReperibility reperibility;
 
-	@ManyToOne( fetch=FetchType.LAZY)
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="qualification_id")
 	public Qualification qualification;
 
@@ -233,11 +233,9 @@ public class Person extends Model {
 	public PersonShift personShift;
 	
 	//@NotAudited
-	@ManyToOne( fetch=FetchType.LAZY )
+	@ManyToOne
 	@JoinColumn(name="office_id")	
 	public Office office;
-
-	
 	
 	
 	public String getName(){

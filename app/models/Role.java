@@ -18,6 +18,8 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
+import com.google.common.collect.Lists;
+
 import play.db.jpa.Model;
 
 @Entity
@@ -28,15 +30,12 @@ public class Role extends Model{
 	public final static String PERSONNEL_ADMIN = "personnelAdmin";
 	public final static String PERSONNEL_ADMIN_MINI = "personnelAdminMini";
 	
-	
 	public String name;
 	
-	@ManyToMany(cascade = {CascadeType.REFRESH, CascadeType.REMOVE}, fetch = FetchType.LAZY)
-	public List<Permission> permissions;
+	@ManyToMany
+	public List<Permission> permissions = Lists.newArrayList();
 	
     @NotAudited
-    @OneToMany(mappedBy="role", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
-    public List<UsersRolesOffices> usersRolesOffices = new ArrayList<UsersRolesOffices>();
-	
-		
+    @OneToMany(mappedBy="role", cascade = {CascadeType.REMOVE}, orphanRemoval=true)
+    public List<UsersRolesOffices> usersRolesOffices = Lists.newArrayList();
 }
