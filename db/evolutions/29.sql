@@ -8,7 +8,7 @@ ALTER TABLE office_history
 
 CREATE TABLE roles
 (
-  id SERIAL PRIMARY KEY,
+  id BIGSERIAL PRIMARY KEY,
   name TEXT
 );
 
@@ -37,7 +37,7 @@ CREATE TABLE roles_permissions_history
 
 CREATE TABLE users_roles_offices
 (
-  id SERIAL PRIMARY KEY,
+  id BIGSERIAL PRIMARY KEY,
   office_id BIGINT REFERENCES office (id),
   role_id BIGINT REFERENCES roles (id),
   user_id BIGINT REFERENCES users (id),
@@ -48,6 +48,7 @@ DROP TABLE users_permissions_history;
 DROP TABLE users_permissions;
 DROP TABLE users_permissions_offices;
 
+ALTER TABLE shift_time_table ALTER COLUMN id set DEFAULT nextval('seq_shift_time_table');
 
 # ---!Downs
 
@@ -92,7 +93,7 @@ CREATE TABLE users_permissions_history
 
 CREATE TABLE users_permissions_offices
 (
-  id SERIAL PRIMARY KEY,
+  id BIGSERIAL PRIMARY KEY,
   user_id bigint NOT NULL REFERENCES users (id),
   permission_id bigint NOT NULL REFERENCES permissions (id),
   office_id bigint NOT NULL REFERENCES office (id)

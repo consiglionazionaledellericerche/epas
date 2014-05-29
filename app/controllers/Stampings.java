@@ -4,14 +4,12 @@ import helpers.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.PersonUtility;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
 import models.AbsenceType;
-import models.ConfGeneral;
 import models.Contract;
 import models.Office;
 import models.Person;
@@ -20,7 +18,6 @@ import models.PersonTags;
 import models.StampModificationType;
 import models.StampType;
 import models.Stamping;
-import models.enumerate.ConfigurationFields;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
 import models.rendering.PersonStampingDayRecap;

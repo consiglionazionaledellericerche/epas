@@ -7,10 +7,6 @@ import java.lang.annotation.Target;
 
 import javax.inject.Inject;
 
-import com.google.common.base.Optional;
-
-import models.User;
-import play.Play;
 import play.mvc.Before;
 import play.mvc.Controller;
 import security.SecurityRules;

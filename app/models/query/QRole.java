@@ -18,11 +18,11 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QRole extends EntityPathBase<Role> {
 
-    private static final long serialVersionUID = 1339536794L;
+    private static final long serialVersionUID = 1339536794;
 
     public static final QRole role = new QRole("role");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;

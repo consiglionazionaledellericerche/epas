@@ -6,9 +6,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
+
 import org.hibernate.envers.Audited;
 
-import play.db.jpa.Model;
+
 
 /**
  * 
@@ -18,7 +20,7 @@ import play.db.jpa.Model;
 @Entity
 @Audited
 @Table(name="web_stamping_address")
-public class WebStampingAddress extends Model{
+public class WebStampingAddress extends BaseModel{
 	
 	public String webAddressType;
 

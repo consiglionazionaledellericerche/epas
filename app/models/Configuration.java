@@ -13,6 +13,7 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
 import models.enumerate.CapacityCompensatoryRestFourEight;
 import models.enumerate.CapacityCompensatoryRestOneThree;
 import models.enumerate.ResidualWithPastYear;
@@ -22,14 +23,14 @@ import org.joda.time.LocalDate;
 
 import play.cache.Cache;
 import play.data.validation.Email;
-import play.db.jpa.Model;
+
 
 
 @Audited
 @Entity
 @Table(name="configurations")
 @Deprecated
-public class Configuration extends Model{
+public class Configuration extends BaseModel{
 	
 	/**
 	 * booleano per stabilire se una configurazione è in uso (true) oppure no (false)

@@ -18,13 +18,13 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QCertificatedData extends EntityPathBase<CertificatedData> {
 
-    private static final long serialVersionUID = -122268133L;
+    private static final long serialVersionUID = -122268133;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
     public static final QCertificatedData certificatedData = new QCertificatedData("certificatedData");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final StringPath absencesSent = createString("absencesSent");
 

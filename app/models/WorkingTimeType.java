@@ -15,14 +15,14 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
+
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
-import com.sun.corba.se.spi.orbutil.threadpool.Work;
-
 import play.data.validation.Required;
-import play.db.jpa.Model;
+
 
 /**
  * Tipologia di orario di lavoro relativa ad un singolo giorno
@@ -35,7 +35,7 @@ import play.db.jpa.Model;
 @Entity
 @Audited
 @Table(name="working_time_types")
-public class WorkingTimeType extends Model {
+public class WorkingTimeType extends BaseModel {
 	
 	private static final long serialVersionUID = -3443521979786226461L;
 

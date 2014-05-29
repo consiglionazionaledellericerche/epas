@@ -10,16 +10,18 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
+
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
-import play.db.jpa.Model;
+
 
 @Entity
 //@Audited
 @Table(name = "vacation_periods")
-public class VacationPeriod extends Model{
+public class VacationPeriod extends BaseModel{
 
 	private static final long serialVersionUID = 7082224747753675170L;
 

@@ -18,13 +18,13 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QPersonChildren extends EntityPathBase<PersonChildren> {
 
-    private static final long serialVersionUID = 954421400L;
+    private static final long serialVersionUID = 954421400;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
     public static final QPersonChildren personChildren = new QPersonChildren("personChildren");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final DatePath<org.joda.time.LocalDate> bornDate = createDate("bornDate", org.joda.time.LocalDate.class);
 

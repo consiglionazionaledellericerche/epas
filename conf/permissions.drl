@@ -21,28 +21,13 @@ then
  $c.grant();
 end
 
-
 /* Ognugno puoi vedere solo i propri dati */
 rule ViewPersonalData
 when
  $o: Office()
  $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
- $p: Permission(description == "viewPerson") from $uro.role.permissions  
- $c: PermissionCheck(action in ("TestDrools.youMustBe"), target == $o, 
-      granted == false)
-then
- $c.grant();
-end
-
-
-
-/* Ognugno puoi vedere solo i propri dati */
-rule ViewPersonalData2
-when
- $o: Office(name == "IIT")
- /* $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices */
+ $p: Permission(description == "viewPerson") from $uro.role.permissions
  $c: PermissionCheck(action in ("TestDrools.youMustBe"), target == $o, granted == false)
 then
- System.out.println( $o );
  $c.grant();
 end

@@ -18,7 +18,6 @@ import models.CompetenceCode;
 import models.Contract;
 import models.InitializationAbsence;
 import models.InitializationTime;
-import models.Permission;
 import models.Person;
 import models.PersonDay;
 import models.PersonMonthRecap;

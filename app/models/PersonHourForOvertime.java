@@ -6,11 +6,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import play.db.jpa.Model;
+import models.base.BaseModel;
+
+
 
 @Table(name="person_hour_for_overtime")
 @Entity
-public class PersonHourForOvertime extends Model{
+public class PersonHourForOvertime extends BaseModel{
 
 	/**
 	 * numero di ore assegnato (viene modificato mese per mese) di straordinari per quella persona che è responsabile di gruppo

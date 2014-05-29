@@ -18,11 +18,11 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QCompetenceCode extends EntityPathBase<CompetenceCode> {
 
-    private static final long serialVersionUID = 435340666L;
+    private static final long serialVersionUID = 435340666;
 
     public static final QCompetenceCode competenceCode = new QCompetenceCode("competenceCode");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final StringPath code = createString("code");
 

@@ -8,14 +8,14 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
+import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
 
 import play.data.validation.Max;
 import play.data.validation.Min;
 import play.data.validation.Required;
-import play.db.jpa.Model;
+
 
 /**
  * Per ogni giorno della settimana ci sono riportate le informazioni necessarie 
@@ -27,7 +27,7 @@ import play.db.jpa.Model;
 @Audited
 @Entity
 @Table(name = "working_time_type_days")
-public class WorkingTimeTypeDay extends Model {
+public class WorkingTimeTypeDay extends BaseModel {
 
 	private static final long serialVersionUID = 4622948996966018754L;
 

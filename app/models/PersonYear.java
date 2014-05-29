@@ -6,9 +6,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
+
 import org.hibernate.envers.Audited;
 
-import play.db.jpa.Model;
+
 
 /**
  * 
@@ -19,7 +21,7 @@ import play.db.jpa.Model;
 @Audited
 @Entity
 @Table(name="person_years")
-public class PersonYear extends Model{
+public class PersonYear extends BaseModel{
 	
 	@ManyToOne
 	@JoinColumn(name = "person_id", nullable = false)

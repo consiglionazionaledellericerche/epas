@@ -3,20 +3,16 @@ package models;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
-import play.db.jpa.Model;
+
  
 @Entity
 @Audited
-@Table(name="remote_office")
 @DiscriminatorValue("R")
 public class RemoteOffice extends Office {
  

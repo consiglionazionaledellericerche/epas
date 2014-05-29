@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QRemoteOffice extends EntityPathBase<RemoteOffice> {
 
-    private static final long serialVersionUID = -2013386810L;
+    private static final long serialVersionUID = -2013386810;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
@@ -64,7 +64,7 @@ public class QRemoteOffice extends EntityPathBase<RemoteOffice> {
     public final ListPath<RemoteOffice, QRemoteOffice> remoteOffices = _super.remoteOffices;
 
     //inherited
-    public final ListPath<models.UsersRolesOffices, QUsersRolesOffices> usersRolesOffices = _super.usersRolesOffices;
+    public final SetPath<models.UsersRolesOffices, QUsersRolesOffices> usersRolesOffices = _super.usersRolesOffices;
 
     //inherited
     public final ListPath<models.WorkingTimeType, QWorkingTimeType> workingTimeType = _super.workingTimeType;
