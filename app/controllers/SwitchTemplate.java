@@ -2,6 +2,9 @@ package controllers;
 
 import java.sql.SQLException;
 
+import org.joda.time.LocalDate;
+import org.joda.time.Years;
+
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -379,8 +382,17 @@ private static void executeAction(String action) {
 		
 	}
 	
+	// esempio se si volesse utilizzare l'anno nei parametri.
+	public static int currentYear() {
+		Integer year = request.params.get("year", Integer.class);
+		if (year == null) {
+			return LocalDate.now().getYear();
+		} else {
+			return year;
+		}
+	}
+	
 	public static void updateYear(Integer year) throws Throwable {
-		
 		String action = session.get("actionSelected");
 		if( action==null ) {
 			

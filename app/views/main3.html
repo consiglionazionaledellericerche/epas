@@ -90,7 +90,6 @@
               </ul>
             </li>
           </ul>
-          
           #{secure.check "viewPersonList"}
           <ul class="nav navbar-nav">
             #{if dropDown.equals("dropDown2") }
@@ -143,74 +142,9 @@
             </li>
           </ul>
           #{/secure.check}
-          
-          #{if switchYear != null && switchYear == true }
-          <ul id="nav-year" class="nav navbar-nav">
-       		<li class="dropdown">
-          	  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="badge">${session.get("yearSelected")}</span><b class="caret"></b></a>
-          	  <ul class="dropdown-menu">
-            	<li><a href="@{SwitchTemplate.updateYear(2013)}">2013</a></li>
-            	<li><a href="@{SwitchTemplate.updateYear(2014)}">2014</a></li>
-            	<li><a href="@{SwitchTemplate.updateYear(2015)}">2015</a></li>            
-          	  </ul>
-        	</li>
-      	  </ul>
-      	  #{/if}
-      
-          #{if switchMonth != null && switchMonth == true }
-      	  <ul id="nav-month" class="nav navbar-nav">
-        	<li class="dropdown">
-          	  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="badge">${templateUtility.monthName(session.get("monthSelected"))}</span><b class="caret"></b></a>
-          	  <ul class="dropdown-menu">
-            	<li><a href="@{SwitchTemplate.updateMonth(1)}">Gennaio</a></li>
-            	<li><a href="@{SwitchTemplate.updateMonth(2)}">Febbraio</a></li>
-            	<li><a href="@{SwitchTemplate.updateMonth(3)}">Marzo</a></li>
-            	<li><a href="@{SwitchTemplate.updateMonth(4)}">Aprile</a></li>  
-            	<li><a href="@{SwitchTemplate.updateMonth(5)}">Maggio</a></li>  
-            	<li><a href="@{SwitchTemplate.updateMonth(6)}">Giugno</a></li>  
-            	<li><a href="@{SwitchTemplate.updateMonth(7)}">Luglio</a></li>  
-            	<li><a href="@{SwitchTemplate.updateMonth(8)}">Agosto</a></li>  
-            	<li><a href="@{SwitchTemplate.updateMonth(9)}">Settembre</a></li>  
-            	<li><a href="@{SwitchTemplate.updateMonth(10)}">Ottobre</a></li> 
-            	<li><a href="@{SwitchTemplate.updateMonth(11)}">Novembre</a></li>  
-            	<li><a href="@{SwitchTemplate.updateMonth(12)}">Dicembre</a></li>               
-          	  </ul>
-        	</li>
-      	  </ul>
-      	  #{/if}
-      	  
-      	  #{if switchDay != null && switchDay == true }
-      	  #{secure.check "viewPersonList"}
-      	  	#{form @SwitchTemplate.updateDay(), class: 'navbar-form navbar-left my-navbar-form', onChange:'javascript:this.form.submit()' }
-      	  	<div class="form-group">
-      	  	<!-- Lista giorni -->
-          	  #{select 'day', value:session.get("daySelected"), class:'form-control', id:'day', onChange:'javascript:this.form.submit()'}
-		  		#{list items:1..dayLenght, as:'d'}
-		    		#{option d}${d}#{/option}
-	  			#{/list}
-		  	  #{/select}
-		  	</div>
-  			
-      		#{/form}
-      	  #{/secure.check}
-      	  #{/if}
-      	  
-      	  #{if switchPerson != null && switchPerson == true }
-      	  #{secure.check "viewPersonList"}
-      	  	#{form @SwitchTemplate.updatePerson(), class: 'navbar-form navbar-left my-navbar-form', onChange:'javascript:this.form.submit()' }
-      	  	<div class="form-group">
-      	  	<!-- Lista persone -->
-          	  #{select 'personId', value:session.get("personSelected"), class:'form-control', id:'person', onChange:'javascript:this.form.submit()'}
-		  		#{list items:navPersons, as:'person'}
-		    		#{option person.id}${person.surname + ' ' + person.name}#{/option}
-	  			#{/list}
-		  	  #{/select}
-		  	</div>
-  			
-      		#{/form}
-      	  #{/secure.check}
-      	  #{/if}
 
+		  #{include '/menu.html' /}          
+      
 
       	  #{if session.contains("sudo.username")}
       	    <ul class="nav navbar-nav navbar-right">
@@ -251,6 +185,10 @@
   		  
   		  
   		  
+  		  <div class="clearfix">
+          #{get 'pagemenu' /}
+          </div>
+          
   		  
   		  
   		  
