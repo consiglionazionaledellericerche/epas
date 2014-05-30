@@ -16,10 +16,10 @@ import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
 
-@With( {Secure.class, RequestInit.class} )
+@With( {Resecure.class, RequestInit.class} )
 public class PersonMonths extends Controller{
 	
-	//@Check(Security.VIEW_PERSONAL_SITUATION)
+	
 	public static void hourRecap(int year){
 
 		//controllo dei parametri
@@ -39,7 +39,7 @@ public class PersonMonths extends Controller{
 		render(csap, user.person, year);	
 	}
 
-	//@Check(Security.VIEW_PERSONAL_SITUATION)
+	
 	public static void trainingHours(int year){
 		
 		if( Security.getUser().get().person == null ) {
@@ -64,7 +64,7 @@ public class PersonMonths extends Controller{
 	}
 
 
-	//@Check(Security.VIEW_PERSONAL_SITUATION)
+	
 	public static void insertTrainingHours(int month, int year){
 		
 		/*
@@ -81,7 +81,7 @@ public class PersonMonths extends Controller{
 		render(person, month, year, max);
 	}
 
-	//@Check(Security.VIEW_PERSONAL_SITUATION)
+	
 	public static void modifyTrainingHours(Long personMonthSituationId){
 		
 		PersonMonthRecap pm = PersonMonthRecap.findById(personMonthSituationId);
@@ -93,7 +93,7 @@ public class PersonMonths extends Controller{
 		render(person, pm, max, year, month);
 	}
 
-	//@Check(Security.VIEW_PERSONAL_SITUATION)
+	
 	public static void saveTrainingHours(@Valid int begin, @Valid int end, @Valid Integer value, int month, int year){
 		if (validation.hasErrors()) {
 			flash.error("Ci sono errori");
@@ -149,7 +149,7 @@ public class PersonMonths extends Controller{
 		PersonMonths.trainingHours(year);
 	}
 	
-	//@Check(Security.VIEW_PERSONAL_SITUATION)
+	
 	public static void updateTrainingHours(@Valid int begin, @Valid int end, @Valid Integer value, int month, int year, Long personMonthId){
 		
 		if (validation.hasErrors()) {
@@ -195,7 +195,7 @@ public class PersonMonths extends Controller{
 		PersonMonths.trainingHours(beginDate.getYear());
 	}
 	
-	//@Check(Security.VIEW_PERSONAL_SITUATION)
+	
 	public static void deleteTrainingHours(Long personId, Long personMonthRecapId){
 		PersonMonthRecap pm = PersonMonthRecap.findById(personMonthRecapId);
 		if(pm == null)
@@ -207,7 +207,7 @@ public class PersonMonths extends Controller{
 		render(pm);
 	}
 	
-	//@Check(Security.VIEW_PERSONAL_SITUATION)
+	
 	public static void deleteTrainingHoursConfirmed( Long personMonthRecapId ){
 		
 		PersonMonthRecap pm = PersonMonthRecap.findById(personMonthRecapId);

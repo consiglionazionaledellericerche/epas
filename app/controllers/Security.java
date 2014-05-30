@@ -167,7 +167,7 @@ public class Security extends Secure.Security {
 		if( personId != null && officeId == null) {
 			
 			Person person = Person.findById(personId);
-			if( checkUro(user.userRoleOffices, permission, person.office) ) {
+			if( checkUro(user.usersRolesOffices, permission, person.office) ) {
 				
 				return true;
 			}
@@ -179,7 +179,7 @@ public class Security extends Secure.Security {
 		if( personId == null && officeId != null ) {
 			
 			Office office = Office.findById(officeId);
-			if( checkUro(user.userRoleOffices, permission, office) ) {
+			if( checkUro(user.usersRolesOffices, permission, office) ) {
 				
 				return true;
 			}
@@ -192,7 +192,7 @@ public class Security extends Secure.Security {
 			
 			Person person = Person.findById(personId);
 			Office office = Office.findById(officeId);
-			if( checkUro(user.userRoleOffices, permission, person.office) && checkUro(user.userRoleOffices, permission, office) ) {
+			if( checkUro(user.usersRolesOffices, permission, person.office) && checkUro(user.usersRolesOffices, permission, office) ) {
 				
 				return true;
 			}
@@ -202,7 +202,7 @@ public class Security extends Secure.Security {
 		
 		/* caso richiesta generica senza personId o officeId specificati */
 		
-		return checkUro(user.userRoleOffices, permission, null);
+		return checkUro(user.usersRolesOffices, permission, null);
 		
 		
 		
@@ -328,7 +328,7 @@ public class Security extends Secure.Security {
 		//User user = Security.getUser();
 		List<Office> officeList = new ArrayList<Office>();
 		
-		for(UsersRolesOffices uro : getUser().get().userRoleOffices)  {
+		for(UsersRolesOffices uro : getUser().get().usersRolesOffices)  {
 			
 			for(Permission p : uro.role.permissions) {
 				

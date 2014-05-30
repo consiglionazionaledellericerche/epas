@@ -17,7 +17,7 @@ import com.mysema.query.types.Path;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QTotalOvertime extends EntityPathBase<TotalOvertime> {
 
-    private static final long serialVersionUID = -695659423;
+    private static final long serialVersionUID = -695659423L;
 
     public static final QTotalOvertime totalOvertime = new QTotalOvertime("totalOvertime");
 

@@ -13,10 +13,10 @@ import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
 
-@With( {Secure.class, RequestInit.class} )
+@With( {Resecure.class, RequestInit.class} )
 public class Vacations extends Controller{
 		
-	//@Check(Security.VIEW_PERSONAL_SITUATION)
+	
 	public static void show(Integer anno) {
 
 		//controllo dei parametri
@@ -56,7 +56,7 @@ public class Vacations extends Controller{
     }
 	
 
-	//@Check(Security.VIEW_PERSONAL_SITUATION)
+	
 	public static void vacationsCurrentYear(Integer anno){
 		
 		Person person = Security.getUser().get().person;
@@ -90,7 +90,7 @@ public class Vacations extends Controller{
 	}
 	
 
-	//@Check(Security.VIEW_PERSONAL_SITUATION)
+	
 	public static void vacationsLastYear(Integer anno){
 		
 		Person person = Security.getUser().get().person;
@@ -123,7 +123,7 @@ public class Vacations extends Controller{
        	render(vacationsRecap);
 	}
 	
-	//@Check(Security.VIEW_PERSONAL_SITUATION)
+	
 	public static void permissionCurrentYear(Integer anno){
 		
 		Person person = Security.getUser().get().person;

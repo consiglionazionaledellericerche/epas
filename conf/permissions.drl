@@ -14,20 +14,88 @@ when
  $c: PermissionCheck(action in (
      	"TestDrools.youMustBeLoggedIn",
      	/* abilitate per il metodo, ristrette poi */
-     	"TestDrools.youMustBe"
+     	"TestDrools.youMustBe",
+     	/* timbrature */
+     	"Stampings.stampings",
+     	/* assenze mensili */
+     	"Absences.absences",
+     	/* modale assenze mensili */
+     	"Absences.absenceInMonth",
+     	/* assenze annuali */
+     	"YearlyAbsences.absencesPerPerson",
+     	/* ferie */
+     	"Vacations.show",
+     	/*modale permessi anno corrente*/
+     	"Vacations.permissionCurrentYear",
+     	/*modale ferie anno corrente*/
+     	"Vacations.vacationsCurrentYear",
+     	/*modale ferie anno passato*/
+     	"Vacations.vacationsLastYear",
+     	/* competenze */
+     	"Competences.competences",
+     	/* riepilogo orario*/
+     	"PersonMonths.hourRecap",
+     	/* ore di formazione */
+     	"PersonMonths.trainingHours",
+     	/* cancella ore di formazione*/
+     	"PersonMonths.deleteTrainingHours",
+     	/* conferma cancellazione ore di formazione */
+     	"PersonMonths.deleteTrainingHoursConfirmed",
+     	/* inserisci ore di formazione */
+     	"PersonMonths.insertTrainingHours",
+     	/* modifica ore di formazione */
+     	"PersonMonths.modifyTrainingHours",
+     	/* salva ore di formazione */
+     	"PersonMonths.saveTrainingHours",
+     	/* aggiorna ore di formazione */
+     	"PersonMonths.updateTrainingHours",
+     	/* modifica password */
+     	"Persons.changePassword"
+     	   	
+     	
      	), target == null, granted == false)
  $u: User(person != null)
 then
  $c.grant();
 end
 
-/* Ognugno puoi vedere solo i propri dati */
-rule ViewPersonalData
+rule ViewPersonGeneric
+when 
+ $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $p: Permission(description == "viewPerson") from $uro.role.permissions
+ $c: PermissionCheck(action in ("Persons.list"), target == null, granted == false)
+then
+$c.grant();
+end
+
+rule PorcoDio
+when
+ $o: Office()
+ $c: PermissionCheck(action in ("Persons.showCurrentVacation"), target == $o, granted == false)
+then
+ System.out.println($o);
+ $c.grant();
+end
+
+
+/* Ognugno puoi vedere solo i propri dati 
+rule ViewPersonInOffice
 when
  $o: Office()
  $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
  $p: Permission(description == "viewPerson") from $uro.role.permissions
- $c: PermissionCheck(action in ("TestDrools.youMustBe"), target == $o, granted == false)
+ $c: PermissionCheck(action in ("Persons.showCurrentVacation"), target == $o, granted == false)
 then
  $c.grant();
 end
+
+rule ViewPersonGeneric
+when 
+ $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $p: Permission(description == "viewPerson") from $uro.role.permissions
+ $c: PermissionCheck(action in ("Persons.list"), target == null, granted == false)
+then
+$c.grant();
+end
+
+*/

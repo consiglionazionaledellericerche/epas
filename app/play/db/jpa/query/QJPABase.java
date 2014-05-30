@@ -17,7 +17,7 @@ import com.mysema.query.types.Path;
 @Generated("com.mysema.query.codegen.SupertypeSerializer")
 public class QJPABase extends EntityPathBase<JPABase> {
 
-    private static final long serialVersionUID = 1552226979;
+    private static final long serialVersionUID = 1552226979L;
 
     public static final QJPABase jPABase = new QJPABase("jPABase");
 

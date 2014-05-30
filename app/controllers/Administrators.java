@@ -313,7 +313,7 @@ public class Administrators extends Controller {
 	@Check(Security.INSERT_AND_UPDATE_ADMINISTRATOR)
 	public static void delete(Long adminId){
 		Person person = Person.findById(adminId);
-		person.user.userRoleOffices.clear();
+		person.user.usersRolesOffices.clear();
 		person.save();
 		flash.success(String.format("Eliminati i permessi per l'utente %s %s", person.name, person.surname));
 		Application.indexAdmin();
