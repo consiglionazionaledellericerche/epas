@@ -7,6 +7,8 @@ import it.cnr.iit.epas.PersonUtility;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import models.Competence;
 import models.CompetenceCode;
 import models.ConfGeneral;
@@ -33,6 +35,7 @@ import play.i18n.Messages;
 import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
+import security.SecurityRules;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
@@ -41,13 +44,17 @@ import com.google.common.hash.Hashing;
 
 import dao.PersonDao;
 
-@With( {Secure.class, RequestInit.class} )
+@With( {Resecure.class, RequestInit.class} )
 public class Persons extends Controller {
 
 	public static final String USERNAME_SESSION_KEY = "username";
+	
+	@Inject
+	static SecurityRules rules;
 
-	@Check(Security.VIEW_PERSON_LIST)
+	@Check(Security.VIEW_PERSON)
 	public static void list(String name){
+		rules.checkIfPermitted();
 		LocalDate startEra = new LocalDate(1900,1,1);
 		LocalDate endEra = new LocalDate(9999,1,1);
 		List<Person> personList = PersonDao.list(Optional.fromNullable(name), 
@@ -384,10 +391,17 @@ public class Persons extends Controller {
 	}
 
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	@Check(Security.VIEW_PERSON)
 	public static void showCurrentVacation(Long personId){
 
 		Person person = Person.findById(personId);
+
+		if(person == null) {
+
+			flash.error("La persona selezionata non esiste. Operazione annullata");
+			Persons.list(null);
+		}
+		rules.checkIfPermitted(person.office);
 		VacationPeriod vp = person.getCurrentContract().getCurrentVacationPeriod();
 		render(person, vp);
 	}

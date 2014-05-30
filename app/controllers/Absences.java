@@ -45,7 +45,7 @@ import play.mvc.With;
 import com.google.common.base.Optional;
 import dao.AbsenceTypeDao;
 
-@With( {Secure.class, RequestInit.class} )
+@With( {Resecure.class, RequestInit.class} )
 public class Absences extends Controller{
 
 	/**
@@ -65,7 +65,7 @@ public class Absences extends Controller{
 		return AbsenceType.find("Select abt from AbsenceType abt where abt.validTo > ? order by code", date).fetch();
 	}
 
-	//@Check(Security.VIEW_PERSONAL_SITUATION)
+	
 	public static void absences(Integer year, Integer month) {
 		Person person = Security.getUser().get().person;
 		Map<AbsenceType,Integer> absenceTypeInMonth = getAbsenceTypeInMonth(person, year, month);
@@ -112,7 +112,7 @@ public class Absences extends Controller{
 
 	}
 	
-	//@Check(Security.VIEW_PERSONAL_SITUATION)
+	
 	public static void absenceInMonth(Long personId, String absenceCode, int year, int month){
 		List<LocalDate> dateAbsences = new ArrayList<LocalDate>();
 		Person person = Person.findById(personId);

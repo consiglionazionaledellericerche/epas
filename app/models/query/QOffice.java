@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QOffice extends EntityPathBase<Office> {
 
-    private static final long serialVersionUID = -1289700640;
+    private static final long serialVersionUID = -1289700640L;
 
     public static final QOffice office = new QOffice("office");
 
