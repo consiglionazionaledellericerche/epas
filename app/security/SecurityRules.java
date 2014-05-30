@@ -112,8 +112,6 @@ public class SecurityRules {
         
         LOG.debug("SecurityRules: currentUser = " + user);
         
-        
-        
         session.setGlobal(CURRENT_OPERATOR_IDENTIFIER, user);
         
         final List<Command<?>> commands = Lists.newArrayList();

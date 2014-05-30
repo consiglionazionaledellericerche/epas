@@ -51,7 +51,6 @@ when
      	"PersonMonths.updateTrainingHours",
      	/* modifica password */
      	"Persons.changePassword"
-     	   	
      	
      	), target == null, granted == false)
  $u: User(person != null)
@@ -59,43 +58,47 @@ then
  $c.grant();
 end
 
+/* Ognugno puoi vedere solo i propri dati */ 
+
 rule ViewPersonGeneric
 when 
  $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
  $p: Permission(description == "viewPerson") from $uro.role.permissions
  $c: PermissionCheck(action in ("Persons.list"), target == null, granted == false)
 then
-$c.grant();
-end
-
-rule PorcoDio
-when
- $o: Office()
- $c: PermissionCheck(action in ("Persons.showCurrentVacation"), target == $o, granted == false)
-then
- System.out.println($o);
  $c.grant();
 end
 
-
-/* Ognugno puoi vedere solo i propri dati 
 rule ViewPersonInOffice
 when
  $o: Office()
  $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
  $p: Permission(description == "viewPerson") from $uro.role.permissions
- $c: PermissionCheck(action in ("Persons.showCurrentVacation"), target == $o, granted == false)
+ $c: PermissionCheck(action in (
+       "Persons.showCurrentVacation",
+       "Persons.edit"
+       ), target == $o, granted == false)
 then
  $c.grant();
 end
 
-rule ViewPersonGeneric
-when 
+rule viewPerson
+when
  $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
  $p: Permission(description == "viewPerson") from $uro.role.permissions
- $c: PermissionCheck(action in ("Persons.list"), target == null, granted == false)
+ $c: PermissionCheck(target == "viewPerson", granted == false)
 then
-$c.grant();
+ $c.grant();
 end
 
-*/
+rule viewPersonDay
+when
+ $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $p: Permission(description == "viewPersonDay") from $uro.role.permissions
+ $c: PermissionCheck(target == "viewPersonDay", granted == false)
+then
+ $c.grant();
+end
+
+
+
