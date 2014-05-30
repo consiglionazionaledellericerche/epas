@@ -42,7 +42,8 @@ import dao.PersonDao;
 
 
 
-@With( {Secure.class, RequestInit.class} )
+@With( {RequestInit.class, Resecure.class} )
+
 public class Stampings extends Controller {
 
 	/**
@@ -51,7 +52,8 @@ public class Stampings extends Controller {
 	 * @param year
 	 * @param month
 	 */
-	//@Check(Security.VIEW_PERSONAL_SITUATION)
+	
+	
 	public static void stampings(Integer year, Integer month){
 
 		Person person = Security.getUser().get().person;

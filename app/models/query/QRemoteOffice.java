@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QRemoteOffice extends EntityPathBase<RemoteOffice> {
 
-    private static final long serialVersionUID = -2013386810;
+    private static final long serialVersionUID = -2013386810L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 

@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QPersonMonthRecap extends EntityPathBase<PersonMonthRecap> {
 
-    private static final long serialVersionUID = -642314632;
+    private static final long serialVersionUID = -642314632L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
