@@ -25,7 +25,7 @@ import com.google.common.collect.TreeBasedTable;
 
 import dao.PersonDao;
 
-@With( {Secure.class, RequestInit.class} )
+@With( {Resecure.class, RequestInit.class} )
 public class YearlyAbsences extends Controller{
 
 	public final static class AbsenceTypeDays{
@@ -203,7 +203,7 @@ public class YearlyAbsences extends Controller{
 	 * @param year
 	 * Render della pagina absencePerPerson.html che riassume le assenze annuali di una persona
 	 */
-	//@Check(Security.VIEW_PERSONAL_SITUATION)
+	
 	public static void absencesPerPerson(Integer year){
 		
 		//controllo sui parametri

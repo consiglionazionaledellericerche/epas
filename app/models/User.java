@@ -33,7 +33,7 @@ public class User extends BaseModel{
 	
 	@NotAudited
 	@OneToMany(mappedBy="user", fetch=FetchType.EAGER, cascade = {CascadeType.REMOVE})
-	public List<UsersRolesOffices> userRoleOffices = new ArrayList<UsersRolesOffices>();
+	public List<UsersRolesOffices> usersRolesOffices = new ArrayList<UsersRolesOffices>();
 	
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="expire_recovery_token")

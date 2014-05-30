@@ -74,11 +74,11 @@
 		
 		<td><font color="#000000">${person.getQualification() != null ? person.getQualification().qualification : ''}</font></td>
 		<td>${''}</td>
-		<td><font color="#000000">${person.getLocation() != null ? person.location.department : ''}</font></td>
-		<td><font color="#000000">${person.getLocation() != null ? person.location.headOffice : '' }</font></td>
-		<td><font color="#000000">${person.contactData != null && !person.contactData.telephone.equals('No phone number') ? person.contactData.telephone : ''}</font></td>
-		<td><font color="#000000">${person.location != null ? person.location.room : ''}</font></td>
-		<td><font color="#000000">${person.contactData != null ? person.contactData.email : ''}</font></td>
+		<td><font color="#000000">${person.department != null ? person.department : ''}</font></td>
+		<td><font color="#000000">${person.headOffice != null ? person.headOffice : '' }</font></td>
+		<td><font color="#000000">${person.telephone != null && !person.telephone.equals('No phone number') ? person.telephone : ''}</font></td>
+		<td><font color="#000000">${person.room != null ? person.room : ''}</font></td>
+		<td><font color="#000000">${person.email != null ? person.email : ''}</font></td>
 		<td>${}</td>
 	#{/if}
 	#{else}
@@ -97,11 +97,11 @@
 		<td><font color="#808080">${person.getVacation() != null ? person.getVacation().description : ''}</font></td>
 		<td><font color="#808080">${person.getQualification() != null ? person.getQualification().qualification : ''}</font></td>
 		<td>${''}</td>
-		<td><font color="#808080">${person.getLocation() != null ? person.location.department : ''}</font></td>
-		<td><font color="#808080">${person.getLocation() != null ? person.location.headOffice : '' }</font></td>
-		<td><font color="#808080">${person.contactData != null && !person.contactData.telephone.equals('No phone number') ? person.contactData.telephone : ''}</font></td>
-		<td><font color="#808080">${person.location != null ? person.location.room : ''}</font></td>
-		<td><font color="#808080">${person.contactData != null ? person.contactData.email : ''}</font></td>
+		<td><font color="#808080">${person.department != null ? person.department : ''}</font></td>
+		<td><font color="#808080">${person.headOffice != null ? person.headOffice : '' }</font></td>
+		<td><font color="#808080">${person.telephone != null && !person.telephone.equals('No phone number') ? person.telephone : ''}</font></td>
+		<td><font color="#808080">${person.room != null ? person.room : ''}</font></td>
+		<td><font color="#808080">${person.email != null ? person.email : ''}</font></td>
 		<td>${}</td>
 	#{/else}
 	</tr>

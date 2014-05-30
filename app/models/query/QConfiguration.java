@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QConfiguration extends EntityPathBase<Configuration> {
 
-    private static final long serialVersionUID = 680577106;
+    private static final long serialVersionUID = 680577106L;
 
     public static final QConfiguration configuration = new QConfiguration("configuration");
 
