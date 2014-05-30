@@ -7,21 +7,50 @@ import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import models.Office;
 import models.Person;
 
 import org.joda.time.LocalDate;
 
+import controllers.Resecure.NoCheck;
 import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Http;
+import security.SecurityRules;
 
 /**
  * @author cristian
  *
  */
 public class RequestInit extends Controller {
+	
+	@Inject
+	static SecurityRules rules;
+	
+	public static class ItemsPermitted {
+		
+		public boolean viewPerson = false;
+		public boolean viewPersonDay = false;
+		
+		public ItemsPermitted() {
+			
+			if(rules.check(Security.VIEW_PERSON))
+				this.viewPerson = true;
+			
+			if(rules.check(Security.VIEW_PERSON_DAY))
+				this.viewPersonDay = true;
+			
+			
+		}
+		
+		public boolean isDropDownVisible() {
+			
+			return viewPerson || viewPersonDay;
+		}
+	}
 	
 	public static class CurrentData {
 		public final Integer year;
@@ -69,7 +98,12 @@ public class RequestInit extends Controller {
 
 
 	@Before 
+	@NoCheck
 	public static void injectMenu() { 
+		
+		ItemsPermitted ip = new ItemsPermitted();
+		renderArgs.put("ip", ip);
+	
 
 		session.put("actionSelected", computeActionSelected(Http.Request.current().action));
 

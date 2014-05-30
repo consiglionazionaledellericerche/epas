@@ -42,6 +42,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import com.google.common.hash.Hashing;
 
+import controllers.Resecure.NoCheck;
 import dao.PersonDao;
 
 @With( {Resecure.class, RequestInit.class} )
@@ -52,9 +53,11 @@ public class Persons extends Controller {
 	@Inject
 	static SecurityRules rules;
 
-	@Check(Security.VIEW_PERSON)
+	@NoCheck
 	public static void list(String name){
+		
 		rules.checkIfPermitted();
+		
 		LocalDate startEra = new LocalDate(1900,1,1);
 		LocalDate endEra = new LocalDate(9999,1,1);
 		List<Person> personList = PersonDao.list(Optional.fromNullable(name), 
@@ -219,10 +222,18 @@ public class Persons extends Controller {
 	}
 
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	@NoCheck
 	public static void edit(Long personId){
+		
 		Person person = Person.findById(personId);
+		if(person == null) {
 
+			flash.error("La persona selezionata non esiste. Operazione annullata");
+			Persons.list(null);
+		}
+		
+		rules.checkIfPermitted(person.office);
+		
 		LocalDate date = new LocalDate();
 		List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract", person).fetch();
 		List<Office> officeList = Security.getOfficeAllowed();	
@@ -391,17 +402,18 @@ public class Persons extends Controller {
 	}
 
 
-	@Check(Security.VIEW_PERSON)
+	@NoCheck
 	public static void showCurrentVacation(Long personId){
 
 		Person person = Person.findById(personId);
-
 		if(person == null) {
 
 			flash.error("La persona selezionata non esiste. Operazione annullata");
 			Persons.list(null);
 		}
+
 		rules.checkIfPermitted(person.office);
+		
 		VacationPeriod vp = person.getCurrentContract().getCurrentVacationPeriod();
 		render(person, vp);
 	}
