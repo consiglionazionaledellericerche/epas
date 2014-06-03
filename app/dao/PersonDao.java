@@ -53,10 +53,10 @@ public final class PersonDao {
 				
 		final JPQLQuery query = ModelQuery.queryFactory().from(qp)
 				.leftJoin(qp.contracts, qc)
-				.leftJoin(qp.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime)
+				.leftJoin(qp.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime).fetch()
 				//.leftJoin(qp.location, QLocation.location)
-				.leftJoin(qp.reperibility, QPersonReperibility.personReperibility)
-				.leftJoin(qp.personShift, QPersonShift.personShift)
+				.leftJoin(qp.reperibility, QPersonReperibility.personReperibility).fetch()
+				.leftJoin(qp.personShift, QPersonShift.personShift).fetch()
 				.leftJoin(qp.user, QUser.user)
 				.orderBy(qp.surname.asc(), qp.name.asc())
 				.distinct();
@@ -136,10 +136,10 @@ public final class PersonDao {
 				
 		final JPQLQuery query = ModelQuery.queryFactory().from(qp)
 				.leftJoin(qp.contracts, qc)
-				.leftJoin(qp.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime)
+				.leftJoin(qp.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime).fetch()
 				//.leftJoin(qp.location, QLocation.location)
-				.leftJoin(qp.reperibility, QPersonReperibility.personReperibility)
-				.leftJoin(qp.personShift, QPersonShift.personShift)
+				.leftJoin(qp.reperibility, QPersonReperibility.personReperibility).fetch()
+				.leftJoin(qp.personShift, QPersonShift.personShift).fetch()
 				.leftJoin(qp.user, QUser.user)
 				.leftJoin(qp.competenceCode, qcc)
 				.orderBy(qp.surname.asc(), qp.name.asc())
