@@ -30,4 +30,5 @@ public class UsersRolesOffices extends BaseModel{
 	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="role_id")
 	public Role role;
+	
 }

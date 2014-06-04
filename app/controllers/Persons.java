@@ -39,6 +39,7 @@ import security.SecurityRules;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.hash.Hashing;
 
@@ -64,19 +65,10 @@ public class Persons extends Controller {
 				Sets.newHashSet(Security.getOfficeAllowed()), false, startEra, 
 				endEra).list();
 		LocalDate date = new LocalDate();
-		List<Person> activePerson = PersonDao.list(Optional.fromNullable(name), 
-				Sets.newHashSet(Security.getOfficeAllowed()), 
-				false, 
-				date, 
-				date)
-				.list();
-		//List<Person> personList = Person.getActivePersonsSpeedyInPeriod(startEra, endEra, Security.getOfficeAllowed(), false);
-
-		//List<Person> activePerson = Person.getActivePersonsInDay(date.getDayOfMonth(), date.getMonthOfYear(), date.getYear(), Security.getOfficeAllowed(), false);
-
-		render(personList, activePerson);
+		
+		//renderText("Fine");
+		render(personList);
 	}
-
 
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void insertPerson() throws InstantiationException, IllegalAccessException {
@@ -675,8 +667,8 @@ public class Persons extends Controller {
 		}	
 		
 		Contract contract = cwtt.contract;
-		List<ContractWorkingTimeType> cwttList = 
-				new ArrayList<ContractWorkingTimeType>(contract.contractWorkingTimeType);
+		List<ContractWorkingTimeType> cwttList = Lists.newArrayList(contract.contractWorkingTimeType);
+		
 		int index = cwttList.indexOf(cwtt);
 		if(contract.contractWorkingTimeType.size()<index){
 			

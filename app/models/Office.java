@@ -2,7 +2,6 @@ package models;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -22,7 +21,7 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.Lists;
 
  
  
@@ -63,7 +62,7 @@ public class Office extends BaseModel{
     
     @NotAudited
     @OneToMany(mappedBy="office", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
-    public Set<UsersRolesOffices> usersRolesOffices = Sets.newHashSet();
+    public List<UsersRolesOffices> usersRolesOffices = Lists.newArrayList();
     
     @NotAudited
 	@OneToMany(mappedBy="office", fetch=FetchType.LAZY)
@@ -125,6 +124,8 @@ public class Office extends BaseModel{
     	}
     	return officeComputed;
     }
+
+	
     
     
 

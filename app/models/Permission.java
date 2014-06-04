@@ -1,6 +1,7 @@
 package models;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
@@ -9,7 +10,9 @@ import javax.persistence.Table;
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
+
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 
 /**
@@ -28,5 +31,5 @@ public class Permission extends BaseModel{
     public List <Group> groups = Lists.newArrayList();
     
 	@ManyToMany(mappedBy="permissions")
-	public List<Role> roles = Lists.newArrayList();
+	public Set<Role> roles = Sets.newHashSet();
 }

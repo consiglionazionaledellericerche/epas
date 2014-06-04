@@ -14,7 +14,11 @@ import models.Person;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
+
 import controllers.Resecure.NoCheck;
+import dao.PersonDao;
 import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -181,15 +185,22 @@ public class RequestInit extends Controller {
 		renderArgs.put("currentData", new CurrentData(year, month, day, 
 				Long.valueOf(session.get("personSelected"))));
 
+		
+		LocalDate beginMonth = new LocalDate(year,month,1);
+		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
+		String name = null;
 		if(Security.getUser().get().person != null) {
-
-			List<Person> persons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
+			
+			List<Person> persons = PersonDao.list(Optional.fromNullable(name), 
+					Sets.newHashSet(Security.getOfficeAllowed()), false, beginMonth, endMonth).list();
 			renderArgs.put("navPersons", persons);
 		} 
 		else {
 
 			List<Office> allOffices = Office.findAll();
-			List<Person> persons = Person.getActivePersonsInMonth(month, year, allOffices, false);
+			List<Person> persons = PersonDao.list(Optional.fromNullable(name), 
+					Sets.newHashSet(allOffices), false, beginMonth, endMonth).list();
+
 			renderArgs.put("navPersons", persons);
 		}
 

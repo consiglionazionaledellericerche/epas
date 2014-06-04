@@ -1,9 +1,11 @@
 package models;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -12,7 +14,9 @@ import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
+
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 
 
@@ -26,10 +30,16 @@ public class Role extends BaseModel{
 	
 	public String name;
 	
-	@ManyToMany
-	public List<Permission> permissions = Lists.newArrayList();
+	@ManyToMany(fetch = FetchType.EAGER)
+	public Set<Permission> permissions = Sets.newHashSet();
 	
     @NotAudited
     @OneToMany(mappedBy="role", cascade = {CascadeType.REMOVE}, orphanRemoval=true)
     public List<UsersRolesOffices> usersRolesOffices = Lists.newArrayList();
+    
+    public Set<Permission> prendiPermissions(String where) {
+    	
+    	Set<Permission> permissionTemp = this.permissions;
+    	return permissionTemp;
+    }
 }

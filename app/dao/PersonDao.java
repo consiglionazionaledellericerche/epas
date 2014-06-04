@@ -10,12 +10,13 @@ import models.Office;
 import models.Person;
 import models.query.QCompetenceCode;
 import models.query.QContract;
-
+import models.query.QContractWorkingTimeType;
 import models.query.QPerson;
 import models.query.QPersonHourForOvertime;
 import models.query.QPersonReperibility;
 import models.query.QPersonShift;
 import models.query.QUser;
+import models.query.QVacationPeriod;
 
 import org.joda.time.LocalDate;
 
@@ -51,16 +52,16 @@ public final class PersonDao {
 		//final LocalDate start = new LocalDate();
 		//final LocalDate end = start;
 				
-		final JPQLQuery query = ModelQuery.queryFactory().from(qp)
-				.leftJoin(qp.contracts, qc)
-				.leftJoin(qp.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime).fetch()
-				//.leftJoin(qp.location, QLocation.location)
-				.leftJoin(qp.reperibility, QPersonReperibility.personReperibility).fetch()
-				.leftJoin(qp.personShift, QPersonShift.personShift).fetch()
-				.leftJoin(qp.user, QUser.user)
-				.orderBy(qp.surname.asc(), qp.name.asc())
-				.distinct();
-				
+					
+		 final JPQLQuery query = ModelQuery.queryFactory().from(qp)
+					.leftJoin(qp.contracts, qc).fetch()
+					.leftJoin(qc.contractWorkingTimeType).fetch()
+					.leftJoin(qc.vacationPeriods).fetch()
+					.leftJoin(qp.personHourForOvertime).fetch()
+					.leftJoin(qp.reperibility).fetch()
+					.leftJoin(qp.personShift).fetch()
+					.orderBy(qp.surname.asc(), qp.name.asc())
+					.distinct();
 		
 		
 		final BooleanBuilder condition = new BooleanBuilder();
