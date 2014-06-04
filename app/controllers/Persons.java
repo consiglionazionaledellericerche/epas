@@ -61,11 +61,8 @@ public class Persons extends Controller {
 		LocalDate startEra = new LocalDate(1900,1,1);
 		LocalDate endEra = new LocalDate(9999,1,1);
 		List<Person> personList = PersonDao.list(Optional.fromNullable(name), 
-				Sets.newHashSet(Security.getOfficeAllowed()), 
-				false, 
-				startEra, 
-				endEra)
-				.list();
+				Sets.newHashSet(Security.getOfficeAllowed()), false, startEra, 
+				endEra).list();
 		LocalDate date = new LocalDate();
 		List<Person> activePerson = PersonDao.list(Optional.fromNullable(name), 
 				Sets.newHashSet(Security.getOfficeAllowed()), 
@@ -671,19 +668,23 @@ public class Persons extends Controller {
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void deleteContractWorkingTimeType(ContractWorkingTimeType cwtt)
 	{
-		if(cwtt==null)
-		{
+		if(cwtt==null){
+			
 			flash.error("Impossibile completare la richiesta, controllare i log.");
 			Application.indexAdmin();
 		}	
+		
 		Contract contract = cwtt.contract;
-		int index = contract.contractWorkingTimeType.indexOf(cwtt);
-		if(contract.contractWorkingTimeType.size()<index)
-		{
+		List<ContractWorkingTimeType> cwttList = 
+				new ArrayList<ContractWorkingTimeType>(contract.contractWorkingTimeType);
+		int index = cwttList.indexOf(cwtt);
+		if(contract.contractWorkingTimeType.size()<index){
+			
 			flash.error("Impossibile completare la richiesta, controllare i log.");
 			Persons.edit(cwtt.contract.person.id);	
 		}
-		ContractWorkingTimeType previous = contract.contractWorkingTimeType.get(index-1);
+		
+		ContractWorkingTimeType previous = cwttList.get(index-1);
 		previous.endDate = cwtt.endDate;
 		previous.save();
 		cwtt.delete();
