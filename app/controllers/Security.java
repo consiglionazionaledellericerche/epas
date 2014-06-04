@@ -223,7 +223,8 @@ public class Security extends Secure.Security {
 				
 				continue;
 			}
-			for(Permission p : uro.role.permissions) {
+			List<Permission> permissionList = Lists.newArrayList(uro.role.permissions);
+			for(Permission p : permissionList) {
 
 				if(p.description.equals(permission.description)) {
 

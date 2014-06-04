@@ -6,6 +6,7 @@ import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -26,6 +27,9 @@ import models.rendering.VacationsRecap;
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import play.Logger;
 import play.data.validation.Required;
@@ -73,7 +77,8 @@ public class Contract extends BaseModel {
 	public Person person;
 	
 	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY, cascade = CascadeType.REMOVE)
-	public List<VacationPeriod> vacationPeriods;
+	@OrderBy("beginFrom")
+	public Set<VacationPeriod> vacationPeriods = Sets.newHashSet();
 	
 	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY, cascade = CascadeType.REMOVE)
 	public List<ContractYearRecap> recapPeriods;
@@ -94,7 +99,7 @@ public class Contract extends BaseModel {
 	@NotAudited
 	@OneToMany(mappedBy = "contract", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	@OrderBy("beginDate")
-	public List<ContractWorkingTimeType> contractWorkingTimeType = new ArrayList<ContractWorkingTimeType>();
+	public Set<ContractWorkingTimeType> contractWorkingTimeType = Sets.newHashSet();
 
 	//TODO eliminare e configurare yaml
 	public void setBeginContract(String date){
@@ -140,8 +145,7 @@ public class Contract extends BaseModel {
 	 */
 	public VacationPeriod getCurrentVacationPeriod()
 	{
-		List<VacationPeriod> vpList = this.getContractVacationPeriods();
-		for(VacationPeriod vp : vpList) {
+		for(VacationPeriod vp : this.vacationPeriods) {
 
 			LocalDate now = new LocalDate();
 
@@ -286,12 +290,17 @@ public class Contract extends BaseModel {
 			this.contractWorkingTimeType.remove(cwtt);
 			this.save();
 		}
-		//Sistemo il primo
-		ContractWorkingTimeType first = this.contractWorkingTimeType.get(0);
+		
+		//Conversione a List per avere il metodo get()
+		List<ContractWorkingTimeType> cwttList = Lists.newArrayList(contractWorkingTimeType);
+						
+		//Sistemo il primo		
+		ContractWorkingTimeType first = cwttList.get(0);
 		first.beginDate = this.getContractDateInterval().getBegin();
 		first.save();
 		//Sistemo l'ultimo
-		ContractWorkingTimeType last = this.contractWorkingTimeType.get(this.contractWorkingTimeType.size()-1);
+		ContractWorkingTimeType last = 
+				cwttList.get(this.contractWorkingTimeType.size()-1);
 		last.endDate = this.getContractDateInterval().getEnd();
 		if(DateUtility.isInfinity(last.endDate))
 			last.endDate = null;

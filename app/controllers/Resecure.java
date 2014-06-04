@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 
 import javax.inject.Inject;
 
+import models.User;
 import play.mvc.Before;
 import play.mvc.Controller;
 import security.SecurityRules;
@@ -32,6 +33,7 @@ public class Resecure extends Controller {
 			return;
 		} else {
 			if (Security.getUser().isPresent()) {
+				User user = Security.getUser().get();
 				renderArgs.put("currentUser", Security.getUser().get());
 			}
 			Secure.checkAccess();

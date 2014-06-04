@@ -288,7 +288,7 @@ public class Competences extends Controller{
 
 		List<Person> activePersons = simpleResults.paginated(page).getResults();
 		
-	//	List<Person> activePersons = Person.getTechnicianForCompetences(new LocalDate(year, month, 1), Security.getUser().person.getOfficeAllowed());
+	
 		for(Person p : activePersons){
 			Integer daysAtWork = 0;
 			Integer recoveryDays = 0;
