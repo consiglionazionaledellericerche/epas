@@ -399,25 +399,27 @@ public class PersonUtility {
 		Absence absence = Absence.find(
 				"Select abs "
 						+ "from Absence abs "
-						+ "where abs.absenceType = ? and abs.personDay.person = ? " 
+						+ "where abs.absenceType = ? and abs.personDay.person = ? "
+						+ "and abs.personDay.date between ? and ? "
 						+ "order by abs.personDay.date desc",
 						absenceType.absenceTypeGroup.replacingAbsenceType, 
-						person).first();
+						person, new LocalDate(date.getYear(),1,1), date).first();
 		if(absence != null){
-
+			int minutesExcess = minutesExcessPreviousAbsenceType(absenceType, person, date);
 			if(absenceType.absenceTypeGroup.accumulationType.equals(AccumulationType.yearly)){
 				absList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup.label = ? and abs.personDay.person = ? and" +
-						" abs.personDay.date between ? and ?", 
+						" abs.personDay.date > ? and abs.personDay.date <= ?", 
 						absenceType.absenceTypeGroup.label, person, absence.personDay.date, date).fetch();
 				for(Absence abs : absList){
 					totalMinutesJustified = totalMinutesJustified + abs.absenceType.justifiedTimeAtWork.minutesJustified;
 				}
-				if(absenceType.absenceTypeGroup.limitInMinute > totalMinutesJustified + absenceType.justifiedTimeAtWork.minutesJustified)
+				if(absenceType.absenceTypeGroup.limitInMinute > totalMinutesJustified + absenceType.justifiedTimeAtWork.minutesJustified + minutesExcess)
 					/**
 					 * in questo caso non si è arrivati a raggiungere il limite previsto per quella assenza oraria 
 					 */
 					return new CheckMessage(true, "Si può utilizzare il codice di assenza e non c'è necessità di rimpiazzare il codice con il codice " +
 							"di rimpiazzamento", null);
+
 				else{
 					/**
 					 * si è arrivati a raggiungere il limite, a questo punto esistono due possibilità:
@@ -464,10 +466,62 @@ public class PersonUtility {
 
 			}
 		}
+		else{
+	
+			absList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup.label = ? and " +
+					"abs.personDay.person = ? and abs.personDay.date between ? and ?", 
+					absenceType.absenceTypeGroup.label, 
+					person, 
+					new LocalDate(date.getYear(),1,1), 
+					date).fetch();
+			
+			for(Absence abs : absList){
+				totalMinutesJustified = totalMinutesJustified+abs.absenceType.justifiedTimeAtWork.minutesJustified;
+			}
+			if(totalMinutesJustified + absenceType.justifiedTimeAtWork.minutesJustified > absenceType.absenceTypeGroup.limitInMinute)
+				return new CheckMessage(true, "Si può inserire il codice di assenza richiesto e viene inserito anche il codice di rimpiazzamento", absenceType.absenceTypeGroup.replacingAbsenceType);
+			else
+				return new CheckMessage(true, "Si può utilizzare il codice di assenza e non c'è necessità di rimpiazzare il codice con il codice " +
+						"di rimpiazzamento", null);
+		}
+		
 
 		return new CheckMessage(true, "Si può prendere il codice di assenza richiesto.", null);	
 	}
 
+	
+	/**
+	 * 
+	 * @param abt
+	 * @param person
+	 * @param date
+	 * @return i minuti in eccesso, se ci sono, relativi all'inserimento del precedente codice di assenza dello stesso tipo 
+	 */
+	private static int minutesExcessPreviousAbsenceType(AbsenceType abt, Person person, LocalDate date){
+		
+		//cerco l'ultima occorrenza del codice di completamento
+		Absence absence = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
+				"and abs.absenceType.absenceTypeGroup.label = ? " +
+				"and abs.personDay.date < ? order by abs.personDay.date desc", person, abt.absenceTypeGroup.label, date).first();
+		if(absence == null)
+			return 0;
+		
+		List<Absence> absList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
+				"and abs.personDay.date between ? and ? and abs.absenceType.absenceTypeGroup.label = ?", 
+				person, new LocalDate(date.getYear(),1,1), date, abt.absenceTypeGroup.label).fetch();
+		int minutesExcess = 0;
+		int minutesJustified = 0;
+		for(Absence abs : absList){
+			minutesJustified = minutesJustified + abs.absenceType.justifiedTimeAtWork.minutesJustified;
+			if(minutesJustified + minutesExcess > abs.absenceType.absenceTypeGroup.limitInMinute ){
+				minutesExcess = minutesExcess + minutesJustified - abs.absenceType.absenceTypeGroup.limitInMinute;
+				minutesJustified = 0;
+			}
+		}		
+		
+		return minutesExcess;
+	}
+	
 	/**
 	 * 
 	 * @param absenceType
