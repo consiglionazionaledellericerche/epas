@@ -294,6 +294,11 @@ public class PersonDay extends Model {
 				justifiedTimeAtWork = justifiedTimeAtWork + abs.absenceType.justifiedTimeAtWork.minutesJustified;
 				continue;
 			}
+			
+			if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.HalfDay){
+				justifiedTimeAtWork = justifiedTimeAtWork + this.person.getCurrentWorkingTimeType().workingTimeTypeDays.get(this.date.getDayOfWeek()).workingTime / 2;
+				continue;
+			}
 		}
 
 		//se non c'è almeno una coppia di timbrature considero il justifiedTimeAtwork 
