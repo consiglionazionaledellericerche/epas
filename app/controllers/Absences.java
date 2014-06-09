@@ -1224,7 +1224,13 @@ public class Absences extends Controller{
 				actualDate = actualDate.plusDays(1);
 				continue;
 			}
-			
+			//Controllo il caso di inserimento di codice 31: verifico che sia valido il periodo in cui voglio inserirlo
+			if(absenceType.code.equals("31") && !absenceType.code.equals(PersonUtility.whichVacationCode(person, actualDate).code)){
+				flash.error("Si prova a inserire un codice di assenza (%s , %s) che non è prendibile per il giorno %s", 
+						absenceType.code, absenceType.description, actualDate);
+				
+				Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
+			}
 			//Costruisco se non esiste il person day
 			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, actualDate).first();
 			if(pd == null){
