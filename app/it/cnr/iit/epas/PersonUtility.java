@@ -1035,7 +1035,7 @@ public class PersonUtility {
 		List<LocalDate> dateTroubleStampingList = new ArrayList<LocalDate>();
 
 		for(PersonDayInTrouble pd : pdList){
-			if(pd.cause.contains(cause) && !pd.personDay.isHoliday())
+			if(pd.cause.contains(cause) && !pd.personDay.isHoliday() && pd.fixed == false)
 				dateTroubleStampingList.add(pd.personDay.date);
 		}
 		if(p.surname.equals("Conti") && p.name.equals("Marco"))
@@ -1183,8 +1183,8 @@ public class PersonUtility {
 			e1.printStackTrace();
 		}
 		try {
-			simpleEmail.addTo(person.contactData.email);
-			//simpleEmail.addTo("dario.tagliaferri@iit.cnr.it");
+			//simpleEmail.addTo(person.contactData.email);
+			simpleEmail.addTo("dario.tagliaferri@iit.cnr.it");
 		} catch (EmailException e) {
 
 			e.printStackTrace();
@@ -1229,6 +1229,7 @@ public class PersonUtility {
 
 		simpleEmail.setMsg(message);
 		Mail.send(simpleEmail);
+		Logger.info("Inviata mail a %s %s contenente le date da controllare : %s", person.name, person.surname, date);
 		return true;
 	}
 
