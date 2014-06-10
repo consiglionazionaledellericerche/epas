@@ -69,7 +69,7 @@ public class QWorkingTimeType extends EntityPathBase<WorkingTimeType> {
 
     public QWorkingTimeType(Class<? extends WorkingTimeType> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.office = inits.isInitialized("office") ? new QOffice(forProperty("office")) : null;
+        this.office = inits.isInitialized("office") ? new QOffice(forProperty("office"), inits.get("office")) : null;
     }
 
 }

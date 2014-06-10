@@ -30,6 +30,7 @@ import models.base.BaseModel;
 import models.exports.StampingFromClient;
 import models.personalMonthSituation.Mese;
 
+import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
@@ -74,6 +75,10 @@ public class Person extends BaseModel {
 	@Column(name = "other_surnames")
 	public String othersSurnames;
 
+	@Column(name = "birthday")
+	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	public LocalDate birthday;
+	
 	@Column(name = "born_date")
 	public Date bornDate;
 
@@ -482,9 +487,9 @@ public class Person extends BaseModel {
 		
 		List<Office> officeList = new ArrayList<Office>();
 		officeList.add(this.office);
-		if(!this.office.remoteOffices.isEmpty()){
+		if(!this.office.subOffices.isEmpty()){
 			
-			for(Office office : this.office.remoteOffices){
+			for(Office office : this.office.subOffices){
 				officeList.add(office);
 			}
 		}
@@ -1249,7 +1254,7 @@ public class Person extends BaseModel {
 			return Person.findAll();
 		}
 		//tutte le persone (l'amministratore è amministratore di sede principale)
-		if(user.person.office.remoteOffices.isEmpty())
+		if(user.person.office.subOffices.isEmpty())
 		{
 			//List<Person> personOffice = new ArrayList<Person>();
 			

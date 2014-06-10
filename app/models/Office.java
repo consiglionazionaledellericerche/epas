@@ -5,35 +5,30 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.DiscriminatorType;
-import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import models.base.BaseModel;
 
+import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
 import com.google.common.collect.Lists;
 
+import controllers.Security;
+
  
  
 @Entity
 @Audited
 @Table(name = "office")
-@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(
-    name="discriminator",
-    discriminatorType=DiscriminatorType.STRING
-)
-@DiscriminatorValue(value="O")
 public class Office extends BaseModel{
  
     @Column(name = "name")
@@ -48,8 +43,16 @@ public class Office extends BaseModel{
     @Column(name = "code")
     public Integer code = 0;
     
+    @Column(name="joining_date")
+    @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+    public LocalDate joiningDate;
+    
     @OneToMany(mappedBy="office", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
-    public List<RemoteOffice> remoteOffices = new ArrayList<RemoteOffice>();
+    public List<Office> subOffices = new ArrayList<Office>();
+    
+    @ManyToOne
+    @JoinColumn(name="office_id")
+    public Office office;
      
     @OneToMany(mappedBy="office", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
     public List<Person> persons = new ArrayList<Person>();
@@ -71,7 +74,6 @@ public class Office extends BaseModel{
     public String getName() {
     	return this.name;
     }
-    
     
     /**
      * Ritorna il numero di dipendenti attivi registrati nella sede e nelle sottosedi
@@ -113,7 +115,7 @@ public class Office extends BaseModel{
     		Office office = officeToCompute.get(0);
     		officeToCompute.remove(office);
     		
-    		for(Office remoteOffice : office.remoteOffices) {
+    		for(Office remoteOffice : office.subOffices) {
     			
     			//Office temp = Office.find("byId", remoteOffice.id).first();
     			//officeToCompute.add(temp);
@@ -125,8 +127,377 @@ public class Office extends BaseModel{
     	return officeComputed;
     }
 
+    
+    
+    /**
+     * La lista di tutte le Aree definite nel db ePAS
+     * @return
+     */
+	public static List<Office> getAllAreas() {
+		
+		List<Office> areaList = Office.find("select o from Office o where o.office is null").fetch();
+		return areaList;
+		
+	}
 	
+	/**
+	 * Se this è una Area ritorna la lista degli istituti definiti per quell'area
+	 * @return la lista degli istituti associati all'area, null nel caso this non 
+	 * sia un'area
+	 */
+	public List<Office> getInstitutes() {
+		
+		if(!this.isArea())
+			return null;
+		
+		return this.subOffices;
+	}
+	
+	/**
+	 * Se this è un Istituto ritorna la lista delle sedi definite per quell'istituto
+	 * @return la lista delle sedi associate all'istituto, null nel caso this non 
+	 * sia un istituto
+	 */
+	public List<Office> getSeats() {
+		
+		if(!this.isInstitute())
+			return null;
+		
+		return this.subOffices;
+	}
+	
+	/**
+	 * Area livello 0
+	 * @return true se this è una Area, false altrimenti
+	 */
+	public boolean isArea() {
+		
+		if(this.office != null) 
+			return false;
+		
+		return true;
+	}
     
-    
+	/**
+	 * Istituto livello 1
+	 * @return true se this è un Istituto, false altrimenti
+	 */
+	public boolean isInstitute() {
+		
+    	if(this.isArea())
+    		return false;
+    	
+    	if(this.office.office != null)
+    		return false;
+    	
+    	return true;
+    }
+	
+	/**
+	 * Sede livello 2
+	 * @return
+	 */
+	public boolean isSeat() {
+		
+		if(this.isArea())
+			return false;
+		
+		if(this.isInstitute())
+			return false;
+		
+		return true;
+		
+	}
+	
+	/**
+	 * Ritorna l'istituto padre se this è una sede
+	 * @return 
+	 */
+	public Office getSuperInstitute() {
+		
+		if(!isSeat())
+			return null;
+		return this.office;
+	}
+	
+	/**
+	 * Ritorna l'area padre se thi è un istituto o una sede
+	 * @return
+	 */
+	public Office getSuperArea() {
+		
+		if(isSeat())
+			return this.office.office;
+		
+		if(isInstitute())
+			return this.office;
+		
+		return null;
+	}
+	
+	/***
+	 * 
+	 * 
+	 * PARTE SULLA SICUREZZA - METODI DA SPOSTARE
+	 * 
+	 * 
+	 * 
+	 */
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public boolean isPrintable() {
+		
+		Role roleAdmin = Role.find("byName", Role.PERSONNEL_ADMIN).first();
+		Role roleAdminMini = Role.find("byName", Role.PERSONNEL_ADMIN_MINI).first();
+		
+		return isRightPermittedOnOfficeTree(roleAdmin) || isRightPermittedOnOfficeTree(roleAdminMini);
+
+	}
+	
+	/**
+	 * @return
+	 */
+	public boolean isEditable() {
+		
+		Role roleAdmin = Role.find("byName", Role.PERSONNEL_ADMIN).first();
+		return isRightPermittedOnOfficeTree(roleAdmin);
+	}
+	
+	
+	/*
+	public String printRole() {
+		UsersRolesOffices uro = Office.getUro(Security.getUser().get(), this);
+		if(uro==null)
+			return "";
+		
+		if(uro.role.name.equals(Role.PERSONNEL_ADMIN))
+			return "Modifica e visualizzazione";
+		if(uro.role.name.equals(Role.PERSONNEL_ADMIN_MINI))
+			return "Visualizzazione";
+		
+		return "";
+	}
+	*/
+	
+	public List<Person> getPersonnelAdmin() {
+		
+		Role roleAdmin = Role.find("byName", Role.PERSONNEL_ADMIN).first();
+		List<Person> personList = Lists.newArrayList();
+		for(UsersRolesOffices uro : this.usersRolesOffices) {
+			
+			if(uro.office.id.equals(this.id) && uro.role.id.equals(roleAdmin.id) 
+					&& uro.user.person != null)
+				personList.add(uro.user.person);
+		}
+		return personList;
+	}
+	
+	public List<Person> getPersonnelAdminMini() {
+		
+		Role roleAdminMini = Role.find("byName", Role.PERSONNEL_ADMIN_MINI).first();
+		List<Person> personList = Lists.newArrayList();
+		for(UsersRolesOffices uro : this.usersRolesOffices) {
+			
+			if(uro.office.id.equals(this.id) && uro.role.id.equals(roleAdminMini.id) 
+					&& uro.user.person != null)
+				personList.add(uro.user.person);
+		}
+		return personList;
+	}
+
+	
+	/**
+	 * 
+	 * @param permission
+	 * @return true se permission è presente in almeno un office del sottoalbero, radice compresa, 
+	 * false altrimenti
+	 */
+	private boolean isRightPermittedOnOfficeTree(Role role) {
+		
+		if(checkUserRoleOffice(Security.getUser().get(), role, this))
+			return true;
+		
+		for(Office subOff : this.subOffices) {
+			
+			if(subOff.isRightPermittedOnOfficeTree(role))
+				return true;
+		}
+		
+		return false;
+	}
+		
+	/**
+	 * 	Check del Permesso
+	 */
+	private static boolean checkUserRoleOffice(User user, Role role, Office office) {
+		
+		/*
+		UsersRolesOffices uro1 = UsersRolesOffices.find(
+				"Select uro from UsersRolesOffices uro, Role role, Permission permission where ? in uro.role.permissions and uro.office = ? and uro.user = ?",
+				permission, office, user).first();
+		*/
+		UsersRolesOffices uro = UsersRolesOffices.find(
+				"Select uro from UsersRolesOffices uro where uro.office = ? and uro.user = ? and uro.role = ?",
+				office, user, role).first();
+		
+		/*
+		for(UsersRolesOffices uro : uroList){
+			for(Permission p : uro.role.permissions) {
+				if(p.id.equals(permission.id))
+					return true;
+			}
+		}
+		return false;
+		*/
+		
+		
+		if(uro == null)
+			return false;
+		else
+			return true;
+		
+		
+	}
+	
+	/**
+	 * 
+	 */
+	public void setPermissionAfterCreation() {
+		
+		User userLogged = Security.getUser().get();
+		User admin = User.find("byUsername", "admin").first();
+		
+		Role roleAdmin = Role.find("byName", Role.PERSONNEL_ADMIN).first();
+		Role roleAdminMini = Role.find("byName", Role.PERSONNEL_ADMIN_MINI).first();
+		
+		Office.setUro(admin, this, roleAdmin);
+		Office.setUro(userLogged, this, roleAdmin);
+		
+		List<Office> officeList = Lists.newArrayList();
+		if(isInstitute()) {
+			officeList.add(getSuperArea());
+		}
+		if(isSeat()) {
+			officeList.add(getSuperArea());
+			officeList.add(getSuperInstitute());
+		}
+			
+		for(Office superOffice : officeList) {
+			
+			//Attribuire roleAdminMini a coloro che hanno roleAdminMini su il super office
+			for(User user : Office.getUserByOfficeAndRole(superOffice, roleAdminMini)) {
+				
+				Office.setUroIfImprove(user, this, roleAdminMini, true);
+			}
+
+
+			//Attribuire roleAdmin a coloro che hanno roleAdmin su area il super office
+			for(User user : Office.getUserByOfficeAndRole(superOffice, roleAdmin)) {
+				
+				Office.setUroIfImprove(user, this, roleAdmin, true);
+			}
+
+		}
+
+	}
+	
+
+	/**
+	 * Setta il ruolo per la tripla <user,office,role>. Se non esiste viene creato.
+	 * Se ifImprove è false il precedente ruolo viene sovrascritto. Se ifImprove è true 
+	 * il ruolo viene sovrascritto solo se assegna maggiori diritti rispetto al precedente. 
+	 * @param user
+	 * @param office
+	 * @param role
+	 * @param ifImprove
+	 */
+	public static void setUroIfImprove(User user, Office office, Role role, boolean ifImprove) {
+		
+		UsersRolesOffices uro = Office.getUro(user, office);
+		
+		if(uro == null || !ifImprove) {
+			
+			Office.setUro(user, office, role);
+			return;
+		}
+		
+		if(ifImprove) {
+			
+			/* implementare la logica di confronto fra ruolo */
+			Role previous = uro.role;
+			
+			if(previous.name.equals(Role.PERSONNEL_ADMIN_MINI)) {
+				
+				Office.setUro(user, office, role);
+				return;
+			}
+			
+		}
+		 
+	}
+	
+	
+	
+	/**
+	 * Ritorna il ruolo attualmente attivo per <user,office>
+	 * @param user
+	 * @param office
+	 */
+	private static UsersRolesOffices getUro(User user, Office office) {
+		
+		UsersRolesOffices uro = UsersRolesOffices.find("select uro from UsersRolesOffices uro "
+				+ "where uro.user = ? and uro.office = ? ", user, office).first();
+		
+		return uro;
+	}
+	
+	/**
+	 * 
+	 * @param user
+	 * @param office
+	 * @param role
+	 */
+	public static void setUro(User user, Office office, Role role){
+		
+		UsersRolesOffices uro = UsersRolesOffices.find("select uro from UsersRolesOffices uro "
+				+ "where uro.user = ? and uro.office = ? ", user, office).first();
+		
+		if(uro == null) {
+			
+			uro = new UsersRolesOffices();
+			uro.user = user;
+			uro.office = office;
+		}
+		
+		uro.role = role;
+		uro.save();
+		
+	}
+	
+	/**
+	 * Ritorna la lista degli utenti che hanno ruolo role nell'ufficio office
+	 * @param office
+	 * @param role
+	 * @return
+	 */
+	public static List<User> getUserByOfficeAndRole(Office office, Role role) {
+		
+		List<User> userList = Lists.newArrayList();
+		
+		for(UsersRolesOffices uro : office.usersRolesOffices) {
+			
+			if(uro.role.id.equals(role.id)) {
+				
+				userList.add(uro.user);
+			}
+		}
+		return userList;
+	}
+	
+	
+
 
 }

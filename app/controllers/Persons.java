@@ -39,7 +39,6 @@ import security.SecurityRules;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.hash.Hashing;
 
@@ -51,9 +50,11 @@ public class Persons extends Controller {
 
 	public static final String USERNAME_SESSION_KEY = "username";
 	
+	//DONE
 	@Inject
 	static SecurityRules rules;
 
+	//DONE
 	@NoCheck
 	public static void list(String name){
 		
@@ -64,9 +65,7 @@ public class Persons extends Controller {
 		List<Person> personList = PersonDao.list(Optional.fromNullable(name), 
 				Sets.newHashSet(Security.getOfficeAllowed()), false, startEra, 
 				endEra).list();
-		LocalDate date = new LocalDate();
-		
-		//renderText("Fine");
+
 		render(personList);
 	}
 
@@ -89,11 +88,11 @@ public class Persons extends Controller {
 	public static void save() {
 		if(validation.hasErrors()) {
 			if(request.isAjax()) error("Invalid value");
-			render("@insertPerson");
+			Persons.list(null);
 		}
 
 		/* creazione persona */
-		Person person = null;
+		Person person = null; 
 		
 		
 
@@ -211,6 +210,7 @@ public class Persons extends Controller {
 	}
 
 
+	//DONE
 	@NoCheck
 	public static void edit(Long personId){
 		
@@ -235,138 +235,33 @@ public class Persons extends Controller {
 	}
 
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void update(){
-		Long personId = params.get("personId", Long.class);		
-
-		Person person = Person.findById(personId);
-		//		ContactData contactData = person.contactData;
-		//Location location = person.location;
-
-		InitializationTime initTime = InitializationTime.find("Select init from InitializationTime init where init.person = ?", person).first();
-
-		if(!params.get("name").equals(person.name))
-			person.name = params.get("name");
-
-		if(!params.get("surname").equals(person.surname))
-			person.surname = params.get("surname");
-
-		if(!params.get("number").equals(person.number))
-			person.number = params.get("number", Integer.class);
-
-		if(person.badgeNumber == null || !person.badgeNumber.equals(params.get("badgeNumber")))
-			person.badgeNumber = params.get("badgeNumber");
-
-		Logger.debug("Sede: %s", params.get("person.office"));
-		if(person.office == null || !person.office.id.equals(new Long(params.get("person.office")))){
-			person.office = Office.findById(Long.parseLong((params.get("person.office"))));
+	//DONE
+	public static void update(Person person, Office office, Integer qualification){
+		
+		if(person==null) {
+			
+			flash.error("La persona da modificare non esiste. Operazione annullata");
+			Persons.list(null);
 		}
-
-
-		//		if(contactData != null){
-		//			if(contactData.email == null || !contactData.email.equals(params.get("email"))){
-		//				contactData.email = params.get("email");
-		//			}
-		//			if(contactData.telephone == null || !contactData.telephone.equals(params.get("telephone"))){
-		//				contactData.telephone = params.get("telephone");
-		//			}
-		//			contactData.save();
-		//		}
-		//		else{
-		//			contactData = new ContactData();
-		//			if(params.get("email") != null)
-		//				contactData.email = params.get("email");
-		//			if(params.get("telephone") != null)
-		//				contactData.telephone = params.get("telephone");
-		//			contactData.save();
-		//		}
-
-
-		if(person.email == null || !person.email.equals(params.get("email"))){
-			person.email = params.get("email");
+		rules.checkIfPermitted(person.office);
+		rules.checkIfPermitted(office);
+		
+		if(office!=null) {
+			person.office = office;
 		}
-		if(person.telephone == null || !person.telephone.equals(params.get("telephone"))){
-		person.telephone = params.get("telephone");
+		
+		Qualification q = Qualification.find("Select q from Qualification q where q.qualification = ?", qualification).first();
+		if(q != null) {
+			person.qualification = q;
 		}
 		
 		person.save();
-
-
-		/**Da scommentare appena attivi i nuovi campi di person**/
-		if(person.department == null || !person.department.equals(params.get("department"))){
-			person.department = params.get("department");
-		}
-		if(person.headOffice == null || !person.headOffice.equals(params.get("headOffice"))){
-			person.headOffice = params.get("headOffice");
-		}
-		if(person.room == null || !person.room.equals(params.get("room"))){
-			person.room = params.get("room");
-		}
-		person.save();
-
-
-
-		//		if(location != null){
-		//			if(location.department == null || !location.department.equals(params.get("department"))){
-		//				location.department = params.get("department");
-		//			}
-		//			if(location.headOffice == null || !location.headOffice.equals(params.get("headOffice"))){
-		//				location.headOffice = params.get("headOffice");
-		//			}
-		//			if(location.room == null || !location.room.equals(params.get("room"))){
-		//				location.room = params.get("room");
-		//			}
-		//			location.save();
-		//		}
-		//		else{
-		//			location = new Location();
-		//			if(params.get("department") != null)
-		//				location.department = params.get("department");
-		//			if(params.get("headOffice") != null)
-		//				location.headOffice = params.get("headOffice");
-		//			if(params.get("room") != null)
-		//				location.room = params.get("room");
-		//			location.save();
-		//		}
-
-		if(initTime != null){
-			if(initTime.residualMinutesCurrentYear == null || ! initTime.residualMinutesCurrentYear.equals(params.get("minutesCurrentYear", Integer.class)))
-				initTime.residualMinutesCurrentYear = params.get("minutesCurrentYear", Integer.class);
-			if(initTime.residualMinutesPastYear == null || ! initTime.residualMinutesPastYear.equals(params.get("minutesPastYear", Integer.class)))
-				initTime.residualMinutesPastYear = params.get("minutesPastYear", Integer.class);
-			initTime.save();
-		}
-		//		else{
-		//			initTime = new InitializationTime();
-		//			if(params.get("minutesPastYear") != null)
-		//				initTime.residualMinutesPastYear = params.get("minutesPastYear", Integer.class);
-		//			if(params.get("minutesCurrentYear") != null)
-		//				initTime.residualMinutesCurrentYear = params.get("minutesCurrentYear", Integer.class);
-		//			initTime.save();
-		//		}
-		if(person.number != null && ! person.number.equals(params.get("number", Integer.class)))
-			person.number = params.get("number", Integer.class);
-		//Logger.debug("Qualifica: %d", params.get("person.qualification", Integer.class));
-		if(person.qualification != null && person.qualification.qualification != params.get("person.qualification", Integer.class)){
-			Qualification q = Qualification.find("Select q from Qualification q where q.qualification = ?", params.get("person.qualification", Integer.class)).first();
-			person.qualification = q;
-		}
-		if(person.qualification == null){
-			Qualification q = Qualification.find("Select q from Qualification q where q.qualification = ?", params.get("person.qualification", Integer.class)).first();
-			person.qualification = q;
-		}
-
-		person.save();
 		flash.success("Modificate informazioni per l'utente %s %s", person.name, person.surname);
-		//Application.indexAdmin();
+		
 		Persons.edit(person.id);	
 	}
 
-	/**
-	 * cancella una persona dal database
-	 * @param person
-	 */
-	@Check(Security.DELETE_PERSON)
+	//DONE
 	public static void deletePerson(Long personId){
 		Person person = Person.findById(personId);
 		if(person == null) {
@@ -374,10 +269,13 @@ public class Persons extends Controller {
 			flash.error("La persona selezionata non esiste. Operazione annullata");
 			Persons.list(null);
 		}
+		
+		rules.checkIfPermitted(person.office);
+		
 		render(person);
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	//DONE
 	public static void deletePersonConfirmed(Long personId){
 		Person person = Person.findById(personId);
 		if(person == null) {
@@ -385,13 +283,18 @@ public class Persons extends Controller {
 			flash.error("La persona selezionata non esiste. Operazione annullata");
 			Persons.list(null);
 		}
-		person.delete();
-		flash.error("La persona è stata eliminata.");
+	
+		rules.checkIfPermitted(person.office);
+		
+		/***** person.delete(); ******/
+		
+		flash.error("Metodo in fase di implementazione, operazione annullata. "
+				+ "Effettuare una segnalazione!");
 		Persons.list(null);
+		
 	}
 
-
-	@NoCheck
+	//DONE
 	public static void showCurrentVacation(Long personId){
 
 		Person person = Person.findById(personId);
@@ -407,15 +310,23 @@ public class Persons extends Controller {
 		render(person, vp);
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	//DONE
 	public static void showCurrentContractWorkingTimeType(Long personId) {
 
-
 		Person person = Person.findById(personId);
+		if(person == null) {
+
+			flash.error("La persona selezionata non esiste. Operazione annullata");
+			Persons.list(null);
+		}
+		
+		rules.checkIfPermitted(person.office);
+		
 		Contract currentContract = person.getCurrentContract();
 		if(currentContract == null) {
 
-			render(person);
+			flash.error("La persona selezionata non ha contratto attivo, operazione annullata.");
+			Persons.list(null);
 		}
 
 		ContractWorkingTimeType cwtt = currentContract.getContractWorkingTimeType(LocalDate.now());
@@ -423,19 +334,22 @@ public class Persons extends Controller {
 		render(person, cwtt, wtt);
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	//DONE
 	public static void insertContract(Person person){
-		if(person == null)
-		{
+		if(person == null) {
+			
 			flash.error("Persona inesistente. Operazione annullata.");
 			Persons.list(null);
 		}
+		
+		rules.checkIfPermitted(person.office);
+		
 		Contract con = new Contract();
 		List<WorkingTimeType> wttList = WorkingTimeType.findAll();
 		render(con, person, wttList);
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	//DONE
 	public static void saveContract(@Required LocalDate dataInizio, @Valid LocalDate dataFine, Person person, WorkingTimeType wtt, boolean onCertificate){
 
 		//Controllo parametri
@@ -444,6 +358,9 @@ public class Persons extends Controller {
 			flash.error("Persona inesistente. Operazione annullata.");
 			Persons.list(null);
 		}
+		
+		rules.checkIfPermitted(person.office);
+		
 		if(dataInizio==null) {
 
 			flash.error("Errore nel fornire il parametro data inizio contratto. Inserire la data nel corretto formato aaaa-mm-gg");
@@ -491,7 +408,7 @@ public class Persons extends Controller {
 	}
 
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	//DONE
 	public static void modifyContract(Long contractId){
 		Contract contract = Contract.findById(contractId);
 		if(contract == null)
@@ -499,11 +416,14 @@ public class Persons extends Controller {
 			flash.error("Non è stato trovato nessun contratto con id %s per il dipendente ", contractId);
 			Persons.list(null);
 		}
+		
+		rules.checkIfPermitted(contract.person.office);
+		
 		render(contract);
 	}
 
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	//DONE
 	public static void updateContract(Contract contract, @Required LocalDate begin, @Valid LocalDate expire, @Valid LocalDate end, boolean onCertificate){
 
 		//Controllo dei parametri
@@ -512,6 +432,9 @@ public class Persons extends Controller {
 			flash.error("Contratto inesistente, operazione annullata");
 			Persons.list(null);
 		}
+		
+		rules.checkIfPermitted(contract.person.office);
+		
 		if(begin==null){
 
 			flash.error("Errore nel fornire il parametro data inizio contratto. Inserire la data nel corretto formato aaaa-mm-gg");
@@ -555,41 +478,68 @@ public class Persons extends Controller {
 	}
 
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	//DONE
 	public static void deleteContract(Long contractId){
+		
 		Contract contract = Contract.findById(contractId);
-		if(contract == null)
-		{
+		if(contract == null) {
+			
 			flash.error("Contratto inesistente. Operazione annullata.");
 			Persons.list(null);
 		}
+		
+		rules.checkIfPermitted(contract.person.office);
+		
 		render(contract);
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	//DONE
 	public static void deleteContractConfirmed(Long contractId){
+		
 		Contract contract = Contract.findById(contractId);
-		if(contract == null)
-		{
+		if(contract == null) {
+			
 			flash.error("Contratto inesistente. Operazione annullata.");
 			Persons.list(null);
 		}
+		
+		rules.checkIfPermitted(contract.person.office);
+		
 		contract.delete();
+		
 		flash.error("Contratto eliminato con successo.");
 		Persons.edit(contract.person.id);
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void updateSourceContract(Long contractId)
-	{
+	//DONE
+	public static void updateSourceContract(Long contractId){
+		
 		Contract contract = Contract.findById(contractId);
-		LocalDate initUse = new LocalDate(ConfGeneral.getFieldValue(ConfigurationFields.InitUseProgram.description, Security.getUser().get().person.office));
+		if(contract == null) {
+			
+			flash.error("Contratto inesistente. Operazione annullata.");
+			Persons.list(null);
+		}
+		
+		rules.checkIfPermitted(contract.person.office);
+		
+		LocalDate initUse = new LocalDate(
+				ConfGeneral.getFieldValue(ConfigurationFields.InitUseProgram.description, 
+				Security.getUser().get().person.office));
 		render(contract, initUse);
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void saveSourceContract(Contract contract)
-	{
+	//DONE
+	public static void saveSourceContract(Contract contract) {
+		
+		if(contract == null) {
+			
+			flash.error("Contratto inesistente. Operazione annullata.");
+			Persons.list(null);
+		}
+		
+		rules.checkIfPermitted(contract.person.office);
+		
 		if(contract.sourceVacationLastYearUsed==null) contract.sourceVacationLastYearUsed=0;
 		if(contract.sourceVacationCurrentYearUsed==null) contract.sourceVacationCurrentYearUsed=0;
 		if(contract.sourcePermissionUsed==null) contract.sourcePermissionUsed=0;
@@ -598,23 +548,35 @@ public class Persons extends Controller {
 		if(contract.sourceRecoveryDayUsed==null) contract.sourceRecoveryDayUsed=0;
 
 		contract.save();
+		
 		//Ricalcolo dei riepiloghi
 		contract.buildContractYearRecap();
 
+		flash.success("Dati di inizializzazione definiti con successo ed effettuati i ricalcoli.");
+		
 		Persons.edit(contract.person.id);
 
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	//DONE
 	public static void updateContractWorkingTimeType(Long id)
 	{
-		List<WorkingTimeType> wttList = WorkingTimeType.findAll();
+		
 		Contract contract = Contract.findById(id);
+		if(contract == null) {
+			
+			flash.error("Contratto inesistente. Operazione annullata.");
+			Persons.list(null);
+		}
+		
+		rules.checkIfPermitted(contract.person.office);
+		
+		List<WorkingTimeType> wttList = WorkingTimeType.findAll();
 		render(contract, wttList);
 	}
 
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	//DONE
 	public static void splitContractWorkingTimeType(ContractWorkingTimeType cwtt, LocalDate splitDate)
 	{
 		//Controllo integrità richiesta
@@ -624,6 +586,8 @@ public class Persons extends Controller {
 			Application.indexAdmin();
 		}
 
+		rules.checkIfPermitted(cwtt.contract.person.office);
+		
 		if(validation.hasError("splitDate")) {
 
 			flash.error("Errore nel fornire il parametro data. Inserire la data nel corretto formato aaaa-mm-gg");
@@ -657,7 +621,7 @@ public class Persons extends Controller {
 	}
 
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	//DONE
 	public static void deleteContractWorkingTimeType(ContractWorkingTimeType cwtt)
 	{
 		if(cwtt==null){
@@ -666,17 +630,19 @@ public class Persons extends Controller {
 			Application.indexAdmin();
 		}	
 		
-		Contract contract = cwtt.contract;
-		List<ContractWorkingTimeType> cwttList = Lists.newArrayList(contract.contractWorkingTimeType);
+		rules.checkIfPermitted(cwtt.contract.person.office);
 		
-		int index = cwttList.indexOf(cwtt);
-		if(contract.contractWorkingTimeType.size()<index){
+		Contract contract = cwtt.contract;
+		//List<ContractWorkingTimeType> cwttList = Lists.newArrayList(contract.contractWorkingTimeType);
+		
+		int index = contract.getContractWorkingTimeTypeAsList().indexOf(cwtt);
+		if(contract.getContractWorkingTimeTypeAsList().size()<index){
 			
 			flash.error("Impossibile completare la richiesta, controllare i log.");
 			Persons.edit(cwtt.contract.person.id);	
 		}
 		
-		ContractWorkingTimeType previous = cwttList.get(index-1);
+		ContractWorkingTimeType previous = contract.getContractWorkingTimeTypeAsList().get(index-1);
 		previous.endDate = cwtt.endDate;
 		previous.save();
 		cwtt.delete();
@@ -685,7 +651,7 @@ public class Persons extends Controller {
 	}
 
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	//DONE
 	public static void changeTypeOfContractWorkingTimeType(ContractWorkingTimeType cwtt, WorkingTimeType newWtt)
 	{
 		if(cwtt==null || newWtt==null) {
@@ -693,6 +659,10 @@ public class Persons extends Controller {
 			flash.error("Impossibile completare la richiesta, controllare i log.");
 			Application.indexAdmin();
 		}
+		
+		rules.checkIfPermitted(cwtt.contract.person.office);
+		rules.checkIfPermitted(newWtt.office);
+		
 		cwtt.workingTimeType = newWtt;
 		cwtt.save();
 
@@ -703,18 +673,15 @@ public class Persons extends Controller {
 		Persons.edit(cwtt.contract.person.id);
 	}
 
-
-	/**
-	 * 
-	 * @param personId permette all'utente amministratore di cambiare la propria password.
-	 */
+	//DONE
 	public static void changePassword(){
 		User user = Security.getUser().get();
 		notFoundIfNull(user);
 		render(user);
 	}
 
-	public static void savePassword(@MinLength(5) @Required String vecchiaPassword, 
+	//DONE
+	public static void savePassword(@Required String vecchiaPassword, 
 			@MinLength(5) @Required String nuovaPassword, @MinLength(5) @Required String confermaPassword){
 
 		User user = User.find("SELECT u FROM User u where username = ? and password = ?", 
@@ -731,13 +698,6 @@ public class Persons extends Controller {
 		}
 
 		notFoundIfNull(user);
-
-
-
-
-
-
-
 
 		Codec codec = new Codec();
 

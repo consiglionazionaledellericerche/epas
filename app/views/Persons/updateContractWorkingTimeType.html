@@ -62,7 +62,7 @@
       <!-- Elimina periodo -->
       
       <td style="text-align: center;" >
-       #{if contract.contractWorkingTimeType.indexOf(cwtt) > 0}
+       #{if contract.contractWorkingTimeTypeAsList.indexOf(cwtt) > 0}
        #{form @Persons.deleteContractWorkingTimeType() }
         <input type="hidden" name="cwtt.id" value="${cwtt.id}" />
         <br>

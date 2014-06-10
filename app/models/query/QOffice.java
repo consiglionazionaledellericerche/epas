@@ -20,7 +20,9 @@ public class QOffice extends EntityPathBase<Office> {
 
     private static final long serialVersionUID = -1289700640L;
 
-    public static final QOffice office = new QOffice("office");
+    private static final PathInits INITS = PathInits.DIRECT2;
+
+    public static final QOffice office1 = new QOffice("office1");
 
     public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
@@ -40,29 +42,42 @@ public class QOffice extends EntityPathBase<Office> {
     //inherited
     public final NumberPath<Long> id = _super.id;
 
+    public final DatePath<org.joda.time.LocalDate> joiningDate = createDate("joiningDate", org.joda.time.LocalDate.class);
+
     public final StringPath name = createString("name");
+
+    public final QOffice office;
 
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
     public final ListPath<models.Person, QPerson> persons = this.<models.Person, QPerson>createList("persons", models.Person.class, QPerson.class, PathInits.DIRECT2);
 
-    public final ListPath<models.RemoteOffice, QRemoteOffice> remoteOffices = this.<models.RemoteOffice, QRemoteOffice>createList("remoteOffices", models.RemoteOffice.class, QRemoteOffice.class, PathInits.DIRECT2);
+    public final ListPath<Office, QOffice> subOffices = this.<Office, QOffice>createList("subOffices", Office.class, QOffice.class, PathInits.DIRECT2);
 
-    public final SetPath<models.UsersRolesOffices, QUsersRolesOffices> usersRolesOffices = this.<models.UsersRolesOffices, QUsersRolesOffices>createSet("usersRolesOffices", models.UsersRolesOffices.class, QUsersRolesOffices.class, PathInits.DIRECT2);
+    public final ListPath<models.UsersRolesOffices, QUsersRolesOffices> usersRolesOffices = this.<models.UsersRolesOffices, QUsersRolesOffices>createList("usersRolesOffices", models.UsersRolesOffices.class, QUsersRolesOffices.class, PathInits.DIRECT2);
 
     public final ListPath<models.WorkingTimeType, QWorkingTimeType> workingTimeType = this.<models.WorkingTimeType, QWorkingTimeType>createList("workingTimeType", models.WorkingTimeType.class, QWorkingTimeType.class, PathInits.DIRECT2);
 
     public QOffice(String variable) {
-        super(Office.class, forVariable(variable));
+        this(Office.class, forVariable(variable), INITS);
     }
 
     public QOffice(Path<? extends Office> path) {
-        super(path.getType(), path.getMetadata());
+        this(path.getType(), path.getMetadata(), path.getMetadata().isRoot() ? INITS : PathInits.DEFAULT);
     }
 
     public QOffice(PathMetadata<?> metadata) {
-        super(Office.class, metadata);
+        this(metadata, metadata.isRoot() ? INITS : PathInits.DEFAULT);
+    }
+
+    public QOffice(PathMetadata<?> metadata, PathInits inits) {
+        this(Office.class, metadata, inits);
+    }
+
+    public QOffice(Class<? extends Office> type, PathMetadata<?> metadata, PathInits inits) {
+        super(type, metadata, inits);
+        this.office = inits.isInitialized("office") ? new QOffice(forProperty("office"), inits.get("office")) : null;
     }
 
 }

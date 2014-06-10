@@ -46,6 +46,8 @@ import play.data.validation.Required;
 @Entity
 @Table(name="contracts")
 public class Contract extends BaseModel {
+	
+	private static final long serialVersionUID = -4472102414284745470L;
 
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="source_date")
@@ -70,7 +72,7 @@ public class Contract extends BaseModel {
 	public Integer sourceRemainingMinutesCurrentYear = null;
 
 	
-	private static final long serialVersionUID = -4472102414284745470L;
+
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="person_id")
@@ -96,11 +98,16 @@ public class Contract extends BaseModel {
 	@Column(name="end_contract")
 	public LocalDate endContract;
 	
+	
 	@NotAudited
 	@OneToMany(mappedBy = "contract", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	@OrderBy("beginDate")
 	public Set<ContractWorkingTimeType> contractWorkingTimeType = Sets.newHashSet();
 
+	@Transient
+	private List<ContractWorkingTimeType> contractWorkingTimeTypeAsList;
+	
+	
 	//TODO eliminare e configurare yaml
 	public void setBeginContract(String date){
 		this.beginContract = new LocalDate(date);
@@ -139,6 +146,12 @@ public class Contract extends BaseModel {
 				id, person.id, beginContract, expireContract, endContract);
 	}
 
+	@Transient
+	public List<ContractWorkingTimeType> getContractWorkingTimeTypeAsList() {
+		
+		return Lists.newArrayList(this.contractWorkingTimeType);
+	}
+	
 	/**
 	 * @param contract
 	 * @return il vacation period associato al contratto con al suo interno la data di oggi

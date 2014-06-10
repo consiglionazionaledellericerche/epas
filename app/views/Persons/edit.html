@@ -25,7 +25,7 @@
 <div class="container">		<!-- Container dati personali e di contatto -->
 
 #{form @Persons.update() }
-<input type="hidden" name="personId" value="${person.id}"/>
+<input type="hidden" name="person.id" value="${person.id}"/>
 
 <!-- Pannello 1 Dati personali -->
 <div class="panel panel-default">
@@ -38,36 +38,38 @@
     <table class="table table-condensed table-form table-hover">
 		<tr>
 			<td class="lab"><b>Cognome</b></td>
-			<td><input name="surname" type="text" value="${person.surname}"/></td>
+			<td><input name="person.surname" type="text" value="${person.surname}"/></td>
 		</tr>
 		<tr>
 			<td class="lab"><b>Nome</b></td> 
-			<td><input name="name" type="text" value="${person.name}"/></td>
+			<td><input name="person.name" type="text" value="${person.name}"/></td>
 		</tr>
+		<!-- 
 		<tr>
 			<td class="lab">Id univoco</td> 
-			<td><input name="personId" type="text" value="${person.id}" disabled="disabled" /></td>
+			<td><input name="daeliminare" type="text" value="${person.id}" disabled="disabled" /></td>
 		</tr>
+		 -->
 		<tr>
 			<td class="lab">Matricola</td> 
-			<td><input name="number" type="number" value="${person.number}"/></td>
+			<td><input name="person.number" type="number" value="${person.number}"/></td>
 		</tr>
 		<tr>
 			<td class="lab">Numbero badge</td>
-			<td><input name="badgeNumber" type="number" value="${person.badgeNumber}"/></td>
+			<td><input name="person.badgeNumber" type="number" value="${person.badgeNumber}"/></td>
 		</tr>
 		<tr>
 			<td class="lab"> Livello </td>
 			<td>
 			#{if person.qualification != null}
-				#{select 'person.qualification', value:person.qualification.qualification, class:'span1', id:'withoutborder'} 
+				#{select 'qualification', value:person.qualification.qualification, class:'span1', id:'withoutborder'} 
 				#{option null}Seleziona la qualifica#{/option}
 				#{option 1}1#{/option} #{option 2}2#{/option} #{option 3}3#{/option}
 				#{option 4}4#{/option} #{option 5}5#{/option} #{option 6}6#{/option}
 				#{option 7}7#{/option} #{option 8}8#{/option} #{/select}</div>
 			#{/if}
 			#{else}
-				#{select 'person.qualification', value:'', class:'span1',id:'withoutborder'} 
+				#{select 'qualification', value:'', class:'span1',id:'withoutborder'} 
 				#{option null}Seleziona la qualifica#{/option}
 				#{option 1}1#{/option} #{option 2}2#{/option} #{option 3}3#{/option}
 				#{option 4}4#{/option} #{option 5}5#{/option} #{option 6}6#{/option}
@@ -79,7 +81,7 @@
 		<tr>
 			<td class="lab">Sede</td>
 			<td>
-			    #{select 'person.office', value:person.office.id, id:'office'} 
+			    #{select 'office.id', value:person.office.id, id:'office'} 
 					#{list items: officeList, as: 'office'}
 						#{option office.id}${office.name}#{/option}
 					#{/list}
@@ -105,37 +107,38 @@
     <table class="table table-condensed table-form table-hover">
 		<tr>
 			<td class="lab">Dipartimento</td>
-			<td><input name="department" type="text" value="${person.location.department}"/></td>
+			<td><input name="person.department" type="text" value="${person.department}"/></td>
 		</tr>
 		<tr>
 			<td class="lab">Sede</td>
-			<td><input name="headOffice" type="text" value="${person.location.headOffice}"/></td>
+			<td><input name="person.headOffice" type="text" value="${person.headOffice}"/></td>
 		</tr>
 		<tr>
 			<td class="lab">Stanza</td>
-			<td><input name="room" type="text" value="${person.location.room}"/></td>
+			<td><input name="person.room" type="text" value="${person.room}"/></td>
 		</tr>
 		<tr>
 			<td class="lab">Telefono</td>
-			#{if person.contactData.telephone != null || !person.contactData.telephone.equals('No phone number') }
-				<td><input name="telephone" type="text" value="${person.contactData.telephone}"/></td>
+			#{if person.telephone != null || !person.telephone.equals('No phone number') }
+				<td><input name="person.telephone" type="text" value="${person.telephone}"/></td>
 			#{/if}
 			#{else}
-				<td><input name="telephone" type="text" value=""/></td>
+				<td><input name="person.telephone" type="text" value=""/></td>
 			#{/else}
 		</tr>
 		<tr>
 			<td class="lab">Email</td>
-			<td><input name="email" type="email" value="${person.contactData.email}"/></td>
+			<td><input name="person.email" type="email" value="${person.email}"/></td>
 		</tr>
 		<tr>
 			<td class="lab">Data di nascita </td>
-			#{if person.bornDate != null }
-				<td><input class="datepicker" name="bornDate" type="text" value="${person.bornDate.convertToLocalDate()}"/></td>
+			#{if person.birthday != null }
+				<td><input data-datepicker data-date-format="yyyy-mm-dd" name="person.birthday" type="text" value="${person.birthday}"/></td>
 			#{/if}
 			#{else}
-				<td><input class="datepicker" name="bornDate" type="text" value=""/></td>
+				<td><input data-datepicker data-date-format="yyyy-mm-dd" name="person.birthday" type="text" value=""/></td>
 			#{/else}
+			
 		</tr>
 	</table>
   
@@ -305,23 +308,14 @@
       <h3 class="panel-title"><span class="badge">4</span> Eliminazione persona ePAS</h3>
     </div>
     <div class="panel-body center">
-      <a href="@{Persons.deletePerson(person.id)}" data-target=".my-modal">
+      <a href="@{Persons.deletePerson(person.id)}" data-modal=".my-modal">
   	    <button type="button" class="btn btn-danger">Elimina</button>
   	  </a>
    </div>
   </div>	<!-- Fine pannello 2 -->
   
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+ 
 </div>
   
   

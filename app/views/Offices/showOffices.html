@@ -4,59 +4,93 @@
 
 
 <div class="container">
-
-	#{list items:instituteList, as:'institute'}
-	 
-	<div class="panel panel-info">
-	  <div class="panel-heading">
-	    <h3 class="panel-title">${institute.name}</h3>
-	  </div>
-	  <div class="panel-body">
-	  
-	    <p>Il numero totale dei dipendenti presenti in ePAS con contratto attivo in questo instituto è <strong>${institute.getActivePersons().size()}</strong></p>
-	  
-	    <table class="table table-hover">
-	      <tr>
-	        <th>Sede</th>
-	        <th>Indirizzo</th>
-	        <th>Codice</th>
-	        <th>Data Affiliazione</th>
-	        <th>Numero Dipendenti</th>
-	        <th>Modifica</th>
-	      </tr>
-	      
-	      #{list items:institute.remoteOffices, as:'seat'}
-	        <tr>
-	          <td>${seat.name}</td>
-	          <td>${seat.address}</td>
-	          <td>${seat.code}</td>
-	          <td>${seat.joiningDate}</td>
-	          <td>${seat.getActivePersons().size()}</td>
-	          <td>
-	            <a data-modal=".my-modal" href="@{Offices.editSeat(seat.id)}">Modifica</a>
-	          </td>
-	        </tr>
-	  	  #{/list} 
-	      
-	    </table>
-	    
-	    <p>
-	      <a  data-modal=".my-modal" href="@{Offices.insertSeat(institute.id)}">
-	        <span class="glyphicon glyphicon-plus"></span> Crea una nuova sede per ${institute.contraction}
-	      </a>
-	    </p>
-	  	 
-	  </div>
-	</div>   
-	  
-	#{/list}
-	
+	<!-- TODO 
 	<p>
-	  <a  data-modal=".my-modal" href="@{Offices.insertInstitute()}">
-	    <span class="glyphicon glyphicon-plus"></span> Crea un nuovo istituto
+	  <a  data-modal=".my-modal" href="@{Offices.insertArea()}">
+	    <span class="glyphicon glyphicon-plus"></span> Crea una nuova Area
 	  </a>
 	</p>
+	 -->
 
+	#{list items:allAreas, as:'area'}
+	  #{if area.isPrintable() }
+		<div class="panel panel-info">
+		  <div class="panel-heading">
+		    <h3 class="panel-title">${area.name}</h3>
+		  </div>
+		  <div class="panel-body">
+		  
+		    <p>Il numero totale dei dipendenti presenti in ePAS con contratto attivo in quest area è <strong>${area.getActivePersons().size()}</strong></p>
+		    
+		    #{if session.username.equals("admin") }
+		    <p>
+		      <a  data-modal=".my-modal" href="@{Offices.insertInstitute(area.id)}">
+		        <span class="glyphicon glyphicon-plus"></span> Crea un nuovo istituto per ${area.name}
+		      </a>
+		    </p>
+		  	#{/if}
+		  	
+		  	#{list items:area.getInstitutes(), as:'istituto'}
+		  	  #{if istituto.isPrintable() }
+			  	  <div class="well">
+			  	    <p class="lead">${istituto.name}</p>
+				    
+				    <table class="table table-hover">
+				      <tr class="warning center">
+				        <th>Sede</th>
+				        <th>Indirizzo</th>
+				        <th>Codice</th>
+				        <th>Data<br>Affiliazione</th>
+				        <th>Numero<br>Dipendenti</th>
+				        <th>Amministratori</th>
+				        <th>Amministratori<br>sola lettura</th>
+				      </tr>
+				      
+				      #{list items:istituto.getSeats(), as:'sede'}
+				      #{if sede.isPrintable() }
+				        <tr style="background-color: white;">
+				          <td>
+				          #{if sede.isEditable() }
+				            <a data-modal=".my-modal" href="@{Offices.editSeat(sede.id)}">${sede.name}</a>
+				          #{/if}
+				          #{else}
+				            ${sede.name}
+				          #{/else}
+				          </td>
+				          <td>${sede.address}</td>
+				          <td class="center">${sede.code}</td>
+				          <td class="center">${sede.joiningDate}</td>
+				          <td class="center">${sede.getActivePersons().size()}</td>
+				          <td class="center">
+				            #{list items:sede.getPersonnelAdmin(), as:'person'}
+				              ${person.surname} ${person.name}<br>
+				            #{/list}
+				          </td>
+				          <td class="center">
+				            #{list items:sede.getPersonnelAdminMini(), as:'person'}
+				              ${person.surname} ${person.name}<br>
+				            #{/list}
+					          </td>
+				        </tr>
+				      #{/if}  
+				  	  #{/list} 
+				    </table>
+				    #{if session.username.equals("admin") }
+				    <p>
+			          <a  data-modal=".my-modal" href="@{Offices.insertSeat(istituto.id)}">
+			            <span class="glyphicon glyphicon-plus"></span> Crea una nuova sede per ${istituto.name}
+			          </a>
+			        </p>
+			        #{/if}
+				  </div>
+			  #{/if}  
+			#{/list}
+
+		  </div>
+		</div>   
+	  #{/if}
+	#{/list}
+	
 </div>
 
 #{include '_myModal.html' /}

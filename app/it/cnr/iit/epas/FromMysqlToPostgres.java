@@ -362,7 +362,7 @@ public class FromMysqlToPostgres {
 			User user = new User();
 			 
 			
-			person.bornDate = rs.getDate("DataNascita");
+			//person.bornDate = rs.getDate("DataNascita"); //TODO adesso è un LocalDate
 			person.number = rs.getInt("Matricola");
 			person.badgeNumber = rs.getString("Matricolabadge");
 			person.oldId = rs.getLong("ID");

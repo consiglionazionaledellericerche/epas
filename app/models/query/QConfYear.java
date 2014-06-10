@@ -61,7 +61,7 @@ public class QConfYear extends EntityPathBase<ConfYear> {
 
     public QConfYear(Class<? extends ConfYear> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.office = inits.isInitialized("office") ? new QOffice(forProperty("office")) : null;
+        this.office = inits.isInitialized("office") ? new QOffice(forProperty("office"), inits.get("office")) : null;
     }
 
 }
