@@ -8,8 +8,8 @@ import play.Logger;
 import play.jobs.Job;
 import play.jobs.On;
 
-//@On("0 18 11 ? * *")
-@On("0 0 15 ? * MON,WED,FRI")
+@On("0 43 16 ? * *")
+//@On("0 0 15 ? * MON,WED,FRI")
 public class ExpandableJob extends Job{
 
 	public void doJob(){
