@@ -1183,8 +1183,8 @@ public class PersonUtility {
 			e1.printStackTrace();
 		}
 		try {
-			//simpleEmail.addTo(person.contactData.email);
-			simpleEmail.addTo("dario.tagliaferri@iit.cnr.it");
+			simpleEmail.addTo(person.contactData.email);
+			//simpleEmail.addTo("dario.tagliaferri@iit.cnr.it");
 		} catch (EmailException e) {
 
 			e.printStackTrace();
