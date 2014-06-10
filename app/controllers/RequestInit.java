@@ -38,6 +38,7 @@ public class RequestInit extends Controller {
 		
 		public boolean viewPerson = false;
 		public boolean viewPersonDay = false;
+		public boolean viewOffice = false;
 		
 		public ItemsPermitted() {
 			
@@ -47,12 +48,20 @@ public class RequestInit extends Controller {
 			if(rules.check(Security.VIEW_PERSON_DAY))
 				this.viewPersonDay = true;
 			
+			if(rules.check(Security.VIEW_OFFICE))
+				this.viewOffice = true;
+			
 			
 		}
 		
 		public boolean isDropDownVisible() {
 			
 			return viewPerson || viewPersonDay;
+		}
+		
+		public boolean isDropDown2Visible() {
+			
+			return viewOffice;
 		}
 	}
 	

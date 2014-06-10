@@ -1,32 +1,32 @@
 #{extends 'modal.html' /}
-#{set modalHeader: 'Modifica ' + office.name /}
+#{set modalHeader: 'Modifica ' + remoteOffice.name /}
 
 <div class="container-fluid">
 
 #{form @Offices.updateSeat()}
 
-  <input type="hidden" name="officeId" value="${office.id}"/>
+  <input type="hidden" name="officeId" value="${remoteOffice.id}"/>
   
   <table class="table table-form table-hover">
   
     <tr>
       <td><strong>Sede</strong></td>
-      <td><input name="name" value="${office.name}"/></td>
+      <td><input name="name" value="${remoteOffice.name}"/></td>
     </tr>
     
     <tr>
       <td><strong>Indirizzo</strong></td>
-      <td><input name="address" value="${office.address}" /></td>
+      <td><input name="address" value="${remoteOffice.address}" /></td>
     </tr>
     
     <tr>
       <td><strong>Codice</strong></td>
-      <td><input name="code" value="${office.code}" /></td>
+      <td><input name="code" value="${remoteOffice.code}" /></td>
     </tr>
 
     <tr>
       <td><strong>Data affiliazione</strong></td>
-      <td><input name="date" value="${office.joiningDate}" type="text" data-datepicker data-date-format="yyyy-mm-dd" /></td>
+      <td><input name="date" value="${remoteOffice.joiningDate}" type="text" data-datepicker data-date-format="yyyy-mm-dd" /></td>
    	</tr>  
     
  </table>

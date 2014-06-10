@@ -59,7 +59,7 @@ public class QUsersRolesOffices extends EntityPathBase<UsersRolesOffices> {
 
     public QUsersRolesOffices(Class<? extends UsersRolesOffices> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.office = inits.isInitialized("office") ? new QOffice(forProperty("office")) : null;
+        this.office = inits.isInitialized("office") ? new QOffice(forProperty("office"), inits.get("office")) : null;
         this.role = inits.isInitialized("role") ? new QRole(forProperty("role")) : null;
         this.user = inits.isInitialized("user") ? new QUser(forProperty("user"), inits.get("user")) : null;
     }

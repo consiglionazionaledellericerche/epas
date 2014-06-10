@@ -59,7 +59,7 @@ public class QConfGeneral extends EntityPathBase<ConfGeneral> {
 
     public QConfGeneral(Class<? extends ConfGeneral> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.office = inits.isInitialized("office") ? new QOffice(forProperty("office")) : null;
+        this.office = inits.isInitialized("office") ? new QOffice(forProperty("office"), inits.get("office")) : null;
     }
 
 }

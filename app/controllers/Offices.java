@@ -2,33 +2,66 @@ package controllers;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import models.Office;
-import models.RemoteOffice;
 
 import org.joda.time.LocalDate;
 
+import controllers.Resecure.NoCheck;
 import play.mvc.Controller;
 import play.mvc.With;
+import security.SecurityRules;
 
-@With( {Secure.class, RequestInit.class})
+@With( {Resecure.class, RequestInit.class})
 public class Offices extends Controller {
 
-	@Check(Security.INSERT_AND_UPDATE_OFFICES)
+	@Inject
+	static SecurityRules rules;
+	
+	@NoCheck
 	public static void showOffices(){
 		
-		//TODOOFF1 Prendere quelli di cui la persona loggata ha diritti
-		List<Office> instituteList = Office.find("Select o from Office o where o.office is null").fetch();	//prendo gli istituti
-		render(instituteList);
+		
+		List<Office> allAreas = Office.getAllAreas();
+		
+		render(allAreas);
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_OFFICES)
-	public static void insertInstitute() {
+	@NoCheck
+	public static void insertArea() {
 		
 		render();
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_OFFICES)
-	public static void saveInstitute(String name, String contraction) {
+	@NoCheck
+	public static void insertInstitute(Long areaId) {
+		
+		Office area = Office.findById(areaId);
+		
+		if(area == null || !area.isArea()) {
+			
+			flash.error("L'area specificata è inesistente. Operazione annullata.");
+			Offices.showOffices();
+		}
+		
+		rules.checkIfPermitted(area);
+		
+		render(area);
+	}
+	
+	@NoCheck
+	public static void saveInstitute(Long areaId, String name, String contraction) {
+		
+		Office area = Office.findById(areaId);
+		
+		if(area == null || !area.isArea()) {
+			
+			flash.error("L'area specificata è inesistente. Operazione annullata.");
+			Offices.showOffices();
+		}
+
+		rules.checkIfPermitted(area);
 		
 		if( name == null || name.equals("") || contraction == null || contraction.equals("") ) {
 			
@@ -53,32 +86,40 @@ public class Offices extends Controller {
 		office = new Office();
 		office.name = name;
 		office.contraction = contraction;
+		office.office = area;
 		office.save();
+		
+		office.setPermissionAfterCreation();
 		
 		flash.success("Istituto %s con sigla %s correttamente inserito", name, contraction);
 		Offices.showOffices();
 	}
 			
-	@Check(Security.INSERT_AND_UPDATE_OFFICES)
-	public static void insertSeat(Long officeId) {
-		Office office = Office.findById(officeId);
-		if(office==null) {
+	@NoCheck
+	public static void insertSeat(Long instituteId) {
+		Office institute = Office.findById(instituteId);
+		if(institute==null) {
 			
 			flash.error("L'instituto selezionato non esiste. Operazione annullata.");
 			Offices.showOffices();
 		}
-		render(office);
+		
+		rules.checkIfPermitted(institute);
+		
+		render(institute);
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_OFFICES)
-	public static void saveSeat(Long officeId, String name, String address, String code, String date) {
+	@NoCheck
+	public static void saveSeat(Long instituteId, String name, String address, String code, String date) {
 	
-		Office office = Office.findById(officeId);
-		if(office==null) {
+		Office institute = Office.findById(instituteId);
+		if(institute==null) {
 			
 			flash.error("L'instituto selezionato non esiste. Operazione annullata.");
 			Offices.showOffices();
 		}
+		
+		rules.checkIfPermitted(institute);
 
 		//Parametri null
 		if( isNullOrEmpty(name) || isNullOrEmpty(address) || isNullOrEmpty(code) || isNullOrEmpty(date) ){
@@ -105,43 +146,49 @@ public class Offices extends Controller {
 			Offices.showOffices();
 		}
 		
-		RemoteOffice remoteOffice = new RemoteOffice();
-		remoteOffice.name = name;
-		remoteOffice.address = address;
-		remoteOffice.code = getInteger(code);
-		remoteOffice.joiningDate = getLocalDate(date);
-		remoteOffice.office = office;
+		Office office = new Office();
+		office.name = name;
+		office.address = address;
+		office.code = getInteger(code);
+		office.joiningDate = getLocalDate(date);
+		office.office = institute;
 
-		remoteOffice.save();
+		office.save();
+		
+		office.setPermissionAfterCreation();
 		
 		flash.success("Sede correttamente inserita");
 		Offices.showOffices();
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_OFFICES)
+	@NoCheck
 	public static void editSeat(Long officeId){
 		
-		RemoteOffice remoteOffice = RemoteOffice.findById(officeId);
+		Office office = Office.findById(officeId);
 		
-		if(remoteOffice==null) {
+		if(office==null) {
 			
 			flash.error("La sede selezionata non esiste. Operazione annullata.");
 			Offices.showOffices();
 		}
 		
-		render(remoteOffice);
+		rules.checkIfPermitted(office);
+		
+		render(office);
 		
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_OFFICES)
+	@NoCheck
 	public static void updateSeat(Long officeId, String name, String address, String code, String date) {
 	
-		RemoteOffice remoteOffice = RemoteOffice.findById(officeId);
-		if(remoteOffice==null) {
+		Office office = Office.findById(officeId);
+		if(office==null) {
 			
 			flash.error("La sede selezionata non esiste. Operazione annullata.");
 			Offices.showOffices();
 		}
+		
+		rules.checkIfPermitted(office);
 
 		//Parametri null
 		if( isNullOrEmpty(name) || isNullOrEmpty(address) || isNullOrEmpty(code) || isNullOrEmpty(date) ){
@@ -163,21 +210,21 @@ public class Offices extends Controller {
 
 		//codice uguale a sedi diverse da remoteOffice
 		List<Office> officeList = Office.find("Select o from Office o where o.code = ?", getInteger(code)).fetch();
-		for(Office office : officeList) {
+		for(Office off : officeList) {
 			
-			if( !office.id.equals(remoteOffice.id) ) {
+			if( !off.id.equals(office.id) ) {
 				
 				flash.error("Il codice sede risulta gia' presente. Valorizzare correttamente tutti i parametri.");
 				Offices.showOffices();
 			}
 		}
 		
-		remoteOffice.name = name;
-		remoteOffice.address = address;
-		remoteOffice.code = getInteger(code);
-		remoteOffice.joiningDate = getLocalDate(date);
+		office.name = name;
+		office.address = address;
+		office.code = getInteger(code);
+		office.joiningDate = getLocalDate(date);
 		
-		remoteOffice.save();
+		office.save();
 		
 		flash.success("Sede correttamente modificata");
 		Offices.showOffices();

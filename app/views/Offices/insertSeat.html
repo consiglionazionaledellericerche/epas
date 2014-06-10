@@ -1,11 +1,11 @@
 #{extends 'modal.html' /}
-#{set modalHeader: 'Nuova sede per ' + office.name /}
+#{set modalHeader: 'Nuova sede per ' + institute.name /}
 
 <div class="container-fluid">
 
 #{form @Offices.saveSeat()}
 
-  <input type="hidden" name="officeId" value="${office.id}"/>
+  <input type="hidden" name="instituteId" value="${institute.id}"/>
   
   <table class="table table-form table-hover">
   

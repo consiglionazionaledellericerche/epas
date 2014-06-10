@@ -8,49 +8,70 @@ import models.Permission;
 
 global models.User currentOperator;
 
-/* i dipendenti possono: */
+/*  
+ *	Azioni eseguibili solo per le persone fisiche
+ */
 rule IsPerson
 when
  $c: PermissionCheck(action in (
+     	
+     	/* Drools Test */
      	"TestDrools.youMustBeLoggedIn",
-     	/* abilitate per il metodo, ristrette poi */
      	"TestDrools.youMustBe",
-     	/* timbrature */
+     	
+     	/* Situazione Mensile */
      	"Stampings.stampings",
-     	/* assenze mensili */
+     	
+     	/* Assenze mensili */
      	"Absences.absences",
-     	/* modale assenze mensili */
      	"Absences.absenceInMonth",
-     	/* assenze annuali */
+
+     	/* Assenze annuali */
      	"YearlyAbsences.absencesPerPerson",
-     	/* ferie */
+     	
+     	/* Ferie */
      	"Vacations.show",
-     	/*modale permessi anno corrente*/
      	"Vacations.permissionCurrentYear",
-     	/*modale ferie anno corrente*/
      	"Vacations.vacationsCurrentYear",
-     	/*modale ferie anno passato*/
-     	"Vacations.vacationsLastYear",
-     	/* competenze */
+       	"Vacations.vacationsLastYear",
+  
+     	/* Competenze */
      	"Competences.competences",
-     	/* riepilogo orario*/
+     	
+     	/* Riepilogo orario*/
      	"PersonMonths.hourRecap",
-     	/* ore di formazione */
+     	
+     	/* Ore di formazione */
      	"PersonMonths.trainingHours",
-     	/* cancella ore di formazione*/
      	"PersonMonths.deleteTrainingHours",
-     	/* conferma cancellazione ore di formazione */
      	"PersonMonths.deleteTrainingHoursConfirmed",
-     	/* inserisci ore di formazione */
      	"PersonMonths.insertTrainingHours",
-     	/* modifica ore di formazione */
      	"PersonMonths.modifyTrainingHours",
-     	/* salva ore di formazione */
      	"PersonMonths.saveTrainingHours",
-     	/* aggiorna ore di formazione */
      	"PersonMonths.updateTrainingHours",
-     	/* modifica password */
-     	"Persons.changePassword"
+     	
+     	/* Modifica password */
+     	"Persons.changePassword",
+     	"Persons.savePassword",
+     	
+     	/* Lista Persone */
+     	"Persons.showCurrentVacation",
+     	"Persons.showCurrentContractWorkingTimeType",
+     	"Persons.update",
+     	"Persons.deletePerson",
+     	"Persons.deletePersonConfirmed",
+     	"Persons.insertContract",
+     	"Persons.saveContract",
+     	"Persons.modifyContract",
+     	"Persons.updateContract",
+     	"Persons.deleteContract",
+     	"Persons.deleteContractConfirmed",
+     	"Persons.updateSourceContract",
+     	"Persons.saveSourceContract",
+     	"Persons.updateContractWorkingTimeType",
+     	"Persons.changeTypeOfContractWorkingTimeType",
+     	"Persons.splitContractWorkingTimeType",
+     	"Persons.deleteContractWorkingTimeType"
      	
      	), target == null, granted == false)
  $u: User(person != null)
@@ -58,31 +79,36 @@ then
  $c.grant();
 end
 
-/* Ognugno puoi vedere solo i propri dati */ 
 
-rule ViewPersonGeneric
+/*
+ *		Permission: viewPerson
+ */
+rule viewPerson_Generic
 when 
  $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
  $p: Permission(description == "viewPerson") from $uro.role.permissions
- $c: PermissionCheck(action in ("Persons.list"), target == null, granted == false)
+ $c: PermissionCheck(action in (
+        "Persons.list"
+        ), target == null, granted == false)
 then
  $c.grant();
 end
 
-rule ViewPersonInOffice
+rule viewPerson_InOffice
 when
  $o: Office()
  $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
  $p: Permission(description == "viewPerson") from $uro.role.permissions
  $c: PermissionCheck(action in (
+       "Persons.edit",
        "Persons.showCurrentVacation",
-       "Persons.edit"
+       "Persons.showCurrentContractWorkingTimeType"
        ), target == $o, granted == false)
 then
  $c.grant();
 end
 
-rule viewPerson
+rule viewPerson_Item
 when
  $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
  $p: Permission(description == "viewPerson") from $uro.role.permissions
@@ -91,7 +117,86 @@ then
  $c.grant();
 end
 
-rule viewPersonDay
+/*
+ *		Permission: editPerson
+ */
+rule editPerson_Generic
+when 
+ $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $p: Permission(description == "editPerson") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        /* inserire le action interessate */
+        "Epas.action"     	
+        ), target == null, granted == false)
+then
+ $c.grant();
+end
+
+rule editPerson_InOffice
+when
+ $o: Office()
+ $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $p: Permission(description == "editPerson") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        /* inserire le action interessate */
+        "Persons.update",
+        "Persons.deletePerson",
+     	"Persons.deletePersonConfirmed",
+     	"Persons.insertContract",
+        "Persons.saveContract",
+        "Persons.modifyContract",
+     	"Persons.updateContract",
+     	"Persons.deleteContract",
+     	"Persons.deleteContractConfirmed",
+     	"Persons.updateSourceContract",
+     	"Persons.saveSourceContract",
+     	"Persons.updateContractWorkingTimeType",
+     	"Persons.changeTypeOfContractWorkingTimeType",
+     	"Persons.splitContractWorkingTimeType",
+     	"Persons.deleteContractWorkingTimeType"
+       ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+rule editPerson_Item
+when
+ $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $p: Permission(description == "editPerson") from $uro.role.permissions
+ $c: PermissionCheck(target == "editPerson", granted == false)
+then
+ $c.grant();
+end
+
+/*
+ *		Permission: viewPersonDay
+ */
+rule viewPersonDay_Generic
+when 
+ $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $p: Permission(description == "viewPersonDay") from $uro.role.permissions
+ $c: PermissionCheck(  action in (
+        /* inserire le action interessate */
+        "Epas.action"
+        ), target == null, granted == false)
+then
+ $c.grant();
+end
+
+rule viewPersonDay_InOffice
+when
+ $o: Office()
+ $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $p: Permission(description == "viewPersonDay") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        /* inserire le action interessate */
+        "Epas.action"
+       ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+rule viewPersonDay_Item
 when
  $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
  $p: Permission(description == "viewPersonDay") from $uro.role.permissions
@@ -99,6 +204,137 @@ when
 then
  $c.grant();
 end
+
+/*
+ *		Permission: viewOffice
+ */
+rule viewOffice_Generic
+when 
+ $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $p: Permission(description == "viewOffice") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        /* inserire le action interessate */
+        "Epas.action"
+        ), target == null, granted == false)
+then
+ $c.grant();
+end
+
+rule viewOffice_InOffice
+when
+ $o: Office()
+ $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $p: Permission(description == "viewOffice") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        /* inserire le action interessate */
+        "Epas.action"
+       ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+rule viewOffice_Item
+when
+ $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $p: Permission(description == "viewOffice") from $uro.role.permissions
+ $c: PermissionCheck(target == "viewOffice", granted == false)
+then
+ $c.grant();
+end
+
+
+/*
+ *		Permission: editOffice
+ */
+rule editOffice_Generic
+when 
+ $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $p: Permission(description == "editOffice") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        /* inserire le action interessate */
+        "Epas.action"
+        ), target == null, granted == false)
+then
+ $c.grant();
+end
+
+rule editOffice_InOffice
+when
+ $o: Office()
+ $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $p: Permission(description == "editOffice") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        /* inserire le action interessate */
+        "Offices.insertInstitute",
+        "Offices.saveInstitute",
+        "Offices.insertSeat",
+        "Offices.saveSeat",
+        "Offices.editSeat",
+        "Offices.updateSeat"
+       ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+rule editOffice_Item
+when
+ $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $p: Permission(description == "editOffice") from $uro.role.permissions
+ $c: PermissionCheck(target == "editOffice", granted == false)
+then
+ $c.grant();
+end
+
+/*
+ *		Schema da implementare per ogni permesso
+ *		Permission: nomePermesso
+
+rule nomePermesso_Generic
+when 
+ $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $p: Permission(description == "nomePermesso") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        /* inserire le action interessate *//*
+        "Epas.action"
+        ), target == null, granted == false)
+then
+ $c.grant();
+end
+
+rule nomePermesso_InOffice
+when
+ $o: Office()
+ $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $p: Permission(description == "nomePermesso") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        /* inserire le action interessate *//*
+        "Epas.action"
+       ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+rule nomePermesso_Item
+when
+ $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $p: Permission(description == "nomePermesso") from $uro.role.permissions
+ $c: PermissionCheck(target == "nomePermesso", granted == false)
+then
+ $c.grant();
+end
+
+ */
+
+
+
+
+
+
+
+
+
+
+
 
 
 

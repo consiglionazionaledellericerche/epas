@@ -103,13 +103,17 @@
           		Amministrazione <b class="caret"></b></a>
               <ul class="dropdown-menu">
                 
-                #{if ip.viewPerson }<li><a href="@{Persons.list()}">Lista Persone</a></li> #{/if}
+                #{if ip.viewPerson }
+                  <li><a href="@{Persons.list()}">Lista Persone</a></li> 
+                #{/if}
                 
                 <li class="divider"></li>
                 
-                 #{if ip.viewPersonDay }<li><a href="@{Stampings.personStamping(session.get("personSelected"), 
+                #{if ip.viewPersonDay }
+                  <li><a href="@{Stampings.personStamping(session.get("personSelected"), 
                    session.get("yearSelected"), 
-                   session.get("monthSelected"))}">Timbrature</a></li> #{/if}
+                   session.get("monthSelected"))}">Timbrature</a></li> 
+                #{/if}
                 <!--
                 <li><a href="@{YearlyAbsences.showGeneralMonthlyAbsences(session.get("yearSelected"), session.get("monthSelected"))}">Assenze</a></li>
                 <li><a href="@{Competences.showCompetences(session.get("yearSelected"), session.get("monthSelected"))}">Competenze</a></li>
@@ -127,7 +131,7 @@
           </ul>
           #{/if}
           
-          #{secure.check "viewPersonList"}
+          #{if ip.isDropDown2Visible() }
           <ul class="nav navbar-nav">
             #{if dropDown.equals("dropDown3") }
             <li class="dropdown active">
@@ -138,18 +142,18 @@
               <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-cog"></i>
           		Configurazione <b class="caret"></b></a>
               <ul class="dropdown-menu">
-                
-                <li><a href="@{Administrators.list()}">Amministratori</a></li>
                 <li><a href="@{Offices.showOffices()}">Sedi</a></li>
+                <li><a href="@{Administrators.list()}">Amministratori</a></li>
+				<!--
                 <li><a href="@{WorkingTimes.manageWorkingTime()}">Orari Lavoro</a></li>
                 <li><a href="@{Administrators.list()}">Codici Assenze</a></li>
                 <li><a href="@{Administrators.list()}">Codici Competenze</a></li>
                 <li><a href="@{Administrators.list()}">Parametri</a></li>
-                
+                -->
               </ul>
             </li>
           </ul>
-          #{/secure.check}
+          #{/if}
 
 		  #{include '/menu.html' /}          
       

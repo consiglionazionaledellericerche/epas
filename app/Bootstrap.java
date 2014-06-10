@@ -1,4 +1,8 @@
 
+import java.util.List;
+
+import org.joda.time.LocalDate;
+
 import models.Office;
 import models.Permission;
 import models.Person;
@@ -215,9 +219,15 @@ public class Bootstrap extends Job {
 			
 			*/
 			
-			bootstrapPermissionsHandler();
+			
 
-	
+			convertPersonBornDateHandler();
+			
+			cleanOfficeTree();
+			
+			bootstrapPermissionsHandler();
+			
+			
 		}
 		catch(RuntimeException e)
 		{
@@ -433,5 +443,193 @@ public class Bootstrap extends Job {
 			uro2.office = Office.find("byCode", new Integer("223410")).first();
 			uro2.save();
 		}
+		
+		
+		
+		//Ogni ufficio deve essere associato ad admin
+		User admin = User.find("byUsername", "admin").first();
+		Role role = Role.find("byName", Role.PERSONNEL_ADMIN).first();
+
+		List<Office> officeList = Office.findAll();
+		for(Office office : officeList) {
+			UsersRolesOffices uro = UsersRolesOffices.find("Select uro from UsersRolesOffices uro "
+					+ "where uro.office = ? and uro.user = ? and uro.role = ?", office, admin, role).first();
+			if(uro==null) {
+				uro = new UsersRolesOffices();
+				uro.user = admin;
+				uro.office = office;
+				uro.role = role;
+				uro.save();
+			}
+		}
+	
+	}
+
+
+	private static void convertPersonBornDateHandler() {
+		
+		//FIXME applicare l'evoluzione che crea il campo e lanciare questo metodo
+		//oppure migliorare l'evoluzione che effettui direttamente la conversione 
+		//da Date a LocalDate. In ogni caso va eliminato il campo born_date
+		
+		List<Person> personList = Person.findAll();
+		for(Person person : personList) {
+			
+			if(person.bornDate != null) {
+				person.birthday = new LocalDate(person.bornDate);
+				person.bornDate = null;
+				person.save();
+			}
+		}
+	}
+	
+	private static void cleanOfficeTree() {
+		
+		//Primo livello AREA
+		
+		//Secondo livello ISTITUTO
+		
+		//Terzo livello SEDE
+		
+		Office areaPisa = Office.find("byName", "Area CNR Pisa").first();
+		if(areaPisa == null) {
+			
+			areaPisa = new Office();
+			areaPisa.name = "Area CNR Pisa";
+			areaPisa.code = null;
+			areaPisa.address = null;
+			areaPisa.contraction = null;
+			areaPisa.joiningDate = null;
+			areaPisa.save();
+		}
+		
+		
+		if(areaPisa.subOffices.size() == 0) {
+			
+			Office iit = new Office();
+			iit.name = "Istituto IIT";
+			iit.address = null;
+			iit.code = null;
+			iit.contraction = "IIT";
+			iit.joiningDate = null;
+			iit.office = areaPisa;
+			iit.save();
+		}
+		
+		
+		Office iit = Office.find("byName", "Istituto IIT").first();
+		if(iit.subOffices.size()  == 0) {
+			
+			Office iitPisa = Office.find("byCode", 223400).first();
+			Office iitCos = Office.find("byCode", 223410).first();
+			
+			iitPisa.office = iit;
+			iitPisa.name = "IIT - Pisa";
+			iitPisa.save();
+			iitCos.office = iit;
+			iitCos.save();
+		}
+		
+		/**
+		 * 
+		 * CREAZIONE ISTI
+		 * 
+		 * 
+		 */
+		
+		if(areaPisa.subOffices.size() == 1) {
+			
+			Office isti = new Office();
+			isti.name = "Istituto ISTI";
+			isti.address = null;
+			isti.code = null;
+			isti.contraction = "ISTI";
+			isti.joiningDate = null;
+			isti.office = areaPisa;
+			isti.save();
+		}
+		
+		
+		Office isti = Office.find("byName", "Istituto ISTI").first();
+		if(isti.subOffices.size()  == 0) {
+			
+			Office seatIsti1 = new Office();
+			seatIsti1.name = "Istituto ISTI Sede 1";
+			seatIsti1.address = null;
+			seatIsti1.code = 1;
+			seatIsti1.contraction = "Sede1";
+			seatIsti1.joiningDate = null;
+			seatIsti1.office = isti;
+			seatIsti1.save();
+
+			Office seatIsti2 = new Office();
+			seatIsti2.name = "Istituto ISTI Sede 2";
+			seatIsti2.address = null;
+			seatIsti2.code = 2;
+			seatIsti2.contraction = "Sede2";
+			seatIsti2.joiningDate = null;
+			seatIsti2.office = isti;
+			seatIsti2.save();
+
+		}
+		
+		/**
+		 * 
+		 * CREAZIONE AREA ROMANA
+		 * 
+		 */
+		
+		
+		Office areaRoma = Office.find("byName", "Area CNR Roma").first();
+		if(areaRoma == null) {
+			
+			areaRoma = new Office();
+			areaRoma.name = "Area CNR Roma";
+			areaRoma.code = null;
+			areaRoma.address = null;
+			areaRoma.contraction = null;
+			areaRoma.joiningDate = null;
+			areaRoma.save();
+		}
+		
+		
+		if(areaRoma.subOffices.size() == 0) {
+			
+			Office roma = new Office();
+			roma.name = "Istituto Romano";
+			roma.address = null;
+			roma.code = null;
+			roma.contraction = "IIT";
+			roma.joiningDate = null;
+			roma.office = areaRoma;
+			roma.save();
+		}
+		
+		
+		Office romaInst = Office.find("byName", "Istituto Romano").first();
+		if(romaInst.subOffices.size()  == 0) {
+			
+			Office seatRoma1 = new Office();
+			seatRoma1.name = "Istituto Romano Sede 1";
+			seatRoma1.address = null;
+			seatRoma1.code = 1;
+			seatRoma1.contraction = "Sede1";
+			seatRoma1.joiningDate = null;
+			seatRoma1.office = romaInst;
+			seatRoma1.save();
+
+			Office seatRoma2 = new Office();
+			seatRoma2.name = "Istituto Romano Sede 2";
+			seatRoma2.address = null;
+			seatRoma2.code = 2;
+			seatRoma2.contraction = "Sede2";
+			seatRoma2.joiningDate = null;
+			seatRoma2.office = romaInst;
+			seatRoma2.save();
+
+		}
+		
+	
+		
 	}
 }
