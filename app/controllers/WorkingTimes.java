@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.joda.time.LocalDate;
 
 import models.Contract;
@@ -18,13 +20,20 @@ import play.Logger;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
+import security.SecurityRules;
 
 @With( {Secure.class, RequestInit.class} )
 public class WorkingTimes extends Controller{
 
-	@Check(Security.INSERT_AND_UPDATE_WORKINGTIME)
+	
+	@Inject
+	static SecurityRules rules;
+	
+	
+
 	public static void manageWorkingTime(){
 		
+		rules.checkIfPermitted("");
 		List<WorkingTimeType> wttDefault = WorkingTimeType.getDefaultWorkingTimeTypes();
 		List<WorkingTimeType> wttAllowed = WorkingTimeType.getOfficesWorkingTimeTypes(Security.getOfficeAllowed()); 
 		
@@ -35,7 +44,7 @@ public class WorkingTimes extends Controller{
 		render(wttList, wttDefault, wttAllowed);
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_WORKINGTIME)
+	//@Check(Security.INSERT_AND_UPDATE_WORKINGTIME)
 	public static void showContractWorkingTimeType(Long wttId) {
 		
 		WorkingTimeType wtt = WorkingTimeType.findById(wttId);
@@ -44,6 +53,7 @@ public class WorkingTimes extends Controller{
 			flash.error("Impossibile caricare il tipo orario specificato. Riprovare o effettuare una segnalazione.");
 			WorkingTimes.manageWorkingTime();
 		}
+		rules.checkIfPermitted(wtt.office);
 		List<Contract> contractList = wtt.getAssociatedActiveContract();
 	
 		render(wtt, contractList);
@@ -51,8 +61,9 @@ public class WorkingTimes extends Controller{
 	}
 	
 	
-	@Check(Security.INSERT_AND_UPDATE_WORKINGTIME)
+	
 	public static void insertWorkingTime(){
+		rules.checkIfPermitted(Security.getUser().get().person.office);
 		List<WorkingTimeTypeDay> wttd = new LinkedList<WorkingTimeTypeDay>();
 		WorkingTimeType wtt = new WorkingTimeType();
 		for(int i = 1; i < 8; i++){
@@ -63,8 +74,10 @@ public class WorkingTimes extends Controller{
 		
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_WORKINGTIME)
+	
 	public static void save(
+			
+			
 			WorkingTimeType wtt, 
 			WorkingTimeTypeDay wttd1,
 			WorkingTimeTypeDay wttd2,
@@ -74,6 +87,7 @@ public class WorkingTimes extends Controller{
 			WorkingTimeTypeDay wttd6,
 			WorkingTimeTypeDay wttd7){
 			
+		rules.checkIfPermitted(Security.getUser().get().person.office);
 			if(wtt.description == null || wtt.description.isEmpty())
 			{
 				flash.error("Il campo nome tipo orario è obbligatorio. Operazione annullata");
@@ -122,7 +136,7 @@ public class WorkingTimes extends Controller{
 
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_WORKINGTIME)
+	//@Check(Security.INSERT_AND_UPDATE_WORKINGTIME)
 	public static void showWorkingTimeType(Long wttId) {
 		
 		WorkingTimeType wtt = WorkingTimeType.findById(wttId);
@@ -131,7 +145,7 @@ public class WorkingTimes extends Controller{
 			flash.error("Impossibile caricare il tipo orario specificato. Riprovare o effettuare una segnalazione.");
 			WorkingTimes.manageWorkingTime();
 		}
-		
+		rules.checkIfPermitted(wtt.office);
 		render(wtt);
 		
 	}
@@ -198,7 +212,7 @@ public class WorkingTimes extends Controller{
 
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_WORKINGTIME)
+	
 	public static void changeWorkingTimeTypeToAll(Long wttId) {
 		
 		WorkingTimeType wtt = WorkingTimeType.findById(wttId);
@@ -208,7 +222,7 @@ public class WorkingTimes extends Controller{
 			WorkingTimes.manageWorkingTime();
 			
 		}
-		
+		rules.checkIfPermitted(wtt.office);
 		List<WorkingTimeType> wttDefault = WorkingTimeType.getDefaultWorkingTimeTypes();
 		List<WorkingTimeType> wttAllowed = WorkingTimeType.getOfficesWorkingTimeTypes(Security.getOfficeAllowed()); 
 		
@@ -220,9 +234,10 @@ public class WorkingTimes extends Controller{
 		render(wtt, wttList);
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_WORKINGTIME)
+	
 	public static void executeChangeWorkingTimeTypeToAll(Long wttId, Long wttId1,  String dateFrom, String dateTo) {
 		
+		rules.checkIfPermitted(Security.getUser().get().person.office);
 		int contractChanges = 0;
 		int contractError = 0;
 		

@@ -138,16 +138,7 @@
                 #{if ip.uploadSituation }
                 <li><a href="@{UploadSituation.show()}">Invio Attestati</a></li>
                 #{/if}
-                
-               <!-- <li><a href="@{VacationsAdmin.list(session.get("yearSelected"))}">Ferie e Permessi</a></li>
-                <li class="divider"></li>
-                <li><a href="@{Stampings.missingStamping(session.get("yearSelected"), session.get("monthSelected") )}">Timbrature Mancanti</a></li>
-                <li><a href="@{Stampings.dailyPresence(session.get("yearSelected"), session.get("monthSelected"), session.get("daySelected") )}">Presenza Giornaliera</a></li>
-                <li><a href="@{MonthRecaps.show(session.get("yearSelected"), session.get("monthSelected") )}">Riepilogo Mensile</a></li>
-                <li><a href="@{Stampings.mealTicketSituation(session.get("yearSelected"), session.get("monthSelected") )}">Riepilogo Buoni Mensa</a></li>
-                <li class="divider"></li>
-                <li><a href="@{UploadSituation.show()}">Invio Attestati</a></li>
-                  -->
+        
               </ul>
             </li>
           </ul>
@@ -165,9 +156,10 @@
           		Configurazione <b class="caret"></b></a>
               <ul class="dropdown-menu">
                 <li><a href="@{Offices.showOffices()}">Sedi e Amministratori</a></li>
-                <!--
+                #{if ip.viewWorkingTimeType}
                 <li><a href="@{WorkingTimes.manageWorkingTime()}">Orari Lavoro</a></li>
-                <li><a href="#">Codici Assenze</a></li>
+                #{/if}
+                <!--<li><a href="#">Codici Assenze</a></li>
                 <li><a href="#">Codici Competenze</a></li>
                 <li><a href="#">Parametri</a></li>
                 -->
