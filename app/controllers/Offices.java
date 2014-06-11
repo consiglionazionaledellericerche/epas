@@ -5,6 +5,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import models.Office;
+import models.Role;
 
 import org.joda.time.LocalDate;
 
@@ -22,10 +23,12 @@ public class Offices extends Controller {
 	@NoCheck
 	public static void showOffices(){
 		
-		
 		List<Office> allAreas = Office.getAllAreas();
 		
-		render(allAreas);
+		Role roleAdmin = Role.find("byName", Role.PERSONNEL_ADMIN).first();
+		Role roleAdminMini = Role.find("byName", Role.PERSONNEL_ADMIN_MINI).first();
+		
+		render(allAreas, roleAdmin, roleAdminMini);
 	}
 	
 	@NoCheck

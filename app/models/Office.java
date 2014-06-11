@@ -71,6 +71,10 @@ public class Office extends BaseModel{
 	@OneToMany(mappedBy="office", fetch=FetchType.LAZY)
 	public List<WorkingTimeType> workingTimeType = new ArrayList<WorkingTimeType>();
     
+    
+    @Transient
+    private Boolean isEditable = null;
+    
     public String getName() {
     	return this.name;
     }
@@ -260,27 +264,18 @@ public class Office extends BaseModel{
 	/**
 	 * @return
 	 */
-	public boolean isEditable() {
+	@Transient
+	public boolean getIsEditable() {
+		
+		if(isEditable != null)
+			return this.isEditable;
 		
 		Role roleAdmin = Role.find("byName", Role.PERSONNEL_ADMIN).first();
-		return isRightPermittedOnOfficeTree(roleAdmin);
+		this.isEditable = isRightPermittedOnOfficeTree(roleAdmin);
+		
+		return this.isEditable;
 	}
 	
-	
-	/*
-	public String printRole() {
-		UsersRolesOffices uro = Office.getUro(Security.getUser().get(), this);
-		if(uro==null)
-			return "";
-		
-		if(uro.role.name.equals(Role.PERSONNEL_ADMIN))
-			return "Modifica e visualizzazione";
-		if(uro.role.name.equals(Role.PERSONNEL_ADMIN_MINI))
-			return "Visualizzazione";
-		
-		return "";
-	}
-	*/
 	
 	public List<Person> getPersonnelAdmin() {
 		
@@ -413,15 +408,16 @@ public class Office extends BaseModel{
 	 * @param office
 	 * @param role
 	 * @param ifImprove
+	 * @return true se il ruolo è stato assegnato, false se il ruolo non è stato assegnato (perchè peggiorativo)
 	 */
-	public static void setUroIfImprove(User user, Office office, Role role, boolean ifImprove) {
+	public static Boolean setUroIfImprove(User user, Office office, Role role, boolean ifImprove) {
 		
 		UsersRolesOffices uro = Office.getUro(user, office);
 		
 		if(uro == null || !ifImprove) {
 			
 			Office.setUro(user, office, role);
-			return;
+			return true;
 		}
 		
 		if(ifImprove) {
@@ -432,10 +428,12 @@ public class Office extends BaseModel{
 			if(previous.name.equals(Role.PERSONNEL_ADMIN_MINI)) {
 				
 				Office.setUro(user, office, role);
-				return;
+				return true;
 			}
 			
 		}
+		
+		return false;
 		 
 	}
 	
@@ -446,7 +444,7 @@ public class Office extends BaseModel{
 	 * @param user
 	 * @param office
 	 */
-	private static UsersRolesOffices getUro(User user, Office office) {
+	public static UsersRolesOffices getUro(User user, Office office) {
 		
 		UsersRolesOffices uro = UsersRolesOffices.find("select uro from UsersRolesOffices uro "
 				+ "where uro.user = ? and uro.office = ? ", user, office).first();
