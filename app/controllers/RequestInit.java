@@ -42,6 +42,8 @@ public class RequestInit extends Controller {
 		public boolean viewCompetence = false;
 		public boolean editCompetence = false;
 		public boolean uploadSituation = false;
+		public boolean viewWorkingTimeType = false;
+		public boolean editWorkingTimeType = false;
 		
 		public ItemsPermitted() {
 			
@@ -63,17 +65,22 @@ public class RequestInit extends Controller {
 			if(rules.check(Security.UPLOAD_SITUATION))
 				this.uploadSituation = true;
 			
+			if(rules.check(Security.VIEW_WORKING_TIME_TYPE))
+				this.viewWorkingTimeType = true;
+			
+			if(rules.check(Security.EDIT_WORKING_TIME_TYPE))
+				this.editWorkingTimeType = true;
 			
 		}
 		
 		public boolean isDropDownVisible() {
 			
-			return viewPerson || viewPersonDay || viewCompetence;
+			return viewPerson || viewPersonDay || viewCompetence || uploadSituation;
 		}
 		
 		public boolean isDropDown2Visible() {
 			
-			return viewOffice;
+			return viewOffice || viewWorkingTimeType;
 		}
 	}
 	

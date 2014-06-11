@@ -116,7 +116,16 @@ when
         "UploadSituation.show",
         "UploadSituation.uploadSituation",
         "UploadSituation.loginAttestati",
-        "UploadSituation.processAttestati"
+        "UploadSituation.processAttestati",
+        
+        /*Orari di lavoro*/
+     	"WorkingTimes.manageWorkingTime",
+     	"WorkingTimes.showWorkingTimeType",
+     	"WorkingTimes.showContractWorkingTimeType",
+     	"WorkingTimes.insertWorkingTime",
+     	"WorkingTimes.save",
+     	"WorkingTimes.changeWorkingTimeTypeToAll",
+     	"WorkingTimes.executeChangeWorkingTimeTypeToAll"
      	
      	), target == null, granted == false)
  $u: User(person != null)
@@ -426,6 +435,69 @@ when
  $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
  $p: Permission(description == "editOffice") from $uro.role.permissions
  $c: PermissionCheck(target == "editOffice", granted == false)
+then
+ $c.grant();
+end
+
+/*
+ * 		Permission: viewWorkingTimeType
+ */
+rule viewWorkingTimeType_Generic
+when 
+ $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $p: Permission(description == "viewWorkingTimeType") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        /* inserire le action interessate */
+        "WorkingTimes.manageWorkingTime"
+        ), target != null, granted == false)
+then
+ $c.grant();
+end
+
+
+rule viewWorkingTimeType_InOffice
+when
+ $o: Office()
+ $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $p: Permission(description == "viewWorkingTimeType") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        /* inserire le action interessate */
+        "WorkingTimes.showWorkingTimeType",
+        "WorkingTimes.showContractWorkingTimeType",
+        "WorkingTimes.changeWorkingTimeTypeToAll",
+        "WorkingTimes.executeChangeWorkingTimeTypeToAll"
+       ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+/*
+ *		Item per visualizzazione dropdown menu
+ */
+ 
+rule viewWorkingTimeType_Item
+when
+ $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $p: Permission(description == "viewWorkingTimeType") from $uro.role.permissions
+ $c: PermissionCheck(target == "viewWorkingTimeType", granted == false)
+then
+ $c.grant();
+end
+
+/*
+ *		Permission: editWorkingTimeType in office
+ */
+
+rule editWorkingTimeType_InOffice
+when
+ $o: Office()
+ $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $p: Permission(description == "editWorkingTimeType") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        /* inserire le action interessate */
+        "WorkingTimes.insertWorkingTime",
+        "WorkingTimes.save"
+       ), target == $o, granted == false)
 then
  $c.grant();
 end
