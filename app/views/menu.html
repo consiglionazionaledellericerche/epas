@@ -23,7 +23,6 @@
       	  </ul>
 #{/if}
 #{if switchDay}
-      	  #{secure.check "viewPersonList"}
       	  	#{form @SwitchTemplate.updateDay(), class: 'navbar-form navbar-left my-navbar-form', onChange:'javascript:this.form.submit()' }
       	  	<div class="form-group">
       	  	<!-- Lista giorni -->
@@ -35,10 +34,8 @@
 		  	</div>
   			
       		#{/form}
-      	  #{/secure.check}
 #{/if}
 #{if switchPerson}
-      	  #{secure.check "viewPersonList"}
       	  	#{form @SwitchTemplate.updatePerson(), class: 'navbar-form navbar-left my-navbar-form', onChange:'javascript:this.form.submit()' }
       	  	<div class="form-group">
       	  	<!-- Lista persone -->
@@ -50,5 +47,4 @@
 		  	</div>
   			
       		#{/form}
-      	  #{/secure.check}
 #{/if}
