@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.persistence.Query;
 
 import models.Absence;
@@ -41,6 +42,7 @@ import play.db.jpa.JPA;
 import play.libs.Mail;
 import play.mvc.Controller;
 import play.mvc.With;
+import security.SecurityRules;
 
 import com.google.common.base.Optional;
 import dao.AbsenceTypeDao;
@@ -48,6 +50,8 @@ import dao.AbsenceTypeDao;
 @With( {Resecure.class, RequestInit.class} )
 public class Absences extends Controller{
 
+	@Inject
+	static SecurityRules rules;
 	/**
 	 * @deprecated use AbsenceTypeDao.getFrequentTypes()
 	 * 
@@ -955,11 +959,12 @@ public class Absences extends Controller{
 		
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
+	
 	public static void manageAttachmentsPerCode(Integer year, Integer month){
 		
+		rules.checkIfPermitted("");
 		LocalDate beginMonth = new LocalDate(year, month, 1);
-				
+		
 		//Prendere le assenze ordinate per tipo
 		List<Absence> absenceList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup is null and " +
 				"abs.personDay.date between ? and ? and abs.absenceFile is not null order by abs.absenceType.code", 
@@ -1008,9 +1013,14 @@ public class Absences extends Controller{
 	}
 
 	
-	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
+	
 	public static void manageAttachmentsPerPerson(Long personId, Integer year, Integer month){
 		Person person = Person.findById(personId);
+		if(person == null){
+			flash.error("Persona inesistente");
+			YearlyAbsences.showGeneralMonthlyAbsences(year, month, null, null);
+		}
+		rules.checkIfPermitted(person.office);
 		List<Absence> personAbsenceListWithFile = new ArrayList<Absence>();
 		List<Absence> personAbsenceList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
 				"and abs.personDay.date between ? and ?", 
@@ -1025,14 +1035,21 @@ public class Absences extends Controller{
 		
 	}	
 	
-	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
+	
 	public static void absenceInPeriod(Long personId){
 
 		List<Person> personList = Person.getActivePersonsInDay(LocalDate.now(),
 				Security.getOfficeAllowed(), false);
+		if(personId == null)
+			personId = Security.getUser().get().person.id;
+		Person person = Person.findById(personId);
+		if(person == null){
+			flash.error("Persona inesistente");
+			Stampings.personStamping(Security.getUser().get().person.id, new LocalDate().getYear(), new LocalDate().getMonthOfYear());
+		}
 		
-		if(personId==null)
-			render(personList);
+		
+		rules.checkIfPermitted(person.office);
 		
 		LocalDate dateFrom = null;
 		LocalDate dateTo = null;
@@ -1053,7 +1070,7 @@ public class Absences extends Controller{
 		List<Absence> ferie = new ArrayList<Absence>();
 		List<Absence> riposiCompensativi = new ArrayList<Absence>();
 		List<Absence> altreAssenze = new ArrayList<Absence>();
-		Person person = Person.findById(personId);
+		
 		List<Absence> absenceList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
 				"and abs.personDay.date between ? and ? and abs.absenceType.justifiedTimeAtWork = ?", person, dateFrom, dateTo, JustifiedTimeAtWork.AllDay).fetch();
 

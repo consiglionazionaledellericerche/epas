@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.joda.time.LocalDate;
 
 import models.Absence;
@@ -34,6 +36,7 @@ import play.Logger;
 import play.cache.Cache;
 import play.mvc.Controller;
 import play.mvc.With;
+import security.SecurityRules;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
@@ -51,14 +54,19 @@ import com.google.common.collect.Sets;
  * @author cristian
  *
  */
-@With( {Secure.class, RequestInit.class} )
+@With( {Resecure.class, RequestInit.class} )
 public class UploadSituation extends Controller{
+	
+	@Inject
+	static SecurityRules rules;
 	
 	public static final String LOGIN_RESPONSE_CACHED = "loginResponse";
 	public static final String LISTA_DIPENTENTI_CNR_CACHED = "listaDipendentiCnr";
 	
 	@Check(Security.UPLOAD_SITUATION)
 	public static void show(){
+		
+		rules.checkIfPermitted(Security.getUser().get().person.office);
 		LocalDate lastMonth = LocalDate.now().minusMonths(1);
 		
 		int month = lastMonth.getMonthOfYear();
@@ -67,10 +75,11 @@ public class UploadSituation extends Controller{
 		render(year, month);
 	}
 
-	@Check(Security.UPLOAD_SITUATION)
+	//@Check(Security.UPLOAD_SITUATION)
 	public static void loginAttestati(Integer year, Integer month) {
 
 		Office office = Security.getUser().get().person.office;
+		rules.checkIfPermitted(office);
 		
 		String urlToPresence = ConfGeneral.getFieldValue(ConfigurationFields.UrlToPresence.description, office);
 		String userToPresence = ConfGeneral.getFieldValue(ConfigurationFields.UserToPresence.description, office);
@@ -80,7 +89,7 @@ public class UploadSituation extends Controller{
 		render(year, month, urlToPresence, attestatiLogin);
 	}
 
-	@Check(Security.UPLOAD_SITUATION)
+	
 	public static void uploadSituation(Integer year, Integer month) throws IOException{
 		if (params.get("loginAttestati") != null) {
 			loginAttestati(year, month);
@@ -95,7 +104,7 @@ public class UploadSituation extends Controller{
 			flash.error("Il valore dei parametri su cui fare il caricamento dei dati non può essere nullo");
 			Application.indexAdmin();
 		}
-
+		rules.checkIfPermitted(Security.getUser().get().person.office);
 //		ConfGeneral conf = ConfGeneral.getConfGeneral();
 		Integer seatCode = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.SeatCode.description, Security.getUser().get().person.office));
 		List<Person> personList = Person.find("Select p from Person p where p.number <> ? and p.number is not null order by p.number", 0).fetch();
@@ -158,9 +167,10 @@ public class UploadSituation extends Controller{
 
 	
 	
-	@Check(Security.UPLOAD_SITUATION)
+	
 	public static void processAttestati(final String attestatiLogin, final String attestatiPassword, Integer year, Integer month) throws MalformedURLException, URISyntaxException
 	{
+		
 		
 		LoginResponse loginResponse = null;
 		List<Dipendente> listaDipendenti = null;
@@ -178,6 +188,7 @@ public class UploadSituation extends Controller{
 		else
 		{
 			User user = Security.getUser().get();
+			rules.checkIfPermitted(user.person.office);
 			Cache.set(LOGIN_RESPONSE_CACHED + user.username, null);
 			Cache.set(LISTA_DIPENTENTI_CNR_CACHED + user.username, null);
 			

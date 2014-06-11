@@ -9,6 +9,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import models.AbsenceType;
 import models.Contract;
 import models.Office;
@@ -31,6 +33,7 @@ import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.mvc.Controller;
 import play.mvc.With;
+import security.SecurityRules;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableTable;
@@ -53,6 +56,8 @@ public class Stampings extends Controller {
 	 * @param month
 	 */
 	
+	@Inject
+	static SecurityRules rules;
 	
 	public static void stampings(Integer year, Integer month){
 
@@ -112,7 +117,7 @@ public class Stampings extends Controller {
 	}
 
 
-	@Check(Security.INSERT_AND_UPDATE_STAMPING)
+	//@Check(Security.INSERT_AND_UPDATE_STAMPING)
 	public static void personStamping(Long personId, int year, int month) {
 		
 		if (personId == null){
@@ -122,6 +127,13 @@ public class Stampings extends Controller {
 			personStamping(personId);
 		}
 		Person person = Person.findById(personId);
+		if(person == null){
+			flash.error("Persona inesistente in anagrafica");
+			Application.indexAdmin();
+		}
+		
+		rules.checkIfPermitted(person.office);
+		
 		if(!person.isActiveInMonth(month, year))
 		{
 			flash.error("Si è cercato di accedere a un mese al di fuori del contratto valido per %s %s. " +
@@ -437,9 +449,10 @@ public class Stampings extends Controller {
 	 * @param year
 	 * @param month
 	 */
-	@Check(Security.INSERT_AND_UPDATE_STAMPING)
+	
 	public static void missingStamping(int year, int month) {
 
+		rules.checkIfPermitted("");
 		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
 		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
 
@@ -490,9 +503,10 @@ public class Stampings extends Controller {
 
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	
 	public static void dailyPresence(Integer year, Integer month, Integer day) {
 
+		rules.checkIfPermitted("");
 		LocalDate dayPresence = new LocalDate(year, month, day);
 		//TODO:
 		List<Office> office = new ArrayList<Office>();
@@ -520,12 +534,13 @@ public class Stampings extends Controller {
 		render(daysRecap, year, month, day, numberOfInOut, month_capitalized);
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	
 	public static void mealTicketSituation(Integer year, Integer month, String name, Integer page){
 
 		if(page == null)
 			page = 0;
 		
+		rules.checkIfPermitted("");
 		LocalDate beginMonth = new LocalDate(year, month, 1);
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
 
