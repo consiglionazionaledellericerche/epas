@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import models.Absence;
 import models.AbsenceType;
 import models.Person;
@@ -16,6 +18,7 @@ import org.joda.time.LocalDate;
 import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
+import security.SecurityRules;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
@@ -28,6 +31,10 @@ import dao.PersonDao;
 @With( {Resecure.class, RequestInit.class} )
 public class YearlyAbsences extends Controller{
 
+	@Inject
+	static SecurityRules rules;
+	
+	
 	public final static class AbsenceTypeDays{
 		//public AbsenceType absenceCode;
 		public String absenceCode;
@@ -86,7 +93,7 @@ public class YearlyAbsences extends Controller{
 		}
 	}
 
-	@Check(Security.VIEW_PERSON_LIST)
+	
 	public static void yearlyAbsences(Long personId, int year) {
 		//controllo sui parametri
 		Person person = null;
@@ -94,6 +101,8 @@ public class YearlyAbsences extends Controller{
 			person = Security.getUser().get().person;
 		else
 			person = Person.findById(personId);
+		
+		rules.checkIfPermitted("");
 		Integer anno = params.get("year", Integer.class);
 		Logger.debug("L'id della persona è: %s", personId);
 		Logger.debug("La persona è: %s %s", person.name, person.surname);
@@ -148,12 +157,14 @@ public class YearlyAbsences extends Controller{
 
 	};
 
-	@Check(Security.VIEW_PERSON_LIST)
+	
 	public static void showGeneralMonthlyAbsences(int year, int month, String name, Integer page) {
 
+		rules.checkIfPermitted("");
+		
 		if(page==null)
 			page=0;
-		
+				
 		Table<Person, AbsenceType, Integer> tableMonthlyAbsences = TreeBasedTable.create(PersonNameComparator, AbsenceCodeComparator);
 		AbsenceType abt = new AbsenceType();
 		abt.code = "Totale";
@@ -225,13 +236,22 @@ public class YearlyAbsences extends Controller{
 		}
 	}
 	
-	@Check(Security.VIEW_PERSON_LIST)
+	
 	public static void showPersonMonthlyAbsences(Long personId, Integer year, Integer month, String absenceTypeCode) throws InstantiationException, IllegalAccessException
 	{
+		
 		LocalDate monthBegin = new LocalDate(year, month, 1);
 		LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
 		
 		Person person = Person.findById(personId);	
+		if(person == null){
+			flash.error("Persona inesistente");
+			YearlyAbsences.showGeneralMonthlyAbsences(year, month, null, null);
+		}
+			
+		rules.checkIfPermitted(person.office);
+		
+			
 		
 		List<Absence> absenceToRender = new ArrayList<Absence>();
 		
