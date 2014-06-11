@@ -4,7 +4,7 @@
           	  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="badge">${session.get("yearSelected")}</span><b class="caret"></b></a>
           	  <ul class="dropdown-menu">
           	   #{list items:[2013, org.joda.time.LocalDate.now().year, 2015], as:'year'}
-            	<li><a href="?year=${year}&month=${currentData.month}">${year}</a></li>
+            	<li><a href="?year=${year}&month=${currentData.month}&personId=${currentData.personId}">${year}</a></li>
                #{/list}
           	  </ul>
         	</li>
@@ -16,7 +16,7 @@
           	  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="badge">${currentData.monthLabel}</span><b class="caret"></b></a>
           	  <ul class="dropdown-menu">
           	  #{list items:1..12, as:'month'}
-            	<li><a href="?month=${month}&year=${currentData.year}">&{'Month.'+month}</a></li>
+            	<li><a href="?month=${month}&year=${currentData.year}&personId=${currentData.personId}">&{'Month.'+month}</a></li>
               #{/list}
           	  </ul>
         	</li>
