@@ -2,19 +2,9 @@
 #{set header:'navbar' /}
 #{set title: 'ePAS - Inserimento nuova persona' /}
 
-<!-- secondo me questo controllo è inutile perchè c'è il template apposito di modifica
-<h2 id="titoloModificaPersonale">
-	%{ if (person.id == null) { }% 
-		Inserisci dati per una nuova persona
-	%{ } else { }%
-		Modifica dati di ${person.name + ' ' + person.surname}
-	%{ } }%
-</h2>
- -->
- 
 #{form @Persons.save()}
 
-	<input type="hidden" name="person.id"  value="${person.id}" />
+	<input type="hidden" name="person.id"" />
 	
 	<fieldset>
 		<legend>Dati personali</legend>
@@ -38,7 +28,7 @@
 			<tr>	
 				<td>Livello </td>
 				<td>
-					#{select 'person.qualification', value:person.qualification, id:'qualifica'} 
+					#{select 'person.qualification', id:'qualifica'} 
 						#{option 0}0#{/option}
 						#{option 1}1#{/option}
 						#{option 2}2#{/option}
@@ -89,7 +79,7 @@
 
 	<fieldset>
 		<legend>Informazioni di ubicazione e contatti</legend>
-		<input type="hidden" name="location.person_id"  value="${person.id}" />
+		<input type="hidden" name="location.person_id" />
 		<table class="tablenoborder">
 			<tr>
 				<td>Sede</td>
@@ -101,27 +91,27 @@
 			</tr>
 			<tr>
 				<td>Dipartimento</td>
-				<td><input name="department" type="text" value="${location.department}" size="20" maxlength="100" /></td>
+				<td><input name="department" type="text" size="20" maxlength="100" /></td>
 			</tr>	
 			<tr>	
 				<td>Sede</td>
-				<td><input name="headOffice" type="text" value="${location.headOffice}" size="40" maxlength="200" /></td>
+				<td><input name="headOffice" type="text" size="40" maxlength="200" /></td>
 			</tr>		
 			<tr>	
 				<td>Stanza</td>
-				<td><input name="room" type="text" value="${location.room}" size="40" maxlength="200" /></td>
+				<td><input name="room" type="text" size="40" maxlength="200" /></td>
 			</tr>		
 			<tr>	
 				<td>Telefono</td>
-				<td><input name="telephone" type="text" value="${contactData.telephone}" size="40" maxlength="200" /></td>
+				<td><input name="telephone" type="text" size="40" maxlength="200" /></td>
 			</tr>		
 			<tr>	
 				<td>Email</td>
-				<td><input name="email" type="email" value="${contactData.email}" size="40" maxlength="200" /></td>
+				<td><input name="email" type="email" size="40" maxlength="200" /></td>
 			</tr>		
 			<tr>	
 				<td>Data di nascita</td>
-				<td><input name="bornDate" type="text" class="datepicker" value="${person.bornDate}" size="40" maxlength="200" /></td>
+				<td><input name="bornDate" type="text" class="datepicker" size="40" maxlength="200" /></td>
 			</tr>	
 	
 		</table>

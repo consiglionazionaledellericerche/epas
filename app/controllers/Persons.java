@@ -69,18 +69,15 @@ public class Persons extends Controller {
 		render(personList);
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	@NoCheck
 	public static void insertPerson() throws InstantiationException, IllegalAccessException {
-		Person person = new Person();
-		Contract contract = new Contract();
-
-
+		
 		InitializationTime initializationTime = new InitializationTime();
 		List<Office> officeList = Security.getOfficeAllowed();
 		List<Office> office = Office.find("Select office from Office office where office.office is null").fetch();
 		List<WorkingTimeType> wttList = WorkingTimeType.findAll();
 		Logger.debug("Lista office: %s", office.get(0).name);
-		render(person, contract, initializationTime, officeList, wttList);
+		render(initializationTime, officeList, wttList);
 	}
 
 
