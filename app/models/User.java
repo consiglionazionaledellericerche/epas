@@ -79,14 +79,17 @@ public class User extends BaseModel{
 	public List<Office> getOfficeAllowed() {
 		
 		List<Office> officeList = new ArrayList<Office>();
+		for(UsersRolesOffices uro : this.usersRolesOffices){
+			officeList.add(uro.office);
+		}
 		//TODO riscrivere col nuovo concetto di ruoli e permessi e funzionale al tipo di ruolo che si cerca
-		if (this.person != null) {
-			officeList.add(this.person.office);
-		}
-		else {
-			
-			officeList = Office.findAll(); 
-		}
+//		if (this.person != null) {
+//			officeList.add(this.person.office);
+//		}
+//		else {
+//			
+//			officeList = Office.findAll(); 
+//		}
 		return officeList;
 			
 		//return Office.find("select distinct o from Office o join "

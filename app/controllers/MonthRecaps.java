@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import models.Competence;
 import models.Person;
 import models.PersonDay;
@@ -17,6 +19,7 @@ import org.joda.time.LocalDate;
 import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
+import security.SecurityRules;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
@@ -25,9 +28,12 @@ import com.google.common.collect.TreeBasedTable;
 
 import dao.PersonDao;
 
-@With( {Secure.class, RequestInit.class} )
+@With( {Resecure.class, RequestInit.class} )
 public class MonthRecaps extends Controller{
 
+	@Inject
+	static SecurityRules rules;
+	
 	private static Comparator<Person> PersonNameComparator = new Comparator<Person>() {
 
 		public int compare(Person person1, Person person2) {
@@ -158,11 +164,13 @@ public class MonthRecaps extends Controller{
 	 * @throws ClassNotFoundException
 	 * @throws SQLException
 	 */
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	
 	public static void show(int year, int month, String name, Integer page) {
 
 		if(page == null)
 			page = 0;
+		
+		rules.checkIfPermitted("");
 		
 		LocalDate today = new LocalDate();
 		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
@@ -256,10 +264,15 @@ public class MonthRecaps extends Controller{
 	 * @param year
 	 * @param month
 	 */
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	
 	public static void notJustifiedAbsences(Long personId, int year, int month){
 		
 		Person person = Person.findById(personId);
+		if(person == null){
+			flash.error("Persona non presente in anagrafica");
+			MonthRecaps.show(year, month, null, null);
+		}
+		rules.checkIfPermitted(person.office);
 		List<PersonDay> notJustifiedAbsences = getPersonDayListRecap(personId, year, month, "notJustifiedAbsences");
 
 		render(notJustifiedAbsences, person);
@@ -271,10 +284,15 @@ public class MonthRecaps extends Controller{
 	 * @param year
 	 * @param month
 	 */
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	
 	public static void justifiedAbsences(Long personId, int year, int month){
 		
 		Person person = Person.findById(personId);
+		if(person == null){
+			flash.error("Persona non presente in anagrafica");
+			MonthRecaps.show(year, month, null, null);
+		}
+		rules.checkIfPermitted(person.office);
 		List<PersonDay> justifiedAbsences = getPersonDayListRecap(personId, year, month, "justifiedAbsences");
 
 		render(justifiedAbsences, person);
@@ -286,10 +304,15 @@ public class MonthRecaps extends Controller{
 	 * @param year
 	 * @param month
 	 */
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	
 	public static void workingDayHoliday(Long personId, int year, int month){
 		
 		Person person = Person.findById(personId);
+		if(person == null){
+			flash.error("Persona non presente in anagrafica");
+			MonthRecaps.show(year, month, null, null);
+		}
+		rules.checkIfPermitted(person.office);
 		List<PersonDay> workingDayHoliday = getPersonDayListRecap(personId, year, month, "workingDayHoliday");
 
 		render(workingDayHoliday, person);
@@ -301,10 +324,15 @@ public class MonthRecaps extends Controller{
 	 * @param year
 	 * @param month
 	 */
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	
 	
 	public static void workingDayNotHoliday(Long personId, int year, int month){
 		Person person = Person.findById(personId);
+		if(person == null){
+			flash.error("Persona non presente in anagrafica");
+			MonthRecaps.show(year, month, null, null);
+		}
+		rules.checkIfPermitted(person.office);
 		List<PersonDay> workingDayNotHoliday = getPersonDayListRecap(personId, year, month, "workingDayNotHoliday");
 
 		render(workingDayNotHoliday, person);

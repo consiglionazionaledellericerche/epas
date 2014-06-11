@@ -71,7 +71,52 @@ when
      	"Persons.updateContractWorkingTimeType",
      	"Persons.changeTypeOfContractWorkingTimeType",
      	"Persons.splitContractWorkingTimeType",
-     	"Persons.deleteContractWorkingTimeType"
+     	"Persons.deleteContractWorkingTimeType",
+     	
+     	/*Assenze*/
+     	"YearlyAbsences.showGeneralMonthlyAbsences",
+     	"YearlyAbsences.showPersonMonthlyAbsences",
+     	"YearlyAbsences.yearlyAbsences",
+     	"Absences.manageAttachmentsPerCode",
+     	"Absences.manageAttachmentsPerPerson",
+     	"Absences.absenceInPeriod",
+     	
+     	/*Competenze*/
+     	"Competences.showCompetences",
+     	"Competences.updateCompetence",
+     	"Competences.overtime",
+     	"Competences.totalOvertimeHours",
+     	"Competences.saveOvertime",
+     	"Competences.enabledCompetences",
+     	"Competences.updatePersonCompetence",
+     	"Competences.saveNewCompetenceConfiguration",
+     	"Competences.exportCompetences",
+     	"Competences.getOvertimeInYear",
+     	
+     	/*Ferie e permessi*/
+     	"VacationsAdmin.list",
+     	"VacationsAdmin.vacationsLastYear",
+     	"VacationsAdmin.vacationsCurrentYear",
+     	"VacationsAdmin.permissionCurrentYear",
+     	
+     	/*Timbrature*/
+     	"Stampings.personStamping",
+     	"Stampings.missingStamping",
+     	"Stampings.dailyPresence",
+     	"Stampings.mealTicketSituation",
+     	
+     	/*Riepilogo mensile*/
+     	"MonthRecaps.show",
+     	"MonthRecaps.justifiedAbsences",
+     	"MonthRecaps.notJustifiedAbsences",
+        "MonthRecaps.workingDayNotHoliday",
+        "MonthRecaps.workingDayHoliday",
+        
+        /*Invio attestati*/
+        "UploadSituation.show",
+        "UploadSituation.uploadSituation",
+        "UploadSituation.loginAttestati",
+        "UploadSituation.processAttestati"
      	
      	), target == null, granted == false)
  $u: User(person != null)
@@ -177,8 +222,15 @@ when
  $p: Permission(description == "viewPersonDay") from $uro.role.permissions
  $c: PermissionCheck(  action in (
         /* inserire le action interessate */
-        "Epas.action"
-        ), target == null, granted == false)
+        "YearlyAbsences.showGeneralMonthlyAbsences",
+        "YearlyAbsences.yearlyAbsences",
+        "Absences.manageAttachmentsPerCode",
+        "VacationsAdmin.list",
+        "Stampings.missingStamping",
+        "Stampings.dailyPresence",
+        "Stampings.mealTicketSituation",
+        "MonthRecaps.show"
+        ), target != null, granted == false)
 then
  $c.grant();
 end
@@ -190,7 +242,17 @@ when
  $p: Permission(description == "viewPersonDay") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
-        "Epas.action"
+        "YearlyAbsences.showPersonMonthlyAbsences",
+        "Absences.manageAttachmentsPerPerson",
+        "Absences.absenceInPeriod",
+        "VacationsAdmin.vacationsLastYear",
+        "VacationsAdmin.vacationsCurrentYear",
+        "VacationsAdmin.permissionCurrentYear",
+        "Stampings.personStamping",
+        "MonthRecaps.justifiedAbsences",
+        "MonthRecaps.notJustifiedAbsences",
+        "MonthRecaps.workingDayNotHoliday",
+        "MonthRecaps.workingDayHoliday"
        ), target == $o, granted == false)
 then
  $c.grant();
@@ -204,6 +266,89 @@ when
 then
  $c.grant();
 end
+
+/*
+*		Permission: viewCompetence
+*/
+rule viewCompetence_Generic
+when 
+ $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $p: Permission(description == "viewCompetence") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        /* inserire le action interessate */
+        "Competences.showCompetences",
+        "Competences.overtime",
+        "Competences.totalOvertimeHours",
+        "Competences.enabledCompetences",
+        "Competences.exportCompetences",
+        "Competences.getOvertimeInYear"
+        ), target != null, granted == false)
+then
+ $c.grant();
+end
+
+/*
+ *		Item per visualizzazione dropdown menu
+ */
+rule viewCompetence_Item
+when
+ $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $p: Permission(description == "viewCompetence") from $uro.role.permissions
+ $c: PermissionCheck(target == "viewCompetence", granted == false)
+then
+ $c.grant();
+end
+
+/*
+ *		Permission: editCompetence
+ */
+rule editCompetence_InOffice
+when
+ $o: Office()
+ $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $p: Permission(description == "editCompetence") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        /* inserire le action interessate */
+        "Competences.updateCompetence",
+        "Competences.saveOvertime",
+        "Competences.updatePersonCompetence",
+        "Competences.saveNewCompetenceConfiguration"
+       ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+/*
+ *		Permissio: uploadSituation in office
+ */
+rule uploadSituation_InOffice
+when
+ $o: Office()
+ $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $p: Permission(description == "uploadSituation") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        /* inserire le action interessate */
+        "UploadSituation.show",
+        "UploadSituation.uploadSituation",
+        "UploadSituation.loginAttestati",
+        "UploadSituation.processAttestati"
+       ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+/*
+ * 		Item per visualizzazione dropdown menu
+ */
+rule uploadSituation_Item
+when
+ $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $p: Permission(description == "uploadSituation") from $uro.role.permissions
+ $c: PermissionCheck(target == "uploadSituation", granted == false)
+then
+ $c.grant();
+end
+
 
 /*
  *		Permission: viewOffice

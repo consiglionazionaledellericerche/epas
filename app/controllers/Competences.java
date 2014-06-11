@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
@@ -26,6 +28,7 @@ import play.Logger;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
+import security.SecurityRules;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
@@ -38,6 +41,8 @@ import dao.PersonDao;
 @With( {Resecure.class, RequestInit.class} )
 public class Competences extends Controller{
 
+	@Inject
+	static SecurityRules rules;
 	
 	public static void competences(int year, int month) {
 
@@ -56,9 +61,9 @@ public class Competences extends Controller{
 	}
 
 
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void showCompetences(Integer year, Integer month, String name, String codice, Integer page){
 
+		rules.checkIfPermitted("");
 		if(page==null)
 			page = 0;
 				
@@ -137,13 +142,16 @@ public class Competences extends Controller{
 
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+
 	public static void updateCompetence(long pk, String name, Integer value){
 		final Competence competence = Competence.findById(pk);
+		
 		notFoundIfNull(competence);
 		if (validation.hasErrors()) {
 			error(Messages.get(Joiner.on(",").join(validation.errors())));
 		}
+		rules.checkIfPermitted(competence.person.office);
+		
 		Logger.info("Anno competenza: %s Mese competenza: %s", competence.year, competence.month);
 		Logger.info("value approved before = %s", competence.valueApproved);
 		competence.valueApproved = value;
@@ -214,8 +222,9 @@ public class Competences extends Controller{
 		manageCompetenceCode();
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void totalOvertimeHours(int year){
+		rules.checkIfPermitted("");
 		List<TotalOvertime> totalList = TotalOvertime.find("Select tot from TotalOvertime tot where tot.year = ?", year).fetch();
 
 		int totale = 0;
@@ -227,8 +236,11 @@ public class Competences extends Controller{
 		render(totalList, totale, year);
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void saveOvertime(int year){
+		
+		rules.checkIfPermitted(Security.getUser().get().person.office);
+		
 		TotalOvertime total = new TotalOvertime();
 		LocalDate data = new LocalDate();
 		total.date = data;
@@ -261,11 +273,13 @@ public class Competences extends Controller{
 		Competences.totalOvertimeHours(year);
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void overtime(int year, int month, String name, Integer page){
 		
 		if(page == null)
 			page = 0;
+		
+		rules.checkIfPermitted("");
 		
 		ImmutableTable.Builder<Person, String, Integer> builder = ImmutableTable.builder();
 		Table<Person, String, Integer> tableFeature = null;
@@ -342,6 +356,8 @@ public class Competences extends Controller{
 	 */
 	public static void enabledCompetences(String name){
 
+		
+		rules.checkIfPermitted("");
 		LocalDate date = new LocalDate();
 		
 		
@@ -389,11 +405,15 @@ public class Competences extends Controller{
 	 */
 	public static void updatePersonCompetence(Long personId){
 		
-		if(personId != null){
+		if(personId == null){
 			
-			Person person = Person.findById(personId);
-			render(person);
+			flash.error("Persona inesistente");
+			Competences.enabledCompetences(null);
 		}
+		
+		Person person = Person.findById(personId);
+		rules.checkIfPermitted(person.office);
+		render(person);
 	}
 
 	/**
@@ -402,6 +422,13 @@ public class Competences extends Controller{
 	public static void saveNewCompetenceConfiguration(){
 		long personId = params.get("personId", Long.class);
 		Person person = Person.findById(personId);
+		if(person == null){
+			flash.error("Persona inesistente in anagrafica");
+			Competences.enabledCompetences(null);
+			
+		}
+		rules.checkIfPermitted(person.office);
+		
 		String overtimeWorkDay = params.get("overtimeWorkDay");
 		String nightlyOvertime = params.get("nightlyOvertime");
 		String nightlyHolidayOvertime = params.get("nightlyHolidayOvertime");
@@ -639,14 +666,16 @@ public class Competences extends Controller{
 
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void exportCompetences(){
+		rules.checkIfPermitted("");
 		render();
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void getOvertimeInYear(int year) throws IOException{
 		
+		rules.checkIfPermitted("");
 		List<Person> personList = Person.getActivePersonsinYear(year, Security.getOfficeAllowed(), true);
 		FileInputStream inputStream = null;
 		File tempFile = File.createTempFile("straordinari"+year,".csv" );
@@ -663,8 +692,10 @@ public class Competences extends Controller{
 					"and code.code = ? ", p, year, "S1").first();			
 			Logger.debug("Totale per %s %s vale %d", p.name, p.surname, totale);
 			out.write(p.surname+' '+p.name+',');
-						
-			out.append(totale.toString());
+			if(totale != null)			
+				out.append(totale.toString());
+			else
+				out.append("0");
 			out.newLine();
 		}
 		out.close();
