@@ -296,9 +296,6 @@ then
  $c.grant();
 end
 
-/*
- *		Item per visualizzazione dropdown menu
- */
 rule viewCompetence_Item
 when
  $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
@@ -328,7 +325,7 @@ then
 end
 
 /*
- *		Permissio: uploadSituation in office
+ *		Permission: uploadSituation in office
  */
 rule uploadSituation_InOffice
 when
@@ -346,9 +343,6 @@ then
  $c.grant();
 end
 
-/*
- * 		Item per visualizzazione dropdown menu
- */
 rule uploadSituation_Item
 when
  $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
@@ -471,10 +465,6 @@ then
  $c.grant();
 end
 
-/*
- *		Item per visualizzazione dropdown menu
- */
- 
 rule viewWorkingTimeType_Item
 when
  $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
