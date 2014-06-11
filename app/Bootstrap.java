@@ -35,6 +35,13 @@ public class Bootstrap extends Job {
 			return;
 		}
 		
+
+		convertPersonBornDateHandler();
+		
+		cleanOfficeTree();
+		
+		bootstrapPermissionsHandler();
+		
 		try
 		{
 			/*
@@ -219,14 +226,7 @@ public class Bootstrap extends Job {
 			
 			*/
 			
-			
 
-			convertPersonBornDateHandler();
-			
-			cleanOfficeTree();
-			
-			bootstrapPermissionsHandler();
-			
 			
 		}
 		catch(RuntimeException e)

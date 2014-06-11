@@ -5,6 +5,8 @@ import helpers.ModelQuery.SimpleResults;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
@@ -20,16 +22,20 @@ import models.rendering.VacationsRecap;
 import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
+import security.SecurityRules;
 
 @With( {Secure.class, RequestInit.class} )
 public class VacationsAdmin extends Controller{
 
-	@Check(Security.INSERT_AND_UPDATE_VACATIONS)
+	@Inject
+	static SecurityRules rules;
+	
+	
 	public static void list(Integer year, String name, Integer page){
 		
 		if(page==null)
 			page = 0;
-		
+		rules.checkIfPermitted("");
 		LocalDate date = new LocalDate();
 		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
 				Sets.newHashSet(Security.getOfficeAllowed()), false, date, date);
@@ -65,14 +71,14 @@ public class VacationsAdmin extends Controller{
 	}
 	
 	
-	@Check(Security.INSERT_AND_UPDATE_VACATIONS)
+	
 	public static void vacationsCurrentYear(Long personId, Integer anno){
 		
 		Person person = Person.findById(personId);
 		if( person == null ) {
 			error();	/* send a 500 error */
 		}
-
+		rules.checkIfPermitted(person.office);
     	//Costruzione oggetto di riepilogo per la persona
 		Contract contract = person.getCurrentContract();
 		
@@ -97,14 +103,14 @@ public class VacationsAdmin extends Controller{
 	}
 	
 
-	@Check(Security.INSERT_AND_UPDATE_VACATIONS)
+	
 	public static void vacationsLastYear(Long personId, Integer anno){
 		
 		Person person = Person.findById(personId);
 		if( person == null ) {
 			error();	/* send a 500 error */
 		}
-    	
+    	rules.checkIfPermitted(person.office);
     	//Costruzione oggetto di riepilogo per la persona
     	Contract contract = person.getCurrentContract();
     	
@@ -128,14 +134,14 @@ public class VacationsAdmin extends Controller{
     	renderTemplate("Vacations/vacationsLastYear.html", vacationsRecap);
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_VACATIONS)
+	
 	public static void permissionCurrentYear(Long personId, Integer anno){
 		
 		Person person = Person.findById(personId);
 		if( person == null ) {
 			error();	/* send a 500 error */
 		}
-		
+		rules.checkIfPermitted(person.office);
     	//Costruzione oggetto di riepilogo per la persona
 		Contract contract = person.getCurrentContract();
 		

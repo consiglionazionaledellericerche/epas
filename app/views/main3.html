@@ -113,11 +113,33 @@
                   <li><a href="@{Stampings.personStamping(session.get("personSelected"), 
                    session.get("yearSelected"), 
                    session.get("monthSelected"))}">Timbrature</a></li> 
+                  <li><a href="@{Stampings.missingStamping(session.get("yearSelected"), 
+                   session.get("monthSelected") )}">Timbrature Mancanti</a></li>
+                  <li><a href="@{Stampings.dailyPresence(session.get("yearSelected"), 
+                   session.get("monthSelected"), session.get("daySelected") )}">Presenza Giornaliera</a></li>
+                  <li><a href="@{Stampings.mealTicketSituation(session.get("yearSelected"), 
+                   session.get("monthSelected") )}">Riepilogo Buoni Mensa</a></li>
+                  <li class="divider"></li>
+                  <li><a href="@{MonthRecaps.show(session.get("yearSelected"), 
+                   session.get("monthSelected") )}">Riepilogo Mensile</a></li>
+                  <li><a href="@{YearlyAbsences.showGeneralMonthlyAbsences(session.get("yearSelected"),
+                   session.get("monthSelected"))}">Assenze</a></li>
+                  <li><a href="@{VacationsAdmin.list(session.get("yearSelected"))}">Ferie e Permessi</a></li>
+                  <li class="divider"></li>
+                  
                 #{/if}
-                <!--
-                <li><a href="@{YearlyAbsences.showGeneralMonthlyAbsences(session.get("yearSelected"), session.get("monthSelected"))}">Assenze</a></li>
-                <li><a href="@{Competences.showCompetences(session.get("yearSelected"), session.get("monthSelected"))}">Competenze</a></li>
-                <li><a href="@{VacationsAdmin.list(session.get("yearSelected"))}">Ferie e Permessi</a></li>
+                
+                #{if ip.viewCompetence }
+                <li><a href="@{Competences.showCompetences(session.get("yearSelected"), 
+                  session.get("monthSelected"))}">Competenze</a></li>
+                <li class="divider"></li>
+                #{/if}
+                
+                #{if ip.uploadSituation }
+                <li><a href="@{UploadSituation.show()}">Invio Attestati</a></li>
+                #{/if}
+                
+               <!-- <li><a href="@{VacationsAdmin.list(session.get("yearSelected"))}">Ferie e Permessi</a></li>
                 <li class="divider"></li>
                 <li><a href="@{Stampings.missingStamping(session.get("yearSelected"), session.get("monthSelected") )}">Timbrature Mancanti</a></li>
                 <li><a href="@{Stampings.dailyPresence(session.get("yearSelected"), session.get("monthSelected"), session.get("daySelected") )}">Presenza Giornaliera</a></li>

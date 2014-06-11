@@ -39,6 +39,9 @@ public class RequestInit extends Controller {
 		public boolean viewPerson = false;
 		public boolean viewPersonDay = false;
 		public boolean viewOffice = false;
+		public boolean viewCompetence = false;
+		public boolean editCompetence = false;
+		public boolean uploadSituation = false;
 		
 		public ItemsPermitted() {
 			
@@ -51,12 +54,21 @@ public class RequestInit extends Controller {
 			if(rules.check(Security.VIEW_OFFICE))
 				this.viewOffice = true;
 			
+			if(rules.check(Security.VIEW_COMPETENCE))
+				this.viewCompetence = true;
+			
+			if(rules.check(Security.EDIT_COMPETENCE))
+				this.editCompetence = true;
+			
+			if(rules.check(Security.UPLOAD_SITUATION))
+				this.uploadSituation = true;
+			
 			
 		}
 		
 		public boolean isDropDownVisible() {
 			
-			return viewPerson || viewPersonDay;
+			return viewPerson || viewPersonDay || viewCompetence;
 		}
 		
 		public boolean isDropDown2Visible() {
