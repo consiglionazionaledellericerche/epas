@@ -3,6 +3,7 @@
  */
 package controllers;
 
+import helpers.ModelQuery;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
@@ -10,15 +11,22 @@ import java.util.List;
 import javax.inject.Inject;
 
 import models.Office;
+import models.Permission;
 import models.Person;
+import models.query.QPermission;
+import models.query.QRole;
+import models.query.QUsersRolesOffices;
 
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
+import com.mysema.query.BooleanBuilder;
+import com.mysema.query.jpa.JPQLQuery;
 
 import controllers.Resecure.NoCheck;
 import dao.PersonDao;
+import play.Logger;
 import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -31,8 +39,8 @@ import security.SecurityRules;
  */
 public class RequestInit extends Controller {
 	
-	@Inject
-	static SecurityRules rules;
+	//@Inject
+	//static SecurityRules rules;
 	
 	public static class ItemsPermitted {
 		
@@ -47,30 +55,51 @@ public class RequestInit extends Controller {
 		
 		public ItemsPermitted() {
 			
-			if(rules.check(Security.VIEW_PERSON))
-				this.viewPerson = true;
+			final QUsersRolesOffices quro = QUsersRolesOffices.usersRolesOffices;
+			final QRole qr = QRole.role;
+			final QPermission qp = QPermission.permission;
+						
+			final JPQLQuery query = ModelQuery.queryFactory().from(qp)
+					.leftJoin(qp.roles, qr).fetch()
+					.leftJoin(qr.usersRolesOffices, quro).fetch()
+					.distinct();
+					
+			final BooleanBuilder condition = new BooleanBuilder();
+			condition.and(quro.user.eq(Security.getUser().get()));
 			
-			if(rules.check(Security.VIEW_PERSON_DAY))
-				this.viewPersonDay = true;
+			query.where(condition);
 			
-			if(rules.check(Security.VIEW_OFFICE))
-				this.viewOffice = true;
+			List<Permission> pList = ModelQuery.simpleResults(query, qp).list();
 			
-			if(rules.check(Security.VIEW_COMPETENCE))
-				this.viewCompetence = true;
-			
-			if(rules.check(Security.EDIT_COMPETENCE))
-				this.editCompetence = true;
-			
-			if(rules.check(Security.UPLOAD_SITUATION))
-				this.uploadSituation = true;
-			
-			if(rules.check(Security.VIEW_WORKING_TIME_TYPE))
-				this.viewWorkingTimeType = true;
-			
-			if(rules.check(Security.EDIT_WORKING_TIME_TYPE))
-				this.editWorkingTimeType = true;
-			
+			for(Permission p : pList) {
+				
+				if(p.description.equals("viewPerson"))
+					this.viewPerson = true;
+				
+				if(p.description.equals("viewPersonDay"))
+					this.viewPersonDay = true;
+				
+				if(p.description.equals("viewOffice"))
+					this.viewOffice = true;
+				
+				if(p.description.equals("viewCompetence"))
+					this.viewCompetence = true;
+				
+				if(p.description.equals("editCompetence"))
+					this.editCompetence = true;
+				
+				if(p.description.equals("uploadSituation"))
+					this.uploadSituation = true;
+				
+				if(p.description.equals("viewWorkingTimeType"))
+					this.viewWorkingTimeType = true;
+				
+				if(p.description.equals("editWorkingTimeType"))
+					this.editWorkingTimeType = true;
+				
+				
+			}
+						
 		}
 		
 		public boolean isDropDownVisible() {
@@ -218,10 +247,12 @@ public class RequestInit extends Controller {
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
 		String name = null;
 		if(Security.getUser().get().person != null) {
-			
+			List<Office> officeList = Security.getOfficeAllowed();
+			if(officeList.size() > 0) {
 			List<Person> persons = PersonDao.list(Optional.fromNullable(name), 
 					Sets.newHashSet(Security.getOfficeAllowed()), false, beginMonth, endMonth).list();
 			renderArgs.put("navPersons", persons);
+			}
 		} 
 		else {
 

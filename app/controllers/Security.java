@@ -130,19 +130,26 @@ public class Security extends Secure.Security {
     }
 	
 	private static Optional<User> getUser(String username){
+		
 		if (username == null || username.isEmpty()) {
 			Logger.trace("getUSer failed for username %s", username);
 			return Optional.<User>absent();
 		}
 		Logger.trace("Richiesta getUser(), username=%s", username);
 		
-
-		User user = User.find("byUsername", username).first();
+		//cache
+		User user = (User)Cache.get(username);
+		if(user!=null)
+			return Optional.of(user);
+		
+		//db
+		user = User.find("byUsername", username).first();
 		Logger.trace("USer.find('byUsername'), username=%s, e' %s", username, user);
 		if (user == null){
 			Logger.info("Security.getUser(): USer con username = %s non trovata nel database", username);
 			return Optional.<User>absent();
 		}
+		Cache.set(username, user, CACHE_DURATION);
 		return Optional.of(user);
 	}
 	
