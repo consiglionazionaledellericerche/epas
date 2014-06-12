@@ -1,129 +1,155 @@
 #{extends 'main3.html' /}
 #{set header:'navbar' /}
 #{set title: 'ePAS - Inserimento nuova persona' /}
-
+<div class="container">
 #{form @Persons.save()}
 
-	<input type="hidden" name="person.id"" />
-	
-	<fieldset>
-		<legend>Dati personali</legend>
-		<table class="tablenoborder">
-			<tr>
-				<td><b>Cognome</b> </td>
-				<td><input name="surname" type="text" size="20" maxlength="100" /></td>
-			</tr>	
-			<tr>	
-				<td><b>Nome</b></td>
-				<td><input name="name" type="text" size="20" maxlength="50" /></td>
-			</tr>		
-			<tr>	
-				<td>Matricola</td>
-				<td><input name="number" type="number" size="10" maxlength="10" /></td>
-			</tr>		
-			<tr>	
-				<td>Numero badge</td>
-				<td><input name="badgeNumber" type="number" size="10" maxlength="20" /></td>
-			</tr>		
-			<tr>	
-				<td>Livello </td>
-				<td>
-					#{select 'person.qualification', id:'qualifica'} 
-						#{option 0}0#{/option}
-						#{option 1}1#{/option}
-						#{option 2}2#{/option}
-						#{option 3}3#{/option}
-						#{option 4}4#{/option}
-						#{option 5}5#{/option}
-						#{option 6}6#{/option}
-						#{option 7}7#{/option}
-						#{option 8}8#{/option}
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title"><span class="badge">1</span> Dati Personali</h3>
+  </div>
+  <div class="panel-body">
+    
+
+    <table class="table table-condensed table-form table-hover">
+		<tr>
+			<td class="lab"><b>Cognome</b></td>
+			<td><input name="person.surname" type="text" /></td>
+		</tr>
+		<tr>
+			<td class="lab"><b>Nome</b></td> 
+			<td><input name="person.name" type="text" /></td>
+		</tr>
+		
+		<tr>
+			<td class="lab">Matricola</td> 
+			<td><input name="person.number" type="number" /></td>
+		</tr>
+		<tr>
+			<td class="lab">Numbero badge</td>
+			<td><input name="person.badgeNumber" type="number" /></td>
+		</tr>
+		<tr>
+			<td class="lab"> Livello </td>
+			<td>
+			
+				#{select 'qualification', value:'', class:'span1',id:'withoutborder'} 
+				#{option null}Seleziona la qualifica#{/option}
+				#{option 1}1#{/option} #{option 2}2#{/option} #{option 3}3#{/option}
+				#{option 4}4#{/option} #{option 5}5#{/option} #{option 6}6#{/option}
+				#{option 7}7#{/option} #{option 8}8#{/option} #{/select} 
+		
+			
+			</td>
+		</tr>
+		<tr>
+			<td class="lab">Sede</td>
+			<td>
+			    #{select 'office', value:'', id:'office'} 
+						#{list items: officeList, as: 'office'}
+							#{option office.id}${office.name}#{/option}
+						#{/list} 
 					#{/select}
-				</td>
-			</tr>	
-		</table>	
-	</fieldset>
+			</td>
+		</tr>
 	
-	<fieldset>
 	
-		<legend>Dati Contrattuali</legend>
-		<table class="tablenoborder">
-			<tr>	
-				<td><b>Inizio contratto</b></td>
-				<td><input name="beginContract" type="text" id="datepicker1" data-date-format="yyyy-mm-dd"/></td>
-			</tr>	
-				
-			<tr>	
-				<td>Fine contratto</td>
-				<td><input name="expireContract" type="text" id="datepicker3" data-date-format="yyyy-mm-dd"/></td>
-				
-				
-			<tr>	
-				<td>Obbligo attestato di presenza (per dipendenti CNR)</td>
-				<td><input name="onCertificate" type="checkbox" /></td>
-			</tr>	
-				
-			<tr>	
-				<td>Tipo Orario</td>
-				<td>
-				#{select 'wtt'}
+	</table>
+
+  </div>
+</div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title"><span class="badge">2</span> Informazioni di ubicazione e contatti</h3>
+  </div>
+  <div class="panel-body">
+	
+    <table class="table table-condensed table-form table-hover">
+		<tr>
+			<td class="lab">Dipartimento</td>
+			<td><input name="person.department" type="text" /></td>
+		</tr>
+		<tr>
+			<td class="lab">Sede</td>
+			<td><input name="person.headOffice" type="text" /></td>
+		</tr>
+		<tr>
+			<td class="lab">Stanza</td>
+			<td><input name="person.room" type="text" /></td>
+		</tr>
+		<tr>
+			<td class="lab">Telefono</td>			
+			<td><input name="person.telephone" type="text" /></td>
+			
+		</tr>
+		<tr>
+			<td class="lab">Email</td>
+			<td><input name="person.email" type="email"/></td>
+		</tr>
+		<tr>
+			<td class="lab">Data di nascita </td>			
+			<td><input data-datepicker data-date-format="yyyy-mm-dd" name="person.birthday" type="text" value=""/></td>			
+		</tr>
+	</table>
+  
+  </div>
+</div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title"><span class="badge">3</span> Dati Contrattuali</h3>
+  </div>
+  <div class="panel-body">
+	
+    <table class="table table-hover center table-list-contract">
+		<tr class="warning">
+			<th>Data inizio contratto</th>
+			<th>Data fine contratto</th>
+			<th>Orario<br>di lavoro</th>
+			<th>Attestato presenza (per dipendenti CNR)</th>			
+		</tr>		
+		
+		<tr>
+			<td>
+			  <h4><input name="beginContract" type="text" id="datepicker1" data-date-format="yyyy-mm-dd"/></h4>
+			</td>
+			
+			<td>
+			  <h4><input name="expireContract" type="text" id="datepicker3" data-date-format="yyyy-mm-dd"/></h4>
+			</td>
+						
+			<td>
+			  
+			  #{select 'wtt'}
                   #{list items:wttList, as:'wttItem'}
 	                #{option wttItem.id}${wttItem.description}#{/option}
 		          #{/list}
 		        #{/select}
-			    </td>
-			</tr>	
-				
-		</table>	
-	</fieldset>
-
-	<fieldset>
-		<legend>Informazioni di ubicazione e contatti</legend>
-		<input type="hidden" name="location.person_id" />
-		<table class="tablenoborder">
-			<tr>
-				<td>Sede</td>
-				<td>#{select 'officeId', value:'', id:'office'} 
-						#{list items: officeList, as: 'office'}
-							#{option office.id}${office.name}#{/option}
-						#{/list} 
-					#{/select}</td>
-			</tr>
-			<tr>
-				<td>Dipartimento</td>
-				<td><input name="department" type="text" size="20" maxlength="100" /></td>
-			</tr>	
-			<tr>	
-				<td>Sede</td>
-				<td><input name="headOffice" type="text" size="40" maxlength="200" /></td>
-			</tr>		
-			<tr>	
-				<td>Stanza</td>
-				<td><input name="room" type="text" size="40" maxlength="200" /></td>
-			</tr>		
-			<tr>	
-				<td>Telefono</td>
-				<td><input name="telephone" type="text" size="40" maxlength="200" /></td>
-			</tr>		
-			<tr>	
-				<td>Email</td>
-				<td><input name="email" type="email" size="40" maxlength="200" /></td>
-			</tr>		
-			<tr>	
-				<td>Data di nascita</td>
-				<td><input name="bornDate" type="text" class="datepicker" size="40" maxlength="200" /></td>
-			</tr>	
-	
-		</table>
-	</fieldset>
-	
-    <p>I valori in <b>grassetto</b> sono obbligatori</p>
- 
-	
-  <div class="forminline buttoncenter">	
-    <input class="btn btn-primary" id="submitInsertPerson" type="submit" value="Avanti"/>
-    #{/form}
-    #{form @Persons.discard()}
-      <input class="btn" id="resetInsertPerson"type="submit" value="Annulla">
-    #{/form}
+			 
+			</td>
+			
+			
+			<td><input name="onCertificate" type="checkbox" /></td>			
+		</tr>		
+	  </table>
+  
   </div>
+</div>
+
+   <div class="container-fluid center">
+      <input class="btn btn-primary" type="submit" value="Avanti" />
+      #{form @Persons.discard()}
+      <input class="btn" id="resetInsertPerson"type="submit" value="Annulla">
+      #{/form}
+   </div>
+	
+<p>I valori in <b>grassetto</b> sono obbligatori</p>
+ 
+
+    #{/form}
+</div>    
+      
+    
+

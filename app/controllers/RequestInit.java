@@ -44,6 +44,7 @@ public class RequestInit extends Controller {
 		public boolean uploadSituation = false;
 		public boolean viewWorkingTimeType = false;
 		public boolean editWorkingTimeType = false;
+		public boolean viewAbsenceType = false;
 		
 		public ItemsPermitted() {
 			
@@ -71,6 +72,9 @@ public class RequestInit extends Controller {
 			if(rules.check(Security.EDIT_WORKING_TIME_TYPE))
 				this.editWorkingTimeType = true;
 			
+			if(rules.check(Security.VIEW_ABSENCE_TYPE))
+				this.viewAbsenceType = true;
+			
 		}
 		
 		public boolean isDropDownVisible() {
@@ -80,7 +84,7 @@ public class RequestInit extends Controller {
 		
 		public boolean isDropDown2Visible() {
 			
-			return viewOffice || viewWorkingTimeType;
+			return viewOffice || viewWorkingTimeType || viewAbsenceType;
 		}
 	}
 	

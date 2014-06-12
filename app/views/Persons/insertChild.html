@@ -1,46 +1,59 @@
-#{extends 'main_with_navbar.html' /}
-#{set titolo: 'Inserimento/modifica figli dei dipendenti'/}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Inserimento/modifica figli dei dipendenti' /}
+
 
 <ul class="nav nav-tabs">
   <li><a href="@{Persons.edit(person.id)}#">Dati Anagrafici ${person.name} ${person.surname}</a></li>
   <li class="active"><a href="@{Persons.insertChild(person.id)}#">Inserisci figlio per ${person.name} ${person.surname}</a></li>
 </ul>
 
+
+<div class="container">
 <p class="lead"><a data-toggle="modal" href="@{Persons.personChildrenList(person.id)}" data-target="#myModal4">Vedi figli di ${person.name} ${person.surname}</a></p>
 #{form @Persons.saveChild()}
-<input type="hidden" name="personId" value="${person.id}"/>
-<fieldset>
-	<legend>Inserimento nuovo figlio per ${person.name} ${person.surname}</legend>
-	<div class="span7">
-	<table class="table table-striped">
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Inserimento nuovo figlio per ${person.name} ${person.surname}</h3>
+  </div>
+  <div class="panel-body">
+    
+
+    <table class="table table-condensed table-hover">
+		
 		<tr>
 			<th>Nome</td>
 			<th>Cognome</td>
 			<th>Data di nascita</td>
 		</tr>
 		<tr>
-			<td><input class="span2" type="text" value="" name="name"></td>
-			<td><input class="span2" type="text" value="" name="surname"></td>
-			<td><input class="span2" type="text" value="" name="bornDate" id="datepicker1" data-date-format="yyyy-mm-dd"></td>
+			<td><input  type="text" value="" name="name"></td>
+			<td><input  type="text" value="" name="surname"></td>
+			<td><input  type="text" value="" name="bornDate" id="datepicker1" data-date-format="yyyy-mm-dd"></td>
 		</tr>
-	</table>
-	<input class="btn btn-primary" type="submit" value="Ok" />
-	</div>
 	
-</fieldset>
-#{/form}
+	
+	</table>
 
-
-<div id="myModal4" class="modal hide fade mymodal-medium" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">Lista figli</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-   <!--   <button class="btn btn-primary">Save changes</button>-->
   </div>
 </div>
+<input type="hidden" name="personId" value="${person.id}"/>
+<div class="container-fluid center">
+      <input class="btn btn-primary" type="submit" value="Ok" />      
+</div>
+#{/form}
+
+</div>
+
+
+<div class="modal fade" id="myModal4" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-center">
+    
+    <div class="modal-content">
+             
+    </div><!-- /.modal-content -->
+           
+    
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

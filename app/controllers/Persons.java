@@ -69,9 +69,10 @@ public class Persons extends Controller {
 		render(personList);
 	}
 
-	@NoCheck
+	//@NoCheck
 	public static void insertPerson() throws InstantiationException, IllegalAccessException {
 		
+		rules.checkIfPermitted(Security.getUser().get().person.office);
 		InitializationTime initializationTime = new InitializationTime();
 		List<Office> officeList = Security.getOfficeAllowed();
 		List<Office> office = Office.find("Select office from Office office where office.office is null").fetch();
@@ -81,72 +82,48 @@ public class Persons extends Controller {
 	}
 
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void save() {
+	
+	public static void save(Person person, Integer qualification, Integer office, Contract contract) {
 		if(validation.hasErrors()) {
 			if(request.isAjax()) error("Invalid value");
 			Persons.list(null);
 		}
-
+		rules.checkIfPermitted(Security.getUser().get().person.office);
+		Logger.debug(person.name);
 		/* creazione persona */
-		Person person = null; 
-		
-		
-
-		Contract contract = new Contract();		
-		person = new Person();		
+		//Person person = null; 
+				
+		//person = new Person();		
 		Logger.debug("Saving person...");
 
-		if(params.get("name").equals("") || params.get("surname").equals("")){
-			flash.error("Inserire nome e cognome per la persona che si intende salvare in anagrafica");
-			render("@list");
-		}
-		person.name = params.get("name");
-
-		person.surname = params.get("surname");
-
-		person.number = params.get("number", Integer.class);
-
-		Qualification qual = Qualification.findById(new Long(params.get("person.qualification", Integer.class)));
+		
+		Qualification qual = Qualification.findById(new Long(qualification));
 		person.qualification = qual;
 
-		Office office = Office.findById(new Long(params.get("person.office", Integer.class)));
-		if(office != null)
-			person.office = office;
-		else{
-			Logger.debug("L'ufficio che si tenta di inserire per %s %s è nullo. Non inserisco niente", person.name, person.surname);
-			flash.error("L'ufficio di appartenenza non può essere nullo.");
-			render("@list");
-		}
+		Office off = Office.findById(new Long(office));
+		//if(office != null)
+		person.office = off;
+
 		person.save();
 
 		/* creazione utente */
 		User user = new User();
-		user.username = params.get("name").toLowerCase()+'.'+params.get("surname").toLowerCase(); 
+		user.username = person.name.toLowerCase()+'.'+person.surname.toLowerCase(); 
 		Codec codec = new Codec();
 		user.password = codec.hexMD5("epas");
 		user.person = person;
 
-		/*creazione location */
-		person.department = params.get("department");
-		person.headOffice = params.get("headOffice");
-		person.room = params.get("room");
-		
+		user.save();
+		person.user = user;
 		person.save();
-		Logger.debug("Saving contact data...");
 
-		/* creazione contactData */
-		person.email = params.get("email");
-		person.telephone = params.get("telephone");
-		
-		person.save();
 
 		/* creazione contratto */
 		Logger.debug("Begin contract: %s", params.get("beginContract"));
 		if(params.get("beginContract") == null){
 			flash.error("Il contratto di %s %s deve avere una data di inizio. Utente cancellato. Reinserirlo con la data di inizio contratto valorizzata.", 
 					person.name, person.surname);
-			//person.delete();
+			person.delete();
 			render("@list");
 		}
 		LocalDate expireContract = null;
@@ -180,29 +157,28 @@ public class Persons extends Controller {
 	}
 
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	
 	public static void insertUsername(Person person){
 
-
+		rules.checkIfPermitted(Security.getUser().get().person.office);
 		List<String> usernameList = new ArrayList<String>();
 		usernameList = PersonUtility.composeUsername(person.name, person.surname);
 		render(person, usernameList);
 	}
 
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	
 	public static void updateUsername(){
-
+		rules.checkIfPermitted(Security.getUser().get().person.office);
 		Long id = params.get("person", Long.class);
 		Person person = Person.findById(id);
-		Logger.debug("Il valore selezionato come username è: %s", params.get("username"));
-		Logger.debug("La persona che si vuole modificare è: %s %s", person.name, person.surname);
+		
 		person.user.username = params.get("username");
 		person.user.save();
-		person.save();
+		
 
 		flash.success("%s %s inserito in anagrafica con il valore %s come username", person.name, person.surname, person.user.username);
-		render("@Stampings.redirectToIndex");
+		Persons.list(null);
 
 	}
 
@@ -704,7 +680,8 @@ public class Persons extends Controller {
 		Persons.changePassword();
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	//@Check(Security.INSERT_AND_UPDATE_PERSON)
+	@NoCheck
 	public static void insertChild(Long personId){
 
 		Person person = Person.findById(personId);
@@ -712,11 +689,13 @@ public class Persons extends Controller {
 		render(person, personChildren);
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	//@Check(Security.INSERT_AND_UPDATE_PERSON)
+	
 	public static void saveChild(){
-
+		
 		PersonChildren personChildren = new PersonChildren();
 		Person person = Person.findById(params.get("personId", Long.class));
+		rules.checkIfPermitted(person.office);
 		personChildren.name = params.get("name");
 		personChildren.surname = params.get("surname");
 		personChildren.bornDate = new LocalDate(params.get("bornDate"));
@@ -727,10 +706,12 @@ public class Persons extends Controller {
 		Application.indexAdmin();
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	//@Check(Security.INSERT_AND_UPDATE_PERSON)
+	
 	public static void personChildrenList(Long personId){
 
 		Person person = Person.findById(personId);
+		rules.checkIfPermitted(person.office);
 		render(person);
 	}
 
