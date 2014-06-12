@@ -65,15 +65,7 @@ public class Security extends Secure.Security {
 	
 	public final static String VIEW_ADMINISTRATOR = "viewAdministrator";
 	public final static String EDIT_ADMINISTRATOR = "editAdministrator";
-	
-	
-	
-	
 
-	
-	
-	
-	
 	
 	public final static String VIEW_PERSON_LIST = "viewPersonList";
 
@@ -138,18 +130,18 @@ public class Security extends Secure.Security {
 		Logger.trace("Richiesta getUser(), username=%s", username);
 		
 		//cache
-		User user = (User)Cache.get(username);
-		if(user!=null)
-			return Optional.of(user);
+		//User user = (User)Cache.get(username);
+		//if(user!=null)
+		//	return Optional.of(user);
 		
 		//db
-		user = User.find("byUsername", username).first();
+		User user = User.find("byUsername", username).first();
 		Logger.trace("USer.find('byUsername'), username=%s, e' %s", username, user);
 		if (user == null){
 			Logger.info("Security.getUser(): USer con username = %s non trovata nel database", username);
 			return Optional.<User>absent();
 		}
-		Cache.set(username, user, CACHE_DURATION);
+		//Cache.set(username, user, CACHE_DURATION);
 		return Optional.of(user);
 	}
 	
