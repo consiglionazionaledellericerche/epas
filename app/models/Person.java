@@ -331,7 +331,6 @@ public class Person extends BaseModel {
 			if(DateUtility.isDateIntoInterval(LocalDate.now(), new DateInterval(cwtt.beginDate, cwtt.endDate)))
 			{
 				this.currentWorkingTimeType = cwtt.workingTimeType;
-				Logger.debug("wtt %s %s", this.name, this.surname);
 				return currentWorkingTimeType;
 			}
 		}
@@ -361,7 +360,6 @@ public class Person extends BaseModel {
 			if(DateUtility.isDateIntoInterval(LocalDate.now(), new DateInterval(vp.beginFrom, vp.endTo)))
 			{
 				this.currentVacationCode = vp.vacationCode;
-				Logger.debug("vp %s %s", this.name, this.surname);
 				return this.currentVacationCode;
 			}
 		}
