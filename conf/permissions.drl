@@ -87,6 +87,9 @@ when
      	"Absences.manageAttachmentsPerPerson",
      	"Absences.absenceInPeriod",
      	"Absences.manageAbsenceCode",
+     	"Absences.editCode",
+     	"Absences.insertAbsenceCode",
+     	"Absences.saveAbsenceCode",
      	
      	/*Competenze*/
      	"Competences.showCompetences",
@@ -464,7 +467,7 @@ end
  *		Permission: editCompetenceCode in office
  */
  
-rule nomePermesso_InOffice
+rule editCompetenceCode_InOffice
 when
  $o: Office()
  $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
@@ -474,6 +477,25 @@ when
         "Competences.insertCompetenceCode",
         "Competences.edit",
         "Competences.save"
+       ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+
+/*
+ * 		Permission: editAbsenceType in Office
+ */
+rule editAbsenceCode_InOffice
+when
+ $o: Office()
+ $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $p: Permission(description == "editAbsenceType") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        /* inserire le action interessate */
+        "Absences.editCode",
+     	"Absences.insertAbsenceCode",
+     	"Absences.saveAbsenceCode"
        ), target == $o, granted == false)
 then
  $c.grant();

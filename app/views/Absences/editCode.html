@@ -1,250 +1,242 @@
-#{extends 'main_with_navbar.html' /}
-#{set titolo: 'Gestione dei codici di assenza' /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title:'ePAS - Modifica codice di assenza' /}
 
+<div class="container">
 #{form @Absences.updateCode()}
 
 <input type="hidden" name="absenceTypeId" value="${abt.id}"/>
+	<div class="panel panel-default">
+		  <div class="panel-heading">
+		    <h3 class="panel-title">Modifica dati per codice di assenza: ${abt.code} (${abt.description})</h3>
+		  </div>
+		<div class="panel-body">
+			<table class="table table-form table-condensed table-hover">
+				<tr>
+					<td><p>Codice: </p></td>
+					<td><input type="text" name="codice" value="${abt.code}" disabled="disabled"/></td>
+				</tr>
+ 				<tr>
+ 					<td><p>Codice per attestati di presenza: </p></td>
+ 					<td><input type="text" name="codicePresenza" value="${abt.certificateCode}" disabled="disabled"/></td>
+ 				</tr>
+				<tr>
+					<td><p>Descrizione: </p></td>
+					<td><input type="text" name="descrizione" value="${abt.description}" size="100"/></td>
+				</tr>
+				<tr>
+					<td><p>Uso interno:</p></td>
+					<td>
+					#{if abt.internalUse == false}
+						<p>Sì <input type="radio" name="usoInterno" value="true" /> 
+						No <input type="radio" name="usoInterno" value="false" checked="checked"/></p>
+					#{/if}
+					#{else}
+						<p>Sì <input type="radio" name="usoInterno" value="true" checked="checked"/> 
+						No <input type="radio" name="usoInterno" value="false"/></p>
+					#{/else}
+					</td>
+				</tr>
+				<tr>
+					<td><p>Uso multiplo: </p></td>
+					<td>
+					#{if abt.multipleUse == false}
+						<p>Sì <input type="radio" name="usoMultiplo" value="true" /> 
+						No <input type="radio" name="usoMultiplo" value="false" checked="checked"/></p>
+					#{/if}
+					#{else}
+						<p>Sì <input type="radio" name="usoMultiplo" value="true" checked="checked"/> 
+						No <input type="radio" name="usoMultiplo" value="false"/></p>
+					#{/else}
+					</td>
+				</tr>
+				<tr>
+					<td><p >Inizio validita': </p></td>
+					<td><input type="text" name="inizio" value="${abt.validFrom}" id="datepicker1" data-date-format="yyyy-mm-dd"/></td>
+				</tr>
+				<tr>
+					<td><p >Fine validita': </p></td>
+					<td><input type="text" name="fine" value="${abt.validTo}" id="datepicker2" data-date-format="yyyy-mm-dd"/></td>
+				</tr>
+				<tr>
+					<td><p id="codice">Tempo di lavoro giustificato: </p></td>
+					<td>#{select 'abt.justifiedTimeAtWork', value:abt.justifiedTimeAtWork.description}
+												#{option null}#{/option}
+												#{option justList.get(0).description}${justList.get(0).description}#{/option}
+												#{option justList.get(1).description}${justList.get(1).description}#{/option}
+												#{option justList.get(2).description}${justList.get(2).description}#{/option}
+												#{option justList.get(3).description}${justList.get(3).description}#{/option}
+												#{option justList.get(4).description}${justList.get(4).description}#{/option}
+												#{option justList.get(5).description}${justList.get(5).description}#{/option}
+												#{option justList.get(6).description}${justList.get(6).description}#{/option}
+												#{option justList.get(7).description}${justList.get(7).description}#{/option}
+												#{option justList.get(8).description}${justList.get(8).description}#{/option}
+												#{option justList.get(9).description}${justList.get(9).description}#{/option}
+												#{option justList.get(10).description}${justList.get(10).description}#{/option}
+												#{option justList.get(11).description}${justList.get(11).description}#{/option}
+												#{option justList.get(12).description}${justList.get(12).description}#{/option}								
+												#{/select}</td>
+				</tr>
+				<tr>
+					<td><p>Livelli:</p></td>
+					<td>
+					#{list items:qualList, as:'qual'}
+					
+						#{if abt.qualifications.contains(qual)}
+							${qual.qualification}: <input type="checkbox" name="qualification${qual.qualification}" value ="si" checked="checked"/>
+						#{/if}
+						#{else}
+							${qual.qualification}: <input type="checkbox" name="qualification${qual.qualification}" value ="no"/>
+						#{/else}
+					#{/list}
+					</td>
+				</tr>
+				<tr>
+					<td><p>Calcola buono pasto:</p></td>
+					<td>
+					#{if abt.mealTicketCalculation == false}
+						<p>Sì <input type="radio" name="calcolaBuonoPasto" value="true" /> 
+						No <input type="radio" name="calcolaBuonoPasto" value="false" checked="checked"/></p>
+					#{/if}
+					#{else}
+						<p>Sì <input type="radio" name="calcolaBuonoPasto" value="true" checked="checked"/> 
+						No <input type="radio" name="calcolaBuonoPasto" value="false"/></p>
+					#{/else}
+					</td>
+				</tr>
+				<tr>
+					<td><p>Ignora timbrature:</p></td>
+					<td>
+					#{if abt.ignoreStamping == false}
+						<p>Sì <input type="radio" name="ignoraTimbrature" value="true" /> 
+						No <input type="radio" name="ignoraTimbrature" value="false" checked="checked"/></p>
+					#{/if}
+					#{else}
+						<p>Sì <input type="radio" name="ignoraTimbrature" value="true" checked="checked"/> 
+						No <input type="radio" name="ignoraTimbrature" value="false"/></p>
+					#{/else}
+					</td>
+				</tr>
+				<tr>
+					<td><p>Gruppo:</td>
+					<td>
+					#{if abt.absenceTypeGroup != null}
+						<input type="text" name="gruppo" value="${abt.absenceTypeGroup.label}"/>
+					#{/if}
+					#{else}
+						<input type="text" name="gruppo" value=""/>
+					#{/else}
+					</td>
+				</tr>
+				<tr>
+					<td>Inseribile anche nei week end e festivi:</td>
+					<td>
+					#{if abt.consideredWeekEnd == false}
+						<p>Sì <input type="radio" name="weekEnd" value="true" /> 
+						No <input type="radio" name="weekEnd" value="false" checked="checked"/></p>
+					#{/if}
+					#{else}
+						<p>Sì <input type="radio" name="weekEnd" value="true" checked="checked"/> 
+						No <input type="radio" name="weekEnd" value="false"/></p>
+					#{/else}
+					</td>
+				</tr>
+			</table>
+				
+		</div>
+	</div> 
 
-<fieldset>
-<legend>Modifica dati per codice di assenza: ${abt.code} (${abt.description})</legend>
-<table class="tablenoborder">
-	<tr>
-		<td><p>Codice: </p></td>
-		<td><input type="text" name="codice" value="${abt.code}" disabled="disabled"/></td>
-	</tr>
- 	<tr>
- 		<td><p>Codice per attestati di presenza: </p></td>
- 		<td><input type="text" name="codicePresenza" value="${abt.certificateCode}" disabled="disabled"/></td>
- 	</tr>
-	<tr>
-		<td><p>Descrizione: </p></td>
-		<td><input type="text" name="descrizione" value="${abt.description}" size="100"/></td>
-	</tr>
-	<tr>
-		<td><p>Uso interno:</p></td>
-		<td>%{	if(abt.internalUse == false){
-}%		<p>Sì <input type="radio" name="usoInterno" value="true" /> 
-		No <input type="radio" name="usoInterno" value="false" checked="checked"/></p>
-%{
-	}else{
-}%		<p>Sì <input type="radio" name="usoInterno" value="true" checked="checked"/> 
-		No <input type="radio" name="usoInterno" value="false"/></p>
-%{
-	}
-	
-}%</td>
-	</tr>
-	<tr>
-		<td><p>Uso multiplo: </p></td>
-		<td>%{	if(abt.multipleUse == false){
-}%		<p>Sì <input type="radio" name="usoMultiplo" value="true" /> 
-		No <input type="radio" name="usoMultiplo" value="false" checked="checked"/></p>
-%{
-	}else{
-}%		<p>Sì <input type="radio" name="usoMultiplo" value="true" checked="checked"/> 
-		No <input type="radio" name="usoMultiplo" value="false"/></p>
-%{
-	}
-	
-}%</td>
-	</tr>
-	<tr>
-		<td><p >Inizio validita': </p></td>
-		<td><input type="text" name="inizio" value="${abt.validFrom}" id="datepicker1" data-date-format="yyyy-mm-dd"/></td>
-	</tr>
-	<tr>
-		<td><p >Fine validita': </p></td>
-		<td><input type="text" name="fine" value="${abt.validTo}" id="datepicker2" data-date-format="yyyy-mm-dd"/></td>
-	</tr>
-	<tr>
-		<td><p id="codice">Tempo di lavoro giustificato: </p></td>
-		<td>#{select 'abt.justifiedTimeAtWork', value:abt.justifiedTimeAtWork.description}
-									#{option null}#{/option}
-									#{option justList.get(0).description}${justList.get(0).description}#{/option}
-									#{option justList.get(1).description}${justList.get(1).description}#{/option}
-									#{option justList.get(2).description}${justList.get(2).description}#{/option}
-									#{option justList.get(3).description}${justList.get(3).description}#{/option}
-									#{option justList.get(4).description}${justList.get(4).description}#{/option}
-									#{option justList.get(5).description}${justList.get(5).description}#{/option}
-									#{option justList.get(6).description}${justList.get(6).description}#{/option}
-									#{option justList.get(7).description}${justList.get(7).description}#{/option}
-									#{option justList.get(8).description}${justList.get(8).description}#{/option}
-									#{option justList.get(9).description}${justList.get(9).description}#{/option}
-									#{option justList.get(10).description}${justList.get(10).description}#{/option}
-									#{option justList.get(11).description}${justList.get(11).description}#{/option}
-									#{option justList.get(12).description}${justList.get(12).description}#{/option}								
-									#{/select}</td>
-	</tr>
-	<tr>
-		<td><p>Livelli:</p></td>
-		<td>%{	for(qual in qualList){
-				if(abt.qualifications.contains(qual)){
-				}%
-						${qual.qualification}: <input type="checkbox" name="qualification${qual.qualification}" value ="si" checked="checked"/>
-				%{
-					}else{
-				}%
-						${qual.qualification}: <input type="checkbox" name="qualification${qual.qualification}" value ="no"/>
-				%{
-					}
-				}
-			}%</td>
-	</tr>
-	<tr>
-		<td><p>Calcola buono pasto:</p></td>
-		<td>%{	if(abt.mealTicketCalculation == false){
-}%		<p>Sì <input type="radio" name="calcolaBuonoPasto" value="true" /> 
-		No <input type="radio" name="calcolaBuonoPasto" value="false" checked="checked"/></p>
-%{
-	}else{
-}%		<p>Sì <input type="radio" name="calcolaBuonoPasto" value="true" checked="checked"/> 
-		No <input type="radio" name="calcolaBuonoPasto" value="false"/></p>
-%{
-	}
-	
-}%</td>
-	</tr>
-	<tr>
-		<td><p>Ignora timbrature:</p></td>
-		<td>%{	if(abt.ignoreStamping == false){
-}%		<p>Sì <input type="radio" name="ignoraTimbrature" value="true" /> 
-		No <input type="radio" name="ignoraTimbrature" value="false" checked="checked"/></p>
-%{
-	}else{
-}%		<p>Sì <input type="radio" name="ignoraTimbrature" value="true" checked="checked"/> 
-		No <input type="radio" name="ignoraTimbrature" value="false"/></p>
-%{
-	}
-	
-}%</td>
-	</tr>
-	<tr>
-		<td><p>Gruppo:</td>
-		<td>%{	if(abt.absenceTypeGroup != null){
-}%		<input type="text" name="gruppo" value="${abt.absenceTypeGroup.label}"/>
-%{
-	}else{
-}%	
-		<input type="text" name="gruppo" value=""/>
-%{
-	}
-}%</td>
-	</tr>
-	<tr>
-		<td>Inseribile anche nei week end e festivi:</td>
-		<td>%{	if(abt.consideredWeekEnd == false){
-}%		<p>Sì <input type="radio" name="weekEnd" value="true" /> 
-		No <input type="radio" name="weekEnd" value="false" checked="checked"/></p>
-%{
-	}else{
-}%		<p>Sì <input type="radio" name="weekEnd" value="true" checked="checked"/> 
-		No <input type="radio" name="weekEnd" value="false"/></p>
-%{
-	}
-	
-}%</td>
-	</tr>
-</table>
-</fieldset>
-
-
-<fieldset>
-<legend>Da riempire in caso di gruppo valorizzato</legend>
-
-<table class="tablenoborder">
-	<tr>
-		<td><p>Minuti in eccesso:</p></td>
-		<td>%{	if(abt.absenceTypeGroup != null){
-}%		<input type="text" name="minutiEccesso" value="${abt.absenceTypeGroup.minutesExcess}"/>
-%{
-	}else{
-}%	
-		<input type="text" name="minutiEccesso" value="" disabled="disabled"/>
-%{
-	}
-}%</td>
-	</tr>
-	<tr>
-		<td><p>Accumulare i valori:</p></td>
-		<td>%{	if(abt.absenceTypeGroup != null){
-}%
-	#{select 'abt.absenceTypeGroup.accumulationType', value:abt.absenceTypeGroup.accumulationType.description}
-		#{option accType.get(0).description}${accType.get(0).description}#{/option}
-		#{option accType.get(1).description}${accType.get(1).description}#{/option}
-		#{option accType.get(2).description}${accType.get(2).description}#{/option}
-		#{option accType.get(3).description}${accType.get(3).description}#{/option}
-	#{/select}
-%{
-	}else{
-}%
-	#{select 'abt.absenceTypeGroup.accumulationType', disabled:disabled}
-		#{option accType.get(0).description}${accType.get(0).description}#{/option}
-		#{option accType.get(1).description}${accType.get(1).description}#{/option}
-		#{option accType.get(2).description}${accType.get(2).description}#{/option}
-		#{option accType.get(3).description}${accType.get(3).description}#{/option}
-	#{/select}
-%{
-	}
-}%</td>
-	</tr>
-	<tr>
-		<td><p>Limite accumulo:</p></td>
-		<td>%{	if(abt.absenceTypeGroup != null){
-}%		<input type="number" name="limiteAccumulo" value="${abt.absenceTypeGroup.limitInMinute}"/>
-%{
-	}else{
-}%	
-		<input type="number" name="limiteAccumulo" value="" disabled="disabled"/>
-%{
-	}
-}%</td>
-	</tr>
-	<tr>
-		<td><p>Cosa fare raggiunto il limite:</p></td>
-		<td>%{	if(abt.absenceTypeGroup != null){
-}%
-	#{select 'abt.absenceTypeGroup.accumulationBehaviour', value:abt.absenceTypeGroup.accumulationBehaviour.description}
-		#{option behaviourType.get(0).description}${behaviourType.get(0).description}#{/option}
-		#{option behaviourType.get(1).description}${behaviourType.get(1).description}#{/option}
-		#{option behaviourType.get(2).description}${behaviourType.get(2).description}#{/option}
+	<div class="panel panel-default">
+		  <div class="panel-heading">
+		    <h3 class="panel-title">Da riempire in caso di gruppo valorizzato</h3>
+		  </div>
+		<div class="panel-body">
 		
-	#{/select}
-%{
-	}else{
-}%
-	#{select 'abt.absenceTypeGroup.accumulationBehaviour', disabled:disabled}
-		#{option behaviourType.get(0).description}${behaviourType.get(0).description}#{/option}
-		#{option behaviourType.get(1).description}${behaviourType.get(1).description}#{/option}
-		#{option behaviourType.get(2).description}${behaviourType.get(2).description}#{/option}
-		
-	#{/select}
-%{
-	}
-}%</td>
-	</tr>
-	<tr>
-		<td><p>Codice per sostituzione:</p></td>
-		<td>
-		#{if (abt.absenceTypeGroup != null)}
-			#{if abt.absenceTypeGroup.replacingAbsenceType != null}
-				<input type="text" name="codiceSostituzione" value="${abt.absenceTypeGroup.replacingAbsenceType.code}"/>
-			#{/if}
-			#{else}
-				<input type="text" name="codiceSostituzione" value="" />
-			#{/else}
-		#{/if}
-		#{else}
-			<input type="text" name="codiceSostituzione" value="" disabled="disabled"/>
-		#{/else}
-		</td>
-	</tr>
-</table>
-<!--  <p>Valore:</p> -->
+			<table class="table table-form table-condensed table-hover">
+				<tr>
+					<td><p>Minuti in eccesso:</p></td>
+					<td>
+					#{ if abt.absenceTypeGroup != null}
+						<input type="text" name="minutiEccesso" value="${abt.absenceTypeGroup.minutesExcess}"/>
+					#{/if}
+					#{else}
+						<input type="text" name="minutiEccesso" value="" disabled="disabled"/>
+					#{/else}
+					</td>
+				</tr>
+				<tr>
+					<td><p>Accumulare i valori:</p></td>
+					<td>#{if abt.absenceTypeGroup != null}
+			
+							#{select 'abt.absenceTypeGroup.accumulationType', value:abt.absenceTypeGroup.accumulationType.description}
+								#{option accType.get(0).description}${accType.get(0).description}#{/option}
+								#{option accType.get(1).description}${accType.get(1).description}#{/option}
+								#{option accType.get(2).description}${accType.get(2).description}#{/option}
+								#{option accType.get(3).description}${accType.get(3).description}#{/option}
+							#{/select}
+						#{/if}
+						#{else}
+			
+							#{select 'abt.absenceTypeGroup.accumulationType', disabled:disabled}
+								#{option accType.get(0).description}${accType.get(0).description}#{/option}
+								#{option accType.get(1).description}${accType.get(1).description}#{/option}
+								#{option accType.get(2).description}${accType.get(2).description}#{/option}
+								#{option accType.get(3).description}${accType.get(3).description}#{/option}
+							#{/select}
+						#{/else}
+					</td>
+				</tr>
+				<tr>
+					<td><p>Limite accumulo:</p></td>
+					<td>#{if abt.absenceTypeGroup != null}
+							<input type="number" name="limiteAccumulo" value="${abt.absenceTypeGroup.limitInMinute}"/>
+						#{/if}
+						#{else}
+							<input type="number" name="limiteAccumulo" value="" disabled="disabled"/>
+						#{/else}
+					</td>
+				</tr>
+				<tr>
+					<td><p>Cosa fare raggiunto il limite:</p></td>
+					<td>#{if abt.absenceTypeGroup != null}			
+							#{select 'abt.absenceTypeGroup.accumulationBehaviour', value:abt.absenceTypeGroup.accumulationBehaviour.description}
+								#{option behaviourType.get(0).description}${behaviourType.get(0).description}#{/option}
+								#{option behaviourType.get(1).description}${behaviourType.get(1).description}#{/option}
+								#{option behaviourType.get(2).description}${behaviourType.get(2).description}#{/option}								
+							#{/select}
+						#{/if}
+						#{else}						
+							#{select 'abt.absenceTypeGroup.accumulationBehaviour', disabled:disabled}
+								#{option behaviourType.get(0).description}${behaviourType.get(0).description}#{/option}
+								#{option behaviourType.get(1).description}${behaviourType.get(1).description}#{/option}
+								#{option behaviourType.get(2).description}${behaviourType.get(2).description}#{/option}								
+							#{/select}
+						#{/else}
+					</td>
+				</tr>
+				<tr>
+					<td><p>Codice per sostituzione:</p></td>
+					<td>
+					#{if (abt.absenceTypeGroup != null)}
+						#{if abt.absenceTypeGroup.replacingAbsenceType != null}
+							<input type="text" name="codiceSostituzione" value="${abt.absenceTypeGroup.replacingAbsenceType.code}"/>
+						#{/if}
+						#{else}
+							<input type="text" name="codiceSostituzione" value="" />
+						#{/else}
+					#{/if}
+					#{else}
+						<input type="text" name="codiceSostituzione" value="" disabled="disabled"/>
+					#{/else}
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+	<div class="container-fluid center">
+      <input class="btn btn-primary" type="submit" value="Ok" />  
+      <input class="btn inputinline" id="indietroAbsenceList" action="action" type="button" value="Indietro" onclick="history.go(-1);" />    
+	</div>
 
-</fieldset>
-
-<div class="buttoncenter">
-<input class="btn btn-primary" type="submit" value="Modifica"/>
-<input class="btn inputinline" id="indietroAbsenceList" action="action" type="button" value="Indietro" onclick="history.go(-1);" />
-</div>
 #{/form}
+</div>
