@@ -1175,6 +1175,7 @@ public class PersonUtility {
 		if(dateList.size() == 0){
 			return false;
 		}
+		Logger.info("Preparo invio mail per %s %s", person.name, person.surname);
 		SimpleEmail simpleEmail = new SimpleEmail();
 		try {
 			simpleEmail.setFrom("epas@iit.cnr.it");
@@ -1228,7 +1229,14 @@ public class PersonUtility {
 		//Logger.info("Messaggio recovery password spedito è: %s", message);
 
 		simpleEmail.setMsg(message);
-		Mail.send(simpleEmail);
+		try{
+			Mail.send(simpleEmail);
+		}catch(Exception e){
+			e.printStackTrace();
+			Logger.error("Errore in fase di invio mail a %s %s", person.name, person.surname);
+		}
+		
+
 		Logger.info("Inviata mail a %s %s contenente le date da controllare : %s", person.name, person.surname, date);
 		return true;
 	}
