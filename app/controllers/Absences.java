@@ -965,7 +965,7 @@ public class Absences extends Controller{
 		int countHowManyCheck = 0; 
 		while(!actualDate.isAfter(dateTo))
 		{
-			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, false, file);
+			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, true, file);
 			checkMealTicket(actualDate, person, mealTicket, absenceType);
 			esito = checkIfAbsenceInReperibilityOrInShift(person, actualDate);
 			if(esito==true){
