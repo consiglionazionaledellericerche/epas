@@ -9,7 +9,7 @@
 
 
 <section id="results">
-<div class="container span3"style="margin-left: 0px;">
+<div class="container span3"style="margin-left: 0px; margin-bottom: 20px;">
 #{form action:@Absences.manageAbsenceCode(), class:'form-search',  
     method:'GET', autocomplete:'off',
     'data-reload':'#results'}
@@ -21,8 +21,8 @@
 #{/form}
 </div>
 
-<div class="pagination pagination-centered" style="margin-left: 10px;">
-  <ul>
+<ul class="pagination pagination-centered" style="margin-left: 10px;">
+  
   	#{list items:0..simpleResults.totalPage-1, as:'indexPage', class:'inline'}
   	  #{if simpleResults.page==indexPage}
   	    <li class="active"><a href="#">${indexPage+1}</a></li>
@@ -33,8 +33,8 @@
   	  
        
 	#{/list}
-  </ul>
-</div>
+  
+</ul>
 
 <table class="table table-condensed table-hover custom2">
 	<tr>

@@ -159,6 +159,12 @@
                 #{if ip.viewWorkingTimeType}
                 <li><a href="@{WorkingTimes.manageWorkingTime()}">Orari Lavoro</a></li>
                 #{/if}
+                #{if ip.viewCompetenceCode}
+                <li><a href="@{Competences.manageCompetenceCode()}">Codici Competenze</a></li>
+                #{/if}
+                #{if ip.viewAbsenceType}
+                <li><a href="@{Absences.manageAbsenceCode()}">Codici Assenze</a></li>
+                #{/if}
                 <!--<li><a href="#">Codici Assenze</a></li>
                 <li><a href="#">Codici Competenze</a></li>
                 <li><a href="#">Parametri</a></li>

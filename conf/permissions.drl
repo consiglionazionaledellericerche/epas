@@ -86,6 +86,7 @@ when
      	"Absences.manageAttachmentsPerCode",
      	"Absences.manageAttachmentsPerPerson",
      	"Absences.absenceInPeriod",
+     	"Absences.manageAbsenceCode",
      	
      	/*Competenze*/
      	"Competences.showCompetences",
@@ -98,6 +99,10 @@ when
      	"Competences.saveNewCompetenceConfiguration",
      	"Competences.exportCompetences",
      	"Competences.getOvertimeInYear",
+     	"Competences.manageCompetenceCode",
+     	"Competences.insertCompetenceCode",
+     	"Competences.edit",
+     	"Competences.save",
      	
      	/*Ferie e permessi*/
      	"VacationsAdmin.list",
@@ -449,6 +454,26 @@ when
         /* inserire le action interessate */
         "WorkingTimes.insertWorkingTime",
         "WorkingTimes.save"
+       ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+
+/*
+ *		Permission: editCompetenceCode in office
+ */
+ 
+rule nomePermesso_InOffice
+when
+ $o: Office()
+ $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $p: Permission(description == "editCompetenceCode") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        /* inserire le action interessate */
+        "Competences.insertCompetenceCode",
+        "Competences.edit",
+        "Competences.save"
        ), target == $o, granted == false)
 then
  $c.grant();

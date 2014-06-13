@@ -53,6 +53,9 @@ public class RequestInit extends Controller {
 		public boolean viewWorkingTimeType = false;
 		public boolean editWorkingTimeType = false;
 		public boolean viewAbsenceType = false;
+		public boolean viewCompetenceCode = false;
+		public boolean editCompetenceCode = false;
+		
 		
 		public ItemsPermitted() {
 			
@@ -98,6 +101,15 @@ public class RequestInit extends Controller {
 				
 				if(p.description.equals("editWorkingTimeType"))
 					this.editWorkingTimeType = true;
+				
+				if(p.description.equals("viewCompetenceCode"))
+					this.viewCompetenceCode = true;
+				
+				if(p.description.equals("editCompetenceCode"))
+					this.editCompetenceCode = true;
+				
+				if(p.description.equals("viewAbsenceType"))
+					this.viewAbsenceType = true;
 				
 				
 			}
