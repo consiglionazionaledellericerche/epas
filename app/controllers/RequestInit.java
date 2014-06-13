@@ -53,6 +53,7 @@ public class RequestInit extends Controller {
 		public boolean viewWorkingTimeType = false;
 		public boolean editWorkingTimeType = false;
 		public boolean viewAbsenceType = false;
+		public boolean editAbsenceType = false;
 		public boolean viewCompetenceCode = false;
 		public boolean editCompetenceCode = false;
 		
@@ -110,6 +111,10 @@ public class RequestInit extends Controller {
 				
 				if(p.description.equals("viewAbsenceType"))
 					this.viewAbsenceType = true;
+				
+				if(p.description.equals("editAbsenceType"))
+					this.editAbsenceType = true;
+				
 				
 				
 			}
