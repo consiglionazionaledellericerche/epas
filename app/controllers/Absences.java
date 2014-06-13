@@ -518,6 +518,8 @@ public class Absences extends Controller{
 	private static void checkMealTicket(LocalDate date, Person person, String mealTicket, AbsenceType abt) throws EmailException{
 		
 		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
+		if(pd == null)
+			pd = new PersonDay(person, date);
 		if(abt==null || !abt.code.equals("92"))
 		{
 			pd.isTicketForcedByAdmin = false;	//una assenza diversa da 92 ha per forza campo calcolato
