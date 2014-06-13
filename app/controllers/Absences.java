@@ -45,6 +45,8 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import com.google.common.base.Optional;
+
+import controllers.Resecure.NoCheck;
 import dao.AbsenceTypeDao;
 
 @With( {Resecure.class, RequestInit.class} )
@@ -136,7 +138,8 @@ public class Absences extends Controller{
 	/**
 	 * questa è una funzione solo per admin, quindi va messa con il check administrator
 	 */
-	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
+	//@Check(Security.INSERT_AND_UPDATE_ABSENCE)
+	@NoCheck
 	public static void manageAbsenceCode(String name, Integer page){
 		if(page==null)
 			page = 0;

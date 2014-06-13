@@ -10,7 +10,7 @@
 
 
 <div class="container">
-<p class="lead"><a data-toggle="modal" href="@{Persons.personChildrenList(person.id)}" data-target="#myModal4">Vedi figli di ${person.name} ${person.surname}</a></p>
+<p class="lead"><a href="@{Persons.personChildrenList(person.id)}" data-modal=".my-modal">Vedi figli di ${person.name} ${person.surname}</a></p>
 #{form @Persons.saveChild()}
 
 <div class="panel panel-default">
@@ -47,13 +47,4 @@
 </div>
 
 
-<div class="modal fade" id="myModal4" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-center">
-    
-    <div class="modal-content">
-             
-    </div><!-- /.modal-content -->
-           
-    
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
+#{include '_myModal.html' /}
