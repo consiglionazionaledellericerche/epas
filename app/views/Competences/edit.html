@@ -1,20 +1,36 @@
-<h3 id="modificaCodiceCompetenza">Modifica codice ${code.code} ${code.description}</h3>
+<div class="modal-header hidden-xs">
+  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+  <h4 id="modificaCodiceCompetenza">Modifica codice ${code.code} ${code.description}</h4> 
+</div>
+
+<div class="modal-body">
 
 #{form @Competences.save()}
+<table class="table table-condensed table-form table-hover">
+		<tr>
+			<td class="lab"><b>Codice</b></td>
+			<td><input type="text" name="codice" value="${code.code}" /></td>
+		</tr>
+		<tr>
+			<td class="lab"><b>Codice per attestato<br> di presenza</b></td> 
+			<td><input type="text" name="codiceAttPres" value="${code.codeToPresence}" /></td>
+		</tr>
+		
+		<tr>
+			<td class="lab">Descrizione</td> 
+			<td><input type="text" name="descrizione" value="${code.description}"/></td>
+		</tr>
+		<tr>
+			<td class="lab">Inattivo<br>(checkare per i codici<br> non più usati)</td>
+			<td><input name="inattivo" type="checkbox" value="${code.inactive}"  /></td>
+		</tr>
 
-		<p id="inserimentoCompetenze"><strong>Codice</strong> <input type="text" name="codice" value="${code.code}"/></p>
-		<p id="inserimentoCompetenze"><strong>Codice per attestato di presenza</strong> <input type="text" name="codiceAttPres" value="${code.codeToPresence}"/></p>
-		<p id="inserimentoCompetenze"><strong>Descrizione</strong> <input type="text" name="descrizione" value="${code.description}" size="60" maxlength="100"/></p>
-		<p id="inserimentoCompetenze"><strong>Inattivo</strong> %{ if(code.inactive == true){
-			}%<input type="checkbox" name ="inattivo" value="${code.inactive}" checked="checked"/>
-			%{ }else{
-			}%<input type="checkbox" name ="inattivo" value="${code.inactive}" />
-			%{
-			}
-			}%
-		</p>
-<div id="frm">
-<input class="btn btn-primary" id="insertCompetenceCode" type="submit" value="Ok"/>
+</table>
+
+
+<div class="container-fluid center">
+      <input class="btn btn-primary" type="submit" value="Ok" />      
+</div>
 #{/form}
 
 </div>

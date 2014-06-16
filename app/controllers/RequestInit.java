@@ -52,6 +52,11 @@ public class RequestInit extends Controller {
 		public boolean uploadSituation = false;
 		public boolean viewWorkingTimeType = false;
 		public boolean editWorkingTimeType = false;
+		public boolean viewAbsenceType = false;
+		public boolean editAbsenceType = false;
+		public boolean viewCompetenceCode = false;
+		public boolean editCompetenceCode = false;
+		
 		
 		public ItemsPermitted() {
 			
@@ -71,6 +76,7 @@ public class RequestInit extends Controller {
 			
 			List<Permission> pList = ModelQuery.simpleResults(query, qp).list();
 			
+
 			for(Permission p : pList) {
 				
 				if(p.description.equals("viewPerson"))
@@ -97,9 +103,23 @@ public class RequestInit extends Controller {
 				if(p.description.equals("editWorkingTimeType"))
 					this.editWorkingTimeType = true;
 				
+				if(p.description.equals("viewCompetenceCode"))
+					this.viewCompetenceCode = true;
+				
+				if(p.description.equals("editCompetenceCode"))
+					this.editCompetenceCode = true;
+				
+				if(p.description.equals("viewAbsenceType"))
+					this.viewAbsenceType = true;
+				
+				if(p.description.equals("editAbsenceType"))
+					this.editAbsenceType = true;
+				
+				
 				
 			}
 						
+
 		}
 		
 		public boolean isDropDownVisible() {
@@ -109,7 +129,7 @@ public class RequestInit extends Controller {
 		
 		public boolean isDropDown2Visible() {
 			
-			return viewOffice || viewWorkingTimeType;
+			return viewOffice || viewWorkingTimeType || viewAbsenceType;
 		}
 	}
 	

@@ -178,6 +178,8 @@ ul.pagination {
 }
 */
 
+
+
 .table-form, .table-form td {
 	border: none !important;
 }
@@ -313,3 +315,14 @@ table#tabellonetimbrature a.btn.note {padding: 0;}
 
 table#tabellonetimbrature th,
 table#tabellonetimbrature td {border: 1px solid #bbb;}
+
+/*username*/
+
+.table-form td.username {
+	text-align: center;
+	padding-right: 0px;
+	font-family: cursive;
+	font-size:large;
+}
+
+
