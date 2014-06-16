@@ -1,6 +1,15 @@
-#{extends 'main_with_navbar.html' /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+<div class="container">
+
+	<div class="panel panel-default">
+		  <div class="panel-heading">
+		    <h4 class="panel-title">Seleziona l'anno</h4>
+		  </div>
+		<div class="panel-body">
+
 #{form @Charts.overtimeOnPositiveResidualInYear()}
-<p class="lead">Seleziona l'anno</p>
+
 #{select 'yearChart', value:annoList.get(0), id:'yearChart'}
 					
 		%{
@@ -14,10 +23,12 @@
 #{/select}
 <input class="btn btn-primary span1" type="submit" value="Ok"/>
 #{/form}
-
+		</div>
+	</div>
+</div>
 #{if yearChart != 0}
 
-<div id="mysecondchart" style="height: 450px;">
+<div id="mysecondchart" style="height: 550px;">
 
 </div>
 
@@ -35,3 +46,8 @@
 	
 	#{/set}
 #{/if}
+
+<ul class="pager">
+  <li><a href="/charts/indexCharts">Indietro</a></li>
+  
+</ul>

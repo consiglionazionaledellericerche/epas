@@ -5,6 +5,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import models.Absence;
 import models.Competence;
 import models.Contract;
@@ -19,13 +21,18 @@ import play.Logger;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
 import play.mvc.With;
+import security.SecurityRules;
 
 @With( {Secure.class, RequestInit.class} )
 public class Charts extends Controller{
 
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	@Inject
+	static SecurityRules rules;
+	
+	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void overtimeOnPositiveResidual(Integer year, Integer month){
 
+		rules.checkIfPermitted(Security.getUser().get().person.office);
 		List<Year> annoList = new ArrayList<Year>();
 		annoList.add(new Year(1,2013));
 		annoList.add(new Year(2,2014));
@@ -76,13 +83,16 @@ public class Charts extends Controller{
 		render(poList, year, month, annoList, meseList);
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void indexCharts(){
+		rules.checkIfPermitted(Security.getUser().get().person.office);
 		render();
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void overtimeOnPositiveResidualInYear(Integer year){
+		
+		rules.checkIfPermitted(Security.getUser().get().person.office);
 		List<Year> annoList = new ArrayList<Year>();
 		annoList.add(new Year(1,2013));
 		annoList.add(new Year(2,2014));
@@ -114,8 +124,10 @@ public class Charts extends Controller{
 
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void whichAbsenceInYear(Integer year){
+		
+		rules.checkIfPermitted(Security.getUser().get().person.office);
 		List<Year> annoList = new ArrayList<Year>();
 		annoList.add(new Year(1,2013));
 		annoList.add(new Year(2,2014));
@@ -148,14 +160,16 @@ public class Charts extends Controller{
 
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void checkLastYearAbsences(){
-
+		rules.checkIfPermitted(Security.getUser().get().person.office);
 		render();
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void processLastYearAbsences(Blob file){
+		
+		rules.checkIfPermitted(Security.getUser().get().person.office);
 		List<RenderResult> listTrueFalse = new ArrayList<RenderResult>();
 		List<RenderResult> listNull = new ArrayList<RenderResult>();
 
