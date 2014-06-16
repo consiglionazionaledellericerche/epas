@@ -69,26 +69,36 @@ public class Persons extends Controller {
 		render(personList);
 	}
 
-	//@NoCheck
+	@NoCheck
 	public static void insertPerson() throws InstantiationException, IllegalAccessException {
 		
-		rules.checkIfPermitted(Security.getUser().get().person.office);
+		rules.checkIfPermitted();
 		InitializationTime initializationTime = new InitializationTime();
 		List<Office> officeList = Security.getOfficeAllowed();
-		List<Office> office = Office.find("Select office from Office office where office.office is null").fetch();
+		
+		//TODO prendere i wtt inerenti gli officeAllowed e fondamentale non quelli disattivati!!!
 		List<WorkingTimeType> wttList = WorkingTimeType.findAll();
-		Logger.debug("Lista office: %s", office.get(0).name);
+		
 		render(initializationTime, officeList, wttList);
 	}
 
 
-	
+	@NoCheck
 	public static void save(Person person, Integer qualification, Integer office, Contract contract) {
 		if(validation.hasErrors()) {
 			if(request.isAjax()) error("Invalid value");
 			Persons.list(null);
 		}
-		rules.checkIfPermitted(Security.getUser().get().person.office);
+		
+		Office off = Office.findById(new Long(office));
+		if(off == null) {
+			
+			flash.error("La sede selezionata non esiste. Effettuare una segnalazione.");
+			Persons.list(null);
+		}
+		
+		rules.checkIfPermitted(off);
+		
 		Logger.debug(person.name);
 		/* creazione persona */
 		//Person person = null; 
@@ -100,7 +110,7 @@ public class Persons extends Controller {
 		Qualification qual = Qualification.findById(new Long(qualification));
 		person.qualification = qual;
 
-		Office off = Office.findById(new Long(office));
+		
 		//if(office != null)
 		person.office = off;
 
@@ -157,26 +167,34 @@ public class Persons extends Controller {
 	}
 
 
-	
+	@NoCheck
 	public static void insertUsername(Person person){
 
-		rules.checkIfPermitted(Security.getUser().get().person.office);
+		if(person==null) {
+			
+			flash.error("La persona selezionata non esiste. Operazione annullata");
+			Persons.list(null);
+		}
+		rules.checkIfPermitted(person.office);
 		List<String> usernameList = new ArrayList<String>();
 		usernameList = PersonUtility.composeUsername(person.name, person.surname);
 		render(person, usernameList);
 	}
 
 
-	
-	public static void updateUsername(){
-		rules.checkIfPermitted(Security.getUser().get().person.office);
-		Long id = params.get("person", Long.class);
-		Person person = Person.findById(id);
+	@NoCheck
+	public static void updateUsername(Long personId, String username){
 		
-		person.user.username = params.get("username");
+		Person person = Person.findById(personId);
+		if(person==null) {
+			
+			flash.error("La persona selezionata non esiste. Operazione annullata");
+			Persons.list(null);
+		}
+		rules.checkIfPermitted(person.office);
+		
 		person.user.save();
 		
-
 		flash.success("%s %s inserito in anagrafica con il valore %s come username", person.name, person.surname, person.user.username);
 		Persons.list(null);
 
