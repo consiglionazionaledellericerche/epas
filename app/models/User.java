@@ -80,7 +80,8 @@ public class User extends BaseModel{
 		
 		List<Office> officeList = new ArrayList<Office>();
 		for(UsersRolesOffices uro : this.usersRolesOffices){
-			officeList.add(uro.office);
+			if(uro.office.isSeat())
+				officeList.add(uro.office);
 		}
 		//TODO riscrivere col nuovo concetto di ruoli e permessi e funzionale al tipo di ruolo che si cerca
 //		if (this.person != null) {

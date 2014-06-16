@@ -944,7 +944,7 @@ public class PersonDay extends BaseModel {
 		Integer mealTimeStartMinute = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_start_minute", person.office));
 		Integer mealTimeEndHour = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_end_hour", person.office));
 		Integer mealTimeEndMinute = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_end_minute", person.office));
-		ConfGeneral conf = ConfGeneral.getConfGeneral();
+		//ConfGeneral conf = ConfGeneral.getConfGeneral();
 		LocalDateTime startLunch = new LocalDateTime()
 		.withYear(this.date.getYear())
 		.withMonthOfYear(this.date.getMonthOfYear())

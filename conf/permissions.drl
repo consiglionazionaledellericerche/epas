@@ -125,7 +125,12 @@ when
      	"WorkingTimes.insertWorkingTime",
      	"WorkingTimes.save",
      	"WorkingTimes.changeWorkingTimeTypeToAll",
-     	"WorkingTimes.executeChangeWorkingTimeTypeToAll"
+     	"WorkingTimes.executeChangeWorkingTimeTypeToAll",
+     	
+     	/*Configurazione Parametri*/
+     	"Configurations.showConfGeneral",
+     	"Configurations.saveConfGeneral",
+     	"Configurations.showConfYear"
      	
      	), target == null, granted == false)
  $u: User(person != null)

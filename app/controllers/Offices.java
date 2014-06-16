@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import models.ConfGeneral;
+import models.ConfYear;
 import models.Office;
 import models.Role;
 
@@ -155,8 +157,14 @@ public class Offices extends Controller {
 		office.code = getInteger(code);
 		office.joiningDate = getLocalDate(date);
 		office.office = institute;
-
 		office.save();
+		
+		//ConfGeneral
+		ConfGeneral.buildDefaultConfGeneral(office);
+		
+		//ConfYear
+		ConfYear.buildDefaultConfYear(office, LocalDate.now().getYear());
+		
 		
 		office.setPermissionAfterCreation();
 		

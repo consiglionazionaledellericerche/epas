@@ -203,6 +203,10 @@ ul.pagination {
 	max-width: 80px;
 }
 
+.table-xeditable, .table-xeditable td {
+	border: none !important;
+}
+
 /* CSS template */
 
 #formLogin input {

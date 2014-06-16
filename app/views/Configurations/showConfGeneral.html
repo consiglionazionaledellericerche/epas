@@ -1,122 +1,154 @@
-#{extends 'main_with_navbar.html' /}
-#{set titolo: 'Gestione parametri di configurazione' /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Parametri di configurazione' /}
 
 <ul class="nav nav-tabs">
-  <li class="active"><a href="@{Configurations.showConfGeneral()}#">Parametri Istituto</a></li>
+  <li class="active"><a href="@{Configurations.showConfGeneral()}#">Parametri Generali</a></li>
   <li><a href="@{Configurations.showConfYear()}#">Parametri Annuali</a></li>
 </ul>
-<div class="container" style="padding-left:200px;">
-#{form action:@Configurations.showConfGeneral(), class:'form', 
-    method:'GET', autocomplete:'off',
-    'data-reload':'#results'}
-    
-    <select style='display:inline;' name="officeid" class="input-medium span2">
-      #{list items:offices, as:'office'}
-        <option value="${office.id}" >${office.name}</option>
-      #{/list}
-	</select>
-    
 
-#{/form}
-</div>
 <div class="container">
-<section id="results">
+  <br>
+  <div class="center">
+	  #{form action:@Configurations.showConfGeneral(), role:'form', class:'form-inline', 
+	    method:'GET', autocomplete:'off',
+	    'data-reload':'#results'}
+	    
+	       <div class="form-group">
+	        <label class="hidden-xs hidden-sm" for="dip">Sede </label>
+	        <select name="officeId" class="form-control" id="dip" >
+	            #{list items:offices, as:'officeItem'}
+	              <option value="${officeItem.id}" #{if officeItem.id.equals(office.id) } selected="selected" #{/if} >
+	                ${officeItem.name}
+	              </option>
+	            #{/list}
+	        </select>
+	      </div>
+	       
+	      <button type="submit" class="btn btn-default">Invio</button>
+	  #{/form}
+  </div>
 
-<fieldset style="margin-left:100px; margin-right:100px;">
-  <legend>Configurazione Generale Istituto (Parametri non modificabili)</legend>
-  <table class="table tablenoborder">
-    <tr>
-	  <td class="span7">Data di inizio uso di questo programma</td>
-	  <td><strong>${initUseProgram.fieldValue}</strong></td>
-    </tr>
-    <tr>	
-	  <td class="span7">Nome dell'istituto</td>
-	  <td><strong>${instituteName.fieldValue}</strong></td>
-    </tr>	
-    <tr>	
-      <td class="span7">Codice sede</td>
-      <td><strong>${seatCode.fieldValue}</strong></td>
-    </tr>
-    <tr>
-      <td>Festa del patrono</td>
-      <td><strong>${dayOfPatron.fieldValue} / ${monthOfPatron.fieldValue}</strong></td>
-    </tr>
-  </table>  
-</fieldset>
 
-<br>
 
-<fieldset style="margin-left:100px; margin-right:100px;">
-  <legend>Gestione Timbrature</legend>
-  <table class="table tablenoborder">
-    <tr>
-      <td class="span7">Autorizzazione timbratura via web</td>
-      <td>
-        <strong>
-          <a href="#" 
-          id="select1" 
-          data-type="select" 
-          data-pk="${webStampingAllowed.id}" 
-          data-value="['${webStampingAllowed.fieldValue}']"
-          data-source="[{'true': 'SI'},{'false': 'NO'}]" 
-          data-url="@{saveConfGeneral()}" 
-          class="editable editable-click"></a>
-        </strong>
-      </td>
-    </tr>
-    <tr>
-      <td class="span7">Indirizzi IP autorizzati per timbratura via web</td>
-      <td>
-        <strong>
-      	  <a href="#" 
-      	    id="textComments1" 
-      	    data-type="textarea" 
-      	    data-pk="todo" 
-      	    data-title="Inserire un indirizzo IP per linea"
-      	    data-url="@{saveConfGeneral()}" 
-      	    class="editable editable-pre-wrapped editable-click">
-      	    
-      	  </a>  
-        </strong>
-      </td>
-    </tr>
-  </table>  
-</fieldset>
 
-<br>
+  <section id="results">
+  
+  <br>
 
-<fieldset style="margin-left:100px; margin-right:100px;">
-  <legend>Parametri applicazione</legend>
-  <table class="table tablenoborder">
-    <tr>	
-      <td class="span7">URL per gestione attestato presenza dell'amministrazione centrale </td>
-      <td><strong><a href="#" id="simpleText1" data-type="text" data-pk="${urlToPresence.id}" data-url="@{saveConfGeneral()}" class="editable editable-click">${urlToPresence.fieldValue}</a></strong></td>
-    </tr>
-    <tr>	
-      <td class="span7">User per gestione attestato presenza dell'amministrazione centrale</td>
-      <td><strong><a href="#" id="simpleText2" data-type="text" data-pk="${userToPresence.id}" data-url="@{saveConfGeneral()}" class="editable editable-click">${userToPresence.fieldValue}</a></strong></td>
-    </tr>
-    <tr>	
-      <td class="span7">Password per gestione attestato presenza dell'amministrazione centrale</td>
-      <td><strong><a href="#" id="simpleText3" data-type="text" data-pk="${passwordToPresence.id}" data-url="@{saveConfGeneral()}" class="editable editable-click">${passwordToPresence.fieldValue}</a></strong></td>
-    </tr>
-    <tr>	
-      <td class="span7">Numero di colonne di entrata/uscita da visualizzare</td>
-      <td>
-        <strong>
-      	   <a href="#" 
-	          id="select2" 
-              data-type="select" 
-              data-pk="${numberOfViewingCouple.id}" 
-              data-value="[${numberOfViewingCouple.fieldValue}]"
-              data-source="[{1: '1'},{2: '2'},{3: '3'},{4: '4'},{5: '5'}]" 
-              data-url="@{saveConfGeneral()}" 
-              class="editable editable-click"></a>
-        </strong>
-      </td>
-    </tr>
-  </table>  
-</fieldset>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><span class="badge">1</span> Configurazione Generale Istituto</h3>
+      </div>
+      <div class="panel-body">
+  		<table class="table table-condensed table-hover table-xeditable">
+          <tr>
+	        <td class="col-sm-6">Data di inizio uso di questo programma</td>
+	        <td class="col-sm-6"><strong>${initUseProgram.fieldValue}</strong></td>
+          </tr>
+          <tr>
+            <td class="col-sm-6">Festa del patrono</td>
+            <td class="col-sm-6"><strong>${dayOfPatron.fieldValue} / ${monthOfPatron.fieldValue}</strong></td>
+          </tr>
+        </table>  
+  	  </div>
+  	</div>
+
+
+  <br>
+
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><span class="badge">2</span> Gestione Timbrature</h3>
+      </div>
+      <div class="panel-body">
+  
+		  <table class="table table-condensed table-hover table-xeditable">
+		    <tr>
+		      <td class="col-sm-6">Autorizzazione timbratura via web</td>
+		      <td class="col-sm-6">
+		        <strong>
+		          <a href="#" 
+		          id="select1" 
+		          data-type="select" 
+		          data-pk="${webStampingAllowed.id}" 
+		          data-value="['${webStampingAllowed.fieldValue}']"
+		          data-source="[{'true': 'SI'},{'false': 'NO'}]" 
+		          data-url="@{saveConfGeneral()}" 
+		          class="editable editable-click"></a>
+		        </strong>
+		      </td>
+		    </tr>
+		    <tr>
+		      <td class="col-sm-6">Indirizzi IP autorizzati per timbratura via web</td>
+		      <td class="col-sm-6">
+		        <strong>
+		      	  <a href="#" 
+		      	    id="textComments1" 
+		      	    data-type="textarea" 
+		      	    data-pk="todo" 
+		      	    data-title="Inserire un indirizzo IP per linea"
+		      	    data-url="@{saveConfGeneral()}" 
+		      	    class="editable editable-pre-wrapped editable-click">
+		      	    
+		      	  </a>  
+		        </strong>
+		      </td>
+		    </tr>
+		  </table>  
+	  </div>
+	</div>
+
+
+  <br>
+
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><span class="badge">3</span> Parametri applicazione</h3>
+      </div>
+      <div class="panel-body">
+
+  
+		 <table class="table table-condensed table-hover table-xeditable">
+		    <tr>	
+		      <td class="col-sm-6">URL per gestione attestato presenza dell'amministrazione centrale </td>
+		      <td class="col-sm-6">
+		        <strong><a href="#" id="simpleText1" data-type="text" 
+		                   data-pk="${urlToPresence.id}" data-url="@{saveConfGeneral()}" 
+		                   class="editable editable-click" >
+		          ${urlToPresence.fieldValue}
+		        </a></strong>
+		      </td>
+		    </tr>
+		    <tr>	
+		      <td class="col-sm-6">User per gestione attestato presenza dell'amministrazione centrale</td>
+		      <td class="col-sm-6"><strong><a href="#" id="simpleText2" data-type="text" data-pk="${userToPresence.id}" data-url="@{saveConfGeneral()}" class="editable editable-click">${userToPresence.fieldValue}</a></strong></td>
+		    </tr>
+		    <tr>	
+		      <td class="col-sm-6">Password per gestione attestato presenza dell'amministrazione centrale</td>
+		      <td class="col-sm-6"><strong><a href="#" id="simpleText3" data-type="text" data-pk="${passwordToPresence.id}" data-url="@{saveConfGeneral()}" class="editable editable-click">${passwordToPresence.fieldValue}</a></strong></td>
+		    </tr>
+		    <tr>	
+		      <td class="col-sm-6">Numero di colonne di entrata/uscita da visualizzare</td>
+		      <td class="col-sm-6">
+		        <strong>
+		      	   <a href="#" 
+			          id="select2" 
+		              data-type="select" 
+		              data-pk="${numberOfViewingCouple.id}" 
+		              data-value="[${numberOfViewingCouple.fieldValue}]"
+		              data-source="[{1: '1'},{2: '2'},{3: '3'},{4: '4'},{5: '5'}]" 
+		              data-url="@{saveConfGeneral()}" 
+		              class="editable editable-click"></a>
+		        </strong>
+		      </td>
+		    </tr>
+		  </table>  
+	  </div>
+	</div>
+
 
 <br>
 
