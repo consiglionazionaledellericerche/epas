@@ -1,28 +1,30 @@
 #{extends 'main3.html' /}
 #{set header:'navbar' /}
 #{set title: 'ePAS - Modifica username' /}
+
 <div class="container">
 
-#{form @Persons.updateUsername()}
-
-<div class="panel panel-default">
-  <div class="panel-heading">
-    <h3 class="panel-title"><span class="badge">3</span> Username per l'utente ${person.name} ${person.surname}</h3>
-  </div>
-  <div class="panel-body">
-<input type="hidden" name="person" value="${person.id}"/>
-<table class="table table-condensed table-form">
-#{list usernameList, as:'string'}
-<tr>
-	<td class="username">${string}</td> 
-	<td><input type="radio" name="username" value="${string}" /></td>
-</tr>
-#{/list}
-</table>
-  </div>
-</div>
-<div class="container-fluid center">
-      <input class="btn btn-primary" type="submit" value="Salva" />
-</div>
-#{/form}
+	#{form @Persons.updateUsername()}
+	
+	<div class="panel panel-default">
+	  <div class="panel-heading">
+	    <h3 class="panel-title"><span class="badge">3</span> Username per l'utente ${person.name} ${person.surname}</h3>
+	  </div>
+	  <div class="panel-body">
+	    <input type="hidden" name="personId" value="${person.id}" />
+		<table class="table table-condensed table-form">
+	      #{list usernameList, as:'string'}
+	      <tr>
+		    <td class="username">${string}</td> 
+		    <td><input type="radio" name="username" value="${string}" /></td>
+	      </tr>
+	      #{/list}
+	    </table>
+	  </div>
+	</div>
+	
+	<div class="container-fluid center">
+	      <input class="btn btn-primary" type="submit" value="Salva" />
+	</div>
+	#{/form}
 </div>

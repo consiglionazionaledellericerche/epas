@@ -212,7 +212,7 @@ when
  $p: Permission(description == "editPerson") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
-        "Epas.action"     	
+        "Persons.insertPerson"     	
         ), target == null, granted == false)
 then
  $c.grant();
@@ -240,7 +240,6 @@ when
      	"Persons.changeTypeOfContractWorkingTimeType",
      	"Persons.splitContractWorkingTimeType",
      	"Persons.deleteContractWorkingTimeType",
-     	"Persons.insertPerson",
      	"Persons.save",
      	"Persons.insertUsername",
      	"Persons.updateUsername",
