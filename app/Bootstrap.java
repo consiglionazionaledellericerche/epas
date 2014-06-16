@@ -500,7 +500,9 @@ public class Bootstrap extends Job {
 			areaPisa.address = null;
 			areaPisa.contraction = null;
 			areaPisa.joiningDate = null;
+			areaPisa.confGeneral = null;
 			areaPisa.save();
+			
 		}
 		
 		
@@ -513,6 +515,7 @@ public class Bootstrap extends Job {
 			iit.contraction = "IIT";
 			iit.joiningDate = null;
 			iit.office = areaPisa;
+			iit.confGeneral = null;
 			iit.save();
 		}
 		
@@ -526,6 +529,7 @@ public class Bootstrap extends Job {
 			iitPisa.office = iit;
 			iitPisa.name = "IIT - Pisa";
 			iitPisa.save();
+			
 			iitCos.office = iit;
 			iitCos.save();
 		}
@@ -537,6 +541,7 @@ public class Bootstrap extends Job {
 		 * 
 		 */
 		
+		/*
 		if(areaPisa.subOffices.size() == 1) {
 			
 			Office isti = new Office();
@@ -572,6 +577,7 @@ public class Bootstrap extends Job {
 			seatIsti2.save();
 
 		}
+		*/
 		
 		/**
 		 * 
@@ -579,7 +585,7 @@ public class Bootstrap extends Job {
 		 * 
 		 */
 		
-		
+		/*
 		Office areaRoma = Office.find("byName", "Area CNR Roma").first();
 		if(areaRoma == null) {
 			
@@ -629,7 +635,7 @@ public class Bootstrap extends Job {
 
 		}
 		
-	
+		*/
 		
 	}
 }

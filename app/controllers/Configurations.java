@@ -16,12 +16,11 @@ import play.cache.Cache;
 import play.mvc.Controller;
 import play.mvc.With;
 
-@With( {Secure.class, RequestInit.class} )
+@With( {Resecure.class, RequestInit.class} )
 public class Configurations extends Controller{
 
 
-
-	@Check(Security.INSERT_AND_UPDATE_CONFIGURATION)
+	
 	public static void showConfGeneral(Long officeId){
 		Office office = null;
 		List<Office> offices = Security.getOfficeAllowed();
@@ -32,23 +31,21 @@ public class Configurations extends Controller{
 			office = Security.getUser().get().person.office;
 		}
 		ConfGeneral initUseProgram = ConfGeneral.getConfGeneralByField(ConfigurationFields.InitUseProgram.description, office);
-		ConfGeneral instituteName = ConfGeneral.getConfGeneralByField(ConfigurationFields.InstituteName.description, office);
-		ConfGeneral seatCode = ConfGeneral.getConfGeneralByField(ConfigurationFields.SeatCode.description, office);
+		
 		ConfGeneral dayOfPatron = ConfGeneral.getConfGeneralByField(ConfigurationFields.DayOfPatron.description, office);
 		ConfGeneral monthOfPatron = ConfGeneral.getConfGeneralByField(ConfigurationFields.MonthOfPatron.description, office);
 		ConfGeneral webStampingAllowed = ConfGeneral.getConfGeneralByField(ConfigurationFields.WebStampingAllowed.description, office);
-		ConfGeneral urlToPresence = ConfGeneral.find("Select c from ConfGeneral c where c.field = ? and c.office = ?", ConfigurationFields.UrlToPresence.description, office).first();
+		ConfGeneral urlToPresence = ConfGeneral.getConfGeneralByField(ConfigurationFields.UrlToPresence.description, office);
 
 		ConfGeneral userToPresence = ConfGeneral.getConfGeneralByField(ConfigurationFields.UserToPresence.description, office);
 		ConfGeneral passwordToPresence = ConfGeneral.getConfGeneralByField(ConfigurationFields.PasswordToPresence.description, office);
 		ConfGeneral numberOfViewingCouple = ConfGeneral.getConfGeneralByField(ConfigurationFields.NumberOfViewingCouple.description, office);
 
-		render(initUseProgram, instituteName, seatCode, dayOfPatron, monthOfPatron, webStampingAllowed, urlToPresence, userToPresence,
-				passwordToPresence, numberOfViewingCouple, offices);
+		render(initUseProgram, dayOfPatron, monthOfPatron, webStampingAllowed, urlToPresence, userToPresence,
+				passwordToPresence, numberOfViewingCouple, offices, office);
 
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_CONFIGURATION)
 	public static void showConfYear(Long officeId){
 
 		Office office = null;
@@ -63,7 +60,7 @@ public class Configurations extends Controller{
 		//		Office office = Security.getUser().person.office;
 
 		//last year (non modificabile)
-		ConfYear lastConfYear = ConfYear.getConfYear(new LocalDate().getYear()-1);
+		//ConfYear lastConfYear = ConfYear.getConfYear(new LocalDate().getYear()-1);
 		Integer lastYearDayExpiryVacationPastYear = Integer.parseInt(ConfYear.getFieldValue(ConfigurationFields.DayExpiryVacationPastYear.description, date.getYear()-1, office));
 		Integer lastYearMonthExpiryVacationPastYear = Integer.parseInt(ConfYear.getFieldValue(ConfigurationFields.MonthExpiryVacationPastYear.description, date.getYear()-1, office));
 		Integer lastYearMonthExpireRecoveryDaysOneThree = Integer.parseInt(ConfYear.getFieldValue(ConfigurationFields.MonthExpireRecoveryDays13.description, date.getYear()-1, office));
@@ -73,7 +70,7 @@ public class Configurations extends Controller{
 		Integer lastYearHourMaxToCalculateWorkTime = Integer.parseInt(ConfYear.getFieldValue(ConfigurationFields.HourMaxToCalculateWorkTime.description, date.getYear()-1, office));
 
 		//current year (modificabile)
-		ConfYear confYear = ConfYear.getConfYear(new LocalDate().getYear());
+		//ConfYear confYear = ConfYear.getConfYear(new LocalDate().getYear());
 		ConfYear dayExpiryVacationPastYear = ConfYear.getConfGeneralByFieldAndYear(ConfigurationFields.DayExpiryVacationPastYear.description, date.getYear(), office);
 		ConfYear monthExpiryVacationPastYear = ConfYear.getConfGeneralByFieldAndYear(ConfigurationFields.MonthExpiryVacationPastYear.description, date.getYear(), office);
 		ConfYear monthExpireRecoveryDaysOneThree = ConfYear.getConfGeneralByFieldAndYear(ConfigurationFields.MonthExpireRecoveryDays13.description, date.getYear(), office);
@@ -82,17 +79,18 @@ public class Configurations extends Controller{
 		ConfYear maxRecoveryDaysFourNine = ConfYear.getConfGeneralByFieldAndYear(ConfigurationFields.MaxRecoveryDays49.description, date.getYear(), office);
 		ConfYear hourMaxToCalculateWorkTime = ConfYear.getConfGeneralByFieldAndYear(ConfigurationFields.HourMaxToCalculateWorkTime.description, date.getYear(), office);
 
+		Integer year = new LocalDate().getYear();
 		Integer nextYear = new LocalDate().getYear()+1;
 
 		render(lastYearDayExpiryVacationPastYear, lastYearMonthExpiryVacationPastYear, lastYearMonthExpireRecoveryDaysOneThree,
 				lastYearMonthExpireRecoveryDaysFourNine, lastYearMaxRecoveryDaysOneThree, lastYearMaxRecoveryDaysFourNine,
-				lastYearHourMaxToCalculateWorkTime, lastConfYear, dayExpiryVacationPastYear, monthExpiryVacationPastYear,
+				lastYearHourMaxToCalculateWorkTime, dayExpiryVacationPastYear, monthExpiryVacationPastYear,
 				monthExpireRecoveryDaysOneThree, monthExpireRecoveryDaysFourNine, monthExpireRecoveryDaysFourNine, maxRecoveryDaysOneThree,
-				maxRecoveryDaysFourNine, hourMaxToCalculateWorkTime, confYear, nextYear, offices);
+				maxRecoveryDaysFourNine, hourMaxToCalculateWorkTime, nextYear, offices, office, year);
 
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_CONFIGURATION)
+	
 	public static void saveConfGeneral(String pk, String value){
 
 		try
