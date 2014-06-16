@@ -36,6 +36,8 @@ import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 
+import controllers.Resecure.NoCheck;
+
 import dao.PersonDao;
 
 @With( {Resecure.class, RequestInit.class} )
@@ -166,26 +168,31 @@ public class Competences extends Controller{
 	}
 	
 
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	@NoCheck
 	public static void manageCompetenceCode(){
+		rules.checkIfPermitted();
 		List<CompetenceCode> compCodeList = CompetenceCode.findAll();
 		render(compCodeList);
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void insertCompetenceCode(){
+		rules.checkIfPermitted(Security.getUser().get().person.office);
 		CompetenceCode code = new CompetenceCode();
 		render(code);
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void edit(Long competenceCodeId){
+		rules.checkIfPermitted(Security.getUser().get().person.office);
 		CompetenceCode code = CompetenceCode.findById(competenceCodeId);
 		render(code);
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void save(Long competenceCodeId){
+		rules.checkIfPermitted(Security.getUser().get().person.office);
 		if(competenceCodeId == null){
 			CompetenceCode code = new CompetenceCode();
 			code.code = params.get("codice");

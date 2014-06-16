@@ -72,6 +72,12 @@ when
      	"Persons.changeTypeOfContractWorkingTimeType",
      	"Persons.splitContractWorkingTimeType",
      	"Persons.deleteContractWorkingTimeType",
+     	"Persons.insertPerson",
+     	"Persons.save",
+     	"Persons.insertUsername",
+     	"Persons.updateUsername",
+     	"Persons.personChildrenList",
+     	"Persons.saveChild",
      	
      	/*Assenze*/
      	"YearlyAbsences.showGeneralMonthlyAbsences",
@@ -80,6 +86,10 @@ when
      	"Absences.manageAttachmentsPerCode",
      	"Absences.manageAttachmentsPerPerson",
      	"Absences.absenceInPeriod",
+     	"Absences.manageAbsenceCode",
+     	"Absences.editCode",
+     	"Absences.insertAbsenceCode",
+     	"Absences.saveAbsenceCode",
      	
      	/*Competenze*/
      	"Competences.showCompetences",
@@ -92,6 +102,10 @@ when
      	"Competences.saveNewCompetenceConfiguration",
      	"Competences.exportCompetences",
      	"Competences.getOvertimeInYear",
+     	"Competences.manageCompetenceCode",
+     	"Competences.insertCompetenceCode",
+     	"Competences.edit",
+     	"Competences.save",
      	
      	/*Ferie e permessi*/
      	"VacationsAdmin.list",
@@ -212,20 +226,19 @@ when
      	"Persons.updateContractWorkingTimeType",
      	"Persons.changeTypeOfContractWorkingTimeType",
      	"Persons.splitContractWorkingTimeType",
-     	"Persons.deleteContractWorkingTimeType"
+     	"Persons.deleteContractWorkingTimeType",
+     	"Persons.insertPerson",
+     	"Persons.save",
+     	"Persons.insertUsername",
+     	"Persons.updateUsername",
+     	"Persons.personChildrenList",
+     	"Persons.saveChild"
        ), target == $o, granted == false)
 then
  $c.grant();
 end
 
-rule editPerson_Item
-when
- $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
- $p: Permission(description == "editPerson") from $uro.role.permissions
- $c: PermissionCheck(target == "editPerson", granted == false)
-then
- $c.grant();
-end
+
 
 /*
  *		Permission: viewPersonDay
@@ -272,14 +285,7 @@ then
  $c.grant();
 end
 
-rule viewPersonDay_Item
-when
- $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
- $p: Permission(description == "viewPersonDay") from $uro.role.permissions
- $c: PermissionCheck(target == "viewPersonDay", granted == false)
-then
- $c.grant();
-end
+
 
 /*
 *		Permission: viewCompetence
@@ -301,14 +307,7 @@ then
  $c.grant();
 end
 
-rule viewCompetence_Item
-when
- $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
- $p: Permission(description == "viewCompetence") from $uro.role.permissions
- $c: PermissionCheck(target == "viewCompetence", granted == false)
-then
- $c.grant();
-end
+
 
 /*
  *		Permission: editCompetence
@@ -348,14 +347,7 @@ then
  $c.grant();
 end
 
-rule uploadSituation_Item
-when
- $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
- $p: Permission(description == "uploadSituation") from $uro.role.permissions
- $c: PermissionCheck(target == "uploadSituation", granted == false)
-then
- $c.grant();
-end
+
 
 
 /*
@@ -386,14 +378,6 @@ then
  $c.grant();
 end
 
-rule viewOffice_Item
-when
- $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
- $p: Permission(description == "viewOffice") from $uro.role.permissions
- $c: PermissionCheck(target == "viewOffice", granted == false)
-then
- $c.grant();
-end
 
 
 /*
@@ -429,14 +413,7 @@ then
  $c.grant();
 end
 
-rule editOffice_Item
-when
- $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
- $p: Permission(description == "editOffice") from $uro.role.permissions
- $c: PermissionCheck(target == "editOffice", granted == false)
-then
- $c.grant();
-end
+
 
 /*
  * 		Permission: viewWorkingTimeType
@@ -470,14 +447,7 @@ then
  $c.grant();
 end
 
-rule viewWorkingTimeType_Item
-when
- $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
- $p: Permission(description == "viewWorkingTimeType") from $uro.role.permissions
- $c: PermissionCheck(target == "viewWorkingTimeType", granted == false)
-then
- $c.grant();
-end
+
 
 /*
  *		Permission: editWorkingTimeType in office
@@ -492,6 +462,45 @@ when
         /* inserire le action interessate */
         "WorkingTimes.insertWorkingTime",
         "WorkingTimes.save"
+       ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+
+/*
+ *		Permission: editCompetenceCode in office
+ */
+ 
+rule editCompetenceCode_InOffice
+when
+ $o: Office()
+ $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $p: Permission(description == "editCompetenceCode") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        /* inserire le action interessate */
+        "Competences.insertCompetenceCode",
+        "Competences.edit",
+        "Competences.save"
+       ), target == $o, granted == false)
+then
+ $c.grant();
+end
+
+
+/*
+ * 		Permission: editAbsenceType in Office
+ */
+rule editAbsenceCode_InOffice
+when
+ $o: Office()
+ $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $p: Permission(description == "editAbsenceType") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        /* inserire le action interessate */
+        "Absences.editCode",
+     	"Absences.insertAbsenceCode",
+     	"Absences.saveAbsenceCode"
        ), target == $o, granted == false)
 then
  $c.grant();

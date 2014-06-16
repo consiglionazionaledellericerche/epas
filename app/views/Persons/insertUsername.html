@@ -1,18 +1,28 @@
-#{extends 'main_with_navbar.html' /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Modifica username' /}
+<div class="container">
 
-<h3>Inserisci un username per l'utente ${person.name} ${person.surname} selezionandolo dalla lista sottostante</h3>
 #{form @Persons.updateUsername()}
-<input type="hidden" name="person" value="${person.id}"/>
-<ul>
-%{	
-	for(string in usernameList){
-}%
-	<li>${string}</li> <input type="radio" name="username" value="${string}" />
-	
-%{
-	}
-}%
-</ul>
 
-<input type="submit" name="submitPerson" value="Ok"/>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title"><span class="badge">3</span> Username per l'utente ${person.name} ${person.surname}</h3>
+  </div>
+  <div class="panel-body">
+<input type="hidden" name="person" value="${person.id}"/>
+<table class="table table-condensed table-form">
+#{list usernameList, as:'string'}
+<tr>
+	<td class="username">${string}</td> 
+	<td><input type="radio" name="username" value="${string}" /></td>
+</tr>
+#{/list}
+</table>
+  </div>
+</div>
+<div class="container-fluid center">
+      <input class="btn btn-primary" type="submit" value="Salva" />
+</div>
 #{/form}
+</div>

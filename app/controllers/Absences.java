@@ -45,6 +45,8 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import com.google.common.base.Optional;
+
+import controllers.Resecure.NoCheck;
 import dao.AbsenceTypeDao;
 
 @With( {Resecure.class, RequestInit.class} )
@@ -136,7 +138,8 @@ public class Absences extends Controller{
 	/**
 	 * questa è una funzione solo per admin, quindi va messa con il check administrator
 	 */
-	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
+	//@Check(Security.INSERT_AND_UPDATE_ABSENCE)
+	@NoCheck
 	public static void manageAbsenceCode(String name, Integer page){
 		if(page==null)
 			page = 0;
@@ -147,8 +150,9 @@ public class Absences extends Controller{
 		render(absenceList, name, simpleResults);
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
+	//@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void insertAbsenceCode(){
+		rules.checkIfPermitted(Security.getUser().get().person.office);
 		AbsenceType abt = new AbsenceType();
 		AbsenceTypeGroup  abtg = new AbsenceTypeGroup();
 		List<Qualification> qualificationList = Qualification.findAll();
@@ -181,8 +185,10 @@ public class Absences extends Controller{
 		render(abt, abtg, qualificationList, abtList, justifiedTimeAtWorkList, accumulationTypeList, accumulationBehaviourList);
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
+	//@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void saveAbsenceCode(){
+		rules.checkIfPermitted(Security.getUser().get().person.office);
+		
 		AbsenceType abt = new AbsenceType();
 		AbsenceTypeGroup abtg = null;
 		abt.code = params.get("codice");
@@ -381,8 +387,10 @@ public class Absences extends Controller{
 		
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
+	//@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void editCode(@Required Long absenceCodeId) throws InstantiationException, IllegalAccessException{
+		rules.checkIfPermitted(Security.getUser().get().person.office);
+		
 		AbsenceType abt = AbsenceType.findById(absenceCodeId);
 		List<JustifiedTimeAtWork> justList = new ArrayList<JustifiedTimeAtWork>();
 		justList.add(0,JustifiedTimeAtWork.AllDay);
