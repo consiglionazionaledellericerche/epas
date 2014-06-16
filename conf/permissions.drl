@@ -119,6 +119,19 @@ when
      	"Stampings.dailyPresence",
      	"Stampings.mealTicketSituation",
      	
+     	/*Stampa cartellino*/
+     	"PrintTags.listPersonForPrintTags",
+     	"PrintTags.showTag",
+     	
+     	/*Utility*/
+     	"Charts.indexCharts",
+     	"Charts.checkLastYearAbsences",
+     	"Charts.whichAbsenceInYear",
+     	"Charts.overtimeOnPositiveResidual",
+     	"Charts.overtimeOnPositiveResidualInYear",
+     	"Charts.processLastYearAbsences",
+     	
+     	
      	/*Riepilogo mensile*/
      	"MonthRecaps.show",
      	"MonthRecaps.justifiedAbsences",
@@ -279,7 +292,15 @@ when
         "MonthRecaps.justifiedAbsences",
         "MonthRecaps.notJustifiedAbsences",
         "MonthRecaps.workingDayNotHoliday",
-        "MonthRecaps.workingDayHoliday"
+        "MonthRecaps.workingDayHoliday",
+        "PrintTags.listPersonForPrintTags",
+        "PrintTags.showTag",
+        "Charts.indexCharts",
+        "Charts.checkLastYearAbsences",
+        "Charts.whichAbsenceInYear",
+     	"Charts.overtimeOnPositiveResidual",
+     	"Charts.overtimeOnPositiveResidualInYear",
+     	"Charts.processLastYearAbsences"
        ), target == $o, granted == false)
 then
  $c.grant();

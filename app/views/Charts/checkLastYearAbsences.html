@@ -1,16 +1,40 @@
-#{extends 'main_with_navbar.html' /}
-#{set titolo: 'Controllo schedone anno passato'/}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Controllo schedone anno passato' /}
 
+
+<div id="container-fluid-nav-tabs" class="container-fluid">
 
 <ul class="nav nav-tabs">
   <li><a href="@{Charts.indexCharts()}">Grafici</a></li>
   <li class="active"><a href="@{Charts.checkLastYearAbsences()}">Controllo schedone anno passato</a></li>
 </ul>
-<p class="lead">Carica il file (formato .csv) su cui fare il controllo</p>
+
+</div>
+
+<div class="container">
+
+<div class="panel panel-default">
+		  <div class="panel-heading">
+		    <h4 class="panel-title">Carica il file (formato .csv) su cui fare il controllo</h4>
+		  </div>
+		<div class="panel-body">
+
 #{form @Charts.processLastYearAbsences() ,  enctype:'multipart/form-data'}
 
 	    <input type="file" name="file">
 		
-		<input class="btn btn-primary" type="submit" value="Ok">
+		<div class="container-fluid center">
+      		<input class="btn btn-primary" type="submit" value="Avanti" />
+      	</div>
 
 #{/form}
+	</div>
+</div>
+
+<ul class="pager">
+  <li><a href="/application/indexAdmin">Home</a></li>
+  <li><a href="/stampings/personStamping">Timbrature</a></li>
+</ul>
+
+</div>

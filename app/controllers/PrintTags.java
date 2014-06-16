@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import models.AbsenceType;
 import models.ConfGeneral;
 import models.Person;
@@ -21,11 +23,15 @@ import org.joda.time.LocalDate;
 
 import play.mvc.Controller;
 import play.mvc.With;
+import security.SecurityRules;
 
 @With( {Secure.class, RequestInit.class} )
 public class PrintTags extends Controller{
 	
-	@Check(Security.INSERT_AND_UPDATE_STAMPING)
+	@Inject
+	static SecurityRules rules;
+	
+	//@Check(Security.INSERT_AND_UPDATE_STAMPING)
 	public static void showTag(Long personId){
 		if(personId == null){
 			flash.error("Malissimo! ci vuole un id! Seleziona una persona!");
@@ -40,6 +46,7 @@ public class PrintTags extends Controller{
 			 */
 		}
 		Person person = Person.findById(personId);
+		rules.checkIfPermitted(person.office);
 		int month = params.get("month", Integer.class);
 		int year = params.get("year", Integer.class);
 		
@@ -91,8 +98,9 @@ public class PrintTags extends Controller{
 		
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_STAMPING)
+	//@Check(Security.INSERT_AND_UPDATE_STAMPING)
 	public static void listPersonForPrintTags(int year, int month){
+		rules.checkIfPermitted(Security.getUser().get().person.office);
 		LocalDate date = new LocalDate(year, month,1);
 		List<Person> personList = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
 		render(personList, date, year, month);

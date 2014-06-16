@@ -119,12 +119,17 @@
                    session.get("monthSelected"), session.get("daySelected") )}">Presenza Giornaliera</a></li>
                   <li><a href="@{Stampings.mealTicketSituation(session.get("yearSelected"), 
                    session.get("monthSelected") )}">Riepilogo Buoni Mensa</a></li>
+                  <li><a href="@{PrintTags.listPersonForPrintTags(session.get("yearSelected"), 
+                   session.get("monthSelected"))}">Stampa Cartellino</a></li>
+                  <li class="divider"></li>
+                  <li><a href="@{Charts.indexCharts()}">Utility</a></li>
                   <li class="divider"></li>
                   <li><a href="@{MonthRecaps.show(session.get("yearSelected"), 
                    session.get("monthSelected") )}">Riepilogo Mensile</a></li>
                   <li><a href="@{YearlyAbsences.showGeneralMonthlyAbsences(session.get("yearSelected"),
                    session.get("monthSelected"))}">Assenze</a></li>
                   <li><a href="@{VacationsAdmin.list(session.get("yearSelected"))}">Ferie e Permessi</a></li>
+                  
                   <li class="divider"></li>
                   
                 #{/if}
