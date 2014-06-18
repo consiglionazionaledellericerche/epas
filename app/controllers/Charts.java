@@ -72,8 +72,8 @@ public class Charts extends Controller{
 			Contract contract = p.getCurrentContract();
 			CalcoloSituazioneAnnualePersona sit = new CalcoloSituazioneAnnualePersona(contract, year, new LocalDate(year,month,1));
 			Mese mese = sit.getMese(year,month);
-			po.month = 1;
-			po.year = 2013;
+			po.month = month;
+			po.year = year;
 			po.overtimeHour = val;
 			po.name = p.name;
 			po.surname = p.surname;

@@ -40,11 +40,12 @@
 		</div>
 	</div>
 </div>
+
 #{if yearChart != 0 && monthChart != 0 }
-<div id="myfirstchart" style="height: 550px;">
+<div class="container-fluid">
+<div id="myfirstchart" style="height: 950px; margin-left: 30px;">
 
 </div>
-
  	#{set 'moreScripts'}
 <script type="text/javascript">
 	new Morris.Bar({
@@ -64,9 +65,11 @@
 </script>
 	
 	#{/set}
+
 #{/if}
+
 <ul class="pager">
   <li><a href="/charts/indexCharts">Indietro</a></li>
   
 </ul>
-	
+</div>	
