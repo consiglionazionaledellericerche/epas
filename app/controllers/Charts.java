@@ -64,21 +64,24 @@ public class Charts extends Controller{
 		List<Person> personeProva = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), true);
 		List<PersonOvertime> poList = new ArrayList<PersonOvertime>();
 		for(Person p : personeProva){
-			PersonOvertime po = new PersonOvertime();
+			if(p.office.equals(Security.getUser().get().person.office)){
+				PersonOvertime po = new PersonOvertime();
 
-			Long val = Competence.find("Select sum(c.valueApproved) from Competence c where c.competenceCode.code in (?,?,?) and c.year = ? and c.month = ? and c.person = ?",
-					"S1","S2","S3", year, month, p).first();
+				Long val = Competence.find("Select sum(c.valueApproved) from Competence c where c.competenceCode.code in (?,?,?) and c.year = ? and c.month = ? and c.person = ?",
+						"S1","S2","S3", year, month, p).first();
 
-			Contract contract = p.getCurrentContract();
-			CalcoloSituazioneAnnualePersona sit = new CalcoloSituazioneAnnualePersona(contract, year, new LocalDate(year,month,1));
-			Mese mese = sit.getMese(year,month);
-			po.month = month;
-			po.year = year;
-			po.overtimeHour = val;
-			po.name = p.name;
-			po.surname = p.surname;
-			po.positiveHourForOvertime = mese.positiveResidualInMonth(p, year, month)/60;
-			poList.add(po);
+				Contract contract = p.getCurrentContract();
+				CalcoloSituazioneAnnualePersona sit = new CalcoloSituazioneAnnualePersona(contract, year, new LocalDate(year,month,1));
+				Mese mese = sit.getMese(year,month);
+				po.month = month;
+				po.year = year;
+				po.overtimeHour = val;
+				po.name = p.name;
+				po.surname = p.surname;
+				po.positiveHourForOvertime = mese.positiveResidualInMonth(p, year, month)/60;
+				poList.add(po);
+			}
+			
 		}
 		render(poList, year, month, annoList, meseList);
 	}
@@ -110,14 +113,17 @@ public class Charts extends Controller{
 		List<Person> personeProva = Person.getActivePersonsinYear(year, Security.getOfficeAllowed(), true);
 		int totaleOreResidue = 0;
 		for(Person p : personeProva){
-			for(int month=1; month<13;month++){
-				//RTODO contratto attivo??
-				Contract contract = p.getCurrentContract();
-				CalcoloSituazioneAnnualePersona sit = new CalcoloSituazioneAnnualePersona(contract, year, new LocalDate(year,month,1).dayOfMonth().withMaximumValue());
-				Mese mese = sit.getMese(year,month);
-				totaleOreResidue = totaleOreResidue+(mese.positiveResidualInMonth(p, year, month)/60);
+			if(p.office.equals(Security.getUser().get().person.office)){
+				for(int month=1; month<13;month++){
+					//RTODO contratto attivo??
+					Contract contract = p.getCurrentContract();
+					CalcoloSituazioneAnnualePersona sit = new CalcoloSituazioneAnnualePersona(contract, year, new LocalDate(year,month,1).dayOfMonth().withMaximumValue());
+					Mese mese = sit.getMese(year,month);
+					totaleOreResidue = totaleOreResidue+(mese.positiveResidualInMonth(p, year, month)/60);
+				}
+				Logger.debug("Ore in più per %s %s nell'anno %d: %d", p.name, p.surname, year,totaleOreResidue);
 			}
-			Logger.debug("Ore in più per %s %s nell'anno %d: %d", p.name, p.surname, year,totaleOreResidue);
+			
 		}
 
 		render(annoList, val, totaleOreResidue);
