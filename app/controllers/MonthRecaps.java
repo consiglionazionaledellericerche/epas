@@ -198,8 +198,8 @@ public class MonthRecaps extends Controller{
 		
 		Table<Person, String, Integer> tableMonthRecap = TreeBasedTable.create(PersonNameComparator, AbsenceCodeComparator);
 
-		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), Sets.newHashSet(Security.getOfficeAllowed()), 
-				false, monthBegin, monthEnd);
+		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
+				Sets.newHashSet(Security.getOfficeAllowed()), false, monthBegin, monthEnd, true);
 
 		List<Person> activePersons = simpleResults.paginated(page).getResults();
 		

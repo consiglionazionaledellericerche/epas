@@ -4,8 +4,6 @@ package controllers;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import models.Office;
 import models.Permission;
 import models.Person;
@@ -13,7 +11,7 @@ import models.User;
 import models.UsersRolesOffices;
 import play.Logger;
 import play.cache.Cache;
-import security.SecurityRules;
+
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;

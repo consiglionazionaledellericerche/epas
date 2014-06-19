@@ -127,6 +127,8 @@ public class WorkingTimeType extends BaseModel {
 		return breakTime;
 	}
 
+	//PER la delete quindi per adesso permettiamo l'eliminazione solo di contratti particolari di office
+	//bisogna controllare che this non sia default ma abbia l'associazione con office
 	public List<Contract> getAssociatedContract() {
 
 		List<Contract> contractList = Contract.find(
@@ -141,15 +143,19 @@ public class WorkingTimeType extends BaseModel {
 	 * I contratti attivi che attualmente hanno impostato il WorkingTimeType
 	 * @return
 	 */
-	public List<Contract> getAssociatedActiveContract() {
+	public List<Contract> getAssociatedActiveContract(Long officeId) {
+		
+		List<Contract> contractList = new ArrayList<Contract>();
 		
 		LocalDate today = new LocalDate();
-
-		List<Contract> contractList = new ArrayList<Contract>();
 		
 		List<Contract> activeContract = Contract.getActiveContractInPeriod(today, today);
 		
 		for(Contract contract : activeContract) {
+			
+			if( !contract.person.office.id.equals(officeId))
+				continue;
+			
 			ContractWorkingTimeType current = contract.getContractWorkingTimeType(today);
 			if(current.workingTimeType.id.equals(this.id))
 				contractList.add(contract);
@@ -166,22 +172,6 @@ public class WorkingTimeType extends BaseModel {
 				"select wtt from WorkingTimeType wtt where wtt.office is null order by description").fetch();
 		return defaultList;
 		
-	}
-	
-	
-	
-	public static List<WorkingTimeType> getOfficesWorkingTimeTypes(List<Office> officeList) {
-		
-		List<WorkingTimeType> wttList = new ArrayList<WorkingTimeType>();
-		for(Office office : officeList) {
-			
-			for(WorkingTimeType wtt : office.workingTimeType) {
-				
-				wttList.add(wtt);
-			}
-		}
-		
-		return wttList;
 	}
 	
 	@Override

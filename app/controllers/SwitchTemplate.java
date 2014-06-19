@@ -3,7 +3,6 @@ package controllers;
 import java.sql.SQLException;
 
 import org.joda.time.LocalDate;
-import org.joda.time.Years;
 
 import play.mvc.Controller;
 import play.mvc.With;
@@ -335,7 +334,7 @@ private static void executeAction(String action) {
 		
 		if(action.equals("WorkingTimes.manageWorkingTime")) {
 			
-			WorkingTimes.manageWorkingTime();
+			WorkingTimes.manageWorkingTime(null);
 		}
 
 		
