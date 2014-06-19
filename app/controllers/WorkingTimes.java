@@ -51,7 +51,7 @@ public class WorkingTimes extends Controller{
 		render(wttList, wttDefault, wttAllowed, office, offices);
 	}
 	
-	public static void showContractWorkingTimeType(Long wttId, Long officeId) {
+	public static void showContract(Long wttId, Long officeId) {
 		
 		WorkingTimeType wtt = WorkingTimeType.findById(wttId);
 		if(wtt==null) {
@@ -68,6 +68,23 @@ public class WorkingTimes extends Controller{
 		
 	}
 	
+	public static void showContractWorkingTimeType(Long wttId, Long officeId) {
+		
+		WorkingTimeType wtt = WorkingTimeType.findById(wttId);
+		if(wtt==null) {
+			
+			flash.error("Impossibile caricare il tipo orario specificato. Riprovare o effettuare una segnalazione.");
+			WorkingTimes.manageWorkingTime(null);
+		}
+		
+		rules.checkIfPermitted(wtt.office);
+		
+		List<ContractWorkingTimeType> cwttList = wtt.getAssociatedPeriodInActiveContract(officeId);
+	
+		render(wtt, cwttList);
+		
+	}
+	
 	
 	public static void insertWorkingTime(Long officeId){
 		
@@ -75,6 +92,12 @@ public class WorkingTimes extends Controller{
 		if(office == null) {
 			
 			flash.error("Sede non trovata. Riprovare o effettuare una segnalazione.");
+			WorkingTimes.manageWorkingTime(null);
+		}
+		
+		if(!office.isSeat()) {
+			
+			flash.error("E' possibile definire tipi orario solo a livello sede. Operazione annullata.");
 			WorkingTimes.manageWorkingTime(null);
 		}
 		
@@ -108,6 +131,13 @@ public class WorkingTimes extends Controller{
 			flash.error("Per inserire un tipo orario è necessario fornire una sede esistente. Operazione annullata.");
 			WorkingTimes.manageWorkingTime(null);
 		}
+		
+		if(!office.isSeat()) {
+			
+			flash.error("E' possibile definire tipi orario solo a livello sede. Operazione annullata.");
+			WorkingTimes.manageWorkingTime(null);
+		}
+		
 		rules.checkIfPermitted(office);
 		
 		if(wtt.description == null || wtt.description.isEmpty()) {
@@ -225,14 +255,14 @@ public class WorkingTimes extends Controller{
 			wtt.disabled = false;
 			wtt.save();
 			flash.success("Riattivato orario di lavoro denominato %s.", wtt.description);
-			WorkingTimes.manageWorkingTime(wtt.office);
+			WorkingTimes.manageWorkingTime(null);	//FIXME vorrei passare wtt.office
 		}
 		else {
 			
 			wtt.disabled = true;
 			wtt.save();
 			flash.success("Disattivato orario di lavoro denominato %s.", wtt.description);
-			WorkingTimes.manageWorkingTime(wtt.office);
+			WorkingTimes.manageWorkingTime(null); //FIXME vorrei passare wtt.office
 		}
 
 	}
@@ -257,14 +287,13 @@ public class WorkingTimes extends Controller{
 		rules.checkIfPermitted(office);
 		
 		List<WorkingTimeType> wttDefault = WorkingTimeType.getDefaultWorkingTimeTypes();
-		
-		
-		List<WorkingTimeType> wttAllowed = office.workingTimeType; 
-		
+		List<WorkingTimeType> wttAllowed = office.getEnabledWorkingTimeType(); 
+
 		List<WorkingTimeType> wttList = new ArrayList<WorkingTimeType>();
 		wttList.addAll(wttDefault);
 		wttList.addAll(wttAllowed);
 		
+		wttList.remove(wtt);
 		
 		render(wtt, wttList, office);
 	}
@@ -338,21 +367,9 @@ public class WorkingTimes extends Controller{
 		//Logica aggiornamento contratto
 		for(Contract contract : contractInPeriod) {
 			
-			//calcolo il periodo potenziale del contratto interessato al cambiamento
-			/*
-			LocalDate contractBegin = contract.getContractDateInterval().getBegin();
-			if(inputBegin.isAfter(contractBegin))
-				contractBegin = inputBegin;
-
-			LocalDate contractEnd = contract.getContractDateInterval().getEnd();
-			if(inputEnd != null && inputEnd.isBefore(contractEnd))
-				contractEnd = inputEnd;
-		
-			DateInterval contractPeriod = new DateInterval(inputBegin, contractEnd);
-			*/
 			DateInterval contractPeriod = new DateInterval(inputBegin, inputEnd);
 			
-			//try {
+			try {
 
 				JPAPlugin.startTx(false);
 
@@ -406,11 +423,11 @@ public class WorkingTimes extends Controller{
 				JPAPlugin.closeTx(false);
 				
 
-			//}
-			//catch (Exception e) {
+			}
+			catch (Exception e) {
 				
-			//	contractError++;
-			//}
+				contractError++;
+			}
 			
 		}
 		
@@ -443,7 +460,7 @@ public class WorkingTimes extends Controller{
 		
 		DateInterval cwttInterval = cwtt.getCwttDateInterval();
 		
-		//caso1 cwtt inizia dopo e finisce prima (interamente contenuto)
+		//caso1 cwtt inizia dopo e finisce prima (interamente contenuto)	Risultato dello split: MIDDLE (new)
 		if(DateUtility.isIntervalIntoAnother(cwtt.getCwttDateInterval(), period)) {
 			
 			middle.beginDate = cwtt.beginDate;
@@ -454,8 +471,8 @@ public class WorkingTimes extends Controller{
 			return newCwttList;
 		}
 		
-		//caso 2 cwtt inizia prima e finisce prima
-		if( cwttInterval.getBegin().isBefore(period.getBegin()) && cwttInterval.getEnd().isBefore(period.getEnd()) ) {
+		//caso 2 cwtt inizia prima e finisce prima (o uguale)				Risultato dello split: FIRST (old) MIDDLE (new)
+		if( cwttInterval.getBegin().isBefore(period.getBegin()) && !cwttInterval.getEnd().isAfter(period.getEnd()) ) {
 			
 			first.beginDate = cwtt.beginDate;
 			first.endDate = period.getBegin().minusDays(1);
@@ -470,14 +487,15 @@ public class WorkingTimes extends Controller{
 		}
 		
 		
-		//caso 3 cwtt inizia dopo e finisce dopo 
-		if( cwttInterval.getBegin().isAfter(period.getBegin()) && cwttInterval.getEnd().isAfter(period.getEnd()) ) {
+		//caso 3 cwtt inizia dopo (o uguale) e finisce dopo 				Risultato dello split: MIDDLE (new) LAST (old)
+		if( !cwttInterval.getBegin().isBefore(period.getBegin()) && cwttInterval.getEnd().isAfter(period.getEnd()) ) {
+			
+			middle.beginDate = cwtt.beginDate;
+			middle.endDate = period.getEnd();
 			
 			last.beginDate = period.getEnd().plusDays(1);
 			last.endDate = cwtt.endDate;
 			
-			middle.beginDate = cwtt.beginDate;
-			middle.endDate = period.getEnd();
 			
 			newCwttList.add(middle);
 			newCwttList.add(last);
@@ -486,7 +504,7 @@ public class WorkingTimes extends Controller{
 			
 		}
 		
-		//caso 4 cwtt inizia prima e finisce dopo
+		//caso 4 cwtt inizia prima e finisce dopo							Risultato dello split: FIRST (old) MIDDLE (new) LAST (old)
 		if( cwttInterval.getBegin().isBefore(period.getBegin()) && cwttInterval.getEnd().isAfter(period.getEnd()) ) {
 			
 			first.beginDate = cwtt.beginDate;

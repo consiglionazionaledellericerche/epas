@@ -148,6 +148,7 @@ when
         /*Orari di lavoro*/
      	"WorkingTimes.manageWorkingTime",
      	"WorkingTimes.showWorkingTimeType",
+     	"WorkingTimes.showContract",
      	"WorkingTimes.showContractWorkingTimeType",
      	"WorkingTimes.insertWorkingTime",
      	"WorkingTimes.save",
@@ -467,7 +468,8 @@ when
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
         "WorkingTimes.showWorkingTimeType",
-        "WorkingTimes.showContractWorkingTimeType",
+        "WorkingTimes.showContractWorkingTimeType",		/* forse è viewPerson */
+        "WorkingTimes.showContract",					/* forse è viewPerson */
         "WorkingTimes.changeWorkingTimeTypeToAll",
         "WorkingTimes.executeChangeWorkingTimeTypeToAll"
        ), target == $o, granted == false)

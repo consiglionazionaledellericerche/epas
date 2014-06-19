@@ -1,26 +1,56 @@
 #{extends 'modal.html' /}
-#{set modalHeader:'Cambia Tipo Orario ' + wtt.description + ' a tutti' /}
+#{set modalHeader:'Cambia Tipo Orario a tutti' /}
 
-<div class="container-fluid">
-	<p class="text-danger">Controllo in fase di implementazione</p>
+
+
+
+
+<div class="container-fluid center">
 	
-	#{form @WorkingTimes.executeChangeWorkingTimeTypeToAll() }
-		<input type="hidden" name="officeId" value="${office.id}"/>
-        <input type="hidden" name="wttId" value="${wtt.id}" />
-        #{select 'wttId1'}
-          
-          #{list items:wttList, as:'wttItem'}
-	        #{option wttItem.id}${wttItem.description}#{/option}
-		  #{/list}
+  <p class="text-info"> Per ogni dipendente nella finestra temporale specificata</p>
+	
+  #{form @WorkingTimes.executeChangeWorkingTimeTypeToAll() }
+	<input type="hidden" name="officeId" value="${office.id}"/>
+    <input type="hidden" name="wttId" value="${wtt.id}" />
+	
+	<div class="well">
+	
+		<table class="table-form table-hover">
+		
+		  <tr>
+		    <td class="lab"><strong>Converti</strong></td>
+		    <td>${wtt.description}</td>
+		  </tr>
 		  
-	    #{/select}
-	    <br>
-	    Inizio<input name="dateFrom" type="text" data-datepicker data-date-format="yyyy-mm-dd" />
-	    <br>
-	    Fine<input name="dateTo" type="text" data-datepicker data-date-format="yyyy-mm-dd" />
-	    <br>
-	    <button type="submit" class="btn btn-default btn-xs">Cambia</button>
+		  <tr>
+		    <td class="lab"><strong>In</strong></td>
+		    <td>
+			  #{select 'wttId1'}
+	            #{list items:wttList, as:'wttItem'}
+		          #{option wttItem.id}${wttItem.description}#{/option}
+			    #{/list}
+		      #{/select}
+		    </td>
+		  </tr>
+		  
+		  <tr>
+		    <td class="lab"><strong>Dal</strong></td>
+		    <td><input name="dateFrom" type="text" data-datepicker data-date-format="yyyy-mm-dd" /></td>
+		  </tr>
+		  
+		  <tr>
+		    <td class="lab"><strong>Al</strong></td>
+		    <td><input name="dateTo" type="text" data-datepicker data-date-format="yyyy-mm-dd" /></td>
+		  </tr>
+		  
+		  
+		</table>
+
+    </div>
 	
-	#{/form}
+    <button type="submit" class="btn btn-info">Cambia</button>
 	
+  #{/form}
+  <br>
+  <p>Nel caso di finestra temporale che impatta sul passato questa operazione potrebbe richiedere alcuni minuti.</p>
 </div>

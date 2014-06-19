@@ -14,6 +14,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import models.base.BaseModel;
 
@@ -129,6 +130,7 @@ public class WorkingTimeType extends BaseModel {
 
 	//PER la delete quindi per adesso permettiamo l'eliminazione solo di contratti particolari di office
 	//bisogna controllare che this non sia default ma abbia l'associazione con office
+	@Transient
 	public List<Contract> getAssociatedContract() {
 
 		List<Contract> contractList = Contract.find(
@@ -143,6 +145,7 @@ public class WorkingTimeType extends BaseModel {
 	 * I contratti attivi che attualmente hanno impostato il WorkingTimeType
 	 * @return
 	 */
+	@Transient
 	public List<Contract> getAssociatedActiveContract(Long officeId) {
 		
 		List<Contract> contractList = new ArrayList<Contract>();
@@ -164,8 +167,32 @@ public class WorkingTimeType extends BaseModel {
 		return contractList;
 	}
 	
+	@Transient
+	public List<ContractWorkingTimeType> getAssociatedPeriodInActiveContract(Long officeId) {
+		
+		List<ContractWorkingTimeType> cwttList = new ArrayList<ContractWorkingTimeType>();
+		
+		LocalDate today = new LocalDate();
+		
+		List<Contract> activeContract = Contract.getActiveContractInPeriod(today, today);
+		
+		for(Contract contract : activeContract) {
+			
+			if( !contract.person.office.id.equals(officeId))	//TODO 	questa restrizione andrebbe fatta dentro activeContract
+				continue;
+			
+			for(ContractWorkingTimeType cwtt: contract.contractWorkingTimeType) {
+				
+				if(cwtt.workingTimeType.id.equals(this.id))
+					cwttList.add(cwtt);	
+			}
+		}
+		
+		return cwttList;
+	}
 	
 	
+	@Transient
 	public static List<WorkingTimeType> getDefaultWorkingTimeTypes() {
 		
 		List<WorkingTimeType> defaultList = WorkingTimeType.find(
@@ -173,6 +200,8 @@ public class WorkingTimeType extends BaseModel {
 		return defaultList;
 		
 	}
+	
+	
 	
 	@Override
 	public String toString() {
