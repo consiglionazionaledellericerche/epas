@@ -1,9 +1,11 @@
 #{extends 'modal.html' /}
-#{set modalHeader:'Creazione nuovo Tipo Orario' /}
+#{set modalHeader:'Creazione nuovo Tipo Orario per ' + office.name /}
 
 <div class="container-fluid">
 
 #{form @WorkingTimes.save()}
+
+  <input type="hidden" name="office.id" value="${office.id}"/>
 
   <div class="well center">
 	<strong>Nome Orario </strong><input name="wtt.description" type="text"/>  

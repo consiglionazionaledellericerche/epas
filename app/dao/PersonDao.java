@@ -10,13 +10,11 @@ import models.Office;
 import models.Person;
 import models.query.QCompetenceCode;
 import models.query.QContract;
-import models.query.QContractWorkingTimeType;
 import models.query.QPerson;
 import models.query.QPersonHourForOvertime;
 import models.query.QPersonReperibility;
 import models.query.QPersonShift;
 import models.query.QUser;
-import models.query.QVacationPeriod;
 
 import org.joda.time.LocalDate;
 
@@ -42,7 +40,7 @@ public final class PersonDao {
 	 * @return la lista delle person corrispondenti
 	 */
 	public static SimpleResults<Person> list(Optional<String> name, Set<Office> offices, 
-			boolean onlyTechnician, LocalDate start, LocalDate end) {
+			boolean onlyTechnician, LocalDate start, LocalDate end, boolean onlyOnCertificate) {
 		
 		Preconditions.checkState(!offices.isEmpty());
 		
@@ -76,7 +74,9 @@ public final class PersonDao {
 			condition.andAnyOf(qp.name.startsWithIgnoreCase(name.get()),
 					qp.surname.startsWithIgnoreCase(name.get()));
 		}
-		condition.and(qc.onCertificate.isTrue());
+		
+		if(onlyOnCertificate)
+			condition.and(qc.onCertificate.isTrue());
 		
 		condition.andAnyOf(
 				
@@ -116,6 +116,7 @@ public final class PersonDao {
 		
 		return ModelQuery.simpleResults(query, qp);
 	}
+	
 	
 	/**
 	 * @param name

@@ -59,14 +59,21 @@ public class Stampings extends Controller {
 	@Inject
 	static SecurityRules rules;
 	
-	public static void stampings(Integer year, Integer month){
+	public static void stampings(Integer year, Integer month) {
 
 		Person person = Security.getUser().get().person;
 		if(!person.isActiveInMonth(month, year))
 		{
 			flash.error("Si è cercato di accedere a un mese al di fuori del contratto valido per %s %s. " +
 					"Non esiste situazione mensile per il mese di %s", person.name, person.surname, DateUtility.fromIntToStringMonth(month));
-			render("@redirectToIndex");
+			
+			//Un dipendente fuori contratto non può accedere a ePAS ??
+			try {
+				Secure.login();
+			}catch(Throwable e) {
+				Application.index();
+			}
+			
 		}
 		
 		//int minInOutColumn = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));
@@ -545,8 +552,8 @@ public class Stampings extends Controller {
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
 
 		
-		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), Sets.newHashSet(Security.getOfficeAllowed()), 
-				false, beginMonth, endMonth);
+		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
+				Sets.newHashSet(Security.getOfficeAllowed()), false, beginMonth, endMonth, true);
 
 		List<Person> activePersons = simpleResults.paginated(page).getResults();
 		

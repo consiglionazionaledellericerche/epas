@@ -8,7 +8,6 @@ import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
 
-import javax.inject.Inject;
 
 import models.Office;
 import models.Permission;
@@ -26,12 +25,10 @@ import com.mysema.query.jpa.JPQLQuery;
 
 import controllers.Resecure.NoCheck;
 import dao.PersonDao;
-import play.Logger;
 import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Http;
-import security.SecurityRules;
 
 /**
  * @author cristian
@@ -270,7 +267,7 @@ public class RequestInit extends Controller {
 			List<Office> officeList = Security.getOfficeAllowed();
 			if(officeList.size() > 0) {
 			List<Person> persons = PersonDao.list(Optional.fromNullable(name), 
-					Sets.newHashSet(Security.getOfficeAllowed()), false, beginMonth, endMonth).list();
+					Sets.newHashSet(Security.getOfficeAllowed()), false, beginMonth, endMonth, true).list();
 			renderArgs.put("navPersons", persons);
 			}
 		} 
@@ -278,7 +275,7 @@ public class RequestInit extends Controller {
 
 			List<Office> allOffices = Office.findAll();
 			List<Person> persons = PersonDao.list(Optional.fromNullable(name), 
-					Sets.newHashSet(allOffices), false, beginMonth, endMonth).list();
+					Sets.newHashSet(allOffices), false, beginMonth, endMonth, true).list();
 
 			renderArgs.put("navPersons", persons);
 		}

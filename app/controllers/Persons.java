@@ -64,7 +64,7 @@ public class Persons extends Controller {
 		LocalDate endEra = new LocalDate(9999,1,1);
 		List<Person> personList = PersonDao.list(Optional.fromNullable(name), 
 				Sets.newHashSet(Security.getOfficeAllowed()), false, startEra, 
-				endEra).list();
+				endEra, false).list();
 
 		render(personList);
 	}
@@ -146,7 +146,15 @@ public class Persons extends Controller {
 		contract.expireContract = expireContract;
 
 		contract.person = person;
-		contract.onCertificate = params.get("onCertificate", Boolean.class);
+		
+		
+		if( params.get("onCertificate", Boolean.class) == null) 
+			contract.onCertificate = false;
+		else
+			contract.onCertificate = params.get("onCertificate", Boolean.class);
+		
+		
+		
 		contract.save();
 		contract.setVacationPeriods();
 

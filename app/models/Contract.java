@@ -626,6 +626,8 @@ public class Contract extends BaseModel {
 	public static List<Contract> getActiveContractInPeriod(LocalDate begin, LocalDate end) {
 		
 		//TODO queryDSL
+		if(end == null)
+			end = new LocalDate(9999,1,1);
 		
 		List<Contract> activeContract = Contract.find(
 				"Select c from Contract c "

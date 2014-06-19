@@ -37,8 +37,9 @@ public class VacationsAdmin extends Controller{
 			page = 0;
 		rules.checkIfPermitted("");
 		LocalDate date = new LocalDate();
+		
 		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
-				Sets.newHashSet(Security.getOfficeAllowed()), false, date, date);
+				Sets.newHashSet(Security.getOfficeAllowed()), false, date, date, true);
 		
 		List<Person> personList = simpleResults.paginated(page).getResults();
 		
