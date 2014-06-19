@@ -1,14 +1,18 @@
-#{extends 'main_with_navbar.html' /}
-#{set titolo: 'Stampa cartellino'/}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Stampa cartellino' /}
 
-<ul class="nav nav-tabs">
-  <li class="active"><a href="@{PrintTags.listPersonForPrintTags(year, month)}#">Stampa cartellino</a></li>
-  <li><a href="@{Absences.absenceInPeriod(0, year, month)}#">Assenze in periodo</a></li>
-</ul>
-<p id="descrizioneStampaCartellino">Sarà generato un file per la stampa di tipo PDF
-Selezionare "Tutti" o uno dei nomi presenti nella lista e premere invio</p>
+
+<div class="container">
+
 
 #{form @PrintTags.showTag()}
+<div class="panel panel-default">
+		  <div class="panel-heading">
+		    <h4 class="panel-title">Sarà generato un file per la stampa di tipo PDF. 
+Selezionare uno dei nomi presenti nella lista e premere invio</h4>
+		  </div>
+		<div class="panel-body">
 <input type="hidden" name="month" value="${date.getMonthOfYear()}"/>
 
 <input type="hidden" name="year" value="${date.getYear()}"/>
@@ -16,7 +20,7 @@ Selezionare "Tutti" o uno dei nomi presenti nella lista e premere invio</p>
 <div id="frm">
 #{select 'personId', value:personList.get(0), id:'person'}
 			#{option}Scegli una persona#{/option}
-			#{option -1}Tutti#{/option}
+			
 		%{
 			for(person in personList){
 		}%
@@ -30,5 +34,8 @@ Selezionare "Tutti" o uno dei nomi presenti nella lista e premere invio</p>
 
 	<input class="btn btn-primary" type="submit" value="Invio"/>
 	<input  action="action" class="btn" type="button" value="Indietro" onclick="history.go(-1);" />
+  </div>
+</div>
 #{/form}
+</div>
 </div>
