@@ -777,7 +777,17 @@ public class PersonDay extends BaseModel {
 	 * @return 
 	 */
 	private WorkingTimeTypeDay getWorkingTimeTypeDay(){
-		return person.getWorkingTimeType(date).workingTimeTypeDays.get(date.getDayOfWeek()-1);
+		
+		//return person.getWorkingTimeType(date).workingTimeTypeDays.get(date.getDayOfWeek()-1);
+		WorkingTimeType wtt = person.getWorkingTimeType(date);
+		if(wtt == null)
+			return null;
+		
+		WorkingTimeTypeDay wttd = wtt.workingTimeTypeDays.get(date.getDayOfWeek()-1);
+		if(wttd == null)
+			return null;
+		
+		return wttd;
 	}
 
 	/**

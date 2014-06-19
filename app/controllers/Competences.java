@@ -370,9 +370,7 @@ public class Competences extends Controller{
 		
 		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
 				Sets.newHashSet(Security.getOfficeAllowed()), 
-				false, 
-				date, 
-				date.dayOfMonth().withMaximumValue());
+				false, date, date.dayOfMonth().withMaximumValue(), true);
 		
 		//List<Person> personList = simpleResults.paginated(page).getResults();
 		List<Person> personList = simpleResults.list();
