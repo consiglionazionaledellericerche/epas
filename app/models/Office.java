@@ -495,6 +495,17 @@ public class Office extends BaseModel{
 		return userList;
 	}
 	
+	@Transient
+	public List<WorkingTimeType> getEnabledWorkingTimeType() {
+		
+		List<WorkingTimeType> enabledWttList = new ArrayList<WorkingTimeType>();
+		for(WorkingTimeType wtt: this.workingTimeType) {
+			
+			if(wtt.disabled == false)
+				enabledWttList.add(wtt);
+		}
+		return enabledWttList;
+	}
 	
 
 

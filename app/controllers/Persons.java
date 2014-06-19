@@ -76,10 +76,9 @@ public class Persons extends Controller {
 		InitializationTime initializationTime = new InitializationTime();
 		List<Office> officeList = Security.getOfficeAllowed();
 		
-		//TODO prendere i wtt inerenti gli officeAllowed e fondamentale non quelli disattivati!!!
-		List<WorkingTimeType> wttList = WorkingTimeType.findAll();
-		
-		render(initializationTime, officeList, wttList);
+		//Decisione: alla creazione come tipo orario viene assegnato Normale.
+				
+		render(initializationTime, officeList);
 	}
 
 
@@ -100,18 +99,13 @@ public class Persons extends Controller {
 		rules.checkIfPermitted(off);
 		
 		Logger.debug(person.name);
+		
 		/* creazione persona */
-		//Person person = null; 
-				
-		//person = new Person();		
 		Logger.debug("Saving person...");
-
 		
 		Qualification qual = Qualification.findById(new Long(qualification));
 		person.qualification = qual;
 
-		
-		//if(office != null)
 		person.office = off;
 
 		person.save();
@@ -126,7 +120,6 @@ public class Persons extends Controller {
 		user.save();
 		person.user = user;
 		person.save();
-
 
 		/* creazione contratto */
 		Logger.debug("Begin contract: %s", params.get("beginContract"));
@@ -147,25 +140,23 @@ public class Persons extends Controller {
 
 		contract.person = person;
 		
-		
 		if( params.get("onCertificate", Boolean.class) == null) 
 			contract.onCertificate = false;
 		else
 			contract.onCertificate = params.get("onCertificate", Boolean.class);
 		
-		
-		
 		contract.save();
 		contract.setVacationPeriods();
 
+		//FIXME deve essere impostato in configurazione l'orario default
+		WorkingTimeType wtt = WorkingTimeType.find("byDescription", "Normale").first();
+		
 		ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
 		cwtt.beginDate = contract.beginContract;
 		cwtt.endDate = contract.expireContract;
-		cwtt.workingTimeType = WorkingTimeType.findById(params.get("wtt", Long.class));
+		cwtt.workingTimeType = wtt;
 		cwtt.contract = contract;
 		cwtt.save();
-
-
 
 		Long personId = person.id;
 		List<String> usernameList = PersonUtility.composeUsername(person.name, person.surname);
@@ -569,8 +560,14 @@ public class Persons extends Controller {
 		}
 		
 		rules.checkIfPermitted(contract.person.office);
+
+		//La lista dei tipi orario ammessi per la persona
+		List<WorkingTimeType> wttDefault = WorkingTimeType.getDefaultWorkingTimeTypes();
+		List<WorkingTimeType> wttAllowed = contract.person.office.getEnabledWorkingTimeType(); 
+		List<WorkingTimeType> wttList = new ArrayList<WorkingTimeType>();
+		wttList.addAll(wttDefault);
+		wttList.addAll(wttAllowed);
 		
-		List<WorkingTimeType> wttList = WorkingTimeType.findAll();
 		render(contract, wttList);
 	}
 
