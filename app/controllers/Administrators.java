@@ -44,7 +44,7 @@ public class Administrators extends Controller {
 		String name = null;
 		List<Person> personList = PersonDao.list(Optional.fromNullable(name), 
 					Sets.newHashSet(Security.getOfficeAllowed()), false, 
-					LocalDate.now(), LocalDate.now()).list();
+					LocalDate.now(), LocalDate.now(), true).list();
 		
 		render(office, role, personList);
 	}
@@ -149,8 +149,8 @@ public class Administrators extends Controller {
 	
 	/**
 	 * Switch in un'altra persona
-	 */
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	 */ //TODO vanno implementati i permessi di questa funzionalità !!!
+	@NoCheck
 	public static void switchUserTo(long id) {
 		final User user = User.findById(id);
 		notFoundIfNull(user);
@@ -167,6 +167,7 @@ public class Administrators extends Controller {
 	/**
 	 * ritorna alla precedente persona.
 	 */
+	@NoCheck
 	public static void restoreUser() {
 		if (session.contains(SUDO_USERNAME)) {
 			session.put(USERNAME, session.get(SUDO_USERNAME));

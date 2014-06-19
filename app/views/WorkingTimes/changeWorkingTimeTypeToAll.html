@@ -5,6 +5,7 @@
 	<p class="text-danger">Controllo in fase di implementazione</p>
 	
 	#{form @WorkingTimes.executeChangeWorkingTimeTypeToAll() }
+		<input type="hidden" name="officeId" value="${office.id}"/>
         <input type="hidden" name="wttId" value="${wtt.id}" />
         #{select 'wttId1'}
           

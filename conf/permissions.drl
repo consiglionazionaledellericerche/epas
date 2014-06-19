@@ -140,11 +140,15 @@ when
      	"WorkingTimes.save",
      	"WorkingTimes.changeWorkingTimeTypeToAll",
      	"WorkingTimes.executeChangeWorkingTimeTypeToAll",
+     	"WorkingTimes.delete",
+     	"WorkingTimes.toggleWorkingTimeTypeEnabled",
+     	"WorkingTimes.insertWorkingTime",
      	
      	/*Configurazione Parametri*/
      	"Configurations.showConfGeneral",
      	"Configurations.saveConfGeneral",
-     	"Configurations.showConfYear"
+     	"Configurations.showConfYear",
+     	"Configurations.saveConfYear"
      	
      	), target == null, granted == false)
  $u: User(person != null)
@@ -199,7 +203,8 @@ when
  $p: Permission(description == "editPerson") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
-        "Persons.insertPerson"     	
+        "Persons.insertPerson",
+        "WorkingTimes.executeChangeWorkingTimeTypeToAll"     	
         ), target == null, granted == false)
 then
  $c.grant();
@@ -231,7 +236,8 @@ when
      	"Persons.insertUsername",
      	"Persons.updateUsername",
      	"Persons.personChildrenList",
-     	"Persons.saveChild"
+     	"Persons.saveChild",
+     	"WorkingTimes.executeChangeWorkingTimeTypeToAll"
        ), target == $o, granted == false)
 then
  $c.grant();
@@ -406,7 +412,9 @@ when
         "Offices.insertSeat",
         "Offices.saveSeat",
         "Offices.editSeat",
-        "Offices.updateSeat"
+        "Offices.updateSeat",
+        "Configurations.saveConfGeneral",
+        "Configurations.saveConfYear"
        ), target == $o, granted == false)
 then
  $c.grant();
@@ -460,7 +468,10 @@ when
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
         "WorkingTimes.insertWorkingTime",
-        "WorkingTimes.save"
+        "WorkingTimes.save",
+        "WorkingTimes.delete",
+        "WorkingTimes.toggleWorkingTimeTypeEnabled",
+        "WorkingTimes.insertWorkingTime"
        ), target == $o, granted == false)
 then
  $c.grant();

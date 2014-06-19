@@ -3,23 +3,25 @@ package controllers;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import models.ConfGeneral;
 import models.ConfYear;
-
 import models.Office;
 import models.enumerate.ConfigurationFields;
-
 
 import org.joda.time.LocalDate;
 
 import play.cache.Cache;
 import play.mvc.Controller;
 import play.mvc.With;
+import security.SecurityRules;
 
 @With( {Resecure.class, RequestInit.class} )
 public class Configurations extends Controller{
 
-
+	@Inject
+	static SecurityRules rules;
 	
 	public static void showConfGeneral(Long officeId){
 		Office office = null;
@@ -93,9 +95,11 @@ public class Configurations extends Controller{
 	
 	public static void saveConfGeneral(String pk, String value){
 
-		try
-		{
+		try  {
 			ConfGeneral conf = ConfGeneral.findById(Long.parseLong(pk));
+			
+			rules.checkIfPermitted(conf.office);
+			
 			conf.fieldValue = value;
 			conf.save();
 			Cache.set(conf.field+conf.office.name, conf.fieldValue);
@@ -130,7 +134,7 @@ public class Configurations extends Controller{
 			if(conf.field.equals(ConfigurationFields.MonthExpiryVacationPastYear.description)){
 				Integer day  = Integer.parseInt(ConfYear.getFieldValue(ConfigurationFields.DayExpiryVacationPastYear.description, year, conf.office));
 				try{
-					LocalDate date = new LocalDate(year, Integer.parseInt(value), day);
+					new LocalDate(year, Integer.parseInt(value), day);
 				}
 				catch(Exception e){
 					response.status = 500;

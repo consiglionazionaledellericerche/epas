@@ -170,8 +170,10 @@ public class YearlyAbsences extends Controller{
 		abt.code = "Totale";
 		
 		
-		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), Sets.newHashSet(Security.getOfficeAllowed()), 
-				false, new LocalDate(year, month,1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
+		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
+				Sets.newHashSet(Security.getOfficeAllowed()), 
+				false, new LocalDate(year, month,1), 
+				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true);
 
 		List<Person> persons = simpleResults.paginated(page).getResults();
 

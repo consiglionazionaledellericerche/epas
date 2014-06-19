@@ -48,6 +48,11 @@ public class ConfGeneral extends BaseModel{
 	public final static String PASSWORD_TO_PRESENCE = "password_to_presence";
 	public final static String URL_TO_PRESENCE = "url_to_presence";
 	
+	public final static String MEAL_TIME_START_HOUR = "meal_time_start_hour";
+	public final static String MEAL_TIME_START_MINUTE = "meal_time_start_minute";
+	public final static String MEAL_TIME_END_HOUR = "meal_time_end_hour";
+	public final static String MEAL_TIME_END_MINUTE = "meal_time_end_minute";
+	
 
 	/*inizio nuova configurazione della tabella*/
 	@ManyToOne( fetch=FetchType.LAZY)
@@ -127,6 +132,19 @@ public class ConfGeneral extends BaseModel{
 		confGeneral = new ConfGeneral(office, ConfGeneral.WEB_STAMPING_ALLOWED, "false");
 		confGeneral.save();
 		
+		
+		//TODO SPORTARLI NELLA CONFIGURAZIONE PERIODICA QUANDO CI SARA'
+		confGeneral = new ConfGeneral(office, ConfGeneral.MEAL_TIME_START_HOUR, "1");
+		confGeneral.save();
+		
+		confGeneral = new ConfGeneral(office, ConfGeneral.MEAL_TIME_START_MINUTE, "0");
+		confGeneral.save();
+		
+		confGeneral = new ConfGeneral(office, ConfGeneral.MEAL_TIME_END_HOUR, "23");
+		confGeneral.save();
+		
+		confGeneral = new ConfGeneral(office, ConfGeneral.MEAL_TIME_END_MINUTE, "0");
+		confGeneral.save();
 	}
 	
 	
