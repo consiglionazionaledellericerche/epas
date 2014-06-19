@@ -94,10 +94,18 @@
         <td>
           ${vacationsRecap.vacationDaysLastYearNotYetUsed}
         </td>
-        
-        <td>${vacationsRecap.vacationDaysCurrentYearTotal - vacationsRecap.vacationDaysCurrentYearUsed.size()} </td>
-        
-        <td>${vacationsRecap.permissionCurrentYearTotal - vacationsRecap.permissionUsed.size()}</td>
+        #{if vacationsRecap.activeContract.expireContract != null}
+        	<td>${vacationsRecap.vacationDaysCurrentYearAccrued - vacationsRecap.vacationDaysCurrentYearUsed.size()}</td>
+        #{/if}
+        #{else}
+        	<td>${vacationsRecap.vacationDaysCurrentYearTotal - vacationsRecap.vacationDaysCurrentYearUsed.size()} </td>
+        #{/else}
+        #{if vacationsRecap.activeContract.expireContract != null}
+        	<td>${vacationsRecap.permissionCurrentYearAccrued - vacationsRecap.permissionUsed.size()}</td>
+        #{/if}
+        #{else}
+        	<td>${vacationsRecap.permissionCurrentYearTotal - vacationsRecap.permissionUsed.size()}</td>
+        #{/else}
         
         <td>
           #{if vacationsRecap.isActiveAfterBeginYear }
