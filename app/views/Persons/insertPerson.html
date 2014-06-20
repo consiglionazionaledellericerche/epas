@@ -4,6 +4,7 @@
 <div class="container">
 #{form @Persons.save()}
 
+<p>I valori in <b>grassetto</b> sono obbligatori.</p>
 
 <div class="panel panel-default">
   <div class="panel-heading">
@@ -107,7 +108,6 @@
 		<tr class="warning">
 			<th>Data inizio contratto</th>
 			<th>Data fine contratto</th>
-			<th>Orario<br>di lavoro</th>
 			<th>Attestato presenza (per dipendenti CNR)</th>			
 		</tr>		
 		
@@ -120,21 +120,14 @@
 			  <h4><input name="expireContract" type="text" id="datepicker3" data-date-format="yyyy-mm-dd"/></h4>
 			</td>
 						
-			<td>
-			  
-			  #{select 'wtt'}
-                  #{list items:wttList, as:'wttItem'}
-	                #{option wttItem.id}${wttItem.description}#{/option}
-		          #{/list}
-		        #{/select}
-			 
-			</td>
-			
-			
 			<td><input name="onCertificate" type="checkbox" /></td>			
 		</tr>		
 	  </table>
-  
+  	  
+  	  <p>
+  	    Alla creazione del contratto verrà assegnato il tipo orario di default <strong><em>Normale</em></strong>.<br>
+  	    Sarà possibile modificarlo in un secondo momento scegliendo fra i tipi orario definiti per la sede selezionata.
+  	  </p>
   </div>
 </div>
 
@@ -144,11 +137,8 @@
       <input class="btn" id="resetInsertPerson"type="submit" value="Annulla">
       #{/form}
    </div>
-	
-<p>I valori in <b>grassetto</b> sono obbligatori</p>
- 
 
-    #{/form}
+#{/form}
 </div>    
       
     
