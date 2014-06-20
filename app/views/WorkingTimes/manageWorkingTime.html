@@ -20,46 +20,7 @@
 #{/set}
 
 <div class="container-fluid">
-
-	<div class="col-md-6">
-	<div class="panel panel-info">
-	  <div class="panel-heading">
-	    <h3 class="panel-title">Tipi orario CNR</h3>
-	  </div>
-	  <div class="panel-body">
-	    <table class="table table-hover">
-	        <tr>
-	          <th class="center">Descrizione</th>
-	          <th class="center">Contratti attivi<br>attualmente associati</th>
-	          <th class="center">Cambia orario<br>a tutti</th>
-	        </tr>
-		    #{list items:wttDefault, as:'wtt'}
-		      <tr>
-		        <td>
-		          <a href="@{WorkingTimes.showWorkingTimeType(wtt.id)}" data-modal=".my-modal-large">
-				    ${wtt.description}			    
-				  </a>
-		        </td>
-		        <td class="center">
-		          <a href="@{WorkingTimes.showContractWorkingTimeType(wtt.id, office.id)}" data-modal=".my-modal">
-		            ${wtt.getAssociatedActiveContract(office.id).size()}
-		    	  </a>    
-		        </td>
-		        <td class="center">
-		          <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.id, office.id)}" data-modal=".my-modal">
-		            Cambia
-		    	  </a>
-		        </td>
-		      </tr>	
-		    #{/list}
-		</table>
-	  </div>
-	</div>
-	</div>
-	
-	<div class="col-md-6">
-	  
-	  <div class="center">
+ <div class="center" style="margin-top: 0px; margin-bottom: 10px;">
 	  #{form action:@WorkingTimes.manageWorkingTime(), role:'form', class:'form-inline', 
 	    method:'GET', autocomplete:'off',
 	    'data-reload':'#results'}
@@ -78,18 +39,66 @@
 	      <button type="submit" class="btn btn-default">Invio</button>
 	  #{/form}
       </div>
+</div>
+
+
+
+<div class="container-fluid">
+
+	<div class="col-md-6">
+	<div class="panel panel-info">
+	  <div class="panel-heading">
+	    <h3 class="panel-title">Tipi orario CNR</h3>
+	  </div>
+	  <div class="panel-body">
+	    <table class="table table-hover">
+	        <tr>
+	          <th class="center">Descrizione</th>
+	          <th class="center">Contratti attivi<br>attualmente associati</th>
+	          <th class="center">Periodi associati<br>a contratti attivi</th> 
+	          <th class="center">Cambia orario<br>a tutti</th>
+	        </tr>
+		    #{list items:wttDefault, as:'wtt'}
+		      <tr>
+		        <td>
+		          <a href="@{WorkingTimes.showWorkingTimeType(wtt.id)}" data-modal=".my-modal-large">
+				    ${wtt.description}			    
+				  </a>
+		        </td>
+		        <td class="center">
+		          <a href="@{WorkingTimes.showContract(wtt.id, office.id)}" data-modal=".my-modal">
+		            ${wtt.getAssociatedActiveContract(office.id).size()}
+		    	  </a>    
+		        </td>
+		        <td class="center">
+		          <a href="@{WorkingTimes.showContractWorkingTimeType(wtt.id, office.id)}" data-modal=".my-modal">
+		            ${wtt.getAssociatedPeriodInActiveContract(office.id).size()}
+		          </a>
+		        </td>
+		        <td class="center">
+		          <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.id, office.id)}" data-modal=".my-modal">
+		            Cambia
+		    	  </a>
+		        </td>
+		      </tr>	
+		    #{/list}
+		</table>
+	  </div>
+	</div>
+	</div>
 	
+	<div class="col-md-6">
 		<div class="panel panel-info">
 		  <div class="panel-heading">
-		    <h3 class="panel-title">Tipi Orario particolari attivi</h3>
+		    <h3 class="panel-title">Tipi Orario particolari attivi per ${office.name} </h3>
 		  </div>
 		  <div class="panel-body">
 		    <!-- lista -->
 		    <table class="table table-condensed table-hover">
 		        <tr>
 		          <th>Descrizione</th>
-		          <th class="center">Sede</th>
-		          <th class="center">Contratti attivi<br>associati</th>
+		          <th class="center">Contratti attivi<br>attualmente associati</th>
+		          <th class="center">Periodi associati<br>a contratti attivi</th> 
 		          <th class="center">Contratti<br>associati<br>(storico)</th>
 		          <th class="center">Cambia orario<br>a tutti</th>
 		        </tr>
@@ -101,9 +110,10 @@
 					    ${wtt.description}			    
 					  </a>
 			        </td>
-			        <td  class="center">${wtt.office.name}</td>
+			        
+			        <!-- contratti attualmente attivi con wtt -->
 			        <td  class="center">
-			          <a href="@{WorkingTimes.showContractWorkingTimeType(wtt.id, office.id)}" data-modal=".my-modal">
+			          <a href="@{WorkingTimes.showContract(wtt.id, office.id)}" data-modal=".my-modal">
 			            ${wtt.getAssociatedActiveContract(office.id).size()}
 			    	  </a>    
 			    	  #{if wtt.getAssociatedActiveContract(office.id).size() == 0 }
@@ -111,9 +121,17 @@
 			    	      <i data-toggle="tooltip" data-placement="bottom" title="Disattiva tipo orario non associato ad alcun contratto attivo" class="fa fa-power-off"></i>
 			    	    </a>
 			    	  #{/if }
-			    	  
 			        </td>
-			        <td  class="center">
+			        
+			        <!-- periodi associati a contratti attualmente attivi con wtt -->
+			        <td class="center">
+		                <a href="@{WorkingTimes.showContractWorkingTimeType(wtt.id, office.id)}" data-modal=".my-modal">
+		                  ${wtt.getAssociatedPeriodInActiveContract(office.id).size()}
+		                </a>
+			        </td>
+			        
+			        <!-- contratti associati con wtt (storico) -->
+			        <td class="center">
 			          ${wtt.getAssociatedContract().size()}
 			          #{if wtt.getAssociatedContract().size() == 0 }
 			    	    <a href="@{WorkingTimes.delete(wtt.id)}">
@@ -201,7 +219,7 @@
 <div class="container">	
 
 	<div class="well">
-		<p class="text-danger"><strong><em>Importante</em></strong></p>
+		<p class="text-danger"><strong><em>Modifica di un tipo orario utilizzato da molti dipendenti</em></strong></p>
 		Per motivi di sicurezza e integrità dei dati calcolati in ePAS non viene permessa la modifica diretta dei tipi orario.
 		La procedura corretta per modificare il tipo orario è la seguente:
 		<ul>
