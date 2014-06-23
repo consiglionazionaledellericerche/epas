@@ -61,6 +61,11 @@ footer p {
 ------------------------------------------------------------------------ */
 /* Not required for template or sticky footer method. */
 
+#google-font {
+	font-family: 'Shadows Into Light', cursive;
+	font-size: 200%;
+}
+
 .flash-panel {
 	border: 1px solid;
 	text-align: center;
