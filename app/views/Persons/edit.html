@@ -325,11 +325,11 @@
 
 
 
-<!--  Da sistemare solo per utente admin
+#{if session.username.equals('admin')}
 <div class="pull-right">
   <a class="btn btn-danger" href="@{Administrators.switchUserTo(person.user.id)}">Assumi questa identità</a>
 </div>
--->
+#{/if}
 
 
 
