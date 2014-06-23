@@ -1,10 +1,16 @@
+<div class="modal-header hidden-xs">
+  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+  <h4 id="titoloInserisciCodiceCompetenza">Lista figli di ${person.name} ${person.surname}</h4>
+</div>
+
+<div class="modal-body">
 #{if person.personChildren == null}
 <p class="lead">${person.name} ${person.surname} non ha figli in anagrafica</p>
 #{/if}
 #{else}
 
 <fieldset>
-<legend>Lista figli di ${person.name} ${person.surname}</legend>
+
 <div class="span5">
 	<table class="table table-striped">
 	
@@ -13,18 +19,18 @@
 			<th>Cognome</td>
 			<th>Data di nascita</td>
 		</tr>
-		%{for(personChildren in person.personChildren){
-		}%
+		#{list person.personChildren, as:'personChildren'}
+		
 		<tr>
 			<td><input class="span2" type="text" value="${personChildren.name}" name="name" disabled="disabled"></td>
 			<td><input class="span2" type="text" value="${personChildren.surname}" name="surname" disabled="disabled"></td>
 			<td><input class="span2" type="date" value="${personChildren.bornDate}" name="bornDate" disabled="disabled"></td>
 		</tr>
-		%{
-		}
-		}%
+		#{/list}
 	</table>
 </div>
 </fieldset>
 
 #{/else}
+
+</div>

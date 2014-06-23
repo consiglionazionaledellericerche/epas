@@ -6,7 +6,9 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import play.db.jpa.Model;
+import models.base.BaseModel;
+
+
 
 /**
  * 
@@ -17,7 +19,7 @@ import play.db.jpa.Model;
  */
 @Entity
 @Table(name = "options")
-public class Option extends Model {
+public class Option extends BaseModel {
 
 	//FIXME questa classe non è mai utilizzata
 	private static final long serialVersionUID = -3732336156485565329L;

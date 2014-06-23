@@ -22,7 +22,7 @@ public class QPersonReperibilityType extends EntityPathBase<PersonReperibilityTy
 
     public static final QPersonReperibilityType personReperibilityType = new QPersonReperibilityType("personReperibilityType");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final StringPath description = createString("description");
 

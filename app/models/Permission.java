@@ -1,16 +1,19 @@
 package models;
 
 import java.util.List;
+import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
+
 import org.hibernate.envers.Audited;
 
-import play.data.validation.Unique;
-import play.db.jpa.Model;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
 
 /**
  * 
@@ -20,14 +23,13 @@ import play.db.jpa.Model;
 @Audited
 @Entity
 @Table(name="permissions")
-public class Permission extends Model{
+public class Permission extends BaseModel{
 
-	@Unique
 	public String description;
-	
-	@ManyToMany(mappedBy = "permissions", cascade = { CascadeType.ALL })
-    public List<User> users;
     
     @ManyToMany
-    public List <Group> groups;
+    public List <Group> groups = Lists.newArrayList();
+    
+	@ManyToMany(mappedBy="permissions")
+	public Set<Role> roles = Sets.newHashSet();
 }

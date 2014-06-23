@@ -22,7 +22,7 @@ public class QPermission extends EntityPathBase<Permission> {
 
     public static final QPermission permission = new QPermission("permission");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final StringPath description = createString("description");
 
@@ -37,7 +37,7 @@ public class QPermission extends EntityPathBase<Permission> {
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
-    public final ListPath<models.User, QUser> users = this.<models.User, QUser>createList("users", models.User.class, QUser.class, PathInits.DIRECT2);
+    public final SetPath<models.Role, QRole> roles = this.<models.Role, QRole>createSet("roles", models.Role.class, QRole.class, PathInits.DIRECT2);
 
     public QPermission(String variable) {
         super(Permission.class, forVariable(variable));

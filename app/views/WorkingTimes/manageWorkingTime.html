@@ -1,123 +1,253 @@
-#{extends 'main_with_navbar.html' /}
-#{set titolo: 'Gestione tipi di orario di lavoro' /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione tipi orario'  /}
 
-<div class="container">
+#{set 'moreStyles'}
+  <style>
+  	#table-wtt th, #table-wtt td {
+  		max-width: 40px;
+  	}
+  	
+  	#table-wtt input[type=number] {
+  		max-width: 60px;
+  	}
+  	
+  	#table-wtt td.item {
+  		font-size: .9em;
+  	}
 
-<p class="text-info lead">
-  <a data-toggle="modal" href="@{WorkingTimes.insertWorkingTime()}" data-target="#myModal1">
-    Inserisci nuovo orario di lavoro
-  </a>
-</p>
-<div class="span11">
-<table  class="table table-hover table-working-type">
-	<tr>
-		<th>Nome tipo orario</th>
-		<th></th>
-		<th>Lunedì</th>
-		<th>Martedì</th>
-		<th>Mercoledì</th>
-		<th>Giovedì</th>
-		<th>Venerdì</th>
-		<th>Sabato</th>
-		<th>Domenica</th>
-		<th>Default</th>
-		<th>Può fare turni</th>
-	</tr>
-	%{
-		for(wtt in wttList){ 
-	}%
-	<tr>
-		<td class="tipo-orario first-line" rowspan=5>
-		  <a data-toggle="modal" href="@{WorkingTimes.edit(wtt.id)}" data-target="#myModal2">
-		    ${wtt.description}
-		  </a>
-		</td>
-		<tr>
-			<td class="caratteristica first-line">Tempo lavoro</td>
-			<td class="first-line">${wtt.getWorkingTimeTypeDayFromDayOfWeek(1).workingTime.toHourTime()}</td>
-			<td class="first-line">${wtt.getWorkingTimeTypeDayFromDayOfWeek(2).workingTime.toHourTime()}</td>
-			<td class="first-line">${wtt.getWorkingTimeTypeDayFromDayOfWeek(3).workingTime.toHourTime()}</td>
-			<td class="first-line">${wtt.getWorkingTimeTypeDayFromDayOfWeek(4).workingTime.toHourTime()}</td>
-			<td class="first-line">${wtt.getWorkingTimeTypeDayFromDayOfWeek(5).workingTime.toHourTime()}</td>
-			<td class="first-line">${wtt.getWorkingTimeTypeDayFromDayOfWeek(6).workingTime.toHourTime()}</td>
-			<td class="first-line">${wtt.getWorkingTimeTypeDayFromDayOfWeek(7).workingTime.toHourTime()}</td>
-			<td class="first-line"></td>
-			<td class="first-line"></td>
-			
-		</tr>
-		<tr>
-			<td class="caratteristica">Tempo minimo di lavoro per diritto a intervallo pranzo</td>
-			<td>${wtt.getMinimalTimeForLunch(1, wtt).toHourTime()}</td>
-			<td>${wtt.getMinimalTimeForLunch(2, wtt).toHourTime()}</td>
-			<td>${wtt.getMinimalTimeForLunch(3, wtt).toHourTime()}</td>
-			<td>${wtt.getMinimalTimeForLunch(4, wtt).toHourTime()}</td>
-			<td>${wtt.getMinimalTimeForLunch(5, wtt).toHourTime()}</td>
-			<td>${wtt.getMinimalTimeForLunch(6, wtt).toHourTime()}</td>
-			<td>${wtt.getMinimalTimeForLunch(7, wtt).toHourTime()}</td>
-			<td></td>
-			<td></td>
-			
-		</tr>
-		<tr>
-			<td class="caratteristica">Intervallo pranzo</td>
-			<td>${wtt.getBreakTime(1, wtt).toHourTime()}</td>
-			<td>${wtt.getBreakTime(2, wtt).toHourTime()}</td>
-			<td>${wtt.getBreakTime(3, wtt).toHourTime()}</td>
-			<td>${wtt.getBreakTime(4, wtt).toHourTime()}</td>
-			<td>${wtt.getBreakTime(5, wtt).toHourTime()}</td>
-			<td>${wtt.getBreakTime(6, wtt).toHourTime()}</td>
-			<td>${wtt.getBreakTime(7, wtt).toHourTime()}</td>
-			<td></td>
-			<td></td>
-		</tr>
-		<tr>
-			<td class="caratteristica">Giorno festivo</td>
-			<td>${wtt.getHolidayFromWorkinTimeType(1, wtt)}</td>
-			<td>${wtt.getHolidayFromWorkinTimeType(2, wtt)}</td>
-			<td>${wtt.getHolidayFromWorkinTimeType(3, wtt)}</td>
-			<td>${wtt.getHolidayFromWorkinTimeType(4, wtt)}</td>
-			<td>${wtt.getHolidayFromWorkinTimeType(5, wtt)}</td>
-			<td>${wtt.getHolidayFromWorkinTimeType(6, wtt)}</td>
-			<td>${wtt.getHolidayFromWorkinTimeType(7, wtt)}</td>
-			<td></td>
-			<td></td>
-		</tr>
+  </style>
+#{/set}
 
+<div class="container-fluid">
+ <div class="center" style="margin-top: 0px; margin-bottom: 10px;">
+	  #{form action:@WorkingTimes.manageWorkingTime(), role:'form', class:'form-inline', 
+	    method:'GET', autocomplete:'off',
+	    'data-reload':'#results'}
+	    
+	       <div class="form-group">
+	        <label class="hidden-xs hidden-sm" for="dip">Sede </label>
+	        <select name="office.id" class="form-control" id="dip" onChange="javascript:this.form.submit()" >
+	            #{list items:offices, as:'officeItem'}
+	              <option value="${officeItem.id}" #{if officeItem.id.equals(office.id) } selected="selected" #{/if} >
+	                ${officeItem.name}
+	              </option>
+	            #{/list}
+	        </select>
+	      </div>
+	       
+	      <button type="submit" class="btn btn-default">Invio</button>
+	  #{/form}
+      </div>
+</div>
+
+
+
+<div class="container-fluid">
+
+	<div class="col-md-6">
+	<div class="panel panel-info">
+	  <div class="panel-heading">
+	    <h3 class="panel-title">Tipi orario CNR</h3>
+	  </div>
+	  <div class="panel-body">
+	    <table class="table table-hover">
+	        <tr>
+	          <th class="center">Descrizione</th>
+	          <th class="center">Contratti attivi<br>attualmente associati</th>
+	          <th class="center">Periodi associati<br>a contratti attivi</th> 
+	          <th class="center">Cambia orario<br>a tutti</th>
+	        </tr>
+		    #{list items:wttDefault, as:'wtt'}
+		      <tr>
+		        <td>
+		          <a href="@{WorkingTimes.showWorkingTimeType(wtt.id)}" data-modal=".my-modal-large">
+				    ${wtt.description}			    
+				  </a>
+		        </td>
+		        <td class="center">
+		          <a href="@{WorkingTimes.showContract(wtt.id, office.id)}" data-modal=".my-modal">
+		            ${wtt.getAssociatedActiveContract(office.id).size()}
+		    	  </a>    
+		        </td>
+		        <td class="center">
+		          <a href="@{WorkingTimes.showContractWorkingTimeType(wtt.id, office.id)}" data-modal=".my-modal">
+		            ${wtt.getAssociatedPeriodInActiveContract(office.id).size()}
+		          </a>
+		        </td>
+		        <td class="center">
+		          <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.id, office.id)}" data-modal=".my-modal">
+		            Cambia
+		    	  </a>
+		        </td>
+		      </tr>	
+		    #{/list}
+		</table>
+	  </div>
+	</div>
+	</div>
 	
-	</tr>
-	%{
-		}
-	}%
-</table>
-</div>
+	<div class="col-md-6">
+		<div class="panel panel-info">
+		  <div class="panel-heading">
+		    <h3 class="panel-title">Tipi Orario particolari attivi per ${office.name} </h3>
+		  </div>
+		  <div class="panel-body">
+		    <!-- lista -->
+		    <table class="table table-condensed table-hover">
+		        <tr>
+		          <th>Descrizione</th>
+		          <th class="center">Contratti attivi<br>attualmente associati</th>
+		          <th class="center">Periodi associati<br>a contratti attivi</th> 
+		          <th class="center">Contratti<br>associati<br>(storico)</th>
+		          <th class="center">Cambia orario<br>a tutti</th>
+		        </tr>
+			    #{list items:wttAllowed, as:'wtt'}
+			    #{if wtt.disabled == false }
+			      <tr>
+			        <td>
+			          <a href="@{WorkingTimes.showWorkingTimeType(wtt.id)}" data-modal=".my-modal-large">
+					    ${wtt.description}			    
+					  </a>
+			        </td>
+			        
+			        <!-- contratti attualmente attivi con wtt -->
+			        <td  class="center">
+			          <a href="@{WorkingTimes.showContract(wtt.id, office.id)}" data-modal=".my-modal">
+			            ${wtt.getAssociatedActiveContract(office.id).size()}
+			    	  </a>    
+			    	  #{if wtt.getAssociatedActiveContract(office.id).size() == 0 }
+			    	    <a href="@{WorkingTimes.toggleWorkingTimeTypeEnabled(wtt.id)}">
+			    	      <i data-toggle="tooltip" data-placement="bottom" title="Disattiva tipo orario non associato ad alcun contratto attivo" class="fa fa-power-off"></i>
+			    	    </a>
+			    	  #{/if }
+			        </td>
+			        
+			        <!-- periodi associati a contratti attualmente attivi con wtt -->
+			        <td class="center">
+		                <a href="@{WorkingTimes.showContractWorkingTimeType(wtt.id, office.id)}" data-modal=".my-modal">
+		                  ${wtt.getAssociatedPeriodInActiveContract(office.id).size()}
+		                </a>
+			        </td>
+			        
+			        <!-- contratti associati con wtt (storico) -->
+			        <td class="center">
+			          ${wtt.getAssociatedContract().size()}
+			          #{if wtt.getAssociatedContract().size() == 0 }
+			    	    <a href="@{WorkingTimes.delete(wtt.id)}">
+			    	      <i data-toggle="tooltip" data-placement="bottom" title="Elimina tipo orario non associato ad alcun contratto" class="fa fa-trash-o"></i>
+			    	    </a>
+			    	  #{/if}
+			    	</td>
+			        <td class="center">
+			          <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.id, office.id)}" data-modal=".my-modal">
+		                Cambia
+		    	      </a>
+					</td>
+			      </tr>	
+			    #{/if }  
+			    #{/list}
+			</table>
+			
+			<!-- Nuovo -->
+			<a href="@{WorkingTimes.insertWorkingTime(office.id)}" data-modal=".my-modal-large">
+		      <span class="glyphicon glyphicon-plus"></span> Crea nuovo orario di lavoro per ${office.name}
+		    </a>
+		  </div>
+		</div>
+	</div>
+	
+	<div class="col-md-6">
+	<div class="panel-group" id="accordion-wtt">
+	  <div class="panel panel-default">
+	    <div class="panel-heading">
+	      <h4 class="panel-title">
+	        <a data-toggle="collapse" data-parent="#accordion-wtt" href="#collapseOne-wtt">
+	          Tipi Orario particolari disattivati
+	        </a>
+	      </h4>
+	    </div>
+	    <div id="collapseOne-wtt" class="panel-collapse collapse out">
+	      <div class="panel-body">
+		    <!-- lista -->
+		    <table class="table table-condensed table-hover">
+		        <tr>
+		          <th>Descrizione</th>
+		          <th class="center">Sede</th>
+		          <th class="center">Riattiva</th>
+		          <th class="center">Contratti<br>associati<br>(storico)</th>
+		        </tr>
+			    #{list items:wttAllowed, as:'wtt'}
+			    #{if wtt.disabled == true }
+			      <tr>
+
+			        <td>
+			          <a href="@{WorkingTimes.showWorkingTimeType(wtt.id)}" data-modal=".my-modal-large">
+					    ${wtt.description}			    
+					  </a>
+			        </td>
+
+			        <td class="center">${wtt.office.name}</td>
+
+			        <td class="center">
+			          <a href="@{WorkingTimes.toggleWorkingTimeTypeEnabled(wtt.id)}">
+			    	    <i data-toggle="tooltip" data-placement="bottom" title="Riattiva tipo orario" class="fa fa-power-off"></i>
+			    	  </a>
+			        </td>
+
+			        <td  class="center">
+			          ${wtt.getAssociatedContract().size()}
+			          #{if wtt.getAssociatedContract().size() == 0 }
+			    	    <a href="@{WorkingTimes.delete(wtt.id)}">
+			    	      <i data-toggle="tooltip" data-placement="bottom" title="Elimina tipo orario non associato ad alcun contratto" class="fa fa-trash-o"></i>
+			    	    </a>
+			    	  #{/if}
+			    	</td>
+			      </tr>	
+			    #{/if }  
+			    #{/list}
+			</table>
+			
+		  </div>
+		</div>
+      </div>
+	</div>
+	</div>
+
 </div>
 
-<div id="myModal1" class="modal hide fade mymodal-large" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3>Inserimento nuovo Tipo Orario</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-   <!--   <button class="btn btn-primary">Save changes</button>-->
-  </div>
+<div class="container">	
+
+	<div class="well">
+		<p class="text-danger"><strong><em>Modifica di un tipo orario utilizzato da molti dipendenti</em></strong></p>
+		Per motivi di sicurezza e integrità dei dati calcolati in ePAS non viene permessa la modifica diretta dei tipi orario.
+		La procedura corretta per modificare il tipo orario è la seguente:
+		<ul>
+		 <li>Individuare il tipo orario da modificare (es <em>Normale</em>)</li>
+		 <li>Creare un nuovo tipo orario con le modifiche opportune rispetto al tipo orario da modificare (es <em>Normale-mod</em>)</li>
+		 <li>Attraverso la Form <strong>Cambia orario a tutti</strong> impostare la data (anche passata) a partire dalla quale tutti coloro che hanno impostato
+		  il vecchio orario (<em>Normale</em>) vengano migrati al nuovo orario (<em>Normale-mod</em>)</li>
+		 <li>Poichè il software provvederà ad effettuare nuovamente tutti i calcoli inerenti tempo lavorato e situazioni residuali 
+		per ogni contratto attivo interessato dall'operazione a partire dalla data specificata, questa procedura potrebbe richiedere alcuni minuti.</li>
+		</ul>
+		
+		
+		<p><strong class="text-danger"><em>Modifiche per singoli dipendenti</em></strong><br>
+		Nel caso di modifiche del tipo orario riguardanti un numero ristretto di dipendenti si consiglia di utilizzare le procedure messe a disposizione
+		nella sezione amministrativa Lista Persone.
+		</p>
+		<p><strong class="text-danger"><em>Eliminare o disabilitare tipi orario</em></strong><br>
+		Per eliminare un tipo orario è necessario che non sia associato ad alcun contratto presente in ePAS (anche terminato).<br>
+		Per disabilitare un tipo orario è necessario che non sia attualmente associato ad alcun contratto attivo.
+		</p>  
+	</div>
+	
+	
+	
 </div>
- 
+	
 
 
-<div id="myModal2" class="modal hide fade mymodal-large" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3>Modifica Tipo Orario</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-   <!--   <button class="btn btn-primary">Save changes</button>-->
-  </div>
-</div>
+
+#{include '_myModal_large.html' /}
+#{include '_myModal.html' /}

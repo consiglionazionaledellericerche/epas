@@ -24,7 +24,7 @@ public class QInitializationTime extends EntityPathBase<InitializationTime> {
 
     public static final QInitializationTime initializationTime = new QInitializationTime("initializationTime");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final DatePath<org.joda.time.LocalDate> date = createDate("date", org.joda.time.LocalDate.class);
 

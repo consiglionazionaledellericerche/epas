@@ -24,7 +24,7 @@ public class QContractYearRecap extends EntityPathBase<ContractYearRecap> {
 
     public static final QContractYearRecap contractYearRecap = new QContractYearRecap("contractYearRecap");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final QContract contract;
 

@@ -1,0 +1,105 @@
+#{extends 'modal.html' /}
+#{set modalHeader:'Tipo Orario ' + wtt.description /}
+
+<div class="container-fluid">
+
+  <table id="table-wtt" class="table center table-hover">
+  
+    <tr class="info">
+		<th></th>
+		<th>Lun</th>
+		<th>Mar</th>
+		<th>Mer</th>
+		<th>Gio</th>
+		<th>Ven</th>
+		<th>Sab</th>
+		<th>Dom</th>
+	</tr>
+	<tr>
+		<td class="item warning">Tempo di lavoro giornaliero<br>(in minuti)</td>
+		#{list items:wtt.workingTimeTypeDays, as:'wttd'}
+		  <td>
+		    #{if wttd.workingTime > 0 }
+		      ${ wttd.workingTime.toHourTime() }  
+		    #{/if}
+		  </td>
+		#{/list}
+	</tr>
+	<tr>
+		<td class="item warning">Tempo di lavoro minimo per diritto a intervallo pranzo<br>(in minuti)</td>
+		#{list items:wtt.workingTimeTypeDays, as:'wttd'}
+		  <td>
+		    #{if wttd.mealTicketEnabled() }
+		      ${ wttd.mealTicketTime.toHourTime() }  
+		    #{/if}
+		  </td>
+		#{/list}
+	</tr>
+	<tr>
+		<td class="item warning">Durata minima intervallo pranzo<br>(in minuti)</td>
+		#{list items:wtt.workingTimeTypeDays, as:'wttd'}
+		  <td>
+		    #{if wttd.mealTicketEnabled() }
+		      ${ wttd.breakTicketTime.toHourTime() }  
+		    #{/if}
+		  </td>
+		#{/list}
+	</tr>
+	<tr>
+		<td class="item warning">Giorno festivo</td>
+		#{list items:wtt.workingTimeTypeDays, as:'wttd'}
+		  <td>
+		    #{if wttd.holiday }
+		       <span class="glyphicon glyphicon-ok"></span>
+		    #{/if}
+		  </td>
+		#{/list}
+		
+		
+	</tr>
+
+  </table>
+  
+  <br>
+  
+	<div class="panel-group" id="accordion">
+	  <div class="panel panel-default">
+	    <div class="panel-heading">
+	      <h4 class="panel-title">
+	        <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+	          Legenda
+	        </a>
+	      </h4>
+	    </div>
+	    <div id="collapseOne" class="panel-collapse collapse out">
+	      <div class="panel-body">
+	        <p>
+	          <strong><em>Tempo di lavoro giornaliero: </em></strong><br>
+	          La quantità di tempo in minuti che il dipendente deve effettuare per ogni giorno della settimana.
+	        </p>
+	        <p>
+	          <strong><em>Tempo di lavoro minimo per diritto a intervallo pranzo: </em></strong><br>
+	          La quantità di lavoro minima che il dipendente deve aver lavorato per poter usufruire del buono pasto. 
+	        </p>
+	        <p>
+	          <strong><em>Durata minima intervallo pranzo: </em></strong><br>
+	          Il tempo minimo che deve obbligatoriamente trascorrere fra la timbratura di uscita per pranzo e la conseguente timbratura di ingresso.
+	        </p>
+	  	  </div>
+	    </div>
+	  </div>
+	</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>

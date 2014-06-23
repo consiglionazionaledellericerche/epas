@@ -1,115 +1,147 @@
-#{extends 'main_with_navbar.html' /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione sedi'  /}
 
-#{set titolo: 'Inserimento/modifica nuova sede' /}
 
-<fieldset>
-	<legend>Sede Suprema</legend>
-	<table>
-		<tr>
-			<th>Nome</th>
-			<th>Codice</th>
-			<th>Indirizzo</th>
-		</tr>
+<div class="container">
+	<!-- TODO 
+	<p>
+	  <a  data-modal=".my-modal" href="@{Offices.insertArea()}">
+	    <span class="glyphicon glyphicon-plus"></span> Crea una nuova Area
+	  </a>
+	</p>
+	 -->
 
-		<tr>
-			<td><a data-toggle="modal" href="@{Offices.editOffice(office.id)}" data-target="#myModal2">${office.name}</a></td>
-			<td>${office.code}</td>
-			<td>${office.address}</td>
-		</tr>	
+	#{list items:allAreas, as:'area'}
+	  #{if area.isPrintable() }
+		<div class="panel panel-info">
+		  <div class="panel-heading">
+		    <h3 class="panel-title">${area.name}</h3>
+		  </div>
+		  <div class="panel-body">
+		  
+		    <p>Il numero totale dei dipendenti presenti in ePAS con contratto attivo in quest area è <strong>${area.getActivePersons().size()}</strong></p>
+		    
+		    #{if session.username.equals("admin") }
+		    <p>
+		      <a  data-modal=".my-modal" href="@{Offices.insertInstitute(area.id)}">
+		        <span class="glyphicon glyphicon-plus"></span> Crea un nuovo istituto per ${area.name}
+		      </a>
+		    </p>
+		  	#{/if}
+		  	
+		  	#{list items:area.getInstitutes(), as:'istituto'}
+		  	  #{if istituto.isPrintable() }
+			  	  <div class="well">
+			  	    <p class="lead">${istituto.name}</p>
+				    
+				    <table class="table table-hover">
+				      <tr class="warning center">
+				        <th>Sede</th>
+				        <th>Indirizzo</th>
+				        <th>Codice</th>
+				        <th>Data<br>Affiliazione</th>
+				        <th>Numero<br>Dipendenti</th>
+				        <th>Amministratori</th>
+				        <th>Amministratori<br>sola lettura</th>
+				      </tr>
+				      
+				      #{list items:istituto.getSeats(), as:'sede'}
+				      #{if sede.isPrintable() }
+				        <tr style="background-color: white;">
+				          
+				          <!-- Seat data -->
+				          <td>
+				          #{if sede.isEditable }
+				            <a data-modal=".my-modal" href="@{Offices.editSeat(sede.id)}">${sede.name}</a>
+				          #{/if}
+				          #{else}
+				            ${sede.name}
+				          #{/else}
+				          </td>
+				          <td>${sede.address}</td>
+				          <td class="center">${sede.code}</td>
+				          <td class="center">${sede.joiningDate}</td>
+				          <td class="center">${sede.getActivePersons().size()}</td>
+				          <!-- End Seat Data -->
+				          
+				          <!-- Seat administrator -->
+				          <td class="center">
+				            #{if sede.isEditable }
+				              <a class="btn btn-primary btn-xs"
+				                 data-modal=".my-modal"
+				                 href="@{Administrators.insertNewAdministrator(sede.id, roleAdmin.id)}">
+				                 <span class="glyphicon glyphicon-plus" 
+				                    data-toggle="tooltip" data-placement="left" 
+				                    title="Aggiungi Amministratore per ${sede.name}">
+				                  </span>
+				              </a>  
+				              <br>
+				            #{/if}
+				            #{list items:sede.getPersonnelAdmin(), as:'person'}
+				                <br>${person.surname} ${person.name}
+								#{if sede.isEditable }
+								  #{if person.user.username.equals(session.username) }
+								  <a href="@{Administrators.deleteSelfAsAdministrator(sede.id)}" data-modal=".my-modal">
+								  #{/if}
+								  #{else}
+								  <a href="@{Administrators.deleteAdministrator(sede.id, person.id)}">
+								  #{/else}
+								    <span class="glyphicon glyphicon-trash" 
+				                      data-toggle="tooltip" data-placement="left" 
+				                      title="Rimuovi dagli amministratori ${person.surname} ${person.name}">
+				                    </span>
+				                  </a>
+								#{/if}
+				            #{/list}
+				          </td>
+				          <td class="center">
+				            #{if sede.isEditable }
+				              <a class="btn btn-primary btn-xs"
+				                 data-modal=".my-modal"
+				                 href="@{Administrators.insertNewAdministrator(sede.id, roleAdminMini.id)}">
+				                 <span class="glyphicon glyphicon-plus" 
+				                    data-toggle="tooltip" data-placement="left" 
+				                    title="Aggiungi Amministratore sola lettura per ${sede.name}">
+				                  </span>
+				              </a>
+				              <br>
+				            #{/if}
+				            #{list items:sede.getPersonnelAdminMini(), as:'person'}
+				                <br>${person.surname} ${person.name}
+				                #{if sede.isEditable }
+								  <a href="@{Administrators.deleteAdministrator(sede.id, person.id)}">
+				                    <span class="glyphicon glyphicon-trash" 
+				                      data-toggle="tooltip" data-placement="left" 
+				                      title="Rimuovi dagli amministratori ${person.surname} ${person.name}">
+				                    </span>
+				                  </a>
+								#{/if}
+				            #{/list}
+					      </td>
+					      <!-- End Seat administrator -->
+				        </tr>
+				      #{/if}  
+				  	  #{/list} 
+				    </table>
+				    #{if session.username.equals("admin") }
+				    <p>
+			          <a  data-modal=".my-modal" href="@{Offices.insertSeat(istituto.id)}">
+			            <span class="glyphicon glyphicon-plus"></span> Crea una nuova sede per ${istituto.name}
+			          </a>
+			        </p>
+			        #{/if}
+				  </div>
+			  #{/if}  
+			#{/list}
+
+		  </div>
+		</div>   
+	  #{/if}
+	#{/list}
 	
-	</table>
-
-</fieldset>
-
-<br>
-
-<fieldset>
-  <legend>Sedi Distaccate associate alla sede suprema</legend>
-  * Le sedi colorate di grigio sono esistenti ma non più associate ad alcuna sede principale
-  #{if remoteOffices.size()>0 }
-    <table>
-	  <tr>
-		<th>Nome</th>
-		<th>Codice</th>
-		<th>Indirizzo</th>
-		<th>Disattiva</th>
-	  </tr>
-      #{list items: remoteOffices, as: 'remoteOffice'}
-      #{if remoteOffice.office != null}
-      <tr>
-        <td><a data-toggle="modal" href="@{Offices.editOffice(remoteOffice.id)}" data-target="#myModal2">${remoteOffice.name}</a></td>
-        <td>${remoteOffice.code}</td>
-        <td>${remoteOffice.address}</td>
-        <td><a class="btn btn-small" href="@{Offices.disableRemoteOffice(remoteOffice.id)}" data-modal="#myModal3">Disabilita</a></td>
-      </tr>	
-      #{/if}
-      #{else}
-      <tr>
-        <td bgcolor="#D2D2D2">${remoteOffice.name}</td>
-        <td bgcolor="#D2D2D2">${remoteOffice.code}</td>
-        <td bgcolor="#D2D2D2">${remoteOffice.address}</td>
-        <td bgcolor="#D2D2D2"><a class="btn btn-small" href="@{Offices.disableRemoteOffice(remoteOffice.id)}" data-modal="#myModal3" disabled="disabled">Disabilita</a></td>
-      </tr>	
-      #{/else}
-      #{/list}
-    </table>  
-  #{/if}
-
-  #{else}
-    <!-- Non è stata ancora definita alcuna sede distaccata -->
-  #{/else}
-  
-  <br>
-  <br>
-  <p class="text-info lead">
-    <a href="@{Offices.insertRemoteOffice()}" data-modal="#myModal1">
-      Inserisci nuova sede distaccata
-    </a>
-  </p>
-  
-  
-</fieldset>
-
-<div id="myModal2" class="modal hide fade mymodal-small" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3>Modifica sede distaccata</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-   <!--   <button class="btn btn-primary">Save changes</button>-->
-  </div>
 </div>
 
-
-<div id="myModal3" class="modal hide fade mymodal-small" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3>Disabilita sede distaccata</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-   <!--   <button class="btn btn-primary">Save changes</button>-->
-  </div>
-</div>
+#{include '_myModal.html' /}
 
 
-<div id="myModal1" class="modal hide fade mymodal-small" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3>Inserimento nuova sede distaccata</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-   <!--   <button class="btn btn-primary">Save changes</button>-->
-  </div>
-</div>

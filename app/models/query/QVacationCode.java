@@ -22,7 +22,7 @@ public class QVacationCode extends EntityPathBase<VacationCode> {
 
     public static final QVacationCode vacationCode = new QVacationCode("vacationCode");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final StringPath description = createString("description");
 

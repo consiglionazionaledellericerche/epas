@@ -28,12 +28,9 @@ import play.Logger;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
-import procedure.evolutions.Evolutions;
 
 
-//@With(Shibboleth.class)
-
-@With( {Secure.class, NavigationMenu.class} )
+@With( {Secure.class, RequestInit.class} )
 public class Administration extends Controller {
 	
 	
@@ -59,12 +56,7 @@ public class Administration extends Controller {
     	//FromMysqlToPostgres.createAbsenceTypeToQualificationRelations();
     	int workingTimeTypes = FromMysqlToPostgres.importWorkingTimeTypes();
     	
-    	try {
-			FromMysqlToPostgres.importAll(NUMERO_PERSONE_DA_IMPORTARE, ANNO_DA_CUI_INIZIARE_IMPORTAZIONE);
-		} catch (EmailException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+    	FromMysqlToPostgres.importAll(NUMERO_PERSONE_DA_IMPORTARE, ANNO_DA_CUI_INIZIARE_IMPORTAZIONE);
       	renderText(
         		String.format("Importate dalla vecchia applicazione %d tipi di assenza con i relativi gruppi e %d tipi di orari di lavoro.\n" +
         			"Importate %d persone con i relativi dati (contratti, dati personali, assenze, timbrature, ...", 
@@ -84,20 +76,11 @@ public class Administration extends Controller {
 	
 	
 	public static void updatePersonDay(){
-		try {
-			FromMysqlToPostgres.checkFixedWorkingTime();
-		} catch (EmailException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		FromMysqlToPostgres.checkFixedWorkingTime();
 		renderText("Aggiornati i person day delle persone con timbratura fissa");
 	}
 	
 
-	public static void checkNewRelation() throws ClassNotFoundException, SQLException{
-		Evolutions.updateWorkingTimeTypeRelation();
-	}
-	
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void utilities(){
 		List<Person> pdList = Person.getActivePersonsInDay(new LocalDate(), Security.getOfficeAllowed(), false);
@@ -117,7 +100,7 @@ public class Administration extends Controller {
 	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void fixPersonSituation(Long personId, int year, int month) throws EmailException{
 		
-		PersonUtility.fixPersonSituation(personId, year, month, Security.getUser());
+		PersonUtility.fixPersonSituation(personId, year, month, Security.getUser().get());
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
@@ -304,13 +287,13 @@ public class Administration extends Controller {
 		}
 		
 		//destroy contact_data
-		if(person.contactData!=null)
-			person.contactData.delete();
+//		if(person.contactData!=null)
+//			person.contactData.delete();
 		
 		//destroy locations
-		if(person.location!=null)
-			person.location.delete();
-		
+//		if(person.location!=null)
+//			person.location.delete();
+//		
 		person.save();
 		
 		renderText(person.name);

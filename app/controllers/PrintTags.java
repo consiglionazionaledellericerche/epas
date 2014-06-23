@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import models.AbsenceType;
 import models.ConfGeneral;
 import models.Person;
@@ -21,11 +23,14 @@ import org.joda.time.LocalDate;
 
 import play.mvc.Controller;
 import play.mvc.With;
+import security.SecurityRules;
 
-@With( {Secure.class, NavigationMenu.class} )
+@With( {Resecure.class, RequestInit.class} )
 public class PrintTags extends Controller{
 	
-	@Check(Security.INSERT_AND_UPDATE_STAMPING)
+	@Inject
+	static SecurityRules rules;
+	
 	public static void showTag(Long personId){
 		if(personId == null){
 			flash.error("Malissimo! ci vuole un id! Seleziona una persona!");
@@ -40,6 +45,7 @@ public class PrintTags extends Controller{
 			 */
 		}
 		Person person = Person.findById(personId);
+		rules.checkIfPermitted(person.office);
 		int month = params.get("month", Integer.class);
 		int year = params.get("year", Integer.class);
 		
@@ -91,22 +97,17 @@ public class PrintTags extends Controller{
 		
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_STAMPING)
+	//@Check(Security.INSERT_AND_UPDATE_STAMPING)
 	public static void listPersonForPrintTags(int year, int month){
+		rules.checkIfPermitted(Security.getUser().get().person.office);
 		LocalDate date = new LocalDate(year, month,1);
 		List<Person> personList = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
 		render(personList, date, year, month);
 	}
 	
-	
-	@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void showPersonTag(Integer year, Integer month){
 		
-		//TODOUSER
-		//if (Security.getPerson().username.equals("admin")) {
-		//	Application.indexAdmin();
-		//}
-		Person person = Security.getUser().person;
+		Person person = Security.getUser().get().person;
 		if(!person.isActiveInMonth(month, year))
 		{
 			flash.error("Si è cercato di accedere a un mese al di fuori del contratto valido per %s %s. " +
@@ -114,7 +115,6 @@ public class PrintTags extends Controller{
 			render("@redirectToIndex");
 		}
 	
-		
 		//Configuration conf = Configuration.getCurrentConfiguration();
 		//ConfGeneral conf = ConfGeneral.getConfGeneral();
 		int minInOutColumn = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));

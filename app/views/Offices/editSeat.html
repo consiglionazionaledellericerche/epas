@@ -1,0 +1,42 @@
+#{extends 'modal.html' /}
+#{set modalHeader: 'Modifica ' + office.name /}
+
+<div class="container-fluid">
+
+#{form @Offices.updateSeat()}
+
+  <input type="hidden" name="officeId" value="${office.id}"/>
+  
+  <table class="table table-form table-hover">
+  
+    <tr>
+      <td><strong>Sede</strong></td>
+      <td><input name="name" value="${office.name}"/></td>
+    </tr>
+    
+    <tr>
+      <td><strong>Indirizzo</strong></td>
+      <td><input name="address" value="${office.address}" /></td>
+    </tr>
+    
+    <tr>
+      <td><strong>Codice</strong></td>
+      <td><input name="code" value="${office.code}" /></td>
+    </tr>
+
+    <tr>
+      <td><strong>Data affiliazione</strong></td>
+      <td><input name="date" value="${office.joiningDate}" type="text" data-datepicker data-date-format="yyyy-mm-dd" /></td>
+   	</tr>  
+    
+ </table>
+ 
+ <p class="center">
+ <input class="btn btn-primary" type="submit" value="Salva" />
+ </p>
+
+
+#{/form}
+
+</div>
+

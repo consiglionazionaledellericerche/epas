@@ -1,9 +1,84 @@
-#{extends 'main_with_navbar.html' /}
-#{set title:person.surname + ' ' + person.name + ', matricola=' + person.number /}
-#{set titolo: 'Situazione presenze mensile ' +  month_capitalized + ' ' + year + ' di ' + person.surname + ' ' + person.name /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Timbrature'  /}
 
-<div class="row-fluid first-row">
-  <div class="span8" style="min-width: 900px;">
+#{set 'moreStyles'}
+
+<style>
+    
+    html, body {
+		background-color: white;
+	}
+	
+	#page_content {
+		padding-top: 70px;
+	}
+	
+	.col-xs-12, col-sm-12, col-md-6  {
+		padding-left: 4px;
+		padding-right: 4px;
+	} 
+	
+	.panel-success>.panel-heading {
+		color: black;
+		background-color: grey;
+		border-color: #dddddd;
+	}
+	
+	.col-xs-10, .col-xs-2 {	/* tabelle riepilogo responsive */
+		border: 1px solid lightgrey;
+		padding-top: 3px;
+		padding-bottom: 3px;
+	}
+	
+	.col-xs-2 {
+		text-align: center;
+	}
+	
+	.container {
+		margin-left: 0;
+		margin-right: 0;
+	}
+	
+	#page_content {
+		widht: 100%;
+	}
+	
+   
+@media (max-width: 767px) {
+
+	#tabellonetimbrature {
+	   font-size: 10px !important; 
+	   /* min-width: 600px; */
+	}
+	
+	#padre {
+	   /* min-width: 640px; */
+	}
+	
+	.container {
+		margin-left: 0px;
+		padding-left: 0px;
+		margin-right: 0px;
+		padding-right: 0px;
+		
+	}
+	
+	footer {
+		display: none;
+	}
+	
+	#riepiloghi {
+	    font-size: 12px !important; 
+	}
+	
+}
+
+</style>
+
+#{/set}
+
+  <div class="col-xs-12 col-lg-8">
     <table id="tabellonetimbrature" class="table table-bordered table-condensed">
       
       
@@ -21,6 +96,8 @@
 			<th class="group-left">${i}<sup>a</sup> <br/>entrata</th>
 			<th class="group-right">${i}<sup>a</sup> <br/>uscita</th>
 		#{/list}
+		
+		
 		<th class="group-single">Inserisci<br>timbratura</th>
 		
 		<th class="invisible"></th>
@@ -45,22 +122,24 @@
 
         <td class="default-single">
 		#{if dayRecap.mealTicket.equals("NO")}
-		  <i class="icon-ban-circle"></i>
+		  <span class="glyphicon glyphicon-ban-circle"></span>
 		#{/if} 
 		#{if dayRecap.mealTicket.equals("NOT_YET")}
-		  <i class="icon-remove"></i>
+		  <span class="glyphicon glyphicon-remove"></span>
 		#{/if} 
 		#{if dayRecap.mealTicket.equals("YES")}
-		  <i class="icon-ok"></i>
+		  <span class="glyphicon glyphicon-ok"></span>
 		#{/if} 
 		</td>
 
 		<td class="invisible"></td>
 		
 		<td class="assenza default-single">
-		  <a data-toggle="modal" data-backdrop="true" href="@{Absences.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" data-target="#myModal1">___</a>
+		  <a data-backdrop="true" href="@{Absences.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" data-modal=".my-modal">
+		  ___
+		  </a>
 		  #{list items:dayRecap.absences, as:'absence'}
-		    <a data-toggle="modal" href="@{Absences.edit(absence.id)}" data-target="#myModal3">
+		    <a href="@{Absences.edit(absence.id)}" data-modal=".my-modal">
 			  ${absence.absenceType.code}
 			</a>
 		  #{/list}	
@@ -78,7 +157,7 @@
 	      #{/elseif}
 					
 		  #{if stampingTemplate.date!=null}
-		    <a data-toggle="modal" href="@{Stampings.edit(stampingTemplate.stampingId)}" data-target="#myModal2">
+		    <a data-toggle="modal" href="@{Stampings.edit(stampingTemplate.stampingId)}" data-modal=".my-modal">
 			  ${stampingTemplate.hour}
 			</a>
 		  #{/if}
@@ -99,7 +178,7 @@
 		  </td>
 	    #{/list}
 	    <td class="inserisciTimbratura default-single">
-		    <a data-toggle="modal" data-backdrop="true" href="@{Stampings.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" data-target="#myModal2">
+		    <a data-toggle="modal" data-backdrop="true" href="@{Stampings.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" data-modal=".my-modal">
 		      +++
 		    </a>
 		</td>
@@ -150,10 +229,10 @@
 	      
 	      
 	    </td>
-	    <td class="default-single">
+	    <td class="default-single note">
 	    #{if dayRecap.note.size != 0}
 	    
-	    	<a href="#" class="btn btn-small" data-popover
+	    	<a href="#" class="btn btn-small note" data-popover
 	    		data-trigger="hover" data-toggle="popover" 
 	    		data-placement="right"
 	    		data-html="true"
@@ -167,55 +246,21 @@
 	  #{/list}
     </table>
   </div>
-  <div class="span4">
-     #{include './_riepilogoRiassuntivoMese.html' /}
-  </div>
-
-</div>
 
 
+  <div id="riepiloghi">
+  
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 left">
+      #{include './_contractsRecap.html' /}
+  </div>
+  
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 right">
+    #{include './_notes.html' /}
+  </div>
+  
+  </div>
+  
+#{include '_myModal.html' /}
 
 
-<div id="myModal1" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3>Inserimento assenza ${person.surname} ${person.name}</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-   <!--   <button class="btn btn-primary">Save changes</button>-->
-  </div>
-</div>
 
-<div id="myModal3" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabe3" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3>Modifica assenza ${person.surname} ${person.name}</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-   <!--   <button class="btn btn-primary">Save changes</button>-->
-  </div>
-</div>
- 
-
-
-<div id="myModal2" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3>Inserimento/modifica timbratura</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-   <!--   <button class="btn btn-primary">Save changes</button>-->
-  </div>
-</div>

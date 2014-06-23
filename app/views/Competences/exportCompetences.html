@@ -1,18 +1,35 @@
-#{extends 'main_with_navbar.html' /}
-#{set titolo: 'Gestione straordinari e altre competenze' /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Esporta competenze'  /}
+
+
+<div id="container-fluid-nav-tabs" class="container-fluid">
 
 <ul class="nav nav-tabs">
-  <li ><a href="@{Competences.showCompetences(year, month)}#">Competenze</a></li>
-  <li><a href="@{Competences.overtime(year, month)}#">Straordinari</a></li>
-  <li><a href="@{Competences.totalOvertimeHours(year, month)}#">Monte ore</a></li>
-  <li><a href="@{Competences.recapCompetences()}#">Recap competenze</a></li>
-  <li class="active"><a href="@{Competences.exportCompetences()}#">Esporta competenze</a></li>
+  <li><a href="@{Competences.showCompetences(session.get("yearSelected"), session.get("monthSelected") )}">Assegna Competenze</a></li>
+  <li><a href="@{Competences.overtime(session.get("yearSelected"), session.get("monthSelected") )}">Straordinari</a></li>
+  <li><a href="@{Competences.totalOvertimeHours(session.get("yearSelected") )}">Monte ore</a></li>
+  <li><a href="@{Competences.enabledCompetences()}">Abilita Competenze</a></li>
+  <li class="active"><a href="@{Competences.exportCompetences()}">Esporta competenze</a></li>
 </ul>
 
-<p class="lead">Esporta in formato .csv la situazione annuale degli straordinari</p>
-#{form @Competences.getOvertimeInYear()}
-<br><br>
-<br>
-Anno per straordinari <input class="span1" type="number" name="year"/>
-<br><br><input class="btn btn-primary" type="submit" value="Calcola straordinari"/>
-#{/form}
+</div>
+
+<div class="container">
+
+
+  <div class="panel panel-info text-center">
+    <div class="panel-heading">
+      <h3 class="panel-title">Esporta in formato .csv la situazione annuale degli straordinari</h3>
+    </div>
+    <div class="panel-body">
+  	  #{form @Competences.getOvertimeInYear()}
+        Anno per straordinari <input type="number" name="year"/><br><br>
+        <input class="btn btn-primary" type="submit" value="Calcola straordinari"/>
+      #{/form}    
+    </div>
+  </div>
+
+  
+
+</div>

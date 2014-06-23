@@ -22,13 +22,16 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import models.MealTicket.BlockMealTicket;
 import models.Stamping.WayType;
+import models.base.BaseModel;
 import models.exports.StampingFromClient;
 import models.personalMonthSituation.Mese;
 
-import org.apache.commons.mail.EmailException;
+import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
@@ -37,12 +40,12 @@ import org.joda.time.LocalDateTime;
 import play.Logger;
 import play.data.validation.Email;
 import play.data.validation.Required;
-import play.db.jpa.Model;
 import play.mvc.With;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 
 import controllers.Secure;
 import controllers.Security;
@@ -55,7 +58,7 @@ import controllers.Security;
 @Audited
 @Table(name = "persons")
 @With(Secure.class)
-public class Person extends Model {
+public class Person extends BaseModel {
 
 	/**
 	 * relazione con la tabella dei permessi
@@ -74,6 +77,10 @@ public class Person extends Model {
 	@Column(name = "other_surnames")
 	public String othersSurnames;
 
+	@Column(name = "birthday")
+	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	public LocalDate birthday;
+	
 	@Column(name = "born_date")
 	public Date bornDate;
 
@@ -99,7 +106,32 @@ public class Person extends Model {
 	 * id che questa persona aveva nel vecchio database
 	 */
 	public Long oldId;
+	
+	/**
+	 * nuovo campo email del cnr da usarsi in caso di autenticazione via shibboleth inserito con l'evoluzione 28
+	 */
+	@Email
+	public String cnr_email;
+	
+	/**
+	 * i prossimi tre campi sono stati inseriti con l'evoluzione 28 prendendoli da contact_data così da eliminare quella tabella
+	 */
+	public String telephone;
+	
+	public String fax;
+	
+	public String mobile;
+	
+	/**
+	 * i prossimi tre campi sono stati inseriti con l'evoluzione 28 prendendoli da locations così da eliminare quella tabella
+	 */
+	public String department;
 
+	@Column(name="head_office")
+	public String headOffice;
+ 
+	public String room;
+	
 	/**
 	 * relazione con la tabella delle assenze iniziali
 	 */
@@ -109,13 +141,8 @@ public class Person extends Model {
 	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<InitializationTime> initializationTimes = new ArrayList<InitializationTime>();
 
-	/**
-	 * relazione con la tabella delle info di contatto
-	 */
-	@OneToOne(mappedBy="person", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE}, orphanRemoval=true, optional=true)
-	public ContactData contactData;
-	
-	@OneToOne(mappedBy="person", fetch = FetchType.EAGER, cascade = {CascadeType.REMOVE})
+
+	@OneToOne(mappedBy="person", fetch = FetchType.EAGER)
 	public PersonHourForOvertime personHourForOvertime;
 
 	@NotAudited
@@ -129,7 +156,7 @@ public class Person extends Model {
 	/**
 	 * relazione con la tabella dei gruppi
 	 */
-	@ManyToMany(cascade = {CascadeType.REFRESH, CascadeType.REMOVE}, fetch = FetchType.LAZY)
+	@ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
 	public List<Group> groups;
 
 
@@ -148,6 +175,12 @@ public class Person extends Model {
 	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<CertificatedData> certificatedData;
 
+	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	public List<MealTicket> mealTickets;
+	
+	@OneToMany(mappedBy="admin", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	public List<MealTicket> mealTicketsAdmin;
+	
 	/**
 	 * relazione con la nuova tabella dei person_month
 	 */
@@ -179,7 +212,7 @@ public class Person extends Model {
 	 * relazione con la tabella dei codici competenza per stabilire se una persona ha diritto o meno a una certa competenza
 	 */
 	@NotAudited
-	@ManyToMany(cascade = {CascadeType.REFRESH, CascadeType.REMOVE}, fetch = FetchType.LAZY)
+	@ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
 	public List<CompetenceCode> competenceCode;
 	
 
@@ -190,28 +223,37 @@ public class Person extends Model {
 	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<ValuableCompetence> valuableCompetences;
 
-	/**
-	 * relazione con la tabella delle locazioni degli utenti
-	 */
-	@NotAudited
-	@OneToOne(mappedBy="person", fetch=FetchType.EAGER, cascade = {CascadeType.REMOVE}, orphanRemoval=true)
-	public Location location;
-
-	@OneToOne(mappedBy="person", fetch=FetchType.EAGER,  cascade = {CascadeType.REMOVE} )
+	@OneToOne(mappedBy="person", fetch=FetchType.EAGER)
 	public PersonReperibility reperibility;
 
-	@ManyToOne( fetch=FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(name="qualification_id")
 	public Qualification qualification;
 
-	@OneToOne(mappedBy="person", fetch=FetchType.EAGER,  cascade = {CascadeType.REMOVE})
+	@OneToOne(mappedBy="person", fetch=FetchType.EAGER)
 	public PersonShift personShift;
 	
 	//@NotAudited
-	@ManyToOne( fetch=FetchType.LAZY )
+	@ManyToOne
 	@JoinColumn(name="office_id")	
 	public Office office;
-
+	
+	
+	
+	/**
+	 * Variabili Transienti LAZY (caricate quando vengono acceduti tramite i getter Transienti definiti
+	 */
+	@Transient
+	private Contract currentContract = null;
+	
+	@Transient
+	private WorkingTimeType currentWorkingTimeType = null;
+	
+	@Transient
+	private VacationCode currentVacationCode = null;
+	
+	
+	
 	
 	
 	
@@ -229,40 +271,10 @@ public class Person extends Model {
 	}
 	
 	
-	/*
-	public WorkingTimeType getWorkingTimeType(){
-		return this.workingTimeType;
-	}
-	*/
-	
-	
-	
-//	@NotAudited
-//	@ManyToOne(fetch=FetchType.LAZY)
-//	@JoinColumn(name="remote_office_id", nullable=true)
-//	public RemoteOffice remoteOffice;
-
 	public String fullName() {
 		return String.format("%s %s", surname, name);
 	}
 
-	
-	/**
-	 * 
-	 * @return il piano ferie associato al contratto a sua volta associato alla data di oggi
-	 */
-	public VacationCode getVacation(){
-		
-		Contract contract = this.getCurrentContract();
-		if(contract==null)
-			return null;
-		
-		VacationPeriod vp = contract.getCurrentVacationPeriod();
-		if(vp==null)
-			return null;
-		
-		return vp.vacationCode;
-	}
 	
 	/**
 	 * 
@@ -275,60 +287,112 @@ public class Person extends Model {
 			return null;
 	}
 
-	/**
-	 * 
-	 * @return la locazione della persona
-	 */
-	public Location getLocation(){
-		if(this.location != null)
-			return this.location;
-		else
-			return null;
-	}
-
-	
-
 	
 	/**
 	 * 
 	 * @return il contratto attivo per quella persona alla date date
 	 */
 	public Contract getContract(LocalDate date){
-
 		
 		for(Contract c : this.contracts)
 		{
 			if(DateUtility.isDateIntoInterval(date, c.getContractDateInterval()))
 				return c;
 		}
-		
 		return null;
 
 	}
 	
-
+	/**
+	 * Cerca nella variabile LAZY il contratto attuale
+	 * @return il contratto attualmente attivo per quella persona, null se la persona non ha contratto attivo
+	 */
+	@Transient
+	public Contract getCurrentContract(){
+		if(this.currentContract!=null)
+			return this.currentContract;
+		
+		this.currentContract = getContract(LocalDate.now()); 
+		return this.currentContract;
+	}
 	
 	
 	/**
-	 * 
-	 * @return il contratto attualmente attivo per quella persona, null se la persona non ha contratto attivo
+	 * Cerca nella variabile LAZY il tipo orario attuale.
+	 * @return l'attuale orario di lavoro 
 	 */
-	public Contract getCurrentContract(){
-		return getContract(LocalDate.now());
+	@Transient
+	public  WorkingTimeType getCurrentWorkingTimeType(){
+		if(this.currentWorkingTimeType!=null) {
+			return this.currentWorkingTimeType;
+		}
+		
+		if(this.currentContract==null) {
+			this.currentContract = getContract(LocalDate.now()); 
+		}
+		if(this.currentContract==null)
+			return null;
+		
+		//ricerca
+		for(ContractWorkingTimeType cwtt : this.currentContract.contractWorkingTimeType)
+		{
+			if(DateUtility.isDateIntoInterval(LocalDate.now(), new DateInterval(cwtt.beginDate, cwtt.endDate)))
+			{
+				this.currentWorkingTimeType = cwtt.workingTimeType;
+				return currentWorkingTimeType;
+			}
+		}
+		return null;
+		
 	}
 	
-	public Contract getCurrentContractEager()
-	{
-		List<Contract> contracts = Contract.find("select c from Contract c where c.person = ?", this).fetch();
-		for(Contract c : contracts)
+	/**
+	 * Cerca nella variabile LAZY il piano ferie attuale.
+	 * @return il piano ferie attivo per la persona
+	 */
+	@Transient
+	public VacationCode getCurrentVacationCode() {
+		
+		if(this.currentVacationCode!=null)
+			return this.currentVacationCode;
+		
+		if(this.currentContract==null) {
+			this.currentContract = getContract(LocalDate.now()); 
+		}
+		if(this.currentContract==null)
+			return null;
+		
+		//ricerca
+		for(VacationPeriod vp : this.currentContract.vacationPeriods)
 		{
-			if(DateUtility.isDateIntoInterval(LocalDate.now(), c.getContractDateInterval()))
-				return c;
+			if(DateUtility.isDateIntoInterval(LocalDate.now(), new DateInterval(vp.beginFrom, vp.endTo)))
+			{
+				this.currentVacationCode = vp.vacationCode;
+				return this.currentVacationCode;
+			}
 		}
 		return null;
 	}
-	
-	
+
+	/**
+	 * 
+	 * @param date
+	 * @return il tipo di orario di lavoro utilizzato in date
+	 */
+	public  WorkingTimeType getWorkingTimeType(LocalDate date) {
+		Contract contract = this.getContract(date);
+		if(contract==null)
+			return null;
+		for(ContractWorkingTimeType cwtt : contract.contractWorkingTimeType)
+		{
+			if(DateUtility.isDateIntoInterval(date, new DateInterval(cwtt.beginDate, cwtt.endDate)))
+			{
+				return cwtt.workingTimeType;
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * True se la persona ha almeno un contratto attivo in month
 	 * @param month
@@ -422,55 +486,6 @@ public class Person extends Model {
 	*/
 	
 	/**
-	 * Metodo deprecato, usare getActivePersonsInDay
-	 * @param date
-	 * @return la lista di persone attive a quella data
-	 */
-	@Deprecated 
-	public static List<Person> getActivePersons(LocalDate date){
-		List<Person> activePersons = null;
-		User user = Security.getUser();
-					
-		if(user.person==null)
-		{
-			return Person.findAll();
-		}
-		//tutte le persone (l'amministratore è amministratore di sede principale)
-		if(user.person.office.remoteOffices.isEmpty())
-		{
-			//List<Person> personOffice = new ArrayList<Person>();
-			
-			activePersons = Person.find(
-					"Select distinct (p) " +
-					"from Person p, Contract c " +
-					"where c.person = p "
-					+ "and (c.endContract is null or c.endContract > ?) "
-					+ "and (c.expireContract > ? or c.expireContract is null) "
-					+ "and (c.beginContract < ? or c.beginContract is null) "
-					+ "and p.username <> ? " + 
-					"order by p.surname, p.name", date, date, date, "epas.clocks").fetch();
-			
-		}
-		//le persone aderenti all'ufficio dell'amministratore, che è amministratore di sede distaccata
-		else
-		{
-			activePersons =Person.find(
-					"Select distinct (p) " +
-					"from Person p, Contract c " +
-					"where c.person = p " +
-					"and p.office = ?" 
-					+ "and (c.endContract is null or c.endContract > ?) "
-					+ "and (c.expireContract > ? or c.expireContract is null) "
-					+ "and (c.beginContract < ? or c.beginContract is null) "
-					+ "and p.username <> ? " + 
-					"order by p.surname, p.name", user.person.office, date, date, date, "epas.clocks").fetch();
-		}
-		
-		return activePersons;
-	
-	}
-
-	/**
 	 * 
 	 * @return la lista delle sedi visibili alla persona che ha chiamato il metodo
 	 */
@@ -478,9 +493,9 @@ public class Person extends Model {
 		
 		List<Office> officeList = new ArrayList<Office>();
 		officeList.add(this.office);
-		if(!this.office.remoteOffices.isEmpty()){
+		if(!this.office.subOffices.isEmpty()){
 			
-			for(Office office : this.office.remoteOffices){
+			for(Office office : this.office.subOffices){
 				officeList.add(office);
 			}
 		}
@@ -563,9 +578,9 @@ public class Person extends Model {
 				
 		//Query //TODO QueryDsl
 		List<Person> personList = Person.find("Select distinct p from Person p "
-				+ "left outer join fetch p.contactData "				//OneToOne			//TODO ISSUE discutere dell'opzionalità di queste relazioni OneToOne
+//				+ "left outer join fetch p.contactData "				//OneToOne			//TODO ISSUE discutere dell'opzionalità di queste relazioni OneToOne
 				+ "left outer join fetch p.personHourForOvertime "		//OneToOne
-				+ "left outer join fetch p.location "					//OneToOne
+//				+ "left outer join fetch p.location "					//OneToOne
 				+ "left outer join fetch p.reperibility "				//OneToOne
 				+ "left outer join fetch p.personShift "				//OneToOne 
 				+ "left outer join fetch p.user "						//OneToOne 
@@ -595,10 +610,7 @@ public class Person extends Model {
 				+ "c.endContract is not null and c.beginContract <= ? and c.endContract >= ? "
 				+ ") "
 				
-				
-				
-				
-							
+						
 				//persona allowed
 				+"and p.office in :officeList "
 				
@@ -695,15 +707,6 @@ public class Person extends Model {
 	}
 
 
-	/**
-	 * Ritorna la lista dei tecnici che beneficiano di competenze, attive alla data passata come argomento,
-	 * @param date
-	 * @param officeAllowed
-	 * @return
-	 */
-	public static List<Person> getTechnicianForCompetences(LocalDate date, List<Office> officeAllowed){
-		return getActivePersonsInDay(date, officeAllowed, true);
-	}
 
 	/**
 	 * True se il giorno passato come argomento è festivo per la persona. False altrimenti.
@@ -836,9 +839,7 @@ public class Person extends Model {
 			
 		}
 		Logger.debug("Chiamo la populatePersonDay per fare i calcoli sulla nuova timbratura inserita per il personDay %s", pd);
-		
 		pd.populatePersonDay();
-		
 
 		pd.save();
 		return true;
@@ -859,6 +860,19 @@ public class Person extends Model {
 		}return false;
 	}
 	
+	
+	/**
+	 * Ritorna la lista delle persone visibili dall'amministratore attive nel mese richiesto.
+	 * Questa lista viene salvata in cache e ricalcolata solo se la copia non esiste o è scaduta.
+	 * Il nome della variabile in cache è persons-year-month-personLogged.id (esempio 'persons-2014-01-146')
+	 * @param year
+	 * @return
+	
+	public static List getCachedActivePersonInMonth(Integer year, Integer month, Person personLogged)
+	{
+		return null;
+	}
+	*/
 	
 	/**
 	 * @param code
@@ -884,6 +898,71 @@ public class Person extends Model {
 	
 	
 	/**
+	 * Cerca per numero di matricola
+	 * @param number
+	 * @return
+	 */
+	public static Person findByNumber(Integer number) {
+		return Person.find("SELECT p FROM Person p WHERE number = ?", number).first();
+	}
+	
+	
+	/**
+	 * 
+	 * @param year
+	 * @param month
+	 * @return l'esito dell'invio attestati per la persona (null se non è ancora stato effettuato)
+	 */
+	public CertificatedData getCertificatedData(int year, int month)
+	{
+		CertificatedData cd = CertificatedData.find("Select cd from CertificatedData cd where cd.person = ? and cd.year = ? and cd.month = ?",
+				this, year, month).first();
+		return cd;
+	}
+	
+	public List<BlockMealTicket> getBlockMealTicketInQuarter(Integer year, Integer quarter) {
+		
+		List<MealTicket> mealTicketList = MealTicket.find("Select mt from MealTicket mt "
+				+ "where mt.person = ? and mt.year = ? and mt.quarter = ? order by mt.block",
+				this, year, quarter).fetch();
+		
+		List<BlockMealTicket> blockList = Lists.newArrayList();
+		
+		BlockMealTicket currentBlock = null;
+		
+		for(MealTicket mealTicket : mealTicketList) {
+			
+			if(currentBlock == null) {
+				currentBlock = new BlockMealTicket(mealTicket.block);
+				currentBlock.mealTickets.add(mealTicket);
+				continue;
+			}	
+				
+			if( !currentBlock.codeBlock.equals(mealTicket.block) ) {
+				blockList.add(currentBlock);
+				currentBlock = new BlockMealTicket(mealTicket.block);
+			}
+			
+			currentBlock.mealTickets.add(mealTicket);
+		}
+		
+		blockList.add(currentBlock);
+		
+		return blockList;
+	}
+	
+	/**
+	 * 
+	 * @param year
+	 * @param month
+	 * @return le ore di residuo positivo fatte nel mese/anno da this. Metodo usato nel template showCompetences
+	 */
+	public Integer getPositiveResidualInMonth(int year, int month){
+		
+		return Mese.positiveResidualInMonth(this, year, month)/60; 
+	}
+
+	/**
 	 * 
 	 * @return se è attiva la reperibilità nei giorni lavorativi
 	 */
@@ -895,7 +974,7 @@ public class Person extends Model {
 		}
 		return flag;
 	}
-	
+
 	/**
 	 * 
 	 * @return se è attiva la reperibilità festiva
@@ -908,7 +987,7 @@ public class Person extends Model {
 		}
 		return flag;
 	}
-	
+
 	/**
 	 * 
 	 * @return se è attivo lo straordinario nei giorni lavorativi
@@ -921,7 +1000,7 @@ public class Person extends Model {
 		}
 		return flag;
 	}
-	
+
 	/**
 	 * 
 	 * @return se è attivo il turno ordinario
@@ -934,7 +1013,7 @@ public class Person extends Model {
 		}
 		return flag;
 	}
-	
+
 	/**
 	 * 
 	 * @return se è attivo il turno notturno
@@ -947,7 +1026,7 @@ public class Person extends Model {
 		}
 		return flag;
 	}
-	
+
 	/**
 	 * 
 	 * @return se è attivo il turno festivo
@@ -960,7 +1039,7 @@ public class Person extends Model {
 		}
 		return flag;
 	}
-	
+
 	/**
 	 * 
 	 * @return se è attivo lo straordinario notturno nei giorni lavorativi o diurno nei festivi
@@ -973,7 +1052,7 @@ public class Person extends Model {
 		}
 		return flag;
 	}
-	
+
 	/**
 	 * 
 	 * @return se è attivo lo straordinario notturno nei giorni festivi
@@ -986,7 +1065,7 @@ public class Person extends Model {
 		}
 		return flag;
 	}
-	
+
 	/**
 	 * 
 	 * @return se è attiva l'indennità meccanografica
@@ -999,7 +1078,7 @@ public class Person extends Model {
 		}
 		return flag;
 	}
-	
+
 	/**
 	 * 
 	 * @return se è attiva per la persona l'indennità di sede disagiata
@@ -1012,7 +1091,7 @@ public class Person extends Model {
 		}
 		return flag;
 	}
-	
+
 	/**
 	 * 
 	 * @return se è attiva l'indennità per maneggio valori
@@ -1025,6 +1104,19 @@ public class Person extends Model {
 		}
 		return flag;
 	}
+
+	/**
+	 * Ritorna la lista delle persone visibili dall'amministratore attive nel mese richiesto.
+	 * Questa lista viene salvata in cache e ricalcolata solo se la copia non esiste o è scaduta.
+	 * Il nome della variabile in cache è persons-year-month-personLogged.id (esempio 'persons-2014-01-146')
+	 * @param year
+	 * @return
+	
+	public static List getCachedActivePersonInMonth(Integer year, Integer month, Person personLogged)
+	{
+		return null;
+	}
+	*/
 	
 	/**
 	 * 
@@ -1038,7 +1130,7 @@ public class Person extends Model {
 		}
 		return flag;
 	}
-	
+
 	/**
 	 * 
 	 * @return se è attiva l'indennità di rischio subacquei
@@ -1051,7 +1143,7 @@ public class Person extends Model {
 		}
 		return flag;
 	}
-	
+
 	public boolean isRiskDegreeOneAvailable(){
 		boolean flag = false;
 		for(CompetenceCode code : this.competenceCode){
@@ -1060,7 +1152,7 @@ public class Person extends Model {
 		}
 		return flag;
 	}
-	
+
 	public boolean isRiskDegreeTwoAvailable(){
 		boolean flag = false;
 		for(CompetenceCode code : this.competenceCode){
@@ -1096,7 +1188,7 @@ public class Person extends Model {
 		}
 		return flag;
 	}
-	
+
 	/**
 	 * 
 	 * @return se è attiva l'indennità mansione
@@ -1109,7 +1201,7 @@ public class Person extends Model {
 		}
 		return flag;
 	}
-	
+
 	/**
 	 * 
 	 * @return se è attiva l'indennità mansione maggiorata
@@ -1122,7 +1214,7 @@ public class Person extends Model {
 		}
 		return flag;
 	}
-	
+
 	public boolean isIonicRadianceRiskCom1Available(){
 		boolean flag = false;
 		for(CompetenceCode code : this.competenceCode){
@@ -1131,7 +1223,7 @@ public class Person extends Model {
 		}
 		return flag;
 	}
-	
+
 	public boolean isIonicRadianceRiskCom3Available(){
 		boolean flag = false;
 		for(CompetenceCode code : this.competenceCode){
@@ -1140,7 +1232,7 @@ public class Person extends Model {
 		}
 		return flag;
 	}
-	
+
 	public boolean isIonicRadianceRiskCom1AvailableBis(){
 		boolean flag = false;
 		for(CompetenceCode code : this.competenceCode){
@@ -1149,6 +1241,19 @@ public class Person extends Model {
 		}
 		return flag;
 	}
+
+	/**
+	 * Ritorna la lista delle persone visibili dall'amministratore attive nel mese richiesto.
+	 * Questa lista viene salvata in cache e ricalcolata solo se la copia non esiste o è scaduta.
+	 * Il nome della variabile in cache è persons-year-month-personLogged.id (esempio 'persons-2014-01-146')
+	 * @param year
+	 * @return
+	
+	public static List getCachedActivePersonInMonth(Integer year, Integer month, Person personLogged)
+	{
+		return null;
+	}
+	*/
 	
 	public boolean isIonicRadianceRiskCom3AvailableBis(){
 		boolean flag = false;
@@ -1160,63 +1265,65 @@ public class Person extends Model {
 	}
 
 	/**
-	 * Cerca per numero di matricola
-	 * @param number
+	 * Ritorna la lista delle persone visibili dall'amministratore attive nel mese richiesto.
+	 * Questa lista viene salvata in cache e ricalcolata solo se la copia non esiste o è scaduta.
+	 * Il nome della variabile in cache è persons-year-month-personLogged.id (esempio 'persons-2014-01-146')
+	 * @param year
 	 * @return
-	 */
-	public static Person findByNumber(Integer number) {
-		return Person.find("SELECT p FROM Person p WHERE number = ?", number).first();
-	}
 	
-	
-	/**
-	 * 
-	 * @return l'attuale orario di lavoro
-	 */
-	public  WorkingTimeType getCurrentWorkingTimeType(){
-		return getWorkingTimeType(LocalDate.now());
-	}
-
-	/**
-	 * 
-	 * @param date
-	 * @return il tipo di orario di lavoro utilizzato in date
-	 */
-	public  WorkingTimeType getWorkingTimeType(LocalDate date) {
-		Contract contract = this.getContract(date);
-		if(contract==null)
-			return null;
-		for(ContractWorkingTimeType cwtt : contract.contractWorkingTimeType)
-		{
-			if(DateUtility.isDateIntoInterval(date, new DateInterval(cwtt.beginDate, cwtt.endDate)))
-			{
-				return cwtt.workingTimeType;
-			}
-		}
+	public static List getCachedActivePersonInMonth(Integer year, Integer month, Person personLogged)
+	{
 		return null;
 	}
+	*/
 	
 	/**
-	 * 
-	 * @param year
-	 * @param month
-	 * @return l'esito dell'invio attestati per la persona (null se non è ancora stato effettuato)
+	 * Metodo deprecato, usare getActivePersonsInDay
+	 * @param date
+	 * @return la lista di persone attive a quella data
 	 */
-	public CertificatedData getCertificatedData(int year, int month)
-	{
-		CertificatedData cd = CertificatedData.find("Select cd from CertificatedData cd where cd.person = ? and cd.year = ? and cd.month = ?",
-				this, year, month).first();
-		return cd;
-	}
-	/**
-	 * 
-	 * @param year
-	 * @param month
-	 * @return le ore di residuo positivo fatte nel mese/anno da this. Metodo usato nel template showCompetences
-	 */
-	public Integer getPositiveResidualInMonth(int year, int month){
+	@Deprecated 
+	public static List<Person> getActivePersons(LocalDate date){
+		List<Person> activePersons = null;
+		User user = Security.getUser().get();
+					
+		if(user.person==null)
+		{
+			return Person.findAll();
+		}
+		//tutte le persone (l'amministratore è amministratore di sede principale)
+		if(user.person.office.subOffices.isEmpty())
+		{
+			//List<Person> personOffice = new ArrayList<Person>();
+			
+			activePersons = Person.find(
+					"Select distinct (p) " +
+					"from Person p, Contract c " +
+					"where c.person = p "
+					+ "and (c.endContract is null or c.endContract > ?) "
+					+ "and (c.expireContract > ? or c.expireContract is null) "
+					+ "and (c.beginContract < ? or c.beginContract is null) "
+					+ "and p.username <> ? " + 
+					"order by p.surname, p.name", date, date, date, "epas.clocks").fetch();
+			
+		}
+		//le persone aderenti all'ufficio dell'amministratore, che è amministratore di sede distaccata
+		else
+		{
+			activePersons =Person.find(
+					"Select distinct (p) " +
+					"from Person p, Contract c " +
+					"where c.person = p " +
+					"and p.office = ?" 
+					+ "and (c.endContract is null or c.endContract > ?) "
+					+ "and (c.expireContract > ? or c.expireContract is null) "
+					+ "and (c.beginContract < ? or c.beginContract is null) "
+					+ "and p.username <> ? " + 
+					"order by p.surname, p.name", user.person.office, date, date, date, "epas.clocks").fetch();
+		}
 		
-		return Mese.positiveResidualInMonth(this, year, month)/60; 
+		return activePersons;
+	
 	}
 
 }

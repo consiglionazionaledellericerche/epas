@@ -21,7 +21,7 @@ public class QOption extends EntityPathBase<Option> {
 
     public static final QOption option = new QOption("option");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final BooleanPath adjustRange = createBoolean("adjustRange");
 

@@ -24,7 +24,7 @@ public class QPersonDay extends EntityPathBase<PersonDay> {
 
     public static final QPersonDay personDay = new QPersonDay("personDay");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final ListPath<models.Absence, QAbsence> absences = this.<models.Absence, QAbsence>createList("absences", models.Absence.class, QAbsence.class, PathInits.DIRECT2);
 

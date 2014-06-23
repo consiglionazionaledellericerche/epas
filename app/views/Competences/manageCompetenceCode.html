@@ -1,10 +1,12 @@
-#{extends 'main_with_navbar.html' /}
-#{set titolo: 'Gestione Codici competenze' /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione Codici competenze' /}
+
 
 <div class="container">
 
 
-<p class="lead" id="nuovoCodiceCompetenza"><a data-toggle="modal" href="@{Competences.insertCompetenceCode}" data-target="#myModal1">Nuovo codice competenza</a></p>
+<p class="lead" id="nuovoCodiceCompetenza"><a href="@{Competences.insertCompetenceCode}" data-modal=".my-modal">Nuovo codice competenza</a></p>
 <div class="span10">
 <table class="table table-striped" id="tabellaCodiciCompetenza">
 	<tr>
@@ -13,32 +15,18 @@
 		<th>Descrizione</th>
 		<th>Inattivo</th>
 	</tr>
-	%{ for(compCode in compCodeList){
-	}%
+	#{list items:compCodeList, as:'compCode'}
+	
 	<tr>
-		<td><a data-toggle="modal" href="@{Competences.edit(compCode.id)}" data-target="#myModal1">${compCode.code}</a></td>
+		<td><a href="@{Competences.edit(compCode.id)}" data-modal=".my-modal">${compCode.code}</a></td>
 		<td>${compCode.codeToPresence}</td>
 		<td>${compCode.description}</td>
 		<td>${compCode.inactive}</td>
 	</tr>
-	%{
-	}
-	}%
-
+	#{/list}
 </table>
 </div>
 </div>
 
-<div id="myModal1" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">Inserimento/modifica codice competenza</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-   <!--   <button class="btn btn-primary">Save changes</button>-->
-  </div>
-</div>
+
+#{include '_myModal.html' /}

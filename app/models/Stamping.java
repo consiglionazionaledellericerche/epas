@@ -12,13 +12,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import models.base.BaseModel;
+
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDateTime;
 
 import play.data.validation.InPast;
 import play.data.validation.Required;
-import play.db.jpa.Model;
+
 
 /**
  * @author cristian
@@ -28,7 +30,7 @@ import play.db.jpa.Model;
 @Entity
 @Table(name = "stampings")
 
-public class Stamping extends Model implements Comparable<Stamping> {
+public class Stamping extends BaseModel implements Comparable<Stamping> {
 
 	private static final long serialVersionUID = -2422323948436157747L;
 
@@ -154,6 +156,15 @@ public class Stamping extends Model implements Comparable<Stamping> {
 		else
 			return 0; 
 	}
+	
+	public boolean isServiceStamping() {
+		if(this.stampType!=null && this.stampType.identifier!=null && this.stampType.identifier.equals("s"))
+		{
+			return true;
+		}
+		return false;
+	}
+	
 
 
 

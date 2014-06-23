@@ -34,7 +34,6 @@ import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.DateTimeFormatterBuilder;
 
 import play.Logger;
 import play.db.jpa.JPA;
@@ -405,7 +404,9 @@ public class PersonUtility {
 						absenceType.absenceTypeGroup.replacingAbsenceType, 
 						person, new LocalDate(date.getYear(),1,1), date).first();
 		if(absence != null){
+
 			int minutesExcess = minutesExcessPreviousAbsenceType(absenceType, person, date);
+
 			if(absenceType.absenceTypeGroup.accumulationType.equals(AccumulationType.yearly)){
 				absList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup.label = ? and abs.personDay.person = ? and" +
 						" abs.personDay.date > ? and abs.personDay.date <= ?", 
@@ -466,15 +467,16 @@ public class PersonUtility {
 
 			}
 		}
+
 		else{
-	
+
 			absList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup.label = ? and " +
 					"abs.personDay.person = ? and abs.personDay.date between ? and ?", 
 					absenceType.absenceTypeGroup.label, 
 					person, 
 					new LocalDate(date.getYear(),1,1), 
 					date).fetch();
-			
+
 			for(Absence abs : absList){
 				totalMinutesJustified = totalMinutesJustified+abs.absenceType.justifiedTimeAtWork.minutesJustified;
 			}
@@ -484,12 +486,12 @@ public class PersonUtility {
 				return new CheckMessage(true, "Si può utilizzare il codice di assenza e non c'è necessità di rimpiazzare il codice con il codice " +
 						"di rimpiazzamento", null);
 		}
-		
+
 
 		return new CheckMessage(true, "Si può prendere il codice di assenza richiesto.", null);	
 	}
 
-	
+
 	/**
 	 * 
 	 * @param abt
@@ -498,14 +500,14 @@ public class PersonUtility {
 	 * @return i minuti in eccesso, se ci sono, relativi all'inserimento del precedente codice di assenza dello stesso tipo 
 	 */
 	private static int minutesExcessPreviousAbsenceType(AbsenceType abt, Person person, LocalDate date){
-		
+
 		//cerco l'ultima occorrenza del codice di completamento
 		Absence absence = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
 				"and abs.absenceType.absenceTypeGroup.label = ? " +
 				"and abs.personDay.date < ? order by abs.personDay.date desc", person, abt.absenceTypeGroup.label, date).first();
 		if(absence == null)
 			return 0;
-		
+
 		List<Absence> absList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
 				"and abs.personDay.date between ? and ? and abs.absenceType.absenceTypeGroup.label = ?", 
 				person, new LocalDate(date.getYear(),1,1), date, abt.absenceTypeGroup.label).fetch();
@@ -518,10 +520,10 @@ public class PersonUtility {
 				minutesJustified = 0;
 			}
 		}		
-		
+
 		return minutesExcess;
 	}
-	
+
 	/**
 	 * 
 	 * @param absenceType
@@ -886,7 +888,6 @@ public class PersonUtility {
 	 * @param person
 	 * @param dateFrom
 	 * @param dateTo
-	 * @throws EmailException 
 	 */
 	public static void updatePersonDaysIntoInterval(Person person, LocalDate dateFrom, LocalDate dateTo)
 	{
@@ -930,8 +931,8 @@ public class PersonUtility {
 			officeAllowed = Office.findAll();
 		else
 			officeAllowed = userLogged.person.getOfficeAllowed();
-		//
-		//		//Costruisco la lista di persone su cui voglio operare
+
+		//Costruisco la lista di persone su cui voglio operare
 		List<Person> personList = new ArrayList<Person>();
 		if(personId==-1)
 			personId=null;
@@ -997,28 +998,25 @@ public class PersonUtility {
 				contract.buildContractYearRecap();
 			}
 		}
-		JPAPlugin.closeTx(false);	
+		JPAPlugin.closeTx(false);		
 		
 		//(4) Invio mail per controllo timbrature da farsi solo nei giorni feriali
-		if(new LocalDate().isAfter(new LocalDate(2014,5,8))){
-			if(new LocalDate().getDayOfWeek() != DateTimeConstants.SATURDAY && new LocalDate().getDayOfWeek() != DateTimeConstants.SUNDAY){
-				JPAPlugin.startTx(false);		
-				LocalDate begin = new LocalDate().minusMonths(1);
-				LocalDate end = new LocalDate().minusDays(1);
+        if(new LocalDate().isAfter(new LocalDate(2014,5,8))){
+                if(new LocalDate().getDayOfWeek() != DateTimeConstants.SATURDAY && new LocalDate().getDayOfWeek() != DateTimeConstants.SUNDAY){
+                        JPAPlugin.startTx(false);
+                        LocalDate begin = new LocalDate().minusMonths(1);
+                        LocalDate end = new LocalDate().minusDays(1);
 
-				for(Person p : personList){
-					Logger.debug("Chiamato controllo sul giorni %s %s", begin, end);
-					checkPersonDayForSendingEmail(p, begin, end, "timbratura");
+                        for(Person p : personList){
+                                Logger.debug("Chiamato controllo sul giorni %s %s", begin, end);
+                                checkPersonDayForSendingEmail(p, begin, end, "timbratura");
 
-				}
-				JPAPlugin.closeTx(false);
-			}
-		}
-		
-		
-		
+                        }
+                        JPAPlugin.closeTx(false);
+                }
+        }		
+
 	}
-
 
 	/**
 	 * metodo che controlla i personday in trouble dei dipendenti che non hanno timbratura fixed e invia mail nel caso in cui esistano
@@ -1058,7 +1056,7 @@ public class PersonUtility {
 			}
 		}
 	}
-	
+
 	/**
 	 * questo metodo viene invocato nell'expandableJob per controllare ogni due giorni la presenza di giorni in cui, per ogni dipendente,
 	 * non ci siano nè assenze nè timbrature
@@ -1077,7 +1075,7 @@ public class PersonUtility {
 			officeAllowed = Office.findAll();
 		else
 			officeAllowed = userLogged.person.getOfficeAllowed();
-		
+
 		if(personId==-1)
 			personId=null;
 		if(personId==null)
@@ -1097,8 +1095,8 @@ public class PersonUtility {
 
 		}
 	}
-	
-	
+
+
 	/**
 	 * Verifica per la persona (se attiva) che alla data 
 	 * 	(1) in caso di giorno lavorativo il person day esista. 
@@ -1109,13 +1107,9 @@ public class PersonUtility {
 	 * 		(b) che le persone not fixed non presentino ne' assenze AllDay ne' timbrature. 
 	 * @param personid la persona da controllare
 	 * @param dayToCheck il giorno da controllare
-	 * @throws EmailException 
 	 */
-	private static void checkPersonDay(Long personid, LocalDate dayToCheck) throws EmailException
+	public static void checkPersonDay(Long personid, LocalDate dayToCheck)
 	{
-		JPAPlugin.closeTx(false);
-		JPAPlugin.startTx(false);
-
 		Person personToCheck = Person.findById(personid);
 		if(!personToCheck.isActiveInDay(dayToCheck)) {
 			return;
@@ -1148,9 +1142,8 @@ public class PersonUtility {
 	 * @param personid la persona da controllare
 	 * @param year l'anno di partenza
 	 * @param month il mese di partenza
-	 * @throws EmailException 
 	 */
-	private static void checkHistoryError(Person person, int year, int month) throws EmailException
+	private static void checkHistoryError(Person person, int year, int month)
 	{
 		//Person person = Person.findById(personid);
 		Logger.info("Check history error %s dal %s-%s-1 a oggi", person.surname, year, month);
@@ -1163,6 +1156,7 @@ public class PersonUtility {
 			if(date.isEqual(today))
 				break;
 		}
+
 	}
 
 
@@ -1180,11 +1174,11 @@ public class PersonUtility {
 		try {
 			simpleEmail.setFrom("epas@iit.cnr.it");
 		} catch (EmailException e1) {
-			
+
 			e1.printStackTrace();
 		}
 		try {
-			simpleEmail.addTo(person.contactData.email);
+			simpleEmail.addTo(person.email);
 			//simpleEmail.addTo("dario.tagliaferri@iit.cnr.it");
 		} catch (EmailException e) {
 
@@ -1225,7 +1219,7 @@ public class PersonUtility {
 					"Saluti \r\n"+
 					"Il team di ePAS";
 		}
-		
+
 		//Logger.info("Messaggio recovery password spedito è: %s", message);
 
 		simpleEmail.setMsg(message);
@@ -1235,10 +1229,11 @@ public class PersonUtility {
 			e.printStackTrace();
 			Logger.error("Errore in fase di invio mail a %s %s", person.name, person.surname);
 		}
-		
+
 
 		Logger.info("Inviata mail a %s %s contenente le date da controllare : %s", person.name, person.surname, date);
 		return true;
+
 	}
 
 	/**

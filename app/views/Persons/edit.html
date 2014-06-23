@@ -1,73 +1,87 @@
-#{extends 'main_with_navbar.html' /}
-#{set titolo: 'Modifica dati per la persona ' + person.name + ' ' + person.surname /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Modifica ' + person.name + ' ' + person.surname /}
+
+#{set 'moreStyles'}
+<style>
+  .panel {
+  	margin-top: 20px;
+  }
+  
+  #table-list-contract {
+  	margin-top: 30px;
+  	margin-bottom: 10px;
+  
+  }
+ 
+</style>
+#{/set}
+
 <ul class="nav nav-tabs">
   <li class="active"><a href="@{Persons.edit(person.id)}#">Dati Anagrafici ${person.name} ${person.surname}</a></li>
   <li><a href="@{Persons.insertChild(person.id)}#">Inserisci figlio per ${person.name} ${person.surname}</a></li>
 </ul>
 
-<input type="hidden" name="id" value="${id}"/>
-#{form @Persons.update()}
-<input type="hidden" name="personId" value="${person.id}"/>
-<input type="hidden" name="year" value="${year}"/>
-<input type="hidden" name="month" value="${month}"/>
+<div class="container">		<!-- Container dati personali e di contatto -->
 
-<fieldset>
-	<legend>Dati personali</legend>
-	#{secure.check "insertAndUpdatePerson"}
-	<div class="pull-right">
-		<a class="btn btn-danger" href="@{Administrators.switchUserTo(person.user.id)}">Assumi questa identità</a>
-	</div>
-	#{/secure.check}
-	<table class="tablenoborder">
+#{form @Persons.update() }
+<input type="hidden" name="person.id" value="${person.id}"/>
+
+<!-- Pannello 1 Dati personali -->
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title"><span class="badge">1</span> Dati Personali</h3>
+  </div>
+  <div class="panel-body">
+    
+
+    <table class="table table-condensed table-form table-hover">
 		<tr>
-			<td><b>Cognome</b></td>
-			<td><input name="surname" type="text" value="${person.surname}" size="20" maxlength="100" /></td>
+			<td class="lab"><b>Cognome</b></td>
+			<td><input name="person.surname" type="text" value="${person.surname}"/></td>
 		</tr>
 		<tr>
-			<td><b>Nome</b></td> 
-			<td><input name="name" type="text" value="${person.name}" size="20" maxlength="50" /></td>
+			<td class="lab"><b>Nome</b></td> 
+			<td><input name="person.name" type="text" value="${person.name}"/></td>
+		</tr>
+		<!-- 
+		<tr>
+			<td class="lab">Id univoco</td> 
+			<td><input name="daeliminare" type="text" value="${person.id}" disabled="disabled" /></td>
+		</tr>
+		 -->
+		<tr>
+			<td class="lab">Matricola</td> 
+			<td><input name="person.number" type="number" value="${person.number}"/></td>
 		</tr>
 		<tr>
-			<td>Id univoco</td> 
-			<td><input class="span1" name="personId" type="text" value="${person.id}" disabled="disabled" /></td>
+			<td class="lab">Numbero badge</td>
+			<td><input name="person.badgeNumber" type="number" value="${person.badgeNumber}"/></td>
 		</tr>
 		<tr>
-			<td>Matricola</td> 
-			<td><input class="span1" name="number" type="number" value="${person.number}" size="10" maxlength="10" /></td>
-		</tr>
-		<tr>
-			<td>Numbero badge</td>
-			<td><input class="span1" name="badgeNumber" type="number" value="${person.badgeNumber}"	size="10" maxlength="20" /></td>
-		</tr>
-		<tr>
-			<td> Livello </td>
+			<td class="lab"> Livello </td>
 			<td>
-			%{
-			if(person.qualification != null){
-			}%
-				#{select 'person.qualification',
-				value:person.qualification.qualification, class:'span1', id:'withoutborder'} #{option null}Seleziona la qualifica#{/option}
+			#{if person.qualification != null}
+				#{select 'qualification', value:person.qualification.qualification, class:'span1', id:'withoutborder'} 
+				#{option null}Seleziona la qualifica#{/option}
 				#{option 1}1#{/option} #{option 2}2#{/option} #{option 3}3#{/option}
 				#{option 4}4#{/option} #{option 5}5#{/option} #{option 6}6#{/option}
 				#{option 7}7#{/option} #{option 8}8#{/option} #{/select}</div>
-			%{
-			}else{
-			}%
-				#{select 'person.qualification', 
-				value:'', class:'span1',id:'withoutborder'} #{option null}Seleziona la qualifica#{/option}
+			#{/if}
+			#{else}
+				#{select 'qualification', value:'', class:'span1',id:'withoutborder'} 
+				#{option null}Seleziona la qualifica#{/option}
 				#{option 1}1#{/option} #{option 2}2#{/option} #{option 3}3#{/option}
 				#{option 4}4#{/option} #{option 5}5#{/option} #{option 6}6#{/option}
 				#{option 7}7#{/option} #{option 8}8#{/option} #{/select} 
 		
-			%{
-			}
-			}%
+			#{/else}
 			</td>
 		</tr>
 		<tr>
-			<td>Sede</td>
+			<td class="lab">Sede</td>
 			<td>
-			    #{select 'person.office', value:person.office.id, id:'office'} 
+			    #{select 'office.id', value:person.office.id, id:'office'} 
 					#{list items: officeList, as: 'office'}
 						#{option office.id}${office.name}#{/option}
 					#{/list}
@@ -77,37 +91,146 @@
 	
 	
 	</table>
-	
-		
-	
-	
-</fieldset>
 
-<fieldset>
-	<legend>Dati Contrattuali</legend>
-	<div class="row" style="margin-left: 30px;">
-	  <p class="lead"><a data-toggle="modal" href="@{Persons.insertContract('person.id':person.id)}" data-target="#modal-insert-contract" >Inserisci</a> un nuovo contratto</p>
-	</div>
-	<div class="row" style="margin-left: 10px;">
-	  <table class="table table-striped table-display-contract span12">
+  </div>
+</div>  <!-- Fine pannello 1 -->
+
+
+
+<!-- Pannello 2 Contatti -->
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title"><span class="badge">2</span> Informazioni di ubicazione e contatti</h3>
+  </div>
+  <div class="panel-body">
+	
+    <table class="table table-condensed table-form table-hover">
 		<tr>
-		    <th>Dati iniziali</th>
+			<td class="lab">Dipartimento</td>
+			<td><input name="person.department" type="text" value="${person.department}"/></td>
+		</tr>
+		<tr>
+			<td class="lab">Sede</td>
+			<td><input name="person.headOffice" type="text" value="${person.headOffice}"/></td>
+		</tr>
+		<tr>
+			<td class="lab">Stanza</td>
+			<td><input name="person.room" type="text" value="${person.room}"/></td>
+		</tr>
+		<tr>
+			<td class="lab">Telefono</td>
+			#{if person.telephone != null || !person.telephone.equals('No phone number') }
+				<td><input name="person.telephone" type="text" value="${person.telephone}"/></td>
+			#{/if}
+			#{else}
+				<td><input name="person.telephone" type="text" value=""/></td>
+			#{/else}
+		</tr>
+		<tr>
+			<td class="lab">Email</td>
+			<td><input name="person.email" type="email" value="${person.email}"/></td>
+		</tr>
+		<tr>
+			<td class="lab">Data di nascita </td>
+			#{if person.birthday != null }
+				<td><input data-datepicker data-date-format="yyyy-mm-dd" name="person.birthday" type="text" value="${person.birthday}"/></td>
+			#{/if}
+			#{else}
+				<td><input data-datepicker data-date-format="yyyy-mm-dd" name="person.birthday" type="text" value=""/></td>
+			#{/else}
+			
+		</tr>
+	</table>
+  
+  </div>
+</div>	<!-- Fine pannello 2 -->
+
+</div>
+
+   <div class="container-fluid center">
+      <input class="btn btn-primary" type="submit" value="Salva" />
+   </div>
+#{/form}
+
+<div class="container">	<!-- Container dati contrattuali -->
+
+<!-- Pannello 3 Dati contrattuali -->
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title"><span class="badge">3</span> Dati Contrattuali</h3>
+  </div>
+  <div class="panel-body">
+  	  
+	  <table class="table table-hover center table-list-contract">
+		<tr class="warning">
 			<th>Data inizio contratto</th>
 			<th>Data fine contratto</th>
-			<th>Data terminazione esperienza lavorativa</th>
-			<th>Orario di lavoro</th>
+			<th>Data terminazione<br>esperienza</th>
+			<th>Orario<br>di lavoro</th>
 			<th>Attestato presenza</th>
 			<th>Modifica date</th>
 			<th>Elimina contratto</th>
-			
+			<th>Inizializzazione<br>ePAS</th>
 			
 		</tr>
 		
 		#{list items:contractList, as:'contract'}
 		
 		<tr>
-		
-		 <td class="span4" style="text-align: center;">
+			<td>
+			  <h4><span class="label label-default">${contract.beginContract}</span></h4>
+			</td>
+			
+			<td>
+			  <h4><span class="label label-default">${contract.expireContract}</span></h4>
+			</td>
+			
+			<td>
+			  <h4><span class="label label-default">${contract.endContract}</span></h4>
+			</td>
+			
+			<td>
+			  
+			  #{list items:contract.contractWorkingTimeType, as:'wtt'}
+			  
+			    <a data-popover
+	    		data-trigger="hover" data-toggle="popover" 
+	    		data-placement="bottom"
+	    		data-html="true"
+	    		data-content="
+	    		${(
+	    		'Inizio Periodo: <strong>'+wtt.beginDate+'</strong>'+
+	    		'<br>Fine Periodo: <strong>'+wtt.endDate+'</strong>'
+	    		).escape()}"
+	    		title="Periodo validità orario">
+	    		
+	    		  <h4><span class="label label-default">${wtt.workingTimeType.description}</span></h4>
+	    		
+	    		</a>
+	    		
+			  #{/list}
+			  
+			  <a href="@{Persons.updateContractWorkingTimeType(contract.id)}" data-modal=".my-modal"><i class="fa fa-pencil-square-o"></i> Modifica</a>
+			</td>
+			
+			<td>
+			  #{if contract.onCertificate == true}
+				<i class="fa fa-check-square-o"></i>
+			  #{/if}
+			  #{else}
+				<i class="fa fa-square-o"></i>
+			  #{/else}
+			</td>
+			
+			<td>
+			  <a href="@{Persons.modifyContract(contract.id)}" data-modal=".my-modal"><i class="fa fa-pencil-square-o"></i> Modifica</a>
+			</td>
+			
+			<td>
+			  <a href="@{Persons.deleteContract(contract.id)}" data-modal=".my-modal"><input value="Elimina" class="btn btn-sm btn-danger" type="button"></a>
+			</td>
+			
+			 <td class="span4" style="text-align: center;">
 			 #{if contract.sourceDate!=null}
 			     Situazione alla data
 			     <strong class="text-error">${contract.sourceDate}</strong><br>
@@ -136,76 +259,26 @@
 			     <strong class="text-error">${contract.sourceRecoveryDayUsed}</strong><br>
 			   #{/if}
 			   
-			   <a class="btn btn-small" href="@{Persons.updateSourceContract(contract.id)}" data-modal="#modal-edit-source-contract">Modifica</a>
+			   <a class="btn btn-small" href="@{Persons.updateSourceContract(contract.id)}" data-modal=".my-modal">Modifica</a>
 			
 			 #{/if}
 			 #{else}
-			   <a class="btn btn-small" href="@{Persons.updateSourceContract(contract.id)}" data-modal="#modal-edit-source-contract">Definisci Inizializzazione</a>
+			   <a class="btn btn-small" href="@{Persons.updateSourceContract(contract.id)}" data-modal=".my-modal">Definisci Inizializzazione</a>
 			 #{/else}
-			</td>
-		
-		
-		
-			<td>
-			  ${contract.beginContract}
-			</td>
-			<td>
-			  ${contract.expireContract}
-			</td>
-			
-			<td>
-			  #{if contract.endContract==null } 
-			    <!-- <a href="@{Persons.terminatePerson(person.id)}">Termina contratto</a> -->
-			    <a href="@{Persons.terminatePerson(person.id)}" data-modal="#modal-terminate-person">Termina contratto</a>
-			  #{/if}
-			  #{else}
-			    ${contract.endContract}
-			  #{/else}
-			</td>
-			
-			<td>
-			  <ul>
-			  #{list items:contract.contractWorkingTimeType, as:'wtt'}
-			    <li>
-			    <a href="#" data-popover
-	    		data-trigger="hover" data-toggle="popover" 
-	    		data-placement="bottom"
-	    		data-html="true"
-	    		data-content="
-	    		${(
-	    		'Inizio Periodo: <strong>'+wtt.beginDate+'</strong>'+
-	    		'<br>Fine Periodo: <strong>'+wtt.endDate+'</strong>'
-	    		).escape()}"
-	    		title="Periodo validità orario">${wtt.workingTimeType.description}</a>
-	    		</li>
-			  #{/list}
-			  </ul>
-			  <a class="btn btn-small" href="@{Persons.updateContractWorkingTimeType(contract.id)}" data-modal="#modal-edit-working-time-type">Modifica</a>
-			</td>
-			
-			<td>
-			  #{if contract.onCertificate == true}
-				<i class="icon-check"></i>
-			  #{/if}
-			  #{else}
-				<i class="icon-check-empty"></i>
-			  #{/else}
-			</td>
-			<td>
-			  <a class="btn btn-small" href="@{Persons.modifyContract(contract.id)}" data-modal="#modal-edit-contract">Modifica</a>
-			</td>
-			
-			<td>
-			  <a data-toggle="modal" href="@{Persons.deleteContract(contract.id)}" data-target="#myModal2"><input value="Elimina" class="btn btn-danger" type="button"></a>
 			</td>
 			
 		</tr>
 		#{/list}
-		
+
 	  </table>
-	</div>
-	<div class="row" style="margin-left:10px;">
-	  <br>
+	  
+	  <p>
+  	    <a href="@{Persons.insertContract('person.id':person.id)}" data-modal=".my-modal">
+  	      <span class="glyphicon glyphicon-plus"></span> Inserisci un nuovo contratto per ${person.surname} ${person.name}
+  	    </a>
+  	  </p>
+	
+	  <!-- Per sviluppo render dati di importazione mysql
 	  <table class="table table-condensed table-border span8">
 	    <tr>
 	      <th>Data Importazione da vecchio orologio</th>
@@ -220,184 +293,49 @@
 	      <td>${initTime.vacationCurrentYearUsed}</td>
 	    </tr>	  
 	    #{/if}
-
 	  </table>
-	</div>
-	<!-- 
-	<table class="tablenoborder">
-		<tr>
-			<td>Ore di inizializzazione maturate in altro istituto l'anno passato (in minuti):</td>
-			%{
-			if(initTime != null){
-			}%
-				<td><input class="span1" name="minutesPastYear" type="number" value="${initTime.residualMinutesPastYear}" size="10" /></td>
-			%{
-			}else{
-			}%
-				<td><input class="span1" name="minutesPastYear" type="number" value="" size="10" /></td>
-			%{
-			}
-			}%
-		</tr>
-		<tr>
-			<td>Ore di inizializzazione maturate in altro istituto nell'anno corrente (in minuti):</td>
-			%{
-			if(initTime != null){
-			}%
-				 <td><input class="span1" name="minutesCurrentYear" type="number" value="${initTime.residualMinutesCurrentYear}" size="10" /></td>
-			%{
-			}else{
-			}%
-				 <td><input name="minutesCurrentYear" type="number" value="" size="10" /></td>
-			%{
-			}
-			}%
-		</tr>	
-	</table>
-	 -->
-</fieldset>
-
-<fieldset>
-	<legend>Informazioni di ubicazione e contatti</legend>
-	
-	<input type="hidden" name="location.person_id" value="${person.id}" />
-	
-	<table class="tablenoborder">
-		<tr>
-			<td>Dipartimento</td>
-			<td><input class="span2" name="department" type="text"	value="${person.location.department}" size="20" maxlength="100" /></td>
-		</tr>
-		<tr>
-			<td>Sede</td>
-			<td><input class="span2" name="headOffice" type="text"	value="${person.location.headOffice}" size="20" maxlength="200" /></td>
-		</tr>
-		<tr>
-			<td>Stanza</td>
-			<td><input class="span2" name="room" type="text" value="${person.location.room}"	size="20" maxlength="200" /></td>
-		</tr>
-		<tr>
-			<td>Telefono</td>
-			%{
-			if(person.contactData.telephone != null || !person.contactData.telephone.equals('No phone number')){
-			}%
-				
-				<td><input class="span2" name="telephone" type="text" value="${person.contactData.telephone}" size="20" maxlength="200" /></td>
-			%{
-			}else{
-			}%
-				<td><input class="span2" name="telephone" type="text" value="" size="20" maxlength="200" /></td>
-			%{
-			}
-			}%
-		</tr>
-		<tr>
-			<td>Email</td>
-			<td><input class="span2" name="email" type="email" value="${person.contactData.email}" size="20" maxlength="200" /></td>
-		</tr>
-		<tr>
-			<td>Data di nascita </td>
-			%{
-			if(person.bornDate != null){
-			}%
-				<td><input class="span2 datepicker" name="bornDate" type="text" value="${person.bornDate.convertToLocalDate()}" size="10" maxlength="50" /></td>
-			%{
-			}else{
-			}%
-				<td><input class="span2 datepicker" name="bornDate" type="text" value="" size="10" maxlength="50" /></td>
-			%{	
-			}
-			}%
-		</tr>
-	</table>
-</fieldset>
-
-
-<div class="forminline buttoncenter">
-<input class="btn btn-primary" id="submitEditPerson"type="submit" value="Ok" />
-#{/form} 
-#{form @Persons.discard()}
-<input class="btn" id="discardEditPerson" type="submit" value="Annulla" />
-#{/form} 
-#{form @Persons.deletePerson(person.id)}
-<input class="btn btn-danger" id="deletePerson" type="submit" value="Elimina" />
-#{/form}
+	  
+	   -->
+    </div>
+  </div>  <!-- Fine pannello dati contrattuli -->
+  
+  
+  
+  
+   <!-- Pannello 4 Elimina -->
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title"><span class="badge">4</span> Eliminazione persona ePAS</h3>
+    </div>
+    <div class="panel-body center">
+      <a href="@{Persons.deletePerson(person.id)}" data-modal=".my-modal">
+  	    <button type="button" class="btn btn-danger">Elimina</button>
+  	  </a>
+   </div>
+  </div>	<!-- Fine pannello 2 -->
+  
+  
+ 
 </div>
+  
+  
+ 
+  
+  
 
 
-<div id="modal-insert-contract" class="modal hide fade mymodal-medium" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">Inserimento nuovo contratto</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-  </div>
+
+#{if session.username.equals('admin')}
+<div class="pull-right">
+  <a class="btn btn-danger" href="@{Administrators.switchUserTo(person.user.id)}">Assumi questa identità</a>
 </div>
+#{/if}
 
-<div id="modal-edit-contract" class="modal hide fade mymodal-medium" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">Modifica contratto</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-  </div>
-</div>
 
-<div id="modal-terminate-person" class="modal hide fade mymodal-large" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">Terminazione rapporto</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-  </div>
-</div>
 
-<div id="modal-edit-source-contract" class="modal hide fade mymodal-medium" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">Imposta dati iniziali Contratto</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-  </div>
-</div>
 
-<div id="modal-edit-working-time-type" class="modal hide fade mymodal-medium" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">Modifica i tipi orario associato al contratto</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-  </div>
-</div>
 
-<div id="myModal2" class="modal hide fade mymodal-small" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">Elimina Contratto</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-  </div>
-</div>
+#{include '_myModal.html' /}
+
+
+

@@ -1,10 +1,7 @@
-#{extends 'main_with_navbar.html' /}
-#{set titolo: 'Controllo schedone anno passato'/}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Controllo schedone anno passato' /}
 
-<ul class="nav nav-tabs">
-  <li><a href="@{Charts.indexCharts()}">Grafici</a></li>
-  <li><a href="@{Charts.checkLastYearAbsences()}">Controllo schedone anno passato</a></li>
-</ul>
 <div class="row"></div>
 <p class="lead">Resoconto</p>
 <table class="span10 table table-condensed table-striped">
@@ -53,6 +50,7 @@
 
 <div class="row">
 <ul class="pager">
+  <li><a href="/charts/indexCharts">Indietro</a></li>
   <li><a href="/application/indexAdmin">Home</a></li>
   <li><a href="/stampings/personStamping">Timbrature</a></li>
 </ul>

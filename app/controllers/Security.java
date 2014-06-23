@@ -1,39 +1,98 @@
 package controllers;
 
+
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import models.Office;
 import models.Permission;
 import models.Person;
-import models.RemoteOffice;
 import models.User;
+import models.UsersRolesOffices;
 import play.Logger;
 import play.cache.Cache;
 
+
 import com.google.common.base.Charsets;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.base.Optional;
 import com.google.common.hash.Hashing;
+import com.google.common.collect.Lists;
+
 
 public class Security extends Secure.Security {
 	
+	/* Sviluppatore */
+	
+	public final static String DEVELOPER = "develop";
+	
+	/* Dipendente */
+	
+	public final static String EMPLOYEE = "employee";
+
+	/* Amministratore Personale */
+	
+	public final static String VIEW_PERSON = "viewPerson";
+	public final static String EDIT_PERSON = "editPerson"; //per adesso utilizzato anche per la nuova gestione dei ticket
+	 
+	
+	
+	public final static String VIEW_PERSON_DAY = "viewPersonDay";
+	public final static String EDIT_PERSON_DAY = "editPersonDay";
+
+	public final static String VIEW_COMPETENCE = "viewCompetence";
+	public final static String EDIT_COMPETENCE = "editCompetence";
+	
+	public final static String UPLOAD_SITUATION = "uploadSituation";
+	
+
+	
+	/* Amministratore ePAS */
+	
+	public final static String VIEW_ABSENCE_TYPE = "viewAbsenceType";
+	public final static String EDIT_ABSENCE_TYPE = "editAbsenceType";
+
+	public final static String VIEW_CONFIGURATION = "viewConfiguration";
+	public final static String EDIT_CONFIGURATION = "editConfiguration";
+
+	public final static String VIEW_OFFICE = "viewOffice";
+	public final static String EDIT_OFFICE = "editOffice";
+
+	public final static String VIEW_WORKING_TIME_TYPE = "viewWorkingTimeType";
+	public final static String EDIT_WORKING_TIME_TYPE = "editWorkingTimeType";
+	
+	public final static String VIEW_COMPETENCE_CODE = "viewCompetenceCode";
+	public final static String EDIT_COMPETENCE_CODE = "editCompetenceCode";
+	
+	public final static String VIEW_ADMINISTRATOR = "viewAdministrator";
+	public final static String EDIT_ADMINISTRATOR = "editAdministrator";
+
+	
 	public final static String VIEW_PERSON_LIST = "viewPersonList";
+
 	public final static String INSERT_AND_UPDATE_PERSON = "insertAndUpdatePerson";
-	public final static String DELETE_PERSON = "deletePerson";
 	public final static String INSERT_AND_UPDATE_STAMPING = "insertAndUpdateStamping";
-	public final static String INSERT_AND_UPDATE_PASSWORD = "insertAndUpdatePassword";
-	public final static String INSERT_AND_UPDATE_WORKINGTIME = "insertAndUpdateWorkingTime";
 	public final static String INSERT_AND_UPDATE_ABSENCE = "insertAndUpdateAbsence";
-	public final static String INSERT_AND_UPDATE_CONFIGURATION = "insertAndUpdateConfiguration";
-	public final static String INSERT_AND_UPDATE_ADMINISTRATOR = "insertAndUpdateAdministrator";
+
+
+	public final static String INSERT_AND_UPDATE_WORKINGTIME = "insertAndUpdateWorkingTime";
 	public final static String INSERT_AND_UPDATE_COMPETENCES = "insertAndUpdateCompetences";
 	public final static String INSERT_AND_UPDATE_VACATIONS = "insertAndUpdateVacations";
-	public final static String VIEW_PERSONAL_SITUATION ="viewPersonalSituation";
-	public final static String UPLOAD_SITUATION = "uploadSituation";
 	public final static String INSERT_AND_UPDATE_OFFICES = "insertAndUpdateOffices";
-	public final static String DEVELOPER = "developer";
+	public final static String INSERT_AND_UPDATE_CONFIGURATION = "insertAndUpdateConfiguration";
+	public final static String INSERT_AND_UPDATE_ADMINISTRATOR = "insertAndUpdateAdministrator";
 	
-	public final static String PERMISSION_CACHE_PREFIX = "permission.";
+
+	
+
+	public final static String INSERT_AND_UPDATE_PASSWORD = "insertAndUpdatePassword";	
+	
+	public final static String DELETE_PERSON = "deletePerson";
+	
+	
+	
+	
+	
+	public final static String PERMISSION_CACHE_PREFIX = "user-permission-office-";
 		
 	public final static String CACHE_DURATION = "30mn";
 	
@@ -47,7 +106,6 @@ public class Security extends Secure.Security {
 
 		if(user != null){
 			Cache.set(username, user, CACHE_DURATION);
-			Cache.set(PERMISSION_CACHE_PREFIX + username, user.getAllPermissions(), CACHE_DURATION);
 			Cache.set("userId", user.id, CACHE_DURATION);
 			            
             //flash.success("Welcome, " + .name + ' ' + person.surname);
@@ -63,24 +121,118 @@ public class Security extends Secure.Security {
         return false;
     }
 	
+	private static Optional<User> getUser(String username){
+		
+		if (username == null || username.isEmpty()) {
+			Logger.trace("getUSer failed for username %s", username);
+			return Optional.<User>absent();
+		}
+		Logger.trace("Richiesta getUser(), username=%s", username);
+		
+		//cache
+		//User user = (User)Cache.get(username);
+		//if(user!=null)
+		//	return Optional.of(user);
+		
+		//db
+		User user = User.find("byUsername", username).first();
+		Logger.trace("USer.find('byUsername'), username=%s, e' %s", username, user);
+		if (user == null){
+			Logger.info("Security.getUser(): USer con username = %s non trovata nel database", username);
+			return Optional.<User>absent();
+		}
+		//Cache.set(username, user, CACHE_DURATION);
+		return Optional.of(user);
+	}
+	
+	public static Optional<User> getUser() {
+		return getUser(connected());
+	}
 	
 	static boolean check(String profile) {
-		String username = connected();
-		if(username == null || username.isEmpty()){
-			Logger.debug("Lo username per la check del profilo %s è null o vuoto", profile);
+		
+		
+		if (!getUser().isPresent()) {
 			return false;
 		}
-			
-		Logger.trace("checking permission %s for user %s", profile, username);
+//		User user = Security.getUser();
 		
-		for (Permission permission : getUserAllPermissions(username)) {
-			if (permission.description.equals(profile)) {
+		User user = getUser().get();
+		Permission permission = Permission.find("byDescription", profile).first();
+		if(permission == null) {
+			
+			Logger.debug("Il Permission per la check del profilo %s è null o vuoto", profile);
+			return false;
+		}
+		
+		Long officeId = params.get("officeId") != null ? Long.valueOf(params.get("officeId")) : null;
+		Long personId = params.get("personId") != null ? Long.valueOf(params.get("personId")) : null;
+
+		/* caso richiesta solo su personId */
+		if( personId != null && officeId == null) {
+			
+			Person person = Person.findById(personId);
+			if( checkUro(user.usersRolesOffices, permission, person.office) ) {
+				
 				return true;
+			}
+			return false;
+		}
+		
+		/* caso richiesta solo su officeId */
+		
+		if( personId == null && officeId != null ) {
+			
+			Office office = Office.findById(officeId);
+			if( checkUro(user.usersRolesOffices, permission, office) ) {
+				
+				return true;
+			}
+			return false;
+		}
+		
+		/* caso richiesta sia su personId che su officeId (rara, solo cambio sede persona) */
+
+		if( personId != null && officeId != null ) { 
+			
+			Person person = Person.findById(personId);
+			Office office = Office.findById(officeId);
+			if( checkUro(user.usersRolesOffices, permission, person.office) && checkUro(user.usersRolesOffices, permission, office) ) {
+				
+				return true;
+			}
+			return false;
+		}
+		
+		
+		/* caso richiesta generica senza personId o officeId specificati */
+		
+		return checkUro(user.usersRolesOffices, permission, null);
+		
+		
+		
+	
+    }   
+	
+	private static boolean checkUro(List<UsersRolesOffices> uroList, Permission permission, Office office) {
+		
+		for(UsersRolesOffices uro : uroList) {
+
+			if(office != null && !office.id.equals(uro.office.id)) {
+				
+				continue;
+			}
+			List<Permission> permissionList = Lists.newArrayList(uro.role.permissions);
+			for(Permission p : permissionList) {
+
+				if(p.description.equals(permission.description)) {
+
+					return true;
+				}
 			}
 		}
 		return false;
-    }   
-	
+	}
 	
 	static boolean permissionCheck() {
 		String username = connected();
@@ -92,106 +244,110 @@ public class Security extends Secure.Security {
 		Logger.trace("checking Admin permission for user %s", username);
 		
 		//TODO Rendere più specifici i controlli per gli account di Amministrazione
+		/*
 		if (getUserAllPermissions(username).size() > 1) {
 			return true;
 		}
 		return false;
+		*/
+		return true;
     }   
 	
-	private static User getUser(String username){
-		if (username == null || username.isEmpty()) {
-			Logger.trace("getUSer failed for username %s", username);
-			return null;
-		}
-		Logger.trace("Richiesta getUser(), username=%s", username);
+//	private static User getUser(String username){
+//		if (username == null || username.isEmpty()) {
+//			Logger.trace("getUSer failed for username %s", username);
+//			return null;
+//		}
+//		Logger.trace("Richiesta getUser(), username=%s", username);
+//		
+//
+//		User user = User.find("byUsername", username).first();
+//		Logger.trace("USer.find('byUsername'), username=%s, e' %s", username, user);
+//		if (user == null){
+//			Logger.info("Security.getUser(): USer con username = %s non trovata nel database", username);
+//			return null;
+//		}
+//		return user;
+//	}
+
+	private static List<Permission> getUserAllPermissions(String username) {
 		
-
-		User user = User.find("byUsername", username).first();
-		Logger.trace("USer.find('byUsername'), username=%s, e' %s", username, user);
-		if (user == null){
-			Logger.info("Security.getUser(): USer con username = %s non trovata nel database", username);
-			return null;
+		Optional<User> user = getUser(username);
+		if (!user.isPresent()) {
+			return Lists.newArrayList();
 		}
-		return user;
-	}
-
-	private static Set<Permission> getUserAllPermissions(String username) {
-		User user = getUser(username);
-		if (user == null) {
-			return ImmutableSet.of();
-		}
-		Set<Permission> permissions = Cache.get(PERMISSION_CACHE_PREFIX + username, Set.class);
+		List<Permission> permissions = Cache.get(PERMISSION_CACHE_PREFIX + username, List.class);
+		
 		if (permissions == null) {
-			user.refresh();
-			permissions = user.getAllPermissions();
+			user.get().refresh();
+			permissions = user.get().getAllPermissions();
 			Cache.set(PERMISSION_CACHE_PREFIX + username, permissions, CACHE_DURATION);
 		}
+		
 		return permissions;
+//		User user = getUser(username);
+//		if (user == null) {
+//
+//			return null;
+//		}
+		//Set<UsersPermissionsOffices> permissions = Cache.get(PERMISSION_CACHE_PREFIX + username, Set.class);
+		
+//		List<Permission> permissions = Cache.get(PERMISSION_CACHE_PREFIX + username, List.class);
+//		
+//		if (permissions == null) {
+//			user.refresh();
+//			permissions = user.getAllPermissions();
+//			Cache.set(PERMISSION_CACHE_PREFIX + username, permissions, CACHE_DURATION);
+//		}
+//		
+//		return permissions;
 	}
 	
-	public static User getUser() {
-		return getUser(connected());
-	}
+//	public static User getUser() {
+//		return getUser(connected());
+//	}
 	
-	public static Set<Permission> getPersonAllPermissions() {
+	public static List<Permission> getPersonAllPermissions() {
 		return getUserAllPermissions(connected());
 	}
 	
 	public static List<Office> getOfficeAllowed()
-	{
-		User userLogged = getUser();
-		if(userLogged.username.equals("admin"))
-			return Office.findAll();
-		if(userLogged.person!=null)
-			return userLogged.person.getOfficeAllowed();
-		else
-			return null;
-	}
-	
-	/**
-	 * 
-	 * @param user
-	 * @param personId
-	 * @return true se l'user possiede i diritti per visualizzarla in termini di office false altrimenti 
-	 */
-	public static boolean canUserSeePerson(User user, Long personId){
-		Person person = Person.findById(personId);
-		if(person == null)
-			return false;
-		
-		//amministratore
-		if(user.isAdmin())
-			return true;
-		
-		if(user.person==null)	//questo evento non dovrebbe verificarsi
-			return false;
-		
-		if(person.office.id == user.person.office.id)
-			return true;
-		for(RemoteOffice remote : user.person.office.remoteOffices){
-			if(remote.id == person.office.id)
-				return true;
+	{	
+		if (!getUser().isPresent()) {
+			return Lists.newArrayList();
 		}
-		return false;
+		return getUser().get().getOfficeAllowed();
+//		User userLogged = getUser();
+//		if(userLogged.person == null)
+//			return Office.findAll();
+//		if(userLogged.person != null)
+//			return userLogged.person.getOfficeAllowed();
+//		else
+//			return null;
+//		return getUser().getOfficeAllowed();
 	}
 	
-	/**
-	 * Ritorna la persona identificata da personId se l'user loggato è effettivamente tale persona.
-	 * @param personId
-	 * @return
-	 */
-	public static Person getSelfPerson(Long personId) {
-		if(personId == null)
-			return null;
-		User user = getUser();
-		if(user == null)
-			return null;
-		if(user.person == null)
-			return null;
-		if(user.person.id.longValue() != personId.longValue())
-			return null;
-		return user.person;
+	public static List<Office> getOfficeAllowed(String profile) {
+		if (!getUser().isPresent()) {
+			return Lists.newArrayList();
+		}
+		//User user = Security.getUser();
+		List<Office> officeList = new ArrayList<Office>();
+		
+		for(UsersRolesOffices uro : getUser().get().usersRolesOffices)  {
+			
+			for(Permission p : uro.role.permissions) {
 				
+				if(p.description.equals(profile)) {
+					
+					officeList.add(uro.office);
+				}
+			}
+		}
+		
+		return officeList;
 	}
+	
+	
 
 }

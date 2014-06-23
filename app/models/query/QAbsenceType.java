@@ -24,7 +24,7 @@ public class QAbsenceType extends EntityPathBase<AbsenceType> {
 
     public static final QAbsenceType absenceType = new QAbsenceType("absenceType");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final SetPath<models.Absence, QAbsence> absences = this.<models.Absence, QAbsence>createSet("absences", models.Absence.class, QAbsence.class, PathInits.DIRECT2);
 

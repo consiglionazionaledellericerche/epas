@@ -24,7 +24,7 @@ public class QPersonWorkingTimeType extends EntityPathBase<PersonWorkingTimeType
 
     public static final QPersonWorkingTimeType personWorkingTimeType = new QPersonWorkingTimeType("personWorkingTimeType");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final DatePath<org.joda.time.LocalDate> beginDate = createDate("beginDate", org.joda.time.LocalDate.class);
 
@@ -62,7 +62,7 @@ public class QPersonWorkingTimeType extends EntityPathBase<PersonWorkingTimeType
     public QPersonWorkingTimeType(Class<? extends PersonWorkingTimeType> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
         this.person = inits.isInitialized("person") ? new QPerson(forProperty("person"), inits.get("person")) : null;
-        this.workingTimeType = inits.isInitialized("workingTimeType") ? new QWorkingTimeType(forProperty("workingTimeType")) : null;
+        this.workingTimeType = inits.isInitialized("workingTimeType") ? new QWorkingTimeType(forProperty("workingTimeType"), inits.get("workingTimeType")) : null;
     }
 
 }

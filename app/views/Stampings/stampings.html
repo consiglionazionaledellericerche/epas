@@ -1,9 +1,83 @@
-#{extends 'main_with_navbar.html' /}
-#{set title:person.surname + ' ' + person.name + ', matricola=' + person.number /}
-#{set titolo: 'Situazione presenze mensile ' +  month_capitalized + ' ' + year + ' di ' + person.surname + ' ' + person.name /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Situazione Mensile'  /}
 
-<div class="row-fluid">
-  <div class="span8" style="min-width: 900px;">
+#{set 'moreStyles'}
+
+<style>
+    
+    html, body {
+		background-color: white;
+	}
+	
+	#page_content {
+		padding-top: 70px;
+	}
+	
+	.col-xs-12, col-sm-12, col-md-6  {
+		padding-left: 4px;
+		padding-right: 4px;
+	} 
+	
+	.panel-success>.panel-heading {
+		color: black;
+		background-color: grey;
+		border-color: #dddddd;
+	}
+	
+	.col-xs-10, .col-xs-2 {	/* tabelle riepilogo responsive */
+		border: 1px solid lightgrey;
+		padding-top: 3px;
+		padding-bottom: 3px;
+	}
+	
+	.col-xs-2 {
+		text-align: center;
+	}
+	
+	.container {
+		margin-left: 0;
+		margin-right: 0;
+	}
+	
+	#page_content {
+		widht: 100%;
+	}
+    
+@media (max-width: 767px) {
+
+	#tabellonetimbrature {
+	   font-size: 10px !important; 
+	   /* min-width: 600px; */
+	}
+	
+	#padre {
+	   /* min-width: 640px; */
+	}
+	
+	.container {
+		margin-left: 0px;
+		padding-left: 0px;
+		margin-right: 0px;
+		padding-right: 0px;
+		
+	}
+	
+	footer {
+		display: none;
+	}
+	
+	#riepiloghi {
+	    font-size: 12px !important; 
+	}
+	
+}
+
+</style>
+
+#{/set}
+
+    <div class="col-xs-12 col-lg-8">
     <table id="tabellonetimbrature" class="table table-bordered table-condensed">
 
 	<tr>
@@ -14,20 +88,21 @@
 		
 		<th class="group-single">Codice <br>assenza</th>
 		
-		
-		
+
 		#{list items:1..numberOfInOut, as:'i'}
-			<th class="group-left">${i}<sup>a</sup> <br/>entrata</th>
-			<th class="group-right">${i}<sup>a</sup> <br/>uscita</th>
+			<th class="group-left hidden-xs">${i}<sup>a</sup> <br/>entrata</th>
+			<th class="group-right hidden-xs">${i}<sup>a</sup> <br/>uscita</th>
 		#{/list}
 		
+		<th class="group-single hidden-sm hidden-md hidden-lg">entrate/uscite</th>
+
 		<th class="invisible"></th>
 		
 		<th class="group-single">Tempo<br>lavoro</th>
 		<th class="group-single">Diffe-</div><br/>renza</th>
 		<th class="group-single">Progres-<br/>sivo</th>		
-		<th class="group-single">Tipo<br>Orario</th>
-		<th class="group-single">Note</th>
+		<th class="group-single hidden-xs hidden-sm">Tipo<br>Orario</th>
+		<th class="group-single hidden-xs hidden-sm">Note</th>
 	</tr>
 	
 	#{list items:daysRecap, as:'dayRecap'}
@@ -41,13 +116,13 @@
 
             <td class="default-single">
 			#{if dayRecap.mealTicket.equals("NO")}
-			  <i class="icon-ban-circle"></i>
+			  <span class="glyphicon glyphicon-ban-circle"></span>
 			#{/if} 
 			#{if dayRecap.mealTicket.equals("NOT_YET")}
-			  <i class="icon-remove"></i>
+			  <span class="glyphicon glyphicon-remove"></span>
 			#{/if} 
 			#{if dayRecap.mealTicket.equals("YES")}
-			  <i class="icon-ok"></i>
+			  <span class="glyphicon glyphicon-ok"></span>
 			#{/if} 
 			</td>
 
@@ -60,16 +135,16 @@
 			</td>
 			
 			
-	       
+	        
 			#{list items:dayRecap.stampingsTemplate, as:'stampingTemplate'}
 				#{if stampingTemplate.colour.equals("in")}
-				  <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-left">
+				  <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-left hidden-xs">
 				#{/if}
 				#{elseif stampingTemplate.colour.equals("out")}
-				  <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-right">
+				  <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-right hidden-xs">
 				#{/elseif}
 				#{elseif stampingTemplate.colour.equals("warn")}
-				  <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} warn">
+				  <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} warn hidden-xs">
 				#{/elseif}
 					
 				#{if stampingTemplate.date!=null}
@@ -90,8 +165,23 @@
 				#{/ifnot}	
 				<!--  ${stampingTemplate.pairId}${stampingTemplate.pairPosition}  -->		
 				</td>
-			
 			#{/list}
+			
+			<td class="default-single hidden-sm hidden-md hidden-lg">
+			  #{list items:dayRecap.stampingsTemplate, as:'stampingTemplate'}
+			  #{/list}
+			  <div class="container-fluid">
+			    <div class="col-xs-3">aaa</div>
+			    <div class="col-xs-3">bbb</div>
+			    <div class="col-xs-3">ccc</div>
+			    <div class="col-xs-3">ddd</div>
+			    <div class="col-xs-3">aaa</div>
+			    <div class="col-xs-3">bbb</div>
+			    <div class="col-xs-3">ccc</div>
+			    <div class="col-xs-3">ddd</div>
+			  </div>
+			
+			</td>
 			
 			<td class="invisible"></td>
 	       			
@@ -124,7 +214,7 @@
 												
 		
 	        
-	        <td class="default-single">
+	        <td class="default-single hidden-xs hidden-sm">
 	        #{if dayRecap.wtt!=null && dayRecap.wttd!=null}
 	        <a href="#" data-popover
 	    		data-trigger="hover" data-toggle="popover" 
@@ -141,7 +231,7 @@
 	      
 	      
 	    </td>
-	        <td class="default-single">
+	        <td class="default-single hidden-xs hidden-sm">
 	        #{list items:dayRecap.note, as:'n'}
 	        	<!--  ${n}<br> -->
 	        #{/list}
@@ -150,12 +240,18 @@
 	#{/list}
 
     </table>
-
   </div>
-  <div class="span4">
-     #{include './_riepilogoRiassuntivoMese.html' /}
-  </div>
-</div>
 
+  <div id="riepiloghi">
+  
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 left">
+      #{include './_contractsRecap.html' /}
+  </div>
+  
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4 right">
+    #{include './_notes.html' /}
+  </div>
+  
+  </div>
 
 

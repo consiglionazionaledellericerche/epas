@@ -24,7 +24,7 @@ public class QPersonShiftShiftType extends EntityPathBase<PersonShiftShiftType> 
 
     public static final QPersonShiftShiftType personShiftShiftType = new QPersonShiftShiftType("personShiftShiftType");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final DatePath<org.joda.time.LocalDate> beginDate = createDate("beginDate", org.joda.time.LocalDate.class);
 

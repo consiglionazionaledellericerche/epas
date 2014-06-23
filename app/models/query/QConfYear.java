@@ -24,14 +24,14 @@ public class QConfYear extends EntityPathBase<ConfYear> {
 
     public static final QConfYear confYear = new QConfYear("confYear");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
     public final StringPath field = createString("field");
 
-    public final NumberPath<Integer> fieldValue = createNumber("fieldValue", Integer.class);
+    public final StringPath fieldValue = createString("fieldValue");
 
     //inherited
     public final NumberPath<Long> id = _super.id;
@@ -61,7 +61,7 @@ public class QConfYear extends EntityPathBase<ConfYear> {
 
     public QConfYear(Class<? extends ConfYear> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.office = inits.isInitialized("office") ? new QOffice(forProperty("office")) : null;
+        this.office = inits.isInitialized("office") ? new QOffice(forProperty("office"), inits.get("office")) : null;
     }
 
 }

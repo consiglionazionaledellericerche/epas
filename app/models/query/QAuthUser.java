@@ -21,7 +21,7 @@ public class QAuthUser extends EntityPathBase<AuthUser> {
 
     public static final QAuthUser authUser = new QAuthUser("authUser");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final StringPath authIp = createString("authIp");
 

@@ -1,28 +1,22 @@
 /* Author: 
  */
+
 $(function($){
 	
 	$.fn.initepas = function() {
 		
+		this.find('data-tooltip').tooltip();
+		
+		this.find('.my-modal').on('hidden.bs.modal', function(){
+		    $(this).data('bs.modal', null);
+		});
+		
+		this.find('.my-modal-large').on('hidden.bs.modal', function(){
+		    $(this).data('bs.modal', null);
+		});
+		
 		// $.fn.editable.defaults.mode = 'inline';
 		this.find('a[data-x-editable]').editable();
-		
-		this.find('a.popup_window').popupWindow({ 
-			height:600, 
-			width:1000,
-			scrollbars:1,
-			resizable:0,
-			top:50, 
-			left:50 
-			});
-		this.find('a.popup_window_mini').popupWindow({ 
-			height:600, 
-			width:800,
-			scrollbars:1,
-			resizable:0,
-			top:50, 
-			left:50 
-			}); 
 		
 		this.find("a[data-popover]").popover();
 		this.find("input[data-datepicker]").datepicker();
@@ -54,9 +48,10 @@ $(function($){
 		    $(this).data('modal', null);
 		});
 
-		this.find('#myModal3').on('hidden', function(){
-		    $(this).data('modal', null);
+		this.find('#myModal3').on('hidden.bs.modal', function(){
+		    $(this).data('bs.modal', null);
 		});
+		
 
 		this.find('#myModal4').on('hidden', function(){
 		    $(this).data('modal', null);
@@ -103,14 +98,28 @@ $(function($){
 
 		this.find('#textComments1').editable({
 		    showbuttons: 'bottom'
-		}); 
+		});
+		
+		this.find('form[data-reload-no-ajax] input[type=text]').on('input', function(e) {
+			var $form = $(this).closest("form");
+	    	var $this = $(this);
+	    	var autochange_timeout = $this.data('autochange_timeout')
+	    	if (autochange_timeout) {
+	    		clearTimeout(autochange_timeout);
+	    		$this.removeData('autochange_timeout', autochange_timeout);
+	    	}
+	    	$this.data('autochange_timeout', setTimeout(function() {
+	    		$form.submit();
+	    	}, 500));
+	    });
+
 		
 		this.find('form[data-reload] :input').on('change', function(e) {
 	    	var $form = $(this).closest("form");
 	    	var selector = $form.data('reload');
 	    	var $target = $(selector);
 	    	$target.addClass('reloading');
-	    	var $spinner = $('<span class="text-primary" style="position:absolute; z-index: 10"><i class="icon-spinner icon-spin icon-2x"></i</span>').prependTo($target);
+	    	var $spinner = $('<span class="text-primary" style="position:absolute; z-index: 10"><i class="fa fa-spin fa-spinner fa-2x"></i></span>').prependTo($target);
 	    	var offset = $spinner.offset();
 	    	$spinner.offset({top:offset.top + 1, left:offset.left + 250});
 	    	var url = $form.prop('action') + '?'+ $form.find(":input").serialize();
@@ -132,22 +141,43 @@ $(function($){
 	    		$this.trigger('change');
 	    	}, 500));
 	    });
+	    
+	    this.find('a[data-modal]').click(function(e) {
+			var $this = $(this);
+			var url = $this.attr('href');
+			var $modal = $($this.data('modal'));
+			var $modalbody = $modal.modal('show').find('.modal-content');
+			$modalbody.load(url, function() {
+				$modalbody.initepas();
+			});
+			e.preventDefault();
+		});
 		
-	}
+	}	/* fine initepas() */
+	
 	$('body').initepas();
 	
-	$('a[data-modal]').click(function(e) {
-		var $this = $(this);
-		var url = $this.attr('href');
-		var $modal = $($this.data('modal'));
-		var $modalbody = $modal.modal('show').find('.modal-body');
-		$modalbody.load(url, function() {
-			$modalbody.initepas();
-		});
-		e.preventDefault();
-	});
-});
+	$('#buttonError').click(function() {
+        $('#flash-error').hide();
+	});	
+	
+	$('#buttonSuccess').click(function() {
+        $('#flash-success').hide();
+	});	
 
+	
+});	/* fine on document load */
+
+function Change(){
+	var assenzaFrequente = document.getElementById("assenzaFrequente");
+	var absenceCode = document.getElementById("absenceCode");
+	absenceCode.value = assenzaFrequente.value;
+}
+function Change2(){
+	var tuttiCodici = document.getElementById("tuttiCodici");
+	var absenceCode = document.getElementById("absenceCode");
+	absenceCode.value = tuttiCodici.value;
+}
 
 
 

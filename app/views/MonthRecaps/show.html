@@ -1,143 +1,138 @@
-#{extends 'main_with_navbar.html' /}
+#{extends 'main3.html' /}
+#{set header: 'navbar' /}
+#{set title: 'ePAS - Riepilogo Mensile'  /}
 
+<div class="container-fluid">
 
-#{if lastDayOfMonth != null}
-  #{set titolo: 'Riepilogo Mensile ' + month_capitalized + ' ' + year /}
-#{/if}
-#{else}
-  #{set titolo: 'Riepilogo di tutti i mesi fino ad oggi' /}
-#{/else}
+  <div class="panel panel-info">
+    <div class="panel-heading">
+      <h3 class="panel-title text-center">Riepilogo mensile &{'views.tags.display.date.month.' + month} ${year} </h3>
+    </div>
+    <div class="panel-body">
+        
 
-<br>
-<p class="lead">Numero di giorni lavorativi: ${generalWorkingDaysOfMonth}</p>
-  <table class="table table-hover custom2">
-	<tr>
-		<th>Nome</th>
-		%{  for(col in tableMonthRecap.columnKeySet()){
-		}%
-		<th>${col}</th>
-		%{
-			}
-		}%
-		</tr>
-		
-		%{  
-		for(entry in tableMonthRecap.rowMap().entrySet())
-		{
-		}%
-		<tr>
-			
-			<td class="caratteristica">
-				<a href="@{Stampings.personStamping(entry.getKey().id,lastDayOfMonth.getYear(),lastDayOfMonth.getMonthOfYear())}">${entry.getKey().name} ${entry.getKey().surname}</a>
-			</td>
-			
-			%{ 
-			for(col in tableMonthRecap.columnKeySet())
-			{
-				 if(col.equals('Differenza ore (Residuo a fine mese)') || col.equals('Ore di lavoro fatte'))
-				 {
-			}%
-					<td>${entry.getValue().get(col).toHourTime()}</td>
-			%{
-				}
-				if(col.equals('Assenze giustificate')){
-					
-			}%						
-					<td>
- 					  <a data-toggle="modal"  href="@{MonthRecaps.justifiedAbsences(entry.getKey().id, lastDayOfMonth.getYear(), lastDayOfMonth.getMonthOfYear())}" data-target="#myModal1">${entry.getValue().get(col)}</a>
-					</td>
-			%{
-					
-				}
-				if(col.equals('Assenze non giustificate')){
-			}%
-					<td>
-					  <a data-toggle="modal"  href="@{MonthRecaps.notJustifiedAbsences(entry.getKey().id, lastDayOfMonth.getYear(), lastDayOfMonth.getMonthOfYear())}" data-target="#myModal2">${entry.getValue().get(col)}</a>
-					</td>
-			%{
-				}
-				if(col.equals('Giorni di presenza al lavoro nei giorni festivi')){
-			}%
-					<td>
-					  <a data-toggle="modal"  href="@{MonthRecaps.workingDayHoliday(entry.getKey().id, lastDayOfMonth.getYear(), lastDayOfMonth.getMonthOfYear())}" data-target="#myModal3">${entry.getValue().get(col)}</a>
-					</td>
-			%{
-				}
-				if(col.equals('Giorni di presenza al lavoro nei giorni lavorativi')){
-			}%
-					<td>
-					  <a data-toggle="modal"  href="@{MonthRecaps.workingDayNotHoliday(entry.getKey().id, lastDayOfMonth.getYear(), lastDayOfMonth.getMonthOfYear())}" data-target="#myModal4">${entry.getValue().get(col)}</a>
-					</td>
-			%{
-				}
-				if(col.equals('Ore straord. pagate') || col.equals('Buoni mensa da restituire')){
-			}%
-			  		<td>${entry.getValue().get(col)}</td>
-			%{
-				}
-	
+	  <p class="lead">Numero di giorni lavorativi: ${generalWorkingDaysOfMonth}</p>
+	  
+	 
+
+	     <div class="col-xs-5">
+	     
+          #{form action:@MonthRecaps.show(), class:'form', method:'GET', autocomplete:'off',
+          'data-reload':'#results'}
+    
+            <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="input-medium search-query"/>
+            <i class="icon-search icon-large"></i>
+            <input type="hidden" name="year" value="${year}"/>
+	        <input type="hidden" name="month" value="${month}"/>
+          #{/form}
+         </div>
+
+	     <section id="results">         
+
+          <div class="col-xs-7">
+            <ul class="pagination">
+  	          #{list items:0..simpleResults.totalPage-1, as:'indexPage', class:'inline'}
+  	            #{if simpleResults.page==indexPage}
+  	              <li class="active"><a href="#">${indexPage+1}</a></li>
+  	            #{/if}
+  	            #{else}
+  	              <li><a href="@{MonthRecaps.show(year, month, name, indexPage)}">${indexPage+1}</a></li>
+  	            #{/else}
+  	          #{/list}
+            </ul>
+		  </div>
+	  
+	  
+	      <div class="col-xs-12">
+	  
+		  <table class="table table-hover center">
+			<tr>
+				<th>Nome</th>
+				%{  for(col in tableMonthRecap.columnKeySet()){
+				}%
+				<th>${col}</th>
+				%{
+					}
+				}%
+				</tr>
 				
-			}	
-			}%
-		
-		</tr>
-		%{
-			}
-		}%	
-</table>
+				%{  
+				for(entry in tableMonthRecap.rowMap().entrySet())
+				{
+				}%
+				<tr>
+					
+					<td class="caratteristica">
+						<a href="@{Stampings.personStamping(entry.getKey().id,lastDayOfMonth.getYear(),lastDayOfMonth.getMonthOfYear())}">${entry.getKey().name} ${entry.getKey().surname}</a>
+					</td>
+					
+					%{ 
+					for(col in tableMonthRecap.columnKeySet())
+					{
+						 if(col.equals('Differenza ore (Residuo a fine mese)') || col.equals('Ore di lavoro fatte'))
+						 {
+					}%
+							<td>${entry.getValue().get(col).toHourTime()}</td>
+					%{
+						}
+						if(col.equals('Assenze giustificate')){
+							
+					}%						
+							<td>
+		 					  <a href="@{MonthRecaps.justifiedAbsences(entry.getKey().id, lastDayOfMonth.getYear(), lastDayOfMonth.getMonthOfYear())}"
+		 					   data-modal=".my-modal">${entry.getValue().get(col)}</a>
+							</td>
+					%{
+							
+						}
+						if(col.equals('Assenze non giustificate')){
+					}%
+							<td>
+							  <a data-toggle="modal"  href="@{MonthRecaps.notJustifiedAbsences(entry.getKey().id, lastDayOfMonth.getYear(), lastDayOfMonth.getMonthOfYear())}" data-modal=".my-modal">${entry.getValue().get(col)}</a>
+							</td>
+					%{
+						}
+						if(col.equals('Giorni di presenza al lavoro nei giorni festivi')){
+					}%
+							<td>
+							  <a data-toggle="modal"  href="@{MonthRecaps.workingDayHoliday(entry.getKey().id, lastDayOfMonth.getYear(), lastDayOfMonth.getMonthOfYear())}" data-modal=".my-modal">${entry.getValue().get(col)}</a>
+							</td>
+					%{
+						}
+						if(col.equals('Giorni di presenza al lavoro nei giorni lavorativi')){
+					}%
+							<td>
+							  <a data-toggle="modal"  href="@{MonthRecaps.workingDayNotHoliday(entry.getKey().id, lastDayOfMonth.getYear(), lastDayOfMonth.getMonthOfYear())}" data-modal=".my-modal">${entry.getValue().get(col)}</a>
+							</td>
+					%{
+						}
+						if(col.equals('Ore straord. pagate') || col.equals('Buoni mensa da restituire')){
+					}%
+					  		<td>${entry.getValue().get(col)}</td>
+					%{
+						}
+			
+						
+					}	
+					}%
+				
+				</tr>
+				%{
+					}
+				}%	
+		  </table>
+		  </div>
+		 
+	  
+	   </section>
+	  
+	</div>
+  </div> <!-- end panel -->  
 
-<div id="myModal1" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">Assenze giustificate</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-   <!--   <button class="btn btn-primary">Save changes</button>-->
-  </div>
 </div>
 
-<div id="myModal2" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">Assenze non giustificate</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-   <!--   <button class="btn btn-primary">Save changes</button>-->
-  </div>
-</div>
+#{include '_myModal.html' /}
 
-<div id="myModal3" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">Presenza al lavoro nei giorni festivi</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-   <!--   <button class="btn btn-primary">Save changes</button>-->
-  </div>
-</div>
 
-<div id="myModal4" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">Presenza al lavoro nei giorni lavorativi</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-   <!--   <button class="btn btn-primary">Save changes</button>-->
-  </div>
-</div>
+
+

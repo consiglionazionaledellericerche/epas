@@ -24,7 +24,7 @@ public class QCertificatedData extends EntityPathBase<CertificatedData> {
 
     public static final QCertificatedData certificatedData = new QCertificatedData("certificatedData");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final StringPath absencesSent = createString("absencesSent");
 

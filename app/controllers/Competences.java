@@ -1,7 +1,6 @@
 package controllers;
 
 import helpers.ModelQuery.SimpleResults;
-import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.PersonUtility;
 
 import java.io.BufferedWriter;
@@ -12,12 +11,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
 import models.Person;
 import models.PersonDay;
 import models.TotalOvertime;
+import models.User;
 import models.rendering.PersonMonthCompetenceRecap;
 
 import org.joda.time.LocalDate;
@@ -26,6 +28,7 @@ import play.Logger;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
+import security.SecurityRules;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
@@ -33,31 +36,36 @@ import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 
+import controllers.Resecure.NoCheck;
+
 import dao.PersonDao;
 
-@With( {Secure.class, NavigationMenu.class} )
+@With( {Resecure.class, RequestInit.class} )
 public class Competences extends Controller{
 
-	@Check(Security.VIEW_PERSONAL_SITUATION)
-	public static void competences(Long personId, int year, int month) {
-		
-		Person person = Security.getSelfPerson(personId);
-		if( person == null ) {
+	@Inject
+	static SecurityRules rules;
+	
+	public static void competences(int year, int month) {
+
+		//controllo dei parametri
+		Optional<User> user = Security.getUser();
+		if( ! user.isPresent() || user.get().person == null ) {
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
 		}
 
-		PersonMonthCompetenceRecap personMonthCompetenceRecap = new PersonMonthCompetenceRecap(person, month, year);
-		String month_capitalized = DateUtility.fromIntToStringMonth(month);
-		
-		render(personMonthCompetenceRecap, person, month_capitalized);
+		PersonMonthCompetenceRecap personMonthCompetenceRecap = new PersonMonthCompetenceRecap(user.get().person, month, year);
+
+		Person person = user.get().person;
+		render(personMonthCompetenceRecap, person, year, month);
 
 	}
 
 
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void showCompetences(Integer year, Integer month, String name, String codice, Integer page){
 
+		rules.checkIfPermitted("");
 		if(page==null)
 			page = 0;
 				
@@ -136,13 +144,16 @@ public class Competences extends Controller{
 
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+
 	public static void updateCompetence(long pk, String name, Integer value){
 		final Competence competence = Competence.findById(pk);
+		
 		notFoundIfNull(competence);
 		if (validation.hasErrors()) {
 			error(Messages.get(Joiner.on(",").join(validation.errors())));
 		}
+		rules.checkIfPermitted(competence.person.office);
+		
 		Logger.info("Anno competenza: %s Mese competenza: %s", competence.year, competence.month);
 		Logger.info("value approved before = %s", competence.valueApproved);
 		competence.valueApproved = value;
@@ -157,26 +168,31 @@ public class Competences extends Controller{
 	}
 	
 
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	@NoCheck
 	public static void manageCompetenceCode(){
+		rules.checkIfPermitted();
 		List<CompetenceCode> compCodeList = CompetenceCode.findAll();
 		render(compCodeList);
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void insertCompetenceCode(){
+		rules.checkIfPermitted(Security.getUser().get().person.office);
 		CompetenceCode code = new CompetenceCode();
 		render(code);
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void edit(Long competenceCodeId){
+		rules.checkIfPermitted(Security.getUser().get().person.office);
 		CompetenceCode code = CompetenceCode.findById(competenceCodeId);
 		render(code);
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void save(Long competenceCodeId){
+		rules.checkIfPermitted(Security.getUser().get().person.office);
 		if(competenceCodeId == null){
 			CompetenceCode code = new CompetenceCode();
 			code.code = params.get("codice");
@@ -213,50 +229,64 @@ public class Competences extends Controller{
 		manageCompetenceCode();
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
-	public static void totalOvertimeHours(int year, int month){
+	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	public static void totalOvertimeHours(int year){
+		rules.checkIfPermitted("");
 		List<TotalOvertime> totalList = TotalOvertime.find("Select tot from TotalOvertime tot where tot.year = ?", year).fetch();
 
 		int totale = 0;
 		for(TotalOvertime tot : totalList) {
-			totale = totale+tot.numberOfHours;
+			
+			totale = totale + tot.numberOfHours;
 		}
 
-		Logger.debug("la lista di monte ore per l'anno %s è %s", year, totalList);
-		render(totalList, totale, year, month);
+		render(totalList, totale, year);
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
-	public static void saveOvertime(int year, int month){
+	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	public static void saveOvertime(int year){
+		
+		rules.checkIfPermitted(Security.getUser().get().person.office);
+		
 		TotalOvertime total = new TotalOvertime();
 		LocalDate data = new LocalDate();
 		total.date = data;
 		total.year = data.getYear();
 
 		String numeroOre = params.get("numeroOre");
-		if(numeroOre.startsWith("-")){
+		try {
+			if(numeroOre.startsWith("-")) {
 
-			total.numberOfHours = - new Integer(numeroOre.substring(1, numeroOre.length()));
+				total.numberOfHours = - new Integer(numeroOre.substring(1, numeroOre.length()));
+			}
+			else if(numeroOre.startsWith("+")) {
 
+				total.numberOfHours = new Integer(numeroOre.substring(1, numeroOre.length()));
+			}
+			else {
+				
+				flash.error("Inserire il segno (+) o (-) davanti al numero di ore da aggiungere (sottrarre)");
+				Competences.totalOvertimeHours(year);
+			}
 		}
-		else if(numeroOre.startsWith("+")){
+		catch (Exception e) {
 
-			total.numberOfHours = new Integer(numeroOre.substring(1, numeroOre.length()));
+			flash.error("Inserire il segno (+) o (-) davanti al numero di ore da aggiungere (sottrarre)");
+			Competences.totalOvertimeHours(year);
 		}
-		else {
-			flash.error(String.format("Format unexpected"));
-			Competences.totalOvertimeHours(year, month);
-		}
+		
 		total.save();
 		flash.success(String.format("Aggiornato monte ore per l'anno %s", data.getYear()));
-		Competences.totalOvertimeHours(year, month);
+		Competences.totalOvertimeHours(year);
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void overtime(int year, int month, String name, Integer page){
 		
 		if(page == null)
 			page = 0;
+		
+		rules.checkIfPermitted("");
 		
 		ImmutableTable.Builder<Person, String, Integer> builder = ImmutableTable.builder();
 		Table<Person, String, Integer> tableFeature = null;
@@ -279,7 +309,7 @@ public class Competences extends Controller{
 
 		List<Person> activePersons = simpleResults.paginated(page).getResults();
 		
-	//	List<Person> activePersons = Person.getTechnicianForCompetences(new LocalDate(year, month, 1), Security.getUser().person.getOfficeAllowed());
+	
 		for(Person p : activePersons){
 			Integer daysAtWork = 0;
 			Integer recoveryDays = 0;
@@ -331,24 +361,32 @@ public class Competences extends Controller{
 	/**
 	 * funzione che ritorna la tabella contenente le competenze associate a ciascuna persona
 	 */
-	public static void recapCompetences(String name, Integer page){
+	public static void enabledCompetences(String name){
+
 		
-		if(page == null)
-			page = 0;
+		rules.checkIfPermitted("");
 		LocalDate date = new LocalDate();
+		
 		
 		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
 				Sets.newHashSet(Security.getOfficeAllowed()), 
-				false, 
-				date, 
-				date.dayOfMonth().withMaximumValue());
-
-		List<Person> personList = simpleResults.paginated(page).getResults();
-//		List<Person> personList = Person.getTechnicianForCompetences(date, Security.getUser().person.getOfficeAllowed());
+				false, date, date.dayOfMonth().withMaximumValue(), true);
+		
+		//List<Person> personList = simpleResults.paginated(page).getResults();
+		List<Person> personList = simpleResults.list();
+		
 		ImmutableTable.Builder<Person, String, Boolean> builder = ImmutableTable.builder();
 		Table<Person, String, Boolean> tableRecapCompetence = null;
-		List<CompetenceCode> codeList = CompetenceCode.findAll();
-		for(Person p : personList){
+		List<CompetenceCode> allCodeList = CompetenceCode.findAll();
+		List<CompetenceCode> codeList = new ArrayList<CompetenceCode>();
+		for(CompetenceCode compCode : allCodeList) {
+			
+			if( compCode.persons.size() > 0 )
+				codeList.add(compCode);
+			
+		}
+			
+		for(Person p : personList) {
 
 			for(CompetenceCode comp : codeList){
 				if(p.competenceCode.contains(comp)){
@@ -357,10 +395,9 @@ public class Competences extends Controller{
 				else{
 					builder.put(p, comp.description+'\n'+comp.code, false);
 				}
-
 			}
-
 		}
+		
 		tableRecapCompetence = builder.build();
 		int month = date.getMonthOfYear();
 		int year = date.getYear();
@@ -372,10 +409,16 @@ public class Competences extends Controller{
 	 * @param personId render della situazione delle competenze per la persona nella form updatePersonCompetence
 	 */
 	public static void updatePersonCompetence(Long personId){
-		if(personId != null){
-			Person person = Person.findById(personId);
-			render(person);
+		
+		if(personId == null){
+			
+			flash.error("Persona inesistente");
+			Competences.enabledCompetences(null);
 		}
+		
+		Person person = Person.findById(personId);
+		rules.checkIfPermitted(person.office);
+		render(person);
 	}
 
 	/**
@@ -384,6 +427,13 @@ public class Competences extends Controller{
 	public static void saveNewCompetenceConfiguration(){
 		long personId = params.get("personId", Long.class);
 		Person person = Person.findById(personId);
+		if(person == null){
+			flash.error("Persona inesistente in anagrafica");
+			Competences.enabledCompetences(null);
+			
+		}
+		rules.checkIfPermitted(person.office);
+		
 		String overtimeWorkDay = params.get("overtimeWorkDay");
 		String nightlyOvertime = params.get("nightlyOvertime");
 		String nightlyHolidayOvertime = params.get("nightlyHolidayOvertime");
@@ -617,18 +667,20 @@ public class Competences extends Controller{
 		}
 		person.save();
 		flash.success(String.format("Aggiornate con successo le competenze per %s %s", person.name, person.surname));
-		Competences.recapCompetences(null, null);
+		Competences.enabledCompetences(null);
 
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void exportCompetences(){
+		rules.checkIfPermitted("");
 		render();
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void getOvertimeInYear(int year) throws IOException{
 		
+		rules.checkIfPermitted("");
 		List<Person> personList = Person.getActivePersonsinYear(year, Security.getOfficeAllowed(), true);
 		FileInputStream inputStream = null;
 		File tempFile = File.createTempFile("straordinari"+year,".csv" );
@@ -645,8 +697,10 @@ public class Competences extends Controller{
 					"and code.code = ? ", p, year, "S1").first();			
 			Logger.debug("Totale per %s %s vale %d", p.name, p.surname, totale);
 			out.write(p.surname+' '+p.name+',');
-						
-			out.append(totale.toString());
+			if(totale != null)			
+				out.append(totale.toString());
+			else
+				out.append("0");
 			out.newLine();
 		}
 		out.close();

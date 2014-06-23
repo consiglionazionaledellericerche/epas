@@ -73,23 +73,27 @@ public class AttestatiClient {
 
 	}
 	
-	public final static class LoginResponse implements Serializable{
+	public final static class LoginResponse implements Serializable {
+		private String usernameCnr;
 		private Integer year;
 		private Integer month;
 		private final boolean loggedIn;
 		private final Map<String, String> cookies;
-		public LoginResponse(boolean loggedIn, Map<String, String> cookies, Integer year, Integer month) {
+		public LoginResponse(String usernameCnr, boolean loggedIn, Map<String, String> cookies, Integer year, Integer month) {
+			this.usernameCnr = usernameCnr;
 			this.loggedIn = loggedIn;
 			this.cookies = cookies;
 			this.year = year;
 			this.month = month;
 		}
-		public LoginResponse(boolean loggedIn, Map<String, String> cookies, Integer year, Integer month, Exception e) {
+		public LoginResponse(String usernameCnr, boolean loggedIn, Map<String, String> cookies, Integer year, Integer month, Exception e) {
+			this.usernameCnr = usernameCnr;
 			this.loggedIn = loggedIn;
 			this.cookies = cookies;
 			this.year = year;
 			this.month = month;
 		}
+		public String getUsernameCnr() { return usernameCnr; }
 		public boolean isLoggedIn() { return loggedIn; }
 		public Map<String, String> getCookies() { return cookies; }
 		public Integer getYear() {return this.year;}
@@ -115,7 +119,7 @@ public class AttestatiClient {
 		
 		//URI baseUri = new URI(Configuration.getCurrentConfiguration().urlToPresence);
 		//ConfGeneral confGeneral =  ConfGeneral.getConfGeneral();
-		Office office = Security.getUser().person.office;
+		Office office = Security.getUser().get().person.office;
 		String urlToPresence = ConfGeneral.getFieldValue("url_to_presence", office);
 		URI baseUri = new URI(urlToPresence);
 		URL loginUrl = baseUri.resolve(BASE_LOGIN_URL).toURL();
@@ -142,14 +146,14 @@ public class AttestatiClient {
 			if (loginResponse.statusCode() != 200 || 
 					loginMessages.isEmpty() || 
 					! loginMessages.first().ownText().contains("Login completata con successo.")) {
-				return new LoginResponse(false, loginResponse.cookies(), year, month);
+				return new LoginResponse(attestatiLogin, false, loginResponse.cookies(), year, month);
 			} else {
-				return new LoginResponse(true, loginResponse.cookies(), year, month);
+				return new LoginResponse(attestatiLogin, true, loginResponse.cookies(), year, month);
 			}
 			
 		} catch (IOException e) {
 			Logger.error("Errore durante la login sul sistema di invio degli attestati. Eccezione = %s", e);
-			return new LoginResponse(false, null, year, month, e);
+			return new LoginResponse(attestatiLogin, false, null, year, month, e);
 		}
 	}
 	
@@ -165,7 +169,7 @@ public class AttestatiClient {
 	public static List<Dipendente> listaDipendenti(Map<String, String> cookies, Integer year, Integer month) throws URISyntaxException, MalformedURLException {
 		Response listaDipendentiResponse;
 //		ConfGeneral conf = ConfGeneral.getConfGeneral();
-		Office office = Security.getUser().person.office;
+		Office office = Security.getUser().get().person.office;
 		String urlToPresence = ConfGeneral.getFieldValue("url_to_presence", office);
 		Integer seatCode = Integer.parseInt(ConfGeneral.getFieldValue("seat_code", office));
 		URI baseUri = new URI(urlToPresence);
@@ -238,7 +242,7 @@ public class AttestatiClient {
 		
 		//Configuration conf = Configuration.getCurrentConfiguration();
 		//ConfGeneral conf = ConfGeneral.getConfGeneral();
-		Office office = Security.getUser().person.office;
+		Office office = Security.getUser().get().person.office;
 		String urlToPresence = ConfGeneral.getFieldValue("url_to_presence", office);
 		Integer seatCode = Integer.parseInt(ConfGeneral.getFieldValue("seat_code", office));
 		URI baseUri = new URI(urlToPresence);
@@ -248,7 +252,6 @@ public class AttestatiClient {
 		StringBuffer competencesSent = new StringBuffer();
 		//Nuovo stringBuffer per l'invio delle ore di formazione
 		StringBuffer trainingHoursSent = new StringBuffer();
-		StringBuffer mealTicketSent = new StringBuffer();
 		StringBuffer problems = new StringBuffer();
 		
 		boolean isOk = true;

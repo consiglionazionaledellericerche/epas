@@ -53,9 +53,13 @@ public class ControlAbsenceStamping extends Job{
 			if(!daysInTrouble.equals("")){
 				Logger.debug("Inizio a preparare la mail per %s %s...", person.name, person.surname);
 				SimpleEmail email = new SimpleEmail();
-				if(person.contactData != null && (!person.contactData.email.trim().isEmpty())){
-					Logger.debug("L'indirizzo a cui inviare la mail è: %s", person.contactData.email);
-					email.addTo(person.contactData.email);
+//				if(person.contactData != null && (!person.contactData.email.trim().isEmpty())){
+//					Logger.debug("L'indirizzo a cui inviare la mail è: %s", person.contactData.email);
+//					email.addTo(person.contactData.email);
+//				}
+				if(person != null && (!person.email.trim().isEmpty())){
+					Logger.debug("L'indirizzo a cui inviare la mail è: %s", person.email);
+					email.addTo(person.email);
 				}
 					
 				else

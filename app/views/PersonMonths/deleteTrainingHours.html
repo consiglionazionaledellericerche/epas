@@ -1,4 +1,23 @@
-<p class="lead">Attenzione!!! <br>Questa operazione non potrà essere annullata.</p>
-<a href="@{PersonMonths.deleteTrainingHoursConfirmed(pm.id, year, month)}">
-  <input value="Conferma Elimina" class="btn btn-danger" type="button">
+
+<div class="modal-header">
+  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+  <h4 class="modal-title">Elimina ore di formazione</h4>
+</div>
+
+<!-- Start Body -->
+<div class="modal-body">
+
+
+Attenzione!!! Questa operazione non potrà essere annullata.
+
+
+<a href="@{PersonMonths.deleteTrainingHoursConfirmed(pm.id)}">
+  <input value="Conferma Elimina" class="btn btn-danger btn-sm" type="button">
 </a>
+
+
+
+
+
+</div> <!-- End Body -->
+

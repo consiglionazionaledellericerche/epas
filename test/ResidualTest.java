@@ -19,7 +19,7 @@ import play.test.UnitTest;
 public class ResidualTest extends UnitTest {
 	
     @Test
-    public void residualLucchesi() {
+    public void residualLucchesi() throws EmailException {
     	LocalDate dateToTest = new LocalDate(2014,2,28);
     	int month = 2;
     	int year = 2014;
@@ -28,12 +28,7 @@ public class ResidualTest extends UnitTest {
     
     	
     	//Ricalcolo tutti i personday
-     	try {
-			PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
-		} catch (EmailException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
@@ -81,7 +76,7 @@ public class ResidualTest extends UnitTest {
     }
     
     @Test
-    public void residualSanterini() {
+    public void residualSanterini() throws EmailException {
     	LocalDate dateToTest = new LocalDate(2014,2,28);
     	int month = 2;
     	int year = 2014;
@@ -92,12 +87,7 @@ public class ResidualTest extends UnitTest {
     
     	
     	//Ricalcolo tutti i personday
-     	try {
-			PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
-		} catch (EmailException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
@@ -145,7 +135,7 @@ public class ResidualTest extends UnitTest {
     }
     
     @Test
-    public void residualMartinelli() {
+    public void residualMartinelli() throws EmailException {
     	LocalDate dateToTest = new LocalDate(2014,2,28);
     	int month = 2;
     	int year = 2014;
@@ -156,12 +146,7 @@ public class ResidualTest extends UnitTest {
     
     	
     	//Ricalcolo tutti i personday
-     	try {
-			PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
-		} catch (EmailException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
@@ -209,7 +194,7 @@ public class ResidualTest extends UnitTest {
     }
     
     @Test
-    public void residualSuccurro() {
+    public void residualSuccurro() throws EmailException {
     	LocalDate dateToTest = new LocalDate(2014,2,28);
     	int month = 2;
     	int year = 2014;
@@ -220,12 +205,7 @@ public class ResidualTest extends UnitTest {
     
     	
     	//Ricalcolo tutti i personday
-     	try {
-			PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
-		} catch (EmailException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
@@ -273,7 +253,7 @@ public class ResidualTest extends UnitTest {
     }
     
     @Test
-    public void residualAbba() {
+    public void residualAbba() throws EmailException {
     	LocalDate dateToTest = new LocalDate(2014,2,28);
     	int month = 2;
     	int year = 2014;
@@ -284,12 +264,7 @@ public class ResidualTest extends UnitTest {
     
     	
     	//Ricalcolo tutti i personday
-     	try {
-			PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
-		} catch (EmailException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user);
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap

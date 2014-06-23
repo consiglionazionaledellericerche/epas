@@ -1,6 +1,6 @@
-<fieldset>
-    <legend>Errori ${cd.person.name} ${cd.person.surname}</legend>
-    <p>Errori riscontrati durante l'elaborazione per il mese ${cd.year}/${cd.month}</p>
-    <br>
+#{extends 'modal.html' /}
+#{set modalHeader: 'Errori Attestati elaborati ' + templateUtility.monthName(cd.month) + ' ' + cd.year + ' per ' + cd.person.surname + ' ' + cd.person.name/}
+
+<div class="container-fluid center">
     <p>${cd.problems}</p>
-  </fieldset>
+</div>

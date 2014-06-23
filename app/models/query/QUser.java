@@ -24,7 +24,7 @@ public class QUser extends EntityPathBase<User> {
 
     public static final QUser user = new QUser("user");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
@@ -36,8 +36,6 @@ public class QUser extends EntityPathBase<User> {
 
     public final StringPath password = createString("password");
 
-    public final ListPath<models.Permission, QPermission> permissions = this.<models.Permission, QPermission>createList("permissions", models.Permission.class, QPermission.class, PathInits.DIRECT2);
-
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
@@ -46,6 +44,8 @@ public class QUser extends EntityPathBase<User> {
     public final StringPath recoveryToken = createString("recoveryToken");
 
     public final StringPath username = createString("username");
+
+    public final ListPath<models.UsersRolesOffices, QUsersRolesOffices> usersRolesOffices = this.<models.UsersRolesOffices, QUsersRolesOffices>createList("usersRolesOffices", models.UsersRolesOffices.class, QUsersRolesOffices.class, PathInits.DIRECT2);
 
     public QUser(String variable) {
         this(User.class, forVariable(variable), INITS);

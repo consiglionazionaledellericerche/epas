@@ -1,7 +1,5 @@
 package models;
 
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,21 +8,23 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
+
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
-import play.db.jpa.Model;
+
 
 @Entity
 //@Audited
 @Table(name = "vacation_periods")
-public class VacationPeriod extends Model{
+public class VacationPeriod extends BaseModel{
 
 	private static final long serialVersionUID = 7082224747753675170L;
 
 	@Required
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="vacation_codes_id", nullable=false)
 	public VacationCode vacationCode;
 	
@@ -41,22 +41,5 @@ public class VacationPeriod extends Model{
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="end_to")
 	public LocalDate endTo;
-	
-	/**
-	 * 
-	 * @param id
-	 * @return vacationList
-	 * funzione che ritorna una lista di ferie mensili relativi a una certa persona
-	 */
-	public List<VacationPeriod> vacationForMonth(long id){
-		List<VacationPeriod> vacationList = new ArrayList<VacationPeriod>();
-		return vacationList;
-	}
-	
-//	@Override
-//	public String toString() {
-//		return String.format("VacactionPeriod[%d] - person.id = %d, vacactionCode.description = %s, beginFrom = %s, endTo = %s",
-//			id, person.id, vacationCode.description, beginFrom, endTo);
-//	}
 	
 }
