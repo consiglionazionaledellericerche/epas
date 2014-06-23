@@ -24,9 +24,11 @@ public class QContract extends EntityPathBase<Contract> {
 
     public static final QContract contract = new QContract("contract");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final DatePath<org.joda.time.LocalDate> beginContract = createDate("beginContract", org.joda.time.LocalDate.class);
+
+    public final SimplePath<it.cnr.iit.epas.DateInterval> contractDatabaseDateInterval = createSimple("contractDatabaseDateInterval", it.cnr.iit.epas.DateInterval.class);
 
     public final SimplePath<it.cnr.iit.epas.DateInterval> contractDateInterval = createSimple("contractDateInterval", it.cnr.iit.epas.DateInterval.class);
 
@@ -52,6 +54,8 @@ public class QContract extends EntityPathBase<Contract> {
     public final BooleanPath persistent = _super.persistent;
 
     public final QPerson person;
+
+    public final BooleanPath properContract = createBoolean("properContract");
 
     public final ListPath<models.ContractYearRecap, QContractYearRecap> recapPeriods = this.<models.ContractYearRecap, QContractYearRecap>createList("recapPeriods", models.ContractYearRecap.class, QContractYearRecap.class, PathInits.DIRECT2);
 

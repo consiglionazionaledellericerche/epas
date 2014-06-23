@@ -10,11 +10,13 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import play.db.jpa.Model;
+import models.base.BaseModel;
+
+
 
 @Entity
 @Table(name="person_shift")
-public class PersonShift extends Model{
+public class PersonShift extends BaseModel{
 
 	public boolean jolly;
 	

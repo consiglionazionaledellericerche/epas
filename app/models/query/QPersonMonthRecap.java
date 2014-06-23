@@ -24,7 +24,7 @@ public class QPersonMonthRecap extends EntityPathBase<PersonMonthRecap> {
 
     public static final QPersonMonthRecap personMonthRecap = new QPersonMonthRecap("personMonthRecap");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;

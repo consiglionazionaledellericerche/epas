@@ -1,0 +1,88 @@
+#{extends 'Wizard/wizard.html' /}
+
+#{set 'moreStyles'}
+	<link rel="stylesheet" media="screen" href="@{'/public/bootstrap-datepicker/css/datepicker.css'}"/>
+	
+<style>
+
+form{
+	margin-bottom: 4em;
+}
+
+</style>
+#{/set}
+
+%{
+initUseStart = properties.getProperty("init_use_program");
+lunchPauseStartHour = properties.getProperty("meal_time_start_hour");
+lunchPauseStartMinute = properties.getProperty("meal_time_start_minute");
+lunchPauseEndHour = properties.getProperty("meal_time_end_hour");
+lunchPauseEndMinute = properties.getProperty("meal_time_end_minute");
+webStampingAllowed = properties.getProperty("web_stamping_allowed");
+}%
+
+#{form @Wizard.setGenConf(),class:'form-horizontal'}
+<fieldset>
+#{field 'initUseStart'}
+    <div class="control-group #{if field.error}error#{/if}">         
+            <label  class="control-label" for="${field.id}">Data di inizio del programma</label>
+     <div class="controls">
+     	<div class="input-append">
+            <input class="input-large" placeholder="dd/mm/yyyy" id="${field.id}" type="text" name="${field.name}" datepicker value="${initUseStart}"><span class="add-on"><p class="icon-calendar"></p></span>
+     	</div>
+            <p class="help-block">${field.error}</p>
+      </div>
+   </div>
+#{/field}
+
+#{field 'lunchPauseStart'}
+    <div class="control-group #{if field.error}error#{/if}">         
+            <label  class="control-label" for="${field.id}">Inizio pausa pranzo</label>
+     <div class="controls">
+            <input placeholder="hh:mm" class="input-large" id="${field.id}" type="text" name="${field.name}" value="${lunchPauseStartHour}#{if lunchPauseStartHour}:#{/if}${lunchPauseStartMinute}">
+            <span class="help-block">${field.error}</span>
+      </div>
+   </div>
+#{/field}
+
+#{field 'lunchPauseStop'}
+    <div class="control-group #{if field.error}error#{/if}">         
+            <label  class="control-label" for="${field.id}">Fine pausa pranzo</label>
+     <div class="controls">
+            <input placeholder="hh:mm" class="input-large" id="${field.id}" type="text" name="${field.name}" value="${lunchPauseEndHour}#{if lunchPauseEndHour}:#{/if}${lunchPauseEndMinute}">
+            <span class="help-block">${field.error}</span>
+      </div>
+   </div>
+#{/field}
+
+#{field 'webStampingAllowed'}
+    <div class="control-group #{if field.error}error#{/if}">         
+            <label  class="control-label" for="${field.id}">Permetti Timbrature Web</label>
+     <div class="controls">
+            <input id="${field.id}" type="checkbox" name="${field.name}" #{if webStampingAllowed == "SI"} checked #{/if}>
+            <span class="help-block">${field.error}</span>
+      </div>
+   </div>
+#{/field}
+
+<input type="submit" class="btn btn-info btn-large"/>
+</fieldset>
+#{/form}
+
+#{set 'moreScripts'}
+
+<script type="text/javascript">
+	
+$('input[datepicker]').datepicker({
+    format: "dd/mm/yyyy",
+    startView: 2,
+    todayBtn: "linked",
+    language: "it",
+    autoclose: true,
+    todayHighlight: true
+});
+</script>
+
+<script src="@{'/public/bootstrap-datepicker/js/bootstrap-datepicker.js'}" type="text/javascript"></script>
+
+#{/set}

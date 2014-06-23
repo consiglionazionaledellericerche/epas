@@ -1,7 +1,6 @@
 package controllers;
 
 
-import java.net.URLEncoder;
 import java.util.HashMap;
 
 import models.Person;
@@ -73,7 +72,7 @@ public class ShibbolethSecurity extends controllers.shib.Security {
 
             flash.success("Welcome, " + person.name + ' ' + person.surname);
             Logger.info("Person %s successfully logged in", person.user.username);
-            Logger.trace("Permission list for %s %s: %s", person.name, person.surname, person.user.permissions);
+            Logger.trace("Permission list for %s %s: %s", person.name, person.surname, person.user.usersRolesOffices);
 		} else {
 			Logger.warn("Person with email %s successfully logged in Shibboleth but unknonw to ePAS", eppn);
 		}

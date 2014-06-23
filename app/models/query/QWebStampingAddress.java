@@ -24,7 +24,7 @@ public class QWebStampingAddress extends EntityPathBase<WebStampingAddress> {
 
     public static final QWebStampingAddress webStampingAddress = new QWebStampingAddress("webStampingAddress");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final QConfiguration confParameters;
 

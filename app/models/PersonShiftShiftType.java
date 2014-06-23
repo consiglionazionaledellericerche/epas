@@ -9,11 +9,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
+
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
-import play.db.jpa.Model;
+
 
 /**
  * @author cristian
@@ -21,7 +23,7 @@ import play.db.jpa.Model;
  */
 @Entity
 @Table(name = "person_shift_shift_type")
-public class PersonShiftShiftType extends Model {
+public class PersonShiftShiftType extends BaseModel {
 
 	@Required
 	@ManyToOne

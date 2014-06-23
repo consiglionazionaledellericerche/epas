@@ -1,55 +1,59 @@
+#{extends 'modal.html' /}
+#{set modalHeader:'Creazione nuovo Tipo Orario per ' + office.name /}
+
+<div class="container-fluid">
+
 #{form @WorkingTimes.save()}
 
-<fieldset>
-<legend>Nuovo tipo orario</legend>
+  <input type="hidden" name="office.id" value="${office.id}"/>
 
+  <div class="well center">
+	<strong>Nome Orario </strong><input name="wtt.description" type="text"/>  
+  </div>
 
-<p class="lead">Nome nuovo tipo di orario <input name="wtt.description" type="text"/></p>
-
-
-<table class="table custom1">
-	<tr>
+  <table id="table-wtt" class="table center table-hover">
+	<tr class="info">
 		<th></th>
-		<th>Lunedì</th>
-		<th>Martedì</th>
-		<th>Mercoledì</th>
-		<th>Giovedì</th>
-		<th>Venerdì</th>
-		<th>Sabato</th>
-		<th>Domenica</th>
+		<th>Lun</th>
+		<th>Mar</th>
+		<th>Mer</th>
+		<th>Gio</th>
+		<th>Ven</th>
+		<th>Sab</th>
+		<th>Dom</th>
 	</tr>
 	<tr>
-		<td class="caratteristica">Tempo di lavoro giornaliero (in minuti)</td>
-		<td><input class="span1" name="wttd1.workingTime" type="number"/></td>
-		<td><input class="span1" name="wttd2.workingTime" type="number"/></td>
-		<td><input class="span1" name="wttd3.workingTime" type="number"/></td>
-		<td><input class="span1" name="wttd4.workingTime" type="number"/></td>
-		<td><input class="span1" name="wttd5.workingTime" type="number"/></td>
-		<td><input class="span1" name="wttd6.workingTime" type="number"/></td>
-		<td><input class="span1" name="wttd7.workingTime" type="number"/></td>
+		<td class="item warning">Tempo di lavoro giornaliero<br>(in minuti)</td>
+		<td><input name="wttd1.workingTime" type="number"/></td>
+		<td><input name="wttd2.workingTime" type="number"/></td>
+		<td><input name="wttd3.workingTime" type="number"/></td>
+		<td><input name="wttd4.workingTime" type="number"/></td>
+		<td><input name="wttd5.workingTime" type="number"/></td>
+		<td><input name="wttd6.workingTime" type="number"/></td>
+		<td><input name="wttd7.workingTime" type="number"/></td>
 	</tr>
-		<tr>
-		<td class="caratteristica">Tempo di lavoro minimo per diritto a intervallo pranzo (in minuti)</td>
-		<td><input class="span1" name="wttd1.mealTicketTime" type="number" /></td>
-		<td><input class="span1" name="wttd2.mealTicketTime" type="number" /></td>
-		<td><input class="span1" name="wttd3.mealTicketTime" type="number" /></td>
-		<td><input class="span1" name="wttd4.mealTicketTime" type="number" /></td>
-		<td><input class="span1" name="wttd5.mealTicketTime" type="number" /></td>
-		<td><input class="span1" name="wttd6.mealTicketTime" type="number" /></td>
-		<td><input class="span1" name="wttd7.mealTicketTime" type="number" /></td>
+	<tr>
+		<td class="item warning">Tempo di lavoro minimo per diritto a intervallo pranzo<br>(in minuti)</td>
+		<td><input name="wttd1.mealTicketTime" type="number" /></td>
+		<td><input name="wttd2.mealTicketTime" type="number" /></td>
+		<td><input name="wttd3.mealTicketTime" type="number" /></td>
+		<td><input name="wttd4.mealTicketTime" type="number" /></td>
+		<td><input name="wttd5.mealTicketTime" type="number" /></td>
+		<td><input name="wttd6.mealTicketTime" type="number" /></td>
+		<td><input name="wttd7.mealTicketTime" type="number" /></td>
 	</tr>
-		<tr>
-		<td class="caratteristica">Tempo minimo intervallo pranzo (in minuti)</td>
-		<td><input class="span1" name="wttd1.breakTicketTime" type="number" /></td>
-		<td><input class="span1" name="wttd2.breakTicketTime" type="number" /></td>
-		<td><input class="span1" name="wttd3.breakTicketTime" type="number" /></td>
-		<td><input class="span1" name="wttd4.breakTicketTime" type="number" /></td>
-		<td><input class="span1" name="wttd5.breakTicketTime" type="number" /></td>
-		<td><input class="span1" name="wttd6.breakTicketTime" type="number" /></td>
-		<td><input class="span1" name="wttd7.breakTicketTime" type="number" /></td>
+	<tr>
+		<td class="item warning">Durata minima intervallo pranzo<br>(in minuti)</td>
+		<td><input name="wttd1.breakTicketTime" type="number" /></td>
+		<td><input name="wttd2.breakTicketTime" type="number" /></td>
+		<td><input name="wttd3.breakTicketTime" type="number" /></td>
+		<td><input name="wttd4.breakTicketTime" type="number" /></td>
+		<td><input name="wttd5.breakTicketTime" type="number" /></td>
+		<td><input name="wttd6.breakTicketTime" type="number" /></td>
+		<td><input name="wttd7.breakTicketTime" type="number" /></td>
 	</tr>
-		<tr>
-		<td class="caratteristica">Giorno festivo</td>
+	<tr>
+		<td class="item warning">Giorno festivo</td>
 		<td><input type="checkbox" name="wttd1.holiday" value="true"/></td>
 		<td><input type="checkbox" name="wttd2.holiday" value="true"/></td>
 		<td><input type="checkbox" name="wttd3.holiday" value="true"/></td>
@@ -59,12 +63,16 @@
 		<td><input type="checkbox" name="wttd7.holiday" value="true"/></td>
 	</tr>
 
-</table>
-</fieldset>
-<div class="buttoncenter forminline">
-<input class="btn btn-primary" id="insertWorkingTime" type="submit" value="Ok"/>
+  </table>
+
+  <div class="center">
+    <input class="btn btn-primary" type="submit" value="Crea"/>
+  </div>
 #{/form}
-#{form @WorkingTimes.discard()}
-<input class="btn" id="back" type="submit" value="Indietro"/>
+
+	<br>
+	
+	#{include './_wttLegend.html' /}
+
 </div>
-#{/form}
+

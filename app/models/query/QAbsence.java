@@ -24,7 +24,7 @@ public class QAbsence extends EntityPathBase<Absence> {
 
     public static final QAbsence absence = new QAbsence("absence");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final SimplePath<play.db.jpa.Blob> absenceFile = createSimple("absenceFile", play.db.jpa.Blob.class);
 

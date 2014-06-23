@@ -24,7 +24,7 @@ public class QStamping extends EntityPathBase<Stamping> {
 
     public static final QStamping stamping = new QStamping("stamping");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final QBadgeReader badgeReader;
 
@@ -44,6 +44,8 @@ public class QStamping extends EntityPathBase<Stamping> {
     public final BooleanPath persistent = _super.persistent;
 
     public final QPersonDay personDay;
+
+    public final BooleanPath serviceStamping = createBoolean("serviceStamping");
 
     public final QStampModificationType stampModificationType;
 

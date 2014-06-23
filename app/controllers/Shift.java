@@ -21,8 +21,6 @@ import models.exports.ShiftPeriods;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-import org.jsoup.HttpStatusException;
-
 import play.Logger;
 import play.data.binding.As;
 import play.db.jpa.JPA;

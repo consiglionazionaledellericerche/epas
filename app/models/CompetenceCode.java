@@ -8,8 +8,9 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
 import play.data.validation.Required;
-import play.db.jpa.Model;
+
 
 /**
  * tabella di decodifica dei codici di competenza
@@ -19,7 +20,7 @@ import play.db.jpa.Model;
  */
 @Entity
 @Table(name= "competence_codes")
-public class CompetenceCode extends Model {
+public class CompetenceCode extends BaseModel {
 	
 	private static final long serialVersionUID = 9211205948423608460L;
 

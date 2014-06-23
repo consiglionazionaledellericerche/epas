@@ -24,7 +24,7 @@ public class QPersonReperibility extends EntityPathBase<PersonReperibility> {
 
     public static final QPersonReperibility personReperibility = new QPersonReperibility("personReperibility");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final DatePath<org.joda.time.LocalDate> endDate = createDate("endDate", org.joda.time.LocalDate.class);
 

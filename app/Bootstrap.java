@@ -1,20 +1,21 @@
-import models.CompetenceCode;
-import models.ConfGeneral;
-import models.Configuration;
+
+import java.util.List;
+
+import org.joda.time.LocalDate;
+
 import models.Office;
 import models.Permission;
-import models.Qualification;
-import models.StampModificationType;
-import models.StampType;
-import models.VacationCode;
+import models.Person;
+import models.Role;
+import models.User;
+import models.UsersRolesOffices;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
-import models.enumerate.ConfigurationFields;
 import play.Logger;
 import play.Play;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
-import play.test.Fixtures;
+import controllers.Security;
 
 
 /**
@@ -34,8 +35,16 @@ public class Bootstrap extends Job {
 			return;
 		}
 		
+
+		convertPersonBornDateHandler();
+		
+		cleanOfficeTree();
+		
+		bootstrapPermissionsHandler();
+		
 		try
 		{
+			/*
 			if(Qualification.count() == 0){
 				Fixtures.loadModels("absenceTypesAndQualifications.yml");
 				Logger.info("Create qualifiche e codici di assenza");
@@ -90,6 +99,59 @@ public class Bootstrap extends Job {
 				Logger.info("Creato ufficio di default con nome %s e codice %s", instituteName, seatCode);
 			}
 			
+			*/
+			
+			if(User.count() == 0){
+				
+				/*
+				
+				User admin = new User();
+				admin.username = "admin";
+				admin.password = Codec.hexMD5("personnelEpasNewVersion");
+				admin.save();
+				
+				List<String> descPermissions = new ArrayList<String>();
+				descPermissions.add("insertAndUpdateOffices");
+				descPermissions.add("viewPersonList");
+				descPermissions.add("deletePerson");
+//				descPermissions.add("insertAndUpdateStamping");
+				descPermissions.add("insertAndUpdatePerson");
+//				descPermissions.add("insertAndUpdateWorkingTime");
+//				descPermissions.add("insertAndUpdateAbsence");
+				descPermissions.add("insertAndUpdateConfiguration");
+				descPermissions.add("insertAndUpdatePassword");
+				descPermissions.add("insertAndUpdateAdministrator");
+//				descPermissions.add("insertAndUpdateCompetences");
+//				descPermissions.add("insertAndUpdateVacations");
+//				descPermissions.add("viewPersonalSituation");
+//				descPermissions.add("uploadSituation");
+				
+				List<Permission> permissions = Permission.find("description in (?1)", descPermissions).fetch();
+				
+				List<UsersPermissionsOffices> usersPermissionOffices = new ArrayList<UsersPermissionsOffices>(); 
+				
+				Office office = Office.findById(1L);
+				if(office == null){
+					office = new Office();
+					office.save();
+				}
+				
+				for (Permission p: permissions){
+					UsersPermissionsOffices upo = new UsersPermissionsOffices();
+					upo.office = office;
+					upo.user = admin;
+					upo.permission = p;
+					upo.save();
+					usersPermissionOffices.add(upo);
+				}
+				
+				admin.userPermissionOffices = usersPermissionOffices;
+				admin.save();
+				
+				*/
+		
+			}
+			
 //			Person admin = Person.find("byUsername", "admin").first();
 //			if(admin!=null && admin.office==null){
 //				admin.office = (Office)Office.findAll().get(0);
@@ -97,9 +159,75 @@ public class Bootstrap extends Job {
 //				
 //			}
 			
+			/*
+			
+			//Fix Creazione configurazione 2012 se non esiste
+			List<ConfYear> confYearList = ConfYear.find("byYear", 2012).fetch();
+			if(confYearList.size() == 0) {
+				
+				List<ConfYear> confYear2013 = ConfYear.find("byYear", 2013).fetch();
+				for(ConfYear confYear : confYear2013) {
+					ConfYear newConf2012 = new ConfYear();
+					newConf2012.field = confYear.field;
+					newConf2012.fieldValue = confYear.fieldValue;
+					newConf2012.office = confYear.office;
+					newConf2012.year = 2012;
+					newConf2012.save();
+				}
+				
+			}
+			
+			*/
+
+			/*
+			//FIX seat IIT, creo la sede pisa e IIT diventa l'istituto 
+			Office iit = Office.find("byName", "IIT").first();
+			if(iit!=null) {
+				iit.code = 1;
+				iit.name = "Istituto Informatica e Telematica";
+				iit.contraction = "IIT";
+				iit.save();
+				if(iit.persons.size()!=0) {
+
+					RemoteOffice iitpisa = new RemoteOffice();
+					iitpisa.name = "IIT - Pisa";
+					iitpisa.code = iit.code;
+					iitpisa.address = iit.address;
+					iitpisa.joiningDate = new LocalDate(2013,1,1);
+					iitpisa.office = iit;
+					iitpisa.save();
+
+					for(Person person : iit.persons) {
+
+						person.office = iitpisa;
+						person.save();
+					}
+
+					for(ConfYear confYear : iit.confYear) {
+
+						confYear.office = iitpisa;
+						confYear.save();
+					}
+
+					for(ConfGeneral confGeneral : iit.confGeneral) {
+
+						confGeneral.office = iitpisa;
+						confGeneral.save();
+					}
+
+					for(UsersPermissionsOffices upo : iit.userPermissionOffices) {
+
+						upo.office = iitpisa;
+						upo.save();
+					}
+
+				}
+			}
+			
+			*/
 			
 
-	
+			
 		}
 		catch(RuntimeException e)
 		{
@@ -167,5 +295,348 @@ public class Bootstrap extends Job {
 			wttd.save();
 			Logger.debug("Creato il WorkingTimeTypeDay per il giorno %d del WorkingTimeType %s", dayOfWeek, wttNew.description);
 		}
+	}
+	
+	
+	private static void bootstrapPermissionsHandler() {
+		
+		/* Metodo provvisiorio per popolare la tabella Permissions con i nuovi permessi */
+		
+		Permission permission;
+
+		if (Permission.find("byDescription", Security.DEVELOPER).first() == null) {
+			
+			Role role = new Role();
+			role.name = Role.PERSONNEL_ADMIN;
+			role.save();
+			
+			Role roleMini = new Role();
+			roleMini.name = Role.PERSONNEL_ADMIN_MINI;
+			
+			permission = new Permission();
+			permission.description = Security.DEVELOPER;
+			permission.save();
+			
+			permission = new Permission();
+			permission.description = Security.EMPLOYEE;
+			permission.save();
+			
+			permission = new Permission();
+			permission.description = Security.VIEW_PERSON;
+			permission.save();
+			role.permissions.add(permission);
+			roleMini.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.EDIT_PERSON;
+			permission.save();
+			role.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.VIEW_PERSON_DAY;
+			permission.save();
+			role.permissions.add(permission);
+			roleMini.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.EDIT_PERSON_DAY;
+			permission.save();
+			role.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.VIEW_COMPETENCE;
+			permission.save();
+			role.permissions.add(permission);
+			roleMini.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.EDIT_COMPETENCE;
+			permission.save();
+			role.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.UPLOAD_SITUATION;
+			permission.save();
+			role.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.VIEW_ABSENCE_TYPE;
+			permission.save();
+			role.permissions.add(permission);
+			roleMini.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.EDIT_ABSENCE_TYPE;
+			permission.save();
+			role.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.VIEW_CONFIGURATION;
+			permission.save();
+			role.permissions.add(permission);
+			roleMini.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.EDIT_CONFIGURATION;
+			permission.save();
+			role.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.VIEW_OFFICE;
+			permission.save();
+			role.permissions.add(permission);
+			roleMini.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.EDIT_OFFICE;
+			permission.save();
+			role.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.VIEW_WORKING_TIME_TYPE;
+			permission.save();
+			role.permissions.add(permission);
+			roleMini.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.EDIT_WORKING_TIME_TYPE;
+			permission.save();
+			role.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.VIEW_COMPETENCE_CODE;
+			permission.save();
+			role.permissions.add(permission);
+			roleMini.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.EDIT_COMPETENCE_CODE;
+			permission.save();
+			role.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.VIEW_ADMINISTRATOR;
+			permission.save();
+			role.permissions.add(permission);
+			roleMini.permissions.add(permission);
+			
+			permission = new Permission();
+			permission.description = Security.EDIT_ADMINISTRATOR;
+			permission.save();
+			role.permissions.add(permission);
+			
+			role.save();
+			roleMini.save();
+			
+			/* ADMIN per IIT  
+			Person person = Person.find("bySurname", "Lucchesi").first();
+			UsersRolesOffices uro = new UsersRolesOffices();
+			uro.user = person.user;
+			uro.role = Role.find("byName", Role.PERSONNEL_ADMIN).first();
+			uro.office = person.office;
+			uro.save();
+			
+			/* ADMIN_MINI per COSENZA 
+			UsersRolesOffices uro2 = new UsersRolesOffices();
+			uro2.user = person.user;
+			uro2.role = Role.find("byName", Role.PERSONNEL_ADMIN_MINI).first();
+			uro2.office = Office.find("byCode", new Integer("223410")).first();
+			uro2.save();
+			*/
+		}
+		
+		
+		
+		//Ogni ufficio deve essere associato ad admin
+		User admin = User.find("byUsername", "admin").first();
+		Role role = Role.find("byName", Role.PERSONNEL_ADMIN).first();
+
+		List<Office> officeList = Office.findAll();
+		for(Office office : officeList) {
+			UsersRolesOffices uro = UsersRolesOffices.find("Select uro from UsersRolesOffices uro "
+					+ "where uro.office = ? and uro.user = ? and uro.role = ?", office, admin, role).first();
+			if(uro==null) {
+				uro = new UsersRolesOffices();
+				uro.user = admin;
+				uro.office = office;
+				uro.role = role;
+				uro.save();
+			}
+		}
+	
+	}
+
+
+	private static void convertPersonBornDateHandler() {
+		
+		//FIXME applicare l'evoluzione che crea il campo e lanciare questo metodo
+		//oppure migliorare l'evoluzione che effettui direttamente la conversione 
+		//da Date a LocalDate. In ogni caso va eliminato il campo born_date
+		
+		List<Person> personList = Person.findAll();
+		for(Person person : personList) {
+			
+			if(person.bornDate != null) {
+				person.birthday = new LocalDate(person.bornDate);
+				person.bornDate = null;
+				person.save();
+			}
+		}
+	}
+	
+	private static void cleanOfficeTree() {
+		
+		//Primo livello AREA
+		
+		//Secondo livello ISTITUTO
+		
+		//Terzo livello SEDE
+		
+		Office areaPisa = Office.find("byName", "Area CNR Pisa").first();
+		if(areaPisa == null) {
+			
+			areaPisa = new Office();
+			areaPisa.name = "Area CNR Pisa";
+			areaPisa.code = null;
+			areaPisa.address = null;
+			areaPisa.contraction = null;
+			areaPisa.joiningDate = null;
+			areaPisa.confGeneral = null;
+			areaPisa.save();
+			
+		}
+		
+		
+		if(areaPisa.subOffices.size() == 0) {
+			
+			Office iit = new Office();
+			iit.name = "Istituto IIT";
+			iit.address = null;
+			iit.code = null;
+			iit.contraction = "IIT";
+			iit.joiningDate = null;
+			iit.office = areaPisa;
+			iit.confGeneral = null;
+			iit.save();
+		}
+		
+		
+		Office iit = Office.find("byName", "Istituto IIT").first();
+		if(iit.subOffices.size()  == 0) {
+			
+			Office iitPisa = Office.find("byCode", 223400).first();
+			Office iitCos = Office.find("byCode", 223410).first();
+			
+			iitPisa.office = iit;
+			iitPisa.name = "IIT - Pisa";
+			iitPisa.save();
+			
+			iitCos.office = iit;
+			iitCos.save();
+		}
+		
+		/**
+		 * 
+		 * CREAZIONE ISTI
+		 * 
+		 * 
+		 */
+		
+		/*
+		if(areaPisa.subOffices.size() == 1) {
+			
+			Office isti = new Office();
+			isti.name = "Istituto ISTI";
+			isti.address = null;
+			isti.code = null;
+			isti.contraction = "ISTI";
+			isti.joiningDate = null;
+			isti.office = areaPisa;
+			isti.save();
+		}
+		
+		
+		Office isti = Office.find("byName", "Istituto ISTI").first();
+		if(isti.subOffices.size()  == 0) {
+			
+			Office seatIsti1 = new Office();
+			seatIsti1.name = "Istituto ISTI Sede 1";
+			seatIsti1.address = null;
+			seatIsti1.code = 1;
+			seatIsti1.contraction = "Sede1";
+			seatIsti1.joiningDate = null;
+			seatIsti1.office = isti;
+			seatIsti1.save();
+
+			Office seatIsti2 = new Office();
+			seatIsti2.name = "Istituto ISTI Sede 2";
+			seatIsti2.address = null;
+			seatIsti2.code = 2;
+			seatIsti2.contraction = "Sede2";
+			seatIsti2.joiningDate = null;
+			seatIsti2.office = isti;
+			seatIsti2.save();
+
+		}
+		*/
+		
+		/**
+		 * 
+		 * CREAZIONE AREA ROMANA
+		 * 
+		 */
+		
+		/*
+		Office areaRoma = Office.find("byName", "Area CNR Roma").first();
+		if(areaRoma == null) {
+			
+			areaRoma = new Office();
+			areaRoma.name = "Area CNR Roma";
+			areaRoma.code = null;
+			areaRoma.address = null;
+			areaRoma.contraction = null;
+			areaRoma.joiningDate = null;
+			areaRoma.save();
+		}
+		
+		
+		if(areaRoma.subOffices.size() == 0) {
+			
+			Office roma = new Office();
+			roma.name = "Istituto Romano";
+			roma.address = null;
+			roma.code = null;
+			roma.contraction = "IIT";
+			roma.joiningDate = null;
+			roma.office = areaRoma;
+			roma.save();
+		}
+		
+		
+		Office romaInst = Office.find("byName", "Istituto Romano").first();
+		if(romaInst.subOffices.size()  == 0) {
+			
+			Office seatRoma1 = new Office();
+			seatRoma1.name = "Istituto Romano Sede 1";
+			seatRoma1.address = null;
+			seatRoma1.code = 1;
+			seatRoma1.contraction = "Sede1";
+			seatRoma1.joiningDate = null;
+			seatRoma1.office = romaInst;
+			seatRoma1.save();
+
+			Office seatRoma2 = new Office();
+			seatRoma2.name = "Istituto Romano Sede 2";
+			seatRoma2.address = null;
+			seatRoma2.code = 2;
+			seatRoma2.contraction = "Sede2";
+			seatRoma2.joiningDate = null;
+			seatRoma2.office = romaInst;
+			seatRoma2.save();
+
+		}
+		
+		*/
+		
 	}
 }

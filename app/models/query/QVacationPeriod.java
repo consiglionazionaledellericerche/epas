@@ -24,7 +24,7 @@ public class QVacationPeriod extends EntityPathBase<VacationPeriod> {
 
     public static final QVacationPeriod vacationPeriod = new QVacationPeriod("vacationPeriod");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final DatePath<org.joda.time.LocalDate> beginFrom = createDate("beginFrom", org.joda.time.LocalDate.class);
 

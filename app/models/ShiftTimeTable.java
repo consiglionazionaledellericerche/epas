@@ -8,14 +8,16 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
+
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDateTime;
 
-import play.db.jpa.Model;
+
 
 @Entity
 @Table(name="shift_time_table")
-public class ShiftTimeTable extends Model{
+public class ShiftTimeTable extends BaseModel{
 
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDateTime")
 	public LocalDateTime startShift;

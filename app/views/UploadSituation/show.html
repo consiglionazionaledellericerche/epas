@@ -1,45 +1,66 @@
-#{extends 'main_with_navbar.html' /}
-#{set titolo: 'Invio attestati' /} 
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Invio Attestati'  /}
 
-<h3 >Caricamento situazione mensile del personale</h3>
-<!--  id="caricamentoSituazioneMensile" -->
-<p>Questa procedura può:</p>
+<div class="container">
 
-<ul>
-  	<li>Produrre il file per caricare i dati della assenze e delle competeze sul sistema degli attestati di presenza dell'amministrazione centrale del CNR</li>
-  	<li>Validare i dati caricati tramite file sul sistema centrale del CNR e riportare eventuali errori segnalati da quest'ultimo</li>
-</ul>
 
-#{form @UploadSituation.uploadSituation()}
-<div>
-<p>Scegli anno e mese di assenze e competenze con cui vuoi popolare il file da inviare agli attestati di presenza</p>
-	
-	#{select 'year', value: mainMenu.year, id:'year'}
-		#{option 2013}2013#{/option}
-		#{option 2014}2014#{/option}
-		#{option 2015}2015#{/option}
-	#{/select}
-	
-	#{select 'month', value: mainMenu.month, id:'month'}
-		#{option 1}Gennaio#{/option}
-		#{option 2}Febbraio#{/option}
-		#{option 3}Marzo#{/option}
-		#{option 4}Aprile#{/option}
-		#{option 5}Maggio#{/option}
-		#{option 6}Giugno#{/option}
-		#{option 7}Luglio#{/option}
-		#{option 8}Agosto#{/option}
-		#{option 9}Settembre#{/option}
-		#{option 10}Ottobre#{/option}
-		#{option 11}Novembre#{/option}
-		#{option 12}Dicembre#{/option}
-	#{/select}
+    <div class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title text-center">Caricamento situazione mensile del personale</h3>
+      </div>
+      <div class="panel-body">
+
+		<p>Questa procedura può:
+		
+		<ul>
+		  	<li>Produrre il file per caricare i dati della assenze e delle competeze sul sistema degli attestati di presenza dell'amministrazione centrale del CNR</li>
+		  	<li>Validare i dati caricati tramite file sul sistema centrale del CNR e riportare eventuali errori segnalati da quest'ultimo</li>
+		</ul>
+		
+		</p>
+		
+		
+		<div class="well center">
+		#{form @UploadSituation.uploadSituation()}
+		<div class="center">
+		<p>Scegli anno e mese di assenze e competenze per i quali vuoi popolare il file da inviare agli attestati di presenza</p>
+			
+			#{select 'year', value: year, id:'year'}
+				#{option 2013}2013#{/option}
+				#{option 2014}2014#{/option}
+				#{option 2015}2015#{/option}
+			#{/select}
+			
+			#{select 'month', value: month, id:'month'}
+				#{option 1}Gennaio#{/option}
+				#{option 2}Febbraio#{/option}
+				#{option 3}Marzo#{/option}
+				#{option 4}Aprile#{/option}
+				#{option 5}Maggio#{/option}
+				#{option 6}Giugno#{/option}
+				#{option 7}Luglio#{/option}
+				#{option 8}Agosto#{/option}
+				#{option 9}Settembre#{/option}
+				#{option 10}Ottobre#{/option}
+				#{option 11}Novembre#{/option}
+				#{option 12}Dicembre#{/option}
+			#{/select}
+		</div>
+		
+		<br>
+		
+		<div class="center">
+		 	<input type="submit" name="creaFile" value="Crea file" class="btn btn-primary"/>
+			<input type="submit" name="loginAttestati" value="Login attestati" class="btn"/>
+			<input type="submit" name="back" value="Indietro" class="btn"/>
+		</div>
+		#{/form}
+		</div>
+		
+		
+		
+	  </div>
+	</div>	
+
 </div>
-
-<div style="margin-top: 1em">
- 	<input type="submit" name="creaFile" value="Crea file" class="btn btn-primary"/>
-	<input type="submit" name="loginAttestati" value="Login attestati" class="btn"/>
-	<input type="submit" name="back" value="Indietro" class="btn"/>
-</div>
-#{/form}
-

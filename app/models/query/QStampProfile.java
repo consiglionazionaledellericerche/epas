@@ -24,7 +24,7 @@ public class QStampProfile extends EntityPathBase<StampProfile> {
 
     public static final QStampProfile stampProfile = new QStampProfile("stampProfile");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final DatePath<org.joda.time.LocalDate> endTo = createDate("endTo", org.joda.time.LocalDate.class);
 

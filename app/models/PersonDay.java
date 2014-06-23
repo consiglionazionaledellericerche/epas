@@ -25,9 +25,9 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import models.Stamping.WayType;
+import models.base.BaseModel;
 import models.enumerate.JustifiedTimeAtWork;
 
-import org.apache.commons.mail.EmailException;
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -35,10 +35,9 @@ import org.joda.time.DateTimeFieldType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
-import play.Logger;
 import play.data.validation.Required;
 import play.db.jpa.JPA;
-import play.db.jpa.Model;
+
 
 /**
  * Classe che rappresenta un giorno, sia esso lavorativo o festivo di una persona.
@@ -50,7 +49,7 @@ import play.db.jpa.Model;
 @Entity
 @Audited
 @Table(name="person_days", uniqueConstraints = { @UniqueConstraint(columnNames={ "person_id", "date"}) })
-public class PersonDay extends Model {
+public class PersonDay extends BaseModel {
 
 
 	@Required
@@ -341,15 +340,20 @@ public class PersonDay extends Model {
 		}
 	
 		//Il pranzo e' servito??		
-		this.stampModificationType = null;
-		int breakTicketTime = getWorkingTimeTypeDay().breakTicketTime;	//30 minuti
-		int mealTicketTime = getWorkingTimeTypeDay().mealTicketTime;	//6 ore
-		if(mealTicketTime == 0){
+		WorkingTimeTypeDay wttd = getWorkingTimeTypeDay();
+		
+		
+		//se mealTicketTime è zero significa che il dipendente nel giorno non ha diritto al calcolo del buono pasto
+		if( ! wttd.mealTicketEnabled() ) {
+			
 			setIsTickeAvailable(false);
 			return workTime + justifiedTimeAtWork;
 		}
-			
 		
+		int mealTicketTime = wttd.mealTicketTime;					//6 ore
+		int breakTicketTime = wttd.breakTicketTime;					//30 minuti
+		
+		this.stampModificationType = null;
 		List<PairStamping> gapLunchPairs = getGapLunchPairs(validPairs);
 		
 		//ha timbrato per il pranzo ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -446,7 +450,7 @@ public class PersonDay extends Model {
 	 * @return la differenza tra l'orario di lavoro giornaliero e l'orario standard in minuti
 	 */
 	private void updateDifference(){
-	
+		
 		//int worktime = this.person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(this.date.getDayOfWeek()).workingTime;
 		int worktime = this.person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(this.date.getDayOfWeek()).workingTime;
 		
@@ -579,7 +583,6 @@ public class PersonDay extends Model {
 	/**
 	 * (1) Controlla che il personDay sia ben formato (altrimenti lo inserisce nella tabella PersonDayInTrouble.
 	 * (2) Popola i valori aggiornati del person day e li persiste nel db
-	 * @throws EmailException 
 	 */
 	public void populatePersonDay()
 	{
@@ -687,7 +690,6 @@ public class PersonDay extends Model {
 	 * fixed.
 	 * @param pd
 	 * @param person
-	 * @throws EmailException 
 	 */
 	public void checkForPersonDayInTrouble()
 	{
@@ -760,7 +762,6 @@ public class PersonDay extends Model {
 	
 	/**
 	 * Metodo da utilizzare per la modifica del personDay che impatta su tutto il mese
-	 * @throws EmailException 
 	 */
 	public void updatePersonDaysInMonth()
 	{
@@ -791,7 +792,17 @@ public class PersonDay extends Model {
 	 * @return 
 	 */
 	private WorkingTimeTypeDay getWorkingTimeTypeDay(){
-		return person.getWorkingTimeType(date).workingTimeTypeDays.get(date.getDayOfWeek()-1);
+		
+		//return person.getWorkingTimeType(date).workingTimeTypeDays.get(date.getDayOfWeek()-1);
+		WorkingTimeType wtt = person.getWorkingTimeType(date);
+		if(wtt == null)
+			return null;
+		
+		WorkingTimeTypeDay wttd = wtt.workingTimeTypeDays.get(date.getDayOfWeek()-1);
+		if(wttd == null)
+			return null;
+		
+		return wttd;
 	}
 
 	/**
@@ -799,8 +810,8 @@ public class PersonDay extends Model {
 	 * @return 
 	 */
 	private boolean isTicketAvailableForWorkingTime(){
-		WorkingTimeType wtt = person.getWorkingTimeType(date);
-		if(wtt.mealTicketEnabled)
+		
+		if( this.getWorkingTimeTypeDay().mealTicketEnabled() )
 		{
 			return true;
 		}
@@ -958,7 +969,7 @@ public class PersonDay extends Model {
 		Integer mealTimeStartMinute = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_start_minute", person.office));
 		Integer mealTimeEndHour = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_end_hour", person.office));
 		Integer mealTimeEndMinute = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_end_minute", person.office));
-		ConfGeneral conf = ConfGeneral.getConfGeneral();
+		//ConfGeneral conf = ConfGeneral.getConfGeneral();
 		LocalDateTime startLunch = new LocalDateTime()
 		.withYear(this.date.getYear())
 		.withMonthOfYear(this.date.getMonthOfYear())

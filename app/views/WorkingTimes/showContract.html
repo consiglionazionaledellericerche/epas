@@ -1,0 +1,41 @@
+#{extends 'modal.html' /}
+#{set modalHeader:'Cotratti attivi associati a ' + wtt.description /}
+
+<div class="container-fluid">
+
+    <table class="table table-condensed table-hover">
+	  <tr>
+	    <th>Nome</th>
+	    <th>Inizio</th>
+	    <th>Fine</th>
+	  </tr>
+	  #{list items:contractList, as:'contract'}
+	  
+	  
+
+	    <tr>
+	      <td>${contract.person.surname} ${contract.person.name}</td>
+	      <td>${contract.beginContract}</td>
+	      <td>
+	        ${contract.expireContract}
+	      </td>
+	    </tr>
+
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+		
+	  #{/list}
+	</table>
+
+
+
+
+
+</div>

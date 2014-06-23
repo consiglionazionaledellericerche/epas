@@ -8,7 +8,6 @@ public enum ActionMenuItem {
 	stampingsAdmin("Timbrature", "insertAndUpdateStamping"),
     personList("Lista persone", "insertAndUpdatePerson"),
     yearlyAbsences("Assenze annuali", "insertAndUpdateAbsence"),
-//    absencesAdmin("Gestione assenze", "insertAndUpdateAbsence"),
     manageAttachments("Gestione allegati", "insertAndUpdateAbsence"),
     vacationsAdmin("Gestione ferie e permessi", "insertAndUpdateVacations"),
     competencesAdmin("Gestione competenze", "insertAndUpdateCompetences"),    
@@ -36,10 +35,8 @@ public enum ActionMenuItem {
 	hourrecap("Riepilogo orario", "viewPersonalSituation"),
 	printPersonTag("Stampa cartellino presenze", "viewPersonalSituation"),
 	trainingHours("Ore di formazione", "viewPersonalSituation");
-	
-	//changePassword("", "");
 
-    
+	
     private String description;
     private String permission;
 

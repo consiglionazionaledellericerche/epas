@@ -56,7 +56,7 @@ public class DateUtility {
 		
 		/*TODO: da riverificare*/
 		if(office == null)
-			office = Security.getUser().person.office;
+			office = Security.getUser().get().person.office;
 		Integer monthOfPatron = Integer.parseInt(ConfGeneral.getFieldValue("month_of_patron", office));
 		Integer dayOfPatron = Integer.parseInt(ConfGeneral.getFieldValue("day_of_patron", office));
 		/*fine pezzo da verificare*/

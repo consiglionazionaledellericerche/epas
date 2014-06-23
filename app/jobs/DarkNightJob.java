@@ -23,6 +23,7 @@ public class DarkNightJob extends Job{
 			PersonUtility.fixPersonSituation(-1l, 2014, 1, userLogged);
 		} catch (EmailException e) {
 			// TODO Auto-generated catch block
+			Logger.error("Generata eccezione durante il lancio della fixPersonSituation");
 			e.printStackTrace();
 		}
 		

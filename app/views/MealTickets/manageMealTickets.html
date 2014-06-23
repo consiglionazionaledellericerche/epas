@@ -1,0 +1,144 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione buoni pasto'  /}
+
+#{set 'moreStyles'}
+ 
+#{/set}
+
+<div class="container">
+  
+  <h3>Attribuzione buoni pasto terzo trimestre 2014 (luglio-settembre)</h3>
+  <br>
+  
+  #{form action:@MealTickets.manageMealTickets(), class:'form', 
+    method:'GET', autocomplete:'off',
+    'data-reload':'#results'}
+    
+    <span class="glyphicon glyphicon-search"></span>
+    <input type="hidden" name="year" value="${year}" />
+    <input type="hidden" name="quarter" value="${quarter}" />
+    <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="search-query"/>
+
+  #{/form}
+  <br>
+  
+  <section id="results">
+
+  #{list items:personNoTicket, as:'person'}
+   
+    <div class="panel panel-default">
+      <div class="panel-body center">
+ 
+	    #{form @MealTickets.submitPersonMealTicketInQuarter() }
+		  <input type="hidden" name="personId" value="${person.id}"/>
+	      <input type="hidden" name="year" value="${year}" />
+	      <input type="hidden" name="quarter" value="${quarter}" />
+	      
+		  <p>${person.name} ${person.surname}</p>
+		  <table class="table table-bordered">
+		    <tr>
+		      <th>Codice Blocco</th>
+		      <th>Dimensione Blocco</th>
+		      <th>Data Attribuzione</th>
+		      <th>Amministratore Assegnatario</th>
+		    </tr>
+		    <!-- blocco1 -->
+		    <tr>
+		      <td>
+		        <input type="number" name="codeBlock1"/>		      
+		      </td>
+		      <td>
+		        #{select 'dimBlock1'}
+	              #{option 22}${22}#{/option}
+	              #{option 23}${23}#{/option}
+		        #{/select}
+		      </td>
+		       <td>
+		        ${today}
+		      </td>
+		      <td>${admin.person.name} ${admin.person.surname}</td>
+		    </tr>
+		    <!-- blocco2 -->
+		    <tr>
+		      <td>
+		        <input type="number" name="codeBlock2"/>		      
+		      </td>
+		      <td>
+		        #{select 'dimBlock2'}
+	              #{option 22}${22}#{/option}
+	              #{option 23}${23}#{/option}
+		        #{/select}
+		      </td>
+		      <td>
+		        ${today}
+		      </td>
+		      <td>${admin.person.name} ${admin.person.surname}</td>
+		    </tr>
+		    <!-- blocco3 -->
+		    <tr>
+		      <td>
+		        <input type="number" name="codeBlock3"/>		      
+		      </td>
+		      <td>
+		        #{select 'dimBlock3'}
+	              #{option 23}${23}#{/option}
+	              #{option 22}${22}#{/option}
+		        #{/select}
+		      </td>
+		       <td>
+		        ${today}
+		      </td>
+		      <td>${admin.person.name} ${admin.person.surname}</td>
+		    </tr>
+		  </table>
+		  
+		  <button type="submit" class="btn btn-sm btn-primary">Salva</button>
+		#{/form}
+        
+      </div>
+    </div>
+   
+  #{/list}
+  
+  #{list items:personWithTicket, as:'person'}
+   
+    <div class="panel panel-default">
+      <div class="panel-body center bg-warning">
+
+		  <p>${person.name} ${person.surname}</p>
+		  <table class="table">
+		    <tr>
+		      <th>Codice Blocco</th>
+		      <th>Numero buoni</th>
+		    </tr>
+		    #{list items:person.getBlockMealTicketInQuarter(year,quarter), as:'block'}
+		      <tr style="background-color: white;">
+		        <td>${block.codeBlock}</td>
+		        
+		        <td>
+		          <a href="@{MealTickets.showPersonBlockMealTicket(person.id, block.codeBlock, year, quarter)}" data-modal=".my-modal">
+		            ${block.mealTickets.size()}
+		    	  </a> 
+		        </td>
+		        
+		      </tr>
+		    #{/list}
+		    
+		  </table>
+		  
+	      #{form @MealTickets.deletePersonMealTicketInQuarter() }
+		    <input type="hidden" name="personId" value="${person.id}"/>
+	        <input type="hidden" name="year" value="${year}" />
+	        <input type="hidden" name="quarter" value="${quarter}" />
+	        <button type="submit" class="btn btn-sm btn-danger">Elimina</button>
+		  #{/form}
+      </div>
+    </div>
+   
+  #{/list}
+   
+  </section>
+  
+</div>
+#{include '_myModal.html' /}

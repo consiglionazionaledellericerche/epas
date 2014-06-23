@@ -1,6 +1,9 @@
-<br>
-<br>
-<table class="table table-bordered table-hover">
+#{extends 'modal.html' /}
+#{set modalHeader: 'Modifica tipo orario per ' + contract.person.name + ' ' + contract.person.surname /}
+
+<div class="container-fluid"  style="padding-left: 0px; padding-right: 0px;">
+
+<table class="table table-bordered table-condensed" style="font-size: .9em;">
   <tr>
     <th>Inizio Periodo</th>
     <th>Fine Periodo</th>
@@ -41,8 +44,8 @@
 		  
 	    #{/select}
 	    <br>
-	    <input class="btn" type="submit" value="Cambia">
-      #{/form}
+	    <button type="submit" class="btn btn-default btn-xs">Cambia</button>
+	  #{/form}
       </td>
       
       <!-- Dividi periodo -->
@@ -52,24 +55,49 @@
         <input type="hidden" name="cwtt.id" value="${cwtt.id}" />
         <input name="splitDate" type="text" data-datepicker data-date-format="yyyy-mm-dd"/>
         <br>
-	    <input class="btn" type="submit" value="Dividi">
+	    <button type="submit" class="btn btn-default btn-xs">Dividi</button>
       #{/form}
       </td>
       
       <!-- Elimina periodo -->
       
       <td style="text-align: center;" >
-       #{if contract.contractWorkingTimeType.indexOf(cwtt) > 0}
+       #{if contract.contractWorkingTimeTypeAsList.indexOf(cwtt) > 0}
        #{form @Persons.deleteContractWorkingTimeType() }
         <input type="hidden" name="cwtt.id" value="${cwtt.id}" />
         <br>
-	    <input class="btn" type="submit" value="Elimina">
+        <button type="submit" class="btn btn-default"><i style="color:red;" class="fa fa-trash-o"></i></button>
+	    
        #{/form}
        #{/if}
       </td>
-      
-      
-      
+ 
     </tr>
   #{/list}
 </table>
+
+<div class="container-fluid well well-sm">
+  <strong>Procedura per cambiare il tipo orario</strong>
+  <p>Il software richiede che per ogni giorno di contratto sia specificato uno e uno solo tipo di orario.
+       Questa procedura guidata permette di definire il tipo orario e la rispettiva durata di validità per quanto desiderato.</p>
+  <ol>
+    <li>
+      <em>Individuare il periodo da specializzare fra quelli presenti in tabella
+       e specificare nella form <strong>Dividi Periodo</strong> la data a partire dalla quale entrerà in vigore il nuovo tipo orario</em>
+    </li>
+    <li>
+      <em>Impostare per il nuovo periodo creato il tipo di orario desiderato attraverso la form <strong>Cambia tipo orario</strong>.</em>
+    </li>
+    <li>
+      <em>Attraverso la funzione <strong>Elimina</strong> è possibile tornare alla situazione precedente.
+       Al periodo eliminato verrà attribuito il tipo orario del periodo precedente. Non è possibile eliminare il primo periodo.</em>
+    </li>
+  </ol>
+  
+   <strong>Attenzione!</strong>
+   <p>Il cambio di tipo orario per periodi passati del tutto o in parte causerà il ricalcolo di tutti i valori riguardanti i giorni
+   lavorati quali il tempo lavorato, la differenza rispetto al tempo giornaliero, i progressivi aggregati a livello mensile e i monte ore residui.</p>
+  
+</div>
+
+</div>

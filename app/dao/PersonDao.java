@@ -10,7 +10,6 @@ import models.Office;
 import models.Person;
 import models.query.QCompetenceCode;
 import models.query.QContract;
-import models.query.QLocation;
 import models.query.QPerson;
 import models.query.QPersonHourForOvertime;
 import models.query.QPersonReperibility;
@@ -41,7 +40,7 @@ public final class PersonDao {
 	 * @return la lista delle person corrispondenti
 	 */
 	public static SimpleResults<Person> list(Optional<String> name, Set<Office> offices, 
-			boolean onlyTechnician, LocalDate start, LocalDate end) {
+			boolean onlyTechnician, LocalDate start, LocalDate end, boolean onlyOnCertificate) {
 		
 		Preconditions.checkState(!offices.isEmpty());
 		
@@ -51,16 +50,16 @@ public final class PersonDao {
 		//final LocalDate start = new LocalDate();
 		//final LocalDate end = start;
 				
-		final JPQLQuery query = ModelQuery.queryFactory().from(qp)
-				.leftJoin(qp.contracts, qc)
-				.leftJoin(qp.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime)
-				.leftJoin(qp.location, QLocation.location)
-				.leftJoin(qp.reperibility, QPersonReperibility.personReperibility)
-				.leftJoin(qp.personShift, QPersonShift.personShift)
-				.leftJoin(qp.user, QUser.user)
-				.orderBy(qp.surname.asc(), qp.name.asc())
-				.distinct();
-				
+					
+		 final JPQLQuery query = ModelQuery.queryFactory().from(qp)
+					.leftJoin(qp.contracts, qc).fetch()
+					.leftJoin(qc.contractWorkingTimeType).fetch()
+					.leftJoin(qc.vacationPeriods).fetch()
+					.leftJoin(qp.personHourForOvertime).fetch()
+					.leftJoin(qp.reperibility).fetch()
+					.leftJoin(qp.personShift).fetch()
+					.orderBy(qp.surname.asc(), qp.name.asc())
+					.distinct();
 		
 		
 		final BooleanBuilder condition = new BooleanBuilder();
@@ -75,7 +74,9 @@ public final class PersonDao {
 			condition.andAnyOf(qp.name.startsWithIgnoreCase(name.get()),
 					qp.surname.startsWithIgnoreCase(name.get()));
 		}
-		condition.and(qc.onCertificate.isTrue());
+		
+		if(onlyOnCertificate)
+			condition.and(qc.onCertificate.isTrue());
 		
 		condition.andAnyOf(
 				
@@ -116,6 +117,7 @@ public final class PersonDao {
 		return ModelQuery.simpleResults(query, qp);
 	}
 	
+	
 	/**
 	 * @param name
 	 * @param offices obbligatorio
@@ -136,10 +138,10 @@ public final class PersonDao {
 				
 		final JPQLQuery query = ModelQuery.queryFactory().from(qp)
 				.leftJoin(qp.contracts, qc)
-				.leftJoin(qp.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime)
-				.leftJoin(qp.location, QLocation.location)
-				.leftJoin(qp.reperibility, QPersonReperibility.personReperibility)
-				.leftJoin(qp.personShift, QPersonShift.personShift)
+				.leftJoin(qp.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime).fetch()
+				//.leftJoin(qp.location, QLocation.location)
+				.leftJoin(qp.reperibility, QPersonReperibility.personReperibility).fetch()
+				.leftJoin(qp.personShift, QPersonShift.personShift).fetch()
 				.leftJoin(qp.user, QUser.user)
 				.leftJoin(qp.competenceCode, qcc)
 				.orderBy(qp.surname.asc(), qp.name.asc())

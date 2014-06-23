@@ -22,7 +22,7 @@ public class QStampModificationType extends EntityPathBase<StampModificationType
 
     public static final QStampModificationType stampModificationType = new QStampModificationType("stampModificationType");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final StringPath code = createString("code");
 

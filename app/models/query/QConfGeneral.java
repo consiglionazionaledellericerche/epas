@@ -24,7 +24,7 @@ public class QConfGeneral extends EntityPathBase<ConfGeneral> {
 
     public static final QConfGeneral confGeneral = new QConfGeneral("confGeneral");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
@@ -59,7 +59,7 @@ public class QConfGeneral extends EntityPathBase<ConfGeneral> {
 
     public QConfGeneral(Class<? extends ConfGeneral> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.office = inits.isInitialized("office") ? new QOffice(forProperty("office")) : null;
+        this.office = inits.isInitialized("office") ? new QOffice(forProperty("office"), inits.get("office")) : null;
     }
 
 }

@@ -36,16 +36,3 @@ Permission(viewPersonalSituation):
     
 Permission(uploadSituation):
     description: uploadSituation
-
-Person(admin):
-    username: admin
-    name: Admin
-    surname: Admin
-    # password = personnelEpasNewVersion
-    password: ec12b5b3f61c4445edc1e8046fe3f24d
-    email: admin@localhost
-    permissions: [viewPersonList, deletePerson, insertAndUpdatePerson, insertAndUpdateConfiguration, insertAndUpdateAdministrator]
-
-    
-
-

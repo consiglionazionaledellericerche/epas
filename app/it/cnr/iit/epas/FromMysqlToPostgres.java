@@ -15,12 +15,9 @@ import models.AbsenceType;
 import models.AbsenceTypeGroup;
 import models.Competence;
 import models.CompetenceCode;
-import models.ContactData;
 import models.Contract;
 import models.InitializationAbsence;
 import models.InitializationTime;
-import models.Location;
-import models.Permission;
 import models.Person;
 import models.PersonDay;
 import models.PersonMonthRecap;
@@ -171,7 +168,7 @@ public class FromMysqlToPostgres {
 
 	}
 
-	public static void importAll(int limit, int anno) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException, EmailException {
+	public static void importAll(int limit, int anno) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		Connection mysqlCon = FromMysqlToPostgres.getMysqlConnection();
 
 		String sqlVacationCode = "Select * from ferie";
@@ -285,9 +282,8 @@ public class FromMysqlToPostgres {
 
 	/**
 	 * controlla tutte le persone che hanno timbrature fisse 
-	 * @throws EmailException 
 	 */
-	public static void checkFixedWorkingTime() throws EmailException {
+	public static void checkFixedWorkingTime() {
 		Logger.debug("Controllo delle persone con timbratura fissa");
 		List<Person> activePerson = Person.getActivePersons(new LocalDate(2013,1,1));
 
@@ -357,12 +353,7 @@ public class FromMysqlToPostgres {
 	 * @throws SQLException
 	 */
 	public static void importAll(int anno) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
-		try {
-			importAll(0, anno);
-		} catch (EmailException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		importAll(0, anno);
 	}
 
 
@@ -377,7 +368,7 @@ public class FromMysqlToPostgres {
 			User user = new User();
 			 
 			
-			person.bornDate = rs.getDate("DataNascita");
+			//person.bornDate = rs.getDate("DataNascita"); //TODO adesso è un LocalDate
 			person.number = rs.getInt("Matricola");
 			person.badgeNumber = rs.getString("Matricolabadge");
 			person.oldId = rs.getLong("ID");
@@ -402,54 +393,51 @@ public class FromMysqlToPostgres {
 
 	public static void createContactData(ResultSet rs, Person person) throws SQLException {
 		Logger.trace("Inizio a creare il contact data per %s", person);
-		ContactData contactData = new ContactData();
-		contactData.person = person;
+		
+		
 
-		contactData.email = rs.getString("Email");
-		contactData.fax = rs.getString("Fax");
-		contactData.telephone = rs.getString("Telefono");
+		person.email = rs.getString("Email");
+		person.fax = rs.getString("Fax");
+		person.telephone = rs.getString("Telefono");
 
 		/**
 		 * controllo sui valori del campo Telefono e conseguente modifica sul nuovo db
 		 */
-		if(contactData.telephone != null){
-			if(contactData.telephone.length() == 4){
-				contactData.telephone = "+39050315" + contactData.telephone;
+		if(person.telephone != null){
+			if(person.telephone.length() == 4){
+				person.telephone = "+39050315" + person.telephone;
 			}
-			if(contactData.telephone.startsWith("315")){
-				contactData.telephone = "+39050" + contactData.telephone;
+			if(person.telephone.startsWith("315")){
+				person.telephone = "+39050" + person.telephone;
 			}	
-			if(contactData.telephone.startsWith("335")){
-				contactData.mobile = contactData.telephone;
-				contactData.telephone = "No internal number";
+			if(person.telephone.startsWith("335")){
+				person.mobile = person.telephone;
+				person.telephone = "No internal number";
 			}
-			if(contactData.telephone.length() == 2){
-				contactData.telephone = "No internal number";
+			if(person.telephone.length() == 2){
+				person.telephone = "No internal number";
 			}
-			if(contactData.telephone.startsWith("503")){
-				contactData.telephone = "+390" + contactData.telephone;
+			if(person.telephone.startsWith("503")){
+				person.telephone = "+390" + person.telephone;
 			}			
 
 		}
 		else{ 
 			Logger.info("Validazione numero di telefono non avvenuta. No phone number");
-			contactData.telephone = null;		
+			person.telephone = null;		
 		}
-		contactData.save();
+		person.save();
 		Logger.info("Creato %s", person);
 	}
 
 
 	public static void createLocation(ResultSet rs, Person person) throws SQLException{
 		Logger.debug("Inizio a creare la location per %s", person);
-		Location location = new Location();
-		location.person = person;
-
-		location.department = rs.getString("Dipartimento");
-		location.headOffice = rs.getString("Sede");
-		location.room = rs.getString("Stanza");		
-		location.save();
-		Logger.info("Creata %s", location);
+		person.department = rs.getString("Dipartimento");
+		person.headOffice = rs.getString("Sede");
+		person.room = rs.getString("Stanza");		
+		person.save();
+		Logger.info("Creata %s", person);
 	}
 
 
@@ -928,8 +916,7 @@ public class FromMysqlToPostgres {
 					Logger.debug("Il progressivo del personday del giorno appena trascorso da cui partire per fare i calcoli è: %s", pd.progressive);
 					PersonDay pdOld = PersonDay.findById(pd.id);
 
-					pdOld.populatePersonDay();
-					
+					pdOld.populatePersonDay();	
 					pdOld.merge();
 
 					Logger.debug("Il progressivo del personday del giorno appena trascorso assegnato a un nuovo personDay è: %s", pdOld.progressive);
@@ -999,7 +986,6 @@ public class FromMysqlToPostgres {
 				 */
 				pd.merge();
 				pd.populatePersonDay();
-				
 
 				Logger.debug("Il progressivo al termine del resultset è: %s e il differenziale è: %s", pd.progressive, pd.difference);
 				Logger.info("Creato %s", pd);
@@ -1398,21 +1384,29 @@ public class FromMysqlToPostgres {
 	 * metodo che consente permessi di "amministrazione" a un utente specificato
 	 */
 	public static void upgradePerson(){
+		
+		/* TODO i permessi non possono più essere importati perchè adesso occorre passare dai ruoli
 		Logger.debug("Chiamata la funzione upgrade person");
 		Person person = Person.find("bySurnameAndName", "Lucchesi", "Cristian").first();
 		Logger.debug("Scelta persona: %s %s", person.name, person.surname);
-		if(person.user.permissions.size() > 0){
-			List<Permission> oldPermissions = person.user.permissions;
-			person.user.permissions.removeAll(oldPermissions);
-			List<Permission> permissionList = Permission.findAll();
-			person.user.permissions.addAll(permissionList);
+		
+		 
+		if(person.user.userPermissionOffices.size() > 0){
+			List<UsersPermissionsOffices> oldPermissions = person.user.userPermissionOffices;
+			person.user.userPermissionOffices.removeAll(oldPermissions);
+			List<UsersPermissionsOffices> permissionList = UsersPermissionsOffices.find("Select upo from UsersPermissionsOffices upo where" +
+					" upo.user = ? and upo.office = ?", person.user, person.office).fetch();
+			person.user.userPermissionOffices.addAll(permissionList);
 		}
 		else{
-			List<Permission> permissionList = Permission.findAll();
-			person.user.permissions.addAll(permissionList);
+			List<UsersPermissionsOffices> permissionList = UsersPermissionsOffices.find("Select upo from UsersPermissionsOffices upo where" +
+					" upo.user = ? and upo.office = ?", person.user, person.office).fetch();
+			person.user.userPermissionOffices.addAll(permissionList);
 		}		
 		person.user.save();
 		person.save();
+		
+		*/
 
 	}
 
@@ -1421,14 +1415,21 @@ public class FromMysqlToPostgres {
 	 * situazione mensile
 	 */
 	public static void addPermissiontoAll(){
+		
+		/* TODO questo diritto è automatico con contratto attivo 
 		Logger.debug("Chiamata la funzione addPermissiontoAll");
 		List<User> userList = User.findAll();
 		Permission per = Permission.find("Select per from Permission per where per.description = ?", "viewPersonalSituation").first();
 		Logger.debug("Caricato il permesso: %s", per.description);
 		for(User u : userList){
-			u.permissions.add(per);
-			u.save();
+			UsersPermissionsOffices upo = new UsersPermissionsOffices();
+			upo.office = u.person.office;
+			upo.permission = per;
+			upo.user = u;
+			upo.save();
+			//u.save();
 		}
+		*/
 
 	}
 	/**
@@ -1635,8 +1636,7 @@ public class FromMysqlToPostgres {
 						Logger.debug("Il progressivo del personday del giorno appena trascorso da cui partire per fare i calcoli è: %s", pd.progressive);
 						PersonDay pdOld = PersonDay.findById(pd.id);
 
-						pdOld.populatePersonDay();
-							
+						pdOld.populatePersonDay();	
 						pdOld.merge();
 
 						Logger.debug("Il progressivo del personday del giorno appena trascorso assegnato a un nuovo personDay è: %s", pdOld.progressive);
@@ -1710,7 +1710,7 @@ public class FromMysqlToPostgres {
 					 */
 					pd.merge();
 					pd.populatePersonDay();
-					
+
 					Logger.debug("Il progressivo al termine del resultset è: %s e il differenziale è: %s", pd.progressive, pd.difference);
 					Logger.info("Creato %s", pd);
 				}

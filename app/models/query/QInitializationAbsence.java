@@ -24,7 +24,7 @@ public class QInitializationAbsence extends EntityPathBase<InitializationAbsence
 
     public static final QInitializationAbsence initializationAbsence = new QInitializationAbsence("initializationAbsence");
 
-    public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
+    public final models.base.query.QBaseModel _super = new models.base.query.QBaseModel(this);
 
     public final NumberPath<Integer> absenceDays = createNumber("absenceDays", Integer.class);
 

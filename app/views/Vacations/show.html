@@ -1,13 +1,21 @@
-#{extends 'main_with_navbar.html' /}
-#{set title:vacationsRecap.person.surname + ' ' + vacationsRecap.person.name + ', matricola=' + vacationsRecap.person.number /}
-#{set titolo: 'Situazione ferie e permessi anno ' + vacationsRecap.year + ' di ' + vacationsRecap.person.surname + ' ' + vacationsRecap.person.name /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title:'ePAS - Ferie e permessi' /}
 
-<div class="row">
-  <div class="container">
-	<p class="lead"><strong>Ferie</strong></p>
-  
-  	<table class="table vacation-recap">
-      <tr>
+<!-- container pagina ferie -->
+<div class="row-fluid container">
+   
+	
+	<div class="container col-xs-12 col-md-6">
+	<!-- panel Ferie -->
+	<div class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title">Ferie</h3>
+      </div>
+      <div class="panel-body">
+      
+      <table class="table table-bordered table-hover">
+      <tr class="warning">
         <th>Anno</th>
         <th>Totali (maturate)</th>
         <th>Utilizzate</th>
@@ -17,9 +25,15 @@
         <td>${vacationsRecap.year-1}</td>
         <td>${vacationsRecap.vacationDaysLastYearAccrued} (${vacationsRecap.vacationDaysLastYearAccrued})</td>
         <td>
-          <a data-toggle="modal" href="@{Vacations.vacationsLastYear(vacationsRecap.person.id, vacationsRecap.year)}" data-target="#myModal3">
+          #{if vacationsRecap.vacationDaysLastYearUsed.size() != 0 } 
+           <a data-toggle="modal" href="@{Vacations.vacationsLastYear(vacationsRecap.year)}" data-target="#myModal3">
 			${vacationsRecap.vacationDaysLastYearUsed.size()}
-	      </a> 
+		  </a>
+		  #{/if}
+		  #{else} 
+		    0 
+		  #{/else}
+          
 	    </td>
         <td>${vacationsRecap.vacationDaysLastYearNotYetUsed}</td>
       </tr>
@@ -27,21 +41,33 @@
         <td>${vacationsRecap.year}</td>
         <td>${vacationsRecap.vacationDaysCurrentYearTotal} (${vacationsRecap.vacationDaysCurrentYearAccrued})</td>
         <td>
-          <a data-toggle="modal" href="@{Vacations.vacationsCurrentYear(vacationsRecap.person.id, vacationsRecap.year)}" data-target="#myModal3">
+          #{if vacationsRecap.vacationDaysCurrentYearUsed.size() != 0 } 
+          <a data-toggle="modal" href="@{Vacations.vacationsCurrentYear(vacationsRecap.year)}" data-target="#myModal3">
 			${vacationsRecap.vacationDaysCurrentYearUsed.size()}
 		  </a>
+		  #{/if}
+		  #{else} 
+		    0 
+		  #{/else}
 		</td>
         <td>${vacationsRecap.vacationDaysCurrentYearAccrued - vacationsRecap.vacationDaysCurrentYearUsed.size()}</td>
       </tr>
   	</table>
-  
-  </div>
-  
-  <div class="container">
-	<p class="lead"><strong>Permessi legge 937/77</strong></p>
-  
-  	<table class="table vacation-recap">
-      <tr>
+      
+      </div>
+    </div> <!-- end panel Ferie -->
+	</div>
+	
+	<div class="container col-xs-12 col-md-6">
+	<!-- panel Permessi -->
+	<div class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title">Permessi legge 937/77</h3>
+      </div>
+      <div class="panel-body">
+      
+      <table class="table table-bordered table-hover">
+      <tr class="warning">
         <th>Anno</th>
         <th>Totali (maturati)</th>
         <th>Utilizzati</th>
@@ -51,24 +77,39 @@
         <td>${vacationsRecap.year}</td>
         <td>${vacationsRecap.permissionCurrentYearTotal} (${vacationsRecap.permissionCurrentYearAccrued})</td>
         <td>
-          <a data-toggle="modal" href="@{Vacations.permissionCurrentYear(vacationsRecap.person.id, vacationsRecap.year)}" data-target="#myModal3">
+        
+          #{if vacationsRecap.permissionUsed.size() != 0 } 
+            <a data-toggle="modal" href="@{Vacations.permissionCurrentYear(vacationsRecap.year)}" data-target="#myModal3">
 			${vacationsRecap.permissionUsed.size()}
-		  </a>
+		    </a>
+		  #{/if}
+		  #{else} 
+		    0 
+		  #{/else}
+         
         </td>
         <td>${vacationsRecap.permissionCurrentYearAccrued - vacationsRecap.permissionUsed.size()}</td>
       </tr>
   	</table>
-  
-  </div>
-</div>  
-  
-<div class="row">
- <div class="container">
-  <br>
-  <br>
-  <p class="lead">Piani ferie associati al contratto corrente</p>
-  <table class="table table-hover table-condensed vacation-recap">
-    <tr>
+      
+      
+      </div>
+    </div>  <!-- end panel Permessi -->
+    </div>
+	
+</div>
+	
+<div class="row-fluid container">
+    <div class="container col-xs-12 col-md-6">	
+	<!-- panel Piani -->
+	<div class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title">Piani ferie associati al contratto corrente</h3>
+      </div>
+      <div class="panel-body">
+      
+      <table class="table table-bordered table-hover center">
+    <tr class="info">
       <th>Descrizione</th>
       <th>Data inizio</th>
       <th>Data fine</th>
@@ -82,22 +123,31 @@
     </tr>
     #{/list}
     
-  </table>
- </div>
+    </table>
+      
+      
+      </div>
+    </div> <!-- end panel Piani -->
+    </div>
 </div>
 
+      
+ 
+
+<div class="modal fade" id="myModal3" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-center">
+    
+    <div class="modal-content">
+             
+    </div><!-- /.modal-content -->
+           
+    
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 
 
-<div id="myModal3" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">Ferie e permessi</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-   <!--   <button class="btn btn-primary">Save changes</button>-->
-  </div>
-</div>
+
+
+
+
+

@@ -1,88 +1,150 @@
-#{extends 'main_with_navbar.html' /}
-#{set titolo: 'Gestione Ferie e Permessi' /}
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Ferie e Permessi' /}
 
-<div class="container">
+#{set 'moreStyles'}
 
-<ul class="nav nav-tabs">
-  <li class="active"><a href="@{VacationsAdmin.list(year)}">Situazione ferie e permessi</a></li>
-  <li><a href="@{VacationsAdmin.manageVacationCode()}">Gestione Piani Ferie</a></li>
-</ul>
+<style>
+	/* allineamento centrato dei th con rowspan e colspan */
+	#tabella-ferie th {
+		vertical-align: inherit;
+	}
+</style>
 
+#{/set}
 
-<div class="span3">
-#{form action:@VacationsAdmin.list()	,  
-    method:'GET', autocomplete:'off',
-    'data-reload':'#results'}
-    <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="input-medium"/>
-    <i class="icon-search icon-large"></i>
-    <input type="hidden" name="year" value="${year}"/>
-#{/form}
-</div>
+<div class="container-fluid">
 
-<section id="results">
-
- <div class="pull-right">
- <div class="pagination pagination-centered" style="margin-top: 0px; margin-right: 0px;">
-  <ul>
-  	#{list items:0..simpleResults.totalPage-1, as:'indexPage', class:'inline'}
-  	  #{if simpleResults.page==indexPage}
-  	    <li class="active"><a href="#">${indexPage+1}</a></li>
-  	  #{/if}
-  	  #{else}
-  	    <li><a href="@{VacationsAdmin.list(year, name, indexPage)}">${indexPage+1}</a></li>
-  	  #{/else}
-	#{/list}
-  </ul>
- </div>
- </div>
+  <div class="panel panel-info">
+    <div class="panel-heading">
+      <h3 class="panel-title text-center">Situazione Ferie e Permessi per l'anno ${year}</h3>
+    </div>
+    <div class="panel-body">
+	
+        <div class="col-xs-5">
+          #{form action:@VacationsAdmin.list()	,  
+          method:'GET', autocomplete:'off',
+          'data-reload':'#results'}
+            <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="input-medium"/>
+            <i class="icon-search icon-large"></i>
+            <input type="hidden" name="year" value="${year}"/>
+         #{/form}
+        </div>
  
- <div class=span12>
-  <table class="table table-bordered table-condensed custom1">
-    <thead>
-      <tr>
-        <td rowspan="2">Nome</td>
-        <td colspan="2">Ferie fatte</td>
-        <td rowspan="2">Permessi legge<br>937/77 fatti</td>
-        <td colspan="3">Residuo</td>
-        <td colspan="2">Limiti utilizzo residui<br>per l'anno ${year}</td>
-      </tr>
-      <tr>
-        <td>${year-1}<br>anno precedente</td>
-        <td>${year}<br>anno richiesto</td>
-        <td>
-          ferie ${year-1}<br>
-          #{if isVacationLastYearExpired}
-            <i class="icon-remove" style="color: red;"></i>
-          #{/if}
-          #{else}
-            <i class="icon-ok" style="color: green;"></i>
-          #{/else}
-        </td>
-        <td>ferie ${year}</td>
-        <td>permessi</td>
-        <td>inizio</td>
-        <td>fine</td>
-      </tr>
-    </thead>
-    
-    <tbody>
-      #{list items:vacationsList, as:'vacationsRecap'}
-      <tr>
-        <!-- ferie e permessi fatti -->
-        <td>${vacationsRecap.person.surname} ${vacationsRecap.person.name}</td>
-        
-        <td>
-          <a data-toggle="modal" href="@{VacationsAdmin.vacationsLastYear(vacationsRecap.person.id, vacationsRecap.year)}" data-target="#myModal3">
-			${vacationsRecap.vacationDaysLastYearUsed.size()}
-	      </a> 
-        </td>
-        
-        <td>
-          <a data-toggle="modal" href="@{VacationsAdmin.vacationsCurrentYear(vacationsRecap.person.id, vacationsRecap.year)}" data-target="#myModal3">
-			${vacationsRecap.vacationDaysCurrentYearUsed.size()}
-		  </a>
-		</td>
+        <section id="results">
+
+          <div class="col-xs-7">
+            <ul class="pagination">
+  	          #{list items:0..simpleResults.totalPage-1, as:'indexPage', class:'inline'}
+  	            #{if simpleResults.page==indexPage}
+  	             <li class="active"><a href="#">${indexPage+1}</a></li>
+  	            #{/if}
+  	            #{else}
+  	              <li><a href="@{VacationsAdmin.list(year, name, indexPage)}">${indexPage+1}</a></li>
+  	            #{/else}
+	          #{/list}
+            </ul>
+		  </div>
+
+
+ 
+		  <div class="col-xs-12">
+		  <table id="tabella-ferie" class="table table-condensed table-hover center">
+		    <thead>
+		      <tr>
+		        <th rowspan="2">Nome</th>
+		        <th colspan="2" class="warning">Ferie fatte</th>
+		        <th rowspan="2" class="warning">Permessi legge<br>937/77 fatti</th>
+		        <th colspan="3" class="success">Residuo</th>
+		        <th colspan="2" class="danger">Limiti utilizzo residui<br>per l'anno ${year}</th>
+		      </tr>
+		      <tr>
+		        <th>${year-1}<br>anno precedente</th>
+		        <th>${year}<br>anno richiesto</th>
+		        <th>
+		          Ferie ${year-1}<br>
+		          #{if isVacationLastYearExpired}
+		            <span class="glyphicon glyphicon-remove" style="color: red;"></span>
+		          #{/if}
+		          #{else}
+		            <span class="glyphicon glyphicon-ok" style="color: green;"></span>
+		          #{/else}
+		        </th>
+		        <th>Ferie ${year}</th>
+		        <th>Permessi</th>
+		        <th>inizio</th>
+		        <th>fine</th>
+		      </tr>
+		    </thead>
+		    
+		    <tbody>
+		      #{list items:vacationsList, as:'vacationsRecap'}
+		      <tr>
+		        <!-- ferie e permessi fatti -->
+		        <td>${vacationsRecap.person.surname} ${vacationsRecap.person.name}</td>
+		        
+		        <td>
+		          <a data-toggle="modal" 
+		             href="@{VacationsAdmin.vacationsLastYear(vacationsRecap.person.id, vacationsRecap.year)}" data-modal=".my-modal">
+					${vacationsRecap.vacationDaysLastYearUsed.size()}
+			      </a> 
+		        </td>
+		        
+		        <td>
+		          <a data-toggle="modal" 
+		             href="@{VacationsAdmin.vacationsCurrentYear(vacationsRecap.person.id, vacationsRecap.year)}" data-modal=".my-modal">
+					${vacationsRecap.vacationDaysCurrentYearUsed.size()}
+				  </a>
+				</td>
+				
+				<td>
+		          <a data-toggle="modal" 
+		             href="@{VacationsAdmin.permissionCurrentYear(vacationsRecap.person.id, vacationsRecap.year)}" data-modal=".my-modal">
+					${vacationsRecap.permissionUsed.size()}
+				  </a>
+		        </td>
+		        
+		        <!-- residui -->
+		        
+		        <td>
+		          ${vacationsRecap.vacationDaysLastYearNotYetUsed}
+		        </td>
+		        
+		        <td>${vacationsRecap.vacationDaysCurrentYearTotal - vacationsRecap.vacationDaysCurrentYearUsed.size()} </td>
+		        
+		        <td>${vacationsRecap.permissionCurrentYearTotal - vacationsRecap.permissionUsed.size()}</td>
+		        
+		        <td>
+		          #{if vacationsRecap.isActiveAfterBeginYear }
+		            <span class="badge badge-success">${vacationsRecap.activeContractInterval.getBegin()}</span>
+		          #{/if}
+		        </td>
+		        
+		        <td>
+		          #{if vacationsRecap.isExpireBeforeEndYear }
+		            <span class="badge badge-important">${vacationsRecap.activeContractInterval.getEnd()}</span>
+		          #{/if}
+		        </td>
+		       
+		      </tr>
+		      #{/list}
+		    
+		    </tbody>
+		  
+		  </table>
+		  
+	  
+		  <p>
+		     <br> 
+		     #{if isVacationLastYearExpired}
+		       <span class="glyphicon glyphicon-remove" style="color: red;"></span> Ferie anno precedente scadute.
+		     #{/if}
+		     #{else}
+		       <span class="glyphicon glyphicon-ok" style="color: green;"></span> Ferie anno precedente utilizzabili.
+		     #{/else} 
+		  </p>
 		
+
 		<td>
           <a data-toggle="modal" href="@{VacationsAdmin.permissionCurrentYear(vacationsRecap.person.id, vacationsRecap.year)}" data-target="#myModal3">
 			${vacationsRecap.permissionUsed.size()}
@@ -135,30 +197,29 @@
      #{/else} 
   </p>
 
-  #{if personsWithVacationsProblems.size() > 0}
-  <p>Sono stati riscontrati errori durante il calcolo dei piani ferie per le seguenti persone. 
-  Tali errori potrebbero derivare dalla mancanza di dati di inizializzazione inerenti il contratto attuale.</p>
-  <ul>
-    #{list items:personsWithVacationsProblems, as:'person'}
-      <li><a href="@{Persons.edit(person.id)}">${person.surname} ${person.name}</a></li>
-    #{/list}
-  </ul>
-  #{/if}
- </div>  
-</section> 
-  
-</div>
+		  #{if personsWithVacationsProblems.size() > 0}
+		    <p>
+		      Sono stati riscontrati errori durante il calcolo dei piani ferie per le seguenti persone: 
+		    </p>
+		    <ul>
+		      #{list items:personsWithVacationsProblems, as:'person'}
+		        <li><a href="@{Persons.edit(person.id)}">${person.surname} ${person.name}</a></li>
+		      #{/list}
+		    </ul>
+		    <p>
+		      Tali errori potrebbero derivare dalla mancanza di dati di inizializzazione inerenti il contratto attuale.
+		    </p>
+		  #{/if}
+		  
+		  </div>
 
-<div id="myModal3" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">Ferie e permessi</h3>
-  </div>
-  <div class="modal-body">
-    <p></p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-   <!--   <button class="btn btn-primary">Save changes</button>-->
-  </div>
-</div>
+
+       </section> 
+  
+    </div> <!-- end panel body -->
+  </div> <!-- end panel -->
+  
+</div>    
+
+
+#{include '_myModal.html' /}

@@ -7,11 +7,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import models.base.BaseModel;
+
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
 import play.data.validation.Required;
-import play.db.jpa.Model;
+
 
 /**
  * 
@@ -20,7 +22,7 @@ import play.db.jpa.Model;
  */
 @Entity
 @Table(name = "persons_working_time_types")
-public class PersonWorkingTimeType extends Model {
+public class PersonWorkingTimeType extends BaseModel {
 
 	@Required
 	@ManyToOne(fetch=FetchType.LAZY)

@@ -1,204 +1,156 @@
 package controllers;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import models.Permission;
+import org.joda.time.LocalDate;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
+
+import controllers.Resecure.NoCheck;
+import dao.PersonDao;
+import models.Office;
 import models.Person;
+import models.Role;
 import models.User;
+import models.UsersRolesOffices;
 import play.Play;
 import play.mvc.Controller;
 import play.mvc.With;
 
-@With( {Secure.class, NavigationMenu.class} )
+@With( {Resecure.class, RequestInit.class} )
 public class Administrators extends Controller {
 
 	private static final String SUDO_USERNAME = "sudo.username";
 	private static final String USERNAME = "username";
 
-	@Check(Security.INSERT_AND_UPDATE_ADMINISTRATOR)
-	public static void list(){
-		/**
-		 * TODO: cambiare i permessi in relazione al fatto che l'utente loggato sia effettivamente attivo nella data in cui visita
-		 * la pagina di lista amministratori
-		 */
-		List<Person> administratorList = Person.find("Select p from Person p where p.name <> ? order by p.surname", "Admin").fetch();
-		List<User> userList = new ArrayList<User>();
-		for(Person person : administratorList)
-		{
-			userList.add(person.user);
+	@NoCheck
+	public static void insertNewAdministrator(Long officeId, Long roleId) {
+		
+		Office office = Office.findById(officeId);
+		if(office==null) {
+			
+			flash.error("La sede per la quale si vuole definire l'amministratore è inesistente. Riprovare o effettuare una segnalazione.");
+			Offices.showOffices();
 		}
-
-		render(userList);
-	}
-
-	
-	@Check(Security.INSERT_AND_UPDATE_ADMINISTRATOR)
-	public static void discard(){
-		Administrators.list();
-	}
-
-	@Check(Security.INSERT_AND_UPDATE_ADMINISTRATOR)
-	public static void edit(Long adminId){
-		if(adminId != null){
-			Person person = Person.findById(adminId);
-			render(person);
+		
+		Role role = Role.findById(roleId);
+		if(office==null) {
+			
+			flash.error("Il ruolo selezionato è inesistente. Riprovare o effettuare una segnalazione.");
+			Offices.showOffices();
 		}
+		
+		String name = null;
+		List<Person> personList = PersonDao.list(Optional.fromNullable(name), 
+					Sets.newHashSet(Security.getOfficeAllowed()), false, 
+					LocalDate.now(), LocalDate.now(), true).list();
+		
+		render(office, role, personList);
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_ADMINISTRATOR)
-	public static void update(){
-		long personId = params.get("personId", Long.class);
+	@NoCheck
+	public static void saveNewAdministrator(Person person, Office office, Role role) {
+		
+		if(person==null || office==null || role==null) {
+			
+			flash.error("Errore nell'inserimento parametri. Riprovare o effettuare una segnalazione.");
+			Offices.showOffices();
+		}
+		
+		//Per adesso faccio inserire solo alle sedi
+		if( !office.isSeat() ) {
+			
+			flash.error("Impossibile assegnare amministratori a livello diverso da quello Sede. Operazione annullata.");
+			Offices.showOffices();
+		}
+		
+		if( !Office.setUroIfImprove(person.user, office, role, true) ) {
+		
+			flash.error("La persona dispone già dei permessi associati al ruolo selezionato. Operazione annullata.");
+			Offices.showOffices();
+		}
+		
+		flash.success("Nuovo amministratore inserito con successo.");
+		Offices.showOffices();
+	}
+	
+	@NoCheck
+	public static void deleteAdministrator(Long officeId, Long personId) {
+		
+		Office office = Office.findById(officeId);
+		if(office==null) {
+			
+			flash.error("La sede per la quale si vuole rimuovere l'amministratore è inesistente. Riprovare o effettuare una segnalazione.");
+			Offices.showOffices();
+		}
 		
 		Person person = Person.findById(personId);
-		User user = person.user;
-		String viewPersonList = params.get("viewPersonList");
-		String insertAndUpdatePerson = params.get("insertAndUpdatePerson");
-		String deletePerson = params.get("deletePerson");
-		String insertAndUpdateStamping = params.get("insertAndUpdateStamping");
-		String insertAndUpdatePassword = params.get("insertAndUpdatePassword");
-		String insertAndUpdateWorkingTime = params.get("insertAndUpdateWorkingTime");
-		String insertAndUpdateAbsence = params.get("insertAndUpdateAbsence");
-		String insertAndUpdateConfiguration = params.get("insertAndUpdateConfiguration");
-		String insertAndUpdateAdministrator = params.get("insertAndUpdateAdministrator");
-		String insertAndUpdateOffices = params.get("insertAndUpdateOffices");
-		String insertAndUpdateVacations = params.get("insertAndUpdateVacations");
-		String insertAndUpdateCompetences = params.get("insertAndUpdateCompetences");
-		String uploadSituation = params.get("uploadSituation");
-		if(viewPersonList.equals("true") && !user.isViewPersonAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "viewPersonList").first();
-			user.permissions.add(p);
-		}
-		else if(viewPersonList.equals("false") && user.isViewPersonAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "viewPersonList").first();
-			user.permissions.remove(p);
+		if(person == null) {
+			
+			flash.error("La persona per la quale si vuole rimuovere il ruolo di ammninistratore è inesistente. Riprovare o effettuare una segnalazione.");
+			Offices.showOffices();
 		}
 		
-		if(insertAndUpdatePerson.equals("true") && !user.isInsertAndUpdatePersonAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdatePerson").first();
-			user.permissions.add(p);
+		UsersRolesOffices uro = Office.getUro(person.user, office);
+		if(uro == null) {
+			
+			flash.error("La persona non dispone di alcun ruolo amministrativo. Operazione annullata.");
+			Offices.showOffices();
 		}
-		else if(insertAndUpdatePerson.equals("false") && user.isInsertAndUpdatePersonAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdatePerson").first();
-			user.permissions.remove(p);
+		Role role = uro.role;
+		
+		//Rimozione ruolo sola lettura
+		if(role.name.equals(Role.PERSONNEL_ADMIN_MINI)) {
+			
+			uro.delete();
+			flash.success("Rimozione amministratore avvenuta con successo.");
+			Offices.showOffices();
 		}
 		
-		if(deletePerson.equals("true") && !user.isDeletePersonAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "deletePerson").first();
-			user.permissions.add(p);
-		}
-		else if(deletePerson.equals("false") && user.isDeletePersonAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "deletePerson").first();
-			user.permissions.remove(p);
-		}
-		
-		if(insertAndUpdateStamping.equals("true") && !user.isInsertAndUpdateStampingAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateStamping").first();
-			user.permissions.add(p);
-		}
-		else if(insertAndUpdateStamping.equals("false") && user.isInsertAndUpdateStampingAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateStamping").first();
-			user.permissions.remove(p);
+		//controllo che l'office non rimanga senza amministratori generali
+		boolean atLeastAnother = false;
+		for(UsersRolesOffices uroOffice : office.usersRolesOffices) {
+			
+			if( uroOffice.role.id.equals(role.id) && !uroOffice.user.isAdmin() 
+					&& !uroOffice.id.equals(uro.id) ) {
+				atLeastAnother = true;
+				break;
+			}
+		} 
+		if( !atLeastAnother) {
+			
+			flash.error("La sede non può rimanere senza amministratori generali. Operazione annullata.");
+			Offices.showOffices();
 		}
 		
-		if(insertAndUpdatePassword.equals("true") && !user.isInsertAndUpdatePasswordAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdatePassword").first();
-			user.permissions.add(p);
-		}	
-		else if(insertAndUpdatePassword.equals("false") && user.isInsertAndUpdatePasswordAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdatePassword").first();
-			user.permissions.remove(p);
-		}
-		
-		if(insertAndUpdateWorkingTime.equals("true") && !user.isInsertAndUpdateWorkinTimeAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateWorkingTime").first();
-			user.permissions.add(p);
-		}	
-		else if(insertAndUpdateWorkingTime.equals("false") && user.isInsertAndUpdateWorkinTimeAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateWorkingTime").first();
-			user.permissions.remove(p);
-		}
-		
-		if(insertAndUpdateAbsence.equals("true") && !user.isInsertAndUpdateAbsenceAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateAbsence").first();
-			user.permissions.add(p);
-		}
-		else if(insertAndUpdateAbsence.equals("false") && user.isInsertAndUpdateAbsenceAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateAbsence").first();
-			user.permissions.remove(p);
-		}
-		
-		if(insertAndUpdateConfiguration.equals("true") && !user.isInsertAndUpdateConfigurationAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateConfiguration").first();
-			user.permissions.add(p);
-		}
-		else if(insertAndUpdateConfiguration.equals("false") && user.isInsertAndUpdateConfigurationAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateConfiguration").first();
-			user.permissions.remove(p);
-		}
-		
-		if(insertAndUpdateAdministrator.equals("true") && !user.isInsertAndUpdateAdministratorAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateAdministrator").first();
-			user.permissions.add(p);
-		}
-		else if(insertAndUpdateAdministrator.equals("false") && user.isInsertAndUpdateAdministratorAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateAdministrator").first();
-			user.permissions.remove(p);
-		}
-		
-		if(insertAndUpdateOffices.equals("true") && !user.isInsertAndUpdateOfficesAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateOffices").first();
-			user.permissions.add(p);
-		}
-		else if(insertAndUpdateOffices.equals("false") && user.isInsertAndUpdateOfficesAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateOffices").first();
-			user.permissions.remove(p);
-		}
-		
-		if(insertAndUpdateCompetences.equals("true") && !user.isInsertAndUpdateCompetenceAndOvertimeAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateCompetences").first();
-			user.permissions.add(p);
-		}
-		else if(insertAndUpdateCompetences.equals("false") && user.isInsertAndUpdateCompetenceAndOvertimeAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateCompetences").first();
-			user.permissions.remove(p);
-		}
-		
-		if(insertAndUpdateVacations.equals("true") && !user.isInsertAndUpdateVacationsAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateVacations").first();
-			user.permissions.add(p);
-		}
-		else if(insertAndUpdateVacations.equals("false") && user.isInsertAndUpdateVacationsAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "insertAndUpdateVacations").first();
-			user.permissions.remove(p);
-		}
-		if(uploadSituation.equals("true") && !user.isUploadSituationAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "uploadSituation").first();
-			user.permissions.add(p);
-		}
-		else if(uploadSituation.equals("false") && user.isUploadSituationAvailable()){
-			Permission p = Permission.find("Select p from Permission p where p.description = ? ", "uploadSituation").first();
-			user.permissions.remove(p);
-		}
-		user.save();
-		flash.success(String.format("Aggiornati con successo i permessi per %s %s", user.person.name, user.person.surname));
-		Administrators.list();
-		
+		uro.delete();
+		flash.success("Rimozione amministratore avvenuta con successo.");
+		Offices.showOffices();
+	
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_ADMINISTRATOR)
-	public static void delete(Long adminId){
-		Person person = Person.findById(adminId);
-		person.user.permissions.clear();
-		person.save();
-		flash.success(String.format("Eliminati i permessi per l'utente %s %s", person.name, person.surname));
-		Application.indexAdmin();
+	@NoCheck //TODO IMPORTANTE VA TOLTO!!!! admin non può chiamarlo
+	public static void deleteSelfAsAdministrator(Long officeId) {
+		
+		Office office = Office.findById(officeId);
+		if(office==null) {
+			
+			flash.error("La sede per la quale si vuole rimuovere l'amministratore è inesistente. Riprovare o effettuare una segnalazione.");
+			Offices.showOffices();
+		}
+		
+		Person person = Security.getUser().get().person;
+		render(office, person);
+	
 	}
+	
+	
 	
 	/**
 	 * Switch in un'altra persona
-	 */
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	 */ //TODO vanno implementati i permessi di questa funzionalità !!!
+	@NoCheck
 	public static void switchUserTo(long id) {
 		final User user = User.findById(id);
 		notFoundIfNull(user);
@@ -215,6 +167,7 @@ public class Administrators extends Controller {
 	/**
 	 * ritorna alla precedente persona.
 	 */
+	@NoCheck
 	public static void restoreUser() {
 		if (session.contains(SUDO_USERNAME)) {
 			session.put(USERNAME, session.get(SUDO_USERNAME));
