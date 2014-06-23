@@ -79,7 +79,12 @@
 		<td><font color="#000000">${person.telephone != null && !person.telephone.equals('No phone number') ? person.telephone : ''}</font></td>
 		<td><font color="#000000">${person.room != null ? person.room : ''}</font></td>
 		<td><font color="#000000">${person.email != null ? person.email : ''}</font></td>
-		<td>${}</td>
+		#{if person.user == null}
+			<td><a href="@{Persons.insertUsername(person.id)}">Ins.username</a></td>
+		#{/if}
+		#{else}
+			<td>${}</td>
+		#{/else}
 	#{/if}
 	#{else}
 		<td><a href="@{edit(person.id)}"><font color="#808080">${person.surname}</font></a></td>
