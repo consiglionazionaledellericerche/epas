@@ -90,12 +90,10 @@
 		
 
 		#{list items:1..numberOfInOut, as:'i'}
-			<th class="group-left hidden-xs">${i}<sup>a</sup> <br/>entrata</th>
-			<th class="group-right hidden-xs">${i}<sup>a</sup> <br/>uscita</th>
+			<th class="group-left">${i}<sup>a</sup> <br/>entrata</th>
+			<th class="group-right">${i}<sup>a</sup> <br/>uscita</th>
 		#{/list}
 		
-		<th class="group-single hidden-sm hidden-md hidden-lg">entrate/uscite</th>
-
 		<th class="invisible"></th>
 		
 		<th class="group-single">Tempo<br>lavoro</th>
@@ -138,13 +136,13 @@
 	        
 			#{list items:dayRecap.stampingsTemplate, as:'stampingTemplate'}
 				#{if stampingTemplate.colour.equals("in")}
-				  <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-left hidden-xs">
+				  <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-left">
 				#{/if}
 				#{elseif stampingTemplate.colour.equals("out")}
-				  <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-right hidden-xs">
+				  <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} default-right">
 				#{/elseif}
 				#{elseif stampingTemplate.colour.equals("warn")}
-				  <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} warn hidden-xs">
+				  <td class="position${stampingTemplate.pairPosition} pair${stampingTemplate.pairId} warn">
 				#{/elseif}
 					
 				#{if stampingTemplate.date!=null}
@@ -166,22 +164,6 @@
 				<!--  ${stampingTemplate.pairId}${stampingTemplate.pairPosition}  -->		
 				</td>
 			#{/list}
-			
-			<td class="default-single hidden-sm hidden-md hidden-lg">
-			  #{list items:dayRecap.stampingsTemplate, as:'stampingTemplate'}
-			  #{/list}
-			  <div class="container-fluid">
-			    <div class="col-xs-3">aaa</div>
-			    <div class="col-xs-3">bbb</div>
-			    <div class="col-xs-3">ccc</div>
-			    <div class="col-xs-3">ddd</div>
-			    <div class="col-xs-3">aaa</div>
-			    <div class="col-xs-3">bbb</div>
-			    <div class="col-xs-3">ccc</div>
-			    <div class="col-xs-3">ddd</div>
-			  </div>
-			
-			</td>
 			
 			<td class="invisible"></td>
 	       			
