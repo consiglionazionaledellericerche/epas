@@ -32,7 +32,9 @@ public class Security extends Secure.Security {
 	/* Amministratore Personale */
 	
 	public final static String VIEW_PERSON = "viewPerson";
-	public final static String EDIT_PERSON = "editPerson";
+	public final static String EDIT_PERSON = "editPerson"; //per adesso utilizzato anche per la nuova gestione dei ticket
+	 
+	
 	
 	public final static String VIEW_PERSON_DAY = "viewPersonDay";
 	public final static String EDIT_PERSON_DAY = "editPersonDay";

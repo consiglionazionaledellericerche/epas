@@ -118,10 +118,19 @@ when
      	"Stampings.missingStamping",
      	"Stampings.dailyPresence",
      	"Stampings.mealTicketSituation",
+     	"Stampings.create",
+     	"Stampings.insert",
+     	"Stampings.edit",
+     	"Stampings.update",
+     	"Absences.create",
+     	"Absences.insert",
+     	"Absences.edit",
+     	"Absences.update",
      	
      	/*Stampa cartellino*/
      	"PrintTags.listPersonForPrintTags",
      	"PrintTags.showTag",
+     	"PrintTags.showPersonTag",
      	
      	/*Utility*/
      	"Charts.indexCharts",
@@ -144,6 +153,12 @@ when
         "UploadSituation.uploadSituation",
         "UploadSituation.loginAttestati",
         "UploadSituation.processAttestati",
+        
+        /*Gestione buoni pasto*/
+        "MealTickets.manageMealTickets",
+        "MealTickets.submitPersonMealTicketInQuarter",
+        "MealTickets.showPersonBlockMealTicket",
+        "MealTickets.deletePersonMealTicketInQuarter",
         
         /*Orari di lavoro*/
      	"WorkingTimes.manageWorkingTime",
@@ -179,7 +194,8 @@ when
  $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
  $p: Permission(description == "viewPerson") from $uro.role.permissions
  $c: PermissionCheck(action in (
-        "Persons.list"
+        "Persons.list",
+        "MealTickets.manageMealTickets"
         ), target == null, granted == false)
 then
  $c.grant();
@@ -193,7 +209,8 @@ when
  $c: PermissionCheck(action in (
        "Persons.edit",
        "Persons.showCurrentVacation",
-       "Persons.showCurrentContractWorkingTimeType"
+       "Persons.showCurrentContractWorkingTimeType",
+       "MealTickets.showPersonBlockMealTicket"
        ), target == $o, granted == false)
 then
  $c.grant();
@@ -251,7 +268,10 @@ when
      	"Persons.updateUsername",
      	"Persons.personChildrenList",
      	"Persons.saveChild",
-     	"WorkingTimes.executeChangeWorkingTimeTypeToAll"
+     	"WorkingTimes.executeChangeWorkingTimeTypeToAll",
+     	"MealTickets.submitPersonMealTicketInQuarter",
+        "MealTickets.deletePersonMealTicketInQuarter"
+     	
        ), target == $o, granted == false)
 then
  $c.grant();
@@ -312,6 +332,30 @@ then
  $c.grant();
 end
 
+/*
+ *		Permission: editPersonDay
+ */
+
+rule editPersonDay_InOffice
+when
+ $o: Office()
+ $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $p: Permission(description == "editPersonDay") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        /* inserire le action interessate */
+       	"Stampings.create",
+       	"Stampings.insert",
+       	"Stampings.edit",
+     	"Stampings.update",
+     	"Absences.create",
+     	"Absences.insert",
+     	"Absences.edit",
+     	"Absences.update"
+     	
+       ), target == $o, granted == false)
+then
+ $c.grant();
+end
 
 
 /*

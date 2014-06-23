@@ -1,0 +1,21 @@
+#{extends 'modal.html' /}
+#{set modalHeader:'Lista buoni pasto blocco ' + codeBlock + ' per ' + person.name + ' ' + person.surname /}
+
+<div class="container-fluid center">
+	
+	<table class="table table-condensed table-hover table-bordered">
+	  <tr>
+	    <th>Numero</th>
+	    <th>Data assegnazione</th>
+	    <th>Amministratore assegnatario</th>
+	  </tr>
+	  #{list items:mealTicketList, as:'mealTicket'}
+	    <tr>
+	      <td>${mealTicket.code}</td>
+	      <td>${mealTicket.date}</td>
+	      <td>${mealTicket.admin.name} ${mealTicket.admin.surname}</td>
+	    
+	    </tr>
+	  #{/list}
+	</table>
+</div>

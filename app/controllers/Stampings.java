@@ -237,24 +237,25 @@ public class Stampings extends Controller {
 	}
 
 
-	@Check(Security.INSERT_AND_UPDATE_STAMPING)
 	public static void create(@Required Long personId, @Required Integer year, @Required Integer month, @Required Integer day){
-		Logger.debug("Insert stamping called for personId=%d, year=%d, month=%d, day=%d", personId, year, month, day);
-		Person person = Person.findById(personId);
 
-		Logger.debug("La person caricata è: %s", person);   	      	
+		Person person = Person.findById(personId);
+		
+		rules.checkIfPermitted(person.office);
+		
 		LocalDate date = new LocalDate(year,month,day);
-		Logger.debug("La data è: %s", date);
+
 		PersonDay personDay = new PersonDay(person, date);
 
 		render(person, personDay);
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_STAMPING)
 	public static void insert(@Valid @Required Long personId, @Required Integer year, @Required Integer month, @Required Integer day) {
 
 		Person person = Person.em().getReference(Person.class, personId);
 
+		rules.checkIfPermitted(person.office);
+		
 		LocalDate date = new LocalDate(year,month,day);
 		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
 		if(pd == null){
@@ -335,7 +336,6 @@ public class Stampings extends Controller {
 
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void edit(@Required Long stampingId) {
 		Logger.debug("Edit stamping called for stampingId=%d", stampingId);
 
@@ -344,17 +344,20 @@ public class Stampings extends Controller {
 			notFound();
 		}
 
+		rules.checkIfPermitted(stamping.personDay.person.office);
+		
 		LocalDate date = stamping.date.toLocalDate();
 		List<String> hourMinute = timeDivided(stamping);
 		render(stamping, hourMinute, date);				
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_STAMPING)
 	public static void update() {
 		Stamping stamping = Stamping.findById(params.get("stampingId", Long.class));
 		if (stamping == null) {
 			notFound();
 		}
+		
+		rules.checkIfPermitted(stamping.personDay.person.office);
 		
 		PersonDay pd = stamping.personDay;
 		
