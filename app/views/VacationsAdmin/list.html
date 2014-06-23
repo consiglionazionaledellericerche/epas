@@ -144,59 +144,6 @@
 		     #{/else} 
 		  </p>
 		
-
-		<td>
-          <a data-toggle="modal" href="@{VacationsAdmin.permissionCurrentYear(vacationsRecap.person.id, vacationsRecap.year)}" data-target="#myModal3">
-			${vacationsRecap.permissionUsed.size()}
-		  </a>
-        </td>
-        
-        <!-- residui -->
-        
-        <td>
-          ${vacationsRecap.vacationDaysLastYearNotYetUsed}
-        </td>
-        #{if vacationsRecap.activeContract.expireContract != null}
-        	<td>${vacationsRecap.vacationDaysCurrentYearAccrued - vacationsRecap.vacationDaysCurrentYearUsed.size()}</td>
-        #{/if}
-        #{else}
-        	<td>${vacationsRecap.vacationDaysCurrentYearTotal - vacationsRecap.vacationDaysCurrentYearUsed.size()} </td>
-        #{/else}
-        #{if vacationsRecap.activeContract.expireContract != null}
-        	<td>${vacationsRecap.permissionCurrentYearAccrued - vacationsRecap.permissionUsed.size()}</td>
-        #{/if}
-        #{else}
-        	<td>${vacationsRecap.permissionCurrentYearTotal - vacationsRecap.permissionUsed.size()}</td>
-        #{/else}
-        
-        <td>
-          #{if vacationsRecap.isActiveAfterBeginYear }
-            <span class="badge badge-success">${vacationsRecap.activeContractInterval.getBegin()}</span>
-          #{/if}
-        </td>
-        
-        <td>
-          #{if vacationsRecap.isExpireBeforeEndYear }
-            <span class="badge badge-important">${vacationsRecap.activeContractInterval.getEnd()}</span>
-          #{/if}
-        </td>
-       
-      </tr>
-      #{/list}
-    
-    </tbody>
-  
-  </table>
-  
-  <p><br> 
-     #{if isVacationLastYearExpired}
-       <i class="icon-remove" style="color: red;"></i> Ferie anno precedente scadute.
-     #{/if}
-     #{else}
-       <i class="icon-ok" style="color: green;"></i> Ferie anno precedente utilizzabili.
-     #{/else} 
-  </p>
-
 		  #{if personsWithVacationsProblems.size() > 0}
 		    <p>
 		      Sono stati riscontrati errori durante il calcolo dei piani ferie per le seguenti persone: 
@@ -212,7 +159,6 @@
 		  #{/if}
 		  
 		  </div>
-
 
        </section> 
   
