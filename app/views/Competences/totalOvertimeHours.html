@@ -13,12 +13,16 @@
 </div>
 
 <div class="container-fluid">
+
+<h4 class="bg-danger center">Controllo disabilitato in fase di manutenzione</h4>
+
   <div class="panel panel-info col-xs-12 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3">
       <div class="panel-heading">
         <h3 class="panel-title">Modifica del monte ore di straordinario del ${year}</h3>
       </div>
       <div class="panel-body">
  
+ 		
  
         #{form @Competences.saveOvertime()}
 
@@ -45,8 +49,8 @@
             </table>
 	      #{/if}
 		  <div class="center">
-		    <input type="text" name="numeroOre" />
-            <input type="submit" value="Salva" />
+		    <input type="text" name="numeroOre" disabled="disabled"/>
+            <input type="submit" value="Salva" disabled="disabled"/>
 		  </div>	    	    
     
           <br>

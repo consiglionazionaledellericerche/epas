@@ -25,13 +25,12 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-@With( {Secure.class, RequestInit.class} )
+@With( {Resecure.class, RequestInit.class} )
 public class PrintTags extends Controller{
 	
 	@Inject
 	static SecurityRules rules;
 	
-	//@Check(Security.INSERT_AND_UPDATE_STAMPING)
 	public static void showTag(Long personId){
 		if(personId == null){
 			flash.error("Malissimo! ci vuole un id! Seleziona una persona!");
@@ -106,14 +105,8 @@ public class PrintTags extends Controller{
 		render(personList, date, year, month);
 	}
 	
-	
-	//@Check(Security.VIEW_PERSONAL_SITUATION)
 	public static void showPersonTag(Integer year, Integer month){
 		
-		//TODOUSER
-		//if (Security.getPerson().username.equals("admin")) {
-		//	Application.indexAdmin();
-		//}
 		Person person = Security.getUser().get().person;
 		if(!person.isActiveInMonth(month, year))
 		{
@@ -122,7 +115,6 @@ public class PrintTags extends Controller{
 			render("@redirectToIndex");
 		}
 	
-		
 		//Configuration conf = Configuration.getCurrentConfiguration();
 		//ConfGeneral conf = ConfGeneral.getConfGeneral();
 		int minInOutColumn = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));

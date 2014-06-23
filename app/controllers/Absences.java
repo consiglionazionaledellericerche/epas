@@ -276,13 +276,18 @@ public class Absences extends Controller{
 		manageAbsenceCode(null, null);
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void create(@Required Long personId, @Required Integer year, @Required Integer month, @Required Integer day) {
+		
+		Person person = Person.em().getReference(Person.class, personId);
+		
+		rules.checkIfPermitted(person.office);
+		
 		Logger.debug("Insert absence called for personId=%d, year=%d, month=%d, day=%d", personId, year, month, day);
 		List<AbsenceType> frequentAbsenceTypeList = getFrequentAbsenceTypes();
 		MainMenu mainMenu = new MainMenu(year,month,day);
 		List<AbsenceType> allCodes = getAllAbsenceTypes(new LocalDate(year,month,day));
-		Person person = Person.em().getReference(Person.class, personId);
+		
+		
 		LocalDate date = new LocalDate(year, month, day);
 		PersonDay personDay = new PersonDay(person, date);
 		render(personDay, frequentAbsenceTypeList, allCodes, mainMenu);
@@ -376,12 +381,14 @@ public class Absences extends Controller{
 	}
 
 	
-	
 
-	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void insert(@Required Long personId, @Required Integer yearFrom, 
 			@Required Integer monthFrom, @Required Integer dayFrom, @Required String absenceCode, String finoa, Blob file, String mealTicket) throws EmailException{
 
+		Person person = Person.findById(personId);
+		
+		rules.checkIfPermitted(person.office);
+		
 		//Ho dovuto implementare un involucro perchè quando richiamavo questo medoto da update il campo blob era null.
 		insertAbsence(personId, yearFrom, monthFrom, dayFrom, absenceCode, finoa, file, mealTicket);
 		
@@ -473,7 +480,6 @@ public class Absences extends Controller{
 	}
 
 
-	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void edit(@Required Long absenceId) {
 		Logger.debug("Edit absence called for absenceId=%d", absenceId);
 
@@ -481,6 +487,9 @@ public class Absences extends Controller{
 		if (absence == null) {
 			notFound();
 		}
+		
+		rules.checkIfPermitted(absence.personDay.person.office);
+		
 		LocalDate date = absence.personDay.date;
 		List<AbsenceType> frequentAbsenceTypeList = getFrequentAbsenceTypes();
 		MainMenu mainMenu = new MainMenu(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth());
@@ -488,12 +497,13 @@ public class Absences extends Controller{
 		render(absence, frequentAbsenceTypeList, allCodes, mainMenu);				
 	}
     
-	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void update(Blob file) throws EmailException {
 		Absence absence = Absence.findById(params.get("absenceId", Long.class));
 		if (absence == null) {
 			notFound();
 		}
+		
+		rules.checkIfPermitted(absence.personDay.person.office);
 		
 		if(file != null && file.exists()){
 			Logger.debug("ricevuto file di tipo: %s", file.type());

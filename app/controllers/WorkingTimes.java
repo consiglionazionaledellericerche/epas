@@ -30,8 +30,6 @@ public class WorkingTimes extends Controller{
 	@Inject
 	static SecurityRules rules;
 	
-	
-
 	public static void manageWorkingTime(Office office){
 		
 		List<Office> offices = Security.getOfficeAllowed();

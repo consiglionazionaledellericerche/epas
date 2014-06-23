@@ -25,6 +25,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import models.MealTicket.BlockMealTicket;
 import models.Stamping.WayType;
 import models.base.BaseModel;
 import models.exports.StampingFromClient;
@@ -44,6 +45,7 @@ import play.mvc.With;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 
 import controllers.Secure;
 import controllers.Security;
@@ -173,6 +175,12 @@ public class Person extends BaseModel {
 	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<CertificatedData> certificatedData;
 
+	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	public List<MealTicket> mealTickets;
+	
+	@OneToMany(mappedBy="admin", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	public List<MealTicket> mealTicketsAdmin;
+	
 	/**
 	 * relazione con la nuova tabella dei person_month
 	 */
@@ -911,6 +919,38 @@ public class Person extends BaseModel {
 				this, year, month).first();
 		return cd;
 	}
+	
+	public List<BlockMealTicket> getBlockMealTicketInQuarter(Integer year, Integer quarter) {
+		
+		List<MealTicket> mealTicketList = MealTicket.find("Select mt from MealTicket mt "
+				+ "where mt.person = ? and mt.year = ? and mt.quarter = ? order by mt.block",
+				this, year, quarter).fetch();
+		
+		List<BlockMealTicket> blockList = Lists.newArrayList();
+		
+		BlockMealTicket currentBlock = null;
+		
+		for(MealTicket mealTicket : mealTicketList) {
+			
+			if(currentBlock == null) {
+				currentBlock = new BlockMealTicket(mealTicket.block);
+				currentBlock.mealTickets.add(mealTicket);
+				continue;
+			}	
+				
+			if( !currentBlock.codeBlock.equals(mealTicket.block) ) {
+				blockList.add(currentBlock);
+				currentBlock = new BlockMealTicket(mealTicket.block);
+			}
+			
+			currentBlock.mealTickets.add(mealTicket);
+		}
+		
+		blockList.add(currentBlock);
+		
+		return blockList;
+	}
+	
 	/**
 	 * 
 	 * @param year

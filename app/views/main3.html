@@ -84,7 +84,7 @@
             	<li><a href="@{PersonMonths.hourRecap(session.get("yearSelected"))}">Riepilogo orario</a></li>
             	<li><a href="@{PersonMonths.trainingHours(session.get("yearSelected"))}">Ore di formazione</a></li>
             	<li class="divider"></li>
-            	<li><a href="#">Stampa cartellino presenze</a></li>
+            	<li><a href="@{PrintTags.showPersonTag(session.get("yearSelected"), session.get("monthSelected"))}">Stampa cartellino presenze</a></li>
             	<li class="divider"></li>
             	<li><a href="@{Persons.changePassword()}">Gestione password</a></li>
               </ul>
@@ -143,7 +143,12 @@
                 #{if ip.uploadSituation }
                 <li><a href="@{UploadSituation.show()}">Invio Attestati</a></li>
                 #{/if}
-        
+                
+                <li class="divider"></li>
+                #{if ip.viewPerson }
+                  <li><a href="@{MealTickets.manageMealTickets(2014,3)}">Gestione Buoni Pasto</a></li>
+        		#{/if}
+        		
               </ul>
             </li>
           </ul>
