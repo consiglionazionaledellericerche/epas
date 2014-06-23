@@ -288,7 +288,12 @@
           <button id="buttonError" type="button" class="close" aria-hidden="true">&times;</button>
         </h3>
         <div class="popover-content">
+          #{if flash.error.equals('secure.error')}
+            <strong>&{'secure.error'}</strong>
+          #{/if} 
+          #{else}
           <strong>${flash.error}</strong>
+          #{/else}
         </div>
       </div>
     #{/if}
@@ -299,7 +304,12 @@
           <button id="buttonSuccess" type="button" class="close" aria-hidden="true">&times;</button>
         </h3>
         <div class="popover-content">
-          <strong>${flash.success}</strong>
+        	#{if flash.success.equals('secure.logout')}
+        		<strong>&{'secure.logout'}</strong>
+        	#{/if}
+        	#{else}
+          		<strong>${flash.success}</strong>
+          	#{/else}
         </div>
       </div>
     #{/if}  
