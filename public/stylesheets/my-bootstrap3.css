@@ -61,6 +61,14 @@ footer p {
 ------------------------------------------------------------------------ */
 /* Not required for template or sticky footer method. */
 
+@font-face {
+  font-family: 'Shadows Into Light';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Shadows Into Light'), local('ShadowsIntoLight'), url(http://themes.googleusercontent.com/static/fonts/shadowsintolight/v4/clhLqOv7MXn459PTh0gXYHW1xglZCgocDnD_teV2lMU.woff) format('woff');
+}
+
+
 #google-font {
 	font-family: 'Shadows Into Light', cursive;
 	font-size: 200%;
