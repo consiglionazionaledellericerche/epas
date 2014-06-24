@@ -178,7 +178,9 @@
 		  </td>
 	    #{/list}
 	    <td class="inserisciTimbratura default-single">
-		    <a data-toggle="modal" data-backdrop="true" href="@{Stampings.create(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" data-modal=".my-modal">
+
+		    <a data-toggle="modal" data-backdrop="true" href="@{Stampings.createStamp(dayRecap.person.id, dayRecap.date.year, dayRecap.date.monthOfYear, dayRecap.date.dayOfMonth)}" data-modal=".my-modal">
+
 		      +++
 		    </a>
 		</td>

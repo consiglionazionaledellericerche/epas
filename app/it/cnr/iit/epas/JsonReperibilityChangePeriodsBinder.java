@@ -67,7 +67,7 @@ public class JsonReperibilityChangePeriodsBinder implements TypeBinder<Reperibil
 				String subPersonEmail = jsonObject.get("mail_sub").getAsString();
 				
 				// get the reperibility period for the requester
-				reqPerson = Person.find("SELECT p FROM Person p WHERE p.contactData.email = ?", reqPersonEmail).first();
+				reqPerson = Person.find("SELECT p FROM Person p WHERE p.email = ?", reqPersonEmail).first();
 				Logger.debug("reqPerson = %s", reqPerson);
 				if (reqPerson == null) {
 					throw new IllegalArgumentException(
@@ -84,7 +84,7 @@ public class JsonReperibilityChangePeriodsBinder implements TypeBinder<Reperibil
 				reperibilityPeriods.add(reperibilityPeriod);
 				
 				// get the reperibility period for the subtitute
-				subPerson = Person.find("SELECT p FROM Person p WHERE p.contactData.email = ?", subPersonEmail).first();
+				subPerson = Person.find("SELECT p FROM Person p WHERE p.email = ?", subPersonEmail).first();
 				if (subPerson == null) {
 					throw new IllegalArgumentException(
 							String.format("Person with email %s not exist in the ePAS database", subPersonEmail));

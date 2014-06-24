@@ -237,7 +237,9 @@ public class Stampings extends Controller {
 	}
 
 
-	public static void create(@Required Long personId, @Required Integer year, @Required Integer month, @Required Integer day){
+
+	public static void createStamp(@Required Long personId, @Required Integer year, @Required Integer month, @Required Integer day){
+
 
 		Person person = Person.findById(personId);
 		

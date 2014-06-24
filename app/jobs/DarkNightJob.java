@@ -9,27 +9,24 @@ import play.jobs.On;
 
 
 @On("0 1 5 * * ?")
+
 //@On("1 /1 * * * ?")
 //@OnApplicationStart
+
+//@On("0 30 14 * * ?")
+
 public class DarkNightJob extends Job{
 	
 	public void doJob(){
 		
-
-		Logger.info("Start Job checkDay");
+		Logger.info("Start DarkNightJob");
+		
 		User userLogged = User.find("byUsername", "admin").first();	
-		PersonUtility.fixPersonSituation(-1l, 2014, 1, userLogged);
+
+		PersonUtility.fixPersonSituation(-1l, 2014, 4, userLogged, true);
+
 		
-		/*
-		LocalDate yesterday = new LocalDate().minusDays(1);
-		
-		List<Person> activePersons = Person.getActivePersonsInMonth(yesterday.getMonthOfYear(), yesterday.getYear(), false);
-		for(Person person : activePersons)
-		{
-			PersonUtility.checkPersonDay(person.id, yesterday);
-		}
-		*/
-		Logger.info("Concluso Job checkDay");
+		Logger.info("Concluso DarkNightJob");
 
 	}
 		
