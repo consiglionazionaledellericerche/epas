@@ -24,6 +24,7 @@ import models.rendering.VacationsRecap;
 import org.apache.commons.mail.EmailException;
 import org.joda.time.LocalDate;
 
+import controllers.Resecure.NoCheck;
 import play.Logger;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
@@ -81,7 +82,8 @@ public class Administration extends Controller {
 	}
 	
 
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	@NoCheck
+	//TODO permessi
 	public static void utilities(){
 		List<Person> pdList = Person.getActivePersonsInDay(new LocalDate(), Security.getOfficeAllowed(), false);
 		render(pdList);
@@ -97,10 +99,11 @@ public class Administration extends Controller {
 	 * 
 	 * 
 	 */	
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
+	
+	//TODO permessi
 	public static void fixPersonSituation(Long personId, int year, int month) throws EmailException{
 		
-		PersonUtility.fixPersonSituation(personId, year, month, Security.getUser().get());
+		PersonUtility.fixPersonSituation(personId, year, month, Security.getUser().get(), false);
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
