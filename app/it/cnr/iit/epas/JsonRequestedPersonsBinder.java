@@ -52,7 +52,7 @@ public class JsonRequestedPersonsBinder implements TypeBinder<PersonsList> {
 				
 				personEmail = jsonObject.get("email").getAsString();
 				
-				person = Person.find("SELECT p FROM Person p WHERE p.contactData.email = ? ORDER BY p.surname", personEmail).first();
+				person = Person.find("SELECT p FROM Person p WHERE p.email = ? ORDER BY p.surname", personEmail).first();
 				if (person == null) {
 					throw new IllegalArgumentException(String.format("Person with email = %s doesn't exist", personEmail));			
 				}
