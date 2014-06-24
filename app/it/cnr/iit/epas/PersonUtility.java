@@ -918,10 +918,10 @@ public class PersonUtility {
 	 * @param personId l'id univoco della persona da fixare, -1 per fixare tutte le persone attive alla data di ieri
 	 * @param year l'anno dal quale far partire il fix
 	 * @param month il mese dal quale far partire il fix
-	 * @param personLogged
+	 * @param userLogged
 	 * @throws EmailException 
 	 */
-	public static void fixPersonSituation(Long personId, int year, int month, User userLogged) throws EmailException{
+	public static void fixPersonSituation(Long personId, int year, int month, User userLogged, boolean sendEmail){
 
 		if(userLogged==null)
 			return;
@@ -936,23 +936,22 @@ public class PersonUtility {
 		List<Person> personList = new ArrayList<Person>();
 		if(personId==-1)
 			personId=null;
-		if(personId==null)
-		{
+		if(personId==null) {
+			
 			LocalDate begin = new LocalDate(year, month, 1);
 			LocalDate end = new LocalDate().minusDays(1);
 			personList = Person.getActivePersonsSpeedyInPeriod(begin, end, officeAllowed, false);	
 		}
-		else
-		{
+		else {
+			
 			//TODO controllare che personLogged abbia i diritti sulla persona
 			personList.add((Person)Person.findById(personId));
 		}
 
 		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
 		JPAPlugin.startTx(false);
-		for(Person person : personList)
-		{
-			PersonUtility.checkHistoryError(person, year, month);
+		for(Person person : personList) {
+				PersonUtility.checkHistoryError(person, year, month);
 		}
 		JPAPlugin.closeTx(false);
 
@@ -964,8 +963,7 @@ public class PersonUtility {
 			LocalDate actualMonth = new LocalDate(year, month, 1);
 			LocalDate endMonth = new LocalDate().withDayOfMonth(1);
 			JPAPlugin.startTx(false);
-			while(!actualMonth.isAfter(endMonth))
-			{
+			while(!actualMonth.isAfter(endMonth)) {
 
 				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
 						p, actualMonth, actualMonth.dayOfMonth().withMaximumValue()).fetch();
@@ -974,7 +972,6 @@ public class PersonUtility {
 				for(PersonDay pd : pdList){
 					JPAPlugin.closeTx(false);
 					JPAPlugin.startTx(false);
-					//Logger.debug("DATA: %s", pd.date);
 					PersonDay pd1 = PersonDay.findById(pd.id);
 					pd1.populatePersonDay();
 					JPAPlugin.closeTx(false);
@@ -989,32 +986,39 @@ public class PersonUtility {
 		//(3) 
 		JPAPlugin.startTx(false);
 		i = 1;
-		for(Person p : personList){
+		for(Person p : personList) {
+			
 			Logger.info("Update residui %s (%s di %s) dal %s-%s-01 a oggi", p.surname, i++, personList.size(), year, month);
 			List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ?", p).fetch();
 
-			for(Contract contract : contractList)
-			{
+			for(Contract contract : contractList) {
+				
 				contract.buildContractYearRecap();
 			}
 		}
 		JPAPlugin.closeTx(false);		
 		
+		
 		//(4) Invio mail per controllo timbrature da farsi solo nei giorni feriali
-        if(new LocalDate().isAfter(new LocalDate(2014,5,8))){
-                if(new LocalDate().getDayOfWeek() != DateTimeConstants.SATURDAY && new LocalDate().getDayOfWeek() != DateTimeConstants.SUNDAY){
-                        JPAPlugin.startTx(false);
-                        LocalDate begin = new LocalDate().minusMonths(1);
-                        LocalDate end = new LocalDate().minusDays(1);
+		if( sendEmail ) {
+			
+			if( LocalDate.now().getDayOfWeek() != DateTimeConstants.SATURDAY 
+					&& LocalDate.now().getDayOfWeek() != DateTimeConstants.SUNDAY){
 
-                        for(Person p : personList){
-                                Logger.debug("Chiamato controllo sul giorni %s %s", begin, end);
-                                checkPersonDayForSendingEmail(p, begin, end, "timbratura");
+				JPAPlugin.startTx(false);
+				LocalDate begin = new LocalDate().minusMonths(1);
+				LocalDate end = new LocalDate().minusDays(1);
 
-                        }
-                        JPAPlugin.closeTx(false);
-                }
-        }		
+				for(Person p : personList){
+					
+					Logger.debug("Chiamato controllo sul giorni %s %s", begin, end);
+					checkPersonDayForSendingEmail(p, begin, end, "timbratura");
+
+				}
+				JPAPlugin.closeTx(false);
+			}
+		}
+
 
 	}
 
@@ -1026,35 +1030,57 @@ public class PersonUtility {
 	 * @param end
 	 * @throws EmailException
 	 */
-	private static void checkPersonDayForSendingEmail(Person p, LocalDate begin, LocalDate end, String cause) throws EmailException{
+	private static void checkPersonDayForSendingEmail(Person p, LocalDate begin, LocalDate end, String cause) {
+
+		if(p.surname.equals("Conti") && p.name.equals("Marco")) {
+			
+			Logger.debug("Trovato Marco Conti, capire cosa fare con la sua situazione...");
+			return;
+		}
+		
 		List<PersonDayInTrouble> pdList = PersonDayInTrouble.find("Select pd from PersonDayInTrouble pd where pd.personDay.person = ? " +
 				"and pd.personDay.date between ? and ? and pd.fixed = ?", p, begin, end, false).fetch();
 
 		List<LocalDate> dateTroubleStampingList = new ArrayList<LocalDate>();
 
 		for(PersonDayInTrouble pd : pdList){
+			
 			if(pd.cause.contains(cause) && !pd.personDay.isHoliday() && pd.fixed == false)
 				dateTroubleStampingList.add(pd.personDay.date);
 		}
-		if(p.surname.equals("Conti") && p.name.equals("Marco"))
-			Logger.debug("Trovato Marco Conti, capire cosa fare con la sua situazione...");
-		else{
-			for(StampProfile sp : p.stampProfiles){
-				if(DateUtility.isDateIntoInterval(begin, new DateInterval(sp.startFrom,sp.endTo))){
-					if(sp.fixedWorkingTime == false){
-						boolean flag = sendEmailToPerson(dateTroubleStampingList, p, cause);
-						//se ho inviato mail devo andare a settare 'true' i campi emailSent dei personDayInTrouble relativi 
-						if(flag){
-							for(PersonDayInTrouble pd : pdList){
-								pd.emailSent = true;
-								pd.save();
-							}
-						}
+		
 
+		for(StampProfile sp : p.stampProfiles) {
+			
+			//FIXME questo è sbagliato: fixedWorkingTime va testato per ogni giorno non solo nel giorno begin.
+						
+			if( DateUtility.isDateIntoInterval(begin, new DateInterval(sp.startFrom,sp.endTo))){
+				if(sp.fixedWorkingTime == false){
+										
+					boolean flag;
+					try {
+						
+						flag = sendEmailToPerson(dateTroubleStampingList, p, cause);
+						
+					} catch (EmailException e) {
+						
+						Logger.debug("sendEmailToPerson(dateTroubleStampingList, p, cause): fallito invio email per %s %s", p.name, p.surname); 
+						e.printStackTrace();
+						return;
 					}
+					
+					//se ho inviato mail devo andare a settare 'true' i campi emailSent dei personDayInTrouble relativi 
+					if(flag){
+						for(PersonDayInTrouble pd : pdList){
+							pd.emailSent = true;
+							pd.save();
+						}
+					}
+
 				}
 			}
 		}
+
 	}
 
 	/**
@@ -1149,12 +1175,17 @@ public class PersonUtility {
 		Logger.info("Check history error %s dal %s-%s-1 a oggi", person.surname, year, month);
 		LocalDate date = new LocalDate(year,month,1);
 		LocalDate today = new LocalDate();
-		while(true)
-		{
+		
+		while(true) {
+			
+			JPAPlugin.closeTx(false);
+			JPAPlugin.startTx(false);
+			
 			PersonUtility.checkPersonDay(person.id, date);
 			date = date.plusDays(1);
 			if(date.isEqual(today))
 				break;
+			
 		}
 
 	}
@@ -1219,8 +1250,6 @@ public class PersonUtility {
 					"Saluti \r\n"+
 					"Il team di ePAS";
 		}
-
-		//Logger.info("Messaggio recovery password spedito è: %s", message);
 
 		simpleEmail.setMsg(message);
 		try{
