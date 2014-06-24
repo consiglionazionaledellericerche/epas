@@ -951,7 +951,6 @@ public class PersonUtility {
 		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
 		JPAPlugin.startTx(false);
 		for(Person person : personList) {
-			
 				PersonUtility.checkHistoryError(person, year, month);
 		}
 		JPAPlugin.closeTx(false);
@@ -1176,12 +1175,17 @@ public class PersonUtility {
 		Logger.info("Check history error %s dal %s-%s-1 a oggi", person.surname, year, month);
 		LocalDate date = new LocalDate(year,month,1);
 		LocalDate today = new LocalDate();
-		while(true)
-		{
+		
+		while(true) {
+			
+			JPAPlugin.closeTx(false);
+			JPAPlugin.startTx(false);
+			
 			PersonUtility.checkPersonDay(person.id, date);
 			date = date.plusDays(1);
 			if(date.isEqual(today))
 				break;
+			
 		}
 
 	}
