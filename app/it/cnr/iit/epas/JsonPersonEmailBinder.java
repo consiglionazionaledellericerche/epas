@@ -40,7 +40,7 @@ public class JsonPersonEmailBinder implements TypeBinder<PersonEmailFromJson>{
 				jsonObject = jsonElement.getAsJsonObject();
 				email = jsonObject.get("email").getAsString();
 
-				person = Person.find("SELECT p FROM Person p WHERE p.contactData.email = ?", email).first();
+				person = Person.find("SELECT p FROM Person p WHERE p.email = ?", email).first();
 				if(person != null)
 					persons.add(person);
 			}

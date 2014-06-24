@@ -49,7 +49,7 @@ public class Overtimes extends Controller {
 		Logger.debug("chiamata la getPersonOvertimes() con email=%s, year=%d, month=%d", email, year, month);
 		
 		// get the person with the given email
-		Person person = Person.find("SELECT p FROM Person p WHERE p.contactData.email = ?", email).first();
+		Person person = Person.find("SELECT p FROM Person p WHERE p.email = ?", email).first();
 		if (person == null) {
 			notFound(String.format("Person with email = %s doesn't exist", email));			
 		}
@@ -91,7 +91,7 @@ public class Overtimes extends Controller {
 		Logger.debug("chiamata la getSupervisorTotalOvertimes() con email=%s", email);
 		
 		// get the person with the given email
-		Person person = Person.find("SELECT p FROM Person p WHERE p.contactData.email = ?", email).first();
+		Person person = Person.find("SELECT p FROM Person p WHERE p.email = ?", email).first();
 		if (person == null) {
 			notFound(String.format("Person with email = %s doesn't exist", email));			
 		}
@@ -146,7 +146,7 @@ public class Overtimes extends Controller {
 		response.accessControl("*");
 		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 		try {
-			Person person = Person.find("SELECT p FROM Person p WHERE p.contactData.email = ?", email).first();
+			Person person = Person.find("SELECT p FROM Person p WHERE p.email = ?", email).first();
 			if (person == null) {
 				throw new IllegalArgumentException(String.format("Person with email = %s doesn't exist", email));			
 			}
