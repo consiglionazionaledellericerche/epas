@@ -118,7 +118,7 @@ when
      	"Stampings.missingStamping",
      	"Stampings.dailyPresence",
      	"Stampings.mealTicketSituation",
-     	"Stampings.create",
+     	"Stampings.createStamp",
      	"Stampings.insert",
      	"Stampings.edit",
      	"Stampings.update",
@@ -343,7 +343,7 @@ when
  $p: Permission(description == "editPersonDay") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
-       	"Stampings.create",
+       	"Stampings.createStamp",
        	"Stampings.insert",
        	"Stampings.edit",
      	"Stampings.update",
