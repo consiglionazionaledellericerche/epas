@@ -555,6 +555,8 @@ public class Absences extends Controller{
 	private static void checkMealTicket(LocalDate date, Person person, String mealTicket, AbsenceType abt){
 		
 		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
+		if(pd == null)
+			pd = new PersonDay(person, date);
 		if(abt==null || !abt.code.equals("92"))
 		{
 			pd.isTicketForcedByAdmin = false;	//una assenza diversa da 92 ha per forza campo calcolato
@@ -872,8 +874,11 @@ public class Absences extends Controller{
 		int taken = 0;
 		while(!actualDate.isAfter(dateTo))
 		{
+
 			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, false, file).totalAbsenceInsert;
+
 			checkMealTicket(actualDate, person, mealTicket, absenceType);
+
 
 			actualDate = actualDate.plusDays(1);
 		}
@@ -1135,7 +1140,13 @@ public class Absences extends Controller{
 				actualDate = actualDate.plusDays(1);
 				continue;
 			}
-			
+			//Controllo il caso di inserimento di codice 31: verifico che sia valido il periodo in cui voglio inserirlo
+			if(absenceType.code.equals("31") && !absenceType.code.equals(PersonUtility.whichVacationCode(person, actualDate).code)){
+				flash.error("Si prova a inserire un codice di assenza (%s , %s) che non è prendibile per il giorno %s", 
+						absenceType.code, absenceType.description, actualDate);
+				
+				Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
+			}
 			//Costruisco se non esiste il person day
 			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, actualDate).first();
 			if(pd == null){
@@ -1158,6 +1169,8 @@ public class Absences extends Controller{
 				absence.absenceFile = file;
 			}
 			absence.save();
+			Logger.info("Inserita nuova assenza %s per %s %s in data: %s", 
+					absence.absenceType.code, absence.personDay.person.name, absence.personDay.person.surname, absence.personDay.date);
 			pd.absences.add(absence);
 			pd.populatePersonDay();
 			//pd.save();
@@ -1230,6 +1243,7 @@ public class Absences extends Controller{
 					pd.isTicketForcedByAdmin = false;
 					pd.populatePersonDay();
 					deleted++;
+					Logger.info("Rimossa assenza del %s per %s %s", actualDate, person.name, person.surname);
 				}
 			}
 			if(pd.date.isAfter(today) && pd.absences.isEmpty() && pd.absences.isEmpty()){

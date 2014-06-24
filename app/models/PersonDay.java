@@ -177,14 +177,23 @@ public class PersonDay extends BaseModel {
 	 * "presente" a lavoro
 	 */
 	public boolean isEnoughHourlyAbsences(){
-		for(Absence abs : absences){
-			if(abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FourHours) ||
-					abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FiveHours) ||
-					abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SixHours) ||
-					abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SevenHours))
-				return true;
+		if(this.person.qualification.qualification > 3){
+			for(Absence abs : absences){
+				if(abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FourHours) ||
+						abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.FiveHours) ||
+						abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SixHours) ||
+						abs.absenceType.justifiedTimeAtWork.equals(JustifiedTimeAtWork.SevenHours))
+					return true;
+			}
+			return false;
 		}
-		return false;
+		else{
+			if(absences.size() >= 1)
+				return true;
+			else
+				return false;
+		}
+		
 	}
 	
 	/**
@@ -282,6 +291,11 @@ public class PersonDay extends BaseModel {
 			{
 				//TODO CASO STRANO qua il buono mensa non si capisce se ci deve essere o no
 				justifiedTimeAtWork = justifiedTimeAtWork + abs.absenceType.justifiedTimeAtWork.minutesJustified;
+				continue;
+			}
+			
+			if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.HalfDay){
+				justifiedTimeAtWork = justifiedTimeAtWork + this.person.getCurrentWorkingTimeType().workingTimeTypeDays.get(this.date.getDayOfWeek()).workingTime / 2;
 				continue;
 			}
 		}
@@ -704,6 +718,7 @@ public class PersonDay extends BaseModel {
 				PersonDayInTrouble.insertPersonDayInTrouble(this, "no assenze giornaliere e no timbrature");
 				return;
 			}
+			
 			//caso no festa, no assenze, timbrature disaccoppiate
 			if(!this.isAllDayAbsences() && !this.isHoliday())
 			{
