@@ -118,8 +118,7 @@ when
      	"Stampings.missingStamping",
      	"Stampings.dailyPresence",
      	"Stampings.mealTicketSituation",
-<<<<<<< HEAD
-     	"Stampings.create",
+     	"Stampings.createStamp",
      	"Stampings.insert",
      	"Stampings.edit",
      	"Stampings.update",
@@ -217,6 +216,14 @@ then
  $c.grant();
 end
 
+rule viewPerson_Item
+when
+ $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $p: Permission(description == "viewPerson") from $uro.role.permissions
+ $c: PermissionCheck(target == "viewPerson", granted == false)
+then
+ $c.grant();
+end
 
 /*
  *		Permission: editPerson
@@ -336,88 +343,19 @@ when
  $p: Permission(description == "editPersonDay") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
-
-     	"Stampings.createStamp",
-     	"Stampings.insert",
-     	"Stampings.edit",
+       	"Stampings.createStamp",
+       	"Stampings.insert",
+       	"Stampings.edit",
      	"Stampings.update",
      	"Absences.create",
      	"Absences.insert",
      	"Absences.edit",
-     	"Absences.update",
+     	"Absences.update"
      	
-     	/*Stampa cartellino*/
-     	"PrintTags.listPersonForPrintTags",
-     	"PrintTags.showTag",
-     	"PrintTags.showPersonTag",
-     	
-     	/*Utility*/
-     	"Charts.indexCharts",
-     	"Charts.checkLastYearAbsences",
-     	"Charts.whichAbsenceInYear",
-     	"Charts.overtimeOnPositiveResidual",
-     	"Charts.overtimeOnPositiveResidualInYear",
-     	"Charts.processLastYearAbsences",
-     	
-     	
-     	/*Riepilogo mensile*/
-     	"MonthRecaps.show",
-     	"MonthRecaps.justifiedAbsences",
-     	"MonthRecaps.notJustifiedAbsences",
-        "MonthRecaps.workingDayNotHoliday",
-        "MonthRecaps.workingDayHoliday",
-        
-        /*Invio attestati*/
-        "UploadSituation.show",
-        "UploadSituation.uploadSituation",
-        "UploadSituation.loginAttestati",
-        "UploadSituation.processAttestati",
-        
-        /*Gestione buoni pasto*/
-        "MealTickets.manageMealTickets",
-        "MealTickets.submitPersonMealTicketInQuarter",
-        "MealTickets.showPersonBlockMealTicket",
-        "MealTickets.deletePersonMealTicketInQuarter",
-        
-        /*Orari di lavoro*/
-     	"WorkingTimes.manageWorkingTime",
-     	"WorkingTimes.showWorkingTimeType",
-     	"WorkingTimes.showContract",
-     	"WorkingTimes.showContractWorkingTimeType",
-     	"WorkingTimes.insertWorkingTime",
-     	"WorkingTimes.save",
-     	"WorkingTimes.changeWorkingTimeTypeToAll",
-     	"WorkingTimes.executeChangeWorkingTimeTypeToAll",
-     	"WorkingTimes.delete",
-     	"WorkingTimes.toggleWorkingTimeTypeEnabled",
-     	"WorkingTimes.insertWorkingTime",
-     	
-     	/*Configurazione Parametri*/
-     	"Configurations.showConfGeneral",
-     	"Configurations.saveConfGeneral",
-     	"Configurations.showConfYear",
-     	"Configurations.saveConfYear"
-     	
-     	), target == null, granted == false)
- $u: User(person != null)
+       ), target == $o, granted == false)
 then
  $c.grant();
 end
-
-
-
-
-rule viewPerson_Item
-when
- $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
- $p: Permission(description == "viewPerson") from $uro.role.permissions
- $c: PermissionCheck(target == "viewPerson", granted == false)
-then
- $c.grant();
-end
-
-
-
 
 
 /*
@@ -684,17 +622,3 @@ then
 end
 
  */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
