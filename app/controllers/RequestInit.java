@@ -25,6 +25,7 @@ import com.mysema.query.jpa.JPQLQuery;
 
 import controllers.Resecure.NoCheck;
 import dao.PersonDao;
+import play.Logger;
 import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -67,7 +68,19 @@ public class RequestInit extends Controller {
 					.distinct();
 					
 			final BooleanBuilder condition = new BooleanBuilder();
-			condition.and(quro.user.eq(Security.getUser().get()));
+			if(Security.getUser().isPresent())
+				condition.and(quro.user.eq(Security.getUser().get()));
+			else{
+				Logger.error("Si tenta di accedere a una risorsa senza essere correttamente loggati");
+				
+				flash.error("Bisogna autenticarsi prima di accedere a una risorsa");
+				try {
+					Secure.login();
+				} catch (Throwable e) {
+					
+					Application.index();
+				}
+			}
 			
 			query.where(condition);
 			
