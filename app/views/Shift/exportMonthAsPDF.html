@@ -14,45 +14,51 @@
     			anno = firstOfMonth.plusMonths(mm).year().getAsText();
 
     		}%
+    		
         	<h1>Istituto di Informatica e Telematica </h1>
         
         	<div class="table">
 			<table class="mensile">
 			<caption> Giorni di turno del personale per il mese di ${mese} ${anno}</caption>
 			<tr>
-			<th>Persona</th><th>Numero di giorni</th><th>Numero di ore</th>
+			<th>Persona</th>
+			%{
+					for(th in thShift) {
+			}%  
+			    		<th>${th} </th> 
+			%{
+					}
+			}%  
+
 			</tr>	
-			<tr>	
+			
 			%{
 				for(person in shiftSumDays.rowKeySet()) {
-				giorniTot = 0;
 			}%
+			<tr>	
 				<td> 
 					<p>
 						${person.surname} ${person.name}
 					</p>
 				</td>
 
-				%{
-					for(shift in shiftSumDays.columnKeySet()) {
-
-						if (shiftSumDays.contains(person, shift)) {
-							giorniTot += shiftSumDays.get(person, shift);
-						}
-    				}
-    				resto = (giorniTot%2 == 0) ? ':00' : ':30'; 
-					ore = giorniTot*6 + (int)(giorniTot/2) + resto;	
-				}%
-				<td>
-					<p>${giorniTot}</p>
+			%{
+					for(th in thShift) {
+			}%  
+			    <td>
+					<p>
+						${shiftSumDays.contains(person, th) ? shiftSumDays.get(person, th) : ''} 
+					</p>
 				</td>
-				<td>
-					<p>${ore}</p>
-				</td>
-			</tr>
+			%{
+					}
+			}%  
+				
+			</tr>			
 			%{
     			}
 			}%
+			
 			</table>
 			</div>
       		
@@ -70,9 +76,8 @@
       			Dott. Maurizio Martinelli
       		</div>
       		
-      		
-      		%{
-				if (!inconsistentAbsence2.isEmpty()) {
+      		    		%{
+				if (!totalInconsistentAbsences.isEmpty()) {
 				
 				fistTr = true;
 			}%
@@ -84,7 +89,7 @@
 			    		<tr>
 			    		<th>Nome dipendente</th>
 			 %{
-					for(th in ths) {
+					for(th in thInconsistence) {
 			 }%  
 			    		<th>${th} </th> 
 			%{
@@ -92,17 +97,17 @@
 			 }%  
 			
 			%{
-					for(person in inconsistentAbsence2.rowKeySet()) {
+					for(person in totalInconsistentAbsences.rowKeySet()) {
 			}%
 						<tr>
 							<td>${person.surname} ${person.name}</td>
 			%{
-							for(th in ths) {
-								if (inconsistentAbsence2.contains(person, th)) {
+							for(th in thInconsistence) {
+								if (totalInconsistentAbsences.contains(person, th)) {
 			}%
 							<td> 
 			%{
-								for(day in inconsistentAbsence2.get(person, th)) {
+								for(day in totalInconsistentAbsences.get(person, th)) {
 			}%
 								${day}<br/>
 			%{
@@ -134,6 +139,8 @@
 		  	%{
 		    	}						
 			}%
+			
+ 
       		
     </body>
 </html>

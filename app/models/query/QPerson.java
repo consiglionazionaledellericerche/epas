@@ -85,6 +85,8 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final QPersonReperibility reperibility;
 
+    public final ListPath<models.ShiftType, QShiftType> shiftTypes = this.<models.ShiftType, QShiftType>createList("shiftTypes", models.ShiftType.class, QShiftType.class, PathInits.DIRECT2);
+
     public final ListPath<models.StampProfile, QStampProfile> stampProfiles = this.<models.StampProfile, QStampProfile>createList("stampProfiles", models.StampProfile.class, QStampProfile.class, PathInits.DIRECT2);
 
     public final StringPath surname = createString("surname");

@@ -57,7 +57,7 @@ public class QShiftCancelled extends EntityPathBase<ShiftCancelled> {
 
     public QShiftCancelled(Class<? extends ShiftCancelled> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.type = inits.isInitialized("type") ? new QShiftType(forProperty("type")) : null;
+        this.type = inits.isInitialized("type") ? new QShiftType(forProperty("type"), inits.get("type")) : null;
     }
 
 }
