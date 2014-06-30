@@ -55,7 +55,7 @@
 		        <th rowspan="2">Nome</th>
 		        <th colspan="2" class="warning">Ferie fatte</th>
 		        <th rowspan="2" class="warning">Permessi legge<br>937/77 fatti</th>
-		        <th colspan="3" class="success">Residuo</th>
+		        <th colspan="5" class="success">Residuo</th>
 		        <th colspan="2" class="danger">Limiti utilizzo residui<br>per l'anno ${year}</th>
 		      </tr>
 		      <tr>
@@ -70,10 +70,12 @@
 		            <span class="glyphicon glyphicon-ok" style="color: green;"></span>
 		          #{/else}
 		        </th>
-		        <th>Ferie ${year}</th>
-		        <th>Permessi</th>
-		        <th>inizio</th>
-		        <th>fine</th>
+		        <th>Ferie ${year}<br>Residue Totali</th>
+		        <th>Ferie ${year}<br>Residue Maturate</th>
+		        <th>Permessi<br>Residui Totali</th>
+		        <th>Permessi<br>Residui Maturati</th>
+		        <th>Inizio</th>
+		        <th>Fine</th>
 		      </tr>
 		    </thead>
 		    
@@ -106,13 +108,18 @@
 		        
 		        <!-- residui -->
 		        
+		        <!-- ferie 2013 -->
 		        <td>
 		          ${vacationsRecap.vacationDaysLastYearNotYetUsed}
 		        </td>
 		        
+		        <!-- ferie 2014 -->
 		        <td>${vacationsRecap.vacationDaysCurrentYearTotal - vacationsRecap.vacationDaysCurrentYearUsed.size()} </td>
+		        <td>${vacationsRecap.vacationDaysCurrentYearAccrued - vacationsRecap.vacationDaysCurrentYearUsed.size()} </td>
 		        
+		        <!-- permessi 2014 -->
 		        <td>${vacationsRecap.permissionCurrentYearTotal - vacationsRecap.permissionUsed.size()}</td>
+		        <td>${vacationsRecap.permissionCurrentYearAccrued - vacationsRecap.permissionUsed.size()}</td>
 		        
 		        <td>
 		          #{if vacationsRecap.isActiveAfterBeginYear }
