@@ -62,7 +62,7 @@ public class QPersonShiftShiftType extends EntityPathBase<PersonShiftShiftType> 
     public QPersonShiftShiftType(Class<? extends PersonShiftShiftType> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
         this.personShift = inits.isInitialized("personShift") ? new QPersonShift(forProperty("personShift"), inits.get("personShift")) : null;
-        this.shiftType = inits.isInitialized("shiftType") ? new QShiftType(forProperty("shiftType")) : null;
+        this.shiftType = inits.isInitialized("shiftType") ? new QShiftType(forProperty("shiftType"), inits.get("shiftType")) : null;
     }
 
 }

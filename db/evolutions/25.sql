@@ -86,6 +86,9 @@ CREATE TABLE shift_type_history (
     REFERENCES revinfo (rev)
 );
 
+ALTER TABLE competences RENAME COLUMN valuerequest TO valuerequested;
+ALTER TABLE competences ALTER COLUMN valuerequested type numeric(4,1);
+
 # ---!Downs
   
 ALTER TABLE shift_time_table ADD COLUMN startshift TIMESTAMP without time zone;
@@ -119,3 +122,7 @@ UPDATE person_shift_days SET shift_time_table_id = 82 WHERE shift_slot = 'MORNIN
 UPDATE person_shift_days SET shift_time_table_id = 83 WHERE shift_slot = 'AFTERNOON';
 
 ALTER TABLE person_shift_days DROP COLUMN shift_slot;
+
+ALTER TABLE competences RENAME COLUMN valuerequested TO valuerequest;
+ALTER TABLE competences ALTER COLUMN valuerequest type integer;
+

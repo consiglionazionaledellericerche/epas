@@ -24,9 +24,13 @@ public class QShiftTimeTable extends EntityPathBase<ShiftTimeTable> {
 
     public final play.db.jpa.query.QModel _super = new play.db.jpa.query.QModel(this);
 
-    public final StringPath description = createString("description");
+    public final TimePath<org.joda.time.LocalTime> endAfternoon = createTime("endAfternoon", org.joda.time.LocalTime.class);
 
-    public final DateTimePath<org.joda.time.LocalDateTime> endShift = createDateTime("endShift", org.joda.time.LocalDateTime.class);
+    public final TimePath<org.joda.time.LocalTime> endAfternoonLunchTime = createTime("endAfternoonLunchTime", org.joda.time.LocalTime.class);
+
+    public final TimePath<org.joda.time.LocalTime> endMorning = createTime("endMorning", org.joda.time.LocalTime.class);
+
+    public final TimePath<org.joda.time.LocalTime> endMorningLunchTime = createTime("endMorningLunchTime", org.joda.time.LocalTime.class);
 
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
@@ -34,12 +38,22 @@ public class QShiftTimeTable extends EntityPathBase<ShiftTimeTable> {
     //inherited
     public final NumberPath<Long> id = _super.id;
 
+    public final NumberPath<Integer> paidMinutes = createNumber("paidMinutes", Integer.class);
+
     //inherited
     public final BooleanPath persistent = _super.persistent;
 
-    public final ListPath<models.PersonShiftDay, QPersonShiftDay> personShiftDay = this.<models.PersonShiftDay, QPersonShiftDay>createList("personShiftDay", models.PersonShiftDay.class, QPersonShiftDay.class, PathInits.DIRECT2);
+    public final ListPath<models.ShiftType, QShiftType> shiftTypes = this.<models.ShiftType, QShiftType>createList("shiftTypes", models.ShiftType.class, QShiftType.class, PathInits.DIRECT2);
 
-    public final DateTimePath<org.joda.time.LocalDateTime> startShift = createDateTime("startShift", org.joda.time.LocalDateTime.class);
+    public final TimePath<org.joda.time.LocalTime> startAfternoon = createTime("startAfternoon", org.joda.time.LocalTime.class);
+
+    public final TimePath<org.joda.time.LocalTime> startAfternoonLunchTime = createTime("startAfternoonLunchTime", org.joda.time.LocalTime.class);
+
+    public final TimePath<org.joda.time.LocalTime> startMorning = createTime("startMorning", org.joda.time.LocalTime.class);
+
+    public final TimePath<org.joda.time.LocalTime> startMorningLunchTime = createTime("startMorningLunchTime", org.joda.time.LocalTime.class);
+
+    public final NumberPath<Integer> totalWorkMinutes = createNumber("totalWorkMinutes", Integer.class);
 
     public QShiftTimeTable(String variable) {
         super(ShiftTimeTable.class, forVariable(variable));
