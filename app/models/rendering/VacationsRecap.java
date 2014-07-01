@@ -165,9 +165,9 @@ public class VacationsRecap {
 //		abs25Last  = getVacationDays(lastYearInter, activeContract, ab25);
 
 		this.vacationDaysLastYearUsed.addAll(abs32Last);
-		this.vacationDaysLastYearUsed.addAll(abs24Last);
-		this.vacationDaysLastYearUsed.addAll(abs24SLast);
-		this.vacationDaysLastYearUsed.addAll(abs25Last);
+//		this.vacationDaysLastYearUsed.addAll(abs24Last);
+//		this.vacationDaysLastYearUsed.addAll(abs24SLast);
+//		this.vacationDaysLastYearUsed.addAll(abs25Last);
 		this.vacationDaysLastYearUsed.addAll(abs31Last);
 		this.vacationDaysLastYearUsed.addAll(abs37Last);
 		while(this.vacationDaysLastYearUsed.size()<vacationDaysPastYearUsedNew)
