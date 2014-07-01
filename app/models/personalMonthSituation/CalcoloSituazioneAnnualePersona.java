@@ -64,24 +64,77 @@ public class CalcoloSituazioneAnnualePersona {
 					initMonteOreAnnoPassato = previous.monteOreAnnoPassato;
 					initMonteOreAnnoCorrente = previous.monteOreAnnoCorrente;
 				}
-				//Calcolo i dati del DataBase dai quali prendere le informazioni non presenti in inizializzazione
-				LocalDate monthBegin = new LocalDate(year, actualMonth, 1);
-				LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
-				if(new LocalDate().isBefore(monthEnd))
-					monthEnd = new LocalDate().minusDays(1);
+				
+				LocalDate today = LocalDate.now();
+				
+				//////////////////////////////////////////////////////////////////////////////////////////////////////////
+				//	Intervallo per progressivi
+				//////////////////////////////////////////////////////////////////////////////////////////////////////////
+				
+				// 1) Tutti i giorni del mese
+				
+				LocalDate monthBeginForPersonDay = new LocalDate(year, actualMonth, 1);
+				LocalDate monthEndForPersonDay = monthBeginForPersonDay.dayOfMonth().withMaximumValue();
+				DateInterval monthIntervalForPersonDay = new DateInterval(monthBeginForPersonDay, monthEndForPersonDay);
+				
+				// 2) Nel caso del calcolo del mese attuale
+				
+				if( DateUtility.isDateIntoInterval(today, monthIntervalForPersonDay) )
+				{
+					// 2.1) Se oggi non è il primo giorno del mese allora tutti i giorni del mese fino a ieri.
+					
+					if ( today.getDayOfMonth() != 1 )
+					{
+						monthEndForPersonDay = today.minusDays(1);
+						monthIntervalForPersonDay = new DateInterval(monthBeginForPersonDay, monthEndForPersonDay);
+					}
+					
+					// 2.2) Se oggi è il primo giorno del mese allora null.
+					
+					else
+					{
+						monthIntervalForPersonDay = null;
+					}
+				}
+				
+				// 3) Filtro per dati nel database e estremi del contratto
+				
+				DateInterval validDataForPersonDay = null;
+				if(monthIntervalForPersonDay != null)
+				{
+					DateInterval requestInterval = new DateInterval(firstDayInDatabase, calcolaFinoA);
+					DateInterval contractInterval = contract.getContractDateInterval();
+				    validDataForPersonDay = DateUtility.intervalIntersection(monthIntervalForPersonDay, requestInterval);
+				    validDataForPersonDay = DateUtility.intervalIntersection(validDataForPersonDay, contractInterval);
+				}
 
-				//HOTFIX da verificare se today è l'ultimo giorno del mese da calcolare bisogna escluderlo
-				if(new LocalDate().isEqual(monthEnd))
-					monthEnd = new LocalDate().minusDays(1);
-
-				DateInterval monthInterval = new DateInterval(monthBegin, monthEnd);
-				DateInterval requestInterval = new DateInterval(firstDayInDatabase, calcolaFinoA);
+			
+				////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				//	Intervallo per riposi compensativi
+				////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				
+				// 1) Tutti i giorni del mese
+				
+				LocalDate monthBeginForCompensatoryRest = new LocalDate(year, actualMonth, 1);
+				LocalDate monthEndForCompensatoryRest = monthBeginForCompensatoryRest.dayOfMonth().withMaximumValue();
+				DateInterval monthIntervalForCompensatoryRest = new DateInterval(monthBeginForCompensatoryRest, monthEndForCompensatoryRest);
+				
+				// 2) Nel caso del mese attuale considero anche il mese successivo
+				
+				if( DateUtility.isDateIntoInterval(today, monthIntervalForCompensatoryRest) ) 
+				{
+					monthEndForCompensatoryRest = monthEndForCompensatoryRest.plusMonths(1).dayOfMonth().withMaximumValue();
+					monthIntervalForCompensatoryRest = new DateInterval(monthBeginForCompensatoryRest, monthEndForCompensatoryRest);
+				}
+				
+				// 3) Filtro per dati nel database e estremi del contratto
+				
+				DateInterval validDataForCompensatoryRest = null;
 				DateInterval contractInterval = contract.getContractDateInterval();
-				DateInterval validData = DateUtility.intervalIntersection(monthInterval, requestInterval);
-				validData = DateUtility.intervalIntersection(validData, contractInterval);
-	
+				validDataForCompensatoryRest = DateUtility.intervalIntersection(monthIntervalForCompensatoryRest, contractInterval);
+				
 				//Costruisco l'oggetto
-				Mese mese = new Mese(previous, year, actualMonth, contract, initMonteOreAnnoPassato, initMonteOreAnnoCorrente, validData);
+				Mese mese = new Mese(previous, year, actualMonth, contract, initMonteOreAnnoPassato, initMonteOreAnnoCorrente, validDataForPersonDay, validDataForCompensatoryRest);
 				this.mesi.add(mese);
 				previous = mese;
 				actualMonth++;	

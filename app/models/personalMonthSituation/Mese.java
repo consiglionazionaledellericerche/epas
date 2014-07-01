@@ -67,9 +67,10 @@ public class Mese {
 	 * @param contract
 	 * @param initMonteOreAnnoPassato
 	 * @param initMonteOreAnnoCorrente
-	 * @param validData
+	 * @param validDataForPersonDay
+	 * @param validDataForCompensatoryRest 
 	 */
-	protected Mese(Mese mesePrecedente, int anno, int mese, Contract contract, int initMonteOreAnnoPassato, int initMonteOreAnnoCorrente, DateInterval validData)
+	protected Mese(Mese mesePrecedente, int anno, int mese, Contract contract, int initMonteOreAnnoPassato, int initMonteOreAnnoCorrente, DateInterval validDataForPersonDay, DateInterval validDataForCompensatoryRest)
 	{
 		this.contract = contract;
 		this.person = contract.person;
@@ -119,8 +120,8 @@ public class Mese {
 			}
 		}
 		
-		setPersonDayInformation(validData);
-		setPersonMonthInformation(validData);
+		setPersonDayInformation(validDataForPersonDay);
+		setPersonMonthInformation(validDataForCompensatoryRest);
 		
 
 		assegnaProgressivoFinaleNegativo();
@@ -140,14 +141,14 @@ public class Mese {
 	
 	/**
 	 * 
-	 * @param calcolaFinoA
+	 * @param validDataForPersonDay l'intervallo all'interno del quale ricercare i person day per il calcolo dei progressivi
 	 */
-	public void setPersonDayInformation(DateInterval validData)
+	public void setPersonDayInformation(DateInterval validDataForPersonDay)
 	{
-		if(validData!=null)
+		if(validDataForPersonDay!=null)
 		{
 			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date desc",
-					this.person, validData.getBegin(), validData.getEnd()).fetch();
+					this.person, validDataForPersonDay.getBegin(), validDataForPersonDay.getEnd()).fetch();
 
 			//progressivo finale fine mese
 			for(PersonDay pd : pdList){
@@ -178,12 +179,12 @@ public class Mese {
 	
 	/**
 	 * 
-	 * @param calcolaFinoA, la data fino alla quale cercare riposi compensativi gia' assegnati
+	 * @param validDataForCompensatoryRest, l'intervallo all'interno del quale ricercare i riposi compensativi
 	 */
-	public void setPersonMonthInformation(DateInterval validData)
+	public void setPersonMonthInformation(DateInterval validDataForCompensatoryRest)
 	{
 		
-		if(validData!=null && this.contract.isLastInMonth(mese, anno))	//gli straordinari li assegno solo all'ultimo contratto attivo del mese
+		if(this.contract.isLastInMonth(mese, anno))	//gli straordinari li assegno solo all'ultimo contratto attivo del mese
 		{
 			//straordinari s1
 			List<Competence> competenceList = Competence.find("Select comp from Competence comp, CompetenceCode compCode where comp.competenceCode = compCode and comp.person = ?"
@@ -212,15 +213,10 @@ public class Mese {
 			this.straordinariMinuti = this.straordinariMinutiS1Print + this.straordinariMinutiS2Print + this.straordinariMinutiS3Print;
 		}
 		
-		if(validData!=null)
+		if(validDataForCompensatoryRest!=null)
 		{
-
-			//riposi compensativi
-			if(this.mese == new LocalDate().getMonthOfYear() && this.anno == new LocalDate().getYear()){
-				validData = new DateInterval(validData.getBegin(), validData.getEnd().plusMonths(1).dayOfMonth().withMaximumValue());
-			}
 			List<Absence> riposiCompensativi = Absence.find("Select abs from Absence abs, AbsenceType abt, PersonDay pd where abs.personDay = pd and abs.absenceType = abt and abt.code = ? and pd.person = ? "
-					+ "and pd.date between ? and ?", "91", this.person, validData.getBegin(), validData.getEnd()).fetch();
+					+ "and pd.date between ? and ?", "91", this.person, validDataForCompensatoryRest.getBegin(), validDataForCompensatoryRest.getEnd()).fetch();
 			this.riposiCompensativiMinuti = 0;
 			this.numeroRiposiCompensativi = 0;
 			for(Absence abs : riposiCompensativi){
