@@ -69,6 +69,11 @@ public class CalcoloSituazioneAnnualePersona {
 				LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
 				if(new LocalDate().isBefore(monthEnd))
 					monthEnd = new LocalDate().minusDays(1);
+
+				//HOTFIX da verificare se today è l'ultimo giorno del mese da calcolare bisogna escluderlo
+				if(new LocalDate().isEqual(monthEnd))
+					monthEnd = new LocalDate().minusDays(1);
+
 				DateInterval monthInterval = new DateInterval(monthBegin, monthEnd);
 				DateInterval requestInterval = new DateInterval(firstDayInDatabase, calcolaFinoA);
 				DateInterval contractInterval = contract.getContractDateInterval();
