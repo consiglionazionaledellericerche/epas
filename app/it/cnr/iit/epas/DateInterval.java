@@ -9,20 +9,25 @@ public class DateInterval {
 	
 	public DateInterval(LocalDate date1, LocalDate date2)
 	{
+		
 		if(date1==null)
 			date1 = DateUtility.setInfinity();
 		if(date2==null)
 			date2 = DateUtility.setInfinity();
+
+		//Non applico il riferimento ma costruisco nuovi oggetti
+		LocalDate date1Copy = new LocalDate(date1);
+		LocalDate date2Copy = new LocalDate(date2);
 		
 		if(date1.isAfter(date2))
 		{
-			this.begin = date2;
-			this.end = date1;
+			this.begin = date2Copy;
+			this.end = date1Copy;
 		}
 		else
 		{
-			this.begin = date1;
-			this.end = date2;
+			this.begin = date1Copy;
+			this.end = date2Copy;
 		}
 	}
 	
