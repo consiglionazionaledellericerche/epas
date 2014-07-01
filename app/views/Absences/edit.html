@@ -46,7 +46,7 @@
     
       <tr>
         <td class="lab"><strong>Fino a</strong></td>
-        <td><input name="finoa" type="text" data-datepicker data-date-format="yyyy-mm-dd"/></td>
+        <td><input name="finoa" value="${absence.personDay.date}" type="text" data-datepicker data-date-format="yyyy-mm-dd"/></td>
 	  </tr>
 	
 	  <tr>
@@ -87,6 +87,7 @@
 		      <li><p class="text-error">N.B. in caso di errore in fase di inserimento nuovi codici, la rimozione delle assenze con codice ${absence.absenceType.code} non verrà ripristinata (si potrà comunque procedere al loro reinserimento mediante la form di Inserimento assenze)</p></li>
 		    </ul>
 		  </p>
+		  <p>Nel campo <strong>Fino a</strong> si può specificare fino a quando si vuole modificare/rimuovere un'assenza (di default, contenendo il giorno per cui si è cliccato, verrà modificata/rimossa solo per quel giorno)</p>
 		  <p class="text-info">
 		    <em>N.B. e' possibile forzare il buono mensa esclusivamente modificando assenze con codice 92 (missione)</em>
 		  </p>
