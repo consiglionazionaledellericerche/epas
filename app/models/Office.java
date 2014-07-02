@@ -71,6 +71,10 @@ public class Office extends BaseModel{
 	@OneToMany(mappedBy="office", fetch=FetchType.LAZY)
 	public List<WorkingTimeType> workingTimeType = new ArrayList<WorkingTimeType>();
     
+    @NotAudited
+	@OneToMany(mappedBy="office", fetch=FetchType.LAZY)
+	public List<TotalOvertime> totalOvertimes = new ArrayList<TotalOvertime>();
+    
     
     @Transient
     private Boolean isEditable = null;
