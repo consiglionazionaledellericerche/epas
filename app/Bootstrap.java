@@ -7,6 +7,7 @@ import models.Office;
 import models.Permission;
 import models.Person;
 import models.Role;
+import models.TotalOvertime;
 import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
@@ -41,6 +42,8 @@ public class Bootstrap extends Job {
 		cleanOfficeTree();
 		
 		bootstrapPermissionsHandler();
+		
+		bootstrapTotalOvertimeHandler();
 		
 		try
 		{
@@ -583,6 +586,39 @@ public class Bootstrap extends Job {
 				iitCos.office = iit;
 				iitCos.save();
 			}
+		}
+
+	}
+	
+	private static void bootstrapTotalOvertimeHandler() {
+		
+		/* EVOLUZIONE IVV */
+		Office ivv = Office.find("byCode", 1000).first();	//WARNING è un codice forse non univoco!!!
+		if(ivv != null) {
+			
+			//Associare tutti gli oggetti TotalOvertime a ivv
+			List<TotalOvertime> totalOvertimes = TotalOvertime.findAll();
+			for(TotalOvertime totalOvertime : totalOvertimes) {
+				if(totalOvertime.office == null) {
+					totalOvertime.office = ivv;
+					totalOvertime.save();
+				}
+			}
+		}
+		
+		/* EVOLUZIONE IIT */
+		Office iit = Office.find("byCode", 223400).first();	
+		if(iit != null) {
+			
+			//Associare tutti gli oggetti TotalOvertime privi di office a iit
+			List<TotalOvertime> totalOvertimes = TotalOvertime.findAll();
+			for(TotalOvertime totalOvertime : totalOvertimes) {
+				if(totalOvertime.office == null) {
+					totalOvertime.office = iit;
+					totalOvertime.save();
+				}
+			}
+			
 		}
 
 	}
