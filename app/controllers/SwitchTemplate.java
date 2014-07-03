@@ -259,22 +259,22 @@ private static void executeAction(String action) {
 		
 		if(action.equals("Competences.showCompetences")) {
 			
-			Competences.showCompetences(year, month, null,  null,  null);
+			Competences.showCompetences(year, month, null, null,  null,  null);
 		}
 		
 		if(action.equals("Competences.overtime")) {
 			
-			Competences.overtime(year, month, null,  null);
+			Competences.overtime(year, month, null, null,  null);
 		}
 		
 		if(action.equals("Competences.totalOvertimeHours")) {
 			
-			Competences.totalOvertimeHours(year);
+			Competences.totalOvertimeHours(year, null);
 		}
 		
 		if(action.equals("Competences.enabledCompetences")) {
 			
-			Competences.enabledCompetences(null);
+			Competences.enabledCompetences(null, null);
 		}
 		
 		if(action.equals("Competences.exportCompetences")) {
