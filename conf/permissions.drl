@@ -367,13 +367,25 @@ when
  $p: Permission(description == "viewCompetence") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
-        "Competences.showCompetences",
-        "Competences.overtime",
-        "Competences.totalOvertimeHours",
-        "Competences.enabledCompetences",
         "Competences.exportCompetences",
         "Competences.getOvertimeInYear"
         ), target != null, granted == false)
+then
+ $c.grant();
+end
+
+rule viewCompetence_InOffice
+when
+ $o: Office()
+ $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $p: Permission(description == "viewCompetence") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        /* inserire le action interessate */
+        "Competences.showCompetences",
+        "Competences.overtime",
+        "Competences.totalOvertimeHours",
+        "Competences.enabledCompetences"
+       ), target == $o, granted == false)
 then
  $c.grant();
 end
