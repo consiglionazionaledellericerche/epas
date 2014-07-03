@@ -6,10 +6,10 @@
 <div id="container-fluid-nav-tabs" class="container-fluid">
 
 <ul class="nav nav-tabs">
-  <li><a href="@{Competences.showCompetences(year, month)}">Assegna Competenze</a></li>
-  <li><a href="@{Competences.overtime(year, month)}">Straordinari</a></li>
-  <li><a href="@{Competences.totalOvertimeHours(year)}">Monte ore</a></li>
-  <li class="active"><a href="@{Competences.enabledCompetences()}">Abilita Competenze</a></li>
+  <li><a href="@{Competences.showCompetences(year, month, office.id)}">Assegna Competenze</a></li>
+  <li><a href="@{Competences.overtime(year, month, office.id)}">Straordinari</a></li>
+  <li><a href="@{Competences.totalOvertimeHours(year, office.id)}">Monte ore</a></li>
+  <li class="active"><a href="@{Competences.enabledCompetences(office.id)}">Abilita Competenze</a></li>
   <li><a href="@{Competences.exportCompetences()}">Esporta competenze</a></li>
 </ul>
 
@@ -17,9 +17,30 @@
  
 <div class="container-fluid">
 
-<h3>Da questa pagina puoi definire quali competenze spettano ad ogni persona</h3> 
-
-<br>
+<!-- FILTRO OFFICE RIPETUTO IN OGNI TEMPLATE DI COMPETENCES, DA METTERE NEL NAVBAR?? -->
+<div class="container-fluid">
+ <div class="center" style="margin-top: 0px; margin-bottom: 10px;">
+	  #{form action:@Competences.enabledCompetences(), role:'form', class:'form-inline', 
+	    method:'GET', autocomplete:'off',
+	    'data-reload':'#results'}
+	    
+	       <div class="form-group">
+	        <label class="hidden-xs hidden-sm" for="dip">Sede </label>
+	        	        	        
+	        <select name="officeId" class="form-control" id="dip" onChange="javascript:this.form.submit()" >
+	            #{list items:offices, as:'officeItem'}
+	              <option value="${officeItem.id}" #{if officeItem.id.equals(office.id) } selected="selected" #{/if} >
+	                ${officeItem.name}
+	              </option>
+	            #{/list}
+	        </select>
+	      </div>
+	       
+	      <button type="submit" class="btn btn-default">Invio</button>
+	  #{/form}
+      </div>
+</div>
+<!-- FINE FILTRO OFFICE -->
 
 #{form action:@Competences.enabledCompetences(), class:'form-search',  
     method:'GET', autocomplete:'off',
@@ -27,8 +48,7 @@
     
     <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="input-medium search-query"/>
     <i class="icon-search icon-large"></i>
-    <input type="hidden" name="year" value="${year}"/>
-	<input type="hidden" name="month" value="${month}"/>
+    <input type="hidden" name="officeId" value="${office.id}"/>
 
 #{/form}
 

@@ -50,16 +50,18 @@ public class CompetenceCode extends BaseModel {
 
 	/**
 	 * 
-	 * @param code
 	 * @param month
 	 * @param year
 	 * @return il totale per quel mese e quell'anno di ore/giorni relativi a quel codice competenza
 	 */
-	public int totalFromCompetenceCode(int month, int year){
+	public int totalFromCompetenceCode(int month, int year, Long officeId){
+		
+		Office office = Office.findById(officeId);
+		
 		int totale = 0;
 		
 		List<Competence> compList = Competence.find("Select comp from Competence comp where comp.competenceCode = ? " +
-				"and comp.month = ? and comp.year = ?", this, month, year).fetch();
+				"and comp.month = ? and comp.year = ? and comp.person.office = ?", this, month, year, office).fetch();
 		for(Competence comp : compList){
 			totale = totale+comp.valueApproved;
 		}
