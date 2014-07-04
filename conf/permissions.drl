@@ -153,6 +153,10 @@ when
         "UploadSituation.uploadSituation",
         "UploadSituation.loginAttestati",
         "UploadSituation.processAttestati",
+        "UploadSituation.processSinglePerson",
+        "UploadSituation.processAllPersons",
+        "UploadSituation.showProblems",
+        "UploadSituation.showCertificatedData",
         
         /*Gestione buoni pasto*/
         "MealTickets.manageMealTickets",
@@ -412,7 +416,11 @@ when
         "UploadSituation.show",
         "UploadSituation.uploadSituation",
         "UploadSituation.loginAttestati",
-        "UploadSituation.processAttestati"
+        "UploadSituation.processAttestati",
+        "UploadSituation.processSinglePerson",
+        "UploadSituation.processAllPersons",
+        "UploadSituation.showProblems",
+        "UploadSituation.showCertificatedData"        
        ), target == $o, granted == false)
 then
  $c.grant();
