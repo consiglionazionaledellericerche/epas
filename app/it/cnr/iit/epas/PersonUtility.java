@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.Query;
 
@@ -19,6 +20,7 @@ import models.PersonDay;
 import models.PersonDayInTrouble;
 import models.PersonMonthRecap;
 import models.StampProfile;
+import models.StampProfileContract;
 import models.Stamping;
 import models.User;
 import models.enumerate.AccumulationBehaviour;
@@ -1048,38 +1050,61 @@ public class PersonUtility {
 			if(pd.cause.contains(cause) && !pd.personDay.isHoliday() && pd.fixed == false)
 				dateTroubleStampingList.add(pd.personDay.date);
 		}
-		
-
-		for(StampProfile sp : p.stampProfiles) {
-			
-			//FIXME questo è sbagliato: fixedWorkingTime va testato per ogni giorno non solo nel giorno begin.
-						
-			if( DateUtility.isDateIntoInterval(begin, new DateInterval(sp.startFrom,sp.endTo))){
-				if(sp.fixedWorkingTime == false){
-										
+		/**
+		 * riscritta la parte di invio mail a partire dalla tipologia di stamp profile associata al contratto (e non più
+		 * alla persona)
+		 */
+		Set<StampProfileContract> spcSet = p.getCurrentContract().stampProfileContract;
+		for(StampProfileContract spc : spcSet){
+			if(DateUtility.isDateIntoInterval(begin, new DateInterval(spc.startFrom,spc.endTo))){
+				if(spc.stampProfile.fixedWorkingTime == false){
 					boolean flag;
-					try {
-						
+					try{
 						flag = sendEmailToPerson(dateTroubleStampingList, p, cause);
-						
-					} catch (EmailException e) {
-						
+					} catch(EmailException e){
 						Logger.debug("sendEmailToPerson(dateTroubleStampingList, p, cause): fallito invio email per %s %s", p.name, p.surname); 
 						e.printStackTrace();
 						return;
 					}
-					
-					//se ho inviato mail devo andare a settare 'true' i campi emailSent dei personDayInTrouble relativi 
 					if(flag){
 						for(PersonDayInTrouble pd : pdList){
 							pd.emailSent = true;
 							pd.save();
 						}
 					}
-
 				}
 			}
 		}
+//		for(StampProfile sp : p.stampProfiles) {
+//			
+//			//FIXME questo è sbagliato: fixedWorkingTime va testato per ogni giorno non solo nel giorno begin.
+//						
+//			if( DateUtility.isDateIntoInterval(begin, new DateInterval(sp.startFrom,sp.endTo))){
+//				if(sp.fixedWorkingTime == false){
+//										
+//					boolean flag;
+//					try {
+//						
+//						flag = sendEmailToPerson(dateTroubleStampingList, p, cause);
+//						
+//					} catch (EmailException e) {
+//						
+//						Logger.debug("sendEmailToPerson(dateTroubleStampingList, p, cause): fallito invio email per %s %s", p.name, p.surname); 
+//						e.printStackTrace();
+//						return;
+//					}
+//					
+//					//se ho inviato mail devo andare a settare 'true' i campi emailSent dei personDayInTrouble relativi 
+//					if(flag){
+//						for(PersonDayInTrouble pd : pdList){
+//							pd.emailSent = true;
+//							pd.save();
+//						}
+//					}
+//
+//				}
+//			}
+//		}
 
 	}
 

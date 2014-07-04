@@ -401,11 +401,11 @@ public class Persons extends Controller {
 		if(person.reperibility != null)
 			person.reperibility.delete();
 		// Eliminazione stamp profile associati alla persona
-		for(StampProfile sp : person.stampProfiles){
-			long id = sp.id;
-			sp = StampProfile.findById(id);
-			sp.delete();
-		}
+//		for(StampProfile sp : person.stampProfiles){
+//			long id = sp.id;
+//			sp = StampProfile.findById(id);
+//			sp.delete();
+//		}
 
 		JPAPlugin.closeTx(false);
 		JPAPlugin.startTx(false);
