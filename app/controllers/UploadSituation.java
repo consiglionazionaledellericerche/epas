@@ -254,13 +254,13 @@ public class UploadSituation extends Controller{
 		
 	}
 
-	@Check(Security.UPLOAD_SITUATION)
+	//@Check(Security.UPLOAD_SITUATION)
 	public static void processAllPersons(int year, int month) throws MalformedURLException, URISyntaxException
 	{
 		if (params.get("back") != null) {
 			UploadSituation.loginAttestati(year, month);
 		}
-		
+		rules.checkIfPermitted(Security.getUser().get().person.office);
 		LoginResponse loginResponse = loadAttestatiLoginCached();
 		List<Dipendente> listaDipendenti = loadAttestatiListaCached();
 		
@@ -269,7 +269,7 @@ public class UploadSituation extends Controller{
 			flash.error("La sessione attestati non è attiva o è scaduta, effettuare nuovamente login.");
 			UploadSituation.loginAttestati(year, month);
 		}
-
+		
 		Set<Dipendente> activeDipendenti = getActiveDipendenti(year, month);
 
 		List<RispostaElaboraDati> checks = elaboraDatiDipendenti( 
@@ -299,7 +299,7 @@ public class UploadSituation extends Controller{
 
 	}
 	
-	@Check(Security.UPLOAD_SITUATION)
+	//@Check(Security.UPLOAD_SITUATION)
 	public static void processSinglePerson(String matricola, int year, int month) throws MalformedURLException, URISyntaxException
 	{
 		if(matricola==null)
@@ -307,7 +307,7 @@ public class UploadSituation extends Controller{
 			flash.error("Errore caricamento dipendente da elaborare. Riprovare o effettuare una segnalazione.");
 			UploadSituation.processAttestati(null, null, year, month);
 		}
-		
+		rules.checkIfPermitted(Security.getUser().get().person.office);
 		LoginResponse loginResponse = loadAttestatiLoginCached();
 		List<Dipendente> listaDipendenti = loadAttestatiListaCached();
 		
@@ -365,9 +365,10 @@ public class UploadSituation extends Controller{
 
 	}
 
-	@Check(Security.UPLOAD_SITUATION)
+	//@Check(Security.UPLOAD_SITUATION)
 	public static void showProblems(Long certificatedDataId)
 	{
+		rules.checkIfPermitted(Security.getUser().get().person.office);
 		CertificatedData cd = CertificatedData.findById(certificatedDataId);
 		if(cd==null)
 		{
@@ -376,9 +377,10 @@ public class UploadSituation extends Controller{
 		render(cd);
 	}
 	
-	@Check(Security.UPLOAD_SITUATION)
+	//@Check(Security.UPLOAD_SITUATION)
 	public static void showCertificatedData(Long certificatedDataId)
 	{
+		rules.checkIfPermitted(Security.getUser().get().person.office);
 		CertificatedData cd = CertificatedData.findById(certificatedDataId);
 		if(cd==null)
 		{
