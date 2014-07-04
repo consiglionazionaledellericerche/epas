@@ -10,6 +10,7 @@ import it.cnr.iit.epas.PersonUtility;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -425,11 +426,16 @@ public class PersonDay extends BaseModel {
 			return this.isFixedTimeAtWorkk;
 		
 		this.isFixedTimeAtWorkk = false;
-		for(StampProfile sp : this.person.stampProfiles)
+		/**
+		 * cambiato il modo di recuperare lo stamp profile a partire dalla nuova relazione tra contratto e stamp profile
+		 * bypassando la person e passando dalla classe intermedia StampProfileContract
+		 */
+		Set<StampProfileContract> spcSet = this.person.getCurrentContract().stampProfileContract;
+		for(StampProfileContract spc : spcSet)
 		{
-			if(DateUtility.isDateIntoInterval(this.date, new DateInterval(sp.startFrom,sp.endTo)))
+			if(DateUtility.isDateIntoInterval(this.date, new DateInterval(spc.startFrom,spc.endTo)))
 			{
-				this.isFixedTimeAtWorkk = sp.fixedWorkingTime;
+				this.isFixedTimeAtWorkk = spc.stampProfile.fixedWorkingTime;
 			}
 		}
 		return this.isFixedTimeAtWorkk;

@@ -2,6 +2,7 @@ package it.cnr.iit.epas;
 
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Set;
 
 import models.Absence;
 import models.AbsenceType;
@@ -14,6 +15,7 @@ import models.PersonDay;
 import models.PersonMonthRecap;
 import models.Qualification;
 import models.StampProfile;
+import models.StampProfileContract;
 import models.Stamping;
 import models.VacationCode;
 
@@ -394,16 +396,30 @@ public class ExportToYaml {
 	private static String appendStampProfiles(Person person)
 	{
 		String out = "";
-		for(StampProfile sp : person.stampProfiles)
-		{
-			out = out + getFormattedHeader("StampProfile", "sp"+sp.id);
+		/**
+		 * si passa dallo StampProfileContract per capire quale sia lo stampProfile associato alla persona sul contratto
+		 * attuale
+		 */
+		Set<StampProfileContract> spcSet = person.getCurrentContract().stampProfileContract;
+		for(StampProfileContract spc : spcSet){
+			out = out + getFormattedHeader("StampProfile", "sp"+spc.stampProfile.id);
 			out = out + getFormattedProperty("person", "person" + person.id);
-			if(sp.startFrom!=null)
-				out = out + getFormattedProperty("startFrom", "'" + sp.startFrom + "'");
-			if(sp.endTo!=null)
-				out = out + getFormattedProperty("endTo", "'" + sp.endTo + "'");
-			out = out + getFormattedProperty("fixedWorkingTime", sp.fixedWorkingTime+"");
+			if(spc.startFrom != null)
+				out = out + getFormattedProperty("startFrom", "'" + spc.startFrom + "'");
+			if(spc.endTo != null)
+				out = out + getFormattedProperty("endTo", "'" + spc.endTo + "'");
+			out = out + getFormattedProperty("fixedWorkingTime", spc.stampProfile.fixedWorkingTime+"");
 		}
+//		for(StampProfile sp : person.stampProfiles)
+//		{
+//			out = out + getFormattedHeader("StampProfile", "sp"+sp.id);
+//			out = out + getFormattedProperty("person", "person" + person.id);
+//			if(sp.startFrom!=null)
+//				out = out + getFormattedProperty("startFrom", "'" + sp.startFrom + "'");
+//			if(sp.endTo!=null)
+//				out = out + getFormattedProperty("endTo", "'" + sp.endTo + "'");
+//			out = out + getFormattedProperty("fixedWorkingTime", sp.fixedWorkingTime+"");
+//		}
 		return out;
 	}
 	
