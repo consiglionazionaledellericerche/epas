@@ -93,10 +93,7 @@ public class VacationsRecap {
 		AbsenceType ab31  = AbsenceType.getAbsenceTypeByCode("31");
 		AbsenceType ab37  = AbsenceType.getAbsenceTypeByCode("37");
 		AbsenceType ab94  = AbsenceType.getAbsenceTypeByCode("94");
-		AbsenceType ab24  = AbsenceType.getAbsenceTypeByCode("24");
-		AbsenceType ab24S = AbsenceType.getAbsenceTypeByCode("24S");
-		AbsenceType ab25  = AbsenceType.getAbsenceTypeByCode("25");
-		
+
 		//Expire Last Year
 		
 		//ConfYear conf = ConfYear.getConfYear(year);
@@ -122,9 +119,6 @@ public class VacationsRecap {
 		
 		//(1) Calcolo ferie usate dell'anno passato ---------------------------------------------------------------------------------------------------------------------------------
 		List<Absence> abs32Last = null;
-		List<Absence> abs24Last = null;
-		List<Absence> abs24SLast = null;
-		List<Absence> abs25Last = null;
 		
 		List<Absence> abs31Last = null;
 		List<Absence> abs37Last = null;
@@ -160,14 +154,8 @@ public class VacationsRecap {
 		}
 		//costruisco la lista delle ferie per stampare le date (prendo tutto ciò che trovo nel db e poi riempo con null fino alla dimensione calcolata)
 		abs32Last  = getVacationDays(lastYearInter, activeContract, ab32);
-		abs24Last  = getVacationDays(lastYearInter, activeContract, ab24);
-		abs24SLast = getVacationDays(lastYearInter, activeContract, ab24S);
-		abs25Last  = getVacationDays(lastYearInter, activeContract, ab25);
 
 		this.vacationDaysLastYearUsed.addAll(abs32Last);
-		this.vacationDaysLastYearUsed.addAll(abs24Last);
-		this.vacationDaysLastYearUsed.addAll(abs24SLast);
-		this.vacationDaysLastYearUsed.addAll(abs25Last);
 		this.vacationDaysLastYearUsed.addAll(abs31Last);
 		this.vacationDaysLastYearUsed.addAll(abs37Last);
 		while(this.vacationDaysLastYearUsed.size()<vacationDaysPastYearUsedNew)
@@ -180,9 +168,6 @@ public class VacationsRecap {
 		
 		//(2) Calcolo ferie usate dell'anno corrente ---------------------------------------------------------------------------------------------------------------------------------
 		List<Absence> abs32Current  = null;
-		List<Absence> abs24Current  = null;
-		List<Absence> abs24SCurrent = null;
-		List<Absence> abs25Current  = null;
 		
 		int vacationDaysCurrentYearUsedNew = 0;
 		if(activeContract.sourceDate!=null && activeContract.sourceDate.getYear()==year)
@@ -190,23 +175,14 @@ public class VacationsRecap {
 			vacationDaysCurrentYearUsedNew = vacationDaysCurrentYearUsedNew + activeContract.sourceVacationCurrentYearUsed;
 			DateInterval yearInterSource = new DateInterval(activeContract.sourceDate.plusDays(1), endYear);
 			abs32Current = getVacationDays(yearInterSource, activeContract, ab32);
-			abs24Current = getVacationDays(yearInterSource, activeContract, ab24);
-			abs24SCurrent = getVacationDays(yearInterSource, activeContract, ab24S);
-			abs25Current = getVacationDays(yearInterSource, activeContract, ab25);
-			vacationDaysCurrentYearUsedNew = vacationDaysCurrentYearUsedNew + abs32Current.size() + abs24Current.size() + abs24SCurrent.size() + abs25Current.size();
+			vacationDaysCurrentYearUsedNew = vacationDaysCurrentYearUsedNew + abs32Current.size();
 		}
 		else
 		{
 			abs32Current = getVacationDays(yearInter, activeContract, ab32);
-			abs24Current = getVacationDays(yearInter, activeContract, ab24);
-			abs24SCurrent = getVacationDays(yearInter, activeContract, ab24S);
-			abs25Current = getVacationDays(yearInter, activeContract, ab25);
-			vacationDaysCurrentYearUsedNew = vacationDaysCurrentYearUsedNew + abs32Current.size() + abs24Current.size() + abs24SCurrent.size() + abs25Current.size();
+			vacationDaysCurrentYearUsedNew = vacationDaysCurrentYearUsedNew + abs32Current.size();
 		}
 		this.vacationDaysCurrentYearUsed.addAll(abs32Current);
-		this.vacationDaysCurrentYearUsed.addAll(abs24Current);
-		this.vacationDaysCurrentYearUsed.addAll(abs24SCurrent);
-		this.vacationDaysCurrentYearUsed.addAll(abs25Current);
 		while(this.vacationDaysCurrentYearUsed.size()<vacationDaysCurrentYearUsedNew)
 		{
 			Logger.debug("Inserita assenza nulla");
@@ -279,7 +255,12 @@ public class VacationsRecap {
 	public int getVacationAccruedYear(DateInterval yearInterval, Contract contract, List<VacationPeriod>vacationPeriodList){
 		
 		int vacationDays = 0;
-
+		List<Absence> abs24Current  = null;
+		List<Absence> abs24SCurrent = null;
+		List<Absence> abs25Current  = null;
+		AbsenceType ab24  = AbsenceType.getAbsenceTypeByCode("24");
+		AbsenceType ab24S = AbsenceType.getAbsenceTypeByCode("24S");
+		AbsenceType ab25  = AbsenceType.getAbsenceTypeByCode("25");
 		//Calcolo l'intersezione fra l'anno e il contratto attuale
 		yearInterval = DateUtility.intervalIntersection(yearInterval, new DateInterval(contract.beginContract, contract.expireContract));
 		if(yearInterval == null)
@@ -295,15 +276,17 @@ public class VacationsRecap {
 			{
 				days = DateUtility.daysInInterval(intersection);
 			}
-			
+			abs24Current = getVacationDays(intersection, activeContract, ab24);
+			abs24SCurrent = getVacationDays(intersection, activeContract, ab24S);
+			abs25Current = getVacationDays(intersection, activeContract, ab25);
 			//calcolo i giorni maturati col metodo di conversione
 			if(vp.vacationCode.description.equals("26+4"))
 			{
-				vacationDays = vacationDays + VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysLessThreeYears(days);
+				vacationDays = vacationDays + VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysLessThreeYears(days-abs24Current.size()-abs25Current.size()-abs24SCurrent.size());
 			}
 			if(vp.vacationCode.description.equals("28+4"))
 			{
-				vacationDays = vacationDays + VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysMoreThreeYears(days);
+				vacationDays = vacationDays + VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysMoreThreeYears(days-abs24Current.size()-abs25Current.size()-abs24SCurrent.size());
 			}
 			
 		}

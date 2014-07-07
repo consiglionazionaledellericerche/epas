@@ -42,7 +42,7 @@
     
 	<tr>
       <td class="lab"><strong>Fino a</strong></td>
-      <td><input name="finoa" type="text" data-datepicker data-date-format="yyyy-mm-dd"/></td>
+      <td><input name="finoa" type="text" value="${personDay.date}" data-datepicker data-date-format="yyyy-mm-dd"/></td>
 	</tr>
 	
 	<tr>
@@ -59,6 +59,7 @@
 	<div class="well col-xs-12">
 	  
 	  <p>Se si vuole inserire un'assenza per più giorni, inserire nel campo <strong>Fino a</strong> il giorno fino al quale si vuole inserire tale codice d'assenza.</p>
+	  <p>Di default, in tale campo, viene visualizzato il giorno di partenza per cui si vuole inserire l'assenza</p>
 	  <p class="text-info" style="margin-top: 5px;"><em>N.B. Non e' possibile inserire in uno stesso giorno due codici di assenza che giustificano tutto il giorno</em></p>
 	  <p>Utilizzando il codice <em>FER</em> il software provvederà ad assegnare ferie e permessi fin quando disponibili nel seguente ordine di priorità: 
 	      <ul>

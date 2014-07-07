@@ -62,7 +62,7 @@ public class Stampings extends Controller {
 	public static void stampings(Integer year, Integer month) {
 
 		Person person = Security.getUser().get().person;
-		if(!person.isActiveInMonth(month, year))
+		if(!person.isActiveInMonth(month, year, false))
 		{
 			flash.error("Si è cercato di accedere a un mese al di fuori del contratto valido per %s %s. " +
 					"Non esiste situazione mensile per il mese di %s", person.name, person.surname, DateUtility.fromIntToStringMonth(month));
@@ -141,7 +141,7 @@ public class Stampings extends Controller {
 		
 		rules.checkIfPermitted(person.office);
 		
-		if(!person.isActiveInMonth(month, year))
+		if(!person.isActiveInMonth(month, year, false))
 		{
 			flash.error("Si è cercato di accedere a un mese al di fuori del contratto valido per %s %s. " +
 					"Non esiste situazione mensile per il mese di %s", person.name, person.surname, DateUtility.fromIntToStringMonth(month));
