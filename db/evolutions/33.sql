@@ -11,6 +11,15 @@ stamp_profile_id bigint not null REFERENCES stamp_profiles (id)
 );
 
 
+CREATE TABLE stamp_profiles_tmp(
+id BIGSERIAL PRIMARY KEY,
+fixed_working_time boolean,
+description text
+);
+
+
+insert into stamp_profiles_contracts(start_from, end_to
+
 # ---!Downs
 
 
