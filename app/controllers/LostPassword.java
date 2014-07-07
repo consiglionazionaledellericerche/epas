@@ -29,8 +29,7 @@ public class LostPassword extends Controller{
 			LostPassword.lostPassword();
 		}
 
-		//Person person = Person.find("byEmail", email).first();
-		Person person = Person.find("bySurname", "Lucchesi").first();
+		Person person = Person.find("byEmail", email).first();
 		if(person==null)
 		{
 			flash.error("L'indirizzo email fornito è sconosciuto. Operazione annullata.");
@@ -48,8 +47,7 @@ public class LostPassword extends Controller{
 		
 		SimpleEmail simpleEmail = new SimpleEmail();
 		simpleEmail.setFrom("epas@iit.cnr.it");
-		//simpleEmail.addTo(email);
-		simpleEmail.addTo("alessandro.martelli@iit.cnr.it");
+		simpleEmail.addTo(email);
 		simpleEmail.setSubject("ePas Recupero Password");
 		String message = "Utente: " + person.user.username + "\r\n" + "Per ottenere una nuova password apri il seguente collegamento: " + GET_RECOVERY_PREFIX + token;
 		
