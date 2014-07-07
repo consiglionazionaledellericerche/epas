@@ -11,56 +11,58 @@
     			mm = 0;
     			
     			mese = firstOfMonth.plusMonths(mm).monthOfYear().getAsText();
-    			if (mese.equals('July')) {
-    				mese = 'luglio';
-    			} else if (mese.equals('June')) {
-    				mese = 'giugno';
-    			} else if (mese.equals('August')) {
-    				mese = 'agosto';
-    			}
+    			anno = firstOfMonth.plusMonths(mm).year().getAsText();
+
     		}%
+    		
         	<h1>Istituto di Informatica e Telematica </h1>
         
         	<div class="table">
 			<table class="mensile">
-			<caption> Giorni di turno del personale per il mese di ${mese} ${firstOfMonth.plusMonths(mm).year().getAsText()}</caption>
+			<caption> Giorni di turno del personale per il mese di ${mese} ${anno}</caption>
 			<tr>
-			<th>Persona</th><th>Numero di giorni</th><th>Numero di ore</th>
-			</tr>	
-			<tr>	
+			<th>Persona</th>
 			%{
-				for(person in shiftSumDays.rowKeySet()) {
-				giorniTot = 0;
+					for(th in thShift) {
+			}%  
+			    		<th>${th} </th> 
+			%{
+					}
+			}%  
+
+			</tr>	
+			
+			%{
+				for(person in totalShiftInfo.rowKeySet()) {
 			}%
+			<tr>	
 				<td> 
 					<p>
-						${person}
+						${person.surname} ${person.name}
 					</p>
 				</td>
 
-				%{
-					for(shift in shiftSumDays.columnKeySet()) {
-
-						if (shiftSumDays.contains(person, shift)) {
-							giorniTot += shiftSumDays.get(person, shift);
-						}
-    				}
-    				resto = (giorniTot%2 == 0) ? ':00' : ':30'; 
-					ore = giorniTot*6 + (int)(giorniTot/2) + resto;	
-				}%
-				<td>
-					<p>${giorniTot}</p>
+			%{
+					for(th in thShift) {
+			}%  
+			    <td>
+					<p>
+						${totalShiftInfo.contains(person, th) ? totalShiftInfo.get(person, th) : ''} 
+					</p>
 				</td>
-				<td>
-					<p>${ore}</p>
-				</td>
-			</tr>
+			%{
+					}
+			}%  
+				
+			</tr>			
 			%{
     			}
 			}%
 			
 			</table>
-      		</div>
+			</div>
+      		
+      		
       		<div class="date">
       			<strong>Data </strong>&nbsp;&nbsp;${today.getDayOfMonth()}/${today.getMonthOfYear()}/${today.getYear()}
       		</div>
@@ -73,6 +75,72 @@
       			<strong>Il Responsabile</strong><br />
       			Dott. Maurizio Martinelli
       		</div>
+      		
+      		    		%{
+				if (!totalInconsistentAbsences.isEmpty()) {
+				
+				fistTr = true;
+			}%
+					<div class="note_presenze">
+					<h1>Inconsistenze con le presenze del personale </h1>
+			    	<p>Sono state rilevate delle inconsistenze tra i turni e le presenze del personale: </p>
+			    	
+			    	<table class="mensile">
+			    		<tr>
+			    		<th>Nome dipendente</th>
+			 %{
+					for(th in thInconsistence) {
+			 }%  
+			    		<th>${th} </th> 
+			%{
+					}
+			 }%  
+			
+			%{
+					for(person in totalInconsistentAbsences.rowKeySet()) {
+			}%
+						<tr>
+							<td>${person.surname} ${person.name}</td>
+			%{
+							for(th in thInconsistence) {
+								if (totalInconsistentAbsences.contains(person, th)) {
+			}%
+							<td> 
+			%{
+								for(day in totalInconsistentAbsences.get(person, th)) {
+			}%
+								${day}<br/>
+			%{
+    							}
+			}%
+							</td>
+			%{
+		    					} else {
+		    }%
+		  					<td>&nbsp;</td>
+		  	%{
+		  						}
+				
+							}
+			}%
+		    			</tr>
+		    %{
+		    		}
+		  	}%
+		  	
+		  	</table>
+						
+      		</div>
+      		
+      		<div class="date">
+      			<strong>Data</strong> &nbsp;&nbsp;${today.getDayOfMonth()}/${today.getMonthOfYear()}/${today.getYear()}
+      		</div>
+      		
+		  	%{
+		    	}						
+			}%
+			
+ 
       		
     </body>
 </html>

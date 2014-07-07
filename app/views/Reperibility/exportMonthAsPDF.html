@@ -11,21 +11,15 @@
     			mm = 0;
     			
        			mese = firstOfMonth.plusMonths(mm).monthOfYear().getAsText();
-    			if (mese.equals('July')) {
-    				mese = 'luglio';
-    			} else if (mese.equals('June')) {
-    				mese = 'giugno';
-    			} else if (mese.equals('August')) {
-    				mese = 'agosto';
-    			}
+				anno = firstOfMonth.plusMonths(mm).year().getAsText();
     		}%
         	<h1>Istituto di Informatica e Telematica </h1>
         
         	<div class="table">
 			<table class="mensile">
-			<caption> Reperibilità del personale per il mese di ${mese} ${firstOfMonth.plusMonths(mm).year().getAsText()}</caption>
+			<caption> Reperibilità del personale per il mese di ${mese} ${anno}</caption>
 			<tr>
-				<td class="no-border"></td><th colspan="2"> Feriali - Cod: ${codFr}</th> <th colspan="2" class="red"> Festivi - Cod: ${codFs}</th>
+				<td class="no-border"></td><th colspan="2"> Feriali - Cod: ${cFr}</th> <th colspan="2" class="red"> Festivi - Cod: ${cFs}</th>
 			</tr>
 			<tr>
 				<th>Nome dipendente  </th> <th> Date </th> <th> Num. giorni</th> <th> Date </th> <th>Num. giorni</th>
@@ -35,26 +29,11 @@
 				for(person in reperibilitySumDays.rowKeySet()) {
 			}%
 			<tr>
-				<td> ${person}</td>
-				<td> 
-					%{
-						for(day in reperibilityDateDays.get(person, "FR")) {
-					}%
-						${day} <br/>
-					%{
-    					}
-					}%
-				</td>
-				<td> ${reperibilitySumDays.contains(person, "FR") ? reperibilitySumDays.get(person, "FR") : ''}</td>
-				<td> %{
-						for(day in reperibilityDateDays.get(person, "FS")) {
-					}%
-						${day} <br/>
-					%{
-    					}
-					}%
-				</td>
-				<td class="red"> ${reperibilitySumDays.contains(person, "FS") ? reperibilitySumDays.get(person, "FS") : '0'}</td>
+				<td> ${person.surname} ${person.name}</td>
+				<td> ${reperibilityDateDays.get(person, cFr)}</td>
+				<td>  ${reperibilitySumDays.contains(person, cFr) ? reperibilitySumDays.get(person, cFr) : '0'}</td>
+				<td> ${reperibilityDateDays.get(person, cFs)} </td>
+				<td class="red"> ${reperibilitySumDays.contains(person, cFs) ? reperibilitySumDays.get(person, cFs) : '0'}</td>
 			</tr>
 
 			%{
@@ -62,9 +41,11 @@
 			}%
 			</table>
       		</div>
+      		
       		<div class="date">
       			<strong>Data</strong> &nbsp;&nbsp;${today.getDayOfMonth()}/${today.getMonthOfYear()}/${today.getYear()}
       		</div>
+      		
       		<div class="firma dir">
       			<strong>Il Direttore</strong> <br />
       			Dott. Domenico Laforenza
@@ -74,6 +55,82 @@
       			<strong>Il Responsabile</strong><br />
       			Dott. Maurizio Martinelli
       		</div>
+      		
+     
+			
+			%{
+				if (!inconsistentAbsence.isEmpty()) {
+				
+				fistTr = true;
+			}%
+					<div class="note_presenze">
+					<h1>Inconsistenze con le presenze del personale </h1>
+			    	<p>Sono state rilevate delle inconsistenze tra i turni di reperibilit&agrave; e le presenze del personale: </p>
+			    	
+			    	<table class="mensile">
+			    		<tr>
+			    		<th>Nome dipendente </th> <th>${thNoStamp}</th> <th>${thAbs}</th>
+			
+			%{
+					for(person in inconsistentAbsence.rowKeySet()) {
+			}%
+						<tr>
+							<td>${person.surname} ${person.name}</td>
+			%{
+							if (inconsistentAbsence.contains(person, thNoStamp)) {
+			}%
+							<td> 
+			%{
+								for(day in inconsistentAbsence.get(person, thNoStamp)) {
+			}%
+								${day}<br/>
+			%{
+    							}
+			}%
+							</td>
+			%{
+		    				} else {
+		    }%
+		  					<td>&nbsp;</td>
+		  	%{
+		  					}
+				
+							if (inconsistentAbsence.contains(person, thAbs)) {
+			}%
+							<td> 
+			%{
+								for(day in inconsistentAbsence.get(person, thAbs)) {
+			}%
+								${day}<br/>
+			%{
+    							}
+			}%
+							</td>
+			%{
+		    				} else {
+		    }%
+		  					<td>&nbsp;</td>
+		  	%{
+		  					}
+		  	}%				
+		    			</tr>
+		    %{
+		    		}
+		  	}%
+		  	
+		  	</table>
+						
+      		</div>
+      		
+      		<div class="date">
+      			<strong>Data</strong> &nbsp;&nbsp;${today.getDayOfMonth()}/${today.getMonthOfYear()}/${today.getYear()}
+      		</div>
+      		
+		  	%{
+		    	}						
+			}%
+					
+
       		
     </body>
 </html>
