@@ -537,25 +537,27 @@ public class Person extends BaseModel {
 	 *  true se la persona ha almeno un giorno lavorativo coperto da contratto nel mese month
 	 * @param month
 	 * @param year
+	 * @param onCertificateFilter true se si vuole filtrare solo i dipendenti con certificati attivi 
 	 * @return 
 	 */
-	public boolean isActiveInMonth(int month, int year)
+	public boolean isActiveInMonth(int month, int year, boolean onCertificateFilter)
 	{
 		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
 		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
-		return this.isActiveInPeriod(monthBegin, monthEnd);
+		return this.isActiveInPeriod(monthBegin, monthEnd, onCertificateFilter);
 	}
 
 	/**
 	 * true se la persona ha almeno un giorno lavorativo coperto da contratto in year
 	 * @param year
+	 * @param onCertificateFilter true se si vuole filtrare solo i dipendenti con certificati attivi 
 	 * @return
 	 */
-	public boolean isActiveInYear(int year)
+	public boolean isActiveInYear(int year, boolean onCertificateFilter)
 	{
 		LocalDate yearBegin = new LocalDate().withYear(year).withMonthOfYear(1).withDayOfMonth(1);
 		LocalDate yearEnd = new LocalDate().withYear(year).withMonthOfYear(12).dayOfMonth().withMaximumValue();
-		return this.isActiveInPeriod(yearBegin, yearEnd);
+		return this.isActiveInPeriod(yearBegin, yearEnd, onCertificateFilter);
 	}
 
 	
@@ -684,15 +686,16 @@ public class Person extends BaseModel {
 	 * 
 	 * @param startPeriod
 	 * @param endPeriod
+	 * @param onCertificateFilter true se si vuole filtrare solo i dipendenti con certificati attivi 
 	 * @return
 	 */
-	private boolean isActiveInPeriod(LocalDate startPeriod, LocalDate endPeriod)
+	private boolean isActiveInPeriod(LocalDate startPeriod, LocalDate endPeriod, boolean onCertificateFilter)
 	{
 		List<Contract> periodContracts = new ArrayList<Contract>();
 		DateInterval periodInterval = new DateInterval(startPeriod, endPeriod);
 		for(Contract contract : this.contracts)
 		{
-			if(!contract.onCertificate)
+			if(onCertificateFilter && !contract.onCertificate)
 				continue;
 			DateInterval contractInterval = new DateInterval(contract.beginContract, contract.expireContract); //TODO è sbagliato bisogna considerare anche endContract
 			if(DateUtility.intervalIntersection(periodInterval, contractInterval)!=null)
