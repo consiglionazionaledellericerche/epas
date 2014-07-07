@@ -62,11 +62,9 @@ public class Persons extends Controller {
 
 	public static final String USERNAME_SESSION_KEY = "username";
 
-	//DONE
 	@Inject
 	static SecurityRules rules;
 
-	//DONE
 	@NoCheck
 	public static void list(String name){
 
@@ -228,8 +226,6 @@ public class Persons extends Controller {
 
 	}
 
-
-	//DONE
 	@NoCheck
 	public static void edit(Long personId){
 
@@ -253,8 +249,6 @@ public class Persons extends Controller {
 		render(person, contractList, initTime, month, year, id, officeList);
 	}
 
-
-	//DONE
 	public static void update(Person person, Office office, Integer qualification){
 
 		if(person==null) {
@@ -280,7 +274,6 @@ public class Persons extends Controller {
 		Persons.edit(person.id);	
 	}
 
-	//DONE
 	public static void deletePerson(Long personId){
 		Person person = Person.findById(personId);
 		if(person == null) {
@@ -294,7 +287,6 @@ public class Persons extends Controller {
 		render(person);
 	}
 
-	//DONE
 	public static void deletePersonConfirmed(Long personId){
 		Person person = Person.findById(personId);
 		if(person == null) {
@@ -432,7 +424,6 @@ public class Persons extends Controller {
 
 	}
 
-	//DONE
 	public static void showCurrentVacation(Long personId){
 
 		Person person = Person.findById(personId);
@@ -448,7 +439,6 @@ public class Persons extends Controller {
 		render(person, vp);
 	}
 
-	//DONE
 	public static void showCurrentContractWorkingTimeType(Long personId) {
 
 		Person person = Person.findById(personId);
@@ -472,7 +462,6 @@ public class Persons extends Controller {
 		render(person, cwtt, wtt);
 	}
 
-	//DONE
 	public static void insertContract(Person person){
 		if(person == null) {
 
@@ -487,7 +476,6 @@ public class Persons extends Controller {
 		render(con, person, wttList);
 	}
 
-	//DONE
 	public static void saveContract(@Required LocalDate dataInizio, @Valid LocalDate dataFine, Person person, WorkingTimeType wtt, boolean onCertificate){
 
 		//Controllo parametri
@@ -545,8 +533,6 @@ public class Persons extends Controller {
 		Persons.edit(person.id);
 	}
 
-
-	//DONE
 	public static void modifyContract(Long contractId){
 		Contract contract = Contract.findById(contractId);
 		if(contract == null)
@@ -560,8 +546,6 @@ public class Persons extends Controller {
 		render(contract);
 	}
 
-
-	//DONE
 	public static void updateContract(Contract contract, @Required LocalDate begin, @Valid LocalDate expire, @Valid LocalDate end, boolean onCertificate){
 
 		//Controllo dei parametri
@@ -615,8 +599,6 @@ public class Persons extends Controller {
 
 	}
 
-
-	//DONE
 	public static void deleteContract(Long contractId){
 
 		Contract contract = Contract.findById(contractId);
@@ -631,7 +613,6 @@ public class Persons extends Controller {
 		render(contract);
 	}
 
-	//DONE
 	public static void deleteContractConfirmed(Long contractId){
 
 		Contract contract = Contract.findById(contractId);
@@ -649,7 +630,6 @@ public class Persons extends Controller {
 		Persons.edit(contract.person.id);
 	}
 
-	//DONE
 	public static void updateSourceContract(Long contractId){
 
 		Contract contract = Contract.findById(contractId);
@@ -667,7 +647,7 @@ public class Persons extends Controller {
 		render(contract, initUse);
 	}
 
-	//DONE
+
 	public static void saveSourceContract(Contract contract) {
 
 		if(contract == null) {
@@ -696,7 +676,7 @@ public class Persons extends Controller {
 
 	}
 
-	//DONE
+
 	public static void updateContractWorkingTimeType(Long id)
 	{
 
@@ -721,8 +701,6 @@ public class Persons extends Controller {
 		render(contract, wttList);
 	}
 
-
-	//DONE
 	public static void splitContractWorkingTimeType(ContractWorkingTimeType cwtt, LocalDate splitDate)
 	{
 		//Controllo integrità richiesta
@@ -766,8 +744,6 @@ public class Persons extends Controller {
 		Persons.edit(cwtt.contract.person.id);	
 	}
 
-
-	//DONE
 	public static void deleteContractWorkingTimeType(ContractWorkingTimeType cwtt)
 	{
 		if(cwtt==null){
@@ -796,8 +772,6 @@ public class Persons extends Controller {
 		Persons.edit(cwtt.contract.person.id);	
 	}
 
-
-	//DONE
 	public static void changeTypeOfContractWorkingTimeType(ContractWorkingTimeType cwtt, WorkingTimeType newWtt)
 	{
 		if(cwtt==null || newWtt==null) {
@@ -819,14 +793,12 @@ public class Persons extends Controller {
 		Persons.edit(cwtt.contract.person.id);
 	}
 
-	//DONE
 	public static void changePassword(){
 		User user = Security.getUser().get();
 		notFoundIfNull(user);
 		render(user);
 	}
 
-	//DONE
 	public static void savePassword(@Required String vecchiaPassword, 
 			@MinLength(5) @Required String nuovaPassword, @MinLength(5) @Required String confermaPassword){
 
@@ -852,8 +824,32 @@ public class Persons extends Controller {
 		flash.success(Messages.get("passwordSuccessfullyChanged"));
 		Persons.changePassword();
 	}
+	
+	public static void resetPassword(@MinLength(5) @Required String nuovaPassword, @MinLength(5) @Required String confermaPassword) throws Throwable {
+		
+		User user = Security.getUser().get();
+		if(user.expireRecoveryToken == null || !user.expireRecoveryToken.equals(LocalDate.now()))
+		{
+			flash.error("La procedura di recovery password è scaduta. Operazione annullata.");
+			Secure.login();
+		}
+		
+		if(validation.hasErrors() || !nuovaPassword.equals(confermaPassword)) {
+			flash.error("Tutti i campi devono essere valorizzati. "
+					+ "La passord deve essere almeno lunga 5 caratteri. Operazione annullata.");
+			LostPassword.lostPasswordRecovery(user.recoveryToken);
+		}
+		
+		Codec codec = new Codec();
+		user.password = codec.hexMD5(nuovaPassword);
+		user.recoveryToken = null;
+		user.expireRecoveryToken = null;
+		user.save();
+		
+		flash.success("La password è stata resettata con successo.");
+		Stampings.stampings(new LocalDate().getYear(), new LocalDate().getMonthOfYear());
+	}
 
-	//@Check(Security.INSERT_AND_UPDATE_PERSON)
 	@NoCheck
 	public static void insertChild(Long personId){
 
@@ -861,8 +857,6 @@ public class Persons extends Controller {
 		PersonChildren personChildren = new PersonChildren();
 		render(person, personChildren);
 	}
-
-	//@Check(Security.INSERT_AND_UPDATE_PERSON)
 
 	public static void saveChild(){
 
@@ -878,8 +872,6 @@ public class Persons extends Controller {
 		flash.success("Aggiunto %s %s nell'anagrafica dei figli di %s %s", personChildren.name, personChildren.surname, person.name, person.surname);
 		Application.indexAdmin();
 	}
-
-	//@Check(Security.INSERT_AND_UPDATE_PERSON)
 
 	public static void personChildrenList(Long personId){
 

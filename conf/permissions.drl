@@ -53,6 +53,7 @@ when
      	/* Modifica password */
      	"Persons.changePassword",
      	"Persons.savePassword",
+     	"Persons.resetPassword",
      	
      	/* Lista Persone */
      	"Persons.showCurrentVacation",
