@@ -1,5 +1,7 @@
 package models;
 
+import java.math.BigDecimal;
+
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -14,6 +16,7 @@ import play.data.validation.Required;
  * attraverso due interi, uno relativo all'anno e uno relativo al mese con relative descrizioni e valori
  * 
  * @author dario
+ * @author arianna
  *
  */
 @Entity
@@ -37,14 +40,14 @@ public class Competence extends BaseModel {
 	
 	public int valueApproved;
 	
-	public int valueRequest;
+	public BigDecimal valueRequested;
 	
 	public String reason;
 	
 	@Override
 	public String toString() {
-		return String.format("Competence[%d] - person.id = %d, competenceCode.id = %d, year = %d, month = %d,value = %d",
-			id, person.id, competenceCode.id, year, month, valueApproved);
+		return String.format("Competence[%d] - person.id = %d, competenceCode.id = %d, year = %d, month = %d, valueApproved = %d, valueRequested = %s, reason = %s",
+			id, person.id, competenceCode.id, year, month, valueApproved, valueRequested, reason);
 	}
 
 	public Competence(Person person, CompetenceCode competenceCode, int year, int month) {
@@ -54,6 +57,17 @@ public class Competence extends BaseModel {
 		this.year = year;
 		this.month = month;
 	}
+	
+	public Competence(Person person, CompetenceCode competenceCode, int year, int month, int value, String reason) {
+		super();
+		this.person = person;
+		this.competenceCode = competenceCode;
+		this.year = year;
+		this.month = month;
+		this.valueApproved = value;
+		this.reason = reason;
+	}
+	
 
 	public Competence() {
 		super();
@@ -79,21 +93,25 @@ public class Competence extends BaseModel {
 		return valueApproved;
 	}
 
+	public void setValueApproved(int valueApproved) {
+		this.valueApproved = valueApproved;
+	}
+	
 	public void setValueApproved(int valueApproved, String reason) {
 		this.valueApproved = valueApproved;
 		this.reason = reason;
 	}
 
-	public int getValueRequest() {
-		return valueRequest;
+	public BigDecimal getValueRequested() {
+		return valueRequested;
 	}
 
 	public String getReason() {
 		return reason;
 	}
 	
-	public void setRequest(int valueRequest) {
-		this.valueRequest = valueRequest;
+	public void setValueRequested(BigDecimal valueRequested) {
+		this.valueRequested = valueRequested;
 	}
 
 
