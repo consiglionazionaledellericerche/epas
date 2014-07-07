@@ -1025,10 +1025,11 @@ public class Absences extends Controller{
 		render(attachmentRecapList, year, month);
 	}
 	
-	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
+	
 	public static void downloadAttachment(long id){
 		Logger.debug("Assenza con id: %d", id);
 		   Absence absence = Absence.findById(id);
+		   rules.checkIfPermitted(absence.personDay.person.office);
 		   notFoundIfNull(absence);
 		   response.setContentTypeIfNotSet(absence.absenceFile.type());
 		   Logger.debug("Allegato relativo all'assenza: %s", absence.absenceFile.getFile());

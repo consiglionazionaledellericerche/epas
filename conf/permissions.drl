@@ -90,6 +90,7 @@ when
      	"Absences.editCode",
      	"Absences.insertAbsenceCode",
      	"Absences.saveAbsenceCode",
+     	"Absences.downloadAttachment",
      	
      	/*Competenze*/
      	"Competences.showCompetences",
@@ -314,6 +315,7 @@ when
         /* inserire le action interessate */
         "YearlyAbsences.showPersonMonthlyAbsences",
         "Absences.manageAttachmentsPerPerson",
+        "Absences.downloadAttachment",
         "Absences.absenceInPeriod",
         "VacationsAdmin.vacationsLastYear",
         "VacationsAdmin.vacationsCurrentYear",
