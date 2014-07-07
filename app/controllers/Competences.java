@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
+import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.TotalOvertime;
@@ -37,7 +38,6 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 
 import controllers.Resecure.NoCheck;
-
 import dao.PersonDao;
 
 @With( {Resecure.class, RequestInit.class} )
@@ -63,9 +63,30 @@ public class Competences extends Controller{
 	}
 
 
-	public static void showCompetences(Integer year, Integer month, String name, String codice, Integer page){
+	public static void showCompetences(Integer year, Integer month, Long officeId, String name, String codice, Integer page){
 
-		rules.checkIfPermitted("");
+		//TODO selezionare gli uffici con viewCompetence
+		List<Office> offices = Security.getOfficeAllowed();
+
+		if(officeId == null) {
+			if(offices.size() == 0) {
+				flash.error("L'user non dispone di alcun diritto di visione delle sedi. Operazione annullata.");
+				Application.indexAdmin();
+			}
+			officeId = offices.get(0).id;
+		}
+
+		Office office = Office.findById(officeId);
+		if(office == null) {
+
+			flash.error("Sede non trovata. Riprovare o effettuare una segnalazione.");
+			Application.indexAdmin();
+		}
+
+		rules.checkIfPermitted(office);
+
+
+		//rules.checkIfPermitted("");
 		if(page==null)
 			page = 0;
 				
@@ -87,7 +108,7 @@ public class Competences extends Controller{
 
 		
 		SimpleResults<Person> simpleResults = PersonDao.listForCompetence(competenceCode, Optional.fromNullable(name), 
-				Sets.newHashSet(Security.getOfficeAllowed()), 
+				Sets.newHashSet(office), 
 				false, 
 				new LocalDate(year, month, 1), 
 				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
@@ -119,27 +140,38 @@ public class Competences extends Controller{
 			}
 		}
 		
-		List<Competence> competenceList = Competence.find("Select comp from Competence comp, CompetenceCode code where comp.year = ? and comp.month = ? " +
-				"and comp.competenceCode = code and code.code in (?,?,?)", 
-				year, month, "S1", "S2", "S3").fetch();
+		List<Competence> competenceList = 
+				Competence.find("Select comp from Competence comp, CompetenceCode code where comp.year = ? and comp.month = ? " +
+				"and comp.competenceCode = code and code.code in (?,?,?) and comp.person.office = ?", 
+				year, month, "S1", "S2", "S3", office).fetch();
+		
 		int totaleOreStraordinarioMensile = 0;
 		int totaleOreStraordinarioAnnuale = 0;
 		int totaleMonteOre = 0;
+		
 		for(Competence comp : competenceList){
+			
 			totaleOreStraordinarioMensile = totaleOreStraordinarioMensile + comp.valueApproved;
 		}
-		List<Competence> competenceYearList = Competence.find("Select comp from Competence comp, CompetenceCode code where comp.year = ? and comp.month <= ? " +
-				"and comp.competenceCode = code and code.code in (?,?,?)", 
-				year, month, "S1", "S2", "S3").fetch();
+		
+		List<Competence> competenceYearList = 
+				Competence.find("Select comp from Competence comp, CompetenceCode code where comp.year = ? and comp.month <= ? " +
+				"and comp.competenceCode = code and code.code in (?,?,?) and comp.person.office = ?", 
+				year, month, "S1", "S2", "S3", office).fetch();
+		
 		for(Competence comp : competenceYearList){
+			
 			totaleOreStraordinarioAnnuale = totaleOreStraordinarioAnnuale + comp.valueApproved;
 		}
-		List<TotalOvertime> total = TotalOvertime.find("Select tot from TotalOvertime tot where tot.year = ?", year).fetch();
+		
+		List<TotalOvertime> total = TotalOvertime.find("Select tot from TotalOvertime tot where tot.year = ? and tot.office = ?", year, office).fetch();
+		
 		for(TotalOvertime tot : total){
+			
 			totaleMonteOre = totaleMonteOre+tot.numberOfHours;
 		}
 		
-		render(year, month, activePersons, totaleOreStraordinarioMensile, totaleOreStraordinarioAnnuale, 
+		render(year, month, office, offices, activePersons, totaleOreStraordinarioMensile, totaleOreStraordinarioAnnuale, 
 				totaleMonteOre, simpleResults, name, codice, activeCompetenceCodes, competenceCode);
 
 	}
@@ -229,31 +261,60 @@ public class Competences extends Controller{
 		manageCompetenceCode();
 	}
 
-	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
-	public static void totalOvertimeHours(int year){
-		rules.checkIfPermitted("");
-		List<TotalOvertime> totalList = TotalOvertime.find("Select tot from TotalOvertime tot where tot.year = ?", year).fetch();
+	
+	
+	public static void totalOvertimeHours(int year, Long officeId){
+	
+		//TODO selezionare gli uffici con viewCompetence
+		List<Office> offices = Security.getOfficeAllowed();
+		
+		if(officeId == null) {
+			if(offices.size() == 0) {
+				flash.error("L'user non dispone di alcun diritto di visione delle sedi. Operazione annullata.");
+				Application.indexAdmin();
+			}
+			officeId = offices.get(0).id;
+		}
+		
+		Office office = Office.findById(officeId);
+		if(office == null) {
+			
+			flash.error("Sede non trovata. Riprovare o effettuare una segnalazione.");
+			Application.indexAdmin();
+		}
+		
+		rules.checkIfPermitted(office);
+		
+		List<TotalOvertime> totalList = 
+				TotalOvertime.find("Select tot from TotalOvertime tot where tot.year = ? and tot.office = ?",
+						year, office).fetch();
 
 		int totale = 0;
 		for(TotalOvertime tot : totalList) {
 			
 			totale = totale + tot.numberOfHours;
 		}
-
-		render(totalList, totale, year);
+		
+		render(totalList, totale, year, office, offices);
 	}
 
-	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
-	public static void saveOvertime(int year){
+	public static void saveOvertime(Integer year, String numeroOre, Long officeId){
+
+		Office office = Office.findById(officeId);
+		if(office == null) {
+			
+			flash.error("Sede non trovata. Riprovare o effettuare una segnalazione.");
+			Application.indexAdmin();
+		}
 		
-		rules.checkIfPermitted(Security.getUser().get().person.office);
+		rules.checkIfPermitted(office);
 		
 		TotalOvertime total = new TotalOvertime();
 		LocalDate data = new LocalDate();
 		total.date = data;
 		total.year = data.getYear();
+		total.office = office;
 
-		String numeroOre = params.get("numeroOre");
 		try {
 			if(numeroOre.startsWith("-")) {
 
@@ -266,27 +327,44 @@ public class Competences extends Controller{
 			else {
 				
 				flash.error("Inserire il segno (+) o (-) davanti al numero di ore da aggiungere (sottrarre)");
-				Competences.totalOvertimeHours(year);
+				Competences.totalOvertimeHours(year, officeId);
 			}
 		}
 		catch (Exception e) {
 
 			flash.error("Inserire il segno (+) o (-) davanti al numero di ore da aggiungere (sottrarre)");
-			Competences.totalOvertimeHours(year);
+			Competences.totalOvertimeHours(year, officeId);
 		}
 		
 		total.save();
 		flash.success(String.format("Aggiornato monte ore per l'anno %s", data.getYear()));
-		Competences.totalOvertimeHours(year);
+		Competences.totalOvertimeHours(year, officeId);
 	}
 
-	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
-	public static void overtime(int year, int month, String name, Integer page){
+	public static void overtime(int year, int month, Long officeId, String name, Integer page){
+		
+		//TODO selezionare gli uffici con viewCompetence
+		List<Office> offices = Security.getOfficeAllowed();
+
+		if(officeId == null) {
+			if(offices.size() == 0) {
+				flash.error("L'user non dispone di alcun diritto di visione delle sedi. Operazione annullata.");
+				Application.indexAdmin();
+			}
+			officeId = offices.get(0).id;
+		}
+
+		Office office = Office.findById(officeId);
+		if(office == null) {
+
+			flash.error("Sede non trovata. Riprovare o effettuare una segnalazione.");
+			Application.indexAdmin();
+		}
+
+		rules.checkIfPermitted(office);
 		
 		if(page == null)
 			page = 0;
-		
-		rules.checkIfPermitted("");
 		
 		ImmutableTable.Builder<Person, String, Integer> builder = ImmutableTable.builder();
 		Table<Person, String, Integer> tableFeature = null;
@@ -302,7 +380,7 @@ public class Competences extends Controller{
 		
 		CompetenceCode code = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", "S1").first();
 		SimpleResults<Person> simpleResults = PersonDao.listForCompetence(code, Optional.fromNullable(name), 
-				Sets.newHashSet(Security.getOfficeAllowed()), 
+				Sets.newHashSet(office), 
 				false, 
 				new LocalDate(year, month, 1), 
 				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
@@ -349,11 +427,11 @@ public class Competences extends Controller{
 		}
 		tableFeature = builder.build();
 		if(year != 0 && month != 0)
-			render(tableFeature, year, month, simpleResults, name);
+			render(tableFeature, year, month, simpleResults, name, office, offices);
 		else{
 			int yearParams = params.get("year", Integer.class);
 			int monthParams = params.get("month", Integer.class);
-			render(tableFeature,yearParams,monthParams,simpleResults, name );
+			render(tableFeature,yearParams,monthParams,simpleResults, name, office, offices );
 		}
 
 	}
@@ -361,15 +439,33 @@ public class Competences extends Controller{
 	/**
 	 * funzione che ritorna la tabella contenente le competenze associate a ciascuna persona
 	 */
-	public static void enabledCompetences(String name){
+	public static void enabledCompetences(Long officeId, String name){
 
-		
-		rules.checkIfPermitted("");
+		//TODO selezionare gli uffici con viewCompetence
+		List<Office> offices = Security.getOfficeAllowed();
+
+		if(officeId == null) {
+			if(offices.size() == 0) {
+				flash.error("L'user non dispone di alcun diritto di visione delle sedi. Operazione annullata.");
+				Application.indexAdmin();
+			}
+			officeId = offices.get(0).id;
+		}
+
+		Office office = Office.findById(officeId);
+		if(office == null) {
+
+			flash.error("Sede non trovata. Riprovare o effettuare una segnalazione.");
+			Application.indexAdmin();
+		}
+
+		rules.checkIfPermitted(office);
+
 		LocalDate date = new LocalDate();
 		
 		
 		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
-				Sets.newHashSet(Security.getOfficeAllowed()), 
+				Sets.newHashSet(office), 
 				false, date, date.dayOfMonth().withMaximumValue(), true);
 		
 		//List<Person> personList = simpleResults.paginated(page).getResults();
@@ -401,7 +497,7 @@ public class Competences extends Controller{
 		tableRecapCompetence = builder.build();
 		int month = date.getMonthOfYear();
 		int year = date.getYear();
-		render(tableRecapCompetence, month, year, simpleResults, name);
+		render(tableRecapCompetence, month, year, office, offices, simpleResults, name);
 	}
 
 	/**
@@ -413,7 +509,7 @@ public class Competences extends Controller{
 		if(personId == null){
 			
 			flash.error("Persona inesistente");
-			Competences.enabledCompetences(null);
+			Application.indexAdmin();
 		}
 		
 		Person person = Person.findById(personId);
@@ -429,7 +525,7 @@ public class Competences extends Controller{
 		Person person = Person.findById(personId);
 		if(person == null){
 			flash.error("Persona inesistente in anagrafica");
-			Competences.enabledCompetences(null);
+			Application.indexAdmin();
 			
 		}
 		rules.checkIfPermitted(person.office);
@@ -667,7 +763,7 @@ public class Competences extends Controller{
 		}
 		person.save();
 		flash.success(String.format("Aggiornate con successo le competenze per %s %s", person.name, person.surname));
-		Competences.enabledCompetences(null);
+		Competences.enabledCompetences( person.office.id, null);
 
 	}
 	
