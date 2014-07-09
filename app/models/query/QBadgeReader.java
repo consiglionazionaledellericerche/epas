@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QBadgeReader extends EntityPathBase<BadgeReader> {
 
-    private static final long serialVersionUID = 642176162L;
+    private static final long serialVersionUID = 642176162;
 
     public static final QBadgeReader badgeReader = new QBadgeReader("badgeReader");
 
