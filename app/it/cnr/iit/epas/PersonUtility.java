@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.Query;
 
@@ -19,6 +20,7 @@ import models.PersonDay;
 import models.PersonDayInTrouble;
 import models.PersonMonthRecap;
 import models.StampProfile;
+
 import models.Stamping;
 import models.User;
 import models.enumerate.AccumulationBehaviour;
@@ -1049,7 +1051,6 @@ public class PersonUtility {
 				dateTroubleStampingList.add(pd.personDay.date);
 		}
 		
-
 		for(StampProfile sp : p.stampProfiles) {
 			
 			//FIXME questo è sbagliato: fixedWorkingTime va testato per ogni giorno non solo nel giorno begin.
