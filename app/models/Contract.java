@@ -107,6 +107,7 @@ public class Contract extends BaseModel {
 	
 	@NotAudited
 	@OneToMany(mappedBy="contract")
+	@OrderBy("startFrom")
 	public Set<ContractStampProfile> contractStampProfile = Sets.newHashSet();
 	
 
@@ -156,6 +157,13 @@ public class Contract extends BaseModel {
 	public List<ContractWorkingTimeType> getContractWorkingTimeTypeAsList() {
 		
 		return Lists.newArrayList(this.contractWorkingTimeType);
+	}
+	
+	
+	@Transient
+	public List<ContractStampProfile> getContractStampProfileAsList() {
+		
+		return Lists.newArrayList(this.contractStampProfile);
 	}
 	
 	/**

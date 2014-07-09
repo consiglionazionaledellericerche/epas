@@ -161,8 +161,9 @@
   		<tr>
   			<th class="warning">Da</th>
   			<th class="warning">A</th>
-  			<th class="warning">Presenza default</th>
-  			<th class="warning">Modifica presenza default</th>
+  			<th class="warning">Presenza automatica</th>
+  			<th class="warning">Modifica presenza automatica</th>
+  			<th class="warning">Elimina periodo</th>
   		</tr>
   		#{list items:contractStampProfileList, as:'contractStampProfile'}
   		<tr>  			
@@ -178,12 +179,16 @@
   			</td>
   			
   			<td>
-  				#{if contractStampProfile.startFrom < actualDate && (contractStampProfile.endTo > actualDate || contractStampProfile.endTo == null)}
-  					<a href="@{Persons.updateContractStampProfile(contractStampProfile.id)}" data-modal=".my-modal"><i class="fa fa-pencil-square-o"></i> Modifica</a>
+  				<a href="@{Persons.updateContractStampProfile(contractStampProfile.id)}" data-modal=".my-modal"><i class="fa fa-pencil-square-o"></i> Modifica</a>
+  			</td>
+  			<td>
+  			#{form @Persons.deleteContractStampProfile() }
+  				#{if contractStampProfileList.indexOf(contractStampProfile) > 0}
+  					<input type="hidden" name="contractStampProfile.id" value="${contractStampProfile.id}" />
+  					<a href="@{Persons.deleteContractStampProfile(contractStampProfile.id)}" style="color:red;"><i style="color:red;" class="fa fa-trash-o"></i>Elimina</a>
+  					
   				#{/if}
-  				#{else}
-  					---
-  				#{/else}
+  			#{/form}
   			</td>
   		</tr>
   		#{/list}
