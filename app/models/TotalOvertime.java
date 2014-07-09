@@ -1,6 +1,9 @@
 package models;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import models.base.BaseModel;
@@ -28,4 +31,8 @@ public class TotalOvertime extends BaseModel{
 	public Integer numberOfHours;
 	
 	public Integer year;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name = "office_id")
+	public Office office;
 }

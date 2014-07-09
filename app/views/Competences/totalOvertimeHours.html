@@ -4,17 +4,41 @@
   
 <div id="container-fluid-nav-tabs" class="container-fluid">
   <ul class="nav nav-tabs">
-    <li><a href="@{Competences.showCompetences(year, session.get("monthSelected") )}">Assegna Competenze</a></li>
-    <li><a href="@{Competences.overtime(year, session.get("monthSelected") )}">Straordinari</a></li>
-    <li class="active"><a href="@{Competences.totalOvertimeHours(year)}">Monte ore</a></li>
-    <li><a href="@{Competences.enabledCompetences()}">Abilita Competenze</a></li>
+    <li><a href="@{Competences.showCompetences(year, session.get("monthSelected"), office.id )}">Assegna Competenze</a></li>
+    <li><a href="@{Competences.overtime(year, session.get("monthSelected"), office.id )}">Straordinari</a></li>
+    <li class="active"><a href="@{Competences.totalOvertimeHours(year, office.id)}">Monte ore</a></li>
+    <li><a href="@{Competences.enabledCompetences(office.id)}">Abilita Competenze</a></li>
     <li><a href="@{Competences.exportCompetences()}">Esporta competenze</a></li>
   </ul>
 </div>
 
+<!-- FILTRO OFFICE RIPETUTO IN OGNI TEMPLATE DI COMPETENCES, DA METTERE NEL NAVBAR?? -->
 <div class="container-fluid">
+ <div class="center" style="margin-top: 0px; margin-bottom: 10px;">
+	  #{form action:@Competences.totalOvertimeHours(), role:'form', class:'form-inline', 
+	    method:'GET', autocomplete:'off',
+	    'data-reload':'#results'}
+	    
+	       <div class="form-group">
+	        <label class="hidden-xs hidden-sm" for="dip">Sede </label>
+	        <input type="hidden" name="year" value="${year}"/>
+	        
+	        <select name="officeId" class="form-control" id="dip" onChange="javascript:this.form.submit()" >
+	            #{list items:offices, as:'officeItem'}
+	              <option value="${officeItem.id}" #{if officeItem.id.equals(office.id) } selected="selected" #{/if} >
+	                ${officeItem.name}
+	              </option>
+	            #{/list}
+	        </select>
+	      </div>
+	       
+	      <button type="submit" class="btn btn-default">Invio</button>
+	  #{/form}
+      </div>
+</div>
+<!-- FINE FILTRO OFFICE -->
 
-<h4 class="bg-danger center">Controllo disabilitato in fase di manutenzione</h4>
+<div class="container-fluid">
 
   <div class="panel panel-info col-xs-12 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3">
       <div class="panel-heading">
@@ -22,11 +46,10 @@
       </div>
       <div class="panel-body">
  
- 		
- 
         #{form @Competences.saveOvertime()}
 
           <input type="hidden" name="year" value="${year}"/>
+          <input type="hidden" name="officeId" value="${office.id}"/>
 	
           #{if totalList.size()!=0}
             <table class="table table-condensed table-hover">
@@ -49,8 +72,8 @@
             </table>
 	      #{/if}
 		  <div class="center">
-		    <input type="text" name="numeroOre" disabled="disabled"/>
-            <input type="submit" value="Salva" disabled="disabled"/>
+		    <input type="text" name="numeroOre"/>
+            <input type="submit" value="Salva"/>
 		  </div>	    	    
     
           <br>
@@ -60,7 +83,6 @@
   
         #{/form}
  
-      
       </div>
   </div>
 </div>
