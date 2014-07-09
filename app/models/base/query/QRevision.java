@@ -17,7 +17,7 @@ import com.mysema.query.types.Path;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QRevision extends EntityPathBase<Revision> {
 
-    private static final long serialVersionUID = -1702410764L;
+    private static final long serialVersionUID = -1702410764;
 
     public static final QRevision revision = new QRevision("revision");
 

@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QGroup extends EntityPathBase<Group> {
 
-    private static final long serialVersionUID = -1434098213L;
+    private static final long serialVersionUID = -1434098213;
 
     public static final QGroup group = new QGroup("group1");
 

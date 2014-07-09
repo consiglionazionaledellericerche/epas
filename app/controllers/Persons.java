@@ -14,6 +14,7 @@ import models.Competence;
 import models.CompetenceCode;
 import models.ConfGeneral;
 import models.Contract;
+import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
 import models.Group;
 import models.InitializationAbsence;
@@ -51,6 +52,7 @@ import security.SecurityRules;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.hash.Hashing;
 
@@ -60,6 +62,9 @@ import dao.PersonDao;
 @With( {Resecure.class, RequestInit.class} )
 public class Persons extends Controller {
 
+	
+	
+	
 	public static final String USERNAME_SESSION_KEY = "username";
 
 	@Inject
@@ -241,12 +246,15 @@ public class Persons extends Controller {
 		LocalDate date = new LocalDate();
 		List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract", person).fetch();
 		List<Office> officeList = Security.getOfficeAllowed();	
-
+		List<ContractStampProfile> contractStampProfileList = ContractStampProfile.find("Select csp from ContractStampProfile csp, Contract c "
+				+ "where csp.contract = c and c.person = ? order by csp.startFrom", person).fetch();
+		
 		InitializationTime initTime = InitializationTime.find("Select init from InitializationTime init where init.person = ?", person).first();
 		Integer month = date.getMonthOfYear();
 		Integer year = date.getYear();
+		LocalDate actualDate = new LocalDate();
 		Long id = person.id;		
-		render(person, contractList, initTime, month, year, id, officeList);
+		render(person, contractList, contractStampProfileList, initTime, month, year, id, actualDate,officeList);
 	}
 
 	public static void update(Person person, Office office, Integer qualification){
@@ -393,11 +401,11 @@ public class Persons extends Controller {
 		if(person.reperibility != null)
 			person.reperibility.delete();
 		// Eliminazione stamp profile associati alla persona
-		for(StampProfile sp : person.stampProfiles){
-			long id = sp.id;
-			sp = StampProfile.findById(id);
-			sp.delete();
-		}
+//		for(StampProfile sp : person.stampProfiles){
+//			long id = sp.id;
+//			sp = StampProfile.findById(id);
+//			sp.delete();
+//		}
 
 		JPAPlugin.closeTx(false);
 		JPAPlugin.startTx(false);
@@ -1026,5 +1034,118 @@ public class Persons extends Controller {
 
 	}
 
+	public static void updateContractStampProfile(Long id){
+		ContractStampProfile contract = ContractStampProfile.findById(id);
+		if(contract == null) {
 
+			flash.error("Contratto inesistente. Operazione annullata.");
+			Persons.list(null);
+		}
+		
+		rules.checkIfPermitted(contract.contract.person.office);
+		
+		List<String> listTipo = Lists.newArrayList();
+		
+		for(int i = 1; i <=2; i++){
+			String t = null;
+			if(i % 2 == 0)
+				t = new String("Timbratura automatica");
+			else
+				t = new String("Timbratura manuale");
+			listTipo.add(t);
+			
+		}
+		render(contract, listTipo);
+	}
+	
+	public static void changeTypeOfContractStampProfile(ContractStampProfile contract, String newtipo){
+		if(contract==null || newtipo==null) {
+
+			flash.error("Impossibile completare la richiesta, controllare i log.");
+			Application.indexAdmin();
+		}
+				
+		rules.checkIfPermitted(contract.contract.person.office);
+		if(newtipo.equals("Timbratura automatica"))
+			contract.fixedworkingtime = true;
+		else
+			contract.fixedworkingtime = false;
+		
+		contract.save();
+		
+		contract.contract.recomputeContract(contract.startFrom);
+
+		flash.success("Cambiata correttamente tipologia di timbratura per il periodo a %s.", newtipo);
+		Persons.edit(contract.contract.person.id);
+		
+	}
+
+	public static void splitContractStampProfile(ContractStampProfile contract, LocalDate splitDate){
+		if(contract==null) {
+
+			flash.error("Impossibile completare la richiesta, controllare i log.");
+			Application.indexAdmin();
+		}
+
+		rules.checkIfPermitted(contract.contract.person.office);
+		
+
+		if(validation.hasError("splitDate")) {
+
+			flash.error("Errore nel fornire il parametro data. Inserire la data nel corretto formato aaaa-mm-gg");
+			Persons.edit(contract.contract.person.id);
+		}
+		
+		if(!DateUtility.isDateIntoInterval(splitDate, new DateInterval(contract.startFrom, contract.endTo))) {
+
+			flash.error("Errore nel fornire il parametro data. La data deve essere contenuta nel periodo da dividere.");
+			Persons.edit(contract.contract.person.id);
+		}
+		DateInterval first = new DateInterval(contract.startFrom, splitDate.minusDays(1));
+		if(! DateUtility.isIntervalIntoAnother(first, contract.contract.getContractDateInterval())) {
+			flash.error("Errore nel fornire il parametro data. La data deve essere contenuta nel periodo da dividere.");
+			Persons.edit(contract.contract.person.id);
+		}
+		
+		ContractStampProfile csp2 = new ContractStampProfile();
+		csp2.contract = contract.contract;
+		csp2.startFrom = splitDate;
+		csp2.endTo = contract.endTo;
+		csp2.fixedworkingtime = contract.fixedworkingtime;
+		csp2.save();
+
+		contract.endTo = splitDate.minusDays(1);
+		contract.save();
+		flash.success("Tipo timbratura suddivisa in due sottoperiodi con valore %s.", contract.fixedworkingtime);
+		Persons.edit(contract.contract.person.id);	
+		
+	}
+	
+	public static void deleteContractStampProfile(Long contractStampProfileId){
+		ContractStampProfile csp = ContractStampProfile.findById(contractStampProfileId);
+		if(csp==null){
+
+			flash.error("Impossibile completare la richiesta, controllare i log.");
+			Application.indexAdmin();
+		}	
+
+		rules.checkIfPermitted(csp.contract.person.office);
+
+		Contract contract = csp.contract;
+		//List<ContractWorkingTimeType> cwttList = Lists.newArrayList(contract.contractWorkingTimeType);
+
+		int index = contract.getContractStampProfileAsList().indexOf(csp);
+		if(contract.getContractStampProfileAsList().size()<index){
+
+			flash.error("Impossibile completare la richiesta, controllare i log.");
+			Persons.edit(csp.contract.person.id);	
+		}
+
+		ContractStampProfile previous = contract.getContractStampProfileAsList().get(index-1);
+		previous.endTo = csp.endTo;
+		previous.save();
+		csp.delete();
+		flash.success("Tipologia di timbratura eliminata correttamente. Tornati alla precedente che ha timbratura automatica con valore: %s", previous.fixedworkingtime);
+		Persons.edit(csp.contract.person.id);
+	}
 }

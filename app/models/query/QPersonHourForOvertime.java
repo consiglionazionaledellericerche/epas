@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QPersonHourForOvertime extends EntityPathBase<PersonHourForOvertime> {
 
-    private static final long serialVersionUID = -1600219059L;
+    private static final long serialVersionUID = -1600219059;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 

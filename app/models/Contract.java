@@ -98,11 +98,18 @@ public class Contract extends BaseModel {
 	@Column(name="end_contract")
 	public LocalDate endContract;
 	
-	
+		
 	@NotAudited
 	@OneToMany(mappedBy = "contract", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	@OrderBy("beginDate")
 	public Set<ContractWorkingTimeType> contractWorkingTimeType = Sets.newHashSet();
+	
+	
+	@NotAudited
+	@OneToMany(mappedBy="contract")
+	@OrderBy("startFrom")
+	public Set<ContractStampProfile> contractStampProfile = Sets.newHashSet();
+	
 
 	@Transient
 	private List<ContractWorkingTimeType> contractWorkingTimeTypeAsList;
@@ -150,6 +157,13 @@ public class Contract extends BaseModel {
 	public List<ContractWorkingTimeType> getContractWorkingTimeTypeAsList() {
 		
 		return Lists.newArrayList(this.contractWorkingTimeType);
+	}
+	
+	
+	@Transient
+	public List<ContractStampProfile> getContractStampProfileAsList() {
+		
+		return Lists.newArrayList(this.contractStampProfile);
 	}
 	
 	/**

@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QConfYear extends EntityPathBase<ConfYear> {
 
-    private static final long serialVersionUID = 2027912357L;
+    private static final long serialVersionUID = 2027912357;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 

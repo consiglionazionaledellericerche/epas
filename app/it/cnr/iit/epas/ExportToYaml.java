@@ -2,6 +2,7 @@ package it.cnr.iit.epas;
 
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Set;
 
 import models.Absence;
 import models.AbsenceType;
@@ -14,6 +15,7 @@ import models.PersonDay;
 import models.PersonMonthRecap;
 import models.Qualification;
 import models.StampProfile;
+
 import models.Stamping;
 import models.VacationCode;
 
@@ -394,6 +396,7 @@ public class ExportToYaml {
 	private static String appendStampProfiles(Person person)
 	{
 		String out = "";
+		
 		for(StampProfile sp : person.stampProfiles)
 		{
 			out = out + getFormattedHeader("StampProfile", "sp"+sp.id);
