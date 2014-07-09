@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QPersonShift extends EntityPathBase<PersonShift> {
 
-    private static final long serialVersionUID = 1443244169L;
+    private static final long serialVersionUID = 1443244169;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 

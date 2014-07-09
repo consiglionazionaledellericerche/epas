@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QAbsenceType extends EntityPathBase<AbsenceType> {
 
-    private static final long serialVersionUID = 1593874803L;
+    private static final long serialVersionUID = 1593874803;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
