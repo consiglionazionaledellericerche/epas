@@ -426,18 +426,18 @@ public class PersonDay extends BaseModel {
 			return this.isFixedTimeAtWorkk;
 		
 		this.isFixedTimeAtWorkk = false;
-		/**
-		 * cambiato il modo di recuperare lo stamp profile a partire dalla nuova relazione tra contratto e stamp profile
-		 * bypassando la person e passando dalla classe intermedia StampProfileContract
-		 */
-		Set<StampProfileContract> spcSet = this.person.getCurrentContract().stampProfileContract;
-		for(StampProfileContract spc : spcSet)
-		{
-			if(DateUtility.isDateIntoInterval(this.date, new DateInterval(spc.startFrom,spc.endTo)))
-			{
-				this.isFixedTimeAtWorkk = spc.stampProfile.fixedWorkingTime;
+		for(ContractStampProfile csp : this.person.getCurrentContract().contractStampProfile){
+			if(DateUtility.isDateIntoInterval(this.date, new DateInterval(csp.startFrom, csp.endTo))){
+				this.isFixedTimeAtWorkk = csp.fixedworkingtime;
 			}
 		}
+//		for(StampProfile sp : this.person.stampProfiles)
+//		{
+//			if(DateUtility.isDateIntoInterval(this.date, new DateInterval(sp.startFrom,sp.endTo)))
+//			{
+//				this.isFixedTimeAtWorkk = sp.fixedWorkingTime;
+//			}
+//		}
 		return this.isFixedTimeAtWorkk;
 	}
 	
