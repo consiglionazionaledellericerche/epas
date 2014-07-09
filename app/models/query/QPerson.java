@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QPerson extends EntityPathBase<Person> {
 
-    private static final long serialVersionUID = -1261627527L;
+    private static final long serialVersionUID = -1261627527;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
@@ -79,6 +79,10 @@ public class QPerson extends EntityPathBase<Person> {
     public final BooleanPath ionicRadianceRiskCom3Available = createBoolean("ionicRadianceRiskCom3Available");
 
     public final BooleanPath ionicRadianceRiskCom3AvailableBis = createBoolean("ionicRadianceRiskCom3AvailableBis");
+
+    public final ListPath<models.MealTicket, QMealTicket> mealTickets = this.<models.MealTicket, QMealTicket>createList("mealTickets", models.MealTicket.class, QMealTicket.class, PathInits.DIRECT2);
+
+    public final ListPath<models.MealTicket, QMealTicket> mealTicketsAdmin = this.<models.MealTicket, QMealTicket>createList("mealTicketsAdmin", models.MealTicket.class, QMealTicket.class, PathInits.DIRECT2);
 
     public final BooleanPath mechanographicalAllowanceAvailable = createBoolean("mechanographicalAllowanceAvailable");
 
