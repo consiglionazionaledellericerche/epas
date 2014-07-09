@@ -1120,4 +1120,32 @@ public class Persons extends Controller {
 		Persons.edit(contract.contract.person.id);	
 		
 	}
+	
+	public static void deleteContractStampProfile(Long contractStampProfileId){
+		ContractStampProfile csp = ContractStampProfile.findById(contractStampProfileId);
+		if(csp==null){
+
+			flash.error("Impossibile completare la richiesta, controllare i log.");
+			Application.indexAdmin();
+		}	
+
+		rules.checkIfPermitted(csp.contract.person.office);
+
+		Contract contract = csp.contract;
+		//List<ContractWorkingTimeType> cwttList = Lists.newArrayList(contract.contractWorkingTimeType);
+
+		int index = contract.getContractStampProfileAsList().indexOf(csp);
+		if(contract.getContractStampProfileAsList().size()<index){
+
+			flash.error("Impossibile completare la richiesta, controllare i log.");
+			Persons.edit(csp.contract.person.id);	
+		}
+
+		ContractStampProfile previous = contract.getContractStampProfileAsList().get(index-1);
+		previous.endTo = csp.endTo;
+		previous.save();
+		csp.delete();
+		flash.success("Tipologia di timbratura eliminata correttamente. Tornati alla precedente che ha timbratura automatica con valore: %s", previous.fixedworkingtime);
+		Persons.edit(csp.contract.person.id);
+	}
 }
