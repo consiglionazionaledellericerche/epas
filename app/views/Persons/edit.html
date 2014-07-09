@@ -151,13 +151,52 @@
       <input class="btn btn-primary" type="submit" value="Salva" />
    </div>
 #{/form}
-
+<div class="container">
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title"><span class="badge">3</span> Informazioni su presenza default</h3>
+  </div>
+  <div class="panel-body">
+  	<table class="table table-hover center table-list-contract">
+  		<tr>
+  			<th class="warning">Da</th>
+  			<th class="warning">A</th>
+  			<th class="warning">Presenza default</th>
+  			<th class="warning">Modifica presenza default</th>
+  		</tr>
+  		#{list items:contractStampProfileList, as:'contractStampProfile'}
+  		<tr>  			
+  			<td><h4><span class="label label-default">${contractStampProfile.startFrom}</span></h4></td>
+  			<td><h4><span class="label label-default">${contractStampProfile.endTo}</span></h4></td>
+  			<td>
+  				#{if contractStampProfile.fixedworkingtime == true}
+  					<i class="fa fa-check-square-o"></i>
+  				#{/if}
+  				#{else}
+  					<i class="fa fa-square-o"></i>
+  				#{/else}
+  			</td>
+  			
+  			<td>
+  				#{if contractStampProfile.startFrom < actualDate && (contractStampProfile.endTo > actualDate || contractStampProfile.endTo == null)}
+  					<a href="@{Persons.updateContractStampProfile(contractStampProfile.id)}" data-modal=".my-modal"><i class="fa fa-pencil-square-o"></i> Modifica</a>
+  				#{/if}
+  				#{else}
+  					---
+  				#{/else}
+  			</td>
+  		</tr>
+  		#{/list}
+  	</table>
+  </div>
+</div>	<!-- Fine pannello 3 -->
+</div>
 <div class="container">	<!-- Container dati contrattuali -->
 
 <!-- Pannello 3 Dati contrattuali -->
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title"><span class="badge">3</span> Dati Contrattuali</h3>
+    <h3 class="panel-title"><span class="badge">4</span> Dati Contrattuali</h3>
   </div>
   <div class="panel-body">
   	  
@@ -305,7 +344,7 @@
    <!-- Pannello 4 Elimina -->
   <div class="panel panel-default">
     <div class="panel-heading">
-      <h3 class="panel-title"><span class="badge">4</span> Eliminazione persona ePAS</h3>
+      <h3 class="panel-title"><span class="badge">5</span> Eliminazione persona ePAS</h3>
     </div>
     <div class="panel-body center">
       <a href="@{Persons.deletePerson(person.id)}" data-modal=".my-modal">
