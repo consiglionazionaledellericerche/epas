@@ -5,14 +5,41 @@
 <div id="container-fluid-nav-tabs" class="container-fluid">
 
 <ul class="nav nav-tabs">
-  <li class="active"><a href="@{Competences.showCompetences(year, month)}">Assegna Competenze</a></li>
-  <li><a href="@{Competences.overtime(year, month)}">Straordinari</a></li>
-  <li><a href="@{Competences.totalOvertimeHours(year)}">Monte ore</a></li>
-  <li><a href="@{Competences.enabledCompetences()}">Abilita Competenze</a></li>
+  <li class="active"><a href="@{Competences.showCompetences(year, month, office.id)}">Assegna Competenze</a></li>
+  <li><a href="@{Competences.overtime(year, month, office.id)}">Straordinari</a></li>
+  <li><a href="@{Competences.totalOvertimeHours(year, office.id)}">Monte ore</a></li>
+  <li><a href="@{Competences.enabledCompetences(office.id)}">Abilita Competenze</a></li>
   <li><a href="@{Competences.exportCompetences()}">Esporta competenze</a></li>
 </ul>
 
 </div>
+
+<!-- FILTRO OFFICE RIPETUTO IN OGNI TEMPLATE DI COMPETENCES, DA METTERE NEL NAVBAR?? -->
+<div class="container-fluid">
+ <div class="center" style="margin-top: 0px; margin-bottom: 10px;">
+	  #{form action:@Competences.showCompetences(), role:'form', class:'form-inline', 
+	    method:'GET', autocomplete:'off',
+	    'data-reload':'#results'}
+	    
+	       <div class="form-group">
+	        <label class="hidden-xs hidden-sm" for="dip">Sede </label>
+	        <input type="hidden" name="year" value="${year}"/>
+	        <input type="hidden" name="month" value="${month}"/>
+	        
+	        <select name="officeId" class="form-control" id="dip" onChange="javascript:this.form.submit()" >
+	            #{list items:offices, as:'officeItem'}
+	              <option value="${officeItem.id}" #{if officeItem.id.equals(office.id) } selected="selected" #{/if} >
+	                ${officeItem.name}
+	              </option>
+	            #{/list}
+	        </select>
+	      </div>
+	       
+	      <button type="submit" class="btn btn-default">Invio</button>
+	  #{/form}
+      </div>
+</div>
+<!-- FINE FILTRO OFFICE -->
 
 <div class="container-fluid">
   
@@ -20,7 +47,7 @@
   
     <div class="panel panel-info">
       <div class="panel-heading">
-        <h3 class="panel-title">Assegna competenze &{'views.tags.display.date.month.' + month} ${year} </h3>
+        <h3 class="panel-title">Assegna competenze &{'views.tags.display.date.month.' + month} ${year} per ${office.name}</h3>
       </div>
       <div class="panel-body">
         <!-- begin Assegna competenze panel body -->
@@ -40,6 +67,7 @@
       
           <input type="hidden" name="year" value="${year}"/>
 	      <input type="hidden" name="month" value="${month}"/>
+	      <input type="hidden" name="officeId" value="${office.id}"/>
         #{/form}
         </div>
 
@@ -52,7 +80,7 @@
   	            <li class="active"><a href="#">${indexPage+1}</a></li>
   	          #{/if}
   	          #{else}
-  	            <li><a href="@{Competences.showCompetences(year, month, name, codice, indexPage)}">${indexPage+1}</a></li>
+  	            <li><a href="@{Competences.showCompetences(year, month, office.id, name, codice, indexPage)}">${indexPage+1}</a></li>
   	          #{/else}
 	        #{/list}
             </ul>
@@ -85,9 +113,9 @@
 	      </table>
 	      
 	      
-	      <strong>Totale ${competenceCode.code} mese istituto</strong>
+	      <strong>Totale competenze ${competenceCode.code} assegnate nel mese per ${office.name}</strong>
 		  <a data-tooltip data-toggle="tooltip" data-placement="right" title="Per aggiornare questo valore ricaricare la pagina">
-		    <strong>${competenceCode.totalFromCompetenceCode(month, year)}</strong>
+		    <strong>${competenceCode.totalFromCompetenceCode(month, year, office.id)}</strong>
 		  </a>	      
 
 		  </div>
@@ -109,7 +137,7 @@
       <div class="panel-heading">
         <h4 class="panel-title">
           <a data-toggle="collapse" data-parent="#collapseInfo" href="#collapseInfoContent">
-            <strong>Riepilogo Istituto</strong>
+            Riepilogo Straordinari ${office.name}
           </a>
         </h4>
       </div>
@@ -148,7 +176,7 @@
       <div class="panel-heading">
         <h4 class="panel-title">
           <a data-toggle="collapse" data-parent="#collapseInfo2" href="#collapseInfoContent2">
-            <i class="fa fa-info fa-lg"></i> <strong>Note</strong>
+            <i class="fa fa-info fa-lg"></i> Note
           </a>
         </h4>
       </div>
