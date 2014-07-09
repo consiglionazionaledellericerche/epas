@@ -4,12 +4,12 @@ import java.util.List;
 import org.joda.time.LocalDate;
 
 import models.Contract;
+import models.ContractStampProfile;
 import models.Office;
 import models.Permission;
 import models.Person;
 import models.Role;
 import models.StampProfile;
-import models.StampProfileContract;
 import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
@@ -45,7 +45,7 @@ public class Bootstrap extends Job {
 		
 		bootstrapPermissionsHandler();
 		
-		createStampProfileContract();
+		createContractStampProfile();
 		
 		try
 		{
@@ -646,8 +646,8 @@ public class Bootstrap extends Job {
 	}
 	
 	
-	private void createStampProfileContract(){
-		if(StampProfileContract.count() == 0){
+	private void createContractStampProfile(){
+		if(ContractStampProfile.count() == 0){
 			Logger.info("inizio operazioni di creazione nuovi stamp profile associati ai contratti");
 			List<Office> officeList = Office.findAll();
 			List<Person> personList = Person.getActivePersonsInDay(new LocalDate(), officeList, false);
@@ -656,37 +656,40 @@ public class Bootstrap extends Job {
 				for(Contract c : p.contracts){
 					for(StampProfile sp : p.stampProfiles){
 						if(c.endContract == null || sp.endTo == null){
-							StampProfileContract spc = new StampProfileContract();
+							ContractStampProfile spc = new ContractStampProfile();
 							spc.contract = c;
 							spc.startFrom = sp.startFrom;
 							spc.endTo = sp.endTo;
-							spc.stampProfile = sp;
+							//spc.stampProfile = sp;
+							spc.fixedworkingtime = sp.fixedWorkingTime;
 							spc.save();
 							
 						}
 						else
 							
 							if(sp.endTo.isEqual(c.endContract) && sp.startFrom.isEqual(c.beginContract)){
-								StampProfileContract spc = new StampProfileContract();
+								ContractStampProfile spc = new ContractStampProfile();
 								spc.contract = c;
 								spc.startFrom = c.beginContract;
 								spc.endTo = c.endContract;
-								spc.stampProfile = sp;
+								spc.fixedworkingtime = sp.fixedWorkingTime;
+								//spc.stampProfile = sp;
 								spc.save();
 							}
+							
 					}
 				}
-//				Contract c = p.getCurrentContract();
-//				for(StampProfile sp : p.stampProfiles){
-//					if(sp.endTo.isEqual(c.endContract) && sp.startFrom.isEqual(c.beginContract)){
-//						StampProfileContract spc = new StampProfileContract();
-//						spc.contract = c;
-//						spc.startFrom = c.beginContract;
-//						spc.endTo = c.endContract;
-//						spc.stampProfile = sp;
-//						spc.save();
-//					}					
-//				}				
+////				Contract c = p.getCurrentContract();
+////				for(StampProfile sp : p.stampProfiles){
+////					if(sp.endTo.isEqual(c.endContract) && sp.startFrom.isEqual(c.beginContract)){
+////						StampProfileContract spc = new StampProfileContract();
+////						spc.contract = c;
+////						spc.startFrom = c.beginContract;
+////						spc.endTo = c.endContract;
+////						spc.stampProfile = sp;
+////						spc.save();
+////					}					
+////				}				
 			}
 		}
 	}

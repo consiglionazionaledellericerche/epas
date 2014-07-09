@@ -32,6 +32,7 @@ import play.data.validation.Required;
  */
 @Entity
 @Table(name = "stamp_profiles")
+@Deprecated
 public class StampProfile extends BaseModel {
 
 	private static final long serialVersionUID = 5187385003376986175L;
@@ -48,10 +49,8 @@ public class StampProfile extends BaseModel {
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="end_to")
 	public LocalDate endTo;
-	
-	@NotAudited
-	@OneToMany(mappedBy="stampProfile", fetch=FetchType.LAZY)
-	public Set<StampProfileContract> stampProfileContract = Sets.newHashSet();
+
+
 	/**
 	 * Corrisponde alla voce "Presenza predefinita" della vecchia applicazione
 	 * Quando è true viene impostato nel PersonDay l'orario di lavoro previsto
