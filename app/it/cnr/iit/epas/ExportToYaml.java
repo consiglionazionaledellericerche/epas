@@ -14,7 +14,6 @@ import models.Person;
 import models.PersonDay;
 import models.PersonMonthRecap;
 import models.Qualification;
-import models.StampProfile;
 
 import models.Stamping;
 import models.VacationCode;
@@ -397,6 +396,7 @@ public class ExportToYaml {
 	{
 		String out = "";
 		
+		/*
 		for(StampProfile sp : person.stampProfiles)
 		{
 			out = out + getFormattedHeader("StampProfile", "sp"+sp.id);
@@ -407,6 +407,7 @@ public class ExportToYaml {
 				out = out + getFormattedProperty("endTo", "'" + sp.endTo + "'");
 			out = out + getFormattedProperty("fixedWorkingTime", sp.fixedWorkingTime+"");
 		}
+		*/
 		return out;
 	}
 	
