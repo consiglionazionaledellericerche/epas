@@ -14,6 +14,7 @@ import models.Office;
 import models.Permission;
 import models.Person;
 import models.Role;
+import models.StampModificationType;
 import models.StampProfile;
 import models.TotalOvertime;
 import models.User;
@@ -54,6 +55,8 @@ public class Bootstrap extends Job {
 		createContractStampProfile2();
 
 		bootstrapTotalOvertimeHandler();
+		
+		insertDefaultStampModificationType();
 
 		
 		try
@@ -693,6 +696,21 @@ public class Bootstrap extends Job {
 			
 			sp.delete();
 		}
+	}
+	
+	private static void insertDefaultStampModificationType() {
+		
+		//FIX d 
+		StampModificationType smt = StampModificationType.find("byCode", "d").first();
+		if(smt == null) {
+			
+			smt = new StampModificationType();
+			smt.code = "d";
+			smt.description = "Considerato presente se non ci sono codici di assenza (orario di lavoro autodichiarato)";
+			smt.save();
+		}
+		
+		
 	}
 	
 	
