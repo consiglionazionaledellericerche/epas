@@ -27,7 +27,6 @@ import models.PersonDayInTrouble;
 import models.PersonWorkingTimeType;
 import models.PersonYear;
 import models.Qualification;
-import models.StampProfile;
 import models.Stamping;
 import models.User;
 import models.VacationPeriod;
