@@ -166,6 +166,26 @@ public class Contract extends BaseModel {
 		return Lists.newArrayList(this.contractStampProfile);
 	}
 	
+	@Transient
+	public ContractStampProfile getContractStampProfile(LocalDate date) {
+		
+		for(ContractStampProfile csp : this.contractStampProfile) {
+			DateInterval interval = new DateInterval(csp.startFrom, csp.endTo);
+			if(DateUtility.isDateIntoInterval(date, interval))
+				return csp;
+			
+		}
+		return null;
+	}
+	
+	@Transient
+	public ContractStampProfile getCurrentContractStampProfile() {
+		
+		return getContractStampProfile(LocalDate.now());
+	}
+	
+	
+	
 	/**
 	 * @param contract
 	 * @return il vacation period associato al contratto con al suo interno la data di oggi
