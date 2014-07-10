@@ -19,8 +19,6 @@ import models.PersonChildren;
 import models.PersonDay;
 import models.PersonDayInTrouble;
 import models.PersonMonthRecap;
-import models.StampProfile;
-
 import models.Stamping;
 import models.User;
 import models.enumerate.AccumulationBehaviour;
