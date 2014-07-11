@@ -36,4 +36,4 @@ alter table working_time_type_days alter column id set DEFAULT nextval('seq_work
 alter table working_time_types alter column id set DEFAULT nextval('seq_working_time_types'::regclass);
 alter table year_recaps alter column id set DEFAULT nextval('seq_year_recaps'::regclass);
 
-
+select setval('seq_permissions', 16);
