@@ -1,4 +1,4 @@
-# --- !Ups
+# ---!Ups
 
 ALTER TABLE total_overtime 
   ADD COLUMN office_id bigint,
