@@ -691,11 +691,11 @@ public class Bootstrap extends Job {
 			*/
 		}
 		
-		List<StampProfile> spList = StampProfile.findAll();
-		for(StampProfile sp : spList) {
-			
-			sp.delete();
-		}
+//		List<StampProfile> spList = StampProfile.findAll();
+//		for(StampProfile sp : spList) {
+//			
+//			sp.delete();
+//		}
 	}
 	
 	private static void insertDefaultStampModificationType() {
