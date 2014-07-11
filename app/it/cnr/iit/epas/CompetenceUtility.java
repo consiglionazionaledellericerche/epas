@@ -268,38 +268,53 @@ public class CompetenceUtility {
 				
 		final QCompetence com = new QCompetence("competence");
 		final JPQLQuery query = ModelQuery.queryFactory().query();
-		final Competence mycompetence = query
+		final Competence myCompetence = query
 				.from(com)
 				.where(
 						com.person.eq(person)
-						.and(com.year.lt(year))
+						.and(com.year.eq(year))
 						.and(com.month.lt(month))
-						.and(com.competenceCode.eq(competenceCode))					
-						.and(com.valueRequested.ne(com.valueRequested.floor()).or(com.valueRequested.eq(BigDecimal.ZERO)))
+						.and(com.competenceCode.eq(competenceCode))		
+						.and(com.valueApproved.ne(0))
+						.and(com.valueRequested.ne(BigDecimal.ZERO))
+						.and(com.valueRequested.intValue().ne(com.valueApproved)
+						  .or(com.valueRequested.floor().ne(com.valueRequested)))
 				)
 				.orderBy(com.year.desc(), com.month.desc())
+				.limit(1)
 				.uniqueResult(com);
-		
-		
-		 Logger.debug("La query sulle competenze ha trovato %s", mycompetence.toString());
+		 
+		 if (myCompetence == null) {
+			 // we are at the first case, so the person has its fist 0.5 hour to accumulate
+			 Logger.debug("myCompetence is null");
+			 valueApproved = requestedHours.setScale(0, RoundingMode.DOWN).intValue();
+		 } else if (myCompetence.valueRequested.setScale(0, RoundingMode.UP).intValue() <= myCompetence.valueApproved) {
+			 Logger.debug("La query sulle competenze ha trovato %s e myCompetence.valueRequested.ROUND_CEILING=%s <= myCompetence.valueApproved=%d", myCompetence.toString(), myCompetence.valueRequested.ROUND_CEILING, myCompetence.valueApproved);
+			 // Last rounding was on ceiling, so we round to floor
+			 valueApproved = requestedHours.setScale(0, RoundingMode.DOWN).intValue();
+		 } else {
+			 Logger.debug("La query sulle competenze ha trovato %s", myCompetence.toString());
+			 // we round to ceiling
+			 valueApproved = requestedHours.setScale(0, RoundingMode.UP).intValue();
+		 }
 		
 		
 		Logger.debug("La calcShiftValueApproved ha preso il requsestHour=%s e restituisce %s", requestedHours, valueApproved);
 			
 		return valueApproved;
-		
-
 	}
+
 	
 	/*
 	 * @author arianna
 	 * Salva le ore di turno di un certo mese nelle competenze.
-	 * Per ogni persona riceve l ore effettive di turno svolte e le salva 
-	 * nel campo valueRequested
+	 * Per ogni persona riceve le ore effettive di turno svolte, calcola quelle da approvare e le salva 
+	 * nei campi valueRequested e valueApproved rispettvamente
 	 */
-	public static int updateDBShiftCompetences(Table<Person, String, BigDecimal> personsShiftHours, int year, int month) {
-		int numSavedCompetences = 0;
+	public static List<Competence> updateDBShiftCompetences(Table<Person, String, BigDecimal> personsShiftHours, int year, int month) {
 
+		List<Competence> savedCompetences = new ArrayList<Competence>();
+		
 		// get the Competence code for the ordinary shift  
 		CompetenceCode competenceCode = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", codShift).first();
 	
@@ -310,7 +325,7 @@ public class CompetenceUtility {
 			Logger.debug("Esamino person= %s %s", person.surname, person.name);
 			
 			BigDecimal numOfShiftHours = new BigDecimal(0);  // number of real shift hours
-			int calcApproved = 0;								 // number of approved shift hours
+			int calcApproved = 0;							 // number of approved shift hours
 			
 			// for each shift type
 			for (String shiftType: personsShiftHours.columnKeySet()) {
@@ -325,34 +340,50 @@ public class CompetenceUtility {
 			Competence shiftCompetence = Competence.find("SELECT c FROM Competence c WHERE c.person = ? AND c.year = ? AND c.month = ? AND c.competenceCode = ?", 
 					person, year, month, competenceCode).first();
 			
-			BigDecimal prova = numOfShiftHours.setScale(0, RoundingMode.FLOOR);
-			Boolean res = prova.compareTo(numOfShiftHours) == 0;
+			//BigDecimal roundNumOfShiftHours = numOfShiftHours.setScale(0, RoundingMode.FLOOR);
+			//Boolean res = roundNumOfShiftHours.compareTo(numOfShiftHours) == 0;
 		
-			Logger.debug("Calcola la calcApproved=%d -> numOfShiftHours.abs()=%s  != numOfShiftHours=%s  comparison= %s", calcApproved, prova, numOfShiftHours, res);
+			//Logger.debug("Calcola la calcApproved -> numOfShiftHours.abs()=%s  != numOfShiftHours=%s  comparison= %s", roundNumOfShiftHours, numOfShiftHours, res);
 			
 			calcApproved = (numOfShiftHours.setScale(0, RoundingMode.FLOOR).compareTo(numOfShiftHours) == 0) ? numOfShiftHours.intValue() : calcShiftValueApproved(person, year, month, numOfShiftHours);
 			
+			//Competence appCompetence = new Competence(person, competenceCode, year, month);
 			
 			if (shiftCompetence != null) {
 				// update the requested hours
+				int calcApproved1 = (shiftCompetence.valueApproved != 0) ? shiftCompetence.valueApproved : calcApproved;
+				Logger.debug("vecchia valueApproved=%d, calcolata=%d salvata=%d", shiftCompetence.valueApproved, calcApproved, calcApproved1);
+				shiftCompetence.setValueApproved(calcApproved1);
 				shiftCompetence.setValueRequested(numOfShiftHours);
 				shiftCompetence.save();
 				
 				Logger.debug("Aggiornata competenza di %s %s: valueApproved=%s, valueRequested=%s, calcApproved=%s", shiftCompetence.person.surname, shiftCompetence.person.name, shiftCompetence.valueApproved, shiftCompetence.valueRequested, calcApproved);
-				numSavedCompetences++;
+				
+				//---------------				
+				//appCompetence.setValueApproved(calcApproved1);
+				//appCompetence.setValueRequested(numOfShiftHours);
+				//savedCompetences.add(appCompetence);
+				
+				savedCompetences.add(shiftCompetence);
 			} else {
 				// insert a new competence with the requested hours an reason
 				Competence competence = new Competence(person, competenceCode, year, month);
+				competence.setValueApproved(calcApproved);
 				competence.setValueRequested(numOfShiftHours);
 				competence.save();
 				
+				//appCompetence.setValueApproved(calcApproved);
+				//appCompetence.setValueRequested(numOfShiftHours);
+				//savedCompetences.add(appCompetence);
+				
+				savedCompetences.add(competence);
+				
 				Logger.debug("Salvata competenza %s", shiftCompetence);
-				numSavedCompetences++;
 			}
 		}
 		
 		// return the number of saved competences
-		return numSavedCompetences;
+		return savedCompetences;
 	}
 	
 	

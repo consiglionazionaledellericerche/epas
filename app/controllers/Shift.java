@@ -95,7 +95,8 @@ public class Shift extends Controller {
 	public static String thBadStampings = "Timbratura errata";  // nome della colonna per i giorni con timbratura fuori dalle fasce orarie dei turni
 
 	public static String thDays = "Numero di giorni";			// nome della colonna per i giorni di turno svolti mensilmente da una persona
-	public static String thHour = "Numero di ore";				// nome della colonna per le ore di turno svolte mensilmente da una persona
+	public static String thReqHour = "Num. di ore richieste";	// nome della colonna per le ore di turno svolte mensilmente da una persona
+	public static String thAppHour = "Num. di ore approvate";	// nome della colonna per le ore di turno approvate mensilmente per una persona
 	
 	/*
 	 * @author arianna
@@ -408,7 +409,7 @@ public class Shift extends Controller {
 		int month = params.get("month", Integer.class);
 //		Long groupType = params.get("type", Long.class);
 		
-		//Logger.debug("sono nella exportMonthAsPDF con year=%s e month=%s", year, month);
+		Logger.debug("sono nella exportMonthAsPDF con year=%s e month=%s", year, month);
 		
 		 ArrayList<String> shiftTypes = new ArrayList<String>();
 		 shiftTypes.add("A"); 
@@ -452,7 +453,7 @@ public class Shift extends Controller {
 			// conta e memorizza i giorni di turno per ogni persona
 			singleShiftSumDays = CompetenceUtility.getShiftCompetences(personShiftDays);
 			
-			// for each person conunt and save the total shift hours
+			// for each person conunt the total shift hours
 			for (Person person: singleShiftSumDays.rowKeySet()) {
 				BigDecimal numOfHours;	
 				int numOfDays;
@@ -462,7 +463,7 @@ public class Shift extends Controller {
 					//Logger.debug("Leggo da singleShiftSumDays i giorni %s del tipo %s", singleShiftSumDays.get(person, type), type);
 							
 					numOfDays = singleShiftSumDays.get(person, type);
-					numOfHours = (totalShiftSumHours.contains(person, thHour)) ? totalShiftSumHours.get(person, thHour) : new BigDecimal(0);		
+					numOfHours = (totalShiftSumHours.contains(person, thReqHour)) ? totalShiftSumHours.get(person, thReqHour) : new BigDecimal(0);		
 					
 					//Logger.debug("In singleShiftSumDays ci sono giorni=%d e ore precedenti =%s", numOfDays, numOfHours);
 					
@@ -472,7 +473,7 @@ public class Shift extends Controller {
 					calcHours = calcHours.add(numOfHours);		
 					
 					//Logger.debug("Salvo in totalShiftSumHours.(person=%s, thHour=%s)  %s", person, thHour, calcHours);
-					totalShiftSumHours.put(person, thHour, calcHours);
+					totalShiftSumHours.put(person, thReqHour, calcHours);
 				}
 			}
 			
@@ -505,26 +506,28 @@ public class Shift extends Controller {
 		}
 		
 		// save the total requested Shift Hours in the DB
-		CompetenceUtility.updateDBShiftCompetences(totalShiftSumHours, year, month);
+		List<Competence> savedCompetences = CompetenceUtility.updateDBShiftCompetences(totalShiftSumHours, year, month);
 		
 		
 		// Save shifts info form the PDF
-		for (Person person: totalShiftSumHours.rowKeySet()) {
+		for (Competence competence: savedCompetences) {
 			
 				//Logger.debug("leggo le ore di %s", person);
-				BigDecimal numOfHours = totalShiftSumHours.get(person, thHour);
-				int numOfDays = CompetenceUtility.calcShiftDaysFromHour(numOfHours);
+				BigDecimal numOfRealHours = competence.getValueRequested();
+				int numOfDays = CompetenceUtility.calcShiftDaysFromHour(numOfRealHours);
+				int numOfApprovedHours = competence.getValueApproved();
 				
-				Logger.debug("In totalShiftInfo emorizzo giorni=%s, ore=%s", numOfDays, numOfHours);
-				totalShiftInfo.put(person, thHour, numOfHours.toString());
-				totalShiftInfo.put(person, thDays, Integer.toString(numOfDays)); 		
+				Logger.debug("In totalShiftInfo emorizzo giorni=%s, ore=%s", numOfDays, numOfRealHours);
+				totalShiftInfo.put(competence.person, thReqHour, numOfRealHours.toString());
+				totalShiftInfo.put(competence.person, thAppHour, Integer.toString(numOfApprovedHours));
+				totalShiftInfo.put(competence.person, thDays, Integer.toString(numOfDays)); 		
 			
 			//Logger.debug("salvato nella tabella i giorni %d e le ore %s", calcDays, competence.valueRequested);
 		}
 								
 
 		ArrayList<String> thInconsistence = new ArrayList<String>(Arrays.asList(thAbsences, thNoStampings, thBadStampings));
-		ArrayList<String> thShift = new ArrayList<String>(Arrays.asList(thDays, thHour));
+		ArrayList<String> thShift = new ArrayList<String>(Arrays.asList(thDays, thReqHour, thAppHour));
 		
 		LocalDate today = new LocalDate();
 		renderPDF(today, firstOfMonth, totalShiftInfo, totalInconsistentAbsences, thInconsistence, thShift);
@@ -629,7 +632,7 @@ public class Shift extends Controller {
 				Logger.debug("person %s", person);
 				if (shiftCalendarMonth.contains(person, day)) {
 					currShift = shiftCalendarMonth.get(person, day).tipoTurno;
-					ShiftSlot f = shiftCalendarMonth.get(person, day).fasciaTurno;
+					//ShiftSlot f = shiftCalendarMonth.get(person, day).fasciaTurno;
 					//Logger.debug("trovato turno (%s,%s) per (%s, %s)", currShift, f, person, day);
 					
 					
