@@ -57,6 +57,8 @@ import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
+
 
 /**
  * @author cristian
@@ -662,7 +664,7 @@ public class Reperibility extends Controller {
 		Table<Person, String, Integer> reperibilitySumDays = TreeBasedTable.<Person, String, Integer>create();
 		
 		// for each person contains the list of the rep periods divided by fr o fs
-		Table<Person, String, String> reperibilityDateDays = TreeBasedTable.<Person, String, String>create();
+		Table<Person, String, List<String>> reperibilityDateDays = TreeBasedTable.<Person, String, List<String>>create();
 		
 		// for each person contains days with absences and no-stamping  matching the reperibility days 
 		Table<Person, String, List<String>> inconsistentAbsence = TreeBasedTable.<Person, String, List<String>>create();				
@@ -702,7 +704,8 @@ public class Reperibility extends Controller {
 		
 		for (Competence frCompetence : frCompetences) {	
 			Logger.debug("Metto nella tabella competence = %s", frCompetence.toString());
-			reperibilityDateDays.put(frCompetence.person, codFr, frCompetence.reason);
+			List <String> str = Arrays.asList(frCompetence.reason.split(" "));
+			reperibilityDateDays.put(frCompetence.person, codFr, str);
 			reperibilitySumDays.put(frCompetence.person, codFr, frCompetence.valueApproved);
 		}
 		
@@ -713,7 +716,8 @@ public class Reperibility extends Controller {
 		
 		for (Competence fsCompetence : fsCompetences) {		
 			Logger.debug("Metto nella tabella competence = %s", fsCompetence.toString());
-			reperibilityDateDays.put(fsCompetence.person, codFs, fsCompetence.reason);
+			List <String> str = Arrays.asList(fsCompetence.reason.split(" "));
+			reperibilityDateDays.put(fsCompetence.person, codFs, str);
 			reperibilitySumDays.put(fsCompetence.person, codFs, fsCompetence.valueApproved);
 		}
 		
@@ -726,6 +730,7 @@ public class Reperibility extends Controller {
 		String cFs = codFs;
 		String thNoStamp = thNoStampings;
 		String thAbs = thAbsences;
+		
 		renderPDF(today, firstOfMonth, reperibilitySumDays, reperibilityDateDays, inconsistentAbsence, cFs, cFr, thNoStamp, thAbs);
 		
 	}
