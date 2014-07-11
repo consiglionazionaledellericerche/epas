@@ -263,11 +263,13 @@ public class PersonUtility {
 		if(vr.vacationDaysLastYearNotYetUsed>0)
 			return AbsenceType.find("byCode", "31").first();
 
+		if(vr.persmissionNotYetUsed>0)
+			return AbsenceType.find("byCode", "94").first();
+		
 		if(vr.vacationDaysCurrentYearNotYetUsed>0)
 			return AbsenceType.find("byCode", "32").first();
 
-		if(vr.persmissionNotYetUsed>0)
-			return AbsenceType.find("byCode", "94").first();	
+			
 
 		return null;
 	}
