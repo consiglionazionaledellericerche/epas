@@ -162,7 +162,7 @@ public class CompetenceUtility {
 				}
 			}
 			
-			Logger.debug("fsPeriods=%s frPeriods=%s", fsPeriods, frPeriods);
+			Logger.debug("NumOfFsDays=%d fsPeriods=%s - NumOfFrDays=%d frPeriods=%s ", NumOfFsDays, fsPeriods, NumOfFrDays, frPeriods);
 			
 			// build the Fs and Fr reasons
 			String fsReason = "";
@@ -175,12 +175,13 @@ public class CompetenceUtility {
 			}
 			Logger.debug("ReasonFS=%s ReasonFR=%s", fsReason, frReason);
 			
-			
+			Logger.debug("Cerca Competence FS per person=%s id=%d, year=%d, month=%d competenceCodeId=%d", person.surname, person.id, year, month, competenceCodeFS.id);
 			// save the FS reperibility competences in the DB
 			Competence FsCompetence = Competence.find("SELECT c FROM Competence c WHERE c.person = ? AND c.year = ? AND c.month = ? AND c.competenceCode = ?", 
 					person, year, month, competenceCodeFS).first();
 			
 			if (FsCompetence != null) {
+				Logger.debug("Trovato competenza FS =%s", FsCompetence);
 				// update the requested hours
 				FsCompetence.setValueApproved(NumOfFsDays, fsReason);
 				FsCompetence.save();
@@ -188,7 +189,8 @@ public class CompetenceUtility {
 				Logger.debug("Aggiornata competenza %s", FsCompetence);
 				numSavedCompetences++;
 			} else {
-				// insert a new competence with the requested hours an reason
+				Logger.debug("Trovato nessuna competenza FS");
+				// insert a new competence with the requested hours and reason
 				Competence competence = new Competence(person, competenceCodeFS, year, month, NumOfFsDays, fsReason);
 				competence.save();
 				
@@ -196,11 +198,14 @@ public class CompetenceUtility {
 				numSavedCompetences++;
 			}
 			
+			Logger.debug("Cerca Competence FR per person=%s id=%d, year=%d, month=%d competenceCodeId=%d", person.surname, person.id, year, month, competenceCodeFR.id);
 			// save the FR reperibility competences in the DB
 			Competence FrCompetence = Competence.find("SELECT c FROM Competence c WHERE c.person = ? AND c.year = ? AND c.month = ? AND c.competenceCode = ?", 
 					person, year, month, competenceCodeFR).first();
+			
 			if (FrCompetence != null) {
 				// update the requested hours
+				Logger.debug("Trovato competenza FR =%s", FsCompetence);
 				FrCompetence.setValueApproved(NumOfFrDays, frReason);
 				FrCompetence.save();
 				
@@ -209,6 +214,7 @@ public class CompetenceUtility {
 				
 			} else {
 				// insert a new competence with the requested hours an reason
+				Logger.debug("Trovato nessuna competenza FR");
 				Competence competence = new Competence(person, competenceCodeFR, year, month, NumOfFrDays, fsReason);
 				competence.save();
 				Logger.debug("Salvata competenza %s", competence);

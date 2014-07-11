@@ -40,7 +40,7 @@ public class Competence extends BaseModel {
 	
 	public int valueApproved;
 	
-	public BigDecimal valueRequested;
+	public BigDecimal valueRequested = BigDecimal.ZERO;
 	
 	public String reason;
 	

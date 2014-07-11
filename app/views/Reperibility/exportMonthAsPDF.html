@@ -30,9 +30,25 @@
 			}%
 			<tr>
 				<td> ${person.surname} ${person.name}</td>
-				<td> ${reperibilityDateDays.get(person, cFr)}</td>
+				<td>
+					%{
+								for(day in reperibilityDateDays.get(person, cFr)) {
+					}%
+								${day}<br/>
+					%{
+    							}
+					}% 
+				</td>
 				<td>  ${reperibilitySumDays.contains(person, cFr) ? reperibilitySumDays.get(person, cFr) : '0'}</td>
-				<td> ${reperibilityDateDays.get(person, cFs)} </td>
+				<td> 
+					%{
+								for(day in reperibilityDateDays.get(person, cFs)) {
+					}%
+								${day}<br/>
+					%{
+    							}
+					}% 
+				</td>
 				<td class="red"> ${reperibilitySumDays.contains(person, cFs) ? reperibilitySumDays.get(person, cFs) : '0'}</td>
 			</tr>
 
