@@ -78,7 +78,6 @@ import play.Play;
 import play.data.binding.As;
 import play.db.jpa.JPA;
 import play.mvc.Controller;
-import sun.tools.java.Package;
 
 /**
  * 
