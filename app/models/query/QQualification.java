@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QQualification extends EntityPathBase<Qualification> {
 
-    private static final long serialVersionUID = -1883508405;
+    private static final long serialVersionUID = -1883508405L;
 
     public static final QQualification qualification1 = new QQualification("qualification1");
 

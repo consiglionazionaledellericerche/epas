@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QContract extends EntityPathBase<Contract> {
 
-    private static final long serialVersionUID = 2041582646;
+    private static final long serialVersionUID = 2041582646L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
@@ -32,11 +32,9 @@ public class QContract extends EntityPathBase<Contract> {
 
     public final SimplePath<it.cnr.iit.epas.DateInterval> contractDateInterval = createSimple("contractDateInterval", it.cnr.iit.epas.DateInterval.class);
 
-    public final SetPath<models.ContractStampProfile, QContractStampProfile> contractStampProfile = this.<models.ContractStampProfile, QContractStampProfile>createSet("contractStampProfile", models.ContractStampProfile.class, QContractStampProfile.class, PathInits.DIRECT2);
-
     public final ListPath<models.VacationPeriod, QVacationPeriod> contractVacationPeriods = this.<models.VacationPeriod, QVacationPeriod>createList("contractVacationPeriods", models.VacationPeriod.class, QVacationPeriod.class, PathInits.DIRECT2);
 
-    public final SetPath<models.ContractWorkingTimeType, QContractWorkingTimeType> contractWorkingTimeType = this.<models.ContractWorkingTimeType, QContractWorkingTimeType>createSet("contractWorkingTimeType", models.ContractWorkingTimeType.class, QContractWorkingTimeType.class, PathInits.DIRECT2);
+    public final ListPath<models.ContractWorkingTimeType, QContractWorkingTimeType> contractWorkingTimeType = this.<models.ContractWorkingTimeType, QContractWorkingTimeType>createList("contractWorkingTimeType", models.ContractWorkingTimeType.class, QContractWorkingTimeType.class, PathInits.DIRECT2);
 
     public final QVacationPeriod currentVacationPeriod;
 
@@ -75,7 +73,7 @@ public class QContract extends EntityPathBase<Contract> {
 
     public final NumberPath<Integer> sourceVacationLastYearUsed = createNumber("sourceVacationLastYearUsed", Integer.class);
 
-    public final SetPath<models.VacationPeriod, QVacationPeriod> vacationPeriods = this.<models.VacationPeriod, QVacationPeriod>createSet("vacationPeriods", models.VacationPeriod.class, QVacationPeriod.class, PathInits.DIRECT2);
+    public final ListPath<models.VacationPeriod, QVacationPeriod> vacationPeriods = this.<models.VacationPeriod, QVacationPeriod>createList("vacationPeriods", models.VacationPeriod.class, QVacationPeriod.class, PathInits.DIRECT2);
 
     public QContract(String variable) {
         this(Contract.class, forVariable(variable), INITS);

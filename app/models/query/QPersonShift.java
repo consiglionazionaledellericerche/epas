@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QPersonShift extends EntityPathBase<PersonShift> {
 
-    private static final long serialVersionUID = 1443244169;
+    private static final long serialVersionUID = 1443244169L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
@@ -43,7 +43,7 @@ public class QPersonShift extends EntityPathBase<PersonShift> {
 
     public final ListPath<models.PersonShiftDay, QPersonShiftDay> personShiftDays = this.<models.PersonShiftDay, QPersonShiftDay>createList("personShiftDays", models.PersonShiftDay.class, QPersonShiftDay.class, PathInits.DIRECT2);
 
-    public final ListPath<models.PersonShiftShiftType, QPersonShiftShiftType> personShiftShiftType = this.<models.PersonShiftShiftType, QPersonShiftShiftType>createList("personShiftShiftType", models.PersonShiftShiftType.class, QPersonShiftShiftType.class, PathInits.DIRECT2);
+    public final ListPath<models.PersonShiftShiftType, QPersonShiftShiftType> personShiftShiftTypes = this.<models.PersonShiftShiftType, QPersonShiftShiftType>createList("personShiftShiftTypes", models.PersonShiftShiftType.class, QPersonShiftShiftType.class, PathInits.DIRECT2);
 
     public QPersonShift(String variable) {
         this(PersonShift.class, forVariable(variable), INITS);

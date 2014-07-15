@@ -11,4 +11,3 @@ UPDATE total_overtime SET office_id = null;
 ALTER TABLE total_overtime
   DROP CONSTRAINT totalovertime_office_key,
   DROP COLUMN office_id;
-

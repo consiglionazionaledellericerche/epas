@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QPerson extends EntityPathBase<Person> {
 
-    private static final long serialVersionUID = -1261627527;
+    private static final long serialVersionUID = -1261627527L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
@@ -142,6 +142,8 @@ public class QPerson extends EntityPathBase<Person> {
     public final BooleanPath riskDivingAllowanceAvailable = createBoolean("riskDivingAllowanceAvailable");
 
     public final StringPath room = createString("room");
+
+    public final ListPath<models.ShiftType, QShiftType> shiftTypes = this.<models.ShiftType, QShiftType>createList("shiftTypes", models.ShiftType.class, QShiftType.class, PathInits.DIRECT2);
 
     public final ListPath<models.StampProfile, QStampProfile> stampProfiles = this.<models.StampProfile, QStampProfile>createList("stampProfiles", models.StampProfile.class, QStampProfile.class, PathInits.DIRECT2);
 

@@ -102,7 +102,7 @@ public class Administration extends Controller {
 	 * 
 	 */	
 
-	@NoCheck
+	@Check(Security.INSERT_AND_UPDATE_PERSON)
 	public static void fixPersonSituation(Long personId, int year, int month){	
 	//TODO permessi
 		PersonUtility.fixPersonSituation(personId, year, month, Security.getUser().get(), false);

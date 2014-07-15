@@ -1,84 +1,110 @@
 <!DOCTYPE html>
 
-<html>	
+<html>
+	
     <h3>Situazione presenze mensile di <span class="capitalized">&{'views.tags.display.date.month.' + month}</span> ${year} per ${person.name} ${person.surname} matr.: ${person.number}</h3>
+    
+
 <table>
 	<tr>
-		<th><font size="1.5">Buono mensa</font></th>
-		<th><font size="1.5">Giorno</font></th>
-		<th align="center"><font size="1.5">Codice di assenza</font></th>
+		<th><font size="0.5">Buono mensa</font></th>
+		<th><font size="0.5">Giorno</font></th>
+		<th><font size="0.5">Codice di assenza</font></th>
 		%{ for(int i = 1; i <= numberOfInOut; i++){
 		}%
-		<th><font size="1.5">${i}° entrata</font></th>
-		<th><font size="1.5">${i}° uscita</font></th>
+		<th><font size="0.5">${i}° entrata</font></th>
+		<th><font size="0.5">${i}° uscita</font></th>
 		%{ } }%
-		<th><font size="1.5">Tempo lavoro</font></th>
-		<th><font size="1.5">Differenza</font></th>
-		<th><font size="1.5">Progressivo</font></th>
-		<th><font size="1.5">Tipo Orario</font></th>
-		<th><font size="1.5">Note</font></th>
-	</tr>	
+		<th><font size="0.5">Tempo lavoro</font></th>
+		<th><font size="0.5">Differenza</font></th>
+		<th><font size="0.5">Progressivo</font></th>
+		<th><font size="0.5">Tipo Orario</font></th>
+		<th><font size="0.5">Note</font></th>
+	</tr>
 	
-    #{list items:daysRecap, as:'dayRecap'}	
-    	
-	<tr>
+	%{
+     for(dayRecap in daysRecap) {
+     		
+			
+	}%
+		
+	<tr >
 	        <td>
 			#{if dayRecap.mealTicket.equals('NO')}
-			  <font size="1.5">${dayRecap.mealTicket}</font>
+			  <font size="0.5">${dayRecap.mealTicket}</font>
 			#{/if}
 			</td>
-			
-			#{if dayRecap.holiday==false}
-			
-				<td><font size="1.5">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</font></td>
-			#{/if}
-			#{else}
-			
-				<td><font size="1.5">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</font></td>
-			#{/else}
+			%{
+			if(dayRecap.holiday==false)
+			{
+			}%	
+				<td><font size="0.5">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</font></td>
+			%{
+			}
+			else
+			{
+			}%	
+				<td><font size="0.5">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</font></td>
+			%{
+			}
+			}%
 		
-			<td align="center">
-				<font size="1.5">
-				#{list items:dayRecap.absences, as:'absence'}
-				
+			<td>
+				<font size="0.5">
+				%{	
+				for (absence in dayRecap.absences) 
+				{ 
+				%}
 				 	${absence.absenceType.code}
-				#{/list}
+				 %{
+				 }
+				 }%
 				 </font>
 			</td>
 
-			#{list items:dayRecap.stampingsTemplate, as:'stampingTemplate'}
-			
-					#{if stampingTemplate.colour.equals("in")}
-					
-						<td><font size="1.5">
-					#{/if}
-					#{else}
-						#{if stampingTemplate.colour.equals("out")}
-					
-						<td><font size="1.5">
-						#{/if}
-						#{else}
-						#{if stampingTemplate.colour.equals("warn")}
-					
-						<td><font size="1.5">
-						#{/if}
-						#{/else}
-					#{/else}
-				
-					#{if stampingTemplate.date!=null} 
-				
-						${stampingTemplate.hour}
-					#{/if}
+
+			%{  
+			for(stampingTemplate in dayRecap.stampingsTemplate){
+			}%
+			%{
+					if(stampingTemplate.colour.equals("in"))
+					{
+					}%
+						<td><font size="0.5">
+					%{
+					}
+					else if (stampingTemplate.colour.equals("out"))
+					{
+					}%
+						<td><font size="0.5">
+					%{
+					}
+					else if (stampingTemplate.colour.equals("warn"))
+					{
+					}%
+						<td><font size="0.5">
+					%{
+					}
+				}%
+				%{ if(stampingTemplate.date!=null) 
+				{ 
+				}%
+					${stampingTemplate.hour}
+				 %{
+				 }
+				 }%
 				 
-						<strong>${stampingTemplate.identifier}</strong>
-						<strong>${stampingTemplate.markedByAdminCode}</strong>
-						<strong>${stampingTemplate.missingExitStampBeforeMidnightCode}</strong>
-						</font>
-						</td>
+				<strong>${stampingTemplate.identifier}</strong>
+				<strong>${stampingTemplate.markedByAdminCode}</strong>
+				<strong>${stampingTemplate.missingExitStampBeforeMidnightCode}</strong>
+				</font>
+				</td>
 			
-			#{/list}
+			%{ 
+			} 
+			}%
 			<td>
-			<font size="1.5">
+			<font size="0.5">
 				${dayRecap.workTime}
 				<strong>${dayRecap.todayLunchTimeCode}</strong>
 				<strong>${dayRecap.fixedWorkingTimeCode}</strong>
@@ -86,28 +112,36 @@
 			</font>
 			</td>							
 	       	<td>
-	       	<font size="1.5">
+	       	<font size="0.5">
 	       		${dayRecap.difference}
 	       	</font>
 	       	</td>	
 			<td>
-			<font size="1.5">
+			<font size="0.5">
 			 	${dayRecap.progressive}
 			</font>
 		    </td>
 	        
-	        <td><font size="1.5">${dayRecap.workingTimeTypeDescription}</font></td>
+	        <td><font size="0.5">${dayRecap.workingTimeTypeDescription}</font></td>
 	        <td>
-	        <font size="1.5">
-	        #{list items:dayRecap.note, as:'n'}	    	
+	        <font size="0.5">
+	    	%{
+    		for(n in dayRecap.note) 
+    		{
+			}%
 	       		${n}<br>
-	        #{/list}
+	        %{
+	        }
+	        }%
 	        </font>
 	        </td>
 	        
 	</tr>
-	
-	#{/list}
+
+	%{  		   
+ 	}
+   
+	}%
 
 </table>
 	
@@ -119,50 +153,64 @@ Il numero di buoni mensa usabili per questo mese e': <strong>${numberOfMealTicke
 </p>
 <p id="spiegazioneTabellaTimbrature"/>
 <div id="tabelleRiassuntive">
-#{if !stampModificationTypeList.isEmpty()}
+%{if(!stampModificationTypeList.isEmpty()) { }%
 
-	<h3 style="margin-top: 1em">Note:</h3>
+	<h3 style="margin-top: 2em">Note:</h3>
 	<table id="Note timbrature">
 		<tr>
 			<th width="80">Codice timbratura</th>
 			<th width="400">Descrizione</th>
 				
 		</tr>
-		#{list items:stampModificationTypeList, as:'smt'}
-		
+		%{
+	     for(smt in stampModificationTypeList) {
+		}%
 			<tr>
 				<td>${smt.code}</td>     
 				<td>${smt.description}</td>		
 			</tr>
 		
-		#{/list}
-		#{list items:stampTypeList, as:'type'}
-		
+		%{  		   
+	     }
+	     
+		}%
+		%{
+		for(type in stampTypeList) 
+		{
+		}%
 			<tr>
 				<td>${type.identifier}</td>
 				<td>${type.description}</td>
 			</tr>
-		#{/list}
+		%{  		   
+	    }
+	    }%
 	</table>
-#{/if}
+%{ 
+}
+}%
 
 *{Significato codici assenza}*
-<h3 style="margin-top: 1em">Tabella codici di assenza</h3>
+<h3 style="margin-top: 2em">Tabella codici di assenza</h3>
 <table id="Codici di assenza">
 	<tr>
 		<th width="80">Codice assenza</th>
-		<th width="1.500">Descrizione</th>
+		<th width="200">Descrizione</th>
 		<th width="80">Numero giorni</th>
 			
 	</tr>
-	#{list items:absenceCodeMap.entrySet(), as:'entry'}
-	
+	%{
+	for(entry in absenceCodeMap.entrySet()) 
+	{
+	}%
 	<tr>
-		<td><font size="1.5">${entry.getKey().code}</font></td>     
-		<td><font size="1.5">${entry.getKey().description}</font></td>	
-		<td><font size="1.5">${entry.getValue()}</font></td>	
+		<td><font size="2">${entry.getKey().code}</font></td>     
+		<td><font size="2">${entry.getKey().description}</font></td>	
+		<td><font size="2">${entry.getValue()}</font></td>	
 	</tr>
-	#{/list}
+	%{
+	 }
+	}%
 </table>
 </div>
 
@@ -171,4 +219,8 @@ Il numero di buoni mensa usabili per questo mese e': <strong>${numberOfMealTicke
 	<br>
 	Firma
 </p>
+
+
+
+
 </html>

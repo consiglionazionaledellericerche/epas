@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QPermission extends EntityPathBase<Permission> {
 
-    private static final long serialVersionUID = -1980985357;
+    private static final long serialVersionUID = -1980985357L;
 
     public static final QPermission permission = new QPermission("permission");
 
