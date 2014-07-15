@@ -79,10 +79,6 @@ when
      	"Persons.updateUsername",
      	"Persons.personChildrenList",
      	"Persons.saveChild",
-     	"Persons.updateContractStampProfile",
-     	"Persons.splitContractStampProfile",
-     	"Persons.changeTypeOfContractStampProfile",
-     	"Persons.deleteContractStampProfile",
      	
      	/*Assenze*/
      	"YearlyAbsences.showGeneralMonthlyAbsences",
@@ -273,10 +269,6 @@ when
      	"Persons.updateUsername",
      	"Persons.personChildrenList",
      	"Persons.saveChild",
-     	"Persons.updateContractStampProfile",
-     	"Persons.splitContractStampProfile",
-     	"Persons.changeTypeOfContractStampProfile",
-     	"Persons.deleteContractStampProfile",
      	"WorkingTimes.executeChangeWorkingTimeTypeToAll",
      	"MealTickets.submitPersonMealTicketInQuarter",
         "MealTickets.deletePersonMealTicketInQuarter"

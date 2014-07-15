@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QRole extends EntityPathBase<Role> {
 
-    private static final long serialVersionUID = 1339536794;
+    private static final long serialVersionUID = 1339536794L;
 
     public static final QRole role = new QRole("role");
 

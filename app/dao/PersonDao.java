@@ -54,7 +54,6 @@ public final class PersonDao {
 		 final JPQLQuery query = ModelQuery.queryFactory().from(qp)
 					.leftJoin(qp.contracts, qc).fetch()
 					.leftJoin(qc.contractWorkingTimeType).fetch()
-					.leftJoin(qc.contractStampProfile).fetch()
 					.leftJoin(qc.vacationPeriods).fetch()
 					.leftJoin(qp.personHourForOvertime).fetch()
 					.leftJoin(qp.reperibility).fetch()

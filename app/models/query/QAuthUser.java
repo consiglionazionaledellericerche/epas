@@ -17,7 +17,7 @@ import com.mysema.query.types.Path;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QAuthUser extends EntityPathBase<AuthUser> {
 
-    private static final long serialVersionUID = -254137161;
+    private static final long serialVersionUID = -254137161L;
 
     public static final QAuthUser authUser = new QAuthUser("authUser");
 

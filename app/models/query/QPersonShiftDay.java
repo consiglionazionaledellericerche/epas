@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QPersonShiftDay extends EntityPathBase<PersonShiftDay> {
 
-    private static final long serialVersionUID = -1230493101;
+    private static final long serialVersionUID = -1230493101L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
@@ -39,7 +39,7 @@ public class QPersonShiftDay extends EntityPathBase<PersonShiftDay> {
 
     public final QPersonShift personShift;
 
-    public final QShiftTimeTable shiftTimeTable;
+    public final EnumPath<models.enumerate.ShiftSlot> shiftSlot = createEnum("shiftSlot", models.enumerate.ShiftSlot.class);
 
     public final QShiftType shiftType;
 
@@ -62,8 +62,7 @@ public class QPersonShiftDay extends EntityPathBase<PersonShiftDay> {
     public QPersonShiftDay(Class<? extends PersonShiftDay> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
         this.personShift = inits.isInitialized("personShift") ? new QPersonShift(forProperty("personShift"), inits.get("personShift")) : null;
-        this.shiftTimeTable = inits.isInitialized("shiftTimeTable") ? new QShiftTimeTable(forProperty("shiftTimeTable")) : null;
-        this.shiftType = inits.isInitialized("shiftType") ? new QShiftType(forProperty("shiftType")) : null;
+        this.shiftType = inits.isInitialized("shiftType") ? new QShiftType(forProperty("shiftType"), inits.get("shiftType")) : null;
     }
 
 }

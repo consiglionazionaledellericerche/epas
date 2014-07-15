@@ -1,21 +1,12 @@
 
-import it.cnr.iit.epas.DateInterval;
-import it.cnr.iit.epas.DateUtility;
-
 import java.util.List;
 
 import org.joda.time.LocalDate;
 
-import com.google.common.collect.Lists;
-
-import models.Contract;
-import models.ContractStampProfile;
 import models.Office;
 import models.Permission;
 import models.Person;
 import models.Role;
-import models.StampModificationType;
-import models.StampProfile;
 import models.TotalOvertime;
 import models.User;
 import models.UsersRolesOffices;
@@ -51,13 +42,8 @@ public class Bootstrap extends Job {
 		cleanOfficeTree();
 		
 		bootstrapPermissionsHandler();
-
-		createContractStampProfile2();
-
-		bootstrapTotalOvertimeHandler();
 		
-		insertDefaultStampModificationType();
-
+		bootstrapTotalOvertimeHandler();
 		
 		try
 		{
@@ -637,81 +623,4 @@ public class Bootstrap extends Job {
 		}
 		
 	}
-	
-	
-	private static void createContractStampProfile2() {
-		
-		if(ContractStampProfile.count() != 0){
-		
-			return;
-		}
-		
-		List<Contract> contractList = Contract.findAll();
-		for(Contract contract : contractList) {
-			
-			DateInterval contractInterval = contract.getContractDateInterval();
-
-			List<StampProfile> spInvolved = Lists.newArrayList();
-			
-			for(StampProfile sp : contract.person.stampProfiles) {
-				
-				DateInterval spInterval = new DateInterval(sp.startFrom, sp.endTo);
-				
-				//Calcolo l'intersezione fra stamp profile e contractInterval
-				DateInterval intersection = DateUtility.intervalIntersection(contractInterval, spInterval);
-				if(intersection != null) {
-					spInvolved.add(sp);
-				}
-			}
-			
-			StampProfile definitivo;
-			ContractStampProfile csp = new ContractStampProfile();
-			
-			csp.startFrom = contract.beginContract;
-			csp.endTo = contract.expireContract;
-			if(contract.endContract!=null)
-				csp.endTo = contract.endContract;
-			
-			csp.contract = contract;
-			
-			csp.fixedworkingtime = false;
-			
-			if(spInvolved.size()>0) {
-				definitivo = spInvolved.get(0);
-				csp.fixedworkingtime = definitivo.fixedWorkingTime;
-			}
-			
-			csp.save();
-			/*
-			System.out.println(" ContractId: "+ contract.id 
-					+ " ContractBegin: "+ contract.beginContract 
-					+ " Involved: "+spInvolved.size()
-					+ " Persona: "+contract.person.surname + " " + contract.person.name);
-			
-			*/
-		}
-		
-//		List<StampProfile> spList = StampProfile.findAll();
-//		for(StampProfile sp : spList) {
-//			
-//			sp.delete();
-//		}
-	}
-	
-	private static void insertDefaultStampModificationType() {
-		
-		//FIX d 
-		StampModificationType smt = StampModificationType.find("byCode", "d").first();
-		if(smt == null) {
-			
-			smt = new StampModificationType();
-			smt.code = "d";
-			smt.description = "Considerato presente se non ci sono codici di assenza (orario di lavoro autodichiarato)";
-			smt.save();
-		}
-		
-		
-	}
-	
-	
 }

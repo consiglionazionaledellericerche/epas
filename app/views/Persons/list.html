@@ -4,7 +4,7 @@
 
 #{set 'moreStyles'}
   <style>
-    td.personName { text-align: left !important; }
+  
   </style>
 #{/set}
 
@@ -22,8 +22,9 @@
 </p>
 
 <section id="results">
-<table class="table table-striped table-hover table-condensed center" id="listaPersone"><!-- Da aggiungere come entry nel file main.css dove dovrò sistemare le caratteristiche della tabella  -->
+<table class="table table-striped table-hover table-condensed" id="listaPersone"><!-- Da aggiungere come entry nel file main.css dove dovrò sistemare le caratteristiche della tabella  -->
 	<tr>
+		<th>Cognome</th>
 		<th>Nome</th>
 		<th>Matricola</th>
 		<th>Matricola Badge</th>
@@ -32,7 +33,7 @@
 		<th>Orario</th>
 		<th>Ferie</th>
 		<th>Livello</th>
-		<th>Timbratura<br>Default</th>
+		<th>Aut. timbratura via web</th>
 		<th>Dipartimento</th>
 		<th>Sede</th>
 		<th>Telefono</th>
@@ -48,7 +49,8 @@
 	<tr>
 	#{if person.currentContract != null }
 	
-		<td class="personName"><a href="@{edit(person.id)}"><font color="#0000FF">${person.surname} ${person.name}</font></a></td>
+		<td><a href="@{edit(person.id)}"><font color="#0000FF">${person.surname}</font></a></td>
+		<td><font color="#000000">${person.name}</font></td>
 		<td><font color="#000000">${person.number}</font></td>
 		<td><font color="#000000">${person.badgeNumber}</font></td>
 		<td><font color="#000000">${person.currentContract != null ? person.currentContract.beginContract : ''}</font></td>
@@ -71,11 +73,7 @@
 		</td>
 		
 		<td><font color="#000000">${person.getQualification() != null ? person.getQualification().qualification : ''}</font></td>
-		<td>
-		  #{if person.currentContract.getCurrentContractStampProfile().fixedworkingtime}
-		    <i class="fa fa-check-square-o"></i>
-		  #{/if}  
-		</td>
+		<td>${''}</td>
 		<td><font color="#000000">${person.department != null ? person.department : ''}</font></td>
 		<td><font color="#000000">${person.headOffice != null ? person.headOffice : '' }</font></td>
 		<td><font color="#000000">${person.telephone != null && !person.telephone.equals('No phone number') ? person.telephone : ''}</font></td>
@@ -89,7 +87,8 @@
 		#{/else}
 	#{/if}
 	#{else}
-		<td class="personName"><a href="@{edit(person.id)}"><font color="#808080">${person.surname} ${person.name}</font></a></td>
+		<td><a href="@{edit(person.id)}"><font color="#808080">${person.surname}</font></a></td>
+		<td><font color="#808080">${person.name}</font></td>
 		<td><font color="#808080">${person.number}</font></td>
 		<td><font color="#000000">${person.badgeNumber}</font></td>
 		<td><!-- begin contract --></td>

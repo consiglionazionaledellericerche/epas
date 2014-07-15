@@ -291,10 +291,6 @@ public class VacationsRecap {
 			
 		}
 		
-		//FIXME decidere se deve essere un parametro di configurazione
-		if(vacationDays>28)
-			vacationDays = 28;
-		
 		return vacationDays;
 
 	}

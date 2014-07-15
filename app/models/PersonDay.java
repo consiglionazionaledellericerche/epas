@@ -10,7 +10,6 @@ import it.cnr.iit.epas.PersonUtility;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -426,18 +425,13 @@ public class PersonDay extends BaseModel {
 			return this.isFixedTimeAtWorkk;
 		
 		this.isFixedTimeAtWorkk = false;
-		for(ContractStampProfile csp : this.person.getCurrentContract().contractStampProfile){
-			if(DateUtility.isDateIntoInterval(this.date, new DateInterval(csp.startFrom, csp.endTo))){
-				this.isFixedTimeAtWorkk = csp.fixedworkingtime;
+		for(StampProfile sp : this.person.stampProfiles)
+		{
+			if(DateUtility.isDateIntoInterval(this.date, new DateInterval(sp.startFrom,sp.endTo)))
+			{
+				this.isFixedTimeAtWorkk = sp.fixedWorkingTime;
 			}
 		}
-//		for(StampProfile sp : this.person.stampProfiles)
-//		{
-//			if(DateUtility.isDateIntoInterval(this.date, new DateInterval(sp.startFrom,sp.endTo)))
-//			{
-//				this.isFixedTimeAtWorkk = sp.fixedWorkingTime;
-//			}
-//		}
 		return this.isFixedTimeAtWorkk;
 	}
 	
@@ -1108,8 +1102,9 @@ public class PersonDay extends BaseModel {
 		private static int sequence_id = 1;
 		
 		int pairId;	//for hover template
-		Stamping in;
-		Stamping out;
+		public Stamping in;
+		public Stamping out;
+
 		int timeInPair = 0;
 
 		PairStamping(Stamping in, Stamping out)

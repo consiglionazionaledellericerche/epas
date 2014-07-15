@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QShiftCancelled extends EntityPathBase<ShiftCancelled> {
 
-    private static final long serialVersionUID = 306636563;
+    private static final long serialVersionUID = 306636563L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
@@ -57,7 +57,7 @@ public class QShiftCancelled extends EntityPathBase<ShiftCancelled> {
 
     public QShiftCancelled(Class<? extends ShiftCancelled> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.type = inits.isInitialized("type") ? new QShiftType(forProperty("type")) : null;
+        this.type = inits.isInitialized("type") ? new QShiftType(forProperty("type"), inits.get("type")) : null;
     }
 
 }
