@@ -594,9 +594,11 @@ public class Persons extends Controller {
 		contract.onCertificate = onCertificate;
 		contract.setVacationPeriods();
 		contract.updateContractWorkingTimeType();
-
+		contract.updateContractStampProfile();
+		
 		//Ricalcolo valori
-		contract.recomputeContract(null);
+		DateInterval contractDateInterval = contract.getContractDateInterval();
+		contract.recomputeContract(contractDateInterval.getBegin(), contractDateInterval.getEnd());
 
 		contract.save();
 
@@ -794,7 +796,7 @@ public class Persons extends Controller {
 		cwtt.save();
 
 		//Ricalcolo valori
-		cwtt.contract.recomputeContract(cwtt.beginDate);
+		cwtt.contract.recomputeContract(cwtt.beginDate, null);
 
 		flash.success("Cambiato correttamente tipo orario per il periodo a %s.", cwtt.workingTimeType.description);
 		Persons.edit(cwtt.contract.person.id);
@@ -1072,7 +1074,7 @@ public class Persons extends Controller {
 		
 		contract.save();
 		
-		contract.contract.recomputeContract(contract.startFrom);
+		contract.contract.recomputeContract(contract.startFrom, null);
 
 		flash.success("Cambiata correttamente tipologia di timbratura per il periodo a %s.", newtipo);
 		Persons.edit(contract.contract.person.id);
