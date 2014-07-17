@@ -1,42 +1,72 @@
-#{extends 'main_clock1.html' /}
+#{extends 'main3.html' /}
+#{set header:'clock' /}
+#{set title:'ePAS - electronic Personnel Attendance System' /}
 
-<h3 id="clock">Orologio per firma nel mese di <span class="capitalized">&{'views.tags.display.date.month.' + data.getMonthOfYear()}</span> dell'anno ${data.getYear()}</h3>
+#{set 'moreScripts'}
+	<script type = "text/javascript" >
+		function preventBack(){window.history.forward();}
+		setTimeout("preventBack()", 0);
+		window.onunload=function(){null};
+	</script>
+	<script>
+		function startTime()
+		{
+			var today=new Date();
+			var h=today.getHours();
+			var m=today.getMinutes();
+			var s=today.getSeconds();
+			// add a zero in front of numbers<10
+			m=checkTime(m);
+			s=checkTime(s);
+			document.getElementById('clockBase').innerHTML=h+":"+m+":"+s;
+			t=setTimeout(function(){startTime()},500);
+		}
+		
+		function checkTime(i)
+		{
+			if (i<10)
+				{
+					i="0" + i;
+				}
+			return i;
+		}
+	</script>
+#{/set}
 
-<form id="formClockLogin" action="/clocks/clocklogin" method="post" align="center">
+<div class="container center">
 
-<select id="formClockPerson" name="userId" size="1" id="login" width="500" style="width: 500px">
-	
-	<option value="0"></option>
-	%{
-	for(person in personList){
-	}%
-		<option value="${person.user.id}">${person.surname + ' ' + person.name}</option>
-	%{
-	}
-	}%	
-</select>
+<h3>Orologio per firma nel mese di &{'views.tags.display.date.month.' + data.getMonthOfYear()} dell'anno ${data.getYear()}</h3>
 <br>
-<br>
-<input id="formClockPassword" type="password" name="password" placeholder="Digita Password"/>
+<div class="col-sm-offset-2 col-sm-8">
+<form action="/clocks/clocklogin" method="post" class="form-horizontal" role="form">
 
-<br>
-<br>
-
-<input type="submit" class="btn btn-large btn-primary" name ="submit" value="Login" align="center"/>
+  <div class="form-group">
+    <label class="col-sm-2 control-label" for="forUsername">Nome</label>
+    <div class="col-sm-10">
+    <select name="userId" class="form-control" id="forUsername">
+	  <option value="0"></option>
+	  #{list items:personList, as:'person'}
+	   <option value="${person.user.id}">${person.surname + ' ' + person.name}</option>
+	  #{/list}
+      </select>
+    </div>
+  </div>
+  
+  <div class="form-group">
+    <label class="col-sm-2 control-label" for="forPassword">Password</label>
+    <div class="col-sm-10">
+      <input name="password" type="password" class="form-control" id="forPassword" placeholder="Password">
+    </div>
+  </div>
+  <div >
+    <input type="submit" class="btn btn-large btn-primary" name ="submit" value="Login" align="center"/>
+  </div>
 </form>
-<br>
-<br>
-<div id="clockBase" style></div>
+</div>
 
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
+</div>
+
+<div class="container center">
+  <div id="clockBase"></div>
+</div>
+
