@@ -879,7 +879,7 @@ public class Persons extends Controller {
 		personChildren.save();
 		person.save();
 		flash.success("Aggiunto %s %s nell'anagrafica dei figli di %s %s", personChildren.name, personChildren.surname, person.name, person.surname);
-		Application.indexAdmin();
+		Persons.insertChild(person.id);
 	}
 
 	public static void personChildrenList(Long personId){
