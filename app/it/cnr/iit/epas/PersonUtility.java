@@ -1055,7 +1055,7 @@ public class PersonUtility {
 				continue;
 			}
 			
-			if(contract.getContractStampProfile(pdt.personDay.date).fixedworkingtime == false) {
+			if(contract.getContractStampProfile(pdt.personDay.date).fixedworkingtime == true) {
 				continue;
 			}
 			
