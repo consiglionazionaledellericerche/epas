@@ -36,6 +36,7 @@ import org.joda.time.DateTimeFieldType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
+import play.Logger;
 import play.data.validation.Required;
 import play.db.jpa.JPA;
 
@@ -426,18 +427,17 @@ public class PersonDay extends BaseModel {
 			return this.isFixedTimeAtWorkk;
 		
 		this.isFixedTimeAtWorkk = false;
-		for(ContractStampProfile csp : this.person.getCurrentContract().contractStampProfile){
+		
+		Contract contract = this.person.getContract(this.date);
+		if(contract == null)
+			return false;
+		
+		for(ContractStampProfile csp : contract.contractStampProfile){
 			if(DateUtility.isDateIntoInterval(this.date, new DateInterval(csp.startFrom, csp.endTo))){
 				this.isFixedTimeAtWorkk = csp.fixedworkingtime;
 			}
 		}
-//		for(StampProfile sp : this.person.stampProfiles)
-//		{
-//			if(DateUtility.isDateIntoInterval(this.date, new DateInterval(sp.startFrom,sp.endTo)))
-//			{
-//				this.isFixedTimeAtWorkk = sp.fixedWorkingTime;
-//			}
-//		}
+
 		return this.isFixedTimeAtWorkk;
 	}
 	
@@ -592,7 +592,7 @@ public class PersonDay extends BaseModel {
 	 */
 	public void populatePersonDay()
 	{
-			
+	
 		//if(this.person.id == 45) Logger.info("  *PopulatePersonDay date=%s", this.date);
 		//controllo problemi strutturali del person day
 		if(this.date.isBefore(new LocalDate())){
@@ -650,6 +650,18 @@ public class PersonDay extends BaseModel {
 		//if(this.person.id == 45) Logger.info("  *  Ticket                        %s", this.isTicketAvailable);
 		
 		//this.merge();
+		
+		//Nel caso in cui il personDay sia precedente a sourceContract imposto i valori a 0
+		if(this.personDayContract != null 
+				&& this.personDayContract.sourceDate != null 
+				&& this.date.isBefore(this.personDayContract.sourceDate)) {
+			this.timeAtWork = 0;
+			this.progressive = 0;
+			this.difference = 0;
+			this.setIsTickeAvailable(false); //TODO calcolarlo se ci sono timbrature
+			this.stampModificationType = null;
+		}
+		
 		this.save();
 		
 		//if(this.person.id == 45) Logger.info("  **********************************************************************");
