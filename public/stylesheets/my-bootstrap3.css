@@ -177,14 +177,6 @@ ul.pagination {
 	text-align: center;
 }
 
-/*
-.modal-dialog-center {
-    margin-top: 15%;
-}
-*/
-
-
-
 .table-form, .table-form td {
 	border: none !important;
 }
@@ -228,6 +220,13 @@ ul.pagination {
 
 div.datepicker {
     z-index: 9999 !important;
+}
+
+#clockBase{
+	text-align: center;
+	font-size:180px;
+	font-weight:bold;
+	text-shadow: 5px 5px 5px black;
 }
 
 
