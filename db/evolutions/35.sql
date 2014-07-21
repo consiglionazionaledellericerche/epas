@@ -1,3 +1,5 @@
+# ---!Ups
+
 ALTER TABLE shift_time_table DROP COLUMN startshift;
 ALTER TABLE shift_time_table DROP COLUMN endshift;
 ALTER TABLE shift_time_table DROP COLUMN description;
