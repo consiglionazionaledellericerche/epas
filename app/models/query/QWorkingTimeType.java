@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QWorkingTimeType extends EntityPathBase<WorkingTimeType> {
 
-    private static final long serialVersionUID = 772072020L;
+    private static final long serialVersionUID = 772072020;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
