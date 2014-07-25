@@ -1,12 +1,21 @@
 
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
+
 import java.util.List;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.collect.Lists;
+
+import models.Contract;
+import models.ContractStampProfile;
 import models.Office;
 import models.Permission;
 import models.Person;
 import models.Role;
+import models.StampModificationType;
+import models.StampProfile;
 import models.TotalOvertime;
 import models.User;
 import models.UsersRolesOffices;
@@ -42,8 +51,13 @@ public class Bootstrap extends Job {
 		cleanOfficeTree();
 		
 		bootstrapPermissionsHandler();
-		
+
+		createContractStampProfile2();
+
 		bootstrapTotalOvertimeHandler();
+		
+		insertDefaultStampModificationType();
+
 		
 		try
 		{
@@ -489,6 +503,53 @@ public class Bootstrap extends Job {
 	
 	private static void cleanOfficeTree() {
 		
+		/* EVOLUZIONE IRPI */
+		
+		Office irpi = Office.find("byCode", 3000).first();	//WARNING è un codice forse non univoco!!!
+		if(irpi != null) {
+			
+			// Primo livello AREA
+			Office areaTorino = Office.find("byName", "Area CNR Torino").first();
+			if(areaTorino == null) {
+				
+				areaTorino = new Office();
+				areaTorino.name = "Area CNR Torino";
+				areaTorino.code = null;
+				areaTorino.address = null;
+				areaTorino.contraction = null;
+				areaTorino.joiningDate = null;
+				areaTorino.confGeneral = null;
+				areaTorino.save();
+				
+			}
+			
+			//Secondo livello ISTITUTO
+			if(areaTorino.subOffices.size() == 0) {
+				
+				Office istitutoIrpi = new Office();
+				istitutoIrpi.name = "Istituto IRPI";
+				istitutoIrpi.address = null;
+				istitutoIrpi.code = null;
+				istitutoIrpi.contraction = "IRPI";
+				istitutoIrpi.joiningDate = null;
+				istitutoIrpi.office = areaTorino;
+				istitutoIrpi.confGeneral = null;
+				istitutoIrpi.save();
+			}
+			
+			//Terzo livello SEDE
+			Office istitutoIrpi = Office.find("byName", "Istituto IRPI").first();
+			if(istitutoIrpi.subOffices.size()  == 0) {
+
+				Office irpiTorino = Office.find("byCode", 3000).first();
+				irpiTorino.office = istitutoIrpi;
+				irpiTorino.name = "IRPI - Torino";
+				irpiTorino.save();
+			}
+			
+			
+		}
+		
 		/* EVOLUZIONE IVV */
 		
 		Office ivv = Office.find("byCode", 1000).first();	//WARNING è un codice forse non univoco!!!
@@ -539,7 +600,9 @@ public class Bootstrap extends Job {
 			
 		}
 		
-		/* EVOLUTIONE PISA */
+		
+		
+		/* EVOLUZIONE PISA */
 		Office iitPisa = Office.find("byCode", 223400).first();
 		if(iitPisa != null) 
 		{
@@ -587,10 +650,69 @@ public class Bootstrap extends Job {
 				iitCos.save();
 			}
 		}
+		
+		/* EVOLUZIONE ISE */
+		
+		Office ise = Office.find("byCode", 2000).first();	//WARNING è un codice forse non univoco!!!
+		if(ise != null) {
+			
+			//Primo livello AREA
+			Office areaPisa = Office.find("byName", "Area CNR Pisa").first();
+			if(areaPisa == null) {
+				
+				areaPisa = new Office();
+				areaPisa.name = "Area CNR Pisa";
+				areaPisa.code = null;
+				areaPisa.address = null;
+				areaPisa.contraction = null;
+				areaPisa.joiningDate = null;
+				areaPisa.confGeneral = null;
+				areaPisa.save();
+				
+			}
+			
+			//Secondo livello ISTITUTO
+			if(areaPisa.subOffices.size() == 0) {
+				
+				Office istitutoIse = new Office();
+				istitutoIse.name = "Istituto ISE";
+				istitutoIse.address = null;
+				istitutoIse.code = null;
+				istitutoIse.contraction = "ISE";
+				istitutoIse.joiningDate = null;
+				istitutoIse.office = areaPisa;
+				istitutoIse.confGeneral = null;
+				istitutoIse.save();
+			}
+			
+			//Terzo livello SEDE
+			Office istitutoIse = Office.find("byName", "Istituto ISE").first();
+			if(istitutoIse.subOffices.size()  == 0) {
+				Office isePisa = Office.find("byCode", 2000).first();
+				isePisa.office = istitutoIse;
+				isePisa.name = "ISE - Pisa";
+				isePisa.save();
+			}
+		}
 
 	}
 	
 	private static void bootstrapTotalOvertimeHandler() {
+		
+		/* EVOLUZIONE IRPI */
+		Office irpi = Office.find("byCode", 3000).first();	//WARNING è un codice forse non univoco!!!
+		if(irpi != null) {
+			
+			//Associare tutti gli oggetti TotalOvertime a ivv
+			List<TotalOvertime> totalOvertimes = TotalOvertime.findAll();
+			for(TotalOvertime totalOvertime : totalOvertimes) {
+				if(totalOvertime.office == null) {
+					totalOvertime.office = irpi;
+					totalOvertime.save();
+				}
+			}
+			
+		}
 		
 		/* EVOLUZIONE IVV */
 		Office ivv = Office.find("byCode", 1000).first();	//WARNING è un codice forse non univoco!!!
@@ -601,6 +723,21 @@ public class Bootstrap extends Job {
 			for(TotalOvertime totalOvertime : totalOvertimes) {
 				if(totalOvertime.office == null) {
 					totalOvertime.office = ivv;
+					totalOvertime.save();
+				}
+			}
+			
+		}
+		
+		/* EVOLUZIONE ISE */
+		Office ise = Office.find("byCode", 2000).first();	//WARNING è un codice forse non univoco!!!
+		if(ise != null) {
+			
+			//Associare tutti gli oggetti TotalOvertime a ivv
+			List<TotalOvertime> totalOvertimes = TotalOvertime.findAll();
+			for(TotalOvertime totalOvertime : totalOvertimes) {
+				if(totalOvertime.office == null) {
+					totalOvertime.office = ise;
 					totalOvertime.save();
 				}
 			}
@@ -623,4 +760,81 @@ public class Bootstrap extends Job {
 		}
 		
 	}
+	
+	
+	private static void createContractStampProfile2() {
+		
+		if(ContractStampProfile.count() != 0){
+		
+			return;
+		}
+		
+		List<Contract> contractList = Contract.findAll();
+		for(Contract contract : contractList) {
+			
+			DateInterval contractInterval = contract.getContractDateInterval();
+
+			List<StampProfile> spInvolved = Lists.newArrayList();
+			
+			for(StampProfile sp : contract.person.stampProfiles) {
+				
+				DateInterval spInterval = new DateInterval(sp.startFrom, sp.endTo);
+				
+				//Calcolo l'intersezione fra stamp profile e contractInterval
+				DateInterval intersection = DateUtility.intervalIntersection(contractInterval, spInterval);
+				if(intersection != null) {
+					spInvolved.add(sp);
+				}
+			}
+			
+			StampProfile definitivo;
+			ContractStampProfile csp = new ContractStampProfile();
+			
+			csp.startFrom = contract.beginContract;
+			csp.endTo = contract.expireContract;
+			if(contract.endContract!=null)
+				csp.endTo = contract.endContract;
+			
+			csp.contract = contract;
+			
+			csp.fixedworkingtime = false;
+			
+			if(spInvolved.size()>0) {
+				definitivo = spInvolved.get(0);
+				csp.fixedworkingtime = definitivo.fixedWorkingTime;
+			}
+			
+			csp.save();
+			/*
+			System.out.println(" ContractId: "+ contract.id 
+					+ " ContractBegin: "+ contract.beginContract 
+					+ " Involved: "+spInvolved.size()
+					+ " Persona: "+contract.person.surname + " " + contract.person.name);
+			
+			*/
+		}
+		
+//		List<StampProfile> spList = StampProfile.findAll();
+//		for(StampProfile sp : spList) {
+//			
+//			sp.delete();
+//		}
+	}
+	
+	private static void insertDefaultStampModificationType() {
+		
+		//FIX d 
+		StampModificationType smt = StampModificationType.find("byCode", "d").first();
+		if(smt == null) {
+			
+			smt = new StampModificationType();
+			smt.code = "d";
+			smt.description = "Considerato presente se non ci sono codici di assenza (orario di lavoro autodichiarato)";
+			smt.save();
+		}
+		
+		
+	}
+	
+	
 }
