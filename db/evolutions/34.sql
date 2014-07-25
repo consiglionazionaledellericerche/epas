@@ -11,3 +11,6 @@ contract_id bigint NOT NULL REFERENCES contracts (id)
 # ---!Downs
 
 DROP TABLE contract_stamp_profiles;
+
+
+

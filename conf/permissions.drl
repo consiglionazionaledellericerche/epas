@@ -79,6 +79,10 @@ when
      	"Persons.updateUsername",
      	"Persons.personChildrenList",
      	"Persons.saveChild",
+     	"Persons.updateContractStampProfile",
+     	"Persons.splitContractStampProfile",
+     	"Persons.changeTypeOfContractStampProfile",
+     	"Persons.deleteContractStampProfile",
      	
      	/*Assenze*/
      	"YearlyAbsences.showGeneralMonthlyAbsences",
@@ -91,6 +95,7 @@ when
      	"Absences.editCode",
      	"Absences.insertAbsenceCode",
      	"Absences.saveAbsenceCode",
+     	"Absences.downloadAttachment",
      	
      	/*Competenze*/
      	"Competences.showCompetences",
@@ -154,6 +159,10 @@ when
         "UploadSituation.uploadSituation",
         "UploadSituation.loginAttestati",
         "UploadSituation.processAttestati",
+        "UploadSituation.processSinglePerson",
+        "UploadSituation.processAllPersons",
+        "UploadSituation.showProblems",
+        "UploadSituation.showCertificatedData",
         
         /*Gestione buoni pasto*/
         "MealTickets.manageMealTickets",
@@ -269,6 +278,10 @@ when
      	"Persons.updateUsername",
      	"Persons.personChildrenList",
      	"Persons.saveChild",
+     	"Persons.updateContractStampProfile",
+     	"Persons.splitContractStampProfile",
+     	"Persons.changeTypeOfContractStampProfile",
+     	"Persons.deleteContractStampProfile",
      	"WorkingTimes.executeChangeWorkingTimeTypeToAll",
      	"MealTickets.submitPersonMealTicketInQuarter",
         "MealTickets.deletePersonMealTicketInQuarter"
@@ -311,6 +324,7 @@ when
         /* inserire le action interessate */
         "YearlyAbsences.showPersonMonthlyAbsences",
         "Absences.manageAttachmentsPerPerson",
+        "Absences.downloadAttachment",
         "Absences.absenceInPeriod",
         "VacationsAdmin.vacationsLastYear",
         "VacationsAdmin.vacationsCurrentYear",
@@ -425,7 +439,11 @@ when
         "UploadSituation.show",
         "UploadSituation.uploadSituation",
         "UploadSituation.loginAttestati",
-        "UploadSituation.processAttestati"
+        "UploadSituation.processAttestati",
+        "UploadSituation.processSinglePerson",
+        "UploadSituation.processAllPersons",
+        "UploadSituation.showProblems",
+        "UploadSituation.showCertificatedData"        
        ), target == $o, granted == false)
 then
  $c.grant();
