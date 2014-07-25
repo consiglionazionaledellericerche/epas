@@ -40,9 +40,9 @@
 	<script src="@{'/public/js/libs/modernizr-2.0.6.min.js'}"></script>
     
   </head>
-
-  <body>
   
+  <body #{if header.equals('clock') } onload="startTime()" #{/if} >	
+	  
    <div id="wrapper">
 
     #{if header.equals('navbar') }
@@ -274,6 +274,8 @@
       <img class="img-responsive pull-right hidden-xs" src="/public/images/logo.jpg" alt="alt">
     </div>
 	#{/if}
+	
+
 	
     <!-- Begin page content -->
     <div class="container-fluid" id="page_content">
