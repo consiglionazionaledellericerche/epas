@@ -98,11 +98,18 @@ public class Contract extends BaseModel {
 	@Column(name="end_contract")
 	public LocalDate endContract;
 	
-	
+		
 	@NotAudited
 	@OneToMany(mappedBy = "contract", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	@OrderBy("beginDate")
 	public Set<ContractWorkingTimeType> contractWorkingTimeType = Sets.newHashSet();
+	
+	
+	@NotAudited
+	@OneToMany(mappedBy="contract")
+	@OrderBy("startFrom")
+	public Set<ContractStampProfile> contractStampProfile = Sets.newHashSet();
+	
 
 	@Transient
 	private List<ContractWorkingTimeType> contractWorkingTimeTypeAsList;
@@ -151,6 +158,33 @@ public class Contract extends BaseModel {
 		
 		return Lists.newArrayList(this.contractWorkingTimeType);
 	}
+	
+	
+	@Transient
+	public List<ContractStampProfile> getContractStampProfileAsList() {
+		
+		return Lists.newArrayList(this.contractStampProfile);
+	}
+	
+	@Transient
+	public ContractStampProfile getContractStampProfile(LocalDate date) {
+		
+		for(ContractStampProfile csp : this.contractStampProfile) {
+			DateInterval interval = new DateInterval(csp.startFrom, csp.endTo);
+			if(DateUtility.isDateIntoInterval(date, interval))
+				return csp;
+			
+		}
+		return null;
+	}
+	
+	@Transient
+	public ContractStampProfile getCurrentContractStampProfile() {
+		
+		return getContractStampProfile(LocalDate.now());
+	}
+	
+	
 	
 	/**
 	 * @param contract
@@ -320,6 +354,50 @@ public class Contract extends BaseModel {
 		last.save();
 		this.save();
 	}
+	
+	/**
+	 * Quando vengono modificate le date di inizio o fine del contratto occorre rivedere la struttura dei periodi di stampProfile.
+	 * 1)Eliminare i periodi non più appartenenti al contratto
+	 * 2)Modificare la data di inizio del primo periodo se è cambiata la data di inizio del contratto
+	 * 3)Modificare la data di fine dell'ultimo periodo se è cambiata la data di fine del contratto
+	 * 
+	 */
+	public void updateContractStampProfile()
+	{
+		//Aggiornare i periodi stampProfile
+		//1) Cancello quelli che non appartengono più a contract
+		List<ContractStampProfile> toDelete = new ArrayList<ContractStampProfile>();
+		for(ContractStampProfile csp : this.contractStampProfile)
+		{
+			DateInterval cspInterval = new DateInterval(csp.startFrom, csp.endTo);
+			if(DateUtility.intervalIntersection(this.getContractDateInterval(), cspInterval) == null)
+			{
+				toDelete.add(csp);
+			}
+		}
+		for(ContractStampProfile csp : toDelete)
+		{
+			csp.delete();
+			this.contractWorkingTimeType.remove(csp);
+			this.save();
+		}
+		
+		//Conversione a List per avere il metodo get()
+		List<ContractStampProfile> cspList = Lists.newArrayList(contractStampProfile);
+						
+		//Sistemo il primo		
+		ContractStampProfile first = cspList.get(0);
+		first.startFrom = this.getContractDateInterval().getBegin();
+		first.save();
+		//Sistemo l'ultimo
+		ContractStampProfile last = 
+				cspList.get(this.contractStampProfile.size()-1);
+		last.endTo = this.getContractDateInterval().getEnd();
+		if(DateUtility.isInfinity(last.endTo))
+			last.endTo = null;
+		last.save();
+		this.save();
+	}
 
 	/**
 	 * Utilizza la libreria DateUtils per costruire l'intervallo attivo per il contratto.
@@ -465,8 +543,8 @@ public class Contract extends BaseModel {
 	 */
 	public int populateContractYearFromSource()
 	{
-		LocalDate lastDayInYear = new LocalDate(this.sourceDate.getYear(), 12, 31);
 		//Caso semplice source riepilogo dell'anno
+		LocalDate lastDayInYear = new LocalDate(this.sourceDate.getYear(), 12, 31);
 		if(lastDayInYear.isEqual(this.sourceDate))
 		{
 			int yearToCompute = this.sourceDate.getYear();
@@ -485,6 +563,11 @@ public class Contract extends BaseModel {
 			return yearToCompute+1;
 		}
 
+		//Nel caso in cui non sia l'ultimo giorno dell'anno e source cade nell'anno attuale 
+		//non devo calcolare alcun riepilogo
+		if(this.sourceDate != null && this.sourceDate.getYear() == LocalDate.now().getYear())
+			return LocalDate.now().getYear();
+		
 		//Caso complesso, TODO vedere (dopo che ci sono i test) se creando il VacationRecap si ottengono le stesse informazioni
 		AbsenceType ab31 = AbsenceType.getAbsenceTypeByCode("31");
 		AbsenceType ab32 = AbsenceType.getAbsenceTypeByCode("32");
@@ -510,6 +593,7 @@ public class Contract extends BaseModel {
 		this.recapPeriods.add(cyr);
 		this.save();
 		return this.sourceDate.getYear()+1;
+		
 	}
 	
 	
@@ -557,16 +641,19 @@ public class Contract extends BaseModel {
 	 */
 	
 	/**
-	 * Fix definitivo da dateFrom a oggi per l'intero contratto. (ricalca il flusso di fixPersonSituation).
+	 * Fix definitivo da dateFrom a dateTo per l'intero contratto. (ricalca il flusso di fixPersonSituation).
 	 *  
 	 * 1) CheckHistoryError 
 	 * 2) Ricalcolo tempi lavoro
 	 * 3) Ricalcolo riepiloghi annuali 
 	 * @param dateFrom giorno a partire dal quale effettuare il ricalcolo. Se null ricalcola dall'inizio del contratto.
+	 * @param dateTo ultimo giorno coinvolto nel ricalcolo. Se null ricalcola fino alla fine del contratto (utile nel caso in cui 
+	 * si modifica la data fine che potrebbe non essere persistita)
 	 */
-	public void recomputeContract(LocalDate dateFrom) {
+	public void recomputeContract(LocalDate dateFrom, LocalDate dateTo) {
 		
 		// (0) Definisco l'intervallo su cui operare
+		// Decido la data inizio
 		String dateInitUse = ConfGeneral.getFieldValue("init_use_program", person.office);
 		LocalDate initUse = new LocalDate(dateInitUse);
 		LocalDate date = this.beginContract;
@@ -576,7 +663,11 @@ public class Contract extends BaseModel {
 		if( dateFrom != null && contractInterval.getBegin().isBefore(dateFrom)) {
 			contractInterval = new DateInterval(dateFrom, contractInterval.getEnd());
 		}
-
+		// Decido la data di fine
+		if(dateTo != null && dateTo.isBefore(contractInterval.getEnd())) {
+			contractInterval = new DateInterval(contractInterval.getBegin(), dateTo);
+		}
+		
 		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
 		Logger.info("CheckPersonDay");
 		LocalDate today = new LocalDate();
