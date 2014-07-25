@@ -636,6 +636,41 @@ public class Absences extends Controller{
 		Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
 	}
 
+	/**
+	 * Gestisce l'inserimento esplicito del codice 31
+	 * @param person
+	 * @param dateFrom
+	 * @param dateTo
+	 * @param absenceType
+	 * @param file
+	 */
+	private static void handler31(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, Blob file) {
+		
+	}
+	
+	/**
+	 * Gestisce l'inserimento esplicito del codice 32
+	 * @param person
+	 * @param dateFrom
+	 * @param dateTo
+	 * @param absenceType
+	 * @param file
+	 */
+	private static void handler32(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, Blob file) {
+		
+	}
+	
+	/**
+	 * Gestisce l'inserimento esplicito del codice 94
+	 * @param person
+	 * @param dateFrom
+	 * @param dateTo
+	 * @param absenceType
+	 * @param file
+	 */
+	private static void handler94(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, Blob file) {
+		
+	}
 	
 	/**
 	 * Gestisce l'inserimento dei codici FER, 94-31-32 nell'ordine. Fino ad esaurimento.

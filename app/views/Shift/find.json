@@ -9,8 +9,9 @@
   			"start" : "${shiftPeriod.start}",
   			"end" : "${shiftPeriod.end}",
   			"cancelled": "${shiftPeriod.cancelled}",
-  			"ttStart": "${shiftPeriod.shiftTimeTable.getStartShift()}",
-  			"ttEnd": "${shiftPeriod.shiftTimeTable.getEndShift()}"
+  			"shiftSlot": "${shiftPeriod.shiftSlot.getName()}",
+  			"ttStart": "${shiftPeriod.startSlot}",
+  			"ttEnd": "${shiftPeriod.endSlot}"
   			}${shiftPeriod_isLast ? '' : ','}
   	%{
   		} else {
