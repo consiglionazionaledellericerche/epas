@@ -18,7 +18,7 @@ import com.mysema.query.types.path.PathInits;
 @Generated("com.mysema.query.codegen.EntitySerializer")
 public class QShiftTimeTable extends EntityPathBase<ShiftTimeTable> {
 
-    private static final long serialVersionUID = -144019773L;
+    private static final long serialVersionUID = -144019773;
 
     public static final QShiftTimeTable shiftTimeTable = new QShiftTimeTable("shiftTimeTable");
 
