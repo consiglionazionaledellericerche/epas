@@ -1120,8 +1120,9 @@ public class PersonDay extends BaseModel {
 		private static int sequence_id = 1;
 		
 		int pairId;	//for hover template
-		Stamping in;
-		Stamping out;
+		public Stamping in;
+		public Stamping out;
+
 		int timeInPair = 0;
 
 		PairStamping(Stamping in, Stamping out)
