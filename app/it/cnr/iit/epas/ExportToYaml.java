@@ -2,6 +2,7 @@ package it.cnr.iit.epas;
 
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Set;
 
 import models.Absence;
 import models.AbsenceType;
@@ -13,7 +14,7 @@ import models.Person;
 import models.PersonDay;
 import models.PersonMonthRecap;
 import models.Qualification;
-import models.StampProfile;
+
 import models.Stamping;
 import models.VacationCode;
 
@@ -394,6 +395,8 @@ public class ExportToYaml {
 	private static String appendStampProfiles(Person person)
 	{
 		String out = "";
+		
+		/*
 		for(StampProfile sp : person.stampProfiles)
 		{
 			out = out + getFormattedHeader("StampProfile", "sp"+sp.id);
@@ -404,6 +407,7 @@ public class ExportToYaml {
 				out = out + getFormattedProperty("endTo", "'" + sp.endTo + "'");
 			out = out + getFormattedProperty("fixedWorkingTime", sp.fixedWorkingTime+"");
 		}
+		*/
 		return out;
 	}
 	
@@ -469,7 +473,7 @@ public class ExportToYaml {
 				out = out + getFormattedProperty("month", comp.month+"");
 				out = out + getFormattedProperty("reason", comp.reason);
 				out = out + getFormattedProperty("valueApproved", comp.valueApproved+"");
-				out = out + getFormattedProperty("valueRequested", comp.valueRequested+"");
+				out = out + getFormattedProperty("valueRequest", comp.valueRequest+"");
 				out = out + getFormattedProperty("year", comp.year+"");
 			}
 		}

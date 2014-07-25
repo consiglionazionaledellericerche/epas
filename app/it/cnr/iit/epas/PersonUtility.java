@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.Query;
 
@@ -18,7 +19,6 @@ import models.PersonChildren;
 import models.PersonDay;
 import models.PersonDayInTrouble;
 import models.PersonMonthRecap;
-import models.StampProfile;
 import models.Stamping;
 import models.User;
 import models.enumerate.AccumulationBehaviour;
@@ -261,11 +261,13 @@ public class PersonUtility {
 		if(vr.vacationDaysLastYearNotYetUsed>0)
 			return AbsenceType.find("byCode", "31").first();
 
+		if(vr.persmissionNotYetUsed>0)
+			return AbsenceType.find("byCode", "94").first();
+		
 		if(vr.vacationDaysCurrentYearNotYetUsed>0)
 			return AbsenceType.find("byCode", "32").first();
 
-		if(vr.persmissionNotYetUsed>0)
-			return AbsenceType.find("byCode", "94").first();	
+			
 
 		return null;
 	}
@@ -1043,43 +1045,47 @@ public class PersonUtility {
 
 		List<LocalDate> dateTroubleStampingList = new ArrayList<LocalDate>();
 
-		for(PersonDayInTrouble pd : pdList){
+		for(PersonDayInTrouble pdt : pdList){
 			
-			if(pd.cause.contains(cause) && !pd.personDay.isHoliday() && pd.fixed == false)
-				dateTroubleStampingList.add(pd.personDay.date);
-		}
-		
-
-		for(StampProfile sp : p.stampProfiles) {
+			Contract contract = p.getContract(pdt.personDay.date);
+			if(contract == null) {
+				
+				Logger.error("Individuato PersonDayInTrouble al di fuori del contratto. Person: %s %s - Data: %s",
+						p.surname, p.name, pdt.personDay.date);
+				continue;
+			}
 			
-			//FIXME questo è sbagliato: fixedWorkingTime va testato per ogni giorno non solo nel giorno begin.
-						
-			if( DateUtility.isDateIntoInterval(begin, new DateInterval(sp.startFrom,sp.endTo))){
-				if(sp.fixedWorkingTime == false){
-										
-					boolean flag;
-					try {
-						
-						flag = sendEmailToPerson(dateTroubleStampingList, p, cause);
-						
-					} catch (EmailException e) {
-						
-						Logger.debug("sendEmailToPerson(dateTroubleStampingList, p, cause): fallito invio email per %s %s", p.name, p.surname); 
-						e.printStackTrace();
-						return;
-					}
-					
-					//se ho inviato mail devo andare a settare 'true' i campi emailSent dei personDayInTrouble relativi 
-					if(flag){
-						for(PersonDayInTrouble pd : pdList){
-							pd.emailSent = true;
-							pd.save();
-						}
-					}
-
-				}
+			if(contract.getContractStampProfile(pdt.personDay.date).fixedworkingtime == true) {
+				continue;
+			}
+			
+			if(pdt.cause.contains(cause) && !pdt.personDay.isHoliday() && pdt.fixed == false) { 
+				dateTroubleStampingList.add(pdt.personDay.date);
 			}
 		}
+
+
+
+		boolean flag;
+		try {
+
+			flag = sendEmailToPerson(dateTroubleStampingList, p, cause);
+
+		} catch (Exception e) {
+
+			Logger.debug("sendEmailToPerson(dateTroubleStampingList, p, cause): fallito invio email per %s %s", p.name, p.surname); 
+			e.printStackTrace();
+			return;
+		}
+
+		//se ho inviato mail devo andare a settare 'true' i campi emailSent dei personDayInTrouble relativi 
+		if(flag){
+			for(PersonDayInTrouble pd : pdList){
+				pd.emailSent = true;
+				pd.save();
+			}
+		}
+
 
 	}
 
@@ -1252,13 +1258,8 @@ public class PersonUtility {
 		}
 
 		simpleEmail.setMsg(message);
-		try{
-			Mail.send(simpleEmail);
-		}catch(Exception e){
-			e.printStackTrace();
-			Logger.error("Errore in fase di invio mail a %s %s", person.name, person.surname);
-		}
-
+		
+		Mail.send(simpleEmail);
 
 		Logger.info("Inviata mail a %s %s contenente le date da controllare : %s", person.name, person.surname, date);
 		return true;
