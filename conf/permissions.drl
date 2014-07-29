@@ -83,6 +83,8 @@ when
      	"Persons.splitContractStampProfile",
      	"Persons.changeTypeOfContractStampProfile",
      	"Persons.deleteContractStampProfile",
+     	"Persons.modifySendEmail",
+     	"Persons.updateSendEmail",
      	
      	/*Assenze*/
      	"YearlyAbsences.showGeneralMonthlyAbsences",
@@ -282,6 +284,8 @@ when
      	"Persons.splitContractStampProfile",
      	"Persons.changeTypeOfContractStampProfile",
      	"Persons.deleteContractStampProfile",
+     	"Persons.modifySendEmail",
+     	"Persons.updateSendEmail",
      	"WorkingTimes.executeChangeWorkingTimeTypeToAll",
      	"MealTickets.submitPersonMealTicketInQuarter",
         "MealTickets.deletePersonMealTicketInQuarter"
