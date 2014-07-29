@@ -1014,7 +1014,10 @@ public class PersonUtility {
 				for(Person p : personList){
 					
 					Logger.debug("Chiamato controllo sul giorni %s %s", begin, end);
-					checkPersonDayForSendingEmail(p, begin, end, "timbratura");
+					if(p.wantEmail)
+						checkPersonDayForSendingEmail(p, begin, end, "timbratura");
+					else
+						Logger.info("Non verrà inviata la mail a %s %s in quanto il campo di invio mail è false", p.name, p.surname);
 
 				}
 				JPAPlugin.closeTx(false);
@@ -1123,7 +1126,10 @@ public class PersonUtility {
 		}
 		for(Person p : personList){
 			Logger.debug("Chiamato controllo sul giorni %s %s", begin, end);
-			checkPersonDayForSendingEmail(p, begin, end, "no assenze");
+			if(p.wantEmail)
+				checkPersonDayForSendingEmail(p, begin, end, "no assenze");
+			else
+				Logger.info("Non verrà inviata la mail a %s %s in quanto il campo di invio mail è false", p.name, p.surname);
 
 		}
 	}
