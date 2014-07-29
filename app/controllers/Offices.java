@@ -164,6 +164,7 @@ public class Offices extends Controller {
 		
 		//ConfYear
 		ConfYear.buildDefaultConfYear(office, LocalDate.now().getYear());
+		ConfYear.buildDefaultConfYear(office, LocalDate.now().getYear() - 1);
 		
 		
 		office.setPermissionAfterCreation();

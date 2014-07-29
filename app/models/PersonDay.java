@@ -125,21 +125,17 @@ public class PersonDay extends BaseModel {
 		this(person, date, 0, 0, 0);
 	}
 	
-	//setter implementato per yaml parser TODO toglierlo configurando snakeyaml
-	public void setDate(String date){
-		this.date = new LocalDate(date);
-	}
+	@Transient
+	public Contract getPersonDayContract() {
 
-	public void addAbsence(Absence abs){
-		this.absences.add(abs);
-		abs.personDay = this;
+		if(this.personDayContract != null)
+			return this.personDayContract;
+		
+		this.personDayContract = this.person.getContract(date);
+		
+		return this.personDayContract;
 	}
-
-	public void addStamping(Stamping st){
-		this.stampings.add(st);
-		st.personDay = this;
-	}
-
+	
 	/**
 	 * Controlla che il personDay cada in un giorno festivo
 	 * @param data
@@ -497,7 +493,7 @@ public class PersonDay extends BaseModel {
 		}
 		
 		//primo giorno del contratto
-		if(previousPersonDayInMonth.personDayContract == null || previousPersonDayInMonth.personDayContract.id != personDayContract.id)
+		if(previousPersonDayInMonth.getPersonDayContract() == null || previousPersonDayInMonth.getPersonDayContract().id != personDayContract.id)
 		{
 			progressive = difference;
 			return;
@@ -592,20 +588,14 @@ public class PersonDay extends BaseModel {
 	 */
 	public void populatePersonDay()
 	{
-	
-		//if(this.person.id == 45) Logger.info("  *PopulatePersonDay date=%s", this.date);
 		//controllo problemi strutturali del person day
 		if(this.date.isBefore(new LocalDate())){
 			this.save();
 			this.checkForPersonDayInTrouble();
 		}
-			//this.checkForPersonDayInTrouble();
-
-		//if(this.person.id == 45 && this.troubles.size()==0) Logger.info("  *  Check Trouble                 NO");
-		//if(this.person.id == 45 && this.troubles.size()==1) Logger.info("  *  Check Trouble                 SI");
 		
 		//Strutture dati transienti necessarie al calcolo
-		if(personDayContract==null)
+		if(this.getPersonDayContract()==null)
 		{
 			this.personDayContract = this.person.getContract(date);
 			//Se la persona non ha un contratto attivo non si fanno calcoli per quel giorno, le timbrature vengono comunque mantenute
@@ -613,19 +603,10 @@ public class PersonDay extends BaseModel {
 				return;
 		}
 		
-		//if(this.person.id == 45) Logger.info("  *  Associa contratto             contract=%s", this.personDayContract.id);
-	
-		
 		if(previousPersonDayInMonth==null)
 		{
 			associatePreviousInMonth();
 		}
-		
-		//if(this.person.id == 45 && this.previousPersonDayInMonth!=null) Logger.info("  *  Associa previous in month     previous=%s", this.previousPersonDayInMonth.date);
-		//if(this.person.id == 45 && this.previousPersonDayInMonth==null) Logger.info("  *  Associa previous in month     previous=null");
-		
-		
-		
 		
 		if(previousPersonDayInMonth!=null && previousPersonDayInMonth.personDayContract==null)
 		{
@@ -635,21 +616,13 @@ public class PersonDay extends BaseModel {
 		//controllo uscita notturna
 		this.checkExitStampNextDay();
 		
-		//if(this.person.id == 45 && this.previousPersonDayInMonth!=null) Logger.info("  *  After check midnight          previous=%s", this.previousPersonDayInMonth.date);
-		//if(this.person.id == 45 && this.previousPersonDayInMonth==null) Logger.info("  *  After check midnight          previous=null");
-		
-		
 		updateTimeAtWork();
 		
-		//if(this.person.id == 45) Logger.info("  *  Time at work                  %s", this.timeAtWork);
 		updateDifference();
-		//if(this.person.id == 45) Logger.info("  *  Difference                    %s", this.difference);
+	
 		updateProgressive();
-		//if(this.person.id == 45) Logger.info("  *  Progressive                   %s", this.progressive);
-		updateTicketAvailable();
-		//if(this.person.id == 45) Logger.info("  *  Ticket                        %s", this.isTicketAvailable);
 		
-		//this.merge();
+		updateTicketAvailable();
 		
 		//Nel caso in cui il personDay sia precedente a sourceContract imposto i valori a 0
 		if(this.personDayContract != null 
@@ -664,8 +637,6 @@ public class PersonDay extends BaseModel {
 		
 		this.save();
 		
-		//if(this.person.id == 45) Logger.info("  **********************************************************************");
-		
 	}
 	
 	/**
@@ -674,7 +645,7 @@ public class PersonDay extends BaseModel {
 	public void queSeraSera()
 	{
 		//Strutture dati transienti necessarie al calcolo
-		if(personDayContract==null)
+		if(this.getPersonDayContract() == null)
 		{
 			this.personDayContract = this.person.getContract(date);
 			//Se la persona non ha un contratto attivo non si fanno calcoli per quel giorno, le timbrature vengono comunque mantenute
@@ -711,6 +682,22 @@ public class PersonDay extends BaseModel {
 	 */
 	public void checkForPersonDayInTrouble()
 	{
+		//se prima o uguale a source contract il problema è fixato
+		if(this.getPersonDayContract().sourceDate != null) {
+			
+			if( ! this.date.isAfter( this.getPersonDayContract().sourceDate ) ) {
+				
+				for(PersonDayInTrouble pdt : this.troubles) {
+					if(pdt.fixed == false) {
+						pdt.fixed = true;
+						pdt.save();
+						Logger.info("Fixato %s perchè precedente a sourceContract(%s)", this.date, this.getPersonDayContract().sourceDate);
+					}
+				}
+				return;
+			}
+		}
+		
 		//persona fixed
 		if(this.isFixedTimeAtWork())
 		{
@@ -750,6 +737,7 @@ public class PersonDay extends BaseModel {
 					}
 				}
 			}
+			
 			//caso festa, no assenze, timbrature disaccoppiate
 			else if(!this.isAllDayAbsences() && this.isHoliday())
 			{

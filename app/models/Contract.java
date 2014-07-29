@@ -684,7 +684,7 @@ public class Contract extends BaseModel {
 		Logger.info("PopulatePersonDay");
 		
 		// (2) Ricalcolo i valori dei person day aggregandoli per mese
-		LocalDate actualMonth = contractInterval.getBegin().withDayOfMonth(1);
+		LocalDate actualMonth = contractInterval.getBegin().withDayOfMonth(1).minusMonths(1);
 		LocalDate endMonth = new LocalDate().withDayOfMonth(1);
 
 		while( !actualMonth.isAfter(endMonth) )
