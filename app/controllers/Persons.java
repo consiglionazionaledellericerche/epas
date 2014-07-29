@@ -176,6 +176,14 @@ public class Persons extends Controller {
 		cwtt.workingTimeType = wtt;
 		cwtt.contract = contract;
 		cwtt.save();
+		
+		ContractStampProfile csp = new ContractStampProfile();
+		csp.contract = contract;
+		csp.startFrom = contract.beginContract;
+		csp.endTo = contract.expireContract;
+		csp.fixedworkingtime = false;
+		csp.save();
+		contract.save();
 
 		Long personId = person.id;
 		List<String> usernameList = PersonUtility.composeUsername(person.name, person.surname);
@@ -330,6 +338,21 @@ public class Persons extends Controller {
 		for(Contract c : helpList){			
 
 			Logger.debug("Elimino contratto di %s %s che va da %s a %s", person.name, person.surname, c.beginContract, c.expireContract);
+						
+			// Eliminazione orari di lavoro 
+			List<ContractWorkingTimeType> cwttList = ContractWorkingTimeType.find("Select cwtt from ContractWorkingTimeType cwtt where cwtt.contract = ?"
+					, c).fetch();
+			for(ContractWorkingTimeType cwtt : cwttList){
+				cwtt.delete();
+			}
+			// Eliminazione stamp profile
+			List<ContractStampProfile> cspList = ContractStampProfile.find("Select csp from ContractStampProfile csp where csp.contract = ?"
+					, c).fetch();
+			for(ContractStampProfile csp : cspList){
+				csp.delete();
+			}
+
+			
 			c.delete();
 			person = Person.findById(personId);
 			person.contracts.remove(c);
@@ -352,13 +375,6 @@ public class Persons extends Controller {
 			ia.delete();
 		}
 		
-		// Eliminazione orari di lavoro storici associati alla persona
-		List<PersonWorkingTimeType> pwttList = PersonWorkingTimeType.find("Select pwtt from PersonWorkingTimeType pwtt where pwtt.person = ?"
-				, person).fetch();
-		for(PersonWorkingTimeType pwtt : pwttList){
-			pwtt.delete();
-			
-		}
 
 
 		JPAPlugin.closeTx(false);
@@ -535,6 +551,15 @@ public class Persons extends Controller {
 		cwtt.contract = contract;
 		cwtt.save();
 		contract.save();
+		
+		ContractStampProfile csp = new ContractStampProfile();
+		csp.contract = contract;
+		csp.startFrom = dataInizio;
+		csp.endTo = dataFine;
+		csp.fixedworkingtime = false;
+		csp.save();
+		contract.save();
+		
 		flash.success("Il contratto per %s %s è stato correttamente salvato", person.name, person.surname);
 
 		Persons.edit(person.id);
@@ -676,8 +701,10 @@ public class Persons extends Controller {
 
 		contract.save();
 
-		//Ricalcolo dei riepiloghi
-		contract.buildContractYearRecap();
+		//Ricalcolo valori
+		DateInterval contractDateInterval = contract.getContractDateInterval();
+		contract.recomputeContract(contractDateInterval.getBegin(), contractDateInterval.getEnd());
+		//contract.buildContractYearRecap();
 
 		flash.success("Dati di inizializzazione definiti con successo ed effettuati i ricalcoli.");
 
