@@ -132,6 +132,9 @@ public class Person extends BaseModel implements Comparable<Person>{
  
 	public String room;
 	
+	@Column(name="want_email")
+	public boolean wantEmail;
+	
 	/**
 	 * relazione con la tabella delle assenze iniziali
 	 */
