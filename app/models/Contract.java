@@ -669,27 +669,33 @@ public class Contract extends BaseModel {
 		}
 		
 		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
-		Logger.info("CheckPersonDay");
 		LocalDate today = new LocalDate();
+		Logger.info("CheckPersonDay (creazione ed history error) DA %s A %s", date, today);
 		while(true) {
+			Logger.debug("RecomputePopulate %s", date);
+			if(!DateUtility.isDateIntoInterval(date, contractInterval)) {
+				date = date.plusDays(1);
+				continue;
+			}
+			if(date.isEqual(today))
+				break;
 			
 			PersonUtility.checkPersonDay(person.id, date);
 			date = date.plusDays(1);
-			if(date.isEqual(today))
-				break;
-			if(!DateUtility.isDateIntoInterval(date, contractInterval))
-				break;
+			
+			
 		}
 		
-		Logger.info("PopulatePersonDay");
+		
 		
 		// (2) Ricalcolo i valori dei person day aggregandoli per mese
 		LocalDate actualMonth = contractInterval.getBegin().withDayOfMonth(1).minusMonths(1);
 		LocalDate endMonth = new LocalDate().withDayOfMonth(1);
 
+		Logger.debug("PopulatePersonDay (ricalcoli ed history error) DA %s A %s", actualMonth, endMonth);
+		
 		while( !actualMonth.isAfter(endMonth) )
 		{
-
 			List<PersonDay> pdList = 
 					PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
 					this.person, actualMonth, actualMonth.dayOfMonth().withMaximumValue()).fetch();
@@ -697,6 +703,7 @@ public class Contract extends BaseModel {
 			for(PersonDay pd : pdList){
 				
 				PersonDay pd1 = PersonDay.findById(pd.id);
+				Logger.debug("RecomputePopulate %s", pd1.date);
 				pd1.populatePersonDay();
 			}
 
