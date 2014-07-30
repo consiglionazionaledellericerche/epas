@@ -140,6 +140,15 @@
 					#{/else}
 					
 				</tr>
+				<tr>
+					<td class="lab">Email per controllo dati</td>
+					#{if person.wantEmail}
+						<td><a href="@{Persons.modifySendEmail(person.id)}" data-modal=".my-modal"><i class="fa fa-check-square-o"></i> Modifica</a></td>
+					#{/if}
+					#{else}
+						<td><a href="@{Persons.modifySendEmail(person.id)}" data-modal=".my-modal"><i class="fa fa-square-o"></i> Modifica</a></td>
+					#{/else}
+				</tr>
 			</table>
 		  
 		  </div>

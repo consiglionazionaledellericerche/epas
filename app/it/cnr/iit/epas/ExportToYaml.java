@@ -473,7 +473,7 @@ public class ExportToYaml {
 				out = out + getFormattedProperty("month", comp.month+"");
 				out = out + getFormattedProperty("reason", comp.reason);
 				out = out + getFormattedProperty("valueApproved", comp.valueApproved+"");
-				out = out + getFormattedProperty("valueRequest", comp.valueRequest+"");
+				out = out + getFormattedProperty("valueRequest", comp.valueRequested+"");
 				out = out + getFormattedProperty("year", comp.year+"");
 			}
 		}

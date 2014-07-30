@@ -2,17 +2,30 @@
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
+import java.net.URL;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
+import org.dbunit.DatabaseUnitException;
+import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.IDataSet;
+import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
+import org.dbunit.ext.h2.H2Connection;
+import org.dbunit.operation.DatabaseOperation;
+import org.hibernate.Session;
+import org.hibernate.jdbc.Work;
 import org.joda.time.LocalDate;
 
 import com.google.common.collect.Lists;
+import com.google.common.io.Resources;
 
 import models.Contract;
 import models.ContractStampProfile;
 import models.Office;
 import models.Permission;
 import models.Person;
+import models.Qualification;
 import models.Role;
 import models.StampModificationType;
 import models.StampProfile;
@@ -23,10 +36,11 @@ import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import play.Logger;
 import play.Play;
+import play.db.jpa.JPA;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
+import play.libs.Codec;
 import controllers.Security;
-
 
 /**
  * Carica nel database dell'applicazione i dati iniziali predefiniti nel caso questi non siano già presenti 
@@ -35,17 +49,78 @@ import controllers.Security;
  *
  */
 @OnApplicationStart
-public class Bootstrap extends Job {
-	
-	
+public class Bootstrap extends Job<Void> {
+
+	public static class DatasetImport implements Work {
+
+		private DatabaseOperation operation;
+		private final URL url;
+
+		public DatasetImport(DatabaseOperation operation, URL url) {
+			this.operation = operation;
+			this.url = url;
+		}
+
+		@Override
+		public void execute(Connection connection) {
+			try {
+				//org.dbunit.dataset.datatype.DefaultDataTypeFactory
+				IDataSet dataSet = new FlatXmlDataSetBuilder()
+				.setColumnSensing(true).build(url);
+				operation.execute(new H2Connection(connection, ""), dataSet);
+			} catch (DataSetException e) {
+				e.printStackTrace();
+			} catch (DatabaseUnitException e) {
+				e.printStackTrace();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 	public void doJob() {
 
 		if (Play.id.equals("test")) {
 			Logger.info("Application in test mode, default boostrap job not started");
 			return;
 		}
-		
 
+
+		Session session = (Session) JPA.em().getDelegate();
+		
+		if(Qualification.count() == 0 ) {
+			
+			//qualification absenceType absenceTypeQualification absenceTypeGroup
+			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Bootstrap.class, "absence-type-and-qualification-phase1.xml")));		
+			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Bootstrap.class, "absence-type-and-qualification-phase2.xml")));
+
+			//competenceCode
+			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Bootstrap.class, "competence-codes.xml")));	
+
+			//stampModificationType
+			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Bootstrap.class, "stamp-modification-types.xml")));
+
+			//stampType
+			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Bootstrap.class, "stamp-types.xml")));
+
+			//vacationCode
+			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Bootstrap.class, "vacation-codes.xml")));
+			
+			//workingTimeType workingTimeTypeDay
+			session.doWork(new DatasetImport(DatabaseOperation.INSERT, Resources.getResource(Bootstrap.class, "working-time-types.xml")));
+
+		}
+		
+		if(User.count() == 0) {
+			User admin = new User();
+			admin.username = "admin";
+			admin.password = Codec.hexMD5("personnelEpasNewVersion");
+			admin.save();
+		}
+				
+		bootstrapPermissionsHandler();
+
+		/*
 		convertPersonBornDateHandler();
 		
 		cleanOfficeTree();
@@ -57,7 +132,7 @@ public class Bootstrap extends Job {
 		bootstrapTotalOvertimeHandler();
 		
 		insertDefaultStampModificationType();
-
+		 */
 		
 		try
 		{
