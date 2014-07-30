@@ -29,6 +29,7 @@ import models.PersonYear;
 import models.Qualification;
 import models.Stamping;
 import models.User;
+import models.UsersRolesOffices;
 import models.VacationPeriod;
 import models.ValuableCompetence;
 import models.WorkingTimeType;
@@ -129,15 +130,15 @@ public class Persons extends Controller {
 		person.save();
 
 		/* creazione utente */
-		User user = new User();
-		user.username = person.name.toLowerCase()+'.'+person.surname.toLowerCase(); 
-		Codec codec = new Codec();
-		user.password = codec.hexMD5("epas");
-		user.person = person;
+		//User user = new User();
+		//user.username = person.name.toLowerCase()+'.'+person.surname.toLowerCase(); 
+		//Codec codec = new Codec();
+		//user.password = codec.hexMD5("epas");
+		//user.person = person;
 
-		user.save();
-		person.user = user;
-		person.save();
+		//user.save();
+		//person.user = user;
+		//person.save();
 
 		/* creazione contratto */
 		Logger.debug("Begin contract: %s", params.get("beginContract"));
@@ -226,6 +227,8 @@ public class Persons extends Controller {
 		else{
 			User user = new User();
 			//user.id = person.id;
+			Codec codec = new Codec();
+			user.password = codec.hexMD5("epas");
 			user.person = person;
 			user.username = username;
 			user.save();
@@ -314,7 +317,24 @@ public class Persons extends Controller {
 		rules.checkIfPermitted(person.office);
 
 		/***** person.delete(); ******/
+		
+		if(person.user != null) {
 
+			if(person.user.usersRolesOffices.size() > 0) {
+				flash.error("Impossibile eliminare una persona che detiene diritti di amministrazione su almeno una sede. Rimuovere tali diritti e riprovare.");
+				Persons.list(null);
+			}
+			
+			if(person.user.username.equals(Security.getUser().get().username)) {
+				
+				flash.error("Impossibile eliminare la persona loggata nella sessione corrente. Operazione annullata.");
+				Persons.list(null);
+			}
+		}
+		
+		
+		
+		
 		String name = person.name;
 		String surname = person.surname;
 
@@ -435,15 +455,36 @@ public class Persons extends Controller {
 		for(YearRecap yr : person.yearRecaps){
 			yr.delete();
 		}
-
 		JPAPlugin.closeTx(false);
+		
+//		//Eliminazione user
+//		JPAPlugin.startTx(false);
+//		person = Person.findById(personId);
+//		if(person.user != null) {
+//			User user = User.findById(person.user.id);
+//			user.delete();
+//
+//		}
+//		JPAPlugin.closeTx(false);
+
+		// Eliminazione persona e user
 		JPAPlugin.startTx(false);
 		person = Person.findById(personId);
-		// Eliminazione persona
+		Long userId = null;
+		if(person.user != null) {
+			userId = person.user.id;
+		}
 		person.delete();
 		JPAPlugin.closeTx(false);
+		
+		JPAPlugin.startTx(false);
+		if(userId != null) {
+			User user = User.findById(userId);
+			user.delete();
+		}
+		JPAPlugin.closeTx(false);
 
-		flash.success("%s %s eliminata dall'anagrafica insieme a tutti i suoi dati",name, surname);
+		flash.success("La persona %s %s eliminata dall'anagrafica insieme a tutti i suoi dati.",name, surname);
 
 		Persons.list(null);
 
