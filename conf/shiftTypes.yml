@@ -13,17 +13,19 @@ Person(27):
 
 Person(24):
     id: 24
+    
 
 # tipologie di turno
 #------------------------
 ShiftType(a):
     type: A
-    description: 'turno di tipo a'
+    description: 'Mantenimento e gestione server fax, centralino del Registro e postazioni hw e sf del Registro e dello IIT'
+    shiftTimeTable: [3]
 
 ShiftType(b):
     type: B
-    description: 'turno di tipo b'
-
+    description: 'Gestione operazioni per la gestione e mantenimento dei domini .it'
+    shiftTimeTable: [3]
 
 # definizione dei turnisti
 #------------------------

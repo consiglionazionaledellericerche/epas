@@ -108,7 +108,8 @@ public class ConfGeneral extends BaseModel{
 		
 		ConfGeneral confGeneral;
 
-		confGeneral = new ConfGeneral(office, ConfGeneral.INIT_USE_PROGRAM, LocalDate.now().toString());
+		LocalDate beginYear = new LocalDate(LocalDate.now().getYear(), 1, 1);
+		confGeneral = new ConfGeneral(office, ConfGeneral.INIT_USE_PROGRAM, beginYear.toString());
 		confGeneral.save();
 
 		confGeneral = new ConfGeneral(office, ConfGeneral.DAY_OF_PATRON, "1");

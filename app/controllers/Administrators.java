@@ -149,19 +149,25 @@ public class Administrators extends Controller {
 	
 	/**
 	 * Switch in un'altra persona
-	 */ //TODO vanno implementati i permessi di questa funzionalità !!!
+	 */ 
 	@NoCheck
 	public static void switchUserTo(long id) {
 		final User user = User.findById(id);
 		notFoundIfNull(user);
 		
+		//Per adesso permettiamo questa funzionalità solo all'utente admin
+		User userLogged = Security.getUser().get();
+		if(userLogged != null && userLogged.username.equals("admin") ){
+
+			// salva il precedente
+			session.put(SUDO_USERNAME, session.get(USERNAME));
+			// recupera 
+			session.put(USERNAME, user.username);
+			// redirect alla radice
+			redirect(Play.ctxPath + "/");
+		}
 		
-		// salva il precedente
-		session.put(SUDO_USERNAME, session.get(USERNAME));
-		// recupera 
-		session.put(USERNAME, user.username);
-		// redirect alla radice
-		redirect(Play.ctxPath + "/");
+		forbidden();
 	}
 	
 	/**

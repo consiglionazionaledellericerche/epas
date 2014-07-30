@@ -10,3 +10,9 @@ lib/
 /modules
 /precompiled
 /data
+/conf/secure
+/conf/pdf-0.9
+/conf/db-1.1.1
+/conf/shibboleth-1.2
+/build
+/.settings

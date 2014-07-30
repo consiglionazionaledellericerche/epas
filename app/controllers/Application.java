@@ -1,6 +1,9 @@
 package controllers;
 
+import java.util.List;
+
 import models.Office;
+
 import org.joda.time.LocalDate;
 
 import play.Logger;
@@ -19,41 +22,48 @@ public class Application extends Controller {
 	
     public static void index() {
     	
-		Office office = Office.findById(1L);
-		if(office.code.intValue() == 0){
-			Wizard.wizard(0);
-		}
+    	List<Office> officeList = Office.findAll();
+    	boolean seatExist = false;
+    	for(Office office : officeList) {
+    		
+    		if(office.isSeat()) {
+    			seatExist = true;
+    			break;
+    		}
+    	}
     	
-    	if(Security.getUser().get().username.equals("epas.clocks")){
+    	if(!seatExist) {
+    		
+    		Offices.showOffices();
+    	}
+    	
+//		Office office = Office.findById(1L);
+//		if(office.code.intValue() == 0){
+//			Wizard.wizard(0);
+//		}
+	
+    	if( Security.getUser().get().username.equals("epas.clocks") ){
+    		
     		Clocks.show();
     		return;
     	}
-    	if(Security.getUser().get().person == null){
+    	
+    	if( Security.getUser().get().username.equals("admin") ){
+    		
     		Persons.list(null);
     		return;
     	}
     	
-    	
     	//inizializzazione functional menu dopo login
+    	session.put("monthSelected", new LocalDate().getMonthOfYear());
+    	session.put("yearSelected", new LocalDate().getYear());
+    	session.put("personSelected", Security.getUser().get().person.id);
     	
-		session.put("monthSelected", new LocalDate().getMonthOfYear());
-		session.put("yearSelected", new LocalDate().getYear());
-		session.put("personSelected", Security.getUser().get().person.id);
+    	session.put("methodSelected", "stampingsAdmin");
+		session.put("actionSelected", "Stampings.stampings");
+    	Stampings.stampings(new LocalDate().getYear(), new LocalDate().getMonthOfYear());
 		
-		//method
-    	if (Security.check(Security.INSERT_AND_UPDATE_STAMPING)) {
-    		    		
-    		session.put("methodSelected", "stampingsAdmin");
-    		session.put("actionSelected", "Stampings.stampings");
-    		Stampings.stampings(new LocalDate().getYear(), new LocalDate().getMonthOfYear());
 
-    	} else {
-    		
-    		session.put("methodSelected", "stampings");
-    		session.put("actionSelected", "Stampings.stampings");
-    		Stampings.stampings(new LocalDate().getYear(), new LocalDate().getMonthOfYear());
-    	}
-    	
     }
     
     

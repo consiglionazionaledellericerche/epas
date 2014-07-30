@@ -1,12 +1,10 @@
-
-#{set title: 'Unexpected error' /}
-#{set titolo: 'ePas 500' /}
+#{set title: 'ePAS - Errore inaspettato'  /}
 
         #{if play.mode.name() == 'DEV'}
             #{500 exception /}
         #{/if}
         #{else}
- <div class="row-fluid">
+ <div class="row-fluid center">
   <div class="pagination-centered">
     <img src="http://icons.iconarchive.com/icons/3dlb/3d-vol2/256/warning-icon.png">
   </div>

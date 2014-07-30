@@ -58,7 +58,7 @@ import controllers.Security;
 @Audited
 @Table(name = "persons")
 @With(Secure.class)
-public class Person extends BaseModel {
+public class Person extends BaseModel implements Comparable<Person>{
 
 	/**
 	 * relazione con la tabella dei permessi
@@ -132,6 +132,9 @@ public class Person extends BaseModel {
  
 	public String room;
 	
+	@Column(name="want_email")
+	public boolean wantEmail;
+	
 	/**
 	 * relazione con la tabella delle assenze iniziali
 	 */
@@ -140,6 +143,12 @@ public class Person extends BaseModel {
 
 	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<InitializationTime> initializationTimes = new ArrayList<InitializationTime>();
+	
+	/**
+	 *  relazione con i turni
+	 */
+	@OneToMany(mappedBy="supervisor", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	public List<ShiftType> shiftTypes = new ArrayList<ShiftType>();
 
 
 	@OneToOne(mappedBy="person", fetch = FetchType.EAGER)
@@ -1339,6 +1348,13 @@ public class Person extends BaseModel {
 		
 		return activePersons;
 	
+	}
+
+	@Override
+	public int compareTo(Person person) {
+				
+		int res = (this.surname.compareTo(person.surname) == 0) ?  this.name.compareTo(person.name) :  this.surname.compareTo(person.surname);
+		return res;
 	}
 
 }
