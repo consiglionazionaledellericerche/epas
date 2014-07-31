@@ -57,7 +57,19 @@
 		  <!--  Anno corrente -->
 		  <p><h4>Situazione residuo derivante dall'anno corrente</h4><p>
 		  <table class="table table-bordered table-condensed">
-	
+		  
+		  #{if mese.initResiduoAnnoCorrenteNelMese != 0}
+		  <tr>
+		    <td class="col-xs-10">Residuo da inizializzazione (${mese.contract.sourceDate})</td>
+		       #{if mese.initResiduoAnnoCorrenteNelMese > 0}
+		    	<td class="col-xs-2 success">${mese.initResiduoAnnoCorrenteNelMese.toHourTimeWithPlus()}</td>
+		    	#{/if}
+		    	#{else}
+		    	<td class="col-xs-2 danger">${mese.initResiduoAnnoCorrenteNelMese.toHourTimeWithMinus()}</td>
+		    	#{/else}
+	      </tr>
+	      #{/if}
+	      
 	      <tr>
 		    <td class="col-xs-10">Residuo dai mesi precedenti</td>
 		    #{if mese.mesePrecedente==null}
