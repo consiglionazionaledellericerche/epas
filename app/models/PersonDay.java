@@ -588,6 +588,18 @@ public class PersonDay extends BaseModel {
 	 */
 	public void populatePersonDay()
 	{
+		
+		//il contratto non esiste più nel giorno perchè è stata inserita data terminazione
+		if(this.getPersonDayContract() == null){
+			this.timeAtWork = 0;
+			this.progressive = 0;
+			this.difference = 0;
+			this.setIsTickeAvailable(false); //TODO calcolarlo se ci sono timbrature
+			this.stampModificationType = null;
+			this.save();
+			return;
+		}
+		
 		//controllo problemi strutturali del person day
 		if(this.date.isBefore(new LocalDate())){
 			this.save();
@@ -597,10 +609,7 @@ public class PersonDay extends BaseModel {
 		//Strutture dati transienti necessarie al calcolo
 		if(this.getPersonDayContract()==null)
 		{
-			this.personDayContract = this.person.getContract(date);
-			//Se la persona non ha un contratto attivo non si fanno calcoli per quel giorno, le timbrature vengono comunque mantenute
-			if(personDayContract==null)
-				return;
+			return;
 		}
 		
 		if(previousPersonDayInMonth==null)
@@ -647,10 +656,7 @@ public class PersonDay extends BaseModel {
 		//Strutture dati transienti necessarie al calcolo
 		if(this.getPersonDayContract() == null)
 		{
-			this.personDayContract = this.person.getContract(date);
-			//Se la persona non ha un contratto attivo non si fanno calcoli per quel giorno, le timbrature vengono comunque mantenute
-			if(personDayContract==null)
-				return;
+			return;
 		}
 		
 		if(previousPersonDayInMonth==null)
