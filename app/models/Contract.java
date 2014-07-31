@@ -673,12 +673,14 @@ public class Contract extends BaseModel {
 		Logger.info("CheckPersonDay (creazione ed history error) DA %s A %s", date, today);
 		while(true) {
 			Logger.debug("RecomputePopulate %s", date);
+			
+			if(date.isEqual(today))
+				break;
+			
 			if(!DateUtility.isDateIntoInterval(date, contractInterval)) {
 				date = date.plusDays(1);
 				continue;
 			}
-			if(date.isEqual(today))
-				break;
 			
 			PersonUtility.checkPersonDay(person.id, date);
 			date = date.plusDays(1);
@@ -703,7 +705,7 @@ public class Contract extends BaseModel {
 			for(PersonDay pd : pdList){
 				
 				PersonDay pd1 = PersonDay.findById(pd.id);
-				Logger.debug("RecomputePopulate %s", pd1.date);
+				Logger.debug("RecomputePopulate %s", pd1.date);				
 				pd1.populatePersonDay();
 			}
 
