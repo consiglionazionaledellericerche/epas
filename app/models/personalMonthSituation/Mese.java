@@ -29,12 +29,14 @@ public class Mese {
 	public int initMonteOreAnnoPassato;
 	public int initMonteOreAnnoCorrente;
 	
+	public int initResiduoAnnoCorrenteNelMese = 0;	//per il template (se sourceContract è del mese)
+	
 	public int progressivoFinaleMese		 = 0;	//person day
 	public int progressivoFinalePositivoMese = 0;	//person day
 	public int progressivoFinaleNegativoMese = 0;	//person day
 	
 	public int progressivoFinalePositivoMesePrint = 0;	//per il template
-
+	
 	public int straordinariMinuti 			 = 0;	//competences
 	public int straordinariMinutiS1Print	 = 0;	//per il template
 	public int straordinariMinutiS2Print	 = 0;	//per il template
@@ -80,6 +82,13 @@ public class Mese {
 
 		this.initMonteOreAnnoCorrente = initMonteOreAnnoCorrente;
 		this.initMonteOreAnnoPassato = initMonteOreAnnoPassato;
+		
+		
+		//Per stampare a video il residuo da inizializzazione se riferito al mese
+		if(contract.sourceDate != null && 
+				contract.sourceDate.getMonthOfYear() == mese && contract.sourceDate.getYear() == anno) {
+			this.initResiduoAnnoCorrenteNelMese = contract.sourceRemainingMinutesCurrentYear;
+		}
 		
 		setContractDescription();
 		

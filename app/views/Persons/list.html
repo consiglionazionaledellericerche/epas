@@ -33,11 +33,10 @@
 		<th>Ferie</th>
 		<th>Livello</th>
 		<th>Timbratura<br>Default</th>
-		<th>Dipartimento</th>
-		<th>Sede</th>
-		<th>Telefono</th>
-		<th>Stanza</th>
 		<th>Email</th>
+		<th>Contatti</th>
+		<th>Inizializzazione</th>
+		<th>Invio Email</th>
 		<th>Note</th>
 	</tr>
 	
@@ -76,16 +75,41 @@
 		    <i class="fa fa-check-square-o"></i>
 		  #{/if}  
 		</td>
-		<td><font color="#000000">${person.department != null ? person.department : ''}</font></td>
-		<td><font color="#000000">${person.headOffice != null ? person.headOffice : '' }</font></td>
-		<td><font color="#000000">${person.telephone != null && !person.telephone.equals('No phone number') ? person.telephone : ''}</font></td>
-		<td><font color="#000000">${person.room != null ? person.room : ''}</font></td>
 		<td><font color="#000000">${person.email != null ? person.email : ''}</font></td>
+		<td>
+		 <a href="#" data-popover
+	    		data-trigger="hover" data-toggle="popover" 
+	    		data-placement="bottom"
+	    		data-html="true"
+	    		data-content="${(
+	    		'Dipartimento: <strong>'+person.department+'</strong>'+
+	    		'<br>Sede: <strong>'+person.headOffice+'</strong>'+
+	    		'<br>Stanza: <strong>'+person.room+'</strong>'+
+	    		'<br>Telefono: <strong>'+person.telephone+'</strong>').escape()}"
+	    		title="Contatti ${person.name} ${person.surname}"><i class="fa fa-phone"></i></a>
+		</td>
+
+		<!-- Inizializzazione ePAS -->
+		<td>
+		  #{if person.currentContract.sourceDate != null}
+		    <i class="fa fa-check-square-o"></i>
+		  #{/if}  
+		</td>
+
+		<!-- Invio email -->
+		<td>
+		  #{if person.wantEmail}
+		    <i class="fa fa-check-square-o"></i>
+		  #{/if}  
+		</td>
+		
+		<!-- Note -->
+		
 		#{if person.user == null}
 			<td><a href="@{Persons.insertUsername(person.id)}">Ins.username</a></td>
 		#{/if}
 		#{else}
-			<td>${}</td>
+			<td></td>
 		#{/else}
 	#{/if}
 	#{else}
@@ -98,11 +122,10 @@
 		<td><!-- ferie --></td>
 		<td><font color="#808080">${person.getQualification() != null ? person.getQualification().qualification : ''}</font></td>
 		<td>${''}</td>
-		<td><font color="#808080">${person.department != null ? person.department : ''}</font></td>
-		<td><font color="#808080">${person.headOffice != null ? person.headOffice : '' }</font></td>
-		<td><font color="#808080">${person.telephone != null && !person.telephone.equals('No phone number') ? person.telephone : ''}</font></td>
-		<td><font color="#808080">${person.room != null ? person.room : ''}</font></td>
 		<td><font color="#808080">${person.email != null ? person.email : ''}</font></td>
+		<td></td>
+		<td>${}</td>
+		<td>${}</td>
 		<td>${}</td>
 	#{/else}
 	</tr>

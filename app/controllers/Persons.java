@@ -847,6 +847,17 @@ public class Persons extends Controller {
 		previous.endDate = cwtt.endDate;
 		previous.save();
 		cwtt.delete();
+		
+		//FIXME, trovare un modo per pulire lo heap che ci trovo sempre quello eliminato	
+		for(ContractWorkingTimeType cwttt : contract.contractWorkingTimeType){
+			if(cwttt.id.equals(cwtt.id)) {
+				contract.contractWorkingTimeType.remove(cwttt);
+			}
+		}
+		
+		//Ricalcolo valori
+		cwtt.contract.recomputeContract(cwtt.beginDate, null);
+		
 		flash.success("Orario di lavoro eliminato correttamente. Attribuito al periodo eliminato il tipo orario %s.", previous.workingTimeType.description);
 		Persons.edit(cwtt.contract.person.id);	
 	}
@@ -1216,6 +1227,18 @@ public class Persons extends Controller {
 		previous.endTo = csp.endTo;
 		previous.save();
 		csp.delete();
+		
+		//Ricalcolo i valori
+		//FIXME, trovare un modo per pulire lo heap che ci trovo sempre quello eliminato	
+		for(ContractStampProfile cspp : contract.contractStampProfile){
+			if(cspp.id.equals(csp.id)) {
+				contract.contractStampProfile.remove(cspp);
+			}
+		}
+		
+		//Ricalcolo i valori
+		previous.contract.recomputeContract(csp.startFrom, null);
+		
 		flash.success("Tipologia di timbratura eliminata correttamente. Tornati alla precedente che ha timbratura automatica con valore: %s", previous.fixedworkingtime);
 		Persons.edit(csp.contract.person.id);
 	}
