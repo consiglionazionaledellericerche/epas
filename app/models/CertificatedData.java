@@ -46,8 +46,8 @@ public class CertificatedData extends BaseModel {
 	@Column(name="competences_sent")
 	public String competencesSent = null;
 	
-	@Column(name="mealticket_sent")
-	public Integer mealTicketSent = null;
+	@Column(name="meal_ticket_sent")
+	public String mealTicketSent = null;
 	
 	@Column(name="traininghours_sent")
 	public String trainingHoursSent = null;

@@ -17,7 +17,7 @@ public final class RispostaElaboraDati {
 	private boolean ok = false;
 	private String absencesSent = null;
 	private String competencesSent = null;
-	private Integer mealTicketSent = null;
+	private String mealTicketSent = null;
 	private String trainingHoursSent = null;
 	private String problems = null;
 	
@@ -34,8 +34,8 @@ public final class RispostaElaboraDati {
 	public void setAbsencesSent(String absencesSent) { this.absencesSent = absencesSent; }
 	public String getCompetencesSent() { return competencesSent; }
 	public void setCompetencesSent(String compentecesSent) { this.competencesSent = compentecesSent; }
-	public Integer getMealTicketSent() { return mealTicketSent; }
-	public void setMealTicketSent(Integer mealTicketSent) { this.mealTicketSent = mealTicketSent; }
+	public String getMealTicketSent() { return mealTicketSent; }
+	public void setMealTicketSent(String mealTicketSent) { this.mealTicketSent = mealTicketSent; }
 	public String getProblems() {	return problems; }
 	public void setProblems(String errors) { this.problems = errors; }
 
