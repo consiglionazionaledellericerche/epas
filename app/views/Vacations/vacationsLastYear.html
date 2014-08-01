@@ -19,20 +19,20 @@
 		
 	}%
 	<tr>
-		#{if vacationsRecap.vacationDaysLastYearUsed.get(i) != null }
+	  #{if vacationsRecap.vacationDaysLastYearUsed.get(i) != null}
 		<td>${vacationsRecap.vacationDaysLastYearUsed.get(i).personDay.date.getDayOfMonth()}</td>
 		<td>${vacationsRecap.vacationDaysLastYearUsed.get(i).personDay.date.getMonthOfYear()}</td>
 		<td>${vacationsRecap.vacationDaysLastYearUsed.get(i).personDay.date.getYear()}</td>
 		<td>${vacationsRecap.vacationDaysLastYearUsed.get(i).absenceType.description}</td>
 		<td>${vacationsRecap.vacationDaysLastYearUsed.get(i).absenceType.code}</td>
-		#{/if}
-		#{else}
-		<td>Dati da inizializzazione non presenti</td>
+	  #{/if}
+	  #{else}
+		<td>Da Inizializzazione</td>
 		<td></td>
 		<td></td>
 		<td></td>
 		<td></td>
-		#{/else}
+	  #{/else}
 	</tr>
 	%{
 		i++;}
