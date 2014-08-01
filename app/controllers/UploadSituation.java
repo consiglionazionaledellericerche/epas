@@ -429,6 +429,7 @@ public class UploadSituation extends Controller{
 				String matricola = dipendente.getMatricola();
 				cert = new CertificatedData(person, cognomeNome, matricola, anno, mese);				
 			}
+			Logger.info("Inizio creazione record certificated_data");
 			cert.absencesSent = rispostaElaboraDati.getAbsencesSent();
 			cert.competencesSent = rispostaElaboraDati.getCompetencesSent();
 			cert.mealTicketSent = rispostaElaboraDati.getMealTicketSent();
