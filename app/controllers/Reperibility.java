@@ -378,7 +378,7 @@ public class Reperibility extends Controller {
 			}
 		}
 		
-		Logger.info("Giorni di reperibilità da rimuovere = %s", daysOfMonthToAssign);
+		Logger.debug("Giorni di reperibilità da rimuovere = %s", daysOfMonthToAssign);
 		
 		for (int dayToRemove : daysOfMonthToAssign) {
 			LocalDate dateToRemove = new LocalDate(year, month, dayToRemove);
@@ -827,7 +827,7 @@ public class Reperibility extends Controller {
 		}
 		
 		Logger.debug("Find %s periodi di reperibilità.", icsCalendar.getComponents().size());
-		Logger.info("Crea iCal per l'anno %d della person con id = %d, reperibility type %s", year, personId, type);
+		Logger.debug("Crea iCal per l'anno %d della person con id = %d, reperibility type %s", year, personId, type);
 		
         return icsCalendar;
 	}
