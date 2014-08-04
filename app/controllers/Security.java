@@ -154,9 +154,7 @@ public class Security extends Secure.Security {
 	}
 	
 	public static Optional<User> getUser() {
-		Optional<User> u = getUser(connected());
-		Logger.info("getUser -> %s", u);
-		return u;
+		return getUser(connected());
 	}
 	
 	static boolean check(String profile) {
