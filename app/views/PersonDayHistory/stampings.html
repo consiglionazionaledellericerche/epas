@@ -1,0 +1,9 @@
+<ul>
+	#{list items:results, as:'item'}
+	<li>
+		${item.value.id}
+		${item.revision.revisionDate} ${item.revision.owner}
+		${item.type}
+	</li>
+	#{/list}
+</ul>
