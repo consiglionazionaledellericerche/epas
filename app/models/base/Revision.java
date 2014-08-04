@@ -1,7 +1,5 @@
 package models.base;
 
-import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -16,6 +14,7 @@ import models.User;
 import org.hibernate.envers.RevisionEntity;
 import org.hibernate.envers.RevisionNumber;
 import org.hibernate.envers.RevisionTimestamp;
+import org.joda.time.LocalDateTime;
 
 import com.google.common.base.Objects;
 
@@ -38,8 +37,8 @@ public class Revision {
     public long timestamp;
 
     @Transient
-    public Date getRevisionDate() {
-        return new Date(timestamp);
+    public LocalDateTime getRevisionDate() {
+    	return new LocalDateTime(timestamp);
     }
 
 	@ManyToOne(optional=true)
