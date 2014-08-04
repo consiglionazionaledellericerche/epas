@@ -8,6 +8,7 @@ import java.lang.annotation.Target;
 import javax.inject.Inject;
 
 import models.User;
+import play.Play;
 import play.mvc.Before;
 import play.mvc.Controller;
 import security.SecurityRules;
@@ -18,12 +19,31 @@ import security.SecurityRules;
  */
 public class Resecure extends Controller {
 	
+	private static final String REALM = "E-PAS";
+	  
 	@Inject
 	static SecurityRules rules;
 	
+	/**
+	 * @author marco
+	 * 
+	 * Con questo si evitano i controlli.
+	 *
+	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ElementType.METHOD})
 	public @interface NoCheck {
+	}
+	
+	/**
+	 * @author marco
+	 * 
+	 * Con questo si adotta soltanto la basicauth.
+	 *
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ElementType.METHOD})
+	public @interface BasicAuth {
 	}
 	
 	@Before(unless={"login", "authenticate", "logout"})
@@ -32,17 +52,43 @@ public class Resecure extends Controller {
 				getControllerInheritedAnnotation(NoCheck.class) != null) {
 			return;
 		} else {
-			if (Security.getUser().isPresent()) {
-				User user = Security.getUser().get();
-				renderArgs.put("currentUser", Security.getUser().get());
+			if (getActionAnnotation(BasicAuth.class) != null ||
+					getControllerInheritedAnnotation(BasicAuth.class) != null) {
+				if (request.user == null ||
+						!Security.authenticate(request.user, request.password)) {
+					unauthorized(REALM);
+				}
 			}
-			Secure.checkAccess();
+			if (Security.getUser().isPresent()) {
+				final User user = Security.getUser().get();
+				renderArgs.put("currentUser", user);
+			} else {
+	            flash.put("url", "GET".equals(request.method) ? request.url : Play.ctxPath + "/"); // seems a good default
+	            Secure.login();
+	        }
+	        // Checks
+	        Check check = getActionAnnotation(Check.class);
+	        if(check != null) {
+	            check(check);
+	        }
+	        check = getControllerInheritedAnnotation(Check.class);
+	        if(check != null) {
+	            check(check);
+	        }
 			rules.checkIfPermitted();
         }
 	}
-	
-	public static boolean check(String action, Object instance) {
+
+    private static void check(Check check) throws Throwable {
+        for(String profile : check.value()) {
+            boolean hasProfile = (Boolean)Security.invoke("check", profile);
+            if(!hasProfile) {
+                Security.invoke("onCheckFailed", profile);
+            }
+        }
+    }
+
+    public static boolean check(String action, Object instance) {
 		return rules.check(action, instance);
 	}
-	
 }
