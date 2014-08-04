@@ -1,6 +1,7 @@
 package controllers;
 
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,13 +12,13 @@ import models.User;
 import models.UsersRolesOffices;
 import play.Logger;
 import play.cache.Cache;
-
+import play.utils.Java;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.common.hash.Hashing;
 import com.google.common.collect.Lists;
-
 
 public class Security extends Secure.Security {
 	
@@ -81,15 +82,9 @@ public class Security extends Secure.Security {
 	public final static String INSERT_AND_UPDATE_CONFIGURATION = "insertAndUpdateConfiguration";
 	public final static String INSERT_AND_UPDATE_ADMINISTRATOR = "insertAndUpdateAdministrator";
 	
-
-	
-
 	public final static String INSERT_AND_UPDATE_PASSWORD = "insertAndUpdatePassword";	
 	
 	public final static String DELETE_PERSON = "deletePerson";
-	
-	
-	
 	
 	
 	public final static String PERMISSION_CACHE_PREFIX = "user-permission-office-";
@@ -97,6 +92,11 @@ public class Security extends Secure.Security {
 	public final static String CACHE_DURATION = "30mn";
 	
 
+	/**
+	 * @param username
+	 * @param password
+	 * @return true se è autenticato, false altrimenti.
+	 */
 	static boolean authenticate(String username, String password) {
 	    Logger.trace("Richiesta autenticazione di %s",username);
 
@@ -136,7 +136,7 @@ public class Security extends Secure.Security {
 		
 		//db
 		User user = User.find("byUsername", username).first();
-		Logger.trace("USer.find('byUsername'), username=%s, e' %s", username, user);
+		Logger.trace("User.find('byUsername'), username=%s, e' %s", username, user);
 		if (user == null){
 			Logger.info("Security.getUser(): USer con username = %s non trovata nel database", username);
 			return Optional.<User>absent();
@@ -145,20 +145,28 @@ public class Security extends Secure.Security {
 		return Optional.of(user);
 	}
 	
+	static String connected() {
+		if (request.user != null) {
+			return request.user;
+		} else {
+			return Secure.Security.connected();
+		}
+	}
+	
 	public static Optional<User> getUser() {
-		return getUser(connected());
+		Optional<User> u = getUser(connected());
+		Logger.info("getUser -> %s", u);
+		return u;
 	}
 	
 	static boolean check(String profile) {
 		
-		
 		if (!getUser().isPresent()) {
 			return false;
 		}
-//		User user = Security.getUser();
-		
-		User user = getUser().get();
-		Permission permission = Permission.find("byDescription", profile).first();
+	
+		final User user = getUser().get();
+		final Permission permission = Permission.find("byDescription", profile).first();
 		if(permission == null) {
 			
 			Logger.debug("Il Permission per la check del profilo %s è null o vuoto", profile);
@@ -208,16 +216,11 @@ public class Security extends Secure.Security {
 		/* caso richiesta generica senza personId o officeId specificati */
 		
 		return checkUro(user.usersRolesOffices, permission, null);
-		
-		
-		
-	
     }   
 	
 	private static boolean checkUro(List<UsersRolesOffices> uroList, Permission permission, Office office) {
 		
 		for(UsersRolesOffices uro : uroList) {
-
 			if(office != null && !office.id.equals(uro.office.id)) {
 				
 				continue;
@@ -226,7 +229,6 @@ public class Security extends Secure.Security {
 			for(Permission p : permissionList) {
 
 				if(p.description.equals(permission.description)) {
-
 					return true;
 				}
 			}
@@ -235,8 +237,8 @@ public class Security extends Secure.Security {
 	}
 	
 	static boolean permissionCheck() {
-		String username = connected();
-		if(username == null || username.isEmpty()){
+		final String username = connected();
+		if (Strings.isNullOrEmpty(username)) {
 			Logger.debug("Nessun utente connesso");
 			return false;
 		}
@@ -253,30 +255,14 @@ public class Security extends Secure.Security {
 		return true;
     }   
 	
-//	private static User getUser(String username){
-//		if (username == null || username.isEmpty()) {
-//			Logger.trace("getUSer failed for username %s", username);
-//			return null;
-//		}
-//		Logger.trace("Richiesta getUser(), username=%s", username);
-//		
-//
-//		User user = User.find("byUsername", username).first();
-//		Logger.trace("USer.find('byUsername'), username=%s, e' %s", username, user);
-//		if (user == null){
-//			Logger.info("Security.getUser(): USer con username = %s non trovata nel database", username);
-//			return null;
-//		}
-//		return user;
-//	}
-
 	private static List<Permission> getUserAllPermissions(String username) {
 		
-		Optional<User> user = getUser(username);
+		final Optional<User> user = getUser(username);
 		if (!user.isPresent()) {
 			return Lists.newArrayList();
 		}
-		List<Permission> permissions = Cache.get(PERMISSION_CACHE_PREFIX + username, List.class);
+		List<Permission> permissions = Cache.get(PERMISSION_CACHE_PREFIX +
+				username, List.class);
 		
 		if (permissions == null) {
 			user.get().refresh();
@@ -285,28 +271,8 @@ public class Security extends Secure.Security {
 		}
 		
 		return permissions;
-//		User user = getUser(username);
-//		if (user == null) {
-//
-//			return null;
-//		}
-		//Set<UsersPermissionsOffices> permissions = Cache.get(PERMISSION_CACHE_PREFIX + username, Set.class);
-		
-//		List<Permission> permissions = Cache.get(PERMISSION_CACHE_PREFIX + username, List.class);
-//		
-//		if (permissions == null) {
-//			user.refresh();
-//			permissions = user.getAllPermissions();
-//			Cache.set(PERMISSION_CACHE_PREFIX + username, permissions, CACHE_DURATION);
-//		}
-//		
-//		return permissions;
 	}
-	
-//	public static User getUser() {
-//		return getUser(connected());
-//	}
-	
+
 	public static List<Permission> getPersonAllPermissions() {
 		return getUserAllPermissions(connected());
 	}
@@ -317,37 +283,30 @@ public class Security extends Secure.Security {
 			return Lists.newArrayList();
 		}
 		return getUser().get().getOfficeAllowed();
-//		User userLogged = getUser();
-//		if(userLogged.person == null)
-//			return Office.findAll();
-//		if(userLogged.person != null)
-//			return userLogged.person.getOfficeAllowed();
-//		else
-//			return null;
-//		return getUser().getOfficeAllowed();
 	}
 	
 	public static List<Office> getOfficeAllowed(String profile) {
 		if (!getUser().isPresent()) {
 			return Lists.newArrayList();
 		}
-		//User user = Security.getUser();
-		List<Office> officeList = new ArrayList<Office>();
+		final List<Office> officeList = new ArrayList<Office>();
 		
 		for(UsersRolesOffices uro : getUser().get().usersRolesOffices)  {
-			
 			for(Permission p : uro.role.permissions) {
-				
 				if(p.description.equals(profile)) {
-					
 					officeList.add(uro.office);
 				}
 			}
 		}
-		
 		return officeList;
 	}
 	
-	
+    static Object invoke(String m, Object... args) throws Throwable {
 
+        try {
+            return Java.invokeChildOrStatic(Security.class, m, args);       
+        } catch(InvocationTargetException e) {
+            throw e.getTargetException();
+        }
+    }
 }
