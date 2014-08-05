@@ -3,6 +3,8 @@
  */
 package models;
 
+import it.cnr.iit.epas.DateUtility;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -119,12 +121,8 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 		this.date = new LocalDateTime(year,month,day,hour,min,0);
 	}
 	
-	/**
-	 * 
-	 * @return
-	 */
-	public boolean isValid()
-	{
+	@Transient
+	public boolean isValid() {
 		return this.valid;
 	}
 	
@@ -157,12 +155,19 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 			return 0; 
 	}
 	
+	@Transient
 	public boolean isServiceStamping() {
 		if(this.stampType!=null && this.stampType.identifier!=null && this.stampType.identifier.equals("s"))
 		{
 			return true;
 		}
 		return false;
+	}
+	
+	@Transient
+	public String formattedHour() {
+		
+		return DateUtility.fromLocalDateTimeHourTime(this.date);
 	}
 	
 
