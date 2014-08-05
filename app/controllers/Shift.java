@@ -414,9 +414,6 @@ public class Shift extends Controller {
 		 shiftTypes.add("A"); 
 		 shiftTypes.add("B");
 		 Logger.debug("shiftTypes=%s", shiftTypes);
-			
-		// get the Competence code for the ordinary shift  (S1)
-		CompetenceCode competenceCode = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", codShift).first();
 		
 		//  Used TreeBasedTable becouse of the alphabetical name order (persona, A/B, num. giorni)
 		Table<Person, String, Integer> singleShiftSumDays = TreeBasedTable.<Person, String, Integer>create();
@@ -428,8 +425,7 @@ public class Shift extends Controller {
 		Table<Person, String, String> totalShiftInfo = TreeBasedTable.<Person, String, String>create();
 				
 		// crea la tabella per registrare le assenze e le timbrature inconsistenti con i turni trovati
-		//Table<String, String, List<Integer>> inconsistentAbsence = TreeBasedTable.<String, String, List<Integer>>create();
-		
+		// (person, [thAbsences, thNoStampings,thBadStampings], <giorni/fasce orarieinconsistenti>)
 		Table<Person, String, List<String>> singleShiftInconsistentAbsences = TreeBasedTable.<Person, String, List<String>>create();
 		Table<Person, String, List<String>> totalInconsistentAbsences = TreeBasedTable.<Person, String, List<String>>create();
 				
@@ -476,7 +472,7 @@ public class Shift extends Controller {
 				}
 			}
 			
-			// Memorizzo le inconsistenze dei turni
+			// Memorizzo le inconsistenze del turno
 			singleShiftInconsistentAbsences = CompetenceUtility.getShiftInconsistencyTimestampTable(personShiftDays);
 			
 			// for each person
@@ -593,10 +589,10 @@ public class Shift extends Controller {
 			if (shiftType == null) {
 				notFound(String.format("ShiftType = %s doesn't exist", shiftType));			
 			}
-			
+						
 			// legge i giorni di turno del tipo 'type' da inizio a fine mese 
 			List<PersonShiftDay> personShiftDays = 
-				PersonShiftDay.find("SELECT prd FROM PersonShiftDay prd WHERE date BETWEEN ? AND ? AND prd.shiftType = ? ORDER by date, prd.shiftType.shiftTimeTable.startShift", firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue(), shiftType).fetch();
+				PersonShiftDay.find("SELECT prd FROM PersonShiftDay prd WHERE date BETWEEN ? AND ? AND prd.shiftType = ? ORDER by date", firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue(), shiftType).fetch();
 				//Logger.debug("Trovati %d turni di tipo %s",personShiftDays.size(), type);
 			
 			for (PersonShiftDay personShiftDay : personShiftDays) {
