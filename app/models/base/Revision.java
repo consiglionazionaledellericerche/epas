@@ -1,18 +1,20 @@
 package models.base;
 
-import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+
+import models.User;
 
 import org.hibernate.envers.RevisionEntity;
 import org.hibernate.envers.RevisionNumber;
 import org.hibernate.envers.RevisionTimestamp;
+import org.joda.time.LocalDateTime;
 
 import com.google.common.base.Objects;
 
@@ -21,7 +23,7 @@ import com.google.common.base.Objects;
  *
  */
 @Entity
-@RevisionEntity
+@RevisionEntity(ExtendedRevisionListener.class)
 @Table(name="revinfo")
 public class Revision {
 	
@@ -35,10 +37,16 @@ public class Revision {
     public long timestamp;
 
     @Transient
-    public Date getRevisionDate() {
-        return new Date(timestamp);
+    public LocalDateTime getRevisionDate() {
+    	return new LocalDateTime(timestamp);
     }
 
+	@ManyToOne(optional=true)
+	public User owner;
+	
+	// ip address
+	public String ipaddress;
+	
     @Override
     public boolean equals(Object o) {
 
@@ -60,6 +68,8 @@ public class Revision {
 		return Objects.toStringHelper(this)
 				.add("id", id)
 				.add("date", getRevisionDate())
+				.add("owner", owner)
+				.add("ipaddress", ipaddress)
 				.omitNullValues()
 				.toString();
 	}
