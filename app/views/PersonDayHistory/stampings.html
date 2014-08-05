@@ -1,9 +1,26 @@
-<ul>
-	#{list items:results, as:'item'}
-	<li>
-		${item.value.id}
-		${item.revision.revisionDate} ${item.revision.owner}
-		${item.type}
-	</li>
-	#{/list}
-</ul>
+#{extends 'modal.html' /}
+#{set modalHeader:'La storia siamo noi'  /}
+
+<div class="container-fluid text-center">
+<table class="table">
+
+<tr>
+  <th>Id stamping</th>
+  <th>Ora stamping</th>
+  <th>Ora revisione</th>
+  <th>Owner</th>
+  <th>Tipo modifica</th>
+</tr>
+  
+  #{list items:results, as:'item'}
+    <tr>
+      <td>${item.value.id}</td>
+      <td>${item.value.formattedHour()}</td>
+      <td>${item.revision.revisionDate}</td>
+      <td>${item.revision.owner}</td>
+      <td>${item.type}</td>
+    </tr>
+  #{/list}
+  
+</table>
+</div>
