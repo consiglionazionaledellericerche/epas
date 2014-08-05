@@ -192,7 +192,7 @@ when
      	"Configurations.saveConfYear"
      	
      	), target == null, granted == false)
- $u: User(person != null)
+// $u: User(person != null)
 then
  $c.grant();
 end
@@ -617,6 +617,17 @@ when
 then
  $c.grant();
 end
+
+rule stampings_create
+when 
+ $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $p: Permission(description == "stampingsCreate") from $uro.role.permissions
+ $c: PermissionCheck(action in ("StampingsFromClient.create"),
+ 	target == null, granted == false)
+then
+ $c.grant();
+end
+
 
 /*
  *		Schema da implementare per ogni permesso
