@@ -323,4 +323,6 @@ public class DateUtility {
 		int hour = time.getHourOfDay();
 		return String.format("%02d:%02d", hour, min);    
 	}
+	
+	
 }

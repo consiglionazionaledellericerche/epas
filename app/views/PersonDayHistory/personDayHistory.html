@@ -1,0 +1,36 @@
+#{extends 'modal.html' /}
+#{set modalHeader:'La storia siamo noi'  /}
+
+<div class="container-fluid text-center">
+
+
+
+<!-- Per ogni timbratura una tabella -->
+
+#{list items:historyStampingsList, as:'historyStamping'}
+  <h5>Storico timbratura ore ${historyStamping.get(0).value.formattedHour()} (id=${historyStamping.get(0).value.id})</h5>
+  
+  <table class="table table-condensed table-bordered" >
+
+	<tr>
+	  <th>Ora timbratura</th>
+	  <th>Data modifica</th>
+	  <th>Amministratore</th>
+	  <th>Tipo</th>
+	</tr>
+	  
+	#{list items:historyStamping, as:'stamping'}  
+    <tr>
+      <td>${stamping.value.formattedHour()} ${stamping.value.formattedMark()}</td>
+      <td>${stamping.formattedRevisionDate()}</td>
+      <td>${stamping.formattedOwner()}</td>
+      <td>${stamping.type}</td>
+    </tr>
+    #{/list}
+
+  </table>
+
+#{/list}
+
+
+</div>
