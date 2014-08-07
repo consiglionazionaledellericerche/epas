@@ -13,6 +13,7 @@ import play.mvc.Controller;
 import dao.HistoryValue;
 import dao.PersonDayHistoryDao;
 import dao.StampingHistoryDao;
+import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * @author marco
@@ -28,7 +29,7 @@ public class PersonDayHistory extends Controller {
 	static StampingHistoryDao stampingHistoryDao;
 	
 	
-	public static void stampings(long personDayId) {
+	public static void personDayHistory(long personDayId) {
 		List<HistoryValue<Stamping>> allStampings = personDayHistoryDao
 				.stampings(personDayId);
 		
@@ -37,15 +38,19 @@ public class PersonDayHistory extends Controller {
 			stampingIds.add(historyValue.value.id);
 		}
 		
-		List<HistoryValue<Stamping>> results = Lists.newArrayList();
+		List<Long> sortedStampingsIds = Lists.newArrayList(stampingIds);
+		Collections.sort(sortedStampingsIds);
 		
-		for(Long stampingId : stampingIds) {
-			
-			List<HistoryValue<Stamping>> stampings = stampingHistoryDao
+		//Lista di stampings
+		List<List<HistoryValue<Stamping>>> historyStampingsList = Lists.newArrayList();
+		
+		for(Long stampingId : sortedStampingsIds) {
+		
+			List<HistoryValue<Stamping>> historyStamping = stampingHistoryDao
 					.stampings(stampingId);
-			results.addAll(stampings);
+			historyStampingsList.add(historyStamping);
 		}
 		
-		render(results);
+		render(historyStampingsList);
 	}
 }
