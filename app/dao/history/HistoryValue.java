@@ -1,4 +1,4 @@
-package dao;
+package dao.history;
 
 import it.cnr.iit.epas.DateUtility;
 import models.base.BaseModel;
@@ -59,6 +59,11 @@ public class HistoryValue<T extends BaseModel> {
 			return this.revision.owner.username;
 		else
 			return "ePAS";
+	}
+	
+	public boolean typeIsDel() {
+		String name = type.name();
+		return type.name().equals("DEL");
 	}
 
 }
