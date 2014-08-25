@@ -350,58 +350,39 @@ public class PersonDay extends BaseModel {
 		
 		int mealTicketTime = wttd.mealTicketTime;					//6 ore
 		int breakTicketTime = wttd.breakTicketTime;					//30 minuti
-		
+		int breakTimeDiff = breakTicketTime;
 		this.stampModificationType = null;
 		List<PairStamping> gapLunchPairs = getGapLunchPairs(validPairs);
 		
-		//ha timbrato per il pranzo ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		if(gapLunchPairs.size()>0)
-		{
+		if(gapLunchPairs.size()>0){
+			//	recupero la durata della pausa pranzo fatta		
 			int minTimeForLunch = gapLunchPairs.get(0).timeInPair;
-			
-			//gap e worktime sufficienti
-			if(minTimeForLunch >= breakTicketTime && workTime >= mealTicketTime)
-			{
-				setIsTickeAvailable(true);
-				return workTime + justifiedTimeAtWork;
-			}
-			
-			//worktime sufficiente gap insufficiente (e)
-			if(workTime - breakTicketTime >= mealTicketTime)
-			{
-				if( minTimeForLunch < breakTicketTime ) //dovrebbe essere certamente true
-				{
-					if(!isTicketForcedByAdmin || isTicketForcedByAdmin&&isTicketAvailable )		//TODO decidere la situazione intricata se l'amministratore forza a true
-						workTime = workTime - (breakTicketTime - minTimeForLunch);
-					this.stampModificationType = StampModificationType.getStampModificationTypeByCode(StampModificationTypeCode.FOR_MIN_LUNCH_TIME.getCode());
-					
-				}
-				setIsTickeAvailable(true);
-				return workTime + justifiedTimeAtWork;
-			}
-			
-			//worktime insufficiente
-			setIsTickeAvailable(false);
-			return workTime + justifiedTimeAtWork;
-			
+			//Calcolo l'eventuale differenza tra la pausa fatta e la pausa minima
+			breakTimeDiff = (breakTicketTime-minTimeForLunch<=0) ? 0 : (breakTicketTime-minTimeForLunch);
 		}
 		
-		//non ha timbrato per il pranzo //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		if( workTime > mealTicketTime && workTime - breakTicketTime >= mealTicketTime )
-		{
-			//worktime sufficiente (p)
-			if(!isTicketForcedByAdmin || isTicketForcedByAdmin&&isTicketAvailable )			//TODO decidere la situazione intricata se l'amministratore forza a true
-				workTime = workTime - breakTicketTime;
+		if(workTime - breakTimeDiff >= mealTicketTime){
 			setIsTickeAvailable(true);
-			this.stampModificationType = StampModificationType.getStampModificationTypeByCode(StampModificationTypeCode.FOR_DAILY_LUNCH_TIME.getCode());
-			return workTime + justifiedTimeAtWork;
+			
+			if(!isTicketForcedByAdmin || isTicketForcedByAdmin&&isTicketAvailable ) //TODO decidere la situazione intricata se l'amministratore forza a true
+				workTime -= breakTimeDiff;
+			
+			// caso in cui non sia stata effettuata una pausa pranzo
+			if(breakTimeDiff == breakTicketTime){
+				this.stampModificationType = StampModificationType.getStampModificationTypeByCode(StampModificationTypeCode.FOR_DAILY_LUNCH_TIME.getCode());
+			}
+			// Caso in cui la pausa pranzo fatta è inferiore a quella minima
+			else if(breakTimeDiff > 0 && breakTimeDiff != breakTicketTime){
+				this.stampModificationType = StampModificationType.getStampModificationTypeByCode(StampModificationTypeCode.FOR_MIN_LUNCH_TIME.getCode());
+			}
 		}
-		else
-		{
-			//worktime insufficiente
+		
+		else{
 			setIsTickeAvailable(false);
-			return workTime + justifiedTimeAtWork;
 		}
+				
+		return workTime + justifiedTimeAtWork;
+
 	}
 	
 	/**
