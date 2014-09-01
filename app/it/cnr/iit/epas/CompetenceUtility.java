@@ -12,6 +12,7 @@ import java.util.Map;
 import javax.persistence.Query;
 
 import models.Absence;
+import models.CertificatedData;
 import models.Competence;
 import models.CompetenceCode;
 import models.Person;
@@ -357,8 +358,17 @@ public class CompetenceUtility {
 			
 			if (shiftCompetence != null) {
 				// update the requested hours
-				int calcApproved1 = (shiftCompetence.valueApproved != 0) ? shiftCompetence.valueApproved : calcApproved;
-				Logger.debug("vecchia valueApproved=%d, calcolata=%d salvata=%d", shiftCompetence.valueApproved, calcApproved, calcApproved1);
+				//int calcApproved1 = (shiftCompetence.valueApproved != 0) ? shiftCompetence.valueApproved : calcApproved;
+				
+				// check if the competence has been processed to be sent to Rome
+				// and and this case we don't change the valueApproved
+				CertificatedData certData = CertificatedData.find("SELECT cd FROM CertificatedData cd WHERE cd.person = ? AND cd.year = ? AND cd.month = ?", person, year, month).first();
+				
+				Logger.debug("certData=%s isOK=%s competencesSent=%s", certData, certData.isOk, certData.competencesSent);
+				
+				int calcApproved1 = (certData != null & certData.isOk & (certData.competencesSent != null)) ? shiftCompetence.valueApproved : calcApproved;
+				Logger.debug("competenza è inviata = %s vecchia valueApproved=%d, calcolata=%d salvata=%d", certData.isOk, shiftCompetence.valueApproved, calcApproved, calcApproved1);
+				
 				shiftCompetence.setValueApproved(calcApproved1);
 				shiftCompetence.setValueRequested(numOfShiftHours);
 				shiftCompetence.save();
@@ -395,7 +405,8 @@ public class CompetenceUtility {
 	
 	/*
 	 * @author arianna
-	 * Restituisce il numero delle ore di turno effettuate conteggiando i giorni passati come parametro
+	 * Restituisce la tabella che contiene, per ogni persona nella lista dei turni presi come parametro,
+	 * e per ogni tipo di turno trovato, il numero di giorni di turno effettuati
 	 */
 	public static Table<Person, String, Integer> getShiftCompetences(List<PersonShiftDay> personShiftDays) {
 
@@ -403,7 +414,7 @@ public class CompetenceUtility {
 		ImmutableTable.Builder<Person, Integer, String> builder = ImmutableTable.builder(); 
 		Table<Person, Integer, String> shiftMonth = null;
 		
-		// for each person contains the number of hours of working shift divided by shift's type 
+		// for each person contains the number of days of working shift divided by shift's type 
     	Table<Person, String, Integer> shiftsSumDays = TreeBasedTable.<Person, String, Integer>create();
 		
 		for (PersonShiftDay personShiftDay : personShiftDays) {
@@ -466,7 +477,7 @@ public class CompetenceUtility {
 			//Logger.info("Prelevo il personDay %s per la persona %s - personDay=%s", personReperibilityDay.date, person, personDay);
 			
 			// if there are no events and it is not an holiday -> error
-			if (personDay == null) {
+			if (personDay == null & LocalDate.now().isAfter(personReperibilityDay.date)) {
 				if (!person.isHoliday(personReperibilityDay.date)) {
 					Logger.info("La reperibilità di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personReperibilityDay.date);
 				
@@ -474,7 +485,7 @@ public class CompetenceUtility {
 					noStampingDays.add(personReperibilityDay.date.toString("dd MMM"));
 					inconsistentAbsenceTable.put(person, thNoStampings, noStampingDays);	
 				}
-			} else {
+			} else if (LocalDate.now().isAfter(personReperibilityDay.date)) {
 				// check for the stampings in working days
 				if (!person.isHoliday(personReperibilityDay.date) && personDay.stampings.isEmpty()) {
 					Logger.info("La reperibilità di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personDay.date);
@@ -556,7 +567,7 @@ public class CompetenceUtility {
 			} else {
 
 				// check for the stampings in working days
-				if (!person.isHoliday(personShiftDay.date)) {
+				if (!person.isHoliday(personShiftDay.date) & LocalDate.now().isAfter(personShiftDay.date)) {
 					
 					// check no stampings
 					//-----------------------------

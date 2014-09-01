@@ -24,13 +24,14 @@ import controllers.Security;
 public class SecurityModule implements Module {
 	
 	private final static Logger LOG = LoggerFactory.getLogger(SecurityModule.class);
+	public final static String REMOTE_ADDRESS = "request.remoteAddress";
 	
 	@Provides @Named("request.action")
 	public String currentAction() {
 		return Http.Request.current().action;
 	}
 	
-	@Provides @Named("request.remoteAddress")
+	@Provides @Named(REMOTE_ADDRESS)
 	public String currentIpAddress() {
 		return Http.Request.current().remoteAddress;
 	}
