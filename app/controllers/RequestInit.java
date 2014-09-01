@@ -71,7 +71,7 @@ public class RequestInit extends Controller {
 			if(Security.getUser().isPresent())
 				condition.and(quro.user.eq(Security.getUser().get()));
 			else{
-				Logger.error("Si tenta di accedere a una risorsa senza essere correttamente loggati");
+				Logger.info("Si tenta di accedere a una risorsa senza essere correttamente loggati");
 				
 				flash.error("Bisogna autenticarsi prima di accedere a una risorsa");
 				try {

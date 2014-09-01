@@ -14,6 +14,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -56,8 +57,6 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
-
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 
 /**
@@ -378,7 +377,7 @@ public class Reperibility extends Controller {
 			}
 		}
 		
-		Logger.info("Giorni di reperibilità da rimuovere = %s", daysOfMonthToAssign);
+		Logger.debug("Giorni di reperibilità da rimuovere = %s", daysOfMonthToAssign);
 		
 		for (int dayToRemove : daysOfMonthToAssign) {
 			LocalDate dateToRemove = new LocalDate(year, month, dayToRemove);
@@ -827,7 +826,7 @@ public class Reperibility extends Controller {
 		}
 		
 		Logger.debug("Find %s periodi di reperibilità.", icsCalendar.getComponents().size());
-		Logger.info("Crea iCal per l'anno %d della person con id = %d, reperibility type %s", year, personId, type);
+		Logger.debug("Crea iCal per l'anno %d della person con id = %d, reperibility type %s", year, personId, type);
 		
         return icsCalendar;
 	}

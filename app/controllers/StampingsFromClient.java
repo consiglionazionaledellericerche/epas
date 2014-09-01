@@ -1,12 +1,15 @@
 package controllers;
 
+import controllers.Resecure.BasicAuth;
 import it.cnr.iit.epas.JsonStampingBinder;
 import models.Person;
 import models.exports.StampingFromClient;
 import play.Logger;
 import play.data.binding.As;
 import play.mvc.Controller;
+import play.mvc.With;
 
+@With(Resecure.class)
 public class StampingsFromClient extends Controller{
 
 	/**
@@ -14,6 +17,7 @@ public class StampingsFromClient extends Controller{
 	 *  
 	 * @param body
 	 */
+	@BasicAuth
 	public static String create(@As(binder=JsonStampingBinder.class) StampingFromClient body) {
 
 		Logger.debug("create: Received stampingFromClient %s", body);
