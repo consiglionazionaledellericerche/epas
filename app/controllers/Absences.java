@@ -33,6 +33,7 @@ import models.rendering.VacationsRecap;
 
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.MultiPartEmail;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 
 import play.Logger;
@@ -907,10 +908,13 @@ public class Absences extends Controller{
 	{
 		LocalDate actualDate = dateFrom;
 		int taken = 0;
+		boolean isHoliday = false;
 		while(!actualDate.isAfter(dateTo))
 		{
-
-			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, false, file).totalAbsenceInsert;
+			
+			if(actualDate.getDayOfWeek() == DateTimeConstants.SATURDAY || actualDate.getDayOfWeek() == DateTimeConstants.SUNDAY)
+				isHoliday = true;
+			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, isHoliday, file).totalAbsenceInsert;
 
 			checkMealTicket(actualDate, person, mealTicket, absenceType);
 
