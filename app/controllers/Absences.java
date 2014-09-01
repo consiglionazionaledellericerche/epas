@@ -912,7 +912,8 @@ public class Absences extends Controller{
 		while(!actualDate.isAfter(dateTo))
 		{
 			
-			if(DateUtility.isGeneralHoliday(person.office, actualDate))
+			if(DateUtility.isGeneralHoliday(person.office, actualDate) ||
+					person.getContract(actualDate).getContractWorkingTimeType(actualDate).workingTimeType.getHolidayFromWorkinTimeType(actualDate.getDayOfWeek(), person.getWorkingTimeType(actualDate)))
 				isHoliday = true;
 			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, isHoliday, file).totalAbsenceInsert;
 
