@@ -912,7 +912,7 @@ public class Absences extends Controller{
 		while(!actualDate.isAfter(dateTo))
 		{
 			
-			if(actualDate.getDayOfWeek() == DateTimeConstants.SATURDAY || actualDate.getDayOfWeek() == DateTimeConstants.SUNDAY)
+			if(DateUtility.isGeneralHoliday(person.office, actualDate))
 				isHoliday = true;
 			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, isHoliday, file).totalAbsenceInsert;
 
