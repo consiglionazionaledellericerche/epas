@@ -1041,8 +1041,11 @@ public class PersonDay extends BaseModel {
 		
 		if(this.previousPersonDayInMonth==null) //primo giorno del contratto
 			return;
-		if(!this.previousPersonDayInMonth.date.plusDays(1).isEqual(this.date)) //giorni non consecutivi
-			return;
+		if(!this.previousPersonDayInMonth.date.plusDays(1).isEqual(this.date)){
+			this.previousPersonDayInMonth = null;
+			return;//giorni non consecutivi
+		}
+			
 		
 		Stamping lastStampingPreviousDay = this.previousPersonDayInMonth.getLastStamping();
 		
@@ -1078,12 +1081,16 @@ public class PersonDay extends BaseModel {
 				this.save();
 			}
 
-			if(this.date.getDayOfMonth() == 1)
+			if(this.date.getDayOfMonth() == 1){
 				this.previousPersonDayInMonth = null;
+				this.save();
+			}
 		}
 		
-		if(this.date.getDayOfMonth() == 1)
+		if(this.date.getDayOfMonth() == 1){
 			this.previousPersonDayInMonth = null;
+			this.save();
+		}
 
 	}
 	
