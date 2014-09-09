@@ -1036,13 +1036,19 @@ public class PersonDay extends BaseModel {
 		if(this.isFixedTimeAtWork())
 			return;
 		
-		if(this.date.getDayOfMonth()==1)
+		if(this.date.getDayOfMonth()==1){
 			this.previousPersonDayInMonth = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? and pd.date < ? ORDER by pd.date DESC", this.person, this.date).first();
+			if(this.previousPersonDayInMonth.date.isBefore( 
+					new LocalDate(this.previousPersonDayInMonth.date.getYear(), 
+							this.previousPersonDayInMonth.date.getMonthOfYear(), 
+							this.previousPersonDayInMonth.date.getDayOfMonth()).dayOfMonth().withMaximumValue()))
+						this.previousPersonDayInMonth = null;	
+		}
 		
 		if(this.previousPersonDayInMonth==null) //primo giorno del contratto
 			return;
 		if(!this.previousPersonDayInMonth.date.plusDays(1).isEqual(this.date)){
-			this.previousPersonDayInMonth = null;
+			//this.previousPersonDayInMonth = null;
 			return;//giorni non consecutivi
 		}
 			
