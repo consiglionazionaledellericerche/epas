@@ -1038,7 +1038,7 @@ public class PersonDay extends BaseModel {
 		
 		if(this.date.getDayOfMonth()==1){
 			this.previousPersonDayInMonth = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? and pd.date < ? ORDER by pd.date DESC", this.person, this.date).first();
-			if(this.previousPersonDayInMonth.date.isBefore( 
+			if(this.previousPersonDayInMonth != null && this.previousPersonDayInMonth.date.isBefore( 
 					new LocalDate(this.previousPersonDayInMonth.date.getYear(), 
 							this.previousPersonDayInMonth.date.getMonthOfYear(), 
 							this.previousPersonDayInMonth.date.getDayOfMonth()).dayOfMonth().withMaximumValue()))
