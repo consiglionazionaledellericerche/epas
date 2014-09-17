@@ -1,9 +1,12 @@
 package controllers;
 
 
+import helpers.ModelQuery;
+
 import java.util.HashMap;
 
 import models.Person;
+import models.query.QPerson;
 import play.Logger;
 import play.Play;
 import play.Play.Mode;
@@ -57,11 +60,9 @@ public class ShibbolethSecurity extends controllers.shib.Security {
 		String eppn = session.get("eppn");
 	    Logger.debug("Trasformazione dell'utente shibboleth in utente locale, email = %s", eppn);
 	    
-	    //FIXME: invece del campo email di ContactData andrebbe utilizzato solo campo email della persona
-	    //	meglio se ci fossero due campi email, l'email di istituto e l'email del CNR e fossero controllate
-	    //  entrambe
-		Person person = Person.find("SELECT p FROM Person p LEFT JOIN p.contactData cd where cd.email = ? OR p.email = ?", 
-				eppn, eppn).first();
+	    QPerson qPerson = QPerson.person;
+	    Person person = 
+	    	ModelQuery.queryFactory().from(qPerson).where(qPerson.email.eq(eppn).or(qPerson.cnr_email.eq(eppn))).singleResult(qPerson);
 		
 		if(person != null){
 			Cache.set(person.user.username, person, Security.CACHE_DURATION);
