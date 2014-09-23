@@ -96,6 +96,7 @@ when
      	"Absences.manageAbsenceCode",
      	"Absences.editCode",
      	"Absences.insertAbsenceCode",
+     	"Absences.updateCode",
      	"Absences.saveAbsenceCode",
      	"Absences.downloadAttachment",
      	
@@ -612,7 +613,8 @@ when
         /* inserire le action interessate */
         "Absences.editCode",
      	"Absences.insertAbsenceCode",
-     	"Absences.saveAbsenceCode"
+     	"Absences.saveAbsenceCode",
+     	"Absences.updateCode"
        ), target == $o, granted == false)
 then
  $c.grant();

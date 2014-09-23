@@ -193,30 +193,31 @@ public class Absences extends Controller{
 		AbsenceType abt = new AbsenceType();
 		AbsenceTypeGroup abtg = null;
 		abt.code = params.get("codice");
-		if(params.get("codiceAttestati") != null)
-			abt.certificateCode = params.get("codiceAttestati");
+		if(params.get("codicePresenza") != null)
+			abt.certificateCode = params.get("codicePresenza");
 		else
 			abt.certificateCode = null;
 		abt.description = params.get("descrizione");
-		abt.ignoreStamping = params.get("ignoraTimbrature", Boolean.class);
+		
 		abt.internalUse = params.get("usoInterno", Boolean.class);
 		abt.consideredWeekEnd = params.get("weekEnd", Boolean.class);
-		abt.mealTicketCalculation = params.get("calcoloBuono", Boolean.class);
-		if(params.get("inizioValidita", Date.class) != null){
-			Date validFrom = params.get("inizioValidita", Date.class);
+		
+		if(params.get("inizio").equals("")){
+			Date validFrom = params.get("inizio", Date.class);
 			abt.validFrom = new LocalDate(validFrom);
 		}
 		else
 			abt.validFrom = null;
-		if(params.get("fineValidita", Date.class) != null){
-			Date validTo = params.get("fineValidita", Date.class);
+		if(params.get("fine").equals("")){
+			Date validTo = params.get("fine", Date.class);
 			abt.validTo = new LocalDate(validTo);
 		}
 		else
 			abt.validTo = null;
-
-		abt.justifiedTimeAtWork = params.get("jwt", JustifiedTimeAtWork.class);
-		abt.multipleUse = params.get("usoMultiplo", Boolean.class);
+		String just = params.get("jwt");
+		JustifiedTimeAtWork jwt = JustifiedTimeAtWork.getByDescription(just);
+		abt.justifiedTimeAtWork = jwt;
+		
 
 		if(params.get("livello1", Boolean.class) != null){
 			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 1).first();
@@ -263,13 +264,16 @@ public class Absences extends Controller{
 			abtg.limitInMinute = params.get("limiteAccumulo", Integer.class);
 			abtg.minutesExcess = params.get("minutiEccesso", Boolean.class);
 			abtg.replacingAbsenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", params.get("codicePerSostituzione")).first();
+			abt.absenceTypeGroup = abtg;
 			abtg.save();
 		}
-		abt.absenceTypeGroup = abtg;
+		
 		abt.save();
 		flash.success(
 				String.format("Inserita nuova assenza con codice %s", abt.code));
-		Application.indexAdmin();
+		//Application.indexAdmin();
+		Stampings.personStamping(Security.getUser().get().person.id, new LocalDate().getYear(), new LocalDate().getMonthOfYear());
+		
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
@@ -429,8 +433,10 @@ public class Absences extends Controller{
 		render(abt, justList, qualList, accType, behaviourType);
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
+	
 	public static void updateCode(){
+		rules.checkIfPermitted(Security.getUser().get().person.office);
+		
 		AbsenceType absence = AbsenceType.findById(params.get("absenceTypeId", Long.class));
 		if(absence == null)
 			notFound();
