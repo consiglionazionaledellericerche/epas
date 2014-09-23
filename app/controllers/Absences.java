@@ -202,13 +202,13 @@ public class Absences extends Controller{
 		abt.internalUse = params.get("usoInterno", Boolean.class);
 		abt.consideredWeekEnd = params.get("weekEnd", Boolean.class);
 		
-		if(params.get("inizio").equals("")){
+		if(!params.get("inizio").equals("")){
 			Date validFrom = params.get("inizio", Date.class);
 			abt.validFrom = new LocalDate(validFrom);
 		}
 		else
 			abt.validFrom = null;
-		if(params.get("fine").equals("")){
+		if(!params.get("fine").equals("")){
 			Date validTo = params.get("fine", Date.class);
 			abt.validTo = new LocalDate(validTo);
 		}
@@ -218,43 +218,14 @@ public class Absences extends Controller{
 		JustifiedTimeAtWork jwt = JustifiedTimeAtWork.getByDescription(just);
 		abt.justifiedTimeAtWork = jwt;
 		
+		String qual = params.get("qual");
+		Integer qualifica = new Integer(qual);
+		for(int i = 1; i <= qualifica; i++){
+			Qualification q = Qualification.find("Select q from Qualification q where q.qualification = ?", i).first();
+			abt.qualifications.add(q);
+		}
 
-		if(params.get("livello1", Boolean.class) != null){
-			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 1).first();
-			abt.qualifications.add(qual);
-		}
-		if(params.get("livello2", Boolean.class) != null){
-			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 2).first();
-			abt.qualifications.add(qual);
-		}
-		if(params.get("livello3", Boolean.class) != null){
-			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 3).first();
-			abt.qualifications.add(qual);
-		}
-		if(params.get("livello4", Boolean.class) != null){
-			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 4).first();
-			abt.qualifications.add(qual);
-		}
-		if(params.get("livello5", Boolean.class) != null){
-			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 5).first();
-			abt.qualifications.add(qual);
-		}
-		if(params.get("livello6", Boolean.class) != null){
-			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 6).first();
-			abt.qualifications.add(qual);
-		}
-		if(params.get("livello7", Boolean.class) != null){
-			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 7).first();
-			abt.qualifications.add(qual);
-		}
-		if(params.get("livello8", Boolean.class) != null){
-			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 8).first();
-			abt.qualifications.add(qual);
-		}
-		if(params.get("livello9", Boolean.class) != null){
-			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 9).first();
-			abt.qualifications.add(qual);
-		}
+		
 
 		if(!params.get("gruppo").equals("")){
 			abtg = new AbsenceTypeGroup();

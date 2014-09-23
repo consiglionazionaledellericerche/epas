@@ -60,11 +60,11 @@
 					<td>Tempo di lavoro giustificato (Es. codice 661h2 indicare 2)</td>
 				</tr>
 				<tr>
-					<td><p>Livelli:</p></td>
+					<td><p>Per i livelli fino al:</p></td>
 					<td>
-					#{select 'qual', value:qual , id:'qual.id'}
+					#{select 'qual', id:'qual.id'}
 						#{list items:qualificationList, as:'qual'}
-							#{option qual}${qual.qualification}#{/option}
+							#{option qual.qualification}${qual.qualification}#{/option}
 						#{/list}
 					#{/select}
 					</td>
