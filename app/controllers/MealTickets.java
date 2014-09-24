@@ -116,27 +116,24 @@ public class MealTickets  extends Controller {
 		
 		rules.checkIfPermitted(person.office);
 		
-		if(codeBlock1 == null || codeBlock2 == null || codeBlock3 == null || 
-				dimBlock1 == null || dimBlock2 == null || dimBlock3 == null) {
-			
-			flash.error("Errore in fase di parsing dei parametri Inserire correttamente tutte le informazioni."
-					+ " Operazione annullata");
-			MealTickets.manageMealTickets(null);
+		List<MealTicket> ticketToAdd = Lists.newArrayList();
+		
+		//Blocco1
+		if(codeBlock1 != null && dimBlock1 != null) {
+			ticketToAdd.addAll(generateBlockMealTicket(codeBlock1, dimBlock1));
 		}
 		
-		if(codeBlock1.equals(codeBlock2) || codeBlock1.equals(codeBlock3) || codeBlock2.equals(codeBlock3)) {
-			
-			flash.error("Errore in fase di inserimento codice blocchi. Inserire tre blocchi distinti."
-					+ " Operazione annullata");
-			MealTickets.manageMealTickets(null);
+		//Blocco2
+		if(codeBlock2 != null && dimBlock2 != null) {
+			ticketToAdd.addAll(generateBlockMealTicket(codeBlock2, dimBlock2));
+		}
+		
+		//Blocco3
+		if(codeBlock3 != null && dimBlock3 != null) {
+			ticketToAdd.addAll(generateBlockMealTicket(codeBlock3, dimBlock3));
 		}
 		
 		User admin = Security.getUser().get();
-		
-		List<MealTicket> ticketToAdd = Lists.newArrayList();
-		ticketToAdd.addAll(generateBlockMealTicket(codeBlock1, dimBlock1));
-		ticketToAdd.addAll(generateBlockMealTicket(codeBlock2, dimBlock2));
-		ticketToAdd.addAll(generateBlockMealTicket(codeBlock3, dimBlock3));
 		
 		//Controllo esistenza
 		for(MealTicket mealTicket : ticketToAdd) {
