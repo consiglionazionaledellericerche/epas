@@ -168,9 +168,9 @@ when
         
         /*Gestione buoni pasto*/
         "MealTickets.manageMealTickets",
-        "MealTickets.submitPersonMealTicketInQuarter",
+        "MealTickets.submitPersonMealTicket",
         "MealTickets.showPersonBlockMealTicket",
-        "MealTickets.deletePersonMealTicketInQuarter",
+        "MealTickets.deletePersonMealTicket",
         
         /*Orari di lavoro*/
      	"WorkingTimes.manageWorkingTime",
@@ -287,8 +287,8 @@ when
      	"Persons.modifySendEmail",
      	"Persons.updateSendEmail",
      	"WorkingTimes.executeChangeWorkingTimeTypeToAll",
-     	"MealTickets.submitPersonMealTicketInQuarter",
-        "MealTickets.deletePersonMealTicketInQuarter"
+     	"MealTickets.submitPersonMealTicket",
+        "MealTickets.deletePersonMealTicket"
      	
        ), target == $o, granted == false)
 then

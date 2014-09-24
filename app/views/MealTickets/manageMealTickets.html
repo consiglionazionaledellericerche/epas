@@ -6,18 +6,24 @@
  
 #{/set}
 
+
+
+
 <div class="container">
-  
-  <h3>Attribuzione buoni pasto terzo trimestre 2014 (luglio-settembre)</h3>
-  <br>
+
+  <div id="container-fluid-nav-tabs" class="container-fluid">
+    <ul class="nav nav-tabs">
+      <li><a href="@{MealTickets.recapMealTickets()}">Riepilogo buoni pasto</a></li>
+      <li class="active"><a href="@{MealTickets.manageMealTickets()}">Assegnazione nuovi</a></li>
+    </ul>
+  </div>
+
   
   #{form action:@MealTickets.manageMealTickets(), class:'form', 
     method:'GET', autocomplete:'off',
     'data-reload':'#results'}
     
     <span class="glyphicon glyphicon-search"></span>
-    <input type="hidden" name="year" value="${year}" />
-    <input type="hidden" name="quarter" value="${quarter}" />
     <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="search-query"/>
 
   #{/form}
@@ -25,18 +31,21 @@
   
   <section id="results">
 
-  #{list items:personNoTicket, as:'person'}
+  #{list items:personList, as:'person'}
    
     <div class="panel panel-default">
-      <div class="panel-body center">
- 
-	    #{form @MealTickets.submitPersonMealTicketInQuarter() }
+      <div class="panel-body bg-warning">
+ 		
+ 		<div class="center">
+ 		  <h3>${person.name} ${person.surname}</h3>
+ 		</div>
+
+        <p><span class="badge">1</span><strong> Inserisci blocchi buoni pasto (fino ad un massimo di 3 alla volta)</strong></p>
+	    #{form @MealTickets.submitPersonMealTicket() }
 		  <input type="hidden" name="personId" value="${person.id}"/>
-	      <input type="hidden" name="year" value="${year}" />
-	      <input type="hidden" name="quarter" value="${quarter}" />
 	      
-		  <p>${person.name} ${person.surname}</p>
-		  <table class="table table-bordered">
+		  
+		  <table class="table table-bordered center">
 		    <tr>
 		      <th>Codice Blocco</th>
 		      <th>Dimensione Blocco</th>
@@ -44,7 +53,7 @@
 		      <th>Amministratore Assegnatario</th>
 		    </tr>
 		    <!-- blocco1 -->
-		    <tr>
+		    <tr  style="background-color: white;">
 		      <td>
 		        <input type="number" name="codeBlock1"/>		      
 		      </td>
@@ -60,7 +69,7 @@
 		      <td>${admin.person.name} ${admin.person.surname}</td>
 		    </tr>
 		    <!-- blocco2 -->
-		    <tr>
+		    <tr  style="background-color: white;">
 		      <td>
 		        <input type="number" name="codeBlock2"/>		      
 		      </td>
@@ -76,7 +85,7 @@
 		      <td>${admin.person.name} ${admin.person.surname}</td>
 		    </tr>
 		    <!-- blocco3 -->
-		    <tr>
+		    <tr style="background-color: white;">
 		      <td>
 		        <input type="number" name="codeBlock3"/>		      
 		      </td>
@@ -92,52 +101,49 @@
 		      <td>${admin.person.name} ${admin.person.surname}</td>
 		    </tr>
 		  </table>
-		  
-		  <button type="submit" class="btn btn-sm btn-primary">Salva</button>
+		  <div class="center">
+		    <button type="submit" class="btn btn-sm btn-primary">Salva</button>
+		  </div>
 		#{/form}
-        
-      </div>
-    </div>
-   
-  #{/list}
-  
-  #{list items:personWithTicket, as:'person'}
-   
-    <div class="panel panel-default">
-      <div class="panel-body center bg-warning">
 
-		  <p>${person.name} ${person.surname}</p>
-		  <table class="table">
+		
+
+		<p><span class="badge">2</span><strong> Riepilogo blocchi assegnati</strong></p>
+		 <table class="table center">
 		    <tr>
 		      <th>Codice Blocco</th>
 		      <th>Numero buoni</th>
+		      <th>Rimozione</th>
 		    </tr>
-		    #{list items:person.getBlockMealTicketInQuarter(year,quarter), as:'block'}
+		    #{list items:person.getBlockMealTicket(), as:'block'}
 		      <tr style="background-color: white;">
 		        <td>${block.codeBlock}</td>
 		        
 		        <td>
-		          <a href="@{MealTickets.showPersonBlockMealTicket(person.id, block.codeBlock, year, quarter)}" data-modal=".my-modal">
+		          <a href="@{MealTickets.showPersonBlockMealTicket(person.id, block.codeBlock)}" data-modal=".my-modal">
 		            ${block.mealTickets.size()}
 		    	  </a> 
+		        </td>
+		        
+		        <td>
+		        #{form @MealTickets.deletePersonMealTicket() }
+		    	  <input type="hidden" name="personId" value="${person.id}"/>
+		    	  <input type="hidden" name="codeBlock" value="${block.codeBlock}"/>
+	        	  <button type="submit" class="btn btn-sm btn-danger"><span class="glyphicon glyphicon-trash"></span></button>
+		  		#{/form}
 		        </td>
 		        
 		      </tr>
 		    #{/list}
 		    
 		  </table>
-		  
-	      #{form @MealTickets.deletePersonMealTicketInQuarter() }
-		    <input type="hidden" name="personId" value="${person.id}"/>
-	        <input type="hidden" name="year" value="${year}" />
-	        <input type="hidden" name="quarter" value="${quarter}" />
-	        <button type="submit" class="btn btn-sm btn-danger">Elimina</button>
-		  #{/form}
+		  </div>
+        
       </div>
-    </div>
+	  <br>
    
   #{/list}
-   
+  
   </section>
   
 </div>

@@ -944,13 +944,16 @@ public class Person extends BaseModel implements Comparable<Person>{
 		return cd;
 	}
 	
-	public List<BlockMealTicket> getBlockMealTicketInQuarter(Integer year, Integer quarter) {
+	public List<BlockMealTicket> getBlockMealTicket() {
 		
 		List<MealTicket> mealTicketList = MealTicket.find("Select mt from MealTicket mt "
-				+ "where mt.person = ? and mt.year = ? and mt.quarter = ? order by mt.block",
-				this, year, quarter).fetch();
+				+ "where mt.person = ? order by mt.block",
+				this).fetch();
 		
 		List<BlockMealTicket> blockList = Lists.newArrayList();
+		
+		if(mealTicketList.size() == 0)
+			return blockList;
 		
 		BlockMealTicket currentBlock = null;
 		
