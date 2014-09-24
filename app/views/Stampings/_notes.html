@@ -3,16 +3,23 @@
     <div class="panel-heading">
       <h4 class="panel-title">
         <a data-toggle="collapse" data-parent="#accordion_meal" href="#meal">
-          Situazione buoni mensa
+          Situazione buoni pasto
         </a>
       </h4>
     </div>
     <div id="meal" class="panel-collapse collapse in">
       <div class="panel-body">
-   
+   		
+   	   <!-- Vecchia gestione buoni mensa 	
        Il numero di buoni mensa usabili per questo mese è <strong>${numberOfMealTicketToUse}</strong> <br>
        Il numero di buoni mensa da restituire per questo mese è <strong>${numberOfMealTicketToRender}</strong> <br>   
-	
+	   -->
+	   
+	   <!-- Nuova gestione buoni mensa -->
+	   Il numero di buoni pasto rimanenti alla data di oggi è <strong>${mealTicketRecap.remaining()}</strong> <br>
+	   Buoni pasto consegnati: ${mealTicketRecap.mealTickets.size()} <br>
+	   Buoni pasto utilizzati: ${mealTicketRecap.numberOfMealTicketToUse} <br><br>
+	   
 	  #{if !stampModificationTypeList.isEmpty() }
       <table class="table table-condensed table-bordered">
 		<tr>
