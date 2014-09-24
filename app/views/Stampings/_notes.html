@@ -10,16 +10,21 @@
     <div id="meal" class="panel-collapse collapse in">
       <div class="panel-body">
    		
-   	   <!-- Vecchia gestione buoni mensa 	
-       Il numero di buoni mensa usabili per questo mese è <strong>${numberOfMealTicketToUse}</strong> <br>
-       Il numero di buoni mensa da restituire per questo mese è <strong>${numberOfMealTicketToRender}</strong> <br>   
-	   -->
-	   
-	   <!-- Nuova gestione buoni mensa -->
-	   Il numero di buoni pasto usabili per questo mese è: ${numberOfMealTicketToUse}<br>
-	   Il numero di buoni pasto rimanenti alla data di oggi è <strong>${mealTicketRecap.remaining()}</strong> <br>
-	   Buoni pasto consegnati: ${mealTicketRecap.mealTickets.size()} <br>
-	   Buoni pasto utilizzati: ${mealTicketRecap.numberOfMealTicketToUse} <br><br>
+   	   <table class="table table-bordered table-condensed">
+			
+		  <tr>
+		    <td class="col-xs-10">Buoni pasto consegnati</td>
+		    <td class="col-xs-2 success">${mealTicketRecap.mealTickets.size()}</td>
+		  </tr>
+		  <tr>
+				<td class="col-xs-10"> Buoni pasto utilizzati</td>
+				<td class="col-xs-2 danger">${mealTicketRecap.numberOfMealTicketToUse}</td>
+		  </tr>
+		  <tr class="warning">
+				<td class="col-xs-10">Buoni pasto rimanenti alla data di oggi</td>
+				<td  class="col-xs-2"><strong>${mealTicketRecap.remaining()}</strong></td>
+		  </tr>	
+	    </table>
 	   
 	  #{if !stampModificationTypeList.isEmpty() }
       <table class="table table-condensed table-bordered">
