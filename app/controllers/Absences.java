@@ -316,9 +316,7 @@ public class Absences extends Controller{
 			Stampings.personStamping(personId, yearFrom, monthFrom);
 		}
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
 
-		
 		if(absenceType.code.equals("91"))
 		{
 			handlerCompensatoryRest(person, dateFrom, dateTo, absenceType, file);
@@ -340,6 +338,11 @@ public class Absences extends Controller{
 			handlerChildIllness(person, dateFrom, dateTo, absenceType, file);
 			return;
 		}
+		
+		if(absenceType.code.equals("92")){
+			handlerGenericAbsenceType(person, dateFrom, dateTo, absenceType, file, mealTicket);
+			return;
+		}
 
 		if(absenceType.absenceTypeGroup != null){
 			handlerAbsenceTypeGroup(person, dateFrom, dateTo, absenceType, file);
@@ -347,6 +350,8 @@ public class Absences extends Controller{
 		}
 		
 		if(absenceType.consideredWeekEnd){
+			//FIXME disastroso, considereWeekEnd true cattura anche codici diversi da illness e discharge. 
+			//Mettere condizione diversa.
 			handlerIllnessOrDischarge(person, dateFrom, dateTo, absenceType, file);
 			return;
 		}
