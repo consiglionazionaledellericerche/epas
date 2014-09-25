@@ -605,7 +605,7 @@ public class Absences extends Controller{
 				continue;
 			}
 
-			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, true, file).totalAbsenceInsert;
+			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, file).totalAbsenceInsert;
 
 			actualDate = actualDate.plusDays(1);
 		}
@@ -690,7 +690,7 @@ public class Absences extends Controller{
 				Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
 			}
 
-			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, wichFer, true, file).totalAbsenceInsert;
+			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, wichFer, file).totalAbsenceInsert;
 			actualDate = actualDate.plusDays(1);
 			
 		}
@@ -736,7 +736,7 @@ public class Absences extends Controller{
 		while(!actualDate.isAfter(dateTo) && taken<=remaining37)
 		{
 
-			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, true, file).totalAbsenceInsert;
+			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, file).totalAbsenceInsert;
 			actualDate = actualDate.plusDays(1);
 		}
 
@@ -784,7 +784,7 @@ public class Absences extends Controller{
 		while(!actualDate.isAfter(dateTo))
 		{
 
-			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, !absenceType.consideredWeekEnd, file).totalAbsenceInsert;
+			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, file).totalAbsenceInsert;
 			actualDate = actualDate.plusDays(1);
 		}
 		if(taken > 0)
@@ -807,7 +807,7 @@ public class Absences extends Controller{
 	 */
 	private static void handlerIllnessOrDischarge(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType,Blob file) throws EmailException
 	{
-		int taken = insertAbsencesInPeriod(person, dateFrom, dateTo, absenceType, false, file).totalAbsenceInsert;
+		int taken = insertAbsencesInPeriod(person, dateFrom, dateTo, absenceType, file).totalAbsenceInsert;
 		flash.success("Inseriti %s codici assenza per la persona", taken);
 		PersonUtility.updatePersonDaysIntoInterval(person, dateFrom, dateTo);
 		Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
@@ -890,14 +890,9 @@ public class Absences extends Controller{
 	{
 		LocalDate actualDate = dateFrom;
 		int taken = 0;
-		boolean isHoliday = false;
-		while(!actualDate.isAfter(dateTo))
-		{
+		while(!actualDate.isAfter(dateTo)) {
 			
-			if(DateUtility.isGeneralHoliday(person.office, actualDate) ||
-					person.getContract(actualDate).getContractWorkingTimeType(actualDate).workingTimeType.getHolidayFromWorkinTimeType(actualDate.getDayOfWeek(), person.getWorkingTimeType(actualDate)))
-				isHoliday = true;
-			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, isHoliday, file).totalAbsenceInsert;
+			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, file).totalAbsenceInsert;
 
 			checkMealTicket(actualDate, person, mealTicket, absenceType);
 
@@ -1148,7 +1143,7 @@ public class Absences extends Controller{
 	 * @param file
 	 * @throws EmailException 
 	 */
-	private static CheckAbsenceInsert insertAbsencesInPeriod(Person person, LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, boolean notInHoliday, Blob file) throws EmailException
+	private static CheckAbsenceInsert insertAbsencesInPeriod(Person person, LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, Blob file) throws EmailException
 	{
 		CheckAbsenceInsert cai = new CheckAbsenceInsert(0,null, false, 0);
 		LocalDate actualDate = dateFrom;
@@ -1158,7 +1153,7 @@ public class Absences extends Controller{
 		while(!actualDate.isAfter(dateTo))
 		{
 			//se non devo considerare festa ed è festa vado oltre
-			if(notInHoliday && person.isHoliday(actualDate))
+			if(!absenceType.consideredWeekEnd && person.isHoliday(actualDate))
 			{
 				actualDate = actualDate.plusDays(1);
 				continue;
