@@ -33,6 +33,7 @@ import models.rendering.VacationsRecap;
 
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.MultiPartEmail;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 
 import play.Logger;
@@ -192,67 +193,39 @@ public class Absences extends Controller{
 		AbsenceType abt = new AbsenceType();
 		AbsenceTypeGroup abtg = null;
 		abt.code = params.get("codice");
-		if(params.get("codiceAttestati") != null)
-			abt.certificateCode = params.get("codiceAttestati");
+		if(params.get("codicePresenza") != null)
+			abt.certificateCode = params.get("codicePresenza");
 		else
 			abt.certificateCode = null;
 		abt.description = params.get("descrizione");
-		abt.ignoreStamping = params.get("ignoraTimbrature", Boolean.class);
+		
 		abt.internalUse = params.get("usoInterno", Boolean.class);
 		abt.consideredWeekEnd = params.get("weekEnd", Boolean.class);
-		abt.mealTicketCalculation = params.get("calcoloBuono", Boolean.class);
-		if(params.get("inizioValidita", Date.class) != null){
-			Date validFrom = params.get("inizioValidita", Date.class);
+		
+		if(!params.get("inizio").equals("")){
+			Date validFrom = params.get("inizio", Date.class);
 			abt.validFrom = new LocalDate(validFrom);
 		}
 		else
 			abt.validFrom = null;
-		if(params.get("fineValidita", Date.class) != null){
-			Date validTo = params.get("fineValidita", Date.class);
+		if(!params.get("fine").equals("")){
+			Date validTo = params.get("fine", Date.class);
 			abt.validTo = new LocalDate(validTo);
 		}
 		else
 			abt.validTo = null;
+		String just = params.get("jwt");
+		JustifiedTimeAtWork jwt = JustifiedTimeAtWork.getByDescription(just);
+		abt.justifiedTimeAtWork = jwt;
+		
+		String qual = params.get("qual");
+		Integer qualifica = new Integer(qual);
+		for(int i = 1; i <= qualifica; i++){
+			Qualification q = Qualification.find("Select q from Qualification q where q.qualification = ?", i).first();
+			abt.qualifications.add(q);
+		}
 
-		abt.justifiedTimeAtWork = params.get("jwt", JustifiedTimeAtWork.class);
-		abt.multipleUse = params.get("usoMultiplo", Boolean.class);
-
-		if(params.get("livello1", Boolean.class) != null){
-			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 1).first();
-			abt.qualifications.add(qual);
-		}
-		if(params.get("livello2", Boolean.class) != null){
-			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 2).first();
-			abt.qualifications.add(qual);
-		}
-		if(params.get("livello3", Boolean.class) != null){
-			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 3).first();
-			abt.qualifications.add(qual);
-		}
-		if(params.get("livello4", Boolean.class) != null){
-			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 4).first();
-			abt.qualifications.add(qual);
-		}
-		if(params.get("livello5", Boolean.class) != null){
-			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 5).first();
-			abt.qualifications.add(qual);
-		}
-		if(params.get("livello6", Boolean.class) != null){
-			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 6).first();
-			abt.qualifications.add(qual);
-		}
-		if(params.get("livello7", Boolean.class) != null){
-			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 7).first();
-			abt.qualifications.add(qual);
-		}
-		if(params.get("livello8", Boolean.class) != null){
-			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 8).first();
-			abt.qualifications.add(qual);
-		}
-		if(params.get("livello9", Boolean.class) != null){
-			Qualification qual = Qualification.find("Select q from Qualification q where q.qualification = ?", 9).first();
-			abt.qualifications.add(qual);
-		}
+		
 
 		if(!params.get("gruppo").equals("")){
 			abtg = new AbsenceTypeGroup();
@@ -262,13 +235,16 @@ public class Absences extends Controller{
 			abtg.limitInMinute = params.get("limiteAccumulo", Integer.class);
 			abtg.minutesExcess = params.get("minutiEccesso", Boolean.class);
 			abtg.replacingAbsenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", params.get("codicePerSostituzione")).first();
+			abt.absenceTypeGroup = abtg;
 			abtg.save();
 		}
-		abt.absenceTypeGroup = abtg;
+		
 		abt.save();
 		flash.success(
 				String.format("Inserita nuova assenza con codice %s", abt.code));
-		Application.indexAdmin();
+		//Application.indexAdmin();
+		Stampings.personStamping(Security.getUser().get().person.id, new LocalDate().getYear(), new LocalDate().getMonthOfYear());
+		
 	}
 
 	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
@@ -340,9 +316,7 @@ public class Absences extends Controller{
 			Stampings.personStamping(personId, yearFrom, monthFrom);
 		}
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
 
-		
 		if(absenceType.code.equals("91"))
 		{
 			handlerCompensatoryRest(person, dateFrom, dateTo, absenceType, file);
@@ -364,6 +338,11 @@ public class Absences extends Controller{
 			handlerChildIllness(person, dateFrom, dateTo, absenceType, file);
 			return;
 		}
+		
+		if(absenceType.code.equals("92")){
+			handlerGenericAbsenceType(person, dateFrom, dateTo, absenceType, file, mealTicket);
+			return;
+		}
 
 		if(absenceType.absenceTypeGroup != null){
 			handlerAbsenceTypeGroup(person, dateFrom, dateTo, absenceType, file);
@@ -371,6 +350,8 @@ public class Absences extends Controller{
 		}
 		
 		if(absenceType.consideredWeekEnd){
+			//FIXME disastroso, considereWeekEnd true cattura anche codici diversi da illness e discharge. 
+			//Mettere condizione diversa.
 			handlerIllnessOrDischarge(person, dateFrom, dateTo, absenceType, file);
 			return;
 		}
@@ -428,8 +409,10 @@ public class Absences extends Controller{
 		render(abt, justList, qualList, accType, behaviourType);
 	}
 
-	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
+	
 	public static void updateCode(){
+		rules.checkIfPermitted(Security.getUser().get().person.office);
+		
 		AbsenceType absence = AbsenceType.findById(params.get("absenceTypeId", Long.class));
 		if(absence == null)
 			notFound();
@@ -622,7 +605,7 @@ public class Absences extends Controller{
 				continue;
 			}
 
-			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, true, file).totalAbsenceInsert;
+			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, file).totalAbsenceInsert;
 
 			actualDate = actualDate.plusDays(1);
 		}
@@ -707,7 +690,7 @@ public class Absences extends Controller{
 				Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
 			}
 
-			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, wichFer, true, file).totalAbsenceInsert;
+			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, wichFer, file).totalAbsenceInsert;
 			actualDate = actualDate.plusDays(1);
 			
 		}
@@ -753,7 +736,7 @@ public class Absences extends Controller{
 		while(!actualDate.isAfter(dateTo) && taken<=remaining37)
 		{
 
-			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, true, file).totalAbsenceInsert;
+			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, file).totalAbsenceInsert;
 			actualDate = actualDate.plusDays(1);
 		}
 
@@ -801,7 +784,7 @@ public class Absences extends Controller{
 		while(!actualDate.isAfter(dateTo))
 		{
 
-			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, !absenceType.consideredWeekEnd, file).totalAbsenceInsert;
+			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, file).totalAbsenceInsert;
 			actualDate = actualDate.plusDays(1);
 		}
 		if(taken > 0)
@@ -824,7 +807,7 @@ public class Absences extends Controller{
 	 */
 	private static void handlerIllnessOrDischarge(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType,Blob file) throws EmailException
 	{
-		int taken = insertAbsencesInPeriod(person, dateFrom, dateTo, absenceType, false, file).totalAbsenceInsert;
+		int taken = insertAbsencesInPeriod(person, dateFrom, dateTo, absenceType, file).totalAbsenceInsert;
 		flash.success("Inseriti %s codici assenza per la persona", taken);
 		PersonUtility.updatePersonDaysIntoInterval(person, dateFrom, dateTo);
 		Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
@@ -907,10 +890,9 @@ public class Absences extends Controller{
 	{
 		LocalDate actualDate = dateFrom;
 		int taken = 0;
-		while(!actualDate.isAfter(dateTo))
-		{
-
-			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, false, file).totalAbsenceInsert;
+		while(!actualDate.isAfter(dateTo)) {
+			
+			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, file).totalAbsenceInsert;
 
 			checkMealTicket(actualDate, person, mealTicket, absenceType);
 
@@ -1161,7 +1143,7 @@ public class Absences extends Controller{
 	 * @param file
 	 * @throws EmailException 
 	 */
-	private static CheckAbsenceInsert insertAbsencesInPeriod(Person person, LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, boolean notInHoliday, Blob file) throws EmailException
+	private static CheckAbsenceInsert insertAbsencesInPeriod(Person person, LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, Blob file) throws EmailException
 	{
 		CheckAbsenceInsert cai = new CheckAbsenceInsert(0,null, false, 0);
 		LocalDate actualDate = dateFrom;
@@ -1171,7 +1153,7 @@ public class Absences extends Controller{
 		while(!actualDate.isAfter(dateTo))
 		{
 			//se non devo considerare festa ed è festa vado oltre
-			if(notInHoliday && person.isHoliday(actualDate))
+			if(!absenceType.consideredWeekEnd && person.isHoliday(actualDate))
 			{
 				actualDate = actualDate.plusDays(1);
 				continue;

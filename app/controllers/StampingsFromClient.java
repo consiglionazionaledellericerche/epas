@@ -9,7 +9,7 @@ import play.data.binding.As;
 import play.mvc.Controller;
 import play.mvc.With;
 
-@With(Resecure.class)
+//@With(Resecure.class)
 public class StampingsFromClient extends Controller{
 
 	/**
@@ -17,7 +17,7 @@ public class StampingsFromClient extends Controller{
 	 *  
 	 * @param body
 	 */
-	@BasicAuth
+	//@BasicAuth
 	public static String create(@As(binder=JsonStampingBinder.class) StampingFromClient body) {
 
 		Logger.debug("create: Received stampingFromClient %s", body);

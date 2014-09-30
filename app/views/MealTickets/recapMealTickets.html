@@ -1,0 +1,58 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Gestione buoni pasto'  /}
+
+#{set 'moreStyles'}
+ 
+#{/set}
+
+<div class="container">
+  
+  <div id="container-fluid-nav-tabs" class="container-fluid">
+
+  <ul class="nav nav-tabs">
+    <li class="active"><a href="@{MealTickets.recapMealTickets()}">Riepilogo buoni pasto</a></li>
+    <li><a href="@{MealTickets.manageMealTickets()}">Assegnazione nuovi</a></li>
+  </ul>
+
+  </div>
+  
+  <div class="col-md-8 col-md-offset-2">
+  <table class="table table-striped">
+    <tr>
+      <th>Nome</th>
+      <th>Consegnati</th>
+      <th>Utilizzati</th>
+      <th>Rimanenti</th>
+  	</tr>
+  	
+  	#{list items:mealTicketRecaps, as:'mealTicketRecap'}
+  	  <tr>
+  	    <td>${mealTicketRecap.person.name} ${mealTicketRecap.person.surname}</td>
+  	    <td>${mealTicketRecap.mealTickets.size()}</td>
+  	    <td>${mealTicketRecap.numberOfMealTicketToUse}</td>
+  	    
+  	    <!-- remaining cell -->
+  	    #{if mealTicketRecap.isOk()}
+  	      <td class="success">
+  	    #{/if}
+  	    #{if mealTicketRecap.isWarning()}
+  	       <td class="warning">
+  	    #{/if}
+  	    #{if mealTicketRecap.isDanger()}
+  	       <td class="danger">
+  	    #{/if}
+  	      <strong>
+  	      ${mealTicketRecap.mealTickets.size() - mealTicketRecap.numberOfMealTicketToUse} 
+  	      </strong>
+  	    </td>
+  	  
+  	  </tr>
+  	
+  	
+  	#{/list}
+  
+  </table>
+  </div>
+  
+</div>

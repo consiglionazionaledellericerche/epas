@@ -166,8 +166,20 @@ public class Stamping extends BaseModel implements Comparable<Stamping> {
 	
 	@Transient
 	public String formattedHour() {
-		
-		return DateUtility.fromLocalDateTimeHourTime(this.date);
+		if(this.date != null)
+			return DateUtility.fromLocalDateTimeHourTime(this.date);
+		else
+			return "";
+	}
+	
+	@Transient
+	public String formattedMark() {
+		String mark = "";
+		if(this.markedByAdmin!=null && this.markedByAdmin==true)
+			mark = mark + "m";
+		if(this.stampType != null)
+			mark = mark + " " + this.stampType.identifier;
+		return mark;
 	}
 	
 

@@ -276,7 +276,7 @@ public class AttestatiClient {
 			absencesSent.append(assenzaPerPost.getCodice()).append(",")
 								.append(assenzaPerPost.getGgInizio()).append(",")
 								.append(assenzaPerPost.getGgFine()).append("; ");
-			Logger.debug("%s, sto spedendo l'assenza di tipo %s, gg inizio = %d, gg_fine = %d", 
+			Logger.info("%s, sto spedendo l'assenza di tipo %s, gg inizio = %d, gg_fine = %d", 
 					dipendente.getCognomeNome(), assenzaPerPost.getCodice(),
 					assenzaPerPost.getGgInizio(), assenzaPerPost.getGgInizio());
 			codAssAssoCounter++;
@@ -288,7 +288,7 @@ public class AttestatiClient {
 			connection.data("oreatt" + codComCounter, String.valueOf(competence.valueApproved));
 			competencesSent.append(competence.competenceCode.code).append(",")
 							.append(competence.valueApproved).append("; ");			
-			Logger.debug("%s, sto spedendo la competenza di tipo %s, ore attribuite = %d", 
+			Logger.info("%s, sto spedendo la competenza di tipo %s, ore attribuite = %d", 
 					dipendente.getCognomeNome(), competence.competenceCode.code, competence.valueApproved);
 			codComCounter++;
 		}
@@ -302,7 +302,7 @@ public class AttestatiClient {
 				trainingHoursSent.append(String.valueOf(pm.fromDate.getDayOfMonth())).append(",")
 									.append(String.valueOf(pm.toDate.getDayOfMonth())).append(",")
 									.append(String.valueOf(pm.trainingHours)).append("; ");
-				Logger.debug("%s, sto spedendo %d ore di formazione dal giorno %s al giorno %s", dipendente.getCognomeNome(), pm.trainingHours,
+				Logger.info("%s, sto spedendo %d ore di formazione dal giorno %s al giorno %s", dipendente.getCognomeNome(), pm.trainingHours,
 						pm.fromDate, pm.toDate);
 				codFormCounter++;
 			}
@@ -313,7 +313,7 @@ public class AttestatiClient {
 			connection.data("gg_buoni_pasto", String.valueOf(mealTicket));
 			mealTicketSent.append(String.valueOf(year)).append(",").append(String.valueOf(month)).append(",")
 			.append(String.valueOf(mealTicket));
-			Logger.debug("Inviati %d buoni pasto per %s", mealTicket, dipendente.getCognomeNome());
+			Logger.info("Inviati %d buoni pasto per %s", mealTicket, dipendente.getCognomeNome());
 		}
 		
 		
@@ -329,7 +329,7 @@ public class AttestatiClient {
 			}
 
 			Document elaboraDatiDoc = elaboraDatiResponse.parse();
-			Logger.debug("Risposta all'elaborazione dati = \n%s", elaboraDatiDoc);
+			Logger.info("Risposta all'elaborazione dati = \n%s", elaboraDatiDoc);
 			
 			/*
 			 * In caso di errore nella pagina restituita compaiono degli H5 come questi:
