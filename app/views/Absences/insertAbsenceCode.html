@@ -45,7 +45,7 @@
 				</tr>
 				<tr>
 					<td><p >Fine validita': </p></td>
-					<td><input type="text" name="fine"  id="datepicker2" data-date-format="yyyy-mm-dd"/></td>
+					<td><input type="text" name="fine"  id="datepicker1" data-date-format="yyyy-mm-dd"/></td>
 					<td>Data fine validità di questo codice nel formato aaa/mm/gg (se vuoto valido per sempre)	</td>
 				</tr>
 				<tr>
@@ -60,11 +60,11 @@
 					<td>Tempo di lavoro giustificato (Es. codice 661h2 indicare 2)</td>
 				</tr>
 				<tr>
-					<td><p>Livelli:</p></td>
+					<td><p>Per i livelli fino al:</p></td>
 					<td>
-					#{select 'qual', value:qual , id:'qual.id'}
+					#{select 'qual', id:'qual.id'}
 						#{list items:qualificationList, as:'qual'}
-							#{option qual}${qual.qualification}#{/option}
+							#{option qual.qualification}${qual.qualification}#{/option}
 						#{/list}
 					#{/select}
 					</td>

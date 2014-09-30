@@ -1,9 +1,11 @@
-package dao;
+package dao.history;
 
+import it.cnr.iit.epas.DateUtility;
 import models.base.BaseModel;
 import models.base.Revision;
 
 import org.hibernate.envers.RevisionType;
+import org.joda.time.LocalDateTime;
 
 import com.google.common.base.Function;
 
@@ -34,4 +36,34 @@ public class HistoryValue<T extends BaseModel> {
 			}
 		};
 	}
+	
+	public String formattedRevisionDate() {
+		
+		LocalDateTime time = this.revision.getRevisionDate();
+		
+		if(time == null)
+			return "";
+		
+		//data
+		String day = time.getYear() + "-" + time.getMonthOfYear() + "-" + time.getDayOfMonth() + " ";
+		
+		//ora
+		String hour = DateUtility.fromLocalDateTimeHourTime(time); 
+	
+		return day + " - " + hour;
+	}
+	
+	public String formattedOwner() {
+	
+		if(this.revision.owner != null)
+			return this.revision.owner.username;
+		else
+			return "ePAS";
+	}
+	
+	public boolean typeIsDel() {
+		String name = type.name();
+		return type.name().equals("DEL");
+	}
+
 }

@@ -42,14 +42,14 @@
 		<th>Codice per att. presenza</th>
 		<th>Descrizione</th>
 		<th>uso interno</th>
-		<th>uso multiplo</th>
+
 		<th>Usabile w.e. e festivi</th>
 		<th>inizio validità</th>
 		<th>fine validità</th>
 		<th>tempo di lavoro giustificato</th>
 		<th>livelli</th>
-		<th>calcolo buono pasto</th>
-		<th>ignora timbrature</th>
+		
+
 		<th>gruppo</th>
 		<th>valore</th>
 		<th>minuti in eccesso</th>
@@ -66,7 +66,7 @@
 		<td>${absenceCode.certificateCode}</td>
 		<td>${absenceCode.description}</td>
 		<td>${absenceCode.internalUse == true ? 'Sì' : 'No'}</td>
-		<td>${absenceCode.multipleUse == true ? 'Sì' : 'No'}</td>
+
 		<td>${absenceCode.consideredWeekEnd == true ? 'Sì' : 'No'}</td>
 		<td>${absenceCode.validFrom}</td>
 		<td>${absenceCode.validTo}</td>
@@ -76,8 +76,8 @@
 				${qualification.qualification},
 			%{ } }%
 		</td> 
-		<td>${absenceCode.mealTicketCalculation == true ? 'Sì' : 'No'}</td>
-		<td>${absenceCode.ignoreStamping == true ? 'Sì' : 'No'}</td>
+		
+
 		<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.label : ''}</td>
 		<td>${}</td> <!-- cos'è??? -->
 		<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.minutesExcess : ''}</td>

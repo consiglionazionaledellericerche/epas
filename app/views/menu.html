@@ -16,7 +16,7 @@
           	  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="badge">${currentData.monthLabel}</span><b class="caret"></b></a>
           	  <ul class="dropdown-menu">
           	  #{list items:1..12, as:'month'}
-            	<li><a href="?month=${month}&year=${currentData.year}&personId=${currentData.personId}">&{'Month.'+month}</a></li>
+            	<li><a href="?month=${month}&year=${currentData.year}&personId=${currentData.personId}&day=${currentData.day}">&{'Month.'+month}</a></li>
               #{/list}
           	  </ul>
         	</li>

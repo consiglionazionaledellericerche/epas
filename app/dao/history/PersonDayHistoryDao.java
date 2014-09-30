@@ -1,7 +1,8 @@
-package dao;
+package dao.history;
 
 import java.util.List;
 
+import models.Absence;
 import models.Stamping;
 
 import org.hibernate.envers.AuditReader;
@@ -37,5 +38,20 @@ public class PersonDayHistoryDao {
 				.transform(HistoryValue.fromTuple(Stamping.class))
 				.toList();
 	}
+	
+	@SuppressWarnings("unchecked")
+	public List<HistoryValue<Absence>> absences(long personDayId) {
+		final AuditQuery query = auditReader.get().createQuery()
+			    .forRevisionsOfEntity(Absence.class, false, true)
+				.add(AuditEntity.relatedId("personDay").eq(personDayId))
+				.addOrder(AuditEntity.property("id").asc())
+				.addOrder(AuditEntity.revisionNumber().asc());
+		
+		return FluentIterable.from(query.getResultList())
+				.transform(HistoryValue.fromTuple(Absence.class))
+				.toList();
+	}
+	
+	
 	
 }
