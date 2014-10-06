@@ -7,6 +7,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import models.MealTicket;
 import models.Person;
@@ -49,19 +50,30 @@ public class MealTickets  extends Controller {
 		public Person person;
 		public int numberOfMealTicketToUse;
 		public List<MealTicket> mealTickets;
-		
+
+		//TODO: i costruttori non dovrebbero compiere molte operazioni ma 
+		// andrebbero demandate ad altri metodi da chiamare quando e se c'è bisogno
 		public TemporaryPersonMealTicketRecap(Person person) {
 			this.person = person;
+
+			//TODO: Il giorno iniziale è da mettere in configurazione
+			//  (considerare la scadenza buoni pasto??)
+			LocalDate mealTicketStartDate = new LocalDate(2014,7,1);
 			
 			//Numero ticket consegnati dal primo luglio
 			this.mealTickets = MealTicket.find("select mt from MealTicket mt where mt.person = ? and mt.date > ?",
-		    		person, new LocalDate(2014,7,1)).fetch();
+		    		person, mealTicketStartDate).fetch();
 
-			//TODO parametrizzare. Giorno iniziale da mettere in configurazione (e considerare la scadenza buoni pasto??)
 			int numberOfMealTicketToUse = 0;
-			numberOfMealTicketToUse = numberOfMealTicketToUse + PersonUtility.numberOfMealTicketToUse(person, 2014, 7);
-			numberOfMealTicketToUse = numberOfMealTicketToUse + PersonUtility.numberOfMealTicketToUse(person, 2014, 8);
-			numberOfMealTicketToUse = numberOfMealTicketToUse + PersonUtility.numberOfMealTicketToUse(person, 2014, 9);	
+			
+			LocalDate now = LocalDate.now();
+			YearMonth currentMonth = new YearMonth(now.getYear(), now.getMonthOfYear());
+			
+			YearMonth activeMonth = new YearMonth(mealTicketStartDate.getYear(), mealTicketStartDate.getMonthOfYear());
+			while(activeMonth.isBefore(currentMonth) || activeMonth.isEqual(currentMonth)) {
+				numberOfMealTicketToUse += PersonUtility.numberOfMealTicketToUse(person, activeMonth.getYear(), activeMonth.getMonthOfYear());
+				activeMonth = activeMonth.plusMonths(1);
+			}
 			this.numberOfMealTicketToUse = numberOfMealTicketToUse;
 		}
 		
