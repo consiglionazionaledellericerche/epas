@@ -364,10 +364,12 @@ public class CompetenceUtility {
 				// and and this case we don't change the valueApproved
 				CertificatedData certData = CertificatedData.find("SELECT cd FROM CertificatedData cd WHERE cd.person = ? AND cd.year = ? AND cd.month = ?", person, year, month).first();
 				
-				Logger.debug("certData=%s isOK=%s competencesSent=%s", certData, certData.isOk, certData.competencesSent);
+				//Logger.debug("certData=%s isOK=%s competencesSent=%s", certData, certData.isOk, certData.competencesSent);
 				
-				int calcApproved1 = (certData != null & certData.isOk & (certData.competencesSent != null)) ? shiftCompetence.valueApproved : calcApproved;
-				Logger.debug("competenza è inviata = %s vecchia valueApproved=%d, calcolata=%d salvata=%d", certData.isOk, shiftCompetence.valueApproved, calcApproved, calcApproved1);
+				Logger.debug("certData=%s", certData);
+				
+				int calcApproved1 = (certData != null && certData.isOk && (certData.competencesSent != null)) ? shiftCompetence.valueApproved : calcApproved;
+				//Logger.debug("competenza è inviata = %s vecchia valueApproved=%d, calcolata=%d salvata=%d", certData.isOk, shiftCompetence.valueApproved, calcApproved, calcApproved1);
 				
 				shiftCompetence.setValueApproved(calcApproved1);
 				shiftCompetence.setValueRequested(numOfShiftHours);
