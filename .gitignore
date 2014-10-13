@@ -16,3 +16,4 @@ lib/
 /conf/shibboleth-1.2
 /build
 /.settings
+/docs/_build
