@@ -47,7 +47,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'ePAS'
-copyright = u'2014, Claudio Baesso, Cristian Lucchesi, Alessandro Martelli, Maurizio Martinelli, Irene Sannicandro, Dario Tagliaferri'
+copyright = u'2014, IIT-CNR'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
