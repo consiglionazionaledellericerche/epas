@@ -11,14 +11,22 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-
-
+   architecture
+   mainComponents
+   mainFeatures
+   
 Indice e tabelle
 ================
 
 * :ref:`genindex`
 * :ref:`search`
 
+.. index::
+   index Introduzione
+   architecture Architettura di Massima
+   mainComponents Componenti principali di ePAS
+   mainFeatures Funzionalità principali
+   
 Introduzione
 ============
 ePAS (Electronic Personnel Attendance System) è un software per la rilevazione e
