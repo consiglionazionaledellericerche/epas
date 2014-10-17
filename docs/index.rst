@@ -14,6 +14,8 @@ Contents:
    architecture
    mainComponents
    mainFeatures
+   managePerson
+   workingTimeType
    
 Indice e tabelle
 ================
@@ -26,6 +28,8 @@ Indice e tabelle
    architecture Architettura di Massima
    mainComponents Componenti principali di ePAS
    mainFeatures Funzionalità principali
+   managePerson Inserimento e gestione personale
+   workingTimeType Inserimento e gestione orari di lavoro
    
 Introduzione
 ============
