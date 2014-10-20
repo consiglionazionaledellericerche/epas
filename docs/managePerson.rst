@@ -1,7 +1,7 @@
 Gestione e inserimento Personale
 ================================
 La prima funzionalità che si incontra analizzando il sistema in modalità amministratore riguarda la possibilità di inserire, modificare e, più in generale, gestire il personale.
-Dal menu "Amministrazione", selezionando il link "Lista Persone", è possibile aprire l'interfaccia di consultazione delle persone presenti in anagrafica.
+Dal menu :menuselection:`Amministrazione --> Lista Persone` è possibile aprire l'interfaccia di consultazione delle persone presenti in anagrafica.
 
 .. figure:: _static/images/listPersone.png
    :scale: 40
