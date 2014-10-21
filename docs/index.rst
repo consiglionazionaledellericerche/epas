@@ -16,6 +16,7 @@ Contents:
    mainFeatures
    managePerson
    workingTimeType
+   stampings
    
 Indice e tabelle
 ================
@@ -30,6 +31,7 @@ Indice e tabelle
    mainFeatures Funzionalità principali
    managePerson Inserimento e gestione personale
    workingTimeType Inserimento e gestione orari di lavoro
+   stampings Visualizzazione e modifica timbrature
    
 Introduzione
 ============
