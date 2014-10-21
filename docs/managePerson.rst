@@ -9,6 +9,9 @@ Dal menu "Amministrazione", selezionando il link "Lista Persone", è possibile a
 
    Schermata visualizzazione lista personale
    
+In primo luogo si può notare come esistano due colorazioni distine per il personale:
+   * quelli colorati di blu sono i dipendenti effettivi, ovvero coloro i quali sono strutturati attraverso un contratto a tempo determinato o indeterminato e che sono abilitati alle timbrature.
+   * quelli colorati di grigio sono o ex dipendenti per i quali è terminato il rapporto di lavoro con l'ente, o personale non strutturato (co.co,co., co.co.pro., assegnisti ecc...) che non sono abilitati alle timbrature.   
 Da questa schermata è possibile evincere quali siano i tipi di dato supportati per ciascun dipendente.
 Ogni persona è attualmente modificabile cliccando sul nominativo. 
 In tal caso, la schermata che potremo visualizzare sarà di questo tipo
