@@ -101,19 +101,22 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
+html_theme = 'agogo'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#html_theme_options = {}
+html_theme_options = {
+    "headerbg" : "#033c73",
+    "bodyfont" : '"Helvetica Neue",Helvetica,Arial,sans-serif'
+}
 
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-#html_title = None
+html_title = "ePAS v1.0.4 Documentazione per Ufficio Personale"
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #html_short_title = None
@@ -200,7 +203,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
   ('index', 'ePAS.tex', u'ePAS Documentation',
-   u'Claudio Baesso, Cristian Lucchesi, Alessandro Martelli, Maurizio Martinelli, Irene Sannicandro, Dario Tagliaferri', 'manual'),
+   u'2014, IIT-CNR', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -230,7 +233,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'epas', u'ePAS Documentation',
-     [u'Claudio Baesso, Cristian Lucchesi, Alessandro Martelli, Maurizio Martinelli, Irene Sannicandro, Dario Tagliaferri'], 1)
+     [u'2014, IIT-CNR'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -244,7 +247,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'ePAS', u'ePAS Documentation',
-   u'Claudio Baesso, Cristian Lucchesi, Alessandro Martelli, Maurizio Martinelli, Irene Sannicandro, Dario Tagliaferri', 'ePAS', 'One line description of project.',
+   u'2014, IIT-CNR', 'ePAS', 'ePAS - Personnel Attendance System.',
    'Miscellaneous'),
 ]
 

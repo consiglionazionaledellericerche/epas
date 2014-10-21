@@ -35,7 +35,7 @@ lettori le informazioni ed inviarle via Rest al modulo ePAS Rest per il loro
 salvataggio e trattamento.
 
 .. figure:: _static/images/epas.png
-   :scale: 40
+   :scale: 35
    :align: center
    
    ePAS Architecture Overview
