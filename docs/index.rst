@@ -17,6 +17,8 @@ Contents:
    managePerson
    workingTimeType
    stampings
+   seat
+   parameters
    
 Indice e tabelle
 ================
@@ -32,6 +34,8 @@ Indice e tabelle
    managePerson Inserimento e gestione personale
    workingTimeType Inserimento e gestione orari di lavoro
    stampings Visualizzazione e modifica timbrature
+   seat Gestione sedi e amministratori
+   parameters Gestione parametri
    
 Introduzione
 ============
