@@ -19,6 +19,7 @@ Contents:
    stampings
    seat
    parameters
+   absences
    
 Indice e tabelle
 ================
@@ -36,6 +37,7 @@ Indice e tabelle
    stampings Visualizzazione e modifica timbrature
    seat Gestione sedi e amministratori
    parameters Gestione parametri
+   absences Consultazione assenze
    
 Introduzione
 ============
