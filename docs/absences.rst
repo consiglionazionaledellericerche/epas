@@ -1,6 +1,7 @@
 Assenze
 =======
 
+
 Il sistema ePAS permette all'amministratore di poter verificare le assenze di tutto il personale attraverso vari livelli di granularità.
 In particolare, dal menu "Amministrazione", selezionando il link "Assenze", accediamo alla schermata seguente:
 

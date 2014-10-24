@@ -20,6 +20,8 @@ Contents:
    seat
    parameters
    absences
+   vacations
+   competences
    
 Indice e tabelle
 ================
@@ -38,6 +40,8 @@ Indice e tabelle
    seat Gestione sedi e amministratori
    parameters Gestione parametri
    absences Consultazione assenze
+   vacations Consultazione ferie e permessi
+   competences Gestione competenze
    
 Introduzione
 ============
