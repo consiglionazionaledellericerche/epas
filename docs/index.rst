@@ -9,7 +9,7 @@ Benvenuto nella documentazione di ePAS!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
 
    architecture
    mainComponents
@@ -22,6 +22,8 @@ Contents:
    absences
    vacations
    competences
+   tickets
+   sendStampings
    
 Indice e tabelle
 ================
@@ -42,6 +44,8 @@ Indice e tabelle
    absences Consultazione assenze
    vacations Consultazione ferie e permessi
    competences Gestione competenze
+   tickets Gestione buoni pasto
+   sendStampings Invio attestati di presenza
    
 Introduzione
 ============
