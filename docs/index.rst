@@ -24,6 +24,8 @@ Contents:
    competences
    tickets
    sendStampings
+   variousRecap
+   utility
    
 Indice e tabelle
 ================
@@ -46,6 +48,8 @@ Indice e tabelle
    competences Gestione competenze
    tickets Gestione buoni pasto
    sendStampings Invio attestati di presenza
+   variousRecap Schermate di riepilogo
+   utility Tool di utilità
    
 Introduzione
 ============

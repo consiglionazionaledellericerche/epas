@@ -2,7 +2,7 @@ Gestione Competenze
 ===================
 
 Il sistema ePAS consente all'amministratore di gestire le competenze assegnabili a ciascuna persona afferente all'istituto.
-Selezionando dal menu "Amministrazione" la voce "Competenze", verrà visualizzata la seguente schermata:
+Selezionando dal menu :menuselection:`Amministrazione --> Competenze`, verrà visualizzata la seguente schermata:
 
 .. figure:: _static/images/competenze.png
    :scale: 40
@@ -19,6 +19,9 @@ La schermata principale presenta tre panelli:
 
 Come nel caso dei parametri (v. :doc:`Gestione parametri </parameters>` ), troviamo al di sopra dei pannelli un menu a tendina che specifica per quale sede intendiamo assegnare le competenze. Naturalmente, sulla base dei privilegi che l'amministratore ha assegnati (v. :doc:`Gestione sedi e amministratori </seat>`), sarà possibile modificare o meno le competenze per i dipendenti afferenti alla propria sede o a quelle eventuali distaccate che fanno comunque parte del proprio istituto.
 
+Straordinari
+------------
+
 La tab successiva è quella relativa agli straordinari, in particolare in questa tabella sono riportati i valori di ore straordinario assegnate in relazione a tutta una serie di altri parametri:
 
 .. figure:: _static/images/straordinari.png
@@ -29,6 +32,9 @@ La tab successiva è quella relativa agli straordinari, in particolare in questa
    
 
 Paginati in numero di 10 alla volta, troviamo la lista dei dipendenti sulla sinistra della tabella, i giorni di presenza a lavoro nel mese selezionato in alto (come nel caso della tab delle competenze al punto precedente), le ore effettivamente lavorate nel mese selezionato, il tempo lavorato in eccesso rispetto a quanto previsto dal proprio orario di lavoro associato (v. :doc:`Gestione e inserimento Personale </managePerson>`), il residuo meno gli eventuali riposi compensativi di cui si è usufruito nel mese, il residuo netto, le ore di straordinario pagate e il numero degli eventuali riposi compensativi di cui si è usufruito.
+
+Configurazione monte ore
+------------------------
 
 La tab successiva è relativa alla configurazione del monte ore per gli straordinari
 
@@ -41,6 +47,8 @@ La tab successiva è relativa alla configurazione del monte ore per gli straordi
 In questa schermata vengono riepilogate le aggiunte successive di ore per gli straordinari utilizzabili all'interno dell'istituto (listate per data di aggiunta).
 In più è possibile specificare eventuali ulteriori ore di straordinario da aggiungere (precedendo la quantità da inserire con il segno "+") o da togliere (precedendo la quantità da togliere con il segno "-") rispetto al totale a cui ci troviamo. 
 
+Abilita competenze
+------------------
 
 Nella tab "Abilita competenze" troviamo la lista del personale afferente all'istituto selezionato con di fianco tutte le eventuali competenze assegnate a ciascun dipendente, contrassegnate con una spunta.
 
@@ -61,6 +69,9 @@ Si aprirà una pagina di questo tipo:
    Finestra di modifica competenze
    
 Selezionando le competenze che si intende aggiungere al dipendente e premendo su "Ok", la pagina precedente verrà ricaricata con i simboli di spunta in presenza delle competenze che sono state assegnate al dipendente.
+
+Esporta competenze
+------------------
 
 L'ultima tab che si incontra è quella relativa all'esportazione delle competenze. 
 In particolare è possibile esportare la situazione delle competenze assegnate a tutti i dipendenti in un determinato anno in formato csv

@@ -2,6 +2,7 @@ Gestione e inserimento orari di lavoro
 ======================================
 
 Gli orari di lavoro del personale sono una parte fondamentale dell'applicazione perché la loro definizione e la loro associazione ai vari dipendenti determina il calcolo della “differenza” giornaliera ovvero della differenza tra i minuti che un dipendente ha svolto in una determinata giornata ed i minuti che avrebbe dovuto svolgere in funzione del proprio orario di lavoro.
+Dal menu :menuselection:`Configurazione --> orari di lavoro`, l'amministratore potrà trovarsi di fronte una schermata come questa:
 
 .. figure:: _static/images/orarioDiLavoro.png
    :scale: 90

@@ -12,9 +12,15 @@ Dal menu :menuselection:`Amministrazione --> Lista Persone` è possibile aprire 
 In primo luogo si può notare come esistano due colorazioni distine per il personale:
    * quelli colorati di blu sono i dipendenti effettivi, ovvero coloro i quali sono strutturati attraverso un contratto a tempo determinato o indeterminato e che sono abilitati alle timbrature.
    * quelli colorati di grigio sono o ex dipendenti per i quali è terminato il rapporto di lavoro con l'ente, o personale non strutturato (co.co,co., co.co.pro., assegnisti ecc...) che non sono abilitati alle timbrature.   
+
 Da questa schermata è possibile evincere quali siano i tipi di dato supportati per ciascun dipendente.
 Ogni persona è attualmente modificabile cliccando sul nominativo. 
-In tal caso, la schermata che potremo visualizzare sarà di questo tipo
+
+
+Modifica persona
+----------------
+
+In caso si voglia modificare i dati di una certa persona la schermata che potremo visualizzare sarà di questo tipo
 
 .. figure:: _static/images/modificaPersona.png
    :scale: 40
@@ -29,6 +35,10 @@ In tal caso, la schermata che potremo visualizzare sarà di questo tipo
    Schermata modifica persona (bottom)
 
 In ogni pannello (titolato) sono contenute informazioni referenti ad esso, rendendo così più intuitivo dove andare a cercare l'informazione specifica che si richiede o che si intende modificare.
+
+Inserimento figli dipendente
+----------------------------
+
 Nella schermata top della modifica del personale si può notare anche il link ad un'altra schermata: la possibilità di inserire per il dipendente in questione, dei figli in anagrafica. Di modo da poter far verificare al sistema la possibilità per quel dipendente di usufruire di particolari permessi per l'astensione dal lavoro.
 Il link si chiama "Inserisci figlio per...", cliccandoci verrà proposta una form di inserimento per l'eventuale figlio del dipendente contenente nome, cognome e data di nascita e, sopra, un link per la visualizzazione di eventuali figli già inseriti.
 

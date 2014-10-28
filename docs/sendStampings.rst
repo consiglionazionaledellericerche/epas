@@ -2,7 +2,7 @@ Invio attestati di presenza
 ===========================
 
 Il sistema ePAS consente all'amministratore di interfacciarsi con le funzionalità di sottomissione di assenze e competenze presenti sul sito *https://attestati.rm.cnr.it/attestati*
-Dal menu "Amministrazione", selezionando "Invio attestati", l'amministratore si troverà di fronte a questa schermata:
+Dal menu :menuselection:`Amministrazione --> Invio attestati`, l'amministratore si troverà di fronte a questa schermata:
 
 .. figure:: _static/images/invioAttestati.png
    :scale: 40
