@@ -2,7 +2,7 @@ Gestione Timbrature
 ===================
 
 Per l'amministratore è possibile controllare la situazione giornaliera/mensile di ogni dipendente afferente all'istituto.
-Dalla schermata "Amministrazione", cliccando su "Timbrature", è possibile verificare la situazione di ciascun dipendente (selezionabile dal menu a tendina che compare in alto di fianco a mese e anno da consultare anch'essi selzionabili).
+Dalla schermata :menuselection:`Amministrazione --> Timbrature`, è possibile verificare la situazione di ciascun dipendente (selezionabile dal menu a tendina che compare in alto di fianco a mese e anno da consultare anch'essi selzionabili).
 
 .. figure:: _static/images/timbrature.png
    :scale: 40

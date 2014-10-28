@@ -2,7 +2,7 @@ Gestione buoni pasto
 ====================
 
 Il sistema ePAS permette all'amministratore di poter gestire i buoni pasto da attribuire a ciascun dipendente.
-Dal menu "Amministrazione", selezionando il link "Gestione buoni pasto" si arriva in questa schermata:
+Dal menu :menuselection:`Amministrazione --> Gestione buoni pasto` si arriva in questa schermata:
 
 .. figure:: _static/images/assegnaBuoni.png
    :scale: 40

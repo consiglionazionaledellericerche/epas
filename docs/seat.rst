@@ -3,6 +3,7 @@ Gestione Sedi e amministratori
 
 All'interno di questa funzionalità è possibile specificare nomi e caratteristiche delle sedi di cui il proprio istituto di appartenenza dispone, oltre che delle persone che saranno insignite dei diritti di amministrazione per poter gestire il programma e il personale.
 Gli amministratori potranno essere designati sia completi (con diritto di modifica) o in sola lettura, quindi con la possibilità di visualizzare le situazioni mensili del personale senza però poterle modificare.
+Dal menu :menuselection:`Configurazione --> Sedi e amministratori` l'amministratore si troverà di fronte la seguente schermata:
 
 .. figure:: _static/images/sediAmministratori.png
    :scale: 40

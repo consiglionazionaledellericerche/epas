@@ -2,6 +2,7 @@ Gestione Ferie e Permessi
 =========================
 
 Il sistema ePAS fornisce all'amministratore anche una schermata in cui poter visualizzare la situazione relativa a ferie e permessi di ciascun dipendente.
+Dal menu :menuselection:`Amministrazione --> Ferie e permessi` è possibile visualizzare la seguente schermata:
 
 .. figure:: _static/images/feriePermessi.png
    :scale: 40
