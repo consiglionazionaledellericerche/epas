@@ -25,17 +25,18 @@ drop table year_recaps;
 alter table absence_types_history add column compensatory_rest integer;
 alter table absence_types_history add column ignore_stamping boolean;
 alter table absence_types add column compensatory_rest integer;
-alter table absence_types add column ignore stamping boolean;
-
-add table auth_users;
-add table configurations_history;
-add table configurations;
-add table groups_history;
-add table groups;
-add table options;
-add table valuable_competences;
-add table web_stamping_address_history;
-add table web_stamping_address;
-add table year_recaps;
+alter table absence_types add column ignore_stamping boolean;
+create table groups_history;
+create table groups;
+create table web_stamping_address_history;
+create table web_stamping_address;
+alter table permissions_groups add constraint fk7abb85ef522ebd41 FOREIGN KEY (groups_id) REFERENCES groups (id);
+alter table web_stamping_address add constraint fk84df567fac97433e FOREIGN KEY (configuration_id) REFERENCES configurations (id);
+create table auth_users;
+create table configurations_history;
+create table configurations;
+create table options;
+create table valuable_competences;
+create table year_recaps;
 
 
