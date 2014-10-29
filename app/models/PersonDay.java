@@ -279,7 +279,7 @@ public class PersonDay extends BaseModel {
 
 		//assenze all day piu' altri casi di assenze
 		for(Absence abs : absences){
-			if(abs.absenceType.ignoreStamping || (abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay && !checkHourlyAbsenceCodeSameGroup(abs.absenceType)))
+			if((abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay && !checkHourlyAbsenceCodeSameGroup(abs.absenceType)))
 			{
 				setIsTickeAvailable(false);
 				return 0;
