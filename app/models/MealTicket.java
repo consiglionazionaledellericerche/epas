@@ -2,6 +2,7 @@ package models;
 
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -35,7 +36,6 @@ public class MealTicket extends BaseModel{
 	
 	}
 	
-	
 	@Required
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "person_id", nullable = false)
@@ -60,6 +60,11 @@ public class MealTicket extends BaseModel{
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "admin_id", nullable = false)
 	public Person admin;
+	
+	@Required
+	@Column(name = "expire_date")
+	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	public LocalDate expireDate;
 	
 
 }
