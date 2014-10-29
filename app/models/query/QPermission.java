@@ -29,8 +29,6 @@ public class QPermission extends EntityPathBase<Permission> {
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
-    public final ListPath<models.Group, QGroup> groups = this.<models.Group, QGroup>createList("groups", models.Group.class, QGroup.class, PathInits.DIRECT2);
-
     //inherited
     public final NumberPath<Long> id = _super.id;
 

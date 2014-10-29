@@ -30,6 +30,8 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final DatePath<org.joda.time.LocalDate> birthday = createDate("birthday", org.joda.time.LocalDate.class);
 
+    public final ListPath<models.MealTicket.BlockMealTicket, SimplePath<models.MealTicket.BlockMealTicket>> blockMealTicket = this.<models.MealTicket.BlockMealTicket, SimplePath<models.MealTicket.BlockMealTicket>>createList("blockMealTicket", models.MealTicket.BlockMealTicket.class, SimplePath.class, PathInits.DIRECT2);
+
     public final BooleanPath boatsAllowanceAvailable = createBoolean("boatsAllowanceAvailable");
 
     public final DateTimePath<java.util.Date> bornDate = createDateTime("bornDate", java.util.Date.class);
@@ -52,8 +54,6 @@ public class QPerson extends EntityPathBase<Person> {
     public final SimplePath<Object> entityId = _super.entityId;
 
     public final StringPath fax = createString("fax");
-
-    public final ListPath<models.Group, QGroup> groups = this.<models.Group, QGroup>createList("groups", models.Group.class, QGroup.class, PathInits.DIRECT2);
 
     public final BooleanPath handleValuesAllowanceAvailable = createBoolean("handleValuesAllowanceAvailable");
 
@@ -157,13 +157,11 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final QUser user;
 
-    public final ListPath<models.ValuableCompetence, QValuableCompetence> valuableCompetences = this.<models.ValuableCompetence, QValuableCompetence>createList("valuableCompetences", models.ValuableCompetence.class, QValuableCompetence.class, PathInits.DIRECT2);
-
     public final NumberPath<Integer> version = createNumber("version", Integer.class);
 
-    public final BooleanPath workDayReperibilityAvailable = createBoolean("workDayReperibilityAvailable");
+    public final BooleanPath wantEmail = createBoolean("wantEmail");
 
-    public final ListPath<models.YearRecap, QYearRecap> yearRecaps = this.<models.YearRecap, QYearRecap>createList("yearRecaps", models.YearRecap.class, QYearRecap.class, PathInits.DIRECT2);
+    public final BooleanPath workDayReperibilityAvailable = createBoolean("workDayReperibilityAvailable");
 
     public QPerson(String variable) {
         this(Person.class, forVariable(variable), INITS);

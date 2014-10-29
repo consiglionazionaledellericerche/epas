@@ -162,11 +162,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<StampProfile> stampProfiles = new ArrayList<StampProfile>();
 
-	/**
-	 * relazione con la tabella dei gruppi
-	 */
-	@ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
-	public List<Group> groups;
+
 
 
 	/**
@@ -203,12 +199,6 @@ public class Person extends BaseModel implements Comparable<Person>{
 	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<PersonYear> personYears;
 
-	/**
-	 * relazione con la tabella di storico YearRecap	//TODO db.evolutions remove, tenere solo PersonYear
-	 */
-	@NotAudited
-	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<YearRecap> yearRecaps;
 
 	/**
 	 * relazione con la tabella Competence
@@ -224,13 +214,6 @@ public class Person extends BaseModel implements Comparable<Person>{
 	@ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
 	public List<CompetenceCode> competenceCode;
 	
-
-	/**
-	 * relazione con la tabella delle competence valide
-	 */
-	@NotAudited
-	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<ValuableCompetence> valuableCompetences;
 
 	@OneToOne(mappedBy="person", fetch=FetchType.EAGER)
 	public PersonReperibility reperibility;

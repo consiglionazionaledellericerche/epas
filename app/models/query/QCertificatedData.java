@@ -42,7 +42,7 @@ public class QCertificatedData extends EntityPathBase<CertificatedData> {
 
     public final StringPath matricola = createString("matricola");
 
-    public final NumberPath<Integer> mealTicketSent = createNumber("mealTicketSent", Integer.class);
+    public final StringPath mealTicketSent = createString("mealTicketSent");
 
     public final NumberPath<Integer> month = createNumber("month", Integer.class);
 
