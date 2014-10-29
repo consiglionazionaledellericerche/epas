@@ -45,8 +45,6 @@ public class QStamping extends EntityPathBase<Stamping> {
 
     public final QPersonDay personDay;
 
-    public final BooleanPath serviceStamping = createBoolean("serviceStamping");
-
     public final QStampModificationType stampModificationType;
 
     public final QStampType stampType;

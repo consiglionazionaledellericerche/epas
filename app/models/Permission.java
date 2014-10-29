@@ -27,9 +27,7 @@ public class Permission extends BaseModel{
 
 	public String description;
     
-    @ManyToMany
-    public List <Group> groups = Lists.newArrayList();
-    
+ 
 	@ManyToMany(mappedBy="permissions")
 	public Set<Role> roles = Sets.newHashSet();
 }

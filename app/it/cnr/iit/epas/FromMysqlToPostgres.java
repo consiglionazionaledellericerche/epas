@@ -33,7 +33,7 @@ import models.TotalOvertime;
 import models.User;
 import models.VacationCode;
 import models.VacationPeriod;
-import models.ValuableCompetence;
+
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import models.enumerate.AccumulationBehaviour;
@@ -470,7 +470,7 @@ public class FromMysqlToPostgres {
 
 			//I codici della serie 91 sono riposi compensativi
 			if (absenceType.code.startsWith("91")) {
-				absenceType.compensatoryRest = true;
+	//			absenceType.compensatoryRest = true;
 			}
 
 			if(absenceType.code.equals("21") || absenceType.code.equals("38") || absenceType.code.startsWith("11")){
@@ -482,7 +482,7 @@ public class FromMysqlToPostgres {
 			absenceType.validTo = new LocalDate(rsCodici.getDate("DataFine"));
 
 			absenceType.internalUse = rsCodici.getByte("Interno") != 0; 
-			absenceType.ignoreStamping =  rsCodici.getByte("IgnoraTimbr") != 0;
+//			absenceType.ignoreStamping =  rsCodici.getByte("IgnoraTimbr") != 0;
 
 
 			if (rsCodici.getInt("QuantGiust") == 22) {
@@ -1142,7 +1142,7 @@ public class FromMysqlToPostgres {
 				competenceCode.code = rs.getString("codice");
 				competenceCode.codeToPresence = rs.getString("codice_att");
 				competenceCode.description = rs.getString("descrizione");
-				competenceCode.inactive = rs.getByte("inattivo") != 0;
+//				competenceCode.inactive = rs.getByte("inattivo") != 0;
 
 				competenceCode.save();
 				mappaCodiciCompetence.put(idCodiciCompetenza,competenceCode);
@@ -1188,18 +1188,18 @@ public class FromMysqlToPostgres {
 		PreparedStatement stmt = mysqlCon.prepareStatement("SELECT codicecomp, descrizione FROM compvalide " +
 				"WHERE matricola = " +matricola );
 		ResultSet rs = stmt.executeQuery();
-		ValuableCompetence valuableCompetence = null;
-		while(rs.next()){
-			valuableCompetence = new ValuableCompetence();
-			valuableCompetence.person = person;
-			valuableCompetence.codicecomp = rs.getString("codicecomp");
-			valuableCompetence.descrizione = rs.getString("descrizione");
-			valuableCompetence.save();
-			Logger.info("Creato %s", valuableCompetence);
-		}
-		if (valuableCompetence == null) {
-			Logger.info("Non ci sono competenza valide da importare per %s", person);
-		}
+//		ValuableCompetence valuableCompetence = null;
+//		while(rs.next()){
+//			valuableCompetence = new ValuableCompetence();
+//			valuableCompetence.person = person;
+//			valuableCompetence.codicecomp = rs.getString("codicecomp");
+//			valuableCompetence.descrizione = rs.getString("descrizione");
+//			valuableCompetence.save();
+//			Logger.info("Creato %s", valuableCompetence);
+//		}
+//		if (valuableCompetence == null) {
+//			Logger.info("Non ci sono competenza valide da importare per %s", person);
+//		}
 
 	}
 
@@ -1444,7 +1444,7 @@ public class FromMysqlToPostgres {
 			code.description = "Straordinario diurno nei giorni lavorativi";
 			code.code = "S1";
 			code.codeToPresence = "S1";
-			code.inactive = false;
+//			code.inactive = false;
 			code.save();
 			Logger.debug("Il codice creato: %s", code.code);
 		}
@@ -1514,7 +1514,7 @@ public class FromMysqlToPostgres {
 				code.code = rs.getString("codice");
 				code.codeToPresence = rs.getString("codice_att");
 				code.description = rs.getString("descrizione");
-				code.inactive = rs.getBoolean("inattivo");
+//				code.inactive = rs.getBoolean("inattivo");
 				code.save();
 			}					
 

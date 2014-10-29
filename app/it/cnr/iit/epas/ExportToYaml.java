@@ -242,7 +242,7 @@ public class ExportToYaml {
 		out = out + getFormattedProperty("code", comp.code);
 		out = out + getFormattedProperty("codeToPresence", comp.codeToPresence);
 		out = out + getFormattedProperty("description", comp.description);
-		out = out + getFormattedProperty("inactive", comp.inactive+"");
+//		out = out + getFormattedProperty("inactive", comp.inactive+"");
 		return out;
 	}
 	
@@ -278,10 +278,10 @@ public class ExportToYaml {
 		out = out + getFormattedHeader("AbsenceType", "abt"+abt.id);
 		out = out + getFormattedProperty("certificateCode", abt.certificateCode);
 		out = out + getFormattedProperty("code", abt.code);
-		out = out + getFormattedProperty("compensatoryRest", abt.compensatoryRest+"");
+//		out = out + getFormattedProperty("compensatoryRest", abt.compensatoryRest+"");
 		out = out + getFormattedProperty("consideredWeekEnd", abt.consideredWeekEnd+"");
 		out = out + getFormattedProperty("description", abt.description);
-		out = out + getFormattedProperty("ignoreStamping", abt.ignoreStamping+"");
+//		out = out + getFormattedProperty("ignoreStamping", abt.ignoreStamping+"");
 		out = out + getFormattedProperty("internalUse", abt.internalUse+"");
 		out = out + getFormattedProperty("justifiedTimeAtWork", abt.justifiedTimeAtWork.toString());
 		out = out + getFormattedProperty("mealTicketCalculation", abt.mealTicketCalculation+"");
