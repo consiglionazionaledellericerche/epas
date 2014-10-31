@@ -34,8 +34,6 @@ public class QAbsenceType extends EntityPathBase<AbsenceType> {
 
     public final StringPath code = createString("code");
 
-    public final BooleanPath compensatoryRest = createBoolean("compensatoryRest");
-
     public final BooleanPath consideredWeekEnd = createBoolean("consideredWeekEnd");
 
     public final StringPath description = createString("description");
@@ -45,8 +43,6 @@ public class QAbsenceType extends EntityPathBase<AbsenceType> {
 
     //inherited
     public final NumberPath<Long> id = _super.id;
-
-    public final BooleanPath ignoreStamping = createBoolean("ignoreStamping");
 
     public final ListPath<models.InitializationAbsence, QInitializationAbsence> initializationAbsences = this.<models.InitializationAbsence, QInitializationAbsence>createList("initializationAbsences", models.InitializationAbsence.class, QInitializationAbsence.class, PathInits.DIRECT2);
 

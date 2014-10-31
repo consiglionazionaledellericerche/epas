@@ -16,7 +16,7 @@ import models.ConfGeneral;
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
-import models.Group;
+
 import models.InitializationAbsence;
 import models.InitializationTime;
 import models.Office;
@@ -31,9 +31,9 @@ import models.Stamping;
 import models.User;
 import models.UsersRolesOffices;
 import models.VacationPeriod;
-import models.ValuableCompetence;
+
 import models.WorkingTimeType;
-import models.YearRecap;
+
 import models.enumerate.ConfigurationFields;
 import net.sf.oval.constraint.MinLength;
 
@@ -448,13 +448,7 @@ public class Persons extends Controller {
 		JPAPlugin.startTx(false);
 		person = Person.findById(personId);
 		//Eliminazione competenze valide
-		for(ValuableCompetence vc : person.valuableCompetences){
-			vc.delete();
-		}
-
-		for(YearRecap yr : person.yearRecaps){
-			yr.delete();
-		}
+		
 		JPAPlugin.closeTx(false);
 		
 //		//Eliminazione user

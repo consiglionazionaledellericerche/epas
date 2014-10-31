@@ -37,6 +37,8 @@ public class QMealTicket extends EntityPathBase<MealTicket> {
     //inherited
     public final SimplePath<Object> entityId = _super.entityId;
 
+    public final DatePath<org.joda.time.LocalDate> expireDate = createDate("expireDate", org.joda.time.LocalDate.class);
+
     //inherited
     public final NumberPath<Long> id = _super.id;
 
