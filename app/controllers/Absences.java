@@ -444,7 +444,7 @@ public class Absences extends Controller{
 
 
 		absence.mealTicketCalculation = params.get("calcolaBuonoPasto", Boolean.class);
-		absence.ignoreStamping = params.get("ignoraTimbrature", Boolean.class);
+//		absence.ignoreStamping = params.get("ignoraTimbrature", Boolean.class);
 		if(!params.get("gruppo").equals("")){
 			absence.absenceTypeGroup.label = params.get("gruppo");
 			absence.absenceTypeGroup.accumulationBehaviour = AccumulationBehaviour.getByDescription((params.get("abt.absenceTypeGroup.accumulationBehaviour")));

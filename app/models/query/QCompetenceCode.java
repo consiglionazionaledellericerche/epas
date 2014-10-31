@@ -38,8 +38,6 @@ public class QCompetenceCode extends EntityPathBase<CompetenceCode> {
     //inherited
     public final NumberPath<Long> id = _super.id;
 
-    public final BooleanPath inactive = createBoolean("inactive");
-
     //inherited
     public final BooleanPath persistent = _super.persistent;
 

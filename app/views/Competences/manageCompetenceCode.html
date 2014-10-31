@@ -13,7 +13,7 @@
 		<th>Codice</th>
 		<th>Codice per attestato di presenza</th>
 		<th>Descrizione</th>
-		<th>Inattivo</th>
+		
 	</tr>
 	#{list items:compCodeList, as:'compCode'}
 	
@@ -21,7 +21,7 @@
 		<td><a href="@{Competences.edit(compCode.id)}" data-modal=".my-modal">${compCode.code}</a></td>
 		<td>${compCode.codeToPresence}</td>
 		<td>${compCode.description}</td>
-		<td>${compCode.inactive}</td>
+		
 	</tr>
 	#{/list}
 </table>

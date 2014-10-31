@@ -39,8 +39,8 @@ public class CompetenceCode extends BaseModel {
 	@Required
 	public String description;
 	
-	@Required
-	public boolean inactive = false;
+//	@Required
+//	public boolean inactive = false;
 	
 	@Override
 	public String toString() {

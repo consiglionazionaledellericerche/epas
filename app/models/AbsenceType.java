@@ -79,8 +79,8 @@ public class AbsenceType extends BaseModel {
 	//FIXME questo campo non e' mai utilizzato, e' il caso della missione che prevede comunque il calcolo del buono mensa?
 
 	
-	@Column(name = "ignore_stamping")
-	public boolean ignoreStamping = false;
+//	@Column(name = "ignore_stamping")
+//	public boolean ignoreStamping = false;
 	
 	@Column(name = "considered_week_end")
 	public boolean consideredWeekEnd = false;
@@ -93,8 +93,8 @@ public class AbsenceType extends BaseModel {
 	 * Se è true è un riposo compensativo che viene trattato in maniera "speciale" 
 	 * rispetto agli altri tipi di assenza
 	 */
-	@Column(name = "compensatory_rest")
-	public boolean compensatoryRest = false; 
+//	@Column(name = "compensatory_rest")
+//	public boolean compensatoryRest = false; 
 	//FIXME questo campo e' inutile, usato solo in FromMysql
 	
 	
