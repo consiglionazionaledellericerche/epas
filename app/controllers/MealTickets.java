@@ -18,6 +18,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import controllers.Resecure.NoCheck;
+import dao.MealTicketDao;
 import dao.PersonDao;
 import play.Logger;
 import play.mvc.Controller;
@@ -36,7 +37,6 @@ public class MealTickets  extends Controller {
 		
 		List<Person> personList = PersonDao.list(Optional.fromNullable(name), 
 			Sets.newHashSet(Security.getOfficeAllowed()), false, LocalDate.now(), LocalDate.now(), true).list();
-		
 		
 		LocalDate today = new LocalDate();
 		
@@ -61,8 +61,7 @@ public class MealTickets  extends Controller {
 			LocalDate mealTicketStartDate = new LocalDate(2014,7,1);
 			
 			//Numero ticket consegnati dal primo luglio
-			this.mealTickets = MealTicket.find("select mt from MealTicket mt where mt.person = ? and mt.date > ?",
-		    		person, mealTicketStartDate).fetch();
+			this.mealTickets = MealTicketDao.getMealTicketAssignedToPersonFromDate(person,  mealTicketStartDate);
 
 			int numberOfMealTicketToUse = 0;
 			
@@ -215,9 +214,7 @@ public class MealTickets  extends Controller {
 		
 		rules.checkIfPermitted(person.office);
 		
-		List<MealTicket> mealTicketList = MealTicket.find("Select mt from MealTicket mt "
-				+ "where mt.person = ? and mt.block = ?",
-				person, codeBlock).fetch();
+		List<MealTicket> mealTicketList = MealTicketDao.getMealTicketInBlock(person, codeBlock);
 		
 		render(mealTicketList, person, codeBlock);
 	}

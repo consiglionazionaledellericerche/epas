@@ -3,6 +3,7 @@ import it.cnr.iit.epas.PersonUtility;
 import java.util.ArrayList;
 import java.util.List;
 
+import manager.ContractYearRecapManager;
 import models.Contract;
 import models.Person;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
@@ -37,7 +38,7 @@ public class ResidualTest extends UnitTest {
     	List<Contract> monthContracts = person.getMonthContracts(month, year);
     	for(Contract contract : monthContracts)
 		{
-			contract.buildContractYearRecap();
+    		ContractYearRecapManager.buildContractYearRecap(contract);
 		}
     	assertEquals(monthContracts.size(),1);
 
@@ -98,7 +99,7 @@ public class ResidualTest extends UnitTest {
     	List<Contract> monthContracts = person.getMonthContracts(month, year);
     	for(Contract contract : monthContracts)
 		{
-			contract.buildContractYearRecap();
+    		ContractYearRecapManager.buildContractYearRecap(contract);
 		}
     	assertEquals(monthContracts.size(),1);
 
@@ -159,7 +160,7 @@ public class ResidualTest extends UnitTest {
     	List<Contract> monthContracts = person.getMonthContracts(month, year);
     	for(Contract contract : monthContracts)
 		{
-			contract.buildContractYearRecap();
+    		ContractYearRecapManager.buildContractYearRecap(contract);
 		}
     	assertEquals(monthContracts.size(),1);
 
@@ -220,7 +221,7 @@ public class ResidualTest extends UnitTest {
     	List<Contract> monthContracts = person.getMonthContracts(month, year);
     	for(Contract contract : monthContracts)
 		{
-			contract.buildContractYearRecap();
+    		ContractYearRecapManager.buildContractYearRecap(contract);
 		}
     	assertEquals(monthContracts.size(),1);
 
@@ -281,7 +282,7 @@ public class ResidualTest extends UnitTest {
     	List<Contract> monthContracts = person.getMonthContracts(month, year);
     	for(Contract contract : monthContracts)
 		{
-			contract.buildContractYearRecap();
+    		ContractYearRecapManager.buildContractYearRecap(contract);
 		}
     	assertEquals(monthContracts.size(),1);
 

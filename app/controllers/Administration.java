@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import manager.ContractYearRecapManager;
 import models.AbsenceType;
 import models.Contract;
 import models.ContractYearRecap;
@@ -244,7 +245,7 @@ public class Administration extends Controller {
 			{
 				try
 				{
-					contract.buildContractYearRecap();
+					ContractYearRecapManager.buildContractYearRecap(contract);
 				}
 				catch(Exception e)
 				{

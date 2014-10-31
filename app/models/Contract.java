@@ -19,6 +19,7 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import manager.ContractYearRecapManager;
 import models.base.BaseModel;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
@@ -714,7 +715,7 @@ public class Contract extends BaseModel {
 
 		Logger.info("BuildContractYearRecap");
 		//(3) Ricalcolo dei riepiloghi annuali
-		this.buildContractYearRecap();
+		ContractYearRecapManager.buildContractYearRecap(this);
 		
 		
 	}
