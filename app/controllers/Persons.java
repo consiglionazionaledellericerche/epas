@@ -9,6 +9,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import manager.ContractManager;
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
@@ -16,7 +17,6 @@ import models.ConfGeneral;
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
-
 import models.InitializationAbsence;
 import models.InitializationTime;
 import models.Office;
@@ -31,9 +31,7 @@ import models.Stamping;
 import models.User;
 import models.UsersRolesOffices;
 import models.VacationPeriod;
-
 import models.WorkingTimeType;
-
 import models.enumerate.ConfigurationFields;
 import net.sf.oval.constraint.MinLength;
 
@@ -660,8 +658,8 @@ public class Persons extends Controller {
 		
 		//Ricalcolo valori
 		DateInterval contractDateInterval = contract.getContractDateInterval();
-		contract.recomputeContract(contractDateInterval.getBegin(), contractDateInterval.getEnd());
-
+		ContractManager.recomputeContract(contract, contractDateInterval.getBegin(), contractDateInterval.getEnd());
+	
 		contract.save();
 
 		flash.success("Aggiornato contratto per il dipendente %s %s", contract.person.name, contract.person.surname);
@@ -740,7 +738,7 @@ public class Persons extends Controller {
 
 		//Ricalcolo valori
 		DateInterval contractDateInterval = contract.getContractDateInterval();
-		contract.recomputeContract(contractDateInterval.getBegin(), contractDateInterval.getEnd());
+		ContractManager.recomputeContract(contract, contractDateInterval.getBegin(), contractDateInterval.getEnd());
 		//contract.buildContractYearRecap();
 
 		flash.success("Dati di inizializzazione definiti con successo ed effettuati i ricalcoli.");
@@ -850,7 +848,7 @@ public class Persons extends Controller {
 		}
 		
 		//Ricalcolo valori
-		cwtt.contract.recomputeContract(cwtt.beginDate, null);
+		ContractManager.recomputeContract(cwtt.contract, cwtt.beginDate, null);
 		
 		flash.success("Orario di lavoro eliminato correttamente. Attribuito al periodo eliminato il tipo orario %s.", previous.workingTimeType.description);
 		Persons.edit(cwtt.contract.person.id);	
@@ -871,7 +869,7 @@ public class Persons extends Controller {
 		cwtt.save();
 
 		//Ricalcolo valori
-		cwtt.contract.recomputeContract(cwtt.beginDate, null);
+		ContractManager.recomputeContract(cwtt.contract, cwtt.beginDate, null);
 
 		flash.success("Cambiato correttamente tipo orario per il periodo a %s.", cwtt.workingTimeType.description);
 		Persons.edit(cwtt.contract.person.id);
@@ -1149,8 +1147,8 @@ public class Persons extends Controller {
 		
 		contract.save();
 		
-		contract.contract.recomputeContract(contract.startFrom, null);
-
+		ContractManager.recomputeContract(contract.contract, contract.startFrom, null);
+		
 		flash.success("Cambiata correttamente tipologia di timbratura per il periodo a %s.", newtipo);
 		Persons.edit(contract.contract.person.id);
 		
@@ -1231,7 +1229,7 @@ public class Persons extends Controller {
 		}
 		
 		//Ricalcolo i valori
-		previous.contract.recomputeContract(csp.startFrom, null);
+		ContractManager.recomputeContract(previous.contract, csp.startFrom, null);
 		
 		flash.success("Tipologia di timbratura eliminata correttamente. Tornati alla precedente che ha timbratura automatica con valore: %s", previous.fixedworkingtime);
 		Persons.edit(csp.contract.person.id);
