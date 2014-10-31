@@ -8,6 +8,7 @@ import java.util.Set;
 
 import javax.persistence.Query;
 
+import manager.ContractYearRecapManager;
 import models.Absence;
 import models.AbsenceType;
 import models.Competence;
@@ -995,7 +996,7 @@ public class PersonUtility {
 
 			for(Contract contract : contractList) {
 				
-				contract.buildContractYearRecap();
+				ContractYearRecapManager.buildContractYearRecap(contract);
 			}
 		}
 		JPAPlugin.closeTx(false);		
