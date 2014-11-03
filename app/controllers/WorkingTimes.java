@@ -12,6 +12,7 @@ import javax.inject.Inject;
 
 import org.joda.time.LocalDate;
 
+import manager.ContractManager;
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Office;
@@ -412,7 +413,7 @@ public class WorkingTimes extends Controller{
 					replaceContractWorkingTimeTypeList(contract, newCwttListClean);
 					Logger.info("recompute");
 
-					contract.recomputeContract(inputBegin, null);
+					ContractManager.recomputeContract(contract, inputBegin, null);
 					
 					contractChanges++;
 
