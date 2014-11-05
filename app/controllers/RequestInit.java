@@ -287,10 +287,11 @@ public class RequestInit extends Controller {
 		else {
 
 			List<Office> allOffices = Office.findAll();
+			if (allOffices!=null && !allOffices.isEmpty()){
 			List<Person> persons = PersonDao.list(Optional.fromNullable(name), 
 					Sets.newHashSet(allOffices), false, beginMonth, endMonth, true).list();
-
 			renderArgs.put("navPersons", persons);
+			}
 		}
 
 		// day lenght (provvisorio)
