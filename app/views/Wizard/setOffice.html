@@ -1,40 +1,57 @@
 #{extends 'Wizard/wizard.html' /}
-#{set 'moreStyles'}
-<style>
-form{
-	margin-bottom: 12em;
-}
-</style>
-#{/set}
+
 %{
-	institute = properties.getProperty("institute_name");
-	siteCode = properties.getProperty("seat_code");
+  stepIndex = currentStep.getIndex();
+
+  area_ = properties.getProperty("area");
+	institute = properties.getProperty("institute");
+	seat = properties.getProperty("seat");
+  seat_code = properties.getProperty("seat_code");
 }%
 
-#{form @Wizard.setOffice(),class:'form-horizontal'}
-
+#{form @Wizard.setOffice(),class:'form-orizontal',role:'form'}
 <fieldset>
+#{field 'area'}
+<div class='form-group col-sm-8 col-sm-offset-2 #{if field.error}has-error#{/if}'>
+  <label class="control-label" for="${field.id}">Nome Area</label>
+  <input class="form-control" placeholder="Es. Area CNR Pisa" id="${field.id}" type="text" name="${field.name}" value="${area_}" />
+  #{if field.error}
+  <span class="help-block">${field.error}</span>
+  #{/if}
+</div>
+#{/field}
+
 #{field 'institute'}
-    <div class="control-group #{if field.error}error#{/if}">         
-            <label  class="control-label" for="${field.id}">Inserire il nome dell'istituto</label>
-     <div class="controls">
-            <input class="input-large" placeholder="Nome istituto" id="${field.id}" type="text" name="${field.name}" value="${institute}">
-            <p class="help-block">${field.error}</p>
-      </div>
-   </div>
+<div class='form-group col-sm-8 col-sm-offset-2 #{if field.error}has-error#{/if}'>
+  <label class="control-label" for="${field.id}">Nome Istituto</label>
+  <input class="form-control" placeholder="Es. IIT" id="${field.id}" type="text" name="${field.name}" />
+  #{if field.error}
+  <span class="help-block">${field.error}</span>
+  #{/if}
+</div>
 #{/field}
 
-#{field 'code'}
-    <div class="control-group #{if field.error}error#{/if}">         
-            <label  class="control-label" for="${field.id}">Inserire il codice Sede</label>
-     <div class="controls">
-            <input class="input-large" placeholder="Codice Sede" id="${field.id}" type="text" name="${field.name}" value="${siteCode}">
-            <p class="help-block">${field.error}</p>
-      </div>
-   </div>
+#{field 'seat'}
+<div class='form-group col-sm-6 col-sm-offset-2 #{if field.error}has-error#{/if}'>
+  <label class="control-label" for="${field.id}">Nome Sede</label>
+  <input class="form-control" placeholder="Es. IIT Pisa" id="${field.id}" type="text" name="${field.name}" />
+  #{if field.error}
+  <span class="help-block">${field.error}</span>
+  #{/if}
+</div>
 #{/field}
 
-<input type="submit" class="btn btn-info btn-large"/>
+#{field 'seat_code'}
+<div class='form-group col-sm-2 #{if field.error}has-error#{/if}'>
+  <label class="control-label" for="${field.id}">Codice Sede</label>
+  <input class="form-control" placeholder="Es. 12345" id="${field.id}" type="text" name="${field.name}"/>
+  #{if field.error}
+  <span class="help-block">${field.error}</span>
+  #{/if}
+</div>
+#{/field}
 
+<button type="submit" class="btn btn-primary col-sm-4 col-sm-offset-4">Invia</button>
 </fieldset>
 #{/form}
+
