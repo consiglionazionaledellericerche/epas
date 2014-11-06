@@ -3,6 +3,7 @@ Componenti principali di ePAS
 
 Il sistema ePAS è di tipo modulare (Figure 2). Il sistema si suddivide in tre
 componenti: 
+
  * ePAS Server
  * ePAS Rest
  * ePAS Stamping Client. 
