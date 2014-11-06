@@ -1,5 +1,7 @@
 package controllers;
 
+import it.cnr.iit.epas.DateUtility;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -384,30 +386,32 @@ public class Charts extends Controller{
 		inputStream = new FileInputStream( tempFile );
 		FileWriter writer = new FileWriter(tempFile, true);
 		BufferedWriter out = new BufferedWriter(writer);
-		out.write("Cognome Nome, ore straordinari gennaio,ore riposi compensativi gennaio,ore in più gennaio, ore straordinari febbraio,ore riposi compensativi febbraio,ore in più febbraio,"
-				+ "ore straordinari marzo,ore riposi compensativi marzo,ore in più marzo,"
-				+ "ore straordinari aprile,ore riposi compensativi aprile,ore in più aprile,"
-				+ "ore straordinari maggio,ore riposi compensativi maggio,ore in più maggio,"
-				+ "ore straordinari giugno,ore riposi compensativi giugno,ore in più giugno,"
-				+ "ore straordinari luglio,ore riposi compensativi luglio,ore in più luglio,"
-				+ "ore straordinari agosto,ore riposi compensativi agosto,ore in più agosto,"
-				+ "ore straordinari settembre,ore riposi compensativi settembre,ore in più settembre,"
-				+ "ore straordinari ottobre,ore riposi compensativi ottobre,ore in più ottobre,"
-				+ "ore straordinari novembre,ore riposi compensativi novembre,ore in più novembre,"
-				+ "ore straordinari dicembre,ore riposi compensativi dicembre,ore in più dicembre,"+' '+year);
+		Integer month = new LocalDate().getMonthOfYear();
+		out.write("Cognome Nome,");
+		for(int i = 1; i <= month; i++){
+			out.append("ore straordinari "+DateUtility.fromIntToStringMonth(i)+','+"ore riposi compensativi "+DateUtility.fromIntToStringMonth(i)+','+"ore in più "+DateUtility.fromIntToStringMonth(i)+',');
+		}
+
+		out.append("ore straordinari TOTALI,ore riposi compensativi TOTALI, ore in più TOTALI");
 		out.newLine();
-		LocalDate date = new LocalDate();
+		
+		int totalOvertime = 0;
+		int totalCompensatoryRest = 0;
+		int totalPlusHours = 0;
 		for(Person p : personList){
 			Logger.debug("Scrivo i dati per %s %s", p.name, p.surname);
-			//out.write(p.surname+' '+p.name+',');
+			
 			String situazione = p.surname+' '+p.name+',';
 			
-			CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(p.getCurrentContract(), year, new LocalDate(year,12,31));
-			for(int i = 1; i < date.getMonthOfYear(); i++){	//out.newLine();
+			CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(p.getCurrentContract(), year, new LocalDate(year,month,1).dayOfMonth().withMaximumValue());
+			for(int i = 1; i <= month; i++){	
+				
 				Mese m = c.getMese(year, i);
 				if(m != null){
 					situazione = situazione+(new Integer(m.straordinariMinuti/60).toString())+','+(new Integer(m.riposiCompensativiMinuti/60).toString())+','+(new Integer(m.progressivoFinaleMese/60).toString())+',';
-					
+					totalOvertime = totalOvertime+new Integer(m.straordinariMinuti/60);
+					totalCompensatoryRest = totalCompensatoryRest+new Integer(m.riposiCompensativiMinuti/60);
+					totalPlusHours = totalPlusHours+new Integer(m.progressivoFinaleMese/60);
 				}
 					
 				else
@@ -415,7 +419,13 @@ public class Charts extends Controller{
 
 			}
 			out.append(situazione);
+			out.append(new Integer(totalOvertime).toString()+',');
+			out.append(new Integer(totalCompensatoryRest).toString()+',');
+			out.append(new Integer(totalPlusHours).toString()+',');
 			out.newLine();
+			totalCompensatoryRest = 0;
+			totalOvertime = 0;
+			totalPlusHours = 0;
 
 		}
 		out.close();
