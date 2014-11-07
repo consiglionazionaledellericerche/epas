@@ -43,8 +43,10 @@ public class Configurations extends Controller{
 		ConfGeneral passwordToPresence = ConfGeneral.getConfGeneralByField(ConfigurationFields.PasswordToPresence.description, office);
 		ConfGeneral numberOfViewingCouple = ConfGeneral.getConfGeneralByField(ConfigurationFields.NumberOfViewingCouple.description, office);
 
+		ConfGeneral dateStartMealTicket = ConfGeneral.getConfGeneralByField(ConfigurationFields.DateStartMealTicket.description, office);
+		
 		render(initUseProgram, dayOfPatron, monthOfPatron, webStampingAllowed, urlToPresence, userToPresence,
-				passwordToPresence, numberOfViewingCouple, offices, office);
+				passwordToPresence, numberOfViewingCouple, dateStartMealTicket, offices, office);
 
 	}
 
@@ -228,9 +230,21 @@ public class Configurations extends Controller{
 
 		try  {
 			ConfGeneral conf = ConfGeneral.findById(Long.parseLong(pk));
-
+			
 			rules.checkIfPermitted(conf.office);
 
+			/*
+			if(conf.field.equals(ConfigurationFields.DateStartMealTicket.description)){
+				
+				if(value.equals("")){
+					value = null;
+				} else {
+					//Controllo validità parametro
+					new LocalDate(value);
+				}
+			}
+			*/
+			
 			conf.fieldValue = value;
 			conf.save();
 			Cache.set(conf.field+conf.office.name, conf.fieldValue);

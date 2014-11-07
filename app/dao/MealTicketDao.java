@@ -40,5 +40,4 @@ public class MealTicketDao {
 		return query.list(mealTicket);
 	}
 	
-
 }

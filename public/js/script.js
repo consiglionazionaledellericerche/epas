@@ -85,7 +85,6 @@ $(function($){
 		    $(this).data('modal', null);
 		});
 
-
 		this.find('#select1').editable(); 
 		this.find('#select2').editable(); 
 		this.find('#select3').editable(); 
@@ -95,10 +94,13 @@ $(function($){
 		this.find('#simpleText1').editable(); 
 		this.find('#simpleText2').editable();
 		this.find('#simpleText3').editable(); 
+		
 
 		this.find('#textComments1').editable({
 		    showbuttons: 'bottom'
 		});
+		
+		this.find('#dob1').editable();
 		
 		this.find('form[data-reload-no-ajax] input[type=text]').on('input', function(e) {
 			var $form = $(this).closest("form");
