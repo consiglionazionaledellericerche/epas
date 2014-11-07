@@ -8,10 +8,11 @@ import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
 
-
+import models.ConfGeneral;
 import models.Office;
 import models.Permission;
 import models.Person;
+import models.enumerate.ConfigurationFields;
 import models.query.QPermission;
 import models.query.QRole;
 import models.query.QUsersRolesOffices;
@@ -19,6 +20,7 @@ import models.query.QUsersRolesOffices;
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
@@ -302,112 +304,30 @@ public class RequestInit extends Controller {
 		}
 		catch (Exception e) {
 			
-		}
-		 
-		
-		
-		
-
-		/*
-		LocalDate now = new LocalDate();
-		User userLogged = Security.getUser();
-		if(userLogged==null)
-		{
-			flash.error("Nessun utente risulta loggato");
-			Application.index(); 	
-		}
-		Integer year;
-		Integer month;
-		Integer day;
-		Long personId;
-		String method = "";
-
-		if(session.get("dispatched")!= null && session.get("dispatched").equals("true"))
-		{
-			year = Integer.parseInt(session.get("yearSelected"));
-			month = Integer.parseInt(session.get("monthSelected"));
-			day = Integer.parseInt(session.get("daySelected"));
-			personId = Long.parseLong(session.get("personSelected"));
-			method = session.get("methodSelected");
-
-		}
-		else
-		{
-			//Year from routes (otherwise now)
-			year = params.get("year") != null ? Integer.valueOf(params.get("year")) : now.getYear(); 
-			session.put("yearSelected", year);
-
-			//Month from routes (otherwise now)
-			month = params.get("month") != null  ? Integer.valueOf(params.get("month")) : now.getMonthOfYear();
-			session.put("monthSelected", month);
-			session.put("monthSelectedName", DateUtility.getName(month));
-
-			//Day from routes (otherwise now)
-			day = params.get("day") != null ? Integer.valueOf(params.get("day")) : now.getDayOfMonth();
-			session.put("daySelected", day);
-
-			//personId from routes (otherwise security)
-			if(params.get("personId")!=null)
-				personId = Long.parseLong(params.get("personId"));
-			else if(userLogged.person != null)
-				personId = userLogged.person.id;
-			else
-				personId = 1l; //admin id
-
-			//personId = params.get("personId") != null ? Long.parseLong(params.get("personId")) : Security.getUser().person.id; 
-			session.put("personSelected", personId);
-
-			//Method from Http.Request
-			method = getFormAction(Http.Request.current().action);
-			session.put("methodSelected", method);
-
-		}
-
-		session.put("dispatched", "false");
-
-		List<Person> persons = null;
-		if(userLogged.person != null)
-		{
-			persons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
-		}
-		else
-		{
-			List<Office> allOffices = Office.findAll();
-			persons = Person.getActivePersonsInMonth(month, year, allOffices, false);
-		}
-
-		ActionMenuItem action;
-		if(method != null && !method.equals("")) 
-			action = ActionMenuItem.valueOf(method);
-		else
-			action = ActionMenuItem.stampingsAdmin;
-
-		MainMenu mainMenu = null;
-		if(action.getDescription().equals("Riepilogo mensile"))
-		{
-			mainMenu = new MainMenu(year, month, action);
-		}
-		if(action.getDescription().equals("Presenza giornaliera"))
-		{
-			mainMenu = new MainMenu(personId, year, month, day, action, persons);			
-		}
-		else
-		{
-			mainMenu = new MainMenu(personId, year, month, action, persons);
 		}		
-
-		//Se personId è una persona reale (1 admin, 0 tutti) eseguo il controllo
-		if( personId > 1 )
-		{
-			if( !Security.canUserSeePerson(userLogged, personId) )
-			{
-				flash.error("Non si può accedere alla funzionalità per la persona con id %d", personId);
-				renderArgs.put("mainMenu", mainMenu);
-				Application.indexAdmin();
-			}
-		}
-		renderArgs.put("mainMenu", mainMenu);
+		
+		/**
+		 *  years per la gestione dinamica degli anni(provvisorio)
 		 */
+		List<Integer> years = Lists.newArrayList();
+		Integer actualYear = new LocalDate().getYear();
+		ConfGeneral yearBegin = ConfGeneral.find("Select c from ConfGeneral c where c.field = ? ", 
+				ConfigurationFields.InitUseProgram.description).first();
+		Integer yearBeginProgram = new Integer(yearBegin.fieldValue.substring(0, 4));
+		Logger.debug("yearBeginProgram = %s", yearBeginProgram);
+		try{
+			while(yearBeginProgram <= actualYear+1){
+				years.add(yearBeginProgram);
+				Logger.debug("Aggiunto %s alla lista", yearBeginProgram);
+				yearBeginProgram++;
+			}
+			
+			renderArgs.put("navYears", years);
+		}
+		catch(Exception e){
+			
+		}
+		
 	}
 	
 	private static String computeActionSelected(String action) {

@@ -1,0 +1,48 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Esportazione ore e straodinari' /}
+
+<div id="container-fluid-nav-tabs" class="container-fluid">
+
+<ul class="nav nav-tabs">
+  <li><a href="@{Charts.indexCharts()}">Grafici</a></li>
+  <li><a href="@{Charts.checkLastYearAbsences()}">Controllo schedone anno passato</a></li>
+  <li class="active"><a href="@{Charts.exportHourAndOvertime()}">Esportazione ore in più e di straordinario</a></li>
+</ul>
+
+</div>
+
+<div class="container">
+<div class="panel panel-default">
+		  <div class="panel-heading">
+		    <h4 class="panel-title">Seleziona l'anno per il quale esportare ore in più e straordinari</h4>
+		  </div>
+		<div class="panel-body">
+
+#{form @Charts.export()}
+
+#{select 'year', value:year, id:'year'}
+					
+		%{
+			for(year in annoList){
+		}%
+			#{option year.anno}${year.anno}#{/option}
+			%{
+				}
+			}%
+		
+#{/select}
+		<div class="container-fluid center">
+      		<input class="btn btn-primary" type="submit" value="Avanti" />
+      	</div>
+#{/form}
+		</div>
+	</div>
+</div>
+
+<ul class="pager">
+  <li><a href="/application/indexAdmin">Home</a></li>
+  <li><a href="/stampings/personStamping">Timbrature</a></li>
+</ul>
+
+</div>
