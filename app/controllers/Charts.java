@@ -16,8 +16,10 @@ import javax.inject.Inject;
 
 import models.Absence;
 import models.Competence;
+import models.ConfGeneral;
 import models.Contract;
 import models.Person;
+import models.enumerate.ConfigurationFields;
 import models.exports.PersonOvertime;
 import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 import models.personalMonthSituation.Mese;
@@ -37,28 +39,24 @@ public class Charts extends Controller{
 	static SecurityRules rules;
 
 	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
-	public static void overtimeOnPositiveResidual(Integer year, Integer month){
+	public static void overtimeOnPositiveResidual(Integer yearChart, Integer monthChart){
 
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		List<Year> annoList = new ArrayList<Year>();
-		annoList.add(new Year(1,2013));
-		annoList.add(new Year(2,2014));
-		annoList.add(new Year(3,2015));
+		ConfGeneral conf = ConfGeneral.find("Select c from ConfGeneral c where c.field = ? and c.office = ?", 
+				ConfigurationFields.InitUseProgram.description, Security.getUser().get().person.office).first();
+		Integer anno = new Integer(conf.fieldValue.substring(0,4));
+		int j = 1;
+		for(int i = anno; i <= new LocalDate().getYear(); i++){
+			annoList.add(new Year(j, i));
+			j++;
+		}
 
 		List<Month> meseList = new ArrayList<Month>();
 
-		meseList.add(new Month(1,"Gennaio"));
-		meseList.add(new Month(2,"Febbraio"));
-		meseList.add(new Month(3,"Marzo"));
-		meseList.add(new Month(4,"Aprile"));
-		meseList.add(new Month(5,"Maggio"));
-		meseList.add(new Month(6,"Giugno"));
-		meseList.add(new Month(7,"Luglio"));
-		meseList.add(new Month(8,"Agosto"));
-		meseList.add(new Month(9,"Settembre"));
-		meseList.add(new Month(10,"Ottobre"));
-		meseList.add(new Month(11,"Novembre"));
-		meseList.add(new Month(12,"Dicembre"));
+		for(int i = 1; i < 13; i++){
+			meseList.add(new Month(i, DateUtility.fromIntToStringMonth(i)));
+		}
 
 		if(params.get("yearChart") == null || params.get("monthChart") == null){
 			Logger.debug("Params year: %s", params.get("yearChart", Integer.class));
@@ -66,31 +64,47 @@ public class Charts extends Controller{
 			render(annoList, meseList);
 		}
 
-		year = params.get("yearChart", Integer.class);
-		month = params.get("monthChart", Integer.class);
-		List<Person> personeProva = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), true);
+//		year = params.get("yearChart", Integer.class);
+//		month = params.get("monthChart", Integer.class);
+		List<Person> personeProva = null;
+		if(yearChart != null && monthChart != null)
+			personeProva = Person.getActivePersonsInMonth(monthChart, yearChart, Security.getOfficeAllowed(), true);
 		List<PersonOvertime> poList = new ArrayList<PersonOvertime>();
-		for(Person p : personeProva){
-			if(p.office.equals(Security.getUser().get().person.office)){
-				PersonOvertime po = new PersonOvertime();
+		if(yearChart != null && monthChart != null){
+			for(Person p : personeProva){
+				if(p.office.equals(Security.getUser().get().person.office)){
+					PersonOvertime po = new PersonOvertime();
 
-				Long val = Competence.find("Select sum(c.valueApproved) from Competence c where c.competenceCode.code in (?,?,?) and c.year = ? and c.month = ? and c.person = ?",
-						"S1","S2","S3", year, month, p).first();
+//					Long val = Competence.find("Select sum(c.valueApproved) from Competence c where c.competenceCode.code in (?,?,?) and c.year = ? and c.month = ? and c.person = ?",
+//							"S1","S2","S3", yearChart, monthChart, p).first();
 
-				Contract contract = p.getCurrentContract();
-				CalcoloSituazioneAnnualePersona sit = new CalcoloSituazioneAnnualePersona(contract, year, new LocalDate(year,month,1));
-				Mese mese = sit.getMese(year,month);
-				po.month = month;
-				po.year = year;
-				po.overtimeHour = val;
-				po.name = p.name;
-				po.surname = p.surname;
-				po.positiveHourForOvertime = mese.positiveResidualInMonth(p, year, month)/60;
-				poList.add(po);
+					Contract contract = p.getCurrentContract();
+					CalcoloSituazioneAnnualePersona sit = new CalcoloSituazioneAnnualePersona(contract, yearChart, new LocalDate(yearChart,monthChart,1));
+					Mese mese = sit.getMese(yearChart,monthChart);
+					if(mese != null){
+						po.month = monthChart;
+						po.year = yearChart;
+						po.overtimeHour = new Long(mese.straordinariMinuti/60);
+						po.name = p.name;
+						po.surname = p.surname;
+						po.positiveHourForOvertime = mese.positiveResidualInMonth(p, yearChart, monthChart)/60;
+						poList.add(po);
+					}
+					else{
+						Logger.debug("Mese non presente per %s %s", p.name, p.surname);
+					}
+					
+				}
+
 			}
-
+			session.put("yearChart", yearChart);
+			session.put("monthChart", monthChart);
+			render(poList, yearChart, monthChart, annoList, meseList);
 		}
-		render(poList, year, month, annoList, meseList);
+		else{
+			render(annoList, meseList);
+		}
+		
 	}
 
 	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
@@ -100,41 +114,56 @@ public class Charts extends Controller{
 	}
 
 	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
-	public static void overtimeOnPositiveResidualInYear(Integer year){
+	public static void overtimeOnPositiveResidualInYear(Integer yearChart){
 
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		List<Year> annoList = new ArrayList<Year>();
-		annoList.add(new Year(1,2013));
-		annoList.add(new Year(2,2014));
-		annoList.add(new Year(3,2015));
+		ConfGeneral conf = ConfGeneral.find("Select c from ConfGeneral c where c.field = ? and c.office = ?", 
+				ConfigurationFields.InitUseProgram.description, Security.getUser().get().person.office).first();
+		Integer anno = new Integer(conf.fieldValue.substring(0,4));
+		int j = 1;
+		for(int i = anno; i <= new LocalDate().getYear(); i++){
+			annoList.add(new Year(j, i));
+			j++;
+		}
+//		annoList.add(new Year(1,2013));
+//		annoList.add(new Year(2,2014));
+//		annoList.add(new Year(3,2015));
 
-		if(params.get("yearChart") == null && year == null){
-			Logger.debug("Params year: %s", params.get("yearChart", Integer.class));
-			Logger.debug("Chiamato metodo con anno e mese nulli");
+//		if(params.get("yearChart") == null && yearChart == null){
+//			Logger.debug("Params year: %s", params.get("yearChart", Integer.class));
+//			Logger.debug("Chiamato metodo con anno e mese nulli");
+//			render(annoList);
+//		}
+//		yearChart = params.get("yearChart", Integer.class);
+//		Logger.debug("Anno preso dai params: %d", yearChart);
+		if(yearChart != null){
+			Long val = Competence.find("Select sum(c.valueApproved) from Competence c where c.competenceCode.code in (?,?,?) and c.year = ?", 
+					"S1","S2","S3", yearChart).first();
+			
+			List<Person> personeProva = Person.getActivePersonsinYear(yearChart, Security.getOfficeAllowed(), true);
+			int totaleOreResidue = 0;
+			for(Person p : personeProva){
+				if(p.office.equals(Security.getUser().get().person.office)){
+					Contract contract = p.getCurrentContract();
+					CalcoloSituazioneAnnualePersona sit = new CalcoloSituazioneAnnualePersona(contract, yearChart, new LocalDate(yearChart,12,1).dayOfMonth().withMaximumValue());
+					for(int month=1; month<13;month++){			//RTODO contratto attivo??
+										
+						Mese mese = sit.getMese(yearChart,month);
+						totaleOreResidue = totaleOreResidue+(mese.positiveResidualInMonth(p, yearChart, month)/60);
+					}
+					Logger.debug("Ore in più per %s %s nell'anno %d: %d", p.name, p.surname, yearChart,totaleOreResidue);
+				}
+
+			}
+			int totale = val.intValue()+totaleOreResidue;
+			session.put("yearChart", yearChart);
+			render(annoList, val, totaleOreResidue, totale);
+		}
+		else{
 			render(annoList);
 		}
-		year = params.get("yearChart", Integer.class);
-		Logger.debug("Anno preso dai params: %d", year);
-		Long val = Competence.find("Select sum(c.valueApproved) from Competence c where c.competenceCode.code in (?,?,?) and c.year = ?", 
-				"S1","S2","S3", year).first();
-		List<Person> personeProva = Person.getActivePersonsinYear(year, Security.getOfficeAllowed(), true);
-		int totaleOreResidue = 0;
-		for(Person p : personeProva){
-			if(p.office.equals(Security.getUser().get().person.office)){
-				for(int month=1; month<13;month++){
-					//RTODO contratto attivo??
-					Contract contract = p.getCurrentContract();
-					CalcoloSituazioneAnnualePersona sit = new CalcoloSituazioneAnnualePersona(contract, year, new LocalDate(year,month,1).dayOfMonth().withMaximumValue());
-					Mese mese = sit.getMese(year,month);
-					totaleOreResidue = totaleOreResidue+(mese.positiveResidualInMonth(p, year, month)/60);
-				}
-				Logger.debug("Ore in più per %s %s nell'anno %d: %d", p.name, p.surname, year,totaleOreResidue);
-			}
-
-		}
-
-		render(annoList, val, totaleOreResidue);
-
+		
 	}
 
 	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)

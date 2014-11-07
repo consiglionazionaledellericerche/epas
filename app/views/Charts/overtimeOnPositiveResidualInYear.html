@@ -1,7 +1,7 @@
 #{extends 'main3.html' /}
 #{set header:'navbar' /}
 <div class="container">
-
+#{if yearChart != null}
 	<div class="panel panel-default">
 		  <div class="panel-heading">
 		    <h4 class="panel-title">Seleziona l'anno</h4>
@@ -25,6 +25,32 @@
 #{/form}
 		</div>
 	</div>
+#{/if}
+#{else}
+		<div class="panel panel-default">
+		  <div class="panel-heading">
+		    <h4 class="panel-title">Torta della quantità di ore di straordinario annuali sul quantitativo orario in più totale dei dipendenti</h4>
+		  </div>
+		<div class="panel-body">
+
+#{form @Charts.overtimeOnPositiveResidualInYear()}
+
+#{select 'yearChart', value:session.get("yearChart"), id:'yearChart'}
+					
+		%{
+			for(anno in annoList){
+		}%
+			#{option anno.anno}${anno.anno}#{/option}
+			%{
+				}
+			}%
+		
+#{/select}
+<input class="btn btn-primary span1" type="submit" value="Ok"/>
+#{/form}
+		</div>
+	</div>
+#{/else}
 </div>
 #{if yearChart != 0}
 
@@ -37,9 +63,9 @@
 	new Morris.Donut({
 	  element: 'mysecondchart',
 	  data: [
-		{label: "Ore annuali totali di straordinario", value: '${val}'},
-    	{label: "Ore annuali totali per straordinario", value: '${totaleOreResidue}'}    	
-	  ]	  
+		{label: "Ore totali di straordinario nell'anno ", value: '${val}'},
+    	{label: "Ore totali usabili per straordinario nell'anno ", value: '${totaleOreResidue}'}    	
+	  ]
 	});
 
 	</script>
