@@ -15,4 +15,12 @@ select setval('seq_vacation_codes', max(id)) FROM vacation_codes;
 select setval('seq_working_time_types', max(id)) FROM working_time_types;
 select setval('seq_working_time_type_days', max(id)) FROM working_time_type_days;
 
+
+INSERT INTO conf_general (field, field_value, office_id) 
+	SELECT 'date_start_meal_ticket', null, office_id 
+	FROM conf_general 
+	GROUP BY office_id; 
+
 # ---!Downs
+
+DELETE FROM conf_general WHERE field = 'date_start_meal_ticket';

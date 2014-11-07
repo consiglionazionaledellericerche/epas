@@ -9,9 +9,12 @@ import javax.inject.Inject;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
+import manager.MealTicketManager;
+import models.ConfGeneral;
 import models.MealTicket;
 import models.Person;
 import models.User;
+import models.enumerate.ConfigurationFields;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -58,17 +61,21 @@ public class MealTickets  extends Controller {
 
 			//TODO: Il giorno iniziale è da mettere in configurazione
 			//  (considerare la scadenza buoni pasto??)
-			LocalDate mealTicketStartDate = new LocalDate(2014,7,1);
+			LocalDate dateStartMealTicket = new LocalDate(
+					ConfGeneral.getFieldValue(ConfigurationFields.DateStartMealTicket.description, 
+							person.office));
+			
+			//ConfGeneral.getFieldValue(ConfGeneral., office)LocalDate mealTicketStartDate = new LocalDate(2014,7,1);
 			
 			//Numero ticket consegnati dal primo luglio
-			this.mealTickets = MealTicketDao.getMealTicketAssignedToPersonFromDate(person,  mealTicketStartDate);
+			this.mealTickets = MealTicketDao.getMealTicketAssignedToPersonFromDate(person,  dateStartMealTicket);
 
 			int numberOfMealTicketToUse = 0;
 			
 			LocalDate now = LocalDate.now();
 			YearMonth currentMonth = new YearMonth(now.getYear(), now.getMonthOfYear());
 			
-			YearMonth activeMonth = new YearMonth(mealTicketStartDate.getYear(), mealTicketStartDate.getMonthOfYear());
+			YearMonth activeMonth = new YearMonth(dateStartMealTicket.getYear(), dateStartMealTicket.getMonthOfYear());
 			while(activeMonth.isBefore(currentMonth) || activeMonth.isEqual(currentMonth)) {
 				numberOfMealTicketToUse += PersonUtility.numberOfMealTicketToUse(person, activeMonth.getYear(), activeMonth.getMonthOfYear());
 				activeMonth = activeMonth.plusMonths(1);
@@ -131,17 +138,17 @@ public class MealTickets  extends Controller {
 		
 		//Blocco1
 		if(codeBlock1 != null && dimBlock1 != null) {
-			ticketToAdd.addAll(generateBlockMealTicket(codeBlock1, dimBlock1));
+			ticketToAdd.addAll(MealTicketManager.buildBlockMealTicket(codeBlock1, dimBlock1));
 		}
 		
 		//Blocco2
 		if(codeBlock2 != null && dimBlock2 != null) {
-			ticketToAdd.addAll(generateBlockMealTicket(codeBlock2, dimBlock2));
+			ticketToAdd.addAll(MealTicketManager.buildBlockMealTicket(codeBlock2, dimBlock2));
 		}
 		
 		//Blocco3
 		if(codeBlock3 != null && dimBlock3 != null) {
-			ticketToAdd.addAll(generateBlockMealTicket(codeBlock3, dimBlock3));
+			ticketToAdd.addAll(MealTicketManager.buildBlockMealTicket(codeBlock3, dimBlock3));
 		}
 		
 		User admin = Security.getUser().get();
@@ -175,6 +182,8 @@ public class MealTickets  extends Controller {
 	}
 	
 	public static void deletePersonMealTicket(Long personId, Integer codeBlock) {
+		
+		//TODO un metodo deletePersonMealTicketConfirmed
 		
 		Person person = Person.findById(personId);
 		if(person == null) {
@@ -219,28 +228,6 @@ public class MealTickets  extends Controller {
 		render(mealTicketList, person, codeBlock);
 	}
 	
-	private static List<MealTicket> generateBlockMealTicket(Integer codeBlock, Integer dimBlock) {
-		
-		
-		List<MealTicket> mealTicketList = Lists.newArrayList();
-				
-		for(int i=1; i<=dimBlock; i++) {
-			
-			MealTicket mealTicket = new MealTicket();
-			mealTicket.block = codeBlock;
-			mealTicket.number = i;
-			
-			if(i<10) 
-				mealTicket.code = codeBlock + "0" + i;
-			else
-				mealTicket.code = "" + codeBlock + i;
-			
-			mealTicketList.add(mealTicket);
-			
-			Logger.info(mealTicket.code);
-		}
-		
-		return  mealTicketList;
-	}
+
 
 }
