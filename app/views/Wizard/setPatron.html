@@ -1,14 +1,11 @@
 #{extends 'Wizard/wizard.html' /}
-#{set 'moreStyles'}
-<style>
-form{
-	margin-bottom: 14em;
-}
-</style>
-#{/set}
+
 %{
 	patronMonth = properties.getProperty("month_of_patron");
 	patronDay = properties.getProperty("day_of_patron");
+
+  stepIndex = currentStep.index;
+
 }%
 
 #{form @Wizard.setPatron(),class:'form-horizontal'}
