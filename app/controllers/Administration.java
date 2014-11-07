@@ -11,6 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import manager.ContractYearRecapManager;
+import manager.PersonResidualManager;
+import manager.recaps.PersonResidualMonthRecap;
+import manager.recaps.PersonResidualYearRecap;
 import models.AbsenceType;
 import models.Contract;
 import models.ContractYearRecap;
@@ -18,8 +21,6 @@ import models.InitializationTime;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
-import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
-import models.personalMonthSituation.Mese;
 import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
@@ -122,12 +123,13 @@ public class Administration extends Controller {
 	{
 		
 		List<Person> listPerson = Person.getActivePersonsInDay(new LocalDate(), Security.getOfficeAllowed(), false);
-		List<Mese> listMese = new ArrayList<Mese>();
+		List<PersonResidualMonthRecap> listMese = new ArrayList<PersonResidualMonthRecap>();
 		for(Person person : listPerson)
 		{
 			LocalDate today = new LocalDate().minusMonths(1);
-			CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person.getCurrentContract(), today.getYear(), null);
-			Mese mese = c.getMese(today.getYear(), today.getMonthOfYear());
+			PersonResidualYearRecap c = 
+					PersonResidualManager.build(person.getCurrentContract(), today.getYear(), null);
+			PersonResidualMonthRecap mese = c.getMese(today.getMonthOfYear());
 			listMese.add(mese);
 		}
 		render(listMese);

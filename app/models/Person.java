@@ -25,11 +25,12 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import manager.PersonResidualManager;
+import manager.recaps.PersonResidualMonthRecap;
 import models.MealTicket.BlockMealTicket;
 import models.Stamping.WayType;
 import models.base.BaseModel;
 import models.exports.StampingFromClient;
-import models.personalMonthSituation.Mese;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
@@ -969,7 +970,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 	 */
 	public Integer getPositiveResidualInMonth(int year, int month){
 		
-		return Mese.positiveResidualInMonth(this, year, month)/60; 
+		return PersonResidualManager.positiveResidualInMonth(this, year, month)/60; 
 	}
 
 	/**

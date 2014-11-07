@@ -1,11 +1,14 @@
 package models.rendering;
 
+import org.joda.time.LocalDate;
+
+import manager.PersonResidualManager;
+import manager.recaps.PersonResidualMonthRecap;
+import manager.recaps.PersonResidualYearRecap;
 import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
 import models.Person;
-import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
-import models.personalMonthSituation.Mese;
 import play.Logger;
 import play.data.validation.Valid;
 
@@ -36,8 +39,9 @@ public class PersonMonthCompetenceRecap {
 		
 		//RTODO
 		Contract contract = person.getCurrentContract();
-		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, year, null);
-		Mese mese = c.getMese(year, month);
+		PersonResidualYearRecap c = 
+				PersonResidualManager.build(contract, year, null);
+		PersonResidualMonthRecap mese = c.getMese(month);
 		this.progressivoFinalePositivoMese = mese.progressivoFinalePositivoMese;
 	}
 

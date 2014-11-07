@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import manager.ContractYearRecapManager;
+import manager.PersonResidualManager;
+import manager.recaps.PersonResidualMonthRecap;
+import manager.recaps.PersonResidualYearRecap;
 import models.Contract;
 import models.Person;
-import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
-import models.personalMonthSituation.Mese;
 import models.rendering.VacationsRecap;
 
 import org.apache.commons.mail.EmailException;
@@ -43,12 +44,13 @@ public class ResidualTest extends UnitTest {
     	assertEquals(monthContracts.size(),1);
 
     	//Costruisco la situazione residuale al 28 febbraio (già concluso)
-		List<Mese> contractMonths = new ArrayList<Mese>();
+		List<PersonResidualMonthRecap> contractMonths = new ArrayList<PersonResidualMonthRecap>();
 		for(Contract contract : monthContracts)
 		{
-			CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, year, dateToTest);
-			if(c.getMese(year, month)!=null)
-				contractMonths.add(c.getMese(year, month));
+			PersonResidualYearRecap c = 
+					PersonResidualManager.build(contract, year, dateToTest);
+			if(c.getMese(month)!=null)
+				contractMonths.add(c.getMese(month));
 		}
 		
 		//Costruisco la situazione ferie al 28 febbraio (già concluso)
@@ -65,7 +67,7 @@ public class ResidualTest extends UnitTest {
 		assertEquals(contractVacationRecap.size(),1);
 		
 		//asserzioni sui residui
-    	Mese february = contractMonths.get(0);
+    	PersonResidualMonthRecap february = contractMonths.get(0);
     	assertEquals(february.monteOreAnnoPassato, 0);
     	assertEquals(february.monteOreAnnoCorrente, 1445);
     	
@@ -104,12 +106,13 @@ public class ResidualTest extends UnitTest {
     	assertEquals(monthContracts.size(),1);
 
     	//Costruisco la situazione residuale al 28 febbraio (già concluso)
-		List<Mese> contractMonths = new ArrayList<Mese>();
+		List<PersonResidualMonthRecap> contractMonths = new ArrayList<PersonResidualMonthRecap>();
 		for(Contract contract : monthContracts)
 		{
-			CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, year, dateToTest);
-			if(c.getMese(year, month)!=null)
-				contractMonths.add(c.getMese(year, month));
+			PersonResidualYearRecap c = 
+					PersonResidualManager.build(contract, year, dateToTest);
+			if(c.getMese(month)!=null)
+				contractMonths.add(c.getMese(month));
 		}
 		
 		//Costruisco la situazione ferie al 28 febbraio (già concluso)
@@ -126,7 +129,7 @@ public class ResidualTest extends UnitTest {
 		assertEquals(contractVacationRecap.size(),1);
 		
 		//asserzioni sui residui
-    	Mese february = contractMonths.get(0);
+    	PersonResidualMonthRecap february = contractMonths.get(0);
     	assertEquals(february.monteOreAnnoPassato, 3207);
     	assertEquals(february.monteOreAnnoCorrente, 2453);
     	
@@ -165,12 +168,13 @@ public class ResidualTest extends UnitTest {
     	assertEquals(monthContracts.size(),1);
 
     	//Costruisco la situazione residuale al 28 febbraio (già concluso)
-		List<Mese> contractMonths = new ArrayList<Mese>();
+		List<PersonResidualMonthRecap> contractMonths = new ArrayList<PersonResidualMonthRecap>();
 		for(Contract contract : monthContracts)
 		{
-			CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, year, dateToTest);
-			if(c.getMese(year, month)!=null)
-				contractMonths.add(c.getMese(year, month));
+			PersonResidualYearRecap c = 
+					PersonResidualManager.build(contract, year, dateToTest);
+			if(c.getMese(month)!=null)
+				contractMonths.add(c.getMese(month));
 		}
 		
 		//Costruisco la situazione ferie al 28 febbraio (già concluso)
@@ -187,7 +191,7 @@ public class ResidualTest extends UnitTest {
 		assertEquals(contractVacationRecap.size(),1);
 		
 		//asserzioni sui residui
-    	Mese february = contractMonths.get(0);
+    	PersonResidualMonthRecap february = contractMonths.get(0);
     	assertEquals(february.monteOreAnnoPassato, 29196);
     	assertEquals(february.monteOreAnnoCorrente, 2166);
     	
@@ -226,12 +230,13 @@ public class ResidualTest extends UnitTest {
     	assertEquals(monthContracts.size(),1);
 
     	//Costruisco la situazione residuale al 28 febbraio (già concluso)
-		List<Mese> contractMonths = new ArrayList<Mese>();
+		List<PersonResidualMonthRecap> contractMonths = new ArrayList<PersonResidualMonthRecap>();
 		for(Contract contract : monthContracts)
 		{
-			CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, year, dateToTest);
-			if(c.getMese(year, month)!=null)
-				contractMonths.add(c.getMese(year, month));
+			PersonResidualYearRecap c = 
+					PersonResidualManager.build(contract, year, dateToTest);
+			if(c.getMese(month)!=null)
+				contractMonths.add(c.getMese(month));
 		}
 		
 		//Costruisco la situazione ferie al 28 febbraio (già concluso)
@@ -248,7 +253,7 @@ public class ResidualTest extends UnitTest {
 		assertEquals(contractVacationRecap.size(),1);
 		
 		//asserzioni sui residui
-    	Mese february = contractMonths.get(0);
+    	PersonResidualMonthRecap february = contractMonths.get(0);
     	assertEquals(february.monteOreAnnoPassato, 32991);
     	assertEquals(february.monteOreAnnoCorrente, 6487);
     	
@@ -287,12 +292,13 @@ public class ResidualTest extends UnitTest {
     	assertEquals(monthContracts.size(),1);
 
     	//Costruisco la situazione residuale al 28 febbraio (già concluso)
-		List<Mese> contractMonths = new ArrayList<Mese>();
+		List<PersonResidualMonthRecap> contractMonths = new ArrayList<PersonResidualMonthRecap>();
 		for(Contract contract : monthContracts)
 		{
-			CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, year, dateToTest);
-			if(c.getMese(year, month)!=null)
-				contractMonths.add(c.getMese(year, month));
+			PersonResidualYearRecap c = 
+					PersonResidualManager.build(contract, year, dateToTest);
+			if(c.getMese(month)!=null)
+				contractMonths.add(c.getMese(month));
 		}
 		
 		//Costruisco la situazione ferie al 28 febbraio (già concluso)
@@ -309,7 +315,7 @@ public class ResidualTest extends UnitTest {
 		assertEquals(contractVacationRecap.size(),1);
 		
 		//asserzioni sui residui
-    	Mese february = contractMonths.get(0);
+    	PersonResidualMonthRecap february = contractMonths.get(0);
     	assertEquals(february.monteOreAnnoPassato, 0);
     	assertEquals(february.monteOreAnnoCorrente, 0);
     	
@@ -321,51 +327,6 @@ public class ResidualTest extends UnitTest {
     	assertEquals(februaryVacation.persmissionNotYetUsed, new Integer(4));
 
     }
-    
-    
-    /* TODO prima vedere se funzionano per i casi semplici 
-    @Test
-    public void residualLami() {
-    	int month = 12;
-    	int year = 2013;
-    	
-    	JPAPlugin.startTx(false);
-    	Person person = Person.findById(131l);
-    	assertEquals(Double.valueOf(131), Double.valueOf(person.id));
-    	
-    	
-    	//Ricalcolo tutti i personday
-    	PersonUtility.fixPersonSituation(person.id, 2013, 1, person);
-    	JPAPlugin.startTx(false);
-
-    	//Ricalcolo tutti i contract year recap
-    	List<Contract> monthContracts = person.getMonthContracts(month, year);
-    	for(Contract contract : monthContracts)
-		{
-			contract.buildContractYearRecap();
-		}
-
-    	//Costruisco la situazione residuale di febbraio 2014
-		List<Mese> contractMonths = new ArrayList<Mese>();
-		for(Contract contract : monthContracts)
-		{
-			CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, year, null);
-			if(c.getMese(year, month)!=null)
-				contractMonths.add(c.getMese(year, month));
-		}
-    	
-    	
-    	JPAPlugin.closeTx(false);
-    	assertEquals(contractMonths.size(),2);
-    	Mese february = contractMonths.get(0);
-    	assertEquals(february.monteOreAnnoPassato, 0);
-    	assertEquals(february.monteOreAnnoCorrente, 1445);
-	
-    }
-    */
-
-    
-	
-
+ 
 
 }

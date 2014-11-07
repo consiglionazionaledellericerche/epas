@@ -6,13 +6,13 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.ArrayList;
 import java.util.List;
 
+import manager.recaps.PersonResidualMonthRecap;
+import manager.recaps.PersonResidualYearRecap;
 import models.Absence;
 import models.AbsenceType;
 import models.ConfGeneral;
 import models.Contract;
 import models.ContractYearRecap;
-import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
-import models.personalMonthSituation.Mese;
 import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
@@ -130,12 +130,13 @@ public class ContractYearRecapManager {
 			cyr.permissionUsed = vacationRecap.permissionUsed.size();
 			
 			//RESIDUI
-			CalcoloSituazioneAnnualePersona csap = new CalcoloSituazioneAnnualePersona(contract, yearToCompute, new LocalDate().minusDays(1));
-			Mese lastComputedMonthInYear;
+			PersonResidualYearRecap csap = 
+					PersonResidualManager.build(contract, yearToCompute, new LocalDate().minusDays(1));
+			PersonResidualMonthRecap lastComputedMonthInYear;
 			if(yearToCompute!=currentYear)
-				lastComputedMonthInYear = csap.getMese(yearToCompute, 12);
+				lastComputedMonthInYear = csap.getMese(12);
 			else
-				lastComputedMonthInYear = csap.getMese(yearToCompute, new LocalDate().getMonthOfYear());
+				lastComputedMonthInYear = csap.getMese(new LocalDate().getMonthOfYear());
 			
 			cyr.remainingMinutesLastYear = lastComputedMonthInYear.monteOreAnnoPassato;
 			cyr.remainingMinutesCurrentYear = lastComputedMonthInYear.monteOreAnnoCorrente;
@@ -211,8 +212,9 @@ public class ContractYearRecapManager {
 		cyr.vacationLastYearUsed = contract.sourceVacationLastYearUsed + abs31.size() + abs37.size();
 		cyr.vacationCurrentYearUsed = contract.sourceVacationCurrentYearUsed + abs32.size();
 		cyr.permissionUsed = contract.sourcePermissionUsed + abs94.size();
-		CalcoloSituazioneAnnualePersona csap = new CalcoloSituazioneAnnualePersona(contract, yearToCompute, new LocalDate().minusDays(1));
-		Mese december = csap.getMese(yearToCompute, 12);
+		PersonResidualYearRecap csap = 
+				PersonResidualManager.build(contract, yearToCompute, new LocalDate().minusDays(1));
+		PersonResidualMonthRecap december = csap.getMese(12);
 		cyr.remainingMinutesCurrentYear = december.monteOreAnnoCorrente;
 		cyr.remainingMinutesLastYear = december.monteOreAnnoPassato;
 		cyr.save();
