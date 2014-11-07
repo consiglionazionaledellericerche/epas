@@ -1,6 +1,13 @@
 package controllers;
 
+import it.cnr.iit.epas.DateUtility;
+
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +35,7 @@ public class Charts extends Controller{
 
 	@Inject
 	static SecurityRules rules;
-	
+
 	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void overtimeOnPositiveResidual(Integer year, Integer month){
 
@@ -81,7 +88,7 @@ public class Charts extends Controller{
 				po.positiveHourForOvertime = mese.positiveResidualInMonth(p, year, month)/60;
 				poList.add(po);
 			}
-			
+
 		}
 		render(poList, year, month, annoList, meseList);
 	}
@@ -94,7 +101,7 @@ public class Charts extends Controller{
 
 	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void overtimeOnPositiveResidualInYear(Integer year){
-		
+
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		List<Year> annoList = new ArrayList<Year>();
 		annoList.add(new Year(1,2013));
@@ -123,7 +130,7 @@ public class Charts extends Controller{
 				}
 				Logger.debug("Ore in più per %s %s nell'anno %d: %d", p.name, p.surname, year,totaleOreResidue);
 			}
-			
+
 		}
 
 		render(annoList, val, totaleOreResidue);
@@ -132,7 +139,7 @@ public class Charts extends Controller{
 
 	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void whichAbsenceInYear(Integer year){
-		
+
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		List<Year> annoList = new ArrayList<Year>();
 		annoList.add(new Year(1,2013));
@@ -174,7 +181,7 @@ public class Charts extends Controller{
 
 	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void processLastYearAbsences(Blob file){
-		
+
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		List<RenderResult> listTrueFalse = new ArrayList<RenderResult>();
 		List<RenderResult> listNull = new ArrayList<RenderResult>();
@@ -191,7 +198,7 @@ public class Charts extends Controller{
 			int indexMatricola = 0;
 			int indexAssenza = 0;
 			int indexDataAssenza = 0;
-						//renderText("Numero colonne: "+numeroColonne+'\n'+"Indice Matricola: "+indexMatricola+'\n'+"Indice assenza: "+indexAssenza+'\n'+"Indice data assenza: "+indexDataAssenza+"");
+			//renderText("Numero colonne: "+numeroColonne+'\n'+"Indice Matricola: "+indexMatricola+'\n'+"Indice assenza: "+indexAssenza+'\n'+"Indice data assenza: "+indexDataAssenza+"");
 
 			while((line = in.readLine()) != null) {
 
@@ -201,7 +208,7 @@ public class Charts extends Controller{
 				if(line.contains("Query"))
 				{					
 					String[] tokens = line.split(",");
-					
+
 					for(int i = 0; i < tokens.length; i ++){
 						if(tokens[i].startsWith("Matricola"))
 							indexMatricola = i;
@@ -213,12 +220,12 @@ public class Charts extends Controller{
 					}
 					continue;
 				}
-				
+
 				RenderResult renderResult = null;
 				//tokens = line.split("\",\"");
-				
+
 				List<String> tokenList = Charts.splitter(line);
-				
+
 				//if(tokenList.size() != numeroColonne){
 				//	renderResult = new RenderResult(line, null, null, null, null, null, true);
 				//	list.add(renderResult);
@@ -233,10 +240,10 @@ public class Charts extends Controller{
 							p, dataAssenza).first();
 					if(abs == null){
 						if(!dataAssenza.isBefore(new LocalDate(2013,1,1)))
-//							renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, false, "assenza prima della data inizio utilizzo del programma", null);
-//						else
+							//							renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, false, "assenza prima della data inizio utilizzo del programma", null);
+							//						else
 							renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, false, "nessuna assenza trovata", null);
-						
+
 					}
 					else{
 						if(abs.absenceType.certificateCode.equalsIgnoreCase(assenza)){
@@ -245,12 +252,12 @@ public class Charts extends Controller{
 						}
 						else{
 							if(!abs.personDay.date.isBefore(new LocalDate(2013,1,1)))
-//								renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, false, "assenza prima della data inizio utilizzo del programma", null);
-//							else
+								//								renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, false, "assenza prima della data inizio utilizzo del programma", null);
+								//							else
 								renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, false, "assenza diversa da quella in anagrafica", abs.absenceType.code);
 						}
 					}
-					
+
 				}
 				catch(Exception e){
 					e.printStackTrace();
@@ -280,7 +287,7 @@ public class Charts extends Controller{
 			token = token.substring(0, token.length()-1);
 		return token;
 	}
-	
+
 	private static LocalDate buildDate(String token)
 	{
 		token = Charts.removeApice(token);
@@ -289,7 +296,7 @@ public class Charts extends Controller{
 		LocalDate date = new LocalDate(Integer.parseInt(elements[2]),Integer.parseInt(elements[1]), Integer.parseInt(elements[0]));
 		return date;
 	}
-	
+
 	private static List<String> splitter(String line)
 	{
 		line = Charts.removeApice(line);
@@ -334,7 +341,7 @@ public class Charts extends Controller{
 			this.check = check;
 			this.message = message;
 			this.codiceInAnagrafica = codiceInAnagrafica;
-			
+
 		}
 	}
 
@@ -357,5 +364,71 @@ public class Charts extends Controller{
 			this.id = id;
 			this.anno = anno;
 		}
+	}
+
+
+	public static void exportHourAndOvertime(){
+		rules.checkIfPermitted(Security.getUser().get().person.office);
+		List<Year> annoList = new ArrayList<Year>();
+		annoList.add(new Year(1,2013));
+		annoList.add(new Year(2,2014));
+		annoList.add(new Year(3,2015));
+		render(annoList);
+	}
+
+
+	public static void export(Integer year) throws IOException{
+		rules.checkIfPermitted(Security.getUser().get().person.office);
+		List<Person> personList = Person.getActivePersonsinYear(year, Security.getOfficeAllowed(), true);
+		Logger.debug("Esporto dati per %s persone", personList.size());
+		FileInputStream inputStream = null;
+		File tempFile = File.createTempFile("straordinari"+year,".csv" );
+		inputStream = new FileInputStream( tempFile );
+		FileWriter writer = new FileWriter(tempFile, true);
+		BufferedWriter out = new BufferedWriter(writer);
+		Integer month = new LocalDate().getMonthOfYear();
+		out.write("Cognome Nome,");
+		for(int i = 1; i <= month; i++){
+			out.append("ore straordinari "+DateUtility.fromIntToStringMonth(i)+','+"ore riposi compensativi "+DateUtility.fromIntToStringMonth(i)+','+"ore in più "+DateUtility.fromIntToStringMonth(i)+',');
+		}
+
+		out.append("ore straordinari TOTALI,ore riposi compensativi TOTALI, ore in più TOTALI");
+		out.newLine();
+		
+		int totalOvertime = 0;
+		int totalCompensatoryRest = 0;
+		int totalPlusHours = 0;
+		for(Person p : personList){
+			Logger.debug("Scrivo i dati per %s %s", p.name, p.surname);
+			
+			String situazione = p.surname+' '+p.name+',';
+			
+			CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(p.getCurrentContract(), year, new LocalDate(year,month,1).dayOfMonth().withMaximumValue());
+			for(int i = 1; i <= month; i++){	
+				
+				Mese m = c.getMese(year, i);
+				if(m != null){
+					situazione = situazione+(new Integer(m.straordinariMinuti/60).toString())+','+(new Integer(m.riposiCompensativiMinuti/60).toString())+','+(new Integer(m.progressivoFinaleMese/60).toString())+',';
+					totalOvertime = totalOvertime+new Integer(m.straordinariMinuti/60);
+					totalCompensatoryRest = totalCompensatoryRest+new Integer(m.riposiCompensativiMinuti/60);
+					totalPlusHours = totalPlusHours+new Integer(m.progressivoFinaleMese/60);
+				}
+					
+				else
+					situazione = situazione +("0"+','+"0"+','+"0");
+
+			}
+			out.append(situazione);
+			out.append(new Integer(totalOvertime).toString()+',');
+			out.append(new Integer(totalCompensatoryRest).toString()+',');
+			out.append(new Integer(totalPlusHours).toString()+',');
+			out.newLine();
+			totalCompensatoryRest = 0;
+			totalOvertime = 0;
+			totalPlusHours = 0;
+
+		}
+		out.close();
+		renderBinary(inputStream, "straordinariOreInPiuERiposiCompensativi"+year+".csv");
 	}
 }

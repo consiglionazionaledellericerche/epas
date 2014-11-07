@@ -9,7 +9,7 @@ Benvenuto nella documentazione di ePAS!
 Contents:
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
 
    architecture
    mainComponents

@@ -37,6 +37,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import play.Logger;
+import play.Play;
 import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 import play.libs.Mail;
@@ -1217,6 +1218,8 @@ public class PersonUtility {
 		SimpleEmail simpleEmail = new SimpleEmail();
 		try {
 			simpleEmail.setFrom("epas@iit.cnr.it");
+			//simpleEmail.addReplyTo("segreteria@iit.cnr.it");
+			simpleEmail.addReplyTo(Play.configuration.getProperty("mail.replyTo.alias"));
 		} catch (EmailException e1) {
 
 			e1.printStackTrace();
