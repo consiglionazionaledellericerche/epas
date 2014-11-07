@@ -3,6 +3,9 @@ package controllers;
 import static play.modules.pdf.PDF.renderPDF;
 import it.cnr.iit.epas.JsonRequestedOvertimeBinder;
 import it.cnr.iit.epas.JsonRequestedPersonsBinder;
+import manager.PersonResidualManager;
+import manager.recaps.PersonResidualMonthRecap;
+import manager.recaps.PersonResidualYearRecap;
 import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
@@ -11,8 +14,6 @@ import models.PersonHourForOvertime;
 import models.exports.OvertimesData;
 import models.exports.PersonsCompetences;
 import models.exports.PersonsList;
-import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
-import models.personalMonthSituation.Mese;
 
 import org.joda.time.LocalDate;
 
@@ -55,16 +56,10 @@ public class Overtimes extends Controller {
 		}
 		Logger.debug("Find persons %s with email %s", person.name, email);
 		
-
-//		PersonMonth personMonth = PersonMonth.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", person, month, year).first();
-//		if(personMonth == null)
-//			personMonth = new PersonMonth(person, year, month);
-		
-		/*OvertimesData personOvertimesData = new OvertimesData(PersonTags.toHourTime(new Integer(personMonth.totaleResiduoAnnoCorrenteAFineMese())), PersonTags.toHourTime(new Integer(personMonth.residuoDelMese())), PersonTags.toHourTime(new Integer(personMonth.tempoDisponibilePerStraordinari())));*/		
-		/* temporaneamente tutti i dati vengono presi dalle nuove classi CalcoloSituazioneAnnualePersona e Mese */
 		Contract contract = person.getCurrentContract();
-		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, year, null);
-		Mese mese = c.getMese(year, month);
+		PersonResidualYearRecap c = 
+				PersonResidualManager.build(contract, year, null);
+		PersonResidualMonthRecap mese = c.getMese(month);
 		
 		int totaleResiduoAnnoCorrenteAFineMese = mese.monteOreAnnoCorrente;
 		int residuoDelMese = mese.progressivoFinaleMese;

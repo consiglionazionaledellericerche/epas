@@ -47,6 +47,8 @@ public class ConfGeneral extends BaseModel{
 	public final static String USER_TO_PRESENCE = "user_to_presence";
 	public final static String PASSWORD_TO_PRESENCE = "password_to_presence";
 	public final static String URL_TO_PRESENCE = "url_to_presence";
+	public final static String DATE_START_MEAL_TICKET = "date_start_meal_ticket";
+	
 	
 	public final static String MEAL_TIME_START_HOUR = "meal_time_start_hour";
 	public final static String MEAL_TIME_START_MINUTE = "meal_time_start_minute";

@@ -11,6 +11,9 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import manager.PersonResidualManager;
+import manager.recaps.PersonResidualMonthRecap;
+import manager.recaps.PersonResidualYearRecap;
 import models.AbsenceType;
 import models.Contract;
 import models.Office;
@@ -20,8 +23,6 @@ import models.PersonTags;
 import models.StampModificationType;
 import models.StampType;
 import models.Stamping;
-import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
-import models.personalMonthSituation.Mese;
 import models.rendering.PersonStampingDayRecap;
 import models.rendering.PersonTroublesInMonthRecap;
 
@@ -108,12 +109,13 @@ public class Stampings extends Controller {
 		Map<AbsenceType,Integer> absenceCodeMap = PersonUtility.getAllAbsenceCodeInMonth(totalPersonDays);
 
 		List<Contract> monthContracts = person.getMonthContracts(month, year);
-		List<Mese> contractMonths = new ArrayList<Mese>();
+		List<PersonResidualMonthRecap> contractMonths = new ArrayList<PersonResidualMonthRecap>();
 		for(Contract contract : monthContracts)
 		{
-			CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, year, null);
-			if(c.getMese(year, month)!=null)
-				contractMonths.add(c.getMese(year, month));
+			PersonResidualYearRecap c = 
+					PersonResidualManager.build(contract, year, null);
+			if(c.getMese(month)!=null)
+				contractMonths.add(c.getMese(month));
 		}
 		
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);
@@ -197,12 +199,13 @@ public class Stampings extends Controller {
 		Map<AbsenceType,Integer> absenceCodeMap = PersonUtility.getAllAbsenceCodeInMonth(totalPersonDays);				//1 sql
 
 		List<Contract> monthContracts = person.getMonthContracts(month, year);
-		List<Mese> contractMonths = new ArrayList<Mese>();
+		List<PersonResidualMonthRecap> contractMonths = new ArrayList<PersonResidualMonthRecap>();
 		for(Contract contract : monthContracts)
 		{
-			CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, year, null);
-			if(c.getMese(year, month)!=null)
-				contractMonths.add(c.getMese(year, month));
+			PersonResidualYearRecap c = 
+					PersonResidualManager.build(contract, year, null);
+			if(c.getMese(month)!=null)
+				contractMonths.add(c.getMese(month));
 		}
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);
 

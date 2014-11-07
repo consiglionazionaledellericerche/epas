@@ -82,11 +82,11 @@ public class PrintTags extends Controller{
 		int basedWorkingDays = PersonUtility.basedWorkingDays(totalPersonDays);
 		Map<AbsenceType,Integer> absenceCodeMap = PersonUtility.getAllAbsenceCodeInMonth(totalPersonDays);
 
-		/*
 		//RTODO il contratto attivo nel mese (quello più recente)
+		/*
 		Contract contract = person.getCurrentContract();
-		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, year, null);
-		Mese mese = c.getMese(year, month);
+		PersonResidualYearRecap c = PersonResidualYearRecap.build(contract, year, null);
+		PersonResidualMonthRecap mese = c.getMese(month);
 		*/
 		
 		String titolo = "Situazione presenze mensile " +  DateUtility.fromIntToStringMonth(month) + " " + year + " di " + person.surname + " " + person.name;

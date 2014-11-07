@@ -20,9 +20,9 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import manager.ContractYearRecapManager;
+import manager.recaps.PersonResidualMonthRecap;
+import manager.recaps.PersonResidualYearRecap;
 import models.base.BaseModel;
-import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
-import models.personalMonthSituation.Mese;
 import models.rendering.VacationsRecap;
 
 import org.hibernate.annotations.Type;
