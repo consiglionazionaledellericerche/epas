@@ -5,6 +5,7 @@ import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -838,14 +839,16 @@ public class Persons extends Controller {
 		ContractWorkingTimeType previous = contract.getContractWorkingTimeTypeAsList().get(index-1);
 		previous.endDate = cwtt.endDate;
 		previous.save();
-		cwtt.delete();
 		
-		//FIXME, trovare un modo per pulire lo heap che ci trovo sempre quello eliminato	
-		for(ContractWorkingTimeType cwttt : contract.contractWorkingTimeType){
-			if(cwttt.id.equals(cwtt.id)) {
-				contract.contractWorkingTimeType.remove(cwttt);
+		//Safe remove from hibernate set of elements (pattern da riutilizzare quando serve)
+		for (Iterator<ContractWorkingTimeType> i = contract.contractWorkingTimeType.iterator(); i.hasNext();) {
+		    ContractWorkingTimeType cwttt = i.next();
+		    if(cwttt.id.equals(cwtt.id)) {
+				i.remove();
 			}
 		}
+
+		cwtt.delete();
 		
 		//Ricalcolo valori
 		ContractManager.recomputeContract(cwtt.contract, cwtt.beginDate, null);
