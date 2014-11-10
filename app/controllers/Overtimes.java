@@ -3,7 +3,6 @@ package controllers;
 import static play.modules.pdf.PDF.renderPDF;
 import it.cnr.iit.epas.JsonRequestedOvertimeBinder;
 import it.cnr.iit.epas.JsonRequestedPersonsBinder;
-import manager.PersonResidualManager;
 import manager.recaps.PersonResidualMonthRecap;
 import manager.recaps.PersonResidualYearRecap;
 import models.Competence;
@@ -58,7 +57,7 @@ public class Overtimes extends Controller {
 		
 		Contract contract = person.getCurrentContract();
 		PersonResidualYearRecap c = 
-				PersonResidualManager.build(contract, year, null);
+				PersonResidualYearRecap.factory(contract, year, null);
 		PersonResidualMonthRecap mese = c.getMese(month);
 		
 		int totaleResiduoAnnoCorrenteAFineMese = mese.monteOreAnnoCorrente;

@@ -11,7 +11,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import manager.PersonResidualManager;
 import manager.recaps.PersonResidualMonthRecap;
 import manager.recaps.PersonResidualYearRecap;
 import models.AbsenceType;
@@ -113,7 +112,7 @@ public class Stampings extends Controller {
 		for(Contract contract : monthContracts)
 		{
 			PersonResidualYearRecap c = 
-					PersonResidualManager.build(contract, year, null);
+					PersonResidualYearRecap.factory(contract, year, null);
 			if(c.getMese(month)!=null)
 				contractMonths.add(c.getMese(month));
 		}
@@ -203,7 +202,7 @@ public class Stampings extends Controller {
 		for(Contract contract : monthContracts)
 		{
 			PersonResidualYearRecap c = 
-					PersonResidualManager.build(contract, year, null);
+					PersonResidualYearRecap.factory(contract, year, null);
 			if(c.getMese(month)!=null)
 				contractMonths.add(c.getMese(month));
 		}

@@ -8,7 +8,6 @@ import java.util.Map;
 import javax.persistence.Query;
 
 import manager.ContractYearRecapManager;
-import manager.PersonResidualManager;
 import manager.recaps.PersonResidualMonthRecap;
 import manager.recaps.PersonResidualYearRecap;
 import models.Absence;
@@ -614,7 +613,7 @@ public class PersonUtility {
 			date = date.minusDays(1);
 		Contract contract = person.getContract(date);
 		PersonResidualYearRecap c = 
-				PersonResidualManager.build(contract, date.getYear(), date);
+				PersonResidualYearRecap.factory(contract, date.getYear(), date);
 		
 		if(c==null)
 			return false;

@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import manager.ContractYearRecapManager;
-import manager.PersonResidualManager;
 import manager.recaps.PersonResidualMonthRecap;
 import manager.recaps.PersonResidualYearRecap;
 import models.AbsenceType;
@@ -25,11 +24,11 @@ import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
 
-import controllers.Resecure.NoCheck;
 import play.Logger;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
+import controllers.Resecure.NoCheck;
 
 
 @With( {Secure.class, RequestInit.class} )
@@ -128,7 +127,7 @@ public class Administration extends Controller {
 		{
 			LocalDate today = new LocalDate().minusMonths(1);
 			PersonResidualYearRecap c = 
-					PersonResidualManager.build(person.getCurrentContract(), today.getYear(), null);
+					PersonResidualYearRecap.factory(person.getCurrentContract(), today.getYear(), null);
 			PersonResidualMonthRecap mese = c.getMese(today.getMonthOfYear());
 			listMese.add(mese);
 		}

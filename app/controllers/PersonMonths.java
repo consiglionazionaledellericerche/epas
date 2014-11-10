@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.validation.Valid;
 
-import manager.PersonResidualManager;
 import manager.recaps.PersonResidualYearRecap;
 import models.Contract;
 import models.Person;
@@ -38,7 +37,7 @@ public class PersonMonths extends Controller{
 		
 		Contract contract = user.person.getCurrentContract();
 		PersonResidualYearRecap csap = 
-				PersonResidualManager.build(contract, year, null);
+				PersonResidualYearRecap.factory(contract, year, null);
 		render(csap, user.person, year);	
 	}
 

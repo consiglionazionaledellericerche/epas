@@ -131,7 +131,7 @@ public class ContractYearRecapManager {
 			
 			//RESIDUI
 			PersonResidualYearRecap csap = 
-					PersonResidualManager.build(contract, yearToCompute, new LocalDate().minusDays(1));
+					PersonResidualYearRecap.factory(contract, yearToCompute, new LocalDate().minusDays(1));
 			PersonResidualMonthRecap lastComputedMonthInYear;
 			if(yearToCompute!=currentYear)
 				lastComputedMonthInYear = csap.getMese(12);
@@ -213,7 +213,7 @@ public class ContractYearRecapManager {
 		cyr.vacationCurrentYearUsed = contract.sourceVacationCurrentYearUsed + abs32.size();
 		cyr.permissionUsed = contract.sourcePermissionUsed + abs94.size();
 		PersonResidualYearRecap csap = 
-				PersonResidualManager.build(contract, yearToCompute, new LocalDate().minusDays(1));
+				PersonResidualYearRecap.factory(contract, yearToCompute, new LocalDate().minusDays(1));
 		PersonResidualMonthRecap december = csap.getMese(12);
 		cyr.remainingMinutesCurrentYear = december.monteOreAnnoCorrente;
 		cyr.remainingMinutesLastYear = december.monteOreAnnoPassato;

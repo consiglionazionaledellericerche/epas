@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import manager.ContractYearRecapManager;
-import manager.PersonResidualManager;
 import manager.recaps.PersonResidualMonthRecap;
 import manager.recaps.PersonResidualYearRecap;
 import models.Contract;
@@ -48,7 +47,7 @@ public class ResidualTest extends UnitTest {
 		for(Contract contract : monthContracts)
 		{
 			PersonResidualYearRecap c = 
-					PersonResidualManager.build(contract, year, dateToTest);
+					PersonResidualYearRecap.factory(contract, year, dateToTest);
 			if(c.getMese(month)!=null)
 				contractMonths.add(c.getMese(month));
 		}
@@ -110,7 +109,7 @@ public class ResidualTest extends UnitTest {
 		for(Contract contract : monthContracts)
 		{
 			PersonResidualYearRecap c = 
-					PersonResidualManager.build(contract, year, dateToTest);
+					PersonResidualYearRecap.factory(contract, year, dateToTest);
 			if(c.getMese(month)!=null)
 				contractMonths.add(c.getMese(month));
 		}
@@ -172,7 +171,7 @@ public class ResidualTest extends UnitTest {
 		for(Contract contract : monthContracts)
 		{
 			PersonResidualYearRecap c = 
-					PersonResidualManager.build(contract, year, dateToTest);
+					PersonResidualYearRecap.factory(contract, year, dateToTest);
 			if(c.getMese(month)!=null)
 				contractMonths.add(c.getMese(month));
 		}
@@ -234,7 +233,7 @@ public class ResidualTest extends UnitTest {
 		for(Contract contract : monthContracts)
 		{
 			PersonResidualYearRecap c = 
-					PersonResidualManager.build(contract, year, dateToTest);
+					PersonResidualYearRecap.factory(contract, year, dateToTest);
 			if(c.getMese(month)!=null)
 				contractMonths.add(c.getMese(month));
 		}
@@ -296,7 +295,7 @@ public class ResidualTest extends UnitTest {
 		for(Contract contract : monthContracts)
 		{
 			PersonResidualYearRecap c = 
-					PersonResidualManager.build(contract, year, dateToTest);
+					PersonResidualYearRecap.factory(contract, year, dateToTest);
 			if(c.getMese(month)!=null)
 				contractMonths.add(c.getMese(month));
 		}
