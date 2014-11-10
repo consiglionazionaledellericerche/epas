@@ -1,8 +1,5 @@
 package models.rendering;
 
-import org.joda.time.LocalDate;
-
-import manager.PersonResidualManager;
 import manager.recaps.PersonResidualMonthRecap;
 import manager.recaps.PersonResidualYearRecap;
 import models.Competence;
@@ -40,7 +37,7 @@ public class PersonMonthCompetenceRecap {
 		//RTODO
 		Contract contract = person.getCurrentContract();
 		PersonResidualYearRecap c = 
-				PersonResidualManager.build(contract, year, null);
+				PersonResidualYearRecap.factory(contract, year, null);
 		PersonResidualMonthRecap mese = c.getMese(month);
 		this.progressivoFinalePositivoMese = mese.progressivoFinalePositivoMese;
 	}
