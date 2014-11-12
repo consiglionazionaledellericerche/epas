@@ -40,5 +40,8 @@ public class ContractYearRecap extends BaseModel{
 	
 	@Column(name="remaining_minutes_current_year")
 	public Integer remainingMinutesCurrentYear = 0;
+	
+	@Column(name="remaining_meal_tickets")
+	public Integer remainingMealTickets = 0;
 
 }

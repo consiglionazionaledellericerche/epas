@@ -5,13 +5,15 @@ import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
 
-import org.joda.time.LocalDate;
-
 import models.Absence;
 import models.Competence;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
+
+import org.joda.time.LocalDate;
+
+import dao.MealTicketDao;
 
 public class PersonResidualMonthRecap {
 
@@ -60,6 +62,10 @@ public class PersonResidualMonthRecap {
 	
 	public int oreLavorate = 0;
 	
+	public int buoniPastoDalMesePrecedente = 0;
+	public int buoniPastoConsegnatiNelMese = 0;
+	public int buoniPastoUsatiNelMese = 0;
+	
 	private PersonResidualMonthRecap() {}
 	
 	/**
@@ -75,8 +81,8 @@ public class PersonResidualMonthRecap {
 	 * @param validDataForCompensatoryRest 
 	 */
 	public static PersonResidualMonthRecap factory(PersonResidualMonthRecap mesePrecedente, int year, int month, Contract contract, 
-			int initMonteOreAnnoPassato, int initMonteOreAnnoCorrente, 
-			DateInterval validDataForPersonDay, DateInterval validDataForCompensatoryRest) {
+			int initMonteOreAnnoPassato, int initMonteOreAnnoCorrente, int initMealTickets,
+			DateInterval validDataForPersonDay, DateInterval validDataForCompensatoryRest, DateInterval validDataForMealTickets) {
 		
 		
 		PersonResidualMonthRecap newMese = new PersonResidualMonthRecap();
@@ -99,6 +105,7 @@ public class PersonResidualMonthRecap {
 		
 		setContractDescription(newMese);
 		
+		//Inizializzazione residui
 		//Gennaio
 		if(month==1)
 		{
@@ -135,6 +142,22 @@ public class PersonResidualMonthRecap {
 				newMese.monteOreAnnoPassato = 0;
 			}
 		}
+		
+		//Inizializzazione buoni pasto
+		if(month==1) 
+		{
+			newMese.mesePrecedente = null;
+			newMese.buoniPastoDalMesePrecedente = initMealTickets;
+		}
+		else if(newMese.mesePrecedente != null)
+		{
+			newMese.buoniPastoDalMesePrecedente = 
+					mesePrecedente.buoniPastoDalMesePrecedente 
+					+ mesePrecedente.buoniPastoConsegnatiNelMese
+					- mesePrecedente.buoniPastoUsatiNelMese;
+		}
+		
+		setMealTicketsInformation(newMese, validDataForMealTickets);
 		
 		setPersonDayInformation(newMese, validDataForPersonDay);
 		setPersonMonthInformation(newMese, validDataForCompensatoryRest);
@@ -216,6 +239,33 @@ public class PersonResidualMonthRecap {
 			monthRecap.progressivoFinaleNegativoMese = monthRecap.progressivoFinaleNegativoMese*-1;
 
 			monthRecap.progressivoFinalePositivoMesePrint = monthRecap.progressivoFinalePositivoMese;
+			
+		}
+	}
+	
+	/**
+	 * 
+	 * @param validDataForPersonDay l'intervallo all'interno del quale ricercare i person day per il calcolo dei progressivi
+	 */
+	private static void setMealTicketsInformation(PersonResidualMonthRecap monthRecap, DateInterval validDataForMealTickets)
+	{
+		
+		if(validDataForMealTickets!=null)
+		{
+			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date",
+					monthRecap.person, validDataForMealTickets.getBegin(), validDataForMealTickets.getEnd()).fetch();
+
+			//buoni pasto utilizzati
+			for(PersonDay pd : pdList){
+				if(pd != null && pd.isTicketAvailable){
+					monthRecap.buoniPastoUsatiNelMese++;
+				}
+			}
+			
+			//Numero ticket consegnati nel mese
+			monthRecap.buoniPastoConsegnatiNelMese = MealTicketDao.getMealTicketAssignedToPersonIntoInterval(monthRecap.person,  
+					validDataForMealTickets.getBegin(), validDataForMealTickets.getEnd()).size();
+						
 		}
 	}
 	

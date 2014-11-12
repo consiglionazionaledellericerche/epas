@@ -2,7 +2,6 @@ package models;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,21 +18,17 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import manager.ContractYearRecapManager;
-import manager.recaps.PersonResidualMonthRecap;
-import manager.recaps.PersonResidualYearRecap;
 import models.base.BaseModel;
-import models.rendering.VacationsRecap;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
 import play.Logger;
 import play.data.validation.Required;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 
 /**
