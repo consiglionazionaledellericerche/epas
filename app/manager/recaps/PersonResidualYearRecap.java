@@ -6,8 +6,10 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.ArrayList;
 import java.util.List;
 
+import models.ConfGeneral;
 import models.Contract;
 import models.ContractYearRecap;
+import models.enumerate.ConfigurationFields;
 
 import org.joda.time.LocalDate;
 
@@ -32,23 +34,35 @@ public class PersonResidualYearRecap {
 	 */
 	public static PersonResidualYearRecap factory(Contract contract, int year, LocalDate calcolaFinoA) {
 
-		PersonResidualYearRecap csap = new PersonResidualYearRecap();
-
-		int firstMonthToCompute = 1;
-		LocalDate firstDayInDatabase = new LocalDate(year,1,1);
-		int initMonteOreAnnoPassato = 0;
-		int initMonteOreAnnoCorrente = 0;
-
 		if(contract==null)
 		{
 			return null;
 		}	
+		
+		//TODO mettere come parametro
+		//Recupero data iniziale utilizzo mealticket
+				LocalDate dateStartMealTicket = new LocalDate(
+						ConfGeneral.getFieldValue(ConfigurationFields.DateStartMealTicket.description, 
+								contract.person.office));
+		
+		
+		PersonResidualYearRecap csap = new PersonResidualYearRecap();
+
+		int firstMonthToCompute = 1;
+		LocalDate firstDayInDatabase = new LocalDate(year,1,1);
+		DateInterval contractInterval = contract.getContractDateInterval();
+		DateInterval requestInterval = new DateInterval(firstDayInDatabase, calcolaFinoA);
+		DateInterval mealTicketInterval = new DateInterval(dateStartMealTicket, calcolaFinoA);
+		int initMonteOreAnnoPassato = 0;
+		int initMonteOreAnnoCorrente = 0;
+		int initMealTicket = 0;
 
 		//Recupero situazione iniziale dell'anno richiesto
 		ContractYearRecap recapPreviousYear = contract.getContractYearRecap(year-1);
 		if(recapPreviousYear!=null)	
 		{
 			initMonteOreAnnoPassato = recapPreviousYear.remainingMinutesCurrentYear + recapPreviousYear.remainingMinutesLastYear;
+			initMealTicket = recapPreviousYear.remainingMealTickets;
 		}
 		if(contract.sourceDate!=null && contract.sourceDate.getYear()==year)
 		{
@@ -56,6 +70,7 @@ public class PersonResidualYearRecap {
 			initMonteOreAnnoCorrente = contract.sourceRemainingMinutesCurrentYear;
 			firstDayInDatabase = contract.sourceDate.plusDays(1);
 			firstMonthToCompute = contract.sourceDate.getMonthOfYear();
+			//TODO initMealTickets da source contract
 		}
 
 		csap.mesi = new ArrayList<PersonResidualMonthRecap>();
@@ -110,8 +125,6 @@ public class PersonResidualYearRecap {
 			DateInterval validDataForPersonDay = null;
 			if(monthIntervalForPersonDay != null)
 			{
-				DateInterval requestInterval = new DateInterval(firstDayInDatabase, calcolaFinoA);
-				DateInterval contractInterval = contract.getContractDateInterval();
 				validDataForPersonDay = DateUtility.intervalIntersection(monthIntervalForPersonDay, requestInterval);
 				validDataForPersonDay = DateUtility.intervalIntersection(validDataForPersonDay, contractInterval);
 			}
@@ -138,13 +151,53 @@ public class PersonResidualYearRecap {
 			// 3) Filtro per dati nel database e estremi del contratto
 
 			DateInterval validDataForCompensatoryRest = null;
-			DateInterval contractInterval = contract.getContractDateInterval();
+			
 			validDataForCompensatoryRest = DateUtility.intervalIntersection(monthIntervalForCompensatoryRest, contractInterval);
+			
+			//////////////////////////////////////////////////////////////////////////////////////////////////////////
+			//	Intervallo per mealTickets
+			//////////////////////////////////////////////////////////////////////////////////////////////////////////
+			
+			// 1) Tutti i giorni del mese
+			
+			LocalDate monthBeginForMealTickets = new LocalDate(year, actualMonth, 1);
+			LocalDate monthEndForMealTickets = monthBeginForMealTickets.dayOfMonth().withMaximumValue();
+			DateInterval monthIntervalForMealTickets = new DateInterval(monthBeginForMealTickets, monthEndForMealTickets);
+			
+			// 2) Nel caso del calcolo del mese attuale
+			
+			if( DateUtility.isDateIntoInterval(today, monthIntervalForMealTickets) )
+			{
+				// 2.1) Se oggi non è il primo giorno del mese allora tutti i giorni del mese fino a ieri.
+				
+				if ( today.getDayOfMonth() != 1 )
+				{
+					monthEndForMealTickets = today.minusDays(1);
+					monthIntervalForMealTickets = new DateInterval(monthBeginForMealTickets, monthEndForMealTickets);
+				}
+				
+				// 2.2) Se oggi è il primo giorno del mese allora null.
+				
+				else
+				{
+					monthIntervalForMealTickets = null;
+				}
+			}
+			
+			// 3) Filtro per dati nel database, estremi del contratto, inizio utilizzo buoni pasto
+			
+			DateInterval validDataForMealTickets = null;
+			if(monthIntervalForMealTickets != null)
+			{
+				validDataForMealTickets = DateUtility.intervalIntersection(monthIntervalForMealTickets, requestInterval);
+				validDataForMealTickets = DateUtility.intervalIntersection(validDataForMealTickets, contractInterval);
+				validDataForMealTickets = DateUtility.intervalIntersection(validDataForMealTickets, mealTicketInterval);
+			}
 
 			//Costruisco l'oggetto
 			PersonResidualMonthRecap mese = PersonResidualMonthRecap.factory(previous, year, actualMonth, contract, 
-					initMonteOreAnnoPassato, initMonteOreAnnoCorrente, 
-					validDataForPersonDay, validDataForCompensatoryRest);
+					initMonteOreAnnoPassato, initMonteOreAnnoCorrente, initMealTicket,
+					validDataForPersonDay, validDataForCompensatoryRest, validDataForMealTickets);
 			
 			csap.mesi.add(mese);
 			previous = mese;

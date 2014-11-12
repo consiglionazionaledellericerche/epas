@@ -21,17 +21,21 @@
   <table class="table table-striped">
     <tr>
       <th>Nome</th>
+      <th>Residuo Mese Precedente</th>
       <th>Consegnati</th>
       <th>Utilizzati</th>
       <th>Rimanenti</th>
   	</tr>
   	
-  	#{list items:mealTicketRecaps, as:'mealTicketRecap'}
+  	#{list items:personsMonthRecaps, as:'monthRecap'}
   	  <tr>
-  	    <td>${mealTicketRecap.person.name} ${mealTicketRecap.person.surname}</td>
-  	    <td>${mealTicketRecap.mealTickets.size()}</td>
-  	    <td>${mealTicketRecap.numberOfMealTicketToUse}</td>
+  	    <td>${monthRecap.person.name} ${monthRecap.person.surname}</td>
+  	    <td>${monthRecap.buoniPastoDalMesePrecedente}</td>
+  	    <td>${monthRecap.buoniPastoConsegnatiNelMese}</td>
+  	    <td>${monthRecap.buoniPastoUsatiNelMese}</td>
+  	    <td>${monthRecap.buoniPastoDalMesePrecedente + monthRecap.buoniPastoConsegnatiNelMese - monthRecap.buoniPastoUsatiNelMese}</td>
   	    
+  	    *{
   	    <!-- remaining cell -->
   	    #{if mealTicketRecap.isOk()}
   	      <td class="success">
@@ -46,6 +50,7 @@
   	      ${mealTicketRecap.mealTickets.size() - mealTicketRecap.numberOfMealTicketToUse} 
   	      </strong>
   	    </td>
+  	    }*
   	  
   	  </tr>
   	

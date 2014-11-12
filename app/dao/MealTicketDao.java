@@ -16,14 +16,15 @@ import com.mysema.query.jpa.JPQLQuery;
  */
 public class MealTicketDao {
 
-	public static List<MealTicket> getMealTicketAssignedToPersonFromDate(Person p, LocalDate dateFrom) {
+	public static List<MealTicket> getMealTicketAssignedToPersonIntoInterval(Person p, LocalDate dateFrom, LocalDate dateTo) {
 		
 		QMealTicket mealTicket = QMealTicket.mealTicket;
 		
 		final JPQLQuery query = ModelQuery.queryFactory()
 				.from(mealTicket)
 				.where(mealTicket.person.id.eq(p.id))
-				.where(mealTicket.date.goe(dateFrom));
+				.where(mealTicket.date.goe(dateFrom))
+				.where(mealTicket.date.loe(dateTo));
 		
 		return query.list(mealTicket);
 	}

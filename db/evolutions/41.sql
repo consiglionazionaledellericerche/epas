@@ -20,7 +20,13 @@ INSERT INTO conf_general (field, field_value, office_id)
 	SELECT 'date_start_meal_ticket', null, office_id 
 	FROM conf_general 
 	GROUP BY office_id; 
+	
+ALTER TABLE contract_year_recap ADD COLUMN remaining_meal_tickets INTEGER;
+
+UPDATE contract_year_recap set remaining_meal_tickets = 0;
 
 # ---!Downs
 
 DELETE FROM conf_general WHERE field = 'date_start_meal_ticket';
+
+ALTER TABLE contract_year_recap DROP COLUMN remaining_meal_tickets;
