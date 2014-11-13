@@ -41,7 +41,6 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.ImmutableTable.Builder;
 import com.google.common.collect.Table;
 
-import controllers.MealTickets.TemporaryPersonMealTicketRecap;
 import dao.PersonDao;
 
 
@@ -119,11 +118,9 @@ public class Stampings extends Controller {
 		
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);
 		
-		TemporaryPersonMealTicketRecap mealTicketRecap = new TemporaryPersonMealTicketRecap(person);
-			
 		//Render
 		render(person, year, month, numberOfInOut, numberOfCompensatoryRestUntilToday,numberOfMealTicketToUse,numberOfMealTicketToRender,
-				daysRecap, stampModificationTypeList, stampTypeList, basedWorkingDays, absenceCodeMap, contractMonths, month_capitalized, mealTicketRecap) ;
+				daysRecap, stampModificationTypeList, stampTypeList, basedWorkingDays, absenceCodeMap, contractMonths, month_capitalized) ;
 
 	}
 
@@ -208,11 +205,8 @@ public class Stampings extends Controller {
 		}
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);
 
-		TemporaryPersonMealTicketRecap mealTicketRecap = new TemporaryPersonMealTicketRecap(person);
-		
-		//Render	//0 sql
 		render(person, year, month, numberOfInOut, numberOfCompensatoryRestUntilToday,numberOfMealTicketToUse,numberOfMealTicketToRender,
-				daysRecap, stampModificationTypeList, stampTypeList, basedWorkingDays, absenceCodeMap, contractMonths, month_capitalized, mealTicketRecap);
+				daysRecap, stampModificationTypeList, stampTypeList, basedWorkingDays, absenceCodeMap, contractMonths, month_capitalized);
 
 		 
 	}
