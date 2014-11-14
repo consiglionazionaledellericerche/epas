@@ -150,6 +150,8 @@ when
      	"Charts.processLastYearAbsences",
      	"Charts.exportHourAndOvertime",
      	"Charts.export",
+     	"Charts.exportDataSituation",
+     	"Charts.exportFinalSituation",
      	
      	
      	/*Riepilogo mensile*/
@@ -350,7 +352,9 @@ when
      	"Charts.overtimeOnPositiveResidualInYear",
      	"Charts.exportHourAndOvertime",
      	"Charts.export",
-     	"Charts.processLastYearAbsences"
+     	"Charts.processLastYearAbsences",
+     	"Charts.exportDataSituation",
+     	"Charts.exportFinalSituation"
        ), target == $o, granted == false)
 then
  $c.grant();
