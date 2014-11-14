@@ -65,6 +65,7 @@ public class PersonResidualMonthRecap {
 	public int buoniPastoDalMesePrecedente = 0;
 	public int buoniPastoConsegnatiNelMese = 0;
 	public int buoniPastoUsatiNelMese = 0;
+	public int buoniPastoResidui = 0;
 	
 	private PersonResidualMonthRecap() {}
 	
@@ -263,8 +264,11 @@ public class PersonResidualMonthRecap {
 			}
 			
 			//Numero ticket consegnati nel mese
-			monthRecap.buoniPastoConsegnatiNelMese = MealTicketDao.getMealTicketAssignedToPersonIntoInterval(monthRecap.person,  
+			monthRecap.buoniPastoConsegnatiNelMese = MealTicketDao.getMealTicketAssignedToPersonIntoInterval(monthRecap.contract,  
 					validDataForMealTickets.getBegin(), validDataForMealTickets.getEnd()).size();
+			
+			//residuo
+			monthRecap.buoniPastoResidui = monthRecap.buoniPastoDalMesePrecedente + monthRecap.buoniPastoConsegnatiNelMese - monthRecap.buoniPastoUsatiNelMese;
 						
 		}
 	}

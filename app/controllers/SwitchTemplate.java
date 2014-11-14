@@ -419,7 +419,7 @@ private static void executeAction(String action) {
 			Secure.login();
 		}
 		
-		if(personId == null ) {	/* TODO check bound year */
+		if(personId == null ) {	
 			
 			Application.index();	
 		}

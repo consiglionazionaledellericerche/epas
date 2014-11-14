@@ -162,9 +162,6 @@ public class Person extends BaseModel implements Comparable<Person>{
 	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<StampProfile> stampProfiles = new ArrayList<StampProfile>();
 
-
-
-
 	/**
 	 * relazione con la tabella dei figli del personale
 	 */
@@ -180,9 +177,6 @@ public class Person extends BaseModel implements Comparable<Person>{
 	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<CertificatedData> certificatedData;
 
-	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<MealTicket> mealTickets;
-	
 	@OneToMany(mappedBy="admin", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<MealTicket> mealTicketsAdmin;
 	
@@ -225,7 +219,6 @@ public class Person extends BaseModel implements Comparable<Person>{
 	@OneToOne(mappedBy="person", fetch=FetchType.EAGER)
 	public PersonShift personShift;
 	
-	//@NotAudited
 	@ManyToOne
 	@JoinColumn(name="office_id")	
 	public Office office;
@@ -927,11 +920,14 @@ public class Person extends BaseModel implements Comparable<Person>{
 		return cd;
 	}
 	
+	@Deprecated
 	public List<BlockMealTicket> getBlockMealTicket() {
 		
+		Contract contract = this.getCurrentContract();
+		
 		List<MealTicket> mealTicketList = MealTicket.find("Select mt from MealTicket mt "
-				+ "where mt.person = ? order by mt.block",
-				this).fetch();
+				+ "where mt.contract = ? order by mt.block",
+				contract).fetch();
 		
 		List<BlockMealTicket> blockList = Lists.newArrayList();
 		

@@ -1,5 +1,7 @@
 package controllers;
 
+import helpers.ModelQuery.SimpleResults;
+
 import java.util.List;
 
 import javax.inject.Inject;
@@ -47,11 +49,22 @@ public class MealTickets  extends Controller {
 	}
 	
 	@NoCheck
-	public static void recapMealTickets() {
+	public static void recapMealTickets(String name, Integer page) {
 		
-		List<Person> personList = PersonDao.list( Optional.<String>absent(),
-				Sets.newHashSet(Security.getOfficeAllowed()), false, LocalDate.now(), LocalDate.now(), true).list();
+		//		List<Person> personList = PersonDao.list( Optional.<String>absent(),
+		//			Sets.newHashSet(Security.getOfficeAllowed()), false, LocalDate.now(), LocalDate.now(), true).list();
 
+		if(page==null)
+			page = 0;
+
+		
+		
+		
+		SimpleResults<Person> simpleResults = PersonDao.list( Optional.fromNullable(name),
+				Sets.newHashSet(Security.getOfficeAllowed()), false, LocalDate.now(), LocalDate.now(), true);
+
+		List<Person> personList = simpleResults.paginated(page).getResults();
+		
 		List<PersonResidualMonthRecap> personsMonthRecaps = Lists.newArrayList();
 		
 		for(Person person : personList) {
@@ -60,7 +73,7 @@ public class MealTickets  extends Controller {
 			personsMonthRecaps.add(c.getMese(LocalDate.now().getMonthOfYear()));
 		}
 		
-		render(personsMonthRecaps); 
+		render(personsMonthRecaps, simpleResults); 
 		
 	}
 	
@@ -106,17 +119,16 @@ public class MealTickets  extends Controller {
 			if(exist!=null)  {
 				
 				flash.error("Il buono pasto con codice %s risulta già essere assegnato alla persona %s %s in data %s."
-						+ " L'Operazione è annullata", mealTicket.code, exist.person.name, exist.person.surname, exist.date);
+						+ " L'Operazione è annullata", mealTicket.code, exist.contract.person.name, exist.contract.person.surname, exist.date);
 				MealTickets.manageMealTickets(null);
 			}
-		
 		}
 		
 		//Persistenza
 		for(MealTicket mealTicket : ticketToAdd) {
 		
 			mealTicket.date = LocalDate.now();
-			mealTicket.person = person;
+			mealTicket.contract = person.getContract(mealTicket.date);
 			mealTicket.admin = admin.person; 
 			mealTicket.save();
 		}
