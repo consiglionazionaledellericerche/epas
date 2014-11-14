@@ -80,8 +80,6 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final BooleanPath ionicRadianceRiskCom3AvailableBis = createBoolean("ionicRadianceRiskCom3AvailableBis");
 
-    public final ListPath<models.MealTicket, QMealTicket> mealTickets = this.<models.MealTicket, QMealTicket>createList("mealTickets", models.MealTicket.class, QMealTicket.class, PathInits.DIRECT2);
-
     public final ListPath<models.MealTicket, QMealTicket> mealTicketsAdmin = this.<models.MealTicket, QMealTicket>createList("mealTicketsAdmin", models.MealTicket.class, QMealTicket.class, PathInits.DIRECT2);
 
     public final BooleanPath mechanographicalAllowanceAvailable = createBoolean("mechanographicalAllowanceAvailable");

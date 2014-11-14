@@ -12,6 +12,7 @@ import models.base.BaseModel;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
 import com.google.common.collect.Lists;
@@ -35,11 +36,12 @@ public class MealTicket extends BaseModel{
 		}
 	
 	}
-	
+
+	@NotAudited
 	@Required
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "person_id", nullable = false)
-	public Person person;
+	@JoinColumn(name = "contract_id", nullable = false)
+	public Contract contract;
 	
 	public Integer year;
 	
