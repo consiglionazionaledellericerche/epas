@@ -36,13 +36,12 @@ public class MealTicketDao {
 	}
 	
 	//TODO rivederla dopo la rifattorizzazione delle relazioni
-	public static List<MealTicket> getMealTicketInBlock(Person p, Integer codeBlock) {
+	public static List<MealTicket> getMealTicketInBlock(Integer codeBlock) {
 		
 		QMealTicket mealTicket = QMealTicket.mealTicket;
 		
 		final JPQLQuery query = ModelQuery.queryFactory()
 				.from(mealTicket)
-				.where(mealTicket.contract.person.id.eq(p.id))
 				.where(mealTicket.block.eq(codeBlock));
 		
 		return query.list(mealTicket);

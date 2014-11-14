@@ -120,14 +120,13 @@
 		        <td>${block.codeBlock}</td>
 		        
 		        <td>
-		          <a href="@{MealTickets.showPersonBlockMealTicket(person.id, block.codeBlock)}" data-modal=".my-modal">
+		          <a href="@{MealTickets.showPersonBlockMealTicket(block.codeBlock)}" data-modal=".my-modal">
 		            ${block.mealTickets.size()}
 		    	  </a> 
 		        </td>
 		        
 		        <td>
 		        #{form @MealTickets.deletePersonMealTicket() }
-		    	  <input type="hidden" name="personId" value="${person.id}"/>
 		    	  <input type="hidden" name="codeBlock" value="${block.codeBlock}"/>
 	        	  <button type="submit" class="btn btn-sm btn-danger"><span class="glyphicon glyphicon-trash"></span></button>
 		  		#{/form}
