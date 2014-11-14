@@ -50,16 +50,10 @@ public class MealTickets  extends Controller {
 	
 	@NoCheck
 	public static void recapMealTickets(String name, Integer page) {
-		
-		//		List<Person> personList = PersonDao.list( Optional.<String>absent(),
-		//			Sets.newHashSet(Security.getOfficeAllowed()), false, LocalDate.now(), LocalDate.now(), true).list();
 
 		if(page==null)
 			page = 0;
 
-		
-		
-		
 		SimpleResults<Person> simpleResults = PersonDao.list( Optional.fromNullable(name),
 				Sets.newHashSet(Security.getOfficeAllowed()), false, LocalDate.now(), LocalDate.now(), true);
 
@@ -139,27 +133,28 @@ public class MealTickets  extends Controller {
 
 	}
 	
-	public static void deletePersonMealTicket(Long personId, Integer codeBlock) {
+	public static void deletePersonMealTicket(Integer codeBlock) {
 		
 		//TODO un metodo deletePersonMealTicketConfirmed
-		
-		Person person = Person.findById(personId);
-		if(person == null) {
-			
-			flash.error("Impossibile trovare la persona specificata. Operazione annullata");
-			MealTickets.manageMealTickets(null);
-		}
 		
 		if(codeBlock == null){
 			flash.error("Impossibile trovare il codice blocco specificato. Operazione annullata");
 			MealTickets.manageMealTickets(null);
 		}
+				
+		List<MealTicket> mealTicketList = MealTicket.find("Select mt from MealTicket mt "
+				+ "where mt.block = ?",
+				codeBlock).fetch();
+		
+		if(mealTicketList == null || mealTicketList.size() == 0) {
+			flash.error("Il blocco selezionato è inesistente. Operazione annullata");
+			MealTickets.manageMealTickets(null);
+		}
+		
+		Person person = mealTicketList.get(0).contract.person;
 		
 		rules.checkIfPermitted(person.office);
 		
-		List<MealTicket> mealTicketList = MealTicket.find("Select mt from MealTicket mt "
-				+ "where mt.person = ? and mt.block = ?",
-				person, codeBlock).fetch();
 		
 		for(MealTicket mealTicket : mealTicketList) {
 			
@@ -170,18 +165,18 @@ public class MealTickets  extends Controller {
 		MealTickets.manageMealTickets(null);
 	}
 	
-	public static void showPersonBlockMealTicket(Long personId, Integer codeBlock) {
+	public static void showPersonBlockMealTicket(Integer codeBlock) {
 		
-		Person person = Person.findById(personId);
-		if(person == null) {
-			
-			flash.error("Impossibile trovare la persona specificata. Operazione annullata");
+		List<MealTicket> mealTicketList = MealTicketDao.getMealTicketInBlock(codeBlock);
+		
+		if(mealTicketList == null || mealTicketList.size() == 0) {
+			flash.error("Il blocco selezionato è inesistente. Operazione annullata");
 			MealTickets.manageMealTickets(null);
 		}
 		
-		rules.checkIfPermitted(person.office);
+		Person person = mealTicketList.get(0).contract.person;
 		
-		List<MealTicket> mealTicketList = MealTicketDao.getMealTicketInBlock(person, codeBlock);
+		rules.checkIfPermitted(person.office);
 		
 		render(mealTicketList, person, codeBlock);
 	}
