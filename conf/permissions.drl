@@ -136,6 +136,13 @@ when
      	"Absences.edit",
      	"Absences.update",
      	
+     	/*Gestione Buoni Pasto*/
+     	"MealTickets.recapMealTickets",
+     	"MealTickets.manageMealTickets",
+     	"MealTickets.submitPersonMealTicket",
+        "MealTickets.deletePersonMealTicket",
+     	
+     	
      	/*Stampa cartellino*/
      	"PrintTags.listPersonForPrintTags",
      	"PrintTags.showTag",
@@ -212,7 +219,8 @@ when
  $p: Permission(description == "viewPerson") from $uro.role.permissions
  $c: PermissionCheck(action in (
         "Persons.list",
-        "MealTickets.manageMealTickets"
+        "MealTickets.manageMealTickets",
+        "MealTickets.recapMealTickets"
         ), target == null, granted == false)
 then
  $c.grant();
