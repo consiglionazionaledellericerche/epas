@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -19,11 +20,18 @@ import manager.recaps.PersonResidualYearRecap;
 import models.Absence;
 import models.Competence;
 import models.Contract;
+import models.Office;
 import models.Person;
+import models.WorkingTimeType;
 import models.exports.PersonOvertime;
+import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
+
+import dao.PersonDao;
 import play.Logger;
 import play.db.jpa.Blob;
 import play.mvc.Controller;
@@ -430,5 +438,50 @@ public class Charts extends Controller{
 		}
 		out.close();
 		renderBinary(inputStream, "straordinariOreInPiuERiposiCompensativi"+year+".csv");
+	}
+	
+	public static void exportFinalSituation(){
+		rules.checkIfPermitted(Security.getUser().get().person.office);
+		Set<Office> offices = Sets.newHashSet();
+		offices.add(Security.getUser().get().person.office);
+		String name = null;
+		List<Person> personList = PersonDao.list(Optional.fromNullable(name), 
+								Sets.newHashSet(Security.getOfficeAllowed()), false, LocalDate.now(), LocalDate.now(), true).list();
+		render(personList);
+	}
+	
+	public static void exportDataSituation(Long personId) throws IOException{
+		rules.checkIfPermitted(Security.getUser().get().person.office);
+		FileInputStream inputStream = null;
+		Person person = Person.findById(personId);
+		File tempFile = File.createTempFile("esportazioneSituazioneFinale"+person.surname,".csv" );
+		inputStream = new FileInputStream( tempFile );
+		FileWriter writer = new FileWriter(tempFile, true);
+		BufferedWriter out = new BufferedWriter(writer);
+		
+		out.write("Cognome Nome,Ferie usate anno corrente,Ferie usate anno passato,Permessi usati anno corrente,Residuo anno corrente (minuti), Residuo anno passato (minuti),Riposi compensativi anno corrente");
+		out.newLine();
+		VacationsRecap vr = new VacationsRecap(person, LocalDate.now().getYear(), person.getContract(LocalDate.now()), LocalDate.now(), false);
+		PersonResidualYearRecap pryr = PersonResidualYearRecap.factory(person.getContract(LocalDate.now()), LocalDate.now().getYear(), LocalDate.now());
+		PersonResidualMonthRecap prmr = pryr.getMese(LocalDate.now().getMonthOfYear());
+		WorkingTimeType wtt = person.getCurrentWorkingTimeType();
+		int workingTime = wtt.workingTimeTypeDays.get(0).workingTime;
+		out.append(person.surname+' '+person.name+',');
+		out.append(new Integer(vr.vacationDaysCurrentYearUsed.size()).toString()+','+
+				new Integer(vr.vacationDaysLastYearUsed.size()).toString()+','+
+				new Integer(vr.permissionUsed.size()).toString()+','+
+				new Integer(prmr.monteOreAnnoCorrente).toString()+','+
+				new Integer(prmr.monteOreAnnoPassato).toString()+',');
+		int month = LocalDate.now().getMonthOfYear();
+		int riposiCompensativiMinuti = 0;
+		for(int i = 1; i <= month; i++){
+			PersonResidualMonthRecap pm = pryr.getMese(i);
+			riposiCompensativiMinuti+=pm.riposiCompensativiMinuti;
+		}
+		out.append(new Integer(riposiCompensativiMinuti/workingTime).toString());
+		
+		out.close();
+		renderBinary(inputStream, "exportDataSituation"+person.surname+".csv");
+		
 	}
 }
