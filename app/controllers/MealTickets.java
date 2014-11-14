@@ -48,7 +48,6 @@ public class MealTickets  extends Controller {
 		
 	}
 	
-	@NoCheck
 	public static void recapMealTickets(String name, Integer page) {
 
 		if(page==null)
