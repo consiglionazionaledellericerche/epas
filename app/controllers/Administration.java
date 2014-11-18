@@ -310,28 +310,5 @@ public class Administration extends Controller {
 		
 		renderText(person.name);
 	}
-	
-	public static void printResidualSituation() {
-		
-		List<Person> personList = PersonDao.list(Optional.<String>absent(),
-				Sets.newHashSet(Security.getOfficeAllowed()), false, LocalDate.now(), LocalDate.now(), true).list();
-		for(Person person : personList) {
-			
-			System.out.println(person.surname);
-			
-			Contract contract = person.getCurrentContract();
-			PersonResidualYearRecap recap = PersonResidualYearRecap.factory(contract, LocalDate.now().getYear(), null);
-			
-			
-			for(PersonResidualMonthRecap mese : recap.mesi) {
-				
-				if(mese!=null) {
-					System.out.println(mese.anno + "," + mese.mese + ",[" + mese.initMonteOreAnnoPassato + "," + mese.initMonteOreAnnoPassato + "]" +
-							",[" + mese.initMonteOreAnnoCorrente + "," + mese.initMonteOreAnnoCorrente + "]");
-				}
-			}
-				
-		}
-	}
-    
+   
 }
