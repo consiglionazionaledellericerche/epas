@@ -24,11 +24,15 @@ import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
+
 import play.Logger;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
 import controllers.Resecure.NoCheck;
+import dao.PersonDao;
 
 
 @With( {Secure.class, RequestInit.class} )
@@ -307,5 +311,27 @@ public class Administration extends Controller {
 		renderText(person.name);
 	}
 	
+	public static void printResidualSituation() {
+		
+		List<Person> personList = PersonDao.list(Optional.<String>absent(),
+				Sets.newHashSet(Security.getOfficeAllowed()), false, LocalDate.now(), LocalDate.now(), true).list();
+		for(Person person : personList) {
+			
+			System.out.println(person.surname);
+			
+			Contract contract = person.getCurrentContract();
+			PersonResidualYearRecap recap = PersonResidualYearRecap.factory(contract, LocalDate.now().getYear(), null);
+			
+			
+			for(PersonResidualMonthRecap mese : recap.mesi) {
+				
+				if(mese!=null) {
+					System.out.println(mese.anno + "," + mese.mese + ",[" + mese.initMonteOreAnnoPassato + "," + mese.initMonteOreAnnoPassato + "]" +
+							",[" + mese.initMonteOreAnnoCorrente + "," + mese.initMonteOreAnnoCorrente + "]");
+				}
+			}
+				
+		}
+	}
     
 }
