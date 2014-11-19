@@ -24,11 +24,15 @@ import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
+
 import play.Logger;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
 import controllers.Resecure.NoCheck;
+import dao.PersonDao;
 
 
 @With( {Secure.class, RequestInit.class} )
@@ -306,6 +310,5 @@ public class Administration extends Controller {
 		
 		renderText(person.name);
 	}
-	
-    
+   
 }
