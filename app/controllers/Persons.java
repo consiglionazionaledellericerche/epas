@@ -10,9 +10,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import manager.ContractManager;
-import models.Absence;
 import models.Competence;
-import models.CompetenceCode;
 import models.ConfGeneral;
 import models.Contract;
 import models.ContractStampProfile;
@@ -23,13 +21,9 @@ import models.Office;
 import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
-import models.PersonDayInTrouble;
-import models.PersonWorkingTimeType;
 import models.PersonYear;
 import models.Qualification;
-import models.Stamping;
 import models.User;
-import models.UsersRolesOffices;
 import models.VacationPeriod;
 import models.WorkingTimeType;
 import models.enumerate.ConfigurationFields;
@@ -40,7 +34,7 @@ import org.joda.time.LocalDate;
 import play.Logger;
 import play.data.validation.Required;
 import play.data.validation.Valid;
-import play.db.jpa.JPA;
+import play.data.validation.Validation;
 import play.db.jpa.JPAPlugin;
 import play.i18n.Messages;
 import play.libs.Codec;
@@ -99,7 +93,7 @@ public class Persons extends Controller {
 
 	@NoCheck
 	public static void save(Person person, Integer qualification, Integer office, Contract contract) {
-		if(validation.hasErrors()) {
+		if(Validation.hasErrors()) {
 			if(request.isAjax()) error("Invalid value");
 			Persons.list(null);
 		}
@@ -550,7 +544,7 @@ public class Persons extends Controller {
 			flash.error("Errore nel fornire il parametro data inizio contratto. Inserire la data nel corretto formato aaaa-mm-gg");
 			Persons.edit(person.id);
 		}
-		if(validation.hasErrors()) {
+		if(Validation.hasErrors()) {
 
 			flash.error("Errore nel fornire il parametro data fine contratto. Inserire la data nel corretto formato aaaa-mm-gg");
 			Persons.edit(person.id);
