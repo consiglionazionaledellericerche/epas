@@ -411,9 +411,7 @@ public class Charts extends Controller{
 		LocalDate beginDate = new LocalDate().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue();
 		for(Person p : personList){
 			Logger.debug("Scrivo i dati per %s %s", p.name, p.surname);
-			if(p.surname.equals("Lami")){
-				
-			}
+
 			out.append(p.surname+' '+p.name+',');
 			String situazione = "";
 			List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ? and ((c.endContract != null and c.endContract between ? and ?) or "
