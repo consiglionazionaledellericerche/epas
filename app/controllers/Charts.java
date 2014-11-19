@@ -411,11 +411,13 @@ public class Charts extends Controller{
 		LocalDate beginDate = new LocalDate().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue();
 		for(Person p : personList){
 			Logger.debug("Scrivo i dati per %s %s", p.name, p.surname);
-
+			if(p.surname.equals("Lami")){
+				
+			}
 			out.append(p.surname+' '+p.name+',');
 			String situazione = "";
-			List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ? and ((c.endContract != null and c.endContract < ?) or "
-					+ "(c.beginContract > ? and (c.expireContract = null or c.expireContract > ?))) order by c.beginContract", p, endDate,beginDate, endDate).fetch();
+			List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ? and ((c.endContract != null and c.endContract between ? and ?) or "
+					+ "(c.beginContract > ? and (c.expireContract = null or c.expireContract > ?))) order by c.beginContract", p, beginDate, endDate, beginDate, endDate).fetch();
 			LocalDate beginContract = null;
 			if(contractList.isEmpty())
 				contractList = p.contracts;
