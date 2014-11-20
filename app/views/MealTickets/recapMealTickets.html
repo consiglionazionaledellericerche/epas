@@ -19,13 +19,25 @@
   
   <div class="col-md-10 col-md-offset-1">
  
-	  <table class="table table-striped">
-	    <tr>
-	      <th>Nome</th>
-	      <th>Rimanenti</th>
-	      <th>Data Esaurimento</th>
-	  	</tr>
+	  <table id="example" class="display table table-bordered" cellspacing="0" width="100%">
+        <thead>
+	      <tr>
+	        <th>Nome</th>
+	        <th>Rimanenti</th>
+	        <th>Data Esaurimento</th>
+	  	  </tr>
+	  	</thead>
 	  	
+	  	<tfoot>
+          <tr>
+            <th>Nome</th>
+	        <th>Rimanenti</th>
+	        <th>Data Esaurimento</th>
+          </tr>
+        </tfoot>
+ 
+        <tbody>
+        
 	  	#{list items:mealTicketRecaps, as:'recap'}
 	  	  <tr>
 	  	    <td>${recap.contract.person.surname} ${recap.contract.person.name}</td> 
@@ -55,7 +67,8 @@
 	  	  </tr>
 
 	  	#{/list}
+	  	</tbody>
 	  
-	  </table>
-	  
+	  </table> 
+  </div>
 </div>
