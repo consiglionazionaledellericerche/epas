@@ -19,6 +19,7 @@ import manager.recaps.PersonResidualMonthRecap;
 import manager.recaps.PersonResidualYearRecap;
 import models.Absence;
 import models.Competence;
+import models.CompetenceCode;
 import models.Contract;
 import models.Office;
 import models.Person;
@@ -402,54 +403,78 @@ public class Charts extends Controller{
 
 		out.append("ore straordinari TOTALI,ore riposi compensativi TOTALI, ore in più TOTALI");
 		out.newLine();
-		
+
 		int totalOvertime = 0;
 		int totalCompensatoryRest = 0;
 		int totalPlusHours = 0;
+		LocalDate endDate = new LocalDate().monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue();
+		LocalDate beginDate = new LocalDate().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue();
 		for(Person p : personList){
 			Logger.debug("Scrivo i dati per %s %s", p.name, p.surname);
-			
-			String situazione = p.surname+' '+p.name+',';
-			
-			PersonResidualYearRecap c = PersonResidualYearRecap.factory(p.getCurrentContract(), year, new LocalDate(year,month,1).dayOfMonth().withMaximumValue());
-			for(int i = 1; i <= month; i++){	
-				
-				PersonResidualMonthRecap m = c.getMese(i);
-				if(m != null){
-					situazione = situazione+(new Integer(m.straordinariMinuti/60).toString())+','+(new Integer(m.riposiCompensativiMinuti/60).toString())+','+(new Integer(m.progressivoFinaleMese/60).toString())+',';
-					totalOvertime = totalOvertime+new Integer(m.straordinariMinuti/60);
-					totalCompensatoryRest = totalCompensatoryRest+new Integer(m.riposiCompensativiMinuti/60);
-					totalPlusHours = totalPlusHours+new Integer(m.progressivoFinaleMese/60);
-				}
-					
-				else
-					situazione = situazione +("0"+','+"0"+','+"0");
 
-			}
-			out.append(situazione);
-			out.append(new Integer(totalOvertime).toString()+',');
-			out.append(new Integer(totalCompensatoryRest).toString()+',');
-			out.append(new Integer(totalPlusHours).toString()+',');
-			out.newLine();
+			out.append(p.surname+' '+p.name+',');
+			String situazione = "";
+			List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ? and ((c.endContract != null and c.endContract between ? and ?) or "
+					+ "(c.beginContract > ? and (c.expireContract = null or c.expireContract > ?))) order by c.beginContract", p, beginDate, endDate, beginDate, endDate).fetch();
+			LocalDate beginContract = null;
+			if(contractList.isEmpty())
+				contractList = p.contracts;
+			//CompetenceCode code = CompetenceCode.find("Select c from CompetenceCode c where c.code = ?", "S1").first();
+			for(Contract contract : contractList){
+				if(beginContract != null && beginContract.equals(contract.beginContract)){
+					Logger.debug("Due contratti uguali nella stessa lista di contratti per %s %s : come è possibile!?!?", p.name, p.surname);
+				}
+				else{
+					beginContract = contract.beginContract;
+					PersonResidualYearRecap c = PersonResidualYearRecap.factory(contract, year, contract.endContract);
+					if(c != null){
+						int start = c.getMesi().get(0).mese;
+						for(int i = start; i <= c.getMesi().size(); i++){	
+
+							PersonResidualMonthRecap m = c.getMese(i);
+							if(m != null){
+
+								situazione = situazione+(new Integer(m.straordinariMinuti/60).toString())+','+(new Integer(m.riposiCompensativiMinuti/60).toString())+','+(new Integer((m.progressivoFinalePositivoMese+m.straordinariMinuti)/60).toString())+',';
+															
+								totalOvertime = totalOvertime+new Integer(m.straordinariMinuti/60);
+								totalCompensatoryRest = totalCompensatoryRest+new Integer(m.riposiCompensativiMinuti/60);
+								totalPlusHours = totalPlusHours+new Integer((m.progressivoFinalePositivoMese+m.straordinariMinuti)/60);
+								
+							}
+
+							else
+								situazione = situazione +("0"+','+"0"+','+"0");
+
+						}
+						out.append(situazione);
+						out.append(new Integer(totalOvertime).toString()+',');
+						out.append(new Integer(totalCompensatoryRest).toString()+',');
+						out.append(new Integer(totalPlusHours).toString()+',');				
+
+					}				
+
+				}
+
+			}		
 			totalCompensatoryRest = 0;
 			totalOvertime = 0;
 			totalPlusHours = 0;
-
+			out.newLine();
 		}
 		out.close();
 		renderBinary(inputStream, "straordinariOreInPiuERiposiCompensativi"+year+".csv");
 	}
-	
+
 	public static void exportFinalSituation(){
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		Set<Office> offices = Sets.newHashSet();
 		offices.add(Security.getUser().get().person.office);
 		String name = null;
 		List<Person> personList = PersonDao.list(Optional.fromNullable(name), 
-								Sets.newHashSet(Security.getOfficeAllowed()), false, LocalDate.now(), LocalDate.now(), true).list();
+				Sets.newHashSet(Security.getOfficeAllowed()), false, LocalDate.now(), LocalDate.now(), true).list();
 		render(personList);
 	}
-	
+
 	public static void exportDataSituation(Long personId) throws IOException{
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		FileInputStream inputStream = null;
@@ -458,7 +483,7 @@ public class Charts extends Controller{
 		inputStream = new FileInputStream( tempFile );
 		FileWriter writer = new FileWriter(tempFile, true);
 		BufferedWriter out = new BufferedWriter(writer);
-		
+
 		out.write("Cognome Nome,Ferie usate anno corrente,Ferie usate anno passato,Permessi usati anno corrente,Residuo anno corrente (minuti), Residuo anno passato (minuti),Riposi compensativi anno corrente");
 		out.newLine();
 		VacationsRecap vr = new VacationsRecap(person, LocalDate.now().getYear(), person.getContract(LocalDate.now()), LocalDate.now(), false);
@@ -479,9 +504,9 @@ public class Charts extends Controller{
 			riposiCompensativiMinuti+=pm.riposiCompensativiMinuti;
 		}
 		out.append(new Integer(riposiCompensativiMinuti/workingTime).toString());
-		
+
 		out.close();
 		renderBinary(inputStream, "exportDataSituation"+person.surname+".csv");
-		
+
 	}
 }
