@@ -41,6 +41,11 @@ public class DateInterval {
 		return end;
 	}
 	
+	@Override
+	public String toString() {
+		return "[" + this.begin.toString() + "," + this.getEnd().toString() + "]";
+	}
+	
 	
 	
 	

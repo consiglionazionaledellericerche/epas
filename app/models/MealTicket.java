@@ -15,6 +15,7 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 
 import play.data.validation.Required;
@@ -24,6 +25,11 @@ import play.data.validation.Required;
 @Table(name = "meal_ticket")
 public class MealTicket extends BaseModel{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public static class BlockMealTicket {
 		
 		public Integer codeBlock;
@@ -67,6 +73,18 @@ public class MealTicket extends BaseModel{
 	@Column(name = "expire_date")
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate expireDate;
+	
+	@Override
+	public String toString() {
+		
+		return Objects.toStringHelper(this)
+				.add("id", id)
+				.add("contract", contract.id)
+				.add("person", contract.person.name + " " + contract.person.surname)
+				.add("date", date)
+				.add("expire", expireDate).toString();
+		
+	}
 	
 
 }

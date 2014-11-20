@@ -19,69 +19,43 @@
   
   <div class="col-md-10 col-md-offset-1">
  
-	  <div class="col-xs-3">
-	  #{form action:@MealTickets.recapMealTickets()	,  
-	          method:'GET', autocomplete:'off',
-	          'data-reload':'#results'}
-	          <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="input-medium"/>
-	
-	          <i class="icon-search icon-large"></i>
-	 #{/form}
-	 </div>
-
-	 <section id="results">
-	  
-	  <div class="col-xs-7">
-	    <ul class="pagination">
-		  #{list items:0..simpleResults.totalPage-1, as:'indexPage', class:'inline'}
-		    #{if simpleResults.page==indexPage}
-		      <li class="active"><a href="#">${indexPage+1}</a></li>
-		    #{/if}
-		    #{else}
-		      <li><a href="@{MealTickets.recapMealTickets(name, indexPage)}">${indexPage+1}</a></li>
-		    #{/else}
-	      #{/list}
-	    </ul>
-	  </div>
-	  
 	  <table class="table table-striped">
 	    <tr>
 	      <th>Nome</th>
-	      <th>Residuo Mese Precedente</th>
-	      <th>Consegnati</th>
-	      <th>Utilizzati</th>
 	      <th>Rimanenti</th>
+	      <th>Data Esaurimento</th>
 	  	</tr>
 	  	
-	  	#{list items:personsMonthRecaps, as:'monthRecap'}
+	  	#{list items:mealTicketRecaps, as:'recap'}
 	  	  <tr>
-	  	    <td>${monthRecap.person.name} ${monthRecap.person.surname}</td>
-	  	    <td>${monthRecap.buoniPastoDalMesePrecedente}</td>
-	  	    <td>${monthRecap.buoniPastoConsegnatiNelMese}</td>
-	  	    <td>${monthRecap.buoniPastoUsatiNelMese}</td>
-
+	  	    <td>${recap.contract.person.surname} ${recap.contract.person.name}</td> 
 	  	    <!-- remaining cell -->
-	  	    #{if monthRecap.buoniPastoResidui >= 5}
+	  	    #{if recap.remaining >= 5}
 	  	      <td class="success">
 	  	    #{/if}
-	  	    #{if monthRecap.buoniPastoResidui >= 0 && monthRecap.buoniPastoResidui < 5}
+	  	    #{if recap.remaining > 0 && recap.remaining < 5}
 	  	       <td class="warning">
 	  	    #{/if}   
-	  	    #{if monthRecap.buoniPastoResidui < 0}
+	  	    #{if recap.remaining == 0}
 	  	      <td class="danger">
 	  	    #{/if}
 	  	      <strong>
-	  	      ${monthRecap.buoniPastoResidui}
+	  	      ${recap.remaining}
 	  	      </strong>
 	  	    </td>
-	  	  
+	  	    
+	  	    <td>
+	  	    #{if recap.isMealTicketRunOut()}
+	  	    	${recap.getDateError()}
+	  	    #{/if}
+	  	     #{if recap.isMealTicketExpired()}
+	  	    	${recap.getDateError()} *
+	  	    #{/if}
+	  	    </td>
 	  	  </tr>
 
 	  	#{/list}
 	  
 	  </table>
-	  </div>
 	  
-	  </section>
-  
 </div>

@@ -7,19 +7,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.dbunit.DatabaseUnitException;
-import org.dbunit.dataset.DataSetException;
-import org.dbunit.dataset.IDataSet;
-import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
-import org.dbunit.ext.h2.H2Connection;
-import org.dbunit.operation.DatabaseOperation;
-import org.hibernate.Session;
-import org.hibernate.jdbc.Work;
-import org.joda.time.LocalDate;
-
-import com.google.common.collect.Lists;
-import com.google.common.io.Resources;
-
 import models.Contract;
 import models.ContractStampProfile;
 import models.Office;
@@ -34,12 +21,27 @@ import models.User;
 import models.UsersRolesOffices;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
+
+import org.dbunit.DatabaseUnitException;
+import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.IDataSet;
+import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
+import org.dbunit.ext.h2.H2Connection;
+import org.dbunit.operation.DatabaseOperation;
+import org.hibernate.Session;
+import org.hibernate.jdbc.Work;
+import org.joda.time.LocalDate;
+
 import play.Logger;
 import play.Play;
 import play.db.jpa.JPA;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 import play.libs.Codec;
+
+import com.google.common.collect.Lists;
+import com.google.common.io.Resources;
+
 import controllers.Security;
 
 /**
@@ -120,6 +122,7 @@ public class Bootstrap extends Job<Void> {
 				
 		bootstrapPermissionsHandler();
 
+		
 		/*
 		convertPersonBornDateHandler();
 		
@@ -318,7 +321,6 @@ public class Bootstrap extends Job<Void> {
 			
 			*/
 			
-
 			
 		}
 		catch(RuntimeException e)
