@@ -112,6 +112,9 @@ public class PersonDay extends BaseModel {
 	@Transient
 	private Boolean isFixedTimeAtWorkk = null;
 	
+	@Transient
+	public MealTicket mealTicketAssigned = null;
+	
 	
 	public PersonDay(Person person, LocalDate date, int timeAtWork, int difference, int progressive) {
 		this.person = person;
