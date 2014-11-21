@@ -1,26 +1,15 @@
 
-import it.cnr.iit.epas.DateInterval;
-import it.cnr.iit.epas.DateUtility;
-
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-import models.Contract;
-import models.ContractStampProfile;
 import models.Office;
 import models.Permission;
-import models.Person;
 import models.Qualification;
 import models.Role;
-import models.StampModificationType;
-import models.StampProfile;
-import models.TotalOvertime;
 import models.User;
 import models.UsersRolesOffices;
-import models.WorkingTimeType;
-import models.WorkingTimeTypeDay;
 
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.dataset.DataSetException;
@@ -30,7 +19,6 @@ import org.dbunit.ext.h2.H2Connection;
 import org.dbunit.operation.DatabaseOperation;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.joda.time.LocalDate;
 
 import play.Logger;
 import play.Play;
@@ -39,7 +27,6 @@ import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 import play.libs.Codec;
 
-import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 
 import controllers.Security;
@@ -331,11 +318,12 @@ public class Bootstrap extends Job<Void> {
 
 	}
 
-
+	
 	/**
 	 * Crea il tipo di WorkingTimeTypeNormaleMod. Questo tipo non era presente nella vecchia applicazione
 	 * che mostrava per default questo tipo di Orario quando la persona non aveva nessuno Orario impostato.
 	 */
+	/*
 	private static void createWorkinTimeTypeNormaleMod() {
 		final String NORMALE_MOD = "normale-mod";
 
@@ -390,6 +378,7 @@ public class Bootstrap extends Job<Void> {
 			Logger.debug("Creato il WorkingTimeTypeDay per il giorno %d del WorkingTimeType %s", dayOfWeek, wttNew.description);
 		}
 	}
+	*/
 	
 	
 	private static void bootstrapPermissionsHandler() {
@@ -560,12 +549,8 @@ public class Bootstrap extends Job<Void> {
 	
 	}
 
-
+	/*
 	private static void convertPersonBornDateHandler() {
-		
-		//FIXME applicare l'evoluzione che crea il campo e lanciare questo metodo
-		//oppure migliorare l'evoluzione che effettui direttamente la conversione 
-		//da Date a LocalDate. In ogni caso va eliminato il campo born_date
 		
 		List<Person> personList = Person.findAll();
 		for(Person person : personList) {
@@ -577,10 +562,12 @@ public class Bootstrap extends Job<Void> {
 			}
 		}
 	}
+	*/
 	
+	/*
 	private static void cleanOfficeTree() {
 		
-		/* EVOLUZIONE IRPI */
+		//EVOLUZIONE IRPI
 		
 		Office irpi = Office.find("byCode", 3000).first();	//WARNING è un codice forse non univoco!!!
 		if(irpi != null) {
@@ -627,7 +614,7 @@ public class Bootstrap extends Job<Void> {
 			
 		}
 		
-		/* EVOLUZIONE IVV */
+		//EVOLUZIONE IVV
 		
 		Office ivv = Office.find("byCode", 1000).first();	//WARNING è un codice forse non univoco!!!
 		if(ivv != null) {
@@ -679,7 +666,7 @@ public class Bootstrap extends Job<Void> {
 		
 		
 		
-		/* EVOLUZIONE PISA */
+		// EVOLUZIONE PISA
 		Office iitPisa = Office.find("byCode", 223400).first();
 		if(iitPisa != null) 
 		{
@@ -728,7 +715,7 @@ public class Bootstrap extends Job<Void> {
 			}
 		}
 		
-		/* EVOLUZIONE ISE */
+		// EVOLUZIONE ISE
 		
 		Office ise = Office.find("byCode", 2000).first();	//WARNING è un codice forse non univoco!!!
 		if(ise != null) {
@@ -773,10 +760,12 @@ public class Bootstrap extends Job<Void> {
 		}
 
 	}
+	*/
 	
+	/*
 	private static void bootstrapTotalOvertimeHandler() {
 		
-		/* EVOLUZIONE IRPI */
+		// EVOLUZIONE IRPI 
 		Office irpi = Office.find("byCode", 3000).first();	//WARNING è un codice forse non univoco!!!
 		if(irpi != null) {
 			
@@ -791,7 +780,7 @@ public class Bootstrap extends Job<Void> {
 			
 		}
 		
-		/* EVOLUZIONE IVV */
+		// EVOLUZIONE IVV 
 		Office ivv = Office.find("byCode", 1000).first();	//WARNING è un codice forse non univoco!!!
 		if(ivv != null) {
 			
@@ -806,7 +795,7 @@ public class Bootstrap extends Job<Void> {
 			
 		}
 		
-		/* EVOLUZIONE ISE */
+		// EVOLUZIONE ISE 
 		Office ise = Office.find("byCode", 2000).first();	//WARNING è un codice forse non univoco!!!
 		if(ise != null) {
 			
@@ -821,7 +810,7 @@ public class Bootstrap extends Job<Void> {
 			
 		}
 		
-		/* EVOLUZIONE IIT */
+		// EVOLUZIONE IIT 
 		Office iit = Office.find("byCode", 223400).first();	
 		if(iit != null) {
 			
@@ -837,8 +826,9 @@ public class Bootstrap extends Job<Void> {
 		}
 		
 	}
+	*/
 	
-	
+	/*
 	private static void createContractStampProfile2() {
 		
 		if(ContractStampProfile.count() != 0){
@@ -882,14 +872,15 @@ public class Bootstrap extends Job<Void> {
 			}
 			
 			csp.save();
-			/*
-			System.out.println(" ContractId: "+ contract.id 
-					+ " ContractBegin: "+ contract.beginContract 
-					+ " Involved: "+spInvolved.size()
-					+ " Persona: "+contract.person.surname + " " + contract.person.name);
 			
-			*/
+//			System.out.println(" ContractId: "+ contract.id 
+//					+ " ContractBegin: "+ contract.beginContract 
+//					+ " Involved: "+spInvolved.size()
+//					+ " Persona: "+contract.person.surname + " " + contract.person.name);
+			
+			
 		}
+
 		
 //		List<StampProfile> spList = StampProfile.findAll();
 //		for(StampProfile sp : spList) {
@@ -897,7 +888,9 @@ public class Bootstrap extends Job<Void> {
 //			sp.delete();
 //		}
 	}
+	*/
 	
+	/*
 	private static void insertDefaultStampModificationType() {
 		
 		//FIX d 
@@ -912,6 +905,7 @@ public class Bootstrap extends Job<Void> {
 		
 		
 	}
+	*/
 	
 	
 }

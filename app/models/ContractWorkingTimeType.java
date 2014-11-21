@@ -25,6 +25,8 @@ import play.data.validation.Required;
 @Table(name = "contracts_working_time_types")
 public class ContractWorkingTimeType extends BaseModel implements Comparable<ContractWorkingTimeType> {
 
+	private static final long serialVersionUID = 3730183716240278997L;
+
 	@Required
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="contract_id")
