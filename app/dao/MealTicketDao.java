@@ -9,7 +9,6 @@ import models.ConfGeneral;
 import models.Contract;
 import models.MealTicket;
 import models.Office;
-import models.PersonDay;
 import models.enumerate.ConfigurationFields;
 import models.query.QMealTicket;
 

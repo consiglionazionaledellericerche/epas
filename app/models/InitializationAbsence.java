@@ -20,6 +20,8 @@ import play.data.validation.Required;
 @Table(name= "initialization_absences")
 public class InitializationAbsence extends BaseModel{
 	
+	private static final long serialVersionUID = -2978002818277223003L;
+
 	@Required
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "person_id", nullable = false)

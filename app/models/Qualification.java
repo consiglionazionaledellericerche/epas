@@ -22,7 +22,9 @@ import org.hibernate.envers.Audited;
 @Audited
 @Table(name="qualifications")
 public class Qualification extends BaseModel{
-	
+
+	private static final long serialVersionUID = 7147378609067987191L;
+
 	@OneToMany(mappedBy="qualification")
 	public List<Person> person;
 	

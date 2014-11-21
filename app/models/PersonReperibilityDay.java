@@ -27,6 +27,8 @@ import play.data.validation.Required;
 @Table(name = "person_reperibility_days", uniqueConstraints = { @UniqueConstraint(columnNames={ "person_reperibility_id", "date"}) })
 public class PersonReperibilityDay extends BaseModel {
 	
+	private static final long serialVersionUID = 6170327692153445002L;
+
 	@Required
 	@ManyToOne	
 	@JoinColumn(name = "person_reperibility_id", nullable = false)

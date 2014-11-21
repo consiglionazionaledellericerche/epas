@@ -31,7 +31,9 @@ import controllers.Security;
 @Table(name = "office")
 public class Office extends BaseModel{
  
-    @Column(name = "name")
+	private static final long serialVersionUID = -8689432709728656660L;
+
+	@Column(name = "name")
     public String name;
     
     @Column(name = "contraction")

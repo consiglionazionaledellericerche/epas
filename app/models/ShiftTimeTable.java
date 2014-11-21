@@ -12,14 +12,13 @@ import javax.persistence.Table;
 import models.base.BaseModel;
 
 import org.hibernate.annotations.Type;
-import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
-
-
 
 @Entity
 @Table(name="shift_time_table")
 public class ShiftTimeTable extends BaseModel{
+
+	private static final long serialVersionUID = -7869931573320174606L;
 
 	@OneToMany(mappedBy="shiftTimeTable", fetch=FetchType.LAZY)
 	public List<ShiftType> shiftTypes = new ArrayList<ShiftType>();

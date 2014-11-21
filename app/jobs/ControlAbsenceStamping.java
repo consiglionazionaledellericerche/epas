@@ -18,6 +18,7 @@ import play.jobs.*;
 
 //@On("0 0 7 1 * ?")
 //@On("0 /5 * * * ?")
+@SuppressWarnings("rawtypes")
 public class ControlAbsenceStamping extends Job{
 
 	/**
@@ -27,6 +28,7 @@ public class ControlAbsenceStamping extends Job{
 	 * 
 	 * @throws EmailException 
 	 */
+	@SuppressWarnings("unchecked")
 	public void doJob() throws EmailException{
 //		Long id = new Long(Play.configuration.getProperty("mail.person.cc"));
 //		Person p = null;

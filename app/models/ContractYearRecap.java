@@ -15,6 +15,8 @@ import play.data.validation.Required;
 @Table(name="contract_year_recap")
 public class ContractYearRecap extends BaseModel{
 
+	private static final long serialVersionUID = 7025943511706872182L;
+
 	@Required
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="contract_id")
