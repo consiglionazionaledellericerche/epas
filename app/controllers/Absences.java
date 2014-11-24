@@ -16,6 +16,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.persistence.Query;
 
+import manager.AbsenceManager;
 import models.Absence;
 import models.AbsenceType;
 import models.AbsenceTypeGroup;
@@ -33,7 +34,6 @@ import models.rendering.VacationsRecap;
 
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.MultiPartEmail;
-import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 
 import play.Logger;
@@ -46,6 +46,7 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 import controllers.Resecure.NoCheck;
 import dao.AbsenceTypeDao;
@@ -328,6 +329,10 @@ public class Absences extends Controller{
 			handlerFER(person, dateFrom, dateTo, absenceType, file);
 			return;
 		}
+		if(absenceType.code.equals("32") || absenceType.code.equals("31") || absenceType.code.equals("94"))
+		{
+			handler32_31_94(person, dateFrom, dateTo, absenceType, file);
+		}
 		
 		if(absenceType.code.equals("37")){
 			handler37(person, dateFrom, dateTo, absenceType, file);
@@ -605,7 +610,7 @@ public class Absences extends Controller{
 				continue;
 			}
 
-			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, file).totalAbsenceInsert;
+			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, file);
 
 			actualDate = actualDate.plusDays(1);
 		}
@@ -620,38 +625,68 @@ public class Absences extends Controller{
 	}
 
 	/**
-	 * Gestisce l'inserimento esplicito del codice 31
+	 * Gestisce l'inserimento esplicito dei codici 32, 31 e 94.
 	 * @param person
 	 * @param dateFrom
 	 * @param dateTo
 	 * @param absenceType
 	 * @param file
 	 */
-	private static void handler31(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, Blob file) {
+	private static void handler32_31_94(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, Blob file) {
 		
-	}
-	
-	/**
-	 * Gestisce l'inserimento esplicito del codice 32
-	 * @param person
-	 * @param dateFrom
-	 * @param dateTo
-	 * @param absenceType
-	 * @param file
-	 */
-	private static void handler32(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, Blob file) {
+		Preconditions.checkArgument(absenceType.code.equals("32") || absenceType.code.equals("31") || absenceType.code.equals("94"));
 		
-	}
-	
-	/**
-	 * Gestisce l'inserimento esplicito del codice 94
-	 * @param person
-	 * @param dateFrom
-	 * @param dateTo
-	 * @param absenceType
-	 * @param file
-	 */
-	private static void handler94(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, Blob file) {
+		LocalDate actualDate = dateFrom;
+
+		//inserimento
+		int taken = 0;
+		
+		actualDate = dateFrom;
+		while(!actualDate.isAfter(dateTo))
+		{
+				
+			AbsenceType anotherAbsence = absenceType;
+			
+			if(absenceType.code.equals("32")) {
+				anotherAbsence = AbsenceManager.takeAnother32(person, actualDate);
+			}
+			if(absenceType.code.equals("31")) {
+				anotherAbsence = AbsenceManager.takeAnother31(person, actualDate);
+			}
+			if(absenceType.code.equals("94")) {
+				anotherAbsence = AbsenceManager.takeAnother94(person, actualDate);
+			}
+			
+			//Esaurito
+			if(anotherAbsence == null)
+			{
+				if(taken == 0)
+				{
+					flash.error("Il dipendente %s %s ha esaurito tutti i codici %s", person.name, person.surname, absenceType.code);
+					Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
+				}
+				
+				flash.error("Aggiunti %s codici assenza %s da %s a %s. In data %s il dipendente ha esaurito tutti i codici %s a disposizione.",
+						taken, absenceType.code, dateFrom, actualDate.minusDays(1), actualDate, absenceType.code);
+
+				PersonUtility.updatePersonDaysIntoInterval(person,dateFrom,dateTo);
+				Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
+			}
+
+			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, anotherAbsence, file);
+			actualDate = actualDate.plusDays(1);
+			
+		}
+		actualDate = actualDate.minusDays(1);
+
+		
+		if(taken==1)
+			flash.success("Aggiunto codice assenza %s per il giorno %s", absenceType.code, actualDate);
+		if(taken>1)
+			flash.success("Aggiunti %s codici assenza %s da %s a %s.", taken, absenceType.code, dateFrom, dateTo);
+		
+		PersonUtility.updatePersonDaysIntoInterval(person,dateFrom,dateTo);
+		Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
 		
 	}
 	
@@ -663,9 +698,8 @@ public class Absences extends Controller{
 	 * @param absenceType
 	 * @throws EmailException 
 	 */
-	private static void handlerFER(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, Blob file) throws EmailException
+	private static void handlerFER(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, Blob file)
 	{
-		//controllo reperibilita'
 		LocalDate actualDate = dateFrom;
 
 		//inserimento
@@ -675,7 +709,7 @@ public class Absences extends Controller{
 		while(!actualDate.isAfter(dateTo))
 		{
 						
-			AbsenceType wichFer = PersonUtility.whichVacationCode(person, actualDate);
+			AbsenceType wichFer = AbsenceManager.whichVacationCode(person, actualDate);
 			
 			//FER esauriti
 			if(wichFer==null)
@@ -690,7 +724,7 @@ public class Absences extends Controller{
 				Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
 			}
 
-			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, wichFer, file).totalAbsenceInsert;
+			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, wichFer, file);
 			actualDate = actualDate.plusDays(1);
 			
 		}
@@ -736,7 +770,7 @@ public class Absences extends Controller{
 		while(!actualDate.isAfter(dateTo) && taken<=remaining37)
 		{
 
-			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, file).totalAbsenceInsert;
+			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, file);
 			actualDate = actualDate.plusDays(1);
 		}
 
@@ -784,7 +818,7 @@ public class Absences extends Controller{
 		while(!actualDate.isAfter(dateTo))
 		{
 
-			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, file).totalAbsenceInsert;
+			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, file);
 			actualDate = actualDate.plusDays(1);
 		}
 		if(taken > 0)
@@ -807,7 +841,7 @@ public class Absences extends Controller{
 	 */
 	private static void handlerIllnessOrDischarge(Person person,LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType,Blob file) throws EmailException
 	{
-		int taken = insertAbsencesInPeriod(person, dateFrom, dateTo, absenceType, file).totalAbsenceInsert;
+		int taken = insertAbsencesInPeriod(person, dateFrom, dateTo, absenceType, file);
 		flash.success("Inseriti %s codici assenza per la persona", taken);
 		PersonUtility.updatePersonDaysIntoInterval(person, dateFrom, dateTo);
 		Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
@@ -892,7 +926,7 @@ public class Absences extends Controller{
 		int taken = 0;
 		while(!actualDate.isAfter(dateTo)) {
 			
-			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, file).totalAbsenceInsert;
+			taken = taken + insertAbsencesInPeriod(person, actualDate, actualDate, absenceType, file);
 
 			checkMealTicket(actualDate, person, mealTicket, absenceType);
 
@@ -1133,17 +1167,18 @@ public class Absences extends Controller{
 	}
 
 	
+
 	/**
-	 * Inserisce l'assenza absenceType nel person day della persona nel periodo indicato. Se dateFrom = dateTo inserisce nel giorno singolo.
+	 * Inserisce l'assenza absenceType nel person day della persona nel periodo indicato.
+	 *  Se dateFrom = dateTo inserisce nel giorno singolo.
 	 * @param person
 	 * @param dateFrom
 	 * @param dateTo
 	 * @param absenceType
-	 * @param considerHoliday
 	 * @param file
-	 * @throws EmailException 
+	 * @return	il numero di assenze effettivamente inserite nel periodo passato come argomento.
 	 */
-	private static CheckAbsenceInsert insertAbsencesInPeriod(Person person, LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, Blob file) throws EmailException
+	private static int insertAbsencesInPeriod(Person person, LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType, Blob file)
 	{
 		CheckAbsenceInsert cai = new CheckAbsenceInsert(0,null, false, 0);
 		LocalDate actualDate = dateFrom;
@@ -1159,7 +1194,7 @@ public class Absences extends Controller{
 				continue;
 			}
 			//Controllo il caso di inserimento di codice 31: verifico che sia valido il periodo in cui voglio inserirlo
-			if(absenceType.code.equals("31") && !absenceType.code.equals(PersonUtility.whichVacationCode(person, actualDate).code)){
+			if(absenceType.code.equals("31") && !absenceType.code.equals(AbsenceManager.whichVacationCode(person, actualDate).code)){
 				flash.error("Si prova a inserire un codice di assenza (%s , %s) che non è prendibile per il giorno %s", 
 						absenceType.code, absenceType.description, actualDate);
 				
@@ -1188,7 +1223,9 @@ public class Absences extends Controller{
 			}
 			absence.save();
 			Logger.info("Inserita nuova assenza %s per %s %s in data: %s", 
-					absence.absenceType.code, absence.personDay.person.name, absence.personDay.person.surname, absence.personDay.date);
+					absence.absenceType.code, absence.personDay.person.name,
+					absence.personDay.person.surname, absence.personDay.date);
+			
 			pd.absences.add(absence);
 			pd.populatePersonDay();
 			//pd.save();
@@ -1198,10 +1235,16 @@ public class Absences extends Controller{
 			actualDate = actualDate.plusDays(1);
 		}
 		//controllo che ci siano date in cui l'assenza sovrascrive una reperibilità o un turno e nel caso invio la mail
-		if(cai.dateInTrouble.size() > 0)
-			sendEmail(person, cai);
+		if(cai.dateInTrouble.size() > 0) {
+			try {
+				sendEmail(person, cai);
+			} catch (EmailException e) {
+				// TODO Segnalare questo evento in qualche modo
+				e.printStackTrace();
+			}
+		}
 
-		return cai;
+		return cai.totalAbsenceInsert;
 	}
 	
 	/**
