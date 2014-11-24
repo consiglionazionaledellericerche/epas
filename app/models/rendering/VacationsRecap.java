@@ -238,9 +238,20 @@ public class VacationsRecap {
 			this.vacationDaysLastYearNotYetUsed = 0;
 		//Anno corrente
 		this.permissionCurrentYearTotal = getPermissionAccruedYear(yearInter, this.activeContract);
-		this.vacationDaysCurrentYearTotal = getVacationAccruedYear(yearInter, this.activeContract, this.vacationPeriodList);	
-		this.vacationDaysCurrentYearNotYetUsed = this.vacationDaysCurrentYearTotal - this.vacationDaysCurrentYearUsed.size();									//per adesso quelli non utilizzati li considero tutti
-		this.persmissionNotYetUsed = this.permissionCurrentYearTotal - this.permissionUsed.size();
+		this.vacationDaysCurrentYearTotal = getVacationAccruedYear(yearInter, this.activeContract, this.vacationPeriodList);
+		if(contract.expireContract != null) 
+		{
+			//per i detereminati considero le maturate (perchè potrebbero decidere di cambiare contratto)
+			this.vacationDaysCurrentYearNotYetUsed = this.vacationDaysCurrentYearAccrued - this.vacationDaysCurrentYearUsed.size();
+			this.persmissionNotYetUsed = this.permissionCurrentYearAccrued - this.permissionUsed.size();
+		}
+		else 
+		{
+			//per gli indeterminati le considero tutte (è più improbabile....)
+			this.vacationDaysCurrentYearNotYetUsed = this.vacationDaysCurrentYearTotal - this.vacationDaysCurrentYearUsed.size();
+			this.persmissionNotYetUsed = this.permissionCurrentYearTotal - this.permissionUsed.size();
+		}
+		
 	}
 	
 	

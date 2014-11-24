@@ -155,6 +155,14 @@ $(function($){
 			e.preventDefault();
 		});
 	    
+	    this.find('#buttonError').click(function() {
+	    	$('#flash-error').hide();
+		});	
+		
+	    this.find('#buttonSuccess').click(function() {
+	        $('#flash-success').hide();
+		});	
+	    
 	    /*Data tables */
 	    // Setup - add a text input to each footer cell
 	    this.find('#example tfoot th').each( function () {
@@ -178,13 +186,7 @@ $(function($){
 	
 	$('body').initepas();
 	
-	$('#buttonError').click(function() {
-        $('#flash-error').hide();
-	});	
-	
-	$('#buttonSuccess').click(function() {
-        $('#flash-success').hide();
-	});	
+
 
 	
 });	/* fine on document load */
