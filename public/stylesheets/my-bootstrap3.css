@@ -329,4 +329,10 @@ table#tabellonetimbrature td {border: 1px solid #bbb;}
 	font-size:large;
 }
 
+/* Data tables */
+tfoot input {
+   width: 100%;
+   padding: 3px;
+   box-sizing: border-box;
+}
 

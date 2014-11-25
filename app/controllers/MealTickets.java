@@ -1,14 +1,11 @@
 package controllers;
 
-import helpers.ModelQuery.SimpleResults;
-
 import java.util.List;
 
 import javax.inject.Inject;
 
 import manager.MealTicketManager;
-import manager.recaps.PersonResidualMonthRecap;
-import manager.recaps.PersonResidualYearRecap;
+import manager.MealTicketManager.MealTicketRecap;
 import models.MealTicket;
 import models.Person;
 import models.User;
@@ -23,7 +20,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import controllers.Resecure.NoCheck;
 import dao.MealTicketDao;
 import dao.PersonDao;
 
@@ -48,25 +44,25 @@ public class MealTickets  extends Controller {
 		
 	}
 	
-	public static void recapMealTickets(String name, Integer page) {
+	public static void recapMealTickets(String name) {
 
-		if(page==null)
-			page = 0;
+		final List<Person> personList = PersonDao.list( 
+				Optional.<String>absent(), Sets.newHashSet(Security.getOfficeAllowed()), 
+				false, LocalDate.now(), LocalDate.now(), true)
+				.list();
 
-		SimpleResults<Person> simpleResults = PersonDao.list( Optional.fromNullable(name),
-				Sets.newHashSet(Security.getOfficeAllowed()), false, LocalDate.now(), LocalDate.now(), true);
-
-		List<Person> personList = simpleResults.paginated(page).getResults();
-		
-		List<PersonResidualMonthRecap> personsMonthRecaps = Lists.newArrayList();
-		
+		List<MealTicketRecap> mealTicketRecaps = Lists.newArrayList();
 		for(Person person : personList) {
-			PersonResidualYearRecap c = 
-					PersonResidualYearRecap.factory(person.getCurrentContract(), LocalDate.now().getYear(), null);
-			personsMonthRecaps.add(c.getMese(LocalDate.now().getMonthOfYear()));
+			
+			MealTicketRecap recap = MealTicketRecap.build(person.getCurrentContract());
+			if(recap == null) {
+				System.out.println(person.toString());
+				continue;
+			}
+			mealTicketRecaps.add(recap);
 		}
 		
-		render(personsMonthRecaps, simpleResults); 
+		render(mealTicketRecaps); 
 		
 	}
 	
@@ -180,6 +176,39 @@ public class MealTickets  extends Controller {
 		render(mealTicketList, person, codeBlock);
 	}
 	
+	
+	/*
+	@NoCheck
+	public static void exec() {
+		List<Person> personList = PersonDao.list(
+				Optional.<String>absent(), Sets.newHashSet(Security.getOfficeAllowed()),
+				false, LocalDate.now(), LocalDate.now(), true).list();
+			
+		for(Person person : personList) {
+			
+			Contract contract = person.getCurrentContract();
+			
+			MealTicketRecap
+			//MealTicketManager.mealTicketsLegacy(contract);
+			int message = MealTicketManager.computeMappingPersonDayMealTicket(contract);
+			
+			if(message == MealTicketManager.MESSAGE_MEAL_TICKET_EXPIRED) {
+				System.out.println("EXPIRED" + " " + person.toString());
+			}
+			
+			else if(message == MealTicketManager.MESSAGE_MEAL_TICKET_RUN_OUT) {
+				System.out.println("RUN OUT" + " " + person.toString());
+			}
+			
+			else {
+				System.out.println("OK" + " " + message + " " + person.toString());
+			}
+			
 
+		}
+		
+		
+	}
+	*/
 
 }

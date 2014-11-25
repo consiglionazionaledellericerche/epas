@@ -20,6 +20,8 @@ import play.data.validation.Required;
 @Table(name= "initialization_times")
 public class InitializationTime extends BaseModel{
 
+	private static final long serialVersionUID = -6470786908402803925L;
+
 	@Required
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "person_id", nullable = false)

@@ -14,6 +14,8 @@ import models.base.BaseModel;
 @Entity
 public class PersonHourForOvertime extends BaseModel{
 
+	private static final long serialVersionUID = -298105801035472529L;
+
 	/**
 	 * numero di ore assegnato (viene modificato mese per mese) di straordinari per quella persona che è responsabile di gruppo
 	 */

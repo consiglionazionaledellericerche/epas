@@ -15,6 +15,8 @@ import models.base.BaseModel;
 @Table(name="contract_stamp_profiles")
 public class ContractStampProfile extends BaseModel{
 	
+	private static final long serialVersionUID = 3503562995113282540L;
+
 	@Column(name="fixed_working_time")
 	public boolean fixedworkingtime;
 	

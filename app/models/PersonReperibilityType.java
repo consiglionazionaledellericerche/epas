@@ -25,6 +25,8 @@ import play.data.validation.Required;
 @Table(name = "person_reperibility_types")
 public class PersonReperibilityType extends BaseModel {
 
+	private static final long serialVersionUID = 3234688199593333012L;
+
 	@Required
 	public String description;
 	

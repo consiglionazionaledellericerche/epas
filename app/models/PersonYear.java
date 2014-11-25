@@ -23,6 +23,8 @@ import org.hibernate.envers.Audited;
 @Table(name="person_years")
 public class PersonYear extends BaseModel{
 	
+	private static final long serialVersionUID = -6004683146771851321L;
+
 	@ManyToOne
 	@JoinColumn(name = "person_id", nullable = false)
 	public Person person;
