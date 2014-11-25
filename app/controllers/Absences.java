@@ -1068,7 +1068,7 @@ public class Absences extends Controller{
 
 	public static void zipAttachment(String code, Integer year, Integer month) throws IOException, ZipException{
 		rules.checkIfPermitted(Security.getUser().get().person.office);
-		FileOutputStream fos = new FileOutputStream("attachment.zip");
+		FileOutputStream fos = new FileOutputStream("attachment"+'-'+code+".zip");
 		ZipOutputStream zos = new ZipOutputStream(fos);
 		
 		
@@ -1100,7 +1100,7 @@ public class Absences extends Controller{
 		
 		zos.close();
 			
-		renderBinary(new File("attachment.zip"));
+		renderBinary(new File("attachment"+'-'+code+".zip"));
 	}
 	
 	
