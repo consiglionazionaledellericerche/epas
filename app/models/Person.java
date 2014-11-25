@@ -60,9 +60,6 @@ import controllers.Security;
 @With(Secure.class)
 public class Person extends BaseModel implements Comparable<Person>{
 
-	/**
-	 * relazione con la tabella dei permessi
-	 */
 	private static final long serialVersionUID = -2293369685203872207L;
 
 	@Version

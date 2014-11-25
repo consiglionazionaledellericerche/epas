@@ -154,18 +154,39 @@ $(function($){
 			});
 			e.preventDefault();
 		});
+	    
+	    this.find('#buttonError').click(function() {
+	    	$('#flash-error').hide();
+		});	
 		
+	    this.find('#buttonSuccess').click(function() {
+	        $('#flash-success').hide();
+		});	
+	    
+	    /*Data tables */
+	    // Setup - add a text input to each footer cell
+	    this.find('#example tfoot th').each( function () {
+	        var title = $('#example thead th').eq( $(this).index() ).text();
+	        $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+	    } );
+	    // DataTable
+	    var table = $('#example').DataTable();
+	    // Apply the search
+	    table.columns().eq( 0 ).each( function ( colIdx ) {
+	        $( 'input', table.column( colIdx ).footer() ).on( 'keyup change', function () {
+	            table
+	                .column( colIdx )
+	                .search( this.value )
+	                .draw();
+	        } );
+	    } );
+
+	    
 	}	/* fine initepas() */
 	
 	$('body').initepas();
 	
-	$('#buttonError').click(function() {
-        $('#flash-error').hide();
-	});	
-	
-	$('#buttonSuccess').click(function() {
-        $('#flash-success').hide();
-	});	
+
 
 	
 });	/* fine on document load */

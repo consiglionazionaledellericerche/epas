@@ -19,6 +19,8 @@ import play.data.validation.Required;
 @Table(name="stamp_modification_types")
 public class StampModificationType extends BaseModel{
 	
+	private static final long serialVersionUID = 8403725731267832733L;
+
 	@Required
 	public String code;
 	

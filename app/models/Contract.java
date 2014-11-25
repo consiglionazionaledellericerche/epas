@@ -21,7 +21,6 @@ import javax.persistence.Transient;
 import models.base.BaseModel;
 
 import org.hibernate.annotations.Type;
-import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 

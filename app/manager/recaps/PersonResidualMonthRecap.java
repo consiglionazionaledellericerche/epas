@@ -264,8 +264,9 @@ public class PersonResidualMonthRecap {
 			}
 			
 			//Numero ticket consegnati nel mese
-			monthRecap.buoniPastoConsegnatiNelMese = MealTicketDao.getMealTicketAssignedToPersonIntoInterval(monthRecap.contract,  
-					validDataForMealTickets.getBegin(), validDataForMealTickets.getEnd()).size();
+			monthRecap.buoniPastoConsegnatiNelMese = 
+					MealTicketDao.getMealTicketAssignedToPersonIntoInterval(
+							monthRecap.contract, validDataForMealTickets).size();
 			
 			//residuo
 			monthRecap.buoniPastoResidui = monthRecap.buoniPastoDalMesePrecedente + monthRecap.buoniPastoConsegnatiNelMese - monthRecap.buoniPastoUsatiNelMese;

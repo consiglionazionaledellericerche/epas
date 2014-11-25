@@ -15,6 +15,9 @@ import org.joda.time.LocalDate;
 @Entity
 @Table(name="shift_cancelled")
 public class ShiftCancelled extends BaseModel{
+
+	private static final long serialVersionUID = -6164045507709173642L;
+
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate date;
 	

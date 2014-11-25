@@ -20,6 +20,8 @@ import com.google.common.base.Objects;
 @MappedSuperclass
 public abstract class BaseModel extends GenericModel {
 
+	private static final long serialVersionUID = 4849404810311166199L;
+	
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
 	public Long id;
 	

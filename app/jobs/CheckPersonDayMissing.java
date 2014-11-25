@@ -12,6 +12,7 @@ import play.jobs.Job;
 
 //@On("0 /5 * * * ?")
 //@On("0 0 2 * * ?")
+@SuppressWarnings("rawtypes")
 public class CheckPersonDayMissing extends Job{
 
 	/**

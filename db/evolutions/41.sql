@@ -53,6 +53,9 @@ ALTER TABLE meal_ticket_history ADD COLUMN contract_id bigint;
 ALTER TABLE meal_ticket DROP COLUMN person_id;
 ALTER TABLE meal_ticket_history DROP COLUMN person_id;
 
+UPDATE meal_ticket SET expire_date = '2015-12-31' WHERE expire_date IS null;
+ALTER TABLE meal_ticket ALTER COLUMN expire_date SET NOT NULL;
+
 
 # ---!Downs
 

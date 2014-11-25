@@ -22,7 +22,8 @@ import org.joda.time.LocalDate;
 @Table(name="users")
 public class User extends BaseModel{
 
-	
+	private static final long serialVersionUID = -6039180733038072891L;
+
 	public String username;
 
 	public String password;

@@ -24,6 +24,8 @@ import play.data.validation.Required;
 @Table(name = "persons_working_time_types")
 public class PersonWorkingTimeType extends BaseModel {
 
+	private static final long serialVersionUID = 4762746376542370546L;
+
 	@Required
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="person_id")
