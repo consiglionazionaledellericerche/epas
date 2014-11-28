@@ -18,6 +18,8 @@ import play.mvc.results.Result;
  */
 public class BadRequest extends Result {
 
+	private static final long serialVersionUID = -884396263781488733L;
+
 	private String description;
 	
 	public BadRequest() {

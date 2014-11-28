@@ -14,6 +14,7 @@ public class LocalDateBinder implements TypeBinder<LocalDate>{
 	
 	private static final DateBinder DATE_BINDER = new DateBinder();
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public Object bind(String name, Annotation[] annotations, String value,
 			Class actualClass, Type genericType) throws Exception {

@@ -25,6 +25,8 @@ import play.data.validation.Required;
 @Entity()
 @Table(name="certificated_data")
 public class CertificatedData extends BaseModel {
+
+	private static final long serialVersionUID = 4909012051833782060L;
 	
 	public int year;
 	public int month;

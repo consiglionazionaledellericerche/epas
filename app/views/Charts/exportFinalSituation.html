@@ -1,0 +1,36 @@
+#{extends 'main3.html' /}
+#{set header:'navbar' /}
+#{set title: 'ePAS - Esportazione situazione finale dipendente' /}
+
+<div id="container-fluid-nav-tabs" class="container-fluid">
+
+<ul class="nav nav-tabs">
+  <li><a href="@{Charts.indexCharts()}">Grafici</a></li>
+  <li><a href="@{Charts.checkLastYearAbsences()}">Controllo schedone anno passato</a></li>
+  <li><a href="@{Charts.exportHourAndOvertime()}">Esportazione ore in più e di straordinario</a></li>
+  <li class="active"><a href="@{Charts.exportFinalSituation()}">Esportazione informazioni finali di un dipendente</a></li>
+</ul>
+
+</div>
+
+<div class="container">
+<div class="panel panel-default">
+		  <div class="panel-heading">
+		    <h4 class="panel-title">Seleziona il dipendente per il quale esportare la situazione al termine del contratto</h4>
+		  </div>
+		<div class="panel-body">
+
+	#{form @Charts.exportDataSituation()}
+
+		#{select 'personId', class:'form-control', id:'person'}
+		  		#{list items:personList, as:'person'}
+		    		#{option person.id}${person.surname + ' ' + person.name}#{/option}
+	  			#{/list}
+		 #{/select}
+		<div class="container-fluid center">
+      		<input class="btn btn-primary" type="submit" value="Avanti" />
+      	</div>
+#{/form}
+		</div>
+	</div>
+</div>

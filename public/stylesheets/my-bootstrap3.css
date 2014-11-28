@@ -329,6 +329,7 @@ table#tabellonetimbrature td {border: 1px solid #bbb;}
 	font-size:large;
 }
 
+
 /* ----- Datepicker Default reset --------
 
 Sosvrascrive le regole
@@ -345,5 +346,11 @@ td, th { padding: 5px; text-align: left; border-right: 1px solid #aaa; border-bo
 	border:none;
 }
 
+/* Data tables */
+tfoot input {
+   width: 100%;
+   padding: 3px;
+   box-sizing: border-box;
+}
 
 

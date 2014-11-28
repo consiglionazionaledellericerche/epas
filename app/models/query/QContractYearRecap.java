@@ -41,6 +41,8 @@ public class QContractYearRecap extends EntityPathBase<ContractYearRecap> {
 
     public final NumberPath<Integer> recoveryDayUsed = createNumber("recoveryDayUsed", Integer.class);
 
+    public final NumberPath<Integer> remainingMealTickets = createNumber("remainingMealTickets", Integer.class);
+
     public final NumberPath<Integer> remainingMinutesCurrentYear = createNumber("remainingMinutesCurrentYear", Integer.class);
 
     public final NumberPath<Integer> remainingMinutesLastYear = createNumber("remainingMinutesLastYear", Integer.class);

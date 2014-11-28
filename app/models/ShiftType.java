@@ -22,6 +22,8 @@ import models.base.BaseModel;
 @Table(name="shift_type")
 public class ShiftType extends BaseModel{
 
+	private static final long serialVersionUID = 3156856871540530483L;
+	
 	public String type;
 	public String description;
 	

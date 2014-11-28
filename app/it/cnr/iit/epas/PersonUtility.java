@@ -245,37 +245,6 @@ public class PersonUtility {
 	}
 
 	/**
-	 * Il primo codice utilizzabile per l'anno selezionato come assenza nel seguente ordine 31,32,94
-	 * @param person
-	 * @param actualDate
-	 * @return
-	 */
-	public static AbsenceType whichVacationCode(Person person, LocalDate actualDate){
-
-		Contract contract = person.getCurrentContract();
-
-		VacationsRecap vr = null;
-		try { 
-			vr = new VacationsRecap(person, actualDate.getYear(), contract, actualDate, true);
-		} catch(IllegalStateException e) {
-			return null;
-		}
-
-		if(vr.vacationDaysLastYearNotYetUsed>0)
-			return AbsenceType.find("byCode", "31").first();
-
-		if(vr.persmissionNotYetUsed>0)
-			return AbsenceType.find("byCode", "94").first();
-		
-		if(vr.vacationDaysCurrentYearNotYetUsed>0)
-			return AbsenceType.find("byCode", "32").first();
-
-			
-
-		return null;
-	}
-
-	/**
 	 * 
 	 * @param person
 	 * @param date

@@ -6,12 +6,12 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.ArrayList;
 import java.util.List;
 
-import models.ConfGeneral;
 import models.Contract;
 import models.ContractYearRecap;
-import models.enumerate.ConfigurationFields;
 
 import org.joda.time.LocalDate;
+
+import dao.MealTicketDao;
 
 /**
  * 
@@ -39,12 +39,7 @@ public class PersonResidualYearRecap {
 			return null;
 		}	
 		
-		//TODO mettere come parametro
-		//Recupero data iniziale utilizzo mealticket
-				LocalDate dateStartMealTicket = new LocalDate(
-						ConfGeneral.getFieldValue(ConfigurationFields.DateStartMealTicket.description, 
-								contract.person.office));
-		
+		LocalDate dateStartMealTicket = MealTicketDao.getMealTicketStartDate(contract.person.office);
 		
 		PersonResidualYearRecap csap = new PersonResidualYearRecap();
 

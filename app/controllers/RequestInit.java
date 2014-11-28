@@ -322,18 +322,15 @@ public class RequestInit extends Controller {
 		}
 		 
 		Logger.debug("yearBeginProgram = %s", yearBeginProgram);
-		try{
-			while(yearBeginProgram <= actualYear+1){
-				years.add(yearBeginProgram);
-				Logger.debug("Aggiunto %s alla lista", yearBeginProgram);
-				yearBeginProgram++;
-			}
-			
-			renderArgs.put("navYears", years);
+
+		while(yearBeginProgram <= actualYear+1){
+			years.add(yearBeginProgram);
+			Logger.debug("Aggiunto %s alla lista", yearBeginProgram);
+			yearBeginProgram++;
 		}
-		catch(Exception e){
-			
-		}
+
+		renderArgs.put("navYears", years);
+		
 		
 	}
 	

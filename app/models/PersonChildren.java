@@ -25,6 +25,8 @@ import org.joda.time.LocalDate;
 @Table(name="person_children")
 public class PersonChildren extends BaseModel{
 
+	private static final long serialVersionUID = 2528486222814596830L;
+
 	public String name;
 	
 	public String surname;

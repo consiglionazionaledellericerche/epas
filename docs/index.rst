@@ -6,7 +6,7 @@
 Benvenuto nella documentazione di ePAS!
 =======================================
 
-Contents:
+Contenuti:
 
 .. toctree::
    :maxdepth: 2
@@ -27,29 +27,7 @@ Contents:
    variousRecap
    utility
    
-Indice e tabelle
-================
 
-* :ref:`genindex`
-* :ref:`search`
-
-.. index::
-   index Introduzione
-   architecture Architettura di Massima
-   mainComponents Componenti principali di ePAS
-   mainFeatures Funzionalità principali
-   managePerson Inserimento e gestione personale
-   workingTimeType Inserimento e gestione orari di lavoro
-   stampings Visualizzazione e modifica timbrature
-   seat Gestione sedi e amministratori
-   parameters Gestione parametri
-   absences Consultazione assenze
-   vacations Consultazione ferie e permessi
-   competences Gestione competenze
-   tickets Gestione buoni pasto
-   sendStampings Invio attestati di presenza
-   variousRecap Schermate di riepilogo
-   utility Tool di utilità
    
 Introduzione
 ============
