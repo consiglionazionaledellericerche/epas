@@ -12,6 +12,7 @@ public enum ConfigurationFields {
 	// ConfGeneral
 	InitUseProgram("init_use_program"),
 	InstituteName("institute_name"),
+	JobsEmailAlias("email_from_jobs"),
 	EmailToContact("email_to_contact"),
 	SeatCode("seat_code"),
 	UrlToPresence("url_to_presence"),
@@ -46,6 +47,8 @@ public enum ConfigurationFields {
 			return ConfigurationFields.InitUseProgram;
 		if(description.equals("institute_name"))
 			return ConfigurationFields.InstituteName;
+		if(description.equals("email_from_jobs"))
+			return ConfigurationFields.JobsEmailAlias;
 		if(description.equals("email_to_contact"))
 			return ConfigurationFields.EmailToContact;
 		if(description.equals("seat_code"))
