@@ -24,6 +24,8 @@ import play.data.validation.Required;
 @Table(name = "total_overtime")
 public class TotalOvertime extends BaseModel{
 
+	private static final long serialVersionUID = 468974629639837568L;
+
 	@Required
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate date;

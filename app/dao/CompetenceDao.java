@@ -2,23 +2,13 @@ package dao;
 
 import helpers.ModelQuery;
 import helpers.ModelQuery.SimpleResults;
-
-import java.util.List;
-import java.util.Map;
-
-import models.AbsenceType;
 import models.Competence;
 import models.Person;
-import models.query.QAbsence;
-import models.query.QAbsenceType;
 import models.query.QCompetence;
-
-import org.bouncycastle.util.Strings;
 
 import com.google.common.base.Optional;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.types.Projections;
 
 public class CompetenceDao {
 

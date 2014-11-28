@@ -25,6 +25,8 @@ import com.google.common.collect.Sets;
 @Table(name="roles")
 public class Role extends BaseModel{
 
+	private static final long serialVersionUID = 6717202212924325368L;
+	
 	public final static String PERSONNEL_ADMIN = "personnelAdmin";
 	public final static String PERSONNEL_ADMIN_MINI = "personnelAdminMini";
 	

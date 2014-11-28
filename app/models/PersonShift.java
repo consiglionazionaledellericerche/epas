@@ -18,6 +18,8 @@ import models.base.BaseModel;
 @Table(name="person_shift")
 public class PersonShift extends BaseModel{
 
+	private static final long serialVersionUID = 651448817233184716L;
+
 	public boolean jolly;
 	
 	public String description;

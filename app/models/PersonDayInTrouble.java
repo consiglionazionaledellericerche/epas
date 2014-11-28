@@ -18,6 +18,8 @@ import play.Logger;
 public class PersonDayInTrouble extends BaseModel
 {
 	
+	private static final long serialVersionUID = 4802468368796902865L;
+	
 	public String cause;
 	public boolean fixed;
 	public boolean emailSent;

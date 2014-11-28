@@ -16,6 +16,8 @@ import org.hibernate.envers.NotAudited;
 @Table(name="users_roles_offices")
 public class UsersRolesOffices extends BaseModel{
 
+	private static final long serialVersionUID = -1403683534643592790L;
+
 	@NotAudited
 	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="user_id")

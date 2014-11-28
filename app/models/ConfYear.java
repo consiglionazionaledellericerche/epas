@@ -30,6 +30,7 @@ public class ConfYear extends BaseModel{
 	  7 | hour_max_to_calculate_worktime  | 5           | 2014 |         1
 	*/
 	
+	private static final long serialVersionUID = -3157754270960969163L;
 	
 	public final static String MONTH_EXPIRY_VACATION_PAST_YEAR = "month_expiry_vacation_past_year";
 	public final static String DAY_EXPIRY_VACATION_PAST_YEAR = "day_expiry_vacation_past_year";

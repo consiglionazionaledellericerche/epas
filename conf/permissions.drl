@@ -99,6 +99,7 @@ when
      	"Absences.updateCode",
      	"Absences.saveAbsenceCode",
      	"Absences.downloadAttachment",
+     	"Absences.zipAttachment",
      	
      	/*Competenze*/
      	"Competences.showCompetences",
@@ -136,6 +137,13 @@ when
      	"Absences.edit",
      	"Absences.update",
      	
+     	/*Gestione Buoni Pasto*/
+     	"MealTickets.recapMealTickets",
+     	"MealTickets.manageMealTickets",
+     	"MealTickets.submitPersonMealTicket",
+        "MealTickets.deletePersonMealTicket",
+     	
+     	
      	/*Stampa cartellino*/
      	"PrintTags.listPersonForPrintTags",
      	"PrintTags.showTag",
@@ -150,6 +158,8 @@ when
      	"Charts.processLastYearAbsences",
      	"Charts.exportHourAndOvertime",
      	"Charts.export",
+     	"Charts.exportDataSituation",
+     	"Charts.exportFinalSituation",
      	
      	
      	/*Riepilogo mensile*/
@@ -210,7 +220,8 @@ when
  $p: Permission(description == "viewPerson") from $uro.role.permissions
  $c: PermissionCheck(action in (
         "Persons.list",
-        "MealTickets.manageMealTickets"
+        "MealTickets.manageMealTickets",
+        "MealTickets.recapMealTickets"
         ), target == null, granted == false)
 then
  $c.grant();
@@ -332,6 +343,7 @@ when
         "YearlyAbsences.showPersonMonthlyAbsences",
         "Absences.manageAttachmentsPerPerson",
         "Absences.downloadAttachment",
+        "Absences.zipAttachment",
         "Absences.absenceInPeriod",
         "VacationsAdmin.vacationsLastYear",
         "VacationsAdmin.vacationsCurrentYear",
@@ -350,7 +362,9 @@ when
      	"Charts.overtimeOnPositiveResidualInYear",
      	"Charts.exportHourAndOvertime",
      	"Charts.export",
-     	"Charts.processLastYearAbsences"
+     	"Charts.processLastYearAbsences",
+     	"Charts.exportDataSituation",
+     	"Charts.exportFinalSituation"
        ), target == $o, granted == false)
 then
  $c.grant();

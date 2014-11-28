@@ -117,9 +117,9 @@ public class PersonStampingDayRecap {
 				if(pd.timeAtWork!=0)
 				{
 					if(fixedStampModificationType==null)							//DEVE ANDARE NELLA CACHE
-						this.fixedStampModificationType = pd.getFixedWorkingTime();
-					this.fixedWorkingTimeCode = this.fixedStampModificationType.code;
-					addStampModificationTypeToList(this.fixedStampModificationType);
+						fixedStampModificationType = pd.getFixedWorkingTime();
+					this.fixedWorkingTimeCode = fixedStampModificationType.code;
+					addStampModificationTypeToList(fixedStampModificationType);
 				}
 				
 			}

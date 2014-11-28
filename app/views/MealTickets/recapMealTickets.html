@@ -17,47 +17,58 @@
 
   </div>
   
-  <div class="col-md-8 col-md-offset-2">
-  <table class="table table-striped">
-    <tr>
-      <th>Nome</th>
-      <th>Residuo Mese Precedente</th>
-      <th>Consegnati</th>
-      <th>Utilizzati</th>
-      <th>Rimanenti</th>
-  	</tr>
-  	
-  	#{list items:personsMonthRecaps, as:'monthRecap'}
-  	  <tr>
-  	    <td>${monthRecap.person.name} ${monthRecap.person.surname}</td>
-  	    <td>${monthRecap.buoniPastoDalMesePrecedente}</td>
-  	    <td>${monthRecap.buoniPastoConsegnatiNelMese}</td>
-  	    <td>${monthRecap.buoniPastoUsatiNelMese}</td>
-  	    <td>${monthRecap.buoniPastoDalMesePrecedente + monthRecap.buoniPastoConsegnatiNelMese - monthRecap.buoniPastoUsatiNelMese}</td>
-  	    
-  	    *{
-  	    <!-- remaining cell -->
-  	    #{if mealTicketRecap.isOk()}
-  	      <td class="success">
-  	    #{/if}
-  	    #{if mealTicketRecap.isWarning()}
-  	       <td class="warning">
-  	    #{/if}
-  	    #{if mealTicketRecap.isDanger()}
-  	       <td class="danger">
-  	    #{/if}
-  	      <strong>
-  	      ${mealTicketRecap.mealTickets.size() - mealTicketRecap.numberOfMealTicketToUse} 
-  	      </strong>
-  	    </td>
-  	    }*
-  	  
-  	  </tr>
-  	
-  	
-  	#{/list}
-  
-  </table>
+  <div class="col-md-10 col-md-offset-1">
+ 
+	  <table id="example" class="display table table-bordered" cellspacing="0" width="100%">
+        <thead>
+	      <tr>
+	        <th>Nome</th>
+	        <th>Rimanenti</th>
+	        <th>Data Esaurimento</th>
+	  	  </tr>
+	  	</thead>
+	  	
+	  	<tfoot>
+          <tr>
+            <th>Nome</th>
+	        <th>Rimanenti</th>
+	        <th>Data Esaurimento</th>
+          </tr>
+        </tfoot>
+ 
+        <tbody>
+        
+	  	#{list items:mealTicketRecaps, as:'recap'}
+	  	  <tr>
+	  	    <td>${recap.contract.person.surname} ${recap.contract.person.name}</td> 
+	  	    <!-- remaining cell -->
+	  	    #{if recap.remaining >= 5}
+	  	      <td class="success">
+	  	    #{/if}
+	  	    #{if recap.remaining > 0 && recap.remaining < 5}
+	  	       <td class="warning">
+	  	    #{/if}   
+	  	    #{if recap.remaining == 0}
+	  	      <td class="danger">
+	  	    #{/if}
+	  	      <strong>
+	  	      ${recap.remaining}
+	  	      </strong>
+	  	    </td>
+	  	    
+	  	    <td>
+	  	    #{if recap.isMealTicketRunOut()}
+	  	    	${recap.getDateError()}
+	  	    #{/if}
+	  	     #{if recap.isMealTicketExpired()}
+	  	    	${recap.getDateError()} *
+	  	    #{/if}
+	  	    </td>
+	  	  </tr>
+
+	  	#{/list}
+	  	</tbody>
+	  
+	  </table> 
   </div>
-  
 </div>
