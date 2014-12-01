@@ -7,11 +7,18 @@ import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.MainMenu;
 import it.cnr.iit.epas.PersonUtility;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.inject.Inject;
 import javax.persistence.Query;
@@ -50,6 +57,7 @@ import com.google.common.base.Preconditions;
 
 import controllers.Resecure.NoCheck;
 import dao.AbsenceTypeDao;
+
 
 @With( {Resecure.class, RequestInit.class} )
 public class Absences extends Controller{
@@ -1087,6 +1095,42 @@ public class Absences extends Controller{
 		   renderBinary(absence.absenceFile.get(), absence.absenceFile.length());
 	}
 
+	public static void zipAttachment(String code, Integer year, Integer month) throws IOException{
+		rules.checkIfPermitted(Security.getUser().get().person.office);
+		FileOutputStream fos = new FileOutputStream("attachment"+'-'+code+".zip");
+		ZipOutputStream zos = new ZipOutputStream(fos);
+		
+		
+		List<Absence> absList = Absence.find("Select abs from Absence abs where abs.absenceType.code = ? "
+				+ "and abs.personDay.date between ? and ? and abs.absenceFile is not null",
+				code, new LocalDate(year, month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
+		byte[] buffer = new byte[1024];
+
+		for(Absence abs : absList){
+			try {
+			
+				FileInputStream fis = new FileInputStream(abs.absenceFile.getFile());
+				
+				zos.putNextEntry(new ZipEntry(abs.absenceFile.getFile().getName()));
+				
+				int length;
+				while ((length = fis.read(buffer)) >= 0) {
+				       zos.write(buffer, 0, length);
+				}
+				
+				zos.closeEntry();
+				
+				fis.close();
+			} catch (IOException e) {
+				
+				e.printStackTrace();
+			}
+		}	
+		
+		zos.close();
+			
+		renderBinary(new File("attachment"+'-'+code+".zip"));
+	}
 	
 	
 	public static void manageAttachmentsPerPerson(Long personId, Integer year, Integer month){
