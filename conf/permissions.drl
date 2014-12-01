@@ -202,7 +202,8 @@ when
      	"Configurations.showConfGeneral",
      	"Configurations.saveConfGeneral",
      	"Configurations.showConfYear",
-     	"Configurations.saveConfYear"
+     	"Configurations.saveConfYear",
+     	"Configurations.insertNewConfYear"
      	
      	), target == null, granted == false)
 // $u: User(person != null)
@@ -534,7 +535,8 @@ when
         "Offices.editSeat",
         "Offices.updateSeat",
         "Configurations.saveConfGeneral",
-        "Configurations.saveConfYear"
+        "Configurations.saveConfYear",
+        "Configurations.insertNewConfYear"
        ), target == $o, granted == false)
 then
  $c.grant();
