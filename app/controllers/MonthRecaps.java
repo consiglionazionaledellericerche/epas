@@ -220,7 +220,7 @@ public class MonthRecaps extends Controller{
 					tableMonthRecap.put(person, "Ore straord. pagate".intern(), 0);
 					tableMonthRecap.put(person, "Buoni mensa da restituire".intern(),0);
 				}
-				render(tableMonthRecap, generalWorkingDaysOfMonth, today, lastDayOfMonth);
+				render(tableMonthRecap, generalWorkingDaysOfMonth, today, lastDayOfMonth, year, month, simpleResults, name);
 				return;
 			}
 			

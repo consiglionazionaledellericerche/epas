@@ -41,6 +41,14 @@ public class DateInterval {
 		return end;
 	}
 	
+	public boolean isClosed()
+	{
+		if(DateUtility.isInfinity(this.end))
+			return false;
+		return true;
+				
+	}
+	
 	@Override
 	public String toString() {
 		return "[" + this.begin.toString() + "," + this.getEnd().toString() + "]";
