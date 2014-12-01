@@ -10,12 +10,6 @@
   
   <div id="container-fluid-nav-tabs" class="container-fluid">
 
-  <ul class="nav nav-tabs">
-    <li class="active"><a href="@{MealTickets.recapMealTickets()}">Riepilogo buoni pasto</a></li>
-    <li><a href="@{MealTickets.manageMealTickets()}">Assegnazione nuovi</a></li>
-    <li><a href="@{MealTickets.manageMealTickets(session.get("personSelected"))}">Riepilogo buoni pasto per persona</a></li>
-  </ul>
-
   </div>
     <!-- Ultimi inseriti -->
     #{if blockAdded != null }

@@ -34,21 +34,6 @@ public class MealTickets  extends Controller {
 	@Inject
 	static SecurityRules rules;
 	
-	public static void manageMealTickets(String name) {
-		
-		rules.checkIfPermitted();
-		
-		List<Person> personList = PersonDao.list(Optional.fromNullable(name), 
-			Sets.newHashSet(Security.getOfficeAllowed()), false, LocalDate.now(), LocalDate.now(), true).list();
-		
-		LocalDate today = new LocalDate();
-		
-		User admin = Security.getUser().get();
-		
-		render(personList, today, admin);
-		
-	}
-	
 	public static void recapMealTickets(String name, Integer page, Integer max, 
 			List<Integer> blockIdsAdded, Long personIdAdded) {
 
@@ -89,10 +74,10 @@ public class MealTickets  extends Controller {
 			List<MealTicket> mealTicketAdded = MealTicketDao.getMealTicketsInCodeBlockIds(blockIdsAdded);
 			blockAdded = BlockMealTicket.getBlockMealTicketFromMealTicketList(mealTicketAdded);
 
-			render(paginableList, max, name, blockAdded, personAdded);
+			render(paginableList, page, max, name, blockAdded, personAdded);
 		}
 		
-		render(paginableList, max, name);
+		render(paginableList, page, max, name);
 		
 	}
 	
@@ -219,7 +204,7 @@ public class MealTickets  extends Controller {
 		
 		if(codeBlock == null){
 			flash.error("Impossibile trovare il codice blocco specificato. Operazione annullata");
-			MealTickets.manageMealTickets(null);
+			MealTickets.recapMealTickets(name, page, max, null, null);
 		}
 				
 		List<MealTicket> mealTicketList = MealTicket.find("Select mt from MealTicket mt "
@@ -228,7 +213,7 @@ public class MealTickets  extends Controller {
 		
 		if(mealTicketList == null || mealTicketList.size() == 0) {
 			flash.error("Il blocco selezionato è inesistente. Operazione annullata");
-			MealTickets.manageMealTickets(null);
+			MealTickets.recapMealTickets(name, page, max, null, null);
 		}
 		
 		Person person = mealTicketList.get(0).contract.person;
