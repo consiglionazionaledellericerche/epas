@@ -141,12 +141,9 @@ when
      	"MealTickets.recapMealTickets",
      	"MealTickets.quickBlocksInsert",
      	"MealTickets.mealTicketsLegacy",
-     	"MealTickets.manageMealTickets",
      	"MealTickets.submitPersonMealTicket",
         "MealTickets.deletePersonMealTicket",
         
-     	
-     	
      	/*Stampa cartellino*/
      	"PrintTags.listPersonForPrintTags",
      	"PrintTags.showTag",
@@ -181,12 +178,6 @@ when
         "UploadSituation.processAllPersons",
         "UploadSituation.showProblems",
         "UploadSituation.showCertificatedData",
-        
-        /*Gestione buoni pasto*/
-        "MealTickets.manageMealTickets",
-        "MealTickets.submitPersonMealTicket",
-        "MealTickets.showPersonBlockMealTicket",
-        "MealTickets.deletePersonMealTicket",
         
         /*Orari di lavoro*/
      	"WorkingTimes.manageWorkingTime",
@@ -223,7 +214,6 @@ when
  $p: Permission(description == "viewPerson") from $uro.role.permissions
  $c: PermissionCheck(action in (
         "Persons.list",
-        "MealTickets.manageMealTickets",
         "MealTickets.recapMealTickets"
         ), target == null, granted == false)
 then
@@ -239,7 +229,6 @@ when
        "Persons.edit",
        "Persons.showCurrentVacation",
        "Persons.showCurrentContractWorkingTimeType",
-       "MealTickets.showPersonBlockMealTicket",
        "MealTickets.quickBlocksInsert"
        ), target == $o, granted == false)
 then
