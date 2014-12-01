@@ -183,15 +183,28 @@
 		        </td>
 		        <td>${block.getExpireDate()}</td>
 		        <td>
-		        #{form @MealTickets.deletePersonMealTicket() }
-		    	  <input type="hidden" name="codeBlock" value="${block.codeBlock}"/>
+		        
+		    	  <div class="delete-confirmed">
+		    	    <button type="submit" class="btn btn-sm btn-danger delete-first"><span class="glyphicon glyphicon-trash"></span></button>
+		    	    
+				    <div class="delete" style="display: none">
+				      
+				      #{form @MealTickets.deletePersonMealTicket() }
+		    	      <input type="hidden" name="codeBlock" value="${block.codeBlock}"/>
 		    	  
-		    	  <input type="hidden" name="name" value="${name}"/>
-		    	  <input type="hidden" name="page" value="${page}"/>
-		    	  <input type="hidden" name="max" value="${max}"/>
+ 			    	  <input type="hidden" name="name" value="${name}"/>
+		    	      <input type="hidden" name="page" value="${page}"/>
+		    	      <input type="hidden" name="max" value="${max}"/>
+		    	      
+		    	      <button type="submit" class="btn btn-sm btn-danger">Sei sicuro??</button>
+		    	      
+	        	      #{/form}   
+		    	    </div>
+		    	  </div>
 		    	  
-	        	  <button type="submit" class="btn btn-sm btn-danger"><span class="glyphicon glyphicon-trash"></span></button>
-		  		#{/form}
+		    	  
+	        	  
+		  		
 		        </td>
 		      </tr>
 		    #{/list}
