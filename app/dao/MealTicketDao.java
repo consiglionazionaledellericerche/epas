@@ -10,10 +10,13 @@ import models.Contract;
 import models.MealTicket;
 import models.Office;
 import models.enumerate.ConfigurationFields;
+import models.query.QContract;
 import models.query.QMealTicket;
+import models.query.QPerson;
 
 import org.joda.time.LocalDate;
 
+import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 
 /**
@@ -26,7 +29,7 @@ public class MealTicketDao {
 
 	/**
 	 * Ritorna la lista di mealTickt assegnati alla persona nella finestra temporale specificata.
-	 * Ordinati per data di scadenza con ordinamento crescente.
+	 * Ordinati per data di scadenza con ordinamento crescente e per codice blocco con ordinamento crescente.
 	 * @param c
 	 * @param dateFrom
 	 * @param dateTo
@@ -35,28 +38,48 @@ public class MealTicketDao {
 	public static List<MealTicket> getMealTicketAssignedToPersonIntoInterval(
 			Contract c, DateInterval interval) {
 		
-		QMealTicket mealTicket = QMealTicket.mealTicket;
+		final QMealTicket mealTicket = QMealTicket.mealTicket;
 		
 		final JPQLQuery query = ModelQuery.queryFactory()
 				.from(mealTicket)
 				.where(mealTicket.contract.id.eq(c.id))
 				.where(mealTicket.date.goe(interval.getBegin()))
 				.where(mealTicket.date.loe(interval.getEnd()))
-				.orderBy(mealTicket.expireDate.asc());
+				.orderBy(mealTicket.expireDate.asc())
+				.orderBy(mealTicket.block.asc());
 		
 		return query.list(mealTicket);
 	}
 	
-	//TODO rivederla dopo la rifattorizzazione delle relazioni
-	public static List<MealTicket> getMealTicketInBlock(Integer codeBlock) {
+	/**
+	 * La scadenza massima precedentemente assegnata ai buoni pasto inseriti per le persone 
+	 * appartenenti all'office passato come argomento.
+	 * @param office
+	 * @return
+	 */
+	public static LocalDate getFurtherExpireDateInOffice(Office office) {
 		
-		QMealTicket mealTicket = QMealTicket.mealTicket;
+		final QMealTicket qmt = QMealTicket.mealTicket;
+		final QPerson qp = QPerson.person;
+		final QContract qc = QContract.contract;
 		
 		final JPQLQuery query = ModelQuery.queryFactory()
-				.from(mealTicket)
-				.where(mealTicket.block.eq(codeBlock));
+				
+				.from(qmt)
+				.leftJoin(qmt.contract, qc)
+				.leftJoin(qc.person, qp)
+				.where(qp.office.id.eq(office.id))
+				.groupBy(qmt.expireDate)
+				.orderBy(qmt.expireDate.desc());
 		
-		return query.list(mealTicket);
+		List<LocalDate> date = query.list(qmt.expireDate);
+		
+		if(date.size() == 0)
+			return null;
+		
+		return date.get(0);
+		
+		//FIXME trovare un modo di selezionare solo il primo elemento
 	}
 	
 	/**
@@ -66,7 +89,7 @@ public class MealTicketDao {
 	 * @return
 	 */
 	public static List<MealTicket> getOrderedMealTicketInContract(Contract contract) {
-		QMealTicket mealTicket = QMealTicket.mealTicket;
+		final QMealTicket mealTicket = QMealTicket.mealTicket;
 		
 		final JPQLQuery query = ModelQuery.queryFactory()
 				.from(mealTicket)
@@ -93,6 +116,30 @@ public class MealTicketDao {
 			return null;
 		
 		return new LocalDate(confParam);
+		
+	}
+	
+	/**
+	 * 
+	 * @param codeBlockIds
+	 * @return
+	 */
+	public static List<MealTicket> getMealTicketsInCodeBlockIds(List<Integer> codeBlockIds) {
+		
+	final QMealTicket mealTicket = QMealTicket.mealTicket;
+		
+		final JPQLQuery query = ModelQuery.queryFactory()
+				.from(mealTicket)
+				.orderBy(mealTicket.code.asc());
+		
+		final BooleanBuilder condition = new BooleanBuilder();
+		for(Integer block : codeBlockIds) {
+			condition.or(mealTicket.block.eq(block));
+		}
+		
+		query.where(condition);
+		
+		return query.list(mealTicket);
 		
 	}
 	

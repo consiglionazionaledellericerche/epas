@@ -138,9 +138,12 @@ when
      	
      	/*Gestione Buoni Pasto*/
      	"MealTickets.recapMealTickets",
+     	"MealTickets.quickBlocksInsert",
+     	"MealTickets.mealTicketsLegacy",
      	"MealTickets.manageMealTickets",
      	"MealTickets.submitPersonMealTicket",
         "MealTickets.deletePersonMealTicket",
+        
      	
      	
      	/*Stampa cartellino*/
@@ -235,7 +238,8 @@ when
        "Persons.edit",
        "Persons.showCurrentVacation",
        "Persons.showCurrentContractWorkingTimeType",
-       "MealTickets.showPersonBlockMealTicket"
+       "MealTickets.showPersonBlockMealTicket",
+       "MealTickets.quickBlocksInsert"
        ), target == $o, granted == false)
 then
  $c.grant();
@@ -301,8 +305,9 @@ when
      	"Persons.updateSendEmail",
      	"WorkingTimes.executeChangeWorkingTimeTypeToAll",
      	"MealTickets.submitPersonMealTicket",
-        "MealTickets.deletePersonMealTicket"
-     	
+        "MealTickets.deletePersonMealTicket",
+        "MealTickets.mealTicketsLegacy"
+        
        ), target == $o, granted == false)
 then
  $c.grant();

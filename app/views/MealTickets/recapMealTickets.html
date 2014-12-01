@@ -13,34 +13,106 @@
   <ul class="nav nav-tabs">
     <li class="active"><a href="@{MealTickets.recapMealTickets()}">Riepilogo buoni pasto</a></li>
     <li><a href="@{MealTickets.manageMealTickets()}">Assegnazione nuovi</a></li>
+    <li><a href="@{MealTickets.manageMealTickets(session.get("personSelected"))}">Riepilogo buoni pasto per persona</a></li>
   </ul>
 
   </div>
+    <!-- Ultimi inseriti -->
+    #{if blockAdded != null }
+    <div class="col-md-12 center">
+  	
+  	  <div class="alert alert-success alert-dismissible fade in" role="alert">
+        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+        <strong>Buoni Pasto correttamente inseriti per la persona 
+          <a data-toggle="modal" data-backdrop="true" href="@{MealTickets.quickBlocksInsert(personAdded.id, name, page, max)}"
+	  	       data-modal=".my-modal-large">	  	      
+	  	     ${personAdded.surname} ${personAdded.name}</a>
+	  	  </a>
+	  	</strong>
+        <br><br>
+         <table class="table center">
+		    <tr>
+		      <th>Codice Blocco</th>
+		      <th>Dimensione</th>
+			  <th>Data Scadenza</th>
+		      <th>Data Attribuzione</th>
+		      <th>Amministratore Assegnatario</th>
+		    </tr>
+		    #{list items:blockAdded, as:'block'}
+		      <tr style="background-color: white;">
+		        <td>
+		          <strong>${block.codeBlock}</strong>
+		        </td>
+		        <td>${block.getDimBlock()}</td>
+		        <td>${block.getExpireDate()}</td>
+		        <td>${block.getReceivedDate()}</td>
+		        <td>${block.getAdmin().name} ${block.getAdmin().surname}</td>	        
+		      </tr>
+		    #{/list}
+		  </table>
+      </div>
+      
+    </div>    
+    #{/if}
+
   
-  <div class="col-md-10 col-md-offset-1">
- 
-	  <table id="example" class="display table table-bordered" cellspacing="0" width="100%">
-        <thead>
-	      <tr>
-	        <th>Nome</th>
-	        <th>Rimanenti</th>
-	        <th>Data Esaurimento</th>
-	  	  </tr>
-	  	</thead>
+  	<!-- Filtro nome 5 -->
+  	<div class="col-xs-5">
+      #{form action:@MealTickets.recapMealTickets()	,  
+          method:'GET', autocomplete:'off',
+          'data-reload':'#results'}
+          <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="input-medium"/>
+      #{/form}
+    </div>
+  
+    <!-- Section -->
+    <section id="results">
+    
+      <!-- Section Paginazione 5-->
+      <div class="col-xs-7">
+        <ul class="pagination">
+  	    #{list items:0..paginableList.totalPage-1, as:'indexPage', class:'inline'}
+  	      #{if paginableList.page==indexPage}
+  	          <li class="active"><a href="#">${indexPage+1}</a></li>
+  	      #{/if}
+  	      #{else}
+  	        <li><a href="@{MealTickets.recapMealTickets(name, indexPage, max)}">${indexPage+1}</a></li>
+  	      #{/else}
+	    #{/list}
+        </ul>
+      </div>
+      
+      <!-- Section Tabella 12-->
+      <div class="col-md-12">
+        <table class="table table-bordered center" cellspacing="0" width="100%">
+        <tr>
+	      <th>Nome</th>
+	      <th>
+	        Rimanenti 
+	        <br>
+	        <div class="col-md-4 col-md-offset-4">
+	        #{form action:@MealTickets.recapMealTickets(), class:'form-inline auto-submit', role:'form'}
+	          <select name="max" default="${max}" class="form-control">
+  	 		    <option value="0" #{if max==0} selected #{/if}>0</option>
+  				<option value="5" #{if max==5} selected #{/if}>5</option>
+  				<option value="10"#{if max==10} selected #{/if}>10</option>
+  				<option value=""  #{if max==null} selected #{/if}>Tutti</option>
+			  </select>
+   			#{/form}
+   			</div>
+   		  </th>
+	      <th>Data Esaurimento</th>
+	  	</tr>
 	  	
-	  	<tfoot>
-          <tr>
-            <th>Nome</th>
-	        <th>Rimanenti</th>
-	        <th>Data Esaurimento</th>
-          </tr>
-        </tfoot>
- 
-        <tbody>
-        
-	  	#{list items:mealTicketRecaps, as:'recap'}
+	  	#{list items:paginableList.getPaginatedItems(), as:'recap'}
 	  	  <tr>
-	  	    <td>${recap.contract.person.surname} ${recap.contract.person.name}</td> 
+	  	    <td>
+	  	      <!-- modal person recap-->
+	  	      <a data-toggle="modal" data-backdrop="true" href="@{MealTickets.quickBlocksInsert(recap.contract.person.id, name, page, max)}"
+	  	       data-modal=".my-modal-large">
+	  	      
+	  	      ${recap.contract.person.surname} ${recap.contract.person.name}</a>
+	  	    </td> 
 	  	    <!-- remaining cell -->
 	  	    #{if recap.remaining >= 5}
 	  	      <td class="success">
@@ -66,9 +138,13 @@
 	  	    </td>
 	  	  </tr>
 
-	  	#{/list}
-	  	</tbody>
+	  	  #{/list}
 	  
-	  </table> 
-  </div>
+	    </table>
+      </div>
+    </section>  
+  
+
 </div>
+
+#{include '_myModal_large.html' /}
