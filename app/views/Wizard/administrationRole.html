@@ -2,12 +2,10 @@
 
 %{
 date_of_patron_ = properties.getProperty("date_of_patron");
-email_to_contact_ = properties.getProperty("email_to_contact_");
-lunch_pause_start_ = properties.getProperty("lunch_pause_start");
-lunch_pause_end_ = properties.getProperty("lunch_pause_end");
+
 }%
 
-#{form @Wizard.setGenConf(),class:'form-orizontal',role:'form'}
+#{form @Wizard.administrationRole(),class:'form-orizontal',role:'form'}
 <input type="hidden" name="stepIndex" value="${currentStep.index}"/>
 <fieldset>
 
@@ -26,7 +24,7 @@ lunch_pause_end_ = properties.getProperty("lunch_pause_end");
 
   <div class="row">
   #{field 'lunch_pause_start'}
-    <div class='form-group col-sm-3 col-sm-offset-3 #{if field.error}has-error#{/if}'>
+    <div class='form-group col-sm-2 col-sm-offset-4 #{if field.error}has-error#{/if}'>
       <label class="control-label" for="${field.id}">Inizio pausa pranzo</label>
       <input class="form-control" placeholder="hh:mm" id="${field.id}" type="text" name="${field.name}" value="${lunch_pause_start_}">
       #{if field.error}<span class="help-block">${field.error}</span>#{/if}
@@ -34,7 +32,7 @@ lunch_pause_end_ = properties.getProperty("lunch_pause_end");
     #{/field}
 
     #{field 'lunch_pause_end'}
-    <div class='form-group col-sm-3 #{if field.error}has-error#{/if}'>
+    <div class='form-group col-sm-2#{if field.error}has-error#{/if}'>
       <label class="control-label" for="${field.id}">Fine pausa pranzo</label>
       <input class="form-control" placeholder="hh:mm" id="${field.id}" type="text" name="${field.name}" value="${lunch_pause_end_}">
       #{if field.error}<span class="help-block">${field.error}</span>#{/if}
@@ -44,7 +42,7 @@ lunch_pause_end_ = properties.getProperty("lunch_pause_end");
 
   <div class="row">
     #{field 'email_to_contact'}
-    <div class='form-group col-sm-6 col-sm-offset-3 #{if field.error}has-error#{/if}'>
+    <div class='form-group col-sm-4 col-sm-offset-4 #{if field.error}has-error#{/if}'>
       <label class="control-label" for="${field.id}">Indirizzo email dell'amministrazione <small>(opzionale)</small></label>
       <input class="form-control" placeholder="segreteria@cnr.it" id="${field.id}" type="text" name="${field.name}" value="${email_to_contact_}">
       #{if field.error}<span class="help-block">${field.error}</span>#{/if}
@@ -52,20 +50,6 @@ lunch_pause_end_ = properties.getProperty("lunch_pause_end");
     #{/field}
   </div>
 
-
-<!--   <div class="row">
-    #{field 'web_stamping_allowed'}
-     <div class='form-group'>
-      <div class="col-sm-2 col-sm-offset-5">
-       <div class="checkbox">
-         <label>
-            <input type="checkbox" id="${field.id}" name="${field.name}" #{if 'web_stamping_allowed_' == "SI"} checked #{/if}> Permetti Timbrature Web
-         </label>
-       </div>
-      </div>
-    </div>
-    #{/field} 
-  </div> -->
     
    <legend id="bottom_line" class="col-sm-12"></legend>
 

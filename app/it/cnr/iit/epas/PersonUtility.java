@@ -14,6 +14,7 @@ import models.Absence;
 import models.AbsenceType;
 import models.Competence;
 import models.CompetenceCode;
+import models.ConfGeneral;
 import models.Contract;
 import models.Office;
 import models.Person;
@@ -25,6 +26,7 @@ import models.Stamping;
 import models.User;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
+import models.enumerate.ConfigurationFields;
 import models.enumerate.JustifiedTimeAtWork;
 import models.rendering.VacationsRecap;
 
@@ -1190,7 +1192,9 @@ public class PersonUtility {
 		try {
 			simpleEmail.setFrom("epas@iit.cnr.it");
 			//simpleEmail.addReplyTo("segreteria@iit.cnr.it");
-			simpleEmail.addReplyTo(Play.configuration.getProperty("mail.replyTo.alias"));
+			simpleEmail.addReplyTo(ConfGeneral.getConfGeneralByField(
+							ConfigurationFields.EmailToContact.description, 
+							person.office).fieldValue);
 		} catch (EmailException e1) {
 
 			e1.printStackTrace();
