@@ -1,71 +1,111 @@
 #{extends 'Wizard/wizard.html' /}
 
-%{
-date_of_patron_ = properties.getProperty("date_of_patron");
-
-}%
-
 #{form @Wizard.administrationRole(),class:'form-orizontal',role:'form'}
 <input type="hidden" name="stepIndex" value="${currentStep.index}"/>
 <fieldset>
 
+  <div class="page-header">
+    <h1><small>Creazione utente per l'amministrazione del sistema</small></h1>
+  </div>
+
   <div class="row">
-    #{field 'date_of_patron'}
-    <div class='form-group col-sm-4 col-sm-offset-4 #{if field.error}has-error#{/if}'>
-      <label class="control-label" for="${field.id}">Data del Patrono</label>
+    #{field 'admin_surname'}
+    <div class='form-group col-sm-4 col-sm-offset-2 #{if field.error}has-error#{/if}'>
+      <label class="control-label" for="${field.id}">Cognome</label>
+      <input class="form-control" placeholder="Cognome" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
+      #{if field.error}
+      <span class="help-block">${field.error}</span>
+      #{/if}
+    </div>
+    #{/field}
+
+    #{field 'admin_name'}
+    <div class='form-group col-sm-4 #{if field.error}has-error#{/if}'>
+      <label class="control-label" for="${field.id}">Nome</label>
+      <input class="form-control" placeholder="Nome" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
+      #{if field.error}
+      <span class="help-block">${field.error}</span>
+      #{/if}
+    </div>
+    #{/field}
+  </div>
+
+  <div class="row">
+    #{field 'admin_qualification'}
+    <div class='form-group col-sm-2 col-sm-offset-2 #{if field.error}has-error#{/if}'>
+      <label class="control-label" for="${field.id}">Livello qualifica</label>
+      #{select field.id, value:properties.getProperty(field.name), id:field.id,class:'form-control'}
+      #{list items:1..9, as:'i'}
+      #{option i}${i}#{/option}
+      #{/list}
+      #{/select}
+      #{if field.error}<span class="help-block">${field.error}</span>#{/if}
+    </div>
+    #{/field}
+
+    #{field 'admin_badge_number'}
+    <div class='form-group col-sm-2 #{if field.error}has-error#{/if}'>
+      <label class="control-label" for="${field.id}">Numero badge</label>
+      <input class="form-control" placeholder="num. badge" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}'>
+      #{if field.error}<span class="help-block">${field.error}</span>#{/if}
+    </div>
+    #{/field}
+
+    #{field 'admin_registration_number'}
+    <div class='form-group col-sm-2 #{if field.error}has-error#{/if}'>
+      <label class="control-label" for="${field.id}">Matricola</label>
+      <input class="form-control" placeholder="num. matricola" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
+      #{if field.error}<span class="help-block">${field.error}</span>#{/if}
+    </div>
+    #{/field}
+
+    #{field 'admin_birthday'}
+    <div class='form-group col-sm-2 #{if field.error}has-error#{/if}'>
+      <label class="control-label" for="${field.id}">Giorno di Nascita</label>
       <div class="input-group">
-        <input datepicker class="form-control" placeholder="dd/mm" id="${field.id}" type="text" name="${field.name}" value="${date_of_patron_}">
+        <input datepicker class="form-control" placeholder="dd/mm/yyyy" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}'>
         <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
       </div>
       #{if field.error}<span class="help-block">${field.error}</span>#{/if}
     </div>
-    #{/field} 
-  </div>
-
-  <div class="row">
-  #{field 'lunch_pause_start'}
-    <div class='form-group col-sm-2 col-sm-offset-4 #{if field.error}has-error#{/if}'>
-      <label class="control-label" for="${field.id}">Inizio pausa pranzo</label>
-      <input class="form-control" placeholder="hh:mm" id="${field.id}" type="text" name="${field.name}" value="${lunch_pause_start_}">
-      #{if field.error}<span class="help-block">${field.error}</span>#{/if}
-    </div>
-    #{/field}
-
-    #{field 'lunch_pause_end'}
-    <div class='form-group col-sm-2#{if field.error}has-error#{/if}'>
-      <label class="control-label" for="${field.id}">Fine pausa pranzo</label>
-      <input class="form-control" placeholder="hh:mm" id="${field.id}" type="text" name="${field.name}" value="${lunch_pause_end_}">
-      #{if field.error}<span class="help-block">${field.error}</span>#{/if}
-    </div>
     #{/field}
   </div>
 
   <div class="row">
-    #{field 'email_to_contact'}
-    <div class='form-group col-sm-4 col-sm-offset-4 #{if field.error}has-error#{/if}'>
-      <label class="control-label" for="${field.id}">Indirizzo email dell'amministrazione <small>(opzionale)</small></label>
-      <input class="form-control" placeholder="segreteria@cnr.it" id="${field.id}" type="text" name="${field.name}" value="${email_to_contact_}">
+    #{field 'admin_email'}
+    <div class='form-group col-sm-4 col-sm-offset-2 #{if field.error}has-error#{/if}'>
+      <label class="control-label" for="${field.id}">Indirizzo email</label>
+      <input class="form-control" placeholder="tua@email.it" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}'>
       #{if field.error}<span class="help-block">${field.error}</span>#{/if}
     </div>
     #{/field}
+
+    #{field 'admin_contract_begin'}
+    <div class='form-group col-sm-2 #{if field.error}has-error#{/if}'>
+      <label class="control-label" for="${field.id}">Data inizio contratto</label>
+      <div class="input-group">
+        <input datepicker class="form-control" placeholder="dd/mm/yyyy" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
+        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+      </div>
+      #{if field.error}<span class="help-block">${field.error}</span>#{/if}
+    </div>
+    #{/field}
+
+    #{field 'admin_contract_end'}
+    <div class='form-group col-sm-2 #{if field.error}has-error#{/if}'>
+      <label class="control-label" for="${field.id}">Data termine contratto</label>
+      <div class="input-group">
+        <input datepicker class="form-control" placeholder="dd/mm/yyyy" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}'>
+        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+      </div>
+      #{if field.error}<span class="help-block">${field.error}</span>#{/if}
+    </div>
+    #{/field}
+
   </div>
 
-    
-   <legend id="bottom_line" class="col-sm-12"></legend>
+  <legend id="bottom_line" class="col-sm-12"></legend>
 
   <button type="submit" class="btn btn-primary col-xs-4 col-xs-offset-4 col-sm-2 col-sm-offset-5">Invia</button>
 </fieldset>
 #{/form}
-
-#{set 'moreScripts'}
-<script type="text/javascript">
-$('input[datepicker]').datepicker({
-  format: "dd/mm",
-  startDate: "1/1",
-  endDate: "31/12",
-  language: 'it',
-  autoclose: true,
-  todayHighlight: true
-});
-</script>
-#{/set}
