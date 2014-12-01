@@ -1,15 +1,5 @@
 #{extends 'Wizard/wizard.html' /}
 
-%{
-area_ = properties.getProperty("area");
-institute_ = properties.getProperty("institute");
-institute_contraction_ = properties.getProperty("institute_contraction");
-seat_ = properties.getProperty("seat");
-seat_address_ = properties.getProperty("seat_address");
-seat_affiliation_date_ = properties.getProperty("seat_affiliation_date");
-seat_code_ = properties.getProperty("seat_code");
-}%
-
 #{form @Wizard.setOffice(),class:'form-orizontal',role:'form'}
 <input type="hidden" name="stepIndex" value="${currentStep.index}"/>
 <fieldset>
@@ -18,7 +8,7 @@ seat_code_ = properties.getProperty("seat_code");
     #{field 'area'}
     <div class='form-group col-sm-8 col-sm-offset-2 #{if field.error}has-error#{/if}'>
       <label class="control-label" for="${field.id}">Nome Area</label>
-      <input class="form-control" placeholder="Es. Area CNR Pisa" id="${field.id}" type="text" name="${field.name}" value="${area_}">
+      <input class="form-control" placeholder="Es. Area CNR Pisa" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
       #{if field.error}
       <span class="help-block">${field.error}</span>
       #{/if}
@@ -33,7 +23,7 @@ seat_code_ = properties.getProperty("seat_code");
     #{field 'institute'}
     <div class='form-group col-sm-5 col-sm-offset-2 #{if field.error}has-error#{/if}'>
       <label class="control-label" for="${field.id}">Nome Istituto</label>
-      <input class="form-control" placeholder="Es. Istituto di Informatica e Telematica" id="${field.id}" type="text" name="${field.name}" value="${institute_}">
+      <input class="form-control" placeholder="Es. Istituto di Informatica e Telematica" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
       #{if field.error}<span class="help-block">${field.error}</span>#{/if}
     </div>
     #{/field}
@@ -41,7 +31,7 @@ seat_code_ = properties.getProperty("seat_code");
     #{field 'institute_contraction'}
     <div class='form-group col-sm-3 #{if field.error}has-error#{/if}'>
       <label class="control-label" for="${field.id}">Sigla Istituto</label>
-      <input class="form-control" placeholder="Es. IIT" id="${field.id}" type="text" name="${field.name}" value="${institute_contraction_}">
+      <input class="form-control" placeholder="Es. IIT" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
       #{if field.error}<span class="help-block">${field.error}</span>#{/if}
     </div>
     #{/field}
@@ -55,7 +45,7 @@ seat_code_ = properties.getProperty("seat_code");
     #{field 'seat'}
     <div class='form-group col-sm-4 col-sm-offset-2 #{if field.error}has-error#{/if}'>
       <label class="control-label" for="${field.id}">Nome Sede</label>
-      <input class="form-control" placeholder="Es. IIT - Pisa" id="${field.id}" type="text" name="${field.name}" value="${seat_}">
+      <input class="form-control" placeholder="Es. IIT - Pisa" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
       #{if field.error}<span class="help-block">${field.error}</span>#{/if}
     </div>
     #{/field}
@@ -63,7 +53,7 @@ seat_code_ = properties.getProperty("seat_code");
     #{field 'seat_address'}
     <div class='form-group col-sm-4 #{if field.error}has-error#{/if}'>
       <label class="control-label" for="${field.id}">Indirizzo</label>
-      <input class="form-control" placeholder="Parametro opzionale" id="${field.id}" type="text" name="${field.name}" value="${seat_address_}">
+      <input class="form-control" placeholder="Parametro opzionale" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
       #{if field.error}<span class="help-block">${field.error}</span>#{/if}
     </div>
     #{/field}
@@ -71,7 +61,7 @@ seat_code_ = properties.getProperty("seat_code");
     #{field 'seat_code'}
     <div class='form-group col-sm-4 col-sm-offset-2 #{if field.error}has-error#{/if}'>
       <label class="control-label" for="${field.id}">Codice Sede</label>
-      <input class="form-control" placeholder="Es. 12345" id="${field.id}" type="text" name="${field.name}" value="${seat_code_}">
+      <input class="form-control" placeholder="Es. 12345" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
       #{if field.error}<span class="help-block">${field.error}</span>#{/if}
     </div>
     #{/field}
@@ -80,7 +70,7 @@ seat_code_ = properties.getProperty("seat_code");
     <div class='form-group col-sm-4 #{if field.error}has-error#{/if}'>
       <label class="control-label" for="${field.id}">Data affiliazione</label>
       <div class="input-group">
-        <input datepicker class="form-control" placeholder="dd/mm/yyyy" id="${field.id}" type="text" name="${field.name}" value="${seat_affiliation_date_}">
+        <input datepicker class="form-control" placeholder="dd/mm/yyyy" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
         <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
       </div>
       #{if field.error}<span class="help-block">${field.error}</span>#{/if}
@@ -89,7 +79,7 @@ seat_code_ = properties.getProperty("seat_code");
 
   </div>
 
-   <legend id="bottom_line" class="col-sm-12"></legend>
+  <legend id="bottom_line" class="col-sm-12"></legend>
 
   <button type="submit" class="btn btn-primary col-xs-4 col-xs-offset-4 col-sm-2 col-sm-offset-5">Invia</button>
 </fieldset>
