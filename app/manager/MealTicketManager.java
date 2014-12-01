@@ -160,6 +160,11 @@ public class MealTicketManager {
 					MealTicketDao.getMealTicketAssignedToPersonIntoInterval(contract, recap.mealTicketInterval);
 
 			//MAPPING
+			//init lazy variable
+			for(MealTicket mealTicket : recap.mealTicketsReceivedOrdered) {
+				mealTicket.used = false;
+			}
+			//mapping
 			for(int i = 0; i < recap.personDaysMealTickets.size(); i++)
 			{
 				PersonDay currentPersonDay = recap.personDaysMealTickets.get(i);
@@ -299,19 +304,30 @@ public class MealTicketManager {
 		
 		/**
 		 * Il numero di buoni rimanenti all'interno del blocchetto.
+		 * N.B. Il metodo ritorna un valore valido solo se la variabile 
+		 * lazy used è valorizzata per tutti i buoni pasto del blocchetto.
+		 * (Per valorizzarla occorre passare dalla MealTicketRecap.build())
 		 * @return
 		 */
 		public Integer getRemaining() {
+			Integer consumed = this.getConsumed();
+			if(consumed == null)
+				return null;
 			return this.getDimBlock() - this.getConsumed();
 		}
 		
 		/**
 		 * Il numero di buoni consumati all'interno del blocchetto.
+		 * N.B. Il metodo ritorna un valore valido solo se la variabile 
+		 * lazy used è valorizzata per tutti i buoni pasto del blocchetto.
+		 * (Per valorizzarla occorre passare dalla MealTicketRecap.build())
 		 * @return
 		 */
 		public Integer getConsumed() {
 			Integer count = 0;
 			for(MealTicket mealTicket : this.mealTickets) {
+				if(mealTicket.used == null)
+					return null;
 				if(mealTicket.used)
 					count++;
 			}

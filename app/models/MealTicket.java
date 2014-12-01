@@ -60,7 +60,7 @@ public class MealTicket extends BaseModel{
 	public LocalDate expireDate;
 	
 	@Transient 
-	public boolean used = false;
+	public Boolean used = null;
 	
 	@Override
 	public String toString() {
