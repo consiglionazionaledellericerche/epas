@@ -1,12 +1,9 @@
 package manager;
 
 import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
-
-
-
-
 
 import org.joda.time.LocalDate;
 
@@ -14,8 +11,8 @@ import manager.recaps.PersonResidualMonthRecap;
 import manager.recaps.PersonResidualYearRecap;
 import models.Contract;
 import models.MealTicket;
+import models.Person;
 import models.PersonDay;
-import play.Logger;
 
 import com.google.common.collect.Lists;
 
@@ -34,15 +31,18 @@ public class MealTicketManager {
 	 * Genera la lista di MealTicket appartenenti al blocco identificato dal codice codeBlock
 	 * @param codeBlock il codice del blocco di meal ticket
 	 * @param dimBlock la dimensione del blocco di meal ticket
+	 * @param expireDate la data di scadenza dei buoni nel blocco
 	 * @return la lista di MealTicket appartenenti al blocco.
 	 */
-	public static List<MealTicket> buildBlockMealTicket(Integer codeBlock, Integer dimBlock) {
+	public static List<MealTicket> buildBlockMealTicket(
+			Integer codeBlock, Integer dimBlock, LocalDate expireDate) {
 
 		List<MealTicket> mealTicketList = Lists.newArrayList();
 
 		for(int i=1; i<=dimBlock; i++) {
 
 			MealTicket mealTicket = new MealTicket();
+			mealTicket.expireDate = expireDate;
 			mealTicket.block = codeBlock;
 			mealTicket.number = i;
 
@@ -52,8 +52,6 @@ public class MealTicketManager {
 				mealTicket.code = "" + codeBlock + i;
 
 			mealTicketList.add(mealTicket);
-
-			Logger.info(mealTicket.code);
 		}
 
 		return  mealTicketList;
@@ -67,11 +65,21 @@ public class MealTicketManager {
 	 * all'inizio del nuovo contratto
 	 * @param contract
 	 */
-	public static void mealTicketsLegacy(Contract contract) {
+	
+	/**
+	 * Verifica che nel contratto precedente a contract siano avanzati dei buoni
+	 * pasto assegnati. In tal caso per quei buoni pasto viene modificata la relazione
+	 * col contratto successivo e cambiata la data di attribuzione in modo che ricada 
+	 * all'inizio del nuovo contratto.
+	 * Ritorna il numero di buoni pasto trasferiti fra un contratto e l'altro.
+	 * @param contract
+	 * @return
+	 */
+	public static int mealTicketsLegacy(Contract contract) {
 		
 		Contract previousContract = PersonDao.getPreviousPersonContract(contract);
 		if(previousContract == null)
-			return;
+			return 0;
 		
 		DateInterval previousContractInterval = previousContract.getContractDateInterval();
 		
@@ -82,10 +90,12 @@ public class MealTicketManager {
 		PersonResidualMonthRecap monthRecap = c.getMese(previousContractInterval.getEnd().getMonthOfYear());
 		
 		if(monthRecap == null)
-			return;
+			return 0;
 		
 		if(monthRecap.buoniPastoResidui == 0)
-			return;
+			return 0;
+		
+		int mealTicketsTransfered = 0;
 		
 		List<MealTicket> contractMealTicketsDesc = MealTicketDao.getOrderedMealTicketInContract(previousContract);
 		for(int i = 0; i<monthRecap.buoniPastoResidui; i++) {
@@ -94,9 +104,10 @@ public class MealTicketManager {
 			ticketToChange.contract = contract;
 			ticketToChange.date = contract.beginContract;
 			ticketToChange.save();
+			mealTicketsTransfered++;
 		}
 
-		return;
+		return mealTicketsTransfered;
 	}
 
 	/**
@@ -113,7 +124,11 @@ public class MealTicketManager {
 		private int error = 0;
 		private LocalDate dateErrore = null;
 		private List<PersonDay> personDaysMealTickets = Lists.newArrayList();
+		private List<MealTicket> mealTicketsReceivedOrdered = Lists.newArrayList();
+				
 		private int remaining = 0;
+		
+		private DateInterval mealTicketInterval = null;
 		
 		private MealTicketRecap(Contract contract) {
 			this.contract = contract;
@@ -133,36 +148,30 @@ public class MealTicketManager {
 			
 			MealTicketRecap recap =  new MealTicketRecap(contract);
 			
-			LocalDate startMealTicket = MealTicketDao.getMealTicketStartDate(contract.person.office);
-			if(startMealTicket == null)
+			recap.mealTicketInterval = contract.getContractMealTicketDateInterval();
+			
+			if(recap.mealTicketInterval == null)
 				return null;
+			
+			recap.personDaysMealTickets = 
+					PersonDao.getPersonDayIntoInterval(contract.person, recap.mealTicketInterval, true);
 
-			DateInterval contractDatabaseInterval = contract.getContractDatabaseDateInterval();
-			if(contractDatabaseInterval.getBegin().isBefore(startMealTicket)) 
-			{
-				contractDatabaseInterval = new DateInterval(
-						startMealTicket, contractDatabaseInterval.getEnd());
-			}
-
-			List<PersonDay> orderedPersonDayWithMealTicketIntoInterval = 
-					PersonDao.getPersonDayIntoInterval(contract.person, contractDatabaseInterval, true);
-
-			List<MealTicket> orderedMealTicketAvailableIntoInterval =
-					MealTicketDao.getMealTicketAssignedToPersonIntoInterval(contract, contractDatabaseInterval);
+			recap.mealTicketsReceivedOrdered =
+					MealTicketDao.getMealTicketAssignedToPersonIntoInterval(contract, recap.mealTicketInterval);
 
 			//MAPPING
-			for(int i = 0; i < orderedPersonDayWithMealTicketIntoInterval.size(); i++)
+			for(int i = 0; i < recap.personDaysMealTickets.size(); i++)
 			{
-				PersonDay currentPersonDay = orderedPersonDayWithMealTicketIntoInterval.get(i);
+				PersonDay currentPersonDay = recap.personDaysMealTickets.get(i);
 
-				if(orderedMealTicketAvailableIntoInterval.size() == i )
+				if(recap.mealTicketsReceivedOrdered.size() == i )
 				{
 					recap.dateErrore = currentPersonDay.date;
 					recap.error = MESSAGE_MEAL_TICKET_RUN_OUT;
 					return recap;
 				}
 
-				MealTicket currentMealTicket = orderedMealTicketAvailableIntoInterval.get(i);
+				MealTicket currentMealTicket = recap.mealTicketsReceivedOrdered.get(i);
 				
 				if(currentPersonDay.date.isAfter(currentMealTicket.expireDate)) 
 				{
@@ -172,16 +181,19 @@ public class MealTicketManager {
 				}
 				
 				currentPersonDay.mealTicketAssigned = currentMealTicket;
+				currentMealTicket.used = true;
 
 			}
 
-			recap.remaining = orderedMealTicketAvailableIntoInterval.size() 
-					- orderedPersonDayWithMealTicketIntoInterval.size();
+			recap.remaining =recap.mealTicketsReceivedOrdered.size() 
+					- recap.personDaysMealTickets.size();
 			
 			return recap;
 		}
 		
 		public Contract getContract() { return this.contract; }
+		
+		public DateInterval getMealTicketInterval() { return this.mealTicketInterval; }
 		
 		public boolean isMealTicketRunOut() { 
 			return this.error == MealTicketRecap.MESSAGE_MEAL_TICKET_RUN_OUT; 
@@ -191,9 +203,191 @@ public class MealTicketManager {
 		}
 		public LocalDate getDateError() { return this.dateErrore; }
 		
-		public List<PersonDay> getPersonDayMapped() { return this.personDaysMealTickets; }
-		public int getRemainig() { return this.remaining; }
+		public List<PersonDay> getPersonDayMapped() { 
+			return this.personDaysMealTickets; 
+		}
+		public List<MealTicket> getMealTicketsReceivedOrdered() { 
+			return this.mealTicketsReceivedOrdered; 
+		}
+		public int getRemaining() { return this.remaining; }
+		
+		/**
+		 * Ritorna i blocchi di buoni pasto consegnati alla persona nell anno year 
+		 * ordinati per data di scadenza e per codice blocco.
+		 * @param year
+		 * @return
+		 */
+		public List<BlockMealTicket> getBlockMealTicketReceivedInYear(Integer year) {
+			
+			DateInterval yearInterval = new DateInterval( new LocalDate(year,1,1), new LocalDate(year,12,31));
+
+			return MealTicketRecap.getBlockMealTicketReceivedIntoInterval(this, yearInterval);
+		}
+		
+		/**
+		 * Ritorna i blocchi di buoni pasto consegnati alla persona nell anno year 
+		 * ordinati per data di scadenza e per codice blocco.
+		 * @param year
+		 * @return
+		 */
+		public List<BlockMealTicket> getBlockMealTicketReceived() {
+			
+			List<BlockMealTicket> blockList = MealTicketRecap.getBlockMealTicketReceivedIntoInterval(this, this.mealTicketInterval);
+			return blockList;
+		}
+
+		
+		/**
+		 * Ritorna i blocchi inerenti la lista di buoni pasto recap.mealTicketsReceivedOrdered,
+		 * consegnati nell'intervallo temporale indicato. N.B. la lista di di cui sopra è ordinata
+		 * per data di scadenza e per codice blocco in ordine ascendente.
+		 * @param recap
+		 * @param interval
+		 * @return
+		 */
+		private static List<BlockMealTicket> getBlockMealTicketReceivedIntoInterval(
+				MealTicketRecap recap, DateInterval interval) {
+			
+			List<BlockMealTicket> blockList = Lists.newArrayList();
+			BlockMealTicket currentBlock = null;
+						
+			for(MealTicket mealTicket : recap.mealTicketsReceivedOrdered) {
+				if( DateUtility.isDateIntoInterval(mealTicket.date, interval) ) {
+					
+					if(currentBlock == null) {
+						currentBlock = new BlockMealTicket(mealTicket.block);
+						currentBlock.mealTickets.add(mealTicket);
+						continue;
+					}
+					
+					if(currentBlock.codeBlock.equals( mealTicket.block )) {
+						currentBlock.mealTickets.add(mealTicket);
+						continue;
+					}
+									
+					blockList.add(currentBlock);
+					currentBlock = new BlockMealTicket(mealTicket.block);
+					currentBlock.mealTickets.add(mealTicket);
+				}
+			}
+			if(currentBlock != null) {
+				blockList.add(currentBlock);
+			}	
+			return blockList;
+			
+		}
+	}
 	
+	public static final class BlockMealTicket {
+		
+		public Integer codeBlock;
+		public List<MealTicket> mealTickets;
+		
+		public BlockMealTicket(Integer codeBlock) {
+			
+			this.codeBlock = codeBlock;
+			this.mealTickets = Lists.newArrayList();
+		}
+		
+		/**
+		 * La dimensione del blocchetto.
+		 * @return
+		 */
+		public Integer getDimBlock() {
+			return this.mealTickets.size();
+		}
+		
+		/**
+		 * Il numero di buoni rimanenti all'interno del blocchetto.
+		 * @return
+		 */
+		public Integer getRemaining() {
+			return this.getDimBlock() - this.getConsumed();
+		}
+		
+		/**
+		 * Il numero di buoni consumati all'interno del blocchetto.
+		 * @return
+		 */
+		public Integer getConsumed() {
+			Integer count = 0;
+			for(MealTicket mealTicket : this.mealTickets) {
+				if(mealTicket.used)
+					count++;
+			}
+			return count;
+		}
+		
+		/**
+		 * Il giorno di scadenza dei buoni appartenenti al blocchetto.
+		 * @return
+		 */
+		public LocalDate getExpireDate() {
+			if(this.getDimBlock()>0)
+				return this.mealTickets.get(0).expireDate;
+			return null;
+		}
+		
+		/**
+		 * L'amministratore assegnatario del blocchetto.
+		 * @return
+		 */
+		public Person getAdmin() {
+			if(this.getDimBlock()>0)
+				return this.mealTickets.get(0).admin;
+			return null;
+		}
+		
+		/**
+		 * La data di consegna (inserimento ePAS) del blocchetto.
+		 * @return
+		 */
+		public LocalDate getReceivedDate() {
+			if(this.getDimBlock()>0)
+				return this.mealTickets.get(0).date;
+			return null;
+		}
+		
+		/**
+		 * 
+		 * @param mealTicket
+		 * @return
+		 */
+		public static List<BlockMealTicket> getBlockMealTicketFromMealTicketList(
+				List<MealTicket> mealTicketList) {
+			
+			//FIXME è lo stesso algoritmo del metodo statico
+			//getBlockMealTicketReceivedIntoInterval della classe
+			//d MealTicketRecap. Renderlo generico.
+			
+			List<BlockMealTicket> blockList = Lists.newArrayList();
+			BlockMealTicket currentBlock = null;
+
+			for(MealTicket mealTicket : mealTicketList) {
+
+				if(currentBlock == null) {
+					currentBlock = new BlockMealTicket(mealTicket.block);
+					currentBlock.mealTickets.add(mealTicket);
+					continue;
+				}
+
+				if(currentBlock.codeBlock.equals( mealTicket.block )) {
+					currentBlock.mealTickets.add(mealTicket);
+					continue;
+				}
+
+				blockList.add(currentBlock);
+				currentBlock = new BlockMealTicket(mealTicket.block);
+				currentBlock.mealTickets.add(mealTicket);
+
+			}
+			if(currentBlock != null) {
+				blockList.add(currentBlock);
+			}	
+			return blockList;
+			
+		}
+		
 	}
 
 }
