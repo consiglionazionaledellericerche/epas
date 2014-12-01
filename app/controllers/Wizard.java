@@ -17,6 +17,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Collections2;
@@ -65,16 +66,16 @@ public class Wizard extends Controller {
 	
 	public static List<WizardStep> createSteps() {
 		return ImmutableList
-				.of(WizardStep.of("Cambio Password admin", "changeAdminPsw",0),
+				.of(WizardStep.of("Cambio password Admin", "changeAdminPsw",0),
 					WizardStep.of("Nuovo ufficio", "setOffice",1),
-					WizardStep.of("Configurazione Giorno Patrono", "setPatron",2),
-					WizardStep.of("Configurazione generale", "setGenConf",3),
-					WizardStep.of("Configurazione annuale", "setConfYear", 4),
-					WizardStep.of("Riepilogo", "summary",5));
+					WizardStep.of("Configurazione generale", "setGenConf",2),
+					WizardStep.of("Creazione Ruolo per l'amministrazione", "administrationRole", 3),
+					WizardStep.of("Riepilogo", "summary",4));
 	}
 	
 	@NoCheck
 	public static void wizard(int step) {
+		Preconditions.checkNotNull(step);
     	    	
     	List<WizardStep> steps = Cache.get(STEPS_KEY, List.class);
     	Properties properties = Cache.get(PROPERTIES_KEY, Properties.class);
@@ -96,34 +97,30 @@ public class Wizard extends Controller {
     		Cache.safeAdd(PROPERTIES_KEY, properties,"10mn");
     	}
     	
-    	if(step>0 && step<=steps.size()){
+    	int stepsCompleted = Collections2.filter(steps, 
+	    		new Predicate<WizardStep>() {
+	    	    @Override
+	    	    public boolean apply(WizardStep p) {
+	    	        return p.completed;
+	    	    }
+	    	}).size();
+    	
+    	percent = stepsCompleted*(100/steps.size());
+    	
+    	if (step < 0 | step > steps.size()){
+    		step = stepsCompleted;
+    	}
     		
-    		int stepsCompleted = Collections2.filter(steps, 
-    	    		new Predicate<WizardStep>() {
-    	    	    @Override
-    	    	    public boolean apply(WizardStep p) {
-    	    	        return p.completed;
-    	    	    }
-    	    	}).size();
-    		
-    		percent = stepsCompleted*(100/steps.size());
-    		
-    		if(!steps.get(step-1).completed){
+    	else if(step != 0 && !steps.get(step-1).completed){
     			step = stepsCompleted;
         	}
-    	}
-    	
-    	else {
-    		step = 0;
-    	}
     	
     	WizardStep currentStep = steps.get(step);
-    	
-    	
-    	if(properties != null && step == (steps.size()-1)){
+
+    	if(properties != null && step > 0){
     	try{
-    		properties.store(new FileOutputStream("conf/properties.conf"), "File impostazioni wizard");
-    		Logger.info("Creato file properties.conf");
+    		properties.store(new FileOutputStream("conf/properties.conf"), "Wizard values file");
+    		Logger.info("Salvato file properties.conf");
     	}
     	catch(IOException e){
     		flash.error(e.getMessage());    		
@@ -138,9 +135,9 @@ public class Wizard extends Controller {
      */
 	@NoCheck
     public static void changeAdminPsw(
-    		@Required int stepIndex,
-    		@Required String adminPassword,
-    		@Required @Equals("adminPassword") String adminPasswordRetype){
+    		int stepIndex,
+    		@Required String admin_password,
+    		@Required @Equals("admin_password") String admin_password_retype){
     	
     	if (validation.hasErrors()){
     	    params.flash(); 
@@ -152,68 +149,40 @@ public class Wizard extends Controller {
     	Properties properties = Cache.get(PROPERTIES_KEY, Properties.class);
     	
     	if(steps != null){
-    		properties.setProperty("Nuova Password Admin",adminPassword);
-
-    		steps.get(stepIndex).complete();
+    		properties.setProperty("admin_password",admin_password);
+    		
+    		if(!steps.get(stepIndex).completed){
+    			steps.get(stepIndex).complete();
+            	Logger.info("Completato lo step %s del wizard", stepIndex);
+    		}
+    		
     		Cache.safeSet(STEPS_KEY, steps, "10mn");
     		Cache.safeSet(PROPERTIES_KEY, properties, "10mn");
     	}
     	
-    	Logger.info("Completato lo step n %s del wizard", stepIndex);
        	wizard(stepIndex+1);
     }
     
-//    /**
-//     * STEP 2 "Creazione Amministratore"
-//     */
-//	@NoCheck
-//    public static void setAdmin(
-//    		@Required String user,
-//    		@Required String password,
-//    		@Required @Equals("password") String passwordRetype){
-//    	
-//    	User admin = User.find("byUsername", user).first();
-//    	if(admin != null){
-//    		validation.addError("user", "Nome utente già utilizzato");
-//    	}
-//    	if (validation.hasErrors()){
-//    	    params.flash(); 
-//    	    validation.keep();
-//    		wizard(1);
-//    	}
-//    	
-//    	List<WizardStep> steps = Cache.get(STEPS_KEY, List.class);
-//    	Properties properties = Cache.get(PROPERTIES_KEY, Properties.class);
-//    	
-//    	if(steps != null){
-//    		
-//    		properties.setProperty("Nome Amministratore",user);
-//    		properties.setProperty("Password Amministratore",password);
-//
-//    		steps.get(1).complete();
-//    		Cache.safeSet(STEPS_KEY, steps, "10mn");
-//    		Cache.safeSet(PROPERTIES_KEY, properties, "10mn");
-//    	}
-//    	
-//       	wizard(2);
-//    }
     
     /**
-     * STEP 2 "Inserimento nome istituto e codice sede"
+     * STEP 2 "Creazione Area,Istituto e Sede"
      */
 	
 	@NoCheck
     public static void setOffice(
-    	    @Required int stepIndex,
+    	    int stepIndex,
     		@Required String area,
     		@Required String institute,
+    		@Required String institute_contraction,
     		@Required String seat,
-    		@Required String seat_code ){
+    		@Required String seat_address,
+    		@Required String seat_code,
+    		@Required String seat_affiliation_date ){
 
     	if (validation.hasErrors()){
     	    params.flash(); 
     	    validation.keep();
-    		wizard(1);
+    		wizard(stepIndex);
     	}
     	
     	List<WizardStep> steps = Cache.get(STEPS_KEY, List.class);
@@ -223,127 +192,119 @@ public class Wizard extends Controller {
     		
     		properties.setProperty("area",area);
     		properties.setProperty("institute",institute);
+    		properties.setProperty("institute_contraction",institute_contraction);
     		properties.setProperty("seat",seat);
+    		properties.setProperty("seat_address",seat_address);
     		properties.setProperty("seat_code",seat_code);
+    		properties.setProperty("seat_affiliation_date",seat_affiliation_date);
 
+    		if(!steps.get(stepIndex).completed){
+    			steps.get(stepIndex).complete();
+    		}
+    		
     		steps.get(stepIndex).complete();
     		Cache.safeSet(STEPS_KEY, steps, "10mn");
     		Cache.safeSet(PROPERTIES_KEY, properties, "10mn");
+    		
     	}
-    	Logger.info("Completato lo step n %s del wizard", stepIndex);
+
        	wizard(stepIndex+1);
     }
-    
+      
     /**
-     * STEP 4 Inserimento Giorno Patrono"
+     * STEP 3 Impostazioni Generali relativi alla Sede creata
      */
-	@NoCheck
-    public static void setPatron(
-    		@Required String patronMonth,
-    		@Required String patronDay){
-
-    	if (validation.hasErrors()){
-    	    params.flash(); 
-    	    validation.keep();
-    		wizard(3);
-    	}
-    	
-    	List<WizardStep> steps = Cache.get(STEPS_KEY, List.class);
-    	Properties properties = Cache.get(PROPERTIES_KEY, Properties.class);
-    	
-    	if(steps != null){
-    		
-    		properties.setProperty("month_of_patron",patronMonth);
-    		properties.setProperty("day_of_patron",patronDay);
-
-    		steps.get(3).complete();
-    		Cache.safeSet(STEPS_KEY, steps, "10mn");
-    		Cache.safeSet(PROPERTIES_KEY, properties, "10mn");
-    	}
-    	
-       	wizard(4);
-    }
-    
-    /**
-     * STEP 5
-     */
+	
 	@NoCheck
     public static void setGenConf(
-    		@Required String initUseStart,
-    		@Required @CheckWith (StringIsTime.class) String lunchPauseStart, 
-    		@Required @CheckWith (StringIsTime.class) String lunchPauseStop,
-    		@Required boolean webStampingAllowed){
-    	
+    		int stepIndex,
+    		@Required String date_of_patron,  		
+    		@Required @CheckWith (StringIsTime.class) String lunch_pause_start, 
+    		@Required @CheckWith (StringIsTime.class) String lunch_pause_end,
+    		@Email String email_to_contact
+    		){
+		
     	if (validation.hasErrors()){
     	    params.flash(); 
     	    validation.keep();
-    		wizard(4);
+    		wizard(stepIndex);
     	}
-    	    	
+    		
     	List<WizardStep> steps = Cache.get(STEPS_KEY, List.class);
     	Properties properties = Cache.get(PROPERTIES_KEY, Properties.class);
     	
     	if(steps != null){
-    		
-    		properties.setProperty("init_use_program",initUseStart);
-    		
-			List<String> pauseStart = Splitter.on(":").trimResults().splitToList(lunchPauseStart);
-			List<String> pauseStop = Splitter.on(":").trimResults().splitToList(lunchPauseStop);
-			
-    		properties.setProperty("meal_time_start_hour",pauseStart.get(0));
-    		properties.setProperty("meal_time_start_minute",pauseStart.get(1));
-    		properties.setProperty("meal_time_end_hour",pauseStop.get(0));
-    		properties.setProperty("meal_time_end_minute",pauseStop.get(1));
-    		String allowed = "NO";
-    		if(webStampingAllowed){allowed ="SI";}
-    		properties.setProperty("web_stamping_allowed",allowed);
 
-    		steps.get(4).complete();
+    		properties.setProperty("date_of_patron",date_of_patron);
+    		properties.setProperty("lunch_pause_start",lunch_pause_start);
+    		properties.setProperty("lunch_pause_end",lunch_pause_end);
+    		properties.setProperty("email_to_contact",email_to_contact);
+
+    		if(!steps.get(stepIndex).completed){
+    			steps.get(stepIndex).complete();
+            	Logger.info("Completato lo step %s del wizard", stepIndex);
+    		}
+
     		Cache.safeSet(STEPS_KEY, steps, "10mn");
     		Cache.safeSet(PROPERTIES_KEY, properties, "10mn");
     	}
     	
-       	wizard(5);
+       	wizard(stepIndex+1);
     }
 	
+	
+    /**
+     * STEP 4 Creazione Profilo per l'amministratore
+     */
 	
 	@NoCheck
-    public static void setConfYear(
-    		@Required String dayVacantionExp,
-    		@Required String monthVacantionExp,
-    		@Required String monthExpireRecoveryDaysOneThree,
-    		@Required String maxRecoveryDaysOneThree,
-    		@Required String monthExpireRecoveryDaysFourNine,
-    		@Required String maxRecoveryDaysFourNine,
-    		@Required @Range(min = 0,max = 23)String hourMaxToCalculateWorkTime
+    public static void administrationRole(
+    		int stepIndex,
+    		@Required String admin_surname,
+    		@Required String admin_name,
+    		@Required String admin_qualification,
+    		String admin_badge_number,
+    		@Required String admin_registration_number,
+    		String admin_birthday,
+    		@Email String admin_email,
+    		@Required String admin_contract_begin,
+    		String admin_contract_end
     		){
-    	
+		
     	if (validation.hasErrors()){
     	    params.flash(); 
     	    validation.keep();
-    		wizard(5);  	
+    		wizard(stepIndex);
     	}
-    	    	
+    		
     	List<WizardStep> steps = Cache.get(STEPS_KEY, List.class);
     	Properties properties = Cache.get(PROPERTIES_KEY, Properties.class);
     	
     	if(steps != null){
+
+    		properties.setProperty("admin_surname",admin_surname);
+    		properties.setProperty("admin_name",admin_name);
+    		properties.setProperty("admin_qualification",admin_qualification);
+    		properties.setProperty("admin_badge_number",admin_badge_number);
+    		properties.setProperty("admin_registration_number",admin_registration_number);
+    		properties.setProperty("admin_birthday",admin_birthday);
+    		properties.setProperty("admin_email",admin_email);
+    		properties.setProperty("admin_contract_begin",admin_contract_begin);
+    		properties.setProperty("admin_contract_end",admin_contract_end);
+
     		
-    		properties.setProperty("day_expiry_vacation_past_year",dayVacantionExp);
-    		properties.setProperty("month_expiry_vacation_past_year",monthVacantionExp);
-    		properties.setProperty("month_expire_recovery_days_13",monthExpireRecoveryDaysOneThree);
-    		properties.setProperty("max_recovery_days_13",maxRecoveryDaysOneThree);
-    		properties.setProperty("month_expire_recovery_days_49",monthExpireRecoveryDaysFourNine);
-    		properties.setProperty("max_recovery_days_49",maxRecoveryDaysFourNine);
-    		properties.setProperty("hour_max_to_calculate_worktime",hourMaxToCalculateWorkTime); 
-    		    		
-    		steps.get(5).complete();
+    		if(!steps.get(stepIndex).completed){
+    			steps.get(stepIndex).complete();
+            	Logger.info("Completato lo step %s del wizard", stepIndex);
+    		}
+
     		Cache.safeSet(STEPS_KEY, steps, "10mn");
     		Cache.safeSet(PROPERTIES_KEY, properties, "10mn");
-    		
     	}
-       	wizard(6);
+    	
+       	wizard(stepIndex+1);
     }
+	
     
 	@NoCheck
     public static void submit(){
@@ -358,6 +319,17 @@ public class Wizard extends Controller {
 		User admin = User.find("byUsername", "admin").first();
 		admin.password = Codec.hexMD5(properties.getProperty("Nuova Password Admin"));
 		admin.save();
+		
+		
+		
+//		List<String> pauseStart = Splitter.on(":").trimResults().splitToList(lunch_pause_start);
+//		List<String> pauseStop = Splitter.on(":").trimResults().splitToList(lunch_pause_end);
+//		
+//		properties.setProperty("meal_time_start_hour",pauseStart.get(0));
+//		properties.setProperty("meal_time_start_minute",pauseStart.get(1));
+//		properties.setProperty("meal_time_end_hour",pauseStop.get(0));
+//		properties.setProperty("meal_time_end_minute",pauseStop.get(1));
+		
 		
 		// setOffice
 		Office office = Office.findById(1L); 

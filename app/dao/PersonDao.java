@@ -179,6 +179,34 @@ public final class PersonDao {
 		return ModelQuery.simpleResults(query, qp);
 	}
 	
+	/**
+	 * L'ultimo contratto inserito in ordine di data inizio. 
+	 * (Tendenzialmente quello attuale)
+	 * @param person
+	 * @return
+	 */
+	public Contract getLastContract(Person person) {
+		
+		final QContract qc = QContract.contract;
+		
+		final JPQLQuery query = ModelQuery.queryFactory()
+				.from(qc)
+				.where(qc.person.eq(person))
+				.orderBy(qc.beginContract.desc());
+		
+		List<Contract> contracts = query.list(qc);
+		if(contracts.size() == 0)
+			return null;
+		return contracts.get(0);
+		
+	}
+	
+	/**
+	 * Il contratto precedente in ordine temporale rispetto a quello passato
+	 * come argomento.
+	 * @param contract
+	 * @return
+	 */
 	public static Contract getPreviousPersonContract(Contract contract) {
 	
 		final QContract qc = QContract.contract;

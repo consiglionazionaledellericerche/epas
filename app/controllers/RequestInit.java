@@ -313,7 +313,14 @@ public class RequestInit extends Controller {
 		Integer actualYear = new LocalDate().getYear();
 		ConfGeneral yearBegin = ConfGeneral.find("Select c from ConfGeneral c where c.field = ? ", 
 				ConfigurationFields.InitUseProgram.description).first();
-		Integer yearBeginProgram = new Integer(yearBegin.fieldValue.substring(0, 4));
+		Integer yearBeginProgram;
+		if(yearBegin!=null){
+			yearBeginProgram = new Integer(yearBegin.fieldValue.substring(0, 4));
+		}
+		else{
+			yearBeginProgram = new LocalDate().getYear();
+		}
+		 
 		Logger.debug("yearBeginProgram = %s", yearBeginProgram);
 
 		while(yearBeginProgram <= actualYear+1){

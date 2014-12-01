@@ -57,11 +57,6 @@ import com.google.common.base.Preconditions;
 
 import controllers.Resecure.NoCheck;
 import dao.AbsenceTypeDao;
-import net.lingala.zip4j.*;
-import net.lingala.zip4j.core.ZipFile;
-import net.lingala.zip4j.exception.ZipException;
-import net.lingala.zip4j.model.ZipParameters;
-import net.lingala.zip4j.util.Zip4jConstants;
 
 
 @With( {Resecure.class, RequestInit.class} )
@@ -1100,7 +1095,7 @@ public class Absences extends Controller{
 		   renderBinary(absence.absenceFile.get(), absence.absenceFile.length());
 	}
 
-	public static void zipAttachment(String code, Integer year, Integer month) throws IOException, ZipException{
+	public static void zipAttachment(String code, Integer year, Integer month) throws IOException{
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		FileOutputStream fos = new FileOutputStream("attachment"+'-'+code+".zip");
 		ZipOutputStream zos = new ZipOutputStream(fos);
@@ -1113,7 +1108,7 @@ public class Absences extends Controller{
 
 		for(Absence abs : absList){
 			try {
-				String type = abs.absenceFile.type();			
+			
 				FileInputStream fis = new FileInputStream(abs.absenceFile.getFile());
 				
 				zos.putNextEntry(new ZipEntry(abs.absenceFile.getFile().getName()));

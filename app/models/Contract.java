@@ -30,6 +30,8 @@ import play.data.validation.Required;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import dao.MealTicketDao;
+
 
 /**
  * 
@@ -410,7 +412,8 @@ public class Contract extends BaseModel {
 	}
 	
 	/**
-	 * Ritorna l'intervallo valido ePAS per il contratto. (scarto la parte precedente a source contract se definita)
+	 * Ritorna l'intervallo valido ePAS per il contratto. 
+	 * (scarto la parte precedente a source contract se definita)
 	 * @return
 	 */
 	public DateInterval getContractDatabaseDateInterval() {
@@ -427,6 +430,29 @@ public class Contract extends BaseModel {
 		
 		return this.getContractDateInterval();
 		
+	}
+	
+	/**
+	 * Ritorna l'intervallo valido ePAS per il contratto riguardo la gestione dei buoni pasto.
+	 * (scarto la parte precedente a source se definita, e la parte precedente alla data inizio 
+	 * utilizzo per la sede della persona).
+	 * @return null in caso non vi siano giorni coperti dalla gestione dei buoni pasto.
+	 */
+	public DateInterval getContractMealTicketDateInterval() {
+		
+		DateInterval contractDataBaseInterval = this.getContractDatabaseDateInterval();
+		
+		LocalDate officeStartDate = MealTicketDao.getMealTicketStartDate(this.person.office);
+		if(officeStartDate == null)
+			return null;
+		
+		if(officeStartDate.isBefore(contractDataBaseInterval.getBegin()))
+			return contractDataBaseInterval;
+		
+		if(DateUtility.isDateIntoInterval(officeStartDate, contractDataBaseInterval))
+			return new DateInterval(officeStartDate, contractDataBaseInterval.getEnd());
+		
+		return null;
 	}
 
 	
