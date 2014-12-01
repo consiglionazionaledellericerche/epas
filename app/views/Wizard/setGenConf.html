@@ -9,7 +9,7 @@
     <div class='form-group col-sm-4 col-sm-offset-4 #{if field.error}has-error#{/if}'>
       <label class="control-label" for="${field.id}">Data del Patrono</label>
       <div class="input-group">
-        <input datepicker class="form-control" placeholder="dd/mm" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
+        <input datepicker-month class="form-control" placeholder="dd/mm" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
         <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
       </div>
       #{if field.error}<span class="help-block">${field.error}</span>#{/if}
@@ -50,16 +50,3 @@
   <button type="submit" class="btn btn-primary col-xs-4 col-xs-offset-4 col-sm-2 col-sm-offset-5">Invia</button>
 </fieldset>
 #{/form}
-
-#{set 'moreScripts'}
-<script type="text/javascript">
-$('input[datepicker]').datepicker({
-  format: "dd/mm",
-  startDate: "1/1",
-  endDate: "31/12",
-  language: 'it',
-  autoclose: true,
-  todayHighlight: true
-});
-</script>
-#{/set}
