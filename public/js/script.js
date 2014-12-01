@@ -208,6 +208,24 @@ function Change2(){
 	absenceCode.value = tuttiCodici.value;
 }
 
+$('input[datepicker]').datepicker({
+  format: "dd/mm/yyyy",
+  startView: 2,
+  todayBtn: "linked",
+  language: "it",
+  autoclose: true,
+  todayHighlight: true
+});
+
+$('input[datepicker-month]').datepicker({
+  format: "dd/mm",
+  startDate: "1/1",
+  endDate: "31/12",
+  language: 'it',
+  autoclose: true,
+  todayHighlight: true
+});
+
 
 
 
