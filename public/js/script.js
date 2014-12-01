@@ -163,6 +163,10 @@ $(function($){
 	        $('#flash-success').hide();
 		});	
 	    
+	    this.find('.auto-submit').change(function() {
+	    	$(this).submit();
+	    });
+	    
 	    /*Data tables */
 	    // Setup - add a text input to each footer cell
 	    this.find('#example tfoot th').each( function () {
@@ -180,6 +184,8 @@ $(function($){
 	                .draw();
 	        } );
 	    } );
+	    
+	    
 
 	    
 	}	/* fine initepas() */

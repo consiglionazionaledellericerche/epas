@@ -26,7 +26,6 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import manager.recaps.PersonResidualMonthRecap;
-import models.MealTicket.BlockMealTicket;
 import models.Stamping.WayType;
 import models.base.BaseModel;
 import models.exports.StampingFromClient;
@@ -45,7 +44,6 @@ import play.mvc.With;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
 
 import controllers.Secure;
 import controllers.Security;
@@ -917,42 +915,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 		return cd;
 	}
 	
-	@Deprecated
-	public List<BlockMealTicket> getBlockMealTicket() {
-		
-		Contract contract = this.getCurrentContract();
-		
-		List<MealTicket> mealTicketList = MealTicket.find("Select mt from MealTicket mt "
-				+ "where mt.contract = ? order by mt.block",
-				contract).fetch();
-		
-		List<BlockMealTicket> blockList = Lists.newArrayList();
-		
-		if(mealTicketList.size() == 0)
-			return blockList;
-		
-		BlockMealTicket currentBlock = null;
-		
-		for(MealTicket mealTicket : mealTicketList) {
-			
-			if(currentBlock == null) {
-				currentBlock = new BlockMealTicket(mealTicket.block);
-				currentBlock.mealTickets.add(mealTicket);
-				continue;
-			}	
-				
-			if( !currentBlock.codeBlock.equals(mealTicket.block) ) {
-				blockList.add(currentBlock);
-				currentBlock = new BlockMealTicket(mealTicket.block);
-			}
-			
-			currentBlock.mealTickets.add(mealTicket);
-		}
-		
-		blockList.add(currentBlock);
-		
-		return blockList;
-	}
+
 	
 	/**
 	 * 
