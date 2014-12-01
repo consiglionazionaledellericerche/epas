@@ -328,5 +328,28 @@ public class Configurations extends Controller{
 		}	
 
 	}
+	
+	
+	public static void insertNewConfYear(Long officeId){
+		rules.checkIfPermitted(Security.getUser().get().person.office);
+		Office office = null;
+		List<Office> offices = Security.getOfficeAllowed();
+		if(officeId != null){
+			office = Office.findById(officeId);
+		}
+		else{
+			office = Security.getUser().get().person.office;
+		}
+		int year = LocalDate.now().getYear()+1;
+		ConfYear dayExpiryVacationPastYear = new ConfYear();
+		ConfYear monthExpiryVacationPastYear = new ConfYear();
+		ConfYear monthExpireRecoveryDaysOneThree = new ConfYear();
+		ConfYear monthExpireRecoveryDaysFourNine = new ConfYear();
+		ConfYear maxRecoveryDaysOneThree = new ConfYear();
+		ConfYear maxRecoveryDaysFourNine = new ConfYear();
+		ConfYear hourMaxToCalculateWorkTime = new ConfYear(); 
+		render(year, office, dayExpiryVacationPastYear, monthExpiryVacationPastYear, monthExpireRecoveryDaysOneThree,
+				monthExpireRecoveryDaysFourNine,maxRecoveryDaysOneThree, maxRecoveryDaysFourNine, hourMaxToCalculateWorkTime);
+	}
 
 }
