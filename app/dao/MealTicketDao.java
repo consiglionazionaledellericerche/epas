@@ -120,7 +120,7 @@ public class MealTicketDao {
 	}
 	
 	/**
-	 * 
+	 * La lista di buoni pasto inseriti nei blocchi passati per argomento.
 	 * @param codeBlockIds
 	 * @return
 	 */
