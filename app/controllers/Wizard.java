@@ -17,6 +17,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Collections2;
@@ -74,6 +75,7 @@ public class Wizard extends Controller {
 	
 	@NoCheck
 	public static void wizard(int step) {
+		Preconditions.checkNotNull(step);
     	    	
     	List<WizardStep> steps = Cache.get(STEPS_KEY, List.class);
     	Properties properties = Cache.get(PROPERTIES_KEY, Properties.class);
@@ -95,30 +97,26 @@ public class Wizard extends Controller {
     		Cache.safeAdd(PROPERTIES_KEY, properties,"10mn");
     	}
     	
-    	if(step>0 && step<=steps.size()){
+    	int stepsCompleted = Collections2.filter(steps, 
+	    		new Predicate<WizardStep>() {
+	    	    @Override
+	    	    public boolean apply(WizardStep p) {
+	    	        return p.completed;
+	    	    }
+	    	}).size();
+    	
+    	percent = stepsCompleted*(100/steps.size());
+    	
+    	if (step < 0 | step > steps.size()){
+    		step = stepsCompleted;
+    	}
     		
-    		int stepsCompleted = Collections2.filter(steps, 
-    	    		new Predicate<WizardStep>() {
-    	    	    @Override
-    	    	    public boolean apply(WizardStep p) {
-    	    	        return p.completed;
-    	    	    }
-    	    	}).size();
-    		
-    		percent = stepsCompleted*(100/steps.size());
-    		
-    		if(!steps.get(step-1).completed){
+    	else if(step != 0 && !steps.get(step-1).completed){
     			step = stepsCompleted;
         	}
-    	}
-    	
-    	else {
-    		step = 0;
-    	}
     	
     	WizardStep currentStep = steps.get(step);
-    	
-    	
+
     	if(properties != null && step > 0){
     	try{
     		properties.store(new FileOutputStream("conf/properties.conf"), "Wizard values file");
@@ -238,14 +236,10 @@ public class Wizard extends Controller {
     	if(steps != null){
 
     		properties.setProperty("date_of_patron",date_of_patron);
-//    		properties.setProperty("web_stamping_allowed",web_stamping_allowed ? "SI" : "NO");
     		properties.setProperty("lunch_pause_start",lunch_pause_start);
     		properties.setProperty("lunch_pause_end",lunch_pause_end);
-    
-    		if(email_to_contact!=null){
-    			properties.setProperty("email_to_contact",email_to_contact);
-    		}
-    		
+    		properties.setProperty("email_to_contact",email_to_contact);
+
     		if(!steps.get(stepIndex).completed){
     			steps.get(stepIndex).complete();
             	Logger.info("Completato lo step %s del wizard", stepIndex);
@@ -260,16 +254,21 @@ public class Wizard extends Controller {
 	
 	
     /**
-     * STEP 3 Impostazioni Generali relativi alla Sede creata
+     * STEP 4 Creazione Profilo per l'amministratore
      */
 	
 	@NoCheck
     public static void administrationRole(
     		int stepIndex,
-    		@Required String date_of_patron,  		
-    		@Required @CheckWith (StringIsTime.class) String lunch_pause_start, 
-    		@Required @CheckWith (StringIsTime.class) String lunch_pause_end,
-    		@Email String email_to_contact
+    		@Required String admin_surname,
+    		@Required String admin_name,
+    		@Required String admin_qualification,
+    		String admin_badge_number,
+    		@Required String admin_registration_number,
+    		String admin_birthday,
+    		@Email String admin_email,
+    		@Required String admin_contract_begin,
+    		String admin_contract_end
     		){
 		
     	if (validation.hasErrors()){
@@ -283,14 +282,16 @@ public class Wizard extends Controller {
     	
     	if(steps != null){
 
-    		properties.setProperty("date_of_patron",date_of_patron);
-//    		properties.setProperty("web_stamping_allowed",web_stamping_allowed ? "SI" : "NO");
-    		properties.setProperty("lunch_pause_start",lunch_pause_start);
-    		properties.setProperty("lunch_pause_end",lunch_pause_end);
-    
-    		if(email_to_contact!=null){
-    			properties.setProperty("email_to_contact",email_to_contact);
-    		}
+    		properties.setProperty("admin_surname",admin_surname);
+    		properties.setProperty("admin_name",admin_name);
+    		properties.setProperty("admin_qualification",admin_qualification);
+    		properties.setProperty("admin_badge_number",admin_badge_number);
+    		properties.setProperty("admin_registration_number",admin_registration_number);
+    		properties.setProperty("admin_birthday",admin_birthday);
+    		properties.setProperty("admin_email",admin_email);
+    		properties.setProperty("admin_contract_begin",admin_contract_begin);
+    		properties.setProperty("admin_contract_end",admin_contract_end);
+
     		
     		if(!steps.get(stepIndex).completed){
     			steps.get(stepIndex).complete();
