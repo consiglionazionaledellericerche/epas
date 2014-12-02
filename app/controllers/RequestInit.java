@@ -175,6 +175,7 @@ public class RequestInit extends Controller {
 			return DateUtility.getName(month);
 		}
 		
+	
 		public boolean checkTemplate(String profile) {
 			
 			return false;

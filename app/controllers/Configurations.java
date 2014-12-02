@@ -339,12 +339,6 @@ public class Configurations extends Controller{
 	public static void insertNewConfYear(Long officeId){
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		
-		List<ConfYear> confList = ConfYearDao.getConfByYear(Optional.fromNullable(Security.getUser().get().person.office), LocalDate.now().getYear()+1);
-		
-		String message = "";
-		if(confList.size() > 0){
-			message="Attenzione! attualmente il database contiene già una configurazione per l'anno richiesto. Continuando si sovrascriverà tale configurazione.";
-		}
 		Office office = null;
 //		List<Office> offices = Security.getOfficeAllowed();
 		if(officeId != null){
@@ -354,11 +348,7 @@ public class Configurations extends Controller{
 			office = Security.getUser().get().person.office;
 		}
 		int year = LocalDate.now().getYear()+1;
-		List<String> mesi = Lists.newArrayList();
-		mesi.add("Nessuno");
-		for(int i = 1; i < 13; i++){
-			mesi.add(DateUtility.getName(i));
-		}
+		List<ConfYear> confList = ConfYearDao.getConfByYear(Optional.fromNullable(Security.getUser().get().person.office), year);
 		ConfYear dayExpiryVacationPastYear = new ConfYear();
 		ConfYear monthExpiryVacationPastYear = new ConfYear();
 		ConfYear monthExpireRecoveryDaysOneThree = new ConfYear();
@@ -366,6 +356,25 @@ public class Configurations extends Controller{
 		ConfYear maxRecoveryDaysOneThree = new ConfYear();
 		ConfYear maxRecoveryDaysFourNine = new ConfYear();
 		ConfYear hourMaxToCalculateWorkTime = new ConfYear(); 
+		String message = "";
+		if(confList.size() > 0){
+			message="Attenzione! attualmente il database contiene già una configurazione per l'anno richiesto. Continuando si sovrascriverà tale configurazione.";
+			dayExpiryVacationPastYear = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, ConfigurationFields.DayExpiryVacationPastYear.description);
+			monthExpiryVacationPastYear = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, ConfigurationFields.MonthExpiryVacationPastYear.description);
+			monthExpireRecoveryDaysOneThree = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, ConfigurationFields.MonthExpireRecoveryDays13.description);
+			monthExpireRecoveryDaysFourNine = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, ConfigurationFields.MonthExpireRecoveryDays49.description);
+			maxRecoveryDaysOneThree = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, ConfigurationFields.MaxRecoveryDays13.description);
+			maxRecoveryDaysFourNine = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, ConfigurationFields.MaxRecoveryDays49.description);
+			hourMaxToCalculateWorkTime = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, ConfigurationFields.HourMaxToCalculateWorkTime.description);
+		}
+		
+		
+		List<String> mesi = Lists.newArrayList();
+		mesi.add("Nessuno");
+		for(int i = 1; i < 13; i++){
+			mesi.add(DateUtility.getName(i));
+		}
+		
 		render(year, office, dayExpiryVacationPastYear, monthExpiryVacationPastYear, monthExpireRecoveryDaysOneThree,
 				monthExpireRecoveryDaysFourNine,maxRecoveryDaysOneThree, maxRecoveryDaysFourNine, hourMaxToCalculateWorkTime, mesi, message);
 	}
