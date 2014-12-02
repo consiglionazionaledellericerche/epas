@@ -8,6 +8,10 @@ import models.Office;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
+import com.google.common.base.Optional;
 
 import controllers.Security;
 
@@ -323,6 +327,20 @@ public class DateUtility {
 		int hour = time.getHourOfDay();
 		return String.format("%02d:%02d", hour, min);    
 	}
+	
+
+	/**
+	 * @param date
+	 * @param pattern : default dd/MM
+	 * @return Effettua il parsing di una Stringa che contiene solo giorno e Mese
+	 * 
+	 */
+	public static LocalDate dayMonth(String date,Optional<String> pattern){
+		
+		DateTimeFormatter dtf = DateTimeFormat.forPattern(pattern.isPresent() ? pattern.get() : "dd/MM");
+
+		return LocalDate.parse(date,dtf);
+	};
 	
 	
 }
