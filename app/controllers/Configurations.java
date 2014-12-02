@@ -17,6 +17,7 @@ import org.joda.time.LocalDate;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
+import dao.ConfYearDao;
 import play.cache.Cache;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -337,7 +338,9 @@ public class Configurations extends Controller{
 	
 	public static void insertNewConfYear(Long officeId){
 		rules.checkIfPermitted(Security.getUser().get().person.office);
-		List<ConfYear> confList = ConfYear.find("Select conf from ConfYear conf where conf.year = ? and conf.office = ?", LocalDate.now().getYear()+1, Security.getUser().get().person.office).fetch();
+		
+		List<ConfYear> confList = ConfYearDao.getConfByYear(Optional.fromNullable(Security.getUser().get().person.office), LocalDate.now().getYear()+1);
+		
 		String message = "";
 		if(confList.size() > 0){
 			message="Attenzione! attualmente il database contiene già una configurazione per l'anno richiesto. Continuando si sovrascriverà tale configurazione.";
@@ -376,7 +379,8 @@ public class Configurations extends Controller{
 			if(request.isAjax()) error("Parametri incompleti");
 			Configurations.showConfYear(Security.getUser().get().person.office.id);
 		}
-		List<ConfYear> confList = ConfYear.find("Select conf from ConfYear conf where conf.year = ? and conf.office = ?", year, Security.getUser().get().person.office).fetch();
+		
+		List<ConfYear> confList = ConfYearDao.getConfByYear(Optional.fromNullable(Security.getUser().get().person.office), year);
 		if(confList.size() > 0){
 		
 			for(ConfYear conf : confList){
