@@ -162,23 +162,16 @@
   
   </section>
 
- <a data-toggle="modal" href="@{Configurations.insertNewConfYear(officeId)}" data-target="#myModal3">
+ <a data-toggle="modal" href="@{Configurations.insertNewConfYear(officeId)}" data-modal=".my-modal">
  Inserisci configurazione ${nextYear}
  </a>
 
 
 </div>
 
-<div class="modal fade" id="myModal3" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-center">
-    
-    <div class="modal-content">
-             
-    </div><!-- /.modal-content -->
-           
-    
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
+
+#{include '_myModal.html' /}
+
 
 
 
