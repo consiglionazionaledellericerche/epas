@@ -5,6 +5,25 @@ $(function($){
 	
 	$.fn.initepas = function() {
 		
+		this.find('input[datepicker-year]').datepicker({
+			  format: "dd/mm/yyyy",
+			  startView: 2,
+			  todayBtn: "linked",
+			  language: "it",
+			  autoclose: true,
+			  todayHighlight: true
+			});
+
+		this.find('input[datepicker-month]').datepicker({
+			  format: "dd/mm",
+			  startDate: "1/1",
+			  endDate: "31/12",
+			  language: 'it',
+			  autoclose: true,
+			  todayHighlight: true
+			});
+
+		
 		this.find('data-tooltip').tooltip();
 		
 		this.find('.my-modal').on('hidden.bs.modal', function(){
@@ -167,26 +186,12 @@ $(function($){
 	    	$(this).submit();
 	    });
 	    
-	    /*Data tables */
-	    // Setup - add a text input to each footer cell
-	    this.find('#example tfoot th').each( function () {
-	        var title = $('#example thead th').eq( $(this).index() ).text();
-	        $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
-	    } );
-	    // DataTable
-	    var table = $('#example').DataTable();
-	    // Apply the search
-	    table.columns().eq( 0 ).each( function ( colIdx ) {
-	        $( 'input', table.column( colIdx ).footer() ).on( 'keyup change', function () {
-	            table
-	                .column( colIdx )
-	                .search( this.value )
-	                .draw();
-	        } );
-	    } );
-	    
-	    
-
+	    this.find( '.delete-confirmed' ).click(function() {
+	    	var $delete = $(this).find( '.delete' );
+	    	var $deleteFirst = $(this).find( '.delete-first' );
+	    	$deleteFirst.hide();
+	    	$delete.show( "fast" );
+	    });
 	    
 	}	/* fine initepas() */
 	
@@ -208,23 +213,6 @@ function Change2(){
 	absenceCode.value = tuttiCodici.value;
 }
 
-$('input[datepicker]').datepicker({
-  format: "dd/mm/yyyy",
-  startView: 2,
-  todayBtn: "linked",
-  language: "it",
-  autoclose: true,
-  todayHighlight: true
-});
-
-$('input[datepicker-month]').datepicker({
-  format: "dd/mm",
-  startDate: "1/1",
-  endDate: "31/12",
-  language: 'it',
-  autoclose: true,
-  todayHighlight: true
-});
 
 
 
