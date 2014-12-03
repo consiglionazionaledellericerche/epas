@@ -458,11 +458,11 @@ var Search = {
       // search finished, update title and status message
       else {
         Search.stopPulse();
-        Search.title.text(_('Search Results'));
+        Search.title.text(_('Risultati ricerca'));
         if (!resultCount)
-          Search.status.text(_('Your search did not match any documents. Please make sure that all words are spelled correctly and that you\'ve selected enough categories.'));
+          Search.status.text(_('La ricerca non ha dato alcun risultato. Si prega di assicurarsi che tutte le parole siano scritte correttamente.'));
         else
-            Search.status.text(_('Search finished, found %s page(s) matching the search query.').replace('%s', resultCount));
+            Search.status.text(_('Ricerca terminata, trovate %s pagine corrispondenti ai criteri di ricerca.').replace('%s', resultCount));
         Search.status.fadeIn(500);
       }
     }
