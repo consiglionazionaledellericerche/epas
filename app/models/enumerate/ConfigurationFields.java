@@ -12,6 +12,7 @@ public enum ConfigurationFields {
 	// ConfGeneral
 	InitUseProgram("init_use_program"),
 	InstituteName("institute_name"),
+	JobsEmailAlias("email_from_jobs"),
 	EmailToContact("email_to_contact"),
 	SeatCode("seat_code"),
 	UrlToPresence("url_to_presence"),
@@ -25,6 +26,7 @@ public enum ConfigurationFields {
 	MealTimeStartMinute("meal_time_start_minute"),
 	MealTimeEndHour("meal_time_end_hour"),
 	MealTimeEndMinute("meal_time_end_minute"),
+	DateStartMealTicket("date_start_meal_ticket"),
 	// ConfYear
 	MonthExpiryVacationPastYear("month_expiry_vacation_past_year"),
 	DayExpiryVacationPastYear("day_expiry_vacation_past_year"),
@@ -45,6 +47,8 @@ public enum ConfigurationFields {
 			return ConfigurationFields.InitUseProgram;
 		if(description.equals("institute_name"))
 			return ConfigurationFields.InstituteName;
+		if(description.equals("email_from_jobs"))
+			return ConfigurationFields.JobsEmailAlias;
 		if(description.equals("email_to_contact"))
 			return ConfigurationFields.EmailToContact;
 		if(description.equals("seat_code"))
@@ -63,6 +67,10 @@ public enum ConfigurationFields {
 			return ConfigurationFields.DayOfPatron;
 		if(description.equals("web_stamping_allowed"))
 			return ConfigurationFields.WebStampingAllowed;
+		if(description.equals("date_start_meal_ticket"))
+			return ConfigurationFields.DateStartMealTicket;
+		
+		
 		if(description.equals("meal_time_start_hour"))
 			return ConfigurationFields.MealTimeStartHour;
 		if(description.equals("meal_time_start_minute"))
@@ -71,6 +79,8 @@ public enum ConfigurationFields {
 			return ConfigurationFields.MealTimeEndHour;
 		if(description.equals("meal_time_end_minute"))
 			return ConfigurationFields.MealTimeEndMinute;
+		
+		
 		if(description.equals("month_expiry_vacation_past_year"))
 			return ConfigurationFields.MonthExpiryVacationPastYear;
 		if(description.equals("day_expiry_vacation_past_year"))
@@ -105,7 +115,8 @@ public enum ConfigurationFields {
 		   MealTimeStartMinute.description,
 		   MealTimeEndHour.description,
 		   MealTimeEndMinute.description,
-		   WebStampingAllowed.description);
+		   WebStampingAllowed.description,
+		   DateStartMealTicket.description);
 	}
 	
 	

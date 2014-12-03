@@ -73,6 +73,7 @@ public class AttestatiClient {
 
 	}
 	
+	@SuppressWarnings("serial")
 	public final static class LoginResponse implements Serializable {
 		private String usernameCnr;
 		private Integer year;

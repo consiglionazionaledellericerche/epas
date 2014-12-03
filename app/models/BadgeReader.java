@@ -27,6 +27,8 @@ import net.sf.oval.constraint.NotNull;
 @Audited
 public class BadgeReader extends BaseModel {
 
+	private static final long serialVersionUID = -3508739971079270193L;
+
 	@NotNull
 	public String code;
 	

@@ -32,6 +32,8 @@ public class QMealTicket extends EntityPathBase<MealTicket> {
 
     public final StringPath code = createString("code");
 
+    public final QContract contract;
+
     public final DatePath<org.joda.time.LocalDate> date = createDate("date", org.joda.time.LocalDate.class);
 
     //inherited
@@ -46,8 +48,6 @@ public class QMealTicket extends EntityPathBase<MealTicket> {
 
     //inherited
     public final BooleanPath persistent = _super.persistent;
-
-    public final QPerson person;
 
     public final NumberPath<Integer> quarter = createNumber("quarter", Integer.class);
 
@@ -72,7 +72,7 @@ public class QMealTicket extends EntityPathBase<MealTicket> {
     public QMealTicket(Class<? extends MealTicket> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
         this.admin = inits.isInitialized("admin") ? new QPerson(forProperty("admin"), inits.get("admin")) : null;
-        this.person = inits.isInitialized("person") ? new QPerson(forProperty("person"), inits.get("person")) : null;
+        this.contract = inits.isInitialized("contract") ? new QContract(forProperty("contract"), inits.get("contract")) : null;
     }
 
 }

@@ -162,10 +162,15 @@
   
   </section>
 
- <a href="#">Inserisci configurazione ${nextYear}</a>
+ <a data-toggle="modal" href="@{Configurations.insertNewConfYear(officeId)}" data-modal=".my-modal">
+ Inserisci configurazione ${nextYear}
+ </a>
 
 
 </div>
+
+
+#{include '_myModal.html' /}
 
 
 

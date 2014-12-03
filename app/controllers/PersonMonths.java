@@ -2,13 +2,14 @@ package controllers;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.validation.Valid;
 
+import manager.recaps.PersonResidualYearRecap;
 import models.Contract;
 import models.Person;
 import models.PersonMonthRecap;
 import models.User;
-import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
 
 import org.joda.time.LocalDate;
 
@@ -35,7 +36,8 @@ public class PersonMonths extends Controller{
 		}
 		
 		Contract contract = user.person.getCurrentContract();
-		CalcoloSituazioneAnnualePersona csap = new CalcoloSituazioneAnnualePersona(contract, year, null);
+		PersonResidualYearRecap csap = 
+				PersonResidualYearRecap.factory(contract, year, null);
 		render(csap, user.person, year);	
 	}
 

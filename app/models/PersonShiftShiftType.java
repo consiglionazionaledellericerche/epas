@@ -25,6 +25,8 @@ import play.data.validation.Required;
 @Table(name = "person_shift_shift_type")
 public class PersonShiftShiftType extends BaseModel {
 
+	private static final long serialVersionUID = -4476838239881674080L;
+
 	@Required
 	@ManyToOne
 	@JoinColumn(name="personshifts_id")

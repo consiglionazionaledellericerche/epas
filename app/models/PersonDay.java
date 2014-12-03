@@ -10,7 +10,6 @@ import it.cnr.iit.epas.PersonUtility;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -53,6 +52,7 @@ import play.db.jpa.JPA;
 @Table(name="person_days", uniqueConstraints = { @UniqueConstraint(columnNames={ "person_id", "date"}) })
 public class PersonDay extends BaseModel {
 
+	private static final long serialVersionUID = -5013385113251848310L;
 
 	@Required
 	@ManyToOne(optional = false)
@@ -111,6 +111,9 @@ public class PersonDay extends BaseModel {
 	
 	@Transient
 	private Boolean isFixedTimeAtWorkk = null;
+	
+	@Transient
+	public MealTicket mealTicketAssigned = null;
 	
 	
 	public PersonDay(Person person, LocalDate date, int timeAtWork, int difference, int progressive) {

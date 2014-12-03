@@ -32,6 +32,8 @@ import play.data.validation.Unique;
 @Table(name="person_reperibility")
 public class PersonReperibility extends BaseModel {
 
+	private static final long serialVersionUID = 7543768807724174894L;
+
 	@Unique
 	@Required
 	@OneToOne(fetch=FetchType.LAZY)

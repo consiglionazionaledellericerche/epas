@@ -8,6 +8,10 @@ import models.Office;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
+import com.google.common.base.Optional;
 
 import controllers.Security;
 
@@ -248,6 +252,43 @@ public class DateUtility {
 		return date.monthOfYear().getAsText();
 	}
 	
+	/**
+	 * 
+	 * @param month
+	 * @return il numero corrispondente al mese passato come parametro
+	 */
+	public static int fromStringToIntMonth(String month){
+		if(month.equals("Gennaio"))
+			return 1;
+		if(month.equals("Febbraio"))
+			return 2;
+		if(month.equals("Marzo"))
+			return 3;
+		if(month.equals("Aprile"))
+			return 4;
+		if(month.equals("Maggio"))
+			return 5;
+		if(month.equals("Giugno"))
+			return 6;
+		if(month.equals("Luglio"))
+			return 7;
+		if(month.equals("Agosto"))
+			return 8;
+		if(month.equals("Settembre"))
+			return 9;
+		if(month.equals("Ottobre"))
+			return 10;
+		if(month.equals("Novembre"))
+			return 11;
+		if(month.equals("Dicembre"))
+			return 12;
+		else
+			return 0;
+		
+	}
+	
+	
+	
 	public static String getName(int mese)
 	{
 		if(mese==1)
@@ -323,6 +364,20 @@ public class DateUtility {
 		int hour = time.getHourOfDay();
 		return String.format("%02d:%02d", hour, min);    
 	}
+	
+
+	/**
+	 * @param date
+	 * @param pattern : default dd/MM
+	 * @return Effettua il parsing di una Stringa che contiene solo giorno e Mese
+	 * 
+	 */
+	public static LocalDate dayMonth(String date,Optional<String> pattern){
+		
+		DateTimeFormatter dtf = DateTimeFormat.forPattern(pattern.isPresent() ? pattern.get() : "dd/MM");
+
+		return LocalDate.parse(date,dtf);
+	};
 	
 	
 }

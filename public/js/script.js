@@ -5,6 +5,25 @@ $(function($){
 	
 	$.fn.initepas = function() {
 		
+		this.find('input[datepicker-year]').datepicker({
+			  format: "dd/mm/yyyy",
+			  startView: 2,
+			  todayBtn: "linked",
+			  language: "it",
+			  autoclose: true,
+			  todayHighlight: true
+			});
+
+		this.find('input[datepicker-month]').datepicker({
+			  format: "dd/mm",
+			  startDate: "1/1",
+			  endDate: "31/12",
+			  language: 'it',
+			  autoclose: true,
+			  todayHighlight: true
+			});
+
+		
 		this.find('data-tooltip').tooltip();
 		
 		this.find('.my-modal').on('hidden.bs.modal', function(){
@@ -85,7 +104,6 @@ $(function($){
 		    $(this).data('modal', null);
 		});
 
-
 		this.find('#select1').editable(); 
 		this.find('#select2').editable(); 
 		this.find('#select3').editable(); 
@@ -95,10 +113,13 @@ $(function($){
 		this.find('#simpleText1').editable(); 
 		this.find('#simpleText2').editable();
 		this.find('#simpleText3').editable(); 
+		
 
 		this.find('#textComments1').editable({
 		    showbuttons: 'bottom'
 		});
+		
+		this.find('#dob1').editable();
 		
 		this.find('form[data-reload-no-ajax] input[type=text]').on('input', function(e) {
 			var $form = $(this).closest("form");
@@ -152,18 +173,31 @@ $(function($){
 			});
 			e.preventDefault();
 		});
+	    
+	    this.find('#buttonError').click(function() {
+	    	$('#flash-error').hide();
+		});	
 		
+	    this.find('#buttonSuccess').click(function() {
+	        $('#flash-success').hide();
+		});	
+	    
+	    this.find('.auto-submit').change(function() {
+	    	$(this).submit();
+	    });
+	    
+	    this.find( '.delete-confirmed' ).click(function() {
+	    	var $delete = $(this).find( '.delete' );
+	    	var $deleteFirst = $(this).find( '.delete-first' );
+	    	$deleteFirst.hide();
+	    	$delete.show( "fast" );
+	    });
+	    
 	}	/* fine initepas() */
 	
 	$('body').initepas();
 	
-	$('#buttonError').click(function() {
-        $('#flash-error').hide();
-	});	
-	
-	$('#buttonSuccess').click(function() {
-        $('#flash-success').hide();
-	});	
+
 
 	
 });	/* fine on document load */
@@ -178,6 +212,7 @@ function Change2(){
 	var absenceCode = document.getElementById("absenceCode");
 	absenceCode.value = tuttiCodici.value;
 }
+
 
 
 

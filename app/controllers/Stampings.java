@@ -11,6 +11,8 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import manager.recaps.PersonResidualMonthRecap;
+import manager.recaps.PersonResidualYearRecap;
 import models.AbsenceType;
 import models.Contract;
 import models.Office;
@@ -20,8 +22,6 @@ import models.PersonTags;
 import models.StampModificationType;
 import models.StampType;
 import models.Stamping;
-import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
-import models.personalMonthSituation.Mese;
 import models.rendering.PersonStampingDayRecap;
 import models.rendering.PersonTroublesInMonthRecap;
 
@@ -41,7 +41,6 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.ImmutableTable.Builder;
 import com.google.common.collect.Table;
 
-import controllers.MealTickets.TemporaryPersonMealTicketRecap;
 import dao.PersonDao;
 
 
@@ -108,21 +107,20 @@ public class Stampings extends Controller {
 		Map<AbsenceType,Integer> absenceCodeMap = PersonUtility.getAllAbsenceCodeInMonth(totalPersonDays);
 
 		List<Contract> monthContracts = person.getMonthContracts(month, year);
-		List<Mese> contractMonths = new ArrayList<Mese>();
+		List<PersonResidualMonthRecap> contractMonths = new ArrayList<PersonResidualMonthRecap>();
 		for(Contract contract : monthContracts)
 		{
-			CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, year, null);
-			if(c.getMese(year, month)!=null)
-				contractMonths.add(c.getMese(year, month));
+			PersonResidualYearRecap c = 
+					PersonResidualYearRecap.factory(contract, year, null);
+			if(c.getMese(month)!=null)
+				contractMonths.add(c.getMese(month));
 		}
 		
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);
 		
-		TemporaryPersonMealTicketRecap mealTicketRecap = new TemporaryPersonMealTicketRecap(person);
-			
 		//Render
 		render(person, year, month, numberOfInOut, numberOfCompensatoryRestUntilToday,numberOfMealTicketToUse,numberOfMealTicketToRender,
-				daysRecap, stampModificationTypeList, stampTypeList, basedWorkingDays, absenceCodeMap, contractMonths, month_capitalized, mealTicketRecap) ;
+				daysRecap, stampModificationTypeList, stampTypeList, basedWorkingDays, absenceCodeMap, contractMonths, month_capitalized) ;
 
 	}
 
@@ -197,20 +195,18 @@ public class Stampings extends Controller {
 		Map<AbsenceType,Integer> absenceCodeMap = PersonUtility.getAllAbsenceCodeInMonth(totalPersonDays);				//1 sql
 
 		List<Contract> monthContracts = person.getMonthContracts(month, year);
-		List<Mese> contractMonths = new ArrayList<Mese>();
+		List<PersonResidualMonthRecap> contractMonths = new ArrayList<PersonResidualMonthRecap>();
 		for(Contract contract : monthContracts)
 		{
-			CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, year, null);
-			if(c.getMese(year, month)!=null)
-				contractMonths.add(c.getMese(year, month));
+			PersonResidualYearRecap c = 
+					PersonResidualYearRecap.factory(contract, year, null);
+			if(c.getMese(month)!=null)
+				contractMonths.add(c.getMese(month));
 		}
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);
 
-		TemporaryPersonMealTicketRecap mealTicketRecap = new TemporaryPersonMealTicketRecap(person);
-		
-		//Render	//0 sql
 		render(person, year, month, numberOfInOut, numberOfCompensatoryRestUntilToday,numberOfMealTicketToUse,numberOfMealTicketToRender,
-				daysRecap, stampModificationTypeList, stampTypeList, basedWorkingDays, absenceCodeMap, contractMonths, month_capitalized, mealTicketRecap);
+				daysRecap, stampModificationTypeList, stampTypeList, basedWorkingDays, absenceCodeMap, contractMonths, month_capitalized);
 
 		 
 	}

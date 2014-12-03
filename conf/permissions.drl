@@ -99,6 +99,7 @@ when
      	"Absences.updateCode",
      	"Absences.saveAbsenceCode",
      	"Absences.downloadAttachment",
+     	"Absences.zipAttachment",
      	
      	/*Competenze*/
      	"Competences.showCompetences",
@@ -136,6 +137,13 @@ when
      	"Absences.edit",
      	"Absences.update",
      	
+     	/*Gestione Buoni Pasto*/
+     	"MealTickets.recapMealTickets",
+     	"MealTickets.quickBlocksInsert",
+     	"MealTickets.mealTicketsLegacy",
+     	"MealTickets.submitPersonMealTicket",
+        "MealTickets.deletePersonMealTicket",
+        
      	/*Stampa cartellino*/
      	"PrintTags.listPersonForPrintTags",
      	"PrintTags.showTag",
@@ -150,6 +158,8 @@ when
      	"Charts.processLastYearAbsences",
      	"Charts.exportHourAndOvertime",
      	"Charts.export",
+     	"Charts.exportDataSituation",
+     	"Charts.exportFinalSituation",
      	
      	
      	/*Riepilogo mensile*/
@@ -169,12 +179,6 @@ when
         "UploadSituation.showProblems",
         "UploadSituation.showCertificatedData",
         
-        /*Gestione buoni pasto*/
-        "MealTickets.manageMealTickets",
-        "MealTickets.submitPersonMealTicket",
-        "MealTickets.showPersonBlockMealTicket",
-        "MealTickets.deletePersonMealTicket",
-        
         /*Orari di lavoro*/
      	"WorkingTimes.manageWorkingTime",
      	"WorkingTimes.showWorkingTimeType",
@@ -192,7 +196,9 @@ when
      	"Configurations.showConfGeneral",
      	"Configurations.saveConfGeneral",
      	"Configurations.showConfYear",
-     	"Configurations.saveConfYear"
+     	"Configurations.saveConfYear",
+     	"Configurations.insertNewConfYear",
+     	"Configurations.saveNewConfYear"
      	
      	), target == null, granted == false)
 // $u: User(person != null)
@@ -210,7 +216,7 @@ when
  $p: Permission(description == "viewPerson") from $uro.role.permissions
  $c: PermissionCheck(action in (
         "Persons.list",
-        "MealTickets.manageMealTickets"
+        "MealTickets.recapMealTickets"
         ), target == null, granted == false)
 then
  $c.grant();
@@ -225,7 +231,7 @@ when
        "Persons.edit",
        "Persons.showCurrentVacation",
        "Persons.showCurrentContractWorkingTimeType",
-       "MealTickets.showPersonBlockMealTicket"
+       "MealTickets.quickBlocksInsert"
        ), target == $o, granted == false)
 then
  $c.grant();
@@ -291,8 +297,9 @@ when
      	"Persons.updateSendEmail",
      	"WorkingTimes.executeChangeWorkingTimeTypeToAll",
      	"MealTickets.submitPersonMealTicket",
-        "MealTickets.deletePersonMealTicket"
-     	
+        "MealTickets.deletePersonMealTicket",
+        "MealTickets.mealTicketsLegacy"
+        
        ), target == $o, granted == false)
 then
  $c.grant();
@@ -332,6 +339,7 @@ when
         "YearlyAbsences.showPersonMonthlyAbsences",
         "Absences.manageAttachmentsPerPerson",
         "Absences.downloadAttachment",
+        "Absences.zipAttachment",
         "Absences.absenceInPeriod",
         "VacationsAdmin.vacationsLastYear",
         "VacationsAdmin.vacationsCurrentYear",
@@ -350,7 +358,9 @@ when
      	"Charts.overtimeOnPositiveResidualInYear",
      	"Charts.exportHourAndOvertime",
      	"Charts.export",
-     	"Charts.processLastYearAbsences"
+     	"Charts.processLastYearAbsences",
+     	"Charts.exportDataSituation",
+     	"Charts.exportFinalSituation"
        ), target == $o, granted == false)
 then
  $c.grant();
@@ -520,7 +530,9 @@ when
         "Offices.editSeat",
         "Offices.updateSeat",
         "Configurations.saveConfGeneral",
-        "Configurations.saveConfYear"
+        "Configurations.saveConfYear",
+        "Configurations.insertNewConfYear",
+        "Configurations.saveNewConfYear"
        ), target == $o, granted == false)
 then
  $c.grant();

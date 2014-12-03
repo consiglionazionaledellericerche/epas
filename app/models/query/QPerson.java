@@ -30,8 +30,6 @@ public class QPerson extends EntityPathBase<Person> {
 
     public final DatePath<org.joda.time.LocalDate> birthday = createDate("birthday", org.joda.time.LocalDate.class);
 
-    public final ListPath<models.MealTicket.BlockMealTicket, SimplePath<models.MealTicket.BlockMealTicket>> blockMealTicket = this.<models.MealTicket.BlockMealTicket, SimplePath<models.MealTicket.BlockMealTicket>>createList("blockMealTicket", models.MealTicket.BlockMealTicket.class, SimplePath.class, PathInits.DIRECT2);
-
     public final BooleanPath boatsAllowanceAvailable = createBoolean("boatsAllowanceAvailable");
 
     public final DateTimePath<java.util.Date> bornDate = createDateTime("bornDate", java.util.Date.class);
@@ -79,8 +77,6 @@ public class QPerson extends EntityPathBase<Person> {
     public final BooleanPath ionicRadianceRiskCom3Available = createBoolean("ionicRadianceRiskCom3Available");
 
     public final BooleanPath ionicRadianceRiskCom3AvailableBis = createBoolean("ionicRadianceRiskCom3AvailableBis");
-
-    public final ListPath<models.MealTicket, QMealTicket> mealTickets = this.<models.MealTicket, QMealTicket>createList("mealTickets", models.MealTicket.class, QMealTicket.class, PathInits.DIRECT2);
 
     public final ListPath<models.MealTicket, QMealTicket> mealTicketsAdmin = this.<models.MealTicket, QMealTicket>createList("mealTicketsAdmin", models.MealTicket.class, QMealTicket.class, PathInits.DIRECT2);
 

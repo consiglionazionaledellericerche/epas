@@ -99,7 +99,36 @@
 		  </table>  
 	  </div>
 	</div>
-
+	
+  <br>
+	
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><span class="badge">2</span> Gestione Buoni Mensa</h3>
+      </div>
+      <div class="panel-body">
+  
+		  <table class="table table-condensed table-hover table-xeditable">
+		    <tr>
+		      <td class="col-sm-6">Data inizio gestione Ticket Restaurant</td>
+		      <td class="col-sm-6">
+				<a href="#" 
+				   id="dob1" 
+				   data-type="combodate" 
+				   data-value="#{if dateStartMealTicket.fieldValue != null}${dateStartMealTicket.fieldValue}#{/if}"
+				   data-format="YYYY-MM-DD" 
+				   data-viewformat="DD/MM/YYYY" 
+				   data-template="D / MMM / YYYY" 
+				   data-pk="${dateStartMealTicket.id}" 
+				   data-title="Select Date of birth" 
+				   data-url="@{saveConfGeneral()}" 
+				   class="editable editable-click">${dateStartMealTicket.fieldValue}</a>
+		      </td>
+		    </tr>
+		    
+		  </table>  
+	  </div>
+	</div>
 
   <br>
 
