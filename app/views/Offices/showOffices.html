@@ -31,9 +31,17 @@
 		  	#{/if}
 		  	
 		  	#{list items:area.getInstitutes(), as:'istituto'}
+		  	  
 		  	  #{if istituto.isPrintable() }
 			  	  <div class="well">
 			  	    <p class="lead">${istituto.name}</p>
+			  	    
+			  	    <strong>Lettori istituto installati</strong> 
+		  	  	    #{list items:istituto.getActiveBadgeReaders(), as:'badgeReader'}
+			          <span class="label label-success">${badgeReader}</span>
+			        #{/list}
+				    <br>
+				    <br>
 				    
 				    <table class="table table-hover">
 				      <tr class="warning center">
@@ -59,7 +67,13 @@
 				            ${sede.name}
 				          #{/else}
 				          </td>
-				          <td>${sede.address}</td>
+				          <td>
+				            ${sede.address}<br><br>
+				            <strong>Lettori sede abilitati</strong><br>
+				            #{list items:sede.getActiveBadgeReaders(), as:'badgeReader'}
+				              <h4><span class="label label-success">${badgeReader}</span></h4>
+				            #{/list}
+				          </td>
 				          <td class="center">${sede.code}</td>
 				          <td class="center">${sede.joiningDate}</td>
 				          <td class="center">${sede.getActivePersons().size()}</td>

@@ -199,7 +199,7 @@ when
      	"Configurations.saveConfYear"
      	
      	), target == null, granted == false)
-// $u: User(person != null)
+   $u: User(person != null)
 then
  $c.grant();
 end
@@ -632,12 +632,24 @@ then
  $c.grant();
 end
 
+
 rule stampings_create
-when 
+when
  $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
  $p: Permission(description == "stampingsCreate") from $uro.role.permissions
- $c: PermissionCheck(action in ("StampingsFromClient.create"),
+ $c: PermissionCheck(action in ("StampingsFromClient.prova"),
  	target == null, granted == false)
+ then
+ $c.grant();
+end
+
+rule stampings_create_InOffice
+when
+ $o: Office() 
+ $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $p: Permission(description == "stampingsCreate") from $uro.role.permissions
+ $c: PermissionCheck(action in ("StampingsFromClient.prova"),
+ 	target == $o, granted == false)
 then
  $c.grant();
 end
