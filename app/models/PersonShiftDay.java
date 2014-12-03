@@ -1,11 +1,9 @@
 package models;
 
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -13,19 +11,14 @@ import javax.persistence.Table;
 import models.base.BaseModel;
 import models.enumerate.ShiftSlot;
 
-
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
-
-import org.hibernate.envers.NotAudited;
-
-
-
 
 @Entity
 @Table(name="person_shift_days")
 public class PersonShiftDay extends BaseModel{
+
+	private static final long serialVersionUID = -2441219908198684741L;
 
 	// morning or afternoon slot
 	@Column(name="shift_slot")

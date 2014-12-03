@@ -1,20 +1,20 @@
 package models;
 
-import java.util.List;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import models.base.BaseModel;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
-import com.google.common.collect.Lists;
+import com.google.common.base.Objects;
 
 import play.data.validation.Required;
 
@@ -23,23 +23,16 @@ import play.data.validation.Required;
 @Table(name = "meal_ticket")
 public class MealTicket extends BaseModel{
 	
-	public static class BlockMealTicket {
-		
-		public Integer codeBlock;
-		public List<MealTicket> mealTickets;
-		
-		public BlockMealTicket(Integer codeBlock) {
-			
-			this.codeBlock = codeBlock;
-			this.mealTickets = Lists.newArrayList();
-		}
-	
-	}
-	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	@NotAudited
 	@Required
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "person_id", nullable = false)
-	public Person person;
+	@JoinColumn(name = "contract_id", nullable = false)
+	public Contract contract;
 	
 	public Integer year;
 	
@@ -65,6 +58,21 @@ public class MealTicket extends BaseModel{
 	@Column(name = "expire_date")
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate expireDate;
+	
+	@Transient 
+	public Boolean used = null;
+	
+	@Override
+	public String toString() {
+		
+		return Objects.toStringHelper(this)
+				.add("id", id)
+				.add("contract", contract.id)
+				.add("person", contract.person.name + " " + contract.person.surname)
+				.add("date", date)
+				.add("expire", expireDate).toString();
+		
+	}
 	
 
 }

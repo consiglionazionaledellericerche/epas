@@ -26,6 +26,8 @@ import play.data.validation.Required;
 @Entity
 public class PersonMonthRecap extends BaseModel {
 
+	private static final long serialVersionUID = -8423858325056981355L;
+
 	@Required
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "person_id", nullable = false, updatable = false)

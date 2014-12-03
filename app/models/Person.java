@@ -25,11 +25,10 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import models.MealTicket.BlockMealTicket;
+import manager.recaps.PersonResidualMonthRecap;
 import models.Stamping.WayType;
 import models.base.BaseModel;
 import models.exports.StampingFromClient;
-import models.personalMonthSituation.Mese;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
@@ -45,7 +44,6 @@ import play.mvc.With;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
 
 import controllers.Secure;
 import controllers.Security;
@@ -60,9 +58,6 @@ import controllers.Security;
 @With(Secure.class)
 public class Person extends BaseModel implements Comparable<Person>{
 
-	/**
-	 * relazione con la tabella dei permessi
-	 */
 	private static final long serialVersionUID = -2293369685203872207L;
 
 	@Version
@@ -162,9 +157,6 @@ public class Person extends BaseModel implements Comparable<Person>{
 	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<StampProfile> stampProfiles = new ArrayList<StampProfile>();
 
-
-
-
 	/**
 	 * relazione con la tabella dei figli del personale
 	 */
@@ -180,9 +172,6 @@ public class Person extends BaseModel implements Comparable<Person>{
 	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<CertificatedData> certificatedData;
 
-	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<MealTicket> mealTickets;
-	
 	@OneToMany(mappedBy="admin", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<MealTicket> mealTicketsAdmin;
 	
@@ -225,7 +214,6 @@ public class Person extends BaseModel implements Comparable<Person>{
 	@OneToOne(mappedBy="person", fetch=FetchType.EAGER)
 	public PersonShift personShift;
 	
-	//@NotAudited
 	@ManyToOne
 	@JoinColumn(name="office_id")	
 	public Office office;
@@ -927,39 +915,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 		return cd;
 	}
 	
-	public List<BlockMealTicket> getBlockMealTicket() {
-		
-		List<MealTicket> mealTicketList = MealTicket.find("Select mt from MealTicket mt "
-				+ "where mt.person = ? order by mt.block",
-				this).fetch();
-		
-		List<BlockMealTicket> blockList = Lists.newArrayList();
-		
-		if(mealTicketList.size() == 0)
-			return blockList;
-		
-		BlockMealTicket currentBlock = null;
-		
-		for(MealTicket mealTicket : mealTicketList) {
-			
-			if(currentBlock == null) {
-				currentBlock = new BlockMealTicket(mealTicket.block);
-				currentBlock.mealTickets.add(mealTicket);
-				continue;
-			}	
-				
-			if( !currentBlock.codeBlock.equals(mealTicket.block) ) {
-				blockList.add(currentBlock);
-				currentBlock = new BlockMealTicket(mealTicket.block);
-			}
-			
-			currentBlock.mealTickets.add(mealTicket);
-		}
-		
-		blockList.add(currentBlock);
-		
-		return blockList;
-	}
+
 	
 	/**
 	 * 
@@ -969,7 +925,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 	 */
 	public Integer getPositiveResidualInMonth(int year, int month){
 		
-		return Mese.positiveResidualInMonth(this, year, month)/60; 
+		return PersonResidualMonthRecap.positiveResidualInMonth(this, year, month)/60; 
 	}
 
 	/**

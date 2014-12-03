@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import manager.ContractYearRecapManager;
+import manager.recaps.PersonResidualMonthRecap;
+import manager.recaps.PersonResidualYearRecap;
 import models.AbsenceType;
 import models.Contract;
 import models.ContractYearRecap;
@@ -18,17 +20,19 @@ import models.InitializationTime;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
-import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
-import models.personalMonthSituation.Mese;
 import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
 
-import controllers.Resecure.NoCheck;
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
+
 import play.Logger;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
+import controllers.Resecure.NoCheck;
+import dao.PersonDao;
 
 
 @With( {Secure.class, RequestInit.class} )
@@ -122,12 +126,13 @@ public class Administration extends Controller {
 	{
 		
 		List<Person> listPerson = Person.getActivePersonsInDay(new LocalDate(), Security.getOfficeAllowed(), false);
-		List<Mese> listMese = new ArrayList<Mese>();
+		List<PersonResidualMonthRecap> listMese = new ArrayList<PersonResidualMonthRecap>();
 		for(Person person : listPerson)
 		{
 			LocalDate today = new LocalDate().minusMonths(1);
-			CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(person.getCurrentContract(), today.getYear(), null);
-			Mese mese = c.getMese(today.getYear(), today.getMonthOfYear());
+			PersonResidualYearRecap c = 
+					PersonResidualYearRecap.factory(person.getCurrentContract(), today.getYear(), null);
+			PersonResidualMonthRecap mese = c.getMese(today.getMonthOfYear());
 			listMese.add(mese);
 		}
 		render(listMese);
@@ -305,6 +310,5 @@ public class Administration extends Controller {
 		
 		renderText(person.name);
 	}
-	
-    
+   
 }

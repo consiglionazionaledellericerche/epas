@@ -105,7 +105,8 @@
 	            #{/if}
 	            <a data-x-editable href="#" data-type="number" data-pk="${person.competence(competenceCode,year,month).id}" data-name="value"
 	     	    data-url="@{updateCompetence()}" 
-	     	    data-title="Modifica ${competenceCode.description} per ${person.name} ${person.surname}">${person.competence(competenceCode,year,month).valueApproved}</a>
+	     	    data-title="Modifica ${competenceCode.description} per ${person.name} ${person.surname}">${person.competence(competenceCode,year,month).valueApproved}
+	     	    </a>
 	            </td>
 	          </tr>
 	          #{/if}

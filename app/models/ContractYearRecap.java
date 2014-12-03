@@ -15,6 +15,8 @@ import play.data.validation.Required;
 @Table(name="contract_year_recap")
 public class ContractYearRecap extends BaseModel{
 
+	private static final long serialVersionUID = 7025943511706872182L;
+
 	@Required
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="contract_id")
@@ -40,5 +42,8 @@ public class ContractYearRecap extends BaseModel{
 	
 	@Column(name="remaining_minutes_current_year")
 	public Integer remainingMinutesCurrentYear = 0;
+	
+	@Column(name="remaining_meal_tickets")
+	public Integer remainingMealTickets = 0;
 
 }

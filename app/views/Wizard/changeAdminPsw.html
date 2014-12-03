@@ -1,52 +1,47 @@
 #{extends 'Wizard/wizard.html' /}
-#{set 'moreStyles'}
-<style>
-form{
-	margin-bottom: 8.5em;
-}
-</style>
-#{/set}
 
-%{
-	adminPassword = properties.getProperty("Nuova Password Admin");
-}%
-
-
-#{form @Wizard.changeAdminPsw(),class:'form-horizontal'}
+#{form @Wizard.changeAdminPsw(),class:'form-orizontal',role:'form'}
+<input type="hidden" name="stepIndex" value="${currentStep.index}"/>
 <fieldset>
+  #{field 'admin'}
+  <div class='form-group col-sm-6 col-sm-offset-3'>
+    <label class="control-label" for="${field.id}">Profilo Admin</label>
+    <input class="form-control" disabled placeholder="admin" id="${field.id}" type="text" />
+  </div>
+  #{/field}
 
-#{field 'admin'}
-    <div class="control-group">         
-            <label  class="control-label"">Profilo Admin</label>
-     <div class="controls">
-            <input class="input-large" disabled placeholder="admin" id="${field.id}" type="text">
-      </div>
-   </div>
-#{/field}
+  #{field 'admin_password'}
+  <div class='form-group col-sm-3 col-sm-offset-3 #{if field.error}has-error#{/if}'>
+    <label class="control-label" for="${field.id}">Nuova Password Admin</label>
+    <input  class="form-control" placeholder="Password" id="${field.id}" type="password" name="${field.name}" value='${properties.getProperty(field.name)}' required>
+    #{if field.error}<span class="help-block">${field.error}</span>#{/if}
+  </div>
+  #{/field}
 
-#{field 'adminPassword'}
-    <div class="control-group #{if field.error}error#{/if}">         
-            <label  class="control-label" for="${field.id}">Reimpostare password account 'admin'</label>
-     <div class="controls">
-            <input  class="input-large" placeholder="Password" id="${field.id}" type="password" name="${field.name}" value="${adminPassword}">
-            <p class="help-block">${field.error}</p>
-      </div>
-   </div>
-#{/field}
+  #{field 'admin_password_retype'}
+  <div class='form-group col-sm-3 #{if field.error}has-error#{/if}'>
+    <label class="control-label" for="${field.id}">Reinserire la password</label>
+    <input class="form-control" placeholder="Retype Password" id="${field.id}" type="password" name="${field.name}" value='${properties.getProperty("admin_password")}' required>
+    #{if field.error}<span class="help-block">${field.error}</span>#{/if}
+  </div>
+  #{/field}
 
-#{field 'adminPasswordRetype'}
-    <div class="control-group #{if field.error}error#{/if}">         
-            <label  class="control-label" for="${field.id}">Reinserire la password</label>
-     <div class="controls">
-            <input  class="input-large" placeholder="Retype Password" id="${field.id}" type="password" name="${field.name}" value="${adminPassword}" />
-            <p class="help-block">${field.error}</p>
-      </div>
-   </div>
-#{/field}
+  <legend id="bottom_line" class="col-sm-12"></legend>
 
-<input type="submit" class="btn btn-info btn-large"/>
-
+  <button type="submit" class="btn btn-primary col-xs-4 col-xs-offset-4 col-sm-2 col-sm-offset-5">Invia</button>
 </fieldset>
 #{/form}
+
+
+
+
+
+
+
+
+
+
+
+
 
 

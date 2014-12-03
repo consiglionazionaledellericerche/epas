@@ -2,15 +2,20 @@ package dao;
 
 import helpers.ModelQuery;
 import helpers.ModelQuery.SimpleResults;
+import it.cnr.iit.epas.DateInterval;
 
+import java.util.List;
 import java.util.Set;
 
 import models.CompetenceCode;
+import models.Contract;
 import models.Office;
 import models.Person;
+import models.PersonDay;
 import models.query.QCompetenceCode;
 import models.query.QContract;
 import models.query.QPerson;
+import models.query.QPersonDay;
 import models.query.QPersonHourForOvertime;
 import models.query.QPersonReperibility;
 import models.query.QPersonShift;
@@ -173,4 +178,82 @@ public final class PersonDao {
 		
 		return ModelQuery.simpleResults(query, qp);
 	}
+	
+	/**
+	 * L'ultimo contratto inserito in ordine di data inizio. 
+	 * (Tendenzialmente quello attuale)
+	 * @param person
+	 * @return
+	 */
+	public Contract getLastContract(Person person) {
+		
+		final QContract qc = QContract.contract;
+		
+		final JPQLQuery query = ModelQuery.queryFactory()
+				.from(qc)
+				.where(qc.person.eq(person))
+				.orderBy(qc.beginContract.desc());
+		
+		List<Contract> contracts = query.list(qc);
+		if(contracts.size() == 0)
+			return null;
+		return contracts.get(0);
+		
+	}
+	
+	/**
+	 * Il contratto precedente in ordine temporale rispetto a quello passato
+	 * come argomento.
+	 * @param contract
+	 * @return
+	 */
+	public static Contract getPreviousPersonContract(Contract contract) {
+	
+		final QContract qc = QContract.contract;
+		
+		final JPQLQuery query = ModelQuery.queryFactory()
+				.from(qc)
+				.where(qc.person.eq(contract.person))
+				.orderBy(qc.beginContract.desc());
+		
+		List<Contract> contracts = query.list(qc);
+		
+		final int indexOf = contracts.indexOf(contract);
+		if(indexOf + 1 < contracts.size())
+			return contracts.get(indexOf + 1);
+		else 
+			return null;
+	}
+
+	/**
+	 * Ritorna la lista dei person day della persona nella finestra temporale specificata
+	 * ordinati per data con ordinimento crescente.
+	 * @param person
+	 * @param interval
+	 * @param onlyWithMealTicket 
+	 * @return
+	 */
+	public static List<PersonDay> getPersonDayIntoInterval(
+			Person person, DateInterval interval, boolean onlyWithMealTicket) {
+		
+		final QPersonDay qpd = QPersonDay.personDay;
+		
+		final JPQLQuery query = ModelQuery.queryFactory()
+				.from(qpd)
+				.orderBy(qpd.date.asc());
+
+		final BooleanBuilder condition = new BooleanBuilder();
+		condition.and(qpd.person.eq(person)
+				.and(qpd.date.goe(interval.getBegin()))
+				.and(qpd.date.loe(interval.getEnd())));
+		
+		if(onlyWithMealTicket) {
+			condition.and(qpd.isTicketAvailable.eq(true));
+		}
+		query.where(condition);
+		
+		return query.list(qpd);
+	}
+	
+	
 }

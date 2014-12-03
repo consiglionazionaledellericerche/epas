@@ -4,15 +4,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.persistence.Query;
 
 import manager.ContractYearRecapManager;
+import manager.recaps.PersonResidualMonthRecap;
+import manager.recaps.PersonResidualYearRecap;
 import models.Absence;
 import models.AbsenceType;
 import models.Competence;
 import models.CompetenceCode;
+import models.ConfGeneral;
 import models.Contract;
 import models.Office;
 import models.Person;
@@ -24,9 +26,8 @@ import models.Stamping;
 import models.User;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
+import models.enumerate.ConfigurationFields;
 import models.enumerate.JustifiedTimeAtWork;
-import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
-import models.personalMonthSituation.Mese;
 import models.rendering.VacationsRecap;
 
 import org.apache.commons.mail.EmailException;
@@ -241,37 +242,6 @@ public class PersonUtility {
 		else
 			return true;
 
-	}
-
-	/**
-	 * Il primo codice utilizzabile per l'anno selezionato come assenza nel seguente ordine 31,32,94
-	 * @param person
-	 * @param actualDate
-	 * @return
-	 */
-	public static AbsenceType whichVacationCode(Person person, LocalDate actualDate){
-
-		Contract contract = person.getCurrentContract();
-
-		VacationsRecap vr = null;
-		try { 
-			vr = new VacationsRecap(person, actualDate.getYear(), contract, actualDate, true);
-		} catch(IllegalStateException e) {
-			return null;
-		}
-
-		if(vr.vacationDaysLastYearNotYetUsed>0)
-			return AbsenceType.find("byCode", "31").first();
-
-		if(vr.persmissionNotYetUsed>0)
-			return AbsenceType.find("byCode", "94").first();
-		
-		if(vr.vacationDaysCurrentYearNotYetUsed>0)
-			return AbsenceType.find("byCode", "32").first();
-
-			
-
-		return null;
 	}
 
 	/**
@@ -613,26 +583,29 @@ public class PersonUtility {
 		if(date.getDayOfMonth()>1)
 			date = date.minusDays(1);
 		Contract contract = person.getContract(date);
-		CalcoloSituazioneAnnualePersona c = new CalcoloSituazioneAnnualePersona(contract, date.getYear(), date);
+		PersonResidualYearRecap c = 
+				PersonResidualYearRecap.factory(contract, date.getYear(), date);
+		
+		if(c==null)
+			return false;
+		
 		/**
 		 * TODO: aggiungere la condizione per poter inserire un riposo compensativo in un mese futuro (verosimilmente il mese successivo a
 		 * quello in cui ci troviamo al momento in cui viene chiamato l'handler
 		 */
 		LocalDate now = new LocalDate();
-		Mese mese = null;
+		PersonResidualMonthRecap mese = null;
 		if(now.isBefore(date))
-			mese = c.getMese(date.getYear(), now.getMonthOfYear());
+			mese = c.getMese(now.getMonthOfYear());
 		else
-			mese = c.getMese(date.getYear(), date.getMonthOfYear());
+			mese = c.getMese(date.getMonthOfYear());
+		
 		Logger.info("monteOreAnnoCorrente=%s ,  monteOreAnnoPassato=%s, workingTime=%s", mese.monteOreAnnoCorrente, mese.monteOreAnnoPassato, mese.person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime);
-		if(mese.monteOreAnnoCorrente + mese.monteOreAnnoPassato > mese.person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime)
-		{
-			Logger.debug("decido si");
+		
+		if(mese.monteOreAnnoCorrente + mese.monteOreAnnoPassato > 
+			mese.person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime) {
 			return true;
-		}
-		else
-		{
-			Logger.debug("decido no");
+		} else {
 			return false;
 		}
 	}
@@ -1219,7 +1192,9 @@ public class PersonUtility {
 		try {
 			simpleEmail.setFrom("epas@iit.cnr.it");
 			//simpleEmail.addReplyTo("segreteria@iit.cnr.it");
-			simpleEmail.addReplyTo(Play.configuration.getProperty("mail.replyTo.alias"));
+			simpleEmail.addReplyTo(ConfGeneral.getConfGeneralByField(
+							ConfigurationFields.EmailToContact.description, 
+							person.office).fieldValue);
 		} catch (EmailException e1) {
 
 			e1.printStackTrace();

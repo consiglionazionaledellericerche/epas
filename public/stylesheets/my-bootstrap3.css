@@ -233,7 +233,7 @@ div.datepicker {
 /* CSS Tabellone Timbrature */
 
 /* tabella default */
-table { border: 1px solid #aaa; }
+table{ border: 1px solid #aaa; }
 th { background: #eee}
 td, th { padding: 5px; text-align: left; border-right: 1px solid #aaa; border-bottom: 1px solid #aaa; }
 
@@ -327,6 +327,30 @@ table#tabellonetimbrature td {border: 1px solid #bbb;}
 	padding-right: 0px;
 	font-family: cursive;
 	font-size:large;
+}
+
+
+/* ----- Datepicker Default reset --------
+
+Sosvrascrive le regole
+table{ border: 1px solid #aaa; }
+th { background: #eee}
+td, th { padding: 5px; text-align: left; border-right: 1px solid #aaa; border-bottom: 1px solid #aaa; }
+*/
+
+.datepicker th,td {
+	background: #FFFFFF;
+}
+
+.datepicker table{
+	border:none;
+}
+
+/* Data tables */
+tfoot input {
+   width: 100%;
+   padding: 3px;
+   box-sizing: border-box;
 }
 
 

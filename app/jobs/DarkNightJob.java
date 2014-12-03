@@ -8,6 +8,7 @@ import play.jobs.On;
 
 
 
+@SuppressWarnings("rawtypes")
 @On("0 1 5 * * ?")
 
 //@On("1 /1 * * * ?")

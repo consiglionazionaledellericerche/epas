@@ -1,3 +1,4 @@
+#{list items:contractMonths, as:'mese'} 
 <div class="panel-group" id="accordion_meal">
   <div class="panel panel-info">
     <div class="panel-heading">
@@ -12,18 +13,22 @@
    	   Il numero di buoni mensa usabili per questo mese è <strong>${numberOfMealTicketToUse}</strong> <br>
        Il numero di buoni mensa da restituire per questo mese è <strong>${numberOfMealTicketToRender}</strong> <br>
    	   <table class="table table-bordered table-condensed">
-			
+
+	      <tr>
+		    <td class="col-xs-10">Buoni pasto rimanenti dal mese precedente</td>
+		    <td class="col-xs-2 success">${mese.buoniPastoDalMesePrecedente}</td>
+		  </tr>
 		  <tr>
-		    <td class="col-xs-10">Buoni pasto consegnati</td>
-		    <td class="col-xs-2 success">${mealTicketRecap.mealTickets.size()}</td>
+		    <td class="col-xs-10">Buoni pasto consegnati nel mese</td>
+		    <td class="col-xs-2 success">${mese.buoniPastoConsegnatiNelMese}</td>
 		  </tr>
 		  <tr>
 				<td class="col-xs-10"> Buoni pasto utilizzati</td>
-				<td class="col-xs-2 danger">${mealTicketRecap.numberOfMealTicketToUse}</td>
+				<td class="col-xs-2 danger">${mese.buoniPastoUsatiNelMese}</td>
 		  </tr>
 		  <tr class="warning">
 				<td class="col-xs-10">Buoni pasto rimanenti alla data di oggi</td>
-				<td  class="col-xs-2"><strong>${mealTicketRecap.remaining()}</strong></td>
+				<td  class="col-xs-2"><strong>${mese.buoniPastoDalMesePrecedente + mese.buoniPastoConsegnatiNelMese - mese.buoniPastoUsatiNelMese}</strong></td>
 		  </tr>	
 	    </table>
 	   
@@ -54,6 +59,7 @@
     </div>
   </div>
 </div>
+#{/list}
 
 <div class="panel-group" id="accordion_notes">
   <div class="panel panel-info">

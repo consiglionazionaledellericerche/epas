@@ -2,7 +2,6 @@ package models;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,21 +18,19 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import manager.ContractYearRecapManager;
 import models.base.BaseModel;
-import models.personalMonthSituation.CalcoloSituazioneAnnualePersona;
-import models.personalMonthSituation.Mese;
-import models.rendering.VacationsRecap;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
+import play.Logger;
+import play.data.validation.Required;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import play.Logger;
-import play.data.validation.Required;
+import dao.MealTicketDao;
 
 
 /**
@@ -72,9 +69,6 @@ public class Contract extends BaseModel {
 	@Column(name="source_remaining_minutes_current_year")
 	public Integer sourceRemainingMinutesCurrentYear = null;
 
-	
-
-
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="person_id")
 	public Person person;
@@ -105,13 +99,16 @@ public class Contract extends BaseModel {
 	@OrderBy("beginDate")
 	public Set<ContractWorkingTimeType> contractWorkingTimeType = Sets.newHashSet();
 	
-	
 	@NotAudited
 	@OneToMany(mappedBy="contract")
 	@OrderBy("startFrom")
 	public Set<ContractStampProfile> contractStampProfile = Sets.newHashSet();
 	
-
+	@NotAudited
+	@OneToMany(mappedBy="contract", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
+	public List<MealTicket> mealTickets;
+	
+	
 	@Transient
 	private List<ContractWorkingTimeType> contractWorkingTimeTypeAsList;
 	
@@ -415,7 +412,8 @@ public class Contract extends BaseModel {
 	}
 	
 	/**
-	 * Ritorna l'intervallo valido ePAS per il contratto. (scarto la parte precedente a source contract se definita)
+	 * Ritorna l'intervallo valido ePAS per il contratto. 
+	 * (scarto la parte precedente a source contract se definita)
 	 * @return
 	 */
 	public DateInterval getContractDatabaseDateInterval() {
@@ -432,6 +430,29 @@ public class Contract extends BaseModel {
 		
 		return this.getContractDateInterval();
 		
+	}
+	
+	/**
+	 * Ritorna l'intervallo valido ePAS per il contratto riguardo la gestione dei buoni pasto.
+	 * (scarto la parte precedente a source se definita, e la parte precedente alla data inizio 
+	 * utilizzo per la sede della persona).
+	 * @return null in caso non vi siano giorni coperti dalla gestione dei buoni pasto.
+	 */
+	public DateInterval getContractMealTicketDateInterval() {
+		
+		DateInterval contractDataBaseInterval = this.getContractDatabaseDateInterval();
+		
+		LocalDate officeStartDate = MealTicketDao.getMealTicketStartDate(this.person.office);
+		if(officeStartDate == null)
+			return null;
+		
+		if(officeStartDate.isBefore(contractDataBaseInterval.getBegin()))
+			return contractDataBaseInterval;
+		
+		if(DateUtility.isDateIntoInterval(officeStartDate, contractDataBaseInterval))
+			return new DateInterval(officeStartDate, contractDataBaseInterval.getEnd());
+		
+		return null;
 	}
 
 	
@@ -494,92 +515,14 @@ public class Contract extends BaseModel {
 	
 	 */
 	
-	/**
-	 * Fix definitivo da dateFrom a dateTo per l'intero contratto. (ricalca il flusso di fixPersonSituation).
-	 *  
-	 * 1) CheckHistoryError 
-	 * 2) Ricalcolo tempi lavoro
-	 * 3) Ricalcolo riepiloghi annuali 
-	 * @param dateFrom giorno a partire dal quale effettuare il ricalcolo. Se null ricalcola dall'inizio del contratto.
-	 * @param dateTo ultimo giorno coinvolto nel ricalcolo. Se null ricalcola fino alla fine del contratto (utile nel caso in cui 
-	 * si modifica la data fine che potrebbe non essere persistita)
-	 */
-	public void recomputeContract(LocalDate dateFrom, LocalDate dateTo) {
 		
-		// (0) Definisco l'intervallo su cui operare
-		// Decido la data inizio
-		String dateInitUse = ConfGeneral.getFieldValue("init_use_program", person.office);
-		LocalDate initUse = new LocalDate(dateInitUse);
-		LocalDate date = this.beginContract;
-		if(date.isBefore(initUse))
-			date = initUse;
-		DateInterval contractInterval = this.getContractDatabaseDateInterval();
-		if( dateFrom != null && contractInterval.getBegin().isBefore(dateFrom)) {
-			contractInterval = new DateInterval(dateFrom, contractInterval.getEnd());
-		}
-		// Decido la data di fine
-		if(dateTo != null && dateTo.isBefore(contractInterval.getEnd())) {
-			contractInterval = new DateInterval(contractInterval.getBegin(), dateTo);
-		}
-		
-		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
-		LocalDate today = new LocalDate();
-		Logger.info("CheckPersonDay (creazione ed history error) DA %s A %s", date, today);
-		while(true) {
-			Logger.debug("RecomputePopulate %s", date);
-			
-			if(date.isEqual(today))
-				break;
-			
-			if(!DateUtility.isDateIntoInterval(date, contractInterval)) {
-				date = date.plusDays(1);
-				continue;
-			}
-			
-			PersonUtility.checkPersonDay(person.id, date);
-			date = date.plusDays(1);
-			
-			
-		}
-		
-		
-		
-		// (2) Ricalcolo i valori dei person day aggregandoli per mese
-		LocalDate actualMonth = contractInterval.getBegin().withDayOfMonth(1).minusMonths(1);
-		LocalDate endMonth = new LocalDate().withDayOfMonth(1);
-
-		Logger.debug("PopulatePersonDay (ricalcoli ed history error) DA %s A %s", actualMonth, endMonth);
-		
-		while( !actualMonth.isAfter(endMonth) )
-		{
-			List<PersonDay> pdList = 
-					PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
-					this.person, actualMonth, actualMonth.dayOfMonth().withMaximumValue()).fetch();
-
-			for(PersonDay pd : pdList){
-				
-				PersonDay pd1 = PersonDay.findById(pd.id);
-				Logger.debug("RecomputePopulate %s", pd1.date);				
-				pd1.populatePersonDay();
-			}
-
-			actualMonth = actualMonth.plusMonths(1);
-		}
-
-		Logger.info("BuildContractYearRecap");
-		//(3) Ricalcolo dei riepiloghi annuali
-		ContractYearRecapManager.buildContractYearRecap(this);
-		
-		
-	}
-	
 	/**
 	 * La lista con tutti i contratti attivi nel periodo selezionato.
 	 * @return
 	 */
 	public static List<Contract> getActiveContractInPeriod(LocalDate begin, LocalDate end) {
 		
-		//TODO queryDSL
+		//TODO queryDSL e spostare nel ContractDao
 		if(end == null)
 			end = new LocalDate(9999,1,1);
 		

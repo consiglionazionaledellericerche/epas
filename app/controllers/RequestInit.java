@@ -175,6 +175,13 @@ public class RequestInit extends Controller {
 			return DateUtility.getName(month);
 		}
 		
+		public String monthNameByString(String month){
+			if(month != null)
+				return DateUtility.getName(Integer.parseInt(month));
+			else
+				return null;
+		}
+		
 		public boolean checkTemplate(String profile) {
 			
 			return false;
@@ -289,10 +296,11 @@ public class RequestInit extends Controller {
 		else {
 
 			List<Office> allOffices = Office.findAll();
+			if (allOffices!=null && !allOffices.isEmpty()){
 			List<Person> persons = PersonDao.list(Optional.fromNullable(name), 
 					Sets.newHashSet(allOffices), false, beginMonth, endMonth, true).list();
-
 			renderArgs.put("navPersons", persons);
+			}
 		}
 
 		// day lenght (provvisorio)
@@ -312,20 +320,24 @@ public class RequestInit extends Controller {
 		Integer actualYear = new LocalDate().getYear();
 		ConfGeneral yearBegin = ConfGeneral.find("Select c from ConfGeneral c where c.field = ? ", 
 				ConfigurationFields.InitUseProgram.description).first();
-		Integer yearBeginProgram = new Integer(yearBegin.fieldValue.substring(0, 4));
+		Integer yearBeginProgram;
+		if(yearBegin!=null){
+			yearBeginProgram = new Integer(yearBegin.fieldValue.substring(0, 4));
+		}
+		else{
+			yearBeginProgram = new LocalDate().getYear();
+		}
+		 
 		Logger.debug("yearBeginProgram = %s", yearBeginProgram);
-		try{
-			while(yearBeginProgram <= actualYear+1){
-				years.add(yearBeginProgram);
-				Logger.debug("Aggiunto %s alla lista", yearBeginProgram);
-				yearBeginProgram++;
-			}
-			
-			renderArgs.put("navYears", years);
+
+		while(yearBeginProgram <= actualYear+1){
+			years.add(yearBeginProgram);
+			Logger.debug("Aggiunto %s alla lista", yearBeginProgram);
+			yearBeginProgram++;
 		}
-		catch(Exception e){
-			
-		}
+
+		renderArgs.put("navYears", years);
+		
 		
 	}
 	

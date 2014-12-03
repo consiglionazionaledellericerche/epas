@@ -1,6 +1,5 @@
 package models;
 
-import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Entity;
@@ -11,7 +10,6 @@ import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 
@@ -24,6 +22,9 @@ import com.google.common.collect.Sets;
 @Entity
 @Table(name="permissions")
 public class Permission extends BaseModel{
+
+	private static final long serialVersionUID = 7368960878704914559L;
+
 
 	public String description;
     

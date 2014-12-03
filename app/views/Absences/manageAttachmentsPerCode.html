@@ -26,6 +26,9 @@
 		  <tr>
 		  	<th>Codice</th>
 		  	<th>Allegati</th>
+		  	#{if attachmentRecapList.size() > 0}
+		  		<th>Comprimi</th>
+		  	#{/if}
 		  </tr>
 		  #{list items:attachmentRecapList, as:'recap'}
 		  <tr>
@@ -41,6 +44,13 @@
 		    
 		    
 		    </td>
+		    #{if recap != null}
+		    	<td><a href="@{Absences.zipAttachment(recap.getCode(),year, month)}" 
+					   data-toggle="tooltip" 
+					   title="comprimi file">
+					<span class="glyphicon glyphicon-compressed"></span>
+				</a></td>
+		    #{/if}
 		  </tr>
 		  #{/list}
 		
