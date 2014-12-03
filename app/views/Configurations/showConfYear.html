@@ -161,8 +161,8 @@
   </div>
   
   </section>
-
- <a data-toggle="modal" href="@{Configurations.insertNewConfYear(officeId)}" data-modal=".my-modal">
+<input type="hidden" name="id" value="${office.id}"/>
+ <a data-toggle="modal" href="@{Configurations.insertNewConfYear(office.id)}" data-modal=".my-modal">
  Inserisci configurazione ${nextYear}
  </a>
 
