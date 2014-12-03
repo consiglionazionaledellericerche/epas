@@ -336,19 +336,20 @@ public class Configurations extends Controller{
 	}
 	
 	
-	public static void insertNewConfYear(Long officeId){
-		rules.checkIfPermitted(Security.getUser().get().person.office);
-		
+	public static void insertNewConfYear(Long id){
 		Office office = null;
-//		List<Office> offices = Security.getOfficeAllowed();
-		if(officeId != null){
-			office = Office.findById(officeId);
+
+		if(id != null){
+			office = Office.findById(id);
 		}
 		else{
 			office = Security.getUser().get().person.office;
 		}
+		rules.checkIfPermitted(office);
+		
+		
 		int year = LocalDate.now().getYear()+1;
-		List<ConfYear> confList = ConfYearDao.getConfByYear(Optional.fromNullable(Security.getUser().get().person.office), year);
+		List<ConfYear> confList = ConfYearDao.getConfByYear(Optional.fromNullable(office), year);
 		ConfYear dayExpiryVacationPastYear = new ConfYear();
 		ConfYear monthExpiryVacationPastYear = new ConfYear();
 		ConfYear monthExpireRecoveryDaysOneThree = new ConfYear();
@@ -380,16 +381,26 @@ public class Configurations extends Controller{
 	}
 
 	public static void saveNewConfYear(String giornoMassimoFerieAnnoPrecedente, String residuiAnnoPrecedente13, String residuiAnnoPrecedente49,
-			String giorniRecupero13, String giorniRecupero49, String oreTimbraturaNotturna, int year){
+			String giorniRecupero13, String giorniRecupero49, String oreTimbraturaNotturna, int year, Long id){
 		
-		rules.checkIfPermitted(Security.getUser().get().person.office);
+		Office office = null;
+
+		if(id != null){
+			office = Office.findById(id);
+		}
+		else{
+			office = Security.getUser().get().person.office;
+		}
+		rules.checkIfPermitted(office);
+		
+		
 		
 		if(validation.hasErrors()) {
 			if(request.isAjax()) error("Parametri incompleti");
-			Configurations.showConfYear(Security.getUser().get().person.office.id);
+			Configurations.showConfYear(office.id);
 		}
 		
-		List<ConfYear> confList = ConfYearDao.getConfByYear(Optional.fromNullable(Security.getUser().get().person.office), year);
+		List<ConfYear> confList = ConfYearDao.getConfByYear(Optional.fromNullable(office), year);
 		if(confList.size() > 0){
 		
 			for(ConfYear conf : confList){
@@ -423,7 +434,7 @@ public class Configurations extends Controller{
 				}
 			}
 			flash.success("Modificati i valori precedentemente impostati per la configurazione dell'anno %s", year);
-			Configurations.showConfYear(Security.getUser().get().person.office.id);
+			Configurations.showConfYear(office.id);
 		}
 		ConfYear giornoFerieAP = new ConfYear();
 		giornoFerieAP.field = ConfigurationFields.DayExpiryVacationPastYear.description;
@@ -475,7 +486,7 @@ public class Configurations extends Controller{
 		oreTimbrNotturna.save();
 		
 		flash.success("Aggiunta nuova configurazione per l'anno %s", year);
-		Configurations.showConfYear(Security.getUser().get().person.office.id);
+		Configurations.showConfYear(office.id);
 		
 	}
 }
