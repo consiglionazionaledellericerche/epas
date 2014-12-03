@@ -10,6 +10,8 @@ import models.base.BaseModel;
 
 import org.hibernate.envers.NotAudited;
 
+import com.google.common.base.Objects;
+
 
 
 @Entity
@@ -32,5 +34,17 @@ public class UsersRolesOffices extends BaseModel{
 	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="role_id")
 	public Role role;
+	
+	@Override
+	public String toString() {
+		
+		return Objects.toStringHelper(this)
+				.add("id", id)
+				.add("user", user.username)
+				.add("role", role.name)
+				.add("office", office.name)
+				.toString();
+		
+	}
 	
 }

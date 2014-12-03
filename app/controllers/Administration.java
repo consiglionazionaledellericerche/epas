@@ -93,8 +93,14 @@ public class Administration extends Controller {
 	//TODO permessi
 
 	public static void utilities(){
-		List<Person> pdList = Person.getActivePersonsInDay(new LocalDate(), Security.getOfficeAllowed(), false);
-		render(pdList);
+		//List<Person> pdList = Person.getActivePersonsInDay(new LocalDate(), Security.getOfficeAllowed(), false);
+		
+		final List<Person> personList = PersonDao.list( 
+				Optional.<String>absent(), Sets.newHashSet(Security.getOfficeAllowed()), 
+				false, LocalDate.now(), LocalDate.now(), true)
+				.list();
+		
+		render(personList);
 	}
 	
 	

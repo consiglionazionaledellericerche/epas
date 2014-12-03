@@ -2,9 +2,9 @@
 <h3>Utility per il Supremo</h3>
 
 #{form @Administration.fixPersonSituation()}
-  #{select 'personId', value:pdList.get(0), id:'person'}
+  #{select 'personId', value:personList.get(0), id:'person'}
     #{option -1}Tutti#{/option}
-		%{for(person in pdList){}%
+		%{for(person in personList){}%
 		#{option person.id}${person.surname + ' ' + person.name}#{/option}
 		%{}}%
 	#{/select}
