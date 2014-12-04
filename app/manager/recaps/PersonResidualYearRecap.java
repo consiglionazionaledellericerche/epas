@@ -167,7 +167,7 @@ public class PersonResidualYearRecap {
 				
 				if ( today.getDayOfMonth() != 1 )
 				{
-					monthEndForMealTickets = today.minusDays(1);
+					monthEndForMealTickets = today;
 					monthIntervalForMealTickets = new DateInterval(monthBeginForMealTickets, monthEndForMealTickets);
 				}
 				
