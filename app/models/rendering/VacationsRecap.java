@@ -141,6 +141,15 @@ public class VacationsRecap {
 			abs31Last  = new ArrayList<Absence>();
 			abs37Last  = new ArrayList<Absence>();
 		}
+		else if(this.year > LocalDate.now().getYear()) 
+		{
+			//Caso in cui voglio inserire ferie per l'anno prossimo
+			VacationsRecap vrPastYear = new VacationsRecap(this.person, this.year-1, this.activeContract, endLastYear, true);
+
+			abs31Last = getVacationDays(yearInter, activeContract, ab31);						
+			abs37Last = getVacationDays(yearInter, activeContract, ab37);		
+			vacationDaysPastYearUsedNew = vrPastYear.vacationDaysCurrentYearUsed.size() + abs31Last.size() + abs37Last.size();
+		}
 		else
 		{
 			//Popolare da contractYearRecap

@@ -61,11 +61,12 @@ public class ReportCentre extends Controller{
 
 			email.addTo("epas@iit.cnr.it");
 			email.setFrom("segnalazioni@epas.tools.iit.cnr.it");
-
+			if(!person.email.equals(""))
+				email.addReplyTo(person.email);
 			email.attach(attachment);
 
 			email.setSubject("Segnalazione malfunzionamento ");
-			email.setMsg("E' stata riscontrata una anomalia dalla pagina: "+body.url+'\n'+"Con il seguente messaggio: "+body.note);
+			email.setMsg("E' stata riscontrata una anomalia dalla pagina: "+body.url+" visitata da: "+person.name+" "+person.surname+'\n'+"Con il seguente messaggio: "+body.note);
 			Mail.send(email); 
 
 
