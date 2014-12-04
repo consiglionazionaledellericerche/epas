@@ -15,7 +15,7 @@ import play.mvc.With;
 import security.SecurityRules;
 
 
-@With( {Resecure.class, RequestInit.class} )
+//@With( {Resecure.class, RequestInit.class} )
 public class StampingsFromClient extends Controller{
 
 	@Inject
@@ -26,7 +26,7 @@ public class StampingsFromClient extends Controller{
 	 *  
 	 * @param body
 	 */
-	@BasicAuth
+	//@BasicAuth
 	public static String create(@As(binder=JsonStampingBinder.class) StampingFromClient body) {
 
 		
@@ -45,7 +45,7 @@ public class StampingsFromClient extends Controller{
 		 
 	}
 	
-	@BasicAuth
+	//@BasicAuth
 	public static void prova(Long officeId) {
 
 		Office office = Office.findById(officeId);
