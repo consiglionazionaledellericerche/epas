@@ -609,10 +609,9 @@ public class Absences extends Controller{
 				}
 			}
 			
-			//Controllo del residuo
-			if(!PersonUtility.canTakeCompensatoryRest(person, actualDate))
+
+			if(!AbsenceManager.canTakeCompensatoryRest(person, actualDate))
 			{
-				
 				actualDate = actualDate.plusDays(1);
 				continue;
 			}
@@ -1350,9 +1349,9 @@ public class Absences extends Controller{
 					Logger.info("Rimossa assenza del %s per %s %s", actualDate, person.name, person.surname);
 				}
 			}
-			if(pd.date.isAfter(today) && pd.absences.isEmpty() && pd.absences.isEmpty()){
-				pd.delete();
-			}
+			//if(pd.date.isAfter(today) && pd.absences.isEmpty() && pd.absences.isEmpty()){
+			//	pd.delete();
+			//}
 			actualDate = actualDate.plusDays(1);
 		}
 		return deleted;

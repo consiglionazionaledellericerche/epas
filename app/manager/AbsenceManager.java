@@ -1,11 +1,15 @@
 package manager;
 
+import manager.recaps.PersonResidualMonthRecap;
+import manager.recaps.PersonResidualYearRecap;
 import models.AbsenceType;
 import models.Contract;
 import models.Person;
 import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
+
+import play.Logger;
 
 /**
  * 
@@ -42,6 +46,8 @@ public class AbsenceManager {
 
 		return null;
 	}
+	
+	
 	
 	
 	/**
@@ -117,6 +123,49 @@ public class AbsenceManager {
 		return null;
 	}
 	
+	/**
+	 * Verifica la possibilità che la persona possa usufruire di un riposo compensativo nella data specificata.
+	 * Se voglio inserire un riposo compensativo per il mese successivo a oggi considero il residuo a ieri.
+	 * N.B Non posso inserire un riposo compensativo oltre il mese successivo a oggi.
+	 * @param person
+	 * @param date
+	 * @return 
+	 */
+	public static boolean canTakeCompensatoryRest(Person person, LocalDate date)
+	{
+		
+		//Data da considerare 
+		
+		// (1) Se voglio inserire un riposo compensativo per il mese successivo considero il residuo a ieri.
+		//N.B Non posso inserire un riposo compensativo oltre il mese successivo.
+		LocalDate dateToCheck = date;
+		if( dateToCheck.getMonthOfYear() == LocalDate.now().getMonthOfYear() + 1) {
+			dateToCheck = LocalDate.now();
+		}
+		
+		// (2) Calcolo il residuo alla data precedente di quella che voglio considerare.
+		if(dateToCheck.getDayOfMonth()>1)
+			dateToCheck = dateToCheck.minusDays(1);
+
+		Contract contract = person.getContract(dateToCheck);
+		
+		PersonResidualYearRecap c = 
+				PersonResidualYearRecap.factory(contract, dateToCheck.getYear(), dateToCheck);
+		
+		if(c == null)
+			return false;
+			
+		PersonResidualMonthRecap mese = c.getMese(dateToCheck.getMonthOfYear());
+		
+		if(mese.monteOreAnnoCorrente + mese.monteOreAnnoPassato 
+				> mese.person.getWorkingTimeType(dateToCheck)
+				.getWorkingTimeTypeDayFromDayOfWeek(dateToCheck.getDayOfWeek()).workingTime) {
+			return true;
+		} 
+	
+		return false;
+		
+	}
 	
 	
 }
