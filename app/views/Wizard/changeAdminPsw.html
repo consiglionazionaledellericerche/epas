@@ -1,6 +1,6 @@
 #{extends 'Wizard/wizard.html' /}
 
-#{form @Wizard.changeAdminPsw(),class:'form-orizontal',role:'form'}
+#{form @Wizard.changeAdminPsw(),role:'form'}
 <input type="hidden" name="stepIndex" value="${currentStep.index}"/>
 <fieldset>
   #{field 'admin'}
@@ -13,7 +13,7 @@
   #{field 'admin_password'}
   <div class='form-group col-sm-3 col-sm-offset-3 #{if field.error}has-error#{/if}'>
     <label class="control-label" for="${field.id}">Nuova Password Admin</label>
-    <input  class="form-control" placeholder="Password" id="${field.id}" type="password" name="${field.name}" value='${properties.getProperty(field.name)}' required>
+    <input  class="form-control" placeholder="Password" id="${field.id}" type="password" name="${field.name}" value='${properties.getProperty(field.name)}'>
     #{if field.error}<span class="help-block">${field.error}</span>#{/if}
   </div>
   #{/field}
@@ -21,7 +21,7 @@
   #{field 'admin_password_retype'}
   <div class='form-group col-sm-3 #{if field.error}has-error#{/if}'>
     <label class="control-label" for="${field.id}">Reinserire la password</label>
-    <input class="form-control" placeholder="Retype Password" id="${field.id}" type="password" name="${field.name}" value='${properties.getProperty("admin_password")}' required>
+    <input class="form-control" placeholder="Retype Password" id="${field.id}" type="password" name="${field.name}" value='${properties.getProperty("admin_password")}'>
     #{if field.error}<span class="help-block">${field.error}</span>#{/if}
   </div>
   #{/field}

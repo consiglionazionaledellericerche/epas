@@ -1,12 +1,11 @@
 #{extends 'Wizard/wizard.html' /}
 
-#{form @Wizard.setGenConf(),class:'form-orizontal',role:'form'}
+#{form @Wizard.setGenConf(),role:'form'}
 <input type="hidden" name="stepIndex" value="${currentStep.index}"/>
 <fieldset>
 
-  <div class="row">
     #{field 'date_of_patron'}
-    <div class='form-group col-sm-4 col-sm-offset-4 #{if field.error}has-error#{/if}'>
+    <div class='form-group col-sm-6 col-sm-offset-3 #{if field.error}has-error#{/if}'>
       <label class="control-label" for="${field.id}">Data del Patrono</label>
       <div class="input-group">
         <input datepicker-month class="form-control" placeholder="dd/mm" id="${field.id}" type="text" name="${field.name}" value='${properties.getProperty(field.name)}' required>
@@ -15,9 +14,9 @@
       #{if field.error}<span class="help-block">${field.error}</span>#{/if}
     </div>
     #{/field} 
-  </div>
 
-  <div class="row">
+
+
     #{field 'lunch_pause_start'}
     <div class='form-group col-sm-3 col-sm-offset-3 #{if field.error}has-error#{/if}'>
       <label class="control-label" for="${field.id}">Inizio pausa pranzo</label>
@@ -33,9 +32,7 @@
       #{if field.error}<span class="help-block">${field.error}</span>#{/if}
     </div>
     #{/field}
-  </div>
 
-  <div class="row">
     #{field 'email_to_contact'}
     <div class='form-group col-sm-6 col-sm-offset-3 #{if field.error}has-error#{/if}'>
       <label class="control-label" for="${field.id}">Indirizzo email dell'amministrazione</label>
@@ -43,7 +40,7 @@
       #{if field.error}<span class="help-block">${field.error}</span>#{/if}
     </div>
     #{/field}
-  </div>
+
 
   <legend id="bottom_line" class="col-sm-12"></legend>
 

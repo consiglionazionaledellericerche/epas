@@ -11,7 +11,7 @@ public class StringIsTime extends Check {
 	@Override
 	public boolean isSatisfied(Object validatedObject, Object time) {
 
-		setMessage("not a valid time!");
+		setMessage("Orario non valido");
 			List<String> hourMinute = Splitter.on(":").trimResults().splitToList((String) time);
 				if(hourMinute.size() == 2){
 					if(StringIsNumber(hourMinute.get(0)) && StringIsNumber(hourMinute.get(1))){

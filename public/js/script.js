@@ -6,7 +6,7 @@ $(function($){
 	$.fn.initepas = function() {
 		
 		this.find('input[datepicker-year]').datepicker({
-			  format: "dd/mm/yyyy",
+			  format: "yyyy-mm-dd",
 			  startView: 2,
 			  todayBtn: "linked",
 			  language: "it",

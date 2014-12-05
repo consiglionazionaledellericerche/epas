@@ -49,6 +49,7 @@ public class ConfGeneral extends BaseModel{
 	public final static String USER_TO_PRESENCE = "user_to_presence";
 	public final static String PASSWORD_TO_PRESENCE = "password_to_presence";
 	public final static String URL_TO_PRESENCE = "url_to_presence";
+	public final static String EMAIL_TO_CONTACT = "email_to_contact";
 	public final static String DATE_START_MEAL_TICKET = "date_start_meal_ticket";
 	
 	
@@ -115,6 +116,9 @@ public class ConfGeneral extends BaseModel{
 		LocalDate beginYear = new LocalDate(LocalDate.now().getYear(), 1, 1);
 		confGeneral = new ConfGeneral(office, ConfGeneral.INIT_USE_PROGRAM, beginYear.toString());
 		confGeneral.save();
+		
+		confGeneral = new ConfGeneral(office, ConfGeneral.DATE_START_MEAL_TICKET,null);
+		confGeneral.save();
 
 		confGeneral = new ConfGeneral(office, ConfGeneral.DAY_OF_PATRON, "1");
 		confGeneral.save();
@@ -128,7 +132,7 @@ public class ConfGeneral extends BaseModel{
 		confGeneral = new ConfGeneral(office, ConfGeneral.PASSWORD_TO_PRESENCE, null);
 		confGeneral.save();
 		
-		confGeneral = new ConfGeneral(office, ConfGeneral.URL_TO_PRESENCE, null);
+		confGeneral = new ConfGeneral(office, ConfGeneral.URL_TO_PRESENCE, "https://attestati.rm.cnr.it/attestati/" );
 		confGeneral.save();
 		
 		confGeneral = new ConfGeneral(office, ConfGeneral.NUMBER_OF_VIEWING_COUPLE, "2");
