@@ -22,6 +22,10 @@ import com.google.common.collect.Lists;
 
 public class Security extends Secure.Security {
 	
+	/* lettore badge */
+	
+	public final static String STAMPINGS_CREATE = "stampingsCreate";
+	
 	/* Sviluppatore */
 	
 	public final static String DEVELOPER = "develop";

@@ -103,10 +103,17 @@
 	     	        (${person.getPositiveResidualInMonth(year,month)+person.competence(competenceCode,year,month).valueApproved})
 	              #{/if}
 	            #{/if}
-	            <a data-x-editable href="#" data-type="number" data-pk="${person.competence(competenceCode,year,month).id}" data-name="value"
-	     	    data-url="@{updateCompetence()}" 
-	     	    data-title="Modifica ${competenceCode.description} per ${person.name} ${person.surname}">${person.competence(competenceCode,year,month).valueApproved}
+	            
+	            
+	              <a 
+	              #{secure.check 'Competences.updateCompetence', target:person.office} data-x-editable href="#" data-type="number" data-pk="${person.competence(competenceCode,year,month).id}" data-name="value"
+		     	    data-url="@{updateCompetence()}" 
+		     	    data-title="Modifica ${competenceCode.description} per ${person.name} ${person.surname}"
+		     	  #{/secure.check}
+		     	  >
+	    	 	  ${person.competence(competenceCode,year,month).valueApproved}
 	     	    </a>
+
 	            </td>
 	          </tr>
 	          #{/if}

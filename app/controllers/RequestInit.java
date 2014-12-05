@@ -175,6 +175,13 @@ public class RequestInit extends Controller {
 			return DateUtility.getName(month);
 		}
 		
+		public String monthNameByString(String month){
+			if(month != null)
+				return DateUtility.getName(Integer.parseInt(month));
+			else
+				return null;
+		}
+		
 		public boolean checkTemplate(String profile) {
 			
 			return false;

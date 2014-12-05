@@ -252,6 +252,43 @@ public class DateUtility {
 		return date.monthOfYear().getAsText();
 	}
 	
+	/**
+	 * 
+	 * @param month
+	 * @return il numero corrispondente al mese passato come parametro
+	 */
+	public static int fromStringToIntMonth(String month){
+		if(month.equals("Gennaio"))
+			return 1;
+		if(month.equals("Febbraio"))
+			return 2;
+		if(month.equals("Marzo"))
+			return 3;
+		if(month.equals("Aprile"))
+			return 4;
+		if(month.equals("Maggio"))
+			return 5;
+		if(month.equals("Giugno"))
+			return 6;
+		if(month.equals("Luglio"))
+			return 7;
+		if(month.equals("Agosto"))
+			return 8;
+		if(month.equals("Settembre"))
+			return 9;
+		if(month.equals("Ottobre"))
+			return 10;
+		if(month.equals("Novembre"))
+			return 11;
+		if(month.equals("Dicembre"))
+			return 12;
+		else
+			return 0;
+		
+	}
+	
+	
+	
 	public static String getName(int mese)
 	{
 		if(mese==1)

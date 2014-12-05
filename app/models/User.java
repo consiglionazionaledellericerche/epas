@@ -2,6 +2,7 @@ package models;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,6 +17,8 @@ import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
+
+import com.google.common.base.Objects;
 
 @Entity
 @Audited
@@ -42,6 +45,14 @@ public class User extends BaseModel{
 	
 	@Column(name="recovery_token")
 	public String recoveryToken;
+	
+	@Override
+	public String toString() {
+		return Objects.toStringHelper(this)
+				.add("id", this.id)
+				.add("user", this.username)
+				.toString();
+	}
 	
 	public boolean isAdmin()
 	{

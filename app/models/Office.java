@@ -20,9 +20,12 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import controllers.Security;
+import dao.PersonDao;
 
  
  
@@ -91,22 +94,44 @@ public class Office extends BaseModel{
      */
     public List<Person> getActivePersons() {
     
-    	List<Office> officeList = this.getSubOfficeTree();
+    	//List<Office> officeList = this.getSubOfficeTree();
     	LocalDate date = new LocalDate();
     	
-    	List<Person> activePerson = Person.getActivePersonsSpeedyInPeriod(date, date,
-    			officeList, false);
     	
-    	//TODOOFF capire perchè con person dao non funziona!!!
-    	/*
-		List<Person> activePerson = PersonDao.list(Optional.fromNullable(name), 
-				Sets.newHashSet(this.getSubOfficeTree()), 
-				false, 
-				date, 
-				date)
-				.list();
-				*/
+    	
+    	//List<Person> activePerson = Person.getActivePersonsSpeedyInPeriod(date, date,
+    	//		officeList, false);
+    	
+    	List<Person> activePerson = PersonDao.list(Optional.<String>absent(), 
+    			Sets.newHashSet(this.getSubOfficeTree()), false, date, date, true).list();
+    	    			
     	return activePerson;
+    	
+    }
+    
+    /**
+     * Ritorna i nomi (user.username) dei lettori badge abilitati all'ufficio.
+     * @return
+     */
+    public List<String> getActiveBadgeReaders() {
+    	
+    	List<String> bgList = Lists.newArrayList();
+    	
+    	List<Office> officeList = this.getSubOfficeTree();
+    	
+    	for(Office office : officeList) {
+    		
+    		for(UsersRolesOffices uro : office.usersRolesOffices) {
+    			
+    			if( uro.role.name.equals(Role.BADGE_READER) && !bgList.contains(uro.user.username) ) {
+    				
+    				bgList.add(uro.user.username);
+    				
+    			}
+    		}
+    	}
+    	
+    	return bgList;
     	
     }
     
