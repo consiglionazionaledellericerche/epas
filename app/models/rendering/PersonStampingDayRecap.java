@@ -199,7 +199,8 @@ public class PersonStampingDayRecap {
 			return;
 		}
 			
-		if(!mealTicket){
+		
+		if(this.future && !mealTicket && !this.absences.isEmpty()) {
 			this.mealTicket = "NO";
 		}
 		else

@@ -196,10 +196,12 @@ when
      	"Configurations.showConfGeneral",
      	"Configurations.saveConfGeneral",
      	"Configurations.showConfYear",
-     	"Configurations.saveConfYear"
+     	"Configurations.saveConfYear",
+     	"Configurations.insertNewConfYear",
+     	"Configurations.saveNewConfYear"
      	
      	), target == null, granted == false)
-// $u: User(person != null)
+   $u: User(person != null)
 then
  $c.grant();
 end
@@ -210,7 +212,7 @@ end
  */
 rule viewPerson_Generic
 when 
- $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $uro: UsersRolesOffices()
  $p: Permission(description == "viewPerson") from $uro.role.permissions
  $c: PermissionCheck(action in (
         "Persons.list",
@@ -222,8 +224,8 @@ end
 
 rule viewPerson_InOffice
 when
- $o: Office()
- $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
  $p: Permission(description == "viewPerson") from $uro.role.permissions
  $c: PermissionCheck(action in (
        "Persons.edit",
@@ -232,12 +234,13 @@ when
        "MealTickets.quickBlocksInsert"
        ), target == $o, granted == false)
 then
+ System.out.println("puppa");
  $c.grant();
 end
 
 rule viewPerson_Item
 when
- $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $uro: UsersRolesOffices()
  $p: Permission(description == "viewPerson") from $uro.role.permissions
  $c: PermissionCheck(target == "viewPerson", granted == false)
 then
@@ -249,7 +252,7 @@ end
  */
 rule editPerson_Generic
 when 
- $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $uro: UsersRolesOffices()
  $p: Permission(description == "editPerson") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
@@ -262,8 +265,8 @@ end
 
 rule editPerson_InOffice
 when
- $o: Office()
- $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
  $p: Permission(description == "editPerson") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
@@ -310,7 +313,7 @@ end
  */
 rule viewPersonDay_Generic
 when 
- $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $uro: UsersRolesOffices()
  $p: Permission(description == "viewPersonDay") from $uro.role.permissions
  $c: PermissionCheck(  action in (
         /* inserire le action interessate */
@@ -329,8 +332,8 @@ end
 
 rule viewPersonDay_InOffice
 when
- $o: Office()
- $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
  $p: Permission(description == "viewPersonDay") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
@@ -370,8 +373,8 @@ end
 
 rule editPersonDay_InOffice
 when
- $o: Office()
- $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
  $p: Permission(description == "editPersonDay") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
@@ -395,7 +398,7 @@ end
 */
 rule viewCompetence_Generic
 when 
- $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $uro: UsersRolesOffices()
  $p: Permission(description == "viewCompetence") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
@@ -408,8 +411,8 @@ end
 
 rule viewCompetence_InOffice
 when
- $o: Office()
- $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
  $p: Permission(description == "viewCompetence") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
@@ -429,8 +432,8 @@ end
  */
 rule editCompetence_InOffice
 when
- $o: Office()
- $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
  $p: Permission(description == "editCompetence") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
@@ -448,8 +451,8 @@ end
  */
 rule uploadSituation_InOffice
 when
- $o: Office()
- $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
  $p: Permission(description == "uploadSituation") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
@@ -474,7 +477,7 @@ end
  */
 rule viewOffice_Generic
 when 
- $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $uro: UsersRolesOffices()
  $p: Permission(description == "viewOffice") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
@@ -486,8 +489,8 @@ end
 
 rule viewOffice_InOffice
 when
- $o: Office()
- $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
  $p: Permission(description == "viewOffice") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
@@ -504,7 +507,7 @@ end
  */
 rule editOffice_Generic
 when 
- $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $uro: UsersRolesOffices()
  $p: Permission(description == "editOffice") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
@@ -516,8 +519,8 @@ end
 
 rule editOffice_InOffice
 when
- $o: Office()
- $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
  $p: Permission(description == "editOffice") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
@@ -528,7 +531,9 @@ when
         "Offices.editSeat",
         "Offices.updateSeat",
         "Configurations.saveConfGeneral",
-        "Configurations.saveConfYear"
+        "Configurations.saveConfYear",
+        "Configurations.insertNewConfYear",
+        "Configurations.saveNewConfYear"
        ), target == $o, granted == false)
 then
  $c.grant();
@@ -541,7 +546,7 @@ end
  */
 rule viewWorkingTimeType_Generic
 when 
- $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $uro: UsersRolesOffices()
  $p: Permission(description == "viewWorkingTimeType") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
@@ -554,8 +559,8 @@ end
 
 rule viewWorkingTimeType_InOffice
 when
- $o: Office()
- $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
  $p: Permission(description == "viewWorkingTimeType") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
@@ -577,8 +582,8 @@ end
 
 rule editWorkingTimeType_InOffice
 when
- $o: Office()
- $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
  $p: Permission(description == "editWorkingTimeType") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
@@ -599,8 +604,8 @@ end
  
 rule editCompetenceCode_InOffice
 when
- $o: Office()
- $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
  $p: Permission(description == "editCompetenceCode") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
@@ -618,8 +623,8 @@ end
  */
 rule editAbsenceCode_InOffice
 when
- $o: Office()
- $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
  $p: Permission(description == "editAbsenceType") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate */
@@ -632,12 +637,24 @@ then
  $c.grant();
 end
 
+
 rule stampings_create
-when 
- $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+when
+ $uro: UsersRolesOffices()
  $p: Permission(description == "stampingsCreate") from $uro.role.permissions
- $c: PermissionCheck(action in ("StampingsFromClient.create"),
+ $c: PermissionCheck(action in ("StampingsFromClient.prova"),
  	target == null, granted == false)
+ then
+ $c.grant();
+end
+
+rule stampings_create_InOffice
+when
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
+ $p: Permission(description == "stampingsCreate") from $uro.role.permissions
+ $c: PermissionCheck(action in ("StampingsFromClient.prova"),
+ 	target == $o, granted == false)
 then
  $c.grant();
 end
@@ -649,7 +666,7 @@ end
 
 rule nomePermesso_Generic
 when 
- $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $uro: UsersRolesOffices()
  $p: Permission(description == "nomePermesso") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate *//*
@@ -661,8 +678,8 @@ end
 
 rule nomePermesso_InOffice
 when
- $o: Office()
- $uro: UsersRolesOffices(user == currentOperator) from $o.usersRolesOffices
+ $uro: UsersRolesOffices()
+ $o: Office( usersRolesOffices contains $uro)
  $p: Permission(description == "nomePermesso") from $uro.role.permissions
  $c: PermissionCheck(action in (
         /* inserire le action interessate *//*
@@ -674,7 +691,7 @@ end
 
 rule nomePermesso_Item
 when
- $uro: UsersRolesOffices(user == currentOperator) from currentOperator.usersRolesOffices
+ $uro: UsersRolesOffices()
  $p: Permission(description == "nomePermesso") from $uro.role.permissions
  $c: PermissionCheck(target == "nomePermesso", granted == false)
 then

@@ -106,6 +106,8 @@ public class Bootstrap extends Job<Void> {
 			admin.password = Codec.hexMD5("personnelEpasNewVersion");
 			admin.save();
 		}
+
+		bootstrapStampingCreateHandler();
 				
 		bootstrapPermissionsHandler();
 
@@ -316,6 +318,105 @@ public class Bootstrap extends Job<Void> {
 			e.printStackTrace();
 		}
 
+	}
+	
+	private static void bootstrapStampingCreateHandler() {
+		
+		//1) Creazione Ruolo con permesso
+		Role role = Role.find("byName",  Role.BADGE_READER).first();
+		if(role == null) {
+			role = new Role();
+			role.name = Role.BADGE_READER;
+			role.save();
+			Permission permission = new Permission();
+			permission.description = Security.STAMPINGS_CREATE;
+			permission.save();
+			role.permissions.add(permission);
+			role.save();
+		}
+		
+		//2) Creazione lettore badge di default da associare ad ogni ufficio
+		User defaultBadgeReader = User.find("byUsername", "defaultBadgeReader").first();
+		if(defaultBadgeReader == null){
+			defaultBadgeReader = new User();
+			defaultBadgeReader.username = "defaultBadgeReader";
+			defaultBadgeReader.password = Codec.hexMD5("defaultBadgeReader");
+			defaultBadgeReader.save();
+		}
+		
+		//3) Ogni ufficio sede senza alcun lettore badge è associato a lettore badge default
+		List<Office> officeList = Office.findAll();
+		for(Office office : officeList) {
+			
+			if( !office.isSeat() )
+				continue;
+			
+			boolean hasBadgeReader = false;
+			
+			for(UsersRolesOffices uro : office.usersRolesOffices) {
+				if(uro.role.name.equals(Role.BADGE_READER)) {
+					hasBadgeReader = true;
+					break;
+				}
+			}
+			if(hasBadgeReader) {
+				continue;
+			}
+			
+			UsersRolesOffices uro = new UsersRolesOffices();
+			uro.user = defaultBadgeReader;
+			uro.office = office;
+			uro.role = role;
+			uro.save();
+		}
+		
+		
+		//4)TEST PISA E COSENZA
+		Office pisa = Office.find("byCode", 223400).first();
+		Office cosenza = Office.find("byCode", 223410).first();
+		User pisaBadge = User.find("byUsername", "pisaBadge").first();
+		if(pisaBadge == null){
+			pisaBadge = new User();
+			pisaBadge.username = "pisaBadge";
+			pisaBadge.password = Codec.hexMD5("pisaBadge");
+			pisaBadge.save();
+		}
+		User cosenzaBadge = User.find("byUsername", "cosenzaBadge").first();
+		if(cosenzaBadge == null){
+			cosenzaBadge = new User();
+			cosenzaBadge.username = "cosenzaBadge";
+			cosenzaBadge.password = Codec.hexMD5("cosenzaBadge");
+			cosenzaBadge.save();
+		}
+		
+		for(UsersRolesOffices uro : pisa.usersRolesOffices) {
+			if(uro.role.name.equals(Role.BADGE_READER)) {
+				uro.delete();
+			}
+		}
+		for(UsersRolesOffices uro : cosenza.usersRolesOffices) {
+			if(uro.role.name.equals(Role.BADGE_READER)) {
+				uro.delete();
+			}
+		}
+		
+		UsersRolesOffices uro = new UsersRolesOffices();
+		uro.office = pisa;
+		uro.user = pisaBadge;
+		uro.role = role;
+		uro.save();
+		
+		uro = new UsersRolesOffices();
+		uro.office = cosenza;
+		uro.user = cosenzaBadge;
+		uro.role = role;
+		uro.save();
+		
+		uro = new UsersRolesOffices();
+		uro.office = pisa;
+		uro.user = cosenzaBadge;
+		uro.role = role;
+		uro.save();
 	}
 
 	

@@ -118,9 +118,9 @@ public class SecurityRules {
         commands.add(CommandFactory.newInsert(check));
         commands.add(CommandFactory.newInsert(check.getTarget()));
         commands.add(CommandFactory.newInsert(user));
-        //commands.add(CommandFactory.newInsertElements(user.roles));
+        commands.add(CommandFactory.newInsertElements(user.usersRolesOffices));
         session.execute(CommandFactory.newBatchExecution(commands));
-
+        
         LOG.debug("{}", check);
         return check.isGranted();
 	}

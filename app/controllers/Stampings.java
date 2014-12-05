@@ -239,7 +239,8 @@ public class Stampings extends Controller {
 
 
 
-	public static void createStamp(@Required Long personId, @Required Integer year, @Required Integer month, @Required Integer day){
+	public static void createStamp(@Required Long personId, 
+			@Required Integer year, @Required Integer month, @Required Integer day){
 
 
 		Person person = Person.findById(personId);
@@ -253,14 +254,16 @@ public class Stampings extends Controller {
 		render(person, personDay);
 	}
 
-	public static void insert(@Valid @Required Long personId, @Required Integer year, @Required Integer month, @Required Integer day) {
+	public static void insert(@Valid @Required Long personId, 
+			@Required Integer year, @Required Integer month, @Required Integer day) {
 
 		Person person = Person.em().getReference(Person.class, personId);
 
 		rules.checkIfPermitted(person.office);
 		
 		LocalDate date = new LocalDate(year,month,day);
-		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
+		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", 
+				person, date).first();
 		if(pd == null){
 			pd = new PersonDay(person, date);
 			pd.create();

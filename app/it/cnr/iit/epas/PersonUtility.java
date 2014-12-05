@@ -573,44 +573,6 @@ public class PersonUtility {
 	}
 
 	/**
-	 * 
-	 * @param person
-	 * @param date
-	 * @return true se la persona ha sufficiente residuo al giorno precedente per prendere un riposo compensativo
-	 */
-	public static boolean canTakeCompensatoryRest(Person person, LocalDate date)
-	{
-		if(date.getDayOfMonth()>1)
-			date = date.minusDays(1);
-		Contract contract = person.getContract(date);
-		PersonResidualYearRecap c = 
-				PersonResidualYearRecap.factory(contract, date.getYear(), date);
-		
-		if(c==null)
-			return false;
-		
-		/**
-		 * TODO: aggiungere la condizione per poter inserire un riposo compensativo in un mese futuro (verosimilmente il mese successivo a
-		 * quello in cui ci troviamo al momento in cui viene chiamato l'handler
-		 */
-		LocalDate now = new LocalDate();
-		PersonResidualMonthRecap mese = null;
-		if(now.isBefore(date))
-			mese = c.getMese(now.getMonthOfYear());
-		else
-			mese = c.getMese(date.getMonthOfYear());
-		
-		Logger.info("monteOreAnnoCorrente=%s ,  monteOreAnnoPassato=%s, workingTime=%s", mese.monteOreAnnoCorrente, mese.monteOreAnnoPassato, mese.person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime);
-		
-		if(mese.monteOreAnnoCorrente + mese.monteOreAnnoPassato > 
-			mese.person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	/**
 	 * Il numero di coppie ingresso/uscita da stampare per il personday
 	 * @param pd
 	 * @return
@@ -787,7 +749,7 @@ public class PersonUtility {
 		int number = 0;
 		for(PersonDay pd : workingDays)
 		{
-			if(!pd.isHoliday())
+			if(!pd.isHoliday() )
 				number++;
 		}
 		return number;
@@ -807,10 +769,20 @@ public class PersonUtility {
 				person, beginMonth, endMonth, false).fetch();
 		int ticketTorender = pdListNoTicket.size();
 
-		//tolgo da ticket da restituire i giorni festivi e oggi
-		for(PersonDay pd : pdListNoTicket)
-			if(pd.isHoliday() || pd.isToday())
+		
+		for(PersonDay pd : pdListNoTicket) {
+			
+			//tolgo da ticket da restituire i giorni festivi e oggi e i giorni futuri
+			if(pd.isHoliday() || pd.isToday() ) 
+			{
 				ticketTorender--;
+				continue;
+			}
+			
+			//tolgo da ticket da restituire i giorni futuri in cui non ho assenze
+			if(pd.date.isAfter(LocalDate.now()) && pd.absences.isEmpty())
+				ticketTorender--;
+		}
 
 		return ticketTorender;
 	}
