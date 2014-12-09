@@ -1,3 +1,8 @@
+#{ if switchYear && switchMonth && !switchDay}
+		  <ul class="nav navbar-nav">
+        	<li><a href="?month=${templateUtility.computePreviousMonth(currentData.month)}&year=${templateUtility.computePreviousYear(currentData.month, currentData.year)}&personId=${currentData.personId}&day=${currentData.day}"><i class="fa fa-arrow-left"></i></span></a></li>
+      	  </ul>
+#{/if}
 #{if switchYear}
 		
 		<ul id="nav-year" class="nav navbar-nav">
@@ -24,6 +29,11 @@
           	  </ul>
         	</li>
       	  </ul>
+#{/if}
+#{ if switchYear && switchMonth && !switchDay}
+      	  <ul class="nav navbar-nav">
+        	<li><a href="?month=${templateUtility.computeNextMonth(currentData.month)}&year=${templateUtility.computeNextYear(currentData.month, currentData.year)}&personId=${currentData.personId}&day=${currentData.day}"><i class="fa fa-arrow-right"></i></i></a></li>
+      	  </ul>	
 #{/if}
 #{if switchDay}
       	  	#{form @SwitchTemplate.updateDay(), class: 'navbar-form navbar-left my-navbar-form', onChange:'javascript:this.form.submit()' }

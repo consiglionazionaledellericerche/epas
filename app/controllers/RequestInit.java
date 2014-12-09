@@ -145,6 +145,11 @@ public class RequestInit extends Controller {
 		}
 	}
 	
+	/**
+	 * Contiene i dati di sessione raccolti per il template.
+	 * @author alessandro
+	 *
+	 */
 	public static class CurrentData {
 		public final Integer year;
 		public final Integer month;
@@ -163,8 +168,16 @@ public class RequestInit extends Controller {
 		}
 	}
 
+	/**
+	 * Metodi di calcolo usabili nel template.
+	 * @author alessandro
+	 *
+	 */
 	public static class TemplateUtility {
 
+		///////////////////////////////////////////////////////////////////////////7
+		//Convertitori mese
+		
 		public String monthName(String month) {
 
 			return DateUtility.getName(Integer.parseInt(month));
@@ -185,6 +198,37 @@ public class RequestInit extends Controller {
 		public boolean checkTemplate(String profile) {
 			
 			return false;
+		}
+		
+		///////////////////////////////////////////////////////////////////////////7
+		//Navigazione menu (next/previous month)
+		
+		public int computeNextMonth(int month){
+			if(month==12)
+				return 1;
+			
+			return month + 1;
+		}
+		
+		public int computeNextYear(int month, int year){
+			if(month==12)
+				return year + 1;
+			
+			return year;
+		}
+		
+		public int computePreviousMonth(int month){
+			if(month==1)
+				return 12;
+			
+			return month - 1;
+		}
+		
+		public int computePreviousYear(int month, int year){
+			if(month==1)
+				return year - 1;
+			
+			return year;
 		}
 	}
 
