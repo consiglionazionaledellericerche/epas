@@ -1,4 +1,4 @@
-#{ if switchYear && switchMonth && !switchDay}
+#{ if switchYear && switchMonth}
 		  <ul class="nav navbar-nav">
         	<li><a href="?month=${templateUtility.computePreviousMonth(currentData.month)}&year=${templateUtility.computePreviousYear(currentData.month, currentData.year)}&personId=${currentData.personId}&day=${currentData.day}"><i class="fa fa-arrow-left"></i></span></a></li>
       	  </ul>
@@ -30,7 +30,7 @@
         	</li>
       	  </ul>
 #{/if}
-#{ if switchYear && switchMonth && !switchDay}
+#{ if switchYear && switchMonth}
       	  <ul class="nav navbar-nav">
         	<li><a href="?month=${templateUtility.computeNextMonth(currentData.month)}&year=${templateUtility.computeNextYear(currentData.month, currentData.year)}&personId=${currentData.personId}&day=${currentData.day}"><i class="fa fa-arrow-right"></i></i></a></li>
       	  </ul>	
