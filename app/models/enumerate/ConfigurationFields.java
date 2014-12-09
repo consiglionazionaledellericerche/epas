@@ -12,8 +12,8 @@ public enum ConfigurationFields {
 	// ConfGeneral
 	InitUseProgram("init_use_program"),
 	InstituteName("institute_name"),
-	JobsEmailAlias("email_from_jobs"),
-	EmailToContact("email_to_contact"),
+	JobsEmailAlias("email_from_jobs"),  //%prod.mail.replyTo.alias=segreteria@iit.cnr.it
+	EmailToContact("email_to_contact"),	//%prod.mail.from.alias=situazione.presenze@cnr.it
 	SeatCode("seat_code"),
 	UrlToPresence("url_to_presence"),
 	UserToPresence("user_to_presence"),

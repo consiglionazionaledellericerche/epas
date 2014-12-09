@@ -9,8 +9,6 @@ import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
 
-import play.Logger;
-
 /**
  * 
  * @author alessandro
@@ -139,7 +137,16 @@ public class AbsenceManager {
 		// (1) Se voglio inserire un riposo compensativo per il mese successivo considero il residuo a ieri.
 		//N.B Non posso inserire un riposo compensativo oltre il mese successivo.
 		LocalDate dateToCheck = date;
-		if( dateToCheck.getMonthOfYear() == LocalDate.now().getMonthOfYear() + 1) {
+		//Caso generale
+		if( dateToCheck.getMonthOfYear() == LocalDate.now().getMonthOfYear() + 1) 
+		{
+			dateToCheck = LocalDate.now();
+		}
+		//Caso particolare dicembre - gennaio
+		else if( dateToCheck.getYear() == LocalDate.now().getYear() + 1 
+				&& dateToCheck.getMonthOfYear() == 1 && LocalDate.now().getMonthOfYear() == 12) 
+		{
+			
 			dateToCheck = LocalDate.now();
 		}
 		
