@@ -22,6 +22,12 @@ import models.rendering.PersonStampingDayRecap;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
+import com.google.common.base.Optional;
+
+import dao.OfficeDao;
+import dao.PersonDao;
+import dao.PersonDayDao;
+import dao.UserDao;
 import play.Logger;
 import play.mvc.Controller;
 
@@ -29,8 +35,9 @@ public class Clocks extends Controller{
 
 	public static void show(){
 		LocalDate data = new LocalDate();
-		//TODO Capire quali office saranno visibili a questo livello 
-		List<Office> officeAllowed = Office.findAll();
+		//TODO Capire quali office saranno visibili a questo livello
+		List<Office> officeAllowed = OfficeDao.getAllOffices();
+		//List<Office> officeAllowed = Office.findAll();
 		MainMenu mainMenu = new MainMenu(data.getYear(),data.getMonthOfYear());
 		List<Person> personList = Person.getActivePersonsInMonth(data.getMonthOfYear(), data.getYear(), officeAllowed, false);
 		render(data, personList,mainMenu);
@@ -46,7 +53,8 @@ public class Clocks extends Controller{
 			Clocks.show();
 		}
 		
-		User user = User.find("select u from User u where id = ? and password = md5(?)", userId, password).first();
+		User user = UserDao.getUserById(userId, Optional.fromNullable(password));
+		//User user = User.find("select u from User u where id = ? and password = md5(?)", userId, password).first();
 		
 		if(user == null)
 		{
@@ -55,7 +63,8 @@ public class Clocks extends Controller{
 		}
 	
 					
-		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", user.person, today).first();
+		PersonDay pd = PersonDayDao.getPersonDayInPeriod(user.person, today, Optional.<LocalDate>absent()).size() > 0 ? PersonDayDao.getPersonDayInPeriod(user.person, today, Optional.<LocalDate>absent()).get(0) : null;
+		//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", user.person, today).first();
 		if(pd == null){
 			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", user.person.name, user.person.surname);
 			pd = new PersonDay(user.person, today);
@@ -83,12 +92,14 @@ public class Clocks extends Controller{
 	 * @param personId. Con questo metodo si permette l'inserimento della timbratura per la persona contrassegnata da id personId.
 	 */
 	public static void insertStamping(Long personId){
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		if(person == null)
 			throw new IllegalArgumentException("Persona non trovata!!!! Controllare l'id!");
 		LocalDateTime ldt = new LocalDateTime();
 		LocalDateTime time = new LocalDateTime(ldt.getYear(),ldt.getMonthOfYear(),ldt.getDayOfMonth(),ldt.getHourOfDay(),ldt.getMinuteOfHour(),0);
-		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, ldt.toLocalDate()).first();
+		PersonDay pd = PersonDayDao.getPersonDayInPeriod(person, ldt.toLocalDate(), Optional.<LocalDate>absent()).size() > 0 ? PersonDayDao.getPersonDayInPeriod(person, ldt.toLocalDate(), Optional.<LocalDate>absent()).get(0) : null;
+		//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, ldt.toLocalDate()).first();
 		if(pd == null){
 			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", person.name, person.surname);
 			pd = new PersonDay(person, ldt.toLocalDate());
@@ -139,12 +150,14 @@ public class Clocks extends Controller{
 	
 	public static void showRecap(Long personId)
 	{
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		if(person == null)
 			throw new IllegalArgumentException("Persona non trovata!!!! Controllare l'id!");
 		
 		LocalDate today = new LocalDate();
-		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, today).first();
+		PersonDay pd = PersonDayDao.getPersonDayInPeriod(person, today, Optional.<LocalDate>absent()).size() > 0 ? PersonDayDao.getPersonDayInPeriod(person, today, Optional.<LocalDate>absent()).get(0) : null;
+		//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, today).first();
 		if(pd == null){
 			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", person.name, person.surname);
 			pd = new PersonDay(person, today);
