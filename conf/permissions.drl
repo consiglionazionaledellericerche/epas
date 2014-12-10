@@ -642,7 +642,7 @@ rule stampings_create
 when
  $uro: UsersRolesOffices()
  $p: Permission(description == "stampingsCreate") from $uro.role.permissions
- $c: PermissionCheck(action in ("StampingsFromClient.prova"),
+ $c: PermissionCheck(action in ("StampingsFromClient.create"),
  	target == null, granted == false)
  then
  $c.grant();
@@ -653,7 +653,7 @@ when
  $uro: UsersRolesOffices()
  $o: Office( usersRolesOffices contains $uro)
  $p: Permission(description == "stampingsCreate") from $uro.role.permissions
- $c: PermissionCheck(action in ("StampingsFromClient.prova"),
+ $c: PermissionCheck(action in ("StampingsFromClient.create"),
  	target == $o, granted == false)
 then
  $c.grant();
