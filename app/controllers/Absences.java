@@ -9,6 +9,7 @@ import it.cnr.iit.epas.PersonUtility;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -55,7 +56,14 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
 import controllers.Resecure.NoCheck;
+import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
+import dao.AbsenceTypeGroupDao;
+import dao.PersonDao;
+import dao.PersonDayDao;
+import dao.PersonReperibilityDayDao;
+import dao.PersonShiftDayDao;
+import dao.QualificationDao;
 
 
 @With( {Resecure.class, RequestInit.class} )
@@ -76,8 +84,8 @@ public class Absences extends Controller{
 	}
 
 	private static List<AbsenceType> getAllAbsenceTypes(LocalDate date){
-
-		return AbsenceType.find("Select abt from AbsenceType abt where abt.validTo > ? order by code", date).fetch();
+		return AbsenceTypeDao.getAbsenceTypeFromEffectiveDate(date); 
+		//return AbsenceType.find("Select abt from AbsenceType abt where abt.validTo > ? order by code", date).fetch();
 	}
 
 	
@@ -101,8 +109,9 @@ public class Absences extends Controller{
 		LocalDate beginMonth = new LocalDate(year, month, 1);
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
 		
-		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date",
-				person, beginMonth, endMonth).fetch();
+		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, beginMonth, Optional.fromNullable(endMonth));
+//		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date",
+//				person, beginMonth, endMonth).fetch();
 		
 		Map<AbsenceType,Integer> absenceCodeMap = new HashMap<AbsenceType, Integer>();
 
@@ -130,9 +139,13 @@ public class Absences extends Controller{
 	
 	public static void absenceInMonth(Long personId, String absenceCode, int year, int month){
 		List<LocalDate> dateAbsences = new ArrayList<LocalDate>();
-		Person person = Person.findById(personId);
-		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-				person, new LocalDate(year,month,1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
+		Person person = PersonDao.getPersonById(personId);
+//		Person person = Person.findById(personId);
+		LocalDate begin = new LocalDate(year, month, 1);
+		LocalDate end = new LocalDate(year, month, 1).dayOfMonth().withMaximumValue();
+		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, begin, Optional.fromNullable(end));
+//		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+//				person, new LocalDate(year,month,1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
 		for(PersonDay pd : pdList){
 			if(pd.absences != null){
 				for(Absence abs : pd.absences){
@@ -164,8 +177,10 @@ public class Absences extends Controller{
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		AbsenceType abt = new AbsenceType();
 		AbsenceTypeGroup  abtg = new AbsenceTypeGroup();
-		List<Qualification> qualificationList = Qualification.findAll();
-		List<AbsenceTypeGroup> abtList = AbsenceTypeGroup.findAll();
+		List<Qualification> qualificationList = QualificationDao.getQualification(null, null, true);
+		//List<Qualification> qualificationList = Qualification.findAll();
+		List<AbsenceTypeGroup> abtList = AbsenceTypeGroupDao.getAbsenceTypeGroup(null,true);
+		//List<AbsenceTypeGroup> abtList = AbsenceTypeGroup.findAll();
 		List<JustifiedTimeAtWork> justifiedTimeAtWorkList = new ArrayList<JustifiedTimeAtWork>();
 		justifiedTimeAtWorkList.add(JustifiedTimeAtWork.AllDay);
 		justifiedTimeAtWorkList.add(JustifiedTimeAtWork.EightHours);
@@ -229,7 +244,8 @@ public class Absences extends Controller{
 		String qual = params.get("qual");
 		Integer qualifica = new Integer(qual);
 		for(int i = 1; i <= qualifica; i++){
-			Qualification q = Qualification.find("Select q from Qualification q where q.qualification = ?", i).first();
+			Qualification q = QualificationDao.getQualification(Optional.fromNullable(new Integer(i)), null, false).get(0);
+			//Qualification q = Qualification.find("Select q from Qualification q where q.qualification = ?", i).first();
 			abt.qualifications.add(q);
 		}
 
@@ -242,7 +258,8 @@ public class Absences extends Controller{
 			abtg.label = params.get("gruppo");
 			abtg.limitInMinute = params.get("limiteAccumulo", Integer.class);
 			abtg.minutesExcess = params.get("minutiEccesso", Boolean.class);
-			abtg.replacingAbsenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", params.get("codicePerSostituzione")).first();
+			abtg.replacingAbsenceType = AbsenceTypeDao.getAbsenceTypeByCode(params.get("codiceSostituzione"));
+			//abtg.replacingAbsenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", params.get("codicePerSostituzione")).first();
 			abt.absenceTypeGroup = abtg;
 			abtg.save();
 		}
@@ -283,7 +300,8 @@ public class Absences extends Controller{
 		Person person = Person.em().getReference(Person.class, personId);
 		LocalDate dateFrom = new LocalDate(yearFrom, monthFrom, dayFrom);
 		
-		AbsenceType absenceType = AbsenceType.find("byCode", absenceCode).first();
+		AbsenceType absenceType = AbsenceTypeDao.getAbsenceTypeByCode(absenceCode);
+//		AbsenceType absenceType = AbsenceType.find("byCode", absenceCode).first();
 		
 		if (absenceType == null) {
 			validation.keep();
@@ -378,7 +396,8 @@ public class Absences extends Controller{
 	public static void insert(@Required Long personId, @Required Integer yearFrom, 
 			@Required Integer monthFrom, @Required Integer dayFrom, @Required String absenceCode, String finoa, Blob file, String mealTicket) throws EmailException{
 
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		
 		rules.checkIfPermitted(person.office);
 		
@@ -391,7 +410,8 @@ public class Absences extends Controller{
 	public static void editCode(@Required Long absenceCodeId) throws InstantiationException, IllegalAccessException{
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		
-		AbsenceType abt = AbsenceType.findById(absenceCodeId);
+		AbsenceType abt = AbsenceTypeDao.getAbsenceTypeById(absenceCodeId);
+		//AbsenceType abt = AbsenceType.findById(absenceCodeId);
 		List<JustifiedTimeAtWork> justList = new ArrayList<JustifiedTimeAtWork>();
 		justList.add(0,JustifiedTimeAtWork.AllDay);
 		justList.add(1,JustifiedTimeAtWork.HalfDay);
@@ -407,7 +427,8 @@ public class Absences extends Controller{
 		justList.add(11,JustifiedTimeAtWork.TimeToComplete);
 		justList.add(12,JustifiedTimeAtWork.ReduceWorkingTimeOfTwoHours);
 
-		List<Qualification> qualList = Qualification.findAll();
+		List<Qualification> qualList = QualificationDao.getQualification(null, null, true);
+		//List<Qualification> qualList = Qualification.findAll();
 		List<AccumulationType> accType = new ArrayList<AccumulationType>();
 		accType.add(0, AccumulationType.always);
 		accType.add(1, AccumulationType.monthly);
@@ -425,7 +446,9 @@ public class Absences extends Controller{
 	public static void updateCode(){
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		
-		AbsenceType absence = AbsenceType.findById(params.get("absenceTypeId", Long.class));
+		//TODO: rimuovere tutti i params.get presenti nel metodo passandoli invece come parametri al metodo stesso
+		AbsenceType absence = AbsenceTypeDao.getAbsenceTypeById(params.get("absenceTypeId", Long.class));
+		//AbsenceType absence = AbsenceType.findById(params.get("absenceTypeId", Long.class));
 		if(absence == null)
 			notFound();
 		Logger.debug("Il codice d'assenza da modificare è %s", absence.code);
@@ -443,12 +466,14 @@ public class Absences extends Controller{
 
 		for(int i = 1; i <= 10; i++){
 			if(params.get("qualification"+i) != null){
-				Qualification q = Qualification.findById(new Long(i));
+				Qualification q = QualificationDao.getQualification(null, Optional.fromNullable(new Long(i)), false).get(0);
+				//Qualification q = Qualification.findById(new Long(i));
 				if(!absence.qualifications.contains(q))
 					absence.qualifications.add(q);
 			}
 			else{
-				Qualification q = Qualification.findById(new Long(i));
+				Qualification q = QualificationDao.getQualification(null, Optional.fromNullable(new Long(i)), false).get(0);
+				//Qualification q = Qualification.findById(new Long(i));
 				if(absence.qualifications.contains(q))
 					absence.qualifications.remove(q);
 			}
@@ -464,7 +489,8 @@ public class Absences extends Controller{
 			absence.absenceTypeGroup.limitInMinute = params.get("limiteAccumulo", Integer.class);
 			absence.absenceTypeGroup.minutesExcess = params.get("minutiEccesso", Boolean.class);
 			String codeToReplace = params.get("codiceSostituzione");
-			AbsenceTypeGroup abtg = AbsenceTypeGroup.find("Select abtg from AbsenceTypeGroup abtg where abtg.code = ?", codeToReplace).first();
+			AbsenceTypeGroup abtg = AbsenceTypeGroupDao.getAbsenceTypeGroup(Optional.fromNullable(codeToReplace), false).get(0);
+			//AbsenceTypeGroup abtg = AbsenceTypeGroup.find("Select abtg from AbsenceTypeGroup abtg where abtg.code = ?", codeToReplace).first();
 			absence.absenceTypeGroup = abtg;
 		}
 		absence.save();
@@ -478,7 +504,8 @@ public class Absences extends Controller{
 	public static void edit(@Required Long absenceId) {
 		Logger.debug("Edit absence called for absenceId=%d", absenceId);
 
-		Absence absence = Absence.findById(absenceId);
+		Absence absence = AbsenceDao.getAbsenceById(absenceId);
+		//Absence absence = Absence.findById(absenceId);
 		if (absence == null) {
 			notFound();
 		}
@@ -486,14 +513,17 @@ public class Absences extends Controller{
 		rules.checkIfPermitted(absence.personDay.person.office);
 		
 		LocalDate date = absence.personDay.date;
-		List<AbsenceType> frequentAbsenceTypeList = getFrequentAbsenceTypes();
+		List<AbsenceType> frequentAbsenceTypeList = AbsenceTypeDao.getFrequentTypes();
+		//List<AbsenceType> frequentAbsenceTypeList = getFrequentAbsenceTypes();
 		MainMenu mainMenu = new MainMenu(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth());
 		List<AbsenceType> allCodes = getAllAbsenceTypes(absence.personDay.date);
 		render(absence, frequentAbsenceTypeList, allCodes, mainMenu);				
 	}
     
 	public static void update(Blob file) throws EmailException {
-		Absence absence = Absence.findById(params.get("absenceId", Long.class));
+		
+		Absence absence = AbsenceDao.getAbsenceById(params.get("absenceId", Long.class));
+		//Absence absence = Absence.findById(params.get("absenceId", Long.class));
 		if (absence == null) {
 			notFound();
 		}
@@ -526,7 +556,8 @@ public class Absences extends Controller{
 		int monthFrom = dateFrom.getMonthOfYear();
 		int dayFrom = dateFrom.getDayOfMonth();
 		
-		AbsenceType newAbsenceType = AbsenceType.find("byCode", params.get("absenceCode")).first();
+		AbsenceType newAbsenceType = AbsenceTypeDao.getAbsenceTypeByCode(params.get("absenceCode"));
+		//AbsenceType newAbsenceType = AbsenceType.find("byCode", params.get("absenceCode")).first();
 		String mealTicket =  params.get("buonoMensa");
 
 		int deleted = removeAbsencesInPeriod(person, dateFrom, dateTo, absence.absenceType);
@@ -549,7 +580,9 @@ public class Absences extends Controller{
 	 */
 	private static void checkMealTicket(LocalDate date, Person person, String mealTicket, AbsenceType abt){
 		
-		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
+		PersonDay pd = PersonDayDao.getPersonDayInPeriod(person, date, Optional.<LocalDate>absent()).get(0);
+		
+		//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
 		if(pd == null)
 			pd = new PersonDay(person, date);
 		if(abt==null || !abt.code.equals("92"))
@@ -609,9 +642,10 @@ public class Absences extends Controller{
 				}
 			}
 			
-
+			//Controllo del residuo
 			if(!AbsenceManager.canTakeCompensatoryRest(person, actualDate))
 			{
+				
 				actualDate = actualDate.plusDays(1);
 				continue;
 			}
@@ -874,7 +908,8 @@ public class Absences extends Controller{
 				Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
 			}
 			
-			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, actualDate).first();
+			PersonDay pd = PersonDayDao.getPersonDayInPeriod(person, actualDate, null).get(0);
+			//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, actualDate).first();
 			if(pd == null){
 				pd = new PersonDay(person, actualDate);
 				pd.populatePersonDay();
@@ -962,7 +997,8 @@ public class Absences extends Controller{
 		
 		while(!actualDate.isAfter(dateTo))
 		{
-			List<Absence> absenceList = Absence.find("Select a from Absence a, PersonDay pd where a.personDay = pd and pd.person = ? and pd.date = ?", person, actualDate).fetch();
+			List<Absence> absenceList = AbsenceDao.getAbsenceInDay(Optional.fromNullable(person), actualDate, Optional.<LocalDate>absent(), false);
+			//List<Absence> absenceList = Absence.find("Select a from Absence a, PersonDay pd where a.personDay = pd and pd.person = ? and pd.date = ?", person, actualDate).fetch();
 			for(Absence abs : absenceList)
 			{
 				if(abs.absenceType.equals(absenceType)){
@@ -989,7 +1025,8 @@ public class Absences extends Controller{
 		
 		while(!actualDate.isAfter(dateTo))
 		{
-			List<Absence> absenceList = Absence.find("Select a from Absence a, PersonDay pd where a.personDay = pd and pd.person = ? and pd.date = ?", person, actualDate).fetch();
+			List<Absence> absenceList = AbsenceDao.getAbsenceInDay(Optional.fromNullable(person), actualDate, Optional.<LocalDate>absent(), false);
+			//List<Absence> absenceList = Absence.find("Select a from Absence a, PersonDay pd where a.personDay = pd and pd.person = ? and pd.date = ?", person, actualDate).fetch();
 			for(Absence abs : absenceList)
 			{
 				if(abs != null && abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay && absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay)
@@ -1009,12 +1046,16 @@ public class Absences extends Controller{
 	 */
 	private static boolean checkIfAbsenceInReperibilityOrInShift(Person person, LocalDate date){
 		//controllo se la persona è in reperibilità
-		PersonReperibilityDay prd = PersonReperibilityDay.find("Select prd from PersonReperibilityDay prd where prd.date = ? and prd.personReperibility.person = ?", 
-				date, person).first();
+		
+		PersonReperibilityDay prd = PersonReperibilityDayDao.getPersonReperibilityDay(person, date);
+//		PersonReperibilityDay prd = PersonReperibilityDay.find("Select prd from PersonReperibilityDay prd where prd.date = ? and prd.personReperibility.person = ?", 
+//				date, person).first();
 				
 		//controllo se la persona è in turno
-		PersonShiftDay psd = PersonShiftDay.find("Select psd from PersonShiftDay psd where psd.date = ? and psd.personShift.person = ?",
-				date, person).first();
+		PersonShiftDay psd = PersonShiftDayDao.getPersonShiftDay(person, date);
+		
+//		PersonShiftDay psd = PersonShiftDay.find("Select psd from PersonShiftDay psd where psd.date = ? and psd.personShift.person = ?",
+//				date, person).first();
 		if(psd == null && prd == null)		
 			return false;
 		else
@@ -1046,9 +1087,10 @@ public class Absences extends Controller{
 		LocalDate beginMonth = new LocalDate(year, month, 1);
 		
 		//Prendere le assenze ordinate per tipo
-		List<Absence> absenceList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup is null and " +
-				"abs.personDay.date between ? and ? and abs.absenceFile is not null order by abs.absenceType.code", 
-				beginMonth, beginMonth.dayOfMonth().withMaximumValue()).fetch();
+		List<Absence> absenceList = AbsenceDao.getAbsenceInDay(Optional.<Person>absent(), beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), true);
+//		List<Absence> absenceList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup is null and " +
+//				"abs.personDay.date between ? and ? and abs.absenceFile is not null order by abs.absenceType.code", 
+//				beginMonth, beginMonth.dayOfMonth().withMaximumValue()).fetch();
 	
 		List<AttachmentsPerCodeRecap> attachmentRecapList = new ArrayList<AttachmentsPerCodeRecap>();
 		AttachmentsPerCodeRecap currentRecap = new AttachmentsPerCodeRecap();
@@ -1085,12 +1127,13 @@ public class Absences extends Controller{
 	
 	public static void downloadAttachment(long id){
 		Logger.debug("Assenza con id: %d", id);
-		   Absence absence = Absence.findById(id);
-		   rules.checkIfPermitted(absence.personDay.person.office);
-		   notFoundIfNull(absence);
-		   response.setContentTypeIfNotSet(absence.absenceFile.type());
-		   Logger.debug("Allegato relativo all'assenza: %s", absence.absenceFile.getFile());
-		   renderBinary(absence.absenceFile.get(), absence.absenceFile.length());
+		Absence absence = AbsenceDao.getAbsenceById(id);   
+		//Absence absence = Absence.findById(id);
+		rules.checkIfPermitted(absence.personDay.person.office);
+		notFoundIfNull(absence);
+		response.setContentTypeIfNotSet(absence.absenceFile.type());
+		Logger.debug("Allegato relativo all'assenza: %s", absence.absenceFile.getFile());
+		renderBinary(absence.absenceFile.get(), absence.absenceFile.length());
 	}
 
 	public static void zipAttachment(String code, Integer year, Integer month) throws IOException{
@@ -1099,9 +1142,12 @@ public class Absences extends Controller{
 		ZipOutputStream zos = new ZipOutputStream(fos);
 		
 		
-		List<Absence> absList = Absence.find("Select abs from Absence abs where abs.absenceType.code = ? "
-				+ "and abs.personDay.date between ? and ? and abs.absenceFile is not null",
-				code, new LocalDate(year, month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
+		List<Absence> absList = AbsenceDao.getAbsenceByCodeInPeriod(Optional.<Person>absent(),Optional.fromNullable(code), 
+				new LocalDate(year, month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), 
+				Optional.<JustifiedTimeAtWork>absent(), true);
+//		List<Absence> absList = Absence.find("Select abs from Absence abs where abs.absenceType.code = ? "
+//				+ "and abs.personDay.date between ? and ? and abs.absenceFile is not null",
+//				code, new LocalDate(year, month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
 		byte[] buffer = new byte[1024];
 
 		for(Absence abs : absList){
@@ -1132,16 +1178,18 @@ public class Absences extends Controller{
 	
 	
 	public static void manageAttachmentsPerPerson(Long personId, Integer year, Integer month){
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		if(person == null){
 			flash.error("Persona inesistente");
 			YearlyAbsences.showGeneralMonthlyAbsences(year, month, null, null);
 		}
 		rules.checkIfPermitted(person.office);
 		List<Absence> personAbsenceListWithFile = new ArrayList<Absence>();
-		List<Absence> personAbsenceList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
-				"and abs.personDay.date between ? and ?", 
-				person, new LocalDate(year, month,1), new LocalDate(year, month,1).dayOfMonth().withMaximumValue()).fetch();
+		List<Absence> personAbsenceList = AbsenceDao.getAbsenceInDay(Optional.fromNullable(person), new LocalDate(year, month,1), Optional.fromNullable(new LocalDate(year, month,1).dayOfMonth().withMaximumValue()), false);
+//		List<Absence> personAbsenceList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
+//				"and abs.personDay.date between ? and ?", 
+//				person, new LocalDate(year, month,1), new LocalDate(year, month,1).dayOfMonth().withMaximumValue()).fetch();
 		for(Absence abs : personAbsenceList){
 			if (abs.absenceFile.get() != null){
 				personAbsenceListWithFile.add(abs);
@@ -1159,7 +1207,8 @@ public class Absences extends Controller{
 				Security.getOfficeAllowed(), false);
 		if(personId == null)
 			personId = Security.getUser().get().person.id;
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		if(person == null){
 			flash.error("Persona inesistente");
 			Stampings.personStamping(Security.getUser().get().person.id, new LocalDate().getYear(), new LocalDate().getMonthOfYear());
@@ -1188,8 +1237,10 @@ public class Absences extends Controller{
 		List<Absence> riposiCompensativi = new ArrayList<Absence>();
 		List<Absence> altreAssenze = new ArrayList<Absence>();
 		
-		List<Absence> absenceList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
-				"and abs.personDay.date between ? and ? and abs.absenceType.justifiedTimeAtWork = ?", person, dateFrom, dateTo, JustifiedTimeAtWork.AllDay).fetch();
+		List<Absence> absenceList = AbsenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person), 
+				Optional.<String>absent(), dateFrom, dateTo, Optional.fromNullable(JustifiedTimeAtWork.AllDay), false);
+//		List<Absence> absenceList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
+//				"and abs.personDay.date between ? and ? and abs.absenceType.justifiedTimeAtWork = ?", person, dateFrom, dateTo, JustifiedTimeAtWork.AllDay).fetch();
 
 		for(Absence abs : absenceList){
 			if(abs.absenceType.code.equals("92")){
@@ -1242,12 +1293,22 @@ public class Absences extends Controller{
 				
 				Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
 			}
+			PersonDay pd = null;
+			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, actualDate, Optional.<LocalDate>absent());
 			//Costruisco se non esiste il person day
-			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, actualDate).first();
-			if(pd == null){
+			if(pdList.size() == 0){
 				pd = new PersonDay(person, actualDate);
 				pd.create();
 			}
+			else{
+				pd = pdList.get(0);
+			}
+//			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, actualDate).first();
+			
+//			if(pd == null){
+//				pd = new PersonDay(person, actualDate);
+//				pd.create();
+//			}
 			esito = checkIfAbsenceInReperibilityOrInShift(person, actualDate);
 			if(esito==true){
 				cai.insertInShiftOrReperibility = true;
@@ -1329,14 +1390,27 @@ public class Absences extends Controller{
 		int deleted = 0;
 		while(!actualDate.isAfter(dateTo))
 		{
-			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, actualDate).first();
-			if(pd == null)
-			{
+			
+			PersonDay pd = null;
+			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, actualDate, Optional.<LocalDate>absent());
+			//Costruisco se non esiste il person day
+			if(pdList.size() == 0){
 				actualDate = actualDate.plusDays(1);
 				continue;
 			}
-			List<Absence> absenceList = Absence.find("Select ab from Absence ab, PersonDay pd where ab.personDay = pd and pd.person = ? and pd.date = ?", 
-					person, actualDate).fetch();
+			else{
+				pd = pdList.get(0);
+			}
+			
+		//	PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, actualDate).first();
+//			if(pd == null)
+//			{
+//				actualDate = actualDate.plusDays(1);
+//				continue;
+//			}
+			List<Absence> absenceList = AbsenceDao.getAbsenceInDay(Optional.fromNullable(person), actualDate, Optional.<LocalDate>absent(), false);
+//			List<Absence> absenceList = Absence.find("Select ab from Absence ab, PersonDay pd where ab.personDay = pd and pd.person = ? and pd.date = ?", 
+//					person, actualDate).fetch();
 			for(Absence absence : absenceList)
 			{
 				if(absence.absenceType.code.equals(absenceType.code))
@@ -1349,9 +1423,9 @@ public class Absences extends Controller{
 					Logger.info("Rimossa assenza del %s per %s %s", actualDate, person.name, person.surname);
 				}
 			}
-			//if(pd.date.isAfter(today) && pd.absences.isEmpty() && pd.absences.isEmpty()){
-			//	pd.delete();
-			//}
+			if(pd.date.isAfter(today) && pd.absences.isEmpty() && pd.absences.isEmpty()){
+				pd.delete();
+			}
 			actualDate = actualDate.plusDays(1);
 		}
 		return deleted;

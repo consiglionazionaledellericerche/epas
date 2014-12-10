@@ -17,9 +17,11 @@ import models.query.QPersonDay;
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 
+import dao.AbsenceDao;
 import play.Logger;
 import play.data.binding.As;
 import play.mvc.Controller;
@@ -67,9 +69,10 @@ public class AbsenceFromJson extends Controller{
 			if(person != null){
 				Logger.debug("Controllo %s %s", person.name, person.surname);
 
-				List<Absence> absences = Absence.find("Select abs from Absence abs, PersonDay pd " +
-						"where abs.personDay = pd and pd.date between ? and ? and pd.person = ? order by abs.personDay.date", 
-						dateFrom, dateTo, person).fetch();
+				List<Absence> absences = AbsenceDao.getAbsenceInDay(Optional.fromNullable(person), dateFrom, Optional.fromNullable(dateTo), false);
+//				List<Absence> absences = Absence.find("Select abs from Absence abs, PersonDay pd " +
+//						"where abs.personDay = pd and pd.date between ? and ? and pd.person = ? order by abs.personDay.date", 
+//						dateFrom, dateTo, person).fetch();
 				Logger.debug("Lista assenze per %s %s: %s", person.name, person.surname, absences.toString());
 
 				LocalDate startCurrentPeriod = null;
