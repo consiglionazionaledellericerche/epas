@@ -31,14 +31,19 @@
 
           <div class="col-xs-7">
             <ul class="pagination">
-  	          #{list items:0..simpleResults.totalPage-1, as:'indexPage', class:'inline'}
-  	            #{if simpleResults.page==indexPage}
-  	              <li class="active"><a href="#">${indexPage+1}</a></li>
-  	            #{/if}
-  	            #{else}
-  	              <li><a href="@{MonthRecaps.show(year, month, name, indexPage)}">${indexPage+1}</a></li>
-  	            #{/else}
-  	          #{/list}
+                #{if simpleResults.totalPage > 0}
+	  	          #{list items:0..simpleResults.totalPage-1, as:'indexPage', class:'inline'}
+	  	            #{if simpleResults.page==indexPage}
+	  	              <li class="active"><a href="#">${indexPage+1}</a></li>
+	  	            #{/if}
+	  	            #{else}
+	  	              <li><a href="@{MonthRecaps.show(year, month, name, indexPage)}">${indexPage+1}</a></li>
+	  	            #{/else}
+	  	          #{/list}
+	  	        #{/if}
+	        	#{else}
+	              <br>
+	            #{/else}   
             </ul>
 		  </div>
 	  
