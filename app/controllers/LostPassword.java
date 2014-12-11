@@ -9,6 +9,8 @@ import models.User;
 import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.LocalDate;
 
+import dao.PersonDao;
+import dao.UserDao;
 import play.Logger;
 import play.Play;
 import play.libs.Codec;
@@ -29,7 +31,8 @@ public class LostPassword extends Controller{
 			LostPassword.lostPassword();
 		}
 
-		Person person = Person.find("byEmail", email).first();
+		Person person = PersonDao.getPersonByEmail(email);
+		//Person person = Person.find("byEmail", email).first();
 		if(person==null)
 		{
 			flash.error("L'indirizzo email fornito è sconosciuto. Operazione annullata.");
@@ -68,7 +71,8 @@ public class LostPassword extends Controller{
 			Secure.login();
 		}
 		
-		User user = User.find("byRecoveryToken", token).first();
+		User user = UserDao.getUserByRecoveryToken(token);
+		//User user = User.find("byRecoveryToken", token).first();
 		if(user==null)
 		{
 			flash.error("Accesso non autorizzato. Operazione annullata.");

@@ -282,10 +282,9 @@ public final class PersonDao {
 	public static Person getPersonById(Long personId) {
 		QPerson person = QPerson.person;
 		final JPQLQuery query = ModelQuery.queryFactory().from(person).where(person.id.eq(personId));
-		if(query.list(person).size() > 0)
-			return query.list(person).get(0);
-		else
-			return null;
+		
+		return query.singleResult(person);
+		
 	
 	}
 	
@@ -297,10 +296,21 @@ public final class PersonDao {
 	public static Person getPersonByNumber(Integer number){
 		QPerson person = QPerson.person;
 		final JPQLQuery query = ModelQuery.queryFactory().from(person).where(person.number.eq(number));
-		if(query.list(person).size() > 0)
-			return query.list(person).get(0);
-		else
-			return null;
+		
+		return query.singleResult(person);
+		
+	}
+	
+	/**
+	 * 
+	 * @param email
+	 * @return la persona che ha associata la mail email
+	 */
+	public static Person getPersonByEmail(String email){
+		QPerson person = QPerson.person;
+		final JPQLQuery query = ModelQuery.queryFactory().from(person).where(person.email.eq(email));
+		
+		return query.singleResult(person);
 	}
 	
 	

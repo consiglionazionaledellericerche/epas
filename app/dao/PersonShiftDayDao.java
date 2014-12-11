@@ -23,9 +23,8 @@ public class PersonShiftDayDao {
 		QPersonShiftDay personShiftDay = QPersonShiftDay.personShiftDay;
 		JPQLQuery query = ModelQuery.queryFactory().from(personShiftDay)
 				.where(personShiftDay.personShift.person.eq(person).and(personShiftDay.date.eq(date)));
-		if(query.list(personShiftDay).size() > 0)
-			return query.list(personShiftDay).get(0);
-		else
-			return null;
+		
+		return query.singleResult(personShiftDay);
+		
 	}
 }

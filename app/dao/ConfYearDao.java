@@ -54,4 +54,16 @@ public class ConfYearDao {
 		query.where(condition);
 		return query.singleResult(confYear);
 	}
+	
+	/**
+	 * 
+	 * @param id
+	 * @return la confYear relativa all'id passato come parametro
+	 */
+	public static ConfYear getConfYearById(Long id){
+		QConfYear confYear = QConfYear.confYear;
+		final JPQLQuery query = ModelQuery.queryFactory().from(confYear)
+				.where(confYear.id.eq(id));
+		return query.singleResult(confYear);
+	}
 }

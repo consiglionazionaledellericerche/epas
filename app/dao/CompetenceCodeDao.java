@@ -20,10 +20,9 @@ public class CompetenceCodeDao {
 		QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
 		final JPQLQuery query = ModelQuery.queryFactory().from(competenceCode)
 				.where(competenceCode.code.eq(code));
-		if(query.list(competenceCode).size() > 0)
-			return query.list(competenceCode).get(0);
-		else
-			return null;
+		
+		return query.singleResult(competenceCode);
+		
 	}
 	
 	/**
@@ -35,10 +34,9 @@ public class CompetenceCodeDao {
 		QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
 		final JPQLQuery query = ModelQuery.queryFactory().from(competenceCode)
 				.where(competenceCode.description.eq(description));
-		if(query.list(competenceCode).size() > 0)
-			return query.list(competenceCode).get(0);
-		else
-			return null;
+		
+		return query.singleResult(competenceCode);
+		
 	}
 	
 	/**
@@ -50,10 +48,9 @@ public class CompetenceCodeDao {
 		QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
 		final JPQLQuery query = ModelQuery.queryFactory().from(competenceCode)
 				.where(competenceCode.id.eq(id));
-		if(query.list(competenceCode).size() > 0)
-			return query.list(competenceCode).get(0);
-		else
-			return null;
+		
+		return query.singleResult(competenceCode);
+		
 	}
 	
 	/**

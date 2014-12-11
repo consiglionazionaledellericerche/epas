@@ -16,6 +16,18 @@ public class RoleDao {
 		QRole role = QRole.role;
 		final JPQLQuery query = ModelQuery.queryFactory().from(role)
 				.where(role.id.eq(id));
-		return query.list(role).get(0);
+		return query.singleResult(role);
+	}
+	
+	/**
+	 * 
+	 * @param name
+	 * @return il ruolo identificato dal nome passato come parametro
+	 */
+	public static Role getRoleByName(String name){
+		QRole role = QRole.role;
+		final JPQLQuery query = ModelQuery.queryFactory().from(role)
+				.where(role.name.eq(name));
+		return query.singleResult(role);
 	}
 }

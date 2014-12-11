@@ -8,8 +8,10 @@ import models.Competence;
 import models.CompetenceCode;
 import models.Office;
 import models.Person;
+import models.PersonHourForOvertime;
 import models.TotalOvertime;
 import models.query.QCompetence;
+import models.query.QPersonHourForOvertime;
 import models.query.QTotalOvertime;
 
 import com.google.common.base.Optional;
@@ -27,10 +29,9 @@ public class CompetenceDao {
 		QCompetence competence = QCompetence.competence;
 		final JPQLQuery query = ModelQuery.queryFactory().from(competence)
 				.where(competence.id.eq(id));
-		if(query.list(competence).size() > 0)
-			return query.list(competence).get(0);
-		else
-			return null;
+		
+		return query.singleResult(competence);
+		
 	}
 	
 	/**
@@ -100,10 +101,9 @@ public class CompetenceDao {
 		final JPQLQuery query = ModelQuery.queryFactory().from(competence)
 				.where(competence.person.eq(person).
 						and(competence.year.eq(year).and(competence.month.eq(month).and(competence.competenceCode.eq(code)))));
-		if(query.list(competence).size() > 0)
-			return query.list(competence).get(0);
-		else
-			return null;
+		
+		return query.singleResult(competence);
+		
 	}
 	
 	/**
@@ -147,6 +147,21 @@ public class CompetenceDao {
 		final JPQLQuery query = ModelQuery.queryFactory().from(totalOvertime)
 				.where(totalOvertime.year.eq(year).and(totalOvertime.office.eq(office)));
 		return query.list(totalOvertime);
+	}
+	
+	/**********************************************************************************************************************************/
+	/*Parte relativa a query su PersonHourForOvertime per la quale, essendo unica, non si è deciso di creare un Dao ad hoc*/
+	
+	/**
+	 * 
+	 * @param person
+	 * @return il personHourForOvertime relativo alla persona person passata come parametro
+	 */
+	public static PersonHourForOvertime getPersonHourForOvertime(Person person){
+		QPersonHourForOvertime personHourForOvertime = QPersonHourForOvertime.personHourForOvertime;
+		final JPQLQuery query = ModelQuery.queryFactory().from(personHourForOvertime)
+				.where(personHourForOvertime.person.eq(person));
+		return query.singleResult(personHourForOvertime);
 	}
 	
 }

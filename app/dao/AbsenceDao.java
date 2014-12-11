@@ -26,10 +26,8 @@ public class AbsenceDao {
 		QAbsence absence = QAbsence.absence;
 		final JPQLQuery query = ModelQuery.queryFactory().from(absence)
 				.where(absence.id.eq(id));
-		if(query.list(absence).size() > 0)
-			return query.list(absence).get(0);
-		else
-			return null;
+		return query.singleResult(absence);
+
 	}
 	
 	/**
