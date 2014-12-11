@@ -22,6 +22,10 @@ public class Application extends Controller {
 	
     public static void index() {
     	
+		if(Office.count() == 0 && Security.getUser().get().username.equals("admin")){
+			Wizard.wizard(0);
+		}
+    	
     	List<Office> officeList = Office.findAll();
     	boolean seatExist = false;
     	for(Office office : officeList) {
@@ -37,11 +41,6 @@ public class Application extends Controller {
     		Offices.showOffices();
     	}
     	
-//		Office office = Office.findById(1L);
-//		if(office.code.intValue() == 0){
-//			Wizard.wizard(0);
-//		}
-	
     	if( Security.getUser().get().username.equals("epas.clocks") ){
     		
     		Clocks.show();
