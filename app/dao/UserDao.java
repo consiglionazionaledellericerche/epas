@@ -23,6 +23,18 @@ public class UserDao {
 			condition.and(user.password.eq(password.get()));
 		final JPQLQuery query = ModelQuery.queryFactory().from(user)
 				.where(condition.and(user.id.eq(id)));
-		return query.list(user).get(0);
+		return query.singleResult(user);
+	}
+	
+	/**
+	 * 
+	 * @param recoveryToken
+	 * @return
+	 */
+	public static User getUserByRecoveryToken(String recoveryToken){
+		QUser user = QUser.user;
+		final JPQLQuery query = ModelQuery.queryFactory().from(user)
+				.where(user.recoveryToken.eq(recoveryToken));
+		return query.singleResult(user);
 	}
 }

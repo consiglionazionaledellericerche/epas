@@ -92,10 +92,9 @@ public class AbsenceTypeDao {
 		QAbsenceType absenceType = QAbsenceType.absenceType;
 		final JPQLQuery query = ModelQuery.queryFactory().from(absenceType)
 				.where(absenceType.id.eq(long1));
-		if(query.list(absenceType).size() > 0)
-			return query.list(absenceType).get(0);
-		else
-			return null;
+		
+		return query.singleResult(absenceType);
+		
 	}
 
 	/**
@@ -121,10 +120,9 @@ public class AbsenceTypeDao {
 		QAbsenceType absenceType = QAbsenceType.absenceType;
 		final JPQLQuery query = ModelQuery.queryFactory().from(absenceType)
 				.where(absenceType.code.eq(string));
-		if(query.list(absenceType).size() > 0)
-			return query.list(absenceType).get(0);
-		else
-			return null;
+		
+		return query.singleResult(absenceType);
+		
 	}
 
 	

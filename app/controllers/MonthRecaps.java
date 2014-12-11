@@ -22,11 +22,14 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
+import dao.CompetenceDao;
 import dao.PersonDao;
+import dao.PersonDayDao;
 
 @With( {Resecure.class, RequestInit.class} )
 public class MonthRecaps extends Controller{
@@ -143,10 +146,15 @@ public class MonthRecaps extends Controller{
 			}
 
 			//straordinari s1/s2/s3
-			List<Competence> competenceList = 
-					Competence.find("Select comp from Competence comp, CompetenceCode compCode where comp.competenceCode = compCode and comp.person = ?"
-					+ "and comp.year = ? and comp.month = ? and (compCode.code = ? or compCode.code = ? or compCode.code = ?)",
-					person, year, month, "S1", "S2", "S3").fetch();
+			List<String> code = Lists.newArrayList();
+			code.add("S1");
+			code.add("S2");
+			code.add("S3");
+			List<Competence> competenceList = CompetenceDao.getCompetences(year, month, code, person.office, true);
+//			List<Competence> competenceList = 
+//					Competence.find("Select comp from Competence comp, CompetenceCode compCode where comp.competenceCode = compCode and comp.person = ?"
+//					+ "and comp.year = ? and comp.month = ? and (compCode.code = ? or compCode.code = ? or compCode.code = ?)",
+//					person, year, month, "S1", "S2", "S3").fetch();
 			valueApproved = 0;
 			for(Competence comp : competenceList)
 			{
@@ -234,10 +242,11 @@ public class MonthRecaps extends Controller{
 		for(Person person : activePersons)
 		{
 			//person day list
-			List<PersonDay> pdList = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? AND pd.date between ? and ?", 
-					person, 
-					monthBegin, 
-					monthEnd).fetch();
+			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, monthBegin, Optional.fromNullable(monthEnd));
+//			List<PersonDay> pdList = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? AND pd.date between ? and ?", 
+//					person, 
+//					monthBegin, 
+//					monthEnd).fetch();
 			
 			
 			Logger.info("Costruisco riepilogo mensile per %s %s %s",person.id, person.name, person.surname);
@@ -267,7 +276,8 @@ public class MonthRecaps extends Controller{
 	
 	public static void notJustifiedAbsences(Long personId, int year, int month){
 		
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		if(person == null){
 			flash.error("Persona non presente in anagrafica");
 			MonthRecaps.show(year, month, null, null);
@@ -287,7 +297,8 @@ public class MonthRecaps extends Controller{
 	
 	public static void justifiedAbsences(Long personId, int year, int month){
 		
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		if(person == null){
 			flash.error("Persona non presente in anagrafica");
 			MonthRecaps.show(year, month, null, null);
@@ -307,7 +318,8 @@ public class MonthRecaps extends Controller{
 	
 	public static void workingDayHoliday(Long personId, int year, int month){
 		
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		if(person == null){
 			flash.error("Persona non presente in anagrafica");
 			MonthRecaps.show(year, month, null, null);
@@ -327,7 +339,9 @@ public class MonthRecaps extends Controller{
 	
 	
 	public static void workingDayNotHoliday(Long personId, int year, int month){
-		Person person = Person.findById(personId);
+		
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		if(person == null){
 			flash.error("Persona non presente in anagrafica");
 			MonthRecaps.show(year, month, null, null);
@@ -349,7 +363,8 @@ public class MonthRecaps extends Controller{
 	private static List<PersonDay> getPersonDayListRecap(Long id, int year, int month, String listType)
 	{
 		
-		Person person = Person.findById(id);
+		Person person = PersonDao.getPersonById(id);
+		//Person person = Person.findById(id);
 				
 		LocalDate today = new LocalDate();
 		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
@@ -370,10 +385,11 @@ public class MonthRecaps extends Controller{
 
 		}
 		
-		List<PersonDay> pdList = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? AND pd.date between ? and ?", 
-			person, 
-			monthBegin, 
-			monthEnd).fetch();
+		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, monthBegin, Optional.fromNullable(monthEnd));
+//		List<PersonDay> pdList = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? AND pd.date between ? and ?", 
+//			person, 
+//			monthBegin, 
+//			monthEnd).fetch();
 		
 		PersonMonthRecapFieldSet mr = new PersonMonthRecapFieldSet();
 		mr.populatePersonMonthRecap(person, pdList, year, month);

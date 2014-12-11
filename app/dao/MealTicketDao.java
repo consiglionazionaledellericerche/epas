@@ -143,8 +143,17 @@ public class MealTicketDao {
 		
 	}
 	
-	
-	
+	/**
+	 * 
+	 * @param code
+	 * @return il mealTicket corrispondente al codice code passato come parametro
+	 */
+	public static MealTicket getMealTicketByCode(String code){
+		QMealTicket mealTicket = QMealTicket.mealTicket;
+		final JPQLQuery query = ModelQuery.queryFactory().from(mealTicket)
+				.where(mealTicket.code.eq(code));
+		return query.singleResult(mealTicket);
+	}
 	
 	
 	
