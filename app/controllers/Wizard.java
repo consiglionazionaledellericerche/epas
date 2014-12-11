@@ -81,7 +81,7 @@ public class Wizard extends Controller {
 				.of(WizardStep.of("Cambio password Admin", "changeAdminPsw",0),
 					WizardStep.of("Nuovo ufficio", "setOffice",1),
 					WizardStep.of("Configurazione generale", "setGenConf",2),
-					WizardStep.of("Creazione Ruolo per l'amministrazione", "managerRole", 3),
+					WizardStep.of("Creazione Ruolo per l'amministrazione", "seatManagerRole", 3),
 					WizardStep.of("Riepilogo", "summary",4));
 	}
 	
@@ -279,7 +279,7 @@ public class Wizard extends Controller {
      */
 	
 	@NoCheck
-    public static void managerRole(
+    public static void seatManagerRole(
     		int stepIndex,
     		@Required String manager_surname,
     		@Required String manager_name,
