@@ -32,9 +32,11 @@
         </div>
  
         <section id="results">
+	      
+	      <div class="col-xs-7">
+	        <ul class="pagination">
 
-          <div class="col-xs-7">
-            <ul class="pagination">
+	        #{if simpleResults.totalPage > 0}
   	          #{list items:0..simpleResults.totalPage-1, as:'indexPage', class:'inline'}
   	            #{if simpleResults.page==indexPage}
   	             <li class="active"><a href="#">${indexPage+1}</a></li>
@@ -43,9 +45,14 @@
   	              <li><a href="@{VacationsAdmin.list(year, name, indexPage)}">${indexPage+1}</a></li>
   	            #{/else}
 	          #{/list}
-            </ul>
-		  </div>
+	        #{/if}
+	        #{else}
+	          <br>
+	        #{/else}  
 
+            </ul>
+          </div>
+		  
 
  
 		  <div class="col-xs-12">
