@@ -39,4 +39,30 @@ public class PersonDayDao {
 		query.where(condition);
 		return query.list(personDay);
 	}
+	
+	
+	/**
+	 * 
+	 * @param personDayId
+	 * @return il personDay associato all'id passato come parametro
+	 */
+	public static PersonDay getPersonDayById(Long personDayId){
+		QPersonDay personDay = QPersonDay.personDay;
+		final JPQLQuery query = ModelQuery.queryFactory().from(personDay)
+				.where(personDay.id.eq(personDayId));
+		return query.singleResult(personDay);
+	}
+	
+	
+	/**
+	 * 
+	 * @param person
+	 * @return tutti i personDay relativi alla persona person passata come parametro
+	 */
+	public static List<PersonDay> getAllPersonDay(Person person){
+		QPersonDay personDay = QPersonDay.personDay;
+		final JPQLQuery query = ModelQuery.queryFactory().from(personDay)
+				.where(personDay.person.eq(person));
+		return query.list(personDay);
+	}
 }

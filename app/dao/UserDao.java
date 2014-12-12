@@ -29,12 +29,25 @@ public class UserDao {
 	/**
 	 * 
 	 * @param recoveryToken
-	 * @return
+	 * @return l'user corrispondente al recoveryToken inviato per il recovery della password
 	 */
 	public static User getUserByRecoveryToken(String recoveryToken){
 		QUser user = QUser.user;
 		final JPQLQuery query = ModelQuery.queryFactory().from(user)
 				.where(user.recoveryToken.eq(recoveryToken));
+		return query.singleResult(user);
+	}
+	
+	/**
+	 * 
+	 * @param username
+	 * @param password
+	 * @return l'user corrispondente a username e password passati come parametro
+	 */
+	public static User getUserByUsernameAndPassword(String username, String password){
+		QUser user = QUser.user;
+		final JPQLQuery query = ModelQuery.queryFactory().from(user)
+				.where(user.username.eq(username).and(user.password.eq(password)));
 		return query.singleResult(user);
 	}
 }
