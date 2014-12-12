@@ -50,7 +50,15 @@ import com.google.common.collect.Sets;
 import com.google.common.hash.Hashing;
 
 import controllers.Resecure.NoCheck;
+import dao.CompetenceDao;
+import dao.ContractDao;
+import dao.OfficeDao;
+import dao.PersonChildrenDao;
 import dao.PersonDao;
+import dao.PersonDayDao;
+import dao.QualificationDao;
+import dao.UserDao;
+import dao.WorkingTimeTypeDao;
 
 @With( {Resecure.class, RequestInit.class} )
 public class Persons extends Controller {
@@ -99,7 +107,8 @@ public class Persons extends Controller {
 			Persons.list(null);
 		}
 
-		Office off = Office.findById(new Long(office));
+		Office off = OfficeDao.getOfficeById(new Long(office));
+		//Office off = Office.findById(new Long(office));
 		if(off == null) {
 
 			flash.error("La sede selezionata non esiste. Effettuare una segnalazione.");
@@ -114,7 +123,8 @@ public class Persons extends Controller {
 
 		Logger.debug("Saving person...");
 
-		Qualification qual = Qualification.findById(new Long(qualification));
+		Qualification qual = QualificationDao.getQualification(Optional.<Integer>absent(), Optional.fromNullable(new Long(qualification)), false).get(0);
+		//Qualification qual = Qualification.findById(new Long(qualification));
 		person.qualification = qual;
 
 
@@ -163,7 +173,8 @@ public class Persons extends Controller {
 		
 
 		//FIXME deve essere impostato in configurazione l'orario default
-		WorkingTimeType wtt = WorkingTimeType.find("byDescription", "Normale").first();
+		WorkingTimeType wtt = WorkingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
+		//WorkingTimeType wtt = WorkingTimeType.find("byDescription", "Normale").first();
 		
 		ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
 		cwtt.beginDate = contract.beginContract;
@@ -190,7 +201,8 @@ public class Persons extends Controller {
 
 	@NoCheck
 	public static void insertUsername(Long personId){
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		if(person==null) {
 
 			flash.error("La persona selezionata non esiste. Operazione annullata");
@@ -206,7 +218,8 @@ public class Persons extends Controller {
 	@NoCheck
 	public static void updateUsername(Long personId, String username){
 
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		if(person==null) {
 
 			flash.error("La persona selezionata non esiste. Operazione annullata");
@@ -238,7 +251,8 @@ public class Persons extends Controller {
 	@NoCheck
 	public static void edit(Long personId){
 
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		if(person == null) {
 
 			flash.error("La persona selezionata non esiste. Operazione annullata");
@@ -248,12 +262,15 @@ public class Persons extends Controller {
 		rules.checkIfPermitted(person.office);
 
 		LocalDate date = new LocalDate();
-		List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract", person).fetch();
+		List<Contract> contractList = ContractDao.getPersonContractList(person);
+		//List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract", person).fetch();
 		List<Office> officeList = Security.getOfficeAllowed();	
-		List<ContractStampProfile> contractStampProfileList = ContractStampProfile.find("Select csp from ContractStampProfile csp, Contract c "
-				+ "where csp.contract = c and c.person = ? order by csp.startFrom", person).fetch();
+		List<ContractStampProfile> contractStampProfileList = ContractDao.getPersonContractStampProfile(Optional.fromNullable(person), Optional.<Contract>absent());
+//		List<ContractStampProfile> contractStampProfileList = ContractStampProfile.find("Select csp from ContractStampProfile csp, Contract c "
+//				+ "where csp.contract = c and c.person = ? order by csp.startFrom", person).fetch();
 		
-		InitializationTime initTime = InitializationTime.find("Select init from InitializationTime init where init.person = ?", person).first();
+		InitializationTime initTime = ContractDao.getInitializationTime(person);
+		//InitializationTime initTime = InitializationTime.find("Select init from InitializationTime init where init.person = ?", person).first();
 		Integer month = date.getMonthOfYear();
 		Integer year = date.getYear();
 		LocalDate actualDate = new LocalDate();
@@ -275,7 +292,8 @@ public class Persons extends Controller {
 			person.office = office;
 		}
 
-		Qualification q = Qualification.find("Select q from Qualification q where q.qualification = ?", qualification).first();
+		Qualification q = QualificationDao.getQualification(Optional.fromNullable(qualification), Optional.<Long>absent(), false).get(0);
+		//Qualification q = Qualification.find("Select q from Qualification q where q.qualification = ?", qualification).first();
 		if(q != null) {
 			person.qualification = q;
 		}
@@ -287,7 +305,8 @@ public class Persons extends Controller {
 	}
 
 	public static void deletePerson(Long personId){
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		if(person == null) {
 
 			flash.error("La persona selezionata non esiste. Operazione annullata");
@@ -300,7 +319,8 @@ public class Persons extends Controller {
 	}
 
 	public static void deletePersonConfirmed(Long personId){
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		if(person == null) {
 
 			flash.error("La persona selezionata non esiste. Operazione annullata");
@@ -338,7 +358,8 @@ public class Persons extends Controller {
 		// Eliminazione competenze
 		for(Competence c : person.competences){
 			long id = c.id;
-			c = Competence.findById(id);
+			c = CompetenceDao.getCompetenceById(id);
+			//c = Competence.findById(id);
 			c.delete();
 		}
 		JPAPlugin.closeTx(false);
@@ -346,7 +367,8 @@ public class Persons extends Controller {
 		// Eliminazione contratti
 		Logger.debug("Elimino contratti...");
 		JPAPlugin.startTx(false);
-		List<Contract> helpList = Contract.find("Select c from Contract c where c.person = ?", person).fetch();
+		List<Contract> helpList = ContractDao.getPersonContractList(person);
+		//List<Contract> helpList = Contract.find("Select c from Contract c where c.person = ?", person).fetch();
 		
 		
 		for(Contract c : helpList){			
@@ -354,21 +376,24 @@ public class Persons extends Controller {
 			Logger.debug("Elimino contratto di %s %s che va da %s a %s", person.name, person.surname, c.beginContract, c.expireContract);
 						
 			// Eliminazione orari di lavoro 
-			List<ContractWorkingTimeType> cwttList = ContractWorkingTimeType.find("Select cwtt from ContractWorkingTimeType cwtt where cwtt.contract = ?"
-					, c).fetch();
+			List<ContractWorkingTimeType> cwttList = ContractDao.getContractWorkingTimeTypeList(c);
+			//List<ContractWorkingTimeType> cwttList = ContractWorkingTimeType.find("Select cwtt from ContractWorkingTimeType cwtt where cwtt.contract = ?"
+			//		, c).fetch();
 			for(ContractWorkingTimeType cwtt : cwttList){
 				cwtt.delete();
 			}
 			// Eliminazione stamp profile
-			List<ContractStampProfile> cspList = ContractStampProfile.find("Select csp from ContractStampProfile csp where csp.contract = ?"
-					, c).fetch();
+			List<ContractStampProfile> cspList = ContractDao.getPersonContractStampProfile(Optional.<Person>absent(), Optional.fromNullable(c));
+//			List<ContractStampProfile> cspList = ContractStampProfile.find("Select csp from ContractStampProfile csp where csp.contract = ?"
+//					, c).fetch();
 			for(ContractStampProfile csp : cspList){
 				csp.delete();
 			}
 
 			
 			c.delete();
-			person = Person.findById(personId);
+			person = PersonDao.getPersonById(personId);
+			//person = Person.findById(personId);
 			person.contracts.remove(c);
 			
 			person.save();
@@ -378,14 +403,16 @@ public class Persons extends Controller {
 		// Eliminazione assenze da inizializzazione
 		for(InitializationAbsence ia : person.initializationAbsences){
 			long id = ia.id;
-			ia = InitializationAbsence.findById(id);
+			ia = ContractDao.getInitializationAbsenceById(id);
+			//ia = InitializationAbsence.findById(id);
 			ia.delete();
 		}
 
 		// Eliminazione tempi da inizializzazione
 		for(InitializationTime ia : person.initializationTimes){
 			long id = ia.id;
-			ia = InitializationTime.findById(id);
+			ia = ContractDao.getInitializationTimeById(id);
+			//ia = InitializationTime.findById(id);
 			ia.delete();
 		}
 		
@@ -395,17 +422,20 @@ public class Persons extends Controller {
 		JPAPlugin.closeTx(false);
 		Logger.debug("Elimino timbrature e dati mensili e annuali...");
 		JPAPlugin.startTx(false);
-		person = Person.findById(personId);
+		person = PersonDao.getPersonById(personId);
+		//person = Person.findById(personId);
 		// Eliminazione figli in anagrafica
 		for(PersonChildren pc : person.personChildren){
 			long id = pc.id;
 			Logger.debug("Elimino figli...");
-			pc = PersonChildren.findById(id);
+			pc = PersonChildrenDao.getPersonChildrenById(id);
+			//pc = PersonChildren.findById(id);
 			pc.delete();
 		}
 
 		// Eliminazione person day
-		List<PersonDay> helpPdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ?", person).fetch();
+		List<PersonDay> helpPdList = PersonDayDao.getAllPersonDay(person);
+		//List<PersonDay> helpPdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ?", person).fetch();
 		for(PersonDay pd : helpPdList){
 
 			pd.delete();
@@ -422,7 +452,8 @@ public class Persons extends Controller {
 			person.personShift.delete();
 		JPAPlugin.closeTx(false);
 		JPAPlugin.startTx(false);
-		person = Person.findById(personId);
+		person = PersonDao.getPersonById(personId);
+		//person = Person.findById(personId);
 		//Eliminazione riepiloghi annuali
 		for(PersonYear py : person.personYears){
 			py.delete();
@@ -439,7 +470,8 @@ public class Persons extends Controller {
 
 		JPAPlugin.closeTx(false);
 		JPAPlugin.startTx(false);
-		person = Person.findById(personId);
+		person = PersonDao.getPersonById(personId);
+		//person = Person.findById(personId);
 		//Eliminazione competenze valide
 		
 		JPAPlugin.closeTx(false);
@@ -456,7 +488,8 @@ public class Persons extends Controller {
 
 		// Eliminazione persona e user
 		JPAPlugin.startTx(false);
-		person = Person.findById(personId);
+		person = PersonDao.getPersonById(personId);
+		//person = Person.findById(personId);
 		Long userId = null;
 		if(person.user != null) {
 			userId = person.user.id;
@@ -466,7 +499,8 @@ public class Persons extends Controller {
 		
 		JPAPlugin.startTx(false);
 		if(userId != null) {
-			User user = User.findById(userId);
+			User user = UserDao.getUserById(userId, Optional.<String>absent());
+			//User user = User.findById(userId);
 			user.delete();
 		}
 		JPAPlugin.closeTx(false);
@@ -479,7 +513,8 @@ public class Persons extends Controller {
 
 	public static void showCurrentVacation(Long personId){
 
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		if(person == null) {
 
 			flash.error("La persona selezionata non esiste. Operazione annullata");
@@ -494,7 +529,8 @@ public class Persons extends Controller {
 
 	public static void showCurrentContractWorkingTimeType(Long personId) {
 
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		if(person == null) {
 
 			flash.error("La persona selezionata non esiste. Operazione annullata");
@@ -525,7 +561,8 @@ public class Persons extends Controller {
 		rules.checkIfPermitted(person.office);
 
 		Contract con = new Contract();
-		List<WorkingTimeType> wttList = WorkingTimeType.findAll();
+		List<WorkingTimeType> wttList = WorkingTimeTypeDao.getAllWorkingTimeType();
+		//List<WorkingTimeType> wttList = WorkingTimeType.findAll();
 		render(con, person, wttList);
 	}
 
@@ -596,7 +633,8 @@ public class Persons extends Controller {
 	}
 
 	public static void modifyContract(Long contractId){
-		Contract contract = Contract.findById(contractId);
+		Contract contract = ContractDao.getContractById(contractId);
+		//Contract contract = Contract.findById(contractId);
 		if(contract == null)
 		{
 			flash.error("Non è stato trovato nessun contratto con id %s per il dipendente ", contractId);
@@ -665,7 +703,8 @@ public class Persons extends Controller {
 
 	public static void deleteContract(Long contractId){
 
-		Contract contract = Contract.findById(contractId);
+		Contract contract = ContractDao.getContractById(contractId);
+		//Contract contract = Contract.findById(contractId);
 		if(contract == null) {
 
 			flash.error("Contratto inesistente. Operazione annullata.");
@@ -679,7 +718,8 @@ public class Persons extends Controller {
 
 	public static void deleteContractConfirmed(Long contractId){
 
-		Contract contract = Contract.findById(contractId);
+		Contract contract = ContractDao.getContractById(contractId);
+		//Contract contract = Contract.findById(contractId);
 		if(contract == null) {
 
 			flash.error("Contratto inesistente. Operazione annullata.");
@@ -696,7 +736,8 @@ public class Persons extends Controller {
 
 	public static void updateSourceContract(Long contractId){
 
-		Contract contract = Contract.findById(contractId);
+		Contract contract = ContractDao.getContractById(contractId);
+		//Contract contract = Contract.findById(contractId);
 		if(contract == null) {
 
 			flash.error("Contratto inesistente. Operazione annullata.");
@@ -746,7 +787,8 @@ public class Persons extends Controller {
 	public static void updateContractWorkingTimeType(Long id)
 	{
 
-		Contract contract = Contract.findById(id);
+		Contract contract = ContractDao.getContractById(id);
+		//Contract contract = Contract.findById(id);
 		if(contract == null) {
 
 			flash.error("Contratto inesistente. Operazione annullata.");
@@ -881,8 +923,10 @@ public class Persons extends Controller {
 	public static void savePassword(@Required String vecchiaPassword, 
 			@MinLength(5) @Required String nuovaPassword, @MinLength(5) @Required String confermaPassword){
 
-		User user = User.find("SELECT u FROM User u where username = ? and password = ?", 
-				Security.getUser().get().username, Hashing.md5().hashString(vecchiaPassword,  Charsets.UTF_8).toString()).first();
+		User user = UserDao.getUserByUsernameAndPassword(Security.getUser().get().username, Hashing.md5().hashString(vecchiaPassword,  Charsets.UTF_8).toString());
+		
+//		User user = User.find("SELECT u FROM User u where username = ? and password = ?", 
+//				Security.getUser().get().username, Hashing.md5().hashString(vecchiaPassword,  Charsets.UTF_8).toString()).first();
 		if(user == null) {
 			flash.error("Nessuna corrispondenza trovata fra utente e vecchia password inserita.");
 			Persons.changePassword();
@@ -932,7 +976,8 @@ public class Persons extends Controller {
 	@NoCheck
 	public static void insertChild(Long personId){
 
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		PersonChildren personChildren = new PersonChildren();
 		render(person, personChildren);
 	}
@@ -940,7 +985,8 @@ public class Persons extends Controller {
 	public static void saveChild(){
 
 		PersonChildren personChildren = new PersonChildren();
-		Person person = Person.findById(params.get("personId", Long.class));
+		Person person = PersonDao.getPersonById(params.get("personId", Long.class));
+	//	Person person = Person.findById(params.get("personId", Long.class));
 		rules.checkIfPermitted(person.office);
 		personChildren.name = params.get("name");
 		personChildren.surname = params.get("surname");
@@ -954,7 +1000,8 @@ public class Persons extends Controller {
 
 	public static void personChildrenList(Long personId){
 
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		rules.checkIfPermitted(person.office);
 		render(person);
 	}
@@ -963,7 +1010,9 @@ public class Persons extends Controller {
 
 
 	public static void updateContractStampProfile(Long id){
-		ContractStampProfile contract = ContractStampProfile.findById(id);
+		
+		ContractStampProfile contract = ContractDao.getContractStampProfileById(id);
+		//ContractStampProfile contract = ContractStampProfile.findById(id);
 		if(contract == null) {
 
 			flash.error("Contratto inesistente. Operazione annullata.");
@@ -1050,7 +1099,8 @@ public class Persons extends Controller {
 	}
 	
 	public static void deleteContractStampProfile(Long contractStampProfileId){
-		ContractStampProfile csp = ContractStampProfile.findById(contractStampProfileId);
+		ContractStampProfile csp = ContractDao.getContractStampProfileById(contractStampProfileId);
+		//ContractStampProfile csp = ContractStampProfile.findById(contractStampProfileId);
 		if(csp==null){
 
 			flash.error("Impossibile completare la richiesta, controllare i log.");
@@ -1092,7 +1142,8 @@ public class Persons extends Controller {
 	
 	public static void modifySendEmail(Long personId){
 		
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		rules.checkIfPermitted(person.office);
 		render(person);
 	}
