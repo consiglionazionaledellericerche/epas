@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import javax.inject.Inject;
+
 import models.ConfGeneral;
 import models.ConfYear;
 import models.Contract;
@@ -37,23 +39,27 @@ import com.google.common.collect.ImmutableList;
 
 import controllers.Resecure.NoCheck;
 import play.Logger;
+import play.Play;
 import play.cache.Cache;
 import play.data.validation.*;
 import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
+import security.SecurityRules;
 import validators.StringIsTime;
 
 /**
  * @author daniele
  *
  */
-@With( {Resecure.class, RequestInit.class})
+@With( {Resecure.class})
 public class Wizard extends Controller {
 	
 	public static final String STEPS_KEY = "steps";
 	public static final String PROPERTIES_KEY = "properties";
+	public static final String OFFICE_COUNT = "officeCount";
 	
+		
 	public static class WizardStep {
 		public final int index;
 		public final String name;
@@ -81,16 +87,30 @@ public class Wizard extends Controller {
 				.of(WizardStep.of("Cambio password Admin", "changeAdminPsw",0),
 					WizardStep.of("Nuovo ufficio", "setOffice",1),
 					WizardStep.of("Configurazione generale", "setGenConf",2),
-					WizardStep.of("Creazione Ruolo per l'amministrazione", "managerRole", 3),
+					WizardStep.of("Creazione Ruolo per l'amministrazione", "seatManagerRole", 3),
 					WizardStep.of("Riepilogo", "summary",4));
 	}
 	
-	@NoCheck
+
 	public static void wizard(int step) {
 		Preconditions.checkNotNull(step);
+		
+		
 //    	Recupero dalla cache  	
     	List<WizardStep> steps = Cache.get(STEPS_KEY, List.class);
     	Properties properties = Cache.get(PROPERTIES_KEY, Properties.class);
+    	Long officeCount = Cache.get(OFFICE_COUNT,Long.class);
+    	
+    	if(officeCount == null){
+    		officeCount = Office.count();
+      		Cache.add(OFFICE_COUNT, officeCount);
+    	}
+    	
+    	if(officeCount > 0){
+			flash.error("Impossibile accedere alla procedura di Wizard se è già presente un Ufficio nel sistema");
+			Offices.showOffices();
+    	}
+    	
     	double percent = 0;
     	
     	if (steps == null) {
@@ -151,7 +171,6 @@ public class Wizard extends Controller {
     /**
      * STEP 1 "Cambio password admin"
      */
-	@NoCheck
     public static void changeAdminPsw(
     		int stepIndex,
     		@Required String admin_password,
@@ -187,7 +206,6 @@ public class Wizard extends Controller {
      * STEP 2 "Creazione Area,Istituto e Sede"
      */
 	
-	@NoCheck
     public static void setOffice(
     	    int stepIndex,
     		@Required String area,
@@ -236,7 +254,6 @@ public class Wizard extends Controller {
      * STEP 3 Impostazioni Generali relativi alla Sede creata
      */
 	
-	@NoCheck
     public static void setGenConf(
     		int stepIndex,
     		@Required String date_of_patron,  		
@@ -278,8 +295,7 @@ public class Wizard extends Controller {
      * STEP 4 Creazione Profilo per l'amministratore
      */
 	
-	@NoCheck
-    public static void managerRole(
+    public static void seatManagerRole(
     		int stepIndex,
     		@Required String manager_surname,
     		@Required String manager_name,
@@ -335,7 +351,6 @@ public class Wizard extends Controller {
        	wizard(stepIndex+1);
     }
 	
-	@NoCheck
     public static void summary(
     		int stepIndex,
     		@Required String area,
@@ -419,8 +434,8 @@ public class Wizard extends Controller {
     	wizard(stepIndex+1);
     }
 	
-	@NoCheck
-    public static void submit(){
+    
+    private static void submit(){
 		Properties properties = new Properties();
 		try{
 			properties.load(new FileInputStream("conf/properties.conf"));	
