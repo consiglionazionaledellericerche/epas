@@ -111,10 +111,11 @@
   </div>
 
   #{field 'manager_username'}
-  <div class='form-group col-sm-6 col-sm-offset-3' >
+  <div class='form-group col-sm-6 col-sm-offset-3 #{if field.error}has-error#{/if}' >
     <label class="control-label" for="${field.id}">Scelta Username</label>
     #{select field.id, id:field.id,class:'form-control'}
     #{/select}
+    #{if field.error}<span class="help-block">${field.error}</span>#{/if}
   </div>
   #{/field}
 
@@ -165,6 +166,8 @@ $.each(options, function(index, option) {
   .text(option.text);
   $el.append($option);
 });
+
+$el.val('${properties.getProperty('manager_username')}');
 
 $('#manager_surname').change(function(){
     var name = $('#manager_name').val().replace(/\s+/g, '');
