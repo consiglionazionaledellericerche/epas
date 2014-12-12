@@ -13,12 +13,12 @@ chown -R epas:epas /home/epas
 #EPAS_SSH_HOST=${EPAS_SSH_HOST:-$EPAS_HOST}
 #EPAS_SSH_PORT=${EPAS_SSH_PORT:-10022}
 
-EPAS_HTTPS=${EPAS_HTTPS:-false}
+HTTPS=${HTTPS:-false}
 
 EPAS_SHIB_LOGIN=${EPAS_SHIB_LOGIN:-false}
 
 # use default port number if it is still not set
-case "${EPAS_HTTPS}" in
+case "${HTTPS}" in
   false) EPAS_APPLICATION_BASEURL="http:\/\/${EPAS_HOST}" ;;
   true) EPAS_APPLICATION_BASEURL="https:\/\/${EPAS_HOST}" 
 
@@ -36,13 +36,13 @@ fi
 ;;
   *)
     echo "ERROR: "
-    echo "  Please specify the database http/https protocol via the EPAS_HTTPS configuration option."
+    echo "  Please specify the database http/https protocol via the HTTPS configuration option."
     echo "  Accepted values are \"true\" or \"false\". Aborting..."
     exit 1
     ;;
 esac
 
-#case "${EPAS_HTTPS}" in
+#case "${HTTPS}" in
 #  true)
 #    NGINX_PORT=${NGNIX_PORT:-443}
 #    NGINX_X_FORWARDED_PROTO=${NGINX_X_FORWARDED_PROTO:-https}
