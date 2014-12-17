@@ -22,6 +22,7 @@ import models.PersonTags;
 import models.StampModificationType;
 import models.StampType;
 import models.Stamping;
+import models.enumerate.StampTypeValues;
 import models.rendering.PersonStampingDayRecap;
 import models.rendering.PersonTroublesInMonthRecap;
 
@@ -42,6 +43,8 @@ import com.google.common.collect.ImmutableTable.Builder;
 import com.google.common.collect.Table;
 
 import dao.PersonDao;
+import dao.PersonDayDao;
+import dao.StampingDao;
 
 
 
@@ -134,7 +137,8 @@ public class Stampings extends Controller {
 		if (year == 0 || month == 0) {
 			personStamping(personId);
 		}
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		if(person == null){
 			flash.error("Persona inesistente in anagrafica");
 			Application.indexAdmin();
@@ -224,7 +228,8 @@ public class Stampings extends Controller {
 
 
 	public static void dailyStampings() {
-		Person person = Person.findById(params.get("id", Long.class));
+		Person person = PersonDao.getPersonById(params.get("id", Long.class));
+		//Person person = Person.findById(params.get("id", Long.class));
 		LocalDate day = 
 				new LocalDate(
 						params.get("year", Integer.class),
@@ -243,7 +248,8 @@ public class Stampings extends Controller {
 			@Required Integer year, @Required Integer month, @Required Integer day){
 
 
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		
 		rules.checkIfPermitted(person.office);
 		
@@ -262,8 +268,9 @@ public class Stampings extends Controller {
 		rules.checkIfPermitted(person.office);
 		
 		LocalDate date = new LocalDate(year,month,day);
-		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", 
-				person, date).first();
+		PersonDay pd = PersonDayDao.getPersonDayInPeriod(person, date, Optional.<LocalDate>absent(), false).size() > 0 ? PersonDayDao.getPersonDayInPeriod(person, date, Optional.<LocalDate>absent(), false).get(0) : null;
+//		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", 
+//				person, date).first();
 		if(pd == null){
 			pd = new PersonDay(person, date);
 			pd.create();
@@ -312,7 +319,8 @@ public class Stampings extends Controller {
 		
 		if(service.equals("true")){
 			stamp.note = "timbratura di servizio";
-			stamp.stampType = StampType.find("Select st from StampType st where st.code = ?", "motiviDiServizio").first();
+			stamp.stampType = StampingDao.getStampTypeByCode("motiviDiServizio");
+			//stamp.stampType = StampType.find("Select st from StampType st where st.code = ?", "motiviDiServizio").first();
 		}
 		else{
 			String note = params.get("note");
@@ -345,7 +353,8 @@ public class Stampings extends Controller {
 	public static void edit(@Required Long stampingId) {
 		Logger.debug("Edit stamping called for stampingId=%d", stampingId);
 
-		Stamping stamping = Stamping.findById(stampingId);
+		Stamping stamping = StampingDao.getStampingById(stampingId);
+		//Stamping stamping = Stamping.findById(stampingId);
 		if (stamping == null) {
 			notFound();
 		}
@@ -358,7 +367,8 @@ public class Stampings extends Controller {
 	}
 
 	public static void update() {
-		Stamping stamping = Stamping.findById(params.get("stampingId", Long.class));
+		Stamping stamping = StampingDao.getStampingById(params.get("stampingId", Long.class));
+		//Stamping stamping = Stamping.findById(params.get("stampingId", Long.class));
 		if (stamping == null) {
 			notFound();
 		}
@@ -407,7 +417,8 @@ public class Stampings extends Controller {
 			}
 			if(service.equals("true") && (stamping.stampType == null || !stamping.stampType.identifier.equals("s"))){
 				stamping.note = "timbratura di servizio";
-				stamping.stampType = StampType.find("Select st from StampType st where st.code = ?", "motiviDiServizio").first();
+				stamping.stampType = StampingDao.getStampTypeByCode("motiviDiServizio");
+				//stamping.stampType = StampType.find("Select st from StampType st where st.code = ?", "motiviDiServizio").first();
 			}
 			if(service.equals("false") && (stamping.stampType != null)){
 				stamping.stampType = null;
@@ -508,8 +519,9 @@ public class Stampings extends Controller {
 		int max = 0;
 			
 		for(Person person : activePersonsInDay){
-			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.date = ? and pd.person = ?", 
-					date, person).first();
+			PersonDay pd = PersonDayDao.getPersonDayInPeriod(person, date, Optional.<LocalDate>absent(), false).size() > 0 ? PersonDayDao.getPersonDayInPeriod(person, date, Optional.<LocalDate>absent(), false).get(0) : null;
+//			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.date = ? and pd.person = ?", 
+//					date, person).first();
 
 			if(max < PersonUtility.numberOfInOutInPersonDay(pd))
 				max = PersonUtility.numberOfInOutInPersonDay(pd);
@@ -536,7 +548,8 @@ public class Stampings extends Controller {
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 		for(Person person : activePersonsInDay){
 
-			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.date = ? and pd.person = ?", dayPresence, person).first();
+			PersonDay pd = PersonDayDao.getPersonDayInPeriod(person, dayPresence, Optional.<LocalDate>absent(), false).size() > 0 ? PersonDayDao.getPersonDayInPeriod(person, dayPresence, Optional.<LocalDate>absent(), false).get(0) : null; 
+			//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.date = ? and pd.person = ?", dayPresence, person).first();
 			if(pd==null)
 				pd = new PersonDay(person, dayPresence);
 
@@ -583,8 +596,9 @@ public class Stampings extends Controller {
 		});
 		for(Person p : activePersons)
 		{
-			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
-					p, beginMonth, beginMonth.dayOfMonth().withMaximumValue()).fetch();
+			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), true);
+//			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
+//					p, beginMonth, beginMonth.dayOfMonth().withMaximumValue()).fetch();
 			Logger.debug("La lista dei personDay: ", pdList);
 			for(PersonDay pd : pdList){
 				if(pd.isTicketForcedByAdmin) {

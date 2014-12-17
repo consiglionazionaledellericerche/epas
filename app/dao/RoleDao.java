@@ -1,8 +1,11 @@
 package dao;
 
 import helpers.ModelQuery;
+import models.Permission;
 import models.Role;
+import models.query.QPermission;
 import models.query.QRole;
+
 import com.mysema.query.jpa.JPQLQuery;
 
 public class RoleDao {
@@ -29,5 +32,18 @@ public class RoleDao {
 		final JPQLQuery query = ModelQuery.queryFactory().from(role)
 				.where(role.name.eq(name));
 		return query.singleResult(role);
+	}
+	
+	
+	/**
+	 * 
+	 * @param description
+	 * @return il permesso associato alla descrizione passata come parametro
+	 */
+	public static Permission getPermissionByDescription(String description){
+		QPermission permission = QPermission.permission;
+		final JPQLQuery query = ModelQuery.queryFactory().from(permission)
+				.where(permission.description.eq(description));
+		return query.singleResult(permission);
 	}
 }

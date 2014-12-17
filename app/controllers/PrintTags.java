@@ -21,6 +21,7 @@ import models.rendering.PersonStampingDayRecap;
 
 import org.joda.time.LocalDate;
 
+import dao.PersonDao;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
@@ -44,7 +45,8 @@ public class PrintTags extends Controller{
 			 * è il caso in cui ho chiesto la stampa cartellino di tutti...vediamo come gestirla in un secondo momento
 			 */
 		}
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		rules.checkIfPermitted(person.office);
 		int month = params.get("month", Integer.class);
 		int year = params.get("year", Integer.class);

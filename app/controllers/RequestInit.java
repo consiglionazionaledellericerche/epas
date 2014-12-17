@@ -26,6 +26,8 @@ import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 
 import controllers.Resecure.NoCheck;
+import dao.ConfGeneralDao;
+import dao.OfficeDao;
 import dao.PersonDao;
 import play.Logger;
 import play.i18n.Messages;
@@ -295,7 +297,8 @@ public class RequestInit extends Controller {
 		} 
 		else {
 
-			List<Office> allOffices = Office.findAll();
+			List<Office> allOffices = OfficeDao.getAllOffices();
+			//List<Office> allOffices = Office.findAll();
 			if (allOffices!=null && !allOffices.isEmpty()){
 			List<Person> persons = PersonDao.list(Optional.fromNullable(name), 
 					Sets.newHashSet(allOffices), false, beginMonth, endMonth, true).list();
@@ -318,8 +321,9 @@ public class RequestInit extends Controller {
 		 */
 		List<Integer> years = Lists.newArrayList();
 		Integer actualYear = new LocalDate().getYear();
-		ConfGeneral yearBegin = ConfGeneral.find("Select c from ConfGeneral c where c.field = ? ", 
-				ConfigurationFields.InitUseProgram.description).first();
+		ConfGeneral yearBegin = ConfGeneralDao.getConfGeneralByField(ConfigurationFields.InitUseProgram.description);
+//		ConfGeneral yearBegin = ConfGeneral.find("Select c from ConfGeneral c where c.field = ? ", 
+//				ConfigurationFields.InitUseProgram.description).first();
 		Integer yearBeginProgram;
 		if(yearBegin!=null){
 			yearBeginProgram = new Integer(yearBegin.fieldValue.substring(0, 4));

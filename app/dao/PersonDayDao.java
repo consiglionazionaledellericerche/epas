@@ -23,10 +23,11 @@ public class PersonDayDao {
 	 * @param person
 	 * @param begin
 	 * @param end
+	 * @param ordered
 	 * @return la lista dei personday relativi a una persona in un certo periodo di tempo se il parametro end è presente, 
-	 * il personDay relativo a un certo giorno specifico (begin) altrimenti
+	 * il personDay relativo a un certo giorno specifico (begin) altrimenti. Se ordered è 'true' la lista dei personDay viene ordinata
 	 */
-	public static List<PersonDay> getPersonDayInPeriod(Person person, LocalDate begin, Optional<LocalDate> end){
+	public static List<PersonDay> getPersonDayInPeriod(Person person, LocalDate begin, Optional<LocalDate> end, boolean ordered){
 		QPersonDay personDay = QPersonDay.personDay;
 		final BooleanBuilder condition = new BooleanBuilder();
 		final JPQLQuery query = ModelQuery.queryFactory().from(personDay);
@@ -37,6 +38,8 @@ public class PersonDayDao {
 		condition.and(personDay.person.eq(person));
 		
 		query.where(condition);
+		if(ordered)
+			query.orderBy(personDay.date.asc());
 		return query.list(personDay);
 	}
 	
