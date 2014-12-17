@@ -36,6 +36,10 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 
 import controllers.Resecure.NoCheck;
+import dao.QualificationDao;
+import dao.RoleDao;
+import dao.UserDao;
+import dao.WorkingTimeTypeDao;
 import play.Logger;
 import play.cache.Cache;
 import play.data.validation.*;
@@ -431,7 +435,8 @@ public class Wizard extends Controller {
 		
 //      Cambio password user admin
 		
-		User admin = User.find("byUsername", "admin").first();
+		User admin = UserDao.getUserByUsernameAndPassword("admin", Optional.<String>absent());
+		//User admin = User.find("byUsername", "admin").first();
 		admin.password = Codec.hexMD5(properties.getProperty("admin_password"));
 		admin.save();
 		
@@ -526,8 +531,9 @@ public class Wizard extends Controller {
 		p.name = properties.getProperty("manager_name");
 		p.surname = properties.getProperty("manager_surname");
 		
-		Qualification qualification = Qualification.find("byQualification", 
-				Integer.parseInt(properties.getProperty("manager_qualification"))).first();
+		Qualification qualification = QualificationDao.getQualification(Optional.fromNullable(Integer.parseInt(properties.getProperty("manager_qualification"))), Optional.<Long>absent(), false).get(0);
+//		Qualification qualification = Qualification.find("byQualification", 
+//				Integer.parseInt(properties.getProperty("manager_qualification"))).first();
 		p.qualification = qualification;
 		
 		if(!properties.getProperty("manager_badge_number").isEmpty()){
@@ -570,7 +576,8 @@ public class Wizard extends Controller {
 		ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
 		cwtt.beginDate = contractBegin;
 		cwtt.endDate = contractEnd;
-		cwtt.workingTimeType = WorkingTimeType.find("byDescription", "Normale").first();
+		cwtt.workingTimeType = WorkingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
+		//cwtt.workingTimeType = WorkingTimeType.find("byDescription", "Normale").first();
 		cwtt.contract = contract;
 		cwtt.save();
 		contract.save();
@@ -595,7 +602,8 @@ public class Wizard extends Controller {
 		UsersRolesOffices uro = new UsersRolesOffices();
 		uro.office = seat;
 		uro.user = user;
-		uro.role = Role.find("byName", Role.PERSONNEL_ADMIN).first();
+		uro.role = RoleDao.getRoleByName(Role.PERSONNEL_ADMIN);
+		//uro.role = Role.find("byName", Role.PERSONNEL_ADMIN).first();
 		
 		uro.save();
 		
