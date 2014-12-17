@@ -923,7 +923,7 @@ public class Persons extends Controller {
 	public static void savePassword(@Required String vecchiaPassword, 
 			@MinLength(5) @Required String nuovaPassword, @MinLength(5) @Required String confermaPassword){
 
-		User user = UserDao.getUserByUsernameAndPassword(Security.getUser().get().username, Hashing.md5().hashString(vecchiaPassword,  Charsets.UTF_8).toString());
+		User user = UserDao.getUserByUsernameAndPassword(Security.getUser().get().username, Optional.fromNullable(Hashing.md5().hashString(vecchiaPassword,  Charsets.UTF_8).toString()));
 		
 //		User user = User.find("SELECT u FROM User u where username = ? and password = ?", 
 //				Security.getUser().get().username, Hashing.md5().hashString(vecchiaPassword,  Charsets.UTF_8).toString()).first();

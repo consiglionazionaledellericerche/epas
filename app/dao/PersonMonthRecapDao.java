@@ -10,8 +10,10 @@ import com.google.common.base.Optional;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 
+import models.CertificatedData;
 import models.Person;
 import models.PersonMonthRecap;
+import models.query.QCertificatedData;
 import models.query.QPersonMonthRecap;
 
 public class PersonMonthRecapDao {
@@ -65,4 +67,23 @@ public class PersonMonthRecapDao {
 										personMonthRecap.fromDate.loe(end).and(personMonthRecap.toDate.goe(end))))));
 		return query.list(personMonthRecap);
 	}
+	
+	
+	/***************************************************************************************************************************************/
+	/*Parte relativa a query su CertificatedData per la quale, essendo unica, non si è deciso di creare un Dao ad hoc                      */
+	/***************************************************************************************************************************************/
+
+	/**
+	 * 
+	 * @param id
+	 * @return il certificatedData relativo all'id passato come parametro
+	 */
+	public static CertificatedData getCertificatedDataById(Long id){
+		QCertificatedData cert = QCertificatedData.certificatedData;
+		JPQLQuery query = ModelQuery.queryFactory().from(cert)
+				.where(cert.id.eq(id));
+		return query.singleResult(cert);
+	}
+	
+	
 }

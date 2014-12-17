@@ -242,7 +242,7 @@ public class MonthRecaps extends Controller{
 		for(Person person : activePersons)
 		{
 			//person day list
-			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, monthBegin, Optional.fromNullable(monthEnd));
+			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, monthBegin, Optional.fromNullable(monthEnd), false);
 //			List<PersonDay> pdList = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? AND pd.date between ? and ?", 
 //					person, 
 //					monthBegin, 
@@ -385,7 +385,7 @@ public class MonthRecaps extends Controller{
 
 		}
 		
-		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, monthBegin, Optional.fromNullable(monthEnd));
+		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, monthBegin, Optional.fromNullable(monthEnd), false);
 //		List<PersonDay> pdList = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? AND pd.date between ? and ?", 
 //			person, 
 //			monthBegin, 

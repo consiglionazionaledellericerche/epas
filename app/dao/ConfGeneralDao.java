@@ -20,5 +20,18 @@ public class ConfGeneralDao {
 				.where(confGeneral.id.eq(pk));
 		return query.singleResult(confGeneral);
 	}
+	
+	
+	/**
+	 * 
+	 * @param field
+	 * @return il confGeneral relativo al campo field passato come parametro
+	 */
+	public static ConfGeneral getConfGeneralByField(String field){
+		QConfGeneral confGeneral = QConfGeneral.confGeneral;
+		final JPQLQuery query = ModelQuery.queryFactory().from(confGeneral)
+				.where(confGeneral.field.eq(field));
+		return query.singleResult(confGeneral);
+	}
 
 }

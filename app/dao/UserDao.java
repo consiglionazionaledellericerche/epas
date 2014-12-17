@@ -44,10 +44,13 @@ public class UserDao {
 	 * @param password
 	 * @return l'user corrispondente a username e password passati come parametro
 	 */
-	public static User getUserByUsernameAndPassword(String username, String password){
+	public static User getUserByUsernameAndPassword(String username, Optional<String> password){
 		QUser user = QUser.user;
+		final BooleanBuilder condition = new BooleanBuilder();
+		if(password.isPresent())
+			condition.and(user.password.eq(password.get()));
 		final JPQLQuery query = ModelQuery.queryFactory().from(user)
-				.where(user.username.eq(username).and(user.password.eq(password)));
+				.where(condition.and(user.username.eq(username)));
 		return query.singleResult(user);
 	}
 }

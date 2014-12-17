@@ -303,6 +303,18 @@ public final class PersonDao {
 	
 	/**
 	 * 
+	 * @return la lista di persone che hanno una matricola associata
+	 */
+	public static List<Person> getPersonsByNumber(){
+		QPerson person = QPerson.person;
+		final JPQLQuery query = ModelQuery.queryFactory().from(person)
+				.where(person.number.isNotNull().and(person.number.ne(0)));
+		query.orderBy(person.number.asc());
+		return query.list(person);
+	}
+	
+	/**
+	 * 
 	 * @param email
 	 * @return la persona che ha associata la mail email
 	 */
