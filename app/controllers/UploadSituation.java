@@ -29,6 +29,7 @@ import models.Competence;
 import models.ConfGeneral;
 import models.Office;
 import models.Person;
+import models.PersonDay;
 import models.PersonMonthRecap;
 import models.User;
 import models.enumerate.ConfigurationFields;
@@ -412,8 +413,9 @@ public class UploadSituation extends Controller{
 			Integer mealTicket = PersonUtility.numberOfMealTicketToUse(person, year, month);
 			
 			//vedere se l'ho gia' inviato con successo
-			CertificatedData cert = CertificatedData.find("Select cert from CertificatedData cert where cert.person = ? and cert.year = ? and cert.month = ?", person, year, month).first();
-			
+			CertificatedData cert = PersonMonthRecapDao.getCertificatedDataByPersonMonthAndYear(person, month, year);
+			//CertificatedData cert = CertificatedData.find("Select cert from CertificatedData cert where cert.person = ? and cert.year = ? and cert.month = ?", person, year, month).first();
+	
 			
 			RispostaElaboraDati rispostaElaboraDati = AttestatiClient.elaboraDatiDipendente(
 					cookies, dipendente, year, month, 

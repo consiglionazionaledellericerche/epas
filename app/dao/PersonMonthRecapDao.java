@@ -86,4 +86,19 @@ public class PersonMonthRecapDao {
 	}
 	
 	
+	/**
+	 * 
+	 * @param person
+	 * @param month
+	 * @param year
+	 * @return il certificatedData relativo alla persona 'person' per il mese 'month' e l'anno 'year'
+	 */
+	public static CertificatedData getCertificatedDataByPersonMonthAndYear(Person person, Integer month, Integer year){
+		QCertificatedData cert = QCertificatedData.certificatedData;
+		JPQLQuery query = ModelQuery.queryFactory().from(cert)
+				.where(cert.person.eq(person).and(cert.month.eq(month).and(cert.year.eq(year))));
+		return query.singleResult(cert);
+	}
+	
+	
 }
