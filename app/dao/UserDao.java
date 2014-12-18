@@ -1,9 +1,7 @@
 package dao;
 
 import helpers.ModelQuery;
-import models.Office;
 import models.User;
-import models.query.QOffice;
 import models.query.QUser;
 
 import com.google.common.base.Optional;
