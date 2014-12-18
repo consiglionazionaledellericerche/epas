@@ -230,9 +230,8 @@ public class MealTicketManager {
 		}
 		
 		/**
-		 * Ritorna i blocchi di buoni pasto consegnati alla persona nell anno year 
+		 * Ritorna i blocchi di buoni pasto consegnati alla persona 
 		 * ordinati per data di scadenza e per codice blocco.
-		 * @param year
 		 * @return
 		 */
 		public List<BlockMealTicket> getBlockMealTicketReceived() {
@@ -403,7 +402,6 @@ public class MealTicketManager {
 			return blockList;
 			
 		}
-		
 	}
 
 }
