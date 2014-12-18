@@ -11,7 +11,11 @@ import models.Role;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
+
 import controllers.Resecure.NoCheck;
+import dao.OfficeDao;
+import dao.RoleDao;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
@@ -27,8 +31,10 @@ public class Offices extends Controller {
 		
 		List<Office> allAreas = Office.getAllAreas();
 		
-		Role roleAdmin = Role.find("byName", Role.PERSONNEL_ADMIN).first();
-		Role roleAdminMini = Role.find("byName", Role.PERSONNEL_ADMIN_MINI).first();
+		Role roleAdmin = RoleDao.getRoleByName(Role.PERSONNEL_ADMIN);
+		Role roleAdminMini = RoleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI);
+//		Role roleAdmin = Role.find("byName", Role.PERSONNEL_ADMIN).first();
+//		Role roleAdminMini = Role.find("byName", Role.PERSONNEL_ADMIN_MINI).first();
 		
 		render(allAreas, roleAdmin, roleAdminMini);
 	}
@@ -42,7 +48,8 @@ public class Offices extends Controller {
 	@NoCheck
 	public static void insertInstitute(Long areaId) {
 		
-		Office area = Office.findById(areaId);
+		Office area = OfficeDao.getOfficeById(areaId);
+		//Office area = Office.findById(areaId);
 		
 		if(area == null || !area.isArea()) {
 			
@@ -58,7 +65,8 @@ public class Offices extends Controller {
 	@NoCheck
 	public static void saveInstitute(Long areaId, String name, String contraction) {
 		
-		Office area = Office.findById(areaId);
+		Office area = OfficeDao.getOfficeById(areaId);
+		//Office area = Office.findById(areaId);
 		
 		if(area == null || !area.isArea()) {
 			
@@ -74,14 +82,16 @@ public class Offices extends Controller {
 			Offices.showOffices();
 		}
 		
-		Office office = Office.find("byName",name).first();
+		Office office = OfficeDao.getOfficeByNameOrByContraction(Optional.fromNullable(name), Optional.<String>absent());
+		//Office office = Office.find("byName",name).first();
 		if( office != null ) {
 			
 			flash.error("Esiste gia' un istituto con nome %s, operazione annullata.", name);
 			Offices.showOffices();
 		}
 		
-		office = Office.find("byContraction",name).first();
+		office = OfficeDao.getOfficeByNameOrByContraction(Optional.<String>absent(), Optional.fromNullable(contraction));
+		//office = Office.find("byContraction",name).first();
 		if( office != null ) {
 			
 			flash.error("Esiste gia' un istituto con sigla %s, operazione annullata.", contraction);
@@ -102,7 +112,8 @@ public class Offices extends Controller {
 			
 	@NoCheck
 	public static void insertSeat(Long instituteId) {
-		Office institute = Office.findById(instituteId);
+		Office institute = OfficeDao.getOfficeById(instituteId);
+		//Office institute = Office.findById(instituteId);
 		if(institute==null) {
 			
 			flash.error("L'instituto selezionato non esiste. Operazione annullata.");
@@ -117,7 +128,8 @@ public class Offices extends Controller {
 	@NoCheck
 	public static void saveSeat(Long instituteId, String name, String address, String code, String date) {
 	
-		Office institute = Office.findById(instituteId);
+		Office institute = OfficeDao.getOfficeById(instituteId);
+		//Office institute = Office.findById(instituteId);
 		if(institute==null) {
 			
 			flash.error("L'instituto selezionato non esiste. Operazione annullata.");
@@ -145,7 +157,8 @@ public class Offices extends Controller {
 		}
 
 		//codice esistente
-		Office alreadyExist = Office.find("Select o from Office o where o.code = ?", getInteger(code)).first();
+		Office alreadyExist = OfficeDao.getOfficeByCode(getInteger(code));
+		//Office alreadyExist = Office.find("Select o from Office o where o.code = ?", getInteger(code)).first();
 		if(alreadyExist!=null){
 			flash.error("Il codice sede risulta gia' presente. Valorizzare correttamente tutti i parametri.");
 			Offices.showOffices();
@@ -176,7 +189,8 @@ public class Offices extends Controller {
 	@NoCheck
 	public static void editSeat(Long officeId){
 		
-		Office office = Office.findById(officeId);
+		Office office = OfficeDao.getOfficeById(officeId);
+		//Office office = Office.findById(officeId);
 		
 		if(office==null) {
 			
@@ -193,7 +207,8 @@ public class Offices extends Controller {
 	@NoCheck
 	public static void updateSeat(Long officeId, String name, String address, String code, String date) {
 	
-		Office office = Office.findById(officeId);
+		Office office = OfficeDao.getOfficeById(officeId);
+		//Office office = Office.findById(officeId);
 		if(office==null) {
 			
 			flash.error("La sede selezionata non esiste. Operazione annullata.");
@@ -221,7 +236,8 @@ public class Offices extends Controller {
 		}
 
 		//codice uguale a sedi diverse da remoteOffice
-		List<Office> officeList = Office.find("Select o from Office o where o.code = ?", getInteger(code)).fetch();
+		List<Office> officeList = OfficeDao.getOfficesByCode(getInteger(code));
+		//List<Office> officeList = Office.find("Select o from Office o where o.code = ?", getInteger(code)).fetch();
 		for(Office off : officeList) {
 			
 			if( !off.id.equals(office.id) ) {

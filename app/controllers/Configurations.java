@@ -17,7 +17,9 @@ import org.joda.time.LocalDate;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
+import dao.ConfGeneralDao;
 import dao.ConfYearDao;
+import dao.OfficeDao;
 import play.cache.Cache;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -33,7 +35,8 @@ public class Configurations extends Controller{
 		Office office = null;
 		List<Office> offices = Security.getOfficeAllowed();
 		if(officeId != null){
-			office = Office.findById(officeId);
+			office = OfficeDao.getOfficeById(officeId);
+			//office = Office.findById(officeId);
 		}
 		else{
 			office = Security.getUser().get().person.office;
@@ -61,7 +64,8 @@ public class Configurations extends Controller{
 		Office office = null;
 		List<Office> offices = Security.getOfficeAllowed();
 		if(officeId != null){
-			office = Office.findById(officeId);
+			office = OfficeDao.getOfficeById(officeId);
+			//office = Office.findById(officeId);
 		}
 		else{
 			office = Security.getUser().get().person.office;
@@ -78,7 +82,8 @@ public class Configurations extends Controller{
 		Integer lastYearMaxRecoveryDaysOneThree = null;
 		Integer lastYearMaxRecoveryDaysFourNine = null;
 		Integer lastYearHourMaxToCalculateWorkTime = null;
-		List<ConfYear> confLastYear = ConfYear.find("Select c from ConfYear c where c.year = ? and c.office = ?", date.getYear()-1, office).fetch();
+		List<ConfYear> confLastYear = ConfYearDao.getConfByYear(Optional.fromNullable(office), date.getYear()-1);
+		//List<ConfYear> confLastYear = ConfYear.find("Select c from ConfYear c where c.year = ? and c.office = ?", date.getYear()-1, office).fetch();
 		if(confLastYear.size()==0){
 			/**
 			 * controllo se esiste una configurazione dell'anno passato, nel caso non ci sia ne creo una con valori piuttosto
@@ -154,7 +159,8 @@ public class Configurations extends Controller{
 		ConfYear maxRecoveryDaysOneThree = null;
 		ConfYear maxRecoveryDaysFourNine = null;
 		ConfYear hourMaxToCalculateWorkTime = null;
-		List<ConfYear> confYear = ConfYear.find("Select c from ConfYear c where c.year = ? and c.office = ?", date.getYear(), office).fetch();
+		List<ConfYear> confYear = ConfYearDao.getConfByYear(Optional.fromNullable(office), date.getYear());
+		//List<ConfYear> confYear = ConfYear.find("Select c from ConfYear c where c.year = ? and c.office = ?", date.getYear(), office).fetch();
 		if(confYear.size()==0){
 			/**
 			 * se non esiste una configurazione annuale dell'anno in corso per l'ufficio office, ne creo una di default 
@@ -235,7 +241,9 @@ public class Configurations extends Controller{
 	public static void saveConfGeneral(String pk, String value){
 
 		try  {
-			ConfGeneral conf = ConfGeneral.findById(Long.parseLong(pk));
+			
+			ConfGeneral conf = ConfGeneralDao.getConfGeneralById(Long.parseLong(pk));
+			//ConfGeneral conf = ConfGeneral.findById(Long.parseLong(pk));
 			
 			rules.checkIfPermitted(conf.office);
 
@@ -269,7 +277,8 @@ public class Configurations extends Controller{
 
 		try
 		{
-			ConfYear conf = ConfYear.findById(Long.parseLong(pk));
+			ConfYear conf = ConfYearDao.getConfYearById(Long.parseLong(pk));
+			//ConfYear conf = ConfYear.findById(Long.parseLong(pk));
 
 			if(conf.field.equals(ConfigurationFields.DayExpiryVacationPastYear.description)){
 				Integer month = Integer.parseInt(ConfYear.getFieldValue(ConfigurationFields.MonthExpiryVacationPastYear.description, year, conf.office));
@@ -340,7 +349,8 @@ public class Configurations extends Controller{
 		Office office = null;
 
 		if(id != null){
-			office = Office.findById(id);
+			office = OfficeDao.getOfficeById(id);
+			//office = Office.findById(id);
 		}
 		else{
 			office = Security.getUser().get().person.office;
@@ -386,7 +396,8 @@ public class Configurations extends Controller{
 		Office office = null;
 
 		if(id != null){
-			office = Office.findById(id);
+			office = OfficeDao.getOfficeById(id);
+			//office = Office.findById(id);
 		}
 		else{
 			office = Security.getUser().get().person.office;

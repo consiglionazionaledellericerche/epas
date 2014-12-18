@@ -23,6 +23,10 @@ import play.mvc.Controller;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
+import dao.CompetenceCodeDao;
+import dao.CompetenceDao;
+import dao.PersonDao;
+
 
 /*
  * @autor arianna
@@ -49,7 +53,8 @@ public class Overtimes extends Controller {
 		Logger.debug("chiamata la getPersonOvertimes() con email=%s, year=%d, month=%d", email, year, month);
 		
 		// get the person with the given email
-		Person person = Person.find("SELECT p FROM Person p WHERE p.email = ?", email).first();
+		Person person = PersonDao.getPersonByEmail(email);
+		//Person person = Person.find("SELECT p FROM Person p WHERE p.email = ?", email).first();
 		if (person == null) {
 			notFound(String.format("Person with email = %s doesn't exist", email));			
 		}
@@ -85,14 +90,16 @@ public class Overtimes extends Controller {
 		Logger.debug("chiamata la getSupervisorTotalOvertimes() con email=%s", email);
 		
 		// get the person with the given email
-		Person person = Person.find("SELECT p FROM Person p WHERE p.email = ?", email).first();
+		Person person = PersonDao.getPersonByEmail(email);
+		//Person person = Person.find("SELECT p FROM Person p WHERE p.email = ?", email).first();
 		if (person == null) {
 			notFound(String.format("Person with email = %s doesn't exist", email));			
 		}
 		Logger.debug("Find persons %s with email %s", person.name, email);
 		
 
-		PersonHourForOvertime personHourForOvertime = PersonHourForOvertime.find("Select ph from PersonHourForOvertime ph where ph.person = ?", person).first();
+		PersonHourForOvertime personHourForOvertime = CompetenceDao.getPersonHourForOvertime(person);
+		//PersonHourForOvertime personHourForOvertime = PersonHourForOvertime.find("Select ph from PersonHourForOvertime ph where ph.person = ?", person).first();
 		if(personHourForOvertime == null)
 			personHourForOvertime = new PersonHourForOvertime(person, 0);
 		
@@ -114,8 +121,9 @@ public class Overtimes extends Controller {
 		}
 		
 		for (Competence competence : body.competences) {
-			Competence oldCompetence = Competence.find("SELECT c FROM Competence c WHERE c.person = ? AND c.year = ? AND c.month = ? AND c.competenceCode = ?", 
-					competence.person, year, month, competence.competenceCode).first();
+			Competence oldCompetence = CompetenceDao.getCompetence(competence.person, year, month, competence.competenceCode);
+//			Competence oldCompetence = Competence.find("SELECT c FROM Competence c WHERE c.person = ? AND c.year = ? AND c.month = ? AND c.competenceCode = ?", 
+//					competence.person, year, month, competence.competenceCode).first();
 			if (oldCompetence != null) {
 				// update the requested hours
 				oldCompetence.setValueApproved(competence.getValueApproved(), competence.getReason());
@@ -140,13 +148,15 @@ public class Overtimes extends Controller {
 		response.accessControl("*");
 		//response.setHeader("Access-Control-Allow-Origin", "http://sistorg.iit.cnr.it");
 		try {
-			Person person = Person.find("SELECT p FROM Person p WHERE p.email = ?", email).first();
+			Person person = PersonDao.getPersonByEmail(email);
+			//Person person = Person.find("SELECT p FROM Person p WHERE p.email = ?", email).first();
 			if (person == null) {
 				throw new IllegalArgumentException(String.format("Person with email = %s doesn't exist", email));			
 			}
 			Logger.debug("Find persons %s with email %s", person.name, email);
 			
-			PersonHourForOvertime personHourForOvertime = PersonHourForOvertime.find("Select ph from PersonHourForOvertime ph where ph.person = ?", person).first();
+			PersonHourForOvertime personHourForOvertime = CompetenceDao.getPersonHourForOvertime(person);
+			//PersonHourForOvertime personHourForOvertime = PersonHourForOvertime.find("Select ph from PersonHourForOvertime ph where ph.person = ?", person).first();
 			if (personHourForOvertime == null) {
 				personHourForOvertime = new PersonHourForOvertime(person, hours);
 				Logger.debug("Created  PersonHourForOvertime with persons %s and  hours=%s", person.name, hours);
@@ -181,12 +191,14 @@ public class Overtimes extends Controller {
 		//Table<Person, String, Integer> overtimesMonth = HashBasedTable.<Person, String, Integer>create();
 		Table<String, String, Integer> overtimesMonth = TreeBasedTable.<String, String, Integer>create();
 		
-		CompetenceCode competenceCode = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", "S1").first();
+		CompetenceCode competenceCode = CompetenceCodeDao.getCompetenceCodeByCode("S1");
+		//CompetenceCode competenceCode = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", "S1").first();
 		Logger.debug("find  CompetenceCode %s con CompetenceCode.code=%s", competenceCode, competenceCode.code);	
 		
 		for (Person person : body.persons) {
-			Competence competence = Competence.find("SELECT c FROM Competence c WHERE c.person = ? AND c.year = ? AND c.month = ? AND c.competenceCode = ?", 
-					person, year, month, competenceCode).first();
+			Competence competence = CompetenceDao.getCompetence(person, year, month, competenceCode);
+//			Competence competence = Competence.find("SELECT c FROM Competence c WHERE c.person = ? AND c.year = ? AND c.month = ? AND c.competenceCode = ?", 
+//					person, year, month, competenceCode).first();
 			Logger.debug("find  Competence %s per person=%s, year=%s, month=%s, competenceCode=%s", competence, person, year, month, competenceCode);	
 
 			if ((competence != null) && (competence.valueApproved != 0)) {

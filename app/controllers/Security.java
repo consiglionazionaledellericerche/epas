@@ -20,6 +20,11 @@ import com.google.common.base.Strings;
 import com.google.common.hash.Hashing;
 import com.google.common.collect.Lists;
 
+import dao.OfficeDao;
+import dao.PersonDao;
+import dao.RoleDao;
+import dao.UserDao;
+
 public class Security extends Secure.Security {
 	
 	/* lettore badge */
@@ -104,9 +109,10 @@ public class Security extends Secure.Security {
 	static boolean authenticate(String username, String password) {
 	    Logger.trace("Richiesta autenticazione di %s",username);
 
-		User user = 
-			User.find("SELECT u FROM User u where username = ? and password = ?", 
-					username, Hashing.md5().hashString(password,  Charsets.UTF_8).toString()).first();
+	    User user = UserDao.getUserByUsernameAndPassword(username, Optional.fromNullable(Hashing.md5().hashString(password,  Charsets.UTF_8).toString()));
+//		User user = 
+//			User.find("SELECT u FROM User u where username = ? and password = ?", 
+//					username, Hashing.md5().hashString(password,  Charsets.UTF_8).toString()).first();
 
 		if(user != null){
 			Cache.set(username, user, CACHE_DURATION);
@@ -139,7 +145,8 @@ public class Security extends Secure.Security {
 		//	return Optional.of(user);
 		
 		//db
-		User user = User.find("byUsername", username).first();
+		User user = UserDao.getUserByUsernameAndPassword(username, Optional.<String>absent());
+		//User user = User.find("byUsername", username).first();
 		Logger.trace("User.find('byUsername'), username=%s, e' %s", username, user);
 		if (user == null){
 			Logger.info("Security.getUser(): USer con username = %s non trovata nel database", username);
@@ -168,7 +175,8 @@ public class Security extends Secure.Security {
 		}
 	
 		final User user = getUser().get();
-		final Permission permission = Permission.find("byDescription", profile).first();
+		final Permission permission = RoleDao.getPermissionByDescription(profile);
+		//final Permission permission = Permission.find("byDescription", profile).first();
 		if(permission == null) {
 			
 			Logger.debug("Il Permission per la check del profilo %s è null o vuoto", profile);
@@ -181,7 +189,8 @@ public class Security extends Secure.Security {
 		/* caso richiesta solo su personId */
 		if( personId != null && officeId == null) {
 			
-			Person person = Person.findById(personId);
+			Person person = PersonDao.getPersonById(personId);
+			//Person person = Person.findById(personId);
 			if( checkUro(user.usersRolesOffices, permission, person.office) ) {
 				
 				return true;
@@ -193,7 +202,8 @@ public class Security extends Secure.Security {
 		
 		if( personId == null && officeId != null ) {
 			
-			Office office = Office.findById(officeId);
+			Office office = OfficeDao.getOfficeById(officeId);
+			//Office office = Office.findById(officeId);
 			if( checkUro(user.usersRolesOffices, permission, office) ) {
 				
 				return true;
@@ -205,8 +215,10 @@ public class Security extends Secure.Security {
 
 		if( personId != null && officeId != null ) { 
 			
-			Person person = Person.findById(personId);
-			Office office = Office.findById(officeId);
+			Person person = PersonDao.getPersonById(personId);
+			//Person person = Person.findById(personId);
+			Office office = OfficeDao.getOfficeById(officeId);
+			//Office office = Office.findById(officeId);
 			if( checkUro(user.usersRolesOffices, permission, person.office) && checkUro(user.usersRolesOffices, permission, office) ) {
 				
 				return true;

@@ -4,6 +4,7 @@ package controllers;
 import javax.inject.Inject;
 
 import controllers.Resecure.BasicAuth;
+import dao.OfficeDao;
 import it.cnr.iit.epas.JsonStampingBinder;
 import models.Office;
 import models.Person;
@@ -48,7 +49,8 @@ public class StampingsFromClient extends Controller{
 	//@BasicAuth
 	public static void prova(Long officeId) {
 
-		Office office = Office.findById(officeId);
+		Office office = OfficeDao.getOfficeById(officeId);
+		//Office office = Office.findById(officeId);
 		
 		User user = Security.getUser().get();
 		

@@ -25,6 +25,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
 
+import dao.ContractDao;
 import dao.MealTicketDao;
 import dao.PersonDao;
 
@@ -66,7 +67,8 @@ public class MealTickets  extends Controller {
 		
 		//Riepilogo buoni inseriti nella precedente action
 		if(personIdAdded != null && blockIdsAdded != null) {
-			Person personAdded = Person.findById(personIdAdded);
+			Person personAdded = PersonDao.getPersonById(personIdAdded);
+			//Person personAdded = Person.findById(personIdAdded);
 			Preconditions.checkNotNull(personAdded);
 			Preconditions.checkArgument(personAdded.isPersistent());
 			
@@ -83,7 +85,8 @@ public class MealTickets  extends Controller {
 	
 	public static void quickBlocksInsert(Long personId, String name, Integer page, Integer max) {
 		
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		Preconditions.checkArgument(person.isPersistent());
 		
 		rules.checkIfPermitted(person.office);
@@ -109,7 +112,8 @@ public class MealTickets  extends Controller {
 	
 	public static void mealTicketsLegacy(Long contractId, String name, Integer page, Integer max) {
 		
-		Contract contract = Contract.findById(contractId);
+		Contract contract = ContractDao.getContractById(contractId);
+		//Contract contract = Contract.findById(contractId);
 		Preconditions.checkNotNull(contract);
 		Preconditions.checkArgument(contract.isPersistent());
 		
@@ -136,7 +140,8 @@ public class MealTickets  extends Controller {
 			Integer codeBlock3, Integer dimBlock3, LocalDate expireDate3) {
 		
 		//Controllo dei parametri
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		if(person == null) {
 			
 			flash.error("Impossibile trovare la persona specificata. Operazione annullata");
@@ -171,7 +176,8 @@ public class MealTickets  extends Controller {
 		//Controllo esistenza
 		for(MealTicket mealTicket : ticketToAdd) {
 					
-			MealTicket exist = MealTicket.find("byCode", mealTicket.code).first();
+			MealTicket exist = MealTicketDao.getMealTicketByCode(mealTicket.code);
+			//MealTicket exist = MealTicket.find("byCode", mealTicket.code).first();
 			if(exist!=null)  {
 				
 				flash.error("Il buono pasto con codice %s risulta già essere assegnato alla persona %s %s in data %s."
@@ -206,10 +212,12 @@ public class MealTickets  extends Controller {
 			flash.error("Impossibile trovare il codice blocco specificato. Operazione annullata");
 			MealTickets.recapMealTickets(name, page, max, null, null);
 		}
-				
-		List<MealTicket> mealTicketList = MealTicket.find("Select mt from MealTicket mt "
-				+ "where mt.block = ?",
-				codeBlock).fetch();
+		List<Integer> codeBlockIds = Lists.newArrayList();
+		codeBlockIds.add(codeBlock);
+		List<MealTicket> mealTicketList = MealTicketDao.getMealTicketsInCodeBlockIds(codeBlockIds);
+//		List<MealTicket> mealTicketList = MealTicket.find("Select mt from MealTicket mt "
+//				+ "where mt.block = ?",
+//				codeBlock).fetch();
 		
 		if(mealTicketList == null || mealTicketList.size() == 0) {
 			flash.error("Il blocco selezionato è inesistente. Operazione annullata");

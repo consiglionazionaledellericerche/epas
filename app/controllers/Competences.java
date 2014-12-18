@@ -34,11 +34,16 @@ import security.SecurityRules;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableTable;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 
 import controllers.Resecure.NoCheck;
+import dao.CompetenceCodeDao;
+import dao.CompetenceDao;
+import dao.OfficeDao;
 import dao.PersonDao;
+import dao.PersonDayDao;
 
 @With( {Resecure.class, RequestInit.class} )
 public class Competences extends Controller{
@@ -76,7 +81,8 @@ public class Competences extends Controller{
 			officeId = offices.get(0).id;
 		}
 
-		Office office = Office.findById(officeId);
+		Office office = OfficeDao.getOfficeById(officeId);
+		//Office office = Office.findById(officeId);
 		if(office == null) {
 
 			flash.error("Sede non trovata. Riprovare o effettuare una segnalazione.");
@@ -129,8 +135,9 @@ public class Competences extends Controller{
 		
 		for(Person p : activePersons){
 			for(CompetenceCode c : p.competenceCode){
-				Competence comp = Competence.find("Select comp from Competence comp where comp.person = ? and comp.month = ? and comp.year = ?" +
-						"and comp.competenceCode = ?", p, month, year, c).first();
+				Competence comp = CompetenceDao.getCompetence(p, year, month, c);
+//				Competence comp = Competence.find("Select comp from Competence comp where comp.person = ? and comp.month = ? and comp.year = ?" +
+//						"and comp.competenceCode = ?", p, month, year, c).first();
 				if(comp == null){
 					comp = new Competence(p, c, year, month);
 					comp.valueApproved = 0;
@@ -139,11 +146,15 @@ public class Competences extends Controller{
 					
 			}
 		}
-		
-		List<Competence> competenceList = 
-				Competence.find("Select comp from Competence comp, CompetenceCode code where comp.year = ? and comp.month = ? " +
-				"and comp.competenceCode = code and code.code in (?,?,?) and comp.person.office = ?", 
-				year, month, "S1", "S2", "S3", office).fetch();
+		List<String> code = Lists.newArrayList();
+		code.add("S1");
+		code.add("S2");
+		code.add("S3");
+		List<Competence> competenceList = CompetenceDao.getCompetences(year, month, code, office, false);
+//		List<Competence> competenceList = 
+//				Competence.find("Select comp from Competence comp, CompetenceCode code where comp.year = ? and comp.month = ? " +
+//				"and comp.competenceCode = code and code.code in (?,?,?) and comp.person.office = ?", 
+//				year, month, "S1", "S2", "S3", office).fetch();
 		
 		int totaleOreStraordinarioMensile = 0;
 		int totaleOreStraordinarioAnnuale = 0;
@@ -154,17 +165,19 @@ public class Competences extends Controller{
 			totaleOreStraordinarioMensile = totaleOreStraordinarioMensile + comp.valueApproved;
 		}
 		
-		List<Competence> competenceYearList = 
-				Competence.find("Select comp from Competence comp, CompetenceCode code where comp.year = ? and comp.month <= ? " +
-				"and comp.competenceCode = code and code.code in (?,?,?) and comp.person.office = ?", 
-				year, month, "S1", "S2", "S3", office).fetch();
+		List<Competence> competenceYearList = CompetenceDao.getCompetences(year, month, code, office, true);
+//		List<Competence> competenceYearList = 
+//				Competence.find("Select comp from Competence comp, CompetenceCode code where comp.year = ? and comp.month <= ? " +
+//				"and comp.competenceCode = code and code.code in (?,?,?) and comp.person.office = ?", 
+//				year, month, "S1", "S2", "S3", office).fetch();
 		
 		for(Competence comp : competenceYearList){
 			
 			totaleOreStraordinarioAnnuale = totaleOreStraordinarioAnnuale + comp.valueApproved;
 		}
 		
-		List<TotalOvertime> total = TotalOvertime.find("Select tot from TotalOvertime tot where tot.year = ? and tot.office = ?", year, office).fetch();
+		List<TotalOvertime> total = CompetenceDao.getTotalOvertime(year, office);
+		//List<TotalOvertime> total = TotalOvertime.find("Select tot from TotalOvertime tot where tot.year = ? and tot.office = ?", year, office).fetch();
 		
 		for(TotalOvertime tot : total){
 			
@@ -178,7 +191,8 @@ public class Competences extends Controller{
 	
 
 	public static void updateCompetence(long pk, String name, Integer value){
-		final Competence competence = Competence.findById(pk);
+		final Competence competence = CompetenceDao.getCompetenceById(pk);
+		//final Competence competence = Competence.findById(pk);
 		
 		notFoundIfNull(competence);
 		if (validation.hasErrors()) {
@@ -204,7 +218,8 @@ public class Competences extends Controller{
 	@NoCheck
 	public static void manageCompetenceCode(){
 		rules.checkIfPermitted();
-		List<CompetenceCode> compCodeList = CompetenceCode.findAll();
+		List<CompetenceCode> compCodeList = CompetenceCodeDao.getAllCompetenceCode();
+		//List<CompetenceCode> compCodeList = CompetenceCode.findAll();
 		render(compCodeList);
 	}
 
@@ -218,7 +233,8 @@ public class Competences extends Controller{
 	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void edit(Long competenceCodeId){
 		rules.checkIfPermitted(Security.getUser().get().person.office);
-		CompetenceCode code = CompetenceCode.findById(competenceCodeId);
+		CompetenceCode code = CompetenceCodeDao.getCompetenceCodeById(competenceCodeId);
+		//CompetenceCode code = CompetenceCode.findById(competenceCodeId);
 		render(code);
 	}
 
@@ -231,8 +247,10 @@ public class Competences extends Controller{
 			code.codeToPresence = params.get("codiceAttPres");
 			code.description = params.get("descrizione");
 			//code.inactive = params.get("inattivo", Boolean.class) != null ? params.get("inattivo", Boolean.class) : false;
-			CompetenceCode codeControl = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", 
-					params.get("codice")).first();
+			
+			CompetenceCode codeControl = CompetenceCodeDao.getCompetenceCodeByCode(params.get("codice"));
+//			CompetenceCode codeControl = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", 
+//					params.get("codice")).first();
 			if(codeControl == null){
 				code.save();
 				flash.success(String.format("Codice %s aggiunto con successo", code.code));
@@ -245,7 +263,8 @@ public class Competences extends Controller{
 
 		}
 		else{
-			CompetenceCode code = CompetenceCode.findById(competenceCodeId);
+			CompetenceCode code = CompetenceCodeDao.getCompetenceCodeById(competenceCodeId);
+			//CompetenceCode code = CompetenceCode.findById(competenceCodeId);
 			code.code = params.get("codice");
 			code.codeToPresence = params.get("codiceAttPres");
 			code.description = params.get("descrizione");
@@ -276,7 +295,8 @@ public class Competences extends Controller{
 			officeId = offices.get(0).id;
 		}
 		
-		Office office = Office.findById(officeId);
+		Office office = OfficeDao.getOfficeById(officeId);
+		//Office office = Office.findById(officeId);
 		if(office == null) {
 			
 			flash.error("Sede non trovata. Riprovare o effettuare una segnalazione.");
@@ -285,9 +305,10 @@ public class Competences extends Controller{
 		
 		rules.checkIfPermitted(office);
 		
-		List<TotalOvertime> totalList = 
-				TotalOvertime.find("Select tot from TotalOvertime tot where tot.year = ? and tot.office = ?",
-						year, office).fetch();
+		List<TotalOvertime> totalList = CompetenceDao.getTotalOvertime(year, office);
+//		List<TotalOvertime> totalList = 
+//				TotalOvertime.find("Select tot from TotalOvertime tot where tot.year = ? and tot.office = ?",
+//						year, office).fetch();
 
 		int totale = 0;
 		for(TotalOvertime tot : totalList) {
@@ -300,7 +321,8 @@ public class Competences extends Controller{
 
 	public static void saveOvertime(Integer year, String numeroOre, Long officeId){
 
-		Office office = Office.findById(officeId);
+		Office office = OfficeDao.getOfficeById(officeId);
+		//Office office = Office.findById(officeId);
 		if(office == null) {
 			
 			flash.error("Sede non trovata. Riprovare o effettuare una segnalazione.");
@@ -354,7 +376,8 @@ public class Competences extends Controller{
 			officeId = offices.get(0).id;
 		}
 
-		Office office = Office.findById(officeId);
+		Office office = OfficeDao.getOfficeById(officeId);
+		//Office office = Office.findById(officeId);
 		if(office == null) {
 
 			flash.error("Sede non trovata. Riprovare o effettuare una segnalazione.");
@@ -378,7 +401,8 @@ public class Competences extends Controller{
 			beginMonth = new LocalDate(year, month, 1);
 		}
 		
-		CompetenceCode code = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", "S1").first();
+		CompetenceCode code = CompetenceCodeDao.getCompetenceCodeByCode("S1");
+		//CompetenceCode code = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", "S1").first();
 		SimpleResults<Person> simpleResults = PersonDao.listForCompetence(code, Optional.fromNullable(name), 
 				Sets.newHashSet(office), 
 				false, 
@@ -394,8 +418,10 @@ public class Competences extends Controller{
 			Integer timeAtWork = 0;
 			Integer difference = 0;
 			Integer overtime = 0;
-			List<PersonDay> personDayList = PersonDay.find("Select pd from PersonDay pd where pd.date between ? and ? and pd.person = ?", 
-					beginMonth, beginMonth.dayOfMonth().withMaximumValue(), p).fetch();
+			
+			List<PersonDay> personDayList = PersonDayDao.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), false);
+//			List<PersonDay> personDayList = PersonDay.find("Select pd from PersonDay pd where pd.date between ? and ? and pd.person = ?", 
+//					beginMonth, beginMonth.dayOfMonth().withMaximumValue(), p).fetch();
 			for(PersonDay pd : personDayList){
 				if(pd.stampings.size()>0)
 					daysAtWork = daysAtWork +1;
@@ -409,9 +435,10 @@ public class Competences extends Controller{
 			}
 	//		CompetenceCode code = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", "S1").first();
 			
-			Competence comp = Competence.find("Select comp from Competence comp where comp.person = ? " +
-					"and comp.year = ? and comp.month = ? and comp.competenceCode.code = ?", 
-					p, year, month, code.code).first();
+			Competence comp = CompetenceDao.getCompetence(p, year, month, code);
+//			Competence comp = Competence.find("Select comp from Competence comp where comp.person = ? " +
+//					"and comp.year = ? and comp.month = ? and comp.competenceCode.code = ?", 
+//					p, year, month, code.code).first();
 			if(comp != null)
 				overtime = comp.valueApproved;
 			else
@@ -452,7 +479,8 @@ public class Competences extends Controller{
 			officeId = offices.get(0).id;
 		}
 
-		Office office = Office.findById(officeId);
+		Office office = OfficeDao.getOfficeById(officeId);
+		//Office office = Office.findById(officeId);
 		if(office == null) {
 
 			flash.error("Sede non trovata. Riprovare o effettuare una segnalazione.");
@@ -473,7 +501,9 @@ public class Competences extends Controller{
 		
 		ImmutableTable.Builder<Person, String, Boolean> builder = ImmutableTable.builder();
 		Table<Person, String, Boolean> tableRecapCompetence = null;
-		List<CompetenceCode> allCodeList = CompetenceCode.findAll();
+		
+		List<CompetenceCode> allCodeList = CompetenceCodeDao.getAllCompetenceCode();
+		//List<CompetenceCode> allCodeList = CompetenceCode.findAll();
 		List<CompetenceCode> codeList = new ArrayList<CompetenceCode>();
 		for(CompetenceCode compCode : allCodeList) {
 			
@@ -512,7 +542,8 @@ public class Competences extends Controller{
 			Application.indexAdmin();
 		}
 		
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		rules.checkIfPermitted(person.office);
 		render(person);
 	}
@@ -522,7 +553,8 @@ public class Competences extends Controller{
 	 */
 	public static void saveNewCompetenceConfiguration(){
 		long personId = params.get("personId", Long.class);
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		if(person == null){
 			flash.error("Persona inesistente in anagrafica");
 			Application.indexAdmin();
@@ -555,210 +587,256 @@ public class Competences extends Controller{
 		String ionicRadiance3bis = params.get("ionicRadiance3bis");
 
 		if(overtimeWorkDay.equals("true") && !person.isOvertimeInWorkDayAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Straordinario diurno nei giorni lavorativi").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Straordinario diurno nei giorni lavorativi");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Straordinario diurno nei giorni lavorativi").first();
 			person.competenceCode.add(c);
 		}
 		else if(overtimeWorkDay.equals("false") && person.isOvertimeInWorkDayAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Straordinario diurno nei giorni lavorativi").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Straordinario diurno nei giorni lavorativi");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Straordinario diurno nei giorni lavorativi").first();
 			person.competenceCode.remove(c);
 		}
 
 		if(nightlyOvertime.equals("true") && !person.isOvertimeInHolidayOrNightlyInWorkDayAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Straordinario diurno nei giorni festivi o notturno nei giorni lavorativi").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Straordinario diurno nei giorni festivi o notturno nei giorni lavorativi");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Straordinario diurno nei giorni festivi o notturno nei giorni lavorativi").first();
 			person.competenceCode.add(c);
 		}
 		else if(nightlyOvertime.equals("false") && person.isOvertimeInHolidayOrNightlyInWorkDayAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Straordinario diurno nei giorni festivi o notturno nei giorni lavorativi").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Straordinario diurno nei giorni festivi o notturno nei giorni lavorativi");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Straordinario diurno nei giorni festivi o notturno nei giorni lavorativi").first();
 			person.competenceCode.remove(c);
 		}
 
 		if(nightlyHolidayOvertime.equals("true") && !person.isOvertimeInNightlyHolidayAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Straordinario notturno nei giorni festivi").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Straordinario notturno nei giorni festivi");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Straordinario notturno nei giorni festivi").first();
 			person.competenceCode.add(c);
 		}
 		else if(nightlyHolidayOvertime.equals("false") && person.isOvertimeInNightlyHolidayAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Straordinario notturno nei giorni festivi").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Straordinario notturno nei giorni festivi");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Straordinario notturno nei giorni festivi").first();
 			person.competenceCode.remove(c);
 		}
 
 		if(workdayReperibility.equals("true") && !person.isWorkDayReperibilityAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Reper.ta' Feriale").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Ind.ta' Reper.ta' Feriale");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Reper.ta' Feriale").first();
 			person.competenceCode.add(c);
 		}
 		else if(workdayReperibility.equals("false") && person.isWorkDayReperibilityAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Reper.ta' Feriale").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Ind.ta' Reper.ta' Feriale");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Reper.ta' Feriale").first();
 			person.competenceCode.remove(c);
 		}
 
 		if(holidayReperebility.equals("true") && !person.isHolidayReperibilityAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Reper.ta' Festiva").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Ind.ta' Reper.ta' Festiva");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Reper.ta' Festiva").first();
 			person.competenceCode.add(c);
 		}
 		else if(holidayReperebility.equals("false") && person.isHolidayReperibilityAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Reper.ta' Festiva").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Ind.ta' Reper.ta' Festiva");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Reper.ta' Festiva").first();
 			person.competenceCode.remove(c);
 		}
 
 		if(ordinaryShift.equals("true") && !person.isOrdinaryShiftAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Turno ordinario").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Turno ordinario");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Turno ordinario").first();
 			person.competenceCode.add(c);
 		}
 		else if(ordinaryShift.equals("false") && person.isOrdinaryShiftAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Turno ordinario").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Turno ordinario");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Turno ordinario").first();
 			person.competenceCode.remove(c);
 		}
 
 		if(holidayShift.equals("true") && !person.isHolidayShiftAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Turno festivo").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Turno festivo");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Turno festivo").first();
 			person.competenceCode.add(c);
 		}
 		else if(holidayShift.equals("false") && person.isHolidayShiftAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Turno festivo").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Turno festivo");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Turno festivo").first();
 			person.competenceCode.remove(c);
 		}
 
 		if(nightlyShift.equals("true") && !person.isNightlyShiftAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Turno notturno").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Turno notturno");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Turno notturno").first();
 			person.competenceCode.add(c);
 		}
 		else if(nightlyShift.equals("false") && person.isNightlyShiftAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Turno notturno").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Turno notturno");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Turno notturno").first();
 			person.competenceCode.remove(c);
 		}
 
 		if(hardship.equals("true") && !person.isHardshipAllowance()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.tà Sede Disagiata").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Ind.tà Sede Disagiata");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.tà Sede Disagiata").first();
 			person.competenceCode.add(c);
 		}
 		else if(hardship.equals("false") && person.isHardshipAllowance()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.tà Sede Disagiata").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Ind.tà Sede Disagiata");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.tà Sede Disagiata").first();
 			person.competenceCode.remove(c);
 		}
 
 		if(handleValues.equals("true") && !person.isHandleValuesAllowanceAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Maneggio Valori").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Ind.ta' Maneggio Valori");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Maneggio Valori").first();
 			person.competenceCode.add(c);
 		}
 		else if(handleValues.equals("false") && person.isHandleValuesAllowanceAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Maneggio Valori").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Ind.ta' Maneggio Valori");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Maneggio Valori").first();
 			person.competenceCode.remove(c);
 		}
 
 		if(task.equals("true") && !person.isTaskAllowanceAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' mansione L.397/71").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Ind.ta' mansione L.397/71");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' mansione L.397/71").first();
 			person.competenceCode.add(c);
 		}
 		else if(task.equals("false") && person.isTaskAllowanceAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' mansione L.397/71").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Ind.ta' mansione L.397/71");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' mansione L.397/71").first();
 			person.competenceCode.remove(c);
 		}
 
 		if(taskIncreased.equals("true") && !person.isTaskAllowanceIncreasedAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' mansione L.397/71 Magg.").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Ind.ta' mansione L.397/71 Magg.");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' mansione L.397/71 Magg.").first();
 			person.competenceCode.add(c);
 		}
 		else if(taskIncreased.equals("false") && person.isTaskAllowanceIncreasedAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' mansione L.397/71 Magg.").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Ind.ta' mansione L.397/71 Magg.");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' mansione L.397/71 Magg.").first();
 			person.competenceCode.remove(c);
 		}
 
 		if(boats.equals("true") && !person.isBoatsAllowanceAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Natanti").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Ind.ta' Natanti");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Natanti").first();
 			person.competenceCode.add(c);
 		}
 		else if(boats.equals("false") && person.isBoatsAllowanceAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Natanti").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Ind.ta' Natanti");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Natanti").first();
 			person.competenceCode.remove(c);
 		}
 
 		if(riskOne.equals("true") && !person.isRiskDegreeOneAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.1 DPR.146").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Ind.ta' Rischio GR.1 DPR.146");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.1 DPR.146").first();
 			person.competenceCode.add(c);
 		}
 		else if(riskOne.equals("false") && person.isRiskDegreeOneAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.1 DPR.146").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Ind.ta' Rischio GR.1 DPR.146");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.1 DPR.146").first();
 			person.competenceCode.remove(c);
 		}
 
 		if(riskTwo.equals("true") && !person.isRiskDegreeTwoAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.2 DPR.146").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Ind.ta' Rischio GR.2 DPR.146");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.2 DPR.146").first();
 			person.competenceCode.add(c);
 		}
 		else if(riskTwo.equals("false") && person.isRiskDegreeTwoAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.2 DPR.146").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Ind.ta' Rischio GR.2 DPR.146");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.2 DPR.146").first();
 			person.competenceCode.remove(c);
 		}
 
 		if(riskThree.equals("true") && !person.isRiskDegreeThreeAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.3 DPR.146").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Ind.ta' Rischio GR.3 DPR.146");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.3 DPR.146").first();
 			person.competenceCode.add(c);
 		}
 		else if(riskThree.equals("false") && person.isRiskDegreeThreeAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.3 DPR.146").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Ind.ta' Rischio GR.3 DPR.146");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.3 DPR.146").first();
 			person.competenceCode.remove(c);
 		}
 
 		if(riskFour.equals("true") && !person.isRiskDegreeFourAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.4 DPR.146").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Ind.ta' Rischio GR.4 DPR.146");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.4 DPR.146").first();
 			person.competenceCode.add(c);
 		}
 		else if(riskFour.equals("false") && person.isRiskDegreeFourAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.4 DPR.146").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Ind.ta' Rischio GR.4 DPR.146");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.4 DPR.146").first();
 			person.competenceCode.remove(c);
 		}
 
 		if(riskFive.equals("true") && !person.isRiskDegreeFiveAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.5 DPR.146").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Ind.ta' Rischio GR.5 DPR.146");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.5 DPR.146").first();
 			person.competenceCode.add(c);
 		}
 		else if(riskFive.equals("false") && person.isRiskDegreeFiveAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.5 DPR.146").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Ind.ta' Rischio GR.5 DPR.146");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio GR.5 DPR.146").first();
 			person.competenceCode.remove(c);
 		}
 
 		if(riskDiving.equals("true") && !person.isRiskDivingAllowanceAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio Subacquei").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Ind.ta' Rischio Subacquei");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio Subacquei").first();
 			person.competenceCode.add(c);
 		}
 		else if(riskDiving.equals("false") && person.isRiskDivingAllowanceAvailable()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio Subacquei").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByDescription("Ind.ta' Rischio Subacquei");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.description = ? ", "Ind.ta' Rischio Subacquei").first();
 			person.competenceCode.remove(c);
 		}
 
 
 		if(ionicRadiance1.equals("true") && !person.isIonicRadianceRiskCom1Available()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.code = ? ", "205").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByCode("205");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.code = ? ", "205").first();
 			person.competenceCode.add(c);
 		}
 		else if(ionicRadiance1.equals("false") && person.isIonicRadianceRiskCom1Available()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.code = ? ", "205").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByCode("205");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.code = ? ", "205").first();
 			person.competenceCode.remove(c);
 		}
 
 		if(ionicRadiance3.equals("true") && !person.isIonicRadianceRiskCom3Available()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.code = ? ", "206").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByCode("206");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.code = ? ", "206").first();
 			person.competenceCode.add(c);
 		}
 		else if(ionicRadiance3.equals("false") && person.isIonicRadianceRiskCom3Available()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.code = ? ", "206").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByCode("206");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.code = ? ", "206").first();
 			person.competenceCode.remove(c);
 		}
 
 		if(ionicRadiance1bis.equals("true") && !person.isIonicRadianceRiskCom1AvailableBis()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.code = ? ", "303").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByCode("303");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.code = ? ", "303").first();
 			person.competenceCode.add(c);
 		}
 		else if(ionicRadiance1bis.equals("false") && person.isIonicRadianceRiskCom1AvailableBis()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.code = ? ", "303").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByCode("303");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.code = ? ", "303").first();
 			person.competenceCode.remove(c);
 		}
 
 		if(ionicRadiance3bis.equals("true") && !person.isIonicRadianceRiskCom3AvailableBis()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.code = ? ", "304").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByCode("304");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.code = ? ", "304").first();
 			person.competenceCode.add(c);
 		}
 		else if(ionicRadiance3bis.equals("false") && person.isIonicRadianceRiskCom3AvailableBis()){
-			CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.code = ? ", "304").first();
+			CompetenceCode c = CompetenceCodeDao.getCompetenceCodeByCode("304");
+			//CompetenceCode c = CompetenceCode.find("Select c from CompetenceCode c where c.code = ? ", "304").first();
 			person.competenceCode.remove(c);
 		}
 		person.save();
@@ -785,12 +863,15 @@ public class Competences extends Controller{
 		BufferedWriter out = new BufferedWriter(writer);
 		out.write("Cognome Nome,Totale straordinari"+' '+year);
 		out.newLine();
+		List<CompetenceCode> codeList = Lists.newArrayList();
+		codeList.add(CompetenceCodeDao.getCompetenceCodeByCode("S1"));
 		for(Person p : personList){
-			Long totale = Competence.find("Select sum(comp.valueApproved) from Competence comp, CompetenceCode code " +
-					"where comp.person = ?" +
-					"and comp.year = ? " +
-					"and comp.competenceCode = code " +
-					"and code.code = ? ", p, year, "S1").first();			
+			Long totale = CompetenceDao.valueOvertimeApprovedByMonthAndYear(year, Optional.<Integer>absent(), Optional.fromNullable(p), codeList).longValue();
+//			Long totale = Competence.find("Select sum(comp.valueApproved) from Competence comp, CompetenceCode code " +
+//					"where comp.person = ?" +
+//					"and comp.year = ? " +
+//					"and comp.competenceCode = code " +
+//					"and code.code = ? ", p, year, "S1").first();			
 			Logger.debug("Totale per %s %s vale %d", p.name, p.surname, totale);
 			out.write(p.surname+' '+p.name+',');
 			if(totale != null)			

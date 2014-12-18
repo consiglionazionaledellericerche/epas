@@ -11,6 +11,7 @@ import models.query.QAbsence;
 import models.query.QAbsenceType;
 
 import org.bouncycastle.util.Strings;
+import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
 import com.mysema.query.BooleanBuilder;
@@ -81,4 +82,48 @@ public class AbsenceTypeDao {
 		
 		return ModelQuery.simpleResults(query, absenceType);
 	}
+
+	/**
+	 * 
+	 * @param long1
+	 * @return l'absenceType relativo all'id passato come parametro
+	 */
+	public static AbsenceType getAbsenceTypeById(Long long1) {
+		QAbsenceType absenceType = QAbsenceType.absenceType;
+		final JPQLQuery query = ModelQuery.queryFactory().from(absenceType)
+				.where(absenceType.id.eq(long1));
+		
+		return query.singleResult(absenceType);
+		
+	}
+
+	/**
+	 * 
+	 * @param date
+	 * @return la lista di codici di assenza che sono validi da una certa data in poi, ordinati per codice di assenza crescente
+	 */
+	public static List<AbsenceType> getAbsenceTypeFromEffectiveDate(
+			LocalDate date) {
+		QAbsenceType absenceType = QAbsenceType.absenceType;
+		final JPQLQuery query = ModelQuery.queryFactory().from(absenceType)
+				.where(absenceType.validTo.after(date)).orderBy(absenceType.code.asc());
+		
+		return query.list(absenceType);
+	}
+
+	/**
+	 * 
+	 * @param string
+	 * @return l'absenceType relativo al codice passato come parametro
+	 */
+	public static AbsenceType getAbsenceTypeByCode(String string) {
+		QAbsenceType absenceType = QAbsenceType.absenceType;
+		final JPQLQuery query = ModelQuery.queryFactory().from(absenceType)
+				.where(absenceType.code.eq(string));
+		
+		return query.singleResult(absenceType);
+		
+	}
+
+	
 }

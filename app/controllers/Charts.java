@@ -30,8 +30,12 @@ import models.rendering.VacationsRecap;
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import dao.AbsenceDao;
+import dao.CompetenceCodeDao;
+import dao.CompetenceDao;
 import dao.PersonDao;
 import play.Logger;
 import play.db.jpa.Blob;
@@ -79,12 +83,22 @@ public class Charts extends Controller{
 		month = params.get("monthChart", Integer.class);
 		List<Person> personeProva = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), true);
 		List<PersonOvertime> poList = new ArrayList<PersonOvertime>();
+		//Nuovo codice per la gestione delle query con queryDSL
+		List<CompetenceCode> codeList = Lists.newArrayList();
+		CompetenceCode c1 = CompetenceCodeDao.getCompetenceCodeByCode("S1");
+		CompetenceCode c2 = CompetenceCodeDao.getCompetenceCodeByCode("S2");
+		CompetenceCode c3 = CompetenceCodeDao.getCompetenceCodeByCode("S3");
+		codeList.add(c1);
+		codeList.add(c2);
+		codeList.add(c3);
 		for(Person p : personeProva){
 			if(p.office.equals(Security.getUser().get().person.office)){
 				PersonOvertime po = new PersonOvertime();
 
-				Long val = Competence.find("Select sum(c.valueApproved) from Competence c where c.competenceCode.code in (?,?,?) and c.year = ? and c.month = ? and c.person = ?",
-						"S1","S2","S3", year, month, p).first();
+				
+				Long val = CompetenceDao.valueOvertimeApprovedByMonthAndYear(year, Optional.fromNullable(month), Optional.fromNullable(p), codeList).longValue();
+//				Long val = Competence.find("Select sum(c.valueApproved) from Competence c where c.competenceCode.code in (?,?,?) and c.year = ? and c.month = ? and c.person = ?",
+//						"S1","S2","S3", year, month, p).first();
 
 				Contract contract = p.getCurrentContract();
 				//CalcoloSituazioneAnnualePersona sit = new CalcoloSituazioneAnnualePersona(contract, year, new LocalDate(year,month,1));
@@ -124,8 +138,17 @@ public class Charts extends Controller{
 		}
 		year = params.get("yearChart", Integer.class);
 		Logger.debug("Anno preso dai params: %d", year);
-		Long val = Competence.find("Select sum(c.valueApproved) from Competence c where c.competenceCode.code in (?,?,?) and c.year = ?", 
-				"S1","S2","S3", year).first();
+		//Nuovo codice per la gestione delle query con queryDSL
+		List<CompetenceCode> codeList = Lists.newArrayList();
+		CompetenceCode c1 = CompetenceCodeDao.getCompetenceCodeByCode("S1");
+		CompetenceCode c2 = CompetenceCodeDao.getCompetenceCodeByCode("S2");
+		CompetenceCode c3 = CompetenceCodeDao.getCompetenceCodeByCode("S3");
+		codeList.add(c1);
+		codeList.add(c2);
+		codeList.add(c3);
+		Long val = CompetenceDao.valueOvertimeApprovedByMonthAndYear(year, Optional.<Integer>absent(), Optional.<Person>absent(), codeList).longValue();
+		//		Long val = Competence.find("Select sum(c.valueApproved) from Competence c where c.competenceCode.code in (?,?,?) and c.year = ?", 
+//				"S1","S2","S3", year).first();
 		List<Person> personeProva = Person.getActivePersonsinYear(year, Security.getOfficeAllowed(), true);
 		int totaleOreResidue = 0;
 		for(Person p : personeProva){
@@ -164,14 +187,25 @@ public class Charts extends Controller{
 		year = params.get("yearChart", Integer.class);
 		Logger.debug("Anno preso dai params: %d", year);
 
-		Long missioniSize = Absence.find("Select count(abs) from Absence abs where abs.personDay.date between ? and ? and abs.absenceType.code = ?", 
-				new LocalDate(year,1,1), new LocalDate(year,1,1).monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue(), "92").first();
-		Long riposiCompensativiSize = Absence.find("Select count(abs) from Absence abs where abs.personDay.date between ? and ? and abs.absenceType.code = ?", 
-				new LocalDate(year,1,1), new LocalDate(year,1,1).monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue(), "91").first();
-		Long malattiaSize = Absence.find("Select count(abs) from Absence abs where abs.personDay.date between ? and ? and abs.absenceType.code = ?", 
-				new LocalDate(year,1,1), new LocalDate(year,1,1).monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue(), "111").first();
-		Long altreSize = Absence.find("Select count(abs) from Absence abs where abs.personDay.date between ? and ? and abs.absenceType.code not in(?,?,?)", 
-				new LocalDate(year,1,1), new LocalDate(year,1,1).monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue(), "92","91","111").first();
+		//Codice aggiunto per le queryDSL
+		List<String> absenceCode = Lists.newArrayList();
+		absenceCode.add("92");
+		absenceCode.add("91");
+		absenceCode.add("111");
+		LocalDate beginYear = new LocalDate(year, 1,1);
+		LocalDate endYear = beginYear.monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue();
+		Long missioniSize = AbsenceDao.howManyAbsenceInPeriod(beginYear, endYear, "92");
+		Long riposiCompensativiSize = AbsenceDao.howManyAbsenceInPeriod(beginYear, endYear, "91");
+		Long malattiaSize = AbsenceDao.howManyAbsenceInPeriod(beginYear, endYear, "111");
+		Long altreSize = AbsenceDao.howManyAbsenceInPeriodNotInList(beginYear, endYear, absenceCode);
+//		Long missioniSize = Absence.find("Select count(abs) from Absence abs where abs.personDay.date between ? and ? and abs.absenceType.code = ?", 
+//				new LocalDate(year,1,1), new LocalDate(year,1,1).monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue(), "92").first();
+//		Long riposiCompensativiSize = Absence.find("Select count(abs) from Absence abs where abs.personDay.date between ? and ? and abs.absenceType.code = ?", 
+//				new LocalDate(year,1,1), new LocalDate(year,1,1).monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue(), "91").first();
+//		Long malattiaSize = Absence.find("Select count(abs) from Absence abs where abs.personDay.date between ? and ? and abs.absenceType.code = ?", 
+//				new LocalDate(year,1,1), new LocalDate(year,1,1).monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue(), "111").first();
+//		Long altreSize = Absence.find("Select count(abs) from Absence abs where abs.personDay.date between ? and ? and abs.absenceType.code not in(?,?,?)", 
+//				new LocalDate(year,1,1), new LocalDate(year,1,1).monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue(), "92","91","111").first();
 
 		Logger.debug("Missioni size: %d", missioniSize);
 		Logger.debug("RiposiCompensativi size: %d", riposiCompensativiSize);
@@ -244,9 +278,11 @@ public class Charts extends Controller{
 					int matricola = Integer.parseInt(Charts.removeApice(tokenList.get(indexMatricola)));
 					String assenza = Charts.removeApice(tokenList.get(indexAssenza));
 					LocalDate dataAssenza = Charts.buildDate(tokenList.get(indexDataAssenza));
-					Person p = Person.find("Select p from Person p where p.number = ?", matricola).first();
-					Absence abs = Absence.find("Select abs from Absence abs where abs.personDay.person = ? and abs.personDay.date = ?", 
-							p, dataAssenza).first();
+					Person p = PersonDao.getPersonByNumber(matricola);
+					//Person p = Person.find("Select p from Person p where p.number = ?", matricola).first();
+					Absence abs = AbsenceDao.getAbsenceInDay(Optional.fromNullable(p), dataAssenza, Optional.<LocalDate>absent(), false).size() > 0 ? AbsenceDao.getAbsenceInDay(Optional.fromNullable(p), dataAssenza, Optional.<LocalDate>absent(), false).get(0) : null;
+					//Absence abs = Absence.find("Select abs from Absence abs where abs.personDay.person = ? and abs.personDay.date = ?", 
+					//		p, dataAssenza).first();
 					if(abs == null){
 						if(!dataAssenza.isBefore(new LocalDate(2013,1,1)))
 							//							renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, false, "assenza prima della data inizio utilizzo del programma", null);
@@ -414,8 +450,9 @@ public class Charts extends Controller{
 
 			out.append(p.surname+' '+p.name+',');
 			String situazione = "";
-			List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ? and ((c.endContract != null and c.endContract between ? and ?) or "
-					+ "(c.beginContract > ? and (c.expireContract = null or c.expireContract > ?))) order by c.beginContract", p, beginDate, endDate, beginDate, endDate).fetch();
+			List<Contract> contractList = PersonDao.getContractList(p, beginDate, endDate);
+//			List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ? and ((c.endContract != null and c.endContract between ? and ?) or "
+//					+ "(c.beginContract > ? and (c.expireContract = null or c.expireContract > ?))) order by c.beginContract", p, beginDate, endDate, beginDate, endDate).fetch();
 			LocalDate beginContract = null;
 			if(contractList.isEmpty())
 				contractList = p.contracts;
@@ -478,7 +515,8 @@ public class Charts extends Controller{
 	public static void exportDataSituation(Long personId) throws IOException{
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		FileInputStream inputStream = null;
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		File tempFile = File.createTempFile("esportazioneSituazioneFinale"+person.surname,".csv" );
 		inputStream = new FileInputStream( tempFile );
 		FileWriter writer = new FileWriter(tempFile, true);

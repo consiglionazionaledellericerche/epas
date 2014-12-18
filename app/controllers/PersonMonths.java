@@ -13,6 +13,9 @@ import models.User;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
+
+import dao.PersonMonthRecapDao;
 import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -55,8 +58,10 @@ public class PersonMonths extends Controller{
 		for(int i = 1; i < 13; i++){
 			mesi.add(i);
 		}
-		List<PersonMonthRecap> pmList = PersonMonthRecap.find("Select pm from PersonMonthRecap pm where pm.year = ? and pm.person = ?",
-				year, person).fetch();
+		
+		List<PersonMonthRecap> pmList = PersonMonthRecapDao.getPersonMonthRecapInYearOrWithMoreDetails(person, year, Optional.<Integer>absent(), Optional.<Boolean>absent());
+//		List<PersonMonthRecap> pmList = PersonMonthRecap.find("Select pm from PersonMonthRecap pm where pm.year = ? and pm.person = ?",
+//				year, person).fetch();
 		
 		LocalDate today = new LocalDate();
 		
@@ -86,7 +91,8 @@ public class PersonMonths extends Controller{
 	
 	public static void modifyTrainingHours(Long personMonthSituationId){
 		
-		PersonMonthRecap pm = PersonMonthRecap.findById(personMonthSituationId);
+		PersonMonthRecap pm = PersonMonthRecapDao.getPersonMonthRecapById(personMonthSituationId);
+		//PersonMonthRecap pm = PersonMonthRecap.findById(personMonthSituationId);
 		int year = pm.year;
 		int month = pm.month;
 		Person person = pm.person;
@@ -121,9 +127,10 @@ public class PersonMonths extends Controller{
 			PersonMonths.trainingHours(beginDate.getYear());
 		}
 
-		List<PersonMonthRecap> pmList = PersonMonthRecap.find("Select pm from PersonMonthRecap pm where pm.person = ? and pm.year = ? " +
-				"and pm.month = ? and (? between pm.fromDate and pm.toDate or ? between pm.fromDate and pm.toDate)", 
-				person, year, month, beginDate, endDate).fetch();
+		List<PersonMonthRecap> pmList = PersonMonthRecapDao.getPersonMonthRecaps(person, year, month, beginDate, endDate);
+//		List<PersonMonthRecap> pmList = PersonMonthRecap.find("Select pm from PersonMonthRecap pm where pm.person = ? and pm.year = ? " +
+//				"and pm.month = ? and (? between pm.fromDate and pm.toDate or ? between pm.fromDate and pm.toDate)", 
+//				person, year, month, beginDate, endDate).fetch();
 		if(pmList != null && pmList.size() > 0){
 			flash.error("Esiste un periodo di ore di formazione che contiene uno o entrambi i giorni specificati.");
 			PersonMonths.trainingHours(beginDate.getYear());
@@ -133,8 +140,10 @@ public class PersonMonths extends Controller{
 		 * agli attestati, il sistema non permette l'inserimento.
 		 * In caso contrario sì
 		 */
-		List<PersonMonthRecap> list = PersonMonthRecap.find("Select pm from PersonMonthRecap pm where pm.person = ? and pm.month = ? and pm.year = ? and pm.hoursApproved = ?",
-				person, month, year, true).fetch();
+		List<PersonMonthRecap> list = PersonMonthRecapDao.getPersonMonthRecapInYearOrWithMoreDetails(person, year, Optional.fromNullable(month), Optional.fromNullable(new Boolean(true)));
+		
+//		List<PersonMonthRecap> list = PersonMonthRecap.find("Select pm from PersonMonthRecap pm where pm.person = ? and pm.month = ? and pm.year = ? and pm.hoursApproved = ?",
+//				person, month, year, true).fetch();
 		if(list.size() > 0){
 			flash.error("Impossibile inserire ore di formazione per il mese precedente poichè gli attestati per quel mese sono già stati inviati");
 			trainingHours(year);
@@ -171,7 +180,8 @@ public class PersonMonths extends Controller{
 			PersonMonths.trainingHours(beginDate.getYear());
 		}
 		
-		PersonMonthRecap pm = PersonMonthRecap.findById(personMonthId);
+		PersonMonthRecap pm = PersonMonthRecapDao.getPersonMonthRecapById(personMonthId);
+		//PersonMonthRecap pm = PersonMonthRecap.findById(personMonthId);
 		if(pm == null) {
 			
 			flash.error("Ore di formazione non trovate. Operazione annullata.");
@@ -199,7 +209,8 @@ public class PersonMonths extends Controller{
 	
 	
 	public static void deleteTrainingHours(Long personId, Long personMonthRecapId){
-		PersonMonthRecap pm = PersonMonthRecap.findById(personMonthRecapId);
+		PersonMonthRecap pm = PersonMonthRecapDao.getPersonMonthRecapById(personMonthRecapId);
+		//PersonMonthRecap pm = PersonMonthRecap.findById(personMonthRecapId);
 		if(pm == null)
 		{
 			flash.error("Ore di formazioni inesistenti. Operazione annullata.");
@@ -212,7 +223,8 @@ public class PersonMonths extends Controller{
 	
 	public static void deleteTrainingHoursConfirmed( Long personMonthRecapId ){
 		
-		PersonMonthRecap pm = PersonMonthRecap.findById(personMonthRecapId);
+		PersonMonthRecap pm = PersonMonthRecapDao.getPersonMonthRecapById(personMonthRecapId);
+		//PersonMonthRecap pm = PersonMonthRecap.findById(personMonthRecapId);
 		if(pm == null)
 		{
 			flash.error("Ore di formazioni inesistenti. Operazione annullata.");
