@@ -73,8 +73,9 @@ public class AbsenceDao {
 	 * le assenze da ritornare per il download degli allegati
 	 */
 	public static List<Absence> getAbsenceByCodeInPeriod(Optional<Person> person, Optional<String> code, 
-			LocalDate from, LocalDate to, Optional<JustifiedTimeAtWork> justifiedTimeAtWork, boolean forAttachment){
+			LocalDate from, LocalDate to, Optional<JustifiedTimeAtWork> justifiedTimeAtWork, boolean forAttachment, boolean ordered){
 		QAbsence absence = QAbsence.absence;
+		final JPQLQuery query = ModelQuery.queryFactory().from(absence);
 		final BooleanBuilder condition = new BooleanBuilder();
 		if(forAttachment)
 			condition.and(absence.absenceFile.isNotNull());
@@ -88,8 +89,9 @@ public class AbsenceDao {
 			condition.and(absence.absenceType.code.eq(code.get()));
 		}
 		condition.and(absence.personDay.date.between(from, to));
-		final JPQLQuery query = ModelQuery.queryFactory().from(absence)
-				.where(condition);
+		query.where(condition);
+		if(ordered)
+			query.orderBy(absence.personDay.date.asc());
 		return query.list(absence);
 		
 	}

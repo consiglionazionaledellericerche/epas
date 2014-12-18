@@ -33,4 +33,17 @@ public class WorkingTimeTypeDao {
 		final JPQLQuery query = ModelQuery.queryFactory().from(wtt);
 		return query.list(wtt);
 	}
+	
+	
+	/**
+	 * 
+	 * @param id
+	 * @return il workingTimeType relativo all'id passato come parametro
+	 */
+	public static WorkingTimeType getWorkingTimeTypeById(Long id){
+		QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
+		final JPQLQuery query = ModelQuery.queryFactory().from(wtt)
+				.where(wtt.id.eq(id));
+		return query.singleResult(wtt);
+	}
 }

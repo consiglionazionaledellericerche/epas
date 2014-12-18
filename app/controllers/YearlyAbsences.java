@@ -1,6 +1,7 @@
 package controllers;
 
 import helpers.ModelQuery.SimpleResults;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -11,6 +12,7 @@ import models.Absence;
 import models.AbsenceType;
 import models.Person;
 import models.User;
+import models.enumerate.JustifiedTimeAtWork;
 import models.rendering.YearlyAbsencesRecap;
 
 import org.joda.time.LocalDate;
@@ -26,6 +28,7 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
+import dao.AbsenceDao;
 import dao.PersonDao;
 
 @With( {Resecure.class, RequestInit.class} )
@@ -100,7 +103,8 @@ public class YearlyAbsences extends Controller{
 		if(personId == null)
 			person = Security.getUser().get().person;
 		else
-			person = Person.findById(personId);
+			person = PersonDao.getPersonById(personId);
+			//person = Person.findById(personId);
 		
 		rules.checkIfPermitted("");
 		Integer anno = params.get("year", Integer.class);
@@ -176,11 +180,13 @@ public class YearlyAbsences extends Controller{
 				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true);
 
 		List<Person> persons = simpleResults.paginated(page).getResults();
-
+		LocalDate begin = new LocalDate(year, month, 1);
+		LocalDate end = new LocalDate(year, month, 1).dayOfMonth().withMaximumValue();
 		for(Person p : persons){
-			List<Absence> absenceInMonth = Absence.find("Select abs from Absence abs where " +
-					"abs.personDay.person = ? and abs.personDay.date >= ? and abs.personDay.date <= ?", 
-					p, new LocalDate(year, month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
+			List<Absence> absenceInMonth = AbsenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(p), Optional.<String>absent(), begin, end, Optional.<JustifiedTimeAtWork>absent(), false, false);
+//			List<Absence> absenceInMonth = Absence.find("Select abs from Absence abs where " +
+//					"abs.personDay.person = ? and abs.personDay.date >= ? and abs.personDay.date <= ?", 
+//					p, new LocalDate(year, month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
 
 			tableMonthlyAbsences.put(p, abt, absenceInMonth.size());
 			for(Absence abs : absenceInMonth){
@@ -245,7 +251,8 @@ public class YearlyAbsences extends Controller{
 		LocalDate monthBegin = new LocalDate(year, month, 1);
 		LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
 		
-		Person person = Person.findById(personId);	
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);	
 		if(person == null){
 			flash.error("Persona inesistente");
 			YearlyAbsences.showGeneralMonthlyAbsences(year, month, null, null);
@@ -259,13 +266,15 @@ public class YearlyAbsences extends Controller{
 		
 		if(absenceTypeCode.equals("Totale"))
 		{
-			absenceToRender = Absence.find("Select ab from Absence ab, PersonDay pd where ab.personDay = pd and pd.date between ? and ? and pd.person = ? order by pd.date", 
-					monthBegin, monthEnd, person).fetch();
+			absenceToRender = AbsenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person), Optional.<String>absent(), monthBegin, monthEnd, Optional.<JustifiedTimeAtWork>absent(), false, true);
+//			absenceToRender = Absence.find("Select ab from Absence ab, PersonDay pd where ab.personDay = pd and pd.date between ? and ? and pd.person = ? order by pd.date", 
+//					monthBegin, monthEnd, person).fetch();
 		}
 		else
 		{
-			absenceToRender = Absence.find("Select ab from Absence ab, PersonDay pd where ab.personDay = pd and pd.date between ? and ? and pd.person = ? and ab.absenceType.code = ? order by pd.date", 
-					monthBegin, monthEnd, person, absenceTypeCode).fetch();
+			absenceToRender = AbsenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person), Optional.fromNullable(absenceTypeCode), monthBegin, monthEnd, Optional.<JustifiedTimeAtWork>absent(), false, true);
+//			absenceToRender = Absence.find("Select ab from Absence ab, PersonDay pd where ab.personDay = pd and pd.date between ? and ? and pd.person = ? and ab.absenceType.code = ? order by pd.date", 
+//					monthBegin, monthEnd, person, absenceTypeCode).fetch();
 		}
 		
 		render(person, absenceToRender);

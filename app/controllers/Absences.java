@@ -1144,7 +1144,7 @@ public class Absences extends Controller{
 		
 		List<Absence> absList = AbsenceDao.getAbsenceByCodeInPeriod(Optional.<Person>absent(),Optional.fromNullable(code), 
 				new LocalDate(year, month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), 
-				Optional.<JustifiedTimeAtWork>absent(), true);
+				Optional.<JustifiedTimeAtWork>absent(), true, false);
 //		List<Absence> absList = Absence.find("Select abs from Absence abs where abs.absenceType.code = ? "
 //				+ "and abs.personDay.date between ? and ? and abs.absenceFile is not null",
 //				code, new LocalDate(year, month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
@@ -1238,7 +1238,7 @@ public class Absences extends Controller{
 		List<Absence> altreAssenze = new ArrayList<Absence>();
 		
 		List<Absence> absenceList = AbsenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person), 
-				Optional.<String>absent(), dateFrom, dateTo, Optional.fromNullable(JustifiedTimeAtWork.AllDay), false);
+				Optional.<String>absent(), dateFrom, dateTo, Optional.fromNullable(JustifiedTimeAtWork.AllDay), false, false);
 //		List<Absence> absenceList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
 //				"and abs.personDay.date between ? and ? and abs.absenceType.justifiedTimeAtWork = ?", person, dateFrom, dateTo, JustifiedTimeAtWork.AllDay).fetch();
 
