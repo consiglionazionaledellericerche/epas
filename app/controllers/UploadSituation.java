@@ -29,6 +29,7 @@ import models.Competence;
 import models.ConfGeneral;
 import models.Office;
 import models.Person;
+import models.PersonDay;
 import models.PersonMonthRecap;
 import models.User;
 import models.enumerate.ConfigurationFields;
@@ -40,12 +41,16 @@ import security.SecurityRules;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
+import dao.PersonDao;
+import dao.PersonMonthRecapDao;
 
 /**
  * Contiene in metodi necessari per l'interazione tra utente, ePAS e 
@@ -107,7 +112,8 @@ public class UploadSituation extends Controller{
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 //		ConfGeneral conf = ConfGeneral.getConfGeneral();
 		Integer seatCode = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.SeatCode.description, Security.getUser().get().person.office));
-		List<Person> personList = Person.find("Select p from Person p where p.number <> ? and p.number is not null order by p.number", 0).fetch();
+		List<Person> personList = PersonDao.getPersonsByNumber();
+		//List<Person> personList = Person.find("Select p from Person p where p.number <> ? and p.number is not null order by p.number", 0).fetch();
 		Logger.debug("La lista di nomi è composta da %s persone ", personList.size());
 		List<Absence> absenceList = null;
 		List<Competence> competenceList = null;
@@ -369,7 +375,8 @@ public class UploadSituation extends Controller{
 	public static void showProblems(Long certificatedDataId)
 	{
 		rules.checkIfPermitted(Security.getUser().get().person.office);
-		CertificatedData cd = CertificatedData.findById(certificatedDataId);
+		CertificatedData cd = PersonMonthRecapDao.getCertificatedDataById(certificatedDataId);
+		//CertificatedData cd = CertificatedData.findById(certificatedDataId);
 		if(cd==null)
 		{
 			renderText("L'elaborazione attestati richiesta è inesistente.");
@@ -381,7 +388,8 @@ public class UploadSituation extends Controller{
 	public static void showCertificatedData(Long certificatedDataId)
 	{
 		rules.checkIfPermitted(Security.getUser().get().person.office);
-		CertificatedData cd = CertificatedData.findById(certificatedDataId);
+		CertificatedData cd = PersonMonthRecapDao.getCertificatedDataById(certificatedDataId);
+		//CertificatedData cd = CertificatedData.findById(certificatedDataId);
 		if(cd==null)
 		{
 			renderText("L'elaborazione attestati richiesta è inesistente.");
@@ -394,17 +402,20 @@ public class UploadSituation extends Controller{
 		Person person = null;
 		PersonMonthRecap pm = null;
 		for (Dipendente dipendente : dipendenti) {
-			person = Person.findByNumber(Integer.parseInt(dipendente.getMatricola()));
+			person = PersonDao.getPersonByNumber(Integer.parseInt(dipendente.getMatricola()));
+			//person = Person.findByNumber(Integer.parseInt(dipendente.getMatricola()));
 			pm = new PersonMonthRecap(person, year, month);
 			
-			List<PersonMonthRecap> pmList = PersonMonthRecap.find("Select pm from PersonMonthRecap pm where pm.person = ? and pm.month = ? and pm.year = ?",
-					 person, month, year).fetch();
+			List<PersonMonthRecap> pmList = PersonMonthRecapDao.getPersonMonthRecapInYearOrWithMoreDetails(person, year, Optional.fromNullable(month), Optional.<Boolean>absent());
+			//List<PersonMonthRecap> pmList = PersonMonthRecap.find("Select pm from PersonMonthRecap pm where pm.person = ? and pm.month = ? and pm.year = ?",
+			//person, month, year).fetch();
 			//Numero di buoni mensa da passare alla procedura di invio attestati
 			Integer mealTicket = PersonUtility.numberOfMealTicketToUse(person, year, month);
 			
 			//vedere se l'ho gia' inviato con successo
-			CertificatedData cert = CertificatedData.find("Select cert from CertificatedData cert where cert.person = ? and cert.year = ? and cert.month = ?", person, year, month).first();
-			
+			CertificatedData cert = PersonMonthRecapDao.getCertificatedDataByPersonMonthAndYear(person, month, year);
+			//CertificatedData cert = CertificatedData.find("Select cert from CertificatedData cert where cert.person = ? and cert.year = ? and cert.month = ?", person, year, month).first();
+	
 			
 			RispostaElaboraDati rispostaElaboraDati = AttestatiClient.elaboraDatiDipendente(
 					cookies, dipendente, year, month, 

@@ -13,6 +13,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 
 import dao.PersonDao;
+import dao.VacationCodeDao;
 import models.ConfYear;
 import models.Contract;
 import models.Office;
@@ -75,7 +76,8 @@ public class VacationsAdmin extends Controller{
 	
 	public static void vacationsCurrentYear(Long personId, Integer anno){
 		
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		if( person == null ) {
 			error();	/* send a 500 error */
 		}
@@ -107,7 +109,8 @@ public class VacationsAdmin extends Controller{
 	
 	public static void vacationsLastYear(Long personId, Integer anno){
 		
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		if( person == null ) {
 			error();	/* send a 500 error */
 		}
@@ -138,7 +141,8 @@ public class VacationsAdmin extends Controller{
 	
 	public static void permissionCurrentYear(Long personId, Integer anno){
 		
-		Person person = Person.findById(personId);
+		Person person = PersonDao.getPersonById(personId);
+		//Person person = Person.findById(personId);
 		if( person == null ) {
 			error();	/* send a 500 error */
 		}
@@ -169,14 +173,16 @@ public class VacationsAdmin extends Controller{
 	@Check(Security.INSERT_AND_UPDATE_VACATIONS)
 	public static void manageVacationCode(){
 		
-		List<VacationCode> vacationCodeList = VacationCode.findAll();
+		List<VacationCode> vacationCodeList = VacationCodeDao.getAllVacationCodes();
+		//List<VacationCode> vacationCodeList = VacationCode.findAll();
 		renderArgs.put("year", session.get("yearSelected"));
 		render(vacationCodeList);
 	}
 	
 	@Check(Security.INSERT_AND_UPDATE_VACATIONS)
 	public static void edit(Long vacationCodeId){
-		VacationCode vc = VacationCode.findById(vacationCodeId);
+		VacationCode vc = VacationCodeDao.getVacationCodeById(vacationCodeId);
+		//VacationCode vc = VacationCode.findById(vacationCodeId);
 		render(vc);
 	}
 	
@@ -186,7 +192,8 @@ public class VacationsAdmin extends Controller{
 		vacationCode.description = params.get("nome");
 		vacationCode.vacationDays = params.get("giorniFerie", Integer.class);
 		vacationCode.permissionDays = params.get("giorniPermesso", Integer.class);
-		VacationCode vc = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", params.get("nome")).first();
+		VacationCode vc = VacationCodeDao.getVacationCodeByDescription(params.get("nome"));
+		//VacationCode vc = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", params.get("nome")).first();
 		if(vc == null){
 			vacationCode.save();
 			flash.success(String.format("Inserito nuovo piano ferie con nome %s", vacationCode.description));
@@ -201,7 +208,8 @@ public class VacationsAdmin extends Controller{
 	@Check(Security.INSERT_AND_UPDATE_VACATIONS)
 	public static void update(){
 		Long vacationCodeId = params.get("vacationCodeId", Long.class);
-		VacationCode code = VacationCode.findById(vacationCodeId);
+		VacationCode code = VacationCodeDao.getVacationCodeById(vacationCodeId);
+		//VacationCode code = VacationCode.findById(vacationCodeId);
 		code.description = params.get("nome");
 		code.vacationDays = params.get("giorniFerie", Integer.class);
 		code.permissionDays = params.get("giorniPermesso", Integer.class);

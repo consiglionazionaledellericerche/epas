@@ -18,6 +18,8 @@ import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.FluentIterable;
 
+import dao.OfficeDao;
+
 /**
  * @author cristian
  *
@@ -45,7 +47,8 @@ public class JsonExport extends Controller {
 	//TODO: serve un permesso più specifico?
 	@Check(Security.INSERT_AND_UPDATE_ADMINISTRATOR)
 	public static void activePersons() {
-		List<Office> offices = Office.findAll();
+		List<Office> offices = OfficeDao.getAllOffices();
+		//List<Office> offices = Office.findAll();
 		List<Person> activePersons = Person.getActivePersonsInDay(LocalDate.now(), offices, false);
 		Logger.debug("activePersons.size() = %d", activePersons.size());
 		

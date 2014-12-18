@@ -224,6 +224,25 @@ public final class PersonDao {
 		else 
 			return null;
 	}
+	
+	/**
+	 * 
+	 * @param person
+	 * @param begin
+	 * @param end
+	 * @return la lista di contratti che soddisfa le seguenti condizioni:
+	 */
+	public static List<Contract> getContractList(Person person, LocalDate begin, LocalDate end){
+		final QContract qc = QContract.contract;
+		final JPQLQuery query = ModelQuery.queryFactory().from(qc)
+				.where(qc.person.eq(person)
+						.andAnyOf(qc.endContract.isNotNull().and(qc.endContract.between(begin, end))
+								,qc.beginContract.after(begin).and(qc.expireContract.isNull())
+								,qc.beginContract.after(begin).and(qc.expireContract.after(end)))).orderBy(qc.beginContract.asc());
+								
+						
+		return query.list(qc);
+	}
 
 	/**
 	 * Ritorna la lista dei person day della persona nella finestra temporale specificata
@@ -253,6 +272,57 @@ public final class PersonDao {
 		query.where(condition);
 		
 		return query.list(qpd);
+	}
+
+	/**
+	 * 
+	 * @param personId
+	 * @return la persona corrispondente all'id passato come parametro
+	 */
+	public static Person getPersonById(Long personId) {
+		QPerson person = QPerson.person;
+		final JPQLQuery query = ModelQuery.queryFactory().from(person).where(person.id.eq(personId));
+		
+		return query.singleResult(person);
+		
+	
+	}
+	
+	/**
+	 * 
+	 * @param number
+	 * @return la persona corrispondente alla matricola passata come parametro
+	 */
+	public static Person getPersonByNumber(Integer number){
+		QPerson person = QPerson.person;
+		final JPQLQuery query = ModelQuery.queryFactory().from(person).where(person.number.eq(number));
+		
+		return query.singleResult(person);
+		
+	}
+	
+	/**
+	 * 
+	 * @return la lista di persone che hanno una matricola associata
+	 */
+	public static List<Person> getPersonsByNumber(){
+		QPerson person = QPerson.person;
+		final JPQLQuery query = ModelQuery.queryFactory().from(person)
+				.where(person.number.isNotNull().and(person.number.ne(0)));
+		query.orderBy(person.number.asc());
+		return query.list(person);
+	}
+	
+	/**
+	 * 
+	 * @param email
+	 * @return la persona che ha associata la mail email
+	 */
+	public static Person getPersonByEmail(String email){
+		QPerson person = QPerson.person;
+		final JPQLQuery query = ModelQuery.queryFactory().from(person).where(person.email.eq(email));
+		
+		return query.singleResult(person);
 	}
 	
 	
