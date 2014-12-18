@@ -109,7 +109,7 @@ public class Absences extends Controller{
 		LocalDate beginMonth = new LocalDate(year, month, 1);
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
 		
-		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, beginMonth, Optional.fromNullable(endMonth), true);
+		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, beginMonth, endMonth, true);
 //		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date",
 //				person, beginMonth, endMonth).fetch();
 		
@@ -143,7 +143,7 @@ public class Absences extends Controller{
 //		Person person = Person.findById(personId);
 		LocalDate begin = new LocalDate(year, month, 1);
 		LocalDate end = new LocalDate(year, month, 1).dayOfMonth().withMaximumValue();
-		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, begin, Optional.fromNullable(end), false);
+		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, begin, end, false);
 //		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 //				person, new LocalDate(year,month,1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
 		for(PersonDay pd : pdList){
@@ -580,7 +580,7 @@ public class Absences extends Controller{
 	 */
 	private static void checkMealTicket(LocalDate date, Person person, String mealTicket, AbsenceType abt){
 		
-		PersonDay pd = PersonDayDao.getPersonDayInPeriod(person, date, Optional.<LocalDate>absent(), false).get(0);
+		PersonDay pd = PersonDayDao.getSinglePersonDay(person, date).get();
 		
 		//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
 		if(pd == null)
@@ -908,7 +908,7 @@ public class Absences extends Controller{
 				Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
 			}
 			
-			PersonDay pd = PersonDayDao.getPersonDayInPeriod(person, actualDate, Optional.<LocalDate>absent(), false).size() > 0 ? PersonDayDao.getPersonDayInPeriod(person, actualDate, Optional.<LocalDate>absent(), false).get(0) : null;
+			PersonDay pd = PersonDayDao.getSinglePersonDay(person, actualDate).get();
 			//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, actualDate).first();
 			if(pd == null){
 				pd = new PersonDay(person, actualDate);
@@ -1293,16 +1293,14 @@ public class Absences extends Controller{
 				
 				Stampings.personStamping(person.id, actualDate.getYear(), actualDate.getMonthOfYear());
 			}
-			PersonDay pd = null;
-			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, actualDate, Optional.<LocalDate>absent(), false);
+			
+			PersonDay pd = PersonDayDao.getSinglePersonDay(person, actualDate).get();
 			//Costruisco se non esiste il person day
-			if(pdList.size() == 0){
+			if(pd == null){
 				pd = new PersonDay(person, actualDate);
 				pd.create();
 			}
-			else{
-				pd = pdList.get(0);
-			}
+			
 //			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, actualDate).first();
 			
 //			if(pd == null){
@@ -1391,16 +1389,14 @@ public class Absences extends Controller{
 		while(!actualDate.isAfter(dateTo))
 		{
 			
-			PersonDay pd = null;
-			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, actualDate, Optional.<LocalDate>absent(), false);
+			PersonDay pd = PersonDayDao.getSinglePersonDay(person, actualDate).get();
+			
 			//Costruisco se non esiste il person day
-			if(pdList.size() == 0){
+			if(pd == null){
 				actualDate = actualDate.plusDays(1);
 				continue;
 			}
-			else{
-				pd = pdList.get(0);
-			}
+			
 			
 		//	PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, actualDate).first();
 //			if(pd == null)

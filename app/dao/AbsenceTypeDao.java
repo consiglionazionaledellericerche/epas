@@ -18,6 +18,11 @@ import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.types.Projections;
 
+/**
+ * 
+ * @author dario
+ *
+ */
 public class AbsenceTypeDao {
 
 	public static class AbsenceTypeDto {

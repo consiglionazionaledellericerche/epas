@@ -15,6 +15,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import dao.PersonDao;
+
 
 public class JsonPersonEmailBinder implements TypeBinder<PersonEmailFromJson>{
 
@@ -40,7 +42,8 @@ public class JsonPersonEmailBinder implements TypeBinder<PersonEmailFromJson>{
 				jsonObject = jsonElement.getAsJsonObject();
 				email = jsonObject.get("email").getAsString();
 
-				person = Person.find("SELECT p FROM Person p WHERE p.email = ?", email).first();
+				person = PersonDao.getPersonByEmail(email);
+				//person = Person.find("SELECT p FROM Person p WHERE p.email = ?", email).first();
 				if(person != null)
 					persons.add(person);
 			}

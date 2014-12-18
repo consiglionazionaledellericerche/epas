@@ -19,6 +19,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import dao.PersonDao;
+
 
 /**
  * @author arianna
@@ -52,7 +54,8 @@ public class JsonRequestedPersonsBinder implements TypeBinder<PersonsList> {
 				
 				personEmail = jsonObject.get("email").getAsString();
 				
-				person = Person.find("SELECT p FROM Person p WHERE p.email = ? ORDER BY p.surname", personEmail).first();
+				person = PersonDao.getPersonByEmail(personEmail);
+				//person = Person.find("SELECT p FROM Person p WHERE p.email = ? ORDER BY p.surname", personEmail).first();
 				if (person == null) {
 					throw new IllegalArgumentException(String.format("Person with email = %s doesn't exist", personEmail));			
 				}

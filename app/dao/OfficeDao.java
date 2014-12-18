@@ -11,6 +11,11 @@ import com.mysema.query.jpa.JPQLQuery;
 import models.Office;
 import models.query.QOffice;
 
+/**
+ * 
+ * @author dario
+ *
+ */
 public class OfficeDao {
 
 	/**

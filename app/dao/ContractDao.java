@@ -20,6 +20,11 @@ import models.query.QContractWorkingTimeType;
 import models.query.QInitializationAbsence;
 import models.query.QInitializationTime;
 
+/**
+ * 
+ * @author dario
+ *
+ */
 public class ContractDao {
 
 	/**

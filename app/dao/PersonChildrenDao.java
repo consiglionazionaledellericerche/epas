@@ -9,6 +9,11 @@ import com.mysema.query.jpa.JPQLQuery;
 import models.PersonChildren;
 import models.query.QPersonChildren;
 
+/**
+ * 
+ * @author dario
+ *
+ */
 public class PersonChildrenDao {
 
 	

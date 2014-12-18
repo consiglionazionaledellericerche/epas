@@ -8,6 +8,11 @@ import models.query.QRole;
 
 import com.mysema.query.jpa.JPQLQuery;
 
+/**
+ * 
+ * @author dario
+ *
+ */
 public class RoleDao {
 
 	/**

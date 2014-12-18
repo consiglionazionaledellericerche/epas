@@ -7,6 +7,11 @@ import com.mysema.query.jpa.JPQLQuery;
 import models.ConfGeneral;
 import models.query.QConfGeneral;
 
+/**
+ * 
+ * @author dario
+ *
+ */
 public class ConfGeneralDao {
 	
 	/**

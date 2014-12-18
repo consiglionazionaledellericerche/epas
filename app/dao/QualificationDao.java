@@ -11,6 +11,11 @@ import com.mysema.query.jpa.JPQLQuery;
 import models.Qualification;
 import models.query.QQualification;
 
+/**
+ * 
+ * @author dario
+ *
+ */
 public class QualificationDao {
 
 	
