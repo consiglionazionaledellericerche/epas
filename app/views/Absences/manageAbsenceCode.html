@@ -2,93 +2,90 @@
 #{set header:'navbar' /}
 #{set title:'ePAS - Codici di assenza' /}
 
-
-
 <p class="lead"><a href="@{Absences.insertAbsenceCode}">Definisci nuovo codice di assenza</a></p>
 
-
-
 <section id="results">
-<div class="container span3"style="margin-left: 0px; margin-bottom: 20px;">
-#{form action:@Absences.manageAbsenceCode(), class:'form-search',  
-    method:'GET', autocomplete:'off',
-    'data-reload':'#results'}
-    
-    <input type="text" name="name" placeholder="Codice o descrizione" value="${name}" class="input-medium search-query"/>
-    <i class="icon-search icon-large"></i>
-    
+	<div class="container span3"style="margin-left: 0px; margin-bottom: 20px;">
+	#{form action:@Absences.manageAbsenceCode(), class:'form-search',  
+	    method:'GET', autocomplete:'off',
+	    'data-reload':'#results'}
+	    
+	    <input type="text" name="name" placeholder="Codice o descrizione" value="${name}" class="input-medium search-query"/>
+	    <i class="icon-search icon-large"></i>
+	    
+	
+	#{/form}
+	</div>
 
-#{/form}
-</div>
+	<ul class="pagination pagination-centered" style="margin-left: 10px;">
+	  #{if simpleResults.totalPage > 0}
+	  	#{list items:0..simpleResults.totalPage-1, as:'indexPage', class:'inline'}
+	  	  #{if simpleResults.page==indexPage}
+	  	    <li class="active"><a href="#">${indexPage+1}</a></li>
+	  	  #{/if}
+	  	  #{else}
+	  	    <li><a href="@{Absences.manageAbsenceCode(name, indexPage)}">${indexPage+1}</a></li>
+	  	  #{/else}
+		#{/list}
+	  #{/if}
+	  #{else}
+	    <br>
+	  #{/else}
+	</ul>
 
-<ul class="pagination pagination-centered" style="margin-left: 10px;">
-  
-  	#{list items:0..simpleResults.totalPage-1, as:'indexPage', class:'inline'}
-  	  #{if simpleResults.page==indexPage}
-  	    <li class="active"><a href="#">${indexPage+1}</a></li>
-  	  #{/if}
-  	  #{else}
-  	    <li><a href="@{Absences.manageAbsenceCode(name, indexPage)}">${indexPage+1}</a></li>
-  	  #{/else}
-  	  
-       
-	#{/list}
-  
-</ul>
-
-<table class="table table-condensed table-hover custom2">
-	<tr>
-		<th>Codice</th>
-		<th>Codice per att. presenza</th>
-		<th>Descrizione</th>
-		<th>uso interno</th>
-
-		<th>Usabile w.e. e festivi</th>
-		<th>inizio validità</th>
-		<th>fine validità</th>
-		<th>tempo di lavoro giustificato</th>
-		<th>livelli</th>
-		
-
-		<th>gruppo</th>
-		<th>valore</th>
-		<th>minuti in eccesso</th>
-		<th>accumulare i valori</th>
-		<th>limite accumulo</th>
-		<th>cosa fare raggiunto il limite</th>
-		<th>codice per sostituzione</th>
-	</tr>
-	%{
-		for(absenceCode in absenceList){			
-	}%
-	<tr>
-		<td class="caratteristica"><a href="@{Absences.editCode(absenceCode.id)}">${absenceCode.code}</a></td>
-		<td>${absenceCode.certificateCode}</td>
-		<td>${absenceCode.description}</td>
-		<td>${absenceCode.internalUse == true ? 'Sì' : 'No'}</td>
-
-		<td>${absenceCode.consideredWeekEnd == true ? 'Sì' : 'No'}</td>
-		<td>${absenceCode.validFrom}</td>
-		<td>${absenceCode.validTo}</td>
-		<td>${absenceCode.justifiedTimeAtWork != null ? absenceCode.justifiedTimeAtWork.description : ''}</td>
-		<td>%{for(qualification in absenceCode.qualifications){
-			}%
-				${qualification.qualification},
-			%{ } }%
-		</td> 
-		
-
-		<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.label : ''}</td>
-		<td>${}</td> <!-- cos'è??? -->
-		<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.minutesExcess : ''}</td>
-		<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.accumulationType.description : ''}</td>
-		<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.limitInMinute : ''}</td>
-		<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.accumulationBehaviour.description : ''}</td>
-		<td>${absenceCode.absenceTypeGroup != null && absenceCode.absenceTypeGroup.replacingAbsenceType != null ? absenceCode.absenceTypeGroup.replacingAbsenceType.code : ''}</td>
-	</tr>
-	%{
-		}
-	}%
-
-</table>
+	<table class="table table-condensed table-hover custom2">
+		<tr>
+			<th>Codice</th>
+			<th>Codice per att. presenza</th>
+			<th>Descrizione</th>
+			<th>uso interno</th>
+	
+			<th>Usabile w.e. e festivi</th>
+			<th>inizio validità</th>
+			<th>fine validità</th>
+			<th>tempo di lavoro giustificato</th>
+			<th>livelli</th>
+			
+	
+			<th>gruppo</th>
+			<th>valore</th>
+			<th>minuti in eccesso</th>
+			<th>accumulare i valori</th>
+			<th>limite accumulo</th>
+			<th>cosa fare raggiunto il limite</th>
+			<th>codice per sostituzione</th>
+		</tr>
+		%{
+			for(absenceCode in absenceList){			
+		}%
+		<tr>
+			<td class="caratteristica"><a href="@{Absences.editCode(absenceCode.id)}">${absenceCode.code}</a></td>
+			<td>${absenceCode.certificateCode}</td>
+			<td>${absenceCode.description}</td>
+			<td>${absenceCode.internalUse == true ? 'Sì' : 'No'}</td>
+	
+			<td>${absenceCode.consideredWeekEnd == true ? 'Sì' : 'No'}</td>
+			<td>${absenceCode.validFrom}</td>
+			<td>${absenceCode.validTo}</td>
+			<td>${absenceCode.justifiedTimeAtWork != null ? absenceCode.justifiedTimeAtWork.description : ''}</td>
+			<td>%{for(qualification in absenceCode.qualifications){
+				}%
+					${qualification.qualification},
+				%{ } }%
+			</td> 
+			
+	
+			<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.label : ''}</td>
+			<td>${}</td> <!-- cos'è??? -->
+			<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.minutesExcess : ''}</td>
+			<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.accumulationType.description : ''}</td>
+			<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.limitInMinute : ''}</td>
+			<td>${absenceCode.absenceTypeGroup != null ? absenceCode.absenceTypeGroup.accumulationBehaviour.description : ''}</td>
+			<td>${absenceCode.absenceTypeGroup != null && absenceCode.absenceTypeGroup.replacingAbsenceType != null ? absenceCode.absenceTypeGroup.replacingAbsenceType.code : ''}</td>
+		</tr>
+		%{
+			}
+		}%
+	
+	</table>
 </section>
