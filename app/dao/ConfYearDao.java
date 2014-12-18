@@ -1,17 +1,16 @@
 package dao;
 
 import helpers.ModelQuery;
-import helpers.ModelQuery.SimpleResults;
 
 import java.util.List;
-
-import com.google.common.base.Optional;
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.jpa.JPQLQuery;
 
 import models.ConfYear;
 import models.Office;
 import models.query.QConfYear;
+
+import com.google.common.base.Optional;
+import com.mysema.query.BooleanBuilder;
+import com.mysema.query.jpa.JPQLQuery;
 
 public class ConfYearDao {
 

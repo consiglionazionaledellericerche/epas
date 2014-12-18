@@ -4,16 +4,15 @@ import helpers.ModelQuery;
 
 import java.util.List;
 
+import models.Person;
+import models.PersonDay;
+import models.query.QPersonDay;
+
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
-
-import models.Person;
-import models.PersonDay;
-import models.query.QAbsenceType;
-import models.query.QPersonDay;
 
 public class PersonDayDao {
 
