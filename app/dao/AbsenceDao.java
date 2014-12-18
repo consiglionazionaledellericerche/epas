@@ -15,6 +15,11 @@ import models.Person;
 import models.enumerate.JustifiedTimeAtWork;
 import models.query.QAbsence;
 
+/**
+ * 
+ * @author dario
+ *
+ */
 public class AbsenceDao {
 
 	/**

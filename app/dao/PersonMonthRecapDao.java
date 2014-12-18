@@ -16,6 +16,11 @@ import models.PersonMonthRecap;
 import models.query.QCertificatedData;
 import models.query.QPersonMonthRecap;
 
+/**
+ * 
+ * @author dario
+ *
+ */
 public class PersonMonthRecapDao {
 
 	/**

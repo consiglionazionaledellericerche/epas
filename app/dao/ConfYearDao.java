@@ -13,6 +13,11 @@ import models.ConfYear;
 import models.Office;
 import models.query.QConfYear;
 
+/**
+ * 
+ * @author dario
+ *
+ */
 public class ConfYearDao {
 
 	/**

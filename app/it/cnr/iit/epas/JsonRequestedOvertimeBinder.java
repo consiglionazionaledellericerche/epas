@@ -21,6 +21,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import dao.CompetenceCodeDao;
+import dao.PersonDao;
+
 
 /**
  * @author arianna
@@ -53,13 +56,15 @@ public class JsonRequestedOvertimeBinder implements TypeBinder<PersonsCompetence
 				
 				personEmail = jsonObject.get("email").getAsString();
 				
-				person = Person.find("SELECT p FROM Person p WHERE p.email = ?", personEmail).first();
+				person = PersonDao.getPersonByEmail(personEmail);
+				//person = Person.find("SELECT p FROM Person p WHERE p.email = ?", personEmail).first();
 				if (person == null) {
 					throw new IllegalArgumentException(String.format("Person with email = %s doesn't exist", personEmail));			
 				}
 				Logger.debug("Find persons %s with email %s", person.name, personEmail);
 				
-				CompetenceCode competenceCode = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", "S1").first();
+				CompetenceCode competenceCode = CompetenceCodeDao.getCompetenceCodeByCode("S1");
+				//CompetenceCode competenceCode = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", "S1").first();
 				Competence competence =	new Competence(person, competenceCode, 0, 0);
 				competence.setValueApproved(jsonObject.get("ore").getAsInt(), jsonObject.get("motivazione").getAsString());
 				

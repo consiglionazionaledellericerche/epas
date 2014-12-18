@@ -3,6 +3,7 @@
  */
 package helpers.attestati;
 
+import dao.PersonDao;
 import models.Person;
 
 /**
@@ -21,7 +22,8 @@ public final class Dipendente implements Comparable<Dipendente> {
 	public Dipendente(final String matricola, final String nomeCognome) {
 		this.matricola = matricola;
 		this.cognomeNome = nomeCognome;
-		this.person = Person.findByNumber(Integer.parseInt(this.matricola));
+		this.person = PersonDao.getPersonByNumber(Integer.parseInt(this.matricola));
+		//this.person = Person.findByNumber(Integer.parseInt(this.matricola));
 	}
 
 	public String getMatricola() { return matricola; }

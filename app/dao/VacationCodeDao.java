@@ -9,6 +9,11 @@ import com.mysema.query.jpa.JPQLQuery;
 import models.VacationCode;
 import models.query.QVacationCode;
 
+/**
+ * 
+ * @author dario
+ *
+ */
 public class VacationCodeDao {
 
 	/**

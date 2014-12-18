@@ -9,12 +9,18 @@ import org.joda.time.LocalDate;
 import com.google.common.base.Optional;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.types.Expression;
 
 import models.Person;
 import models.PersonDay;
 import models.query.QAbsenceType;
 import models.query.QPersonDay;
 
+/**
+ * 
+ * @author dario
+ *
+ */
 public class PersonDayDao {
 
 	
@@ -24,17 +30,15 @@ public class PersonDayDao {
 	 * @param begin
 	 * @param end
 	 * @param ordered
-	 * @return la lista dei personday relativi a una persona in un certo periodo di tempo se il parametro end è presente, 
-	 * il personDay relativo a un certo giorno specifico (begin) altrimenti. Se ordered è 'true' la lista dei personDay viene ordinata
+	 * @return la lista dei personday relativi a una persona in un certo periodo di tempo  
+	 * Se ordered è 'true' la lista dei personDay viene ordinata
 	 */
-	public static List<PersonDay> getPersonDayInPeriod(Person person, LocalDate begin, Optional<LocalDate> end, boolean ordered){
+	public static List<PersonDay> getPersonDayInPeriod(Person person, LocalDate begin, LocalDate end, boolean ordered){
 		QPersonDay personDay = QPersonDay.personDay;
 		final BooleanBuilder condition = new BooleanBuilder();
 		final JPQLQuery query = ModelQuery.queryFactory().from(personDay);
-		if(end.isPresent())
-			condition.and(personDay.date.between(begin, end.get()));
-		else
-			condition.and(personDay.date.eq(begin));
+		
+		condition.and(personDay.date.between(begin, end));
 		condition.and(personDay.person.eq(person));
 		
 		query.where(condition);
@@ -67,5 +71,19 @@ public class PersonDayDao {
 		final JPQLQuery query = ModelQuery.queryFactory().from(personDay)
 				.where(personDay.person.eq(person));
 		return query.list(personDay);
+	}
+	
+	
+	/**
+	 * 
+	 * @param person
+	 * @param date
+	 * @return il personDay relativo al giorno e alla persona passati come parametro. E' optional perchè potrebbe non esistere
+	 */
+	public static Optional<PersonDay> getSinglePersonDay(Person person, LocalDate date){
+		QPersonDay personDay = QPersonDay.personDay;
+		final JPQLQuery query = ModelQuery.queryFactory().from(personDay)
+				.where(personDay.person.eq(person).and(personDay.date.eq(date)));
+		return Optional.fromNullable(query.singleResult(personDay));
 	}
 }

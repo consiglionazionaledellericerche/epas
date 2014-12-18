@@ -16,6 +16,7 @@ import org.joda.time.LocalDate;
 import play.Logger;
 import play.cache.Cache;
 import controllers.Security;
+import dao.PersonDao;
 
 /**
  * @author cristian
@@ -87,7 +88,8 @@ public class MainMenu {
 		
 		if (person == null) {
 			Logger.debug("L'id della persona è: %s", personId);
-			person = Person.findById(personId);
+			person = PersonDao.getPersonById(personId);
+			//person = Person.findById(personId);
 
 			Cache.set(PERSON_ID_CACHE_PREFIX + personId, person, "30mn");
 		}

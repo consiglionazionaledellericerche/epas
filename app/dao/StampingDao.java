@@ -9,6 +9,11 @@ import models.Stamping;
 import models.query.QStampType;
 import models.query.QStamping;
 
+/**
+ * 
+ * @author dario
+ *
+ */
 public class StampingDao {
 
 	/**

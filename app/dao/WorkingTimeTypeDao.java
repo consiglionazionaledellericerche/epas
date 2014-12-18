@@ -9,6 +9,11 @@ import com.mysema.query.jpa.JPQLQuery;
 import models.WorkingTimeType;
 import models.query.QWorkingTimeType;
 
+/**
+ * 
+ * @author dario
+ *
+ */
 public class WorkingTimeTypeDao {
 
 	/**

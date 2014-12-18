@@ -37,6 +37,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import dao.PersonDayDao;
 import play.Logger;
 import play.Play;
 import play.db.jpa.JPA;
@@ -55,8 +56,9 @@ public class PersonUtility {
 	public static int getPositiveDaysForOvertime(PersonMonthRecap personMonth){
 		int positiveDifference = 0;
 		LocalDate date = new LocalDate(personMonth.year, personMonth.month, 1);
-		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-				personMonth.person, date, date.dayOfMonth().withMaximumValue()).fetch();
+		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(personMonth.person, date, date.dayOfMonth().withMaximumValue(), false);
+//		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
+//				personMonth.person, date, date.dayOfMonth().withMaximumValue()).fetch();
 		for(PersonDay pd : pdList){
 			if(pd.difference > 0)
 				positiveDifference = positiveDifference + pd.difference;

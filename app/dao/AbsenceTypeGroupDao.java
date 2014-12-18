@@ -11,6 +11,11 @@ import com.mysema.query.jpa.JPQLQuery;
 import models.AbsenceTypeGroup;
 import models.query.QAbsenceTypeGroup;
 
+/**
+ * 
+ * @author dario
+ *
+ */
 public class AbsenceTypeGroupDao {
 
 	/**

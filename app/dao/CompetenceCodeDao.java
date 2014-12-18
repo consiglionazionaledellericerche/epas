@@ -9,6 +9,11 @@ import com.mysema.query.jpa.JPQLQuery;
 import models.CompetenceCode;
 import models.query.QCompetenceCode;
 
+/**
+ * 
+ * @author dario
+ *
+ */
 public class CompetenceCodeDao {
 
 	/**
