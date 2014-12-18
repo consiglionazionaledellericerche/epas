@@ -232,6 +232,37 @@ public class RequestInit extends Controller {
 			
 			return year;
 		}
+		
+		///////////////////////////////////////////////////////////////////////////7
+		//Navigazione menu (next/previous month)
+		
+		public int computeNextMonth(int month){
+			if(month==12)
+				return 1;
+			
+			return month + 1;
+		}
+		
+		public int computeNextYear(int month, int year){
+			if(month==12)
+				return year + 1;
+			
+			return year;
+		}
+		
+		public int computePreviousMonth(int month){
+			if(month==1)
+				return 12;
+			
+			return month - 1;
+		}
+		
+		public int computePreviousYear(int month, int year){
+			if(month==1)
+				return year - 1;
+			
+			return year;
+		}
 	}
 
 	@Before
