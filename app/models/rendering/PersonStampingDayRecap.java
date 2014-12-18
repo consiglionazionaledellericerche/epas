@@ -186,6 +186,7 @@ public class PersonStampingDayRecap {
 
 	private void setMealTicket(boolean mealTicket, boolean todayInProgress) {
 		
+		//Caso di oggi
 		if(todayInProgress)
 		{
 			if(!mealTicket)
@@ -199,12 +200,24 @@ public class PersonStampingDayRecap {
 			return;
 		}
 			
-		
+		//Casi assenze future (create o cancellate)
 		if(this.future && !mealTicket && !this.absences.isEmpty()) {
 			this.mealTicket = "NO";
+			return;
 		}
-		else
+		
+		if(this.future && !mealTicket && this.absences.isEmpty()) {
 			this.mealTicket = "";
+			return;
+		}
+		
+		//Casi generali
+		if(!mealTicket){
+			this.mealTicket = "NO";
+			return;
+		}
+		
+		this.mealTicket = "";
 	}
 	
 	private void setDate(LocalDate date)

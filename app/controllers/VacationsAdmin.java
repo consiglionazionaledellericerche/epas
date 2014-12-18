@@ -69,7 +69,7 @@ public class VacationsAdmin extends Controller{
 		LocalDate expireDate = LocalDate.now().withMonthOfYear(monthExpiryVacationPastYear).withDayOfMonth(dayExpiryVacationPastYear);
 		
 		boolean isVacationLastYearExpired = VacationsRecap.isVacationsLastYearExpired(year, expireDate);
-		render(vacationsList, isVacationLastYearExpired, personsWithVacationsProblems, year, simpleResults);
+		render(vacationsList, isVacationLastYearExpired, personsWithVacationsProblems, year, simpleResults, name);
 	}
 	
 	
