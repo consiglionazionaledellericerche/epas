@@ -42,6 +42,7 @@ import models.rendering.VacationsRecap;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.MultiPartEmail;
 import org.joda.time.LocalDate;
+import org.joda.time.YearMonth;
 
 import play.Logger;
 import play.data.validation.Required;
@@ -91,48 +92,13 @@ public class Absences extends Controller{
 	
 	public static void absences(Integer year, Integer month) {
 		Person person = Security.getUser().get().person;
-		Map<AbsenceType,Integer> absenceTypeInMonth = getAbsenceTypeInMonth(person, year, month);
+		YearMonth yearMonth = new YearMonth(year,month);
+		Map<AbsenceType,Integer> absenceTypeInMonth = AbsenceTypeDao.getAbsenceTypeInPeriod(person,
+				DateUtility.getMonthFirstDay(yearMonth), 
+				Optional.fromNullable(DateUtility.getMonthLastDay(yearMonth)));
+
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);
 		render(absenceTypeInMonth, person, year, month, month_capitalized);
-
-	}
-	
-	/**
-	 * Una mappa contenente gli AbsenceType fatte dalle persona nel mese e numero di assenze fatte per ogni tipo.
-	 * @param person
-	 * @param year
-	 * @param month
-	 * @return
-	 */
-	private static Map<AbsenceType,Integer> getAbsenceTypeInMonth(Person person, Integer year, Integer month){
-
-		LocalDate beginMonth = new LocalDate(year, month, 1);
-		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
-		
-		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, beginMonth, Optional.fromNullable(endMonth), true);
-//		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date",
-//				person, beginMonth, endMonth).fetch();
-		
-		Map<AbsenceType,Integer> absenceCodeMap = new HashMap<AbsenceType, Integer>();
-
-		int i;
-		for(PersonDay pd : pdList){
-			for (Absence absence : pd.absences) {
-				AbsenceType absenceType = absence.absenceType;
-				if(absenceType != null){
-					boolean stato = absenceCodeMap.containsKey(absenceType);
-					if(stato==false){
-						i=1;
-						absenceCodeMap.put(absenceType,i);            	 
-					} else{
-						i = absenceCodeMap.get(absenceType);
-						absenceCodeMap.remove(absenceType);
-						absenceCodeMap.put(absenceType, i+1);
-					}
-				}            
-			}	 
-		}       
-		return absenceCodeMap;	
 
 	}
 	
