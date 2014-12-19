@@ -20,6 +20,8 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
+import play.data.validation.Required;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -36,6 +38,7 @@ public class Office extends BaseModel{
  
 	private static final long serialVersionUID = -8689432709728656660L;
 
+	@Required
 	@Column(name = "name")
     public String name;
     
@@ -45,6 +48,7 @@ public class Office extends BaseModel{
     @Column(name = "address")
     public String address = "";
     
+    @Required
     @Column(name = "code")
     public Integer code = 0;
     
@@ -85,6 +89,11 @@ public class Office extends BaseModel{
     private Boolean isEditable = null;
     
     public String getName() {
+    	return this.name;
+    }
+    
+    @Override
+    public String getLabel() {
     	return this.name;
     }
     

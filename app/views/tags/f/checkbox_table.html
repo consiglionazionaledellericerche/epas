@@ -1,0 +1,22 @@
+<tr>
+#{field _arg}
+
+  <!-- label -->
+  <td class="lab">
+    #{if _required}
+      <strong>&{field.name}</strong>
+    #{/if}
+    #{else}
+      &{field.name}
+    #{/else}
+  </td>
+  
+  <!-- input -->
+  <td>
+    <input name="${field.name}" type="checkbox" #{if _checked} checked="checked" #{/if} 
+    	value="${flash[field.name]}"/>
+    #{ifError field.name}<span class="error">${field.error}</span>#{/ifError}
+  </td>
+  	
+#{/field}
+</tr>

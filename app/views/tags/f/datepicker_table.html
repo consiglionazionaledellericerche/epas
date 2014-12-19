@@ -1,0 +1,21 @@
+<tr>
+#{field _arg}
+
+  <!-- label -->
+  <td class="lab">
+    #{if _required}
+      <strong>&{field.name}</strong>
+    #{/if}
+    #{else}
+      &{field.name}
+    #{/else}
+  </td>
+  
+  <!-- input -->
+  <td>
+    <input data-datepicker name="${field.name}" type="text" value="${flash[field.name]}" data-date-format="yyyy-mm-dd"/>
+    #{ifError field.name}<span class="error">${field.error}</span>#{/ifError}
+  </td>
+  	
+#{/field}
+</tr>
