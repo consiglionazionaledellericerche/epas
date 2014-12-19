@@ -22,7 +22,7 @@
 	        <td>${entry.getKey().description}</td>
 	        <td>${entry.getKey().code}</td>
 	        <td>
-	         <a data-toggle="modal" href="@{Absences.absenceInMonth(person.id, entry.getKey().code, year, month)}" data-target=".my-modal">${entry.getValue()}</a>
+	         <a data-toggle="modal" href="@{Absences.absenceInMonth(entry.getKey().code, year, month)}" data-target=".my-modal">${entry.getValue()}</a>
 			</td>
 		</tr>
 		 #{/list}

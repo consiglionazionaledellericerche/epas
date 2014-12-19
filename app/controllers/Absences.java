@@ -44,6 +44,11 @@ import org.apache.commons.mail.MultiPartEmail;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.FluentIterable;
+
 import play.Logger;
 import play.data.validation.Required;
 import play.db.jpa.Blob;
@@ -52,10 +57,6 @@ import play.libs.Mail;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
-
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-
 import controllers.Resecure.NoCheck;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
@@ -72,6 +73,16 @@ public class Absences extends Controller{
 
 	@Inject
 	static SecurityRules rules;
+	
+	public enum AbsenceToDate implements Function<Absence, LocalDate>{
+		INSTANCE;
+		
+		@Override
+		public LocalDate apply(Absence absence){
+			return absence.personDay.date;
+		}
+	}
+		
 	/**
 	 * @deprecated use AbsenceTypeDao.getFrequentTypes()
 	 * 
@@ -97,24 +108,25 @@ public class Absences extends Controller{
 						Optional.fromNullable(DateUtility.getMonthLastDay(yearMonth)));
 
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);
-		render(absenceTypeInMonth, person, year, month, month_capitalized);
+		render(absenceTypeInMonth, year, month, month_capitalized);
 	}
-	
-	public static void absenceInMonth(Long personId, String absenceCode, int year, int month){
-		List<LocalDate> dateAbsences = new ArrayList<LocalDate>();
-		Person person = PersonDao.getPersonById(personId);
-		LocalDate begin = new LocalDate(year, month, 1);
-		LocalDate end = new LocalDate(year, month, 1).dayOfMonth().withMaximumValue();
-		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, begin, Optional.fromNullable(end), false);
 
-		for(PersonDay pd : pdList){
-			if(pd.absences != null){
-				for(Absence abs : pd.absences){
-					if(abs.absenceType.code.equals(absenceCode))
-						dateAbsences.add(pd.date);
-				}
-			}
-		}
+	public static void absenceInMonth(String absenceCode, int year, int month){
+		Person person = Security.getUser().get().person;
+		YearMonth yearMonth = new YearMonth(year,month);
+		
+		List<Absence> absences = AbsenceDao.getAbsenceByCodeInPeriod(
+				Optional.fromNullable(person), 
+				Optional.fromNullable(absenceCode), 
+				DateUtility.getMonthFirstDay(yearMonth), 
+				DateUtility.getMonthLastDay(yearMonth),
+				Optional.<JustifiedTimeAtWork>absent(),
+				false, 
+				true);
+		
+		List<LocalDate> dateAbsences = FluentIterable.from(absences)
+				.transform(AbsenceToDate.INSTANCE).toList();
+
 		render(dateAbsences, absenceCode);
 	}
 
