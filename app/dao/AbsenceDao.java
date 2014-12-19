@@ -11,6 +11,7 @@ import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 
 import models.Absence;
+import models.AbsenceType;
 import models.Person;
 import models.enumerate.JustifiedTimeAtWork;
 import models.query.QAbsence;
@@ -134,5 +135,46 @@ public class AbsenceDao {
 			return query.count();
 		else
 			return new Long(0);
+	}
+	
+	/**
+	 * 
+	 * @param abt
+	 * @param person
+	 * @param begin
+	 * @param end
+	 * @return nella storia dei personDay, l'ultima occorrenza in ordine temporale del codice di rimpiazzamento (abt.absenceTypeGroup.label)
+	 * relativo al codice di assenza che intendo inserire.
+	 *  
+	 */
+	public static Absence getLastOccurenceAbsenceInPeriod(AbsenceType abt, Person person, Optional<LocalDate> begin, LocalDate end){
+		QAbsence absence = QAbsence.absence;
+		final BooleanBuilder condition = new BooleanBuilder();
+		final JPQLQuery query = ModelQuery.queryFactory().from(absence);				
+		if(begin.isPresent())
+			condition.and(absence.personDay.date.between(begin.get(), end));
+		else
+			condition.and(absence.personDay.date.loe(end));
+		query.where(condition.and(absence.absenceType.absenceTypeGroup.label.eq(abt.absenceTypeGroup.label)
+				.and(absence.personDay.person.eq(person))));
+		query.orderBy(absence.personDay.date.desc());
+		return query.singleResult(absence);
+	}
+	
+	
+	/**
+	 * 
+	 * @param abt
+	 * @param person
+	 * @param begin
+	 * @param end
+	 * @return la lista dei codici di rimpiazzamento presenti nel periodo specificato da begin e end utilizzati dalla persona person
+	 */
+	public static List<Absence> getReplacingAbsenceOccurrenceListInPeriod(AbsenceType abt, Person person, LocalDate begin, LocalDate end){
+		QAbsence absence = QAbsence.absence;
+		final JPQLQuery query = ModelQuery.queryFactory().from(absence)
+				.where(absence.absenceType.absenceTypeGroup.label.eq(abt.absenceTypeGroup.label)
+						.and(absence.personDay.person.eq(person).and(absence.personDay.date.between(begin, end))));
+		return query.list(absence);
 	}
 }

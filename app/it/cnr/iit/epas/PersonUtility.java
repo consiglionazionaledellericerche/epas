@@ -37,6 +37,11 @@ import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import com.google.common.base.Optional;
+
+import dao.AbsenceDao;
+import dao.PersonChildrenDao;
+import dao.PersonDao;
 import dao.PersonDayDao;
 import play.Logger;
 import play.Play;
@@ -76,8 +81,9 @@ public class PersonUtility {
 		/**
 		 * controllo che la persona abbia un figlio in età per poter usufruire del congedo
 		 */
-		List<PersonChildren> persChildList = PersonChildren.find("Select pc from PersonChildren pc where pc.person = ? order by pc.bornDate", 
-				person).fetch();
+		List<PersonChildren> persChildList = PersonChildrenDao.getAllPersonChildren(person);
+//		List<PersonChildren> persChildList = PersonChildren.find("Select pc from PersonChildren pc where pc.person = ? order by pc.bornDate", 
+//				person).fetch();
 		int code = new Integer(abt.code).intValue();
 		Logger.debug("Person children list size: %d", persChildList.size());
 		PersonChildren child = null;
@@ -88,8 +94,10 @@ public class PersonUtility {
 			child = persChildList.get(0) != null ? persChildList.get(0) : null;
 			if(child != null){
 				if(child.bornDate.isAfter(date.minusYears(3))){
-					List<Absence> existingAbsence = Absence.find("Select a from Absence a where a.personDay.person = ? and a.personDay.date between ? and ?" +
-							"and a.absenceType.code = ?", person, date.minusYears(3), date, abt.code).fetch();
+					List<Absence> existingAbsence = AbsenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person), 
+							Optional.fromNullable(abt.code), date.minusYears(3), date, Optional.<JustifiedTimeAtWork>absent(), false, false);
+//					List<Absence> existingAbsence = Absence.find("Select a from Absence a where a.personDay.person = ? and a.personDay.date between ? and ?" +
+//							"and a.absenceType.code = ?", person, date.minusYears(3), date, abt.code).fetch();
 					if(existingAbsence.size() < 30)
 						return true;
 					else
@@ -111,8 +119,10 @@ public class PersonUtility {
 			if(child != null){
 				if(child.bornDate.isAfter(date.minusYears(3))){
 					Logger.debug("La data di nascita del figlio è inferiore ai 3 anni necessari per prendere il codice");
-					List<Absence> existingAbsence = Absence.find("Select a from Absence a where a.personDay.person = ? and a.personDay.date between ? and ?" +
-							"and a.absenceType.code = ?", person, date.minusYears(3), date, abt.code).fetch();
+					List<Absence> existingAbsence = AbsenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person), 
+							Optional.fromNullable(abt.code), date.minusYears(3), date, Optional.<JustifiedTimeAtWork>absent(), false, false);
+//					List<Absence> existingAbsence = Absence.find("Select a from Absence a where a.personDay.person = ? and a.personDay.date between ? and ?" +
+//							"and a.absenceType.code = ?", person, date.minusYears(3), date, abt.code).fetch();
 					Logger.debug("Il dipendente ha già preso %d giorni con codice %s", existingAbsence.size(), abt.code);
 					if(existingAbsence.size() < 30)
 						return true;
@@ -129,8 +139,10 @@ public class PersonUtility {
 			child = persChildList.get(2) != null ? persChildList.get(2) : null;
 			if(child != null){
 				if(child.bornDate.isAfter(date.minusYears(3))){
-					List<Absence> existingAbsence = Absence.find("Select a from Absence a where a.personDay.person = ? and a.personDay.date between ? and ?" +
-							"and a.absenceType.code = ?", person, date.minusYears(3), date, abt.code).fetch();
+					List<Absence> existingAbsence = AbsenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person), 
+							Optional.fromNullable(abt.code), date.minusYears(3), date, Optional.<JustifiedTimeAtWork>absent(), false, false);
+//					List<Absence> existingAbsence = Absence.find("Select a from Absence a where a.personDay.person = ? and a.personDay.date between ? and ?" +
+//							"and a.absenceType.code = ?", person, date.minusYears(3), date, abt.code).fetch();
 					if(existingAbsence.size() < 30)
 						return true;
 					else
@@ -149,8 +161,10 @@ public class PersonUtility {
 			child = persChildList.get(0) != null ? persChildList.get(0) : null;
 			if(child != null){
 				if(child.bornDate.isAfter(date.minusYears(8))){
-					List<Absence> existingAbsence = Absence.find("Select a from Absence a where a.personDay.person = ? and a.personDay.date between ? and ?" +
-							"and a.absenceType.code = ?", person, date.minusYears(8), date, abt.code).fetch();
+					List<Absence> existingAbsence = AbsenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person), 
+							Optional.fromNullable(abt.code), date.minusYears(8), date, Optional.<JustifiedTimeAtWork>absent(), false, false);
+//					List<Absence> existingAbsence = Absence.find("Select a from Absence a where a.personDay.person = ? and a.personDay.date between ? and ?" +
+//							"and a.absenceType.code = ?", person, date.minusYears(8), date, abt.code).fetch();
 					if(existingAbsence.size() < 5)
 						return true;
 					else
@@ -169,8 +183,10 @@ public class PersonUtility {
 			child = persChildList.get(1) != null ? persChildList.get(1) : null;
 			if(child != null){
 				if(child.bornDate.isAfter(date.minusYears(8))){
-					List<Absence> existingAbsence = Absence.find("Select a from Absence a where a.personDay.person = ? and a.personDay.date between ? and ?" +
-							"and a.absenceType.code = ?", person, date.minusYears(8), date, abt.code).fetch();
+					List<Absence> existingAbsence = AbsenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person), 
+							Optional.fromNullable(abt.code), date.minusYears(8), date, Optional.<JustifiedTimeAtWork>absent(), false, false);
+//					List<Absence> existingAbsence = Absence.find("Select a from Absence a where a.personDay.person = ? and a.personDay.date between ? and ?" +
+//							"and a.absenceType.code = ?", person, date.minusYears(8), date, abt.code).fetch();
 					if(existingAbsence.size() < 5)
 						return true;
 					else
@@ -189,8 +205,10 @@ public class PersonUtility {
 			child = persChildList.get(2) != null ? persChildList.get(2) : null;
 			if(child != null){
 				if(child.bornDate.isAfter(date.minusYears(8))){
-					List<Absence> existingAbsence = Absence.find("Select a from Absence a where a.personDay.person = ? and a.personDay.date between ? and ?" +
-							"and a.absenceType.code = ?", person, date.minusYears(8), date, abt.code).fetch();
+					List<Absence> existingAbsence = AbsenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person), 
+							Optional.fromNullable(abt.code), date.minusYears(8), date, Optional.<JustifiedTimeAtWork>absent(), false, false);
+//					List<Absence> existingAbsence = Absence.find("Select a from Absence a where a.personDay.person = ? and a.personDay.date between ? and ?" +
+//							"and a.absenceType.code = ?", person, date.minusYears(8), date, abt.code).fetch();
 					if(existingAbsence.size() < 5)
 						return true;
 					else
@@ -208,8 +226,10 @@ public class PersonUtility {
 			child = persChildList.get(3) != null ? persChildList.get(3) : null;
 			if(child != null){
 				if(child.bornDate.isAfter(date.minusYears(8))){
-					List<Absence> existingAbsence = Absence.find("Select a from Absence a where a.personDay.person = ? and a.personDay.date between ? and ?" +
-							"and a.absenceType.code = ?", person, date.minusYears(8), date, abt.code).fetch();
+					List<Absence> existingAbsence = AbsenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person), 
+							Optional.fromNullable(abt.code), date.minusYears(8), date, Optional.<JustifiedTimeAtWork>absent(), false, false);
+//					List<Absence> existingAbsence = Absence.find("Select a from Absence a where a.personDay.person = ? and a.personDay.date between ? and ?" +
+//							"and a.absenceType.code = ?", person, date.minusYears(8), date, abt.code).fetch();
 					if(existingAbsence.size() < 5)
 						return true;
 					else
@@ -238,7 +258,8 @@ public class PersonUtility {
 	 * sequence postgres ha generato
 	 */
 	public static boolean isIdPresentInOldSoftware(Long id){
-		Person person = Person.find("Select p from Person p where p.oldId = ?", id).first();
+		Person person = PersonDao.getPersonByOldID(id);
+		//Person person = Person.find("Select p from Person p where p.oldId = ?", id).first();
 		if(person == null)
 			return false;
 		else
@@ -371,22 +392,24 @@ public class PersonUtility {
 		List<Absence> absList = null;
 		//trovo nella storia dei personDay l'ultima occorrenza in ordine temporale del codice di rimpiazzamento relativo al codice di assenza
 		//che intendo inserire, di modo da fare i calcoli sulla possibilità di inserire quel codice di assenza da quel giorno in poi.
-		Absence absence = Absence.find(
-				"Select abs "
-						+ "from Absence abs "
-						+ "where abs.absenceType = ? and abs.personDay.person = ? "
-						+ "and abs.personDay.date between ? and ? "
-						+ "order by abs.personDay.date desc",
-						absenceType.absenceTypeGroup.replacingAbsenceType, 
-						person, new LocalDate(date.getYear(),1,1), date).first();
+		Absence absence = AbsenceDao.getLastOccurenceAbsenceInPeriod(absenceType, person, Optional.fromNullable(new LocalDate(date.getYear(),1,1)), date);
+//		Absence absence = Absence.find(
+//				"Select abs "
+//						+ "from Absence abs "
+//						+ "where abs.absenceType = ? and abs.personDay.person = ? "
+//						+ "and abs.personDay.date between ? and ? "
+//						+ "order by abs.personDay.date desc",
+//						absenceType.absenceTypeGroup.replacingAbsenceType, 
+//						person, new LocalDate(date.getYear(),1,1), date).first();
 		if(absence != null){
 
 			int minutesExcess = minutesExcessPreviousAbsenceType(absenceType, person, date);
 
 			if(absenceType.absenceTypeGroup.accumulationType.equals(AccumulationType.yearly)){
-				absList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup.label = ? and abs.personDay.person = ? and" +
-						" abs.personDay.date > ? and abs.personDay.date <= ?", 
-						absenceType.absenceTypeGroup.label, person, absence.personDay.date, date).fetch();
+				absList = AbsenceDao.getReplacingAbsenceOccurrenceListInPeriod(absenceType, person, absence.personDay.date, date);
+//				absList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup.label = ? and abs.personDay.person = ? and" +
+//						" abs.personDay.date > ? and abs.personDay.date <= ?", 
+//						absenceType.absenceTypeGroup.label, person, absence.personDay.date, date).fetch();
 				for(Absence abs : absList){
 					totalMinutesJustified = totalMinutesJustified + abs.absenceType.justifiedTimeAtWork.minutesJustified;
 				}
@@ -404,9 +427,12 @@ public class PersonUtility {
 					 * raggiunto o meno il limite per esso previsto, se sì non si fa prendere il codice di assenza altrimenti si concede
 					 */
 					int totalReplacingAbsence = 0;
-					List<Absence> replacingAbsenceList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? and " +
-							"abs.personDay.date between ? and ? and abs.absenceType.code = ?", 
-							person, date.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), date, absenceType.absenceTypeGroup.replacingAbsenceType.code).fetch();
+					List<Absence> replacingAbsenceList = AbsenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person), 
+							Optional.fromNullable(absenceType.absenceTypeGroup.replacingAbsenceType.code), 
+							date.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), date, Optional.<JustifiedTimeAtWork>absent(), false, false);
+//					List<Absence> replacingAbsenceList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? and " +
+//							"abs.personDay.date between ? and ? and abs.absenceType.code = ?", 
+//							person, date.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), date, absenceType.absenceTypeGroup.replacingAbsenceType.code).fetch();
 					totalReplacingAbsence = replacingAbsenceList.size();
 					if(absenceType.absenceTypeGroup.replacingAbsenceType.absenceTypeGroup.limitInMinute < totalReplacingAbsence*absenceType.absenceTypeGroup.limitInMinute){
 						return new CheckMessage(false,"Non è possibile prendere ulteriori assenze con questo codice poichè si è superato il limite massimo a livello annuale per il suo codice di rimpiazzamento", null);
@@ -419,9 +445,10 @@ public class PersonUtility {
 			}
 			else if(absenceType.absenceTypeGroup.accumulationType.equals(AccumulationType.always)){
 
-				absList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup.label = ? and abs.personDay.person = ? and" +
-						" abs.personDay.date between ? and ?", 
-						absenceType.absenceTypeGroup.label, person, absence.personDay.date, date).fetch();
+				absList = AbsenceDao.getReplacingAbsenceOccurrenceListInPeriod(absenceType, person, absence.personDay.date, date);
+//				absList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup.label = ? and abs.personDay.person = ? and" +
+//						" abs.personDay.date between ? and ?", 
+//						absenceType.absenceTypeGroup.label, person, absence.personDay.date, date).fetch();
 				for(Absence abs : absList){
 					if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay)
 						totalMinutesJustified = person.getCurrentWorkingTimeType().getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime;
@@ -446,12 +473,13 @@ public class PersonUtility {
 
 		else{
 
-			absList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup.label = ? and " +
-					"abs.personDay.person = ? and abs.personDay.date between ? and ?", 
-					absenceType.absenceTypeGroup.label, 
-					person, 
-					new LocalDate(date.getYear(),1,1), 
-					date).fetch();
+			absList = AbsenceDao.getReplacingAbsenceOccurrenceListInPeriod(absenceType, person, new LocalDate(date.getYear(),1,1), date);
+//			absList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup.label = ? and " +
+//					"abs.personDay.person = ? and abs.personDay.date between ? and ?", 
+//					absenceType.absenceTypeGroup.label, 
+//					person, 
+//					new LocalDate(date.getYear(),1,1), 
+//					date).fetch();
 
 			for(Absence abs : absList){
 				totalMinutesJustified = totalMinutesJustified+abs.absenceType.justifiedTimeAtWork.minutesJustified;
@@ -478,15 +506,17 @@ public class PersonUtility {
 	private static int minutesExcessPreviousAbsenceType(AbsenceType abt, Person person, LocalDate date){
 
 		//cerco l'ultima occorrenza del codice di completamento
-		Absence absence = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
-				"and abs.absenceType.absenceTypeGroup.label = ? " +
-				"and abs.personDay.date < ? order by abs.personDay.date desc", person, abt.absenceTypeGroup.label, date).first();
+		Absence absence = AbsenceDao.getLastOccurenceAbsenceInPeriod(abt, person, Optional.<LocalDate>absent(), date);
+//		Absence absence = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
+//				"and abs.absenceType.absenceTypeGroup.label = ? " +
+//				"and abs.personDay.date < ? order by abs.personDay.date desc", person, abt.absenceTypeGroup.label, date).first();
 		if(absence == null)
 			return 0;
 
-		List<Absence> absList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
-				"and abs.personDay.date between ? and ? and abs.absenceType.absenceTypeGroup.label = ?", 
-				person, new LocalDate(date.getYear(),1,1), date, abt.absenceTypeGroup.label).fetch();
+		List<Absence> absList = AbsenceDao.getReplacingAbsenceOccurrenceListInPeriod(abt, person, new LocalDate(date.getYear(),1,1), date);
+//		List<Absence> absList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
+//				"and abs.personDay.date between ? and ? and abs.absenceType.absenceTypeGroup.label = ?", 
+//				person, new LocalDate(date.getYear(),1,1), date, abt.absenceTypeGroup.label).fetch();
 		int minutesExcess = 0;
 		int minutesJustified = 0;
 		for(Absence abs : absList){
@@ -516,9 +546,10 @@ public class PersonUtility {
 		//controllo che il tipo di accumulo sia su base mensile cercando nel mese tutte le occorrenze di codici di assenza che hanno
 		//lo stesso gruppo identificativo
 		if(absenceType.absenceTypeGroup.accumulationType.equals(AccumulationType.monthly)){
-			absList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup.label = ? and " +
-					"abs.personDay.person = ? and abs.personDay.date between ? and ?", 
-					absenceType.absenceTypeGroup.label, person, date.dayOfMonth().withMinimumValue(), date).fetch();
+			absList = AbsenceDao.getReplacingAbsenceOccurrenceListInPeriod(absenceType, person, date.dayOfMonth().withMinimumValue(), date);
+//			absList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup.label = ? and " +
+//					"abs.personDay.person = ? and abs.personDay.date between ? and ?", 
+//					absenceType.absenceTypeGroup.label, person, date.dayOfMonth().withMinimumValue(), date).fetch();
 			Logger.debug("La lista di codici di assenza con gruppo %s contiene %d elementi", absenceType.absenceTypeGroup.label, absList.size());
 			for(Absence abs : absList){
 				totalMinutesJustified = totalMinutesJustified+abs.absenceType.justifiedTimeAtWork.minutesJustified;
@@ -531,9 +562,10 @@ public class PersonUtility {
 		//controllo che il tipo di accumulo sia su base annuale cercando nel mese tutte le occorrenze di codici di assenza che hanno
 		//lo stesso gruppo identificativo
 		else{
-			absList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup.label = ? and abs.personDay.person = ? and" +
-					" abs.personDay.date between ? and ?", 
-					absenceType.absenceTypeGroup.label, person, date.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), date).fetch();
+			absList = AbsenceDao.getReplacingAbsenceOccurrenceListInPeriod(absenceType, person, date.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), date);
+//			absList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup.label = ? and abs.personDay.person = ? and" +
+//					" abs.personDay.date between ? and ?", 
+//					absenceType.absenceTypeGroup.label, person, date.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), date).fetch();
 			Logger.debug("List size: %d", absList.size());
 			for(Absence abs : absList){
 				if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay)
