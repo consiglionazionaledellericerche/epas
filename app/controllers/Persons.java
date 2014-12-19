@@ -52,7 +52,6 @@ import com.google.common.hash.Hashing;
 import controllers.Resecure.NoCheck;
 import dao.CompetenceDao;
 import dao.ContractDao;
-import dao.OfficeDao;
 import dao.PersonChildrenDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -63,9 +62,6 @@ import dao.WorkingTimeTypeDao;
 @With( {Resecure.class, RequestInit.class} )
 public class Persons extends Controller {
 
-	
-	
-	
 	public static final String USERNAME_SESSION_KEY = "username";
 
 	@Inject
@@ -89,88 +85,55 @@ public class Persons extends Controller {
 	public static void insertPerson() throws InstantiationException, IllegalAccessException {
 
 		rules.checkIfPermitted();
-		InitializationTime initializationTime = new InitializationTime();
-		List<Office> officeList = Security.getOfficeAllowed();
-
+		List<Office> allOffices  = Security.getOfficeAllowed();
+		List<Qualification> allQualifications = QualificationDao.findAll();		
 		
-		//Decisione: alla creazione come tipo orario viene assegnato Normale.
+		Person person = new Person();
+		Contract contract = new Contract();
 				
-		render(initializationTime, officeList);
+		render(allOffices, allQualifications, person, contract);
 
 	}
 
-
 	@NoCheck
-	public static void save(Person person, Integer qualification, Integer office, Contract contract) {
-		if(Validation.hasErrors()) {
-			if(request.isAjax()) error("Invalid value");
-			Persons.list(null);
-		}
-
-		Office off = OfficeDao.getOfficeById(new Long(office));
-		//Office off = Office.findById(new Long(office));
-		if(off == null) {
-
-			flash.error("La sede selezionata non esiste. Effettuare una segnalazione.");
-			Persons.list(null);
-		}
-
-		rules.checkIfPermitted(off);
-
-		Logger.debug(person.name);
+	public static void save(@Valid @Required Person person, 
+			@Valid @Required Qualification qualification, @Valid @Required Office office, 
+			@Valid @Required Contract contract, 
+			boolean onCertificate) {
 		
-		/* creazione persona */
+		if(Validation.hasErrors()) {
+			
+			flash.error("Inserire correttamente tutti i parametri");
+			params.flash(); // add http parameters to the flash scope
+		    
+			List<Office> allOffices  = Security.getOfficeAllowed();
+			List<Qualification> allQualifications = QualificationDao.findAll();		
+			render("@insertPerson", person, allOffices, allQualifications, qualification, office);
+		}
+		
+		if(!contract.crossFieldsValidation()){
+			
+			flash.error("Errore nella validazione del contratto. Inserire correttamente tutti i parametri.");
+			params.flash(); // add http parameters to the flash scope
+		    
+			List<Office> allOffices  = Security.getOfficeAllowed();
+			List<Qualification> allQualifications = QualificationDao.findAll();		
+			render("@insertPerson", person, allOffices, allQualifications, qualification, office);
+		}
 
-		Logger.debug("Saving person...");
+		rules.checkIfPermitted(office);
+		
+		person.qualification = qualification;
+		person.office = office;
 
-		Qualification qual = QualificationDao.getQualification(Optional.<Integer>absent(), Optional.fromNullable(new Long(qualification)), false).get(0);
-		//Qualification qual = Qualification.findById(new Long(qualification));
-		person.qualification = qual;
-
-
-		person.office = off;
+		contract.person = person;
+		contract.onCertificate = onCertificate;
 
 		person.save();
 
-		/* creazione utente */
-		//User user = new User();
-		//user.username = person.name.toLowerCase()+'.'+person.surname.toLowerCase(); 
-		//Codec codec = new Codec();
-		//user.password = codec.hexMD5("epas");
-		//user.person = person;
-
-		//user.save();
-		//person.user = user;
-		//person.save();
-
-		/* creazione contratto */
-		Logger.debug("Begin contract: %s", params.get("beginContract"));
-		if(params.get("beginContract") == null){
-			flash.error("Il contratto di %s %s deve avere una data di inizio. Utente cancellato. Reinserirlo con la data di inizio contratto valorizzata.", 
-					person.name, person.surname);
-			person.delete();
-			render("@list");
-		}
-		LocalDate expireContract = null;
-		LocalDate beginContract = new LocalDate(params.get("beginContract"));
-		if(params.get("expireContract").equals("") || params.get("expireContract") == null)
-			contract.expireContract = null;
-		else			
-			expireContract = new LocalDate(params.get("expireContract"));
-		contract.beginContract = beginContract;
-		contract.expireContract = expireContract;
-
-		contract.person = person;
-
-		if( params.get("onCertificate", Boolean.class) == null) 
-			contract.onCertificate = false;
-		else
-			contract.onCertificate = params.get("onCertificate", Boolean.class);
-
-
 		contract.save();
-		contract.setVacationPeriods();
 		
+		contract.setVacationPeriods();
 
 		//FIXME deve essere impostato in configurazione l'orario default
 		WorkingTimeType wtt = WorkingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
@@ -192,9 +155,8 @@ public class Persons extends Controller {
 		contract.save();
 
 		Long personId = person.id;
-		List<String> usernameList = PersonUtility.composeUsername(person.name, person.surname);
-		render("@insertUsername", personId, usernameList, person);
-
+		
+		Persons.insertUsername(personId);
 
 	}
 
@@ -208,9 +170,11 @@ public class Persons extends Controller {
 			flash.error("La persona selezionata non esiste. Operazione annullata");
 			Persons.list(null);
 		}
+		
 		rules.checkIfPermitted(person.office);
-		List<String> usernameList = new ArrayList<String>();
-		usernameList = PersonUtility.composeUsername(person.name, person.surname);
+		
+		List<String> usernameList = PersonUtility.composeUsername(person.name, person.surname);
+		
 		render(person, usernameList);
 	}
 
@@ -233,8 +197,7 @@ public class Persons extends Controller {
 		else{
 			User user = new User();
 			//user.id = person.id;
-			Codec codec = new Codec();
-			user.password = codec.hexMD5("epas");
+			user.password = Codec.hexMD5("epas");
 			user.person = person;
 			user.username = username;
 			user.save();
@@ -261,21 +224,24 @@ public class Persons extends Controller {
 
 		rules.checkIfPermitted(person.office);
 
-		LocalDate date = new LocalDate();
+		
 		List<Contract> contractList = ContractDao.getPersonContractList(person);
+		
 		//List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract", person).fetch();
 		List<Office> officeList = Security.getOfficeAllowed();	
-		List<ContractStampProfile> contractStampProfileList = ContractDao.getPersonContractStampProfile(Optional.fromNullable(person), Optional.<Contract>absent());
+		
+		List<ContractStampProfile> contractStampProfileList = 
+				ContractDao.getPersonContractStampProfile(Optional.fromNullable(person), Optional.<Contract>absent());
 //		List<ContractStampProfile> contractStampProfileList = ContractStampProfile.find("Select csp from ContractStampProfile csp, Contract c "
 //				+ "where csp.contract = c and c.person = ? order by csp.startFrom", person).fetch();
+
 		
-		InitializationTime initTime = ContractDao.getInitializationTime(person);
-		//InitializationTime initTime = InitializationTime.find("Select init from InitializationTime init where init.person = ?", person).first();
-		Integer month = date.getMonthOfYear();
-		Integer year = date.getYear();
 		LocalDate actualDate = new LocalDate();
+		Integer month = actualDate.getMonthOfYear();
+		Integer year = actualDate.getYear();
+
 		Long id = person.id;		
-		render(person, contractList, contractStampProfileList, initTime, month, year, id, actualDate,officeList);
+		render(person, contractList, contractStampProfileList, month, year, id, actualDate, officeList);
 	}
 
 	public static void update(Person person, Office office, Integer qualification){
@@ -292,12 +258,14 @@ public class Persons extends Controller {
 			person.office = office;
 		}
 
-		Qualification q = QualificationDao.getQualification(Optional.fromNullable(qualification), Optional.<Long>absent(), false).get(0);
+		Optional<Qualification> q = QualificationDao.byQualification(qualification);
 		//Qualification q = Qualification.find("Select q from Qualification q where q.qualification = ?", qualification).first();
-		if(q != null) {
-			person.qualification = q;
+		if( !q.isPresent() ) {
+			flash.error("La qualifica selezionata non esiste. Operazione annullata");
+			Persons.list(null);
 		}
-
+		
+		person.qualification = q.get();
 		person.save();
 		flash.success("Modificate informazioni per l'utente %s %s", person.name, person.surname);
 

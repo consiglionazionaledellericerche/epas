@@ -17,6 +17,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
 
 import models.base.BaseModel;
 
@@ -80,6 +81,7 @@ public class Contract extends BaseModel {
 	@OneToMany(mappedBy="contract", fetch=FetchType.LAZY, cascade = CascadeType.REMOVE)
 	public List<ContractYearRecap> recapPeriods;
 
+	@Required @NotNull
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="begin_contract")
 	public LocalDate beginContract;
@@ -93,7 +95,6 @@ public class Contract extends BaseModel {
 	@Column(name="end_contract")
 	public LocalDate endContract;
 	
-		
 	@NotAudited
 	@OneToMany(mappedBy = "contract", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	@OrderBy("beginDate")
@@ -113,19 +114,6 @@ public class Contract extends BaseModel {
 	private List<ContractWorkingTimeType> contractWorkingTimeTypeAsList;
 	
 	
-	//TODO eliminare e configurare yaml
-	public void setBeginContract(String date){
-		this.beginContract = new LocalDate(date);
-	}
-	//TODO eliminare e configurare yaml
-	public void setEndContract(String date){
-		this.endContract = new LocalDate(date);
-	}
-	//TODO eliminare e configurare yaml
-	public void setExpireContract(String date){
-		this.expireContract = new LocalDate(date);
-	}
-	
 	public void setSourceDate(String date){
 		this.sourceDate = new LocalDate(date);
 	}
@@ -137,6 +125,32 @@ public class Contract extends BaseModel {
 	 */
 	@Required
 	public boolean onCertificate = false;
+	
+	@Override
+	public boolean crossFieldsValidation() {
+		
+		if(this.expireContract != null 
+				&& this.expireContract.isBefore(this.beginContract))
+			return false;
+		
+		if(this.endContract != null 
+				&& this.endContract.isBefore(this.beginContract))
+			return false;
+		
+		if(this.expireContract != null && this.endContract != null 
+				&& this.expireContract.isBefore(this.endContract))
+			return false;
+		
+		return true;
+		
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("Contract[%d] - person.id = %d, beginContract = %s, expireContract = %s, endContract = %s",
+				id, person.id, beginContract, expireContract, endContract);
+	}
+
 
 	@Transient
 	public boolean isValidContract(){
@@ -145,18 +159,11 @@ public class Contract extends BaseModel {
 
 	}
 
-	@Override
-	public String toString() {
-		return String.format("Contract[%d] - person.id = %d, beginContract = %s, expireContract = %s, endContract = %s",
-				id, person.id, beginContract, expireContract, endContract);
-	}
-
 	@Transient
 	public List<ContractWorkingTimeType> getContractWorkingTimeTypeAsList() {
 		
 		return Lists.newArrayList(this.contractWorkingTimeType);
 	}
-	
 	
 	@Transient
 	public List<ContractStampProfile> getContractStampProfileAsList() {

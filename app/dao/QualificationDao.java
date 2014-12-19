@@ -5,6 +5,7 @@ import helpers.ModelQuery;
 import java.util.List;
 
 import com.google.common.base.Optional;
+import com.google.gdata.util.common.base.Preconditions;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 
@@ -44,5 +45,34 @@ public class QualificationDao {
 		}
 		return null;
 		
+	}
+	
+	/**
+	 * 
+	 * @param qualification
+	 * @return
+	 */
+	public static Optional<Qualification> byQualification(Integer qualification) {
+		
+		Preconditions.checkNotNull(qualification);
+
+		QQualification qual = QQualification.qualification1;
+		final JPQLQuery query = ModelQuery.queryFactory().from(qual)
+				.where(qual.qualification.eq(qualification));
+		
+		return Optional.fromNullable(query.singleResult(qual));
+
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public static List<Qualification> findAll() {
+		
+		QQualification qual = QQualification.qualification1;
+		final JPQLQuery query = ModelQuery.queryFactory().from(qual);
+		
+		return query.list(qual);
 	}
 }
