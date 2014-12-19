@@ -141,6 +141,9 @@ public class Contract extends BaseModel {
 				&& this.expireContract.isBefore(this.endContract))
 			return false;
 		
+		if(!this.isProperContract()) 
+			return false;
+		
 		return true;
 		
 	}

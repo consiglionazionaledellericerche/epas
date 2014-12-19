@@ -85,13 +85,11 @@ public class Persons extends Controller {
 	public static void insertPerson() throws InstantiationException, IllegalAccessException {
 
 		rules.checkIfPermitted();
-		List<Office> allOffices  = Security.getOfficeAllowed();
-		List<Qualification> allQualifications = QualificationDao.findAll();		
 		
 		Person person = new Person();
 		Contract contract = new Contract();
 				
-		render(allOffices, allQualifications, person, contract);
+		render(person, contract);
 
 	}
 
@@ -105,20 +103,14 @@ public class Persons extends Controller {
 			
 			flash.error("Inserire correttamente tutti i parametri");
 			params.flash(); // add http parameters to the flash scope
-		    
-			List<Office> allOffices  = Security.getOfficeAllowed();
-			List<Qualification> allQualifications = QualificationDao.findAll();		
-			render("@insertPerson", person, allOffices, allQualifications, qualification, office);
+			render("@insertPerson", person, qualification, office);
 		}
 		
 		if(!contract.crossFieldsValidation()){
 			
 			flash.error("Errore nella validazione del contratto. Inserire correttamente tutti i parametri.");
 			params.flash(); // add http parameters to the flash scope
-		    
-			List<Office> allOffices  = Security.getOfficeAllowed();
-			List<Qualification> allQualifications = QualificationDao.findAll();		
-			render("@insertPerson", person, allOffices, allQualifications, qualification, office);
+			render("@insertPerson", person, qualification, office);
 		}
 
 		rules.checkIfPermitted(office);

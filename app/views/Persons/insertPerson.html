@@ -15,8 +15,8 @@
 		#{f.input_table 'person.name', required:'true', type:'text'/}
 	 	#{f.input_table 'person.number', type:'number'/}
 	 	#{f.input_table 'person.badgeNumber', type:'number'/}
-		#{f.select_table 'qualification', value: qualification, items:allQualifications, required:'true'/}
-		#{f.select_table 'office', value: office, items:allOffices, required:'true'/}
+		#{f.select_table 'qualification', value: qualification, items:templateUtility.allQualifications, required:'true'/}
+		#{f.select_table 'office', value: office, items:templateUtility.allOfficesAllowed, required:'true'/}
 		#{f.checkbox_table 'person.wantEmail', checked:'true' /}
 	</table>
     <p>
