@@ -30,6 +30,16 @@ public abstract class BaseModel extends GenericModel {
 		return id;
 	}
 	
+	@Transient
+	public String getLabel() {
+		return ""; 
+	}
+	
+	@Transient
+	public boolean crossFieldsValidation() {
+		return true;
+	}
+	
 	@Override
 	public String toString() {
 		return Objects.toStringHelper(this).add("id", id).toString();

@@ -38,3 +38,23 @@ Month.9=Settembre
 Month.10=Ottobre
 Month.11=Novembre
 Month.12=Dicembre
+
+person.surname=Cognome
+person.name=Nome
+person.number=Matricola
+person.badgeNumber=Numero Badge
+person.department=Dipartimento
+person.room=Stanza
+person.telephone=Telefono
+person.email=Email
+person.birthday=Data di nascita
+person.wantEmail=Invio mail
+
+contract.beginContract=Inizio contratto
+contract.expireContract=Fine contratto
+contract.onCertificate=In attestati
+
+
+qualification=Livello
+
+office=Sede

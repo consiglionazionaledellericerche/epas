@@ -12,6 +12,8 @@ import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
 
+import play.data.validation.Required;
+
 
 /**
  * 
@@ -31,8 +33,15 @@ public class Qualification extends BaseModel{
 	@ManyToMany(mappedBy = "qualifications", fetch = FetchType.LAZY)
 	public List<AbsenceType> absenceTypes;
 	
+	@Required
 	public int qualification;
 	
+	@Required
 	public String description;
+	
+	@Override
+	public String getLabel() {
+		return this.description;
+	}
 	
 }
