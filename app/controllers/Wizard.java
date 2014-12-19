@@ -125,10 +125,10 @@ public class Wizard extends Controller {
     	if(properties == null){
     		try{
     			properties = new Properties();
-    			properties.load(new FileInputStream("conf/properties.conf"));	
+    			properties.load(new FileInputStream("conf/Wizard_Properties.conf"));	
     		}
     		catch(IOException f){
-    			Logger.error("Impossibile caricare il file properties.conf per la procedura di Wizard");
+    			Logger.error("Impossibile caricare il file Wizard_Properties.conf per la procedura di Wizard");
     		}
     		Cache.safeAdd(PROPERTIES_KEY, properties,"10mn");
     	}
@@ -153,8 +153,8 @@ public class Wizard extends Controller {
     	
     	if(properties != null && step > 0){
         	try{
-        		properties.store(new FileOutputStream("conf/properties.conf"), "Wizard values file");
-        		Logger.info("Salvato file properties.conf");
+        		properties.store(new FileOutputStream("conf/Wizard_Properties.conf"), "Wizard values file");
+        		Logger.info("Salvato file Wizard_Properties.conf");
         	}
         	catch(IOException e){
         		flash.error(e.getMessage());    		
@@ -442,10 +442,10 @@ public class Wizard extends Controller {
     private static void submit(){
 		Properties properties = new Properties();
 		try{
-			properties.load(new FileInputStream("conf/properties.conf"));	
+			properties.load(new FileInputStream("conf/Wizard_Properties.conf"));	
 		}
 		catch(IOException f){
-			Logger.error("Impossibile caricare il file properties.conf per la procedura di Wizard");	
+			Logger.error("Impossibile caricare il file Wizard_Properties.conf per la procedura di Wizard");	
 		}
 		
 //      Cambio password user admin
@@ -478,7 +478,7 @@ public class Wizard extends Controller {
 			seat.code = Integer.decode(properties.getProperty("seat_code"));	
 		}
 		catch(Exception f){
-			Logger.error("Errore nel parsing dal properties.conf: %s", f);	
+			Logger.error("Errore nel parsing dal Wizard_Properties.conf: %s", f);	
 		}
 		if(properties.containsKey("seat_affiliation_date") && 
 				!properties.getProperty("seat_affiliation_date").isEmpty()){
@@ -626,8 +626,8 @@ public class Wizard extends Controller {
 		properties.remove("admin_password");
 		
 		try{
-    		properties.store(new FileOutputStream("conf/properties.conf"), "Wizard values file");
-    		Logger.info("Salvato file properties.conf");
+    		properties.store(new FileOutputStream("conf/Wizard_Properties.conf"), "Wizard values file");
+    		Logger.info("Salvato file Wizard_Properties.conf");
     	}
     	catch(IOException e){
     		flash.error(e.getMessage());    		
