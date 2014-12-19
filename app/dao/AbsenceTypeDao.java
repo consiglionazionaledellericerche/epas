@@ -148,8 +148,7 @@ public class AbsenceTypeDao {
 		Preconditions.checkNotNull(person);
 		Preconditions.checkNotNull(fromDate);
 		
-		List<Absence> absences = AbsenceDao.findByPersonAndDate(person, fromDate,toDate).list();
-			
+		List<Absence> absences = AbsenceDao.findByPersonAndDate(person, fromDate,toDate).list();	
 		Map<AbsenceType,Integer> absenceCodeMap = new HashMap<AbsenceType, Integer>();
 
 		for (Absence absence : absences){
@@ -160,26 +159,7 @@ public class AbsenceTypeDao {
 				absenceCodeMap.put(absence.absenceType,1);
 			}
 		}
-		
-//		int i;
-//		for(PersonDay pd : pdList){
-//			for (Absence absence : pd.absences) {
-//				AbsenceType absenceType = absence.absenceType;
-//				if(absenceType != null){
-//					boolean stato = absenceCodeMap.containsKey(absenceType);
-//					if(stato==false){
-//						i=1;
-//						absenceCodeMap.put(absenceType,i);            	 
-//					} else{
-//						i = absenceCodeMap.get(absenceType);
-//						absenceCodeMap.remove(absenceType);
-//						absenceCodeMap.put(absenceType, i+1);
-//					}
-//				}            
-//			}	 
-//		}       
 		return absenceCodeMap;	
-
 	}
 
 	
