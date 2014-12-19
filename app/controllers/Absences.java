@@ -86,32 +86,27 @@ public class Absences extends Controller{
 
 	private static List<AbsenceType> getAllAbsenceTypes(LocalDate date){
 		return AbsenceTypeDao.getAbsenceTypeFromEffectiveDate(date); 
-		//return AbsenceType.find("Select abt from AbsenceType abt where abt.validTo > ? order by code", date).fetch();
 	}
 
-	
-	public static void absences(Integer year, Integer month) {
+	public static void absences(int year, int month) {
 		Person person = Security.getUser().get().person;
 		YearMonth yearMonth = new YearMonth(year,month);
-		Map<AbsenceType,Integer> absenceTypeInMonth = AbsenceTypeDao.getAbsenceTypeInPeriod(person,
-				DateUtility.getMonthFirstDay(yearMonth), 
-				Optional.fromNullable(DateUtility.getMonthLastDay(yearMonth)));
+		Map<AbsenceType,Integer> absenceTypeInMonth = 
+				AbsenceTypeDao.getAbsenceTypeInPeriod(person,
+						DateUtility.getMonthFirstDay(yearMonth), 
+						Optional.fromNullable(DateUtility.getMonthLastDay(yearMonth)));
 
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);
 		render(absenceTypeInMonth, person, year, month, month_capitalized);
-
 	}
-	
 	
 	public static void absenceInMonth(Long personId, String absenceCode, int year, int month){
 		List<LocalDate> dateAbsences = new ArrayList<LocalDate>();
 		Person person = PersonDao.getPersonById(personId);
-//		Person person = Person.findById(personId);
 		LocalDate begin = new LocalDate(year, month, 1);
 		LocalDate end = new LocalDate(year, month, 1).dayOfMonth().withMaximumValue();
 		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, begin, Optional.fromNullable(end), false);
-//		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
-//				person, new LocalDate(year,month,1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
+
 		for(PersonDay pd : pdList){
 			if(pd.absences != null){
 				for(Absence abs : pd.absences){
