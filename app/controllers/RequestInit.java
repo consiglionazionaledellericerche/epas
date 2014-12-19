@@ -12,6 +12,7 @@ import models.ConfGeneral;
 import models.Office;
 import models.Permission;
 import models.Person;
+import models.Qualification;
 import models.enumerate.ConfigurationFields;
 import models.query.QPermission;
 import models.query.QRole;
@@ -29,6 +30,7 @@ import controllers.Resecure.NoCheck;
 import dao.ConfGeneralDao;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.QualificationDao;
 import play.Logger;
 import play.i18n.Messages;
 import play.mvc.Before;
@@ -171,7 +173,7 @@ public class RequestInit extends Controller {
 	}
 
 	/**
-	 * Metodi di calcolo usabili nel template.
+	 * Metodi usabili nel template.
 	 * @author alessandro
 	 *
 	 */
@@ -233,6 +235,17 @@ public class RequestInit extends Controller {
 				return year - 1;
 			
 			return year;
+		}
+		
+		///////////////////////////////////////////////////////////////////////////7
+		//Liste di utilità per i template
+		
+		public List<Qualification> getAllQualifications() {
+			return QualificationDao.findAll();
+		}
+		
+		public List<Office> getAllOfficesAllowed() {
+			return Security.getOfficeAllowed();
 		}
 	}
 

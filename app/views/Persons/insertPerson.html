@@ -4,132 +4,42 @@
 <div class="container">
 #{form @Persons.save()}
 
-<p>I valori in <b>grassetto</b> sono obbligatori.</p>
-
 <div class="panel panel-default">
   <div class="panel-heading">
     <h3 class="panel-title"><span class="badge">1</span> Dati Personali</h3>
   </div>
   <div class="panel-body">
-    
 
     <table class="table table-condensed table-form table-hover">
-		<tr>
-			<td class="lab"><b>Cognome</b></td>
-			<td><input name="person.surname" type="text" /></td>
-		</tr>
-		<tr>
-			<td class="lab"><b>Nome</b></td> 
-			<td><input name="person.name" type="text" /></td>
-		</tr>
-		
-		<tr>
-			<td class="lab">Matricola</td> 
-			<td><input name="person.number" type="number" /></td>
-		</tr>
-		<tr>
-			<td class="lab">Numbero badge</td>
-			<td><input name="person.badgeNumber" type="number" /></td>
-		</tr>
-		<tr>
-			<td class="lab"> Livello </td>
-			<td>
-			
-				#{select 'qualification', value:'', class:'span1',id:'withoutborder'} 
-				#{option null}Seleziona la qualifica#{/option}
-				#{option 1}1#{/option} #{option 2}2#{/option} #{option 3}3#{/option}
-				#{option 4}4#{/option} #{option 5}5#{/option} #{option 6}6#{/option}
-				#{option 7}7#{/option} #{option 8}8#{/option} #{/select} 
-		
-			
-			</td>
-		</tr>
-		<tr>
-			<td class="lab">Sede</td>
-			<td>
-			    #{select 'office', value:'', id:'office'} 
-						#{list items: officeList, as: 'office'}
-							#{option office.id}${office.name}#{/option}
-						#{/list} 
-					#{/select}
-			</td>
-		</tr>
-	
-	
+        #{f.input_table 'person.surname', required:'true', type:'text' /}
+		#{f.input_table 'person.name', required:'true', type:'text'/}
+	 	#{f.input_table 'person.number', type:'number'/}
+	 	#{f.input_table 'person.badgeNumber', type:'number'/}
+		#{f.select_table 'qualification', value: qualification, items:templateUtility.allQualifications, required:'true'/}
+		#{f.select_table 'office', value: office, items:templateUtility.allOfficesAllowed, required:'true'/}
+		#{f.checkbox_table 'person.wantEmail', checked:'true' /}
 	</table>
-
+    <p>
+  	   Abilitando l'invio mail per il dipendente, si permetterà alle procedure di controllo sui 
+  	   <strong><em>giorni con timbrature disaccoppiate</em></strong> e sui
+  	   <strong><em>giorni con mancanza di timbrature e codici assenza</em></strong>, di inviare una mail
+      	al dipendente contenente i giorni in cui sono stati riscontrati i casi descritti.
+  	</p>
   </div>
 </div>
 
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title"><span class="badge">2</span> Informazioni di ubicazione e contatti</h3>
+    <h3 class="panel-title"><span class="badge">2</span> Dati Contrattuali</h3>
   </div>
   <div class="panel-body">
 	
-    <table class="table table-condensed table-form table-hover">
-		<tr>
-			<td class="lab">Dipartimento</td>
-			<td><input name="person.department" type="text" /></td>
-		</tr>
-		<tr>
-			<td class="lab">Sede</td>
-			<td><input name="person.headOffice" type="text" /></td>
-		</tr>
-		<tr>
-			<td class="lab">Stanza</td>
-			<td><input name="person.room" type="text" /></td>
-		</tr>
-		<tr>
-			<td class="lab">Telefono</td>			
-			<td><input name="person.telephone" type="text" /></td>
-			
-		</tr>
-		<tr>
-			<td class="lab">Email</td>
-			<td><input name="person.email" type="email"/></td>
-		</tr>
-		<tr>
-			<td class="lab">Data di nascita </td>			
-			<td><input data-datepicker data-date-format="yyyy-mm-dd" name="person.birthday" type="text" value=""/></td>			
-		</tr>
-		<tr>
-			<td class="lab"><abbr title=
-			"Abilitando/disabilitando l'invio mail per il dipendente, si permetterà alle procedure di controllo sulle
-      			timbrature mancanti e sui giorni con mancanza di timbrature e codici assenza, di inviare/non inviare una mail
-      			al dipendente contenente i giorni in cui sono stati riscontrati i casi descritti." class="initialism">Invio mail</abbr></td>
-			<td><input name="person.wantEmail" type="checkbox" /></td>
-		</tr>
-	</table>
-  
-  </div>
-</div>
-
-<div class="panel panel-default">
-  <div class="panel-heading">
-    <h3 class="panel-title"><span class="badge">3</span> Dati Contrattuali</h3>
-  </div>
-  <div class="panel-body">
-	
-    <table class="table table-hover center table-list-contract">
-		<tr class="warning">
-			<th>Data inizio contratto</th>
-			<th>Data fine contratto</th>
-			<th>Attestato presenza (per dipendenti CNR)</th>			
-		</tr>		
+   <table class="table table-condensed table-form table-hover">
 		
-		<tr>
-			<td>
-			  <h4><input name="beginContract" type="text" id="datepicker1" data-date-format="yyyy-mm-dd"/></h4>
-			</td>
-			
-			<td>
-			  <h4><input name="expireContract" type="text" id="datepicker3" data-date-format="yyyy-mm-dd"/></h4>
-			</td>
-						
-			<td><input name="onCertificate" type="checkbox" checked="checked"/></td>			
-		</tr>		
-	  </table>
+     #{f.datepicker_table 'contract.beginContract', required:'true' /}
+   	 #{f.datepicker_table 'contract.expireContract' /}
+	 #{f.checkbox_table 'contract.onCertificate', checked:'true', required:'true' /}				
+   </table>
   	  
   	  <p>
   	    Alla creazione del contratto verrà assegnato il tipo orario di default <strong><em>Normale</em></strong>.<br>
@@ -137,6 +47,23 @@
   	    <strong>Importante:</strong> Per motivi di sicurezza al personale non in Attestati non può essere attribuito 
   	    alcun ruolo amministrativo ePAS.
   	  </p>
+  </div>
+</div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title"><span class="badge">1</span> Informazioni di ubicazione e contatti (opzionali)</h3>
+  </div>
+  <div class="panel-body">
+	
+    <table class="table table-condensed table-form table-hover">
+    	#{f.input_table 'person.department', type:'text' /}
+    	#{f.input_table 'person.room', type:'text' /}
+    	#{f.input_table 'person.telephone', type:'text' /}
+    	#{f.input_table 'person.email', type:'email' /}
+    	#{f.datepicker_table 'person.birthday', type:'text' /}
+    </table>
+
   </div>
 </div>
 
