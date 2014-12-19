@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.mysema.query.jpa.JPQLQuery;
 
+import models.Person;
 import models.PersonChildren;
 import models.query.QPersonChildren;
 
@@ -27,5 +28,19 @@ public class PersonChildrenDao {
 		final JPQLQuery query = ModelQuery.queryFactory().from(personChildren)
 				.where(personChildren.id.eq(id));
 		return query.singleResult(personChildren);
+	}
+	
+	
+	/**
+	 * 
+	 * @param person
+	 * @return la lista di tutti i figli della persona person passata come parametro
+	 */
+	public static List<PersonChildren> getAllPersonChildren(Person person){
+		QPersonChildren personChildren = QPersonChildren.personChildren;
+		final JPQLQuery query = ModelQuery.queryFactory().from(personChildren)
+				.where(personChildren.person.eq(person));
+		query.orderBy(personChildren.bornDate.asc());
+		return query.list(personChildren);
 	}
 }
