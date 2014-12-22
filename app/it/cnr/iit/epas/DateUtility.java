@@ -10,6 +10,7 @@ import org.joda.time.DateTimeFieldType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
+import org.joda.time.YearMonth;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -377,11 +378,18 @@ public class DateUtility {
 	 * 
 	 */
 	public static LocalDate dayMonth(String date,Optional<String> pattern){
-		
 		DateTimeFormatter dtf = DateTimeFormat.forPattern(pattern.isPresent() ? pattern.get() : "dd/MM");
 
 		return LocalDate.parse(date,dtf);
 	};
+	
+	public static LocalDate getMonthFirstDay(YearMonth yearMonth){
+		return yearMonth.toInterval().getStart().toLocalDate();
+	}
+	
+	public static LocalDate getMonthLastDay(YearMonth yearMonth){
+		return yearMonth.toInterval().getEnd().minusDays(1).toLocalDate();
+	}
 	
 	
 }
