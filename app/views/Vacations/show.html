@@ -19,7 +19,7 @@
         <th>Anno</th>
         <th>Totali (maturate)</th>
         <th>Utilizzate</th>
-        <th>Residue</th>
+        <th>Residue (maturate)</th>
       </tr>  	
       <tr>
         <td>${vacationsRecap.year-1}</td>
@@ -35,7 +35,7 @@
 		  #{/else}
           
 	    </td>
-        <td>${vacationsRecap.vacationDaysLastYearNotYetUsed}</td>
+        <td>${vacationsRecap.vacationDaysLastYearNotYetUsed} (${vacationsRecap.vacationDaysLastYearAccrued})</td>
       </tr>
       <tr>
         <td>${vacationsRecap.year}</td>
@@ -50,7 +50,7 @@
 		    0 
 		  #{/else}
 		</td>
-        <td>${vacationsRecap.vacationDaysCurrentYearAccrued - vacationsRecap.vacationDaysCurrentYearUsed.size()}</td>
+        <td>${vacationsRecap.vacationDaysCurrentYearAccrued - vacationsRecap.vacationDaysCurrentYearUsed.size()} (${vacationsRecap.vacationDaysCurrentYearAccrued}) </td>
       </tr>
   	</table>
       
@@ -71,7 +71,7 @@
         <th>Anno</th>
         <th>Totali (maturati)</th>
         <th>Utilizzati</th>
-        <th>Residui</th>
+        <th>Residui (maturati)</th>
       </tr>  	
       <tr>
         <td>${vacationsRecap.year}</td>
@@ -88,7 +88,7 @@
 		  #{/else}
          
         </td>
-        <td>${vacationsRecap.permissionCurrentYearAccrued - vacationsRecap.permissionUsed.size()}</td>
+        <td>${vacationsRecap.permissionCurrentYearAccrued - vacationsRecap.permissionUsed.size()} (${vacationsRecap.permissionCurrentYearAccrued})</td>
       </tr>
   	</table>
       
