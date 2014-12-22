@@ -7,52 +7,54 @@ import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
 
-import com.google.common.base.Optional;
-
 import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
+
+import com.google.common.base.Optional;
+
+import dto.VacationsShowDto;
 
 @With( {Resecure.class, RequestInit.class} )
 public class Vacations extends Controller{
 		
 	
-	public static void show(Integer anno) {
-
-		//controllo dei parametri
+	public static void show(Integer year) {
+		
+		//Controllo parametri
 		Optional<User> currentUser = Security.getUser();
+		
 		if( ! currentUser.isPresent() || currentUser.get().person == null ) {
+		
 			flash.error("Accesso negato.");
 			renderTemplate("Application/indexAdmin.html");
 		}
-		User user = currentUser.get();
 		
-		//default l'anno corrente
-    	if(anno==null)
-			anno = new LocalDate().getYear(); 
+		User user = currentUser.get();
 
-		Contract contract = user.person.getCurrentContract();
-    	
-    	VacationsRecap vacationsRecap = null;
-    	try { 
-    		vacationsRecap = new VacationsRecap(user.person, anno, contract, new LocalDate(), true);
+		//Logica
+    	try {
+    		
+    		if(year == null) {
+    			year = new LocalDate().getYear(); 
+        	}
+    		
+    		Contract contract = user.person.getCurrentContract();
+    		
+    		VacationsRecap vacationsRecap = new VacationsRecap(user.person, year, contract, new LocalDate(), true);
+    		VacationsRecap vacationsRecapPrevious = new VacationsRecap(user.person, year-1, contract, new LocalDate(year-1,12,31), true);
+    		
+    	 	VacationsShowDto vacationShowDto = VacationsShowDto.build(year, vacationsRecap, vacationsRecapPrevious);
+    	 	
+    	 	render(vacationsRecap, vacationsRecapPrevious, vacationShowDto);
+    	 	
     	} catch(IllegalStateException e) {
+    		
     		flash.error("Impossibile calcolare la situazione ferie. Definire i dati di inizializzazione per %s %s.", user.person.name, user.person.surname);
     		renderTemplate("Application/indexAdmin.html");
-    		return;
     	}
     	
-    	if(vacationsRecap.vacationPeriodList==null)
-    	{
-    		Logger.debug("Period e' null");
-    		flash.error("Piano ferie inesistente per %s %s", user.person.name, user.person.surname);
-    		render(vacationsRecap);
-    	}
-    	
-    	//rendering
-       	render(vacationsRecap);
-    
-    	
+    	return;
     }
 	
 
