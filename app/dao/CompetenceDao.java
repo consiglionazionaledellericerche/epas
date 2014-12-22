@@ -123,9 +123,11 @@ public class CompetenceDao {
 	 * Se il booleano untilThisMonth è true, viene presa la lista delle competenze dall'inizio dell'anno fino a quel mese compreso, se è false
 	 * solo quelle del mese specificato
 	 */
-	public static List<Competence> getCompetences(Integer year, Integer month, List<String> code, Office office, boolean untilThisMonth){
+	public static List<Competence> getCompetences(Optional<Person> person, Integer year, Integer month, List<String> code, Office office, boolean untilThisMonth){
 		QCompetence competence = QCompetence.competence;
 		final BooleanBuilder condition = new BooleanBuilder();
+		if(person.isPresent())
+			condition.and(competence.person.eq(person.get()));
 		if(untilThisMonth)
 			condition.and(competence.month.loe(month));
 		else
