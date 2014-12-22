@@ -150,7 +150,7 @@ public class Competences extends Controller{
 		code.add("S1");
 		code.add("S2");
 		code.add("S3");
-		List<Competence> competenceList = CompetenceDao.getCompetences(year, month, code, office, false);
+		List<Competence> competenceList = CompetenceDao.getCompetences(Optional.<Person>absent(),year, month, code, office, false);
 //		List<Competence> competenceList = 
 //				Competence.find("Select comp from Competence comp, CompetenceCode code where comp.year = ? and comp.month = ? " +
 //				"and comp.competenceCode = code and code.code in (?,?,?) and comp.person.office = ?", 
@@ -165,7 +165,7 @@ public class Competences extends Controller{
 			totaleOreStraordinarioMensile = totaleOreStraordinarioMensile + comp.valueApproved;
 		}
 		
-		List<Competence> competenceYearList = CompetenceDao.getCompetences(year, month, code, office, true);
+		List<Competence> competenceYearList = CompetenceDao.getCompetences(Optional.<Person>absent(),year, month, code, office, true);
 //		List<Competence> competenceYearList = 
 //				Competence.find("Select comp from Competence comp, CompetenceCode code where comp.year = ? and comp.month <= ? " +
 //				"and comp.competenceCode = code and code.code in (?,?,?) and comp.person.office = ?", 

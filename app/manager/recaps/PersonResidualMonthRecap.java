@@ -337,7 +337,7 @@ public class PersonResidualMonthRecap {
 		
 		if(validDataForCompensatoryRest!=null)
 		{
-			List<Absence> riposiCompensativi = AbsenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(monthRecap.person), Optional.fromNullable("S1"), 
+			List<Absence> riposiCompensativi = AbsenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(monthRecap.person), Optional.fromNullable("91"), 
 					validDataForCompensatoryRest.getBegin(), validDataForCompensatoryRest.getEnd(), 
 					Optional.<JustifiedTimeAtWork>absent(), false, false);
 //			List<Absence> riposiCompensativi = Absence.find("Select abs from Absence abs, AbsenceType abt, PersonDay pd where abs.personDay = pd and abs.absenceType = abt and abt.code = ? and pd.person = ? "
