@@ -40,9 +40,14 @@ import org.joda.time.format.DateTimeFormatter;
 import com.google.common.base.Optional;
 
 import dao.AbsenceDao;
+import dao.AbsenceTypeDao;
+import dao.CompetenceDao;
+import dao.ContractDao;
+import dao.OfficeDao;
 import dao.PersonChildrenDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
+import dao.PersonDayInTroubleDao;
 import play.Logger;
 import play.Play;
 import play.db.jpa.JPA;
@@ -546,7 +551,8 @@ public class PersonUtility {
 		//controllo che il tipo di accumulo sia su base mensile cercando nel mese tutte le occorrenze di codici di assenza che hanno
 		//lo stesso gruppo identificativo
 		if(absenceType.absenceTypeGroup.accumulationType.equals(AccumulationType.monthly)){
-			absList = AbsenceDao.getReplacingAbsenceOccurrenceListInPeriod(absenceType, person, date.dayOfMonth().withMinimumValue(), date);
+			absList = AbsenceDao.getAllAbsencesWithSameLabel(absenceType, person, date.dayOfMonth().withMinimumValue(), date);
+
 //			absList = Absence.find("Select abs from Absence abs where abs.absenceType.absenceTypeGroup.label = ? and " +
 //					"abs.personDay.person = ? and abs.personDay.date between ? and ?", 
 //					absenceType.absenceTypeGroup.label, person, date.dayOfMonth().withMinimumValue(), date).fetch();
@@ -676,7 +682,8 @@ public class PersonUtility {
 		LocalDate begin = new LocalDate(year, month, 1);
 		if(begin.isAfter(new LocalDate()))
 			return 0;
-		List<PersonDay> pdList = PersonDay.find("Select pd From PersonDay pd where pd.person = ? and pd.date between ? and ?", person,begin,begin.dayOfMonth().withMaximumValue() ).fetch();
+		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, begin, begin.dayOfMonth().withMaximumValue(), false);
+		//List<PersonDay> pdList = PersonDay.find("Select pd From PersonDay pd where pd.person = ? and pd.date between ? and ?", person,begin,begin.dayOfMonth().withMaximumValue() ).fetch();
 
 		int max = 0;
 		for(PersonDay pd : pdList)
@@ -703,8 +710,9 @@ public class PersonUtility {
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
 
 		List<PersonDay> totalDays = new ArrayList<PersonDay>();
-		List<PersonDay> workingDays = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date",
-				person, beginMonth, endMonth).fetch();
+		List<PersonDay> workingDays = PersonDayDao.getPersonDayInPeriod(person, beginMonth, endMonth, true);
+//		List<PersonDay> workingDays = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date",
+//				person, beginMonth, endMonth).fetch();
 
 		int currentWorkingDays = 0;
 		LocalDate currentDate = beginMonth;
@@ -751,6 +759,7 @@ public class PersonUtility {
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
 		Person person = personDays.get(0).person;
 
+	//	List<AbsenceType> abtList = AbsenceTypeDao.getAbsenceTypeInPeriod(beginMonth, endMonth, person);
 		List<AbsenceType> abtList = AbsenceType.find("Select abt from AbsenceType abt, Absence ab, PersonDay pd where ab.personDay = pd and ab.absenceType = abt and pd.person = ? and pd.date between ? and ?", person, beginMonth, endMonth ).fetch();
 		Map<AbsenceType, Integer> absenceCodeMap = new HashMap<AbsenceType, Integer>();
 		int i = 0;
@@ -778,8 +787,9 @@ public class PersonUtility {
 		LocalDate beginMonth = new LocalDate(year, month, 1);
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
 
-		List<PersonDay> workingDays = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? and pd.isTicketAvailable = ? order by pd.date",
-				person, beginMonth, endMonth, true).fetch();
+		List<PersonDay> workingDays = PersonDayDao.getPersonDayForTicket(person, beginMonth, endMonth, true);
+//		List<PersonDay> workingDays = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? and pd.isTicketAvailable = ? order by pd.date",
+//				person, beginMonth, endMonth, true).fetch();
 		int number = 0;
 		for(PersonDay pd : workingDays)
 		{
@@ -799,8 +809,9 @@ public class PersonUtility {
 		LocalDate beginMonth = new LocalDate(year, month, 1);
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
 
-		List<PersonDay> pdListNoTicket = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? and pd.isTicketAvailable = ? order by pd.date",
-				person, beginMonth, endMonth, false).fetch();
+		List<PersonDay> pdListNoTicket = PersonDayDao.getPersonDayForTicket(person, beginMonth, endMonth, false);
+//		List<PersonDay> pdListNoTicket = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? and pd.isTicketAvailable = ? order by pd.date",
+//				person, beginMonth, endMonth, false).fetch();
 		int ticketTorender = pdListNoTicket.size();
 
 		
@@ -878,11 +889,12 @@ public class PersonUtility {
 		LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
 		while(true)
 		{
-			List<PersonDay> pdList = PersonDay.find(
-					"select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date asc",
-					person,
-					monthBegin,
-					monthEnd).fetch();
+			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, monthBegin, monthEnd, true);
+//			List<PersonDay> pdList = PersonDay.find(
+//					"select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date asc",
+//					person,
+//					monthBegin,
+//					monthEnd).fetch();
 			for(PersonDay pd : pdList)
 			{
 				pd.populatePersonDay();
@@ -911,7 +923,8 @@ public class PersonUtility {
 
 		List<Office> officeAllowed = new ArrayList<Office>();
 		if(userLogged.person == null)
-			officeAllowed = Office.findAll();
+			officeAllowed = OfficeDao.getAllOffices();
+			//officeAllowed = Office.findAll();
 		else
 			officeAllowed = userLogged.person.getOfficeAllowed();
 
@@ -928,7 +941,8 @@ public class PersonUtility {
 		else {
 			
 			//TODO controllare che personLogged abbia i diritti sulla persona
-			personList.add((Person)Person.findById(personId));
+			personList.add(PersonDao.getPersonById(personId));
+			//personList.add((Person)Person.findById(personId));
 		}
 
 		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
@@ -948,14 +962,16 @@ public class PersonUtility {
 			JPAPlugin.startTx(false);
 			while(!actualMonth.isAfter(endMonth)) {
 
-				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
-						p, actualMonth, actualMonth.dayOfMonth().withMaximumValue()).fetch();
+				List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(p, actualMonth, actualMonth.dayOfMonth().withMaximumValue(), true);
+//				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
+//						p, actualMonth, actualMonth.dayOfMonth().withMaximumValue()).fetch();
 
 
 				for(PersonDay pd : pdList){
 					JPAPlugin.closeTx(false);
 					JPAPlugin.startTx(false);
-					PersonDay pd1 = PersonDay.findById(pd.id);
+					PersonDay pd1 = PersonDayDao.getPersonDayById(pd.id);
+					//PersonDay pd1 = PersonDay.findById(pd.id);
 					pd1.populatePersonDay();
 					JPAPlugin.closeTx(false);
 					JPAPlugin.startTx(false);
@@ -972,7 +988,8 @@ public class PersonUtility {
 		for(Person p : personList) {
 			
 			Logger.info("Update residui %s (%s di %s) dal %s-%s-01 a oggi", p.surname, i++, personList.size(), year, month);
-			List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ?", p).fetch();
+			List<Contract> contractList = ContractDao.getPersonContractList(p);
+			//List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ?", p).fetch();
 
 			for(Contract contract : contractList) {
 				
@@ -1024,8 +1041,9 @@ public class PersonUtility {
 			return;
 		}
 		
-		List<PersonDayInTrouble> pdList = PersonDayInTrouble.find("Select pd from PersonDayInTrouble pd where pd.personDay.person = ? " +
-				"and pd.personDay.date between ? and ? and pd.fixed = ?", p, begin, end, false).fetch();
+		List<PersonDayInTrouble> pdList = PersonDayInTroubleDao.getPersonDayInTroubleInPeriod(p, begin, end, false);
+//		List<PersonDayInTrouble> pdList = PersonDayInTrouble.find("Select pd from PersonDayInTrouble pd where pd.personDay.person = ? " +
+//				"and pd.personDay.date between ? and ? and pd.fixed = ?", p, begin, end, false).fetch();
 
 		List<LocalDate> dateTroubleStampingList = new ArrayList<LocalDate>();
 
@@ -1088,7 +1106,8 @@ public class PersonUtility {
 		LocalDate begin = null;
 		LocalDate end = null;
 		if(userLogged.person == null)
-			officeAllowed = Office.findAll();
+			officeAllowed = OfficeDao.getAllOffices();
+			//officeAllowed = Office.findAll();
 		else
 			officeAllowed = userLogged.person.getOfficeAllowed();
 
@@ -1103,7 +1122,8 @@ public class PersonUtility {
 		else
 		{
 			//TODO controllare che personLogged abbia i diritti sulla persona
-			personList.add((Person)Person.findById(personId));
+			personList.add(PersonDao.getPersonById(personId));
+			//personList.add((Person)Person.findById(personId));
 		}
 		for(Person p : personList){
 			Logger.debug("Chiamato controllo sul giorni %s %s", begin, end);
@@ -1129,27 +1149,29 @@ public class PersonUtility {
 	 */
 	public static void checkPersonDay(Long personid, LocalDate dayToCheck)
 	{
-		Person personToCheck = Person.findById(personid);
+		Person personToCheck = PersonDao.getPersonById(personid);
+		//Person personToCheck = Person.findById(personid);
 		if(!personToCheck.isActiveInDay(dayToCheck)) {
 			return;
 		}
+		PersonDay personDay = null;
+		Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(personToCheck, dayToCheck);
+//		PersonDay pd = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? AND pd.date = ? ", 
+//				personToCheck,dayToCheck).first();
 
-		PersonDay pd = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? AND pd.date = ? ", 
-				personToCheck,dayToCheck).first();
-
-		if(pd!=null){
-			pd.checkForPersonDayInTrouble(); 
+		if(pd.isPresent()){
+			pd.get().checkForPersonDayInTrouble(); 
 			return;
 		}
 		else {
-			pd = new PersonDay(personToCheck, dayToCheck);
-			if(pd.isHoliday()) {
+			personDay = new PersonDay(personToCheck, dayToCheck);
+			if(personDay.isHoliday()) {
 				return;
 			}
-			pd.create();
-			pd.populatePersonDay();
-			pd.save();
-			pd.checkForPersonDayInTrouble();
+			personDay.create();
+			personDay.populatePersonDay();
+			personDay.save();
+			personDay.checkForPersonDayInTrouble();
 			return;
 		}
 	}
@@ -1263,7 +1285,8 @@ public class PersonUtility {
 	 */
 	public static List<CompetenceCode> activeCompetence(){
 		List<CompetenceCode> competenceCodeList = new ArrayList<CompetenceCode>();
-		List<Competence> competenceList = Competence.find("Select comp from Competence comp where comp.year = ? order by comp.competenceCode.code", new LocalDate().getYear()).fetch();
+		List<Competence> competenceList = CompetenceDao.getCompetenceInYear(new LocalDate().getYear());
+		//List<Competence> competenceList = Competence.find("Select comp from Competence comp where comp.year = ? order by comp.competenceCode.code", new LocalDate().getYear()).fetch();
 		for(Competence comp : competenceList){
 			if(!competenceCodeList.contains(comp.competenceCode))
 				competenceCodeList.add(comp.competenceCode);

@@ -7,13 +7,21 @@ import java.util.List;
 
 import models.Absence;
 import models.Competence;
+import models.CompetenceCode;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
+import models.enumerate.JustifiedTimeAtWork;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
+
+import dao.AbsenceDao;
+import dao.CompetenceCodeDao;
+import dao.CompetenceDao;
 import dao.MealTicketDao;
+import dao.PersonDayDao;
 
 public class PersonResidualMonthRecap {
 
@@ -213,8 +221,9 @@ public class PersonResidualMonthRecap {
 	{
 		if(validDataForPersonDay!=null)
 		{
-			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date desc",
-					monthRecap.person, validDataForPersonDay.getBegin(), validDataForPersonDay.getEnd()).fetch();
+			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriodDesc(monthRecap.person, validDataForPersonDay.getBegin(), validDataForPersonDay.getEnd(), true);
+//			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date desc",
+//					monthRecap.person, validDataForPersonDay.getBegin(), validDataForPersonDay.getEnd()).fetch();
 
 			//progressivo finale fine mese
 			for(PersonDay pd : pdList){
@@ -253,8 +262,9 @@ public class PersonResidualMonthRecap {
 		
 		if(validDataForMealTickets!=null)
 		{
-			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date",
-					monthRecap.person, validDataForMealTickets.getBegin(), validDataForMealTickets.getEnd()).fetch();
+			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(monthRecap.person, validDataForMealTickets.getBegin(), validDataForMealTickets.getEnd(), true);
+//			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date",
+//					monthRecap.person, validDataForMealTickets.getBegin(), validDataForMealTickets.getEnd()).fetch();
 
 			//buoni pasto utilizzati
 			for(PersonDay pd : pdList){
@@ -280,40 +290,58 @@ public class PersonResidualMonthRecap {
 	 */
 	private static void setPersonMonthInformation(PersonResidualMonthRecap monthRecap, DateInterval validDataForCompensatoryRest)
 	{
-		
+		CompetenceCode s1 = CompetenceCodeDao.getCompetenceCodeByCode("S1");
+		CompetenceCode s2 = CompetenceCodeDao.getCompetenceCodeByCode("S2");
+		CompetenceCode s3 = CompetenceCodeDao.getCompetenceCodeByCode("S3");
 		if(monthRecap.contract.isLastInMonth(monthRecap.mese, monthRecap.anno))	//gli straordinari li assegno solo all'ultimo contratto attivo del mese
 		{
 			//straordinari s1
-			List<Competence> competenceList = Competence.find("Select comp from Competence comp, CompetenceCode compCode where comp.competenceCode = compCode and comp.person = ?"
-					+ "and comp.year = ? and comp.month = ? and compCode.code = ?", monthRecap.person, monthRecap.anno, monthRecap.mese, "S1").fetch();
-			for(Competence comp : competenceList)
-			{
-				monthRecap.straordinariMinutiS1Print = monthRecap.straordinariMinutiS1Print + (comp.valueApproved * 60);
-			}
+			Competence competenceS1 = CompetenceDao.getCompetence(monthRecap.person, monthRecap.anno, monthRecap.mese, s1);
+//			List<Competence> competenceList = Competence.find("Select comp from Competence comp, CompetenceCode compCode where comp.competenceCode = compCode and comp.person = ?"
+//					+ "and comp.year = ? and comp.month = ? and compCode.code = ?", monthRecap.person, monthRecap.anno, monthRecap.mese, "S1").fetch();
+//			for(Competence comp : competenceList)
+//			{
+			if(competenceS1 != null)
+				monthRecap.straordinariMinutiS1Print = monthRecap.straordinariMinutiS1Print + (competenceS1.valueApproved * 60);
+			else
+				monthRecap.straordinariMinutiS1Print = 0;
+//			}
 
 			//straordinari s2
-			competenceList = Competence.find("Select comp from Competence comp, CompetenceCode compCode where comp.competenceCode = compCode and comp.person = ?"
-					+ "and comp.year = ? and comp.month = ? and compCode.code = ?", monthRecap.person, monthRecap.anno, monthRecap.mese, "S2").fetch();
-			for(Competence comp : competenceList)
-			{
-				monthRecap.straordinariMinutiS2Print = monthRecap.straordinariMinutiS2Print + (comp.valueApproved * 60);
-			}
+			Competence competenceS2 = CompetenceDao.getCompetence(monthRecap.person, monthRecap.anno, monthRecap.mese, s2);
+			
+//			competenceList = Competence.find("Select comp from Competence comp, CompetenceCode compCode where comp.competenceCode = compCode and comp.person = ?"
+//					+ "and comp.year = ? and comp.month = ? and compCode.code = ?", monthRecap.person, monthRecap.anno, monthRecap.mese, "S2").fetch();
+//			for(Competence comp : competenceList)
+//			{
+			if(competenceS2 != null)
+				monthRecap.straordinariMinutiS2Print = monthRecap.straordinariMinutiS2Print + (competenceS2.valueApproved * 60);
+			else
+				monthRecap.straordinariMinutiS2Print = 0;
+//			}
 
 			//straordinari s3
-			competenceList = Competence.find("Select comp from Competence comp, CompetenceCode compCode where comp.competenceCode = compCode and comp.person = ?"
-					+ "and comp.year = ? and comp.month = ? and compCode.code = ?", monthRecap.person, monthRecap.anno, monthRecap.mese, "S3").fetch();
-			for(Competence comp : competenceList)
-			{
-				monthRecap.straordinariMinutiS3Print = monthRecap.straordinariMinutiS3Print + (comp.valueApproved * 60);
-			}
+			Competence competenceS3 = CompetenceDao.getCompetence(monthRecap.person, monthRecap.anno, monthRecap.mese, s3);
+//			competenceList = Competence.find("Select comp from Competence comp, CompetenceCode compCode where comp.competenceCode = compCode and comp.person = ?"
+//					+ "and comp.year = ? and comp.month = ? and compCode.code = ?", monthRecap.person, monthRecap.anno, monthRecap.mese, "S3").fetch();
+//			for(Competence comp : competenceList)
+//			{
+			if(competenceS3 != null)
+				monthRecap.straordinariMinutiS3Print = monthRecap.straordinariMinutiS3Print + (competenceS3.valueApproved * 60);
+			else
+				monthRecap.straordinariMinutiS3Print = 0;
+//			}
 
 			monthRecap.straordinariMinuti = monthRecap.straordinariMinutiS1Print + monthRecap.straordinariMinutiS2Print + monthRecap.straordinariMinutiS3Print;
 		}
 		
 		if(validDataForCompensatoryRest!=null)
 		{
-			List<Absence> riposiCompensativi = Absence.find("Select abs from Absence abs, AbsenceType abt, PersonDay pd where abs.personDay = pd and abs.absenceType = abt and abt.code = ? and pd.person = ? "
-					+ "and pd.date between ? and ?", "91", monthRecap.person, validDataForCompensatoryRest.getBegin(), validDataForCompensatoryRest.getEnd()).fetch();
+			List<Absence> riposiCompensativi = AbsenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(monthRecap.person), Optional.fromNullable("S1"), 
+					validDataForCompensatoryRest.getBegin(), validDataForCompensatoryRest.getEnd(), 
+					Optional.<JustifiedTimeAtWork>absent(), false, false);
+//			List<Absence> riposiCompensativi = Absence.find("Select abs from Absence abs, AbsenceType abt, PersonDay pd where abs.personDay = pd and abs.absenceType = abt and abt.code = ? and pd.person = ? "
+//					+ "and pd.date between ? and ?", "91", monthRecap.person, validDataForCompensatoryRest.getBegin(), validDataForCompensatoryRest.getEnd()).fetch();
 			monthRecap.riposiCompensativiMinuti = 0;
 			monthRecap.numeroRiposiCompensativi = 0;
 			for(Absence abs : riposiCompensativi){

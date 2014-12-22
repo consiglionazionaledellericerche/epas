@@ -138,6 +138,19 @@ public class CompetenceDao {
 	}
 	
 	
+	/**
+	 * 
+	 * @param year
+	 * @return la lista delle competenze presenti nell'anno
+	 */
+	public static List<Competence> getCompetenceInYear(Integer year){
+		QCompetence competence = QCompetence.competence;
+		JPQLQuery query = ModelQuery.queryFactory().from(competence)
+				.where(competence.year.eq(year));
+		query.orderBy(competence.competenceCode.code.asc());
+		return query.list(competence);
+	}
+	
 	/*********************************************************************************************************************************/
 	/*Parte relativa a query su TotalOvertime per la quale, essendo unica, non si è deciso di creare un Dao ad hoc*/
 	

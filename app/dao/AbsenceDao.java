@@ -143,7 +143,7 @@ public class AbsenceDao {
 	 * @param person
 	 * @param begin
 	 * @param end
-	 * @return nella storia dei personDay, l'ultima occorrenza in ordine temporale del codice di rimpiazzamento (abt.absenceTypeGroup.label)
+	 * @return nella storia dei personDay, l'ultima occorrenza in ordine temporale del codice di rimpiazzamento (abt.absenceTypeGroup.replacingAbsenceType)
 	 * relativo al codice di assenza che intendo inserire.
 	 *  
 	 */
@@ -155,7 +155,7 @@ public class AbsenceDao {
 			condition.and(absence.personDay.date.between(begin.get(), end));
 		else
 			condition.and(absence.personDay.date.loe(end));
-		query.where(condition.and(absence.absenceType.absenceTypeGroup.label.eq(abt.absenceTypeGroup.label)
+		query.where(condition.and(absence.absenceType.eq(abt.absenceTypeGroup.replacingAbsenceType)
 				.and(absence.personDay.person.eq(person))));
 		query.orderBy(absence.personDay.date.desc());
 		return query.singleResult(absence);
@@ -173,8 +173,25 @@ public class AbsenceDao {
 	public static List<Absence> getReplacingAbsenceOccurrenceListInPeriod(AbsenceType abt, Person person, LocalDate begin, LocalDate end){
 		QAbsence absence = QAbsence.absence;
 		final JPQLQuery query = ModelQuery.queryFactory().from(absence)
-				.where(absence.absenceType.absenceTypeGroup.label.eq(abt.absenceTypeGroup.label)
+				.where(absence.absenceType.eq(abt.absenceTypeGroup.replacingAbsenceType)
 						.and(absence.personDay.person.eq(person).and(absence.personDay.date.between(begin, end))));
+		return query.list(absence);
+	}
+	
+	/**
+	 * 
+	 * @param abt
+	 * @param person
+	 * @param begin
+	 * @param end
+	 * @return la lista dei codici di assenza accomunati dallo stesso label relativo al codice di gruppo nel periodo begin-end
+	 * per la persona person
+	 */
+	public static List<Absence> getAllAbsencesWithSameLabel(AbsenceType abt, Person person, LocalDate begin, LocalDate end){
+		QAbsence absence = QAbsence.absence;
+		final JPQLQuery query = ModelQuery.queryFactory().from(absence)
+				.where(absence.absenceType.absenceTypeGroup.label.eq(abt.absenceTypeGroup.label).and(absence.personDay.person.eq(person))
+						.and(absence.personDay.date.between(begin, end)));
 		return query.list(absence);
 	}
 }
