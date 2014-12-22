@@ -22,7 +22,6 @@ import models.PersonTags;
 import models.StampModificationType;
 import models.StampType;
 import models.Stamping;
-import models.enumerate.StampTypeValues;
 import models.rendering.PersonStampingDayRecap;
 import models.rendering.PersonTroublesInMonthRecap;
 
@@ -38,8 +37,8 @@ import security.SecurityRules;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Sets;
 import com.google.common.collect.ImmutableTable.Builder;
+import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 
 import dao.PersonDao;

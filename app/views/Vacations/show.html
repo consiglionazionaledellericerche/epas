@@ -20,37 +20,48 @@
         <th>Totali (maturate)</th>
         <th>Utilizzate</th>
         <th>Residue (maturate)</th>
-      </tr>  	
-      <tr>
-        <td>${vacationsRecap.year-1}</td>
-        <td>${vacationsRecap.vacationDaysLastYearAccrued} (${vacationsRecap.vacationDaysLastYearAccrued})</td>
-        <td>
-          #{if vacationsRecap.vacationDaysLastYearUsed.size() != 0 } 
-           <a data-toggle="modal" href="@{Vacations.vacationsLastYear(vacationsRecap.year)}" data-target="#myModal3">
-			${vacationsRecap.vacationDaysLastYearUsed.size()}
-		  </a>
-		  #{/if}
-		  #{else} 
-		    0 
-		  #{/else}
-          
-	    </td>
-        <td>${vacationsRecap.vacationDaysLastYearNotYetUsed} (${vacationsRecap.vacationDaysLastYearAccrued})</td>
       </tr>
+
+      <!-- Ferie Past year -->  	
       <tr>
-        <td>${vacationsRecap.year}</td>
-        <td>${vacationsRecap.vacationDaysCurrentYearTotal} (${vacationsRecap.vacationDaysCurrentYearAccrued})</td>
+        <!-- year -->
+        <td>${vacationShowDto.year-1}</td>
+        <!-- totali (maturate) -->
+        <td>${vacationShowDto.previousYearVacationTotal} (${vacationShowDto.previousYearVacationAccrued})</td>
+        <!-- utilizzate -->
         <td>
-          #{if vacationsRecap.vacationDaysCurrentYearUsed.size() != 0 } 
-          <a data-toggle="modal" href="@{Vacations.vacationsCurrentYear(vacationsRecap.year)}" data-target="#myModal3">
-			${vacationsRecap.vacationDaysCurrentYearUsed.size()}
+		  #{if vacationShowDto.previousYearVacationUsed.size() != 0 } 
+           <a data-toggle="modal" href="@{Vacations.vacationsLastYear(vacationShowDto.year)}" data-target="#myModal3">
+			${vacationShowDto.previousYearVacationUsed.size()}
 		  </a>
 		  #{/if}
-		  #{else} 
-		    0 
-		  #{/else}
-		</td>
-        <td>${vacationsRecap.vacationDaysCurrentYearAccrued - vacationsRecap.vacationDaysCurrentYearUsed.size()} (${vacationsRecap.vacationDaysCurrentYearAccrued}) </td>
+		  #{else} 0 #{/else}     
+	    </td>
+	    <!-- residue (maturate) -->
+        <td>${vacationShowDto.previousYearVacationTotal - vacationShowDto.previousYearVacationUsed.size()} 
+           (${vacationShowDto.previousYearVacationAccrued - vacationShowDto.previousYearVacationUsed.size()}) </td>
+        </td>
+      </tr>
+      
+      <!-- Ferie Current year -->
+      <tr>
+        <!-- year -->
+        <td>${vacationShowDto.year}</td>
+        <!-- totali (maturate) -->
+        <td>${vacationShowDto.queryYearVacationTotal} (${vacationShowDto.queryYearVacationAccrued})</td>
+        <!-- utilizzate -->
+        <td>
+		  #{if vacationShowDto.queryYearVacationUsed.size() != 0 } 
+           <a data-toggle="modal" href="@{Vacations.vacationsCurrentYear(vacationShowDto.year)}" data-target="#myModal3">
+			${vacationShowDto.queryYearVacationUsed.size()}
+		  </a>
+		  #{/if}
+		  #{else} 0 #{/else}     
+	    </td>
+	    <!-- residue (maturate) -->
+        <td>${vacationShowDto.queryYearVacationTotal - vacationShowDto.queryYearVacationUsed.size()} 
+           (${vacationShowDto.queryYearVacationAccrued - vacationShowDto.queryYearVacationUsed.size()}) </td>
+        </td>
       </tr>
   	</table>
       
@@ -74,21 +85,23 @@
         <th>Residui (maturati)</th>
       </tr>  	
       <tr>
-        <td>${vacationsRecap.year}</td>
-        <td>${vacationsRecap.permissionCurrentYearTotal} (${vacationsRecap.permissionCurrentYearAccrued})</td>
+        <!-- year -->
+        <td>${vacationShowDto.year}</td>
+        <!-- totali (maturate) -->
+        <td>${vacationShowDto.queryYearPermissionTotal} (${vacationShowDto.queryYearPermissionAccrued})</td>
+        <!-- utilizzate -->
         <td>
-        
-          #{if vacationsRecap.permissionUsed.size() != 0 } 
-            <a data-toggle="modal" href="@{Vacations.permissionCurrentYear(vacationsRecap.year)}" data-target="#myModal3">
-			${vacationsRecap.permissionUsed.size()}
-		    </a>
+		  #{if vacationShowDto.queryYearPermissionUsed.size() != 0 } 
+           <a data-toggle="modal" href="@{Vacations.permissionCurrentYear(vacationShowDto.year)}" data-target="#myModal3">
+			${vacationShowDto.queryYearPermissionUsed.size()}
+		  </a>
 		  #{/if}
-		  #{else} 
-		    0 
-		  #{/else}
-         
+		  #{else} 0 #{/else}     
+	    </td>
+	    <!-- residue (maturate) -->
+        <td>${vacationShowDto.queryYearPermissionTotal - vacationShowDto.queryYearPermissionUsed.size()} 
+           (${vacationShowDto.queryYearPermissionAccrued - vacationShowDto.queryYearPermissionUsed.size()}) </td>
         </td>
-        <td>${vacationsRecap.permissionCurrentYearAccrued - vacationsRecap.permissionUsed.size()} (${vacationsRecap.permissionCurrentYearAccrued})</td>
       </tr>
   	</table>
       
