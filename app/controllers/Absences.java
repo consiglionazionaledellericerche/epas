@@ -364,7 +364,7 @@ public class Absences extends Controller{
 			return;
 		}	
 
-		if((absenceType.code.startsWith("12") || absenceType.code.startsWith("13")) && absenceType.code.length() == 3){
+		if((absenceType.code.startsWith("12") || absenceType.code.startsWith("13"))){
 			handlerChildIllness(person, dateFrom, dateTo, absenceType, file);
 			return;
 		}

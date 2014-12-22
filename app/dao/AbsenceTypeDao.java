@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import models.AbsenceType;
+import models.Person;
 import models.query.QAbsence;
 import models.query.QAbsenceType;
 
@@ -130,5 +131,19 @@ public class AbsenceTypeDao {
 		
 	}
 
+	/**
+	 * 
+	 * @param begin
+	 * @param end
+	 * @param person
+	 * @return la lista dei codici di assenza presi dalla persona person nel periodo compreso tra begin e end
+	 */
+//	public static List<AbsenceType> getAbsenceTypeInPeriod(LocalDate begin, LocalDate end, Person person){
+//		QAbsenceType absenceType = QAbsenceType.absenceType;
+//		QAbsence absence = QAbsence.absence;
+//		final JPQLQuery query = ModelQuery.queryFactory().from(absence)
+//				.where(absence.personDay.date.between(begin, end).and(absence.personDay.person.eq(person)).and(absence.absenceType.eq(absenceType)));
+//		return query.list(absenceType);
+//	}
 	
 }

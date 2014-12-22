@@ -31,7 +31,7 @@ public class PersonDayDao {
 	 * @param end
 	 * @param ordered
 	 * @return la lista dei personday relativi a una persona in un certo periodo di tempo  
-	 * Se ordered è 'true' la lista dei personDay viene ordinata
+	 * Se ordered è 'true' la lista dei personDay viene ordinata per data crescente
 	 */
 	public static List<PersonDay> getPersonDayInPeriod(Person person, LocalDate begin, LocalDate end, boolean ordered){
 		QPersonDay personDay = QPersonDay.personDay;
@@ -47,6 +47,27 @@ public class PersonDayDao {
 		return query.list(personDay);
 	}
 	
+	/**
+	 * 
+	 * @param person
+	 * @param begin
+	 * @param end
+	 * @param ordered
+	 * @return la lista dei personDay della persona person nel periodo begin-end ordinata per data in ordine decrescente
+	 */
+	public static List<PersonDay> getPersonDayInPeriodDesc(Person person, LocalDate begin, LocalDate end, boolean ordered){
+		QPersonDay personDay = QPersonDay.personDay;
+		final BooleanBuilder condition = new BooleanBuilder();
+		final JPQLQuery query = ModelQuery.queryFactory().from(personDay);
+		
+		condition.and(personDay.date.between(begin, end));
+		condition.and(personDay.person.eq(person));
+		
+		query.where(condition);
+		if(ordered)
+			query.orderBy(personDay.date.desc());
+		return query.list(personDay);
+	}
 	
 	/**
 	 * 
@@ -85,5 +106,21 @@ public class PersonDayDao {
 		final JPQLQuery query = ModelQuery.queryFactory().from(personDay)
 				.where(personDay.person.eq(person).and(personDay.date.eq(date)));
 		return Optional.fromNullable(query.singleResult(personDay));
+	}
+	
+	
+	/**
+	 * 
+	 * @param person
+	 * @param begin
+	 * @param end
+	 * @param isAvailable
+	 * @return la lista dei giorni compresi tra begin e end in cui la persona person può usare i ticket 
+	 */
+	public static List<PersonDay> getPersonDayForTicket(Person person, LocalDate begin, LocalDate end, boolean isAvailable){
+		QPersonDay personDay = QPersonDay.personDay;
+		final JPQLQuery query = ModelQuery.queryFactory().from(personDay)
+				.where(personDay.person.eq(person).and(personDay.date.between(begin, end)).and(personDay.isTicketAvailable.eq(isAvailable)));
+		return query.orderBy(personDay.date.asc()).list(personDay);
 	}
 }

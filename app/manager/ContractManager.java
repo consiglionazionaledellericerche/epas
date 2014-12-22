@@ -12,6 +12,7 @@ import models.PersonDay;
 
 import org.joda.time.LocalDate;
 
+import dao.PersonDayDao;
 import play.Logger;
 
 /**
@@ -83,13 +84,15 @@ public class ContractManager {
 		
 		while( !actualMonth.isAfter(endMonth) )
 		{
-			List<PersonDay> pdList = 
-					PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
-							contract.person, actualMonth, actualMonth.dayOfMonth().withMaximumValue()).fetch();
+			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(contract.person, actualMonth, actualMonth.dayOfMonth().withMaximumValue(), true);
+//			List<PersonDay> pdList = 
+//					PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
+//							contract.person, actualMonth, actualMonth.dayOfMonth().withMaximumValue()).fetch();
 
 			for(PersonDay pd : pdList){
 				
-				PersonDay pd1 = PersonDay.findById(pd.id);
+				PersonDay pd1 = PersonDayDao.getPersonDayById(pd.id);
+				//PersonDay pd1 = PersonDay.findById(pd.id);
 				Logger.debug("RecomputePopulate %s", pd1.date);				
 				pd1.populatePersonDay();
 			}
