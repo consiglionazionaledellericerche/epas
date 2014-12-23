@@ -185,15 +185,15 @@ public class CompetenceUtility {
 			
 			Logger.debug("Cerca Competence FS per person=%s id=%d, year=%d, month=%d competenceCodeId=%d", person.surname, person.id, year, month, competenceCodeFS.id);
 			// save the FS reperibility competences in the DB
-			Competence FsCompetence = CompetenceDao.getCompetence(person, year, month, competenceCodeFS);
+			Optional<Competence> FsCompetence = CompetenceDao.getCompetence(person, year, month, competenceCodeFS);
 //			Competence FsCompetence = Competence.find("SELECT c FROM Competence c WHERE c.person = ? AND c.year = ? AND c.month = ? AND c.competenceCode = ?", 
 //					person, year, month, competenceCodeFS).first();
 			
-			if (FsCompetence != null) {
+			if (FsCompetence.isPresent()) {
 				Logger.debug("Trovato competenza FS =%s", FsCompetence);
 				// update the requested hours
-				FsCompetence.setValueApproved(NumOfFsDays, fsReason);
-				FsCompetence.save();
+				FsCompetence.get().setValueApproved(NumOfFsDays, fsReason);
+				FsCompetence.get().save();
 				
 				Logger.debug("Aggiornata competenza %s", FsCompetence);
 				numSavedCompetences++;
@@ -209,15 +209,15 @@ public class CompetenceUtility {
 			
 			Logger.debug("Cerca Competence FR per person=%s id=%d, year=%d, month=%d competenceCodeId=%d", person.surname, person.id, year, month, competenceCodeFR.id);
 			// save the FR reperibility competences in the DB
-			Competence FrCompetence = CompetenceDao.getCompetence(person, year, month, competenceCodeFR);
+			Optional<Competence> FrCompetence = CompetenceDao.getCompetence(person, year, month, competenceCodeFR);
 //			Competence FrCompetence = Competence.find("SELECT c FROM Competence c WHERE c.person = ? AND c.year = ? AND c.month = ? AND c.competenceCode = ?", 
 //					person, year, month, competenceCodeFR).first();
 			
-			if (FrCompetence != null) {
+			if (FrCompetence.isPresent()) {
 				// update the requested hours
 				Logger.debug("Trovato competenza FR =%s", FsCompetence);
-				FrCompetence.setValueApproved(NumOfFrDays, frReason);
-				FrCompetence.save();
+				FrCompetence.get().setValueApproved(NumOfFrDays, frReason);
+				FrCompetence.get().save();
 				
 				Logger.debug("Aggiornata competenza %s", FrCompetence);
 				numSavedCompetences++;
@@ -355,7 +355,7 @@ public class CompetenceUtility {
 			}
 		
 			// save the FS reperibility competences in the DB
-			Competence shiftCompetence = CompetenceDao.getCompetence(person, year, month, competenceCode);
+			Optional<Competence> shiftCompetence = CompetenceDao.getCompetence(person, year, month, competenceCode);
 //			Competence shiftCompetence = Competence.find("SELECT c FROM Competence c WHERE c.person = ? AND c.year = ? AND c.month = ? AND c.competenceCode = ?", 
 //					person, year, month, competenceCode).first();
 			
@@ -368,7 +368,7 @@ public class CompetenceUtility {
 			
 			//Competence appCompetence = new Competence(person, competenceCode, year, month);
 			
-			if (shiftCompetence != null) {
+			if (shiftCompetence.isPresent()) {
 				// update the requested hours
 				//int calcApproved1 = (shiftCompetence.valueApproved != 0) ? shiftCompetence.valueApproved : calcApproved;
 				
@@ -381,21 +381,21 @@ public class CompetenceUtility {
 				
 				Logger.debug("certData=%s", certData);
 				
-				int calcApproved1 = (certData != null && certData.isOk && (certData.competencesSent != null)) ? shiftCompetence.valueApproved : calcApproved;
+				int calcApproved1 = (certData != null && certData.isOk && (certData.competencesSent != null)) ? shiftCompetence.get().valueApproved : calcApproved;
 				//Logger.debug("competenza è inviata = %s vecchia valueApproved=%d, calcolata=%d salvata=%d", certData.isOk, shiftCompetence.valueApproved, calcApproved, calcApproved1);
 				
-				shiftCompetence.setValueApproved(calcApproved1);
-				shiftCompetence.setValueRequested(numOfShiftHours);
-				shiftCompetence.save();
+				shiftCompetence.get().setValueApproved(calcApproved1);
+				shiftCompetence.get().setValueRequested(numOfShiftHours);
+				shiftCompetence.get().save();
 				
-				Logger.debug("Aggiornata competenza di %s %s: valueApproved=%s, valueRequested=%s, calcApproved=%s", shiftCompetence.person.surname, shiftCompetence.person.name, shiftCompetence.valueApproved, shiftCompetence.valueRequested, calcApproved);
+				Logger.debug("Aggiornata competenza di %s %s: valueApproved=%s, valueRequested=%s, calcApproved=%s", shiftCompetence.get().person.surname, shiftCompetence.get().person.name, shiftCompetence.get().valueApproved, shiftCompetence.get().valueRequested, calcApproved);
 				
 				//---------------				
 				//appCompetence.setValueApproved(calcApproved1);
 				//appCompetence.setValueRequested(numOfShiftHours);
 				//savedCompetences.add(appCompetence);
 				
-				savedCompetences.add(shiftCompetence);
+				savedCompetences.add(shiftCompetence.get());
 			} else {
 				// insert a new competence with the requested hours an reason
 				Competence competence = new Competence(person, competenceCode, year, month);

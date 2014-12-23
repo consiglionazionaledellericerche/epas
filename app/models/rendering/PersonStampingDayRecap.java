@@ -19,6 +19,8 @@ import models.WorkingTimeTypeDay;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
+import dao.StampingDao;
+
 /**
  * Oggetto che modella il giorno di una persona nelle viste personStamping e stampings.
  * @author alessandro
@@ -169,7 +171,8 @@ public class PersonStampingDayRecap {
 		//----------------------------------------------- uscita adesso f ---------------------------------------------------------------
 		if(this.today && !this.holiday && !pd.isAllDayAbsences()) 
 		{
-			StampModificationType smt = StampModificationType.findById(StampModificationTypeValue.ACTUAL_TIME_AT_WORK.getId());
+			StampModificationType smt = StampingDao.getStampModificationTypeById(StampModificationTypeValue.ACTUAL_TIME_AT_WORK.getId());
+			//StampModificationType smt = StampModificationType.findById(StampModificationTypeValue.ACTUAL_TIME_AT_WORK.getId());
 			this.exitingNowCode = smt.code;
 			addStampModificationTypeToList(smt);
 		}
@@ -433,7 +436,8 @@ public class PersonStampingDayRecap {
 			//----------------------------------------- timbratura modificata dall'amministatore ---------------------------------
 			if(stamping.markedByAdmin) 
 			{
-				StampModificationType smt = StampModificationType.findById(StampModificationTypeValue.MARKED_BY_ADMIN.getId());
+				StampModificationType smt = StampingDao.getStampModificationTypeById(StampModificationTypeValue.MARKED_BY_ADMIN.getId());
+				//StampModificationType smt = StampModificationType.findById(StampModificationTypeValue.MARKED_BY_ADMIN.getId());
 				this.markedByAdminCode = smt.code;
 				addStampModificationTypeToList(smt);
 			}

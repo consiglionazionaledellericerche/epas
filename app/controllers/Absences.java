@@ -634,13 +634,16 @@ public class Absences extends Controller{
 
 			//verifica se ha esaurito il bonus per l'anno
 			if(person.qualification.qualification > 0 && person.qualification.qualification < 4){
-				Query query = JPA.em().createQuery("SELECT abs FROM Absence abs WHERE abs.personDay.person = :person "+ 
-						"AND abs.personDay.date between :dateStart AND :dateTo AND abs.absenceType.code = :code");
-				query.setParameter("person", person).
-				setParameter("dateStart", new LocalDate(actualDate.getYear(), 1,1)).
-				setParameter("dateTo",actualDate).
-				setParameter("code", "91");
-				List<Object> resultList = query.getResultList();
+				List<Absence> resultList = AbsenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person), Optional.fromNullable("91"), 
+						new LocalDate(actualDate.getYear(), 1,1), actualDate, Optional.<JustifiedTimeAtWork>absent(), false, false);
+				
+//				Query query = JPA.em().createQuery("SELECT abs FROM Absence abs WHERE abs.personDay.person = :person "+ 
+//						"AND abs.personDay.date between :dateStart AND :dateTo AND abs.absenceType.code = :code");
+//				query.setParameter("person", person).
+//				setParameter("dateStart", new LocalDate(actualDate.getYear(), 1,1)).
+//				setParameter("dateTo",actualDate).
+//				setParameter("code", "91");
+//				List<Object> resultList = query.getResultList();
 				Logger.debug("Il numero di assenze con codice %s fino a oggi è %d", absenceType.code, resultList.size());
 				if(resultList.size() >= maxRecoveryDaysOneThree){
 					actualDate = actualDate.plusDays(1);
