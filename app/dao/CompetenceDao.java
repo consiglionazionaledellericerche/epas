@@ -101,13 +101,13 @@ public class CompetenceDao {
 	 * @param code
 	 * @return la competenza relativa ai parametri passati alla funzione
 	 */
-	public static Competence getCompetence(Person person, Integer year, Integer month, CompetenceCode code){
+	public static Optional<Competence> getCompetence(Person person, Integer year, Integer month, CompetenceCode code){
 		QCompetence competence = QCompetence.competence;
 		final JPQLQuery query = ModelQuery.queryFactory().from(competence)
 				.where(competence.person.eq(person).
 						and(competence.year.eq(year).and(competence.month.eq(month).and(competence.competenceCode.eq(code)))));
 		
-		return query.singleResult(competence);
+		return Optional.fromNullable(query.singleResult(competence));
 		
 	}
 	

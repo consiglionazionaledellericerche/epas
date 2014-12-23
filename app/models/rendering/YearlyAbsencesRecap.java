@@ -9,11 +9,15 @@ import java.util.Map;
 import models.Absence;
 import models.AbsenceType;
 import models.Person;
+import models.enumerate.JustifiedTimeAtWork;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
+
+import dao.AbsenceDao;
 
 /**
  * 
@@ -49,15 +53,18 @@ public class YearlyAbsencesRecap {
 	 */
 	public static List<Absence> getYearlyAbsence(Person person, int year)
 	{
-		List<Absence> yearlyAbsence = 
-				Absence.find( "SELECT abs "
-							+ "FROM Absence abs "
-							+ "WHERE abs.personDay.person = ? AND abs.personDay.date BETWEEN ? AND ? "
-							+ "ORDER BY abs.personDay.date", 
-								person, 
-								new LocalDate(year,1,1), 
-								new LocalDate(year,12,31)
-							).fetch();
+		
+		List<Absence> yearlyAbsence = AbsenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person), Optional.<String>absent(), 
+				new LocalDate(year,1,1), new LocalDate(year,12,31), Optional.<JustifiedTimeAtWork>absent(), false, true);
+//		List<Absence> yearlyAbsence = 
+//				Absence.find( "SELECT abs "
+//							+ "FROM Absence abs "
+//							+ "WHERE abs.personDay.person = ? AND abs.personDay.date BETWEEN ? AND ? "
+//							+ "ORDER BY abs.personDay.date", 
+//								person, 
+//								new LocalDate(year,1,1), 
+//								new LocalDate(year,12,31)
+//							).fetch();
 		
 		return yearlyAbsence;
 	}

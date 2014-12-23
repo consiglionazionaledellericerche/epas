@@ -296,38 +296,38 @@ public class PersonResidualMonthRecap {
 		if(monthRecap.contract.isLastInMonth(monthRecap.mese, monthRecap.anno))	//gli straordinari li assegno solo all'ultimo contratto attivo del mese
 		{
 			//straordinari s1
-			Competence competenceS1 = CompetenceDao.getCompetence(monthRecap.person, monthRecap.anno, monthRecap.mese, s1);
+			Optional<Competence> competenceS1 = CompetenceDao.getCompetence(monthRecap.person, monthRecap.anno, monthRecap.mese, s1);
 //			List<Competence> competenceList = Competence.find("Select comp from Competence comp, CompetenceCode compCode where comp.competenceCode = compCode and comp.person = ?"
 //					+ "and comp.year = ? and comp.month = ? and compCode.code = ?", monthRecap.person, monthRecap.anno, monthRecap.mese, "S1").fetch();
 //			for(Competence comp : competenceList)
 //			{
-			if(competenceS1 != null)
-				monthRecap.straordinariMinutiS1Print = monthRecap.straordinariMinutiS1Print + (competenceS1.valueApproved * 60);
+			if(competenceS1.isPresent())
+				monthRecap.straordinariMinutiS1Print = monthRecap.straordinariMinutiS1Print + (competenceS1.get().valueApproved * 60);
 			else
 				monthRecap.straordinariMinutiS1Print = 0;
 //			}
 
 			//straordinari s2
-			Competence competenceS2 = CompetenceDao.getCompetence(monthRecap.person, monthRecap.anno, monthRecap.mese, s2);
+			Optional<Competence> competenceS2 = CompetenceDao.getCompetence(monthRecap.person, monthRecap.anno, monthRecap.mese, s2);
 			
 //			competenceList = Competence.find("Select comp from Competence comp, CompetenceCode compCode where comp.competenceCode = compCode and comp.person = ?"
 //					+ "and comp.year = ? and comp.month = ? and compCode.code = ?", monthRecap.person, monthRecap.anno, monthRecap.mese, "S2").fetch();
 //			for(Competence comp : competenceList)
 //			{
-			if(competenceS2 != null)
-				monthRecap.straordinariMinutiS2Print = monthRecap.straordinariMinutiS2Print + (competenceS2.valueApproved * 60);
+			if(competenceS2.isPresent())
+				monthRecap.straordinariMinutiS2Print = monthRecap.straordinariMinutiS2Print + (competenceS2.get().valueApproved * 60);
 			else
 				monthRecap.straordinariMinutiS2Print = 0;
 //			}
 
 			//straordinari s3
-			Competence competenceS3 = CompetenceDao.getCompetence(monthRecap.person, monthRecap.anno, monthRecap.mese, s3);
+			Optional<Competence> competenceS3 = CompetenceDao.getCompetence(monthRecap.person, monthRecap.anno, monthRecap.mese, s3);
 //			competenceList = Competence.find("Select comp from Competence comp, CompetenceCode compCode where comp.competenceCode = compCode and comp.person = ?"
 //					+ "and comp.year = ? and comp.month = ? and compCode.code = ?", monthRecap.person, monthRecap.anno, monthRecap.mese, "S3").fetch();
 //			for(Competence comp : competenceList)
 //			{
-			if(competenceS3 != null)
-				monthRecap.straordinariMinutiS3Print = monthRecap.straordinariMinutiS3Print + (competenceS3.valueApproved * 60);
+			if(competenceS3.isPresent())
+				monthRecap.straordinariMinutiS3Print = monthRecap.straordinariMinutiS3Print + (competenceS3.get().valueApproved * 60);
 			else
 				monthRecap.straordinariMinutiS3Print = 0;
 //			}

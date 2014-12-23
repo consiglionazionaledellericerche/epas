@@ -134,14 +134,15 @@ public class Competences extends Controller{
 
 		
 		for(Person p : activePersons){
+			Competence competence = null;
 			for(CompetenceCode c : p.competenceCode){
-				Competence comp = CompetenceDao.getCompetence(p, year, month, c);
+				Optional<Competence> comp = CompetenceDao.getCompetence(p, year, month, c);
 //				Competence comp = Competence.find("Select comp from Competence comp where comp.person = ? and comp.month = ? and comp.year = ?" +
 //						"and comp.competenceCode = ?", p, month, year, c).first();
-				if(comp == null){
-					comp = new Competence(p, c, year, month);
-					comp.valueApproved = 0;
-					comp.save();
+				if(!comp.isPresent()){
+					competence = new Competence(p, c, year, month);
+					competence.valueApproved = 0;
+					competence.save();
 				}
 					
 			}
@@ -435,12 +436,12 @@ public class Competences extends Controller{
 			}
 	//		CompetenceCode code = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", "S1").first();
 			
-			Competence comp = CompetenceDao.getCompetence(p, year, month, code);
+			Optional<Competence> comp = CompetenceDao.getCompetence(p, year, month, code);
 //			Competence comp = Competence.find("Select comp from Competence comp where comp.person = ? " +
 //					"and comp.year = ? and comp.month = ? and comp.competenceCode.code = ?", 
 //					p, year, month, code.code).first();
-			if(comp != null)
-				overtime = comp.valueApproved;
+			if(comp.isPresent())
+				overtime = comp.get().valueApproved;
 			else
 				overtime = 0;
 			builder.put(p, "Giorni di Presenza", daysAtWork);
