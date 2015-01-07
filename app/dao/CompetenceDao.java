@@ -87,10 +87,8 @@ public class CompetenceDao {
 			condition.and(competence.person.eq(person.get()));
 		final JPQLQuery query = ModelQuery.queryFactory().from(competence)
 				.where(condition.and(competence.year.eq(year).and(competence.competenceCode.in(codeList))));
-		if(query.list(competence.valueApproved.sum()).get(0) != null)
-			return query.list(competence.valueApproved.sum()).get(0);
-		else 
-			return 0;
+		return query.singleResult(competence.valueApproved.sum());
+		
 	}
 	
 	/**

@@ -12,6 +12,9 @@ import models.base.BaseModel;
 import org.hibernate.envers.Audited;
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
+
+import dao.ConfGeneralDao;
 import play.cache.Cache;
 
 
@@ -86,9 +89,11 @@ public class ConfGeneral extends BaseModel{
 	public static String getFieldValue(String field, Office office){
 		String value = (String)Cache.get(field+office.name);
 		if(value == null || value.equals("")){
-			ConfGeneral conf = ConfGeneral.find("Select conf from ConfGeneral conf where conf.field = ? and conf.office = ?", 
-					field, office).first();
-			value = conf.fieldValue;
+			Optional<ConfGeneral> conf = ConfGeneralDao.getConfGeneralByField(field, office);
+//			ConfGeneral conf = ConfGeneral.find("Select conf from ConfGeneral conf where conf.field = ? and conf.office = ?", 
+//					field, office).first();
+			if(conf.isPresent())
+				value = conf.get().fieldValue;
 			Cache.set(field+office.name, value);
 		}
 		return value;
@@ -96,11 +101,13 @@ public class ConfGeneral extends BaseModel{
 
 	public static ConfGeneral getConfGeneralByField(String field, Office office){
 		
-		ConfGeneral conf = ConfGeneral.find("Select conf from ConfGeneral conf where conf.field = ? and conf.office = ?", 
-				field, office).first();
+		Optional<ConfGeneral> conf = ConfGeneralDao.getConfGeneralByField(field, office);
+//		ConfGeneral conf = ConfGeneral.find("Select conf from ConfGeneral conf where conf.field = ? and conf.office = ?", 
+//				field, office).first();
 				
-		
-		return conf;
+		if(conf.isPresent())
+			return conf.get();
+		return null;
 	}
 	
 	/**

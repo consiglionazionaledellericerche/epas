@@ -85,4 +85,15 @@ public class OfficeDao {
 				.where(office.code.eq(code));
 		return query.list(office);
 	}
+	
+	/**
+	 * 
+	 * @return la lista delle aree presenti in anagrafica (per convenzione sono quelle col campo office = null)
+	 */
+	public static List<Office> getAreas(){
+		QOffice office = QOffice.office1;
+		final JPQLQuery query = ModelQuery.queryFactory().from(office)
+				.where(office.office.isNull());
+		return query.list(office);
+	}
 }

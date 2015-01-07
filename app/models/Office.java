@@ -25,7 +25,11 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import controllers.Security;
+import dao.OfficeDao;
 import dao.PersonDao;
+import dao.RoleDao;
+import dao.UserDao;
+import dao.UsersRolesOfficesDao;
 
  
  
@@ -170,7 +174,8 @@ public class Office extends BaseModel{
      */
 	public static List<Office> getAllAreas() {
 		
-		List<Office> areaList = Office.find("select o from Office o where o.office is null").fetch();
+		List<Office> areaList = OfficeDao.getAreas();
+		//List<Office> areaList = Office.find("select o from Office o where o.office is null").fetch();
 		return areaList;
 		
 	}
@@ -285,8 +290,10 @@ public class Office extends BaseModel{
 	 */
 	public boolean isPrintable() {
 		
-		Role roleAdmin = Role.find("byName", Role.PERSONNEL_ADMIN).first();
-		Role roleAdminMini = Role.find("byName", Role.PERSONNEL_ADMIN_MINI).first();
+		Role roleAdmin = RoleDao.getRoleByName(Role.PERSONNEL_ADMIN);
+		//Role roleAdmin = Role.find("byName", Role.PERSONNEL_ADMIN).first();
+		Role roleAdminMini = RoleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI);
+		//Role roleAdminMini = Role.find("byName", Role.PERSONNEL_ADMIN_MINI).first();
 		
 		return isRightPermittedOnOfficeTree(roleAdmin) || isRightPermittedOnOfficeTree(roleAdminMini);
 
@@ -301,7 +308,8 @@ public class Office extends BaseModel{
 		if(isEditable != null)
 			return this.isEditable;
 		
-		Role roleAdmin = Role.find("byName", Role.PERSONNEL_ADMIN).first();
+		Role roleAdmin = RoleDao.getRoleByName(Role.PERSONNEL_ADMIN);
+		//Role roleAdmin = Role.find("byName", Role.PERSONNEL_ADMIN).first();
 		this.isEditable = isRightPermittedOnOfficeTree(roleAdmin);
 		
 		return this.isEditable;
@@ -310,7 +318,8 @@ public class Office extends BaseModel{
 	
 	public List<Person> getPersonnelAdmin() {
 		
-		Role roleAdmin = Role.find("byName", Role.PERSONNEL_ADMIN).first();
+		Role roleAdmin = RoleDao.getRoleByName(Role.PERSONNEL_ADMIN);
+		//Role roleAdmin = Role.find("byName", Role.PERSONNEL_ADMIN).first();
 		List<Person> personList = Lists.newArrayList();
 		for(UsersRolesOffices uro : this.usersRolesOffices) {
 			
@@ -323,7 +332,8 @@ public class Office extends BaseModel{
 	
 	public List<Person> getPersonnelAdminMini() {
 		
-		Role roleAdminMini = Role.find("byName", Role.PERSONNEL_ADMIN_MINI).first();
+		Role roleAdminMini = RoleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI);
+		//Role roleAdminMini = Role.find("byName", Role.PERSONNEL_ADMIN_MINI).first();
 		List<Person> personList = Lists.newArrayList();
 		for(UsersRolesOffices uro : this.usersRolesOffices) {
 			
@@ -365,9 +375,10 @@ public class Office extends BaseModel{
 				"Select uro from UsersRolesOffices uro, Role role, Permission permission where ? in uro.role.permissions and uro.office = ? and uro.user = ?",
 				permission, office, user).first();
 		*/
-		UsersRolesOffices uro = UsersRolesOffices.find(
-				"Select uro from UsersRolesOffices uro where uro.office = ? and uro.user = ? and uro.role = ?",
-				office, user, role).first();
+		Optional<UsersRolesOffices> uro = UsersRolesOfficesDao.getUsersRolesOffices(user, role, office);
+//		UsersRolesOffices uro = UsersRolesOffices.find(
+//				"Select uro from UsersRolesOffices uro where uro.office = ? and uro.user = ? and uro.role = ?",
+//				office, user, role).first();
 		
 		/*
 		for(UsersRolesOffices uro : uroList){
@@ -376,11 +387,9 @@ public class Office extends BaseModel{
 					return true;
 			}
 		}
-		return false;
-		*/
-		
-		
-		if(uro == null)
+		return false;*/
+				
+		if(!uro.isPresent())
 			return false;
 		else
 			return true;
@@ -394,10 +403,13 @@ public class Office extends BaseModel{
 	public void setPermissionAfterCreation() {
 		
 		User userLogged = Security.getUser().get();
-		User admin = User.find("byUsername", "admin").first();
+		User admin = UserDao.getUserByUsernameAndPassword("admin", Optional.<String>absent());
+		//User admin = User.find("byUsername", "admin").first();
 		
-		Role roleAdmin = Role.find("byName", Role.PERSONNEL_ADMIN).first();
-		Role roleAdminMini = Role.find("byName", Role.PERSONNEL_ADMIN_MINI).first();
+		Role roleAdmin = RoleDao.getRoleByName(Role.PERSONNEL_ADMIN);
+		//Role roleAdmin = Role.find("byName", Role.PERSONNEL_ADMIN).first();
+		Role roleAdminMini = RoleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI);
+		//Role roleAdminMini = Role.find("byName", Role.PERSONNEL_ADMIN_MINI).first();
 		
 		Office.setUro(admin, this, roleAdmin);
 		Office.setUro(userLogged, this, roleAdmin);
@@ -477,10 +489,14 @@ public class Office extends BaseModel{
 	 */
 	public static UsersRolesOffices getUro(User user, Office office) {
 		
-		UsersRolesOffices uro = UsersRolesOffices.find("select uro from UsersRolesOffices uro "
-				+ "where uro.user = ? and uro.office = ? ", user, office).first();
+		Optional<UsersRolesOffices> uro = UsersRolesOfficesDao.getUsersRolesOfficesByUserAndOffice(user, office);
+		if(uro.isPresent())
+//		UsersRolesOffices uro = UsersRolesOffices.find("select uro from UsersRolesOffices uro "
+//				+ "where uro.user = ? and uro.office = ? ", user, office).first();
 		
-		return uro;
+			return uro.get();
+		else
+			return null;
 	}
 	
 	/**
@@ -491,18 +507,21 @@ public class Office extends BaseModel{
 	 */
 	public static void setUro(User user, Office office, Role role){
 		
-		UsersRolesOffices uro = UsersRolesOffices.find("select uro from UsersRolesOffices uro "
-				+ "where uro.user = ? and uro.office = ? ", user, office).first();
+		UsersRolesOffices newUro = null;
+		Optional<UsersRolesOffices> uro = UsersRolesOfficesDao.getUsersRolesOfficesByUserAndOffice(user, office);
+//		UsersRolesOffices uro = UsersRolesOffices.find("select uro from UsersRolesOffices uro "
+//				+ "where uro.user = ? and uro.office = ? ", user, office).first();
 		
-		if(uro == null) {
+		if(!uro.isPresent()) {
 			
-			uro = new UsersRolesOffices();
-			uro.user = user;
-			uro.office = office;
+			newUro = new UsersRolesOffices();
+			newUro.user = user;
+			newUro.office = office;
 		}
 		
-		uro.role = role;
-		uro.save();
+		newUro = uro.get();
+		newUro.role = role;
+		newUro.save();
 		
 	}
 	
