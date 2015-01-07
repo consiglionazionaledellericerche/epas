@@ -89,7 +89,7 @@
 		</td>
 		<td>
 			#{if pm != null && pm.month == mese }
-				#{if mese == today.getMonthOfYear() || mese == today.getMonthOfYear()-1}
+				#{if mese == today.getMonthOfYear() || mese == today.minusMonths(1).getMonthOfYear()}
 					#{if pm.hoursApproved == true}
 						SI<br>
 					#{/if}
