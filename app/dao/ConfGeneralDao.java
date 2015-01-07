@@ -2,9 +2,11 @@ package dao;
 
 import helpers.ModelQuery;
 
+import com.google.common.base.Optional;
 import com.mysema.query.jpa.JPQLQuery;
 
 import models.ConfGeneral;
+import models.Office;
 import models.query.QConfGeneral;
 
 /**
@@ -30,13 +32,14 @@ public class ConfGeneralDao {
 	/**
 	 * 
 	 * @param field
-	 * @return il confGeneral relativo al campo field passato come parametro
+	 * @param office
+	 * @return il confGeneral relativo al campo field e all'ufficio office passati come parametro
 	 */
-	public static ConfGeneral getConfGeneralByField(String field){
+	public static Optional<ConfGeneral> getConfGeneralByField(String field, Office office){
 		QConfGeneral confGeneral = QConfGeneral.confGeneral;
 		final JPQLQuery query = ModelQuery.queryFactory().from(confGeneral)
-				.where(confGeneral.field.eq(field));
-		return query.singleResult(confGeneral);
+				.where(confGeneral.field.eq(field).and(confGeneral.office.eq(office)));
+		return Optional.fromNullable(query.singleResult(confGeneral));
 	}
 
 }

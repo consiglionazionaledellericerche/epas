@@ -360,6 +360,7 @@ public class Configurations extends Controller{
 		
 		int year = LocalDate.now().getYear()+1;
 		List<ConfYear> confList = ConfYearDao.getConfByYear(Optional.fromNullable(office), year);
+		Optional<ConfYear> conf = null;
 		ConfYear dayExpiryVacationPastYear = new ConfYear();
 		ConfYear monthExpiryVacationPastYear = new ConfYear();
 		ConfYear monthExpireRecoveryDaysOneThree = new ConfYear();
@@ -370,13 +371,27 @@ public class Configurations extends Controller{
 		String message = "";
 		if(confList.size() > 0){
 			message="Attenzione! attualmente il database contiene già una configurazione per l'anno richiesto. Continuando si sovrascriverà tale configurazione.";
-			dayExpiryVacationPastYear = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, ConfigurationFields.DayExpiryVacationPastYear.description);
-			monthExpiryVacationPastYear = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, ConfigurationFields.MonthExpiryVacationPastYear.description);
-			monthExpireRecoveryDaysOneThree = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, ConfigurationFields.MonthExpireRecoveryDays13.description);
-			monthExpireRecoveryDaysFourNine = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, ConfigurationFields.MonthExpireRecoveryDays49.description);
-			maxRecoveryDaysOneThree = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, ConfigurationFields.MaxRecoveryDays13.description);
-			maxRecoveryDaysFourNine = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, ConfigurationFields.MaxRecoveryDays49.description);
-			hourMaxToCalculateWorkTime = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, ConfigurationFields.HourMaxToCalculateWorkTime.description);
+			conf = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, ConfigurationFields.DayExpiryVacationPastYear.description);
+			if(conf.isPresent())
+				dayExpiryVacationPastYear = conf.get();
+			conf = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, ConfigurationFields.MonthExpiryVacationPastYear.description);
+			if(conf.isPresent())
+					monthExpiryVacationPastYear = conf.get();
+			conf = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, ConfigurationFields.MonthExpireRecoveryDays13.description);
+			if(conf.isPresent())
+				monthExpireRecoveryDaysOneThree = conf.get(); 
+			conf = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, ConfigurationFields.MonthExpireRecoveryDays49.description);
+			if(conf.isPresent())
+				monthExpireRecoveryDaysFourNine = conf.get();
+			conf = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, ConfigurationFields.MaxRecoveryDays13.description);
+			if(conf.isPresent())
+				maxRecoveryDaysOneThree = conf.get(); 
+			conf = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, ConfigurationFields.MaxRecoveryDays49.description);
+			if(conf.isPresent())
+				maxRecoveryDaysFourNine = conf.get(); 
+			conf = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, ConfigurationFields.HourMaxToCalculateWorkTime.description);
+			if(conf.isPresent())
+				hourMaxToCalculateWorkTime = conf.get(); 
 		}
 		
 		

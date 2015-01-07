@@ -2,6 +2,8 @@ package dao;
 
 import java.util.List;
 
+import org.joda.time.LocalDate;
+
 import helpers.ModelQuery;
 
 import com.google.common.base.Optional;
@@ -37,6 +39,22 @@ public class ContractDao {
 		final JPQLQuery query = ModelQuery.queryFactory().from(contract)
 				.where(contract.id.eq(id));
 		return query.singleResult(contract);
+	}
+	
+	/**
+	 * 
+	 * @param begin
+	 * @param end
+	 * @return la lista di contratti che sono attivi nel periodo compreso tra begin e end
+	 */
+	public static List<Contract> getActiveContractsInPeriod(LocalDate begin, LocalDate end){
+		QContract contract = QContract.contract;
+		final JPQLQuery query = ModelQuery.queryFactory().from(contract)
+				.where(contract.endContract.isNull().andAnyOf(
+						contract.expireContract.isNull().and(contract.beginContract.loe(end)), 
+						contract.expireContract.isNotNull().and(contract.beginContract.loe(end).and(contract.expireContract.goe(begin))))
+						.or(contract.endContract.isNotNull().and(contract.beginContract.loe(end).and(contract.endContract.goe(begin)))));
+		return query.list(contract);
 	}
 	
 	/**

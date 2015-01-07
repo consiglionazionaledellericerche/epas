@@ -11,6 +11,9 @@ import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
 
+import com.google.common.base.Optional;
+
+import dao.ConfYearDao;
 import play.cache.Cache;
 
 
@@ -75,21 +78,28 @@ public class ConfYear extends BaseModel{
 	public static String getFieldValue(String field, Integer year, Office office) {
 		String value = (String)Cache.get(field+year);
 		if(value == null){
-			ConfYear conf = ConfYear.find("Select cy from ConfYear cy where cy.year = ? and cy.field = ? and cy.office = ?", 
-					year, field, office).first();
-			value = conf.fieldValue;
-			Cache.set(field+year, value);
+			Optional<ConfYear> conf = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, field);
+//			ConfYear conf = ConfYear.find("Select cy from ConfYear cy where cy.year = ? and cy.field = ? and cy.office = ?", 
+//					year, field, office).first();
+			if(conf.isPresent()){
+				value = conf.get().fieldValue;
+				Cache.set(field+year, value);
+			}
+			
+			
 		}
 		return value;
 	}
 	
 	public static ConfYear getConfGeneralByFieldAndYear(String field, Integer year, Office office){
 		
-		ConfYear conf = ConfYear.find("Select conf from ConfYear conf where conf.field = ? and conf.office = ? and conf.year = ?", 
-				field, office, year).first();
-				
-		
-		return conf;
+		Optional<ConfYear> conf = ConfYearDao.getConfYearField(Optional.fromNullable(office), year, field);
+		if(conf.isPresent())
+//		ConfYear conf = ConfYear.find("Select conf from ConfYear conf where conf.field = ? and conf.office = ? and conf.year = ?", 
+//				field, office, year).first();
+			return conf.get();
+		else
+			return null;
 	}
 	
 	/**

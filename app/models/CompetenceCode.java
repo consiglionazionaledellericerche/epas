@@ -8,6 +8,11 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+
+import dao.CompetenceDao;
+import dao.OfficeDao;
 import models.base.BaseModel;
 import play.data.validation.Required;
 
@@ -56,12 +61,15 @@ public class CompetenceCode extends BaseModel {
 	 */
 	public int totalFromCompetenceCode(int month, int year, Long officeId){
 		
-		Office office = Office.findById(officeId);
+		Office office = OfficeDao.getOfficeById(officeId);
+		//Office office = Office.findById(officeId);
 		
 		int totale = 0;
-		
-		List<Competence> compList = Competence.find("Select comp from Competence comp where comp.competenceCode = ? " +
-				"and comp.month = ? and comp.year = ? and comp.person.office = ?", this, month, year, office).fetch();
+		List<String> competenceCodeList = Lists.newArrayList();
+		competenceCodeList.add(this.code);
+		List<Competence> compList = CompetenceDao.getCompetences(Optional.<Person>absent(), year, month, competenceCodeList, office, false);
+//		List<Competence> compList = Competence.find("Select comp from Competence comp where comp.competenceCode = ? " +
+//				"and comp.month = ? and comp.year = ? and comp.person.office = ?", this, month, year, office).fetch();
 		for(Competence comp : compList){
 			totale = totale+comp.valueApproved;
 		}

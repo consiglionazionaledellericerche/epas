@@ -8,6 +8,7 @@ import com.google.common.base.Optional;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 
+import models.AbsenceType;
 import models.Qualification;
 import models.query.QQualification;
 
@@ -49,5 +50,17 @@ public class QualificationDao {
 		}
 		return null;
 		
+	}
+	
+	/**
+	 * 
+	 * @param abt
+	 * @return la lista di qualifiche che possono usufruire del codice di assenza abt
+	 */
+	public static List<Qualification> getQualificationByAbsenceTypeLinked(AbsenceType abt){
+		QQualification qual = QQualification.qualification1;
+		final JPQLQuery query = ModelQuery.queryFactory().from(qual)
+				.where(qual.absenceTypes.contains(abt));
+		return query.list(qual);
 	}
 }

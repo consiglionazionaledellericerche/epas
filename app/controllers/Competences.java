@@ -856,7 +856,15 @@ public class Competences extends Controller{
 	public static void getOvertimeInYear(int year) throws IOException{
 		
 		rules.checkIfPermitted("");
-		List<Person> personList = Person.getActivePersonsinYear(year, Security.getOfficeAllowed(), true);
+		Office office = Security.getUser().get().person.office;
+		SimpleResults<Person> simpleResults = PersonDao.listForCompetence(CompetenceCodeDao.getCompetenceCodeByCode("S1"), 
+				Optional.fromNullable(""), 
+				Sets.newHashSet(office), 
+				false, 
+				new LocalDate(year, 1, 1), 
+				new LocalDate(year, 12, 1).dayOfMonth().withMaximumValue());
+		
+		List<Person> personList = simpleResults.list();
 		FileInputStream inputStream = null;
 		File tempFile = File.createTempFile("straordinari"+year,".csv" );
 		inputStream = new FileInputStream( tempFile );

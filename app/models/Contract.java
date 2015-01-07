@@ -30,7 +30,10 @@ import play.data.validation.Required;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import dao.ContractDao;
 import dao.MealTicketDao;
+import dao.VacationCodeDao;
+import dao.VacationPeriodDao;
 
 
 /**
@@ -223,11 +226,12 @@ public class Contract extends BaseModel {
 	public List<VacationPeriod> getContractVacationPeriods()
 	{
 		//vacation period piu' recente per la persona
-		List<VacationPeriod> vpList = VacationPeriod.find(  "SELECT vp "
-				+ "FROM VacationPeriod vp "
-				+ "WHERE vp.contract = ? "
-				+ "ORDER BY vp.beginFrom",
-				this).fetch();
+		List<VacationPeriod> vpList = VacationPeriodDao.getVacationPeriodByContract(this);
+//		List<VacationPeriod> vpList = VacationPeriod.find(  "SELECT vp "
+//				+ "FROM VacationPeriod vp "
+//				+ "WHERE vp.contract = ? "
+//				+ "ORDER BY vp.beginFrom",
+//				this).fetch();
 
 		//se il piano ferie associato al contratto non esiste 
 		if(vpList==null)
@@ -268,13 +272,15 @@ public class Contract extends BaseModel {
 			VacationPeriod first = new VacationPeriod();
 			first.beginFrom = this.beginContract;
 			first.endTo = this.beginContract.plusYears(3).minusDays(1);
-			first.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "26+4").first();
+			first.vacationCode = VacationCodeDao.getVacationCodeByDescription("26+4");
+			//first.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "26+4").first();
 			first.contract = this;
 			first.save();
 			VacationPeriod second = new VacationPeriod();
 			second.beginFrom = this.beginContract.plusYears(3);
 			second.endTo = null;
-			second.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "28+4").first();
+			second.vacationCode = VacationCodeDao.getVacationCodeByDescription("28+4");
+			//second.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "28+4").first();
 			second.contract =this;
 			second.save();
 			this.save();
@@ -286,13 +292,15 @@ public class Contract extends BaseModel {
 			VacationPeriod first = new VacationPeriod();
 			first.beginFrom = this.beginContract;
 			first.endTo = this.beginContract.plusYears(3).minusDays(1);
-			first.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "26+4").first();
+			first.vacationCode = VacationCodeDao.getVacationCodeByDescription("26+4");
+			//first.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "26+4").first();
 			first.contract = this;
 			first.save();
 			VacationPeriod second = new VacationPeriod();
 			second.beginFrom = this.beginContract.plusYears(3);
 			second.endTo = this.expireContract;
-			second.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "28+4").first();
+			second.vacationCode = VacationCodeDao.getVacationCodeByDescription("28+4");
+			//second.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "28+4").first();
 			second.contract =this;
 			second.save();
 			this.save();
@@ -304,7 +312,8 @@ public class Contract extends BaseModel {
 		first.beginFrom = this.beginContract;
 		first.endTo = this.expireContract;
 		first.contract = this;
-		first.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "26+4").first();
+		first.vacationCode = VacationCodeDao.getVacationCodeByDescription("26+4");
+		//first.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "26+4").first();
 		first.save();
 		this.save();
 	}
@@ -526,23 +535,28 @@ public class Contract extends BaseModel {
 		if(end == null)
 			end = new LocalDate(9999,1,1);
 		
-		List<Contract> activeContract = Contract.find(
-				"Select c from Contract c "
-										
-						//contratto attivo nel periodo
-						+ " where ( "
-						//caso contratto non terminato
-						+ "c.endContract is null and "
-							//contratto a tempo indeterminato che si interseca col periodo 
-							+ "( (c.expireContract is null and c.beginContract <= ? )"
-							+ "or "
-							//contratto a tempo determinato che si interseca col periodo (comanda il campo endContract)
-							+ "(c.expireContract is not null and c.beginContract <= ? and c.expireContract >= ? ) ) "
-						+ "or "
-						//caso contratto terminato che si interseca col periodo		
-						+ "c.endContract is not null and c.beginContract <= ? and c.endContract >= ? "
-						+ ") "
-						, end, end, begin, end, begin).fetch();
+		/**
+		 * TODO: verificare nell'unico metodo in cui è chiamata (WorkingTimes.executeChangeWorkingTimeTypeToAll) se funziona correttamente,
+		 * visto che quel metodo ha un discreto impatto sui dati
+		 */
+		List<Contract> activeContract = ContractDao.getActiveContractsInPeriod(begin, end);
+//		List<Contract> activeContract = Contract.find(
+//				"Select c from Contract c "
+//										
+//						//contratto attivo nel periodo
+//						+ " where ( "
+//						//caso contratto non terminato
+//						+ "c.endContract is null and "
+//							//contratto a tempo indeterminato che si interseca col periodo 
+//							+ "( (c.expireContract is null and c.beginContract <= ? )"
+//							+ "or "
+//							//contratto a tempo determinato che si interseca col periodo (comanda il campo endContract)
+//							+ "(c.expireContract is not null and c.beginContract <= ? and c.expireContract >= ? ) ) "
+//						+ "or "
+//						//caso contratto terminato che si interseca col periodo		
+//						+ "c.endContract is not null and c.beginContract <= ? and c.endContract >= ? "
+//						+ ") "
+//						, end, end, begin, end, begin).fetch();
 		
 		return activeContract;
 		
