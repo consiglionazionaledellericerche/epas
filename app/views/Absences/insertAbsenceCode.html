@@ -13,12 +13,12 @@
 			<table class="table table-form table-condensed table-hover">
 				<tr>
 					<td><p>Codice: </p></td>
-					<td><input type="text" name="codice"  /></td>
+					<td><input type="text" name="codice" /></td>
 					<td>codice di assenza</td>
 				</tr>
  				<tr>
  					<td><p>Codice per attestati di presenza: </p></td>
- 					<td><input type="text" name="codicePresenza"  /></td>
+ 					<td><input type="text" name="codicePresenza"/></td>
  					<td>Usare solo se il codice che deve andare negli attestati di presenza e' diverso da quello definito nella riga precedente (questo diventa il codice vero e quello sulla riga precedente un alias per uso interno)</td>
  				</tr>
 				<tr>
@@ -40,13 +40,13 @@
 				
 				<tr>
 					<td><p >Inizio validita': </p></td>
-					<td><input type="text" name="inizio"  id="datepicker1" data-date-format="yyyy-mm-dd"/></td>
-					<td>Data inizio validità di questo codice nel formato aaa/mm/gg (se vuoto valido da sempre)	</td>
+					<td><input type="text" name="inizio" id="datepicker1" datepicker-year /></td>
+					<td>Data inizio validità di questo codice nel formato aaaa-mm-gg (se vuoto valido da sempre)</td>
 				</tr>
 				<tr>
 					<td><p >Fine validita': </p></td>
-					<td><input type="text" name="fine"  id="datepicker1" data-date-format="yyyy-mm-dd"/></td>
-					<td>Data fine validità di questo codice nel formato aaa/mm/gg (se vuoto valido per sempre)	</td>
+					<td><input type="text" name="fine" id="datepicker1" datepicker-year /></td>
+					<td>Data fine validità di questo codice nel formato aaaa-mm-gg (se vuoto valido per sempre)</td>
 				</tr>
 				<tr>
 					<td><p id="codice">Tempo di lavoro giustificato: </p></td>
@@ -72,7 +72,7 @@
 				</tr>
 				
 				<tr>
-					<td><p>Gruppo:</td>
+					<td>Gruppo:</td>
 					<td>
 					
 						<input type="text" name="gruppo" />
@@ -107,9 +107,9 @@
 				<tr>
 					<td><p>Accumulare i valori:</p></td>
 					<td>
-						#{select 'type', value:qual , id:'qual.id'}
-							#{list items:accumulationTypeList, as: 'type'}
-								#{option type.description}${type.description}#{/option}
+						#{select 'accType', value:accType , id:'accType.id'}
+							#{list items:accumulationTypeList, as: 'accType'}
+								#{option accType.description}${accType.description}#{/option}
 							#{/list}
 						#{/select}						
 					</td>
@@ -121,14 +121,22 @@
 							<input type="number" name="limiteAccumulo" />
 						
 					</td>
-					<td>Valore massimo accumulo, raggiuntio il quale deve comportarsi come specificato nella definizione successiva (Es. codice 661h2 indicare 18)</td>
+					<td>Valore massimo accumulo, raggiunto il quale deve comportarsi come specificato nella definizione successiva (Es. codice 661h2 indicare 18)</td>
+				</tr>
+				<tr>
+					<td>Minuti in Eccesso:</td>
+					<td>
+						Sì <input type="radio" name="minutiEccesso" value="true" /> 
+						No <input type="radio" name="minutiEccesso" value="false" checked="checked"/>
+					</td>
+					<td>Se selezionato, consente di giustificare anche gli eventuali minuti in eccesso mancanti al totale dell'orario di lavoro giornaliero: es.: se il mio orario di lavoro prevede un orario giornaliero di 7 ore e 12 e prendo un codice di assenza che giustifica 7 ore e quel codice ha il campo minuti in eccesso = si, allora il sistema calcolerà 7 ore e 12 di giustificazione invece di 7</td>
 				</tr>
 				<tr>
 					<td><p>Cosa fare raggiunto il limite:</p></td>
 					<td>	
-						#{select 'acc', value:acc, id:'acc.id'}
-							#{list items:accumulationBehaviourList, as: 'acc'}
-								#{option acc.description}${acc.description}#{/option}
+						#{select 'accBehaviour', value:accBehaviour, id:'accBehaviour.id'}
+							#{list items:accumulationBehaviourList, as: 'accBehaviour'}
+								#{option accBehaviour.description}${accBehaviour.description}#{/option}
 							#{/list}															
 						#{/select}						
 					</td>

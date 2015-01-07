@@ -659,6 +659,21 @@ then
  $c.grant();
 end
 
+rule wizard
+when
+ $u: User( username.equals("admin"))
+ $c: PermissionCheck(action in (
+    "Wizard.wizard",
+    "Wizard.changeAdminPsw",
+    "Wizard.seatManagerRole",
+    "Wizard.setGenConf",
+    "Wizard.setOffice",
+    "Wizard.summary"  
+    ), target == null, granted == false)
+then
+ $c.grant();
+end 
+
 
 /*
  *		Schema da implementare per ogni permesso
@@ -699,18 +714,3 @@ then
 end
 
  */
-
-rule wizard
- when
-  $u: User( username.equals("admin"))
-  $c: PermissionCheck(action in (
-       "Wizard.wizard",
-       "Wizard.changeAdminPsw",
-       "Wizard.seatManagerRole",
-       "Wizard.setGenConf",
-       "Wizard.setOffice",
-       "Wizard.summary"  
-       ), target == null, granted == false)
-then
- $c.grant();
-end 

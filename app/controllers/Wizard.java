@@ -546,9 +546,8 @@ public class Wizard extends Controller {
 		p.name = properties.getProperty("manager_name");
 		p.surname = properties.getProperty("manager_surname");
 		
-		Qualification qualification = QualificationDao.getQualification(Optional.fromNullable(Integer.parseInt(properties.getProperty("manager_qualification"))), Optional.<Long>absent(), false).get(0);
-//		Qualification qualification = Qualification.find("byQualification", 
-//				Integer.parseInt(properties.getProperty("manager_qualification"))).first();
+		Qualification qualification = QualificationDao.getQualification(
+				Optional.fromNullable(Integer.parseInt(properties.getProperty("manager_qualification"))), Optional.<Long>absent(), false).get(0);
 		p.qualification = qualification;
 		
 		if(!properties.getProperty("manager_badge_number").isEmpty()){
@@ -592,7 +591,6 @@ public class Wizard extends Controller {
 		cwtt.beginDate = contractBegin;
 		cwtt.endDate = contractEnd;
 		cwtt.workingTimeType = WorkingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
-		//cwtt.workingTimeType = WorkingTimeType.find("byDescription", "Normale").first();
 		cwtt.contract = contract;
 		cwtt.save();
 		contract.save();
@@ -618,7 +616,6 @@ public class Wizard extends Controller {
 		uro.office = seat;
 		uro.user = user;
 		uro.role = RoleDao.getRoleByName(Role.PERSONNEL_ADMIN);
-		//uro.role = Role.find("byName", Role.PERSONNEL_ADMIN).first();
 		
 		uro.save();
 		
