@@ -13,6 +13,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.zip.ZipOutputStream;
 
 import javax.inject.Inject;
 import javax.persistence.Query;
+import javax.validation.constraints.NotNull;
 
 import manager.AbsenceManager;
 import models.Absence;
@@ -48,9 +50,11 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 
 import play.Logger;
 import play.data.validation.Required;
+import play.data.validation.Valid;
 import play.db.jpa.Blob;
 import play.db.jpa.JPA;
 import play.libs.Mail;
@@ -95,10 +99,6 @@ public class Absences extends Controller{
 
 	}
 
-	private static List<AbsenceType> getAllAbsenceTypes(LocalDate date){
-		return AbsenceTypeDao.getAbsenceTypeFromEffectiveDate(date); 
-	}
-
 	public static void absences(int year, int month) {
 		Person person = Security.getUser().get().person;
 		YearMonth yearMonth = new YearMonth(year,month);
@@ -130,141 +130,102 @@ public class Absences extends Controller{
 		render(dateAbsences, absenceCode);
 	}
 
-	/**
-	 * questa è una funzione solo per admin, quindi va messa con il check administrator
-	 */
-	//@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	@NoCheck
 	public static void manageAbsenceCode(String name, Integer page){
 		if(page==null)
 			page = 0;
+		
 		SimpleResults<AbsenceType> simpleResults = AbsenceTypeDao.getAbsences(Optional.fromNullable(name));
 		List<AbsenceType> absenceList = simpleResults.paginated(page).getResults();
-		//List<AbsenceType> absenceList = AbsenceType.find("Select abt from AbsenceType abt order by abt.code").fetch();
 		
 		render(absenceList, name, simpleResults);
 	}
 
-	//@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void insertAbsenceCode(){
 		rules.checkIfPermitted(Security.getUser().get().person.office);
-		AbsenceType abt = new AbsenceType();
-		AbsenceTypeGroup  abtg = new AbsenceTypeGroup();
+		
 		List<Qualification> qualificationList = QualificationDao.getQualification(null, null, true);
-		//List<Qualification> qualificationList = Qualification.findAll();
 		List<AbsenceTypeGroup> abtList = AbsenceTypeGroupDao.getAbsenceTypeGroup(null,true);
-		//List<AbsenceTypeGroup> abtList = AbsenceTypeGroup.findAll();
-		List<JustifiedTimeAtWork> justifiedTimeAtWorkList = new ArrayList<JustifiedTimeAtWork>();
-		justifiedTimeAtWorkList.add(JustifiedTimeAtWork.AllDay);
-		justifiedTimeAtWorkList.add(JustifiedTimeAtWork.EightHours);
-		justifiedTimeAtWorkList.add(JustifiedTimeAtWork.FiveHours);
-		justifiedTimeAtWorkList.add(JustifiedTimeAtWork.FourHours);
-		justifiedTimeAtWorkList.add(JustifiedTimeAtWork.HalfDay);
-		justifiedTimeAtWorkList.add(JustifiedTimeAtWork.Nothing);
-		justifiedTimeAtWorkList.add(JustifiedTimeAtWork.OneHour);
-		justifiedTimeAtWorkList.add(JustifiedTimeAtWork.ReduceWorkingTimeOfTwoHours);
-		justifiedTimeAtWorkList.add(JustifiedTimeAtWork.SevenHours);
-		justifiedTimeAtWorkList.add(JustifiedTimeAtWork.SixHours);
-		justifiedTimeAtWorkList.add(JustifiedTimeAtWork.ThreeHours);
-		justifiedTimeAtWorkList.add(JustifiedTimeAtWork.TimeToComplete);
-		justifiedTimeAtWorkList.add(JustifiedTimeAtWork.TwoHours);
-		List<AccumulationType> accumulationTypeList = new ArrayList<AccumulationType>();
-		accumulationTypeList.add(AccumulationType.always);
-		accumulationTypeList.add(AccumulationType.monthly);
-		accumulationTypeList.add(AccumulationType.no);
-		accumulationTypeList.add(AccumulationType.yearly);
+		List<JustifiedTimeAtWork> justifiedTimeAtWorkList = Lists.newArrayList(JustifiedTimeAtWork.values());
+		List<AccumulationType> accumulationTypeList = Lists.newArrayList(AccumulationType.values());
+		List<AccumulationBehaviour> accumulationBehaviourList = Lists.newArrayList(AccumulationBehaviour.values());
 
-		List<AccumulationBehaviour> accumulationBehaviourList = new ArrayList<AccumulationBehaviour>();
-		accumulationBehaviourList.add(AccumulationBehaviour.noMoreAbsencesAccepted);
-		accumulationBehaviourList.add(AccumulationBehaviour.nothing);
-		accumulationBehaviourList.add(AccumulationBehaviour.replaceCodeAndDecreaseAccumulation);
-
-		render(abt, abtg, qualificationList, abtList, justifiedTimeAtWorkList, accumulationTypeList, accumulationBehaviourList);
+		render(qualificationList, abtList, justifiedTimeAtWorkList, accumulationTypeList, accumulationBehaviourList);
 	}
 
-	//@Check(Security.INSERT_AND_UPDATE_ABSENCE)
-	public static void saveAbsenceCode(){
+	public static void saveAbsenceCode(
+			@Required String codice,
+			String codicePresenza,
+			@Required String descrizione,
+			@Required boolean usoInterno,
+			@Required boolean weekEnd,
+			LocalDate inizio,
+			LocalDate fine,
+			@Required String jwt,
+			@Required int qual,
+			String gruppo,
+			String accBehaviour,
+			String accType,
+			int limiteAccumulo,
+			String codiceSostituzione,
+			boolean minutiEccesso
+			){
+		
+    	if (validation.hasErrors()){
+    		flash.error(validation.errorsMap().toString());
+    		// TODO modificare il template per visualizzare gli errori di validazione
+    	    insertAbsenceCode();
+    	}
+    	
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		
 		AbsenceType abt = new AbsenceType();
-		AbsenceTypeGroup abtg = null;
-		abt.code = params.get("codice");
-		if(params.get("codicePresenza") != null)
-			abt.certificateCode = params.get("codicePresenza");
-		else
-			abt.certificateCode = null;
-		abt.description = params.get("descrizione");
+		abt.code = codice;
+		abt.certificateCode = Optional.fromNullable(codicePresenza).orNull();
+		abt.description = descrizione;
+		abt.internalUse = usoInterno;
+		abt.consideredWeekEnd = weekEnd;
+		abt.validFrom = Optional.fromNullable(inizio).orNull();
+		abt.validTo = Optional.fromNullable(fine).orNull();
+		abt.justifiedTimeAtWork = JustifiedTimeAtWork.getByDescription(jwt);
 		
-		abt.internalUse = params.get("usoInterno", Boolean.class);
-		abt.consideredWeekEnd = params.get("weekEnd", Boolean.class);
-		
-		if(!params.get("inizio").equals("")){
-			Date validFrom = params.get("inizio", Date.class);
-			abt.validFrom = new LocalDate(validFrom);
-		}
-		else
-			abt.validFrom = null;
-		if(!params.get("fine").equals("")){
-			Date validTo = params.get("fine", Date.class);
-			abt.validTo = new LocalDate(validTo);
-		}
-		else
-			abt.validTo = null;
-		String just = params.get("jwt");
-		JustifiedTimeAtWork jwt = JustifiedTimeAtWork.getByDescription(just);
-		abt.justifiedTimeAtWork = jwt;
-		
-		String qual = params.get("qual");
-		Integer qualifica = new Integer(qual);
-		for(int i = 1; i <= qualifica; i++){
-			Qualification q = QualificationDao.getQualification(Optional.fromNullable(new Integer(i)), null, false).get(0);
-			//Qualification q = Qualification.find("Select q from Qualification q where q.qualification = ?", i).first();
+		for(int i = 1; i <= qual; i++){
+			Qualification q = QualificationDao.byQualification(i).orNull();
 			abt.qualifications.add(q);
 		}
 
-		
-
-		if(!params.get("gruppo").equals("")){
-			abtg = new AbsenceTypeGroup();
-			abtg.accumulationBehaviour = params.get("accBehaviour", AccumulationBehaviour.class);
-			abtg.accumulationType = params.get("accType", AccumulationType.class);
-			abtg.label = params.get("gruppo");
-			abtg.limitInMinute = params.get("limiteAccumulo", Integer.class);
-			abtg.minutesExcess = params.get("minutiEccesso", Boolean.class);
-			abtg.replacingAbsenceType = AbsenceTypeDao.getAbsenceTypeByCode(params.get("codiceSostituzione"));
-			//abtg.replacingAbsenceType = AbsenceType.find("Select abt from AbsenceType abt where abt.code = ?", params.get("codicePerSostituzione")).first();
+		if(gruppo != null && !gruppo.isEmpty()){
+			AbsenceTypeGroup abtg = new AbsenceTypeGroup();
+			abtg.label = gruppo;
+			abtg.accumulationBehaviour = AccumulationBehaviour.getByDescription(accBehaviour);
+			abtg.accumulationType = AccumulationType.getByDescription(accType);
+			abtg.limitInMinute = limiteAccumulo;
+			abtg.minutesExcess = minutiEccesso;
+			if(accBehaviour.equals(AccumulationBehaviour.replaceCodeAndDecreaseAccumulation)){
+				abtg.replacingAbsenceType = AbsenceTypeDao.getAbsenceTypeByCode(codiceSostituzione);
+			}
 			abt.absenceTypeGroup = abtg;
 			abtg.save();
 		}
 		
 		abt.save();
-		flash.success(
-				String.format("Inserita nuova assenza con codice %s", abt.code));
-		//Application.indexAdmin();
-		Stampings.personStamping(Security.getUser().get().person.id, new LocalDate().getYear(), new LocalDate().getMonthOfYear());
+		flash.success("Inserito nuovo codice di assenza %s", codice);
 		
-	}
-
-	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
-	public static void discard(){
 		manageAbsenceCode(null, null);
 	}
 
-	public static void create(@Required Long personId, @Required Integer year, @Required Integer month, @Required Integer day) {
+	public static void create(@Required Long personId, @Valid @Required LocalDate date) {
 		
-		Person person = Person.em().getReference(Person.class, personId);
+		Person person = PersonDao.getPersonById(personId);
 		
 		rules.checkIfPermitted(person.office);
 		
-		Logger.debug("Insert absence called for personId=%d, year=%d, month=%d, day=%d", personId, year, month, day);
-		List<AbsenceType> frequentAbsenceTypeList = getFrequentAbsenceTypes();
-		MainMenu mainMenu = new MainMenu(year,month,day);
-		List<AbsenceType> allCodes = getAllAbsenceTypes(new LocalDate(year,month,day));
-		
-		
-		LocalDate date = new LocalDate(year, month, day);
+		Logger.debug("Insert absence called for personId = %s, %s", personId, date);
+		List<AbsenceType> frequentAbsenceTypeList = AbsenceTypeDao.getFrequentTypes();
+		List<AbsenceType> allCodes = AbsenceTypeDao.getAbsenceTypeFromEffectiveDate(date);
+
 		PersonDay personDay = new PersonDay(person, date);
-		render(personDay, frequentAbsenceTypeList, allCodes, mainMenu);
+		render(personDay, frequentAbsenceTypeList, allCodes);
 	}
 
 	private static void insertAbsence(Long personId, Integer yearFrom, 
@@ -379,38 +340,15 @@ public class Absences extends Controller{
 		
 	}
 
-	//@Check(Security.INSERT_AND_UPDATE_ABSENCE)
 	public static void editCode(@Required Long absenceCodeId) throws InstantiationException, IllegalAccessException{
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		
 		AbsenceType abt = AbsenceTypeDao.getAbsenceTypeById(absenceCodeId);
-		//AbsenceType abt = AbsenceType.findById(absenceCodeId);
-		List<JustifiedTimeAtWork> justList = new ArrayList<JustifiedTimeAtWork>();
-		justList.add(0,JustifiedTimeAtWork.AllDay);
-		justList.add(1,JustifiedTimeAtWork.HalfDay);
-		justList.add(2,JustifiedTimeAtWork.OneHour);
-		justList.add(3,JustifiedTimeAtWork.TwoHours);
-		justList.add(4,JustifiedTimeAtWork.ThreeHours);
-		justList.add(5,JustifiedTimeAtWork.FourHours);
-		justList.add(6,JustifiedTimeAtWork.FiveHours);
-		justList.add(7,JustifiedTimeAtWork.SixHours);
-		justList.add(8,JustifiedTimeAtWork.SevenHours);
-		justList.add(9,JustifiedTimeAtWork.EightHours);
-		justList.add(10,JustifiedTimeAtWork.Nothing);
-		justList.add(11,JustifiedTimeAtWork.TimeToComplete);
-		justList.add(12,JustifiedTimeAtWork.ReduceWorkingTimeOfTwoHours);
-
+		
 		List<Qualification> qualList = QualificationDao.getQualification(null, null, true);
-		//List<Qualification> qualList = Qualification.findAll();
-		List<AccumulationType> accType = new ArrayList<AccumulationType>();
-		accType.add(0, AccumulationType.always);
-		accType.add(1, AccumulationType.monthly);
-		accType.add(2, AccumulationType.no);
-		accType.add(3, AccumulationType.yearly);
-		List<AccumulationBehaviour> behaviourType = new ArrayList<AccumulationBehaviour>();
-		behaviourType.add(0, AccumulationBehaviour.nothing);
-		behaviourType.add(1, AccumulationBehaviour.noMoreAbsencesAccepted);
-		behaviourType.add(2, AccumulationBehaviour.replaceCodeAndDecreaseAccumulation);
+		List<JustifiedTimeAtWork> justList = Lists.newArrayList(JustifiedTimeAtWork.values());
+		List<AccumulationType> accType = Lists.newArrayList(AccumulationType.values());
+		List<AccumulationBehaviour> behaviourType = Lists.newArrayList(AccumulationBehaviour.values());
 
 		render(abt, justList, qualList, accType, behaviourType);
 	}
@@ -489,7 +427,7 @@ public class Absences extends Controller{
 		List<AbsenceType> frequentAbsenceTypeList = AbsenceTypeDao.getFrequentTypes();
 		//List<AbsenceType> frequentAbsenceTypeList = getFrequentAbsenceTypes();
 		MainMenu mainMenu = new MainMenu(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth());
-		List<AbsenceType> allCodes = getAllAbsenceTypes(absence.personDay.date);
+		List<AbsenceType> allCodes = AbsenceTypeDao.getAbsenceTypeFromEffectiveDate(absence.personDay.date);
 		render(absence, frequentAbsenceTypeList, allCodes, mainMenu);				
 	}
     
