@@ -47,6 +47,7 @@ import com.google.common.collect.FluentIterable;
 
 import controllers.Secure;
 import controllers.Security;
+import dao.ContractDao;
 
 /**
  * @author cristian
@@ -281,7 +282,8 @@ public class Person extends BaseModel implements Comparable<Person>{
 		}
 		
 		//FIXME sommani aprile 2014, lui ha due contratti ma nello heap ce ne sono due identici e manca quello nuovo.
-		List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ?", this).fetch();
+		List<Contract> contractList = ContractDao.getPersonContractList(this);
+		//List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ?", this).fetch();
 		//this.contracts = contractList;
 		for(Contract c : contractList)
 		{
@@ -395,7 +397,8 @@ public class Person extends BaseModel implements Comparable<Person>{
 	{
 		//TODO usare getMonthContracts e ritornare size>0
 		List<Contract> monthContracts = new ArrayList<Contract>();
-		List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ?",this).fetch();
+		List<Contract> contractList = ContractDao.getPersonContractList(this);
+		//List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ?",this).fetch();
 		if(contractList == null){
 			return false;
 		}
@@ -427,7 +430,8 @@ public class Person extends BaseModel implements Comparable<Person>{
 	public List<Contract> getMonthContracts(Integer month, Integer year)
 	{
 		List<Contract> monthContracts = new ArrayList<Contract>();
-		List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract",this).fetch();
+		List<Contract> contractList = ContractDao.getPersonContractList(this);
+		//List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract",this).fetch();
 		if(contractList == null){
 			return monthContracts;
 		}
