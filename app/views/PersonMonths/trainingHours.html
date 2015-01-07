@@ -60,7 +60,7 @@
 			#{list items:pmList, as: 'pm'}
 				#{if pm != null}
 				  #{if pm.month == mese}	
-					#{if mese == today.getMonthOfYear() || (mese == today.getMonthOfYear()-1 && pm.hoursApproved == false)}		
+					#{if mese == today.getMonthOfYear() || (mese == today.minusMonths(1).getMonthOfYear() && pm.hoursApproved == false)}		
 					  <li class="list-group-item list-group-item-info" >
 					    <p>
 					      <span class="label label-success">${pm.trainingHours} ore</span>

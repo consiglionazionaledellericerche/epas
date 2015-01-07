@@ -82,6 +82,29 @@ public class PersonMonths extends Controller{
 		
 		render(person, month, year, max);
 	}
+	
+	
+	
+	public static void insertTrainingHoursPreviousMonth(){
+		
+		Person person = Security.getUser().get().person;
+		LocalDate date = new LocalDate();
+		int month = 0;
+		int year = 0;
+		int max = 0;
+		if(date.getMonthOfYear() == 1){
+			date = date.minusMonths(1);
+			month = date.getMonthOfYear();
+			year = date.getYear();
+			max = date.dayOfMonth().withMaximumValue().getDayOfMonth();
+			render(person, month, year, max);
+		}
+		max = date.dayOfMonth().withMaximumValue().getDayOfMonth();
+		month = date.getMonthOfYear();
+		year = date.getYear();
+		
+		render(person, month, year, max);
+	}
 
 	
 	public static void modifyTrainingHours(Long personMonthSituationId){

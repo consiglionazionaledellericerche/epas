@@ -46,6 +46,7 @@ when
      	"PersonMonths.deleteTrainingHours",
      	"PersonMonths.deleteTrainingHoursConfirmed",
      	"PersonMonths.insertTrainingHours",
+     	"PersonMonths.insertTrainingHoursPreviousMonth",
      	"PersonMonths.modifyTrainingHours",
      	"PersonMonths.saveTrainingHours",
      	"PersonMonths.updateTrainingHours",
