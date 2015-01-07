@@ -140,6 +140,7 @@ public class ContractYearRecapManager {
 			
 			cyr.remainingMinutesLastYear = lastComputedMonthInYear.monteOreAnnoPassato;
 			cyr.remainingMinutesCurrentYear = lastComputedMonthInYear.monteOreAnnoCorrente;
+			cyr.remainingMealTickets = lastComputedMonthInYear.buoniPastoResidui;
 			
 			//RIPOSI COMPENSATIVI
 			//TODO la logica che persiste il dato sui riposi compensativi utilizzati deve essere ancora implementata in quanto non banale.
