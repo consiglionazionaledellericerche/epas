@@ -51,4 +51,16 @@ public class WorkingTimeTypeDao {
 				.where(wtt.id.eq(id));
 		return query.singleResult(wtt);
 	}
+	
+	
+	/**
+	 * 
+	 * @return la lista degli orari di lavoro presenti di default sul database perchè validi a livello nazionale per il CNR
+	 */
+	public static List<WorkingTimeType> getDefaultWorkingTimeType(){
+		QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
+		final JPQLQuery query = ModelQuery.queryFactory().from(wtt)
+				.where(wtt.office.isNull()).orderBy(wtt.description.asc());
+		return query.list(wtt);
+	}
 }

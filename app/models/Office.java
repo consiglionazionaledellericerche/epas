@@ -517,11 +517,15 @@ public class Office extends BaseModel{
 			newUro = new UsersRolesOffices();
 			newUro.user = user;
 			newUro.office = office;
+			newUro.role = role;
+			newUro.save();
+		}
+		else{
+			newUro = uro.get();
+			newUro.role = role;
+			newUro.save();
 		}
 		
-		newUro = uro.get();
-		newUro.role = role;
-		newUro.save();
 		
 	}
 	
