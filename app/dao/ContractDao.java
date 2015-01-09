@@ -9,6 +9,7 @@ import helpers.ModelQuery;
 import com.google.common.base.Optional;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
+import com.sun.org.apache.xml.internal.utils.SuballocatedByteVector;
 
 import models.Contract;
 import models.ContractStampProfile;
@@ -16,11 +17,13 @@ import models.ContractWorkingTimeType;
 import models.InitializationAbsence;
 import models.InitializationTime;
 import models.Person;
+import models.WorkingTimeType;
 import models.query.QContract;
 import models.query.QContractStampProfile;
 import models.query.QContractWorkingTimeType;
 import models.query.QInitializationAbsence;
 import models.query.QInitializationTime;
+import models.query.QWorkingTimeType;
 
 /**
  * 
@@ -69,6 +72,20 @@ public class ContractDao {
 		return query.list(contract);
 	}
 	
+	
+	/**
+	 * 
+	 * @param wtt
+	 * @return la lista di contratti associata al workingTimeType passato come parametro
+	 */
+	public static List<Contract> getContractListByWorkingTimeType(WorkingTimeType wtt){
+		QContractWorkingTimeType cwtt = QContractWorkingTimeType.contractWorkingTimeType;
+		QContract contract = QContract.contract;
+		final JPQLQuery query = ModelQuery.queryFactory().from(contract).
+				leftJoin(contract.contractWorkingTimeType,cwtt).where(cwtt.workingTimeType.eq(wtt));
+						
+		return query.list(contract);
+	}
 	
 	/******************************************************************************************************************************************/
 	/*Inserisco in questa parte del Dao le query relative ai ContractStampProfile per evitare di creare una classe specifica che contenga     */

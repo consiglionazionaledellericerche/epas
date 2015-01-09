@@ -63,4 +63,18 @@ public class QualificationDao {
 				.where(qual.absenceTypes.contains(abt));
 		return query.list(qual);
 	}
+	
+	
+	/**
+	 * 
+	 * @param limit
+	 * @return la lista di qualifiche superiori o uguali al limite passato come parametro (da usare, ad esempio, per ritornare la
+	 * lista delle qualifiche dei tecnici che hanno qualifica superiore a 3)
+	 */
+	public static List<Qualification> getQualificationGreaterThan(Integer limit){
+		QQualification qual = QQualification.qualification1;
+		final JPQLQuery query = ModelQuery.queryFactory().from(qual)
+				.where(qual.qualification.goe(limit));
+		return query.list(qual);
+	}
 }

@@ -19,6 +19,9 @@ import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Optional;
+
+import dao.UsersRolesOfficesDao;
 
 @Entity
 @Audited
@@ -66,11 +69,15 @@ public class User extends BaseModel{
 		List<Permission> permissions = new ArrayList<Permission>();
 		
 		if(this.person != null){
-			UsersRolesOffices uro = UsersRolesOffices.find("Select upo from UsersRolesOffices uro where " +
-					"uro.user = ? and uro.office = ?", this, this.person.office).first();
-			for(Permission p : uro.role.permissions){
-				permissions.add(p);
+			Optional<UsersRolesOffices> uro = UsersRolesOfficesDao.getUsersRolesOfficesByUserAndOffice(this, this.person.office);
+			if(uro.isPresent()){
+				for(Permission p : uro.get().role.permissions){
+					permissions.add(p);
+				}
 			}
+//			UsersRolesOffices uro = UsersRolesOffices.find("Select upo from UsersRolesOffices uro where " +
+//					"uro.user = ? and uro.office = ?", this, this.person.office).first();
+			
 			
 		}
 		

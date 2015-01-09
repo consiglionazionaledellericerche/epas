@@ -123,4 +123,24 @@ public class PersonDayDao {
 				.where(personDay.person.eq(person).and(personDay.date.between(begin, end)).and(personDay.isTicketAvailable.eq(isAvailable)));
 		return query.orderBy(personDay.date.asc()).list(personDay);
 	}
+	
+	
+	/**
+	 * 
+	 * @param person
+	 * @param begin
+	 * @param end
+	 * @return il personDay precedente al giorno in cui viene richiamata questa funzione. Utilizzato per creare il recap della lista
+	 * dei personDay
+	 */
+	public static PersonDay getPersonDayForRecap(Person person, Optional<LocalDate> begin, LocalDate end){
+		QPersonDay personDay = QPersonDay.personDay;
+		BooleanBuilder condition = new BooleanBuilder();
+		if(begin.isPresent())
+			condition.and(personDay.date.goe(begin.get()));
+		final JPQLQuery query = ModelQuery.queryFactory().from(personDay)
+				.where(personDay.person.eq(person).and(condition.and(personDay.date.lt(end))))
+				.orderBy(personDay.date.desc());
+		return query.singleResult(personDay);
+	}
 }

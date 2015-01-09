@@ -151,6 +151,23 @@ public class CompetenceDao {
 		return query.list(competence);
 	}
 	
+	
+	/**
+	 * 
+	 * @param person
+	 * @param year
+	 * @param month
+	 * @return la lista di tutte le competenze di una persona nel mese month e nell'anno year che abbiano un valore approvato > 0
+	 */
+	public static List<Competence> getAllCompetenceForPerson(Person person, Integer year, Integer month){
+		QCompetence competence = QCompetence.competence;
+		JPQLQuery query = ModelQuery.queryFactory().from(competence)
+				.where(competence.year.eq(year).and(competence.person.eq(person)
+						.and(competence.month.eq(month).and(competence.valueApproved.gt(0)))));
+		return query.list(competence);
+	}
+	
+	
 	/*********************************************************************************************************************************/
 	/*Parte relativa a query su TotalOvertime per la quale, essendo unica, non si è deciso di creare un Dao ad hoc*/
 	

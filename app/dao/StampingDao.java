@@ -2,6 +2,7 @@ package dao;
 
 import helpers.ModelQuery;
 
+import com.google.common.base.Optional;
 import com.mysema.query.jpa.JPQLQuery;
 
 import models.StampModificationType;
@@ -64,5 +65,18 @@ public class StampingDao {
 		JPQLQuery query = ModelQuery.queryFactory().from(smt)
 				.where(smt.id.eq(id));
 		return query.singleResult(smt);
+	}
+	
+	
+	/**
+	 * 
+	 * @param code
+	 * @return lo stampModificationType relativo al codice code passato come parametro
+	 */
+	public static Optional<StampModificationType> getStampModificationTypeByCode(String code){
+		QStampModificationType smt = QStampModificationType.stampModificationType;
+		JPQLQuery query = ModelQuery.queryFactory().from(smt)
+				.where(smt.code.eq(code));
+		return Optional.fromNullable(query.singleResult(smt));
 	}
 }

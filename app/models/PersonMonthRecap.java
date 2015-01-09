@@ -13,6 +13,11 @@ import models.base.BaseModel;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
+
+import dao.AbsenceDao;
+import dao.CompetenceDao;
+import dao.PersonMonthRecapDao;
 import play.Logger;
 import play.data.validation.Required;
 
@@ -66,25 +71,32 @@ public class PersonMonthRecap extends BaseModel {
 
 	
 	public static PersonMonthRecap build(Person person, int year, int month){
-		PersonMonthRecap pm = PersonMonthRecap.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
-				person, month, year).first();
-		if(pm == null){
-			pm = new PersonMonthRecap(person, year, month);
-			pm.create();
+		PersonMonthRecap pmr = null;
+		Optional<PersonMonthRecap> pm = PersonMonthRecapDao.getPersonMonthRecapByPersonYearAndMonth(person, year, month);
+//		PersonMonthRecap pm = PersonMonthRecap.find("Select pm from PersonMonth pm where pm.person = ? and pm.month = ? and pm.year = ?", 
+//				person, month, year).first();
+		if(!pm.isPresent()){
+			pmr = new PersonMonthRecap(person, year, month);
+			pmr.create();			
 		}
-		
+		else
+			pmr = pm.get();
 		//pm.aggiornaRiepiloghi();
-		return pm;
+		return pmr;
 
 	}
 
 	
 	public static PersonMonthRecap getInstance(Person person, int year, int month) {
-		PersonMonthRecap personMonth = PersonMonthRecap.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? and pm.month = ?", person, year, month).first();
-		if (personMonth == null) {
-			personMonth = new PersonMonthRecap(person, year, month);
+		PersonMonthRecap pmr = null;
+		Optional<PersonMonthRecap> personMonth = PersonMonthRecapDao.getPersonMonthRecapByPersonYearAndMonth(person, year, month);
+		//PersonMonthRecap personMonth = PersonMonthRecap.find("Select pm from PersonMonth pm where pm.person = ? and pm.year = ? and pm.month = ?", person, year, month).first();
+		if (!personMonth.isPresent()) {
+			pmr = new PersonMonthRecap(person, year, month);
 		}
-		return personMonth;
+		else
+			pmr = personMonth.get();
+		return pmr;
 	}
 
 
@@ -99,10 +111,11 @@ public class PersonMonthRecap extends BaseModel {
 	 * 
 	 */
 	public List<Absence> getAbsencesNotInternalUseInMonth() {
-		return Absence.find(
-				"SELECT abs from Absence abs JOIN FETCH abs.absenceType abt JOIN FETCH abs.personDay pd JOIN FETCH pd.person p "
-					+ "WHERE p = ? AND pd.date BETWEEN ? AND ? AND abt.internalUse = false ORDER BY abt.code, pd.date, abs.id", 
-					person, new LocalDate(year,month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
+		return AbsenceDao.getAbsenceWithNotInternalUseInMonth(person, new LocalDate(year,month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
+//		return Absence.find(
+//				"SELECT abs from Absence abs JOIN FETCH abs.absenceType abt JOIN FETCH abs.personDay pd JOIN FETCH pd.person p "
+//					+ "WHERE p = ? AND pd.date BETWEEN ? AND ? AND abt.internalUse = false ORDER BY abt.code, pd.date, abs.id", 
+//					person, new LocalDate(year,month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
 	}
 	
 	/**
@@ -110,8 +123,9 @@ public class PersonMonthRecap extends BaseModel {
 	 * @return la lista delle competenze del dipendente in questione per quel mese in quell'anno
 	 */
 	public List<Competence> getCompetenceInMonthForUploadSituation(){
-		List<Competence> competenceList = Competence.find("Select comp from Competence comp where comp.person = ? and comp.month = ? " +
-				"and comp.year = ? and comp.valueApproved > 0", person, month, year).fetch();
+		List<Competence> competenceList = CompetenceDao.getAllCompetenceForPerson(person, year, month);
+//		List<Competence> competenceList = Competence.find("Select comp from Competence comp where comp.person = ? and comp.month = ? " +
+//				"and comp.year = ? and comp.valueApproved > 0", person, month, year).fetch();
 		Logger.trace("Per la persona %s %s trovate %d competenze approvate nei mesi di %d/%d", person.surname, person.name, competenceList.size(), month, year );
 		return competenceList;
 	}

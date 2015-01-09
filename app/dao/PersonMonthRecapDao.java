@@ -74,6 +74,21 @@ public class PersonMonthRecapDao {
 	}
 	
 	
+	/**
+	 * 
+	 * @param person
+	 * @param year
+	 * @param month
+	 * @return il personMonthRecap, se esiste, relativo ai parametri passati come riferimento
+	 */
+	public static Optional<PersonMonthRecap> getPersonMonthRecapByPersonYearAndMonth(Person person, Integer year, Integer month){
+		QPersonMonthRecap personMonthRecap = QPersonMonthRecap.personMonthRecap;
+		final JPQLQuery query = ModelQuery.queryFactory().from(personMonthRecap)
+				.where(personMonthRecap.person.eq(person).and(personMonthRecap.year.eq(year).and(personMonthRecap.month.eq(month))));
+		return Optional.fromNullable(query.singleResult(personMonthRecap));
+	}
+	
+	
 	/***************************************************************************************************************************************/
 	/*Parte relativa a query su CertificatedData per la quale, essendo unica, non si è deciso di creare un Dao ad hoc                      */
 	/***************************************************************************************************************************************/
