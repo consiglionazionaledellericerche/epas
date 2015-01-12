@@ -325,5 +325,31 @@ public final class PersonDao {
 		return query.singleResult(person);
 	}
 	
+	/**
+	 * 
+	 * @param oldId
+	 * @return la persona associata al vecchio id (se presente in anagrafica) passato come parametro
+	 */
+	public static Person getPersonByOldID(Long oldId){
+		QPerson person = QPerson.person;
+		final JPQLQuery query = ModelQuery.queryFactory().from(person).where(person.oldId.eq(oldId));
+		
+		return query.singleResult(person);
+	}
+	
+	/**
+	 * 
+	 * @param badgeNumber
+	 * @return la persona associata al badgeNumber passato come parametro
+	 */
+	public static Person getPersonByBadgeNumber(String badgeNumber){
+		QPerson person = QPerson.person;
+		final JPQLQuery query = ModelQuery.queryFactory().from(person).where(person.badgeNumber.eq(badgeNumber));
+		
+		return query.singleResult(person);
+	}
+	
+	
+	
 	
 }

@@ -62,13 +62,16 @@ public class Clocks extends Controller{
 			Clocks.show();
 		}
 	
-					
-		PersonDay pd = PersonDayDao.getPersonDayInPeriod(user.person, today, Optional.<LocalDate>absent(), false).size() > 0 ? PersonDayDao.getPersonDayInPeriod(user.person, today, Optional.<LocalDate>absent(), false).get(0) : null;
+		PersonDay personDay = null;			
+		Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(user.person, today);
 		//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", user.person, today).first();
-		if(pd == null){
+		if(!pd.isPresent()){
 			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", user.person.name, user.person.surname);
-			pd = new PersonDay(user.person, today);
-			pd.save();
+			personDay = new PersonDay(user.person, today);
+			personDay.create();
+		}
+		else{
+			personDay = pd.get();
 		}
 		
 		//numero di colonne da visualizzare
@@ -76,11 +79,11 @@ public class Clocks extends Controller{
 		//ConfGeneral conf = ConfGeneral.getConfGeneral();
 		int minInOutColumn = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, user.person.office));
 		//int minInOutColumn = conf.numberOfViewingCoupleColumn;
-		int numberOfInOut = Math.max(minInOutColumn,  PersonUtility.numberOfInOutInPersonDay(pd));
+		int numberOfInOut = Math.max(minInOutColumn,  PersonUtility.numberOfInOutInPersonDay(personDay));
 		
 		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
 		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();				
-		PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(pd,numberOfInOut);
+		PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(personDay,numberOfInOut);
 		
 		render(user, dayRecap, numberOfInOut);
 	}
@@ -98,18 +101,22 @@ public class Clocks extends Controller{
 			throw new IllegalArgumentException("Persona non trovata!!!! Controllare l'id!");
 		LocalDateTime ldt = new LocalDateTime();
 		LocalDateTime time = new LocalDateTime(ldt.getYear(),ldt.getMonthOfYear(),ldt.getDayOfMonth(),ldt.getHourOfDay(),ldt.getMinuteOfHour(),0);
-		PersonDay pd = PersonDayDao.getPersonDayInPeriod(person, ldt.toLocalDate(), Optional.<LocalDate>absent(), false).size() > 0 ? PersonDayDao.getPersonDayInPeriod(person, ldt.toLocalDate(), Optional.<LocalDate>absent(), false).get(0) : null;
+		PersonDay personDay = null;
+		Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(person, ldt.toLocalDate());
 		//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, ldt.toLocalDate()).first();
-		if(pd == null){
+		if(!pd.isPresent()){
 			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", person.name, person.surname);
-			pd = new PersonDay(person, ldt.toLocalDate());
-			pd.save();
+			personDay = new PersonDay(person, ldt.toLocalDate());
+			personDay.create();
+		}
+		else{
+			personDay = pd.get();
 		}
 		
 		//Se la stamping esiste già mostro il riepilogo
 		int minNew = time.getMinuteOfHour();
 		int hourNew = time.getHourOfDay();
-		for(Stamping s : pd.stampings){
+		for(Stamping s : personDay.stampings){
 			int hour = s.date.getHourOfDay();
 			int min = s.date.getMinuteOfHour();
 			int minMinusOne = s.date.plusMinutes(1).getMinuteOfHour();
@@ -133,15 +140,15 @@ public class Clocks extends Controller{
 		}
 		else
 			stamp.way = WayType.out;
-		stamp.personDay = pd;
+		stamp.personDay = personDay;
 		stamp.markedByAdmin = false;
 		stamp.save();
-		pd.stampings.add(stamp);
-		pd.save();
+		personDay.stampings.add(stamp);
+		personDay.save();
 		
 		Logger.debug("Faccio i calcoli per %s %s sul personday %s chiamando la populatePersonDay", person.name, person.surname, pd);
-		pd.populatePersonDay();
-		pd.updatePersonDaysInMonth();
+		personDay.populatePersonDay();
+		personDay.updatePersonDaysInMonth();
 		//pd.save();
 		flash.success("Aggiunta timbratura per %s %s", person.name, person.surname);
 		
@@ -156,12 +163,16 @@ public class Clocks extends Controller{
 			throw new IllegalArgumentException("Persona non trovata!!!! Controllare l'id!");
 		
 		LocalDate today = new LocalDate();
-		PersonDay pd = PersonDayDao.getPersonDayInPeriod(person, today, Optional.<LocalDate>absent(), false).size() > 0 ? PersonDayDao.getPersonDayInPeriod(person, today, Optional.<LocalDate>absent(), false).get(0) : null;
+		PersonDay personDay = null;
+		Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(person, today);
 		//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, today).first();
-		if(pd == null){
+		if(!pd.isPresent()){
 			Logger.debug("Prima timbratura per %s %s non c'è il personday quindi va creato.", person.name, person.surname);
-			pd = new PersonDay(person, today);
-			pd.save();
+			personDay = new PersonDay(person, today);
+			personDay.create();
+		}
+		else{
+			personDay = pd.get();
 		}
 		
 		//numero di colonne da visualizzare
@@ -169,11 +180,11 @@ public class Clocks extends Controller{
 		//ConfGeneral conf = ConfGeneral.getConfGeneral();
 		//int minInOutColumn = conf.numberOfViewingCoupleColumn;
 		int minInOutColumn = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.NumberOfViewingCouple.description, person.office));
-		int numberOfInOut = Math.max(minInOutColumn,  PersonUtility.numberOfInOutInPersonDay(pd));
+		int numberOfInOut = Math.max(minInOutColumn,  PersonUtility.numberOfInOutInPersonDay(personDay));
 		
 		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
 		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();				
-		PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(pd,numberOfInOut);
+		PersonStampingDayRecap dayRecap = new PersonStampingDayRecap(personDay,numberOfInOut);
 		
 		render(person, dayRecap, numberOfInOut);
 		

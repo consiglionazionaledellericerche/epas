@@ -35,6 +35,10 @@ import org.joda.time.DateTimeFieldType;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
+import com.google.common.base.Optional;
+
+import dao.PersonDayDao;
+import dao.StampingDao;
 import play.Logger;
 import play.data.validation.Required;
 import play.db.jpa.JPA;
@@ -394,7 +398,8 @@ public class PersonDay extends BaseModel {
 	 */
 	public StampModificationType getFixedWorkingTime(){
 		//TODO usato solo in PersonStampingDayRecap bisogna metterlo nella cache
-		return StampModificationType.findById(StampModificationTypeValue.FIXED_WORKINGTIME.getId());
+		return StampingDao.getStampModificationTypeById(StampModificationTypeValue.FIXED_WORKINGTIME.getId());
+		//return StampModificationType.findById(StampModificationTypeValue.FIXED_WORKINGTIME.getId());
 	}
 
 	/** 
@@ -497,8 +502,9 @@ public class PersonDay extends BaseModel {
 		LocalDate beginMonth = this.date.dayOfMonth().withMinimumValue();
 		LocalDate endMonth = this.date.dayOfMonth().withMaximumValue();
 		
-		List<PersonDay> pdList = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? and pd.date >= ? and pd.date <= ? ORDER by pd.date",
-				person, beginMonth, endMonth).fetch();
+		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, beginMonth, endMonth, true);
+//		List<PersonDay> pdList = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? and pd.date >= ? and pd.date <= ? ORDER by pd.date",
+//				person, beginMonth, endMonth).fetch();
 		for(int i=1; i<pdList.size(); i++)
 		{
 			pdList.get(i).previousPersonDayInMonth = pdList.get(i-1);
@@ -561,8 +567,9 @@ public class PersonDay extends BaseModel {
 	public PersonDay previousPersonDay()
 	{
 		//TODO usato solo in PersonStampingDayRecap, vedere come ottimizzarlo
-		PersonDay lastPreviousPersonDayInMonth = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? " +
-				"and pd.date >= ? and pd.date < ? ORDER by pd.date DESC", person, date.dayOfMonth().withMinimumValue(), date).first();
+		PersonDay lastPreviousPersonDayInMonth = PersonDayDao.getPersonDayForRecap(person, Optional.fromNullable(date.dayOfMonth().withMinimumValue()), date);
+//		PersonDay lastPreviousPersonDayInMonth = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? " +
+//				"and pd.date >= ? and pd.date < ? ORDER by pd.date DESC", person, date.dayOfMonth().withMinimumValue(), date).first();
 		return lastPreviousPersonDayInMonth;
 	}
 
@@ -944,7 +951,8 @@ public class PersonDay extends BaseModel {
 		StampModificationType smt = null;
 		for(Stamping st : stampings){
 			if(st.stampModificationType != null && st.stampModificationType.equals(StampModificationTypeValue.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getStampModificationType()))
-				smt = StampModificationType.findById(StampModificationTypeValue.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getId());
+				smt = StampingDao.getStampModificationTypeById(StampModificationTypeValue.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getId());
+				//smt = StampModificationType.findById(StampModificationTypeValue.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getId());
 		}
 		return smt;
 	}
@@ -1040,7 +1048,8 @@ public class PersonDay extends BaseModel {
 			return;
 		
 		if(this.date.getDayOfMonth()==1){
-			this.previousPersonDayInMonth = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? and pd.date < ? ORDER by pd.date DESC", this.person, this.date).first();
+			this.previousPersonDayInMonth = PersonDayDao.getPersonDayForRecap(this.person, Optional.<LocalDate>absent(), this.date);
+			//this.previousPersonDayInMonth = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? and pd.date < ? ORDER by pd.date DESC", this.person, this.date).first();
 			if(this.previousPersonDayInMonth != null && this.previousPersonDayInMonth.date.isBefore( 
 					new LocalDate(this.previousPersonDayInMonth.date.getYear(), 
 							this.previousPersonDayInMonth.date.getMonthOfYear(), 
@@ -1070,7 +1079,8 @@ public class PersonDay extends BaseModel {
 				correctStamp.date = new LocalDateTime(this.previousPersonDayInMonth.date.getYear(), this.previousPersonDayInMonth.date.getMonthOfYear(), this.previousPersonDayInMonth.date.getDayOfMonth(), 23, 59);
 				correctStamp.way = WayType.out;
 				correctStamp.markedByAdmin = false;
-				correctStamp.stampModificationType = StampModificationType.findById(4l);
+				correctStamp.stampModificationType = StampingDao.getStampModificationTypeById(4l);
+				//correctStamp.stampModificationType = StampModificationType.findById(4l);
 				correctStamp.note = "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
 				correctStamp.personDay = this.previousPersonDayInMonth;
 				correctStamp.save();
@@ -1082,7 +1092,8 @@ public class PersonDay extends BaseModel {
 				newEntranceStamp.date = new LocalDateTime(this.date.getYear(), this.date.getMonthOfYear(), this.date.getDayOfMonth(),0,0);
 				newEntranceStamp.way = WayType.in;
 				newEntranceStamp.markedByAdmin = false;
-				newEntranceStamp.stampModificationType = StampModificationType.findById(4l);
+				newEntranceStamp.stampModificationType = StampingDao.getStampModificationTypeById(4l);
+				//newEntranceStamp.stampModificationType = StampModificationType.findById(4l);
 				newEntranceStamp.note = "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
 				newEntranceStamp.personDay = this;
 				newEntranceStamp.save();

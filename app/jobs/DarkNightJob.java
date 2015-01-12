@@ -1,5 +1,8 @@
 package jobs;
 
+import com.google.common.base.Optional;
+
+import dao.UserDao;
 import it.cnr.iit.epas.PersonUtility;
 import models.User;
 import play.Logger;
@@ -22,7 +25,8 @@ public class DarkNightJob extends Job{
 		
 		Logger.info("Start DarkNightJob");
 		
-		User userLogged = User.find("byUsername", "admin").first();	
+		User userLogged = UserDao.getUserByUsernameAndPassword("admin", Optional.<String>absent());
+//		User userLogged = User.find("byUsername", "admin").first();	
 
 		PersonUtility.fixPersonSituation(-1l, 2014, 4, userLogged, true);
 

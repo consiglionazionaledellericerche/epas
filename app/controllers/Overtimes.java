@@ -20,6 +20,7 @@ import play.Logger;
 import play.data.binding.As;
 import play.mvc.Controller;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
@@ -121,13 +122,13 @@ public class Overtimes extends Controller {
 		}
 		
 		for (Competence competence : body.competences) {
-			Competence oldCompetence = CompetenceDao.getCompetence(competence.person, year, month, competence.competenceCode);
+			Optional<Competence> oldCompetence = CompetenceDao.getCompetence(competence.person, year, month, competence.competenceCode);
 //			Competence oldCompetence = Competence.find("SELECT c FROM Competence c WHERE c.person = ? AND c.year = ? AND c.month = ? AND c.competenceCode = ?", 
 //					competence.person, year, month, competence.competenceCode).first();
-			if (oldCompetence != null) {
+			if (oldCompetence.isPresent()) {
 				// update the requested hours
-				oldCompetence.setValueApproved(competence.getValueApproved(), competence.getReason());
-				oldCompetence.save();
+				oldCompetence.get().setValueApproved(competence.getValueApproved(), competence.getReason());
+				oldCompetence.get().save();
 				
 				Logger.debug("Aggiornata competenza %s", oldCompetence);
 			} else {
@@ -196,15 +197,15 @@ public class Overtimes extends Controller {
 		Logger.debug("find  CompetenceCode %s con CompetenceCode.code=%s", competenceCode, competenceCode.code);	
 		
 		for (Person person : body.persons) {
-			Competence competence = CompetenceDao.getCompetence(person, year, month, competenceCode);
+			Optional<Competence> competence = CompetenceDao.getCompetence(person, year, month, competenceCode);
 //			Competence competence = Competence.find("SELECT c FROM Competence c WHERE c.person = ? AND c.year = ? AND c.month = ? AND c.competenceCode = ?", 
 //					person, year, month, competenceCode).first();
 			Logger.debug("find  Competence %s per person=%s, year=%s, month=%s, competenceCode=%s", competence, person, year, month, competenceCode);	
 
-			if ((competence != null) && (competence.valueApproved != 0)) {
+			if ((competence.isPresent()) && (competence.get().valueApproved != 0)) {
 				
-				overtimesMonth.put(person.surname + " " + person.name, competence.reason != null ? competence.reason : "", competence.valueApproved);
-				Logger.debug("Inserita riga person=%s reason=%s and  valueApproved=%s", person, competence.reason, competence.valueApproved);
+				overtimesMonth.put(person.surname + " " + person.name, competence.get().reason != null ? competence.get().reason : "", competence.get().valueApproved);
+				Logger.debug("Inserita riga person=%s reason=%s and  valueApproved=%s", person, competence.get().reason, competence.get().valueApproved);
 			} /*else {
 				overtimesMonth.put(person.surname + " " + person.name, "cancella", 0);
 				Logger.debug("Inserita riga person=%s reason='' and  valueApproved=0", person);

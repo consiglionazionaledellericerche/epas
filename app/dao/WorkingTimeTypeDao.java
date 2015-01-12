@@ -9,6 +9,11 @@ import com.mysema.query.jpa.JPQLQuery;
 import models.WorkingTimeType;
 import models.query.QWorkingTimeType;
 
+/**
+ * 
+ * @author dario
+ *
+ */
 public class WorkingTimeTypeDao {
 
 	/**
@@ -45,5 +50,17 @@ public class WorkingTimeTypeDao {
 		final JPQLQuery query = ModelQuery.queryFactory().from(wtt)
 				.where(wtt.id.eq(id));
 		return query.singleResult(wtt);
+	}
+	
+	
+	/**
+	 * 
+	 * @return la lista degli orari di lavoro presenti di default sul database perchè validi a livello nazionale per il CNR
+	 */
+	public static List<WorkingTimeType> getDefaultWorkingTimeType(){
+		QWorkingTimeType wtt = QWorkingTimeType.workingTimeType;
+		final JPQLQuery query = ModelQuery.queryFactory().from(wtt)
+				.where(wtt.office.isNull()).orderBy(wtt.description.asc());
+		return query.list(wtt);
 	}
 }

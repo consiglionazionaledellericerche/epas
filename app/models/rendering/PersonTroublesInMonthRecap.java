@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.joda.time.LocalDate;
 
+import dao.PersonDayInTroubleDao;
 import models.Person;
 import models.PersonDayInTrouble;
 
@@ -36,9 +37,10 @@ public class PersonTroublesInMonthRecap {
 	 */
 	public PersonTroublesInMonthRecap(Person person, LocalDate monthBegin, LocalDate monthEnd) {
 		this.person = person;
-		List<PersonDayInTrouble> troubles = PersonDayInTrouble.find(
-				"select trouble from PersonDayInTrouble trouble, PersonDay pd where trouble.personDay = pd and pd.person = ? and trouble.fixed = false and pd.date between ? and ? order by pd.date",
-				person, monthBegin, monthEnd).fetch();
+		List<PersonDayInTrouble> troubles = PersonDayInTroubleDao.getPersonDayInTroubleInPeriod(person, monthBegin, monthEnd, false);
+//		List<PersonDayInTrouble> troubles = PersonDayInTrouble.find(
+//				"select trouble from PersonDayInTrouble trouble, PersonDay pd where trouble.personDay = pd and pd.person = ? and trouble.fixed = false and pd.date between ? and ? order by pd.date",
+//				person, monthBegin, monthEnd).fetch();
 		
 		for(PersonDayInTrouble trouble : troubles)
 		{

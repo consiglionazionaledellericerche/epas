@@ -1,5 +1,9 @@
 package models.rendering;
 
+import com.google.common.base.Optional;
+
+import dao.CompetenceCodeDao;
+import dao.CompetenceDao;
 import manager.recaps.PersonResidualMonthRecap;
 import manager.recaps.PersonResidualYearRecap;
 import models.Competence;
@@ -51,11 +55,14 @@ public class PersonMonthCompetenceRecap {
 	 */
 	private static int getHolidaysAvailability(Person person, int year, int month){
 		int holidaysAvailability = 0;
-		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "208").first();
-		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
-				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
-		if(competence != null)
-			holidaysAvailability = competence.valueApproved;
+		CompetenceCode cmpCode = CompetenceCodeDao.getCompetenceCodeByCode("208");
+		//CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "208").first();
+		Optional<Competence> competence = CompetenceDao.getCompetence(person, year, month, cmpCode);
+		
+//		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
+//				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
+		if(competence.isPresent())
+			holidaysAvailability = competence.get().valueApproved;
 		else
 			holidaysAvailability = 0;
 		return holidaysAvailability;
@@ -70,13 +77,14 @@ public class PersonMonthCompetenceRecap {
 	 */
 	private static int getWeekDayAvailability(Person person, @Valid int year, @Valid int month){
 		int weekDayAvailability = 0;
-		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "207").first();
+		CompetenceCode cmpCode = CompetenceCodeDao.getCompetenceCodeByCode("207");
+		//CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "207").first();
 		Logger.debug("Il codice competenza é: %s", cmpCode);
-
-		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
-				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
-		if(competence != null)
-			weekDayAvailability = competence.valueApproved;
+		Optional<Competence> competence = CompetenceDao.getCompetence(person, year, month, cmpCode);
+//		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
+//				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
+		if(competence.isPresent())
+			weekDayAvailability = competence.get().valueApproved;
 		else
 			weekDayAvailability = 0;
 		return weekDayAvailability;
@@ -91,12 +99,14 @@ public class PersonMonthCompetenceRecap {
 	 */
 	private static int getDaylightWorkingDaysOvertime(Person person, int year, int month){
 		int daylightWorkingDaysOvertime = 0;
-		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "S1").first();
+		CompetenceCode cmpCode = CompetenceCodeDao.getCompetenceCodeByCode("S1");
+		//CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "S1").first();
 		Logger.debug("Il codice competenza é: %s", cmpCode);
-		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
-				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
-		if(competence != null)
-			daylightWorkingDaysOvertime = competence.valueApproved;
+		Optional<Competence> competence = CompetenceDao.getCompetence(person, year, month, cmpCode);
+//		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
+//				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
+		if(competence.isPresent())
+			daylightWorkingDaysOvertime = competence.get().valueApproved;
 		else
 			daylightWorkingDaysOvertime = 0;
 		return daylightWorkingDaysOvertime;
@@ -111,12 +121,14 @@ public class PersonMonthCompetenceRecap {
 	 */
 	private static int getDaylightholidaysOvertime(Person person, int year, int month){
 		int daylightholidaysOvertime = 0;
-		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "S2").first();
+		CompetenceCode cmpCode = CompetenceCodeDao.getCompetenceCodeByCode("S2");
+		//CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "S2").first();
 		Logger.debug("Il codice competenza é: %s", cmpCode);
-		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
-				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
-		if(competence != null)
-			daylightholidaysOvertime = competence.valueApproved;
+		Optional<Competence> competence = CompetenceDao.getCompetence(person, year, month, cmpCode); 
+//		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
+//				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
+		if(competence.isPresent())
+			daylightholidaysOvertime = competence.get().valueApproved;
 		else
 			daylightholidaysOvertime = 0;
 		return daylightholidaysOvertime;
@@ -131,12 +143,14 @@ public class PersonMonthCompetenceRecap {
 	 */
 	private static int getOrdinaryShift(Person person, int year, int month){
 		int ordinaryShift = 0;
-		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "T1").first();
+		CompetenceCode cmpCode = CompetenceCodeDao.getCompetenceCodeByCode("T1");
+		//CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "T1").first();
 		Logger.debug("Il codice competenza é: %s", cmpCode);
-		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
-				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
-		if(competence != null)
-			ordinaryShift = competence.valueApproved;
+		Optional<Competence> competence = CompetenceDao.getCompetence(person, year, month, cmpCode);
+//		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
+//				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
+		if(competence.isPresent())
+			ordinaryShift = competence.get().valueApproved;
 		else
 			ordinaryShift = 0;
 		return ordinaryShift;
@@ -151,14 +165,16 @@ public class PersonMonthCompetenceRecap {
 	 */
 	private static int getNightShift(Person person, int year, int month){
 		int nightShift = 0;
-		CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "T2").first();
+		CompetenceCode cmpCode = CompetenceCodeDao.getCompetenceCodeByCode("T2");
+		//CompetenceCode cmpCode = CompetenceCode.find("Select cmp from CompetenceCode cmp where cmp.code = ?", "T2").first();
 		Logger.debug("Il codice competenza é: %s", cmpCode);
 		if(cmpCode == null)
 			return 0;
-		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
-				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
-		if(competence != null)
-			nightShift = competence.valueApproved;
+		Optional<Competence> competence = CompetenceDao.getCompetence(person, year, month, cmpCode);
+//		Competence competence = Competence.find("Select comp from Competence comp, CompetenceCode cmpCode where comp.person = ? and " +
+//				"comp.year = ? and comp.month = ? and comp.competenceCode = cmpCode and cmpCode = ?", person, year, month, cmpCode).first();
+		if(competence.isPresent())
+			nightShift = competence.get().valueApproved;
 		else
 			nightShift = 0;
 		return nightShift;

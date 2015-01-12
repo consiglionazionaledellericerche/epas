@@ -18,6 +18,11 @@ import com.google.common.base.Optional;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 
+/**
+ * 
+ * @author dario
+ *
+ */
 public class CompetenceDao {
 
 	/**
@@ -82,10 +87,8 @@ public class CompetenceDao {
 			condition.and(competence.person.eq(person.get()));
 		final JPQLQuery query = ModelQuery.queryFactory().from(competence)
 				.where(condition.and(competence.year.eq(year).and(competence.competenceCode.in(codeList))));
-		if(query.list(competence.valueApproved.sum()).get(0) != null)
-			return query.list(competence.valueApproved.sum()).get(0);
-		else 
-			return 0;
+		return query.singleResult(competence.valueApproved.sum());
+		
 	}
 	
 	/**
@@ -96,13 +99,13 @@ public class CompetenceDao {
 	 * @param code
 	 * @return la competenza relativa ai parametri passati alla funzione
 	 */
-	public static Competence getCompetence(Person person, Integer year, Integer month, CompetenceCode code){
+	public static Optional<Competence> getCompetence(Person person, Integer year, Integer month, CompetenceCode code){
 		QCompetence competence = QCompetence.competence;
 		final JPQLQuery query = ModelQuery.queryFactory().from(competence)
 				.where(competence.person.eq(person).
 						and(competence.year.eq(year).and(competence.month.eq(month).and(competence.competenceCode.eq(code)))));
 		
-		return query.singleResult(competence);
+		return Optional.fromNullable(query.singleResult(competence));
 		
 	}
 	
@@ -118,9 +121,11 @@ public class CompetenceDao {
 	 * Se il booleano untilThisMonth è true, viene presa la lista delle competenze dall'inizio dell'anno fino a quel mese compreso, se è false
 	 * solo quelle del mese specificato
 	 */
-	public static List<Competence> getCompetences(Integer year, Integer month, List<String> code, Office office, boolean untilThisMonth){
+	public static List<Competence> getCompetences(Optional<Person> person, Integer year, Integer month, List<String> code, Office office, boolean untilThisMonth){
 		QCompetence competence = QCompetence.competence;
 		final BooleanBuilder condition = new BooleanBuilder();
+		if(person.isPresent())
+			condition.and(competence.person.eq(person.get()));
 		if(untilThisMonth)
 			condition.and(competence.month.loe(month));
 		else
@@ -129,6 +134,36 @@ public class CompetenceDao {
 				.where(condition.and(competence.year.eq(year)
 						.and(competence.competenceCode.code.in(code)
 								.and(competence.person.office.eq(office)))));
+		return query.list(competence);
+	}
+	
+	
+	/**
+	 * 
+	 * @param year
+	 * @return la lista delle competenze presenti nell'anno
+	 */
+	public static List<Competence> getCompetenceInYear(Integer year){
+		QCompetence competence = QCompetence.competence;
+		JPQLQuery query = ModelQuery.queryFactory().from(competence)
+				.where(competence.year.eq(year));
+		query.orderBy(competence.competenceCode.code.asc());
+		return query.list(competence);
+	}
+	
+	
+	/**
+	 * 
+	 * @param person
+	 * @param year
+	 * @param month
+	 * @return la lista di tutte le competenze di una persona nel mese month e nell'anno year che abbiano un valore approvato > 0
+	 */
+	public static List<Competence> getAllCompetenceForPerson(Person person, Integer year, Integer month){
+		QCompetence competence = QCompetence.competence;
+		JPQLQuery query = ModelQuery.queryFactory().from(competence)
+				.where(competence.year.eq(year).and(competence.person.eq(person)
+						.and(competence.month.eq(month).and(competence.valueApproved.gt(0)))));
 		return query.list(competence);
 	}
 	

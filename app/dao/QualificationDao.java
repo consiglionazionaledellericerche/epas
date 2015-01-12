@@ -9,9 +9,15 @@ import com.google.gdata.util.common.base.Preconditions;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 
+import models.AbsenceType;
 import models.Qualification;
 import models.query.QQualification;
 
+/**
+ * 
+ * @author dario
+ *
+ */
 public class QualificationDao {
 
 	
@@ -72,7 +78,31 @@ public class QualificationDao {
 		
 		QQualification qual = QQualification.qualification1;
 		final JPQLQuery query = ModelQuery.queryFactory().from(qual);
-		
+		return query.list(qual);
+	}
+
+	 /** @param abt
+	  * @return la lista di qualifiche che possono usufruire del codice di assenza abt
+	  */
+	public static List<Qualification> getQualificationByAbsenceTypeLinked(AbsenceType abt){
+		QQualification qual = QQualification.qualification1;
+		final JPQLQuery query = ModelQuery.queryFactory().from(qual)
+				.where(qual.absenceTypes.contains(abt));
+		return query.list(qual);
+	}
+	
+	
+	/**
+	 * 
+	 * @param limit
+	 * @return la lista di qualifiche superiori o uguali al limite passato come parametro (da usare, ad esempio, per ritornare la
+	 * lista delle qualifiche dei tecnici che hanno qualifica superiore a 3)
+	 */
+	public static List<Qualification> getQualificationGreaterThan(Integer limit){
+		QQualification qual = QQualification.qualification1;
+		final JPQLQuery query = ModelQuery.queryFactory().from(qual)
+				.where(qual.qualification.goe(limit));
+
 		return query.list(qual);
 	}
 }

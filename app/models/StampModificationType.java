@@ -9,6 +9,9 @@ import javax.persistence.Table;
 
 import org.hibernate.envers.Audited;
 
+import com.google.common.base.Optional;
+
+import dao.StampingDao;
 import models.base.BaseModel;
 import net.sf.oval.constraint.MinLength;
 import play.data.validation.Required;
@@ -41,12 +44,13 @@ public class StampModificationType extends BaseModel{
 		if(code==null)
 			return null;
 		
-		StampModificationType smt = StampModificationType.find("byCode", code).first();
-		if(smt==null)
+		Optional<StampModificationType> smt = StampingDao.getStampModificationTypeByCode(code);
+		//StampModificationType smt = StampModificationType.find("byCode", code).first();
+		if(!smt.isPresent())
 		{
 			return null;
 		}
-		return smt;
+		return smt.get();
 	}
 
 }

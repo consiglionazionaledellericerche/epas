@@ -380,12 +380,13 @@ public class RequestInit extends Controller {
 		 */
 		List<Integer> years = Lists.newArrayList();
 		Integer actualYear = new LocalDate().getYear();
-		ConfGeneral yearBegin = ConfGeneralDao.getConfGeneralByField(ConfigurationFields.InitUseProgram.description);
+		Optional<ConfGeneral> yearInitUseProgram = ConfGeneralDao.getConfGeneralByField(ConfigurationFields.InitUseProgram.description, Security.getOfficeAllowed().get(0));
 //		ConfGeneral yearBegin = ConfGeneral.find("Select c from ConfGeneral c where c.field = ? ", 
 //				ConfigurationFields.InitUseProgram.description).first();
+		
 		Integer yearBeginProgram;
-		if(yearBegin!=null){
-			yearBeginProgram = new Integer(yearBegin.fieldValue.substring(0, 4));
+		if(yearInitUseProgram.isPresent()){
+			yearBeginProgram = new Integer(yearInitUseProgram.get().fieldValue.substring(0, 4));
 		}
 		else{
 			yearBeginProgram = new LocalDate().getYear();
