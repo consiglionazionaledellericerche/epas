@@ -13,9 +13,13 @@ import models.Contract;
 import models.ContractYearRecap;
 import models.Person;
 import models.VacationPeriod;
+import models.enumerate.JustifiedTimeAtWork;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
+
+import dao.AbsenceDao;
 import play.Logger;
 
 /**
@@ -376,11 +380,14 @@ public class VacationsRecap {
 						contract.person, inter.getBegin(), inter.getEnd(), ab.code).fetch();
 		*/
 		
-		List<Absence> absences = Absence.find(
-				"SELECT ab "
-						+ "FROM Absence ab "
-						+ "WHERE ab.personDay.person = ? AND ( ab.personDay.date between ? AND ? ) AND ab.absenceType.code = ? order by ab.personDay.date",
-						contract.person, contractInterInterval.getBegin(), contractInterInterval.getEnd(), ab.code).fetch();
+		
+		List<Absence> absences = AbsenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(contract.person), Optional.fromNullable(ab.code), 
+				contractInterInterval.getBegin(), contractInterInterval.getEnd(), Optional.<JustifiedTimeAtWork>absent(), false, true);
+//		List<Absence> absences = Absence.find(
+//				"SELECT ab "
+//						+ "FROM Absence ab "
+//						+ "WHERE ab.personDay.person = ? AND ( ab.personDay.date between ? AND ? ) AND ab.absenceType.code = ? order by ab.personDay.date",
+//						contract.person, contractInterInterval.getBegin(), contractInterInterval.getEnd(), ab.code).fetch();
 		
 		
 		return absences;	

@@ -22,6 +22,9 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
+import dao.ContractDao;
+import dao.WorkingTimeTypeDao;
+import dao.WorkingTimeTypeDayDao;
 import play.data.validation.Required;
 
 
@@ -83,8 +86,9 @@ public class WorkingTimeType extends BaseModel {
 	 */
 	public boolean getHolidayFromWorkinTimeType(int dayOfWeek, WorkingTimeType wtt){
 		boolean holiday = false;
-		WorkingTimeTypeDay wttd = WorkingTimeTypeDay.find("Select wttd from WorkingTimeTypeDay wttd where wttd.workingTimeType = ?" +
-				" and wttd.dayOfWeek = ?", wtt, dayOfWeek).first();
+		WorkingTimeTypeDay wttd = WorkingTimeTypeDayDao.getWorkingTimeTypeDayByDayOfWeek(wtt, dayOfWeek);
+//		WorkingTimeTypeDay wttd = WorkingTimeTypeDay.find("Select wttd from WorkingTimeTypeDay wttd where wttd.workingTimeType = ?" +
+//				" and wttd.dayOfWeek = ?", wtt, dayOfWeek).first();
 		holiday = wttd.holiday;
 		return holiday;
 	}
@@ -107,8 +111,9 @@ public class WorkingTimeType extends BaseModel {
 	 */
 	public int getMinimalTimeForLunch(int dayOfWeek, WorkingTimeType wtt){
 		int minTimeForLunch = 0;
-		WorkingTimeTypeDay wttd = WorkingTimeTypeDay.find("Select wttd from WorkingTimeTypeDay wttd where wttd.workingTimeType = ?" +
-				" and wttd.dayOfWeek = ?", wtt, dayOfWeek).first();
+		WorkingTimeTypeDay wttd = WorkingTimeTypeDayDao.getWorkingTimeTypeDayByDayOfWeek(wtt, dayOfWeek);
+//		WorkingTimeTypeDay wttd = WorkingTimeTypeDay.find("Select wttd from WorkingTimeTypeDay wttd where wttd.workingTimeType = ?" +
+//				" and wttd.dayOfWeek = ?", wtt, dayOfWeek).first();
 		minTimeForLunch = wttd.mealTicketTime;
 		return minTimeForLunch;
 	}
@@ -121,8 +126,9 @@ public class WorkingTimeType extends BaseModel {
 	 */
 	public int getBreakTime(int dayOfWeek, WorkingTimeType wtt){
 		int breakTime = 0;
-		WorkingTimeTypeDay wttd = WorkingTimeTypeDay.find("Select wttd from WorkingTimeTypeDay wttd where wttd.workingTimeType = ?" +
-				"and wttd.dayOfWeek = ?", wtt, dayOfWeek).first();
+		WorkingTimeTypeDay wttd = WorkingTimeTypeDayDao.getWorkingTimeTypeDayByDayOfWeek(wtt, dayOfWeek);
+//		WorkingTimeTypeDay wttd = WorkingTimeTypeDay.find("Select wttd from WorkingTimeTypeDay wttd where wttd.workingTimeType = ?" +
+//				"and wttd.dayOfWeek = ?", wtt, dayOfWeek).first();
 		breakTime = wttd.breakTicketTime;
 		
 		return breakTime;
@@ -133,10 +139,11 @@ public class WorkingTimeType extends BaseModel {
 	@Transient
 	public List<Contract> getAssociatedContract() {
 
-		List<Contract> contractList = Contract.find(
-				"Select distinct c from Contract c "
-						+ "left outer join fetch c.contractWorkingTimeType as cwtt "
-						+ "where cwtt.workingTimeType = ?", this).fetch();
+		List<Contract> contractList = ContractDao.getContractListByWorkingTimeType(this);
+//		List<Contract> contractList = Contract.find(
+//				"Select distinct c from Contract c "
+//						+ "left outer join fetch c.contractWorkingTimeType as cwtt "
+//						+ "where cwtt.workingTimeType = ?", this).fetch();
 
 		return contractList;
 	}
@@ -195,8 +202,9 @@ public class WorkingTimeType extends BaseModel {
 	@Transient
 	public static List<WorkingTimeType> getDefaultWorkingTimeTypes() {
 		
-		List<WorkingTimeType> defaultList = WorkingTimeType.find(
-				"select wtt from WorkingTimeType wtt where wtt.office is null order by description").fetch();
+		List<WorkingTimeType> defaultList = WorkingTimeTypeDao.getDefaultWorkingTimeType();
+//		List<WorkingTimeType> defaultList = WorkingTimeType.find(
+//				"select wtt from WorkingTimeType wtt where wtt.office is null order by description").fetch();
 		return defaultList;
 		
 	}

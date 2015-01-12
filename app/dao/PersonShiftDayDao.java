@@ -10,6 +10,11 @@ import models.Person;
 import models.PersonShiftDay;
 import models.query.QPersonShiftDay;
 
+/**
+ * 
+ * @author dario
+ *
+ */
 public class PersonShiftDayDao {
 
 	/**

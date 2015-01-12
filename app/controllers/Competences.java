@@ -134,14 +134,15 @@ public class Competences extends Controller{
 
 		
 		for(Person p : activePersons){
+			Competence competence = null;
 			for(CompetenceCode c : p.competenceCode){
-				Competence comp = CompetenceDao.getCompetence(p, year, month, c);
+				Optional<Competence> comp = CompetenceDao.getCompetence(p, year, month, c);
 //				Competence comp = Competence.find("Select comp from Competence comp where comp.person = ? and comp.month = ? and comp.year = ?" +
 //						"and comp.competenceCode = ?", p, month, year, c).first();
-				if(comp == null){
-					comp = new Competence(p, c, year, month);
-					comp.valueApproved = 0;
-					comp.save();
+				if(!comp.isPresent()){
+					competence = new Competence(p, c, year, month);
+					competence.valueApproved = 0;
+					competence.save();
 				}
 					
 			}
@@ -150,7 +151,7 @@ public class Competences extends Controller{
 		code.add("S1");
 		code.add("S2");
 		code.add("S3");
-		List<Competence> competenceList = CompetenceDao.getCompetences(year, month, code, office, false);
+		List<Competence> competenceList = CompetenceDao.getCompetences(Optional.<Person>absent(),year, month, code, office, false);
 //		List<Competence> competenceList = 
 //				Competence.find("Select comp from Competence comp, CompetenceCode code where comp.year = ? and comp.month = ? " +
 //				"and comp.competenceCode = code and code.code in (?,?,?) and comp.person.office = ?", 
@@ -165,7 +166,7 @@ public class Competences extends Controller{
 			totaleOreStraordinarioMensile = totaleOreStraordinarioMensile + comp.valueApproved;
 		}
 		
-		List<Competence> competenceYearList = CompetenceDao.getCompetences(year, month, code, office, true);
+		List<Competence> competenceYearList = CompetenceDao.getCompetences(Optional.<Person>absent(),year, month, code, office, true);
 //		List<Competence> competenceYearList = 
 //				Competence.find("Select comp from Competence comp, CompetenceCode code where comp.year = ? and comp.month <= ? " +
 //				"and comp.competenceCode = code and code.code in (?,?,?) and comp.person.office = ?", 
@@ -419,7 +420,7 @@ public class Competences extends Controller{
 			Integer difference = 0;
 			Integer overtime = 0;
 			
-			List<PersonDay> personDayList = PersonDayDao.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), false);
+			List<PersonDay> personDayList = PersonDayDao.getPersonDayInPeriod(p, beginMonth, beginMonth.dayOfMonth().withMaximumValue(), false);
 //			List<PersonDay> personDayList = PersonDay.find("Select pd from PersonDay pd where pd.date between ? and ? and pd.person = ?", 
 //					beginMonth, beginMonth.dayOfMonth().withMaximumValue(), p).fetch();
 			for(PersonDay pd : personDayList){
@@ -435,12 +436,12 @@ public class Competences extends Controller{
 			}
 	//		CompetenceCode code = CompetenceCode.find("Select code from CompetenceCode code where code.code = ?", "S1").first();
 			
-			Competence comp = CompetenceDao.getCompetence(p, year, month, code);
+			Optional<Competence> comp = CompetenceDao.getCompetence(p, year, month, code);
 //			Competence comp = Competence.find("Select comp from Competence comp where comp.person = ? " +
 //					"and comp.year = ? and comp.month = ? and comp.competenceCode.code = ?", 
 //					p, year, month, code.code).first();
-			if(comp != null)
-				overtime = comp.valueApproved;
+			if(comp.isPresent())
+				overtime = comp.get().valueApproved;
 			else
 				overtime = 0;
 			builder.put(p, "Giorni di Presenza", daysAtWork);
@@ -855,7 +856,15 @@ public class Competences extends Controller{
 	public static void getOvertimeInYear(int year) throws IOException{
 		
 		rules.checkIfPermitted("");
-		List<Person> personList = Person.getActivePersonsinYear(year, Security.getOfficeAllowed(), true);
+		Office office = Security.getUser().get().person.office;
+		SimpleResults<Person> simpleResults = PersonDao.listForCompetence(CompetenceCodeDao.getCompetenceCodeByCode("S1"), 
+				Optional.fromNullable(""), 
+				Sets.newHashSet(office), 
+				false, 
+				new LocalDate(year, 1, 1), 
+				new LocalDate(year, 12, 1).dayOfMonth().withMaximumValue());
+		
+		List<Person> personList = simpleResults.list();
 		FileInputStream inputStream = null;
 		File tempFile = File.createTempFile("straordinari"+year,".csv" );
 		inputStream = new FileInputStream( tempFile );

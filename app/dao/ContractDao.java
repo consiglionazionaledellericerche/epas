@@ -2,11 +2,14 @@ package dao;
 
 import java.util.List;
 
+import org.joda.time.LocalDate;
+
 import helpers.ModelQuery;
 
 import com.google.common.base.Optional;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
+import com.sun.org.apache.xml.internal.utils.SuballocatedByteVector;
 
 import models.Contract;
 import models.ContractStampProfile;
@@ -14,12 +17,19 @@ import models.ContractWorkingTimeType;
 import models.InitializationAbsence;
 import models.InitializationTime;
 import models.Person;
+import models.WorkingTimeType;
 import models.query.QContract;
 import models.query.QContractStampProfile;
 import models.query.QContractWorkingTimeType;
 import models.query.QInitializationAbsence;
 import models.query.QInitializationTime;
+import models.query.QWorkingTimeType;
 
+/**
+ * 
+ * @author dario
+ *
+ */
 public class ContractDao {
 
 	/**
@@ -36,6 +46,22 @@ public class ContractDao {
 	
 	/**
 	 * 
+	 * @param begin
+	 * @param end
+	 * @return la lista di contratti che sono attivi nel periodo compreso tra begin e end
+	 */
+	public static List<Contract> getActiveContractsInPeriod(LocalDate begin, LocalDate end){
+		QContract contract = QContract.contract;
+		final JPQLQuery query = ModelQuery.queryFactory().from(contract)
+				.where(contract.endContract.isNull().andAnyOf(
+						contract.expireContract.isNull().and(contract.beginContract.loe(end)), 
+						contract.expireContract.isNotNull().and(contract.beginContract.loe(end).and(contract.expireContract.goe(begin))))
+						.or(contract.endContract.isNotNull().and(contract.beginContract.loe(end).and(contract.endContract.goe(begin)))));
+		return query.list(contract);
+	}
+	
+	/**
+	 * 
 	 * @param person
 	 * @return la lista di contratti associati alla persona person passata come parametro ordinati per data inizio contratto
 	 */
@@ -46,6 +72,20 @@ public class ContractDao {
 		return query.list(contract);
 	}
 	
+	
+	/**
+	 * 
+	 * @param wtt
+	 * @return la lista di contratti associata al workingTimeType passato come parametro
+	 */
+	public static List<Contract> getContractListByWorkingTimeType(WorkingTimeType wtt){
+		QContractWorkingTimeType cwtt = QContractWorkingTimeType.contractWorkingTimeType;
+		QContract contract = QContract.contract;
+		final JPQLQuery query = ModelQuery.queryFactory().from(contract).
+				leftJoin(contract.contractWorkingTimeType,cwtt).where(cwtt.workingTimeType.eq(wtt));
+						
+		return query.list(contract);
+	}
 	
 	/******************************************************************************************************************************************/
 	/*Inserisco in questa parte del Dao le query relative ai ContractStampProfile per evitare di creare una classe specifica che contenga     */

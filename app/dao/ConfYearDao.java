@@ -8,9 +8,17 @@ import models.ConfYear;
 import models.Office;
 import models.query.QConfYear;
 
+
 import com.google.common.base.Optional;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
+
+
+/**
+ * 
+ * @author dario
+ *
+ */
 
 public class ConfYearDao {
 
@@ -41,7 +49,7 @@ public class ConfYearDao {
 	 * @param field
 	 * @return il conf year di un certo ufficio in un certo anno rispondente al parametro field
 	 */
-	public static ConfYear getConfYearField(Optional<Office> office, Integer year, String field){
+	public static Optional<ConfYear> getConfYearField(Optional<Office> office, Integer year, String field){
 		final BooleanBuilder condition = new BooleanBuilder();
 		QConfYear confYear = QConfYear.confYear;
 		final JPQLQuery query = ModelQuery.queryFactory().from(confYear);
@@ -51,7 +59,7 @@ public class ConfYearDao {
 		condition.and(confYear.year.eq(year));
 		condition.and(confYear.field.eq(field));
 		query.where(condition);
-		return query.singleResult(confYear);
+		return Optional.fromNullable(query.singleResult(confYear));
 	}
 	
 	/**

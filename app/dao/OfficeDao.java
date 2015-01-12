@@ -11,6 +11,11 @@ import com.mysema.query.jpa.JPQLQuery;
 import models.Office;
 import models.query.QOffice;
 
+/**
+ * 
+ * @author dario
+ *
+ */
 public class OfficeDao {
 
 	/**
@@ -78,6 +83,17 @@ public class OfficeDao {
 		QOffice office = QOffice.office1;
 		final JPQLQuery query = ModelQuery.queryFactory().from(office)
 				.where(office.code.eq(code));
+		return query.list(office);
+	}
+	
+	/**
+	 * 
+	 * @return la lista delle aree presenti in anagrafica (per convenzione sono quelle col campo office = null)
+	 */
+	public static List<Office> getAreas(){
+		QOffice office = QOffice.office1;
+		final JPQLQuery query = ModelQuery.queryFactory().from(office)
+				.where(office.office.isNull());
 		return query.list(office);
 	}
 }

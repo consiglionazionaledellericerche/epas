@@ -10,6 +10,11 @@ import models.Person;
 import models.PersonReperibilityDay;
 import models.query.QPersonReperibilityDay;
 
+/**
+ * 
+ * @author dario
+ *
+ */
 public class PersonReperibilityDayDao {
 
 	/**

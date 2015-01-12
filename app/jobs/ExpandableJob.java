@@ -2,6 +2,9 @@ package jobs;
 
 import org.apache.commons.mail.EmailException;
 
+import com.google.common.base.Optional;
+
+import dao.UserDao;
 import models.User;
 import it.cnr.iit.epas.PersonUtility;
 import play.Logger;
@@ -15,7 +18,8 @@ public class ExpandableJob extends Job{
 
 	public void doJob(){
 		Logger.info("Start Job expandable");
-		User userLogged = User.find("byUsername", "admin").first();	
+		User userLogged = UserDao.getUserByUsernameAndPassword("admin", Optional.<String>absent());
+//		User userLogged = User.find("byUsername", "admin").first();	
 		try {
 			PersonUtility.checkNoAbsenceNoStamping(-1l, 2014, 1, userLogged);
 		}

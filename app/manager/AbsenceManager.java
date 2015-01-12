@@ -9,6 +9,12 @@ import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
 
+
+
+import dao.AbsenceTypeDao;
+import play.Logger;
+
+
 /**
  * 
  * @author alessandro
@@ -34,13 +40,16 @@ public class AbsenceManager {
 		}
 
 		if(vr.vacationDaysLastYearNotYetUsed > 0)
-			return AbsenceType.find("byCode", "31").first();
+			return AbsenceTypeDao.getAbsenceTypeByCode("31");
+			//return AbsenceType.find("byCode", "31").first();
 
 		if(vr.persmissionNotYetUsed > 0)
-			return AbsenceType.find("byCode", "94").first();
+			return AbsenceTypeDao.getAbsenceTypeByCode("94");
+			//return AbsenceType.find("byCode", "94").first();
 		
 		if(vr.vacationDaysCurrentYearNotYetUsed > 0)
-			return AbsenceType.find("byCode", "32").first();
+			return AbsenceTypeDao.getAbsenceTypeByCode("32");
+			//return AbsenceType.find("byCode", "32").first();
 
 		return null;
 	}
@@ -67,7 +76,8 @@ public class AbsenceManager {
 		}
 		
 		if(vr.vacationDaysCurrentYearNotYetUsed > 0)
-			return AbsenceType.find("byCode", "32").first();
+			return AbsenceTypeDao.getAbsenceTypeByCode("32");
+			//return AbsenceType.find("byCode", "32").first();
 		
 		return null;
 		
@@ -92,7 +102,8 @@ public class AbsenceManager {
 		}
 		
 		if(vr.vacationDaysLastYearNotYetUsed > 0)
-			return AbsenceType.find("byCode", "31").first();
+			return AbsenceTypeDao.getAbsenceTypeByCode("31");
+			//return AbsenceType.find("byCode", "31").first();
 
 		return null;
 	}
@@ -116,7 +127,8 @@ public class AbsenceManager {
 		}
 		
 		if(vr.persmissionNotYetUsed > 0)
-			return AbsenceType.find("byCode", "94").first();
+			return AbsenceTypeDao.getAbsenceTypeByCode("94");
+			//return AbsenceType.find("byCode", "94").first();
 
 		return null;
 	}

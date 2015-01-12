@@ -29,6 +29,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import dao.PersonDao;
+
 /**
  * @author arianna
  *
@@ -78,7 +80,8 @@ public class JsonShiftPeriodsBinder implements TypeBinder<ShiftPeriods> {
 				if (!jsonObject.get("cancelled").getAsBoolean()) {
 					// validate person id
 					personId = jsonObject.get("id").getAsLong();
-					person = Person.findById(personId);
+					person = PersonDao.getPersonById(personId);
+					//person = Person.findById(personId);
 					if (person == null) {
 						throw new IllegalArgumentException(String.format("Person with id = %s not found", personId));
 					}

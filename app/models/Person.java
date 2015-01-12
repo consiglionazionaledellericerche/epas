@@ -47,6 +47,11 @@ import com.google.common.collect.FluentIterable;
 
 import controllers.Secure;
 import controllers.Security;
+import dao.ContractDao;
+import dao.PersonDao;
+import dao.PersonDayDao;
+import dao.PersonMonthRecapDao;
+import dao.QualificationDao;
 
 /**
  * @author cristian
@@ -281,7 +286,8 @@ public class Person extends BaseModel implements Comparable<Person>{
 		}
 		
 		//FIXME sommani aprile 2014, lui ha due contratti ma nello heap ce ne sono due identici e manca quello nuovo.
-		List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ?", this).fetch();
+		List<Contract> contractList = ContractDao.getPersonContractList(this);
+		//List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ?", this).fetch();
 		//this.contracts = contractList;
 		for(Contract c : contractList)
 		{
@@ -395,7 +401,8 @@ public class Person extends BaseModel implements Comparable<Person>{
 	{
 		//TODO usare getMonthContracts e ritornare size>0
 		List<Contract> monthContracts = new ArrayList<Contract>();
-		List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ?",this).fetch();
+		List<Contract> contractList = ContractDao.getPersonContractList(this);
+		//List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ?",this).fetch();
 		if(contractList == null){
 			return false;
 		}
@@ -427,7 +434,8 @@ public class Person extends BaseModel implements Comparable<Person>{
 	public List<Contract> getMonthContracts(Integer month, Integer year)
 	{
 		List<Contract> monthContracts = new ArrayList<Contract>();
-		List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract",this).fetch();
+		List<Contract> contractList = ContractDao.getPersonContractList(this);
+		//List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract",this).fetch();
 		if(contractList == null){
 			return monthContracts;
 		}
@@ -566,9 +574,11 @@ public class Person extends BaseModel implements Comparable<Person>{
 		//Filtro sulla qualifica
 		List<Qualification> qualificationRequested;
 		if(onlyTechnician)
-			qualificationRequested = Qualification.find("Select q from Qualification q where q.qualification >= ?", 4).fetch();
+			qualificationRequested = QualificationDao.getQualificationGreaterThan(4);
+			//qualificationRequested = Qualification.find("Select q from Qualification q where q.qualification >= ?", 4).fetch();
 		else
-			qualificationRequested = Qualification.findAll();
+			qualificationRequested = QualificationDao.getQualification(Optional.<Integer>absent(), Optional.<Long>absent(), true);
+			//qualificationRequested = Qualification.findAll();
 				
 		//Query //TODO QueryDsl
 		List<Person> personList = Person.find("Select distinct p from Person p "
@@ -776,23 +786,26 @@ public class Person extends BaseModel implements Comparable<Person>{
 			return false;
 		}
 			
-		Person person = Person.findById(id);
+		Person person = PersonDao.getPersonById(id);
+		//Person person = Person.findById(id);
 		if(person == null){
 			Logger.warn("L'id della persona passata tramite json non ha trovato corrispondenza nell'anagrafica del personale. Controllare id = %s", id);
 			return false;
 		}
 		
 		Logger.debug("Sto per segnare la timbratura di %s %s", person.name, person.surname);
-		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", 
-				person, stamping.dateTime.toLocalDate() ).first();
-		if(pd == null){
+		PersonDay personDay = null;
+		Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(person, stamping.dateTime.toLocalDate());
+//		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", 
+//				person, stamping.dateTime.toLocalDate() ).first();
+		if(!pd.isPresent()){
 			/**
 			 * non esiste un personDay per quella data, va creato e quindi salvato
 			 */
 			//Logger.debug("Non esiste il personDay...è il primo personDay per il giorno %s per %s %s", pd.date, person.name, person.surname);
-			pd = new PersonDay(person, stamping.dateTime.toLocalDate());
-			pd.save();		
-			Logger.debug("Salvato il nuovo personDay %s", pd);
+			personDay = new PersonDay(person, stamping.dateTime.toLocalDate());
+			personDay.save();		
+			Logger.debug("Salvato il nuovo personDay %s", personDay);
 			Stamping stamp = new Stamping();
 			stamp.date = stamping.dateTime;
 			stamp.markedByAdmin = false;
@@ -803,14 +816,15 @@ public class Person extends BaseModel implements Comparable<Person>{
 				stamp.way = WayType.out;
 			stamp.stampType = stamping.stampType;
 			stamp.badgeReader = stamping.badgeReader;
-			stamp.personDay = pd;
+			stamp.personDay = personDay;
 			stamp.save();
-			pd.stampings.add(stamp);
-			pd.save();
+			personDay.stampings.add(stamp);
+			personDay.save();
 
 		}
 		else{
-			if(checkDuplicateStamping(pd, stamping) == false){
+			personDay = pd.get();
+			if(checkDuplicateStamping(personDay, stamping) == false){
 				Stamping stamp = new Stamping();
 				stamp.date = stamping.dateTime;
 				stamp.markedByAdmin = false;
@@ -821,22 +835,22 @@ public class Person extends BaseModel implements Comparable<Person>{
 					stamp.way = WayType.out;
 				stamp.stampType = stamping.stampType;
 				stamp.badgeReader = stamping.badgeReader;
-				stamp.personDay = pd;
+				stamp.personDay = personDay;
 				stamp.save();
-				pd.stampings.add(stamp);
-				pd.save();
+				personDay.stampings.add(stamp);
+				personDay.save();
 			}
 			else{
 				Logger.info("All'interno della lista di timbrature di %s %s nel giorno %s c'è una timbratura uguale a quella passata dallo" +
-						"stampingsFromClient: %s", person.name, person.surname, pd.date, stamping.dateTime);
+						"stampingsFromClient: %s", person.name, person.surname, personDay.date, stamping.dateTime);
 			}
 
 			
 		}
 		Logger.debug("Chiamo la populatePersonDay per fare i calcoli sulla nuova timbratura inserita per il personDay %s", pd);
-		pd.populatePersonDay();
+		personDay.populatePersonDay();
 
-		pd.save();
+		personDay.save();
 		return true;
 	}
 
@@ -898,7 +912,8 @@ public class Person extends BaseModel implements Comparable<Person>{
 	 * @return
 	 */
 	public static Person findByNumber(Integer number) {
-		return Person.find("SELECT p FROM Person p WHERE number = ?", number).first();
+		return PersonDao.getPersonByNumber(number);
+		//return Person.find("SELECT p FROM Person p WHERE number = ?", number).first();
 	}
 	
 	
@@ -910,8 +925,10 @@ public class Person extends BaseModel implements Comparable<Person>{
 	 */
 	public CertificatedData getCertificatedData(int year, int month)
 	{
-		CertificatedData cd = CertificatedData.find("Select cd from CertificatedData cd where cd.person = ? and cd.year = ? and cd.month = ?",
-				this, year, month).first();
+		
+		CertificatedData cd = PersonMonthRecapDao.getCertificatedDataByPersonMonthAndYear(this, month, year);
+//		CertificatedData cd = CertificatedData.find("Select cd from CertificatedData cd where cd.person = ? and cd.year = ? and cd.month = ?",
+//				this, year, month).first();
 		return cd;
 	}
 	

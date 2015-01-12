@@ -8,6 +8,11 @@ import com.google.common.base.Optional;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 
+/**
+ * 
+ * @author dario
+ *
+ */
 public class UserDao {
 	/**
 	 * 

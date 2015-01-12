@@ -16,6 +16,11 @@ import models.PersonMonthRecap;
 import models.query.QCertificatedData;
 import models.query.QPersonMonthRecap;
 
+/**
+ * 
+ * @author dario
+ *
+ */
 public class PersonMonthRecapDao {
 
 	/**
@@ -66,6 +71,21 @@ public class PersonMonthRecapDao {
 								.andAnyOf(personMonthRecap.fromDate.loe(begin).and(personMonthRecap.toDate.goe(end)),
 										personMonthRecap.fromDate.loe(end).and(personMonthRecap.toDate.goe(end))))));
 		return query.list(personMonthRecap);
+	}
+	
+	
+	/**
+	 * 
+	 * @param person
+	 * @param year
+	 * @param month
+	 * @return il personMonthRecap, se esiste, relativo ai parametri passati come riferimento
+	 */
+	public static Optional<PersonMonthRecap> getPersonMonthRecapByPersonYearAndMonth(Person person, Integer year, Integer month){
+		QPersonMonthRecap personMonthRecap = QPersonMonthRecap.personMonthRecap;
+		final JPQLQuery query = ModelQuery.queryFactory().from(personMonthRecap)
+				.where(personMonthRecap.person.eq(person).and(personMonthRecap.year.eq(year).and(personMonthRecap.month.eq(month))));
+		return Optional.fromNullable(query.singleResult(personMonthRecap));
 	}
 	
 	

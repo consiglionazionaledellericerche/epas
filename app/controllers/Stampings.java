@@ -267,12 +267,16 @@ public class Stampings extends Controller {
 		rules.checkIfPermitted(person.office);
 		
 		LocalDate date = new LocalDate(year,month,day);
-		PersonDay pd = PersonDayDao.getPersonDayInPeriod(person, date, Optional.<LocalDate>absent(), false).size() > 0 ? PersonDayDao.getPersonDayInPeriod(person, date, Optional.<LocalDate>absent(), false).get(0) : null;
+		PersonDay personDay = null;
+		Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(person, date);
 //		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", 
 //				person, date).first();
-		if(pd == null){
-			pd = new PersonDay(person, date);
-			pd.create();
+		if(!pd.isPresent()){
+			personDay = new PersonDay(person, date);
+			personDay.create();
+		}
+		else{
+			personDay = pd.get();
 		}
 
 
@@ -334,13 +338,13 @@ public class Stampings extends Controller {
 		else{
 			stamp.way = Stamping.WayType.out;
 		}
-		stamp.personDay = pd;
+		stamp.personDay = personDay;
 		stamp.save();
-		pd.stampings.add(stamp);
-		pd.save();
+		personDay.stampings.add(stamp);
+		personDay.save();
 			
-		pd.populatePersonDay();
-		pd.updatePersonDaysInMonth();
+		personDay.populatePersonDay();
+		personDay.updatePersonDaysInMonth();
 		
 		flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
 
@@ -518,12 +522,15 @@ public class Stampings extends Controller {
 		int max = 0;
 			
 		for(Person person : activePersonsInDay){
-			PersonDay pd = PersonDayDao.getPersonDayInPeriod(person, date, Optional.<LocalDate>absent(), false).size() > 0 ? PersonDayDao.getPersonDayInPeriod(person, date, Optional.<LocalDate>absent(), false).get(0) : null;
+			PersonDay personDay = null;
+			Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(person, date);
 //			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.date = ? and pd.person = ?", 
 //					date, person).first();
-
-			if(max < PersonUtility.numberOfInOutInPersonDay(pd))
-				max = PersonUtility.numberOfInOutInPersonDay(pd);
+			if(pd.isPresent())
+				personDay = pd.get();
+			
+			if(max < PersonUtility.numberOfInOutInPersonDay(personDay))
+				max = PersonUtility.numberOfInOutInPersonDay(personDay);
 
 		}
 		return max;
@@ -546,14 +553,19 @@ public class Stampings extends Controller {
 		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();						
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 		for(Person person : activePersonsInDay){
-
-			PersonDay pd = PersonDayDao.getPersonDayInPeriod(person, dayPresence, Optional.<LocalDate>absent(), false).size() > 0 ? PersonDayDao.getPersonDayInPeriod(person, dayPresence, Optional.<LocalDate>absent(), false).get(0) : null; 
+			PersonDay personDay = null;
+			Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(person, dayPresence); 
 			//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.date = ? and pd.person = ?", dayPresence, person).first();
-			if(pd==null)
-				pd = new PersonDay(person, dayPresence);
+			if(!pd.isPresent()){
+				personDay = new PersonDay(person, dayPresence);
+				personDay.create();
+			}
+			else{
+				personDay = pd.get();
+			}
 
-			pd.computeValidStampings();
-			daysRecap.add(new PersonStampingDayRecap(pd, numberOfInOut));
+			personDay.computeValidStampings();
+			daysRecap.add(new PersonStampingDayRecap(personDay, numberOfInOut));
 		}
 
 		
@@ -595,7 +607,7 @@ public class Stampings extends Controller {
 		});
 		for(Person p : activePersons)
 		{
-			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), true);
+			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(p, beginMonth, beginMonth.dayOfMonth().withMaximumValue(), true);
 //			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
 //					p, beginMonth, beginMonth.dayOfMonth().withMaximumValue()).fetch();
 			Logger.debug("La lista dei personDay: ", pdList);

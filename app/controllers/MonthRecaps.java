@@ -150,7 +150,8 @@ public class MonthRecaps extends Controller{
 			code.add("S1");
 			code.add("S2");
 			code.add("S3");
-			List<Competence> competenceList = CompetenceDao.getCompetences(year, month, code, person.office, true);
+
+			List<Competence> competenceList = CompetenceDao.getCompetences(Optional.fromNullable(person),year, month, code, person.office, false);
 //			List<Competence> competenceList = 
 //					Competence.find("Select comp from Competence comp, CompetenceCode compCode where comp.competenceCode = compCode and comp.person = ?"
 //					+ "and comp.year = ? and comp.month = ? and (compCode.code = ? or compCode.code = ? or compCode.code = ?)",
@@ -235,14 +236,13 @@ public class MonthRecaps extends Controller{
 			//Considero il riepilogo fino a ieri
 			monthEnd = today.minusDays(1);
 			
-		}
-			
+		}	
 		
 
 		for(Person person : activePersons)
 		{
 			//person day list
-			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, monthBegin, Optional.fromNullable(monthEnd), false);
+			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, monthBegin, monthEnd, false);
 //			List<PersonDay> pdList = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? AND pd.date between ? and ?", 
 //					person, 
 //					monthBegin, 
@@ -385,7 +385,7 @@ public class MonthRecaps extends Controller{
 
 		}
 		
-		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, monthBegin, Optional.fromNullable(monthEnd), false);
+		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, monthBegin, monthEnd, false);
 //		List<PersonDay> pdList = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? AND pd.date between ? and ?", 
 //			person, 
 //			monthBegin, 
