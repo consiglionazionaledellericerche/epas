@@ -110,6 +110,9 @@ public class User extends BaseModel{
 //			
 //			officeList = Office.findAll(); 
 //		}
+		if(this.person != null) {
+			officeList.add(this.person.office);
+		}
 		return officeList;
 			
 		//return Office.find("select distinct o from Office o join "
