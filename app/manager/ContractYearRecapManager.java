@@ -17,6 +17,7 @@ import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
 
+import dao.AbsenceTypeDao;
 import play.Logger;
 
 /**
@@ -197,10 +198,10 @@ public class ContractYearRecapManager {
 			return LocalDate.now().getYear();
 		
 		//Caso complesso, TODO vedere (dopo che ci sono i test) se creando il VacationRecap si ottengono le stesse informazioni
-		AbsenceType ab31 = AbsenceType.getAbsenceTypeByCode("31");
-		AbsenceType ab32 = AbsenceType.getAbsenceTypeByCode("32");
-		AbsenceType ab37 = AbsenceType.getAbsenceTypeByCode("37");
-		AbsenceType ab94 = AbsenceType.getAbsenceTypeByCode("94");
+		AbsenceType ab31 = AbsenceTypeDao.getAbsenceTypeByCode("31");
+		AbsenceType ab32 = AbsenceTypeDao.getAbsenceTypeByCode("32");
+		AbsenceType ab37 = AbsenceTypeDao.getAbsenceTypeByCode("37"); 
+		AbsenceType ab94 = AbsenceTypeDao.getAbsenceTypeByCode("94"); 
 		DateInterval yearInterSource = new DateInterval(contract.sourceDate.plusDays(1), lastDayInYear);
 		List<Absence> abs32 = VacationsRecap.getVacationDays(yearInterSource, contract, ab32);
 		List<Absence> abs31 = VacationsRecap.getVacationDays(yearInterSource, contract, ab31);
