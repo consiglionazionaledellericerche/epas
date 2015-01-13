@@ -13,6 +13,7 @@ import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 
 import models.Absence;
+import models.AbsenceType;
 import models.Person;
 import models.enumerate.JustifiedTimeAtWork;
 import models.query.QAbsence;
@@ -135,7 +136,7 @@ public class AbsenceDao {
 			return new Long(0);
 	}
 	
-	public static SimpleResults<Absence> findByPersonAndDate(Person person, LocalDate fromDate, Optional<LocalDate> toDate) {
+	public static SimpleResults<Absence> findByPersonAndDate(Person person, LocalDate fromDate, Optional<LocalDate> toDate,Optional<AbsenceType> absenceType) {
 		Preconditions.checkNotNull(person);
 		Preconditions.checkNotNull(fromDate);
 				
@@ -143,6 +144,9 @@ public class AbsenceDao {
 			new BooleanBuilder(absence.personDay.person.eq(person).and(absence.personDay.date.goe(fromDate)));
 		if (toDate.isPresent()) {
 			conditions.and(absence.personDay.date.loe(toDate.get()));
+		}
+		if(absenceType.isPresent()){
+			conditions.and(absence.absenceType.eq(absenceType.get()));
 		}
 		return ModelQuery.simpleResults(ModelQuery.queryFactory().from(absence).where(conditions), absence);
 	}

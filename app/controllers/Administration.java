@@ -32,6 +32,7 @@ import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
 import controllers.Resecure.NoCheck;
+import dao.AbsenceTypeDao;
 import dao.PersonDao;
 
 
@@ -227,7 +228,7 @@ public class Administration extends Controller {
 	
 			//AGGIORNAMENTO RISPETTO ALLA PROCEDURA DI IMPORTAZIONE
 			DateInterval year2012 = new DateInterval(new LocalDate(2012,1,1), new LocalDate(2012,12,31));
-			AbsenceType ab32 = AbsenceType.getAbsenceTypeByCode("32");
+			AbsenceType ab32 = AbsenceTypeDao.getAbsenceTypeByCode("32");
 			mysqlInitPerson.vacationCurrentYearUsed = VacationsRecap.getVacationDays(year2012, contract, ab32).size();
 			mysqlInitPerson.save();
 	
