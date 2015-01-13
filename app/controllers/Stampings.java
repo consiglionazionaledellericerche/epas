@@ -6,6 +6,7 @@ import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +32,7 @@ import org.joda.time.LocalDateTime;
 import play.Logger;
 import play.data.validation.Required;
 import play.data.validation.Valid;
+import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
@@ -541,19 +543,26 @@ public class Stampings extends Controller {
 	public static void dailyPresence(Integer year, Integer month, Integer day) {
 
 		rules.checkIfPermitted("");
+		//JPAPlugin.startTx(false);
 		LocalDate dayPresence = new LocalDate(year, month, day);
 		//TODO:
 		List<Office> office = new ArrayList<Office>();
 		office.add(Security.getUser().get().person.office);
-		List<Person> activePersonsInDay = Person.getActivePersonsInDay(day, month, year, Security.getOfficeAllowed(), false);
+		List<Person> activePersonsInDay = PersonDao.list(Optional.<String>absent(), new HashSet<Office>(Security.getOfficeAllowed()), false, dayPresence, dayPresence, true).list();
+//		List<Person> activePersonsInDay = Person.getActivePersonsInDay(day, month, year, Security.getOfficeAllowed(), false);
 		
 		int numberOfInOut = maxNumberOfStampingsInMonth(year, month, day, activePersonsInDay);
 				
 		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
 		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();						
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
+		
 		for(Person person : activePersonsInDay){
+			//JPAPlugin.closeTx(false);
+			//JPAPlugin.startTx(false);
+			Logger.debug("Person: %s %s", person.name, person.surname); 
 			PersonDay personDay = null;
+			person = PersonDao.getPersonById(person.id);
 			Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(person, dayPresence); 
 			//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.date = ? and pd.person = ?", dayPresence, person).first();
 			if(!pd.isPresent()){
@@ -566,12 +575,15 @@ public class Stampings extends Controller {
 
 			personDay.computeValidStampings();
 			daysRecap.add(new PersonStampingDayRecap(personDay, numberOfInOut));
+			
 		}
 
 		
 		
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);
+		
 		render(daysRecap, year, month, day, numberOfInOut, month_capitalized);
+		//JPAPlugin.closeTx(false);
 	}
 
 	
