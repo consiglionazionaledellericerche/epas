@@ -141,13 +141,29 @@ public class AbsenceDao {
 		Preconditions.checkNotNull(fromDate);
 				
 		BooleanBuilder conditions = 
-			new BooleanBuilder(absence.personDay.person.eq(person).and(absence.personDay.date.goe(fromDate)));
-		if (toDate.isPresent()) {
-			conditions.and(absence.personDay.date.loe(toDate.get()));
-		}
+			new BooleanBuilder(absence.personDay.person.eq(person).and(
+					absence.personDay.date.between(fromDate, toDate.or(fromDate))));
 		if(absenceType.isPresent()){
 			conditions.and(absence.absenceType.eq(absenceType.get()));
 		}
 		return ModelQuery.simpleResults(ModelQuery.queryFactory().from(absence).where(conditions), absence);
+	}
+	
+	/**
+	 * Controlla che nell'intervallo passato in args non esista gia' una assenza giornaliera
+	 * 
+	 * @param person
+	 * @param dateFrom
+	 * @param dateTo
+	 * @return true se esiste un'assenza giornaliera nel periodo passato, false altrimenti
+	 */
+	public static List<Absence> allDayAbsenceAlreadyExisting(Person person,LocalDate fromDate,  Optional<LocalDate> toDate) {
+		Preconditions.checkNotNull(person);
+		Preconditions.checkNotNull(fromDate);
+
+		return ModelQuery.queryFactory().from(absence)
+				.where(absence.personDay.person.eq(person).and(
+						absence.personDay.date.between(fromDate, toDate.or(fromDate))).and(
+								absence.absenceType.justifiedTimeAtWork.eq(JustifiedTimeAtWork.AllDay))).list(absence);
 	}
 }

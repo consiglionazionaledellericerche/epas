@@ -63,8 +63,7 @@ public class VacationsRecap {
 	 * @throws IllegalStateException nel caso in cui la persona non abbia sufficienti riepiloghi annuali dovuti dalla mancanza di dati di inizializzazione
 	 * 
 	 */
-	public VacationsRecap(Person person, int year, Contract contract, LocalDate actualDate, boolean considerExpireLastYear) throws IllegalStateException
-	{
+	public VacationsRecap(Person person, int year, Contract contract, LocalDate actualDate, boolean considerExpireLastYear) throws IllegalStateException{
 		
 		this.person = person;
 		this.year = year;
