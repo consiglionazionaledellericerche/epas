@@ -78,16 +78,7 @@ public class Absences extends Controller{
 
 	@Inject
 	static SecurityRules rules;
-	
-	public enum AbsenceToDate implements Function<Absence, LocalDate>{
-		INSTANCE;
-		
-		@Override
-		public LocalDate apply(Absence absence){
-			return absence.personDay.date;
-		}
-	}
-		
+			
 	/**
 	 * @deprecated use AbsenceTypeDao.getFrequentTypes()
 	 * 
@@ -126,7 +117,7 @@ public class Absences extends Controller{
 				true);
 		
 		List<LocalDate> dateAbsences = FluentIterable.from(absences)
-				.transform(AbsenceToDate.INSTANCE).toList();
+				.transform(AbsenceManager.AbsenceToDate.INSTANCE).toList();
 
 		render(dateAbsences, absenceCode);
 	}
@@ -230,9 +221,7 @@ public class Absences extends Controller{
 		if(absenceType == null){
 			flash.error("codice di assenza inesistente", absenceCode);
 		}
-		if(dateTo != null && dateTo.isBefore(dateFrom)){
-			flash.error("la data indicata non è valida", dateTo);
-		}
+	
 		if(flash.contains("error")){
 			Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
 		}
