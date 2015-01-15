@@ -619,7 +619,7 @@ public class Stampings extends Controller {
 		});
 		for(Person p : activePersons)
 		{
-			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(p, beginMonth, beginMonth.dayOfMonth().withMaximumValue(), true);
+			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), true);
 //			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
 //					p, beginMonth, beginMonth.dayOfMonth().withMaximumValue()).fetch();
 			Logger.debug("La lista dei personDay: ", pdList);

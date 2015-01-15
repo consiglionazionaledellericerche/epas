@@ -128,16 +128,6 @@ public class AbsenceType extends BaseModel {
 		return description;
 	}
 	
-	//TODO eliminare e configurare yaml
-	public void setValidFrom(String date){
-		this.validFrom = new LocalDate(date);
-	}
-	
-	//TODO eliminare e configurare yaml
-	public void setValidTo(String date){
-		this.validTo = new LocalDate(date);
-	}
-		
 	public List<Qualification> getQualification(AbsenceType abt){
 		List<Qualification> listQualification = QualificationDao.getQualificationByAbsenceTypeLinked(abt);
 		//List<Qualification> listQualification = Qualification.find("Select q from Qualification q where q.absenceType = ?", abt).fetch();
@@ -145,14 +135,5 @@ public class AbsenceType extends BaseModel {
 		return listQualification;
 	}
 	
-	public static AbsenceType getAbsenceTypeByCode(String code)
-	{
-		AbsenceType ab = AbsenceTypeDao.getAbsenceTypeByCode(code);
-		//AbsenceType ab = AbsenceType.find("Select ab from AbsenceType ab where ab.code = ?", code).first();
-		if(ab==null)
-			return null;
-		else
-			return ab;
-		
-	}
+
 }

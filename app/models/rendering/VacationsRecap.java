@@ -16,10 +16,9 @@ import models.VacationPeriod;
 import models.enumerate.JustifiedTimeAtWork;
 
 import org.joda.time.LocalDate;
-
 import com.google.common.base.Optional;
-
 import dao.AbsenceDao;
+import dao.AbsenceTypeDao;
 import play.Logger;
 
 /**
@@ -66,8 +65,7 @@ public class VacationsRecap {
 	 * @throws IllegalStateException nel caso in cui la persona non abbia sufficienti riepiloghi annuali dovuti dalla mancanza di dati di inizializzazione
 	 * 
 	 */
-	public VacationsRecap(Person person, int year, Contract contract, LocalDate actualDate, boolean considerExpireLastYear) throws IllegalStateException
-	{
+	public VacationsRecap(Person person, int year, Contract contract, LocalDate actualDate, boolean considerExpireLastYear) throws IllegalStateException{
 		
 		this.person = person;
 		this.year = year;
@@ -93,10 +91,10 @@ public class VacationsRecap {
 		DateInterval yearInter = new DateInterval(startYear, endYear);
 		DateInterval yearActualDateInter = new DateInterval(startYear, actualDate);
 
-		AbsenceType ab32  = AbsenceType.getAbsenceTypeByCode("32");
-		AbsenceType ab31  = AbsenceType.getAbsenceTypeByCode("31");
-		AbsenceType ab37  = AbsenceType.getAbsenceTypeByCode("37");
-		AbsenceType ab94  = AbsenceType.getAbsenceTypeByCode("94");
+		AbsenceType ab32  = AbsenceTypeDao.getAbsenceTypeByCode("32");
+		AbsenceType ab31  = AbsenceTypeDao.getAbsenceTypeByCode("31");
+		AbsenceType ab37  = AbsenceTypeDao.getAbsenceTypeByCode("37");
+		AbsenceType ab94  = AbsenceTypeDao.getAbsenceTypeByCode("94");
 
 		//Expire Last Year
 		
@@ -282,9 +280,9 @@ public class VacationsRecap {
 		List<Absence> abs24Current  = null;
 		List<Absence> abs24SCurrent = null;
 		List<Absence> abs25Current  = null;
-		AbsenceType ab24  = AbsenceType.getAbsenceTypeByCode("24");
-		AbsenceType ab24S = AbsenceType.getAbsenceTypeByCode("24S");
-		AbsenceType ab25  = AbsenceType.getAbsenceTypeByCode("25");
+		AbsenceType ab24  = AbsenceTypeDao.getAbsenceTypeByCode("24");
+		AbsenceType ab24S = AbsenceTypeDao.getAbsenceTypeByCode("24S"); 
+		AbsenceType ab25  = AbsenceTypeDao.getAbsenceTypeByCode("25"); 
 		//Calcolo l'intersezione fra l'anno e il contratto attuale
 		yearInterval = DateUtility.intervalIntersection(yearInterval, new DateInterval(contract.beginContract, contract.expireContract));
 		if(yearInterval == null)

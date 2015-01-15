@@ -133,10 +133,10 @@
 				<tr>
 					<td class="lab">Data di nascita </td>
 					#{if person.birthday != null }
-						<td><input data-datepicker data-date-format="yyyy-mm-dd" name="person.birthday" type="text" value="${person.birthday}"/></td>
+						<td><input datepicker name="person.birthday" type="text" value="${person.birthday}"/></td>
 					#{/if}
 					#{else}
-						<td><input data-datepicker data-date-format="yyyy-mm-dd" name="person.birthday" type="text" value=""/></td>
+						<td><input datepicker name="person.birthday" type="text" value=""/></td>
 					#{/else}
 					
 				</tr>

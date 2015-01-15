@@ -420,7 +420,7 @@ public class Competences extends Controller{
 			Integer difference = 0;
 			Integer overtime = 0;
 			
-			List<PersonDay> personDayList = PersonDayDao.getPersonDayInPeriod(p, beginMonth, beginMonth.dayOfMonth().withMaximumValue(), false);
+			List<PersonDay> personDayList = PersonDayDao.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), false);
 //			List<PersonDay> personDayList = PersonDay.find("Select pd from PersonDay pd where pd.date between ? and ? and pd.person = ?", 
 //					beginMonth, beginMonth.dayOfMonth().withMaximumValue(), p).fetch();
 			for(PersonDay pd : personDayList){

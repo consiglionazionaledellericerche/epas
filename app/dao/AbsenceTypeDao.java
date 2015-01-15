@@ -155,7 +155,7 @@ public class AbsenceTypeDao {
 		Preconditions.checkNotNull(person);
 		Preconditions.checkNotNull(fromDate);
 		
-		List<Absence> absences = AbsenceDao.findByPersonAndDate(person, fromDate,toDate).list();	
+		List<Absence> absences = AbsenceDao.findByPersonAndDate(person, fromDate,toDate,Optional.<AbsenceType>absent()).list();	
 		Map<AbsenceType,Integer> absenceCodeMap = new HashMap<AbsenceType, Integer>();
 
 		for (Absence absence : absences){
