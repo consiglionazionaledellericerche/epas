@@ -296,19 +296,10 @@ public class AbsenceManager {
 
 			actualDate = actualDate.plusDays(1);
 		}
-
-		//		TODO spostare questa chiamata nella insertAbsence
-		//		}
-		//		//controllo che ci siano date in cui l'assenza sovrascrive una reperibilità o un turno e nel caso invio la mail
-		//		if(cai.dateInTrouble.size() > 0) {
-		//			try {
-		//				sendEmail(person, cai);
-		//			} catch (EmailException e) {
-		//				// TODO Segnalare questo evento in qualche modo
-		//				e.printStackTrace();
-		//			}
-		//		}
-		//		return cai.totalAbsenceInsert;
+		
+		if(airl.getAbsenceInReperibilityOrShift() > 0){
+			sendEmail(person, airl);
+		}					
 
 		return airl;
 	}
@@ -438,24 +429,30 @@ public class AbsenceManager {
 	 * @param cai
 	 * @throws EmailException
 	 */
-	private static void sendEmail(Person person, CheckAbsenceInsert cai) throws EmailException{
+	private static void sendEmail(Person person, AbsenceInsertResponseList airl) {
 		MultiPartEmail email = new MultiPartEmail();
-
-		email.addTo(person.email);
-		//Da attivare, commentando la riga precedente, per fare i test così da evitare di inviare mail a caso ai dipendenti...
-		//email.addTo("dario.tagliaferri@iit.cnr.it");
-		email.setFrom("epas@iit.cnr.it");
-
-		email.setSubject("Segnalazione inserimento assenza in giorno con reperibilità/turno");
-		String date = "";
-		for(LocalDate data : cai.dateInTrouble){
-			date = date+data+' ';
+		
+		try {
+			email.addTo(person.email);
+			//Da attivare, commentando la riga precedente, per fare i test così da evitare di inviare mail a caso ai dipendenti...
+			//email.addTo("dario.tagliaferri@iit.cnr.it");
+			email.setFrom("epas@iit.cnr.it");
+			email.setSubject("Segnalazione inserimento assenza in giorno con reperibilità/turno");
+			String date = "";
+			for(LocalDate data : airl.datesInReperibilityOrShift()){
+				date = date+data+' ';
+			}
+			email.setMsg("E' stato richiesto l'inserimento di una assenza per il giorno "+date+ 
+					" per il quale risulta una reperibilità o un turno attivi. "+'\n'+
+					"Controllare tramite la segreteria del personale."+'\n'+
+					'\n'+
+					"Servizio ePas");
+			
+		} catch (EmailException e) {
+			// TODO GESTIRE L'Eccezzione nella generazione dell'email
+			e.printStackTrace();
 		}
-		email.setMsg("E' stato richiesto l'inserimento di una assenza per il giorno "+date+ 
-				" per il quale risulta una reperibilità o un turno attivi. "+'\n'+
-				"Controllare tramite la segreteria del personale."+'\n'+
-				'\n'+
-				"Servizio ePas");
+		
 		Mail.send(email); 
 	}
 
