@@ -2,6 +2,7 @@ package jobs;
 
 import java.util.List;
 
+import manager.PersonManager;
 import models.Person;
 import models.PersonDay;
 
@@ -33,7 +34,7 @@ public class CheckPersonDayMissing extends Job{
 			Logger.debug("Analizzo %s %s", p.name, p.surname);
 			while(dateBegin.isBefore(date)){
 				PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", p, dateBegin).first();
-				if(pd == null && !p.isHoliday(dateBegin)){
+				if(pd == null && !PersonManager.isHoliday(p,dateBegin)){
 					Logger.debug("Non c'è personDay e non è festa per %s %s nel giorno %s", p.name, p.surname, dateBegin);
 					pd = new PersonDay(p, dateBegin);
 					pd.create();

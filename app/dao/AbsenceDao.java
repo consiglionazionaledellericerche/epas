@@ -251,4 +251,22 @@ public class AbsenceDao {
 								absence.absenceType.justifiedTimeAtWork.eq(JustifiedTimeAtWork.AllDay))).list(absence);
 
 	}
+	
+	
+	
+	/**
+	 * La lista delle assenze restituite è prelevata in FETCH JOIN con le absenceType i personDay e la person 
+	 * in modo da non effettuare ulteriori select.
+	 * 
+	 * @return la lista delle assenze che non sono di tipo internalUse effettuate in questo mese dalla persona relativa
+	 * 	a questo personMonth.
+	 * 
+	 */
+	public static List<Absence> getAbsencesNotInternalUseInMonth(Person person, Integer year, Integer month) {
+		return AbsenceDao.getAbsenceWithNotInternalUseInMonth(person, new LocalDate(year,month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
+//		return Absence.find(
+//				"SELECT abs from Absence abs JOIN FETCH abs.absenceType abt JOIN FETCH abs.personDay pd JOIN FETCH pd.person p "
+//					+ "WHERE p = ? AND pd.date BETWEEN ? AND ? AND abt.internalUse = false ORDER BY abt.code, pd.date, abs.id", 
+//					person, new LocalDate(year,month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
+	}
 }

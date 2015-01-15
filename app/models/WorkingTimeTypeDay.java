@@ -8,6 +8,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
@@ -52,28 +53,90 @@ public class WorkingTimeTypeDay extends BaseModel {
 	public Integer mealTicketTime;
 	
 	public Integer breakTicketTime;	
+	
 	/**
 	 * booleano per controllo se il giorno in questione è festivo o meno
 	 */
 	public boolean holiday = false;
+	
 	/**
 	 * tempo di inizio finestra di entrata
 	 */
+	
 	public Integer timeSlotEntranceFrom;
+	
 	/**
 	 * tempo di fine finestra di entrata
 	 */
 	public Integer timeSlotEntranceTo;
 	public Integer timeSlotExitFrom;
 	public Integer timeSlotExitTo;
+	
 	/**
 	 * tempo inizio pausa pranzo
 	 */
 	public Integer timeMealFrom;
+	
 	/**
 	 * tempo fine pausa pranzo
 	 */
 	public Integer timeMealTo;	
+
+	
+	/**
+	 * Setter per tempo di lavoro.
+	 * @param workingTime
+	 * @param wttd
+	 * 
+	 */
+	public void setWorkingTime(Integer workingTime)
+	{
+		if(workingTime==null)
+			this.workingTime = 0;
+		else
+			this.workingTime = workingTime;
+	}
+	
+	/**
+	 * Setter per tempo di pausa pranzo.
+	 * @param breakTicketTime
+	 */
+	public void setBreakTicketTime(Integer breakTicketTime)
+	{
+		if(breakTicketTime==null)
+			this.breakTicketTime = 0;
+		else
+			this.breakTicketTime = breakTicketTime;
+		
+		if(this.breakTicketTime < 30)
+			this.breakTicketTime = 30;
+	}
+	
+	/**
+	 * Setter per tempo per avere il buono pasto.
+	 * @param mealTicketTime
+	 */
+	public void setMealTicketTime(Integer mealTicketTime)
+	{
+		if(mealTicketTime==null)
+			this.mealTicketTime = 0;
+		else
+			this.mealTicketTime = mealTicketTime;
+	}
+	
+	/**
+	 * Setter per giorno festivo.
+	 * @param holiday
+	 */
+	public void setHoliday(String holiday)
+	{
+		if(holiday != null && holiday.equals("true"))
+			this.holiday = true;
+		else
+			this.holiday = false;
+	}
+	
+	
 	
 	
 	@Override
@@ -83,5 +146,4 @@ public class WorkingTimeTypeDay extends BaseModel {
 			id, dayOfWeek, workingTimeType.id, workingTime, mealTicketTime, breakTicketTime, holiday, timeSlotEntranceFrom, timeSlotEntranceTo, 
 			timeSlotExitFrom, timeSlotExitTo, timeMealFrom, timeMealTo);
 	}
-	
 }

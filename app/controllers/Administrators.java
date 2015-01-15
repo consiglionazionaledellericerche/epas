@@ -119,7 +119,8 @@ public class Administrators extends Controller {
 		boolean atLeastAnother = false;
 		for(UsersRolesOffices uroOffice : office.usersRolesOffices) {
 			
-			if( uroOffice.role.id.equals(role.id) && !uroOffice.user.isAdmin() 
+			//if( uroOffice.role.id.equals(role.id) && !uroOffice.user.isAdmin()
+			if(uroOffice.role.id.equals(role.id) && UserDao.isAdmin(uroOffice.user)
 					&& !uroOffice.id.equals(uro.id) ) {
 				atLeastAnother = true;
 				break;
