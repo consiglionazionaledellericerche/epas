@@ -33,6 +33,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 import controllers.Resecure.NoCheck;
 import dao.AbsenceTypeDao;
+import dao.ContractDao;
 import dao.PersonDao;
 
 
@@ -222,7 +223,8 @@ public class Administration extends Controller {
 				continue;
 
 			InitializationTime mysqlInitPerson = person.initializationTimes.get(0);			
-			Contract contract = person.getContract(mySqlImportation);
+			//Contract contract = person.getContract(mySqlImportation);
+			Contract contract = ContractDao.getContract(mySqlImportation, person);
 			if(contract==null)
 				continue;
 	

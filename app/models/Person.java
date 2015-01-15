@@ -274,33 +274,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 	}
 
 	
-	/**
-	 * 
-	 * @return il contratto attivo per quella persona alla date date
-	 */
-	public Contract getContract(LocalDate date){
-		
-		for(Contract c : this.contracts)
-		{
-			if(DateUtility.isDateIntoInterval(date, c.getContractDateInterval()))
-				return c;
-		}
-		
-		//FIXME sommani aprile 2014, lui ha due contratti ma nello heap ce ne sono due identici e manca quello nuovo.
-		List<Contract> contractList = ContractDao.getPersonContractList(this);
-		//List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ?", this).fetch();
-		//this.contracts = contractList;
-		for(Contract c : contractList)
-		{
-			if(DateUtility.isDateIntoInterval(date, c.getContractDateInterval()))
-				return c;
-		}
-		//-----------------------
-		
-		
-		return null;
-
-	}
+	
 	
 	/**
 	 * Cerca nella variabile LAZY il contratto attuale
@@ -311,7 +285,8 @@ public class Person extends BaseModel implements Comparable<Person>{
 		if(this.currentContract!=null)
 			return this.currentContract;
 		
-		this.currentContract = getContract(LocalDate.now()); 
+		//this.currentContract = getContract(LocalDate.now());
+		this.currentContract = ContractDao.getContract(LocalDate.now(), this);
 		return this.currentContract;
 	}
 	
@@ -327,7 +302,8 @@ public class Person extends BaseModel implements Comparable<Person>{
 		}
 		
 		if(this.currentContract==null) {
-			this.currentContract = getContract(LocalDate.now()); 
+			//this.currentContract = getContract(LocalDate.now());
+			this.currentContract = ContractDao.getContract(LocalDate.now(), this);
 		}
 		if(this.currentContract==null)
 			return null;
@@ -356,7 +332,8 @@ public class Person extends BaseModel implements Comparable<Person>{
 			return this.currentVacationCode;
 		
 		if(this.currentContract==null) {
-			this.currentContract = getContract(LocalDate.now()); 
+			//this.currentContract = getContract(LocalDate.now());
+			this.currentContract = ContractDao.getContract(LocalDate.now(), this);
 		}
 		if(this.currentContract==null)
 			return null;
@@ -373,58 +350,9 @@ public class Person extends BaseModel implements Comparable<Person>{
 		return null;
 	}
 
-	/**
-	 * 
-	 * @param date
-	 * @return il tipo di orario di lavoro utilizzato in date
-	 */
-	public  WorkingTimeType getWorkingTimeType(LocalDate date) {
-		Contract contract = this.getContract(date);
-		if(contract==null)
-			return null;
-		for(ContractWorkingTimeType cwtt : contract.contractWorkingTimeType)
-		{
-			if(DateUtility.isDateIntoInterval(date, new DateInterval(cwtt.beginDate, cwtt.endDate)))
-			{
-				return cwtt.workingTimeType;
-			}
-		}
-		return null;
-	}
+	
 
-	/**
-	 * True se la persona ha almeno un contratto attivo in month
-	 * @param month
-	 * @param year
-	 * @return
-	 */
-	public boolean hasMonthContracts(Integer month, Integer year)
-	{
-		//TODO usare getMonthContracts e ritornare size>0
-		List<Contract> monthContracts = new ArrayList<Contract>();
-		List<Contract> contractList = ContractDao.getPersonContractList(this);
-		//List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ?",this).fetch();
-		if(contractList == null){
-			return false;
-		}
-		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
-		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
-		DateInterval monthInterval = new DateInterval(monthBegin, monthEnd);
-		for(Contract contract : contractList)
-		{
-			if(!contract.onCertificate)
-				continue;
-			DateInterval contractInterval = new DateInterval(contract.beginContract, contract.expireContract);
-			if(DateUtility.intervalIntersection(monthInterval, contractInterval)!=null)
-			{
-				monthContracts.add(contract);
-			}
-		}
-		if(monthContracts.size()==0)
-			return false;
-		
-		return true;
-	}
+	
 	
 	/**
 	 * 
@@ -456,20 +384,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 		return monthContracts;
 	}
 	
-	/**
-	 * True se la persona ha almeno un contratto attivo in year
-	 * @param year
-	 * @return
-	 */
-	public boolean hasYearContracts(Integer year)
-	{
-		for(int month=1; month<=12; month++)
-		{
-			if(this.hasMonthContracts(month, year))
-				return true;
-		}
-		return false;
-	}
+	
 	
 	
 
@@ -486,80 +401,16 @@ public class Person extends BaseModel implements Comparable<Person>{
 	}
 	*/
 	
-	/**
-	 * 
-	 * @return la lista delle sedi visibili alla persona che ha chiamato il metodo
-	 */
-	public List<Office> getOfficeAllowed(){
-		
-		List<Office> officeList = new ArrayList<Office>();
-		officeList.add(this.office);
-		if(!this.office.subOffices.isEmpty()){
-			
-			for(Office office : this.office.subOffices){
-				officeList.add(office);
-			}
-		}
-		
-		return officeList;
-	}
 	
-	/**
-	 * 
-	 * @param administrator
-	 * @return true se la persona è visibile al parametro amministratore
-	 */
-	public boolean isAllowedBy(Person administrator)
-	{
-		List<Office> officeAllowed = administrator.getOfficeAllowed();
-		for(Office office : officeAllowed)
-		{
-			if(office.id.equals(this.office.id))
-				return true;
-		}
-		return false;
-	}
+	
+	
 	
 
-	/**
-	 * True se la persona alla data ha un contratto attivo, False altrimenti
-	 * @param date
-	 */
-	public boolean isActiveInDay(LocalDate date)
-	{
-		Contract c = this.getContract(date);
-		if(c==null)
-			return false;
-		else
-			return true;
-	}
+	
 
-	/**
-	 *  true se la persona ha almeno un giorno lavorativo coperto da contratto nel mese month
-	 * @param month
-	 * @param year
-	 * @param onCertificateFilter true se si vuole filtrare solo i dipendenti con certificati attivi 
-	 * @return 
-	 */
-	public boolean isActiveInMonth(int month, int year, boolean onCertificateFilter)
-	{
-		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
-		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
-		return this.isActiveInPeriod(monthBegin, monthEnd, onCertificateFilter);
-	}
+	
 
-	/**
-	 * true se la persona ha almeno un giorno lavorativo coperto da contratto in year
-	 * @param year
-	 * @param onCertificateFilter true se si vuole filtrare solo i dipendenti con certificati attivi 
-	 * @return
-	 */
-	public boolean isActiveInYear(int year, boolean onCertificateFilter)
-	{
-		LocalDate yearBegin = new LocalDate().withYear(year).withMonthOfYear(1).withDayOfMonth(1);
-		LocalDate yearEnd = new LocalDate().withYear(year).withMonthOfYear(12).dayOfMonth().withMaximumValue();
-		return this.isActiveInPeriod(yearBegin, yearEnd, onCertificateFilter);
-	}
+	
 
 	
 	/**
@@ -685,64 +536,11 @@ public class Person extends BaseModel implements Comparable<Person>{
 	
 	}
 	
-	/**
-	 * 
-	 * @param startPeriod
-	 * @param endPeriod
-	 * @param onCertificateFilter true se si vuole filtrare solo i dipendenti con certificati attivi 
-	 * @return
-	 */
-	private boolean isActiveInPeriod(LocalDate startPeriod, LocalDate endPeriod, boolean onCertificateFilter)
-	{
-		List<Contract> periodContracts = new ArrayList<Contract>();
-		DateInterval periodInterval = new DateInterval(startPeriod, endPeriod);
-		for(Contract contract : this.contracts)
-		{
-			if(onCertificateFilter && !contract.onCertificate)
-				continue;
-			DateInterval contractInterval = new DateInterval(contract.beginContract, contract.expireContract); //TODO è sbagliato bisogna considerare anche endContract
-			if(DateUtility.intervalIntersection(periodInterval, contractInterval)!=null)
-			{
-				periodContracts.add(contract);
-			}
-		}
-		if(periodContracts.size()==0)
-			return false;
-		
-		return true;
-	}
+	
 
 
 
-	/**
-	 * True se il giorno passato come argomento è festivo per la persona. False altrimenti.
-	 * @param date
-	 * @return
-	 */
-	public boolean isHoliday(LocalDate date)
-	{
-		if(DateUtility.isGeneralHoliday(this.office, date))
-			return true;
-		
-		Contract contract = this.getContract(date);
-		if(contract == null)
-		{
-			//persona fuori contratto
-			return false;
-		}
-			
-		for(ContractWorkingTimeType cwtt : contract.contractWorkingTimeType)
-		{
-			if(DateUtility.isDateIntoInterval(date, new DateInterval(cwtt.beginDate, cwtt.endDate)))
-			{
-				//return cwtt.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).holiday;
-				return WorkingTimeTypeManager.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek(), cwtt.workingTimeType).holiday;
-			}
-		}
-		
-		return false;	//se il db è consistente non si verifica mai
-		
-	}
+	
 	
 	@Override
 	public String toString() {

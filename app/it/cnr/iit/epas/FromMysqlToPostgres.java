@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import manager.PersonManager;
 import models.Absence;
 import models.AbsenceType;
 import models.AbsenceTypeGroup;
@@ -33,7 +34,6 @@ import models.TotalOvertime;
 import models.User;
 import models.VacationCode;
 import models.VacationPeriod;
-
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import models.enumerate.AccumulationBehaviour;
@@ -287,7 +287,7 @@ public class FromMysqlToPostgres {
 			if(StampProfile.getCurrentStampProfile(p,date).fixedWorkingTime){
 
 				while(date.isBefore(new LocalDate())){
-					if(!p.isHoliday(date)){
+					if(!PersonManager.isHoliday(p, date)){
 
 						PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", p, date).first();
 						if(pd == null){

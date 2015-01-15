@@ -48,6 +48,7 @@ import controllers.Stampings;
 import controllers.Wizard.WizardStep;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
+import dao.ContractDao;
 import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
 import dao.PersonShiftDayDao;
@@ -55,6 +56,7 @@ import dao.PersonShiftDayDao;
 
 
 import dao.AbsenceTypeDao;
+import dao.WorkingTimeTypeDao;
 import play.Logger;
 
 
@@ -200,7 +202,8 @@ public class AbsenceManager {
 		if(dateToCheck.getDayOfMonth()>1)
 			dateToCheck = dateToCheck.minusDays(1);
 
-		Contract contract = person.getContract(dateToCheck);
+		//Contract contract = person.getContract(dateToCheck);
+		Contract contract = ContractDao.getContract(dateToCheck, person);
 
 		PersonResidualYearRecap c = 
 				PersonResidualYearRecap.factory(contract, dateToCheck.getYear(), dateToCheck);
@@ -213,7 +216,7 @@ public class AbsenceManager {
 
 		if(mese.monteOreAnnoCorrente + mese.monteOreAnnoPassato 
 				> //mese.person.getWorkingTimeType(dateToCheck).getWorkingTimeTypeDayFromDayOfWeek(dateToCheck.getDayOfWeek()).workingTime) {
-					WorkingTimeTypeManager.getWorkingTimeTypeDayFromDayOfWeek(dateToCheck.getDayOfWeek(), mese.person.getWorkingTimeType(dateToCheck)).workingTime){
+					WorkingTimeTypeManager.getWorkingTimeTypeDayFromDayOfWeek(dateToCheck.getDayOfWeek(), WorkingTimeTypeDao.getWorkingTimeType(dateToCheck, person)).workingTime){
 			return true;
 		} 
 		return false;	
@@ -337,7 +340,8 @@ public class AbsenceManager {
 		AbsenceInsertResponse aim = new AbsenceInsertResponse(date,absenceType.code);
 
 		//se non devo considerare festa ed è festa non inserisco l'assenza
-		if(!absenceType.consideredWeekEnd && person.isHoliday(date)){
+		//if(!absenceType.consideredWeekEnd && person.isHoliday(date)){
+		if(!absenceType.consideredWeekEnd && PersonManager.isHoliday(person, date)){
 			aim.setHoliday(true);
 			aim.setWarning(AbsenceInsertResponse.CODICE_NON_WEEKEND);
 		}

@@ -102,32 +102,6 @@ public class PersonMonthRecap extends BaseModel {
 
 
 		
-	/**
-	 * La lista delle assenze restituite è prelevata in FETCH JOIN con le absenceType i personDay e la person 
-	 * in modo da non effettuare ulteriori select.
-	 * 
-	 * @return la lista delle assenze che non sono di tipo internalUse effettuate in questo mese dalla persona relativa
-	 * 	a questo personMonth.
-	 * 
-	 */
-	public List<Absence> getAbsencesNotInternalUseInMonth() {
-		return AbsenceDao.getAbsenceWithNotInternalUseInMonth(person, new LocalDate(year,month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
-//		return Absence.find(
-//				"SELECT abs from Absence abs JOIN FETCH abs.absenceType abt JOIN FETCH abs.personDay pd JOIN FETCH pd.person p "
-//					+ "WHERE p = ? AND pd.date BETWEEN ? AND ? AND abt.internalUse = false ORDER BY abt.code, pd.date, abs.id", 
-//					person, new LocalDate(year,month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
-	}
-	
-	/**
-	 * metodo di utilità per il controller UploadSituation
-	 * @return la lista delle competenze del dipendente in questione per quel mese in quell'anno
-	 */
-	public List<Competence> getCompetenceInMonthForUploadSituation(){
-		List<Competence> competenceList = CompetenceDao.getAllCompetenceForPerson(person, year, month);
-//		List<Competence> competenceList = Competence.find("Select comp from Competence comp where comp.person = ? and comp.month = ? " +
-//				"and comp.year = ? and comp.valueApproved > 0", person, month, year).fetch();
-		Logger.trace("Per la persona %s %s trovate %d competenze approvate nei mesi di %d/%d", person.surname, person.name, competenceList.size(), month, year );
-		return competenceList;
-	}
+
 	
 }
