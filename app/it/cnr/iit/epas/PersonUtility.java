@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.persistence.Query;
 
 import manager.ContractYearRecapManager;
+import manager.PersonManager;
 import manager.WorkingTimeTypeManager;
 import manager.recaps.PersonResidualMonthRecap;
 import manager.recaps.PersonResidualYearRecap;
@@ -301,7 +302,8 @@ public class PersonUtility {
 	 * @return il personDay se la data passata è di un giorno feriale, null altrimenti
 	 */
 	public static PersonDay createPersonDayFromDate(Person person, LocalDate date){
-		if(person.isHoliday(date))
+		//if(person.isHoliday(date))
+		if(PersonManager.isHoliday(person, date))
 			return null;
 		return new PersonDay(person, date);
 	}
@@ -930,7 +932,8 @@ public class PersonUtility {
 			officeAllowed = OfficeDao.getAllOffices();
 			//officeAllowed = Office.findAll();
 		else
-			officeAllowed = userLogged.person.getOfficeAllowed();
+			//officeAllowed = userLogged.person.getOfficeAllowed();
+			officeAllowed = OfficeDao.getOfficeAllowed(userLogged.person);
 
 		//Costruisco la lista di persone su cui voglio operare
 		List<Person> personList = new ArrayList<Person>();
@@ -1053,7 +1056,8 @@ public class PersonUtility {
 
 		for(PersonDayInTrouble pdt : pdList){
 			
-			Contract contract = p.getContract(pdt.personDay.date);
+			//Contract contract = p.getContract(pdt.personDay.date);
+			Contract contract = ContractDao.getContract(pdt.personDay.date, pdt.personDay.person);
 			if(contract == null) {
 				
 				Logger.error("Individuato PersonDayInTrouble al di fuori del contratto. Person: %s %s - Data: %s",
@@ -1113,7 +1117,8 @@ public class PersonUtility {
 			officeAllowed = OfficeDao.getAllOffices();
 			//officeAllowed = Office.findAll();
 		else
-			officeAllowed = userLogged.person.getOfficeAllowed();
+			//officeAllowed = userLogged.person.getOfficeAllowed();
+			officeAllowed = OfficeDao.getOfficeAllowed(userLogged.person);
 
 		if(personId==-1)
 			personId=null;
@@ -1155,7 +1160,8 @@ public class PersonUtility {
 	{
 		Person personToCheck = PersonDao.getPersonById(personid);
 		//Person personToCheck = Person.findById(personid);
-		if(!personToCheck.isActiveInDay(dayToCheck)) {
+		//if(!personToCheck.isActiveInDay(dayToCheck)) {
+		if(PersonManager.isActiveInDay(dayToCheck, personToCheck)){
 			return;
 		}
 		PersonDay personDay = null;

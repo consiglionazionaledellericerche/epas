@@ -17,6 +17,7 @@ import play.Logger;
 import play.cache.Cache;
 import controllers.Security;
 import dao.PersonDao;
+import dao.RoleDao;
 
 /**
  * @author cristian
@@ -102,7 +103,8 @@ public class MainMenu {
 		List<ActionMenuItem> actions = new ArrayList<ActionMenuItem>();
 		
 		//Set<UsersPermissionsOffices> permissions = Security.getUser().getAllPermissions();
-		List<Permission> permissions = Security.getUser().get().getAllPermissions();
+		//List<Permission> permissions = Security.getUser().get().getAllPermissions();
+		List<Permission> permissions = RoleDao.getAllPermissions(Security.getUser().get());
 		
 		Set<String> permissionDescriptions = new HashSet<String>();
 		for(Permission p : permissions){

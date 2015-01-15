@@ -280,7 +280,8 @@ public class Security extends Secure.Security {
 		
 		if (permissions == null) {
 			user.get().refresh();
-			permissions = user.get().getAllPermissions();
+			//permissions = user.get().getAllPermissions();
+			permissions = RoleDao.getAllPermissions(user.get());
 			Cache.set(PERMISSION_CACHE_PREFIX + username, permissions, CACHE_DURATION);
 		}
 		
@@ -296,7 +297,8 @@ public class Security extends Secure.Security {
 		if (!getUser().isPresent()) {
 			return Lists.newArrayList();
 		}
-		return getUser().get().getOfficeAllowed();
+		//return getUser().get().getOfficeAllowed();
+		return OfficeDao.getOfficeAllowed(getUser().get());
 	}
 	
 	public static List<Office> getOfficeAllowed(String profile) {

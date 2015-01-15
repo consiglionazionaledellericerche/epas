@@ -24,6 +24,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import manager.PersonDayInTroubleManager;
+import manager.PersonManager;
 import manager.WorkingTimeTypeDayManager;
 import manager.WorkingTimeTypeManager;
 import models.Stamping.WayType;
@@ -39,8 +41,10 @@ import org.joda.time.LocalDateTime;
 
 import com.google.common.base.Optional;
 
+import dao.ContractDao;
 import dao.PersonDayDao;
 import dao.StampingDao;
+import dao.WorkingTimeTypeDao;
 import play.Logger;
 import play.data.validation.Required;
 import play.db.jpa.JPA;
@@ -140,7 +144,8 @@ public class PersonDay extends BaseModel {
 		if(this.personDayContract != null)
 			return this.personDayContract;
 		
-		this.personDayContract = this.person.getContract(date);
+		//this.personDayContract = this.person.getContract(date);
+		this.personDayContract = ContractDao.getContract(date, person);
 		
 		return this.personDayContract;
 	}
@@ -153,7 +158,8 @@ public class PersonDay extends BaseModel {
 	public boolean isHoliday(){
 		if(isHolidayy!=null)	//già calcolato
 			return isHolidayy;
-		isHolidayy = this.person.isHoliday(this.date);
+		//isHolidayy = this.person.isHoliday(this.date);
+		isHolidayy = PersonManager.isHoliday(person, date);
 		return isHolidayy;
 	}
 	
@@ -416,7 +422,8 @@ public class PersonDay extends BaseModel {
 		
 		this.isFixedTimeAtWorkk = false;
 		
-		Contract contract = this.person.getContract(this.date);
+		//Contract contract = this.person.getContract(this.date);
+		Contract contract = ContractDao.getContract(date, person);
 		if(contract == null)
 			return false;
 		
@@ -447,7 +454,7 @@ public class PersonDay extends BaseModel {
 		
 		//int worktime = this.person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(this.date.getDayOfWeek()).workingTime;
 		//int worktime = this.person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(this.date.getDayOfWeek()).workingTime;
-		int worktime = WorkingTimeTypeManager.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek(), this.person.getWorkingTimeType(date)).workingTime;
+		int worktime = WorkingTimeTypeManager.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek(), WorkingTimeTypeDao.getWorkingTimeType(date, person)).workingTime;
 				
 		
 		//persona fixed
@@ -615,7 +622,8 @@ public class PersonDay extends BaseModel {
 		
 		if(previousPersonDayInMonth!=null && previousPersonDayInMonth.personDayContract==null)
 		{
-			this.previousPersonDayInMonth.personDayContract = this.person.getContract(this.previousPersonDayInMonth.date);
+			//this.previousPersonDayInMonth.personDayContract = this.person.getContract(this.previousPersonDayInMonth.date);
+			this.previousPersonDayInMonth.personDayContract = ContractDao.getContract(this.previousPersonDayInMonth.date, person);
 		}
 	
 		//controllo uscita notturna
@@ -663,7 +671,8 @@ public class PersonDay extends BaseModel {
 		
 		if(previousPersonDayInMonth!=null && previousPersonDayInMonth.personDayContract==null)
 		{
-			this.previousPersonDayInMonth.personDayContract = this.person.getContract(this.previousPersonDayInMonth.date);
+			//this.previousPersonDayInMonth.personDayContract = this.person.getContract(this.previousPersonDayInMonth.date);
+			this.previousPersonDayInMonth.personDayContract = ContractDao.getContract(this.previousPersonDayInMonth.date, person);
 		}
 		
 		updateTimeAtWork();
@@ -711,7 +720,8 @@ public class PersonDay extends BaseModel {
 				{
 					if(!s.valid)
 					{
-						PersonDayInTrouble.insertPersonDayInTrouble(this, "timbratura disaccoppiata persona fixed");
+						//PersonDayInTrouble.insertPersonDayInTrouble(this, "timbratura disaccoppiata persona fixed");
+						PersonDayInTroubleManager.insertPersonDayInTrouble(this, "timbratura disaccoppiata persona fixed");
 						return;
 					}
 				}
@@ -723,7 +733,8 @@ public class PersonDay extends BaseModel {
 			//caso no festa, no assenze, no timbrature
 			if(!this.isAllDayAbsences() && this.stampings.size()==0 && !this.isHoliday() && !this.isEnoughHourlyAbsences())
 			{
-				PersonDayInTrouble.insertPersonDayInTrouble(this, "no assenze giornaliere e no timbrature");
+				//PersonDayInTrouble.insertPersonDayInTrouble(this, "no assenze giornaliere e no timbrature");
+				PersonDayInTroubleManager.insertPersonDayInTrouble(this, "no assenze giornaliere e no timbrature");
 				return;
 			}
 			
@@ -735,7 +746,8 @@ public class PersonDay extends BaseModel {
 				{
 					if(!s.valid)
 					{
-						PersonDayInTrouble.insertPersonDayInTrouble(this, "timbratura disaccoppiata giorno feriale");
+						//PersonDayInTrouble.insertPersonDayInTrouble(this, "timbratura disaccoppiata giorno feriale");
+						PersonDayInTroubleManager.insertPersonDayInTrouble(this, "timbratura disaccoppiata giorno feriale");
 						return;
 					}
 				}
@@ -749,7 +761,8 @@ public class PersonDay extends BaseModel {
 				{
 					if(!s.valid)
 					{
-						PersonDayInTrouble.insertPersonDayInTrouble(this, "timbratura disaccoppiata giorno festivo");
+						//PersonDayInTrouble.insertPersonDayInTrouble(this, "timbratura disaccoppiata giorno festivo");
+						PersonDayInTroubleManager.insertPersonDayInTrouble(this, "timbratura disaccoppiata giorno festivo");
 						return;
 					}
 				}
@@ -803,7 +816,8 @@ public class PersonDay extends BaseModel {
 	private WorkingTimeTypeDay getWorkingTimeTypeDay(){
 		
 		//return person.getWorkingTimeType(date).workingTimeTypeDays.get(date.getDayOfWeek()-1);
-		WorkingTimeType wtt = person.getWorkingTimeType(date);
+		//WorkingTimeType wtt = person.getWorkingTimeType(date);
+		WorkingTimeType wtt = WorkingTimeTypeDao.getWorkingTimeType(date, person);
 		if(wtt == null)
 			return null;
 		

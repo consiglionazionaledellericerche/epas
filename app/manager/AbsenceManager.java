@@ -49,6 +49,7 @@ import controllers.Stampings;
 import controllers.Wizard.WizardStep;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
+import dao.ContractDao;
 import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
 import dao.PersonShiftDayDao;
@@ -56,6 +57,7 @@ import dao.PersonShiftDayDao;
 
 
 import dao.AbsenceTypeDao;
+import dao.WorkingTimeTypeDao;
 import play.Logger;
 
 
@@ -94,16 +96,16 @@ public class AbsenceManager {
 
 		if(vr.vacationDaysLastYearNotYetUsed > 0)
 			return AbsenceTypeDao.getAbsenceTypeByCode("31");
-			//return AbsenceType.find("byCode", "31").first();
+		//return AbsenceType.find("byCode", "31").first();
 
 		if(vr.persmissionNotYetUsed > 0)
 
 			return AbsenceTypeDao.getAbsenceTypeByCode("94");
-			//return AbsenceType.find("byCode", "94").first();
-		
+		//return AbsenceType.find("byCode", "94").first();
+
 		if(vr.vacationDaysCurrentYearNotYetUsed > 0)
 			return AbsenceTypeDao.getAbsenceTypeByCode("32");
-			//return AbsenceType.find("byCode", "32").first();
+		//return AbsenceType.find("byCode", "32").first();
 
 		return null;
 	}
@@ -119,7 +121,7 @@ public class AbsenceManager {
 
 		Contract contract = person.getCurrentContract();
 		VacationsRecap vr = null;
-		
+
 		try { 
 			vr = new VacationsRecap(person, date.getYear(), contract, date, true);
 		} catch(IllegalStateException e) {
@@ -162,7 +164,7 @@ public class AbsenceManager {
 
 		Contract contract = person.getCurrentContract();
 		VacationsRecap vr = null;
-				
+
 		try { 
 			vr = new VacationsRecap(person, date.getYear(), contract, date, true);
 		} catch(IllegalStateException e) {
@@ -201,7 +203,8 @@ public class AbsenceManager {
 		if(dateToCheck.getDayOfMonth()>1)
 			dateToCheck = dateToCheck.minusDays(1);
 
-		Contract contract = person.getContract(dateToCheck);
+		//Contract contract = person.getContract(dateToCheck);
+		Contract contract = ContractDao.getContract(dateToCheck, person);
 
 		PersonResidualYearRecap c = 
 				PersonResidualYearRecap.factory(contract, dateToCheck.getYear(), dateToCheck);
@@ -214,7 +217,7 @@ public class AbsenceManager {
 
 		if(mese.monteOreAnnoCorrente + mese.monteOreAnnoPassato 
 				> //mese.person.getWorkingTimeType(dateToCheck).getWorkingTimeTypeDayFromDayOfWeek(dateToCheck.getDayOfWeek()).workingTime) {
-					WorkingTimeTypeManager.getWorkingTimeTypeDayFromDayOfWeek(dateToCheck.getDayOfWeek(), mese.person.getWorkingTimeType(dateToCheck)).workingTime){
+		WorkingTimeTypeManager.getWorkingTimeTypeDayFromDayOfWeek(dateToCheck.getDayOfWeek(), WorkingTimeTypeDao.getWorkingTimeType(dateToCheck, person)).workingTime){
 			return true;
 		} 
 		return false;	
@@ -285,7 +288,7 @@ public class AbsenceManager {
 				air.add(handler31_32_94(person, actualDate, absenceType, file));
 				actualDate = actualDate.plusDays(1);
 				continue;
-				
+
 			}
 			if(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.is(absenceType)){
 				air.add(handler37(person, actualDate, absenceType, file));
@@ -300,23 +303,23 @@ public class AbsenceManager {
 			}
 			if(absenceType.absenceTypeGroup != null){
 				for(AbsencesResponse ar : handlerAbsenceTypeGroup(person, actualDate, absenceType, file))
-				air.add(ar);
+					air.add(ar);
 				actualDate = actualDate.plusDays(1);
 				continue;
 			}
-			
+
 			air.add(handlerGenericAbsenceType(person, actualDate, absenceType, file,mealTicket));
 
 			actualDate = actualDate.plusDays(1);
 		}
-		
+
 		if(air.getAbsenceInReperibilityOrShift() > 0){
 			sendEmail(person, air);
 		}					
-		
+
 		return air;
 	}
-	
+
 	/**
 	 * Inserisce l'assenza absenceType nel person day della persona nella data.
 	 *  Se dateFrom = dateTo inserisce nel giorno singolo.
@@ -339,18 +342,19 @@ public class AbsenceManager {
 		AbsencesResponse ar = new AbsencesResponse(date,absenceType.code);
 
 		//se non devo considerare festa ed è festa non inserisco l'assenza
-		if(!absenceType.consideredWeekEnd && person.isHoliday(date)){
+		if(!absenceType.consideredWeekEnd && PersonManager.isHoliday(person, date)){
 			ar.setHoliday(true);
 			ar.setWarning(AbsencesResponse.CODICE_NON_WEEKEND);
+
 		}
-		else{
+		else {
 			if(checkIfAbsenceInReperibilityOrInShift(person, date)){
 				ar.setDayInReperibilityOrShift(true);				
 			}
-		
+
 			List<PersonDay> personDays = PersonDayDao.getPersonDayInPeriod(person, date, Optional.<LocalDate>absent(), false);
 			PersonDay pd = personDays != null ? personDays.listIterator().next() : new PersonDay(person, date);
-			
+
 			if(personDays == null){
 				pd.populatePersonDay();
 				pd.create();
@@ -441,7 +445,7 @@ public class AbsenceManager {
 	 */
 	private static void sendEmail(Person person, AbsenceInsertReport airl) {
 		MultiPartEmail email = new MultiPartEmail();
-		
+
 		try {
 			email.addTo(person.email);
 			//Da attivare, commentando la riga precedente, per fare i test così da evitare di inviare mail a caso ai dipendenti...
@@ -457,12 +461,12 @@ public class AbsenceManager {
 					"Controllare tramite la segreteria del personale."+'\n'+
 					'\n'+
 					"Servizio ePas");
-			
+
 		} catch (EmailException e) {
 			// TODO GESTIRE L'Eccezzione nella generazione dell'email
 			e.printStackTrace();
 		}
-		
+
 		Mail.send(email); 
 	}
 
@@ -517,7 +521,7 @@ public class AbsenceManager {
 	private static AbsencesResponse handler37(Person person,
 			LocalDate date, AbsenceType absenceType,Optional<Blob> file){
 
-//  FIXME Verificare i controlli d'inserimento
+		//  FIXME Verificare i controlli d'inserimento
 		if(date.getYear() == LocalDate.now().getYear()){
 
 			int remaining37 = VacationsRecap.remainingPastVacationsAs37(date.getYear(), person);
@@ -541,21 +545,21 @@ public class AbsenceManager {
 	 */
 	private static List<AbsencesResponse> handlerAbsenceTypeGroup(Person person,LocalDate date,
 			AbsenceType absenceType, Optional<Blob> file){
-		
+
 		CheckMessage checkMessage = PersonUtility.checkAbsenceGroup(absenceType, person, date);
 		List<AbsencesResponse> result = Lists.newArrayList();
-		
+
 		if(checkMessage.check == false){
 			result.add(new AbsencesResponse(date, absenceType.code,AbsencesResponse.ERRORE_GENERICO));
 			return result;
 		}
-		
+
 		result.add(insert(person, date,absenceType,file));
 
-	    if(checkMessage.absenceType != null){
+		if(checkMessage.absenceType != null){
 			result.add(insert(person, date,checkMessage.absenceType,file));
 		}
-	    return result;
+		return result;
 	}
 
 
@@ -567,7 +571,7 @@ public class AbsenceManager {
 	 * @throws EmailException 
 	 */
 	private static AbsencesResponse handlerChildIllness(Person person,LocalDate date,
-				AbsenceType absenceType, Optional<Blob> file){
+			AbsenceType absenceType, Optional<Blob> file){
 		/**
 		 * controllo sulla possibilità di poter prendere i congedi per malattia dei figli, guardo se il codice di assenza appartiene alla
 		 * lista dei codici di assenza da usare per le malattie dei figli
@@ -576,15 +580,15 @@ public class AbsenceManager {
 		if(PersonUtility.canTakePermissionIllnessChild(person, date, absenceType)){
 			return insert(person, date,absenceType,file);
 		}
-//		TODO Completare i controlli nel caso non sia possibile prendere il codice assenza per malattia dei figli
-//		if(esito==null){
-//			//			flash.error("ATTENZIONE! In anagrafica la persona selezionata non ha il numero di figli sufficienti per valutare l'assegnazione del codice di assenza nel periodo selezionato. "
-//			//					+ "Accertarsi che la persona disponga dei privilegi per usufruire dal codice e nel caso rimuovere le assenze inserite.");
-//		}
-//		else if(!esito){
-//			//			flash.error(String.format("Il dipendente %s %s non può prendere il codice d'assenza %s poichè ha già usufruito del numero" +
-//			//					" massimo di giorni di assenza per quel codice o non ha figli che possono usufruire di quel codice", person.name, person.surname, absenceType.code));
-//		}
+		//		TODO Completare i controlli nel caso non sia possibile prendere il codice assenza per malattia dei figli
+		//		if(esito==null){
+		//			//			flash.error("ATTENZIONE! In anagrafica la persona selezionata non ha il numero di figli sufficienti per valutare l'assegnazione del codice di assenza nel periodo selezionato. "
+		//			//					+ "Accertarsi che la persona disponga dei privilegi per usufruire dal codice e nel caso rimuovere le assenze inserite.");
+		//		}
+		//		else if(!esito){
+		//			//			flash.error(String.format("Il dipendente %s %s non può prendere il codice d'assenza %s poichè ha già usufruito del numero" +
+		//			//					" massimo di giorni di assenza per quel codice o non ha figli che possono usufruire di quel codice", person.name, person.surname, absenceType.code));
+		//		}
 		return new AbsencesResponse(date,absenceType.code,
 				AbsencesResponse.CODICI_MALATTIA_FIGLI_NON_DISPONIBILE);
 	}

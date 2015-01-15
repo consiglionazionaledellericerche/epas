@@ -1,5 +1,7 @@
 package dao;
 
+import it.cnr.iit.epas.DateUtility;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -133,6 +135,34 @@ public class ContractDao {
 		return contractList;
 	}
 
+	
+	/**
+	 * 
+	 * @return il contratto attivo per quella persona alla date date
+	 */
+	public static Contract getContract(LocalDate date, Person person){
+		
+		for(Contract c : person.contracts)
+		{
+			if(DateUtility.isDateIntoInterval(date, c.getContractDateInterval()))
+				return c;
+		}
+		
+		//FIXME sommani aprile 2014, lui ha due contratti ma nello heap ce ne sono due identici e manca quello nuovo.
+		List<Contract> contractList = ContractDao.getPersonContractList(person);
+		//List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ?", this).fetch();
+		//this.contracts = contractList;
+		for(Contract c : contractList)
+		{
+			if(DateUtility.isDateIntoInterval(date, c.getContractDateInterval()))
+				return c;
+		}
+		//-----------------------
+		
+		
+		return null;
+
+	}
 	
 	/******************************************************************************************************************************************/
 	/*Inserisco in questa parte del Dao le query relative ai ContractStampProfile per evitare di creare una classe specifica che contenga     */
