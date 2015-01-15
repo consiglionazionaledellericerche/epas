@@ -79,18 +79,6 @@ public class Absences extends Controller{
 	@Inject
 	static SecurityRules rules;
 			
-	/**
-	 * @deprecated use AbsenceTypeDao.getFrequentTypes()
-	 * 
-	 * @return la lista dei tipi di competenza più utilizzati
-	 */
-	@Deprecated
-	private static List<AbsenceType> getFrequentAbsenceTypes(){
-		return AbsenceType.find("Select abt from AbsenceType abt, Absence abs " +
-				"where abs.absenceType = abt group by abt order by sum(abt.id) desc limit 20").fetch();
-
-	}
-
 	public static void absences(int year, int month) {
 		Person person = Security.getUser().get().person;
 		YearMonth yearMonth = new YearMonth(year,month);

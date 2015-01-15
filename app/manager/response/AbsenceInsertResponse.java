@@ -1,8 +1,13 @@
 package manager.response;
 
+import models.Absence;
+
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Function;
+
 public class AbsenceInsertResponse {
+	
 	public static final String CODICE_FERIE_GIA_PRESENTE = "Il codice di assenza é già presente in almeno uno dei giorni in cui lo si voleva inserire. Controllare.";
 	public static final String CODICE_GIORNALIERO_GIA_PRESENTE = "Esiste già un codice di assenza giornaliero nel periodo indicato. Operazione annullata.";
 	public static final String NESSUN_CODICE_FERIE_DISPONIBILE_PER_IL_PERIODO_RICHIESTO = "Nessun codice ferie disponibile per il periodo richiesto";
@@ -18,7 +23,6 @@ public class AbsenceInsertResponse {
 	private String warning;
 	private boolean insertSucceeded = false;
 	private boolean isHoliday = false;
-	private boolean InTrouble = false;
 	private boolean isDayInReperibilityOrShift = false;
 
 	public AbsenceInsertResponse(LocalDate date, String absenceCode) {
@@ -66,20 +70,21 @@ public class AbsenceInsertResponse {
 		this.isHoliday = isHoliday;
 	}
 
-	public boolean isInTrouble() {
-		return InTrouble;
-	}
-
-	public void setInTrouble(boolean inTrouble) {
-		InTrouble = inTrouble;
-	}
-
 	public boolean isDayInReperibilityOrShift() {
 		return isDayInReperibilityOrShift;
 	}
 
 	public void setDayInReperibilityOrShift(boolean isDayInReperibilityOrShift) {
 		this.isDayInReperibilityOrShift = isDayInReperibilityOrShift;
+	}
+	
+	public enum toDate implements Function<AbsenceInsertResponse, LocalDate>{
+		INSTANCE;
+
+		@Override
+		public LocalDate apply(AbsenceInsertResponse air){
+			return air.date;
+		}
 	}
 
 }

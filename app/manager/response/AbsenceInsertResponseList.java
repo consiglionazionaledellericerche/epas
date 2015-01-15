@@ -1,10 +1,21 @@
 package manager.response;
 
 import java.util.List;
+
+import manager.response.AbsenceInsertResponse.toDate;
+
 import org.joda.time.LocalDate;
+
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 
+import controllers.Wizard.WizardStep;
+
 public class AbsenceInsertResponseList {
+	
 	private List<AbsenceInsertResponse> absences = Lists.newArrayList();
 	private List<String> warnings = Lists.newArrayList();
 	private List<LocalDate> datesInTrouble = Lists.newArrayList();
@@ -63,6 +74,17 @@ public class AbsenceInsertResponseList {
 
 	public void setAbsenceInReperibilityOrShift(int absenceInReperibilityOrShift) {
 		this.absenceInReperibilityOrShift = absenceInReperibilityOrShift;
+	}
+	
+	public List<LocalDate> datesInReperibilityOrShift(){
+		
+		return FluentIterable.from(absences).filter(
+				new Predicate<AbsenceInsertResponse>() {
+		    	    @Override
+		    	    public boolean apply(AbsenceInsertResponse air) {
+		    	        return air.isDayInReperibilityOrShift();
+		    	    }
+		    	}).transform(AbsenceInsertResponse.toDate.INSTANCE).toList();
 	}
 
 }
