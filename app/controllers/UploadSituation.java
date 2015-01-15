@@ -49,6 +49,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import dao.AbsenceDao;
+import dao.CompetenceDao;
 import dao.PersonDao;
 import dao.PersonMonthRecapDao;
 
@@ -132,7 +134,8 @@ public class UploadSituation extends Controller{
 			for(Person p : personList){
 
 				PersonMonthRecap pm = new PersonMonthRecap(p, year, month);
-				absenceList = pm.getAbsencesNotInternalUseInMonth();
+				//absenceList = pm.getAbsencesNotInternalUseInMonth();
+				absenceList = AbsenceDao.getAbsencesNotInternalUseInMonth(p, year, month);
 				for(Absence abs : absenceList){
 					out.write(p.number.toString());
 					out.append(' ').append('A').append(' ')
@@ -143,7 +146,8 @@ public class UploadSituation extends Controller{
 					out.newLine();
 				}
 
-				competenceList = pm.getCompetenceInMonthForUploadSituation();
+				//competenceList = pm.getCompetenceInMonthForUploadSituation();
+				competenceList = CompetenceDao.getCompetenceInMonthForUploadSituation(p, year, month);
 
 				for(Competence comp : competenceList){
 					Logger.trace(
@@ -419,8 +423,10 @@ public class UploadSituation extends Controller{
 			
 			RispostaElaboraDati rispostaElaboraDati = AttestatiClient.elaboraDatiDipendente(
 					cookies, dipendente, year, month, 
-					pm.getAbsencesNotInternalUseInMonth(),
-					pm.getCompetenceInMonthForUploadSituation(),
+					//pm.getAbsencesNotInternalUseInMonth(),
+					AbsenceDao.getAbsencesNotInternalUseInMonth(person, year, month),
+					//pm.getCompetenceInMonthForUploadSituation(),
+					CompetenceDao.getCompetenceInMonthForUploadSituation(person, year, month),
 					pmList, mealTicket);
 			if(rispostaElaboraDati.isOk()){
 				for(PersonMonthRecap personMonth : pmList){

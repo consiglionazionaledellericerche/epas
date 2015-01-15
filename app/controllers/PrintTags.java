@@ -10,6 +10,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import manager.PersonManager;
 import models.AbsenceType;
 import models.ConfGeneral;
 import models.Person;
@@ -110,7 +111,8 @@ public class PrintTags extends Controller{
 	public static void showPersonTag(Integer year, Integer month){
 		
 		Person person = Security.getUser().get().person;
-		if(!person.isActiveInMonth(month, year, false))
+		//if(!person.isActiveInMonth(month, year, false))
+		if(!PersonManager.isActiveInMonth(person, month, year, false))
 		{
 			flash.error("Si è cercato di accedere a un mese al di fuori del contratto valido per %s %s. " +
 					"Non esiste situazione mensile per il mese di %s", person.name, person.surname, DateUtility.fromIntToStringMonth(month));

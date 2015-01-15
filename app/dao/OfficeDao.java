@@ -1,5 +1,6 @@
 package dao;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import helpers.ModelQuery;
@@ -9,6 +10,9 @@ import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 
 import models.Office;
+import models.Person;
+import models.User;
+import models.UsersRolesOffices;
 import models.query.QOffice;
 
 /**
@@ -95,5 +99,51 @@ public class OfficeDao {
 		final JPQLQuery query = ModelQuery.queryFactory().from(office)
 				.where(office.office.isNull());
 		return query.list(office);
+	}
+	
+	/**
+	 * 
+	 * @param user
+	 * @return la lista degli uffici permessi per l'utente user passato come parametro
+	 */
+	public static List<Office> getOfficeAllowed(User user) {
+		
+		List<Office> officeList = new ArrayList<Office>();
+		for(UsersRolesOffices uro : user.usersRolesOffices){
+			if(uro.office.isSeat())
+				officeList.add(uro.office);
+		}
+		//TODO riscrivere col nuovo concetto di ruoli e permessi e funzionale al tipo di ruolo che si cerca
+//		if (this.person != null) {
+//			officeList.add(this.person.office);
+//		}
+//		else {
+//			
+//			officeList = Office.findAll(); 
+//		}
+		return officeList;
+			
+		//return Office.find("select distinct o from Office o join "
+		//		+ "o.userPermissionOffices as upo where upo.user = ?",this).fetch();
+		
+	}
+	
+	
+	/**
+	 * 
+	 * @return la lista delle sedi visibili alla persona che ha chiamato il metodo
+	 */
+	public static List<Office> getOfficeAllowed(Person person){
+		
+		List<Office> officeList = new ArrayList<Office>();
+		officeList.add(person.office);
+		if(!person.office.subOffices.isEmpty()){
+			
+			for(Office office : person.office.subOffices){
+				officeList.add(office);
+			}
+		}
+		
+		return officeList;
 	}
 }

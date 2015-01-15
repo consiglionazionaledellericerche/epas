@@ -21,6 +21,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
 import dao.StampingDao;
+import dao.WorkingTimeTypeDao;
 
 /**
  * Oggetto che modella il giorno di una persona nelle viste personStamping e stampings.
@@ -82,8 +83,10 @@ public class PersonStampingDayRecap {
 
 		
 		this.setStampingTemplate( stampingsForTemplate, pd );
-		if(pd.person.getWorkingTimeType(pd.date) != null){		
-			this.wtt = pd.person.getWorkingTimeType(pd.date);
+		//if(pd.person.getWorkingTimeType(pd.date) != null){
+		if(WorkingTimeTypeDao.getWorkingTimeType(pd.date, pd.person) != null){
+			//this.wtt = pd.person.getWorkingTimeType(pd.date);
+			this.wtt = WorkingTimeTypeDao.getWorkingTimeType(pd.date, pd.person);
 			//this.wttd = this.wtt != null ? this.wtt.getWorkingTimeTypeDayFromDayOfWeek(pd.date.getDayOfWeek()) : this.wtt.getWorkingTimeTypeDayFromDayOfWeek(pd.date.plusMonths(1).getDayOfWeek());
 			this.wttd = WorkingTimeTypeManager.getWorkingTimeTypeDayFromDayOfWeek(pd.date.getDayOfWeek(), this.wtt);
 			//this.wttd = this.wtt.getWorkingTimeTypeDayFromDayOfWeek(pd.date.getDayOfWeek());
