@@ -177,8 +177,8 @@ public class AbsenceManager {
 		PersonResidualMonthRecap mese = c.getMese(dateToCheck.getMonthOfYear());
 		
 		if(mese.monteOreAnnoCorrente + mese.monteOreAnnoPassato 
-				> mese.person.getWorkingTimeType(dateToCheck)
-				.getWorkingTimeTypeDayFromDayOfWeek(dateToCheck.getDayOfWeek()).workingTime) {
+				> //mese.person.getWorkingTimeType(dateToCheck).getWorkingTimeTypeDayFromDayOfWeek(dateToCheck.getDayOfWeek()).workingTime) {
+					WorkingTimeTypeManager.getWorkingTimeTypeDayFromDayOfWeek(dateToCheck.getDayOfWeek(), mese.person.getWorkingTimeType(dateToCheck)).workingTime){
 			return true;
 		} 
 	

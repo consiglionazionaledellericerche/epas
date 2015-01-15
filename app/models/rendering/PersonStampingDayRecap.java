@@ -5,6 +5,7 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.ArrayList;
 import java.util.List;
 
+import manager.WorkingTimeTypeManager;
 import models.Absence;
 import models.ConfGeneral;
 import models.Person;
@@ -84,7 +85,8 @@ public class PersonStampingDayRecap {
 		if(pd.person.getWorkingTimeType(pd.date) != null){		
 			this.wtt = pd.person.getWorkingTimeType(pd.date);
 			//this.wttd = this.wtt != null ? this.wtt.getWorkingTimeTypeDayFromDayOfWeek(pd.date.getDayOfWeek()) : this.wtt.getWorkingTimeTypeDayFromDayOfWeek(pd.date.plusMonths(1).getDayOfWeek());
-			this.wttd = this.wtt.getWorkingTimeTypeDayFromDayOfWeek(pd.date.getDayOfWeek());
+			this.wttd = WorkingTimeTypeManager.getWorkingTimeTypeDayFromDayOfWeek(pd.date.getDayOfWeek(), this.wtt);
+			//this.wttd = this.wtt.getWorkingTimeTypeDayFromDayOfWeek(pd.date.getDayOfWeek());
 			this.setWorkingTime(this.wttd.workingTime);
 			this.setMealTicketTime(this.wttd.mealTicketTime);
 			this.setBreakTicketTime(this.wttd.breakTicketTime);
