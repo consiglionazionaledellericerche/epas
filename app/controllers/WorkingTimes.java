@@ -66,7 +66,8 @@ public class WorkingTimes extends Controller{
 		
 		rules.checkIfPermitted(wtt.office);
 		
-		List<Contract> contractList = wtt.getAssociatedActiveContract(officeId);
+		//List<Contract> contractList = wtt.getAssociatedActiveContract(officeId);
+		List<Contract> contractList = ContractDao.getAssociatedActiveContract(officeId, wtt);
 	
 		render(wtt, contractList);
 		
@@ -223,7 +224,8 @@ public class WorkingTimes extends Controller{
 		rules.checkIfPermitted(wtt.office);
 		
 		//Prima di cancellare il tipo orario controllo che non sia associato ad alcun contratto
-		if( wtt.getAssociatedContract().size() > 0) {
+		//if( wtt.getAssociatedContract().size() > 0) {
+		if(ContractDao.getAssociatedContract(wtt).size() > 0){
 			
 			flash.error("Impossibile eliminare il tipo orario %s perchè associato ad almeno un contratto. Operazione annullata", wtt.description);
 			WorkingTimes.manageWorkingTime(wtt.office);
@@ -253,7 +255,8 @@ public class WorkingTimes extends Controller{
 		rules.checkIfPermitted(wtt.office);
 
 		//Prima di disattivarlo controllo che non sia associato ad alcun contratto attivo 
-		if( wtt.disabled == false && wtt.getAssociatedActiveContract(wtt.office.id).size() > 0) {
+		//if( wtt.disabled == false && wtt.getAssociatedActiveContract(wtt.office.id).size() > 0) {
+		if(wtt.disabled == false && ContractDao.getAssociatedActiveContract(wtt.office.id, wtt).size() > 0){
 		
 			flash.error("Impossibile eliminare il tipo orario %s perchè attualmente associato ad almeno un contratto attivo. Operazione annullata", wtt.description);
 			WorkingTimes.manageWorkingTime(wtt.office);

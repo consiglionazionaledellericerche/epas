@@ -73,59 +73,7 @@ public class WorkingTimeTypeDay extends BaseModel {
 	/**
 	 * tempo fine pausa pranzo
 	 */
-	public Integer timeMealTo;
-		
-	public void setWorkingTime(Integer workingTime)
-	{
-		if(workingTime==null)
-			this.workingTime = 0;
-		else
-			this.workingTime = workingTime;
-	}
-	
-	public void setBreakTicketTime(Integer breakTicketTime)
-	{
-		if(breakTicketTime==null)
-			this.breakTicketTime = 0;
-		else
-			this.breakTicketTime = breakTicketTime;
-		
-		if(this.breakTicketTime < 30)
-			this.breakTicketTime = 30;
-	}
-	
-	public void setMealTicketTime(Integer mealTicketTime)
-	{
-		if(mealTicketTime==null)
-			this.mealTicketTime = 0;
-		else
-			this.mealTicketTime = mealTicketTime;
-	}
-	
-	public void setHoliday(String holiday)
-	{
-		if(holiday != null && holiday.equals("true"))
-			this.holiday = true;
-		else
-			this.holiday = false;
-	}
-	
-	
-	/**
-	 * True se è ammesso il calcolo del buono pasto per la persona, false altrimenti (il campo mealTicketTime
-	 *  che rappresenta il tempo minimo di lavoro per avere diritto al buono pasto è pari a zero)
-	 * @return
-	 */
-	public boolean mealTicketEnabled() {
-		if( holiday )
-			return false;
-		
-		if( mealTicketTime > 0)
-			return true;
-		else 
-			return false;
-		
-	}
+	public Integer timeMealTo;	
 	
 	
 	@Override

@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.persistence.Query;
 
 import manager.ContractYearRecapManager;
+import manager.WorkingTimeTypeManager;
 import manager.recaps.PersonResidualMonthRecap;
 import manager.recaps.PersonResidualYearRecap;
 import models.Absence;
@@ -456,7 +457,8 @@ public class PersonUtility {
 //						absenceType.absenceTypeGroup.label, person, absence.personDay.date, date).fetch();
 				for(Absence abs : absList){
 					if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay)
-						totalMinutesJustified = person.getCurrentWorkingTimeType().getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime;
+						//totalMinutesJustified = person.getCurrentWorkingTimeType().getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime;
+						totalMinutesJustified = WorkingTimeTypeManager.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek(), person.getCurrentWorkingTimeType()).workingTime;
 					else{
 
 						totalMinutesJustified = totalMinutesJustified+abs.absenceType.justifiedTimeAtWork.minutesJustified;
@@ -575,7 +577,8 @@ public class PersonUtility {
 			Logger.debug("List size: %d", absList.size());
 			for(Absence abs : absList){
 				if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay)
-					totalMinutesJustified = person.getCurrentWorkingTimeType().getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime;
+					//totalMinutesJustified = person.getCurrentWorkingTimeType().getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime;
+					totalMinutesJustified = WorkingTimeTypeManager.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek(), person.getCurrentWorkingTimeType()).workingTime;
 				else{
 
 					totalMinutesJustified = totalMinutesJustified+abs.absenceType.justifiedTimeAtWork.minutesJustified;
@@ -588,7 +591,8 @@ public class PersonUtility {
 			if(absenceType.justifiedTimeAtWork != JustifiedTimeAtWork.AllDay)
 				quantitaGiustificata = absenceType.justifiedTimeAtWork.minutesJustified;
 			else
-				quantitaGiustificata = person.getCurrentWorkingTimeType().getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime;
+				quantitaGiustificata = WorkingTimeTypeManager.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek(), person.getCurrentWorkingTimeType()).workingTime;
+				//quantitaGiustificata = person.getCurrentWorkingTimeType().getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime;
 			if(absenceType.absenceTypeGroup.limitInMinute >= totalMinutesJustified+quantitaGiustificata)
 				return new CheckMessage(true, "E' possibile prendere il codice di assenza", null);
 			else

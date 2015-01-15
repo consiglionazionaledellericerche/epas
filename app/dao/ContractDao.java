@@ -1,6 +1,9 @@
 package dao;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.persistence.Transient;
 
 import org.joda.time.LocalDate;
 
@@ -86,6 +89,50 @@ public class ContractDao {
 						
 		return query.list(contract);
 	}
+	
+
+	//PER la delete quindi per adesso permettiamo l'eliminazione solo di contratti particolari di office
+	//bisogna controllare che this non sia default ma abbia l'associazione con office
+	
+	public static List<Contract> getAssociatedContract(WorkingTimeType wtt) {
+
+		List<Contract> contractList = ContractDao.getContractListByWorkingTimeType(wtt);
+//		List<Contract> contractList = Contract.find(
+//				"Select distinct c from Contract c "
+//						+ "left outer join fetch c.contractWorkingTimeType as cwtt "
+//						+ "where cwtt.workingTimeType = ?", this).fetch();
+
+		return contractList;
+	}
+
+	
+	/**
+	 * 
+	 * @param officeId
+	 * @param wtt
+	 * @return I contratti attivi che attualmente hanno impostato il WorkingTimeType
+	 */
+	public static List<Contract> getAssociatedActiveContract(Long officeId, WorkingTimeType wtt) {
+		
+		List<Contract> contractList = new ArrayList<Contract>();
+		
+		LocalDate today = new LocalDate();
+		
+		List<Contract> activeContract = Contract.getActiveContractInPeriod(today, today);
+		
+		for(Contract contract : activeContract) {
+			
+			if( !contract.person.office.id.equals(officeId))
+				continue;
+			
+			ContractWorkingTimeType current = contract.getContractWorkingTimeType(today);
+			if(current.workingTimeType.id.equals(wtt.id))
+				contractList.add(contract);
+		}
+		
+		return contractList;
+	}
+
 	
 	/******************************************************************************************************************************************/
 	/*Inserisco in questa parte del Dao le query relative ai ContractStampProfile per evitare di creare una classe specifica che contenga     */

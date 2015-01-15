@@ -25,6 +25,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import manager.WorkingTimeTypeManager;
 import manager.recaps.PersonResidualMonthRecap;
 import models.Stamping.WayType;
 import models.base.BaseModel;
@@ -734,7 +735,8 @@ public class Person extends BaseModel implements Comparable<Person>{
 		{
 			if(DateUtility.isDateIntoInterval(date, new DateInterval(cwtt.beginDate, cwtt.endDate)))
 			{
-				return cwtt.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).holiday;
+				//return cwtt.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).holiday;
+				return WorkingTimeTypeManager.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek(), cwtt.workingTimeType).holiday;
 			}
 		}
 		
