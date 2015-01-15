@@ -67,7 +67,7 @@ public class PersonUtility {
 	public static int getPositiveDaysForOvertime(PersonMonthRecap personMonth){
 		int positiveDifference = 0;
 		LocalDate date = new LocalDate(personMonth.year, personMonth.month, 1);
-		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(personMonth.person, date, date.dayOfMonth().withMaximumValue(), false);
+		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(personMonth.person, date, Optional.fromNullable(date.dayOfMonth().withMaximumValue()), false);
 //		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 //				personMonth.person, date, date.dayOfMonth().withMaximumValue()).fetch();
 		for(PersonDay pd : pdList){
@@ -686,7 +686,7 @@ public class PersonUtility {
 		LocalDate begin = new LocalDate(year, month, 1);
 		if(begin.isAfter(new LocalDate()))
 			return 0;
-		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, begin, begin.dayOfMonth().withMaximumValue(), false);
+		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, begin, Optional.fromNullable(begin.dayOfMonth().withMaximumValue()), false);
 		//List<PersonDay> pdList = PersonDay.find("Select pd From PersonDay pd where pd.person = ? and pd.date between ? and ?", person,begin,begin.dayOfMonth().withMaximumValue() ).fetch();
 
 		int max = 0;
@@ -714,7 +714,7 @@ public class PersonUtility {
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
 
 		List<PersonDay> totalDays = new ArrayList<PersonDay>();
-		List<PersonDay> workingDays = PersonDayDao.getPersonDayInPeriod(person, beginMonth, endMonth, true);
+		List<PersonDay> workingDays = PersonDayDao.getPersonDayInPeriod(person, beginMonth, Optional.fromNullable(endMonth), true);
 //		List<PersonDay> workingDays = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date",
 //				person, beginMonth, endMonth).fetch();
 
@@ -893,7 +893,7 @@ public class PersonUtility {
 		LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
 		while(true)
 		{
-			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, monthBegin, monthEnd, true);
+			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, monthBegin, Optional.fromNullable(monthEnd), true);
 //			List<PersonDay> pdList = PersonDay.find(
 //					"select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date asc",
 //					person,
@@ -966,7 +966,7 @@ public class PersonUtility {
 			JPAPlugin.startTx(false);
 			while(!actualMonth.isAfter(endMonth)) {
 
-				List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(p, actualMonth, actualMonth.dayOfMonth().withMaximumValue(), true);
+				List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(p, actualMonth, Optional.fromNullable(actualMonth.dayOfMonth().withMaximumValue()), true);
 //				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
 //						p, actualMonth, actualMonth.dayOfMonth().withMaximumValue()).fetch();
 

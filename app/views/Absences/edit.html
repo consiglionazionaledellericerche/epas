@@ -6,14 +6,7 @@
 
 #{form @Absences.update(), enctype:'multipart/form-data'}
 	
-
-	<input type="hidden" name="absenceId" value="${absence.id}"/>
-	<input type="hidden" name="date" value="${absence.personDay.date}"/>
-	<input type="hidden" name="person" value="${absence.personDay.person}"/>
-	<input type="hidden" name="personId" value="${absence.personDay.person.id}"/>
-	<input type="hidden" name="yearFrom" value="${absence.personDay.date.year}"/>
-	<input type="hidden" name="monthFrom" value="${absence.personDay.date.monthOfYear}"/>
-	<input type="hidden" name="dayFrom" value="${absence.personDay.date.dayOfMonth}"/>
+	<input type="hidden" name="absence.id" value="${absence.id}"/>
 
 	<table class="table table-hover table-form">
 	  <tr>
@@ -25,14 +18,14 @@
 	          </div>
 	          <div class="col-sm-6" style="padding-left:0px;">
 			    #{select 'code', value: '', class:'col-xs-12', id:'assenzaFrequente', 
-			    style:'margin-bottom: 10px;', onclick:'Change();'}
+			    style:'margin-bottom: 10px;', onchange:'Change();'}
 			      <option value="">Codici più usati</option>
 			      #{list items: frequentAbsenceTypeList, as:'absenceType'} 
 		           #{option absenceType.code}${absenceType.code} ${absenceType.getShortDescription()}#{/option}
 			      #{/list}
 			    #{/select}
 				<br>
-				#{select 'code', value: '', class:'col-xs-12', id:'tuttiCodici', onclick:'Change2();'}
+				#{select 'code', value: '', class:'col-xs-12', id:'tuttiCodici', onchange:'Change2();'}
 			      <option value="">Tutti i codici</option>
 			      #{list items: allCodes, as:'absenceType'}
 			        #{option absenceType.code}${absenceType.code} ${absenceType.getShortDescription()}#{/option}
@@ -46,7 +39,7 @@
     
       <tr>
         <td class="lab"><strong>Fino a</strong></td>
-        <td><input name="finoa" value="${absence.personDay.date}" type="text" data-datepicker data-date-format="yyyy-mm-dd"/></td>
+        <td><input name="dateTo" value="${absence.personDay.date}" type="text" datepicker-year/></td>
 	  </tr>
 	
 	  <tr>
@@ -60,14 +53,14 @@
 	    <td class="lab"><strong>Buono Mensa</strong></td>
 	    <td>
 		    #{if absence.absenceType.code.equals("92")}
-			    calcolato<input type="radio" name="buonoMensa" value="calcolato" #{if !absence.personDay.isTicketForcedByAdmin } checked="checked" #{/if}/>
-		  		No <input type="radio" name="buonoMensa" value="no" 			 #{if absence.personDay.isTicketForcedByAdmin && !absence.personDay.isTicketAvailable } checked="checked" #{/if}/>
-		  		Sì <input type="radio" name="buonoMensa" value="si" 			 #{if absence.personDay.isTicketForcedByAdmin && absence.personDay.isTicketAvailable } checked="checked" #{/if}/>
+			    calcolato<input type="radio" name="mealTicket" value="calcolato" #{if !absence.personDay.isTicketForcedByAdmin } checked="checked" #{/if}/>
+		  		No <input type="radio" name="mealTicket" value="no" 			 #{if absence.personDay.isTicketForcedByAdmin && !absence.personDay.isTicketAvailable } checked="checked" #{/if}/>
+		  		Sì <input type="radio" name="mealTicket" value="si" 			 #{if absence.personDay.isTicketForcedByAdmin && absence.personDay.isTicketAvailable } checked="checked" #{/if}/>
 			#{/if}
 			#{else}
-			   calcolato<input type="radio" name="buonoMensa" value="calcolato" checked="checked" disabled/>	<!-- in questo caso sempre calcolato -->
-		  		No <input type="radio" name="buonoMensa" value="no" disabled/>
-		  		Sì <input type="radio" name="buonoMensa" value="si" disabled/>
+			   calcolato<input type="radio" name="mealTicket" value="calcolato" checked="checked" disabled/>	<!-- in questo caso sempre calcolato -->
+		  		No <input type="radio" name="mealTicket" value="no" disabled/>
+		  		Sì <input type="radio" name="mealTicket" value="si" disabled/>
 			#{/else}
 	    </td>
 	  </tr>

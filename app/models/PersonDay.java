@@ -507,7 +507,7 @@ public class PersonDay extends BaseModel {
 		LocalDate beginMonth = this.date.dayOfMonth().withMinimumValue();
 		LocalDate endMonth = this.date.dayOfMonth().withMaximumValue();
 		
-		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, beginMonth, endMonth, true);
+		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, beginMonth, Optional.fromNullable(endMonth), true);
 //		List<PersonDay> pdList = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? and pd.date >= ? and pd.date <= ? ORDER by pd.date",
 //				person, beginMonth, endMonth).fetch();
 		for(int i=1; i<pdList.size(); i++)

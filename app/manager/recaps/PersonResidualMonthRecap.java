@@ -263,7 +263,7 @@ public class PersonResidualMonthRecap {
 		
 		if(validDataForMealTickets!=null)
 		{
-			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(monthRecap.person, validDataForMealTickets.getBegin(), validDataForMealTickets.getEnd(), true);
+			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(monthRecap.person, validDataForMealTickets.getBegin(), Optional.fromNullable(validDataForMealTickets.getEnd()), true);
 //			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date",
 //					monthRecap.person, validDataForMealTickets.getBegin(), validDataForMealTickets.getEnd()).fetch();
 
