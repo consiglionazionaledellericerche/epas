@@ -499,10 +499,7 @@ public class Absences extends Controller{
 			}
 		}
 		render(personAbsenceListWithFile, year, month, person);
-
-		
 	}	
-	
 	
 	public static void absenceInPeriod(Long personId){
 
@@ -563,7 +560,3 @@ public class Absences extends Controller{
 	}
 	
 }
-
-
-
-

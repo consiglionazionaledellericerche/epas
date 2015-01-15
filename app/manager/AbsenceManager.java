@@ -208,6 +208,15 @@ public class AbsenceManager {
 		return false;	
 	}
 
+	/**
+	 * @param person
+	 * @param dateFrom
+	 * @param dateTo
+	 * @param absenceType
+	 * @param file
+	 * @param mealTicket
+	 * @return
+	 */
 	public static AbsenceInsertResponseList insertAbsence(Person person, LocalDate dateFrom,Optional<LocalDate> dateTo, 
 			AbsenceType absenceType, Optional<Blob> file, Optional<String> mealTicket){
 
@@ -250,26 +259,39 @@ public class AbsenceManager {
 
 			if (AbsenceTypeMapping.RIPOSO_COMPENSATIVO.is(absenceType)) {
 				airl.add(handlerCompensatoryRest(person, actualDate, absenceType, file));
+				actualDate = actualDate.plusDays(1);
+				continue;
 			}
 			if(AbsenceTypeMapping.FER.is(absenceType)){
 				airl.add(handlerFER(person, actualDate, absenceType, file));
+				actualDate = actualDate.plusDays(1);
+				continue;
 			}
 			if(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.is(absenceType) || 
 					AbsenceTypeMapping.FERIE_ANNO_CORRENTE.is(absenceType) ||
 					AbsenceTypeMapping.FESTIVITA_SOPPRESSE.is(absenceType)){
 				airl.add(handler31_32_94(person, actualDate, absenceType, file));
+				actualDate = actualDate.plusDays(1);
+				continue;
+				
 			}
 			if(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.is(absenceType)){
 				airl.add(handler37(person, actualDate, absenceType, file));
+				actualDate = actualDate.plusDays(1);
+				continue;
 			}
 			//			TODO Inserire i codici di assenza necessari nell'AbsenceTypeMapping
 			if((absenceType.code.startsWith("12") || absenceType.code.startsWith("13")) && absenceType.code.length() == 3){
 				airl.add(handlerChildIllness(person, actualDate, absenceType, file));
+				actualDate = actualDate.plusDays(1);
+				continue;
 			}
 			if(absenceType.absenceTypeGroup != null){
 				handlerAbsenceTypeGroup(person, dateFrom, dateTo.or(dateFrom), absenceType, file.orNull());
+				actualDate = actualDate.plusDays(1);
+				continue;
 			}
-
+			
 			airl.add(handlerGenericAbsenceType(person, actualDate, absenceType, file,mealTicket));
 
 			actualDate = actualDate.plusDays(1);
@@ -490,17 +512,16 @@ public class AbsenceManager {
 			LocalDate date, AbsenceType absenceType,Optional<Blob> file){
 
 		AbsenceInsertResponse aim = new AbsenceInsertResponse(date,absenceType.code);
+//  FIXME Verificare i controlli d'inserimento
+		if(date.getYear() == LocalDate.now().getYear()){
 
-		if(date.getYear() != LocalDate.now().getYear()){
-			aim.setWarning(AbsenceInsertResponse.NESSUN_CODICE_FERIE_ANNO_PRECEDENTE_37);
+			int remaining37 = VacationsRecap.remainingPastVacationsAs37(date.getYear(), person);
+			if(remaining37 > 0){
+				return insert(person, date,absenceType, file);
+			}
 		}
-		int remaining37 = VacationsRecap.remainingPastVacationsAs37(date.getYear(), person);
-		if(remaining37 > 0){
-			return insert(person, date,absenceType, file);
-		}
-		else{
-			aim.setWarning(AbsenceInsertResponse.NESSUN_CODICE_FERIE_ANNO_PRECEDENTE_37);
-		}
+
+		aim.setWarning(AbsenceInsertResponse.NESSUN_CODICE_FERIE_ANNO_PRECEDENTE_37);
 		return aim;
 	}
 

@@ -23,8 +23,13 @@ $(function($){
 			  todayHighlight: true
 			});
 
-		
-		this.find('data-datepicker').datepicker();
+		this.find('input[datepicker]').datepicker({
+			  format: "yyyy-mm-dd",
+			  todayBtn: "linked",
+			  language: "it",
+			  autoclose: true,
+			  todayHighlight: true
+			});
 		
 		this.find('data-tooltip').tooltip();
 		
