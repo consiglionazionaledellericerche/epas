@@ -1,11 +1,17 @@
 package dao;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import helpers.ModelQuery;
 import models.Permission;
 import models.Role;
+import models.User;
+import models.UsersRolesOffices;
 import models.query.QPermission;
 import models.query.QRole;
 
+import com.google.common.base.Optional;
 import com.mysema.query.jpa.JPQLQuery;
 
 /**
@@ -50,5 +56,40 @@ public class RoleDao {
 		final JPQLQuery query = ModelQuery.queryFactory().from(permission)
 				.where(permission.description.eq(description));
 		return query.singleResult(permission);
+	}
+	
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public static List<Permission> getAllPermissions(User user) {
+		List<Permission> permissions = new ArrayList<Permission>();
+		
+		if(user.person != null){
+			Optional<UsersRolesOffices> uro = UsersRolesOfficesDao.getUsersRolesOfficesByUserAndOffice(user, user.person.office);
+			if(uro.isPresent()){
+				for(Permission p : uro.get().role.permissions){
+					permissions.add(p);
+				}
+			}
+//			UsersRolesOffices uro = UsersRolesOffices.find("Select upo from UsersRolesOffices uro where " +
+//					"uro.user = ? and uro.office = ?", this, this.person.office).first();
+			
+			
+		}
+		
+		//TODO admin 
+		/*
+		else{
+			Office office = Office.find("Select off from Office off where off.joiningDate is null").first();
+			List<UsersPermissionsOffices> upoList = UsersPermissionsOffices.find("Select upo from UsersPermissionsOffices upo where " +
+					"upo.user = ? and upo.office = ?", this, office).fetch();
+			for(UsersPermissionsOffices upo : upoList){
+				permissions.add(upo.permission);
+			}
+		}
+		*/
+		return permissions;
 	}
 }

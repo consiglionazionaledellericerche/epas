@@ -2,6 +2,7 @@ package dao;
 
 import java.util.List;
 
+import play.Logger;
 import helpers.ModelQuery;
 import helpers.ModelQuery.SimpleResults;
 import models.Competence;
@@ -167,6 +168,20 @@ public class CompetenceDao {
 		return query.list(competence);
 	}
 	
+	
+
+	
+	/**
+	 * metodo di utilità per il controller UploadSituation
+	 * @return la lista delle competenze del dipendente in questione per quel mese in quell'anno
+	 */
+	public static List<Competence> getCompetenceInMonthForUploadSituation(Person person, Integer year, Integer month){
+		List<Competence> competenceList = CompetenceDao.getAllCompetenceForPerson(person, year, month);
+//		List<Competence> competenceList = Competence.find("Select comp from Competence comp where comp.person = ? and comp.month = ? " +
+//				"and comp.year = ? and comp.valueApproved > 0", person, month, year).fetch();
+		Logger.trace("Per la persona %s %s trovate %d competenze approvate nei mesi di %d/%d", person.surname, person.name, competenceList.size(), month, year );
+		return competenceList;
+	}
 	
 	/*********************************************************************************************************************************/
 	/*Parte relativa a query su TotalOvertime per la quale, essendo unica, non si è deciso di creare un Dao ad hoc*/
