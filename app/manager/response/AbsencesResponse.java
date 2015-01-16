@@ -6,7 +6,7 @@ import org.joda.time.LocalDate;
 
 import com.google.common.base.Function;
 
-public class AbsenceInsertResponse {
+public class AbsencesResponse {
 	
 	public static final String CODICE_FERIE_GIA_PRESENTE = "Il codice di assenza é già presente in almeno uno dei giorni in cui lo si voleva inserire. Controllare.";
 	public static final String CODICE_GIORNALIERO_GIA_PRESENTE = "Esiste già un codice di assenza giornaliero nel periodo indicato. Operazione annullata.";
@@ -17,6 +17,7 @@ public class AbsenceInsertResponse {
 	public static final String CODICE_NON_WEEKEND = "Codice non assegnabile a un giorno festivo";
 	public static final String CODICI_MALATTIA_FIGLI_NON_DISPONIBILE = "Impossibile usufruire dei codici ferie per malattia dei figli";
 	public static final String NESSUN_CODICE_FERIE_ANNO_PRECEDENTE_37 = "Nessun codice ferie dell'anno precedente 37 utilizzabile";
+	public static final String ERRORE_GENERICO = "Impossibile inserire il codice d'assenza";
 	
 	private LocalDate date;
 	private String absenceCode;
@@ -25,9 +26,16 @@ public class AbsenceInsertResponse {
 	private boolean isHoliday = false;
 	private boolean isDayInReperibilityOrShift = false;
 
-	public AbsenceInsertResponse(LocalDate date, String absenceCode) {
+	public AbsencesResponse(LocalDate date, String absenceCode) {
 		this.date = date;
 		this.absenceCode = absenceCode;
+	}
+
+	public AbsencesResponse(LocalDate date, String absenceCode, String warning) {
+		super();
+		this.date = date;
+		this.absenceCode = absenceCode;
+		this.warning = warning;
 	}
 
 	public LocalDate getDate() {
@@ -78,11 +86,11 @@ public class AbsenceInsertResponse {
 		this.isDayInReperibilityOrShift = isDayInReperibilityOrShift;
 	}
 	
-	public enum toDate implements Function<AbsenceInsertResponse, LocalDate>{
+	public enum toDate implements Function<AbsencesResponse, LocalDate>{
 		INSTANCE;
 
 		@Override
-		public LocalDate apply(AbsenceInsertResponse air){
+		public LocalDate apply(AbsencesResponse air){
 			return air.date;
 		}
 	}

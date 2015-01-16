@@ -23,6 +23,7 @@ import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.MealTicketDao;
 import dao.PersonDayDao;
+import dao.WorkingTimeTypeDao;
 
 public class PersonResidualMonthRecap {
 
@@ -347,7 +348,7 @@ public class PersonResidualMonthRecap {
 			monthRecap.numeroRiposiCompensativi = 0;
 			for(Absence abs : riposiCompensativi){
 				//monthRecap.riposiCompensativiMinuti = monthRecap.riposiCompensativiMinuti + monthRecap.person.getWorkingTimeType(abs.personDay.date).getWorkingTimeTypeDayFromDayOfWeek(abs.personDay.date.getDayOfWeek()).workingTime;
-				monthRecap.riposiCompensativiMinuti = monthRecap.riposiCompensativiMinuti + WorkingTimeTypeManager.getWorkingTimeTypeDayFromDayOfWeek(abs.personDay.date.getDayOfWeek(), monthRecap.person.getWorkingTimeType(abs.personDay.date)).workingTime;
+				monthRecap.riposiCompensativiMinuti = monthRecap.riposiCompensativiMinuti + WorkingTimeTypeManager.getWorkingTimeTypeDayFromDayOfWeek(abs.personDay.date.getDayOfWeek(), WorkingTimeTypeDao.getWorkingTimeType(abs.personDay.date, abs.personDay.person)).workingTime;
 				monthRecap.numeroRiposiCompensativi++;
 			}
 			monthRecap.riposiCompensativiMinutiPrint = monthRecap.riposiCompensativiMinuti;

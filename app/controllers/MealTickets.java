@@ -189,7 +189,8 @@ public class MealTickets  extends Controller {
 		//Persistenza
 		for(MealTicket mealTicket : ticketToAdd) {
 			mealTicket.date = LocalDate.now();
-			mealTicket.contract = person.getContract(mealTicket.date);
+			//mealTicket.contract = person.getContract(mealTicket.date);
+			mealTicket.contract = ContractDao.getContract(mealTicket.date, person);
 			mealTicket.admin = admin.person; 
 			mealTicket.save();
 		}

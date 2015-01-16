@@ -2,7 +2,7 @@ package manager.response;
 
 import java.util.List;
 
-import manager.response.AbsenceInsertResponse.toDate;
+import manager.response.AbsencesResponse.toDate;
 
 import org.joda.time.LocalDate;
 
@@ -14,15 +14,15 @@ import com.google.common.collect.Lists;
 
 import controllers.Wizard.WizardStep;
 
-public class AbsenceInsertResponseList {
+public class AbsenceInsertReport {
 	
-	private List<AbsenceInsertResponse> absences = Lists.newArrayList();
+	private List<AbsencesResponse> absences = Lists.newArrayList();
 	private List<String> warnings = Lists.newArrayList();
 	private List<LocalDate> datesInTrouble = Lists.newArrayList();
 	private int totalAbsenceInsert = 0;
 	private int absenceInReperibilityOrShift = 0;
 	
-	public void add(AbsenceInsertResponse response) {
+	public void add(AbsencesResponse response) {
 		absences.add(response);
 		if (response.isInsertSucceeded()) {
 			totalAbsenceInsert++;
@@ -36,11 +36,11 @@ public class AbsenceInsertResponseList {
 		return !(warnings.isEmpty() && datesInTrouble.isEmpty());
 	}
 
-	public List<AbsenceInsertResponse> getAbsences() {
+	public List<AbsencesResponse> getAbsences() {
 		return absences;
 	}
 
-	public void setAbsences(List<AbsenceInsertResponse> absences) {
+	public void setAbsences(List<AbsencesResponse> absences) {
 		this.absences = absences;
 	}
 
@@ -79,12 +79,12 @@ public class AbsenceInsertResponseList {
 	public List<LocalDate> datesInReperibilityOrShift(){
 		
 		return FluentIterable.from(absences).filter(
-				new Predicate<AbsenceInsertResponse>() {
+				new Predicate<AbsencesResponse>() {
 		    	    @Override
-		    	    public boolean apply(AbsenceInsertResponse air) {
+		    	    public boolean apply(AbsencesResponse air) {
 		    	        return air.isDayInReperibilityOrShift();
 		    	    }
-		    	}).transform(AbsenceInsertResponse.toDate.INSTANCE).toList();
+		    	}).transform(AbsencesResponse.toDate.INSTANCE).toList();
 	}
 
 }
