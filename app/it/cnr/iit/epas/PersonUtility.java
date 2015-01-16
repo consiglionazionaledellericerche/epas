@@ -1161,7 +1161,7 @@ public class PersonUtility {
 		Person personToCheck = PersonDao.getPersonById(personid);
 		//Person personToCheck = Person.findById(personid);
 		//if(!personToCheck.isActiveInDay(dayToCheck)) {
-		if(PersonManager.isActiveInDay(dayToCheck, personToCheck)){
+		if(!PersonManager.isActiveInDay(dayToCheck, personToCheck)){
 			return;
 		}
 		PersonDay personDay = null;

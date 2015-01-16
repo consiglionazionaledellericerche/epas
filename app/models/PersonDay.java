@@ -26,7 +26,6 @@ import javax.persistence.UniqueConstraint;
 
 import manager.PersonDayInTroubleManager;
 import manager.PersonManager;
-import manager.WorkingTimeTypeDayManager;
 import manager.WorkingTimeTypeManager;
 import models.Stamping.WayType;
 import models.base.BaseModel;
@@ -357,9 +356,8 @@ public class PersonDay extends BaseModel {
 		
 		
 		//se mealTicketTime è zero significa che il dipendente nel giorno non ha diritto al calcolo del buono pasto
-		//if( ! wttd.mealTicketEnabled() ) {
-		if(WorkingTimeTypeDayManager.mealTicketEnabled(wttd)){
-			
+		if( ! wttd.mealTicketEnabled() ) {
+					
 			setIsTickeAvailable(false);
 			return workTime + justifiedTimeAtWork;
 		}
@@ -834,8 +832,7 @@ public class PersonDay extends BaseModel {
 	 */
 	private boolean isTicketAvailableForWorkingTime(){
 		
-		//if( this.getWorkingTimeTypeDay().mealTicketEnabled() )
-		if(WorkingTimeTypeDayManager.mealTicketEnabled(this.getWorkingTimeTypeDay()))
+		if( this.getWorkingTimeTypeDay().mealTicketEnabled() )
 		{
 			return true;
 		}

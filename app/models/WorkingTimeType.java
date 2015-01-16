@@ -76,7 +76,31 @@ public class WorkingTimeType extends BaseModel {
 	public List<WorkingTimeTypeDay> workingTimeTypeDays = new ArrayList<WorkingTimeTypeDay>();
 	
 	
-	
+	/**
+	 * 
+	 * @param officeId
+	 * @return I contratti attivi che attualmente hanno impostato il WorkingTimeType
+	 */
+	public List<Contract> getAssociatedActiveContract(Long officeId) {
+		
+		List<Contract> contractList = new ArrayList<Contract>();
+		
+		LocalDate today = new LocalDate();
+		
+		List<Contract> activeContract = Contract.getActiveContractInPeriod(today, today);
+		
+		for(Contract contract : activeContract) {
+			
+			if( !contract.person.office.id.equals(officeId))
+				continue;
+			
+			ContractWorkingTimeType current = contract.getContractWorkingTimeType(today);
+			if(current.workingTimeType.id.equals(this.id))
+				contractList.add(contract);
+		}
+		
+		return contractList;
+	}
 	
 	
 	@Transient
