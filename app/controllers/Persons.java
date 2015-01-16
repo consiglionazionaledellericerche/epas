@@ -105,13 +105,6 @@ public class Persons extends Controller {
 			params.flash(); // add http parameters to the flash scope
 			render("@insertPerson", person, qualification, office);
 		}
-		
-		if(!contract.crossFieldsValidation()){
-			
-			flash.error("Errore nella validazione del contratto. Inserire correttamente tutti i parametri.");
-			params.flash(); // add http parameters to the flash scope
-			render("@insertPerson", person, qualification, office);
-		}
 
 		rules.checkIfPermitted(office);
 		
@@ -119,33 +112,23 @@ public class Persons extends Controller {
 		person.office = office;
 
 		contract.person = person;
+		
+		if(!contract.crossFieldsValidation()){
+			
+			flash.error("Errore nella validazione del contratto. Inserire correttamente tutti i parametri.");
+			params.flash(); // add http parameters to the flash scope
+			render("@insertPerson", person, qualification, office);
+		}
+		
 		contract.onCertificate = onCertificate;
 
 		person.save();
 
 		contract.save();
 		
-		contract.setVacationPeriods();
-
-		//FIXME deve essere impostato in configurazione l'orario default
 		WorkingTimeType wtt = WorkingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
-		//WorkingTimeType wtt = WorkingTimeType.find("byDescription", "Normale").first();
+		ContractManager.properContractCreate(contract, wtt);
 		
-		ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
-		cwtt.beginDate = contract.beginContract;
-		cwtt.endDate = contract.expireContract;
-		cwtt.workingTimeType = wtt;
-		cwtt.contract = contract;
-		cwtt.save();
-		
-		ContractStampProfile csp = new ContractStampProfile();
-		csp.contract = contract;
-		csp.startFrom = contract.beginContract;
-		csp.endTo = contract.expireContract;
-		csp.fixedworkingtime = false;
-		csp.save();
-		contract.save();
-
 		Long personId = person.id;
 		
 		Persons.insertUsername(personId);
@@ -569,23 +552,7 @@ public class Persons extends Controller {
 		}
 
 		contract.save();
-		contract.setVacationPeriods();
-		contract.save();
-		ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
-		cwtt.beginDate = dataInizio;
-		cwtt.endDate = dataFine;
-		cwtt.workingTimeType = wtt;
-		cwtt.contract = contract;
-		cwtt.save();
-		contract.save();
-		
-		ContractStampProfile csp = new ContractStampProfile();
-		csp.contract = contract;
-		csp.startFrom = dataInizio;
-		csp.endTo = dataFine;
-		csp.fixedworkingtime = false;
-		csp.save();
-		contract.save();
+		ContractManager.properContractCreate(contract, wtt);
 		
 		flash.success("Il contratto per %s %s è stato correttamente salvato", person.name, person.surname);
 
@@ -645,9 +612,8 @@ public class Persons extends Controller {
 		}
 
 		contract.onCertificate = onCertificate;
-		contract.setVacationPeriods();
-		contract.updateContractWorkingTimeType();
-		contract.updateContractStampProfile();
+		
+		ContractManager.properContractUpdate(contract);
 		
 		//Ricalcolo valori
 		DateInterval contractDateInterval = contract.getContractDateInterval();

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package models;
 
 import java.util.ArrayList;
@@ -22,10 +19,8 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
-import dao.ContractDao;
-import dao.WorkingTimeTypeDao;
-import dao.WorkingTimeTypeDayDao;
 import play.data.validation.Required;
+import dao.WorkingTimeTypeDao;
 
 
 /**
