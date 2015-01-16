@@ -62,18 +62,9 @@ public class MealTicketManager {
 	 * Verifica che nel contratto precedente a contract siano avanzati dei buoni
 	 * pasto assegnati. In tal caso per quei buoni pasto viene modificata la relazione
 	 * col contratto successivo e cambiata la data di attribuzione in modo che ricada 
-	 * all'inizio del nuovo contratto
-	 * @param contract
-	 */
-	
-	/**
-	 * Verifica che nel contratto precedente a contract siano avanzati dei buoni
-	 * pasto assegnati. In tal caso per quei buoni pasto viene modificata la relazione
-	 * col contratto successivo e cambiata la data di attribuzione in modo che ricada 
 	 * all'inizio del nuovo contratto.
-	 * Ritorna il numero di buoni pasto trasferiti fra un contratto e l'altro.
 	 * @param contract
-	 * @return
+	 * @return il numero di buoni pasto trasferiti fra un contratto e l'altro.
 	 */
 	public static int mealTicketsLegacy(Contract contract) {
 		
@@ -230,7 +221,7 @@ public class MealTicketManager {
 		}
 		
 		/**
-		 * Ritorna i blocchi di buoni pasto consegnati alla persona 
+		 * Ritorna i blocchi di buoni pasto consegnati alla persona nell'intero intervallo del recap,
 		 * ordinati per data di scadenza e per codice blocco.
 		 * @return
 		 */
