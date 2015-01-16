@@ -5,6 +5,7 @@ import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +22,8 @@ import models.enumerate.ConfigurationFields;
 import models.rendering.PersonStampingDayRecap;
 
 import org.joda.time.LocalDate;
+
+import com.google.common.base.Optional;
 
 import dao.PersonDao;
 import play.mvc.Controller;
@@ -104,7 +107,8 @@ public class PrintTags extends Controller{
 	public static void listPersonForPrintTags(int year, int month){
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		LocalDate date = new LocalDate(year, month,1);
-		List<Person> personList = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
+		//List<Person> personList = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
+		List<Person> personList = PersonDao.list(Optional.<String>absent(), new HashSet(Security.getOfficeAllowed()), false, date, date.dayOfMonth().withMaximumValue(), true).list();
 		render(personList, date, year, month);
 	}
 	

@@ -10,6 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -82,7 +83,8 @@ public class Charts extends Controller{
 
 		year = params.get("yearChart", Integer.class);
 		month = params.get("monthChart", Integer.class);
-		List<Person> personeProva = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), true);
+		//List<Person> personeProva = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), true);
+		List<Person> personeProva = PersonDao.list(Optional.<String>absent(), new HashSet(Security.getOfficeAllowed()), true, new LocalDate(year,month,1), new LocalDate(year, month,1).dayOfMonth().withMaximumValue(), true).list();
 		List<PersonOvertime> poList = new ArrayList<PersonOvertime>();
 		//Nuovo codice per la gestione delle query con queryDSL
 		List<CompetenceCode> codeList = Lists.newArrayList();
@@ -150,7 +152,8 @@ public class Charts extends Controller{
 		Long val = CompetenceDao.valueOvertimeApprovedByMonthAndYear(year, Optional.<Integer>absent(), Optional.<Person>absent(), codeList).longValue();
 		//		Long val = Competence.find("Select sum(c.valueApproved) from Competence c where c.competenceCode.code in (?,?,?) and c.year = ?", 
 //				"S1","S2","S3", year).first();
-		List<Person> personeProva = Person.getActivePersonsinYear(year, Security.getOfficeAllowed(), true);
+		//List<Person> personeProva = Person.getActivePersonsinYear(year, Security.getOfficeAllowed(), true);
+		List<Person> personeProva = PersonDao.list(Optional.<String>absent(), new HashSet(Security.getOfficeAllowed()), true, new LocalDate(year,1,1), new LocalDate(year,12,31), true).list();
 		int totaleOreResidue = 0;
 		for(Person p : personeProva){
 			if(p.office.equals(Security.getUser().get().person.office)){
@@ -425,7 +428,8 @@ public class Charts extends Controller{
 
 	public static void export(Integer year) throws IOException{
 		rules.checkIfPermitted(Security.getUser().get().person.office);
-		List<Person> personList = Person.getActivePersonsinYear(year, Security.getOfficeAllowed(), true);
+		//List<Person> personList = Person.getActivePersonsinYear(year, Security.getOfficeAllowed(), true);
+		List<Person> personList = PersonDao.list(Optional.<String>absent(), new HashSet(Security.getOfficeAllowed()), true, new LocalDate(year,1,1), LocalDate.now(), true).list();
 		Logger.debug("Esporto dati per %s persone", personList.size());
 		FileInputStream inputStream = null;
 		File tempFile = File.createTempFile("straordinari"+year,".csv" );

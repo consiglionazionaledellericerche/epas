@@ -5,6 +5,7 @@ import it.cnr.iit.epas.MainMenu;
 import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import models.ConfGeneral;
@@ -39,7 +40,8 @@ public class Clocks extends Controller{
 		List<Office> officeAllowed = OfficeDao.getAllOffices();
 		//List<Office> officeAllowed = Office.findAll();
 		MainMenu mainMenu = new MainMenu(data.getYear(),data.getMonthOfYear());
-		List<Person> personList = Person.getActivePersonsInMonth(data.getMonthOfYear(), data.getYear(), officeAllowed, false);
+		//List<Person> personList = Person.getActivePersonsInMonth(data.getMonthOfYear(), data.getYear(), officeAllowed, false);
+		List<Person> personList = PersonDao.list(Optional.<String>absent(), new HashSet(officeAllowed), false, data, data, true).list();
 		render(data, personList,mainMenu);
 	}
 	
