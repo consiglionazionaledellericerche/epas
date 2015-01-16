@@ -125,27 +125,8 @@ public class Persons extends Controller {
 
 		contract.save();
 		
-		contract.setVacationPeriods();
-
-		//FIXME deve essere impostato in configurazione l'orario default
-		WorkingTimeType wtt = WorkingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
-		//WorkingTimeType wtt = WorkingTimeType.find("byDescription", "Normale").first();
+		ContractManager.contractProperCreate(contract);
 		
-		ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
-		cwtt.beginDate = contract.beginContract;
-		cwtt.endDate = contract.expireContract;
-		cwtt.workingTimeType = wtt;
-		cwtt.contract = contract;
-		cwtt.save();
-		
-		ContractStampProfile csp = new ContractStampProfile();
-		csp.contract = contract;
-		csp.startFrom = contract.beginContract;
-		csp.endTo = contract.expireContract;
-		csp.fixedworkingtime = false;
-		csp.save();
-		contract.save();
-
 		Long personId = person.id;
 		
 		Persons.insertUsername(personId);
