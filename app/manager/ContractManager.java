@@ -8,13 +8,17 @@ import java.util.List;
 
 import models.ConfGeneral;
 import models.Contract;
+import models.ContractStampProfile;
+import models.ContractWorkingTimeType;
 import models.PersonDay;
+import models.WorkingTimeType;
 
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
 
 import dao.PersonDayDao;
+import dao.WorkingTimeTypeDao;
 import play.Logger;
 
 /**
@@ -25,6 +29,39 @@ import play.Logger;
  *
  */
 public class ContractManager {
+	
+	/**
+	 * Costruisce in modo controllato tutte le strutture dati associate al contratto
+	 * appena creato passato come argomento.
+	 * (1) I piani ferie associati al contratto
+	 * (2) Il periodo con tipo orario Normale per la durata del contratto
+	 * (3) Il periodo con timbratura default impostata a false.
+	 * 
+	 * @param contract
+	 */
+	public static void contractProperCreate(Contract contract) {
+		
+		contract.setVacationPeriods();
+
+		//FIXME deve essere impostato in configurazione l'orario default
+		WorkingTimeType wtt = WorkingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
+		
+		ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
+		cwtt.beginDate = contract.beginContract;
+		cwtt.endDate = contract.expireContract;
+		cwtt.workingTimeType = wtt;
+		cwtt.contract = contract;
+		cwtt.save();
+		
+		ContractStampProfile csp = new ContractStampProfile();
+		csp.contract = contract;
+		csp.startFrom = contract.beginContract;
+		csp.endTo = contract.expireContract;
+		csp.fixedworkingtime = false;
+		csp.save();
+		contract.save();
+
+	}
 	
 	/**
 	 * Ricalcola completamente tutti i dati del contratto da dateFrom a dateTo.
