@@ -105,13 +105,6 @@ public class Persons extends Controller {
 			params.flash(); // add http parameters to the flash scope
 			render("@insertPerson", person, qualification, office);
 		}
-		
-		if(!contract.crossFieldsValidation()){
-			
-			flash.error("Errore nella validazione del contratto. Inserire correttamente tutti i parametri.");
-			params.flash(); // add http parameters to the flash scope
-			render("@insertPerson", person, qualification, office);
-		}
 
 		rules.checkIfPermitted(office);
 		
@@ -119,6 +112,14 @@ public class Persons extends Controller {
 		person.office = office;
 
 		contract.person = person;
+		
+		if(!contract.crossFieldsValidation()){
+			
+			flash.error("Errore nella validazione del contratto. Inserire correttamente tutti i parametri.");
+			params.flash(); // add http parameters to the flash scope
+			render("@insertPerson", person, qualification, office);
+		}
+		
 		contract.onCertificate = onCertificate;
 
 		person.save();
