@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -364,7 +365,8 @@ public class Absences extends Controller{
 	public static void insertPersonChildren(){
 		int month = new LocalDate().getMonthOfYear();
 		int year = new LocalDate().getYear();
-		List<Person> personList = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
+		//List<Person> personList = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
+		List<Person> personList = PersonDao.list(Optional.<String>absent(), new HashSet(Security.getOfficeAllowed()), false, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
 		render(personList);
 	}
 	
@@ -498,8 +500,8 @@ public class Absences extends Controller{
 	
 	public static void absenceInPeriod(Long personId){
 
-		List<Person> personList = Person.getActivePersonsInDay(LocalDate.now(),
-				Security.getOfficeAllowed(), false);
+		//List<Person> personList = Person.getActivePersonsInDay(LocalDate.now(),Security.getOfficeAllowed(), false);
+		List<Person> personList = PersonDao.list(Optional.<String>absent(), new HashSet(Security.getOfficeAllowed()), false, LocalDate.now(), LocalDate.now(), true).list();;
 		if(personId == null)
 			personId = Security.getUser().get().person.id;
 		Person person = PersonDao.getPersonById(personId);
@@ -521,12 +523,13 @@ public class Absences extends Controller{
 			String dataFine = params.get("dataFine");
 			dateFrom = new LocalDate(dataInizio);
 			dateTo = new LocalDate(dataFine);
+			
 		} catch (Exception e) {
 			
 			flash.error("Errore nell'inserimento dei parametri. Valorizzare correttamente data inizio e data fine secondo il formato aaaa-mm-dd");
 			render(personId, personList);
 		}
-		
+		personList = PersonDao.list(Optional.<String>absent(), new HashSet(Security.getOfficeAllowed()), false, dateFrom, dateTo, true).list();
 		List<Absence> missioni = new ArrayList<Absence>();
 		List<Absence> ferie = new ArrayList<Absence>();
 		List<Absence> riposiCompensativi = new ArrayList<Absence>();

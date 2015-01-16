@@ -8,6 +8,7 @@ import it.cnr.iit.epas.PersonUtility;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import manager.ContractYearRecapManager;
@@ -133,7 +134,8 @@ public class Administration extends Controller {
 	public static void personalResidualSituation()
 	{
 		
-		List<Person> listPerson = Person.getActivePersonsInDay(new LocalDate(), Security.getOfficeAllowed(), false);
+		//List<Person> listPerson = Person.getActivePersonsInDay(new LocalDate(), Security.getOfficeAllowed(), false);
+		List<Person> listPerson = PersonDao.list(Optional.<String>absent(), new HashSet(Security.getOfficeAllowed()), false, LocalDate.now(), LocalDate.now(), true).list();
 		List<PersonResidualMonthRecap> listMese = new ArrayList<PersonResidualMonthRecap>();
 		for(Person person : listPerson)
 		{
