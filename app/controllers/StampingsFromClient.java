@@ -6,6 +6,7 @@ import javax.inject.Inject;
 import controllers.Resecure.BasicAuth;
 import dao.OfficeDao;
 import it.cnr.iit.epas.JsonStampingBinder;
+import manager.StampingManager;
 import models.Office;
 import models.Person;
 import models.User;
@@ -37,7 +38,7 @@ public class StampingsFromClient extends Controller{
 			badRequest();	
 		}
 				
-		if (Person.createStamping(body)) {
+		if (StampingManager.createStamping(body)) {
 			return "OK";
 		}
 		
