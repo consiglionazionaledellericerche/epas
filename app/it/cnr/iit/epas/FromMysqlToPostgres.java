@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -49,9 +50,12 @@ import play.Play;
 import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 
 import controllers.Administration;
+import controllers.Security;
+import dao.PersonDao;
 
 
 public class FromMysqlToPostgres {
@@ -279,7 +283,8 @@ public class FromMysqlToPostgres {
 	 */
 	public static void checkFixedWorkingTime() {
 		Logger.debug("Controllo delle persone con timbratura fissa");
-		List<Person> activePerson = Person.getActivePersons(new LocalDate(2013,1,1));
+		//List<Person> activePerson = Person.getActivePersons(new LocalDate(2013,1,1));
+		List<Person> activePerson = PersonDao.list(Optional.<String>absent(), new HashSet(Security.getOfficeAllowed()), false, new LocalDate().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), new LocalDate(), true).list();
 
 		for(Person p : activePerson){
 			Logger.debug("Analizzo %s %s", p.name, p.surname);

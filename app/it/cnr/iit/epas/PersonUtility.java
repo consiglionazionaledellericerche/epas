@@ -2,6 +2,7 @@ package it.cnr.iit.epas;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -943,7 +944,8 @@ public class PersonUtility {
 			
 			LocalDate begin = new LocalDate(year, month, 1);
 			LocalDate end = new LocalDate().minusDays(1);
-			personList = Person.getActivePersonsSpeedyInPeriod(begin, end, officeAllowed, false);	
+			//personList = Person.getActivePersonsSpeedyInPeriod(begin, end, officeAllowed, false);	
+			personList = PersonDao.list(Optional.<String>absent(), new HashSet(officeAllowed), false, begin, end, true).list();
 		}
 		else {
 			
@@ -1126,7 +1128,8 @@ public class PersonUtility {
 		{
 			begin = new LocalDate(year, month, 1);
 			end = new LocalDate().minusDays(1);
-			personList = Person.getActivePersonsSpeedyInPeriod(begin, end, officeAllowed, false);	
+			//personList = Person.getActivePersonsSpeedyInPeriod(begin, end, officeAllowed, false);
+			personList = PersonDao.list(Optional.<String>absent(), new HashSet(officeAllowed), false, begin, end, true).list();
 		}
 		else
 		{
