@@ -219,6 +219,7 @@ public class Absences extends Controller{
 		//Ho dovuto implementare un involucro perchè quando richiamavo questo medoto da update il campo blob era null.
 		AbsenceManager.insertAbsence(person, dateFrom,Optional.fromNullable(dateTo), 
 				absenceType, Optional.fromNullable(file), Optional.<String>absent());
+
 		
 		Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());	
 	}
@@ -328,11 +329,16 @@ public class Absences extends Controller{
 		Person person = absence.personDay.person;
 		LocalDate dateFrom =  absence.personDay.date;	
 		
-		AbsenceType absenceType = AbsenceTypeDao.getAbsenceTypeByCode(absenceCode);
-		
-		if(absenceType == null){
-			flash.error("codice di assenza inesistente", absenceCode);
+		AbsenceType absenceType = null;
+//		Verifico se si tratta di un aggiornamento o di una rimozione
+		if(!absenceCode.isEmpty()){
+			absenceType  = AbsenceTypeDao.getAbsenceTypeByCode(absenceCode);
+			
+			if(absenceType == null){
+				flash.error("codice di assenza inesistente", absenceCode);
+			}
 		}
+	
 		if(dateTo != null && dateTo.isBefore(dateFrom)){
 			flash.error("Errore nell'inserimento del campo Fino A, inserire una data valida. Operazione annullata");
 		}
@@ -345,11 +351,12 @@ public class Absences extends Controller{
 		if(deleted > 0){
 			flash.success("Rimossi %s codici assenza di tipo %s", deleted, absence.absenceType.code);
 		}
+//		Se si tratta di una modifica, effettuo l'inserimento dopo la rimozione della vecchia assenza
+		if(!absenceCode.isEmpty()){
+			AbsenceManager.insertAbsence(person, dateFrom, Optional.fromNullable(dateTo),
+					absenceType,Optional.fromNullable(file), Optional.fromNullable(mealTicket));
+		}
 		
-		AbsenceManager.insertAbsence(person, dateFrom, Optional.fromNullable(dateTo),
-				absenceType,Optional.fromNullable(file), Optional.fromNullable(mealTicket));
-		
-		PersonUtility.updatePersonDaysIntoInterval(person, dateFrom, dateTo);
 		Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
 	}
 				
