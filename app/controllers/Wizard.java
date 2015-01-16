@@ -1,22 +1,17 @@
 package controllers;
 
 import it.cnr.iit.epas.DateUtility;
-import it.cnr.iit.epas.PersonUtility;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import javax.inject.Inject;
-
+import manager.ContractManager;
 import models.ConfGeneral;
 import models.ConfYear;
 import models.Contract;
-import models.ContractStampProfile;
-import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
 import models.Qualification;
@@ -27,8 +22,18 @@ import models.WorkingTimeType;
 import models.enumerate.ConfigurationFields;
 
 import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
+
+import play.Logger;
+import play.cache.Cache;
+import play.data.validation.CheckWith;
+import play.data.validation.Email;
+import play.data.validation.Equals;
+import play.data.validation.Required;
+import play.data.validation.Valid;
+import play.libs.Codec;
+import play.mvc.Controller;
+import play.mvc.With;
+import validators.StringIsTime;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -37,20 +42,10 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 
-import controllers.Resecure.NoCheck;
 import dao.QualificationDao;
 import dao.RoleDao;
 import dao.UserDao;
 import dao.WorkingTimeTypeDao;
-import play.Logger;
-import play.Play;
-import play.cache.Cache;
-import play.data.validation.*;
-import play.libs.Codec;
-import play.mvc.Controller;
-import play.mvc.With;
-import security.SecurityRules;
-import validators.StringIsTime;
 
 /**
  * @author daniele
@@ -584,25 +579,10 @@ public class Wizard extends Controller {
 		contract.person = p;
 		
 		contract.save();
-		contract.setVacationPeriods();
-		contract.save();
-		
-		ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
-		cwtt.beginDate = contractBegin;
-		cwtt.endDate = contractEnd;
-		cwtt.workingTimeType = WorkingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
-		cwtt.contract = contract;
-		cwtt.save();
-		contract.save();
-		
-		ContractStampProfile csp = new ContractStampProfile();
-		csp.contract = contract;
-		csp.startFrom = contractBegin;
-		csp.endTo = contractEnd;
-		csp.fixedworkingtime = false;
-		csp.save();
-		contract.save();
-		
+
+		WorkingTimeType wtt = WorkingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
+		ContractManager.properContractCreate(contract, wtt);
+				
 		User user = new User();
 		//user.id = person.id;
 		user.password = Codec.hexMD5(properties.getProperty("manager_password"));

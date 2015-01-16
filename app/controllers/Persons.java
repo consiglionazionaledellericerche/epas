@@ -125,7 +125,8 @@ public class Persons extends Controller {
 
 		contract.save();
 		
-		ContractManager.contractProperCreate(contract);
+		WorkingTimeType wtt = WorkingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
+		ContractManager.properContractCreate(contract, wtt);
 		
 		Long personId = person.id;
 		
@@ -550,23 +551,7 @@ public class Persons extends Controller {
 		}
 
 		contract.save();
-		contract.setVacationPeriods();
-		contract.save();
-		ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
-		cwtt.beginDate = dataInizio;
-		cwtt.endDate = dataFine;
-		cwtt.workingTimeType = wtt;
-		cwtt.contract = contract;
-		cwtt.save();
-		contract.save();
-		
-		ContractStampProfile csp = new ContractStampProfile();
-		csp.contract = contract;
-		csp.startFrom = dataInizio;
-		csp.endTo = dataFine;
-		csp.fixedworkingtime = false;
-		csp.save();
-		contract.save();
+		ContractManager.properContractCreate(contract, wtt);
 		
 		flash.success("Il contratto per %s %s è stato correttamente salvato", person.name, person.surname);
 
@@ -626,9 +611,8 @@ public class Persons extends Controller {
 		}
 
 		contract.onCertificate = onCertificate;
-		contract.setVacationPeriods();
-		contract.updateContractWorkingTimeType();
-		contract.updateContractStampProfile();
+		
+		ContractManager.properContractUpdate(contract);
 		
 		//Ricalcolo valori
 		DateInterval contractDateInterval = contract.getContractDateInterval();
