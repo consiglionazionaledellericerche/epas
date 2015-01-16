@@ -10,6 +10,7 @@ import it.cnr.iit.epas.DateUtility;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -385,163 +386,6 @@ public class Person extends BaseModel implements Comparable<Person>{
 	}
 	
 	
-	
-	
-
-	/**
-	 * Ritorna la lista delle persone visibili dall'amministratore attive nel mese richiesto.
-	 * Questa lista viene salvata in cache e ricalcolata solo se la copia non esiste o è scaduta.
-	 * Il nome della variabile in cache è persons-year-month-personLogged.id (esempio 'persons-2014-01-146')
-	 * @param year
-	 * @return
-	 
-	public static List getCachedActivePersonInMonth(Integer year, Integer month, Person personLogged)
-	{
-		return null;
-	}
-	*/
-	
-	
-	
-	
-	
-
-	
-
-	
-
-	
-
-	
-	/**
-	 * 
-	 * @param startPeriod
-	 * @param endPeriod
-	 * @param officeAllowed
-	 * @param onlyTechnician true se voglio solo i tecnici con qualifica <= 3
-	 * @return
-	 */
-	public static List<Person> getActivePersonsSpeedyInPeriod(LocalDate startPeriod, LocalDate endPeriod, List<Office> officeAllowed, boolean onlyTechnician)
-	{
-		//Filtro sulla qualifica
-		List<Qualification> qualificationRequested;
-		if(onlyTechnician)
-			qualificationRequested = QualificationDao.getQualificationGreaterThan(4);
-			//qualificationRequested = Qualification.find("Select q from Qualification q where q.qualification >= ?", 4).fetch();
-		else
-			qualificationRequested = QualificationDao.getQualification(Optional.<Integer>absent(), Optional.<Long>absent(), true);
-			//qualificationRequested = Qualification.findAll();
-				
-		//Query //TODO QueryDsl
-		List<Person> personList = Person.find("Select distinct p from Person p "
-//				+ "left outer join fetch p.contactData "				//OneToOne			//TODO ISSUE discutere dell'opzionalità di queste relazioni OneToOne
-				+ "left outer join fetch p.personHourForOvertime "		//OneToOne
-//				+ "left outer join fetch p.location "					//OneToOne
-				+ "left outer join fetch p.reperibility "				//OneToOne
-				+ "left outer join fetch p.personShift "				//OneToOne 
-				+ "left outer join fetch p.user "						//OneToOne 
-				+ "left outer join fetch p.contracts as c "
-				+ "where "
-				
-				//utenti di sistema
-				//+"p.username != ? "
-				
-				//contratto on certificate
-				//+ "and c.onCertificate = true " tolto and perchè ho tolto username
-				+ "c.onCertificate = true "
-				
-				+ "and "
-				
-				//contratto attivo nel periodo
-				+ "( "
-				//caso contratto non terminato
-				+ "c.endContract is null and "
-					//contratto a tempo indeterminato che si interseca col periodo 
-					+ "( (c.expireContract is null and c.beginContract <= ? )"
-					+ "or "
-					//contratto a tempo determinato che si interseca col periodo (comanda il campo endContract)
-					+ "(c.expireContract is not null and c.beginContract <= ? and c.expireContract >= ? ) ) "
-				+ "or "
-				//caso contratto terminato che si interseca col periodo		
-				+ "c.endContract is not null and c.beginContract <= ? and c.endContract >= ? "
-				+ ") "
-				
-						
-				//persona allowed
-				+"and p.office in :officeList "
-				
-				//only technician
-				+"and p.qualification in :qualificationList "
-				
-								
-				+ "order by p.surname, p.name", /*"epas.clocks",*/ endPeriod, endPeriod, startPeriod, endPeriod, startPeriod).bind("officeList", officeAllowed).bind("qualificationList", qualificationRequested).fetch();
-
-		return personList;
-	}
-	
-	/**
-	 * La lista delle persone attive in uno specifico giorno
-	 * @param day
-	 * @param month
-	 * @param year
-	 * @param officeAllowed
-	 * @param onlyTechnician true se si desiderano solo tecnici, false altrimenti
-	 * @return
-	 */
-	public static List<Person> getActivePersonsInDay(int day, int month, int year, List<Office> officeAllowed, boolean onlyTechnician)
-	{
-		LocalDate date = new LocalDate(year, month, day);
-		return Person.getActivePersonsSpeedyInPeriod(date, date, officeAllowed, onlyTechnician);
-	}
-	
-	/**
-	 * La lista delle persone attive in uno specifico giorno
-	 * @param day
-	 * @param officeAllowed
-	 * @param onlyTechnician
-	 * @return
-	 */
-	public static List<Person> getActivePersonsInDay(LocalDate day, List<Office> officeAllowed, boolean onlyTechnician)
-	{	
-		return Person.getActivePersonsSpeedyInPeriod(day, day, officeAllowed, onlyTechnician);
-	}
-
-	/**
-	 * La lista delle persone che abbiano almeno un giorno lavorativo coperto da contratto nel mese month
-	 * @param month
-	 * @param year
-	 * @param officeAllowed
-	 * @param onlyTechnician true se si desiderano solo tecnici, false altrimenti
-	 * @return
-	 */
-	public static List<Person> getActivePersonsInMonth(int month, int year, List<Office> officeAllowed, boolean onlyTechnician)
-	{
-
-		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
-		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
-		return Person.getActivePersonsSpeedyInPeriod(monthBegin, monthEnd, officeAllowed, onlyTechnician);
-	}
-
-	/**
-	 * La lista delle persone che abbiano almeno un giorno lavorativo coperto da contratto nell'anno year
-	 * @param officeAllowed
-	 * @param year, onlyTechnician
-	 * @return le persone attive in un anno se il booleano è true ritorna solo la lista dei tecnici (per competenze)
-	 */
-	public static List<Person> getActivePersonsinYear(int year, List<Office> officeAllowed, boolean onlyTechnician){
-
-		LocalDate yearBegin = new LocalDate().withYear(year).withMonthOfYear(1).withDayOfMonth(1);
-		LocalDate yearEnd = new LocalDate().withYear(year).withMonthOfYear(12).dayOfMonth().withMaximumValue();
-		return Person.getActivePersonsSpeedyInPeriod(yearBegin, yearEnd, officeAllowed, onlyTechnician);
-	
-	}
-	
-	
-
-
-
-	
-	
 	@Override
 	public String toString() {
 		return String.format("Person[%d] - %s %s", id, name, surname);
@@ -564,110 +408,6 @@ public class Person extends BaseModel implements Comparable<Person>{
 		
 	}
 
-	/**
-	 * metodo per la creazione di una timbratura a partire dall'oggetto stampModificationType che è stato costruito dal binder del Json
-	 * passato dal client python
-	 * @throws IllegalAccessException 
-	 * @throws InstantiationException 
-	 */
-	public static boolean createStamping(StampingFromClient stamping){
-
-		if(stamping == null)
-			return false;
-		
-		if(stamping.dateTime.isBefore(new LocalDateTime().minusMonths(1))){
-			Logger.warn("La timbratura che si cerca di inserire è troppo precedente rispetto alla data odierna. Controllare il server!");
-			return false;
-		}
-		Long id = stamping.personId;
-		
-		if(id == null){
-			Logger.warn("L'id della persona passata tramite json non ha trovato corrispondenza nell'anagrafica del personale. Controllare id = null");
-			return false;
-		}
-			
-		Person person = PersonDao.getPersonById(id);
-		//Person person = Person.findById(id);
-		if(person == null){
-			Logger.warn("L'id della persona passata tramite json non ha trovato corrispondenza nell'anagrafica del personale. Controllare id = %s", id);
-			return false;
-		}
-		
-		Logger.debug("Sto per segnare la timbratura di %s %s", person.name, person.surname);
-		PersonDay personDay = null;
-		Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(person, stamping.dateTime.toLocalDate());
-//		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", 
-//				person, stamping.dateTime.toLocalDate() ).first();
-		if(!pd.isPresent()){
-			/**
-			 * non esiste un personDay per quella data, va creato e quindi salvato
-			 */
-			//Logger.debug("Non esiste il personDay...è il primo personDay per il giorno %s per %s %s", pd.date, person.name, person.surname);
-			personDay = new PersonDay(person, stamping.dateTime.toLocalDate());
-			personDay.save();		
-			Logger.debug("Salvato il nuovo personDay %s", personDay);
-			Stamping stamp = new Stamping();
-			stamp.date = stamping.dateTime;
-			stamp.markedByAdmin = false;
-//			stamp.considerForCounting = true;
-			if(stamping.inOut == 0)
-				stamp.way = WayType.in;
-			else
-				stamp.way = WayType.out;
-			stamp.stampType = stamping.stampType;
-			stamp.badgeReader = stamping.badgeReader;
-			stamp.personDay = personDay;
-			stamp.save();
-			personDay.stampings.add(stamp);
-			personDay.save();
-
-		}
-		else{
-			personDay = pd.get();
-			if(checkDuplicateStamping(personDay, stamping) == false){
-				Stamping stamp = new Stamping();
-				stamp.date = stamping.dateTime;
-				stamp.markedByAdmin = false;
-//				stamp.considerForCounting = true;
-				if(stamping.inOut == 0)
-					stamp.way = WayType.in;
-				else
-					stamp.way = WayType.out;
-				stamp.stampType = stamping.stampType;
-				stamp.badgeReader = stamping.badgeReader;
-				stamp.personDay = personDay;
-				stamp.save();
-				personDay.stampings.add(stamp);
-				personDay.save();
-			}
-			else{
-				Logger.info("All'interno della lista di timbrature di %s %s nel giorno %s c'è una timbratura uguale a quella passata dallo" +
-						"stampingsFromClient: %s", person.name, person.surname, personDay.date, stamping.dateTime);
-			}
-
-			
-		}
-		Logger.debug("Chiamo la populatePersonDay per fare i calcoli sulla nuova timbratura inserita per il personDay %s", pd);
-		personDay.populatePersonDay();
-
-		personDay.save();
-		return true;
-	}
-
-	/**
-	 * 
-	 * @param pd
-	 * @param stamping
-	 * @return true se all'interno della lista delle timbrature per quel personDay c'è una timbratura uguale a quella passata come parametro
-	 * false altrimenti
-	 */
-	private static boolean checkDuplicateStamping(PersonDay pd, StampingFromClient stamping){
-		for(Stamping s : pd.stampings){
-			if(s.date.isEqual(stamping.dateTime)){
-				return true;
-			}
-		}return false;
-	}
 	
 	
 	/**
@@ -705,18 +445,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 		}
 	}
 	
-	
-	/**
-	 * Cerca per numero di matricola
-	 * @param number
-	 * @return
-	 */
-	public static Person findByNumber(Integer number) {
-		return PersonDao.getPersonByNumber(number);
-		//return Person.find("SELECT p FROM Person p WHERE number = ?", number).first();
-	}
-	
-	
+
 	/**
 	 * 
 	 * @param year
@@ -1025,18 +754,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 		return flag;
 	}
 
-	/**
-	 * Ritorna la lista delle persone visibili dall'amministratore attive nel mese richiesto.
-	 * Questa lista viene salvata in cache e ricalcolata solo se la copia non esiste o è scaduta.
-	 * Il nome della variabile in cache è persons-year-month-personLogged.id (esempio 'persons-2014-01-146')
-	 * @param year
-	 * @return
 	
-	public static List getCachedActivePersonInMonth(Integer year, Integer month, Person personLogged)
-	{
-		return null;
-	}
-	*/
 	
 	public boolean isIonicRadianceRiskCom3AvailableBis(){
 		boolean flag = false;
@@ -1046,68 +764,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 		}
 		return flag;
 	}
-
-	/**
-	 * Ritorna la lista delle persone visibili dall'amministratore attive nel mese richiesto.
-	 * Questa lista viene salvata in cache e ricalcolata solo se la copia non esiste o è scaduta.
-	 * Il nome della variabile in cache è persons-year-month-personLogged.id (esempio 'persons-2014-01-146')
-	 * @param year
-	 * @return
 	
-	public static List getCachedActivePersonInMonth(Integer year, Integer month, Person personLogged)
-	{
-		return null;
-	}
-	*/
-	
-	/**
-	 * Metodo deprecato, usare getActivePersonsInDay
-	 * @param date
-	 * @return la lista di persone attive a quella data
-	 */
-	@Deprecated 
-	public static List<Person> getActivePersons(LocalDate date){
-		List<Person> activePersons = null;
-		User user = Security.getUser().get();
-					
-		if(user.person==null)
-		{
-			return Person.findAll();
-		}
-		//tutte le persone (l'amministratore è amministratore di sede principale)
-		if(user.person.office.subOffices.isEmpty())
-		{
-			//List<Person> personOffice = new ArrayList<Person>();
-			
-			activePersons = Person.find(
-					"Select distinct (p) " +
-					"from Person p, Contract c " +
-					"where c.person = p "
-					+ "and (c.endContract is null or c.endContract > ?) "
-					+ "and (c.expireContract > ? or c.expireContract is null) "
-					+ "and (c.beginContract < ? or c.beginContract is null) "
-					+ "and p.username <> ? " + 
-					"order by p.surname, p.name", date, date, date, "epas.clocks").fetch();
-			
-		}
-		//le persone aderenti all'ufficio dell'amministratore, che è amministratore di sede distaccata
-		else
-		{
-			activePersons =Person.find(
-					"Select distinct (p) " +
-					"from Person p, Contract c " +
-					"where c.person = p " +
-					"and p.office = ?" 
-					+ "and (c.endContract is null or c.endContract > ?) "
-					+ "and (c.expireContract > ? or c.expireContract is null) "
-					+ "and (c.beginContract < ? or c.beginContract is null) "
-					+ "and p.username <> ? " + 
-					"order by p.surname, p.name", user.person.office, date, date, date, "epas.clocks").fetch();
-		}
-		
-		return activePersons;
-	
-	}
 
 	@Override
 	public int compareTo(Person person) {

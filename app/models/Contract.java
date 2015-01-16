@@ -3,7 +3,6 @@ package models;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -33,7 +32,6 @@ import com.google.common.collect.Sets;
 
 import dao.ContractDao;
 import dao.MealTicketDao;
-import dao.VacationCodeDao;
 import dao.VacationPeriodDao;
 
 
@@ -254,167 +252,6 @@ public class Contract extends BaseModel {
 		return vpList;
 	}
 
-	/**
-	 * Costruisce la struttura valida dei vacation period associati al contratto.
-	 */
-	public void setVacationPeriods(){
-
-
-		//Distruggo i vacation period precedenti
-		if(this.vacationPeriods != null){
-			for(VacationPeriod vp : this.vacationPeriods)
-			{
-				vp.delete();
-			}
-		}
-
-		//Contratto terminato nessun vacation period
-		if(this.endContract!=null)
-		{
-			this.save();
-			return;
-		}
-
-		//Tempo indeterminato, creo due vacatio 3 anni più infinito
-		if(this.expireContract == null)
-		{
-
-			VacationPeriod first = new VacationPeriod();
-			first.beginFrom = this.beginContract;
-			first.endTo = this.beginContract.plusYears(3).minusDays(1);
-			first.vacationCode = VacationCodeDao.getVacationCodeByDescription("26+4");
-			//first.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "26+4").first();
-			first.contract = this;
-			first.save();
-			VacationPeriod second = new VacationPeriod();
-			second.beginFrom = this.beginContract.plusYears(3);
-			second.endTo = null;
-			second.vacationCode = VacationCodeDao.getVacationCodeByDescription("28+4");
-			//second.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "28+4").first();
-			second.contract =this;
-			second.save();
-			this.save();
-			return;
-		}
-
-		//Tempo determinato più lungo di 3 anni
-		if(this.expireContract.isAfter(this.beginContract.plusYears(3).minusDays(1))){
-			VacationPeriod first = new VacationPeriod();
-			first.beginFrom = this.beginContract;
-			first.endTo = this.beginContract.plusYears(3).minusDays(1);
-			first.vacationCode = VacationCodeDao.getVacationCodeByDescription("26+4");
-			//first.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "26+4").first();
-			first.contract = this;
-			first.save();
-			VacationPeriod second = new VacationPeriod();
-			second.beginFrom = this.beginContract.plusYears(3);
-			second.endTo = this.expireContract;
-			second.vacationCode = VacationCodeDao.getVacationCodeByDescription("28+4");
-			//second.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "28+4").first();
-			second.contract =this;
-			second.save();
-			this.save();
-			return;
-		}
-
-		//Tempo determinato più corto di 3 anni
-		VacationPeriod first = new VacationPeriod();
-		first.beginFrom = this.beginContract;
-		first.endTo = this.expireContract;
-		first.contract = this;
-		first.vacationCode = VacationCodeDao.getVacationCodeByDescription("26+4");
-		//first.vacationCode = VacationCode.find("Select code from VacationCode code where code.description = ?", "26+4").first();
-		first.save();
-		this.save();
-	}
-	
-	/**
-	 * Quando vengono modificate le date di inizio o fine del contratto occorre rivedere la struttura dei periodi di tipo orario.
-	 * 1)Eliminare i periodi non più appartenenti al contratto
-	 * 2)Modificare la data di inizio del primo periodo se è cambiata la data di inizio del contratto
-	 * 3)Modificare la data di fine dell'ultimo periodo se è cambiata la data di fine del contratto
-	 * 
-	 */
-	public void updateContractWorkingTimeType()
-	{
-		//Aggiornare i periodi workingTimeType
-		//1) Cancello quelli che non appartengono più a contract
-		List<ContractWorkingTimeType> toDelete = new ArrayList<ContractWorkingTimeType>();
-		for(ContractWorkingTimeType cwtt : this.contractWorkingTimeType)
-		{
-			DateInterval cwttInterval = new DateInterval(cwtt.beginDate, cwtt.endDate);
-			if(DateUtility.intervalIntersection(this.getContractDateInterval(), cwttInterval) == null)
-			{
-				toDelete.add(cwtt);
-			}
-		}
-		for(ContractWorkingTimeType cwtt : toDelete)
-		{
-			cwtt.delete();
-			this.contractWorkingTimeType.remove(cwtt);
-			this.save();
-		}
-		
-		//Conversione a List per avere il metodo get()
-		List<ContractWorkingTimeType> cwttList = Lists.newArrayList(contractWorkingTimeType);
-						
-		//Sistemo il primo		
-		ContractWorkingTimeType first = cwttList.get(0);
-		first.beginDate = this.getContractDateInterval().getBegin();
-		first.save();
-		//Sistemo l'ultimo
-		ContractWorkingTimeType last = 
-				cwttList.get(this.contractWorkingTimeType.size()-1);
-		last.endDate = this.getContractDateInterval().getEnd();
-		if(DateUtility.isInfinity(last.endDate))
-			last.endDate = null;
-		last.save();
-		this.save();
-	}
-	
-	/**
-	 * Quando vengono modificate le date di inizio o fine del contratto occorre rivedere la struttura dei periodi di stampProfile.
-	 * 1)Eliminare i periodi non più appartenenti al contratto
-	 * 2)Modificare la data di inizio del primo periodo se è cambiata la data di inizio del contratto
-	 * 3)Modificare la data di fine dell'ultimo periodo se è cambiata la data di fine del contratto
-	 * 
-	 */
-	public void updateContractStampProfile()
-	{
-		//Aggiornare i periodi stampProfile
-		//1) Cancello quelli che non appartengono più a contract
-		List<ContractStampProfile> toDelete = new ArrayList<ContractStampProfile>();
-		for(ContractStampProfile csp : this.contractStampProfile)
-		{
-			DateInterval cspInterval = new DateInterval(csp.startFrom, csp.endTo);
-			if(DateUtility.intervalIntersection(this.getContractDateInterval(), cspInterval) == null)
-			{
-				toDelete.add(csp);
-			}
-		}
-		for(ContractStampProfile csp : toDelete)
-		{
-			csp.delete();
-			this.contractWorkingTimeType.remove(csp);
-			this.save();
-		}
-		
-		//Conversione a List per avere il metodo get()
-		List<ContractStampProfile> cspList = Lists.newArrayList(contractStampProfile);
-						
-		//Sistemo il primo		
-		ContractStampProfile first = cspList.get(0);
-		first.startFrom = this.getContractDateInterval().getBegin();
-		first.save();
-		//Sistemo l'ultimo
-		ContractStampProfile last = 
-				cspList.get(this.contractStampProfile.size()-1);
-		last.endTo = this.getContractDateInterval().getEnd();
-		if(DateUtility.isInfinity(last.endTo))
-			last.endTo = null;
-		last.save();
-		this.save();
-	}
 
 	/**
 	 * Utilizza la libreria DateUtils per costruire l'intervallo attivo per il contratto.

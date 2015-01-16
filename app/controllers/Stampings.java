@@ -493,7 +493,8 @@ public class Stampings extends Controller {
 
 		//lista delle persone che sono state attive nel mese
 		//TODO usare PersonDao
-		List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
+		//List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
+		List<Person> activePersons = PersonDao.list(Optional.<String>absent(), new HashSet(Security.getOfficeAllowed()), false, monthBegin, monthEnd, true).list();
 
 		List<PersonTroublesInMonthRecap> missingStampings = new ArrayList<PersonTroublesInMonthRecap>();
 		

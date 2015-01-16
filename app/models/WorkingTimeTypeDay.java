@@ -8,6 +8,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import models.base.BaseModel;
 
@@ -138,6 +139,23 @@ public class WorkingTimeTypeDay extends BaseModel {
 	
 	
 	
+	/**
+	 * True se è ammesso il calcolo del buono pasto per la persona, false altrimenti (il campo mealTicketTime
+	 *  che rappresenta il tempo minimo di lavoro per avere diritto al buono pasto è pari a zero)
+	 * @return
+	 */
+	@Transient
+	public boolean mealTicketEnabled() {
+		
+		if( this.holiday )
+			return false;
+		
+		if( this.mealTicketTime > 0)
+			return true;
+		else 
+			return false;
+		
+	}
 	
 	@Override
 	public String toString() {
