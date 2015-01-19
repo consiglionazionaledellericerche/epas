@@ -189,4 +189,49 @@ public class PersonManager {
 		return false;	//se il db è consistente non si verifica mai
 		
 	}
+	
+	
+
+	
+	/**
+	 * 
+	 * @return la lista delle persone che sono state selezionate per far parte della sperimentazione del nuovo sistema delle presenze
+	 */
+	public static List<Person> getPeopleForTest(){
+		List<Person> peopleForTest = Person.find("Select p from Person p where p.surname in (?,?,?,?,?,?) or (p.name = ? and p.surname = ?)", 
+				"Vasarelli", "Lucchesi", "Vivaldi", "Del Soldato", "Sannicandro", "Ruberti", "Maurizio", "Martinelli").fetch();
+		return peopleForTest;
+		
+	}
+
+	
+	/**
+	 * 
+	 * @param month
+	 * @param year
+	 * @return
+	 */
+	public static List<Contract> getMonthContracts(Person person, Integer month, Integer year)
+	{
+		List<Contract> monthContracts = new ArrayList<Contract>();
+		List<Contract> contractList = ContractDao.getPersonContractList(person);
+		//List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract",this).fetch();
+		if(contractList == null){
+			return monthContracts;
+		}
+		LocalDate monthBegin = new LocalDate().withYear(year).withMonthOfYear(month).withDayOfMonth(1);
+		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
+		DateInterval monthInterval = new DateInterval(monthBegin, monthEnd);
+		for(Contract contract : contractList)
+		{
+			if(!contract.onCertificate)
+				continue;
+			DateInterval contractInterval = contract.getContractDateInterval();
+			if(DateUtility.intervalIntersection(monthInterval, contractInterval)!=null)
+			{
+				monthContracts.add(contract);
+			}
+		}
+		return monthContracts;
+	}
 }
