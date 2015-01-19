@@ -107,35 +107,6 @@ public class ContractDao {
 		return contractList;
 	}
 
-	
-	/**
-	 * 
-	 * @param officeId
-	 * @param wtt
-	 * @return I contratti attivi che attualmente hanno impostato il WorkingTimeType
-	 */
-	public static List<Contract> getAssociatedActiveContract(Long officeId, WorkingTimeType wtt) {
-		
-		List<Contract> contractList = new ArrayList<Contract>();
-		
-		LocalDate today = new LocalDate();
-		
-		List<Contract> activeContract = Contract.getActiveContractInPeriod(today, today);
-		
-		for(Contract contract : activeContract) {
-			
-			if( !contract.person.office.id.equals(officeId))
-				continue;
-			
-			ContractWorkingTimeType current = contract.getContractWorkingTimeType(today);
-			if(current.workingTimeType.id.equals(wtt.id))
-				contractList.add(contract);
-		}
-		
-		return contractList;
-	}
-
-	
 	/**
 	 * 
 	 * @return il contratto attivo per quella persona alla date date
