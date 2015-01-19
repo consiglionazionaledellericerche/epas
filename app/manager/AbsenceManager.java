@@ -86,14 +86,8 @@ public class AbsenceManager {
 	 */
 	private static AbsenceType whichVacationCode(Person person, LocalDate date){
 
-		Contract contract = person.getCurrentContract();
-
-		VacationsRecap vr = null;
-		try { 
-			vr = new VacationsRecap(person, date.getYear(), contract, date, true);
-		} catch(IllegalStateException e) {
-			return null;
-		}
+		VacationsRecap vr = VacationsRecap.Factory.build(person, date.getYear(),
+				Optional.<Contract>absent(), date, true);
 
 		if(vr.vacationDaysLastYearNotYetUsed > 0)
 			return AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode());
@@ -118,14 +112,8 @@ public class AbsenceManager {
 	 */
 	private static boolean canTake32(Person person, LocalDate date) {
 
-		Contract contract = person.getCurrentContract();
-		VacationsRecap vr = null;
-
-		try { 
-			vr = new VacationsRecap(person, date.getYear(), contract, date, true);
-		} catch(IllegalStateException e) {
-			return false;
-		}
+		VacationsRecap vr = VacationsRecap.Factory.build(person, date.getYear(),
+				Optional.<Contract>absent(), date, true);
 
 		return (vr.vacationDaysCurrentYearNotYetUsed > 0);		
 
@@ -140,14 +128,8 @@ public class AbsenceManager {
 	 */
 	private static boolean canTake31(Person person, LocalDate date) {
 
-		Contract contract = person.getCurrentContract();
-		VacationsRecap vr = null;
-
-		try { 
-			vr = new VacationsRecap(person, date.getYear(), contract, date, true);
-		} catch(IllegalStateException e) {
-			return false;
-		}
+		VacationsRecap vr = VacationsRecap.Factory.build(person, date.getYear(),
+				Optional.<Contract>absent(), date, true);
 
 		return (vr.vacationDaysLastYearNotYetUsed > 0);
 	}
@@ -161,14 +143,8 @@ public class AbsenceManager {
 	 */
 	private static boolean canTake94(Person person, LocalDate date) {
 
-		Contract contract = person.getCurrentContract();
-		VacationsRecap vr = null;
-
-		try { 
-			vr = new VacationsRecap(person, date.getYear(), contract, date, true);
-		} catch(IllegalStateException e) {
-			return false;
-		}
+		VacationsRecap vr = VacationsRecap.Factory.build(person, date.getYear(),
+				Optional.<Contract>absent(), date, true);
 
 		return (vr.persmissionNotYetUsed > 0);
 
