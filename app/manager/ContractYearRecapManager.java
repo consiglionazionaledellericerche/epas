@@ -17,6 +17,8 @@ import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
+
 import dao.AbsenceTypeDao;
 import play.Logger;
 
@@ -125,7 +127,7 @@ public class ContractYearRecapManager {
 			cyr.contract = contract;
 			
 			//FERIE E PERMESSI
-			VacationsRecap vacationRecap = new VacationsRecap(contract.person, yearToCompute, contract, new LocalDate(), true);
+			VacationsRecap vacationRecap = VacationsRecap.Factory.build(contract.person, yearToCompute, Optional.of(contract), new LocalDate(), true);
 			cyr.vacationLastYearUsed = vacationRecap.vacationDaysLastYearUsed.size();
 			cyr.vacationCurrentYearUsed = vacationRecap.vacationDaysCurrentYearUsed.size();
 			cyr.permissionUsed = vacationRecap.permissionUsed.size();
