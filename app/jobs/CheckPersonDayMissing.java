@@ -26,7 +26,7 @@ public class CheckPersonDayMissing extends Job{
 		LocalDate date = new LocalDate();
 	//	List<Person> personList = Person.find("Select p from Person p where p.surname = ? or p.surname = ?", "Vasarelli", "Lucchesi").fetch();
 	//	List<Person> personList = Person.getActivePersons(date);
-		List<Person> personList = Person.getPeopleForTest();
+		List<Person> personList = PersonManager.getPeopleForTest();
 		Logger.debug("La lista di personale attivo è composta da %d persone", personList.size());
 		
 		for(Person p : personList){

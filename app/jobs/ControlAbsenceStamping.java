@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.Query;
 
 import manager.ConfGeneralManager;
+import manager.PersonManager;
 import models.ConfGeneral;
 import models.Person;
 import models.PersonDay;
@@ -39,7 +40,7 @@ public class ControlAbsenceStamping extends Job{
 //			p = Person.findById(id);
 		//List<Person> personList = Person.find("Select p from Person p where p.surname in (?,?) ", "Tagliaferri", "Del Soldato").fetch();
 	//	List<Person> personList = Person.getActivePersons(new LocalDate());
-		List<Person> personList = Person.getPeopleForTest();
+		List<Person> personList = PersonManager.getPeopleForTest();
 		LocalDate date = new LocalDate();
 		
 		for(Person person : personList){

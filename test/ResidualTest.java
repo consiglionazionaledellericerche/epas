@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import manager.ContractYearRecapManager;
+import manager.PersonManager;
 import manager.recaps.PersonResidualMonthRecap;
 import manager.recaps.PersonResidualYearRecap;
 import models.Contract;
@@ -37,7 +38,7 @@ public class ResidualTest extends UnitTest {
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
-    	List<Contract> monthContracts = person.getMonthContracts(month, year);
+    	List<Contract> monthContracts = PersonManager.getMonthContracts(person,month, year);
     	for(Contract contract : monthContracts)
 		{
     		ContractYearRecapManager.buildContractYearRecap(contract);
@@ -99,7 +100,7 @@ public class ResidualTest extends UnitTest {
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
-    	List<Contract> monthContracts = person.getMonthContracts(month, year);
+    	List<Contract> monthContracts = PersonManager.getMonthContracts(person, month, year);
     	for(Contract contract : monthContracts)
 		{
     		ContractYearRecapManager.buildContractYearRecap(contract);
@@ -161,7 +162,7 @@ public class ResidualTest extends UnitTest {
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
-    	List<Contract> monthContracts = person.getMonthContracts(month, year);
+    	List<Contract> monthContracts = PersonManager.getMonthContracts(person, month, year);
     	for(Contract contract : monthContracts)
 		{
     		ContractYearRecapManager.buildContractYearRecap(contract);
@@ -223,7 +224,7 @@ public class ResidualTest extends UnitTest {
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
-    	List<Contract> monthContracts = person.getMonthContracts(month, year);
+    	List<Contract> monthContracts = PersonManager.getMonthContracts(person, month, year);
     	for(Contract contract : monthContracts)
 		{
     		ContractYearRecapManager.buildContractYearRecap(contract);
@@ -285,7 +286,7 @@ public class ResidualTest extends UnitTest {
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
-    	List<Contract> monthContracts = person.getMonthContracts(month, year);
+    	List<Contract> monthContracts = PersonManager.getMonthContracts(person,month, year);
     	for(Contract contract : monthContracts)
 		{
     		ContractYearRecapManager.buildContractYearRecap(contract);
