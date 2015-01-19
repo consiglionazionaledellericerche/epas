@@ -41,6 +41,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
@@ -889,7 +890,10 @@ public class PersonUtility {
 	 * @param person
 	 * @param dateFrom
 	 * @param dateTo
+	 * 
+	 * @deprecated use {@link #PersonUtility.updatePersonDaysFromDate()} instead. 
 	 */
+	@Deprecated
 	public static void updatePersonDaysIntoInterval(Person person, LocalDate dateFrom, LocalDate dateTo)
 	{
 		LocalDate monthBegin = new LocalDate(dateFrom.getYear(), dateFrom.getMonthOfYear(), 1);
@@ -906,12 +910,37 @@ public class PersonUtility {
 			{
 				pd.populatePersonDay();
 			}
+//			FIXME c'è realmente bisogno di fare la populate oltre la data di oggi??
 			if(monthEnd.isEqual(dateTo) || monthEnd.isAfter(dateTo))
 				return;
 			monthBegin = monthBegin.plusMonths(1);
 			monthEnd = monthBegin.dayOfMonth().withMaximumValue();
 		}
 
+	}
+	
+
+	/** 
+	 * Aggiorna tutti i personday a partire dalla data specificata fino al giorno corrente
+	 * @param person
+	 * @param date
+	 */
+	public static void updatePersonDaysFromDate(Person person, LocalDate date){
+		
+		Preconditions.checkNotNull(person);
+		Preconditions.checkState(person.isPersistent());
+		Preconditions.checkNotNull(date);
+		
+//		Verifico se la data è passata, in caso contrario non è necessario ricalcolare nulla
+		if(date.isAfter(LocalDate.now())){
+			return;
+		}
+// 		Prendo la lista ordinata di tutti i personday della persona fino ad oggi e effettuo il ricalcolo su tutti
+		List<PersonDay> personDays = PersonDayDao.getPersonDayInPeriod(person, date, Optional.fromNullable(LocalDate.now()), true);
+
+		for(PersonDay pd : personDays){
+			pd.populatePersonDay();
+		}
 	}
 
 
@@ -1164,7 +1193,7 @@ public class PersonUtility {
 		Person personToCheck = PersonDao.getPersonById(personid);
 		//Person personToCheck = Person.findById(personid);
 		//if(!personToCheck.isActiveInDay(dayToCheck)) {
-		if(PersonManager.isActiveInDay(dayToCheck, personToCheck)){
+		if(!PersonManager.isActiveInDay(dayToCheck, personToCheck)){
 			return;
 		}
 		PersonDay personDay = null;

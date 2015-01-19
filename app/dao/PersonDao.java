@@ -12,6 +12,7 @@ import models.Contract;
 import models.Office;
 import models.Person;
 import models.PersonDay;
+import models.query.QAbsence;
 import models.query.QCompetenceCode;
 import models.query.QContract;
 import models.query.QPerson;
@@ -36,6 +37,8 @@ import com.mysema.query.jpa.JPQLQuery;
  */
 public final class PersonDao {
 
+	private final static QPerson person = QPerson.person;
+	private final static QContract contract = QContract.contract;
 	private PersonDao() {}
 	
 	/**
@@ -49,56 +52,54 @@ public final class PersonDao {
 		
 		Preconditions.checkState(!offices.isEmpty());
 		
-		final QPerson qp = QPerson.person;
-		final QContract qc = QContract.contract;
 		// TODO: completare con l'intervallo
 		//final LocalDate start = new LocalDate();
 		//final LocalDate end = start;
 				
 					
-		 final JPQLQuery query = ModelQuery.queryFactory().from(qp)
-					.leftJoin(qp.contracts, qc).fetch()
-					.leftJoin(qc.contractWorkingTimeType).fetch()
-					.leftJoin(qc.contractStampProfile).fetch()
-					.leftJoin(qc.vacationPeriods).fetch()
-					.leftJoin(qp.personHourForOvertime).fetch()
-					.leftJoin(qp.reperibility).fetch()
-					.leftJoin(qp.personShift).fetch()
-					.orderBy(qp.surname.asc(), qp.name.asc())
+		 final JPQLQuery query = ModelQuery.queryFactory().from(person)
+					.leftJoin(person.contracts, contract).fetch()
+					.leftJoin(contract.contractWorkingTimeType).fetch()
+					.leftJoin(contract.contractStampProfile).fetch()
+					.leftJoin(contract.vacationPeriods).fetch()
+					.leftJoin(person.personHourForOvertime).fetch()
+					.leftJoin(person.reperibility).fetch()
+					.leftJoin(person.personShift).fetch()
+					.orderBy(person.surname.asc(), person.name.asc())
 					.distinct();
 		
 		
 		final BooleanBuilder condition = new BooleanBuilder();
-		condition.and(qp.office.in(offices));
+		condition.and(person.office.in(offices));
 		
 		if (onlyTechnician) {
 			// i livelli sopra al 3 sono dei tecnici:
-			condition.and(qp.qualification.qualification.gt(3));
+			condition.and(person.qualification.qualification.gt(3));
 		}
 		
 		if (name.isPresent() && !name.get().trim().isEmpty()) {
-			condition.andAnyOf(qp.name.startsWithIgnoreCase(name.get()),
-					qp.surname.startsWithIgnoreCase(name.get()));
+			condition.andAnyOf(person.name.startsWithIgnoreCase(name.get()),
+					person.surname.startsWithIgnoreCase(name.get()));
 		}
 		
 		if(onlyOnCertificate)
-			condition.and(qc.onCertificate.isTrue());
+			condition.and(contract.onCertificate.isTrue());
 		
 		condition.andAnyOf(
 				
 				//contratto terminato
-				qc.endContract.isNotNull().and(qc.beginContract.loe(end)).and(qc.endContract.goe(start)),
+				contract.endContract.isNotNull().and(contract.beginContract.loe(end)).and(contract.endContract.goe(start)),
 
 				//contratto non terminato
-				qc.endContract.isNull().and(
+				contract.endContract.isNull().and(
 
 						//contratto tempo indeterminato
-						qc.expireContract.isNull().and(qc.beginContract.loe(end))
+						contract.expireContract.isNull().and(contract.beginContract.loe(end))
 						
 						.or(
 						
 						//contratto tempo determinato
-						qc.expireContract.isNotNull().and(qc.beginContract.loe(end)).and(qc.expireContract.goe(start))
+						contract.expireContract.isNotNull().and(contract.beginContract.loe(end)).and(contract.expireContract.goe(start))
 						
 						)
 					)
@@ -120,7 +121,7 @@ public final class PersonDao {
 
 		query.where(condition);
 		
-		return ModelQuery.simpleResults(query, qp);
+		return ModelQuery.simpleResults(query, person);
 	}
 	
 	
@@ -135,48 +136,46 @@ public final class PersonDao {
 		
 		Preconditions.checkState(!offices.isEmpty());
 		
-		final QPerson qp = QPerson.person;
-		final QContract qc = QContract.contract;
 		final QCompetenceCode qcc = QCompetenceCode.competenceCode;
 		// TODO: completare con l'intervallo
 		//final LocalDate start = new LocalDate();
 		//final LocalDate end = start;
 				
-		final JPQLQuery query = ModelQuery.queryFactory().from(qp)
-				.leftJoin(qp.contracts, qc)
-				.leftJoin(qp.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime).fetch()
+		final JPQLQuery query = ModelQuery.queryFactory().from(person)
+				.leftJoin(person.contracts, contract)
+				.leftJoin(person.personHourForOvertime, QPersonHourForOvertime.personHourForOvertime).fetch()
 				//.leftJoin(qp.location, QLocation.location)
-				.leftJoin(qp.reperibility, QPersonReperibility.personReperibility).fetch()
-				.leftJoin(qp.personShift, QPersonShift.personShift).fetch()
-				.leftJoin(qp.user, QUser.user)
-				.leftJoin(qp.competenceCode, qcc)
-				.orderBy(qp.surname.asc(), qp.name.asc())
+				.leftJoin(person.reperibility, QPersonReperibility.personReperibility).fetch()
+				.leftJoin(person.personShift, QPersonShift.personShift).fetch()
+				.leftJoin(person.user, QUser.user)
+				.leftJoin(person.competenceCode, qcc)
+				.orderBy(person.surname.asc(), person.name.asc())
 				.distinct();
 		
 		
 		
 		final BooleanBuilder condition = new BooleanBuilder();
-		condition.and(qp.office.in(offices));
+		condition.and(person.office.in(offices));
 		
 		if (onlyTechnician) {
 			// i livelli sopra al 3 sono dei tecnici:
-			condition.and(qp.qualification.qualification.gt(3));
+			condition.and(person.qualification.qualification.gt(3));
 		}
 		
 		if (name.isPresent() && !name.get().trim().isEmpty()) {
-			condition.andAnyOf(qp.name.startsWithIgnoreCase(name.get()),
-					qp.surname.startsWithIgnoreCase(name.get()));
+			condition.andAnyOf(person.name.startsWithIgnoreCase(name.get()),
+					person.surname.startsWithIgnoreCase(name.get()));
 		}
-		condition.and(qp.competenceCode.contains(compCode));
-		condition.and(qc.onCertificate.isTrue());
-		condition.and(qc.beginContract.before(end));
-		condition.andAnyOf(qc.endContract.isNull().and(qc.expireContract.isNull()),
-				qc.expireContract.isNotNull().and(qc.expireContract.goe(start)),
-				qc.endContract.isNotNull().and(qc.endContract.goe(start)));
+		condition.and(person.competenceCode.contains(compCode));
+		condition.and(contract.onCertificate.isTrue());
+		condition.and(contract.beginContract.before(end));
+		condition.andAnyOf(contract.endContract.isNull().and(contract.expireContract.isNull()),
+				contract.expireContract.isNotNull().and(contract.expireContract.goe(start)),
+				contract.endContract.isNotNull().and(contract.endContract.goe(start)));
 		
 		query.where(condition);
 		
-		return ModelQuery.simpleResults(query, qp);
+		return ModelQuery.simpleResults(query, person);
 	}
 	
 	/**
@@ -186,15 +185,13 @@ public final class PersonDao {
 	 * @return
 	 */
 	public Contract getLastContract(Person person) {
-		
-		final QContract qc = QContract.contract;
-		
+				
 		final JPQLQuery query = ModelQuery.queryFactory()
-				.from(qc)
-				.where(qc.person.eq(person))
-				.orderBy(qc.beginContract.desc());
+				.from(contract)
+				.where(contract.person.eq(person))
+				.orderBy(contract.beginContract.desc());
 		
-		List<Contract> contracts = query.list(qc);
+		List<Contract> contracts = query.list(contract);
 		if(contracts.size() == 0)
 			return null;
 		return contracts.get(0);
@@ -204,21 +201,19 @@ public final class PersonDao {
 	/**
 	 * Il contratto precedente in ordine temporale rispetto a quello passato
 	 * come argomento.
-	 * @param contract
+	 * @param c
 	 * @return
 	 */
-	public static Contract getPreviousPersonContract(Contract contract) {
-	
-		final QContract qc = QContract.contract;
-		
+	public static Contract getPreviousPersonContract(Contract c) {
+			
 		final JPQLQuery query = ModelQuery.queryFactory()
-				.from(qc)
-				.where(qc.person.eq(contract.person))
-				.orderBy(qc.beginContract.desc());
+				.from(contract)
+				.where(contract.person.eq(c.person))
+				.orderBy(contract.beginContract.desc());
 		
-		List<Contract> contracts = query.list(qc);
+		List<Contract> contracts = query.list(contract);
 		
-		final int indexOf = contracts.indexOf(contract);
+		final int indexOf = contracts.indexOf(c);
 		if(indexOf + 1 < contracts.size())
 			return contracts.get(indexOf + 1);
 		else 
@@ -232,16 +227,17 @@ public final class PersonDao {
 	 * @param end
 	 * @return la lista di contratti che soddisfa le seguenti condizioni:
 	 */
-	public static List<Contract> getContractList(Person person, LocalDate begin, LocalDate end){
-		final QContract qc = QContract.contract;
-		final JPQLQuery query = ModelQuery.queryFactory().from(qc)
-				.where(qc.person.eq(person)
-						.andAnyOf(qc.endContract.isNotNull().and(qc.endContract.between(begin, end))
-								,qc.beginContract.after(begin).and(qc.expireContract.isNull())
-								,qc.beginContract.after(begin).and(qc.expireContract.after(end)))).orderBy(qc.beginContract.asc());
-								
-						
-		return query.list(qc);
+	public static List<Contract> getContractList(Person person,LocalDate fromDate,LocalDate toDate){
+
+		BooleanBuilder conditions = new BooleanBuilder(contract.person.eq(person).and(contract.beginContract.loe(toDate)));
+		
+		conditions.andAnyOf(
+				contract.endContract.isNull().and(contract.expireContract.isNull()),
+				contract.endContract.isNull().and(contract.expireContract.goe(fromDate)),
+				contract.endContract.isNotNull().and(contract.endContract.goe(fromDate))
+				);
+		
+		return ModelQuery.queryFactory().from(contract).where(conditions).list(contract);
 	}
 
 	/**
@@ -280,7 +276,7 @@ public final class PersonDao {
 	 * @return la persona corrispondente all'id passato come parametro
 	 */
 	public static Person getPersonById(Long personId) {
-		QPerson person = QPerson.person;
+
 		final JPQLQuery query = ModelQuery.queryFactory().from(person).where(person.id.eq(personId));
 		
 		return query.singleResult(person);
@@ -294,7 +290,7 @@ public final class PersonDao {
 	 * @return la persona corrispondente alla matricola passata come parametro
 	 */
 	public static Person getPersonByNumber(Integer number){
-		QPerson person = QPerson.person;
+
 		final JPQLQuery query = ModelQuery.queryFactory().from(person).where(person.number.eq(number));
 		
 		return query.singleResult(person);
@@ -306,7 +302,7 @@ public final class PersonDao {
 	 * @return la lista di persone che hanno una matricola associata
 	 */
 	public static List<Person> getPersonsByNumber(){
-		QPerson person = QPerson.person;
+
 		final JPQLQuery query = ModelQuery.queryFactory().from(person)
 				.where(person.number.isNotNull().and(person.number.ne(0)));
 		query.orderBy(person.number.asc());
@@ -319,7 +315,7 @@ public final class PersonDao {
 	 * @return la persona che ha associata la mail email
 	 */
 	public static Person getPersonByEmail(String email){
-		QPerson person = QPerson.person;
+
 		final JPQLQuery query = ModelQuery.queryFactory().from(person).where(person.email.eq(email));
 		
 		return query.singleResult(person);
@@ -331,7 +327,7 @@ public final class PersonDao {
 	 * @return la persona associata al vecchio id (se presente in anagrafica) passato come parametro
 	 */
 	public static Person getPersonByOldID(Long oldId){
-		QPerson person = QPerson.person;
+
 		final JPQLQuery query = ModelQuery.queryFactory().from(person).where(person.oldId.eq(oldId));
 		
 		return query.singleResult(person);
@@ -343,7 +339,7 @@ public final class PersonDao {
 	 * @return la persona associata al badgeNumber passato come parametro
 	 */
 	public static Person getPersonByBadgeNumber(String badgeNumber){
-		QPerson person = QPerson.person;
+
 		final JPQLQuery query = ModelQuery.queryFactory().from(person).where(person.badgeNumber.eq(badgeNumber));
 		
 		return query.singleResult(person);
