@@ -6,6 +6,7 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.ArrayList;
 import java.util.List;
 
+import manager.ConfYearManager;
 import models.Absence;
 import models.AbsenceType;
 import models.ConfYear;
@@ -16,7 +17,9 @@ import models.VacationPeriod;
 import models.enumerate.JustifiedTimeAtWork;
 
 import org.joda.time.LocalDate;
+
 import com.google.common.base.Optional;
+
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import play.Logger;
@@ -99,8 +102,8 @@ public class VacationsRecap {
 		//Expire Last Year
 		
 		//ConfYear conf = ConfYear.getConfYear(year);
-		Integer monthExpiryVacationPastYear = Integer.parseInt(ConfYear.getFieldValue("month_expiry_vacation_past_year", year, person.office));
-		Integer dayExpiryVacationPastYear = Integer.parseInt(ConfYear.getFieldValue("day_expiry_vacation_past_year", year, person.office));
+		Integer monthExpiryVacationPastYear = Integer.parseInt(ConfYearManager.getFieldValue("month_expiry_vacation_past_year", year, person.office));
+		Integer dayExpiryVacationPastYear = Integer.parseInt(ConfYearManager.getFieldValue("day_expiry_vacation_past_year", year, person.office));
 		LocalDate expireVacation = actualDate.withMonthOfYear(monthExpiryVacationPastYear).withDayOfMonth(dayExpiryVacationPastYear);
 		
 		this.isExpireLastYear = false;

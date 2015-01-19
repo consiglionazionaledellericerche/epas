@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import manager.ConfGeneralManager;
+import manager.ConfYearManager;
 import models.ConfGeneral;
 import models.ConfYear;
 import models.Office;
@@ -173,11 +175,14 @@ public class Offices extends Controller {
 		office.save();
 		
 		//ConfGeneral
-		ConfGeneral.buildDefaultConfGeneral(office);
+		ConfGeneralManager.buildDefaultConfGeneral(office);
 		
 		//ConfYear
-		ConfYear.buildDefaultConfYear(office, LocalDate.now().getYear());
-		ConfYear.buildDefaultConfYear(office, LocalDate.now().getYear() - 1);
+		//ConfYear.buildDefaultConfYear(office, LocalDate.now().getYear());
+		//ConfYear.buildDefaultConfYear(office, LocalDate.now().getYear() - 1);
+		ConfYearManager.buildDefaultConfYear(office, LocalDate.now().getYear());
+		ConfYearManager.buildDefaultConfYear(office, LocalDate.now().getYear() - 1);
+		
 		
 		
 		office.setPermissionAfterCreation();
