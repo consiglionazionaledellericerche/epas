@@ -39,10 +39,8 @@ public class Vacations extends Controller{
     			year = new LocalDate().getYear(); 
         	}
     		
-    		Contract contract = user.person.getCurrentContract();
-    		
-    		VacationsRecap vacationsRecap = new VacationsRecap(user.person, year, contract, new LocalDate(), true);
-    		VacationsRecap vacationsRecapPrevious = new VacationsRecap(user.person, year-1, contract, new LocalDate(year-1,12,31), true);
+    		VacationsRecap vacationsRecap = VacationsRecap.Factory.build(user.person, year, Optional.<Contract>absent(), new LocalDate(), true);
+    		VacationsRecap vacationsRecapPrevious = VacationsRecap.Factory.build(user.person, year-1, Optional.<Contract>absent(), new LocalDate(year-1,12,31), true);
     		
     	 	VacationsShowDto vacationShowDto = VacationsShowDto.build(year, vacationsRecap, vacationsRecapPrevious);
     	 	
@@ -69,12 +67,9 @@ public class Vacations extends Controller{
 		}
 
     	//Costruzione oggetto di riepilogo per la persona
-		Contract contract = person.getCurrentContract();
 		
-		VacationsRecap vacationsRecap = null;
-    	try { 
-    		vacationsRecap = new VacationsRecap(person, anno, contract, new LocalDate(), true);
-    	} catch(IllegalStateException e) {
+		VacationsRecap vacationsRecap = VacationsRecap.Factory.build(person, anno, Optional.<Contract>absent(), new LocalDate(), true);
+    	if(vacationsRecap == null) {
     		flash.error("Impossibile calcolare la situazione ferie. Definire i dati di inizializzazione per %s %s.", person.name, person.surname);
     		renderTemplate("Application/indexAdmin.html");
     		return;
@@ -103,12 +98,9 @@ public class Vacations extends Controller{
 		}
     	
     	//Costruzione oggetto di riepilogo per la persona
-    	Contract contract = person.getCurrentContract();
-    	
-    	VacationsRecap vacationsRecap = null;
-    	try { 
-    		vacationsRecap = new VacationsRecap(person, anno, contract, new LocalDate(), true);
-    	} catch(IllegalStateException e) {
+		
+		VacationsRecap vacationsRecap = VacationsRecap.Factory.build(person, anno, Optional.<Contract>absent(), new LocalDate(), true);
+    	if(vacationsRecap == null) {
     		flash.error("Impossibile calcolare la situazione ferie. Definire i dati di inizializzazione per %s %s.", person.name, person.surname);
     		renderTemplate("Application/indexAdmin.html");
     		return;
@@ -136,12 +128,9 @@ public class Vacations extends Controller{
 		}
 		
     	//Costruzione oggetto di riepilogo per la persona
-		Contract contract = person.getCurrentContract();
 		
-    	VacationsRecap vacationsRecap = null;
-    	try { 
-    		vacationsRecap = new VacationsRecap(person, anno, contract, new LocalDate(), true);
-    	} catch(IllegalStateException e) {
+		VacationsRecap vacationsRecap = VacationsRecap.Factory.build(person, anno, Optional.<Contract>absent(), new LocalDate(), true);
+    	if(vacationsRecap == null) {
     		flash.error("Impossibile calcolare la situazione ferie. Definire i dati di inizializzazione per %s %s.", person.name, person.surname);
     		renderTemplate("Application/indexAdmin.html");
     		return;
