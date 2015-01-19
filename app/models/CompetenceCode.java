@@ -15,6 +15,7 @@ import dao.CompetenceDao;
 import dao.OfficeDao;
 import models.base.BaseModel;
 import play.data.validation.Required;
+import play.data.validation.Unique;
 
 
 /**
@@ -36,6 +37,7 @@ public class CompetenceCode extends BaseModel {
 	public List<Person> persons;
 	
 	@Required
+	@Unique
 	public String code;
 	
 	@Column
