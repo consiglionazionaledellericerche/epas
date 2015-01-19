@@ -14,6 +14,8 @@ import org.apache.commons.mail.EmailException;
 import org.joda.time.LocalDate;
 import org.junit.Test;
 
+import com.google.common.base.Optional;
+
 import play.db.jpa.JPAPlugin;
 import play.test.UnitTest;
 
@@ -56,7 +58,7 @@ public class ResidualTest extends UnitTest {
 		List<VacationsRecap> contractVacationRecap = new ArrayList<VacationsRecap>();
 		for(Contract contract : monthContracts)
 		{
-			VacationsRecap vr = new VacationsRecap(person, 2014, contract, dateToTest, true);
+			VacationsRecap vr = VacationsRecap.Factory.build(person, 2014, Optional.of(contract), dateToTest, true);
 			contractVacationRecap.add(vr);
 		}
 		JPAPlugin.closeTx(false);
@@ -118,7 +120,7 @@ public class ResidualTest extends UnitTest {
 		List<VacationsRecap> contractVacationRecap = new ArrayList<VacationsRecap>();
 		for(Contract contract : monthContracts)
 		{
-			VacationsRecap vr = new VacationsRecap(person, 2014, contract, dateToTest, true);
+			VacationsRecap vr = VacationsRecap.Factory.build(person, 2014, Optional.of(contract), dateToTest, true);
 			contractVacationRecap.add(vr);
 		}
 		JPAPlugin.closeTx(false);
@@ -180,7 +182,7 @@ public class ResidualTest extends UnitTest {
 		List<VacationsRecap> contractVacationRecap = new ArrayList<VacationsRecap>();
 		for(Contract contract : monthContracts)
 		{
-			VacationsRecap vr = new VacationsRecap(person, 2014, contract, dateToTest, true);
+			VacationsRecap vr = VacationsRecap.Factory.build(person, 2014, Optional.of(contract), dateToTest, true);
 			contractVacationRecap.add(vr);
 		}
 		JPAPlugin.closeTx(false);
@@ -242,7 +244,7 @@ public class ResidualTest extends UnitTest {
 		List<VacationsRecap> contractVacationRecap = new ArrayList<VacationsRecap>();
 		for(Contract contract : monthContracts)
 		{
-			VacationsRecap vr = new VacationsRecap(person, 2014, contract, dateToTest, true);
+			VacationsRecap vr = VacationsRecap.Factory.build(person, 2014, Optional.of(contract), dateToTest, true);
 			contractVacationRecap.add(vr);
 		}
 		JPAPlugin.closeTx(false);
@@ -304,7 +306,7 @@ public class ResidualTest extends UnitTest {
 		List<VacationsRecap> contractVacationRecap = new ArrayList<VacationsRecap>();
 		for(Contract contract : monthContracts)
 		{
-			VacationsRecap vr = new VacationsRecap(person, 2014, contract, dateToTest, true);
+			VacationsRecap vr = VacationsRecap.Factory.build(person, 2014, Optional.of(contract), dateToTest, true);
 			contractVacationRecap.add(vr);
 		}
 		JPAPlugin.closeTx(false);
