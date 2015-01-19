@@ -92,7 +92,7 @@ public class ContractYearRecapManager {
 		
 		//Controllo se ho sufficienti dati
 		
-		String dateInitUse = ConfGeneral.getFieldValue("init_use_program", contract.person.office);
+		String dateInitUse = ConfGeneralManager.getFieldValue("init_use_program", contract.person.office);
 		LocalDate initUse = new LocalDate(dateInitUse);
 		if(contract.sourceDate!=null)
 			initUse = contract.sourceDate.plusDays(1);

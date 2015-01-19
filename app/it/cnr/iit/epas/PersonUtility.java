@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.persistence.Query;
 
+import manager.ConfGeneralManager;
 import manager.ContractYearRecapManager;
 import manager.PersonManager;
 import manager.WorkingTimeTypeManager;
@@ -1262,7 +1263,7 @@ public class PersonUtility {
 		try {
 			simpleEmail.setFrom("epas@iit.cnr.it");
 			//simpleEmail.addReplyTo("segreteria@iit.cnr.it");
-			simpleEmail.addReplyTo(ConfGeneral.getConfGeneralByField(
+			simpleEmail.addReplyTo(ConfGeneralManager.getConfGeneralByField(
 							ConfigurationFields.EmailToContact.description, 
 							person.office).fieldValue);
 		} catch (EmailException e1) {

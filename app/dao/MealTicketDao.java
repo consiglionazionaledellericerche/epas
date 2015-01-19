@@ -5,6 +5,7 @@ import it.cnr.iit.epas.DateInterval;
 
 import java.util.List;
 
+import manager.ConfGeneralManager;
 import models.ConfGeneral;
 import models.Contract;
 import models.MealTicket;
@@ -109,7 +110,7 @@ public class MealTicketDao {
 	 */
 	public static LocalDate getMealTicketStartDate(Office office) {
 		
-		String confParam = ConfGeneral.getFieldValue(
+		String confParam = ConfGeneralManager.getFieldValue(
 				ConfigurationFields.DateStartMealTicket.description, office);
 		
 		if(confParam == null)

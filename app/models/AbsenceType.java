@@ -128,12 +128,7 @@ public class AbsenceType extends BaseModel {
 		return description;
 	}
 	
-	public List<Qualification> getQualification(AbsenceType abt){
-		List<Qualification> listQualification = QualificationDao.getQualificationByAbsenceTypeLinked(abt);
-		//List<Qualification> listQualification = Qualification.find("Select q from Qualification q where q.absenceType = ?", abt).fetch();
-		
-		return listQualification;
-	}
+
 	
 
 }
