@@ -52,8 +52,11 @@ import org.joda.time.YearMonth;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 
 import play.Logger;
 import play.data.validation.InFuture;
@@ -85,7 +88,7 @@ public class Absences extends Controller{
 	public static void absences(int year, int month) {
 		Person person = Security.getUser().get().person;
 		YearMonth yearMonth = new YearMonth(year,month);
-		Map<AbsenceType,Integer> absenceTypeInMonth = 
+		Map<AbsenceType,Long> absenceTypeInMonth = 
 				AbsenceTypeDao.getAbsenceTypeInPeriod(person,
 						DateUtility.getMonthFirstDay(yearMonth), 
 						Optional.fromNullable(DateUtility.getMonthLastDay(yearMonth)));
@@ -198,13 +201,14 @@ public class Absences extends Controller{
 		render(personDay, frequentAbsenceTypeList, allCodes);
 	}
 
-	public static void insert(@Required Person person, 
+	public static void insert(@Required Long personId, 
 			@Required LocalDate dateFrom,
 			LocalDate dateTo,
 			@Required String absenceCode, 
 			Blob file){
-		
+
 		AbsenceType absenceType = AbsenceTypeDao.getAbsenceTypeByCode(absenceCode);
+		Person person = PersonDao.getPersonById(personId);
 		
 		if(person == null){
 			flash.error("id della persona non valido");
@@ -226,21 +230,23 @@ public class Absences extends Controller{
 
 //		Verifica errori generali nel periodo specificato
 		if(air.hasWarningOrDaysInTrouble()){
-			StringBuffer errors = new StringBuffer();
-			for(String error : air.getWarnings()){
-				errors.append((String.format(error + " - %s",air.getDatesInTrouble())));
-			}
-			flash.error(errors.toString());
+			
+			flash.error(String.format(air.getWarnings().iterator().next() + 
+					" - %s",air.getDatesInTrouble()));
 		}
 		
 //		Verifica degli errori sui singoli giorni
 		if(air.getTotalAbsenceInsert() == 0 && !air.getAbsences().isEmpty()){
-			StringBuffer errors = new StringBuffer();
+			
+			Multimap<String, LocalDate> errors = ArrayListMultimap.create();
+			
 			for(AbsencesResponse ar : air.getAbsences()){
-				errors.append((String.format(ar.getWarning() + " - codice: %s - data: %s ", ar.getAbsenceCode(),ar.getDate())));
+				errors.put(ar.getWarning() + " [codice: " + ar.getAbsenceCode() + "]", ar.getDate());
 			}
+
 			flash.error(errors.toString());
 		}
+
 
 //		Verifica per eventuali giorni di reperibilità
 		if(air.getAbsenceInReperibilityOrShift() > 0){
@@ -251,8 +257,6 @@ public class Absences extends Controller{
 			flash.success("Inserite %s assenze con codice %s", 
 					air.getTotalAbsenceInsert(),air.getAbsences().iterator().next().getAbsenceCode());
 		}
-
-
 
 		Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());	
 	}
@@ -348,10 +352,14 @@ public class Absences extends Controller{
 		render(absence, frequentAbsenceTypeList, allCodes, mainMenu);				
 	}
     
-	public static void update(@Required Absence absence,@Valid LocalDate dateTo,
+	public static void update(@Required Long absenceId,@Valid LocalDate dateTo,
 		@Required String absenceCode, Blob file, String mealTicket){
 		
-	    Preconditions.checkState(absence.isPersistent());
+		Absence absence = AbsenceDao.getAbsenceById(absenceId);
+		
+		if(absence == null){
+			notFound();
+		}
 		
 		rules.checkIfPermitted(absence.personDay.person.office);
 		
