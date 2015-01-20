@@ -68,6 +68,8 @@ import play.Logger;
  *
  */
 public class AbsenceManager {
+	
+	private static final String DATE_NON_VALIDE = "L'intervallo di date specificato non è corretto";
 
 	public enum AbsenceToDate implements Function<Absence, LocalDate>{
 		INSTANCE;
@@ -130,7 +132,7 @@ public class AbsenceManager {
 
 		VacationsRecap vr = VacationsRecap.Factory.build(person, date.getYear(),
 				Optional.<Contract>absent(), date, true);
-
+		
 		return (vr.vacationDaysLastYearNotYetUsed > 0);
 	}
 
@@ -224,7 +226,10 @@ public class AbsenceManager {
 		AbsenceInsertReport air = new AbsenceInsertReport();
 
 		if(dateTo.isPresent() && dateFrom.isAfter(dateTo.get())){
-			air.getWarnings().add(String.format("La data di inizio delle ferie (%s) è successiva alla data di fine (%s)", dateFrom, dateTo));
+			air.getWarnings().add(DATE_NON_VALIDE);
+			air.getDatesInTrouble().add(dateFrom);
+			air.getDatesInTrouble().add(dateTo.get());
+			return air;
 		}
 
 		List<Absence> absenceTypeAlreadyExisting = absenceTypeAlreadyExist(
@@ -232,15 +237,13 @@ public class AbsenceManager {
 		if (absenceTypeAlreadyExisting.size() > 0) {
 			air.getWarnings().add(AbsencesResponse.CODICE_FERIE_GIA_PRESENTE);
 			air.getDatesInTrouble().addAll(Collections2.transform(absenceTypeAlreadyExisting, AbsenceToDate.INSTANCE));
+			return air;
 		}
 
 		List<Absence> allDayAbsenceAlreadyExisting = AbsenceDao.allDayAbsenceAlreadyExisting(person, dateFrom, dateTo);
 		if (allDayAbsenceAlreadyExisting.size() > 0) {
 			air.getWarnings().add(AbsencesResponse.CODICE_GIORNALIERO_GIA_PRESENTE);
 			air.getDatesInTrouble().addAll(Collections2.transform(allDayAbsenceAlreadyExisting, AbsenceToDate.INSTANCE));
-		}
-
-		if (air.hasWarningOrDaysInTrouble()) {
 			return air;
 		}
 
@@ -331,7 +334,7 @@ public class AbsenceManager {
 		//se non devo considerare festa ed è festa non inserisco l'assenza
 		if(!absenceType.consideredWeekEnd && PersonManager.isHoliday(person, date)){
 			ar.setHoliday(true);
-			ar.setWarning(AbsencesResponse.CODICE_NON_WEEKEND);
+			ar.setWarning(AbsencesResponse.NON_UTILIZZABILE_NEI_FESTIVI);
 		}
 		else {
 			if(checkIfAbsenceInReperibilityOrInShift(person, date)){

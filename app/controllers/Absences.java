@@ -27,6 +27,8 @@ import javax.persistence.Query;
 import javax.validation.constraints.NotNull;
 
 import manager.AbsenceManager;
+import manager.response.AbsenceInsertReport;
+import manager.response.AbsencesResponse;
 import models.Absence;
 import models.AbsenceType;
 import models.AbsenceTypeGroup;
@@ -208,7 +210,7 @@ public class Absences extends Controller{
 			flash.error("id della persona non valido");
 		}
 		if(absenceType == null){
-			flash.error("codice di assenza inesistente", absenceCode);
+			flash.error("codice di assenza %s inesistente", absenceCode);
 		}
 	
 		if(flash.contains("error")){
@@ -218,10 +220,40 @@ public class Absences extends Controller{
 		rules.checkIfPermitted(person.office);
 		
 		//Ho dovuto implementare un involucro perchè quando richiamavo questo medoto da update il campo blob era null.
-		AbsenceManager.insertAbsence(person, dateFrom,Optional.fromNullable(dateTo), 
+		AbsenceInsertReport air = AbsenceManager.insertAbsence(person, dateFrom,Optional.fromNullable(dateTo), 
 				absenceType, Optional.fromNullable(file), Optional.<String>absent());
-
 		
+
+//		Verifica errori generali nel periodo specificato
+		if(air.hasWarningOrDaysInTrouble()){
+			StringBuffer errors = new StringBuffer();
+			for(String error : air.getWarnings()){
+				errors.append((String.format(error + " - %s",air.getDatesInTrouble())));
+			}
+			flash.error(errors.toString());
+		}
+		
+//		Verifica degli errori sui singoli giorni
+		if(air.getTotalAbsenceInsert() == 0 && !air.getAbsences().isEmpty()){
+			StringBuffer errors = new StringBuffer();
+			for(AbsencesResponse ar : air.getAbsences()){
+				errors.append((String.format(ar.getWarning() + " - codice: %s - data: %s ", ar.getAbsenceCode(),ar.getDate())));
+			}
+			flash.error(errors.toString());
+		}
+
+//		Verifica per eventuali giorni di reperibilità
+		if(air.getAbsenceInReperibilityOrShift() > 0){
+			flash.error("Attenzione! verificare le reperibilità nei seguenti giorni : %s", air.datesInReperibilityOrShift());
+		}
+			
+		if(air.getTotalAbsenceInsert() > 0){
+			flash.success("Inserite %s assenze con codice %s", 
+					air.getTotalAbsenceInsert(),air.getAbsences().iterator().next().getAbsenceCode());
+		}
+
+
+
 		Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());	
 	}
 	
