@@ -294,13 +294,13 @@ public class Absences extends Controller{
 
 		for(int i = 1; i <= 10; i++){
 			if(params.get("qualification"+i) != null){
-				Qualification q = QualificationDao.getQualification(null, Optional.fromNullable(new Long(i)), false).get(0);
+				Qualification q = QualificationDao.getQualification(Optional.fromNullable(new Integer(i)), Optional.fromNullable(new Long(i)), false).get(0);
 				//Qualification q = Qualification.findById(new Long(i));
 				if(!absence.qualifications.contains(q))
 					absence.qualifications.add(q);
 			}
 			else{
-				Qualification q = QualificationDao.getQualification(null, Optional.fromNullable(new Long(i)), false).get(0);
+				Qualification q = QualificationDao.getQualification(Optional.<Integer>absent(), Optional.fromNullable(new Long(i)), false).get(0);
 				//Qualification q = Qualification.findById(new Long(i));
 				if(absence.qualifications.contains(q))
 					absence.qualifications.remove(q);

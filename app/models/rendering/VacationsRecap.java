@@ -6,6 +6,7 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.ArrayList;
 import java.util.List;
 
+import manager.ConfYearManager;
 import models.Absence;
 import models.AbsenceType;
 import models.ConfYear;
@@ -19,8 +20,10 @@ import models.enumerate.JustifiedTimeAtWork;
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
+
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
+
 
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
@@ -109,8 +112,8 @@ public class VacationsRecap {
 			//Expire Last Year
 			
 			//ConfYear conf = ConfYear.getConfYear(year);
-			Integer monthExpiryVacationPastYear = Integer.parseInt(ConfYear.getFieldValue("month_expiry_vacation_past_year", year, person.office));
-			Integer dayExpiryVacationPastYear = Integer.parseInt(ConfYear.getFieldValue("day_expiry_vacation_past_year", year, person.office));
+			Integer monthExpiryVacationPastYear = Integer.parseInt(ConfYearManager.getFieldValue("month_expiry_vacation_past_year", year, person.office));
+			Integer dayExpiryVacationPastYear = Integer.parseInt(ConfYearManager.getFieldValue("day_expiry_vacation_past_year", year, person.office));
 			LocalDate expireVacation = actualDate.withMonthOfYear(monthExpiryVacationPastYear).withDayOfMonth(dayExpiryVacationPastYear);
 			
 			vr.isExpireLastYear = false;
@@ -158,7 +161,6 @@ public class VacationsRecap {
 				//Caso in cui voglio inserire ferie per l'anno prossimo
 				VacationsRecap vrPastYear = VacationsRecap.Factory.build(vr.person,
 						vr.year-1,Optional.of(vr.activeContract), endLastYear, true);
-
 				abs31Last = getVacationDays(yearInter, vr.activeContract, ab31);						
 				abs37Last = getVacationDays(yearInter, vr.activeContract, ab37);		
 				vacationDaysPastYearUsedNew = vrPastYear.vacationDaysCurrentYearUsed.size() + abs31Last.size() + abs37Last.size();
@@ -175,6 +177,77 @@ public class VacationsRecap {
 			}
 			//costruisco la lista delle ferie per stampare le date (prendo tutto ciò che trovo nel db e poi riempo con null fino alla dimensione calcolata)
 			abs32Last  = getVacationDays(lastYearInter, vr.activeContract, ab32);
+
+//<<<<<<< HEAD
+//		//Expire Last Year
+//		
+//		//ConfYear conf = ConfYear.getConfYear(year);
+//		Integer monthExpiryVacationPastYear = Integer.parseInt(ConfYearManager.getFieldValue("month_expiry_vacation_past_year", year, person.office));
+//		Integer dayExpiryVacationPastYear = Integer.parseInt(ConfYearManager.getFieldValue("day_expiry_vacation_past_year", year, person.office));
+//		LocalDate expireVacation = actualDate.withMonthOfYear(monthExpiryVacationPastYear).withDayOfMonth(dayExpiryVacationPastYear);
+//		
+//		this.isExpireLastYear = false;
+//		
+//		if( this.year < today.getYear() ) {		//query anni passati 
+//			this.isExpireLastYear = true;
+//		}
+//		else if( this.year == today.getYear() && actualDate.isAfter(expireVacation)) {	//query anno attuale
+//			this.isExpireLastYear = true;
+//		}
+//		
+//		//Expire Before End Of Year / Active After Begin Of Year
+//		
+//		if(this.activeContractInterval.getEnd().isBefore(endYear))
+//			this.isExpireBeforeEndYear = true;
+//		if(this.activeContractInterval.getBegin().isAfter(startYear))
+//			this.isActiveAfterBeginYear = true;
+//		
+//		//(1) Calcolo ferie usate dell'anno passato ---------------------------------------------------------------------------------------------------------------------------------
+//		List<Absence> abs32Last = null;
+//		
+//		List<Absence> abs31Last = null;
+//		List<Absence> abs37Last = null;
+//		
+//		
+//		int vacationDaysPastYearUsedNew = 0;
+//		if(activeContract.sourceDate!=null && activeContract.sourceDate.getYear()==year)
+//		{
+//			//Popolare da source data
+//			vacationDaysPastYearUsedNew = vacationDaysPastYearUsedNew + activeContract.sourceVacationLastYearUsed;
+//			DateInterval yearInterSource = new DateInterval(activeContract.sourceDate.plusDays(1), endYear);
+//			abs31Last = getVacationDays(yearInterSource, activeContract, ab31);										
+//			abs37Last = getVacationDays(yearInterSource, activeContract, ab37);		
+//			vacationDaysPastYearUsedNew = vacationDaysPastYearUsedNew + abs31Last.size() + abs37Last.size();
+//		}
+//		else if(activeContract.beginContract.getYear()==this.year)
+//		{
+//			//Non esiste anno passato nel presente contratto
+//			vacationDaysPastYearUsedNew = 0;
+//			abs31Last  = new ArrayList<Absence>();
+//			abs37Last  = new ArrayList<Absence>();
+//		}
+//		else if(this.year > LocalDate.now().getYear()) 
+//		{
+//			//Caso in cui voglio inserire ferie per l'anno prossimo
+//			VacationsRecap vrPastYear = new VacationsRecap(this.person, this.year-1, this.activeContract, endLastYear, true);
+//=======
+//				abs31Last = getVacationDays(yearInter, vr.activeContract, ab31);						
+//				abs37Last = getVacationDays(yearInter, vr.activeContract, ab37);		
+//				vacationDaysPastYearUsedNew = vrPastYear.vacationDaysCurrentYearUsed.size() + abs31Last.size() + abs37Last.size();
+//			}
+//			else{
+//				//Popolare da contractYearRecap
+//				ContractYearRecap recapPastYear = vr.activeContract.getContractYearRecap(year-1);
+//				if(recapPastYear==null)
+//					throw new IllegalStateException("Mancano i riepiloghi annuali.");
+//				vacationDaysPastYearUsedNew = recapPastYear.vacationCurrentYearUsed;
+//				abs31Last = getVacationDays(yearInter, vr.activeContract, ab31);						
+//				abs37Last = getVacationDays(yearInter, vr.activeContract, ab37);						
+//				vacationDaysPastYearUsedNew = vacationDaysPastYearUsedNew + abs31Last.size() + abs37Last.size();
+//			}
+//			//costruisco la lista delle ferie per stampare le date (prendo tutto ciò che trovo nel db e poi riempo con null fino alla dimensione calcolata)
+//			abs32Last  = getVacationDays(lastYearInter, vr.activeContract, ab32);
+//>>>>>>> branch 'refactorManager' of https://dario.tagliaferri@wiki.iit.cnr.it/redmine/e-gov-iit-cnr/epas.git
 
 			vr.vacationDaysLastYearUsed.addAll(abs32Last);
 			vr.vacationDaysLastYearUsed.addAll(abs31Last);

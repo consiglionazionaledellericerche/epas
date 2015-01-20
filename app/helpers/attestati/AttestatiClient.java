@@ -14,6 +14,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
+import manager.ConfGeneralManager;
 import models.Absence;
 import models.Competence;
 import models.ConfGeneral;
@@ -121,7 +122,7 @@ public class AttestatiClient {
 		//URI baseUri = new URI(Configuration.getCurrentConfiguration().urlToPresence);
 		//ConfGeneral confGeneral =  ConfGeneral.getConfGeneral();
 		Office office = Security.getUser().get().person.office;
-		String urlToPresence = ConfGeneral.getFieldValue("url_to_presence", office);
+		String urlToPresence = ConfGeneralManager.getFieldValue("url_to_presence", office);
 		URI baseUri = new URI(urlToPresence);
 		URL loginUrl = baseUri.resolve(BASE_LOGIN_URL).toURL();
 		
@@ -171,8 +172,8 @@ public class AttestatiClient {
 		Response listaDipendentiResponse;
 //		ConfGeneral conf = ConfGeneral.getConfGeneral();
 		Office office = Security.getUser().get().person.office;
-		String urlToPresence = ConfGeneral.getFieldValue("url_to_presence", office);
-		Integer seatCode = Integer.parseInt(ConfGeneral.getFieldValue("seat_code", office));
+		String urlToPresence = ConfGeneralManager.getFieldValue("url_to_presence", office);
+		Integer seatCode = Integer.parseInt(ConfGeneralManager.getFieldValue("seat_code", office));
 		URI baseUri = new URI(urlToPresence);
 		final URL listaDipendentiUrl = baseUri.resolve(BASE_LISTA_DIPENDENTI_URL).toURL();
 		Connection connection = Jsoup.connect(listaDipendentiUrl.toString());
@@ -244,8 +245,8 @@ public class AttestatiClient {
 		//Configuration conf = Configuration.getCurrentConfiguration();
 		//ConfGeneral conf = ConfGeneral.getConfGeneral();
 		Office office = Security.getUser().get().person.office;
-		String urlToPresence = ConfGeneral.getFieldValue("url_to_presence", office);
-		Integer seatCode = Integer.parseInt(ConfGeneral.getFieldValue("seat_code", office));
+		String urlToPresence = ConfGeneralManager.getFieldValue("url_to_presence", office);
+		Integer seatCode = Integer.parseInt(ConfGeneralManager.getFieldValue("seat_code", office));
 		URI baseUri = new URI(urlToPresence);
 		final URL elaboraDatiUrl = baseUri.resolve(BASE_ELABORA_DATI_URL).toURL();
 

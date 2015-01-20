@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import manager.ConfGeneralManager;
 import manager.ContractManager;
 import models.Competence;
 import models.ConfGeneral;
@@ -673,7 +674,7 @@ public class Persons extends Controller {
 		rules.checkIfPermitted(contract.person.office);
 
 		LocalDate initUse = new LocalDate(
-				ConfGeneral.getFieldValue(ConfigurationFields.InitUseProgram.description, 
+				ConfGeneralManager.getFieldValue(ConfigurationFields.InitUseProgram.description, 
 						Security.getUser().get().person.office));
 		render(contract, initUse);
 	}

@@ -3,6 +3,7 @@ package it.cnr.iit.epas;
 import java.util.ArrayList;
 import java.util.List;
 
+import manager.ConfGeneralManager;
 import models.ConfGeneral;
 import models.Office;
 
@@ -64,8 +65,8 @@ public class DateUtility {
 		/*TODO: da riverificare*/
 		if(office == null)
 			office = Security.getUser().get().person.office;
-		Integer monthOfPatron = Integer.parseInt(ConfGeneral.getFieldValue("month_of_patron", office));
-		Integer dayOfPatron = Integer.parseInt(ConfGeneral.getFieldValue("day_of_patron", office));
+		Integer monthOfPatron = Integer.parseInt(ConfGeneralManager.getFieldValue("month_of_patron", office));
+		Integer dayOfPatron = Integer.parseInt(ConfGeneralManager.getFieldValue("day_of_patron", office));
 		/*fine pezzo da verificare*/
 		
 		LocalDate easter = findEaster(date.getYear());
