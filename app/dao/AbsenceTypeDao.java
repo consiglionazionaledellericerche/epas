@@ -151,22 +151,16 @@ public class AbsenceTypeDao {
 	 * @param month
 	 * @return
 	 */
-	public static Map<AbsenceType,Integer> getAbsenceTypeInPeriod(Person person, LocalDate fromDate, Optional<LocalDate> toDate){
+	public static Map<AbsenceType,Long> getAbsenceTypeInPeriod(Person person, LocalDate fromDate, Optional<LocalDate> toDate){
 		Preconditions.checkNotNull(person);
 		Preconditions.checkNotNull(fromDate);
-		
-		List<Absence> absences = AbsenceDao.findByPersonAndDate(person, fromDate,toDate,Optional.<AbsenceType>absent()).list();	
-		Map<AbsenceType,Integer> absenceCodeMap = new HashMap<AbsenceType, Integer>();
 
-		for (Absence absence : absences){
-			if(absenceCodeMap.containsKey(absence.absenceType)){
-				absenceCodeMap.put(absence.absenceType, absenceCodeMap.get(absence.absenceType)+1);
-			}
-			else{
-				absenceCodeMap.put(absence.absenceType,1);
-			}
-		}
-		return absenceCodeMap;	
+		return ModelQuery.queryFactory().from(absenceType)
+				.join(absenceType.absences, absence).where(absence.personDay.person.eq(person).and(
+						absence.personDay.date.between(fromDate, toDate.or(fromDate))))
+						.groupBy(absenceType)
+						.orderBy(absence.count().desc())
+						.map(absenceType, absence.count());
 	}
 
 	/**
