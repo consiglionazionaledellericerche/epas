@@ -394,7 +394,7 @@ public class AbsenceManager {
 	private static AbsencesResponse handlerCompensatoryRest(Person person,
 			LocalDate date, AbsenceType absenceType,Optional<Blob> file){
 
-		Integer maxRecoveryDaysOneThree = Integer.parseInt(ConfYear.getFieldValue(
+		Integer maxRecoveryDaysOneThree = Integer.parseInt(ConfYearManager.getFieldValue(
 				ConfigurationFields.MaxRecoveryDays13.description, date.getYear(), person.office));
 //		TODO le assenze con codice 91 non sono sufficienti a coprire tutti i casi.
 //		Bisogna considerare anche eventuali inizializzazioni

@@ -5,6 +5,7 @@ import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
 
+import manager.PersonManager;
 import manager.WorkingTimeTypeManager;
 import models.Absence;
 import models.Competence;
@@ -199,7 +200,7 @@ public class PersonResidualMonthRecap {
 	 * @param month
 	 */
 	public static Integer positiveResidualInMonth(Person person, int year, int month){
-		List<Contract> monthContracts = person.getMonthContracts(month, year);
+		List<Contract> monthContracts = PersonManager.getMonthContracts(person,month, year);
 		for(Contract contract : monthContracts)
 		{
 			if(contract.isLastInMonth(month, year))

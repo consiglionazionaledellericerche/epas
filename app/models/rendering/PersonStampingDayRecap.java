@@ -5,6 +5,7 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.ArrayList;
 import java.util.List;
 
+import manager.ConfGeneralManager;
 import manager.WorkingTimeTypeManager;
 import models.Absence;
 import models.ConfGeneral;
@@ -99,10 +100,10 @@ public class PersonStampingDayRecap {
 		
 		
 		//ConfGeneral conf = ConfGeneral.getConfGeneral();
-		Integer mealTimeStartHour = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_start_hour", person.office));
-		Integer mealTimeStartMinute = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_start_minute", person.office));
-		Integer mealTimeEndHour = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_end_hour", person.office));
-		Integer mealTimeEndMinute = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_end_minute", person.office));
+		Integer mealTimeStartHour = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_start_hour", person.office));
+		Integer mealTimeStartMinute = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_start_minute", person.office));
+		Integer mealTimeEndHour = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_end_hour", person.office));
+		Integer mealTimeEndMinute = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_end_minute", person.office));
 		
 		this.setTimeMealFrom(mealTimeStartHour, mealTimeStartMinute);
 		this.setTimeMealTo(mealTimeEndHour, mealTimeEndMinute);

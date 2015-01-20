@@ -23,6 +23,7 @@ import javax.inject.Inject;
 
 import org.joda.time.LocalDate;
 
+import manager.ConfGeneralManager;
 import models.Absence;
 import models.CertificatedData;
 import models.Competence;
@@ -88,8 +89,8 @@ public class UploadSituation extends Controller{
 		Office office = Security.getUser().get().person.office;
 		rules.checkIfPermitted(office);
 		
-		String urlToPresence = ConfGeneral.getFieldValue(ConfigurationFields.UrlToPresence.description, office);
-		String userToPresence = ConfGeneral.getFieldValue(ConfigurationFields.UserToPresence.description, office);
+		String urlToPresence = ConfGeneralManager.getFieldValue(ConfigurationFields.UrlToPresence.description, office);
+		String userToPresence = ConfGeneralManager.getFieldValue(ConfigurationFields.UserToPresence.description, office);
 		
 		String attestatiLogin = params.get("attestatiLogin") == null ? userToPresence : params.get("attestatiLogin"); 
 
@@ -113,7 +114,7 @@ public class UploadSituation extends Controller{
 		}
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 //		ConfGeneral conf = ConfGeneral.getConfGeneral();
-		Integer seatCode = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.SeatCode.description, Security.getUser().get().person.office));
+		Integer seatCode = Integer.parseInt(ConfGeneralManager.getFieldValue(ConfigurationFields.SeatCode.description, Security.getUser().get().person.office));
 		List<Person> personList = PersonDao.getPersonsByNumber();
 		//List<Person> personList = Person.find("Select p from Person p where p.number <> ? and p.number is not null order by p.number", 0).fetch();
 		Logger.debug("La lista di nomi è composta da %s persone ", personList.size());
@@ -210,7 +211,7 @@ public class UploadSituation extends Controller{
 				redirect("Application.indexAdmin");
 			}
 
-			String urlToPresence = ConfGeneral.getFieldValue(ConfigurationFields.UrlToPresence.description, user.person.office);
+			String urlToPresence = ConfGeneralManager.getFieldValue(ConfigurationFields.UrlToPresence.description, user.person.office);
 			
 			try {
 				//1) LOGIN

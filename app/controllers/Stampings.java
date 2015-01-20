@@ -112,7 +112,7 @@ public class Stampings extends Controller {
 		int basedWorkingDays = PersonUtility.basedWorkingDays(totalPersonDays);
 		Map<AbsenceType,Integer> absenceCodeMap = PersonUtility.getAllAbsenceCodeInMonth(totalPersonDays);
 
-		List<Contract> monthContracts = person.getMonthContracts(month, year);
+		List<Contract> monthContracts = PersonManager.getMonthContracts(person,month, year);
 		List<PersonResidualMonthRecap> contractMonths = new ArrayList<PersonResidualMonthRecap>();
 		for(Contract contract : monthContracts)
 		{
@@ -202,7 +202,7 @@ public class Stampings extends Controller {
 		int basedWorkingDays = PersonUtility.basedWorkingDays(totalPersonDays);											//0 sql
 		Map<AbsenceType,Integer> absenceCodeMap = PersonUtility.getAllAbsenceCodeInMonth(totalPersonDays);				//1 sql
 
-		List<Contract> monthContracts = person.getMonthContracts(month, year);
+		List<Contract> monthContracts = PersonManager.getMonthContracts(person,month, year);
 		List<PersonResidualMonthRecap> contractMonths = new ArrayList<PersonResidualMonthRecap>();
 		for(Contract contract : monthContracts)
 		{
