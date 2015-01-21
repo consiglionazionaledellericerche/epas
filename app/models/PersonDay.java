@@ -24,6 +24,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import manager.ConfGeneralManager;
+import manager.ConfYearManager;
 import manager.PersonDayInTroubleManager;
 import manager.PersonManager;
 import manager.WorkingTimeTypeManager;
@@ -987,10 +989,10 @@ public class PersonDay extends BaseModel {
 	{
 		//Assumo che la timbratura di uscita e di ingresso debbano appartenere alla finestra 12:00 - 15:00
 		//Configuration conf = Configuration.getConfiguration(this.date);
-		Integer mealTimeStartHour = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_start_hour", person.office));
-		Integer mealTimeStartMinute = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_start_minute", person.office));
-		Integer mealTimeEndHour = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_end_hour", person.office));
-		Integer mealTimeEndMinute = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_end_minute", person.office));
+		Integer mealTimeStartHour = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_start_hour", person.office));
+		Integer mealTimeStartMinute = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_start_minute", person.office));
+		Integer mealTimeEndHour = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_end_hour", person.office));
+		Integer mealTimeEndMinute = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_end_minute", person.office));
 		//ConfGeneral conf = ConfGeneral.getConfGeneral();
 		LocalDateTime startLunch = new LocalDateTime()
 		.withYear(this.date.getYear())
@@ -1087,7 +1089,7 @@ public class PersonDay extends BaseModel {
 		if(lastStampingPreviousDay != null && lastStampingPreviousDay.isIn())
 		{
 			this.orderStampings();
-			String hourMaxToCalculateWorkTime = ConfYear.getFieldValue("hour_max_to_calculate_worktime", this.date.getYear(), this.person.office);
+			String hourMaxToCalculateWorkTime = ConfYearManager.getFieldValue("hour_max_to_calculate_worktime", this.date.getYear(), this.person.office);
 			//ConfYear config = ConfYear.getConfYear(this.date.getYear());
 			Integer maxHour = Integer.parseInt(hourMaxToCalculateWorkTime);
 			if(this.stampings.size() > 0 && this.stampings.get(0).way == WayType.out && maxHour > this.stampings.get(0).date.getHourOfDay())

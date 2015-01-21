@@ -97,7 +97,7 @@ public class ContractManager {
 			
 			// (0) Definisco l'intervallo su cui operare
 			// Decido la data inizio
-			String dateInitUse = ConfGeneral.getFieldValue("init_use_program", contract.person.office);
+			String dateInitUse = ConfGeneralManager.getFieldValue("init_use_program", contract.person.office);
 			LocalDate initUse = new LocalDate(dateInitUse);
 			LocalDate date = contract.beginContract;
 			if(date.isBefore(initUse))

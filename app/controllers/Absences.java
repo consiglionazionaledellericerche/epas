@@ -27,6 +27,8 @@ import javax.persistence.Query;
 import javax.validation.constraints.NotNull;
 
 import manager.AbsenceManager;
+import manager.response.AbsenceInsertReport;
+import manager.response.AbsencesResponse;
 import models.Absence;
 import models.AbsenceType;
 import models.AbsenceTypeGroup;
@@ -50,8 +52,11 @@ import org.joda.time.YearMonth;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 
 import play.Logger;
 import play.data.validation.InFuture;
@@ -83,7 +88,7 @@ public class Absences extends Controller{
 	public static void absences(int year, int month) {
 		Person person = Security.getUser().get().person;
 		YearMonth yearMonth = new YearMonth(year,month);
-		Map<AbsenceType,Integer> absenceTypeInMonth = 
+		Map<AbsenceType,Long> absenceTypeInMonth = 
 				AbsenceTypeDao.getAbsenceTypeInPeriod(person,
 						DateUtility.getMonthFirstDay(yearMonth), 
 						Optional.fromNullable(DateUtility.getMonthLastDay(yearMonth)));
@@ -196,19 +201,20 @@ public class Absences extends Controller{
 		render(personDay, frequentAbsenceTypeList, allCodes);
 	}
 
-	public static void insert(@Required Person person, 
+	public static void insert(@Required Long personId, 
 			@Required LocalDate dateFrom,
 			LocalDate dateTo,
 			@Required String absenceCode, 
 			Blob file){
-		
+
 		AbsenceType absenceType = AbsenceTypeDao.getAbsenceTypeByCode(absenceCode);
+		Person person = PersonDao.getPersonById(personId);
 		
 		if(person == null){
 			flash.error("id della persona non valido");
 		}
 		if(absenceType == null){
-			flash.error("codice di assenza inesistente", absenceCode);
+			flash.error("codice di assenza %s inesistente", absenceCode);
 		}
 	
 		if(flash.contains("error")){
@@ -218,9 +224,40 @@ public class Absences extends Controller{
 		rules.checkIfPermitted(person.office);
 		
 		//Ho dovuto implementare un involucro perchè quando richiamavo questo medoto da update il campo blob era null.
-		AbsenceManager.insertAbsence(person, dateFrom,Optional.fromNullable(dateTo), 
+		AbsenceInsertReport air = AbsenceManager.insertAbsence(person, dateFrom,Optional.fromNullable(dateTo), 
 				absenceType, Optional.fromNullable(file), Optional.<String>absent());
 		
+
+//		Verifica errori generali nel periodo specificato
+		if(air.hasWarningOrDaysInTrouble()){
+			
+			flash.error(String.format(air.getWarnings().iterator().next() + 
+					" - %s",air.getDatesInTrouble()));
+		}
+		
+//		Verifica degli errori sui singoli giorni
+		if(air.getTotalAbsenceInsert() == 0 && !air.getAbsences().isEmpty()){
+			
+			Multimap<String, LocalDate> errors = ArrayListMultimap.create();
+			
+			for(AbsencesResponse ar : air.getAbsences()){
+				errors.put(ar.getWarning() + " [codice: " + ar.getAbsenceCode() + "]", ar.getDate());
+			}
+
+			flash.error(errors.toString());
+		}
+
+
+//		Verifica per eventuali giorni di reperibilità
+		if(air.getAbsenceInReperibilityOrShift() > 0){
+			flash.error("Attenzione! verificare le reperibilità nei seguenti giorni : %s", air.datesInReperibilityOrShift());
+		}
+			
+		if(air.getTotalAbsenceInsert() > 0){
+			flash.success("Inserite %s assenze con codice %s", 
+					air.getTotalAbsenceInsert(),air.getAbsences().iterator().next().getAbsenceCode());
+		}
+
 		Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());	
 	}
 	
@@ -261,13 +298,13 @@ public class Absences extends Controller{
 
 		for(int i = 1; i <= 10; i++){
 			if(params.get("qualification"+i) != null){
-				Qualification q = QualificationDao.getQualification(null, Optional.fromNullable(new Long(i)), false).get(0);
+				Qualification q = QualificationDao.getQualification(Optional.fromNullable(new Integer(i)), Optional.fromNullable(new Long(i)), false).get(0);
 				//Qualification q = Qualification.findById(new Long(i));
 				if(!absence.qualifications.contains(q))
 					absence.qualifications.add(q);
 			}
 			else{
-				Qualification q = QualificationDao.getQualification(null, Optional.fromNullable(new Long(i)), false).get(0);
+				Qualification q = QualificationDao.getQualification(Optional.<Integer>absent(), Optional.fromNullable(new Long(i)), false).get(0);
 				//Qualification q = Qualification.findById(new Long(i));
 				if(absence.qualifications.contains(q))
 					absence.qualifications.remove(q);
@@ -315,10 +352,14 @@ public class Absences extends Controller{
 		render(absence, frequentAbsenceTypeList, allCodes, mainMenu);				
 	}
     
-	public static void update(@Required Absence absence,@Valid LocalDate dateTo,
+	public static void update(@Required Long absenceId,@Valid LocalDate dateTo,
 		@Required String absenceCode, Blob file, String mealTicket){
 		
-	    Preconditions.checkState(absence.isPersistent());
+		Absence absence = AbsenceDao.getAbsenceById(absenceId);
+		
+		if(absence == null){
+			notFound();
+		}
 		
 		rules.checkIfPermitted(absence.personDay.person.office);
 		
@@ -329,11 +370,16 @@ public class Absences extends Controller{
 		Person person = absence.personDay.person;
 		LocalDate dateFrom =  absence.personDay.date;	
 		
-		AbsenceType absenceType = AbsenceTypeDao.getAbsenceTypeByCode(absenceCode);
-		
-		if(absenceType == null){
-			flash.error("codice di assenza inesistente", absenceCode);
+		AbsenceType absenceType = null;
+//		Verifico se si tratta di un aggiornamento o di una rimozione
+		if(!absenceCode.isEmpty()){
+			absenceType  = AbsenceTypeDao.getAbsenceTypeByCode(absenceCode);
+			
+			if(absenceType == null){
+				flash.error("codice di assenza inesistente", absenceCode);
+			}
 		}
+	
 		if(dateTo != null && dateTo.isBefore(dateFrom)){
 			flash.error("Errore nell'inserimento del campo Fino A, inserire una data valida. Operazione annullata");
 		}
@@ -346,11 +392,12 @@ public class Absences extends Controller{
 		if(deleted > 0){
 			flash.success("Rimossi %s codici assenza di tipo %s", deleted, absence.absenceType.code);
 		}
+//		Se si tratta di una modifica, effettuo l'inserimento dopo la rimozione della vecchia assenza
+		if(!absenceCode.isEmpty()){
+			AbsenceManager.insertAbsence(person, dateFrom, Optional.fromNullable(dateTo),
+					absenceType,Optional.fromNullable(file), Optional.fromNullable(mealTicket));
+		}
 		
-		AbsenceManager.insertAbsence(person, dateFrom, Optional.fromNullable(dateTo),
-				absenceType,Optional.fromNullable(file), Optional.fromNullable(mealTicket));
-		
-		PersonUtility.updatePersonDaysIntoInterval(person, dateFrom, dateTo);
 		Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
 	}
 				

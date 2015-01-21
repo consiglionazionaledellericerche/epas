@@ -50,6 +50,7 @@ import controllers.Wizard.WizardStep;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.ContractDao;
+import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
 import dao.PersonShiftDayDao;
@@ -67,6 +68,8 @@ import play.Logger;
  *
  */
 public class AbsenceManager {
+	
+	private static final String DATE_NON_VALIDE = "L'intervallo di date specificato non è corretto";
 
 	public enum AbsenceToDate implements Function<Absence, LocalDate>{
 		INSTANCE;
@@ -85,27 +88,19 @@ public class AbsenceManager {
 	 */
 	private static AbsenceType whichVacationCode(Person person, LocalDate date){
 
-		Contract contract = person.getCurrentContract();
-
-		VacationsRecap vr = null;
-		try { 
-			vr = new VacationsRecap(person, date.getYear(), contract, date, true);
-		} catch(IllegalStateException e) {
-			return null;
-		}
+		VacationsRecap vr = VacationsRecap.Factory.build(person, date.getYear(),
+				Optional.<Contract>absent(), date, true);
 
 		if(vr.vacationDaysLastYearNotYetUsed > 0)
-			return AbsenceTypeDao.getAbsenceTypeByCode("31");
-		//return AbsenceType.find("byCode", "31").first();
+			return AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode());
 
 		if(vr.persmissionNotYetUsed > 0)
 
-			return AbsenceTypeDao.getAbsenceTypeByCode("94");
-		//return AbsenceType.find("byCode", "94").first();
+			return AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode());
 
 		if(vr.vacationDaysCurrentYearNotYetUsed > 0)
-			return AbsenceTypeDao.getAbsenceTypeByCode("32");
-		//return AbsenceType.find("byCode", "32").first();
+			return AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode());
+
 
 		return null;
 	}
@@ -119,14 +114,8 @@ public class AbsenceManager {
 	 */
 	private static boolean canTake32(Person person, LocalDate date) {
 
-		Contract contract = person.getCurrentContract();
-		VacationsRecap vr = null;
-
-		try { 
-			vr = new VacationsRecap(person, date.getYear(), contract, date, true);
-		} catch(IllegalStateException e) {
-			return false;
-		}
+		VacationsRecap vr = VacationsRecap.Factory.build(person, date.getYear(),
+				Optional.<Contract>absent(), date, true);
 
 		return (vr.vacationDaysCurrentYearNotYetUsed > 0);		
 
@@ -141,15 +130,9 @@ public class AbsenceManager {
 	 */
 	private static boolean canTake31(Person person, LocalDate date) {
 
-		Contract contract = person.getCurrentContract();
-		VacationsRecap vr = null;
-
-		try { 
-			vr = new VacationsRecap(person, date.getYear(), contract, date, true);
-		} catch(IllegalStateException e) {
-			return false;
-		}
-
+		VacationsRecap vr = VacationsRecap.Factory.build(person, date.getYear(),
+				Optional.<Contract>absent(), date, true);
+		
 		return (vr.vacationDaysLastYearNotYetUsed > 0);
 	}
 
@@ -162,19 +145,14 @@ public class AbsenceManager {
 	 */
 	private static boolean canTake94(Person person, LocalDate date) {
 
-		Contract contract = person.getCurrentContract();
-		VacationsRecap vr = null;
-
-		try { 
-			vr = new VacationsRecap(person, date.getYear(), contract, date, true);
-		} catch(IllegalStateException e) {
-			return false;
-		}
+		VacationsRecap vr = VacationsRecap.Factory.build(person, date.getYear(),
+				Optional.<Contract>absent(), date, true);
 
 		return (vr.persmissionNotYetUsed > 0);
 
 	}
 
+	
 	/**
 	 * Verifica la possibilità che la persona possa usufruire di un riposo compensativo nella data specificata.
 	 * Se voglio inserire un riposo compensativo per il mese successivo a oggi considero il residuo a ieri.
@@ -248,7 +226,10 @@ public class AbsenceManager {
 		AbsenceInsertReport air = new AbsenceInsertReport();
 
 		if(dateTo.isPresent() && dateFrom.isAfter(dateTo.get())){
-			air.getWarnings().add(String.format("La data di inizio delle ferie (%s) è successiva alla data di fine (%s)", dateFrom, dateTo));
+			air.getWarnings().add(DATE_NON_VALIDE);
+			air.getDatesInTrouble().add(dateFrom);
+			air.getDatesInTrouble().add(dateTo.get());
+			return air;
 		}
 
 		List<Absence> absenceTypeAlreadyExisting = absenceTypeAlreadyExist(
@@ -256,15 +237,13 @@ public class AbsenceManager {
 		if (absenceTypeAlreadyExisting.size() > 0) {
 			air.getWarnings().add(AbsencesResponse.CODICE_FERIE_GIA_PRESENTE);
 			air.getDatesInTrouble().addAll(Collections2.transform(absenceTypeAlreadyExisting, AbsenceToDate.INSTANCE));
+			return air;
 		}
 
 		List<Absence> allDayAbsenceAlreadyExisting = AbsenceDao.allDayAbsenceAlreadyExisting(person, dateFrom, dateTo);
 		if (allDayAbsenceAlreadyExisting.size() > 0) {
 			air.getWarnings().add(AbsencesResponse.CODICE_GIORNALIERO_GIA_PRESENTE);
 			air.getDatesInTrouble().addAll(Collections2.transform(allDayAbsenceAlreadyExisting, AbsenceToDate.INSTANCE));
-		}
-
-		if (air.hasWarningOrDaysInTrouble()) {
 			return air;
 		}
 
@@ -295,7 +274,7 @@ public class AbsenceManager {
 				actualDate = actualDate.plusDays(1);
 				continue;
 			}
-			//			TODO Inserire i codici di assenza necessari nell'AbsenceTypeMapping
+//			TODO Inserire i codici di assenza necessari nell'AbsenceTypeMapping
 			if((absenceType.code.startsWith("12") || absenceType.code.startsWith("13")) && absenceType.code.length() == 3){
 				air.add(handlerChildIllness(person, actualDate, absenceType, file));
 				actualDate = actualDate.plusDays(1);
@@ -312,7 +291,18 @@ public class AbsenceManager {
 
 			actualDate = actualDate.plusDays(1);
 		}
-
+//		Al termine dell'inserimento delle assenze aggiorno tutta la situazione dal primo giorno di assenza fino ad oggi
+		PersonUtility.updatePersonDaysFromDate(person, dateFrom);
+//		Se ho inserito una data in un anno precedente a quello attuale effettuo 
+//		il ricalcolo del riepilogo annuale per ogni contratto attivo in quell'anno
+		if(dateFrom.getYear() < LocalDate.now().getYear()){
+			for(Contract c : PersonDao.getContractList(person, 
+					dateFrom.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), 
+					dateFrom.monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue())){
+				ContractYearRecapManager.buildContractYearRecap(c);
+			}
+		}
+		
 		if(air.getAbsenceInReperibilityOrShift() > 0){
 			sendEmail(person, air);
 		}					
@@ -344,8 +334,7 @@ public class AbsenceManager {
 		//se non devo considerare festa ed è festa non inserisco l'assenza
 		if(!absenceType.consideredWeekEnd && PersonManager.isHoliday(person, date)){
 			ar.setHoliday(true);
-			ar.setWarning(AbsencesResponse.CODICE_NON_WEEKEND);
-
+			ar.setWarning(AbsencesResponse.NON_UTILIZZABILE_NEI_FESTIVI);
 		}
 		else {
 			if(checkIfAbsenceInReperibilityOrInShift(person, date)){
@@ -353,10 +342,9 @@ public class AbsenceManager {
 			}
 
 			List<PersonDay> personDays = PersonDayDao.getPersonDayInPeriod(person, date, Optional.<LocalDate>absent(), false);
-			PersonDay pd = personDays != null ? personDays.listIterator().next() : new PersonDay(person, date);
+			PersonDay pd = 	FluentIterable.from(personDays).first().or(new PersonDay(person, date));
 
-			if(personDays == null){
-				pd.populatePersonDay();
+			if(personDays.isEmpty()){
 				pd.create();
 			}
 
@@ -375,9 +363,6 @@ public class AbsenceManager {
 					absence.personDay.person.surname, absence.personDay.date);
 
 			pd.absences.add(absence);
-// 			TODO VERIFICARE SE LA pd.populatePersonDay() E' SUFFICIENTE O SERVE LA 	pd.updatePersonDaysInMonth() !!!!!
-			pd.populatePersonDay();
-
 		}
 		return ar;
 	}
@@ -409,21 +394,25 @@ public class AbsenceManager {
 	private static AbsencesResponse handlerCompensatoryRest(Person person,
 			LocalDate date, AbsenceType absenceType,Optional<Blob> file){
 
-		Integer maxRecoveryDaysOneThree = Integer.parseInt(ConfYear.getFieldValue(
+		Integer maxRecoveryDaysOneThree = Integer.parseInt(ConfYearManager.getFieldValue(
 				ConfigurationFields.MaxRecoveryDays13.description, date.getYear(), person.office));
-		//		TODO le assenze con codice 91 non sono sufficienti a coprire tutti i casi.
-		//		Bisogna considerare anche eventuali inizializzazioni
-		int alreadyUsed = AbsenceDao.getAbsenceByCodeInPeriod(
+//		TODO le assenze con codice 91 non sono sufficienti a coprire tutti i casi.
+//		Bisogna considerare anche eventuali inizializzazioni
+		int alreadyUsed = 0;
+		List<Absence> absences91 = AbsenceDao.getAbsenceByCodeInPeriod(
 				Optional.fromNullable(person), Optional.fromNullable(absenceType.code),
 				date.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(),
-				date, Optional.<JustifiedTimeAtWork>absent(), false, false).size();
+				date, Optional.<JustifiedTimeAtWork>absent(), false, false);
+		if(absences91 != null){
+			alreadyUsed = absences91.size();
+		}
 
-		// 			verifica se ha esaurito il bonus per l'anno
+// 			verifica se ha esaurito il bonus per l'anno
 		if(person.qualification.qualification > 0 && 
 				person.qualification.qualification < 4 && 
 				alreadyUsed >= maxRecoveryDaysOneThree){
-			//			TODO	questo è il caso semplice,c'è da considerare anche eventuali cambi di contratto,
-			//					assenze richieste per gennaio con residui dell'anno precedente sufficienti etc..
+//			TODO	questo è il caso semplice,c'è da considerare anche eventuali cambi di contratto,
+//					assenze richieste per gennaio con residui dell'anno precedente sufficienti etc..
 			return new AbsencesResponse(date,absenceType.code,
 					String.format(AbsencesResponse.RIPOSI_COMPENSATIVI_ESAURITI +
 							" - Usati %s", alreadyUsed));
@@ -449,7 +438,7 @@ public class AbsenceManager {
 		try {
 			email.addTo(person.email);
 			//Da attivare, commentando la riga precedente, per fare i test così da evitare di inviare mail a caso ai dipendenti...
-			//email.addTo("dario.tagliaferri@iit.cnr.it");
+//			email.addTo("daniele.murgia@iit.cnr.it");
 			email.setFrom("epas@iit.cnr.it");
 			email.setSubject("Segnalazione inserimento assenza in giorno con reperibilità/turno");
 			String date = "";
@@ -521,7 +510,7 @@ public class AbsenceManager {
 	private static AbsencesResponse handler37(Person person,
 			LocalDate date, AbsenceType absenceType,Optional<Blob> file){
 
-		//  FIXME Verificare i controlli d'inserimento
+//  	FIXME Verificare i controlli d'inserimento
 		if(date.getYear() == LocalDate.now().getYear()){
 
 			int remaining37 = VacationsRecap.remainingPastVacationsAs37(date.getYear(), person);
@@ -638,8 +627,7 @@ public class AbsenceManager {
 		//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, date).first();
 		if(pd == null)
 			pd = new PersonDay(person, date);
-		if(abt==null || !abt.code.equals("92"))
-		{
+		if(abt==null || !abt.code.equals("92")){
 			pd.isTicketForcedByAdmin = false;	//una assenza diversa da 92 ha per forza campo calcolato
 			pd.populatePersonDay();
 			return;
@@ -672,26 +660,17 @@ public class AbsenceManager {
 		LocalDate today = new LocalDate();
 		LocalDate actualDate = dateFrom;
 		int deleted = 0;
-		while(!actualDate.isAfter(dateTo))
-		{
+		while(!actualDate.isAfter(dateTo)){
 
-			PersonDay pd = null;
-			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, actualDate, Optional.<LocalDate>absent(), false);
+			List<PersonDay> personDays = PersonDayDao.getPersonDayInPeriod(person, actualDate, Optional.<LocalDate>absent(), false);
+			PersonDay pd = FluentIterable.from(personDays).first().orNull();
+
 			//Costruisco se non esiste il person day
-			if(pdList.size() == 0){
+			if(pd == null){
 				actualDate = actualDate.plusDays(1);
 				continue;
 			}
-			else{
-				pd = pdList.get(0);
-			}
-
-			//	PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", person, actualDate).first();
-			//			if(pd == null)
-			//			{
-			//				actualDate = actualDate.plusDays(1);
-			//				continue;
-			//			}
+			
 			List<Absence> absenceList = AbsenceDao.getAbsenceInDay(Optional.fromNullable(person), actualDate, Optional.<LocalDate>absent(), false);
 			//			List<Absence> absenceList = Absence.find("Select ab from Absence ab, PersonDay pd where ab.personDay = pd and pd.person = ? and pd.date = ?", 
 			//					person, actualDate).fetch();
@@ -702,7 +681,6 @@ public class AbsenceManager {
 					absence.delete();
 					pd.absences.remove(absence);
 					pd.isTicketForcedByAdmin = false;
-					pd.populatePersonDay();
 					deleted++;
 					Logger.info("Rimossa assenza del %s per %s %s", actualDate, person.name, person.surname);
 				}
@@ -711,6 +689,18 @@ public class AbsenceManager {
 				pd.delete();
 			}
 			actualDate = actualDate.plusDays(1);
+		}
+		
+//		Al termine della cancellazione delle assenze aggiorno tutta la situazione dal primo giorno di assenza fino ad oggi
+		PersonUtility.updatePersonDaysFromDate(person, dateFrom);
+//		Se ho inserito una data in un anno precedente a quello attuale effettuo 
+//		il ricalcolo del riepilogo annuale per ogni contratto attivo in quell'anno
+		if(dateFrom.getYear() < LocalDate.now().getYear()){
+			for(Contract c : PersonDao.getContractList(person, 
+					dateFrom.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), 
+					dateFrom.monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue())){
+				ContractYearRecapManager.buildContractYearRecap(c);
+			}
 		}
 		return deleted;
 	}

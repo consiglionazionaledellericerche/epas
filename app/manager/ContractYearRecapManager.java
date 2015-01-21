@@ -17,6 +17,8 @@ import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
+
 import dao.AbsenceTypeDao;
 import play.Logger;
 
@@ -92,7 +94,7 @@ public class ContractYearRecapManager {
 		
 		//Controllo se ho sufficienti dati
 		
-		String dateInitUse = ConfGeneral.getFieldValue("init_use_program", contract.person.office);
+		String dateInitUse = ConfGeneralManager.getFieldValue("init_use_program", contract.person.office);
 		LocalDate initUse = new LocalDate(dateInitUse);
 		if(contract.sourceDate!=null)
 			initUse = contract.sourceDate.plusDays(1);
@@ -125,7 +127,7 @@ public class ContractYearRecapManager {
 			cyr.contract = contract;
 			
 			//FERIE E PERMESSI
-			VacationsRecap vacationRecap = new VacationsRecap(contract.person, yearToCompute, contract, new LocalDate(), true);
+			VacationsRecap vacationRecap = VacationsRecap.Factory.build(contract.person, yearToCompute, Optional.of(contract), new LocalDate(), true);
 			cyr.vacationLastYearUsed = vacationRecap.vacationDaysLastYearUsed.size();
 			cyr.vacationCurrentYearUsed = vacationRecap.vacationDaysCurrentYearUsed.size();
 			cyr.permissionUsed = vacationRecap.permissionUsed.size();
