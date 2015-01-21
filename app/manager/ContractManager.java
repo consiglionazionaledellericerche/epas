@@ -7,7 +7,6 @@ import it.cnr.iit.epas.PersonUtility;
 import java.util.ArrayList;
 import java.util.List;
 
-import models.ConfGeneral;
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
@@ -170,21 +169,6 @@ public class ContractManager {
 	 * @param contract
 	 */
 	private static void buildVacationPeriods(Contract contract){
-
-		//Distruggo i vacation period precedenti
-		if(contract.vacationPeriods != null){
-			for(VacationPeriod vp : contract.vacationPeriods)
-			{
-				vp.delete();
-			}
-		}
-
-		//Contratto terminato nessun vacation period
-		if(contract.endContract!=null)
-		{
-			contract.save();
-			return;
-		}
 
 		//Tempo indeterminato, creo due vacatio 3 anni più infinito
 		if(contract.expireContract == null)

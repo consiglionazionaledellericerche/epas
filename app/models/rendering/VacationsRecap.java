@@ -7,9 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import manager.ConfYearManager;
+import manager.ContractManager;
 import models.Absence;
 import models.AbsenceType;
-import models.ConfYear;
 import models.Contract;
 import models.ContractYearRecap;
 import models.Person;
@@ -19,15 +19,14 @@ import models.enumerate.JustifiedTimeAtWork;
 
 import org.joda.time.LocalDate;
 
-import com.google.common.base.Optional;
+import play.Logger;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 
-
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
-import play.Logger;
 
 /**
  * @author alessandro
@@ -90,6 +89,11 @@ public class VacationsRecap {
 			
 			List<VacationPeriod> vacationPeriodList = vr.activeContract.getContractVacationPeriods();
 			
+			//FIXME Se non ho i piani ferie li costruisco. Decidere dove metterli (bootstrap??)
+			//il riepilogo non dovrebbe modificare il db
+			if(vacationPeriodList==null || vacationPeriodList.isEmpty()) {
+				ContractManager.properContractUpdate(vr.activeContract);
+			}
 			Verify.verify(vacationPeriodList!=null && !vacationPeriodList.isEmpty(), "Nessun piano ferie presente per il contratto!");
 			
 			vr.activeContractInterval = vr.activeContract.getContractDateInterval();
