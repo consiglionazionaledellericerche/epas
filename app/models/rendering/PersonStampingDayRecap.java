@@ -9,7 +9,6 @@ import manager.ConfGeneralManager;
 import manager.PersonDayManager;
 import manager.WorkingTimeTypeManager;
 import models.Absence;
-import models.ConfGeneral;
 import models.Person;
 import models.PersonDay;
 import models.StampModificationType;
