@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import manager.ConfGeneralManager;
+import manager.PersonDayManager;
 import models.ConfGeneral;
 import models.Office;
 import models.Person;
@@ -150,8 +151,8 @@ public class Clocks extends Controller{
 		personDay.save();
 		
 		Logger.debug("Faccio i calcoli per %s %s sul personday %s chiamando la populatePersonDay", person.name, person.surname, pd);
-		personDay.populatePersonDay();
-		personDay.updatePersonDaysInMonth();
+		PersonDayManager.populatePersonDay(personDay);
+		PersonDayManager.updatePersonDaysInMonth(personDay);
 		//pd.save();
 		flash.success("Aggiunta timbratura per %s %s", person.name, person.surname);
 		

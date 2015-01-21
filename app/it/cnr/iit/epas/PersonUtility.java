@@ -10,6 +10,7 @@ import javax.persistence.Query;
 
 import manager.ConfGeneralManager;
 import manager.ContractYearRecapManager;
+import manager.PersonDayManager;
 import manager.PersonManager;
 import manager.WorkingTimeTypeManager;
 import manager.recaps.PersonResidualMonthRecap;
@@ -630,7 +631,7 @@ public class PersonUtility {
 	{
 		if(pd == null)
 			return 0;
-		pd.orderStampings();
+		PersonDayManager.orderStampings(pd);
 
 		int coupleOfStampings = 0;
 
@@ -854,11 +855,11 @@ public class PersonUtility {
 			if(pd.isHoliday())
 				continue;
 
-			if(fixed && !pd.isAllDayAbsences() )
+			if(fixed && !PersonDayManager.isAllDayAbsences(pd) )
 			{
 				basedDays++;
 			}
-			else if(!fixed && pd.stampings.size()>0 && !pd.isAllDayAbsences() )
+			else if(!fixed && pd.stampings.size()>0 && !PersonDayManager.isAllDayAbsences(pd) )
 			{
 				basedDays++;
 			}
@@ -909,7 +910,7 @@ public class PersonUtility {
 //					monthEnd).fetch();
 			for(PersonDay pd : pdList)
 			{
-				pd.populatePersonDay();
+				PersonDayManager.populatePersonDay(pd);
 			}
 //			FIXME c'è realmente bisogno di fare la populate oltre la data di oggi??
 			if(monthEnd.isEqual(dateTo) || monthEnd.isAfter(dateTo))
@@ -940,7 +941,7 @@ public class PersonUtility {
 		List<PersonDay> personDays = PersonDayDao.getPersonDayInPeriod(person, date, Optional.fromNullable(LocalDate.now()), true);
 
 		for(PersonDay pd : personDays){
-			pd.populatePersonDay();
+			PersonDayManager.populatePersonDay(pd);
 		}
 	}
 
@@ -1011,7 +1012,7 @@ public class PersonUtility {
 					JPAPlugin.startTx(false);
 					PersonDay pd1 = PersonDayDao.getPersonDayById(pd.id);
 					//PersonDay pd1 = PersonDay.findById(pd.id);
-					pd1.populatePersonDay();
+					PersonDayManager.populatePersonDay(pd1);
 					JPAPlugin.closeTx(false);
 					JPAPlugin.startTx(false);
 				}
@@ -1203,7 +1204,7 @@ public class PersonUtility {
 //				personToCheck,dayToCheck).first();
 
 		if(pd.isPresent()){
-			pd.get().checkForPersonDayInTrouble(); 
+			PersonDayManager.checkForPersonDayInTrouble(pd.get()); 
 			return;
 		}
 		else {
@@ -1212,9 +1213,9 @@ public class PersonUtility {
 				return;
 			}
 			personDay.create();
-			personDay.populatePersonDay();
+			PersonDayManager.populatePersonDay(personDay);
 			personDay.save();
-			personDay.checkForPersonDayInTrouble();
+			PersonDayManager.checkForPersonDayInTrouble(personDay);
 			return;
 		}
 	}

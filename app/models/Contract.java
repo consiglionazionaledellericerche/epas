@@ -243,7 +243,7 @@ public class Contract extends BaseModel {
 //				this).fetch();
 
 		//se il piano ferie associato al contratto non esiste 
-		if(vpList==null)
+		if(vpList.isEmpty())
 		{
 			Logger.debug("CurrentPersonVacationPeriod: il vacation period è inesistente");
 			return null;

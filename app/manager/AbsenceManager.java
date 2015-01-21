@@ -629,23 +629,23 @@ public class AbsenceManager {
 			pd = new PersonDay(person, date);
 		if(abt==null || !abt.code.equals("92")){
 			pd.isTicketForcedByAdmin = false;	//una assenza diversa da 92 ha per forza campo calcolato
-			pd.populatePersonDay();
+			PersonDayManager.populatePersonDay(pd);
 			return;
 		}
 		if(mealTicket!= null && mealTicket.equals("si")){
 			pd.isTicketForcedByAdmin = true;
 			pd.isTicketAvailable = true;
-			pd.populatePersonDay();
+			PersonDayManager.populatePersonDay(pd);
 		}
 		if(mealTicket!= null && mealTicket.equals("no")){
 			pd.isTicketForcedByAdmin = true;
 			pd.isTicketAvailable = false;
-			pd.populatePersonDay();
+			PersonDayManager.populatePersonDay(pd);
 		}
 
 		if(mealTicket!= null && mealTicket.equals("calcolato")){
 			pd.isTicketForcedByAdmin = false;
-			pd.populatePersonDay();
+			PersonDayManager.populatePersonDay(pd);
 		}
 	}
 

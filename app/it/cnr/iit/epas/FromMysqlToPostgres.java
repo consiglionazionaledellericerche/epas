@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import manager.PersonDayManager;
 import manager.PersonManager;
 import models.Absence;
 import models.AbsenceType;
@@ -299,7 +300,7 @@ public class FromMysqlToPostgres {
 							pd = new PersonDay(p, date);
 							pd.create();
 							Logger.debug("Creato person day per %s %s in data %s", p.name, p.surname, date);
-							pd.populatePersonDay();
+							PersonDayManager.populatePersonDay(pd);
 							pd.save();
 							Logger.debug("Persistito il tempo di lavoro = %d per %s %s in data %s", pd.timeAtWork, p.name, p.surname, date);
 						}
@@ -915,7 +916,7 @@ public class FromMysqlToPostgres {
 					Logger.debug("Il progressivo del personday del giorno appena trascorso da cui partire per fare i calcoli è: %s", pd.progressive);
 					PersonDay pdOld = PersonDay.findById(pd.id);
 
-					pdOld.populatePersonDay();	
+					PersonDayManager.populatePersonDay(pdOld);	
 					pdOld.merge();
 
 					Logger.debug("Il progressivo del personday del giorno appena trascorso assegnato a un nuovo personDay è: %s", pdOld.progressive);
@@ -984,7 +985,7 @@ public class FromMysqlToPostgres {
 				 * i calcoli del personDay relativi a questo ultimo giorno (quello con date = data).
 				 */
 				pd.merge();
-				pd.populatePersonDay();
+				PersonDayManager.populatePersonDay(pd);
 
 				Logger.debug("Il progressivo al termine del resultset è: %s e il differenziale è: %s", pd.progressive, pd.difference);
 				Logger.info("Creato %s", pd);
@@ -1635,7 +1636,7 @@ public class FromMysqlToPostgres {
 						Logger.debug("Il progressivo del personday del giorno appena trascorso da cui partire per fare i calcoli è: %s", pd.progressive);
 						PersonDay pdOld = PersonDay.findById(pd.id);
 
-						pdOld.populatePersonDay();	
+						PersonDayManager.populatePersonDay(pdOld);	
 						pdOld.merge();
 
 						Logger.debug("Il progressivo del personday del giorno appena trascorso assegnato a un nuovo personDay è: %s", pdOld.progressive);
@@ -1708,7 +1709,7 @@ public class FromMysqlToPostgres {
 					 * i calcoli del personDay relativi a questo ultimo giorno (quello con date = data).
 					 */
 					pd.merge();
-					pd.populatePersonDay();
+					PersonDayManager.populatePersonDay(pd);
 
 					Logger.debug("Il progressivo al termine del resultset è: %s e il differenziale è: %s", pd.progressive, pd.difference);
 					Logger.info("Creato %s", pd);

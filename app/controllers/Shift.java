@@ -48,7 +48,7 @@ import models.Absence;
 import models.CompetenceCode;
 import models.Person;
 import models.PersonDay;
-import models.PersonDay.PairStamping;
+
 import models.Competence;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;

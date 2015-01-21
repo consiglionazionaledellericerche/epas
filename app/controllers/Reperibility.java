@@ -30,7 +30,7 @@ import models.PersonReperibility;
 import models.PersonReperibilityDay;
 import models.PersonReperibilityType;
 import models.ShiftType;
-import models.PersonDay.PairStamping;
+
 import models.enumerate.JustifiedTimeAtWork;
 import models.exports.AbsenceReperibilityPeriod;
 import models.exports.ReperibilityPeriod;

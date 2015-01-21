@@ -11,6 +11,7 @@ import java.util.Map;
 
 import javax.persistence.Query;
 
+import manager.PersonDayManager.PairStamping;
 import manager.PersonManager;
 import models.Absence;
 import models.CertificatedData;
@@ -23,7 +24,7 @@ import models.PersonReperibilityDay;
 import models.PersonShiftDay;
 import models.Stamping;
 import models.User;
-import models.PersonDay.PairStamping;
+import manager.PersonDayManager;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.ShiftSlot;
 import models.query.QCompetence;
@@ -612,7 +613,7 @@ public class CompetenceUtility {
 						//-----------------------------
 						
 						// legge le coppie di timbrature valide 
-						List<PairStamping> pairStampings = PersonDay.PairStamping.getValidPairStamping(personDay.get().stampings);
+						List<PairStamping> pairStampings = PairStamping.getValidPairStamping(personDay.get().stampings);
 						
 						// se c'è una timbratura guardo se è entro il turno
 						if ((personDay.get().stampings.size() == 1) &&

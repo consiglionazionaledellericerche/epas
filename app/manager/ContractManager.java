@@ -149,7 +149,7 @@ public class ContractManager {
 					PersonDay pd1 = PersonDayDao.getPersonDayById(pd.id);
 					//PersonDay pd1 = PersonDay.findById(pd.id);
 					Logger.debug("RecomputePopulate %s", pd1.date);				
-					pd1.populatePersonDay();
+					PersonDayManager.populatePersonDay(pd1);
 				}
 	
 				actualMonth = actualMonth.plusMonths(1);

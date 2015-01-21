@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import manager.PersonDayManager;
 import models.Competence;
 import models.Person;
 import models.PersonDay;
@@ -118,7 +119,7 @@ public class MonthRecaps extends Controller{
 				//persone fixed
 				else if(pd.isFixedTimeAtWork())
 				{
-					if(!pd.isAllDayAbsences())
+					if(!PersonDayManager.isAllDayAbsences(pd))
 					{	
 						workingDayNotHoliday.add(pd);
 					}
@@ -130,11 +131,11 @@ public class MonthRecaps extends Controller{
 				//persone non fixed
 				else if(!pd.isFixedTimeAtWork())
 				{
-					if(pd.isInTrouble()) 
+					if(PersonDayManager.isInTrouble(pd)) 
 					{
 						notJustifiedAbsences.add(pd);
 					}
-					else if(!pd.isAllDayAbsences())
+					else if(!PersonDayManager.isAllDayAbsences(pd))
 					{
 						workingDayNotHoliday.add(pd);
 					}
