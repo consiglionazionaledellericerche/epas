@@ -2,6 +2,7 @@ package jobs;
 
 import java.util.List;
 
+import manager.PersonDayManager;
 import manager.PersonManager;
 import models.Person;
 import models.PersonDay;
@@ -38,7 +39,7 @@ public class CheckPersonDayMissing extends Job{
 					Logger.debug("Non c'è personDay e non è festa per %s %s nel giorno %s", p.name, p.surname, dateBegin);
 					pd = new PersonDay(p, dateBegin);
 					pd.create();
-					pd.populatePersonDay();
+					PersonDayManager.populatePersonDay(pd);
 					pd.save();
 					Logger.debug("Creato person day per %s %s per il giorno %s in cui non risultavano nè timbrature nè codici di assenza", 
 							p.name, p.surname, dateBegin);

@@ -15,8 +15,11 @@ import com.mysema.query.jpa.JPQLQuery;
 import models.Absence;
 import models.AbsenceType;
 import models.Person;
+import models.PersonDay;
 import models.enumerate.JustifiedTimeAtWork;
 import models.query.QAbsence;
+import models.query.QAbsenceType;
+import models.query.QAbsenceTypeGroup;
 
 /**
  * 
@@ -24,7 +27,7 @@ import models.query.QAbsence;
  *
  */
 public class AbsenceDao {
-	
+
 	private final static QAbsence absence = QAbsence.absence;
 
 	/**
@@ -39,7 +42,7 @@ public class AbsenceDao {
 		return query.singleResult(absence);
 
 	}
-	
+
 	/**
 	 * 
 	 * @param person
@@ -64,12 +67,12 @@ public class AbsenceDao {
 		else{
 			condition.and(absence.personDay.date.eq(dateFrom));
 		}
-		
+
 		query.where(condition).orderBy(absence.absenceType.code.asc());
 		return query.list(absence);
-		
+
 	}
-	
+
 	/**
 	 * 
 	 * @param person
@@ -103,9 +106,9 @@ public class AbsenceDao {
 		if(ordered)
 			query.orderBy(absence.personDay.date.asc());
 		return query.list(absence);
-		
+
 	}
-	
+
 	/**
 	 * 
 	 * @param begin
@@ -122,7 +125,7 @@ public class AbsenceDao {
 		else
 			return new Long(0);
 	}
-	
+
 	/**
 	 * 
 	 * @param begin
@@ -140,15 +143,15 @@ public class AbsenceDao {
 		else
 			return new Long(0);
 	}
-	
+
 	public static SimpleResults<Absence> findByPersonAndDate(Person person, LocalDate fromDate, Optional<LocalDate> toDate,Optional<AbsenceType> absenceType) {
 
 		Preconditions.checkNotNull(person);
 		Preconditions.checkNotNull(fromDate);
-				
+
 		BooleanBuilder conditions = 
-			new BooleanBuilder(absence.personDay.person.eq(person).and(
-					absence.personDay.date.between(fromDate, toDate.or(fromDate))));
+				new BooleanBuilder(absence.personDay.person.eq(person).and(
+						absence.personDay.date.between(fromDate, toDate.or(fromDate))));
 		if(absenceType.isPresent()){
 			conditions.and(absence.absenceType.eq(absenceType.get()));
 		}
@@ -178,8 +181,8 @@ public class AbsenceDao {
 		query.orderBy(absence.personDay.date.desc());
 		return query.singleResult(absence);
 	}
-	
-	
+
+
 	/**
 	 * 
 	 * @param abt
@@ -195,7 +198,7 @@ public class AbsenceDao {
 						.and(absence.personDay.person.eq(person).and(absence.personDay.date.between(begin, end))));
 		return query.list(absence);
 	}
-	
+
 	/**
 	 * 
 	 * @param abt
@@ -212,8 +215,8 @@ public class AbsenceDao {
 						.and(absence.personDay.date.between(begin, end)));
 		return query.list(absence);
 	}
-	
-	
+
+
 	/**
 	 * 
 	 * @param person
@@ -232,7 +235,7 @@ public class AbsenceDao {
 		return query.list(absence);
 
 	}
-	
+
 	/**
 	 * Controlla che nell'intervallo passato in args non esista gia' una assenza giornaliera
 	 * 
@@ -251,9 +254,9 @@ public class AbsenceDao {
 								absence.absenceType.justifiedTimeAtWork.eq(JustifiedTimeAtWork.AllDay))).list(absence);
 
 	}
-	
-	
-	
+
+
+
 	/**
 	 * La lista delle assenze restituite è prelevata in FETCH JOIN con le absenceType i personDay e la person 
 	 * in modo da non effettuare ulteriori select.
@@ -264,9 +267,35 @@ public class AbsenceDao {
 	 */
 	public static List<Absence> getAbsencesNotInternalUseInMonth(Person person, Integer year, Integer month) {
 		return AbsenceDao.getAbsenceWithNotInternalUseInMonth(person, new LocalDate(year,month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
-//		return Absence.find(
-//				"SELECT abs from Absence abs JOIN FETCH abs.absenceType abt JOIN FETCH abs.personDay pd JOIN FETCH pd.person p "
-//					+ "WHERE p = ? AND pd.date BETWEEN ? AND ? AND abt.internalUse = false ORDER BY abt.code, pd.date, abs.id", 
-//					person, new LocalDate(year,month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
+		//		return Absence.find(
+		//				"SELECT abs from Absence abs JOIN FETCH abs.absenceType abt JOIN FETCH abs.personDay pd JOIN FETCH pd.person p "
+		//					+ "WHERE p = ? AND pd.date BETWEEN ? AND ? AND abt.internalUse = false ORDER BY abt.code, pd.date, abs.id", 
+		//					person, new LocalDate(year,month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
+	}
+
+	/**
+	 * 
+	 * @param abt
+	 * @param pd
+	 * @return
+	 */
+	public static boolean getAbsenceWithReplacingAbsenceTypeNotNull(AbsenceType abt, PersonDay pd){
+		final QAbsence qabs = QAbsence.absence;
+		final QAbsenceType qabt = QAbsenceType.absenceType;
+		final QAbsenceTypeGroup qabtg = QAbsenceTypeGroup.absenceTypeGroup;
+
+		final JPQLQuery query2 = ModelQuery.queryFactory().from(qabs)
+				.leftJoin(qabs.absenceType, qabt).fetch()
+				.leftJoin(qabt.absenceTypeGroup, qabtg).fetch();
+
+
+		final BooleanBuilder condition = new BooleanBuilder();
+		condition.and(qabs.absenceType.eq(qabt));
+		condition.and(qabt.absenceTypeGroup.eq(qabtg));
+		condition.and(qabtg.replacingAbsenceType.eq(abt));
+		condition.and(qabs.personDay.eq(pd));
+		query2.where(condition);
+
+		return query2.count() > 0;
 	}
 }

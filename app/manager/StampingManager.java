@@ -101,7 +101,7 @@ public class StampingManager {
 			
 		}
 		Logger.debug("Chiamo la populatePersonDay per fare i calcoli sulla nuova timbratura inserita per il personDay %s", pd);
-		personDay.populatePersonDay();
+		PersonDayManager.populatePersonDay(personDay);
 
 		personDay.save();
 		return true;

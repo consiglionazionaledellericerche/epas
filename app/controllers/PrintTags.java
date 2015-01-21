@@ -12,6 +12,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import manager.ConfGeneralManager;
+import manager.PersonDayManager;
 import manager.PersonManager;
 import models.AbsenceType;
 import models.ConfGeneral;
@@ -69,7 +70,7 @@ public class PrintTags extends Controller{
 		//Costruzione dati da renderizzare
 		for(PersonDay pd : totalPersonDays)
 		{
-			pd.computeValidStampings(); //calcolo del valore valid per le stamping del mese (persistere??)
+			PersonDayManager.computeValidStampings(pd); //calcolo del valore valid per le stamping del mese (persistere??)
 		}
 		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
 		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();							
@@ -136,7 +137,7 @@ public class PrintTags extends Controller{
 		//Costruzione dati da renderizzare
 		for(PersonDay pd : totalPersonDays)
 		{
-			pd.computeValidStampings(); //calcolo del valore valid per le stamping del mese (persistere??)
+			PersonDayManager.computeValidStampings(pd); //calcolo del valore valid per le stamping del mese (persistere??)
 		}
 		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
 		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();							

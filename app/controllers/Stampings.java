@@ -12,6 +12,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import manager.PersonDayManager;
 import manager.PersonManager;
 import manager.recaps.PersonResidualMonthRecap;
 import manager.recaps.PersonResidualYearRecap;
@@ -92,7 +93,7 @@ public class Stampings extends Controller {
 		//Costruzione dati da renderizzare
 		for(PersonDay pd : totalPersonDays)
 		{
-			pd.computeValidStampings(); //calcolo del valore valid per le stamping del mese (persistere??)
+			PersonDayManager.computeValidStampings(pd); //calcolo del valore valid per le stamping del mese (persistere??)
 		}
 		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
 		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();							
@@ -177,7 +178,7 @@ public class Stampings extends Controller {
 		//Costruzione dati da renderizzare
 		for(PersonDay pd : totalPersonDays)
 		{
-			pd.computeValidStampings(); //calcolo del valore valid per le stamping del mese								//0 sql
+			PersonDayManager.computeValidStampings(pd); //calcolo del valore valid per le stamping del mese								//0 sql
 		}
 		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
 		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();							
@@ -348,8 +349,8 @@ public class Stampings extends Controller {
 		personDay.stampings.add(stamp);
 		personDay.save();
 			
-		personDay.populatePersonDay();
-		personDay.updatePersonDaysInMonth();
+		PersonDayManager.populatePersonDay(personDay);
+		PersonDayManager.updatePersonDaysInMonth(personDay);
 		
 		flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
 
@@ -390,8 +391,8 @@ public class Stampings extends Controller {
 			stamping.delete();
 			pd.stampings.remove(stamping);
 
-			pd.populatePersonDay();
-			pd.updatePersonDaysInMonth();
+			PersonDayManager.populatePersonDay(pd);
+			PersonDayManager.updatePersonDaysInMonth(pd);
 	
 			flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(stamping.date.toLocalDate()));	
 
@@ -442,8 +443,8 @@ public class Stampings extends Controller {
 			
 			stamping.save();
 		
-			pd.populatePersonDay();
-			pd.updatePersonDaysInMonth();
+			PersonDayManager.populatePersonDay(pd);
+			PersonDayManager.updatePersonDaysInMonth(pd);
 			flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name);
 
 		}
@@ -577,7 +578,7 @@ public class Stampings extends Controller {
 				personDay = pd.get();
 			}
 
-			personDay.computeValidStampings();
+			PersonDayManager.computeValidStampings(personDay);
 			daysRecap.add(new PersonStampingDayRecap(personDay, numberOfInOut));
 			
 		}

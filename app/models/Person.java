@@ -357,25 +357,6 @@ public class Person extends BaseModel implements Comparable<Person>{
 	public String toString() {
 		return String.format("Person[%d] - %s %s", id, name, surname);
 	}
-
-	/**
-	 * Metodi di utilità per verificare se nella lista dei permessi c'è il permesso richiesto. Utile in visualizzazione
-	 * 
-	 */
-
-	
-	/**
-	 * Ritorna la lista delle persone visibili dall'amministratore attive nel mese richiesto.
-	 * Questa lista viene salvata in cache e ricalcolata solo se la copia non esiste o è scaduta.
-	 * Il nome della variabile in cache è persons-year-month-personLogged.id (esempio 'persons-2014-01-146')
-	 * @param year
-	 * @return
-	
-	public static List getCachedActivePersonInMonth(Integer year, Integer month, Person personLogged)
-	{
-		return null;
-	}
-	*/
 	
 	/**
 	 * @param code
