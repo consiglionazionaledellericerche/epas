@@ -89,7 +89,7 @@
 		<th class="group-single">Codice <br>assenza</th>
 		
 
-		#{list items:1..numberOfInOut, as:'i'}
+		#{list items:1..psDto.numberOfInOut, as:'i'}
 			<th class="group-left">${i}<sup>a</sup> <br/>entrata</th>
 			<th class="group-right">${i}<sup>a</sup> <br/>uscita</th>
 		#{/list}
@@ -103,7 +103,7 @@
 		<th class="group-single hidden-xs hidden-sm">Note</th>
 	</tr>
 	
-	#{list items:daysRecap, as:'dayRecap'}
+	#{list items:psDto.daysRecap, as:'dayRecap'}
 	<tr>
      		#{if dayRecap.holiday==false}
 				<td class="capitalized default-single">${String.format(messages.get('views.tags.display.date.format.dayAndShortDayName'), dayRecap.date.toDate())}</td>
