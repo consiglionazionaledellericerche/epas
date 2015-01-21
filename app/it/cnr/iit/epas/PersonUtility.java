@@ -13,8 +13,6 @@ import manager.ContractYearRecapManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
 import manager.WorkingTimeTypeManager;
-import manager.recaps.PersonResidualMonthRecap;
-import manager.recaps.PersonResidualYearRecap;
 import models.Absence;
 import models.AbsenceType;
 import models.Competence;
@@ -33,7 +31,6 @@ import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
 import models.enumerate.ConfigurationFields;
 import models.enumerate.JustifiedTimeAtWork;
-import models.rendering.VacationsRecap;
 
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
@@ -42,11 +39,15 @@ import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import play.Logger;
+import play.db.jpa.JPA;
+import play.db.jpa.JPAPlugin;
+import play.libs.Mail;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
 import dao.AbsenceDao;
-import dao.AbsenceTypeDao;
 import dao.CompetenceDao;
 import dao.ContractDao;
 import dao.OfficeDao;
@@ -54,11 +55,6 @@ import dao.PersonChildrenDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonDayInTroubleDao;
-import play.Logger;
-import play.Play;
-import play.db.jpa.JPA;
-import play.db.jpa.JPAPlugin;
-import play.libs.Mail;
 
 public class PersonUtility {
 
@@ -984,7 +980,7 @@ public class PersonUtility {
 			personList.add(PersonDao.getPersonById(personId));
 			//personList.add((Person)Person.findById(personId));
 		}
-
+		
 		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
 		JPAPlugin.startTx(false);
 		for(Person person : personList) {
@@ -1021,7 +1017,7 @@ public class PersonUtility {
 			}
 			JPAPlugin.closeTx(false);
 		}
-
+		
 		//(3) 
 		JPAPlugin.startTx(false);
 		i = 1;
@@ -1032,7 +1028,9 @@ public class PersonUtility {
 			//List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ?", p).fetch();
 
 			for(Contract contract : contractList) {
-				
+				JPAPlugin.closeTx(false);	
+				JPAPlugin.startTx(false);
+				contract = ContractDao.getContractById(contract.id);
 				ContractYearRecapManager.buildContractYearRecap(contract);
 			}
 		}
