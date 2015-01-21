@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.persistence.Query;
 
+import manager.ConfGeneralManager;
 import manager.ContractYearRecapManager;
 import manager.PersonManager;
 import manager.WorkingTimeTypeManager;
@@ -43,6 +44,7 @@ import play.db.jpa.JPAPlugin;
 import play.libs.Mail;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 
 import dao.AbsenceDao;
 import dao.CompetenceDao;
@@ -885,7 +887,10 @@ public class PersonUtility {
 	 * @param person
 	 * @param dateFrom
 	 * @param dateTo
+	 * 
+	 * @deprecated use {@link #PersonUtility.updatePersonDaysFromDate()} instead. 
 	 */
+	@Deprecated
 	public static void updatePersonDaysIntoInterval(Person person, LocalDate dateFrom, LocalDate dateTo)
 	{
 		LocalDate monthBegin = new LocalDate(dateFrom.getYear(), dateFrom.getMonthOfYear(), 1);
@@ -902,12 +907,37 @@ public class PersonUtility {
 			{
 				pd.populatePersonDay();
 			}
+//			FIXME c'è realmente bisogno di fare la populate oltre la data di oggi??
 			if(monthEnd.isEqual(dateTo) || monthEnd.isAfter(dateTo))
 				return;
 			monthBegin = monthBegin.plusMonths(1);
 			monthEnd = monthBegin.dayOfMonth().withMaximumValue();
 		}
 
+	}
+	
+
+	/** 
+	 * Aggiorna tutti i personday a partire dalla data specificata fino al giorno corrente
+	 * @param person
+	 * @param date
+	 */
+	public static void updatePersonDaysFromDate(Person person, LocalDate date){
+		
+		Preconditions.checkNotNull(person);
+		Preconditions.checkState(person.isPersistent());
+		Preconditions.checkNotNull(date);
+		
+//		Verifico se la data è passata, in caso contrario non è necessario ricalcolare nulla
+		if(date.isAfter(LocalDate.now())){
+			return;
+		}
+// 		Prendo la lista ordinata di tutti i personday della persona fino ad oggi e effettuo il ricalcolo su tutti
+		List<PersonDay> personDays = PersonDayDao.getPersonDayInPeriod(person, date, Optional.fromNullable(LocalDate.now()), true);
+
+		for(PersonDay pd : personDays){
+			pd.populatePersonDay();
+		}
 	}
 
 
@@ -1231,7 +1261,7 @@ public class PersonUtility {
 		try {
 			simpleEmail.setFrom("epas@iit.cnr.it");
 			//simpleEmail.addReplyTo("segreteria@iit.cnr.it");
-			simpleEmail.addReplyTo(ConfGeneral.getConfGeneralByField(
+			simpleEmail.addReplyTo(ConfGeneralManager.getConfGeneralByField(
 							ConfigurationFields.EmailToContact.description, 
 							person.office).fieldValue);
 		} catch (EmailException e1) {

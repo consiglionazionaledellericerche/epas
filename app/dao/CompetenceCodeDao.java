@@ -65,6 +65,6 @@ public class CompetenceCodeDao {
 	public static List<CompetenceCode> getAllCompetenceCode(){
 		QCompetenceCode competenceCode = QCompetenceCode.competenceCode;
 		final JPQLQuery query = ModelQuery.queryFactory().from(competenceCode);
-		return query.list(competenceCode);
+		return query.orderBy(competenceCode.id.asc()).list(competenceCode);
 	}
 }

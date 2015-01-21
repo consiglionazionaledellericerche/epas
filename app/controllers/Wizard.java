@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
+import manager.ConfGeneralManager;
+import manager.ConfYearManager;
 import manager.ContractManager;
 import models.ConfGeneral;
 import models.ConfYear;
@@ -482,47 +484,50 @@ public class Wizard extends Controller {
 		seat.office = institute;
 		seat.save();
 		
-		ConfGeneral.buildDefaultConfGeneral(seat);
+		ConfGeneralManager.buildDefaultConfGeneral(seat);
 		
-		ConfYear.buildDefaultConfYear(seat, LocalDate.now().getYear());
-		ConfYear.buildDefaultConfYear(seat, LocalDate.now().getYear() - 1);
+		//ConfYear.buildDefaultConfYear(seat, LocalDate.now().getYear());
+		//ConfYear.buildDefaultConfYear(seat, LocalDate.now().getYear() - 1);
+		ConfYearManager.buildDefaultConfYear(seat, LocalDate.now().getYear());
+		ConfYearManager.buildDefaultConfYear(seat, LocalDate.now().getYear() - 1);
+		
 		
 		seat.setPermissionAfterCreation();
 		
 		ConfGeneral confGeneral;
 		
 //		INIT_USE_PROGRAM
-		confGeneral = ConfGeneral.getConfGeneralByField(ConfGeneral.INIT_USE_PROGRAM, seat);
+		confGeneral = ConfGeneralManager.getConfGeneralByField(ConfGeneral.INIT_USE_PROGRAM, seat);
 		confGeneral.fieldValue = LocalDate.now().toString();
 		confGeneral.save();
 //		DAY_OF_PATRON
 		LocalDate dayMonth = DateUtility.dayMonth(properties.getProperty("date_of_patron"),Optional.<String>absent());
 
-		confGeneral = ConfGeneral.getConfGeneralByField(ConfGeneral.DAY_OF_PATRON, seat);
+		confGeneral = ConfGeneralManager.getConfGeneralByField(ConfGeneral.DAY_OF_PATRON, seat);
 		confGeneral.fieldValue = dayMonth.dayOfMonth().getAsString();
 		confGeneral.save();
 //		MONTH_OF_PATRON
-		confGeneral = ConfGeneral.getConfGeneralByField(ConfGeneral.MONTH_OF_PATRON, seat);
+		confGeneral = ConfGeneralManager.getConfGeneralByField(ConfGeneral.MONTH_OF_PATRON, seat);
 		confGeneral.fieldValue = dayMonth.monthOfYear().getAsString();
 		confGeneral.save();
 //		MEAL_TIME_START_HOUR
 		List<String> lunchStart = Splitter.on(":").trimResults().splitToList(properties.getProperty("lunch_pause_start"));    
 
-		confGeneral = ConfGeneral.getConfGeneralByField(ConfGeneral.MEAL_TIME_START_HOUR, seat);
+		confGeneral = ConfGeneralManager.getConfGeneralByField(ConfGeneral.MEAL_TIME_START_HOUR, seat);
 		confGeneral.fieldValue = lunchStart.get(0);
 		confGeneral.save();
 //		MEAL_TIME_START_MINUTE
-		confGeneral = ConfGeneral.getConfGeneralByField(ConfGeneral.MEAL_TIME_START_MINUTE, seat);
+		confGeneral = ConfGeneralManager.getConfGeneralByField(ConfGeneral.MEAL_TIME_START_MINUTE, seat);
 		confGeneral.fieldValue = lunchStart.get(1);
 		confGeneral.save();	
 //		MEAL_TIME_END_HOUR
 		List<String> lunchStop = Splitter.on(":").trimResults().splitToList(properties.getProperty("lunch_pause_end"));
 
-		confGeneral = ConfGeneral.getConfGeneralByField(ConfGeneral.MEAL_TIME_END_HOUR, seat);
+		confGeneral = ConfGeneralManager.getConfGeneralByField(ConfGeneral.MEAL_TIME_END_HOUR, seat);
 		confGeneral.fieldValue = lunchStop.get(0);
 		confGeneral.save();
 //		MEAL_TIME_END_MINUTE
-		confGeneral = ConfGeneral.getConfGeneralByField(ConfGeneral.MEAL_TIME_END_MINUTE, seat);
+		confGeneral = ConfGeneralManager.getConfGeneralByField(ConfGeneral.MEAL_TIME_END_MINUTE, seat);
 		confGeneral.fieldValue = lunchStop.get(1);
 		confGeneral.save();
 //		EMAIL_TO_CONTACT

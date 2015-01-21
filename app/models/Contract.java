@@ -18,6 +18,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
+import manager.PersonManager;
 import models.base.BaseModel;
 
 import org.hibernate.annotations.Type;
@@ -337,7 +338,7 @@ public class Contract extends BaseModel {
 	 */
 	public boolean isLastInMonth(Integer month, Integer year)
 	{
-		List<Contract> contractInMonth = this.person.getMonthContracts(month, year);
+		List<Contract> contractInMonth = PersonManager.getMonthContracts(this.person,month, year);
 		if(contractInMonth.size()==0)
 			return false;
 		if(contractInMonth.get(contractInMonth.size()-1).id.equals(this.id))

@@ -530,7 +530,7 @@ public class Charts extends Controller{
 		out.write("Cognome Nome,Ferie usate anno corrente,Ferie usate anno passato,Permessi usati anno corrente,Residuo anno corrente (minuti), Residuo anno passato (minuti),Riposi compensativi anno corrente");
 		out.newLine();
 		//VacationsRecap vr = new VacationsRecap(person, LocalDate.now().getYear(), person.getContract(LocalDate.now()), LocalDate.now(), false);
-		VacationsRecap vr = new VacationsRecap(person, LocalDate.now().getYear(), ContractDao.getContract(LocalDate.now(), person), LocalDate.now(), false);
+		VacationsRecap vr = VacationsRecap.Factory.build(person, LocalDate.now().getYear(), Optional.<Contract>absent(), LocalDate.now(), false);
 		//PersonResidualYearRecap pryr = PersonResidualYearRecap.factory(person.getContract(LocalDate.now()), LocalDate.now().getYear(), LocalDate.now());
 		PersonResidualYearRecap pryr = PersonResidualYearRecap.factory(ContractDao.getContract(LocalDate.now(), person), LocalDate.now().getYear(), LocalDate.now());
 		PersonResidualMonthRecap prmr = pryr.getMese(LocalDate.now().getMonthOfYear());

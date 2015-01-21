@@ -662,7 +662,7 @@ end
 
 rule wizard
 when
- $u: User( username.equals("admin"))
+ $u: User( username == "admin")
  $c: PermissionCheck(action in (
     "Wizard.wizard",
     "Wizard.changeAdminPsw",
