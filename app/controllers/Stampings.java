@@ -2,7 +2,6 @@ package controllers;
 
 import helpers.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.DateUtility;
-import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -13,6 +12,7 @@ import javax.inject.Inject;
 
 import manager.PersonDayManager;
 import manager.PersonManager;
+import manager.StampingManager;
 import models.Office;
 import models.Person;
 import models.PersonDay;
@@ -48,15 +48,9 @@ import dto.PersonStampingDto;
 
 public class Stampings extends Controller {
 
-	/**
-	 * 
-	 * @param person
-	 * @param year
-	 * @param month
-	 */
-	
 	@Inject
 	static SecurityRules rules;
+	
 	
 	public static void stampings(Integer year, Integer month) {
 
@@ -70,7 +64,7 @@ public class Stampings extends Controller {
 			//Un dipendente fuori contratto non può accedere a ePAS ??
 			try {
 				Secure.login();
-			}catch(Throwable e) {
+			} catch(Throwable e) {
 				Application.index();
 			}
 			
@@ -82,26 +76,30 @@ public class Stampings extends Controller {
 
 	}
 
-
-	//@Check(Security.INSERT_AND_UPDATE_STAMPING)
+	
 	public static void personStamping(Long personId, int year, int month) {
 		
-		if (personId == null){
-			personStamping();
+		if (personId == null) {
+			
+			personId = Security.getUser().get().person.getId();
+			year = LocalDate.now().getYear();
+			month = LocalDate.now().getMonthOfYear();
 		}
 		if (year == 0 || month == 0) {
-			personStamping(personId);
+			
+			year = LocalDate.now().getYear();
+			month = LocalDate.now().getMonthOfYear();
 		}
+		
 		Person person = PersonDao.getPersonById(personId);
-		//Person person = Person.findById(personId);
+
 		if(person == null){
 			flash.error("Persona inesistente in anagrafica");
 			Application.indexAdmin();
 		}
 		
 		rules.checkIfPermitted(person.office);
-		
-		//if(!person.isActiveInMonth(month, year, false))
+
 		if(!PersonManager.isActiveInMonth(person, month, year, false))
 		{
 			flash.error("Si è cercato di accedere a un mese al di fuori del contratto valido per %s %s. " +
@@ -116,41 +114,10 @@ public class Stampings extends Controller {
 		 
 	}
 
-	private static void personStamping() {
-		LocalDate now = new LocalDate();
-		personStamping(Security.getUser().get().person.getId(), now.getYear(),now.getMonthOfYear());
-	}
-
-	private static void personStamping(Long personId) {
-		LocalDate now = new LocalDate();
-		personStamping(personId, now.getYear(), now.getMonthOfYear());
-	}
-
-
-
-	public static void dailyStampings() {
-		Person person = PersonDao.getPersonById(params.get("id", Long.class));
-		//Person person = Person.findById(params.get("id", Long.class));
-		LocalDate day = 
-				new LocalDate(
-						params.get("year", Integer.class),
-						params.get("month", Integer.class), 
-						params.get("day", Integer.class));
-
-		Logger.trace("dailyStampings called for %s %s", person, day);
-
-		PersonDay personDay = new PersonDay(person, day);
-		render(personDay);
-	}
-
-
-
 	public static void createStamp(@Required Long personId, 
 			@Required Integer year, @Required Integer month, @Required Integer day){
 
-
 		Person person = PersonDao.getPersonById(personId);
-		//Person person = Person.findById(personId);
 		
 		rules.checkIfPermitted(person.office);
 		
@@ -161,18 +128,34 @@ public class Stampings extends Controller {
 		render(person, personDay);
 	}
 
+	
 	public static void insert(@Valid @Required Long personId, 
-			@Required Integer year, @Required Integer month, @Required Integer day) {
+			@Required Integer year, @Required Integer month, @Required Integer day,
+			@Required boolean type, @Required boolean service, @Required String hourStamping,
+			String note) {
 
 		Person person = Person.em().getReference(Person.class, personId);
 
 		rules.checkIfPermitted(person.office);
 		
 		LocalDate date = new LocalDate(year,month,day);
+
+		if( date.isAfter(new LocalDate()) ) 
+		{
+			flash.error("Non si può inserire una timbratura futura!!!");
+			Stampings.personStamping(personId, year, month);
+		}
+
+		LocalDateTime time = StampingManager.buildStampingDateTime(year, month, day, hourStamping);
+		
+		if(time == null) {
+			flash.error("Inserire un valore valido per l'ora timbratura. Operazione annullata");
+			Stampings.personStamping(personId, year, month);
+		}
+		
 		PersonDay personDay = null;
 		Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(person, date);
-//		PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", 
-//				person, date).first();
+
 		if(!pd.isPresent()){
 			personDay = new PersonDay(person, date);
 			personDay.create();
@@ -180,72 +163,8 @@ public class Stampings extends Controller {
 		else{
 			personDay = pd.get();
 		}
-
-
-		if(date.isAfter(new LocalDate())){
-			flash.error("Non si può inserire una timbratura futura!!!");
-			Stampings.personStamping(personId, year, month);
-		}
-
 		
-		/* TODO rifarla perchè non funziona, va inserito un boolean in PersonDay
-		if(params.get("timeAtWork", Boolean.class) == true){
-			//pd.timeAtWork = person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(new LocalDate(year, month, day).getDayOfWeek()).workingTime;
-			pd.timeAtWork = person.getWorkingTimeType(new LocalDate(year,month,day)).getWorkingTimeTypeDayFromDayOfWeek(new LocalDate(year, month, day).getDayOfWeek()).workingTime;
-			pd.save();
-			pd.populatePersonDay();
-			pd.save();
-			flash.success("Inserita timbratura forzata all'orario di lavoro per %s %s", person.name, person.surname);
-			Stampings.personStamping(personId, year, month);
-		}
-		*/
-		
-		Stamping stamp = new Stamping();
-		
-		
-		try {
-			String hour = params.get("hourStamping");
-			Integer hourNumber = Integer.parseInt(hour.substring(0,2));
-			Integer minNumber = Integer.parseInt(hour.substring(2,4));
-			if(hourNumber < 0 || hourNumber > 23 || minNumber < 0 || minNumber > 59)  {
-				flash.error("Inserire un valore valido per l'ora timbratura. Operazione annullata");
-				Stampings.personStamping(personId, year, month);
-			}
-			stamp.date = new LocalDateTime(year, month, day, hourNumber, minNumber, 0);
-			stamp.markedByAdmin = true;
-			
-		} catch(Exception e) {
-			flash.error("Inserire un valore valido per l'ora timbratura. Operazione annullata");
-			Stampings.personStamping(personId, year, month);
-		}
-		
-		String type = params.get("type");
-		String service = params.get("service");
-		
-		if(service.equals("true")){
-			stamp.note = "timbratura di servizio";
-			stamp.stampType = StampingDao.getStampTypeByCode("motiviDiServizio");
-			//stamp.stampType = StampType.find("Select st from StampType st where st.code = ?", "motiviDiServizio").first();
-		}
-		else{
-			String note = params.get("note");
-			if(!note.equals(""))
-				stamp.note = note;
-			else
-				stamp.note = "timbratura inserita dall'amministratore";
-		}
-		if(type.equals("true")){
-			stamp.way = Stamping.WayType.in;
-		}
-		else{
-			stamp.way = Stamping.WayType.out;
-		}
-		stamp.personDay = personDay;
-		stamp.save();
-		personDay.stampings.add(stamp);
-		personDay.save();
-			
-		PersonDayManager.updatePersonDaysFromDate(person, personDay.date);
+		StampingManager.addStamping(personDay, time, note, service, type, true);
 				
 		flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
 
@@ -253,12 +172,12 @@ public class Stampings extends Controller {
 
 
 	}
+	
 
 	public static void edit(@Required Long stampingId) {
-		Logger.debug("Edit stamping called for stampingId=%d", stampingId);
-
+		
 		Stamping stamping = StampingDao.getStampingById(stampingId);
-		//Stamping stamping = Stamping.findById(stampingId);
+		
 		if (stamping == null) {
 			notFound();
 		}
@@ -266,7 +185,9 @@ public class Stampings extends Controller {
 		rules.checkIfPermitted(stamping.personDay.person.office);
 		
 		LocalDate date = stamping.date.toLocalDate();
+
 		List<String> hourMinute = timeDivided(stamping);
+		
 		render(stamping, hourMinute, date);				
 	}
 
@@ -363,23 +284,12 @@ public class Stampings extends Controller {
 		return td;
 	}
 
-
-
-	@Check(Security.INSERT_AND_UPDATE_PERSON)
-	public static void discard(){
-		personStamping();
-	}
-
-
-
-
 	/**
 	 * Controller che attua la verifica di timbrature mancanti per il mese selezionato per tutte quelle persone
 	 * che avevano almeno un contratto attivo in tale mese
 	 * @param year
 	 * @param month
 	 */
-	
 	public static void missingStamping(int year, int month) {
 
 		rules.checkIfPermitted("");
@@ -399,71 +309,34 @@ public class Stampings extends Controller {
 			missingStampings.add(pt);
 		}
 		
-		render(month, year, missingStampings);
-
-
-
-
 	}
 
-
-
 	/**
-	 * Calcola il numero massimo di coppie ingresso/uscita nel personday di un giorno specifico per tutte le persone presenti nella lista
-	 * di persone attive a quella data
+	 * Controller che renderizza la presenza giornaliera dei dipendenti visibili all'amministratore.
 	 * @param year
 	 * @param month
 	 * @param day
-	 * @param activePersonsInDay
-	 * @return 
 	 */
-	private static int maxNumberOfStampingsInMonth(Integer year, Integer month, Integer day, List<Person> activePersonsInDay){
-		
-		LocalDate date = new LocalDate(year, month, day);
-		int max = 0;
-			
-		for(Person person : activePersonsInDay){
-			PersonDay personDay = null;
-			Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(person, date);
-//			PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.date = ? and pd.person = ?", 
-//					date, person).first();
-			if(pd.isPresent())
-				personDay = pd.get();
-			
-			if(max < PersonUtility.numberOfInOutInPersonDay(personDay))
-				max = PersonUtility.numberOfInOutInPersonDay(personDay);
-
-		}
-		return max;
-
-	}
-
-	
 	public static void dailyPresence(Integer year, Integer month, Integer day) {
 
 		rules.checkIfPermitted("");
-		//JPAPlugin.startTx(false);
-		LocalDate dayPresence = new LocalDate(year, month, day);
-		//TODO:
-		List<Office> office = new ArrayList<Office>();
-		office.add(Security.getUser().get().person.office);
-		List<Person> activePersonsInDay = PersonDao.list(Optional.<String>absent(), new HashSet<Office>(Security.getOfficeAllowed()), false, dayPresence, dayPresence, true).list();
-//		List<Person> activePersonsInDay = Person.getActivePersonsInDay(day, month, year, Security.getOfficeAllowed(), false);
 		
-		int numberOfInOut = maxNumberOfStampingsInMonth(year, month, day, activePersonsInDay);
+		LocalDate dayPresence = new LocalDate(year, month, day);
+
+		List<Person> activePersonsInDay = PersonDao.list(Optional.<String>absent(), new HashSet<Office>(Security.getOfficeAllowed()), false, dayPresence, dayPresence, true).list();
+
+		int numberOfInOut = StampingManager.maxNumberOfStampingsInMonth(year, month, day, activePersonsInDay);
 				
 		PersonStampingDayRecap.stampModificationTypeList = new ArrayList<StampModificationType>();	
 		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();						
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 		
 		for(Person person : activePersonsInDay){
-			//JPAPlugin.closeTx(false);
-			//JPAPlugin.startTx(false);
-			Logger.debug("Person: %s %s", person.name, person.surname); 
+		
 			PersonDay personDay = null;
 			person = PersonDao.getPersonById(person.id);
 			Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(person, dayPresence); 
-			//PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.date = ? and pd.person = ?", dayPresence, person).first();
+			
 			if(!pd.isPresent()){
 				personDay = new PersonDay(person, dayPresence);
 				personDay.create();
@@ -477,12 +350,9 @@ public class Stampings extends Controller {
 			
 		}
 
-		
-		
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);
 		
 		render(daysRecap, year, month, day, numberOfInOut, month_capitalized);
-		//JPAPlugin.closeTx(false);
 	}
 
 	
@@ -501,9 +371,6 @@ public class Stampings extends Controller {
 
 		List<Person> activePersons = simpleResults.paginated(page).getResults();
 		
-		//List<Person> activePersons = PersonDao.list(Optional.fromNullable(name), Sets.newHashSet(Security.getOfficeAllowed()), 
-		//		false, beginMonth, endMonth).list();
-		
 		Builder<Person, LocalDate, String> builder = ImmutableTable.<Person, LocalDate, String>builder().orderColumnsBy(new Comparator<LocalDate>() {
 
 			public int compare(LocalDate date1, LocalDate date2) {
@@ -516,12 +383,11 @@ public class Stampings extends Controller {
 			}
 
 		});
+		
 		for(Person p : activePersons)
 		{
 			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), true);
-//			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
-//					p, beginMonth, beginMonth.dayOfMonth().withMaximumValue()).fetch();
-			Logger.debug("La lista dei personDay: ", pdList);
+
 			for(PersonDay pd : pdList){
 				if(pd.isTicketForcedByAdmin) {
 					
