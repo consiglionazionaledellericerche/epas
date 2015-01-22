@@ -1,20 +1,20 @@
 package controllers;
 
 
+import it.cnr.iit.epas.JsonStampingBinder;
+
 import javax.inject.Inject;
 
-import controllers.Resecure.BasicAuth;
-import dao.OfficeDao;
-import it.cnr.iit.epas.JsonStampingBinder;
 import manager.StampingManager;
 import models.Office;
-import models.Person;
 import models.User;
 import models.exports.StampingFromClient;
 import play.data.binding.As;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
+import controllers.Resecure.BasicAuth;
+import dao.OfficeDao;
 
 
 @With( {Resecure.class, RequestInit.class} )

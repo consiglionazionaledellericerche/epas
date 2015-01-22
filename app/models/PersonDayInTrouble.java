@@ -10,8 +10,6 @@ import models.base.BaseModel;
 
 import org.hibernate.envers.NotAudited;
 
-import play.Logger;
-
 
 @Entity
 @Table(name="person_days_in_trouble")

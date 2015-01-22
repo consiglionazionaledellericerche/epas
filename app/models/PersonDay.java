@@ -5,10 +5,8 @@ package models;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -19,36 +17,21 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
-import javax.persistence.Query;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
-import manager.ConfGeneralManager;
-import manager.ConfYearManager;
-import manager.PersonDayInTroubleManager;
 import manager.PersonManager;
-import manager.WorkingTimeTypeManager;
-import models.Stamping.WayType;
 import models.base.BaseModel;
-import models.enumerate.JustifiedTimeAtWork;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
-import org.joda.time.DateTimeFieldType;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 
-import com.google.common.base.Optional;
-
-import dao.ContractDao;
-import dao.PersonDayDao;
-import dao.StampingDao;
-import dao.WorkingTimeTypeDao;
-import play.Logger;
 import play.data.validation.Required;
-import play.db.jpa.JPA;
+import dao.ContractDao;
+import dao.WorkingTimeTypeDao;
 
 
 /**

@@ -1,7 +1,5 @@
 package models;
 
-import java.util.List;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -13,13 +11,11 @@ import models.base.BaseModel;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
+import play.data.validation.Required;
+
 import com.google.common.base.Optional;
 
-import dao.AbsenceDao;
-import dao.CompetenceDao;
 import dao.PersonMonthRecapDao;
-import play.Logger;
-import play.data.validation.Required;
 
 
 /**

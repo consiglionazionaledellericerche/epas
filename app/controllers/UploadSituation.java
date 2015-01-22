@@ -21,19 +21,18 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.joda.time.LocalDate;
-
 import manager.ConfGeneralManager;
 import models.Absence;
 import models.CertificatedData;
 import models.Competence;
-import models.ConfGeneral;
 import models.Office;
 import models.Person;
-import models.PersonDay;
 import models.PersonMonthRecap;
 import models.User;
 import models.enumerate.ConfigurationFields;
+
+import org.joda.time.LocalDate;
+
 import play.Logger;
 import play.cache.Cache;
 import play.mvc.Controller;
@@ -134,8 +133,6 @@ public class UploadSituation extends Controller{
 			out.newLine();
 			for(Person p : personList){
 
-				PersonMonthRecap pm = new PersonMonthRecap(p, year, month);
-				//absenceList = pm.getAbsencesNotInternalUseInMonth();
 				absenceList = AbsenceDao.getAbsencesNotInternalUseInMonth(p, year, month);
 				for(Absence abs : absenceList){
 					out.write(p.number.toString());
@@ -243,7 +240,7 @@ public class UploadSituation extends Controller{
 		}
 		
 		//final List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
-		final List<Person> activePersons = PersonDao.list(Optional.<String>absent(), new HashSet(Security.getOfficeAllowed()), false, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
+		final List<Person> activePersons = PersonDao.list(Optional.<String>absent(), new HashSet<Office>(Security.getOfficeAllowed()), false, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
 		
 		final Set<Dipendente> activeDipendenti = FluentIterable.from(activePersons).transform(new Function<Person, Dipendente>() {
 			@Override
@@ -406,15 +403,13 @@ public class UploadSituation extends Controller{
 	private static List<RispostaElaboraDati> elaboraDatiDipendenti(Map<String, String> cookies, Set<Dipendente> dipendenti, int year, int month) throws MalformedURLException, URISyntaxException {
 		List<RispostaElaboraDati> checks = Lists.newLinkedList();
 		Person person = null;
-		PersonMonthRecap pm = null;
+
 		for (Dipendente dipendente : dipendenti) {
+
 			person = PersonDao.getPersonByNumber(Integer.parseInt(dipendente.getMatricola()));
-			//person = Person.findByNumber(Integer.parseInt(dipendente.getMatricola()));
-			pm = new PersonMonthRecap(person, year, month);
-			
+						
 			List<PersonMonthRecap> pmList = PersonMonthRecapDao.getPersonMonthRecapInYearOrWithMoreDetails(person, year, Optional.fromNullable(month), Optional.<Boolean>absent());
-			//List<PersonMonthRecap> pmList = PersonMonthRecap.find("Select pm from PersonMonthRecap pm where pm.person = ? and pm.month = ? and pm.year = ?",
-			//person, month, year).fetch();
+
 			//Numero di buoni mensa da passare alla procedura di invio attestati
 			Integer mealTicket = PersonUtility.numberOfMealTicketToUse(person, year, month);
 			
@@ -425,9 +420,7 @@ public class UploadSituation extends Controller{
 			
 			RispostaElaboraDati rispostaElaboraDati = AttestatiClient.elaboraDatiDipendente(
 					cookies, dipendente, year, month, 
-					//pm.getAbsencesNotInternalUseInMonth(),
 					AbsenceDao.getAbsencesNotInternalUseInMonth(person, year, month),
-					//pm.getCompetenceInMonthForUploadSituation(),
 					CompetenceDao.getCompetenceInMonthForUploadSituation(person, year, month),
 					pmList, mealTicket);
 			if(rispostaElaboraDati.isOk()){
@@ -509,7 +502,7 @@ public class UploadSituation extends Controller{
 	{
 		//final List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
 		final List<Person> activePersons = 
-				PersonDao.list(Optional.<String>absent(), new HashSet(Security.getOfficeAllowed()), false, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
+				PersonDao.list(Optional.<String>absent(), new HashSet<Office>(Security.getOfficeAllowed()), false, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
 		
 		final Set<Dipendente> activeDipendenti = FluentIterable.from(activePersons).transform(new Function<Person, Dipendente>() {
 			@Override

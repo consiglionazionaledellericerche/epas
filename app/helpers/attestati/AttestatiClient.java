@@ -17,7 +17,6 @@ import java.util.Map;
 import manager.ConfGeneralManager;
 import models.Absence;
 import models.Competence;
-import models.ConfGeneral;
 import models.Office;
 import models.PersonMonthRecap;
 
