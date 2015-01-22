@@ -617,7 +617,10 @@ public class Competences extends Controller{
 		List<CompetenceCode> codeList = Lists.newArrayList();
 		codeList.add(CompetenceCodeDao.getCompetenceCodeByCode("S1"));
 		for(Person p : personList){
-			Long totale = CompetenceDao.valueOvertimeApprovedByMonthAndYear(year, Optional.<Integer>absent(), Optional.fromNullable(p), codeList).longValue();
+			Long totale = null;
+			Optional<Integer> result = CompetenceDao.valueOvertimeApprovedByMonthAndYear(year, Optional.<Integer>absent(), Optional.fromNullable(p), codeList);
+			if(result.isPresent())
+				totale = result.get().longValue();
 //			Long totale = Competence.find("Select sum(comp.valueApproved) from Competence comp, CompetenceCode code " +
 //					"where comp.person = ?" +
 //					"and comp.year = ? " +

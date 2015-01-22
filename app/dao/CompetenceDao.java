@@ -78,7 +78,7 @@ public class CompetenceDao {
 	 * @return sulla base dei parametri passati alla funzione ritorna la quantità di ore approvate di straordinario
 	 * (sommando i codici S1 S2 e S3) 
 	 */
-	public static Integer valueOvertimeApprovedByMonthAndYear(Integer year, Optional<Integer> month, Optional<Person> person, 
+	public static Optional<Integer> valueOvertimeApprovedByMonthAndYear(Integer year, Optional<Integer> month, Optional<Person> person, 
 			List<CompetenceCode> codeList){
 		QCompetence competence = QCompetence.competence;
 		final BooleanBuilder condition = new BooleanBuilder();
@@ -88,7 +88,7 @@ public class CompetenceDao {
 			condition.and(competence.person.eq(person.get()));
 		final JPQLQuery query = ModelQuery.queryFactory().from(competence)
 				.where(condition.and(competence.year.eq(year).and(competence.competenceCode.in(codeList))));
-		return query.singleResult(competence.valueApproved.sum());
+		return Optional.fromNullable(query.singleResult(competence.valueApproved.sum()));
 		
 	}
 	
