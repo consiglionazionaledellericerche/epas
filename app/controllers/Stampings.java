@@ -245,9 +245,8 @@ public class Stampings extends Controller {
 		personDay.stampings.add(stamp);
 		personDay.save();
 			
-		PersonDayManager.populatePersonDay(personDay);
-		PersonDayManager.updatePersonDaysInMonth(personDay);
-		
+		PersonDayManager.updatePersonDaysFromDate(person, personDay.date);
+				
 		flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
 
 		Stampings.personStamping(personId, year, month);
@@ -287,8 +286,7 @@ public class Stampings extends Controller {
 			stamping.delete();
 			pd.stampings.remove(stamping);
 
-			PersonDayManager.populatePersonDay(pd);
-			PersonDayManager.updatePersonDaysInMonth(pd);
+			PersonDayManager.updatePersonDaysFromDate(pd.person, pd.date);
 	
 			flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(stamping.date.toLocalDate()));	
 
@@ -339,8 +337,8 @@ public class Stampings extends Controller {
 			
 			stamping.save();
 		
-			PersonDayManager.populatePersonDay(pd);
-			PersonDayManager.updatePersonDaysInMonth(pd);
+			PersonDayManager.updatePersonDaysFromDate(pd.person, pd.date);
+			
 			flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name);
 
 		}
@@ -389,9 +387,9 @@ public class Stampings extends Controller {
 		LocalDate monthEnd = new LocalDate().withYear(year).withMonthOfYear(month).dayOfMonth().withMaximumValue();
 
 		//lista delle persone che sono state attive nel mese
-		//TODO usare PersonDao
-		//List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
-		List<Person> activePersons = PersonDao.list(Optional.<String>absent(), new HashSet(Security.getOfficeAllowed()), false, monthBegin, monthEnd, true).list();
+		List<Person> activePersons = 
+				PersonDao.list(Optional.<String>absent(), new HashSet<Office>(Security.getOfficeAllowed()), 
+						false, monthBegin, monthEnd, true).list();
 
 		List<PersonTroublesInMonthRecap> missingStampings = new ArrayList<PersonTroublesInMonthRecap>();
 		

@@ -1,41 +1,36 @@
 package manager;
 
-import it.cnr.iit.epas.DateInterval;
-import it.cnr.iit.epas.DateUtility;
-import it.cnr.iit.epas.PersonUtility;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.persistence.Query;
-
-import org.joda.time.DateTimeFieldType;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-
-import com.google.common.base.Optional;
-
-import dao.AbsenceDao;
-import dao.ContractDao;
-import dao.PersonDayDao;
-import dao.StampingDao;
-import dao.WorkingTimeTypeDao;
 import models.Absence;
 import models.AbsenceType;
-import models.Contract;
-import models.ContractStampProfile;
+import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
 import models.StampModificationType;
 import models.StampModificationTypeCode;
 import models.StampModificationTypeValue;
 import models.Stamping;
-import models.WorkingTimeTypeDay;
 import models.Stamping.WayType;
+import models.WorkingTimeTypeDay;
 import models.enumerate.JustifiedTimeAtWork;
+
+import org.joda.time.DateTimeFieldType;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+
 import play.Logger;
-import play.db.jpa.JPA;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+
+import dao.AbsenceDao;
+import dao.ContractDao;
+import dao.PersonDayDao;
+import dao.StampingDao;
+import dao.WorkingTimeTypeDao;
 
 public class PersonDayManager {
 
@@ -538,8 +533,6 @@ public class PersonDayManager {
 		return lastPreviousPersonDayInMonth;
 	}
 
-	
-	
 
 	/**
 	 * (1) Controlla che il personDay sia ben formato (altrimenti lo inserisce nella tabella PersonDayInTrouble.
@@ -608,19 +601,31 @@ public class PersonDayManager {
 		pd.save();
 		
 	}	
-
-	/**
-	 * Metodo da utilizzare per la modifica del personDay che impatta su tutto il mese
+	
+	/** 
+	 * Aggiorna tutti i personday a partire dalla data specificata fino al giorno corrente
+	 * @param person
+	 * @param date
 	 */
-	public static void updatePersonDaysInMonth(PersonDay pd)
-	{
-		//TODO renderlo statico
-		PersonUtility.updatePersonDaysIntoInterval(pd.person, pd.date, pd.date);
-		//TODO: inserire qui una chiamata alla fixPersonSituation di Administration quando le modifiche dovranno ripercuotersi anche 
-		//sui personMonth
+	public static void updatePersonDaysFromDate(Person person, LocalDate date){
+		
+		Preconditions.checkNotNull(person);
+		Preconditions.checkState(person.isPersistent());
+		Preconditions.checkNotNull(date);
+		
+		//Verifico se la data è passata, in caso contrario non è necessario ricalcolare nulla
+		if(date.isAfter(LocalDate.now())){
+			return;
+		}
+		
+		//Prendo la lista ordinata di tutti i personday della persona fino ad oggi e effettuo il ricalcolo su tutti
+		List<PersonDay> personDays = PersonDayDao.getPersonDayInPeriod(person, date, Optional.fromNullable(LocalDate.now()), true);
+
+		for(PersonDay pd : personDays){
+			PersonDayManager.populatePersonDay(pd);
+		}
 	}
 
-	
 	/**
 	 * Stessa logica di populatePersonDay ma senza persistere i calcoli (usato per il giorno di oggi)
 	 */
