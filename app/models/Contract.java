@@ -50,7 +50,7 @@ public class Contract extends BaseModel {
 	
 	private static final long serialVersionUID = -4472102414284745470L;
 
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="source_date")
 	public LocalDate sourceDate = null;
 	
@@ -84,16 +84,16 @@ public class Contract extends BaseModel {
 	public List<ContractYearRecap> recapPeriods;
 
 	@Required @NotNull
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="begin_contract")
 	public LocalDate beginContract;
 
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="expire_contract")
 	public LocalDate expireContract;
 
 	//data di termine contratto in casi di licenziamento, pensione, morte, ecc ecc...
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="end_contract")
 	public LocalDate endContract;
 	

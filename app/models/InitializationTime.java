@@ -28,7 +28,7 @@ public class InitializationTime extends BaseModel{
 	public Person person;
 	
 	@Required
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate date;	
 	
 	@Column

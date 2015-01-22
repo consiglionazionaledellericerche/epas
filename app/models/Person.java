@@ -70,7 +70,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 	public String othersSurnames;
 
 	@Column(name = "birthday")
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate birthday;
 	
 	@Column(name = "born_date")

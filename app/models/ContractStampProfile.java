@@ -21,11 +21,11 @@ public class ContractStampProfile extends BaseModel{
 	public boolean fixedworkingtime;
 	
 	@Column(name="start_from")
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate startFrom;
 	
 	@Column(name="end_to")
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate endTo;
 	
 	@ManyToOne

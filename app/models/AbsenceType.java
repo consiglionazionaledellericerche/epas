@@ -58,11 +58,11 @@ public class AbsenceType extends BaseModel {
 	
 	public String description;
 	
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name = "valid_from")
 	public LocalDate validFrom;
 	
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name = "valid_to")
 	public LocalDate validTo;
 	

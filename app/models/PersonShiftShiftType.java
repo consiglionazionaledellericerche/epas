@@ -37,11 +37,11 @@ public class PersonShiftShiftType extends BaseModel {
 	@JoinColumn(name="shifttypes_id")
 	public ShiftType shiftType;
 	
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="begin_date")
 	public LocalDate beginDate;
 	
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="end_date")
 	public LocalDate endDate;
 }

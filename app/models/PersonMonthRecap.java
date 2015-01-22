@@ -39,10 +39,10 @@ public class PersonMonthRecap extends BaseModel {
 	
 	public Integer month;
 	
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate fromDate;
 	
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate toDate;
 
 	@Column(name="training_hours")
