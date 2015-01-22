@@ -93,6 +93,7 @@ public class VacationsRecap {
 			//il riepilogo non dovrebbe modificare il db
 			if(vacationPeriodList==null || vacationPeriodList.isEmpty()) {
 				ContractManager.properContractUpdate(vr.activeContract);
+				vacationPeriodList = vr.activeContract.getContractVacationPeriods();
 			}
 			Verify.verify(vacationPeriodList!=null && !vacationPeriodList.isEmpty(), "Nessun piano ferie presente per il contratto!");
 			
