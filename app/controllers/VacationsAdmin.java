@@ -11,7 +11,6 @@ import manager.ConfYearManager;
 import models.Contract;
 import models.Office;
 import models.Person;
-import models.VacationCode;
 import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
@@ -25,7 +24,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 
 import dao.PersonDao;
-import dao.VacationCodeDao;
 
 @With( {Secure.class, RequestInit.class} )
 public class VacationsAdmin extends Controller{
@@ -168,65 +166,5 @@ public class VacationsAdmin extends Controller{
     	//rendering
     	renderTemplate("Vacations/permissionCurrentYear.html", vacationsRecap);
 	}
-
-	@Check(Security.INSERT_AND_UPDATE_VACATIONS)
-	public static void manageVacationCode(){
-		
-		List<VacationCode> vacationCodeList = VacationCodeDao.getAllVacationCodes();
-		//List<VacationCode> vacationCodeList = VacationCode.findAll();
-		renderArgs.put("year", session.get("yearSelected"));
-		render(vacationCodeList);
-	}
-	
-	@Check(Security.INSERT_AND_UPDATE_VACATIONS)
-	public static void edit(Long vacationCodeId){
-		VacationCode vc = VacationCodeDao.getVacationCodeById(vacationCodeId);
-		//VacationCode vc = VacationCode.findById(vacationCodeId);
-		render(vc);
-	}
-	
-	@Check(Security.INSERT_AND_UPDATE_VACATIONS)
-	public static void save(){
-		VacationCode vacationCode = new VacationCode();
-		vacationCode.description = params.get("nome");
-		vacationCode.vacationDays = params.get("giorniFerie", Integer.class);
-		vacationCode.permissionDays = params.get("giorniPermesso", Integer.class);
-		VacationCode vc = VacationCodeDao.getVacationCodeByDescription(params.get("nome"));
-		//VacationCode vc = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", params.get("nome")).first();
-		if(vc == null){
-			vacationCode.save();
-			flash.success(String.format("Inserito nuovo piano ferie con nome %s", vacationCode.description));
-			VacationsAdmin.manageVacationCode();
-		}
-		else{
-			flash.error(String.format("Esiste già un piano ferie con nome: %s. Cambiare il nome.", params.get("nome")));
-			VacationsAdmin.manageVacationCode();
-		}
-	}
-	
-	@Check(Security.INSERT_AND_UPDATE_VACATIONS)
-	public static void update(){
-		Long vacationCodeId = params.get("vacationCodeId", Long.class);
-		VacationCode code = VacationCodeDao.getVacationCodeById(vacationCodeId);
-		//VacationCode code = VacationCode.findById(vacationCodeId);
-		code.description = params.get("nome");
-		code.vacationDays = params.get("giorniFerie", Integer.class);
-		code.permissionDays = params.get("giorniPermesso", Integer.class);
-		code.save();
-		flash.success("Aggiornato valore del piano ferie %s", code.description);
-		VacationsAdmin.manageVacationCode();
-	}
-	
-	@Check(Security.INSERT_AND_UPDATE_VACATIONS)
-	public static void insertVacationCode(){
-		VacationCode vacationCode = new VacationCode();
-		render(vacationCode);
-	}
-	
-	@Check(Security.INSERT_AND_UPDATE_VACATIONS)
-	public static void discard(){
-		manageVacationCode();
-	}
-	
 	
 }

@@ -6,7 +6,6 @@ import javax.persistence.Query;
 
 import manager.ConfGeneralManager;
 import manager.PersonManager;
-import models.ConfGeneral;
 import models.Person;
 import models.PersonDay;
 import models.enumerate.ConfigurationFields;
@@ -18,7 +17,7 @@ import org.joda.time.LocalDate;
 import play.Logger;
 import play.Play;
 import play.db.jpa.JPA;
-import play.jobs.*;
+import play.jobs.Job;
 
 //@On("0 0 7 1 * ?")
 //@On("0 /5 * * * ?")
