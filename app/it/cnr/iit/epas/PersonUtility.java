@@ -17,7 +17,6 @@ import models.Absence;
 import models.AbsenceType;
 import models.Competence;
 import models.CompetenceCode;
-import models.ConfGeneral;
 import models.Contract;
 import models.Office;
 import models.Person;
@@ -916,31 +915,6 @@ public class PersonUtility {
 		}
 
 	}
-	
-
-	/** 
-	 * Aggiorna tutti i personday a partire dalla data specificata fino al giorno corrente
-	 * @param person
-	 * @param date
-	 */
-	public static void updatePersonDaysFromDate(Person person, LocalDate date){
-		
-		Preconditions.checkNotNull(person);
-		Preconditions.checkState(person.isPersistent());
-		Preconditions.checkNotNull(date);
-		
-//		Verifico se la data è passata, in caso contrario non è necessario ricalcolare nulla
-		if(date.isAfter(LocalDate.now())){
-			return;
-		}
-// 		Prendo la lista ordinata di tutti i personday della persona fino ad oggi e effettuo il ricalcolo su tutti
-		List<PersonDay> personDays = PersonDayDao.getPersonDayInPeriod(person, date, Optional.fromNullable(LocalDate.now()), true);
-
-		for(PersonDay pd : personDays){
-			PersonDayManager.populatePersonDay(pd);
-		}
-	}
-
 
 	/**
 	 * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
