@@ -1,4 +1,4 @@
-#{list items:contractMonths, as:'mese'} 
+#{list items:psDto.contractMonths, as:'mese'} 
 <div class="panel-group" id="accordion_meal">
   <div class="panel panel-info">
     <div class="panel-heading">
@@ -10,8 +10,8 @@
     </div>
     <div id="meal" class="panel-collapse collapse in">
       <div class="panel-body">
-   	   Il numero di buoni mensa usabili per questo mese è <strong>${numberOfMealTicketToUse}</strong> <br>
-       Il numero di buoni mensa da restituire per questo mese è <strong>${numberOfMealTicketToRender}</strong> <br>
+   	   Il numero di buoni mensa usabili per questo mese è <strong>${psDto.numberOfMealTicketToUse}</strong> <br>
+       Il numero di buoni mensa da restituire per questo mese è <strong>${psDto.numberOfMealTicketToRender}</strong> <br>
    	   <table class="table table-bordered table-condensed">
 
 	      <tr>
@@ -32,7 +32,7 @@
 		  </tr>	
 	    </table>
 	   
-	  #{if !stampModificationTypeList.isEmpty() }
+	  #{if !psDto.stampModificationTypeList.isEmpty() }
       <table class="table table-condensed table-bordered">
 		<tr>
 			<th width="80">Codice</th>
@@ -73,14 +73,14 @@
     <div id="notes" class="panel-collapse collapse out">
       <div class="panel-body">
  
- 	  #{if !stampModificationTypeList.isEmpty() }
+ 	  #{if !psDto.stampModificationTypeList.isEmpty() }
       <table class="table table-condensed table-bordered">
 		<tr>
 			<th width="80">Codice</th>
 			<th width="400">Descrizione</th>
 				
 		</tr>
-		#{list items:stampModificationTypeList, as:'smt'}
+		#{list items:psDto.stampModificationTypeList, as:'smt'}
 		  <tr>
 			<td>${smt.code}</td>     
 			<td>${smt.description}</td>		
@@ -119,7 +119,7 @@
 		    <th width="200">Descrizione</th>
 		    <th width="80">Numero giorni</th>
 		  </tr>
-		  #{list items:absenceCodeMap.entrySet(), as:'entry'}
+		  #{list items:psDto.absenceCodeMap.entrySet(), as:'entry'}
 		  <tr>
 		    <td>${entry.getKey().code}</td>     
 		    <td>${entry.getKey().description}</td>	

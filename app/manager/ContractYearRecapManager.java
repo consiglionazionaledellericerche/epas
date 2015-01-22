@@ -10,17 +10,17 @@ import manager.recaps.PersonResidualMonthRecap;
 import manager.recaps.PersonResidualYearRecap;
 import models.Absence;
 import models.AbsenceType;
-import models.ConfGeneral;
 import models.Contract;
 import models.ContractYearRecap;
 import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
 
+import play.Logger;
+
 import com.google.common.base.Optional;
 
 import dao.AbsenceTypeDao;
-import play.Logger;
 
 /**
  * 

@@ -2,17 +2,11 @@ package manager.response;
 
 import java.util.List;
 
-import manager.response.AbsencesResponse.toDate;
-
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-
-import controllers.Wizard.WizardStep;
 
 public class AbsenceInsertReport {
 	
