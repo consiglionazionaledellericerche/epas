@@ -6,7 +6,6 @@ import it.cnr.iit.epas.DateInterval;
 import java.util.List;
 
 import manager.ConfGeneralManager;
-import models.ConfGeneral;
 import models.Contract;
 import models.MealTicket;
 import models.Office;

@@ -14,13 +14,6 @@ import com.google.common.base.Optional;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 
-import com.mysema.query.types.Expression;
-
-import models.Person;
-import models.PersonDay;
-import models.query.QAbsenceType;
-import models.query.QPersonDay;
-
 
 /**
  * 

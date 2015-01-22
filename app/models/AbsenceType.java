@@ -28,9 +28,6 @@ import org.joda.time.LocalDate;
 import play.data.validation.Required;
 
 import com.google.common.collect.Sets;
-
-import dao.AbsenceTypeDao;
-import dao.QualificationDao;
 /**
  * 
  * @author dario
