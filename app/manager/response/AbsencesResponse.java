@@ -1,7 +1,5 @@
 package manager.response;
 
-import models.Absence;
-
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Function;

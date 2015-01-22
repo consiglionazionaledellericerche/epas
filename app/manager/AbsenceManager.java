@@ -1,20 +1,16 @@
 package manager;
 
-import it.cnr.iit.epas.CheckAbsenceInsert;
 import it.cnr.iit.epas.CheckMessage;
 import it.cnr.iit.epas.PersonUtility;
 
 import java.util.List;
 
-import javax.persistence.Query;
-
 import manager.recaps.PersonResidualMonthRecap;
 import manager.recaps.PersonResidualYearRecap;
-import manager.response.AbsencesResponse;
 import manager.response.AbsenceInsertReport;
+import manager.response.AbsencesResponse;
 import models.Absence;
 import models.AbsenceType;
-import models.ConfYear;
 import models.Contract;
 import models.Person;
 import models.PersonDay;
@@ -27,26 +23,19 @@ import models.rendering.VacationsRecap;
 
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.MultiPartEmail;
-import org.joda.time.Interval;
 import org.joda.time.LocalDate;
-import org.joda.time.Period;
+
+import play.Logger;
+import play.db.jpa.Blob;
+import play.libs.Mail;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Range;
 
-import play.Logger;
-import play.db.jpa.Blob;
-import play.db.jpa.JPA;
-import play.libs.Mail;
-import controllers.Stampings;
-import controllers.Wizard.WizardStep;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.ContractDao;
@@ -54,12 +43,7 @@ import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.PersonReperibilityDayDao;
 import dao.PersonShiftDayDao;
-
-
-
-import dao.AbsenceTypeDao;
 import dao.WorkingTimeTypeDao;
-import play.Logger;
 
 
 /**
@@ -274,7 +258,7 @@ public class AbsenceManager {
 				actualDate = actualDate.plusDays(1);
 				continue;
 			}
-//			TODO Inserire i codici di assenza necessari nell'AbsenceTypeMapping
+			//TODO Inserire i codici di assenza necessari nell'AbsenceTypeMapping
 			if((absenceType.code.startsWith("12") || absenceType.code.startsWith("13")) && absenceType.code.length() == 3){
 				air.add(handlerChildIllness(person, actualDate, absenceType, file));
 				actualDate = actualDate.plusDays(1);
@@ -291,10 +275,12 @@ public class AbsenceManager {
 
 			actualDate = actualDate.plusDays(1);
 		}
-//		Al termine dell'inserimento delle assenze aggiorno tutta la situazione dal primo giorno di assenza fino ad oggi
-		PersonUtility.updatePersonDaysFromDate(person, dateFrom);
-//		Se ho inserito una data in un anno precedente a quello attuale effettuo 
-//		il ricalcolo del riepilogo annuale per ogni contratto attivo in quell'anno
+		
+		//Al termine dell'inserimento delle assenze aggiorno tutta la situazione dal primo giorno di assenza fino ad oggi
+		PersonDayManager.updatePersonDaysFromDate(person, dateFrom);
+		
+		//Se ho inserito una data in un anno precedente a quello attuale effettuo 
+		//il ricalcolo del riepilogo annuale per ogni contratto attivo in quell'anno
 		if(dateFrom.getYear() < LocalDate.now().getYear()){
 			for(Contract c : PersonDao.getContractList(person, 
 					dateFrom.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), 
@@ -691,10 +677,11 @@ public class AbsenceManager {
 			actualDate = actualDate.plusDays(1);
 		}
 		
-//		Al termine della cancellazione delle assenze aggiorno tutta la situazione dal primo giorno di assenza fino ad oggi
-		PersonUtility.updatePersonDaysFromDate(person, dateFrom);
-//		Se ho inserito una data in un anno precedente a quello attuale effettuo 
-//		il ricalcolo del riepilogo annuale per ogni contratto attivo in quell'anno
+		//Al termine della cancellazione delle assenze aggiorno tutta la situazione dal primo giorno di assenza fino ad oggi
+		PersonDayManager.updatePersonDaysFromDate(person, dateFrom);
+		
+		//Se ho inserito una data in un anno precedente a quello attuale effettuo 
+		//il ricalcolo del riepilogo annuale per ogni contratto attivo in quell'anno
 		if(dateFrom.getYear() < LocalDate.now().getYear()){
 			for(Contract c : PersonDao.getContractList(person, 
 					dateFrom.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), 

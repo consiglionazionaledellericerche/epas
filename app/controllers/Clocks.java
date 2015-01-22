@@ -10,7 +10,6 @@ import java.util.List;
 
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
-import models.ConfGeneral;
 import models.Office;
 import models.Person;
 import models.PersonDay;
@@ -25,14 +24,15 @@ import models.rendering.PersonStampingDayRecap;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
+import play.Logger;
+import play.mvc.Controller;
+
 import com.google.common.base.Optional;
 
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.UserDao;
-import play.Logger;
-import play.mvc.Controller;
 
 public class Clocks extends Controller{
 
@@ -43,7 +43,7 @@ public class Clocks extends Controller{
 		//List<Office> officeAllowed = Office.findAll();
 		MainMenu mainMenu = new MainMenu(data.getYear(),data.getMonthOfYear());
 		//List<Person> personList = Person.getActivePersonsInMonth(data.getMonthOfYear(), data.getYear(), officeAllowed, false);
-		List<Person> personList = PersonDao.list(Optional.<String>absent(), new HashSet(officeAllowed), false, data, data, true).list();
+		List<Person> personList = PersonDao.list(Optional.<String>absent(), new HashSet<Office>(officeAllowed), false, data, data, true).list();
 		render(data, personList,mainMenu);
 	}
 	
@@ -150,9 +150,8 @@ public class Clocks extends Controller{
 		personDay.stampings.add(stamp);
 		personDay.save();
 		
-		Logger.debug("Faccio i calcoli per %s %s sul personday %s chiamando la populatePersonDay", person.name, person.surname, pd);
-		PersonDayManager.populatePersonDay(personDay);
-		PersonDayManager.updatePersonDaysInMonth(personDay);
+		PersonDayManager.updatePersonDaysFromDate(person, personDay.date);
+		
 		//pd.save();
 		flash.success("Aggiunta timbratura per %s %s", person.name, person.surname);
 		
