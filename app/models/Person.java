@@ -10,7 +10,6 @@ import it.cnr.iit.epas.DateUtility;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -26,19 +25,14 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import manager.WorkingTimeTypeManager;
 import manager.recaps.PersonResidualMonthRecap;
-import models.Stamping.WayType;
 import models.base.BaseModel;
-import models.exports.StampingFromClient;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 
-import play.Logger;
 import play.data.validation.Email;
 import play.data.validation.Required;
 import play.mvc.With;
@@ -48,12 +42,8 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 
 import controllers.Secure;
-import controllers.Security;
 import dao.ContractDao;
-import dao.PersonDao;
-import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
-import dao.QualificationDao;
 
 /**
  * @author cristian

@@ -15,7 +15,7 @@ import manager.ConfGeneralManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
 import models.AbsenceType;
-import models.ConfGeneral;
+import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.StampModificationType;
@@ -25,12 +25,13 @@ import models.rendering.PersonStampingDayRecap;
 
 import org.joda.time.LocalDate;
 
-import com.google.common.base.Optional;
-
-import dao.PersonDao;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
+
+import com.google.common.base.Optional;
+
+import dao.PersonDao;
 
 @With( {Resecure.class, RequestInit.class} )
 public class PrintTags extends Controller{
@@ -110,7 +111,7 @@ public class PrintTags extends Controller{
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		LocalDate date = new LocalDate(year, month,1);
 		//List<Person> personList = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
-		List<Person> personList = PersonDao.list(Optional.<String>absent(), new HashSet(Security.getOfficeAllowed()), false, date, date.dayOfMonth().withMaximumValue(), true).list();
+		List<Person> personList = PersonDao.list(Optional.<String>absent(), new HashSet<Office>(Security.getOfficeAllowed()), false, date, date.dayOfMonth().withMaximumValue(), true).list();
 		render(personList, date, year, month);
 	}
 	

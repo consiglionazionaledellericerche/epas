@@ -2,12 +2,9 @@ package models.rendering;
 
 import java.util.List;
 
-import com.google.common.collect.Lists;
-
-import dao.CompetenceCodeDao;
-import models.Competence;
 import models.CompetenceCode;
 import models.Person;
+import dao.CompetenceCodeDao;
 
 /**
  * 

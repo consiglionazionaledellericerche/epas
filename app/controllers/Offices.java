@@ -6,21 +6,20 @@ import javax.inject.Inject;
 
 import manager.ConfGeneralManager;
 import manager.ConfYearManager;
-import models.ConfGeneral;
-import models.ConfYear;
 import models.Office;
 import models.Role;
 
 import org.joda.time.LocalDate;
+
+import play.mvc.Controller;
+import play.mvc.With;
+import security.SecurityRules;
 
 import com.google.common.base.Optional;
 
 import controllers.Resecure.NoCheck;
 import dao.OfficeDao;
 import dao.RoleDao;
-import play.mvc.Controller;
-import play.mvc.With;
-import security.SecurityRules;
 
 @With( {Resecure.class, RequestInit.class})
 public class Offices extends Controller {

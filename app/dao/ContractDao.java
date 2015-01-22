@@ -1,20 +1,9 @@
 package dao;
 
+import helpers.ModelQuery;
 import it.cnr.iit.epas.DateUtility;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import javax.persistence.Transient;
-
-import org.joda.time.LocalDate;
-
-import helpers.ModelQuery;
-
-import com.google.common.base.Optional;
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.jpa.JPQLQuery;
-import com.sun.org.apache.xml.internal.utils.SuballocatedByteVector;
 
 import models.Contract;
 import models.ContractStampProfile;
@@ -28,7 +17,12 @@ import models.query.QContractStampProfile;
 import models.query.QContractWorkingTimeType;
 import models.query.QInitializationAbsence;
 import models.query.QInitializationTime;
-import models.query.QWorkingTimeType;
+
+import org.joda.time.LocalDate;
+
+import com.google.common.base.Optional;
+import com.mysema.query.BooleanBuilder;
+import com.mysema.query.jpa.JPQLQuery;
 
 /**
  * 

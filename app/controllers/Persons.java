@@ -13,7 +13,6 @@ import javax.inject.Inject;
 import manager.ConfGeneralManager;
 import manager.ContractManager;
 import models.Competence;
-import models.ConfGeneral;
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
