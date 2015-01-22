@@ -34,11 +34,11 @@ public class StampProfile extends BaseModel {
 	@JoinColumn(name="person_id", nullable=false)
 	public Person person;
 	
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="start_from")
 	public LocalDate startFrom;
 	
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="end_to")
 	public LocalDate endTo;
 

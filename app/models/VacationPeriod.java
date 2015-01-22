@@ -34,11 +34,11 @@ public class VacationPeriod extends BaseModel{
 	@JoinColumn(name="contract_id", nullable=false, updatable=false)
 	public Contract contract;
 	
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="begin_from")
 	public LocalDate beginFrom;
 	
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Column(name="end_to")
 	public LocalDate endTo;
 	

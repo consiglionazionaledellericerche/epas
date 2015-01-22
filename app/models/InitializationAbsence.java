@@ -36,7 +36,7 @@ public class InitializationAbsence extends BaseModel{
 	 * data da cui far partire l'inizializzazione giorni
 	 */
 	@Required
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate date;	
 	
 	/**

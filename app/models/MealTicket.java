@@ -39,7 +39,7 @@ public class MealTicket extends BaseModel{
 	public Integer quarter;
 	
 	@Required
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate date;
 	
 	@Required
@@ -56,7 +56,7 @@ public class MealTicket extends BaseModel{
 	
 	@Required
 	@Column(name = "expire_date")
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate expireDate;
 	
 	@Transient 

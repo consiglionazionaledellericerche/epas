@@ -31,7 +31,7 @@ public class PersonChildren extends BaseModel{
 	
 	public String surname;
 	
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate bornDate;
 	
 	@ManyToOne(fetch=FetchType.LAZY)

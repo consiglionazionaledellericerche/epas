@@ -35,7 +35,7 @@ public class PersonReperibilityDay extends BaseModel {
 	public PersonReperibility personReperibility;
 
 	@Required
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate date;
 
 	@Column(name = "holiday_day")

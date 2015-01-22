@@ -26,7 +26,7 @@ public class PersonShiftDay extends BaseModel{
 	public ShiftSlot shiftSlot;
 	
 	// shift date
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate date;
 	
 	@ManyToOne

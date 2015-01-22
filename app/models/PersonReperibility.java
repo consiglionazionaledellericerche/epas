@@ -41,11 +41,11 @@ public class PersonReperibility extends BaseModel {
 	public Person person;
 	
 	@Column(name="start_date")
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate startDate;
 	
 	@Column(name="end_date")
-	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+	//  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate endDate;
 	
 	@Required
