@@ -19,9 +19,6 @@ import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Optional;
-
-import dao.UsersRolesOfficesDao;
 
 @Entity
 @Audited

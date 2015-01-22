@@ -7,24 +7,25 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import manager.ConfYearManager;
+import models.Contract;
+import models.Office;
+import models.Person;
+import models.VacationCode;
+import models.rendering.VacationsRecap;
+
 import org.joda.time.LocalDate;
+
+import play.Logger;
+import play.mvc.Controller;
+import play.mvc.With;
+import security.SecurityRules;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 
 import dao.PersonDao;
 import dao.VacationCodeDao;
-import manager.ConfYearManager;
-import models.ConfYear;
-import models.Contract;
-import models.Office;
-import models.Person;
-import models.VacationCode;
-import models.rendering.VacationsRecap;
-import play.Logger;
-import play.mvc.Controller;
-import play.mvc.With;
-import security.SecurityRules;
 
 @With( {Secure.class, RequestInit.class} )
 public class VacationsAdmin extends Controller{

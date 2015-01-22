@@ -9,13 +9,12 @@ import models.User;
 import org.apache.commons.mail.SimpleEmail;
 import org.joda.time.LocalDate;
 
-import dao.PersonDao;
-import dao.UserDao;
 import play.Logger;
 import play.Play;
-import play.libs.Codec;
 import play.libs.Mail;
 import play.mvc.Controller;
+import dao.PersonDao;
+import dao.UserDao;
 
 public class LostPassword extends Controller{
 	

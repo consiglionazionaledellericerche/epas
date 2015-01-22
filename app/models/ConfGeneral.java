@@ -10,12 +10,6 @@ import javax.persistence.Table;
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
-import org.joda.time.LocalDate;
-
-import com.google.common.base.Optional;
-
-import dao.ConfGeneralDao;
-import play.cache.Cache;
 
 
 
