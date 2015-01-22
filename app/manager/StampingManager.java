@@ -125,6 +125,7 @@ public class StampingManager {
 		return max;
 	}
 	
+
 	/**
 	 * metodo per la creazione di una timbratura a partire dall'oggetto stampModificationType che è stato costruito dal binder del Json
 	 * passato dal client python

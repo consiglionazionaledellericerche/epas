@@ -26,7 +26,6 @@ import models.rendering.PersonTroublesInMonthRecap;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
-import play.Logger;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.mvc.Controller;
@@ -186,14 +185,17 @@ public class Stampings extends Controller {
 		
 		LocalDate date = stamping.date.toLocalDate();
 
-		List<String> hourMinute = timeDivided(stamping);
+		Integer hour = stamping.date.getHourOfDay();
+		Integer minute = stamping.date.getMinuteOfHour();
 		
-		render(stamping, hourMinute, date);				
+		render(stamping, hour, minute, date);				
 	}
 
-	public static void update() {
-		Stamping stamping = StampingDao.getStampingById(params.get("stampingId", Long.class));
-		//Stamping stamping = Stamping.findById(params.get("stampingId", Long.class));
+	public static void update(@Required Long stampingId, String elimina, 
+			Integer stampingHour, Integer stampingMinute,
+			@Required boolean service, String note) {
+		
+		Stamping stamping = StampingDao.getStampingById(stampingId);
 		if (stamping == null) {
 			notFound();
 		}
@@ -203,7 +205,8 @@ public class Stampings extends Controller {
 		PersonDay pd = stamping.personDay;
 		
 		//elimina
-		if( params.get("elimina") != null) {
+		if( elimina != null) {
+			
 			stamping.delete();
 			pd.stampings.remove(stamping);
 
@@ -213,75 +216,42 @@ public class Stampings extends Controller {
 
 			Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
 		}
+
+		if (stampingHour == null || stampingMinute == null) {
 		
-		
-		Integer hour = params.get("stampingHour", Integer.class);
-		Integer minute = params.get("stampingMinute", Integer.class);
-		
-		if(hour != null && minute == null || hour == null && minute != null)
-		{
-			flash.error("Attribuire valore a ciascun campo se si intende modificare la timbratura");
+			flash.error("E' necessario specificare sia il campo ore che minuti. Operazione annullata.");
 			Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
 		}
-		else 
-		{
-			if (hour == null || minute == null) {
-				flash.error("E' necessario specificare sia il campo ore che minuti.");
-				Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
-				
-			}
-			Logger.debug("Ore: %s Minuti: %s", hour, minute);
 
-			stamping.date = stamping.date.withHourOfDay(hour);
-			stamping.date = stamping.date.withMinuteOfHour(minute);
-			String service = params.get("service");
-			if(service.equals("false") && (stamping.stampType == null || !stamping.stampType.identifier.equals("s"))){
-				String note = params.get("note");
-				stamping.note = note;
-			}
-			if(service.equals("true") && (stamping.stampType == null || !stamping.stampType.identifier.equals("s"))){
-				stamping.note = "timbratura di servizio";
-				stamping.stampType = StampingDao.getStampTypeByCode("motiviDiServizio");
-				//stamping.stampType = StampType.find("Select st from StampType st where st.code = ?", "motiviDiServizio").first();
-			}
-			if(service.equals("false") && (stamping.stampType != null)){
-				stamping.stampType = null;
-				stamping.note = "timbratura inserita dall'amministratore";
-			}
-			
-			if(service.equals("true") && (stamping.stampType != null || stamping.stampType.identifier.equals("s"))){
-				String note = params.get("note");
-				stamping.note = note;
-			}
-			
-			stamping.markedByAdmin = true;
-			
-			stamping.save();
+		stamping.date = stamping.date.withHourOfDay(stampingHour);
+		stamping.date = stamping.date.withMinuteOfHour(stampingMinute);
 		
-			PersonDayManager.updatePersonDaysFromDate(pd.person, pd.date);
-			
-			flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name);
-
+		//TODO rivedere questi if se possono essere semplificati  
+		if(service == false && (stamping.stampType == null || !stamping.stampType.identifier.equals("s"))){
+			stamping.note = note;
 		}
+		if(service == true && (stamping.stampType == null || !stamping.stampType.identifier.equals("s"))){
+			stamping.note = "timbratura di servizio";
+			stamping.stampType = StampingDao.getStampTypeByCode("motiviDiServizio");
+		}
+		if(service == false && (stamping.stampType != null)){
+			stamping.stampType = null;
+			stamping.note = "timbratura inserita dall'amministratore";
+		}
+		if(service == true && (stamping.stampType != null || stamping.stampType.identifier.equals("s"))){
+			stamping.note = note;
+		}
+
+		stamping.markedByAdmin = true;
+
+		stamping.save();
+
+		PersonDayManager.updatePersonDaysFromDate(pd.person, pd.date);
+
+		flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name);
+
 		Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
 
-	}
-
-	/**
-	 * 
-	 * @return una lista con due elementi: nella prima posizione c'è l'ora della timbratura in forma di Stringa, nella seconda posizione
-	 * troviamo invece i minuti della timbratura sempre in forma di stringa
-	 */
-	public static List<String> timeDivided (Stamping s){
-		List<String> td = new ArrayList<String>();
-		Integer hour = s.date.getHourOfDay();
-		Integer minute = s.date.getMinuteOfHour();
-		String hours = Integer.toString(hour);
-		String minutes = Integer.toString(minute);
-		td.add(0, hours);
-		td.add(1, minutes);
-
-		return td;
 	}
 
 	/**

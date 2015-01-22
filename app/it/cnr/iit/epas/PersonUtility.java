@@ -44,7 +44,6 @@ import play.db.jpa.JPAPlugin;
 import play.libs.Mail;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 
 import dao.AbsenceDao;
 import dao.CompetenceDao;
