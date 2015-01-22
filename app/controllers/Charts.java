@@ -82,18 +82,17 @@ public class Charts extends Controller{
 		render(poList, year, month, annoList, meseList);
 	}
 
-	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	
 	public static void indexCharts(){
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		render();
 	}
 
-	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	
 	public static void overtimeOnPositiveResidualInYear(Integer year){
 
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		List<Year> annoList = ChartsManager.populateYearList(Security.getUser().get().person.office);
-
 
 		if(params.get("yearChart") == null && year == null){
 			Logger.debug("Params year: %s", params.get("yearChart", Integer.class));
@@ -102,15 +101,13 @@ public class Charts extends Controller{
 		}
 		year = params.get("yearChart", Integer.class);
 		Logger.debug("Anno preso dai params: %d", year);
-		//Nuovo codice per la gestione delle query con queryDSL
+		
 		List<CompetenceCode> codeList = ChartsManager.populateOvertimeCodeList();
 		Long val = null;
 		Optional<Integer> result = CompetenceDao.valueOvertimeApprovedByMonthAndYear(year, Optional.<Integer>absent(), Optional.<Person>absent(), codeList);
 		if(result.isPresent())
 			val = result.get().longValue();
-		//		Long val = Competence.find("Select sum(c.valueApproved) from Competence c where c.competenceCode.code in (?,?,?) and c.year = ?", 
-//				"S1","S2","S3", year).first();
-		//List<Person> personeProva = Person.getActivePersonsinYear(year, Security.getOfficeAllowed(), true);
+
 		List<Person> personeProva = PersonDao.list(Optional.<String>absent(), new HashSet(Security.getOfficeAllowed()), true, new LocalDate(year,1,1), new LocalDate(year,12,31), true).list();
 		int totaleOreResidue = ChartsManager.calculateTotalResidualHour(personeProva, year);
 
@@ -118,7 +115,7 @@ public class Charts extends Controller{
 
 	}
 
-	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	
 	public static void whichAbsenceInYear(Integer year){
 
 		rules.checkIfPermitted(Security.getUser().get().person.office);
@@ -134,7 +131,7 @@ public class Charts extends Controller{
 		year = params.get("yearChart", Integer.class);
 		Logger.debug("Anno preso dai params: %d", year);
 
-		//Codice aggiunto per le queryDSL
+		
 		List<String> absenceCode = Lists.newArrayList();
 		absenceCode.add("92");
 		absenceCode.add("91");
@@ -145,26 +142,18 @@ public class Charts extends Controller{
 		Long riposiCompensativiSize = AbsenceDao.howManyAbsenceInPeriod(beginYear, endYear, "91");
 		Long malattiaSize = AbsenceDao.howManyAbsenceInPeriod(beginYear, endYear, "111");
 		Long altreSize = AbsenceDao.howManyAbsenceInPeriodNotInList(beginYear, endYear, absenceCode);
-//		Long missioniSize = Absence.find("Select count(abs) from Absence abs where abs.personDay.date between ? and ? and abs.absenceType.code = ?", 
-//				new LocalDate(year,1,1), new LocalDate(year,1,1).monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue(), "92").first();
-//		Long riposiCompensativiSize = Absence.find("Select count(abs) from Absence abs where abs.personDay.date between ? and ? and abs.absenceType.code = ?", 
-//				new LocalDate(year,1,1), new LocalDate(year,1,1).monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue(), "91").first();
-//		Long malattiaSize = Absence.find("Select count(abs) from Absence abs where abs.personDay.date between ? and ? and abs.absenceType.code = ?", 
-//				new LocalDate(year,1,1), new LocalDate(year,1,1).monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue(), "111").first();
-//		Long altreSize = Absence.find("Select count(abs) from Absence abs where abs.personDay.date between ? and ? and abs.absenceType.code not in(?,?,?)", 
-//				new LocalDate(year,1,1), new LocalDate(year,1,1).monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue(), "92","91","111").first();
 
 		render(annoList, missioniSize, riposiCompensativiSize, malattiaSize, altreSize);
 
 	}
 
-	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	
 	public static void checkLastYearAbsences(){
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		render();
 	}
 
-	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
+	
 	public static void processLastYearAbsences(Blob file){
 
 		rules.checkIfPermitted(Security.getUser().get().person.office);
@@ -176,9 +165,6 @@ public class Charts extends Controller{
 		render(listTrueFalse, listNull);
 	}
 
-
-
-
 	public static void exportHourAndOvertime(){
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		List<Year> annoList = ChartsManager.populateYearList(Security.getUser().get().person.office);
@@ -186,10 +172,9 @@ public class Charts extends Controller{
 		render(annoList);
 	}
 
-
 	public static void export(Integer year) throws IOException{
 		rules.checkIfPermitted(Security.getUser().get().person.office);
-		//List<Person> personList = Person.getActivePersonsinYear(year, Security.getOfficeAllowed(), true);
+		
 		List<Person> personList = PersonDao.list(Optional.<String>absent(), new HashSet(Security.getOfficeAllowed()), true, new LocalDate(year,1,1), LocalDate.now(), true).list();
 		Logger.debug("Esporto dati per %s persone", personList.size());
 		FileInputStream inputStream = ChartsManager.export(year, personList);
@@ -209,38 +194,10 @@ public class Charts extends Controller{
 
 	public static void exportDataSituation(Long personId) throws IOException{
 		rules.checkIfPermitted(Security.getUser().get().person.office);
-		FileInputStream inputStream = null;
+		
 		Person person = PersonDao.getPersonById(personId);
-		//Person person = Person.findById(personId);
-		File tempFile = File.createTempFile("esportazioneSituazioneFinale"+person.surname,".csv" );
-		inputStream = new FileInputStream( tempFile );
-		FileWriter writer = new FileWriter(tempFile, true);
-		BufferedWriter out = new BufferedWriter(writer);
-
-		out.write("Cognome Nome,Ferie usate anno corrente,Ferie usate anno passato,Permessi usati anno corrente,Residuo anno corrente (minuti), Residuo anno passato (minuti),Riposi compensativi anno corrente");
-		out.newLine();
-		//VacationsRecap vr = new VacationsRecap(person, LocalDate.now().getYear(), person.getContract(LocalDate.now()), LocalDate.now(), false);
-		VacationsRecap vr = VacationsRecap.Factory.build(person, LocalDate.now().getYear(), Optional.<Contract>absent(), LocalDate.now(), false);
-		//PersonResidualYearRecap pryr = PersonResidualYearRecap.factory(person.getContract(LocalDate.now()), LocalDate.now().getYear(), LocalDate.now());
-		PersonResidualYearRecap pryr = PersonResidualYearRecap.factory(ContractDao.getContract(LocalDate.now(), person), LocalDate.now().getYear(), LocalDate.now());
-		PersonResidualMonthRecap prmr = pryr.getMese(LocalDate.now().getMonthOfYear());
-		WorkingTimeType wtt = person.getCurrentWorkingTimeType();
-		int workingTime = wtt.workingTimeTypeDays.get(0).workingTime;
-		out.append(person.surname+' '+person.name+',');
-		out.append(new Integer(vr.vacationDaysCurrentYearUsed.size()).toString()+','+
-				new Integer(vr.vacationDaysLastYearUsed.size()).toString()+','+
-				new Integer(vr.permissionUsed.size()).toString()+','+
-				new Integer(prmr.monteOreAnnoCorrente).toString()+','+
-				new Integer(prmr.monteOreAnnoPassato).toString()+',');
-		int month = LocalDate.now().getMonthOfYear();
-		int riposiCompensativiMinuti = 0;
-		for(int i = 1; i <= month; i++){
-			PersonResidualMonthRecap pm = pryr.getMese(i);
-			riposiCompensativiMinuti+=pm.riposiCompensativiMinuti;
-		}
-		out.append(new Integer(riposiCompensativiMinuti/workingTime).toString());
-
-		out.close();
+		
+		FileInputStream inputStream = ChartsManager.exportDataSituation(person);
 		renderBinary(inputStream, "exportDataSituation"+person.surname+".csv");
 
 	}

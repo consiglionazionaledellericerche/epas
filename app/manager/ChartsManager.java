@@ -24,8 +24,10 @@ import models.ConfGeneral;
 import models.Contract;
 import models.Office;
 import models.Person;
+import models.WorkingTimeType;
 import models.enumerate.ConfigurationFields;
 import models.exports.PersonOvertime;
+import models.rendering.VacationsRecap;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -36,11 +38,12 @@ import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.ConfGeneralDao;
+import dao.ContractDao;
 import dao.PersonDao;
 
 public class ChartsManager {
 	
-	//Classi innestate che servono per la restituzione delle liste di anni e mesi per i grafici
+	/**Classi innestate che servono per la restituzione delle liste di anni e mesi per i grafici**/
 	
 	public final static class Month{
 		private int id;
@@ -63,8 +66,8 @@ public class ChartsManager {
 	}
 	
 	
-	//Classe per la restituzione di un oggetto al controller che contenga le liste per la verifica di quanto trovato all'interno
-	//del file dello schedone
+	/**Classe per la restituzione di un oggetto al controller che contenga le liste per la verifica di quanto trovato all'interno
+	del file dello schedone**/
 	
 	public final static class RenderList{
 		private List<RenderResult> listNull;
@@ -83,7 +86,7 @@ public class ChartsManager {
 		}
 	}
 	
-	//classe privata per la restituzione del risultato relativo al processo di controllo sulle assenze dell'anno passato
+	/**classe privata per la restituzione del risultato relativo al processo di controllo sulle assenze dell'anno passato**/
 	
 	public static class RenderResult{
 		private String line;
@@ -110,7 +113,9 @@ public class ChartsManager {
 		}
 	}
 
-	//Inizio parte di business logic
+	/**Inizio parte di business logic**/
+	
+	
 	/**
 	 * 
 	 * @param office
@@ -192,12 +197,7 @@ public class ChartsManager {
 				Optional<Integer> result = CompetenceDao.valueOvertimeApprovedByMonthAndYear(year, Optional.fromNullable(month), Optional.fromNullable(p), codeList);
 				if (result.isPresent())
 					val = result.get().longValue();
-//				Long val = Competence.find("Select sum(c.valueApproved) from Competence c where c.competenceCode.code in (?,?,?) and c.year = ? and c.month = ? and c.person = ?",
-//						"S1","S2","S3", year, month, p).first();
 
-				//Contract contract = p.getCurrentContract();
-				//CalcoloSituazioneAnnualePersona sit = new CalcoloSituazioneAnnualePersona(contract, year, new LocalDate(year,month,1));
-				//Mese mese = sit.getMese(year,month);
 				po.month = month;
 				po.year = year;
 				po.overtimeHour = val;
@@ -222,7 +222,7 @@ public class ChartsManager {
 		for(Person p : personeProva){
 			if(p.office.equals(Security.getUser().get().person.office)){
 				for(int month=1; month<13;month++){
-					//RTODO contratto attivo??
+					
 					Contract contract = p.getCurrentContract();
 					totaleOreResidue = totaleOreResidue+(PersonResidualMonthRecap.positiveResidualInMonth(p, year, month)/60);
 				}
@@ -270,9 +270,7 @@ public class ChartsManager {
 					}
 					continue;
 				}
-
-				RenderResult renderResult = null;
-				
+				RenderResult renderResult = null;				
 				List<String> tokenList = ChartsManager.splitter(line);
 	
 				try{
@@ -280,10 +278,8 @@ public class ChartsManager {
 					String assenza = removeApice(tokenList.get(indexAssenza));
 					LocalDate dataAssenza = buildDate(tokenList.get(indexDataAssenza));
 					Person p = PersonDao.getPersonByNumber(matricola);
-					//Person p = Person.find("Select p from Person p where p.number = ?", matricola).first();
 					Absence abs = AbsenceDao.getAbsenceInDay(Optional.fromNullable(p), dataAssenza, Optional.<LocalDate>absent(), false).size() > 0 ? AbsenceDao.getAbsenceInDay(Optional.fromNullable(p), dataAssenza, Optional.<LocalDate>absent(), false).get(0) : null;
-					//Absence abs = Absence.find("Select abs from Absence abs where abs.personDay.person = ? and abs.personDay.date = ?", 
-					//		p, dataAssenza).first();
+					
 					if(abs == null){
 						if(!dataAssenza.isBefore(new LocalDate(2013,1,1)))
 							renderResult = new RenderResult(null, matricola, p.name, p.surname, assenza, dataAssenza, false, "nessuna assenza trovata", null);
@@ -318,7 +314,14 @@ public class ChartsManager {
 		return new RenderList(listTrueFalse, listNull);
 	}
 
-	
+	/**
+	 * 
+	 * @param year
+	 * @param personList
+	 * @return il file contenente la situazione di ore in più, ore di straordinario e riposi compensativi per ciascuna persona della lista 
+	 * passata come parametro relativa all'anno year
+	 * @throws IOException
+	 */
 	public static FileInputStream export(Integer year, List<Person> personList) throws IOException{
 		File tempFile = File.createTempFile("straordinari"+year,".csv" );
 		FileInputStream inputStream = new FileInputStream( tempFile );
@@ -355,12 +358,11 @@ public class ChartsManager {
 			out.append(p.surname+' '+p.name+',');
 			String situazione = "";
 			List<Contract> contractList = PersonDao.getContractList(p, beginDate, endDate);
-//			List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ? and ((c.endContract != null and c.endContract between ? and ?) or "
-//					+ "(c.beginContract > ? and (c.expireContract = null or c.expireContract > ?))) order by c.beginContract", p, beginDate, endDate, beginDate, endDate).fetch();
+
 			LocalDate beginContract = null;
 			if(contractList.isEmpty())
 				contractList = p.contracts;
-			//CompetenceCode code = CompetenceCode.find("Select c from CompetenceCode c where c.code = ?", "S1").first();
+			
 			for(Contract contract : contractList){
 				if(beginContract != null && beginContract.equals(contract.beginContract)){
 					Logger.debug("Due contratti uguali nella stessa lista di contratti per %s %s : come è possibile!?!?", p.name, p.surname);
@@ -406,8 +408,47 @@ public class ChartsManager {
 		return inputStream;
 	}
 	
+	/**
+	 * 
+	 * @param person
+	 * @return la situazione in termini di ferie usate anno corrente e passato, permessi usati e residuo per la persona passata come parametro
+	 * @throws IOException
+	 */
+	public static FileInputStream exportDataSituation(Person person) throws IOException{
+		File tempFile = File.createTempFile("esportazioneSituazioneFinale"+person.surname,".csv" );
+		FileInputStream inputStream = new FileInputStream( tempFile );
+		FileWriter writer = new FileWriter(tempFile, true);
+		BufferedWriter out = new BufferedWriter(writer);
+
+		out.write("Cognome Nome,Ferie usate anno corrente,Ferie usate anno passato,Permessi usati anno corrente,Residuo anno corrente (minuti), Residuo anno passato (minuti),Riposi compensativi anno corrente");
+		out.newLine();
+		
+		VacationsRecap vr = VacationsRecap.Factory.build(person, LocalDate.now().getYear(), Optional.<Contract>absent(), LocalDate.now(), false);
+		
+		PersonResidualYearRecap pryr = PersonResidualYearRecap.factory(ContractDao.getContract(LocalDate.now(), person), LocalDate.now().getYear(), LocalDate.now());
+		PersonResidualMonthRecap prmr = pryr.getMese(LocalDate.now().getMonthOfYear());
+		WorkingTimeType wtt = person.getCurrentWorkingTimeType();
+		int workingTime = wtt.workingTimeTypeDays.get(0).workingTime;
+		out.append(person.surname+' '+person.name+',');
+		out.append(new Integer(vr.vacationDaysCurrentYearUsed.size()).toString()+','+
+				new Integer(vr.vacationDaysLastYearUsed.size()).toString()+','+
+				new Integer(vr.permissionUsed.size()).toString()+','+
+				new Integer(prmr.monteOreAnnoCorrente).toString()+','+
+				new Integer(prmr.monteOreAnnoPassato).toString()+',');
+		int month = LocalDate.now().getMonthOfYear();
+		int riposiCompensativiMinuti = 0;
+		for(int i = 1; i <= month; i++){
+			PersonResidualMonthRecap pm = pryr.getMese(i);
+			riposiCompensativiMinuti+=pm.riposiCompensativiMinuti;
+		}
+		out.append(new Integer(riposiCompensativiMinuti/workingTime).toString());
+
+		out.close();
+		return inputStream;
+	}
 	
-	//Metodi privati per il calcolo da utilizzare per la restituzione al controller del dato richiesto
+	
+	/**Metodi privati per il calcolo da utilizzare per la restituzione al controller del dato richiesto**/
 	
 	private static String removeApice(String token)
 	{
@@ -427,7 +468,9 @@ public class ChartsManager {
 		return date;
 	}
 
-	public static List<String> splitter(String line)
+	
+	
+	private static List<String> splitter(String line)
 	{
 		line = removeApice(line);
 		List<String> list = new ArrayList<String>();
@@ -449,6 +492,6 @@ public class ChartsManager {
 		return list;
 	}
 
-
+	/***********************************************************************************************************/
 	
 }
