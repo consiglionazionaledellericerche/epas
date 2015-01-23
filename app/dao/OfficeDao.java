@@ -4,13 +4,18 @@ import java.util.List;
 import java.util.Set;
 
 import helpers.ModelQuery;
+
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Sets;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 
 import controllers.Security;
+import controllers.Wizard.WizardStep;
 import models.Office;
 import models.User;
 import models.UsersRolesOffices;
@@ -110,12 +115,26 @@ public class OfficeDao {
 	public static Set<Office> getOfficeAllowed(Optional<User> user) {
 		
 		User u = user.or(Security.getUser().get());
-
-		return FluentIterable.from(u.usersRolesOffices).transform(new Function<UsersRolesOffices,Office>() {
+		Set<Office> offices = Sets.newHashSet();
+		
+		offices.addAll(FluentIterable.from(u.usersRolesOffices).transform(new Function<UsersRolesOffices,Office>() {
 			@Override
 			public Office apply(UsersRolesOffices uro) {
 				return uro.office;
-		}}).toSet();
+			}}).toSet());
+//     FIXME Capire se è indispensabile restituire solo le sedi
+//			filter(new Predicate<Office>() {
+//	    	    @Override
+//	    	    public boolean apply(Office o) {
+//	    	        return o.isSeat();
+//	    	    }}).toSet();
 		
+//		FIXME non sarebbe meglio avere dei ruoli anche per gli impiegati???
+//		Necessario perchè non esistono userRoleOffice per gli utenti standard
+		
+		if(u.person != null) {
+			offices.add(u.person.office);
+		}
+		return offices;
 	}
 }
