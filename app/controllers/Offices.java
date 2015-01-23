@@ -84,7 +84,7 @@ public class Offices extends Controller {
 			flash.error(message);
 			Offices.showOffices();
 		}
-
+		office = new Office();
 		OfficeManager.saveInstitute(office, area, name, contraction);
 
 		OfficeManager.setPermissionAfterCreation(office);
