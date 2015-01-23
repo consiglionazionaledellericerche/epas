@@ -21,8 +21,6 @@ import models.enumerate.ConfigurationFields;
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-
 import dao.ConfGeneralDao;
 import dao.ConfYearDao;
 import dao.OfficeDao;
