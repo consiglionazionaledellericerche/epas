@@ -19,6 +19,7 @@ import dao.ContractDao;
 import dao.OfficeDao;
 import dao.WorkingTimeTypeDao;
 import manager.ContractManager;
+import manager.OfficeManager;
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Office;
@@ -105,7 +106,7 @@ public class WorkingTimes extends Controller{
 			WorkingTimes.manageWorkingTime(null);
 		}
 		
-		if(!office.isSeat()) {
+		if(!OfficeManager.isSeat(office)) {
 			
 			flash.error("E' possibile definire tipi orario solo a livello sede. Operazione annullata.");
 			WorkingTimes.manageWorkingTime(null);
@@ -142,7 +143,7 @@ public class WorkingTimes extends Controller{
 			WorkingTimes.manageWorkingTime(null);
 		}
 		
-		if(!office.isSeat()) {
+		if(!OfficeManager.isSeat(office)) {
 			
 			flash.error("E' possibile definire tipi orario solo a livello sede. Operazione annullata.");
 			WorkingTimes.manageWorkingTime(null);
