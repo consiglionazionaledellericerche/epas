@@ -352,7 +352,7 @@ public class RequestInit extends Controller {
 			Set<Office> officeList = OfficeDao.getOfficeAllowed(Optional.<User>absent());
 			if(!officeList.isEmpty()) {
 			List<Person> persons = PersonDao.list(Optional.fromNullable(name), 
-					OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, beginMonth, endMonth, true).list();
+					officeList, false, beginMonth, endMonth, true).list();
 			renderArgs.put("navPersons", persons);
 			}
 		} 
