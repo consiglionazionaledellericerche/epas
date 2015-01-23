@@ -83,6 +83,7 @@ public class ChartsManager {
 		}
 		public List<RenderResult> getListTrueFalse(){
 			return this.listTrueFalse;
+			
 		}
 	}
 	
@@ -99,7 +100,7 @@ public class ChartsManager {
 		private String message;
 		private String codiceInAnagrafica;
 
-		private RenderResult(String line, Integer matricola, String nome, String cognome, String codice, LocalDate data, boolean check, String message, String codiceInAnagrafica){
+		public RenderResult(String line, Integer matricola, String nome, String cognome, String codice, LocalDate data, boolean check, String message, String codiceInAnagrafica){
 			this.line = line;
 			this.matricola = matricola;
 			this.nome = nome;
@@ -222,8 +223,6 @@ public class ChartsManager {
 		for(Person p : personeProva){
 			if(p.office.equals(Security.getUser().get().person.office)){
 				for(int month=1; month<13;month++){
-					
-					Contract contract = p.getCurrentContract();
 					totaleOreResidue = totaleOreResidue+(PersonResidualMonthRecap.positiveResidualInMonth(p, year, month)/60);
 				}
 				Logger.debug("Ore in più per %s %s nell'anno %d: %d", p.name, p.surname, year,totaleOreResidue);
@@ -274,7 +273,7 @@ public class ChartsManager {
 				List<String> tokenList = ChartsManager.splitter(line);
 	
 				try{
-					int matricola = Integer.parseInt(ChartsManager.removeApice(tokenList.get(indexMatricola)));
+					int matricola = Integer.parseInt(removeApice(tokenList.get(indexMatricola)));
 					String assenza = removeApice(tokenList.get(indexAssenza));
 					LocalDate dataAssenza = buildDate(tokenList.get(indexDataAssenza));
 					Person p = PersonDao.getPersonByNumber(matricola);
