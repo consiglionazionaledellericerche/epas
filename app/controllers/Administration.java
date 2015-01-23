@@ -37,7 +37,7 @@ import dao.OfficeDao;
 import dao.PersonDao;
 
 
-@With( {Secure.class, RequestInit.class} )
+@With( {Resecure.class, RequestInit.class} )
 public class Administration extends Controller {
 	
 	
@@ -87,13 +87,7 @@ public class Administration extends Controller {
 		renderText("Aggiornati i person day delle persone con timbratura fissa");
 	}
 	
-
-
 	
-
-	@NoCheck
-	//TODO permessi
-
 	public static void utilities(){
 		//List<Person> pdList = Person.getActivePersonsInDay(new LocalDate(), Security.getOfficeAllowed(), false);
 		
@@ -114,8 +108,6 @@ public class Administration extends Controller {
 	 * 
 	 * 
 	 */	
-
-	@NoCheck
 	public static void fixPersonSituation(Long personId, int year, int month){	
 	//TODO permessi
 		PersonUtility.fixPersonSituation(personId, year, month, Security.getUser().get(), false);
