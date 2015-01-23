@@ -80,7 +80,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 	@Email
 	public String email;
 
-	@OneToOne(fetch=FetchType.LAZY)
+	@OneToOne
 	@JoinColumn(name = "user_id")
 	public User user;
 

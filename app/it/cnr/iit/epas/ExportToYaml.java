@@ -2,8 +2,6 @@ package it.cnr.iit.epas;
 
 import java.io.PrintWriter;
 import java.util.List;
-import java.util.Set;
-
 import models.Absence;
 import models.AbsenceType;
 import models.AbsenceTypeGroup;

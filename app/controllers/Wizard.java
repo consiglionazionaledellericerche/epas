@@ -12,7 +12,6 @@ import manager.ConfGeneralManager;
 import manager.ConfYearManager;
 import manager.ContractManager;
 import models.ConfGeneral;
-import models.ConfYear;
 import models.Contract;
 import models.Office;
 import models.Person;
