@@ -5,11 +5,13 @@ import java.util.List;
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
+
 import controllers.Resecure.NoCheck;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.RoleDao;
 import dao.UserDao;
+import manager.OfficeManager;
 import models.Office;
 import models.Person;
 import models.Role;
@@ -62,13 +64,13 @@ public class Administrators extends Controller {
 		}
 		
 		//Per adesso faccio inserire solo alle sedi
-		if( !office.isSeat() ) {
+		if( !OfficeManager.isSeat(office) ) {
 			
 			flash.error("Impossibile assegnare amministratori a livello diverso da quello Sede. Operazione annullata.");
 			Offices.showOffices();
 		}
 		
-		if( !Office.setUroIfImprove(person.user, office, role, true) ) {
+		if( !OfficeManager.setUroIfImprove(person.user, office, role, true) ) {
 		
 			flash.error("La persona dispone già dei permessi associati al ruolo selezionato. Operazione annullata.");
 			Offices.showOffices();
