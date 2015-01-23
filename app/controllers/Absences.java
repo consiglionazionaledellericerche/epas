@@ -1,29 +1,19 @@
 package controllers;
 
 import helpers.ModelQuery.SimpleResults;
-import it.cnr.iit.epas.CheckAbsenceInsert;
-import it.cnr.iit.epas.CheckMessage;
 import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.MainMenu;
-import it.cnr.iit.epas.PersonUtility;
-
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import javax.inject.Inject;
-import javax.persistence.Query;
 import javax.validation.constraints.NotNull;
 
 import manager.AbsenceManager;
@@ -32,50 +22,38 @@ import manager.response.AbsencesResponse;
 import models.Absence;
 import models.AbsenceType;
 import models.AbsenceTypeGroup;
-import models.ConfYear;
 import models.Person;
 import models.PersonDay;
-import models.PersonReperibilityDay;
-import models.PersonShiftDay;
 import models.Qualification;
+import models.User;
+import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
-import models.enumerate.ConfigurationFields;
 import models.enumerate.JustifiedTimeAtWork;
-import models.rendering.VacationsRecap;
-
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.MultiPartEmail;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
 import play.Logger;
-import play.data.validation.InFuture;
+import play.data.validation.Max;
+import play.data.validation.Min;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.db.jpa.Blob;
-import play.db.jpa.JPA;
-import play.libs.Mail;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
-import controllers.Resecure.NoCheck;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 import dao.AbsenceTypeGroupDao;
+import dao.OfficeDao;
 import dao.PersonDao;
-import dao.PersonDayDao;
-import dao.PersonReperibilityDayDao;
-import dao.PersonShiftDayDao;
 import dao.QualificationDao;
 
 
@@ -116,7 +94,6 @@ public class Absences extends Controller{
 		render(dateAbsences, absenceCode);
 	}
 
-	@NoCheck
 	public static void manageAbsenceCode(String name, Integer page){
 		if(page==null)
 			page = 0;
@@ -142,7 +119,7 @@ public class Absences extends Controller{
 	public static void saveAbsenceCode(
 			@Required @Valid AbsenceType absenceType,
 			@Required String jwt,
-			@Required int qual,
+			@Required @Min(1) @Max(10) int qual,
 			AbsenceTypeGroup abtg,
 			String accBehaviour,
 			String accType,
@@ -176,12 +153,13 @@ public class Absences extends Controller{
 		}
 		
 		absenceType.save();
+		Logger.info("Inserito nuovo codice di assenza %s", absenceType.code);
 		flash.success("Inserito nuovo codice di assenza %s", absenceType.code);
 		
 		manageAbsenceCode(null, null);
 	}
 
-	public static void create(@Required Long personId, @Valid @Required LocalDate date) {
+	public static void create(@Required Long personId, @Valid @NotNull LocalDate date) {
 		
 		if (validation.hasErrors()){
     		flash.error(validation.errorsMap().toString());
@@ -193,7 +171,7 @@ public class Absences extends Controller{
 		
 		rules.checkIfPermitted(person.office);
 		
-		Logger.debug("Insert absence called for personId = %s, %s", personId, date);
+		Logger.info("Insert absence called for personId = %s, %s", personId, date);
 		List<AbsenceType> frequentAbsenceTypeList = AbsenceTypeDao.getFrequentTypes();
 		List<AbsenceType> allCodes = AbsenceTypeDao.getAbsenceTypeFromEffectiveDate(date);
 
@@ -201,14 +179,14 @@ public class Absences extends Controller{
 		render(personDay, frequentAbsenceTypeList, allCodes);
 	}
 
-	public static void insert(@Required Long personId, 
-			@Required LocalDate dateFrom,
+	public static void insert(@Required Person person, 
+			@NotNull LocalDate dateFrom,
 			LocalDate dateTo,
 			@Required String absenceCode, 
 			Blob file){
 
 		AbsenceType absenceType = AbsenceTypeDao.getAbsenceTypeByCode(absenceCode);
-		Person person = PersonDao.getPersonById(personId);
+//		Person person = PersonDao.getPersonById(personId);
 		
 		if(person == null){
 			flash.error("id della persona non valido");
@@ -246,7 +224,6 @@ public class Absences extends Controller{
 
 			flash.error(errors.toString());
 		}
-
 
 //		Verifica per eventuali giorni di reperibilità
 		if(air.getAbsenceInReperibilityOrShift() > 0){
@@ -326,6 +303,7 @@ public class Absences extends Controller{
 			absence.absenceTypeGroup = abtg;
 		}
 		absence.save();
+		Logger.info("Modificato codice di assenza %s", absence.code);
 
 		flash.success("Modificato codice di assenza %s", absence.code);
 		Absences.manageAbsenceCode(null, null);
@@ -406,7 +384,8 @@ public class Absences extends Controller{
 		int month = new LocalDate().getMonthOfYear();
 		int year = new LocalDate().getYear();
 		//List<Person> personList = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
-		List<Person> personList = PersonDao.list(Optional.<String>absent(), new HashSet(Security.getOfficeAllowed()), false, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
+		List<Person> personList = PersonDao.list(Optional.<String>absent(), OfficeDao.getOfficeAllowed(Optional.<User>absent())
+				, false, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
 		render(personList);
 	}
 	
@@ -538,62 +517,56 @@ public class Absences extends Controller{
 		render(personAbsenceListWithFile, year, month, person);
 	}	
 	
-	public static void absenceInPeriod(Long personId){
-
-		//List<Person> personList = Person.getActivePersonsInDay(LocalDate.now(),Security.getOfficeAllowed(), false);
-		List<Person> personList = PersonDao.list(Optional.<String>absent(), new HashSet(Security.getOfficeAllowed()), false, LocalDate.now(), LocalDate.now(), true).list();;
-		if(personId == null)
-			personId = Security.getUser().get().person.id;
-		Person person = PersonDao.getPersonById(personId);
-		//Person person = Person.findById(personId);
-		if(person == null){
-			flash.error("Persona inesistente");
-			Stampings.personStamping(Security.getUser().get().person.id, new LocalDate().getYear(), new LocalDate().getMonthOfYear());
+	public static void absenceInPeriod(Person person,
+			LocalDate from,
+			LocalDate to){
+    	
+//		Se la persona non è specificata si usa l'utente attualmente connesso
+		if(!person.isPersistent())
+			person = Security.getUser().get().person;
+//		Se le date non sono specificate imposto il giorno corrente
+		if(from == null || to == null){
+			from = LocalDate.now();
+			to = LocalDate.now();
 		}
-		
+		else if(from.isAfter(to)){
+			render();
+		}
+				
+//      Capita solo se l'utente connesso è l'admin, che però non può accedere a questo controller per via delle drools!
+//		if(person == null){
+//			flash.error("Persona inesistente");
+//			Stampings.personStamping(Security.getUser().get().person.id, new LocalDate().getYear(), new LocalDate().getMonthOfYear());
+//		}
 		
 		rules.checkIfPermitted(person.office);
 		
-		LocalDate dateFrom = null;
-		LocalDate dateTo = null;
-		
-		try {
-			
-			String dataInizio = params.get("dataInizio");
-			String dataFine = params.get("dataFine");
-			dateFrom = new LocalDate(dataInizio);
-			dateTo = new LocalDate(dataFine);
-			
-		} catch (Exception e) {
-			
-			flash.error("Errore nell'inserimento dei parametri. Valorizzare correttamente data inizio e data fine secondo il formato aaaa-mm-dd");
-			render(personId, personList);
-		}
-		personList = PersonDao.list(Optional.<String>absent(), new HashSet(Security.getOfficeAllowed()), false, dateFrom, dateTo, true).list();
+		List<Person> personList = PersonDao.list(Optional.<String>absent(), 
+				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, from, to, true).list();
 		List<Absence> missioni = new ArrayList<Absence>();
 		List<Absence> ferie = new ArrayList<Absence>();
 		List<Absence> riposiCompensativi = new ArrayList<Absence>();
 		List<Absence> altreAssenze = new ArrayList<Absence>();
 		
 		List<Absence> absenceList = AbsenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(person), 
-				Optional.<String>absent(), dateFrom, dateTo, Optional.fromNullable(JustifiedTimeAtWork.AllDay), false, false);
-//		List<Absence> absenceList = Absence.find("Select abs from Absence abs where abs.personDay.person = ? " +
-//				"and abs.personDay.date between ? and ? and abs.absenceType.justifiedTimeAtWork = ?", person, dateFrom, dateTo, JustifiedTimeAtWork.AllDay).fetch();
+				Optional.<String>absent(), from, to, Optional.fromNullable(JustifiedTimeAtWork.AllDay), false, false);
 
 		for(Absence abs : absenceList){
-			if(abs.absenceType.code.equals("92")){
+			if(AbsenceTypeMapping.MISSIONE.is(abs.absenceType)){
 				missioni.add(abs);
 			}
-			else if(abs.absenceType.code.equals("31") || abs.absenceType.code.equals("32") || abs.absenceType.code.equals("94")){
+			else if(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.is(abs.absenceType) ||
+					AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.is(abs.absenceType) || 
+					AbsenceTypeMapping.FESTIVITA_SOPPRESSE.is(abs.absenceType)){
 				ferie.add(abs);
 			}
-			else if(abs.absenceType.code.equals("91")){
+			else if(AbsenceTypeMapping.RIPOSO_COMPENSATIVO.is(abs.absenceType)){
 				riposiCompensativi.add(abs);
 			}
 			else
 				altreAssenze.add(abs);
 		}
-		render(personList, person, absenceList, dateFrom, dateTo, missioni, ferie, riposiCompensativi, altreAssenze, personId);
+		render(personList, person, absenceList, from, to, missioni, ferie, riposiCompensativi, altreAssenze, person.id);
 
 	}
 	

@@ -51,6 +51,7 @@ import com.google.common.collect.Sets;
 
 import dao.AbsenceDao;
 import dao.CompetenceDao;
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonMonthRecapDao;
 
@@ -240,7 +241,8 @@ public class UploadSituation extends Controller{
 		}
 		
 		//final List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
-		final List<Person> activePersons = PersonDao.list(Optional.<String>absent(), new HashSet<Office>(Security.getOfficeAllowed()), false, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
+		final List<Person> activePersons = PersonDao.list(Optional.<String>absent(),
+				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
 		
 		final Set<Dipendente> activeDipendenti = FluentIterable.from(activePersons).transform(new Function<Person, Dipendente>() {
 			@Override
@@ -502,7 +504,8 @@ public class UploadSituation extends Controller{
 	{
 		//final List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
 		final List<Person> activePersons = 
-				PersonDao.list(Optional.<String>absent(), new HashSet<Office>(Security.getOfficeAllowed()), false, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
+				PersonDao.list(Optional.<String>absent(),
+						OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
 		
 		final Set<Dipendente> activeDipendenti = FluentIterable.from(activePersons).transform(new Function<Person, Dipendente>() {
 			@Override

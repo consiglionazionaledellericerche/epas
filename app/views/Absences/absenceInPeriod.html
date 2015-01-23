@@ -19,9 +19,9 @@
   #{form @Absences.absenceInPeriod(), class:'form-inline', role:'form'}
        <div class="form-group">
         <label class="hidden-xs hidden-sm" for="dip">Dipendente </label>
-        <select name="personId" class="form-control" id="dip" >
+        <select name="person.id" class="form-control" id="dip" >
 	        #{list items:personList, as:'personItem'}
-	          <option value="${personItem.id}" #{if personItem.id.equals(personId) } selected="selected" #{/if} >
+	          <option value="${personItem.id}" #{if personItem.id.equals(person.id) } selected="selected" #{/if} >
                 ${personItem.surname} ${personItem.name}
 	          </option>
 			#{/list}
@@ -30,13 +30,13 @@
        
        <div class="form-group">
          <label for="da">Da: </label>
-         <input value="${dateFrom}" class="form-control" type="text" name="dataInizio" 
+         <input value="${from}" class="form-control" type="text" name="from" 
            datepicker id="da"/>
        </div>
        
        <div class="form-group">
          <label for="a">A: </label>
-         <input value="${dateTo}" class="form-control" type="text" name="dataFine" 
+         <input value="${to}" class="form-control" type="text" name="to" 
            datepicker id="a" />
        </div>
        
@@ -50,7 +50,7 @@
   <div class="col-xs-12 col-sm-12 col-md-6">
     <div class="panel panel-info">
       <div class="panel-heading">
-        <h3 class="panel-title text-center">Assenze di ${person.name} ${person.surname} nel periodo ${dateFrom} - ${dateTo}</h3>
+        <h3 class="panel-title text-center">Assenze di ${person.name} ${person.surname} nel periodo ${from} - ${to}</h3>
       </div>
       <div class="panel-body">
 		<table>

@@ -16,6 +16,7 @@ import manager.PersonDayManager;
 import models.Competence;
 import models.Person;
 import models.PersonDay;
+import models.User;
 
 import org.joda.time.LocalDate;
 
@@ -26,11 +27,11 @@ import security.SecurityRules;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
 import dao.CompetenceDao;
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 
@@ -82,7 +83,7 @@ public class MonthRecaps extends Controller{
 		Table<Person, String, Integer> tableMonthRecap = TreeBasedTable.create(MonthRecapManager.PersonNameComparator, MonthRecapManager.AbsenceCodeComparator);
 
 		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
-				Sets.newHashSet(Security.getOfficeAllowed()), false, monthBegin, monthEnd, true);
+				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, monthBegin, monthEnd, true);
 
 		List<Person> activePersons = simpleResults.paginated(page).getResults();
 		

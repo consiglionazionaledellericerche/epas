@@ -11,6 +11,7 @@ import manager.ConfYearManager;
 import models.Contract;
 import models.Office;
 import models.Person;
+import models.User;
 import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
@@ -21,8 +22,7 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
-
+import dao.OfficeDao;
 import dao.PersonDao;
 
 @With( {Secure.class, RequestInit.class} )
@@ -40,7 +40,7 @@ public class VacationsAdmin extends Controller{
 		LocalDate date = new LocalDate();
 		
 		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
-				Sets.newHashSet(Security.getOfficeAllowed()), false, date, date, true);
+				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, date, date, true);
 		
 		List<Person> personList = simpleResults.paginated(page).getResults();
 		

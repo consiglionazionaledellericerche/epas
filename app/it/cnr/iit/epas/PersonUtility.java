@@ -2,10 +2,8 @@ package it.cnr.iit.epas;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-
 import javax.persistence.Query;
 
 import manager.ConfGeneralManager;
@@ -20,7 +18,6 @@ import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
 import models.ContractStampProfile;
-import models.Office;
 import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
@@ -930,14 +927,6 @@ public class PersonUtility {
 		if(userLogged==null)
 			return;
 
-		List<Office> officeAllowed = new ArrayList<Office>();
-		if(userLogged.person == null)
-			officeAllowed = OfficeDao.getAllOffices();
-			//officeAllowed = Office.findAll();
-		else
-			//officeAllowed = userLogged.person.getOfficeAllowed();
-			officeAllowed = OfficeDao.getOfficeAllowed(userLogged.person);
-
 		//Costruisco la lista di persone su cui voglio operare
 		List<Person> personList = new ArrayList<Person>();
 		if(personId==-1)
@@ -947,7 +936,8 @@ public class PersonUtility {
 			LocalDate begin = new LocalDate(year, month, 1);
 			LocalDate end = new LocalDate().minusDays(1);
 			//personList = Person.getActivePersonsSpeedyInPeriod(begin, end, officeAllowed, false);	
-			personList = PersonDao.list(Optional.<String>absent(), new HashSet<Office>(officeAllowed), false, begin, end, true).list();
+			personList = PersonDao.list(Optional.<String>absent(), 
+					OfficeDao.getOfficeAllowed(Optional.fromNullable(userLogged)), false, begin, end, true).list();
 		}
 		else {
 			
@@ -1117,15 +1107,8 @@ public class PersonUtility {
 	 */
 	public static void checkNoAbsenceNoStamping(Long personId, int year, int month, User userLogged) throws EmailException{
 		List<Person> personList = new ArrayList<Person>();
-		List<Office> officeAllowed = new ArrayList<Office>();
 		LocalDate begin = null;
 		LocalDate end = null;
-		if(userLogged.person == null)
-			officeAllowed = OfficeDao.getAllOffices();
-			//officeAllowed = Office.findAll();
-		else
-			//officeAllowed = userLogged.person.getOfficeAllowed();
-			officeAllowed = OfficeDao.getOfficeAllowed(userLogged.person);
 
 		if(personId==-1)
 			personId=null;
@@ -1134,7 +1117,8 @@ public class PersonUtility {
 			begin = new LocalDate(year, month, 1);
 			end = new LocalDate().minusDays(1);
 			//personList = Person.getActivePersonsSpeedyInPeriod(begin, end, officeAllowed, false);
-			personList = PersonDao.list(Optional.<String>absent(), new HashSet<Office>(officeAllowed), false, begin, end, true).list();
+			personList = PersonDao.list(Optional.<String>absent(),
+					OfficeDao.getOfficeAllowed(Optional.fromNullable(userLogged)), false, begin, end, true).list();
 		}
 		else
 		{

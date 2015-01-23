@@ -2,14 +2,12 @@ package controllers;
 
 import static play.modules.pdf.PDF.renderPDF;
 import helpers.BadRequest;
-import helpers.ModelQuery;
 import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.JsonShiftPeriodsBinder;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -25,8 +23,6 @@ import models.exports.ShiftPeriod;
 import models.exports.ShiftPeriods;
 
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-
 import org.joda.time.LocalTime;
 
 import play.Logger;
@@ -39,45 +35,9 @@ import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
-import com.google.common.collect.ImmutableTable.Builder;
-import com.mysema.query.Query;
-import com.mysema.query.jpa.JPQLQuery;
-import com.ning.http.client.Response;
-
-import models.Absence;
-import models.CompetenceCode;
-import models.Person;
-import models.PersonDay;
-
 import models.Competence;
-import models.PersonReperibilityDay;
-import models.PersonReperibilityType;
-import models.PersonShift;
-import models.PersonShiftDay;
-import models.PersonShiftShiftType;
-import models.ShiftCancelled;
 import models.ShiftTimeTable;
-import models.ShiftType;
-import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.ShiftSlot;
-import models.exports.AbsenceReperibilityPeriod;
-import models.exports.AbsenceShiftPeriod;
-import models.exports.ShiftCancelledPeriod;
-import models.exports.ShiftPeriod;
-import models.exports.ShiftPeriods;
-import models.query.QCompetence;
-import models.query.QPerson;
-import models.query.QPersonShift;
-import models.query.QPersonShiftShiftType;
-import models.query.QShiftType;
-
-import helpers.BadRequest;
-
-import play.Logger;
-import play.Play;
-import play.data.binding.As;
-import play.db.jpa.JPA;
-import play.mvc.Controller;
 
 /**
  * 

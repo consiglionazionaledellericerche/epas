@@ -5,7 +5,6 @@ import it.cnr.iit.epas.DateUtility;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -13,13 +12,13 @@ import javax.inject.Inject;
 import manager.PersonDayManager;
 import manager.PersonManager;
 import manager.StampingManager;
-import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.PersonTags;
 import models.StampModificationType;
 import models.StampType;
 import models.Stamping;
+import models.User;
 import models.rendering.PersonStampingDayRecap;
 import models.rendering.PersonTroublesInMonthRecap;
 
@@ -35,9 +34,9 @@ import security.SecurityRules;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.ImmutableTable.Builder;
-import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.StampingDao;
@@ -268,7 +267,7 @@ public class Stampings extends Controller {
 
 		//lista delle persone che sono state attive nel mese
 		List<Person> activePersons = 
-				PersonDao.list(Optional.<String>absent(), new HashSet<Office>(Security.getOfficeAllowed()), 
+				PersonDao.list(Optional.<String>absent(), OfficeDao.getOfficeAllowed(Optional.<User>absent()), 
 						false, monthBegin, monthEnd, true).list();
 
 		List<PersonTroublesInMonthRecap> missingStampings = new ArrayList<PersonTroublesInMonthRecap>();
@@ -278,7 +277,7 @@ public class Stampings extends Controller {
 			PersonTroublesInMonthRecap pt = new PersonTroublesInMonthRecap(person, monthBegin, monthEnd);
 			missingStampings.add(pt);
 		}
-		
+		render(month, year, missingStampings);
 	}
 
 	/**
@@ -293,7 +292,8 @@ public class Stampings extends Controller {
 		
 		LocalDate dayPresence = new LocalDate(year, month, day);
 
-		List<Person> activePersonsInDay = PersonDao.list(Optional.<String>absent(), new HashSet<Office>(Security.getOfficeAllowed()), false, dayPresence, dayPresence, true).list();
+		List<Person> activePersonsInDay = PersonDao.list(Optional.<String>absent(), 
+				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, dayPresence, dayPresence, true).list();
 
 		int numberOfInOut = StampingManager.maxNumberOfStampingsInMonth(year, month, day, activePersonsInDay);
 				
@@ -337,7 +337,7 @@ public class Stampings extends Controller {
 
 		
 		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
-				Sets.newHashSet(Security.getOfficeAllowed()), false, beginMonth, endMonth, true);
+				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, beginMonth, endMonth, true);
 
 		List<Person> activePersons = simpleResults.paginated(page).getResults();
 		

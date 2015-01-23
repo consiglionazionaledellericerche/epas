@@ -7,6 +7,7 @@ import it.cnr.iit.epas.PersonUtility;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -46,12 +47,12 @@ import security.SecurityRules;
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.common.hash.Hashing;
 
 import controllers.Resecure.NoCheck;
 import dao.CompetenceDao;
 import dao.ContractDao;
+import dao.OfficeDao;
 import dao.PersonChildrenDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -75,7 +76,7 @@ public class Persons extends Controller {
 		LocalDate startEra = new LocalDate(1900,1,1);
 		LocalDate endEra = new LocalDate(9999,1,1);
 		List<Person> personList = PersonDao.list(Optional.fromNullable(name), 
-				Sets.newHashSet(Security.getOfficeAllowed()), false, startEra, 
+				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, startEra, 
 				endEra, false).list();
 
 		render(personList);
@@ -203,7 +204,7 @@ public class Persons extends Controller {
 		List<Contract> contractList = ContractDao.getPersonContractList(person);
 		
 		//List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract", person).fetch();
-		List<Office> officeList = Security.getOfficeAllowed();	
+		Set<Office> officeList = OfficeDao.getOfficeAllowed(Optional.<User>absent());	
 		
 		List<ContractStampProfile> contractStampProfileList = 
 				ContractDao.getPersonContractStampProfile(Optional.fromNullable(person), Optional.<Contract>absent());
