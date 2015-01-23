@@ -13,6 +13,7 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import manager.ContractManager;
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
@@ -87,14 +88,14 @@ public class WorkingTimeType extends BaseModel {
 		
 		LocalDate today = new LocalDate();
 		
-		List<Contract> activeContract = Contract.getActiveContractInPeriod(today, today);
+		List<Contract> activeContract = ContractManager.getActiveContractInPeriod(today, today);
 		
 		for(Contract contract : activeContract) {
 			
 			if( !contract.person.office.id.equals(officeId))
 				continue;
 			
-			ContractWorkingTimeType current = contract.getContractWorkingTimeType(today);
+			ContractWorkingTimeType current = ContractManager.getContractWorkingTimeTypeFromDate(contract, today);
 			if(current.workingTimeType.id.equals(this.id))
 				contractList.add(contract);
 		}
@@ -110,7 +111,7 @@ public class WorkingTimeType extends BaseModel {
 		
 		LocalDate today = new LocalDate();
 		
-		List<Contract> activeContract = Contract.getActiveContractInPeriod(today, today);
+		List<Contract> activeContract = ContractManager.getActiveContractInPeriod(today, today);
 		
 		for(Contract contract : activeContract) {
 			
@@ -140,14 +141,14 @@ public class WorkingTimeType extends BaseModel {
 		
 		LocalDate today = new LocalDate();
 		
-		List<Contract> activeContract = Contract.getActiveContractInPeriod(today, today);
+		List<Contract> activeContract = ContractManager.getActiveContractInPeriod(today, today);
 		
 		for(Contract contract : activeContract) {
 			
 			if( !contract.person.office.id.equals(officeId))
 				continue;
 			
-			ContractWorkingTimeType current = contract.getContractWorkingTimeType(today);
+			ContractWorkingTimeType current = ContractManager.getContractWorkingTimeTypeFromDate(contract, today);
 			if(current.workingTimeType.id.equals(wtt.id))
 				contractList.add(contract);
 		}

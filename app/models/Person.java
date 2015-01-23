@@ -25,6 +25,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import manager.ContractManager;
 import manager.recaps.PersonResidualMonthRecap;
 import models.base.BaseModel;
 
@@ -230,10 +231,6 @@ public class Person extends BaseModel implements Comparable<Person>{
 	private VacationCode currentVacationCode = null;
 	
 	
-	
-	
-	
-	
 	public String getName(){
 		return this.name;
 	}
@@ -252,21 +249,6 @@ public class Person extends BaseModel implements Comparable<Person>{
 		return String.format("%s %s", surname, name);
 	}
 
-	
-	/**
-	 * 
-	 * @return la qualifica della persona
-	 */
-	public Qualification getQualification(){
-		if(this.qualification != null)
-			return this.qualification;
-		else
-			return null;
-	}
-
-	
-	
-	
 	/**
 	 * Cerca nella variabile LAZY il contratto attuale
 	 * @return il contratto attualmente attivo per quella persona, null se la persona non ha contratto attivo
@@ -281,6 +263,40 @@ public class Person extends BaseModel implements Comparable<Person>{
 		return this.currentContract;
 	}
 	
+	/**
+	 * FIXME richiamato nelle view spostare nel wrapper
+	 * Il ContractStampProfile associato alla data di oggi (Se attivo)
+	 * @return null in caso di persona senza contratto attivo
+	 */
+	@Transient
+	public ContractStampProfile getCurrentContractStampProfile() {
+		Contract contract = this.getCurrentContract();
+		if(contract == null)
+			return null;
+		return ContractManager.getContractStampProfileFromDate(contract, LocalDate.now());
+	}
+	
+	/**
+	 * FIXME nel manager (non è chiamato nelle view)
+	 * Il VacationPeriod associato alla data di oggi (Se attivo)
+	 * @return
+	 */
+	@Transient
+	public VacationPeriod getCurrentVacationPeriod()
+	{
+		Contract contract = this.getCurrentContract();
+		if(contract == null)
+			return null;
+		
+		for(VacationPeriod vp : contract.vacationPeriods) {
+
+			LocalDate now = new LocalDate();
+
+			if(DateUtility.isDateIntoInterval(now, new DateInterval(vp.beginFrom, vp.endTo)))
+				return vp;
+		}
+		return null;
+	}
 	
 	/**
 	 * Cerca nella variabile LAZY il tipo orario attuale.
