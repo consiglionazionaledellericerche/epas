@@ -457,7 +457,7 @@ public class Persons extends Controller {
 	public static void showCurrentVacation(Long personId){
 
 		Person person = PersonDao.getPersonById(personId);
-		//Person person = Person.findById(personId);
+
 		if(person == null) {
 
 			flash.error("La persona selezionata non esiste. Operazione annullata");
@@ -466,14 +466,14 @@ public class Persons extends Controller {
 
 		rules.checkIfPermitted(person.office);
 
-		VacationPeriod vp = person.getCurrentContract().getCurrentVacationPeriod();
+		VacationPeriod vp = person.getCurrentVacationPeriod();
 		render(person, vp);
 	}
 
 	public static void showCurrentContractWorkingTimeType(Long personId) {
 
 		Person person = PersonDao.getPersonById(personId);
-		//Person person = Person.findById(personId);
+
 		if(person == null) {
 
 			flash.error("La persona selezionata non esiste. Operazione annullata");
@@ -489,7 +489,7 @@ public class Persons extends Controller {
 			Persons.list(null);
 		}
 
-		ContractWorkingTimeType cwtt = currentContract.getContractWorkingTimeType(LocalDate.now());
+		ContractWorkingTimeType cwtt = ContractManager.getContractWorkingTimeTypeFromDate(currentContract, LocalDate.now());
 		WorkingTimeType wtt = cwtt.workingTimeType;
 		render(person, cwtt, wtt);
 	}
@@ -545,7 +545,7 @@ public class Persons extends Controller {
 		contract.person = person;
 
 		//Date non si sovrappongono con gli altri contratti della persona	
-		if( !contract.isProperContract() ) {
+		if( ! ContractManager.isProperContract(contract) ) {
 
 			flash.error("Il nuovo contratto si interseca con contratti precedenti. Controllare le date di inizio e fine. Operazione annulalta.");
 			Persons.edit(person.id);
@@ -605,7 +605,7 @@ public class Persons extends Controller {
 		contract.endContract = end;
 
 		//Date non si sovrappongono con gli altri contratti della persona	
-		if( !contract.isProperContract() ) {
+		if( ! ContractManager.isProperContract(contract) ) {
 
 			flash.error("Il contratto si interseca con altri contratti della persona. Controllare le date di inizio e fine. Operazione annulalta.");
 			Persons.edit(contract.person.id);
@@ -789,7 +789,6 @@ public class Persons extends Controller {
 		rules.checkIfPermitted(cwtt.contract.person.office);
 
 		Contract contract = cwtt.contract;
-		//List<ContractWorkingTimeType> cwttList = Lists.newArrayList(contract.contractWorkingTimeType);
 
 		int index = contract.getContractWorkingTimeTypeAsList().indexOf(cwtt);
 		if(contract.getContractWorkingTimeTypeAsList().size()<index){
@@ -1036,16 +1035,15 @@ public class Persons extends Controller {
 		rules.checkIfPermitted(csp.contract.person.office);
 
 		Contract contract = csp.contract;
-		//List<ContractWorkingTimeType> cwttList = Lists.newArrayList(contract.contractWorkingTimeType);
 
-		int index = contract.getContractStampProfileAsList().indexOf(csp);
-		if(contract.getContractStampProfileAsList().size()<index){
+		int index = ContractManager.getContractStampProfileAsList(contract).indexOf(csp);
+		if(ContractManager.getContractStampProfileAsList(contract).size()<index){
 
 			flash.error("Impossibile completare la richiesta, controllare i log.");
 			Persons.edit(csp.contract.person.id);	
 		}
 
-		ContractStampProfile previous = contract.getContractStampProfileAsList().get(index-1);
+		ContractStampProfile previous = ContractManager.getContractStampProfileAsList(contract).get(index-1);
 		previous.endTo = csp.endTo;
 		previous.save();
 		csp.delete();
