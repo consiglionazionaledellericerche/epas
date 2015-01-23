@@ -3,24 +3,20 @@ package controllers;
 import helpers.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.PersonUtility;
 
-import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
 import manager.CompetenceManager;
-import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
 import models.Office;
 import models.Person;
-import models.PersonDay;
 import models.TotalOvertime;
 import models.User;
 import models.rendering.PersonCompetenceRecap;
@@ -36,8 +32,6 @@ import security.SecurityRules;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 
@@ -46,7 +40,6 @@ import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
-import dao.PersonDayDao;
 
 @With( {Resecure.class, RequestInit.class} )
 public class Competences extends Controller{
@@ -73,14 +66,14 @@ public class Competences extends Controller{
 
 	public static void showCompetences(Integer year, Integer month, Long officeId, String name, String codice, Integer page){
 		
-		List<Office> offices = Security.getOfficeAllowed();
+		Set<Office> offices = OfficeDao.getOfficeAllowed(Optional.<User>absent());
 
 		if(officeId == null) {
 			if(offices.size() == 0) {
 				flash.error("L'user non dispone di alcun diritto di visione delle sedi. Operazione annullata.");
 				Application.indexAdmin();
 			}
-			officeId = offices.get(0).id;
+			officeId = offices.iterator().next().id;
 		}
 
 		Office office = OfficeDao.getOfficeById(officeId);
@@ -212,13 +205,13 @@ public class Competences extends Controller{
 	
 	public static void totalOvertimeHours(int year, Long officeId){
 	
-		List<Office> offices = Security.getOfficeAllowed();		
+		Set<Office> offices = OfficeDao.getOfficeAllowed(Optional.<User>absent());		
 		if(officeId == null) {
 			if(offices.size() == 0) {
 				flash.error("L'user non dispone di alcun diritto di visione delle sedi. Operazione annullata.");
 				Application.indexAdmin();
 			}
-			officeId = offices.get(0).id;
+			officeId = offices.iterator().next().id;
 		}
 		
 		Office office = OfficeDao.getOfficeById(officeId);
@@ -250,14 +243,14 @@ public class Competences extends Controller{
 
 	public static void overtime(int year, int month, Long officeId, String name, Integer page){
 		
-		List<Office> offices = Security.getOfficeAllowed();
+		Set<Office> offices = OfficeDao.getOfficeAllowed(Optional.<User>absent());
 
 		if(officeId == null) {
 			if(offices.size() == 0) {
 				flash.error("L'user non dispone di alcun diritto di visione delle sedi. Operazione annullata.");
 				Application.indexAdmin();
 			}
-			officeId = offices.get(0).id;
+			officeId = offices.iterator().next().id;
 		}
 
 		Office office = OfficeDao.getOfficeById(officeId);
@@ -299,14 +292,14 @@ public class Competences extends Controller{
 	 */
 	public static void enabledCompetences(Long officeId, String name){
 
-		List<Office> offices = Security.getOfficeAllowed();
+		Set<Office> offices = OfficeDao.getOfficeAllowed(Optional.<User>absent());
 
 		if(officeId == null) {
 			if(offices.size() == 0) {
 				flash.error("L'user non dispone di alcun diritto di visione delle sedi. Operazione annullata.");
 				Application.indexAdmin();
 			}
-			officeId = offices.get(0).id;
+			officeId = offices.iterator().next().id;
 		}
 
 		Office office = OfficeDao.getOfficeById(officeId);

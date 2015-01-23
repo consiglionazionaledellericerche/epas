@@ -5,12 +5,7 @@ import helpers.ModelQuery;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import javax.persistence.Query;
-
 import manager.PersonDayManager.PairStamping;
 import manager.PersonManager;
 import models.Absence;
@@ -18,13 +13,9 @@ import models.CertificatedData;
 import models.Competence;
 import models.CompetenceCode;
 import models.Person;
-import models.PersonChildren;
 import models.PersonDay;
 import models.PersonReperibilityDay;
 import models.PersonShiftDay;
-import models.Stamping;
-import models.User;
-import manager.PersonDayManager;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.ShiftSlot;
 import models.query.QCompetence;
@@ -43,8 +34,6 @@ import dao.CompetenceDao;
 import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
 import play.Logger;
-import play.db.jpa.JPA;
-import play.db.jpa.JPAPlugin;
 
 
 public class CompetenceUtility {

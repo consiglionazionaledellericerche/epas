@@ -4,6 +4,7 @@ package controllers;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -14,6 +15,7 @@ import manager.ConfigurationsManager.MessageResult;
 import models.ConfGeneral;
 import models.ConfYear;
 import models.Office;
+import models.User;
 import models.enumerate.ConfigurationFields;
 
 import org.joda.time.LocalDate;
@@ -37,7 +39,7 @@ public class Configurations extends Controller{
 
 	public static void showConfGeneral(Long officeId){
 		Office office = null;
-		List<Office> offices = Security.getOfficeAllowed();
+		Set<Office> offices = OfficeDao.getOfficeAllowed(Optional.<User>absent());
 		if(officeId != null){
 			office = OfficeDao.getOfficeById(officeId);			
 		}
@@ -65,7 +67,7 @@ public class Configurations extends Controller{
 	public static void showConfYear(Long officeId){
 
 		Office office = null;
-		List<Office> offices = Security.getOfficeAllowed();
+		Set<Office> offices = OfficeDao.getOfficeAllowed(Optional.<User>absent());
 		if(officeId != null){
 			office = OfficeDao.getOfficeById(officeId);
 

@@ -24,11 +24,11 @@ import security.SecurityRules;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
 import dao.AbsenceDao;
+import dao.OfficeDao;
 import dao.PersonDao;
 
 @With( {Resecure.class, RequestInit.class} )
@@ -175,7 +175,7 @@ public class YearlyAbsences extends Controller{
 		
 		
 		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
-				Sets.newHashSet(Security.getOfficeAllowed()), 
+				OfficeDao.getOfficeAllowed(Optional.<User>absent()), 
 				false, new LocalDate(year, month,1), 
 				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true);
 

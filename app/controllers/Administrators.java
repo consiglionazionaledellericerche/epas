@@ -5,8 +5,6 @@ import java.util.List;
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
-
 import controllers.Resecure.NoCheck;
 import dao.OfficeDao;
 import dao.PersonDao;
@@ -48,7 +46,7 @@ public class Administrators extends Controller {
 		
 		String name = null;
 		List<Person> personList = PersonDao.list(Optional.fromNullable(name), 
-					Sets.newHashSet(Security.getOfficeAllowed()), false, 
+				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, 
 					LocalDate.now(), LocalDate.now(), true).list();
 		
 		render(office, role, personList);

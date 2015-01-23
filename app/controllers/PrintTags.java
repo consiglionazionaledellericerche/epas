@@ -5,7 +5,6 @@ import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -15,11 +14,11 @@ import manager.ConfGeneralManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
 import models.AbsenceType;
-import models.Office;
 import models.Person;
 import models.PersonDay;
 import models.StampModificationType;
 import models.StampType;
+import models.User;
 import models.enumerate.ConfigurationFields;
 import models.rendering.PersonStampingDayRecap;
 
@@ -31,6 +30,7 @@ import security.SecurityRules;
 
 import com.google.common.base.Optional;
 
+import dao.OfficeDao;
 import dao.PersonDao;
 
 @With( {Resecure.class, RequestInit.class} )
@@ -111,7 +111,8 @@ public class PrintTags extends Controller{
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		LocalDate date = new LocalDate(year, month,1);
 		//List<Person> personList = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
-		List<Person> personList = PersonDao.list(Optional.<String>absent(), new HashSet<Office>(Security.getOfficeAllowed()), false, date, date.dayOfMonth().withMaximumValue(), true).list();
+		List<Person> personList = PersonDao.list(Optional.<String>absent(), 
+				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, date, date.dayOfMonth().withMaximumValue(), true).list();
 		render(personList, date, year, month);
 	}
 	
