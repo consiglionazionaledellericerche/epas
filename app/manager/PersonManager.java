@@ -5,6 +5,7 @@ import it.cnr.iit.epas.DateUtility;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import models.Contract;
 import models.ContractWorkingTimeType;
@@ -12,6 +13,8 @@ import models.Office;
 import models.Person;
 
 import org.joda.time.LocalDate;
+
+import com.google.common.base.Optional;
 
 import dao.ContractDao;
 import dao.OfficeDao;
@@ -77,7 +80,7 @@ public class PersonManager {
 	public boolean isAllowedBy(Person administrator, Person person)
 	{
 		//List<Office> officeAllowed = administrator.getOfficeAllowed();
-		List<Office> officeAllowed = OfficeDao.getOfficeAllowed(person);
+		Set<Office> officeAllowed = OfficeDao.getOfficeAllowed(Optional.of(person.user));
 		for(Office office : officeAllowed)
 		{
 			if(office.id.equals(administrator.office.id))

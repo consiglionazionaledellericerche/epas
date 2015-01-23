@@ -8,7 +8,6 @@ import it.cnr.iit.epas.PersonUtility;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 import manager.ContractYearRecapManager;
@@ -21,13 +20,12 @@ import models.InitializationTime;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
+import models.User;
 import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
-
 import play.Logger;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
@@ -35,6 +33,7 @@ import play.mvc.With;
 import controllers.Resecure.NoCheck;
 import dao.AbsenceTypeDao;
 import dao.ContractDao;
+import dao.OfficeDao;
 import dao.PersonDao;
 
 
@@ -99,7 +98,7 @@ public class Administration extends Controller {
 		//List<Person> pdList = Person.getActivePersonsInDay(new LocalDate(), Security.getOfficeAllowed(), false);
 		
 		final List<Person> personList = PersonDao.list( 
-				Optional.<String>absent(), Sets.newHashSet(Security.getOfficeAllowed()), 
+				Optional.<String>absent(),OfficeDao.getOfficeAllowed(Optional.<User>absent()), 
 				false, LocalDate.now(), LocalDate.now(), true)
 				.list();
 		
@@ -135,7 +134,8 @@ public class Administration extends Controller {
 	{
 		
 		//List<Person> listPerson = Person.getActivePersonsInDay(new LocalDate(), Security.getOfficeAllowed(), false);
-		List<Person> listPerson = PersonDao.list(Optional.<String>absent(), new HashSet(Security.getOfficeAllowed()), false, LocalDate.now(), LocalDate.now(), true).list();
+		List<Person> listPerson = PersonDao.list(Optional.<String>absent(), 
+				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, LocalDate.now(), LocalDate.now(), true).list();
 		List<PersonResidualMonthRecap> listMese = new ArrayList<PersonResidualMonthRecap>();
 		for(Person person : listPerson)
 		{
