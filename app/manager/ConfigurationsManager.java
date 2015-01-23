@@ -9,7 +9,6 @@ import org.joda.time.LocalDate;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
-import play.Logger;
 import play.cache.Cache;
 import controllers.Security;
 import models.ConfYear;

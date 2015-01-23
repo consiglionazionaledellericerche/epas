@@ -4,36 +4,28 @@ import helpers.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.DateUtility;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import manager.MonthRecapManager;
 
-import manager.PersonDayManager;
-import models.Competence;
 import models.Person;
 import models.PersonDay;
 import models.User;
 
 import org.joda.time.LocalDate;
 
-import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
-import dao.CompetenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
-import dao.PersonDayDao;
 
 @With( {Resecure.class, RequestInit.class} )
 public class MonthRecaps extends Controller{

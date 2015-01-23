@@ -30,7 +30,6 @@ import play.Logger;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
-import controllers.Resecure.NoCheck;
 import dao.AbsenceTypeDao;
 import dao.ContractDao;
 import dao.OfficeDao;
