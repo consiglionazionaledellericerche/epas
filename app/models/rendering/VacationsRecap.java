@@ -87,13 +87,13 @@ public class VacationsRecap {
 			
 			Verify.verify(vr.activeContract != null, "non c'è contratto attivo!");
 			
-			List<VacationPeriod> vacationPeriodList = vr.activeContract.getContractVacationPeriods();
+			List<VacationPeriod> vacationPeriodList = ContractManager.getContractVacationPeriods(vr.activeContract);
 			
 			//FIXME Se non ho i piani ferie li costruisco. Decidere dove metterli (bootstrap??)
 			//il riepilogo non dovrebbe modificare il db
 			if(vacationPeriodList==null || vacationPeriodList.isEmpty()) {
 				ContractManager.properContractUpdate(vr.activeContract);
-				vacationPeriodList = vr.activeContract.getContractVacationPeriods();
+				vacationPeriodList = ContractManager.getContractVacationPeriods(vr.activeContract);
 			}
 			Verify.verify(vacationPeriodList!=null && !vacationPeriodList.isEmpty(), "Nessun piano ferie presente per il contratto!");
 			
@@ -172,7 +172,7 @@ public class VacationsRecap {
 			}
 			else{
 				//Popolare da contractYearRecap
-				ContractYearRecap recapPastYear = vr.activeContract.getContractYearRecap(year-1);
+				ContractYearRecap recapPastYear = ContractManager.getContractYearRecap(vr.activeContract, year-1);
 				if(recapPastYear==null)
 					throw new IllegalStateException("Mancano i riepiloghi annuali.");
 				vacationDaysPastYearUsedNew = recapPastYear.vacationCurrentYearUsed;

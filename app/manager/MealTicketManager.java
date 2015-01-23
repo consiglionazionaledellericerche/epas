@@ -100,6 +100,29 @@ public class MealTicketManager {
 
 		return mealTicketsTransfered;
 	}
+	
+	/**
+	 * Ritorna l'intervallo valido ePAS per il contratto riguardo la gestione dei buoni pasto.
+	 * (scarto la parte precedente a source se definita, e la parte precedente alla data inizio 
+	 * utilizzo per la sede della persona).
+	 * @return null in caso non vi siano giorni coperti dalla gestione dei buoni pasto.
+	 */
+	public static DateInterval getContractMealTicketDateInterval(Contract contract) {
+		
+		DateInterval contractDataBaseInterval = ContractManager.getContractDatabaseDateInterval(contract);
+		
+		LocalDate officeStartDate = MealTicketDao.getMealTicketStartDate(contract.person.office);
+		if(officeStartDate == null)
+			return null;
+		
+		if(officeStartDate.isBefore(contractDataBaseInterval.getBegin()))
+			return contractDataBaseInterval;
+		
+		if(DateUtility.isDateIntoInterval(officeStartDate, contractDataBaseInterval))
+			return new DateInterval(officeStartDate, contractDataBaseInterval.getEnd());
+		
+		return null;
+	}
 
 	/**
 	 * 
@@ -139,7 +162,7 @@ public class MealTicketManager {
 			
 			MealTicketRecap recap =  new MealTicketRecap(contract);
 			
-			recap.mealTicketInterval = contract.getContractMealTicketDateInterval();
+			recap.mealTicketInterval = MealTicketManager.getContractMealTicketDateInterval(contract);
 			
 			if(recap.mealTicketInterval == null)
 				return null;
