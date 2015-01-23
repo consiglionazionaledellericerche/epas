@@ -6,6 +6,7 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.ArrayList;
 import java.util.List;
 
+import manager.ContractManager;
 import models.Contract;
 import models.ContractYearRecap;
 
@@ -53,7 +54,7 @@ public class PersonResidualYearRecap {
 		int initMealTicket = 0;
 
 		//Recupero situazione iniziale dell'anno richiesto
-		ContractYearRecap recapPreviousYear = contract.getContractYearRecap(year-1);
+		ContractYearRecap recapPreviousYear = ContractManager.getContractYearRecap(contract, year-1);
 		if(recapPreviousYear!=null)	
 		{
 			initMonteOreAnnoPassato = recapPreviousYear.remainingMinutesCurrentYear + recapPreviousYear.remainingMinutesLastYear;

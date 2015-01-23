@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.persistence.Query;
 
 import manager.ConfGeneralManager;
+import manager.ContractManager;
 import manager.ContractYearRecapManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
@@ -18,6 +19,7 @@ import models.AbsenceType;
 import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
+import models.ContractStampProfile;
 import models.Office;
 import models.Person;
 import models.PersonChildren;
@@ -945,7 +947,7 @@ public class PersonUtility {
 			LocalDate begin = new LocalDate(year, month, 1);
 			LocalDate end = new LocalDate().minusDays(1);
 			//personList = Person.getActivePersonsSpeedyInPeriod(begin, end, officeAllowed, false);	
-			personList = PersonDao.list(Optional.<String>absent(), new HashSet(officeAllowed), false, begin, end, true).list();
+			personList = PersonDao.list(Optional.<String>absent(), new HashSet<Office>(officeAllowed), false, begin, end, true).list();
 		}
 		else {
 			
@@ -1069,7 +1071,8 @@ public class PersonUtility {
 				continue;
 			}
 			
-			if(contract.getContractStampProfile(pdt.personDay.date).fixedworkingtime == true) {
+			ContractStampProfile csp = ContractManager.getContractStampProfileFromDate(contract, pdt.personDay.date);
+			if(csp.fixedworkingtime == true) {
 				continue;
 			}
 			
@@ -1131,7 +1134,7 @@ public class PersonUtility {
 			begin = new LocalDate(year, month, 1);
 			end = new LocalDate().minusDays(1);
 			//personList = Person.getActivePersonsSpeedyInPeriod(begin, end, officeAllowed, false);
-			personList = PersonDao.list(Optional.<String>absent(), new HashSet(officeAllowed), false, begin, end, true).list();
+			personList = PersonDao.list(Optional.<String>absent(), new HashSet<Office>(officeAllowed), false, begin, end, true).list();
 		}
 		else
 		{

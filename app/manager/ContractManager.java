@@ -10,6 +10,7 @@ import java.util.List;
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
+import models.ContractYearRecap;
 import models.PersonDay;
 import models.VacationPeriod;
 import models.WorkingTimeType;
@@ -21,8 +22,10 @@ import play.Logger;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
+import dao.ContractDao;
 import dao.PersonDayDao;
 import dao.VacationCodeDao;
+import dao.VacationPeriodDao;
 
 /**
  * 
@@ -79,88 +82,109 @@ public class ContractManager {
 	}
 
 	/**
-		 * Ricalcola completamente tutti i dati del contratto da dateFrom a dateTo.
-		 *  
-		 * 1) CheckHistoryError 
-		 * 2) Ricalcolo tempi lavoro
-		 * 3) Ricalcolo riepiloghi annuali 
-		 * 
-		 * @param dateFrom giorno a partire dal quale effettuare il ricalcolo. 
-		 *   Se null ricalcola dall'inizio del contratto.
-		 *   
-		 * @param dateTo ultimo giorno coinvolto nel ricalcolo. 
-		 *   Se null ricalcola fino alla fine del contratto (utile nel caso in cui si 
-		 *   modifica la data fine che potrebbe non essere persistita)
-		 */
-		public static void recomputeContract(Contract contract, LocalDate dateFrom, LocalDate dateTo) {
+	 * Ritorna l'intervallo valido ePAS per il contratto. 
+	 * (scarto la parte precedente a source contract se definita)
+	 * @return
+	 */
+	public static DateInterval getContractDatabaseDateInterval(Contract contract) {
+		
+		if(contract.sourceDate != null && contract.sourceDate.isAfter(contract.beginContract)) {
 			
-			// (0) Definisco l'intervallo su cui operare
-			// Decido la data inizio
-			String dateInitUse = ConfGeneralManager.getFieldValue("init_use_program", contract.person.office);
-			LocalDate initUse = new LocalDate(dateInitUse);
-			LocalDate date = contract.beginContract;
-			if(date.isBefore(initUse))
-				date = initUse;
-			DateInterval contractInterval = contract.getContractDatabaseDateInterval();
-			if( dateFrom != null && contractInterval.getBegin().isBefore(dateFrom)) {
-				contractInterval = new DateInterval(dateFrom, contractInterval.getEnd());
-			}
-			// Decido la data di fine
-			if(dateTo != null && dateTo.isBefore(contractInterval.getEnd())) {
-				contractInterval = new DateInterval(contractInterval.getBegin(), dateTo);
-			}
-			
-			// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
-			LocalDate today = new LocalDate();
-			Logger.info("CheckPersonDay (creazione ed history error) DA %s A %s", date, today);
-			while(true) {
-				Logger.debug("RecomputePopulate %s", date);
-				
-				if(date.isEqual(today))
-					break;
-				
-				if(!DateUtility.isDateIntoInterval(date, contractInterval)) {
-					date = date.plusDays(1);
-					continue;
-				}
-				
-				PersonUtility.checkPersonDay(contract.person.id, date);
-				date = date.plusDays(1);
-				
-				
-			}
-	
-			// (2) Ricalcolo i valori dei person day aggregandoli per mese
-			LocalDate actualMonth = contractInterval.getBegin().withDayOfMonth(1).minusMonths(1);
-			LocalDate endMonth = new LocalDate().withDayOfMonth(1);
-	
-			Logger.debug("PopulatePersonDay (ricalcoli ed history error) DA %s A %s", actualMonth, endMonth);
-			
-			while( !actualMonth.isAfter(endMonth) )
-			{
-				List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(contract.person, actualMonth, Optional.fromNullable(actualMonth.dayOfMonth().withMaximumValue()), true);
-	//			List<PersonDay> pdList = 
-	//					PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
-	//							contract.person, actualMonth, actualMonth.dayOfMonth().withMaximumValue()).fetch();
-	
-				for(PersonDay pd : pdList){
-					
-					PersonDay pd1 = PersonDayDao.getPersonDayById(pd.id);
-					//PersonDay pd1 = PersonDay.findById(pd.id);
-					Logger.debug("RecomputePopulate %s", pd1.date);				
-					PersonDayManager.populatePersonDay(pd1);
-				}
-	
-				actualMonth = actualMonth.plusMonths(1);
-			}
-	
-			Logger.info("BuildContractYearRecap");
-			
-			//(3) Ricalcolo dei riepiloghi annuali
-			ContractYearRecapManager.buildContractYearRecap(contract);
-			
-			
+			DateInterval contractInterval;
+			if(contract.endContract!=null)
+				contractInterval = new DateInterval(contract.sourceDate, contract.endContract);
+			else
+				contractInterval = new DateInterval(contract.sourceDate, contract.expireContract);
+			return contractInterval;
 		}
+		
+		return contract.getContractDateInterval();
+		
+	}
+	
+	/**
+	 * Ricalcola completamente tutti i dati del contratto da dateFrom a dateTo.
+	 *  
+	 * 1) CheckHistoryError 
+	 * 2) Ricalcolo tempi lavoro
+	 * 3) Ricalcolo riepiloghi annuali 
+	 * 
+	 * @param dateFrom giorno a partire dal quale effettuare il ricalcolo. 
+	 *   Se null ricalcola dall'inizio del contratto.
+	 *   
+	 * @param dateTo ultimo giorno coinvolto nel ricalcolo. 
+	 *   Se null ricalcola fino alla fine del contratto (utile nel caso in cui si 
+	 *   modifica la data fine che potrebbe non essere persistita)
+	 */
+	public static void recomputeContract(Contract contract, LocalDate dateFrom, LocalDate dateTo) {
+
+		// (0) Definisco l'intervallo su cui operare
+		// Decido la data inizio
+		String dateInitUse = ConfGeneralManager.getFieldValue("init_use_program", contract.person.office);
+		LocalDate initUse = new LocalDate(dateInitUse);
+		LocalDate date = contract.beginContract;
+		if(date.isBefore(initUse))
+			date = initUse;
+		DateInterval contractInterval = ContractManager.getContractDatabaseDateInterval(contract);
+		if( dateFrom != null && contractInterval.getBegin().isBefore(dateFrom)) {
+			contractInterval = new DateInterval(dateFrom, contractInterval.getEnd());
+		}
+		// Decido la data di fine
+		if(dateTo != null && dateTo.isBefore(contractInterval.getEnd())) {
+			contractInterval = new DateInterval(contractInterval.getBegin(), dateTo);
+		}
+
+		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
+		LocalDate today = new LocalDate();
+		Logger.info("CheckPersonDay (creazione ed history error) DA %s A %s", date, today);
+		while(true) {
+			Logger.debug("RecomputePopulate %s", date);
+
+			if(date.isEqual(today))
+				break;
+
+			if(!DateUtility.isDateIntoInterval(date, contractInterval)) {
+				date = date.plusDays(1);
+				continue;
+			}
+
+			PersonUtility.checkPersonDay(contract.person.id, date);
+			date = date.plusDays(1);
+
+
+		}
+
+		// (2) Ricalcolo i valori dei person day aggregandoli per mese
+		LocalDate actualMonth = contractInterval.getBegin().withDayOfMonth(1).minusMonths(1);
+		LocalDate endMonth = new LocalDate().withDayOfMonth(1);
+
+		Logger.debug("PopulatePersonDay (ricalcoli ed history error) DA %s A %s", actualMonth, endMonth);
+
+		while( !actualMonth.isAfter(endMonth) )
+		{
+			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(contract.person, actualMonth, Optional.fromNullable(actualMonth.dayOfMonth().withMaximumValue()), true);
+			//			List<PersonDay> pdList = 
+			//					PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
+			//							contract.person, actualMonth, actualMonth.dayOfMonth().withMaximumValue()).fetch();
+
+			for(PersonDay pd : pdList){
+
+				PersonDay pd1 = PersonDayDao.getPersonDayById(pd.id);
+				//PersonDay pd1 = PersonDay.findById(pd.id);
+				Logger.debug("RecomputePopulate %s", pd1.date);				
+				PersonDayManager.populatePersonDay(pd1);
+			}
+
+			actualMonth = actualMonth.plusMonths(1);
+		}
+
+		Logger.info("BuildContractYearRecap");
+
+		//(3) Ricalcolo dei riepiloghi annuali
+		ContractYearRecapManager.buildContractYearRecap(contract);
+
+
+	}
 
 	/**
 	 * Costruisce la struttura dei periodi ferie associati al contratto 
@@ -310,6 +334,117 @@ public class ContractManager {
 			last.endTo = null;
 		last.save();
 		contract.save();
+	}
+	
+	/**
+	 * Il ContractWorkingTimeType a cui appartiene la data.
+	 * @param date
+	 * @return
+	 */
+	public static ContractWorkingTimeType getContractWorkingTimeTypeFromDate(Contract contract, LocalDate date) {
+		
+		for(ContractWorkingTimeType cwtt: contract.contractWorkingTimeType) {
+			
+			if(DateUtility.isDateIntoInterval(date, new DateInterval(cwtt.beginDate, cwtt.endDate) ))
+				return cwtt;
+		}
+		return null;
+	}
+	
+	
+	/**
+	 * Conversione della lista dei contractStampProfile da Set a List
+	 * @param contract
+	 * @return
+	 */
+	public static List<ContractStampProfile> getContractStampProfileAsList(Contract contract) {
+		
+		return Lists.newArrayList(contract.contractStampProfile);
+	}
+	
+	/**
+	 * Ritorna il ContractStampProfile attivo alla data.
+	 * @param contract
+	 * @param date
+	 * @return
+	 */
+	public static ContractStampProfile getContractStampProfileFromDate(Contract contract, LocalDate date) {
+		
+		for(ContractStampProfile csp : contract.contractStampProfile) {
+			DateInterval interval = new DateInterval(csp.startFrom, csp.endTo);
+			if(DateUtility.isDateIntoInterval(date, interval))
+				return csp;
+			
+		}
+		return null;
+	}
+	
+	/**
+	 * La lista dei VacationPeriod associati al contratto in ordine crescente per data di inizio periodo.
+	 * @param contract
+	 * @return null in caso di piani ferie inesistenti.
+	 */
+	public static List<VacationPeriod> getContractVacationPeriods(Contract contract)
+	{
+	
+		List<VacationPeriod> vpList = VacationPeriodDao.getVacationPeriodByContract(contract);
+
+		//se il piano ferie associato al contratto non esiste 
+		if(vpList.isEmpty())
+		{
+			return null;
+		}
+
+		return vpList;
+	}
+
+	/**
+	 * Ritorna il riepilogo annule del contatto.
+	 * @param year
+	 * @return
+	 */
+	public static ContractYearRecap getContractYearRecap(Contract contract, int year)	{
+		for(ContractYearRecap cyr : contract.recapPeriods) {
+			
+			if(cyr.year==year)
+				return cyr;
+		}
+		return null;
+	}
+	
+	/**
+	 * La lista con tutti i contratti attivi nel periodo selezionato.
+	 * @return
+	 */
+	public static List<Contract> getActiveContractInPeriod(LocalDate begin, LocalDate end) {
+		
+		if(end == null)
+			end = new LocalDate(9999,1,1);
+
+		List<Contract> activeContract = ContractDao.getActiveContractsInPeriod(begin, end);
+		
+		return activeContract;
+
+	}
+	
+	/**
+	 * True se il contratto non si interseca con nessun altro contratto per la persona. False altrimenti
+	 * @return
+	 */
+	public static boolean isProperContract(Contract contract) {
+
+		DateInterval contractInterval = contract.getContractDateInterval();
+		for(Contract c : contract.person.contracts) {
+			
+			if(contract.id != null && c.id.equals(contract.id)) {
+				continue;
+			}
+			
+			if(DateUtility.intervalIntersection(contractInterval, c.getContractDateInterval()) != null) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 }

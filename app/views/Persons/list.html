@@ -71,7 +71,7 @@
 		
 		<td><font color="#000000">${person.getQualification() != null ? person.getQualification().qualification : ''}</font></td>
 		<td>
-		  #{if person.currentContract.getCurrentContractStampProfile().fixedworkingtime}
+		  #{if person.getCurrentContractStampProfile().fixedworkingtime}
 		    <i class="fa fa-check-square-o"></i>
 		  #{/if}  
 		</td>
