@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package models;
 
@@ -73,7 +73,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 	@Column(name = "birthday")
 	@Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
 	public LocalDate birthday;
-	
+
 	@Column(name = "born_date")
 	public Date bornDate;
 
@@ -92,29 +92,29 @@ public class Person extends BaseModel implements Comparable<Person>{
 	/**
 	 * numero di matricola sul badge
 	 */
-	
+
 	public String badgeNumber;
 
 	/**
 	 * id che questa persona aveva nel vecchio database
 	 */
 	public Long oldId;
-	
+
 	/**
 	 * nuovo campo email del cnr da usarsi in caso di autenticazione via shibboleth inserito con l'evoluzione 28
 	 */
 	@Email
 	public String cnr_email;
-	
+
 	/**
 	 * i prossimi tre campi sono stati inseriti con l'evoluzione 28 prendendoli da contact_data così da eliminare quella tabella
 	 */
 	public String telephone;
-	
+
 	public String fax;
-	
+
 	public String mobile;
-	
+
 	/**
 	 * i prossimi tre campi sono stati inseriti con l'evoluzione 28 prendendoli da locations così da eliminare quella tabella
 	 */
@@ -122,12 +122,12 @@ public class Person extends BaseModel implements Comparable<Person>{
 
 	@Column(name="head_office")
 	public String headOffice;
- 
+
 	public String room;
-	
+
 	@Column(name="want_email")
 	public boolean wantEmail;
-	
+
 	/**
 	 * relazione con la tabella delle assenze iniziali
 	 */
@@ -136,7 +136,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 
 	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<InitializationTime> initializationTimes = new ArrayList<InitializationTime>();
-	
+
 	/**
 	 *  relazione con i turni
 	 */
@@ -149,7 +149,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 
 	@NotAudited
 	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<Contract> contracts = new ArrayList<Contract>(); 
+	public List<Contract> contracts = new ArrayList<Contract>();
 
 	@NotAudited
 	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
@@ -166,13 +166,13 @@ public class Person extends BaseModel implements Comparable<Person>{
 	 */
 	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<PersonDay> personDays;
-	
+
 	@OneToMany(mappedBy="person", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<CertificatedData> certificatedData;
 
 	@OneToMany(mappedBy="admin", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<MealTicket> mealTicketsAdmin;
-	
+
 	/**
 	 * relazione con la nuova tabella dei person_month
 	 */
@@ -193,14 +193,14 @@ public class Person extends BaseModel implements Comparable<Person>{
 	@NotAudited
 	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<Competence> competences;
-	
+
 	/**
 	 * relazione con la tabella dei codici competenza per stabilire se una persona ha diritto o meno a una certa competenza
 	 */
 	@NotAudited
 	@ManyToMany(cascade = {CascadeType.REFRESH}, fetch = FetchType.LAZY)
 	public List<CompetenceCode> competenceCode;
-	
+
 
 	@OneToOne(mappedBy="person", fetch=FetchType.EAGER)
 	public PersonReperibility reperibility;
@@ -211,42 +211,49 @@ public class Person extends BaseModel implements Comparable<Person>{
 
 	@OneToOne(mappedBy="person", fetch=FetchType.EAGER)
 	public PersonShift personShift;
-	
+
 	@ManyToOne
-	@JoinColumn(name="office_id")	
+	@JoinColumn(name="office_id")
 	public Office office;
-	
-	
-	
+
+
+
 	/**
 	 * Variabili Transienti LAZY (caricate quando vengono acceduti tramite i getter Transienti definiti
 	 */
 	@Transient
 	private Contract currentContract = null;
-	
+
 	@Transient
 	private WorkingTimeType currentWorkingTimeType = null;
-	
+
 	@Transient
 	private VacationCode currentVacationCode = null;
-	
-	
+
+
 	public String getName(){
 		return this.name;
 	}
-	
+
 	public String getSurname(){
 		return this.surname;
 	}
-	
+
 	public void setCompetenceCodes(List<CompetenceCode> competenceCode)
 	{
 		this.competenceCode = competenceCode;
 	}
-	
-	
-	public String fullName() {
+
+	/**
+	 * @return il nome completo.
+	 */
+	public String getFullname() {
 		return String.format("%s %s", surname, name);
+	}
+
+
+	public String fullName() {
+		return getFullname();
 	}
 
 	/**
@@ -257,12 +264,12 @@ public class Person extends BaseModel implements Comparable<Person>{
 	public Contract getCurrentContract(){
 		if(this.currentContract!=null)
 			return this.currentContract;
-		
+
 		//this.currentContract = getContract(LocalDate.now());
 		this.currentContract = ContractDao.getContract(LocalDate.now(), this);
 		return this.currentContract;
 	}
-	
+
 	/**
 	 * FIXME richiamato nelle view spostare nel wrapper
 	 * Il ContractStampProfile associato alla data di oggi (Se attivo)
@@ -275,7 +282,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 			return null;
 		return ContractManager.getContractStampProfileFromDate(contract, LocalDate.now());
 	}
-	
+
 	/**
 	 * FIXME nel manager (non è chiamato nelle view)
 	 * Il VacationPeriod associato alla data di oggi (Se attivo)
@@ -287,7 +294,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 		Contract contract = this.getCurrentContract();
 		if(contract == null)
 			return null;
-		
+
 		for(VacationPeriod vp : contract.vacationPeriods) {
 
 			LocalDate now = new LocalDate();
@@ -297,24 +304,24 @@ public class Person extends BaseModel implements Comparable<Person>{
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Cerca nella variabile LAZY il tipo orario attuale.
-	 * @return l'attuale orario di lavoro 
+	 * @return l'attuale orario di lavoro
 	 */
 	@Transient
 	public  WorkingTimeType getCurrentWorkingTimeType(){
 		if(this.currentWorkingTimeType!=null) {
 			return this.currentWorkingTimeType;
 		}
-		
+
 		if(this.currentContract==null) {
 			//this.currentContract = getContract(LocalDate.now());
 			this.currentContract = ContractDao.getContract(LocalDate.now(), this);
 		}
 		if(this.currentContract==null)
 			return null;
-		
+
 		//ricerca
 		for(ContractWorkingTimeType cwtt : this.currentContract.contractWorkingTimeType)
 		{
@@ -325,26 +332,26 @@ public class Person extends BaseModel implements Comparable<Person>{
 			}
 		}
 		return null;
-		
+
 	}
-	
+
 	/**
 	 * Cerca nella variabile LAZY il piano ferie attuale.
 	 * @return il piano ferie attivo per la persona
 	 */
 	@Transient
 	public VacationCode getCurrentVacationCode() {
-		
+
 		if(this.currentVacationCode!=null)
 			return this.currentVacationCode;
-		
+
 		if(this.currentContract==null) {
 			//this.currentContract = getContract(LocalDate.now());
 			this.currentContract = ContractDao.getContract(LocalDate.now(), this);
 		}
 		if(this.currentContract==null)
 			return null;
-		
+
 		//ricerca
 		for(VacationPeriod vp : this.currentContract.vacationPeriods)
 		{
@@ -357,13 +364,13 @@ public class Person extends BaseModel implements Comparable<Person>{
 		return null;
 	}
 
-	
-	
+
+
 	@Override
 	public String toString() {
 		return String.format("Person[%d] - %s %s", id, name, surname);
 	}
-	
+
 	/**
 	 * @param code
 	 * @return la competenza di quella persona nell'anno year e nel mese month con il codice competenza code
@@ -372,55 +379,55 @@ public class Person extends BaseModel implements Comparable<Person>{
 		if (competenceCode.contains(code)) {
 			Optional<Competence> o = FluentIterable.from(competences)
 					.firstMatch(new Predicate<Competence>() {
-				
+
 				@Override
 				public boolean apply(Competence input) {
-					
+
 					return input.competenceCode.equals(code) && input.year == year && input.month == month;
 				}
-				
+
 			});
 			return o.orNull();
 		} else {
 			return null;
 		}
 	}
-	
+
 
 	/**
-	 * 
+	 *
 	 * @param year
 	 * @param month
 	 * @return l'esito dell'invio attestati per la persona (null se non è ancora stato effettuato)
 	 */
 	public CertificatedData getCertificatedData(int year, int month)
 	{
-		
+
 		CertificatedData cd = PersonMonthRecapDao.getCertificatedDataByPersonMonthAndYear(this, month, year);
 //		CertificatedData cd = CertificatedData.find("Select cd from CertificatedData cd where cd.person = ? and cd.year = ? and cd.month = ?",
 //				this, year, month).first();
 		return cd;
 	}
-	
 
-	
+
+
 	/**
-	 * 
+	 *
 	 * @param year
 	 * @param month
 	 * @return le ore di residuo positivo fatte nel mese/anno da this. Metodo usato nel template showCompetences
 	 */
 	public Integer getPositiveResidualInMonth(int year, int month){
-		
-		return PersonResidualMonthRecap.positiveResidualInMonth(this, year, month)/60; 
+
+		return PersonResidualMonthRecap.positiveResidualInMonth(this, year, month)/60;
 	}
 
-	
-	
+
+
 
 	@Override
 	public int compareTo(Person person) {
-				
+
 		int res = (this.surname.compareTo(person.surname) == 0) ?  this.name.compareTo(person.name) :  this.surname.compareTo(person.surname);
 		return res;
 	}
