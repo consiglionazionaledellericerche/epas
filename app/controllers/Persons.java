@@ -46,6 +46,7 @@ import security.SecurityRules;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.hash.Hashing;
 
@@ -59,6 +60,8 @@ import dao.PersonDayDao;
 import dao.QualificationDao;
 import dao.UserDao;
 import dao.WorkingTimeTypeDao;
+import dao.wrapper.WrapperFunction;
+import dao.wrapper.WrapperPerson;
 
 @With( {Resecure.class, RequestInit.class} )
 public class Persons extends Controller {
@@ -67,18 +70,20 @@ public class Persons extends Controller {
 
 	@Inject
 	static SecurityRules rules;
+	@Inject
+	static WrapperFunction wrapperFunction;
+	@Inject
+	static PersonDao personDao;
+
 
 	@NoCheck
 	public static void list(String name){
 
 		rules.checkIfPermitted();
 
-		LocalDate startEra = new LocalDate(1900,1,1);
-		LocalDate endEra = new LocalDate(9999,1,1);
-		List<Person> personList = PersonDao.list(Optional.fromNullable(name), 
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, startEra, 
-				endEra, false).list();
-
+		List<WrapperPerson> personList = FluentIterable
+				.from(personDao.simpleList(name))
+				.transform(wrapperFunction).toList();
 		render(personList);
 	}
 
@@ -86,52 +91,52 @@ public class Persons extends Controller {
 	public static void insertPerson() throws InstantiationException, IllegalAccessException {
 
 		rules.checkIfPermitted();
-		
+
 		Person person = new Person();
 		Contract contract = new Contract();
-				
+
 		render(person, contract);
 
 	}
 
 	@NoCheck
-	public static void save(@Valid @Required Person person, 
-			@Valid @Required Qualification qualification, @Valid @Required Office office, 
-			@Valid @Required Contract contract, 
+	public static void save(@Valid @Required Person person,
+			@Valid @Required Qualification qualification, @Valid @Required Office office,
+			@Valid @Required Contract contract,
 			boolean onCertificate) {
-		
+
 		if(Validation.hasErrors()) {
-			
+
 			flash.error("Inserire correttamente tutti i parametri");
 			params.flash(); // add http parameters to the flash scope
 			render("@insertPerson", person, qualification, office);
 		}
 
 		rules.checkIfPermitted(office);
-		
+
 		person.qualification = qualification;
 		person.office = office;
 
 		contract.person = person;
-		
+
 		if(!contract.crossFieldsValidation()){
-			
+
 			flash.error("Errore nella validazione del contratto. Inserire correttamente tutti i parametri.");
 			params.flash(); // add http parameters to the flash scope
 			render("@insertPerson", person, qualification, office);
 		}
-		
+
 		contract.onCertificate = onCertificate;
 
 		person.save();
 
 		contract.save();
-		
+
 		WorkingTimeType wtt = WorkingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
 		ContractManager.properContractCreate(contract, wtt);
-		
+
 		Long personId = person.id;
-		
+
 		Persons.insertUsername(personId);
 
 	}
@@ -146,11 +151,11 @@ public class Persons extends Controller {
 			flash.error("La persona selezionata non esiste. Operazione annullata");
 			Persons.list(null);
 		}
-		
+
 		rules.checkIfPermitted(person.office);
-		
+
 		List<String> usernameList = PersonUtility.composeUsername(person.name, person.surname);
-		
+
 		render(person, usernameList);
 	}
 
@@ -180,7 +185,7 @@ public class Persons extends Controller {
 			person.user = user;
 			person.save();
 
-		}			
+		}
 
 		flash.success("%s %s inserito in anagrafica con il valore %s come username", person.name, person.surname, person.user.username);
 		Persons.list(null);
@@ -200,23 +205,23 @@ public class Persons extends Controller {
 
 		rules.checkIfPermitted(person.office);
 
-		
+
 		List<Contract> contractList = ContractDao.getPersonContractList(person);
-		
+
 		//List<Contract> contractList = Contract.find("Select con from Contract con where con.person = ? order by con.beginContract", person).fetch();
-		Set<Office> officeList = OfficeDao.getOfficeAllowed(Optional.<User>absent());	
-		
-		List<ContractStampProfile> contractStampProfileList = 
+		Set<Office> officeList = OfficeDao.getOfficeAllowed(Optional.<User>absent());
+
+		List<ContractStampProfile> contractStampProfileList =
 				ContractDao.getPersonContractStampProfile(Optional.fromNullable(person), Optional.<Contract>absent());
 //		List<ContractStampProfile> contractStampProfileList = ContractStampProfile.find("Select csp from ContractStampProfile csp, Contract c "
 //				+ "where csp.contract = c and c.person = ? order by csp.startFrom", person).fetch();
 
-		
+
 		LocalDate actualDate = new LocalDate();
 		Integer month = actualDate.getMonthOfYear();
 		Integer year = actualDate.getYear();
 
-		Long id = person.id;		
+		Long id = person.id;
 		render(person, contractList, contractStampProfileList, month, year, id, actualDate, officeList);
 	}
 
@@ -240,12 +245,12 @@ public class Persons extends Controller {
 			flash.error("La qualifica selezionata non esiste. Operazione annullata");
 			Persons.list(null);
 		}
-		
+
 		person.qualification = q.get();
 		person.save();
 		flash.success("Modificate informazioni per l'utente %s %s", person.name, person.surname);
 
-		Persons.edit(person.id);	
+		Persons.edit(person.id);
 	}
 
 	public static void deletePerson(Long personId){
@@ -274,24 +279,24 @@ public class Persons extends Controller {
 		rules.checkIfPermitted(person.office);
 
 		/***** person.delete(); ******/
-		
+
 		if(person.user != null) {
 
 			if(person.user.usersRolesOffices.size() > 0) {
 				flash.error("Impossibile eliminare una persona che detiene diritti di amministrazione su almeno una sede. Rimuovere tali diritti e riprovare.");
 				Persons.list(null);
 			}
-			
+
 			if(person.user.username.equals(Security.getUser().get().username)) {
-				
+
 				flash.error("Impossibile eliminare la persona loggata nella sessione corrente. Operazione annullata.");
 				Persons.list(null);
 			}
 		}
-		
-		
-		
-		
+
+
+
+
 		String name = person.name;
 		String surname = person.surname;
 
@@ -307,19 +312,19 @@ public class Persons extends Controller {
 			c.delete();
 		}
 		JPAPlugin.closeTx(false);
-		
+
 		// Eliminazione contratti
 		Logger.debug("Elimino contratti...");
 		JPAPlugin.startTx(false);
 		List<Contract> helpList = ContractDao.getPersonContractList(person);
 		//List<Contract> helpList = Contract.find("Select c from Contract c where c.person = ?", person).fetch();
-		
-		
-		for(Contract c : helpList){			
+
+
+		for(Contract c : helpList){
 
 			Logger.debug("Elimino contratto di %s %s che va da %s a %s", person.name, person.surname, c.beginContract, c.expireContract);
-						
-			// Eliminazione orari di lavoro 
+
+			// Eliminazione orari di lavoro
 			List<ContractWorkingTimeType> cwttList = ContractDao.getContractWorkingTimeTypeList(c);
 			//List<ContractWorkingTimeType> cwttList = ContractWorkingTimeType.find("Select cwtt from ContractWorkingTimeType cwtt where cwtt.contract = ?"
 			//		, c).fetch();
@@ -334,16 +339,16 @@ public class Persons extends Controller {
 				csp.delete();
 			}
 
-			
+
 			c.delete();
 			person = PersonDao.getPersonById(personId);
 			//person = Person.findById(personId);
 			person.contracts.remove(c);
-			
+
 			person.save();
 
 		}
-		
+
 		// Eliminazione assenze da inizializzazione
 		for(InitializationAbsence ia : person.initializationAbsences){
 			long id = ia.id;
@@ -359,7 +364,7 @@ public class Persons extends Controller {
 			//ia = InitializationTime.findById(id);
 			ia.delete();
 		}
-		
+
 
 
 
@@ -417,9 +422,9 @@ public class Persons extends Controller {
 		person = PersonDao.getPersonById(personId);
 		//person = Person.findById(personId);
 		//Eliminazione competenze valide
-		
+
 		JPAPlugin.closeTx(false);
-		
+
 //		//Eliminazione user
 //		JPAPlugin.startTx(false);
 //		person = Person.findById(personId);
@@ -440,7 +445,7 @@ public class Persons extends Controller {
 		}
 		person.delete();
 		JPAPlugin.closeTx(false);
-		
+
 		JPAPlugin.startTx(false);
 		if(userId != null) {
 			User user = UserDao.getUserById(userId, Optional.<String>absent());
@@ -545,7 +550,7 @@ public class Persons extends Controller {
 		contract.onCertificate = onCertificate;
 		contract.person = person;
 
-		//Date non si sovrappongono con gli altri contratti della persona	
+		//Date non si sovrappongono con gli altri contratti della persona
 		if( ! ContractManager.isProperContract(contract) ) {
 
 			flash.error("Il nuovo contratto si interseca con contratti precedenti. Controllare le date di inizio e fine. Operazione annulalta.");
@@ -554,7 +559,7 @@ public class Persons extends Controller {
 
 		contract.save();
 		ContractManager.properContractCreate(contract, wtt);
-		
+
 		flash.success("Il contratto per %s %s è stato correttamente salvato", person.name, person.surname);
 
 		Persons.edit(person.id);
@@ -605,7 +610,7 @@ public class Persons extends Controller {
 		contract.expireContract = expire;
 		contract.endContract = end;
 
-		//Date non si sovrappongono con gli altri contratti della persona	
+		//Date non si sovrappongono con gli altri contratti della persona
 		if( ! ContractManager.isProperContract(contract) ) {
 
 			flash.error("Il contratto si interseca con altri contratti della persona. Controllare le date di inizio e fine. Operazione annulalta.");
@@ -613,13 +618,13 @@ public class Persons extends Controller {
 		}
 
 		contract.onCertificate = onCertificate;
-		
+
 		ContractManager.properContractUpdate(contract);
-		
+
 		//Ricalcolo valori
 		DateInterval contractDateInterval = contract.getContractDateInterval();
 		ContractManager.recomputeContract(contract, contractDateInterval.getBegin(), contractDateInterval.getEnd());
-	
+
 		contract.save();
 
 		flash.success("Aggiornato contratto per il dipendente %s %s", contract.person.name, contract.person.surname);
@@ -674,7 +679,7 @@ public class Persons extends Controller {
 		rules.checkIfPermitted(contract.person.office);
 
 		LocalDate initUse = new LocalDate(
-				ConfGeneralManager.getFieldValue(ConfigurationFields.InitUseProgram.description, 
+				ConfGeneralManager.getFieldValue(ConfigurationFields.InitUseProgram.description,
 						Security.getUser().get().person.office));
 		render(contract, initUse);
 	}
@@ -727,11 +732,11 @@ public class Persons extends Controller {
 
 		//La lista dei tipi orario ammessi per la persona
 		List<WorkingTimeType> wttDefault = WorkingTimeType.getDefaultWorkingTimeTypes();
-		List<WorkingTimeType> wttAllowed = contract.person.office.getEnabledWorkingTimeType(); 
+		List<WorkingTimeType> wttAllowed = contract.person.office.getEnabledWorkingTimeType();
 		List<WorkingTimeType> wttList = new ArrayList<WorkingTimeType>();
 		wttList.addAll(wttDefault);
 		wttList.addAll(wttAllowed);
-		
+
 
 		render(contract, wttList);
 	}
@@ -776,7 +781,7 @@ public class Persons extends Controller {
 		cwtt.endDate = splitDate.minusDays(1);
 		cwtt.save();
 		flash.success("Orario di lavoro correttamente suddiviso in due sottoperiodi con tipo orario %s.", cwtt.workingTimeType.description);
-		Persons.edit(cwtt.contract.person.id);	
+		Persons.edit(cwtt.contract.person.id);
 	}
 
 	public static void deleteContractWorkingTimeType(ContractWorkingTimeType cwtt)
@@ -785,7 +790,7 @@ public class Persons extends Controller {
 
 			flash.error("Impossibile completare la richiesta, controllare i log.");
 			Application.indexAdmin();
-		}	
+		}
 
 		rules.checkIfPermitted(cwtt.contract.person.office);
 
@@ -795,13 +800,13 @@ public class Persons extends Controller {
 		if(contract.getContractWorkingTimeTypeAsList().size()<index){
 
 			flash.error("Impossibile completare la richiesta, controllare i log.");
-			Persons.edit(cwtt.contract.person.id);	
+			Persons.edit(cwtt.contract.person.id);
 		}
 
 		ContractWorkingTimeType previous = contract.getContractWorkingTimeTypeAsList().get(index-1);
 		previous.endDate = cwtt.endDate;
 		previous.save();
-		
+
 		//Safe remove from hibernate set of elements (pattern da riutilizzare quando serve)
 		for (Iterator<ContractWorkingTimeType> i = contract.contractWorkingTimeType.iterator(); i.hasNext();) {
 		    ContractWorkingTimeType cwttt = i.next();
@@ -811,12 +816,12 @@ public class Persons extends Controller {
 		}
 
 		cwtt.delete();
-		
+
 		//Ricalcolo valori
 		ContractManager.recomputeContract(cwtt.contract, cwtt.beginDate, null);
-		
+
 		flash.success("Orario di lavoro eliminato correttamente. Attribuito al periodo eliminato il tipo orario %s.", previous.workingTimeType.description);
-		Persons.edit(cwtt.contract.person.id);	
+		Persons.edit(cwtt.contract.person.id);
 	}
 
 	public static void changeTypeOfContractWorkingTimeType(ContractWorkingTimeType cwtt, WorkingTimeType newWtt)
@@ -846,12 +851,12 @@ public class Persons extends Controller {
 		render(user);
 	}
 
-	public static void savePassword(@Required String vecchiaPassword, 
+	public static void savePassword(@Required String vecchiaPassword,
 			@MinLength(5) @Required String nuovaPassword, @MinLength(5) @Required String confermaPassword){
 
 		User user = UserDao.getUserByUsernameAndPassword(Security.getUser().get().username, Optional.fromNullable(Hashing.md5().hashString(vecchiaPassword,  Charsets.UTF_8).toString()));
-		
-//		User user = User.find("SELECT u FROM User u where username = ? and password = ?", 
+
+//		User user = User.find("SELECT u FROM User u where username = ? and password = ?",
 //				Security.getUser().get().username, Hashing.md5().hashString(vecchiaPassword,  Charsets.UTF_8).toString()).first();
 		if(user == null) {
 			flash.error("Nessuna corrispondenza trovata fra utente e vecchia password inserita.");
@@ -873,28 +878,28 @@ public class Persons extends Controller {
 		flash.success(Messages.get("passwordSuccessfullyChanged"));
 		Persons.changePassword();
 	}
-	
+
 	public static void resetPassword(@MinLength(5) @Required String nuovaPassword, @MinLength(5) @Required String confermaPassword) throws Throwable {
-		
+
 		User user = Security.getUser().get();
 		if(user.expireRecoveryToken == null || !user.expireRecoveryToken.equals(LocalDate.now()))
 		{
 			flash.error("La procedura di recovery password è scaduta. Operazione annullata.");
 			Secure.login();
 		}
-		
+
 		if(validation.hasErrors() || !nuovaPassword.equals(confermaPassword)) {
 			flash.error("Tutti i campi devono essere valorizzati. "
 					+ "La passord deve essere almeno lunga 5 caratteri. Operazione annullata.");
 			LostPassword.lostPasswordRecovery(user.recoveryToken);
 		}
-		
+
 		Codec codec = new Codec();
 		user.password = codec.hexMD5(nuovaPassword);
 		user.recoveryToken = null;
 		user.expireRecoveryToken = null;
 		user.save();
-		
+
 		flash.success("La password è stata resettata con successo.");
 		Stampings.stampings(new LocalDate().getYear(), new LocalDate().getMonthOfYear());
 	}
@@ -936,7 +941,7 @@ public class Persons extends Controller {
 
 
 	public static void updateContractStampProfile(Long id){
-		
+
 		ContractStampProfile contract = ContractDao.getContractStampProfileById(id);
 		//ContractStampProfile contract = ContractStampProfile.findById(id);
 		if(contract == null) {
@@ -944,11 +949,11 @@ public class Persons extends Controller {
 			flash.error("Contratto inesistente. Operazione annullata.");
 			Persons.list(null);
 		}
-		
+
 		rules.checkIfPermitted(contract.contract.person.office);
-		
+
 		List<String> listTipo = Lists.newArrayList();
-		
+
 		for(int i = 1; i <=2; i++){
 			String t = null;
 			if(i % 2 == 0)
@@ -956,31 +961,31 @@ public class Persons extends Controller {
 			else
 				t = new String("Timbratura manuale");
 			listTipo.add(t);
-			
+
 		}
 		render(contract, listTipo);
 	}
-	
+
 	public static void changeTypeOfContractStampProfile(ContractStampProfile contract, String newtipo){
 		if(contract==null || newtipo==null) {
 
 			flash.error("Impossibile completare la richiesta, controllare i log.");
 			Application.indexAdmin();
 		}
-				
+
 		rules.checkIfPermitted(contract.contract.person.office);
 		if(newtipo.equals("Timbratura automatica"))
 			contract.fixedworkingtime = true;
 		else
 			contract.fixedworkingtime = false;
-		
+
 		contract.save();
-		
+
 		ContractManager.recomputeContract(contract.contract, contract.startFrom, null);
-		
+
 		flash.success("Cambiata correttamente tipologia di timbratura per il periodo a %s.", newtipo);
 		Persons.edit(contract.contract.person.id);
-		
+
 	}
 
 	public static void splitContractStampProfile(ContractStampProfile contract, LocalDate splitDate){
@@ -991,14 +996,14 @@ public class Persons extends Controller {
 		}
 
 		rules.checkIfPermitted(contract.contract.person.office);
-		
+
 
 		if(validation.hasError("splitDate")) {
 
 			flash.error("Errore nel fornire il parametro data. Inserire la data nel corretto formato aaaa-mm-gg");
 			Persons.edit(contract.contract.person.id);
 		}
-		
+
 		if(!DateUtility.isDateIntoInterval(splitDate, new DateInterval(contract.startFrom, contract.endTo))) {
 
 			flash.error("Errore nel fornire il parametro data. La data deve essere contenuta nel periodo da dividere.");
@@ -1009,7 +1014,7 @@ public class Persons extends Controller {
 			flash.error("Errore nel fornire il parametro data. La data deve essere contenuta nel periodo da dividere.");
 			Persons.edit(contract.contract.person.id);
 		}
-		
+
 		ContractStampProfile csp2 = new ContractStampProfile();
 		csp2.contract = contract.contract;
 		csp2.startFrom = splitDate;
@@ -1020,10 +1025,10 @@ public class Persons extends Controller {
 		contract.endTo = splitDate.minusDays(1);
 		contract.save();
 		flash.success("Tipo timbratura suddivisa in due sottoperiodi con valore %s.", contract.fixedworkingtime);
-		Persons.edit(contract.contract.person.id);	
-		
+		Persons.edit(contract.contract.person.id);
+
 	}
-	
+
 	public static void deleteContractStampProfile(Long contractStampProfileId){
 		ContractStampProfile csp = ContractDao.getContractStampProfileById(contractStampProfileId);
 		//ContractStampProfile csp = ContractStampProfile.findById(contractStampProfileId);
@@ -1031,7 +1036,7 @@ public class Persons extends Controller {
 
 			flash.error("Impossibile completare la richiesta, controllare i log.");
 			Application.indexAdmin();
-		}	
+		}
 
 		rules.checkIfPermitted(csp.contract.person.office);
 
@@ -1041,38 +1046,38 @@ public class Persons extends Controller {
 		if(ContractManager.getContractStampProfileAsList(contract).size()<index){
 
 			flash.error("Impossibile completare la richiesta, controllare i log.");
-			Persons.edit(csp.contract.person.id);	
+			Persons.edit(csp.contract.person.id);
 		}
 
 		ContractStampProfile previous = ContractManager.getContractStampProfileAsList(contract).get(index-1);
 		previous.endTo = csp.endTo;
 		previous.save();
 		csp.delete();
-		
+
 		//Ricalcolo i valori
-		//FIXME, trovare un modo per pulire lo heap che ci trovo sempre quello eliminato	
+		//FIXME, trovare un modo per pulire lo heap che ci trovo sempre quello eliminato
 		for(ContractStampProfile cspp : contract.contractStampProfile){
 			if(cspp.id.equals(csp.id)) {
 				contract.contractStampProfile.remove(cspp);
 			}
 		}
-		
+
 		//Ricalcolo i valori
 		ContractManager.recomputeContract(previous.contract, csp.startFrom, null);
-		
+
 		flash.success("Tipologia di timbratura eliminata correttamente. Tornati alla precedente che ha timbratura automatica con valore: %s", previous.fixedworkingtime);
 		Persons.edit(csp.contract.person.id);
 	}
-	
-	
+
+
 	public static void modifySendEmail(Long personId){
-		
+
 		Person person = PersonDao.getPersonById(personId);
 		//Person person = Person.findById(personId);
 		rules.checkIfPermitted(person.office);
 		render(person);
 	}
-	
+
 	public static void updateSendEmail(Person person, boolean wantEmail){
 		if(person == null) {
 
