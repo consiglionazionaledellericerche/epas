@@ -31,6 +31,7 @@ public class ExtendedRevisionListener implements RevisionListener {
 	
 	@Override
 	public void newRevision(Object revisionEntity) {
+		try {
 		 final Revision revision = (Revision) revisionEntity;
 		 try {
 			 revision.ipaddress = ipaddress.get();
@@ -38,5 +39,8 @@ public class ExtendedRevisionListener implements RevisionListener {
 		 } catch (ProvisionException e) {
 			 LOG.warn("unkown owner or user on {}: {}", revision, e);
 		 }
+		} catch (NullPointerException ignored) {
+			LOG.warn("NPE", ignored);
+		}
 	}
 }
