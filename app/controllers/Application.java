@@ -2,6 +2,7 @@ package controllers;
 
 import java.util.List;
 
+import manager.OfficeManager;
 import models.Office;
 
 import org.joda.time.LocalDate;
@@ -30,7 +31,7 @@ public class Application extends Controller {
     	boolean seatExist = false;
     	for(Office office : officeList) {
     		
-    		if(office.isSeat()) {
+    		if(OfficeManager.isSeat(office)) {
     			seatExist = true;
     			break;
     		}

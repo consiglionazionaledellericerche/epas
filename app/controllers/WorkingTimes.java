@@ -7,18 +7,23 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
+
 import dao.ContractDao;
 import dao.OfficeDao;
 import dao.WorkingTimeTypeDao;
 import manager.ContractManager;
+import manager.OfficeManager;
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Office;
+import models.User;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import play.Logger;
@@ -36,10 +41,10 @@ public class WorkingTimes extends Controller{
 	
 	public static void manageWorkingTime(Office office){
 		
-		List<Office> offices = Security.getOfficeAllowed();
+		Set<Office> offices = OfficeDao.getOfficeAllowed(Optional.<User>absent());
 		if(office == null || office.id == null) {
 			//TODO se offices è vuota capire come comportarsi
-			office = offices.get(0);
+			office = offices.iterator().next();
 		}
 		
 		rules.checkIfPermitted(office);
@@ -101,7 +106,7 @@ public class WorkingTimes extends Controller{
 			WorkingTimes.manageWorkingTime(null);
 		}
 		
-		if(!office.isSeat()) {
+		if(!OfficeManager.isSeat(office)) {
 			
 			flash.error("E' possibile definire tipi orario solo a livello sede. Operazione annullata.");
 			WorkingTimes.manageWorkingTime(null);
@@ -138,7 +143,7 @@ public class WorkingTimes extends Controller{
 			WorkingTimes.manageWorkingTime(null);
 		}
 		
-		if(!office.isSeat()) {
+		if(!OfficeManager.isSeat(office)) {
 			
 			flash.error("E' possibile definire tipi orario solo a livello sede. Operazione annullata.");
 			WorkingTimes.manageWorkingTime(null);

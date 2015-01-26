@@ -1,16 +1,22 @@
 package dao;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import helpers.ModelQuery;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Sets;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 
+import controllers.Security;
+import controllers.Wizard.WizardStep;
 import models.Office;
-import models.Person;
 import models.User;
 import models.UsersRolesOffices;
 import models.query.QOffice;
@@ -106,44 +112,29 @@ public class OfficeDao {
 	 * @param user
 	 * @return la lista degli uffici permessi per l'utente user passato come parametro
 	 */
-	public static List<Office> getOfficeAllowed(User user) {
+	public static Set<Office> getOfficeAllowed(Optional<User> user) {
 		
-		List<Office> officeList = new ArrayList<Office>();
-		for(UsersRolesOffices uro : user.usersRolesOffices){
-			if(uro.office.isSeat())
-				officeList.add(uro.office);
+		User u = user.or(Security.getUser().get());
+		Set<Office> offices = Sets.newHashSet();
+		
+		offices.addAll(FluentIterable.from(u.usersRolesOffices).transform(new Function<UsersRolesOffices,Office>() {
+			@Override
+			public Office apply(UsersRolesOffices uro) {
+				return uro.office;
+			}}).toSet());
+//     FIXME Capire se è indispensabile restituire solo le sedi
+//			filter(new Predicate<Office>() {
+//	    	    @Override
+//	    	    public boolean apply(Office o) {
+//	    	        return o.isSeat();
+//	    	    }}).toSet();
+		
+//		FIXME non sarebbe meglio avere dei ruoli anche per gli impiegati???
+//		Necessario perchè non esistono userRoleOffice per gli utenti standard
+		
+		if(u.person != null) {
+			offices.add(u.person.office);
 		}
-		//TODO riscrivere col nuovo concetto di ruoli e permessi e funzionale al tipo di ruolo che si cerca
-//		if (this.person != null) {
-//			officeList.add(this.person.office);
-//		}
-//		else {
-//			
-//			officeList = Office.findAll(); 
-//		}
-		return officeList;
-			
-		//return Office.find("select distinct o from Office o join "
-		//		+ "o.userPermissionOffices as upo where upo.user = ?",this).fetch();
-		
-	}
-	
-	
-	/**
-	 * 
-	 * @return la lista delle sedi visibili alla persona che ha chiamato il metodo
-	 */
-	public static List<Office> getOfficeAllowed(Person person){
-		
-		List<Office> officeList = new ArrayList<Office>();
-		officeList.add(person.office);
-		if(!person.office.subOffices.isEmpty()){
-			
-			for(Office office : person.office.subOffices){
-				officeList.add(office);
-			}
-		}
-		
-		return officeList;
+		return offices;
 	}
 }

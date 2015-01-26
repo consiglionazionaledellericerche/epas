@@ -18,15 +18,11 @@ import play.Logger;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 
-import controllers.Application;
-import controllers.Competences;
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.OfficeDao;
-import dao.PersonDao;
 import dao.PersonDayDao;
 import models.Absence;
 import models.Competence;

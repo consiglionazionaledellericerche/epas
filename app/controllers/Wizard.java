@@ -11,8 +11,8 @@ import java.util.Properties;
 import manager.ConfGeneralManager;
 import manager.ConfYearManager;
 import manager.ContractManager;
+import manager.OfficeManager;
 import models.ConfGeneral;
-import models.ConfYear;
 import models.Contract;
 import models.Office;
 import models.Person;
@@ -492,7 +492,7 @@ public class Wizard extends Controller {
 		ConfYearManager.buildDefaultConfYear(seat, LocalDate.now().getYear() - 1);
 		
 		
-		seat.setPermissionAfterCreation();
+		OfficeManager.setPermissionAfterCreation(seat);
 		
 		ConfGeneral confGeneral;
 		
