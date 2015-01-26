@@ -11,10 +11,10 @@
 <p><a href="@{Persons.insertPerson}"><span class="glyphicon glyphicon-plus"></span> Inserisci una nuova persona</a></p>
 
 <p>
-#{form action:@Persons.list(), class:'form', 
+#{form action:@Persons.list(), class:'form',
     method:'GET', autocomplete:'off',
     'data-reload':'#results'}
-    
+
     <span class="glyphicon glyphicon-search"></span>
     <input type="text" name="name" placeholder="Nome o cognome" value="${name}" class="search-query"/>
 
@@ -39,94 +39,94 @@
 		<th>Invio Email</th>
 		<th>Note</th>
 	</tr>
-	
+
 	#{list items:personList, as:'person'}
-	
+
 
 
 	<tr>
-	#{if person.currentContract != null }
-	
-		<td class="personName"><a href="@{edit(person.id)}"><font color="#0000FF">${person.surname} ${person.name}</font></a></td>
-		<td><font color="#000000">${person.number}</font></td>
-		<td><font color="#000000">${person.badgeNumber}</font></td>
-		<td><font color="#000000">${person.currentContract != null ? person.currentContract.beginContract : ''}</font></td>
-		<td><font color="#000000">${person.currentContract != null ? person.currentContract.expireContract : ''}</font></td>
-		
+	#{if person.currentContract.present}
+
+		<td class="personName"><a href="@{edit(person.value.id)}"><font color="#0000FF">${person.value.fullname}</font></a></td>
+		<td><font color="#000000">${person.value.number}</font></td>
+		<td><font color="#000000">${person.value.badgeNumber}</font></td>
+		<td><font color="#000000">${person.currentContract.get().beginContract}</font></td>
+		<td><font color="#000000">${person.currentContract.get().expireContract}</font></td>
+
 		<td>
-		  #{if person.currentWorkingTimeType != null}
-		    <a data-toggle="modal" href="@{Persons.showCurrentContractWorkingTimeType(person.id)}" data-target=".my-modal">
-		      ${person.currentWorkingTimeType.description}
+		  #{if person.value.currentWorkingTimeType != null}
+		    <a data-toggle="modal" href="@{Persons.showCurrentContractWorkingTimeType(person.value.id)}" data-target=".my-modal">
+		      ${person.value.currentWorkingTimeType.description}
 		    </a>
 		  #{/if}
 		</td>
-		
+
 		<td>
-		  #{if person.currentVacationCode != null }
-		     <a data-toggle="modal" href="@{Persons.showCurrentVacation(person.id)}" data-target=".my-modal">
-		        ${person.currentVacationCode.description}
+		  #{if person.value.currentVacationCode != null }
+		     <a data-toggle="modal" href="@{Persons.showCurrentVacation(person.value.id)}" data-target=".my-modal">
+		        ${person.value.currentVacationCode.description}
 		     </a>
 		  #{/if}
 		</td>
-		
-		<td><font color="#000000">${person.getQualification() != null ? person.getQualification().qualification : ''}</font></td>
+
+		<td><font color="#000000">${person.value.getQualification() != null ? person.value.getQualification().qualification : ''}</font></td>
 		<td>
-		  #{if person.getCurrentContractStampProfile().fixedworkingtime}
+		  #{if person.currentContractStampProfile?.fixedworkingtime}
 		    <i class="fa fa-check-square-o"></i>
-		  #{/if}  
+		  #{/if}
 		</td>
-		<td><font color="#000000">${person.email != null ? person.email : ''}</font></td>
+		<td><font color="#000000">${person.value.email}</font></td>
 		<td>
 		 <a href="#" data-popover
-	    		data-trigger="hover" data-toggle="popover" 
+	    		data-trigger="hover" data-toggle="popover"
 	    		data-placement="bottom"
 	    		data-html="true"
 	    		data-content="${(
-	    		'Dipartimento: <strong>'+person.department+'</strong>'+
-	    		'<br>Sede: <strong>'+person.headOffice+'</strong>'+
-	    		'<br>Stanza: <strong>'+person.room+'</strong>'+
-	    		'<br>Telefono: <strong>'+person.telephone+'</strong>').escape()}"
-	    		title="Contatti ${person.name} ${person.surname}"><i class="fa fa-phone"></i></a>
+	    		'Dipartimento: <strong>'+person.value.department+'</strong>'+
+	    		'<br>Sede: <strong>'+person.value.headOffice+'</strong>'+
+	    		'<br>Stanza: <strong>'+person.value.room+'</strong>'+
+	    		'<br>Telefono: <strong>'+person.value.telephone+'</strong>').escape()}"
+	    		title="Contatti ${person.value.fullname}"><i class="fa fa-phone"></i></a>
 		</td>
 
 		<!-- Inizializzazione ePAS -->
 		<td>
-		  #{if person.currentContract.sourceDate != null}
+		  #{if person.currentContract.get().sourceDate != null}
 		    <i class="fa fa-check-square-o"></i>
-		  #{/if}  
+		  #{/if}
 		</td>
 
 		<!-- Invio email -->
 		<td>
-		  #{if person.wantEmail}
+		  #{if person.value.wantEmail}
 		    <i class="fa fa-check-square-o"></i>
-		  #{/if}  
+		  #{/if}
 		</td>
-		
+
 		<!-- Note -->
-		
-		#{if person.user == null}
-			<td><a href="@{Persons.insertUsername(person.id)}">Ins.username</a></td>
+
+		#{if person.value.user == null}
+			<td><a href="@{Persons.insertUsername(person.value.id)}">Ins.username</a></td>
 		#{/if}
 		#{else}
 			<td></td>
 		#{/else}
 	#{/if}
 	#{else}
-		<td class="personName"><a href="@{edit(person.id)}"><font color="#808080">${person.surname} ${person.name}</font></a></td>
-		<td><font color="#808080">${person.number}</font></td>
-		<td><font color="#000000">${person.badgeNumber}</font></td>
+		<td class="personName"><a href="@{edit(person.value.id)}"><font color="#808080">${person.value.fullname}</font></a></td>
+		<td><font color="#808080">${person.value.number}</font></td>
+		<td><font color="#000000">${person.value.badgeNumber}</font></td>
 		<td><!-- begin contract --></td>
 		<td><!-- expire contract --></td>
 		<td><!-- tipo orario --></td>
 		<td><!-- ferie --></td>
-		<td><font color="#808080">${person.getQualification() != null ? person.getQualification().qualification : ''}</font></td>
+		<td><font color="#808080">${person.value.getQualification() != null ? person.value.getQualification().qualification : ''}</font></td>
 		<td>${''}</td>
-		<td><font color="#808080">${person.email != null ? person.email : ''}</font></td>
+		<td><font color="#808080">${person.value.email}</font></td>
 		<td></td>
-		<td>${}</td>
-		<td>${}</td>
-		<td>${}</td>
+		<td></td>
+		<td></td>
+		<td></td>
 	#{/else}
 	</tr>
 

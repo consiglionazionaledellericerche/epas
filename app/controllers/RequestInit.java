@@ -7,12 +7,14 @@ import helpers.ModelQuery;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
+import java.util.Set;
 
 import models.ConfGeneral;
 import models.Office;
 import models.Permission;
 import models.Person;
 import models.Qualification;
+import models.User;
 import models.enumerate.ConfigurationFields;
 import models.query.QPermission;
 import models.query.QRole;
@@ -244,8 +246,8 @@ public class RequestInit extends Controller {
 			return QualificationDao.findAll();
 		}
 		
-		public List<Office> getAllOfficesAllowed() {
-			return Security.getOfficeAllowed();
+		public Set<Office> getAllOfficesAllowed() {
+			return OfficeDao.getOfficeAllowed(Optional.<User>absent());
 		}
 	}
 
@@ -347,17 +349,16 @@ public class RequestInit extends Controller {
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
 		String name = null;
 		if(Security.getUser().get().person != null) {
-			List<Office> officeList = Security.getOfficeAllowed();
-			if(officeList.size() > 0) {
+			Set<Office> officeList = OfficeDao.getOfficeAllowed(Optional.<User>absent());
+			if(!officeList.isEmpty()) {
 			List<Person> persons = PersonDao.list(Optional.fromNullable(name), 
-					Sets.newHashSet(Security.getOfficeAllowed()), false, beginMonth, endMonth, true).list();
+					officeList, false, beginMonth, endMonth, true).list();
 			renderArgs.put("navPersons", persons);
 			}
 		} 
 		else {
 
 			List<Office> allOffices = OfficeDao.getAllOffices();
-			//List<Office> allOffices = Office.findAll();
 			if (allOffices!=null && !allOffices.isEmpty()){
 			List<Person> persons = PersonDao.list(Optional.fromNullable(name), 
 					Sets.newHashSet(allOffices), false, beginMonth, endMonth, true).list();
@@ -380,7 +381,8 @@ public class RequestInit extends Controller {
 		 */
 		List<Integer> years = Lists.newArrayList();
 		Integer actualYear = new LocalDate().getYear();
-		Optional<ConfGeneral> yearInitUseProgram = ConfGeneralDao.getConfGeneralByField(ConfigurationFields.InitUseProgram.description, Security.getOfficeAllowed().get(0));
+		Optional<ConfGeneral> yearInitUseProgram = ConfGeneralDao.getConfGeneralByField(ConfigurationFields.InitUseProgram.description,
+				OfficeDao.getOfficeAllowed(Optional.<User>absent()).iterator().next());
 //		ConfGeneral yearBegin = ConfGeneral.find("Select c from ConfGeneral c where c.field = ? ", 
 //				ConfigurationFields.InitUseProgram.description).first();
 		

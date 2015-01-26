@@ -8,6 +8,38 @@ import models.Permission;
 
 global models.User currentOperator;
 
+
+/*
+ * 		Permission: editAbsenceType
+ */
+rule editAbsenceType_generic
+when
+ $uro: UsersRolesOffices()
+ $p: Permission(description == "editAbsenceType") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        /* inserire le action interessate */
+        "Absences.manageAbsenceCode"
+       ), target == null, granted == false)
+then
+ $c.grant();
+end
+
+/*
+ * 		Permission: developer
+ */
+rule developer
+when
+ $uro: UsersRolesOffices()
+ $p: Permission(description == "developer") from $uro.role.permissions
+ $c: PermissionCheck(action in (
+        /* inserire le action interessate */
+        "Administration.utilities",
+        "Administration.fixPersonSituation"
+       ), target == null, granted == false)
+then
+ $c.grant();
+end
+
 /*  
  *	Azioni eseguibili solo per le persone fisiche
  */

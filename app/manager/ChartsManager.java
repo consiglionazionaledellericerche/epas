@@ -32,7 +32,6 @@ import models.rendering.VacationsRecap;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
-import controllers.Charts;
 import controllers.Security;
 import dao.AbsenceDao;
 import dao.CompetenceCodeDao;
