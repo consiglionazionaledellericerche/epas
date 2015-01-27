@@ -115,13 +115,18 @@ public class OfficeDao {
 	public static Set<Office> getOfficeAllowed(Optional<User> user) {
 		
 		User u = user.or(Security.getUser().get());
-		Set<Office> offices = Sets.newHashSet();
-		
-		offices.addAll(FluentIterable.from(u.usersRolesOffices).transform(new Function<UsersRolesOffices,Office>() {
+// 		L'utente standard non ha nessun userRoleoffice ed è necessario restituire il suo ufficio di appartenenza
+//		FIXME Non sarebbe meglio avere un ruolo base per gli utenti???
+		if(u.usersRolesOffices.isEmpty()){
+			return Sets.newHashSet(u.person.office);
+		}
+
+		return	FluentIterable.from(u.usersRolesOffices).transform(new Function<UsersRolesOffices,Office>() {
 			@Override
 			public Office apply(UsersRolesOffices uro) {
 				return uro.office;
-			}}).toSet());
+			}}).toSet();
+
 //     FIXME Capire se è indispensabile restituire solo le sedi
 //			filter(new Predicate<Office>() {
 //	    	    @Override
@@ -129,12 +134,5 @@ public class OfficeDao {
 //	    	        return o.isSeat();
 //	    	    }}).toSet();
 		
-//		FIXME non sarebbe meglio avere dei ruoli anche per gli impiegati???
-//		Necessario perchè non esistono userRoleOffice per gli utenti standard
-		
-		if(u.person != null) {
-			offices.add(u.person.office);
-		}
-		return offices;
 	}
 }
