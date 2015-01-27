@@ -276,7 +276,7 @@ public class ChartsManager {
 					String assenza = removeApice(tokenList.get(indexAssenza));
 					LocalDate dataAssenza = buildDate(tokenList.get(indexDataAssenza));
 					Person p = PersonDao.getPersonByNumber(matricola);
-					Absence abs = AbsenceDao.getAbsenceInDay(Optional.fromNullable(p), dataAssenza, Optional.<LocalDate>absent(), false).size() > 0 ? AbsenceDao.getAbsenceInDay(Optional.fromNullable(p), dataAssenza, Optional.<LocalDate>absent(), false).get(0) : null;
+					Absence abs = AbsenceDao.getAbsencesInPeriod(Optional.fromNullable(p), dataAssenza, Optional.<LocalDate>absent(), false).size() > 0 ? AbsenceDao.getAbsencesInPeriod(Optional.fromNullable(p), dataAssenza, Optional.<LocalDate>absent(), false).get(0) : null;
 					
 					if(abs == null){
 						if(!dataAssenza.isBefore(new LocalDate(2013,1,1)))

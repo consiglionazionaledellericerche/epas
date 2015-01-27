@@ -71,7 +71,7 @@ public class AbsenceDao extends DaoBase {
 	 * In caso non sia valorizzato, verrano ritornate le assenze relative a un solo giorno.
 	 * Se il booleano forAttachment è true, si cercano gli allegati relativi a un certo periodo.
 	 */
-	public static List<Absence> getAbsenceInDay(Optional<Person> person, LocalDate dateFrom, Optional<LocalDate> dateTo, boolean forAttachment){
+	public static List<Absence> getAbsencesInPeriod(Optional<Person> person, LocalDate dateFrom, Optional<LocalDate> dateTo, boolean forAttachment){
 
 		final BooleanBuilder condition = new BooleanBuilder();
 		final JPQLQuery query = ModelQuery.queryFactory().from(absence);
