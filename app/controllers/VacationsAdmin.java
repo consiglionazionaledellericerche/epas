@@ -61,8 +61,7 @@ public class VacationsAdmin extends Controller{
 				personsWithVacationsProblems.add(person);
 			}
 		}
-		
-		//ConfYear conf = ConfYear.getConfYear(year);
+				
 		Office office = Security.getUser().get().person.office;
 		Integer monthExpiryVacationPastYear = Integer.parseInt(ConfYearManager.getFieldValue("month_expiry_vacation_past_year", year, office));
 		Integer dayExpiryVacationPastYear = Integer.parseInt(ConfYearManager.getFieldValue("day_expiry_vacation_past_year", year, office));
@@ -77,7 +76,6 @@ public class VacationsAdmin extends Controller{
 	public static void vacationsCurrentYear(Long personId, Integer anno){
 		
 		Person person = PersonDao.getPersonById(personId);
-		//Person person = Person.findById(personId);
 		if( person == null ) {
 			error();	/* send a 500 error */
 		}
@@ -109,7 +107,6 @@ public class VacationsAdmin extends Controller{
 	public static void vacationsLastYear(Long personId, Integer anno){
 		
 		Person person = PersonDao.getPersonById(personId);
-		//Person person = Person.findById(personId);
 		if( person == null ) {
 			error();	/* send a 500 error */
 		}
@@ -140,7 +137,6 @@ public class VacationsAdmin extends Controller{
 	public static void permissionCurrentYear(Long personId, Integer anno){
 		
 		Person person = PersonDao.getPersonById(personId);
-		//Person person = Person.findById(personId);
 		if( person == null ) {
 			error();	/* send a 500 error */
 		}
