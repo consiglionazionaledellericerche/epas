@@ -4,26 +4,19 @@ import helpers.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.CheckAbsenceInsert;
 import it.cnr.iit.epas.CheckMessage;
 import it.cnr.iit.epas.DateUtility;
-import it.cnr.iit.epas.MainMenu;
 import it.cnr.iit.epas.PersonUtility;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import javax.inject.Inject;
-import javax.persistence.Query;
-import javax.validation.constraints.NotNull;
 
 import manager.AbsenceManager;
 import models.Absence;
@@ -46,21 +39,21 @@ import org.apache.commons.mail.MultiPartEmail;
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 
+import play.Logger;
+import play.data.validation.Required;
+import play.data.validation.Valid;
+import play.db.jpa.Blob;
+import play.libs.Mail;
+import play.mvc.Controller;
+import play.mvc.With;
+import security.SecurityRules;
+
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 
-import play.Logger;
-import play.data.validation.Required;
-import play.data.validation.Valid;
-import play.db.jpa.Blob;
-import play.db.jpa.JPA;
-import play.libs.Mail;
-import play.mvc.Controller;
-import play.mvc.With;
-import security.SecurityRules;
 import controllers.Resecure.NoCheck;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
@@ -311,7 +304,10 @@ public class Absences extends Controller{
 		}	
 
 		if((absenceType.code.startsWith("12") || absenceType.code.startsWith("13"))){
-			handlerChildIllness(person, dateFrom, dateTo, absenceType, file);
+			//TODO il controllo sull'inserimento assenza per malattia figli è momentaneamente disabilitato
+			//perchè va implementato con la nuova logica. Baesso avvisato.
+			//handlerChildIllness(person, dateFrom, dateTo, absenceType, file);
+			handlerGenericAbsenceType(person, dateFrom, dateTo, absenceType, file, mealTicket);
 			return;
 		}
 
@@ -438,9 +434,8 @@ public class Absences extends Controller{
 		LocalDate date = absence.personDay.date;
 		List<AbsenceType> frequentAbsenceTypeList = AbsenceTypeDao.getFrequentTypes();
 		//List<AbsenceType> frequentAbsenceTypeList = getFrequentAbsenceTypes();
-		MainMenu mainMenu = new MainMenu(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth());
 		List<AbsenceType> allCodes = AbsenceTypeDao.getAbsenceTypeFromEffectiveDate(absence.personDay.date);
-		render(absence, frequentAbsenceTypeList, allCodes, mainMenu);				
+		render(absence, frequentAbsenceTypeList, allCodes);				
 	}
 
 	public static void update(Blob file) throws EmailException {

@@ -1,7 +1,6 @@
 package controllers;
 
 import it.cnr.iit.epas.DateUtility;
-import it.cnr.iit.epas.MainMenu;
 import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
@@ -22,15 +21,20 @@ import models.rendering.PersonStampingDayRecap;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
+import play.Logger;
+import play.mvc.Controller;
+import play.mvc.With;
+
+import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
+import com.google.common.hash.Hashing;
 
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.UserDao;
-import play.Logger;
-import play.mvc.Controller;
 
+@With( RequestInit.class )
 public class Clocks extends Controller{
 
 	public static void show(){
@@ -38,9 +42,8 @@ public class Clocks extends Controller{
 		//TODO Capire quali office saranno visibili a questo livello
 		List<Office> officeAllowed = OfficeDao.getAllOffices();
 		//List<Office> officeAllowed = Office.findAll();
-		MainMenu mainMenu = new MainMenu(data.getYear(),data.getMonthOfYear());
 		List<Person> personList = Person.getActivePersonsInMonth(data.getMonthOfYear(), data.getYear(), officeAllowed, false);
-		render(data, personList,mainMenu);
+		render(data, personList);
 	}
 	
 	
@@ -53,7 +56,7 @@ public class Clocks extends Controller{
 			Clocks.show();
 		}
 		
-		User user = UserDao.getUserById(userId, Optional.fromNullable(password));
+		User user = UserDao.getUserById(userId, Optional.fromNullable(Hashing.md5().hashString(password,  Charsets.UTF_8).toString()));
 		//User user = User.find("select u from User u where id = ? and password = md5(?)", userId, password).first();
 		
 		if(user == null)
