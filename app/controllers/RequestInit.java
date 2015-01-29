@@ -262,6 +262,10 @@ public class RequestInit extends Controller {
 	@NoCheck
 	public static void injectMenu() { 
 		
+		if(Office.count() == 0 && Security.getUser().get().username.equals("admin")){
+			Wizard.wizard(0);
+		}
+		
 		ItemsPermitted ip = new ItemsPermitted();
 		renderArgs.put("ip", ip);
 	
@@ -381,8 +385,6 @@ public class RequestInit extends Controller {
 		List<Integer> years = Lists.newArrayList();
 		Integer actualYear = new LocalDate().getYear();
 		Optional<ConfGeneral> yearInitUseProgram = ConfGeneralDao.getConfGeneralByField(ConfigurationFields.InitUseProgram.description, Security.getOfficeAllowed().get(0));
-//		ConfGeneral yearBegin = ConfGeneral.find("Select c from ConfGeneral c where c.field = ? ", 
-//				ConfigurationFields.InitUseProgram.description).first();
 		
 		Integer yearBeginProgram;
 		if(yearInitUseProgram.isPresent()){
