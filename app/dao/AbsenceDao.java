@@ -189,7 +189,7 @@ public class AbsenceDao {
 	public static List<Absence> getReplacingAbsenceOccurrenceListInPeriod(AbsenceType abt, Person person, LocalDate begin, LocalDate end){
 		QAbsence absence = QAbsence.absence;
 		final JPQLQuery query = ModelQuery.queryFactory().from(absence)
-				.where(absence.absenceType.eq(abt.absenceTypeGroup.replacingAbsenceType)
+				.where(absence.absenceType.absenceTypeGroup.label.eq(abt.absenceTypeGroup.label)
 						.and(absence.personDay.person.eq(person).and(absence.personDay.date.between(begin, end))));
 		return query.list(absence);
 	}
