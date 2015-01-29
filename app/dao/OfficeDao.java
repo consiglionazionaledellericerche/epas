@@ -118,9 +118,13 @@ public class OfficeDao {
 // 		L'utente standard non ha nessun userRoleoffice ed è necessario restituire il suo ufficio di appartenenza
 //		FIXME Non sarebbe meglio avere un ruolo base per gli utenti???
 		if(u.usersRolesOffices.isEmpty()){
-			return Sets.newHashSet(u.person.office);
+			if(u.person != null){
+				return Sets.newHashSet(u.person.office);
+			}
+			else
+				return Sets.newHashSet();
 		}
-
+		
 		return	FluentIterable.from(u.usersRolesOffices).transform(new Function<UsersRolesOffices,Office>() {
 			@Override
 			public Office apply(UsersRolesOffices uro) {
