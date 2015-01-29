@@ -304,7 +304,10 @@ public class Absences extends Controller{
 		}	
 
 		if((absenceType.code.startsWith("12") || absenceType.code.startsWith("13"))){
-			handlerChildIllness(person, dateFrom, dateTo, absenceType, file);
+			//TODO il controllo sull'inserimento assenza per malattia figli è momentaneamente disabilitato
+			//perchè va implementato con la nuova logica. Baesso avvisato.
+			//handlerChildIllness(person, dateFrom, dateTo, absenceType, file);
+			handlerGenericAbsenceType(person, dateFrom, dateTo, absenceType, file, mealTicket);
 			return;
 		}
 
