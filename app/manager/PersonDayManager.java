@@ -81,11 +81,7 @@ public class PersonDayManager {
 	 */
 	private static boolean checkHourlyAbsenceCodeSameGroup(AbsenceType abt, PersonDay pd){
 		return AbsenceDao.getAbsenceWithReplacingAbsenceTypeNotNull(abt, pd);
-				
-//		Query query = JPA.em().createQuery("Select abs from Absence abs where abs.absenceType.absenceTypeGroup.replacingAbsenceType = :abt and " +
-//				"abs.personDay = :pd");
-//		query.setParameter("abt", abt).setParameter("pd", pd);
-//		return query.getResultList().size() > 0;
+
 	}
 	
 	
@@ -166,7 +162,6 @@ public class PersonDayManager {
 			setIsTickeAvailable(pd,false);
 			return justifiedTimeAtWork + holidayWorkTime;
 		}
-
 			
 		orderStampings(pd);
 		List<PairStamping> validPairs = PairStamping.getValidPairStamping(pd.stampings);
@@ -252,13 +247,8 @@ public class PersonDayManager {
 	public static StampModificationType getFixedWorkingTime(){
 		//TODO usato solo in PersonStampingDayRecap bisogna metterlo nella cache
 		return StampingDao.getStampModificationTypeById(StampModificationTypeValue.FIXED_WORKINGTIME.getId());
-		//return StampModificationType.findById(StampModificationTypeValue.FIXED_WORKINGTIME.getId());
 	}
-	
-	
-	
-	
-	
+
 	/**
 	 * Ordina per orario la lista delle stamping nel person day
 	 */
@@ -266,8 +256,7 @@ public class PersonDayManager {
 	{
 		Collections.sort(pd.stampings);
 	}
-	
-	
+		
 	/**
 	 * Setta il campo valid per ciascuna stamping contenuta in orderedStampings
 	 */
@@ -288,12 +277,10 @@ public class PersonDayManager {
 	private static List<PairStamping> getGapLunchPairs(PersonDay pd, List<PairStamping> validPairs)
 	{
 		//Assumo che la timbratura di uscita e di ingresso debbano appartenere alla finestra 12:00 - 15:00
-		//Configuration conf = Configuration.getConfiguration(this.date);
 		Integer mealTimeStartHour = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_start_hour", pd.person.office));
 		Integer mealTimeStartMinute = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_start_minute", pd.person.office));
 		Integer mealTimeEndHour = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_end_hour", pd.person.office));
 		Integer mealTimeEndMinute = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_end_minute", pd.person.office));
-		//ConfGeneral conf = ConfGeneral.getConfGeneral();
 		LocalDateTime startLunch = new LocalDateTime()
 		.withYear(pd.date.getYear())
 		.withMonthOfYear(pd.date.getMonthOfYear())
@@ -308,7 +295,6 @@ public class PersonDayManager {
 		.withHourOfDay(mealTimeEndHour)
 		.withMinuteOfHour(mealTimeEndMinute);
 		
-		//List<PairStamping> lunchPairs = new ArrayList<PersonDay.PairStamping>();
 		List<PairStamping> allGapPairs = new ArrayList<PairStamping>();
 		
 		//1) Calcolare tutte le gapPair
@@ -354,9 +340,6 @@ public class PersonDayManager {
 		
 		return gapPairs;
 	}
-
-
-	
 	
 	/**
 	 * Ritorna l'ultima timbratura in ordine di tempo nel giorno
@@ -384,19 +367,13 @@ public class PersonDayManager {
 		pd.timeAtWork = getCalculatedTimeAtWork(pd);
 	}
 
-
-
 	/**
 	 * 
 	 * @return la differenza tra l'orario di lavoro giornaliero e l'orario standard in minuti
 	 */
 	private static void updateDifference(PersonDay pd){
 		
-		//int worktime = this.person.workingTimeType.getWorkingTimeTypeDayFromDayOfWeek(this.date.getDayOfWeek()).workingTime;
-		//int worktime = this.person.getWorkingTimeType(date).getWorkingTimeTypeDayFromDayOfWeek(this.date.getDayOfWeek()).workingTime;
 		int worktime = WorkingTimeTypeManager.getWorkingTimeTypeDayFromDayOfWeek(pd.date.getDayOfWeek(), WorkingTimeTypeDao.getWorkingTimeType(pd.date, pd.person)).workingTime;
-				
-		
 		//persona fixed
 		if(pd.isFixedTimeAtWork() && pd.timeAtWork == 0){
 			pd.difference = 0;
@@ -447,7 +424,6 @@ public class PersonDayManager {
 	}
 	
 	
-	
 	/**
 	 * Assegna ad ogni person day del mese il primo precedente esistente.
 	 * Assegna null al primo giorno del mese.
@@ -458,16 +434,11 @@ public class PersonDayManager {
 		LocalDate endMonth = pd.date.dayOfMonth().withMaximumValue();
 		
 		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(pd.person, beginMonth, Optional.fromNullable(endMonth), true);
-//		List<PersonDay> pdList = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? and pd.date >= ? and pd.date <= ? ORDER by pd.date",
-//				person, beginMonth, endMonth).fetch();
 		for(int i=1; i<pdList.size(); i++)
 		{
 			pdList.get(i).previousPersonDayInMonth = pdList.get(i-1);
 		}
 	}
-	
-	
-
 
 	/**
 	 * Aggiorna il campo ticket available e persiste il dato. Controllare per le persone fixed nel giorno di festa.
@@ -477,7 +448,6 @@ public class PersonDayManager {
 		//caso forced by admin
 		if(pd.isTicketForcedByAdmin)
 		{
-			//this.isTicketAvailable = true; SBAGLIATO non devo fare niente
 			pd.save();
 			return;
 		}
@@ -528,8 +498,6 @@ public class PersonDayManager {
 	{
 		//TODO usato solo in PersonStampingDayRecap, vedere come ottimizzarlo
 		PersonDay lastPreviousPersonDayInMonth = PersonDayDao.getPersonDayForRecap(pd.person, Optional.fromNullable(pd.date.dayOfMonth().withMinimumValue()), pd.date);
-//		PersonDay lastPreviousPersonDayInMonth = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? " +
-//				"and pd.date >= ? and pd.date < ? ORDER by pd.date DESC", person, date.dayOfMonth().withMinimumValue(), date).first();
 		return lastPreviousPersonDayInMonth;
 	}
 
@@ -644,7 +612,6 @@ public class PersonDayManager {
 		
 		if(pd.previousPersonDayInMonth!=null && pd.previousPersonDayInMonth.personDayContract==null)
 		{
-			//this.previousPersonDayInMonth.personDayContract = this.person.getContract(this.previousPersonDayInMonth.date);
 			pd.previousPersonDayInMonth.personDayContract = ContractDao.getContract(pd.previousPersonDayInMonth.date, pd.person);
 		}
 		
@@ -694,7 +661,6 @@ public class PersonDayManager {
 				{
 					if(!s.valid)
 					{
-						//PersonDayInTrouble.insertPersonDayInTrouble(this, "timbratura disaccoppiata persona fixed");
 						PersonDayInTroubleManager.insertPersonDayInTrouble(pd, "timbratura disaccoppiata persona fixed");
 						return;
 					}
@@ -707,7 +673,6 @@ public class PersonDayManager {
 			//caso no festa, no assenze, no timbrature
 			if(!isAllDayAbsences(pd) && pd.stampings.size()==0 && !pd.isHoliday() && !isEnoughHourlyAbsences(pd))
 			{
-				//PersonDayInTrouble.insertPersonDayInTrouble(this, "no assenze giornaliere e no timbrature");
 				PersonDayInTroubleManager.insertPersonDayInTrouble(pd, "no assenze giornaliere e no timbrature");
 				return;
 			}
@@ -720,7 +685,6 @@ public class PersonDayManager {
 				{
 					if(!s.valid)
 					{
-						//PersonDayInTrouble.insertPersonDayInTrouble(this, "timbratura disaccoppiata giorno feriale");
 						PersonDayInTroubleManager.insertPersonDayInTrouble(pd, "timbratura disaccoppiata giorno feriale");
 						return;
 					}
@@ -735,7 +699,6 @@ public class PersonDayManager {
 				{
 					if(!s.valid)
 					{
-						//PersonDayInTrouble.insertPersonDayInTrouble(this, "timbratura disaccoppiata giorno festivo");
 						PersonDayInTroubleManager.insertPersonDayInTrouble(pd, "timbratura disaccoppiata giorno festivo");
 						return;
 					}
@@ -901,7 +864,6 @@ public class PersonDayManager {
 		
 		if(pd.date.getDayOfMonth()==1){
 			pd.previousPersonDayInMonth = PersonDayDao.getPersonDayForRecap(pd.person, Optional.<LocalDate>absent(), pd.date);
-			//this.previousPersonDayInMonth = PersonDay.find("SELECT pd FROM PersonDay pd WHERE pd.person = ? and pd.date < ? ORDER by pd.date DESC", this.person, this.date).first();
 			if(pd.previousPersonDayInMonth != null && pd.previousPersonDayInMonth.date.isBefore( 
 					new LocalDate(pd.previousPersonDayInMonth.date.getYear(), 
 							pd.previousPersonDayInMonth.date.getMonthOfYear(), 
@@ -912,7 +874,6 @@ public class PersonDayManager {
 		if(pd.previousPersonDayInMonth==null) //primo giorno del contratto
 			return;
 		if(!pd.previousPersonDayInMonth.date.plusDays(1).isEqual(pd.date)){
-			//this.previousPersonDayInMonth = null;
 			return;//giorni non consecutivi
 		}
 			
@@ -923,7 +884,6 @@ public class PersonDayManager {
 		{
 			orderStampings(pd);
 			String hourMaxToCalculateWorkTime = ConfYearManager.getFieldValue("hour_max_to_calculate_worktime", pd.date.getYear(), pd.person.office);
-			//ConfYear config = ConfYear.getConfYear(this.date.getYear());
 			Integer maxHour = Integer.parseInt(hourMaxToCalculateWorkTime);
 			if(pd.stampings.size() > 0 && pd.stampings.get(0).way == WayType.out && maxHour > pd.stampings.get(0).date.getHourOfDay())
 			{
@@ -932,7 +892,6 @@ public class PersonDayManager {
 				correctStamp.way = WayType.out;
 				correctStamp.markedByAdmin = false;
 				correctStamp.stampModificationType = StampingDao.getStampModificationTypeById(4l);
-				//correctStamp.stampModificationType = StampModificationType.findById(4l);
 				correctStamp.note = "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
 				correctStamp.personDay = pd.previousPersonDayInMonth;
 				correctStamp.save();
@@ -945,7 +904,6 @@ public class PersonDayManager {
 				newEntranceStamp.way = WayType.in;
 				newEntranceStamp.markedByAdmin = false;
 				newEntranceStamp.stampModificationType = StampingDao.getStampModificationTypeById(4l);
-				//newEntranceStamp.stampModificationType = StampModificationType.findById(4l);
 				newEntranceStamp.note = "Ora inserita automaticamente per considerare il tempo di lavoro a cavallo della mezzanotte";
 				newEntranceStamp.personDay = pd;
 				newEntranceStamp.save();
@@ -978,8 +936,7 @@ public class PersonDayManager {
 		for(Stamping st : pd.stampings){
 			if(st.stampModificationType != null && st.stampModificationType.equals(StampModificationTypeValue.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getStampModificationType()))
 				smt = StampingDao.getStampModificationTypeById(StampModificationTypeValue.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getId());
-				//smt = StampModificationType.findById(StampModificationTypeValue.TO_CONSIDER_TIME_AT_TURN_OF_MIDNIGHT.getId());
-		}
+			}
 		return smt;
 	}
 	
@@ -1147,6 +1104,21 @@ public class PersonDayManager {
 			}
 			
 			return validPairs;
+		}
+				
+	}
+	
+	/**
+	 * Utilizzata nel metodo delete del controller Persons per cancellare tutti i personDays relativi alla persona person
+	 * @param person
+	 */
+	public static void deletePersonDays(Person person){
+		List<PersonDay> helpPdList = PersonDayDao.getAllPersonDay(person);
+		for(PersonDay pd : helpPdList){
+
+			pd.delete();
+			person.personDays.remove(pd);
+			person.save();
 		}
 	}
 

@@ -11,6 +11,9 @@ import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
 import models.ContractYearRecap;
+import models.InitializationAbsence;
+import models.InitializationTime;
+import models.Person;
 import models.PersonDay;
 import models.VacationPeriod;
 import models.WorkingTimeType;
@@ -22,7 +25,9 @@ import play.Logger;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
+import controllers.Persons;
 import dao.ContractDao;
+import dao.PersonDao;
 import dao.PersonDayDao;
 import dao.VacationCodeDao;
 import dao.VacationPeriodDao;
@@ -447,4 +452,97 @@ public class ContractManager {
 		return true;
 	}
 
+	/**
+	 * 
+	 * @param contract
+	 */
+	public static void saveSourceContract(Contract contract){
+		if(contract.sourceVacationLastYearUsed==null) contract.sourceVacationLastYearUsed=0;
+		if(contract.sourceVacationCurrentYearUsed==null) contract.sourceVacationCurrentYearUsed=0;
+		if(contract.sourcePermissionUsed==null) contract.sourcePermissionUsed=0;
+		if(contract.sourceRemainingMinutesCurrentYear==null) contract.sourceRemainingMinutesCurrentYear=0;
+		if(contract.sourceRemainingMinutesLastYear==null) contract.sourceRemainingMinutesLastYear=0;
+		if(contract.sourceRecoveryDayUsed==null) contract.sourceRecoveryDayUsed=0;
+
+		contract.save();
+
+	}
+	
+	/**
+	 * 
+	 * @param dataInizio
+	 * @param dataFine
+	 * @param onCertificate
+	 * @param person
+	 * @param wtt
+	 * @return una stringa contenente il messaggio da passare al template nel caso di impossibilità a inserire un contratto nuovo.
+	 * Stringa vuota altrimenti che corrisponde al corretto inserimento del contratto
+	 */
+	public static String saveContract(LocalDate dataInizio, LocalDate dataFine, boolean onCertificate, Person person, WorkingTimeType wtt){
+		String result = "";
+		Contract contract = new Contract();
+		contract.beginContract = dataInizio;
+		contract.expireContract = dataFine;
+		contract.onCertificate = onCertificate;
+		contract.person = person;
+
+		//Date non si sovrappongono con gli altri contratti della persona
+		if( !isProperContract(contract) ) {
+
+			result = "Il nuovo contratto si interseca con contratti precedenti. Controllare le date di inizio e fine. Operazione annullata.";
+			return result;
+		}
+
+		contract.save();
+		properContractCreate(contract, wtt);
+		return result;
+	}
+	
+	
+	/**
+	 * Utilizzata nel metodo delete del controller Persons, elimina contratti, orari di lavoro e stamp profile
+	 * @param person
+	 */
+	public static void deletePersonContracts(Person person){
+		List<Contract> helpList = ContractDao.getPersonContractList(person);
+		for(Contract c : helpList){
+
+			Logger.debug("Elimino contratto di %s %s che va da %s a %s", person.name, person.surname, c.beginContract, c.expireContract);
+
+			// Eliminazione orari di lavoro
+			List<ContractWorkingTimeType> cwttList = ContractDao.getContractWorkingTimeTypeList(c);
+			for(ContractWorkingTimeType cwtt : cwttList){
+				cwtt.delete();
+			}
+			// Eliminazione stamp profile
+			List<ContractStampProfile> cspList = ContractDao.getPersonContractStampProfile(Optional.<Person>absent(), Optional.fromNullable(c));
+			for(ContractStampProfile csp : cspList){
+				csp.delete();
+			}
+
+			c.delete();
+			person = PersonDao.getPersonById(person.id);
+			person.contracts.remove(c);
+
+			person.save();
+
+		}
+	}
+	
+	/**
+	 * utilizzata nel metodo delete del controller Persons, elimina le eventuali inizializzazioni di tempi e assenze
+	 * @param person
+	 */
+	public static void deleteInitializations(Person person){
+		for(InitializationAbsence ia : person.initializationAbsences){
+			long id = ia.id;
+			ia = ContractDao.getInitializationAbsenceById(id);
+			ia.delete();
+		}
+		for(InitializationTime ia : person.initializationTimes){
+			long id = ia.id;
+			ia = ContractDao.getInitializationTimeById(id);
+			ia.delete();
+		}
+	}
 }
