@@ -41,7 +41,6 @@ public final class PersonDao {
 
 	private final static QPerson person = QPerson.person;
 	private final static QContract contract = QContract.contract;
-	//private PersonDao() {}
 
 	/**
 	 * @param name

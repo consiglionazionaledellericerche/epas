@@ -361,7 +361,7 @@ public class WorkingTimes extends Controller{
 
 				for(ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) {	
 					if(cwtt.workingTimeType.id.equals(wttOld.id) &&
-							DateUtility.intervalIntersection(contractPeriod, cwtt.getCwttDateInterval()) != null) {
+							DateUtility.intervalIntersection(contractPeriod, new DateInterval(cwtt.beginDate, cwtt.endDate)) != null) {
 						needChanges = true;
 					}
 				}
@@ -374,7 +374,7 @@ public class WorkingTimes extends Controller{
 
 					for(ContractWorkingTimeType cwtt : contract.contractWorkingTimeType) { //requires ordinata per beginDate @OrderBy
 						
-						DateInterval intersection = DateUtility.intervalIntersection(contractPeriod, cwtt.getCwttDateInterval());
+						DateInterval intersection = DateUtility.intervalIntersection(contractPeriod, new DateInterval(cwtt.beginDate, cwtt.endDate));
 						if(cwtt.workingTimeType.id.equals(wttOld.id) && intersection != null) {
 
 							newCwttList.addAll( splitContractWorkingTimeType(cwtt, intersection, wttNew) );
@@ -438,10 +438,10 @@ public class WorkingTimes extends Controller{
 		ContractWorkingTimeType last = new ContractWorkingTimeType();
 		last.workingTimeType = cwtt.workingTimeType;
 		
-		DateInterval cwttInterval = cwtt.getCwttDateInterval();
+		DateInterval cwttInterval = new DateInterval(cwtt.beginDate, cwtt.endDate);
 		
 		//caso1 cwtt inizia dopo e finisce prima (interamente contenuto)	Risultato dello split: MIDDLE (new)
-		if(DateUtility.isIntervalIntoAnother(cwtt.getCwttDateInterval(), period)) {
+		if(DateUtility.isIntervalIntoAnother(new DateInterval(cwtt.beginDate, cwtt.endDate), period)) {
 			
 			middle.beginDate = cwtt.beginDate;
 			middle.endDate = cwtt.endDate;

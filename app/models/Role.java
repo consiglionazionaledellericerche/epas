@@ -40,9 +40,4 @@ public class Role extends BaseModel{
     @OneToMany(mappedBy="role", cascade = {CascadeType.REMOVE}, orphanRemoval=true)
     public List<UsersRolesOffices> usersRolesOffices = Lists.newArrayList();
     
-    public Set<Permission> prendiPermissions(String where) {
-    	
-    	Set<Permission> permissionTemp = this.permissions;
-    	return permissionTemp;
-    }
 }

@@ -69,7 +69,7 @@ public class AbsenceFromJson extends Controller{
 			if(person != null){
 				Logger.debug("Controllo %s %s", person.name, person.surname);
 
-				List<Absence> absences = AbsenceDao.getAbsenceInDay(Optional.fromNullable(person), dateFrom, Optional.fromNullable(dateTo), false);
+				List<Absence> absences = AbsenceDao.getAbsencesInPeriod(Optional.fromNullable(person), dateFrom, Optional.fromNullable(dateTo), false);
 //				List<Absence> absences = Absence.find("Select abs from Absence abs, PersonDay pd " +
 //						"where abs.personDay = pd and pd.date between ? and ? and pd.person = ? order by abs.personDay.date", 
 //						dateFrom, dateTo, person).fetch();

@@ -641,9 +641,10 @@ public class AbsenceManager {
 	 * @param dateFrom
 	 * @param dateTo
 	 */
-	public static int removeAbsencesInPeriod(Person person, LocalDate dateFrom, LocalDate dateTo, AbsenceType absenceType)
-	{
-		LocalDate today = new LocalDate();
+	public static int removeAbsencesInPeriod(Person person, LocalDate dateFrom, 
+			LocalDate dateTo, AbsenceType absenceType){
+
+		LocalDate today = LocalDate.now();
 		LocalDate actualDate = dateFrom;
 		int deleted = 0;
 		while(!actualDate.isAfter(dateTo)){
@@ -656,12 +657,10 @@ public class AbsenceManager {
 				actualDate = actualDate.plusDays(1);
 				continue;
 			}
-			
-			List<Absence> absenceList = AbsenceDao.getAbsenceInDay(Optional.fromNullable(person), actualDate, Optional.<LocalDate>absent(), false);
-			//			List<Absence> absenceList = Absence.find("Select ab from Absence ab, PersonDay pd where ab.personDay = pd and pd.person = ? and pd.date = ?", 
-			//					person, actualDate).fetch();
-			for(Absence absence : absenceList)
-			{
+
+			List<Absence> absenceList = AbsenceDao.getAbsencesInPeriod(Optional.fromNullable(person), actualDate, Optional.<LocalDate>absent(), false);
+
+			for(Absence absence : absenceList){
 				if(absence.absenceType.code.equals(absenceType.code))
 				{
 					absence.delete();
@@ -676,10 +675,10 @@ public class AbsenceManager {
 			}
 			actualDate = actualDate.plusDays(1);
 		}
-		
+
 		//Al termine della cancellazione delle assenze aggiorno tutta la situazione dal primo giorno di assenza fino ad oggi
 		PersonDayManager.updatePersonDaysFromDate(person, dateFrom);
-		
+
 		//Se ho inserito una data in un anno precedente a quello attuale effettuo 
 		//il ricalcolo del riepilogo annuale per ogni contratto attivo in quell'anno
 		if(dateFrom.getYear() < LocalDate.now().getYear()){
