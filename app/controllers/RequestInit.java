@@ -248,9 +248,18 @@ public class RequestInit extends Controller {
 			return Security.getOfficeAllowed();
 		}
 	}
-
+	
 	@Before
-	public static void injectUtility() {
+	static void dbStateCheck(){
+		
+		if(Office.count() == 0 && Security.getUser().get().username.equals("admin")){
+			Wizard.wizard(0);
+		}
+		
+	}
+
+	@Before (priority = 1)
+	static void injectUtility() {
 
 		TemplateUtility templateUtility = new TemplateUtility();
 		renderArgs.put("templateUtility", templateUtility);
@@ -258,14 +267,10 @@ public class RequestInit extends Controller {
 	}
 
 
-	@Before 
+	@Before (priority = 1)
 	@NoCheck
-	public static void injectMenu() { 
-		
-		if(Office.count() == 0 && Security.getUser().get().username.equals("admin")){
-			Wizard.wizard(0);
-		}
-		
+	static void injectMenu() { 
+				
 		ItemsPermitted ip = new ItemsPermitted();
 		renderArgs.put("ip", ip);
 	
