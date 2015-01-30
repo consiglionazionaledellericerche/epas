@@ -313,4 +313,16 @@ public class CompetenceManager {
 		out.close();
 		return inputStream;
 	}
+	
+	/**
+	 * Viene utilizzata nella delete della persona nel controller Persons
+	 * @param person
+	 */
+	public static void deletePersonCompetence(Person person){
+		for(Competence c : person.competences){
+			long id = c.id;
+			c = CompetenceDao.getCompetenceById(id);
+			c.delete();
+		}
+	}
 }

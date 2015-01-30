@@ -11,13 +11,18 @@ import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
+import models.PersonChildren;
+import models.PersonYear;
 
 import org.joda.time.LocalDate;
+
+import play.Logger;
 
 import com.google.common.base.Optional;
 
 import dao.ContractDao;
 import dao.OfficeDao;
+import dao.PersonChildrenDao;
 
 public class PersonManager {
 
@@ -236,5 +241,52 @@ public class PersonManager {
 			}
 		}
 		return monthContracts;
+	}
+	
+	
+	/**
+	 * 
+	 * @param name
+	 * @param surname
+	 * @param bornDate
+	 * @param person
+	 */
+	public static void savePersonChild(String name, String surname, LocalDate bornDate, Person person){
+		PersonChildren personChildren = new PersonChildren();
+		personChildren.name = name;
+		personChildren.surname = surname;
+		personChildren.bornDate = bornDate;
+		personChildren.person = person;
+		personChildren.save();
+	}
+	
+	/**
+	 * utilizzata nel metodo delete del controller Persons per cancellare gli eventuali figli della persona passata come parametro
+	 * @param person
+	 */
+	public static void deletePersonChildren(Person person){
+		for(PersonChildren pc : person.personChildren){
+			long id = pc.id;
+			Logger.debug("Elimino figli...");
+			pc = PersonChildrenDao.getPersonChildrenById(id);
+			pc.delete();
+		}
+	}
+	
+	/**
+	 * Utilizzato nel metodo delete del controller Persons per eleminare turni, reperibilità, ore di formazione e riepiloghi annuali
+	 * per la persona person
+	 * @param person
+	 */
+	public static void deleteShiftReperibilityTrainingHoursAndYearRecap(Person person){
+		if(person.personHourForOvertime != null)
+			person.personHourForOvertime.delete();
+		if(person.personShift != null)
+			person.personShift.delete();
+		if(person.reperibility != null)
+			person.reperibility.delete();
+		for(PersonYear py : person.personYears){
+			py.delete();
+		}
 	}
 }

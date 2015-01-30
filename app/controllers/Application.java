@@ -22,11 +22,7 @@ public class Application extends Controller {
     
 	
     public static void index() {
-    	
-		if(Office.count() == 0 && Security.getUser().get().username.equals("admin")){
-			Wizard.wizard(0);
-		}
-    	
+    	    	
     	List<Office> officeList = Office.findAll();
     	boolean seatExist = false;
     	for(Office office : officeList) {
