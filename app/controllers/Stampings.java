@@ -222,28 +222,7 @@ public class Stampings extends Controller {
 			Stampings.personStamping(pd.person.id, pd.date.getYear(), pd.date.getMonthOfYear());
 		}
 
-		stamping.date = stamping.date.withHourOfDay(stampingHour);
-		stamping.date = stamping.date.withMinuteOfHour(stampingMinute);
-		
-		//TODO rivedere questi if se possono essere semplificati  
-		if(service == false && (stamping.stampType == null || !stamping.stampType.identifier.equals("s"))){
-			stamping.note = note;
-		}
-		if(service == true && (stamping.stampType == null || !stamping.stampType.identifier.equals("s"))){
-			stamping.note = "timbratura di servizio";
-			stamping.stampType = StampingDao.getStampTypeByCode("motiviDiServizio");
-		}
-		if(service == false && (stamping.stampType != null)){
-			stamping.stampType = null;
-			stamping.note = "timbratura inserita dall'amministratore";
-		}
-		if(service == true && (stamping.stampType != null || stamping.stampType.identifier.equals("s"))){
-			stamping.note = note;
-		}
-
-		stamping.markedByAdmin = true;
-
-		stamping.save();
+		StampingManager.persistStampingForUpdate(stamping, note, stampingHour, stampingMinute, service);
 
 		PersonDayManager.updatePersonDaysFromDate(pd.person, pd.date);
 
@@ -301,24 +280,7 @@ public class Stampings extends Controller {
 		PersonStampingDayRecap.stampTypeList = new ArrayList<StampType>();						
 		List<PersonStampingDayRecap> daysRecap = new ArrayList<PersonStampingDayRecap>();
 		
-		for(Person person : activePersonsInDay){
-		
-			PersonDay personDay = null;
-			person = PersonDao.getPersonById(person.id);
-			Optional<PersonDay> pd = PersonDayDao.getSinglePersonDay(person, dayPresence); 
-			
-			if(!pd.isPresent()){
-				personDay = new PersonDay(person, dayPresence);
-				personDay.create();
-			}
-			else{
-				personDay = pd.get();
-			}
-
-			PersonDayManager.computeValidStampings(personDay);
-			daysRecap.add(new PersonStampingDayRecap(personDay, numberOfInOut));
-			
-		}
+		daysRecap = StampingManager.populatePersonStampingDayRecapList(activePersonsInDay, dayPresence, numberOfInOut);
 
 		String month_capitalized = DateUtility.fromIntToStringMonth(month);
 		
@@ -334,60 +296,14 @@ public class Stampings extends Controller {
 		rules.checkIfPermitted("");
 		LocalDate beginMonth = new LocalDate(year, month, 1);
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
-
 		
 		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
 				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, beginMonth, endMonth, true);
 
-		List<Person> activePersons = simpleResults.paginated(page).getResults();
-		
-		Builder<Person, LocalDate, String> builder = ImmutableTable.<Person, LocalDate, String>builder().orderColumnsBy(new Comparator<LocalDate>() {
-
-			public int compare(LocalDate date1, LocalDate date2) {
-				return date1.compareTo(date2);
-			}
-		}).orderRowsBy(new Comparator<Person>(){
-			public int compare(Person p1, Person p2) {
-
-				return p1.surname.compareTo(p2.surname);
-			}
-
-		});
-		
-		for(Person p : activePersons)
-		{
-			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(p, beginMonth, Optional.fromNullable(beginMonth.dayOfMonth().withMaximumValue()), true);
-
-			for(PersonDay pd : pdList){
-				if(pd.isTicketForcedByAdmin) {
-					
-					if(pd.isTicketAvailable) {
-						builder.put(p, pd.date, "siAd");
-					}
-					else {
-						builder.put(p, pd.date, "noAd");
-					}
-				}
-				else {
-					
-					if(pd.isTicketAvailable) {
-						builder.put(p, pd.date, "si");
-					}
-					else {
-						builder.put(p, pd.date, "");
-					}
-				}    			
-
-			}
-
-		}
+		List<Person> activePersons = simpleResults.paginated(page).getResults();		
 
 		int numberOfDays = endMonth.getDayOfMonth();
-		Table<Person, LocalDate, String> tablePersonTicket = builder.build();
+		Table<Person, LocalDate, String> tablePersonTicket = StampingManager.populatePersonTicketTable(activePersons, beginMonth);
 		render(year, month, tablePersonTicket, numberOfDays, simpleResults, name);
 	}
-
-
-
-
 }

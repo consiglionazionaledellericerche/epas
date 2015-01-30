@@ -13,8 +13,7 @@ public class WorkingTimeTypeManager {
 	public static boolean getHolidayFromWorkinTimeType(int dayOfWeek, WorkingTimeType wtt){
 		boolean holiday = false;
 		WorkingTimeTypeDay wttd = WorkingTimeTypeDayDao.getWorkingTimeTypeDayByDayOfWeek(wtt, dayOfWeek);
-//		WorkingTimeTypeDay wttd = WorkingTimeTypeDay.find("Select wttd from WorkingTimeTypeDay wttd where wttd.workingTimeType = ?" +
-//				" and wttd.dayOfWeek = ?", wtt, dayOfWeek).first();
+
 		holiday = wttd.holiday;
 		return holiday;
 	}
@@ -41,8 +40,7 @@ public class WorkingTimeTypeManager {
 	public int getMinimalTimeForLunch(int dayOfWeek, WorkingTimeType wtt){
 		int minTimeForLunch = 0;
 		WorkingTimeTypeDay wttd = WorkingTimeTypeDayDao.getWorkingTimeTypeDayByDayOfWeek(wtt, dayOfWeek);
-//		WorkingTimeTypeDay wttd = WorkingTimeTypeDay.find("Select wttd from WorkingTimeTypeDay wttd where wttd.workingTimeType = ?" +
-//				" and wttd.dayOfWeek = ?", wtt, dayOfWeek).first();
+
 		minTimeForLunch = wttd.mealTicketTime;
 		return minTimeForLunch;
 	}
@@ -58,11 +56,24 @@ public class WorkingTimeTypeManager {
 	public int getBreakTime(int dayOfWeek, WorkingTimeType wtt){
 		int breakTime = 0;
 		WorkingTimeTypeDay wttd = WorkingTimeTypeDayDao.getWorkingTimeTypeDayByDayOfWeek(wtt, dayOfWeek);
-//		WorkingTimeTypeDay wttd = WorkingTimeTypeDay.find("Select wttd from WorkingTimeTypeDay wttd where wttd.workingTimeType = ?" +
-//				"and wttd.dayOfWeek = ?", wtt, dayOfWeek).first();
+
 		breakTime = wttd.breakTicketTime;
 		
 		return breakTime;
 	}
 
+	/**
+	 * 
+	 * @param wttd
+	 * @param wtt
+	 * @param dayOfWeek
+	 */
+	public static void saveWorkingTimeType(WorkingTimeTypeDay wttd, WorkingTimeType wtt, int dayOfWeek){
+		
+		wttd.dayOfWeek = dayOfWeek;
+		wttd.workingTimeType = wtt;
+		wttd.save();
+	}
+	
+		
 }
