@@ -58,9 +58,5 @@ public class ContractWorkingTimeType extends BaseModel implements Comparable<Con
 			return 0; 
 	}
 	
-	public DateInterval getCwttDateInterval() {
-		
-		return new DateInterval(beginDate, endDate);
-	}
-	
+
 }
