@@ -6,7 +6,6 @@ import it.cnr.iit.epas.JsonRequestedPersonsBinder;
 import manager.OvertimesManager;
 import manager.recaps.PersonResidualMonthRecap;
 import manager.recaps.PersonResidualYearRecap;
-import models.Competence;
 import models.CompetenceCode;
 import models.Contract;
 import models.Person;
@@ -21,7 +20,6 @@ import play.Logger;
 import play.data.binding.As;
 import play.mvc.Controller;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 

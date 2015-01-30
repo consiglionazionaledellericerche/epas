@@ -2,6 +2,7 @@ package controllers;
 
 import helpers.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.DateUtility;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -29,6 +30,7 @@ import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
 import models.enumerate.JustifiedTimeAtWork;
+import models.enumerate.QualificationMapping;
 
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
@@ -40,10 +42,9 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Range;
 
 import play.Logger;
-import play.data.validation.Max;
-import play.data.validation.Min;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.db.jpa.Blob;
@@ -52,7 +53,6 @@ import play.mvc.With;
 import security.SecurityRules;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
-import dao.AbsenceTypeGroupDao;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.QualificationDao;
@@ -108,24 +108,29 @@ public class Absences extends Controller{
 	public static void insertAbsenceCode(){
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		
-		List<Qualification> qualificationList = QualificationDao.getQualification(null, null, true);
-		List<AbsenceTypeGroup> abtList = AbsenceTypeGroupDao.getAbsenceTypeGroup(null,true);
 		List<JustifiedTimeAtWork> justifiedTimeAtWorkList = Lists.newArrayList(JustifiedTimeAtWork.values());
 		List<AccumulationType> accumulationTypeList = Lists.newArrayList(AccumulationType.values());
 		List<AccumulationBehaviour> accumulationBehaviourList = Lists.newArrayList(AccumulationBehaviour.values());
 
-		render(qualificationList, abtList, justifiedTimeAtWorkList, accumulationTypeList, accumulationBehaviourList);
+		render(justifiedTimeAtWorkList, accumulationTypeList, accumulationBehaviourList);
 	}
 
 	public static void saveAbsenceCode(
 			@Required @Valid AbsenceType absenceType,
-			@Required String jwt,
-			@Required @Min(1) @Max(10) int qual,
-			AbsenceTypeGroup abtg,
+			@Required String justifiedTimeAtWork,
+			boolean tecnologi,
+			boolean tecnici,
+			AbsenceTypeGroup absenceTypeGroup,
 			String accBehaviour,
 			String accType,
 			String codiceSostituzione
 			){
+		
+		if (!(tecnologi || tecnici)){
+    	    params.flash();
+			flash.error("Selezionare almeno una categoria tra Tecnologi e Tecnici");
+			insertAbsenceCode();
+		}
 		
     	if (validation.hasErrors()){
     		flash.error(validation.errorsMap().toString());
@@ -135,22 +140,33 @@ public class Absences extends Controller{
     	
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		
-		absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.getByDescription(jwt);
+		absenceType.justifiedTimeAtWork = JustifiedTimeAtWork.getByDescription(justifiedTimeAtWork);
 		
-		for(int i = 1; i <= qual; i++){
+		Range<Integer> qualifiche;
+		if(tecnologi && tecnici){
+			qualifiche = QualificationMapping.TECNICI.getRange().span(QualificationMapping.TECNOLOGI.getRange());
+		}
+		else if(tecnologi){
+			qualifiche = QualificationMapping.TECNOLOGI.getRange();
+		}
+		else{
+			qualifiche = QualificationMapping.TECNICI.getRange();
+		}
+				
+		for(int i = qualifiche.lowerEndpoint(); i <= qualifiche.upperEndpoint(); i++){
 			Qualification q = QualificationDao.byQualification(i).orNull();
 			absenceType.qualifications.add(q);
 		}
 
-		if(abtg.label != null && !abtg.label.isEmpty()){
-			abtg.accumulationBehaviour = AccumulationBehaviour.getByDescription(accBehaviour);
-			abtg.accumulationType = AccumulationType.getByDescription(accType);
+		if(absenceTypeGroup.label != null && !absenceTypeGroup.label.isEmpty()){
+			absenceTypeGroup.accumulationBehaviour = AccumulationBehaviour.getByDescription(accBehaviour);
+			absenceTypeGroup.accumulationType = AccumulationType.getByDescription(accType);
 
 			if(accBehaviour.equals(AccumulationBehaviour.replaceCodeAndDecreaseAccumulation.description)){
-				abtg.replacingAbsenceType = AbsenceTypeDao.getAbsenceTypeByCode(codiceSostituzione);
+				absenceTypeGroup.replacingAbsenceType = AbsenceTypeDao.getAbsenceTypeByCode(codiceSostituzione);
 			}
-			absenceType.absenceTypeGroup = abtg;
-			abtg.save();
+			absenceType.absenceTypeGroup = absenceTypeGroup;
+			absenceTypeGroup.save();
 		}
 		
 		absenceType.save();
@@ -232,71 +248,59 @@ public class Absences extends Controller{
 		
 		AbsenceType abt = AbsenceTypeDao.getAbsenceTypeById(absenceCodeId);
 		
-		List<Qualification> qualList = QualificationDao.getQualification(null, null, true);
-		List<JustifiedTimeAtWork> justList = Lists.newArrayList(JustifiedTimeAtWork.values());
-		List<AccumulationType> accType = Lists.newArrayList(AccumulationType.values());
-		List<AccumulationBehaviour> behaviourType = Lists.newArrayList(AccumulationBehaviour.values());
-
-		render(abt, justList, qualList, accType, behaviourType);
+		List<JustifiedTimeAtWork> justifiedTimeAtWorkList = Lists.newArrayList(JustifiedTimeAtWork.values());
+		List<AccumulationType> accumulationTypeList = Lists.newArrayList(AccumulationType.values());
+		List<AccumulationBehaviour> accumulationBehaviourList = Lists.newArrayList(AccumulationBehaviour.values());
+		
+		boolean tecnologo = false;
+		boolean tecnico = false;
+		
+		for(Qualification q : abt.qualifications){
+			tecnologo = !tecnologo ? QualificationMapping.TECNOLOGI.contains(q) : tecnologo;
+			tecnico = !tecnico ? QualificationMapping.TECNICI.contains(q) : tecnico;
+		}
+				
+		render(abt,justifiedTimeAtWorkList, accumulationTypeList, accumulationBehaviourList,tecnologo,tecnico);
 	}
 
 	
-	public static void updateCode(){
+	public static void updateCode(@Required @Valid AbsenceType absenceType,
+			boolean tecnologi,
+			boolean tecnici){
+		
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		
-		//TODO: rimuovere tutti i params.get presenti nel metodo passandoli invece come parametri al metodo stesso
-		AbsenceType absence = AbsenceTypeDao.getAbsenceTypeById(params.get("absenceTypeId", Long.class));
-		//AbsenceType absence = AbsenceType.findById(params.get("absenceTypeId", Long.class));
-		if(absence == null)
-			notFound();
-		Logger.debug("Il codice d'assenza da modificare è %s", absence.code);
-		absence.description = params.get("descrizione");
-		Logger.debug("Il valore di uso interno è: %s", params.get("usoInterno", Boolean.class));
-		Logger.debug("Il valore di uso multiplo è: %s", params.get("usoMultiplo", Boolean.class));
-		Logger.debug("Il valore di tempo giustificato è: %s", params.get("abt.justifiedTimeAtWork"));
-		absence.internalUse = params.get("usoInterno", Boolean.class);		
-		absence.multipleUse = params.get("usoMultiplo", Boolean.class);
-		absence.consideredWeekEnd = params.get("weekEnd", Boolean.class);
-		absence.validFrom = new LocalDate(params.get("inizio"));
-		absence.validTo = new LocalDate(params.get("fine"));
-		String justifiedTimeAtWork = params.get("abt.justifiedTimeAtWork");			
-		absence.justifiedTimeAtWork = JustifiedTimeAtWork.getByDescription(justifiedTimeAtWork);
-
-		for(int i = 1; i <= 10; i++){
-			if(params.get("qualification"+i) != null){
-				Qualification q = QualificationDao.getQualification(Optional.fromNullable(new Integer(i)), Optional.fromNullable(new Long(i)), false).get(0);
-				//Qualification q = Qualification.findById(new Long(i));
-				if(!absence.qualifications.contains(q))
-					absence.qualifications.add(q);
-			}
-			else{
-				Qualification q = QualificationDao.getQualification(Optional.<Integer>absent(), Optional.fromNullable(new Long(i)), false).get(0);
-				//Qualification q = Qualification.findById(new Long(i));
-				if(absence.qualifications.contains(q))
-					absence.qualifications.remove(q);
-			}
+		if (!(tecnologi || tecnici)){
+    	    params.flash();
+			flash.error("Selezionare almeno una categoria tra Tecnologi e Tecnici");
+			insertAbsenceCode();
 		}
-
-
-		absence.mealTicketCalculation = params.get("calcolaBuonoPasto", Boolean.class);
-//		absence.ignoreStamping = params.get("ignoraTimbrature", Boolean.class);
-		if(!params.get("gruppo").equals("")){
-			absence.absenceTypeGroup.label = params.get("gruppo");
-			absence.absenceTypeGroup.accumulationBehaviour = AccumulationBehaviour.getByDescription((params.get("abt.absenceTypeGroup.accumulationBehaviour")));
-			absence.absenceTypeGroup.accumulationType = AccumulationType.getByDescription((params.get("abt.absenceTypeGroup.accumulationType")));
-			absence.absenceTypeGroup.limitInMinute = params.get("limiteAccumulo", Integer.class);
-			absence.absenceTypeGroup.minutesExcess = params.get("minutiEccesso", Boolean.class);
-			String codeToReplace = params.get("codiceSostituzione");
-			AbsenceTypeGroup abtg = AbsenceTypeGroupDao.getAbsenceTypeGroup(Optional.fromNullable(codeToReplace), false).get(0);
-			//AbsenceTypeGroup abtg = AbsenceTypeGroup.find("Select abtg from AbsenceTypeGroup abtg where abtg.code = ?", codeToReplace).first();
-			absence.absenceTypeGroup = abtg;
+		
+		Verify.verify(absenceType.isPersistent(),"Codice d'assenza inesistente!");
+		
+		absenceType.qualifications.clear();
+		Range<Integer> qualifiche;
+		if(tecnologi && tecnici){
+			qualifiche = QualificationMapping.TECNICI.getRange().span(QualificationMapping.TECNOLOGI.getRange());
 		}
-		absence.save();
-		Logger.info("Modificato codice di assenza %s", absence.code);
+		else if(tecnologi){
+			qualifiche = QualificationMapping.TECNOLOGI.getRange();
+		}
+		else{
+			qualifiche = QualificationMapping.TECNICI.getRange();
+		}
+				
+		for(int i = qualifiche.lowerEndpoint(); i <= qualifiche.upperEndpoint(); i++){
+			Qualification q = QualificationDao.byQualification(i).orNull();
+			absenceType.qualifications.add(q);
+		}
+		
+		absenceType.save();
+		
+		Logger.info("Modificato codice di assenza %s", absenceType.code);
 
-		flash.success("Modificato codice di assenza %s", absence.code);
+		flash.success("Modificato codice di assenza %s", absenceType.code);
 		Absences.manageAbsenceCode(null, null);
-
 	}
 
 

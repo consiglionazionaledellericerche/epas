@@ -1,7 +1,5 @@
 package dao.wrapper;
 
-import javax.persistence.Transient;
-
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;

@@ -7,15 +7,12 @@ import helpers.ModelQuery;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 
 import controllers.Security;
-import controllers.Wizard.WizardStep;
 import models.Office;
 import models.User;
 import models.UsersRolesOffices;

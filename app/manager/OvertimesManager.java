@@ -1,7 +1,5 @@
 package manager;
 
-import java.util.List;
-
 import play.Logger;
 import models.Competence;
 import models.CompetenceCode;
