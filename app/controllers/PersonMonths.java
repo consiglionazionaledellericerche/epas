@@ -105,7 +105,7 @@ public class PersonMonths extends Controller{
 			render(person, month, year, max);
 		}
 		max = date.dayOfMonth().withMaximumValue().getDayOfMonth();
-		month = date.getMonthOfYear();
+		month = date.minusMonths(1).getMonthOfYear();
 		year = date.getYear();
 		
 		render(person, month, year, max);
