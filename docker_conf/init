@@ -42,28 +42,6 @@ fi
     ;;
 esac
 
-#case "${HTTPS}" in
-#  true)
-#    NGINX_PORT=${NGNIX_PORT:-443}
-#    NGINX_X_FORWARDED_PROTO=${NGINX_X_FORWARDED_PROTO:-https}
-#    ;;
-#  *)
-#    NGINX_PORT=${NGINX_PORT_PORT:-80}
-#    NGINX_X_FORWARDED_PROTO=${NGINX_X_FORWARDED_PROTO:-\$scheme}
-#    ;;
-#esac
-
-# SSL_SELF_SIGNED=${SSL_SELF_SIGNED:-false}
-# SSL_CERTIFICATE_PATH=${SSL_CERTIFICATE_PATH:-/opt/epas/certs/epas.crt}
-# SSL_KEY_PATH=${SSL_KEY_PATH:-"/opt/epas/certs/epas.key"}
-# SSL_DHPARAM_PATH=${SSL_DHPARAM_PATH:-$EPAS_DATA_DIR/certs/dhparam.pem}
-
-#CA_CERTIFICATES_PATH=${CA_CERTIFICATES_PATH:-$EPAS_DATA_DIR/certs/ca.crt}
-#EPAS_BACKUPS=${EPAS_BACKUPS:-disable}
-#EPAS_BACKUP_EXPIRY=${EPAS_BACKUP_EXPIRY:-}
-
-#NGINX_MAX_UPLOAD_SIZE=${NGINX_MAX_UPLOAD_SIZE:-20m}
-
 DB_HOST=${DB_HOST:-$POSTGRES_PORT_5432_TCP_ADDR}
 DB_PORT=${DB_PORT:-$POSTGRES_PORT_5432_TCP_PORT}
 DB_NAME=${DB_NAME:-epas}
@@ -79,8 +57,8 @@ SMTP_HOST=${SMTP_HOST:-smtp.cnr.it}
 SMTP_PORT=${SMTP_PORT:-587}
 SMTP_CHANNEL=${SMTP_CHANNEL:-starttls}
 
-CRON_MINUTES=${CRON_MINUTES:-5}
-CRON_HOURS=${CRON_HOURS:-6,12,18}
+BACKUP_MINUTES=${BACKUP_MINUTES:-5}
+BACKUP_HOURS=${BACKUP_HOURS:-6,12,18}
 
 # LOGCHECK
 LOGCHECK_ADDRESSES=${LOGCHECK_ADDRESSES:-cristian.lucchesi@iit.cnr.it,dario.tagliaferri@iit.cnr.it alessandro.martelli@iit.cnr.it, daniele.murgia@iit.cnr.it}
@@ -102,13 +80,17 @@ sudo -u epas -H sed 's/{{EPAS_HOST}}/'"${EPAS_HOST}"'/g' -i /home/epas/epas/tool
 
 sudo -u epas chmod +x /home/epas/epas/tools/backupdb.sh
 
-sudo -u epas -H cp /home/epas/epas/docker_conf/cron /home/epas/epas/tools/cron 
+sudo -u epas -H cp /home/epas/epas/docker_conf/cron /home/epas/epas/tools/cron
 
-sudo -u epas -H sed 's/{{CRON_MINUTES}}/'"${CRON_MINUTES}"'/' -i /home/epas/epas/tools/cron
-sudo -u epas -H sed 's/{{CRON_HOURS}}/'"${CRON_HOURS}"'/' -i /home/epas/epas/tools/cron
+sudo -u epas -H sed 's/{{BACKUP_MINUTES}}/'"${BACKUP_MINUTES}"'/' -i /home/epas/epas/tools/cron
+sudo -u epas -H sed 's/{{BACKUP_HOURS}}/'"${BACKUP_HOURS}"'/' -i /home/epas/epas/tools/cron
 
+BACKUP=${BACKUP:-false}
+
+if [ "${BACKUP}" == true ]; then
 crontab -u epas /home/epas/epas/tools/cron
 cron
+fi
 
 # configure ePAS
 sudo -u epas -H cp /home/epas/epas/docker_conf/prod.conf /home/epas/epas/conf/prod.conf
