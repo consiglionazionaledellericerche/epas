@@ -6,7 +6,6 @@ import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
 
-import controllers.PersonMonths;
 import dao.PersonMonthRecapDao;
 import models.Person;
 import models.PersonMonthRecap;
