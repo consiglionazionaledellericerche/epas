@@ -16,9 +16,11 @@ import models.Person;
 import models.PersonDay;
 import models.PersonReperibilityDay;
 import models.PersonShiftDay;
+import models.Qualification;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.ConfigurationFields;
 import models.enumerate.JustifiedTimeAtWork;
+import models.enumerate.QualificationMapping;
 import models.rendering.VacationsRecap;
 
 import org.apache.commons.mail.EmailException;
@@ -691,5 +693,15 @@ public class AbsenceManager {
 		return deleted;
 	}
 
+	public static boolean AbsenceTypeIsTecnologo(Qualification qualification){
+			return QualificationMapping.TECNOLOGI.getRange().contains(qualification.qualification);
+	}
+	
+	public static boolean istechnician(List<Qualification> list){
+		for(Qualification q : list){
+			return QualificationMapping.TECNICI.getRange().contains(q.qualification);
+		}
+		return false;
+	}
 
 }
