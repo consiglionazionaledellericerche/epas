@@ -143,8 +143,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 	 *  relazione con i turni
 	 */
 	@OneToMany(mappedBy="supervisor", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<ShiftType> shiftTypes = new ArrayList<ShiftType>();
-
+	public List<ShiftCategories> shiftCategories = new ArrayList<ShiftCategories>();
 
 	@OneToOne(mappedBy="person", fetch = FetchType.EAGER)
 	public PersonHourForOvertime personHourForOvertime;

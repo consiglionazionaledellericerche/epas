@@ -15,7 +15,9 @@
 	
 	for(reperibilityMonth in reperibilityMonths) {
 }%
+	<div class= "page">
 	<div class="table">
+
 	<table class="month">
 		<caption>Reperibilità ${firstOfYear.plusMonths(mm).monthOfYear().getAsText()} ${year}</caption>
 		
@@ -47,10 +49,10 @@
 
 					for (dayOfMonth in reperibilityMonth.columnKeySet()) {
 					
-						if (reperibilityMonth.contains(person, dayOfMonth) && reperibilityMonth.get(person, dayOfMonth).toString().equals('fs')) { 
+						if (reperibilityMonth.contains(person, dayOfMonth) && reperibilityMonth.get(person, dayOfMonth).toString().equals('FS')) { 
 							nfs++;
 						}
-						if (reperibilityMonth.contains(person, dayOfMonth) && reperibilityMonth.get(person, dayOfMonth).toString().equals('fr')) { 
+						if (reperibilityMonth.contains(person, dayOfMonth) && reperibilityMonth.get(person, dayOfMonth).toString().equals('FR')) { 
 							nfr++;
 						}
 						
@@ -79,12 +81,22 @@
 		}%
 		
 	</table>
-</div>
+	
+ 	</div>
 
 %{
 		mm++;
+		
+		if ((mm % 4) == 0) {
+}%
+
+	</div>
+	<div class="page">
+%{
+		}
     }
 }%
+	</div>
 
 	<table class="no-border">
 	<tr>

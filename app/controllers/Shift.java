@@ -24,6 +24,7 @@ import models.exports.AbsenceShiftPeriod;
 import models.exports.ShiftPeriod;
 import models.exports.ShiftPeriods;
 
+import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
@@ -32,6 +33,7 @@ import org.joda.time.LocalTime;
 import play.Logger;
 import play.data.binding.As;
 import play.db.jpa.JPA;
+import play.modules.pdf.PDF.Options;
 import play.mvc.Controller;
 
 import com.google.common.collect.HashBasedTable;
@@ -56,6 +58,7 @@ import models.PersonShift;
 import models.PersonShiftDay;
 import models.PersonShiftShiftType;
 import models.ShiftCancelled;
+import models.ShiftCategories;
 import models.ShiftTimeTable;
 import models.ShiftType;
 import models.enumerate.JustifiedTimeAtWork;
@@ -92,10 +95,15 @@ public class Shift extends Controller {
 	public static String thNoStampings = "Mancata timbratura";  // nome della colonna per i giorni di mancata timbratura della tabella delle inconsistenze
 	public static String thAbsences = "Assenza";				// nome della colonna per i giorni di assenza della tabella delle inconsistenze
 	public static String thBadStampings = "Timbratura errata";  // nome della colonna per i giorni con timbratura fuori dalle fasce orarie dei turni
+	public static String thMissions = "Missione";				// nome della colonna per i giorni di assenza della tabella delle inconsistenze
+	public static String thWarnStampings = "Orario da motivare";  // nome della colonna per i giorni con timbratura fuori dalle fasce orarie dei turni ma 
+																// con le ore lavorate che discostano meno di 2 ore
 
-	public static String thDays = "Numero di giorni";			// nome della colonna per i giorni di turno svolti mensilmente da una persona
-	public static String thReqHour = "Num. di ore richieste";	// nome della colonna per le ore di turno svolte mensilmente da una persona
-	public static String thAppHour = "Num. di ore approvate";	// nome della colonna per le ore di turno approvate mensilmente per una persona
+	public static String thDays = "Num. di giorni";				// nome della colonna per i giorni di turno svolti mensilmente da una persona
+	public static String thReqHour = "Num. di ore calcolate";	// nome della colonna per le ore di turno svolte mensilmente da una persona
+	public static String thAppHour = "Num. di ore approvate";		// nome della colonna per le ore di turno approvate mensilmente per una persona
+	public static String thLackTime = "Tempo mancante";
+	
 	
 	/*
 	 * @author arianna
@@ -393,7 +401,7 @@ public class Shift extends Controller {
 	
 	/**
 	 * @author arianna
-	 * crea il file PDF con il resoconto mensile dei turni di tipo 'A e B' per
+	 * crea il file PDF con il resoconto mensile dei turni dello IIT
 	 * il mese 'month' dell'anno 'year'
 	 * (portale sistorg)
 	 * 
@@ -406,20 +414,20 @@ public class Shift extends Controller {
 	public static void exportMonthAsPDF() {
 		int year = params.get("year", Integer.class);
 		int month = params.get("month", Integer.class);
-//		Long groupType = params.get("type", Long.class);
+		Long shiftCategoryId = params.get("type", Long.class);
 		
-		Logger.debug("sono nella exportMonthAsPDF con year=%s e month=%s", year, month);
+		Logger.debug("sono nella exportMonthAsPDF con shiftCategory=%s year=%s e month=%s", shiftCategoryId, year, month);
 		
-		 ArrayList<String> shiftTypes = new ArrayList<String>();
-		 shiftTypes.add("A"); 
-		 shiftTypes.add("B");
-		 Logger.debug("shiftTypes=%s", shiftTypes);
+		final LocalDate firstOfMonth = new LocalDate(year, month, 1);
+		final LocalDate lastOfMonth = firstOfMonth.dayOfMonth().withMaximumValue();
 		
 		//  Used TreeBasedTable becouse of the alphabetical name order (persona, A/B, num. giorni)
 		Table<Person, String, Integer> singleShiftSumDays = TreeBasedTable.<Person, String, Integer>create();
 		
 		// Contains the number of the effective hours of worked shifts 
 		Table<Person, String, BigDecimal> totalShiftSumHours = TreeBasedTable.<Person, String, BigDecimal>create();
+		
+		Table<Person, String, LocalDateTime> totalShiftSumHours2 = TreeBasedTable.<Person, String, LocalDateTime>create();
 		
 		// Contains for each person the numer of days and hours of worked shift
 		Table<Person, String, String> totalShiftInfo = TreeBasedTable.<Person, String, String>create();
@@ -428,18 +436,23 @@ public class Shift extends Controller {
 		// (person, [thAbsences, thNoStampings,thBadStampings], <giorni/fasce orarieinconsistenti>)
 		Table<Person, String, List<String>> singleShiftInconsistentAbsences = TreeBasedTable.<Person, String, List<String>>create();
 		Table<Person, String, List<String>> totalInconsistentAbsences = TreeBasedTable.<Person, String, List<String>>create();
-				
-		final LocalDate firstOfMonth = new LocalDate(year, month, 1);
-		final LocalDate lastOfMonth = firstOfMonth.dayOfMonth().withMaximumValue();
 		
-		for (String type: shiftTypes)
+		
+		ShiftCategories shiftCategory = ShiftCategories.findById(shiftCategoryId);
+		if (shiftCategory == null) {
+			notFound(String.format("shiftCategory shiftCategory = %s doesn't exist", shiftCategory));			
+		}
+		
+		// Legge i turni associati alla categoria (es: A, B)
+		 List<ShiftType> shiftTypes = ShiftType.find("SELECT st FROM ShiftType st WHERE st.shiftCategories = ?", shiftCategory).fetch();
+		 Logger.debug("shiftTypes=%s", shiftTypes);
+		
+	
+		 // for each shift
+		for (ShiftType shiftType: shiftTypes)
 		{	
+			String type = shiftType.type;
 			Logger.debug("Elabora type=%s", type);
-			
-			ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();	
-			if (shiftType == null) {
-				notFound(String.format("ShiftType = %s doesn't exist", shiftType));			
-			}
 
 			// seleziona i giorni di turno di tutte le persone associate al turno 'shiftType' da inizio a fine mese
 			List<PersonShiftDay> personShiftDays = 
@@ -450,40 +463,53 @@ public class Shift extends Controller {
 			
 			// for each person conunt the total shift hours
 			for (Person person: singleShiftSumDays.rowKeySet()) {
+				LocalDateTime numOfHours2;
+				LocalDateTime numOfDays2;
+				
 				BigDecimal numOfHours;	
 				int numOfDays;
 
 				// counts the shift hours 
 				if (singleShiftSumDays.contains(person, type)) { 						
-					//Logger.debug("Leggo da singleShiftSumDays i giorni %s del tipo %s", singleShiftSumDays.get(person, type), type);
+					Logger.debug("Leggo da singleShiftSumDays  %s giorni del tipo %s", singleShiftSumDays.get(person, type), type);
 							
 					numOfDays = singleShiftSumDays.get(person, type);
-					numOfHours = (totalShiftSumHours.contains(person, thReqHour)) ? totalShiftSumHours.get(person, thReqHour) : new BigDecimal(0);		
+					numOfDays2 = new LocalDateTime(singleShiftSumDays.get(person, type), 0, 0, 0, 0);
+					
+					numOfHours = (totalShiftSumHours.contains(person, thReqHour)) ? totalShiftSumHours.get(person, thReqHour) : new BigDecimal(0);
+					numOfHours2 = (totalShiftSumHours2.contains(person, thReqHour)) ? totalShiftSumHours2.get(person, thReqHour) : new LocalDateTime(0, 0, 0, 0, 0);	
 					
 					//Logger.debug("In singleShiftSumDays ci sono giorni=%d e ore precedenti =%s", numOfDays, numOfHours);
 					
-					BigDecimal calcHours = CompetenceUtility.calcShiftHoursFromDays(numOfDays);
+					LocalTime calcHours = CompetenceUtility.calcShiftHoursFromDays(numOfDays);
+					
+					
+					// DA TERMINARE 
 					
 					//Logger.debug("Aggiungo a %s i nuovi %s", numOfHours, calcHours);
-					calcHours = calcHours.add(numOfHours);		
+					//calcHours = calcHours.add(numOfHours);		
+					//LocalDateTime calcHours2 = 
 					
-					//Logger.debug("Salvo in totalShiftSumHours.(person=%s, thHour=%s)  %s", person, thHour, calcHours);
-					totalShiftSumHours.put(person, thReqHour, calcHours);
+					Logger.debug("Salvo in totalShiftSumHours.(person=%s, thReqHour=%s)  %s", person, thReqHour, calcHours);
+					//totalShiftSumHours.put(person, thReqHour, calcHours);
 				}
 			}
 			
 			// Memorizzo le inconsistenze del turno
 			singleShiftInconsistentAbsences = CompetenceUtility.getShiftInconsistencyTimestampTable(personShiftDays);
 			
+			LocalTime totalLackOfTime = new LocalTime(0, 0, 0);
+			String[] timeStr;
+			
 			// for each person
 			for (Person person: singleShiftInconsistentAbsences.rowKeySet()) {
 				List<String> str;			
-				//Logger.debug("leggo in inconsistentAbsences %s", person);
+				Logger.debug("leggo in inconsistentAbsences %s", person);
 						
-				// for each day of month
+				// for each type of shift
 				for (String tipo: singleShiftInconsistentAbsences.columnKeySet()) {
 							
-							// counts the shift days 
+					// counts the shift days 
 					if (singleShiftInconsistentAbsences.contains(person, tipo)) { 						
 						//Logger.debug("Leggo da singleShiftInconsistentAbsences l'inconsistenza %s del tipo %s", singleShiftInconsistentAbsences.get(person, tipo), tipo);
 								
@@ -492,7 +518,19 @@ public class Shift extends Controller {
 								
 						str.addAll(singleShiftInconsistentAbsences.get(person, tipo));		
 								
-						//Logger.debug("nuova str=%s", str);
+						if (tipo.equals(thLackTime)) {
+							for (String time: str) {
+				
+								timeStr= time.split(":");			
+								totalLackOfTime = totalLackOfTime.plusHours(Integer.parseInt(timeStr[0])).plusMinutes(Integer.parseInt(timeStr[1]));
+								//Logger.debug("timeStr = %s:%s e totalLackOfTime = %s", timeStr[0], timeStr[1], totalLackOfTime);
+							}
+							
+							str.removeAll(str);
+							str.add(totalLackOfTime.toString("HH:mm"));
+							//Logger.debug("str = %s", str);
+						}
+						Logger.debug("nuova inconsistenza=%s di tipo %s per %s", str, tipo, person);
 						totalInconsistentAbsences.put(person, tipo, str);
 					}
 				} 
@@ -511,21 +549,28 @@ public class Shift extends Controller {
 				BigDecimal numOfRealHours = competence.getValueRequested();
 				int numOfDays = CompetenceUtility.calcShiftDaysFromHour(numOfRealHours);
 				int numOfApprovedHours = competence.getValueApproved();
+				String lackHours = totalInconsistentAbsences.contains(competence.person, thLackTime) ? totalInconsistentAbsences.get(competence.person, thLackTime).get(0).toString() : "";
 				
-				Logger.debug("In totalShiftInfo emorizzo giorni=%s, ore=%s", numOfDays, numOfRealHours);
+				Logger.debug("In totalShiftInfo memorizzo giorni=%s, ore=%s", numOfDays, numOfRealHours);
 				totalShiftInfo.put(competence.person, thReqHour, numOfRealHours.toString());
 				totalShiftInfo.put(competence.person, thAppHour, Integer.toString(numOfApprovedHours));
-				totalShiftInfo.put(competence.person, thDays, Integer.toString(numOfDays)); 		
+				totalShiftInfo.put(competence.person, thDays, Integer.toString(numOfDays)); 
+				totalShiftInfo.put(competence.person, thLackTime, lackHours);
 			
 			//Logger.debug("salvato nella tabella i giorni %d e le ore %s", calcDays, competence.valueRequested);
 		}
 								
-
-		ArrayList<String> thInconsistence = new ArrayList<String>(Arrays.asList(thAbsences, thNoStampings, thBadStampings));
-		ArrayList<String> thShift = new ArrayList<String>(Arrays.asList(thDays, thReqHour, thAppHour));
+		Options options = new Options();
+		options.pageSize = IHtmlToPdfTransformer.A4L;
+		
+		ArrayList<String> thInconsistence = new ArrayList<String>(Arrays.asList(thAbsences, thNoStampings, thBadStampings, thMissions, thWarnStampings));
+		ArrayList<String> thShift = new ArrayList<String>(Arrays.asList(thDays, thReqHour, thAppHour, thLackTime));
 		
 		LocalDate today = new LocalDate();
-		renderPDF(today, firstOfMonth, totalShiftInfo, totalInconsistentAbsences, thInconsistence, thShift);
+		String shiftDesc = shiftCategory.description;
+		String supervisor = shiftCategory.supervisor.name.concat(" ").concat(shiftCategory.supervisor.surname);
+		
+		renderPDF(options, today, firstOfMonth, totalShiftInfo, totalInconsistentAbsences, thInconsistence, thShift, shiftDesc, supervisor);
 	}
 	
 
@@ -541,12 +586,18 @@ public class Shift extends Controller {
 	public static void exportMonthCalAsPDF() {
 		int year = params.get("year", Integer.class);
 		int month = params.get("month", Integer.class);
-
-		Logger.debug("sono nella exportMonthCalAsPDF con year=%s e month=%s", year, month);
+		Long shiftCategoryId = params.get("type", Long.class);
 		
-		ArrayList<String> shiftTypes = new ArrayList<String>();
-		shiftTypes.add("A"); 
-		shiftTypes.add("B");
+		Logger.debug("sono nella exportMonthCalAsPDF con shiftCategory=%s year=%s e month=%s", shiftCategoryId, year, month);
+		
+		ShiftCategories shiftCategory = ShiftCategories.findById(shiftCategoryId);
+		if (shiftCategory == null) {
+			notFound(String.format("shiftCategory shiftCategory = %s doesn't exist", shiftCategory));			
+		}
+		
+		//ArrayList<String> shiftTypes = new ArrayList<String>();
+		List<ShiftType> shiftTypes = ShiftType.find("SELECT st FROM ShiftType st WHERE st.shiftCategories = ?", shiftCategory).fetch();
+		 		
 
 		Logger.debug("shiftTypes=%s", shiftTypes);
 		
@@ -582,13 +633,9 @@ public class Shift extends Controller {
 		// prende il primo giorno del mese
 		LocalDate firstOfMonth = new LocalDate(year, month, 1);
 		
-		for (String type: shiftTypes)
+		for (ShiftType shiftType: shiftTypes)
 		{	
-			Logger.debug("controlla type=%s", type);
-			ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();	
-			if (shiftType == null) {
-				notFound(String.format("ShiftType = %s doesn't exist", shiftType));			
-			}
+			String type = shiftType.type;
 						
 			// legge i giorni di turno del tipo 'type' da inizio a fine mese 
 			List<PersonShiftDay> personShiftDays = 
@@ -615,7 +662,6 @@ public class Shift extends Controller {
 		}
 		
 		shiftCalendarMonth = builder.build();
-		
 	
 		Logger.debug("Costruisce il calendario ...");
 		for (int day: shiftCalendarMonth.columnKeySet()) {
@@ -627,6 +673,7 @@ public class Shift extends Controller {
 				Logger.debug("person %s", person);
 				if (shiftCalendarMonth.contains(person, day)) {
 					currShift = shiftCalendarMonth.get(person, day).tipoTurno;
+					
 					//ShiftSlot f = shiftCalendarMonth.get(person, day).fasciaTurno;
 					//Logger.debug("trovato turno (%s,%s) per (%s, %s)", currShift, f, person, day);
 					
@@ -651,7 +698,9 @@ public class Shift extends Controller {
 		}
 		
 		LocalDate today = new LocalDate();
-		renderPDF(today, firstOfMonth, shiftCalendar);
+		String shiftDesc = shiftCategory.description;
+		String supervisor = shiftCategory.supervisor.name.concat(" ").concat(shiftCategory.supervisor.surname);
+		renderPDF(today, firstOfMonth, shiftCalendar, shiftDesc, supervisor);
 	}
 	
 	/*
