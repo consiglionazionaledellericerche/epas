@@ -19,7 +19,8 @@
         
         	<div class="table">
 			<table class="mensile">
-			<caption> Giorni di turno del personale per il mese di ${mese} ${anno}</caption>
+			<caption> Report turni di lavoro del gruppo <em>${shiftDesc}</em> <br />  ${mese} ${anno}</caption>
+			
 			<tr>
 			<th>Persona</th>
 			%{
@@ -73,7 +74,7 @@
       
      		<div class="firma resp">
       			<strong>Il Responsabile</strong><br />
-      			Dott. Maurizio Martinelli
+      			Dott. ${supervisor}
       		</div>
       		
       		%{
@@ -81,8 +82,9 @@
 				
 				fistTr = true;
 			}%
-					<div class="note_presenze">
-					<h1>Inconsistenze con le presenze del personale </h1>
+			
+			<div class="note_presenze">
+					<h1>Inconsistenze con le timbrature del personale </h1>
 			    	<p>Sono state rilevate delle inconsistenze tra i turni e le presenze del personale: </p>
 			    	
 			    	<table class="mensile">
@@ -134,6 +136,17 @@
       		
       		<div class="date">
       			<strong>Data</strong> &nbsp;&nbsp;${today.getDayOfMonth()}/${today.getMonthOfYear()}/${today.getYear()}
+      		</div>
+      		
+      		
+      		<div class="note">
+      		<p><strong>NOTE</strong>:</p>
+      		<ul>
+      		<li><strong>Timbratura errata</strong>: non sono rilevate coppie di timbrature valide o l'orario di lavoro e' inferiore alla durata del turno con una differenza maggiore di 2 ore.</li>
+      		<li><strong>Missione</strong>: e' stata rilevata una missione in concomitanza col turno ed è necessario verificare la compatibilita' degli orari.</li>
+      		<li><strong>Orario da motivare</strong>: l'orario di lavoro e' inferiore alla durata del turno ma con una differenza minore di 2 ore. </li>
+      		</ul>
+      		<p>Gli orari sono calcolati con una flessibilita' di 5 min. come dalla circolare "Approfondimenti in materia di turni" - PROT. N. 0008692 del 2/12/2014</p>
       		</div>
       		
 		  	%{

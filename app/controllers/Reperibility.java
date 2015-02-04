@@ -4,6 +4,7 @@
 package controllers;
 
 import static play.modules.pdf.PDF.renderPDF;
+import play.modules.pdf.PDF.Options;
 import helpers.BadRequest;
 import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.JsonReperibilityChangePeriodsBinder;
@@ -45,6 +46,7 @@ import net.fortuna.ical4j.model.property.ProdId;
 import net.fortuna.ical4j.model.property.Uid;
 import net.fortuna.ical4j.model.property.Version;
 
+import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
 
@@ -592,7 +594,7 @@ public class Reperibility extends Controller {
 				for (Integer dayOfMonth: reperibilityMonth.columnKeySet()) {
 					if (reperibilityMonth.contains(person, dayOfMonth)) { 
 						//SemRep semRep = SemRep.valueOf( String.format("%s%dS", reperibilityMonth.get(person, dayOfMonth).toUpperCase(), (i<=6 ?1:2)));
-						String col = String.format("%s%dS", reperibilityMonth.get(person, dayOfMonth).toUpperCase(), (i<=6 ?1:2));
+						String col = String.format("%s%dS", reperibilityMonth.get(person, dayOfMonth).toUpperCase(), (i<=6 ? 1:2));
 						
 						//int n = reperibilitySumDays.contains(person, semRep) ? reperibilitySumDays.get(person, semRep) + 1 : 1;
 						//reperibilitySumDays.put(person, semRep, Integer.valueOf(n));
@@ -607,9 +609,12 @@ public class Reperibility extends Controller {
 		}
 		
 		Logger.info("Creazione del documento PDF con il calendario annuale delle reperibilità per l'anno %s", year);
+
 		
 		LocalDate firstOfYear = new LocalDate(year, 1, 1);
-		renderPDF(year, firstOfYear, reperibilityMonths, reperibilitySumDays);
+		Options options = new Options();
+		options.pageSize = IHtmlToPdfTransformer.A4L;
+		renderPDF(options, year, firstOfYear, reperibilityMonths, reperibilitySumDays);
 	}
 
     
