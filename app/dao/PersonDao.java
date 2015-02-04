@@ -359,6 +359,18 @@ public final class PersonDao {
 	}
 
 
+	/**
+	 * 
+	 * @param type
+	 * @return la lista di persone in reperibilità con tipo type 
+	 */
+	public static List<Person> getPersonForReperibility(Long type){
+		final JPQLQuery query = ModelQuery.queryFactory().from(person)
+				.where(person.reperibility.personReperibilityType.id.eq(type).and(person.reperibility.startDate.isNull().or(person.reperibility.startDate.loe(LocalDate.now())
+						.and(person.reperibility.endDate.isNull().or(person.reperibility.endDate.goe(LocalDate.now()))))));
+		return query.list(person);
+		
+	}
 
 
 }

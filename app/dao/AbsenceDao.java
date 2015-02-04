@@ -60,6 +60,8 @@ public class AbsenceDao extends DaoBase {
 		return query.singleResult(absence);
 
 	}
+	
+	
 
 	/**
 	 *
@@ -162,6 +164,14 @@ public class AbsenceDao extends DaoBase {
 			return new Long(0);
 	}
 
+	/**
+	 * 
+	 * @param person
+	 * @param fromDate
+	 * @param toDate
+	 * @param absenceType
+	 * @return
+	 */
 	public static SimpleResults<Absence> findByPersonAndDate(Person person, LocalDate fromDate, Optional<LocalDate> toDate,Optional<AbsenceType> absenceType) {
 
 		Preconditions.checkNotNull(person);
@@ -316,4 +326,21 @@ public class AbsenceDao extends DaoBase {
 
 		return query2.count() > 0;
 	}
+	
+	/**
+	 * 
+	 * @param personList
+	 * @param from
+	 * @param to
+	 * @return la lista di assenze effettuate dalle persone presenti nella lista personList nel periodo temporale compreso tra 
+	 * from e to
+	 */
+	public static List<Absence> getAbsenceForPersonListInPeriod(List<Person> personList, LocalDate from, LocalDate to){
+		final JPQLQuery query = ModelQuery.queryFactory().from(absence)
+				.where(absence.personDay.date.between(from, to)
+						.and(absence.personDay.person.in(personList)))
+						.orderBy(absence.personDay.person.id.asc(),absence.personDay.date.asc());
+		return query.list(absence);
+	}
+	
 }

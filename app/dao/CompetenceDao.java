@@ -10,6 +10,7 @@ import models.CompetenceCode;
 import models.Office;
 import models.Person;
 import models.PersonHourForOvertime;
+import models.PersonReperibilityType;
 import models.TotalOvertime;
 import models.query.QCompetence;
 import models.query.QPersonHourForOvertime;
@@ -181,6 +182,26 @@ public class CompetenceDao {
 //				"and comp.year = ? and comp.valueApproved > 0", person, month, year).fetch();
 		Logger.trace("Per la persona %s %s trovate %d competenze approvate nei mesi di %d/%d", person.surname, person.name, competenceList.size(), month, year );
 		return competenceList;
+	}
+	
+	
+	/**
+	 * 
+	 * @param type
+	 * @param year
+	 * @param month
+	 * @param code
+	 * @return la lista di competenze relative all'anno year, al mese month e al codice code di persone che hanno reperibilità 
+	 * di tipo type associata
+	 */
+	public static List<Competence> getCompetenceInReperibility(PersonReperibilityType type, int year, int month, CompetenceCode code){
+		QCompetence competence = QCompetence.competence;
+		JPQLQuery query = ModelQuery.queryFactory().from(competence)
+				.where(competence.person.reperibility.personReperibilityType.eq(type)
+						.and(competence.year.eq(year).and(competence.month.eq(month)
+								.and(competence.competenceCode.eq(code)))))
+								.orderBy(competence.person.surname.asc());
+		return query.list(competence);
 	}
 	
 	/*********************************************************************************************************************************/
