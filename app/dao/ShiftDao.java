@@ -63,4 +63,26 @@ public class ShiftDao {
 		return query.list(sc);
 	}
 	
+	/**
+	 * 
+	 * @param day
+	 * @param type
+	 * @return il turno cancellato relativo al giorno 'day' e al tipo 'type' passati come parametro
+	 */
+	public static ShiftCancelled getShiftCancelled(LocalDate day, ShiftType type){
+		JPQLQuery query = ModelQuery.queryFactory().from(sc).where(sc.date.eq(day).and(sc.type.eq(type)));
+		return query.singleResult(sc);
+	}
+	
+	/**
+	 * 
+	 * @param type
+	 * @param day
+	 * @return il quantitativo di shiftCancelled effettivamente cancellati
+	 */
+	public static Long deleteShiftCancelled(ShiftType type, LocalDate day){
+		Long deleted = ModelQuery.queryFactory().delete(sc).where(sc.date.eq(day).and(sc.type.eq(type))).execute();
+		return deleted;
+	}
 }
+
