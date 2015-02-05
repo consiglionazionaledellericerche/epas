@@ -14,6 +14,7 @@ import models.Contract;
 import models.Office;
 import models.Person;
 import models.PersonDay;
+import models.PersonShift;
 import models.User;
 import models.query.QCompetenceCode;
 import models.query.QContract;
@@ -22,6 +23,7 @@ import models.query.QPersonDay;
 import models.query.QPersonHourForOvertime;
 import models.query.QPersonReperibility;
 import models.query.QPersonShift;
+import models.query.QPersonShiftShiftType;
 import models.query.QUser;
 
 import org.joda.time.LocalDate;
@@ -372,5 +374,20 @@ public final class PersonDao {
 		
 	}
 
+	/**
+	 * 
+	 * @param type
+	 * @return la lista di persone che hanno come tipo turno quello passato come parametro
+	 */
+	public static List<Person> getPersonForShift(String type){
+		QPersonShiftShiftType psst = QPersonShiftShiftType.personShiftShiftType;
+		QPersonShift ps = QPersonShift.personShift;
+		final JPQLQuery query = ModelQuery.queryFactory().from(person)
+				.leftJoin(person.personShift, ps)
+				.leftJoin(ps.personShiftShiftTypes, psst).where(psst.shiftType.type.eq(type)
+						.and(psst.beginDate.isNull().or(psst.beginDate.loe(LocalDate.now()))
+								.and(psst.endDate.isNull().or(psst.endDate.goe(LocalDate.now())))));
+		return query.list(person);
+	}
 
 }

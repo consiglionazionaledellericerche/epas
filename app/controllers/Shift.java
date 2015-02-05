@@ -35,6 +35,8 @@ import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
+import dao.PersonDao;
+import dao.ShiftDao;
 import models.Competence;
 import models.ShiftTimeTable;
 import models.enumerate.ShiftSlot;
@@ -68,16 +70,18 @@ public class Shift extends Controller {
 		String type = params.get("type");		
 		Logger.debug("Cerco persone del turno %s", type);
 		
-		ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();
+		//ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();
+		ShiftType shiftType = ShiftDao.getShiftTypeByType(type);
 		if (shiftType == null) {
 			notFound(String.format("ShiftType type = %s doesn't exist", type));			
 		}
 		Logger.debug("Cerco Turnisti di tipo %s", shiftType.type);
 		
 		List<Person> personList = new ArrayList<Person>();
-		personList = JPA.em().createQuery("SELECT p FROM PersonShiftShiftType psst JOIN psst.personShift ps JOIN ps.person p WHERE psst.shiftType.type = :type AND (psst.beginDate IS NULL OR psst.beginDate <= now()) AND (psst.endDate IS NULL OR psst.endDate >= now())")
-				.setParameter("type", type)
-				.getResultList(); 
+//		personList = JPA.em().createQuery("SELECT p FROM PersonShiftShiftType psst JOIN psst.personShift ps JOIN ps.person p WHERE psst.shiftType.type = :type AND (psst.beginDate IS NULL OR psst.beginDate <= now()) AND (psst.endDate IS NULL OR psst.endDate >= now())")
+//				.setParameter("type", type)
+//				.getResultList(); 
+		personList = PersonDao.getPersonForShift(type);
 		
 		Logger.debug("Shift personList called, found %s shift person", personList.size());
 		
@@ -98,7 +102,8 @@ public class Shift extends Controller {
 		
 		// type validation
 		String type = params.get("type");
-		ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();
+		//ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();
+		ShiftType shiftType = ShiftDao.getShiftTypeByType(type);
 		if (shiftType == null) {
 			notFound(String.format("ShiftType type = %s doesn't exist", type));			
 		}
@@ -119,7 +124,8 @@ public class Shift extends Controller {
 		
 		// type validation
 		String type = params.get("type");
-		ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();
+		//ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();
+		ShiftType shiftType = ShiftDao.getShiftTypeByType(type);
 		if (shiftType == null) {
 			notFound(String.format("ShiftType type = %s doesn't exist", type));			
 		}
@@ -132,12 +138,13 @@ public class Shift extends Controller {
 		List<ShiftPeriod> shiftPeriods = new ArrayList<ShiftPeriod>();
 	
 		// get the normal shift  ????????????????????????? 
-		List<PersonShiftDay> personShiftDay = PersonShiftDay.find("" +
-				"SELECT psd FROM PersonShiftDay psd WHERE psd.date BETWEEN ? AND ? " +
-				"AND psd.shiftType = ? " +
-				"ORDER BY psd.shiftSlot, psd.date",
-			//	"ORDER BY psd.shiftTimeTable.startShift, psd.date", 
-				from, to, shiftType).fetch();
+//		List<PersonShiftDay> personShiftDay = PersonShiftDay.find("" +
+//				"SELECT psd FROM PersonShiftDay psd WHERE psd.date BETWEEN ? AND ? " +
+//				"AND psd.shiftType = ? " +
+//				"ORDER BY psd.shiftSlot, psd.date",
+//			//	"ORDER BY psd.shiftTimeTable.startShift, psd.date", 
+//				from, to, shiftType).fetch();
+		List<PersonShiftDay> personShiftDay = ShiftDao.getPersonShiftDaysByPeriodAndType(from, to, shiftType);	
 		Logger.debug("Shift find called from %s to %s, type %s - found %s shift days", from, to, shiftType.type, personShiftDay.size());
 		
 
@@ -159,10 +166,11 @@ public class Shift extends Controller {
 		}
 		
 		// get the cancelled shifts of type shiftType
-		List<ShiftCancelled> shiftCancelled = ShiftCancelled.find("SELECT sc FROM ShiftCancelled sc WHERE sc.date BETWEEN ? AND ? " +"" +
-				"AND sc.type = ? " +
-				"ORDER BY sc.date", 
-				from, to, shiftType).fetch();
+//		List<ShiftCancelled> shiftCancelled = ShiftCancelled.find("SELECT sc FROM ShiftCancelled sc WHERE sc.date BETWEEN ? AND ? " +"" +
+//				"AND sc.type = ? " +
+//				"ORDER BY sc.date", 
+//				from, to, shiftType).fetch();
+		List<ShiftCancelled> shiftCancelled = ShiftDao.getShiftCancelledByPeriodAndType(from, to, shiftType);
 		Logger.debug("ShiftCancelled find called from %s to %s, type %s - found %s shift days", from, to, shiftType.type, shiftCancelled.size());
 	
 		shiftPeriod = null;
