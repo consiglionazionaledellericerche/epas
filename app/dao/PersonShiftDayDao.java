@@ -17,6 +17,7 @@ import models.query.QPersonShiftDay;
  */
 public class PersonShiftDayDao {
 
+	public final static QPersonShiftDay personShiftDay = QPersonShiftDay.personShiftDay;
 	/**
 	 * 
 	 * @param person
@@ -25,11 +26,14 @@ public class PersonShiftDayDao {
 	 * Null altrimenti 
 	 */
 	public static PersonShiftDay getPersonShiftDay(Person person, LocalDate date){
-		QPersonShiftDay personShiftDay = QPersonShiftDay.personShiftDay;
+		
 		JPQLQuery query = ModelQuery.queryFactory().from(personShiftDay)
 				.where(personShiftDay.personShift.person.eq(person).and(personShiftDay.date.eq(date)));
 		
 		return query.singleResult(personShiftDay);
 		
 	}
+	
+	
+	
 }
