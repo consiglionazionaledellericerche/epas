@@ -673,12 +673,12 @@ public class Shift extends Controller {
 		}
 				
 		AbsenceShiftPeriod absenceShiftPeriod = null;
-		
-		absencePersonShiftDays = JPA.em().createQuery("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date BETWEEN :from AND :to AND pd.person IN (:personList) ORDER BY pd.person.id, pd.date")
-			.setParameter("from", from)
-			.setParameter("to", to)
-			.setParameter("personList", personList)
-			.getResultList();
+		absencePersonShiftDays = AbsenceDao.getAbsenceForPersonListInPeriod(personList, from, to);
+//		absencePersonShiftDays = JPA.em().createQuery("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date BETWEEN :from AND :to AND pd.person IN (:personList) ORDER BY pd.person.id, pd.date")
+//			.setParameter("from", from)
+//			.setParameter("to", to)
+//			.setParameter("personList", personList)
+//			.getResultList();
 		
 		
 		Logger.debug("Trovati %s giorni di assenza", absencePersonShiftDays.size());
