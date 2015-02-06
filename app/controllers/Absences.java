@@ -386,17 +386,6 @@ public class Absences extends Controller{
 		Stampings.personStamping(person.id, dateFrom.getYear(), dateFrom.getMonthOfYear());
 	}
 	
-// 	FIXME Questo controller non viene mai usato,Non esiste nemmeno la vista 
-//	@Check(Security.INSERT_AND_UPDATE_ABSENCE)
-//	public static void insertPersonChildren(){
-//		int month = new LocalDate().getMonthOfYear();
-//		int year = new LocalDate().getYear();
-//		//List<Person> personList = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
-//		List<Person> personList = PersonDao.list(Optional.<String>absent(), OfficeDao.getOfficeAllowed(Optional.<User>absent())
-//				, false, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
-//		render(personList);
-//	}
-	
 	public static class AttachmentsPerCodeRecap {
 		
 		List<Absence> absenceSameType = new ArrayList<Absence>();
@@ -469,9 +458,6 @@ public class Absences extends Controller{
 		List<Absence> absList = AbsenceDao.getAbsenceByCodeInPeriod(Optional.<Person>absent(),Optional.fromNullable(code), 
 				new LocalDate(year, month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), 
 				Optional.<JustifiedTimeAtWork>absent(), true, false);
-//		List<Absence> absList = Absence.find("Select abs from Absence abs where abs.absenceType.code = ? "
-//				+ "and abs.personDay.date between ? and ? and abs.absenceFile is not null",
-//				code, new LocalDate(year, month, 1), new LocalDate(year, month, 1).dayOfMonth().withMaximumValue()).fetch();
 		byte[] buffer = new byte[1024];
 
 		for(Absence abs : absList){
@@ -532,12 +518,6 @@ public class Absences extends Controller{
 			from = LocalDate.now();
 			to = LocalDate.now();
 		}
-				
-//      Capita solo se l'utente connesso è l'admin, che però non può accedere a questo controller per via delle drools!
-//		if(person == null){
-//			flash.error("Persona inesistente");
-//			Stampings.personStamping(Security.getUser().get().person.id, new LocalDate().getYear(), new LocalDate().getMonthOfYear());
-//		}
 				
 		List<Absence> missioni = Lists.newArrayList();
 		List<Absence> ferie = Lists.newArrayList();
