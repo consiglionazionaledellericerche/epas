@@ -106,6 +106,13 @@ public class Persons extends Controller {
 			render("@insertPerson", person, qualification, office);
 		}
 		
+		rules.checkIfPermitted(office);
+		
+		person.qualification = qualification;
+		person.office = office;
+
+		contract.person = person;
+		
 		if(!contract.crossFieldsValidation()){
 			
 			flash.error("Errore nella validazione del contratto. Inserire correttamente tutti i parametri.");
@@ -113,12 +120,6 @@ public class Persons extends Controller {
 			render("@insertPerson", person, qualification, office);
 		}
 
-		rules.checkIfPermitted(office);
-		
-		person.qualification = qualification;
-		person.office = office;
-
-		contract.person = person;
 		contract.onCertificate = onCertificate;
 
 		person.save();
