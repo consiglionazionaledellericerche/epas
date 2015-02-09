@@ -5,8 +5,10 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.ArrayList;
 import java.util.List;
 
+import manager.ConfGeneralManager;
+import manager.PersonDayManager;
+import manager.WorkingTimeTypeManager;
 import models.Absence;
-import models.ConfGeneral;
 import models.Person;
 import models.PersonDay;
 import models.StampModificationType;
@@ -20,6 +22,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
 import dao.StampingDao;
+import dao.WorkingTimeTypeDao;
 
 /**
  * Oggetto che modella il giorno di una persona nelle viste personStamping e stampings.
@@ -77,14 +80,17 @@ public class PersonStampingDayRecap {
 		setDate(pd.date); 
 		this.absences = pd.absences;
 
-		List<Stamping> stampingsForTemplate = pd.getStampingsForTemplate(numberOfInOut, today);
+		List<Stamping> stampingsForTemplate = PersonDayManager.getStampingsForTemplate(pd,numberOfInOut, today);
 
 		
 		this.setStampingTemplate( stampingsForTemplate, pd );
-		if(pd.person.getWorkingTimeType(pd.date) != null){		
-			this.wtt = pd.person.getWorkingTimeType(pd.date);
+		//if(pd.person.getWorkingTimeType(pd.date) != null){
+		if(WorkingTimeTypeDao.getWorkingTimeType(pd.date, pd.person) != null){
+			//this.wtt = pd.person.getWorkingTimeType(pd.date);
+			this.wtt = WorkingTimeTypeDao.getWorkingTimeType(pd.date, pd.person);
 			//this.wttd = this.wtt != null ? this.wtt.getWorkingTimeTypeDayFromDayOfWeek(pd.date.getDayOfWeek()) : this.wtt.getWorkingTimeTypeDayFromDayOfWeek(pd.date.plusMonths(1).getDayOfWeek());
-			this.wttd = this.wtt.getWorkingTimeTypeDayFromDayOfWeek(pd.date.getDayOfWeek());
+			this.wttd = WorkingTimeTypeManager.getWorkingTimeTypeDayFromDayOfWeek(pd.date.getDayOfWeek(), this.wtt);
+			//this.wttd = this.wtt.getWorkingTimeTypeDayFromDayOfWeek(pd.date.getDayOfWeek());
 			this.setWorkingTime(this.wttd.workingTime);
 			this.setMealTicketTime(this.wttd.mealTicketTime);
 			this.setBreakTicketTime(this.wttd.breakTicketTime);
@@ -94,10 +100,10 @@ public class PersonStampingDayRecap {
 		
 		
 		//ConfGeneral conf = ConfGeneral.getConfGeneral();
-		Integer mealTimeStartHour = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_start_hour", person.office));
-		Integer mealTimeStartMinute = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_start_minute", person.office));
-		Integer mealTimeEndHour = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_end_hour", person.office));
-		Integer mealTimeEndMinute = Integer.parseInt(ConfGeneral.getFieldValue("meal_time_end_minute", person.office));
+		Integer mealTimeStartHour = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_start_hour", person.office));
+		Integer mealTimeStartMinute = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_start_minute", person.office));
+		Integer mealTimeEndHour = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_end_hour", person.office));
+		Integer mealTimeEndMinute = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_end_minute", person.office));
 		
 		this.setTimeMealFrom(mealTimeStartHour, mealTimeStartMinute);
 		this.setTimeMealTo(mealTimeEndHour, mealTimeEndMinute);
@@ -119,7 +125,7 @@ public class PersonStampingDayRecap {
 				if(pd.timeAtWork!=0)
 				{
 					if(fixedStampModificationType==null)							//DEVE ANDARE NELLA CACHE
-						fixedStampModificationType = pd.getFixedWorkingTime();
+						fixedStampModificationType = PersonDayManager.getFixedWorkingTime();
 					this.fixedWorkingTimeCode = fixedStampModificationType.code;
 					addStampModificationTypeToList(fixedStampModificationType);
 				}
@@ -136,7 +142,7 @@ public class PersonStampingDayRecap {
 		//----------------------------------------  not fixed:  worktime, difference, progressive for today-------------------------------
 		else if(this.today)
 		{
-			pd.queSeraSera();
+			PersonDayManager.queSeraSera(pd);
 			this.setWorkTime(pd.timeAtWork);
 			this.setDifference( pd.difference );
 			this.setProgressive(pd.progressive);
@@ -150,10 +156,10 @@ public class PersonStampingDayRecap {
 		}
 
 		//----------------------------------------------- meal ticket (NO)--------------------------------------------------------------
-		if(this.today && !pd.isAllDayAbsences())
+		if(this.today && !PersonDayManager.isAllDayAbsences(pd))
 			this.setMealTicket(pd.isTicketAvailable, true);
 		
-		else if(this.today && pd.isAllDayAbsences())
+		else if(this.today && PersonDayManager.isAllDayAbsences(pd))
 			this.setMealTicket(pd.isTicketAvailable, false);	//c'è una assenza giornaliera, la decisione è già presa
 		
 		else if(!this.holiday)
@@ -169,7 +175,7 @@ public class PersonStampingDayRecap {
 			addStampModificationTypeToList(pd.stampModificationType);
 		}
 		//----------------------------------------------- uscita adesso f ---------------------------------------------------------------
-		if(this.today && !this.holiday && !pd.isAllDayAbsences()) 
+		if(this.today && !this.holiday && !PersonDayManager.isAllDayAbsences(pd)) 
 		{
 			StampModificationType smt = StampingDao.getStampModificationTypeById(StampModificationTypeValue.ACTUAL_TIME_AT_WORK.getId());
 			//StampModificationType smt = StampModificationType.findById(StampModificationTypeValue.ACTUAL_TIME_AT_WORK.getId());
@@ -462,7 +468,7 @@ public class PersonStampingDayRecap {
 			//----------------------------------------- missingExitStampBeforeMidnightCode ?? --------------------------------------
 			if(stamping.stampModificationType!=null)
 			{
-				StampModificationType smt = pd.checkMissingExitStampBeforeMidnight();
+				StampModificationType smt = PersonDayManager.checkMissingExitStampBeforeMidnight(pd);
 				if(smt!=null)
 				{
 					this.missingExitStampBeforeMidnightCode = smt.code;

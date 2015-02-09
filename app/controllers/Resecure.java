@@ -7,7 +7,6 @@ import java.lang.annotation.Target;
 
 import javax.inject.Inject;
 
-import models.User;
 import play.Play;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -59,10 +58,7 @@ public class Resecure extends Controller {
 					unauthorized(REALM);
 				}
 			}
-			if (Security.getUser().isPresent()) {
-				final User user = Security.getUser().get();
-				renderArgs.put("currentUser", user);
-			} else {
+			if (!Security.getUser().isPresent()) {
 	            flash.put("url", "GET".equals(request.method) ? request.url : Play.ctxPath + "/"); // seems a good default
 	            Secure.login();
 	        }

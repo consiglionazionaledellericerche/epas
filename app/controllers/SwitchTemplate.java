@@ -329,7 +329,7 @@ private static void executeAction(String action) {
 		
 		if(action.equals("Absences.absenceInPeriod")) {
 			
-			Absences.absenceInPeriod(personId);
+			Absences.absenceInPeriod(null,null,null);
 		}
 		
 		if(action.equals("WorkingTimes.manageWorkingTime")) {

@@ -3,6 +3,7 @@
  */
 package controllers;
 
+import java.util.HashSet;
 import java.util.List;
 
 import models.Office;
@@ -16,9 +17,11 @@ import play.mvc.With;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 
 import dao.OfficeDao;
+import dao.PersonDao;
 
 /**
  * @author cristian
@@ -49,7 +52,8 @@ public class JsonExport extends Controller {
 	public static void activePersons() {
 		List<Office> offices = OfficeDao.getAllOffices();
 		//List<Office> offices = Office.findAll();
-		List<Person> activePersons = Person.getActivePersonsInDay(LocalDate.now(), offices, false);
+		//List<Person> activePersons = Person.getActivePersonsInDay(LocalDate.now(), offices, false);
+		List<Person> activePersons = PersonDao.list(Optional.<String>absent(), new HashSet(offices), false, LocalDate.now(), LocalDate.now(), true).list();
 		Logger.debug("activePersons.size() = %d", activePersons.size());
 		
 		List<PersonInfo> activePersonInfos = FluentIterable.from(activePersons).transform(new Function<Person, PersonInfo>() {

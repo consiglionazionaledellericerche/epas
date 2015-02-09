@@ -8,6 +8,8 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import models.base.BaseModel;
 
 import org.hibernate.envers.Audited;
@@ -52,29 +54,42 @@ public class WorkingTimeTypeDay extends BaseModel {
 	public Integer mealTicketTime;
 	
 	public Integer breakTicketTime;	
+	
 	/**
 	 * booleano per controllo se il giorno in questione è festivo o meno
 	 */
 	public boolean holiday = false;
+	
 	/**
 	 * tempo di inizio finestra di entrata
 	 */
+	
 	public Integer timeSlotEntranceFrom;
+	
 	/**
 	 * tempo di fine finestra di entrata
 	 */
 	public Integer timeSlotEntranceTo;
 	public Integer timeSlotExitFrom;
 	public Integer timeSlotExitTo;
+	
 	/**
 	 * tempo inizio pausa pranzo
 	 */
 	public Integer timeMealFrom;
+	
 	/**
 	 * tempo fine pausa pranzo
 	 */
-	public Integer timeMealTo;
-		
+	public Integer timeMealTo;	
+
+	
+	/**
+	 * Setter per tempo di lavoro.
+	 * @param workingTime
+	 * @param wttd
+	 * 
+	 */
 	public void setWorkingTime(Integer workingTime)
 	{
 		if(workingTime==null)
@@ -83,6 +98,10 @@ public class WorkingTimeTypeDay extends BaseModel {
 			this.workingTime = workingTime;
 	}
 	
+	/**
+	 * Setter per tempo di pausa pranzo.
+	 * @param breakTicketTime
+	 */
 	public void setBreakTicketTime(Integer breakTicketTime)
 	{
 		if(breakTicketTime==null)
@@ -94,6 +113,10 @@ public class WorkingTimeTypeDay extends BaseModel {
 			this.breakTicketTime = 30;
 	}
 	
+	/**
+	 * Setter per tempo per avere il buono pasto.
+	 * @param mealTicketTime
+	 */
 	public void setMealTicketTime(Integer mealTicketTime)
 	{
 		if(mealTicketTime==null)
@@ -102,6 +125,10 @@ public class WorkingTimeTypeDay extends BaseModel {
 			this.mealTicketTime = mealTicketTime;
 	}
 	
+	/**
+	 * Setter per giorno festivo.
+	 * @param holiday
+	 */
 	public void setHoliday(String holiday)
 	{
 		if(holiday != null && holiday.equals("true"))
@@ -111,22 +138,24 @@ public class WorkingTimeTypeDay extends BaseModel {
 	}
 	
 	
+	
 	/**
 	 * True se è ammesso il calcolo del buono pasto per la persona, false altrimenti (il campo mealTicketTime
 	 *  che rappresenta il tempo minimo di lavoro per avere diritto al buono pasto è pari a zero)
 	 * @return
 	 */
+	@Transient
 	public boolean mealTicketEnabled() {
-		if( holiday )
+		
+		if( this.holiday )
 			return false;
 		
-		if( mealTicketTime > 0)
+		if( this.mealTicketTime > 0)
 			return true;
 		else 
 			return false;
 		
 	}
-	
 	
 	@Override
 	public String toString() {
@@ -135,5 +164,4 @@ public class WorkingTimeTypeDay extends BaseModel {
 			id, dayOfWeek, workingTimeType.id, workingTime, mealTicketTime, breakTicketTime, holiday, timeSlotEntranceFrom, timeSlotEntranceTo, 
 			timeSlotExitFrom, timeSlotExitTo, timeMealFrom, timeMealTo);
 	}
-	
 }

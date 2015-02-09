@@ -7,23 +7,23 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.joda.time.LocalDate;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
-
-import dao.PersonDao;
-import dao.VacationCodeDao;
-import models.ConfYear;
+import manager.ConfYearManager;
 import models.Contract;
 import models.Office;
 import models.Person;
-import models.VacationCode;
+import models.User;
 import models.rendering.VacationsRecap;
+
+import org.joda.time.LocalDate;
+
 import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
+
+import com.google.common.base.Optional;
+import dao.OfficeDao;
+import dao.PersonDao;
 
 @With( {Secure.class, RequestInit.class} )
 public class VacationsAdmin extends Controller{
@@ -40,7 +40,7 @@ public class VacationsAdmin extends Controller{
 		LocalDate date = new LocalDate();
 		
 		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
-				Sets.newHashSet(Security.getOfficeAllowed()), false, date, date, true);
+				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, date, date, true);
 		
 		List<Person> personList = simpleResults.paginated(page).getResults();
 		
@@ -54,18 +54,17 @@ public class VacationsAdmin extends Controller{
 			Logger.info("%s", person.surname);
 			VacationsRecap vr = null;
 			try {
-				vr = new VacationsRecap(person, year, person.getCurrentContract(), new LocalDate(), true);
+				vr = VacationsRecap.Factory.build(person, year, Optional.<Contract>absent(), new LocalDate(), true);
 				vacationsList.add(vr);
 			}
 			catch(IllegalStateException e){
 				personsWithVacationsProblems.add(person);
 			}
 		}
-		
-		//ConfYear conf = ConfYear.getConfYear(year);
+				
 		Office office = Security.getUser().get().person.office;
-		Integer monthExpiryVacationPastYear = Integer.parseInt(ConfYear.getFieldValue("month_expiry_vacation_past_year", year, office));
-		Integer dayExpiryVacationPastYear = Integer.parseInt(ConfYear.getFieldValue("day_expiry_vacation_past_year", year, office));
+		Integer monthExpiryVacationPastYear = Integer.parseInt(ConfYearManager.getFieldValue("month_expiry_vacation_past_year", year, office));
+		Integer dayExpiryVacationPastYear = Integer.parseInt(ConfYearManager.getFieldValue("day_expiry_vacation_past_year", year, office));
 		LocalDate expireDate = LocalDate.now().withMonthOfYear(monthExpiryVacationPastYear).withDayOfMonth(dayExpiryVacationPastYear);
 		
 		boolean isVacationLastYearExpired = VacationsRecap.isVacationsLastYearExpired(year, expireDate);
@@ -77,17 +76,15 @@ public class VacationsAdmin extends Controller{
 	public static void vacationsCurrentYear(Long personId, Integer anno){
 		
 		Person person = PersonDao.getPersonById(personId);
-		//Person person = Person.findById(personId);
 		if( person == null ) {
 			error();	/* send a 500 error */
 		}
 		rules.checkIfPermitted(person.office);
     	//Costruzione oggetto di riepilogo per la persona
-		Contract contract = person.getCurrentContract();
 		
 		VacationsRecap vacationsRecap = null;
     	try { 
-    		vacationsRecap = new VacationsRecap(person, anno, contract, new LocalDate(), true);
+    		vacationsRecap = VacationsRecap.Factory.build(person, anno, Optional.<Contract>absent(), new LocalDate(), true);
     	} catch(IllegalStateException e) {
     		flash.error("Impossibile calcolare la situazione ferie. Definire i dati di inizializzazione per %s %s.", person.name, person.surname);
     		renderTemplate("Application/indexAdmin.html");
@@ -110,17 +107,15 @@ public class VacationsAdmin extends Controller{
 	public static void vacationsLastYear(Long personId, Integer anno){
 		
 		Person person = PersonDao.getPersonById(personId);
-		//Person person = Person.findById(personId);
 		if( person == null ) {
 			error();	/* send a 500 error */
 		}
     	rules.checkIfPermitted(person.office);
     	//Costruzione oggetto di riepilogo per la persona
-    	Contract contract = person.getCurrentContract();
     	
     	VacationsRecap vacationsRecap = null;
     	try { 
-    		vacationsRecap = new VacationsRecap(person, anno, contract, new LocalDate(), true);
+    		vacationsRecap = VacationsRecap.Factory.build(person, anno, Optional.<Contract>absent(), new LocalDate(), true);
     	} catch(IllegalStateException e) {
     		flash.error("Impossibile calcolare la situazione ferie. Definire i dati di inizializzazione per %s %s.", person.name, person.surname);
     		renderTemplate("Application/indexAdmin.html");
@@ -142,17 +137,15 @@ public class VacationsAdmin extends Controller{
 	public static void permissionCurrentYear(Long personId, Integer anno){
 		
 		Person person = PersonDao.getPersonById(personId);
-		//Person person = Person.findById(personId);
 		if( person == null ) {
 			error();	/* send a 500 error */
 		}
 		rules.checkIfPermitted(person.office);
     	//Costruzione oggetto di riepilogo per la persona
-		Contract contract = person.getCurrentContract();
 		
     	VacationsRecap vacationsRecap = null;
     	try { 
-    		vacationsRecap = new VacationsRecap(person, anno, contract, new LocalDate(), true);
+    		vacationsRecap = VacationsRecap.Factory.build(person, anno, Optional.<Contract>absent(), new LocalDate(), true);
     	} catch(IllegalStateException e) {
     		flash.error("Impossibile calcolare la situazione ferie. Definire i dati di inizializzazione per %s %s.", person.name, person.surname);
     		renderTemplate("Application/indexAdmin.html");
@@ -169,65 +162,5 @@ public class VacationsAdmin extends Controller{
     	//rendering
     	renderTemplate("Vacations/permissionCurrentYear.html", vacationsRecap);
 	}
-
-	@Check(Security.INSERT_AND_UPDATE_VACATIONS)
-	public static void manageVacationCode(){
-		
-		List<VacationCode> vacationCodeList = VacationCodeDao.getAllVacationCodes();
-		//List<VacationCode> vacationCodeList = VacationCode.findAll();
-		renderArgs.put("year", session.get("yearSelected"));
-		render(vacationCodeList);
-	}
-	
-	@Check(Security.INSERT_AND_UPDATE_VACATIONS)
-	public static void edit(Long vacationCodeId){
-		VacationCode vc = VacationCodeDao.getVacationCodeById(vacationCodeId);
-		//VacationCode vc = VacationCode.findById(vacationCodeId);
-		render(vc);
-	}
-	
-	@Check(Security.INSERT_AND_UPDATE_VACATIONS)
-	public static void save(){
-		VacationCode vacationCode = new VacationCode();
-		vacationCode.description = params.get("nome");
-		vacationCode.vacationDays = params.get("giorniFerie", Integer.class);
-		vacationCode.permissionDays = params.get("giorniPermesso", Integer.class);
-		VacationCode vc = VacationCodeDao.getVacationCodeByDescription(params.get("nome"));
-		//VacationCode vc = VacationCode.find("Select vc from VacationCode vc where vc.description = ?", params.get("nome")).first();
-		if(vc == null){
-			vacationCode.save();
-			flash.success(String.format("Inserito nuovo piano ferie con nome %s", vacationCode.description));
-			VacationsAdmin.manageVacationCode();
-		}
-		else{
-			flash.error(String.format("Esiste già un piano ferie con nome: %s. Cambiare il nome.", params.get("nome")));
-			VacationsAdmin.manageVacationCode();
-		}
-	}
-	
-	@Check(Security.INSERT_AND_UPDATE_VACATIONS)
-	public static void update(){
-		Long vacationCodeId = params.get("vacationCodeId", Long.class);
-		VacationCode code = VacationCodeDao.getVacationCodeById(vacationCodeId);
-		//VacationCode code = VacationCode.findById(vacationCodeId);
-		code.description = params.get("nome");
-		code.vacationDays = params.get("giorniFerie", Integer.class);
-		code.permissionDays = params.get("giorniPermesso", Integer.class);
-		code.save();
-		flash.success("Aggiornato valore del piano ferie %s", code.description);
-		VacationsAdmin.manageVacationCode();
-	}
-	
-	@Check(Security.INSERT_AND_UPDATE_VACATIONS)
-	public static void insertVacationCode(){
-		VacationCode vacationCode = new VacationCode();
-		render(vacationCode);
-	}
-	
-	@Check(Security.INSERT_AND_UPDATE_VACATIONS)
-	public static void discard(){
-		manageVacationCode();
-	}
-	
 	
 }

@@ -1,22 +1,19 @@
 package controllers;
 
 import it.cnr.iit.epas.DateUtility;
-import it.cnr.iit.epas.PersonUtility;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import javax.inject.Inject;
-
+import manager.ConfGeneralManager;
+import manager.ConfYearManager;
+import manager.ContractManager;
+import manager.OfficeManager;
 import models.ConfGeneral;
-import models.ConfYear;
 import models.Contract;
-import models.ContractStampProfile;
-import models.ContractWorkingTimeType;
 import models.Office;
 import models.Person;
 import models.Qualification;
@@ -27,8 +24,18 @@ import models.WorkingTimeType;
 import models.enumerate.ConfigurationFields;
 
 import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
+
+import play.Logger;
+import play.cache.Cache;
+import play.data.validation.CheckWith;
+import play.data.validation.Email;
+import play.data.validation.Equals;
+import play.data.validation.Required;
+import play.data.validation.Valid;
+import play.libs.Codec;
+import play.mvc.Controller;
+import play.mvc.With;
+import validators.StringIsTime;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -37,20 +44,10 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 
-import controllers.Resecure.NoCheck;
 import dao.QualificationDao;
 import dao.RoleDao;
 import dao.UserDao;
 import dao.WorkingTimeTypeDao;
-import play.Logger;
-import play.Play;
-import play.cache.Cache;
-import play.data.validation.*;
-import play.libs.Codec;
-import play.mvc.Controller;
-import play.mvc.With;
-import security.SecurityRules;
-import validators.StringIsTime;
 
 /**
  * @author daniele
@@ -487,47 +484,50 @@ public class Wizard extends Controller {
 		seat.office = institute;
 		seat.save();
 		
-		ConfGeneral.buildDefaultConfGeneral(seat);
+		ConfGeneralManager.buildDefaultConfGeneral(seat);
 		
-		ConfYear.buildDefaultConfYear(seat, LocalDate.now().getYear());
-		ConfYear.buildDefaultConfYear(seat, LocalDate.now().getYear() - 1);
+		//ConfYear.buildDefaultConfYear(seat, LocalDate.now().getYear());
+		//ConfYear.buildDefaultConfYear(seat, LocalDate.now().getYear() - 1);
+		ConfYearManager.buildDefaultConfYear(seat, LocalDate.now().getYear());
+		ConfYearManager.buildDefaultConfYear(seat, LocalDate.now().getYear() - 1);
 		
-		seat.setPermissionAfterCreation();
+		
+		OfficeManager.setPermissionAfterCreation(seat);
 		
 		ConfGeneral confGeneral;
 		
 //		INIT_USE_PROGRAM
-		confGeneral = ConfGeneral.getConfGeneralByField(ConfGeneral.INIT_USE_PROGRAM, seat);
+		confGeneral = ConfGeneralManager.getConfGeneralByField(ConfGeneral.INIT_USE_PROGRAM, seat);
 		confGeneral.fieldValue = LocalDate.now().toString();
 		confGeneral.save();
 //		DAY_OF_PATRON
 		LocalDate dayMonth = DateUtility.dayMonth(properties.getProperty("date_of_patron"),Optional.<String>absent());
 
-		confGeneral = ConfGeneral.getConfGeneralByField(ConfGeneral.DAY_OF_PATRON, seat);
+		confGeneral = ConfGeneralManager.getConfGeneralByField(ConfGeneral.DAY_OF_PATRON, seat);
 		confGeneral.fieldValue = dayMonth.dayOfMonth().getAsString();
 		confGeneral.save();
 //		MONTH_OF_PATRON
-		confGeneral = ConfGeneral.getConfGeneralByField(ConfGeneral.MONTH_OF_PATRON, seat);
+		confGeneral = ConfGeneralManager.getConfGeneralByField(ConfGeneral.MONTH_OF_PATRON, seat);
 		confGeneral.fieldValue = dayMonth.monthOfYear().getAsString();
 		confGeneral.save();
 //		MEAL_TIME_START_HOUR
 		List<String> lunchStart = Splitter.on(":").trimResults().splitToList(properties.getProperty("lunch_pause_start"));    
 
-		confGeneral = ConfGeneral.getConfGeneralByField(ConfGeneral.MEAL_TIME_START_HOUR, seat);
+		confGeneral = ConfGeneralManager.getConfGeneralByField(ConfGeneral.MEAL_TIME_START_HOUR, seat);
 		confGeneral.fieldValue = lunchStart.get(0);
 		confGeneral.save();
 //		MEAL_TIME_START_MINUTE
-		confGeneral = ConfGeneral.getConfGeneralByField(ConfGeneral.MEAL_TIME_START_MINUTE, seat);
+		confGeneral = ConfGeneralManager.getConfGeneralByField(ConfGeneral.MEAL_TIME_START_MINUTE, seat);
 		confGeneral.fieldValue = lunchStart.get(1);
 		confGeneral.save();	
 //		MEAL_TIME_END_HOUR
 		List<String> lunchStop = Splitter.on(":").trimResults().splitToList(properties.getProperty("lunch_pause_end"));
 
-		confGeneral = ConfGeneral.getConfGeneralByField(ConfGeneral.MEAL_TIME_END_HOUR, seat);
+		confGeneral = ConfGeneralManager.getConfGeneralByField(ConfGeneral.MEAL_TIME_END_HOUR, seat);
 		confGeneral.fieldValue = lunchStop.get(0);
 		confGeneral.save();
 //		MEAL_TIME_END_MINUTE
-		confGeneral = ConfGeneral.getConfGeneralByField(ConfGeneral.MEAL_TIME_END_MINUTE, seat);
+		confGeneral = ConfGeneralManager.getConfGeneralByField(ConfGeneral.MEAL_TIME_END_MINUTE, seat);
 		confGeneral.fieldValue = lunchStop.get(1);
 		confGeneral.save();
 //		EMAIL_TO_CONTACT
@@ -584,25 +584,10 @@ public class Wizard extends Controller {
 		contract.person = p;
 		
 		contract.save();
-		contract.setVacationPeriods();
-		contract.save();
-		
-		ContractWorkingTimeType cwtt = new ContractWorkingTimeType();
-		cwtt.beginDate = contractBegin;
-		cwtt.endDate = contractEnd;
-		cwtt.workingTimeType = WorkingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
-		cwtt.contract = contract;
-		cwtt.save();
-		contract.save();
-		
-		ContractStampProfile csp = new ContractStampProfile();
-		csp.contract = contract;
-		csp.startFrom = contractBegin;
-		csp.endTo = contractEnd;
-		csp.fixedworkingtime = false;
-		csp.save();
-		contract.save();
-		
+
+		WorkingTimeType wtt = WorkingTimeTypeDao.getWorkingTimeTypeByDescription("Normale");
+		ContractManager.properContractCreate(contract, wtt);
+				
 		User user = new User();
 		//user.id = person.id;
 		user.password = Codec.hexMD5(properties.getProperty("manager_password"));

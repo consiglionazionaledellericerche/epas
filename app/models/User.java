@@ -19,9 +19,6 @@ import org.hibernate.envers.NotAudited;
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Optional;
-
-import dao.UsersRolesOfficesDao;
 
 @Entity
 @Audited
@@ -55,67 +52,6 @@ public class User extends BaseModel{
 				.add("id", this.id)
 				.add("user", this.username)
 				.toString();
-	}
-	
-	public boolean isAdmin()
-	{
-		if(this.username.equals("admin"))
-			return true;
-		else
-			return false;
-	}
-	
-	public List<Permission> getAllPermissions() {
-		List<Permission> permissions = new ArrayList<Permission>();
-		
-		if(this.person != null){
-			Optional<UsersRolesOffices> uro = UsersRolesOfficesDao.getUsersRolesOfficesByUserAndOffice(this, this.person.office);
-			if(uro.isPresent()){
-				for(Permission p : uro.get().role.permissions){
-					permissions.add(p);
-				}
-			}
-//			UsersRolesOffices uro = UsersRolesOffices.find("Select upo from UsersRolesOffices uro where " +
-//					"uro.user = ? and uro.office = ?", this, this.person.office).first();
-			
-			
-		}
-		
-		//TODO admin 
-		/*
-		else{
-			Office office = Office.find("Select off from Office off where off.joiningDate is null").first();
-			List<UsersPermissionsOffices> upoList = UsersPermissionsOffices.find("Select upo from UsersPermissionsOffices upo where " +
-					"upo.user = ? and upo.office = ?", this, office).fetch();
-			for(UsersPermissionsOffices upo : upoList){
-				permissions.add(upo.permission);
-			}
-		}
-		*/
-		return permissions;
-	}
-	
-	public List<Office> getOfficeAllowed() {
-		
-		List<Office> officeList = new ArrayList<Office>();
-		for(UsersRolesOffices uro : this.usersRolesOffices){
-			if(uro.office.isSeat())
-				officeList.add(uro.office);
-		}
-		//TODO riscrivere col nuovo concetto di ruoli e permessi e funzionale al tipo di ruolo che si cerca
-//		if (this.person != null) {
-//			officeList.add(this.person.office);
-//		}
-//		else {
-//			
-//			officeList = Office.findAll(); 
-//		}
-		return officeList;
-			
-		//return Office.find("select distinct o from Office o join "
-		//		+ "o.userPermissionOffices as upo where upo.user = ?",this).fetch();
-		
-	}
-	
+	}	
 	
 }

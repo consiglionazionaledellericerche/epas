@@ -14,13 +14,6 @@ import com.google.common.base.Optional;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 
-import com.mysema.query.types.Expression;
-
-import models.Person;
-import models.PersonDay;
-import models.query.QAbsenceType;
-import models.query.QPersonDay;
-
 
 /**
  * 
@@ -39,12 +32,12 @@ public class PersonDayDao {
 	 * @return la lista dei personday relativi a una persona in un certo periodo di tempo  
 	 * Se ordered è 'true' la lista dei personDay viene ordinata per data crescente
 	 */
-	public static List<PersonDay> getPersonDayInPeriod(Person person, LocalDate begin, LocalDate end, boolean ordered){
+	public static List<PersonDay> getPersonDayInPeriod(Person person, LocalDate begin, Optional<LocalDate> end, boolean ordered){
 		QPersonDay personDay = QPersonDay.personDay;
 		final BooleanBuilder condition = new BooleanBuilder();
 		final JPQLQuery query = ModelQuery.queryFactory().from(personDay);
 		
-		condition.and(personDay.date.between(begin, end));
+		condition.and(personDay.date.between(begin, end.or(begin)));
 		condition.and(personDay.person.eq(person));
 		
 		query.where(condition);

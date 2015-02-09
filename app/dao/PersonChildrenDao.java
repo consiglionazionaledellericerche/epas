@@ -2,16 +2,11 @@ package dao;
 
 import helpers.ModelQuery;
 
-
 import java.util.List;
 
-import com.mysema.query.jpa.JPQLQuery;
-
 import models.Person;
-
 import models.PersonChildren;
 import models.query.QPersonChildren;
-
 
 import com.mysema.query.jpa.JPQLQuery;
 

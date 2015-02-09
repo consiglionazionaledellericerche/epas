@@ -22,11 +22,11 @@ import security.SecurityRules;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.gdata.util.common.base.Preconditions;
 
 import dao.ContractDao;
 import dao.MealTicketDao;
+import dao.OfficeDao;
 import dao.PersonDao;
 
 @With( {Resecure.class, RequestInit.class} )
@@ -44,7 +44,7 @@ public class MealTickets  extends Controller {
 		rules.checkIfPermitted();
 		
 		final List<Person> personList = PersonDao.list( 
-				Optional.fromNullable(name), Sets.newHashSet(Security.getOfficeAllowed()), 
+				Optional.fromNullable(name), OfficeDao.getOfficeAllowed(Optional.<User>absent()), 
 				false, LocalDate.now(), LocalDate.now(), true)
 				.list();
 
@@ -189,7 +189,8 @@ public class MealTickets  extends Controller {
 		//Persistenza
 		for(MealTicket mealTicket : ticketToAdd) {
 			mealTicket.date = LocalDate.now();
-			mealTicket.contract = person.getContract(mealTicket.date);
+			//mealTicket.contract = person.getContract(mealTicket.date);
+			mealTicket.contract = ContractDao.getContract(mealTicket.date, person);
 			mealTicket.admin = admin.person; 
 			mealTicket.save();
 		}

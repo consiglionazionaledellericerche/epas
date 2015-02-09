@@ -2,6 +2,8 @@ package jobs;
 
 import java.util.List;
 
+import manager.PersonDayManager;
+import manager.PersonManager;
 import models.Person;
 import models.PersonDay;
 
@@ -25,7 +27,7 @@ public class CheckPersonDayMissing extends Job{
 		LocalDate date = new LocalDate();
 	//	List<Person> personList = Person.find("Select p from Person p where p.surname = ? or p.surname = ?", "Vasarelli", "Lucchesi").fetch();
 	//	List<Person> personList = Person.getActivePersons(date);
-		List<Person> personList = Person.getPeopleForTest();
+		List<Person> personList = PersonManager.getPeopleForTest();
 		Logger.debug("La lista di personale attivo è composta da %d persone", personList.size());
 		
 		for(Person p : personList){
@@ -33,11 +35,11 @@ public class CheckPersonDayMissing extends Job{
 			Logger.debug("Analizzo %s %s", p.name, p.surname);
 			while(dateBegin.isBefore(date)){
 				PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", p, dateBegin).first();
-				if(pd == null && !p.isHoliday(dateBegin)){
+				if(pd == null && !PersonManager.isHoliday(p,dateBegin)){
 					Logger.debug("Non c'è personDay e non è festa per %s %s nel giorno %s", p.name, p.surname, dateBegin);
 					pd = new PersonDay(p, dateBegin);
 					pd.create();
-					pd.populatePersonDay();
+					PersonDayManager.populatePersonDay(pd);
 					pd.save();
 					Logger.debug("Creato person day per %s %s per il giorno %s in cui non risultavano nè timbrature nè codici di assenza", 
 							p.name, p.surname, dateBegin);
