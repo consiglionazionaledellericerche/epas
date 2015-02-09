@@ -56,4 +56,13 @@ public class UserDao {
 				.where(condition.and(user.username.eq(username)));
 		return query.singleResult(user);
 	}
+	
+	
+	public static boolean isAdmin(User user)
+	{
+		if(user.username.equals("admin"))
+			return true;
+		else
+			return false;
+	}
 }

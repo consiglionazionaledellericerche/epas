@@ -5,6 +5,8 @@ import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
 
+import manager.PersonManager;
+import manager.WorkingTimeTypeManager;
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
@@ -22,6 +24,7 @@ import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.MealTicketDao;
 import dao.PersonDayDao;
+import dao.WorkingTimeTypeDao;
 
 public class PersonResidualMonthRecap {
 
@@ -197,7 +200,7 @@ public class PersonResidualMonthRecap {
 	 * @param month
 	 */
 	public static Integer positiveResidualInMonth(Person person, int year, int month){
-		List<Contract> monthContracts = person.getMonthContracts(month, year);
+		List<Contract> monthContracts = PersonManager.getMonthContracts(person,month, year);
 		for(Contract contract : monthContracts)
 		{
 			if(contract.isLastInMonth(month, year))
@@ -262,7 +265,7 @@ public class PersonResidualMonthRecap {
 		
 		if(validDataForMealTickets!=null)
 		{
-			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(monthRecap.person, validDataForMealTickets.getBegin(), validDataForMealTickets.getEnd(), true);
+			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(monthRecap.person, validDataForMealTickets.getBegin(), Optional.fromNullable(validDataForMealTickets.getEnd()), true);
 //			List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date",
 //					monthRecap.person, validDataForMealTickets.getBegin(), validDataForMealTickets.getEnd()).fetch();
 
@@ -345,7 +348,8 @@ public class PersonResidualMonthRecap {
 			monthRecap.riposiCompensativiMinuti = 0;
 			monthRecap.numeroRiposiCompensativi = 0;
 			for(Absence abs : riposiCompensativi){
-				monthRecap.riposiCompensativiMinuti = monthRecap.riposiCompensativiMinuti + monthRecap.person.getWorkingTimeType(abs.personDay.date).getWorkingTimeTypeDayFromDayOfWeek(abs.personDay.date.getDayOfWeek()).workingTime;
+				//monthRecap.riposiCompensativiMinuti = monthRecap.riposiCompensativiMinuti + monthRecap.person.getWorkingTimeType(abs.personDay.date).getWorkingTimeTypeDayFromDayOfWeek(abs.personDay.date.getDayOfWeek()).workingTime;
+				monthRecap.riposiCompensativiMinuti = monthRecap.riposiCompensativiMinuti + WorkingTimeTypeManager.getWorkingTimeTypeDayFromDayOfWeek(abs.personDay.date.getDayOfWeek(), WorkingTimeTypeDao.getWorkingTimeType(abs.personDay.date, abs.personDay.person)).workingTime;
 				monthRecap.numeroRiposiCompensativi++;
 			}
 			monthRecap.riposiCompensativiMinutiPrint = monthRecap.riposiCompensativiMinuti;

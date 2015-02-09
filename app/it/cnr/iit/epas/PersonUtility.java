@@ -4,17 +4,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.persistence.Query;
 
+import manager.ConfGeneralManager;
+import manager.ContractManager;
 import manager.ContractYearRecapManager;
+
+import manager.PersonDayManager;
+import manager.PersonManager;
+import manager.WorkingTimeTypeManager;
+
 import models.Absence;
 import models.AbsenceType;
 import models.Competence;
 import models.CompetenceCode;
-import models.ConfGeneral;
 import models.Contract;
-import models.Office;
+import models.ContractStampProfile;
 import models.Person;
 import models.PersonChildren;
 import models.PersonDay;
@@ -62,7 +67,7 @@ public class PersonUtility {
 	public static int getPositiveDaysForOvertime(PersonMonthRecap personMonth){
 		int positiveDifference = 0;
 		LocalDate date = new LocalDate(personMonth.year, personMonth.month, 1);
-		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(personMonth.person, date, date.dayOfMonth().withMaximumValue(), false);
+		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(personMonth.person, date, Optional.fromNullable(date.dayOfMonth().withMaximumValue()), false);
 //		List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ?", 
 //				personMonth.person, date, date.dayOfMonth().withMaximumValue()).fetch();
 		for(PersonDay pd : pdList){
@@ -296,7 +301,8 @@ public class PersonUtility {
 	 * @return il personDay se la data passata è di un giorno feriale, null altrimenti
 	 */
 	public static PersonDay createPersonDayFromDate(Person person, LocalDate date){
-		if(person.isHoliday(date))
+		//if(person.isHoliday(date))
+		if(PersonManager.isHoliday(person, date))
 			return null;
 		return new PersonDay(person, date);
 	}
@@ -452,7 +458,8 @@ public class PersonUtility {
 //						absenceType.absenceTypeGroup.label, person, absence.personDay.date, date).fetch();
 				for(Absence abs : absList){
 					if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay)
-						totalMinutesJustified = person.getCurrentWorkingTimeType().getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime;
+						//totalMinutesJustified = person.getCurrentWorkingTimeType().getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime;
+						totalMinutesJustified = WorkingTimeTypeManager.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek(), person.getCurrentWorkingTimeType()).workingTime;
 					else{
 
 						totalMinutesJustified = totalMinutesJustified+abs.absenceType.justifiedTimeAtWork.minutesJustified;
@@ -571,7 +578,8 @@ public class PersonUtility {
 			Logger.debug("List size: %d", absList.size());
 			for(Absence abs : absList){
 				if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.AllDay)
-					totalMinutesJustified = person.getCurrentWorkingTimeType().getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime;
+					//totalMinutesJustified = person.getCurrentWorkingTimeType().getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime;
+					totalMinutesJustified = WorkingTimeTypeManager.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek(), person.getCurrentWorkingTimeType()).workingTime;
 				else{
 
 					totalMinutesJustified = totalMinutesJustified+abs.absenceType.justifiedTimeAtWork.minutesJustified;
@@ -584,7 +592,8 @@ public class PersonUtility {
 			if(absenceType.justifiedTimeAtWork != JustifiedTimeAtWork.AllDay)
 				quantitaGiustificata = absenceType.justifiedTimeAtWork.minutesJustified;
 			else
-				quantitaGiustificata = person.getCurrentWorkingTimeType().getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime;
+				quantitaGiustificata = WorkingTimeTypeManager.getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek(), person.getCurrentWorkingTimeType()).workingTime;
+				//quantitaGiustificata = person.getCurrentWorkingTimeType().getWorkingTimeTypeDayFromDayOfWeek(date.getDayOfWeek()).workingTime;
 			if(absenceType.absenceTypeGroup.limitInMinute >= totalMinutesJustified+quantitaGiustificata)
 				return new CheckMessage(true, "E' possibile prendere il codice di assenza", null);
 			else
@@ -617,7 +626,7 @@ public class PersonUtility {
 	{
 		if(pd == null)
 			return 0;
-		pd.orderStampings();
+		PersonDayManager.orderStampings(pd);
 
 		int coupleOfStampings = 0;
 
@@ -678,7 +687,7 @@ public class PersonUtility {
 		LocalDate begin = new LocalDate(year, month, 1);
 		if(begin.isAfter(new LocalDate()))
 			return 0;
-		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, begin, begin.dayOfMonth().withMaximumValue(), false);
+		List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, begin, Optional.fromNullable(begin.dayOfMonth().withMaximumValue()), false);
 		//List<PersonDay> pdList = PersonDay.find("Select pd From PersonDay pd where pd.person = ? and pd.date between ? and ?", person,begin,begin.dayOfMonth().withMaximumValue() ).fetch();
 
 		int max = 0;
@@ -706,7 +715,7 @@ public class PersonUtility {
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
 
 		List<PersonDay> totalDays = new ArrayList<PersonDay>();
-		List<PersonDay> workingDays = PersonDayDao.getPersonDayInPeriod(person, beginMonth, endMonth, true);
+		List<PersonDay> workingDays = PersonDayDao.getPersonDayInPeriod(person, beginMonth, Optional.fromNullable(endMonth), true);
 //		List<PersonDay> workingDays = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date",
 //				person, beginMonth, endMonth).fetch();
 
@@ -841,11 +850,11 @@ public class PersonUtility {
 			if(pd.isHoliday())
 				continue;
 
-			if(fixed && !pd.isAllDayAbsences() )
+			if(fixed && !PersonDayManager.isAllDayAbsences(pd) )
 			{
 				basedDays++;
 			}
-			else if(!fixed && pd.stampings.size()>0 && !pd.isAllDayAbsences() )
+			else if(!fixed && pd.stampings.size()>0 && !PersonDayManager.isAllDayAbsences(pd) )
 			{
 				basedDays++;
 			}
@@ -878,14 +887,17 @@ public class PersonUtility {
 	 * @param person
 	 * @param dateFrom
 	 * @param dateTo
+	 * 
+	 * @deprecated use {@link #PersonUtility.updatePersonDaysFromDate()} instead. 
 	 */
+	@Deprecated
 	public static void updatePersonDaysIntoInterval(Person person, LocalDate dateFrom, LocalDate dateTo)
 	{
 		LocalDate monthBegin = new LocalDate(dateFrom.getYear(), dateFrom.getMonthOfYear(), 1);
 		LocalDate monthEnd = monthBegin.dayOfMonth().withMaximumValue();
 		while(true)
 		{
-			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, monthBegin, monthEnd, true);
+			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, monthBegin, Optional.fromNullable(monthEnd), true);
 //			List<PersonDay> pdList = PersonDay.find(
 //					"select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date asc",
 //					person,
@@ -893,8 +905,9 @@ public class PersonUtility {
 //					monthEnd).fetch();
 			for(PersonDay pd : pdList)
 			{
-				pd.populatePersonDay();
+				PersonDayManager.populatePersonDay(pd);
 			}
+//			FIXME c'è realmente bisogno di fare la populate oltre la data di oggi??
 			if(monthEnd.isEqual(dateTo) || monthEnd.isAfter(dateTo))
 				return;
 			monthBegin = monthBegin.plusMonths(1);
@@ -902,7 +915,6 @@ public class PersonUtility {
 		}
 
 	}
-
 
 	/**
 	 * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
@@ -917,13 +929,6 @@ public class PersonUtility {
 		if(userLogged==null)
 			return;
 
-		List<Office> officeAllowed = new ArrayList<Office>();
-		if(userLogged.person == null)
-			officeAllowed = OfficeDao.getAllOffices();
-			//officeAllowed = Office.findAll();
-		else
-			officeAllowed = userLogged.person.getOfficeAllowed();
-
 		//Costruisco la lista di persone su cui voglio operare
 		List<Person> personList = new ArrayList<Person>();
 		if(personId==-1)
@@ -932,7 +937,9 @@ public class PersonUtility {
 			
 			LocalDate begin = new LocalDate(year, month, 1);
 			LocalDate end = new LocalDate().minusDays(1);
-			personList = Person.getActivePersonsSpeedyInPeriod(begin, end, officeAllowed, false);	
+			//personList = Person.getActivePersonsSpeedyInPeriod(begin, end, officeAllowed, false);	
+			personList = PersonDao.list(Optional.<String>absent(), 
+					OfficeDao.getOfficeAllowed(Optional.fromNullable(userLogged)), false, begin, end, true).list();
 		}
 		else {
 			
@@ -940,7 +947,7 @@ public class PersonUtility {
 			personList.add(PersonDao.getPersonById(personId));
 			//personList.add((Person)Person.findById(personId));
 		}
-
+		
 		// (1) Porto il db in uno stato consistente costruendo tutti gli eventuali person day mancanti
 		JPAPlugin.startTx(false);
 		for(Person person : personList) {
@@ -958,7 +965,7 @@ public class PersonUtility {
 			JPAPlugin.startTx(false);
 			while(!actualMonth.isAfter(endMonth)) {
 
-				List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(p, actualMonth, actualMonth.dayOfMonth().withMaximumValue(), true);
+				List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(p, actualMonth, Optional.fromNullable(actualMonth.dayOfMonth().withMaximumValue()), true);
 //				List<PersonDay> pdList = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date between ? and ? order by pd.date", 
 //						p, actualMonth, actualMonth.dayOfMonth().withMaximumValue()).fetch();
 
@@ -968,7 +975,7 @@ public class PersonUtility {
 					JPAPlugin.startTx(false);
 					PersonDay pd1 = PersonDayDao.getPersonDayById(pd.id);
 					//PersonDay pd1 = PersonDay.findById(pd.id);
-					pd1.populatePersonDay();
+					PersonDayManager.populatePersonDay(pd1);
 					JPAPlugin.closeTx(false);
 					JPAPlugin.startTx(false);
 				}
@@ -977,7 +984,7 @@ public class PersonUtility {
 			}
 			JPAPlugin.closeTx(false);
 		}
-
+		
 		//(3) 
 		JPAPlugin.startTx(false);
 		i = 1;
@@ -988,7 +995,9 @@ public class PersonUtility {
 			//List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ?", p).fetch();
 
 			for(Contract contract : contractList) {
-				
+				JPAPlugin.closeTx(false);	
+				JPAPlugin.startTx(false);
+				contract = ContractDao.getContractById(contract.id);
 				ContractYearRecapManager.buildContractYearRecap(contract);
 			}
 		}
@@ -1045,7 +1054,8 @@ public class PersonUtility {
 
 		for(PersonDayInTrouble pdt : pdList){
 			
-			Contract contract = p.getContract(pdt.personDay.date);
+			//Contract contract = p.getContract(pdt.personDay.date);
+			Contract contract = ContractDao.getContract(pdt.personDay.date, pdt.personDay.person);
 			if(contract == null) {
 				
 				Logger.error("Individuato PersonDayInTrouble al di fuori del contratto. Person: %s %s - Data: %s",
@@ -1053,7 +1063,8 @@ public class PersonUtility {
 				continue;
 			}
 			
-			if(contract.getContractStampProfile(pdt.personDay.date).fixedworkingtime == true) {
+			ContractStampProfile csp = ContractManager.getContractStampProfileFromDate(contract, pdt.personDay.date);
+			if(csp.fixedworkingtime == true) {
 				continue;
 			}
 			
@@ -1098,14 +1109,8 @@ public class PersonUtility {
 	 */
 	public static void checkNoAbsenceNoStamping(Long personId, int year, int month, User userLogged) throws EmailException{
 		List<Person> personList = new ArrayList<Person>();
-		List<Office> officeAllowed = new ArrayList<Office>();
 		LocalDate begin = null;
 		LocalDate end = null;
-		if(userLogged.person == null)
-			officeAllowed = OfficeDao.getAllOffices();
-			//officeAllowed = Office.findAll();
-		else
-			officeAllowed = userLogged.person.getOfficeAllowed();
 
 		if(personId==-1)
 			personId=null;
@@ -1113,7 +1118,9 @@ public class PersonUtility {
 		{
 			begin = new LocalDate(year, month, 1);
 			end = new LocalDate().minusDays(1);
-			personList = Person.getActivePersonsSpeedyInPeriod(begin, end, officeAllowed, false);	
+			//personList = Person.getActivePersonsSpeedyInPeriod(begin, end, officeAllowed, false);
+			personList = PersonDao.list(Optional.<String>absent(),
+					OfficeDao.getOfficeAllowed(Optional.fromNullable(userLogged)), false, begin, end, true).list();
 		}
 		else
 		{
@@ -1147,7 +1154,8 @@ public class PersonUtility {
 	{
 		Person personToCheck = PersonDao.getPersonById(personid);
 		//Person personToCheck = Person.findById(personid);
-		if(!personToCheck.isActiveInDay(dayToCheck)) {
+		//if(!personToCheck.isActiveInDay(dayToCheck)) {
+		if(!PersonManager.isActiveInDay(dayToCheck, personToCheck)){
 			return;
 		}
 		PersonDay personDay = null;
@@ -1156,7 +1164,7 @@ public class PersonUtility {
 //				personToCheck,dayToCheck).first();
 
 		if(pd.isPresent()){
-			pd.get().checkForPersonDayInTrouble(); 
+			PersonDayManager.checkForPersonDayInTrouble(pd.get()); 
 			return;
 		}
 		else {
@@ -1165,9 +1173,9 @@ public class PersonUtility {
 				return;
 			}
 			personDay.create();
-			personDay.populatePersonDay();
+			PersonDayManager.populatePersonDay(personDay);
 			personDay.save();
-			personDay.checkForPersonDayInTrouble();
+			PersonDayManager.checkForPersonDayInTrouble(personDay);
 			return;
 		}
 	}
@@ -1216,7 +1224,7 @@ public class PersonUtility {
 		try {
 			simpleEmail.setFrom("epas@iit.cnr.it");
 			//simpleEmail.addReplyTo("segreteria@iit.cnr.it");
-			simpleEmail.addReplyTo(ConfGeneral.getConfGeneralByField(
+			simpleEmail.addReplyTo(ConfGeneralManager.getConfGeneralByField(
 							ConfigurationFields.EmailToContact.description, 
 							person.office).fieldValue);
 		} catch (EmailException e1) {

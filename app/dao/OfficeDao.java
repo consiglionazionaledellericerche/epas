@@ -1,14 +1,21 @@
 package dao;
 
 import java.util.List;
+import java.util.Set;
 
 import helpers.ModelQuery;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Sets;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 
+import controllers.Security;
 import models.Office;
+import models.User;
+import models.UsersRolesOffices;
 import models.query.QOffice;
 
 /**
@@ -95,5 +102,38 @@ public class OfficeDao {
 		final JPQLQuery query = ModelQuery.queryFactory().from(office)
 				.where(office.office.isNull());
 		return query.list(office);
+	}
+	
+	/**
+	 * 
+	 * @param user
+	 * @return la lista degli uffici permessi per l'utente user passato come parametro
+	 */
+	public static Set<Office> getOfficeAllowed(Optional<User> user) {
+		
+		User u = user.or(Security.getUser().get());
+// 		L'utente standard non ha nessun userRoleoffice ed è necessario restituire il suo ufficio di appartenenza
+//		FIXME Non sarebbe meglio avere un ruolo base per gli utenti???
+		if(u.usersRolesOffices.isEmpty()){
+			if(u.person != null){
+				return Sets.newHashSet(u.person.office);
+			}
+			else
+				return Sets.newHashSet();
+		}
+		
+		return	FluentIterable.from(u.usersRolesOffices).transform(new Function<UsersRolesOffices,Office>() {
+			@Override
+			public Office apply(UsersRolesOffices uro) {
+				return uro.office;
+			}}).toSet();
+
+//     FIXME Capire se è indispensabile restituire solo le sedi
+//			filter(new Predicate<Office>() {
+//	    	    @Override
+//	    	    public boolean apply(Office o) {
+//	    	        return o.isSeat();
+//	    	    }}).toSet();
+		
 	}
 }

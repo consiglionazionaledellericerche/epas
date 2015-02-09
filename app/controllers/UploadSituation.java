@@ -21,18 +21,18 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.joda.time.LocalDate;
-
+import manager.ConfGeneralManager;
 import models.Absence;
 import models.CertificatedData;
 import models.Competence;
-import models.ConfGeneral;
 import models.Office;
 import models.Person;
-import models.PersonDay;
 import models.PersonMonthRecap;
 import models.User;
 import models.enumerate.ConfigurationFields;
+
+import org.joda.time.LocalDate;
+
 import play.Logger;
 import play.cache.Cache;
 import play.mvc.Controller;
@@ -49,6 +49,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import dao.AbsenceDao;
+import dao.CompetenceDao;
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.PersonMonthRecapDao;
 
@@ -86,8 +89,8 @@ public class UploadSituation extends Controller{
 		Office office = Security.getUser().get().person.office;
 		rules.checkIfPermitted(office);
 		
-		String urlToPresence = ConfGeneral.getFieldValue(ConfigurationFields.UrlToPresence.description, office);
-		String userToPresence = ConfGeneral.getFieldValue(ConfigurationFields.UserToPresence.description, office);
+		String urlToPresence = ConfGeneralManager.getFieldValue(ConfigurationFields.UrlToPresence.description, office);
+		String userToPresence = ConfGeneralManager.getFieldValue(ConfigurationFields.UserToPresence.description, office);
 		
 		String attestatiLogin = params.get("attestatiLogin") == null ? userToPresence : params.get("attestatiLogin"); 
 
@@ -111,7 +114,7 @@ public class UploadSituation extends Controller{
 		}
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 //		ConfGeneral conf = ConfGeneral.getConfGeneral();
-		Integer seatCode = Integer.parseInt(ConfGeneral.getFieldValue(ConfigurationFields.SeatCode.description, Security.getUser().get().person.office));
+		Integer seatCode = Integer.parseInt(ConfGeneralManager.getFieldValue(ConfigurationFields.SeatCode.description, Security.getUser().get().person.office));
 		List<Person> personList = PersonDao.getPersonsByNumber();
 		//List<Person> personList = Person.find("Select p from Person p where p.number <> ? and p.number is not null order by p.number", 0).fetch();
 		Logger.debug("La lista di nomi è composta da %s persone ", personList.size());
@@ -131,8 +134,7 @@ public class UploadSituation extends Controller{
 			out.newLine();
 			for(Person p : personList){
 
-				PersonMonthRecap pm = new PersonMonthRecap(p, year, month);
-				absenceList = pm.getAbsencesNotInternalUseInMonth();
+				absenceList = AbsenceDao.getAbsencesNotInternalUseInMonth(p, year, month);
 				for(Absence abs : absenceList){
 					out.write(p.number.toString());
 					out.append(' ').append('A').append(' ')
@@ -143,7 +145,8 @@ public class UploadSituation extends Controller{
 					out.newLine();
 				}
 
-				competenceList = pm.getCompetenceInMonthForUploadSituation();
+				//competenceList = pm.getCompetenceInMonthForUploadSituation();
+				competenceList = CompetenceDao.getCompetenceInMonthForUploadSituation(p, year, month);
 
 				for(Competence comp : competenceList){
 					Logger.trace(
@@ -206,7 +209,7 @@ public class UploadSituation extends Controller{
 				redirect("Application.indexAdmin");
 			}
 
-			String urlToPresence = ConfGeneral.getFieldValue(ConfigurationFields.UrlToPresence.description, user.person.office);
+			String urlToPresence = ConfGeneralManager.getFieldValue(ConfigurationFields.UrlToPresence.description, user.person.office);
 			
 			try {
 				//1) LOGIN
@@ -237,7 +240,9 @@ public class UploadSituation extends Controller{
 			}
 		}
 		
-		final List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
+		//final List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
+		final List<Person> activePersons = PersonDao.list(Optional.<String>absent(),
+				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
 		
 		final Set<Dipendente> activeDipendenti = FluentIterable.from(activePersons).transform(new Function<Person, Dipendente>() {
 			@Override
@@ -400,15 +405,13 @@ public class UploadSituation extends Controller{
 	private static List<RispostaElaboraDati> elaboraDatiDipendenti(Map<String, String> cookies, Set<Dipendente> dipendenti, int year, int month) throws MalformedURLException, URISyntaxException {
 		List<RispostaElaboraDati> checks = Lists.newLinkedList();
 		Person person = null;
-		PersonMonthRecap pm = null;
+
 		for (Dipendente dipendente : dipendenti) {
+
 			person = PersonDao.getPersonByNumber(Integer.parseInt(dipendente.getMatricola()));
-			//person = Person.findByNumber(Integer.parseInt(dipendente.getMatricola()));
-			pm = new PersonMonthRecap(person, year, month);
-			
+						
 			List<PersonMonthRecap> pmList = PersonMonthRecapDao.getPersonMonthRecapInYearOrWithMoreDetails(person, year, Optional.fromNullable(month), Optional.<Boolean>absent());
-			//List<PersonMonthRecap> pmList = PersonMonthRecap.find("Select pm from PersonMonthRecap pm where pm.person = ? and pm.month = ? and pm.year = ?",
-			//person, month, year).fetch();
+
 			//Numero di buoni mensa da passare alla procedura di invio attestati
 			Integer mealTicket = PersonUtility.numberOfMealTicketToUse(person, year, month);
 			
@@ -419,8 +422,8 @@ public class UploadSituation extends Controller{
 			
 			RispostaElaboraDati rispostaElaboraDati = AttestatiClient.elaboraDatiDipendente(
 					cookies, dipendente, year, month, 
-					pm.getAbsencesNotInternalUseInMonth(),
-					pm.getCompetenceInMonthForUploadSituation(),
+					AbsenceDao.getAbsencesNotInternalUseInMonth(person, year, month),
+					CompetenceDao.getCompetenceInMonthForUploadSituation(person, year, month),
 					pmList, mealTicket);
 			if(rispostaElaboraDati.isOk()){
 				for(PersonMonthRecap personMonth : pmList){
@@ -499,7 +502,10 @@ public class UploadSituation extends Controller{
 	
 	private static Set<Dipendente> getActiveDipendenti(int year, int month)
 	{
-		final List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
+		//final List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
+		final List<Person> activePersons = 
+				PersonDao.list(Optional.<String>absent(),
+						OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
 		
 		final Set<Dipendente> activeDipendenti = FluentIterable.from(activePersons).transform(new Function<Person, Dipendente>() {
 			@Override

@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
+import manager.OfficeManager;
 import models.Office;
 import models.Permission;
 import models.Qualification;
@@ -142,7 +143,7 @@ public class Bootstrap extends Job<Void> {
 		List<Office> officeList = Office.findAll();
 		for(Office office : officeList) {
 			
-			if( !office.isSeat() )
+			if( !OfficeManager.isSeat(office) )
 				continue;
 			
 			boolean hasBadgeReader = false;
