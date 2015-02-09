@@ -1,5 +1,6 @@
 #{extends 'main3.html' /}
 #{set header:'navbar' /}
+#{set title: 'ePAS - Grafici'  /}
 
 <div class="container">
 #{if yearChart == null && monthChart == null }
@@ -40,7 +41,7 @@
 		</div>
 	</div>
 	
-	#{/if}
+#{/if}
 #{else}
 <div class="panel panel-default">
 		  <div class="panel-heading">
@@ -83,7 +84,7 @@
 
 #{if yearChart != 0 && monthChart != 0 }
 <div class="container-fluid">
-<div id="myfirstchart" style="height: 950px; margin-left: 30px;">
+<div id="myfirstchart" style="height: 1000px; margin-left: 30px;">
 
 </div>
  	#{set 'moreScripts'}
@@ -98,7 +99,7 @@
 	  xkey: 'y',
 	  ykeys: ['a', 'b'],
 	  labels: ['Ore straordinario', 'Ore positive usabili'],
-	  xLabelAngle: 80.0,
+	  xLabelAngle: 110.0,
 	  gridTextSize: 14
 	});
 
