@@ -40,31 +40,28 @@ public class Charts extends Controller{
 	static SecurityRules rules;
 
 	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
-	public static void overtimeOnPositiveResidual(Integer year, Integer month){
+	public static void overtimeOnPositiveResidual(Integer yearChart, Integer monthChart){
 
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		
 		List<Year> annoList = ChartsManager.populateYearList(Security.getUser().get().person.office);
 		List<Month> meseList = ChartsManager.populateMonthList();	
 
-		if(params.get("yearChart") == null || params.get("monthChart") == null){
-			Logger.debug("Params year: %s", params.get("yearChart", Integer.class));
+		if(yearChart == null || monthChart == null){
+			Logger.debug("Params year: %s", yearChart);
 			Logger.debug("Chiamato metodo con anno e mese nulli");
 			render(annoList, meseList);
 		}
-
-		year = params.get("yearChart", Integer.class);
-		month = params.get("monthChart", Integer.class);
-		//List<Person> personeProva = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), true);
+		
 		List<Person> personeProva = PersonDao.list(Optional.<String>absent(),
 				OfficeDao.getOfficeAllowed(Optional.<User>absent()), true, 
-				new LocalDate(year,month,1), new LocalDate(year, month,1).dayOfMonth().withMaximumValue(), true).list();
+				new LocalDate(yearChart,monthChart,1), new LocalDate(yearChart, monthChart,1).dayOfMonth().withMaximumValue(), true).list();
 		
 		
 		List<CompetenceCode> codeList = ChartsManager.populateOvertimeCodeList();
-		List<PersonOvertime> poList = ChartsManager.populatePersonOvertimeList(personeProva, codeList, year, month);
+		List<PersonOvertime> poList = ChartsManager.populatePersonOvertimeList(personeProva, codeList, yearChart, monthChart);
 		
-		render(poList, year, month, annoList, meseList);
+		render(poList, yearChart, monthChart, annoList, meseList);
 	}
 
 	
