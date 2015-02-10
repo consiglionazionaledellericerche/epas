@@ -68,8 +68,15 @@ public class AbsenceFromJson extends Controller{
 	/**
 	 * metodo esposto per ritornare la lista dei codici di assenza presi 
 	 */
-	public static void frequentAbsence(Integer yearFrom, Integer monthFrom, Integer dayFrom, Integer yearTo, Integer monthTo, Integer dayTo){
+
+
 		
+
+	public static void frequentAbsence(Integer yearFrom, Integer monthFrom, Integer dayFrom, Integer yearTo, Integer monthTo, Integer dayTo) {
+		//		Logger.debug("Received PeriodAbsenceCode %s", body);
+		//		if(body == null)
+		//			badRequest();
+
 		List<FrequentAbsenceCode> frequentAbsenceCodeList = new ArrayList<FrequentAbsenceCode>();
 		
 		LocalDate dateFrom = new LocalDate(params.get("yearFrom", Integer.class), params.get("monthFrom", Integer.class), params.get("dayFrom", Integer.class));
