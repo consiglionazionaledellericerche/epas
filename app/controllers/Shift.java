@@ -27,6 +27,7 @@ import models.exports.ShiftPeriods;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.joda.time.Period;
 
 import org.joda.time.LocalTime;
 
@@ -81,6 +82,7 @@ import play.Play;
 import play.data.binding.As;
 import play.db.jpa.JPA;
 import play.mvc.Controller;
+import sun.security.util.BigInt;
 
 /**
  * 
@@ -463,8 +465,6 @@ public class Shift extends Controller {
 			
 			// for each person conunt the total shift hours
 			for (Person person: singleShiftSumDays.rowKeySet()) {
-				LocalDateTime numOfHours2;
-				LocalDateTime numOfDays2;
 				
 				BigDecimal numOfHours;	
 				int numOfDays;
@@ -474,31 +474,28 @@ public class Shift extends Controller {
 					Logger.debug("Leggo da singleShiftSumDays  %s giorni del tipo %s", singleShiftSumDays.get(person, type), type);
 							
 					numOfDays = singleShiftSumDays.get(person, type);
-					numOfDays2 = new LocalDateTime(singleShiftSumDays.get(person, type), 0, 0, 0, 0);
+					//numOfDays2 = new LocalDateTime(year, month, singleShiftSumDays.get(person, type), 0, 0);
 					
-					numOfHours = (totalShiftSumHours.contains(person, thReqHour)) ? totalShiftSumHours.get(person, thReqHour) : new BigDecimal(0);
-					numOfHours2 = (totalShiftSumHours2.contains(person, thReqHour)) ? totalShiftSumHours2.get(person, thReqHour) : new LocalDateTime(0, 0, 0, 0, 0);	
+					numOfHours = (totalShiftSumHours.contains(person, thReqHour)) ? totalShiftSumHours.get(person, thReqHour) : BigDecimal.ZERO;	
 					
 					//Logger.debug("In singleShiftSumDays ci sono giorni=%d e ore precedenti =%s", numOfDays, numOfHours);
 					
-					LocalTime calcHours = CompetenceUtility.calcShiftHoursFromDays(numOfDays);
+					BigDecimal calcHours = CompetenceUtility.calcShiftHoursFromDays(numOfDays);
 					
 					
-					// DA TERMINARE 
-					
-					//Logger.debug("Aggiungo a %s i nuovi %s", numOfHours, calcHours);
-					//calcHours = calcHours.add(numOfHours);		
-					//LocalDateTime calcHours2 = 
+					Logger.debug("Aggiungo a %s i nuovi %s", numOfHours, calcHours);
+					// adds new computed hours 
+					calcHours = calcHours.add(numOfHours);
 					
 					Logger.debug("Salvo in totalShiftSumHours.(person=%s, thReqHour=%s)  %s", person, thReqHour, calcHours);
-					//totalShiftSumHours.put(person, thReqHour, calcHours);
+					totalShiftSumHours.put(person, thReqHour, calcHours);
 				}
 			}
 			
 			// Memorizzo le inconsistenze del turno
 			singleShiftInconsistentAbsences = CompetenceUtility.getShiftInconsistencyTimestampTable(personShiftDays);
 			
-			LocalTime totalLackOfTime = new LocalTime(0, 0, 0);
+			int totalLackOfTime = 0;
 			String[] timeStr;
 			
 			// for each person
@@ -522,12 +519,12 @@ public class Shift extends Controller {
 							for (String time: str) {
 				
 								timeStr= time.split(":");			
-								totalLackOfTime = totalLackOfTime.plusHours(Integer.parseInt(timeStr[0])).plusMinutes(Integer.parseInt(timeStr[1]));
+								totalLackOfTime += (Integer.parseInt(timeStr[0]) * 60) + Integer.parseInt(timeStr[1]);
 								//Logger.debug("timeStr = %s:%s e totalLackOfTime = %s", timeStr[0], timeStr[1], totalLackOfTime);
 							}
 							
 							str.removeAll(str);
-							str.add(totalLackOfTime.toString("HH:mm"));
+							str.add(CompetenceUtility.calcLocalTimeFromMinutes(totalLackOfTime));
 							//Logger.debug("str = %s", str);
 						}
 						Logger.debug("nuova inconsistenza=%s di tipo %s per %s", str, tipo, person);
@@ -536,6 +533,22 @@ public class Shift extends Controller {
 				} 
 			}
 			
+		}
+		
+		int lackMin;
+		String[] lackStrMin; 
+		
+		// Subcract the lack of time from the Requested Hours
+		for (Person person: totalInconsistentAbsences.rowKeySet()) {
+			if (totalInconsistentAbsences.contains(person, thLackTime)) {
+				/*shiftMin = totalShiftSumHours.get(person, thLackTime).multiply(new BigDecimal(60)).intValue();
+				lackStrMin = totalInconsistentAbsences.get(person, thLackTime).get(0).split(":");
+				shiftMin -= (Integer.parseInt(lackStrMin[0]) * 60) - Integer.parseInt(lackStrMin[1]);*/
+				
+				lackStrMin = totalInconsistentAbsences.get(person, thLackTime).get(0).split(":");
+				lackMin = (Integer.parseInt(lackStrMin[0]) * 60) + Integer.parseInt(lackStrMin[1]);
+				
+			}
 		}
 		
 		// save the total requested Shift Hours in the DB
