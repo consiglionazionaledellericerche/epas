@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import manager.PersonManager;
+import manager.ReperibilityManager;
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
@@ -118,6 +119,8 @@ public class Reperibility extends Controller {
 			notFound(String.format("ReperibilityType id = %s doesn't exist", type));			
 		}
 		
+		PersonReperibilityType prt = PersonReperibilityDayDao.getPersonReperibilityTypeById(type);
+		
 		// date interval construction
 		LocalDate from = new LocalDate(Integer.parseInt(params.get("yearFrom")), Integer.parseInt(params.get("monthFrom")), Integer.parseInt(params.get("dayFrom")));
 		LocalDate to = new LocalDate(Integer.parseInt(params.get("yearTo")), Integer.parseInt(params.get("monthTo")), Integer.parseInt(params.get("dayTo")));
@@ -126,21 +129,8 @@ public class Reperibility extends Controller {
 		//		PersonReperibilityDay.find("SELECT prd FROM PersonReperibilityDay prd WHERE prd.date BETWEEN ? AND ? AND prd.reperibilityType = ? ORDER BY prd.date", from, to, reperibilityType).fetch();
 
 		Logger.debug("Reperibility find called from %s to %s, found %s reperibility days", from, to, reperibilityDays.size());
-
-		List<ReperibilityPeriod> reperibilityPeriods = new ArrayList<ReperibilityPeriod>();
-		ReperibilityPeriod reperibilityPeriod = null;
-
-		for (PersonReperibilityDay prd : reperibilityDays) {
-			//L'ultima parte dell'if serve per il caso in cui la stessa persona ha due periodi di reperibilità non consecutivi. 
-			if (reperibilityPeriod == null || !reperibilityPeriod.person.equals(prd.personReperibility.person) || !reperibilityPeriod.end.plusDays(1).equals(prd.date)) {
-				reperibilityPeriod = new ReperibilityPeriod(prd.personReperibility.person, prd.date, prd.date, (PersonReperibilityType) PersonReperibilityType.findById(type));
-				reperibilityPeriods.add(reperibilityPeriod);
-				Logger.trace("Creato nuovo reperibilityPeriod, person=%s, start=%s, end=%s", reperibilityPeriod.person, reperibilityPeriod.start, reperibilityPeriod.end);
-			} else {
-				reperibilityPeriod.end = prd.date;
-				Logger.trace("Aggiornato reperibilityPeriod, person=%s, start=%s, end=%s", reperibilityPeriod.person, reperibilityPeriod.start, reperibilityPeriod.end);
-			}
-		}
+		// Manager ReperibilityManager called to find out the reperibilityPeriods
+		List<ReperibilityPeriod> reperibilityPeriods = ReperibilityManager.getPersonReperibilityPeriods(reperibilityDays, prt);
 		Logger.debug("Find %s reperibilityPeriods. ReperibilityPeriods = %s", reperibilityPeriods.size(), reperibilityPeriods);
 		
 		render(reperibilityPeriods);
