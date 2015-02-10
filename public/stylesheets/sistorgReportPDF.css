@@ -60,6 +60,12 @@ table.mensile {
 	margin-left: 10%;
 }
 
+div.note_presenze table.mensile {
+	border-collapse: collapse;
+	width: 90%;
+	margin-left: 5%
+}
+
 table.mensile tr th {
 	font-family: Verdana, Arial, sans-serif;
 	font-size: 9pt;
@@ -158,7 +164,7 @@ div.note_presenze {
 	font-family: Verdana, Arial, sans-serif;
 	font-size: 9pt;
 	text-align: left;
-	padding: 2em 1em;
+	padding: 1em 1em;
 	margin-left: 5%;
 	/*margin: 3em, 0, 4em, 7em;*/
 	clear: left;	
@@ -169,4 +175,14 @@ div.note_presenze  h2, h3 {
 	text-align: left;
 	padding-left: 1em;
 	color: red;
+}
+
+div.page {
+	page-break-after:always;
+}
+
+div.note {
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 8pt;
+	text-align: left;
 }
