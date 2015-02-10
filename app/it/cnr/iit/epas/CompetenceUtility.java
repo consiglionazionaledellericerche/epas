@@ -31,6 +31,7 @@ import models.query.QCompetence;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
+import org.joda.time.Minutes;
 import org.joda.time.Period;
 
 import com.google.common.collect.ImmutableTable;
@@ -240,15 +241,21 @@ public class CompetenceUtility {
 	 * resto = (days%2 == 0) ? 0 : 0.5
 	 * ore = days*6 + (int)(days/2) + resto;	
 	 */
-	public static LocalTime calcShiftHoursFromDays (int days) {
+	public static BigDecimal calcShiftHoursFromDays (int days) {
 		BigDecimal decDays = new BigDecimal(days);
 		BigDecimal due = new BigDecimal("2");
 		
-		int minutes = (days%2 == 0) ? 0 : 30; 
+		Logger.debug("In calcShiftHoursFromDays days = %s", days);
 		
-		BigDecimal hours = decDays.multiply(new BigDecimal(6)).add(decDays.divide(due, RoundingMode.HALF_DOWN));	
+		BigDecimal minutes = (days%2 == 0) ? BigDecimal.ZERO : new BigDecimal(5); 
 		
-		return new LocalTime(hours.intValue(), minutes);
+		Logger.debug("In calcShiftHoursFromDays minutes = %s", minutes);
+		
+		BigDecimal hours = decDays.multiply(new BigDecimal(6)).add(decDays.divide(due, RoundingMode.HALF_DOWN)).add(minutes);	
+		
+		Logger.debug("In calcShiftHoursFromDays hours = %s", hours);
+		
+		return hours;
 	}
 	
 	/*
@@ -271,7 +278,7 @@ public class CompetenceUtility {
 	 * Calcola il LocalTime dal numero dei minuti 
 	 * che compongono l'orario
 	 */
-	public static LocalTime calcLocalTimeFromMinutes (int minutes) {
+	public static String calcLocalTimeFromMinutes (int minutes) {
 		int hours;
 		int mins;
 		
@@ -294,7 +301,7 @@ public class CompetenceUtility {
 			Logger.debug("mins = %s", mins);
 		}
 		
-		return new LocalTime(hours, mins);
+		return  Integer.toString(hours).concat(":").concat(Integer.toString(mins));
 	}
 	
 	/*
@@ -735,7 +742,8 @@ public class CompetenceUtility {
 								int lackOfMinutes = teoreticShiftMinutes - workingMinutes;
 								
 								Logger.debug("teoreticShiftMinutes = %s workingMinutes = %s lackOfMinutes = %s", teoreticShiftMinutes, workingMinutes, lackOfMinutes);
-								LocalTime lackOfTime = calcLocalTimeFromMinutes(lackOfMinutes);
+								String lackOfTime = calcLocalTimeFromMinutes(lackOfMinutes);
+								
 								
 								if (lackOfMinutes > twoHoursinMinutes) {
 								
@@ -753,8 +761,8 @@ public class CompetenceUtility {
 									Logger.info("Il turno di %s %s nel giorno %s non è stato completato per meno di 2 ore (%s minuti (%s)) - CONTROLLARE PERMESSO timbrature: %s", person.name, person.surname, personDay.date, lackOfMinutes, lackOfTime, stampings);
 									
 									badStampingDays = (inconsistentAbsenceTable.contains(person, thWarnStampings)) ? inconsistentAbsenceTable.get(person, thWarnStampings) : new ArrayList<String>();
-									badStampingDays.add(personShiftDay.date.toString("dd MMM").concat(" -> ").concat(stampings).concat("(").concat(lackOfTime.toString("HH:mm")).concat(" ore mancanti)"));
-									lackOfTimes.add(lackOfTime.toString("HH:mm"));
+									badStampingDays.add(personShiftDay.date.toString("dd MMM").concat(" -> ").concat(stampings).concat("(").concat(lackOfTime).concat(" ore mancanti)"));
+									lackOfTimes.add(lackOfTime.toString());
 									inconsistentAbsenceTable.put(person, thWarnStampings, badStampingDays);
 									inconsistentAbsenceTable.put(person, thLackTime, lackOfTimes);
 								}
