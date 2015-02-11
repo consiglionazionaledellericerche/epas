@@ -11,9 +11,7 @@ import java.util.Map;
 import models.Absence;
 import models.AbsenceType;
 import models.Person;
-
 import models.PersonDay;
-
 import models.query.QAbsence;
 import models.query.QAbsenceType;
 
@@ -23,6 +21,7 @@ import org.joda.time.YearMonth;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
@@ -171,17 +170,14 @@ public class AbsenceTypeDao {
 
 	/**
 	 * 
-	 * @param begin
-	 * @param end
-	 * @param person
-	 * @return la lista dei codici di assenza presi dalla persona person nel periodo compreso tra begin e end
+	 * @return la lista di tutti i codici di assenza per assistenza post partum che non abbiano remunerazione al 100%
 	 */
-//	public static List<AbsenceType> getAbsenceTypeInPeriod(LocalDate begin, LocalDate end, Person person){
-//		QAbsenceType absenceType = QAbsenceType.absenceType;
-//		QAbsence absence = QAbsence.absence;
-//		final JPQLQuery query = ModelQuery.queryFactory().from(absence)
-//				.where(absence.personDay.date.between(begin, end).and(absence.personDay.person.eq(person)).and(absence.absenceType.eq(absenceType)));
-//		return query.list(absenceType);
-//	}
+	public static List<AbsenceType> getPostPartumAbsenceTypeList(){
+		
+		JPQLQuery query = ModelQuery.queryFactory().from(absenceType)
+				.where(absenceType.code.startsWith("24").or(absenceType.code.startsWith("25")));
+		return query.list(absenceType);
+		
+	}
 	
 }
