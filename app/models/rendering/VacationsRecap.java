@@ -20,6 +20,7 @@ import org.joda.time.LocalDate;
 import com.google.common.base.Optional;
 
 import dao.AbsenceDao;
+import dao.AbsenceTypeDao;
 import play.Logger;
 
 /**
@@ -279,12 +280,15 @@ public class VacationsRecap {
 	public int getVacationAccruedYear(DateInterval yearInterval, Contract contract, List<VacationPeriod>vacationPeriodList){
 		
 		int vacationDays = 0;
-		List<Absence> abs24Current  = null;
-		List<Absence> abs24SCurrent = null;
-		List<Absence> abs25Current  = null;
-		AbsenceType ab24  = AbsenceType.getAbsenceTypeByCode("24");
-		AbsenceType ab24S = AbsenceType.getAbsenceTypeByCode("24S");
-		AbsenceType ab25  = AbsenceType.getAbsenceTypeByCode("25");
+		/* TODO: non sono soltanto i codici 24 24s e 25 a dover concorrere alla riduzione del numero di giorni su cui fare il calcolo
+		 * delle ferie, ma anche tutti gli altri 24qualcosa e 25qualcosa...solo il 23 deve restarne fuori*/
+//		List<Absence> abs24Current  = null;
+//		List<Absence> abs24SCurrent = null;
+//		List<Absence> abs25Current  = null;
+//		AbsenceType ab24  = AbsenceType.getAbsenceTypeByCode("24");
+//		AbsenceType ab24S = AbsenceType.getAbsenceTypeByCode("24S");
+//		AbsenceType ab25  = AbsenceType.getAbsenceTypeByCode("25");
+		
 		//Calcolo l'intersezione fra l'anno e il contratto attuale
 		yearInterval = DateUtility.intervalIntersection(yearInterval, new DateInterval(contract.beginContract, contract.expireContract));
 		if(yearInterval == null)
@@ -300,17 +304,22 @@ public class VacationsRecap {
 			{
 				days = DateUtility.daysInInterval(intersection);
 			}
-			abs24Current = getVacationDays(intersection, activeContract, ab24);
-			abs24SCurrent = getVacationDays(intersection, activeContract, ab24S);
-			abs25Current = getVacationDays(intersection, activeContract, ab25);
+			//			abs24Current = getVacationDays(intersection, activeContract, ab24);
+//			abs24SCurrent = getVacationDays(intersection, activeContract, ab24S);
+//			abs25Current = getVacationDays(intersection, activeContract, ab25);
 			//calcolo i giorni maturati col metodo di conversione
+			List<Absence> absences = accruedVacationDays(intersection, activeContract);
 			if(vp.vacationCode.description.equals("26+4"))
 			{
-				vacationDays = vacationDays + VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysLessThreeYears(days-abs24Current.size()-abs25Current.size()-abs24SCurrent.size());
+				//vacationDays = vacationDays + VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysLessThreeYears(days-abs24Current.size()-abs25Current.size()-abs24SCurrent.size());
+				vacationDays = vacationDays + VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysLessThreeYears(
+						days-absences.size());
 			}
 			if(vp.vacationCode.description.equals("28+4"))
 			{
-				vacationDays = vacationDays + VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysMoreThreeYears(days-abs24Current.size()-abs25Current.size()-abs24SCurrent.size());
+				//vacationDays = vacationDays + VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysMoreThreeYears(days-abs24Current.size()-abs25Current.size()-abs24SCurrent.size());
+				vacationDays = vacationDays + VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysMoreThreeYears(
+						days-absences.size());
 			}
 			
 		}
@@ -360,38 +369,27 @@ public class VacationsRecap {
 		DateInterval contractInterInterval = DateUtility.intervalIntersection(inter, contract.getContractDateInterval());
 		if(contractInterInterval==null)
 			return new ArrayList<Absence>();
-		
-		/*
-		//calcolo inizio fine a seconda del contratto
-		if(inter.getBegin().isBefore(contract.beginContract))
-		{
-			inter = new DateInterval(contract.beginContract, inter.getEnd());
-		}
-		if(contract.expireContract!=null && inter.getEnd().isAfter(contract.expireContract))
-		{
-			inter = new DateInterval(inter.getBegin(), contract.expireContract);
-		}
-		
-		
-		List<Absence> absences = Absence.find(
-				"SELECT ab "
-						+ "FROM Absence ab "
-						+ "WHERE ab.personDay.person = ? AND ( ab.personDay.date between ? AND ? ) AND ab.absenceType.code = ? order by ab.personDay.date",
-						contract.person, inter.getBegin(), inter.getEnd(), ab.code).fetch();
-		*/
-		
-		
+				
 		List<Absence> absences = AbsenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(contract.person), Optional.fromNullable(ab.code), 
 				contractInterInterval.getBegin(), contractInterInterval.getEnd(), Optional.<JustifiedTimeAtWork>absent(), false, true);
-//		List<Absence> absences = Absence.find(
-//				"SELECT ab "
-//						+ "FROM Absence ab "
-//						+ "WHERE ab.personDay.person = ? AND ( ab.personDay.date between ? AND ? ) AND ab.absenceType.code = ? order by ab.personDay.date",
-//						contract.person, contractInterInterval.getBegin(), contractInterInterval.getEnd(), ab.code).fetch();
-		
 		
 		return absences;	
 
+	}
+	
+	/**
+	 * 
+	 * @param intersection
+	 * @param contract
+	 * @return la lista dei giorni di assenza in cui si è usato un codice di assenza per assistenza post partum
+	 */
+	public static List<Absence> accruedVacationDays(DateInterval intersection, Contract contract){
+		List<AbsenceType> postPartumCodeList = AbsenceTypeDao.getPostPartumAbsenceTypeList();
+		DateInterval contractInterInterval = DateUtility.intervalIntersection(intersection, contract.getContractDateInterval());
+		if(contractInterInterval==null)
+			return new ArrayList<Absence>();
+		List<Absence> absences = AbsenceDao.getAbsenceWithPostPartumCode(contract.person, contractInterInterval.getBegin(), contractInterInterval.getEnd(), postPartumCodeList, true);
+		return absences;
 	}
 	
 	/**
@@ -457,51 +455,30 @@ public class VacationsRecap {
 				return 0;
 			
 			if(days >= 1 && days <= 15)
-				return 1;
-			if(days >= 16 && days <= 30)
+				return 0;
+			if(days >= 16 && days <= 45)
 				return 2;
-			if(days >= 31 && days <= 45)
-				return 3;
-			if(days >= 46 && days <= 60)
+			if(days >= 46 && days <= 75)
 				return 4;
-			if(days >= 61 && days <= 75)
-				return 5;
-			if(days >= 76 && days <= 90)
+			if(days >= 76 && days <= 106)
 				return 6;
-			if(days >= 91 && days <= 105)
-				return 7;
-			if(days >= 106 && days <= 120)
-				return 9;
-			if(days >= 121 && days <= 135)
+			if(days >= 107 && days <= 136)
+				return 8;
+			if(days >= 137 && days <= 167)
 				return 10;
-			if(days >= 136 && days <= 150)
-				return 11;
-			if(days >= 151 && days <= 165)
-				return 12;
-			if(days >= 166 && days <= 180)
+			if(days >= 168 && days <= 197)
 				return 13;
-			if(days >= 181 && days <= 195)
-				return 14;
-			if(days >= 196 && days <= 210)
+			if(days >= 198 && days <= 227)
 				return 15;
-			if(days >= 211 && days <= 225)
-				return 16;
-			if(days >= 226 && days <= 240)
+			if(days >= 228 && days <= 258)
 				return 17;
-			if(days >= 241 && days <= 255)
-				return 18;
-			if(days >= 256 && days <= 270)
+			if(days >= 259 && days <= 288)
 				return 19;
-			if(days >= 271 && days <= 285)
-				return 20;
-			if(days >= 286 && days <= 300)
+			if(days >= 289 && days <= 319)
 				return 21;
-			if(days >= 301 && days <= 315)
-				return 22;
-			if(days >= 316 && days <= 330)
-				return 24;
-			if(days >= 331 && days <= 345)
-				return 25;
+			if(days >= 320 && days <= 349)
+				return 23;
+			
 			else
 				return 26;
 			
@@ -518,51 +495,29 @@ public class VacationsRecap {
 				return 0;
 			
 			if(days >= 1 && days <= 15)
-				return 1;
-			if(days >= 16 && days <= 30)
+				return 0;
+			if(days >= 16 && days <= 45)
 				return 2;
-			if(days >= 31 && days <= 45)
-				return 3;
-			if(days >= 46 && days <= 60)
-				return 5;
-			if(days >= 61 && days <= 75)
-				return 6;
-			if(days >= 76 && days <= 90)
+			if(days >= 46 && days <= 75)
+				return 4;
+			if(days >= 76 && days <= 106)
 				return 7;
-			if(days >= 91 && days <= 105)
-				return 8;
-			if(days >= 106 && days <= 120)
+			if(days >= 107 && days <= 136)
 				return 9;
-			if(days >= 121 && days <= 135)
-				return 10;
-			if(days >= 136 && days <= 150)
-				return 12;
-			if(days >= 151 && days <= 165)
-				return 13;
-			if(days >= 166 && days <= 180)
+			if(days >= 137 && days <= 167)
+				return 11;
+			if(days >= 168 && days <= 197)
 				return 14;
-			if(days >= 181 && days <= 195)
-				return 15;
-			if(days >= 196 && days <= 210)
+			if(days >= 198 && days <= 227)
 				return 16;
-			if(days >= 211 && days <= 225)
-				return 17;
-			if(days >= 226 && days <= 240)
+			if(days >= 228 && days <= 258)
 				return 18;
-			if(days >= 241 && days <= 255)
-				return 20;
-			if(days >= 256 && days <= 270)
+			if(days >= 259 && days <= 288)
 				return 21;
-			if(days >= 271 && days <= 285)
-				return 22;
-			if(days >= 286 && days <= 300)
+			if(days >= 289 && days <= 319)
 				return 23;
-			if(days >= 301 && days <= 315)
-				return 24;
-			if(days >= 316 && days <= 330)
-				return 25;
-			if(days >= 331 && days <= 345)
-				return 26;
+			if(days >= 320 && days <= 349)
+				return 25;			
 			else
 				return 28;
 			
