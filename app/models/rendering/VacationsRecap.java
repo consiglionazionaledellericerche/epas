@@ -83,7 +83,7 @@ public class VacationsRecap {
 			VacationsRecap vr = new VacationsRecap();
 			vr.person = person;
 			vr.year = year;
-			vr.activeContract = contract.or(person.getCurrentContract());
+			vr.activeContract = contract.get();//.or(person.getCurrentContract());
 			
 			Verify.verify(vr.activeContract != null, "non c'è contratto attivo!");
 			
