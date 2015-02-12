@@ -3,7 +3,6 @@ package controllers;
 import helpers.ModelQuery.SimpleResults;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.inject.Inject;

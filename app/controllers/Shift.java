@@ -26,7 +26,6 @@ import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.joda.time.LocalDate;
 
 import org.joda.time.LocalDateTime;
-import org.joda.time.Period;
 import org.joda.time.LocalTime;
 
 import play.Logger;
@@ -46,34 +45,9 @@ import dao.PersonDao;
 import dao.PersonShiftDayDao;
 import dao.ShiftDao;
 import models.Competence;
-import models.PersonReperibilityDay;
-import models.PersonReperibilityType;
-import models.PersonShift;
-import models.PersonShiftDay;
-import models.PersonShiftShiftType;
-import models.ShiftCancelled;
 import models.ShiftCategories;
 import models.ShiftTimeTable;
 import models.enumerate.ShiftSlot;
-import models.exports.AbsenceReperibilityPeriod;
-import models.exports.AbsenceShiftPeriod;
-import models.exports.ShiftCancelledPeriod;
-import models.exports.ShiftPeriod;
-import models.exports.ShiftPeriods;
-import models.query.QCompetence;
-import models.query.QPerson;
-import models.query.QPersonShift;
-import models.query.QPersonShiftShiftType;
-import models.query.QShiftType;
-
-import helpers.BadRequest;
-
-import play.Logger;
-import play.Play;
-import play.data.binding.As;
-import play.db.jpa.JPA;
-import play.mvc.Controller;
-import sun.security.util.BigInt;
 
 
 /**
