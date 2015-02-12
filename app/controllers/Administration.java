@@ -26,6 +26,8 @@ import models.rendering.VacationsRecap;
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
+
+import controllers.Resecure.NoCheck;
 import play.Logger;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
@@ -86,7 +88,7 @@ public class Administration extends Controller {
 		renderText("Aggiornati i person day delle persone con timbratura fissa");
 	}
 	
-	
+	@NoCheck
 	public static void utilities(){
 		//List<Person> pdList = Person.getActivePersonsInDay(new LocalDate(), Security.getOfficeAllowed(), false);
 		
@@ -104,9 +106,8 @@ public class Administration extends Controller {
 	 * @param personId l'id univoco della persona da fixare, -1 per fixare tutte le persone
 	 * @param year l'anno dal quale far partire il fix
 	 * @param month il mese dal quale far partire il fix
-	 * 
-	 * 
-	 */	
+	 */
+	@NoCheck
 	public static void fixPersonSituation(Long personId, int year, int month){	
 	//TODO permessi
 		PersonUtility.fixPersonSituation(personId, year, month, Security.getUser().get(), false);
