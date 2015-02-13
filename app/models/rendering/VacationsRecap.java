@@ -28,6 +28,7 @@ import com.google.common.base.Verify;
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
 
+
 /**
  * @author alessandro
  * Classe da utilizzare per il riepilogo delle informazioni relative al piano ferie di una persona.
@@ -179,77 +180,6 @@ public class VacationsRecap {
 			//costruisco la lista delle ferie per stampare le date (prendo tutto ciò che trovo nel db e poi riempo con null fino alla dimensione calcolata)
 			abs32Last  = getVacationDays(lastYearInter, vr.contract, ab32);
 
-//<<<<<<< HEAD
-//		//Expire Last Year
-//		
-//		//ConfYear conf = ConfYear.getConfYear(year);
-//		Integer monthExpiryVacationPastYear = Integer.parseInt(ConfYearManager.getFieldValue("month_expiry_vacation_past_year", year, person.office));
-//		Integer dayExpiryVacationPastYear = Integer.parseInt(ConfYearManager.getFieldValue("day_expiry_vacation_past_year", year, person.office));
-//		LocalDate expireVacation = actualDate.withMonthOfYear(monthExpiryVacationPastYear).withDayOfMonth(dayExpiryVacationPastYear);
-//		
-//		this.isExpireLastYear = false;
-//		
-//		if( this.year < today.getYear() ) {		//query anni passati 
-//			this.isExpireLastYear = true;
-//		}
-//		else if( this.year == today.getYear() && actualDate.isAfter(expireVacation)) {	//query anno attuale
-//			this.isExpireLastYear = true;
-//		}
-//		
-//		//Expire Before End Of Year / Active After Begin Of Year
-//		
-//		if(this.activeContractInterval.getEnd().isBefore(endYear))
-//			this.isExpireBeforeEndYear = true;
-//		if(this.activeContractInterval.getBegin().isAfter(startYear))
-//			this.isActiveAfterBeginYear = true;
-//		
-//		//(1) Calcolo ferie usate dell'anno passato ---------------------------------------------------------------------------------------------------------------------------------
-//		List<Absence> abs32Last = null;
-//		
-//		List<Absence> abs31Last = null;
-//		List<Absence> abs37Last = null;
-//		
-//		
-//		int vacationDaysPastYearUsedNew = 0;
-//		if(activeContract.sourceDate!=null && activeContract.sourceDate.getYear()==year)
-//		{
-//			//Popolare da source data
-//			vacationDaysPastYearUsedNew = vacationDaysPastYearUsedNew + activeContract.sourceVacationLastYearUsed;
-//			DateInterval yearInterSource = new DateInterval(activeContract.sourceDate.plusDays(1), endYear);
-//			abs31Last = getVacationDays(yearInterSource, activeContract, ab31);										
-//			abs37Last = getVacationDays(yearInterSource, activeContract, ab37);		
-//			vacationDaysPastYearUsedNew = vacationDaysPastYearUsedNew + abs31Last.size() + abs37Last.size();
-//		}
-//		else if(activeContract.beginContract.getYear()==this.year)
-//		{
-//			//Non esiste anno passato nel presente contratto
-//			vacationDaysPastYearUsedNew = 0;
-//			abs31Last  = new ArrayList<Absence>();
-//			abs37Last  = new ArrayList<Absence>();
-//		}
-//		else if(this.year > LocalDate.now().getYear()) 
-//		{
-//			//Caso in cui voglio inserire ferie per l'anno prossimo
-//			VacationsRecap vrPastYear = new VacationsRecap(this.person, this.year-1, this.activeContract, endLastYear, true);
-//=======
-//				abs31Last = getVacationDays(yearInter, vr.activeContract, ab31);						
-//				abs37Last = getVacationDays(yearInter, vr.activeContract, ab37);		
-//				vacationDaysPastYearUsedNew = vrPastYear.vacationDaysCurrentYearUsed.size() + abs31Last.size() + abs37Last.size();
-//			}
-//			else{
-//				//Popolare da contractYearRecap
-//				ContractYearRecap recapPastYear = vr.activeContract.getContractYearRecap(year-1);
-//				if(recapPastYear==null)
-//					throw new IllegalStateException("Mancano i riepiloghi annuali.");
-//				vacationDaysPastYearUsedNew = recapPastYear.vacationCurrentYearUsed;
-//				abs31Last = getVacationDays(yearInter, vr.activeContract, ab31);						
-//				abs37Last = getVacationDays(yearInter, vr.activeContract, ab37);						
-//				vacationDaysPastYearUsedNew = vacationDaysPastYearUsedNew + abs31Last.size() + abs37Last.size();
-//			}
-//			//costruisco la lista delle ferie per stampare le date (prendo tutto ciò che trovo nel db e poi riempo con null fino alla dimensione calcolata)
-//			abs32Last  = getVacationDays(lastYearInter, vr.activeContract, ab32);
-//>>>>>>> branch 'refactorManager' of https://dario.tagliaferri@wiki.iit.cnr.it/redmine/e-gov-iit-cnr/epas.git
-
 			vr.vacationDaysLastYearUsed.addAll(abs32Last);
 			vr.vacationDaysLastYearUsed.addAll(abs31Last);
 			vr.vacationDaysLastYearUsed.addAll(abs37Last);
@@ -377,14 +307,9 @@ public class VacationsRecap {
 		 * 	calcolati a partire dai piani ferie associati al contratto corrente
 		 */
 		private static int getVacationAccruedYear(DateInterval yearInterval, VacationsRecap vr){
-			
+						
 			int vacationDays = 0;
-			List<Absence> abs24Current  = null;
-			List<Absence> abs24SCurrent = null;
-			List<Absence> abs25Current  = null;
-			AbsenceType ab24  = AbsenceTypeDao.getAbsenceTypeByCode("24");
-			AbsenceType ab24S = AbsenceTypeDao.getAbsenceTypeByCode("24S"); 
-			AbsenceType ab25  = AbsenceTypeDao.getAbsenceTypeByCode("25"); 
+
 			//Calcolo l'intersezione fra l'anno e il contratto attuale
 			yearInterval = DateUtility.intervalIntersection(yearInterval, 
 					new DateInterval(vr.contract.beginContract, vr.contract.expireContract));
@@ -401,17 +326,18 @@ public class VacationsRecap {
 				{
 					days = DateUtility.daysInInterval(intersection);
 				}
-				abs24Current = getVacationDays(intersection, vr.contract, ab24);
-				abs24SCurrent = getVacationDays(intersection, vr.contract, ab24S);
-				abs25Current = getVacationDays(intersection, vr.contract, ab25);
+				
 				//calcolo i giorni maturati col metodo di conversione
+				List<Absence> absences = accruedVacationDays(intersection, vr.contract);
 				if(vp.vacationCode.description.equals("26+4"))
 				{
-					vacationDays = vacationDays + VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysLessThreeYears(days-abs24Current.size()-abs25Current.size()-abs24SCurrent.size());
+					vacationDays = vacationDays + VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysLessThreeYears(
+							days-absences.size());
 				}
 				if(vp.vacationCode.description.equals("28+4"))
 				{
-					vacationDays = vacationDays + VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysMoreThreeYears(days-abs24Current.size()-abs25Current.size()-abs24SCurrent.size());
+					vacationDays = vacationDays + VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysMoreThreeYears(
+							days-absences.size());
 				}
 				
 			}
@@ -424,6 +350,21 @@ public class VacationsRecap {
 
 		}
 		
+		/**
+		 * 
+		 * @param intersection
+		 * @param contract
+		 * @return la lista dei giorni di assenza in cui si è usato un codice di assenza per assistenza post partum
+		 */
+		private static List<Absence> accruedVacationDays(DateInterval intersection, Contract contract){
+			List<AbsenceType> postPartumCodeList = AbsenceTypeDao.getPostPartumAbsenceTypeList();
+			DateInterval contractInterInterval = DateUtility.intervalIntersection(intersection, contract.getContractDateInterval());
+			if(contractInterInterval==null)
+				return new ArrayList<Absence>();
+			List<Absence> absences = AbsenceDao.getAbsenceWithPostPartumCode(contract.person, contractInterInterval.getBegin(), contractInterInterval.getEnd(), postPartumCodeList, true);
+			return absences;
+		}
+		
 	}
 		
 	
@@ -432,85 +373,6 @@ public class VacationsRecap {
 	}
 
 
-	/**
-	 * 
-	 * @param yearInterval
-	 * @param contract
-	 * @param vacationPeriodList
-	 * @return il numero di giorni di ferie maturati nell'anno year 
-	 * 	calcolati a partire dai piani ferie associati al contratto corrente
-	 */
-	public int getVacationAccruedYear(DateInterval yearInterval, Contract contract, List<VacationPeriod>vacationPeriodList){
-		
-		int vacationDays = 0;
-		List<Absence> abs24Current  = null;
-		List<Absence> abs24SCurrent = null;
-		List<Absence> abs25Current  = null;
-		AbsenceType ab24  = AbsenceTypeDao.getAbsenceTypeByCode("24");
-		AbsenceType ab24S = AbsenceTypeDao.getAbsenceTypeByCode("24S"); 
-		AbsenceType ab25  = AbsenceTypeDao.getAbsenceTypeByCode("25"); 
-		//Calcolo l'intersezione fra l'anno e il contratto attuale
-		yearInterval = DateUtility.intervalIntersection(yearInterval, new DateInterval(contract.beginContract, contract.expireContract));
-		if(yearInterval == null)
-			return 0;
-		
-		//per ogni piano ferie conto i giorni trascorsi in yearInterval e applico la funzione di conversione
-		for(VacationPeriod vp : vacationPeriodList)
-		{
-			int days = 0;
-			DateInterval vpInterval = new DateInterval(vp.beginFrom, vp.endTo);
-			DateInterval intersection = DateUtility.intervalIntersection(vpInterval, yearInterval);
-			if(intersection!=null)
-			{
-				days = DateUtility.daysInInterval(intersection);
-			}
-			abs24Current = getVacationDays(intersection, contract, ab24);
-			abs24SCurrent = getVacationDays(intersection, contract, ab24S);
-			abs25Current = getVacationDays(intersection, contract, ab25);
-			//calcolo i giorni maturati col metodo di conversione
-			if(vp.vacationCode.description.equals("26+4"))
-			{
-				vacationDays = vacationDays + VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysLessThreeYears(days-abs24Current.size()-abs25Current.size()-abs24SCurrent.size());
-			}
-			if(vp.vacationCode.description.equals("28+4"))
-			{
-				vacationDays = vacationDays + VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysMoreThreeYears(days-abs24Current.size()-abs25Current.size()-abs24SCurrent.size());
-			}
-			
-		}
-		
-		//FIXME decidere se deve essere un parametro di configurazione
-		if(vacationDays>28)
-			vacationDays = 28;
-		
-		return vacationDays;
-
-	}
-
-	
-	
-
-	/**
-	 * 
-	 * @param yearInterval
-	 * @param contract
-	 * @return numero di permessi maturati nel periodo yearInterval associati a contract
-	 */
-	public int getPermissionAccruedYear(DateInterval yearInterval, Contract contract){
-		int days = 0;
-		int permissionDays = 0;
-	
-		//Calcolo l'intersezione fra l'anno e il contratto attuale
-		yearInterval = DateUtility.intervalIntersection(yearInterval, new DateInterval(contract.beginContract, contract.expireContract));
-		if(yearInterval == null)
-			return 0;
-		
-		days = yearInterval.getEnd().getDayOfYear() - yearInterval.getBegin().getDayOfYear();
-		permissionDays = VacationsPermissionsDaysAccrued.convertWorkDaysToPermissionDays(days);
-		return permissionDays;
-	}
-	
-	
 	/**
 	 * 
 	 * @param inter
@@ -524,35 +386,9 @@ public class VacationsRecap {
 		DateInterval contractInterInterval = DateUtility.intervalIntersection(inter, contract.getContractDateInterval());
 		if(contractInterInterval==null)
 			return new ArrayList<Absence>();
-		
-		/*
-		//calcolo inizio fine a seconda del contratto
-		if(inter.getBegin().isBefore(contract.beginContract))
-		{
-			inter = new DateInterval(contract.beginContract, inter.getEnd());
-		}
-		if(contract.expireContract!=null && inter.getEnd().isAfter(contract.expireContract))
-		{
-			inter = new DateInterval(inter.getBegin(), contract.expireContract);
-		}
-		
-		
-		List<Absence> absences = Absence.find(
-				"SELECT ab "
-						+ "FROM Absence ab "
-						+ "WHERE ab.personDay.person = ? AND ( ab.personDay.date between ? AND ? ) AND ab.absenceType.code = ? order by ab.personDay.date",
-						contract.person, inter.getBegin(), inter.getEnd(), ab.code).fetch();
-		*/
-		
-		
+				
 		List<Absence> absences = AbsenceDao.getAbsenceByCodeInPeriod(Optional.fromNullable(contract.person), Optional.fromNullable(ab.code), 
 				contractInterInterval.getBegin(), contractInterInterval.getEnd(), Optional.<JustifiedTimeAtWork>absent(), false, true);
-//		List<Absence> absences = Absence.find(
-//				"SELECT ab "
-//						+ "FROM Absence ab "
-//						+ "WHERE ab.personDay.person = ? AND ( ab.personDay.date between ? AND ? ) AND ab.absenceType.code = ? order by ab.personDay.date",
-//						contract.person, contractInterInterval.getBegin(), contractInterInterval.getEnd(), ab.code).fetch();
-		
 		
 		return absences;	
 
@@ -612,51 +448,30 @@ public class VacationsRecap {
 				return 0;
 			
 			if(days >= 1 && days <= 15)
-				return 1;
-			if(days >= 16 && days <= 30)
+				return 0;
+			if(days >= 16 && days <= 45)
 				return 2;
-			if(days >= 31 && days <= 45)
-				return 3;
-			if(days >= 46 && days <= 60)
+			if(days >= 46 && days <= 75)
 				return 4;
-			if(days >= 61 && days <= 75)
-				return 5;
-			if(days >= 76 && days <= 90)
+			if(days >= 76 && days <= 106)
 				return 6;
-			if(days >= 91 && days <= 105)
-				return 7;
-			if(days >= 106 && days <= 120)
-				return 9;
-			if(days >= 121 && days <= 135)
+			if(days >= 107 && days <= 136)
+				return 8;
+			if(days >= 137 && days <= 167)
 				return 10;
-			if(days >= 136 && days <= 150)
-				return 11;
-			if(days >= 151 && days <= 165)
-				return 12;
-			if(days >= 166 && days <= 180)
+			if(days >= 168 && days <= 197)
 				return 13;
-			if(days >= 181 && days <= 195)
-				return 14;
-			if(days >= 196 && days <= 210)
+			if(days >= 198 && days <= 227)
 				return 15;
-			if(days >= 211 && days <= 225)
-				return 16;
-			if(days >= 226 && days <= 240)
+			if(days >= 228 && days <= 258)
 				return 17;
-			if(days >= 241 && days <= 255)
-				return 18;
-			if(days >= 256 && days <= 270)
+			if(days >= 259 && days <= 288)
 				return 19;
-			if(days >= 271 && days <= 285)
-				return 20;
-			if(days >= 286 && days <= 300)
+			if(days >= 289 && days <= 319)
 				return 21;
-			if(days >= 301 && days <= 315)
-				return 22;
-			if(days >= 316 && days <= 330)
-				return 24;
-			if(days >= 331 && days <= 345)
-				return 25;
+			if(days >= 320 && days <= 349)
+				return 23;
+			
 			else
 				return 26;
 			
@@ -673,51 +488,29 @@ public class VacationsRecap {
 				return 0;
 			
 			if(days >= 1 && days <= 15)
-				return 1;
-			if(days >= 16 && days <= 30)
+				return 0;
+			if(days >= 16 && days <= 45)
 				return 2;
-			if(days >= 31 && days <= 45)
-				return 3;
-			if(days >= 46 && days <= 60)
-				return 5;
-			if(days >= 61 && days <= 75)
-				return 6;
-			if(days >= 76 && days <= 90)
+			if(days >= 46 && days <= 75)
+				return 4;
+			if(days >= 76 && days <= 106)
 				return 7;
-			if(days >= 91 && days <= 105)
-				return 8;
-			if(days >= 106 && days <= 120)
+			if(days >= 107 && days <= 136)
 				return 9;
-			if(days >= 121 && days <= 135)
-				return 10;
-			if(days >= 136 && days <= 150)
-				return 12;
-			if(days >= 151 && days <= 165)
-				return 13;
-			if(days >= 166 && days <= 180)
+			if(days >= 137 && days <= 167)
+				return 11;
+			if(days >= 168 && days <= 197)
 				return 14;
-			if(days >= 181 && days <= 195)
-				return 15;
-			if(days >= 196 && days <= 210)
+			if(days >= 198 && days <= 227)
 				return 16;
-			if(days >= 211 && days <= 225)
-				return 17;
-			if(days >= 226 && days <= 240)
+			if(days >= 228 && days <= 258)
 				return 18;
-			if(days >= 241 && days <= 255)
-				return 20;
-			if(days >= 256 && days <= 270)
+			if(days >= 259 && days <= 288)
 				return 21;
-			if(days >= 271 && days <= 285)
-				return 22;
-			if(days >= 286 && days <= 300)
+			if(days >= 289 && days <= 319)
 				return 23;
-			if(days >= 301 && days <= 315)
-				return 24;
-			if(days >= 316 && days <= 330)
-				return 25;
-			if(days >= 331 && days <= 345)
-				return 26;
+			if(days >= 320 && days <= 349)
+				return 25;			
 			else
 				return 28;
 			
