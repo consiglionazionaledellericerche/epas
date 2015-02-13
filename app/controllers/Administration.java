@@ -3,13 +3,13 @@ package controllers;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.ExportToYaml;
 import it.cnr.iit.epas.FromMysqlToPostgres;
-import it.cnr.iit.epas.PersonUtility;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import manager.ConsistencyManager;
 import manager.ContractYearRecapManager;
 import manager.recaps.PersonResidualMonthRecap;
 import manager.recaps.PersonResidualYearRecap;
@@ -25,13 +25,14 @@ import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
 
-import com.google.common.base.Optional;
-
-import controllers.Resecure.NoCheck;
 import play.Logger;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
+
+import com.google.common.base.Optional;
+
+import controllers.Resecure.NoCheck;
 import dao.AbsenceTypeDao;
 import dao.ContractDao;
 import dao.OfficeDao;
@@ -90,8 +91,7 @@ public class Administration extends Controller {
 	
 	@NoCheck
 	public static void utilities(){
-		//List<Person> pdList = Person.getActivePersonsInDay(new LocalDate(), Security.getOfficeAllowed(), false);
-		
+
 		final List<Person> personList = PersonDao.list( 
 				Optional.<String>absent(),OfficeDao.getOfficeAllowed(Optional.<User>absent()), 
 				false, LocalDate.now(), LocalDate.now(), true)
@@ -109,8 +109,8 @@ public class Administration extends Controller {
 	 */
 	@NoCheck
 	public static void fixPersonSituation(Long personId, int year, int month){	
-	//TODO permessi
-		PersonUtility.fixPersonSituation(personId, year, month, Security.getUser().get(), false);
+		//TODO permessi
+		ConsistencyManager.fixPersonSituation(personId, year, month, Security.getUser().get(), false);
 
 	}
 	

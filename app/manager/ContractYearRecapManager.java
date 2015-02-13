@@ -17,9 +17,6 @@ import models.rendering.VacationsRecap;
 import org.joda.time.LocalDate;
 
 import play.Logger;
-
-import com.google.common.base.Optional;
-
 import dao.AbsenceTypeDao;
 
 /**

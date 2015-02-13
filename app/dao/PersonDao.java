@@ -14,7 +14,6 @@ import models.Contract;
 import models.Office;
 import models.Person;
 import models.PersonDay;
-import models.PersonShift;
 import models.User;
 import models.query.QCompetenceCode;
 import models.query.QContract;
