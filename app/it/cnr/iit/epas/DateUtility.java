@@ -204,7 +204,7 @@ public class DateUtility {
 	 */
 	public static int daysInInterval(DateInterval inter)
 	{
-		return inter.getEnd().getDayOfYear() - inter.getBegin().getDayOfYear();
+		return inter.getEnd().getDayOfYear() - inter.getBegin().getDayOfYear() + 1;
 	}
 	
 	/**
