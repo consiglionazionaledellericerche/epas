@@ -929,7 +929,7 @@ public class PersonUtility {
 		if(userLogged==null)
 			return;
 
-		//Costruisco la lista di persone su cui voglio operare
+		// (0) Costruisco la lista di persone su cui voglio operare
 		List<Person> personList = new ArrayList<Person>();
 		if(personId==-1)
 			personId=null;
@@ -990,14 +990,16 @@ public class PersonUtility {
 		i = 1;
 		for(Person p : personList) {
 			
+			JPAPlugin.closeTx(false);	
+			JPAPlugin.startTx(false);
+			p = PersonDao.getPersonById(p.id);
+			
 			Logger.info("Update residui %s (%s di %s) dal %s-%s-01 a oggi", p.surname, i++, personList.size(), year, month);
 			List<Contract> contractList = ContractDao.getPersonContractList(p);
 			//List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ?", p).fetch();
 
 			for(Contract contract : contractList) {
-				JPAPlugin.closeTx(false);	
-				JPAPlugin.startTx(false);
-				contract = ContractDao.getContractById(contract.id);
+
 				ContractYearRecapManager.buildContractYearRecap(contract);
 			}
 		}

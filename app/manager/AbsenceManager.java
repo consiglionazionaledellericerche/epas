@@ -74,8 +74,8 @@ public class AbsenceManager {
 	 */
 	private static AbsenceType whichVacationCode(Person person, LocalDate date){
 
-		VacationsRecap vr = VacationsRecap.Factory.build(person, date.getYear(),
-				Optional.<Contract>absent(), date, true);
+		VacationsRecap vr = VacationsRecap.Factory.build(date.getYear(),
+				person.getCurrentContract(), date, true);
 
 		if(vr.vacationDaysLastYearNotYetUsed > 0)
 			return AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode());
@@ -100,8 +100,8 @@ public class AbsenceManager {
 	 */
 	private static boolean canTake32(Person person, LocalDate date) {
 
-		VacationsRecap vr = VacationsRecap.Factory.build(person, date.getYear(),
-				Optional.<Contract>absent(), date, true);
+		VacationsRecap vr = VacationsRecap.Factory.build(date.getYear(),
+				person.getCurrentContract(), date, true);
 
 		return (vr.vacationDaysCurrentYearNotYetUsed > 0);		
 
@@ -116,8 +116,8 @@ public class AbsenceManager {
 	 */
 	private static boolean canTake31(Person person, LocalDate date) {
 
-		VacationsRecap vr = VacationsRecap.Factory.build(person, date.getYear(),
-				Optional.<Contract>absent(), date, true);
+		VacationsRecap vr = VacationsRecap.Factory.build(date.getYear(),
+				person.getCurrentContract(), date, true);
 		
 		return (vr.vacationDaysLastYearNotYetUsed > 0);
 	}
@@ -131,8 +131,8 @@ public class AbsenceManager {
 	 */
 	private static boolean canTake94(Person person, LocalDate date) {
 
-		VacationsRecap vr = VacationsRecap.Factory.build(person, date.getYear(),
-				Optional.<Contract>absent(), date, true);
+		VacationsRecap vr = VacationsRecap.Factory.build(date.getYear(),
+				person.getCurrentContract(), date, true);
 
 		return (vr.persmissionNotYetUsed > 0);
 
