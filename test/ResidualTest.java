@@ -3,6 +3,7 @@ import it.cnr.iit.epas.PersonUtility;
 import java.util.ArrayList;
 import java.util.List;
 
+import manager.ConsistencyManager;
 import manager.ContractYearRecapManager;
 import manager.PersonManager;
 import manager.recaps.PersonResidualMonthRecap;
@@ -33,7 +34,7 @@ public class ResidualTest extends UnitTest {
     	
     	//Ricalcolo tutti i personday
 
-     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user, false);
+     	ConsistencyManager.fixPersonSituation(person.id, 2013, 1, person.user, false);
 
     	JPAPlugin.startTx(false);
 
@@ -59,7 +60,7 @@ public class ResidualTest extends UnitTest {
 		List<VacationsRecap> contractVacationRecap = new ArrayList<VacationsRecap>();
 		for(Contract contract : monthContracts)
 		{
-			VacationsRecap vr = VacationsRecap.Factory.build(person, 2014, Optional.of(contract), dateToTest, true);
+			VacationsRecap vr = VacationsRecap.Factory.build(2014, contract, dateToTest, true);
 			contractVacationRecap.add(vr);
 		}
 		JPAPlugin.closeTx(false);
@@ -95,7 +96,7 @@ public class ResidualTest extends UnitTest {
     	
     	//Ricalcolo tutti i personday
 
-     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user, false);
+    	ConsistencyManager.fixPersonSituation(person.id, 2013, 1, person.user, false);
 
     	JPAPlugin.startTx(false);
 
@@ -121,7 +122,7 @@ public class ResidualTest extends UnitTest {
 		List<VacationsRecap> contractVacationRecap = new ArrayList<VacationsRecap>();
 		for(Contract contract : monthContracts)
 		{
-			VacationsRecap vr = VacationsRecap.Factory.build(person, 2014, Optional.of(contract), dateToTest, true);
+			VacationsRecap vr = VacationsRecap.Factory.build(2014, contract, dateToTest, true);
 			contractVacationRecap.add(vr);
 		}
 		JPAPlugin.closeTx(false);
@@ -157,7 +158,7 @@ public class ResidualTest extends UnitTest {
     	
     	//Ricalcolo tutti i personday
 
-     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user, false);
+    	ConsistencyManager.fixPersonSituation(person.id, 2013, 1, person.user, false);
 
     	JPAPlugin.startTx(false);
 
@@ -183,7 +184,7 @@ public class ResidualTest extends UnitTest {
 		List<VacationsRecap> contractVacationRecap = new ArrayList<VacationsRecap>();
 		for(Contract contract : monthContracts)
 		{
-			VacationsRecap vr = VacationsRecap.Factory.build(person, 2014, Optional.of(contract), dateToTest, true);
+			VacationsRecap vr = VacationsRecap.Factory.build(2014, contract, dateToTest, true);
 			contractVacationRecap.add(vr);
 		}
 		JPAPlugin.closeTx(false);
@@ -219,7 +220,7 @@ public class ResidualTest extends UnitTest {
     	
     	//Ricalcolo tutti i personday
 
-     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user, false);
+    	ConsistencyManager.fixPersonSituation(person.id, 2013, 1, person.user, false);
 
     	JPAPlugin.startTx(false);
 
@@ -245,7 +246,7 @@ public class ResidualTest extends UnitTest {
 		List<VacationsRecap> contractVacationRecap = new ArrayList<VacationsRecap>();
 		for(Contract contract : monthContracts)
 		{
-			VacationsRecap vr = VacationsRecap.Factory.build(person, 2014, Optional.of(contract), dateToTest, true);
+			VacationsRecap vr = VacationsRecap.Factory.build(2014, contract, dateToTest, true);
 			contractVacationRecap.add(vr);
 		}
 		JPAPlugin.closeTx(false);
@@ -281,7 +282,7 @@ public class ResidualTest extends UnitTest {
     	
     	//Ricalcolo tutti i personday
 
-     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user, false);
+    	ConsistencyManager.fixPersonSituation(person.id, 2013, 1, person.user, false);
 
     	JPAPlugin.startTx(false);
 
@@ -307,7 +308,7 @@ public class ResidualTest extends UnitTest {
 		List<VacationsRecap> contractVacationRecap = new ArrayList<VacationsRecap>();
 		for(Contract contract : monthContracts)
 		{
-			VacationsRecap vr = VacationsRecap.Factory.build(person, 2014, Optional.of(contract), dateToTest, true);
+			VacationsRecap vr = VacationsRecap.Factory.build(2014, contract, dateToTest, true);
 			contractVacationRecap.add(vr);
 		}
 		JPAPlugin.closeTx(false);
