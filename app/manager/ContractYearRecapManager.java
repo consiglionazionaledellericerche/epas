@@ -127,7 +127,7 @@ public class ContractYearRecapManager {
 			cyr.contract = contract;
 			
 			//FERIE E PERMESSI
-			VacationsRecap vacationRecap = VacationsRecap.Factory.build(contract.person, yearToCompute, Optional.of(contract), new LocalDate(), true);
+			VacationsRecap vacationRecap = VacationsRecap.Factory.build(yearToCompute, contract, new LocalDate(), true);
 			cyr.vacationLastYearUsed = vacationRecap.vacationDaysLastYearUsed.size();
 			cyr.vacationCurrentYearUsed = vacationRecap.vacationDaysCurrentYearUsed.size();
 			cyr.permissionUsed = vacationRecap.permissionUsed.size();

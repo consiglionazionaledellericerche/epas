@@ -54,7 +54,7 @@ public class VacationsAdmin extends Controller{
 			Logger.info("%s", person.surname);
 			VacationsRecap vr = null;
 			try {
-				vr = VacationsRecap.Factory.build(person, year, Optional.<Contract>absent(), new LocalDate(), true);
+				vr = VacationsRecap.Factory.build(year, person.getCurrentContract(), new LocalDate(), true);
 				vacationsList.add(vr);
 			}
 			catch(IllegalStateException e){
@@ -84,7 +84,7 @@ public class VacationsAdmin extends Controller{
 		
 		VacationsRecap vacationsRecap = null;
     	try { 
-    		vacationsRecap = VacationsRecap.Factory.build(person, anno, Optional.<Contract>absent(), new LocalDate(), true);
+    		vacationsRecap = VacationsRecap.Factory.build(anno, person.getCurrentContract(), new LocalDate(), true);
     	} catch(IllegalStateException e) {
     		flash.error("Impossibile calcolare la situazione ferie. Definire i dati di inizializzazione per %s %s.", person.name, person.surname);
     		renderTemplate("Application/indexAdmin.html");
@@ -115,7 +115,7 @@ public class VacationsAdmin extends Controller{
     	
     	VacationsRecap vacationsRecap = null;
     	try { 
-    		vacationsRecap = VacationsRecap.Factory.build(person, anno, Optional.<Contract>absent(), new LocalDate(), true);
+    		vacationsRecap = VacationsRecap.Factory.build(anno, person.getCurrentContract(), new LocalDate(), true);
     	} catch(IllegalStateException e) {
     		flash.error("Impossibile calcolare la situazione ferie. Definire i dati di inizializzazione per %s %s.", person.name, person.surname);
     		renderTemplate("Application/indexAdmin.html");
@@ -145,7 +145,7 @@ public class VacationsAdmin extends Controller{
 		
     	VacationsRecap vacationsRecap = null;
     	try { 
-    		vacationsRecap = VacationsRecap.Factory.build(person, anno, Optional.<Contract>absent(), new LocalDate(), true);
+    		vacationsRecap = VacationsRecap.Factory.build(anno, person.getCurrentContract(), new LocalDate(), true);
     	} catch(IllegalStateException e) {
     		flash.error("Impossibile calcolare la situazione ferie. Definire i dati di inizializzazione per %s %s.", person.name, person.surname);
     		renderTemplate("Application/indexAdmin.html");
