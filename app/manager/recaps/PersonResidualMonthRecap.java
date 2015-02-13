@@ -6,7 +6,6 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 
 import manager.PersonManager;
-import manager.WorkingTimeTypeManager;
 import models.Absence;
 import models.Competence;
 import models.CompetenceCode;
@@ -349,7 +348,10 @@ public class PersonResidualMonthRecap {
 			monthRecap.numeroRiposiCompensativi = 0;
 			for(Absence abs : riposiCompensativi){
 				//monthRecap.riposiCompensativiMinuti = monthRecap.riposiCompensativiMinuti + monthRecap.person.getWorkingTimeType(abs.personDay.date).getWorkingTimeTypeDayFromDayOfWeek(abs.personDay.date.getDayOfWeek()).workingTime;
-				monthRecap.riposiCompensativiMinuti = monthRecap.riposiCompensativiMinuti + WorkingTimeTypeManager.getWorkingTimeTypeDayFromDayOfWeek(abs.personDay.date.getDayOfWeek(), WorkingTimeTypeDao.getWorkingTimeType(abs.personDay.date, abs.personDay.person)).workingTime;
+				monthRecap.riposiCompensativiMinuti = monthRecap.riposiCompensativiMinuti + 
+						
+						WorkingTimeTypeDao.getWorkingTimeType(abs.personDay.date, abs.personDay.person).workingTimeTypeDays.get(abs.personDay.date.getDayOfWeek()-1).workingTime;
+						
 				monthRecap.numeroRiposiCompensativi++;
 			}
 			monthRecap.riposiCompensativiMinutiPrint = monthRecap.riposiCompensativiMinuti;

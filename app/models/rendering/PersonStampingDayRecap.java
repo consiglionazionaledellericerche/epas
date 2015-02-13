@@ -7,7 +7,6 @@ import java.util.List;
 
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
-import manager.WorkingTimeTypeManager;
 import models.Absence;
 import models.Person;
 import models.PersonDay;
@@ -88,16 +87,14 @@ public class PersonStampingDayRecap {
 		if(WorkingTimeTypeDao.getWorkingTimeType(pd.date, pd.person) != null){
 			//this.wtt = pd.person.getWorkingTimeType(pd.date);
 			this.wtt = WorkingTimeTypeDao.getWorkingTimeType(pd.date, pd.person);
-			//this.wttd = this.wtt != null ? this.wtt.getWorkingTimeTypeDayFromDayOfWeek(pd.date.getDayOfWeek()) : this.wtt.getWorkingTimeTypeDayFromDayOfWeek(pd.date.plusMonths(1).getDayOfWeek());
-			this.wttd = WorkingTimeTypeManager.getWorkingTimeTypeDayFromDayOfWeek(pd.date.getDayOfWeek(), this.wtt);
-			//this.wttd = this.wtt.getWorkingTimeTypeDayFromDayOfWeek(pd.date.getDayOfWeek());
+			
+			this.wttd = this.wtt.workingTimeTypeDays.get(pd.date.getDayOfWeek()-1);
+			
 			this.setWorkingTime(this.wttd.workingTime);
 			this.setMealTicketTime(this.wttd.mealTicketTime);
 			this.setBreakTicketTime(this.wttd.breakTicketTime);
 		
 		}
-		
-		
 		
 		//ConfGeneral conf = ConfGeneral.getConfGeneral();
 		Integer mealTimeStartHour = Integer.parseInt(ConfGeneralManager.getFieldValue("meal_time_start_hour", person.office));
