@@ -2,7 +2,6 @@ package manager;
 
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
-import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +24,6 @@ import play.Logger;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
-import controllers.Persons;
 import dao.ContractDao;
 import dao.PersonDao;
 import dao.PersonDayDao;
@@ -153,7 +151,7 @@ public class ContractManager {
 				continue;
 			}
 
-			PersonUtility.checkPersonDay(contract.person.id, date);
+			ConsistencyManager.checkPersonDay(contract.person.id, date);
 			date = date.plusDays(1);
 
 

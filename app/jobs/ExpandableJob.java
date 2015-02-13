@@ -1,15 +1,17 @@
 package jobs;
 
+import manager.ConsistencyManager;
+import models.User;
+
 import org.apache.commons.mail.EmailException;
+
+import play.Logger;
+import play.jobs.Job;
+import play.jobs.On;
 
 import com.google.common.base.Optional;
 
 import dao.UserDao;
-import models.User;
-import it.cnr.iit.epas.PersonUtility;
-import play.Logger;
-import play.jobs.Job;
-import play.jobs.On;
 
 //@On("0 34 15 ? * *")
 @SuppressWarnings("rawtypes")
@@ -18,14 +20,16 @@ public class ExpandableJob extends Job{
 
 	public void doJob(){
 		Logger.info("Start Job expandable");
-		User userLogged = UserDao.getUserByUsernameAndPassword("admin", Optional.<String>absent());
-//		User userLogged = User.find("byUsername", "admin").first();	
+		
+		User userLogged = UserDao.getUserByUsernameAndPassword("admin", Optional.<String>absent());	
+		
 		try {
-			PersonUtility.checkNoAbsenceNoStamping(-1l, 2014, 1, userLogged);
+			ConsistencyManager.checkNoAbsenceNoStamping(2014, 1, userLogged);
 		}
 		catch(EmailException e){
 			e.printStackTrace();
 		}
+		
 		Logger.info("Concluso Job expandable");	
 	}
 }
