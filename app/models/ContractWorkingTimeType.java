@@ -1,7 +1,5 @@
 package models;
 
-import it.cnr.iit.epas.DateInterval;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;

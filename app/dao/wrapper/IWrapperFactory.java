@@ -2,6 +2,7 @@ package dao.wrapper;
 
 import models.Contract;
 import models.Person;
+import models.WorkingTimeType;
 
 /**
  * @author marco
@@ -9,6 +10,7 @@ import models.Person;
  */
 public interface IWrapperFactory {
 
-	WrapperPerson create(Person person);
-	WrapperContract create(Contract contract);
+	IWrapperPerson create(Person person);
+	IWrapperContract create(Contract contract);
+	IWrapperWorkingTimeType create(WorkingTimeType wtt);
 }
