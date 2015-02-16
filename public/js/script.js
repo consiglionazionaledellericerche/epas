@@ -34,11 +34,13 @@ $(function($){
 		this.find('data-tooltip').tooltip();
 		
 		this.find('.my-modal').on('hidden.bs.modal', function(){
-		    $(this).data('bs.modal', null);
+		    $(this).find('.modal-content').empty();
 		});
 		
 		this.find('.my-modal-large').on('hidden.bs.modal', function(){
-		    $(this).data('bs.modal', null);
+			/*$(this).data('bs.modal', null); vecchio metodo che non svuotava il modale*/
+			/*$(this).removeData('bs.modal'); per bootstrap precedente al 3*/
+			$(this).find('.modal-content').empty();
 		});
 		
 		// $.fn.editable.defaults.mode = 'inline';
