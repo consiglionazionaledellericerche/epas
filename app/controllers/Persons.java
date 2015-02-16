@@ -5,7 +5,6 @@ import it.cnr.iit.epas.DateUtility;
 import it.cnr.iit.epas.PersonUtility;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -18,20 +17,12 @@ import manager.ContractStampProfileManager;
 import manager.ContractWorkingTimeTypeManager;
 import manager.PersonDayManager;
 import manager.PersonManager;
-import models.Competence;
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
-import models.ContractYearRecap;
-import models.InitializationAbsence;
-import models.InitializationTime;
-import models.MealTicket;
 import models.Office;
 import models.Person;
 import models.PersonChildren;
-import models.PersonDay;
-import models.PersonWorkingTimeType;
-import models.PersonYear;
 import models.Qualification;
 import models.User;
 import models.VacationPeriod;
@@ -59,17 +50,14 @@ import com.google.common.collect.Lists;
 import com.google.common.hash.Hashing;
 
 import controllers.Resecure.NoCheck;
-import dao.CompetenceDao;
 import dao.ContractDao;
 import dao.OfficeDao;
-import dao.PersonChildrenDao;
 import dao.PersonDao;
-import dao.PersonDayDao;
 import dao.QualificationDao;
 import dao.UserDao;
 import dao.WorkingTimeTypeDao;
-import dao.wrapper.WrapperFunction;
-import dao.wrapper.WrapperPerson;
+import dao.wrapper.IWrapperPerson;
+import dao.wrapper.function.WrapperModelFunctionFactory;
 
 @With( {Resecure.class, RequestInit.class} )
 public class Persons extends Controller {
@@ -78,8 +66,13 @@ public class Persons extends Controller {
 
 	@Inject
 	static SecurityRules rules;
+	
+	//@Inject
+	//static WrapperPersonFunction wrapperFunction;
+
 	@Inject
-	static WrapperFunction wrapperFunction;
+	static WrapperModelFunctionFactory wrapperFunctionFactory; 
+	
 	@Inject
 	static PersonDao personDao;
 
@@ -89,9 +82,9 @@ public class Persons extends Controller {
 
 		rules.checkIfPermitted();
 
-		List<WrapperPerson> personList = FluentIterable
+		List<IWrapperPerson> personList = FluentIterable
 				.from(personDao.simpleList(name))
-				.transform(wrapperFunction).toList();
+				.transform(wrapperFunctionFactory.person()).toList();
 		render(personList);
 	}
 
@@ -602,7 +595,7 @@ public class Persons extends Controller {
 		rules.checkIfPermitted(contract.person.office);
 
 		//La lista dei tipi orario ammessi per la persona
-		List<WorkingTimeType> wttDefault = WorkingTimeType.getDefaultWorkingTimeTypes();
+		List<WorkingTimeType> wttDefault = WorkingTimeTypeDao.getDefaultWorkingTimeType();
 		List<WorkingTimeType> wttAllowed = contract.person.office.getEnabledWorkingTimeType();
 		List<WorkingTimeType> wttList = new ArrayList<WorkingTimeType>();
 		wttList.addAll(wttDefault);
