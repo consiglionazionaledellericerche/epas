@@ -8,11 +8,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-
-import dao.CompetenceDao;
-import dao.OfficeDao;
 import models.base.BaseModel;
 import play.data.validation.Required;
 import play.data.validation.Unique;

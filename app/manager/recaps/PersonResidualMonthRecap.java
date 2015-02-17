@@ -5,6 +5,7 @@ import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
 
+import manager.ContractManager;
 import manager.PersonManager;
 import models.Absence;
 import models.Competence;
@@ -202,7 +203,7 @@ public class PersonResidualMonthRecap {
 		List<Contract> monthContracts = PersonManager.getMonthContracts(person,month, year);
 		for(Contract contract : monthContracts)
 		{
-			if(contract.isLastInMonth(month, year))
+			if(ContractManager.isLastInMonth(contract, month, year))
 			{
 				PersonResidualYearRecap c = 
 						PersonResidualYearRecap.factory(contract, year, null);
@@ -295,7 +296,8 @@ public class PersonResidualMonthRecap {
 		CompetenceCode s1 = CompetenceCodeDao.getCompetenceCodeByCode("S1");
 		CompetenceCode s2 = CompetenceCodeDao.getCompetenceCodeByCode("S2");
 		CompetenceCode s3 = CompetenceCodeDao.getCompetenceCodeByCode("S3");
-		if(monthRecap.contract.isLastInMonth(monthRecap.mese, monthRecap.anno))	//gli straordinari li assegno solo all'ultimo contratto attivo del mese
+		//gli straordinari li assegno solo all'ultimo contratto attivo del mese
+		if(ContractManager.isLastInMonth(monthRecap.contract, monthRecap.mese, monthRecap.anno))
 		{
 			//straordinari s1
 			Optional<Competence> competenceS1 = CompetenceDao.getCompetence(monthRecap.person, monthRecap.anno, monthRecap.mese, s1);
@@ -455,6 +457,15 @@ public class PersonResidualMonthRecap {
 		else
 			monthRecap.contractDescription = "";
 		
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public boolean isContractLastInMonth(int month, int year) {
+		
+		return ContractManager.isLastInMonth(this.contract, month, year);
 	}
 	
 	

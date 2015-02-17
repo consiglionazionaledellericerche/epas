@@ -14,7 +14,7 @@
         <div class="panel-body">
    		  
    		  <!-- solo last in month -->
- 		  #{if mese.contract.isLastInMonth(psDto.month, psDto.year)}
+ 		  #{if mese.isContractLastInMonth(psDto.month, psDto.year)}
  		    <p>Il numero di giorni lavorativi in sede è di: <strong>${basedWorkingDays}</strong></p> 
 	        <p>Tempo disponibile per straordinari: <strong>${mese.progressivoFinalePositivoMese.toHourTime()}</strong></p>
 	        <p>Il numero di riposi compensativi usati nell'anno è <strong>${numberOfCompensatoryRestUntilToday}</strong></p>
