@@ -11,6 +11,7 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.RoleDao;
 import dao.UserDao;
+import dao.UsersRolesOfficesDao;
 import manager.OfficeManager;
 import models.Office;
 import models.Person;
@@ -99,18 +100,18 @@ public class Administrators extends Controller {
 			Offices.showOffices();
 		}
 		
-		UsersRolesOffices uro = Office.getUro(person.user, office);
-		if(uro == null) {
+		Optional<UsersRolesOffices> uro = UsersRolesOfficesDao.getUsersRolesOfficesByUserAndOffice(person.user, office);
+		if( !uro.isPresent()) {
 			
 			flash.error("La persona non dispone di alcun ruolo amministrativo. Operazione annullata.");
 			Offices.showOffices();
 		}
-		Role role = uro.role;
+		Role role = uro.get().role;
 		
 		//Rimozione ruolo sola lettura
 		if(role.name.equals(Role.PERSONNEL_ADMIN_MINI)) {
 			
-			uro.delete();
+			uro.get().delete();
 			flash.success("Rimozione amministratore avvenuta con successo.");
 			Offices.showOffices();
 		}
@@ -121,7 +122,7 @@ public class Administrators extends Controller {
 			
 			//if( uroOffice.role.id.equals(role.id) && !uroOffice.user.isAdmin()
 			if(uroOffice.role.id.equals(role.id) && UserDao.isAdmin(uroOffice.user)
-					&& !uroOffice.id.equals(uro.id) ) {
+					&& !uroOffice.id.equals(uro.get().id) ) {
 				atLeastAnother = true;
 				break;
 			}
@@ -132,7 +133,7 @@ public class Administrators extends Controller {
 			Offices.showOffices();
 		}
 		
-		uro.delete();
+		uro.get().delete();
 		flash.success("Rimozione amministratore avvenuta con successo.");
 		Offices.showOffices();
 	
