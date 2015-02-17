@@ -22,10 +22,15 @@ import dao.ContractDao;
 public class WrapperWorkingTimeType implements IWrapperWorkingTimeType {
 
 	private final WorkingTimeType value;
+	private final ContractManager contractManager;
+	private final ContractDao contractDao;
 
 	@Inject
-	WrapperWorkingTimeType(@Assisted WorkingTimeType wtt) {
-		value = wtt;
+	WrapperWorkingTimeType(@Assisted WorkingTimeType wtt,
+			ContractManager contractManager, ContractDao contractDao) {
+		this.value = wtt;
+		this.contractManager = contractManager;
+		this.contractDao = contractDao;
 	}
 
 	@Override
@@ -45,14 +50,14 @@ public class WrapperWorkingTimeType implements IWrapperWorkingTimeType {
 
 		LocalDate today = new LocalDate();
 
-		List<Contract> activeContract = ContractManager.getActiveContractInPeriod(today, today);
+		List<Contract> activeContract = contractManager.getActiveContractInPeriod(today, today);
 
 		for(Contract contract : activeContract) {
 
 			if( !contract.person.office.id.equals(officeId))
 				continue;
 
-			ContractWorkingTimeType current = ContractManager.getContractWorkingTimeTypeFromDate(contract, today);
+			ContractWorkingTimeType current = contractManager.getContractWorkingTimeTypeFromDate(contract, today);
 			if(current.workingTimeType.id.equals(value.id))
 				contractList.add(contract);
 		}
@@ -72,7 +77,7 @@ public class WrapperWorkingTimeType implements IWrapperWorkingTimeType {
 
 		LocalDate today = new LocalDate();
 
-		List<Contract> activeContract = ContractManager.getActiveContractInPeriod(today, today);
+		List<Contract> activeContract = contractManager.getActiveContractInPeriod(today, today);
 
 		for(Contract contract : activeContract) {
 
@@ -98,7 +103,7 @@ public class WrapperWorkingTimeType implements IWrapperWorkingTimeType {
 		//solo di contratti particolari di office bisogna controllare 
 		//che this non sia default ma abbia l'associazione con office
 
-		List<Contract> contractList = ContractDao.getContractListByWorkingTimeType(value);
+		List<Contract> contractList = contractDao.getContractListByWorkingTimeType(value);
 
 		return contractList;
 	}
