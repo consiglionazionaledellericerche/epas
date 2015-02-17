@@ -94,8 +94,8 @@ public class OfficeDao {
 	}
 	
 	/**
-	 * 
-	 * @return la lista delle aree presenti in anagrafica (per convenzione sono quelle col campo office = null)
+	 *  La lista di tutte le Aree definite nel db ePAS (Area -> campo office = null)
+	 * @return la lista delle aree presenti in anagrafica
 	 */
 	public static List<Office> getAreas(){
 		QOffice office = QOffice.office1;

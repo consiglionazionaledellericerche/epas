@@ -2,12 +2,14 @@ package dao.wrapper.function;
 
 import javax.inject.Inject;
 
+import models.Office;
 import models.Person;
 import models.WorkingTimeType;
 
 import com.google.common.base.Function;
 
 import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperOffice;
 import dao.wrapper.IWrapperPerson;
 import dao.wrapper.IWrapperWorkingTimeType;
 
@@ -35,6 +37,16 @@ public class WrapperModelFunctionFactory {
 
 			@Override
 			public IWrapperPerson apply(Person input) {
+				return factory.create(input);
+			}
+		};
+	}
+	
+	public Function<Office, IWrapperOffice> office() {
+		return new Function<Office, IWrapperOffice>() {
+
+			@Override
+			public IWrapperOffice apply(Office input) {
 				return factory.create(input);
 			}
 		};
