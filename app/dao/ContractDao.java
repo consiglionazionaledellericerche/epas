@@ -1,15 +1,9 @@
 package dao;
 
-import java.util.List;
-
-import org.joda.time.LocalDate;
-
 import helpers.ModelQuery;
+import it.cnr.iit.epas.DateUtility;
 
-import com.google.common.base.Optional;
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.jpa.JPQLQuery;
-import com.sun.org.apache.xml.internal.utils.SuballocatedByteVector;
+import java.util.List;
 
 import models.Contract;
 import models.ContractStampProfile;
@@ -23,7 +17,12 @@ import models.query.QContractStampProfile;
 import models.query.QContractWorkingTimeType;
 import models.query.QInitializationAbsence;
 import models.query.QInitializationTime;
-import models.query.QWorkingTimeType;
+
+import org.joda.time.LocalDate;
+
+import com.google.common.base.Optional;
+import com.mysema.query.BooleanBuilder;
+import com.mysema.query.jpa.JPQLQuery;
 
 /**
  * 
@@ -85,6 +84,49 @@ public class ContractDao {
 				leftJoin(contract.contractWorkingTimeType,cwtt).where(cwtt.workingTimeType.eq(wtt));
 						
 		return query.list(contract);
+	}
+	
+
+	//PER la delete quindi per adesso permettiamo l'eliminazione solo di contratti particolari di office
+	//bisogna controllare che this non sia default ma abbia l'associazione con office
+	
+	public static List<Contract> getAssociatedContract(WorkingTimeType wtt) {
+
+		List<Contract> contractList = ContractDao.getContractListByWorkingTimeType(wtt);
+//		List<Contract> contractList = Contract.find(
+//				"Select distinct c from Contract c "
+//						+ "left outer join fetch c.contractWorkingTimeType as cwtt "
+//						+ "where cwtt.workingTimeType = ?", this).fetch();
+
+		return contractList;
+	}
+
+	/**
+	 * 
+	 * @return il contratto attivo per quella persona alla date date
+	 */
+	public static Contract getContract(LocalDate date, Person person){
+		
+		for(Contract c : person.contracts)
+		{
+			if(DateUtility.isDateIntoInterval(date, c.getContractDateInterval()))
+				return c;
+		}
+		
+		//FIXME sommani aprile 2014, lui ha due contratti ma nello heap ce ne sono due identici e manca quello nuovo.
+		List<Contract> contractList = ContractDao.getPersonContractList(person);
+		//List<Contract> contractList = Contract.find("Select c from Contract c where c.person = ?", this).fetch();
+		//this.contracts = contractList;
+		for(Contract c : contractList)
+		{
+			if(DateUtility.isDateIntoInterval(date, c.getContractDateInterval()))
+				return c;
+		}
+		//-----------------------
+		
+		
+		return null;
+
 	}
 	
 	/******************************************************************************************************************************************/

@@ -2,246 +2,29 @@
 #{set modalHeader: 'Abilita competenze per ' + person.name + ' ' + person.surname /}
 
 <div class="container-fluid center">
+#{form @Competences.saveNewCompetenceConfiguration()}
+<input type="hidden" name="personId" value="${person.id}"/>
+<table class="table table-condensed table-hover table-form">
 
-  #{form @Competences.saveNewCompetenceConfiguration()}
-    <input type="hidden" name="personId" value="${person.id}"/>
-	<table class="table table-condensed table-hover table-form">
-	<tr>
-		<td>#{if person.isOvertimeInWorkDayAvailable()}
-			Sì <input type="radio" value="true" name="overtimeWorkDay" checked="checked"/> No <input type="radio" value="false" name="overtimeWorkDay"/>
-			#{/if}
-			#{else} 
-			Sì <input type="radio" value="true" name="overtimeWorkDay"/> No <input type="radio" value="false" checked="checked" name="overtimeWorkDay"/>
-			#{/else}
-		</td>
-		<td>Straordinario diurno nei giorni lavorativi
-		</td>
-	</tr>
-	<tr>
-		<td>#{if person.isOvertimeInHolidayOrNightlyInWorkDayAvailable()}
-			Sì <input type="radio" value="true" name="nightlyOvertime" checked="checked"/> No <input type="radio" name="nightlyOvertime" value="false"/>
-			#{/if}
-			#{else} 
-			Sì <input type="radio" name="nightlyOvertime" value="true"/> No <input type="radio" name="nightlyOvertime" value="false" checked="checked"/>
-			#{/else}</td>
-		<td>Straordinario diurno nei giorni festivi o notturno nei giorni lavorativi
-		</td>
-	</tr>
-	<tr>
-		<td>%{	if(person.isOvertimeInNightlyHolidayAvailable()==true){ }%
-			Sì <input type="radio" value="true" name="nightlyHolidayOvertime" checked="checked"/> No <input type="radio" name="nightlyHolidayOvertime" value="false"/>
-			%{ } else {	}% 
-			Sì <input type="radio" name="nightlyHolidayOvertime" value="true"/> No <input type="radio" value="false" name="nightlyHolidayOvertime" checked="checked"/>
-			%{ } }%</td>
-		<td>Straordinario notturno nei giorni festivi
-	
+#{list items:pcr.totalCompetenceCode, as:'comp'}
+<tr>
+	<td>
+	#{if pcr.personActiveCompetence.contains(comp)}
+		Sì <input type="radio" value="true" name="competence.${comp.code}" checked="checked"/> 
+		No <input type="radio" value="false" name="competence.${comp.code}"/>
+	#{/if}
+	#{else}
+		Sì <input type="radio" value="true" name="competence.${comp.code}"/>
+		No <input type="radio" value="false" checked="checked" name="competence.${comp.code}"/>
+	#{/else}
 	</td>
-	</tr>
-	<tr>
-		<td>
-	%{	if(person.isWorkDayReperibilityAvailable()==true){ }%
-			Sì <input type="radio" value="true" name="workdayReperibility" checked="checked"/> No <input type="radio" name="workdayReperibility" value="false"/>
-			%{ } else {	}% 
-			Sì <input type="radio" value="true" name="workdayReperibility"/> No <input type="radio" value="false" name="workdayReperibility" checked="checked"/>
-			%{ } }%
-	</td>
-		<td>Ind.tà rep.tà feriale</td>
-	</tr>
-	<tr>
-		<td>
-	%{	if(person.isHolidayReperibilityAvailable()==true){ }%
-			Sì <input type="radio" name="holidayReperebility" value="true" checked="checked"/> No <input type="radio" name="holidayReperebility" value="false"/>
-			%{ } else {	}% 
-			Sì <input type="radio" name="holidayReperebility" value="true"/> No <input type="radio" name="holidayReperebility" value="false" checked="checked"/>
-			%{ } }%
-	</td>
-		<td>Ind.tà rep.tà festiva</td>
-	</tr>
-	<tr>
-		<td>
-	%{	if(person.isOrdinaryShiftAvailable()==true){ }%
-			Sì <input type="radio" value="true" name="ordinaryShift" checked="checked"/> No <input type="radio" name="ordinaryShift" value="false"/>
-			%{ } else {	}% 
-			Sì <input type="radio" name="ordinaryShift" value="true"/> No <input type="radio" name="ordinaryShift" value="false" checked="checked"/>
-			%{ } }%
-	</td>
-		<td>Turno ordinario</td>
-	</tr>
-	<tr>
-		<td>
-	%{	if(person.isHolidayShiftAvailable()==true){ }%
-			Sì <input type="radio" name="holidayShift"value="true" checked="checked"/> No <input type="radio" name="holidayShift" value="false"/>
-			%{ } else {	}% 
-			Sì <input type="radio" name="holidayShift" value="true"/> No <input type="radio" value="false" name="holidayShift" checked="checked"/>
-			%{ } }%
-	</td>
-		<td>Turno festivo</td>
-	</tr>
-	<tr>
-		<td>
-	%{	if(person.isNightlyShiftAvailable()==true){ }%
-			Sì <input type="radio" name="nightlyShift" value="true" checked="checked"/> No <input type="radio" name="nightlyShift" value="false"/>
-			%{ } else {	}% 
-			Sì <input type="radio" name="nightlyShift" value="true"/> No <input type="radio" name="nightlyShift" value="false" checked="checked"/>
-			%{ } }%
-	</td>
-		<td>Turno notturno</td>
-	</tr>
-	<tr>
-		<td>
-	%{	if(person.isHardshipAllowance()==true){ }%
-			Sì <input type="radio" name="hardship" value="true" checked="checked"/> No <input type="radio" name="hardship" value="false"/>
-			%{ } else {	}% 
-			Sì <input type="radio" name="hardship" value="true"/> No <input type="radio" value="false"  name="hardship" checked="checked"/>
-			%{ } }%
-	</td>
-		<td>Ind.tà sede disagiata</td>
-	</tr>
-	<tr>
-		<td>
-	%{	if(person.isHandleValuesAllowanceAvailable()==true){ }%
-			Sì <input type="radio" name="handleValues" value="true" checked="checked"/> No <input type="radio" name="handleValues" value="false"/>
-			%{ } else {	}% 
-			Sì <input type="radio" name="handleValues" value="true"/> No <input type="radio" name="handleValues" value="false" checked="checked"/>
-			%{ } }%
-	</td>
-		<td>Ind.tà maneggio valori</td>
-	</tr>
-	<tr>
-		<td>
-	%{	if(person.isTaskAllowanceAvailable()==true){ }%
-			Sì <input type="radio" name="task" value="true" checked="checked"/> No <input type="radio" name="task" value="false"/>
-			%{ } else {	}% 
-			Sì <input type="radio" name="task" value="true"/> No <input type="radio" name="task" value="false" checked="checked"/>
-			%{ } }%
-	</td>
-		<td>Ind.ta'mansione L.397/71</td>
-	</tr>
-	<tr>
-		<td>
-	%{	if(person.isTaskAllowanceIncreasedAvailable()==true){ }%
-			Sì <input type="radio" name="taskIncreased" value="true" checked="checked"/> No <input type="radio" name="taskIncreased" value="false"/>
-			%{ } else {	}% 
-			Sì <input type="radio" name="taskIncreased" value="true"/> No <input type="radio" name="taskIncreased" value="false" checked="checked"/>
-			%{ } }%
-	</td>
-		<td>Ind.ta' mansione L.397/71 Magg.</td>
-	</tr>
-	<tr>
-		<td>
-	%{	if(person.isBoatsAllowanceAvailable()==true){ }%
-			Sì <input type="radio" name="boats" value="true" checked="checked"/> No <input type="radio" name="boats" value="false"/>
-			%{ } else {	}% 
-			Sì <input type="radio" name="boats" value="true"/> No <input type="radio" name="boats" value="false" checked="checked"/>
-			%{ } }%
-	</td>
-		<td>Ind.ta' Natanti</td>
-	</tr>
-	<tr>
-		<td>
-	%{	if(person.isIonicRadianceRiskCom1Available()==true){ }%
-			Sì <input type="radio" name="ionicRadiance1" value="true" checked="checked"/> No <input type="radio" name="ionicRadiance1" value="false"/>
-			%{ } else {	}% 
-			Sì <input type="radio" name="ionicRadiance1" value="true"/> No <input type="radio" name="ionicRadiance1" value="false" checked="checked"/>
-			%{ } }%
-	</td>
-		<td>Ind.ta' Risc.Rad.Ion. Com.1</td>
-	</tr>
-	<tr>
-		<td>
-	%{	if(person.isIonicRadianceRiskCom3Available()==true){ }%
-			Sì <input type="radio" name="ionicRadiance3" value="true" checked="checked"/> No <input type="radio" name="ionicRadiance3" value="false"/>
-			%{ } else {	}% 
-			Sì <input type="radio" name="ionicRadiance3" value="true"/> No <input type="radio" name="ionicRadiance3" value="false" checked="checked"/>
-			%{ } }%
-	</td>
-		<td>Ind.ta' Risc.Rad.Ion. Com.3</td>
-	</tr>
-	<tr>
-		<td>
-	%{	if(person.isIonicRadianceRiskCom1AvailableBis()==true){ }%
-			Sì <input type="radio" name="ionicRadiance1bis" value="true" checked="checked"/> No <input type="radio" name="ionicRadiance1bis" value="false"/>
-			%{ } else {	}% 
-			Sì <input type="radio" name="ionicRadiance1bis" value="true"/> No <input type="radio" name="ionicRadiance1bis" value="false" checked="checked"/>
-			%{ } }%
-	</td>
-		<td>Ind.ta'Risc. Rad. Ion. Com.1</td>
-	</tr>
-	<tr>
-		<td>
-	%{	if(person.isIonicRadianceRiskCom3AvailableBis()==true){ }%
-			Sì <input type="radio" name="ionicRadiance3bis" value="true" checked="checked"/> No <input type="radio" name="ionicRadiance3bis" value="false"/>
-			%{ } else {	}% 
-			Sì <input type="radio" name="ionicRadiance3bis" value="true"/> No <input type="radio" name="ionicRadiance3bis" value="false" checked="checked"/>
-			%{ } }%
-	</td>
-		<td>Ind.ta'Risc. Rad. Ion. Com.3</td>
-	</tr>
-	<tr>
-		<td>
-	%{	if(person.isRiskDegreeOneAvailable()==true){ }%
-			Sì <input type="radio" name="riskOne" value="true" checked="checked"/> No <input type="radio" name="riskOne" value="false"/>
-			%{ } else {	}% 
-			Sì <input type="radio" name="riskOne" value="true"/> No <input type="radio" name="riskOne" value="false" checked="checked"/>
-			%{ } }%
-	</td>
-		<td>Ind.ta' Rischio GR.1 DPR.146</td>
-	</tr>
-	<tr>
-		<td>
-	%{	if(person.isRiskDegreeTwoAvailable()==true){ }%
-			Sì <input type="radio" name="riskTwo" value="true" checked="checked"/> No <input type="radio" name="riskTwo" value="false"/>
-			%{ } else {	}% 
-			Sì <input type="radio" name="riskTwo" value="true"/> No <input type="radio" name="riskTwo" value="false" checked="checked"/>
-			%{ } }%
-	</td>
-		<td>Ind.ta' Rischio GR.2 DPR.146</td>
-	</tr>
-	<tr>
-		<td>
-	%{	if(person.isRiskDegreeThreeAvailable()==true){ }%
-			Sì <input type="radio" name="riskThree" value="true" checked="checked"/> No <input type="radio" name="riskThree" value="false"/>
-			%{ } else {	}% 
-			Sì <input type="radio" name="riskThree" value="true"/> No <input type="radio" name="riskThree" value="false" checked="checked"/>
-			%{ } }%
-	</td>
-		<td>Ind.ta' Rischio GR.3 DPR.146</td>
-	</tr>
-	<tr>
-		<td>
-	%{	if(person.isRiskDegreeFourAvailable()==true){ }%
-			Sì <input type="radio" name="riskFour" value="true" checked="checked"/> No <input type="radio" name="riskFour" value="false"/>
-			%{ } else {	}% 
-			Sì <input type="radio" name="riskFour" value="true"/> No <input type="radio" name="riskFour" value="false" checked="checked"/>
-			%{ } }%
-	</td>
-		<td>Ind.ta' Rischio GR.4 DPR.146</td>
-	</tr>
-	<tr>
-		<td>
-	%{	if(person.isRiskDegreeFiveAvailable()==true){ }%
-			Sì <input type="radio" name="riskFive" value="true" checked="checked"/> No <input type="radio" name="riskFive" value="false"/>
-			%{ } else {	}% 
-			Sì <input type="radio" name="riskFive" value="true"/> No <input type="radio" name="riskFive" value="false" checked="checked"/>
-			%{ } }%
-	</td>
-		<td>Ind.ta' Rischio GR.5 DPR.146</td>
-	</tr>
-	<tr>
-		<td>
-	%{	if(person.isRiskDivingAllowanceAvailable()==true){ }%
-			Sì <input type="radio" name="riskDiving" value="true" checked="checked"/> No <input type="radio" name="riskDiving" value="false"/>
-			%{ } else {	}% 
-			Sì <input type="radio" name="riskDiving" value="true"/> No <input type="radio" name="riskDiving" value="false" checked="checked"/>
-			%{ } }%
-	</td>
-		<td>Ind.ta' Rischio Subacquei</td>
-	</tr>	
-  </table>
+	<td>${comp.description}</td>
+</tr>
+#{/list}
 
+</table>
   <div class="buttoncenter">
     <input type="submit" class="btn btn-primary"id="saveCompetence" value="Ok"/>
   </div>
 #{/form}
-
 </div>

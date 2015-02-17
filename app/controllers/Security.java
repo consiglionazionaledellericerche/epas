@@ -19,7 +19,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.hash.Hashing;
 import com.google.common.collect.Lists;
-
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.RoleDao;
@@ -280,7 +279,8 @@ public class Security extends Secure.Security {
 		
 		if (permissions == null) {
 			user.get().refresh();
-			permissions = user.get().getAllPermissions();
+			//permissions = user.get().getAllPermissions();
+			permissions = RoleDao.getAllPermissions(user.get());
 			Cache.set(PERMISSION_CACHE_PREFIX + username, permissions, CACHE_DURATION);
 		}
 		
@@ -290,15 +290,7 @@ public class Security extends Secure.Security {
 	public static List<Permission> getPersonAllPermissions() {
 		return getUserAllPermissions(connected());
 	}
-	
-	public static List<Office> getOfficeAllowed()
-	{	
-		if (!getUser().isPresent()) {
-			return Lists.newArrayList();
-		}
-		return getUser().get().getOfficeAllowed();
-	}
-	
+		
 	public static List<Office> getOfficeAllowed(String profile) {
 		if (!getUser().isPresent()) {
 			return Lists.newArrayList();

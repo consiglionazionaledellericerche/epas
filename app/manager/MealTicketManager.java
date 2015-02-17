@@ -62,18 +62,9 @@ public class MealTicketManager {
 	 * Verifica che nel contratto precedente a contract siano avanzati dei buoni
 	 * pasto assegnati. In tal caso per quei buoni pasto viene modificata la relazione
 	 * col contratto successivo e cambiata la data di attribuzione in modo che ricada 
-	 * all'inizio del nuovo contratto
-	 * @param contract
-	 */
-	
-	/**
-	 * Verifica che nel contratto precedente a contract siano avanzati dei buoni
-	 * pasto assegnati. In tal caso per quei buoni pasto viene modificata la relazione
-	 * col contratto successivo e cambiata la data di attribuzione in modo che ricada 
 	 * all'inizio del nuovo contratto.
-	 * Ritorna il numero di buoni pasto trasferiti fra un contratto e l'altro.
 	 * @param contract
-	 * @return
+	 * @return il numero di buoni pasto trasferiti fra un contratto e l'altro.
 	 */
 	public static int mealTicketsLegacy(Contract contract) {
 		
@@ -108,6 +99,29 @@ public class MealTicketManager {
 		}
 
 		return mealTicketsTransfered;
+	}
+	
+	/**
+	 * Ritorna l'intervallo valido ePAS per il contratto riguardo la gestione dei buoni pasto.
+	 * (scarto la parte precedente a source se definita, e la parte precedente alla data inizio 
+	 * utilizzo per la sede della persona).
+	 * @return null in caso non vi siano giorni coperti dalla gestione dei buoni pasto.
+	 */
+	public static DateInterval getContractMealTicketDateInterval(Contract contract) {
+		
+		DateInterval contractDataBaseInterval = ContractManager.getContractDatabaseDateInterval(contract);
+		
+		LocalDate officeStartDate = MealTicketDao.getMealTicketStartDate(contract.person.office);
+		if(officeStartDate == null)
+			return null;
+		
+		if(officeStartDate.isBefore(contractDataBaseInterval.getBegin()))
+			return contractDataBaseInterval;
+		
+		if(DateUtility.isDateIntoInterval(officeStartDate, contractDataBaseInterval))
+			return new DateInterval(officeStartDate, contractDataBaseInterval.getEnd());
+		
+		return null;
 	}
 
 	/**
@@ -148,7 +162,7 @@ public class MealTicketManager {
 			
 			MealTicketRecap recap =  new MealTicketRecap(contract);
 			
-			recap.mealTicketInterval = contract.getContractMealTicketDateInterval();
+			recap.mealTicketInterval = MealTicketManager.getContractMealTicketDateInterval(contract);
 			
 			if(recap.mealTicketInterval == null)
 				return null;
@@ -230,7 +244,7 @@ public class MealTicketManager {
 		}
 		
 		/**
-		 * Ritorna i blocchi di buoni pasto consegnati alla persona 
+		 * Ritorna i blocchi di buoni pasto consegnati alla persona nell'intero intervallo del recap,
 		 * ordinati per data di scadenza e per codice blocco.
 		 * @return
 		 */

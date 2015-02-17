@@ -5,24 +5,17 @@ import helpers.ModelQuery;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import javax.persistence.Query;
-
+import manager.PersonDayManager.PairStamping;
+import manager.PersonManager;
 import models.Absence;
 import models.CertificatedData;
 import models.Competence;
 import models.CompetenceCode;
 import models.Person;
-import models.PersonChildren;
 import models.PersonDay;
 import models.PersonReperibilityDay;
 import models.PersonShiftDay;
-import models.Stamping;
-import models.User;
-import models.PersonDay.PairStamping;
 import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.ShiftSlot;
 import models.query.QCompetence;
@@ -41,8 +34,6 @@ import dao.CompetenceDao;
 import dao.PersonDayDao;
 import dao.PersonMonthRecapDao;
 import play.Logger;
-import play.db.jpa.JPA;
-import play.db.jpa.JPAPlugin;
 
 
 public class CompetenceUtility {
@@ -118,7 +109,9 @@ public class CompetenceUtility {
 			Person person = personReperibilityDay.personReperibility.person;
 			
 			// record the reperibility day
-			builder.put(person, personReperibilityDay.date.getDayOfMonth(), person.isHoliday(personReperibilityDay.date) ? codFs : codFr);
+			//builder.put(person, personReperibilityDay.date.getDayOfMonth(), person.isHoliday(personReperibilityDay.date) ? codFs : codFr);
+			builder.put(person, personReperibilityDay.date.getDayOfMonth(), PersonManager.isHoliday(person, personReperibilityDay.date) ? codFs : codFr);
+
 		}
 		reperibilityMonth = builder.build();
 		
@@ -494,7 +487,8 @@ public class CompetenceUtility {
 			
 			// if there are no events and it is not an holiday -> error
 			if (!personDay.isPresent() & LocalDate.now().isAfter(personReperibilityDay.date)) {
-				if (!person.isHoliday(personReperibilityDay.date)) {
+				//if (!person.isHoliday(personReperibilityDay.date)) {
+				if(PersonManager.isHoliday(person, personReperibilityDay.date)){
 					Logger.info("La reperibilità di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personReperibilityDay.date);
 				
 					noStampingDays = (inconsistentAbsenceTable.contains(person, thNoStampings)) ? inconsistentAbsenceTable.get(person, thNoStampings) : new ArrayList<String>();
@@ -503,7 +497,8 @@ public class CompetenceUtility {
 				}
 			} else if (LocalDate.now().isAfter(personReperibilityDay.date)) {
 				// check for the stampings in working days
-				if (!person.isHoliday(personReperibilityDay.date) && personDay.get().stampings.isEmpty()) {
+				//if (!person.isHoliday(personReperibilityDay.date) && personDay.get().stampings.isEmpty()) {
+				if(PersonManager.isHoliday(person, personReperibilityDay.date) && personDay.get().stampings.isEmpty()){
 					Logger.info("La reperibilità di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personDay.get().date);
 					
 					noStampingDays = (inconsistentAbsenceTable.contains(person, thNoStampings)) ? inconsistentAbsenceTable.get(person, thNoStampings) : new ArrayList<String>();	
@@ -570,7 +565,7 @@ public class CompetenceUtility {
 			// if there are no events and it is not an holiday -> error
 			if (!personDay.isPresent()) {	
 				
-				if ( !person.isHoliday(personShiftDay.date) && personShiftDay.date.isBefore(LocalDate.now())) {
+				if ( !PersonManager.isHoliday(person,personShiftDay.date) && personShiftDay.date.isBefore(LocalDate.now())) {
 					Logger.info("Il turno di %s %s è incompatibile con la sua mancata timbratura nel giorno %s (personDay == null)", person.name, person.surname, personShiftDay.date);
 					
 					/*noStampingDays = (inconsistentAbsence.contains(personName, thNoStampings)) ? inconsistentAbsence.get(personName, thNoStampings) : new ArrayList<Integer>();
@@ -584,7 +579,7 @@ public class CompetenceUtility {
 			} else {
 
 				// check for the stampings in working days
-				if (!person.isHoliday(personShiftDay.date) & LocalDate.now().isAfter(personShiftDay.date)) {
+				if (!PersonManager.isHoliday(person,personShiftDay.date) & LocalDate.now().isAfter(personShiftDay.date)) {
 					
 					// check no stampings
 					//-----------------------------
@@ -607,7 +602,7 @@ public class CompetenceUtility {
 						//-----------------------------
 						
 						// legge le coppie di timbrature valide 
-						List<PairStamping> pairStampings = PersonDay.PairStamping.getValidPairStamping(personDay.get().stampings);
+						List<PairStamping> pairStampings = PairStamping.getValidPairStamping(personDay.get().stampings);
 						
 						// se c'è una timbratura guardo se è entro il turno
 						if ((personDay.get().stampings.size() == 1) &&
