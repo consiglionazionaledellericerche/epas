@@ -28,17 +28,9 @@ public class QContract extends EntityPathBase<Contract> {
 
     public final DatePath<org.joda.time.LocalDate> beginContract = createDate("beginContract", org.joda.time.LocalDate.class);
 
-    public final SimplePath<it.cnr.iit.epas.DateInterval> contractDatabaseDateInterval = createSimple("contractDatabaseDateInterval", it.cnr.iit.epas.DateInterval.class);
-
-    public final SimplePath<it.cnr.iit.epas.DateInterval> contractDateInterval = createSimple("contractDateInterval", it.cnr.iit.epas.DateInterval.class);
-
     public final SetPath<models.ContractStampProfile, QContractStampProfile> contractStampProfile = this.<models.ContractStampProfile, QContractStampProfile>createSet("contractStampProfile", models.ContractStampProfile.class, QContractStampProfile.class, PathInits.DIRECT2);
 
-    public final ListPath<models.VacationPeriod, QVacationPeriod> contractVacationPeriods = this.<models.VacationPeriod, QVacationPeriod>createList("contractVacationPeriods", models.VacationPeriod.class, QVacationPeriod.class, PathInits.DIRECT2);
-
     public final SetPath<models.ContractWorkingTimeType, QContractWorkingTimeType> contractWorkingTimeType = this.<models.ContractWorkingTimeType, QContractWorkingTimeType>createSet("contractWorkingTimeType", models.ContractWorkingTimeType.class, QContractWorkingTimeType.class, PathInits.DIRECT2);
-
-    public final QVacationPeriod currentVacationPeriod;
 
     public final DatePath<org.joda.time.LocalDate> endContract = createDate("endContract", org.joda.time.LocalDate.class);
 
@@ -58,8 +50,6 @@ public class QContract extends EntityPathBase<Contract> {
     public final BooleanPath persistent = _super.persistent;
 
     public final QPerson person;
-
-    public final BooleanPath properContract = createBoolean("properContract");
 
     public final ListPath<models.ContractYearRecap, QContractYearRecap> recapPeriods = this.<models.ContractYearRecap, QContractYearRecap>createList("recapPeriods", models.ContractYearRecap.class, QContractYearRecap.class, PathInits.DIRECT2);
 
@@ -97,7 +87,6 @@ public class QContract extends EntityPathBase<Contract> {
 
     public QContract(Class<? extends Contract> type, PathMetadata<?> metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.currentVacationPeriod = inits.isInitialized("currentVacationPeriod") ? new QVacationPeriod(forProperty("currentVacationPeriod"), inits.get("currentVacationPeriod")) : null;
         this.person = inits.isInitialized("person") ? new QPerson(forProperty("person"), inits.get("person")) : null;
     }
 
