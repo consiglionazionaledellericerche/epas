@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import manager.PersonDayManager;
+import manager.PersonManager;
 import models.Absence;
 import models.AbsenceType;
 import models.AbsenceTypeGroup;
@@ -33,7 +35,6 @@ import models.TotalOvertime;
 import models.User;
 import models.VacationCode;
 import models.VacationPeriod;
-
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 import models.enumerate.AccumulationBehaviour;
@@ -49,9 +50,12 @@ import play.Play;
 import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 
 import controllers.Administration;
+import dao.OfficeDao;
+import dao.PersonDao;
 
 
 public class FromMysqlToPostgres {
@@ -279,7 +283,10 @@ public class FromMysqlToPostgres {
 	 */
 	public static void checkFixedWorkingTime() {
 		Logger.debug("Controllo delle persone con timbratura fissa");
-		List<Person> activePerson = Person.getActivePersons(new LocalDate(2013,1,1));
+		//List<Person> activePerson = Person.getActivePersons(new LocalDate(2013,1,1));
+		List<Person> activePerson = PersonDao.list(Optional.<String>absent(), 
+				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false,
+				new LocalDate().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), new LocalDate(), true).list();
 
 		for(Person p : activePerson){
 			Logger.debug("Analizzo %s %s", p.name, p.surname);
@@ -287,14 +294,14 @@ public class FromMysqlToPostgres {
 			if(StampProfile.getCurrentStampProfile(p,date).fixedWorkingTime){
 
 				while(date.isBefore(new LocalDate())){
-					if(!p.isHoliday(date)){
+					if(!PersonManager.isHoliday(p, date)){
 
 						PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", p, date).first();
 						if(pd == null){
 							pd = new PersonDay(p, date);
 							pd.create();
 							Logger.debug("Creato person day per %s %s in data %s", p.name, p.surname, date);
-							pd.populatePersonDay();
+							PersonDayManager.populatePersonDay(pd);
 							pd.save();
 							Logger.debug("Persistito il tempo di lavoro = %d per %s %s in data %s", pd.timeAtWork, p.name, p.surname, date);
 						}
@@ -910,7 +917,7 @@ public class FromMysqlToPostgres {
 					Logger.debug("Il progressivo del personday del giorno appena trascorso da cui partire per fare i calcoli è: %s", pd.progressive);
 					PersonDay pdOld = PersonDay.findById(pd.id);
 
-					pdOld.populatePersonDay();	
+					PersonDayManager.populatePersonDay(pdOld);	
 					pdOld.merge();
 
 					Logger.debug("Il progressivo del personday del giorno appena trascorso assegnato a un nuovo personDay è: %s", pdOld.progressive);
@@ -979,7 +986,7 @@ public class FromMysqlToPostgres {
 				 * i calcoli del personDay relativi a questo ultimo giorno (quello con date = data).
 				 */
 				pd.merge();
-				pd.populatePersonDay();
+				PersonDayManager.populatePersonDay(pd);
 
 				Logger.debug("Il progressivo al termine del resultset è: %s e il differenziale è: %s", pd.progressive, pd.difference);
 				Logger.info("Creato %s", pd);
@@ -1630,7 +1637,7 @@ public class FromMysqlToPostgres {
 						Logger.debug("Il progressivo del personday del giorno appena trascorso da cui partire per fare i calcoli è: %s", pd.progressive);
 						PersonDay pdOld = PersonDay.findById(pd.id);
 
-						pdOld.populatePersonDay();	
+						PersonDayManager.populatePersonDay(pdOld);	
 						pdOld.merge();
 
 						Logger.debug("Il progressivo del personday del giorno appena trascorso assegnato a un nuovo personDay è: %s", pdOld.progressive);
@@ -1703,7 +1710,7 @@ public class FromMysqlToPostgres {
 					 * i calcoli del personDay relativi a questo ultimo giorno (quello con date = data).
 					 */
 					pd.merge();
-					pd.populatePersonDay();
+					PersonDayManager.populatePersonDay(pd);
 
 					Logger.debug("Il progressivo al termine del resultset è: %s e il differenziale è: %s", pd.progressive, pd.difference);
 					Logger.info("Creato %s", pd);

@@ -3,7 +3,9 @@ import it.cnr.iit.epas.PersonUtility;
 import java.util.ArrayList;
 import java.util.List;
 
+import manager.ConsistencyManager;
 import manager.ContractYearRecapManager;
+import manager.PersonManager;
 import manager.recaps.PersonResidualMonthRecap;
 import manager.recaps.PersonResidualYearRecap;
 import models.Contract;
@@ -13,6 +15,8 @@ import models.rendering.VacationsRecap;
 import org.apache.commons.mail.EmailException;
 import org.joda.time.LocalDate;
 import org.junit.Test;
+
+import com.google.common.base.Optional;
 
 import play.db.jpa.JPAPlugin;
 import play.test.UnitTest;
@@ -30,12 +34,12 @@ public class ResidualTest extends UnitTest {
     	
     	//Ricalcolo tutti i personday
 
-     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user, false);
+     	ConsistencyManager.fixPersonSituation(person.id, 2013, 1, person.user, false);
 
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
-    	List<Contract> monthContracts = person.getMonthContracts(month, year);
+    	List<Contract> monthContracts = PersonManager.getMonthContracts(person,month, year);
     	for(Contract contract : monthContracts)
 		{
     		ContractYearRecapManager.buildContractYearRecap(contract);
@@ -56,7 +60,7 @@ public class ResidualTest extends UnitTest {
 		List<VacationsRecap> contractVacationRecap = new ArrayList<VacationsRecap>();
 		for(Contract contract : monthContracts)
 		{
-			VacationsRecap vr = new VacationsRecap(person, 2014, contract, dateToTest, true);
+			VacationsRecap vr = VacationsRecap.Factory.build(2014, contract, dateToTest, true);
 			contractVacationRecap.add(vr);
 		}
 		JPAPlugin.closeTx(false);
@@ -92,12 +96,12 @@ public class ResidualTest extends UnitTest {
     	
     	//Ricalcolo tutti i personday
 
-     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user, false);
+    	ConsistencyManager.fixPersonSituation(person.id, 2013, 1, person.user, false);
 
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
-    	List<Contract> monthContracts = person.getMonthContracts(month, year);
+    	List<Contract> monthContracts = PersonManager.getMonthContracts(person, month, year);
     	for(Contract contract : monthContracts)
 		{
     		ContractYearRecapManager.buildContractYearRecap(contract);
@@ -118,7 +122,7 @@ public class ResidualTest extends UnitTest {
 		List<VacationsRecap> contractVacationRecap = new ArrayList<VacationsRecap>();
 		for(Contract contract : monthContracts)
 		{
-			VacationsRecap vr = new VacationsRecap(person, 2014, contract, dateToTest, true);
+			VacationsRecap vr = VacationsRecap.Factory.build(2014, contract, dateToTest, true);
 			contractVacationRecap.add(vr);
 		}
 		JPAPlugin.closeTx(false);
@@ -154,12 +158,12 @@ public class ResidualTest extends UnitTest {
     	
     	//Ricalcolo tutti i personday
 
-     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user, false);
+    	ConsistencyManager.fixPersonSituation(person.id, 2013, 1, person.user, false);
 
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
-    	List<Contract> monthContracts = person.getMonthContracts(month, year);
+    	List<Contract> monthContracts = PersonManager.getMonthContracts(person, month, year);
     	for(Contract contract : monthContracts)
 		{
     		ContractYearRecapManager.buildContractYearRecap(contract);
@@ -180,7 +184,7 @@ public class ResidualTest extends UnitTest {
 		List<VacationsRecap> contractVacationRecap = new ArrayList<VacationsRecap>();
 		for(Contract contract : monthContracts)
 		{
-			VacationsRecap vr = new VacationsRecap(person, 2014, contract, dateToTest, true);
+			VacationsRecap vr = VacationsRecap.Factory.build(2014, contract, dateToTest, true);
 			contractVacationRecap.add(vr);
 		}
 		JPAPlugin.closeTx(false);
@@ -216,12 +220,12 @@ public class ResidualTest extends UnitTest {
     	
     	//Ricalcolo tutti i personday
 
-     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user, false);
+    	ConsistencyManager.fixPersonSituation(person.id, 2013, 1, person.user, false);
 
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
-    	List<Contract> monthContracts = person.getMonthContracts(month, year);
+    	List<Contract> monthContracts = PersonManager.getMonthContracts(person, month, year);
     	for(Contract contract : monthContracts)
 		{
     		ContractYearRecapManager.buildContractYearRecap(contract);
@@ -242,7 +246,7 @@ public class ResidualTest extends UnitTest {
 		List<VacationsRecap> contractVacationRecap = new ArrayList<VacationsRecap>();
 		for(Contract contract : monthContracts)
 		{
-			VacationsRecap vr = new VacationsRecap(person, 2014, contract, dateToTest, true);
+			VacationsRecap vr = VacationsRecap.Factory.build(2014, contract, dateToTest, true);
 			contractVacationRecap.add(vr);
 		}
 		JPAPlugin.closeTx(false);
@@ -278,12 +282,12 @@ public class ResidualTest extends UnitTest {
     	
     	//Ricalcolo tutti i personday
 
-     	PersonUtility.fixPersonSituation(person.id, 2013, 1, person.user, false);
+    	ConsistencyManager.fixPersonSituation(person.id, 2013, 1, person.user, false);
 
     	JPAPlugin.startTx(false);
 
     	//Ricalcolo tutti i contract year recap
-    	List<Contract> monthContracts = person.getMonthContracts(month, year);
+    	List<Contract> monthContracts = PersonManager.getMonthContracts(person,month, year);
     	for(Contract contract : monthContracts)
 		{
     		ContractYearRecapManager.buildContractYearRecap(contract);
@@ -304,7 +308,7 @@ public class ResidualTest extends UnitTest {
 		List<VacationsRecap> contractVacationRecap = new ArrayList<VacationsRecap>();
 		for(Contract contract : monthContracts)
 		{
-			VacationsRecap vr = new VacationsRecap(person, 2014, contract, dateToTest, true);
+			VacationsRecap vr = VacationsRecap.Factory.build(2014, contract, dateToTest, true);
 			contractVacationRecap.add(vr);
 		}
 		JPAPlugin.closeTx(false);

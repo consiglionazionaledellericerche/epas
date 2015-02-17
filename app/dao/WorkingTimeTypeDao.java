@@ -1,11 +1,19 @@
 package dao;
 
+import it.cnr.iit.epas.DateInterval;
+import it.cnr.iit.epas.DateUtility;
+
 import java.util.List;
+
+import org.joda.time.LocalDate;
 
 import helpers.ModelQuery;
 
 import com.mysema.query.jpa.JPQLQuery;
 
+import models.Contract;
+import models.ContractWorkingTimeType;
+import models.Person;
 import models.WorkingTimeType;
 import models.query.QWorkingTimeType;
 
@@ -62,5 +70,26 @@ public class WorkingTimeTypeDao {
 		final JPQLQuery query = ModelQuery.queryFactory().from(wtt)
 				.where(wtt.office.isNull()).orderBy(wtt.description.asc());
 		return query.list(wtt);
+	}
+	
+	
+	/**
+	 * 
+	 * @param date
+	 * @return il tipo di orario di lavoro utilizzato in date
+	 */
+	public static WorkingTimeType getWorkingTimeType(LocalDate date, Person person) {
+		//Contract contract = this.getContract(date);
+		Contract contract = ContractDao.getContract(date, person);
+		if(contract==null)
+			return null;
+		for(ContractWorkingTimeType cwtt : contract.contractWorkingTimeType)
+		{
+			if(DateUtility.isDateIntoInterval(date, new DateInterval(cwtt.beginDate, cwtt.endDate)))
+			{
+				return cwtt.workingTimeType;
+			}
+		}
+		return null;
 	}
 }

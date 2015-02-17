@@ -14,6 +14,7 @@ import models.base.BaseModel;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
+import dao.ContractDao;
 import play.data.validation.Required;
 
 
@@ -70,7 +71,8 @@ public class StampProfile extends BaseModel {
 	 * @return lo stamp profile attivo alla data passata come parametro
 	 */
 	public static StampProfile getCurrentStampProfile(Person person, LocalDate date){
-		Contract c = person.getContract(date);
+		//Contract c = person.getContract(date);
+		Contract c = ContractDao.getContract(date, person);
 		if (c == null)
 			return null;
 		StampProfile sp = StampProfile.find("Select sp from StampProfile sp where sp.contract.person = ? and "

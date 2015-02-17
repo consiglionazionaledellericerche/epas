@@ -5,6 +5,7 @@ package controllers;
 
 import javax.inject.Inject;
 
+import dao.PersonDao;
 import models.Person;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -25,7 +26,8 @@ public class TestDrools extends Controller {
 	}
 	
 	public static void youMustBe(int number) {
-		Person person = Person.findByNumber(number);
+		Person person = PersonDao.getPersonByNumber(number);
+		//Person person = Person.findByNumber(number);
 		notFoundIfNull(person);
 		
 		rules.checkIfPermitted(person.office);

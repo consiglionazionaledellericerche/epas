@@ -13,6 +13,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import manager.OfficeManager;
 import models.base.BaseModel;
 
 import org.hibernate.annotations.Type;
@@ -30,7 +31,6 @@ import controllers.Security;
 import dao.OfficeDao;
 import dao.PersonDao;
 import dao.RoleDao;
-import dao.UserDao;
 import dao.UsersRolesOfficesDao;
 
  
@@ -107,14 +107,8 @@ public class Office extends BaseModel{
      */
     public List<Person> getActivePersons() {
     
-    	//List<Office> officeList = this.getSubOfficeTree();
-    	LocalDate date = new LocalDate();
-    	
-    	
-    	
-    	//List<Person> activePerson = Person.getActivePersonsSpeedyInPeriod(date, date,
-    	//		officeList, false);
-    	
+       	LocalDate date = new LocalDate();
+   
     	List<Person> activePerson = PersonDao.list(Optional.<String>absent(), 
     			Sets.newHashSet(this.getSubOfficeTree()), false, date, date, true).list();
     	    			
@@ -164,9 +158,7 @@ public class Office extends BaseModel{
     		officeToCompute.remove(office);
     		
     		for(Office remoteOffice : office.subOffices) {
-    			
-    			//Office temp = Office.find("byId", remoteOffice.id).first();
-    			//officeToCompute.add(temp);
+
     			officeToCompute.add((Office)remoteOffice);
     		}
     		
@@ -184,7 +176,6 @@ public class Office extends BaseModel{
 	public static List<Office> getAllAreas() {
 		
 		List<Office> areaList = OfficeDao.getAreas();
-		//List<Office> areaList = Office.find("select o from Office o where o.office is null").fetch();
 		return areaList;
 		
 	}
@@ -196,7 +187,7 @@ public class Office extends BaseModel{
 	 */
 	public List<Office> getInstitutes() {
 		
-		if(!this.isArea())
+		if(!OfficeManager.isArea(this))
 			return null;
 		
 		return this.subOffices;
@@ -209,79 +200,10 @@ public class Office extends BaseModel{
 	 */
 	public List<Office> getSeats() {
 		
-		if(!this.isInstitute())
+		if(!OfficeManager.isInstitute(this))
 			return null;
 		
 		return this.subOffices;
-	}
-	
-	/**
-	 * Area livello 0
-	 * @return true se this è una Area, false altrimenti
-	 */
-	public boolean isArea() {
-		
-		if(this.office != null) 
-			return false;
-		
-		return true;
-	}
-    
-	/**
-	 * Istituto livello 1
-	 * @return true se this è un Istituto, false altrimenti
-	 */
-	public boolean isInstitute() {
-		
-    	if(this.isArea())
-    		return false;
-    	
-    	if(this.office.office != null)
-    		return false;
-    	
-    	return true;
-    }
-	
-	/**
-	 * Sede livello 2
-	 * @return
-	 */
-	public boolean isSeat() {
-		
-		if(this.isArea())
-			return false;
-		
-		if(this.isInstitute())
-			return false;
-		
-		return true;
-		
-	}
-	
-	/**
-	 * Ritorna l'istituto padre se this è una sede
-	 * @return 
-	 */
-	public Office getSuperInstitute() {
-		
-		if(!isSeat())
-			return null;
-		return this.office;
-	}
-	
-	/**
-	 * Ritorna l'area padre se thi è un istituto o una sede
-	 * @return
-	 */
-	public Office getSuperArea() {
-		
-		if(isSeat())
-			return this.office.office;
-		
-		if(isInstitute())
-			return this.office;
-		
-		return null;
 	}
 	
 	/***
@@ -300,10 +222,8 @@ public class Office extends BaseModel{
 	public boolean isPrintable() {
 		
 		Role roleAdmin = RoleDao.getRoleByName(Role.PERSONNEL_ADMIN);
-		//Role roleAdmin = Role.find("byName", Role.PERSONNEL_ADMIN).first();
 		Role roleAdminMini = RoleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI);
-		//Role roleAdminMini = Role.find("byName", Role.PERSONNEL_ADMIN_MINI).first();
-		
+				
 		return isRightPermittedOnOfficeTree(roleAdmin) || isRightPermittedOnOfficeTree(roleAdminMini);
 
 	}
@@ -318,7 +238,6 @@ public class Office extends BaseModel{
 			return this.isEditable;
 		
 		Role roleAdmin = RoleDao.getRoleByName(Role.PERSONNEL_ADMIN);
-		//Role roleAdmin = Role.find("byName", Role.PERSONNEL_ADMIN).first();
 		this.isEditable = isRightPermittedOnOfficeTree(roleAdmin);
 		
 		return this.isEditable;
@@ -328,7 +247,6 @@ public class Office extends BaseModel{
 	public List<Person> getPersonnelAdmin() {
 		
 		Role roleAdmin = RoleDao.getRoleByName(Role.PERSONNEL_ADMIN);
-		//Role roleAdmin = Role.find("byName", Role.PERSONNEL_ADMIN).first();
 		List<Person> personList = Lists.newArrayList();
 		for(UsersRolesOffices uro : this.usersRolesOffices) {
 			
@@ -342,7 +260,6 @@ public class Office extends BaseModel{
 	public List<Person> getPersonnelAdminMini() {
 		
 		Role roleAdminMini = RoleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI);
-		//Role roleAdminMini = Role.find("byName", Role.PERSONNEL_ADMIN_MINI).first();
 		List<Person> personList = Lists.newArrayList();
 		for(UsersRolesOffices uro : this.usersRolesOffices) {
 			
@@ -379,117 +296,14 @@ public class Office extends BaseModel{
 	 */
 	private static boolean checkUserRoleOffice(User user, Role role, Office office) {
 		
-		/*
-		UsersRolesOffices uro1 = UsersRolesOffices.find(
-				"Select uro from UsersRolesOffices uro, Role role, Permission permission where ? in uro.role.permissions and uro.office = ? and uro.user = ?",
-				permission, office, user).first();
-		*/
 		Optional<UsersRolesOffices> uro = UsersRolesOfficesDao.getUsersRolesOffices(user, role, office);
-//		UsersRolesOffices uro = UsersRolesOffices.find(
-//				"Select uro from UsersRolesOffices uro where uro.office = ? and uro.user = ? and uro.role = ?",
-//				office, user, role).first();
-		
-		/*
-		for(UsersRolesOffices uro : uroList){
-			for(Permission p : uro.role.permissions) {
-				if(p.id.equals(permission.id))
-					return true;
-			}
-		}
-		return false;*/
 				
 		if(!uro.isPresent())
 			return false;
 		else
-			return true;
-		
+			return true;		
 		
 	}
-	
-	/**
-	 * 
-	 */
-	public void setPermissionAfterCreation() {
-		
-		User userLogged = Security.getUser().get();
-		User admin = UserDao.getUserByUsernameAndPassword("admin", Optional.<String>absent());
-		//User admin = User.find("byUsername", "admin").first();
-		
-		Role roleAdmin = RoleDao.getRoleByName(Role.PERSONNEL_ADMIN);
-		//Role roleAdmin = Role.find("byName", Role.PERSONNEL_ADMIN).first();
-		Role roleAdminMini = RoleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI);
-		//Role roleAdminMini = Role.find("byName", Role.PERSONNEL_ADMIN_MINI).first();
-		
-		Office.setUro(admin, this, roleAdmin);
-		Office.setUro(userLogged, this, roleAdmin);
-		
-		List<Office> officeList = Lists.newArrayList();
-		if(isInstitute()) {
-			officeList.add(getSuperArea());
-		}
-		if(isSeat()) {
-			officeList.add(getSuperArea());
-			officeList.add(getSuperInstitute());
-		}
-			
-		for(Office superOffice : officeList) {
-			
-			//Attribuire roleAdminMini a coloro che hanno roleAdminMini su il super office
-			for(User user : Office.getUserByOfficeAndRole(superOffice, roleAdminMini)) {
-				
-				Office.setUroIfImprove(user, this, roleAdminMini, true);
-			}
-
-
-			//Attribuire roleAdmin a coloro che hanno roleAdmin su area il super office
-			for(User user : Office.getUserByOfficeAndRole(superOffice, roleAdmin)) {
-				
-				Office.setUroIfImprove(user, this, roleAdmin, true);
-			}
-
-		}
-
-	}
-	
-
-	/**
-	 * Setta il ruolo per la tripla <user,office,role>. Se non esiste viene creato.
-	 * Se ifImprove è false il precedente ruolo viene sovrascritto. Se ifImprove è true 
-	 * il ruolo viene sovrascritto solo se assegna maggiori diritti rispetto al precedente. 
-	 * @param user
-	 * @param office
-	 * @param role
-	 * @param ifImprove
-	 * @return true se il ruolo è stato assegnato, false se il ruolo non è stato assegnato (perchè peggiorativo)
-	 */
-	public static Boolean setUroIfImprove(User user, Office office, Role role, boolean ifImprove) {
-		
-		UsersRolesOffices uro = Office.getUro(user, office);
-		
-		if(uro == null || !ifImprove) {
-			
-			Office.setUro(user, office, role);
-			return true;
-		}
-		
-		if(ifImprove) {
-			
-			/* implementare la logica di confronto fra ruolo */
-			Role previous = uro.role;
-			
-			if(previous.name.equals(Role.PERSONNEL_ADMIN_MINI)) {
-				
-				Office.setUro(user, office, role);
-				return true;
-			}
-			
-		}
-		
-		return false;
-		 
-	}
-	
-	
 	
 	/**
 	 * Ritorna il ruolo attualmente attivo per <user,office>
@@ -500,42 +314,10 @@ public class Office extends BaseModel{
 		
 		Optional<UsersRolesOffices> uro = UsersRolesOfficesDao.getUsersRolesOfficesByUserAndOffice(user, office);
 		if(uro.isPresent())
-//		UsersRolesOffices uro = UsersRolesOffices.find("select uro from UsersRolesOffices uro "
-//				+ "where uro.user = ? and uro.office = ? ", user, office).first();
-		
+	
 			return uro.get();
 		else
 			return null;
-	}
-	
-	/**
-	 * 
-	 * @param user
-	 * @param office
-	 * @param role
-	 */
-	public static void setUro(User user, Office office, Role role){
-		
-		UsersRolesOffices newUro = null;
-		Optional<UsersRolesOffices> uro = UsersRolesOfficesDao.getUsersRolesOfficesByUserAndOffice(user, office);
-//		UsersRolesOffices uro = UsersRolesOffices.find("select uro from UsersRolesOffices uro "
-//				+ "where uro.user = ? and uro.office = ? ", user, office).first();
-		
-		if(!uro.isPresent()) {
-			
-			newUro = new UsersRolesOffices();
-			newUro.user = user;
-			newUro.office = office;
-			newUro.role = role;
-			newUro.save();
-		}
-		else{
-			newUro = uro.get();
-			newUro.role = role;
-			newUro.save();
-		}
-		
-		
 	}
 	
 	/**
@@ -570,6 +352,4 @@ public class Office extends BaseModel{
 		return enabledWttList;
 	}
 	
-
-
 }

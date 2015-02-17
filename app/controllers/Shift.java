@@ -2,14 +2,12 @@ package controllers;
 
 import static play.modules.pdf.PDF.renderPDF;
 import helpers.BadRequest;
-import helpers.ModelQuery;
 import it.cnr.iit.epas.CompetenceUtility;
 import it.cnr.iit.epas.JsonShiftPeriodsBinder;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -25,8 +23,6 @@ import models.exports.ShiftPeriod;
 import models.exports.ShiftPeriods;
 
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-
 import org.joda.time.LocalTime;
 
 import play.Logger;
@@ -34,50 +30,19 @@ import play.data.binding.As;
 import play.db.jpa.JPA;
 import play.mvc.Controller;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.TreeBasedTable;
 
-import com.google.common.collect.ImmutableTable.Builder;
-import com.mysema.query.Query;
-import com.mysema.query.jpa.JPQLQuery;
-import com.ning.http.client.Response;
-
-import models.Absence;
-import models.CompetenceCode;
-import models.Person;
-import models.PersonDay;
-import models.PersonDay.PairStamping;
+import dao.AbsenceDao;
+import dao.PersonDao;
+import dao.PersonShiftDayDao;
+import dao.ShiftDao;
 import models.Competence;
-import models.PersonReperibilityDay;
-import models.PersonReperibilityType;
-import models.PersonShift;
-import models.PersonShiftDay;
-import models.PersonShiftShiftType;
-import models.ShiftCancelled;
 import models.ShiftTimeTable;
-import models.ShiftType;
-import models.enumerate.JustifiedTimeAtWork;
 import models.enumerate.ShiftSlot;
-import models.exports.AbsenceReperibilityPeriod;
-import models.exports.AbsenceShiftPeriod;
-import models.exports.ShiftCancelledPeriod;
-import models.exports.ShiftPeriod;
-import models.exports.ShiftPeriods;
-import models.query.QCompetence;
-import models.query.QPerson;
-import models.query.QPersonShift;
-import models.query.QPersonShiftShiftType;
-import models.query.QShiftType;
-
-import helpers.BadRequest;
-
-import play.Logger;
-import play.Play;
-import play.data.binding.As;
-import play.db.jpa.JPA;
-import play.mvc.Controller;
 
 /**
  * 
@@ -108,16 +73,18 @@ public class Shift extends Controller {
 		String type = params.get("type");		
 		Logger.debug("Cerco persone del turno %s", type);
 		
-		ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();
+		//ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();
+		ShiftType shiftType = ShiftDao.getShiftTypeByType(type);
 		if (shiftType == null) {
 			notFound(String.format("ShiftType type = %s doesn't exist", type));			
 		}
 		Logger.debug("Cerco Turnisti di tipo %s", shiftType.type);
 		
 		List<Person> personList = new ArrayList<Person>();
-		personList = JPA.em().createQuery("SELECT p FROM PersonShiftShiftType psst JOIN psst.personShift ps JOIN ps.person p WHERE psst.shiftType.type = :type AND (psst.beginDate IS NULL OR psst.beginDate <= now()) AND (psst.endDate IS NULL OR psst.endDate >= now())")
-				.setParameter("type", type)
-				.getResultList(); 
+//		personList = JPA.em().createQuery("SELECT p FROM PersonShiftShiftType psst JOIN psst.personShift ps JOIN ps.person p WHERE psst.shiftType.type = :type AND (psst.beginDate IS NULL OR psst.beginDate <= now()) AND (psst.endDate IS NULL OR psst.endDate >= now())")
+//				.setParameter("type", type)
+//				.getResultList(); 
+		personList = PersonDao.getPersonForShift(type);
 		
 		Logger.debug("Shift personList called, found %s shift person", personList.size());
 		
@@ -138,7 +105,8 @@ public class Shift extends Controller {
 		
 		// type validation
 		String type = params.get("type");
-		ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();
+		//ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();
+		ShiftType shiftType = ShiftDao.getShiftTypeByType(type);
 		if (shiftType == null) {
 			notFound(String.format("ShiftType type = %s doesn't exist", type));			
 		}
@@ -159,7 +127,8 @@ public class Shift extends Controller {
 		
 		// type validation
 		String type = params.get("type");
-		ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();
+		//ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();
+		ShiftType shiftType = ShiftDao.getShiftTypeByType(type);
 		if (shiftType == null) {
 			notFound(String.format("ShiftType type = %s doesn't exist", type));			
 		}
@@ -172,12 +141,13 @@ public class Shift extends Controller {
 		List<ShiftPeriod> shiftPeriods = new ArrayList<ShiftPeriod>();
 	
 		// get the normal shift  ????????????????????????? 
-		List<PersonShiftDay> personShiftDay = PersonShiftDay.find("" +
-				"SELECT psd FROM PersonShiftDay psd WHERE psd.date BETWEEN ? AND ? " +
-				"AND psd.shiftType = ? " +
-				"ORDER BY psd.shiftSlot, psd.date",
-			//	"ORDER BY psd.shiftTimeTable.startShift, psd.date", 
-				from, to, shiftType).fetch();
+//		List<PersonShiftDay> personShiftDay = PersonShiftDay.find("" +
+//				"SELECT psd FROM PersonShiftDay psd WHERE psd.date BETWEEN ? AND ? " +
+//				"AND psd.shiftType = ? " +
+//				"ORDER BY psd.shiftSlot, psd.date",
+//			//	"ORDER BY psd.shiftTimeTable.startShift, psd.date", 
+//				from, to, shiftType).fetch();
+		List<PersonShiftDay> personShiftDay = ShiftDao.getPersonShiftDaysByPeriodAndType(from, to, shiftType);	
 		Logger.debug("Shift find called from %s to %s, type %s - found %s shift days", from, to, shiftType.type, personShiftDay.size());
 		
 
@@ -199,10 +169,11 @@ public class Shift extends Controller {
 		}
 		
 		// get the cancelled shifts of type shiftType
-		List<ShiftCancelled> shiftCancelled = ShiftCancelled.find("SELECT sc FROM ShiftCancelled sc WHERE sc.date BETWEEN ? AND ? " +"" +
-				"AND sc.type = ? " +
-				"ORDER BY sc.date", 
-				from, to, shiftType).fetch();
+//		List<ShiftCancelled> shiftCancelled = ShiftCancelled.find("SELECT sc FROM ShiftCancelled sc WHERE sc.date BETWEEN ? AND ? " +"" +
+//				"AND sc.type = ? " +
+//				"ORDER BY sc.date", 
+//				from, to, shiftType).fetch();
+		List<ShiftCancelled> shiftCancelled = ShiftDao.getShiftCancelledByPeriodAndType(from, to, shiftType);
 		Logger.debug("ShiftCancelled find called from %s to %s, type %s - found %s shift days", from, to, shiftType.type, shiftCancelled.size());
 	
 		shiftPeriod = null;
@@ -236,7 +207,8 @@ public class Shift extends Controller {
 		}
 		
 		// type validation
-		ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();
+		//ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();
+		ShiftType shiftType = ShiftDao.getShiftTypeByType(type);
 		if (shiftType == null) {
 			throw new IllegalArgumentException(String.format("ShiftType type = %s doesn't exist", type));			
 		}
@@ -269,14 +241,16 @@ public class Shift extends Controller {
 				// normal shift
 				if (!shiftPeriod.cancelled) {
 					//La persona deve essere tra i turnisti 
-					PersonShift personShift = PersonShift.find("SELECT ps FROM PersonShift ps WHERE ps.person = ?", shiftPeriod.person).first();
+					//PersonShift personShift = PersonShift.find("SELECT ps FROM PersonShift ps WHERE ps.person = ?", shiftPeriod.person).first();
+					PersonShift personShift = PersonShiftDayDao.getPersonShiftByPerson(shiftPeriod.person);
 					if (personShift == null) {
 						throw new IllegalArgumentException(
 							String.format("Person %s is not a shift person", shiftPeriod.person));
 					}
 					
 					//Se la persona è assente in questo giorno non può essere in turno (almeno che non sia cancellato)
-					if (Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date = ? and pd.person = ?", day, shiftPeriod.person).fetch().size() > 0) {
+					//if (Absence.find("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date = ? and pd.person = ?", day, shiftPeriod.person).fetch().size() > 0) {
+					if(AbsenceDao.getAbsencesInPeriod(Optional.fromNullable(shiftPeriod.person), day, Optional.<LocalDate>absent(), false).size() > 0){
 						String msg = String.format("Assenza incompatibile di %s %s per il giorno %s", shiftPeriod.person.name, shiftPeriod.person.surname, day);
 						
 						BadRequest.badRequest(msg);
@@ -290,8 +264,8 @@ public class Shift extends Controller {
 					
 					//String[] hmsStart = shiftPeriod.startShift.getStartShift().split(":");
 					
-					PersonShiftDay personShiftDay = 
-						PersonShiftDay.find("shiftType = ? AND date = ? AND shiftSlot = ?", shiftType, day, shiftPeriod.shiftSlot).first();
+					PersonShiftDay personShiftDay = PersonShiftDayDao.getPersonShiftDayByTypeDateAndSlot(shiftType, day, shiftPeriod.shiftSlot);
+					//	PersonShiftDay.find("shiftType = ? AND date = ? AND shiftSlot = ?", shiftType, day, shiftPeriod.shiftSlot).first();
 					if (personShiftDay == null) {
 						personShiftDay = new PersonShiftDay();
 						Logger.debug("Creo un nuovo personShiftDay per person = %s, day = %s, shiftType = %s", shiftPeriod.person.name, day, shiftType.description);
@@ -313,8 +287,8 @@ public class Shift extends Controller {
 				// cancelled shift
 					// Se non c'è già il turno cancellato lo creo
 					Logger.debug("Cerco turno cancellato shiftType = %s AND date = %s", shiftType.type, day);
-					ShiftCancelled shiftCancelled = 
-							ShiftCancelled.find("type = ? AND date = ?", shiftType, day).first();
+					ShiftCancelled shiftCancelled = ShiftDao.getShiftCancelled(day, shiftType);
+					//		ShiftCancelled.find("type = ? AND date = ?", shiftType, day).first();
 					Logger.debug("shiftCancelled = %s", shiftCancelled);
 					
 					if (shiftCancelled == null) {
@@ -357,10 +331,11 @@ public class Shift extends Controller {
 			LocalDate dateToRemove = new LocalDate(year, month, dayToRemove);
 			Logger.trace("Eseguo la cancellazione del giorno %s", dateToRemove);
 			
-			int cancelled = JPA.em().createQuery("DELETE FROM ShiftCancelled WHERE type = :shiftType AND date = :dateToRemove)")
-					.setParameter("shiftType", shiftType)
-					.setParameter("dateToRemove", dateToRemove)
-					.executeUpdate();
+//			int cancelled = JPA.em().createQuery("DELETE FROM ShiftCancelled WHERE type = :shiftType AND date = :dateToRemove)")
+//					.setParameter("shiftType", shiftType)
+//					.setParameter("dateToRemove", dateToRemove)
+//					.executeUpdate();
+			long cancelled = ShiftDao.deleteShiftCancelled(shiftType, day);
 			if (cancelled == 1) {
 				Logger.info("Rimosso turno cancellato di tipo %s del giorno %s", shiftType.description, dateToRemove);
 			}
@@ -381,8 +356,8 @@ public class Shift extends Controller {
 		Table<Person, String, List<String>> inconsistentAbsence = TreeBasedTable.<Person, String, List<String>>create();
 	
 		// seleziona le persone nel turno 'shiftType' da inizio a fine mese
-		List<PersonShiftDay> personShiftDays = 
-			PersonShiftDay.find("SELECT psd FROM PersonShiftDay psd WHERE date BETWEEN ? AND ? AND psd.shiftType = ? ORDER by date", startDate, endDate, shiftType).fetch();
+		List<PersonShiftDay> personShiftDays = PersonShiftDayDao.getPersonShiftDayByTypeAndPeriod(startDate, endDate, shiftType);
+			//PersonShiftDay.find("SELECT psd FROM PersonShiftDay psd WHERE date BETWEEN ? AND ? AND psd.shiftType = ? ORDER by date", startDate, endDate, shiftType).fetch();
 	
 		inconsistentAbsence = CompetenceUtility.getShiftInconsistencyTimestampTable(personShiftDays);
 
@@ -436,14 +411,15 @@ public class Shift extends Controller {
 		{	
 			Logger.debug("Elabora type=%s", type);
 			
-			ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();	
+			//ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();
+			ShiftType shiftType = ShiftDao.getShiftTypeByType(type);
 			if (shiftType == null) {
 				notFound(String.format("ShiftType = %s doesn't exist", shiftType));			
 			}
 
 			// seleziona i giorni di turno di tutte le persone associate al turno 'shiftType' da inizio a fine mese
-			List<PersonShiftDay> personShiftDays = 
-				PersonShiftDay.find("SELECT psd FROM PersonShiftDay psd WHERE date BETWEEN ? AND ? AND psd.shiftType = ? ORDER by date", firstOfMonth, lastOfMonth, shiftType).fetch();
+			List<PersonShiftDay> personShiftDays = PersonShiftDayDao.getPersonShiftDayByTypeAndPeriod(firstOfMonth, firstOfMonth, shiftType);
+				//PersonShiftDay.find("SELECT psd FROM PersonShiftDay psd WHERE date BETWEEN ? AND ? AND psd.shiftType = ? ORDER by date", firstOfMonth, lastOfMonth, shiftType).fetch();
 			
 			// conta e memorizza i giorni di turno per ogni persona
 			singleShiftSumDays = CompetenceUtility.getShiftCompetences(personShiftDays);
@@ -585,14 +561,15 @@ public class Shift extends Controller {
 		for (String type: shiftTypes)
 		{	
 			Logger.debug("controlla type=%s", type);
-			ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();	
+			//ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();
+			ShiftType shiftType = ShiftDao.getShiftTypeByType(type);
 			if (shiftType == null) {
 				notFound(String.format("ShiftType = %s doesn't exist", shiftType));			
 			}
 						
 			// legge i giorni di turno del tipo 'type' da inizio a fine mese 
-			List<PersonShiftDay> personShiftDays = 
-				PersonShiftDay.find("SELECT prd FROM PersonShiftDay prd WHERE date BETWEEN ? AND ? AND prd.shiftType = ? ORDER by date", firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue(), shiftType).fetch();
+			List<PersonShiftDay> personShiftDays = PersonShiftDayDao.getPersonShiftDayByTypeAndPeriod(firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue(), shiftType);
+				//PersonShiftDay.find("SELECT prd FROM PersonShiftDay prd WHERE date BETWEEN ? AND ? AND prd.shiftType = ? ORDER by date", firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue(), shiftType).fetch();
 				//Logger.debug("Trovati %d turni di tipo %s",personShiftDays.size(), type);
 			
 			for (PersonShiftDay personShiftDay : personShiftDays) {
@@ -605,8 +582,8 @@ public class Shift extends Controller {
 			
 			//legge i turni cancellati e li registra nella tabella mensile
 			Logger.debug("Cerco i turni cancellati di tipo '%s' e li inserisco nella tabella mensile", type);
-			List<ShiftCancelled> shiftsCancelled = 
-					ShiftCancelled.find("SELECT sc FROM ShiftCancelled sc WHERE date BETWEEN ? AND ? AND sc.type = ? ORDER by date", firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue(), shiftType).fetch();
+			List<ShiftCancelled> shiftsCancelled = ShiftDao.getShiftCancelledByPeriodAndType(firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue(), shiftType);
+					//ShiftCancelled.find("SELECT sc FROM ShiftCancelled sc WHERE date BETWEEN ? AND ? AND sc.type = ? ORDER by date", firstOfMonth, firstOfMonth.dayOfMonth().withMaximumValue(), shiftType).fetch();
 			SD shift = new SD (null, null);
 			for (ShiftCancelled sc: shiftsCancelled) {
 				shiftCalendar.put(type, sc.date.getDayOfMonth(), shift);
@@ -669,7 +646,8 @@ public class Shift extends Controller {
 		LocalDate from = new LocalDate(Integer.parseInt(params.get("yearFrom")), Integer.parseInt(params.get("monthFrom")), Integer.parseInt(params.get("dayFrom")));
 		LocalDate to = new LocalDate(Integer.parseInt(params.get("yearTo")), Integer.parseInt(params.get("monthTo")), Integer.parseInt(params.get("dayTo")));
 		
-		ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();
+		//ShiftType shiftType = ShiftType.find("SELECT st FROM ShiftType st WHERE st.type = ?", type).first();
+		ShiftType shiftType = ShiftDao.getShiftTypeByType(type);
 		if (shiftType == null) {
 			notFound(String.format("ShiftType type = %s doesn't exist", type));			
 		}
@@ -695,12 +673,12 @@ public class Shift extends Controller {
 		}
 				
 		AbsenceShiftPeriod absenceShiftPeriod = null;
-		
-		absencePersonShiftDays = JPA.em().createQuery("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date BETWEEN :from AND :to AND pd.person IN (:personList) ORDER BY pd.person.id, pd.date")
-			.setParameter("from", from)
-			.setParameter("to", to)
-			.setParameter("personList", personList)
-			.getResultList();
+		absencePersonShiftDays = AbsenceDao.getAbsenceForPersonListInPeriod(personList, from, to);
+//		absencePersonShiftDays = JPA.em().createQuery("SELECT a FROM Absence a JOIN a.personDay pd WHERE pd.date BETWEEN :from AND :to AND pd.person IN (:personList) ORDER BY pd.person.id, pd.date")
+//			.setParameter("from", from)
+//			.setParameter("to", to)
+//			.setParameter("personList", personList)
+//			.getResultList();
 		
 		
 		Logger.debug("Trovati %s giorni di assenza", absencePersonShiftDays.size());

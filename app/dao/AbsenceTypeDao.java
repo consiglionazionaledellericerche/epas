@@ -2,27 +2,20 @@ package dao;
 
 import helpers.ModelQuery;
 import helpers.ModelQuery.SimpleResults;
-import it.cnr.iit.epas.DateUtility;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import models.Absence;
 import models.AbsenceType;
 import models.Person;
-import models.PersonDay;
 import models.query.QAbsence;
 import models.query.QAbsenceType;
 
 import org.bouncycastle.util.Strings;
 import org.joda.time.LocalDate;
-import org.joda.time.YearMonth;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.inject.Singleton;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 import com.mysema.query.types.Projections;
@@ -150,22 +143,16 @@ public class AbsenceTypeDao {
 	 * @param month
 	 * @return
 	 */
-	public static Map<AbsenceType,Integer> getAbsenceTypeInPeriod(Person person, LocalDate fromDate, Optional<LocalDate> toDate){
+	public static Map<AbsenceType,Long> getAbsenceTypeInPeriod(Person person, LocalDate fromDate, Optional<LocalDate> toDate){
 		Preconditions.checkNotNull(person);
 		Preconditions.checkNotNull(fromDate);
-		
-		List<Absence> absences = AbsenceDao.findByPersonAndDate(person, fromDate,toDate).list();	
-		Map<AbsenceType,Integer> absenceCodeMap = new HashMap<AbsenceType, Integer>();
 
-		for (Absence absence : absences){
-			if(absenceCodeMap.containsKey(absence.absenceType)){
-				absenceCodeMap.put(absence.absenceType, absenceCodeMap.get(absence.absenceType)+1);
-			}
-			else{
-				absenceCodeMap.put(absence.absenceType,1);
-			}
-		}
-		return absenceCodeMap;	
+		return ModelQuery.queryFactory().from(absenceType)
+				.join(absenceType.absences, absence).where(absence.personDay.person.eq(person).and(
+						absence.personDay.date.between(fromDate, toDate.or(fromDate))))
+						.groupBy(absenceType)
+						.orderBy(absence.count().desc())
+						.map(absenceType, absence.count());
 	}
 
 	/**

@@ -6,22 +6,28 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.ArrayList;
 import java.util.List;
 
+import manager.ConfYearManager;
+import manager.ContractManager;
 import models.Absence;
 import models.AbsenceType;
-import models.ConfYear;
 import models.Contract;
 import models.ContractYearRecap;
 import models.Person;
 import models.VacationPeriod;
+import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.JustifiedTimeAtWork;
 
 import org.joda.time.LocalDate;
 
+import play.Logger;
+
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Verify;
 
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
-import play.Logger;
+
 
 /**
  * @author alessandro
@@ -31,7 +37,7 @@ public class VacationsRecap {
 	
 	public Person person;
 	public int year;
-	public Contract activeContract = null;
+	public Contract contract = null;
 	public DateInterval activeContractInterval = null;
 	
 	public List<VacationPeriod>vacationPeriodList = null;	//lista vacation period del current contract
@@ -55,307 +61,318 @@ public class VacationsRecap {
   
 	public boolean isExpireBeforeEndYear = false;	/* true se il contratto termina prima della fine dell'anno richiesto */
 	public boolean isActiveAfterBeginYear = false;	/* true se il contratto inizia dopo l'inizio dell'anno richiesto */
-	 
+
 	
-	/**
-	 * La situazione sui residui e maturazioni di ferie e permessi nell'anno. 
-	 * @param person
-	 * @param year l'anno in considerazione
-	 * @param actualDate la data specifica dell'anno attuale in cui si desidera fotografare la situazione in termini di ferie e permessi maturati (tipicamente oggi)
-	 * @param considerExpireLastYear impostare false se non si vuole considerare il limite di scadenza per l'utilizzo
-	 * delle ferie dell'anno precedente (utile per assegnare il codice 37)
-	 * @throws IllegalStateException nel caso in cui la persona non abbia sufficienti riepiloghi annuali dovuti dalla mancanza di dati di inizializzazione
-	 * 
-	 */
-	public VacationsRecap(Person person, int year, Contract contract, LocalDate actualDate, boolean considerExpireLastYear) throws IllegalStateException
-	{
+	public static class Factory {
 		
-		this.person = person;
-		this.year = year;
-		
-		//active contract
-		this.activeContract = contract;
-		if(activeContract == null)
-			return;
-		
-		this.activeContractInterval = this.activeContract.getContractDateInterval();
-		
-		//vacation periods list
-		this.vacationPeriodList = this.activeContract.getContractVacationPeriods();
-		if(vacationPeriodList == null)
-			return;
-		
-		LocalDate today = LocalDate.now();
-		LocalDate startLastYear = new LocalDate(this.year-1,1,1);	
-		LocalDate endLastYear = new LocalDate(this.year-1,12,31);	
-		LocalDate startYear = new LocalDate(this.year,1,1);
-		LocalDate endYear = new LocalDate(this.year,12,31);
-		DateInterval lastYearInter = new DateInterval(startLastYear, endLastYear);
-		DateInterval yearInter = new DateInterval(startYear, endYear);
-		DateInterval yearActualDateInter = new DateInterval(startYear, actualDate);
-
-		AbsenceType ab32  = AbsenceType.getAbsenceTypeByCode("32");
-		AbsenceType ab31  = AbsenceType.getAbsenceTypeByCode("31");
-		AbsenceType ab37  = AbsenceType.getAbsenceTypeByCode("37");
-		AbsenceType ab94  = AbsenceType.getAbsenceTypeByCode("94");
-
-		//Expire Last Year
-		
-		//ConfYear conf = ConfYear.getConfYear(year);
-		Integer monthExpiryVacationPastYear = Integer.parseInt(ConfYear.getFieldValue("month_expiry_vacation_past_year", year, person.office));
-		Integer dayExpiryVacationPastYear = Integer.parseInt(ConfYear.getFieldValue("day_expiry_vacation_past_year", year, person.office));
-		LocalDate expireVacation = actualDate.withMonthOfYear(monthExpiryVacationPastYear).withDayOfMonth(dayExpiryVacationPastYear);
-		
-		this.isExpireLastYear = false;
-		
-		if( this.year < today.getYear() ) {		//query anni passati 
-			this.isExpireLastYear = true;
-		}
-		else if( this.year == today.getYear() && actualDate.isAfter(expireVacation)) {	//query anno attuale
-			this.isExpireLastYear = true;
-		}
-		
-		//Expire Before End Of Year / Active After Begin Of Year
-		
-		if(this.activeContractInterval.getEnd().isBefore(endYear))
-			this.isExpireBeforeEndYear = true;
-		if(this.activeContractInterval.getBegin().isAfter(startYear))
-			this.isActiveAfterBeginYear = true;
-		
-		//(1) Calcolo ferie usate dell'anno passato ---------------------------------------------------------------------------------------------------------------------------------
-		List<Absence> abs32Last = null;
-		
-		List<Absence> abs31Last = null;
-		List<Absence> abs37Last = null;
-		
-		
-		int vacationDaysPastYearUsedNew = 0;
-		if(activeContract.sourceDate!=null && activeContract.sourceDate.getYear()==year)
-		{
-			//Popolare da source data
-			vacationDaysPastYearUsedNew = vacationDaysPastYearUsedNew + activeContract.sourceVacationLastYearUsed;
-			DateInterval yearInterSource = new DateInterval(activeContract.sourceDate.plusDays(1), endYear);
-			abs31Last = getVacationDays(yearInterSource, activeContract, ab31);										
-			abs37Last = getVacationDays(yearInterSource, activeContract, ab37);		
-			vacationDaysPastYearUsedNew = vacationDaysPastYearUsedNew + abs31Last.size() + abs37Last.size();
-		}
-		else if(activeContract.beginContract.getYear()==this.year)
-		{
-			//Non esiste anno passato nel presente contratto
-			vacationDaysPastYearUsedNew = 0;
-			abs31Last  = new ArrayList<Absence>();
-			abs37Last  = new ArrayList<Absence>();
-		}
-		else if(this.year > LocalDate.now().getYear()) 
-		{
-			//Caso in cui voglio inserire ferie per l'anno prossimo
-			VacationsRecap vrPastYear = new VacationsRecap(this.person, this.year-1, this.activeContract, endLastYear, true);
-
-			abs31Last = getVacationDays(yearInter, activeContract, ab31);						
-			abs37Last = getVacationDays(yearInter, activeContract, ab37);		
-			vacationDaysPastYearUsedNew = vrPastYear.vacationDaysCurrentYearUsed.size() + abs31Last.size() + abs37Last.size();
-		}
-		else
-		{
-			//Popolare da contractYearRecap
-			ContractYearRecap recapPastYear = contract.getContractYearRecap(year-1);
-			if(recapPastYear==null)
-				throw new IllegalStateException("Mancano i riepiloghi annuali.");
-			vacationDaysPastYearUsedNew = recapPastYear.vacationCurrentYearUsed;
-			abs31Last = getVacationDays(yearInter, activeContract, ab31);						
-			abs37Last = getVacationDays(yearInter, activeContract, ab37);						
-			vacationDaysPastYearUsedNew = vacationDaysPastYearUsedNew + abs31Last.size() + abs37Last.size();
-		}
-		//costruisco la lista delle ferie per stampare le date (prendo tutto ciò che trovo nel db e poi riempo con null fino alla dimensione calcolata)
-		abs32Last  = getVacationDays(lastYearInter, activeContract, ab32);
-
-		this.vacationDaysLastYearUsed.addAll(abs32Last);
-		this.vacationDaysLastYearUsed.addAll(abs31Last);
-		this.vacationDaysLastYearUsed.addAll(abs37Last);
-		while(this.vacationDaysLastYearUsed.size()<vacationDaysPastYearUsedNew)
-		{
-			Logger.debug("Inserita assenza nulla");
-			Absence nullAbsence = null;
-			this.vacationDaysLastYearUsed.add(nullAbsence);
-		}
-		
-		
-		//(2) Calcolo ferie usate dell'anno corrente ---------------------------------------------------------------------------------------------------------------------------------
-		List<Absence> abs32Current  = null;
-		
-		int vacationDaysCurrentYearUsedNew = 0;
-		if(activeContract.sourceDate!=null && activeContract.sourceDate.getYear()==year)
-		{
-			vacationDaysCurrentYearUsedNew = vacationDaysCurrentYearUsedNew + activeContract.sourceVacationCurrentYearUsed;
-			DateInterval yearInterSource = new DateInterval(activeContract.sourceDate.plusDays(1), endYear);
-			abs32Current = getVacationDays(yearInterSource, activeContract, ab32);
-			vacationDaysCurrentYearUsedNew = vacationDaysCurrentYearUsedNew + abs32Current.size();
-		}
-		else
-		{
-			abs32Current = getVacationDays(yearInter, activeContract, ab32);
-			vacationDaysCurrentYearUsedNew = vacationDaysCurrentYearUsedNew + abs32Current.size();
-		}
-		this.vacationDaysCurrentYearUsed.addAll(abs32Current);
-		while(this.vacationDaysCurrentYearUsed.size()<vacationDaysCurrentYearUsedNew)
-		{
-			Logger.debug("Inserita assenza nulla");
-			Absence nullAbsence = null;
-			this.vacationDaysCurrentYearUsed.add(nullAbsence);
-		}
-		
-		//(3) Calcolo permessi usati dell'anno corrente
-		List<Absence> abs94Current = null;
-		int permissionCurrentYearUsedNew = 0;
-		
-		if(activeContract.sourceDate!=null && activeContract.sourceDate.getYear()==year)
-		{
-			permissionCurrentYearUsedNew = permissionCurrentYearUsedNew + activeContract.sourcePermissionUsed;
-			DateInterval yearInterSource = new DateInterval(activeContract.sourceDate.plusDays(1), endYear);
-			abs94Current = getVacationDays(yearInterSource, activeContract, ab94);
-			permissionCurrentYearUsedNew = permissionCurrentYearUsedNew + abs94Current.size();
-		}
-		else
-		{
-			abs94Current = getVacationDays(yearInter, activeContract, ab94);
-			permissionCurrentYearUsedNew = permissionCurrentYearUsedNew + abs94Current.size();
-		}
-		this.permissionUsed.addAll(abs94Current);
-		while(this.permissionUsed.size()<permissionCurrentYearUsedNew)
-		{
-			Logger.debug("Inserita assenza nulla");
-			Absence nullAbsence = null;
-			this.permissionUsed.add(nullAbsence);
-		}
-		
-
-		//(4) Calcolo ferie e permessi maturati per l'anno passato e l'anno corrente (sono indipendenti dal database)
-		this.vacationDaysLastYearAccrued = getVacationAccruedYear(lastYearInter, this.activeContract, this.vacationPeriodList);
-		if(endYear.isAfter(actualDate))
-		{
-			//se la query e' per l'anno corrente considero fino a actualDate
-			this.permissionCurrentYearAccrued = getPermissionAccruedYear( yearActualDateInter, this.activeContract);
-			this.vacationDaysCurrentYearAccrued = getVacationAccruedYear( yearActualDateInter, this.activeContract, this.vacationPeriodList);
-		}
-		else
-		{
-			//se la query e' per gli anni passati considero fino a endYear
-			this.permissionCurrentYearAccrued = getPermissionAccruedYear(yearInter, this.activeContract);
-			this.vacationDaysCurrentYearAccrued = getVacationAccruedYear(yearInter, this.activeContract, this.vacationPeriodList);
-		}
-		
-		//(5)Calcolo ferie e permessi non ancora utilizzati per l'anno corrente e per l'anno precedente (sono funzione di quanto calcolato precedentemente)
-		//Anno passato
-		if(actualDate.isBefore(expireVacation) || !considerExpireLastYear)
-			this.vacationDaysLastYearNotYetUsed = this.vacationDaysLastYearAccrued - this.vacationDaysLastYearUsed.size();
-		else
-			this.vacationDaysLastYearNotYetUsed = 0;
-		//Anno corrente
-		this.permissionCurrentYearTotal = getPermissionAccruedYear(yearInter, this.activeContract);
-		this.vacationDaysCurrentYearTotal = getVacationAccruedYear(yearInter, this.activeContract, this.vacationPeriodList);
-		if(contract.expireContract != null) 
-		{
-			//per i detereminati considero le maturate (perchè potrebbero decidere di cambiare contratto)
-			this.vacationDaysCurrentYearNotYetUsed = this.vacationDaysCurrentYearAccrued - this.vacationDaysCurrentYearUsed.size();
-			this.persmissionNotYetUsed = this.permissionCurrentYearAccrued - this.permissionUsed.size();
-		}
-		else 
-		{
-			//per gli indeterminati le considero tutte (è più improbabile....)
-			this.vacationDaysCurrentYearNotYetUsed = this.vacationDaysCurrentYearTotal - this.vacationDaysCurrentYearUsed.size();
-			this.persmissionNotYetUsed = this.permissionCurrentYearTotal - this.permissionUsed.size();
-		}
-		
-	}
-	
-	
-	/**
-	 * 
-	 * @param yearInterval
-	 * @param contract
-	 * @param vacationPeriodList
-	 * @return il numero di giorni di ferie maturati nell'anno year 
-	 * 	calcolati a partire dai piani ferie associati al contratto corrente
-	 */
-	public int getVacationAccruedYear(DateInterval yearInterval, Contract contract, List<VacationPeriod>vacationPeriodList){
-		
-		int vacationDays = 0;
-		/* TODO: non sono soltanto i codici 24 24s e 25 a dover concorrere alla riduzione del numero di giorni su cui fare il calcolo
-		 * delle ferie, ma anche tutti gli altri 24qualcosa e 25qualcosa...solo il 23 deve restarne fuori*/
-//		List<Absence> abs24Current  = null;
-//		List<Absence> abs24SCurrent = null;
-//		List<Absence> abs25Current  = null;
-//		AbsenceType ab24  = AbsenceType.getAbsenceTypeByCode("24");
-//		AbsenceType ab24S = AbsenceType.getAbsenceTypeByCode("24S");
-//		AbsenceType ab25  = AbsenceType.getAbsenceTypeByCode("25");
-		
-		//Calcolo l'intersezione fra l'anno e il contratto attuale
-		yearInterval = DateUtility.intervalIntersection(yearInterval, new DateInterval(contract.beginContract, contract.expireContract));
-		if(yearInterval == null)
-			return 0;
-		
-		//per ogni piano ferie conto i giorni trascorsi in yearInterval e applico la funzione di conversione
-		for(VacationPeriod vp : vacationPeriodList)
-		{
-			int days = 0;
-			DateInterval vpInterval = new DateInterval(vp.beginFrom, vp.endTo);
-			DateInterval intersection = DateUtility.intervalIntersection(vpInterval, yearInterval);
-			if(intersection!=null)
-			{
-				days = DateUtility.daysInInterval(intersection);
+		/**
+		 * @param person
+		 * @param year l'anno in considerazione
+		 * @param contract il contratto di cui si vuole calcolare il riepilogo.
+		 * @param actualDate la data specifica dell'anno attuale in cui si desidera fotografare la situazione in termini di ferie e permessi maturati (tipicamente oggi)
+		 * @param considerExpireLastYear impostare false se non si vuole considerare il limite di scadenza per l'utilizzo
+		 * @return
+		 */
+		public static VacationsRecap build(int year, Contract contract,
+				LocalDate actualDate, boolean considerExpireLastYear) {
+			
+			Preconditions.checkNotNull(year);
+			Preconditions.checkNotNull(contract);
+			Preconditions.checkNotNull(actualDate);
+			
+			VacationsRecap vr = new VacationsRecap();
+			vr.person = contract.person;
+			vr.year = year;
+			vr.contract = contract;
+			
+			List<VacationPeriod> vacationPeriodList = ContractManager.getContractVacationPeriods(vr.contract);
+			
+			//FIXME Se non ho i piani ferie li costruisco. Decidere dove metterli (bootstrap??)
+			//il riepilogo non dovrebbe modificare il db
+			if(vacationPeriodList==null || vacationPeriodList.isEmpty()) {
+				ContractManager.properContractUpdate(vr.contract);
+				vacationPeriodList = ContractManager.getContractVacationPeriods(vr.contract);
 			}
-			//			abs24Current = getVacationDays(intersection, activeContract, ab24);
-//			abs24SCurrent = getVacationDays(intersection, activeContract, ab24S);
-//			abs25Current = getVacationDays(intersection, activeContract, ab25);
-			//calcolo i giorni maturati col metodo di conversione
-			List<Absence> absences = accruedVacationDays(intersection, activeContract);
-			if(vp.vacationCode.description.equals("26+4"))
-			{
-				//vacationDays = vacationDays + VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysLessThreeYears(days-abs24Current.size()-abs25Current.size()-abs24SCurrent.size());
-				vacationDays = vacationDays + VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysLessThreeYears(
-						days-absences.size());
+			Verify.verify(vacationPeriodList!=null && !vacationPeriodList.isEmpty(), "Nessun piano ferie presente per il contratto!");
+			
+			vr.activeContractInterval = vr.contract.getContractDateInterval();
+			vr.vacationPeriodList = vacationPeriodList;
+			
+			LocalDate today = LocalDate.now();
+			LocalDate startLastYear = new LocalDate(vr.year-1,1,1);	
+			LocalDate endLastYear = new LocalDate(vr.year-1,12,31);	
+			LocalDate startYear = new LocalDate(vr.year,1,1);
+			LocalDate endYear = new LocalDate(vr.year,12,31);
+			DateInterval lastYearInter = new DateInterval(startLastYear, endLastYear);
+			DateInterval yearInter = new DateInterval(startYear, endYear);
+			DateInterval yearActualDateInter = new DateInterval(startYear, actualDate);
+			
+			AbsenceType ab32  = AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_CORRENTE.getCode());
+			AbsenceType ab31  = AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE.getCode());
+			AbsenceType ab37  = AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FERIE_ANNO_PRECEDENTE_DOPO_31_08.getCode());
+			AbsenceType ab94  = AbsenceTypeDao.getAbsenceTypeByCode(AbsenceTypeMapping.FESTIVITA_SOPPRESSE.getCode());
+
+			//Expire Last Year
+			
+			//ConfYear conf = ConfYear.getConfYear(year);
+			Integer monthExpiryVacationPastYear = Integer.parseInt(ConfYearManager.getFieldValue("month_expiry_vacation_past_year", year, vr.person.office));
+			Integer dayExpiryVacationPastYear = Integer.parseInt(ConfYearManager.getFieldValue("day_expiry_vacation_past_year", year, vr.person.office));
+			LocalDate expireVacation = actualDate.withMonthOfYear(monthExpiryVacationPastYear).withDayOfMonth(dayExpiryVacationPastYear);
+			
+			vr.isExpireLastYear = false;
+			
+			if( vr.year < today.getYear() ) {		//query anni passati 
+				vr.isExpireLastYear = true;
 			}
-			if(vp.vacationCode.description.equals("28+4"))
-			{
-				//vacationDays = vacationDays + VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysMoreThreeYears(days-abs24Current.size()-abs25Current.size()-abs24SCurrent.size());
-				vacationDays = vacationDays + VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysMoreThreeYears(
-						days-absences.size());
+			else if( vr.year == today.getYear() && actualDate.isAfter(expireVacation)) {	//query anno attuale
+				vr.isExpireLastYear = true;
 			}
 			
+			//Expire Before End Of Year / Active After Begin Of Year
+			
+			if(vr.activeContractInterval.getEnd().isBefore(endYear))
+				vr.isExpireBeforeEndYear = true;
+			if(vr.activeContractInterval.getBegin().isAfter(startYear))
+				vr.isActiveAfterBeginYear = true;
+			
+			//(1) Calcolo ferie usate dell'anno passato ---------------------------------------------------------------------------------------------------------------------------------
+			List<Absence> abs32Last = null;
+			
+			List<Absence> abs31Last = null;
+			List<Absence> abs37Last = null;
+			
+			
+			int vacationDaysPastYearUsedNew = 0;
+			if(vr.contract.sourceDate!=null && vr.contract.sourceDate.getYear()==year)
+			{
+				//Popolare da source data
+				vacationDaysPastYearUsedNew = vacationDaysPastYearUsedNew + vr.contract.sourceVacationLastYearUsed;
+				DateInterval yearInterSource = new DateInterval(vr.contract.sourceDate.plusDays(1), endYear);
+				abs31Last = getVacationDays(yearInterSource, vr.contract, ab31);										
+				abs37Last = getVacationDays(yearInterSource, vr.contract, ab37);		
+				vacationDaysPastYearUsedNew = vacationDaysPastYearUsedNew + abs31Last.size() + abs37Last.size();
+			}
+			else if(vr.contract.beginContract.getYear()==vr.year)
+			{
+				//Non esiste anno passato nel presente contratto
+				vacationDaysPastYearUsedNew = 0;
+				abs31Last  = new ArrayList<Absence>();
+				abs37Last  = new ArrayList<Absence>();
+			}
+			else if(vr.year > LocalDate.now().getYear()) 
+			{
+				//Caso in cui voglio inserire ferie per l'anno prossimo
+				VacationsRecap vrPastYear = VacationsRecap.Factory.build(vr.year-1,vr.contract, endLastYear, true);
+				abs31Last = getVacationDays(yearInter, vr.contract, ab31);						
+				abs37Last = getVacationDays(yearInter, vr.contract, ab37);		
+				vacationDaysPastYearUsedNew = vrPastYear.vacationDaysCurrentYearUsed.size() + abs31Last.size() + abs37Last.size();
+			}
+			else{
+				//Popolare da contractYearRecap
+				ContractYearRecap recapPastYear = ContractManager.getContractYearRecap(vr.contract, year-1);
+				if(recapPastYear==null)
+					throw new IllegalStateException("Mancano i riepiloghi annuali.");
+				vacationDaysPastYearUsedNew = recapPastYear.vacationCurrentYearUsed;
+				abs31Last = getVacationDays(yearInter, vr.contract, ab31);						
+				abs37Last = getVacationDays(yearInter, vr.contract, ab37);						
+				vacationDaysPastYearUsedNew = vacationDaysPastYearUsedNew + abs31Last.size() + abs37Last.size();
+			}
+			//costruisco la lista delle ferie per stampare le date (prendo tutto ciò che trovo nel db e poi riempo con null fino alla dimensione calcolata)
+			abs32Last  = getVacationDays(lastYearInter, vr.contract, ab32);
+
+			vr.vacationDaysLastYearUsed.addAll(abs32Last);
+			vr.vacationDaysLastYearUsed.addAll(abs31Last);
+			vr.vacationDaysLastYearUsed.addAll(abs37Last);
+			while(vr.vacationDaysLastYearUsed.size()<vacationDaysPastYearUsedNew)
+			{
+				Logger.debug("Inserita assenza nulla");
+				Absence nullAbsence = null;
+				vr.vacationDaysLastYearUsed.add(nullAbsence);
+			}
+			
+			
+			//(2) Calcolo ferie usate dell'anno corrente ---------------------------------------------------------------------------------------------------------------------------------
+			List<Absence> abs32Current  = null;
+			
+			int vacationDaysCurrentYearUsedNew = 0;
+			if(vr.contract.sourceDate!=null && vr.contract.sourceDate.getYear()==year)
+			{
+				vacationDaysCurrentYearUsedNew = vacationDaysCurrentYearUsedNew + vr.contract.sourceVacationCurrentYearUsed;
+				DateInterval yearInterSource = new DateInterval(vr.contract.sourceDate.plusDays(1), endYear);
+				abs32Current = getVacationDays(yearInterSource, vr.contract, ab32);
+				vacationDaysCurrentYearUsedNew = vacationDaysCurrentYearUsedNew + abs32Current.size();
+			}
+			else
+			{
+				abs32Current = getVacationDays(yearInter, vr.contract, ab32);
+				vacationDaysCurrentYearUsedNew = vacationDaysCurrentYearUsedNew + abs32Current.size();
+			}
+			vr.vacationDaysCurrentYearUsed.addAll(abs32Current);
+			while(vr.vacationDaysCurrentYearUsed.size()<vacationDaysCurrentYearUsedNew)
+			{
+				Logger.debug("Inserita assenza nulla");
+				Absence nullAbsence = null;
+				vr.vacationDaysCurrentYearUsed.add(nullAbsence);
+			}
+			
+			//(3) Calcolo permessi usati dell'anno corrente
+			List<Absence> abs94Current = null;
+			int permissionCurrentYearUsedNew = 0;
+			
+			if(vr.contract.sourceDate!=null && vr.contract.sourceDate.getYear()==year)
+			{
+				permissionCurrentYearUsedNew = permissionCurrentYearUsedNew + vr.contract.sourcePermissionUsed;
+				DateInterval yearInterSource = new DateInterval(vr.contract.sourceDate.plusDays(1), endYear);
+				abs94Current = getVacationDays(yearInterSource, vr.contract, ab94);
+				permissionCurrentYearUsedNew = permissionCurrentYearUsedNew + abs94Current.size();
+			}
+			else
+			{
+				abs94Current = getVacationDays(yearInter, vr.contract, ab94);
+				permissionCurrentYearUsedNew = permissionCurrentYearUsedNew + abs94Current.size();
+			}
+			vr.permissionUsed.addAll(abs94Current);
+			while(vr.permissionUsed.size()<permissionCurrentYearUsedNew)
+			{
+				Logger.debug("Inserita assenza nulla");
+				Absence nullAbsence = null;
+				vr.permissionUsed.add(nullAbsence);
+			}
+			
+
+			//(4) Calcolo ferie e permessi maturati per l'anno passato e l'anno corrente (sono indipendenti dal database)
+			vr.vacationDaysLastYearAccrued = getVacationAccruedYear(lastYearInter, vr);
+			if(endYear.isAfter(actualDate))
+			{
+				//se la query e' per l'anno corrente considero fino a actualDate
+				vr.permissionCurrentYearAccrued = getPermissionAccruedYear( yearActualDateInter, vr.contract);
+				vr.vacationDaysCurrentYearAccrued = getVacationAccruedYear( yearActualDateInter, vr);
+			}
+			else
+			{
+				//se la query e' per gli anni passati considero fino a endYear
+				vr.permissionCurrentYearAccrued = getPermissionAccruedYear(yearInter, vr.contract);
+				vr.vacationDaysCurrentYearAccrued = getVacationAccruedYear(yearInter, vr);
+			}
+			
+			//(5)Calcolo ferie e permessi non ancora utilizzati per l'anno corrente e per l'anno precedente (sono funzione di quanto calcolato precedentemente)
+			//Anno passato
+			if(actualDate.isBefore(expireVacation) || !considerExpireLastYear)
+				vr.vacationDaysLastYearNotYetUsed = vr.vacationDaysLastYearAccrued - vr.vacationDaysLastYearUsed.size();
+			else
+				vr.vacationDaysLastYearNotYetUsed = 0;
+			//Anno corrente
+			vr.permissionCurrentYearTotal = getPermissionAccruedYear(yearInter, vr.contract);
+			vr.vacationDaysCurrentYearTotal = getVacationAccruedYear(yearInter, vr);
+			if(vr.contract.expireContract != null) {
+				//per i detereminati considero le maturate (perchè potrebbero decidere di cambiare contratto)
+				vr.vacationDaysCurrentYearNotYetUsed = vr.vacationDaysCurrentYearAccrued - vr.vacationDaysCurrentYearUsed.size();
+				vr.persmissionNotYetUsed = vr.permissionCurrentYearAccrued - vr.permissionUsed.size();
+			}
+			else 
+			{
+				//per gli indeterminati le considero tutte (è più improbabile....)
+				vr.vacationDaysCurrentYearNotYetUsed = vr.vacationDaysCurrentYearTotal - vr.vacationDaysCurrentYearUsed.size();
+				vr.persmissionNotYetUsed = vr.permissionCurrentYearTotal - vr.permissionUsed.size();
+			}
+			return vr;
 		}
 		
-		//FIXME decidere se deve essere un parametro di configurazione
-		if(vacationDays>28)
-			vacationDays = 28;
+		/**
+		 * 
+		 * @param yearInterval
+		 * @param contract
+		 * @return numero di permessi maturati nel periodo yearInterval associati a contract
+		 */
+		private static int getPermissionAccruedYear(DateInterval yearInterval, Contract contract){
+			int days = 0;
+			int permissionDays = 0;
 		
-		return vacationDays;
+			//Calcolo l'intersezione fra l'anno e il contratto attuale
+			yearInterval = DateUtility.intervalIntersection(yearInterval, new DateInterval(contract.beginContract, contract.expireContract));
+			if(yearInterval == null)
+				return 0;
+			
+			days = yearInterval.getEnd().getDayOfYear() - yearInterval.getBegin().getDayOfYear();
+			permissionDays = VacationsPermissionsDaysAccrued.convertWorkDaysToPermissionDays(days);
+			return permissionDays;
+		}
+		
+		/**
+		 * 
+		 * @param yearInterval
+		 * @param contract
+		 * @param vacationPeriodList
+		 * @return il numero di giorni di ferie maturati nell'anno year 
+		 * 	calcolati a partire dai piani ferie associati al contratto corrente
+		 */
+		private static int getVacationAccruedYear(DateInterval yearInterval, VacationsRecap vr){
+						
+			int vacationDays = 0;
 
+			//Calcolo l'intersezione fra l'anno e il contratto attuale
+			yearInterval = DateUtility.intervalIntersection(yearInterval, 
+					new DateInterval(vr.contract.beginContract, vr.contract.expireContract));
+			if(yearInterval == null)
+				return 0;
+			
+			//per ogni piano ferie conto i giorni trascorsi in yearInterval e applico la funzione di conversione
+			for(VacationPeriod vp : vr.vacationPeriodList)
+			{
+				int days = 0;
+				DateInterval vpInterval = new DateInterval(vp.beginFrom, vp.endTo);
+				DateInterval intersection = DateUtility.intervalIntersection(vpInterval, yearInterval);
+				if(intersection!=null)
+				{
+					days = DateUtility.daysInInterval(intersection);
+				}
+				
+				//calcolo i giorni maturati col metodo di conversione
+				List<Absence> absences = accruedVacationDays(intersection, vr.contract);
+				if(vp.vacationCode.description.equals("26+4"))
+				{
+					vacationDays = vacationDays + VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysLessThreeYears(
+							days-absences.size());
+				}
+				if(vp.vacationCode.description.equals("28+4"))
+				{
+					vacationDays = vacationDays + VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysMoreThreeYears(
+							days-absences.size());
+				}
+				
+			}
+			
+			//FIXME decidere se deve essere un parametro di configurazione
+			if(vacationDays>28)
+				vacationDays = 28;
+			
+			return vacationDays;
+
+		}
+		
+		/**
+		 * 
+		 * @param intersection
+		 * @param contract
+		 * @return la lista dei giorni di assenza in cui si è usato un codice di assenza per assistenza post partum
+		 */
+		private static List<Absence> accruedVacationDays(DateInterval intersection, Contract contract){
+			List<AbsenceType> postPartumCodeList = AbsenceTypeDao.getPostPartumAbsenceTypeList();
+			DateInterval contractInterInterval = DateUtility.intervalIntersection(intersection, contract.getContractDateInterval());
+			if(contractInterInterval==null)
+				return new ArrayList<Absence>();
+			List<Absence> absences = AbsenceDao.getAbsenceWithPostPartumCode(contract.person, contractInterInterval.getBegin(), contractInterInterval.getEnd(), postPartumCodeList, true);
+			return absences;
+		}
+		
+	}
+		
+	
+	public VacationsRecap() {
+		// TODO Auto-generated constructor stub
 	}
 
-	
-	
 
-	/**
-	 * 
-	 * @param yearInterval
-	 * @param contract
-	 * @return numero di permessi maturati nel periodo yearInterval associati a contract
-	 */
-	public int getPermissionAccruedYear(DateInterval yearInterval, Contract contract){
-		int days = 0;
-		int permissionDays = 0;
-	
-		//Calcolo l'intersezione fra l'anno e il contratto attuale
-		yearInterval = DateUtility.intervalIntersection(yearInterval, new DateInterval(contract.beginContract, contract.expireContract));
-		if(yearInterval == null)
-			return 0;
-		
-		days = yearInterval.getEnd().getDayOfYear() - yearInterval.getBegin().getDayOfYear();
-		permissionDays = VacationsPermissionsDaysAccrued.convertWorkDaysToPermissionDays(days);
-		return permissionDays;
-	}
-	
-	
 	/**
 	 * 
 	 * @param inter
@@ -375,21 +392,6 @@ public class VacationsRecap {
 		
 		return absences;	
 
-	}
-	
-	/**
-	 * 
-	 * @param intersection
-	 * @param contract
-	 * @return la lista dei giorni di assenza in cui si è usato un codice di assenza per assistenza post partum
-	 */
-	public static List<Absence> accruedVacationDays(DateInterval intersection, Contract contract){
-		List<AbsenceType> postPartumCodeList = AbsenceTypeDao.getPostPartumAbsenceTypeList();
-		DateInterval contractInterInterval = DateUtility.intervalIntersection(intersection, contract.getContractDateInterval());
-		if(contractInterInterval==null)
-			return new ArrayList<Absence>();
-		List<Absence> absences = AbsenceDao.getAbsenceWithPostPartumCode(contract.person, contractInterInterval.getBegin(), contractInterInterval.getEnd(), postPartumCodeList, true);
-		return absences;
 	}
 	
 	/**
@@ -423,18 +425,9 @@ public class VacationsRecap {
 	 * @return
 	 */
 	public static int remainingPastVacationsAs37(int year, Person person){
-		
-		Contract contract = person.getCurrentContract();
-		
-		VacationsRecap vr = null;
-		try {
-			vr = new VacationsRecap(person, year, contract, new LocalDate(), false);
-		}
-		catch(IllegalStateException e){
-			return 0;
-		}
-		
-		return vr.vacationDaysLastYearNotYetUsed;
+
+		return VacationsRecap.Factory.build(year, person.getCurrentContract(), new LocalDate(), false).
+				vacationDaysLastYearNotYetUsed;
 		
 	}
 	
