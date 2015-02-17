@@ -40,12 +40,17 @@ import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
 import dao.OfficeDao;
 import dao.PersonDao;
+import dao.wrapper.IWrapperCompetenceCode;
+import dao.wrapper.IWrapperFactory;
 
 @With( {Resecure.class, RequestInit.class} )
 public class Competences extends Controller{
 
 	@Inject
 	static SecurityRules rules;
+	
+	@Inject
+	static IWrapperFactory wrapperFactory;
 	
 	public static void competences(int year, int month) {
 
@@ -83,22 +88,24 @@ public class Competences extends Controller{
 			page = 0;
 				
 		List<CompetenceCode> activeCompetenceCodes = PersonUtility.activeCompetence();
-		CompetenceCode competenceCode = null;
+		
+		IWrapperCompetenceCode competenceCode = null;
+		
 		if(codice==null || codice=="")
 		{
-			competenceCode = activeCompetenceCodes.get(0);	//per adesso assumiamo che almeno una attiva ci sia (esempio S1)
+			//per adesso assumiamo che almeno una attiva ci sia (esempio S1)
+			competenceCode = wrapperFactory.create(activeCompetenceCodes.get(0));
 		}
 		else
 		{
 			for(CompetenceCode compCode : activeCompetenceCodes)
 			{
 				if(compCode.code.equals(codice))
-					competenceCode = compCode;
+					competenceCode = wrapperFactory.create(compCode);
 			}
 		}		
-		SimpleResults<Person> simpleResults = PersonDao.listForCompetence(competenceCode, Optional.fromNullable(name), 
-				Sets.newHashSet(office), 
-				false, 
+		SimpleResults<Person> simpleResults = PersonDao.listForCompetence(competenceCode.getValue(),
+				Optional.fromNullable(name), Sets.newHashSet(office), false, 
 				new LocalDate(year, month, 1), 
 				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
 

@@ -45,36 +45,10 @@ public class CompetenceCode extends BaseModel {
 
 	@Required
 	public String description;
-	
-//	@Required
-//	public boolean inactive = false;
-	
+
 	@Override
 	public String toString() {
 		return String.format("CompetenceCode[%d] - description = %s", id, description);
 	}
 	
-
-	/**
-	 * 
-	 * @param month
-	 * @param year
-	 * @return il totale per quel mese e quell'anno di ore/giorni relativi a quel codice competenza
-	 */
-	public int totalFromCompetenceCode(int month, int year, Long officeId){
-		
-		Office office = OfficeDao.getOfficeById(officeId);
-		//Office office = Office.findById(officeId);
-		
-		int totale = 0;
-		List<String> competenceCodeList = Lists.newArrayList();
-		competenceCodeList.add(this.code);
-		List<Competence> compList = CompetenceDao.getCompetences(Optional.<Person>absent(), year, month, competenceCodeList, office, false);
-//		List<Competence> compList = Competence.find("Select comp from Competence comp where comp.competenceCode = ? " +
-//				"and comp.month = ? and comp.year = ? and comp.person.office = ?", this, month, year, office).fetch();
-		for(Competence comp : compList){
-			totale = totale+comp.valueApproved;
-		}
-		return totale;
-	}
 }

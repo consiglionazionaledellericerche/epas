@@ -95,28 +95,28 @@
           <table class="table table-hover">
 	        <tr class="warning">
 	          <th>Nome e cognome</th>
-	          <th>${competenceCode.description} ${competenceCode.code}</th>
+	          <th>${competenceCode.value.description} ${competenceCode.value.code}</th>
 	        </tr>
 	
 	        #{list items:activePersons, as:'person'}
-	          #{if person.competenceCode.contains(competenceCode) }
+	          #{if person.competenceCode.contains(competenceCode.value) }
 	          <tr>
 	            <td class="person">${person.name} ${person.surname}</td>
 	            <td>
-	            #{if person.competenceCode.contains(competenceCode)}
-	     	      #{if competenceCode.code.equals('S1')}
-	     	        (${person.getPositiveResidualInMonth(year,month)+person.competence(competenceCode,year,month).valueApproved})
+	            #{if person.competenceCode.contains(competenceCode.value)}
+	     	      #{if competenceCode.value.code.equals('S1')}
+	     	        (${person.getPositiveResidualInMonth(year,month)+person.competence(competenceCode.value,year,month).valueApproved})
 	              #{/if}
 	            #{/if}
 	            
 	            
 	              <a 
-	              #{secure.check 'Competences.updateCompetence', target:person.office} data-x-editable href="#" data-type="number" data-pk="${person.competence(competenceCode,year,month).id}" data-name="value"
+	              #{secure.check 'Competences.updateCompetence', target:person.office} data-x-editable href="#" data-type="number" data-pk="${person.competence(competenceCode.value,year,month).id}" data-name="value"
 		     	    data-url="@{updateCompetence()}" 
-		     	    data-title="Modifica ${competenceCode.description} per ${person.name} ${person.surname}"
+		     	    data-title="Modifica ${competenceCode.value.description} per ${person.name} ${person.surname}"
 		     	  #{/secure.check}
 		     	  >
-	    	 	  ${person.competence(competenceCode,year,month).valueApproved}
+	    	 	  ${person.competence(competenceCode.value,year,month).valueApproved}
 	     	    </a>
 
 	            </td>
@@ -126,7 +126,7 @@
 	      </table>
 	      
 	      
-	      <strong>Totale competenze ${competenceCode.code} assegnate nel mese per ${office.name}</strong>
+	      <strong>Totale competenze ${competenceCode.value.code} assegnate nel mese per ${office.name}</strong>
 		  <a data-tooltip data-toggle="tooltip" data-placement="right" title="Per aggiornare questo valore ricaricare la pagina">
 		    <strong>${competenceCode.totalFromCompetenceCode(month, year, office.id)}</strong>
 		  </a>	      
