@@ -120,7 +120,7 @@ public class Persons extends Controller {
 
 		contract.person = person;
 		
-		if(!contract.crossFieldsValidation()){
+		if(!ContractManager.contractCrossFieldValidation(contract)){
 			
 			flash.error("Errore nella validazione del contratto. Inserire correttamente tutti i parametri.");
 			params.flash(); // add http parameters to the flash scope
