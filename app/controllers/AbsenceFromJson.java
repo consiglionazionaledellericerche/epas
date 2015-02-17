@@ -1,28 +1,17 @@
 package controllers;
 
-import helpers.ModelQuery;
 import it.cnr.iit.epas.JsonPersonEmailBinder;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import manager.AbsenceFromJsonManager;
-import models.Absence;
-import models.Person;
 import models.exports.FrequentAbsenceCode;
 import models.exports.PersonEmailFromJson;
 import models.exports.PersonPeriodAbsenceCode;
-import models.query.QAbsence;
-import models.query.QPersonDay;
 
 import org.joda.time.LocalDate;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.jpa.JPQLQuery;
-
-import dao.AbsenceDao;
 import play.Logger;
 import play.data.binding.As;
 import play.mvc.Controller;

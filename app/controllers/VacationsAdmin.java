@@ -8,7 +8,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import manager.ConfYearManager;
-import models.Contract;
 import models.Office;
 import models.Person;
 import models.User;
@@ -22,6 +21,7 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import com.google.common.base.Optional;
+
 import dao.OfficeDao;
 import dao.PersonDao;
 
