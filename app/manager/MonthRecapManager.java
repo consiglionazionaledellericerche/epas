@@ -5,8 +5,9 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import play.Logger;
 import models.Competence;
 import models.Person;
 import models.PersonDay;
@@ -20,6 +21,9 @@ import dao.PersonDao;
 import dao.PersonDayDao;
 
 public class MonthRecapManager {
+	
+	
+	private final static Logger LOG = LoggerFactory.getLogger(MonthRecapManager.class);
 	
 	/**
 	 * Riepilogo mensile per la Persona. Contiene le seguenti informazioni
@@ -227,7 +231,9 @@ public class MonthRecapManager {
 			//person day list
 			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, monthBegin, Optional.fromNullable(monthEnd), false);
 						
-			Logger.info("Costruisco riepilogo mensile per %s %s %s",person.id, person.name, person.surname);
+			LOG.debug("populateRealValueTable -> costruisco riepilogo mensile per {} {} {}",
+					new Object[] { person.id, person.name, person.surname });
+			
 			PersonMonthRecapFieldSet mr = new PersonMonthRecapFieldSet();
 			mr.populatePersonMonthRecap(person, pdList, year, month);
 
