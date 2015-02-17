@@ -267,7 +267,6 @@ when
        "MealTickets.quickBlocksInsert"
        ), target == $o, granted == false)
 then
- System.out.println("puppa");
  $c.grant();
 end
 
