@@ -377,7 +377,7 @@ public class VacationsRecap {
 		 * @return la lista dei giorni di assenza in cui si è usato un codice di assenza per assistenza post partum
 		 */
 		private static List<Absence> accruedVacationDays(DateInterval intersection, Contract contract){
-			List<AbsenceType> postPartumCodeList = AbsenceTypeDao.getPostPartumAbsenceTypeList();
+			List<AbsenceType> postPartumCodeList = AbsenceTypeDao.getReducingAccruingDaysForVacations();
 			DateInterval contractInterInterval = DateUtility.intervalIntersection(intersection, contract.getContractDateInterval());
 			if(contractInterInterval==null)
 				return new ArrayList<Absence>();
