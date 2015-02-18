@@ -124,7 +124,7 @@
 				            #{list items:sede.getPersonnelAdminMini(), as:'person'}
 				                <br>${person.surname} ${person.name}
 				                #{if sede.isEditable }
-								  <a href="@{Administrators.deleteAdministrator(sede.id, person.id)}">
+								  <a href="@{Administrators.deleteAdministrator(sede.value.id, person.id)}">
 				                    <span class="glyphicon glyphicon-trash" 
 				                      data-toggle="tooltip" data-placement="left" 
 				                      title="Rimuovi dagli amministratori ${person.surname} ${person.name}">
