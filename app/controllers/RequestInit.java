@@ -402,11 +402,11 @@ public class RequestInit extends Controller {
 			yearBeginProgram = new LocalDate().getYear();
 		}
 		 
-		Logger.debug("yearBeginProgram = %s", yearBeginProgram);
+		Logger.trace("injectMenu -> yearBeginProgram = %s", yearBeginProgram);
 
 		while(yearBeginProgram <= actualYear+1){
 			years.add(yearBeginProgram);
-			Logger.debug("Aggiunto %s alla lista", yearBeginProgram);
+			Logger.trace("injectMenu -> aggiunto %s alla lista", yearBeginProgram);
 			yearBeginProgram++;
 		}
 

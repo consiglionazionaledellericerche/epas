@@ -157,12 +157,14 @@ public class AbsenceTypeDao {
 
 	/**
 	 * 
-	 * @return la lista di tutti i codici di assenza per assistenza post partum che non abbiano remunerazione al 100%
+	 * @return la lista di tutti i codici di assenza che prevedono la riduzione
+	 * dei giorni dell'anno su cui computare la maturazione delle ferie
 	 */
-	public static List<AbsenceType> getPostPartumAbsenceTypeList(){
+	public static List<AbsenceType> getReducingAccruingDaysForVacations(){
 		
 		JPQLQuery query = ModelQuery.queryFactory().from(absenceType)
-				.where(absenceType.code.startsWith("24").or(absenceType.code.startsWith("25")));
+				.where(absenceType.code.startsWith("24")
+						.or(absenceType.code.startsWith("25").or(absenceType.code.startsWith("17C"))));
 		return query.list(absenceType);
 		
 	}

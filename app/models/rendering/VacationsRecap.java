@@ -245,13 +245,13 @@ public class VacationsRecap {
 			if(endYear.isAfter(actualDate))
 			{
 				//se la query e' per l'anno corrente considero fino a actualDate
-				vr.permissionCurrentYearAccrued = getPermissionAccruedYear( yearActualDateInter, vr.contract);
+				vr.permissionCurrentYearAccrued = getPermissionAccruedYear( yearActualDateInter, vr);
 				vr.vacationDaysCurrentYearAccrued = getVacationAccruedYear( yearActualDateInter, vr);
 			}
 			else
 			{
 				//se la query e' per gli anni passati considero fino a endYear
-				vr.permissionCurrentYearAccrued = getPermissionAccruedYear(yearInter, vr.contract);
+				vr.permissionCurrentYearAccrued = getPermissionAccruedYear(yearInter, vr);
 				vr.vacationDaysCurrentYearAccrued = getVacationAccruedYear(yearInter, vr);
 			}
 			
@@ -262,7 +262,7 @@ public class VacationsRecap {
 			else
 				vr.vacationDaysLastYearNotYetUsed = 0;
 			//Anno corrente
-			vr.permissionCurrentYearTotal = getPermissionAccruedYear(yearInter, vr.contract);
+			vr.permissionCurrentYearTotal = getPermissionAccruedYear(yearInter, vr);
 			vr.vacationDaysCurrentYearTotal = getVacationAccruedYear(yearInter, vr);
 			if(vr.contract.expireContract != null) {
 				//per i detereminati considero le maturate (perchè potrebbero decidere di cambiare contratto)
@@ -284,17 +284,33 @@ public class VacationsRecap {
 		 * @param contract
 		 * @return numero di permessi maturati nel periodo yearInterval associati a contract
 		 */
-		private static int getPermissionAccruedYear(DateInterval yearInterval, Contract contract){
-			int days = 0;
+		private static int getPermissionAccruedYear(DateInterval yearInterval, /*Contract contract*/ VacationsRecap vr){
+			//int days = 0;
 			int permissionDays = 0;
 		
 			//Calcolo l'intersezione fra l'anno e il contratto attuale
-			yearInterval = DateUtility.intervalIntersection(yearInterval, new DateInterval(contract.beginContract, contract.expireContract));
+			yearInterval = DateUtility.intervalIntersection(yearInterval, new DateInterval(vr.contract.beginContract, vr.contract.expireContract));
 			if(yearInterval == null)
 				return 0;
 			
-			days = yearInterval.getEnd().getDayOfYear() - yearInterval.getBegin().getDayOfYear();
-			permissionDays = VacationsPermissionsDaysAccrued.convertWorkDaysToPermissionDays(days);
+			
+			for(VacationPeriod vp : vr.vacationPeriodList){
+				int days = 0;
+				DateInterval vpInterval = new DateInterval(vp.beginFrom, vp.endTo);
+				DateInterval intersection = DateUtility.intervalIntersection(vpInterval, yearInterval);
+				if(intersection!=null)
+				{
+					days = yearInterval.getEnd().getDayOfYear() - yearInterval.getBegin().getDayOfYear();
+					//days = DateUtility.daysInInterval(intersection);
+				}
+				if(vp.vacationCode.equals("21+3")){
+					permissionDays = VacationsPermissionsDaysAccrued.convertWorkDaysToPermissionDaysPartTime(days);
+				}
+				else{
+					permissionDays = VacationsPermissionsDaysAccrued.convertWorkDaysToPermissionDays(days);
+				}
+			}
+			
 			return permissionDays;
 		}
 		
@@ -339,6 +355,10 @@ public class VacationsRecap {
 					vacationDays = vacationDays + VacationsPermissionsDaysAccrued.convertWorkDaysToVacationDaysMoreThreeYears(
 							days-absences.size());
 				}
+				if(vp.vacationCode.description.equals("21+3")){
+					vacationDays = vacationDays + VacationsPermissionsDaysAccrued.converWorkDaysToVacationDaysPartTime(
+							days-absences.size());
+				}
 				
 			}
 			
@@ -357,7 +377,7 @@ public class VacationsRecap {
 		 * @return la lista dei giorni di assenza in cui si è usato un codice di assenza per assistenza post partum
 		 */
 		private static List<Absence> accruedVacationDays(DateInterval intersection, Contract contract){
-			List<AbsenceType> postPartumCodeList = AbsenceTypeDao.getPostPartumAbsenceTypeList();
+			List<AbsenceType> postPartumCodeList = AbsenceTypeDao.getReducingAccruingDaysForVacations();
 			DateInterval contractInterInterval = DateUtility.intervalIntersection(intersection, contract.getContractDateInterval());
 			if(contractInterInterval==null)
 				return new ArrayList<Absence>();
@@ -515,6 +535,44 @@ public class VacationsRecap {
 				return 28;
 			
 		}
+		
+		/**
+		 * 
+		 * @param days
+		 * @return il numero di giorni di ferie maturati secondo il piano di accumulo
+		 * previsto per il part time verticale
+		 */
+		public static int converWorkDaysToVacationDaysPartTime(int days){
+			if(days<=0)
+				return 0;
+			
+			if(days >= 1 && days <= 15)
+				return 0;
+			if(days >= 16 && days <= 45)
+				return 2;
+			if(days >= 46 && days <= 75)
+				return 3;
+			if(days >= 76 && days <= 106)
+				return 5;
+			if(days >= 107 && days <= 136)
+				return 6;
+			if(days >= 137 && days <= 167)
+				return 8;
+			if(days >= 168 && days <= 197)
+				return 10;
+			if(days >= 198 && days <= 227)
+				return 12;
+			if(days >= 228 && days <= 258)
+				return 14;
+			if(days >= 259 && days <= 288)
+				return 15;
+			if(days >= 289 && days <= 319)
+				return 17;
+			if(days >= 320 && days <= 349)
+				return 18;			
+			else
+				return 21;
+		}
 
 		/**
 		 * 
@@ -531,6 +589,24 @@ public class VacationsRecap {
 				permissionDays = 3;
 			if(days >= 316 && days <= 365)
 				permissionDays = 4;
+			return permissionDays;
+		}
+		
+		
+		/**
+		 * 
+		 * @param days
+		 * @return il numero di giorni di permesso maturati con il piano ferie
+		 * relativo al part time
+		 */
+		public static int convertWorkDaysToPermissionDaysPartTime(int days){
+			int permissionDays = 0;
+			if(days >= 45 && days <= 135)
+				permissionDays = 1;
+			if(days >= 136 && days <= 315)
+				permissionDays = 2;			
+			if(days >= 316 && days <= 365)
+				permissionDays = 3;
 			return permissionDays;
 		}
 		
