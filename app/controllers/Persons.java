@@ -67,9 +67,6 @@ public class Persons extends Controller {
 	@Inject
 	static SecurityRules rules;
 	
-	//@Inject
-	//static WrapperPersonFunction wrapperFunction;
-
 	@Inject
 	static WrapperModelFunctionFactory wrapperFunctionFactory; 
 	

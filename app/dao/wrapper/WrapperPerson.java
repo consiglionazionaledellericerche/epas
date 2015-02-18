@@ -3,6 +3,10 @@ package dao.wrapper;
 import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 import manager.ContractManager;
+import manager.recaps.PersonResidualMonthRecap;
+import models.CertificatedData;
+import models.Competence;
+import models.CompetenceCode;
 import models.Contract;
 import models.ContractStampProfile;
 import models.ContractWorkingTimeType;
@@ -14,10 +18,13 @@ import models.WorkingTimeType;
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import dao.ContractDao;
+import dao.PersonMonthRecapDao;
 
 /**
  * @author marco
@@ -123,4 +130,55 @@ public class WrapperPerson implements IWrapperPerson {
 		}
 		return null;
 	}
+	
+	
+	/**
+	 * Getter per la competenza della persona <CompetenceCode, year, month>
+	 * @param code
+	 * @return la competenza della person nell'anno year e mese month con il codice competenza code
+	 */
+	public Competence competence(final CompetenceCode code, final int year, final int month) {
+		if (value.competenceCode.contains(code)) {
+			Optional<Competence> o = FluentIterable.from(value.competences)
+					.firstMatch(new Predicate<Competence>() {
+
+				@Override
+				public boolean apply(Competence input) {
+
+					return input.competenceCode.equals(code) && input.year == year && input.month == month;
+				}
+
+			});
+			return o.orNull();
+		} else {
+			return null;
+		}
+	}
+	
+	/**
+	 * Il residuo positivo del mese fatto dalla person.
+	 * @param year
+	 * @param month
+	 * @return 
+	 */
+	public Integer getPositiveResidualInMonth(int year, int month) {
+
+		return PersonResidualMonthRecap
+				.positiveResidualInMonth(this.value, year, month)/60;
+	}
+	
+	/**
+	 * L'esito dell'invio attestati per la persona (null se non è ancora stato effettuato).
+	 * @param year
+	 * @param month
+	 * @return 
+	 */
+	public CertificatedData getCertificatedData(int year, int month) {
+
+		CertificatedData cd = PersonMonthRecapDao
+				.getCertificatedDataByPersonMonthAndYear(this.value, month, year);
+		return cd;
+	}
+
+	
 }
