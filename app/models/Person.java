@@ -151,10 +151,6 @@ public class Person extends BaseModel implements Comparable<Person>{
 	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
 	public List<Contract> contracts = new ArrayList<Contract>();
 
-	@NotAudited
-	@OneToMany(mappedBy="person", fetch=FetchType.LAZY, cascade = {CascadeType.REMOVE})
-	public List<StampProfile> stampProfiles = new ArrayList<StampProfile>();
-
 	/**
 	 * relazione con la tabella dei figli del personale
 	 */
@@ -215,8 +211,6 @@ public class Person extends BaseModel implements Comparable<Person>{
 	@ManyToOne
 	@JoinColumn(name="office_id")
 	public Office office;
-
-
 
 	/**
 	 * Variabili Transienti LAZY (caricate quando vengono acceduti tramite i getter Transienti definiti

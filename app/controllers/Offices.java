@@ -17,10 +17,13 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
 
 import controllers.Resecure.NoCheck;
 import dao.OfficeDao;
 import dao.RoleDao;
+import dao.wrapper.IWrapperOffice;
+import dao.wrapper.function.WrapperModelFunctionFactory;
 
 @With( {Resecure.class, RequestInit.class})
 public class Offices extends Controller {
@@ -28,10 +31,14 @@ public class Offices extends Controller {
 	@Inject
 	static SecurityRules rules;
 
+	@Inject
+	static WrapperModelFunctionFactory wrapperFunctionFactory;
+
 	@NoCheck
 	public static void showOffices(){
 
-		List<Office> allAreas = Office.getAllAreas();
+		List<IWrapperOffice> allAreas = FluentIterable
+				.from(OfficeDao.getAreas()).transform(wrapperFunctionFactory.office()).toList();
 
 		Role roleAdmin = RoleDao.getRoleByName(Role.PERSONNEL_ADMIN);
 		Role roleAdminMini = RoleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI);

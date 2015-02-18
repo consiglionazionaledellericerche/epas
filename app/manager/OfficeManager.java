@@ -1,5 +1,6 @@
 package manager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.LocalDate;
@@ -71,6 +72,41 @@ public class OfficeManager {
 	
 	/**
 	 * 
+	 * @param permission
+	 * @return true se permission è presente in almeno un office del sottoalbero, radice compresa, 
+	 * false altrimenti
+	 */
+	public static boolean isRightPermittedOnOfficeTree(Office office, Role role) {
+		
+		if(checkUserRoleOffice(Security.getUser().get(), role, office))
+			return true;
+		
+		for(Office subOff : office.subOffices) {
+			
+			if(isRightPermittedOnOfficeTree(subOff, role))
+				return true;
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * 	Check del Permesso
+	 */
+	private static boolean checkUserRoleOffice(User user, Role role, Office office) {
+		
+		Optional<UsersRolesOffices> uro = UsersRolesOfficesDao.getUsersRolesOffices(user, role, office);
+				
+		if(!uro.isPresent())
+			return false;
+		else
+			return true;		
+		
+	}
+	
+	/**
+	 * Assegna i diritti agli amministratori. Da chiamare successivamente alla creazione.
+	 * @param office
 	 */
 	public static void setPermissionAfterCreation(Office office) {
 
@@ -95,19 +131,39 @@ public class OfficeManager {
 		for(Office superOffice : officeList) {
 
 			//Attribuire roleAdminMini a coloro che hanno roleAdminMini su il super office
-			for(User user : Office.getUserByOfficeAndRole(superOffice, roleAdminMini)) {
+			for(User user : getUserByOfficeAndRole(superOffice, roleAdminMini)) {
 
 				setUroIfImprove(user, office, roleAdminMini, true);
 			}
 
 			//Attribuire roleAdmin a coloro che hanno roleAdmin su area il super office
-			for(User user : Office.getUserByOfficeAndRole(superOffice, roleAdmin)) {
+			for(User user : getUserByOfficeAndRole(superOffice, roleAdmin)) {
 
 				setUroIfImprove(user, office, roleAdmin, true);
 			}
 
 		}
 
+	}
+	
+	/**
+	 * Ritorna la lista degli utenti che hanno ruolo role nell'ufficio office
+	 * @param office
+	 * @param role
+	 * @return
+	 */
+	public static List<User> getUserByOfficeAndRole(Office office, Role role) {
+		
+		List<User> userList = Lists.newArrayList();
+		
+		for(UsersRolesOffices uro : office.usersRolesOffices) {
+			
+			if(uro.role.id.equals(role.id)) {
+				
+				userList.add(uro.user);
+			}
+		}
+		return userList;
 	}
 
 	/**
@@ -122,9 +178,9 @@ public class OfficeManager {
 	 */
 	public static Boolean setUroIfImprove(User user, Office office, Role role, boolean ifImprove) {
 
-		UsersRolesOffices uro = Office.getUro(user, office);
-
-		if(uro == null || !ifImprove) {
+		Optional<UsersRolesOffices> uro = UsersRolesOfficesDao.getUsersRolesOfficesByUserAndOffice(user, office);
+			
+		if( !uro.isPresent() || !ifImprove ) {
 
 			setUro(user, office, role);
 			return true;
@@ -133,7 +189,7 @@ public class OfficeManager {
 		if(ifImprove) {
 
 			/* implementare la logica di confronto fra ruolo */
-			Role previous = uro.role;
+			Role previous = uro.get().role;
 
 			if(previous.name.equals(Role.PERSONNEL_ADMIN_MINI)) {
 
@@ -170,7 +226,32 @@ public class OfficeManager {
 			newUro.save();
 		}		
 
-	}	
+	}
+	
+	 /**
+     * Ritorna la lista di tutte le sedi gerarchicamente sotto a Office
+     * @return
+     */
+    public static List<Office> getSubOfficeTree(Office o) {
+    	
+    	List<Office> officeToCompute = new ArrayList<Office>();
+    	List<Office> officeComputed = new ArrayList<Office>();
+    	
+    	officeToCompute.add(o);
+    	while(officeToCompute.size() != 0) {
+    		
+    		Office office = officeToCompute.get(0);
+    		officeToCompute.remove(office);
+    		
+    		for(Office remoteOffice : office.subOffices) {
+
+    			officeToCompute.add((Office)remoteOffice);
+    		}
+    		
+    		officeComputed.add(office);
+    	}
+    	return officeComputed;
+    }
 
 	/**
 	 * Ritorna l'area padre se office è un istituto o una sede

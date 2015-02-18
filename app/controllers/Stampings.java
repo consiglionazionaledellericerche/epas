@@ -4,7 +4,6 @@ import helpers.ModelQuery.SimpleResults;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -32,8 +31,6 @@ import play.mvc.With;
 import security.SecurityRules;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.ImmutableTable.Builder;
 import com.google.common.collect.Table;
 
 import dao.OfficeDao;

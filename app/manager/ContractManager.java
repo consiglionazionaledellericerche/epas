@@ -40,6 +40,32 @@ import dao.VacationPeriodDao;
 public class ContractManager {
 	
 	/**
+	 * Validatore per il contratto. Controlla la consistenza delle date all'interno del contratto
+	 * e la coerenza con gli altri contratti della persona.
+	 * @param contract
+	 * @return
+	 */
+	public static boolean contractCrossFieldValidation(Contract contract) {
+		
+		if(contract.expireContract != null 
+				&& contract.expireContract.isBefore(contract.beginContract))
+			return false;
+		
+		if(contract.endContract != null 
+				&& contract.endContract.isBefore(contract.beginContract))
+			return false;
+		
+		if(contract.expireContract != null && contract.endContract != null 
+				&& contract.expireContract.isBefore(contract.endContract))
+			return false;
+		
+		if(! ContractManager.isProperContract(contract) ) 
+			return false;
+		
+		return true;
+	}
+	
+	/**
 	 * Costruisce in modo controllato tutte le strutture dati associate al contratto
 	 * appena creato passato come argomento.
 	 * (1) I piani ferie associati al contratto
@@ -449,6 +475,22 @@ public class ContractManager {
 		}
 		return true;
 	}
+	
+	/**
+	 * True se il contratto è l'ultimo contratto per mese e anno selezionati.
+	 * @param month
+	 * @param year
+	 * @return
+	 */
+	public static boolean isLastInMonth(Contract contract, int month, int year) {
+		List<Contract> contractInMonth = PersonManager.getMonthContracts(contract.person, month, year);
+		if (contractInMonth.size() == 0)
+			return false;
+		if (contractInMonth.get(contractInMonth.size()-1).id.equals(contract.id))
+			return true;
+		else
+			return false;
+	}
 
 	/**
 	 * 
@@ -543,4 +585,6 @@ public class ContractManager {
 			ia.delete();
 		}
 	}
+	
+	
 }

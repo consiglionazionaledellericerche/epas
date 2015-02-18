@@ -17,8 +17,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
-import manager.ContractManager;
-import manager.PersonManager;
 import models.base.BaseModel;
 
 import org.hibernate.annotations.Type;
@@ -34,11 +32,8 @@ import com.google.common.collect.Sets;
 /**
  * 
  * @author dario
- *
- * il contratto non è gestito direttamente da questa applicazione ma le sue informazioni
- * sono prelevate da un altro servizio
+ * 
  */
-
 @Entity
 @Table(name="contracts")
 public class Contract extends BaseModel {
@@ -124,28 +119,6 @@ public class Contract extends BaseModel {
 	public boolean onCertificate = false;
 	
 	@Override
-	public boolean crossFieldsValidation() {
-		
-		if(this.expireContract != null 
-				&& this.expireContract.isBefore(this.beginContract))
-			return false;
-		
-		if(this.endContract != null 
-				&& this.endContract.isBefore(this.beginContract))
-			return false;
-		
-		if(this.expireContract != null && this.endContract != null 
-				&& this.expireContract.isBefore(this.endContract))
-			return false;
-		
-		if(! ContractManager.isProperContract(this) ) 
-			return false;
-		
-		return true;
-		
-	}
-	
-	@Override
 	public String toString() {
 		return String.format("Contract[%d] - person.id = %d, beginContract = %s, expireContract = %s, endContract = %s",
 				id, person.id, beginContract, expireContract, endContract);
@@ -153,7 +126,7 @@ public class Contract extends BaseModel {
 	
 
 	/**
-	 * FIXME usate nel template spostare nel wrapper
+	 * FIXME ha una dipendenza con DateUtility, capire se può rimanere nel modello.
 	 * Utilizza la libreria DateUtils per costruire l'intervallo attivo per il contratto.
 	 * @return
 	 */
@@ -165,24 +138,6 @@ public class Contract extends BaseModel {
 		else
 			contractInterval = new DateInterval(this.beginContract, this.expireContract);
 		return contractInterval;
-	}
-	
-	/**
-	 * FIXME usate nel template spostare nel wrapper
-	 * True se il contratto è l'ultimo contratto per mese e anno selezionati.
-	 * @param month
-	 * @param year
-	 * @return
-	 */
-	public boolean isLastInMonth(Integer month, Integer year)
-	{
-		List<Contract> contractInMonth = PersonManager.getMonthContracts(this.person,month, year);
-		if(contractInMonth.size()==0)
-			return false;
-		if(contractInMonth.get(contractInMonth.size()-1).id.equals(this.id))
-			return true;
-		else
-			return false;
 	}
 	
 	/**

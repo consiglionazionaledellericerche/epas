@@ -61,22 +61,22 @@
 		    #{list items:wttDefault, as:'wtt'}
 		      <tr>
 		        <td>
-		          <a href="@{WorkingTimes.showWorkingTimeType(wtt.id)}" data-modal=".my-modal-large">
-				    ${wtt.description}			    
+		          <a href="@{WorkingTimes.showWorkingTimeType(wtt.value.id)}" data-modal=".my-modal-large">
+				    ${wtt.value.description}			    
 				  </a>
 		        </td>
 		        <td class="center">
-		          <a href="@{WorkingTimes.showContract(wtt.id, office.id)}" data-modal=".my-modal">
+		          <a href="@{WorkingTimes.showContract(wtt.value.id, office.id)}" data-modal=".my-modal">
 		            ${wtt.getAssociatedActiveContract(office.id).size()}
 		    	  </a>    
 		        </td>
 		        <td class="center">
-		          <a href="@{WorkingTimes.showContractWorkingTimeType(wtt.id, office.id)}" data-modal=".my-modal">
+		          <a href="@{WorkingTimes.showContractWorkingTimeType(wtt.value.id, office.id)}" data-modal=".my-modal">
 		            ${wtt.getAssociatedPeriodInActiveContract(office.id).size()}
 		          </a>
 		        </td>
 		        <td class="center">
-		          <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.id, office.id)}" data-modal=".my-modal">
+		          <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.value.id, office.id)}" data-modal=".my-modal">
 		            Cambia
 		    	  </a>
 		        </td>
@@ -103,21 +103,21 @@
 		          <th class="center">Cambia orario<br>a tutti</th>
 		        </tr>
 			    #{list items:wttAllowed, as:'wtt'}
-			    #{if wtt.disabled == false }
+			    #{if wtt.value.disabled == false }
 			      <tr>
 			        <td>
-			          <a href="@{WorkingTimes.showWorkingTimeType(wtt.id)}" data-modal=".my-modal-large">
-					    ${wtt.description}			    
+			          <a href="@{WorkingTimes.showWorkingTimeType(wtt.value.id)}" data-modal=".my-modal-large">
+					    ${wtt.value.description}			    
 					  </a>
 			        </td>
 			        
 			        <!-- contratti attualmente attivi con wtt -->
 			        <td  class="center">
-			          <a href="@{WorkingTimes.showContract(wtt.id, office.id)}" data-modal=".my-modal">
+			          <a href="@{WorkingTimes.showContract(wtt.value.id, office.id)}" data-modal=".my-modal">
 			            ${wtt.getAssociatedActiveContract(office.id).size()}
 			    	  </a>    
 			    	  #{if wtt.getAssociatedActiveContract(office.id).size() == 0 }
-			    	    <a href="@{WorkingTimes.toggleWorkingTimeTypeEnabled(wtt.id)}">
+			    	    <a href="@{WorkingTimes.toggleWorkingTimeTypeEnabled(wtt.value.id)}">
 			    	      <i data-toggle="tooltip" data-placement="bottom" title="Disattiva tipo orario non associato ad alcun contratto attivo" class="fa fa-power-off"></i>
 			    	    </a>
 			    	  #{/if }
@@ -125,7 +125,7 @@
 			        
 			        <!-- periodi associati a contratti attualmente attivi con wtt -->
 			        <td class="center">
-		                <a href="@{WorkingTimes.showContractWorkingTimeType(wtt.id, office.id)}" data-modal=".my-modal">
+		                <a href="@{WorkingTimes.showContractWorkingTimeType(wtt.value.id, office.id)}" data-modal=".my-modal">
 		                  ${wtt.getAssociatedPeriodInActiveContract(office.id).size()}
 		                </a>
 			        </td>
@@ -134,13 +134,13 @@
 			        <td class="center">
 			          ${wtt.getAssociatedContract().size()}
 			          #{if wtt.getAssociatedContract().size() == 0 }
-			    	    <a href="@{WorkingTimes.delete(wtt.id)}">
+			    	    <a href="@{WorkingTimes.delete(wtt.value.id)}">
 			    	      <i data-toggle="tooltip" data-placement="bottom" title="Elimina tipo orario non associato ad alcun contratto" class="fa fa-trash-o"></i>
 			    	    </a>
 			    	  #{/if}
 			    	</td>
 			        <td class="center">
-			          <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.id, office.id)}" data-modal=".my-modal">
+			          <a href="@{WorkingTimes.changeWorkingTimeTypeToAll(wtt.value.id, office.id)}" data-modal=".my-modal">
 		                Cambia
 		    	      </a>
 					</td>
@@ -178,19 +178,19 @@
 		          <th class="center">Contratti<br>associati<br>(storico)</th>
 		        </tr>
 			    #{list items:wttAllowed, as:'wtt'}
-			    #{if wtt.disabled == true }
+			    #{if wtt.value.disabled == true }
 			      <tr>
 
 			        <td>
-			          <a href="@{WorkingTimes.showWorkingTimeType(wtt.id)}" data-modal=".my-modal-large">
-					    ${wtt.description}			    
+			          <a href="@{WorkingTimes.showWorkingTimeType(wtt.value.id)}" data-modal=".my-modal-large">
+					    ${wtt.value.description}			    
 					  </a>
 			        </td>
 
-			        <td class="center">${wtt.office.name}</td>
+			        <td class="center">${wtt.value.office.name}</td>
 
 			        <td class="center">
-			          <a href="@{WorkingTimes.toggleWorkingTimeTypeEnabled(wtt.id)}">
+			          <a href="@{WorkingTimes.toggleWorkingTimeTypeEnabled(wtt.value.id)}">
 			    	    <i data-toggle="tooltip" data-placement="bottom" title="Riattiva tipo orario" class="fa fa-power-off"></i>
 			    	  </a>
 			        </td>
@@ -198,7 +198,7 @@
 			        <td  class="center">
 			          ${wtt.getAssociatedContract().size()}
 			          #{if wtt.getAssociatedContract().size() == 0 }
-			    	    <a href="@{WorkingTimes.delete(wtt.id)}">
+			    	    <a href="@{WorkingTimes.delete(wtt.value.id)}">
 			    	      <i data-toggle="tooltip" data-placement="bottom" title="Elimina tipo orario non associato ad alcun contratto" class="fa fa-trash-o"></i>
 			    	    </a>
 			    	  #{/if}

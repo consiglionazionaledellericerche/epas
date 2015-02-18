@@ -1,20 +1,19 @@
 package dao;
 
-import java.util.List;
-
-import org.joda.time.LocalDate;
-
 import helpers.ModelQuery;
 
-import com.mysema.query.jpa.JPQLQuery;
+import java.util.List;
 
 import models.PersonShiftDay;
 import models.ShiftCancelled;
 import models.ShiftType;
-import models.query.QPersonShift;
 import models.query.QPersonShiftDay;
 import models.query.QShiftCancelled;
 import models.query.QShiftType;
+
+import org.joda.time.LocalDate;
+
+import com.mysema.query.jpa.JPQLQuery;
 
 /**
  * 
