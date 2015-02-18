@@ -5,9 +5,6 @@ package models;
 
 
 
-import it.cnr.iit.epas.DateInterval;
-import it.cnr.iit.epas.DateUtility;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -22,10 +19,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import manager.ContractManager;
 import manager.recaps.PersonResidualMonthRecap;
 import models.base.BaseModel;
 
@@ -43,7 +38,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 
 import controllers.Secure;
-import dao.ContractDao;
 import dao.PersonMonthRecapDao;
 
 /**
@@ -212,18 +206,6 @@ public class Person extends BaseModel implements Comparable<Person>{
 	@JoinColumn(name="office_id")
 	public Office office;
 
-	/**
-	 * Variabili Transienti LAZY (caricate quando vengono acceduti tramite i getter Transienti definiti
-	 */
-	@Transient
-	private Contract currentContract = null;
-
-	@Transient
-	private WorkingTimeType currentWorkingTimeType = null;
-
-	@Transient
-	private VacationCode currentVacationCode = null;
-
 
 	public String getName(){
 		return this.name;
@@ -250,115 +232,7 @@ public class Person extends BaseModel implements Comparable<Person>{
 		return getFullname();
 	}
 
-	/**
-	 * Cerca nella variabile LAZY il contratto attuale
-	 * @return il contratto attualmente attivo per quella persona, null se la persona non ha contratto attivo
-	 */
-	@Transient
-	public Contract getCurrentContract(){
-		if(this.currentContract!=null)
-			return this.currentContract;
-
-		//this.currentContract = getContract(LocalDate.now());
-		this.currentContract = ContractDao.getContract(LocalDate.now(), this);
-		return this.currentContract;
-	}
-
-	/**
-	 * FIXME richiamato nelle view spostare nel wrapper
-	 * Il ContractStampProfile associato alla data di oggi (Se attivo)
-	 * @return null in caso di persona senza contratto attivo
-	 */
-	@Transient
-	public ContractStampProfile getCurrentContractStampProfile() {
-		Contract contract = this.getCurrentContract();
-		if(contract == null)
-			return null;
-		return ContractManager.getContractStampProfileFromDate(contract, LocalDate.now());
-	}
-
-	/**
-	 * FIXME nel manager (non è chiamato nelle view)
-	 * Il VacationPeriod associato alla data di oggi (Se attivo)
-	 * @return
-	 */
-	@Transient
-	public VacationPeriod getCurrentVacationPeriod()
-	{
-		Contract contract = this.getCurrentContract();
-		if(contract == null)
-			return null;
-
-		for(VacationPeriod vp : contract.vacationPeriods) {
-
-			LocalDate now = new LocalDate();
-
-			if(DateUtility.isDateIntoInterval(now, new DateInterval(vp.beginFrom, vp.endTo)))
-				return vp;
-		}
-		return null;
-	}
-
-	/**
-	 * Cerca nella variabile LAZY il tipo orario attuale.
-	 * @return l'attuale orario di lavoro
-	 */
-	@Transient
-	public  WorkingTimeType getCurrentWorkingTimeType(){
-		if(this.currentWorkingTimeType!=null) {
-			return this.currentWorkingTimeType;
-		}
-
-		if(this.currentContract==null) {
-			//this.currentContract = getContract(LocalDate.now());
-			this.currentContract = ContractDao.getContract(LocalDate.now(), this);
-		}
-		if(this.currentContract==null)
-			return null;
-
-		//ricerca
-		for(ContractWorkingTimeType cwtt : this.currentContract.contractWorkingTimeType)
-		{
-			if(DateUtility.isDateIntoInterval(LocalDate.now(), new DateInterval(cwtt.beginDate, cwtt.endDate)))
-			{
-				this.currentWorkingTimeType = cwtt.workingTimeType;
-				return currentWorkingTimeType;
-			}
-		}
-		return null;
-
-	}
-
-	/**
-	 * Cerca nella variabile LAZY il piano ferie attuale.
-	 * @return il piano ferie attivo per la persona
-	 */
-	@Transient
-	public VacationCode getCurrentVacationCode() {
-
-		if(this.currentVacationCode!=null)
-			return this.currentVacationCode;
-
-		if(this.currentContract==null) {
-			//this.currentContract = getContract(LocalDate.now());
-			this.currentContract = ContractDao.getContract(LocalDate.now(), this);
-		}
-		if(this.currentContract==null)
-			return null;
-
-		//ricerca
-		for(VacationPeriod vp : this.currentContract.vacationPeriods)
-		{
-			if(DateUtility.isDateIntoInterval(LocalDate.now(), new DateInterval(vp.beginFrom, vp.endTo)))
-			{
-				this.currentVacationCode = vp.vacationCode;
-				return this.currentVacationCode;
-			}
-		}
-		return null;
-	}
-
-
+	
 
 	@Override
 	public String toString() {

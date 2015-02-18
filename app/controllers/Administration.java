@@ -125,7 +125,6 @@ public class Administration extends Controller {
 	public static void personalResidualSituation()
 	{
 		
-		//List<Person> listPerson = Person.getActivePersonsInDay(new LocalDate(), Security.getOfficeAllowed(), false);
 		List<Person> listPerson = PersonDao.list(Optional.<String>absent(), 
 				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, LocalDate.now(), LocalDate.now(), true).list();
 		List<PersonResidualMonthRecap> listMese = new ArrayList<PersonResidualMonthRecap>();
@@ -133,7 +132,7 @@ public class Administration extends Controller {
 		{
 			LocalDate today = new LocalDate().minusMonths(1);
 			PersonResidualYearRecap c = 
-					PersonResidualYearRecap.factory(person.getCurrentContract(), today.getYear(), null);
+					PersonResidualYearRecap.factory(ContractDao.getCurrentContract(person), today.getYear(), null);
 			PersonResidualMonthRecap mese = c.getMese(today.getMonthOfYear());
 			listMese.add(mese);
 		}

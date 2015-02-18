@@ -25,6 +25,7 @@ import com.google.common.collect.TreeBasedTable;
 
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
+import dao.ContractDao;
 import dao.PersonDao;
 
 
@@ -59,7 +60,7 @@ public class Overtimes extends Controller {
 		}
 		Logger.debug("Find persons %s with email %s", person.name, email);
 		
-		Contract contract = person.getCurrentContract();
+		Contract contract = ContractDao.getCurrentContract(person);
 		PersonResidualYearRecap c = 
 				PersonResidualYearRecap.factory(contract, year, null);
 		PersonResidualMonthRecap mese = c.getMese(month);

@@ -421,11 +421,11 @@ public class ChartsManager {
 		out.write("Cognome Nome,Ferie usate anno corrente,Ferie usate anno passato,Permessi usati anno corrente,Residuo anno corrente (minuti), Residuo anno passato (minuti),Riposi compensativi anno corrente");
 		out.newLine();
 		
-		VacationsRecap vr = VacationsRecap.Factory.build(LocalDate.now().getYear(), person.getCurrentContract(), LocalDate.now(), false);
+		VacationsRecap vr = VacationsRecap.Factory.build(LocalDate.now().getYear(), ContractDao.getCurrentContract(person), LocalDate.now(), false);
 		
 		PersonResidualYearRecap pryr = PersonResidualYearRecap.factory(ContractDao.getContract(LocalDate.now(), person), LocalDate.now().getYear(), LocalDate.now());
 		PersonResidualMonthRecap prmr = pryr.getMese(LocalDate.now().getMonthOfYear());
-		WorkingTimeType wtt = person.getCurrentWorkingTimeType();
+		WorkingTimeType wtt = ContractDao.getCurrentWorkingTimeType(person);
 		int workingTime = wtt.workingTimeTypeDays.get(0).workingTime;
 		out.append(person.surname+' '+person.name+',');
 		out.append(new Integer(vr.vacationDaysCurrentYearUsed.size()).toString()+','+
