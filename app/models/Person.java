@@ -21,7 +21,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
-import manager.recaps.PersonResidualMonthRecap;
 import models.base.BaseModel;
 
 import org.hibernate.annotations.Type;
@@ -32,13 +31,7 @@ import org.joda.time.LocalDate;
 import play.data.validation.Email;
 import play.data.validation.Required;
 import play.mvc.With;
-
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
-
 import controllers.Secure;
-import dao.PersonMonthRecapDao;
 
 /**
  * @author cristian
@@ -232,66 +225,10 @@ public class Person extends BaseModel implements Comparable<Person>{
 		return getFullname();
 	}
 
-	
-
 	@Override
 	public String toString() {
 		return String.format("Person[%d] - %s %s", id, name, surname);
 	}
-
-	/**
-	 * @param code
-	 * @return la competenza di quella persona nell'anno year e nel mese month con il codice competenza code
-	 */
-	public Competence competence(final CompetenceCode code, final int year, final int month) {
-		if (competenceCode.contains(code)) {
-			Optional<Competence> o = FluentIterable.from(competences)
-					.firstMatch(new Predicate<Competence>() {
-
-				@Override
-				public boolean apply(Competence input) {
-
-					return input.competenceCode.equals(code) && input.year == year && input.month == month;
-				}
-
-			});
-			return o.orNull();
-		} else {
-			return null;
-		}
-	}
-
-
-	/**
-	 *
-	 * @param year
-	 * @param month
-	 * @return l'esito dell'invio attestati per la persona (null se non è ancora stato effettuato)
-	 */
-	public CertificatedData getCertificatedData(int year, int month)
-	{
-
-		CertificatedData cd = PersonMonthRecapDao.getCertificatedDataByPersonMonthAndYear(this, month, year);
-//		CertificatedData cd = CertificatedData.find("Select cd from CertificatedData cd where cd.person = ? and cd.year = ? and cd.month = ?",
-//				this, year, month).first();
-		return cd;
-	}
-
-
-
-	/**
-	 *
-	 * @param year
-	 * @param month
-	 * @return le ore di residuo positivo fatte nel mese/anno da this. Metodo usato nel template showCompetences
-	 */
-	public Integer getPositiveResidualInMonth(int year, int month){
-
-		return PersonResidualMonthRecap.positiveResidualInMonth(this, year, month)/60;
-	}
-
-
-
 
 	@Override
 	public int compareTo(Person person) {

@@ -99,21 +99,21 @@
 	        </tr>
 	
 	        #{list items:activePersons, as:'person'}
-	          #{if person.competenceCode.contains(competenceCode.value) }
+	          #{if person.value.competenceCode.contains(competenceCode.value) }
 	          <tr>
-	            <td class="person">${person.name} ${person.surname}</td>
+	            <td class="person">${person.value.name} ${person.value.surname}</td>
 	            <td>
-	            #{if person.competenceCode.contains(competenceCode.value)}
+	            #{if person.value.competenceCode.contains(competenceCode.value)}
 	     	      #{if competenceCode.value.code.equals('S1')}
-	     	        (${person.getPositiveResidualInMonth(year,month)+person.competence(competenceCode.value,year,month).valueApproved})
+	     	        (${person.getPositiveResidualInMonth(year,month) + person.competence(competenceCode.value,year,month).valueApproved})
 	              #{/if}
 	            #{/if}
 	            
 	            
 	              <a 
-	              #{secure.check 'Competences.updateCompetence', target:person.office} data-x-editable href="#" data-type="number" data-pk="${person.competence(competenceCode.value,year,month).id}" data-name="value"
+	              #{secure.check 'Competences.updateCompetence', target:person.value.office} data-x-editable href="#" data-type="number" data-pk="${person.competence(competenceCode.value,year,month).id}" data-name="value"
 		     	    data-url="@{updateCompetence()}" 
-		     	    data-title="Modifica ${competenceCode.value.description} per ${person.name} ${person.surname}"
+		     	    data-title="Modifica ${competenceCode.value.description} per ${person.value.name} ${person.value.surname}"
 		     	  #{/secure.check}
 		     	  >
 	    	 	  ${person.competence(competenceCode.value,year,month).valueApproved}
