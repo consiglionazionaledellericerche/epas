@@ -11,13 +11,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.joda.time.LocalDate;
-
-import com.google.common.base.Optional;
-
-import dao.ContractDao;
-import dao.OfficeDao;
-import dao.WorkingTimeTypeDao;
 import manager.ContractManager;
 import manager.OfficeManager;
 import manager.WorkingTimeTypeManager;
@@ -27,11 +20,24 @@ import models.Office;
 import models.User;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
+
+import org.joda.time.LocalDate;
+
 import play.Logger;
 import play.db.jpa.JPAPlugin;
 import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
+
+import dao.ContractDao;
+import dao.OfficeDao;
+import dao.WorkingTimeTypeDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperWorkingTimeType;
+import dao.wrapper.function.WrapperModelFunctionFactory;
 
 @With( {Secure.class, RequestInit.class} )
 public class WorkingTimes extends Controller{
@@ -39,6 +45,12 @@ public class WorkingTimes extends Controller{
 	
 	@Inject
 	static SecurityRules rules;
+	
+	@Inject
+	static IWrapperFactory wrapperFactory;
+	
+	@Inject
+	static WrapperModelFunctionFactory wrapperFunctionFactory; 
 	
 	public static void manageWorkingTime(Office office){
 		
@@ -50,9 +62,17 @@ public class WorkingTimes extends Controller{
 		
 		rules.checkIfPermitted(office);
 		
-		List<WorkingTimeType> wttDefault = WorkingTimeType.getDefaultWorkingTimeTypes();
-		List<WorkingTimeType> wttAllowed = office.workingTimeType;
-		List<WorkingTimeType> wttList = WorkingTimeTypeDao.getAllWorkingTimeType();
+		List<IWrapperWorkingTimeType> wttDefault = FluentIterable
+				.from(WorkingTimeTypeDao.getDefaultWorkingTimeType())
+				.transform(wrapperFunctionFactory.workingTimeType()).toList();
+	
+		List<IWrapperWorkingTimeType> wttAllowed = FluentIterable 
+				.from(office.workingTimeType)
+				.transform(wrapperFunctionFactory.workingTimeType()).toList();
+				
+		List<IWrapperWorkingTimeType> wttList = FluentIterable 
+				.from(WorkingTimeTypeDao.getAllWorkingTimeType())
+				.transform(wrapperFunctionFactory.workingTimeType()).toList(); 
 			
 		render(wttList, wttDefault, wttAllowed, office, offices);
 	}
@@ -68,7 +88,7 @@ public class WorkingTimes extends Controller{
 		
 		rules.checkIfPermitted(wtt.office);
 		
-		List<Contract> contractList = wtt.getAssociatedActiveContract(officeId);
+		List<Contract> contractList = wrapperFactory.create(wtt).getAssociatedActiveContract(officeId);
 			
 		render(wtt, contractList);
 		
@@ -85,7 +105,9 @@ public class WorkingTimes extends Controller{
 		
 		rules.checkIfPermitted(wtt.office);
 		
-		List<ContractWorkingTimeType> cwttList = wtt.getAssociatedPeriodInActiveContract(officeId);
+		IWrapperWorkingTimeType wwtt = wrapperFactory.create(wtt); 
+		
+		List<ContractWorkingTimeType> cwttList = wwtt.getAssociatedPeriodInActiveContract(officeId);
 	
 		render(wtt, cwttList);
 		
@@ -223,13 +245,14 @@ public class WorkingTimes extends Controller{
 			
 			flash.error("Impossibile trovare il tipo orario specificato. Riprovare o effettuare una segnalazione.");
 			WorkingTimes.manageWorkingTime(null);
-			
 		}
-		
 		rules.checkIfPermitted(wtt.office);
 
+		IWrapperWorkingTimeType wwtt = wrapperFactory.create(wtt);
+		
+		
 		//Prima di disattivarlo controllo che non sia associato ad alcun contratto attivo 
-		if( wtt.disabled == false && wtt.getAssociatedActiveContract(wtt.office.id).size() > 0) {
+		if( wtt.disabled == false && wwtt.getAssociatedActiveContract(wtt.office.id).size() > 0) {
 				
 			flash.error("Impossibile eliminare il tipo orario %s perchè attualmente associato ad almeno un contratto attivo. Operazione annullata", wtt.description);
 			WorkingTimes.manageWorkingTime(wtt.office);
@@ -271,7 +294,7 @@ public class WorkingTimes extends Controller{
 		
 		rules.checkIfPermitted(office);
 		
-		List<WorkingTimeType> wttDefault = WorkingTimeType.getDefaultWorkingTimeTypes();
+		List<WorkingTimeType> wttDefault = WorkingTimeTypeDao.getDefaultWorkingTimeType();
 		List<WorkingTimeType> wttAllowed = office.getEnabledWorkingTimeType(); 
 
 		List<WorkingTimeType> wttList = new ArrayList<WorkingTimeType>();

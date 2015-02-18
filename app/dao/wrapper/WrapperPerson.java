@@ -1,5 +1,10 @@
 package dao.wrapper;
 
+import manager.ContractManager;
+import models.Contract;
+import models.ContractStampProfile;
+import models.Person;
+
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
@@ -7,11 +12,6 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import dao.ContractDao;
-import manager.ContractManager;
-import manager.PersonManager;
-import models.Contract;
-import models.ContractStampProfile;
-import models.Person;
 
 /**
  * @author marco
@@ -20,16 +20,14 @@ import models.Person;
 public class WrapperPerson implements IWrapperPerson {
 
 	private final Person value;
-	private final PersonManager personManager;
 	private final ContractManager contractManager;
 	private final ContractDao contractDao;
 	private Optional<Contract> currentContract;
 
 	@Inject
-	WrapperPerson(@Assisted Person person, PersonManager personManager,
-			ContractManager contractManager, ContractDao contractDao) {
+	WrapperPerson(@Assisted Person person,	ContractManager contractManager,
+			ContractDao contractDao) {
 		this.value = person;
-		this.personManager = personManager;
 		this.contractManager = contractManager;
 		this.contractDao = contractDao;
 	}

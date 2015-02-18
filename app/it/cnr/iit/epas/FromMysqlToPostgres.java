@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 import manager.PersonDayManager;
-import manager.PersonManager;
 import models.Absence;
 import models.AbsenceType;
 import models.AbsenceTypeGroup;
@@ -27,7 +26,6 @@ import models.PersonReperibility;
 import models.PersonYear;
 import models.Qualification;
 import models.StampModificationTypeValue;
-import models.StampProfile;
 import models.StampType;
 import models.Stamping;
 import models.Stamping.WayType;
@@ -291,27 +289,27 @@ public class FromMysqlToPostgres {
 		for(Person p : activePerson){
 			Logger.debug("Analizzo %s %s", p.name, p.surname);
 			LocalDate date = new LocalDate().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue();
-			if(StampProfile.getCurrentStampProfile(p,date).fixedWorkingTime){
-
-				while(date.isBefore(new LocalDate())){
-					if(!PersonManager.isHoliday(p, date)){
-
-						PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", p, date).first();
-						if(pd == null){
-							pd = new PersonDay(p, date);
-							pd.create();
-							Logger.debug("Creato person day per %s %s in data %s", p.name, p.surname, date);
-							PersonDayManager.populatePersonDay(pd);
-							pd.save();
-							Logger.debug("Persistito il tempo di lavoro = %d per %s %s in data %s", pd.timeAtWork, p.name, p.surname, date);
-						}
-
-					}
-
-					date = date.plusDays(1);
-				}
-
-			}
+//			if(StampProfile.getCurrentStampProfile(p,date).fixedWorkingTime){
+//
+//				while(date.isBefore(new LocalDate())){
+//					if(!PersonManager.isHoliday(p, date)){
+//
+//						PersonDay pd = PersonDay.find("Select pd from PersonDay pd where pd.person = ? and pd.date = ?", p, date).first();
+//						if(pd == null){
+//							pd = new PersonDay(p, date);
+//							pd.create();
+//							Logger.debug("Creato person day per %s %s in data %s", p.name, p.surname, date);
+//							PersonDayManager.populatePersonDay(pd);
+//							pd.save();
+//							Logger.debug("Persistito il tempo di lavoro = %d per %s %s in data %s", pd.timeAtWork, p.name, p.surname, date);
+//						}
+//
+//					}
+//
+//					date = date.plusDays(1);
+//				}
+//
+//			}
 		}
 	}
 
@@ -769,7 +767,7 @@ public class FromMysqlToPostgres {
 		ResultSet rs = stmtContratto.executeQuery();       	
 
 		Contract previousContract = null;
-		StampProfile stampProfile = null;
+		//StampProfile stampProfile = null;
 		int mysqlPresenceDefault = 0;
 		while(rs.next()){
 			//dati contratto mysql
@@ -821,13 +819,13 @@ public class FromMysqlToPostgres {
 
 					previousContract.save();
 
-					stampProfile = new StampProfile();
-					stampProfile.person = person;
-					stampProfile.fixedWorkingTime = mysqlPresenceDefault == 0 ? false : true;
-					stampProfile.startFrom = previousContract.beginContract;
-					stampProfile.endTo = previousContract.expireContract;
-					stampProfile.create();
-					person.stampProfiles.add(stampProfile);
+//					stampProfile = new StampProfile();
+//					stampProfile.person = person;
+//					stampProfile.fixedWorkingTime = mysqlPresenceDefault == 0 ? false : true;
+//					stampProfile.startFrom = previousContract.beginContract;
+//					stampProfile.endTo = previousContract.expireContract;
+//					stampProfile.create();
+//					//person.stampProfiles.add(stampProfile);
 					person.save();
 
 					Contract contract = new Contract();
@@ -845,13 +843,13 @@ public class FromMysqlToPostgres {
 		if(previousContract!=null)
 		{
 			previousContract.save();
-			stampProfile = new StampProfile();
-			stampProfile.person = person;
-			stampProfile.fixedWorkingTime = mysqlPresenceDefault == 0 ? false : true;
-			stampProfile.startFrom = previousContract.beginContract;
-			stampProfile.endTo = previousContract.expireContract;
-			stampProfile.create();
-			person.stampProfiles.add(stampProfile);
+//			stampProfile = new StampProfile();
+//			stampProfile.person = person;
+//			stampProfile.fixedWorkingTime = mysqlPresenceDefault == 0 ? false : true;
+//			stampProfile.startFrom = previousContract.beginContract;
+//			stampProfile.endTo = previousContract.expireContract;
+//			stampProfile.create();
+			//person.stampProfiles.add(stampProfile);
 			person.save();
 			JPAPlugin.closeTx(false);
 			FromMysqlToPostgres.createVacationType(previousContract);

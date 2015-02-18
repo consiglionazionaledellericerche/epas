@@ -16,25 +16,25 @@
 	  #{if area.isPrintable() }
 		<div class="panel panel-info">
 		  <div class="panel-heading">
-		    <h3 class="panel-title">${area.name}</h3>
+		    <h3 class="panel-title">${area.value.name}</h3>
 		  </div>
 		  <div class="panel-body">
 		  
-		    <p>Il numero totale dei dipendenti presenti in ePAS con contratto attivo in quest area è <strong>${area.getActivePersons().size()}</strong></p>
+		    <p>Il numero totale dei dipendenti presenti in ePAS con contratto attivo in quest area è <strong>${area.activePersonsInOffice().size()}</strong></p>
 		    
 		    #{if session.username.equals("admin") }
 		    <p>
-		      <a  data-modal=".my-modal" href="@{Offices.insertInstitute(area.id)}">
-		        <span class="glyphicon glyphicon-plus"></span> Crea un nuovo istituto per ${area.name}
+		      <a  data-modal=".my-modal" href="@{Offices.insertInstitute(area.value.id)}">
+		        <span class="glyphicon glyphicon-plus"></span> Crea un nuovo istituto per ${area.value.name}
 		      </a>
 		    </p>
 		  	#{/if}
 		  	
-		  	#{list items:area.getInstitutes(), as:'istituto'}
+		  	#{list items:area.getWrapperInstitutes(), as:'istituto'}
 		  	  
 		  	  #{if istituto.isPrintable() }
 			  	  <div class="well">
-			  	    <p class="lead">${istituto.name}</p>
+			  	    <p class="lead">${istituto.value.name}</p>
 			  	    
 			  	    <strong>Lettori istituto installati</strong> 
 		  	  	    #{list items:istituto.getActiveBadgeReaders(), as:'badgeReader'}
@@ -54,29 +54,29 @@
 				        <th>Amministratori<br>sola lettura</th>
 				      </tr>
 				      
-				      #{list items:istituto.getSeats(), as:'sede'}
+				      #{list items:istituto.getWrapperSeats(), as:'sede'}
 				      #{if sede.isPrintable() }
 				        <tr style="background-color: white;">
 				          
 				          <!-- Seat data -->
 				          <td>
-				          #{if sede.isEditable }
-				            <a data-modal=".my-modal" href="@{Offices.editSeat(sede.id)}">${sede.name}</a>
+				          #{if sede.isEditable() }
+				            <a data-modal=".my-modal" href="@{Offices.editSeat(sede.value.id)}">${sede.value.name}</a>
 				          #{/if}
 				          #{else}
-				            ${sede.name}
+				            ${sede.value.name}
 				          #{/else}
 				          </td>
 				          <td>
-				            ${sede.address}<br><br>
+				            ${sede.value.address}<br><br>
 				            <strong>Lettori sede abilitati</strong><br>
 				            #{list items:sede.getActiveBadgeReaders(), as:'badgeReader'}
 				              <h4><span class="label label-success">${badgeReader}</span></h4>
 				            #{/list}
 				          </td>
-				          <td class="center">${sede.code}</td>
-				          <td class="center">${sede.joiningDate}</td>
-				          <td class="center">${sede.getActivePersons().size()}</td>
+				          <td class="center">${sede.value.code}</td>
+				          <td class="center">${sede.value.joiningDate}</td>
+				          <td class="center">${sede.activePersonsInOffice().size()}</td>
 				          <!-- End Seat Data -->
 				          
 				          <!-- Seat administrator -->
@@ -84,10 +84,10 @@
 				            #{if sede.isEditable }
 				              <a class="btn btn-primary btn-xs"
 				                 data-modal=".my-modal"
-				                 href="@{Administrators.insertNewAdministrator(sede.id, roleAdmin.id)}">
+				                 href="@{Administrators.insertNewAdministrator(sede.value.id, roleAdmin.id)}">
 				                 <span class="glyphicon glyphicon-plus" 
 				                    data-toggle="tooltip" data-placement="left" 
-				                    title="Aggiungi Amministratore per ${sede.name}">
+				                    title="Aggiungi Amministratore per ${sede.value.name}">
 				                  </span>
 				              </a>  
 				              <br>
@@ -96,10 +96,10 @@
 				                <br>${person.surname} ${person.name}
 								#{if sede.isEditable }
 								  #{if person.user.username.equals(session.username) }
-								  <a href="@{Administrators.deleteSelfAsAdministrator(sede.id)}" data-modal=".my-modal">
+								  <a href="@{Administrators.deleteSelfAsAdministrator(sede.value.id)}" data-modal=".my-modal">
 								  #{/if}
 								  #{else}
-								  <a href="@{Administrators.deleteAdministrator(sede.id, person.id)}">
+								  <a href="@{Administrators.deleteAdministrator(sede.value.id, person.id)}">
 								  #{/else}
 								    <span class="glyphicon glyphicon-trash" 
 				                      data-toggle="tooltip" data-placement="left" 
@@ -113,10 +113,10 @@
 				            #{if sede.isEditable }
 				              <a class="btn btn-primary btn-xs"
 				                 data-modal=".my-modal"
-				                 href="@{Administrators.insertNewAdministrator(sede.id, roleAdminMini.id)}">
+				                 href="@{Administrators.insertNewAdministrator(sede.value.id, roleAdminMini.id)}">
 				                 <span class="glyphicon glyphicon-plus" 
 				                    data-toggle="tooltip" data-placement="left" 
-				                    title="Aggiungi Amministratore sola lettura per ${sede.name}">
+				                    title="Aggiungi Amministratore sola lettura per ${sede.value.name}">
 				                  </span>
 				              </a>
 				              <br>
@@ -124,7 +124,7 @@
 				            #{list items:sede.getPersonnelAdminMini(), as:'person'}
 				                <br>${person.surname} ${person.name}
 				                #{if sede.isEditable }
-								  <a href="@{Administrators.deleteAdministrator(sede.id, person.id)}">
+								  <a href="@{Administrators.deleteAdministrator(sede.value.id, person.id)}">
 				                    <span class="glyphicon glyphicon-trash" 
 				                      data-toggle="tooltip" data-placement="left" 
 				                      title="Rimuovi dagli amministratori ${person.surname} ${person.name}">
@@ -140,8 +140,8 @@
 				    </table>
 				    #{if session.username.equals("admin") }
 				    <p>
-			          <a  data-modal=".my-modal" href="@{Offices.insertSeat(istituto.id)}">
-			            <span class="glyphicon glyphicon-plus"></span> Crea una nuova sede per ${istituto.name}
+			          <a  data-modal=".my-modal" href="@{Offices.insertSeat(istituto.value.id)}">
+			            <span class="glyphicon glyphicon-plus"></span> Crea una nuova sede per ${istituto.value.name}
 			          </a>
 			        </p>
 			        #{/if}

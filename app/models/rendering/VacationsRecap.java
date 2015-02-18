@@ -300,14 +300,15 @@ public class VacationsRecap {
 				DateInterval intersection = DateUtility.intervalIntersection(vpInterval, yearInterval);
 				if(intersection!=null)
 				{
-					days = yearInterval.getEnd().getDayOfYear() - yearInterval.getBegin().getDayOfYear();
-					//days = DateUtility.daysInInterval(intersection);
+					days = DateUtility.daysInInterval(intersection);
 				}
 				if(vp.vacationCode.equals("21+3")){
-					permissionDays = VacationsPermissionsDaysAccrued.convertWorkDaysToPermissionDaysPartTime(days);
+					permissionDays = permissionDays + 
+							VacationsPermissionsDaysAccrued.convertWorkDaysToPermissionDaysPartTime(days);
 				}
-				else{
-					permissionDays = VacationsPermissionsDaysAccrued.convertWorkDaysToPermissionDays(days);
+				else {
+					permissionDays = permissionDays + 
+							VacationsPermissionsDaysAccrued.convertWorkDaysToPermissionDays(days);
 				}
 			}
 			
