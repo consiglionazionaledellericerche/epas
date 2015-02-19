@@ -27,6 +27,7 @@ import com.google.common.base.Verify;
 
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
+import dao.ContractDao;
 
 
 /**
@@ -451,7 +452,7 @@ public class VacationsRecap {
 	 */
 	public static int remainingPastVacationsAs37(int year, Person person){
 
-		return VacationsRecap.Factory.build(year, person.getCurrentContract(), new LocalDate(), false).
+		return VacationsRecap.Factory.build(year, ContractDao.getCurrentContract(person), new LocalDate(), false).
 				vacationDaysLastYearNotYetUsed;
 		
 	}
