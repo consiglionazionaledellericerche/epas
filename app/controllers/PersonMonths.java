@@ -17,6 +17,7 @@ import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
 
+import dao.ContractDao;
 import dao.PersonMonthRecapDao;
 import play.Logger;
 import play.mvc.Controller;
@@ -40,7 +41,7 @@ public class PersonMonths extends Controller{
 			renderTemplate("Application/indexAdmin.html");
 		}
 		
-		Contract contract = user.person.getCurrentContract();
+		Contract contract = ContractDao.getCurrentContract(user.person);
 		PersonResidualYearRecap csap = 
 				PersonResidualYearRecap.factory(contract, year, null);
 		render(csap, user.person, year);	

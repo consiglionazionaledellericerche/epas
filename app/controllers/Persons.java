@@ -67,9 +67,6 @@ public class Persons extends Controller {
 	@Inject
 	static SecurityRules rules;
 	
-	//@Inject
-	//static WrapperPersonFunction wrapperFunction;
-
 	@Inject
 	static WrapperModelFunctionFactory wrapperFunctionFactory; 
 	
@@ -357,7 +354,7 @@ public class Persons extends Controller {
 
 		rules.checkIfPermitted(person.office);
 
-		VacationPeriod vp = person.getCurrentVacationPeriod();
+		VacationPeriod vp = ContractDao.getCurrentVacationPeriod(person);
 		render(person, vp);
 	}
 
@@ -373,7 +370,7 @@ public class Persons extends Controller {
 
 		rules.checkIfPermitted(person.office);
 
-		Contract currentContract = person.getCurrentContract();
+		Contract currentContract = ContractDao.getCurrentContract(person);
 		if(currentContract == null) {
 
 			flash.error("La persona selezionata non ha contratto attivo, operazione annullata.");
