@@ -54,17 +54,17 @@
 		<td><font color="#000000">${person.currentContract.get().expireContract}</font></td>
 
 		<td>
-		  #{if person.value.currentWorkingTimeType != null}
+		  #{if person.currentWorkingTimeType != null}
 		    <a data-toggle="modal" href="@{Persons.showCurrentContractWorkingTimeType(person.value.id)}" data-target=".my-modal">
-		      ${person.value.currentWorkingTimeType.description}
+		      ${person.currentWorkingTimeType.description}
 		    </a>
 		  #{/if}
 		</td>
 
 		<td>
-		  #{if person.value.currentVacationCode != null }
+		  #{if person.currentVacationCode != null }
 		     <a data-toggle="modal" href="@{Persons.showCurrentVacation(person.value.id)}" data-target=".my-modal">
-		        ${person.value.currentVacationCode.description}
+		        ${person.currentVacationCode.description}
 		     </a>
 		  #{/if}
 		</td>

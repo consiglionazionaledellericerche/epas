@@ -3,7 +3,11 @@
  */
 package helpers.attestati;
 
+import javax.inject.Inject;
+
 import dao.PersonDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
 import models.Person;
 
 /**
@@ -16,6 +20,9 @@ import models.Person;
  */
 public final class Dipendente implements Comparable<Dipendente> {
 
+	@Inject
+	static IWrapperFactory wrapperFactory;
+	
 	private final String matricola, cognomeNome;
 	private final Person person;
 	
@@ -29,6 +36,8 @@ public final class Dipendente implements Comparable<Dipendente> {
 	public String getMatricola() { return matricola; }
 	public String getCognomeNome() { return cognomeNome; }
 	public Person getPerson() {return person;}
+	
+	public IWrapperPerson getWrapperPerson() { return wrapperFactory.create(this.person); }
 	
 	/** 
 	 * Metodo necessario per i controlli di "contains" dei Set 

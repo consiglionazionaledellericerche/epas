@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
+import dao.ContractDao;
 import manager.recaps.PersonResidualMonthRecap;
 import manager.recaps.PersonResidualYearRecap;
 import models.Competence;
@@ -38,8 +39,7 @@ public class PersonMonthCompetenceRecap {
 		this.ordinaryShift = getOrdinaryShift(person, year, month);
 		this.nightShift = getNightShift(person, year, month);
 		
-		//RTODO
-		Contract contract = person.getCurrentContract();
+		Contract contract = ContractDao.getCurrentContract(person);
 		PersonResidualYearRecap c = 
 				PersonResidualYearRecap.factory(contract, year, null);
 		PersonResidualMonthRecap mese = c.getMese(month);

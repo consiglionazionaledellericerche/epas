@@ -111,7 +111,7 @@ public class OfficeDao {
 	 */
 	public static Set<Office> getOfficeAllowed(Optional<User> user) {
 		
-		User u = user.or(Security.getUser().get());
+		User u = user.isPresent() ? user.get() : Security.getUser().get();
 // 		L'utente standard non ha nessun userRoleoffice ed è necessario restituire il suo ufficio di appartenenza
 //		FIXME Non sarebbe meglio avere un ruolo base per gli utenti???
 		if(u.usersRolesOffices.isEmpty()){

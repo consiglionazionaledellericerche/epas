@@ -27,6 +27,7 @@ import com.google.common.base.Verify;
 
 import dao.AbsenceDao;
 import dao.AbsenceTypeDao;
+import dao.ContractDao;
 
 
 /**
@@ -257,8 +258,11 @@ public class VacationsRecap {
 			
 			//(5)Calcolo ferie e permessi non ancora utilizzati per l'anno corrente e per l'anno precedente (sono funzione di quanto calcolato precedentemente)
 			//Anno passato
-			if(actualDate.isBefore(expireVacation) || !considerExpireLastYear)
+			if(actualDate.isBefore(expireVacation) || !considerExpireLastYear){
 				vr.vacationDaysLastYearNotYetUsed = vr.vacationDaysLastYearAccrued - vr.vacationDaysLastYearUsed.size();
+				if(vr.vacationDaysLastYearAccrued == 25)
+					vr.vacationDaysLastYearNotYetUsed++; 
+			}
 			else
 				vr.vacationDaysLastYearNotYetUsed = 0;
 			//Anno corrente
@@ -362,6 +366,7 @@ public class VacationsRecap {
 				}
 				
 			}
+
 			
 			//FIXME decidere se deve essere un parametro di configurazione
 			if(vacationDays>28)
@@ -447,7 +452,7 @@ public class VacationsRecap {
 	 */
 	public static int remainingPastVacationsAs37(int year, Person person){
 
-		return VacationsRecap.Factory.build(year, person.getCurrentContract(), new LocalDate(), false).
+		return VacationsRecap.Factory.build(year, ContractDao.getCurrentContract(person), new LocalDate(), false).
 				vacationDaysLastYearNotYetUsed;
 		
 	}
