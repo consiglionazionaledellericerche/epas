@@ -32,6 +32,7 @@ import security.SecurityRules;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 
@@ -42,6 +43,8 @@ import dao.OfficeDao;
 import dao.PersonDao;
 import dao.wrapper.IWrapperCompetenceCode;
 import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperPerson;
+import dao.wrapper.function.WrapperModelFunctionFactory;
 
 @With( {Resecure.class, RequestInit.class} )
 public class Competences extends Controller{
@@ -51,6 +54,9 @@ public class Competences extends Controller{
 	
 	@Inject
 	static IWrapperFactory wrapperFactory;
+	
+	@Inject
+	static WrapperModelFunctionFactory wrapperFunctionFactory; 
 	
 	public static void competences(int year, int month) {
 
@@ -91,9 +97,12 @@ public class Competences extends Controller{
 		
 		IWrapperCompetenceCode competenceCode = null;
 		
-		if(codice==null || codice=="")
-		{
-			//per adesso assumiamo che almeno una attiva ci sia (esempio S1)
+		if(activeCompetenceCodes.size() == 0) {
+			flash.error("Per visualizzare la sezione Competenze è necessario abilitare almeno un codice competenza ad un dipendente.");
+			Competences.enabledCompetences(officeId, null);
+		}
+		
+		if(codice==null || codice=="") {
 			competenceCode = wrapperFactory.create(activeCompetenceCodes.get(0));
 		}
 		else
@@ -104,15 +113,18 @@ public class Competences extends Controller{
 					competenceCode = wrapperFactory.create(compCode);
 			}
 		}		
+		
 		SimpleResults<Person> simpleResults = PersonDao.listForCompetence(competenceCode.getValue(),
 				Optional.fromNullable(name), Sets.newHashSet(office), false, 
 				new LocalDate(year, month, 1), 
 				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
 
-		List<Person> activePersons = simpleResults.paginated(page).getResults();
+		List<IWrapperPerson> activePersons = FluentIterable
+				.from(simpleResults.paginated(page).getResults())
+				.transform(wrapperFunctionFactory.person()).toList();
 		
 		if(activePersons == null)
-			activePersons = new ArrayList<Person>();
+			activePersons = new ArrayList<IWrapperPerson>();
 		
 		//Redirect in caso di mese futuro
 		LocalDate today = new LocalDate();
@@ -122,12 +134,12 @@ public class Competences extends Controller{
 			month = today.getMonthOfYear();
 		}
 		
-		for(Person p : activePersons){
+		for(IWrapperPerson p : activePersons){
 			Competence competence = null;
-			for(CompetenceCode c : p.competenceCode){
-				Optional<Competence> comp = CompetenceDao.getCompetence(p, year, month, c);
+			for(CompetenceCode c : p.getValue().competenceCode){
+				Optional<Competence> comp = CompetenceDao.getCompetence(p.getValue(), year, month, c);
 				if(!comp.isPresent()){
-					competence = new Competence(p, c, year, month);
+					competence = new Competence(p.getValue(), c, year, month);
 					competence.valueApproved = 0;
 					competence.save();
 				}

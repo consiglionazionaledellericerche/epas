@@ -51,7 +51,7 @@ public class MealTickets  extends Controller {
 		List<MealTicketRecap> mealTicketRecaps = Lists.newArrayList();
 		for(Person person : personList) {
 			
-			MealTicketRecap recap = MealTicketRecap.build(person.getCurrentContract());
+			MealTicketRecap recap = MealTicketRecap.build(ContractDao.getCurrentContract(person));
 			if(recap == null) {
 				System.out.println(person.toString());
 				continue;
@@ -91,7 +91,7 @@ public class MealTickets  extends Controller {
 		
 		rules.checkIfPermitted(person.office);
 		
-		Contract contract = person.getCurrentContract();
+		Contract contract = ContractDao.getCurrentContract(person);
 		Preconditions.checkNotNull(contract);
 		MealTicketRecap recap = MealTicketRecap.build(contract);
 		
