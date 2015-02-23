@@ -97,9 +97,12 @@ public class Competences extends Controller{
 		
 		IWrapperCompetenceCode competenceCode = null;
 		
-		if(codice==null || codice=="")
-		{
-			//per adesso assumiamo che almeno una attiva ci sia (esempio S1)
+		if(activeCompetenceCodes.size() == 0) {
+			flash.error("Per visualizzare la sezione Competenze è necessario abilitare almeno un codice competenza ad un dipendente.");
+			Competences.enabledCompetences(officeId, null);
+		}
+		
+		if(codice==null || codice=="") {
 			competenceCode = wrapperFactory.create(activeCompetenceCodes.get(0));
 		}
 		else
