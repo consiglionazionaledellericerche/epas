@@ -13,7 +13,10 @@ import models.PersonHourForOvertime;
 import models.PersonReperibilityType;
 import models.TotalOvertime;
 import models.query.QCompetence;
+import models.query.QPerson;
 import models.query.QPersonHourForOvertime;
+import models.query.QPersonReperibility;
+import models.query.QPersonReperibilityType;
 import models.query.QTotalOvertime;
 
 import com.google.common.base.Optional;
@@ -195,14 +198,20 @@ public class CompetenceDao {
 	 * di tipo type associata
 	 */
 	public static List<Competence> getCompetenceInReperibility(PersonReperibilityType type, int year, int month, CompetenceCode code){
-		QCompetence competence = QCompetence.competence;
-		JPQLQuery query = ModelQuery.queryFactory().from(competence)
-				.where(competence.person.reperibility.personReperibilityType.eq(type)
-						.and(competence.year.eq(year).and(competence.month.eq(month)
-								.and(competence.competenceCode.eq(code)))))
-								.orderBy(competence.person.surname.asc());
-		return query.list(competence);
-	}
+	      QCompetence competence = QCompetence.competence;
+	      QPerson person = QPerson.person;
+	      QPersonReperibilityType prt = QPersonReperibilityType.personReperibilityType;
+	      JPQLQuery query = ModelQuery.queryFactory().from(competence)
+	              .leftJoin(competence.person, person)
+	              .leftJoin(person.reperibility.personReperibilityType, prt)
+	              .where(prt.eq(type)
+	            		  .and(competence.year.eq(year)
+	            				  .and(competence.month.eq(month)
+	            						  .and(competence.competenceCode.eq(code)))))
+	            						  .orderBy(competence.person.surname.asc());
+
+	      return query.list(competence);
+	  }
 	
 	/*********************************************************************************************************************************/
 	/*Parte relativa a query su TotalOvertime per la quale, essendo unica, non si è deciso di creare un Dao ad hoc*/
