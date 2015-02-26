@@ -233,6 +233,13 @@ public class CompetenceManager {
 			if( compCode.persons.size() > 0 )
 				codeList.add(compCode);			
 		}			
+		if(codeList.size() == 0){
+			for(Person p : personList){
+				builder.put(p, "", false);
+			}
+			tableRecapCompetence = builder.build();
+			return tableRecapCompetence;
+		}
 		for(Person p : personList) {
 
 			for(CompetenceCode comp : codeList){
