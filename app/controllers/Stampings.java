@@ -17,7 +17,6 @@ import models.PersonTags;
 import models.StampModificationType;
 import models.StampType;
 import models.Stamping;
-import models.User;
 import models.rendering.PersonStampingDayRecap;
 import models.rendering.PersonTroublesInMonthRecap;
 
@@ -243,7 +242,7 @@ public class Stampings extends Controller {
 
 		//lista delle persone che sono state attive nel mese
 		List<Person> activePersons = 
-				PersonDao.list(Optional.<String>absent(), OfficeDao.getOfficeAllowed(Optional.<User>absent()), 
+				PersonDao.list(Optional.<String>absent(), OfficeDao.getOfficeAllowed(Security.getUser().get()), 
 						false, monthBegin, monthEnd, true).list();
 
 		List<PersonTroublesInMonthRecap> missingStampings = new ArrayList<PersonTroublesInMonthRecap>();
@@ -269,7 +268,7 @@ public class Stampings extends Controller {
 		LocalDate dayPresence = new LocalDate(year, month, day);
 
 		List<Person> activePersonsInDay = PersonDao.list(Optional.<String>absent(), 
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, dayPresence, dayPresence, true).list();
+				OfficeDao.getOfficeAllowed(Security.getUser().get()), false, dayPresence, dayPresence, true).list();
 
 		int numberOfInOut = StampingManager.maxNumberOfStampingsInMonth(year, month, day, activePersonsInDay);
 				
@@ -295,7 +294,7 @@ public class Stampings extends Controller {
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
 		
 		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, beginMonth, endMonth, true);
+				OfficeDao.getOfficeAllowed(Security.getUser().get()), false, beginMonth, endMonth, true);
 
 		List<Person> activePersons = simpleResults.paginated(page).getResults();		
 
