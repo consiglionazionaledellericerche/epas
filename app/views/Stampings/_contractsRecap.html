@@ -15,9 +15,9 @@
    		  
    		  <!-- solo last in month -->
  		  #{if mese.isContractLastInMonth(psDto.month, psDto.year)}
- 		    <p>Il numero di giorni lavorativi in sede è di: <strong>${basedWorkingDays}</strong></p> 
+ 		    <p>Il numero di giorni lavorativi in sede è di: <strong>${psDto.basedWorkingDays}</strong></p> 
 	        <p>Tempo disponibile per straordinari: <strong>${mese.progressivoFinalePositivoMese.toHourTime()}</strong></p>
-	        <p>Il numero di riposi compensativi usati nell'anno è <strong>${numberOfCompensatoryRestUntilToday}</strong></p>
+	        <p>Il numero di riposi compensativi usati nell'anno è <strong>${psDto.numberOfCompensatoryRestUntilToday}</strong></p>
             <p>E' possibile utilizzare il residuo dell'anno precedente? <strong>${mese.possibileUtilizzareResiduoAnnoPrecedente==true ? 'sì' : 'no'}</strong></p>
           #{/if}
           #{else}
