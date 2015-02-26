@@ -14,7 +14,6 @@ import models.Office;
 import models.Permission;
 import models.Person;
 import models.Qualification;
-import models.User;
 import models.enumerate.ConfigurationFields;
 import models.query.QPermission;
 import models.query.QRole;
@@ -247,7 +246,7 @@ public class RequestInit extends Controller {
 		}
 		
 		public Set<Office> getAllOfficesAllowed() {
-			return OfficeDao.getOfficeAllowed(Optional.<User>absent());
+			return OfficeDao.getOfficeAllowed(Security.getUser().get());
 		}
 	}
 	
@@ -358,7 +357,7 @@ public class RequestInit extends Controller {
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
 		String name = null;
 		if(Security.getUser().get().person != null) {
-			Set<Office> officeList = OfficeDao.getOfficeAllowed(Optional.<User>absent());
+			Set<Office> officeList = OfficeDao.getOfficeAllowed(Security.getUser().get());
 			if(!officeList.isEmpty()) {
 			List<Person> persons = PersonDao.list(Optional.fromNullable(name), 
 					officeList, false, beginMonth, endMonth, true).list();
@@ -392,7 +391,7 @@ public class RequestInit extends Controller {
 		Integer actualYear = new LocalDate().getYear();
 
 		Optional<ConfGeneral> yearInitUseProgram = ConfGeneralDao.getConfGeneralByField(ConfigurationFields.InitUseProgram.description,
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()).iterator().next());
+				OfficeDao.getOfficeAllowed(Security.getUser().get()).iterator().next());
 		
 		Integer yearBeginProgram;
 		if(yearInitUseProgram.isPresent()){

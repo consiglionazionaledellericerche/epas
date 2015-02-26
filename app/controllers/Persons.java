@@ -201,7 +201,7 @@ public class Persons extends Controller {
 
 
 		List<Contract> contractList = ContractDao.getPersonContractList(person);
-		Set<Office> officeList = OfficeDao.getOfficeAllowed(Optional.<User>absent());
+		Set<Office> officeList = OfficeDao.getOfficeAllowed(Security.getUser().get());
 
 		List<ContractStampProfile> contractStampProfileList =
 				ContractDao.getPersonContractStampProfile(Optional.fromNullable(person), Optional.<Contract>absent());

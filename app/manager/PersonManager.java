@@ -13,12 +13,11 @@ import models.Office;
 import models.Person;
 import models.PersonChildren;
 import models.PersonYear;
+import models.User;
 
 import org.joda.time.LocalDate;
 
 import play.Logger;
-
-import com.google.common.base.Optional;
 
 import dao.ContractDao;
 import dao.OfficeDao;
@@ -82,16 +81,13 @@ public class PersonManager {
 	 * @param administrator
 	 * @return true se la persona è visibile al parametro amministratore
 	 */
-	public boolean isAllowedBy(Person administrator, Person person)
+	public static boolean isAllowedBy(User admin, Person person)
 	{
-		//List<Office> officeAllowed = administrator.getOfficeAllowed();
-		Set<Office> officeAllowed = OfficeDao.getOfficeAllowed(Optional.of(person.user));
-		for(Office office : officeAllowed)
-		{
-			if(office.id.equals(administrator.office.id))
-				return true;
-		}
-		return false;
+		Set<Office> adminOffices = OfficeDao.getOfficeAllowed(admin);
+		Set<Office> officeAllowed = OfficeDao.getOfficeAllowed(person.user);
+		
+		return adminOffices.contains(officeAllowed.iterator().next());
+
 	}
 	
 	/**

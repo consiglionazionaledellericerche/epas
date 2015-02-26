@@ -9,11 +9,8 @@ import java.util.List;
 import javax.inject.Inject;
 
 import manager.MonthRecapManager;
-
 import models.Person;
 import models.PersonDay;
-import models.User;
-
 import org.joda.time.LocalDate;
 
 import play.mvc.Controller;
@@ -75,7 +72,7 @@ public class MonthRecaps extends Controller{
 		Table<Person, String, Integer> tableMonthRecap = TreeBasedTable.create(MonthRecapManager.PersonNameComparator, MonthRecapManager.AbsenceCodeComparator);
 
 		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, monthBegin, monthEnd, true);
+				OfficeDao.getOfficeAllowed(Security.getUser().get()), false, monthBegin, monthEnd, true);
 
 		List<Person> activePersons = simpleResults.paginated(page).getResults();
 		
