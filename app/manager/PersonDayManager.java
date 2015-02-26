@@ -132,7 +132,7 @@ public class PersonDayManager {
 			}
 			
 			if(abs.absenceType.justifiedTimeAtWork == JustifiedTimeAtWork.HalfDay){
-				justifiedTimeAtWork = justifiedTimeAtWork + pd.person.getCurrentWorkingTimeType().workingTimeTypeDays.get(pd.date.getDayOfWeek()).workingTime / 2;
+				justifiedTimeAtWork = justifiedTimeAtWork + ContractDao.getCurrentWorkingTimeType(pd.person).workingTimeTypeDays.get(pd.date.getDayOfWeek()).workingTime / 2;
 				continue;
 			}
 		}

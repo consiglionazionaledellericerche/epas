@@ -1,6 +1,7 @@
 package dao;
 
 import helpers.ModelQuery;
+import it.cnr.iit.epas.DateInterval;
 import it.cnr.iit.epas.DateUtility;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import models.ContractWorkingTimeType;
 import models.InitializationAbsence;
 import models.InitializationTime;
 import models.Person;
+import models.VacationPeriod;
 import models.WorkingTimeType;
 import models.query.QContract;
 import models.query.QContractStampProfile;
@@ -123,10 +125,62 @@ public class ContractDao {
 				return c;
 		}
 		//-----------------------
-		
-		
 		return null;
+	}
+	
+	/**
+	 * Il Contratto corrente per la persona. (Attivo alla data di oggi).
+	 * @param person
+	 * @return null se non esiste contratto attivo alla data di oggi.
+	 */
+	public static Contract getCurrentContract(Person person) {
+		
+		return getContract(LocalDate.now(), person);
+	}
+	
+	/**
+	 * Il Tipo orario attivo per la persona (Attivo alla data di oggi).
+	 * @param person
+	 * @return null se la persona non ha contratto attivo oggi.
+	 */
+	public static WorkingTimeType getCurrentWorkingTimeType(Person person) {
+		
+		Contract currentContract = ContractDao.getCurrentContract(person);
+		
+		if(currentContract == null)
+			return null;
+		
+		//ricerca
+		for(ContractWorkingTimeType cwtt : currentContract.contractWorkingTimeType)
+		{
+			if(DateUtility.isDateIntoInterval(LocalDate.now(), new DateInterval(cwtt.beginDate, cwtt.endDate)))
+			{
+				return cwtt.workingTimeType; 
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Il piano ferie attivo per la person (Attivo alla data di oggi).
+	 * @param person
+	 * @return
+	 */
+	public static VacationPeriod getCurrentVacationPeriod(Person person)
+	{
+		Contract contract = ContractDao.getCurrentContract(person);
+		
+		if(contract == null)
+			return null;
 
+		for(VacationPeriod vp : contract.vacationPeriods) {
+
+			LocalDate now = new LocalDate();
+
+			if(DateUtility.isDateIntoInterval(now, new DateInterval(vp.beginFrom, vp.endTo)))
+				return vp;
+		}
+		return null;
 	}
 	
 	/******************************************************************************************************************************************/
