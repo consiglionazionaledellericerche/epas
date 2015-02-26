@@ -16,7 +16,6 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 
 import controllers.Resecure.NoCheck;
@@ -33,6 +32,12 @@ public class Offices extends Controller {
 
 	@Inject
 	static WrapperModelFunctionFactory wrapperFunctionFactory;
+	
+	@Inject
+	static OfficeDao officeDao;
+	
+	@Inject
+	static OfficeManager officeManager;
 
 	@NoCheck
 	public static void showOffices(){
@@ -55,7 +60,7 @@ public class Offices extends Controller {
 	@NoCheck
 	public static void insertInstitute(Long areaId) {
 
-		Office area = OfficeDao.getOfficeById(areaId);
+		Office area = officeDao.getOfficeById(areaId);
 		if(area == null || !OfficeManager.isArea(area)) {
 
 			flash.error("L'area specificata è inesistente. Operazione annullata.");
@@ -70,7 +75,7 @@ public class Offices extends Controller {
 	@NoCheck
 	public static void saveInstitute(Long areaId, String name, String contraction) {
 
-		Office area = OfficeDao.getOfficeById(areaId);
+		Office area = officeDao.getOfficeById(areaId);
 
 		if(area == null || !OfficeManager.isArea(area)) {
 
@@ -85,8 +90,8 @@ public class Offices extends Controller {
 			flash.error("Valorizzare correttamente entrambi i campi, operazione annullata.");
 			Offices.showOffices();
 		}
-		Office office = OfficeDao.getOfficeByNameOrByContraction(Optional.fromNullable(name), Optional.<String>absent());
-		String message = OfficeManager.checkIfExists(office, name, contraction); 
+		Office office = officeDao.getOfficeByName(name);
+		String message = officeManager.checkIfExists(office, name, contraction); 
 		if(!message.equals("")){
 			flash.error(message);
 			Offices.showOffices();
@@ -94,7 +99,7 @@ public class Offices extends Controller {
 		office = new Office();
 		OfficeManager.saveInstitute(office, area, name, contraction);
 
-		OfficeManager.setPermissionAfterCreation(office);
+		officeManager.setPermissionAfterCreation(office);
 
 		flash.success("Istituto %s con sigla %s correttamente inserito", name, contraction);
 		Offices.showOffices();
@@ -102,7 +107,7 @@ public class Offices extends Controller {
 
 	@NoCheck
 	public static void insertSeat(Long instituteId) {
-		Office institute = OfficeDao.getOfficeById(instituteId);
+		Office institute = officeDao.getOfficeById(instituteId);
 		if(institute==null) {
 
 			flash.error("L'instituto selezionato non esiste. Operazione annullata.");
@@ -117,7 +122,7 @@ public class Offices extends Controller {
 	@NoCheck
 	public static void saveSeat(Long instituteId, String name, String address, String code, String date) {
 
-		Office institute = OfficeDao.getOfficeById(instituteId);
+		Office institute = officeDao.getOfficeById(instituteId);
 		if(institute==null) {
 
 			flash.error("L'instituto selezionato non esiste. Operazione annullata.");
@@ -152,7 +157,7 @@ public class Offices extends Controller {
 		ConfYearManager.buildDefaultConfYear(office, LocalDate.now().getYear());
 		ConfYearManager.buildDefaultConfYear(office, LocalDate.now().getYear() - 1);		
 
-		OfficeManager.setPermissionAfterCreation(office);
+		officeManager.setPermissionAfterCreation(office);
 
 		flash.success("Sede correttamente inserita");
 		Offices.showOffices();
@@ -161,7 +166,7 @@ public class Offices extends Controller {
 	@NoCheck
 	public static void editSeat(Long officeId){
 
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
 
 		if(office==null) {
 
@@ -178,7 +183,7 @@ public class Offices extends Controller {
 	@NoCheck
 	public static void updateSeat(Long officeId, String name, String address, String code, String date) {
 
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
 		if(office==null) {
 
 			flash.error("La sede selezionata non esiste. Operazione annullata.");

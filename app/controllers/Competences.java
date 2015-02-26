@@ -58,6 +58,12 @@ public class Competences extends Controller{
 	@Inject
 	static WrapperModelFunctionFactory wrapperFunctionFactory; 
 	
+	@Inject
+	static OfficeDao officeDao;
+	
+	@Inject
+	static CompetenceManager competenceManager;
+	
 	public static void competences(int year, int month) {
 
 		//controllo dei parametri
@@ -87,7 +93,7 @@ public class Competences extends Controller{
 			officeId = offices.iterator().next().id;
 		}
 
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
 		notFoundIfNull(office);
 		rules.checkIfPermitted(office);
 		if(page==null)
@@ -233,7 +239,7 @@ public class Competences extends Controller{
 			officeId = offices.iterator().next().id;
 		}
 		
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
 		notFoundIfNull(office);
 		
 		rules.checkIfPermitted(office);
@@ -246,11 +252,11 @@ public class Competences extends Controller{
 
 	public static void saveOvertime(Integer year, String numeroOre, Long officeId){
 
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
 		notFoundIfNull(office);
 		
 		rules.checkIfPermitted(office);
-		if(CompetenceManager.saveOvertime(year, numeroOre, officeId)){
+		if(competenceManager.saveOvertime(year, numeroOre, officeId)){
 			flash.success(String.format("Aggiornato monte ore per l'anno %s", year));
 		}
 		else{
@@ -272,7 +278,7 @@ public class Competences extends Controller{
 			officeId = offices.iterator().next().id;
 		}
 
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
 		notFoundIfNull(office);
 
 		rules.checkIfPermitted(office);
@@ -321,7 +327,7 @@ public class Competences extends Controller{
 			officeId = offices.iterator().next().id;
 		}
 
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
 		notFoundIfNull(office);
 		rules.checkIfPermitted(office);
 		LocalDate date = new LocalDate();		

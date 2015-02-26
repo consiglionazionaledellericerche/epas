@@ -1,38 +1,50 @@
 package dao;
 
+import helpers.ModelQuery;
+
 import java.util.List;
 import java.util.Set;
 
-import helpers.ModelQuery;
+import javax.persistence.EntityManager;
+
+import models.Office;
+import models.User;
+import models.UsersRolesOffices;
+import models.query.QOffice;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
-import com.mysema.query.BooleanBuilder;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.mysema.query.jpa.JPQLQuery;
 
 import controllers.Security;
-import models.Office;
-import models.User;
-import models.UsersRolesOffices;
-import models.query.QOffice;
 
 /**
  * 
  * @author dario
  *
  */
-public class OfficeDao {
+public class OfficeDao extends DaoBase {
 
+	@Inject
+	OfficeDao(/*JPQLQueryFactory queryFactory, */Provider<EntityManager> emp) {
+		super(/*queryFactory, */emp);
+	}
+
+	private final static QOffice office = QOffice.office1;
+	
+	
 	/**
 	 * 
 	 * @param id
 	 * @return l'ufficio identificato dall'id passato come parametro
 	 */
-	public static Office getOfficeById(Long id){
-		QOffice office = QOffice.office1;
-		final JPQLQuery query = ModelQuery.queryFactory().from(office)
+	public Office getOfficeById(Long id){
+		
+		final JPQLQuery query = getQueryFactory().from(office)
 				.where(office.id.eq(id));
 		return query.singleResult(office);
 	}
@@ -51,20 +63,28 @@ public class OfficeDao {
 	
 	/**
 	 * 
-	 * @param name
-	 * @return l'ufficio con nome o contrazione uguali a quelli passati come parametro. I parametri sono opzionali, il metodo va usato scegliendo
-	 * quale fra i due parametri si vuole passare per fare la ricerca dell'ufficio. 
+	 * @param contraction
+	 * @return  
 	 */
-	public static Office getOfficeByNameOrByContraction(Optional<String> name, Optional<String> contraction){
+	public Office getOfficeByContraction(String contraction){
+		
+		final JPQLQuery query = getQueryFactory().from(office)
+				.where(office.contraction.eq(contraction));
+		
+		return query.singleResult(office);
+	}
+	
+	/**
+	 * 
+	 * @param name
+	 * @return  
+	 */
+	public static Office getOfficeByName(String name){
 		QOffice office = QOffice.office1;
-		final BooleanBuilder condition = new BooleanBuilder();
-		if(name.isPresent())
-			condition.and(office.name.eq(name.get()));
-		if(contraction.isPresent())
-			condition.and(office.contraction.eq(contraction.get()));
 		
 		final JPQLQuery query = ModelQuery.queryFactory().from(office)
-				.where(condition);
+				.where(office.name.eq(name));
+		
 		return query.singleResult(office);
 	}
 	

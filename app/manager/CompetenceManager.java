@@ -19,6 +19,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
+import com.google.inject.Inject;
 
 import dao.CompetenceCodeDao;
 import dao.CompetenceDao;
@@ -33,6 +34,9 @@ import models.PersonDay;
 import models.TotalOvertime;
 
 public class CompetenceManager {
+	
+	@Inject
+	public OfficeDao officeDao;
 	
 	/**
 	 * 
@@ -133,8 +137,8 @@ public class CompetenceManager {
 	 * @param officeId
 	 * @return true se è stato possibile inserire un aggiornamento per le ore di straordinario totali per l'ufficio office nell'anno year
 	 */
-	public static boolean saveOvertime(Integer year, String numeroOre, Long officeId){
-		Office office = OfficeDao.getOfficeById(officeId);
+	public boolean saveOvertime(Integer year, String numeroOre, Long officeId){
+		Office office = officeDao.getOfficeById(officeId);
 		TotalOvertime total = new TotalOvertime();
 		LocalDate data = new LocalDate();
 		total.date = data;

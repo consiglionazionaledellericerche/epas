@@ -2,6 +2,8 @@ package controllers;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
@@ -28,10 +30,19 @@ public class Administrators extends Controller {
 	private static final String SUDO_USERNAME = "sudo.username";
 	private static final String USERNAME = "username";
 
+	@Inject
+	static UsersRolesOfficesDao usersRolesOfficesDao;
+	
+	@Inject
+	static OfficeManager officeManager;
+	
+	@Inject
+	static OfficeDao officeDao;
+	
 	@NoCheck
 	public static void insertNewAdministrator(Long officeId, Long roleId) {
 		
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
 		//Office office = Office.findById(officeId);
 		if(office==null) {
 			
@@ -71,7 +82,7 @@ public class Administrators extends Controller {
 			Offices.showOffices();
 		}
 		
-		if( !OfficeManager.setUroIfImprove(person.user, office, role, true) ) {
+		if( !officeManager.setUroIfImprove(person.user, office, role, true) ) {
 		
 			flash.error("La persona dispone già dei permessi associati al ruolo selezionato. Operazione annullata.");
 			Offices.showOffices();
@@ -84,7 +95,7 @@ public class Administrators extends Controller {
 	@NoCheck
 	public static void deleteAdministrator(Long officeId, Long personId) {
 		
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
 		//Office office = Office.findById(officeId);
 		if(office==null) {
 			
@@ -100,7 +111,7 @@ public class Administrators extends Controller {
 			Offices.showOffices();
 		}
 		
-		Optional<UsersRolesOffices> uro = UsersRolesOfficesDao.getUsersRolesOfficesByUserAndOffice(person.user, office);
+		Optional<UsersRolesOffices> uro = usersRolesOfficesDao.getUsersRolesOfficesByUserAndOffice(person.user, office);
 		if( !uro.isPresent()) {
 			
 			flash.error("La persona non dispone di alcun ruolo amministrativo. Operazione annullata.");
@@ -142,7 +153,7 @@ public class Administrators extends Controller {
 	@NoCheck //TODO IMPORTANTE VA TOLTO!!!! admin non può chiamarlo
 	public static void deleteSelfAsAdministrator(Long officeId) {
 		
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
 		//Office office = Office.findById(officeId);
 		if(office==null) {
 			

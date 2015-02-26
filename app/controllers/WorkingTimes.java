@@ -52,6 +52,9 @@ public class WorkingTimes extends Controller{
 	@Inject
 	static WrapperModelFunctionFactory wrapperFunctionFactory; 
 	
+	@Inject
+	static OfficeDao officeDao;
+	
 	public static void manageWorkingTime(Office office){
 		
 		Set<Office> offices = OfficeDao.getOfficeAllowed(Optional.<User>absent());
@@ -116,7 +119,7 @@ public class WorkingTimes extends Controller{
 	
 	public static void insertWorkingTime(Long officeId){
 		
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
 		if(office == null) {
 			
 			flash.error("Sede non trovata. Riprovare o effettuare una segnalazione.");
@@ -285,7 +288,7 @@ public class WorkingTimes extends Controller{
 			WorkingTimes.manageWorkingTime(null);
 		}
 		
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
 		if(office == null) {
 			
 			flash.error("La sede inerente il cambio di orario è obbligatoria. Operazione annullata.");
@@ -320,7 +323,7 @@ public class WorkingTimes extends Controller{
 		
 		JPAPlugin.startTx(false);
 		
-		Office office = OfficeDao.getOfficeById(officeId);
+		Office office = officeDao.getOfficeById(officeId);
 		if(office == null) {
 			
 			flash.error("Fornire la sede interessata per il cambio di orario. Operazione annullata.");
