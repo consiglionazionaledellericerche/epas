@@ -7,6 +7,7 @@ import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
 
 import controllers.Security;
 import dao.OfficeDao;
@@ -20,6 +21,12 @@ import models.UsersRolesOffices;
 
 public class OfficeManager {
 
+	@Inject
+	public OfficeDao officeDao;
+	
+	@Inject
+	public UsersRolesOfficesDao usersRolesOfficesDao;
+	
 	/**
 	 * 
 	 * @param area
@@ -76,7 +83,7 @@ public class OfficeManager {
 	 * @return true se permission è presente in almeno un office del sottoalbero, radice compresa, 
 	 * false altrimenti
 	 */
-	public static boolean isRightPermittedOnOfficeTree(Office office, Role role) {
+	public boolean isRightPermittedOnOfficeTree(Office office, Role role) {
 		
 		if(checkUserRoleOffice(Security.getUser().get(), role, office))
 			return true;
@@ -93,9 +100,9 @@ public class OfficeManager {
 	/**
 	 * 	Check del Permesso
 	 */
-	private static boolean checkUserRoleOffice(User user, Role role, Office office) {
+	private boolean checkUserRoleOffice(User user, Role role, Office office) {
 		
-		Optional<UsersRolesOffices> uro = UsersRolesOfficesDao.getUsersRolesOffices(user, role, office);
+		Optional<UsersRolesOffices> uro = usersRolesOfficesDao.getUsersRolesOffices(user, role, office);
 				
 		if(!uro.isPresent())
 			return false;
@@ -108,7 +115,7 @@ public class OfficeManager {
 	 * Assegna i diritti agli amministratori. Da chiamare successivamente alla creazione.
 	 * @param office
 	 */
-	public static void setPermissionAfterCreation(Office office) {
+	public void setPermissionAfterCreation(Office office) {
 
 		User userLogged = Security.getUser().get();
 		User admin = UserDao.getUserByUsernameAndPassword("admin", Optional.<String>absent());
@@ -176,9 +183,9 @@ public class OfficeManager {
 	 * @param ifImprove
 	 * @return true se il ruolo è stato assegnato, false se il ruolo non è stato assegnato (perchè peggiorativo)
 	 */
-	public static Boolean setUroIfImprove(User user, Office office, Role role, boolean ifImprove) {
+	public Boolean setUroIfImprove(User user, Office office, Role role, boolean ifImprove) {
 
-		Optional<UsersRolesOffices> uro = UsersRolesOfficesDao.getUsersRolesOfficesByUserAndOffice(user, office);
+		Optional<UsersRolesOffices> uro = usersRolesOfficesDao.getUsersRolesOfficesByUserAndOffice(user, office);
 			
 		if( !uro.isPresent() || !ifImprove ) {
 
@@ -207,10 +214,10 @@ public class OfficeManager {
 	 * @param office
 	 * @param role
 	 */
-	public static void setUro(User user, Office office, Role role){
+	public void setUro(User user, Office office, Role role){
 
 		UsersRolesOffices newUro = null;
-		Optional<UsersRolesOffices> uro = UsersRolesOfficesDao.getUsersRolesOfficesByUserAndOffice(user, office);
+		Optional<UsersRolesOffices> uro = usersRolesOfficesDao.getUsersRolesOfficesByUserAndOffice(user, office);
 
 		if(!uro.isPresent()) {
 
@@ -353,14 +360,14 @@ public class OfficeManager {
 	 * @param contraction
 	 * @return un messaggio che descrive se ci sono stati errori nel passaggio dei parametri name e contraction
 	 */
-	public static String checkIfExists(Office office, String name, String contraction){
+	public String checkIfExists(Office office, String name, String contraction){
 		String result = "";
 
 		if( office != null ) {
 			result = "Esiste gia' un istituto con nome "+name+" operazione annullata.";
 		}
 
-		office = OfficeDao.getOfficeByNameOrByContraction(Optional.<String>absent(), Optional.fromNullable(contraction));
+		office = officeDao.getOfficeByContraction(contraction);
 		if( office != null ) {
 			result = "Esiste gia' un istituto con sigla "+contraction+ ", operazione annullata.";
 		}

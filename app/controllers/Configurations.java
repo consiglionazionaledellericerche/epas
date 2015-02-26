@@ -34,12 +34,15 @@ public class Configurations extends Controller{
 
 	@Inject
 	static SecurityRules rules;
+	
+	@Inject
+	static OfficeDao officeDao;
 
 	public static void showConfGeneral(Long officeId){
 		Office office = null;
 		Set<Office> offices = OfficeDao.getOfficeAllowed(Optional.<User>absent());
 		if(officeId != null){
-			office = OfficeDao.getOfficeById(officeId);			
+			office = officeDao.getOfficeById(officeId);			
 		}
 		else{
 			office = Security.getUser().get().person.office;
@@ -67,7 +70,7 @@ public class Configurations extends Controller{
 		Office office = null;
 		Set<Office> offices = OfficeDao.getOfficeAllowed(Optional.<User>absent());
 		if(officeId != null){
-			office = OfficeDao.getOfficeById(officeId);
+			office = officeDao.getOfficeById(officeId);
 
 		}
 		else{
@@ -188,7 +191,7 @@ public class Configurations extends Controller{
 		Office office = null;
 
 		if(id != null){
-			office = OfficeDao.getOfficeById(id);
+			office = officeDao.getOfficeById(id);
 		}
 		else{
 			office = Security.getUser().get().person.office;
@@ -243,7 +246,7 @@ public class Configurations extends Controller{
 		Office office = null;
 
 		if(id != null){
-			office = OfficeDao.getOfficeById(id);			
+			office = officeDao.getOfficeById(id);			
 		}
 		else{
 			office = Security.getUser().get().person.office;
