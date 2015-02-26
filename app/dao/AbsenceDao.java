@@ -1,21 +1,11 @@
 package dao;
 
-import java.util.List;
-
-import javax.persistence.EntityManager;
-
-import org.joda.time.LocalDate;
-
 import helpers.ModelQuery;
 import helpers.ModelQuery.SimpleResults;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.mysema.query.BooleanBuilder;
-import com.mysema.query.jpa.JPQLQuery;
-import com.mysema.query.jpa.JPQLQueryFactory;
+import java.util.List;
+
+import javax.persistence.EntityManager;
 
 import models.Absence;
 import models.AbsenceType;
@@ -26,6 +16,15 @@ import models.query.QAbsence;
 import models.query.QAbsenceType;
 import models.query.QAbsenceTypeGroup;
 
+import org.joda.time.LocalDate;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.mysema.query.BooleanBuilder;
+import com.mysema.query.jpa.JPQLQuery;
+
 /**
  *
  * @author dario
@@ -34,32 +33,32 @@ import models.query.QAbsenceTypeGroup;
 public class AbsenceDao extends DaoBase {
 
 	@Inject
-	AbsenceDao(JPQLQueryFactory queryFactory, Provider<EntityManager> emp) {
-		super(queryFactory, emp);
+	AbsenceDao(/*JPQLQueryFactory queryFactory, */Provider<EntityManager> emp) {
+		super(/*queryFactory, */emp);
 	}
 
 	private final static QAbsence absence = QAbsence.absence;
 
-//	public Absence getAbsenceById(Long id){
-//
-//		final JPQLQuery query = getQueryFactory().from(absence)
-//				.where(absence.id.eq(id));
-//		return query.singleResult(absence);
-//
-//	}
+	public Absence getAbsenceById(Long id){
+
+		final JPQLQuery query = getQueryFactory().from(absence)
+				.where(absence.id.eq(id));
+		return query.singleResult(absence);
+
+	}
 
 	/**
 	 *
 	 * @param id
 	 * @return l'assenza con id specificato come parametro
 	 */
-	public static Absence getAbsenceById(Long id){
-
-		final JPQLQuery query = ModelQuery.queryFactory().from(absence)
-				.where(absence.id.eq(id));
-		return query.singleResult(absence);
-
-	}
+//	public static Absence getAbsenceById(Long id){
+//
+//		final JPQLQuery query = ModelQuery.queryFactory().from(absence)
+//				.where(absence.id.eq(id));
+//		return query.singleResult(absence);
+//
+//	}
 	
 	
 

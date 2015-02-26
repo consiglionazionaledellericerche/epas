@@ -64,6 +64,9 @@ public class Absences extends Controller{
 
 	@Inject
 	static SecurityRules rules;
+	
+	@Inject
+	static AbsenceDao absenceDao;
 			
 	public static void absences(int year, int month) {
 		Person person = Security.getUser().get().person;
@@ -307,7 +310,7 @@ public class Absences extends Controller{
 	public static void edit(@Required Long absenceId) {
 		Logger.debug("Edit absence called for absenceId=%d", absenceId);
 
-		Absence absence = AbsenceDao.getAbsenceById(absenceId);
+		Absence absence = absenceDao.getAbsenceById(absenceId);
 		
 		Verify.verify(absence != null,"Assenza specificata inesistente!");
 		
@@ -440,7 +443,7 @@ public class Absences extends Controller{
 	public static void downloadAttachment(long id){
 		
 		Logger.debug("Assenza con id: %d", id);
-		Absence absence = AbsenceDao.getAbsenceById(id); 
+		Absence absence = absenceDao.getAbsenceById(id); 
 		notFoundIfNull(absence);
 		
 		rules.checkIfPermitted(absence.personDay.person.office);
