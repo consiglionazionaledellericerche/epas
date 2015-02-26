@@ -488,17 +488,18 @@ public class CompetenceUtility {
 			// if there are no events and it is not an holiday -> error
 			if (!personDay.isPresent() & LocalDate.now().isAfter(personReperibilityDay.date)) {
 				//if (!person.isHoliday(personReperibilityDay.date)) {
-				if(PersonManager.isHoliday(person, personReperibilityDay.date)){
-					Logger.info("La reperibilità di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personReperibilityDay.date);
-				
-					noStampingDays = (inconsistentAbsenceTable.contains(person, thNoStampings)) ? inconsistentAbsenceTable.get(person, thNoStampings) : new ArrayList<String>();
-					noStampingDays.add(personReperibilityDay.date.toString("dd MMM"));
-					inconsistentAbsenceTable.put(person, thNoStampings, noStampingDays);	
-				}
-			} else if (LocalDate.now().isAfter(personReperibilityDay.date)) {
-				// check for the stampings in working days
-				//if (!person.isHoliday(personReperibilityDay.date) && personDay.get().stampings.isEmpty()) {
-				if(PersonManager.isHoliday(person, personReperibilityDay.date) && personDay.get().stampings.isEmpty()){
+				 if(!PersonManager.isHoliday(person, personReperibilityDay.date)){
+					 Logger.info("La reperibilità di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personReperibilityDay.date);
+
+
+					 noStampingDays = (inconsistentAbsenceTable.contains(person, thNoStampings)) ? inconsistentAbsenceTable.get(person, thNoStampings) : new ArrayList<String>();
+					 noStampingDays.add(personReperibilityDay.date.toString("dd MMM"));
+					 inconsistentAbsenceTable.put(person, thNoStampings, noStampingDays);	
+					   }
+					 } else if (LocalDate.now().isAfter(personReperibilityDay.date)) {
+					 // check for the stampings in working days
+					 //if (!person.isHoliday(personReperibilityDay.date) && personDay.get().stampings.isEmpty()) {
+					 if (!PersonManager.isHoliday(person, personReperibilityDay.date) && personDay.get().stampings.isEmpty()){
 					Logger.info("La reperibilità di %s %s è incompatibile con la sua mancata timbratura nel giorno %s", person.name, person.surname, personDay.get().date);
 					
 					noStampingDays = (inconsistentAbsenceTable.contains(person, thNoStampings)) ? inconsistentAbsenceTable.get(person, thNoStampings) : new ArrayList<String>();	
