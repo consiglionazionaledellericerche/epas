@@ -50,7 +50,7 @@ public class PersonShiftDayDao {
 	 */
 	public static List<PersonShiftDay> getPersonShiftDayByTypeAndPeriod(LocalDate from, LocalDate to, ShiftType type){
 		JPQLQuery query = ModelQuery.queryFactory().from(personShiftDay).where(personShiftDay.date.between(from, to)
-				.and(personShiftDay.shiftType.eq(type))).orderBy(personShiftDay.date.asc());
+		.and(personShiftDay.shiftType.eq(type))).orderBy(personShiftDay.date.asc());
 		return query.list(personShiftDay);
 	}
 	
