@@ -25,7 +25,6 @@ import models.AbsenceTypeGroup;
 import models.Person;
 import models.PersonDay;
 import models.Qualification;
-import models.User;
 import models.enumerate.AbsenceTypeMapping;
 import models.enumerate.AccumulationBehaviour;
 import models.enumerate.AccumulationType;
@@ -526,7 +525,7 @@ public class Absences extends Controller{
 		List<Absence> altreAssenze = Lists.newArrayList();
 		
 		List<Person> personList = PersonDao.list(Optional.<String>absent(), 
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, from, to, true).list();
+				OfficeDao.getOfficeAllowed(Security.getUser().get()), false, from, to, true).list();
 		
 		if(from.isAfter(to)){
 			flash.error("Intervallo non valido (%s - %s)", from,to);

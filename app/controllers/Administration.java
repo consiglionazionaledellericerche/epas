@@ -20,7 +20,6 @@ import models.InitializationTime;
 import models.Person;
 import models.PersonDay;
 import models.PersonDayInTrouble;
-import models.User;
 import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
@@ -32,7 +31,6 @@ import play.mvc.With;
 
 import com.google.common.base.Optional;
 
-import controllers.Resecure.NoCheck;
 import dao.AbsenceTypeDao;
 import dao.ContractDao;
 import dao.OfficeDao;
@@ -89,11 +87,10 @@ public class Administration extends Controller {
 		renderText("Aggiornati i person day delle persone con timbratura fissa");
 	}
 	
-	@NoCheck
 	public static void utilities(){
 
 		final List<Person> personList = PersonDao.list( 
-				Optional.<String>absent(),OfficeDao.getOfficeAllowed(Optional.<User>absent()), 
+				Optional.<String>absent(),OfficeDao.getOfficeAllowed(Security.getUser().get()), 
 				false, LocalDate.now(), LocalDate.now(), true)
 				.list();
 		
@@ -107,10 +104,13 @@ public class Administration extends Controller {
 	 * @param year l'anno dal quale far partire il fix
 	 * @param month il mese dal quale far partire il fix
 	 */
-	@NoCheck
 	public static void fixPersonSituation(Long personId, int year, int month){	
 		//TODO permessi
-		ConsistencyManager.fixPersonSituation(personId, year, month, Security.getUser().get(), false);
+		LocalDate date = new LocalDate(year,month,1);
+		
+		Optional<Person> person = personId == -1 ? Optional.<Person>absent() : Optional.fromNullable(PersonDao.getPersonById(personId));
+		 
+		ConsistencyManager.fixPersonSituation(person,Security.getUser(), date, false);
 
 	}
 	
@@ -127,7 +127,7 @@ public class Administration extends Controller {
 		
 		//List<Person> listPerson = Person.getActivePersonsInDay(new LocalDate(), Security.getOfficeAllowed(), false);
 		List<Person> listPerson = PersonDao.list(Optional.<String>absent(), 
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, LocalDate.now(), LocalDate.now(), true).list();
+				OfficeDao.getOfficeAllowed(Security.getUser().get()), false, LocalDate.now(), LocalDate.now(), true).list();
 		List<PersonResidualMonthRecap> listMese = new ArrayList<PersonResidualMonthRecap>();
 		for(Person person : listPerson)
 		{

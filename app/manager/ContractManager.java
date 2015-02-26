@@ -177,7 +177,7 @@ public class ContractManager {
 				continue;
 			}
 
-			ConsistencyManager.checkPersonDay(contract.person.id, date);
+			ConsistencyManager.checkPersonDay(contract.person, date);
 			date = date.plusDays(1);
 
 
