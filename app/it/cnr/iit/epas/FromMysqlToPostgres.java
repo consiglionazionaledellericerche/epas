@@ -52,6 +52,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 
 import controllers.Administration;
+import controllers.Security;
 import dao.OfficeDao;
 import dao.PersonDao;
 
@@ -283,7 +284,7 @@ public class FromMysqlToPostgres {
 		Logger.debug("Controllo delle persone con timbratura fissa");
 		//List<Person> activePerson = Person.getActivePersons(new LocalDate(2013,1,1));
 		List<Person> activePerson = PersonDao.list(Optional.<String>absent(), 
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false,
+				OfficeDao.getOfficeAllowed(Security.getUser().get()), false,
 				new LocalDate().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), new LocalDate(), true).list();
 
 		for(Person p : activePerson){
