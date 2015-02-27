@@ -1,5 +1,3 @@
-import it.cnr.iit.epas.PersonUtility;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,12 +14,15 @@ import org.apache.commons.mail.EmailException;
 import org.joda.time.LocalDate;
 import org.junit.Test;
 
-import com.google.common.base.Optional;
-
 import play.db.jpa.JPAPlugin;
 import play.test.UnitTest;
 
+import com.google.inject.Inject;
+
 public class ResidualTest extends UnitTest {
+	
+	@Inject
+	public ConsistencyManager consistencyManager;
 	
     @Test
     public void residualLucchesi() throws EmailException {
@@ -33,8 +34,8 @@ public class ResidualTest extends UnitTest {
     
     	
     	//Ricalcolo tutti i personday
-
-     	ConsistencyManager.fixPersonSituation(person.id, 2013, 1, person.user, false);
+    	
+     	consistencyManager.fixPersonSituation(person.id, 2013, 1, person.user, false);
 
     	JPAPlugin.startTx(false);
 
@@ -96,7 +97,7 @@ public class ResidualTest extends UnitTest {
     	
     	//Ricalcolo tutti i personday
 
-    	ConsistencyManager.fixPersonSituation(person.id, 2013, 1, person.user, false);
+    	consistencyManager.fixPersonSituation(person.id, 2013, 1, person.user, false);
 
     	JPAPlugin.startTx(false);
 
@@ -158,7 +159,7 @@ public class ResidualTest extends UnitTest {
     	
     	//Ricalcolo tutti i personday
 
-    	ConsistencyManager.fixPersonSituation(person.id, 2013, 1, person.user, false);
+    	consistencyManager.fixPersonSituation(person.id, 2013, 1, person.user, false);
 
     	JPAPlugin.startTx(false);
 
@@ -220,7 +221,7 @@ public class ResidualTest extends UnitTest {
     	
     	//Ricalcolo tutti i personday
 
-    	ConsistencyManager.fixPersonSituation(person.id, 2013, 1, person.user, false);
+    	consistencyManager.fixPersonSituation(person.id, 2013, 1, person.user, false);
 
     	JPAPlugin.startTx(false);
 
@@ -282,7 +283,7 @@ public class ResidualTest extends UnitTest {
     	
     	//Ricalcolo tutti i personday
 
-    	ConsistencyManager.fixPersonSituation(person.id, 2013, 1, person.user, false);
+    	consistencyManager.fixPersonSituation(person.id, 2013, 1, person.user, false);
 
     	JPAPlugin.startTx(false);
 

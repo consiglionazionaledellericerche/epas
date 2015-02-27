@@ -33,6 +33,8 @@ import com.google.common.io.Resources;
 
 import controllers.Security;
 import dao.OfficeDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperOffice;
 
 /**
  * Carica nel database dell'applicazione i dati iniziali predefiniti nel caso questi non siano già presenti 
@@ -45,6 +47,9 @@ public class Bootstrap extends Job<Void> {
 	
 	@Inject
 	static OfficeDao officeDao;
+	
+	@Inject
+	static IWrapperFactory wrapperFactory;
 
 	public static class DatasetImport implements Work {
 
@@ -148,7 +153,9 @@ public class Bootstrap extends Job<Void> {
 		List<Office> officeList = Office.findAll();
 		for(Office office : officeList) {
 			
-			if( !officeDao.isSeat(office) )
+			IWrapperOffice wOffice = wrapperFactory.create(office);
+			
+			if( !wOffice.isSeat() )
 				continue;
 			
 			boolean hasBadgeReader = false;

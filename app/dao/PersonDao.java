@@ -45,7 +45,7 @@ public final class PersonDao {
 	private final static QContract contract = QContract.contract;
 	
 	@Inject
-	static OfficeDao officeDao;
+	public OfficeDao officeDao;
 
 	/**
 	 * @param name

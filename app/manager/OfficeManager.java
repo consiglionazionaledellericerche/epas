@@ -18,6 +18,8 @@ import dao.OfficeDao;
 import dao.RoleDao;
 import dao.UserDao;
 import dao.UsersRolesOfficesDao;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperOffice;
 
 public class OfficeManager {
 
@@ -29,6 +31,9 @@ public class OfficeManager {
 	
 	@Inject
 	public UserDao userDao;
+	
+	@Inject
+	public IWrapperFactory wrapperFactory;
 	
 	/**
 	 * 
@@ -130,10 +135,13 @@ public class OfficeManager {
 		setUro(userLogged, office, roleAdmin);
 
 		List<Office> officeList = Lists.newArrayList();
-		if(officeDao.isInstitute(office)) {
+		
+		IWrapperOffice wOffice = wrapperFactory.create(office);
+		
+		if(wOffice.isInstitute()) {
 			officeList.add(officeDao.getSuperArea(office));
 		}
-		if(officeDao.isSeat(office)) {
+		if(wOffice.isSeat()) {
 			officeList.add(officeDao.getSuperArea(office));
 			officeList.add(officeDao.getSuperInstitute(office));
 		}

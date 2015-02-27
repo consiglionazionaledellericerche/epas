@@ -15,11 +15,11 @@ import dao.UserDao;
 
 
 @SuppressWarnings("rawtypes")
-//@On("0 1 5 * * ?")
+@On("0 1 5 * * ?")
 
 //@On("1 /1 * * * ?")
 //@OnApplicationStart
-@On("0 /1 * * * ?")
+
 //@On("0 30 14 * * ?")
 
 public class DarkNightJob extends Job{

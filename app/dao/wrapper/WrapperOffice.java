@@ -49,6 +49,49 @@ public class WrapperOffice implements IWrapperOffice {
 		return value;
 	}
 	
+	/**
+	 * Area livello 0
+	 * @return true se this è una Area, false altrimenti
+	 */
+	public boolean isArea() {
+
+		if(this.value.office != null) 
+			return false;
+
+		return true;
+	}
+
+	/**
+	 * Istituto livello 1
+	 * @return true se this è un Istituto, false altrimenti
+	 */
+	public boolean isInstitute() {
+
+		if(this.isArea())
+			return false;
+
+		if(this.value.office.office != null)
+			return false;
+
+		return true;
+	}
+
+	/**
+	 * Sede livello 2
+	 * @return
+	 */
+	public boolean isSeat() {
+
+		if(this.isArea())
+			return false;
+
+		if(this.isInstitute())
+			return false;
+
+		return true;
+
+	}
+	
   	/**
 	 * Verifica la visibilità dell'office rispetto ai ruoli dell'amministratore loggato.
 	 * (Almeno un office del sottoalbero radice compresa deve essere amministrato dall'user
@@ -102,7 +145,7 @@ public class WrapperOffice implements IWrapperOffice {
   	 */
   	public List<IWrapperOffice> getWrapperInstitutes() {
   		
-  		if(!officeDao.isArea(this.value))
+  		if(!this.isArea())
   			return null;
   		
   		List<IWrapperOffice> wrapperSubOffice = FluentIterable
@@ -118,7 +161,7 @@ public class WrapperOffice implements IWrapperOffice {
   	 */
   	public List<IWrapperOffice> getWrapperSeats() {
   		
-  		if(!officeDao.isInstitute(this.value))
+  		if(!this.isInstitute())
   			return null;
   		
   		List<IWrapperOffice> wrapperSubOffice = FluentIterable
