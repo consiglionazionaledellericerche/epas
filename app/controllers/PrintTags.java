@@ -18,7 +18,6 @@ import models.Person;
 import models.PersonDay;
 import models.StampModificationType;
 import models.StampType;
-import models.User;
 import models.enumerate.ConfigurationFields;
 import models.rendering.PersonStampingDayRecap;
 
@@ -104,7 +103,7 @@ public class PrintTags extends Controller{
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		LocalDate date = new LocalDate(year, month,1);
 		List<Person> personList = PersonDao.list(Optional.<String>absent(), 
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, date, date.dayOfMonth().withMaximumValue(), true).list();
+				OfficeDao.getOfficeAllowed(Security.getUser().get()), false, date, date.dayOfMonth().withMaximumValue(), true).list();
 		render(personList, date, year, month);
 	}
 	

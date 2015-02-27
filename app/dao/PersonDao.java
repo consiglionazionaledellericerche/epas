@@ -14,7 +14,6 @@ import models.Contract;
 import models.Office;
 import models.Person;
 import models.PersonDay;
-import models.User;
 import models.query.QCompetenceCode;
 import models.query.QContract;
 import models.query.QPerson;
@@ -31,6 +30,8 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
+
+import controllers.Security;
 
 /**
  * DAO per le person.
@@ -134,7 +135,7 @@ public final class PersonDao {
 		LocalDate startEra = new LocalDate(1900,1,1);
 		LocalDate endEra = new LocalDate(9999,1,1);
 		return list(Optional.fromNullable(name),
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, startEra,
+				OfficeDao.getOfficeAllowed(Security.getUser().get()), false, startEra,
 				endEra, false).list();
 	}
 

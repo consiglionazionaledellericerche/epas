@@ -418,7 +418,7 @@ public class Shift extends Controller {
 			}
 
 			// seleziona i giorni di turno di tutte le persone associate al turno 'shiftType' da inizio a fine mese
-			List<PersonShiftDay> personShiftDays = PersonShiftDayDao.getPersonShiftDayByTypeAndPeriod(firstOfMonth, firstOfMonth, shiftType);
+			List<PersonShiftDay> personShiftDays = PersonShiftDayDao.getPersonShiftDayByTypeAndPeriod(firstOfMonth, lastOfMonth, shiftType);
 				//PersonShiftDay.find("SELECT psd FROM PersonShiftDay psd WHERE date BETWEEN ? AND ? AND psd.shiftType = ? ORDER by date", firstOfMonth, lastOfMonth, shiftType).fetch();
 			
 			// conta e memorizza i giorni di turno per ogni persona

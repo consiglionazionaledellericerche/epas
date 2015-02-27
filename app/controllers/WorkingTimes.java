@@ -17,7 +17,6 @@ import manager.WorkingTimeTypeManager;
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Office;
-import models.User;
 import models.WorkingTimeType;
 import models.WorkingTimeTypeDay;
 
@@ -29,7 +28,6 @@ import play.mvc.Controller;
 import play.mvc.With;
 import security.SecurityRules;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 
 import dao.ContractDao;
@@ -54,7 +52,7 @@ public class WorkingTimes extends Controller{
 	
 	public static void manageWorkingTime(Office office){
 		
-		Set<Office> offices = OfficeDao.getOfficeAllowed(Optional.<User>absent());
+		Set<Office> offices = OfficeDao.getOfficeAllowed(Security.getUser().get());
 		if(office == null || office.id == null) {
 			//TODO se offices è vuota capire come comportarsi
 			office = offices.iterator().next();
