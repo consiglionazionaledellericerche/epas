@@ -76,7 +76,7 @@ public class YearlyAbsences extends Controller{
 		abt.code = "Totale";		
 		
 		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), 
+				OfficeDao.getOfficeAllowed(Security.getUser().get()), 
 				false, new LocalDate(year, month,1), 
 				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue(), true);
 

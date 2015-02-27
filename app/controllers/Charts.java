@@ -15,8 +15,8 @@ import manager.ChartsManager.Year;
 import models.CompetenceCode;
 import models.Office;
 import models.Person;
-import models.User;
 import models.exports.PersonOvertime;
+
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
@@ -57,7 +57,7 @@ public class Charts extends Controller{
 		month = params.get("monthChart", Integer.class);
 		//List<Person> personeProva = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), true);
 		List<Person> personeProva = PersonDao.list(Optional.<String>absent(),
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), true, 
+				OfficeDao.getOfficeAllowed(Security.getUser().get()), true, 
 				new LocalDate(year,month,1), new LocalDate(year, month,1).dayOfMonth().withMaximumValue(), true).list();
 		
 		
@@ -94,7 +94,7 @@ public class Charts extends Controller{
 			val = result.get().longValue();
 
 		List<Person> personeProva = PersonDao.list(Optional.<String>absent(),
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), true, new LocalDate(year,1,1), new LocalDate(year,12,31), true).list();
+				OfficeDao.getOfficeAllowed(Security.getUser().get()), true, new LocalDate(year,1,1), new LocalDate(year,12,31), true).list();
 		int totaleOreResidue = ChartsManager.calculateTotalResidualHour(personeProva, year);
 
 		render(annoList, val, totaleOreResidue);
@@ -162,7 +162,7 @@ public class Charts extends Controller{
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		
 		List<Person> personList = PersonDao.list(Optional.<String>absent(), 
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), true, new LocalDate(year,1,1), LocalDate.now(), true).list();
+				OfficeDao.getOfficeAllowed(Security.getUser().get()), true, new LocalDate(year,1,1), LocalDate.now(), true).list();
 		Logger.debug("Esporto dati per %s persone", personList.size());
 		FileInputStream inputStream = ChartsManager.export(year, personList);
 		
@@ -175,7 +175,7 @@ public class Charts extends Controller{
 		offices.add(Security.getUser().get().person.office);
 		String name = null;
 		List<Person> personList = PersonDao.list(Optional.fromNullable(name), 
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, LocalDate.now(), LocalDate.now(), true).list();
+				OfficeDao.getOfficeAllowed(Security.getUser().get()), false, LocalDate.now(), LocalDate.now(), true).list();
 		render(personList);
 	}
 

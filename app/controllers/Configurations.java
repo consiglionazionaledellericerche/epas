@@ -15,12 +15,12 @@ import manager.ConfigurationsManager.MessageResult;
 import models.ConfGeneral;
 import models.ConfYear;
 import models.Office;
-import models.User;
 import models.enumerate.ConfigurationFields;
 
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
+
 import dao.ConfGeneralDao;
 import dao.ConfYearDao;
 import dao.OfficeDao;
@@ -37,7 +37,7 @@ public class Configurations extends Controller{
 
 	public static void showConfGeneral(Long officeId){
 		Office office = null;
-		Set<Office> offices = OfficeDao.getOfficeAllowed(Optional.<User>absent());
+		Set<Office> offices = OfficeDao.getOfficeAllowed(Security.getUser().get());
 		if(officeId != null){
 			office = OfficeDao.getOfficeById(officeId);			
 		}
@@ -65,7 +65,7 @@ public class Configurations extends Controller{
 	public static void showConfYear(Long officeId){
 
 		Office office = null;
-		Set<Office> offices = OfficeDao.getOfficeAllowed(Optional.<User>absent());
+		Set<Office> offices = OfficeDao.getOfficeAllowed(Security.getUser().get());
 		if(officeId != null){
 			office = OfficeDao.getOfficeById(officeId);
 

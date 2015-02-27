@@ -44,7 +44,7 @@ public class MealTickets  extends Controller {
 		rules.checkIfPermitted();
 		
 		final List<Person> personList = PersonDao.list( 
-				Optional.fromNullable(name), OfficeDao.getOfficeAllowed(Optional.<User>absent()), 
+				Optional.fromNullable(name), OfficeDao.getOfficeAllowed(Security.getUser().get()), 
 				false, LocalDate.now(), LocalDate.now(), true)
 				.list();
 

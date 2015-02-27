@@ -588,7 +588,7 @@ public class PersonDayManager {
 		}
 		
 		//Prendo la lista ordinata di tutti i personday della persona fino ad oggi e effettuo il ricalcolo su tutti
-		List<PersonDay> personDays = PersonDayDao.getPersonDayInPeriod(person, date, Optional.fromNullable(LocalDate.now()), true);
+		List<PersonDay> personDays = PersonDayDao.getPersonDayInPeriod(person, date, Optional.of(LocalDate.now()), true);
 
 		for(PersonDay pd : personDays){
 			PersonDayManager.populatePersonDay(pd);
