@@ -53,7 +53,7 @@ public class OfficeDao extends DaoBase {
 	 * 
 	 * @return la lista di tutti gli uffici presenti sul database
 	 */
-	public static List<Office> getAllOffices(){
+	public List<Office> getAllOffices(){
 		QOffice office = QOffice.office1;
 		final JPQLQuery query = ModelQuery.queryFactory().from(office);
 		
@@ -79,7 +79,7 @@ public class OfficeDao extends DaoBase {
 	 * @param name
 	 * @return  
 	 */
-	public static Office getOfficeByName(String name){
+	public Office getOfficeByName(String name){
 		QOffice office = QOffice.office1;
 		
 		final JPQLQuery query = ModelQuery.queryFactory().from(office)
@@ -93,7 +93,7 @@ public class OfficeDao extends DaoBase {
 	 * @param code
 	 * @return l'ufficio associato al codice passato come parametro
 	 */
-	public static Office getOfficeByCode(Integer code){
+	public Office getOfficeByCode(Integer code){
 		QOffice office = QOffice.office1;
 		final JPQLQuery query = ModelQuery.queryFactory().from(office)
 				.where(office.code.eq(code));
@@ -106,7 +106,7 @@ public class OfficeDao extends DaoBase {
 	 * @param code
 	 * @return la lista di uffici che possono avere associato il codice code passato come parametro
 	 */
-	public static List<Office> getOfficesByCode(Integer code){
+	public List<Office> getOfficesByCode(Integer code){
 		QOffice office = QOffice.office1;
 		final JPQLQuery query = ModelQuery.queryFactory().from(office)
 				.where(office.code.eq(code));
@@ -117,7 +117,7 @@ public class OfficeDao extends DaoBase {
 	 *  La lista di tutte le Aree definite nel db ePAS (Area -> campo office = null)
 	 * @return la lista delle aree presenti in anagrafica
 	 */
-	public static List<Office> getAreas(){
+	public List<Office> getAreas(){
 		QOffice office = QOffice.office1;
 		final JPQLQuery query = ModelQuery.queryFactory().from(office)
 				.where(office.office.isNull());

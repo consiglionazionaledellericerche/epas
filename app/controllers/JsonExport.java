@@ -6,6 +6,8 @@ package controllers;
 import java.util.HashSet;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import models.Office;
 import models.Person;
 
@@ -30,6 +32,9 @@ import dao.PersonDao;
 @With(Secure.class)
 public class JsonExport extends Controller {
 
+	@Inject
+	static OfficeDao officeDao;
+	
 	final static class PersonInfo {
 		private final String nome;
 		private final String cognome;
@@ -50,10 +55,10 @@ public class JsonExport extends Controller {
 	//TODO: serve un permesso più specifico?
 	@Check(Security.INSERT_AND_UPDATE_ADMINISTRATOR)
 	public static void activePersons() {
-		List<Office> offices = OfficeDao.getAllOffices();
-		//List<Office> offices = Office.findAll();
-		//List<Person> activePersons = Person.getActivePersonsInDay(LocalDate.now(), offices, false);
-		List<Person> activePersons = PersonDao.list(Optional.<String>absent(), new HashSet(offices), false, LocalDate.now(), LocalDate.now(), true).list();
+		
+		List<Office> offices = officeDao.getAllOffices();
+		List<Person> activePersons = PersonDao.list(Optional.<String>absent(), 
+				new HashSet<Office>(offices), false, LocalDate.now(), LocalDate.now(), true).list();
 		Logger.debug("activePersons.size() = %d", activePersons.size());
 		
 		List<PersonInfo> activePersonInfos = FluentIterable.from(activePersons).transform(new Function<Person, PersonInfo>() {
