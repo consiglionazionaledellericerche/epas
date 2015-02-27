@@ -61,7 +61,7 @@ public class Offices extends Controller {
 	public static void insertInstitute(Long areaId) {
 
 		Office area = officeDao.getOfficeById(areaId);
-		if(area == null || !OfficeManager.isArea(area)) {
+		if(area == null || !officeDao.isArea(area)) {
 
 			flash.error("L'area specificata è inesistente. Operazione annullata.");
 			Offices.showOffices();
@@ -77,7 +77,7 @@ public class Offices extends Controller {
 
 		Office area = officeDao.getOfficeById(areaId);
 
-		if(area == null || !OfficeManager.isArea(area)) {
+		if(area == null || !officeDao.isArea(area)) {
 
 			flash.error("L'area specificata è inesistente. Operazione annullata.");
 			Offices.showOffices();
@@ -97,7 +97,7 @@ public class Offices extends Controller {
 			Offices.showOffices();
 		}
 		office = new Office();
-		OfficeManager.saveInstitute(office, area, name, contraction);
+		officeManager.saveInstitute(office, area, name, contraction);
 
 		officeManager.setPermissionAfterCreation(office);
 
@@ -150,7 +150,7 @@ public class Offices extends Controller {
 			Offices.showOffices();
 		}
 		Office office = new Office();
-		OfficeManager.saveSeat(office, name, address, code, date, institute);
+		officeManager.saveSeat(office, name, address, code, date, institute);
 
 		ConfGeneralManager.buildDefaultConfGeneral(office);
 
@@ -215,7 +215,7 @@ public class Offices extends Controller {
 				Offices.showOffices();
 			}
 		}
-		OfficeManager.updateSeat(office, name, address, code, date);
+		officeManager.updateSeat(office, name, address, code, date);
 		
 		flash.success("Sede correttamente modificata");
 		Offices.showOffices();

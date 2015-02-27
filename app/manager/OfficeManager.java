@@ -1,7 +1,11 @@
 package manager;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import models.Office;
+import models.Role;
+import models.User;
+import models.UsersRolesOffices;
 
 import org.joda.time.LocalDate;
 
@@ -14,10 +18,6 @@ import dao.OfficeDao;
 import dao.RoleDao;
 import dao.UserDao;
 import dao.UsersRolesOfficesDao;
-import models.Office;
-import models.Role;
-import models.User;
-import models.UsersRolesOffices;
 
 public class OfficeManager {
 
@@ -27,13 +27,16 @@ public class OfficeManager {
 	@Inject
 	public UsersRolesOfficesDao usersRolesOfficesDao;
 	
+	@Inject
+	public UserDao userDao;
+	
 	/**
 	 * 
 	 * @param area
 	 * @param name
 	 * @param contraction
 	 */
-	public static void saveInstitute(Office office, Office area, String name, String contraction){
+	public void saveInstitute(Office office, Office area, String name, String contraction){
 
 		office.name = name;
 		office.contraction = contraction;
@@ -49,7 +52,7 @@ public class OfficeManager {
 	 * @param date
 	 * @param institute
 	 */
-	public static void saveSeat(Office office, String name, String address, String code, String date, Office institute){
+	public void saveSeat(Office office, String name, String address, String code, String date, Office institute){
 
 		office.name = name;
 		office.address = address;
@@ -67,7 +70,7 @@ public class OfficeManager {
 	 * @param code
 	 * @param date
 	 */
-	public static void updateSeat(Office office, String name, String address, String code, String date){
+	public void updateSeat(Office office, String name, String address, String code, String date){
 		office.name = name;
 		office.address = address;
 		office.code = getInteger(code);
@@ -127,24 +130,24 @@ public class OfficeManager {
 		setUro(userLogged, office, roleAdmin);
 
 		List<Office> officeList = Lists.newArrayList();
-		if(isInstitute(office)) {
-			officeList.add(getSuperArea(office));
+		if(officeDao.isInstitute(office)) {
+			officeList.add(officeDao.getSuperArea(office));
 		}
-		if(isSeat(office)) {
-			officeList.add(getSuperArea(office));
-			officeList.add(getSuperInstitute(office));
+		if(officeDao.isSeat(office)) {
+			officeList.add(officeDao.getSuperArea(office));
+			officeList.add(officeDao.getSuperInstitute(office));
 		}
 
 		for(Office superOffice : officeList) {
 
 			//Attribuire roleAdminMini a coloro che hanno roleAdminMini su il super office
-			for(User user : getUserByOfficeAndRole(superOffice, roleAdminMini)) {
+			for(User user : userDao.getUserByOfficeAndRole(superOffice, roleAdminMini)) {
 
 				setUroIfImprove(user, office, roleAdminMini, true);
 			}
 
 			//Attribuire roleAdmin a coloro che hanno roleAdmin su area il super office
-			for(User user : getUserByOfficeAndRole(superOffice, roleAdmin)) {
+			for(User user : userDao.getUserByOfficeAndRole(superOffice, roleAdmin)) {
 
 				setUroIfImprove(user, office, roleAdmin, true);
 			}
@@ -153,25 +156,7 @@ public class OfficeManager {
 
 	}
 	
-	/**
-	 * Ritorna la lista degli utenti che hanno ruolo role nell'ufficio office
-	 * @param office
-	 * @param role
-	 * @return
-	 */
-	public static List<User> getUserByOfficeAndRole(Office office, Role role) {
-		
-		List<User> userList = Lists.newArrayList();
-		
-		for(UsersRolesOffices uro : office.usersRolesOffices) {
-			
-			if(uro.role.id.equals(role.id)) {
-				
-				userList.add(uro.user);
-			}
-		}
-		return userList;
-	}
+
 
 	/**
 	 * Setta il ruolo per la tripla <user,office,role>. Se non esiste viene creato.
@@ -235,101 +220,6 @@ public class OfficeManager {
 
 	}
 	
-	 /**
-     * Ritorna la lista di tutte le sedi gerarchicamente sotto a Office
-     * @return
-     */
-    public static List<Office> getSubOfficeTree(Office o) {
-    	
-    	List<Office> officeToCompute = new ArrayList<Office>();
-    	List<Office> officeComputed = new ArrayList<Office>();
-    	
-    	officeToCompute.add(o);
-    	while(officeToCompute.size() != 0) {
-    		
-    		Office office = officeToCompute.get(0);
-    		officeToCompute.remove(office);
-    		
-    		for(Office remoteOffice : office.subOffices) {
-
-    			officeToCompute.add((Office)remoteOffice);
-    		}
-    		
-    		officeComputed.add(office);
-    	}
-    	return officeComputed;
-    }
-
-	/**
-	 * Ritorna l'area padre se office è un istituto o una sede
-	 * @return
-	 */
-	public static Office getSuperArea(Office office) {
-
-		if(isSeat(office))
-			return office.office.office;
-
-		if(isInstitute(office))
-			return office.office;
-
-		return null;
-	}
-
-	/**
-	 * Ritorna l'istituto padre se this è una sede
-	 * @return 
-	 */
-	public static Office getSuperInstitute(Office office) {
-
-		if(!isSeat(office))
-			return null;
-		return office.office;
-	}
-
-	/**
-	 * Area livello 0
-	 * @return true se this è una Area, false altrimenti
-	 */
-	public static boolean isArea(Office office) {
-
-		if(office.office != null) 
-			return false;
-
-		return true;
-	}
-
-	/**
-	 * Istituto livello 1
-	 * @return true se this è un Istituto, false altrimenti
-	 */
-	public static boolean isInstitute(Office office) {
-
-		if(isArea(office))
-			return false;
-
-		if(office.office.office != null)
-			return false;
-
-		return true;
-	}
-
-	/**
-	 * Sede livello 2
-	 * @return
-	 */
-	public static boolean isSeat(Office office) {
-
-		if(isArea(office))
-			return false;
-
-		if(isInstitute(office))
-			return false;
-
-		return true;
-
-	}
-
-
 	public static Integer getInteger(String parameter)
 	{
 		try{

@@ -76,7 +76,7 @@ public class Administrators extends Controller {
 		}
 		
 		//Per adesso faccio inserire solo alle sedi
-		if( !OfficeManager.isSeat(office) ) {
+		if( !officeDao.isSeat(office) ) {
 			
 			flash.error("Impossibile assegnare amministratori a livello diverso da quello Sede. Operazione annullata.");
 			Offices.showOffices();

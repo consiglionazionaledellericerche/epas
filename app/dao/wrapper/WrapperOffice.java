@@ -17,6 +17,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
+import dao.OfficeDao;
 import dao.PersonDao;
 import dao.RoleDao;
 import dao.wrapper.function.WrapperModelFunctionFactory;
@@ -29,16 +30,18 @@ public class WrapperOffice implements IWrapperOffice {
 
 	private final Office value;
 	private final OfficeManager officeManager;
+	private final OfficeDao officeDao;
 	private final WrapperModelFunctionFactory wrapperFunctionFactory;
 	
 	private Boolean isEditable = null;
 		
 	@Inject
 	WrapperOffice(@Assisted Office office, OfficeManager officeManager,
-			WrapperModelFunctionFactory wrapperFuncionFactory) {
+			WrapperModelFunctionFactory wrapperFuncionFactory, OfficeDao officeDao) {
 		value = office;
 		this.officeManager = officeManager;
 		this.wrapperFunctionFactory = wrapperFuncionFactory;
+		this.officeDao = officeDao;
 	}
 
 	@Override
@@ -87,7 +90,7 @@ public class WrapperOffice implements IWrapperOffice {
        	LocalDate date = new LocalDate();
    
     	List<Person> activePerson = PersonDao.list(Optional.<String>absent(), 
-    			Sets.newHashSet(officeManager.getSubOfficeTree(value)), false, date, date, true).list();
+    			Sets.newHashSet(officeDao.getSubOfficeTree(value)), false, date, date, true).list();
     	    			
     	return activePerson;
     }
@@ -99,7 +102,7 @@ public class WrapperOffice implements IWrapperOffice {
   	 */
   	public List<IWrapperOffice> getWrapperInstitutes() {
   		
-  		if(!officeManager.isArea(this.value))
+  		if(!officeDao.isArea(this.value))
   			return null;
   		
   		List<IWrapperOffice> wrapperSubOffice = FluentIterable
@@ -115,7 +118,7 @@ public class WrapperOffice implements IWrapperOffice {
   	 */
   	public List<IWrapperOffice> getWrapperSeats() {
   		
-  		if(!OfficeManager.isInstitute(this.value))
+  		if(!officeDao.isInstitute(this.value))
   			return null;
   		
   		List<IWrapperOffice> wrapperSubOffice = FluentIterable
@@ -131,7 +134,7 @@ public class WrapperOffice implements IWrapperOffice {
     	
     	List<String> bgList = Lists.newArrayList();
     	
-    	List<Office> officeList = officeManager.getSubOfficeTree(this.value);
+    	List<Office> officeList = officeDao.getSubOfficeTree(this.value);
     	
     	for(Office office : officeList) {
     		
