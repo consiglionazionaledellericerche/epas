@@ -4,7 +4,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-import manager.OfficeManager;
+import javax.inject.Inject;
+
 import models.Office;
 import models.Permission;
 import models.Qualification;
@@ -31,6 +32,7 @@ import play.libs.Codec;
 import com.google.common.io.Resources;
 
 import controllers.Security;
+import dao.OfficeDao;
 
 /**
  * Carica nel database dell'applicazione i dati iniziali predefiniti nel caso questi non siano già presenti 
@@ -40,6 +42,9 @@ import controllers.Security;
  */
 @OnApplicationStart
 public class Bootstrap extends Job<Void> {
+	
+	@Inject
+	static OfficeDao officeDao;
 
 	public static class DatasetImport implements Work {
 
@@ -143,7 +148,7 @@ public class Bootstrap extends Job<Void> {
 		List<Office> officeList = Office.findAll();
 		for(Office office : officeList) {
 			
-			if( !OfficeManager.isSeat(office) )
+			if( !officeDao.isSeat(office) )
 				continue;
 			
 			boolean hasBadgeReader = false;

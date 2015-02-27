@@ -1,7 +1,6 @@
 package dao;
 
-import helpers.ModelQuery;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -55,7 +54,7 @@ public class OfficeDao extends DaoBase {
 	 */
 	public List<Office> getAllOffices(){
 		QOffice office = QOffice.office1;
-		final JPQLQuery query = ModelQuery.queryFactory().from(office);
+		final JPQLQuery query = getQueryFactory().from(office);
 		
 		return query.list(office);
 				
@@ -82,7 +81,7 @@ public class OfficeDao extends DaoBase {
 	public Office getOfficeByName(String name){
 		QOffice office = QOffice.office1;
 		
-		final JPQLQuery query = ModelQuery.queryFactory().from(office)
+		final JPQLQuery query = getQueryFactory().from(office)
 				.where(office.name.eq(name));
 		
 		return query.singleResult(office);
@@ -95,7 +94,7 @@ public class OfficeDao extends DaoBase {
 	 */
 	public Office getOfficeByCode(Integer code){
 		QOffice office = QOffice.office1;
-		final JPQLQuery query = ModelQuery.queryFactory().from(office)
+		final JPQLQuery query = getQueryFactory().from(office)
 				.where(office.code.eq(code));
 		return query.singleResult(office);
 		
@@ -108,7 +107,7 @@ public class OfficeDao extends DaoBase {
 	 */
 	public List<Office> getOfficesByCode(Integer code){
 		QOffice office = QOffice.office1;
-		final JPQLQuery query = ModelQuery.queryFactory().from(office)
+		final JPQLQuery query = getQueryFactory().from(office)
 				.where(office.code.eq(code));
 		return query.list(office);
 	}
@@ -119,9 +118,106 @@ public class OfficeDao extends DaoBase {
 	 */
 	public List<Office> getAreas(){
 		QOffice office = QOffice.office1;
-		final JPQLQuery query = ModelQuery.queryFactory().from(office)
+		final JPQLQuery query = getQueryFactory().from(office)
 				.where(office.office.isNull());
 		return query.list(office);
+	}
+	
+	/**
+     * Ritorna la lista di tutte le sedi gerarchicamente sotto a Office
+     * @return
+     */
+    public List<Office> getSubOfficeTree(Office o) {
+    	
+    	List<Office> officeToCompute = new ArrayList<Office>();
+    	List<Office> officeComputed = new ArrayList<Office>();
+    	
+    	officeToCompute.add(o);
+    	while(officeToCompute.size() != 0) {
+    		
+    		Office office = officeToCompute.get(0);
+    		officeToCompute.remove(office);
+    		
+    		for(Office remoteOffice : office.subOffices) {
+
+    			officeToCompute.add((Office)remoteOffice);
+    		}
+    		
+    		officeComputed.add(office);
+    	}
+    	return officeComputed;
+    }
+    
+	/**
+	 * Ritorna l'area padre se office è un istituto o una sede
+	 * @return
+	 */
+	public Office getSuperArea(Office office) {
+
+		if(isSeat(office))
+			return office.office.office;
+
+		if(isInstitute(office))
+			return office.office;
+
+		return null;
+	}
+
+	/**
+	 * Ritorna l'istituto padre se this è una sede
+	 * @return 
+	 */
+	public Office getSuperInstitute(Office office) {
+
+		if(!isSeat(office))
+			return null;
+		return office.office;
+	}
+	
+	/**
+	 * FIXME spostare nel wrapperOffice
+	 * Area livello 0
+	 * @return true se this è una Area, false altrimenti
+	 */
+	public boolean isArea(Office office) {
+
+		if(office.office != null) 
+			return false;
+
+		return true;
+	}
+
+	/**
+	 * FIXME spostare nel wrapperOffice
+	 * Istituto livello 1
+	 * @return true se this è un Istituto, false altrimenti
+	 */
+	public boolean isInstitute(Office office) {
+
+		if(isArea(office))
+			return false;
+
+		if(office.office.office != null)
+			return false;
+
+		return true;
+	}
+
+	/**
+	 * FIXME spostare nel wrapperOffice
+	 * Sede livello 2
+	 * @return
+	 */
+	public boolean isSeat(Office office) {
+
+		if(isArea(office))
+			return false;
+
+		if(isInstitute(office))
+			return false;
+
+		return true;
+
 	}
 	
 	/**

@@ -7,12 +7,15 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import models.Office;
 import models.Permission;
+import models.Role;
 import models.User;
 import models.UsersRolesOffices;
 import models.query.QUser;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.mysema.query.BooleanBuilder;
@@ -83,6 +86,26 @@ public class UserDao extends DaoBase {
 			return true;
 		else
 			return false;
+	}
+	
+	/**
+	 * Ritorna la lista degli utenti che hanno ruolo role nell'ufficio office
+	 * @param office
+	 * @param role
+	 * @return
+	 */
+	public List<User> getUserByOfficeAndRole(Office office, Role role) {
+		
+		List<User> userList = Lists.newArrayList();
+		
+		for(UsersRolesOffices uro : office.usersRolesOffices) {
+			
+			if(uro.role.id.equals(role.id)) {
+				
+				userList.add(uro.user);
+			}
+		}
+		return userList;
 	}
 	
 	/**
