@@ -10,7 +10,6 @@ import javax.inject.Inject;
 import manager.ConfYearManager;
 import models.Office;
 import models.Person;
-import models.User;
 import models.rendering.VacationsRecap;
 
 import org.joda.time.LocalDate;
@@ -41,7 +40,7 @@ public class VacationsAdmin extends Controller{
 		LocalDate date = new LocalDate();
 		
 		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, date, date, true);
+				OfficeDao.getOfficeAllowed(Security.getUser().get()), false, date, date, true);
 		
 		List<Person> personList = simpleResults.paginated(page).getResults();
 		

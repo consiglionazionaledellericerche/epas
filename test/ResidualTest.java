@@ -1,5 +1,3 @@
-import it.cnr.iit.epas.PersonUtility;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,10 +29,9 @@ public class ResidualTest extends UnitTest {
     	Person person = Person.find("bySurname", "Lucchesi").first();
     	assertEquals(Double.valueOf(146), Double.valueOf(person.id));
     
-    	
     	//Ricalcolo tutti i personday
 
-     	ConsistencyManager.fixPersonSituation(person.id, 2013, 1, person.user, false);
+     	ConsistencyManager.fixPersonSituation(Optional.of(person),Optional.of(person.user), new LocalDate(2013, 1,1), false);
 
     	JPAPlugin.startTx(false);
 
@@ -96,7 +93,7 @@ public class ResidualTest extends UnitTest {
     	
     	//Ricalcolo tutti i personday
 
-    	ConsistencyManager.fixPersonSituation(person.id, 2013, 1, person.user, false);
+     	ConsistencyManager.fixPersonSituation(Optional.of(person),Optional.of(person.user), new LocalDate(2013, 1,1), false);
 
     	JPAPlugin.startTx(false);
 
@@ -158,7 +155,7 @@ public class ResidualTest extends UnitTest {
     	
     	//Ricalcolo tutti i personday
 
-    	ConsistencyManager.fixPersonSituation(person.id, 2013, 1, person.user, false);
+     	ConsistencyManager.fixPersonSituation(Optional.of(person),Optional.of(person.user), new LocalDate(2013, 1,1), false);
 
     	JPAPlugin.startTx(false);
 
@@ -220,7 +217,7 @@ public class ResidualTest extends UnitTest {
     	
     	//Ricalcolo tutti i personday
 
-    	ConsistencyManager.fixPersonSituation(person.id, 2013, 1, person.user, false);
+     	ConsistencyManager.fixPersonSituation(Optional.of(person),Optional.of(person.user), new LocalDate(2013, 1,1), false);
 
     	JPAPlugin.startTx(false);
 
@@ -282,7 +279,7 @@ public class ResidualTest extends UnitTest {
     	
     	//Ricalcolo tutti i personday
 
-    	ConsistencyManager.fixPersonSituation(person.id, 2013, 1, person.user, false);
+     	ConsistencyManager.fixPersonSituation(Optional.of(person),Optional.of(person.user), new LocalDate(2013, 1,1), false);
 
     	JPAPlugin.startTx(false);
 

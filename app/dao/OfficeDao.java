@@ -7,12 +7,14 @@ import helpers.ModelQuery;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
 import com.mysema.query.BooleanBuilder;
 import com.mysema.query.jpa.JPQLQuery;
 
-import controllers.Security;
+import manager.OfficeManager;
 import models.Office;
 import models.User;
 import models.UsersRolesOffices;
@@ -109,31 +111,32 @@ public class OfficeDao {
 	 * @param user
 	 * @return la lista degli uffici permessi per l'utente user passato come parametro
 	 */
-	public static Set<Office> getOfficeAllowed(Optional<User> user) {
+	public static Set<Office> getOfficeAllowed(User user) {
 		
-		User u = user.isPresent() ? user.get() : Security.getUser().get();
+		Preconditions.checkNotNull(user);
+		Preconditions.checkState(user.isPersistent());
 // 		L'utente standard non ha nessun userRoleoffice ed è necessario restituire il suo ufficio di appartenenza
 //		FIXME Non sarebbe meglio avere un ruolo base per gli utenti???
-		if(u.usersRolesOffices.isEmpty()){
-			if(u.person != null){
-				return Sets.newHashSet(u.person.office);
+	    if(user.usersRolesOffices.isEmpty()){
+			if(user.person != null){
+				return Sets.newHashSet(user.person.office);
 			}
 			else
 				return Sets.newHashSet();
 		}
 		
-		return	FluentIterable.from(u.usersRolesOffices).transform(new Function<UsersRolesOffices,Office>() {
+		return	FluentIterable.from(user.usersRolesOffices).transform(
+			new Function<UsersRolesOffices,Office>() {
 			@Override
 			public Office apply(UsersRolesOffices uro) {
 				return uro.office;
-			}}).toSet();
-
+			}}).filter(
+			new Predicate<Office>() {
+    	    @Override
+    	    public boolean apply(Office o) {
+    	        return OfficeManager.isSeat(o);
+    	    }}).toSet();
 //     FIXME Capire se è indispensabile restituire solo le sedi
-//			filter(new Predicate<Office>() {
-//	    	    @Override
-//	    	    public boolean apply(Office o) {
-//	    	        return o.isSeat();
-//	    	    }}).toSet();
 		
 	}
 }

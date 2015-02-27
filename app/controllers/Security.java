@@ -156,6 +156,9 @@ public class Security extends Secure.Security {
 	}
 	
 	static String connected() {
+		if (request == null){
+			return null;
+		}
 		if (request.user != null) {
 			return request.user;
 		} else {
