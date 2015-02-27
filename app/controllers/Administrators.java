@@ -49,7 +49,7 @@ public class Administrators extends Controller {
 		
 		String name = null;
 		List<Person> personList = PersonDao.list(Optional.fromNullable(name), 
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, 
+				OfficeDao.getOfficeAllowed(Security.getUser().get()), false, 
 					LocalDate.now(), LocalDate.now(), true).list();
 		
 		render(office, role, personList);
