@@ -43,7 +43,7 @@ public class Offices extends Controller {
 	public static void showOffices(){
 
 		List<IWrapperOffice> allAreas = FluentIterable
-				.from(OfficeDao.getAreas()).transform(wrapperFunctionFactory.office()).toList();
+				.from(officeDao.getAreas()).transform(wrapperFunctionFactory.office()).toList();
 
 		Role roleAdmin = RoleDao.getRoleByName(Role.PERSONNEL_ADMIN);
 		Role roleAdminMini = RoleDao.getRoleByName(Role.PERSONNEL_ADMIN_MINI);
@@ -144,7 +144,7 @@ public class Offices extends Controller {
 		}
 
 		//codice esistente
-		Office alreadyExist = OfficeDao.getOfficeByCode(OfficeManager.getInteger(code));
+		Office alreadyExist = officeDao.getOfficeByCode(OfficeManager.getInteger(code));
 		if(alreadyExist!=null){
 			flash.error("Il codice sede risulta gia' presente. Valorizzare correttamente tutti i parametri.");
 			Offices.showOffices();
@@ -206,7 +206,7 @@ public class Offices extends Controller {
 		}
 
 		//codice uguale a sedi diverse da remoteOffice
-		List<Office> officeList = OfficeDao.getOfficesByCode(OfficeManager.getInteger(code));
+		List<Office> officeList = officeDao.getOfficesByCode(OfficeManager.getInteger(code));
 		for(Office off : officeList) {
 
 			if( !off.id.equals(office.id) ) {

@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import manager.ConfGeneralManager;
 import manager.PersonDayManager;
 import models.Office;
@@ -38,12 +40,17 @@ import dao.UserDao;
 
 @With( RequestInit.class )
 public class Clocks extends Controller{
+	
+	@Inject
+	static OfficeDao officeDao;
 
 	public static void show(){
+		
 		LocalDate data = new LocalDate();
+		
 		//TODO Capire quali office saranno visibili a questo livello
-		List<Office> officeAllowed = OfficeDao.getAllOffices();
-		//List<Office> officeAllowed = Office.findAll();
+		List<Office> officeAllowed = officeDao.getAllOffices();
+
 		List<Person> personList = PersonDao.list(Optional.<String>absent(), new HashSet<Office>(officeAllowed), false, data, data, true).list();
 		render(data, personList);
 	}

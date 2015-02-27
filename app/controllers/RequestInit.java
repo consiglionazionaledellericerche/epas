@@ -9,6 +9,8 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import models.ConfGeneral;
 import models.Office;
 import models.Permission;
@@ -47,6 +49,9 @@ public class RequestInit extends Controller {
 	
 	//@Inject
 	//static SecurityRules rules;
+	
+	@Inject
+	static OfficeDao officeDao;
 	
 	public static class ItemsPermitted {
 		
@@ -367,7 +372,7 @@ public class RequestInit extends Controller {
 		} 
 		else {
 
-			List<Office> allOffices = OfficeDao.getAllOffices();
+			List<Office> allOffices = officeDao.getAllOffices();
 			if (allOffices!=null && !allOffices.isEmpty()){
 			List<Person> persons = PersonDao.list(Optional.fromNullable(name), 
 					Sets.newHashSet(allOffices), false, beginMonth, endMonth, true).list();
