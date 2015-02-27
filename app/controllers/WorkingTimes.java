@@ -35,6 +35,7 @@ import dao.ContractDao;
 import dao.OfficeDao;
 import dao.WorkingTimeTypeDao;
 import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperOffice;
 import dao.wrapper.IWrapperWorkingTimeType;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
@@ -119,13 +120,16 @@ public class WorkingTimes extends Controller{
 	public static void insertWorkingTime(Long officeId){
 		
 		Office office = officeDao.getOfficeById(officeId);
+		
 		if(office == null) {
 			
 			flash.error("Sede non trovata. Riprovare o effettuare una segnalazione.");
 			WorkingTimes.manageWorkingTime(null);
 		}
 		
-		if(!officeDao.isSeat(office)) {
+		IWrapperOffice wOffice = wrapperFactory.create(office);
+		
+		if(!wOffice.isSeat()) {
 			
 			flash.error("E' possibile definire tipi orario solo a livello sede. Operazione annullata.");
 			WorkingTimes.manageWorkingTime(null);
@@ -162,7 +166,9 @@ public class WorkingTimes extends Controller{
 			WorkingTimes.manageWorkingTime(null);
 		}
 		
-		if(!officeDao.isSeat(office)) {
+		IWrapperOffice wOffice = wrapperFactory.create(office);
+		
+		if(!wOffice.isSeat()) {
 			
 			flash.error("E' possibile definire tipi orario solo a livello sede. Operazione annullata.");
 			WorkingTimes.manageWorkingTime(null);

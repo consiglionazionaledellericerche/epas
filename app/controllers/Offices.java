@@ -21,6 +21,7 @@ import com.google.common.collect.FluentIterable;
 import controllers.Resecure.NoCheck;
 import dao.OfficeDao;
 import dao.RoleDao;
+import dao.wrapper.IWrapperFactory;
 import dao.wrapper.IWrapperOffice;
 import dao.wrapper.function.WrapperModelFunctionFactory;
 
@@ -32,6 +33,9 @@ public class Offices extends Controller {
 
 	@Inject
 	static WrapperModelFunctionFactory wrapperFunctionFactory;
+	
+	@Inject
+	static IWrapperFactory wrapperFactory;
 	
 	@Inject
 	static OfficeDao officeDao;
@@ -61,7 +65,10 @@ public class Offices extends Controller {
 	public static void insertInstitute(Long areaId) {
 
 		Office area = officeDao.getOfficeById(areaId);
-		if(area == null || !officeDao.isArea(area)) {
+		
+		IWrapperOffice wArea = wrapperFactory.create(area);
+		
+		if(area == null || !wArea.isArea()) {
 
 			flash.error("L'area specificata è inesistente. Operazione annullata.");
 			Offices.showOffices();
@@ -76,8 +83,10 @@ public class Offices extends Controller {
 	public static void saveInstitute(Long areaId, String name, String contraction) {
 
 		Office area = officeDao.getOfficeById(areaId);
+		
+		IWrapperOffice wArea = wrapperFactory.create(area);
 
-		if(area == null || !officeDao.isArea(area)) {
+		if(area == null || !wArea.isArea()) {
 
 			flash.error("L'area specificata è inesistente. Operazione annullata.");
 			Offices.showOffices();

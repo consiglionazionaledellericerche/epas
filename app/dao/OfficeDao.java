@@ -20,6 +20,8 @@ import com.google.inject.Provider;
 import com.mysema.query.jpa.JPQLQuery;
 
 import controllers.Security;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperOffice;
 
 /**
  * 
@@ -28,6 +30,9 @@ import controllers.Security;
  */
 public class OfficeDao extends DaoBase {
 
+	@Inject
+	public IWrapperFactory wrapperFactory;
+	
 	@Inject
 	OfficeDao(/*JPQLQueryFactory queryFactory, */Provider<EntityManager> emp) {
 		super(/*queryFactory, */emp);
@@ -154,10 +159,12 @@ public class OfficeDao extends DaoBase {
 	 */
 	public Office getSuperArea(Office office) {
 
-		if(isSeat(office))
+		IWrapperOffice wOffice = wrapperFactory.create(office);
+		
+		if(wOffice.isSeat())
 			return office.office.office;
 
-		if(isInstitute(office))
+		if(wOffice.isInstitute())
 			return office.office;
 
 		return null;
@@ -169,55 +176,11 @@ public class OfficeDao extends DaoBase {
 	 */
 	public Office getSuperInstitute(Office office) {
 
-		if(!isSeat(office))
+		IWrapperOffice wOffice = wrapperFactory.create(office);
+		
+		if(!wOffice.isSeat())
 			return null;
 		return office.office;
-	}
-	
-	/**
-	 * FIXME spostare nel wrapperOffice
-	 * Area livello 0
-	 * @return true se this è una Area, false altrimenti
-	 */
-	public boolean isArea(Office office) {
-
-		if(office.office != null) 
-			return false;
-
-		return true;
-	}
-
-	/**
-	 * FIXME spostare nel wrapperOffice
-	 * Istituto livello 1
-	 * @return true se this è un Istituto, false altrimenti
-	 */
-	public boolean isInstitute(Office office) {
-
-		if(isArea(office))
-			return false;
-
-		if(office.office.office != null)
-			return false;
-
-		return true;
-	}
-
-	/**
-	 * FIXME spostare nel wrapperOffice
-	 * Sede livello 2
-	 * @return
-	 */
-	public boolean isSeat(Office office) {
-
-		if(isArea(office))
-			return false;
-
-		if(isInstitute(office))
-			return false;
-
-		return true;
-
 	}
 	
 	/**

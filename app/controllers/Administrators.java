@@ -4,7 +4,18 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import manager.OfficeManager;
+import models.Office;
+import models.Person;
+import models.Role;
+import models.User;
+import models.UsersRolesOffices;
+
 import org.joda.time.LocalDate;
+
+import play.Play;
+import play.mvc.Controller;
+import play.mvc.With;
 
 import com.google.common.base.Optional;
 
@@ -14,15 +25,8 @@ import dao.PersonDao;
 import dao.RoleDao;
 import dao.UserDao;
 import dao.UsersRolesOfficesDao;
-import manager.OfficeManager;
-import models.Office;
-import models.Person;
-import models.Role;
-import models.User;
-import models.UsersRolesOffices;
-import play.Play;
-import play.mvc.Controller;
-import play.mvc.With;
+import dao.wrapper.IWrapperFactory;
+import dao.wrapper.IWrapperOffice;
 
 @With( {Resecure.class, RequestInit.class} )
 public class Administrators extends Controller {
@@ -38,6 +42,9 @@ public class Administrators extends Controller {
 	
 	@Inject
 	static OfficeDao officeDao;
+	
+	@Inject
+	static IWrapperFactory wrapperFactory;
 	
 	@NoCheck
 	public static void insertNewAdministrator(Long officeId, Long roleId) {
@@ -75,8 +82,10 @@ public class Administrators extends Controller {
 			Offices.showOffices();
 		}
 		
+		IWrapperOffice wOffice = wrapperFactory.create(office);
+		
 		//Per adesso faccio inserire solo alle sedi
-		if( !officeDao.isSeat(office) ) {
+		if( !wOffice.isSeat() ) {
 			
 			flash.error("Impossibile assegnare amministratori a livello diverso da quello Sede. Operazione annullata.");
 			Offices.showOffices();
