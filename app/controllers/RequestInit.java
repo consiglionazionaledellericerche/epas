@@ -252,7 +252,7 @@ public class RequestInit extends Controller {
 		}
 		
 		public Set<Office> getAllOfficesAllowed() {
-			return OfficeDao.getOfficeAllowed(Optional.<User>absent());
+			return officeDao.getOfficeAllowed(Optional.<User>absent());
 		}
 	}
 	
@@ -363,7 +363,7 @@ public class RequestInit extends Controller {
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
 		String name = null;
 		if(Security.getUser().get().person != null) {
-			Set<Office> officeList = OfficeDao.getOfficeAllowed(Optional.<User>absent());
+			Set<Office> officeList = officeDao.getOfficeAllowed(Optional.<User>absent());
 			if(!officeList.isEmpty()) {
 			List<Person> persons = PersonDao.list(Optional.fromNullable(name), 
 					officeList, false, beginMonth, endMonth, true).list();
@@ -397,7 +397,7 @@ public class RequestInit extends Controller {
 		Integer actualYear = new LocalDate().getYear();
 
 		Optional<ConfGeneral> yearInitUseProgram = ConfGeneralDao.getConfGeneralByField(ConfigurationFields.InitUseProgram.description,
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()).iterator().next());
+				officeDao.getOfficeAllowed(Optional.<User>absent()).iterator().next());
 		
 		Integer yearBeginProgram;
 		if(yearInitUseProgram.isPresent()){

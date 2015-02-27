@@ -46,6 +46,8 @@ public class Stampings extends Controller {
 	@Inject
 	static SecurityRules rules;
 	
+	@Inject
+	static OfficeDao officeDao;
 	
 	public static void stampings(Integer year, Integer month) {
 
@@ -243,7 +245,7 @@ public class Stampings extends Controller {
 
 		//lista delle persone che sono state attive nel mese
 		List<Person> activePersons = 
-				PersonDao.list(Optional.<String>absent(), OfficeDao.getOfficeAllowed(Optional.<User>absent()), 
+				PersonDao.list(Optional.<String>absent(), officeDao.getOfficeAllowed(Optional.<User>absent()), 
 						false, monthBegin, monthEnd, true).list();
 
 		List<PersonTroublesInMonthRecap> missingStampings = new ArrayList<PersonTroublesInMonthRecap>();
@@ -269,7 +271,7 @@ public class Stampings extends Controller {
 		LocalDate dayPresence = new LocalDate(year, month, day);
 
 		List<Person> activePersonsInDay = PersonDao.list(Optional.<String>absent(), 
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, dayPresence, dayPresence, true).list();
+				officeDao.getOfficeAllowed(Optional.<User>absent()), false, dayPresence, dayPresence, true).list();
 
 		int numberOfInOut = StampingManager.maxNumberOfStampingsInMonth(year, month, day, activePersonsInDay);
 				
@@ -295,7 +297,7 @@ public class Stampings extends Controller {
 		LocalDate endMonth = beginMonth.dayOfMonth().withMaximumValue();
 		
 		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, beginMonth, endMonth, true);
+				officeDao.getOfficeAllowed(Optional.<User>absent()), false, beginMonth, endMonth, true);
 
 		List<Person> activePersons = simpleResults.paginated(page).getResults();		
 

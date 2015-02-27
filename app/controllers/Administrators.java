@@ -60,7 +60,7 @@ public class Administrators extends Controller {
 		
 		String name = null;
 		List<Person> personList = PersonDao.list(Optional.fromNullable(name), 
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, 
+				officeDao.getOfficeAllowed(Optional.<User>absent()), false, 
 					LocalDate.now(), LocalDate.now(), true).list();
 		
 		render(office, role, personList);

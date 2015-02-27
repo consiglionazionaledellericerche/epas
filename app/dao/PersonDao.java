@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 
 import models.CompetenceCode;
 import models.Contract;
@@ -42,6 +43,9 @@ public final class PersonDao {
 
 	private final static QPerson person = QPerson.person;
 	private final static QContract contract = QContract.contract;
+	
+	@Inject
+	static OfficeDao officeDao;
 
 	/**
 	 * @param name
@@ -134,7 +138,7 @@ public final class PersonDao {
 		LocalDate startEra = new LocalDate(1900,1,1);
 		LocalDate endEra = new LocalDate(9999,1,1);
 		return list(Optional.fromNullable(name),
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, startEra,
+				officeDao.getOfficeAllowed(Optional.<User>absent()), false, startEra,
 				endEra, false).list();
 	}
 

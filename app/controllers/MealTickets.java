@@ -35,6 +35,9 @@ public class MealTickets  extends Controller {
 	@Inject
 	static SecurityRules rules;
 	
+	@Inject
+	static OfficeDao officeDao;
+	
 	public static void recapMealTickets(String name, Integer page, Integer max, 
 			List<Integer> blockIdsAdded, Long personIdAdded) {
 
@@ -44,7 +47,7 @@ public class MealTickets  extends Controller {
 		rules.checkIfPermitted();
 		
 		final List<Person> personList = PersonDao.list( 
-				Optional.fromNullable(name), OfficeDao.getOfficeAllowed(Optional.<User>absent()), 
+				Optional.fromNullable(name), officeDao.getOfficeAllowed(Optional.<User>absent()), 
 				false, LocalDate.now(), LocalDate.now(), true)
 				.list();
 

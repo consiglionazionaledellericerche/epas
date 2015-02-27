@@ -40,7 +40,7 @@ public class Configurations extends Controller{
 
 	public static void showConfGeneral(Long officeId){
 		Office office = null;
-		Set<Office> offices = OfficeDao.getOfficeAllowed(Optional.<User>absent());
+		Set<Office> offices = officeDao.getOfficeAllowed(Optional.<User>absent());
 		if(officeId != null){
 			office = officeDao.getOfficeById(officeId);			
 		}
@@ -68,7 +68,7 @@ public class Configurations extends Controller{
 	public static void showConfYear(Long officeId){
 
 		Office office = null;
-		Set<Office> offices = OfficeDao.getOfficeAllowed(Optional.<User>absent());
+		Set<Office> offices = officeDao.getOfficeAllowed(Optional.<User>absent());
 		if(officeId != null){
 			office = officeDao.getOfficeById(officeId);
 

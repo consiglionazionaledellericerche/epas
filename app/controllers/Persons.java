@@ -72,6 +72,9 @@ public class Persons extends Controller {
 	
 	@Inject
 	static PersonDao personDao;
+	
+	@Inject
+	static OfficeDao officeDao;
 
 
 	@NoCheck
@@ -201,7 +204,7 @@ public class Persons extends Controller {
 
 
 		List<Contract> contractList = ContractDao.getPersonContractList(person);
-		Set<Office> officeList = OfficeDao.getOfficeAllowed(Optional.<User>absent());
+		Set<Office> officeList = officeDao.getOfficeAllowed(Optional.<User>absent());
 
 		List<ContractStampProfile> contractStampProfileList =
 				ContractDao.getPersonContractStampProfile(Optional.fromNullable(person), Optional.<Contract>absent());

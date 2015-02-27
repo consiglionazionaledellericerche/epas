@@ -9,6 +9,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import manager.ConsistencyManager;
 import manager.ContractYearRecapManager;
 import manager.recaps.PersonResidualMonthRecap;
@@ -42,6 +44,11 @@ import dao.PersonDao;
 @With( {Resecure.class, RequestInit.class} )
 public class Administration extends Controller {
 	
+	@Inject
+	static OfficeDao officeDao;
+	
+	@Inject
+	static ConsistencyManager consistencyManager;
 	
     public static void importOreStraordinario() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
     	
@@ -93,7 +100,7 @@ public class Administration extends Controller {
 	public static void utilities(){
 
 		final List<Person> personList = PersonDao.list( 
-				Optional.<String>absent(),OfficeDao.getOfficeAllowed(Optional.<User>absent()), 
+				Optional.<String>absent(), officeDao.getOfficeAllowed(Optional.<User>absent()), 
 				false, LocalDate.now(), LocalDate.now(), true)
 				.list();
 		
@@ -110,7 +117,7 @@ public class Administration extends Controller {
 	@NoCheck
 	public static void fixPersonSituation(Long personId, int year, int month){	
 		//TODO permessi
-		ConsistencyManager.fixPersonSituation(personId, year, month, Security.getUser().get(), false);
+		consistencyManager.fixPersonSituation(personId, year, month, Security.getUser().get(), false);
 
 	}
 	
@@ -126,7 +133,7 @@ public class Administration extends Controller {
 	{
 		
 		List<Person> listPerson = PersonDao.list(Optional.<String>absent(), 
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, LocalDate.now(), LocalDate.now(), true).list();
+				officeDao.getOfficeAllowed(Optional.<User>absent()), false, LocalDate.now(), LocalDate.now(), true).list();
 		List<PersonResidualMonthRecap> listMese = new ArrayList<PersonResidualMonthRecap>();
 		for(Person person : listPerson)
 		{

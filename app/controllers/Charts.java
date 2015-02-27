@@ -38,6 +38,9 @@ public class Charts extends Controller{
 
 	@Inject
 	static SecurityRules rules;
+	
+	@Inject
+	static OfficeDao officeDao;
 
 	//@Check(Security.INSERT_AND_UPDATE_COMPETENCES)
 	public static void overtimeOnPositiveResidual(Integer year, Integer month){
@@ -55,9 +58,9 @@ public class Charts extends Controller{
 
 		year = params.get("yearChart", Integer.class);
 		month = params.get("monthChart", Integer.class);
-		//List<Person> personeProva = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), true);
+		
 		List<Person> personeProva = PersonDao.list(Optional.<String>absent(),
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), true, 
+				officeDao.getOfficeAllowed(Optional.<User>absent()), true, 
 				new LocalDate(year,month,1), new LocalDate(year, month,1).dayOfMonth().withMaximumValue(), true).list();
 		
 		
@@ -94,7 +97,7 @@ public class Charts extends Controller{
 			val = result.get().longValue();
 
 		List<Person> personeProva = PersonDao.list(Optional.<String>absent(),
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), true, new LocalDate(year,1,1), new LocalDate(year,12,31), true).list();
+				officeDao.getOfficeAllowed(Optional.<User>absent()), true, new LocalDate(year,1,1), new LocalDate(year,12,31), true).list();
 		int totaleOreResidue = ChartsManager.calculateTotalResidualHour(personeProva, year);
 
 		render(annoList, val, totaleOreResidue);
@@ -162,7 +165,7 @@ public class Charts extends Controller{
 		rules.checkIfPermitted(Security.getUser().get().person.office);
 		
 		List<Person> personList = PersonDao.list(Optional.<String>absent(), 
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), true, new LocalDate(year,1,1), LocalDate.now(), true).list();
+				officeDao.getOfficeAllowed(Optional.<User>absent()), true, new LocalDate(year,1,1), LocalDate.now(), true).list();
 		Logger.debug("Esporto dati per %s persone", personList.size());
 		FileInputStream inputStream = ChartsManager.export(year, personList);
 		
@@ -175,7 +178,7 @@ public class Charts extends Controller{
 		offices.add(Security.getUser().get().person.office);
 		String name = null;
 		List<Person> personList = PersonDao.list(Optional.fromNullable(name), 
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, LocalDate.now(), LocalDate.now(), true).list();
+				officeDao.getOfficeAllowed(Optional.<User>absent()), false, LocalDate.now(), LocalDate.now(), true).list();
 		render(personList);
 	}
 

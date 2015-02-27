@@ -1,10 +1,10 @@
 package dao;
 
-import java.util.List;
-
-import play.Logger;
 import helpers.ModelQuery;
 import helpers.ModelQuery.SimpleResults;
+
+import java.util.List;
+
 import models.Competence;
 import models.CompetenceCode;
 import models.Office;
@@ -15,9 +15,9 @@ import models.TotalOvertime;
 import models.query.QCompetence;
 import models.query.QPerson;
 import models.query.QPersonHourForOvertime;
-import models.query.QPersonReperibility;
 import models.query.QPersonReperibilityType;
 import models.query.QTotalOvertime;
+import play.Logger;
 
 import com.google.common.base.Optional;
 import com.mysema.query.BooleanBuilder;
