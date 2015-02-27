@@ -156,15 +156,14 @@ public class Security extends Secure.Security {
 	}
 	
 	static String connected() {
-	if (request != null && session != null){
+		if (request == null){
+			return null;
+		}
 		if (request.user != null) {
 			return request.user;
 		} else {
 			return Secure.Security.connected();
 		}
-	}
-	else 
-		return null;
 	}
 	
 	public static Optional<User> getUser() {
