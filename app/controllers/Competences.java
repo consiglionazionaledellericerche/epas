@@ -83,7 +83,7 @@ public class Competences extends Controller{
 
 	public static void showCompetences(Integer year, Integer month, Long officeId, String name, String codice, Integer page){
 		
-		Set<Office> offices = OfficeDao.getOfficeAllowed(Optional.<User>absent());
+		Set<Office> offices = officeDao.getOfficeAllowed(Optional.<User>absent());
 
 		if(officeId == null) {
 			if(offices.size() == 0) {
@@ -230,7 +230,7 @@ public class Competences extends Controller{
 	
 	public static void totalOvertimeHours(int year, Long officeId){
 	
-		Set<Office> offices = OfficeDao.getOfficeAllowed(Optional.<User>absent());		
+		Set<Office> offices = officeDao.getOfficeAllowed(Optional.<User>absent());		
 		if(officeId == null) {
 			if(offices.size() == 0) {
 				flash.error("L'user non dispone di alcun diritto di visione delle sedi. Operazione annullata.");
@@ -268,7 +268,7 @@ public class Competences extends Controller{
 
 	public static void overtime(int year, int month, Long officeId, String name, Integer page){
 		
-		Set<Office> offices = OfficeDao.getOfficeAllowed(Optional.<User>absent());
+		Set<Office> offices = officeDao.getOfficeAllowed(Optional.<User>absent());
 
 		if(officeId == null) {
 			if(offices.size() == 0) {
@@ -317,7 +317,7 @@ public class Competences extends Controller{
 	 */
 	public static void enabledCompetences(Long officeId, String name){
 
-		Set<Office> offices = OfficeDao.getOfficeAllowed(Optional.<User>absent());
+		Set<Office> offices = officeDao.getOfficeAllowed(Optional.<User>absent());
 
 		if(officeId == null) {
 			if(offices.size() == 0) {

@@ -33,6 +33,9 @@ public class MonthRecaps extends Controller{
 	@Inject
 	static SecurityRules rules;
 	
+	@Inject
+	static OfficeDao officeDao;
+	
 	/**
 	 * Controller che gestisce il calcolo del Riepilogo Mensile.
 	 * @param year
@@ -75,7 +78,7 @@ public class MonthRecaps extends Controller{
 		Table<Person, String, Integer> tableMonthRecap = TreeBasedTable.create(MonthRecapManager.PersonNameComparator, MonthRecapManager.AbsenceCodeComparator);
 
 		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, monthBegin, monthEnd, true);
+				officeDao.getOfficeAllowed(Optional.<User>absent()), false, monthBegin, monthEnd, true);
 
 		List<Person> activePersons = simpleResults.paginated(page).getResults();
 		

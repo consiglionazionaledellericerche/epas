@@ -225,7 +225,7 @@ public class OfficeDao extends DaoBase {
 	 * @param user
 	 * @return la lista degli uffici permessi per l'utente user passato come parametro
 	 */
-	public static Set<Office> getOfficeAllowed(Optional<User> user) {
+	public Set<Office> getOfficeAllowed(Optional<User> user) {
 		
 		User u = user.isPresent() ? user.get() : Security.getUser().get();
 // 		L'utente standard non ha nessun userRoleoffice ed è necessario restituire il suo ufficio di appartenenza

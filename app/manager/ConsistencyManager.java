@@ -5,6 +5,8 @@ import it.cnr.iit.epas.DateUtility;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import models.Contract;
 import models.ContractStampProfile;
 import models.Person;
@@ -40,7 +42,10 @@ import dao.PersonDayInTroubleDao;
  *
  */
 public class ConsistencyManager {
-
+	
+	@Inject
+	public OfficeDao officeDao;
+	
 	/**
 	 * Ricalcolo della situazione di una persona dal mese e anno specificati ad oggi.
 	 * @param personId l'id univoco della persona da fixare, -1 per fixare tutte le persone attive alla data di ieri
@@ -49,7 +54,7 @@ public class ConsistencyManager {
 	 * @param userLogged
 	 * @throws EmailException 
 	 */
-	public static void fixPersonSituation(Long personId, int year, int month, User userLogged, boolean sendEmail){
+	public void fixPersonSituation(Long personId, int year, int month, User userLogged, boolean sendEmail){
 
 		if(userLogged==null)
 			return;
@@ -63,7 +68,7 @@ public class ConsistencyManager {
 			LocalDate begin = new LocalDate(year, month, 1);
 			LocalDate end = new LocalDate().minusDays(1);
 			personList = PersonDao.list(Optional.<String>absent(), 
-					OfficeDao.getOfficeAllowed(Optional.fromNullable(userLogged)), false, begin, end, true).list();
+					officeDao.getOfficeAllowed(Optional.fromNullable(userLogged)), false, begin, end, true).list();
 		}
 		else {
 			
@@ -222,13 +227,13 @@ public class ConsistencyManager {
 	 * @param userLogged
 	 * @throws EmailException 
 	 */
-	public static void checkNoAbsenceNoStamping(int year, int month, User userLogged) throws EmailException{
+	public void checkNoAbsenceNoStamping(int year, int month, User userLogged) throws EmailException{
 
 		LocalDate begin = new LocalDate(year, month, 1);
 		LocalDate end = new LocalDate().minusDays(1);
 
 		List<Person> personList = PersonDao.list(Optional.<String>absent(),
-					OfficeDao.getOfficeAllowed(Optional.fromNullable(userLogged)), false, begin, end, true).list();
+					officeDao.getOfficeAllowed(Optional.fromNullable(userLogged)), false, begin, end, true).list();
 		
 		for(Person p : personList){
 		

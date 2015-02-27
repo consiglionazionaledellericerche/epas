@@ -67,6 +67,9 @@ public class Absences extends Controller{
 	
 	@Inject
 	static AbsenceDao absenceDao;
+	
+	@Inject
+	static OfficeDao officeDao;
 			
 	public static void absences(int year, int month) {
 		Person person = Security.getUser().get().person;
@@ -529,7 +532,7 @@ public class Absences extends Controller{
 		List<Absence> altreAssenze = Lists.newArrayList();
 		
 		List<Person> personList = PersonDao.list(Optional.<String>absent(), 
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, from, to, true).list();
+				officeDao.getOfficeAllowed(Optional.<User>absent()), false, from, to, true).list();
 		
 		if(from.isAfter(to)){
 			flash.error("Intervallo non valido (%s - %s)", from,to);

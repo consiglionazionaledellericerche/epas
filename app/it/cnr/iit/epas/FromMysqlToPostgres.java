@@ -48,12 +48,10 @@ import play.Play;
 import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 
 import controllers.Administration;
-import dao.OfficeDao;
-import dao.PersonDao;
 
 
 public class FromMysqlToPostgres {
@@ -282,9 +280,12 @@ public class FromMysqlToPostgres {
 	public static void checkFixedWorkingTime() {
 		Logger.debug("Controllo delle persone con timbratura fissa");
 		//List<Person> activePerson = Person.getActivePersons(new LocalDate(2013,1,1));
-		List<Person> activePerson = PersonDao.list(Optional.<String>absent(), 
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false,
-				new LocalDate().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), new LocalDate(), true).list();
+		//FIXME o si butta la procedura di importazione (che ormai è abbondatemente compromessa) o
+		//si fa diventare un oggetto.
+		List<Person> activePerson = Lists.newArrayList();
+//		List<Person> activePerson = PersonDao.list(Optional.<String>absent(), 
+//				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false,
+//				new LocalDate().monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue(), new LocalDate(), true).list();
 
 		for(Person p : activePerson){
 			Logger.debug("Analizzo %s %s", p.name, p.surname);

@@ -32,6 +32,8 @@ public class VacationsAdmin extends Controller{
 	@Inject
 	static SecurityRules rules;
 	
+	@Inject
+	static OfficeDao officeDao;
 	
 	public static void list(Integer year, String name, Integer page){
 		
@@ -41,7 +43,7 @@ public class VacationsAdmin extends Controller{
 		LocalDate date = new LocalDate();
 		
 		SimpleResults<Person> simpleResults = PersonDao.list(Optional.fromNullable(name), 
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, date, date, true);
+				officeDao.getOfficeAllowed(Optional.<User>absent()), false, date, date, true);
 		
 		List<Person> personList = simpleResults.paginated(page).getResults();
 		

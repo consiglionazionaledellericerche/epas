@@ -68,6 +68,9 @@ public class UploadSituation extends Controller{
 	@Inject
 	static SecurityRules rules;
 	
+	@Inject
+	static OfficeDao officeDao;
+	
 	public static final String LOGIN_RESPONSE_CACHED = "loginResponse";
 	public static final String LISTA_DIPENTENTI_CNR_CACHED = "listaDipendentiCnr";
 	
@@ -240,9 +243,8 @@ public class UploadSituation extends Controller{
 			}
 		}
 		
-		//final List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
 		final List<Person> activePersons = PersonDao.list(Optional.<String>absent(),
-				OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
+				officeDao.getOfficeAllowed(Optional.<User>absent()), false, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
 		
 		final Set<Dipendente> activeDipendenti = FluentIterable.from(activePersons).transform(new Function<Person, Dipendente>() {
 			@Override
@@ -477,8 +479,10 @@ public class UploadSituation extends Controller{
 	 * Carica in cache la lista dipendenti abilitati in attestati.cnr
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	private static List<Dipendente> loadAttestatiListaCached()
 	{
+		
 		return (List<Dipendente>)Cache.get(LISTA_DIPENTENTI_CNR_CACHED+Security.getUser().get().username);
 	}
 	
@@ -505,7 +509,7 @@ public class UploadSituation extends Controller{
 		//final List<Person> activePersons = Person.getActivePersonsInMonth(month, year, Security.getOfficeAllowed(), false);
 		final List<Person> activePersons = 
 				PersonDao.list(Optional.<String>absent(),
-						OfficeDao.getOfficeAllowed(Optional.<User>absent()), false, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
+						officeDao.getOfficeAllowed(Optional.<User>absent()), false, new LocalDate(year,month,1), new LocalDate(year,month,1).dayOfMonth().withMaximumValue(), true).list();
 		
 		final Set<Dipendente> activeDipendenti = FluentIterable.from(activePersons).transform(new Function<Person, Dipendente>() {
 			@Override

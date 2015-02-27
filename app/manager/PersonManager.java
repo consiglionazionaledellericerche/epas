@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import models.Contract;
 import models.ContractWorkingTimeType;
 import models.Office;
@@ -26,6 +28,9 @@ import dao.PersonChildrenDao;
 
 public class PersonManager {
 
+	@Inject
+	public OfficeDao officeDao;
+	
 	/**
 	 * True se la persona ha almeno un contratto attivo in month
 	 * @param month
@@ -85,7 +90,7 @@ public class PersonManager {
 	public boolean isAllowedBy(Person administrator, Person person)
 	{
 		//List<Office> officeAllowed = administrator.getOfficeAllowed();
-		Set<Office> officeAllowed = OfficeDao.getOfficeAllowed(Optional.of(person.user));
+		Set<Office> officeAllowed = officeDao.getOfficeAllowed(Optional.of(person.user));
 		for(Office office : officeAllowed)
 		{
 			if(office.id.equals(administrator.office.id))

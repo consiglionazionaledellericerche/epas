@@ -56,7 +56,7 @@ public class WorkingTimes extends Controller{
 	
 	public static void manageWorkingTime(Office office){
 		
-		Set<Office> offices = OfficeDao.getOfficeAllowed(Optional.<User>absent());
+		Set<Office> offices = officeDao.getOfficeAllowed(Optional.<User>absent());
 		if(office == null || office.id == null) {
 			//TODO se offices è vuota capire come comportarsi
 			office = offices.iterator().next();
