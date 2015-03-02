@@ -30,6 +30,7 @@ public class PersonResidualMonthRecap {
 	
 	private final IWrapperFactory wrapperFactory; 
 	private final AbsenceDao absenceDao;
+	private final PersonDayDao personDayDao;
 
 	public final IWrapperContract contract;
 	
@@ -80,8 +81,8 @@ public class PersonResidualMonthRecap {
 	public int buoniPastoUsatiNelMese = 0;
 	public int buoniPastoResidui = 0;
 	
-	public PersonResidualMonthRecap(AbsenceDao absenceDao, IWrapperFactory wrapperFactory,
-			PersonResidualMonthRecap mesePrecedente,
+	public PersonResidualMonthRecap(AbsenceDao absenceDao, PersonDayDao personDayDao,
+			IWrapperFactory wrapperFactory,	PersonResidualMonthRecap mesePrecedente,
 			Contract contract, int anno, int mese, int initMonteOreAnnoPassato,
 			int initMonteOreAnnoCorrente, int initMealTickets,
 			DateInterval validDataForPersonDay, 
@@ -89,6 +90,7 @@ public class PersonResidualMonthRecap {
 			DateInterval validDataForMealTickets) {
 		
 		this.absenceDao = absenceDao;
+		this.personDayDao = personDayDao;
 		this.wrapperFactory = wrapperFactory;
 		this.mesePrecedente = mesePrecedente;
 		this.contract = this.wrapperFactory.create(contract);
@@ -229,7 +231,7 @@ public class PersonResidualMonthRecap {
 		
 		if(validDataForMealTickets!=null)
 		{
-			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(monthRecap.person,
+			List<PersonDay> pdList = personDayDao.getPersonDayInPeriod(monthRecap.person,
 					validDataForMealTickets.getBegin(), Optional.fromNullable(validDataForMealTickets.getEnd()), true);
 
 			//buoni pasto utilizzati

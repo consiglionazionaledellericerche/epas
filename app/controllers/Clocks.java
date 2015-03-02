@@ -45,6 +45,9 @@ public class Clocks extends Controller{
 	
 	@Inject
 	static PersonStampingDayRecapFactory stampingDayRecapFactory;
+	
+	@Inject
+	static PersonDayManager personDayManager;
 
 	public static void show(){
 		
@@ -152,7 +155,7 @@ public class Clocks extends Controller{
 		personDay.stampings.add(stamp);
 		personDay.save();
 		
-		PersonDayManager.updatePersonDaysFromDate(person, personDay.date);
+		personDayManager.updatePersonDaysFromDate(person, personDay.date);
 		
 		//pd.save();
 		flash.success("Aggiunta timbratura per %s %s", person.name, person.surname);

@@ -90,16 +90,16 @@ public class PersonStampingRecap {
 		this.month = month;
 		this.year = year;
 		
-		this.numberOfInOut = Math.max(MIN_IN_OUT_COLUMN, PersonUtility.getMaximumCoupleOfStampings(person, year, month));
+		this.numberOfInOut = Math.max(MIN_IN_OUT_COLUMN, personDayManager.getMaximumCoupleOfStampings(person, year, month));
 
 		//Costruzione dati da renderizzare
 		
 		//Lista person day contente tutti i giorni fisici del mese
-		List<PersonDay> totalPersonDays = PersonUtility.getTotalPersonDayInMonth(person, year, month);
+		List<PersonDay> totalPersonDays = personDayManager.getTotalPersonDayInMonth(person, year, month);
 		
 		//calcolo del valore valid per le stamping del mese (persistere??)
 		for(PersonDay pd : totalPersonDays) {
-			PersonDayManager.computeValidStampings(pd);
+			personDayManager.computeValidStampings(pd);
 		}
 		
 		PersonStampingDayRecap.stampModificationTypeSet = Sets.newHashSet(); 

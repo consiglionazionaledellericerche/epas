@@ -55,6 +55,9 @@ public class Stampings extends Controller {
 	@Inject 
 	static PersonStampingRecapFactory stampingsRecapFactory;
 	
+	@Inject
+	static PersonDayManager personDayManager;
+	
 	public static void stampings(Integer year, Integer month) {
 
 		Person person = Security.getUser().get().person;
@@ -167,7 +170,7 @@ public class Stampings extends Controller {
 			personDay = pd.get();
 		}
 		
-		StampingManager.addStamping(personDay, time, note, service, type, true);
+		stampingManager.addStamping(personDay, time, note, service, type, true);
 				
 		flash.success("Inserita timbratura per %s %s in data %s", person.name, person.surname, date);
 
@@ -214,7 +217,7 @@ public class Stampings extends Controller {
 			stamping.delete();
 			pd.stampings.remove(stamping);
 
-			PersonDayManager.updatePersonDaysFromDate(pd.person, pd.date);
+			personDayManager.updatePersonDaysFromDate(pd.person, pd.date);
 	
 			flash.success("Timbratura per il giorno %s rimossa", PersonTags.toDateTime(stamping.date.toLocalDate()));	
 
@@ -229,7 +232,7 @@ public class Stampings extends Controller {
 
 		StampingManager.persistStampingForUpdate(stamping, note, stampingHour, stampingMinute, service);
 
-		PersonDayManager.updatePersonDaysFromDate(pd.person, pd.date);
+		personDayManager.updatePersonDaysFromDate(pd.person, pd.date);
 
 		flash.success("Timbratura per il giorno %s per %s %s aggiornata.", PersonTags.toDateTime(stamping.date.toLocalDate()), stamping.personDay.person.surname, stamping.personDay.person.name);
 
@@ -308,7 +311,8 @@ public class Stampings extends Controller {
 		List<Person> activePersons = simpleResults.paginated(page).getResults();		
 
 		int numberOfDays = endMonth.getDayOfMonth();
-		Table<Person, LocalDate, String> tablePersonTicket = StampingManager.populatePersonTicketTable(activePersons, beginMonth);
+		Table<Person, LocalDate, String> tablePersonTicket = 
+				stampingManager.populatePersonTicketTable(activePersons, beginMonth);
 		render(year, month, tablePersonTicket, numberOfDays, simpleResults, name);
 	}
 }

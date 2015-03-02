@@ -6,7 +6,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
-import manager.PersonDayManager.PairStamping;
+
+import manager.PairStamping;
+import manager.PersonDayManager;
 import manager.PersonManager;
 import models.Absence;
 import models.CertificatedData;
@@ -603,7 +605,8 @@ public class CompetenceUtility {
 						//-----------------------------
 						
 						// legge le coppie di timbrature valide 
-						List<PairStamping> pairStampings = PairStamping.getValidPairStamping(personDay.get().stampings);
+						//FIXME injettare il PersonDayManager
+						List<PairStamping> pairStampings = new PersonDayManager().getValidPairStamping(personDay.get().stampings);
 						
 						// se c'è una timbratura guardo se è entro il turno
 						if ((personDay.get().stampings.size() == 1) &&

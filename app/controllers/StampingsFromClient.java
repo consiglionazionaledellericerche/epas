@@ -20,6 +20,9 @@ public class StampingsFromClient extends Controller{
 	@Inject
 	static SecurityRules rules;
 	
+	@Inject
+	static StampingManager stampingManager;
+	
 	/**
 	 * Aggiunge una timbratura ad una persona
 	 *  
@@ -35,7 +38,7 @@ public class StampingsFromClient extends Controller{
 			badRequest();	
 		}
 				
-		if (StampingManager.createStamping(body)) {
+		if (stampingManager.createStamping(body)) {
 			return "OK";
 		}
 		

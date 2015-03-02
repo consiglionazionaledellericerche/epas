@@ -302,7 +302,7 @@ public class Competences extends Controller{
 				false, 
 				new LocalDate(year, month, 1), 
 				new LocalDate(year, month, 1).dayOfMonth().withMaximumValue());
-		tableFeature = CompetenceManager.composeTableForOvertime(year, month, page, name, office, beginMonth, simpleResults, code);
+		tableFeature = competenceManager.composeTableForOvertime(year, month, page, name, office, beginMonth, simpleResults, code);
 		
 		if(year != 0 && month != 0)
 			render(tableFeature, year, month, simpleResults, name, office, offices);

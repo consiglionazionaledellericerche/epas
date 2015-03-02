@@ -30,7 +30,9 @@ import dao.WorkingTimeTypeDao;
  */
 public class PersonStampingDayRecap {
 	
-	private final PersonDayManager personDayManager;
+	//FIXME se è usato solo nel costruttore ha senso tenerlo come variabile istanza??
+	private final PersonDayManager personDayManager;	
+	
 	private final StampingTemplateFactory stampingTemplateFactory;
 
 	public static Set<StampModificationType> stampModificationTypeSet;
@@ -87,7 +89,7 @@ public class PersonStampingDayRecap {
 		setDate(pd.date); 
 		this.absences = pd.absences;
 
-		List<Stamping> stampingsForTemplate = PersonDayManager.getStampingsForTemplate(pd,numberOfInOut, today);
+		List<Stamping> stampingsForTemplate = personDayManager.getStampingsForTemplate(pd,numberOfInOut, today);
 
 		
 		this.setStampingTemplate( stampingsForTemplate, pd );
@@ -130,7 +132,7 @@ public class PersonStampingDayRecap {
 				if(pd.timeAtWork!=0)
 				{
 					if(fixedStampModificationType==null)							//DEVE ANDARE NELLA CACHE
-						fixedStampModificationType = PersonDayManager.getFixedWorkingTime();
+						fixedStampModificationType = personDayManager.getFixedWorkingTime();
 					this.fixedWorkingTimeCode = fixedStampModificationType.code;
 					
 					stampModificationTypeSet.add(fixedStampModificationType);
@@ -149,7 +151,7 @@ public class PersonStampingDayRecap {
 		//----------------------------------------  not fixed:  worktime, difference, progressive for today-------------------------------
 		else if(this.today)
 		{
-			PersonDayManager.queSeraSera(pd);
+			this.personDayManager.queSeraSera(pd);
 			this.setWorkTime(pd.timeAtWork);
 			this.setDifference( pd.difference );
 			this.setProgressive(pd.progressive);
