@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import models.Competence;
 import models.Person;
 import models.PersonDay;
+
+import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Table;
@@ -23,7 +23,7 @@ import dao.PersonDayDao;
 public class MonthRecapManager {
 	
 	
-	private final static Logger LOG = LoggerFactory.getLogger(MonthRecapManager.class);
+	private final static Logger log = LoggerFactory.getLogger(MonthRecapManager.class);
 	
 	/**
 	 * Riepilogo mensile per la Persona. Contiene le seguenti informazioni
@@ -231,7 +231,7 @@ public class MonthRecapManager {
 			//person day list
 			List<PersonDay> pdList = PersonDayDao.getPersonDayInPeriod(person, monthBegin, Optional.fromNullable(monthEnd), false);
 						
-			LOG.debug("populateRealValueTable -> costruisco riepilogo mensile per {} {} {}",
+			log.debug("populateRealValueTable -> costruisco riepilogo mensile per {} {} {}",
 					new Object[] { person.id, person.name, person.surname });
 			
 			PersonMonthRecapFieldSet mr = new PersonMonthRecapFieldSet();

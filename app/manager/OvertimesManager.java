@@ -1,12 +1,14 @@
 package manager;
 
-import play.Logger;
 import models.Competence;
 import models.CompetenceCode;
 import models.Person;
 import models.PersonHourForOvertime;
 import models.exports.PersonsCompetences;
 import models.exports.PersonsList;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Table;
@@ -16,6 +18,7 @@ import dao.CompetenceDao;
 
 public class OvertimesManager {
 
+	private final static Logger log = LoggerFactory.getLogger(OvertimesManager.class);
 	/**
 	 * 
 	 * @param body
@@ -29,12 +32,14 @@ public class OvertimesManager {
 		
 		for (Person person : body.persons) {
 			Optional<Competence> competence = CompetenceDao.getCompetence(person, year, month, code);
-			Logger.debug("find  Competence %s per person=%s, year=%s, month=%s, competenceCode=%s", competence, person, year, month, code);	
+			log.debug("find  Competence {} per person={}, year={}, month={}, competenceCode={}",
+					new Object[]{competence, person, year, month, code});	
 
 			if ((competence.isPresent()) && (competence.get().valueApproved != 0)) {
 				
 				overtimesMonth.put(person.surname + " " + person.name, competence.get().reason != null ? competence.get().reason : "", competence.get().valueApproved);
-				Logger.debug("Inserita riga person=%s reason=%s and  valueApproved=%s", person, competence.get().reason, competence.get().valueApproved);
+				log.debug("Inserita riga person={} reason={} and valueApproved={}",
+						new Object[]{person, competence.get().reason, competence.get().valueApproved});
 			} 
 		}		
 		
@@ -56,14 +61,14 @@ public class OvertimesManager {
 				oldCompetence.get().setValueApproved(competence.getValueApproved(), competence.getReason());
 				oldCompetence.get().save();
 				
-				Logger.debug("Aggiornata competenza %s", oldCompetence);
+				log.debug("Aggiornata competenza {}", oldCompetence);
 			} else {
 				// insert a new competence with the requested hours an reason
 				competence.setYear(year);
 				competence.setMonth(month);
 				competence.save();
 				
-				Logger.debug("Creata competenza %s", competence);
+				log.debug("Creata competenza {}", competence);
 			}
 		}
 	}
@@ -77,10 +82,10 @@ public class OvertimesManager {
 		PersonHourForOvertime personHourForOvertime = CompetenceDao.getPersonHourForOvertime(person);
 		if (personHourForOvertime == null) {
 			personHourForOvertime = new PersonHourForOvertime(person, hours);
-			Logger.debug("Created  PersonHourForOvertime with persons %s and  hours=%s", person.name, hours);
+			log.debug("Created  PersonHourForOvertime with persons {} and  hours={}", person.getFullname(), hours);
 		} else {
 			personHourForOvertime.setNumberOfHourForOvertime(hours);
-			Logger.debug("Updated  PersonHourForOvertime of persons %s with hours=%s", person.name, hours);
+			log.debug("Updated  PersonHourForOvertime of persons {} with hours={}", person.getFullname(), hours);
 		}
 		personHourForOvertime.save();
 	}
